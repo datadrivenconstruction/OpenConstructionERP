@@ -49,7 +49,7 @@ import logging
 import random
 import uuid
 from collections.abc import Iterable, Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import UTC, datetime, timedelta
 from decimal import Decimal, InvalidOperation
 
@@ -78,6 +78,7 @@ from app.modules.construction_control.repository import (
     TestResultRepository,
 )
 from app.modules.construction_control.schemas import HandoverPackageCreate
+from app.modules.construction_control.seed_phrases import category_text, characteristic_text, instrument_kind, phrase
 from app.modules.construction_control.seed_text import control_text, package_text
 
 logger = logging.getLogger(__name__)
@@ -1013,15 +1014,58 @@ def _material_status(outcome: str, expired: bool) -> str:
     return "accepted"
 
 
-def _build_criterion(project_id: uuid.UUID, package: _WorkPackage, user_id: str) -> AcceptanceCriterion:
+def _localised_package(locale: str | None, package: _WorkPackage) -> _WorkPackage:
+    """``package`` with every prose field in the project's language; the English default is returned as is."""
+    location, inspection_title, criterion_title, lab_title = package_text(
+        locale,
+        package.key,
+        location=package.location,
+        inspection_title=package.inspection_title,
+        criterion_title=package.criterion.title,
+        lab_title=package.lab.title if package.lab else "",
+    )
+    criterion = replace(
+        package.criterion,
+        title=criterion_title,
+        characteristic=phrase(locale, package.criterion.characteristic),
+        method=phrase(locale, package.criterion.method),
+    )
+    material = package.material
+    if material is not None:
+        material = replace(
+            material, name=phrase(locale, material.name), supplier_kind=phrase(locale, material.supplier_kind)
+        )
+    lab = replace(package.lab, title=lab_title) if package.lab is not None else None
+    survey = package.survey
+    if survey is not None:
+        survey = replace(survey, title=phrase(locale, survey.title))
+    return replace(
+        package,
+        location=location,
+        inspection_title=inspection_title,
+        criterion=criterion,
+        material=material,
+        lab=lab,
+        survey=survey,
+        gate_title=phrase(locale, package.gate_title),
+    )
+
+
+def _build_criterion(
+    project_id: uuid.UUID, package: _WorkPackage, user_id: str, locale: str | None = None
+) -> AcceptanceCriterion:
     """The acceptance clause row for a work package."""
     spec = package.criterion
     return AcceptanceCriterion(
         project_id=project_id,
         code=spec.code,
         title=spec.title,
-        description=(
-            f"Applies to {package.category} works at {package.location}. Judged on the {spec.characteristic.lower()}."
+        description=control_text(
+            locale,
+            "criterion_description",
+            category=category_text(locale, package.category),
+            location=package.location,
+            characteristic=characteristic_text(locale, spec.characteristic),
         ),
         standard_ref=spec.standard_ref,
         discipline=package.discipline,
@@ -1057,6 +1101,7 @@ async def _seed_work_package(
     locale: str | None = None,
 ) -> None:
     """Write every control record one work package produces, cross-linked."""
+    package = _localised_package(locale, package)
     criteria = CriterionRepository(session)
     inspections = InspectionRepository(session)
     materials = MaterialRecordRepository(session)
@@ -1066,11 +1111,12 @@ async def _seed_work_package(
     element_refs = ElementRefRepository(session)
 
     spec = package.criterion
+    category = category_text(locale, package.category)
     # The work package's own window: older packages sit further back, so the
     # register reads as months of site work rather than as one busy afternoon.
     anchor = now - timedelta(days=150 - position * 9)
 
-    criterion = await criteria.create(_build_criterion(project_id, package, inspector))
+    criterion = await criteria.create(_build_criterion(project_id, package, inspector, locale))
     counts["criteria"] += 1
 
     # ── Inspection ────────────────────────────────────────────────────────────
@@ -1080,9 +1126,13 @@ async def _seed_work_package(
         party_role=package.party_role,
         intervention_point=package.gate_point_type,
         title=package.inspection_title,
-        description=(
-            f"{package.category.capitalize()} works at {package.location}, "
-            f"inspected against {spec.code} ({spec.standard_ref})."
+        description=control_text(
+            locale,
+            "inspection_description",
+            category=category_text(locale, package.category, head=True),
+            location=package.location,
+            code=spec.code,
+            standard=spec.standard_ref,
         ),
         location_description=package.location,
         criterion_id=str(criterion.id),
@@ -1119,8 +1169,8 @@ async def _seed_work_package(
         inspection.status = "closed" if position % 3 == 0 else _INSPECTION_STATUS_BY_RESULT["pass"]
         inspection.result = "pass"
         inspection.measured_value = spec.within_value
-        inspection.result_notes = (
-            f"Measured {spec.within_value} {spec.unit}, within the limits of {spec.code}. Work accepted."
+        inspection.result_notes = control_text(
+            locale, "passed_notes", value=spec.within_value, unit=spec.unit, code=spec.code
         )
         inspection.scheduled_at = _iso(anchor + timedelta(days=1, hours=9))
         inspection.performed_at = _iso(anchor + timedelta(days=1, hours=11))
@@ -1165,8 +1215,8 @@ async def _seed_work_package(
             inspection_type=package.inspection_type,
             party_role=package.party_role,
             intervention_point=package.gate_point_type,
-            title=f"Re-inspection after rework - {package.inspection_title}",
-            description=f"Re-inspection following the rejection recorded on {inspection.inspection_number}.",
+            title=control_text(locale, "reinspection_title", title=package.inspection_title),
+            description=control_text(locale, "reinspection_description", number=inspection.inspection_number),
             location_description=package.location,
             criterion_id=str(criterion.id),
             status="scheduled",
@@ -1204,7 +1254,7 @@ async def _seed_work_package(
             product_code=f"{package.key.upper()[:6]}-{position + 1:03d}",
             cert_type=mat.cert_type,
             cert_number=f"CERT/{spec.code.split('-')[-1]}/{position + 1:03d}",
-            cert_issuer=_CERT_ISSUERS[position % len(_CERT_ISSUERS)],
+            cert_issuer=phrase(locale, _CERT_ISSUERS[position % len(_CERT_ISSUERS)]),
             dop_number=(f"DoP-{position + 1:04d}" if mat.cert_type in ("dop", "ce") else None),
             ce_marking=mat.ce_marking,
             ukca_marking=False,
@@ -1218,11 +1268,7 @@ async def _seed_work_package(
             unit=mat.unit,
             criterion_id=str(criterion.id),
             status=status,
-            review_notes=(
-                "Certificate and delivery documentation checked against the specification."
-                if reviewed
-                else "Submitted for review; certificate and traceability being checked."
-            ),
+            review_notes=control_text(locale, "material_reviewed" if reviewed else "material_pending"),
             received_at=_iso(anchor - timedelta(days=3)),
             received_by=inspector,
             reviewed_at=(_iso(anchor + timedelta(days=2, hours=14)) if reviewed else None),
@@ -1248,14 +1294,14 @@ async def _seed_work_package(
         test = TestResult(
             project_id=project_id,
             title=lab.title,
-            description=(
-                f"Specimen taken from {package.location} and tested to {lab.test_method}, judged against {spec.code}."
+            description=control_text(
+                locale, "test_description", location=package.location, method=lab.test_method, code=spec.code
             ),
             criterion_id=str(criterion.id),
             sample_id=f"S-{spec.code.split('-')[-1]}-{position + 1:03d}",
             test_method=lab.test_method,
-            lab_name=_LAB_NAMES[position % len(_LAB_NAMES)],
-            lab_accreditation=_LAB_ACCREDITATIONS[position % len(_LAB_ACCREDITATIONS)],
+            lab_name=phrase(locale, _LAB_NAMES[position % len(_LAB_NAMES)]),
+            lab_accreditation=phrase(locale, _LAB_ACCREDITATIONS[position % len(_LAB_ACCREDITATIONS)]),
             is_accredited=True,
             measured_value=(None if pending else measured),
             unit=spec.unit,
@@ -1263,11 +1309,14 @@ async def _seed_work_package(
             status="draft" if pending else "recorded",
             result=result,
             result_notes=(
-                "Sample with the laboratory; result awaited."
+                control_text(locale, "test_pending")
                 if pending
-                else (
-                    f"Measured {measured} {spec.unit} against {spec.code} "
-                    f"({'outside' if result == 'fail' else 'within'} the specified limits)."
+                else control_text(
+                    locale,
+                    "test_outside" if result == "fail" else "test_within",
+                    value=measured,
+                    unit=spec.unit,
+                    code=spec.code,
                 )
             ),
             sampled_at=_iso(sampled),
@@ -1326,24 +1375,28 @@ async def _seed_work_package(
         # completeness figure from reading the same 100% on every project: the
         # manifest counts as-builts only once they are signed.
         attested = outcome == _ACCEPTED and attest_records
-        instrument_kind = survey.capture_method.replace("_", " ").capitalize()
         record = AsBuiltRecord(
             project_id=project_id,
             title=survey.title,
             discipline=package.discipline,
             location_description=package.location,
             capture_method=survey.capture_method,
-            instrument=f"{instrument_kind} instrument, site register no. {position + 1:02d}",
+            instrument=control_text(
+                locale,
+                "instrument",
+                kind=instrument_kind(locale, survey.capture_method),
+                number=f"{position + 1:02d}",
+            ),
             instrument_calibration_ref=f"CAL-{anchor:%Y}-{position + 1:03d}",
             accuracy_class=survey.accuracy_class,
             accuracy_value=survey.accuracy_value,
             accuracy_unit=survey.accuracy_unit,
-            coordinate_system="Project grid, levelled to the site datum",
+            coordinate_system=control_text(locale, "coordinate_system"),
             survey_date=_iso(anchor + timedelta(days=3)),
             # A free-text column that a person reads. It holds who surveyed,
             # written as words - never an identifier, because nothing on the
             # read side of this module resolves one back into a name.
-            surveyed_by=_SURVEY_PARTIES[position % len(_SURVEY_PARTIES)],
+            surveyed_by=phrase(locale, _SURVEY_PARTIES[position % len(_SURVEY_PARTIES)]),
             criterion_id=str(criterion.id),
             measured_value=measured,
             deviation_value=_deviation(measured, spec.nominal_value),
@@ -1378,9 +1431,13 @@ async def _seed_work_package(
             project_id=project_id,
             point_type=point_type,
             title=package.gate_title,
-            description=(
-                f"Applies to {package.category} works at {package.location}. "
-                f"Satisfied by inspection {inspection.inspection_number} against {spec.code}."
+            description=control_text(
+                locale,
+                "gate_description",
+                category=category,
+                location=package.location,
+                number=inspection.inspection_number,
+                code=spec.code,
             ),
             required_party_role=package.gate_party_role,
             inspection_id=str(inspection.id),
@@ -1405,16 +1462,18 @@ async def _seed_work_package(
             gate.released_by = approver
             gate.released_party_role = asserted
             gate.released_at = _iso(anchor + timedelta(days=2, hours=9))
-            gate.release_justification = (
-                f"Released against inspection {inspection.inspection_number}, "
-                f"which passed with {spec.within_value} {spec.unit} on {spec.code}."
+            gate.release_justification = control_text(
+                locale,
+                "gate_release",
+                number=inspection.inspection_number,
+                value=spec.within_value,
+                unit=spec.unit,
+                code=spec.code,
             )
         elif waived:
             gate.status = "waived"
             gate.waived_by = approver
-            gate.waived_reason = (
-                "Attendance waived by agreement; the test record and photographs were accepted in place of attendance."
-            )
+            gate.waived_reason = control_text(locale, "gate_waived")
         await gates.create(gate)
         counts["gates"] += 1
 
@@ -1455,6 +1514,7 @@ async def _seed_handover_packages(
     ordinal: int,
     approver: str,
     counts: dict[str, int],
+    locale: str | None = None,
 ) -> None:
     """Create the acceptance package(s) and let the module compute their gate.
 
@@ -1485,10 +1545,10 @@ async def _seed_handover_packages(
         package = await service.create_package(
             HandoverPackageCreate(
                 project_id=project_id,
-                title=title,
+                title=phrase(locale, title),
                 completion_regime=completion_regime,
                 completion_type=completion_type,
-                section_ref=section_ref,
+                section_ref=phrase(locale, section_ref) if section_ref else None,
             ),
             approver,
         )
@@ -1579,7 +1639,7 @@ async def _seed_project(
             locale=locale,
         )
 
-    await _seed_handover_packages(session, project_id, ordinal=ordinal, approver=approver, counts=counts)
+    await _seed_handover_packages(session, project_id, ordinal=ordinal, approver=approver, counts=counts, locale=locale)
     await session.flush()
     return counts
 

@@ -16,6 +16,22 @@ from app.core.demo_locale_text import language_of
 #: Wrapper sentences, language -> key -> text.
 WORDING: dict[str, dict[str, str]] = {
     "en": {
+        "inspection_description": "{category} works at {location}, inspected against {code} ({standard}).",
+        "criterion_description": "Applies to {category} works at {location}. Judged on the {characteristic}.",
+        "passed_notes": "Measured {value} {unit}, within the limits of {code}. Work accepted.",
+        "reinspection_title": "Re-inspection after rework - {title}",
+        "reinspection_description": "Re-inspection following the rejection recorded on {number}.",
+        "material_reviewed": "Certificate and delivery documentation checked against the specification.",
+        "material_pending": "Submitted for review; certificate and traceability being checked.",
+        "test_description": "Specimen taken from {location} and tested to {method}, judged against {code}.",
+        "test_pending": "Sample with the laboratory; result awaited.",
+        "test_within": "Measured {value} {unit} against {code} (within the specified limits).",
+        "test_outside": "Measured {value} {unit} against {code} (outside the specified limits).",
+        "instrument": "{kind} instrument, site register no. {number}",
+        "coordinate_system": "Project grid, levelled to the site datum",
+        "gate_description": "Applies to {category} works at {location}. Satisfied by inspection {number} against {code}.",
+        "gate_release": "Released against inspection {number}, which passed with {value} {unit} on {code}.",
+        "gate_waived": "Attendance waived by agreement; the test record and photographs were accepted in place of attendance.",
         "failed_inspection": "Failed inspection {number}: {title}",
         "from_inspection": (
             "Raised from inspection {number} ({kind}). {notes} Judged against criterion {code} ({title}), "
@@ -31,6 +47,22 @@ WORDING: dict[str, dict[str, str]] = {
         ),
     },
     "de": {
+        "inspection_description": "{category} an {location}, geprüft nach {code} ({standard}).",
+        "criterion_description": "Gilt für {category} an {location}. Bewertet wird: {characteristic}.",
+        "passed_notes": "Gemessen {value} {unit}, innerhalb der Grenzwerte von {code}. Leistung abgenommen.",
+        "reinspection_title": "Nachprüfung nach Nacharbeit - {title}",
+        "reinspection_description": "Nachprüfung nach der unter {number} festgehaltenen Ablehnung.",
+        "material_reviewed": "Zeugnis und Lieferunterlagen gegen die Leistungsbeschreibung geprüft.",
+        "material_pending": "Zur Prüfung vorgelegt; Zeugnis und Rückverfolgbarkeit werden geprüft.",
+        "test_description": "Probe aus {location} entnommen und nach {method} geprüft, bewertet nach {code}.",
+        "test_pending": "Probe liegt im Labor; Ergebnis steht aus.",
+        "test_within": "Gemessen {value} {unit} gegen {code} (innerhalb der Vorgaben).",
+        "test_outside": "Gemessen {value} {unit} gegen {code} (außerhalb der Vorgaben).",
+        "instrument": "{kind}, Gerätenr. {number} im Baustellenregister",
+        "coordinate_system": "Projektraster, höhenmäßig auf den Baustellenbezugspunkt bezogen",
+        "gate_description": "Gilt für {category} an {location}. Erfüllt durch Prüfung {number} gegen {code}.",
+        "gate_release": "Freigegeben auf Grundlage der Prüfung {number}, bestanden mit {value} {unit} bei {code}.",
+        "gate_waived": "Teilnahme einvernehmlich erlassen; Prüfprotokoll und Fotos wurden anstelle der Anwesenheit akzeptiert.",
         "failed_inspection": "Nicht bestandene Prüfung {number}: {title}",
         "from_inspection": (
             "Aus Prüfung {number} ({kind}) entstanden. {notes} Bewertet nach Kriterium {code} ({title}), "
@@ -46,6 +78,22 @@ WORDING: dict[str, dict[str, str]] = {
         ),
     },
     "fr": {
+        "inspection_description": "{category} : {location}, contrôlé selon {code} ({standard}).",
+        "criterion_description": "S'applique à : {category}, {location}. Critère évalué : {characteristic}.",
+        "passed_notes": "Mesuré {value} {unit}, dans les limites de {code}. Ouvrage accepté.",
+        "reinspection_title": "Contre-visite après reprise - {title}",
+        "reinspection_description": "Contre-visite faisant suite au rejet consigné sous {number}.",
+        "material_reviewed": "Certificat et documents de livraison vérifiés par rapport au cahier des charges.",
+        "material_pending": "Soumis pour examen ; certificat et traçabilité en cours de vérification.",
+        "test_description": "Éprouvette prélevée à {location} et essayée selon {method}, évaluée selon {code}.",
+        "test_pending": "Échantillon au laboratoire ; résultat en attente.",
+        "test_within": "Mesuré {value} {unit} par rapport à {code} (dans les limites spécifiées).",
+        "test_outside": "Mesuré {value} {unit} par rapport à {code} (hors des limites spécifiées).",
+        "instrument": "{kind}, n° {number} du registre de chantier",
+        "coordinate_system": "Trame de projet, nivelée sur le repère de chantier",
+        "gate_description": "S'applique à : {category}, {location}. Satisfait par le contrôle {number} selon {code}.",
+        "gate_release": "Levé sur la base du contrôle {number}, conforme avec {value} {unit} pour {code}.",
+        "gate_waived": "Présence levée d'un commun accord ; le procès-verbal d'essai et les photographies ont été acceptés en lieu et place.",
         "failed_inspection": "Contrôle non conforme {number} : {title}",
         "from_inspection": (
             "Issue du contrôle {number} ({kind}). {notes} Évalué selon le critère {code} ({title}), norme {standard}."
