@@ -94,12 +94,12 @@ class TestContactCrudRoundTrip:
         service = ContactService(session)
         user_id = str(uuid.uuid4())
         await service.create_contact(
-            ContactCreate(contact_type="supplier", primary_email="dup@x.com"),
+            ContactCreate(contact_type="supplier", company_name="Dup Supplier", primary_email="dup@x.com"),
             user_id=user_id,
         )
         with pytest.raises(Exception) as ei:
             await service.create_contact(
-                ContactCreate(contact_type="supplier", primary_email="dup@x.com"),
+                ContactCreate(contact_type="supplier", company_name="Dup Supplier", primary_email="dup@x.com"),
                 user_id=user_id,
             )
         # The service raises an HTTPException with status 409.
