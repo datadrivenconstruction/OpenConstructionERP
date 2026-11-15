@@ -1202,6 +1202,10 @@
       "norm_collapsed": "Položka {ordinal}: řádky zdrojů ztratily katalogovou normu a místo ní obsahují množství položky, takže z nich nebyla znovu odvozena jednotková cena",
       "whole_position_quantities": "Položka {ordinal}: řádky zdrojů obsahují množství celé položky místo norem na jednotku, takže z nich nebyla znovu odvozena jednotková cena",
       "suggestion": "Zkontrolujte kalkulaci – znovu odvoďte položku z katalogu prostřednictvím kontroly norem zdrojů nebo řádky opravte ručně"
+    },
+    "rate_currency_missing": {
+      "fail": "Pozice {ordinal}: {count} sazeb zdrojů nemá měnu a počítá se v základní měně projektu",
+      "suggestion": "Pokud sazba zdroje není v základní měně projektu, nastavte u ní měnu"
     }
   },
   "poland": {
@@ -1742,6 +1746,10 @@
     "approved_immutable": {
       "fail": "{code} je rozhodnut a už ho nelze měnit ani mazat.",
       "suggestion": "Zadejte nový přesun nebo změnu rozpočtu, která ho opraví."
+    },
+    "self_approval": {
+      "fail": "{code} jste požadovali vy, proto jej nemůžete schválit (u tohoto projektu je zapnuto oddělení povinností).",
+      "suggestion": "Požádejte o rozhodnutí jiného schvalovatele, nebo oddělení povinností vypněte v nastavení knihy."
     }
   },
   "schedule": {
@@ -2030,24 +2038,6 @@
     "crew_without_record": {
       "fail": "Na stavbě byla četa {headcount} lidí, ale není zapsána práce, kontrola ani prostoj.",
       "suggestion": "Doplňte, co četa dělala, nebo prostoj, který práci zastavil."
-    }
-  },
-  "sheet": {
-    "number_present": {
-      "fail": "Strana {page} nemá čitelné číslo výkresu",
-      "suggestion": "Zadejte číslo výkresu z popisového pole"
-    },
-    "number_unique_in_set": {
-      "fail": "Číslo výkresu {sheet} se vyskytuje na {count} stranách tohoto nahrání",
-      "suggestion": "Zkontrolujte sadu výkresů, zda nejde o zdvojenou nebo špatně očíslovanou stranu"
-    },
-    "revision_not_lower_than_current": {
-      "fail": "Revize {revision} výkresu {sheet} je nižší než aktuální revize {current}",
-      "suggestion": "Potvrďte, že jde o starší vydání, než se zařadí do historie"
-    },
-    "low_confidence_unconfirmed": {
-      "fail": "Výkres {sheet} byl přečten rozpoznáním textu s jistotou {confidence} a není potvrzen",
-      "suggestion": "Zkontrolujte pole popisového pole a potvrďte přečtení"
     }
   },
   "spec_import": {

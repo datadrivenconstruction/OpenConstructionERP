@@ -1202,6 +1202,10 @@
       "norm_collapsed": "Item {ordinal}: baris sumber daya kehilangan norma katalog dan memuat kuantitas item sebagai gantinya, sehingga harga satuan tidak dihitung ulang darinya",
       "whole_position_quantities": "Item {ordinal}: baris sumber daya memuat kuantitas seluruh item, bukan norma per satuan, sehingga harga satuan tidak dihitung ulang darinya",
       "suggestion": "Tinjau analisisnya; hitung ulang item dari katalog melalui tinjauan norma sumber daya atau perbaiki baris secara manual"
+    },
+    "rate_currency_missing": {
+      "fail": "Posisi {ordinal}: {count} harga sumber daya tanpa mata uang dan dihitung dalam mata uang dasar proyek",
+      "suggestion": "Atur mata uang pada setiap harga sumber daya jika bukan mata uang dasar proyek"
     }
   },
   "poland": {
@@ -1742,6 +1746,10 @@
     "approved_immutable": {
       "fail": "{code} sudah diputuskan dan tidak dapat diubah atau dihapus lagi.",
       "suggestion": "Buat pemindahan atau perubahan anggaran baru yang mengoreksinya."
+    },
+    "self_approval": {
+      "fail": "{code} diajukan oleh Anda, sehingga Anda tidak dapat menyetujuinya (pemisahan tugas aktif untuk proyek ini).",
+      "suggestion": "Minta penyetuju lain untuk memutuskan, atau matikan pemisahan tugas di pengaturan buku besar."
     }
   },
   "schedule": {
@@ -2030,24 +2038,6 @@
     "crew_without_record": {
       "fail": "Regu {headcount} orang ada di lokasi tetapi tidak ada pekerjaan, inspeksi, atau keterlambatan yang dicatat.",
       "suggestion": "Tambahkan apa yang dikerjakan regu, atau keterlambatan yang menghentikan pekerjaan."
-    }
-  },
-  "sheet": {
-    "number_present": {
-      "fail": "Halaman {page} tidak memiliki nomor lembar yang terbaca",
-      "suggestion": "Masukkan nomor lembar dari kepala gambar"
-    },
-    "number_unique_in_set": {
-      "fail": "Nomor lembar {sheet} muncul di {count} halaman unggahan ini",
-      "suggestion": "Periksa set gambar apakah ada halaman ganda atau salah nomor"
-    },
-    "revision_not_lower_than_current": {
-      "fail": "Revisi {revision} lembar {sheet} lebih rendah dari revisi saat ini {current}",
-      "suggestion": "Pastikan ini terbitan lama sebelum ditambahkan ke riwayat"
-    },
-    "low_confidence_unconfirmed": {
-      "fail": "Lembar {sheet} dibaca dengan pengenalan teks pada {confidence} dan belum dikonfirmasi",
-      "suggestion": "Periksa isian kepala gambar dan konfirmasi hasil bacaan"
     }
   },
   "spec_import": {

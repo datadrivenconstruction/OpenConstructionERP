@@ -1202,6 +1202,10 @@
       "norm_collapsed": "Post {ordinal}: ressourcerækkerne har mistet katalogets normtal og indeholder i stedet postens mængde, så enhedsprisen blev ikke genberegnet ud fra dem",
       "whole_position_quantities": "Post {ordinal}: ressourcerækkerne indeholder mængder for hele posten i stedet for normtal pr. enhed, så enhedsprisen blev ikke genberegnet ud fra dem",
       "suggestion": "Gennemgå prisopbygningen – genberegn posten ud fra dens katalogpost gennem gennemgangen af ressourcenormtal, eller ret rækkerne manuelt"
+    },
+    "rate_currency_missing": {
+      "fail": "Position {ordinal}: {count} ressourcepris(er) har ingen valuta og regnes i projektets basisvaluta",
+      "suggestion": "Angiv valuta på hver ressourcepris, hvis den ikke er projektets basisvaluta"
     }
   },
   "poland": {
@@ -1742,6 +1746,10 @@
     "approved_immutable": {
       "fail": "{code} er afgjort og kan ikke længere ændres eller slettes.",
       "suggestion": "Opret en ny overførsel eller budgetændring, der retter den."
+    },
+    "self_approval": {
+      "fail": "{code} er anmodet af dig, så du kan ikke godkende den (funktionsadskillelse er slået til for dette projekt).",
+      "suggestion": "Bed en anden godkender om at afgøre den, eller slå funktionsadskillelse fra i kontoens indstillinger."
     }
   },
   "schedule": {
@@ -2030,24 +2038,6 @@
     "crew_without_record": {
       "fail": "Et hold på {headcount} var på pladsen, men intet arbejde, ingen kontrol og ingen forsinkelse er registreret.",
       "suggestion": "Tilføj hvad holdet lavede, eller forsinkelsen der stoppede arbejdet."
-    }
-  },
-  "sheet": {
-    "number_present": {
-      "fail": "Side {page} har intet læsbart tegningsnummer",
-      "suggestion": "Indtast tegningsnummeret fra tegningshovedet"
-    },
-    "number_unique_in_set": {
-      "fail": "Tegningsnummer {sheet} forekommer på {count} sider i denne upload",
-      "suggestion": "Tjek tegningssættet for en dubleret eller forkert nummereret side"
-    },
-    "revision_not_lower_than_current": {
-      "fail": "Revision {revision} af tegning {sheet} er lavere end den gældende revision {current}",
-      "suggestion": "Bekræft, at det er en ældre udgave, før den lægges ind i historikken"
-    },
-    "low_confidence_unconfirmed": {
-      "fail": "Tegning {sheet} blev læst med tekstgenkendelse på {confidence} og er ikke bekræftet",
-      "suggestion": "Tjek felterne i tegningshovedet, og bekræft aflæsningen"
     }
   },
   "spec_import": {

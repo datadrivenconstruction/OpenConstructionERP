@@ -1202,6 +1202,10 @@
       "norm_collapsed": "항목 {ordinal}: 자원 행의 카탈로그 품셈이 사라지고 그 대신 항목 수량이 들어 있어, 자원 행에 따른 단가 재계산을 하지 않았습니다",
       "whole_position_quantities": "항목 {ordinal}: 자원 행에 단위당 품셈 대신 항목 전체 수량이 들어 있어, 자원 행에 따른 단가 재계산을 하지 않았습니다",
       "suggestion": "단가 구성을 검토하세요. 자원 품셈 검토를 통해 카탈로그 항목에서 다시 산정하거나 행을 수동으로 수정하세요"
+    },
+    "rate_currency_missing": {
+      "fail": "항목 {ordinal}: 리소스 단가 {count}건에 통화가 없어 프로젝트 기준 통화로 계산됩니다",
+      "suggestion": "프로젝트 기준 통화가 아니라면 각 리소스 단가에 통화를 지정하세요"
     }
   },
   "poland": {
@@ -1742,6 +1746,10 @@
     "approved_immutable": {
       "fail": "{code}은(는) 결정이 끝나 더 이상 변경하거나 삭제할 수 없습니다.",
       "suggestion": "이를 바로잡는 새 이체나 예산 변경을 입력하세요."
+    },
+    "self_approval": {
+      "fail": "{code}은(는) 본인이 요청했으므로 승인할 수 없습니다(이 프로젝트는 직무 분리가 켜져 있습니다).",
+      "suggestion": "다른 승인자에게 결정을 요청하거나 원장 설정에서 직무 분리를 끄세요."
     }
   },
   "schedule": {
@@ -2030,24 +2038,6 @@
     "crew_without_record": {
       "fail": "현장에 {headcount}명의 작업반이 있었지만 작업, 검사, 지연이 기록되지 않았습니다.",
       "suggestion": "작업반이 한 일 또는 작업을 멈춘 지연을 추가하세요."
-    }
-  },
-  "sheet": {
-    "number_present": {
-      "fail": "{page}페이지에 읽을 수 있는 도면 번호가 없습니다",
-      "suggestion": "표제란의 도면 번호를 입력하세요"
-    },
-    "number_unique_in_set": {
-      "fail": "도면 번호 {sheet}이(가) 이번 업로드의 {count}개 페이지에 나옵니다",
-      "suggestion": "도면 세트에 중복되거나 번호가 잘못된 페이지가 있는지 확인하세요"
-    },
-    "revision_not_lower_than_current": {
-      "fail": "도면 {sheet}의 개정 {revision}이(가) 현재 개정 {current}보다 낮습니다",
-      "suggestion": "이력에 쌓기 전에 이전 발행본이 맞는지 확인하세요"
-    },
-    "low_confidence_unconfirmed": {
-      "fail": "도면 {sheet}은(는) 문자 인식으로 {confidence} 수준에서 읽혔고 아직 확인되지 않았습니다",
-      "suggestion": "표제란 항목을 확인하고 읽은 결과를 확정하세요"
     }
   },
   "spec_import": {

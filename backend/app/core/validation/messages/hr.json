@@ -1202,6 +1202,10 @@
       "norm_collapsed": "Stavka {ordinal}: redci resursa izgubili su kataloški normativ i umjesto njega sadrže količinu stavke, pa jedinična cijena nije ponovno izvedena iz njih",
       "whole_position_quantities": "Stavka {ordinal}: redci resursa sadrže količine cijele stavke umjesto normativa po jedinici, pa jedinična cijena nije ponovno izvedena iz njih",
       "suggestion": "Pregledajte analizu; ponovno izvedite stavku iz kataloga kroz pregled normativa resursa ili ručno ispravite retke"
+    },
+    "rate_currency_missing": {
+      "fail": "Stavka {ordinal}: {count} cijena resursa nema valutu i računa se u osnovnoj valuti projekta",
+      "suggestion": "Postavite valutu svake cijene resursa ako nije osnovna valuta projekta"
     }
   },
   "poland": {
@@ -1742,6 +1746,10 @@
     "approved_immutable": {
       "fail": "{code} je odlučen i više se ne može mijenjati ni brisati.",
       "suggestion": "Unesite novi prijenos ili izmjenu proračuna koja ga ispravlja."
+    },
+    "self_approval": {
+      "fail": "{code} ste zatražili vi, pa ga ne možete odobriti (razdvajanje dužnosti uključeno je za ovaj projekt).",
+      "suggestion": "Zamolite drugog odobravatelja da odluči ili isključite razdvajanje dužnosti u postavkama knjige."
     }
   },
   "schedule": {
@@ -2030,24 +2038,6 @@
     "crew_without_record": {
       "fail": "Na gradilištu je bila ekipa od {headcount}, ali nisu zabilježeni radovi, pregled ni zastoj.",
       "suggestion": "Dodajte što je ekipa radila ili zastoj koji je zaustavio radove."
-    }
-  },
-  "sheet": {
-    "number_present": {
-      "fail": "Stranica {page} nema čitljiv broj nacrta",
-      "suggestion": "Unesite broj nacrta iz zaglavlja nacrta"
-    },
-    "number_unique_in_set": {
-      "fail": "Broj nacrta {sheet} pojavljuje se na {count} stranica ovog učitavanja",
-      "suggestion": "Provjerite komplet nacrta zbog udvojene ili pogrešno numerirane stranice"
-    },
-    "revision_not_lower_than_current": {
-      "fail": "Revizija {revision} nacrta {sheet} niža je od trenutne revizije {current}",
-      "suggestion": "Potvrdite da je riječ o starijem izdanju prije nego što uđe u povijest"
-    },
-    "low_confidence_unconfirmed": {
-      "fail": "Nacrt {sheet} pročitan je prepoznavanjem teksta s pouzdanošću {confidence} i nije potvrđen",
-      "suggestion": "Provjerite polja u zaglavlju nacrta i potvrdite očitanje"
     }
   },
   "spec_import": {
