@@ -21,9 +21,10 @@ import { useTranslation } from 'react-i18next';
 import clsx from 'clsx';
 import type { ProfessionalRole } from './types';
 import { ROLE_BY_ID, type RoleHeadgear } from './roles';
+import { publicAsset } from '@/shared/lib/publicAsset';
 
 /** Public folder with the circular portraits: `<role>-96.webp` and `<role>-192.webp`. */
-export const ROLE_PHOTO_BASE = '/roles';
+export const ROLE_PHOTO_BASE = publicAsset('/roles');
 
 /** The head-gear overlay drawn on the persona, in the role's `currentColor`. */
 function Headgear({ kind }: { kind: RoleHeadgear }) {

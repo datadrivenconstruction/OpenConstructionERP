@@ -38,7 +38,7 @@ import {
   Plug,
   BarChart3,
 } from 'lucide-react';
-import ddcLogoUrl from '/brand/ddc-logo.webp';
+import { publicAsset } from '@/shared/lib/publicAsset';
 import { Link } from 'react-router-dom';
 import clsx from 'clsx';
 
@@ -172,7 +172,7 @@ export function RequestCustomModuleDialog({ open, onClose }: Props) {
           <div className="relative px-6 sm:px-10 py-8 sm:py-10 text-center">
             <div className="inline-flex h-20 w-20 sm:h-24 sm:w-24 items-center justify-center mb-4">
               <img
-                src={ddcLogoUrl}
+                src={publicAsset('/brand/ddc-logo.webp')}
                 alt="DataDrivenConstruction"
                 className="max-h-full max-w-full object-contain"
                 width="96"

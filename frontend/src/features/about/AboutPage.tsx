@@ -22,6 +22,7 @@ import { APP_VERSION } from '@/shared/lib/version';
 import { CheckForUpdatesButton, UpdateInlineNotice } from '@/shared/ui/UpdateChecker';
 import { Changelog, getRecentReleases } from './Changelog';
 import { ThirdPartyLicenses } from './ThirdPartyLicenses';
+import { publicAsset } from '@/shared/lib/publicAsset';
 import { CONTRIBUTORS, SPONSORS, acknowledgedUrl, type Acknowledged } from './acknowledgments';
 
 const REPO_URL = 'https://github.com/datadrivenconstruction/OpenConstructionERP';
@@ -70,7 +71,7 @@ function AckAvatar({ entry, prominent = false }: { entry: Acknowledged; prominen
   // GitHub) so they serve same-origin and are not blocked by the image CSP,
   // and the wall still shows faces offline. The initials monogram below
   // remains the fallback for any handle without a saved image.
-  const avatarSrc = entry.handle ? `/contributors/${entry.handle}.png` : undefined;
+  const avatarSrc = entry.handle ? publicAsset(`/contributors/${entry.handle}.png`) : undefined;
   const showImg = Boolean(avatarSrc) && !imgFailed;
 
   const body = (
@@ -565,7 +566,7 @@ export function AboutPage() {
               {/* Author attribution — moved to the bottom of the bio per request. */}
               <div className="mt-5 flex items-center gap-3 border-t border-border-light pt-4">
                 <img
-                  src="/brand/ddc-logo.webp"
+                  src={publicAsset('/brand/ddc-logo.webp')}
                   alt={t('about.team_name', { defaultValue: 'DataDrivenConstruction' })}
                   className="h-12 w-12 shrink-0 rounded-xl object-cover bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-800 dark:to-slate-900 ring-1 ring-border-light shadow-sm p-1.5"
                   loading="lazy"
@@ -1050,7 +1051,7 @@ export function AboutPage() {
               title={t('about.book_cta', { defaultValue: 'Pick your language on datadrivenconstruction.io' })}
             >
               <img
-                src="/brand/ddc-book.png"
+                src={publicAsset('/brand/ddc-book.png')}
                 alt={t('about.book_title', { defaultValue: 'Data-Driven Construction' })}
                 className="block w-full h-auto transition-transform duration-500 group-hover:scale-[1.02]"
                 loading="lazy"
