@@ -409,8 +409,26 @@ async def _login(env, email, password=PASSWORD):
     return await env.client.post("/api/v1/users/auth/login/", json={"email": email, "password": password})
 
 
+async def _add_provider(env, slug="idp", **kw):
+    from app.modules.sso.models import SsoProvider
+
+    fields = {
+        "slug": slug,
+        "display_name": slug,
+        "protocol": "oidc",
+        "oidc_issuer": "https://idp.example",
+        "oidc_client_id": "oe",
+        "enabled": True,
+        **kw,
+    }
+    async with env.factory() as s:
+        s.add(SsoProvider(**fields))
+        await s.commit()
+
+
 async def test_sso_enforced_domain_blocks_password_login_but_not_break_glass(env):
     env.settings.sso_enforced_domains = "corp.example, @Other.example"
+    await _add_provider(env)
     await env.add_user("staff@corp.example", "editor")
     await env.add_user("glass@corp.example", "admin", metadata_={"break_glass": True})
     await env.add_user("fake@corp.example", "editor", metadata_={"break_glass": True})
@@ -431,3 +449,32 @@ async def test_sso_enforced_domain_blocks_password_login_but_not_break_glass(env
         json={"email": "new@corp.example", "password": "Abcdef12", "full_name": "New Person"},
     )
     assert reg.status_code == 403 and reg.json()["detail"]["code"] == "auth.sso_required"
+
+
+async def test_enforced_domain_without_enabled_provider_keeps_password_login(env):
+    env.settings.sso_enforced_domains = "corp.example"
+    await env.add_user("staff@corp.example", "editor")
+    assert (await _login(env, "staff@corp.example")).status_code == 200  # no provider at all
+    await _add_provider(env, enabled=False)
+    assert (await _login(env, "staff@corp.example")).status_code == 200  # only a disabled one
+    await _add_provider(env, slug="other", email_domains=["other.example"])
+    assert (await _login(env, "staff@corp.example")).status_code == 200  # routed to another domain
+    await _add_provider(env, slug="corp", email_domains=["corp.example"])
+    assert (await _login(env, "staff@corp.example")).status_code == 403
+
+
+async def test_scim_default_role_follows_enabled_providers(env):
+    env.settings.oidc_default_role = "manager"
+    await _add_provider(env, slug="a", default_role="editor")
+    await _add_provider(env, slug="b", default_role="viewer", enabled=False)
+    res = (await _post_user(env, email="p1@corp.example")).json()
+    assert (await env.get(User, uuid.UUID(res["id"]))).role == "editor"  # the one enabled provider
+    await _add_provider(env, slug="c", default_role="viewer")
+    res = (await _post_user(env, email="p2@corp.example")).json()
+    assert (await env.get(User, uuid.UUID(res["id"]))).role == "viewer"  # several: most restrictive
+
+
+async def test_scim_default_role_falls_back_to_env_without_providers(env):
+    env.settings.oidc_default_role = "editor"
+    res = (await _post_user(env, email="p3@corp.example")).json()
+    assert (await env.get(User, uuid.UUID(res["id"]))).role == "editor"

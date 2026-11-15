@@ -295,7 +295,17 @@ class ScimService:
 
     # ── Roles ──────────────────────────────────────────────────────────
 
-    def _default_role(self) -> str:
+    async def _default_role(self) -> str:
+        """Default role of the enabled SSO providers (most restrictive when several), else the env setting."""
+        from app.modules.sso.repository import SsoRepository
+
+        roles = [
+            p.default_role
+            for p in await SsoRepository(self.session).list_providers(enabled_only=True)
+            if p.default_role in VALID_ROLES and p.default_role != "admin"
+        ]
+        if roles:
+            return max(roles, key=VALID_ROLES.index)
         role = self.settings.oidc_default_role
         return role if role in VALID_ROLES and role != "admin" else "viewer"
 
@@ -307,7 +317,7 @@ class ScimService:
             for g in groups
             if g.role in VALID_ROLES and (g.role != "admin" or self.settings.scim_allow_admin_groups)
         ]
-        target = most_privileged(roles) or self._default_role()
+        target = most_privileged(roles) or await self._default_role()
         if target == user.role:
             return
         if user.role == "admin":
@@ -366,7 +376,7 @@ class ScimService:
             email=email,
             hashed_password=hash_password(secrets.token_urlsafe(32)),
             full_name=attrs.get("full_name", ""),
-            role=self._default_role(),
+            role=await self._default_role(),
             locale=_locale(attrs.get("locale")),
             is_active=attrs.get("active", True),
             external_id=ext,
