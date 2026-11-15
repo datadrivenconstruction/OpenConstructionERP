@@ -60867,6 +60867,7 @@ const resource = {
     "api_errors.invoice_capture_po_not_billable": "{{po_number}} тапсырысына әлі шот жазуға болмайды: тек берілген тапсырысқа шот жазуға болады.",
     "api_errors.invoice_capture_invoice_read_only": "Бекітілген немесе жүргізілген шот тек оқуға арналған. Алдымен оны жобаға қайтарыңыз.",
     "api_errors.module_disabled": "{{module}} модулі осы жұмыс кеңістігі үшін өшірулі. Әкімші оны Модульдер > Шешім пакеттері бөлімінде қоса алады.",
+    "api_errors.budget_ledger_sod_admin_only": "Міндеттерді бөлуді тек әкімші өшіре алады.",
     "conv.stage_upload": "Файл жүктелуде",
     "conv.stage_upload_hint": "Файл серверге жіберілуде. Аяқталғанша бұл қойындыны ашық ұстаңыз.",
     "conv.stage_converter": "Конвертер дайындалуда",

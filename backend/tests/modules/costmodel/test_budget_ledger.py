@@ -105,7 +105,14 @@ async def test_rules_ignore_other_payloads():
 def test_rule_messages_exist_in_english():
     from app.core.validation.messages import is_key_present
 
-    for key in ("net_zero", "below_committed", "approved_immutable"):
+    for key in (
+        "net_zero",
+        "below_committed",
+        "approved_immutable",
+        "self_approval",
+        "sod_prepared",
+        "sod_unattributed",
+    ):
         assert is_key_present(f"budget_ledger.{key}.fail", "en")
         assert is_key_present(f"budget_ledger.{key}.suggestion", "en")
 
@@ -113,12 +120,17 @@ def test_rule_messages_exist_in_english():
 # ── service ───────────────────────────────────────────────────────────────
 
 
+class _Scalars(list):
+    def first(self):
+        return None
+
+
 class _Rows:
     def all(self):
         return []
 
     def scalars(self):
-        return iter(())
+        return _Scalars()
 
 
 class _Nested:
@@ -428,3 +440,105 @@ async def test_self_approval_rule_both_ways():
     assert (await _run({**own, "segregation_of_duties": True}))["budget_ledger.self_approval"]
     assert not (await _run({**own, "segregation_of_duties": False}))["budget_ledger.self_approval"]
     assert not (await _run({**own, "self_approval": False}))["budget_ledger.self_approval"]
+
+
+async def _submitted(s, editor: str | None = None, submitter: str = "u1") -> BudgetTransfer:
+    t = await _draft(s)
+    if editor:
+        # The fake session ignores the DELETE of the old legs, so drop them by hand.
+        s.session.added = [o for o in s.session.added if getattr(o, "transfer_id", None) != t.id]
+        body = TransferIn(
+            reason="Edited",
+            legs=[LegIn(cost_line_id=WALLS, amount=D("-600")), LegIn(cost_line_id=ROOF, amount=D("600"))],
+        )
+        await s.update_transfer(PROJECT, t.id, body, editor, "en")
+    await s.transfer_step(PROJECT, t.id, "submit", submitter, "", "en")
+    return t
+
+
+@pytest.mark.parametrize(
+    ("editor", "submitter", "approver", "rule_key"),
+    [
+        ("u2", "u1", "u2", "sod_prepared"),
+        (None, "u3", "u3", "sod_prepared"),
+        ("u2", "u3", "u1", "self_approval"),
+    ],
+)
+async def test_editor_submitter_and_requester_cannot_approve(service, editor, submitter, approver, rule_key):
+    t = await _submitted(service, editor, submitter)
+    with pytest.raises(HTTPException) as err:
+        await service.transfer_step(PROJECT, t.id, "approve", approver, "", "en")
+    assert err.value.detail[0]["rule_id"] == "budget_ledger.self_approval"
+    expected = {"sod_prepared": "last edited or submitted by you", "self_approval": "was requested by you"}
+    assert expected[rule_key] in err.value.detail[0]["message"]
+    assert t.status == "submitted"
+
+
+async def test_edit_and_submit_record_who_did_them(service):
+    t = await _submitted(service, editor="u2", submitter="u3")
+    assert (t.requested_by, t.last_edited_by, t.submitted_by) == ("u1", "u2", "u3")
+    assert (await service.transfer_step(PROJECT, t.id, "approve", "u4", "", "en")).status == "approved"
+
+
+async def test_modification_editor_cannot_approve(service):
+    out = await service.create_modification(
+        PROJECT, ModificationIn(cost_line_id=ROOF, amount=D("100"), reason="Owner extra"), "u1", "en"
+    )
+    mod = next(o for o in service.session.added if isinstance(o, BudgetModification))
+    service.store[mod.id] = mod
+    body = ModificationIn(cost_line_id=ROOF, amount=D("900"), reason="Owner extra")
+    await service.update_modification(PROJECT, out.id, body, "u2", "en")
+    await service.modification_step(PROJECT, out.id, "submit", "u1", "", "en")
+    with pytest.raises(HTTPException):
+        await service.modification_step(PROJECT, out.id, "approve", "u2", "", "en")
+    assert (await service.modification_step(PROJECT, out.id, "approve", "u3", "", "en")).status == "approved"
+
+
+async def test_entry_without_requester_is_refused_while_sod_is_on(service):
+    t = await _submitted(service)
+    t.requested_by = None
+    with pytest.raises(HTTPException) as err:
+        await service.transfer_step(PROJECT, t.id, "approve", "u2", "", "en")
+    assert "BT-001" in err.value.detail[0]["message"]
+    service.sod = False
+    assert (await service.transfer_step(PROJECT, t.id, "approve", "u2", "", "en")).status == "approved"
+
+
+async def test_anonymous_approver_is_refused_while_sod_is_on(service):
+    t = await _submitted(service)
+    with pytest.raises(HTTPException):
+        await service.transfer_step(PROJECT, t.id, "approve", None, "", "en")
+
+
+async def test_sod_rule_messages_name_the_cause():
+    base = {"kind": "transfer", "action": "approve", "code": "BT-007", "segregation_of_duties": True}
+    for flag, key in (("unattributed", "sod_unattributed"), ("prepared_by_approver", "sod_prepared")):
+        found = (await _run({**base, flag: True}))["budget_ledger.self_approval"]
+        assert found[0].details["problem"] == key and "BT-007" in found[0].message
+
+
+def _settings_service() -> BudgetLedgerService:
+    return BudgetLedgerService(FakeSession())  # type: ignore[arg-type]
+
+
+async def test_only_admin_switches_sod_off_and_it_is_audited():
+    s = _settings_service()
+    with pytest.raises(HTTPException) as err:
+        await s.put_settings(PROJECT, LedgerSettings(segregation_of_duties=False), "mgr")
+    assert err.value.status_code == 403
+    assert err.value.detail["code"] == "budget_ledger_sod_admin_only"
+    assert not _audits(s)
+    out = await s.put_settings(PROJECT, LedgerSettings(segregation_of_duties=False), "admin", is_admin=True)
+    assert out.segregation_of_duties is False
+    assert [(a.action, a.to_status, a.actor) for a in _audits(s)] == [("segregation_of_duties", "off", "admin")]
+
+
+async def test_manager_may_switch_sod_back_on():
+    s = _settings_service()
+    await s.put_settings(PROJECT, LedgerSettings(segregation_of_duties=True), "mgr")
+    assert [a.to_status for a in _audits(s)] == ["on"]
+
+
+def test_settings_put_reads_the_role():
+    route = next(r for r in router.routes if r.path.endswith("/settings/") and "PUT" in r.methods)
+    assert "payload" in route.endpoint.__code__.co_varnames

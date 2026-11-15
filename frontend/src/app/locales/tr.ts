@@ -61787,6 +61787,7 @@ const resource = {
     "api_errors.invoice_capture_po_not_billable": "{{po_number}} siparişi henüz faturalanamaz: yalnızca verilmiş bir sipariş faturalanabilir.",
     "api_errors.invoice_capture_invoice_read_only": "Onaylanmış veya kaydedilmiş bir fatura salt okunurdur. Önce taslağa geri alın.",
     "api_errors.module_disabled": "{{module}} modülü bu çalışma alanında kapalı. Bir yönetici Modüller > Çözüm paketleri bölümünden açabilir.",
+    "api_errors.budget_ledger_sod_admin_only": "Görev ayrılığını yalnızca bir yönetici kapatabilir.",
     "conv.stage_upload": "Dosya yükleniyor",
     "conv.stage_upload_hint": "Dosya sunucuya gönderiliyor. Tamamlanana kadar bu sekmeyi açık tutun.",
     "conv.stage_converter": "Dönüştürücü hazırlanıyor",

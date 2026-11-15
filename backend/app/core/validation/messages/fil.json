@@ -1750,6 +1750,14 @@
     "self_approval": {
       "fail": "Ikaw ang humiling ng {code}, kaya hindi mo ito maaaprubahan (naka-on ang paghihiwalay ng tungkulin para sa proyektong ito).",
       "suggestion": "Hilingin sa ibang tagapag-apruba na magpasya, o patayin ang paghihiwalay ng tungkulin sa mga setting ng ledger."
+    },
+    "sod_prepared": {
+      "fail": "Ikaw ang huling nag-edit o nagsumite ng {code}, kaya hindi mo ito maaaprubahan (naka-on ang paghihiwalay ng tungkulin para sa proyektong ito).",
+      "suggestion": "Hilingin sa ibang tagapag-apruba na magpasya."
+    },
+    "sod_unattributed": {
+      "fail": "Walang naitalang humiling para sa {code}, kaya hindi ito maaaprubahan habang naka-on ang paghihiwalay ng tungkulin.",
+      "suggestion": "Tanggihan ito at ilagay ulit para maitala ang humiling."
     }
   },
   "schedule": {

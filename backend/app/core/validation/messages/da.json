@@ -1750,6 +1750,14 @@
     "self_approval": {
       "fail": "{code} er anmodet af dig, så du kan ikke godkende den (funktionsadskillelse er slået til for dette projekt).",
       "suggestion": "Bed en anden godkender om at afgøre den, eller slå funktionsadskillelse fra i kontoens indstillinger."
+    },
+    "sod_prepared": {
+      "fail": "{code} blev sidst redigeret eller indsendt af dig, så du kan ikke godkende den (funktionsadskillelse er slået til for dette projekt).",
+      "suggestion": "Bed en anden godkender om at afgøre den."
+    },
+    "sod_unattributed": {
+      "fail": "{code} har ingen registreret anmoder, så den kan ikke godkendes, mens funktionsadskillelse er slået til.",
+      "suggestion": "Afvis den og indtast den igen, så anmoderen bliver registreret."
     }
   },
   "schedule": {

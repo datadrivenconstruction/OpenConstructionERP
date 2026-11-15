@@ -1750,6 +1750,14 @@
     "self_approval": {
       "fail": "{code} a été demandé par vous, vous ne pouvez donc pas l'approuver (la séparation des tâches est activée pour ce projet).",
       "suggestion": "Demandez à un autre approbateur de statuer, ou désactivez la séparation des tâches dans les réglages du registre."
+    },
+    "sod_prepared": {
+      "fail": "{code} a été modifié ou soumis en dernier lieu par vous, vous ne pouvez donc pas l'approuver (la séparation des tâches est activée pour ce projet).",
+      "suggestion": "Demandez à un autre approbateur de statuer."
+    },
+    "sod_unattributed": {
+      "fail": "{code} n'a aucun demandeur enregistré, il ne peut donc pas être approuvé tant que la séparation des tâches est activée.",
+      "suggestion": "Rejetez-le et saisissez-le à nouveau pour que le demandeur soit enregistré."
     }
   },
   "schedule": {

@@ -1750,6 +1750,14 @@
     "self_approval": {
       "fail": "{code} wurde von Ihnen beantragt, daher können Sie sie nicht genehmigen (Funktionstrennung ist für dieses Projekt aktiv).",
       "suggestion": "Bitten Sie einen anderen Genehmiger um die Entscheidung oder schalten Sie die Funktionstrennung in den Einstellungen des Budgetbuchs aus."
+    },
+    "sod_prepared": {
+      "fail": "{code} wurde zuletzt von Ihnen bearbeitet oder eingereicht, daher können Sie sie nicht genehmigen (Funktionstrennung ist für dieses Projekt aktiv).",
+      "suggestion": "Bitten Sie einen anderen Genehmiger um die Entscheidung."
+    },
+    "sod_unattributed": {
+      "fail": "Für {code} ist kein Antragsteller erfasst, daher kann dieser Vorgang bei aktiver Funktionstrennung nicht genehmigt werden.",
+      "suggestion": "Lehnen Sie den Vorgang ab und erfassen Sie ihn neu, damit der Antragsteller hinterlegt wird."
     }
   },
   "schedule": {

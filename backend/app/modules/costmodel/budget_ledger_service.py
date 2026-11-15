@@ -126,7 +126,20 @@ class BudgetLedgerService:
         )
         return LedgerSettings(segregation_of_duties=True if row is None else bool(row.segregation_of_duties))
 
-    async def put_settings(self, project_id: uuid.UUID, body: LedgerSettings, user_id: str | None) -> LedgerSettings:
+    async def put_settings(
+        self, project_id: uuid.UUID, body: LedgerSettings, user_id: str | None, *, is_admin: bool = False
+    ) -> LedgerSettings:
+        """Store the settings; only an admin may switch segregation of duties off, and the change is audited."""
+        if (
+            not body.segregation_of_duties
+            and not is_admin
+            and (await self.get_settings(project_id)).segregation_of_duties
+        ):
+            raise _err(
+                status.HTTP_403_FORBIDDEN,
+                "sod_admin_only",
+                "Only an administrator can switch segregation of duties off",
+            )
         row = (
             (
                 await self.session.execute(
@@ -295,12 +308,19 @@ class BudgetLedgerService:
             payload = await self._payload(project_id, kind, action, legs, entry)
             if action == "approve":
                 payload["segregation_of_duties"] = (await self.get_settings(project_id)).segregation_of_duties
+                # Whoever created, last edited or submitted the entry may not approve it; an entry with no
+                # recorded requester (or an anonymous approver) cannot be cleared either.
+                payload["unattributed"] = entry.requested_by is None or user_id is None
                 payload["self_approval"] = user_id is not None and entry.requested_by == user_id
+                payload["prepared_by_approver"] = user_id is not None and user_id in (
+                    entry.last_edited_by,
+                    entry.submitted_by,
+                )
             await self._refuse_on_errors(payload, project_id, locale)
         before, entry.status = entry.status, to
         now = datetime.now(UTC)
         if action == "submit":
-            entry.submitted_at = now
+            entry.submitted_at, entry.submitted_by = now, user_id
         if action in ("approve", "reject"):
             entry.decided_by, entry.decided_at, entry.decision_note = user_id, now, note.strip()
         self._audit(project_id, kind, entry.id, action, before, to, user_id, note.strip())
@@ -347,6 +367,7 @@ class BudgetLedgerService:
         for line_id, amount in legs:
             self.session.add(BudgetTransferLeg(transfer_id=transfer.id, cost_line_id=line_id, amount=amount))
         transfer.reason = body.reason.strip()
+        transfer.last_edited_by = user_id
         self._audit(project_id, "transfer", transfer.id, "edit", "draft", "draft", user_id)
         await self.session.flush()
         return await self._transfer_out(transfer)
@@ -400,6 +421,7 @@ class BudgetLedgerService:
         await self._refuse_on_errors(payload, project_id, locale)
         mod.cost_line_id, mod.amount = body.cost_line_id, amount
         mod.reason, mod.approval_ref = body.reason.strip(), body.approval_ref.strip()
+        mod.last_edited_by = user_id
         self._audit(project_id, "modification", mod.id, "edit", "draft", "draft", user_id)
         await self.session.flush()
         return self._mod_out(mod, await self._codes(project_id))
