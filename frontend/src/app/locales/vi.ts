@@ -60690,6 +60690,7 @@ const resource = {
     "demo_switcher.tab_condo_toronto": "Chủ đầu tư nhà ở, Toronto",
     "demo_switcher.tab_school_paris": "Chuyên gia dự toán, Paris",
     "demo_switcher.tab_office_shanghai": "Tư vấn chi phí, Thượng Hải",
+    "demo_switcher.switch": "Đổi bản demo",
     "demo_chooser.title": "Bạn muốn xem công ty nào?",
     "demo_chooser.subtitle": "Mỗi bản demo là một dự án quy mô thật do một loại công ty khác nhau vận hành, với menu cắt theo công việc của họ. Chuyển bất cứ lúc nào từ thanh phía trên.",
     "demo_chooser.none": "Máy chủ này chưa cài đặt dự án demo nào.",
@@ -64005,6 +64006,10 @@ const resource = {
     "boot.phase.demo_data": "Đang tạo tài khoản demo và dữ liệu tham chiếu",
     "boot.phase.services": "Đang chuẩn bị dịch vụ nền",
     "boot.phase.finishing": "Đang hoàn tất",
+    "demo_scope.all_projects": "Đang hiển thị tất cả dự án demo.",
+    "demo_scope.only_this": "Quay lại {{name}}",
+    "demo_scope.only_project": "Chỉ hiển thị bản demo {{name}}.",
+    "demo_scope.show_all": "Hiển thị tất cả dự án demo",
   }
 } as { translation: Record<string, string> };
 

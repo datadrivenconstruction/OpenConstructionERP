@@ -61545,6 +61545,7 @@ const resource = {
     "demo_switcher.tab_condo_toronto": "Bostadsutvecklare, Toronto",
     "demo_switcher.tab_school_paris": "Byggkalkylator, Paris",
     "demo_switcher.tab_office_shanghai": "Kostnadskonsult, Shanghai",
+    "demo_switcher.switch": "Byt demo",
     "demo_chooser.title": "Vilket företag vill du se?",
     "demo_chooser.subtitle": "Varje demo är ett projekt i verklig storlek som drivs av en annan sorts företag, med en meny anpassad efter dess arbete. Byt när som helst i fältet högst upp.",
     "demo_chooser.none": "Ingen demoprojekt är installerat på den här servern än.",
@@ -64877,6 +64878,10 @@ const resource = {
     "boot.phase.demo_data": "Skapar demokonton och referensdata",
     "boot.phase.services": "Förbereder bakgrundstjänster",
     "boot.phase.finishing": "Slutför",
+    "demo_scope.all_projects": "Visar alla demoprojekt.",
+    "demo_scope.only_this": "Tillbaka till {{name}}",
+    "demo_scope.only_project": "Visar endast demon {{name}}.",
+    "demo_scope.show_all": "Visa alla demoprojekt",
   }
 } as { translation: Record<string, string> };
 

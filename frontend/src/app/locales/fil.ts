@@ -60888,6 +60888,7 @@ const resource = {
     "demo_switcher.tab_condo_toronto": "Developer ng pabahay, Toronto",
     "demo_switcher.tab_school_paris": "Construction economist, Paris",
     "demo_switcher.tab_office_shanghai": "Cost consultancy, Shanghai",
+    "demo_switcher.switch": "Palitan ang demo",
     "demo_chooser.title": "Aling kumpanya ang gusto mong makita?",
     "demo_chooser.subtitle": "Ang bawat demo ay proyektong totoong laki na pinapatakbo ng iba't ibang uri ng kumpanya, na may menu na hiniwa para sa trabaho nito. Lumipat anumang oras mula sa bar sa itaas.",
     "demo_chooser.none": "Wala pang naka-install na demo project sa server na ito.",
@@ -64220,6 +64221,10 @@ const resource = {
     "boot.phase.demo_data": "Ginagawa ang mga demo account at reference data",
     "boot.phase.services": "Inihahanda ang mga background service",
     "boot.phase.finishing": "Tinatapos",
+    "demo_scope.all_projects": "Ipinapakita ang lahat ng demo na proyekto.",
+    "demo_scope.show_all": "Ipakita ang lahat ng demo na proyekto",
+    "demo_scope.only_this": "Bumalik sa {{name}}",
+    "demo_scope.only_project": "Ang demo na {{name}} lamang ang ipinapakita.",
   }
 } as { translation: Record<string, string> };
 

@@ -16,8 +16,9 @@ import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import clsx from 'clsx';
-import { Languages, LayoutGrid, Lock } from 'lucide-react';
+import { ChevronDown, Languages, LayoutGrid, Lock } from 'lucide-react';
 import { changeLanguage, getLanguageByCode } from '@/app/i18n';
+import { useMenuLayoutStore } from '@/app/layout/useMenuLayoutStore';
 import { apiGet } from '@/shared/lib/api';
 import { ACCENT_SWATCH } from '@/shared/lib/appearance';
 import {
@@ -29,6 +30,7 @@ import {
   type DemoSlug,
 } from '@/shared/lib/demoProfiles';
 import { demoFaceFor } from '@/shared/lib/demoFaces';
+import { marketSwitchValue, uiLanguageFor } from '@/shared/lib/demoScope';
 import { fetchProjectList } from '@/shared/lib/projectList';
 import { HexMark } from '@/shared/ui/HexMark';
 import { useAppearanceStore } from '@/stores/useAppearanceStore';
@@ -51,6 +53,31 @@ export function captureDemoPick(search: string = window.location.search): void {
     }
   } catch {
     // Storage blocked: the deep link is a convenience, the tabs still work.
+  }
+}
+
+const MENU_MODE_KEY = 'oe_demo_menu_mode';
+
+/**
+ * Put the sidebar in the demo's work mode: its short list of daily screens,
+ * the rest of its sections under "More modules". Opening a demo always does;
+ * a reload does once per session, so a mode the visitor picks afterwards stays.
+ */
+export function applyDemoMenuPreset(slug: string | null, force: boolean): void {
+  const profile = demoProfile(slug);
+  if (!profile) return;
+  let applied: string | null = null;
+  try {
+    applied = sessionStorage.getItem(MENU_MODE_KEY);
+  } catch {
+    applied = null;
+  }
+  if (!force && applied === profile.slug) return;
+  useMenuLayoutStore.getState().dispatch({ type: 'setMode', mode: profile.menuMode });
+  try {
+    sessionStorage.setItem(MENU_MODE_KEY, profile.slug);
+  } catch {
+    // Storage blocked: the mode is applied again on the next reload, nothing breaks.
   }
 }
 
@@ -104,6 +131,7 @@ export function useDemoProjects() {
       applyDemoMenuStyle(profile.menuStyle);
       writeChosenDemo(slug);
       setDemo(slug);
+      applyDemoMenuPreset(slug, true);
       setActiveProject(p.id, p.name);
       navigate(`/projects/${p.id}`);
     },
@@ -127,9 +155,7 @@ export function DemoMarketSwitch({ className }: { className?: string }) {
   const [busy, setBusy] = useState(false);
   const available = DEMO_PROFILES.filter((p) => bySlug.has(p.slug));
   if (available.length === 0) return null;
-  const lang = (i18n.language || 'en').split('-')[0];
-  const shown = available.find((p) => p.slug === active);
-  const current = shown && shown.locale.split('-')[0] === lang ? shown.slug : '';
+  const current = marketSwitchValue(active, available, i18n.language);
 
   const choose = async (slug: string) => {
     const profile = demoProfile(slug);
@@ -166,9 +192,10 @@ export function DemoMarketSwitch({ className }: { className?: string }) {
         onChange={(e) => void choose(e.target.value)}
         className="min-w-0 flex-1 cursor-pointer truncate bg-transparent font-semibold text-content-primary outline-none disabled:cursor-wait disabled:opacity-60"
       >
+        {/* The interface is not in a listed market's language: name the language it is in. */}
         {current === '' && (
           <option value="" disabled>
-            {t('common.select', { defaultValue: 'Select' })}
+            {uiLanguageFor(i18n.language).name}
           </option>
         )}
         {available.map((p) => (
@@ -187,11 +214,15 @@ export function DemoSwitcherBar() {
   const { pathname } = useLocation();
   const activeProjectId = useProjectContextStore((s) => s.activeProjectId);
   const { demoMode, loaded, bySlug, open } = useDemoProjects();
+  // On a phone the strip folds to one line; the tabs open on demand.
+  const [expanded, setExpanded] = useState(false);
 
   // The menu style follows the chosen demo across reloads and goes away with the demo bar.
   useEffect(() => {
     if (!demoMode) return undefined;
-    applyDemoMenuStyle(demoProfile(readChosenDemo())?.menuStyle ?? null);
+    const chosen = readChosenDemo();
+    applyDemoMenuStyle(demoProfile(chosen)?.menuStyle ?? null);
+    applyDemoMenuPreset(chosen, false);
     return () => applyDemoMenuStyle(null);
   }, [demoMode]);
 
@@ -219,6 +250,8 @@ export function DemoSwitcherBar() {
   // A tab whose project this account cannot see would only sit there greyed out.
   const available = DEMO_PROFILES.filter((p) => bySlug.has(p.slug));
   if (!demoMode || available.length === 0 || pathname === DEMO_CHOOSER_PATH) return null;
+  const openProfile = available.find((p) => bySlug.get(p.slug)?.id === activeProjectId);
+  const switchLabel = t('demo_switcher.switch', { defaultValue: 'Switch demo' });
 
   return (
     <nav
@@ -233,47 +266,74 @@ export function DemoSwitcherBar() {
         <LayoutGrid size={16} className="shrink-0" />
         {t('demo_switcher.label', { defaultValue: 'Demo projects' })}
       </button>
-      <DemoMarketSwitch className="max-w-full sm:max-w-sm" />
-      <div role="tablist" className="flex flex-wrap gap-1.5">
-        {available.map((profile) => {
-          const p = bySlug.get(profile.slug);
-          const active = !!p && p.id === activeProjectId;
-          const face = demoFaceFor(profile.slug);
-          return (
-            <button
-              key={profile.slug}
-              type="button"
-              role="tab"
-              aria-selected={active}
-              title={p?.name}
-              onClick={() => open(profile.slug)}
-              className={clsx(
-                'flex items-center gap-2 rounded-full border px-4 py-1.5 font-medium transition-colors',
-                active
-                  ? 'border-transparent bg-oe-blue text-white shadow-sm'
-                  : 'border-border-light text-content-secondary hover:bg-surface-secondary hover:text-content-primary',
-              )}
-            >
-              <HexMark
-                inline
-                src={face.src}
-                kind={face.kind}
-                accent={active ? 'rgba(255,255,255,0.92)' : ACCENT_SWATCH[profile.appearance.accent]}
-                active={active}
-                size={24}
-                className="-my-1 -ms-2"
-              />
-              {t(`demo_switcher.tab_${profile.slug.replace(/-/g, '_')}`)}
-            </button>
-          );
-        })}
+      <button
+        type="button"
+        data-testid="demo-switcher-toggle"
+        aria-expanded={expanded}
+        aria-controls="oe-demo-switcher-body"
+        aria-label={switchLabel}
+        title={switchLabel}
+        onClick={() => setExpanded((v) => !v)}
+        className="ms-auto flex min-w-0 items-center gap-1 rounded-lg px-2 py-1.5 font-medium text-content-primary hover:bg-surface-secondary sm:hidden"
+      >
+        <span className="truncate">
+          {openProfile ? t(`demo_switcher.tab_${openProfile.slug.replace(/-/g, '_')}`) : switchLabel}
+        </span>
+        <ChevronDown size={16} className={clsx('shrink-0 transition-transform', expanded && 'rotate-180')} aria-hidden="true" />
+      </button>
+      <div
+        id="oe-demo-switcher-body"
+        data-testid="demo-switcher-body"
+        className={clsx(
+          expanded ? 'flex' : 'hidden',
+          'w-full flex-wrap items-center gap-x-3 gap-y-2 sm:flex sm:w-auto sm:flex-1',
+        )}
+      >
+        <DemoMarketSwitch className="max-w-full sm:max-w-sm" />
+        <div role="tablist" className="flex flex-wrap gap-1.5">
+          {available.map((profile) => {
+            const p = bySlug.get(profile.slug);
+            const active = !!p && p.id === activeProjectId;
+            const face = demoFaceFor(profile.slug);
+            return (
+              <button
+                key={profile.slug}
+                type="button"
+                role="tab"
+                aria-selected={active}
+                title={p?.name}
+                onClick={() => {
+                  setExpanded(false);
+                  open(profile.slug);
+                }}
+                className={clsx(
+                  'flex items-center gap-2 rounded-full border px-4 py-1.5 font-medium transition-colors',
+                  active
+                    ? 'border-transparent bg-oe-blue text-white shadow-sm'
+                    : 'border-border-light text-content-secondary hover:bg-surface-secondary hover:text-content-primary',
+                )}
+              >
+                <HexMark
+                  inline
+                  src={face.src}
+                  kind={face.kind}
+                  accent={active ? 'rgba(255,255,255,0.92)' : ACCENT_SWATCH[profile.appearance.accent]}
+                  active={active}
+                  size={24}
+                  className="-my-1 -ms-2"
+                />
+                {t(`demo_switcher.tab_${profile.slug.replace(/-/g, '_')}`)}
+              </button>
+            );
+          })}
+        </div>
+        <span className="ms-auto flex items-center gap-1 text-xs text-content-tertiary">
+          <Lock size={12} className="shrink-0" />
+          {t('demo_switcher.read_only', {
+            defaultValue: 'Read-only demo: many functions are limited. Use demo data only, uploads are off.',
+          })}
+        </span>
       </div>
-      <span className="ms-auto flex items-center gap-1 text-xs text-content-tertiary">
-        <Lock size={12} className="shrink-0" />
-        {t('demo_switcher.read_only', {
-          defaultValue: 'Read-only demo: many functions are limited. Use demo data only, uploads are off.',
-        })}
-      </span>
     </nav>
   );
 }

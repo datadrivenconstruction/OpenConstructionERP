@@ -16,7 +16,7 @@
 // are on what the list actually renders.
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, waitFor, cleanup } from '@testing-library/react';
+import { render, screen, waitFor, cleanup, fireEvent } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter } from 'react-router-dom';
 
@@ -65,6 +65,7 @@ vi.mock('./CreateBOQPage', () => ({
 
 import { BOQListPage } from './BOQListPage';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
+import { useDemoSessionStore } from '@/stores/useDemoSessionStore';
 
 /* ── Fixture: three projects, four estimates ──────────────────────── */
 
@@ -236,5 +237,35 @@ describe('BOQListPage project scope', () => {
 
     const saved = JSON.parse(localStorage.getItem('oe_boq_filters') ?? '{}');
     expect(saved.project ?? '').toBe('');
+  });
+
+  /* ── The hosted demo ────────────────────────────────────────────── */
+
+  it('on the hosted demo lists the open demo project, and every project on request', async () => {
+    // One shared demo account owns every project; London is open.
+    api.get.mockImplementation((url: string) => {
+      if (url === '/system/status') return Promise.resolve({ demo_mode: true });
+      if (url.startsWith('/v1/projects/')) {
+        return Promise.resolve(
+          PROJECTS.map((p) => ({ ...p, metadata: p.id === 'proj-b' ? { demo_id: 'office-london' } : {} })),
+        );
+      }
+      if (url === '/v1/documents/file-types-by-project/') return Promise.resolve({});
+      return Promise.resolve([]);
+    });
+    useDemoSessionStore.getState().setDemo('office-london');
+    try {
+      mountList(newClient());
+      await waitFor(() => expect(screen.getByTestId('demo-scope-notice')).toBeTruthy());
+      await waitFor(() => expect(screen.getByText('Bravo deck works')).toBeTruthy());
+      expect(visibleEstimates().sort()).toEqual(['Bravo abutments', 'Bravo deck works']);
+      expect(screen.getByText(/2 estimates across 1 projects/)).toBeTruthy();
+
+      fireEvent.click(screen.getByTestId('demo-scope-toggle'));
+      await waitFor(() => expect(screen.getByText('Charlie fit out')).toBeTruthy());
+      expect(visibleEstimates()).toHaveLength(TOTAL_BOQS);
+    } finally {
+      useDemoSessionStore.getState().setDemo(null);
+    }
   });
 });

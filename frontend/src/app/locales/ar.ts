@@ -64012,6 +64012,7 @@ const resource = {
     "demo_switcher.tab_condo_toronto": "مطوّر سكني، تورونتو",
     "demo_switcher.tab_school_paris": "اقتصادي بناء، باريس",
     "demo_switcher.tab_office_shanghai": "استشارات التكاليف، شنغهاي",
+    "demo_switcher.switch": "تبديل العرض التوضيحي",
     "demo_chooser.title": "أي شركة تريد أن تراها؟",
     "demo_chooser.subtitle": "كل عرض تجريبي هو مشروع بحجم حقيقي تديره شركة من نوع مختلف، بقائمة مفصلة على عملها. بدّل في أي وقت من الشريط العلوي.",
     "demo_chooser.none": "لم يتم تثبيت أي مشروع تجريبي على هذا الخادم بعد.",
@@ -67468,6 +67469,10 @@ const resource = {
     "boot.phase.demo_data": "جارٍ إنشاء حسابات العرض وبيانات المرجع",
     "boot.phase.services": "جارٍ تجهيز الخدمات الخلفية",
     "boot.phase.finishing": "إنهاء",
+    "demo_scope.only_project": "يتم عرض العرض التوضيحي {{name}} فقط.",
+    "demo_scope.all_projects": "يتم عرض جميع المشاريع التوضيحية.",
+    "demo_scope.show_all": "عرض جميع المشاريع التوضيحية",
+    "demo_scope.only_this": "العودة إلى {{name}}",
   }
 } as { translation: Record<string, string> };
 

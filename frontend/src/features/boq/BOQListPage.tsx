@@ -37,6 +37,9 @@ import { canDeleteBoq } from './canDeleteBoq';
 import { CreateBOQModal } from './CreateBOQPage';
 import { BOQRenameDialog } from './BOQRenameDialog';
 import { projectFilterOptions } from './projectFilterOptions';
+import { useDemoScope } from '@/shared/lib/useDemoScope';
+import { scopeToProject } from '@/shared/lib/demoScope';
+import { DemoScopeNotice } from '@/shared/ui/DemoScopeNotice';
 
 interface Project {
   id: string;
@@ -528,7 +531,7 @@ export function BOQListPage() {
   // On a route-scoped page the fetch below is already narrowed to that
   // project, so the persisted choice does not apply on top of it: a project
   // remembered from /boq would empty another project's page.
-  const userProjectFilter = projectIdFromUrl ? '' : projectFilter;
+  const routeProjectFilter = projectIdFromUrl ? '' : projectFilter;
   const [sortField, setSortField] = useState<SortField>(() => {
     try {
       const saved = JSON.parse(localStorage.getItem('oe_boq_filters') ?? '{}');
@@ -649,9 +652,18 @@ export function BOQListPage() {
   // When the URL pins a single project, only fetch that project's BOQs —
   // not every project's. On prod with 50+ projects, the parallel fan-out
   // was costing 1-2s of skeleton state for no reason.
-  const scopedProjects = projectIdFromUrl
-    ? projects?.filter((p) => p.id === projectIdFromUrl)
-    : projects;
+  // On the hosted demo the open demo's project is the default scope of /boq.
+  const demoScope = useDemoScope();
+  const scopedProjects = useMemo(
+    () =>
+      projectIdFromUrl
+        ? projects?.filter((p) => p.id === projectIdFromUrl)
+        : scopeToProject(projects, demoScope.projectId, (p) => p.id),
+    [projects, projectIdFromUrl, demoScope.projectId],
+  );
+  // A project remembered from outside the demo would empty the demo's list.
+  const userProjectFilter =
+    demoScope.projectId && routeProjectFilter !== demoScope.projectId ? '' : routeProjectFilter;
 
   const {
     data: boqData,
@@ -896,7 +908,7 @@ export function BOQListPage() {
   }
 
   const isLoading = projLoading || boqLoading;
-  const uniqueProjects = projectFilterOptions(projects ?? []);
+  const uniqueProjects = projectFilterOptions(scopedProjects ?? []);
   const uniqueStatuses = [...new Set((allBoqs ?? []).map((b) => b.status))];
 
   function valueBorderColor(value: number): string {
@@ -1010,6 +1022,8 @@ export function BOQListPage() {
           unshared after the project list loaded. Named above the totals, so
           no total below reads as covering them. Refresh reloads the project
           list, which no longer carries them, and the notice goes away. */}
+      {!projectIdFromUrl && <DemoScopeNotice scope={demoScope} />}
+
       {skippedProjects.length > 0 && (
         <BOQListSkippedNotice
           projects={skippedProjects}

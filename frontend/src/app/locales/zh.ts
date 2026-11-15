@@ -63151,6 +63151,7 @@ const resource = {
     "demo_switcher.tab_condo_toronto": "住宅开发商，多伦多",
     "demo_switcher.tab_school_paris": "工程造价师，巴黎",
     "demo_switcher.tab_office_shanghai": "造价咨询，上海",
+    "demo_switcher.switch": "切换演示",
     "demo_chooser.title": "您想查看哪家公司？",
     "demo_chooser.subtitle": "每个演示都是由不同类型的公司运营的真实规模项目，菜单按其业务裁剪。可随时从顶部栏切换。",
     "demo_chooser.none": "此服务器上尚未安装演示项目。",
@@ -66466,6 +66467,10 @@ const resource = {
     "boot.phase.demo_data": "正在创建演示账户和参考数据",
     "boot.phase.services": "正在准备后台服务",
     "boot.phase.finishing": "正在完成",
+    "demo_scope.all_projects": "显示所有演示项目。",
+    "demo_scope.only_this": "返回 {{name}}",
+    "demo_scope.only_project": "仅显示 {{name}} 演示。",
+    "demo_scope.show_all": "显示所有演示项目",
   }
 } as { translation: Record<string, string> };
 

@@ -22,6 +22,9 @@ const hookMock = vi.hoisted(() => ({
 }));
 vi.mock('@/shared/hooks/usePartnerPack', () => hookMock);
 
+const demoPack = vi.hoisted(() => ({ value: { inDemo: false, manifest: null as unknown } }));
+vi.mock('@/shared/hooks/useDemoPack', () => ({ useDemoPack: () => demoPack.value }));
+
 import { ActivePackChip } from './ActivePackChip';
 
 const PACKS = [
@@ -58,6 +61,7 @@ function mountWith(activeSlug: string | null, isLoading = false) {
 beforeEach(() => {
   cleanup();
   hookMock.useInstalledPacks.mockReset();
+  demoPack.value = { inDemo: false, manifest: null };
 });
 
 describe('<ActivePackChip />', () => {
@@ -102,5 +106,19 @@ describe('<ActivePackChip />', () => {
     // a name for it would be worse than the empty state.
     mountWith('pack-that-was-removed');
     expect(screen.getByTestId('active-pack-chip').getAttribute('data-pack-state')).toBe('none');
+  });
+
+  it('in an open demo names the demo project pack, not the applied one', () => {
+    // One shared demo account carries the US pack; the London demo is British.
+    demoPack.value = { inDemo: true, manifest: PACKS[0] };
+    mountWith('china-gbt50500');
+    const chip = screen.getByTestId('active-pack-chip');
+    expect(chip.getAttribute('data-pack-slug')).toBe('uk-jct');
+  });
+
+  it('in an open demo without a pack for its country claims none', () => {
+    demoPack.value = { inDemo: true, manifest: null };
+    mountWith('china-gbt50500');
+    expect(screen.queryByTestId('active-pack-chip')).toBeNull();
   });
 });

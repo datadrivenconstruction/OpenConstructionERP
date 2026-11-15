@@ -57,6 +57,8 @@ import {
 } from '@/shared/ui';
 import { PageHeader } from '@/shared/ui/PageHeader';
 import { TruncationNotice } from '@/shared/ui/TruncationNotice';
+import { DemoScopeNotice } from '@/shared/ui/DemoScopeNotice';
+import { useDemoScope } from '@/shared/lib/useDemoScope';
 import { useConfirm } from '@/shared/hooks/useConfirm';
 import { useCreateShortcut } from '@/shared/hooks/useCreateShortcut';
 import { matchesSearch } from '@/shared/lib/highlightMatch';
@@ -1610,6 +1612,10 @@ export function ContactsPage() {
     !showAddModal && !showImportModal,
   );
 
+  // On the hosted demo the directory shows the open demo's contacts.
+  const demoScope = useDemoScope();
+  const demoProjectId = demoScope.projectId;
+
   // Data
   const {
     data: contactsPage,
@@ -1618,11 +1624,12 @@ export function ContactsPage() {
     error,
     refetch,
   } = useQuery({
-    queryKey: ['contacts', typeFilter, selectedTags],
+    queryKey: ['contacts', typeFilter, selectedTags, demoProjectId],
     queryFn: () =>
       fetchContacts({
         contact_type: typeFilter || undefined,
         tags: selectedTags.length > 0 ? selectedTags : undefined,
+        project_id: demoProjectId ?? undefined,
         // Bumped to 500 so the CRM tier views (e.g. ~3,500 inbound leads)
         // surface enough rows for client-side search to feel right after
         // chip filtering. The backend caps at 500.
@@ -1679,8 +1686,8 @@ export function ContactsPage() {
   // Directory KPIs — total + expiring-prequalification surface, fed by
   // the /stats/ endpoint that was previously orphaned.
   const { data: stats } = useQuery({
-    queryKey: ['contacts', 'stats'],
-    queryFn: fetchContactStats,
+    queryKey: ['contacts', 'stats', demoProjectId],
+    queryFn: () => fetchContactStats(demoProjectId),
     staleTime: 60_000,
   });
 
@@ -1921,6 +1928,8 @@ export function ContactsPage() {
           </>
         }
       />
+
+      <DemoScopeNotice scope={demoScope} />
 
       {/* Canonical module intro — pain-named, copy from MODULE_INTRO_COPY. */}
       <DismissibleInfo

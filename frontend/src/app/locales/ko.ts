@@ -61298,6 +61298,7 @@ const resource = {
     "demo_switcher.tab_condo_toronto": "주거 개발사, 토론토",
     "demo_switcher.tab_school_paris": "건설 원가 전문가, 파리",
     "demo_switcher.tab_office_shanghai": "원가 컨설팅, 상하이",
+    "demo_switcher.switch": "데모 전환",
     "demo_chooser.title": "어떤 회사를 보고 싶으신가요?",
     "demo_chooser.subtitle": "각 데모는 서로 다른 유형의 회사가 운영하는 실제 규모의 프로젝트이며, 메뉴도 그 업무에 맞게 줄였습니다. 상단 바에서 언제든 전환할 수 있습니다.",
     "demo_chooser.none": "이 서버에는 아직 데모 프로젝트가 설치되어 있지 않습니다.",
@@ -64613,6 +64614,10 @@ const resource = {
     "boot.phase.demo_data": "데모 계정과 기준 데이터 생성 중",
     "boot.phase.services": "백그라운드 서비스 준비 중",
     "boot.phase.finishing": "마무리 중",
+    "demo_scope.all_projects": "모든 데모 프로젝트를 표시 중입니다.",
+    "demo_scope.show_all": "모든 데모 프로젝트 표시",
+    "demo_scope.only_this": "{{name}}(으)로 돌아가기",
+    "demo_scope.only_project": "{{name}} 데모만 표시 중입니다.",
   }
 } as { translation: Record<string, string> };
 

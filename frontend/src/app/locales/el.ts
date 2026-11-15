@@ -60890,6 +60890,7 @@ const resource = {
     "demo_switcher.tab_condo_toronto": "Κατασκευαστής κατοικιών, Τορόντο",
     "demo_switcher.tab_school_paris": "Κοστολόγος κατασκευών, Παρίσι",
     "demo_switcher.tab_office_shanghai": "Σύμβουλος κόστους, Σαγκάη",
+    "demo_switcher.switch": "Αλλαγή επίδειξης",
     "demo_chooser.title": "Ποια εταιρεία θέλετε να δείτε;",
     "demo_chooser.subtitle": "Κάθε demo είναι ένα έργο πραγματικού μεγέθους που τρέχει διαφορετικός τύπος εταιρείας, με μενού προσαρμοσμένο στη δουλειά της. Αλλάξτε οποτεδήποτε από τη γραμμή στην κορυφή.",
     "demo_chooser.none": "Δεν έχει εγκατασταθεί ακόμη κάποιο demo έργο σε αυτόν τον διακομιστή.",
@@ -64222,6 +64223,10 @@ const resource = {
     "boot.phase.demo_data": "Δημιουργία demo λογαριασμών και δεδομένων αναφοράς",
     "boot.phase.services": "Προετοιμασία υπηρεσιών παρασκηνίου",
     "boot.phase.finishing": "Ολοκλήρωση",
+    "demo_scope.only_project": "Εμφανίζεται μόνο η επίδειξη {{name}}.",
+    "demo_scope.all_projects": "Εμφανίζονται όλα τα έργα επίδειξης.",
+    "demo_scope.show_all": "Εμφάνιση όλων των έργων επίδειξης",
+    "demo_scope.only_this": "Επιστροφή σε {{name}}",
   }
 } as { translation: Record<string, string> };
 

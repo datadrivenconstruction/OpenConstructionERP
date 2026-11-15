@@ -60608,6 +60608,7 @@ const resource = {
     "demo_switcher.tab_condo_toronto": "Орон сууцны хөгжүүлэгч, Торонто",
     "demo_switcher.tab_school_paris": "Өртөг тооцоологч, Парис",
     "demo_switcher.tab_office_shanghai": "Өртгийн зөвлөх, Шанхай",
+    "demo_switcher.switch": "Демо солих",
     "demo_chooser.title": "Аль компанийг харахыг хүсэж байна вэ?",
     "demo_chooser.subtitle": "Демо бүр нь өөр төрлийн компанийн явуулж буй бодит хэмжээний төсөл бөгөөд цэс нь түүний ажилд тохирсон. Дээд талын самбараас хүссэн үедээ сольж болно.",
     "demo_chooser.none": "Энэ сервэрт демо төсөл одоогоор суугаагүй байна.",
@@ -63940,6 +63941,10 @@ const resource = {
     "boot.phase.demo_data": "Демо бүртгэл болон лавлах өгөгдөл үүсгэж байна",
     "boot.phase.services": "Арын дэвсгэрийн үйлчилгээг бэлдэж байна",
     "boot.phase.finishing": "Дуусгаж байна",
+    "demo_scope.all_projects": "Бүх демо төслийг харуулж байна.",
+    "demo_scope.show_all": "Бүх демо төслийг харуулах",
+    "demo_scope.only_this": "{{name}} руу буцах",
+    "demo_scope.only_project": "Зөвхөн {{name}} демог харуулж байна.",
   }
 } as { translation: Record<string, string> };
 

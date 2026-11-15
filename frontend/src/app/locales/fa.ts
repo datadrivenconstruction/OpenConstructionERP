@@ -60890,6 +60890,7 @@ const resource = {
     "demo_switcher.tab_condo_toronto": "توسعه‌دهنده مسکونی، تورنتو",
     "demo_switcher.tab_school_paris": "برآوردگر ساخت، پاریس",
     "demo_switcher.tab_office_shanghai": "مشاور هزینه، شانگهای",
+    "demo_switcher.switch": "تغییر نسخهٔ نمایشی",
     "demo_chooser.title": "کدام شرکت را می‌خواهید ببینید؟",
     "demo_chooser.subtitle": "هر نسخه نمایشی یک پروژه در اندازه واقعی است که نوع متفاوتی از شرکت آن را اجرا می‌کند، با منویی متناسب با کار آن. هر زمان از نوار بالا جابه‌جا شوید.",
     "demo_chooser.none": "هنوز هیچ پروژه نمایشی روی این سرور نصب نشده است.",
@@ -64222,6 +64223,10 @@ const resource = {
     "boot.phase.demo_data": "در حال ساخت حساب‌های نمونه و داده‌های مرجع",
     "boot.phase.services": "در حال آماده‌سازی سرویس‌های پس‌زمینه",
     "boot.phase.finishing": "در حال پایان",
+    "demo_scope.all_projects": "همهٔ پروژه‌های نمایشی نشان داده می‌شوند.",
+    "demo_scope.show_all": "نمایش همهٔ پروژه‌های نمایشی",
+    "demo_scope.only_this": "بازگشت به {{name}}",
+    "demo_scope.only_project": "فقط نسخهٔ نمایشی {{name}} نشان داده می‌شود.",
   }
 } as { translation: Record<string, string> };
 

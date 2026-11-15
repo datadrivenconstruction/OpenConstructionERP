@@ -62214,6 +62214,7 @@ const resource = {
     "demo_switcher.tab_condo_toronto": "住宅デベロッパー、トロント",
     "demo_switcher.tab_school_paris": "建設コスト専門家、パリ",
     "demo_switcher.tab_office_shanghai": "コストコンサルタント、上海",
+    "demo_switcher.switch": "デモを切り替え",
     "demo_chooser.title": "どの会社の画面をご覧になりますか？",
     "demo_chooser.subtitle": "各デモは、異なる種類の会社が進める実規模のプロジェクトで、メニューもその業務に合わせて絞り込まれています。画面上部のバーからいつでも切り替えられます。",
     "demo_chooser.none": "このサーバーには、まだデモプロジェクトがインストールされていません。",
@@ -65529,6 +65530,10 @@ const resource = {
     "boot.phase.demo_data": "デモアカウントと参照データを作成しています",
     "boot.phase.services": "バックグラウンドサービスを準備しています",
     "boot.phase.finishing": "仕上げ中",
+    "demo_scope.all_projects": "すべてのデモプロジェクトを表示しています。",
+    "demo_scope.show_all": "すべてのデモプロジェクトを表示",
+    "demo_scope.only_this": "{{name}} に戻る",
+    "demo_scope.only_project": "{{name}} のデモのみを表示しています。",
   }
 } as { translation: Record<string, string> };
 

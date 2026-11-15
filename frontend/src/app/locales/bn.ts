@@ -61200,6 +61200,7 @@ const resource = {
     "demo_switcher.tab_condo_toronto": "আবাসিক ডেভেলপার, টরন্টো",
     "demo_switcher.tab_school_paris": "নির্মাণ ব্যয় বিশেষজ্ঞ, প্যারিস",
     "demo_switcher.tab_office_shanghai": "ব্যয় পরামর্শ, সাংহাই",
+    "demo_switcher.switch": "ডেমো বদলান",
     "demo_chooser.title": "আপনি কোন কোম্পানি দেখতে চান?",
     "demo_chooser.subtitle": "প্রতিটি ডেমো বাস্তব আকারের একটি প্রকল্প, যা ভিন্ন ধরনের কোম্পানি চালায়, আর মেনু তার কাজ অনুযায়ী কাটা। উপরের বার থেকে যেকোনো সময় বদলান।",
     "demo_chooser.none": "এই সার্ভারে এখনো কোনো ডেমো প্রকল্প ইনস্টল করা হয়নি।",
@@ -64532,6 +64533,10 @@ const resource = {
     "boot.phase.demo_data": "ডেমো অ্যাকাউন্ট ও রেফারেন্স ডেটা তৈরি হচ্ছে",
     "boot.phase.services": "ব্যাকগ্রাউন্ড সার্ভিস প্রস্তুত হচ্ছে",
     "boot.phase.finishing": "শেষ করা হচ্ছে",
+    "demo_scope.only_project": "শুধু {{name}} ডেমো দেখানো হচ্ছে।",
+    "demo_scope.all_projects": "সব ডেমো প্রকল্প দেখানো হচ্ছে।",
+    "demo_scope.show_all": "সব ডেমো প্রকল্প দেখান",
+    "demo_scope.only_this": "{{name}}-এ ফিরে যান",
   }
 } as { translation: Record<string, string> };
 

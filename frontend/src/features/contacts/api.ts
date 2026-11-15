@@ -118,6 +118,8 @@ export interface ContactFilters {
   search?: string;
   limit?: number;
   tags?: string[];
+  /** Only contacts recorded against this project (`metadata.project_id`). */
+  project_id?: string;
 }
 
 export interface TagFacet {
@@ -206,6 +208,7 @@ export async function fetchContacts(filters?: ContactFilters): Promise<Page<Cont
   if (filters?.country) params.set('country', filters.country);
   if (filters?.search) params.set('search', filters.search);
   if (filters?.limit) params.set('limit', String(filters.limit));
+  if (filters?.project_id) params.set('project_id', filters.project_id);
   if (filters?.tags && filters.tags.length > 0) {
     for (const tag of filters.tags) {
       params.append('tag', tag);
@@ -233,8 +236,9 @@ export async function fetchContactTags(): Promise<TagFacet[]> {
 }
 
 /** Aggregate directory stats (total, by-type, top countries, expiring prequal). */
-export async function fetchContactStats(): Promise<ContactStats> {
-  return apiGet<ContactStats>(`/v1/contacts/stats/`);
+export async function fetchContactStats(projectId?: string | null): Promise<ContactStats> {
+  const qs = projectId ? `?project_id=${encodeURIComponent(projectId)}` : '';
+  return apiGet<ContactStats>(`/v1/contacts/stats/${qs}`);
 }
 
 export async function createContact(data: CreateContactPayload): Promise<Contact> {

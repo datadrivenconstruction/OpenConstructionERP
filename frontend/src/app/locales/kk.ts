@@ -60891,6 +60891,7 @@ const resource = {
     "demo_switcher.tab_condo_toronto": "Тұрғын үй девелоперы, Торонто",
     "demo_switcher.tab_school_paris": "Сметашы, Париж",
     "demo_switcher.tab_office_shanghai": "Құн бойынша кеңесші, Шанхай",
+    "demo_switcher.switch": "Демоны ауыстыру",
     "demo_chooser.title": "Қай компанияның жұмысын көргіңіз келеді?",
     "demo_chooser.subtitle": "Әр демо басқа түрдегі компания жүргізетін нақты ауқымдағы жоба, мәзірі оның жұмысына қарай қиылған. Жоғарғы жолақтан кез келген уақытта ауыстырыңыз.",
     "demo_chooser.none": "Бұл серверде әлі демо жоба орнатылмаған.",
@@ -64223,6 +64224,10 @@ const resource = {
     "boot.phase.demo_data": "Демо аккаунттар мен анықтамалық деректер жасалуда",
     "boot.phase.services": "Фондық қызметтер дайындалуда",
     "boot.phase.finishing": "Аяқталуда",
+    "demo_scope.all_projects": "Барлық демо жобалар көрсетілген.",
+    "demo_scope.show_all": "Барлық демо жобаларды көрсету",
+    "demo_scope.only_this": "{{name}} жобасына оралу",
+    "demo_scope.only_project": "Тек {{name}} демосы көрсетілген.",
   }
 } as { translation: Record<string, string> };
 

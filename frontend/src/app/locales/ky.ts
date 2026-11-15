@@ -61047,6 +61047,7 @@ const resource = {
     "demo_switcher.tab_condo_toronto": "Турак жай девелоперу, Торонто",
     "demo_switcher.tab_school_paris": "Сметачы, Париж",
     "demo_switcher.tab_office_shanghai": "Нарк боюнча кеңешчи, Шанхай",
+    "demo_switcher.switch": "Демону алмаштыруу",
     "demo_chooser.title": "Кайсы компанияны көргүңүз келет?",
     "demo_chooser.subtitle": "Ар бир демо, башка түрдөгү компания жүргүзгөн чыныгы масштабдагы долбоор, менюсу анын ишине ылайыкталган. Жогорку тилкеден каалаган убакта которуштуруңуз.",
     "demo_chooser.none": "Бул серверге азырынча демо долбоор орнотулган эмес.",
@@ -64379,6 +64380,10 @@ const resource = {
     "boot.phase.demo_data": "Демо эсептер менен анык маалыматтар түзүлүүдө",
     "boot.phase.services": "Фондук кызматтар даярдалууда",
     "boot.phase.finishing": "Бүтүүдө",
+    "demo_scope.all_projects": "Бардык демо долбоорлор көрсөтүлүүдө.",
+    "demo_scope.show_all": "Бардык демо долбоорлорду көрсөтүү",
+    "demo_scope.only_this": "{{name}} долбооруна кайтуу",
+    "demo_scope.only_project": "{{name}} демосу гана көрсөтүлүүдө.",
   }
 } as { translation: Record<string, string> };
 

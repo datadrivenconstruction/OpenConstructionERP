@@ -8,6 +8,7 @@
 
 import type { Appearance } from './appearance';
 import { canonicalGroupId } from '@/app/layout/navCatalog';
+import type { MenuModeId } from '@/app/layout/menuLayout';
 
 export type DemoSlug =
   | 'full-showcase-riyadh'
@@ -38,6 +39,10 @@ export interface DemoProfile {
   pack: string;
   /** Standards and currency of the project data, shown as is (proper names, not translated). */
   standards: string;
+  /** Cost database region (`REGION_MAP` id) the cost screens open on in this demo. */
+  costRegion: string;
+  /** Sidebar work mode the demo opens in: the short list of that company's daily screens. */
+  menuMode: MenuModeId;
   /** Picture for the demo's hexagon: the company type whose site scene it wears, and the drawing used without a photo. */
   face?: DemoFace;
 }
@@ -63,6 +68,8 @@ export const DEMO_PROFILES: readonly DemoProfile[] = [
     slug: 'full-showcase-riyadh',
     locale: 'en',
     pack: 'saudi-vision2030',
+    costRegion: 'AR_DUBAI',
+    menuMode: 'all',
     standards: 'MasterFormat · SBC · SAR',
     menuStyle: 'standard',
     appearance: { accent: 'blue', font: 'inter', density: 'comfortable', radius: 'standard', text: 'default', look: 'standard' },
@@ -74,6 +81,8 @@ export const DEMO_PROFILES: readonly DemoProfile[] = [
     slug: 'residential-berlin',
     locale: 'de',
     pack: 'germany-de',
+    costRegion: 'DE_BERLIN',
+    menuMode: 'estimator',
     standards: 'DIN 276 · GAEB XML · EUR',
     menuStyle: 'outline',
     appearance: { accent: 'graphite', font: 'ibm-plex-sans', density: 'normal', radius: 'sharp', text: 'default', look: 'classic' },
@@ -97,6 +106,8 @@ export const DEMO_PROFILES: readonly DemoProfile[] = [
     slug: 'office-london',
     locale: 'en-GB',
     pack: 'uk-jct',
+    costRegion: 'UK_GBP',
+    menuMode: 'finance',
     standards: 'NRM · JCT · GBP',
     menuStyle: 'tinted',
     appearance: { accent: 'violet', font: 'source-sans-3', density: 'comfortable', radius: 'round', text: 'default', look: 'standard' },
@@ -119,6 +130,8 @@ export const DEMO_PROFILES: readonly DemoProfile[] = [
     slug: 'medical-us',
     locale: 'en-US',
     pack: 'us-texas',
+    costRegion: 'USA_USD',
+    menuMode: 'manager',
     standards: 'MasterFormat · AIA · USD',
     menuStyle: 'dark',
     appearance: { accent: 'amber', font: 'inter', density: 'compact', radius: 'sharp', text: 'default', look: 'standard' },
@@ -142,6 +155,8 @@ export const DEMO_PROFILES: readonly DemoProfile[] = [
     slug: 'condo-toronto',
     locale: 'en',
     pack: 'canada-ca',
+    costRegion: 'ENG_TORONTO',
+    menuMode: 'manager',
     standards: 'MasterFormat · CCDC · CAD',
     menuStyle: 'pill',
     appearance: { accent: 'teal', font: 'system', density: 'normal', radius: 'round', text: 'default', look: 'classic' },
@@ -166,6 +181,8 @@ export const DEMO_PROFILES: readonly DemoProfile[] = [
     slug: 'school-paris',
     locale: 'fr',
     pack: 'france-fr',
+    costRegion: 'FR_PARIS',
+    menuMode: 'estimator',
     standards: 'DPGF · RE 2020 · EUR',
     menuStyle: 'tinted',
     appearance: { accent: 'emerald', font: 'source-sans-3', density: 'normal', radius: 'standard', text: 'default', look: 'standard' },
@@ -187,6 +204,8 @@ export const DEMO_PROFILES: readonly DemoProfile[] = [
     slug: 'office-shanghai',
     locale: 'zh',
     pack: 'china-gbt50500',
+    costRegion: 'ZH_SHANGHAI',
+    menuMode: 'estimator',
     standards: 'GB 50500 · GB/T 50378 · CNY',
     menuStyle: 'outline',
     appearance: { accent: 'crimson', font: 'system', density: 'compact', radius: 'standard', text: 'default', look: 'standard' },

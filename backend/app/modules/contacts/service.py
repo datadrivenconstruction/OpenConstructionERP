@@ -218,6 +218,7 @@ class ContactService:
         is_active: bool = True,
         owner_id: str | None = None,
         tags: list[str] | None = None,
+        project_id: str | None = None,
         limit: int = 50,
         offset: int = 0,
         sort_by: str | None = None,
@@ -237,6 +238,7 @@ class ContactService:
             is_active=is_active,
             owner_id=owner_id,
             tags=tags,
+            project_id=project_id,
             limit=limit,
             offset=offset,
             sort_by=sort_by,
@@ -251,6 +253,7 @@ class ContactService:
         is_active: bool = True,
         owner_id: str | None = None,
         tags: list[str] | None = None,
+        project_id: str | None = None,
         limit: int = 50,
         after: tuple[str, uuid.UUID] | None = None,
     ) -> tuple[list[Contact], tuple[str, uuid.UUID] | None]:
@@ -261,6 +264,7 @@ class ContactService:
             is_active=is_active,
             owner_id=owner_id,
             tags=tags,
+            project_id=project_id,
             limit=limit,
             after=after,
         )
@@ -378,13 +382,14 @@ class ContactService:
 
     # ── Stats ────────────────────────────────────────────────────────────
 
-    async def get_stats(self, *, owner_id: str | None = None) -> dict:
+    async def get_stats(self, *, owner_id: str | None = None, project_id: str | None = None) -> dict:
         """Return aggregate contact statistics.
 
         ``owner_id`` scopes the aggregates to the caller's contacts;
-        ``None`` is the global view (admin-only).
+        ``None`` is the global view (admin-only). ``project_id`` narrows
+        them to the contacts recorded against one project.
         """
-        return await self.repo.stats(owner_id=owner_id)
+        return await self.repo.stats(owner_id=owner_id, project_id=project_id)
 
     # ── By Company ───────────────────────────────────────────────────────
 

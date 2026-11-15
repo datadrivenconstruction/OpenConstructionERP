@@ -37,6 +37,11 @@ def _tenant_scope(owner_id: str):  # type: ignore[no-untyped-def]
     return or_(Contact.tenant_id == owner, Contact.created_by == owner)
 
 
+def _project_scope(project_id: str):  # type: ignore[no-untyped-def]
+    """WHERE clause for contacts recorded against one project (``metadata.project_id``)."""
+    return Contact.metadata_["project_id"].as_string() == str(project_id)
+
+
 def name_sort_key():  # type: ignore[no-untyped-def]
     """SQL expression the keyset list sorts on (case-insensitive display name)."""
     return func.lower(
@@ -83,8 +88,11 @@ class ContactRepository:
         is_active: bool,
         owner_id: str | None,
         tags: list[str] | None,
+        project_id: str | None = None,
     ):
         base = select(Contact).where(Contact.is_active == is_active)
+        if project_id is not None:
+            base = base.where(_project_scope(project_id))
 
         if contact_type is not None:
             base = base.where(Contact.contact_type == contact_type)
@@ -122,6 +130,7 @@ class ContactRepository:
         is_active: bool = True,
         owner_id: str | None = None,
         tags: list[str] | None = None,
+        project_id: str | None = None,
         limit: int = 50,
         after: tuple[str, uuid.UUID] | None = None,
     ) -> tuple[list[Contact], tuple[str, uuid.UUID] | None]:
@@ -139,6 +148,7 @@ class ContactRepository:
             is_active=is_active,
             owner_id=owner_id,
             tags=tags,
+            project_id=project_id,
         )
         if after is not None:
             k, last_id = after
@@ -163,6 +173,7 @@ class ContactRepository:
         is_active: bool = True,
         owner_id: str | None = None,
         tags: list[str] | None = None,
+        project_id: str | None = None,
         limit: int = 50,
         offset: int = 0,
         sort_by: str | None = None,
@@ -184,6 +195,7 @@ class ContactRepository:
             is_active=is_active,
             owner_id=owner_id,
             tags=tags,
+            project_id=project_id,
         )
 
         count_stmt = select(func.count()).select_from(base.subquery())
@@ -223,7 +235,7 @@ class ContactRepository:
             )
         return (await self.session.execute(base)).scalar_one()
 
-    async def stats(self, *, owner_id: str | None = None) -> dict:
+    async def stats(self, *, owner_id: str | None = None, project_id: str | None = None) -> dict:
         """Compute aggregate contact statistics.
 
         ``owner_id`` scopes the aggregates to a single tenant via the
@@ -235,9 +247,12 @@ class ContactRepository:
         """
         # Reused base predicate for all 4 sub-queries below.
         owner_filter = _tenant_scope(owner_id) if owner_id is not None else None
+        project_filter = _project_scope(project_id) if project_id is not None else None
 
         def _scope(stmt):  # type: ignore[no-untyped-def]
-            return stmt.where(owner_filter) if owner_filter is not None else stmt
+            if owner_filter is not None:
+                stmt = stmt.where(owner_filter)
+            return stmt.where(project_filter) if project_filter is not None else stmt
 
         # Total active contacts
         total_stmt = _scope(select(func.count()).select_from(Contact).where(Contact.is_active.is_(True)))

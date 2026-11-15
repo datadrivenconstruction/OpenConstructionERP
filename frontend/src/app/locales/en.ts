@@ -55155,6 +55155,7 @@ const resource = {
     "demo_switcher.tab_condo_toronto": "Residential developer, Toronto",
     "demo_switcher.tab_school_paris": "Construction economist, Paris",
     "demo_switcher.tab_office_shanghai": "Cost consultancy, Shanghai",
+    "demo_switcher.switch": "Switch demo",
     "demo_chooser.title": "Which company do you want to see?",
     "demo_chooser.subtitle": "Each demo is a real-sized project run by a different kind of company, with a menu cut to its work. Switch any time from the bar at the top.",
     "demo_chooser.none": "No demo project is installed on this server yet.",
@@ -58518,6 +58519,10 @@ const resource = {
     "boot.phase.demo_data": "Creating demo accounts and reference data",
     "boot.phase.services": "Preparing background services",
     "boot.phase.finishing": "Finishing",
+    "demo_scope.only_project": "Showing the {{name}} demo only.",
+    "demo_scope.all_projects": "Showing every demo project.",
+    "demo_scope.show_all": "Show all demo projects",
+    "demo_scope.only_this": "Back to {{name}}",
   }
 } as { translation: Record<string, string> };
 
