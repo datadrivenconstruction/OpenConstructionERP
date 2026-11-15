@@ -16,6 +16,7 @@ from sqlalchemy.ext.asyncio import async_sessionmaker
 
 import app.config as app_config
 import app.dependencies as deps
+import app.modules.sso.models  # noqa: F401
 from app.modules.scim.router import scim_router
 from app.modules.users.models import APIKey, User
 from app.modules.users.router import router as users_router
