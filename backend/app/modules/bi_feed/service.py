@@ -13,6 +13,7 @@ from sqlalchemy import func
 from sqlalchemy.exc import DBAPIError
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.self_upgrade import repair_hint
 from app.dependencies import accessible_project_ids, verify_project_access
 from app.modules.bi_feed.feeds import (
     MAX_UNPAGED_ROWS,
@@ -132,7 +133,9 @@ class BiFeedService:
             raise BiFeedError(
                 422,
                 "BI_FEED_PARQUET_UNAVAILABLE",
-                "Parquet export needs the optional pyarrow package: pip install 'openconstructionerp[parquet]'",
+                repair_hint(
+                    "Parquet export needs the optional pyarrow package: pip install 'openconstructionerp[parquet]'"
+                ),
             )
         await self._arm_timeout()
         conditions = await self._scope(feed, user_id, params)

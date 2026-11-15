@@ -608,6 +608,7 @@ async def test_convert_lead_creates_opportunity() -> None:
                 account_id=account.id,
                 title="Big build",
                 estimated_value=Decimal("100000"),
+                currency="EUR",
                 stage_id=stage.id,
                 probability_percent=25,
             ),
@@ -647,6 +648,7 @@ async def test_create_opportunity_auto_weighted_value() -> None:
             account_id=account.id,
             title="Build a tower",
             estimated_value=Decimal("10000"),
+            currency="EUR",
             probability_percent=40,
             stage_id=stage.id,
         )
@@ -683,6 +685,7 @@ async def test_transition_opportunity_stage_valid() -> None:
             account_id=account.id,
             title="X",
             estimated_value=Decimal("1000"),
+            currency="EUR",
             probability_percent=10,
             stage_id=stage_a.id,
         )
@@ -709,7 +712,9 @@ async def test_transition_opportunity_stage_override_probability() -> None:
     )
     account = await svc.create_account(AccountCreate(name="Acme"))
     opp = await svc.create_opportunity(
-        OpportunityCreate(account_id=account.id, title="X", estimated_value=Decimal("1000"), stage_id=stage_a.id)
+        OpportunityCreate(
+            account_id=account.id, title="X", estimated_value=Decimal("1000"), currency="EUR", stage_id=stage_a.id
+        )
     )
     with patch("app.modules.crm.service.event_bus.publish_detached"):
         out = await svc.transition_opportunity_stage(opp.id, stage_b.id, override_probability_percent=33)
@@ -763,6 +768,7 @@ async def test_win_opportunity() -> None:
             account_id=account.id,
             title="X",
             estimated_value=Decimal("5000"),
+            currency="EUR",
             stage_id=stage.id,
         )
     )
@@ -912,6 +918,7 @@ async def test_update_opportunity_recomputes_weighted_value() -> None:
             account_id=account.id,
             title="X",
             estimated_value=Decimal("1000"),
+            currency="EUR",
             probability_percent=10,
             stage_id=stage.id,
         )
