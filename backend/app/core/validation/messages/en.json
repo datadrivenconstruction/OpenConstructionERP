@@ -1275,6 +1275,10 @@
       "norm_collapsed": "Position {ordinal}: the resource rows lost their catalogue norm and hold the position quantity instead, so the unit rate was not re-derived from them",
       "whole_position_quantities": "Position {ordinal}: the resource rows hold whole-position quantities instead of per-unit norms, so the unit rate was not re-derived from them",
       "suggestion": "Review the buildup - re-derive the position from its catalogue item through the resource norm review, or correct the rows by hand"
+    },
+    "rate_currency_missing": {
+      "fail": "Position {ordinal}: {count} resource rate(s) have no currency and are counted in the project base currency",
+      "suggestion": "Set the currency on each resource rate if it is not the project base currency"
     }
   },
   "poland": {
@@ -1779,6 +1783,10 @@
     "approved_immutable": {
       "fail": "{code} has been decided and can no longer be changed or deleted.",
       "suggestion": "Enter a new transfer or budget change that corrects it."
+    },
+    "self_approval": {
+      "fail": "{code} was requested by you, so you cannot approve it (segregation of duties is on for this project).",
+      "suggestion": "Ask another approver to decide it, or switch segregation of duties off in the ledger settings."
     }
   },
   "schedule": {

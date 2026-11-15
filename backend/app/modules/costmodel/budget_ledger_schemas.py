@@ -104,3 +104,9 @@ class BudgetLedger(BaseModel):
     pending_transfers: int = 0
     pending_modifications: int = 0
     audit: list[AuditOut] = Field(default_factory=list)
+
+
+class LedgerSettings(BaseModel):
+    """Project setting for the budget ledger."""
+
+    segregation_of_duties: bool = True

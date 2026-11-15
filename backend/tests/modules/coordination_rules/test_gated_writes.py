@@ -32,11 +32,11 @@ def _doc(project_id, **over):
 
 
 @pytest.mark.asyncio
-async def test_compliance_doc_create_rejects_missing_cover_and_bad_currency(client, admin_auth, project_id):
+async def test_compliance_doc_missing_cover_warns_and_bad_currency_rejects(client, admin_auth, project_id):
     _, h = admin_auth
-    bad = await client.post("/api/v1/compliance_docs/", json=_doc(project_id, coverage_amount=None), headers=h)
-    assert bad.status_code == 422 and _codes(bad) == {"compliance_docs.coverage_amount"}
-    assert bad.json()["detail"]["code"] == "compliance_docs.coverage_amount"
+    warn = await client.post("/api/v1/compliance_docs/", json=_doc(project_id, coverage_amount=None), headers=h)
+    assert warn.status_code == 201, warn.text
+    assert [w["rule_id"] for w in warn.json()["validation_warnings"]] == ["compliance_docs.coverage_amount"]
     bad = await client.post("/api/v1/compliance_docs/", json=_doc(project_id, currency="E1R"), headers=h)
     assert bad.status_code == 422 and "compliance_docs.currency_code" in _codes(bad)
 
@@ -66,8 +66,8 @@ async def test_legacy_compliance_doc_stays_editable_but_not_worse(client, admin_
         await s.commit()
     edit = await client.patch(f"/api/v1/compliance_docs/{doc['id']}/", json={"name": "Renamed"}, headers=h)
     assert edit.status_code == 200, edit.text
-    worse = await client.patch(f"/api/v1/compliance_docs/{doc['id']}/", json={"coverage_amount": "0"}, headers=h)
-    assert worse.status_code == 422 and _codes(worse) == {"compliance_docs.coverage_amount"}
+    worse = await client.patch(f"/api/v1/compliance_docs/{doc['id']}/", json={"currency": "X9Y"}, headers=h)
+    assert worse.status_code == 422 and _codes(worse) == {"compliance_docs.currency_code"}
 
 
 @pytest.mark.asyncio

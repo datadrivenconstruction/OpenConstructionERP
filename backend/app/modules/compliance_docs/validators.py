@@ -13,8 +13,11 @@ Rules run over a plain dict built by the service, one record under one key::
 from __future__ import annotations
 
 import re
+from typing import Any
 
 from app.core.validation.engine import RuleResult, Severity, ValidationContext, rule_registry
+from app.core.validation.failure import finding
+from app.core.validation.messages import DEFAULT_LOCALE
 from app.core.validation.money_rules import blank, section, to_dec
 from app.core.validation.quality_rules import QualityRule, parse_day, today_of
 
@@ -31,25 +34,37 @@ def _covered(doc_type: object) -> bool:
     return str(doc_type or "").startswith(_COVERED)
 
 
+def needs_coverage(doc_type: object) -> bool:
+    """True for an insurance or bond document type."""
+    return _covered(doc_type)
+
+
+def coverage_missing(doc_type: object, coverage_amount: object) -> bool:
+    """True for an insurance or bond document with no coverage amount above zero."""
+    if not _covered(doc_type):
+        return False
+    amount = to_dec(coverage_amount)
+    return amount is None or amount <= 0
+
+
 class _ComplianceRule(QualityRule):
     standard = COMPLIANCE_DOCS_RULE_SET
     message_section = "compliance_docs"
 
 
 class CoverageAmountRule(_ComplianceRule):
-    """An insurance policy or bond states the amount it covers."""
+    """An insurance policy or bond states the amount it covers; missing it warns, the document still saves."""
 
     rule_id = "compliance_docs.coverage_amount"
     name = "Insurance or bond states its coverage"
-    description = "insurance and bond documents need coverage_amount above zero"
+    severity = Severity.WARNING
+    description = "insurance and bond documents should carry coverage_amount above zero"
 
     async def validate(self, context: ValidationContext) -> list[RuleResult]:
         doc = section(context, "doc")
         ref = str(doc.get("id", ""))
-        if _covered(doc.get("doc_type")):
-            amount = to_dec(doc.get("coverage_amount"))
-            if amount is None or amount <= 0:
-                return [self.fail(context, "coverage_missing", ref=ref, kind=doc.get("doc_type"))]
+        if coverage_missing(doc.get("doc_type"), doc.get("coverage_amount")):
+            return [self.fail(context, "coverage_missing", ref=ref, kind=doc.get("doc_type"))]
         return [self.ok(ref)]
 
 
@@ -107,6 +122,16 @@ class PolicyNumberRule(_ComplianceRule):
 COMPLIANCE_DOCS_RULES = (CoverageAmountRule, CurrencyCodeRule, StatusMatchesDatesRule, PolicyNumberRule)
 
 
+def coverage_findings(doc: Any, locale: str = DEFAULT_LOCALE) -> list[dict[str, Any]]:
+    """The coverage warning of one stored document, in the response shape."""
+    doc_type = getattr(doc, "doc_type", None)
+    if not coverage_missing(doc_type, getattr(doc, "coverage_amount", None)):
+        return []
+    rule = CoverageAmountRule()
+    ctx = ValidationContext(data={}, metadata={"locale": locale})
+    return [finding(rule.fail(ctx, "coverage_missing", ref=str(getattr(doc, "id", "") or ""), kind=doc_type))]
+
+
 def register_compliance_docs_validation_rules() -> None:
     """Register the compliance document rules with the platform rule registry."""
     for rule_class in COMPLIANCE_DOCS_RULES:
@@ -117,5 +142,9 @@ __all__ = [
     "COMPLIANCE_DOCS_RULES",
     "COMPLIANCE_DOCS_RULE_SET",
     "DOC_FIELDS",
+    "CoverageAmountRule",
+    "coverage_findings",
+    "coverage_missing",
+    "needs_coverage",
     "register_compliance_docs_validation_rules",
 ]

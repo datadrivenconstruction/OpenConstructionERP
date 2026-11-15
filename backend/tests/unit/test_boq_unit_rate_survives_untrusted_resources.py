@@ -484,3 +484,26 @@ def test_the_rule_is_registered_under_the_universal_set() -> None:
     """A rule registered under a set nobody requests never runs."""
     ids = {rule.rule_id for rule in rule_registry.get_rules_for_sets(["boq_quality"])}
     assert UnitRateNotRederivedFromUntrustedBuildup.rule_id in ids
+
+
+# ── resource rate without a currency ──────────────────────────────────────
+
+
+async def test_resource_rate_without_currency_warns_and_is_counted_in_base():
+    from app.modules.boq.service import resource_fx_factor
+    from app.modules.boq.validators import ResourceRateWithoutCurrency
+
+    def position(resources: list[dict[str, Any]]) -> dict[str, Any]:
+        return {"id": "p1", "ordinal": "01.001", "metadata": {"resources": resources}}
+
+    async def run(positions: list[dict[str, Any]]):
+        ctx = ValidationContext(data={"positions": positions}, metadata={"locale": "en"})
+        return [r for r in await ResourceRateWithoutCurrency().validate(ctx) if not r.passed]
+
+    found = await run([position([{"unit_rate": "12.5", "quantity": "1", "currency": ""}])])
+    assert [r.severity for r in found] == [Severity.WARNING]
+    assert found[0].element_ref == "p1" and "01.001" in found[0].message
+    assert not await run([position([{"unit_rate": "12.5", "quantity": "1", "currency": "EUR"}])])
+    assert not await run([position([{"unit_rate": "0", "currency": ""}])])
+    # No guessing: a blank currency converts at 1, i.e. it is the project base currency.
+    assert resource_fx_factor("", "EUR", {"USD": "0.9"}) == Decimal("1")
