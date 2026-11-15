@@ -57,6 +57,8 @@ from typing import Any
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.audit_log import deferred_audit
+
 logger = logging.getLogger(__name__)
 
 ROUTE = "contractor_furnished_installed"
@@ -651,7 +653,7 @@ async def seed_plant_register_demo(session: AsyncSession, project_ids: Iterable[
             demo_module_story(demo_id, "plant_register"), _catalogue_codes(), getattr(project, "locale", None) or "en"
         )
         try:
-            async with session.begin_nested():
+            async with session.begin_nested(), deferred_audit(session):
                 counts = await _seed_project(
                     session,
                     pid,
