@@ -278,6 +278,7 @@ async def test_expired_link_returns_404(
     info = await client.get(f"/api/v1/documents/share-links/{token}/")
     assert info.status_code == 200, info.text
     assert info.json()["expired"] is True
+    assert info.json()["filename"] is None
 
     access = await client.post(
         f"/api/v1/documents/share-links/{token}/access/",
@@ -423,3 +424,24 @@ async def test_public_probe_returns_filename_and_flags(
     assert body["filename"] == "share_me.pdf"
     assert body["requires_password"] is False
     assert body["expired"] is False
+
+
+@pytest.mark.asyncio
+async def test_probe_hides_filename_while_password_is_required(
+    client: AsyncClient,
+    auth_headers: dict[str, str],
+    document_id: str,
+) -> None:
+    create = await client.post(
+        f"/api/v1/documents/{document_id}/share-links/",
+        json={"password": "letmein"},
+        headers=auth_headers,
+    )
+    token = create.json()["token"]
+
+    info = await client.get(f"/api/v1/documents/share-links/{token}/")
+    assert info.status_code == 200
+    body = info.json()
+    assert body["requires_password"] is True
+    assert body["filename"] is None
+    assert "share_me" not in info.text

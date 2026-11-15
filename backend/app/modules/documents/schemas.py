@@ -661,10 +661,11 @@ class ShareLinkPublicInfo(BaseModel):
     """Public probe response - what the recipient sees before unlocking.
 
     Intentionally omits ``download_count`` and ``id``/``created_by`` so
-    nothing about the owner or usage history leaks to recipients.
+    nothing about the owner or usage history leaks to recipients. ``filename`` is
+    withheld until the link is open (no password, not expired).
     """
 
-    filename: str
+    filename: str | None = None
     requires_password: bool = False
     expired: bool = False
 
