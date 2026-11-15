@@ -8,7 +8,7 @@ import {
   ShieldCheck, HardDrive, Zap, Globe2, Brain, Users,
   Building2, Briefcase, Search,
 } from 'lucide-react';
-import { Button, Input, BrandLockup, CountryFlag } from '@/shared/ui';
+import { Button, Input, LogoWithText, CountryFlag } from '@/shared/ui';
 import { SUPPORTED_LANGUAGES, getLanguageByCode } from '@/app/i18n';
 import { sortLanguagesByName } from '@/shared/lib/languageOrder';
 import { readRememberChoice, useAuthStore } from '@/stores/useAuthStore';
@@ -234,13 +234,11 @@ export function RegisterPage() {
 
       {/* ── Right: logo + form ── */}
       <div className="flex flex-1 items-center justify-center p-4 sm:p-6 relative z-10">
-        <div className="w-full max-w-[380px]">
+        <div className="w-full max-w-[400px]">
           {/* Logo */}
           <div className="mb-5 flex flex-col items-center animate-stagger-in" style={{ animationDelay: '0ms' }}>
-            <BrandLockup size="lg" animate />
-            <p className="mt-2 text-sm text-content-tertiary">
-              {t('login.workspace_tagline', { defaultValue: 'Professional construction project workspace' })}
-            </p>
+            <LogoWithText size="md" animate />
+            <p className="mt-1 text-xs text-content-tertiary">{t('app.tagline')}</p>
           </div>
 
           {/* Form */}

@@ -4,7 +4,7 @@ import { useState, useRef, useEffect, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import {
-  Eye, EyeOff, Mail, Lock, Globe, ChevronDown, X, Github, Users, ArrowUpRight,
+  Eye, EyeOff, Mail, Lock, Globe, ChevronDown, X, Github, Users, ArrowUpRight, Pencil,
   ShieldCheck, Zap, Brain, Info,
   FileSpreadsheet, CalendarClock, TrendingUp, Boxes, Database,
   BarChart3, Upload, FileCheck,
@@ -12,9 +12,10 @@ import {
   PenTool, FolderOpen, ClipboardList,
   Sun, Moon, Monitor,
 } from 'lucide-react';
-import { BrandLockup, Button, Input, LogoWithText, CountryFlag } from '@/shared/ui';
+import { Button, Input, Logo, LogoWithText, CountryFlag } from '@/shared/ui';
 import { readRememberChoice, saveRememberChoice, useAuthStore } from '@/stores/useAuthStore';
 import { useBrandingStore } from '@/stores/useBrandingStore';
+import { BrandingEditorModal } from '@/app/layout/CustomBranding';
 import { extractErrorMessageFromBody } from '@/shared/lib/api';
 import { isTauri } from '@/shared/lib/desktop';
 import { HEX_PORTRAIT_ASPECT, HEX_PORTRAIT_CLIP } from '@/shared/lib/honeycomb';
@@ -84,6 +85,7 @@ export function LoginPage() {
   // on the login card instead of the default OpenConstructionERP wordmark.
   const { mode: brandMode, logoDataUrl: brandLogo, companyName: brandName } =
     useBrandingStore();
+  const showLogoEdit = useBrandingStore((s) => s.options.showLogoEdit);
   const brandCustomised = brandMode === 'logo' || brandMode === 'text';
   // Pull the workspace brand from the server so an invited user sees it on this
   // very first (pre-auth) screen, not just the browser that set it (issue #272).
@@ -106,6 +108,7 @@ export function LoginPage() {
   const [rememberMe, setRememberMe] = useState(readRememberChoice);
   const [langOpen, setLangOpen] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
+  const [brandOpen, setBrandOpen] = useState(false);
   const [demoOpen, setDemoOpen] = useState(true);
   const [demoHint, setDemoHint] = useState(false);
   const [demoLoading, setDemoLoading] = useState<string | null>(null);
@@ -375,7 +378,7 @@ export function LoginPage() {
       <div className="relative flex h-screen flex-col items-center justify-center bg-surface-secondary overflow-hidden">
         <AuthBackground />
         <div className="relative z-10 flex flex-col items-center gap-5 px-6 text-center">
-          <BrandLockup size="lg" animate />
+          <Logo size="lg" animate />
           <svg
             className="h-7 w-7 animate-spin text-oe-blue"
             viewBox="0 0 24 24"
@@ -485,7 +488,7 @@ export function LoginPage() {
       </div>
 
       {/* Theme + Language - top right (enlarged for /login so discoverable). */}
-      <div className="absolute top-4 end-4 z-30 flex items-center gap-2">
+      <div className="absolute top-4 right-4 z-30 flex items-center gap-2">
         <ThemeSwitch />
         <div className="relative" ref={langRef}>
         <button
@@ -706,7 +709,7 @@ export function LoginPage() {
           ].map((feat) => {
             const Icon = feat.icon;
             return (
-              <div key={feat.title} className="relative pl-4 max-w-[260px]">
+              <div key={feat.title} className="relative pl-4 max-w-[210px]">
                 <span aria-hidden className="absolute left-0 top-1 h-[14px] w-[2px] rounded-full bg-gradient-to-b from-oe-blue to-sky-500/60" />
                 <div className="flex items-center gap-1.5">
                   <Icon size={13} strokeWidth={1.8} className="text-oe-blue/85" />
@@ -714,7 +717,7 @@ export function LoginPage() {
                     {feat.title}
                   </span>
                 </div>
-                <p className="mt-1 text-xs leading-[1.55] text-content-tertiary tracking-tight">
+                <p className="mt-1 text-xs leading-[1.55] text-content-tertiary tracking-tight whitespace-pre-line">
                   {feat.desc}
                 </p>
               </div>
@@ -736,7 +739,7 @@ export function LoginPage() {
       {/* Center column removed - tags moved to left panel footer */}
 
       {/* ── Left column on lg+: logo + form (primary action). ── */}
-      <div className="oe-auth-form-col relative flex items-start lg:items-center justify-center px-4 pb-4 pt-16 sm:px-6 sm:pb-6 lg:pt-6 z-10 lg:order-1 overflow-y-auto lg:overflow-hidden">
+      <div className="oe-auth-form-col relative flex items-center justify-center p-4 sm:p-6 z-10 lg:order-1 overflow-hidden">
         {/* Form column backdrop - clean near-white field on lg+ so the
             glass card reads against a calm canvas. The decorative show
             (orbs / mesh) lives on the marketing column on the right. */}
@@ -786,13 +789,36 @@ export function LoginPage() {
                     style={{ fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif", letterSpacing: '0.02em' }}
                   >
                     by{' '}
-                    <span className="whitespace-nowrap">
-                      OpenConstruction<span className="font-semibold">ERP</span>
+                    <span className="font-semibold tracking-tight">
+                      Open<span className="text-oe-blue/80">Construction</span>
+                      <span className="text-content-quaternary">ERP</span>
                     </span>
                   </span>
                 </div>
               ) : (
-                <BrandLockup size="lg" animate />
+                <div className="flex items-center gap-2">
+                  <Logo size="md" animate />
+                  <span
+                    className="text-2xl font-medium text-content-primary whitespace-nowrap"
+                    style={{ fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif", letterSpacing: '-0.02em' }}
+                  >
+                    Open<span className="text-oe-blue">Construction</span><span className="text-content-quaternary">ERP</span>
+                  </span>
+                </div>
+              )}
+              {/* White-label trigger - same editor as the in-app sidebar
+                  brand control, available pre-auth so a tenant can put
+                  their own logo on the sign-in screen. */}
+              {showLogoEdit && (
+              <button
+                type="button"
+                onClick={() => setBrandOpen(true)}
+                className="inline-flex h-7 w-7 items-center justify-center rounded-lg border border-border-light bg-surface-elevated/60 text-content-tertiary backdrop-blur-sm transition-colors hover:border-oe-blue/40 hover:bg-oe-blue/5 hover:text-oe-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40"
+                aria-label={t('login.brand_edit', { defaultValue: 'Customize logo' })}
+                title={t('login.brand_edit', { defaultValue: 'Customize logo' })}
+              >
+                <Pencil size={14} strokeWidth={2.25} />
+              </button>
               )}
             </div>
             <p className="mt-2 text-sm text-content-tertiary">
@@ -1087,6 +1113,7 @@ export function LoginPage() {
       </div>
 
       {/* ── White-label branding editor (pre-auth) ── */}
+      {brandOpen && <BrandingEditorModal onClose={() => setBrandOpen(false)} />}
 
       {/* ── About modal ── */}
       {showInfo && (

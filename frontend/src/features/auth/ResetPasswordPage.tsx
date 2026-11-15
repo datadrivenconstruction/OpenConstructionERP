@@ -4,7 +4,7 @@ import { useState, useRef, useEffect, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, Lock, Eye, EyeOff, CheckCircle2, AlertTriangle, Globe, ChevronDown } from 'lucide-react';
-import { Button, Input, BrandLockup, CountryFlag } from '@/shared/ui';
+import { Button, Input, Logo, CountryFlag } from '@/shared/ui';
 import { SUPPORTED_LANGUAGES, getLanguageByCode } from '@/app/i18n';
 import { sortLanguagesByName } from '@/shared/lib/languageOrder';
 import { useAuthStore } from '@/stores/useAuthStore';
@@ -142,7 +142,7 @@ export function ResetPasswordPage() {
       <ClassicAuthFooter />
 
       {/* Language — top right */}
-      <div className="absolute top-3 end-3 z-30" ref={langRef}>
+      <div className="absolute top-3 right-3 z-30" ref={langRef}>
         <button
           onClick={() => setLangOpen(!langOpen)}
           className="flex items-center gap-1.5 rounded-lg border border-border-light bg-surface-elevated/80 backdrop-blur-sm px-2.5 py-1 text-xs text-content-secondary hover:bg-surface-elevated transition-colors shadow-sm"
@@ -153,7 +153,7 @@ export function ResetPasswordPage() {
           <ChevronDown size={11} className={`text-content-tertiary transition-transform ${langOpen ? 'rotate-180' : ''}`} />
         </button>
         {langOpen && (
-          <div className="absolute end-0 mt-1 w-44 max-h-72 overflow-y-auto rounded-xl border border-border-light bg-surface-elevated shadow-xl py-0.5 animate-stagger-in">
+          <div className="absolute right-0 mt-1 w-44 max-h-72 overflow-y-auto rounded-xl border border-border-light bg-surface-elevated shadow-xl py-0.5 animate-stagger-in">
             {sortLanguagesByName(SUPPORTED_LANGUAGES).map((lang) => {
               const isActive = i18n.language === lang.code;
               return (
@@ -171,24 +171,23 @@ export function ResetPasswordPage() {
         )}
       </div>
 
-      <div className="relative z-10 w-full max-w-[380px]">
-        {/* Same brand block as sign-in, so the four auth screens read as one flow. */}
-        <div className="mb-5 flex flex-col items-center animate-stagger-in" style={{ animationDelay: '0ms' }}>
-          <BrandLockup size="lg" animate />
-          <p className="mt-2 text-sm text-content-tertiary">
-            {t('login.workspace_tagline', { defaultValue: 'Professional construction project workspace' })}
-          </p>
+      <div className="relative z-10 w-full max-w-[400px]">
+        {/* Logo — glow entrance */}
+        <div className="mb-8 text-center animate-stagger-in" style={{ animationDelay: '0ms' }}>
+          <div className="mx-auto mb-4 animate-logo-glow rounded-[20px] w-fit">
+            <Logo size="xl" animate className="mx-auto shadow-xl" />
+          </div>
         </div>
 
         {/* Form card — glass morphism + scale-in entrance */}
         <div
-          className="glass-strong rounded-2xl px-6 py-5 shadow-lg animate-form-scale-in"
+          className="glass-strong rounded-2xl p-7 shadow-lg animate-form-scale-in"
           style={{ animationDelay: '150ms' }}
         >
           {view === 'success' && (
-            <div className="text-center py-2 animate-stagger-in" role="status" aria-live="polite" style={{ animationDelay: '200ms' }}>
-              <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-semantic-success-bg text-semantic-success">
-                <CheckCircle2 size={24} />
+            <div className="text-center py-4 animate-stagger-in" role="status" aria-live="polite" style={{ animationDelay: '200ms' }}>
+              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-semantic-success-bg text-semantic-success">
+                <CheckCircle2 size={28} />
               </div>
               <h2 className="oe-section-title mb-2">
                 {t('auth.reset_success_title', { defaultValue: 'Password changed' })}
@@ -202,16 +201,16 @@ export function ResetPasswordPage() {
                 to="/login"
                 className="inline-flex items-center gap-1.5 text-sm font-medium text-oe-blue hover:text-oe-blue-hover transition-colors"
               >
-                <ArrowLeft size={14} className="rtl:rotate-180" />
+                <ArrowLeft size={14} />
                 {t('auth.back_to_login', { defaultValue: 'Back to sign in' })}
               </Link>
             </div>
           )}
 
           {view === 'invalid' && (
-            <div className="text-center py-2 animate-stagger-in" role="alert" style={{ animationDelay: '200ms' }}>
-              <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-semantic-error-bg text-semantic-error">
-                <AlertTriangle size={24} />
+            <div className="text-center py-4 animate-stagger-in" role="alert" style={{ animationDelay: '200ms' }}>
+              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-semantic-error-bg text-semantic-error">
+                <AlertTriangle size={28} />
               </div>
               <h2 className="oe-section-title mb-2">
                 {t('auth.reset_link_invalid_title', { defaultValue: 'This link no longer works' })}
@@ -238,19 +237,19 @@ export function ResetPasswordPage() {
                   to="/login"
                   className="mb-4 flex items-center gap-1.5 text-sm text-content-secondary hover:text-content-primary transition-colors"
                 >
-                  <ArrowLeft size={14} className="rtl:rotate-180" />
+                  <ArrowLeft size={14} />
                   {t('auth.back_to_login', { defaultValue: 'Back to sign in' })}
                 </Link>
 
-                <h2 className="oe-section-title mb-0.5">
+                <h2 className="oe-section-title mb-1">
                   {t('auth.reset_title', { defaultValue: 'Set a new password' })}
                 </h2>
-                <p className="text-xs text-content-secondary mb-4">
+                <p className="text-sm text-content-secondary mb-6">
                   {t('auth.reset_subtitle', { defaultValue: 'Choose a new password for your account.' })}
                 </p>
               </div>
 
-              <form onSubmit={handleSubmit} className="space-y-3" noValidate>
+              <form onSubmit={handleSubmit} className="space-y-4" noValidate>
                 <div className="animate-stagger-in" style={{ animationDelay: '300ms' }}>
                   <Input
                     id="reset-new-password"
