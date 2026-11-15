@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 > **Tip:** This file is long. Use your browser's **Find** (Ctrl+F) to jump to a version number, or see the [Releases page](https://github.com/datadrivenconstruction/OpenConstructionERP/releases) for a per-release view with download links.
 
+## [19.6.1] - 2026-11-15
+
+### Changed
+
+- The sign-in, registration and password pages are back to the fuller layout of 19.4, with the logo edit control on the sign-in card.
+- The README hero is back to the previous image.
+
 ## [19.6.0] - 2026-11-15
 
 ### Added
