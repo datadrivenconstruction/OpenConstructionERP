@@ -19,7 +19,7 @@ from typing import Literal
 
 from fastapi import APIRouter, Depends, Response, status
 
-from app.dependencies import CurrentUserId, RequirePermission, SessionDep, verify_project_access
+from app.dependencies import CurrentUserId, CurrentUserPayload, RequirePermission, SessionDep, verify_project_access
 from app.modules.costmodel.budget_ledger_schemas import (
     BudgetLedger,
     DecisionIn,
@@ -57,10 +57,18 @@ async def get_ledger_settings(project_id: uuid.UUID, user_id: CurrentUserId, ses
 
 @router.put(f"{_BASE}/settings/", response_model=LedgerSettings, dependencies=_MANAGE)
 async def put_ledger_settings(
-    project_id: uuid.UUID, body: LedgerSettings, user_id: CurrentUserId, session: SessionDep
+    project_id: uuid.UUID,
+    body: LedgerSettings,
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
 ) -> LedgerSettings:
+    """Switching segregation of duties off needs the admin role on top of ``costmodel.manage``."""
+    from app.core.permissions import Role, _resolve_role
+
+    is_admin = _resolve_role(payload.get("role", "")) == Role.ADMIN
     svc = await _svc(project_id, user_id, session)
-    return await svc.put_settings(project_id, body, str(user_id))
+    return await svc.put_settings(project_id, body, str(user_id), is_admin=is_admin)
 
 
 @router.get(f"{_BASE}/", response_model=BudgetLedger, dependencies=_READ)

@@ -1750,6 +1750,14 @@
     "self_approval": {
       "fail": "{code} fue solicitado por usted, por lo que no puede aprobarlo (la segregación de funciones está activada en este proyecto).",
       "suggestion": "Pida a otro aprobador que decida, o desactive la segregación de funciones en los ajustes del libro."
+    },
+    "sod_prepared": {
+      "fail": "{code} lo editó o envió por última vez usted, por lo que no puede aprobarlo (la segregación de funciones está activada en este proyecto).",
+      "suggestion": "Pida a otro aprobador que decida."
+    },
+    "sod_unattributed": {
+      "fail": "{code} no tiene un solicitante registrado, por lo que no se puede aprobar mientras la segregación de funciones esté activada.",
+      "suggestion": "Recházelo y vuelva a introducirlo para que quede registrado el solicitante."
     }
   },
   "schedule": {
