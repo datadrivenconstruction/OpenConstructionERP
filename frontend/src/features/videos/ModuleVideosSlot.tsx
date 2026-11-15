@@ -70,7 +70,7 @@ function Chip({ route, where }: { route: string; where: 'row' | 'bar' }) {
         className={clsx(
           // Same geometry as a secondary `Button` md: it shares the header row.
           'inline-flex h-8 items-center gap-1.5 whitespace-nowrap rounded-lg border text-sm font-medium shadow-xs transition-colors',
-          where === 'bar' ? 'px-2 xl:px-3' : 'px-3',
+          where === 'bar' ? 'px-2 2xl:px-3' : 'px-3',
           'focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/60 focus-visible:ring-offset-1 active:scale-[0.98]',
           open
             ? 'border-oe-blue/50 bg-oe-blue/10 text-oe-blue-text'
@@ -78,7 +78,7 @@ function Chip({ route, where }: { route: string; where: 'row' | 'bar' }) {
         )}
       >
         <Icon size={16} className="text-oe-blue-text" aria-hidden />
-        <span className={where === 'bar' ? 'hidden xl:inline' : undefined}>{label}</span>
+        <span className={where === 'bar' ? 'hidden 2xl:inline' : undefined}>{label}</span>
         <span className="rounded-full bg-oe-blue/10 px-1.5 text-2xs font-semibold tabular-nums text-oe-blue-text">{count}</span>
         <ChevronDown size={14} className={clsx('text-content-tertiary transition-transform motion-reduce:transition-none', open && 'rotate-180')} aria-hidden />
       </button>
