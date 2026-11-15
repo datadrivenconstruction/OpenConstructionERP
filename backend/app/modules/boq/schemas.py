@@ -1557,6 +1557,9 @@ class TemplateInfo(BaseModel):
         default=0.0, description="Benchmark cost per m2 of gross floor area: sum of rate x qty_factor"
     )
     currency: str = Field(default="EUR", description="ISO 4217 currency of the template rates")
+    builtin: bool = Field(default=True, description="False for a template the user owns and can edit")
+    classification_standard: str = ""
+    origin: str = "builtin"
 
 
 class BOQFromTemplateRequest(BaseModel):
@@ -1565,8 +1568,12 @@ class BOQFromTemplateRequest(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 
     project_id: UUID
-    template_id: str = Field(..., min_length=1, max_length=50)
-    area_m2: float = Field(..., gt=0.0, description="Gross floor area in m2")
+    template_id: str = Field(..., min_length=1, max_length=50)  # built-in slug or own-template UUID
+    area_m2: float | None = Field(
+        default=None,
+        gt=0.0,
+        description="Gross floor area in m2. Required for built-in templates; optional for your own.",
+    )
     boq_name: str | None = Field(
         default=None,
         min_length=1,

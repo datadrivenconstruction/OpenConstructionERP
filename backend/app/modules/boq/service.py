@@ -9084,7 +9084,7 @@ class BOQService:
             )
         return result
 
-    async def create_boq_from_template(self, data: BOQFromTemplateRequest) -> BOQ:
+    async def create_boq_from_template(self, data: BOQFromTemplateRequest, owner_id: str | None = None) -> BOQ:
         """Create a complete BOQ from a built-in template.
 
         Creates the BOQ, section headers, and all positions with quantities
@@ -9101,12 +9101,23 @@ class BOQService:
             HTTPException 400 if template_id is unknown.
         """
         template = TEMPLATES.get(data.template_id)
+        if template is None and owner_id is not None:
+            from app.modules.boq.template_service import TemplateService
+
+            row = await TemplateService(self.session).get_row(data.template_id, owner_id)
+            if row is not None:
+                return await self._create_boq_from_user_template(data, row)
         if template is None:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=f"Unknown template: {data.template_id}. Available: {', '.join(TEMPLATES.keys())}",
             )
 
+        if data.area_m2 is None:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="area_m2 is required for a built-in template",
+            )
         boq_name = data.boq_name or template["name"]
 
         # Create the BOQ shell
@@ -9185,6 +9196,88 @@ class BOQService:
             boq.name,
             data.project_id,
             data.area_m2,
+        )
+        return boq
+
+    async def _create_boq_from_user_template(self, data: BOQFromTemplateRequest, row: Any) -> BOQ:
+        """Expand a user template: fixed quantities, or ``area_m2 * qty_factor`` where a factor is set."""
+        from app.modules.boq.user_templates import expand_quantity, to_decimal
+
+        area = Decimal(str(data.area_m2)) if data.area_m2 is not None else None
+        boq = await self.boq_repo.create(
+            BOQ(
+                project_id=data.project_id,
+                name=data.boq_name or row.name,
+                description=row.description,
+                status="draft",
+                metadata_={"template_id": str(row.id), "area_m2": data.area_m2},
+            )
+        )
+        sort_order = 0
+        for section_def in row.sections or []:
+            section = await self.position_repo.create(
+                Position(
+                    boq_id=boq.id,
+                    parent_id=None,
+                    ordinal=section_def.get("ordinal", ""),
+                    description=section_def.get("description", ""),
+                    unit="section",
+                    quantity="0",
+                    unit_rate="0",
+                    total="0",
+                    classification=dict(section_def.get("classification") or {}),
+                    source="template",
+                    cad_element_ids=[],
+                    metadata_={},
+                    sort_order=sort_order,
+                )
+            )
+            sort_order += 1
+            for pos_def in section_def.get("positions") or []:
+                quantity = expand_quantity(pos_def, area)
+                unit_rate = to_decimal(pos_def.get("rate")) or Decimal(0)
+                await self.position_repo.create(
+                    Position(
+                        boq_id=boq.id,
+                        parent_id=section.id,
+                        ordinal=pos_def.get("ordinal", ""),
+                        description=pos_def.get("description", ""),
+                        unit=pos_def.get("unit", ""),
+                        quantity=str(quantity),
+                        unit_rate=str(unit_rate),
+                        total=str(quantity * unit_rate),
+                        classification=dict(pos_def.get("classification") or {}),
+                        source="template",
+                        cad_element_ids=[],
+                        metadata_={},
+                        sort_order=sort_order,
+                    )
+                )
+                sort_order += 1
+        for idx, markup_def in enumerate(row.markups or []):
+            await self.markup_repo.create(
+                BOQMarkup(
+                    boq_id=boq.id,
+                    name=markup_def["name"],
+                    markup_type=markup_def.get("markup_type", "percentage"),
+                    category=markup_def.get("category", "overhead"),
+                    percentage=str(markup_def.get("percentage", "0")),
+                    fixed_amount=str(markup_def.get("fixed_amount", "0")),
+                    apply_to=markup_def.get("apply_to", "direct_cost"),
+                    sort_order=idx,
+                    is_active=True,
+                )
+            )
+        await _safe_publish(
+            "boq.boq.created_from_template",
+            {
+                "boq_id": str(boq.id),
+                "project_id": str(data.project_id),
+                "template_id": str(row.id),
+                "area_m2": data.area_m2,
+            },
+            source_module="oe_boq",
+            session=self.session,
         )
         return boq
 

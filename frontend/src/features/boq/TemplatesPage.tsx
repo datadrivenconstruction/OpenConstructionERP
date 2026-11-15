@@ -16,6 +16,11 @@ import {
   Warehouse,
   Check,
   Loader2,
+  Copy,
+  FilePlus2,
+  Pencil,
+  Trash2,
+  FileText,
 } from 'lucide-react';
 import { Button, Badge, Breadcrumb, DismissibleInfo } from '@/shared/ui';
 import { PageHeader } from '@/shared/ui/PageHeader';
@@ -27,6 +32,8 @@ import { parseDecimalInput } from '@/shared/lib/parseDecimal';
 import { projectsApi, type Project } from '@/features/projects/api';
 import { useActiveProjectId } from '@/shared/hooks/useActiveProjectId';
 import type { BOQ } from './api';
+import { templatesApi } from './templatesApi';
+import { TemplateFromBoqDialog } from './TemplateFromBoqDialog';
 
 /* ── Types ──────────────────────────────────────────────────────────── */
 
@@ -40,13 +47,15 @@ interface BOQTemplate {
   position_count: number;
   avg_cost_per_m2: number;
   currency: string;
+  /** False for a template the user owns and can edit. */
+  builtin?: boolean;
 }
 
 interface CreateFromTemplateData {
   template_id: string;
   project_id: string;
   boq_name?: string;
-  area_m2: number;
+  area_m2?: number;
 }
 
 /* ── Icon mapping ───────────────────────────────────────────────────── */
@@ -104,6 +113,7 @@ export function TemplatesPage() {
   const activeProjectId = useActiveProjectId();
   const [projectId, setProjectId] = useState<string>(activeProjectId);
   const [boqName, setBoqName] = useState('');
+  const [fromEstimateOpen, setFromEstimateOpen] = useState(false);
 
   // Follow the global project switcher so this page reacts to a project change
   // like the rest of the app, not just at mount.
@@ -163,6 +173,42 @@ export function TemplatesPage() {
     },
   });
 
+  const invalidateTemplates = () => queryClient.invalidateQueries({ queryKey: ['boq-templates'] });
+
+  // Built-in templates are never edited in place: "Edit" first makes the user's own copy.
+  const duplicateMutation = useMutation({
+    mutationFn: (id: string) => templatesApi.duplicate(id),
+    onSuccess: (copy) => {
+      void invalidateTemplates();
+      addToast({
+        type: 'success',
+        title: t('boq_templates.duplicated', { defaultValue: 'Copy created. Edit it here.' }),
+      });
+      navigate(`/templates/${copy.id}`);
+    },
+    onError: (e: Error) =>
+      addToast({
+        type: 'error',
+        title: t('boq_templates.duplicate_failed', { defaultValue: 'Could not copy the template' }),
+        message: e.message,
+      }),
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => templatesApi.remove(id),
+    onSuccess: () => {
+      void invalidateTemplates();
+      setSelectedId(null);
+      addToast({ type: 'success', title: t('boq_templates.deleted', { defaultValue: 'Template deleted' }) });
+    },
+    onError: (e: Error) =>
+      addToast({
+        type: 'error',
+        title: t('boq_templates.delete_failed', { defaultValue: 'Could not delete the template' }),
+        message: e.message,
+      }),
+  });
+
   /* ── Derived state ───────────────────────────────────────────────── */
 
   const selected = useMemo(
@@ -212,7 +258,8 @@ export function TemplatesPage() {
       template_id: selected.id,
       project_id: projectId,
       boq_name: boqName || generatedName || undefined,
-      area_m2: areaNum,
+      // An own template can hold fixed quantities only; the area then does not apply.
+      area_m2: selected.builtin === false && !selected.avg_cost_per_m2 ? undefined : areaNum,
     });
   }, [selected, projectId, boqName, generatedName, areaNum, createMutation]);
 
@@ -230,6 +277,18 @@ export function TemplatesPage() {
             'Start with a professional template for your building type. Select a template, set the area, and generate a complete BOQ instantly.',
         })}
       />
+
+      <div className="flex flex-wrap justify-end gap-2">
+        <Button
+          variant="secondary"
+          size="sm"
+          icon={<FilePlus2 size={14} />}
+          data-testid="tpl-from-estimate"
+          onClick={() => setFromEstimateOpen(true)}
+        >
+          {t('boq_templates.from_estimate', { defaultValue: 'From an existing estimate' })}
+        </Button>
+      </div>
 
       <DismissibleInfo
         storageKey="templates"
@@ -309,7 +368,7 @@ export function TemplatesPage() {
                   }
                 `}
               >
-                {ICON_MAP[tpl.icon] ?? <Building2 size={28} strokeWidth={1.5} />}
+                {ICON_MAP[tpl.icon] ?? (tpl.builtin === false ? <FileText size={28} strokeWidth={1.5} /> : <Building2 size={28} strokeWidth={1.5} />)}
               </div>
 
               {/* Name */}
@@ -329,9 +388,16 @@ export function TemplatesPage() {
               </div>
 
               {/* Cost indicator - benchmark rate per unit area (reciprocal). */}
-              <Badge variant={isSelected ? 'blue' : 'neutral'} size="sm">
-                ~{fmt.format(tpl.avg_cost_per_m2 / areaUnitScale)} {tpl.currency}/{areaRateUnit}
-              </Badge>
+              {tpl.builtin === false && (
+                <Badge variant="success" size="sm">
+                  {t('boq_templates.mine', { defaultValue: 'My template' })}
+                </Badge>
+              )}
+              {tpl.avg_cost_per_m2 > 0 && (
+                <Badge variant={isSelected ? 'blue' : 'neutral'} size="sm">
+                  ~{fmt.format(tpl.avg_cost_per_m2 / areaUnitScale)} {tpl.currency}/{areaRateUnit}
+                </Badge>
+              )}
             </button>
           );
         })}
@@ -352,6 +418,53 @@ export function TemplatesPage() {
                   <p className="text-sm text-content-secondary">{tplDescription(selected)}</p>
                 </div>
               </div>
+            </div>
+
+            {/* Edit / copy / delete */}
+            <div className="flex flex-wrap gap-2 border-b border-border-light px-6 py-3">
+              <Button
+                variant="secondary"
+                size="sm"
+                icon={<Pencil size={14} />}
+                loading={duplicateMutation.isPending}
+                data-testid="tpl-edit"
+                onClick={() =>
+                  selected.builtin === false
+                    ? navigate(`/templates/${selected.id}`)
+                    : duplicateMutation.mutate(selected.id)
+                }
+              >
+                {selected.builtin === false
+                  ? t('boq_templates.edit', { defaultValue: 'Edit' })
+                  : t('boq_templates.duplicate_to_edit', { defaultValue: 'Duplicate to edit' })}
+              </Button>
+              {selected.builtin === false && (
+                <>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    icon={<Copy size={14} />}
+                    loading={duplicateMutation.isPending}
+                    onClick={() => duplicateMutation.mutate(selected.id)}
+                  >
+                    {t('boq_templates.duplicate', { defaultValue: 'Duplicate' })}
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    icon={<Trash2 size={14} />}
+                    loading={deleteMutation.isPending}
+                    data-testid="tpl-delete"
+                    onClick={() => {
+                      if (window.confirm(t('boq_templates.delete_confirm', { defaultValue: 'Delete this template? Bills already made from it are not affected.' }))) {
+                        deleteMutation.mutate(selected.id);
+                      }
+                    }}
+                  >
+                    {t('boq_templates.delete', { defaultValue: 'Delete' })}
+                  </Button>
+                </>
+              )}
             </div>
 
             {/* Panel body */}
@@ -418,6 +531,8 @@ export function TemplatesPage() {
                     {selected.position_count} {t('boq.positions', { defaultValue: 'positions' })}
                   </p>
                 </div>
+                {selected.avg_cost_per_m2 > 0 && (
+                  <>
                 <div className="h-8 w-px bg-border-light" />
                 <div>
                   <p className="oe-overline">
@@ -428,6 +543,8 @@ export function TemplatesPage() {
                     <span className="text-sm font-normal text-content-secondary">{selected.currency}</span>
                   </p>
                 </div>
+                  </>
+                )}
               </div>
 
               {/* Create button */}
@@ -452,6 +569,13 @@ export function TemplatesPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {fromEstimateOpen && (
+        <TemplateFromBoqDialog
+          onClose={() => setFromEstimateOpen(false)}
+          onCreated={(tpl) => setSelectedId(tpl.id)}
+        />
       )}
     </div>
   );

@@ -6,7 +6,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useUnitsSystem } from '@/features/market/api';
 // lucide-react icons used by sub-components (BOQToolbar, BOQGrid, etc.) — none needed directly here
-import { Database, Download, ExternalLink, X, Sparkles, AlertTriangle as WarnTriangle, Lock, Copy, Wallet, Keyboard, GitCompare, RefreshCw, ShieldCheck, FlaskConical, Send, Percent, CheckCircle, ArrowLeft, LayoutList, SlidersHorizontal } from 'lucide-react';
+import { Database, Download, ExternalLink, X, Sparkles, AlertTriangle as WarnTriangle, Lock, Copy, Wallet, Keyboard, GitCompare, RefreshCw, ShieldCheck, FlaskConical, Send, Percent, CheckCircle, ArrowLeft, LayoutList, SlidersHorizontal, LayoutTemplate } from 'lucide-react';
 import { Button, Badge, Breadcrumb, ModuleHelpButton, ModuleGuideButton, ConfirmDialog, DismissibleInfo, IntroRichText, PageHeader } from '@/shared/ui';
 import { useConfirm } from '@/shared/hooks/useConfirm';
 import { useProgressStore } from '@/shared/ui/GlobalProgress';
@@ -57,6 +57,7 @@ import { AIChatPanel } from './AIChatPanel';
 import { importFidelityNotice, importLanded, importToastText, type ImportToastResult } from './importToastText';
 import { editorErrorText } from './editorErrorText';
 import { BOQRenameTitle } from './BOQRenameTitle';
+import { TemplateFromBoqDialog } from './TemplateFromBoqDialog';
 import { carriesPriceList, saveImportedPriceList } from './saveImportedPriceList';
 import { importProgressText, isImportJob, waitForImportJob, type ImportProgress } from './importJob';
 import { alreadyImported, importFailureFromBody, importFailureText } from './importFailureText';
@@ -295,6 +296,7 @@ export function BOQEditorPage() {
      analysis panels now fetch on expand; the remaining nice-to-haves
      below wait one breath after mount so the grid data wins the race. */
   const [deferredReady, setDeferredReady] = useState(false);
+  const [saveTemplateOpen, setSaveTemplateOpen] = useState(false);
   useEffect(() => {
     const id = window.setTimeout(() => setDeferredReady(true), 1500);
     return () => window.clearTimeout(id);
@@ -5575,6 +5577,18 @@ export function BOQEditorPage() {
       <div className="mb-3 space-y-2">
         <div className="flex flex-wrap items-center gap-2 min-w-0">
           <BOQRenameTitle boqId={boq.id} name={boq.name} locked={boq.is_locked || boq.status === 'final'} />
+          <Button
+            variant="ghost"
+            size="sm"
+            icon={<LayoutTemplate size={14} />}
+            data-testid="boq-save-as-template"
+            onClick={() => setSaveTemplateOpen(true)}
+          >
+            {t('boq_templates.save_as_template', { defaultValue: 'Save as template' })}
+          </Button>
+          {saveTemplateOpen && (
+            <TemplateFromBoqDialog boqId={boq.id} boqName={boq.name} onClose={() => setSaveTemplateOpen(false)} />
+          )}
           <Badge
             variant={
               boq.status === 'final' ? 'success' : boq.status === 'draft' ? 'blue' : 'neutral'
