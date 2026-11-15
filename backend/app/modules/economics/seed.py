@@ -456,11 +456,21 @@ async def _seed_project(
         },
         owner,
     )
-    # Commitments need cost lines to sit under; a project without them is built the way the plan advises.
-    if not (await readings.read_commitments(session, pid)).available:
+    # Commitments need coded cost lines to sit under a cost group; the showcase install only leaves
+    # uncoded placeholder lines, so build the spine from the bill and move their bindings onto it.
+    from app.modules.costmodel.models import CostLine
+
+    coded = (
+        await session.execute(
+            select(CostLine.id).where(CostLine.project_id == pid, CostLine.control_account_id.is_not(None)).limit(1)
+        )
+    ).first()
+    if coded is None:
+        from app.modules.costmodel.cost_control_demo import rehome_showcase_cost_lines
         from app.modules.costmodel.service import CostSpineService
 
         await CostSpineService(session).generate_from_boq(pid, bill.boq_id)
+        await rehome_showcase_cost_lines(session, [pid])
     frame = await service.generate_frame(pid, depth=1, amounts="estimate", replace=True, actor_id=owner)
     for line in frame:
         line.amount = round_up(line.amount)
