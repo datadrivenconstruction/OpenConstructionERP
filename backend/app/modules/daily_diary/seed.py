@@ -205,6 +205,8 @@ async def seed_daily_diary_demo(
             continue
         centre = _DEFAULT_CENTRES[project_idx % len(_DEFAULT_CENTRES)]
         lat0, lng0 = centre
+        project_diaries: list[DailyDiary] = []
+        project_entries_start = len(entries)
 
         for day_offset in range(_DAYS):
             day = base - timedelta(days=_DAYS - day_offset - 1)
@@ -236,6 +238,7 @@ async def seed_daily_diary_demo(
             )
             diaries.append(diary)
             diary_index[(project_id, diary_date)] = diary
+            project_diaries.append(diary)
 
             for w in range(_WEATHER_PER_DIARY):
                 conditions = rng.choice(_WEATHER_CONDITIONS)
@@ -279,11 +282,9 @@ async def seed_daily_diary_demo(
         if status_in_archived := True:  # noqa: E712
             # Add archive signatures for archived/signed diaries
             entries_by_diary: dict[uuid.UUID, list[DiaryEntry]] = {}
-            for entry in entries:
+            for entry in entries[project_entries_start:]:
                 entries_by_diary.setdefault(entry.diary_id, []).append(entry)
-            for (pid, d_date), diary in diary_index.items():
-                if pid != project_id:
-                    continue
+            for diary in project_diaries:
                 if diary.status in ("signed", "archived"):
                     diary_entries = entries_by_diary.get(diary.id, [])
                     payload = compute_immutable_payload(diary, diary_entries, [])
