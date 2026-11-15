@@ -55,6 +55,7 @@ import { dashboardGuide } from './dashboardGuide';
 import { pricedPositions, type PositionCounts } from './pricedPositions';
 import { MultiCurrencyTotal } from '@/shared/ui/MultiCurrencyTotal';
 import { WhatsNewCard } from '@/shared/ui/WhatsNewCard';
+import { DemoSeedingHint } from '@/features/processes/DemoSeedingHint';
 import { CompactProjectCard } from './components/CompactProjectCard';
 import { type ProjectPin } from './components/DashboardProjectsMap';
 import { DateDisplay } from '@/shared/ui/DateDisplay';
@@ -2785,6 +2786,9 @@ function DashboardPageInner() {
           appears once per release per browser. Sits above the hero so
           the user sees release highlights before the dashboard hero. */}
       <WhatsNewCard />
+      {/* First start: the demo projects are still installing in the
+          background, so an empty project list here is temporary. */}
+      <DemoSeedingHint />
       {/* ─── 1. Hero · row A - greeting + primary actions ────────────────
           Compressed from the previous 6-row hero (audit 2026-05-11): the
           greeting and the 3 CTAs share a single line on desktop; row B

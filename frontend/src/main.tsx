@@ -3,6 +3,7 @@ import React from 'react';
 import { appBasePath } from '@/shared/lib/publicAsset';
 import ReactDOM from 'react-dom/client';
 import { QueryClient, QueryClientProvider, MutationCache, QueryCache } from '@tanstack/react-query';
+import { ServerStartingGate } from '@/features/boot/ServerStartingGate';
 import { BrowserRouter } from 'react-router-dom';
 import App from './app/App';
 import { notifyQueryError } from '@/shared/lib/queryErrorToast';
@@ -119,7 +120,9 @@ const renderApp = () => {
     <React.StrictMode>
       <QueryClientProvider client={queryClient}>
         <BrowserRouter basename={routerBasename}>
-          <App />
+          <ServerStartingGate>
+            <App />
+          </ServerStartingGate>
         </BrowserRouter>
       </QueryClientProvider>
     </React.StrictMode>,

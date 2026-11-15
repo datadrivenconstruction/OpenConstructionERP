@@ -1380,9 +1380,9 @@ def cmd_serve(args: argparse.Namespace) -> None:
         # the port when it binds. So this says what the wait is for and points
         # at the thing that is already telling the truth, and commits only to
         # the order of magnitude both measurements agree on.
-        print(_dim("  The address above does not answer yet. A first run builds the database, loads the"))
-        print(_dim("  modules and writes the seed data first, which takes minutes rather than seconds."))
-        print(_dim("  Each step is logged below as it finishes. Open the browser once startup is complete."))
+        print(_dim("  The address above opens within seconds and shows the setup progress. A first run"))
+        print(_dim("  builds the database and loads the modules before you can sign in, which takes"))
+        print(_dim("  minutes rather than seconds; demo projects keep loading in the background after."))
         print()
 
     if args.open:
@@ -1483,6 +1483,13 @@ def cmd_serve(args: argparse.Namespace) -> None:
         print(_dim(f"  {arrow} Installation help: {TROUBLESHOOTING_URL}"))
         print(_dim(f"  {arrow} Report this at: {ISSUES_URL}"))
         sys.exit(1)
+
+    # Startup runs behind the open port, so a failed one ends uvicorn normally;
+    # keep uvicorn's startup-failure exit code for launchers and scripts.
+    from app.core.boot_state import boot_state
+
+    if boot_state.failed:
+        sys.exit(3)
 
 
 def _register_all_module_models() -> tuple[int, int, list[tuple[str, str]]]:
