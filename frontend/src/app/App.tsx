@@ -786,11 +786,8 @@ const OnboardingWizard = lazy(() =>
 const LoginPageNext = lazy(() =>
   import('@/features/auth/LoginPageNext').then((m) => ({ default: m.LoginPageNext }))
 );
-const SamlCallbackPage = lazy(() =>
-  import('@/features/auth/SamlCallback').then((m) => ({ default: m.SamlCallback }))
-);
-const OidcCallbackPage = lazy(() =>
-  import('@/features/auth/OidcCallback').then((m) => ({ default: m.OidcCallback }))
+const SsoCallbackPage = lazy(() =>
+  import('@/features/auth/SsoCallback').then((m) => ({ default: m.SsoCallback }))
 );
 const QuickEstimatePage = lazy(() =>
   import('@/features/ai/QuickEstimatePage').then((m) => ({ default: m.QuickEstimatePage }))
@@ -1394,8 +1391,9 @@ export default function App() {
         <Route path="/login" element={isAuthenticated ? <AuthedHome /> : <LoginPage />} />
         <Route path="/login-next" element={isAuthenticated ? <AuthedHome /> : <Suspense fallback={<LoadingScreen />}><LoginPageNext /></Suspense>} />
         <Route path="/register" element={isAuthenticated ? <AuthedHome /> : <RegisterPage />} />
-        <Route path="/auth/saml/callback" element={<Suspense fallback={<LoadingScreen />}><SamlCallbackPage /></Suspense>} />
-        <Route path="/auth/oidc/callback" element={<Suspense fallback={<LoadingScreen />}><OidcCallbackPage /></Suspense>} />
+        {/* One callback page: SAML hand-off code, and the OIDC redirect URI existing IdP registrations already use. */}
+        <Route path="/auth/sso/complete" element={<Suspense fallback={<LoadingScreen />}><SsoCallbackPage mode="saml" /></Suspense>} />
+        <Route path="/auth/oidc/callback" element={<Suspense fallback={<LoadingScreen />}><SsoCallbackPage mode="oidc" /></Suspense>} />
         <Route path="/forgot-password" element={isAuthenticated ? <AuthedHome /> : <ForgotPasswordPage />} />
         {/* The password-reset email links here (backend users/service.py).
             Rendered signed in or not: AuthedHome would forward to the

@@ -32,8 +32,7 @@ import { safeNextPath } from './nextPath';
 import { SUPPORTED_LANGUAGES } from '@/app/i18n';
 import { sortLanguagesByName } from '@/shared/lib/languageOrder';
 import { useThemeStore } from '@/stores/useThemeStore';
-import { beginOidcLogin } from './oidcPkce';
-import { SamlSignInButton } from './SamlSignInButton';
+import { SsoButtons } from './SsoButtons';
 
 /* Segmented theme switch (Light / Dark / System) for the login page. */
 function ThemeSwitch() {
@@ -241,14 +240,6 @@ export function LoginPage() {
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
-  // OIDC configuration (fetched once on mount)
-  const [oidcConfig, setOidcConfig] = useState<{
-    enabled: boolean;
-    issuer_url: string;
-    authorization_endpoint?: string;
-    client_id: string;
-    scopes: string;
-  } | null>(null);
   // Hide "Create account" when the server refuses self-registration. Any
   // failure keeps the link: the register page explains a refusal itself.
   const [registrationOpen, setRegistrationOpen] = useState(true);
@@ -259,12 +250,6 @@ export function LoginPage() {
         if (d && d.open === false) setRegistrationOpen(false);
       })
       .catch(() => {});
-  }, []);
-  useEffect(() => {
-    fetch('/api/v1/users/auth/oidc/config/')
-      .then((r) => r.json())
-      .then((d) => setOidcConfig(d))
-      .catch(() => setOidcConfig(null));
   }, []);
 
   const handleSubmit = async (e: FormEvent) => {
@@ -916,42 +901,8 @@ export function LoginPage() {
               </div>
             </form>
 
-            {/* OIDC / SSO login - shown when the server has OIDC enabled */}
-            {oidcConfig?.enabled && (
-              <div className="mt-3 animate-stagger-in" style={{ animationDelay: '440ms' }}>
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="flex-1 border-t border-border-light" />
-                  <span className="text-2xs text-content-tertiary">{t('auth.or', { defaultValue: 'or' })}</span>
-                  <div className="flex-1 border-t border-border-light" />
-                </div>
-                <Button
-                  variant="secondary"
-                  size="lg"
-                  className="w-full"
-                  icon={<ShieldCheck size={16} />}
-                  onClick={async () => {
-                    const { state, nonce, codeChallenge } = await beginOidcLogin();
-                    const params = new URLSearchParams({
-                      client_id: oidcConfig.client_id,
-                      response_type: 'code',
-                      scope: oidcConfig.scopes,
-                      redirect_uri: `${window.location.origin}/auth/oidc/callback`,
-                      state,
-                      nonce,
-                      code_challenge: codeChallenge,
-                      code_challenge_method: 'S256',
-                    });
-                    const authorize = oidcConfig.authorization_endpoint
-                      ?? `${oidcConfig.issuer_url.replace(/\/$/, '')}/protocol/openid-connect/auth`;
-                    window.location.href = `${authorize}?${params}`;
-                  }}
-                >
-                  {t('auth.sso_login', { defaultValue: 'Sign in with SSO' })}
-                </Button>
-              </div>
-            )}
-
-            <SamlSignInButton />
+            {/* One button per identity provider enabled in Settings > Identity */}
+            <SsoButtons showDivider />
 
             {registrationOpen && (
               <div className="mt-4 border-t border-border-light pt-3.5 animate-stagger-in" style={{ animationDelay: '460ms' }}>
