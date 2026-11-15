@@ -144,7 +144,7 @@ Lassen Sie `STORAGE_BACKEND` auf dem Standard (`local`): Dateien liegen in `/dat
 
 ## Anmeldung mit Entra ID
 
-Einstellungen: `OIDC_ENABLED`, `OIDC_ISSUER_URL`, `OIDC_CLIENT_ID`, `OIDC_CLIENT_SECRET`; optional `OIDC_SCOPES` (Standard `openid email profile`), `OIDC_AUTO_CREATE_USERS` (Standard true), `OIDC_ROLE_CLAIMS` (Standard `groups,roles`), `OIDC_GROUP_ROLE_MAP` und `OIDC_DEFAULT_ROLE` (Standard `viewer`). Die Anmeldeseite zeigt dann "Sign in with SSO", der Browser wechselt zum Anbieter und kehrt zu `https://<Ihr Host>/auth/oidc/callback` zurück.
+Die Anmeldung richtet ein Admin in der Anwendung ein: **Einstellungen > Single Sign-on > OpenID Connect hinzufügen**. Die Anmeldeseite zeigt dann eine Schaltfläche für den Anbieter, der Browser geht dorthin und kehrt zu `https://<Ihr Host>/auth/oidc/callback` zurück. Installationen mit den alten `OIDC_*`-Umgebungseinstellungen erhalten daraus beim ersten Start automatisch einen Anbietereintrag (Datenreparatur `sso_env_oidc_provider`) und ignorieren sie danach.
 
 **Die laufende Version bestimmt die Einrichtung.**
 
@@ -159,24 +159,24 @@ Einstellungen: `OIDC_ENABLED`, `OIDC_ISSUER_URL`, `OIDC_CLIENT_ID`, `OIDC_CLIENT
 4. Unternehmensanwendungen, Ihre App, Eigenschaften: "Zuweisung erforderlich" auf Ja setzen und die Personen oder Gruppen zuweisen, die sich anmelden dürfen. Ohne das kann sich jeder Benutzer Ihres Mandanten anmelden.
 5. **Plattform:** in `.env` ergänzen und neu starten.
 
-```bash
-OIDC_ENABLED=true
-OIDC_ISSUER_URL=https://login.microsoftonline.com/<tenant id>/v2.0
-OIDC_CLIENT_ID=<application (client) id>
-OIDC_CLIENT_SECRET=<client secret value>
-# Schlüssel sind Objekt-IDs von Gruppen (Claim groups) oder Werte von App-Rollen (Claim roles).
-OIDC_GROUP_ROLE_MAP={"<admins group id>":"admin","<estimators group id>":"editor","Viewer":"viewer"}
-```
+Öffnen Sie dann in der Plattform **Einstellungen > Single Sign-on > OpenID Connect hinzufügen** und tragen Sie ein:
 
-Die zugeordnete Rolle gilt bei jeder Anmeldung; passt eine Person auf mehrere Einträge, gewinnt die Rolle mit den meisten Rechten. Wer ohne zugeordnete Gruppe oder Rolle kommt, wird mit `OIDC_DEFAULT_ROLE` angelegt. Ein vorhandenes lokales Konto mit gleicher E-Mail-Adresse wird bei der ersten SSO-Anmeldung mit der Identität verknüpft. Mit `OIDC_AUTO_CREATE_USERS=false` werden Personen ohne Konto mit einer klaren Meldung abgewiesen, statt angelegt zu werden.
+- Issuer-URL: `https://login.microsoftonline.com/<tenant id>/v2.0`
+- Client-ID: die Application-(Client-)ID
+- Client-Secret: der Secret-Wert (verschlüsselt gespeichert, nie wieder angezeigt)
+- Gruppe auf Rolle, je Zeile eine: Schlüssel sind Gruppenobjekt-IDs (groups-Claim) oder App-Rollenwerte (roles-Claim), zum Beispiel `<admins group id>=admin`, `<estimators group id>=editor`, `Viewer=viewer`. Eine Zuordnung auf admin braucht zusätzlich die Option "Eine Gruppe darf Admin vergeben".
+
+Ein Neustart ist nicht nötig.
+
+Die zugeordnete Rolle gilt bei jeder Anmeldung; passt eine Person zu mehreren Einträgen, gewinnt die höchste Rolle. Wer keiner zugeordneten Gruppe oder Rolle angehört, erhält die Standardrolle des Anbieters. Personen werden über Issuer und Subject erkannt. Ein lokales Konto mit gleicher E-Mail-Adresse wird nur verknüpft, wenn die Anbieteroption "per E-Mail verknüpfen" an ist (Entra meldet eine bestätigte Adresse); ein schon an einen anderen Anbieter gebundenes Konto wird nie umgehängt, die Anmeldung antwortet `account_link_refused`. Ist "Konto bei der ersten Anmeldung anlegen" aus, werden Personen ohne Konto mit klarer Meldung abgewiesen.
 
 Entra nimmt Gruppen-IDs nur bis zu einer Grenze ins Token auf (200 in einem ID-Token); darüber sendet es statt der Liste einen Überlauf-Marker. Weisen Sie der App wenige eigene Gruppen zu oder nutzen Sie App-Rollen, damit der Claim klein bleibt.
 
 ### Keycloak als Vermittler (18.8.2 und älter)
 
-Betreiben Sie Keycloak (eigener Container oder VM, hier nicht behandelt) und binden Sie Entra ID dort als Identity Provider "OpenID Connect v1.0" ein, mit dem Discovery-Endpunkt `https://login.microsoftonline.com/<tenant id>/v2.0/.well-known/openid-configuration`. In der Entra-App-Registrierung lautet die Umleitungs-URI dann `https://<keycloak host>/realms/<realm>/broker/<alias>/endpoint`. Legen Sie im Realm einen Client `openconstructionerp` mit der gültigen Umleitungs-URI `https://erp.example.com/auth/oidc/callback` an, dazu einen Client-Scope mit Gruppenmitgliedschafts-Mapper (Claim-Name `groups`, in der Benutzerinfo enthalten). Richten Sie die Plattform auf den Realm: `OIDC_ISSUER_URL=https://<keycloak host>/realms/<realm>`, `OIDC_CLIENT_ID=openconstructionerp`, das Keycloak-Client-Geheimnis und `OIDC_GROUP_ROLE_MAP` mit den Gruppennamen aus Keycloak als Schlüsseln.
+Betreiben Sie Keycloak (eigener Container oder VM, hier nicht behandelt) und binden Sie Entra ID dort als Identity Provider "OpenID Connect v1.0" ein, mit dem Discovery-Endpunkt `https://login.microsoftonline.com/<tenant id>/v2.0/.well-known/openid-configuration`. In der Entra-App-Registrierung lautet die Umleitungs-URI dann `https://<keycloak host>/realms/<realm>/broker/<alias>/endpoint`. Legen Sie im Realm einen Client `openconstructionerp` mit der gültigen Umleitungs-URI `https://erp.example.com/auth/oidc/callback` an, dazu einen Client-Scope mit Gruppenmitgliedschafts-Mapper (Claim-Name `groups`, in der Benutzerinfo enthalten). Legen Sie in der Plattform einen OpenID-Connect-Anbieter an mit dem Issuer `https://<keycloak host>/realms/<realm>`, der Client-ID `openconstructionerp`, dem Keycloak-Client-Secret und einer Gruppe-auf-Rolle-Liste mit Keycloak-Gruppennamen.
 
-Zwei Probleme von 18.8.2 betreffen jeden Anbieter und sind in 18.8.3 behoben: Ein verknüpfter Benutzer, der sich mit unveränderter Rolle erneut anmeldet, erhält "403 No matching account found", und mit `OIDC_AUTO_CREATE_USERS=false` erhält ein unbekannter Benutzer einen Serverfehler. Testen Sie unter 18.8.2 vor dem Rollout eine zweite Anmeldung derselben Person und steuern Sie den Zugang über "Zuweisung erforderlich".
+Zwei Probleme von 18.8.2 betreffen jeden Anbieter und sind in 18.8.3 behoben: Ein verknüpfter Benutzer, der sich mit unveränderter Rolle erneut anmeldet, erhält "403 No matching account found", und mit ausgeschalteter automatischer Kontoanlage erhält ein unbekannter Benutzer einen Serverfehler. Testen Sie unter 18.8.2 vor dem Rollout eine zweite Anmeldung derselben Person und steuern Sie den Zugang über "Zuweisung erforderlich".
 
 ## Datensicherung
 

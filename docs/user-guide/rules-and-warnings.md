@@ -6,7 +6,7 @@ Short reference for rules that surface as errors or warnings. Warnings never blo
 
 The base install covers everything except two optional packages:
 
-- `pip install "openconstructionerp[saml]"` adds SAML single sign-on, see [SSO](../sso.md). OIDC needs nothing extra.
+- `pip install "openconstructionerp[saml]"` adds SAML single sign-on (the SAML option in Settings > Single sign-on appears once it is installed), see [SSO](../sso.md). OIDC needs nothing extra.
 - `pip install "openconstructionerp[parquet]"` adds `pyarrow` for Parquet data feeds, see [data feeds](../data-feeds.md). Without it a `.parquet` feed answers with a clear message naming this extra, and Settings > Data feeds hides the Parquet URL. CSV and JSON keep working.
 
 ## Equipment
