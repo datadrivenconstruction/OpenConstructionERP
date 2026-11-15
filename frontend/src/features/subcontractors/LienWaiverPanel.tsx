@@ -312,6 +312,12 @@ export function LienWaiverPanel({ subcontractorId, country }: LienWaiverPanelPro
           </Button>
         </div>
       </div>
+      <p className="text-2xs text-content-tertiary" data-testid="lien-reference-disclaimer">
+        {t('common.lien_reference_disclaimer', {
+          defaultValue:
+            'Reference only, not legal advice. Lien rules and deadlines vary by state and change; verify with counsel before relying on them.',
+        })}
+      </p>
 
       {!isTaxForm(uploadType) && payApps.length > 0 && (
         <div className="flex flex-wrap items-center justify-end gap-1.5">
