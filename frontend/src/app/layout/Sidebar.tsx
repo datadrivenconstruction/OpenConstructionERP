@@ -51,7 +51,7 @@ import {
   type NavGroup,
   type NavItem,
 } from './navCatalog';
-import { isRowInDemo, useDemoModules } from '@/shared/lib/useDemoModules';
+import { isRowInDemo, useDemoModules, useDemoServer } from '@/shared/lib/useDemoModules';
 import { LEARN_ANCHOR_ATTR, anchorRect, flyLearn } from './learnFlight';
 import { SidebarToolsCollapse } from './SidebarToolsCollapse';
 import { PRESET_WORKSPACES, resolveWorkspace, shownTab, workspaceSectionByRoute } from './workspaces';
@@ -580,6 +580,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
   );
   // In a demo the menu shows the modules its cards cover, nothing else.
   const demoModules = useDemoModules();
+  const demoServer = useDemoServer();
   const demoSet = useMemo(() => (demoModules ? new Set(demoModules) : null), [demoModules]);
   const setHiddenGroups = useModuleStore((s) => s.setHiddenGroups);
   // The Learn card at the top hides and comes back in one click, outside the
@@ -1246,9 +1247,9 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
   const modeRows = (activeModeRoutes ?? [])
     .map((route) => ALL_NAV_ITEMS[route])
     .filter((item): item is NavItem => item != null && passesRowGates(item) && !pinned.includes(item.to));
-  // A demo is shown as the demo's menu, so groups made in this browser wait
-  // until the visitor leaves it.
-  const userGroupRows = (demoSet ? [] : menuLayout.userGroups).map((group) => ({
+  // The public demo shows its own menu, the full-platform one included; groups made in
+  // this browser stay out of it.
+  const userGroupRows = (demoSet || demoServer ? [] : menuLayout.userGroups).map((group) => ({
     group,
     rows: group.items
       .map((route) => ALL_NAV_ITEMS[route])

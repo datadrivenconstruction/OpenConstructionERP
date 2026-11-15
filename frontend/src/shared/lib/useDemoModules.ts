@@ -56,6 +56,17 @@ export function isRowInDemo(
   );
 }
 
+/** Whether this server runs the public demo. */
+export function useDemoServer(): boolean {
+  const { data: sys } = useQuery<{ demo_mode?: boolean }>({
+    queryKey: ['system-status'],
+    queryFn: () => apiGet<{ demo_mode?: boolean }>('/system/status'),
+    retry: false,
+    staleTime: Infinity,
+  });
+  return sys?.demo_mode === true;
+}
+
 /** The open demo's module list, or null outside a demo and for a demo that
  *  shows the whole platform. */
 export function useDemoModules(): readonly string[] | null {

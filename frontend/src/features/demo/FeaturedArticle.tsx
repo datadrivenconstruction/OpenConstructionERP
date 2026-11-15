@@ -40,7 +40,7 @@ export function FeaturedArticle() {
       aria-label={label}
       className="group flex h-full min-w-0 flex-col overflow-hidden rounded-2xl border border-border-light bg-surface-primary shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue motion-reduce:transition-none motion-reduce:hover:translate-y-0"
     >
-      <div className="relative aspect-[1200/630] w-full shrink-0 overflow-hidden bg-gradient-to-br from-oe-blue/25 via-oe-blue/10 to-sky-400/10">
+      <div className="relative aspect-[1200/630] w-full shrink-0 overflow-hidden lg:aspect-auto lg:min-h-0 lg:shrink lg:flex-1 bg-gradient-to-br from-oe-blue/25 via-oe-blue/10 to-sky-400/10">
         {coverFailed ? (
           <div aria-hidden="true" className="absolute inset-0 flex items-center justify-center">
             <div className="absolute -left-6 -top-8 h-32 w-32 rounded-full bg-oe-blue/20 blur-2xl" />
@@ -62,7 +62,7 @@ export function FeaturedArticle() {
           />
         )}
       </div>
-      <div className="flex min-w-0 flex-1 flex-col gap-1.5 p-6">
+      <div className="flex min-w-0 flex-1 flex-col gap-1.5 p-6 lg:flex-none lg:p-5">
         <span className="inline-flex items-center gap-1.5 text-2xs font-semibold uppercase tracking-wide text-oe-blue dark:text-sky-300">
           <Newspaper size={12} aria-hidden="true" />
           {eyebrow}

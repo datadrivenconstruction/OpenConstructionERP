@@ -119,7 +119,7 @@ function DemoCard({ profile, featured = false }: { profile: DemoProfile; feature
     >
       <HexMark src={face.src} kind={face.kind} accent={accent} size={featured ? 80 : 64} className="-top-4 -start-4" />
       <div className="h-1.5 w-full rounded-t-xl" style={{ backgroundColor: accent }} />
-      <div className={`flex flex-1 flex-col p-5 ${featured ? 'xl:flex-row xl:gap-8' : ''}`}>
+      <div className={`flex flex-1 flex-col p-5 ${featured ? 'lg:flex-row lg:gap-8' : ''}`}>
         <div className="flex min-w-0 flex-1 flex-col">
           {featured && (
             <span
@@ -152,8 +152,8 @@ function DemoCard({ profile, featured = false }: { profile: DemoProfile; feature
           </p>
           <p className="mt-3 text-sm text-content-secondary">{t(`${profile.stem}.body`)}</p>
         </div>
-        <div className={`flex flex-1 flex-col ${featured ? 'xl:justify-center' : ''}`}>
-          <ul className="mt-4 space-y-1.5 text-sm text-content-primary xl:mt-0">
+        <div className={`flex flex-1 flex-col ${featured ? 'lg:justify-center' : ''}`}>
+          <ul className="mt-4 space-y-1.5 text-sm text-content-primary lg:mt-0">
             {list.map((point) => (
               <li key={point} className="flex gap-2">
                 <Check size={16} className={`mt-0.5 shrink-0 ${ACCENT_TEXT}`} />
@@ -233,8 +233,11 @@ export function DemoChooserPage() {
             <DemoCard profile={featured} featured />
           </div>
         )}
-        <div className={`min-w-0 ${featured ? '' : 'lg:col-start-3'}`}>
-          <FeaturedArticle />
+        {/* Beside the full platform the article takes the card's height instead of setting it. */}
+        <div className={`min-w-0 ${featured ? 'lg:relative' : 'lg:col-start-3'}`}>
+          <div className={featured ? 'h-full lg:absolute lg:inset-0' : 'h-full'}>
+            <FeaturedArticle />
+          </div>
         </div>
       </div>
 
