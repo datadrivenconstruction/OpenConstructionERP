@@ -20,6 +20,8 @@ __all__ = [
     "MAX_TEMPLATE_BYTES",
     "Issue",
     "check_blocks",
+    "check_mandatory",
+    "filled",
     "has_errors",
 ]
 
@@ -82,6 +84,20 @@ def check_blocks(kind: DocumentKind, blocks: Mapping[str, str]) -> list[Issue]:
         if name in blocks and not (blocks.get(name) or "").strip():
             issues.append(Issue(BLOCK_REQUIRED, "error", name))
     return issues
+
+
+def filled(values: Mapping[str, object], path: str) -> bool:
+    """Whether *path* (or one of ``a|b`` alternatives) has a non-blank value."""
+    return any(str(values.get(p.strip()) or "").strip() for p in path.split("|"))
+
+
+def check_mandatory(kind: DocumentKind, values: Mapping[str, object]) -> list[Issue]:
+    """Missing data the kind may not be issued without (standards such as EN 16931)."""
+    return [
+        Issue(LEGAL_DATA_MISSING, "error", "", {"field": m.label, "country": "", "source": m.source, "where": m.where})
+        for m in kind.mandatory
+        if not any(filled(values, p) for p in m.paths)
+    ]
 
 
 def has_errors(issues: list[Issue]) -> bool:

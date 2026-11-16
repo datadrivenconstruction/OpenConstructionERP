@@ -8,7 +8,11 @@ A country pack may ship ``document_requirements.json`` beside its manifest::
      "kinds": {"finance.invoice": {"blocks": [
         {"id": "reverse_charge", "when": "doc.reverse_charge",
          "text": {"de": "Steuerschuldnerschaft des Leistungsempfängers (§ 13b UStG)", "en": "..."},
-         "required_fields": ["buyer.vat_id"], "source": "UStG § 13b", "where": "invoice"}]}}}
+         "required_fields": ["recipient.vat_id"], "source": "UStG § 13b", "where": "invoice"}]}}}
+
+``required_fields`` entries may name alternatives, ``entity.vat_id|entity.tax_number``:
+one of them filled satisfies the requirement. ``text`` may be omitted for a
+data-only requirement.
 
 Core holds no country values. A kind gets legal blocks only for the countries
 the workspace's market profile names and whose pack carries the file; with no
@@ -29,7 +33,7 @@ from functools import lru_cache
 from app.core.doc_templates.markup import to_plain
 from app.core.doc_templates.pdf import LegalNote
 from app.core.doc_templates.resolve import normalise_locale
-from app.core.doc_templates.rules import LEGAL_DATA_MISSING, Issue
+from app.core.doc_templates.rules import LEGAL_DATA_MISSING, Issue, filled
 
 __all__ = [
     "LegalRequirement",
@@ -70,14 +74,14 @@ def _parse(raw: object, country: str) -> list[LegalRequirement]:
     out: list[LegalRequirement] = []
     for kind, spec in (raw.get("kinds") or {}).items():
         for block in (spec or {}).get("blocks") or []:
-            if not isinstance(block, dict) or not isinstance(block.get("text"), dict) or not block.get("id"):
+            if not isinstance(block, dict) or not isinstance(block.get("text", {}), dict) or not block.get("id"):
                 continue
             out.append(
                 LegalRequirement(
                     id=str(block["id"]),
                     kind=str(kind),
                     country=country,
-                    text={str(k): str(v) for k, v in block["text"].items()},
+                    text={str(k): str(v) for k, v in (block.get("text") or {}).items()},
                     source=str(block.get("source") or ""),
                     when=str(block["when"]) if block.get("when") else None,
                     required_fields=tuple(str(f) for f in block.get("required_fields") or ()),
@@ -149,7 +153,7 @@ def legal_notes(
         if req.when and not values.get(req.when):
             continue
         for path in req.required_fields:
-            if not str(values.get(path) or "").strip():
+            if not filled(values, path):
                 issues.append(
                     Issue(
                         LEGAL_DATA_MISSING,
@@ -172,8 +176,12 @@ def legal_notes(
 def legal_blocks_for_editor(
     kind_key: str, countries: Iterable[str], locale: str = "en", extra: Iterable[LegalRequirement] | None = None
 ) -> list[dict[str, str]]:
-    """Read-only legal blocks the editor shows with their reason."""
-    return [
-        {"id": r.id, "country": r.country, "text": r.text_in(locale), "source": r.source, "when": r.when or ""}
-        for r in requirements_for(kind_key, countries, extra)
-    ]
+    """Read-only legal blocks the editor shows with their reason.
+
+    A requirement without printed text (data only) is shown as the list of data it asks for.
+    """
+    out = []
+    for r in requirements_for(kind_key, countries, extra):
+        text = r.text_in(locale) or ", ".join(r.labels.get(p, p) for p in r.required_fields)
+        out.append({"id": r.id, "country": r.country, "text": text, "source": r.source, "when": r.when or ""})
+    return out

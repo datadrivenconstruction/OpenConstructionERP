@@ -36,6 +36,7 @@ from app.core.company_profile import (
     MAX_LEGAL_NAME,
     MAX_PHONE,
     MAX_REGISTRATION_LINE,
+    MAX_TAX_ID,
     MAX_WEBSITE,
     read_company_profile,
     reset_company_profile,
@@ -59,6 +60,8 @@ class CompanyProfileResponse(BaseModel):
     legal_name: str = ""
     address: str = ""
     registration_line: str = ""
+    vat_id: str = ""
+    tax_number: str = ""
     phone: str = ""
     email: str = ""
     website: str = ""
@@ -96,6 +99,8 @@ class CompanyProfileUpdate(BaseModel):
     legal_name: str | None = None
     address: str | None = None
     registration_line: str | None = None
+    vat_id: str | None = None
+    tax_number: str | None = None
     phone: str | None = None
     email: str | None = None
     website: str | None = None
@@ -135,6 +140,8 @@ async def get_company_profile_options() -> CompanyProfileOptions:
             "legal_name": MAX_LEGAL_NAME,
             "address": MAX_ADDRESS_CHARS,
             "registration_line": MAX_REGISTRATION_LINE,
+            "vat_id": MAX_TAX_ID,
+            "tax_number": MAX_TAX_ID,
             "phone": MAX_PHONE,
             "email": MAX_EMAIL,
             "website": MAX_WEBSITE,

@@ -78,6 +78,8 @@ const EMPTY_FORM: CompanyForm = {
   legal_name: '',
   address: '',
   registration_line: '',
+  vat_id: '',
+  tax_number: '',
   phone: '',
   email: '',
   website: '',
@@ -571,6 +573,25 @@ function LetterheadSettings() {
                   />
                 </div>
 
+                <Input
+                  id="company-vat-id"
+                  label={t('settings.company.vat_id', { defaultValue: 'VAT id' })}
+                  value={form.vat_id}
+                  maxLength={maxLen('vat_id')}
+                  readOnly={!canEdit}
+                  onChange={(e) => setField('vat_id', e.target.value)}
+                  hint={t('settings.company.tax_id_hint', {
+                    defaultValue: 'Invoices need the VAT id or the tax number.',
+                  })}
+                />
+                <Input
+                  id="company-tax-number"
+                  label={t('settings.company.tax_number', { defaultValue: 'Tax number' })}
+                  value={form.tax_number}
+                  maxLength={maxLen('tax_number')}
+                  readOnly={!canEdit}
+                  onChange={(e) => setField('tax_number', e.target.value)}
+                />
                 <Input
                   id="company-phone"
                   type="tel"

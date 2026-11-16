@@ -23,6 +23,7 @@ class Seller:
     address: str = ""
     registration_line: str = ""
     vat_id: str = ""
+    tax_number: str = ""
     email: str = ""
     phone: str = ""
     website: str = ""
@@ -36,6 +37,8 @@ class Seller:
             "entity.address": self.address.replace("\n", ", "),
             "entity.registration_line": self.registration_line,
             "entity.vat_id": self.vat_id,
+            "entity.tax_number": self.tax_number,
+            "entity.tax_id": self.vat_id or self.tax_number,
             "entity.email": self.email,
             "entity.phone": self.phone,
             "entity.website": self.website,
@@ -67,6 +70,7 @@ def resolve_seller(entity_id: Any = None, *, country: str | None = None) -> Sell
         address=_get("address"),
         registration_line=_get("registration_line"),
         vat_id=_get("vat_id"),
+        tax_number=_get("tax_number"),
         email=_get("email"),
         phone=_get("phone"),
         website=_get("website"),

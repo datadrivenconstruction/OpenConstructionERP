@@ -34,6 +34,8 @@ export interface CompanyProfile {
   address: string;
   /** Whatever registration and licence numbers the firm prints, as one line. */
   registration_line: string;
+  vat_id: string;
+  tax_number: string;
   phone: string;
   email: string;
   website: string;
@@ -44,6 +46,8 @@ export const COMPANY_TEXT_FIELDS = [
   'legal_name',
   'address',
   'registration_line',
+  'vat_id',
+  'tax_number',
   'phone',
   'email',
   'website',

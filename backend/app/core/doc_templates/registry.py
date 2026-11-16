@@ -21,7 +21,9 @@ __all__ = [
     "FIELD_TYPES",
     "PDF_BLOCKS",
     "DocumentKind",
+    "MandatoryField",
     "MergeField",
+    "RecordDocument",
     "all_kinds",
     "get_kind",
     "register_kind",
@@ -60,6 +62,50 @@ class MergeField:
 
 
 @dataclass(frozen=True)
+class MandatoryField:
+    """Data a document may not be issued without, e.g. the seller's tax id on an invoice.
+
+    Attributes:
+        paths: Field paths; any one of them filled satisfies the requirement.
+        label: English name shown in the issue (``{{field}}``).
+        source: The standard or law that asks for it (``EN 16931``).
+        where: Where the user fills it in (``company profile``, ``invoice``).
+    """
+
+    paths: tuple[str, ...]
+    label: str
+    source: str
+    where: str = ""
+
+
+@dataclass
+class RecordDocument:
+    """Everything a generic document PDF needs from one record, already formatted.
+
+    Attributes:
+        values: Merge values by field path, formatted in the document locale.
+        meta: Label/value rows under the title.
+        table: Item table, if any (an :class:`app.core.doc_templates.pdf.TableSpec`).
+        totals: Label/value rows under the table.
+        project_id: Owning project, for access checks and the issue log.
+        filename: Download name without extension.
+        locale: The document language the record asks for, if it has one.
+    """
+
+    values: dict[str, str]
+    meta: list[tuple[str, str]] = field(default_factory=list)
+    table: Any = None
+    totals: list[tuple[str, str]] = field(default_factory=list)
+    project_id: Any = None
+    filename: str = "document"
+    locale: str | None = None
+
+
+#: ``(session, record id, locale) -> RecordDocument``; raises LookupError when the record is gone.
+RecordDocumentFn = Callable[[Any, str, str], Awaitable[RecordDocument]]
+
+
+@dataclass(frozen=True)
 class DocumentKind:
     """A registered document or email.
 
@@ -77,6 +123,9 @@ class DocumentKind:
         appearance_type: Key in :data:`app.core.pdf_appearance.DOCUMENT_TYPES`, if any.
         records: Optional lister of real records for "Preview with".
         record_preview: Optional renderer of the draft against one real record.
+        mandatory: Data the document may not be issued without (standards, not country law).
+        record_document: Optional builder of a generic document PDF from one record;
+            kinds with it can be issued through ``/doc-templates/{kind}/records/{id}/pdf``.
     """
 
     key: str
@@ -92,6 +141,8 @@ class DocumentKind:
     appearance_type: str | None = None
     records: RecordsFn | None = field(default=None, compare=False)
     record_preview: RecordPreviewFn | None = field(default=None, compare=False)
+    mandatory: tuple[MandatoryField, ...] = ()
+    record_document: RecordDocumentFn | None = field(default=None, compare=False)
 
     @property
     def field_paths(self) -> frozenset[str]:

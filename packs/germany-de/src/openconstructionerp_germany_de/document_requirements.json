@@ -1,0 +1,75 @@
+{
+  "country": "DE",
+  "kinds": {
+    "finance.invoice": {
+      "blocks": [
+        {
+          "id": "ustg_14_data",
+          "required_fields": ["doc.number", "doc.date", "recipient.name", "recipient.address", "doc.total_net", "doc.total_vat"],
+          "labels": {
+            "doc.number": "Rechnungsnummer",
+            "doc.date": "Ausstellungsdatum",
+            "recipient.name": "Name des Leistungsempfängers",
+            "recipient.address": "Anschrift des Leistungsempfängers",
+            "doc.total_net": "Entgelt",
+            "doc.total_vat": "Steuerbetrag"
+          },
+          "source": "UStG § 14 Abs. 4",
+          "where": "invoice"
+        },
+        {
+          "id": "ustg_14_seller_tax_id",
+          "text": {
+            "de": "Steuernummer / USt-IdNr. des leistenden Unternehmers: {{entity.tax_id}}",
+            "en": "Seller tax number / VAT id: {{entity.tax_id}}"
+          },
+          "required_fields": ["entity.vat_id|entity.tax_number"],
+          "labels": {"entity.vat_id|entity.tax_number": "Steuernummer oder USt-IdNr."},
+          "source": "UStG § 14 Abs. 4 Nr. 2",
+          "where": "company profile"
+        },
+        {
+          "id": "ustg_14_supply_date",
+          "text": {
+            "de": "Leistungsdatum: {{doc.supply_date}}",
+            "en": "Date of supply: {{doc.supply_date}}"
+          },
+          "required_fields": ["doc.supply_date"],
+          "labels": {"doc.supply_date": "Zeitpunkt der Leistung"},
+          "source": "UStG § 14 Abs. 4 Nr. 6",
+          "where": "invoice"
+        },
+        {
+          "id": "ustg_13b_reverse_charge",
+          "when": "doc.reverse_charge",
+          "text": {
+            "de": "Steuerschuldnerschaft des Leistungsempfängers (§ 13b UStG)",
+            "en": "Reverse charge: the recipient is liable for the VAT (§ 13b UStG)"
+          },
+          "source": "UStG § 14a Abs. 5",
+          "where": "invoice"
+        },
+        {
+          "id": "ustg_19_small_business",
+          "when": "doc.small_business",
+          "text": {
+            "de": "Gemäß § 19 UStG wird keine Umsatzsteuer berechnet.",
+            "en": "No VAT is charged under § 19 UStG (small business)."
+          },
+          "source": "UStG § 19",
+          "where": "invoice"
+        },
+        {
+          "id": "ustg_14_private_retention",
+          "when": "doc.private_customer",
+          "text": {
+            "de": "Der Leistungsempfänger ist verpflichtet, diese Rechnung zwei Jahre aufzubewahren (§ 14b Abs. 1 Satz 5 UStG).",
+            "en": "The recipient must keep this invoice for two years (§ 14b (1) sentence 5 UStG)."
+          },
+          "source": "UStG § 14 Abs. 4 Satz 1 Nr. 9",
+          "where": "invoice"
+        }
+      ]
+    }
+  }
+}
