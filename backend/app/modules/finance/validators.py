@@ -150,3 +150,7 @@ async def evaluate_claim_invoice(record: dict[str, Any], *, record_id: str = "")
         logger.warning("finance validation failed for record %s", record_id, exc_info=True)
         return []
     return [result for result in report.results if not result.passed and not result.is_engine_error]
+
+
+# Booking export rules (booking.*) register on import.
+from app.modules.finance import booking_rules as _booking_rules  # noqa: E402,F401

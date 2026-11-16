@@ -237,6 +237,7 @@ async def enrich_projects(project_ids: list[uuid.UUID]) -> dict[str, Any]:
         from app.modules.field_time.clock_seed import seed_field_clock_demo
         from app.modules.field_time.payroll_seed import seed_payroll_export_demo
         from app.modules.field_time.seed import seed_field_time_demo
+        from app.modules.finance.booking_seed import seed_booking_export_demo
         from app.modules.finance.einvoice_settings_seed import seed_einvoice_settings_demo
         from app.modules.forms.submissions_seed import seed_forms_submissions_demo
         from app.modules.full_evm.seed import seed_full_evm_demo
@@ -383,6 +384,8 @@ async def enrich_projects(project_ids: list[uuid.UUID]) -> dict[str, Any]:
             ("field_time", None, lambda s: seed_field_time_demo(s, _demo_pids)),
             # Sample payroll export profiles and payroll references on the seeded workers.
             ("payroll_export", None, lambda s: seed_payroll_export_demo(s, _demo_pids)),
+            # Sample booking export connector and approved supplier invoices.
+            ("booking_export", None, lambda s: seed_booking_export_demo(s, _demo_pids)),
             # Site geofences and two weeks of clock events for up to three demo
             # projects with a crew, after field time so its seeded approved
             # timesheets exist and the clock adds drafts only. Self-guards per

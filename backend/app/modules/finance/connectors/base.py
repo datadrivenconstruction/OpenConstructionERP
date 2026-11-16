@@ -154,6 +154,8 @@ class Connector(ABC):
     display_name: ClassVar[str] = ""
     supported_directions: ClassVar[tuple[str, ...]] = ("push", "pull", "both")
     setting_fields: ClassVar[tuple[ConnectorField, ...]] = ()
+    # Market codes whose packs contribute this type; empty = offered to everyone.
+    required_markets: ClassVar[tuple[str, ...]] = ()
 
     def __init__(
         self,
