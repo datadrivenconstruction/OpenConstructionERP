@@ -642,6 +642,15 @@ const resource = {
     "projects.location_conflict": "The saved map point and the geocoded address are about {{km}} km apart. Which location is right?",
     "projects.location_use_this": "Use this location",
     "projects.location_keep_current": "Keep current",
+    "projects.facet_unset": "Not set",
+    "projects.facet_all_phases": "All phases",
+    "projects.facet_all_types": "All project types",
+    "projects.facet_phase_aria": "Filter projects by phase",
+    "projects.facet_type_aria": "Filter projects by project type",
+    "projects.phase_tender": "Tender",
+    "projects.phase_operation": "Operation",
+    "projects.phase_concept": "Concept",
+    "projects.phase_handover": "Handover",
     "module_packages.upload_failed": "The archive was refused",
     "module_packages.installed_active": "Module installed and active",
     "module_packages.installed_disabled": "Module installed, switched off",
@@ -935,6 +944,9 @@ const resource = {
     "boq_templates.rule_ordinal_unique": "The number {{ordinal}} is used more than once.",
     "boq_templates.rule_position_classified": "Position {{ordinal}} has no {{standard}} code.",
     "boq_templates.rule_markup_within_band": "Markup {{name}} is {{percentage}} percent, outside 0 to 100.",
+    "analytics.col_project_status": "Project status",
+    "analytics.filter_project_status": "Filter by project status",
+    "analytics.all_project_statuses": "All project statuses",
   }
 } as { translation: Record<string, string> };
 

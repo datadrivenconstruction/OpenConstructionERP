@@ -39,6 +39,12 @@ describe('isProjectFilterActive (#284 toolbar visibility)', () => {
   it('is true when a region filter is set', () => {
     expect(isProjectFilterActive('', 'active', 'Bavaria')).toBe(true);
   });
+
+  it('keeps the toolbar for a phase or type filter that matches nothing (#567)', () => {
+    expect(isProjectFilterActive('', 'active', 'all', { phase: 'tender', project_type: 'all' })).toBe(true);
+    expect(isProjectFilterActive('', 'active', 'all', { phase: 'all', project_type: 'Hospital' })).toBe(true);
+    expect(isProjectFilterActive('', 'active', 'all', { phase: 'all', project_type: 'all' })).toBe(false);
+  });
 });
 
 /**

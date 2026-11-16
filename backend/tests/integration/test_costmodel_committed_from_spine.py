@@ -448,6 +448,32 @@ async def test_portfolio_outturn_reads_the_documents(http_client, admin_headers)
 
 
 @pytest.mark.asyncio
+async def test_portfolio_rows_carry_project_status_and_type_beside_budget_health(http_client, admin_headers):
+    """``status`` stays budget health; the project's own status, phase and type ride alongside (#567)."""
+    resp = await http_client.post(
+        f"{API}/projects/",
+        json={
+            "name": f"Tender {uuid.uuid4().hex[:6]}",
+            "region": "DACH",
+            "currency": "EUR",
+            "phase": "tender",
+            "project_type": "Hospital",
+        },
+        headers=admin_headers,
+    )
+    assert resp.status_code in (200, 201), resp.text
+    project_id = resp.json()["id"]
+
+    overview = await http_client.get(f"{API}/projects/analytics/overview/", headers=admin_headers)
+    assert overview.status_code == 200, overview.text
+    row = next(p for p in overview.json()["projects"] if p["id"] == project_id)
+    assert row["status"] in ("on_budget", "over_budget")
+    assert row["project_status"] == "active"
+    assert row["phase"] == "tender"
+    assert row["project_type"] == "Hospital"
+
+
+@pytest.mark.asyncio
 async def test_portfolio_outturn_counts_a_project_with_no_budget_lines(http_client, admin_headers):
     """An issued PO of 400 on a cost line, and no budget line anywhere in the project.
 
