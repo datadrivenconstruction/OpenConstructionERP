@@ -46929,7 +46929,7 @@ const resource = {
     "settings.tab_account_desc": "Пароль и выход из системы",
     "settings.tab_team": "Команда и тариф",
     "settings.tab_team_desc": "Участники, роли и лицензия",
-    "settings.tab_company": "Компания и документы",
+    "settings.tab_company": "Документы и шаблоны",
     "settings.tab_company_desc": "Логотипы, фирменный бланк и внешний вид печатных документов",
     "settings.tab_regional": "Региональные",
     "settings.tab_regional_desc": "Язык, часовой пояс и форматы",
