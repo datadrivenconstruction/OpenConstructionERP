@@ -176,6 +176,31 @@ def version_satisfies(version: str, spec: str) -> bool:
     return True
 
 
+def platform_incompatibility(module_dir: Path) -> str | None:
+    """Why an installed module no longer fits this platform, or None when it does.
+
+    Reads ``requires_platform`` from the module's ``module.json`` without
+    importing any of its code, so a boot can skip a module before it runs.
+    A module that declares nothing is not refused here: install already warned.
+    """
+    descriptor_path = module_dir / DESCRIPTOR_FILE
+    if not descriptor_path.is_file():
+        return None
+    try:
+        descriptor = json.loads(descriptor_path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return f"{DESCRIPTOR_FILE} is not readable JSON."
+    spec = descriptor.get("requires_platform") if isinstance(descriptor, dict) else None
+    if spec is None:
+        return None
+    current = platform_version()
+    try:
+        ok = isinstance(spec, str) and version_satisfies(current, spec)
+    except ValueError:
+        return f"requires_platform {spec!r} is not a version range."
+    return None if ok else f"The module needs platform {spec}; this server runs {current}."
+
+
 def read_manifest_fields(source: str) -> dict[str, Any]:
     """Literal keyword arguments of the ``ModuleManifest(...)`` call, by ``ast`` (never executed)."""
     try:
