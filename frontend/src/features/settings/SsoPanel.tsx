@@ -111,7 +111,7 @@ function toDraft(p: Provider): Draft {
     enabled: p.enabled,
     tenant_id: p.tenant_id ?? '',
     // Edit field parsed back by split(','): a locale list format would not round-trip.
-    email_domains: p.email_domains.join(',' + ' '),
+    email_domains: p.email_domains.join(', '),
     auto_create_users: p.auto_create_users,
     default_role: p.default_role,
     group_attribute: p.group_attribute,

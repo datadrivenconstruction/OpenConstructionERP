@@ -196,6 +196,7 @@ const KEPT_AS_PLAIN_COMMAS: readonly Excluded[] = [
   { file: 'features/meetings/MeetingGlossaryDialog.tsx', sites: 2, why: 'round-trip form field' },
   { file: 'features/estimate-archive/OpeningModal.tsx', sites: 1, why: 'round-trip form field' },
   { file: 'features/photos/model.ts', sites: 1, why: 'round-trip form field' },
+  { file: 'features/settings/SsoPanel.tsx', sites: 1, why: 'round-trip form field' },
   // `formatList` there reads like a display helper and is not one: its own test
   // asserts that `parseList(formatList(x))` round-trips. The name is the trap.
   { file: 'features/cases/caseDraft.ts', sites: 1, why: 'serialiser paired with parseList' },
