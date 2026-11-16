@@ -538,6 +538,8 @@ class FieldTimeService:
             )
 
         fields = data.model_dump(exclude_unset=True)
+        if fields.get("hour_type") is None:
+            fields.pop("hour_type", None)
         # Resolve the post-update identifiers to enforce labour XOR plant.
         new_resource = fields.get("resource_id", line.resource_id)
         new_equipment = fields.get("equipment_id", line.equipment_id)
@@ -729,6 +731,7 @@ class FieldTimeService:
                     boq_position_id=_as_uuid(line.get("boq_position_id")),
                     is_daywork=bool(line.get("is_daywork")),
                     variation_id=_as_uuid(line.get("variation_id")),
+                    hour_type=str(line.get("hour_type") or "regular"),
                     note=line.get("note"),
                 ),
             )
@@ -1359,6 +1362,7 @@ class FieldTimeService:
             break_minutes=data.break_minutes,
             employer_kind=data.employer_kind,
             employer_subcontractor_id=data.employer_subcontractor_id,
+            hour_type=data.hour_type or "regular",
         )
 
     @staticmethod
@@ -1401,6 +1405,7 @@ class FieldTimeService:
                     "is_daywork": bool(line.is_daywork),
                     "variation_id": str(line.variation_id) if line.variation_id else None,
                     "note": line.note or "",
+                    "hour_type": line.hour_type or "regular",
                     # The clock times under the names the pure engine reads them
                     # by. They are what wakes up the double-booking check: two
                     # lines that put the same worker in two places at once are

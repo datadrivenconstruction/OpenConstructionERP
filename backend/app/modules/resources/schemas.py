@@ -27,6 +27,7 @@ class ResourceCreate(BaseModel):
     )
     home_project_id: UUID | None = None
     contact_id: UUID | None = None
+    payroll_ref: str | None = Field(default=None, max_length=100)
     default_cost_rate: Decimal18_4 = Field(default=Decimal("0"), ge=0)
     currency: str = Field(default="", max_length=3)
     # Max concurrent allocation percent the resource can absorb per bucket.
@@ -54,6 +55,7 @@ class ResourceUpdate(BaseModel):
     )
     home_project_id: UUID | None = None
     contact_id: UUID | None = None
+    payroll_ref: str | None = Field(default=None, max_length=100)
     default_cost_rate: Decimal18_4 | None = Field(default=None, ge=0)
     currency: str | None = Field(default=None, max_length=3)
     capacity_percent: int | None = Field(default=None, ge=0, le=10000)
@@ -77,6 +79,7 @@ class ResourceResponse(BaseModel):
     resource_type: str
     home_project_id: UUID | None = None
     contact_id: UUID | None = None
+    payroll_ref: str | None = None
     default_cost_rate: Decimal = Decimal("0")
     currency: str = ""
     capacity_percent: int | None = None

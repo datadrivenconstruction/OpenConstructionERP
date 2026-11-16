@@ -674,3 +674,7 @@ async def get_validation(
 from app.modules.field_time.clock_router import clock_router  # noqa: E402
 
 router.include_router(clock_router)
+
+from app.modules.field_time.payroll_router import router as _payroll_router  # noqa: E402
+
+router.include_router(_payroll_router)

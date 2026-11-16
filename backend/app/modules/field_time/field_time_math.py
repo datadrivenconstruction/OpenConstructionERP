@@ -587,6 +587,7 @@ def reverse_lines(lines: Sequence[Mapping[str, Any]]) -> list[dict[str, Any]]:
                 "boq_position_id": _clean_str(_get(line, "boq_position_id")) or None,
                 "is_daywork": bool(_get(line, "is_daywork")),
                 "variation_id": _clean_str(_get(line, "variation_id")) or None,
+                "hour_type": _clean_str(_get(line, "hour_type")) or "regular",
                 "note": _clean_str(_get(line, "note")),
             },
         )

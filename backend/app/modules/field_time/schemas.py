@@ -19,6 +19,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_serializer
 
+from app.modules.field_time.payroll_export import HOUR_TYPES
 from app.modules.field_time.working_time import ALL_EMPLOYER_KINDS, ALL_WORKING_TIME_REGIMES
 
 # Status values a timesheet can carry.
@@ -30,6 +31,7 @@ STATUS_PATTERN = r"^(draft|submitted|approved|reversed)$"
 # which would turn a typo into a silently unrecorded legal duty.
 REGIME_PATTERN = rf"^({'|'.join(ALL_WORKING_TIME_REGIMES)})$"
 EMPLOYER_KIND_PATTERN = rf"^({'|'.join(ALL_EMPLOYER_KINDS)})$"
+HOUR_TYPE_PATTERN = rf"^({'|'.join(HOUR_TYPES)})$"
 
 
 def _money_str(value: Decimal | None) -> str | None:
@@ -75,6 +77,7 @@ class FieldTimesheetLineCreate(BaseModel):
     # a main contractor answers for the wages its subcontractors pay.
     employer_kind: str | None = Field(default=None, pattern=EMPLOYER_KIND_PATTERN)
     employer_subcontractor_id: UUID | None = None
+    hour_type: str = Field(default="regular", pattern=HOUR_TYPE_PATTERN)
 
 
 class FieldTimesheetLineUpdate(BaseModel):
@@ -99,6 +102,7 @@ class FieldTimesheetLineUpdate(BaseModel):
     break_minutes: int | None = Field(default=None, ge=0, le=1440)
     employer_kind: str | None = Field(default=None, pattern=EMPLOYER_KIND_PATTERN)
     employer_subcontractor_id: UUID | None = None
+    hour_type: str | None = Field(default=None, pattern=HOUR_TYPE_PATTERN)
 
 
 class FieldTimesheetLineResponse(BaseModel):
@@ -123,6 +127,7 @@ class FieldTimesheetLineResponse(BaseModel):
     break_minutes: int | None = None
     employer_kind: str | None = None
     employer_subcontractor_id: UUID | None = None
+    hour_type: str = "regular"
     # Derived, read-only: "labour" or "plant".
     kind: str = "labour"
     # True when ``hours`` came from the clock times rather than from somebody
