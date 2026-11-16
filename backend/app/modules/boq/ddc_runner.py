@@ -71,6 +71,7 @@ from pathlib import Path
 from typing import Any
 
 from app.core.converter_source import PACKAGES, command_prefix
+from app.core.windows_exit_status import describe_exit_code, plain_exit_message
 from app.modules.boq.glb_quantities import MESH_QUANTITY_COLUMNS, glb_element_quantities
 from app.modules.boq.revit_categories import revit_category_label, revit_category_name
 from app.modules.boq.rvt_ifc_reader import RvtIfcElement, element_quantities, read_rvt_ifc
@@ -124,6 +125,10 @@ class ConverterRun:
                 "code": str(self.status or "CONVERTED_PARTIAL_OUTPUTS"),
                 "message_en": f"The converter could not write its {names} output.",
             }
+        info = describe_exit_code(self.returncode)
+        if info is not None:
+            # Windows killed the process before it could report anything itself.
+            return {"code": info.name, "message_en": plain_exit_message(self.returncode, "The converter")}
         return None
 
     @property

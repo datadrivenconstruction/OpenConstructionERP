@@ -32,6 +32,12 @@ from app.core.converter_source import (
     host_platform_key,
     install_dir_name,
 )
+from app.core.windows_exit_status import (
+    describe_exit_code,
+    missing_vc_runtime,
+    plain_exit_message,
+    vc_runtime_imports,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -793,6 +799,23 @@ def smoke_test_converter(extension: str, force: bool = False) -> ConverterHealth
         _HEALTH_CACHE[extension] = result
         return result
 
+    # The packages carry their own Visual C++ runtime; a folder that lost it
+    # starts only if Windows has one, and otherwise dies with 0xC0000135.
+    absent_runtime = missing_vc_runtime(exe_path.parent, required=vc_runtime_imports(exe_path))
+    if absent_runtime:
+        result = {
+            "status": "failed",
+            "message": (
+                f"The .{extension.upper()} converter needs the Microsoft Visual C++ Redistributable (x64), and "
+                f"neither its folder nor Windows has {', '.join(absent_runtime)}. Install it from "
+                f"https://aka.ms/vs/17/release/vc_redist.x64.exe, then press Verify."
+            ),
+            "suggested_actions": ["install_vc_redist", "reinstall_converter"],
+            "checked_at": now,
+        }
+        _HEALTH_CACHE[extension] = result
+        return result
+
     try:
         import subprocess
 
@@ -852,6 +875,15 @@ def smoke_test_converter(extension: str, force: bool = False) -> ConverterHealth
                     "install_vc_redist",
                     "manual_install_from_github",
                 ],
+                "checked_at": now,
+            }
+        elif describe_exit_code(rc) is not None:
+            # Windows stopped it (crash, blocked instruction, no memory): it will not convert either.
+            info = describe_exit_code(rc)
+            result = {
+                "status": "failed",
+                "message": plain_exit_message(rc, f"The .{extension.upper()} converter"),
+                "suggested_actions": list(info.actions) if info else [],
                 "checked_at": now,
             }
         else:
