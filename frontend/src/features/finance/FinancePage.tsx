@@ -101,6 +101,7 @@ import { PayeeTotalsTab } from './PayeeTotalsTab';
 import { OpenItemsImportModal } from './OpenItemsImportModal';
 import { EInvoiceModal } from './EInvoiceModal';
 import { downloadInvoicePdf, downloadPaymentPdf } from './api';
+import { IssueDocumentButton } from '@/features/doc-templates/IssueDocumentButton';
 import { PURCHASING_DOCUMENT_LOCALES } from '@/shared/lib/documentExport';
 import { RecordPdfButton } from '@/shared/ui/RegisterExport';
 import { financeGuide } from './financeGuide';
@@ -2800,6 +2801,14 @@ export function InvoicesTab({ projectId }: { projectId: string }) {
                             locales={PURCHASING_DOCUMENT_LOCALES}
                             testId={`invoice-pdf-${inv.id}`}
                           />
+                          {isReceivable(inv) && (
+                            <IssueDocumentButton
+                              kind="finance.invoice"
+                              recordId={inv.id}
+                              fallbackName={inv.invoice_number || 'invoice'}
+                              testId={`invoice-document-${inv.id}`}
+                            />
+                          )}
                           {inv.status === 'draft' && (
                             <Button
                               variant="secondary"
@@ -2918,6 +2927,14 @@ export function InvoicesTab({ projectId }: { projectId: string }) {
                         locales={PURCHASING_DOCUMENT_LOCALES}
                         testId={`invoice-card-pdf-${inv.id}`}
                       />
+                      {isReceivable(inv) && (
+                        <IssueDocumentButton
+                          kind="finance.invoice"
+                          recordId={inv.id}
+                          fallbackName={inv.invoice_number || 'invoice'}
+                          testId={`invoice-document-${inv.id}`}
+                        />
+                      )}
                     </div>
                   </div>
                   <div className="flex items-center justify-between text-xs text-content-tertiary">

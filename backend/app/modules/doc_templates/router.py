@@ -12,6 +12,7 @@ POST   /{kind}/publish?locale=        - publish the draft as a new version
 POST   /{kind}/versions/{id}/restore  - publish a copy of an old version
 POST   /{kind}/reset?locale=          - publish "no overrides"
 GET    /{kind}/records                - records "Preview with" can use
+GET    /{kind}/records/{id}/pdf       - issue a record's document (logs the version)
 POST   /{kind}/preview?locale=        - PDF or email HTML of an unsaved text
 POST   /{kind}/test-send?locale=      - email kinds: send to the caller's own address
 """
@@ -244,12 +245,39 @@ async def records(kind_key: str, session: SessionDep, user_id: CurrentUserId) ->
     return [RecordOut(id=rid, label=label) for rid, label in await kind.records(session, ids)]
 
 
+@router.get("/{kind_key}/records/{record_id}/pdf", response_model=None, dependencies=_READ)
+async def issue_pdf(
+    kind_key: str,
+    record_id: str,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    locale: str | None = Query(None, max_length=10),
+) -> Response:
+    """Issue one record's document with the published wording; logs the template version.
+
+    422 with ``detail.issues`` when mandatory data (EN 16931, country packs) is missing.
+    """
+    kind = service.require_kind(kind_key)
+    ids = await accessible_project_ids(session, user_id)
+    countries = await service.workspace_countries(session, payload, user_id)
+    pdf, filename = await service.issue(session, kind, record_id, locale, countries, user_id, ids)
+    await session.commit()
+    safe = "".join(ch if ch.isalnum() or ch in "-_." else "-" for ch in filename)[:120] or "document"
+    return Response(
+        content=pdf,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="{safe}.pdf"', "Cache-Control": "no-store"},
+    )
+
+
 @router.post("/{kind_key}/preview", response_model=None, dependencies=_READ)
 async def preview(
     kind_key: str,
     body: PreviewIn,
     session: SessionDep,
     user_id: CurrentUserId,
+    payload: CurrentUserPayload,
     locale: str = _LOCALE,
 ) -> Response | PreviewEmailOut:
     """Render an unsaved text: a PDF, or for emails the subject and HTML."""
@@ -268,7 +296,8 @@ async def preview(
     ids = await accessible_project_ids(session, user_id)
     options = body.options.model_dump() if body.options else {}
     try:
-        data, media = await service.preview(session, kind, locale, blocks, options, body.record_id, ids)
+        countries = await service.workspace_countries(session, payload, user_id) if body.record_id else []
+        data, media = await service.preview(session, kind, locale, blocks, options, body.record_id, ids, countries)
     except TimeoutError as exc:
         raise HTTPException(status_code=status.HTTP_504_GATEWAY_TIMEOUT, detail="Preview took too long") from exc
     except asyncio.CancelledError:

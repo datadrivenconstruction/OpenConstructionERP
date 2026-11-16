@@ -62,3 +62,25 @@ class DocTemplateVersion(Base):
 
     def __repr__(self) -> str:
         return f"<DocTemplateVersion {self.template_id} v{self.number}>"
+
+
+class DocTemplateIssue(Base):
+    """One issued document and the wording it printed, so a reprint can tell what was sent.
+
+    ``template_version_id`` is ``None`` when the built-in wording printed;
+    ``source`` is ``published``, ``primary_language`` or ``default``.
+    """
+
+    __tablename__ = "oe_doc_templates_issue"
+
+    kind: Mapped[str] = mapped_column(String(120), nullable=False, index=True)
+    record_id: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
+    project_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+    locale: Mapped[str] = mapped_column(String(10), nullable=False)
+    text_locale: Mapped[str] = mapped_column(String(10), nullable=False, default="en", server_default="en")
+    source: Mapped[str] = mapped_column(String(20), nullable=False, default="default", server_default="default")
+    template_version_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+    issued_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
+
+    def __repr__(self) -> str:
+        return f"<DocTemplateIssue {self.kind} {self.record_id}>"
