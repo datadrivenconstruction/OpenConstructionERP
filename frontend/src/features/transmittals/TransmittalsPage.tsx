@@ -40,6 +40,7 @@ import {
 } from '@/shared/ui';
 import { PageHeader } from '@/shared/ui/PageHeader';
 import { RegisterExportButton, RecordPdfButton } from '@/shared/ui/RegisterExport';
+import { IssueDocumentButton } from '@/features/doc-templates/IssueDocumentButton';
 import { TruncationNotice } from '@/shared/ui/TruncationNotice';
 import { InsightsPanel, InsightsToggleButton, useModuleInsights } from '@/features/insights';
 import { useConfirm } from '@/shared/hooks/useConfirm';
@@ -757,6 +758,12 @@ const TransmittalRow = React.memo(function TransmittalRow({
             <RecordPdfButton
               download={(locale) => downloadTransmittalPdf(transmittal.id, locale, transmittal.transmittal_number)}
               testId={`transmittal-pdf-${transmittal.id}`}
+            />
+            <IssueDocumentButton
+              kind="transmittals.transmittal"
+              recordId={transmittal.id}
+              fallbackName={`transmittal-${transmittal.transmittal_number}`}
+              testId={`transmittal-document-${transmittal.id}`}
             />
             {transmittal.status === 'draft' && (
               <>

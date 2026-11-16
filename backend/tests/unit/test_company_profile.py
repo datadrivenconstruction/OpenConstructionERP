@@ -36,6 +36,7 @@ from app.core.company_profile import (
     MAX_LEGAL_NAME,
     MAX_PHONE,
     MAX_REGISTRATION_LINE,
+    MAX_TAX_ID,
     MAX_WEBSITE,
     company_profile_path,
     has_letterhead,
@@ -52,6 +53,8 @@ _PNG = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADU
 _LINE_CAPS = {
     "legal_name": MAX_LEGAL_NAME,
     "registration_line": MAX_REGISTRATION_LINE,
+    "vat_id": MAX_TAX_ID,
+    "tax_number": MAX_TAX_ID,
     "phone": MAX_PHONE,
     "email": MAX_EMAIL,
     "website": MAX_WEBSITE,

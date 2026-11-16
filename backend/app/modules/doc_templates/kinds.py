@@ -224,4 +224,16 @@ def register_builtin_kinds() -> None:
         register_kind(_letter_kind(INVITATION_KEY, "Invitation to tender"))
     except ImportError:
         pass
+    from app.modules.doc_templates.documents import change_order_kind, invoice_kind, offer_kind
+
+    register_kind(invoice_kind())
+    register_kind(change_order_kind())
+    try:
+        register_kind(offer_kind())
+    except (ImportError, KeyError):
+        pass
+    from app.modules.doc_templates.site_documents import minutes_kind, rfi_kind, transmittal_kind
+
+    for factory in (rfi_kind, minutes_kind, transmittal_kind):
+        register_kind(factory())
     register_kind(_password_reset_kind())

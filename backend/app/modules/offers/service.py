@@ -243,12 +243,39 @@ class OfferService:
         cfg.texts_seeded_for = [*(cfg.texts_seeded_for or []), key]
         await self.session.flush()
 
+    async def _template_texts(self, lang: str) -> dict[str, Any]:
+        """The firm's published offer wording (Settings > Documents & templates), by offer text kind."""
+        try:
+            from app.modules.doc_templates.documents import OFFER_BLOCK_TO_TEXT, OFFER_KEY, offer_text_from_block
+            from app.modules.doc_templates.service import published_blocks
+
+            found = await published_blocks(self.session, OFFER_KEY, lang)
+        except ImportError:
+            return {}
+        if not found:
+            return {}
+        blocks, version_id = found
+        return {
+            OFFER_BLOCK_TO_TEXT[b]: {
+                "source": "company",
+                "body": offer_text_from_block(text),
+                "block_id": None,
+                "template_version_id": str(version_id) if version_id else None,
+            }
+            for b, text in blocks.items()
+            if b in OFFER_BLOCK_TO_TEXT
+        }
+
     async def _pick_texts(self, project_id: uuid.UUID, pack: dict[str, Any], locale: str) -> dict[str, Any]:
         lang = (locale or "en").split("-")[0].lower()
         project_blocks = await self.repo.text_blocks(project_id=project_id, scope="project")
         company = await self.repo.text_blocks(scope="company")
+        template = await self._template_texts(lang)
         out: dict[str, Any] = {}
         for kind in pack_mod.TEXT_KINDS:
+            if kind in template and not any(b.kind == kind and b.language in (lang, "en") for b in project_blocks):
+                out[kind] = template[kind]
+                continue
             chosen, source = None, "company"
             for pool, src in ((project_blocks, "project"), ([b for b in company if b.is_default], "company")):
                 same = [b for b in pool if b.kind == kind and b.language == lang]

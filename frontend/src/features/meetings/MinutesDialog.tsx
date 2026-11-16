@@ -31,6 +31,7 @@ import {
   WideModalSection,
 } from '@/shared/ui';
 import { triggerDownload } from '@/shared/lib/api';
+import { IssueDocumentButton } from '@/features/doc-templates/IssueDocumentButton';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useToastStore } from '@/stores/useToastStore';
 import {
@@ -302,6 +303,14 @@ export function MinutesDialog({ meetingId, projectId, meetingTitle, onClose }: M
             <Share2 size={14} className="mr-1.5" />
             {t('record_publishing.publish_action', { defaultValue: 'Publish and distribute' })}
           </Button>
+        )}
+        {minutes && (
+          <IssueDocumentButton
+            kind="meetings.minutes"
+            recordId={meetingId}
+            fallbackName="minutes"
+            testId="minutes-document"
+          />
         )}
       </div>
       <div className="flex items-center gap-2">

@@ -21,7 +21,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.doc_templates.markup import to_html, to_plain
 from app.core.doc_templates.pdf import SignatureImage, decode_png_data_url, render_document_pdf
-from app.core.doc_templates.registry import DocumentKind, all_kinds, get_kind
+from app.core.doc_templates.registry import DocumentKind, RecordDocument, all_kinds, get_kind
 from app.core.doc_templates.resolve import Published, ResolvedText, normalise_locale, resolve_text
 from app.core.doc_templates.rules import DRAFT_UNPUBLISHED, Issue, check_blocks, has_errors
 from app.core.doc_templates.seller import resolve_seller
@@ -128,6 +128,32 @@ async def published_letter_text(session: AsyncSession, key: str, language: str) 
         return None
     fallback = template.defaults.get(language) or template.defaults[template.default_language]
     return blocks_to_letter(resolved.blocks, template.kind, set(template.placeholder_names), fallback)
+
+
+async def published_blocks(
+    session: AsyncSession, kind_key: str, locale: str | None
+) -> tuple[dict[str, str], uuid.UUID | None] | None:
+    """The firm's published blocks for a kind with its own generator, or ``None`` for built-in wording.
+
+    Only blocks the firm wrote are returned; the caller keeps its own text for the rest.
+    """
+    from app.modules.doc_templates.kinds import register_builtin_kinds
+
+    register_builtin_kinds()
+    kind = get_kind(kind_key)
+    if kind is None:
+        return None
+    try:
+        published, primary = await _published(DocTemplateRepository(session), kind_key)
+    except Exception:  # noqa: BLE001 - never break a document on a template read
+        logger.warning("doc_templates: could not read templates for %s", kind_key, exc_info=True)
+        return None
+    resolved = resolve_text(kind, locale, published, primary)
+    if resolved.source == "default":
+        return None
+    own = published.get(resolved.text_locale)
+    blocks = {b: v for b, v in (own.blocks if own else {}).items() if (v or "").strip() and b in kind.blocks}
+    return blocks, resolved.version_id
 
 
 async def resolved_email_blocks(session: AsyncSession, kind_key: str, locale: str | None) -> dict[str, str] | None:
@@ -474,10 +500,17 @@ async def preview(
     options: Mapping[str, Any],
     record_id: str | None,
     project_ids: set[Any] | None,
+    countries: list[str] | None = None,
 ) -> tuple[bytes, str]:
     """Render the draft: against one readable record when given, else the sample fixture."""
     lang = normalise_locale(locale)
     text = clean_blocks(kind, blocks)
+    if record_id and kind.record_document is not None:
+        pdf, _doc, _issues = await asyncio.wait_for(
+            build_record_pdf(session, kind, record_id, lang, text, options, countries or [], project_ids=project_ids),
+            PREVIEW_TIMEOUT,
+        )
+        return pdf, "application/pdf"
     if record_id and kind.record_preview is not None:
         allowed = {rid for rid, _label in await kind.records(session, project_ids)} if kind.records else set()
         if record_id not in allowed:
@@ -487,6 +520,109 @@ async def preview(
         )
         return data, media
     return await asyncio.wait_for(asyncio.to_thread(_render_sample, kind, text, options, lang), PREVIEW_TIMEOUT)
+
+
+async def _load_record(
+    session: AsyncSession, kind: DocumentKind, record_id: str, lang: str, project_ids: set[Any] | None
+) -> RecordDocument:
+    assert kind.record_document is not None
+    try:
+        doc = await kind.record_document(session, record_id, lang)
+    except (LookupError, ValueError) as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Record not found") from exc
+    if project_ids is not None and doc.project_id not in project_ids:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Record not found")
+    return doc
+
+
+async def build_record_pdf(
+    session: AsyncSession,
+    kind: DocumentKind,
+    record_id: str,
+    lang: str,
+    blocks: Mapping[str, str],
+    options: Mapping[str, Any],
+    countries: list[str],
+    *,
+    project_ids: set[Any] | None,
+    strict: bool = False,
+) -> tuple[bytes, RecordDocument, list[Issue]]:
+    """Render one record through the generic generator.
+
+    Missing mandatory data (standards on the kind, country law from packs)
+    is returned as issues; with ``strict`` it refuses the document (422).
+    """
+    from app.core.doc_templates.legal import legal_notes
+    from app.core.doc_templates.rules import check_mandatory
+
+    doc = await _load_record(session, kind, record_id, lang, project_ids)
+    notes, legal_issues = legal_notes(kind.key, countries, doc.values, lang)
+    issues = [*check_mandatory(kind, doc.values), *legal_issues]
+    if strict and has_errors(issues):
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail={"message": "Mandatory document data is missing", "issues": [i.as_dict() for i in issues]},
+        )
+    defaults = kind.default_blocks(lang)
+    full = {b: (blocks.get(b) if (blocks.get(b) or "").strip() else defaults.get(b, "")) or "" for b in kind.blocks}
+    png = decode_png_data_url(str(options.get("signature_image") or ""))
+    pdf = await asyncio.to_thread(
+        render_document_pdf,
+        blocks=full,
+        values=doc.values,
+        known=kind.field_paths,
+        meta=doc.meta,
+        table=doc.table,
+        totals=doc.totals,
+        legal=notes,
+        signature=SignatureImage(png) if png else None,
+        appearance_type=kind.appearance_type,
+        serif=options.get("font") == "serif",
+        title_fallback=kind.label,
+    )
+    return pdf, doc, issues
+
+
+async def issue(
+    session: AsyncSession,
+    kind: DocumentKind,
+    record_id: str,
+    locale: str | None,
+    countries: list[str],
+    user_id: str,
+    project_ids: set[Any] | None,
+) -> tuple[bytes, str]:
+    """Issue a record's document with the published wording and log the version it printed."""
+    from app.modules.doc_templates.models import DocTemplateIssue
+
+    if kind.record_document is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="This document is not issued here")
+    lang = normalise_locale(locale) if locale else None
+    if lang is None:
+        lang = normalise_locale((await _load_record(session, kind, record_id, "en", project_ids)).locale)
+    resolved = await resolve(session, kind.key, lang)
+    assert resolved is not None
+    options: dict[str, Any] = {}
+    if resolved.version_id is not None:
+        version = await session.get(DocTemplateVersion, resolved.version_id)
+        options = dict(version.options or {}) if version is not None else {}
+    pdf, doc, _issues = await build_record_pdf(
+        session, kind, record_id, lang, resolved.blocks, options, countries, project_ids=project_ids, strict=True
+    )
+    session.add(
+        DocTemplateIssue(
+            kind=kind.key,
+            record_id=str(record_id),
+            project_id=doc.project_id,
+            locale=lang,
+            text_locale=resolved.text_locale,
+            source=resolved.source,
+            template_version_id=resolved.version_id,
+            issued_by=user_id,
+        )
+    )
+    await session.flush()
+    return pdf, doc.filename
 
 
 async def send_test(kind: DocumentKind, locale: str, blocks: Mapping[str, str], to: str) -> tuple[bool, str]:

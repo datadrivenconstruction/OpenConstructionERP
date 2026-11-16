@@ -36,6 +36,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { SubcontractChangesPanel } from '@/features/subcontractors/SubcontractChangesPanel';
 import { PageHeader } from '@/shared/ui/PageHeader';
 import { RegisterExportButton, RecordPdfButton } from '@/shared/ui/RegisterExport';
+import { IssueDocumentButton } from '@/features/doc-templates/IssueDocumentButton';
 import type { DocumentExportItem } from '@/shared/ui/DocumentExportMenu';
 import { TruncationNotice } from '@/shared/ui/TruncationNotice';
 import { RequiresProject } from '@/shared/auth/RequiresProject';
@@ -1905,6 +1906,12 @@ function DetailView({
             <RecordPdfButton
               download={(locale) => downloadChangeOrderPdf(order.id, locale, order.code)}
               testId="changeorder-pdf"
+            />
+            <IssueDocumentButton
+              kind="changeorders.change_order"
+              recordId={order.id}
+              fallbackName={order.code || 'change-order'}
+              testId="changeorder-document"
             />
             {order.status === 'draft' && (
               <Button variant="primary" size="sm" onClick={async () => {

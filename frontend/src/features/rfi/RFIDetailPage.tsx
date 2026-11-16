@@ -49,6 +49,7 @@ import { useConfirm } from '@/shared/hooks/useConfirm';
 import { TruncationNotice } from '@/shared/ui/TruncationNotice';
 import { RaiseNoticeButton } from '@/features/variations/RaiseNoticeButton';
 import { RecordPdfButton } from '@/shared/ui/RegisterExport';
+import { IssueDocumentButton } from '@/features/doc-templates/IssueDocumentButton';
 import { useToastStore } from '@/stores/useToastStore';
 import { apiGet, type Page } from '@/shared/lib/api';
 import { useAuthStore } from '@/stores/useAuthStore';
@@ -695,6 +696,12 @@ export function RFIDetailPage() {
             download={downloadPdf}
             locales={pdfLocales}
             testId="rfi-export-pdf"
+          />
+          <IssueDocumentButton
+            kind="rfi.rfi"
+            recordId={rfi.id}
+            fallbackName={`rfi-${rfi.rfi_number}`}
+            testId="rfi-document"
           />
           {letterheadMissing && (
             <Link
