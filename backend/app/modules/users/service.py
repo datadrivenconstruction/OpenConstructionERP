@@ -209,6 +209,47 @@ def create_reset_token(user: User, settings: Settings) -> str:
     return encode_jwt(payload, settings)
 
 
+#: How long a sign-up confirmation link stays valid. Long enough to survive a
+#: weekend, since an administrator may be the one passing it on.
+VERIFY_TOKEN_LIFETIME_HOURS = 72
+
+
+def create_verify_token(user: User, settings: Settings) -> str:
+    """Create a JWT that activates a self-registered account in ``email-verify`` mode."""
+    now = datetime.now(UTC)
+    payload = {
+        "iss": "openconstructionerp",
+        "sub": str(user.id),
+        "email": user.email,
+        "iat": now,
+        "exp": now + timedelta(hours=VERIFY_TOKEN_LIFETIME_HOURS),
+        "type": "verify_email",
+        "jti": _new_jti(),
+    }
+    return encode_jwt(payload, settings)
+
+
+async def _send_verification_email(to: str, verify_url: str, recipient_name: str) -> None:
+    """Deliver a sign-up confirmation; never raises, the account is created either way."""
+    from app.core.email import EmailMessage, template_email_verification
+
+    subject, html = template_email_verification(recipient_name, verify_url, VERIFY_TOKEN_LIFETIME_HOURS)
+    try:
+        result = await get_email_service().send(
+            EmailMessage(to=to, subject=subject, html_body=html, tags=["verify_email"]),
+        )
+    except Exception:
+        logger.exception("Sign-up confirmation email to %s failed", to)
+        return
+    if not result.ok:
+        logger.warning(
+            "Sign-up confirmation email to %s was not delivered (%s); an administrator can copy the "
+            "confirmation link from the Users page",
+            to,
+            result.reason,
+        )
+
+
 async def _send_reset_email(to: str, reset_url: str, recipient_name: str, log_url: bool) -> None:
     """Deliver a password-reset email; never raises.
 
@@ -568,6 +609,78 @@ class UserService:
             is_active,
             mode,
         )
+        if mode == "email-verify" and not is_active:
+            await _send_verification_email(
+                user.email,
+                self._verification_url(user),
+                user.full_name or user.email.split("@", 1)[0],
+            )
+        return user
+
+    def _verification_url(self, user: User) -> str:
+        return (
+            f"{self.settings.resolved_frontend_url}/auth/verify-email?token={create_verify_token(user, self.settings)}"
+        )
+
+    @staticmethod
+    def _is_pending(user: User) -> bool:
+        """A self-registered account that has never been active: the only kind a link may open."""
+        return (
+            not user.is_active
+            and user.last_login_at is None
+            and user.deleted_at is None
+            and (user.provisioned_by or "local") == "local"
+        )
+
+    async def verification_link(self, user_id: uuid.UUID) -> dict[str, object]:
+        """The confirmation link of a pending account, for an administrator to pass on.
+
+        The way in when the confirmation mail never arrives (no SMTP, a spam
+        filter, a typo in the provider settings). Raises 409 for an account
+        that is not pending.
+        """
+        user = await self.get_user(user_id)
+        if not self._is_pending(user):
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="This account is not waiting for confirmation.",
+            )
+        logger.info("Confirmation link issued by an administrator for %s", user.email)
+        return {"url": self._verification_url(user), "expires_in_hours": VERIFY_TOKEN_LIFETIME_HOURS}
+
+    async def verify_email(self, token: str) -> User:
+        """Activate the pending account a confirmation link names.
+
+        Following a link twice is harmless. A link never reactivates an account
+        that has been in use and was switched off since.
+        """
+        from jose import JWTError
+
+        invalid = HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid or expired confirmation link")
+        try:
+            payload = decode_jwt(token, self.settings)
+        except JWTError as exc:
+            raise invalid from exc
+        if payload.get("type") != "verify_email" or not payload.get("sub"):
+            raise invalid
+        try:
+            user = await self.user_repo.get_by_id(uuid.UUID(str(payload["sub"])))
+        except ValueError as exc:
+            raise invalid from exc
+        if user is None or str(payload.get("email", "")).lower() != user.email.lower():
+            raise invalid
+        if user.is_active:
+            return user
+        if not self._is_pending(user):
+            raise invalid
+        await self.user_repo.update_fields(user.id, is_active=True)
+        await self.session.refresh(user)
+        await _safe_publish(
+            "users.user.email_verified",
+            {"user_id": str(user.id), "email": user.email},
+            source_module="oe_users",
+        )
+        logger.info("Account confirmed by email link: %s", user.email)
         return user
 
     # ── Admin: create user (BUG-USERS-CREATE) ──────────────────────────

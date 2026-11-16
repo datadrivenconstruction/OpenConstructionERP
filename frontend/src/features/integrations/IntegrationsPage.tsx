@@ -1061,6 +1061,28 @@ export function IntegrationsPage() {
     },
   });
 
+  // Sends a real message to the signed-in user through the server's SMTP
+  // settings; the answer carries the transport's own reason on failure.
+  const sendTestEmailMut = useMutation({
+    mutationFn: () =>
+      apiPost<{ success: boolean; message: string }>('/v1/integrations/email/send-test/', {}),
+    onSuccess: (data: { success: boolean; message: string }) => {
+      addToast({
+        type: data.success ? 'success' : 'error',
+        title: data.success
+          ? t('integrations.test_email_sent', 'Test email sent')
+          : t('integrations.test_email_failed', 'Test email not sent'),
+        message: data.message,
+      });
+    },
+    onError: () => {
+      addToast({
+        type: 'error',
+        title: t('integrations.test_email_failed', 'Test email not sent'),
+      });
+    },
+  });
+
   const handleConnected = useCallback(() => {
     setConnectingType(null);
     queryClient.invalidateQueries({ queryKey: ['integration-configs'] });
@@ -1233,6 +1255,27 @@ export function IntegrationsPage() {
 
                     {/* Calendar feed URL (inline, no modal needed) */}
                     {connector.calendarFeedUrl && <CalendarFeedSection />}
+
+                    {connector.type === 'email' && (
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        className="mb-2 mr-2"
+                        onClick={() => sendTestEmailMut.mutate()}
+                        disabled={sendTestEmailMut.isPending}
+                        title={t(
+                          'integrations.send_test_email_hint',
+                          'Sends a message to your own address through the server mail settings',
+                        )}
+                      >
+                        {sendTestEmailMut.isPending ? (
+                          <Loader2 size={14} className="mr-1 animate-spin" />
+                        ) : (
+                          <TestTube2 size={14} className="mr-1" />
+                        )}
+                        {t('integrations.send_test_email', 'Send test email')}
+                      </Button>
+                    )}
 
                     {/* Connect / Add another button */}
                     {isConnectable && !connector.calendarFeedUrl && (

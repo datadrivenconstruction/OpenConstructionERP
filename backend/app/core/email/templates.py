@@ -182,3 +182,36 @@ def template_password_reset(
         f"you can safely ignore this email - your password will not change.</p>"
     )
     return subject, wrap("Reset your password", body, reset_url, "Reset password")
+
+
+def template_email_verification(
+    recipient_name: str | None,
+    verify_url: str,
+    token_lifetime_hours: int,
+) -> tuple[str, str]:
+    """Confirmation of a self-registered account; the link activates it."""
+    from html import escape
+
+    greeting = f"Hi {escape(recipient_name)}," if recipient_name else "Hello,"
+    subject = "Confirm your OpenConstructionERP account"
+    body = (
+        f"<p>{greeting}</p>"
+        f"<p>Confirm your email address to activate your <strong>{_APP_NAME}</strong> account. "
+        f"The link is valid for {token_lifetime_hours} hours.</p>"
+        f"<p style='font-size:13px; color:#6e6e73;'>If you did not sign up, you can ignore this email.</p>"
+    )
+    return subject, wrap("Confirm your account", body, verify_url, "Confirm account")
+
+
+def template_test_email(sent_by: str | None) -> tuple[str, str]:
+    """The message an administrator sends to check outbound mail."""
+    from html import escape
+
+    who = f" by {escape(sent_by)}" if sent_by else ""
+    subject = "OpenConstructionERP test email"
+    body = (
+        f"<p>This test message was sent{who} from the email settings of {_APP_NAME}.</p>"
+        f"<p>If you are reading it, outbound email works: password resets, sign-up confirmations "
+        f"and notifications will be delivered.</p>"
+    )
+    return subject, wrap("Outbound email works", body)

@@ -212,6 +212,38 @@ def _email_configuration_report() -> TestNotificationResponse:
     )
 
 
+async def send_server_test_email(to: str, sent_by: str | None = None) -> TestNotificationResponse:
+    """Send a real message through the server's mail transport and report the exact outcome.
+
+    Goes only to the caller's own address, so the button cannot be used to
+    mail anyone else. The answer carries the transport's own reason (refused
+    login, unreachable host, STARTTLS not offered) rather than a generic fail.
+    """
+    from app.config import get_settings
+    from app.core.email import EmailMessage, get_email_service, template_test_email
+
+    report = _email_configuration_report()
+    if not report.success:
+        return report
+    if not to:
+        return TestNotificationResponse(success=False, message="Your account has no email address to send to.")
+    subject, html = template_test_email(sent_by)
+    result = await get_email_service().send(EmailMessage(to=to, subject=subject, html_body=html, tags=["smtp_test"]))
+    settings = get_settings()
+    if result.ok:
+        return TestNotificationResponse(
+            success=True,
+            message=(
+                f"Test email sent to {to} through {settings.smtp_host}:{settings.smtp_port}. "
+                "Check the inbox, and the spam folder if it is not there within a minute."
+            ),
+        )
+    return TestNotificationResponse(
+        success=False,
+        message=f"The mail server did not accept the test email: {result.reason or 'unknown error'}.",
+    )
+
+
 async def _dispatch_integration_test(itype: str, cfg: dict) -> TestNotificationResponse:
     """Send a test notification for an integration type + ad-hoc config.
 
@@ -331,6 +363,27 @@ async def _dispatch_integration_test(itype: str, cfg: dict) -> TestNotificationR
         success=success,
         message="Test notification sent successfully" if success else "Delivery failed",
     )
+
+
+@router.post("/email/send-test/", response_model=TestNotificationResponse)
+async def send_test_email(
+    user_id: CurrentUserId,
+    session: SessionDep,
+    _perm: None = Depends(RequirePermission("integrations.update")),
+) -> TestNotificationResponse:
+    """Send a test email to the caller through the server's outbound mail settings."""
+    allowed, _ = approval_limiter.is_allowed(str(user_id))
+    if not allowed:
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail="Rate limit exceeded. Try again later.",
+        )
+    from app.modules.users.models import User
+
+    user = await session.get(User, uuid.UUID(str(user_id)))
+    if user is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+    return await send_server_test_email(user.email, user.full_name or None)
 
 
 @router.post("/configs/test-connection/", response_model=TestNotificationResponse)
