@@ -4,10 +4,7 @@
 
 ### Считайте, планируйте и стройте на открытых данных.
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/hero-dark.png" />
-  <img src="docs/screenshots/hero-light.png" alt="OpenConstructionERP: обмер по 3D BIM-модели, 4D-график, дашборд проекта, редактор сметы, базы расценок, обмер по DWG и валидация в одном рабочем месте" width="880" />
-</picture>
+<img src="docs/screenshots/hero-overview.png" alt="OpenConstructionERP: строительная ERP с открытым кодом для смет, обмера по BIM, DWG и PDF и 5D-модели затрат" width="900" />
 
 **Открытая ERP для строительства.** Смета, обмер по BIM и CAD, 4D-планирование, 5D-стоимость и тендеры в одной самостоятельно размещаемой платформе. Бесплатно по лицензии AGPL-3.0, без платы за рабочее место, данные остаются на вашем сервере.
 
@@ -18,6 +15,11 @@ pip install --upgrade openconstructionerp && openconstructionerp
 ```
 
 <sub>Открывается на http://localhost:8080 с демоданными. Без Docker, без настройки базы данных. Другие способы установки в <a href="README.md#quick-start">кратком руководстве</a> (на английском).</sub>
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/hero-dark.png" />
+  <img src="docs/screenshots/hero-light.png" alt="OpenConstructionERP: обмер по 3D BIM-модели, 4D-график, дашборд проекта, редактор сметы, базы расценок, обмер по DWG и валидация в одном рабочем месте" width="880" />
+</picture>
 
 [English](README.md) · [Deutsch](README.de.md) · [Расширяйте платформу](DEVELOPING.md) · [Чат сообщества (Telegram)](https://t.me/datadrivenconstruction) · [Сообщить об ошибке](https://github.com/datadrivenconstruction/OpenConstructionERP/issues)
 

@@ -4,10 +4,7 @@
 
 ### Estimate, plan and build on open data.
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/hero-dark.png" />
-  <img src="docs/screenshots/hero-light.png" alt="OpenConstructionERP: BIM 3D takeoff, 4D schedule, project dashboard, BOQ editor, cost databases, DWG takeoff and validation in one workspace" width="880" />
-</picture>
+<img src="docs/screenshots/hero-overview.png" alt="OpenConstructionERP: open-source construction ERP for BOQ, BIM takeoff, DWG/PDF quantification and 5D cost modeling" width="900" />
 
 **The open-source construction ERP.** BOQ, BIM and CAD takeoff, 4D scheduling, 5D cost and tendering in one self-hosted platform. Free under AGPL-3.0, no per-seat fees, your data stays on your server.
 
@@ -20,6 +17,11 @@ pip install --upgrade openconstructionerp && openconstructionerp
 <sub>Opens at http://localhost:8080 with demo data. No Docker, no database to set up. More options in <a href="#quick-start">Quick Start</a>.</sub>
 
 **Modular like a plugin system.** Pick modules from the marketplace, drop in your own, or replace ours. Same idea for BOQ, scheduling, cost control, BIM and tendering.
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/hero-dark.png" />
+  <img src="docs/screenshots/hero-light.png" alt="OpenConstructionERP: BIM 3D takeoff, 4D schedule, project dashboard, BOQ editor, cost databases, DWG takeoff and validation in one workspace" width="880" />
+</picture>
 
 [Deutsch](README.de.md) · [Русский](README.ru.md) · [Build on it](DEVELOPING.md) · [Community chat (Telegram)](https://t.me/datadrivenconstruction) · [Report a bug](https://github.com/datadrivenconstruction/OpenConstructionERP/issues)
 

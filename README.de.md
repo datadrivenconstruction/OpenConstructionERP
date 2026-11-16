@@ -4,10 +4,7 @@
 
 ### Kalkulieren, planen und bauen auf offenen Daten.
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/hero-dark.png" />
-  <img src="docs/screenshots/hero-light.png" alt="OpenConstructionERP: BIM-3D-Mengenermittlung, 4D-Terminplan, Projekt-Dashboard, LV-Editor, Kostendatenbanken, DWG-Mengenermittlung und Validierung in einem Arbeitsbereich" width="880" />
-</picture>
+<img src="docs/screenshots/hero-overview.png" alt="OpenConstructionERP: Open-Source-Bau-ERP für LV, BIM-Mengenermittlung, DWG/PDF-Aufmaß und 5D-Kostenmodell" width="900" />
 
 **Das Open-Source-ERP für das Bauwesen.** LV, BIM- und CAD-Mengenermittlung, 4D-Terminplanung, 5D-Kosten und Ausschreibung in einer selbst gehosteten Plattform. Kostenlos unter AGPL-3.0, keine Lizenzgebühr pro Nutzer, Ihre Daten bleiben auf Ihrem Server.
 
@@ -18,6 +15,11 @@ pip install --upgrade openconstructionerp && openconstructionerp
 ```
 
 <sub>Öffnet sich unter http://localhost:8080 mit Demodaten. Kein Docker, keine Datenbank einzurichten. Weitere Wege in der <a href="README.md#quick-start">Schnellstart-Anleitung</a> (Englisch).</sub>
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/hero-dark.png" />
+  <img src="docs/screenshots/hero-light.png" alt="OpenConstructionERP: BIM-3D-Mengenermittlung, 4D-Terminplan, Projekt-Dashboard, LV-Editor, Kostendatenbanken, DWG-Mengenermittlung und Validierung in einem Arbeitsbereich" width="880" />
+</picture>
 
 [English](README.md) · [Русский](README.ru.md) · [Selbst erweitern](DEVELOPING.md) · [Community-Chat (Telegram)](https://t.me/datadrivenconstruction) · [Fehler melden](https://github.com/datadrivenconstruction/OpenConstructionERP/issues)
 
