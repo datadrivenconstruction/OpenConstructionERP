@@ -333,7 +333,7 @@ export function SsoPanel() {
                 <label className="sm:col-span-2 text-xs font-medium text-content-secondary">
                   {t('sso.field_idp_cert', { defaultValue: 'IdP signing certificate (PEM)' })}
                   <textarea
-                    className="oe-input mt-1 h-28 w-full font-mono text-2xs"
+                    className="oe-textarea mt-1 h-28 w-full font-mono text-2xs"
                     value={draft.saml_idp_cert}
                     onChange={(e) => set('saml_idp_cert', e.target.value)}
                   />
@@ -371,7 +371,7 @@ export function SsoPanel() {
             <label className="sm:col-span-2 text-xs font-medium text-content-secondary">
               {t('sso.field_group_map', { defaultValue: 'Group to role, one per line (group=role)' })}
               <textarea
-                className="oe-input mt-1 h-20 w-full font-mono text-2xs"
+                className="oe-textarea mt-1 h-20 w-full font-mono text-2xs"
                 value={draft.group_role_map}
                 placeholder="estimators=editor"
                 onChange={(e) => set('group_role_map', e.target.value)}
