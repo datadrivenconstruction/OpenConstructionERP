@@ -209,7 +209,23 @@ def create_reset_token(user: User, settings: Settings) -> str:
     return encode_jwt(payload, settings)
 
 
-async def _send_reset_email(to: str, reset_url: str, recipient_name: str, log_url: bool) -> None:
+async def _reset_wording(locale: str | None) -> dict[str, str] | None:
+    """The firm's published reset email wording, or ``None`` for the built-in mail. Never raises."""
+    try:
+        from app.database import async_session_factory
+        from app.modules.doc_templates.kinds import PASSWORD_RESET_KEY
+        from app.modules.doc_templates.service import resolved_email_blocks
+
+        async with async_session_factory() as session:
+            return await resolved_email_blocks(session, PASSWORD_RESET_KEY, locale)
+    except Exception:  # noqa: BLE001 - the reset mail goes out with built-in wording
+        logger.debug("password reset wording unavailable", exc_info=True)
+        return None
+
+
+async def _send_reset_email(
+    to: str, reset_url: str, recipient_name: str, log_url: bool, locale: str | None = None
+) -> None:
     """Deliver a password-reset email; never raises.
 
     Runs inline or as a background task after the response. Either way the
@@ -222,6 +238,7 @@ async def _send_reset_email(to: str, reset_url: str, recipient_name: str, log_ur
             reset_url=reset_url,
             recipient_name=recipient_name,
             token_lifetime_minutes=RESET_TOKEN_LIFETIME_MINUTES,
+            wording=await _reset_wording(locale),
         )
     except Exception:
         logger.exception("Password reset email to %s failed", to)
@@ -1131,9 +1148,11 @@ class UserService:
             getattr(self.settings, "app_env", "development") != "production"
         )
         if background is not None:
-            background.add_task(_send_reset_email, user.email, reset_url, recipient_name, log_url)
+            background.add_task(
+                _send_reset_email, user.email, reset_url, recipient_name, log_url, getattr(user, "locale", None)
+            )
         else:
-            await _send_reset_email(user.email, reset_url, recipient_name, log_url)
+            await _send_reset_email(user.email, reset_url, recipient_name, log_url, getattr(user, "locale", None))
 
         return ForgotPasswordResponse(message=message)
 

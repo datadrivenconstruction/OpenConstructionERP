@@ -14,6 +14,8 @@ be imported from tests without touching the rest of the stack.
 
 from __future__ import annotations
 
+import html
+from collections.abc import Mapping
 from functools import lru_cache
 
 _LOGO_URL = "https://openconstructionerp.com/logo-128.png"
@@ -78,22 +80,71 @@ def wrap(
     )
 
 
+#: Content-ID of the company logo; :class:`app.core.email.service.EmailService` attaches the image.
+COMPANY_LOGO_CID = "company-logo"
+
+
+def company_logo_png() -> bytes | None:
+    """The company profile's document logo as PNG/JPEG bytes for a CID part, or ``None``."""
+    from app.core.doc_templates.pdf import decode_png_data_url
+
+    try:
+        from app.core.company_profile import read_company_profile
+
+        profile = read_company_profile()
+    except Exception:  # noqa: BLE001 - an email never fails on a missing profile
+        return None
+    for key in ("document_logo_png_data_url", "document_logo_data_url"):
+        raw = decode_png_data_url(profile.get(key))
+        if raw:
+            return raw
+    return None
+
+
+def email_brand() -> tuple[str, bool]:
+    """``(name, has_logo)`` for the email shell: the company's own when its profile is filled in.
+
+    An install that never filled the company profile in keeps the platform
+    name and logo, so its emails do not change.
+    """
+    try:
+        from app.core.company_profile import read_company_profile
+
+        name = (read_company_profile().get("legal_name") or "").strip()
+    except Exception:  # noqa: BLE001
+        name = ""
+    has_logo = company_logo_png() is not None
+    if not name and not has_logo:
+        return _APP_NAME, False
+    return (html.escape(name) if name else ""), has_logo
+
+
 def brand_header() -> str:
     """The logo and the brand name that open every email, as an HTML fragment."""
-    return (
-        f"<p style='margin:0 0 12px;'>"
-        f'<img src="{_LOGO_URL}" alt="{_APP_NAME}" width="40" height="40" '
-        f'style="vertical-align:middle; margin-right:8px;"/>'
-        f"<strong style='vertical-align:middle; font-size:15px;'>{_APP_NAME}</strong></p>"
+    name, has_logo = email_brand()
+    if name == _APP_NAME and not has_logo:
+        return (
+            f"<p style='margin:0 0 12px;'>"
+            f'<img src="{_LOGO_URL}" alt="{_APP_NAME}" width="40" height="40" '
+            f'style="vertical-align:middle; margin-right:8px;"/>'
+            f"<strong style='vertical-align:middle; font-size:15px;'>{_APP_NAME}</strong></p>"
+        )
+    logo = (
+        f'<img src="cid:{COMPANY_LOGO_CID}" alt="{name}" height="40" style="vertical-align:middle; margin-right:8px;"/>'
+        if has_logo
+        else ""
     )
+    label = f"<strong style='vertical-align:middle; font-size:15px;'>{name}</strong>" if name else ""
+    return f"<p style='margin:0 0 12px;'>{logo}{label}</p>"
 
 
 def _footer_block(footer: str | None) -> str:
     extra = f"<p style='font-size:12px; color:#86868b; margin:0 0 6px;'>{footer}</p>" if footer else ""
+    name, _logo = email_brand()
     return (
         f"<hr style='border:none; border-top:1px solid #e5e5ea; margin:28px 0 12px;'/>"
         f"{extra}"
-        f"<p style='font-size:12px; color:#86868b; margin:0;'>{_APP_NAME}</p>"
+        f"<p style='font-size:12px; color:#86868b; margin:0;'>{name or _APP_NAME}</p>"
     )
 
 
@@ -164,6 +215,7 @@ def template_password_reset(
     recipient_name: str | None,
     reset_url: str,
     token_lifetime_minutes: int = 60,
+    wording: Mapping[str, str] | None = None,
 ) -> tuple[str, str]:
     """Password-reset template.
 
@@ -171,6 +223,8 @@ def template_password_reset(
     template does not embed the raw token separately so we never leak it
     to copy-paste or forwarded-email attack paths.
     """
+    if wording:
+        return _password_reset_from_wording(wording, recipient_name, reset_url, token_lifetime_minutes)
     greeting = f"Hi {recipient_name}," if recipient_name else "Hello,"
     subject = "Reset your OpenConstructionERP password"
     body = (
@@ -182,3 +236,29 @@ def template_password_reset(
         f"you can safely ignore this email - your password will not change.</p>"
     )
     return subject, wrap("Reset your password", body, reset_url, "Reset password")
+
+
+def _password_reset_from_wording(
+    wording: Mapping[str, str], recipient_name: str | None, reset_url: str, minutes: int
+) -> tuple[str, str]:
+    """The reset email from a firm's published wording (``users.password_reset``)."""
+    from app.core.doc_templates.markup import to_html, to_plain
+
+    try:
+        from app.core.company_profile import read_company_profile
+
+        legal_name = read_company_profile().get("legal_name") or ""
+    except Exception:  # noqa: BLE001
+        legal_name = ""
+    values = {
+        "recipient.name": recipient_name or "",
+        "app.name": _APP_NAME,
+        "entity.legal_name": legal_name,
+        "link.minutes": str(minutes),
+    }
+    subject = to_plain(wording.get("subject") or "", values) or "Reset your password"
+    title = html.escape(to_plain(wording.get("preheader") or "", values) or subject)
+    body = to_html(wording.get("body") or "", values)
+    label = html.escape(to_plain(wording.get("cta_label") or "", values) or "Reset password")
+    footer = to_html(wording.get("footer") or "", values) or None
+    return subject, wrap(title, body, reset_url, label, footer=footer)

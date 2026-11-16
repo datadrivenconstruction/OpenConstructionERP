@@ -42,6 +42,8 @@ class EmailAttachment:
     filename: str
     content: bytes
     content_type: str = "application/pdf"
+    #: Set for an inline image the HTML references as ``cid:<content_id>``.
+    content_id: str | None = None
 
 
 @dataclass(slots=True)

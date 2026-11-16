@@ -26,7 +26,7 @@ modules/users, modules/integrations, and any future consumer.
 from __future__ import annotations
 
 import logging
-from collections.abc import Awaitable, Callable
+from collections.abc import Awaitable, Callable, Mapping
 from contextlib import AbstractAsyncContextManager
 from functools import lru_cache
 from typing import TYPE_CHECKING
@@ -298,6 +298,7 @@ class EmailService:
                 message.subject,
             )
             return DeliveryResult.failure(self._backend.name, "recipient account is deactivated")
+        _attach_company_logo(message)
         result = await self._backend.send(message)
         if not result.ok:
             logger.warning(
@@ -325,8 +326,12 @@ class EmailService:
         reset_url: str,
         recipient_name: str | None = None,
         token_lifetime_minutes: int = 60,
+        wording: Mapping[str, str] | None = None,
     ) -> DeliveryResult:
         """Send a password-reset email. Returns the delivery result.
+
+        ``wording`` is the firm's published ``users.password_reset`` text; ``None``
+        sends the built-in mail.
 
         ``reset_url`` must already embed the signed token as a query
         parameter.  Never log the URL at INFO - the token is sensitive.
@@ -335,6 +340,7 @@ class EmailService:
             recipient_name=recipient_name,
             reset_url=reset_url,
             token_lifetime_minutes=token_lifetime_minutes,
+            wording=wording,
         )
         # Log intent at INFO without the URL; the backend logs the subject.
         logger.info("sending password-reset email to %s via %s", to, self._backend.name)
@@ -391,6 +397,24 @@ class EmailService:
                 attachments=[attachment],
             ),
         )
+
+
+def _attach_company_logo(message: EmailMessage) -> None:
+    """Embed the company logo the shell references, so no client fetches a remote image."""
+    from .base import EmailAttachment
+    from .templates import COMPANY_LOGO_CID, company_logo_png
+
+    if f"cid:{COMPANY_LOGO_CID}" not in message.html_body:
+        return
+    if any(a.content_id == COMPANY_LOGO_CID for a in message.attachments):
+        return
+    raw = company_logo_png()
+    if raw is None:
+        return
+    kind = "jpeg" if raw[:2] == bytes((0xFF, 0xD8)) else "png"
+    message.attachments.append(
+        EmailAttachment(filename=f"logo.{kind}", content=raw, content_type=f"image/{kind}", content_id=COMPANY_LOGO_CID)
+    )
 
 
 @lru_cache(maxsize=4)

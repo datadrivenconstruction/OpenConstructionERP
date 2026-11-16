@@ -74,7 +74,7 @@ async def resolve(
     language: str | None,
     project_id: uuid.UUID | None = None,
 ) -> Resolved:
-    """The text a letter uses now: project, then company, then default."""
+    """The text a letter uses now: project, then published document template, then company, then default."""
     template = require_template(key)
     if language is None:
         language = await project_language(session, project_id)
@@ -84,10 +84,25 @@ async def resolve(
         row = await repo.get(key, lang, project_id)
         if row is not None:
             return Resolved(template, lang, _row_text(row), "project")
+    published = await _published_document_template(session, key, lang)
+    if published is not None:
+        return Resolved(template, lang, published, "company")
     row = await repo.get(key, lang, None)
     if row is not None:
         return Resolved(template, lang, _row_text(row), "company")
     return Resolved(template, lang, default_text(template, lang), "default")
+
+
+async def _published_document_template(session: AsyncSession, key: str, lang: str) -> LetterText | None:
+    """The text published in Settings > Documents & templates, which wins over the older company override."""
+    try:
+        from app.modules.doc_templates.service import published_letter_text
+    except ImportError:
+        return None
+    try:
+        return await published_letter_text(session, key, lang)
+    except Exception:  # noqa: BLE001 - a letter never fails on the template store
+        return None
 
 
 def validate(template: LetterTemplate, text: LetterText) -> list[LetterIssue]:
