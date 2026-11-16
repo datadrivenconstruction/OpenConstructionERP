@@ -823,7 +823,7 @@ export function FileManagerPage() {
         />
       )}
       <ConverterReleaseNotice className="mx-4 mt-3" />
-      <div className="px-4 pt-3">
+      <div className="px-4 pt-3 pb-4">
         <Breadcrumb
           items={[
             ...(ctxProjectName
