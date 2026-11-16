@@ -2015,5 +2015,53 @@
       "fail": "Na budowie była brygada {headcount} osób, ale nie zapisano ani robót, ani kontroli, ani opóźnienia.",
       "suggestion": "Dodaj, co robiła brygada, lub opóźnienie, które wstrzymało roboty."
     }
+  },
+  "estimate_archive": {
+    "arc_hash_mismatch": {
+      "fail": "Odcisk się nie zgadza: zapis daje {actual}, pieczęć mówi {sealed}. Traktuj zapis jako zmieniony."
+    },
+    "arc_total_mismatch": {
+      "fail": "Opieczętowana suma {seal} różni się od wartości umowy {award} o {diff}."
+    },
+    "arc_no_breakdown": {
+      "fail": "{n} pozycji nie ma rozbicia na zasoby; ich cen nie da się później odtworzyć."
+    },
+    "arc_no_markups": {
+      "fail": "Kosztorys nie ma narzutów do opieczętowania."
+    },
+    "arc_sealed_after_signing": {
+      "fail": "Opieczętowano {days} dni po podpisaniu umowy."
+    },
+    "arc_no_receipt": {
+      "fail": "Druga strona nie potwierdziła jeszcze odcisku."
+    },
+    "arc_open_not_closed": {
+      "fail": "Otwarcie {id} trwa od {days} dni bez protokołu."
+    },
+    "arc_open_no_reason": {
+      "fail": "Otwarcie wymaga powodu i odniesienia."
+    },
+    "arc_open_one_party": {
+      "fail": "Podano tylko jedną stronę; zapisz, dlaczego brak drugiej."
+    },
+    "var_basis_no_seal": {
+      "fail": "Pozycja {code} jest wyceniona według pierwotnej podstawy, ale brak opieczętowanego kosztorysu."
+    },
+    "var_basis_deviation": {
+      "fail": "Pozycja {code}: {field} zmieniono z {old} na {new} bez uwagi."
+    },
+    "var_new_resource_no_evidence": {
+      "fail": "Nowy zasób {res} nie ma daty ceny ani odniesienia do oferty."
+    },
+    "var_markup_not_sealed": {
+      "fail": "Pozycja {code} stosuje narzut {m}, którego nie ma w pieczęci."
+    },
+    "var_abnormal_carried_rate": {
+      "fail": "Przyjęty koszt {c} odbiega o {pct} % od wartości odniesienia."
+    },
+    "arc_mutation_refused": {
+      "fail": "Opieczętowanego kosztorysu nie można zmienić ani usunąć. Opieczętuj nową wersję, która go zastąpi."
+    },
+    "contents_locked": "Treść pozostaje opieczętowana do rozpoczęcia formalnego otwarcia."
   }
 }

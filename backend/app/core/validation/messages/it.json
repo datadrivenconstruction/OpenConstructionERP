@@ -2015,5 +2015,53 @@
       "fail": "Una squadra di {headcount} era in cantiere ma non risultano lavori, ispezioni né ritardi.",
       "suggestion": "Aggiungere ciò che ha fatto la squadra o il ritardo che ha fermato i lavori."
     }
+  },
+  "estimate_archive": {
+    "arc_hash_mismatch": {
+      "fail": "Impronta diversa: il record dà {actual}, il sigillo indica {sealed}. Considerare il record alterato."
+    },
+    "arc_total_mismatch": {
+      "fail": "Il totale sigillato {seal} differisce dall'aggiudicazione {award} di {diff}."
+    },
+    "arc_no_breakdown": {
+      "fail": "{n} voci non hanno analisi prezzi; i loro prezzi non saranno ricostruibili."
+    },
+    "arc_no_markups": {
+      "fail": "Il computo non ha maggiorazioni da sigillare."
+    },
+    "arc_sealed_after_signing": {
+      "fail": "Sigillato {days} giorni dopo la firma del contratto."
+    },
+    "arc_no_receipt": {
+      "fail": "La controparte non ha ancora confermato l'impronta."
+    },
+    "arc_open_not_closed": {
+      "fail": "L'apertura {id} è aperta da {days} giorni senza verbale."
+    },
+    "arc_open_no_reason": {
+      "fail": "Un'apertura richiede un motivo e un riferimento."
+    },
+    "arc_open_one_party": {
+      "fail": "È indicata una sola parte; registrare perché manca l'altra."
+    },
+    "var_basis_no_seal": {
+      "fail": "La voce {code} è prezzata sulla base originale, ma non esiste un computo sigillato."
+    },
+    "var_basis_deviation": {
+      "fail": "Voce {code}: {field} cambiato da {old} a {new} senza nota."
+    },
+    "var_new_resource_no_evidence": {
+      "fail": "La nuova risorsa {res} non ha data prezzo né riferimento d'offerta."
+    },
+    "var_markup_not_sealed": {
+      "fail": "La voce {code} applica la maggiorazione {m}, assente dal sigillo."
+    },
+    "var_abnormal_carried_rate": {
+      "fail": "Il costo riportato {c} si discosta del {pct} % dal riferimento."
+    },
+    "arc_mutation_refused": {
+      "fail": "Un computo sigillato non può essere modificato né eliminato. Sigillare una nuova versione che lo sostituisca."
+    },
+    "contents_locked": "Il contenuto resta sigillato finché non inizia un'apertura formale."
   }
 }

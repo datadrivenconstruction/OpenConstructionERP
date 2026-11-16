@@ -2015,5 +2015,53 @@
       "fail": "Na gradilištu je bila ekipa od {headcount}, ali nisu zabilježeni radovi, pregled ni zastoj.",
       "suggestion": "Dodajte što je ekipa radila ili zastoj koji je zaustavio radove."
     }
+  },
+  "estimate_archive": {
+    "arc_hash_mismatch": {
+      "fail": "Otisak se ne podudara: zapis daje {actual}, pečat navodi {sealed}. Smatrajte zapis izmijenjenim."
+    },
+    "arc_total_mismatch": {
+      "fail": "Zapečaćeni zbroj {seal} razlikuje se od ugovora {award} za {diff}."
+    },
+    "arc_no_breakdown": {
+      "fail": "{n} stavki nema raščlambu resursa; njihove cijene kasnije se ne mogu pratiti."
+    },
+    "arc_no_markups": {
+      "fail": "Troškovnik nema dodataka za pečaćenje."
+    },
+    "arc_sealed_after_signing": {
+      "fail": "Zapečaćeno {days} dana nakon potpisa ugovora."
+    },
+    "arc_no_receipt": {
+      "fail": "Druga strana još nije potvrdila otisak."
+    },
+    "arc_open_not_closed": {
+      "fail": "Otvaranje {id} otvoreno je {days} dana bez zapisnika."
+    },
+    "arc_open_no_reason": {
+      "fail": "Otvaranje zahtijeva razlog i referencu."
+    },
+    "arc_open_one_party": {
+      "fail": "Navedena je samo jedna strana; zabilježite zašto nedostaje druga."
+    },
+    "var_basis_no_seal": {
+      "fail": "Stavka {code} vrednovana je na izvornoj osnovi, ali zapečaćeni troškovnik ne postoji."
+    },
+    "var_basis_deviation": {
+      "fail": "Stavka {code}: {field} promijenjeno s {old} na {new} bez napomene."
+    },
+    "var_new_resource_no_evidence": {
+      "fail": "Novi resurs {res} nema datum cijene ni referencu ponude."
+    },
+    "var_markup_not_sealed": {
+      "fail": "Stavka {code} primjenjuje dodatak {m} kojeg nema u pečatu."
+    },
+    "var_abnormal_carried_rate": {
+      "fail": "Preneseni trošak {c} odstupa {pct} % od referentne vrijednosti."
+    },
+    "arc_mutation_refused": {
+      "fail": "Zapečaćeni troškovnik ne može se mijenjati ni brisati. Zapečatite novu verziju koja ga zamjenjuje."
+    },
+    "contents_locked": "Sadržaj ostaje zapečaćen dok ne počne službeno otvaranje."
   }
 }

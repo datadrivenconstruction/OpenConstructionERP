@@ -2015,5 +2015,53 @@
       "fail": "现场有 {headcount} 人的班组，但未记录施工、检查或延误。",
       "suggestion": "请补充班组所做工作，或导致停工的延误。"
     }
+  },
+  "estimate_archive": {
+    "arc_hash_mismatch": {
+      "fail": "指纹不一致：记录为 {actual}，封存值为 {sealed}。请视为记录已被改动。"
+    },
+    "arc_total_mismatch": {
+      "fail": "封存总额 {seal} 与中标金额 {award} 相差 {diff}。"
+    },
+    "arc_no_breakdown": {
+      "fail": "{n} 个清单项没有资源分解，日后无法追溯其单价。"
+    },
+    "arc_no_markups": {
+      "fail": "预算中没有可封存的取费项。"
+    },
+    "arc_sealed_after_signing": {
+      "fail": "在合同签署 {days} 天后封存。"
+    },
+    "arc_no_receipt": {
+      "fail": "对方尚未确认指纹。"
+    },
+    "arc_open_not_closed": {
+      "fail": "开启 {id} 已持续 {days} 天且无会议纪要。"
+    },
+    "arc_open_no_reason": {
+      "fail": "开启需要理由和依据。"
+    },
+    "arc_open_one_party": {
+      "fail": "只列出了一方；请记录另一方缺席的原因。"
+    },
+    "var_basis_no_seal": {
+      "fail": "清单项 {code} 按原始基准计价，但没有封存的预算。"
+    },
+    "var_basis_deviation": {
+      "fail": "清单项 {code}：{field} 从 {old} 改为 {new}，没有说明。"
+    },
+    "var_new_resource_no_evidence": {
+      "fail": "新资源 {res} 没有价格日期或报价依据。"
+    },
+    "var_markup_not_sealed": {
+      "fail": "清单项 {code} 使用了封存中没有的取费 {m}。"
+    },
+    "var_abnormal_carried_rate": {
+      "fail": "沿用成本 {c} 偏离基准 {pct} %。"
+    },
+    "arc_mutation_refused": {
+      "fail": "已封存的预算不能修改或删除。请封存一个替代它的新版本。"
+    },
+    "contents_locked": "在正式开启之前，内容保持封存。"
   }
 }

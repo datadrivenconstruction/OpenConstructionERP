@@ -2015,5 +2015,53 @@
       "fail": "Regu {headcount} orang ada di lokasi tetapi tidak ada pekerjaan, inspeksi, atau keterlambatan yang dicatat.",
       "suggestion": "Tambahkan apa yang dikerjakan regu, atau keterlambatan yang menghentikan pekerjaan."
     }
+  },
+  "estimate_archive": {
+    "arc_hash_mismatch": {
+      "fail": "Sidik jari tidak cocok: catatan memberi {actual}, segel menyebut {sealed}. Anggap catatan telah diubah."
+    },
+    "arc_total_mismatch": {
+      "fail": "Total tersegel {seal} berbeda dari nilai kontrak {award} sebesar {diff}."
+    },
+    "arc_no_breakdown": {
+      "fail": "{n} item tidak memiliki rincian sumber daya; harganya tidak dapat ditelusuri kemudian."
+    },
+    "arc_no_markups": {
+      "fail": "Estimasi tidak memiliki markup untuk disegel."
+    },
+    "arc_sealed_after_signing": {
+      "fail": "Disegel {days} hari setelah kontrak ditandatangani."
+    },
+    "arc_no_receipt": {
+      "fail": "Pihak lawan belum mengonfirmasi sidik jari."
+    },
+    "arc_open_not_closed": {
+      "fail": "Pembukaan {id} sudah terbuka {days} hari tanpa notulen."
+    },
+    "arc_open_no_reason": {
+      "fail": "Pembukaan memerlukan alasan dan referensi."
+    },
+    "arc_open_one_party": {
+      "fail": "Hanya satu pihak tercantum; catat mengapa pihak lain tidak hadir."
+    },
+    "var_basis_no_seal": {
+      "fail": "Item {code} dihargai berdasarkan dasar asli, tetapi tidak ada estimasi tersegel."
+    },
+    "var_basis_deviation": {
+      "fail": "Item {code}: {field} berubah dari {old} menjadi {new} tanpa catatan."
+    },
+    "var_new_resource_no_evidence": {
+      "fail": "Sumber daya baru {res} tidak memiliki tanggal harga atau referensi penawaran."
+    },
+    "var_markup_not_sealed": {
+      "fail": "Item {code} menerapkan markup {m} yang tidak ada di segel."
+    },
+    "var_abnormal_carried_rate": {
+      "fail": "Biaya yang dibawa {c} menyimpang {pct} % dari acuan."
+    },
+    "arc_mutation_refused": {
+      "fail": "Estimasi tersegel tidak dapat diubah atau dihapus. Segel versi baru yang menggantikannya."
+    },
+    "contents_locked": "Isi tetap tersegel sampai pembukaan resmi dimulai."
   }
 }

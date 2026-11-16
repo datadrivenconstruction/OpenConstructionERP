@@ -2015,5 +2015,53 @@
       "fail": "現場に {headcount} 人の班がいましたが、作業、検査、遅延の記録がありません。",
       "suggestion": "班の作業内容、または作業を止めた遅延を追加してください。"
     }
+  },
+  "estimate_archive": {
+    "arc_hash_mismatch": {
+      "fail": "フィンガープリントが一致しません。記録は {actual}、封印は {sealed} です。記録は改変されたものとして扱ってください。"
+    },
+    "arc_total_mismatch": {
+      "fail": "封印された合計 {seal} は契約額 {award} と {diff} 異なります。"
+    },
+    "arc_no_breakdown": {
+      "fail": "{n} 件の項目に資源内訳がなく、後で単価を追跡できません。"
+    },
+    "arc_no_markups": {
+      "fail": "見積に封印する諸経費がありません。"
+    },
+    "arc_sealed_after_signing": {
+      "fail": "契約署名の {days} 日後に封印されました。"
+    },
+    "arc_no_receipt": {
+      "fail": "相手方がまだフィンガープリントを確認していません。"
+    },
+    "arc_open_not_closed": {
+      "fail": "開封 {id} は議事録なしで {days} 日間開いたままです。"
+    },
+    "arc_open_no_reason": {
+      "fail": "開封には理由と参照が必要です。"
+    },
+    "arc_open_one_party": {
+      "fail": "当事者が一方のみです。もう一方が不在の理由を記録してください。"
+    },
+    "var_basis_no_seal": {
+      "fail": "項目 {code} は当初の基準で価格付けされていますが、封印された見積がありません。"
+    },
+    "var_basis_deviation": {
+      "fail": "項目 {code}: {field} が注記なしで {old} から {new} に変更されました。"
+    },
+    "var_new_resource_no_evidence": {
+      "fail": "新しい資源 {res} に価格日付または見積参照がありません。"
+    },
+    "var_markup_not_sealed": {
+      "fail": "項目 {code} は封印にない諸経費 {m} を適用しています。"
+    },
+    "var_abnormal_carried_rate": {
+      "fail": "繰越コスト {c} は基準値から {pct} % 乖離しています。"
+    },
+    "arc_mutation_refused": {
+      "fail": "封印済み見積は変更も削除もできません。置き換える新しい版を封印してください。"
+    },
+    "contents_locked": "正式な開封が始まるまで内容は封印されたままです。"
   }
 }

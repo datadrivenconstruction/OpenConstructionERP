@@ -374,6 +374,9 @@ class VariationBOQTraceResponse(BaseModel):
     contract_line_id: UUID | None = None
     change_kind: str = DEFAULT_CHANGE_KIND
     note: str = ""
+    sealed_seal_id: UUID | None = None
+    sealed_position_ordinal: str | None = None
+    basis_method: str | None = None
     created_at: datetime
 
 

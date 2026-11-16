@@ -2015,5 +2015,53 @@
       "fail": "Une équipe de {headcount} était sur le chantier mais aucun travail, contrôle ou arrêt n'est consigné.",
       "suggestion": "Ajouter ce que l'équipe a fait, ou l'arrêt qui a bloqué les travaux."
     }
+  },
+  "estimate_archive": {
+    "arc_hash_mismatch": {
+      "fail": "Empreinte différente : l'enregistrement donne {actual}, le scellé indique {sealed}. Considérez l'enregistrement comme modifié."
+    },
+    "arc_total_mismatch": {
+      "fail": "Le total scellé {seal} diffère du marché {award} de {diff}."
+    },
+    "arc_no_breakdown": {
+      "fail": "{n} postes n'ont pas de sous-détail ; leurs prix ne pourront pas être retracés."
+    },
+    "arc_no_markups": {
+      "fail": "Le devis n'a aucune majoration à sceller."
+    },
+    "arc_sealed_after_signing": {
+      "fail": "Scellé {days} jours après la signature du contrat."
+    },
+    "arc_no_receipt": {
+      "fail": "La contrepartie n'a pas encore accusé réception de l'empreinte."
+    },
+    "arc_open_not_closed": {
+      "fail": "L'ouverture {id} est en cours depuis {days} jours sans procès-verbal."
+    },
+    "arc_open_no_reason": {
+      "fail": "Une ouverture exige un motif et une référence."
+    },
+    "arc_open_one_party": {
+      "fail": "Une seule partie est indiquée ; consignez pourquoi l'autre est absente."
+    },
+    "var_basis_no_seal": {
+      "fail": "Le poste {code} est chiffré sur la base d'origine, mais aucun devis scellé n'existe."
+    },
+    "var_basis_deviation": {
+      "fail": "Poste {code} : {field} modifié de {old} à {new} sans note."
+    },
+    "var_new_resource_no_evidence": {
+      "fail": "La nouvelle ressource {res} n'a ni date de prix ni référence de devis."
+    },
+    "var_markup_not_sealed": {
+      "fail": "Le poste {code} applique la majoration {m}, absente du scellé."
+    },
+    "var_abnormal_carried_rate": {
+      "fail": "Le coût retenu {c} s'écarte de {pct} % de la référence."
+    },
+    "arc_mutation_refused": {
+      "fail": "Un devis scellé ne peut être ni modifié ni supprimé. Scellez une nouvelle version qui le remplace."
+    },
+    "contents_locked": "Le contenu reste scellé jusqu'au début d'une ouverture formelle."
   }
 }

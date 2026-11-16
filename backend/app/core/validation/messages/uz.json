@@ -2015,5 +2015,53 @@
       "fail": "Obyektda {headcount} kishilik brigada bor edi, ammo ish, tekshiruv yoki toʻxtab qolish yozilmagan.",
       "suggestion": "Brigada nima qilganini yoki ishni toʻxtatgan toʻxtab qolishni qoʻshing."
     }
+  },
+  "estimate_archive": {
+    "arc_hash_mismatch": {
+      "fail": "Barmoq izi mos emas: yozuv {actual} beradi, muhrda {sealed}. Yozuvni o'zgartirilgan deb hisoblang."
+    },
+    "arc_total_mismatch": {
+      "fail": "Muhrlangan jami {seal} shartnoma summasi {award} dan {diff} farq qiladi."
+    },
+    "arc_no_breakdown": {
+      "fail": "{n} ta pozitsiyada resurslar bo'yicha bo'linma yo'q; ularning narxlarini keyin kuzatib bo'lmaydi."
+    },
+    "arc_no_markups": {
+      "fail": "Smetada muhrlanadigan ustamalar yo'q."
+    },
+    "arc_sealed_after_signing": {
+      "fail": "Shartnoma imzolangandan {days} kun keyin muhrlandi."
+    },
+    "arc_no_receipt": {
+      "fail": "Qarama-qarshi tomon barmoq izini hali tasdiqlamadi."
+    },
+    "arc_open_not_closed": {
+      "fail": "{id} ochilishi {days} kundan beri bayonnomasiz ochiq."
+    },
+    "arc_open_no_reason": {
+      "fail": "Ochilish uchun sabab va asos kerak."
+    },
+    "arc_open_one_party": {
+      "fail": "Faqat bitta tomon ko'rsatilgan; ikkinchisi nega yo'qligini yozing."
+    },
+    "var_basis_no_seal": {
+      "fail": "{code} pozitsiyasi dastlabki asos bo'yicha baholangan, lekin muhrlangan smeta yo'q."
+    },
+    "var_basis_deviation": {
+      "fail": "{code} pozitsiyasi: {field} izohsiz {old} dan {new} ga o'zgardi."
+    },
+    "var_new_resource_no_evidence": {
+      "fail": "Yangi resurs {res} uchun narx sanasi yoki taklif havolasi yo'q."
+    },
+    "var_markup_not_sealed": {
+      "fail": "{code} pozitsiyasi muhrda yo'q {m} ustamasini qo'llaydi."
+    },
+    "var_abnormal_carried_rate": {
+      "fail": "O'tkazilgan xarajat {c} etalondan {pct} % farq qiladi."
+    },
+    "arc_mutation_refused": {
+      "fail": "Muhrlangan smetani o'zgartirib yoki o'chirib bo'lmaydi. Uning o'rniga yangi versiyani muhrlang."
+    },
+    "contents_locked": "Rasmiy ochilish boshlanguncha tarkib muhrlangan holda qoladi."
   }
 }

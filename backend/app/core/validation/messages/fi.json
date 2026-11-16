@@ -2015,5 +2015,53 @@
       "fail": "Työmaalla oli {headcount} hengen ryhmä, mutta työtä, tarkastusta tai viivästystä ei ole kirjattu.",
       "suggestion": "Lisää, mitä ryhmä teki, tai viivästys, joka pysäytti työn."
     }
+  },
+  "estimate_archive": {
+    "arc_hash_mismatch": {
+      "fail": "Sormenjälki ei täsmää: tietue antaa {actual}, sinetti ilmoittaa {sealed}. Pidä tietuetta muutettuna."
+    },
+    "arc_total_mismatch": {
+      "fail": "Sinetöity summa {seal} poikkeaa urakkasummasta {award} määrällä {diff}."
+    },
+    "arc_no_breakdown": {
+      "fail": "{n} nimikkeellä ei ole resurssierittelyä; niiden hintoja ei voi myöhemmin jäljittää."
+    },
+    "arc_no_markups": {
+      "fail": "Laskelmassa ei ole sinetöitäviä lisiä."
+    },
+    "arc_sealed_after_signing": {
+      "fail": "Sinetöity {days} päivää sopimuksen allekirjoittamisen jälkeen."
+    },
+    "arc_no_receipt": {
+      "fail": "Vastapuoli ei ole vielä kuitannut sormenjälkeä."
+    },
+    "arc_open_not_closed": {
+      "fail": "Avaus {id} on ollut auki {days} päivää ilman pöytäkirjaa."
+    },
+    "arc_open_no_reason": {
+      "fail": "Avaus vaatii syyn ja viitteen."
+    },
+    "arc_open_one_party": {
+      "fail": "Vain yksi osapuoli on merkitty; kirjaa, miksi toinen puuttuu."
+    },
+    "var_basis_no_seal": {
+      "fail": "Nimike {code} on hinnoiteltu alkuperäisellä perusteella, mutta sinetöityä laskelmaa ei ole."
+    },
+    "var_basis_deviation": {
+      "fail": "Nimike {code}: {field} muuttui arvosta {old} arvoon {new} ilman huomautusta."
+    },
+    "var_new_resource_no_evidence": {
+      "fail": "Uudella resurssilla {res} ei ole hintapäivää eikä tarjousviitettä."
+    },
+    "var_markup_not_sealed": {
+      "fail": "Nimike {code} käyttää lisää {m}, jota ei ole sinetissä."
+    },
+    "var_abnormal_carried_rate": {
+      "fail": "Siirretty kustannus {c} poikkeaa vertailuarvosta {pct} %."
+    },
+    "arc_mutation_refused": {
+      "fail": "Sinetöityä laskelmaa ei voi muuttaa eikä poistaa. Sinetöi uusi versio, joka korvaa sen."
+    },
+    "contents_locked": "Sisältö pysyy sinetöitynä, kunnes virallinen avaus alkaa."
   }
 }
