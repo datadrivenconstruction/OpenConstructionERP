@@ -47,6 +47,7 @@ import { TruncationNotice } from '@/shared/ui/TruncationNotice';
 import { TimesheetEditor } from './TimesheetEditor';
 import { OfflineDayRecorder } from './OfflineDayRecorder';
 import { WorkingTimeRecordPanel } from './WorkingTimeRecord';
+import { PayrollExportCard } from './PayrollExportCard';
 import { ClockPanel } from './ClockPanel';
 import { ClockApprovals } from './ClockApprovals';
 import { ClockEventsLog } from './ClockEventsLog';
@@ -410,6 +411,8 @@ function TimesheetsTab({
         regime={regime}
         onRegimeChange={setRegimeChoice}
       />
+
+      <PayrollExportCard />
 
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap items-center gap-2">

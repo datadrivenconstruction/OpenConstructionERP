@@ -42,6 +42,7 @@ export interface FieldTimesheetLine {
   cost_code: string;
   wbs: string | null;
   is_daywork: boolean;
+  hour_type: HourType;
   variation_id: string | null;
   daywork_sheet_id: string | null;
   note: string | null;
@@ -200,7 +201,11 @@ export interface UpdateTimesheetPayload {
   working_time_regime?: string | null;
 }
 
+export const HOUR_TYPES = ['regular', 'overtime', 'night', 'travel', 'standby', 'leave', 'other'] as const;
+export type HourType = (typeof HOUR_TYPES)[number];
+
 export interface LineCreatePayload {
+  hour_type?: HourType;
   resource_id?: string | null;
   equipment_id?: string | null;
   hours: string;
@@ -218,6 +223,7 @@ export interface LineCreatePayload {
 }
 
 export interface LineUpdatePayload {
+  hour_type?: HourType;
   resource_id?: string | null;
   equipment_id?: string | null;
   hours?: string;

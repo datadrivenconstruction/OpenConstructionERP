@@ -50,10 +50,23 @@ class Mapping:
 
     @classmethod
     def from_settings(cls, settings: dict[str, Any]) -> Mapping:
+        """Read the maps; the connector form stores them as JSON text, an API client may send objects."""
+        import json
+
+        def as_dict(raw: Any) -> dict[str, Any]:
+            if isinstance(raw, str):
+                try:
+                    raw = json.loads(raw or "{}")
+                except ValueError:
+                    return {}
+            return raw if isinstance(raw, dict) else {}
+
         accounts = {
-            str(k): {kk: str(vv) for kk, vv in v.items()} for k, v in (settings.get("account_map") or {}).items()
+            str(k): {kk: str(vv) for kk, vv in v.items()}
+            for k, v in as_dict(settings.get("account_map")).items()
+            if isinstance(v, dict)
         }
-        creditors = {str(k): str(v) for k, v in (settings.get("creditor_accounts") or {}).items()}
+        creditors = {str(k): str(v) for k, v in as_dict(settings.get("creditor_accounts")).items()}
         return cls(accounts=accounts, creditors=creditors)
 
 
