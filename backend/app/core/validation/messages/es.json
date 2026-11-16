@@ -2015,5 +2015,67 @@
       "fail": "Había una cuadrilla de {headcount} en obra pero no consta trabajo, inspección ni retraso.",
       "suggestion": "Añada lo que hizo la cuadrilla o el retraso que paralizó el trabajo."
     }
+  },
+  "framework_agreement": {
+    "item_not_in_agreement": {
+      "fail": "La línea {code} no es una partida activa del acuerdo {agreement}; regístrela como trabajo adicional.",
+      "suggestion": "Quite la línea del pedido y registre el trabajo como adicional del pedido."
+    },
+    "rate_deviates": {
+      "fail": "El precio {rate} de la línea {code} difiere del precio del acuerdo {expected}.",
+      "suggestion": "Los precios del pedido vienen del acuerdo; vuelva a valorar la línea con la lista de precios."
+    },
+    "order_outside_validity": {
+      "fail": "La fecha del pedido {date} está fuera de la vigencia del acuerdo del {from} al {to}.",
+      "suggestion": "Feche el pedido dentro de la vigencia o prorrogue antes el acuerdo."
+    },
+    "rate_period_gap": {
+      "fail": "Ningún período de precios cubre el {date}.",
+      "suggestion": "Añada un período de precios que cubra esa fecha en la pestaña Precios y revisión."
+    },
+    "escalation_unresolved": {
+      "fail": "El índice {series} no tiene valor para {period}; el precio no se puede revisar.",
+      "suggestion": "Introduzca el valor del índice de ese mes en Índices de precios y vuelva a valorar el pedido."
+    },
+    "cap_exceeded": {
+      "fail": "Este pedido lleva el acuerdo a {total} con un tope de {cap}; margen {headroom}.",
+      "suggestion": "Reduzca el pedido al margen o emítalo con una autorización motivada."
+    },
+    "cap_threshold": {
+      "fail": "El uso del acuerdo ha alcanzado el {pct} % del tope.",
+      "suggestion": "Avise al cliente a tiempo para preparar un acuerdo posterior."
+    },
+    "item_max_qty": {
+      "fail": "Partida {code}: {qty} pedidos hasta hoy superan el máximo declarado {max}.",
+      "suggestion": "Acuerde la cantidad adicional con el cliente antes del próximo pedido."
+    },
+    "min_at_risk": {
+      "fail": "Quedan {days} días y está pedido el {pct} % del mínimo garantizado.",
+      "suggestion": "Trate la diferencia con el cliente mientras aún se puede pedir."
+    },
+    "currency_mismatch": {
+      "fail": "La moneda del pedido {cur} difiere de la moneda del acuerdo {agr}.",
+      "suggestion": "Los pedidos se valoran en la moneda del acuerdo."
+    },
+    "adjustment_unknown": {
+      "fail": "La condición {tag} no tiene ajuste en este acuerdo.",
+      "suggestion": "Añada el ajuste en la pestaña Condiciones o quite la condición del pedido."
+    },
+    "direct_claim": {
+      "fail": "Las certificaciones se emiten sobre los pedidos, no sobre el acuerdo.",
+      "suggestion": "Abra el pedido bajo el que se hizo el trabajo y certifique allí."
+    },
+    "duplicate_item": {
+      "fail": "El código {code} aparece dos veces en el período {period}.",
+      "suggestion": "Deje una fila por código antes de guardar la lista de precios."
+    },
+    "measured_over_ordered": {
+      "fail": "Lo medido {m} supera lo pedido {o} en la línea {code}; valore un adicional.",
+      "suggestion": "Registre el exceso como modificación del pedido."
+    },
+    "term_over_legal_max": {
+      "fail": "La vigencia de {years} años supera el límite de {max} años de {source} (paquete).",
+      "suggestion": "Revise la vigencia con el cliente; el límite se indica, no se impone."
+    }
   }
 }

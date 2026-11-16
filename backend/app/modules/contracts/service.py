@@ -220,6 +220,10 @@ CONTRACT_TYPES = (
     "design_build",
     "combination",
     "remeasurement",
+    # A framework agreement holds rates and a cap and is never claimed against;
+    # each call-off order under it is a contract of its own (oe_framework_agreements).
+    "framework",
+    "call_off",
 )
 
 # Type-specific required-keys map. Empty list = no extra required keys.
@@ -234,6 +238,8 @@ _REQUIRED_TERM_FIELDS: dict[str, tuple[str, ...]] = {
     "design_build": (),
     "combination": (),
     "remeasurement": (),
+    "framework": (),
+    "call_off": (),
 }
 
 
@@ -3227,6 +3233,13 @@ class ContractsService:
 
     async def create_progress_claim(self, data: Any) -> ProgressClaim:
         contract = await self.get_contract(data.contract_id)
+        if contract.contract_type == "framework":
+            # FWK_DIRECT_CLAIM: a framework agreement only holds rates and a cap;
+            # work is claimed on the call-off orders issued under it.
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                detail=translate("framework_agreement.direct_claim.fail", locale=get_locale()),
+            )
         claim_number = data.claim_number or await self.claim_repo.next_claim_number(
             contract.id,
         )
@@ -4381,9 +4394,10 @@ class ContractsService:
                 payload.completion or {},
                 prior_by_line=prior_by_line,
             )
-        elif contract.contract_type in ("unit_price", "remeasurement"):
-            # Remeasurement contracts bill re-measured quantities at agreed
-            # unit rates, exactly like unit-price, so they share the generator.
+        elif contract.contract_type in ("unit_price", "remeasurement", "call_off"):
+            # Remeasurement contracts and framework call-off orders bill measured
+            # quantities at agreed unit rates, exactly like unit-price, so they
+            # share the generator.
             result = generate_unit_price_claim(
                 contract,
                 lines,

@@ -548,6 +548,12 @@ const ResourceLevelingPage = lazy(() =>
 const ContractsPage = lazy(() =>
   import('@/features/contracts').then((m) => ({ default: m.ContractsPage }))
 );
+const FrameworkRegisterPage = lazy(() =>
+  import('@/features/framework-agreements').then((m) => ({ default: m.FrameworkRegisterPage }))
+);
+const FrameworkAgreementPage = lazy(() =>
+  import('@/features/framework-agreements').then((m) => ({ default: m.FrameworkAgreementPage }))
+);
 const PaymentClockPage = lazy(() =>
   import('@/features/payment-clock').then((m) => ({ default: m.PaymentClockPage }))
 );
@@ -1839,6 +1845,8 @@ export default function App() {
 
         {/* 18-Modules Wave — Commercial */}
         <Route path="/contracts" element={<P title="Contracts"><ContractsPage /></P>} />
+        <Route path="/framework-agreements" element={<P title="Framework Agreements"><FrameworkRegisterPage /></P>} />
+        <Route path="/framework-agreements/:id" element={<P title="Framework Agreements"><FrameworkAgreementPage /></P>} />
         <Route path="/payment-clock" element={<P title="Payment Clock"><PaymentClockPage /></P>} />
         <Route path="/tax-withholding" element={<P title="Withholding Tax"><TaxWithholdingPage /></P>} />
         <Route path="/tax-rates" element={<P title="Tax Rates"><TaxRatesPage /></P>} />
@@ -1848,6 +1856,7 @@ export default function App() {
         <Route path="/full-evm" element={<P title="Earned Value"><FullEvmPage /></P>} />
         <Route path="/fx" element={<P title="Currencies"><FxPage /></P>} />
         <Route path="/projects/:projectId/contracts" element={<P title="Contracts"><ContractsPage /></P>} />
+        <Route path="/projects/:projectId/framework-agreements" element={<P title="Framework Agreements"><FrameworkRegisterPage /></P>} />
         <Route path="/projects/:projectId/contracts/claims/:claimId" element={<P title="Progress Claim"><ProgressClaimDetailPage /></P>} />
         <Route path="/subcontractors" element={<P title="Subcontractors"><SubcontractorsPage /></P>} />
         {/* A subcontractor is a company relationship; only the agreement

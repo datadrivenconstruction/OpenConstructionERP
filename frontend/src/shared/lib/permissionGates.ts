@@ -72,6 +72,10 @@ export const PERMISSION_MIN_ROLE = {
   'closeout.verify': 'manager',
   'condition.create': 'editor',
   'condition.approve': 'manager',
+  'framework.create': 'editor',
+  'framework.edit_rates': 'editor',
+  'framework.issue_order': 'editor',
+  'framework.override_cap': 'manager',
 } as const satisfies Record<string, RankedRole>;
 
 export type GatedPermission = keyof typeof PERMISSION_MIN_ROLE;

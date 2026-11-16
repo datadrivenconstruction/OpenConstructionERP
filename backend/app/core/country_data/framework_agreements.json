@@ -1,0 +1,80 @@
+{
+  "_comment": "Framework agreement facts per market, read by app.modules.framework_agreements.packs. A market key is an ISO 3166-1 alpha-2 code or a supranational key from supranational_markets.json. Term limits are warnings with their source, never enforced. Escalation templates whose thresholds we could not source carry verified=false and ship as editable templates.",
+  "as_of": "2026-11-16",
+  "markets": {
+    "EU": {
+      "term_variant": "neutral",
+      "term_limits": [
+        {"client_kind": "classic", "years": 4, "source": "Directive 2014/24/EU Art. 33(1)"},
+        {"client_kind": "sector", "years": 8, "source": "Directive 2014/25/EU Art. 51(1)"}
+      ],
+      "notes": ["cjeu_c_23_20"],
+      "pack_fields": ["estimated_value", "max_value_required"],
+      "condition_tags": ["normal_hours", "out_of_hours", "weekend"],
+      "escalation_templates": []
+    },
+    "DE": {
+      "term_variant": "de",
+      "term_limits": [
+        {"client_kind": "classic", "years": 4, "source": "§ 21 Abs. 6 VgV; § 4a EU Abs. 6 VOB/A"},
+        {"client_kind": "sector", "years": 8, "source": "§ 19 Abs. 3 SektVO"}
+      ],
+      "notes": [],
+      "pack_fields": ["leitweg_id", "measurement_preset"],
+      "measurement_preset": "REB 23.003",
+      "condition_tags": ["normal_hours", "out_of_hours", "weekend"],
+      "escalation_templates": [
+        {
+          "code": "DE_VHB_224",
+          "label": "VHB Bund Formblatt 224 (Lohngleitklausel)",
+          "method": "formula",
+          "verified": false,
+          "source": "VHB Bund Formblatt 224"
+        },
+        {
+          "code": "DE_VHB_225",
+          "label": "VHB Bund Formblatt 225 (Stoffpreisgleitklausel)",
+          "method": "formula",
+          "verified": false,
+          "source": "VHB Bund Formblatt 225"
+        }
+      ]
+    },
+    "GB": {
+      "term_variant": "uk",
+      "term_limits": [
+        {"client_kind": "classic", "years": 4, "source": "Procurement Act 2023 s.47"},
+        {"client_kind": "sector", "years": 8, "source": "Procurement Act 2023 s.47"}
+      ],
+      "notes": [],
+      "pack_fields": ["task_order_starting_date", "task_order_completion_date", "price_list_reference", "tendered_percentage"],
+      "condition_tags": ["normal_hours", "out_of_hours", "weekend"],
+      "escalation_templates": [
+        {
+          "code": "UK_NEC_X1",
+          "label": "NEC Option X1 price adjustment for inflation",
+          "method": "formula",
+          "verified": true,
+          "source": "NEC4 Option X1 (weights are agreement data)"
+        }
+      ]
+    },
+    "US": {
+      "term_variant": "us",
+      "term_limits": [],
+      "notes": ["far_16_504_minimum"],
+      "min_value_required": {"source": "FAR 16.504(a)(1)"},
+      "pack_fields": ["min_value_required", "joc_coefficients"],
+      "condition_tags": ["normal_hours", "other_than_normal_hours"],
+      "escalation_templates": [
+        {
+          "code": "US_FAR_52_216_4",
+          "label": "FAR 52.216-4 Economic Price Adjustment, Labor and Material",
+          "method": "formula",
+          "verified": true,
+          "source": "FAR 16.203; FAR 52.216-4"
+        }
+      ]
+    }
+  }
+}

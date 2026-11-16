@@ -33,7 +33,9 @@ export type ContractType =
   | 'unit_price'
   | 'design_build'
   | 'combination'
-  | 'remeasurement';
+  | 'remeasurement'
+  | 'framework'
+  | 'call_off';
 
 export type CounterpartyType = 'client' | 'subcontractor';
 

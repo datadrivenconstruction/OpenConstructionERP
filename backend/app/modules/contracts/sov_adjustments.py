@@ -116,7 +116,7 @@ ADJUSTS_LINE_META_KEY = "adjusts_line_id"
 
 #: Contract types billed as measured quantity x unit rate
 #: (``generate_unit_price_claim``); every other type bills a percent.
-MEASURED_CONTRACT_TYPES: frozenset[str] = frozenset({"unit_price", "remeasurement"})
+MEASURED_CONTRACT_TYPES: frozenset[str] = frozenset({"unit_price", "remeasurement", "call_off"})
 
 #: Used when the bill of quantities module is not installed.
 _FALLBACK_LUMP_SUM_UNITS: frozenset[str] = frozenset({"ls", "lsum", "lump sum", "lumpsum", "psch", "pauschal"})

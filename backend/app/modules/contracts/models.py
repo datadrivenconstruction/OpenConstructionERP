@@ -1093,7 +1093,7 @@ class ContractTemplateClause(Base):
 
 #: Where a schedule of values line came from. Declared beside the column so the
 #: schemas and the change order poster agree on one list.
-CONTRACT_LINE_ORIGINS: frozenset[str] = frozenset({"original", "change_order", "variation"})
+CONTRACT_LINE_ORIGINS: frozenset[str] = frozenset({"original", "change_order", "variation", "framework_item"})
 
 
 class SovAdjustment(Base):

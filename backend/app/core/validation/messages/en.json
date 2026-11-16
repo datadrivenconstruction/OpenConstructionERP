@@ -2015,5 +2015,67 @@
       "fail": "A crew of {headcount} was on site but no work, inspection or delay is recorded.",
       "suggestion": "Add what the crew did, or record the delay that stopped work."
     }
+  },
+  "framework_agreement": {
+    "item_not_in_agreement": {
+      "fail": "Line {code} is not an active item of agreement {agreement}; raise it as an extra.",
+      "suggestion": "Remove the line from the order and raise the work as an extra on the order."
+    },
+    "rate_deviates": {
+      "fail": "Line {code} rate {rate} differs from the agreement rate {expected}.",
+      "suggestion": "Rates on an order come from the agreement; reprice the line from the price list."
+    },
+    "order_outside_validity": {
+      "fail": "Order date {date} is outside the agreement term {from} to {to}.",
+      "suggestion": "Date the order inside the term, or extend the agreement first."
+    },
+    "rate_period_gap": {
+      "fail": "No rate period covers {date}.",
+      "suggestion": "Add a rate period that covers this date on the Rates and escalation tab."
+    },
+    "escalation_unresolved": {
+      "fail": "Index {series} has no value for {period}; the rate cannot be adjusted.",
+      "suggestion": "Enter the index value for that month in Price index, then price the order again."
+    },
+    "cap_exceeded": {
+      "fail": "This order takes the agreement to {total} of a {cap} cap; headroom {headroom}.",
+      "suggestion": "Reduce the order to the headroom, or issue it with a reasoned override."
+    },
+    "cap_threshold": {
+      "fail": "Agreement use has reached {pct} % of the cap.",
+      "suggestion": "Tell the client early so a follow-on agreement can be prepared."
+    },
+    "item_max_qty": {
+      "fail": "Item {code}: {qty} ordered to date exceeds the stated maximum {max}.",
+      "suggestion": "Agree the extra quantity with the client before the next order."
+    },
+    "min_at_risk": {
+      "fail": "{days} days left and {pct} % of the guaranteed minimum is ordered.",
+      "suggestion": "Raise the shortfall with the client while there is still time to order."
+    },
+    "currency_mismatch": {
+      "fail": "Order currency {cur} differs from agreement currency {agr}.",
+      "suggestion": "Orders are priced in the agreement currency."
+    },
+    "adjustment_unknown": {
+      "fail": "Condition {tag} has no adjustment in this agreement.",
+      "suggestion": "Add the adjustment on the Conditions tab, or remove the condition from the order."
+    },
+    "direct_claim": {
+      "fail": "Claims are raised on call-off orders, not on the agreement.",
+      "suggestion": "Open the order the work was done under and claim there."
+    },
+    "duplicate_item": {
+      "fail": "Item code {code} appears twice in rate period {period}.",
+      "suggestion": "Keep one row per item code before saving the price list."
+    },
+    "measured_over_ordered": {
+      "fail": "Measured {m} exceeds ordered {o} on line {code}; consider an extra.",
+      "suggestion": "Raise the extra quantity as a variation on the order."
+    },
+    "term_over_legal_max": {
+      "fail": "Term {years} years exceeds the {max}-year limit in {source} (pack).",
+      "suggestion": "Check the term with the client; the limit is stated by the pack, not enforced."
+    }
   }
 }

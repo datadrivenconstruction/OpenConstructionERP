@@ -237,6 +237,7 @@ async def enrich_projects(project_ids: list[uuid.UUID]) -> dict[str, Any]:
         from app.modules.field_time.seed import seed_field_time_demo
         from app.modules.finance.einvoice_settings_seed import seed_einvoice_settings_demo
         from app.modules.forms.submissions_seed import seed_forms_submissions_demo
+        from app.modules.framework_agreements.seed import seed_framework_agreements_demo
         from app.modules.full_evm.seed import seed_full_evm_demo
         from app.modules.hse_advanced.seed import seed_hse_advanced_demo
         from app.modules.hse_frame.seed import seed_hse_frame_demo
@@ -467,6 +468,7 @@ async def enrich_projects(project_ids: list[uuid.UUID]) -> dict[str, Any]:
             # schedule, of DIN 276 cost groups or Leistungsverzeichnis
             # positions, picked by the trade each contract's title names.
             ("contracts", None, lambda s: seed_contracts_demo(s, _demo_pids)),
+            ("framework_agreements", None, lambda s: seed_framework_agreements_demo(s, _demo_pids)),
             # The cost-value reconciliation register: closed months, the month
             # running, the cashflow curve and the interim applications raised
             # against them. Scales itself from the project's priced bill, so it
