@@ -755,13 +755,13 @@ exports[`Visual Regression - DashboardPage > renders loading/skeleton state 1`] 
             What's new in v0.0.0-test
           </h2>
           <span
-            class="hidden md:inline truncate text-xs text-content-secondary"
+            class="hidden 2xl:inline truncate text-xs text-content-secondary"
           >
             Tap a chip for details.
           </span>
         </div>
         <div
-          class="order-last flex basis-full flex-wrap items-center gap-1.5 min-w-0 sm:order-none sm:flex-1 sm:basis-0"
+          class="order-last flex basis-full flex-wrap items-center gap-1.5 min-w-0 sm:order-none sm:min-w-[36rem] sm:flex-1 sm:basis-0"
         >
           <button
             aria-controls="whatsnew-chip-cost-control-popover"
