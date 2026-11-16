@@ -3407,6 +3407,17 @@ async def install_v3_catalogue(
     }
 
 
+# Largest SQL-filtered subset handed to the vector store as an id list. Past
+# this the search ranks a wider window and keeps the hits inside the subset.
+_VECTOR_PREFILTER_MAX_IDS = 5000
+_VECTOR_OVERSAMPLE = 20
+
+
+def _query_str(value: object) -> str | None:
+    """A query parameter's value, or None when the handler is called directly without it."""
+    return value if isinstance(value, str) and value else None
+
+
 @router.get("/vector/search/")
 async def semantic_search(
     session: SessionDep,
@@ -3414,6 +3425,12 @@ async def semantic_search(
     q: str = Query(..., min_length=2, max_length=500, description="Natural language query"),
     region: str | None = Query(default=None, description="Filter by region"),
     limit: int = Query(default=25, ge=1, le=500),
+    category: str | None = Query(default=None, description="Filter by classification collection"),
+    classification_path: str | None = Query(default=None, description="Slash-delimited classification prefix"),
+    catalog_id: str | None = Query(default=None, description="Filter to one user-owned cost catalog"),
+    unit: str | None = Query(default=None, description="Filter by unit"),
+    source: str | None = Query(default=None, description="Filter by source"),
+    user: CurrentUserPayload = None,  # type: ignore[assignment]
 ) -> list[dict]:
     """Semantic search using vector similarity.
 
@@ -3432,12 +3449,49 @@ async def semantic_search(
     a different answer wearing the same clothes.
 
     The raw import text is still never echoed to the caller (NEW-B-105).
+
+    Catalogue, category, classification, unit and source are applied in SQL
+    first and only the matching items are ranked (#562). Region is filtered
+    inside the vector store as before.
     """
+    filters = {
+        "category": _query_str(category),
+        "classification_path": _query_str(classification_path),
+        "unit": _query_str(unit),
+        "source": _query_str(source),
+    }
+    catalog_uuid: uuid.UUID | None = None
+    if _query_str(catalog_id):
+        try:
+            catalog_uuid = uuid.UUID(str(catalog_id))
+        except ValueError as exc:
+            raise HTTPException(status_code=422, detail="catalog_id is not a valid id.") from exc
+        payload = user if isinstance(user, dict) else {}
+        await CostCatalogService(session).get_owned_catalog(
+            catalog_uuid,
+            owner_id=_parse_user_uuid(payload.get("sub") or _user_id),
+            is_admin=payload.get("role") == "admin",
+        )
+    region = _query_str(region)
     try:
         from app.core.vector import encode_texts, vector_search
 
         query_vector = encode_texts([q])[0]
-        hits = vector_search(query_vector, region=region, limit=limit)
+        if catalog_uuid is None and not any(filters.values()):
+            hits = vector_search(query_vector, region=region, limit=limit)
+            return await cost_scope.visible_hits(session, hits)
+
+        from app.modules.costs.repository import CostItemRepository
+
+        candidates = await CostItemRepository(session).ids_matching(region=region, catalog_id=catalog_uuid, **filters)
+        if not candidates:
+            return []
+        if len(candidates) <= _VECTOR_PREFILTER_MAX_IDS:
+            hits = vector_search(query_vector, region=region, limit=limit, ids=candidates)
+        else:
+            wanted = set(candidates)
+            wide = vector_search(query_vector, region=region, limit=min(limit * _VECTOR_OVERSAMPLE, 2000))
+            hits = [h for h in wide if str(h.get("id")) in wanted][:limit]
         return await cost_scope.visible_hits(session, hits)
     except (ImportError, ModuleNotFoundError, RuntimeError) as exc:
         from app.core.vector import embedder_status

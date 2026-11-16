@@ -954,6 +954,7 @@ def _lancedb_search(
     query_vector: list[float],
     region: str | None = None,
     limit: int = 10,
+    ids: list[str] | None = None,
 ) -> list[dict]:
     """Search LanceDB for similar vectors."""
     db = _get_lancedb()
@@ -966,10 +967,19 @@ def _lancedb_search(
         return []
 
     q = tbl.search(query_vector).limit(limit)
+    where_parts: list[str] = []
     if region:
         safe_region = _safe_quote_scalar(region, "region")
         if safe_region:
-            q = q.where(f"region = {safe_region}")
+            where_parts.append(f"region = {safe_region}")
+    if ids is not None:
+        quoted = _safe_quote_ids(ids)
+        if not quoted:
+            return []
+        where_parts.append(f"id IN ({', '.join(quoted)})")
+    if where_parts:
+        # Filter before the nearest-neighbour cut, so the top-k comes from the subset.
+        q = q.where(" AND ".join(where_parts), prefilter=True)
 
     results = q.to_list()
     return [
@@ -1189,21 +1199,31 @@ def vector_search(
     query_vector: list[float],
     region: str | None = None,
     limit: int = 10,
+    ids: list[str] | None = None,
 ) -> list[dict]:
-    """Search for similar vectors."""
+    """Search for similar vectors.
+
+    ``ids`` restricts the search to those cost items before ranking; the
+    caller narrows them in SQL by catalogue, category and the like.
+    """
+    if ids is not None and not ids:
+        return []
     if _backend() == "qdrant":
         client = _get_qdrant()
         if client is None:
             return []
-        from qdrant_client.models import FieldCondition, Filter, MatchValue
+        from qdrant_client.models import FieldCondition, Filter, HasIdCondition, MatchValue
 
-        search_filter = None
+        must: list[Any] = []
         if region:
-            search_filter = Filter(must=[FieldCondition(key="region", match=MatchValue(value=region))])
+            must.append(FieldCondition(key="region", match=MatchValue(value=region)))
+        if ids is not None:
+            must.append(HasIdCondition(has_id=list(ids)))
+        search_filter = Filter(must=must) if must else None
         response = client.query_points(COST_TABLE, query=query_vector, query_filter=search_filter, limit=limit)
         return [{"id": h.id, "score": round(h.score, 4), **h.payload} for h in response.points]
 
-    return _lancedb_search(query_vector, region, limit)
+    return _lancedb_search(query_vector, region, limit, ids)
 
 
 # ── Multi-collection public API ──────────────────────────────────────────
