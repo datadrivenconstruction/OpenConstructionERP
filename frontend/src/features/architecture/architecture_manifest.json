@@ -7578,7 +7578,8 @@
         "router.py",
         "schemas.py",
         "seed.py",
-        "service.py"
+        "service.py",
+        "validators.py"
       ],
       "manifest": {
         "name": "oe_allowances",
@@ -7887,6 +7888,10 @@
             {
               "name": "updated_at",
               "type": "datetime"
+            },
+            {
+              "name": "warnings",
+              "type": "list[dict]"
             }
           ]
         },
@@ -7939,6 +7944,10 @@
             {
               "name": "created_at",
               "type": "datetime"
+            },
+            {
+              "name": "warnings",
+              "type": "list[dict]"
             }
           ]
         },
@@ -8072,7 +8081,8 @@
         "simulate.py",
         "sla_engine.py",
         "sla_monitor.py",
-        "timeline.py"
+        "timeline.py",
+        "validators.py"
       ],
       "manifest": {
         "name": "oe_approval_routes",
@@ -8705,6 +8715,10 @@
             {
               "name": "steps",
               "type": "list[StepResponse]"
+            },
+            {
+              "name": "validation_warnings",
+              "type": "list[dict[str, Any]]"
             }
           ]
         },
@@ -8965,6 +8979,10 @@
             {
               "name": "updated_at",
               "type": "datetime"
+            },
+            {
+              "name": "validation_warnings",
+              "type": "list[dict[str, Any]]"
             }
           ]
         },
@@ -11241,7 +11259,8 @@
         "permissions.py",
         "router.py",
         "schemas.py",
-        "service.py"
+        "service.py",
+        "validators.py"
       ],
       "manifest": {
         "name": "oe_assets",
@@ -11752,6 +11771,10 @@
             {
               "name": "health",
               "type": "AssetHealthSchema"
+            },
+            {
+              "name": "validation_warnings",
+              "type": "list[dict[str, Any]]"
             }
           ]
         }
@@ -17882,6 +17905,11 @@
             {
               "name": "views",
               "type": "list[str]"
+            },
+            {
+              "name": "parquet",
+              "type": "bool",
+              "default": "True"
             }
           ]
         }
@@ -27830,6 +27858,7 @@
         "rule_runtime.py",
         "schemas.py",
         "service.py",
+        "validators.py",
         "yaml_loader.py"
       ],
       "manifest": {
@@ -41841,7 +41870,8 @@
         "router.py",
         "schemas.py",
         "service.py",
-        "suitability.py"
+        "suitability.py",
+        "validators.py"
       ],
       "manifest": {
         "name": "oe_cde",
@@ -42591,6 +42621,10 @@
             {
               "name": "updated_at",
               "type": "datetime"
+            },
+            {
+              "name": "validation_warnings",
+              "type": "list[dict[str, Any]]"
             }
           ]
         },
@@ -48951,7 +48985,8 @@
         "router.py",
         "schemas.py",
         "seed.py",
-        "service.py"
+        "service.py",
+        "validators.py"
       ],
       "manifest": {
         "name": "oe_clash",
@@ -50390,6 +50425,10 @@
               "type": "list[ClashHistoryEntry]"
             },
             {
+              "name": "validation_warnings",
+              "type": "list[dict[str, Any]]"
+            },
+            {
               "name": "meta",
               "type": "dict"
             },
@@ -50500,6 +50539,10 @@
               "name": "requested",
               "type": "int",
               "default": "0"
+            },
+            {
+              "name": "validation_warnings",
+              "type": "list[dict[str, Any]]"
             }
           ]
         },
@@ -58694,7 +58737,8 @@
         "repository.py",
         "router.py",
         "schemas.py",
-        "service.py"
+        "service.py",
+        "validators.py"
       ],
       "manifest": {
         "name": "oe_compliance_docs",
@@ -59086,9 +59130,17 @@
               "type": "datetime"
             },
             {
+              "name": "validation_warnings",
+              "type": "list[dict[str, Any]]"
+            },
+            {
               "name": "days_until_expiry",
               "type": "int",
               "description": "Signed integer - negative when already expired, 0 on expiry day, positive when still valid."
+            },
+            {
+              "name": "validation_warnings",
+              "type": "list[dict[str, Any]]"
             }
           ]
         }
@@ -60708,7 +60760,8 @@
         "seed_text.py",
         "service.py",
         "signing.py",
-        "uer.py"
+        "uer.py",
+        "validators.py"
       ],
       "manifest": {
         "name": "oe_construction_control",
@@ -62606,6 +62659,10 @@
           "docstring": "",
           "fields": [
             {
+              "name": "validation_warnings",
+              "type": "list[dict[str, Any]]"
+            },
+            {
               "name": "id",
               "type": "UUID"
             },
@@ -62850,6 +62907,10 @@
           ],
           "docstring": "",
           "fields": [
+            {
+              "name": "validation_warnings",
+              "type": "list[dict[str, Any]]"
+            },
             {
               "name": "id",
               "type": "UUID"
@@ -63262,6 +63323,10 @@
           "docstring": "",
           "fields": [
             {
+              "name": "validation_warnings",
+              "type": "list[dict[str, Any]]"
+            },
+            {
               "name": "id",
               "type": "UUID"
             },
@@ -63664,6 +63729,10 @@
           ],
           "docstring": "",
           "fields": [
+            {
+              "name": "validation_warnings",
+              "type": "list[dict[str, Any]]"
+            },
             {
               "name": "id",
               "type": "UUID"
@@ -64094,6 +64163,10 @@
           ],
           "docstring": "",
           "fields": [
+            {
+              "name": "validation_warnings",
+              "type": "list[dict[str, Any]]"
+            },
             {
               "name": "id",
               "type": "UUID"
@@ -64925,7 +64998,8 @@
         "repository.py",
         "router.py",
         "schemas.py",
-        "service.py"
+        "service.py",
+        "validators.py"
       ],
       "manifest": {
         "name": "oe_contacts",
@@ -65687,6 +65761,10 @@
             {
               "name": "custom_properties",
               "type": "dict[str, Any]"
+            },
+            {
+              "name": "validation_warnings",
+              "type": "list[dict[str, Any]]"
             },
             {
               "name": "created_at",
@@ -73249,7 +73327,8 @@
         "permissions.py",
         "router.py",
         "schemas.py",
-        "service.py"
+        "service.py",
+        "validators.py"
       ],
       "manifest": {
         "name": "oe_coordination_hub",
@@ -73702,6 +73781,10 @@
               "name": "message",
               "type": "str",
               "default": "''"
+            },
+            {
+              "name": "validation_warnings",
+              "type": "list[dict[str, Any]]"
             }
           ]
         },
@@ -79044,6 +79127,12 @@
               "nullable": true
             },
             {
+              "name": "segregation_of_duties",
+              "annotation": "Mapped[bool]",
+              "sql_type": "Boolean",
+              "nullable": false
+            },
+            {
               "name": "updated_by",
               "annotation": "Mapped[str | None]",
               "sql_type": "String",
@@ -81485,6 +81574,7 @@
         "schemas.py",
         "service.py",
         "translations/__init__.py",
+        "validators.py",
         "vector_adapter.py"
       ],
       "manifest": {
@@ -82461,6 +82551,10 @@
             {
               "name": "metadata",
               "type": "dict[str, Any]"
+            },
+            {
+              "name": "validation_warnings",
+              "type": "list[dict[str, Any]]"
             },
             {
               "name": "created_at",
@@ -84783,7 +84877,8 @@
         "router.py",
         "schemas.py",
         "seed.py",
-        "service.py"
+        "service.py",
+        "validators.py"
       ],
       "manifest": {
         "name": "oe_crm",
@@ -86564,6 +86659,10 @@
             {
               "name": "competitor_names",
               "type": "list[str]"
+            },
+            {
+              "name": "validation_warnings",
+              "type": "list[dict[str, Any]]"
             },
             {
               "name": "created_at",
@@ -105503,6 +105602,7 @@
         "sheet_fields.py",
         "sheet_index.py",
         "sheet_ocr.py",
+        "validators.py",
         "vector_adapter.py"
       ],
       "manifest": {
@@ -106468,6 +106568,10 @@
             {
               "name": "updated_at",
               "type": "datetime"
+            },
+            {
+              "name": "validation_warnings",
+              "type": "list[dict[str, Any]]"
             },
             {
               "name": "cde_state",
@@ -107626,11 +107730,12 @@
           "bases": [
             "BaseModel"
           ],
-          "docstring": "Public probe response - what the recipient sees before unlocking.\n\nIntentionally omits ``download_count`` and ``id``/``created_by`` so\nnothing about the owner or usage history leaks to recipients.",
+          "docstring": "Public probe response - what the recipient sees before unlocking.\n\nIntentionally omits ``download_count`` and ``id``/``created_by`` so\nnothing about the owner or usage history leaks to recipients. ``filename`` is\nwithheld until the link is open (no password, not expired).",
           "fields": [
             {
               "name": "filename",
-              "type": "str"
+              "type": "str | None",
+              "default": "None"
             },
             {
               "name": "requires_password",
@@ -109074,7 +109179,8 @@
         "router.py",
         "schemas.py",
         "seed.py",
-        "service.py"
+        "service.py",
+        "validators.py"
       ],
       "manifest": {
         "name": "oe_dwg_takeoff",
@@ -109725,6 +109831,10 @@
               "type": "dict[str, Any]"
             },
             {
+              "name": "validation_warnings",
+              "type": "list[dict[str, Any]]"
+            },
+            {
               "name": "created_by",
               "type": "str",
               "default": "''"
@@ -110136,6 +110246,10 @@
             {
               "name": "metadata",
               "type": "dict[str, Any]"
+            },
+            {
+              "name": "validation_warnings",
+              "type": "list[dict[str, Any]]"
             },
             {
               "name": "created_at",
@@ -118767,6 +118881,7 @@
         "models.py",
         "permissions.py",
         "predictive_service.py",
+        "repairs.py",
         "repository.py",
         "router.py",
         "schemas.py",
@@ -118776,6 +118891,7 @@
         "telematics_router.py",
         "telematics_seed.py",
         "telematics_service.py",
+        "tenancy.py",
         "validators.py"
       ],
       "manifest": {
@@ -118848,6 +118964,12 @@
           "tablename": "oe_equipment_equipment",
           "docstring": "A single piece of equipment in the fleet.",
           "columns": [
+            {
+              "name": "tenant_id",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
             {
               "name": "code",
               "annotation": "Mapped[str]",
@@ -122116,7 +122238,8 @@
         "costmodel",
         "field_time",
         "notifications",
-        "projects"
+        "projects",
+        "users"
       ]
     },
     {
@@ -123863,7 +123986,8 @@
         "router.py",
         "schemas.py",
         "seed.py",
-        "service.py"
+        "service.py",
+        "validators.py"
       ],
       "manifest": {
         "name": "oe_estimate_basis",
@@ -124698,6 +124822,10 @@
               "name": "budget_target",
               "type": "dict | None",
               "description": "Client budget target alongside the calculated estimate."
+            },
+            {
+              "name": "validation_warnings",
+              "type": "list[dict]"
             },
             {
               "name": "generated_at",
@@ -133654,7 +133782,8 @@
         "permissions.py",
         "router.py",
         "schemas.py",
-        "service.py"
+        "service.py",
+        "validators.py"
       ],
       "manifest": {
         "name": "oe_file_transmittals",
@@ -133986,6 +134115,10 @@
             {
               "name": "sort_order",
               "type": "int"
+            },
+            {
+              "name": "validation_warnings",
+              "type": "list[dict[str, Any]]"
             }
           ]
         },
@@ -134142,6 +134275,10 @@
             {
               "name": "updated_at",
               "type": "datetime"
+            },
+            {
+              "name": "validation_warnings",
+              "type": "list[dict[str, Any]]"
             }
           ]
         },
@@ -174199,7 +174336,8 @@
         "router.py",
         "schemas.py",
         "service.py",
-        "templates.py"
+        "templates.py",
+        "validators.py"
       ],
       "manifest": {
         "name": "oe_methodology",
@@ -174825,6 +174963,10 @@
           "docstring": "An analytical dimension returned from the API, with its values.",
           "fields": [
             {
+              "name": "validation_warnings",
+              "type": "list[dict[str, Any]]"
+            },
+            {
               "name": "id",
               "type": "UUID"
             },
@@ -174934,6 +175076,10 @@
           ],
           "docstring": "A funding source returned from the API.",
           "fields": [
+            {
+              "name": "validation_warnings",
+              "type": "list[dict[str, Any]]"
+            },
             {
               "name": "id",
               "type": "UUID"
@@ -175195,6 +175341,10 @@
               "name": "effective_vat",
               "type": "EffectiveVat | None",
               "default": "None"
+            },
+            {
+              "name": "validation_warnings",
+              "type": "list[dict[str, Any]]"
             }
           ]
         },
@@ -188382,7 +188532,8 @@
         "router.py",
         "schemas.py",
         "service.py",
-        "transcription.py"
+        "transcription.py",
+        "validators.py"
       ],
       "manifest": {
         "name": "oe_phonelog",
@@ -188716,6 +188867,10 @@
             {
               "name": "updated_at",
               "type": "datetime"
+            },
+            {
+              "name": "validation_warnings",
+              "type": "list[dict[str, Any]]"
             }
           ]
         }
@@ -190758,7 +190913,8 @@
         "repository.py",
         "router.py",
         "schemas.py",
-        "service.py"
+        "service.py",
+        "validators.py"
       ],
       "manifest": {
         "name": "oe_plan_room",
@@ -190970,6 +191126,10 @@
             {
               "name": "updated_at",
               "type": "datetime"
+            },
+            {
+              "name": "validation_warnings",
+              "type": "list[dict[str, Any]]"
             }
           ]
         },
@@ -197148,7 +197308,8 @@
         "schemas.py",
         "seed.py",
         "service.py",
-        "tree_logic.py"
+        "tree_logic.py",
+        "validators.py"
       ],
       "manifest": {
         "name": "oe_portfolio",
@@ -197472,6 +197633,10 @@
               "type": "dict"
             },
             {
+              "name": "validation_warnings",
+              "type": "list[dict]"
+            },
+            {
               "name": "created_at",
               "type": "datetime"
             },
@@ -197627,6 +197792,10 @@
             {
               "name": "lag_days",
               "type": "int"
+            },
+            {
+              "name": "validation_warnings",
+              "type": "list[dict]"
             },
             {
               "name": "created_at",
@@ -197828,7 +197997,8 @@
         "tests/__init__.py",
         "tests/test_cost_link.py",
         "tests/test_stage_guard.py",
-        "tests/test_unit_link.py"
+        "tests/test_unit_link.py",
+        "validators.py"
       ],
       "manifest": {
         "name": "oe_prefab",
@@ -198229,6 +198399,10 @@
               "type": "datetime"
             },
             {
+              "name": "validation_warnings",
+              "type": "list[dict[str, Any]]"
+            },
+            {
               "name": "boq_position_id",
               "type": "UUID | None",
               "default": "None"
@@ -198483,7 +198657,8 @@
         "router.py",
         "schemas.py",
         "seed.py",
-        "service.py"
+        "service.py",
+        "validators.py"
       ],
       "manifest": {
         "name": "oe_preliminaries",
@@ -198739,6 +198914,10 @@
               "type": "DecimalMoney"
             },
             {
+              "name": "validation_warnings",
+              "type": "list[dict[str, Any]]"
+            },
+            {
               "name": "created_at",
               "type": "datetime"
             },
@@ -198896,7 +199075,8 @@
         "schemas.py",
         "seed.py",
         "service.py",
-        "statssa_p0151.py"
+        "statssa_p0151.py",
+        "validators.py"
       ],
       "manifest": {
         "name": "oe_price_index",
@@ -199333,6 +199513,10 @@
             {
               "name": "updated_at",
               "type": "datetime"
+            },
+            {
+              "name": "warnings",
+              "type": "list[dict]"
             }
           ]
         },
@@ -199421,6 +199605,10 @@
             {
               "name": "updated_at",
               "type": "datetime"
+            },
+            {
+              "name": "warnings",
+              "type": "list[dict]"
             }
           ]
         },
@@ -211720,7 +211908,8 @@
         "repository.py",
         "router.py",
         "schemas.py",
-        "service.py"
+        "service.py",
+        "validators.py"
       ],
       "manifest": {
         "name": "oe_projects",
@@ -213277,6 +213466,10 @@
             {
               "name": "owner_id",
               "type": "UUID"
+            },
+            {
+              "name": "validation_warnings",
+              "type": "list[dict[str, Any]]"
             },
             {
               "name": "metadata",
@@ -229191,7 +229384,8 @@
         "schemas.py",
         "seed.py",
         "seed_text.py",
-        "service.py"
+        "service.py",
+        "validators.py"
       ],
       "manifest": {
         "name": "oe_qms",
@@ -231471,6 +231665,10 @@
           "docstring": "NCR returned from the API.",
           "fields": [
             {
+              "name": "validation_warnings",
+              "type": "list[dict[str, Any]]"
+            },
+            {
               "name": "id",
               "type": "UUID"
             },
@@ -231781,6 +231979,10 @@
           ],
           "docstring": "Punch item returned from the API.",
           "fields": [
+            {
+              "name": "validation_warnings",
+              "type": "list[dict[str, Any]]"
+            },
             {
               "name": "id",
               "type": "UUID"
@@ -232665,6 +232867,10 @@
           ],
           "docstring": "Calibration record returned from the API.",
           "fields": [
+            {
+              "name": "validation_warnings",
+              "type": "list[dict[str, Any]]"
+            },
             {
               "name": "id",
               "type": "UUID"
@@ -238155,7 +238361,8 @@
         "router.py",
         "schemas.py",
         "seed.py",
-        "service.py"
+        "service.py",
+        "validators.py"
       ],
       "manifest": {
         "name": "oe_reconciliation",
@@ -238488,6 +238695,10 @@
             {
               "name": "created_by",
               "type": "str | None"
+            },
+            {
+              "name": "validation_warnings",
+              "type": "list[dict[str, Any]]"
             }
           ]
         }
@@ -238738,7 +238949,8 @@
         "repository.py",
         "router.py",
         "schemas.py",
-        "service.py"
+        "service.py",
+        "validators.py"
       ],
       "manifest": {
         "name": "oe_reporting",
@@ -239284,6 +239496,10 @@
             {
               "name": "updated_at",
               "type": "datetime"
+            },
+            {
+              "name": "validation_warnings",
+              "type": "list[dict[str, Any]]"
             }
           ]
         },
@@ -239405,6 +239621,10 @@
             {
               "name": "updated_at",
               "type": "datetime"
+            },
+            {
+              "name": "validation_warnings",
+              "type": "list[dict[str, Any]]"
             }
           ]
         },
@@ -239602,6 +239822,7 @@
         "router.py",
         "schemas.py",
         "service.py",
+        "validators.py",
         "vector_adapter.py"
       ],
       "manifest": {
@@ -240461,6 +240682,10 @@
           "docstring": "Requirement item returned from the API.",
           "fields": [
             {
+              "name": "validation_warnings",
+              "type": "list[dict[str, Any]]"
+            },
+            {
               "name": "id",
               "type": "UUID"
             },
@@ -240846,6 +241071,10 @@
           ],
           "docstring": "Requirement set returned from the API (without nested requirements).",
           "fields": [
+            {
+              "name": "validation_warnings",
+              "type": "list[dict[str, Any]]"
+            },
             {
               "name": "id",
               "type": "UUID"
@@ -250848,7 +251077,8 @@
         "permissions.py",
         "router.py",
         "schemas.py",
-        "service.py"
+        "service.py",
+        "validators.py"
       ],
       "manifest": {
         "name": "oe_rom_estimate",
@@ -251117,6 +251347,11 @@
               "name": "positions_created",
               "type": "int",
               "description": "Number of provisional concept-rate positions created."
+            },
+            {
+              "name": "warnings",
+              "type": "list[dict]",
+              "description": "Non-blocking rule findings of this write."
             }
           ]
         },
@@ -251486,6 +251721,10 @@
               "name": "created_by",
               "type": "UUID | None",
               "default": "None"
+            },
+            {
+              "name": "warnings",
+              "type": "list[dict]"
             }
           ]
         },
@@ -264205,6 +264444,7 @@
         }
       ],
       "import_dependencies": [
+        "sso",
         "users"
       ]
     },
@@ -264433,7 +264673,8 @@
         "router.py",
         "schemas.py",
         "seed.py",
-        "service.py"
+        "service.py",
+        "validators.py"
       ],
       "manifest": {
         "name": "oe_service",
@@ -265817,6 +266058,10 @@
             {
               "name": "updated_at",
               "type": "datetime"
+            },
+            {
+              "name": "validation_warnings",
+              "type": "list[dict[str, Any]]"
             }
           ]
         },
@@ -266512,6 +266757,10 @@
             {
               "name": "updated_at",
               "type": "datetime"
+            },
+            {
+              "name": "validation_warnings",
+              "type": "list[dict[str, Any]]"
             }
           ]
         },
@@ -268846,7 +269095,8 @@
         "repository.py",
         "router.py",
         "schemas.py",
-        "service.py"
+        "service.py",
+        "validators.py"
       ],
       "manifest": {
         "name": "oe_signing",
@@ -269411,6 +269661,10 @@
             {
               "name": "signatures",
               "type": "list[SignatureResponse]"
+            },
+            {
+              "name": "validation_warnings",
+              "type": "list[dict[str, Any]]"
             }
           ]
         },
@@ -273427,7 +273681,8 @@
         "schemas.py",
         "seed.py",
         "seed_text.py",
-        "service.py"
+        "service.py",
+        "validators.py"
       ],
       "manifest": {
         "name": "oe_site_prep",
@@ -273708,6 +273963,10 @@
           "docstring": "A mobilisation plan returned from the API.",
           "fields": [
             {
+              "name": "validation_warnings",
+              "type": "list[dict[str, Any]]"
+            },
+            {
               "name": "id",
               "type": "UUID"
             },
@@ -273868,6 +274127,10 @@
           ],
           "docstring": "A readiness item returned from the API.",
           "fields": [
+            {
+              "name": "validation_warnings",
+              "type": "list[dict[str, Any]]"
+            },
             {
               "name": "id",
               "type": "UUID"
@@ -276130,6 +276393,7 @@
         "permissions.py",
         "repository.py",
         "router.py",
+        "rules.py",
         "schemas.py",
         "service.py",
         "validators.py"
@@ -276520,6 +276784,10 @@
           "docstring": "Visit returned from the API.",
           "fields": [
             {
+              "name": "validation_warnings",
+              "type": "list[dict[str, Any]]"
+            },
+            {
               "name": "id",
               "type": "UUID"
             },
@@ -276671,6 +276939,10 @@
           ],
           "docstring": "Entry returned from the API.",
           "fields": [
+            {
+              "name": "validation_warnings",
+              "type": "list[dict[str, Any]]"
+            },
             {
               "name": "id",
               "type": "UUID"
@@ -277978,6 +278250,723 @@
         }
       ],
       "import_dependencies": []
+    },
+    {
+      "module_id": "sso",
+      "module_label": "Single Sign-On",
+      "module_category": "core",
+      "files": [
+        "__init__.py",
+        "manifest.py",
+        "models.py",
+        "repairs.py",
+        "repository.py",
+        "router.py",
+        "saml.py",
+        "schemas.py",
+        "service.py",
+        "validators.py"
+      ],
+      "manifest": {
+        "name": "oe_sso",
+        "version": "1.0.0",
+        "display_name": "Single Sign-On",
+        "description": "Company sign-in through OpenID Connect or SAML 2.0 identity providers, configured per tenant. Accounts are created on first sign-in, roles follow IdP groups and SCIM-provisioned people are linked, not duplicated. SAML needs the optional [saml] extra.",
+        "author": "OpenConstructionERP Core Team",
+        "category": "core",
+        "depends": [
+          "oe_users"
+        ],
+        "auto_install": true,
+        "enabled": true
+      },
+      "models": [
+        {
+          "class_name": "SsoProvider",
+          "tablename": "oe_sso_provider",
+          "docstring": "An identity provider. Secrets are stored encrypted (app.core.crypto).",
+          "columns": [
+            {
+              "name": "slug",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "display_name",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "protocol",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "enabled",
+              "annotation": "Mapped[bool]",
+              "sql_type": "Boolean",
+              "nullable": false
+            },
+            {
+              "name": "tenant_id",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "email_domains",
+              "annotation": "Mapped[list]",
+              "sql_type": "JSON",
+              "nullable": false
+            },
+            {
+              "name": "auto_create_users",
+              "annotation": "Mapped[bool]",
+              "sql_type": "Boolean",
+              "nullable": false
+            },
+            {
+              "name": "default_role",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "group_attribute",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "group_role_map",
+              "annotation": "Mapped[dict]",
+              "sql_type": "JSON",
+              "nullable": false
+            },
+            {
+              "name": "allow_admin_mapping",
+              "annotation": "Mapped[bool]",
+              "sql_type": "Boolean",
+              "nullable": false
+            },
+            {
+              "name": "clock_skew_seconds",
+              "annotation": "Mapped[int]",
+              "sql_type": "Integer",
+              "nullable": false
+            },
+            {
+              "name": "link_by_email",
+              "annotation": "Mapped[bool]",
+              "sql_type": "Boolean",
+              "nullable": false
+            },
+            {
+              "name": "oidc_issuer",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "oidc_client_id",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "oidc_client_secret_enc",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "Text",
+              "nullable": true
+            },
+            {
+              "name": "oidc_scopes",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "saml_idp_entity_id",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "saml_idp_sso_url",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "saml_idp_cert",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "Text",
+              "nullable": true
+            },
+            {
+              "name": "saml_sp_entity_id",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "saml_email_attribute",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "saml_name_attribute",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "saml_allow_idp_initiated",
+              "annotation": "Mapped[bool]",
+              "sql_type": "Boolean",
+              "nullable": false
+            }
+          ],
+          "relationships": []
+        },
+        {
+          "class_name": "SsoOneTime",
+          "tablename": "oe_sso_one_time",
+          "docstring": "A single-use value; the unique key makes a second consume fail.",
+          "columns": [
+            {
+              "name": "kind",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "value",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "provider_slug",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "expires_at",
+              "annotation": "Mapped[datetime]",
+              "sql_type": "DateTime",
+              "nullable": false
+            },
+            {
+              "name": "data",
+              "annotation": "Mapped[dict]",
+              "sql_type": "JSON",
+              "nullable": false
+            }
+          ],
+          "relationships": []
+        }
+      ],
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/capabilities/",
+          "handler": "capabilities",
+          "response_model": "sch.Capabilities"
+        },
+        {
+          "method": "GET",
+          "path": "/providers/",
+          "handler": "public_providers",
+          "response_model": "sch.PublicProviders",
+          "request_schema": "SsoService"
+        },
+        {
+          "method": "GET",
+          "path": "/saml/{slug}/metadata/",
+          "handler": "saml_metadata",
+          "request_schema": "SsoService"
+        },
+        {
+          "method": "GET",
+          "path": "/saml/{slug}/login/",
+          "handler": "saml_login",
+          "request_schema": "SsoService"
+        },
+        {
+          "method": "POST",
+          "path": "/saml/{slug}/acs/",
+          "handler": "saml_acs",
+          "request_schema": "Request"
+        },
+        {
+          "method": "POST",
+          "path": "/handoff/",
+          "handler": "handoff",
+          "response_model": "TokenResponse",
+          "request_schema": "sch.HandoffIn"
+        },
+        {
+          "method": "GET",
+          "path": "/oidc/{slug}/start/",
+          "handler": "oidc_start",
+          "response_model": "sch.OidcStart",
+          "request_schema": "SsoService"
+        },
+        {
+          "method": "POST",
+          "path": "/oidc/{slug}/callback/",
+          "handler": "oidc_callback",
+          "response_model": "TokenResponse",
+          "request_schema": "sch.OidcCallback"
+        },
+        {
+          "method": "GET",
+          "path": "/providers/admin/",
+          "handler": "list_providers",
+          "response_model": "sch.SsoListResponse",
+          "request_schema": "SsoService"
+        },
+        {
+          "method": "POST",
+          "path": "/providers/admin/",
+          "handler": "create_provider",
+          "response_model": "sch.ProviderOut",
+          "request_schema": "sch.ProviderCreate"
+        },
+        {
+          "method": "PATCH",
+          "path": "/providers/admin/{provider_id}",
+          "handler": "update_provider",
+          "response_model": "sch.ProviderOut",
+          "request_schema": "sch.ProviderUpdate"
+        },
+        {
+          "method": "DELETE",
+          "path": "/providers/admin/{provider_id}",
+          "handler": "delete_provider",
+          "request_schema": "SsoService"
+        }
+      ],
+      "schemas": [
+        {
+          "class_name": "ProviderBase",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "display_name",
+              "type": "str"
+            },
+            {
+              "name": "enabled",
+              "type": "bool",
+              "default": "True"
+            },
+            {
+              "name": "tenant_id",
+              "type": "str | None"
+            },
+            {
+              "name": "email_domains",
+              "type": "list[str]"
+            },
+            {
+              "name": "auto_create_users",
+              "type": "bool",
+              "default": "True"
+            },
+            {
+              "name": "default_role",
+              "type": "Role",
+              "default": "'viewer'"
+            },
+            {
+              "name": "group_attribute",
+              "type": "str"
+            },
+            {
+              "name": "group_role_map",
+              "type": "dict[str, str]"
+            },
+            {
+              "name": "allow_admin_mapping",
+              "type": "bool",
+              "default": "False"
+            },
+            {
+              "name": "clock_skew_seconds",
+              "type": "int",
+              "default": "120"
+            },
+            {
+              "name": "link_by_email",
+              "type": "bool",
+              "default": "False"
+            },
+            {
+              "name": "saml_allow_idp_initiated",
+              "type": "bool",
+              "default": "False"
+            },
+            {
+              "name": "oidc_issuer",
+              "type": "str | None"
+            },
+            {
+              "name": "oidc_client_id",
+              "type": "str | None"
+            },
+            {
+              "name": "oidc_scopes",
+              "type": "str"
+            },
+            {
+              "name": "saml_idp_entity_id",
+              "type": "str | None"
+            },
+            {
+              "name": "saml_idp_sso_url",
+              "type": "str | None"
+            },
+            {
+              "name": "saml_idp_cert",
+              "type": "str | None"
+            },
+            {
+              "name": "saml_sp_entity_id",
+              "type": "str | None"
+            },
+            {
+              "name": "saml_email_attribute",
+              "type": "str"
+            },
+            {
+              "name": "saml_name_attribute",
+              "type": "str"
+            }
+          ]
+        },
+        {
+          "class_name": "ProviderCreate",
+          "bases": [
+            "ProviderBase"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "slug",
+              "type": "str"
+            },
+            {
+              "name": "protocol",
+              "type": "Literal['oidc', 'saml']"
+            },
+            {
+              "name": "oidc_client_secret",
+              "type": "str | None"
+            }
+          ]
+        },
+        {
+          "class_name": "ProviderUpdate",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Every field optional; ``oidc_client_secret`` empty string clears it, absent keeps it.",
+          "fields": [
+            {
+              "name": "display_name",
+              "type": "str | None"
+            },
+            {
+              "name": "enabled",
+              "type": "bool | None",
+              "default": "None"
+            },
+            {
+              "name": "tenant_id",
+              "type": "str | None"
+            },
+            {
+              "name": "email_domains",
+              "type": "list[str] | None"
+            },
+            {
+              "name": "auto_create_users",
+              "type": "bool | None",
+              "default": "None"
+            },
+            {
+              "name": "default_role",
+              "type": "Role | None",
+              "default": "None"
+            },
+            {
+              "name": "group_attribute",
+              "type": "str | None"
+            },
+            {
+              "name": "group_role_map",
+              "type": "dict[str, str] | None",
+              "default": "None"
+            },
+            {
+              "name": "allow_admin_mapping",
+              "type": "bool | None",
+              "default": "None"
+            },
+            {
+              "name": "clock_skew_seconds",
+              "type": "int | None",
+              "default": "None"
+            },
+            {
+              "name": "link_by_email",
+              "type": "bool | None",
+              "default": "None"
+            },
+            {
+              "name": "saml_allow_idp_initiated",
+              "type": "bool | None",
+              "default": "None"
+            },
+            {
+              "name": "oidc_issuer",
+              "type": "str | None"
+            },
+            {
+              "name": "oidc_client_id",
+              "type": "str | None"
+            },
+            {
+              "name": "oidc_client_secret",
+              "type": "str | None"
+            },
+            {
+              "name": "oidc_scopes",
+              "type": "str | None"
+            },
+            {
+              "name": "saml_idp_entity_id",
+              "type": "str | None"
+            },
+            {
+              "name": "saml_idp_sso_url",
+              "type": "str | None"
+            },
+            {
+              "name": "saml_idp_cert",
+              "type": "str | None"
+            },
+            {
+              "name": "saml_sp_entity_id",
+              "type": "str | None"
+            },
+            {
+              "name": "saml_email_attribute",
+              "type": "str | None"
+            },
+            {
+              "name": "saml_name_attribute",
+              "type": "str | None"
+            }
+          ]
+        },
+        {
+          "class_name": "ProviderOut",
+          "bases": [
+            "ProviderBase"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "id",
+              "type": "uuid.UUID"
+            },
+            {
+              "name": "slug",
+              "type": "str"
+            },
+            {
+              "name": "protocol",
+              "type": "str"
+            },
+            {
+              "name": "has_client_secret",
+              "type": "bool",
+              "default": "False"
+            },
+            {
+              "name": "sp_entity_id",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "acs_url",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "metadata_url",
+              "type": "str | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "SsoListResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[ProviderOut]"
+            },
+            {
+              "name": "total",
+              "type": "int"
+            },
+            {
+              "name": "offset",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "limit",
+              "type": "int",
+              "default": "50"
+            }
+          ]
+        },
+        {
+          "class_name": "PublicProvider",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "What the login page may see: no secrets, no mapping.",
+          "fields": [
+            {
+              "name": "slug",
+              "type": "str"
+            },
+            {
+              "name": "display_name",
+              "type": "str"
+            },
+            {
+              "name": "protocol",
+              "type": "str"
+            },
+            {
+              "name": "login_url",
+              "type": "str | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "PublicProviders",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "saml_available",
+              "type": "bool"
+            },
+            {
+              "name": "providers",
+              "type": "list[PublicProvider]"
+            }
+          ]
+        },
+        {
+          "class_name": "OidcStart",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "authorization_endpoint",
+              "type": "str"
+            },
+            {
+              "name": "client_id",
+              "type": "str"
+            },
+            {
+              "name": "scopes",
+              "type": "str"
+            }
+          ]
+        },
+        {
+          "class_name": "OidcCallback",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "code",
+              "type": "str"
+            },
+            {
+              "name": "code_verifier",
+              "type": "str"
+            },
+            {
+              "name": "nonce",
+              "type": "str"
+            },
+            {
+              "name": "redirect_uri",
+              "type": "str"
+            }
+          ]
+        },
+        {
+          "class_name": "HandoffIn",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "code",
+              "type": "str"
+            }
+          ]
+        },
+        {
+          "class_name": "Capabilities",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "saml_available",
+              "type": "bool"
+            }
+          ]
+        }
+      ],
+      "import_dependencies": [
+        "users"
+      ]
     },
     {
       "module_id": "staffing",
@@ -286626,6 +287615,10 @@
         "rules.py",
         "schemas.py",
         "service.py",
+        "spec_checks.py",
+        "spec_parser.py",
+        "spec_routes.py",
+        "spec_service.py",
         "tracking.py",
         "validators.py",
         "vector_adapter.py"
@@ -286831,6 +287824,160 @@
               "annotation": "Mapped[dict]",
               "sql_type": "JSON",
               "nullable": false
+            }
+          ],
+          "relationships": []
+        },
+        {
+          "class_name": "SpecImport",
+          "tablename": "oe_submittals_spec_import",
+          "docstring": "One parse of a specification book (a Document) into proposed submittals.",
+          "columns": [
+            {
+              "name": "project_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_projects_project.id"
+            },
+            {
+              "name": "document_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_documents_document.id"
+            },
+            {
+              "name": "status",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "parser_version",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "section_count",
+              "annotation": "Mapped[int]",
+              "sql_type": "Integer",
+              "nullable": false
+            },
+            {
+              "name": "pages_total",
+              "annotation": "Mapped[int]",
+              "sql_type": "Integer",
+              "nullable": false
+            },
+            {
+              "name": "pages_done",
+              "annotation": "Mapped[int]",
+              "sql_type": "Integer",
+              "nullable": false
+            },
+            {
+              "name": "error_code",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "created_by",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "metadata_",
+              "annotation": "Mapped[dict]",
+              "sql_type": "JSON",
+              "nullable": false
+            }
+          ],
+          "relationships": []
+        },
+        {
+          "class_name": "SpecProposal",
+          "tablename": "oe_submittals_spec_proposal",
+          "docstring": "A submittal the specification asks for, proposed with a confidence, never created by itself.",
+          "columns": [
+            {
+              "name": "import_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_submittals_spec_import.id"
+            },
+            {
+              "name": "project_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false
+            },
+            {
+              "name": "spec_section",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "section_title",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "kind",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "submittal_type",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "title",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "source_page",
+              "annotation": "Mapped[int]",
+              "sql_type": "Integer",
+              "nullable": false
+            },
+            {
+              "name": "source_excerpt",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "confidence",
+              "annotation": "Mapped[float]",
+              "sql_type": "Float",
+              "nullable": false
+            },
+            {
+              "name": "decision",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "submittal_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
             }
           ],
           "relationships": []
@@ -287579,6 +288726,7 @@
       "import_dependencies": [
         "approval_routes",
         "documents",
+        "file_search",
         "users"
       ]
     },
@@ -292907,6 +294055,7 @@
         "__init__.py",
         "carry_over.py",
         "dedup.py",
+        "floorplan.py",
         "manifest.py",
         "manifest_verifier.py",
         "models.py",
@@ -292922,7 +294071,10 @@
         "schemas.py",
         "seed.py",
         "service.py",
-        "text_analyze.py"
+        "sheet_type.py",
+        "text_analyze.py",
+        "validators.py",
+        "vector_plan.py"
       ],
       "manifest": {
         "name": "oe_takeoff",
@@ -294002,6 +295154,11 @@
               "name": "notes",
               "type": "str | None",
               "default": "None"
+            },
+            {
+              "name": "truncated",
+              "type": "int",
+              "default": "0"
             }
           ]
         },
@@ -294590,6 +295747,10 @@
             {
               "name": "metadata",
               "type": "dict[str, Any]"
+            },
+            {
+              "name": "validation_warnings",
+              "type": "list[dict[str, Any]]"
             },
             {
               "name": "created_by",
@@ -305810,18 +306971,6 @@
         },
         {
           "method": "GET",
-          "path": "/auth/oidc/config/",
-          "handler": "oidc_config"
-        },
-        {
-          "method": "POST",
-          "path": "/auth/oidc/callback/",
-          "handler": "oidc_callback",
-          "response_model": "TokenResponse",
-          "request_schema": "Request"
-        },
-        {
-          "method": "GET",
           "path": "/first-run/",
           "handler": "first_run",
           "response_model": "FirstRunResponse",
@@ -306954,7 +308103,8 @@
         }
       ],
       "import_dependencies": [
-        "boq"
+        "boq",
+        "sso"
       ]
     },
     {
@@ -307662,6 +308812,7 @@
         "service.py",
         "time_factors_service.py",
         "time_saved.py",
+        "validators.py",
         "value_math.py"
       ],
       "manifest": {
@@ -308131,6 +309282,10 @@
             {
               "name": "factors",
               "type": "list[TimeFactorOut]"
+            },
+            {
+              "name": "validation_warnings",
+              "type": "list[dict[str, Any]]"
             }
           ]
         },
@@ -313384,6 +314539,7 @@
         "schemas.py",
         "seed.py",
         "service.py",
+        "validators.py",
         "waste_math.py"
       ],
       "manifest": {
@@ -313581,6 +314737,10 @@
             {
               "name": "updated_at",
               "type": "datetime"
+            },
+            {
+              "name": "warnings",
+              "type": "list[dict]"
             }
           ]
         },
@@ -315675,10 +316835,10 @@
     },
     {
       "name": "auth",
-      "ts_files": 22,
+      "ts_files": 24,
       "css_files": 0,
-      "test_files": 7,
-      "total_files": 22
+      "test_files": 8,
+      "total_files": 24
     },
     {
       "name": "authority-submission",
@@ -316445,10 +317605,10 @@
     },
     {
       "name": "inspections",
-      "ts_files": 7,
+      "ts_files": 10,
       "css_files": 0,
-      "test_files": 1,
-      "total_files": 7
+      "test_files": 4,
+      "total_files": 10
     },
     {
       "name": "integrations",
@@ -316571,10 +317731,10 @@
     },
     {
       "name": "moc",
-      "ts_files": 6,
+      "ts_files": 9,
       "css_files": 0,
-      "test_files": 1,
-      "total_files": 6
+      "test_files": 4,
+      "total_files": 9
     },
     {
       "name": "module-builder",
@@ -316998,10 +318158,10 @@
     },
     {
       "name": "settings",
-      "ts_files": 73,
+      "ts_files": 74,
       "css_files": 0,
       "test_files": 26,
-      "total_files": 73
+      "total_files": 74
     },
     {
       "name": "setup",
@@ -317103,10 +318263,10 @@
     },
     {
       "name": "submittals",
-      "ts_files": 24,
+      "ts_files": 27,
       "css_files": 0,
-      "test_files": 8,
-      "total_files": 24
+      "test_files": 9,
+      "total_files": 27
     },
     {
       "name": "supplier-catalogs",
@@ -317131,10 +318291,10 @@
     },
     {
       "name": "tasks",
-      "ts_files": 8,
+      "ts_files": 11,
       "css_files": 0,
-      "test_files": 1,
-      "total_files": 8
+      "test_files": 4,
+      "total_files": 11
     },
     {
       "name": "tax-rates",
@@ -318887,6 +320047,7 @@
       "variations"
     ],
     "scim": [
+      "sso",
       "users"
     ],
     "search": [
@@ -318967,6 +320128,9 @@
       "projects",
       "users"
     ],
+    "sso": [
+      "users"
+    ],
     "staffing": [
       "accommodation",
       "credentials",
@@ -319009,6 +320173,7 @@
     "submittals": [
       "approval_routes",
       "documents",
+      "file_search",
       "projects",
       "users"
     ],
@@ -319081,7 +320246,8 @@
       "us_pack"
     ],
     "users": [
-      "boq"
+      "boq",
+      "sso"
     ],
     "validation": [
       "bim_hub",
@@ -319134,16 +320300,16 @@
     ]
   },
   "statistics": {
-    "backend_modules": 245,
-    "modules_with_manifests": 245,
-    "total_models": 909,
-    "total_columns": 10668,
+    "backend_modules": 246,
+    "modules_with_manifests": 246,
+    "total_models": 913,
+    "total_columns": 10721,
     "total_relationships": 261,
-    "total_routes": 5225,
-    "total_schemas": 4735,
-    "total_python_files": 3373,
+    "total_routes": 5235,
+    "total_schemas": 4746,
+    "total_python_files": 3428,
     "frontend_features": 239,
-    "frontend_ts_files": 4204,
+    "frontend_ts_files": 4219,
     "frontend_backend_mapped": 214
   },
   "frontend_backend_mapping": {
