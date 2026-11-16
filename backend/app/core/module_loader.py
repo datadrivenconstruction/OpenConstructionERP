@@ -305,6 +305,14 @@ class ModuleLoader:
         # claiming the same key is both recognisable and rankable. See
         # _claim_name.
         self._manifest_dirs: dict[str, tuple[Path, int]] = {}
+        # Installed modules that did not load this boot, with the reason shown to
+        # the administrator. Cleared only by an explicit enable.
+        self._failed: dict[str, str] = {}
+        # Installed modules whose module.json rules out this platform version,
+        # found at discovery before any of their code ran.
+        self._incompatible: dict[str, str] = {}
+        # The module being loaded right now, so a failure can unmount its router.
+        self._partial: LoadedModule | None = None
 
     @property
     def loaded_modules(self) -> dict[str, LoadedModule]:
@@ -374,6 +382,12 @@ class ModuleLoader:
             if not manifest_file.exists():
                 continue
 
+            if root_rank > 0:
+                refused = self._refuse_incompatible(module_dir, manifest_file, root_rank)
+                if refused is not None:
+                    manifests.append(refused)
+                    continue
+
             try:
                 module_path = f"app.modules.{module_dir.name}.manifest"
                 mod = importlib.import_module(module_path)
@@ -394,6 +408,76 @@ class ModuleLoader:
                 logger.exception("Failed to load manifest from %s", module_dir.name)
 
         return manifests
+
+    def _refuse_incompatible(self, module_dir: Path, manifest_file: Path, root_rank: int) -> ModuleManifest | None:
+        """Register an installed module that does not fit this platform, without running it.
+
+        The manifest is read as source, not imported: code written against an
+        older platform may fail, or worse, half-work, on import.
+        """
+        from app.core.module_package import platform_incompatibility, read_manifest_fields
+
+        reason = platform_incompatibility(module_dir)
+        if reason is None:
+            return None
+        try:
+            fields = read_manifest_fields(manifest_file.read_text(encoding="utf-8"))
+        except OSError:
+            fields = {}
+        name = fields.get("name")
+        if not isinstance(name, str) or not name:
+            logger.error("Installed module %s is incompatible and has no readable name: %s", module_dir, reason)
+            return None
+        known = ("version", "display_name", "description", "author", "category", "depends", "optional_depends")
+        kwargs: dict[str, Any] = {k: fields[k] for k in known if k in fields}
+        kwargs.setdefault("version", "")
+        kwargs.setdefault("display_name", name)
+        try:
+            manifest = ModuleManifest(name=name, enabled=False, **kwargs)
+        except TypeError:
+            manifest = ModuleManifest(name=name, version="", display_name=name, enabled=False)
+        if not self._claim_name(manifest, module_dir, root_rank):
+            return None
+        self._incompatible[name] = reason
+        logger.error("Installed module %s is not loaded: %s", name, reason)
+        return manifest
+
+    def _is_shipped(self, module_name: str) -> bool:
+        """Whether a module comes from the shipped tree. Unknown origin counts as shipped."""
+        claim = self._manifest_dirs.get(module_name)
+        return claim is None or claim[1] == 0
+
+    def _record_failure(self, module_name: str, reason: str, *, persist: bool) -> None:
+        """Keep an installed module off for this boot and, when it is the culprit, for good."""
+        from app.core.module_state import set_module_enabled
+
+        self._failed[module_name] = reason
+        self._disabled.add(module_name)
+        manifest = self._manifests.get(module_name)
+        if manifest is not None:
+            manifest.enabled = False
+        if persist:
+            try:
+                set_module_enabled(module_name, False)
+            except Exception:
+                logger.exception("Could not persist the disabled state of %s", module_name)
+
+    def _unmount_partial(self, module_name: str, app: FastAPI) -> None:
+        """Remove the routes a failed load already mounted."""
+        partial, self._partial = self._partial, None
+        if partial is not None and partial.router is not None:
+            dir_name = module_name.removeprefix("oe_")
+            prefixes = {f"/api/v1/{dir_name.replace('_', '-')}", f"/api/v1/{dir_name}"}
+            app.routes[:] = [r for r in app.routes if not self._belongs_to(r, partial.router, prefixes)]
+            self._routes_changed(app)
+
+    @staticmethod
+    def _drop_new_tables(before: set[str]) -> None:
+        """Forget tables a failed module registered, so create_all never builds half a schema."""
+        from app.database import Base
+
+        for key in set(Base.metadata.tables) - before:
+            Base.metadata.remove(Base.metadata.tables[key])
 
     def _claim_name(self, manifest: ModuleManifest, module_dir: Path, root_rank: int = 0) -> bool:
         """Register ``manifest`` under its name. False when a better claim holds it.
@@ -460,6 +544,8 @@ class ModuleLoader:
         """
         self._modules.pop(module_name, None)
         self._disabled.discard(module_name)
+        self._failed.pop(module_name, None)
+        self._incompatible.pop(module_name, None)
         self._manifest_dirs.pop(module_name, None)
         return self._manifests.pop(module_name, None) is not None
 
@@ -507,28 +593,55 @@ class ModuleLoader:
         for name, state in states.items():
             if name in self._manifests and not state.enabled:
                 manifest = self._manifests[name]
-                if manifest.category != "core":
+                if manifest.category != "core" or not self._is_shipped(name):
                     manifest.enabled = False
                     self._disabled.add(name)
                     logger.info("Module %s is disabled by persisted state", name)
+
+        for name, reason in self._incompatible.items():
+            self._record_failure(name, reason, persist=True)
 
         order = self.resolve_order()
 
         logger.info("Loading %d modules in order: %s", len(order), order)
 
         from app.core.boot_state import yield_to_requests
+        from app.database import Base
 
         for module_name in order:
             # Imports block the event loop; behind an open port, let health and
             # static requests through between modules.
             await yield_to_requests()
+            if module_name in self._failed:
+                continue
+            blocked = [d for d in self._manifests[module_name].depends if d in self._failed]
+            if blocked:
+                reason = f"Requires {', '.join(blocked)}, which did not load."
+                if self._is_shipped(module_name):
+                    raise RuntimeError(f"Shipped module {module_name} cannot start: {reason}")
+                logger.error("Module %s is skipped: %s", module_name, reason)
+                self._record_failure(module_name, reason, persist=False)
+                continue
+            tables_before = set(Base.metadata.tables)
             try:
                 await self._load_module(module_name, app)
-            except Exception:
-                logger.exception("Failed to load module: %s", module_name)
-                raise
+            except Exception as exc:
+                if self._is_shipped(module_name):
+                    logger.exception("Failed to load shipped module %s; the platform cannot start", module_name)
+                    raise
+                # An installed module broke, usually against a newer platform.
+                # It goes off and stays off until an administrator enables it.
+                logger.exception("Installed module %s failed to load and is now disabled", module_name)
+                self._unmount_partial(module_name, app)
+                self._drop_new_tables(tables_before)
+                self._record_failure(module_name, f"{type(exc).__name__}: {exc}", persist=True)
+            finally:
+                self._partial = None
 
-        logger.info("All modules loaded successfully")
+        if self._failed:
+            logger.warning("Modules loaded; installed modules left off: %s", ", ".join(sorted(self._failed)))
+        else:
+            logger.info("All modules loaded successfully")
 
     async def _load_module(self, module_name: str, app: FastAPI) -> None:
         """Load a single module."""
@@ -547,6 +660,7 @@ class ModuleLoader:
             package = importlib.import_module(package_path)
 
         loaded = LoadedModule(manifest=manifest, package=package)
+        self._partial = loaded
 
         # Load router if exists
         try:
@@ -614,8 +728,10 @@ class ModuleLoader:
         try:
             models_mod = importlib.import_module(f"{package_path}.models")
             loaded.models = [models_mod]
-        except ModuleNotFoundError:
-            pass
+        except ModuleNotFoundError as exc:
+            # Absent models.py is fine; a models.py whose own import is missing is a broken module.
+            if exc.name != f"{package_path}.models":
+                raise
 
         # Load hooks
         with contextlib.suppress(ModuleNotFoundError):
@@ -670,6 +786,8 @@ class ModuleLoader:
                     "enabled": name not in self._disabled,
                     "is_core": manifest.category == "core",
                     "markets": list(manifest.markets),
+                    "failed": name in self._failed,
+                    "failure_reason": self._failed.get(name),
                 }
             )
 
@@ -713,9 +831,13 @@ class ModuleLoader:
                 else:
                     logger.warning("Missing dependency %s for %s", dep, module_name)
 
+        if module_name in self._incompatible:
+            raise ValueError(f"Module '{module_name}' cannot be enabled: {self._incompatible[module_name]}")
+
         # Update state
         manifest.enabled = True
         self._disabled.discard(module_name)
+        self._failed.pop(module_name, None)
 
         # Load if not already loaded. Also force a reload when a stale
         # _modules record exists but the live app route table no longer
