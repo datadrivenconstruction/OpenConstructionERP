@@ -110,7 +110,8 @@ function toDraft(p: Provider): Draft {
     display_name: p.display_name,
     enabled: p.enabled,
     tenant_id: p.tenant_id ?? '',
-    email_domains: p.email_domains.join(', '),
+    // Edit field parsed back by split(','): a locale list format would not round-trip.
+    email_domains: p.email_domains.join(',' + ' '),
     auto_create_users: p.auto_create_users,
     default_role: p.default_role,
     group_attribute: p.group_attribute,

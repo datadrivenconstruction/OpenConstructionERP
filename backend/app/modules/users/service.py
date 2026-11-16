@@ -450,7 +450,7 @@ class UserService:
         from app.config import get_settings as _get_settings
 
         _s = _get_settings()
-        await assert_password_allowed(_s, str(data.email), self.session)
+        await assert_password_allowed(_s, str(data.email), getattr(self, "session", None))
         mode = effective_registration_mode(_s)
 
         # "First real user becomes admin" bootstrap, only on a genuinely fresh
@@ -665,7 +665,7 @@ class UserService:
             return await self.demo_login(email_norm)
 
         user = await self.user_repo.get_by_email(data.email)
-        await assert_password_allowed(self.settings, email_norm, self.session, user)
+        await assert_password_allowed(self.settings, email_norm, getattr(self, "session", None), user)
 
         if user is None:
             # Dummy bcrypt check to prevent timing side-channel (user enumeration)
@@ -1031,7 +1031,7 @@ class UserService:
         slower than for an unknown one, which is enumeration by stopwatch.
         """
         user = await self.user_repo.get_by_email(data.email)
-        await assert_password_allowed(self.settings, data.email, self.session, user)
+        await assert_password_allowed(self.settings, data.email, getattr(self, "session", None), user)
 
         # Generic message regardless of whether the email exists
         message = "If this email exists, a password reset link has been sent."
@@ -1108,7 +1108,7 @@ class UserService:
                 detail="User not found or inactive",
             )
 
-        await assert_password_allowed(self.settings, user.email, self.session, user)
+        await assert_password_allowed(self.settings, user.email, getattr(self, "session", None), user)
 
         # Single-use guard: reject the token if password was already changed
         # after this token was issued (iat).  Mirrors the same logic used in

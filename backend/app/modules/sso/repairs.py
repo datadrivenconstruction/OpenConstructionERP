@@ -94,7 +94,7 @@ async def migrate_env_oidc(session: AsyncSession) -> int:
 
 SSO_ENV_OIDC_PROVIDER = register_data_repair(
     DataRepair(
-        repair_id=REPAIR_ID,
+        repair_id="sso_env_oidc_provider",
         revision="",
         summary="Move the environment OIDC configuration into an oe_sso provider row",
         run=migrate_env_oidc,
