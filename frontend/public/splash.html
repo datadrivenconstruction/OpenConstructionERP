@@ -296,6 +296,19 @@
     <p class="logpath" id="logpath"></p>
     <button class="copybtn" id="copybtn" type="button" data-i18n="copy">Copy details</button>
 
+    <!-- Shown with every startup failure: the log tail to send us, the folder it
+         lives in, and a Repair that runs on the next start and never deletes. -->
+    <div id="failactions" style="display:none">
+      <button class="copybtn" id="copylogbtn" type="button" data-i18n="copyLog">Copy log</button>
+      <button class="copybtn" id="openlogbtn" type="button" data-i18n="openLogFolder">Open log folder</button>
+      <button class="copybtn" id="repairbtn" type="button" data-i18n="repair">Repair</button>
+    </div>
+    <div id="repairconfirm" style="display:none">
+      <p class="hint" data-i18n="repairConfirm">Repair clears what an interrupted start left behind and restarts the app. Your projects and settings are kept.</p>
+      <button class="copybtn" id="repairyes" type="button" data-i18n="repairYes">Repair and restart</button>
+      <button class="copybtn" id="repairno" type="button" data-i18n="repairNo">Cancel</button>
+    </div>
+
     <!-- The way out of a configured server that cannot be reached. Hidden
          unless the launcher calls offerLocalFallback(), because on every other
          failure there is nothing here to fall back FROM: the local server is
@@ -389,7 +402,13 @@
         "uLater": "Not now",
         "uPrivacy": "To find this, OpenConstructionERP asked github.com which version is the latest. Nothing about you or this computer was sent.",
         "uOff": "Turn off update checks",
-        "uOffDone": "Update checks are off. Set the OE_DISABLE_UPDATE_CHECK environment variable to turn them off for every user on this computer."
+        "uOffDone": "Update checks are off. Set the OE_DISABLE_UPDATE_CHECK environment variable to turn them off for every user on this computer.",
+        "copyLog": "Copy log",
+        "openLogFolder": "Open log folder",
+        "repair": "Repair",
+        "repairConfirm": "Repair clears what an interrupted start left behind and restarts the app. Your projects and settings are kept.",
+        "repairYes": "Repair and restart",
+        "repairNo": "Cancel"
       },
       "de": {
         "status": "Anwendung wird gestartet",
@@ -429,7 +448,13 @@
         "uLater": "Nicht jetzt",
         "uPrivacy": "Um dies herauszufinden, hat OpenConstructionERP github.com gefragt, welche Version die aktuellste ist. Es wurden keine Daten über Sie oder diesen Computer gesendet.",
         "uOff": "Update-Prüfungen deaktivieren",
-        "uOffDone": "Update-Prüfungen sind deaktiviert. Setzen Sie die Umgebungsvariable OE_DISABLE_UPDATE_CHECK, um sie für alle Benutzer dieses Computers zu deaktivieren."
+        "uOffDone": "Update-Prüfungen sind deaktiviert. Setzen Sie die Umgebungsvariable OE_DISABLE_UPDATE_CHECK, um sie für alle Benutzer dieses Computers zu deaktivieren.",
+        "copyLog": "Protokoll kopieren",
+        "openLogFolder": "Protokollordner öffnen",
+        "repair": "Reparieren",
+        "repairConfirm": "Die Reparatur entfernt, was ein abgebrochener Start hinterlassen hat, und startet die App neu. Ihre Projekte und Einstellungen bleiben erhalten.",
+        "repairYes": "Reparieren und neu starten",
+        "repairNo": "Abbrechen"
       },
       "fr": {
         "status": "Démarrage de l'application",
@@ -469,7 +494,13 @@
         "uLater": "Pas maintenant",
         "uPrivacy": "Pour le savoir, OpenConstructionERP a demandé à github.com quelle est la dernière version. Aucune information vous concernant ou concernant cet ordinateur n'a été envoyée.",
         "uOff": "Désactiver la vérification des mises à jour",
-        "uOffDone": "La vérification des mises à jour est désactivée. Définissez la variable d'environnement OE_DISABLE_UPDATE_CHECK pour la désactiver pour tous les utilisateurs de cet ordinateur."
+        "uOffDone": "La vérification des mises à jour est désactivée. Définissez la variable d'environnement OE_DISABLE_UPDATE_CHECK pour la désactiver pour tous les utilisateurs de cet ordinateur.",
+        "copyLog": "Copier le journal",
+        "openLogFolder": "Ouvrir le dossier du journal",
+        "repair": "Réparer",
+        "repairConfirm": "La réparation supprime ce qu'un démarrage interrompu a laissé et redémarre l'application. Vos projets et réglages sont conservés.",
+        "repairYes": "Réparer et redémarrer",
+        "repairNo": "Annuler"
       },
       "es": {
         "status": "Iniciando la aplicación",
@@ -509,7 +540,13 @@
         "uLater": "Ahora no",
         "uPrivacy": "Para averiguarlo, OpenConstructionERP preguntó a github.com cuál es la última versión. No se envió ninguna información sobre usted ni sobre este equipo.",
         "uOff": "Desactivar la comprobación de actualizaciones",
-        "uOffDone": "La comprobación de actualizaciones está desactivada. Defina la variable de entorno OE_DISABLE_UPDATE_CHECK para desactivarla para todos los usuarios de este equipo."
+        "uOffDone": "La comprobación de actualizaciones está desactivada. Defina la variable de entorno OE_DISABLE_UPDATE_CHECK para desactivarla para todos los usuarios de este equipo.",
+        "copyLog": "Copiar registro",
+        "openLogFolder": "Abrir carpeta del registro",
+        "repair": "Reparar",
+        "repairConfirm": "La reparación elimina lo que dejó un inicio interrumpido y reinicia la aplicación. Sus proyectos y ajustes se conservan.",
+        "repairYes": "Reparar y reiniciar",
+        "repairNo": "Cancelar"
       },
       "pt": {
         "status": "A iniciar a aplicação",
@@ -549,7 +586,13 @@
         "uLater": "Agora não",
         "uPrivacy": "Para descobrir isto, o OpenConstructionERP perguntou ao github.com qual é a versão mais recente. Não foi enviada qualquer informação sobre si ou sobre este computador.",
         "uOff": "Desativar a verificação de atualizações",
-        "uOffDone": "A verificação de atualizações está desativada. Defina a variável de ambiente OE_DISABLE_UPDATE_CHECK para a desativar para todos os utilizadores deste computador."
+        "uOffDone": "A verificação de atualizações está desativada. Defina a variável de ambiente OE_DISABLE_UPDATE_CHECK para a desativar para todos os utilizadores deste computador.",
+        "copyLog": "Copiar registo",
+        "openLogFolder": "Abrir pasta do registo",
+        "repair": "Reparar",
+        "repairConfirm": "A reparação limpa o que um arranque interrompido deixou e reinicia a aplicação. Os seus projetos e definições são mantidos.",
+        "repairYes": "Reparar e reiniciar",
+        "repairNo": "Cancelar"
       },
       "pt-BR": {
         "status": "Iniciando o aplicativo",
@@ -589,7 +632,13 @@
         "uLater": "Agora não",
         "uPrivacy": "Para descobrir isso, o OpenConstructionERP perguntou ao github.com qual é a versão mais recente. Nenhuma informação sobre você ou este computador foi enviada.",
         "uOff": "Desativar verificação de atualizações",
-        "uOffDone": "A verificação de atualizações está desativada. Defina a variável de ambiente OE_DISABLE_UPDATE_CHECK para desativá-la para todos os usuários deste computador."
+        "uOffDone": "A verificação de atualizações está desativada. Defina a variável de ambiente OE_DISABLE_UPDATE_CHECK para desativá-la para todos os usuários deste computador.",
+        "copyLog": "Copiar log",
+        "openLogFolder": "Abrir pasta do log",
+        "repair": "Reparar",
+        "repairConfirm": "O reparo limpa o que uma inicialização interrompida deixou e reinicia o aplicativo. Seus projetos e configurações são mantidos.",
+        "repairYes": "Reparar e reiniciar",
+        "repairNo": "Cancelar"
       },
       "ru": {
         "status": "Запуск приложения",
@@ -629,7 +678,13 @@
         "uLater": "Не сейчас",
         "uPrivacy": "Чтобы узнать это, OpenConstructionERP запросил у github.com, какая версия последняя. Никакие данные о вас или этом компьютере не отправлялись.",
         "uOff": "Отключить проверку обновлений",
-        "uOffDone": "Проверка обновлений отключена. Чтобы отключить её для всех пользователей этого компьютера, задайте переменную окружения OE_DISABLE_UPDATE_CHECK."
+        "uOffDone": "Проверка обновлений отключена. Чтобы отключить её для всех пользователей этого компьютера, задайте переменную окружения OE_DISABLE_UPDATE_CHECK.",
+        "copyLog": "Скопировать журнал",
+        "openLogFolder": "Открыть папку журнала",
+        "repair": "Восстановить",
+        "repairConfirm": "Восстановление убирает то, что оставил прерванный запуск, и перезапускает приложение. Ваши проекты и настройки сохраняются.",
+        "repairYes": "Восстановить и перезапустить",
+        "repairNo": "Отмена"
       },
       "zh": {
         "status": "正在启动应用程序",
@@ -669,7 +724,13 @@
         "uLater": "暂不",
         "uPrivacy": "为了确认这一点，OpenConstructionERP 向 github.com 查询了最新版本号。未发送任何有关您或此计算机的信息。",
         "uOff": "关闭更新检查",
-        "uOffDone": "更新检查已关闭。设置环境变量 OE_DISABLE_UPDATE_CHECK，可为此计算机上的所有用户关闭更新检查。"
+        "uOffDone": "更新检查已关闭。设置环境变量 OE_DISABLE_UPDATE_CHECK，可为此计算机上的所有用户关闭更新检查。",
+        "copyLog": "复制日志",
+        "openLogFolder": "打开日志文件夹",
+        "repair": "修复",
+        "repairConfirm": "修复会清除中断的启动所遗留的内容并重新启动应用。您的项目和设置会被保留。",
+        "repairYes": "修复并重启",
+        "repairNo": "取消"
       },
       "ar": {
         "status": "جارٍ تشغيل التطبيق",
@@ -709,7 +770,13 @@
         "uLater": "ليس الآن",
         "uPrivacy": "لمعرفة ذلك، سأل OpenConstructionERP موقع github.com عن أحدث إصدار. لم يتم إرسال أي معلومات عنك أو عن هذا الجهاز.",
         "uOff": "إيقاف التحقق من التحديثات",
-        "uOffDone": "تم إيقاف التحقق من التحديثات. لإيقافه لجميع مستخدمي هذا الجهاز، عيّن متغير البيئة OE_DISABLE_UPDATE_CHECK."
+        "uOffDone": "تم إيقاف التحقق من التحديثات. لإيقافه لجميع مستخدمي هذا الجهاز، عيّن متغير البيئة OE_DISABLE_UPDATE_CHECK.",
+        "copyLog": "نسخ السجل",
+        "openLogFolder": "فتح مجلد السجل",
+        "repair": "إصلاح",
+        "repairConfirm": "يزيل الإصلاح ما تركه بدء تشغيل متقطع ويعيد تشغيل التطبيق. تبقى مشاريعك وإعداداتك كما هي.",
+        "repairYes": "إصلاح وإعادة التشغيل",
+        "repairNo": "إلغاء"
       },
       "hi": {
         "status": "एप्लिकेशन शुरू हो रहा है",
@@ -749,7 +816,13 @@
         "uLater": "अभी नहीं",
         "uPrivacy": "यह जानने के लिए, OpenConstructionERP ने github.com से पूछा कि नवीनतम संस्करण कौन-सा है। आपके या इस कंप्यूटर के बारे में कोई जानकारी नहीं भेजी गई।",
         "uOff": "अपडेट जांच बंद करें",
-        "uOffDone": "अपडेट जांच बंद है। इस कंप्यूटर के सभी उपयोगकर्ताओं के लिए इसे बंद करने हेतु OE_DISABLE_UPDATE_CHECK एनवायरनमेंट वेरिएबल सेट करें।"
+        "uOffDone": "अपडेट जांच बंद है। इस कंप्यूटर के सभी उपयोगकर्ताओं के लिए इसे बंद करने हेतु OE_DISABLE_UPDATE_CHECK एनवायरनमेंट वेरिएबल सेट करें।",
+        "copyLog": "लॉग कॉपी करें",
+        "openLogFolder": "लॉग फ़ोल्डर खोलें",
+        "repair": "सुधारें",
+        "repairConfirm": "सुधार बाधित शुरुआत से बची चीज़ों को साफ़ करता है और ऐप को फिर से शुरू करता है। आपकी परियोजनाएँ और सेटिंग्स सुरक्षित रहती हैं।",
+        "repairYes": "सुधारें और फिर से शुरू करें",
+        "repairNo": "रद्द करें"
       },
       "tr": {
         "status": "Uygulama başlatılıyor",
@@ -789,7 +862,13 @@
         "uLater": "Şimdi değil",
         "uPrivacy": "Bunu öğrenmek için OpenConstructionERP, en güncel sürümün hangisi olduğunu github.com'a sordu. Sizinle veya bu bilgisayarla ilgili hiçbir bilgi gönderilmedi.",
         "uOff": "Güncelleme denetimlerini kapat",
-        "uOffDone": "Güncelleme denetimleri kapalı. Bu bilgisayardaki tüm kullanıcılar için kapatmak üzere OE_DISABLE_UPDATE_CHECK ortam değişkenini ayarlayın."
+        "uOffDone": "Güncelleme denetimleri kapalı. Bu bilgisayardaki tüm kullanıcılar için kapatmak üzere OE_DISABLE_UPDATE_CHECK ortam değişkenini ayarlayın.",
+        "copyLog": "Günlüğü kopyala",
+        "openLogFolder": "Günlük klasörünü aç",
+        "repair": "Onar",
+        "repairConfirm": "Onarım, yarıda kalan bir başlatmanın bıraktıklarını temizler ve uygulamayı yeniden başlatır. Projeleriniz ve ayarlarınız korunur.",
+        "repairYes": "Onar ve yeniden başlat",
+        "repairNo": "İptal"
       },
       "it": {
         "status": "Avvio dell'applicazione",
@@ -829,7 +908,13 @@
         "uLater": "Non ora",
         "uPrivacy": "Per scoprirlo, OpenConstructionERP ha chiesto a github.com quale sia la versione più recente. Non è stata inviata alcuna informazione su di te o su questo computer.",
         "uOff": "Disattiva i controlli degli aggiornamenti",
-        "uOffDone": "I controlli degli aggiornamenti sono disattivati. Imposta la variabile d'ambiente OE_DISABLE_UPDATE_CHECK per disattivarli per tutti gli utenti di questo computer."
+        "uOffDone": "I controlli degli aggiornamenti sono disattivati. Imposta la variabile d'ambiente OE_DISABLE_UPDATE_CHECK per disattivarli per tutti gli utenti di questo computer.",
+        "copyLog": "Copia registro",
+        "openLogFolder": "Apri cartella del registro",
+        "repair": "Ripara",
+        "repairConfirm": "La riparazione elimina ciò che un avvio interrotto ha lasciato e riavvia l'app. I tuoi progetti e le impostazioni vengono mantenuti.",
+        "repairYes": "Ripara e riavvia",
+        "repairNo": "Annulla"
       },
       "nl": {
         "status": "De applicatie wordt gestart",
@@ -869,7 +954,13 @@
         "uLater": "Niet nu",
         "uPrivacy": "Om dit te achterhalen, heeft OpenConstructionERP aan github.com gevraagd welke versie de nieuwste is. Er is geen informatie over u of deze computer verzonden.",
         "uOff": "Updatecontroles uitschakelen",
-        "uOffDone": "Updatecontroles zijn uitgeschakeld. Stel de omgevingsvariabele OE_DISABLE_UPDATE_CHECK in om ze voor alle gebruikers van deze computer uit te schakelen."
+        "uOffDone": "Updatecontroles zijn uitgeschakeld. Stel de omgevingsvariabele OE_DISABLE_UPDATE_CHECK in om ze voor alle gebruikers van deze computer uit te schakelen.",
+        "copyLog": "Logboek kopiëren",
+        "openLogFolder": "Logmap openen",
+        "repair": "Herstellen",
+        "repairConfirm": "Herstellen ruimt op wat een onderbroken start heeft achtergelaten en start de app opnieuw. Uw projecten en instellingen blijven behouden.",
+        "repairYes": "Herstellen en opnieuw starten",
+        "repairNo": "Annuleren"
       },
       "pl": {
         "status": "Uruchamianie aplikacji",
@@ -909,7 +1000,13 @@
         "uLater": "Nie teraz",
         "uPrivacy": "Aby to sprawdzić, OpenConstructionERP zapytał github.com, która wersja jest najnowsza. Nie wysłano żadnych informacji o Tobie ani o tym komputerze.",
         "uOff": "Wyłącz sprawdzanie aktualizacji",
-        "uOffDone": "Sprawdzanie aktualizacji jest wyłączone. Aby wyłączyć je dla wszystkich użytkowników tego komputera, ustaw zmienną środowiskową OE_DISABLE_UPDATE_CHECK."
+        "uOffDone": "Sprawdzanie aktualizacji jest wyłączone. Aby wyłączyć je dla wszystkich użytkowników tego komputera, ustaw zmienną środowiskową OE_DISABLE_UPDATE_CHECK.",
+        "copyLog": "Kopiuj dziennik",
+        "openLogFolder": "Otwórz folder dziennika",
+        "repair": "Napraw",
+        "repairConfirm": "Naprawa usuwa to, co zostawiło przerwane uruchomienie, i ponownie uruchamia aplikację. Twoje projekty i ustawienia zostają zachowane.",
+        "repairYes": "Napraw i uruchom ponownie",
+        "repairNo": "Anuluj"
       },
       "cs": {
         "status": "Spouštění aplikace",
@@ -949,7 +1046,13 @@
         "uLater": "Teď ne",
         "uPrivacy": "Aby to zjistil, zeptal se OpenConstructionERP serveru github.com, která verze je nejnovější. Nebyly odeslány žádné informace o vás ani o tomto počítači.",
         "uOff": "Vypnout kontrolu aktualizací",
-        "uOffDone": "Kontrola aktualizací je vypnutá. Chcete-li ji vypnout pro všechny uživatele tohoto počítače, nastavte proměnnou prostředí OE_DISABLE_UPDATE_CHECK."
+        "uOffDone": "Kontrola aktualizací je vypnutá. Chcete-li ji vypnout pro všechny uživatele tohoto počítače, nastavte proměnnou prostředí OE_DISABLE_UPDATE_CHECK.",
+        "copyLog": "Kopírovat protokol",
+        "openLogFolder": "Otevřít složku protokolu",
+        "repair": "Opravit",
+        "repairConfirm": "Oprava odstraní, co zanechalo přerušené spuštění, a aplikaci restartuje. Vaše projekty a nastavení zůstanou zachovány.",
+        "repairYes": "Opravit a restartovat",
+        "repairNo": "Zrušit"
       },
       "hu": {
         "status": "Az alkalmazás indítása",
@@ -989,7 +1092,13 @@
         "uLater": "Most nem",
         "uPrivacy": "Ennek megállapításához az OpenConstructionERP a github.com kiszolgálótól kérdezte meg, melyik a legújabb verzió. Önről és erről a számítógépről semmilyen adat nem került elküldésre.",
         "uOff": "Frissítések keresésének kikapcsolása",
-        "uOffDone": "A frissítések keresése ki van kapcsolva. Ha a számítógép minden felhasználójánál ki szeretné kapcsolni, állítsa be az OE_DISABLE_UPDATE_CHECK környezeti változót."
+        "uOffDone": "A frissítések keresése ki van kapcsolva. Ha a számítógép minden felhasználójánál ki szeretné kapcsolni, állítsa be az OE_DISABLE_UPDATE_CHECK környezeti változót.",
+        "copyLog": "Napló másolása",
+        "openLogFolder": "Naplómappa megnyitása",
+        "repair": "Javítás",
+        "repairConfirm": "A javítás eltávolítja, amit egy megszakadt indítás hátrahagyott, és újraindítja az alkalmazást. A projektjei és beállításai megmaradnak.",
+        "repairYes": "Javítás és újraindítás",
+        "repairNo": "Mégse"
       },
       "ja": {
         "status": "アプリケーションを起動しています",
@@ -1029,7 +1138,13 @@
         "uLater": "後で",
         "uPrivacy": "これを確認するため、OpenConstructionERP は github.com に最新バージョンを問い合わせました。お客様やこのコンピューターに関する情報は送信されていません。",
         "uOff": "更新チェックをオフにする",
-        "uOffDone": "更新チェックはオフになっています。このコンピューターのすべてのユーザーに対してオフにするには、環境変数 OE_DISABLE_UPDATE_CHECK を設定してください。"
+        "uOffDone": "更新チェックはオフになっています。このコンピューターのすべてのユーザーに対してオフにするには、環境変数 OE_DISABLE_UPDATE_CHECK を設定してください。",
+        "copyLog": "ログをコピー",
+        "openLogFolder": "ログフォルダーを開く",
+        "repair": "修復",
+        "repairConfirm": "修復では、中断された起動が残したものを片付けてアプリを再起動します。プロジェクトと設定はそのまま残ります。",
+        "repairYes": "修復して再起動",
+        "repairNo": "キャンセル"
       },
       "ko": {
         "status": "애플리케이션을 시작하는 중",
@@ -1069,7 +1184,13 @@
         "uLater": "나중에",
         "uPrivacy": "이를 확인하기 위해 OpenConstructionERP는 github.com에 최신 버전이 무엇인지 문의했습니다. 사용자나 이 컴퓨터에 관한 정보는 전송되지 않았습니다.",
         "uOff": "업데이트 확인 끄기",
-        "uOffDone": "업데이트 확인이 꺼져 있습니다. 이 컴퓨터의 모든 사용자에 대해 끄려면 OE_DISABLE_UPDATE_CHECK 환경 변수를 설정하세요."
+        "uOffDone": "업데이트 확인이 꺼져 있습니다. 이 컴퓨터의 모든 사용자에 대해 끄려면 OE_DISABLE_UPDATE_CHECK 환경 변수를 설정하세요.",
+        "copyLog": "로그 복사",
+        "openLogFolder": "로그 폴더 열기",
+        "repair": "복구",
+        "repairConfirm": "복구는 중단된 시작이 남긴 항목을 정리하고 앱을 다시 시작합니다. 프로젝트와 설정은 그대로 유지됩니다.",
+        "repairYes": "복구 후 다시 시작",
+        "repairNo": "취소"
       },
       "sv": {
         "status": "Programmet startar",
@@ -1109,7 +1230,13 @@
         "uLater": "Inte nu",
         "uPrivacy": "För att ta reda på detta frågade OpenConstructionERP github.com vilken version som är senast. Ingen information om dig eller den här datorn skickades.",
         "uOff": "Stäng av uppdateringskontroller",
-        "uOffDone": "Uppdateringskontroller är avstängda. Ange miljövariabeln OE_DISABLE_UPDATE_CHECK för att stänga av dem för alla användare på den här datorn."
+        "uOffDone": "Uppdateringskontroller är avstängda. Ange miljövariabeln OE_DISABLE_UPDATE_CHECK för att stänga av dem för alla användare på den här datorn.",
+        "copyLog": "Kopiera logg",
+        "openLogFolder": "Öppna loggmappen",
+        "repair": "Reparera",
+        "repairConfirm": "Reparationen rensar det en avbruten start lämnade kvar och startar om appen. Dina projekt och inställningar behålls.",
+        "repairYes": "Reparera och starta om",
+        "repairNo": "Avbryt"
       },
       "no": {
         "status": "Starter programmet",
@@ -1149,7 +1276,13 @@
         "uLater": "Ikke nå",
         "uPrivacy": "For å finne ut dette spurte OpenConstructionERP github.com om hvilken versjon som er nyest. Ingen informasjon om deg eller denne datamaskinen ble sendt.",
         "uOff": "Slå av oppdateringskontroller",
-        "uOffDone": "Oppdateringskontroller er slått av. Angi miljøvariabelen OE_DISABLE_UPDATE_CHECK for å slå dem av for alle brukere på denne datamaskinen."
+        "uOffDone": "Oppdateringskontroller er slått av. Angi miljøvariabelen OE_DISABLE_UPDATE_CHECK for å slå dem av for alle brukere på denne datamaskinen.",
+        "copyLog": "Kopier logg",
+        "openLogFolder": "Åpne loggmappen",
+        "repair": "Reparer",
+        "repairConfirm": "Reparasjonen rydder opp etter en avbrutt oppstart og starter appen på nytt. Prosjektene og innstillingene dine beholdes.",
+        "repairYes": "Reparer og start på nytt",
+        "repairNo": "Avbryt"
       },
       "da": {
         "status": "Starter programmet",
@@ -1189,7 +1322,13 @@
         "uLater": "Ikke nu",
         "uPrivacy": "For at finde ud af dette spurgte OpenConstructionERP github.com, hvilken version der er den nyeste. Der blev ikke sendt oplysninger om dig eller denne computer.",
         "uOff": "Slå opdateringstjek fra",
-        "uOffDone": "Opdateringstjek er slået fra. Angiv miljøvariablen OE_DISABLE_UPDATE_CHECK for at slå det fra for alle brugere på denne computer."
+        "uOffDone": "Opdateringstjek er slået fra. Angiv miljøvariablen OE_DISABLE_UPDATE_CHECK for at slå det fra for alle brugere på denne computer.",
+        "copyLog": "Kopiér log",
+        "openLogFolder": "Åbn logmappen",
+        "repair": "Reparér",
+        "repairConfirm": "Reparationen rydder op efter en afbrudt opstart og genstarter appen. Dine projekter og indstillinger bevares.",
+        "repairYes": "Reparér og genstart",
+        "repairNo": "Annuller"
       },
       "fi": {
         "status": "Sovellusta käynnistetään",
@@ -1229,7 +1368,13 @@
         "uLater": "Ei nyt",
         "uPrivacy": "Selvittääkseen tämän OpenConstructionERP kysyi sivustolta github.com, mikä versio on uusin. Sinusta tai tästä tietokoneesta ei lähetetty mitään tietoja.",
         "uOff": "Poista päivitystarkistukset käytöstä",
-        "uOffDone": "Päivitystarkistukset ovat pois käytöstä. Aseta ympäristömuuttuja OE_DISABLE_UPDATE_CHECK poistaaksesi ne käytöstä kaikilta tämän tietokoneen käyttäjiltä."
+        "uOffDone": "Päivitystarkistukset ovat pois käytöstä. Aseta ympäristömuuttuja OE_DISABLE_UPDATE_CHECK poistaaksesi ne käytöstä kaikilta tämän tietokoneen käyttäjiltä.",
+        "copyLog": "Kopioi loki",
+        "openLogFolder": "Avaa lokikansio",
+        "repair": "Korjaa",
+        "repairConfirm": "Korjaus siivoaa keskeytyneen käynnistyksen jäljet ja käynnistää sovelluksen uudelleen. Projektisi ja asetuksesi säilyvät.",
+        "repairYes": "Korjaa ja käynnistä uudelleen",
+        "repairNo": "Peruuta"
       },
       "bg": {
         "status": "Приложението се стартира",
@@ -1269,7 +1414,13 @@
         "uLater": "Не сега",
         "uPrivacy": "За да установи това, OpenConstructionERP попита github.com коя е последната версия. Не бяха изпратени данни за вас или този компютър.",
         "uOff": "Изключване на проверката за актуализации",
-        "uOffDone": "Проверката за актуализации е изключена. За да я изключите за всички потребители на този компютър, задайте променливата на средата OE_DISABLE_UPDATE_CHECK."
+        "uOffDone": "Проверката за актуализации е изключена. За да я изключите за всички потребители на този компютър, задайте променливата на средата OE_DISABLE_UPDATE_CHECK.",
+        "copyLog": "Копиране на дневника",
+        "openLogFolder": "Отваряне на папката с дневника",
+        "repair": "Поправка",
+        "repairConfirm": "Поправката премахва оставеното от прекъснато стартиране и рестартира приложението. Проектите и настройките ви се запазват.",
+        "repairYes": "Поправка и рестартиране",
+        "repairNo": "Отказ"
       },
       "hr": {
         "status": "Pokretanje aplikacije",
@@ -1309,7 +1460,13 @@
         "uLater": "Ne sada",
         "uPrivacy": "Kako bi to saznao, OpenConstructionERP je upitao github.com koja je verzija najnovija. Nisu poslani nikakvi podaci o vama ili ovom računalu.",
         "uOff": "Isključi provjeru ažuriranja",
-        "uOffDone": "Provjera ažuriranja je isključena. Postavite varijablu okruženja OE_DISABLE_UPDATE_CHECK da biste je isključili za sve korisnike ovog računala."
+        "uOffDone": "Provjera ažuriranja je isključena. Postavite varijablu okruženja OE_DISABLE_UPDATE_CHECK da biste je isključili za sve korisnike ovog računala.",
+        "copyLog": "Kopiraj zapisnik",
+        "openLogFolder": "Otvori mapu zapisnika",
+        "repair": "Popravi",
+        "repairConfirm": "Popravak uklanja ono što je ostavilo prekinuto pokretanje i ponovno pokreće aplikaciju. Vaši projekti i postavke ostaju sačuvani.",
+        "repairYes": "Popravi i ponovno pokreni",
+        "repairNo": "Odustani"
       },
       "id": {
         "status": "Memulai aplikasi",
@@ -1349,7 +1506,13 @@
         "uLater": "Nanti saja",
         "uPrivacy": "Untuk mengetahuinya, OpenConstructionERP menanyakan ke github.com versi mana yang terbaru. Tidak ada informasi tentang Anda atau komputer ini yang dikirim.",
         "uOff": "Matikan pemeriksaan pembaruan",
-        "uOffDone": "Pemeriksaan pembaruan dimatikan. Atur variabel lingkungan OE_DISABLE_UPDATE_CHECK untuk mematikannya bagi semua pengguna di komputer ini."
+        "uOffDone": "Pemeriksaan pembaruan dimatikan. Atur variabel lingkungan OE_DISABLE_UPDATE_CHECK untuk mematikannya bagi semua pengguna di komputer ini.",
+        "copyLog": "Salin log",
+        "openLogFolder": "Buka folder log",
+        "repair": "Perbaiki",
+        "repairConfirm": "Perbaikan membersihkan sisa dari proses mulai yang terputus lalu memulai ulang aplikasi. Proyek dan pengaturan Anda tetap tersimpan.",
+        "repairYes": "Perbaiki dan mulai ulang",
+        "repairNo": "Batal"
       },
       "ro": {
         "status": "Se pornește aplicația",
@@ -1389,7 +1552,13 @@
         "uLater": "Nu acum",
         "uPrivacy": "Pentru a afla acest lucru, OpenConstructionERP a întrebat github.com care este cea mai recentă versiune. Nu au fost trimise informații despre dumneavoastră sau despre acest computer.",
         "uOff": "Dezactivați verificarea actualizărilor",
-        "uOffDone": "Verificarea actualizărilor este dezactivată. Setați variabila de mediu OE_DISABLE_UPDATE_CHECK pentru a o dezactiva pentru toți utilizatorii acestui computer."
+        "uOffDone": "Verificarea actualizărilor este dezactivată. Setați variabila de mediu OE_DISABLE_UPDATE_CHECK pentru a o dezactiva pentru toți utilizatorii acestui computer.",
+        "copyLog": "Copiază jurnalul",
+        "openLogFolder": "Deschide folderul jurnalului",
+        "repair": "Repară",
+        "repairConfirm": "Repararea curăță ce a lăsat o pornire întreruptă și repornește aplicația. Proiectele și setările dvs. se păstrează.",
+        "repairYes": "Repară și repornește",
+        "repairNo": "Anulează"
       },
       "th": {
         "status": "กำลังเริ่มแอปพลิเคชัน",
@@ -1429,7 +1598,13 @@
         "uLater": "ไว้ทีหลัง",
         "uPrivacy": "เพื่อตรวจสอบเรื่องนี้ OpenConstructionERP ได้สอบถาม github.com ว่าเวอร์ชันใดล่าสุด ไม่มีการส่งข้อมูลใด ๆ เกี่ยวกับคุณหรือคอมพิวเตอร์เครื่องนี้",
         "uOff": "ปิดการตรวจสอบอัปเดต",
-        "uOffDone": "การตรวจสอบอัปเดตถูกปิดอยู่ หากต้องการปิดสำหรับผู้ใช้ทุกคนบนคอมพิวเตอร์เครื่องนี้ ให้ตั้งค่าตัวแปรสภาพแวดล้อม OE_DISABLE_UPDATE_CHECK"
+        "uOffDone": "การตรวจสอบอัปเดตถูกปิดอยู่ หากต้องการปิดสำหรับผู้ใช้ทุกคนบนคอมพิวเตอร์เครื่องนี้ ให้ตั้งค่าตัวแปรสภาพแวดล้อม OE_DISABLE_UPDATE_CHECK",
+        "copyLog": "คัดลอกบันทึก",
+        "openLogFolder": "เปิดโฟลเดอร์บันทึก",
+        "repair": "ซ่อมแซม",
+        "repairConfirm": "การซ่อมแซมจะล้างสิ่งที่การเริ่มต้นที่ถูกขัดจังหวะทิ้งไว้ และเริ่มแอปใหม่ โปรเจกต์และการตั้งค่าของคุณจะยังอยู่ครบ",
+        "repairYes": "ซ่อมแซมและเริ่มใหม่",
+        "repairNo": "ยกเลิก"
       },
       "vi": {
         "status": "Đang khởi động ứng dụng",
@@ -1469,7 +1644,13 @@
         "uLater": "Để sau",
         "uPrivacy": "Để biết điều này, OpenConstructionERP đã hỏi github.com xem phiên bản nào là mới nhất. Không có thông tin nào về bạn hoặc máy tính này được gửi đi.",
         "uOff": "Tắt kiểm tra cập nhật",
-        "uOffDone": "Kiểm tra cập nhật đã tắt. Đặt biến môi trường OE_DISABLE_UPDATE_CHECK để tắt tính năng này cho mọi người dùng trên máy tính này."
+        "uOffDone": "Kiểm tra cập nhật đã tắt. Đặt biến môi trường OE_DISABLE_UPDATE_CHECK để tắt tính năng này cho mọi người dùng trên máy tính này.",
+        "copyLog": "Sao chép nhật ký",
+        "openLogFolder": "Mở thư mục nhật ký",
+        "repair": "Sửa chữa",
+        "repairConfirm": "Sửa chữa sẽ dọn những gì một lần khởi động bị gián đoạn để lại và khởi động lại ứng dụng. Dự án và cài đặt của bạn được giữ nguyên.",
+        "repairYes": "Sửa chữa và khởi động lại",
+        "repairNo": "Hủy"
       },
       "ky": {
         "status": "Колдонмо иштетилүүдө",
@@ -1509,7 +1690,13 @@
         "uLater": "Азыр эмес",
         "uPrivacy": "Муну билүү үчүн OpenConstructionERP github.com сайтынан кайсы версия эң акыркысы экенин сурады. Сиз же бул компьютер жөнүндө эч кандай маалымат жөнөтүлгөн жок.",
         "uOff": "Жаңылоолорду текшерүүнү өчүрүү",
-        "uOffDone": "Жаңылоолорду текшерүү өчүрүлгөн. Бул компьютердеги бардык колдонуучулар үчүн өчүрүү үчүн OE_DISABLE_UPDATE_CHECK чөйрө өзгөрмөсүн коюңуз."
+        "uOffDone": "Жаңылоолорду текшерүү өчүрүлгөн. Бул компьютердеги бардык колдонуучулар үчүн өчүрүү үчүн OE_DISABLE_UPDATE_CHECK чөйрө өзгөрмөсүн коюңуз.",
+        "copyLog": "Журналды көчүрүү",
+        "openLogFolder": "Журнал папкасын ачуу",
+        "repair": "Оңдоо",
+        "repairConfirm": "Оңдоо үзгүлтүккө учураган ишке киргизүүдөн калган нерселерди тазалап, колдонмону кайра иштетет. Долбоорлоруңуз жана жөндөөлөрүңүз сакталат.",
+        "repairYes": "Оңдоп, кайра иштетүү",
+        "repairNo": "Жокко чыгаруу"
       },
       "et": {
         "status": "Rakenduse käivitamine",
@@ -1549,7 +1736,13 @@
         "uLater": "Mitte praegu",
         "uPrivacy": "Selle väljaselgitamiseks küsis OpenConstructionERP saidilt github.com, milline versioon on uusim. Teie ega selle arvuti kohta teavet ei saadetud.",
         "uOff": "Lülita uuenduste kontroll välja",
-        "uOffDone": "Uuenduste kontroll on välja lülitatud. Selle väljalülitamiseks kõigi selle arvuti kasutajate jaoks määrake keskkonnamuutuja OE_DISABLE_UPDATE_CHECK."
+        "uOffDone": "Uuenduste kontroll on välja lülitatud. Selle väljalülitamiseks kõigi selle arvuti kasutajate jaoks määrake keskkonnamuutuja OE_DISABLE_UPDATE_CHECK.",
+        "copyLog": "Kopeeri logi",
+        "openLogFolder": "Ava logikaust",
+        "repair": "Paranda",
+        "repairConfirm": "Parandamine koristab katkenud käivitusest jäänu ja käivitab rakenduse uuesti. Teie projektid ja seaded jäävad alles.",
+        "repairYes": "Paranda ja käivita uuesti",
+        "repairNo": "Loobu"
       },
       "bn": {
         "status": "অ্যাপ্লিকেশন চালু হচ্ছে",
@@ -1589,7 +1782,13 @@
         "uLater": "এখন নয়",
         "uPrivacy": "এটি জানতে, OpenConstructionERP github.com-কে জিজ্ঞাসা করেছিল কোন সংস্করণটি সর্বশেষ। আপনার বা এই কম্পিউটার সম্পর্কে কোনো তথ্য পাঠানো হয়নি।",
         "uOff": "আপডেট পরীক্ষা বন্ধ করুন",
-        "uOffDone": "আপডেট পরীক্ষা বন্ধ আছে। এই কম্পিউটারের সকল ব্যবহারকারীর জন্য এটি বন্ধ করতে OE_DISABLE_UPDATE_CHECK এনভায়রনমেন্ট ভেরিয়েবল সেট করুন।"
+        "uOffDone": "আপডেট পরীক্ষা বন্ধ আছে। এই কম্পিউটারের সকল ব্যবহারকারীর জন্য এটি বন্ধ করতে OE_DISABLE_UPDATE_CHECK এনভায়রনমেন্ট ভেরিয়েবল সেট করুন।",
+        "copyLog": "লগ কপি করুন",
+        "openLogFolder": "লগ ফোল্ডার খুলুন",
+        "repair": "মেরামত",
+        "repairConfirm": "মেরামত বাধাপ্রাপ্ত শুরুর রেখে যাওয়া জিনিস পরিষ্কার করে এবং অ্যাপটি আবার চালু করে। আপনার প্রকল্প ও সেটিংস রাখা থাকে।",
+        "repairYes": "মেরামত করে আবার চালু করুন",
+        "repairNo": "বাতিল"
       },
       "kk": {
         "status": "Қолданба іске қосылуда",
@@ -1629,7 +1828,13 @@
         "uLater": "Қазір емес",
         "uPrivacy": "Мұны білу үшін OpenConstructionERP github.com сайтынан қай нұсқа соңғы екенін сұрады. Сіз немесе осы компьютер туралы ешқандай ақпарат жіберілмеді.",
         "uOff": "Жаңарту тексерулерін өшіру",
-        "uOffDone": "Жаңарту тексерулері өшірулі. Осы компьютердегі барлық пайдаланушылар үшін өшіру үшін OE_DISABLE_UPDATE_CHECK орта айнымалысын орнатыңыз."
+        "uOffDone": "Жаңарту тексерулері өшірулі. Осы компьютердегі барлық пайдаланушылар үшін өшіру үшін OE_DISABLE_UPDATE_CHECK орта айнымалысын орнатыңыз.",
+        "copyLog": "Журналды көшіру",
+        "openLogFolder": "Журнал қалтасын ашу",
+        "repair": "Жөндеу",
+        "repairConfirm": "Жөндеу үзілген іске қосудан қалған нәрселерді тазалап, қолданбаны қайта іске қосады. Жобаларыңыз бен баптауларыңыз сақталады.",
+        "repairYes": "Жөндеп, қайта іске қосу",
+        "repairNo": "Бас тарту"
       },
       "fil": {
         "status": "Sinisimulan ang aplikasyon",
@@ -1669,7 +1874,13 @@
         "uLater": "Hindi ngayon",
         "uPrivacy": "Para malaman ito, tinanong ng OpenConstructionERP ang github.com kung anong bersyon ang pinakabago. Walang impormasyon tungkol sa iyo o sa computer na ito ang naipadala.",
         "uOff": "I-off ang pagsuri ng update",
-        "uOffDone": "Naka-off ang pagsuri ng update. Itakda ang environment variable na OE_DISABLE_UPDATE_CHECK para i-off ito para sa lahat ng user ng computer na ito."
+        "uOffDone": "Naka-off ang pagsuri ng update. Itakda ang environment variable na OE_DISABLE_UPDATE_CHECK para i-off ito para sa lahat ng user ng computer na ito.",
+        "copyLog": "Kopyahin ang log",
+        "openLogFolder": "Buksan ang folder ng log",
+        "repair": "Ayusin",
+        "repairConfirm": "Nililinis ng pag-aayos ang naiwan ng naputol na pagsisimula at muling sinisimulan ang app. Mananatili ang iyong mga proyekto at setting.",
+        "repairYes": "Ayusin at simulan muli",
+        "repairNo": "Kanselahin"
       },
       "ur": {
         "status": "ایپلیکیشن شروع ہو رہی ہے",
@@ -1709,7 +1920,13 @@
         "uLater": "ابھی نہیں",
         "uPrivacy": "یہ جاننے کے لیے، OpenConstructionERP نے github.com سے پوچھا کہ تازہ ترین ورژن کون سا ہے۔ آپ یا اس کمپیوٹر کے بارے میں کوئی معلومات نہیں بھیجی گئیں۔",
         "uOff": "اپ ڈیٹ چیکس بند کریں",
-        "uOffDone": "اپ ڈیٹ چیکس بند ہیں۔ اس کمپیوٹر کے تمام صارفین کے لیے انہیں بند کرنے کے لیے OE_DISABLE_UPDATE_CHECK ماحولیاتی متغیر سیٹ کریں۔"
+        "uOffDone": "اپ ڈیٹ چیکس بند ہیں۔ اس کمپیوٹر کے تمام صارفین کے لیے انہیں بند کرنے کے لیے OE_DISABLE_UPDATE_CHECK ماحولیاتی متغیر سیٹ کریں۔",
+        "copyLog": "لاگ کاپی کریں",
+        "openLogFolder": "لاگ فولڈر کھولیں",
+        "repair": "مرمت",
+        "repairConfirm": "مرمت ادھورے آغاز کی چھوڑی ہوئی چیزیں صاف کرتی ہے اور ایپ دوبارہ شروع کرتی ہے۔ آپ کے پروجیکٹ اور ترتیبات محفوظ رہتی ہیں۔",
+        "repairYes": "مرمت کریں اور دوبارہ شروع کریں",
+        "repairNo": "منسوخ کریں"
       },
       "fa": {
         "status": "در حال راه‌اندازی برنامه",
@@ -1749,7 +1966,13 @@
         "uLater": "اکنون نه",
         "uPrivacy": "برای اطلاع از این موضوع، OpenConstructionERP از github.com پرسید که آخرین نسخه کدام است. هیچ اطلاعاتی دربارهٔ شما یا این رایانه ارسال نشد.",
         "uOff": "خاموش کردن بررسی به‌روزرسانی",
-        "uOffDone": "بررسی به‌روزرسانی خاموش است. برای خاموش کردن آن برای همهٔ کاربران این رایانه، متغیر محیطی OE_DISABLE_UPDATE_CHECK را تنظیم کنید."
+        "uOffDone": "بررسی به‌روزرسانی خاموش است. برای خاموش کردن آن برای همهٔ کاربران این رایانه، متغیر محیطی OE_DISABLE_UPDATE_CHECK را تنظیم کنید.",
+        "copyLog": "کپی گزارش",
+        "openLogFolder": "باز کردن پوشه گزارش",
+        "repair": "تعمیر",
+        "repairConfirm": "تعمیر آنچه از یک راه‌اندازی نیمه‌کاره مانده را پاک می‌کند و برنامه را دوباره راه‌اندازی می‌کند. پروژه‌ها و تنظیمات شما حفظ می‌شوند.",
+        "repairYes": "تعمیر و راه‌اندازی دوباره",
+        "repairNo": "لغو"
       },
       "he": {
         "status": "מפעיל את היישום",
@@ -1789,7 +2012,13 @@
         "uLater": "לא עכשיו",
         "uPrivacy": "כדי לברר זאת, OpenConstructionERP פנה אל github.com לבדוק מהי הגרסה העדכנית ביותר. לא נשלח שום מידע עליך או על המחשב הזה.",
         "uOff": "כבה בדיקות עדכון",
-        "uOffDone": "בדיקות עדכון כבויות. כדי לכבות אותן עבור כל המשתמשים במחשב זה, הגדר את משתנה הסביבה OE_DISABLE_UPDATE_CHECK."
+        "uOffDone": "בדיקות עדכון כבויות. כדי לכבות אותן עבור כל המשתמשים במחשב זה, הגדר את משתנה הסביבה OE_DISABLE_UPDATE_CHECK.",
+        "copyLog": "העתק יומן",
+        "openLogFolder": "פתח את תיקיית היומן",
+        "repair": "תיקון",
+        "repairConfirm": "התיקון מנקה את מה שהשאירה הפעלה שנקטעה ומפעיל מחדש את האפליקציה. הפרויקטים וההגדרות שלך נשמרים.",
+        "repairYes": "תקן והפעל מחדש",
+        "repairNo": "ביטול"
       },
       "el": {
         "status": "Εκκίνηση της εφαρμογής",
@@ -1829,7 +2058,13 @@
         "uLater": "Όχι τώρα",
         "uPrivacy": "Για να το διαπιστώσει αυτό, το OpenConstructionERP ρώτησε το github.com ποια είναι η πιο πρόσφατη έκδοση. Δεν στάλθηκε καμία πληροφορία σχετικά με εσάς ή αυτόν τον υπολογιστή.",
         "uOff": "Απενεργοποίηση ελέγχων ενημέρωσης",
-        "uOffDone": "Οι έλεγχοι ενημέρωσης είναι απενεργοποιημένοι. Ορίστε τη μεταβλητή περιβάλλοντος OE_DISABLE_UPDATE_CHECK για να τους απενεργοποιήσετε για όλους τους χρήστες αυτού του υπολογιστή."
+        "uOffDone": "Οι έλεγχοι ενημέρωσης είναι απενεργοποιημένοι. Ορίστε τη μεταβλητή περιβάλλοντος OE_DISABLE_UPDATE_CHECK για να τους απενεργοποιήσετε για όλους τους χρήστες αυτού του υπολογιστή.",
+        "copyLog": "Αντιγραφή αρχείου καταγραφής",
+        "openLogFolder": "Άνοιγμα φακέλου καταγραφής",
+        "repair": "Επιδιόρθωση",
+        "repairConfirm": "Η επιδιόρθωση καθαρίζει ό,τι άφησε μια διακοπείσα εκκίνηση και επανεκκινεί την εφαρμογή. Τα έργα και οι ρυθμίσεις σας διατηρούνται.",
+        "repairYes": "Επιδιόρθωση και επανεκκίνηση",
+        "repairNo": "Άκυρο"
       },
       "uk": {
         "status": "Запуск застосунку",
@@ -1869,7 +2104,13 @@
         "uLater": "Не зараз",
         "uPrivacy": "Щоб дізнатися це, OpenConstructionERP запитав github.com, яка версія є найновішою. Жодна інформація про вас чи цей комп'ютер не надсилалася.",
         "uOff": "Вимкнути перевірку оновлень",
-        "uOffDone": "Перевірку оновлень вимкнено. Щоб вимкнути її для всіх користувачів цього комп'ютера, встановіть змінну середовища OE_DISABLE_UPDATE_CHECK."
+        "uOffDone": "Перевірку оновлень вимкнено. Щоб вимкнути її для всіх користувачів цього комп'ютера, встановіть змінну середовища OE_DISABLE_UPDATE_CHECK.",
+        "copyLog": "Копіювати журнал",
+        "openLogFolder": "Відкрити папку журналу",
+        "repair": "Відновити",
+        "repairConfirm": "Відновлення прибирає те, що залишив перерваний запуск, і перезапускає застосунок. Ваші проєкти та налаштування зберігаються.",
+        "repairYes": "Відновити й перезапустити",
+        "repairNo": "Скасувати"
       },
       "uz": {
         "status": "Ilova ishga tushirilmoqda",
@@ -1909,7 +2150,13 @@
         "uLater": "Hozir emas",
         "uPrivacy": "Buni aniqlash uchun OpenConstructionERP github.com dan qaysi versiya eng soʻnggisi ekanini soʻradi. Siz yoki bu kompyuter haqida hech narsa yuborilmadi.",
         "uOff": "Yangilanish tekshiruvini oʻchirish",
-        "uOffDone": "Yangilanish tekshiruvi oʻchirilgan. Bu kompyuterdagi barcha foydalanuvchilar uchun oʻchirish uchun OE_DISABLE_UPDATE_CHECK muhit oʻzgaruvchisini oʻrnating."
+        "uOffDone": "Yangilanish tekshiruvi oʻchirilgan. Bu kompyuterdagi barcha foydalanuvchilar uchun oʻchirish uchun OE_DISABLE_UPDATE_CHECK muhit oʻzgaruvchisini oʻrnating.",
+        "copyLog": "Jurnalni nusxalash",
+        "openLogFolder": "Jurnal papkasini ochish",
+        "repair": "Tuzatish",
+        "repairConfirm": "Tuzatish to‘xtatilgan ishga tushirishdan qolgan narsalarni tozalaydi va ilovani qayta ishga tushiradi. Loyihalaringiz va sozlamalaringiz saqlanadi.",
+        "repairYes": "Tuzatish va qayta ishga tushirish",
+        "repairNo": "Bekor qilish"
       }
     };
     // (i18n-table-end)
@@ -2185,6 +2432,57 @@
       }
       var btn = document.getElementById('copybtn');
       if (btn) { btn.style.display = 'inline-block'; }
+      var actions = document.getElementById('failactions');
+      if (actions) { actions.style.display = 'block'; }
+    }
+
+    // The launcher commands behind the failure actions. Absent outside the
+    // desktop shell (the file opened in a browser), where the buttons do nothing.
+    function launcherInvoke(name) {
+      var invoke = window.__TAURI__ &&
+        ((window.__TAURI__.core && window.__TAURI__.core.invoke) ||
+          window.__TAURI__.invoke);
+      if (!invoke) { return Promise.reject(new Error('no launcher')); }
+      return Promise.resolve(invoke(name));
+    }
+
+    function wireFailureActions() {
+      var copyLog = document.getElementById('copylogbtn');
+      if (copyLog) {
+        copyLog.addEventListener('click', function () {
+          launcherInvoke('startup_log_tail').then(function (tail) {
+            var head = 'OpenConstructionERP startup log' +
+              (APP_VERSION ? ' (version ' + APP_VERSION + ')' : '');
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+              return navigator.clipboard.writeText(head + '\n' + (tail || '')).then(function () {
+                copyLog.textContent = t('copied');
+                setTimeout(function () { copyLog.textContent = t('copyLog'); }, 1500);
+              });
+            }
+          }).catch(function () { /* nothing to copy; the log path is shown above */ });
+        });
+      }
+      var openLog = document.getElementById('openlogbtn');
+      if (openLog) {
+        openLog.addEventListener('click', function () {
+          launcherInvoke('open_log_folder').catch(function () { /* path is shown above */ });
+        });
+      }
+      // Two steps instead of window.confirm, which some webviews do not show.
+      var repair = document.getElementById('repairbtn');
+      var confirmBox = document.getElementById('repairconfirm');
+      if (repair && confirmBox) {
+        repair.addEventListener('click', function () { confirmBox.style.display = 'block'; });
+        var no = document.getElementById('repairno');
+        if (no) { no.addEventListener('click', function () { confirmBox.style.display = 'none'; }); }
+        var yes = document.getElementById('repairyes');
+        if (yes) {
+          yes.addEventListener('click', function () {
+            yes.disabled = true;
+            launcherInvoke('request_repair').catch(function () { yes.disabled = false; });
+          });
+        }
+      }
     }
 
     // failStage marks one step as failed and surfaces the error in the hint.
@@ -2322,6 +2620,7 @@
 
     document.addEventListener('DOMContentLoaded', function () {
       renderChecklist();
+      wireFailureActions();
       bootStage('launcher', 'done', '');
       bootStage('sidecar', 'active', '');
 
