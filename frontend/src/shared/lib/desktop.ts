@@ -473,15 +473,28 @@ export function installDesktopExternalLinks(): void {
         return;
       }
       const scheme = resolved.protocol.toLowerCase();
-      const isWeb =
-        (scheme === 'http:' || scheme === 'https:') &&
-        resolved.origin !== window.location.origin;
+      const isHttp = scheme === 'http:' || scheme === 'https:';
+      const isWeb = isHttp && resolved.origin !== window.location.origin;
       const isMail = scheme === 'mailto:';
-      if (!isWeb && !isMail) return;
+      // A same-origin page asked for a new window (the manual, a PDF): the
+      // webview has none, so it goes to the OS browser on the same server.
+      const isOwnPageInNewWindow = isHttp && !isWeb && anchor.getAttribute('target') === '_blank';
+      if (!isWeb && !isMail && !isOwnPageInNewWindow) return;
 
-      // Genuinely external: stop the webview navigating and open it in the real
-      // browser instead.
+      // The shell plugin's injected opener also listens for target="_blank"
+      // clicks and calls plugin:shell|open, which this window may not call.
+      // Hide the target for this one dispatch; component handlers still run.
+      if (anchor.getAttribute('target') === '_blank') {
+        anchor.removeAttribute('target');
+        setTimeout(() => anchor.setAttribute('target', '_blank'), 0);
+      }
       event.preventDefault();
+      if (isOwnPageInNewWindow) {
+        void openAppInBrowser(`${resolved.pathname}${resolved.search}${resolved.hash}`).then((result) => {
+          if (!result.ok) void openExternalUrl(resolved.href);
+        });
+        return;
+      }
       void openExternalUrl(resolved.href);
     },
     true,

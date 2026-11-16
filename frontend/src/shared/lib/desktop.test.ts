@@ -369,3 +369,63 @@ describe('outbound links from the header menus', () => {
     anchors.forEach((label) => label.parentElement?.remove());
   });
 });
+
+/**
+ * The shell plugin injects its own link opener into every page of the window:
+ * a bubble-phase click listener on <body> that hands any target="_blank" http,
+ * https, mailto or tel anchor to `plugin:shell|open`, whether or not the click
+ * was already handled. The application window is a remote origin that is not
+ * granted that command, so each such click raised "shell.open not allowed" and
+ * a same-origin link such as the manual did nothing else at all. This stands in
+ * for that listener, with the plugin's own test.
+ */
+function installShellPluginLinkOpener(invoke: (cmd: string, args: unknown) => void) {
+  const listener = (e: Event) => {
+    const a = (e.target as Element | null)?.closest?.('a') as HTMLAnchorElement | null;
+    if (!a) return;
+    if (a.href !== '' && ['http://', 'https://', 'mailto:', 'tel:'].some((v) => a.href.startsWith(v)) && a.target === '_blank') {
+      invoke('plugin:shell|open', { path: a.href });
+      e.preventDefault();
+    }
+  };
+  document.body.addEventListener('click', listener);
+  return () => document.body.removeEventListener('click', listener);
+}
+
+describe('the shell plugin link opener in the application window', () => {
+  it('never sees a link the application already handed to its own command', async () => {
+    const invoke = vi.fn().mockResolvedValue(undefined);
+    const { installDesktopExternalLinks } = await loadDesktop({ core: { invoke } });
+    delete (window as { __oeExternalLinks?: boolean }).__oeExternalLinks;
+    installDesktopExternalLinks();
+    const pluginCalls: string[] = [];
+    const uninstall = installShellPluginLinkOpener((cmd) => pluginCalls.push(cmd));
+
+    const make = (href: string) => {
+      const a = document.createElement('a');
+      a.href = href;
+      a.target = '_blank';
+      const closeMenu = vi.fn();
+      a.addEventListener('click', closeMenu);
+      document.body.appendChild(a);
+      return { a, closeMenu };
+    };
+    const external = make('https://openconstructionerp.com/docs');
+    const manual = make(`${window.location.origin}/docs/user-manual.pdf`);
+    for (const { a } of [external, manual]) {
+      a.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, button: 0 }));
+    }
+    await settle();
+
+    expect(pluginCalls).toEqual([]);
+    expect(invoke.mock.calls.map((call) => call[0])).toEqual(['open_external_url', 'open_app_in_browser']);
+    expect(invoke.mock.calls[1][1]).toEqual({ path: '/docs/user-manual.pdf' });
+    // The component's own handler (closing the menu) still runs, and the anchor keeps its target.
+    expect(external.closeMenu).toHaveBeenCalledTimes(1);
+    expect(manual.closeMenu).toHaveBeenCalledTimes(1);
+    expect(external.a.target).toBe('_blank');
+    uninstall();
+    external.a.remove();
+    manual.a.remove();
+  });
+});
