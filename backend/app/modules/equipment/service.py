@@ -766,7 +766,7 @@ class EquipmentService:
         return rental
 
     async def create_rental(self, data: EquipmentRentalCreate) -> EquipmentRental:
-        return await self.assign_to_project(
+        rental = await self.assign_to_project(
             equipment_id=data.equipment_id,
             project_id=data.project_id,
             start_date=data.start_date,
@@ -775,6 +775,14 @@ class EquipmentService:
             end_date=data.end_date,
             currency=data.currency,
         )
+        # A rental of an asset linked to a catalogue machine records where its rate came from;
+        # a rate that differs from the catalogue carries the reason the user gave.
+        from app.modules.equipment.rate_service import RateService
+
+        await RateService(self.session).record_rental_source(
+            rental, data.equipment_id, data.internal_rate_per_hour, data.override_reason
+        )
+        return rental
 
     async def return_rental(
         self,

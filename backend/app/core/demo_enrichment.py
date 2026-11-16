@@ -231,6 +231,7 @@ async def enrich_projects(project_ids: list[uuid.UUID]) -> dict[str, Any]:
         from app.modules.economics.seed import seed_economics_demo
         from app.modules.einvoice_clearance.seed import seed_einvoice_clearance_demo
         from app.modules.engineering_brief.seed import seed_engineering_brief_demo
+        from app.modules.equipment.rate_seed import seed_rate_catalogue_demo
         from app.modules.equipment.telematics_seed import seed_telematics_demo
         from app.modules.estimate_basis.seed import seed_estimate_basis_demo
         from app.modules.field_time.clock_seed import seed_field_clock_demo
@@ -386,6 +387,8 @@ async def enrich_projects(project_ids: list[uuid.UUID]) -> dict[str, Any]:
             ("field_clock", None, lambda s: seed_field_clock_demo(s, _demo_pids)),
             # After the clock, so the machines and the fence check use the site fence it drew.
             ("telematics", None, lambda s: seed_telematics_demo(s, _focus_pids or _demo_pids)),
+            # Synthetic plant rate catalogues and the showcase excavator linked to one of them.
+            ("rate_catalogue", None, lambda s: seed_rate_catalogue_demo(s, _demo_pids)),
             ("site_sensors", None, lambda s: seed_site_sensors_demo(s, _focus_pids or _demo_pids)),
             # One payroll export period (overtime, a night shift, locked, exported,
             # posted, one refused edit) on its own week, after field time.

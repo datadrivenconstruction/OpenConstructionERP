@@ -133,6 +133,7 @@ class EquipmentCreate(BaseModel):
     holding_cost_per_month: Decimal18_4 | None = Field(default=None, ge=0)
     market_hire_rate_per_day: Decimal18_4 | None = Field(default=None, ge=0)
     required_certificates: list[str] | None = Field(default=None, max_length=50)
+    rate_item_id: UUID | None = None
 
     @field_validator("required_certificates")
     @classmethod
@@ -172,6 +173,7 @@ class EquipmentUpdate(BaseModel):
     holding_cost_per_month: Decimal18_4 | None = Field(default=None, ge=0)
     market_hire_rate_per_day: Decimal18_4 | None = Field(default=None, ge=0)
     required_certificates: list[str] | None = Field(default=None, max_length=50)
+    rate_item_id: UUID | None = None
 
     @field_validator("required_certificates")
     @classmethod
@@ -210,6 +212,7 @@ class EquipmentResponse(BaseModel):
     emission_class: str | None = None
     holding_cost_per_month: Decimal | None = None
     market_hire_rate_per_day: Decimal | None = None
+    rate_item_id: UUID | None = None
     metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="metadata_")
     created_at: datetime
     updated_at: datetime
@@ -481,6 +484,7 @@ class EquipmentRentalCreate(BaseModel):
     internal_rate_per_hour: Decimal18_4 = Decimal("0")
     currency: str = Field(default="", max_length=3)
     status: str = Field(default="active", pattern=r"^(active|returned)$")
+    override_reason: str | None = Field(default=None, max_length=500)
 
 
 class EquipmentRentalUpdate(BaseModel):

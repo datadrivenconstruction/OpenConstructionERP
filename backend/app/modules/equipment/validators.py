@@ -231,3 +231,5 @@ async def run_rules(payload: dict[str, Any]) -> list[dict[str, Any]]:
 
 
 register_equipment_rules()
+
+from app.modules.equipment import rate_validators as _rate_validators  # noqa: E402,F401  (registers equip_rate.*)

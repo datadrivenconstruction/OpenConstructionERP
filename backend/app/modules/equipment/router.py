@@ -898,3 +898,8 @@ async def fleet_optimization(
 from app.modules.equipment.telematics_router import router as _telematics_router  # noqa: E402
 
 router.include_router(_telematics_router)
+
+# Rate catalogue: internal plant rates per month, day and hour.
+from app.modules.equipment.rate_router import router as _rate_router  # noqa: E402
+
+router.include_router(_rate_router)

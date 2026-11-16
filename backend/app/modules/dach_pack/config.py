@@ -15,6 +15,42 @@ PACK_CONFIG: dict[str, Any] = {
     "paper_size": "A4",
     "date_format": "DD.MM.YYYY",
     "number_format": "1.234,56",
+    # ── Exchange layouts: column names only, never rates, codes or values ────
+    "equipment_rate_layout": {
+        "label_key": "packs.dach.equipment_layout",
+        "interest_convention": "average_value",
+        "decimal_comma": True,
+        "mapping": {
+            "code": "Nr",
+            "name": "Bezeichnung",
+            "category": "Gruppe",
+            "size_key": "Groesse",
+            "value": "Neuwert",
+            "residual": "Restwert",
+            "life_years": "Nutzungsdauer",
+            "months_per_year": "Monate",
+            "interest": "Zinssatz",
+            "repair": "Reparatur",
+            "hours_per_month": "Stunden",
+        },
+    },
+    "payroll_profile": {
+        "label_key": "packs.dach.payroll_profile",
+        "name": "Payroll DE",
+        "delimiter": ";",
+        "decimal": ",",
+        "date_format": "DD.MM.YYYY",
+        "encoding": "utf-8",
+        "grouping": "day",
+        "columns": [
+            {"header": "Personalnummer", "source": "worker_ref"},
+            {"header": "Datum", "source": "date"},
+            {"header": "Projekt", "source": "project_code"},
+            {"header": "Kostenstelle", "source": "cost_code"},
+            {"header": "Lohnart", "source": "pay_code"},
+            {"header": "Stunden", "source": "hours"},
+        ],
+    },
     # ── Standards ────────────────────────────────────────────────────────────
     "standards": [
         {
