@@ -69,6 +69,8 @@ class Resource(Base):
     # NB: ``contact_id`` is a plain UUID - declared with a real FK only in the
     # Alembic migration so test fixtures (which don't load contacts) still work.
     contact_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+    # Personnel or employee number in the company's payroll system (hours export).
+    payroll_ref: Mapped[str | None] = mapped_column(String(100), nullable=True)
     default_cost_rate: Mapped[Decimal] = mapped_column(
         Numeric(18, 4), nullable=False, default=Decimal("0"), server_default="0"
     )

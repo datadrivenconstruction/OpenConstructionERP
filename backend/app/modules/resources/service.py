@@ -514,6 +514,7 @@ class ResourcesService:
             resource_type=data.resource_type,
             home_project_id=data.home_project_id,
             contact_id=data.contact_id,
+            payroll_ref=(data.payroll_ref or None),
             default_cost_rate=data.default_cost_rate,
             currency=data.currency,
             capacity_percent=data.capacity_percent,

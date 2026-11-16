@@ -212,6 +212,9 @@ class FieldTimesheetLine(Base):
     # must outlive an entry being tidied out of it.
     employer_kind: Mapped[str | None] = mapped_column(String(20), nullable=True)
     employer_subcontractor_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+    # What kind of hours this is, entered by the foreman (regular, overtime, night, ...). We never
+    # derive it from law; the payroll export maps it to the customer's pay code.
+    hour_type: Mapped[str] = mapped_column(String(20), nullable=False, default="regular", server_default="regular")
     note: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     timesheet: Mapped[FieldTimesheet] = relationship(back_populates="lines")
@@ -365,3 +368,10 @@ class FieldClockEvent(Base):
 
     def __repr__(self) -> str:
         return f"<FieldClockEvent {self.kind} {self.occurred_at} ({self.approval_status})>"
+
+
+from app.modules.field_time.payroll_models import (  # noqa: E402,F401
+    PayrollExportProfile,
+    PayrollExportRun,
+    PayrollExportRunLine,
+)

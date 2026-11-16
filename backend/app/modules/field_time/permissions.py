@@ -24,5 +24,7 @@ def register_field_time_permissions() -> None:
             # retention and approving flagged clocks are a supervisor's job.
             "field_time.clock": Role.EDITOR,
             "field_time.clock_admin": Role.MANAGER,
+            # Hours export to a payroll system: profiles and immutable export runs.
+            "field_time.export_payroll": Role.MANAGER,
         },
     )
