@@ -15,7 +15,9 @@
  * {@link deviationHeadline} derivations.
  */
 
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { ChevronDown } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import {
   buildDeviationLegend,
@@ -37,6 +39,8 @@ export function DeviationOverlay({
   disabled = false,
 }: DeviationOverlayProps) {
   const { t } = useTranslation();
+  // Collapsed to its headline by default: the full legend would cover the model.
+  const [open, setOpen] = useState(false);
 
   const { data: summary } = useQuery({
     queryKey: ['bim-model-deviation', projectId, modelId],
@@ -69,7 +73,12 @@ export function DeviationOverlay({
       className="absolute bottom-3 start-3 z-20 flex max-w-[240px] flex-col gap-1 rounded-lg border border-border-light bg-surface-primary/95 px-3 py-2 shadow-sm backdrop-blur-sm"
       data-testid="bim-deviation-overlay"
     >
-      <div className="flex items-center gap-1.5">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        className="flex items-center gap-1.5 text-start"
+      >
         <span
           className="inline-block h-2.5 w-2.5 shrink-0 rounded-sm border border-black/10"
           style={{ background: summary.worst_severity_color }}
@@ -77,7 +86,13 @@ export function DeviationOverlay({
         <span className="text-2xs font-semibold text-content-primary">
           {deviationHeadline(summary, t)}
         </span>
-      </div>
+        <ChevronDown
+          size={12}
+          className={`ms-auto shrink-0 text-content-tertiary transition-transform ${open ? 'rotate-180' : ''}`}
+        />
+      </button>
+      {open && (
+      <>
       <span className="text-2xs font-semibold uppercase tracking-wide text-content-tertiary">
         {t('bim.deviation_legend_title', {
           defaultValue: 'Scan vs design',
@@ -122,6 +137,8 @@ export function DeviationOverlay({
             </li>
           )}
         </ul>
+      )}
+      </>
       )}
     </div>
   );

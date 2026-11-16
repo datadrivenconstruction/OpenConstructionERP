@@ -133,18 +133,19 @@ export function BIMConverterStatusBanner({
       }
     },
   );
-  const [collapsed, setCollapsed] = useState<boolean>(() => {
+  // The explicit choice wins; until there is one, follow the page hint live, because
+  // the model list is usually still loading on the first render.
+  const [collapsedChoice, setCollapsed] = useState<boolean | null>(() => {
     try {
       const persisted = localStorage.getItem('oe_bim_converter_panel_collapsed');
       if (persisted === '1') return true;
       if (persisted === '0') return false;
-      // No explicit user choice yet — fall back to the page-level hint
-      // (``defaultCollapsed=true`` when at least one ready model is loaded).
-      return defaultCollapsed;
+      return null;
     } catch {
-      return defaultCollapsed;
+      return null;
     }
   });
+  const collapsed = collapsedChoice ?? defaultCollapsed;
 
   // The "new version available" banner uses sessionStorage so it auto-clears
   // when the user closes the tab — i.e. it shows up again on every fresh

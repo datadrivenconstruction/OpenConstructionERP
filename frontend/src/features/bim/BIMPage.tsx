@@ -14,6 +14,7 @@
  */
 
 import { Fragment, useState, useMemo, useCallback, useEffect, useRef } from 'react';
+import { useFillViewport } from '@/shared/hooks/useFillViewport';
 import clsx from 'clsx';
 import { useTranslation } from 'react-i18next';
 import { useParams, useNavigate, useSearchParams, useLocation } from 'react-router-dom';
@@ -1582,6 +1583,7 @@ function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrum
   onSelectModel?: (id: string) => void;
   onDeleteModel?: (id: string, name: string) => void;
 }) {
+  const [fillRef, fillHeight] = useFillViewport<HTMLDivElement>();
   const { t } = useTranslation();
   const converterRanges = useConverterRanges(['rvt', 'ifc']);
   const navigate = useNavigate();
@@ -1684,7 +1686,7 @@ function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrum
 
   return (
     <>
-    <div className="flex flex-col -mx-4 sm:-mx-7 -mt-6 -mb-6 border-s border-border-light" style={{ height: 'calc(100vh - 56px)' }}>
+    <div className="flex flex-col -mx-4 sm:-mx-7 -mt-2 -mb-24 border-s border-border-light" ref={fillRef} style={{ height: fillHeight }}>
       <div className="px-6 pt-4 pb-3 border-b border-border-light"><Breadcrumb items={breadcrumbItems} /></div>
       {/* Soft modern background - calm base gradient plus two muted
           blurred colour blobs (top-left blue, bottom-right violet) for
@@ -2219,6 +2221,7 @@ function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrum
 /* ── Main BIM Page ───────────────────────────────────────────────────── */
 
 export function BIMPage() {
+  const [fillRef, fillHeight] = useFillViewport<HTMLDivElement>();
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
@@ -3581,7 +3584,7 @@ export function BIMPage() {
 
   if (!projectId) {
     return (
-      <div className="flex items-center justify-center -mx-4 sm:-mx-7 -mt-6 -mb-6 border-s border-border-light" style={{ height: 'calc(100vh - 56px)' }}>
+      <div className="flex items-center justify-center -mx-4 sm:-mx-7 -mt-2 -mb-24 border-s border-border-light" ref={fillRef} style={{ height: fillHeight }}>
         <EmptyState icon={<FolderOpen size={32} />} title={t('bim.no_project')} description={t('bim.no_project_desc')} />
       </div>
     );
@@ -3632,16 +3635,16 @@ export function BIMPage() {
     !!(activeModel && NON_READY_STATUSES.has(activeModel.status));
 
   return (
-    <div className="flex flex-col -mx-4 sm:-mx-7 -mt-6 -mb-6 border-s border-border-light" style={{ height: 'calc(100vh - 56px)' }}>
+    <div className="flex flex-col -mx-4 sm:-mx-7 -mt-2 -mb-24 border-s border-border-light" ref={fillRef} style={{ height: fillHeight }}>
       {/* ── Header ── */}
       <div className="relative z-20 flex min-h-12 items-center justify-between gap-3 border-b border-border-light bg-surface-primary px-3 py-2">
-        <div className="flex min-w-0 items-center gap-3">
-          <div className="flex min-w-0 items-center gap-2">
+        <div className="flex shrink-0 items-center gap-3">
+          <div className="flex shrink-0 items-center gap-2">
             <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-oe-blue/15 bg-oe-blue/10">
               <Cuboid size={16} className="text-oe-blue" />
             </div>
-            <div className="min-w-0">
-              <h1 className="text-sm font-semibold leading-tight text-content-primary">{t('bim.viewer_title', { defaultValue: 'BIM Viewer' })}</h1>
+            <div className="min-w-[8rem]">
+              <h1 className="whitespace-nowrap text-sm font-semibold leading-tight text-content-primary">{t('bim.viewer_title', { defaultValue: 'BIM Viewer' })}</h1>
               {activeModel && (
                 <p
                   className="text-2xs text-content-tertiary truncate max-w-[140px] lg:max-w-[240px] cursor-help"
@@ -3716,7 +3719,7 @@ export function BIMPage() {
                 aria-pressed={filterPanelOpen}
                 data-testid="bim-tour-filter-button"
               >
-                {t('bim.filter_button', { defaultValue: 'Filter' })}
+                <span className="sr-only 2xl:not-sr-only">{t('bim.filter_button', { defaultValue: 'Filter' })}</span>
                 {visibleElementCount !== null && visibleElementCount < elements.length && (
                   <span className="ms-1.5 rounded-full bg-oe-blue px-1.5 text-2xs tabular-nums text-white">
                     {visibleElementCount}
@@ -3737,7 +3740,7 @@ export function BIMPage() {
                 aria-pressed={summaryPanelOpen}
                 data-guide="bim-summary-button"
               >
-                {t('bim.summary_button', { defaultValue: 'Summary' })}
+                <span className="sr-only 2xl:not-sr-only">{t('bim.summary_button', { defaultValue: 'Summary' })}</span>
               </Button>
 
               {/* Color-by selector - field-based (Storey / Type) use the
@@ -4087,7 +4090,7 @@ export function BIMPage() {
       <div className="flex-1 min-h-0 relative bg-surface-secondary flex">
         {/* Filter sidebar - only when model has loaded elements */}
         {activeModelId && !isModelNonReady && elements.length > 0 && filterPanelOpen && (
-          <div className="absolute top-0 start-0 h-full z-20 overflow-y-auto flex flex-col">
+          <div className="relative z-20 h-full shrink-0 overflow-y-auto flex flex-col border-e border-border-light">
             <BIMFilterGroupsPanel
               elements={elementsWithLinks}
               savedGroups={savedGroups}
