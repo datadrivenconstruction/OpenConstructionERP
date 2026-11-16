@@ -56,9 +56,19 @@ class ConnectorRegistry:
     def has(self, connector_type: str) -> bool:
         return connector_type in self._types
 
-    def list_types(self) -> list[dict[str, Any]]:
-        """Return the catalogue of registered types for the UI."""
-        return [cls.describe() for cls in sorted(self._types.values(), key=lambda c: c.display_name)]
+    def list_types(self, markets: list[str] | None = None) -> list[dict[str, Any]]:
+        """Return the catalogue of registered types for the UI.
+
+        With ``markets`` given, a type that declares ``required_markets`` is listed only when
+        one of those markets is active for the company.
+        """
+        from app.core.active_markets import pack_active
+
+        return [
+            cls.describe()
+            for cls in sorted(self._types.values(), key=lambda c: c.display_name)
+            if markets is None or not cls.required_markets or pack_active(markets, cls.required_markets)
+        ]
 
     def create(
         self,

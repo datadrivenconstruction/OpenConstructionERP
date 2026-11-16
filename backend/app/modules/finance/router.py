@@ -42,6 +42,7 @@ from fastapi.responses import StreamingResponse
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.active_markets import ActiveMarkets
 from app.core.content_disposition import attachment_disposition
 from app.core.file_signature import (
     SIGNATURE_BYTES_REQUIRED,
@@ -2611,10 +2612,11 @@ def _get_connector_service(session: SessionDep) -> ConnectorService:
     description="Catalogue of registered ERP / accounting connector types and their config fields.",
 )
 async def list_connector_types(
+    markets: ActiveMarkets,
     _perm: None = Depends(RequirePermission("finance.connector.read")),
 ) -> list[ConnectorTypeInfo]:
-    """Return the connector-type catalogue for the UI form builder."""
-    return [ConnectorTypeInfo(**entry) for entry in connector_registry.list_types()]
+    """Return the connector-type catalogue for the UI form builder (pack types only where active)."""
+    return [ConnectorTypeInfo(**entry) for entry in connector_registry.list_types(markets)]
 
 
 @router.get(
@@ -3318,3 +3320,7 @@ router.include_router(capture_router)
 from app.modules.finance.payment_run_router import payment_run_router  # noqa: E402
 
 router.include_router(payment_run_router)
+
+from app.modules.finance.booking_router import booking_router  # noqa: E402
+
+router.include_router(booking_router)

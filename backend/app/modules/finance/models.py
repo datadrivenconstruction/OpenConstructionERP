@@ -422,6 +422,10 @@ class LedgerAccount(Base):
 # scans each module's ``models.py``) registers the connector tables for
 # ``Base.metadata.create_all``. Defined in a separate module to keep the
 # connector surface self-contained. See TOP-30 #4.
+from app.modules.finance.booking_models import (  # noqa: E402,F401
+    BookingExportBatch,
+    BookingExportItem,
+)
 from app.modules.finance.connector_models import (  # noqa: E402,F401
     AccountingConnectorConfig,
     SyncLog,
