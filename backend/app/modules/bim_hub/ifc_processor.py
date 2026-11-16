@@ -745,15 +745,48 @@ _QTO_PREFERENCE: dict[str, tuple[str, ...]] = {
 }
 
 
-def _ifc_quantity_set_values(lc_row: dict[str, Any]) -> dict[str, float]:
+def _quantity_set_rank(set_name: str, ifc_class: str) -> int:
+    """Lower is better: the element's own ``Qto_<Class>BaseQuantities``, any base set, the rest."""
+    lowered = set_name.lower()
+    own = ifc_class.lower().removeprefix("ifc").removesuffix("standardcase")
+    if own and lowered == f"qto_{own}basequantities":
+        return 0
+    if lowered.startswith("qto_") and lowered.endswith("basequantities"):
+        return 1
+    return 2
+
+
+def _merge_quantity_sets(sets: list[tuple[str, dict[str, float]]], ifc_class: str) -> dict[str, float]:
+    """Bare names from the element's canonical set; every set also under ``<set>.<name>``.
+
+    Several IfcElementQuantity sets on one element (a wall with a lintel's beam
+    set, a base set beside a custom one) share names like Length. Merging them
+    flat let whichever came last win, so the canonical set fills the bare names
+    first and others only fill gaps. Set-qualified keys appear only when there
+    is more than one set, so single-set elements keep their shape.
+    """
+    ordered = sorted(enumerate(sets), key=lambda item: (_quantity_set_rank(item[1][0], ifc_class), item[0]))
+    out: dict[str, float] = {}
+    for _, (_, values) in ordered:
+        for name, value in values.items():
+            out.setdefault(name, value)
+    if len({name for name, _ in sets}) > 1:
+        for set_name, values in sets:
+            for name, value in values.items():
+                out.setdefault(f"{set_name}.{name}", value)
+    return out
+
+
+def _ifc_quantity_set_values(lc_row: dict[str, Any], ifc_class: str = "") -> dict[str, float]:
     """Quantities from ``[Qto_*BaseQuantities] <name>`` columns of a flattened IFC row.
 
     IFC4 files name their base quantity sets ``Qto_WallBaseQuantities``,
     ``Qto_SlabBaseQuantities`` and so on; the values are already SI (the
     converter normalises them). Tessellation quantities the RVT converter adds
-    to its own IFC export count as well.
+    to its own IFC export count as well. ``ifc_class`` (e.g. ``IfcWall``)
+    picks which set supplies the bare names; see :func:`_merge_quantity_sets`.
     """
-    found: dict[str, float] = {}
+    found_by_set: dict[str, dict[str, float]] = {}
     for key, val in lc_row.items():
         if not key.startswith("[") or "] " not in key:
             continue
@@ -765,16 +798,21 @@ def _ifc_quantity_set_values(lc_row: dict[str, Any]) -> dict[str, float]:
         except (TypeError, ValueError):
             continue
         if fval and fval == fval:
-            found.setdefault(prop.replace(" ", "").replace("_", ""), fval)
-    out: dict[str, float] = {}
-    for dest, names in _QTO_PREFERENCE.items():
-        for name in names:
-            if name in found:
-                out[dest] = found[name]
-                break
-    if "Area" not in out and "surfacearea" in found:
-        out["Surface Area"] = found["surfacearea"]
-    return out
+            found_by_set.setdefault(set_name, {}).setdefault(prop.replace(" ", "").replace("_", ""), fval)
+
+    def normalise(found: dict[str, float]) -> dict[str, float]:
+        out: dict[str, float] = {}
+        for dest, names in _QTO_PREFERENCE.items():
+            for name in names:
+                if name in found:
+                    out[dest] = found[name]
+                    break
+        if "Area" not in out and "surfacearea" in found:
+            out["Surface Area"] = found["surfacearea"]
+        return out
+
+    sets = [(set_name, normalise(found)) for set_name, found in found_by_set.items()]
+    return _merge_quantity_sets([(n, v) for n, v in sets if v], ifc_class)
 
 
 def _excel_elements_to_bim_result(
@@ -1159,7 +1197,7 @@ def _excel_elements_to_bim_result(
             except (ValueError, TypeError):
                 pass
 
-        for dest_key, value in _ifc_quantity_set_values(lc_row).items():
+        for dest_key, value in _ifc_quantity_set_values(lc_row, str(category)).items():
             quantities.setdefault(dest_key, value)
 
         # Stable ID - prefer RVT uniqueid, fall back to type ifcguid, then row index
@@ -3109,8 +3147,12 @@ def _extract_quantities_for_element(
     SI metres / square metres / cubic metres / kilograms / seconds.
     Callers that pass ``None`` get the raw IFC value (used by the
     legacy regression tests that build entities by hand).
+
+    Each IfcElementQuantity set is read on its own and merged by
+    :func:`_merge_quantity_sets`, so a foreign set never overwrites the
+    element's own base quantities.
     """
-    quantities: dict[str, float] = {}
+    sets: list[tuple[str, dict[str, float]]] = []
 
     for ent in entities.values():
         if ent["type"] != "IFCRELDEFINESBYPROPERTIES":
@@ -3149,6 +3191,10 @@ def _extract_quantities_for_element(
             continue
         # IFCELEMENTQUANTITY args: (GlobalId, OwnerHistory, Name,
         # Description, MethodOfMeasurement, Quantities=(#q1, #q2, …))
+        name_match = re.match(r"\s*'[^']*'\s*,\s*(?:#\d+|\$)\s*,\s*'([^']*)'", pdef["args_raw"])
+        set_name = name_match.group(1) if name_match else f"#{pdef_id}"
+        quantities: dict[str, float] = {}
+        sets.append((set_name, quantities))
         q_refs = re.findall(r"#(\d+)", pdef["args_raw"])
         for qr in q_refs:
             q_ent = entities.get(int(qr))
@@ -3192,7 +3238,8 @@ def _extract_quantities_for_element(
                     quantities[q_name] = val * scale
                     break
 
-    return quantities
+    element = entities.get(element_id)
+    return _merge_quantity_sets([(n, v) for n, v in sets if v], element["type"] if element else "")
 
 
 def _classify_discipline(ifc_type: str) -> str:
