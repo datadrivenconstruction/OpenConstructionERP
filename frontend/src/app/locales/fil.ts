@@ -11016,7 +11016,7 @@ const resource = {
     "contacts.field_type": "Uri",
     "contacts.filter_all_countries": "Lahat ng Bansa",
     "contacts.filter_all_types": "Lahat ng Uri",
-    "contacts.type_client": "Kliyente",
+    "contacts.type_client": "May-ari ng proyekto",
     "contacts.type_subcontractor": "Subkontratista",
     "contacts.type_contractor": "Kontraktor",
     "contacts.type_supplier": "Tagatustos",

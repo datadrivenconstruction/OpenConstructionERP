@@ -15815,7 +15815,7 @@ const resource = {
     "contacts.field_type": "Typ",
     "contacts.filter_all_countries": "Alla länder",
     "contacts.filter_all_types": "Alla typer",
-    "contacts.type_client": "Kund",
+    "contacts.type_client": "Beställare",
     "contacts.type_subcontractor": "Underentreprenör",
     "contacts.type_contractor": "Entreprenör",
     "contacts.type_supplier": "Leverantör",

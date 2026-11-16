@@ -12182,7 +12182,7 @@ const resource = {
     "contacts.field_type": "Tipo",
     "contacts.filter_all_countries": "Tutti i paesi",
     "contacts.filter_all_types": "Tutti i tipi",
-    "contacts.type_client": "Cliente",
+    "contacts.type_client": "Committente",
     "contacts.type_subcontractor": "Subappaltatore",
     "contacts.type_contractor": "Appaltatore",
     "contacts.type_supplier": "Fornitore",

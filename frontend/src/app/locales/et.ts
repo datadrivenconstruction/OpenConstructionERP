@@ -11985,7 +11985,7 @@ const resource = {
     "contacts.field_type": "Tüüp",
     "contacts.filter_all_countries": "Kõik riigid",
     "contacts.filter_all_types": "Kõik tüübid",
-    "contacts.type_client": "Klient",
+    "contacts.type_client": "Tellija",
     "contacts.type_subcontractor": "Alltöövõtja",
     "contacts.type_contractor": "Töövõtja",
     "contacts.type_supplier": "Tarnija",

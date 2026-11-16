@@ -11806,7 +11806,7 @@ const resource = {
     "contacts.field_type": "Түрү",
     "contacts.filter_all_countries": "Бардык өлкөлөр",
     "contacts.filter_all_types": "Бардык түрлөр",
-    "contacts.type_client": "Кардар",
+    "contacts.type_client": "Буйрутмачы",
     "contacts.type_subcontractor": "Субподрядчы",
     "contacts.type_contractor": "Келишимчи",
     "contacts.type_supplier": "Жеткирүүчү",

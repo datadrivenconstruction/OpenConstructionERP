@@ -12613,7 +12613,7 @@ const resource = {
     "contacts.field_type": "النوع",
     "contacts.filter_all_countries": "جميع الدول",
     "contacts.filter_all_types": "جميع الأنواع",
-    "contacts.type_client": "عميل",
+    "contacts.type_client": "صاحب العمل",
     "contacts.type_subcontractor": "مقاول من الباطن",
     "contacts.type_contractor": "المقاول",
     "contacts.type_supplier": "مورّد",
