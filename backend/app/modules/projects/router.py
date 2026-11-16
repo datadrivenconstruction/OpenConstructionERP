@@ -180,6 +180,23 @@ async def _verify_project_access(
     if uid is not None and await is_project_member(session, project_id, uid):
         return project
 
+    # A person who works for a company of the group is told why, rather than
+    # shown "not found": they know the group's projects exist. Nobody else is.
+    if uid is not None:
+        try:
+            from app.modules.legal_entities.access import member_entity_ids
+
+            if await member_entity_ids(session, uid):
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail={
+                        "code": "legal_entities.forbidden",
+                        "message": "This project belongs to a company you are not a member of.",
+                    },
+                )
+        except ImportError:
+            pass
+
     raise HTTPException(
         status_code=status.HTTP_404_NOT_FOUND,
         detail="Project not found",

@@ -24,9 +24,20 @@ from fastapi import HTTPException, status
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.modules.legal_entities.models import Branch, LegalEntity
+from app.modules.legal_entities.models import Branch, LegalEntity, LegalEntityMember
 from app.modules.legal_entities.repository import BranchRepository, LegalEntityRepository
-from app.modules.legal_entities.validators import Issue, errors, validate_branch, validate_entity
+from app.modules.legal_entities.tax_ids import clean
+from app.modules.legal_entities.validators import (
+    Issue,
+    check_active_for_new_project,
+    check_cross_entity,
+    check_duplicate_code,
+    check_site_entity,
+    check_tax_ids,
+    errors,
+    validate_branch,
+    validate_entity,
+)
 from app.modules.projects.models import Project
 
 
@@ -43,6 +54,21 @@ def _raise_on_errors(issues: list[Issue]) -> list[Issue]:
 
 def _conflict(message: str) -> HTTPException:
     return HTTPException(status_code=status.HTTP_409_CONFLICT, detail=message)
+
+
+def _duplicate(code: str, *, site: bool = False) -> HTTPException:
+    return _conflict(check_duplicate_code(code, taken=True, site=site)[0].message)
+
+
+def _address(value: Any) -> dict[str, str] | None:
+    if not value:
+        return None
+    cleaned = {k: str(v).strip() for k, v in dict(value).items() if v is not None and str(v).strip()}
+    return cleaned or None
+
+
+#: Invoice statuses that mean the document has left the building.
+_ISSUED_STATUSES = ("issued", "sent", "approved", "paid", "partially_paid", "overdue")
 
 
 class LegalEntityService:
@@ -76,8 +102,10 @@ class LegalEntityService:
             )
         )
         if await self.entities.get_by_code(data["code"]) is not None:
-            raise _conflict(f"A legal entity with code {data['code']} already exists.")
-        if data.get("is_default"):
+            raise _duplicate(data["code"])
+        # The first company of an install is the default: nothing names one yet.
+        first = not await self.entities.list(include_inactive=True)
+        if data.get("is_default") or first:
             await self.entities.clear_default()
         entity = LegalEntity(
             code=data["code"],
@@ -87,11 +115,19 @@ class LegalEntityService:
             functional_currency=data["functional_currency"],
             registration_number=data.get("registration_number"),
             tax_id=data.get("tax_id"),
-            is_default=bool(data.get("is_default")),
+            legal_name=(data.get("legal_name") or "").strip() or None,
+            address=_address(data.get("address")),
+            tax_ids=clean(data.get("tax_ids")),
+            invoice_prefix=(data.get("invoice_prefix") or "").strip() or None,
+            is_default=bool(data.get("is_default")) or first,
             is_active=data.get("is_active", True),
             metadata_=dict(data.get("metadata") or {}),
         )
         return await self.entities.add(entity)
+
+    def entity_warnings(self, entity: LegalEntity) -> list[Issue]:
+        """Non-blocking findings on an entity as stored: tax id shapes the country data does not expect."""
+        return check_tax_ids(entity.country_code, entity.tax_ids)
 
     async def update_entity(self, entity_id: uuid.UUID, data: dict[str, Any]) -> LegalEntity:
         entity = await self.get_entity(entity_id)
@@ -105,7 +141,13 @@ class LegalEntityService:
         if merged["code"] != entity.code:
             clash = await self.entities.get_by_code(merged["code"])
             if clash is not None and clash.id != entity.id:
-                raise _conflict(f"A legal entity with code {merged['code']} already exists.")
+                raise _duplicate(merged["code"])
+        if data.get("is_default") is False and entity.is_default:
+            # Unsetting the only default would leave documents with no seller to fall back to.
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                detail="Make another company the default instead of clearing this one.",
+            )
         if data.get("is_default"):
             await self.entities.clear_default(except_id=entity.id)
         for field in ("code", "name", "country_code", "functional_currency", "is_default", "is_active"):
@@ -114,6 +156,13 @@ class LegalEntityService:
         for field in ("subdivision_code", "registration_number", "tax_id"):
             if field in data:
                 setattr(entity, field, data[field])
+        for field in ("legal_name", "invoice_prefix"):
+            if field in data:
+                setattr(entity, field, (data[field] or "").strip() or None)
+        if "address" in data:
+            entity.address = _address(data["address"])
+        if data.get("tax_ids") is not None:
+            entity.tax_ids = clean(data["tax_ids"])
         if data.get("metadata") is not None:
             entity.metadata_ = dict(data["metadata"])
         await self.session.flush()
@@ -121,11 +170,9 @@ class LegalEntityService:
 
     async def delete_entity(self, entity_id: uuid.UUID) -> None:
         entity = await self.get_entity(entity_id)
-        in_use = await self.session.scalar(
-            select(func.count()).select_from(Project).where(Project.legal_entity_id == entity.id)
-        )
+        in_use = (await self.project_counts()).get(entity.id, 0)
         if in_use:
-            raise _conflict(f"Legal entity {entity.code} owns {in_use} project(s); move them first.")
+            raise _conflict(f"Legal entity {entity.code} owns {in_use} project(s); deactivate it instead.")
         await self.entities.delete(entity)
 
     # ── Projects ──────────────────────────────────────────────────────────
@@ -147,20 +194,163 @@ class LegalEntityService:
         return default, "default" if default is not None else "none"
 
     async def assign_project(
-        self, project_id: uuid.UUID, entity_id: uuid.UUID | None
-    ) -> tuple[LegalEntity | None, str]:
-        """Name the entity that owns a project, or clear it with None."""
+        self,
+        project_id: uuid.UUID,
+        entity_id: uuid.UUID | None,
+        branch_id: uuid.UUID | None = None,
+    ) -> tuple[LegalEntity | None, str, list[Issue]]:
+        """Name the entity (and optionally the site) that owns a project, or clear it with None.
+
+        Returns the entity that now answers, how, and the warnings of the move:
+        ``entity.cross_entity_reference`` when invoices already issued under the
+        old company stay behind.
+        """
         project = await self._project(project_id)
-        if entity_id is not None:
+        before, _ = await self.project_entity(project_id)
+        if entity_id is not None and entity_id != project.legal_entity_id:
             entity = await self.get_entity(entity_id)
-            if not entity.is_active:
-                raise HTTPException(
-                    status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
-                    detail=f"Legal entity {entity.code} is inactive and cannot take new projects.",
-                )
+            _raise_on_errors(check_active_for_new_project(code=entity.code, is_active=entity.is_active))
+        if branch_id is not None:
+            branch = await self.branches.get(branch_id)
+            if branch is None:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Site not found")
+            owner = entity_id
+            if owner is None:
+                default = await self.default_entity()
+                owner = default.id if default is not None else None
+            _raise_on_errors(check_site_entity(site_entity_id=branch.legal_entity_id, entity_id=owner))
         project.legal_entity_id = entity_id
+        project.legal_entity_branch_id = branch_id
         await self.session.flush()
-        return await self.project_entity(project_id)
+        entity, source = await self.project_entity(project_id)
+        warnings: list[Issue] = []
+        if before is not None and entity is not None and before.id != entity.id:
+            if await self.issued_invoice_count(project_id):
+                warnings = check_cross_entity([before.id, entity.id])
+        return entity, source, warnings
+
+    async def issued_invoice_count(self, project_id: uuid.UUID) -> int:
+        """Outgoing invoices on the project that are past draft."""
+        try:
+            from app.modules.finance.models import Invoice
+        except ImportError:
+            return 0
+        return int(
+            await self.session.scalar(
+                select(func.count())
+                .select_from(Invoice)
+                .where(
+                    Invoice.project_id == project_id,
+                    Invoice.invoice_direction == "receivable",
+                    Invoice.status.in_(_ISSUED_STATUSES),
+                )
+            )
+            or 0
+        )
+
+    async def project_counts(self) -> dict[uuid.UUID, int]:
+        """Live projects per entity; a project naming none counts for the default entity."""
+        rows = (
+            await self.session.execute(
+                select(Project.legal_entity_id, func.count())
+                .where(Project.status != "archived")
+                .group_by(Project.legal_entity_id)
+            )
+        ).all()
+        counts: dict[uuid.UUID, int] = {}
+        unassigned = 0
+        for entity_id, n in rows:
+            if entity_id is None:
+                unassigned += int(n)
+            else:
+                counts[entity_id] = counts.get(entity_id, 0) + int(n)
+        if unassigned:
+            default = await self.default_entity()
+            if default is not None:
+                counts[default.id] = counts.get(default.id, 0) + unassigned
+        return counts
+
+    async def member_counts(self) -> dict[uuid.UUID, int]:
+        rows = (
+            await self.session.execute(
+                select(LegalEntityMember.legal_entity_id, func.count()).group_by(LegalEntityMember.legal_entity_id)
+            )
+        ).all()
+        return {entity_id: int(n) for entity_id, n in rows}
+
+    async def entities_with_own_settings(self) -> set[str]:
+        """Ids (as text) of the entities that have their own e-invoice seller details."""
+        try:
+            from app.modules.finance.einvoice_settings_models import EInvoiceSettings
+        except ImportError:
+            return set()
+        scopes = (
+            await self.session.execute(select(EInvoiceSettings.scope).where(EInvoiceSettings.scope.like("entity:%")))
+        ).scalars()
+        return {scope.split(":", 1)[1] for scope in scopes}
+
+    # ── Members ───────────────────────────────────────────────────────────
+
+    async def list_members(self, entity_id: uuid.UUID) -> list[tuple[LegalEntityMember, Any]]:
+        from app.modules.users.models import User
+
+        await self.get_entity(entity_id)
+        rows = (
+            await self.session.execute(
+                select(LegalEntityMember, User)
+                .join(User, User.id == LegalEntityMember.user_id)
+                .where(LegalEntityMember.legal_entity_id == entity_id)
+                .order_by(User.full_name, User.email)
+            )
+        ).all()
+        return [(m, u) for m, u in rows]
+
+    async def any_members(self) -> bool:
+        return (await self.session.scalar(select(func.count()).select_from(LegalEntityMember)) or 0) > 0
+
+    async def add_member(self, entity_id: uuid.UUID, user_id: uuid.UUID, role: str) -> LegalEntityMember:
+        from app.modules.users.models import User
+
+        await self.get_entity(entity_id)
+        if await self.session.get(User, user_id) is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+        existing = (
+            await self.session.execute(
+                select(LegalEntityMember).where(
+                    LegalEntityMember.legal_entity_id == entity_id, LegalEntityMember.user_id == user_id
+                )
+            )
+        ).scalar_one_or_none()
+        if existing is not None:
+            existing.role = role
+            await self.session.flush()
+            return existing
+        member = LegalEntityMember(legal_entity_id=entity_id, user_id=user_id, role=role)
+        self.session.add(member)
+        await self.session.flush()
+        return member
+
+    async def _member(self, entity_id: uuid.UUID, member_id: uuid.UUID) -> LegalEntityMember:
+        member = await self.session.get(LegalEntityMember, member_id)
+        if member is None or member.legal_entity_id != entity_id:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Member not found")
+        return member
+
+    async def update_member(self, entity_id: uuid.UUID, member_id: uuid.UUID, role: str) -> LegalEntityMember:
+        member = await self._member(entity_id, member_id)
+        member.role = role
+        await self.session.flush()
+        return member
+
+    async def remove_member(self, entity_id: uuid.UUID, member_id: uuid.UUID) -> None:
+        await self.session.delete(await self._member(entity_id, member_id))
+        await self.session.flush()
+
+    async def my_entity_ids(self, user_id: uuid.UUID) -> list[uuid.UUID]:
+        rows = await self.session.execute(
+            select(LegalEntityMember.legal_entity_id).where(LegalEntityMember.user_id == user_id)
+        )
+        return list(rows.scalars().all())
 
     # ── Branches ──────────────────────────────────────────────────────────
 
@@ -182,13 +372,14 @@ class LegalEntityService:
             )
         )
         if await self.branches.get_by_code(entity.id, data["code"]) is not None:
-            raise _conflict(f"Entity {entity.code} already has a branch with code {data['code']}.")
+            raise _duplicate(data["code"], site=True)
         branch = Branch(
             legal_entity_id=entity.id,
             code=data["code"],
             name=data["name"],
             country_code=country,
             subdivision_code=data.get("subdivision_code"),
+            address=_address(data.get("address")),
             is_active=data.get("is_active", True),
         )
         await self.branches.add(branch)
@@ -213,12 +404,14 @@ class LegalEntityService:
         if merged_code != branch.code:
             clash = await self.branches.get_by_code(entity.id, merged_code)
             if clash is not None and clash.id != branch.id:
-                raise _conflict(f"Entity {entity.code} already has a branch with code {merged_code}.")
+                raise _duplicate(merged_code, site=True)
         for field in ("code", "name", "country_code", "is_active"):
             if data.get(field) is not None:
                 setattr(branch, field, data[field])
         if "subdivision_code" in data:
             branch.subdivision_code = data["subdivision_code"]
+        if "address" in data:
+            branch.address = _address(data["address"])
         await self.session.flush()
         return branch, warnings
 

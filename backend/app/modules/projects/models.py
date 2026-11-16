@@ -153,6 +153,9 @@ class Project(Base):
     # left out, and the core project table must build without its table. The
     # module checks the id on write and refuses to delete an entity in use.
     legal_entity_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, default=None, index=True)
+    # The site (branch, office, yard) of that entity the project runs from. Optional, no
+    # foreign key for the same reason; the module checks it belongs to the entity.
+    legal_entity_branch_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, default=None)
 
     # Whether the client is a public buyer: "public" or "private", the
     # vocabulary the state packs write their retention rules in. Where a

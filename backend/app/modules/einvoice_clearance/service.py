@@ -202,6 +202,7 @@ async def build_payload_from_invoice(
     defaults = await einvoice_defaults_for_invoice(
         session,
         contact_id=invoice.contact_id,
+        project_id=invoice.project_id,
         invoice_direction=invoice.invoice_direction,
     )
 

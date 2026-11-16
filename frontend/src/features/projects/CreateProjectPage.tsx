@@ -6,6 +6,8 @@ import {
 } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { legalEntitiesApi } from '@/features/legal-entities/api';
+import { ProjectCompanyFields, type ProjectCompanyValue } from '@/features/legal-entities/ProjectCompanyFields';
 import { useNavigate } from 'react-router-dom';
 import {
   X, FolderPlus, AlertTriangle, MapPin, Map as MapIcon, CloudSun,
@@ -542,6 +544,7 @@ export function CreateProjectModal({
   const [addressLon, setAddressLon] = useState<number | null>(null);
   // ISO 3166-1 alpha-2 resolved from geocoder or manual country input.
   const [countryCode, setCountryCode] = useState<string | null>(null);
+  const [company, setCompany] = useState<ProjectCompanyValue>({ entityId: null, branchId: null });
   // OC-11: precision of the geocoded location.
   const [locationPrecision, setLocationPrecision] = useState<string | null>(null);
 
@@ -952,6 +955,13 @@ export function CreateProjectModal({
       }
 
       const project = await projectsApi.create(data);
+      if (company.entityId) {
+        try {
+          await legalEntitiesApi.assignProject(project.id, company.entityId, company.branchId);
+        } catch {
+          // The project exists; its company can be set from Project Settings.
+        }
+      }
       // Best-effort profile apply — a failure here must not lose the
       // already-created project; we surface a soft warning instead.
       try {
@@ -1471,6 +1481,7 @@ export function CreateProjectModal({
                     </div>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {!isEdit && <ProjectCompanyFields value={company} onChange={setCompany} prefill />}
                   <div>
                     <GroupedSelectField
                       label={t('projects.region', { defaultValue: 'Region' })}
@@ -1872,6 +1883,7 @@ export function CreateProjectModal({
             <div className="space-y-4">
               <InfoHint text={t('projects.create_hint', { defaultValue: 'Region determines available cost databases and VAT rates. Classification standard defines the cost-structure schema for your BOQ. Currency sets all pricing in the BOQ.' })} />
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {!isEdit && <ProjectCompanyFields value={company} onChange={setCompany} prefill />}
                 <div>
                   <GroupedSelectField
                     label={t('projects.region', { defaultValue: 'Region' })}

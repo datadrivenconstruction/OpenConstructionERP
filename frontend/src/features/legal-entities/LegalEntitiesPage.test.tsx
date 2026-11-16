@@ -40,6 +40,10 @@ const ENTITY: LegalEntity = {
   functional_currency: 'EUR',
   registration_number: null,
   tax_id: 'DE123456789',
+  legal_name: null,
+  address: null,
+  tax_ids: [],
+  invoice_prefix: null,
   is_default: true,
   is_active: true,
   metadata: {},
@@ -57,6 +61,11 @@ const ENTITY: LegalEntity = {
   ],
   created_at: '2026-10-08T00:00:00Z',
   updated_at: '2026-10-08T00:00:00Z',
+  primary_tax_id: 'DE123456789',
+  project_count: 0,
+  member_count: 0,
+  has_own_einvoice_settings: false,
+  warnings: [],
 };
 
 function renderPage() {

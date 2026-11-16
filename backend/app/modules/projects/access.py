@@ -28,7 +28,7 @@ import uuid
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
-from sqlalchemy import false, select
+from sqlalchemy import false, or_, select
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
@@ -92,19 +92,22 @@ def membership_exists(project_id_column: ColumnElement[Any], user_id: uuid.UUID 
     """
     if user_id is None:
         return false()
+    from app.modules.legal_entities.access import entity_membership_exists
     from app.modules.teams.models import Team, TeamMembership
 
     # ``correlate_except`` rather than relying on auto-correlation: if the
     # project table were ever pulled into the subquery's own FROM, the test
     # would become "is a member of ANY project", which lets a member of one
     # project into every other one.
-    return (
+    team = (
         select(TeamMembership.id)
         .join(Team, Team.id == TeamMembership.team_id)
         .where(Team.project_id == project_id_column, TeamMembership.user_id == user_id)
         .correlate_except(Team, TeamMembership)
         .exists()
     )
+    # A membership of the entity that owns the project counts as well; it only widens.
+    return or_(team, entity_membership_exists(project_id_column, user_id))
 
 
 async def project_access(

@@ -101,14 +101,14 @@ async def test_a_project_names_its_entity_or_falls_back_to_the_default(pg_sessio
     assert await service.project_entity(project.id) == (default, "default")
 
     sub = await service.create_entity(_entity("LE-SUB", country_code="PL", functional_currency="PLN"))
-    assert await service.assign_project(project.id, sub.id) == (sub, "assigned")
+    assert await service.assign_project(project.id, sub.id) == (sub, "assigned", [])
     assert project.legal_entity_id == sub.id
 
     with pytest.raises(HTTPException) as exc:
         await service.delete_entity(sub.id)
     assert exc.value.status_code == 409
 
-    assert await service.assign_project(project.id, None) == (default, "default")
+    assert await service.assign_project(project.id, None) == (default, "default", [])
     await service.delete_entity(sub.id)
 
 

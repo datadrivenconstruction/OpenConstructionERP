@@ -43,6 +43,7 @@ import { MethodologyActiveCard } from '../methodology/MethodologyActiveCard';
 import { ProjectSubdivisionCard } from './ProjectSubdivisionCard';
 import { ProjectFolderLinkCard } from './ProjectFolderLinkCard';
 import { ProjectComponentTaxCard } from './ProjectComponentTaxCard';
+import { ProjectCompanyCard } from '../legal-entities/ProjectCompanyCard';
 import { ruleSetLabel } from '../validation/ruleSetLabels';
 import {
   listComplianceRulePacks,
@@ -900,6 +901,9 @@ export function ProjectSettingsPage() {
         onClose={() => setEditSetupOpen(false)}
         editProjectId={project.id}
       />
+
+      {/* Company and site; renders only once the group has two companies. */}
+      <ProjectCompanyCard projectId={project.id} canEdit />
 
       {/* ── Client: public buyer or private (retention law follows it) ─── */}
       <Card padding="lg">

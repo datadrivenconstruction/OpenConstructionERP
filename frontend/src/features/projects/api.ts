@@ -32,6 +32,9 @@ export interface ProjectFxRate {
 
 export interface Project {
   id: string;
+  /** The company the project belongs to; null means the default company. */
+  legal_entity_id?: string | null;
+  legal_entity_branch_id?: string | null;
   name: string;
   description: string;
   region: string;

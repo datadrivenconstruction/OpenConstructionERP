@@ -38,6 +38,9 @@ import { invalidateProjectLists } from './invalidateProjectLists';
 import { DemoSeedingHint } from '@/features/processes/DemoSeedingHint';
 import { useDemoScope } from '@/shared/lib/useDemoScope';
 import { DemoScopeNotice } from '@/shared/ui/DemoScopeNotice';
+import { effectiveEntityId } from '@/features/legal-entities/api';
+import { CompanyFilterSelect } from '@/features/legal-entities/CompanyFilterSelect';
+import { useCompaniesUi } from '@/features/legal-entities/useCompanies';
 
 const LIVE_DEFAULT_MIGRATED_KEY = 'oe_projects_filters_live_default';
 
@@ -172,6 +175,7 @@ export function ProjectsPage() {
     status: 'active' as StatusFilter,
     region: 'all',
     sort: 'newest' as SortOption,
+    company: 'all',
   });
   // One-time move for browsers that saved the old 'all' default: without it
   // the deleted projects would stay on screen for every existing user.
@@ -191,6 +195,16 @@ export function ProjectsPage() {
   const setStatusFilter = (v: StatusFilter) => setFilters((p) => ({ ...p, status: v }));
   const setRegionFilter = (v: string) => setFilters((p) => ({ ...p, region: v }));
   const setSortOption = (v: SortOption) => setFilters((p) => ({ ...p, sort: v }));
+  // Saved filters from before companies existed carry no `company` key.
+  const companyFilter = filters.company ?? 'all';
+  const setCompanyFilter = (v: string) => setFilters((p) => ({ ...p, company: v }));
+  const companiesUi = useCompaniesUi();
+  // Settings links here with ?company=<id> from the companies table.
+  useEffect(() => {
+    const fromUrl = new URLSearchParams(window.location.search).get('company');
+    if (fromUrl) setFilters((p) => ({ ...p, company: fromUrl }));
+    // Runs once on mount by design.
+  }, []);
   const [page, setPage] = useState(1);
 
   const {
@@ -378,6 +392,11 @@ export function ProjectsPage() {
       list = list.filter((p) => p.region === regionFilter);
     }
 
+    // Company filter: a project naming no company belongs to the default one.
+    if (companiesUi.multiCompany && companyFilter !== 'all') {
+      list = list.filter((p) => effectiveEntityId(p, companiesUi.defaultEntityId) === companyFilter);
+    }
+
     // Sort — pinned first, then locale priority (en → de → others)
     // so the US and German demo projects anchor the top of the list,
     // then fall through to the user-selected sort option.
@@ -423,7 +442,7 @@ export function ProjectsPage() {
     });
 
     return list;
-  }, [projects, demoProjectId, searchQuery, statusFilter, regionFilter, sortOption, boqStatsMap, pinnedIds, hasMultipleCurrencies, compareNames]);
+  }, [projects, demoProjectId, searchQuery, statusFilter, regionFilter, companyFilter, companiesUi.multiCompany, companiesUi.defaultEntityId, sortOption, boqStatsMap, pinnedIds, hasMultipleCurrencies, compareNames]);
 
   // Reset page when filters change
   useEffect(() => {
@@ -909,6 +928,8 @@ export function ProjectsPage() {
               </select>
             </div>
 
+            <CompanyFilterSelect value={companyFilter} onChange={setCompanyFilter} />
+
             {/* Region filter */}
             <div className="relative">
               <select
@@ -984,6 +1005,7 @@ export function ProjectsPage() {
               setSearchQuery('');
               setStatusFilter('active');
               setRegionFilter('all');
+              setCompanyFilter('all');
             },
           }}
         />

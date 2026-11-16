@@ -12,6 +12,10 @@ Project-level membership:
 * :func:`member_project_ids_subquery` - synchronous scalar subquery used
   in ORM ``WHERE … IN (…)`` clauses for list/aggregate endpoints.
 
+Both also count a membership of the legal entity that owns the project (see
+:mod:`app.modules.legal_entities.access`). That only ever widens access, and a
+person with no entity membership gets exactly the team answer.
+
 Record-level restriction:
 
 * :func:`hidden_entity_ids` - the subset of ids the caller must NOT see.
@@ -82,7 +86,11 @@ async def is_project_member(
                 .limit(1)
             )
         ).scalar_one_or_none()
-        return row is not None
+        if row is not None:
+            return True
+        from app.modules.legal_entities.access import reaches_through_entity
+
+        return await reaches_through_entity(session, project_id, user_id)
     except Exception:  # noqa: BLE001
         return False
 
@@ -112,7 +120,11 @@ def member_project_ids_subquery(user_id: uuid.UUID, *, live_only: bool = False):
         from app.modules.projects.models import Project
 
         stmt = stmt.join(Project, Project.id == Team.project_id).where(Project.status != "archived")
-    return stmt.scalar_subquery()
+    from sqlalchemy import union
+
+    from app.modules.legal_entities.access import entity_project_ids_select
+
+    return union(stmt, entity_project_ids_select(user_id, live_only=live_only)).scalar_subquery()
 
 
 # ── Record-level restriction ─────────────────────────────────────────────────

@@ -7,7 +7,10 @@ Tables:
         the country whose law it answers to, and the currency its books are
         kept in.
     oe_legal_entities_branch - an establishment of one entity, which may sit
-        in another country (a foreign branch) but books in its entity.
+        in another country (a foreign branch) but books in its entity. The UI
+        calls these sites (office, branch, yard).
+    oe_legal_entities_member - a person who works for an entity, which lets
+        them see that entity's projects.
 
 A construction group trades through several companies, each with its own
 country, functional currency, document numbering and taxes. This is the
@@ -48,6 +51,15 @@ class LegalEntity(Base):
     registration_number: Mapped[str | None] = mapped_column(String(100), nullable=True)
     #: VAT, GST or other tax identifier, as written by the tax authority.
     tax_id: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    #: Registered name for documents when it differs from ``name`` (the short name people use).
+    legal_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    #: Registered address: ``{"line1", "line2", "postcode", "city"}``; the country is ``country_code``.
+    address: Mapped[dict | None] = mapped_column(JSON, nullable=True)  # type: ignore[assignment]
+    #: Tax identifiers by scheme, ``[{"scheme": "vat", "value": "DE123456789"}]``. The schemes a
+    #: country uses come from ``core/country_data/entity_tax_ids.json``, not from core.
+    tax_ids: Mapped[list] = mapped_column(JSON, nullable=False, default=list, server_default="[]")  # type: ignore[assignment]
+    #: Prefix of this entity's own invoice number series, e.g. ``R-HB-``. NULL keeps the install's series.
+    invoice_prefix: Mapped[str | None] = mapped_column(String(32), nullable=True)
     #: The entity a document falls back to when nothing names one. At most one.
     is_default: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default="false")
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True, server_default="true")
@@ -84,9 +96,38 @@ class Branch(Base):
     #: ISO 3166-1 alpha-2 where the branch is. May differ from its entity's.
     country_code: Mapped[str] = mapped_column(String(2), nullable=False)
     subdivision_code: Mapped[str | None] = mapped_column(String(6), nullable=True)
+    #: ``{"line1", "line2", "postcode", "city"}``, or NULL when not recorded.
+    address: Mapped[dict | None] = mapped_column(JSON, nullable=True)  # type: ignore[assignment]
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True, server_default="true")
 
     legal_entity: Mapped[LegalEntity] = relationship(back_populates="branches", lazy="raise_on_sql")
 
     def __repr__(self) -> str:
         return f"<Branch {self.code} of {self.legal_entity_id}>"
+
+
+class LegalEntityMember(Base):
+    """A person who works for one entity of the group.
+
+    Membership widens what a non-admin sees: the projects of every entity they
+    belong to, on top of the projects they own or are on the team of. A person
+    with no membership sees exactly what they saw before entities existed.
+    """
+
+    __tablename__ = "oe_legal_entities_member"
+    __table_args__ = (
+        UniqueConstraint("legal_entity_id", "user_id", name="uq_oe_legal_entities_member_entity_user"),
+        Index("ix_oe_legal_entities_member_user", "user_id"),
+    )
+
+    legal_entity_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(), ForeignKey("oe_legal_entities_entity.id", ondelete="CASCADE"), nullable=False
+    )
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(), ForeignKey("oe_users_user.id", ondelete="CASCADE"), nullable=False
+    )
+    #: ``viewer``, ``member`` or ``admin`` of this entity.
+    role: Mapped[str] = mapped_column(String(16), nullable=False, default="member", server_default="member")
+
+    def __repr__(self) -> str:
+        return f"<LegalEntityMember {self.user_id} in {self.legal_entity_id} as {self.role}>"

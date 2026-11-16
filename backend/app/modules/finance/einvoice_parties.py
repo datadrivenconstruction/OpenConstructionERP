@@ -152,6 +152,7 @@ async def einvoice_defaults_for_invoice(
     *,
     contact_id: str | None,
     invoice_direction: str | None,
+    project_id: Any = None,
 ) -> dict[str, Any]:
     """Return the standing configuration for one invoice, buyer included.
 
@@ -164,6 +165,7 @@ async def einvoice_defaults_for_invoice(
         session: an open database session.
         contact_id: the invoice's ``contact_id``, if it names one.
         invoice_direction: ``receivable`` or ``payable``.
+        project_id: the invoice's project; its legal entity, when it names one, is the seller.
 
     Returns:
         The defaults dict, carrying ``buyer`` only when the contact is the party
@@ -171,7 +173,7 @@ async def einvoice_defaults_for_invoice(
     """
     from app.modules.finance.einvoice_settings_service import einvoice_defaults
 
-    defaults = await einvoice_defaults(session)
+    defaults = await einvoice_defaults(session, project_id=project_id)
     if not contact_id or (invoice_direction or "") != _CONTACT_IS_BUYER:
         return defaults
 

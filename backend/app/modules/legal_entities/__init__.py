@@ -9,7 +9,10 @@ Numbering, tax and stock ownership per entity build on this.
 
 
 async def on_startup() -> None:
-    """Register permissions."""
+    """Register permissions and the ``entity.*`` validation rules."""
     from app.modules.legal_entities.permissions import register_legal_entities_permissions
 
     register_legal_entities_permissions()
+    from app.modules.legal_entities.rules import register_legal_entities_validation_rules
+
+    register_legal_entities_validation_rules()

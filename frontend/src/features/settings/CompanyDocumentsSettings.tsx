@@ -49,6 +49,7 @@ import { fileToDataUrl } from '@/app/layout/CustomBranding';
 import { isSvgDataUrl, rasteriseSvgToPng } from './rasteriseSvg';
 import { DocumentAppearancePanel } from '@/features/property-dev/DocumentAppearancePanel';
 import { DocumentTemplatesPanel } from './DocumentTemplatesPanel';
+import { CompaniesCard } from '@/features/legal-entities/CompaniesCard';
 import { OfferSettingsPanel } from '@/features/offers/OfferSettingsPanel';
 import { getDocumentAppearance, type DocumentAppearance } from '@/features/property-dev/api';
 import {
@@ -358,6 +359,8 @@ export function CompanyDocumentsSettings() {
           </span>
         </div>
       )}
+
+      <CompaniesCard canEdit={canEdit} />
 
       {/* ── Logo on documents ── */}
       <Card padding="md">

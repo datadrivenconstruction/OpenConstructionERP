@@ -700,7 +700,10 @@ async def build_from_invoice(
         .all()
     )
     defaults = await einvoice_defaults_for_invoice(
-        session, contact_id=invoice.contact_id, invoice_direction=invoice.invoice_direction
+        session,
+        contact_id=invoice.contact_id,
+        project_id=invoice.project_id,
+        invoice_direction=invoice.invoice_direction,
     )
     fields = country_fields.get("zatca") if isinstance(country_fields.get("zatca"), dict) else {}
     try:
