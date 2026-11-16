@@ -2015,5 +2015,53 @@
       "fail": "Na stavbě byla četa {headcount} lidí, ale není zapsána práce, kontrola ani prostoj.",
       "suggestion": "Doplňte, co četa dělala, nebo prostoj, který práci zastavil."
     }
+  },
+  "estimate_archive": {
+    "arc_hash_mismatch": {
+      "fail": "Otisk nesouhlasí: záznam dává {actual}, pečeť uvádí {sealed}. Považujte záznam za změněný."
+    },
+    "arc_total_mismatch": {
+      "fail": "Zapečetěný součet {seal} se liší od zakázky {award} o {diff}."
+    },
+    "arc_no_breakdown": {
+      "fail": "{n} položek nemá rozpad na zdroje; jejich ceny nepůjde později doložit."
+    },
+    "arc_no_markups": {
+      "fail": "Rozpočet nemá žádné přirážky k zapečetění."
+    },
+    "arc_sealed_after_signing": {
+      "fail": "Zapečetěno {days} dní po podpisu smlouvy."
+    },
+    "arc_no_receipt": {
+      "fail": "Protistrana zatím otisk nepotvrdila."
+    },
+    "arc_open_not_closed": {
+      "fail": "Otevření {id} trvá {days} dní bez zápisu."
+    },
+    "arc_open_no_reason": {
+      "fail": "Otevření vyžaduje důvod a odkaz."
+    },
+    "arc_open_one_party": {
+      "fail": "Uvedena je jen jedna strana; zaznamenejte, proč druhá chybí."
+    },
+    "var_basis_no_seal": {
+      "fail": "Položka {code} je oceněna podle původního základu, ale zapečetěný rozpočet neexistuje."
+    },
+    "var_basis_deviation": {
+      "fail": "Položka {code}: {field} změněno z {old} na {new} bez poznámky."
+    },
+    "var_new_resource_no_evidence": {
+      "fail": "Nový zdroj {res} nemá datum ceny ani odkaz na nabídku."
+    },
+    "var_markup_not_sealed": {
+      "fail": "Položka {code} uplatňuje přirážku {m}, která v pečeti není."
+    },
+    "var_abnormal_carried_rate": {
+      "fail": "Převzatý náklad {c} se od srovnávací hodnoty liší o {pct} %."
+    },
+    "arc_mutation_refused": {
+      "fail": "Zapečetěný rozpočet nelze změnit ani smazat. Zapečeťte novou verzi, která jej nahradí."
+    },
+    "contents_locked": "Obsah zůstává zapečetěn, dokud nezačne formální otevření."
   }
 }

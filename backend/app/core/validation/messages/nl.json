@@ -2015,5 +2015,53 @@
       "fail": "Een ploeg van {headcount} was op de bouwplaats, maar er is geen werk, keuring of vertraging vastgelegd.",
       "suggestion": "Voeg toe wat de ploeg deed, of de vertraging die het werk stillegde."
     }
+  },
+  "estimate_archive": {
+    "arc_hash_mismatch": {
+      "fail": "Vingerafdruk wijkt af: het record geeft {actual}, het zegel zegt {sealed}. Beschouw het record als gewijzigd."
+    },
+    "arc_total_mismatch": {
+      "fail": "Het verzegelde totaal {seal} wijkt {diff} af van de gunning {award}."
+    },
+    "arc_no_breakdown": {
+      "fail": "{n} posten hebben geen uitsplitsing; hun prijzen zijn later niet te herleiden."
+    },
+    "arc_no_markups": {
+      "fail": "De begroting heeft geen opslagen om te verzegelen."
+    },
+    "arc_sealed_after_signing": {
+      "fail": "Verzegeld {days} dagen na ondertekening van het contract."
+    },
+    "arc_no_receipt": {
+      "fail": "De wederpartij heeft de vingerafdruk nog niet bevestigd."
+    },
+    "arc_open_not_closed": {
+      "fail": "Opening {id} staat al {days} dagen open zonder verslag."
+    },
+    "arc_open_no_reason": {
+      "fail": "Een opening vraagt een reden en een referentie."
+    },
+    "arc_open_one_party": {
+      "fail": "Er staat maar één partij; leg vast waarom de andere ontbreekt."
+    },
+    "var_basis_no_seal": {
+      "fail": "Post {code} is geprijsd op de oorspronkelijke basis, maar er is geen verzegelde begroting."
+    },
+    "var_basis_deviation": {
+      "fail": "Post {code}: {field} gewijzigd van {old} naar {new} zonder notitie."
+    },
+    "var_new_resource_no_evidence": {
+      "fail": "Nieuwe resource {res} heeft geen prijsdatum of offertereferentie."
+    },
+    "var_markup_not_sealed": {
+      "fail": "Post {code} past opslag {m} toe die niet in het zegel staat."
+    },
+    "var_abnormal_carried_rate": {
+      "fail": "Overgenomen kosten {c} wijken {pct} % af van de referentie."
+    },
+    "arc_mutation_refused": {
+      "fail": "Een verzegelde begroting kan niet worden gewijzigd of verwijderd. Verzegel een nieuwe versie die haar vervangt."
+    },
+    "contents_locked": "De inhoud blijft verzegeld tot een formele opening begint."
   }
 }

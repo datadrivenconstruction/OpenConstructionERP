@@ -233,6 +233,7 @@ async def enrich_projects(project_ids: list[uuid.UUID]) -> dict[str, Any]:
         from app.modules.engineering_brief.seed import seed_engineering_brief_demo
         from app.modules.equipment.rate_seed import seed_rate_catalogue_demo
         from app.modules.equipment.telematics_seed import seed_telematics_demo
+        from app.modules.estimate_archive.seed import seed_estimate_archive_demo
         from app.modules.estimate_basis.seed import seed_estimate_basis_demo
         from app.modules.field_time.clock_seed import seed_field_clock_demo
         from app.modules.field_time.payroll_seed import seed_payroll_export_demo
@@ -378,6 +379,7 @@ async def enrich_projects(project_ids: list[uuid.UUID]) -> dict[str, Any]:
             # seeder guards per project itself now.
             ("schedule_advanced", None, lambda s: seed_schedule_advanced_demo(s, _focus_pids)),
             ("variations", None, lambda s: seed_variations_demo(s, _demo_pids)),
+            ("estimate_archive", None, lambda s: seed_estimate_archive_demo(s, _demo_pids)),
             ("rfq_bidding", None, lambda s: seed_rfq_demo(s, _demo_pids)),
             ("takt", None, lambda s: seed_takt_demo(s, _demo_pids)),
             ("dispatch", None, lambda s: seed_dispatch_demo(s, _demo_pids)),

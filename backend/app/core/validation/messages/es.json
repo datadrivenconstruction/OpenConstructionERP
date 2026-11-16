@@ -2077,5 +2077,53 @@
       "fail": "La vigencia de {years} años supera el límite de {max} años de {source} (paquete).",
       "suggestion": "Revise la vigencia con el cliente; el límite se indica, no se impone."
     }
+  },
+  "estimate_archive": {
+    "arc_hash_mismatch": {
+      "fail": "La huella no coincide: el registro da {actual}, el sello indica {sealed}. Considere el registro alterado."
+    },
+    "arc_total_mismatch": {
+      "fail": "El total sellado {seal} difiere de la adjudicación {award} en {diff}."
+    },
+    "arc_no_breakdown": {
+      "fail": "{n} partidas no tienen desglose; sus precios no podrán rastrearse."
+    },
+    "arc_no_markups": {
+      "fail": "El presupuesto no tiene recargos que sellar."
+    },
+    "arc_sealed_after_signing": {
+      "fail": "Sellado {days} días después de firmar el contrato."
+    },
+    "arc_no_receipt": {
+      "fail": "La contraparte aún no ha confirmado la huella."
+    },
+    "arc_open_not_closed": {
+      "fail": "La apertura {id} lleva {days} días abierta sin acta."
+    },
+    "arc_open_no_reason": {
+      "fail": "Una apertura necesita un motivo y una referencia."
+    },
+    "arc_open_one_party": {
+      "fail": "Solo figura una parte; registre por qué falta la otra."
+    },
+    "var_basis_no_seal": {
+      "fail": "La partida {code} se valora con la base original, pero no existe un presupuesto sellado."
+    },
+    "var_basis_deviation": {
+      "fail": "Partida {code}: {field} cambió de {old} a {new} sin nota."
+    },
+    "var_new_resource_no_evidence": {
+      "fail": "El nuevo recurso {res} no tiene fecha de precio ni referencia de oferta."
+    },
+    "var_markup_not_sealed": {
+      "fail": "La partida {code} aplica el recargo {m}, que no está en el sello."
+    },
+    "var_abnormal_carried_rate": {
+      "fail": "El coste aplicado {c} se aparta un {pct} % de la referencia."
+    },
+    "arc_mutation_refused": {
+      "fail": "Un presupuesto sellado no se puede cambiar ni borrar. Selle una nueva versión que lo sustituya."
+    },
+    "contents_locked": "El contenido sigue sellado hasta que empiece una apertura formal."
   }
 }

@@ -2015,5 +2015,53 @@
       "fail": "O echipă de {headcount} persoane era pe șantier, dar nu sunt consemnate lucrări, inspecții sau întârzieri.",
       "suggestion": "Adăugați ce a făcut echipa sau întârzierea care a oprit lucrările."
     }
+  },
+  "estimate_archive": {
+    "arc_hash_mismatch": {
+      "fail": "Amprenta nu corespunde: înregistrarea dă {actual}, sigiliul indică {sealed}. Considerați înregistrarea modificată."
+    },
+    "arc_total_mismatch": {
+      "fail": "Totalul sigilat {seal} diferă de atribuire {award} cu {diff}."
+    },
+    "arc_no_breakdown": {
+      "fail": "{n} articole nu au defalcare pe resurse; prețurile lor nu vor putea fi urmărite."
+    },
+    "arc_no_markups": {
+      "fail": "Devizul nu are adaosuri de sigilat."
+    },
+    "arc_sealed_after_signing": {
+      "fail": "Sigilat la {days} zile după semnarea contractului."
+    },
+    "arc_no_receipt": {
+      "fail": "Contrapartea nu a confirmat încă amprenta."
+    },
+    "arc_open_not_closed": {
+      "fail": "Deschiderea {id} este în curs de {days} zile fără proces-verbal."
+    },
+    "arc_open_no_reason": {
+      "fail": "O deschidere necesită un motiv și o referință."
+    },
+    "arc_open_one_party": {
+      "fail": "Este indicată o singură parte; consemnați de ce lipsește cealaltă."
+    },
+    "var_basis_no_seal": {
+      "fail": "Articolul {code} este evaluat pe baza inițială, dar nu există deviz sigilat."
+    },
+    "var_basis_deviation": {
+      "fail": "Articolul {code}: {field} modificat din {old} în {new} fără notă."
+    },
+    "var_new_resource_no_evidence": {
+      "fail": "Resursa nouă {res} nu are dată de preț sau referință de ofertă."
+    },
+    "var_markup_not_sealed": {
+      "fail": "Articolul {code} aplică adaosul {m}, care nu este în sigiliu."
+    },
+    "var_abnormal_carried_rate": {
+      "fail": "Costul preluat {c} se abate cu {pct} % de la referință."
+    },
+    "arc_mutation_refused": {
+      "fail": "Un deviz sigilat nu poate fi modificat sau șters. Sigilați o versiune nouă care îl înlocuiește."
+    },
+    "contents_locked": "Conținutul rămâne sigilat până începe o deschidere formală."
   }
 }

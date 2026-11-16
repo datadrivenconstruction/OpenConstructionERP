@@ -2077,5 +2077,53 @@
       "fail": "Laufzeit {years} Jahre überschreitet die Grenze von {max} Jahren nach {source} (Paket).",
       "suggestion": "Laufzeit mit dem Auftraggeber prüfen; die Grenze wird angezeigt, nicht erzwungen."
     }
+  },
+  "estimate_archive": {
+    "arc_hash_mismatch": {
+      "fail": "Fingerabdruck stimmt nicht: der Datensatz ergibt {actual}, versiegelt war {sealed}. Der Datensatz gilt als verändert."
+    },
+    "arc_total_mismatch": {
+      "fail": "Die versiegelte Summe {seal} weicht vom Auftragswert {award} um {diff} ab."
+    },
+    "arc_no_breakdown": {
+      "fail": "{n} Positionen haben keine Aufgliederung; ihre Preise sind später nicht nachvollziehbar."
+    },
+    "arc_no_markups": {
+      "fail": "Die Kalkulation hat keine Zuschläge zum Versiegeln."
+    },
+    "arc_sealed_after_signing": {
+      "fail": "{days} Tage nach Vertragsunterzeichnung versiegelt."
+    },
+    "arc_no_receipt": {
+      "fail": "Die Gegenseite hat den Fingerabdruck noch nicht bestätigt."
+    },
+    "arc_open_not_closed": {
+      "fail": "Öffnung {id} ist seit {days} Tagen ohne Protokoll offen."
+    },
+    "arc_open_no_reason": {
+      "fail": "Eine Öffnung braucht einen Anlass und einen Bezug."
+    },
+    "arc_open_one_party": {
+      "fail": "Nur eine Partei ist erfasst; halten Sie fest, warum die andere fehlt."
+    },
+    "var_basis_no_seal": {
+      "fail": "Position {code} ist auf Grundlage der Urkalkulation bepreist, es gibt aber keine versiegelte Kalkulation."
+    },
+    "var_basis_deviation": {
+      "fail": "Position {code}: {field} von {old} auf {new} geändert, ohne Vermerk."
+    },
+    "var_new_resource_no_evidence": {
+      "fail": "Neue Ressource {res} hat kein Preisdatum und keinen Angebotsbezug."
+    },
+    "var_markup_not_sealed": {
+      "fail": "Position {code} setzt den Zuschlag {m} an, der nicht versiegelt ist."
+    },
+    "var_abnormal_carried_rate": {
+      "fail": "Angesetzte Kosten {c} weichen um {pct} % vom Vergleichswert ab."
+    },
+    "arc_mutation_refused": {
+      "fail": "Eine versiegelte Kalkulation kann weder geändert noch gelöscht werden. Versiegeln Sie eine neue Fassung, die sie ersetzt."
+    },
+    "contents_locked": "Der Inhalt bleibt versiegelt, bis eine förmliche Öffnung beginnt."
   }
 }

@@ -2015,5 +2015,53 @@
       "fail": "Estava em obra uma equipa de {headcount} mas não há trabalho, inspeção nem atraso registado.",
       "suggestion": "Acrescente o que a equipa fez, ou o atraso que parou os trabalhos."
     }
+  },
+  "estimate_archive": {
+    "arc_hash_mismatch": {
+      "fail": "A impressão digital não coincide: o registo dá {actual}, o selo indica {sealed}. Considere o registo alterado."
+    },
+    "arc_total_mismatch": {
+      "fail": "O total selado {seal} difere da adjudicação {award} em {diff}."
+    },
+    "arc_no_breakdown": {
+      "fail": "{n} artigos não têm decomposição; os seus preços não poderão ser rastreados."
+    },
+    "arc_no_markups": {
+      "fail": "O orçamento não tem margens para selar."
+    },
+    "arc_sealed_after_signing": {
+      "fail": "Selado {days} dias após a assinatura do contrato."
+    },
+    "arc_no_receipt": {
+      "fail": "A contraparte ainda não confirmou a impressão digital."
+    },
+    "arc_open_not_closed": {
+      "fail": "A abertura {id} está aberta há {days} dias sem ata."
+    },
+    "arc_open_no_reason": {
+      "fail": "Uma abertura precisa de motivo e referência."
+    },
+    "arc_open_one_party": {
+      "fail": "Só uma parte está indicada; registe porque falta a outra."
+    },
+    "var_basis_no_seal": {
+      "fail": "O artigo {code} é valorizado pela base original, mas não existe orçamento selado."
+    },
+    "var_basis_deviation": {
+      "fail": "Artigo {code}: {field} mudou de {old} para {new} sem nota."
+    },
+    "var_new_resource_no_evidence": {
+      "fail": "O novo recurso {res} não tem data de preço nem referência de proposta."
+    },
+    "var_markup_not_sealed": {
+      "fail": "O artigo {code} aplica a margem {m}, que não está no selo."
+    },
+    "var_abnormal_carried_rate": {
+      "fail": "O custo considerado {c} afasta-se {pct} % da referência."
+    },
+    "arc_mutation_refused": {
+      "fail": "Um orçamento selado não pode ser alterado nem apagado. Sele uma nova versão que o substitua."
+    },
+    "contents_locked": "O conteúdo continua selado até começar uma abertura formal."
   }
 }

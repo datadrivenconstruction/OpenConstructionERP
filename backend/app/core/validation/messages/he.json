@@ -2015,5 +2015,53 @@
       "fail": "צוות של {headcount} היה באתר אך לא נרשמו עבודה, בדיקה או עיכוב.",
       "suggestion": "הוסיפו מה עשה הצוות או את העיכוב שעצר את העבודה."
     }
+  },
+  "estimate_archive": {
+    "arc_hash_mismatch": {
+      "fail": "טביעת האצבע אינה תואמת: הרשומה נותנת {actual}, החותם מציין {sealed}. יש להתייחס לרשומה כאל משונה."
+    },
+    "arc_total_mismatch": {
+      "fail": "הסכום החתום {seal} שונה מסכום ההתקשרות {award} ב-{diff}."
+    },
+    "arc_no_breakdown": {
+      "fail": "ל-{n} סעיפים אין פירוק משאבים; לא ניתן יהיה לעקוב אחר מחיריהם."
+    },
+    "arc_no_markups": {
+      "fail": "באומדן אין תוספות לחתימה."
+    },
+    "arc_sealed_after_signing": {
+      "fail": "נחתם {days} ימים לאחר חתימת החוזה."
+    },
+    "arc_no_receipt": {
+      "fail": "הצד שכנגד טרם אישר את טביעת האצבע."
+    },
+    "arc_open_not_closed": {
+      "fail": "הפתיחה {id} פתוחה {days} ימים ללא פרוטוקול."
+    },
+    "arc_open_no_reason": {
+      "fail": "פתיחה דורשת סיבה והפניה."
+    },
+    "arc_open_one_party": {
+      "fail": "רק צד אחד רשום; תעדו מדוע הצד השני חסר."
+    },
+    "var_basis_no_seal": {
+      "fail": "סעיף {code} מתומחר לפי הבסיס המקורי, אך אין אומדן חתום."
+    },
+    "var_basis_deviation": {
+      "fail": "סעיף {code}: {field} שונה מ-{old} ל-{new} ללא הערה."
+    },
+    "var_new_resource_no_evidence": {
+      "fail": "למשאב החדש {res} אין תאריך מחיר או הפניה להצעה."
+    },
+    "var_markup_not_sealed": {
+      "fail": "סעיף {code} מחיל את התוספת {m}, שאינה בחותם."
+    },
+    "var_abnormal_carried_rate": {
+      "fail": "העלות המועברת {c} סוטה ב-{pct} % מהייחוס."
+    },
+    "arc_mutation_refused": {
+      "fail": "לא ניתן לשנות או למחוק אומדן חתום. חתמו גרסה חדשה שתחליף אותו."
+    },
+    "contents_locked": "התוכן נשאר חתום עד שמתחילה פתיחה רשמית."
   }
 }

@@ -1,0 +1,102 @@
+{
+  "_comment": "Market profiles for sealed estimates (module oe_estimate_archive). Read by app/modules/estimate_archive/policy.py. A profile decides whether the module shows at all for a project, which pricing methods a change shows and in what order, and the defaults of the governance settings. Citations are the legal texts the method notes name; the platform never decides which method is lawful. Profile 'neutral' is everything not listed: module off, neutral words only.",
+  "profiles": {
+    "neutral": {
+      "enabled": false,
+      "term": "neutral",
+      "methods": ["original_basis", "cost_plus_markup"],
+      "require_breakdown": false,
+      "require_receipt": false,
+      "require_both_parties": false,
+      "internal_read": true,
+      "retention_years": 10,
+      "on_account_percent": null,
+      "cost_plus_stack": null,
+      "attachment_presets": [],
+      "citations": []
+    },
+    "de": {
+      "enabled": true,
+      "term": "de",
+      "methods": ["original_basis", "cost_plus_markup"],
+      "require_breakdown": false,
+      "require_receipt": true,
+      "require_both_parties": true,
+      "internal_read": true,
+      "retention_years": 5,
+      "retention_note": "BGB § 634a Abs. 1 Nr. 2: 5 years from acceptance for buildings",
+      "on_account_percent": 80,
+      "cost_plus_stack": null,
+      "attachment_presets": ["efb_221_223"],
+      "citations": [
+        "BGB § 650c Abs. 1",
+        "BGB § 650c Abs. 2",
+        "BGB § 650c Abs. 3",
+        "VOB/B § 2 Abs. 5",
+        "VOB/B § 2 Abs. 6 Nr. 2",
+        "BGH 08.08.2019 VII ZR 34/18"
+      ]
+    },
+    "uk": {
+      "enabled": true,
+      "term": "uk",
+      "methods": ["cost_plus_markup", "original_basis"],
+      "require_breakdown": false,
+      "require_receipt": false,
+      "require_both_parties": false,
+      "internal_read": true,
+      "retention_years": 12,
+      "on_account_percent": null,
+      "cost_plus_stack": null,
+      "attachment_presets": [],
+      "citations": ["JCT SBC 2016 cl. 5.6", "NEC4 ECC 63.1", "NEC4 ECC 63.2"]
+    },
+    "fidic": {
+      "enabled": true,
+      "term": "fidic",
+      "methods": ["original_basis", "cost_plus_markup"],
+      "require_breakdown": false,
+      "require_receipt": false,
+      "require_both_parties": false,
+      "internal_read": true,
+      "retention_years": 10,
+      "on_account_percent": null,
+      "cost_plus_stack": [
+        {"name": "Profit (Cost Plus Profit)", "category": "profit", "percentage": "5", "apply_to": "direct_cost"}
+      ],
+      "attachment_presets": [],
+      "citations": ["FIDIC 2017 Red Book 12.3", "FIDIC 2017 Red Book 1.1.20"]
+    },
+    "us": {
+      "enabled": true,
+      "term": "us",
+      "methods": ["original_basis", "cost_plus_markup"],
+      "require_breakdown": false,
+      "require_receipt": false,
+      "require_both_parties": true,
+      "internal_read": true,
+      "retention_years": 10,
+      "on_account_percent": null,
+      "cost_plus_stack": null,
+      "attachment_presets": [],
+      "citations": []
+    }
+  },
+  "countries": {
+    "DE": "de",
+    "GB": "uk",
+    "US": "us",
+    "AE": "fidic",
+    "SA": "fidic",
+    "QA": "fidic",
+    "OM": "fidic",
+    "BH": "fidic",
+    "KW": "fidic"
+  },
+  "contract_forms": {
+    "fidic": "fidic",
+    "jct": "uk",
+    "nec": "uk",
+    "vob": "de"
+  }
+}

@@ -2077,5 +2077,53 @@
       "fail": "Term {years} years exceeds the {max}-year limit in {source} (pack).",
       "suggestion": "Check the term with the client; the limit is stated by the pack, not enforced."
     }
+  },
+  "estimate_archive": {
+    "arc_hash_mismatch": {
+      "fail": "Fingerprint mismatch: the record reads {actual}, the seal says {sealed}. Treat the record as altered."
+    },
+    "arc_total_mismatch": {
+      "fail": "The sealed total {seal} differs from the award {award} by {diff}."
+    },
+    "arc_no_breakdown": {
+      "fail": "{n} positions have no resource breakdown; their rates cannot be traced later."
+    },
+    "arc_no_markups": {
+      "fail": "The bill has no markups to seal."
+    },
+    "arc_sealed_after_signing": {
+      "fail": "Sealed {days} days after the contract was signed."
+    },
+    "arc_no_receipt": {
+      "fail": "The counterparty has not acknowledged the fingerprint yet."
+    },
+    "arc_open_not_closed": {
+      "fail": "Opening {id} has been open for {days} days without minutes."
+    },
+    "arc_open_no_reason": {
+      "fail": "An opening needs a reason and a reference."
+    },
+    "arc_open_one_party": {
+      "fail": "Only one party is listed; record why the other party is absent."
+    },
+    "var_basis_no_seal": {
+      "fail": "Position {code} is priced on the original basis, but no sealed estimate exists."
+    },
+    "var_basis_deviation": {
+      "fail": "Position {code}: {field} changed from {old} to {new} without a note."
+    },
+    "var_new_resource_no_evidence": {
+      "fail": "New resource {res} has no price date or quote reference."
+    },
+    "var_markup_not_sealed": {
+      "fail": "Position {code} applies markup {m}, which is not in the seal."
+    },
+    "var_abnormal_carried_rate": {
+      "fail": "Carried cost {c} is {pct} % away from the benchmark."
+    },
+    "arc_mutation_refused": {
+      "fail": "A sealed estimate cannot be changed or deleted. Seal a new version that supersedes it."
+    },
+    "contents_locked": "The contents stay sealed until a formal opening starts."
   }
 }

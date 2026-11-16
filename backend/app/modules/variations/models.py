@@ -256,6 +256,13 @@ class VariationBOQTrace(Base):
     #: the same way as no row rather than as a claim nobody made.
     change_kind: Mapped[str] = mapped_column(String(10), nullable=False, default="added", server_default="added")
     note: Mapped[str] = mapped_column(Text, nullable=False, default="", server_default="")
+    #: Set when ``origin='sealed_estimate'``: the seal (``oe_estimate_archive_seal.id``)
+    #: and the sealed position ordinal the line was carried from.
+    sealed_seal_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, index=True)
+    sealed_position_ordinal: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    #: ``original_basis``, ``cost_plus_markup``, ``agreed`` or ``daywork``; recorded by a
+    #: person, never picked by the engine. NULL for lines not priced from a seal.
+    basis_method: Mapped[str | None] = mapped_column(String(30), nullable=True)
 
     def __repr__(self) -> str:
         return f"<VariationBOQTrace {self.origin}/{self.change_kind} pos={self.position_id}>"

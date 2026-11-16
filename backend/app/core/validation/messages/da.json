@@ -2015,5 +2015,53 @@
       "fail": "Et hold på {headcount} var på pladsen, men intet arbejde, ingen kontrol og ingen forsinkelse er registreret.",
       "suggestion": "Tilføj hvad holdet lavede, eller forsinkelsen der stoppede arbejdet."
     }
+  },
+  "estimate_archive": {
+    "arc_hash_mismatch": {
+      "fail": "Fingeraftrykket passer ikke: posten giver {actual}, forseglingen siger {sealed}. Betragt posten som ændret."
+    },
+    "arc_total_mismatch": {
+      "fail": "Den forseglede sum {seal} afviger fra kontrakten {award} med {diff}."
+    },
+    "arc_no_breakdown": {
+      "fail": "{n} poster har ingen ressourceopdeling; deres priser kan ikke spores senere."
+    },
+    "arc_no_markups": {
+      "fail": "Overslaget har ingen tillæg at forsegle."
+    },
+    "arc_sealed_after_signing": {
+      "fail": "Forseglet {days} dage efter kontrakten blev underskrevet."
+    },
+    "arc_no_receipt": {
+      "fail": "Modparten har endnu ikke bekræftet fingeraftrykket."
+    },
+    "arc_open_not_closed": {
+      "fail": "Åbning {id} har været åben i {days} dage uden referat."
+    },
+    "arc_open_no_reason": {
+      "fail": "En åbning kræver en årsag og en reference."
+    },
+    "arc_open_one_party": {
+      "fail": "Kun én part er angivet; notér hvorfor den anden mangler."
+    },
+    "var_basis_no_seal": {
+      "fail": "Post {code} er prissat på det oprindelige grundlag, men der findes intet forseglet overslag."
+    },
+    "var_basis_deviation": {
+      "fail": "Post {code}: {field} ændret fra {old} til {new} uden note."
+    },
+    "var_new_resource_no_evidence": {
+      "fail": "Ny ressource {res} mangler prisdato og tilbudsreference."
+    },
+    "var_markup_not_sealed": {
+      "fail": "Post {code} anvender tillæg {m}, som ikke er i forseglingen."
+    },
+    "var_abnormal_carried_rate": {
+      "fail": "Overført omkostning {c} afviger {pct} % fra referencen."
+    },
+    "arc_mutation_refused": {
+      "fail": "Et forseglet overslag kan ikke ændres eller slettes. Forsegl en ny version, der erstatter det."
+    },
+    "contents_locked": "Indholdet forbliver forseglet, indtil en formel åbning begynder."
   }
 }

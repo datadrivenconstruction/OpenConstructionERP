@@ -2015,5 +2015,53 @@
       "fail": "A helyszínen {headcount} fős brigád volt, de nincs rögzítve munka, ellenőrzés vagy akadályoztatás.",
       "suggestion": "Adja meg, mit csinált a brigád, vagy a munkát leállító akadályoztatást."
     }
+  },
+  "estimate_archive": {
+    "arc_hash_mismatch": {
+      "fail": "Az ujjlenyomat eltér: a rekord {actual}, a pecsét {sealed}. Tekintse a rekordot módosítottnak."
+    },
+    "arc_total_mismatch": {
+      "fail": "A lepecsételt összeg {seal} eltér a szerződéses {award} értéktől: {diff}."
+    },
+    "arc_no_breakdown": {
+      "fail": "{n} tételnek nincs erőforrás-bontása; áraik később nem követhetők."
+    },
+    "arc_no_markups": {
+      "fail": "A költségvetésben nincs lepecsételhető pótlék."
+    },
+    "arc_sealed_after_signing": {
+      "fail": "Lepecsételve {days} nappal a szerződés aláírása után."
+    },
+    "arc_no_receipt": {
+      "fail": "A szerződő fél még nem igazolta az ujjlenyomatot."
+    },
+    "arc_open_not_closed": {
+      "fail": "A(z) {id} bontás {days} napja nyitva van jegyzőkönyv nélkül."
+    },
+    "arc_open_no_reason": {
+      "fail": "A bontáshoz ok és hivatkozás kell."
+    },
+    "arc_open_one_party": {
+      "fail": "Csak egy fél szerepel; rögzítse, miért hiányzik a másik."
+    },
+    "var_basis_no_seal": {
+      "fail": "A(z) {code} tétel az eredeti alapon árazott, de nincs lepecsételt költségvetés."
+    },
+    "var_basis_deviation": {
+      "fail": "{code} tétel: {field} {old} értékről {new} értékre változott megjegyzés nélkül."
+    },
+    "var_new_resource_no_evidence": {
+      "fail": "Az új {res} erőforrásnak nincs ár dátuma vagy ajánlati hivatkozása."
+    },
+    "var_markup_not_sealed": {
+      "fail": "A(z) {code} tétel a(z) {m} pótlékot alkalmazza, amely nincs a pecsétben."
+    },
+    "var_abnormal_carried_rate": {
+      "fail": "Az átvett költség ({c}) {pct} %-kal tér el a referenciától."
+    },
+    "arc_mutation_refused": {
+      "fail": "Lepecsételt költségvetés nem módosítható és nem törölhető. Pecsételjen le egy új, azt felváltó változatot."
+    },
+    "contents_locked": "A tartalom lepecsételve marad, amíg hivatalos bontás nem kezdődik."
   }
 }

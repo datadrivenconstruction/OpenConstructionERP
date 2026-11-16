@@ -2015,5 +2015,53 @@
       "fail": "Ett arbetslag på {headcount} fanns på plats men inget arbete, ingen kontroll och ingen försening är registrerad.",
       "suggestion": "Lägg till vad arbetslaget gjorde, eller förseningen som stoppade arbetet."
     }
+  },
+  "estimate_archive": {
+    "arc_hash_mismatch": {
+      "fail": "Fingeravtrycket stämmer inte: posten ger {actual}, förseglingen anger {sealed}. Behandla posten som ändrad."
+    },
+    "arc_total_mismatch": {
+      "fail": "Den förseglade summan {seal} skiljer sig från kontraktet {award} med {diff}."
+    },
+    "arc_no_breakdown": {
+      "fail": "{n} poster saknar resursuppdelning; deras priser kan inte spåras senare."
+    },
+    "arc_no_markups": {
+      "fail": "Kalkylen har inga påslag att försegla."
+    },
+    "arc_sealed_after_signing": {
+      "fail": "Förseglad {days} dagar efter att kontraktet undertecknades."
+    },
+    "arc_no_receipt": {
+      "fail": "Motparten har ännu inte bekräftat fingeravtrycket."
+    },
+    "arc_open_not_closed": {
+      "fail": "Öppning {id} har varit öppen i {days} dagar utan protokoll."
+    },
+    "arc_open_no_reason": {
+      "fail": "En öppning kräver ett skäl och en referens."
+    },
+    "arc_open_one_party": {
+      "fail": "Bara en part anges; anteckna varför den andra saknas."
+    },
+    "var_basis_no_seal": {
+      "fail": "Post {code} är prissatt på ursprunglig grund, men ingen förseglad kalkyl finns."
+    },
+    "var_basis_deviation": {
+      "fail": "Post {code}: {field} ändrat från {old} till {new} utan anteckning."
+    },
+    "var_new_resource_no_evidence": {
+      "fail": "Ny resurs {res} saknar prisdatum och offertreferens."
+    },
+    "var_markup_not_sealed": {
+      "fail": "Post {code} använder påslag {m}, som inte finns i förseglingen."
+    },
+    "var_abnormal_carried_rate": {
+      "fail": "Överförd kostnad {c} avviker {pct} % från referensen."
+    },
+    "arc_mutation_refused": {
+      "fail": "En förseglad kalkyl kan inte ändras eller raderas. Försegla en ny version som ersätter den."
+    },
+    "contents_locked": "Innehållet förblir förseglat tills en formell öppning börjar."
   }
 }

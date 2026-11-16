@@ -2015,5 +2015,53 @@
       "fail": "May grupong {headcount} sa site pero walang naitalang trabaho, inspeksyon, o pagkaantala.",
       "suggestion": "Idagdag ang ginawa ng grupo, o ang pagkaantalang nagpatigil ng trabaho."
     }
+  },
+  "estimate_archive": {
+    "arc_hash_mismatch": {
+      "fail": "Hindi tugma ang fingerprint: ang rekord ay {actual}, ang selyo ay {sealed}. Ituring na binago ang rekord."
+    },
+    "arc_total_mismatch": {
+      "fail": "Ang selyadong kabuuan na {seal} ay iba sa award na {award} nang {diff}."
+    },
+    "arc_no_breakdown": {
+      "fail": "{n} item ang walang breakdown ng resources; hindi na masusundan ang mga rate nila."
+    },
+    "arc_no_markups": {
+      "fail": "Walang markup sa estimate na isesely."
+    },
+    "arc_sealed_after_signing": {
+      "fail": "Sinelyuhan {days} araw matapos pirmahan ang kontrata."
+    },
+    "arc_no_receipt": {
+      "fail": "Hindi pa kinikilala ng kabilang panig ang fingerprint."
+    },
+    "arc_open_not_closed": {
+      "fail": "Ang pagbubukas na {id} ay bukas na nang {days} araw nang walang minutes."
+    },
+    "arc_open_no_reason": {
+      "fail": "Kailangan ng dahilan at reference ang pagbubukas."
+    },
+    "arc_open_one_party": {
+      "fail": "Isang panig lang ang nakalista; itala kung bakit wala ang kabila."
+    },
+    "var_basis_no_seal": {
+      "fail": "Ang item {code} ay may presyo batay sa orihinal na basehan, pero walang selyadong estimate."
+    },
+    "var_basis_deviation": {
+      "fail": "Item {code}: binago ang {field} mula {old} tungo {new} nang walang tala."
+    },
+    "var_new_resource_no_evidence": {
+      "fail": "Ang bagong resource na {res} ay walang petsa ng presyo o reference ng quote."
+    },
+    "var_markup_not_sealed": {
+      "fail": "Gumagamit ang item {code} ng markup na {m} na wala sa selyo."
+    },
+    "var_abnormal_carried_rate": {
+      "fail": "Ang dinalang gastos na {c} ay lihis nang {pct} % sa benchmark."
+    },
+    "arc_mutation_refused": {
+      "fail": "Hindi mababago o mabubura ang selyadong estimate. Magselyo ng bagong bersyon na papalit dito."
+    },
+    "contents_locked": "Mananatiling selyado ang nilalaman hanggang magsimula ang pormal na pagbubukas."
   }
 }

@@ -2015,5 +2015,53 @@
       "fail": "Sahada {headcount} kişilik bir ekip vardı ancak iş, kontrol veya gecikme kaydı yok.",
       "suggestion": "Ekibin ne yaptığını veya işi durduran gecikmeyi ekleyin."
     }
+  },
+  "estimate_archive": {
+    "arc_hash_mismatch": {
+      "fail": "Parmak izi uyuşmuyor: kayıt {actual} veriyor, mühür {sealed} diyor. Kaydı değiştirilmiş sayın."
+    },
+    "arc_total_mismatch": {
+      "fail": "Mühürlü toplam {seal}, ihale bedeli {award} değerinden {diff} farklı."
+    },
+    "arc_no_breakdown": {
+      "fail": "{n} pozisyonda kaynak dökümü yok; fiyatları sonradan izlenemez."
+    },
+    "arc_no_markups": {
+      "fail": "Keşifte mühürlenecek ek yok."
+    },
+    "arc_sealed_after_signing": {
+      "fail": "Sözleşme imzalandıktan {days} gün sonra mühürlendi."
+    },
+    "arc_no_receipt": {
+      "fail": "Karşı taraf parmak izini henüz onaylamadı."
+    },
+    "arc_open_not_closed": {
+      "fail": "{id} açılışı {days} gündür tutanaksız açık."
+    },
+    "arc_open_no_reason": {
+      "fail": "Bir açılış için gerekçe ve referans gerekir."
+    },
+    "arc_open_one_party": {
+      "fail": "Yalnızca bir taraf listelenmiş; diğerinin neden olmadığını kaydedin."
+    },
+    "var_basis_no_seal": {
+      "fail": "{code} pozisyonu orijinal esasa göre fiyatlandı, ancak mühürlü keşif yok."
+    },
+    "var_basis_deviation": {
+      "fail": "{code} pozisyonu: {field} not olmadan {old} değerinden {new} değerine değişti."
+    },
+    "var_new_resource_no_evidence": {
+      "fail": "Yeni kaynak {res} için fiyat tarihi veya teklif referansı yok."
+    },
+    "var_markup_not_sealed": {
+      "fail": "{code} pozisyonu mühürde olmayan {m} ekini uyguluyor."
+    },
+    "var_abnormal_carried_rate": {
+      "fail": "Aktarılan maliyet {c}, referanstan % {pct} sapıyor."
+    },
+    "arc_mutation_refused": {
+      "fail": "Mühürlü bir keşif değiştirilemez veya silinemez. Yerine geçecek yeni bir sürüm mühürleyin."
+    },
+    "contents_locked": "İçerik resmi bir açılış başlayana kadar mühürlü kalır."
   }
 }

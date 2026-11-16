@@ -2015,5 +2015,53 @@
       "fail": "كان في الموقع طاقم من {headcount} أشخاص لكن لم تُسجل أعمال أو فحص أو تأخير.",
       "suggestion": "أضف ما فعله الطاقم أو التأخير الذي أوقف العمل."
     }
+  },
+  "estimate_archive": {
+    "arc_hash_mismatch": {
+      "fail": "البصمة غير مطابقة: السجل يعطي {actual} والختم يذكر {sealed}. اعتبر السجل معدلاً."
+    },
+    "arc_total_mismatch": {
+      "fail": "المجموع المختوم {seal} يختلف عن قيمة الترسية {award} بمقدار {diff}."
+    },
+    "arc_no_breakdown": {
+      "fail": "{n} بنود بلا تحليل للموارد؛ لا يمكن تتبع أسعارها لاحقاً."
+    },
+    "arc_no_markups": {
+      "fail": "لا توجد إضافات في المقايسة لختمها."
+    },
+    "arc_sealed_after_signing": {
+      "fail": "خُتم بعد {days} يوماً من توقيع العقد."
+    },
+    "arc_no_receipt": {
+      "fail": "لم يؤكد الطرف الآخر البصمة بعد."
+    },
+    "arc_open_not_closed": {
+      "fail": "الفتح {id} مفتوح منذ {days} يوماً دون محضر."
+    },
+    "arc_open_no_reason": {
+      "fail": "يتطلب الفتح سبباً ومرجعاً."
+    },
+    "arc_open_one_party": {
+      "fail": "طرف واحد فقط مدرج؛ سجّل سبب غياب الطرف الآخر."
+    },
+    "var_basis_no_seal": {
+      "fail": "البند {code} مسعّر على الأساس الأصلي، لكن لا توجد مقايسة مختومة."
+    },
+    "var_basis_deviation": {
+      "fail": "البند {code}: تغيّر {field} من {old} إلى {new} دون ملاحظة."
+    },
+    "var_new_resource_no_evidence": {
+      "fail": "المورد الجديد {res} بلا تاريخ سعر أو مرجع عرض."
+    },
+    "var_markup_not_sealed": {
+      "fail": "البند {code} يطبق الإضافة {m} غير الموجودة في الختم."
+    },
+    "var_abnormal_carried_rate": {
+      "fail": "التكلفة المنقولة {c} تنحرف بنسبة {pct} % عن المرجع."
+    },
+    "arc_mutation_refused": {
+      "fail": "لا يمكن تعديل مقايسة مختومة أو حذفها. اختم نسخة جديدة تحل محلها."
+    },
+    "contents_locked": "يبقى المحتوى مختوماً حتى يبدأ فتح رسمي."
   }
 }
