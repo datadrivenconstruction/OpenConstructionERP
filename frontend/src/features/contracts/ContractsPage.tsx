@@ -154,7 +154,8 @@ import { RunAgentButton } from '@/features/ai-agents/components/RunAgentButton';
 // through to the previous default.
 const CONTRACTS_TYPE_LABELS: Record<string, string> = {
   lump_sum: 'Lump sum', gmp: 'GMP', cost_plus: 'Cost plus', tm: 'T&M', unit_price: 'Unit price',
-  design_build: 'Design and build', combination: 'Combination', remeasurement: 'Remeasurement'
+  design_build: 'Design and build', combination: 'Combination', remeasurement: 'Remeasurement',
+  framework: 'Framework agreement', call_off: 'Call-off order'
 };
 
 
@@ -172,6 +173,8 @@ const CONTRACT_TYPE_COLORS: Record<
   design_build: { bg: 'bg-fuchsia-50 dark:bg-fuchsia-950/40', ring: 'ring-fuchsia-200 dark:ring-fuchsia-800', text: 'text-fuchsia-700 dark:text-fuchsia-300' },
   combination: { bg: 'bg-surface-secondary', ring: 'ring-slate-200 dark:ring-slate-700', text: 'text-content-secondary' },
   remeasurement: { bg: 'bg-teal-50 dark:bg-teal-950/40', ring: 'ring-teal-200 dark:ring-teal-800', text: 'text-teal-700 dark:text-teal-300' },
+  framework: { bg: 'bg-semantic-info-bg', ring: 'ring-semantic-info/30', text: 'text-semantic-info' },
+  call_off: { bg: 'bg-surface-secondary', ring: 'ring-slate-200 dark:ring-slate-700', text: 'text-content-secondary' },
 };
 
 /** Neutral fallback so an unknown/missing contract type never crashes the chip. */
@@ -214,6 +217,10 @@ const CONTRACT_TYPES: ContractType[] = [
   'combination',
   'remeasurement',
 ];
+
+// Framework agreements and their call-off orders are created in their own module; the
+// register can still filter by them.
+const CONTRACT_FILTER_TYPES: ContractType[] = [...CONTRACT_TYPES, 'framework', 'call_off'];
 
 const CONTRACT_STATUSES: ContractStatus[] = [
   'draft',
@@ -905,7 +912,7 @@ export function ContractsPage() {
             <option value="">
               {t('contracts.all_types', { defaultValue: 'All types' })}
             </option>
-            {CONTRACT_TYPES.map((tp) => (
+            {CONTRACT_FILTER_TYPES.map((tp) => (
               <option key={tp} value={tp}>
                 {t(`contracts.type_${tp}`, {
                   defaultValue: CONTRACTS_TYPE_LABELS[tp] ?? (tp === 'tm' ? 'T&M' : tp.replace(/_/g, ' ')),

@@ -2015,5 +2015,67 @@
       "fail": "Eine Mannschaft von {headcount} war auf der Baustelle, aber weder Arbeit, Prüfung noch Behinderung ist erfasst.",
       "suggestion": "Ergänzen, was die Mannschaft getan hat, oder die Behinderung erfassen, die die Arbeit stoppte."
     }
+  },
+  "framework_agreement": {
+    "item_not_in_agreement": {
+      "fail": "Position {code} ist keine aktive Position des Rahmenvertrags {agreement}; als Nachtrag erfassen.",
+      "suggestion": "Position aus dem Abruf entfernen und die Leistung als Nachtrag zum Abruf erfassen."
+    },
+    "rate_deviates": {
+      "fail": "Position {code}: Preis {rate} weicht vom Vertragspreis {expected} ab.",
+      "suggestion": "Preise eines Abrufs kommen aus dem Rahmenvertrag; Position aus dem Preisverzeichnis neu bepreisen."
+    },
+    "order_outside_validity": {
+      "fail": "Abrufdatum {date} liegt außerhalb der Laufzeit {from} bis {to}.",
+      "suggestion": "Abruf innerhalb der Laufzeit datieren oder zuerst den Rahmenvertrag verlängern."
+    },
+    "rate_period_gap": {
+      "fail": "Kein Preiszeitraum deckt den {date} ab.",
+      "suggestion": "Auf dem Reiter Preise und Gleitung einen Zeitraum für dieses Datum anlegen."
+    },
+    "escalation_unresolved": {
+      "fail": "Index {series} hat keinen Wert für {period}; der Preis kann nicht angepasst werden.",
+      "suggestion": "Indexwert für diesen Monat im Preisindex erfassen und den Abruf neu bepreisen."
+    },
+    "cap_exceeded": {
+      "fail": "Dieser Abruf bringt den Rahmenvertrag auf {total} bei einem Höchstwert von {cap}; Rest {headroom}.",
+      "suggestion": "Abruf auf den Rest kürzen oder mit begründeter Freigabe erteilen."
+    },
+    "cap_threshold": {
+      "fail": "Der Rahmenvertrag ist zu {pct} % ausgeschöpft.",
+      "suggestion": "Den Auftraggeber frühzeitig informieren, damit ein Folgevertrag vorbereitet werden kann."
+    },
+    "item_max_qty": {
+      "fail": "Position {code}: bisher {qty} abgerufen, mehr als die Höchstmenge {max}.",
+      "suggestion": "Mehrmenge vor dem nächsten Abruf mit dem Auftraggeber abstimmen."
+    },
+    "min_at_risk": {
+      "fail": "Noch {days} Tage, {pct} % der Mindestabnahme sind abgerufen.",
+      "suggestion": "Die Lücke mit dem Auftraggeber klären, solange noch abgerufen werden kann."
+    },
+    "currency_mismatch": {
+      "fail": "Abrufwährung {cur} weicht von der Vertragswährung {agr} ab.",
+      "suggestion": "Abrufe werden in der Vertragswährung bepreist."
+    },
+    "adjustment_unknown": {
+      "fail": "Für die Bedingung {tag} gibt es in diesem Rahmenvertrag keinen Zuschlag.",
+      "suggestion": "Zuschlag auf dem Reiter Bedingungen anlegen oder die Bedingung vom Abruf entfernen."
+    },
+    "direct_claim": {
+      "fail": "Abrechnungen erfolgen auf Abrufe, nicht auf den Rahmenvertrag.",
+      "suggestion": "Den Abruf öffnen, unter dem die Leistung erbracht wurde, und dort abrechnen."
+    },
+    "duplicate_item": {
+      "fail": "Positionsnummer {code} kommt im Preiszeitraum {period} doppelt vor.",
+      "suggestion": "Vor dem Speichern nur eine Zeile je Positionsnummer behalten."
+    },
+    "measured_over_ordered": {
+      "fail": "Aufmaß {m} übersteigt die abgerufene Menge {o} bei Position {code}; Nachtrag prüfen.",
+      "suggestion": "Mehrmenge als Nachtrag zum Abruf erfassen."
+    },
+    "term_over_legal_max": {
+      "fail": "Laufzeit {years} Jahre überschreitet die Grenze von {max} Jahren nach {source} (Paket).",
+      "suggestion": "Laufzeit mit dem Auftraggeber prüfen; die Grenze wird angezeigt, nicht erzwungen."
+    }
   }
 }

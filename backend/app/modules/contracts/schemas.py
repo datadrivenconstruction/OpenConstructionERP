@@ -33,7 +33,7 @@ from app.modules.contracts.retention import (
 #: Largest magnitude the NUMERIC(18,4) money columns hold; larger input would be a database overflow, not a 422.
 _MONEY_LIMIT = Decimal(10**14)
 
-CONTRACT_TYPES = "lump_sum|gmp|cost_plus|tm|unit_price|design_build|combination|remeasurement"
+CONTRACT_TYPES = "lump_sum|gmp|cost_plus|tm|unit_price|design_build|combination|remeasurement|framework|call_off"
 COUNTERPARTY_TYPES = "client|subcontractor"
 CONTRACT_STATUSES = "draft|active|suspended|completed|terminated"
 #: Every name a contract's release event has been written under. Accepted on

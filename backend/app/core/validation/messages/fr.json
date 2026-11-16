@@ -2015,5 +2015,67 @@
       "fail": "Une équipe de {headcount} était sur le chantier mais aucun travail, contrôle ou arrêt n'est consigné.",
       "suggestion": "Ajouter ce que l'équipe a fait, ou l'arrêt qui a bloqué les travaux."
     }
+  },
+  "framework_agreement": {
+    "item_not_in_agreement": {
+      "fail": "La ligne {code} n'est pas un article actif de l'accord-cadre {agreement} ; saisissez-la en travaux supplémentaires.",
+      "suggestion": "Retirez la ligne du bon de commande et saisissez les travaux en supplément sur ce bon."
+    },
+    "rate_deviates": {
+      "fail": "Le prix {rate} de la ligne {code} diffère du prix de l'accord {expected}.",
+      "suggestion": "Les prix d'un bon de commande viennent de l'accord ; revalorisez la ligne depuis le bordereau."
+    },
+    "order_outside_validity": {
+      "fail": "La date du bon {date} est hors de la durée de l'accord du {from} au {to}.",
+      "suggestion": "Datez le bon dans la durée de l'accord ou prolongez d'abord l'accord."
+    },
+    "rate_period_gap": {
+      "fail": "Aucune période de prix ne couvre le {date}.",
+      "suggestion": "Ajoutez une période de prix couvrant cette date dans l'onglet Prix et révision."
+    },
+    "escalation_unresolved": {
+      "fail": "L'indice {series} n'a pas de valeur pour {period} ; le prix ne peut pas être révisé.",
+      "suggestion": "Saisissez la valeur de l'indice pour ce mois dans Indices de prix, puis revalorisez le bon."
+    },
+    "cap_exceeded": {
+      "fail": "Ce bon porte l'accord à {total} pour un plafond de {cap} ; reste {headroom}.",
+      "suggestion": "Réduisez le bon au reste disponible ou émettez-le avec une dérogation motivée."
+    },
+    "cap_threshold": {
+      "fail": "L'accord est consommé à {pct} % du plafond.",
+      "suggestion": "Prévenez le client tôt pour préparer un accord suivant."
+    },
+    "item_max_qty": {
+      "fail": "Article {code} : {qty} commandés à ce jour dépassent le maximum indiqué {max}.",
+      "suggestion": "Convenez de la quantité supplémentaire avec le client avant le prochain bon."
+    },
+    "min_at_risk": {
+      "fail": "Il reste {days} jours et {pct} % du minimum garanti est commandé.",
+      "suggestion": "Évoquez l'écart avec le client tant qu'il reste du temps pour commander."
+    },
+    "currency_mismatch": {
+      "fail": "La devise du bon {cur} diffère de la devise de l'accord {agr}.",
+      "suggestion": "Les bons sont valorisés dans la devise de l'accord."
+    },
+    "adjustment_unknown": {
+      "fail": "La condition {tag} n'a pas d'ajustement dans cet accord.",
+      "suggestion": "Ajoutez l'ajustement dans l'onglet Conditions ou retirez la condition du bon."
+    },
+    "direct_claim": {
+      "fail": "Les situations sont établies sur les bons de commande, pas sur l'accord-cadre.",
+      "suggestion": "Ouvrez le bon sous lequel les travaux ont été faits et établissez la situation là."
+    },
+    "duplicate_item": {
+      "fail": "Le code {code} apparaît deux fois dans la période {period}.",
+      "suggestion": "Gardez une seule ligne par code avant d'enregistrer le bordereau."
+    },
+    "measured_over_ordered": {
+      "fail": "Le métré {m} dépasse la quantité commandée {o} sur la ligne {code} ; envisagez un supplément.",
+      "suggestion": "Saisissez le dépassement en modification du bon."
+    },
+    "term_over_legal_max": {
+      "fail": "La durée de {years} ans dépasse la limite de {max} ans selon {source} (pack).",
+      "suggestion": "Vérifiez la durée avec le client ; la limite est indiquée, pas imposée."
+    }
   }
 }

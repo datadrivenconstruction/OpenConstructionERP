@@ -88,7 +88,7 @@ describe('menu groups', () => {
         '/methodologies',
         '/sheets',
         '/geo', '/pointcloud',
-        '/contracts', '/payment-clock', '/tax-withholding', '/tax-rates', '/einvoice-clearance',
+        '/contracts', '/framework-agreements', '/payment-clock', '/tax-withholding', '/tax-rates', '/einvoice-clearance',
       ].sort(),
     );
   });
