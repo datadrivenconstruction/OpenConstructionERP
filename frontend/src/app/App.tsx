@@ -670,6 +670,10 @@ const PropertyDevDashboardFullView = lazy(() =>
 const BidManagementPage = lazy(() =>
   import('@/features/bid-management').then((m) => ({ default: m.BidManagementPage }))
 );
+const EstimateArchivePage = lazy(() =>
+  import('@/features/estimate-archive').then((m) => ({ default: m.EstimateArchivePage })),
+);
+const SealPage = lazy(() => import('@/features/estimate-archive').then((m) => ({ default: m.SealPage })));
 const WinLossPage = lazy(() => import('@/features/win-loss').then((m) => ({ default: m.WinLossPage })));
 const VariationsPage = lazy(() =>
   import('@/features/variations').then((m) => ({ default: m.VariationsPage }))
@@ -1931,6 +1935,8 @@ export default function App() {
             its own register tracks contractual variation instructions with
             day-works, instructions, time-impact analysis. */}
         <Route path="/variations" element={<P title="Variations"><VariationsPage /></P>} />
+        <Route path="/estimate-archive" element={<P title="Sealed estimates"><EstimateArchivePage /></P>} />
+        <Route path="/estimate-archive/:sealId" element={<P title="Sealed estimate"><SealPage /></P>} />
         <Route path="/projects/:projectId/variations" element={<P title="Variations"><VariationsPage /></P>} />
         <Route path="/change-intelligence" element={<P title="Change Intelligence"><ChangeIntelligencePage /></P>} />
         <Route path="/projects/:projectId/change-intelligence" element={<P title="Change Intelligence"><ChangeIntelligencePage /></P>} />
