@@ -70,7 +70,6 @@ import {
   Users,
   ScrollText,
   Building2,
-  Mail,
   Boxes,
   Database,
 } from 'lucide-react';
