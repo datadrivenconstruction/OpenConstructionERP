@@ -31,6 +31,7 @@ import asyncio
 import logging
 import smtplib
 from email.mime.application import MIMEApplication
+from email.mime.image import MIMEImage
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.utils import formataddr, parseaddr
@@ -127,10 +128,23 @@ class SmtpEmailBackend(EmailBackend):
         body.attach(MIMEText(_html_to_text(message.html_body), "plain", "utf-8"))
         body.attach(MIMEText(message.html_body, "html", "utf-8"))
 
-        if message.attachments:
+        inline = [a for a in message.attachments if a.content_id]
+        files = [a for a in message.attachments if not a.content_id]
+        if inline:
+            related = MIMEMultipart("related")
+            related.attach(body)
+            for att in inline:
+                subtype = (att.content_type.split("/", 1) or ["image", "png"])[-1]
+                part = MIMEImage(att.content, _subtype=subtype)
+                part.add_header("Content-ID", f"<{att.content_id}>")
+                part.add_header("Content-Disposition", "inline", filename=att.filename)
+                related.attach(part)
+            body = related
+
+        if files:
             mime = MIMEMultipart("mixed")
             mime.attach(body)
-            for att in message.attachments:
+            for att in files:
                 subtype = (att.content_type.split("/", 1) or ["application", "octet-stream"])[-1]
                 part = MIMEApplication(att.content, _subtype=subtype)
                 part.add_header(

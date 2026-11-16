@@ -26,7 +26,7 @@
 
 import { useRef, useState, type DragEvent, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import clsx from 'clsx';
 import {
@@ -39,7 +39,8 @@ import {
   Trash2,
   Upload,
 } from 'lucide-react';
-import { Button, Card, Input, SkeletonText } from '@/shared/ui';
+import { Button, Card, Input, SkeletonText, TabBar } from '@/shared/ui';
+import { DocTemplatesList } from '@/features/doc-templates';
 import { ApiError, getErrorMessage, triggerDownload } from '@/shared/lib/api';
 import { fmtFixed, fmtList } from '@/shared/lib/formatters';
 import { useAuthStore } from '@/stores/useAuthStore';
@@ -190,7 +191,50 @@ function limitLines(value: string, max: number): string {
   return value.split('\n').slice(0, max).join('\n');
 }
 
+type CompanyDocumentsTab = 'letterhead' | 'documents' | 'emails';
+const COMPANY_DOCUMENTS_TABS: readonly CompanyDocumentsTab[] = ['letterhead', 'documents', 'emails'];
+
+/**
+ * Settings > Documents & templates: the letterhead (logos, company details,
+ * look) and, in their own tabs, the wording of every document and email.
+ * Deep link: ``settings?tab=company&sub=documents&kind=<key>``.
+ */
 export function CompanyDocumentsSettings() {
+  const { t } = useTranslation();
+  const [params, setParams] = useSearchParams();
+  const rawSub = params.get('sub') as CompanyDocumentsTab | null;
+  const sub: CompanyDocumentsTab = rawSub && COMPANY_DOCUMENTS_TABS.includes(rawSub) ? rawSub : 'letterhead';
+  const setSub = (next: CompanyDocumentsTab) => {
+    const p = new URLSearchParams(params);
+    p.set('sub', next);
+    p.delete('kind');
+    setParams(p, { replace: true });
+  };
+  return (
+    <div className="space-y-4">
+      <p className="text-sm text-content-secondary">
+        {t('settings.document_templates.page_subtitle', {
+          defaultValue: 'Wording, letterhead and numbering of everything you send',
+        })}
+      </p>
+      <TabBar
+        tabs={[
+          { id: 'letterhead', label: t('settings.document_templates.tab_letterhead', { defaultValue: 'Letterhead' }) },
+          { id: 'documents', label: t('settings.document_templates.tab_documents', { defaultValue: 'Documents' }) },
+          { id: 'emails', label: t('settings.document_templates.tab_emails', { defaultValue: 'Emails' }) },
+        ]}
+        activeId={sub}
+        onChange={setSub}
+        ariaLabel={t('settings.tab_company', { defaultValue: 'Documents & templates' })}
+      />
+      {sub === 'letterhead' && <LetterheadSettings />}
+      {sub === 'documents' && <DocTemplatesList channel="pdf" initialKind={params.get('kind')} />}
+      {sub === 'emails' && <DocTemplatesList channel="email" initialKind={params.get('kind')} />}
+    </div>
+  );
+}
+
+function LetterheadSettings() {
   const { t } = useTranslation();
   const qc = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
