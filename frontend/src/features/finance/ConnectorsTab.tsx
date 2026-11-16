@@ -25,6 +25,8 @@ import { useConfirm } from '@/shared/hooks/useConfirm';
 import { apiGet, apiPost, apiPatch, apiDelete } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
 import { fmtList } from '@/shared/lib/formatters';
+import { BookingExportPanel } from './BookingExportPanel';
+import { BOOKING_CONNECTOR_TYPES } from './bookingExportApi';
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
 
@@ -375,6 +377,7 @@ export function ConnectorsTab({ projectId }: { projectId: string }) {
                 </div>
 
                 {expanded === c.id && <SyncHistory configId={c.id} />}
+                {BOOKING_CONNECTOR_TYPES.includes(c.connector_type) && <BookingExportPanel configId={c.id} />}
               </Card>
             );
           })}

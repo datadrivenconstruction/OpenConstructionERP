@@ -92,6 +92,7 @@ import { RequiredCertificatesInput } from './components/RequiredCertificatesInpu
 import { EquipmentHealthDashboard } from './components/EquipmentHealthDashboard';
 import { FleetOptimizationPanel } from './components/FleetOptimizationPanel';
 import { TelematicsTab } from './components/TelematicsTab';
+import { RateCatalogueTab } from './components/RateCatalogueTab';
 import { equipmentGuide } from './equipmentGuide';
 import { InsightsPanel, InsightsToggleButton, useModuleInsights } from '@/features/insights';
 import { buildEquipmentInsights } from './equipmentInsights';
@@ -123,7 +124,7 @@ type DrawerTab =
   | 'maintenance'
   | 'certifications'
   | 'damage';
-const EQUIPMENT_TAB_IDS = ['assets', 'types', 'telematics'] as const;
+const EQUIPMENT_TAB_IDS = ['assets', 'types', 'telematics', 'rates'] as const;
 type PageTab = (typeof EQUIPMENT_TAB_IDS)[number];
 
 const STATUS_VARIANT: Record<
@@ -302,7 +303,10 @@ function HowEquipmentWorks() {
 export function EquipmentPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const [pageTab, setPageTab] = useState<PageTab>('assets');
+  const [pageTab, setPageTab] = useState<PageTab>(() => {
+    const wanted = new URLSearchParams(window.location.search).get('tab');
+    return (EQUIPMENT_TAB_IDS as readonly string[]).includes(wanted ?? '') ? (wanted as PageTab) : 'assets';
+  });
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('');
   const [ownershipFilter, setOwnershipFilter] = useState<string>('');
@@ -478,6 +482,7 @@ export function EquipmentPage() {
           { id: 'assets', label: t('equipment.tab_assets', { defaultValue: 'Assets' }), icon: <Truck size={14} /> },
           { id: 'types', label: t('equipment.tab_types', { defaultValue: 'Types' }), icon: <Tags size={14} /> },
           { id: 'telematics', label: t('equipment.tab_telematics', { defaultValue: 'Telematics' }), icon: <Radio size={14} /> },
+          { id: 'rates', label: t('equipment.tab_rates', { defaultValue: 'Rate catalogue' }), icon: <Tags size={14} /> },
         ]}
       />
 
@@ -485,6 +490,8 @@ export function EquipmentPage() {
         <TypesPage />
       ) : pageTab === 'telematics' ? (
         <TelematicsTab />
+      ) : pageTab === 'rates' ? (
+        <RateCatalogueTab />
       ) : (
       <>
       <FleetOptimizationPanel

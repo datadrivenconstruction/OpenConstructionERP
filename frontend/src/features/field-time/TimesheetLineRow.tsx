@@ -16,11 +16,13 @@ import { Trash2, HardHat, Wrench } from 'lucide-react';
 import { Toggle } from '@/shared/ui/Toggle';
 import { CostCodeAssist } from './CostCodeAssist';
 import {
+  HOUR_TYPES,
   formatHours,
   instantFromTime,
   timeOfDay,
   type EmployerKind,
   type FieldTimesheetLine,
+  type HourType,
   type LineUpdatePayload,
 } from './api';
 
@@ -175,6 +177,30 @@ export function TimesheetLineRow({
           }}
         />
       </label>
+
+      {/* Hour type: labour lines only; entered, never computed. */}
+      {isLabour && (
+        <label className="lg:col-span-1">
+          <span className="mb-1 block text-2xs font-medium text-content-tertiary">
+            {t('field_time.hour_type', { defaultValue: 'Hour type' })}
+          </span>
+          {editable ? (
+            <select
+              value={line.hour_type ?? 'regular'}
+              className={fieldCls}
+              onChange={(e) => commit({ hour_type: e.target.value as HourType })}
+            >
+              {HOUR_TYPES.map((h) => (
+                <option key={h} value={h}>
+                  {t(`field_time.hour_type_${h}`, { defaultValue: h })}
+                </option>
+              ))}
+            </select>
+          ) : (
+            <span className="block py-1 text-sm">{t(`field_time.hour_type_${line.hour_type ?? 'regular'}`, { defaultValue: line.hour_type })}</span>
+          )}
+        </label>
+      )}
 
       {/* Cost code + assist */}
       <div className="col-span-2 lg:col-span-3">

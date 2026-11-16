@@ -78,7 +78,9 @@ def fiscal_year_of(start: str, day: date) -> int:
 
 
 def _gl_accounts(settings: dict[str, Any]) -> list[str]:
-    return [str(v.get("account", "")) for v in (settings.get("account_map") or {}).values() if isinstance(v, dict)]
+    from app.modules.finance.booking_export import Mapping
+
+    return [v.get("account", "") for v in Mapping.from_settings(settings).accounts.values()]
 
 
 def _issue(key: str, **details: Any) -> dict[str, Any]:
