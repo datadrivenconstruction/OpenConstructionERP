@@ -7,7 +7,7 @@ Creates ``oe_submittals_spec_import`` (one parse of a specification book) and
 decision; nothing reaches the register until a person confirms it).
 
 Revision ID: vsb01_spec_submittals
-Revises: vpc01_project_country_from_region
+Revises: vbt01_boq_templates
 Create Date: 2026-11-03
 """
 
@@ -19,7 +19,7 @@ import sqlalchemy as sa
 from alembic import op
 
 revision: str = "vsb01_spec_submittals"
-down_revision: str | Sequence[str] | None = "vpc01_project_country_from_region"
+down_revision: str | Sequence[str] | None = "vbt01_boq_templates"
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 
