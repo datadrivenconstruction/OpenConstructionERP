@@ -333,7 +333,10 @@ async def build_from_invoice(
         .all()
     )
     defaults = await einvoice_defaults_for_invoice(
-        session, contact_id=invoice.contact_id, invoice_direction=invoice.invoice_direction
+        session,
+        contact_id=invoice.contact_id,
+        project_id=invoice.project_id,
+        invoice_direction=invoice.invoice_direction,
     )
     settings = dict((profile.settings or {}).get("ksef") or {})
     ksef_fields = country_fields.get("ksef") if isinstance(country_fields.get("ksef"), dict) else {}

@@ -854,6 +854,10 @@ async def list_einvoice_profiles(
     }
 
 
+#: ``default``, or one legal entity's own seller details.
+_EINVOICE_SCOPE_PATTERN = r"^(default|entity:[0-9a-fA-F-]{36})$"
+
+
 @router.get(
     "/einvoice-settings",
     response_model=EInvoiceSettingsRead,
@@ -868,11 +872,15 @@ async def list_einvoice_profiles(
 async def read_einvoice_settings(
     session: SessionDep,
     _perm: None = Depends(RequirePermission("finance.read")),
+    scope: str = Query("default", pattern=_EINVOICE_SCOPE_PATTERN),
 ) -> EInvoiceSettingsRead:
-    """Return the configuration, and which of its required fields are still blank."""
+    """Return the configuration, and which of its required fields are still blank.
+
+    ``scope`` is ``default`` or ``entity:<id>``, one legal entity's own seller details.
+    """
     from app.modules.finance.einvoice_settings_service import get_settings
 
-    return EInvoiceSettingsRead.from_row(await get_settings(session))
+    return EInvoiceSettingsRead.from_row(await get_settings(session, scope))
 
 
 @router.put(
@@ -892,11 +900,12 @@ async def write_einvoice_settings(
     session: SessionDep,
     user_id: CurrentUserId,
     _perm: None = Depends(RequirePermission("finance.einvoice_settings")),
+    scope: str = Query("default", pattern=_EINVOICE_SCOPE_PATTERN),
 ) -> EInvoiceSettingsRead:
     """Store the seller identity and payment details for every future e-invoice."""
     from app.modules.finance.einvoice_settings_service import update_settings
 
-    row = await update_settings(session, payload, user_id=user_id)
+    row = await update_settings(session, payload, user_id=user_id, scope=scope)
     await session.commit()
     return EInvoiceSettingsRead.from_row(row)
 
@@ -1146,6 +1155,7 @@ async def export_invoice_einvoice(
     defaults = await einvoice_defaults_for_invoice(
         session,
         contact_id=fresh.contact_id,
+        project_id=fresh.project_id,
         invoice_direction=fresh.invoice_direction,
     )
 

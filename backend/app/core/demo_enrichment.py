@@ -357,7 +357,11 @@ async def enrich_projects(project_ids: list[uuid.UUID]) -> dict[str, Any]:
 
         # (name, marker model gating a restart-safe skip, coroutine builder).
         # A None marker means the seeder self-guards against duplicates.
+        from app.modules.legal_entities.seed import seed_legal_entities_demo
+
         _module_seeders = [
+            # First: the companies own the projects, so documents seeded below carry the right seller.
+            ("legal_entities", None, lambda s: seed_legal_entities_demo(s, _demo_pids)),
             ("crm", None, lambda s: seed_crm_demo(s)),
             ("service", None, lambda s: seed_service_demo(s, _demo_pids)),
             ("bid_management", None, lambda s: seed_bid_management_demo(s, _demo_pids)),

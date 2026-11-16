@@ -1,0 +1,387 @@
+{
+  "_comment": "Tax identifier schemes a legal entity carries, per country of registration. Read by app/modules/legal_entities/tax_ids.py. A pattern is matched against the value uppercased with spaces removed; a mismatch is a warning (entity.tax_id_format), never a refusal. mandatory_on_invoice marks the identifiers the country's invoice rules require of the seller (EU: Directive 2006/112/EC art. 226(3)). A country not listed gets one free 'other' field and no check. Formats only; no checksum is verified.",
+  "schema": "oe.entity_tax_ids/1",
+  "read_date": "2026-11-16",
+  "countries": {
+    "AT": {
+      "schemes": [
+        {
+          "scheme": "vat",
+          "pattern": "^ATU\\d{8}$",
+          "example": "ATU12345678",
+          "mandatory_on_invoice": true,
+          "legal_reference": "Council Directive 2006/112/EC, art. 226(3)",
+          "source_url": "https://ec.europa.eu/taxation_customs/vies/#/faq"
+        }
+      ]
+    },
+    "BE": {
+      "schemes": [
+        {
+          "scheme": "vat",
+          "pattern": "^BE[01]\\d{9}$",
+          "example": "BE0123456789",
+          "mandatory_on_invoice": true,
+          "legal_reference": "Council Directive 2006/112/EC, art. 226(3)",
+          "source_url": "https://ec.europa.eu/taxation_customs/vies/#/faq"
+        }
+      ]
+    },
+    "BG": {
+      "schemes": [
+        {
+          "scheme": "vat",
+          "pattern": "^BG\\d{9,10}$",
+          "example": "BG123456789",
+          "mandatory_on_invoice": true,
+          "legal_reference": "Council Directive 2006/112/EC, art. 226(3)",
+          "source_url": "https://ec.europa.eu/taxation_customs/vies/#/faq"
+        }
+      ]
+    },
+    "CA": {
+      "schemes": [
+        {
+          "scheme": "bn",
+          "pattern": "^\\d{9}(RT\\d{4})?$",
+          "example": "123456789RT0001",
+          "mandatory_on_invoice": false,
+          "legal_reference": "Business number; the GST/HST account (RT) is shown on invoices of CAD 30 and more",
+          "source_url": "https://www.canada.ca/en/revenue-agency/services/tax/businesses/topics/business-number.html"
+        }
+      ]
+    },
+    "CH": {
+      "schemes": [
+        {
+          "scheme": "vat",
+          "pattern": "^CHE-?\\d{3}\\.?\\d{3}\\.?\\d{3}( ?(MWST|TVA|IVA))?$",
+          "example": "CHE-123.456.789 MWST",
+          "mandatory_on_invoice": true,
+          "legal_reference": "MWSTG art. 26(2)(a)",
+          "source_url": "https://www.fedlex.admin.ch/eli/cc/2009/615/de#art_26"
+        }
+      ]
+    },
+    "CY": {
+      "schemes": [
+        {
+          "scheme": "vat",
+          "pattern": "^CY\\d{8}[A-Z]$",
+          "example": "CY12345678X",
+          "mandatory_on_invoice": true,
+          "legal_reference": "Council Directive 2006/112/EC, art. 226(3)",
+          "source_url": "https://ec.europa.eu/taxation_customs/vies/#/faq"
+        }
+      ]
+    },
+    "CZ": {
+      "schemes": [
+        {
+          "scheme": "vat",
+          "pattern": "^CZ\\d{8,10}$",
+          "example": "CZ12345678",
+          "mandatory_on_invoice": true,
+          "legal_reference": "Council Directive 2006/112/EC, art. 226(3)",
+          "source_url": "https://ec.europa.eu/taxation_customs/vies/#/faq"
+        }
+      ]
+    },
+    "DE": {
+      "schemes": [
+        {
+          "scheme": "vat",
+          "pattern": "^DE\\d{9}$",
+          "example": "DE123456789",
+          "mandatory_on_invoice": true,
+          "legal_reference": "Council Directive 2006/112/EC, art. 226(3)",
+          "source_url": "https://ec.europa.eu/taxation_customs/vies/#/faq"
+        },
+        {
+          "scheme": "tax_number",
+          "pattern": "^(\\d{2,3}/\\d{3,4}/\\d{4,5}|\\d{10,13})$",
+          "example": "12/345/67890",
+          "mandatory_on_invoice": false,
+          "legal_reference": "UStG § 14(4) no. 2: the tax number or the VAT id",
+          "source_url": "https://www.gesetze-im-internet.de/ustg_1980/__14.html"
+        }
+      ]
+    },
+    "DK": {
+      "schemes": [
+        {
+          "scheme": "vat",
+          "pattern": "^DK\\d{8}$",
+          "example": "DK12345678",
+          "mandatory_on_invoice": true,
+          "legal_reference": "Council Directive 2006/112/EC, art. 226(3)",
+          "source_url": "https://ec.europa.eu/taxation_customs/vies/#/faq"
+        }
+      ]
+    },
+    "EE": {
+      "schemes": [
+        {
+          "scheme": "vat",
+          "pattern": "^EE\\d{9}$",
+          "example": "EE123456789",
+          "mandatory_on_invoice": true,
+          "legal_reference": "Council Directive 2006/112/EC, art. 226(3)",
+          "source_url": "https://ec.europa.eu/taxation_customs/vies/#/faq"
+        }
+      ]
+    },
+    "ES": {
+      "schemes": [
+        {
+          "scheme": "vat",
+          "pattern": "^ES[A-Z0-9]\\d{7}[A-Z0-9]$",
+          "example": "ESX1234567X",
+          "mandatory_on_invoice": true,
+          "legal_reference": "Council Directive 2006/112/EC, art. 226(3)",
+          "source_url": "https://ec.europa.eu/taxation_customs/vies/#/faq"
+        }
+      ]
+    },
+    "FI": {
+      "schemes": [
+        {
+          "scheme": "vat",
+          "pattern": "^FI\\d{8}$",
+          "example": "FI12345678",
+          "mandatory_on_invoice": true,
+          "legal_reference": "Council Directive 2006/112/EC, art. 226(3)",
+          "source_url": "https://ec.europa.eu/taxation_customs/vies/#/faq"
+        }
+      ]
+    },
+    "FR": {
+      "schemes": [
+        {
+          "scheme": "vat",
+          "pattern": "^FR[A-HJ-NP-Z0-9]{2}\\d{9}$",
+          "example": "FRXX123456789",
+          "mandatory_on_invoice": true,
+          "legal_reference": "Council Directive 2006/112/EC, art. 226(3)",
+          "source_url": "https://ec.europa.eu/taxation_customs/vies/#/faq"
+        }
+      ]
+    },
+    "GB": {
+      "schemes": [
+        {
+          "scheme": "vat",
+          "pattern": "^GB(\\d{9}|\\d{12}|GD\\d{3}|HA\\d{3})$",
+          "example": "GB123456789",
+          "mandatory_on_invoice": true,
+          "legal_reference": "VAT Regulations 1995, reg. 14",
+          "source_url": "https://www.gov.uk/guidance/vat-guide-notice-700"
+        }
+      ]
+    },
+    "GR": {
+      "schemes": [
+        {
+          "scheme": "vat",
+          "pattern": "^EL\\d{9}$",
+          "example": "EL123456789",
+          "mandatory_on_invoice": true,
+          "legal_reference": "Council Directive 2006/112/EC, art. 226(3)",
+          "source_url": "https://ec.europa.eu/taxation_customs/vies/#/faq"
+        }
+      ]
+    },
+    "HR": {
+      "schemes": [
+        {
+          "scheme": "vat",
+          "pattern": "^HR\\d{11}$",
+          "example": "HR12345678901",
+          "mandatory_on_invoice": true,
+          "legal_reference": "Council Directive 2006/112/EC, art. 226(3)",
+          "source_url": "https://ec.europa.eu/taxation_customs/vies/#/faq"
+        }
+      ]
+    },
+    "HU": {
+      "schemes": [
+        {
+          "scheme": "vat",
+          "pattern": "^HU\\d{8}$",
+          "example": "HU12345678",
+          "mandatory_on_invoice": true,
+          "legal_reference": "Council Directive 2006/112/EC, art. 226(3)",
+          "source_url": "https://ec.europa.eu/taxation_customs/vies/#/faq"
+        }
+      ]
+    },
+    "IE": {
+      "schemes": [
+        {
+          "scheme": "vat",
+          "pattern": "^IE\\d[A-Z0-9+*]\\d{5}[A-Z]{1,2}$",
+          "example": "IE1234567WA",
+          "mandatory_on_invoice": true,
+          "legal_reference": "Council Directive 2006/112/EC, art. 226(3)",
+          "source_url": "https://ec.europa.eu/taxation_customs/vies/#/faq"
+        }
+      ]
+    },
+    "IT": {
+      "schemes": [
+        {
+          "scheme": "vat",
+          "pattern": "^IT\\d{11}$",
+          "example": "IT12345678901",
+          "mandatory_on_invoice": true,
+          "legal_reference": "Council Directive 2006/112/EC, art. 226(3)",
+          "source_url": "https://ec.europa.eu/taxation_customs/vies/#/faq"
+        }
+      ]
+    },
+    "LT": {
+      "schemes": [
+        {
+          "scheme": "vat",
+          "pattern": "^LT(\\d{9}|\\d{12})$",
+          "example": "LT123456789",
+          "mandatory_on_invoice": true,
+          "legal_reference": "Council Directive 2006/112/EC, art. 226(3)",
+          "source_url": "https://ec.europa.eu/taxation_customs/vies/#/faq"
+        }
+      ]
+    },
+    "LU": {
+      "schemes": [
+        {
+          "scheme": "vat",
+          "pattern": "^LU\\d{8}$",
+          "example": "LU12345678",
+          "mandatory_on_invoice": true,
+          "legal_reference": "Council Directive 2006/112/EC, art. 226(3)",
+          "source_url": "https://ec.europa.eu/taxation_customs/vies/#/faq"
+        }
+      ]
+    },
+    "LV": {
+      "schemes": [
+        {
+          "scheme": "vat",
+          "pattern": "^LV\\d{11}$",
+          "example": "LV12345678901",
+          "mandatory_on_invoice": true,
+          "legal_reference": "Council Directive 2006/112/EC, art. 226(3)",
+          "source_url": "https://ec.europa.eu/taxation_customs/vies/#/faq"
+        }
+      ]
+    },
+    "MT": {
+      "schemes": [
+        {
+          "scheme": "vat",
+          "pattern": "^MT\\d{8}$",
+          "example": "MT12345678",
+          "mandatory_on_invoice": true,
+          "legal_reference": "Council Directive 2006/112/EC, art. 226(3)",
+          "source_url": "https://ec.europa.eu/taxation_customs/vies/#/faq"
+        }
+      ]
+    },
+    "NL": {
+      "schemes": [
+        {
+          "scheme": "vat",
+          "pattern": "^NL\\d{9}B\\d{2}$",
+          "example": "NL123456789B01",
+          "mandatory_on_invoice": true,
+          "legal_reference": "Council Directive 2006/112/EC, art. 226(3)",
+          "source_url": "https://ec.europa.eu/taxation_customs/vies/#/faq"
+        }
+      ]
+    },
+    "PL": {
+      "schemes": [
+        {
+          "scheme": "vat",
+          "pattern": "^PL\\d{10}$",
+          "example": "PL1234567890",
+          "mandatory_on_invoice": true,
+          "legal_reference": "Council Directive 2006/112/EC, art. 226(3)",
+          "source_url": "https://ec.europa.eu/taxation_customs/vies/#/faq"
+        }
+      ]
+    },
+    "PT": {
+      "schemes": [
+        {
+          "scheme": "vat",
+          "pattern": "^PT\\d{9}$",
+          "example": "PT123456789",
+          "mandatory_on_invoice": true,
+          "legal_reference": "Council Directive 2006/112/EC, art. 226(3)",
+          "source_url": "https://ec.europa.eu/taxation_customs/vies/#/faq"
+        }
+      ]
+    },
+    "RO": {
+      "schemes": [
+        {
+          "scheme": "vat",
+          "pattern": "^RO\\d{2,10}$",
+          "example": "RO1234567890",
+          "mandatory_on_invoice": true,
+          "legal_reference": "Council Directive 2006/112/EC, art. 226(3)",
+          "source_url": "https://ec.europa.eu/taxation_customs/vies/#/faq"
+        }
+      ]
+    },
+    "SE": {
+      "schemes": [
+        {
+          "scheme": "vat",
+          "pattern": "^SE\\d{12}$",
+          "example": "SE123456789001",
+          "mandatory_on_invoice": true,
+          "legal_reference": "Council Directive 2006/112/EC, art. 226(3)",
+          "source_url": "https://ec.europa.eu/taxation_customs/vies/#/faq"
+        }
+      ]
+    },
+    "SI": {
+      "schemes": [
+        {
+          "scheme": "vat",
+          "pattern": "^SI\\d{8}$",
+          "example": "SI12345678",
+          "mandatory_on_invoice": true,
+          "legal_reference": "Council Directive 2006/112/EC, art. 226(3)",
+          "source_url": "https://ec.europa.eu/taxation_customs/vies/#/faq"
+        }
+      ]
+    },
+    "SK": {
+      "schemes": [
+        {
+          "scheme": "vat",
+          "pattern": "^SK\\d{10}$",
+          "example": "SK1234567890",
+          "mandatory_on_invoice": true,
+          "legal_reference": "Council Directive 2006/112/EC, art. 226(3)",
+          "source_url": "https://ec.europa.eu/taxation_customs/vies/#/faq"
+        }
+      ]
+    },
+    "US": {
+      "schemes": [
+        {
+          "scheme": "ein",
+          "pattern": "^\\d{2}-?\\d{7}$",
+          "example": "12-3456789",
+          "mandatory_on_invoice": false,
+          "legal_reference": "No federal VAT; an EIN is not required on an invoice",
+          "source_url": "https://www.irs.gov/businesses/small-businesses-self-employed/employer-id-numbers"
+        }
+      ]
+    }
+  }
+}

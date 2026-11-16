@@ -783,6 +783,7 @@ class ProjectResponse(BaseModel):
     component_tax_treatment: str = "recoverable"
     # Set through the legal entities module, read-only here.
     legal_entity_id: UUID | None = None
+    legal_entity_branch_id: UUID | None = None
     works: str | None = None
     color: str | None = None
     external_folder_url: str | None = None

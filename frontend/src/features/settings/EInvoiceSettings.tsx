@@ -22,6 +22,8 @@ import { Card, CardHeader, CardContent, Button } from '@/shared/ui';
 import { apiGet, apiPut, getErrorMessage } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
 import { fmtList } from '@/shared/lib/formatters';
+import { LEGAL_ENTITIES_KEY } from '@/features/legal-entities/api';
+import { EInvoiceScopeSelect } from '@/features/legal-entities/EInvoiceScopeSelect';
 
 // The stored fields, in the order they are shown. Kept as data so the form and
 // the payload cannot disagree about which fields exist.
@@ -107,10 +109,19 @@ export function EInvoiceSettings() {
   const addToast = useToastStore((s) => s.addToast);
   const [form, setForm] = useState<FormState>(EMPTY);
   const [fieldError, setFieldError] = useState<string | null>(null);
+  // `default` is the group's seller; `entity:<id>` overrides it for one company.
+  const [scope, setScope] = useState<string>(() => {
+    const fromUrl = typeof window === 'undefined' ? null : new URLSearchParams(window.location.search).get('scope');
+    return fromUrl && /^entity:[0-9a-fA-F-]{36}$/.test(fromUrl) ? fromUrl : 'default';
+  });
+  const settingsUrl =
+    scope === 'default'
+      ? '/api/v1/finance/einvoice-settings'
+      : `/api/v1/finance/einvoice-settings?scope=${encodeURIComponent(scope)}`;
 
   const { data, isLoading } = useQuery<EInvoiceSettingsPayload>({
-    queryKey: ['finance', 'einvoice-settings'],
-    queryFn: () => apiGet('/api/v1/finance/einvoice-settings'),
+    queryKey: scope === 'default' ? ['finance', 'einvoice-settings'] : ['finance', 'einvoice-settings', scope],
+    queryFn: () => apiGet(settingsUrl),
   });
 
   // The form is seeded while rendering rather than from an effect, and the state
@@ -128,10 +139,11 @@ export function EInvoiceSettings() {
   }
 
   const save = useMutation({
-    mutationFn: (body: FormState) => apiPut('/api/v1/finance/einvoice-settings', body),
+    mutationFn: (body: FormState) => apiPut(settingsUrl, body),
     onSuccess: () => {
       setFieldError(null);
       queryClient.invalidateQueries({ queryKey: ['finance', 'einvoice-settings'] });
+      queryClient.invalidateQueries({ queryKey: LEGAL_ENTITIES_KEY });
       // Every open compliance check was decided against the old configuration.
       queryClient.invalidateQueries({ queryKey: ['finance', 'einvoice-dry-run'] });
       addToast({ type: 'success', title: t('settings.einvoice.saved') });
@@ -226,6 +238,7 @@ export function EInvoiceSettings() {
           subtitle={t('settings.einvoice.subtitle')}
         />
         <CardContent className="space-y-4">
+          <EInvoiceScopeSelect value={scope} onChange={setScope} />
           {missing.length > 0 && (
             <div
               role="status"
