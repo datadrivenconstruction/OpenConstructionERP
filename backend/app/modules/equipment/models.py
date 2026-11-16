@@ -75,6 +75,7 @@ class Equipment(Base):
     __table_args__ = (
         Index("ix_oe_equipment_equipment_status", "status"),
         Index("ix_oe_equipment_equipment_type", "type_code"),
+        Index("ix_oe_equipment_equipment_rate_item", "rate_item_id"),
     )
 
     code: Mapped[str] = mapped_column(String(50), nullable=False, unique=True, index=True)
@@ -136,6 +137,11 @@ class Equipment(Base):
     # rented/leased units) and the market hire rate per day for rent-or-return.
     holding_cost_per_month: Mapped[Decimal | None] = mapped_column(Numeric(18, 4), nullable=True)
     market_hire_rate_per_day: Mapped[Decimal | None] = mapped_column(Numeric(18, 4), nullable=True)
+
+    # Catalogue machine this unit takes its internal rates from (a new rental starts from them).
+    rate_item_id: Mapped[uuid.UUID | None] = mapped_column(
+        GUID(), ForeignKey("oe_equipment_rate_item.id", ondelete="SET NULL"), nullable=True
+    )
 
     # Cost code the plant-hire allocation books against; engine class for the country minimum.
     cost_code: Mapped[str] = mapped_column(String(100), nullable=False, default="", server_default="")
@@ -556,3 +562,10 @@ class UtilisationDay(Base):
 
     def __repr__(self) -> str:
         return f"<UtilisationDay equipment={self.equipment_id} {self.day}>"
+
+
+from app.modules.equipment.rate_models import (  # noqa: E402,F401
+    EquipmentRateCatalogue,
+    EquipmentRateItem,
+    EquipmentRateProfile,
+)

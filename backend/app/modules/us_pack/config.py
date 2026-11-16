@@ -14,6 +14,43 @@ PACK_CONFIG: dict[str, Any] = {
     "paper_size": "Letter",
     "date_format": "MM/DD/YYYY",
     "number_format": "1,234.56",
+    # ── Exchange layouts: column names only, never rates, codes or values ────
+    "equipment_rate_layout": {
+        "label_key": "packs.us.equipment_layout",
+        "interest_convention": "average_annual_investment",
+        "decimal_comma": False,
+        "mapping": {
+            "code": "Code",
+            "name": "Description",
+            "category": "Category",
+            "size_key": "Size",
+            "value": "Purchase price",
+            "residual": "Resale value",
+            "life_years": "Life years",
+            "months_per_year": "Months per year",
+            "interest": "Interest",
+            "repair": "Repair",
+            "hours_per_month": "Hours per month",
+        },
+    },
+    "payroll_profile": {
+        "label_key": "packs.us.payroll_profile",
+        "name": "Payroll US",
+        "delimiter": ",",
+        "decimal": ".",
+        "date_format": "MM/DD/YYYY",
+        "encoding": "utf-8",
+        "grouping": "week",
+        "week_start": 0,
+        "columns": [
+            {"header": "Employee ID", "source": "worker_ref"},
+            {"header": "Week ending", "source": "date"},
+            {"header": "Job", "source": "project_code"},
+            {"header": "Cost code", "source": "cost_code"},
+            {"header": "Pay code", "source": "pay_code"},
+            {"header": "Hours", "source": "hours"},
+        ],
+    },
     # ── Standards ────────────────────────────────────────────────────────────
     # Division numbers are interoperability facts. The "scope" strings are our
     # own descriptions of the work each division covers - the proprietary
