@@ -125,6 +125,7 @@ def ocr_title_block(
         raise OcrUnavailable("pytesseract is not installed") from exc
 
     from app.core import pdf_reader  # noqa: PLC0415
+    from app.modules.file_search.extractors import MAX_OCR_PIXELS, _clamp_render_scale  # noqa: PLC0415
 
     image = None
     try:
@@ -137,11 +138,13 @@ def ocr_title_block(
                 width, height = rect.x1 - rect.x0, rect.y1 - rect.y0
                 left, top = TITLE_BLOCK_REGION
                 clip = (rect.x0 + width * left, rect.y0 + height * top, rect.x1, rect.y1)
+                # A plotter-size sheet must not allocate a huge bitmap on a small server.
+                zoom = _clamp_render_scale(clip[2] - clip[0], clip[3] - clip[1], OCR_DPI, MAX_OCR_PIXELS)
                 if render_lock is not None:
                     with render_lock:
-                        rendered = page.render(dpi=OCR_DPI, clip=clip)
+                        rendered = page.render(zoom=zoom, clip=clip)
                 else:
-                    rendered = page.render(dpi=OCR_DPI, clip=clip)
+                    rendered = page.render(zoom=zoom, clip=clip)
             finally:
                 page.close()
             image = rendered.pil()
