@@ -235,7 +235,8 @@ async def editor_state(
     elif published_text is not None:
         text = {b: published_text[b] or defaults.get(b, "") for b in kind.blocks}
     else:
-        text = dict(defaults)
+        legacy = await _legacy_letter_blocks(session, kind, lang)
+        text = {b: legacy.get(b) or defaults.get(b, "") for b in kind.blocks} if legacy else dict(defaults)
     versions: list[dict[str, Any]] = []
     options: dict[str, Any] = {}
     if row is not None:
@@ -284,6 +285,32 @@ async def editor_state(
         "legal_blocks": legal_blocks_for_editor(kind.key, countries or [], lang),
         "has_records": kind.records is not None,
     }
+
+
+async def _legacy_letter_blocks(session: AsyncSession, kind: DocumentKind, lang: str) -> dict[str, str]:
+    """Company wording saved in the retired Letters tab, shown until a template is published.
+
+    Letters still print it while nothing is published, so the editor opens on the
+    same text instead of the shipped default.
+    """
+    from app.core.letter_templates import get_template
+
+    template = get_template(kind.key)
+    if template is None:
+        return {}
+    try:
+        from app.modules.doc_templates.kinds import letter_to_blocks
+        from app.modules.letter_templates.repository import LetterTemplateRepository
+
+        row = await LetterTemplateRepository(session).get(kind.key, lang, None)
+    except Exception:  # noqa: BLE001 - the editor never fails on the retired store
+        return {}
+    if row is None:
+        return {}
+    from app.core.letter_templates import LetterText
+
+    text = LetterText(subject=row.subject, heading=row.heading, body=row.body, closing=row.closing)
+    return {b: v for b, v in letter_to_blocks(text, template.kind, set(template.placeholder_names)).items() if v}
 
 
 # ── Draft, publish, restore, reset ──────────────────────────────────────────

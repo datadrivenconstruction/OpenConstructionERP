@@ -40415,7 +40415,7 @@ const resource = {
     "settings.tab_account_desc": "Password and sign out",
     "settings.tab_team": "Team & Plan",
     "settings.tab_team_desc": "Members, roles, and license",
-    "settings.tab_company": "Company & documents",
+    "settings.tab_company": "Documents & templates",
     "settings.tab_company_desc": "Logos, letterhead, and how printed documents look",
     "settings.tab_regional": "Regional",
     "settings.tab_regional_desc": "Language, timezone, and formats",

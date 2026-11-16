@@ -98,3 +98,25 @@ async def test_transmittal_cover_lists_the_documents(db_session) -> None:
     assert r.status_code == 200, r.text
     text = _text(r.content)
     assert "Transmittal TR-003: Structural drawings" in text and "S-201 Rev C" in text
+
+
+@pytest.mark.asyncio
+async def test_wording_from_the_retired_letters_tab_opens_in_the_editor(db_session) -> None:
+    from app.modules.letter_templates.models import LetterTemplateOverride
+
+    user = await _user(db_session)
+    db_session.add(
+        LetterTemplateOverride(
+            template_key="tendering.award_letter",
+            language="en",
+            heading="Award of {package}",
+            body="We are pleased to award {package} on {project} to you.",
+            closing="Yours, {company}",
+        )
+    )
+    await db_session.commit()
+    async with _http(_app(db_session, str(user.id))) as c:
+        state = (await c.get("/dt/tendering.award_letter", params={"locale": "en"})).json()
+    assert state["text"]["body"] == "We are pleased to award {{package.name}} on {{project.name}} to you."
+    assert state["text"]["title"] == "Award of {{package.name}}"
+    assert state["has_draft"] is False

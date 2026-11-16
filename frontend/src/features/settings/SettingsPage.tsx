@@ -14,7 +14,6 @@ import { DataFeedsSettings } from './DataFeedsSettings';
 import { ModulesSettings } from './ModulesSettings';
 import { SettingsTeamPanel } from './SettingsTeamPanel';
 import { CompanyDocumentsSettings } from './CompanyDocumentsSettings';
-import { LetterTemplatesSettings } from '@/features/letter-templates';
 import { MarketSettings } from '@/features/market/MarketSettings';
 import { WebhookLeads } from './WebhookLeads';
 import { McpSettingsPanel } from '@/features/mcp';
@@ -1476,7 +1475,7 @@ function DemoLoginAdminRow() {
 
 // ── Tab definitions ──────────────────────────────────────────────────────────
 
-type SettingsTab = 'general' | 'dashboard' | 'team' | 'company' | 'letters' | 'account' | 'market' | 'einvoice' | 'converters' | 'ai' | 'security' | 'integrations' | 'datafeeds' | 'developer' | 'packages' | 'modules' | 'governance' | 'identity' | 'audit' | 'advanced';
+type SettingsTab = 'general' | 'dashboard' | 'team' | 'company' | 'account' | 'market' | 'einvoice' | 'converters' | 'ai' | 'security' | 'integrations' | 'datafeeds' | 'developer' | 'packages' | 'modules' | 'governance' | 'identity' | 'audit' | 'advanced';
 
 interface TabDef {
   id: SettingsTab;
@@ -1503,9 +1502,7 @@ const TABS: readonly TabDef[] = [
   { id: 'team',         labelKey: 'settings.tab_team',         defaultLabel: 'Team & Plan',  icon: Users,    descKey: 'settings.tab_team_desc',         descDefault: 'Members, roles, and license' },
   // Company & documents - logos and the letterhead printed on exported
   // documents. Visible to everyone; the panel is read-only below admin.
-  { id: 'company',      labelKey: 'settings.tab_company',      defaultLabel: 'Company & documents', icon: Building2, descKey: 'settings.tab_company_desc', descDefault: 'Logos, letterhead, and how printed documents look' },
-  // Letter templates: wording of award, rejection and invitation letters. Editors read, managers change.
-  { id: 'letters',      labelKey: 'settings.tab_letters',      defaultLabel: 'Letter templates', icon: Mail, descKey: 'settings.tab_letters_desc', descDefault: 'Wording of award, rejection and invitation letters' },
+  { id: 'company',      labelKey: 'settings.tab_company',      defaultLabel: 'Documents & templates', icon: Building2, descKey: 'settings.tab_company_desc', descDefault: 'Logos, letterhead, and how printed documents look' },
   // Market & standards: country, packs, standards and units; language and formats sit below as display formats.
   { id: 'market',       labelKey: 'settings.tab_market',       defaultLabel: 'Market & standards', icon: Globe, descKey: 'settings.tab_market_desc', descDefault: 'Country, packs, standards and units' },
   { id: 'einvoice',     labelKey: 'settings.tab_einvoice',     defaultLabel: 'E-invoice',    icon: ReceiptText, descKey: 'settings.tab_einvoice_desc',  descDefault: 'Seller identity and bank account for electronic invoices' },
@@ -1651,6 +1648,8 @@ export function SettingsPage() {
     cad: 'converters',
     mcp: 'integrations',
     regional: 'market',
+    // The Letters tab was folded into Documents & templates; its saved wording opens there.
+    letters: 'company',
   };
   // Audit log is Manager+ only. Hide the tab for everyone else so a viewer
   // never lands on a section that 403s on load. The backend `audit.view`
@@ -1662,18 +1661,15 @@ export function SettingsPage() {
   // offers would 403 for anyone else, and a form that cannot be submitted is
   // the dead end this screen was built to remove.
   const canEditEInvoice = userRole === 'admin' || userRole === 'manager';
-  // Reading letter templates is `letter_templates.read` (editor and above).
-  const canReadLetters = userRole === 'admin' || userRole === 'manager' || userRole === 'editor';
   const visibleTabs = useMemo(
     () =>
       TABS.filter(
         (tab) =>
           (tab.id !== 'audit' || canViewAudit) &&
           (tab.id !== 'einvoice' || canEditEInvoice) &&
-          (tab.id !== 'identity' || userRole === 'admin') &&
-          (tab.id !== 'letters' || canReadLetters),
+          (tab.id !== 'identity' || userRole === 'admin'),
       ),
-    [canViewAudit, canEditEInvoice, canReadLetters, userRole],
+    [canViewAudit, canEditEInvoice, userRole],
   );
 
   const rawTab = searchParams.get('tab') ?? '';
@@ -2131,13 +2127,6 @@ export function SettingsPage() {
           {activeTab === 'company' && (
             <div className="lg:col-span-2 min-w-0">
               <CompanyDocumentsSettings />
-            </div>
-          )}
-
-          {/* ── LETTER TEMPLATES ─────────────────────────────────── */}
-          {activeTab === 'letters' && canReadLetters && (
-            <div className="lg:col-span-2 min-w-0">
-              <LetterTemplatesSettings />
             </div>
           )}
 

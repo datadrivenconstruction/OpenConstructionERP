@@ -46368,7 +46368,7 @@ const resource = {
     "settings.tab_account_desc": "Passwort und Abmeldung",
     "settings.tab_team": "Team & Tarif",
     "settings.tab_team_desc": "Mitglieder, Rollen und Lizenz",
-    "settings.tab_company": "Unternehmen & Dokumente",
+    "settings.tab_company": "Dokumente & Vorlagen",
     "settings.tab_company_desc": "Logos, Briefkopf und das Aussehen gedruckter Dokumente",
     "settings.tab_regional": "Regional",
     "settings.tab_regional_desc": "Sprache, Zeitzone und Formate",
