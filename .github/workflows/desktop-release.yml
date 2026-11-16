@@ -648,6 +648,9 @@ jobs:
           set -uo pipefail
           bin="${{ env.SIDECAR_BIN }}"
           chmod +x "$bin" 2>/dev/null || true
+          # The verdict below mirrors the launcher's blocking_fault; its test
+          # fails here if the two have drifted apart.
+          python desktop/tests/test_health_verdict.py || exit 1
           # Relative for the same reason the step above uses one: RUNNER_TEMP on
           # Windows carries backslashes and handing one to bash fails a leg of
           # the matrix for a reason unrelated to what is being checked.
@@ -783,14 +786,28 @@ jobs:
             # dies reports at once, so the loop ends early on a dead process
             # rather than waiting the budget out.
             ok=0
+            fault=""
             for _ in $(seq 1 150); do
               if ! kill -0 "$pid" 2>/dev/null; then
                 echo "the sidecar exited before it answered"
                 break
               fi
-              body=$(curl -fsS --max-time 4 "http://127.0.0.1:${port}/api/health" 2>/dev/null) && { ok=1; break; }
+              # A 200 is not enough: the backend answers 200 with a degraded
+              # body when its database or UI files are missing, and the launcher
+              # refuses that body, so this check refuses it too.
+              if body=$(curl -fsS --max-time 4 "http://127.0.0.1:${port}/api/health" 2>/dev/null); then
+                if fault=$(python desktop/health_verdict.py "$body"); then
+                  ok=1
+                  break
+                fi
+              fi
               sleep 2
             done
+            if [ "$ok" -ne 1 ] && [ -n "$fault" ]; then
+              echo "(${label}) /api/health answered, but the launcher would refuse it: ${fault}"
+              echo "$body" | head -c 800
+              echo ""
+            fi
             if [ "$ok" -eq 1 ]; then
               echo "OK (${label}): /api/health answered"
               echo "$body" | head -c 800
