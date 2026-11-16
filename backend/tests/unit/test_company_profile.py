@@ -63,6 +63,8 @@ _FULL_PROFILE = {
     "legal_name": "Acme Builders GmbH",
     "address": "Musterstrasse 1\n10115 Berlin\nGermany",
     "registration_line": "USt-IdNr. DE123456789 · HRB 12345",
+    "vat_id": "DE123456789",
+    "tax_number": "",
     "phone": "+49 30 1234567",
     "email": "office@acme.example",
     "website": "acme.example",

@@ -67,6 +67,8 @@ LOGO_IMAGE_TYPES = ("png", "jpeg", "webp", "svg+xml")
 #: registered company names seen in practice.
 MAX_LEGAL_NAME = 120
 MAX_REGISTRATION_LINE = 160
+#: VAT id or national tax number of the seller (EN 16931 BT-31 / BT-32).
+MAX_TAX_ID = 40
 MAX_PHONE = 40
 MAX_EMAIL = 120
 MAX_WEBSITE = 120
@@ -99,6 +101,8 @@ DEFAULT_COMPANY_PROFILE: dict[str, str] = {
     "legal_name": "",
     "address": "",
     "registration_line": "",
+    "vat_id": "",
+    "tax_number": "",
     "phone": "",
     "email": "",
     "website": "",
@@ -108,6 +112,8 @@ DEFAULT_COMPANY_PROFILE: dict[str, str] = {
 _LINE_CAPS: dict[str, int] = {
     "legal_name": MAX_LEGAL_NAME,
     "registration_line": MAX_REGISTRATION_LINE,
+    "vat_id": MAX_TAX_ID,
+    "tax_number": MAX_TAX_ID,
     "phone": MAX_PHONE,
     "email": MAX_EMAIL,
     "website": MAX_WEBSITE,

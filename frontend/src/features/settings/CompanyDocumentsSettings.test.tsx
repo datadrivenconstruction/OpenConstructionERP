@@ -82,6 +82,8 @@ const BLANK: profileApi.CompanyProfile = {
   legal_name: '',
   address: '',
   registration_line: '',
+  vat_id: '',
+  tax_number: '',
   phone: '',
   email: '',
   website: '',

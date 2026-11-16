@@ -79,6 +79,8 @@ const PROFILE: profileApi.CompanyProfile = {
   legal_name: 'Hochbau Nord GmbH',
   address: '',
   registration_line: '',
+  vat_id: '',
+  tax_number: '',
   phone: '',
   email: '',
   website: '',
