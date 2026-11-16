@@ -387,10 +387,10 @@
       "description": "Permission identifier",
       "oneOf": [
         {
-          "description": "Everything the launcher's own documents may call: the splash screen, the startup failure screen and the update notice. These documents are served by the launcher itself over the Tauri protocol, so this set is granted to the local origin only. It is the full command list on purpose, because that is exactly what the local origin could already reach before the application declared any permissions at all, and this file must not quietly take something away while it is adding the declaration.\n#### This permission set includes:\n\n- `allow-open-external-url`\n- `allow-open-app-in-browser`\n- `allow-open-log-file`\n- `allow-get-app-url`\n- `allow-set-update-check-enabled`\n- `allow-decline-update-version`\n- `allow-check-for-update-now`\n- `allow-get-server-choice`\n- `allow-set-server-choice`\n- `allow-use-local-server`",
+          "description": "Everything the launcher's own documents may call: the splash screen, the startup failure screen and the update notice. These documents are served by the launcher itself over the Tauri protocol, so this set is granted to the local origin only. It is the full command list on purpose, because that is exactly what the local origin could already reach before the application declared any permissions at all, and this file must not quietly take something away while it is adding the declaration.\n#### This permission set includes:\n\n- `allow-open-external-url`\n- `allow-open-app-in-browser`\n- `allow-open-log-file`\n- `allow-get-app-url`\n- `allow-set-update-check-enabled`\n- `allow-decline-update-version`\n- `allow-check-for-update-now`\n- `allow-get-server-choice`\n- `allow-set-server-choice`\n- `allow-use-local-server`\n- `allow-startup-log-tail`\n- `allow-open-log-folder`\n- `allow-request-repair`",
           "type": "string",
           "const": "launcher-shell",
-          "markdownDescription": "Everything the launcher's own documents may call: the splash screen, the startup failure screen and the update notice. These documents are served by the launcher itself over the Tauri protocol, so this set is granted to the local origin only. It is the full command list on purpose, because that is exactly what the local origin could already reach before the application declared any permissions at all, and this file must not quietly take something away while it is adding the declaration.\n#### This permission set includes:\n\n- `allow-open-external-url`\n- `allow-open-app-in-browser`\n- `allow-open-log-file`\n- `allow-get-app-url`\n- `allow-set-update-check-enabled`\n- `allow-decline-update-version`\n- `allow-check-for-update-now`\n- `allow-get-server-choice`\n- `allow-set-server-choice`\n- `allow-use-local-server`"
+          "markdownDescription": "Everything the launcher's own documents may call: the splash screen, the startup failure screen and the update notice. These documents are served by the launcher itself over the Tauri protocol, so this set is granted to the local origin only. It is the full command list on purpose, because that is exactly what the local origin could already reach before the application declared any permissions at all, and this file must not quietly take something away while it is adding the declaration.\n#### This permission set includes:\n\n- `allow-open-external-url`\n- `allow-open-app-in-browser`\n- `allow-open-log-file`\n- `allow-get-app-url`\n- `allow-set-update-check-enabled`\n- `allow-decline-update-version`\n- `allow-check-for-update-now`\n- `allow-get-server-choice`\n- `allow-set-server-choice`\n- `allow-use-local-server`\n- `allow-startup-log-tail`\n- `allow-open-log-folder`\n- `allow-request-repair`"
         },
         {
           "description": "Ask github.com, once, which version is the latest, when the user presses the button on the startup failure screen. Takes no argument: the address and the repository are fixed by the launcher, so this cannot be pointed anywhere else. Answers newer, current, unreachable or disabled.",
@@ -435,6 +435,18 @@
           "markdownDescription": "Open the launcher's own diagnostic log in the default handler. The path is resolved by the launcher and cannot be supplied by the caller."
         },
         {
+          "description": "Open the folder that holds the launcher's diagnostic log in the file manager. The folder is resolved by the launcher and cannot be supplied by the caller.",
+          "type": "string",
+          "const": "allow-open-log-folder",
+          "markdownDescription": "Open the folder that holds the launcher's diagnostic log in the file manager. The folder is resolved by the launcher and cannot be supplied by the caller."
+        },
+        {
+          "description": "Ask the next start to repair the local data folder, then restart. Takes no argument. The repair never deletes: it removes a pidfile whose process is gone, moves a database folder that never started out of the way, and forgets the remembered port; a database that is running is not touched.",
+          "type": "string",
+          "const": "allow-request-repair",
+          "markdownDescription": "Ask the next start to repair the local data folder, then restart. Takes no argument. The repair never deletes: it removes a pidfile whose process is gone, moves a database folder that never started out of the way, and forgets the remembered port; a database that is running is not touched."
+        },
+        {
           "description": "Show a file from this workspace in the operating system's file manager. The caller names a path, and the command opens the FOLDER that holds it rather than the file, so nothing here launches a program by extension. The path is canonicalised and must resolve inside the data folder this launcher's own backend stores files in, so a page cannot name a system folder or a network share. It reports nothing back about the machine beyond whether the folder was opened.",
           "type": "string",
           "const": "allow-reveal-path-in-os",
@@ -451,6 +463,12 @@
           "type": "string",
           "const": "allow-set-update-check-enabled",
           "markdownDescription": "Turn the update check on or off, which is the choice offered by the update notice."
+        },
+        {
+          "description": "Read the last lines of the launcher's own diagnostic log, for the Copy log button on the startup failure screen. The path is resolved by the launcher and cannot be supplied by the caller.",
+          "type": "string",
+          "const": "allow-startup-log-tail",
+          "markdownDescription": "Read the last lines of the launcher's own diagnostic log, for the Copy log button on the startup failure screen. The path is resolved by the launcher and cannot be supplied by the caller."
         },
         {
           "description": "Record a choice of a server on this computer and restart into it. This is the way out of a configured server that cannot be reached, so it is granted to the launcher's own startup failure screen. It takes no argument and can only ever move the launcher towards the default it shipped with.",

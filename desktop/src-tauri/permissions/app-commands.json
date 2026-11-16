@@ -54,6 +54,21 @@
       "identifier": "allow-use-local-server",
       "description": "Record a choice of a server on this computer and restart into it. This is the way out of a configured server that cannot be reached, so it is granted to the launcher's own startup failure screen. It takes no argument and can only ever move the launcher towards the default it shipped with.",
       "commands": { "allow": ["use_local_server"] }
+    },
+    {
+      "identifier": "allow-startup-log-tail",
+      "description": "Read the last lines of the launcher's own diagnostic log, for the Copy log button on the startup failure screen. The path is resolved by the launcher and cannot be supplied by the caller.",
+      "commands": { "allow": ["startup_log_tail"] }
+    },
+    {
+      "identifier": "allow-open-log-folder",
+      "description": "Open the folder that holds the launcher's diagnostic log in the file manager. The folder is resolved by the launcher and cannot be supplied by the caller.",
+      "commands": { "allow": ["open_log_folder"] }
+    },
+    {
+      "identifier": "allow-request-repair",
+      "description": "Ask the next start to repair the local data folder, then restart. Takes no argument. The repair never deletes: it removes a pidfile whose process is gone, moves a database folder that never started out of the way, and forgets the remembered port; a database that is running is not touched.",
+      "commands": { "allow": ["request_repair"] }
     }
   ],
   "set": [
@@ -70,7 +85,10 @@
         "allow-check-for-update-now",
         "allow-get-server-choice",
         "allow-set-server-choice",
-        "allow-use-local-server"
+        "allow-use-local-server",
+        "allow-startup-log-tail",
+        "allow-open-log-folder",
+        "allow-request-repair"
       ]
     }
   ]

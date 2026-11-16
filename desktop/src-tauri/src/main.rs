@@ -39,6 +39,7 @@ mod update_check;
 /// an answer without touching a network, a process or Tauri, which is what lets
 /// the precedence order be tested as a function rather than as a startup.
 mod server_config;
+mod startup_repair;
 
 struct AppState {
     /// Handle to the spawned backend process so it survives past setup() and
@@ -482,6 +483,74 @@ fn open_log_file(_app: tauri::AppHandle) -> Result<(), String> {
     let path = log_path().ok_or_else(|| "Could not resolve the log file path".to_string())?;
     let path_str = path.to_string_lossy().to_string();
     open_with_os_default(&path_str).map_err(|e| format!("Could not open the log file: {e}"))
+}
+
+/// The end of the launcher log, for the failure screen's Copy log button.
+///
+/// The path is the launcher's own; the caller cannot name a file. The backend's
+/// output and its crash-log tail are already written into this log.
+#[tauri::command]
+fn startup_log_tail() -> String {
+    match log_path() {
+        Some(path) => startup_repair::log_tail(&path, 200),
+        None => String::new(),
+    }
+}
+
+/// Open the folder that holds the launcher log, for the failure screen.
+#[tauri::command]
+fn open_log_folder() -> Result<(), String> {
+    let dir = log_path()
+        .and_then(|p| p.parent().map(|d| d.to_path_buf()))
+        .ok_or_else(|| "Could not resolve the log folder".to_string())?;
+    open_with_os_default(&dir.to_string_lossy())
+        .map_err(|e| format!("Could not open the log folder: {e}"))
+}
+
+/// The failure screen's Repair button: leave a note and restart.
+///
+/// The repair itself runs at the next start, before the backend is spawned
+/// (`run_pending_repair`), because only then is nothing of ours holding the
+/// data folder. The restart stops this run's backend the usual way.
+#[tauri::command]
+fn request_repair(app: tauri::AppHandle) {
+    match workspace_data_dir() {
+        Some(dir) => {
+            let _ = std::fs::create_dir_all(&dir);
+            if let Err(e) = std::fs::write(dir.join(startup_repair::REPAIR_MARKER), "1") {
+                log_line(&format!("could not record the repair request: {e}"));
+            } else {
+                log_line("repair requested from the startup failure screen, restarting");
+            }
+        }
+        None => log_line("repair requested but the data folder could not be resolved"),
+    }
+    app.restart();
+}
+
+/// Run a repair the previous run asked for, once, before the backend starts.
+fn run_pending_repair() {
+    let Some(data_dir) = workspace_data_dir() else {
+        return;
+    };
+    let marker = data_dir.join(startup_repair::REPAIR_MARKER);
+    if !marker.is_file() {
+        return;
+    }
+    // Removed first: a repair that fails must not repeat on every start.
+    let _ = std::fs::remove_file(&marker);
+    let now = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map(|d| d.as_secs())
+        .unwrap_or(0);
+    let report = startup_repair::repair_data_dir(
+        &data_dir,
+        &cluster_dir_of(&data_dir),
+        LAST_PORT_FILENAME,
+        now,
+        &process_is_alive,
+    );
+    log_line(&startup_repair::repair_summary(&report));
 }
 
 /// Tell the caller which server this window is talking to, and who decided.
@@ -4247,9 +4316,8 @@ tools block newly installed programs; allow OpenConstructionERP and try again."
                                 let tail = tail_now;
                                 let core = if tail.trim().is_empty() {
                                     format!(
-                                        "The backend stopped unexpectedly (exit code {:?}) \
-before it finished starting.",
-                                        payload.code
+                                        "The backend stopped before it finished starting: {}.",
+                                        startup_repair::describe_exit_code(payload.code)
                                     )
                                 } else {
                                     // Last resort: show the tail of stderr,
@@ -4328,11 +4396,11 @@ this keeps happening send it to info@datadrivenconstruction.io. Installation hel
                                 &lost_flag,
                                 "The application backend has stopped",
                                 &format!(
-                                    "The backend exited unexpectedly (exit code {:?}), so \
+                                    "The backend exited unexpectedly ({}), so \
 this window can no longer load or save anything. Please close it and start \
 OpenConstructionERP again. If this keeps happening, send the log file to \
 info@datadrivenconstruction.io. Installation help: https://openconstructionerp.com/install-help",
-                                    payload.code
+                                    startup_repair::describe_exit_code(payload.code)
                                 ),
                             );
                         }
@@ -4549,6 +4617,9 @@ fn main() {
             get_server_choice,
             set_server_choice,
             use_local_server,
+            startup_log_tail,
+            open_log_folder,
+            request_repair,
             update_check::set_update_check_enabled,
             update_check::decline_update_version,
             update_check::check_for_update_now
@@ -4731,6 +4802,9 @@ fn main() {
                     // written against.
                     let reporter = handle.clone();
                     let start = move || {
+                        // Before anything reads the data folder, so a repair
+                        // asked for on the failure screen sees it untouched.
+                        run_pending_repair();
                         // On Windows the backend no longer unpacks, so the
                         // sweep only clears extractions left by the onefile
                         // builds this version replaces, and nothing the
