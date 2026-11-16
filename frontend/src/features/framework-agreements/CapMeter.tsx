@@ -9,7 +9,7 @@
 import clsx from 'clsx';
 import { AlertTriangle, CircleAlert } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { capMeterGeometry, type CapMeterInput } from './capMeter';
+import { capMeterGeometry, type CapMeterInput } from './capMeterGeometry';
 
 export interface CapMeterProps extends CapMeterInput {
   /** The sentence screen readers hear (the server's headroom sentence). */

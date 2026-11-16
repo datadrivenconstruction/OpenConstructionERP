@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { capMeterGeometry, capTone } from './capMeter';
+import { capMeterGeometry, capTone } from './capMeterGeometry';
 import { parsePastedLines } from './status';
 import { parsePriceList } from './CreateAgreementModal';
 
