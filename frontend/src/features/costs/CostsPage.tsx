@@ -842,6 +842,12 @@ export function CostsPage() {
         try {
           const params = new URLSearchParams({ q: debouncedQuery, limit: String(pageSize) });
           if (region) params.set('region', region);
+          // Narrowed in SQL first, then ranked by meaning within the subset (#562).
+          if (category) params.set('category', category);
+          if (classificationPath) params.set('classification_path', classificationPath);
+          if (catalogId) params.set('catalog_id', catalogId);
+          if (unit) params.set('unit', unit);
+          if (source) params.set('source', source);
           const results = await apiGet<Array<Record<string, unknown>>>(`/v1/costs/vector/search/?${params}`);
           // Wrap in CostSearchResponse format
           return {

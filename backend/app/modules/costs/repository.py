@@ -221,6 +221,55 @@ def reset_trgm_probe() -> None:
     _TRGM_AVAILABLE = None
 
 
+def _apply_structured_filters(
+    base: Any,
+    *,
+    unit: str | None = None,
+    source: str | None = None,
+    region: str | None = None,
+    catalog_id: uuid.UUID | None = None,
+    category: str | None = None,
+    classification_path: str | None = None,
+) -> Any:
+    """The deterministic cost filters, shared by text search and the semantic prefilter."""
+    if unit:
+        base = base.where(CostItem.unit == unit)
+
+    if source:
+        base = base.where(CostItem.source == source)
+
+    if region:
+        base = base.where(CostItem.region == region)
+
+    if catalog_id is not None:
+        base = base.where(CostItem.catalog_id == catalog_id)
+
+    if category:
+        # Use database-agnostic JSON access: json_extract for SQLite,
+        # ->> operator for PostgreSQL.  Both are handled via SQLAlchemy's
+        # generic JSON subscript when we fall back to text matching.
+        from app.database import engine as _engine
+
+        _url = str(_engine.url)
+        if "sqlite" in _url:
+            collection_expr = json_path_text(CostItem.classification, "$.collection")
+            base = base.where(collection_expr == category)
+        else:
+            # PostgreSQL: use the ->> operator via SQLAlchemy column subscript
+            base = base.where(CostItem.classification["collection"].as_string() == category)
+
+    if classification_path:
+        # Prefix-filter at every depth supplied. Empty middle segments
+        # ⇒ no filter at that depth (wildcard). Reuses the same
+        # dialect-aware extractor as ``category`` so semantics match.
+        for depth_idx, segment in enumerate(_split_classification_path(classification_path)):
+            if segment is None:
+                continue
+            base = base.where(_classification_predicate(_CLASSIFICATION_DEPTHS[depth_idx], segment))
+
+    return base
+
+
 class CostItemRepository:
     """Data access for CostItem model."""
 
@@ -441,40 +490,15 @@ class CostItemRepository:
         if description:
             base = base.where(CostItem.description.ilike(f"%{description}%"))
 
-        if unit:
-            base = base.where(CostItem.unit == unit)
-
-        if source:
-            base = base.where(CostItem.source == source)
-
-        if region:
-            base = base.where(CostItem.region == region)
-
-        if catalog_id is not None:
-            base = base.where(CostItem.catalog_id == catalog_id)
-
-        if category:
-            # Use database-agnostic JSON access: json_extract for SQLite,
-            # ->> operator for PostgreSQL.  Both are handled via SQLAlchemy's
-            # generic JSON subscript when we fall back to text matching.
-            from app.database import engine as _engine
-
-            _url = str(_engine.url)
-            if "sqlite" in _url:
-                collection_expr = json_path_text(CostItem.classification, "$.collection")
-                base = base.where(collection_expr == category)
-            else:
-                # PostgreSQL: use the ->> operator via SQLAlchemy column subscript
-                base = base.where(CostItem.classification["collection"].as_string() == category)
-
-        if classification_path:
-            # Prefix-filter at every depth supplied. Empty middle segments
-            # ⇒ no filter at that depth (wildcard). Reuses the same
-            # dialect-aware extractor as ``category`` so semantics match.
-            for depth_idx, segment in enumerate(_split_classification_path(classification_path)):
-                if segment is None:
-                    continue
-                base = base.where(_classification_predicate(_CLASSIFICATION_DEPTHS[depth_idx], segment))
+        base = _apply_structured_filters(
+            base,
+            unit=unit,
+            source=source,
+            region=region,
+            catalog_id=catalog_id,
+            category=category,
+            classification_path=classification_path,
+        )
 
         # Coerce to float for cross-dialect comparison - the rate column is
         # String(50) for SQLite Decimal compat (see models.py). ``numeric_value``
@@ -633,6 +657,28 @@ class CostItemRepository:
             func.similarity(code_lower, q_norm),
         )
         return tier + similarity
+
+    async def ids_matching(
+        self,
+        *,
+        unit: str | None = None,
+        source: str | None = None,
+        region: str | None = None,
+        catalog_id: uuid.UUID | None = None,
+        category: str | None = None,
+        classification_path: str | None = None,
+    ) -> list[str]:
+        """Ids of the active items a semantic search may rank, by the same filters as :meth:`search`."""
+        stmt = _apply_structured_filters(
+            select(CostItem.id).where(CostItem.is_active.is_(True)),
+            unit=unit,
+            source=source,
+            region=region,
+            catalog_id=catalog_id,
+            category=category,
+            classification_path=classification_path,
+        )
+        return [str(row[0]) for row in (await self.session.execute(stmt)).all()]
 
     async def search_for_autocomplete(
         self,
