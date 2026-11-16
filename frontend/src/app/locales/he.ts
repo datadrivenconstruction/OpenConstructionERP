@@ -11414,7 +11414,7 @@ const resource = {
     "contacts.field_type": "סוג",
     "contacts.filter_all_countries": "כל המדינות",
     "contacts.filter_all_types": "כל הסוגים",
-    "contacts.type_client": "לקוח",
+    "contacts.type_client": "מזמין העבודה",
     "contacts.type_subcontractor": "קבלן משנה",
     "contacts.type_contractor": "קבלן",
     "contacts.type_supplier": "ספק",

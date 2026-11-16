@@ -13716,7 +13716,7 @@ const resource = {
     "contacts.filter_all_countries": "Barcha mamlakatlar",
     "contacts.filter_all_types": "Barcha turlar",
     "contacts.type_client": "Mijoz",
-    "contacts.type_subcontractor": "Pudratchi",
+    "contacts.type_subcontractor": "Subpudratchi",
     "contacts.type_contractor": "Pudratchi",
     "contacts.type_supplier": "Yetkazib beruvchi",
     "contacts.type_consultant": "Konsultant",

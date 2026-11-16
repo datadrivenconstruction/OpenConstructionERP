@@ -13155,7 +13155,7 @@ const resource = {
     "contacts.field_type": "Тип",
     "contacts.filter_all_countries": "Всички държави",
     "contacts.filter_all_types": "Всички типове",
-    "contacts.type_client": "Клиент",
+    "contacts.type_client": "Възложител",
     "contacts.type_subcontractor": "Подизпълнител",
     "contacts.type_contractor": "Изпълнител",
     "contacts.type_supplier": "Доставчик",

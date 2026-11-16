@@ -13626,7 +13626,7 @@ const resource = {
     "contacts.field_type": "Typ",
     "contacts.filter_all_countries": "Wszystkie kraje",
     "contacts.filter_all_types": "Wszystkie typy",
-    "contacts.type_client": "Klient",
+    "contacts.type_client": "Zamawiający",
     "contacts.type_subcontractor": "Podwykonawca",
     "contacts.type_contractor": "Wykonawca",
     "contacts.type_supplier": "Dostawca",

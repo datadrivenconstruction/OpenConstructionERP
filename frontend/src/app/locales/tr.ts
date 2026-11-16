@@ -13859,7 +13859,7 @@ const resource = {
     "contacts.field_type": "Tür",
     "contacts.filter_all_countries": "Tüm Ülkeler",
     "contacts.filter_all_types": "Tüm Türler",
-    "contacts.type_client": "Müşteri",
+    "contacts.type_client": "İşveren",
     "contacts.type_subcontractor": "Alt yüklenici",
     "contacts.type_contractor": "Yüklenici",
     "contacts.type_supplier": "Tedarikçi",

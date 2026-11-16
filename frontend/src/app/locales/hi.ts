@@ -13124,7 +13124,7 @@ const resource = {
     "contacts.field_type": "प्रकार",
     "contacts.filter_all_countries": "सभी देश",
     "contacts.filter_all_types": "सभी प्रकार",
-    "contacts.type_client": "ग्राहक",
+    "contacts.type_client": "परियोजना स्वामी",
     "contacts.type_subcontractor": "उपठेकेदार",
     "contacts.type_contractor": "ठेकेदार",
     "contacts.type_supplier": "आपूर्तिकर्ता",

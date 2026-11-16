@@ -13760,7 +13760,7 @@ const resource = {
     "contacts.field_type": "Tip",
     "contacts.filter_all_countries": "Toate țările",
     "contacts.filter_all_types": "Toate tipurile",
-    "contacts.type_client": "Client",
+    "contacts.type_client": "Beneficiar",
     "contacts.type_subcontractor": "Subcontractant",
     "contacts.type_contractor": "Contractant",
     "contacts.type_supplier": "Furnizor",

@@ -13649,7 +13649,7 @@ const resource = {
     "contacts.field_type": "ประเภท",
     "contacts.filter_all_countries": "ทุกประเทศ",
     "contacts.filter_all_types": "ทุกประเภท",
-    "contacts.type_client": "ลูกค้า",
+    "contacts.type_client": "ผู้ว่าจ้าง",
     "contacts.type_subcontractor": "ผู้รับเหมาช่วง",
     "contacts.type_contractor": "ผู้รับเหมา",
     "contacts.type_supplier": "ผู้จัดจำหน่าย",

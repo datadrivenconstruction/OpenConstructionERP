@@ -15793,7 +15793,7 @@ const resource = {
     "contacts.field_type": "Type",
     "contacts.filter_all_countries": "Alle lande",
     "contacts.filter_all_types": "Alle typer",
-    "contacts.type_client": "Kunde",
+    "contacts.type_client": "Bygherre",
     "contacts.type_subcontractor": "Underentreprenør",
     "contacts.type_contractor": "Entreprenør",
     "contacts.type_supplier": "Leverandør",

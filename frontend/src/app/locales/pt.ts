@@ -12035,7 +12035,7 @@ const resource = {
     "contacts.field_type": "Tipo",
     "contacts.filter_all_countries": "Todos os países",
     "contacts.filter_all_types": "Todos os tipos",
-    "contacts.type_client": "Cliente",
+    "contacts.type_client": "Dono de obra",
     "contacts.type_subcontractor": "Subempreiteiro",
     "contacts.type_contractor": "Empreiteiro",
     "contacts.type_supplier": "Fornecedor",
