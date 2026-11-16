@@ -207,6 +207,32 @@ def allowed_final_account_transitions(current: str) -> list[str]:
     return list(FA_TRANSITIONS.get(current, []))
 
 
+#: Statuses an edit may move a record to: the moves no action exists for.
+#: Every other status is reached through its action, which records the decision.
+_EDITABLE_STATUS_TARGETS: frozenset[str] = frozenset({"draft", "under_review"})
+
+
+def _pop_edited_status(fields: dict[str, Any], current: str, transitions: dict[str, list[str]]) -> None:
+    """Drop an unchanged status from an edit; refuse one an action owns.
+
+    Leaves ``fields["status"]`` in place only for a lifecycle move no action
+    covers (back to draft, into review). A closed or decided record is never
+    reopened by an edit.
+    """
+    if "status" not in fields:
+        return
+    requested = fields["status"]
+    if requested is None or requested == current:
+        fields.pop("status")
+        return
+    if requested in _EDITABLE_STATUS_TARGETS and requested in transitions.get(current, []):
+        return
+    raise HTTPException(
+        status_code=http_status.HTTP_422_UNPROCESSABLE_CONTENT,
+        detail=f"Status cannot be changed from {current} to {requested} by editing; use the record's action.",
+    )
+
+
 # ── Pure compute helpers ───────────────────────────────────────────────────
 
 
@@ -1467,6 +1493,7 @@ class VariationsService:
     async def update_notice(self, notice_id: uuid.UUID, data: NoticeUpdate, user_id: str | None = None) -> Notice:
         notice = await self.get_notice(notice_id)
         fields = data.model_dump(exclude_unset=True)
+        _pop_edited_status(fields, notice.status, NOTICE_TRANSITIONS)
         if "metadata" in fields:
             fields["metadata_"] = fields.pop("metadata")
         if not fields:
@@ -1599,6 +1626,7 @@ class VariationsService:
                 detail=(f"Variation request is {vr.status} and can no longer be edited; create a new request instead"),
             )
         fields = data.model_dump(exclude_unset=True)
+        _pop_edited_status(fields, vr.status, VR_TRANSITIONS)
         if "metadata" in fields:
             fields["metadata_"] = fields.pop("metadata")
         if not fields:
@@ -3568,6 +3596,7 @@ class VariationsService:
     ) -> DayworkSheet:
         ds = await self.get_daywork_sheet(sheet_id)
         fields = data.model_dump(exclude_unset=True)
+        _pop_edited_status(fields, ds.status, DAYWORK_TRANSITIONS)
         if not fields:
             return ds
         await self.daywork_repo.update_fields(sheet_id, **fields)
@@ -3807,6 +3836,7 @@ class VariationsService:
     ) -> DisruptionClaim:
         claim = await self.get_disruption_claim(claim_id)
         fields = data.model_dump(exclude_unset=True)
+        _pop_edited_status(fields, claim.status, DISRUPTION_TRANSITIONS)
         for money_key in ("cost_amount", "decided_amount"):
             if money_key in fields and fields[money_key] is not None:
                 fields[money_key] = _to_decimal(fields[money_key])
@@ -3896,6 +3926,7 @@ class VariationsService:
     ) -> ExtensionOfTimeClaim:
         claim = await self.get_eot_claim(claim_id)
         fields = data.model_dump(exclude_unset=True)
+        _pop_edited_status(fields, claim.status, EOT_TRANSITIONS)
         if not fields:
             return claim
         await self.eot_repo.update_fields(claim_id, **fields)
