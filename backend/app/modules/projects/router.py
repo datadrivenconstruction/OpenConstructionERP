@@ -2465,6 +2465,9 @@ async def analytics_overview(
                 "gross_floor_area": gfa,
                 "cost_per_sqm": cost_per_sqm,
                 "phase": getattr(p, "phase", None),
+                # ``status`` above is budget health; these are the project's own fields (#567).
+                "project_status": getattr(p, "status", None),
+                "project_type": getattr(p, "project_type", None),
             }
         )
 

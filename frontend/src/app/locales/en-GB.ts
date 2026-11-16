@@ -647,6 +647,15 @@ const resource = {
     "projects.no_site": "No site",
     "projects.filter_company": "Filter projects by company",
     "projects.filter_all_companies": "All companies",
+    "projects.facet_unset": "Not set",
+    "projects.facet_all_phases": "All phases",
+    "projects.facet_all_types": "All project types",
+    "projects.facet_phase_aria": "Filter projects by phase",
+    "projects.facet_type_aria": "Filter projects by project type",
+    "projects.phase_tender": "Tender",
+    "projects.phase_operation": "Operation",
+    "projects.phase_concept": "Concept",
+    "projects.phase_handover": "Handover",
     "module_packages.upload_failed": "The archive was refused",
     "module_packages.installed_active": "Module installed and active",
     "module_packages.installed_disabled": "Module installed, switched off",
@@ -1090,6 +1099,9 @@ const resource = {
     "validation.doctpl.draft_unpublished": "A draft is not published yet.",
     "einvoice.applies_to": "Applies to",
     "einvoice.all_companies": "All companies (default)",
+    "analytics.col_project_status": "Project status",
+    "analytics.filter_project_status": "Filter by project status",
+    "analytics.all_project_statuses": "All project statuses",
   }
 } as { translation: Record<string, string> };
 
