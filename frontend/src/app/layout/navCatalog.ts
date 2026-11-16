@@ -76,6 +76,7 @@ import {
   FileSignature,
   Briefcase,
   Scale,
+  Lock,
   Percent,
   Landmark,
   Stamp,
@@ -624,6 +625,15 @@ export const navGroups: NavGroup[] = [
     hideInSimple: true,
     items: [
       { labelKey: 'nav.variations', to: '/variations', icon: GitBranch },
+      {
+        labelKey: 'nav.estimate_archive',
+        defaultLabel: 'Sealed estimates',
+        to: '/estimate-archive',
+        icon: Lock,
+        advancedOnly: true,
+        helpKey: 'sidebar.help.estimate_archive',
+        defaultHelp: 'The estimate behind the contract rates, sealed and fingerprinted; price changes from it.',
+      },
       { labelKey: 'moc.title', to: '/moc', icon: Replace, advancedOnly: true },
       { labelKey: 'nav.change_orders', to: '/changeorders', icon: FileEdit, advancedOnly: true },
       { labelKey: 'nav.change_intelligence', to: '/change-intelligence', icon: BrainCircuit, advancedOnly: true },

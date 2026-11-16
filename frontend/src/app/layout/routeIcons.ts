@@ -58,6 +58,7 @@ import {
   Activity,
   CalendarRange,
   Scale,
+  Lock,
   Percent,
   Stamp,
   ShieldAlert,
@@ -203,6 +204,7 @@ const EXTRA_ROUTE_ICONS: Record<string, LucideIcon> = {
   '/tendering': FileText,
   // ── 9. Procurement & Change ───────────────────────────────────────
   '/variations': GitBranch,
+  '/estimate-archive': Lock,
   '/moc': Replace,
   '/supplier-catalogs': ShoppingCart,
   '/procurement': Package,

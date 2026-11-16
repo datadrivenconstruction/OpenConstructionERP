@@ -81,6 +81,7 @@ const preloaders: Record<string, () => void> = {
   '/procurement': () => void import('@/features/procurement/ProcurementPage'),
   '/postcalc': () => void import('@/features/postcalc/PostCalcPage'),
   '/variations': () => void import('@/features/variations'),
+  '/estimate-archive': () => void import('@/features/estimate-archive'),
   '/changeorders': () => void import('@/features/changeorders/ChangeOrdersPage'),
   '/payment-clock': () => void import('@/features/payment-clock'),
   '/tax-withholding': () => void import('@/features/tax-withholding'),
