@@ -305,6 +305,9 @@ def _infer_failure_cause(*, reason: str, exit_code: int | None, stderr_text: str
         Reinstall CTA.
       * ``timeout`` - converter hung.
       * ``empty_output`` - converter ran, produced no rows.
+      * the ``cause`` of a known Windows exit status (``runtime_missing``,
+        ``native_crash``, ``blocked_instruction`` ...), see
+        ``app.core.windows_exit_status``.
       * ``unknown`` - anything else; UI shows the generic guidance + Retry.
     """
     lower = stderr_text.lower()
@@ -312,6 +315,11 @@ def _infer_failure_cause(*, reason: str, exit_code: int | None, stderr_text: str
         return "converter_outdated"
     if reason == "timeout":
         return "timeout"
+    from app.core.windows_exit_status import describe_exit_code
+
+    status = describe_exit_code(exit_code)
+    if status is not None:
+        return status.cause
     if reason == "empty_output":
         return "empty_output"
     # A bare exit code (even 15) with no unknown-argument stderr marker is NOT

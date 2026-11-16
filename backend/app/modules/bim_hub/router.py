@@ -1950,6 +1950,10 @@ async def _process_cad_in_background(
                 conv_version = conv_info.get("version")  # e.g. "18.0.0.0"
                 stderr_tail = (ddc_failure.get("stderr") or "").strip()
                 cause = ddc_failure.get("cause") or "unknown"
+                from app.core.windows_exit_status import describe_exit_code, plain_exit_message
+
+                exit_code = ddc_failure.get("exit_code")
+                windows_exit = describe_exit_code(exit_code)
 
                 if ext == ".rvt" and ddc_failure.get("reason") == "no_model_elements":
                     # The file was read; it holds views, legends or definitions only.
@@ -1983,6 +1987,10 @@ async def _process_cad_in_background(
                         parts.append(f"Installed RVT converter: {conv_version}.")
                     if cause == "converter_outdated":
                         parts.append("Open Settings → BIM Converters and click Reinstall to fetch the latest version.")
+                    elif windows_exit is not None:
+                        # Windows killed the converter: the file was never judged, so say what
+                        # stopped it and how to fix that instead of blaming the file.
+                        parts.insert(0, plain_exit_message(exit_code, "The RVT converter"))
                     else:
                         parts.append(
                             "The converter produced no elements from this file. "
@@ -1996,7 +2004,7 @@ async def _process_cad_in_background(
                         first_line = stderr_tail.splitlines()[0][:200]
                         if first_line:
                             parts.append(f"Converter said: {first_line}")
-                    if cause != "converter_outdated":
+                    if cause != "converter_outdated" and windows_exit is None:
                         parts.append(
                             "Try updating the RVT converter (Settings → BIM Converters → Reinstall) and clicking Retry."
                         )
@@ -2004,6 +2012,8 @@ async def _process_cad_in_background(
 
                     meta["error_code"] = "converter_outdated" if cause == "converter_outdated" else "ddc_failed"
                     meta["cause"] = cause
+                    if windows_exit is not None:
+                        meta["suggested_actions"] = list(windows_exit.actions)
                     meta["converter_id"] = "rvt"
                     meta["install_endpoint"] = "/api/v1/takeoff/converters/rvt/install/"
                     # Structured diagnostic info for the frontend to render
@@ -2040,7 +2050,12 @@ async def _process_cad_in_background(
                     # real story when no readable rows came back at all.  When
                     # the parse DID yield a classification reason we trust that
                     # instead, because it describes the file we actually read.
-                    if cause == "timeout" and not empty_reason:
+                    if windows_exit is not None and not empty_reason:
+                        model.error_message = plain_exit_message(exit_code, "The converter")
+                        meta["error_code"] = "ddc_failed"
+                        meta["cause"] = cause
+                        meta["suggested_actions"] = list(windows_exit.actions)
+                    elif cause == "timeout" and not empty_reason:
                         model.error_message = (
                             "Converting this IFC timed out before any elements "
                             "were produced. This usually happens with very "
