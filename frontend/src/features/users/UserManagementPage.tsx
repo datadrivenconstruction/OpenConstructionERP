@@ -36,6 +36,7 @@ import {
   Unlock,
   Save,
   Trash2,
+  Link2,
 } from 'lucide-react';
 import { Card, Badge, Button, WideModal, Breadcrumb, ConfirmDialog, DismissibleInfo, IntroRichText, ModuleGuideButton } from '@/shared/ui';
 import { PageHeader } from '@/shared/ui/PageHeader';
@@ -49,6 +50,7 @@ import { apiGet } from '@/shared/lib/api';
 import {
   fetchAllUsers,
   updateUser,
+  getVerificationLink,
   deleteUser,
   inviteUser,
   getUserModuleAccess,
@@ -773,6 +775,36 @@ export function UserManagementPage() {
     },
   });
 
+  // The way in for a self-registered user whose confirmation email never arrived.
+  const copyLinkMut = useMutation({
+    mutationFn: (id: string) => getVerificationLink(id),
+    onSuccess: async ({ url }) => {
+      try {
+        await navigator.clipboard.writeText(url);
+        addToast({
+          type: 'success',
+          title: t('users.confirmation_link_copied', { defaultValue: 'Confirmation link copied' }),
+          message: t('users.confirmation_link_copied_hint', {
+            defaultValue: 'Send it to the user. Opening it activates the account.',
+          }),
+        });
+      } catch {
+        addToast({
+          type: 'info',
+          title: t('users.confirmation_link', { defaultValue: 'Confirmation link' }),
+          message: url,
+        });
+      }
+    },
+    onError: (e: Error) => {
+      addToast({
+        type: 'error',
+        title: t('common.error', { defaultValue: 'Error' }),
+        message: e.message,
+      });
+    },
+  });
+
   const inviteMut = useMutation({
     mutationFn: inviteUser,
     onSuccess: () => {
@@ -1116,6 +1148,19 @@ export function UserManagementPage() {
                           <Settings2 size={14} />
                           {t('users.access', { defaultValue: 'Access' })}
                         </button>
+                        {!user.is_active && !user.last_login_at && (
+                          <button
+                            onClick={() => copyLinkMut.mutate(user.id)}
+                            disabled={copyLinkMut.isPending}
+                            className="flex items-center gap-1 px-2 py-1 rounded text-xs font-medium text-oe-blue hover:bg-oe-blue/10 transition-colors"
+                            title={t('users.copy_confirmation_link_hint', {
+                              defaultValue: 'For when the sign-up confirmation email did not arrive',
+                            })}
+                          >
+                            <Link2 size={14} />
+                            {t('users.copy_confirmation_link', { defaultValue: 'Copy link' })}
+                          </button>
+                        )}
                         <button
                           onClick={() => handleToggleActive(user)}
                           disabled={isSelf}

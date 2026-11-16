@@ -5,7 +5,7 @@ import { Suspense, lazy, useState, useCallback, useEffect, useLayoutEffect, useC
 import { Routes, Route, Navigate, Outlet, useLocation, useMatch, useParams } from 'react-router-dom';
 import { AppLayout } from './layout';
 import { DashboardPage } from '@/features/dashboard';
-import { LoginPage, RegisterPage, ForgotPasswordPage, ResetPasswordPage, AuthedHome } from '@/features/auth';
+import { LoginPage, RegisterPage, ForgotPasswordPage, ResetPasswordPage, VerifyEmailPage, AuthedHome } from '@/features/auth';
 import { ProjectsPage, CreateProjectPage, ProjectDetailPage, ProjectSettingsPage } from '@/features/projects';
 // Import the lightweight BOQ pages from their source modules directly,
 // NOT via the `@/features/boq` barrel.  The barrel re-exports
@@ -1409,6 +1409,8 @@ export default function App() {
             any link end a session. The page drops the local session itself
             once the reset succeeds. */}
         <Route path="/auth/reset" element={<ResetPasswordPage />} />
+        {/* Sign-up confirmation link (emailed, or copied by an admin from Users). */}
+        <Route path="/auth/verify-email" element={<VerifyEmailPage />} />
 
         {/* Onboarding — full-screen, no layout */}
         <Route path="/onboarding" element={

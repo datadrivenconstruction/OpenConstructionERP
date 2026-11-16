@@ -40,7 +40,7 @@ from typing import Any, Literal
 
 from fastapi import APIRouter, BackgroundTasks, Depends, File, HTTPException, Query, Request, UploadFile, status
 from fastapi.responses import Response
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from app.core.demo_accounts import DEMO_ACCOUNT_EMAILS
 from app.core.demo_privacy import redact_model
@@ -691,6 +691,31 @@ async def reset_password(
 ) -> ResetPasswordResponse:
     """Reset password using a valid reset token."""
     return await service.reset_password(data)
+
+
+class VerifyEmailRequest(BaseModel):
+    """Body of the sign-up confirmation call; the token comes from the emailed link."""
+
+    token: str = Field(..., min_length=1, max_length=4096)
+
+
+@router.post("/auth/verify-email/")
+@router.post("/auth/verify-email", include_in_schema=False)
+async def verify_email(
+    data: VerifyEmailRequest,
+    request: Request,
+    service: UserService = Depends(_get_service),
+) -> dict[str, Any]:
+    """Activate a self-registered account from its confirmation link. Rate-limited per IP."""
+    allowed, _remaining = login_limiter.is_allowed(f"verify_{client_identifier(request)}")
+    if not allowed:
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail="Too many requests. Please wait a minute and try again.",
+            headers={"Retry-After": "60"},
+        )
+    user = await service.verify_email(data.token)
+    return {"verified": True, "email": user.email}
 
 
 # ── Current user ───────────────────────────────────────────────────────────
@@ -1801,6 +1826,21 @@ async def update_user(
     _guard_admin_scope(payload, target.role, fields.get("role"))
     user = await service.update_profile(user_id, **fields)
     return redact_model(UserResponse.model_validate(user), subject_id=user.id, viewer_id=viewer_id)
+
+
+@router.get(
+    "/{user_id}/verification-link/",
+    dependencies=[Depends(RequirePermission("users.update"))],
+)
+async def get_verification_link(
+    user_id: uuid.UUID,
+    payload: CurrentUserPayload,
+    service: UserService = Depends(_get_service),
+) -> dict[str, object]:
+    """Admin-only: the confirmation link of a pending account, for when the email never arrived."""
+    target = await service.get_user(user_id)
+    _guard_admin_scope(payload, target.role)
+    return await service.verification_link(user_id)
 
 
 @router.delete(

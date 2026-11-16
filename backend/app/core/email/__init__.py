@@ -58,11 +58,13 @@ from .smtp import SmtpEmailBackend
 from .templates import (
     BRAND_NAME,
     brand_header,
+    template_email_verification,
     template_invoice_approved,
     template_meeting_invitation,
     template_password_reset,
     template_safety_alert,
     template_task_assigned,
+    template_test_email,
     wrap,
 )
 
@@ -85,10 +87,12 @@ __all__ = [
     "get_email_service",
     "report_email_config_at_startup",
     "reset_email_service_cache",
+    "template_email_verification",
     "template_invoice_approved",
     "template_meeting_invitation",
     "template_password_reset",
     "template_safety_alert",
     "template_task_assigned",
+    "template_test_email",
     "wrap",
 ]

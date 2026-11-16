@@ -104,6 +104,19 @@ export function RegisterPage() {
       // clear pending-activation message instead.
       const regBody = await regRes.json().catch(() => null);
       if (regBody && regBody.is_active === false) {
+        const reg = await fetch('/api/v1/users/auth/registration/')
+          .then((r) => (r.ok ? r.json() : null))
+          .catch(() => null);
+        if (reg?.mode === 'email-verify') {
+          setError(
+            t(
+              'auth.registration_check_email',
+              'Account created. Open the confirmation link we sent to your email to activate it. ' +
+                'If it does not arrive, ask your administrator for the link.',
+            ),
+          );
+          return;
+        }
         setError(
           t(
             'auth.registration_pending_activation',
