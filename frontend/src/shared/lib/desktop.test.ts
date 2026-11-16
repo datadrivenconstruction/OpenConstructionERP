@@ -419,7 +419,7 @@ describe('the shell plugin link opener in the application window', () => {
 
     expect(pluginCalls).toEqual([]);
     expect(invoke.mock.calls.map((call) => call[0])).toEqual(['open_external_url', 'open_app_in_browser']);
-    expect(invoke.mock.calls[1][1]).toEqual({ path: '/docs/user-manual.pdf' });
+    expect(invoke.mock.calls[1]?.[1]).toEqual({ path: '/docs/user-manual.pdf' });
     // The component's own handler (closing the menu) still runs, and the anchor keeps its target.
     expect(external.closeMenu).toHaveBeenCalledTimes(1);
     expect(manual.closeMenu).toHaveBeenCalledTimes(1);
