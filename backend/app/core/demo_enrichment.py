@@ -734,6 +734,17 @@ async def enrich_projects(project_ids: list[uuid.UUID]) -> dict[str, Any]:
             except Exception:
                 logger.warning("cash-flow forecast demo seed skipped for %s (non-fatal)", _pid, exc_info=True)
 
+        # One customised invoice template (German and English) for the whole workspace;
+        # skipped once any invoice template exists, so the user's own wording is never touched.
+        try:
+            from app.modules.doc_templates.seed import seed_doc_templates_demo
+
+            async with async_session_factory() as _ds:
+                if await seed_doc_templates_demo(_ds):
+                    await _ds.commit()
+        except Exception:
+            logger.warning("document templates demo seed skipped (non-fatal)", exc_info=True)
+
         # QMS seeds one project at a time and is not internally idempotent; loop
         # the projects, skipping any that already carry an ITP plan so a re-run
         # never duplicates.
