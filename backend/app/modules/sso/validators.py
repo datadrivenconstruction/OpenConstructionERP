@@ -22,6 +22,7 @@ import re
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
+from app.core.self_upgrade import DESKTOP_NO_EXTRA, repair_hint
 from app.core.validation.engine import (
     RuleCategory,
     RuleResult,
@@ -140,7 +141,12 @@ class SamlAvailable(ValidationRule):
         if d.get("protocol") != "saml":
             return []
         ok = bool(d.get("saml_available"))
-        msg = "OK" if ok else "SAML is not installed on this server: pip install 'openconstructionerp[saml]'."
+        msg = (
+            "OK"
+            if ok
+            else "SAML is not installed on this server. "
+            + repair_hint("Install the extra: pip install 'openconstructionerp[saml]'.", DESKTOP_NO_EXTRA)
+        )
         return [_result(self, ok, msg, d.get("slug"))]
 
 
