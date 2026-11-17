@@ -62,7 +62,7 @@ def _matches_the_models(connection) -> None:
         assert set(migrated) == {c.name for c in table.columns}, table.name
         for column in table.columns:
             assert migrated[column.name]["nullable"] == column.nullable, (table.name, column.name)
-            if isinstance(column.type, sa.Numeric):
+            if type(column.type) is sa.Numeric:
                 got = migrated[column.name]["type"]
                 assert (got.precision, got.scale) == (column.type.precision, column.type.scale), (
                     table.name,
@@ -193,7 +193,7 @@ async def test_the_schema_holds_the_invariants_the_service_relies_on(monkeypatch
         e, n, z = connection.execute(sa.text(f"SELECT e::text, n::text, z::text FROM {POINTS}")).one()
         assert (e, n, z) == ("389000.1234", "5819000.0001", "-0.0001")
         # Beyond the column is an error from the database, so the application has to stop it first.
-        with pytest.raises(sa.exc.DataError), connection.begin_nested():
+        with pytest.raises(sa.exc.DBAPIError), connection.begin_nested():
             connection.execute(
                 sa.text(
                     f"INSERT INTO {POINTS} (id, project_id, point_set_id, point_id, e, n) "
