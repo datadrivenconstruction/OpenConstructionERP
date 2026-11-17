@@ -440,6 +440,7 @@ from app.modules.finance.einvoice_settings_models import EInvoiceSettings  # noq
 # Same rationale: re-exported so ``Base.metadata.create_all`` registers the
 # oe_finance_captured_invoice table via the module's models.py scan.
 from app.modules.finance.invoice_capture_models import CapturedInvoice  # noqa: E402,F401
+from app.modules.finance.invoice_mailbox_models import InvoiceMailbox  # noqa: E402,F401
 
 # ── Payment runs ─────────────────────────────────────────────────────────────
 # Same rationale: re-exported so the module's models.py scan registers
