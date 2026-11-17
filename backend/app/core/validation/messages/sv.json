@@ -2062,6 +2062,7 @@
     "arc_mutation_refused": {
       "fail": "En förseglad kalkyl kan inte ändras eller raderas. Försegla en ny version som ersätter den."
     },
-    "contents_locked": "Innehållet förblir förseglat tills en formell öppning börjar."
+    "contents_locked": "Innehållet förblir förseglat tills en formell öppning börjar.",
+    "market_off": "Förseglade kalkyler ingår inte i projektets marknadsprofil."
   }
 }

@@ -2,9 +2,10 @@
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 """Demo seals for the four demo projects, one per market.
 
-Each demo project gets one sealed estimate built from the worked examples, a
-receipt, one closed opening with its attendees and audit trail, and one priced
-change. Idempotent: a project that already has a seal is skipped.
+Each demo project gets its own bill sealed (the worked example only where the
+project has no priced bill), a receipt, one closed opening with its attendees
+and audit trail, and one change priced from a position of that sealed bill.
+Idempotent: a project that already has a seal is skipped.
 """
 
 from __future__ import annotations
@@ -68,13 +69,11 @@ _FIDIC_CHANGE: dict[str, Any] = {
     "changes": [{"code": "CONC", "unit_cost": "113.50", "note": "Higher grade, dated quote 2026-10-20"}],
 }
 
-#: demo id -> (payload builder, profile, ordinal, change, reference, attendees: (name, organisation, role, side))
-_PLAN: dict[str, tuple[Any, str, str, dict[str, Any], str, list[tuple[str, str, str, str]]]] = {
+#: demo id -> (fallback payload, profile, reference, attendees: (name, organisation, role, side))
+_PLAN: dict[str, tuple[Any, str, str, list[tuple[str, str, str, str]]]] = {
     "residential-berlin": (
         fixtures.example_de_trench,
         "de",
-        "02.03.0040",
-        _DE_CHANGE,
         "Nachtrag N-07",
         [
             ("Jonas Weber", "Bauunternehmung", "Kalkulator", "internal"),
@@ -84,8 +83,6 @@ _PLAN: dict[str, tuple[Any, str, str, dict[str, Any], str, list[tuple[str, str, 
     "office-london": (
         fixtures.example_uk_trench,
         "uk",
-        "D20.1",
-        _UK_CHANGE,
         "Variation V-012",
         [
             ("Sam Patel", "Main contractor", "Commercial manager", "internal"),
@@ -95,8 +92,6 @@ _PLAN: dict[str, tuple[Any, str, str, dict[str, Any], str, list[tuple[str, str, 
     "warehouse-dubai": (
         fixtures.example_fidic_pipe_surround,
         "fidic",
-        "4.07",
-        _FIDIC_CHANGE,
         "Variation VO-04",
         [
             ("Omar Haddad", "Contractor", "Planning and cost lead", "internal"),
@@ -106,8 +101,6 @@ _PLAN: dict[str, tuple[Any, str, str, dict[str, Any], str, list[tuple[str, str, 
     "medical-us": (
         fixtures.example_fidic_pipe_surround,
         "us",
-        "4.07",
-        _FIDIC_CHANGE,
         "Change order CO-03",
         [
             ("Dana Brooks", "General contractor", "Senior estimator", "internal"),
@@ -115,6 +108,42 @@ _PLAN: dict[str, tuple[Any, str, str, dict[str, Any], str, list[tuple[str, str, 
         ],
     ),
 }
+
+
+#: The worked examples' changes, used when the sealed bill holds their position.
+_KNOWN_CHANGES: tuple[tuple[str, dict[str, Any]], ...] = (
+    ("02.03.0040", _DE_CHANGE),
+    ("D20.1", _UK_CHANGE),
+    ("4.07", _FIDIC_CHANGE),
+)
+
+
+def demo_change(payload: dict[str, Any]) -> tuple[str, dict[str, Any]] | None:
+    """A believable change to one position of the sealed bill, or None when it prices nothing.
+
+    The worked example's change where the bill holds that position; otherwise a
+    quarter more of the costliest coded resource on the first position with a
+    breakdown; a position without one only changes quantity.
+    """
+    priced = [p for p in payload.get("positions") or [] if engine.is_priced(p)]
+    if not priced:
+        return None
+    for ordinal, change in _KNOWN_CHANGES:
+        position = engine.find_position(payload, ordinal)
+        codes = {str(r.get("code") or "") for r in (position or {}).get("resources") or []}
+        if position is not None and {str(c["code"]) for c in change.get("changes") or []} <= codes:
+            return ordinal, change
+    position = next((p for p in priced if any(r.get("code") for r in p.get("resources") or [])), priced[0])
+    quantity = max(engine.dec(position.get("quantity")) / 4, Decimal(1)).quantize(Decimal(1))
+    change: dict[str, Any] = {"quantity": engine.canon(quantity)}
+    coded = [r for r in position.get("resources") or [] if r.get("code")]
+    if coded:
+        top = max(coded, key=lambda r: engine.dec(r.get("consumption")) * engine.dec(r.get("unit_cost")))
+        more = engine.dec(top.get("consumption")) * Decimal("1.25")
+        change["changes"] = [
+            {"code": top["code"], "consumption": engine.canon(more), "note": "Harder conditions than tendered"}
+        ]
+    return str(position.get("ordinal")), change
 
 
 async def seed_estimate_archive_demo(session: AsyncSession, project_ids: Iterable[uuid.UUID]) -> dict[str, int]:
@@ -138,7 +167,7 @@ async def seed_estimate_archive_demo(session: AsyncSession, project_ids: Iterabl
         plan = _PLAN.get(demo_id)
         if plan is None or pid in done:
             continue
-        build, profile, ordinal, change, reference, people = plan
+        build, profile, reference, people = plan
         boq_id = (
             await session.execute(select(BOQ.id).where(BOQ.project_id == pid).order_by(BOQ.created_at).limit(1))
         ).scalar_one_or_none()
@@ -154,11 +183,37 @@ async def seed_estimate_archive_demo(session: AsyncSession, project_ids: Iterabl
             .scalars()
             .first()
         )
-        await _seal_one(session, pid, owner_id, boq_id, contract, build(), profile, ordinal, change, reference, people)
+        payload, total = await _sealed_bill(session, boq_id, contract)
+        if payload is None:
+            payload, boq_id = build(), None
+            total = engine.payload_totals(payload)["grand_total"]
+        award = getattr(contract, "original_contract_value", None)
+        if award is not None and abs(engine.dec(award) - total) > Decimal("0.01"):
+            # Seal the bill as it stands; a contract whose award differs is not claimed as its basis.
+            contract = None
+        await _seal_one(session, pid, owner_id, boq_id, contract, payload, total, profile, reference, people)
         created += 1
     await session.flush()
     logger.info("seed_estimate_archive_demo: %d seals", created)
     return {"seals": created}
+
+
+async def _sealed_bill(
+    session: AsyncSession, boq_id: uuid.UUID | None, contract: Any
+) -> tuple[dict[str, Any] | None, Decimal]:
+    """The project's own bill as a seal payload with its total; None when it prices nothing."""
+    if boq_id is None:
+        return None, Decimal(0)
+    from app.modules.estimate_archive.service import EstimateArchiveService
+
+    svc = EstimateArchiveService(session)
+    boq, positions, markups = await svc._bill(boq_id)
+    project = await svc._project(boq.project_id)
+    currency = str(getattr(contract, "currency", "") or getattr(project, "currency", "") or "")
+    payload = await svc.build_payload(boq, positions, markups, [], currency)
+    if demo_change(payload) is None:
+        return None, Decimal(0)
+    return payload, await svc._bill_total(boq_id, payload)
 
 
 async def _seal_one(
@@ -168,16 +223,22 @@ async def _seal_one(
     boq_id: uuid.UUID | None,
     contract: Any,
     payload: dict[str, Any],
+    total: Decimal,
     profile: str,
-    ordinal: str,
-    change: dict[str, Any],
     reference: str,
     people: list[tuple[str, str, str, str]],
 ) -> None:
+    from app.modules.estimate_archive import policy
+    from app.modules.estimate_archive.service import add_years
+
     now = datetime.now(UTC).replace(microsecond=0)
     sealed_at = now - timedelta(days=120)
     digest = engine.seal_digest(payload)
-    total = engine.payload_totals(payload)["grand_total"]
+    years = int(policy.policy_for(profile).get("retention_years") or 10)
+    picked = demo_change(payload)
+    if picked is None:
+        return
+    ordinal, change = picked
     currency = payload["estimate"].get("currency") or ""
     base = f"{contract.code} {contract.title}".strip() if contract is not None else payload["estimate"]["name"]
     seal = EstimateSeal(
@@ -195,7 +256,7 @@ async def _seal_one(
         basis_kind="award",
         status="sealed",
         deposit_mode="platform",
-        retention_until=(sealed_at.date().replace(year=sealed_at.year + 10)).isoformat(),
+        retention_until=add_years(sealed_at.date(), years).isoformat(),
         supersede_reason="",
         profile=profile,
         last_verified_at=now - timedelta(days=14),

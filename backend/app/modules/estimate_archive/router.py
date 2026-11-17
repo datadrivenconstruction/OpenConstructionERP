@@ -31,6 +31,7 @@ from app.modules.estimate_archive.schemas import (
     EventList,
     EventOut,
     ExternalReceiptCreate,
+    Finding,
     OpeningClose,
     OpeningCreate,
     OpeningList,
@@ -58,7 +59,12 @@ def _service(session: SessionDep) -> EstimateArchiveService:
 async def _derivation_out(svc: EstimateArchiveService, row: object) -> DerivationOut:
     out = DerivationOut.model_validate(row)
     seal = await svc.repo.get_seal(out.seal_id)
-    out.findings = await svc.pricing_findings(seal, out.result, out.basis_method)
+    claimed = (
+        await svc.variation_markups(seal.project_id, out.variation_request_id)
+        if seal is not None and out.variation_request_id is not None
+        else None
+    )
+    out.findings = await svc.pricing_findings(seal, out.result, out.basis_method, claimed_markups=claimed)
     return out
 
 
@@ -394,3 +400,14 @@ async def fill_change_order_rate(
     return ChangeOrderRateFilled(
         change_order_item_id=item_id, original_rate=rate, seal_id=seal.id, position_ordinal=data.position_ordinal
     )
+
+
+@router.get("/variations/{variation_request_id}/findings", response_model=list[Finding])
+async def variation_findings(
+    variation_request_id: uuid.UUID,
+    user_id: CurrentUserId,
+    _perm: None = Depends(RequirePermission("estimate_archive.read")),
+    svc: EstimateArchiveService = Depends(_service),
+) -> list[Finding]:
+    """Lines of a variation priced on the original basis with no live seal behind them."""
+    return await svc.variation_findings(variation_request_id, user_id)

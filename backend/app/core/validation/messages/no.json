@@ -2062,6 +2062,7 @@
     "arc_mutation_refused": {
       "fail": "En forseglet kalkyle kan ikke endres eller slettes. Forsegl en ny versjon som erstatter den."
     },
-    "contents_locked": "Innholdet forblir forseglet til en formell åpning starter."
+    "contents_locked": "Innholdet forblir forseglet til en formell åpning starter.",
+    "market_off": "Forseglede kalkyler er ikke en del av prosjektets markedsprofil."
   }
 }

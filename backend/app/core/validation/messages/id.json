@@ -2062,6 +2062,7 @@
     "arc_mutation_refused": {
       "fail": "Estimasi tersegel tidak dapat diubah atau dihapus. Segel versi baru yang menggantikannya."
     },
-    "contents_locked": "Isi tetap tersegel sampai pembukaan resmi dimulai."
+    "contents_locked": "Isi tetap tersegel sampai pembukaan resmi dimulai.",
+    "market_off": "Estimasi bersegel bukan bagian dari profil pasar proyek ini."
   }
 }

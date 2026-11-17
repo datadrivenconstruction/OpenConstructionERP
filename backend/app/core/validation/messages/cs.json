@@ -2062,6 +2062,7 @@
     "arc_mutation_refused": {
       "fail": "Zapečetěný rozpočet nelze změnit ani smazat. Zapečeťte novou verzi, která jej nahradí."
     },
-    "contents_locked": "Obsah zůstává zapečetěn, dokud nezačne formální otevření."
+    "contents_locked": "Obsah zůstává zapečetěn, dokud nezačne formální otevření.",
+    "market_off": "Zapečetěné rozpočty nejsou součástí tržního profilu tohoto projektu."
   }
 }

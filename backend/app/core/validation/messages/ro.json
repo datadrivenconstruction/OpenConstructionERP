@@ -2062,6 +2062,7 @@
     "arc_mutation_refused": {
       "fail": "Un deviz sigilat nu poate fi modificat sau șters. Sigilați o versiune nouă care îl înlocuiește."
     },
-    "contents_locked": "Conținutul rămâne sigilat până începe o deschidere formală."
+    "contents_locked": "Conținutul rămâne sigilat până începe o deschidere formală.",
+    "market_off": "Devizele sigilate nu fac parte din profilul de piață al acestui proiect."
   }
 }

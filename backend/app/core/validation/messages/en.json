@@ -2124,6 +2124,7 @@
     "arc_mutation_refused": {
       "fail": "A sealed estimate cannot be changed or deleted. Seal a new version that supersedes it."
     },
-    "contents_locked": "The contents stay sealed until a formal opening starts."
+    "contents_locked": "The contents stay sealed until a formal opening starts.",
+    "market_off": "Sealed estimates are not part of this project's market profile."
   }
 }

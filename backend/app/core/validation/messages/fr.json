@@ -2124,6 +2124,7 @@
     "arc_mutation_refused": {
       "fail": "Un devis scellé ne peut être ni modifié ni supprimé. Scellez une nouvelle version qui le remplace."
     },
-    "contents_locked": "Le contenu reste scellé jusqu'au début d'une ouverture formelle."
+    "contents_locked": "Le contenu reste scellé jusqu'au début d'une ouverture formelle.",
+    "market_off": "Les devis scellés ne font pas partie du profil de marché de ce projet."
   }
 }

@@ -46,6 +46,7 @@
       "require_both_parties": false,
       "internal_read": true,
       "retention_years": 12,
+      "retention_note": "Configurable default. Limitation Act 1980 s.8: 12 years for a contract executed as a deed (s.5: 6 years for a simple contract)",
       "on_account_percent": null,
       "cost_plus_stack": null,
       "attachment_presets": [],
