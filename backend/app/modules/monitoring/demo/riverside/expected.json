@@ -1,0 +1,46 @@
+{
+  "dataset": "riverside_yard",
+  "demo_profiles_label": "Demo values, not a standard",
+  "monitoring": {
+    "profile": {
+      "name": "Demo wall profile",
+      "alert_mm": 10,
+      "action_mm": 20,
+      "alarm_mm": 30,
+      "rate_alert_mm_day": 1.0
+    },
+    "lesson_1": {
+      "file": "monitoring_epochs_1-3.csv",
+      "rows_read": 6,
+      "epochs": 3,
+      "point": "MP-01",
+      "displacement_mm": -15.0,
+      "rate_mm_day": -1.29,
+      "level": "alert",
+      "other_point": {"point": "MP-02", "displacement_mm": -2.0, "level": "ok"}
+    },
+    "lesson_2": {
+      "point": "MP-01",
+      "epochs": 3,
+      "bands_mm": [10, 20, 30],
+      "displacements_mm": [0.0, -6.0, -15.0]
+    },
+    "lesson_3": {
+      "file": "monitoring_epoch_4.csv",
+      "point": "MP-01",
+      "displacement_mm": -23.0,
+      "rate_mm_day": -1.14,
+      "level": "action",
+      "notification": true,
+      "risk_draft": true,
+      "rule": "MON-001",
+      "finding": "Point MP-01 displacement -23.0 mm or rate -1.14 mm/day crossed Action"
+    },
+    "lesson_4": {"note": "Cracks surveyed, wall stable", "acknowledged": true},
+    "lesson_5": {
+      "report": {"action": 1, "alarm": 0, "alert": 0, "ok": 1},
+      "points": {"MP-01": "action", "MP-02": "ok"}
+    },
+    "kpi_after_epoch_4": {"points": 2, "alarm": 0, "action": 1, "alert": 0, "last_epoch": "2026-10-30"}
+  }
+}

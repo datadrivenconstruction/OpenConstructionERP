@@ -47,6 +47,7 @@ import { manifest as survey } from './survey/manifest';
 import { manifest as surveyVolumes } from './survey-volumes/manifest';
 import { manifest as settingOut } from './setting-out/manifest';
 import { manifest as landParcels } from './land-parcels/manifest';
+import { manifest as monitoring } from './monitoring/manifest';
 
 /* ── Registry ──────────────────────────────────────────────────────── */
 
@@ -74,6 +75,7 @@ export const MODULE_REGISTRY: ModuleManifest[] = [
   surveyVolumes,
   settingOut,
   landParcels,
+  monitoring,
 ];
 
 /* ── Helper functions ──────────────────────────────────────────────── */

@@ -2344,5 +2344,40 @@
       "status_acquired": "Acquired",
       "status_expropriation": "Expropriation"
     }
+  },
+  "monitoring": {
+    "crossed": {
+      "fail": "Point {id} displacement {d} mm or rate {r} mm/day crossed {level}",
+      "suggestion": "Check the point and the structure, then acknowledge the alert with a note."
+    },
+    "level": {
+      "ok": "OK",
+      "alert": "Alert",
+      "action": "Action",
+      "alarm": "Alarm"
+    },
+    "risk": {
+      "title": "Monitoring point {id} at {level}",
+      "description": "Displacement {d} mm, rate {r} mm/day against {profile}. Draft opened by monitoring: review it and name an owner."
+    },
+    "report": {
+      "title": "Monitoring alarm report",
+      "project": "Project",
+      "crs": "Coordinate system",
+      "profile": "Threshold profile",
+      "generated": "Generated",
+      "point": "Point",
+      "baseline": "Baseline (m)",
+      "latest": "Latest (m)",
+      "displacement": "Displacement (mm)",
+      "rate": "Rate (mm/day)",
+      "level": "Level",
+      "acknowledged": "Acknowledged",
+      "counts": "Alarm: {alarm} · Action: {action} · Alert: {alert} · OK: {ok}",
+      "findings": "Findings",
+      "no_profile": "No profile, set one",
+      "ack_yes": "Yes",
+      "ack_no": "No"
+    }
   }
 }
