@@ -2015,5 +2015,11 @@
       "fail": "Regu {headcount} orang ada di lokasi tetapi tidak ada pekerjaan, inspeksi, atau keterlambatan yang dicatat.",
       "suggestion": "Tambahkan apa yang dikerjakan regu, atau keterlambatan yang menghentikan pekerjaan."
     }
+  },
+  "boq_revision": {
+    "superseded_still_editable": {
+      "fail": "Revisi {label} masih dapat diedit meskipun {later} sudah dibuat setelahnya; perubahan di sini tidak terbawa",
+      "suggestion": "Kunci {label} atau lanjutkan bekerja di revisi terbaru"
+    }
   }
 }

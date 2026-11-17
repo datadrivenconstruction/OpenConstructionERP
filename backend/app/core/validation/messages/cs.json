@@ -2015,5 +2015,11 @@
       "fail": "Na stavbě byla četa {headcount} lidí, ale není zapsána práce, kontrola ani prostoj.",
       "suggestion": "Doplňte, co četa dělala, nebo prostoj, který práci zastavil."
     }
+  },
+  "boq_revision": {
+    "superseded_still_editable": {
+      "fail": "Revize {label} je stále upravitelná, přestože mezitím vznikla {later}; změny provedené zde se nepřenesou",
+      "suggestion": "Uzamkněte {label}, nebo pokračujte v nejnovější revizi"
+    }
   }
 }

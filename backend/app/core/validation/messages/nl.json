@@ -2015,5 +2015,11 @@
       "fail": "Een ploeg van {headcount} was op de bouwplaats, maar er is geen werk, keuring of vertraging vastgelegd.",
       "suggestion": "Voeg toe wat de ploeg deed, of de vertraging die het werk stillegde."
     }
+  },
+  "boq_revision": {
+    "superseded_still_editable": {
+      "fail": "Revisie {label} is nog bewerkbaar terwijl daarna {later} is aangemaakt; wijzigingen hier worden niet overgenomen",
+      "suggestion": "Vergrendel {label} om haar te bevriezen, of werk verder in de nieuwste revisie"
+    }
   }
 }

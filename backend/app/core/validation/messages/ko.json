@@ -2015,5 +2015,11 @@
       "fail": "현장에 {headcount}명의 작업반이 있었지만 작업, 검사, 지연이 기록되지 않았습니다.",
       "suggestion": "작업반이 한 일 또는 작업을 멈춘 지연을 추가하세요."
     }
+  },
+  "boq_revision": {
+    "superseded_still_editable": {
+      "fail": "{label} 개정은 아직 편집할 수 있지만 이후 {later}이(가) 생성되었습니다. 여기서의 변경은 반영되지 않습니다",
+      "suggestion": "{label}을(를) 잠그거나 최신 개정에서 계속 작업하세요"
+    }
   }
 }

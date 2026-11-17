@@ -2015,5 +2015,11 @@
       "fail": "Eine Mannschaft von {headcount} war auf der Baustelle, aber weder Arbeit, Prüfung noch Behinderung ist erfasst.",
       "suggestion": "Ergänzen, was die Mannschaft getan hat, oder die Behinderung erfassen, die die Arbeit stoppte."
     }
+  },
+  "boq_revision": {
+    "superseded_still_editable": {
+      "fail": "Revision {label} ist noch bearbeitbar, obwohl seitdem {later} erstellt wurde; Änderungen hier werden nicht übernommen",
+      "suggestion": "Sperren Sie {label}, um sie einzufrieren, oder arbeiten Sie in der neuesten Revision weiter"
+    }
   }
 }

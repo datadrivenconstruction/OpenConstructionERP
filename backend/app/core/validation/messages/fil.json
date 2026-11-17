@@ -2015,5 +2015,11 @@
       "fail": "May grupong {headcount} sa site pero walang naitalang trabaho, inspeksyon, o pagkaantala.",
       "suggestion": "Idagdag ang ginawa ng grupo, o ang pagkaantalang nagpatigil ng trabaho."
     }
+  },
+  "boq_revision": {
+    "superseded_still_editable": {
+      "fail": "Maaari pang i-edit ang rebisyon {label} kahit nagawa na ang {later} pagkatapos nito; hindi madadala ang mga pagbabago rito",
+      "suggestion": "I-lock ang {label} o magpatuloy sa pinakabagong rebisyon"
+    }
   }
 }

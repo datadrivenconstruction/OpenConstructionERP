@@ -35,6 +35,8 @@ export interface BOQCompareDrawerProps {
    * picker: the baseline is pre-selected and grouped at the top.
    */
   parentEstimateId?: string | null;
+  /** Pre-picked other side, e.g. two revisions chosen in the revision navigator. */
+  initialOtherId?: string | null;
 }
 
 export function BOQCompareDrawer({
@@ -43,10 +45,15 @@ export function BOQCompareDrawer({
   isOpen,
   onClose,
   parentEstimateId,
+  initialOtherId,
 }: BOQCompareDrawerProps) {
   const { t } = useTranslation();
   const [otherId, setOtherId] = useState<string>('');
   const [hideUnchanged, setHideUnchanged] = useState(true);
+
+  useEffect(() => {
+    if (isOpen && initialOtherId) setOtherId(initialOtherId);
+  }, [isOpen, initialOtherId, boqId]);
 
   // Close on Escape (mirrors VersionHistoryDrawer).
   useEffect(() => {
@@ -96,10 +103,10 @@ export function BOQCompareDrawer({
   // its baseline so the common "scenario vs baseline" diff is one step. Only
   // seeds an empty pick; never overrides a manual choice.
   useEffect(() => {
-    if (isOpen && parentEstimateId && !otherId) {
+    if (isOpen && parentEstimateId && !otherId && !initialOtherId) {
       setOtherId(parentEstimateId);
     }
-  }, [isOpen, parentEstimateId, otherId]);
+  }, [isOpen, parentEstimateId, otherId, initialOtherId]);
 
   const {
     data: cmp,

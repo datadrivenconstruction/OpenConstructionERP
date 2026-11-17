@@ -2015,5 +2015,11 @@
       "fail": "Una squadra di {headcount} era in cantiere ma non risultano lavori, ispezioni né ritardi.",
       "suggestion": "Aggiungere ciò che ha fatto la squadra o il ritardo che ha fermato i lavori."
     }
+  },
+  "boq_revision": {
+    "superseded_still_editable": {
+      "fail": "La revisione {label} è ancora modificabile anche se nel frattempo è stata creata {later}; le modifiche fatte qui non vengono riportate",
+      "suggestion": "Blocca {label} per congelarla o continua a lavorare nell'ultima revisione"
+    }
   }
 }

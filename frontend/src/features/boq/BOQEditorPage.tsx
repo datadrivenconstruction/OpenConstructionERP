@@ -6,7 +6,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useUnitsSystem } from '@/features/market/api';
 // lucide-react icons used by sub-components (BOQToolbar, BOQGrid, etc.) — none needed directly here
-import { Database, Download, ExternalLink, X, Sparkles, AlertTriangle as WarnTriangle, Lock, Copy, Wallet, Keyboard, GitCompare, RefreshCw, ShieldCheck, FlaskConical, Send, Percent, CheckCircle, ArrowLeft, LayoutList, SlidersHorizontal, LayoutTemplate } from 'lucide-react';
+import { Database, Download, ExternalLink, X, Sparkles, AlertTriangle as WarnTriangle, Lock, Copy, Wallet, Keyboard, GitCompare, RefreshCw, ShieldCheck, FlaskConical, Send, Percent, CheckCircle, ArrowLeft, LayoutList, SlidersHorizontal, LayoutTemplate, Layers } from 'lucide-react';
 import { Button, Badge, Breadcrumb, ModuleHelpButton, ModuleGuideButton, ConfirmDialog, DismissibleInfo, IntroRichText, PageHeader } from '@/shared/ui';
 import { useConfirm } from '@/shared/hooks/useConfirm';
 import { useProgressStore } from '@/shared/ui/GlobalProgress';
@@ -67,7 +67,7 @@ import { AISmartPanel } from './AISmartPanel';
 import { AIPositionCopilot } from './AIPositionCopilot';
 // ClassificationPicker used in sub-components
 // import { ClassificationPicker } from './ClassificationPicker';
-import { VersionHistoryDrawer } from './VersionHistoryDrawer';
+import { VersionHistoryDrawer, type VersionHistoryTab } from './VersionHistoryDrawer';
 import { ModelLinkPanel } from './ModelLinkPanel';
 import { ModelLinkReviewPanel } from './ModelLinkReviewPanel';
 import { ChangeReviewButton, ChangeReviewPanel, type ChangeReviewTab } from './ChangeReviewPanel';
@@ -1090,6 +1090,7 @@ export function BOQEditorPage() {
     mutationFn: () => apiPost<{ id: string }>(`/v1/boq/boqs/${boqId}/create-revision/`, {}),
     onSuccess: (result) => {
       invalidateAll();
+      queryClient.invalidateQueries({ queryKey: ['boq-revisions'] });
       addToast({
         type: 'success',
         title: t('boq.revision_created', { defaultValue: 'Revision created' }),
@@ -2243,6 +2244,9 @@ export function BOQEditorPage() {
   /* ── Export / Version History state ─────────────────────────────────── */
 
   const [showVersionHistory, setShowVersionHistory] = useState(false);
+  const [versionHistoryTab, setVersionHistoryTab] = useState<VersionHistoryTab | undefined>(undefined);
+  // Two revisions picked in the revision navigator, older first, for the BOQ compare.
+  const [revisionCompare, setRevisionCompare] = useState<{ base: string; other: string } | null>(null);
   const [exportWarning, setExportWarning] = useState<{ format: string; score: number } | null>(null);
   const [gaebPreviewOpen, setGaebPreviewOpen] = useState(false);
   // Exchange report of the last export or import, or the check dialog (id null).
@@ -5419,6 +5423,16 @@ export function BOQEditorPage() {
             </Button>
             <Button
               variant="secondary"
+              onClick={() => {
+                setVersionHistoryTab('revisions');
+                setShowVersionHistory(true);
+              }}
+            >
+              <Layers size={14} className="mr-1" />
+              {t('boq.tab_revisions', { defaultValue: 'Revisions' })}
+            </Button>
+            <Button
+              variant="secondary"
               onClick={handleJumpToMarkups}
               title={t('boq.markups_btn_hint', {
                 defaultValue: 'Overhead, profit, tax and contingency (OH&P)',
@@ -6285,7 +6299,20 @@ export function BOQEditorPage() {
         <VersionHistoryDrawer
           boqId={boqId}
           isOpen={showVersionHistory}
-          onClose={() => setShowVersionHistory(false)}
+          initialTab={versionHistoryTab}
+          onClose={() => {
+            setShowVersionHistory(false);
+            setVersionHistoryTab(undefined);
+          }}
+          onOpenRevision={(id) => {
+            setShowVersionHistory(false);
+            navigate(`/boq/${id}`);
+          }}
+          onCompareRevisions={(older, newer) => {
+            setShowVersionHistory(false);
+            setRevisionCompare({ base: older, other: newer });
+            setCompareOpen(true);
+          }}
         />
       )}
 
@@ -6331,11 +6358,15 @@ export function BOQEditorPage() {
       {/* ── Feature 2: Estimate baseline / line-level compare ───────── */}
       {boqId && boq?.project_id && (
         <BOQCompareDrawer
-          boqId={boqId}
+          boqId={revisionCompare?.base ?? boqId}
           projectId={boq.project_id}
           isOpen={compareOpen}
-          onClose={() => setCompareOpen(false)}
-          parentEstimateId={boq.parent_estimate_id}
+          onClose={() => {
+            setCompareOpen(false);
+            setRevisionCompare(null);
+          }}
+          parentEstimateId={revisionCompare ? null : boq.parent_estimate_id}
+          initialOtherId={revisionCompare?.other ?? null}
         />
       )}
 

@@ -2015,5 +2015,11 @@
       "fail": "Estava em obra uma equipa de {headcount} mas não há trabalho, inspeção nem atraso registado.",
       "suggestion": "Acrescente o que a equipa fez, ou o atraso que parou os trabalhos."
     }
+  },
+  "boq_revision": {
+    "superseded_still_editable": {
+      "fail": "A revisão {label} ainda pode ser editada embora {later} já tenha sido criada; as alterações feitas aqui não são transferidas",
+      "suggestion": "Bloqueie {label} para congelá-la ou continue a trabalhar na revisão mais recente"
+    }
   }
 }

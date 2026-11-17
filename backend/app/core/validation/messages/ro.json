@@ -2015,5 +2015,11 @@
       "fail": "O echipă de {headcount} persoane era pe șantier, dar nu sunt consemnate lucrări, inspecții sau întârzieri.",
       "suggestion": "Adăugați ce a făcut echipa sau întârzierea care a oprit lucrările."
     }
+  },
+  "boq_revision": {
+    "superseded_still_editable": {
+      "fail": "Revizia {label} poate fi încă editată deși între timp a fost creată {later}; modificările făcute aici nu se transferă",
+      "suggestion": "Blocați {label} pentru a o îngheța sau continuați în cea mai recentă revizie"
+    }
   }
 }

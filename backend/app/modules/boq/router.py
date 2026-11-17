@@ -160,6 +160,7 @@ from app.modules.boq.schemas import (
     BOQListByProjectsRequest,
     BOQListItem,
     BOQResponse,
+    BOQRevisionLineage,
     BOQStatisticsResponse,
     BOQUpdate,
     BOQWithPositions,
@@ -2159,27 +2160,54 @@ async def create_revision(
     session: SessionDep,
     service: BOQService = Depends(_get_service),
 ) -> BOQResponse:
-    """Create a new revision of a BOQ.
+    """Create the next formal revision (R1, R2, ...) of a BOQ.
 
-    Duplicates the entire BOQ (positions + markups) and links the copy
-    back to the original via parent_estimate_id for revision tracking.
+    Duplicates the entire BOQ (positions + markups), links the copy back to
+    the source via parent_estimate_id and numbers it within its lineage.
     """
     await _verify_boq_owner(session, boq_id, _user_id, payload)
+    from app.modules.boq.revisions import RevisionService
+
     # Ensure Projects model is registered in SQLAlchemy metadata (FK resolution)
     from app.modules.projects import models as _proj_models  # noqa: F401
 
-    new_boq = await service.duplicate_boq(boq_id)
-    new_boq_id = new_boq.id  # Capture before session expires attributes
-    # Link the new BOQ to the original as its revision parent
-    await service.boq_repo.update_fields(
-        new_boq_id,
-        parent_estimate_id=boq_id,
-        status="draft",
-        is_locked=False,
-        created_by=uuid.UUID(str(_user_id)),
+    created = await RevisionService(session).create_revision(boq_id, user_id=uuid.UUID(str(_user_id)))
+    new_boq_id = created.id
+    response = BOQResponse.model_validate(created)
+    await _log_activity(
+        service,
+        user_id=_user_id,
+        action="revision_created",
+        target_type="boq",
+        description=f"Created revision '{response.name}'",
+        boq_id=new_boq_id,
+        target_id=new_boq_id,
+        changes={"source_boq_id": str(boq_id)},
     )
-    refreshed = await service.get_boq(new_boq_id)
-    return BOQResponse.model_validate(refreshed)
+    return response
+
+
+@router.get(
+    "/boqs/{boq_id}/revisions/",
+    response_model=BOQRevisionLineage,
+    summary="Formal revision lineage of a BOQ",
+    dependencies=[Depends(RequirePermission("boq.read"))],
+)
+async def get_revision_lineage(
+    boq_id: uuid.UUID,
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+) -> BOQRevisionLineage:
+    """Every formal revision linked to this BOQ (R0 to Rn), oldest first, with totals.
+
+    Pure read. The walk stays inside the BOQ's own project, so the owner check
+    on this BOQ covers every revision returned.
+    """
+    from app.modules.boq.revisions import RevisionService
+
+    await _verify_boq_owner(session, boq_id, user_id, payload)
+    return await RevisionService(session).lineage(boq_id)
 
 
 # ── Position CRUD ─────────────────────────────────────────────────────────────
@@ -4290,6 +4318,12 @@ async def validate_boq(
     branch_block = await BranchService(session).divergence(boq_id)
     if branch_block is not None:
         markup_context["branch"] = branch_block
+    # Where this bill stands in its formal revision lineage, for the boq.revision.* rules.
+    from app.modules.boq.revisions import RevisionService
+
+    revision_block = await RevisionService(session).rule_block(boq_id)
+    if revision_block is not None:
+        markup_context["revision"] = revision_block
     # The applied risk contingency against the current risk inputs, for the boq.risk.* rules.
     from app.modules.boq.risk_contingency import RiskContingencyService
 

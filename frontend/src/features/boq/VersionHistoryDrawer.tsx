@@ -2,14 +2,20 @@
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 import { useState, useCallback, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { X, Clock, RotateCcw, Loader2, Save, History, Undo2, Trash2 } from 'lucide-react';
+import { useQuery, useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { X, Clock, RotateCcw, Loader2, Save, History, Undo2, Trash2, Eye, GitCompare, Layers } from 'lucide-react';
 import clsx from 'clsx';
 import { boqApi, type BOQSnapshot, type ActivityEntry } from './api';
 import { useToastStore } from '@/stores/useToastStore';
 import { getIntlLocale } from '@/shared/lib/formatters';
 import { getNumberLocale } from '@/stores/usePreferencesStore';
 import { snapshotDisplayName } from './snapshotNames';
+import { RevisionsPanel } from './RevisionsPanel';
+import { SnapshotComparePanel, SnapshotPreviewPanel } from './SnapshotViews';
+import { authorOf, type Author } from './revisionHelpers';
+
+/** Activity entries fetched per "Show more" page (the API caps a page at 100). */
+const ACTIVITY_PAGE = 50;
 
 /* ── Snapshot diff helpers ─────────────────────────────────────────────── */
 
@@ -101,21 +107,49 @@ function formatAuditValue(v: unknown): string {
   }
 }
 
+export type VersionHistoryTab = 'revisions' | 'snapshots' | 'fields';
+
 interface VersionHistoryDrawerProps {
   boqId: string;
   isOpen: boolean;
   onClose: () => void;
+  /** Tab shown when the drawer opens; snapshots by default. */
+  initialTab?: VersionHistoryTab;
+  /** Go to another formal revision of this bill. The Revisions tab needs both callbacks. */
+  onOpenRevision?: (boqId: string) => void;
+  /** Hand two revisions, older first, to the BOQ compare. */
+  onCompareRevisions?: (olderId: string, newerId: string) => void;
 }
 
-type DrawerTab = 'snapshots' | 'fields';
+type SnapshotView =
+  | { kind: 'preview'; id: string; title: string }
+  | { kind: 'compare'; olderId: string; newerId: string };
 
-export function VersionHistoryDrawer({ boqId, isOpen, onClose }: VersionHistoryDrawerProps) {
+export function VersionHistoryDrawer({
+  boqId,
+  isOpen,
+  onClose,
+  initialTab,
+  onOpenRevision,
+  onCompareRevisions,
+}: VersionHistoryDrawerProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [newLabel, setNewLabel] = useState('');
   const [confirmRestoreId, setConfirmRestoreId] = useState<string | null>(null);
-  // v3.12.0 Stream A — drawer now has two tabs: snapshots + field history.
-  const [tab, setTab] = useState<DrawerTab>('snapshots');
+  const showRevisions = !!onOpenRevision && !!onCompareRevisions;
+  const [tab, setTab] = useState<VersionHistoryTab>(initialTab ?? 'snapshots');
+  const [snapView, setSnapView] = useState<SnapshotView | null>(null);
+  const [snapPicked, setSnapPicked] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (isOpen && initialTab) setTab(initialTab);
+  }, [isOpen, initialTab]);
+
+  useEffect(() => {
+    setSnapView(null);
+    setSnapPicked([]);
+  }, [boqId]);
 
   const { data: snapshots, isLoading, isError } = useQuery({
     queryKey: ['boq-snapshots', boqId],
@@ -125,11 +159,28 @@ export function VersionHistoryDrawer({ boqId, isOpen, onClose }: VersionHistoryD
 
   // v3.12.0 — load activity log for the "Field history" tab. Hidden until
   // the tab is selected so we don't pay the GET on every drawer open.
-  const { data: activity, isLoading: isActLoading, isError: isActError } = useQuery({
-    queryKey: ['boq-activity', boqId],
-    queryFn: () => boqApi.getActivity(boqId),
+  // Paged on demand: older entries load with "Show more" instead of stopping at the first page.
+  const {
+    data: activityPages,
+    isLoading: isActLoading,
+    isError: isActError,
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
+    queryKey: ['boq-activity', boqId, 'paged'],
+    queryFn: ({ pageParam }) => boqApi.getActivity(boqId, { offset: pageParam, limit: ACTIVITY_PAGE }),
+    initialPageParam: 0,
+    getNextPageParam: (last, pages) => {
+      const loaded = pages.reduce((n, p) => n + p.activities.length, 0);
+      return last.activities.length > 0 && loaded < last.total ? loaded : undefined;
+    },
     enabled: isOpen && !!boqId && tab === 'fields',
   });
+  const activity = useMemo(
+    () => ({ activities: (activityPages?.pages ?? []).flatMap((p) => p.activities) }),
+    [activityPages],
+  );
 
   // Close on Escape
   useEffect(() => {
@@ -284,6 +335,7 @@ export function VersionHistoryDrawer({ boqId, isOpen, onClose }: VersionHistoryD
     newValue: unknown;
     when: string;
     summary: string;
+    author: Author;
   }
   const fieldRows = useMemo<FieldRow[]>(() => {
     if (!activity?.activities) return [];
@@ -301,6 +353,7 @@ export function VersionHistoryDrawer({ boqId, isOpen, onClose }: VersionHistoryD
           newValue: change.newValue,
           when: entry.created_at,
           summary: entry.description,
+          author: authorOf(entry),
         });
       }
     }
@@ -319,7 +372,10 @@ export function VersionHistoryDrawer({ boqId, isOpen, onClose }: VersionHistoryD
         role="dialog"
         aria-modal="true"
         aria-label={t('boq.version_history', { defaultValue: 'Version History' })}
-        className="relative ml-auto flex h-full w-96 flex-col bg-surface-elevated border-l border-border shadow-2xl animate-slide-in-right"
+        className={clsx(
+          'relative ml-auto flex h-full flex-col bg-surface-elevated border-l border-border shadow-2xl animate-slide-in-right',
+          snapView && tab === 'snapshots' ? 'w-[36rem] max-w-full' : 'w-96',
+        )}
       >
         {/* Header */}
         <div className="flex items-center justify-between border-b border-border px-4 py-3">
@@ -340,6 +396,22 @@ export function VersionHistoryDrawer({ boqId, isOpen, onClose }: VersionHistoryD
 
         {/* v3.12.0 — tab switcher (Snapshots / Field history) */}
         <div className="flex items-center gap-1 border-b border-border px-3 py-1.5 bg-surface-secondary/40">
+          {showRevisions && (
+            <button
+              type="button"
+              onClick={() => setTab('revisions')}
+              aria-pressed={tab === 'revisions'}
+              className={clsx(
+                'flex h-7 items-center gap-1.5 rounded-md px-2 text-xs font-medium transition-colors',
+                tab === 'revisions'
+                  ? 'bg-surface-elevated text-oe-blue shadow-xs'
+                  : 'text-content-secondary hover:text-content-primary hover:bg-surface-tertiary',
+              )}
+            >
+              <Layers size={12} />
+              {t('boq.tab_revisions', { defaultValue: 'Revisions' })}
+            </button>
+          )}
           <button
             type="button"
             onClick={() => setTab('snapshots')}
@@ -370,7 +442,29 @@ export function VersionHistoryDrawer({ boqId, isOpen, onClose }: VersionHistoryD
           </button>
         </div>
 
-        {tab === 'snapshots' && (
+        {tab === 'revisions' && showRevisions && (
+          <RevisionsPanel boqId={boqId} onOpen={onOpenRevision!} onCompare={onCompareRevisions!} />
+        )}
+
+        {tab === 'snapshots' && snapView?.kind === 'preview' && (
+          <SnapshotPreviewPanel
+            boqId={boqId}
+            snapshotId={snapView.id}
+            title={snapView.title}
+            onBack={() => setSnapView(null)}
+          />
+        )}
+
+        {tab === 'snapshots' && snapView?.kind === 'compare' && (
+          <SnapshotComparePanel
+            boqId={boqId}
+            olderId={snapView.olderId}
+            newerId={snapView.newerId}
+            onBack={() => setSnapView(null)}
+          />
+        )}
+
+        {tab === 'snapshots' && !snapView && (
           <>
             {/* Create snapshot */}
             <div className="border-b border-border p-3">
@@ -401,6 +495,29 @@ export function VersionHistoryDrawer({ boqId, isOpen, onClose }: VersionHistoryD
                 </button>
               </div>
             </div>
+
+            {snapshots && snapshots.length > 1 && (
+              <div className="flex items-center justify-between border-b border-border px-4 py-1.5">
+                <span className="text-2xs text-content-tertiary">
+                  {t('boq.select_two_to_compare', { defaultValue: 'Tick two to compare' })}
+                </span>
+                <button
+                  type="button"
+                  disabled={snapPicked.length !== 2}
+                  onClick={() => {
+                    // The list is newest first, so the higher index is the older snapshot.
+                    const order = snapshots.map((s) => s.id);
+                    const [x, y] = snapPicked as [string, string];
+                    const older = order.indexOf(x) > order.indexOf(y) ? x : y;
+                    setSnapView({ kind: 'compare', olderId: older, newerId: older === x ? y : x });
+                  }}
+                  className="flex h-6 items-center gap-1 rounded bg-oe-blue px-2 text-2xs font-medium text-white hover:bg-oe-blue-hover disabled:opacity-40"
+                >
+                  <GitCompare size={10} />
+                  {t('boq.compare_btn', { defaultValue: 'Compare' })}
+                </button>
+              </div>
+            )}
 
             {/* Snapshot list */}
             <div className="flex-1 overflow-y-auto">
@@ -447,6 +564,19 @@ export function VersionHistoryDrawer({ boqId, isOpen, onClose }: VersionHistoryD
                     >
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex items-start gap-2 flex-1 min-w-0">
+                          {snapshots.length > 1 && (
+                            <input
+                              type="checkbox"
+                              className="mt-1"
+                              checked={snapPicked.includes(snap.id)}
+                              onChange={() =>
+                                setSnapPicked((cur) =>
+                                  cur.includes(snap.id) ? cur.filter((x) => x !== snap.id) : [...cur, snap.id].slice(-2),
+                                )
+                              }
+                              aria-label={t('boq.select_two_to_compare', { defaultValue: 'Tick two to compare' })}
+                            />
+                          )}
                           {/* Trend dot */}
                           <span
                             className={clsx(
@@ -556,6 +686,25 @@ export function VersionHistoryDrawer({ boqId, isOpen, onClose }: VersionHistoryD
                         ) : (
                           <div className="flex items-center gap-0.5 shrink-0">
                             <button
+                              type="button"
+                              onClick={() =>
+                                setSnapView({
+                                  kind: 'preview',
+                                  id: snap.id,
+                                  title: snap.name
+                                    ? snapshotDisplayName(snap.name, t)
+                                    : t('boq.auto_snapshot', { defaultValue: 'Auto-save' }),
+                                })
+                              }
+                              className="flex h-6 items-center gap-1 rounded px-1.5 text-2xs font-medium text-oe-blue hover:bg-oe-blue/10 transition-colors"
+                              title={t('boq.snapshot_view_hint', {
+                                defaultValue: 'Read-only view. The current bill is not changed.',
+                              })}
+                            >
+                              <Eye size={12} />
+                              {t('boq.snapshot_view', { defaultValue: 'View' })}
+                            </button>
+                            <button
                               onClick={() => setConfirmRestoreId(snap.id)}
                               className="flex h-6 w-6 items-center justify-center rounded text-content-tertiary hover:text-semantic-warning hover:bg-semantic-warning-bg transition-colors"
                               title={t('boq.restore_snapshot', { defaultValue: 'Restore this version' })}
@@ -631,7 +780,15 @@ export function VersionHistoryDrawer({ boqId, isOpen, onClose }: VersionHistoryD
                           </span>
                         </p>
                         <p className="text-2xs text-content-tertiary mt-0.5 truncate" title={row.summary}>
-                          {formatDate(row.when)} · {row.summary}
+                          {formatDate(row.when)} ·{' '}
+                          <span className={clsx(row.author.kind !== 'user' && 'italic')}>
+                            {row.author.kind === 'user'
+                              ? row.author.name
+                              : row.author.kind === 'unknown'
+                                ? t('boq.author_unknown', { defaultValue: 'Unknown user' })
+                                : t('boq.author_unavailable', { defaultValue: 'Author not recorded' })}
+                          </span>{' '}
+                          · {row.summary}
                         </p>
                       </div>
                       <button
@@ -674,6 +831,19 @@ export function VersionHistoryDrawer({ boqId, isOpen, onClose }: VersionHistoryD
                   </li>
                 ))}
               </ul>
+            )}
+            {hasNextPage && (
+              <div className="flex justify-center py-3">
+                <button
+                  type="button"
+                  onClick={() => fetchNextPage()}
+                  disabled={isFetchingNextPage}
+                  className="flex h-7 items-center gap-1 rounded-md px-3 text-xs text-oe-blue hover:bg-oe-blue/10 disabled:opacity-50"
+                >
+                  {isFetchingNextPage && <Loader2 size={12} className="animate-spin" />}
+                  {t('common.show_more', { defaultValue: 'Show more' })}
+                </button>
+              </div>
             )}
           </div>
         )}

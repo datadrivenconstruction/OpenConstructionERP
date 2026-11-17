@@ -2015,5 +2015,11 @@
       "fail": "A helyszínen {headcount} fős brigád volt, de nincs rögzítve munka, ellenőrzés vagy akadályoztatás.",
       "suggestion": "Adja meg, mit csinált a brigád, vagy a munkát leállító akadályoztatást."
     }
+  },
+  "boq_revision": {
+    "superseded_still_editable": {
+      "fail": "A(z) {label} revízió még szerkeszthető, pedig azóta létrejött a(z) {later}; az itt végzett módosítások nem kerülnek át",
+      "suggestion": "Zárolja a(z) {label} revíziót, vagy dolgozzon tovább a legújabb revízióban"
+    }
   }
 }

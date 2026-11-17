@@ -2015,5 +2015,11 @@
       "fail": "Objektil oli {headcount} liikmeline brigaad, kuid tööd, kontrolli ega viivitust pole kirjendatud.",
       "suggestion": "Lisage, mida brigaad tegi, või viivitus, mis töö peatas."
     }
+  },
+  "boq_revision": {
+    "superseded_still_editable": {
+      "fail": "Revisjon {label} on endiselt muudetav, kuigi pärast seda on loodud {later}; siin tehtud muudatused üle ei kandu",
+      "suggestion": "Lukusta {label} või jätka tööd uusimas revisjonis"
+    }
   }
 }

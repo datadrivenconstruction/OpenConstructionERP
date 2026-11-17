@@ -2015,5 +2015,11 @@
       "fail": "Une équipe de {headcount} était sur le chantier mais aucun travail, contrôle ou arrêt n'est consigné.",
       "suggestion": "Ajouter ce que l'équipe a fait, ou l'arrêt qui a bloqué les travaux."
     }
+  },
+  "boq_revision": {
+    "superseded_still_editable": {
+      "fail": "La révision {label} est encore modifiable alors que {later} a été créée depuis ; les modifications faites ici ne sont pas reportées",
+      "suggestion": "Verrouillez {label} pour la figer, ou poursuivez dans la révision la plus récente"
+    }
   }
 }

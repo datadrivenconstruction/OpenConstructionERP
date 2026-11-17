@@ -2015,5 +2015,11 @@
       "fail": "Tổ đội {headcount} người có mặt nhưng không ghi công việc, kiểm tra hay chậm trễ.",
       "suggestion": "Thêm việc tổ đã làm, hoặc chậm trễ đã dừng công việc."
     }
+  },
+  "boq_revision": {
+    "superseded_still_editable": {
+      "fail": "Bản sửa đổi {label} vẫn có thể chỉnh sửa dù {later} đã được tạo sau đó; thay đổi ở đây không được chuyển sang",
+      "suggestion": "Khóa {label} hoặc tiếp tục làm việc trong bản sửa đổi mới nhất"
+    }
   }
 }

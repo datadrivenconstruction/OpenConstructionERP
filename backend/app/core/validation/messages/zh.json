@@ -2015,5 +2015,11 @@
       "fail": "现场有 {headcount} 人的班组，但未记录施工、检查或延误。",
       "suggestion": "请补充班组所做工作，或导致停工的延误。"
     }
+  },
+  "boq_revision": {
+    "superseded_still_editable": {
+      "fail": "修订 {label} 仍可编辑，但之后已创建 {later}；在此所做的更改不会带入后续修订",
+      "suggestion": "锁定 {label}，或在最新修订中继续工作"
+    }
   }
 }

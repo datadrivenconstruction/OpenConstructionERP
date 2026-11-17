@@ -1706,6 +1706,9 @@ class ActivityLogResponse(BaseModel):
     project_id: UUID | None
     boq_id: UUID | None
     user_id: UUID | None = None
+    #: Display name of ``user_id`` from the user directory; None when the entry
+    #: has no actor or the user no longer exists (never guessed).
+    user_name: str | None = None
     action: str
     target_type: str
     target_id: UUID | None
@@ -1713,6 +1716,39 @@ class ActivityLogResponse(BaseModel):
     changes: dict[str, Any] = Field(default_factory=dict)
     metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="metadata_")
     created_at: datetime
+
+
+class BOQRevisionEntry(BaseModel):
+    """One formal revision (R0, R1, ...) in a bill's revision lineage."""
+
+    boq_id: UUID
+    number: int
+    label: str
+    #: True for a revision made before numbering existed: its number is its
+    #: place in time, shown but never written back to the bill.
+    number_is_derived: bool = False
+    name: str
+    status: str
+    is_locked: bool = False
+    parent_id: UUID | None = None
+    created_at: datetime
+    created_by: UUID | None = None
+    created_by_name: str | None = None
+    grand_total: Decimal
+    #: Grand total minus the grand total of the revision this one was raised from.
+    delta_vs_parent: Decimal | None = None
+    is_current: bool = False
+
+
+class BOQRevisionLineage(BaseModel):
+    """The whole formal revision lineage of a bill, oldest first."""
+
+    boq_id: UUID
+    root_id: UUID
+    current_in_lineage: bool = True
+    previous_id: UUID | None = None
+    next_id: UUID | None = None
+    revisions: list[BOQRevisionEntry] = Field(default_factory=list)
 
 
 class ActivityLogList(BaseModel):

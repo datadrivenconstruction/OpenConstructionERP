@@ -2015,5 +2015,11 @@
       "fail": "A crew of {headcount} was on site but no work, inspection or delay is recorded.",
       "suggestion": "Add what the crew did, or record the delay that stopped work."
     }
+  },
+  "boq_revision": {
+    "superseded_still_editable": {
+      "fail": "Revision {label} can still be edited although {later} has been raised since; changes made here do not carry over",
+      "suggestion": "Lock {label} to freeze it, or open the latest revision to keep working"
+    }
   }
 }

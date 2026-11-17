@@ -2015,5 +2015,11 @@
       "fail": "Obyektda {headcount} kishilik brigada bor edi, ammo ish, tekshiruv yoki toʻxtab qolish yozilmagan.",
       "suggestion": "Brigada nima qilganini yoki ishni toʻxtatgan toʻxtab qolishni qoʻshing."
     }
+  },
+  "boq_revision": {
+    "superseded_still_editable": {
+      "fail": "{label} reviziyasi hali ham tahrirlanadi, garchi undan keyin {later} yaratilgan bo'lsa ham; bu yerdagi o'zgarishlar unga o'tmaydi",
+      "suggestion": "{label} ni qulflang yoki eng so'nggi reviziyada ishlashni davom ettiring"
+    }
   }
 }

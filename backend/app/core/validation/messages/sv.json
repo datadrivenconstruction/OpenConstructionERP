@@ -2015,5 +2015,11 @@
       "fail": "Ett arbetslag på {headcount} fanns på plats men inget arbete, ingen kontroll och ingen försening är registrerad.",
       "suggestion": "Lägg till vad arbetslaget gjorde, eller förseningen som stoppade arbetet."
     }
+  },
+  "boq_revision": {
+    "superseded_still_editable": {
+      "fail": "Revision {label} kan fortfarande redigeras trots att {later} har skapats sedan dess; ändringar här förs inte över",
+      "suggestion": "Lås {label} för att frysa den, eller fortsätt arbeta i den senaste revisionen"
+    }
   }
 }

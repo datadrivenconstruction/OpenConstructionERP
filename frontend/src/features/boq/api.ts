@@ -932,6 +932,9 @@ export interface ActivityEntry {
   description: string;
   details: Record<string, unknown>;
   created_at: string;
+  /** The actor recorded on the entry; null when the log has none. */
+  user_id?: string | null;
+  /** Display name resolved by the server; absent when the actor is unknown. */
   user_name?: string;
   /** v3.12.0 — target_type (position / markup / boq) for the restore UI. */
   target_type?: string;
@@ -1427,6 +1430,36 @@ export interface SensitivityResponse {
   iterations?: number;
   correlation?: number;
   items: SensitivityItem[];
+}
+
+/* ── Formal revision lineage (R0, R1, ...) ───────────────────────────── */
+
+export interface BOQRevisionEntry {
+  boq_id: string;
+  number: number;
+  label: string;
+  /** A revision made before numbering existed; its number is its place in time. */
+  number_is_derived: boolean;
+  name: string;
+  status: string;
+  is_locked: boolean;
+  parent_id: string | null;
+  created_at: string;
+  created_by: string | null;
+  created_by_name: string | null;
+  /** Decimal as a string. */
+  grand_total: string;
+  delta_vs_parent: string | null;
+  is_current: boolean;
+}
+
+export interface BOQRevisionLineage {
+  boq_id: string;
+  root_id: string;
+  current_in_lineage: boolean;
+  previous_id: string | null;
+  next_id: string | null;
+  revisions: BOQRevisionEntry[];
 }
 
 /* ── BOQ Snapshot / Version History types ─────────────────────────────── */
@@ -2183,12 +2216,20 @@ export const boqApi = {
     apiPost<Markup[]>(`/v1/boq/boqs/${boqId}/markups/apply-defaults/?region=${encodeURIComponent(region)}`, {}),
 
   /* Activity */
-  getActivity: async (boqId: string): Promise<ActivityResponse> => {
+  getActivity: async (
+    boqId: string,
+    page: { offset?: number; limit?: number } = {},
+  ): Promise<ActivityResponse> => {
+    const params = new URLSearchParams();
+    if (page.offset) params.set('offset', String(page.offset));
+    if (page.limit) params.set('limit', String(page.limit));
+    const qs = params.toString();
     const raw = await apiGet<{
       items: Array<{
         id: string;
         boq_id: string;
-        user_id: string;
+        user_id: string | null;
+        user_name?: string | null;
         action: string;
         description: string;
         target_type?: string;
@@ -2199,7 +2240,7 @@ export const boqApi = {
         created_at: string;
       }>;
       total: number;
-    }>(`/v1/boq/boqs/${boqId}/activity/`);
+    }>(`/v1/boq/boqs/${boqId}/activity/${qs ? `?${qs}` : ''}`);
     return {
       activities: (raw.items ?? []).map((item) => ({
         id: item.id,
@@ -2208,7 +2249,8 @@ export const boqApi = {
         description: item.description,
         details: item.changes ?? item.metadata_ ?? item.metadata ?? {},
         created_at: item.created_at,
-        user_name: undefined,
+        user_id: item.user_id ?? null,
+        user_name: item.user_name ?? undefined,
         // v3.12.0 — surface target identity so the per-cell restore UI can
         // call the position-scoped endpoint with the right ids.
         target_type: item.target_type,
@@ -2390,6 +2432,10 @@ export const boqApi = {
       created_at: string;
       updated_at: string;
     }>(`/v1/boq/boqs/${boqId}/statistics/`),
+
+  /* Formal revisions */
+  getRevisions: (boqId: string) =>
+    apiGet<BOQRevisionLineage>(`/v1/boq/boqs/${boqId}/revisions/`),
 
   /* Snapshot / Version History */
   getSnapshots: (boqId: string) =>

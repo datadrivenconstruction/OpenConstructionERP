@@ -2015,5 +2015,11 @@
       "fail": "Et hold på {headcount} var på pladsen, men intet arbejde, ingen kontrol og ingen forsinkelse er registreret.",
       "suggestion": "Tilføj hvad holdet lavede, eller forsinkelsen der stoppede arbejdet."
     }
+  },
+  "boq_revision": {
+    "superseded_still_editable": {
+      "fail": "Revision {label} kan stadig redigeres, selvom {later} er oprettet siden; ændringer her overføres ikke",
+      "suggestion": "Lås {label} for at fastfryse den, eller arbejd videre i den nyeste revision"
+    }
   }
 }

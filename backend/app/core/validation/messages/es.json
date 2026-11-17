@@ -2015,5 +2015,11 @@
       "fail": "Había una cuadrilla de {headcount} en obra pero no consta trabajo, inspección ni retraso.",
       "suggestion": "Añada lo que hizo la cuadrilla o el retraso que paralizó el trabajo."
     }
+  },
+  "boq_revision": {
+    "superseded_still_editable": {
+      "fail": "La revisión {label} aún se puede editar aunque después se creó {later}; los cambios hechos aquí no se trasladan",
+      "suggestion": "Bloquee {label} para congelarla o siga trabajando en la revisión más reciente"
+    }
   }
 }

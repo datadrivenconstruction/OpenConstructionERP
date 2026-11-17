@@ -2015,5 +2015,11 @@
       "fail": "現場に {headcount} 人の班がいましたが、作業、検査、遅延の記録がありません。",
       "suggestion": "班の作業内容、または作業を止めた遅延を追加してください。"
     }
+  },
+  "boq_revision": {
+    "superseded_still_editable": {
+      "fail": "改訂 {label} はまだ編集できますが、その後 {later} が作成されています。ここでの変更は引き継がれません",
+      "suggestion": "{label} をロックするか、最新の改訂で作業を続けてください"
+    }
   }
 }
