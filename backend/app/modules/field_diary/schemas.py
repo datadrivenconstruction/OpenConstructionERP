@@ -306,6 +306,24 @@ class FieldHaulTicketCreate(FieldCapture):
     notes: str = Field(default="", max_length=4000)
 
 
+class FieldPlanPinCreate(FieldCapture):
+    """A location pin dropped on a drawing from the field.
+
+    The record it belongs to is either an existing one (``record_id``) or one raised earlier in the same
+    queue (``record_client_op_id``, resolved through the sync ledger). ``record_kind`` is not called
+    ``target_kind`` because a batch op already carries that name for its own routing.
+    """
+
+    record_kind: Literal["rfi", "punch", "inspection", "ncr", "observation", "note"] = "note"
+    record_id: uuid.UUID | None = None
+    record_client_op_id: str | None = Field(default=None, min_length=8, max_length=128)
+    document_id: str = Field(..., min_length=1, max_length=255)
+    page: int = Field(default=1, ge=1)
+    x: float = Field(..., ge=0.0, le=1.0)
+    y: float = Field(..., ge=0.0, le=1.0)
+    note: str | None = Field(default=None, max_length=5000)
+
+
 class FieldCaptureResponse(BaseModel):
     """Per-op outcome returned to the client (and stored in the ledger).
 
@@ -330,7 +348,9 @@ class FieldSyncOpItem(FieldCapture):
     routed ``target_kind`` so the server can dispatch it.
     """
 
-    target_kind: Literal["punch_item", "inspection", "schedule_progress", "ncr", "safety_observation", "haul_ticket"]
+    target_kind: Literal[
+        "punch_item", "inspection", "schedule_progress", "ncr", "safety_observation", "haul_ticket", "plan_pin"
+    ]
     # The op-specific payload (a FieldPunchCreate / FieldInspectionCreate /
     # FieldScheduleProgressCreate body minus the capture envelope, which is
     # carried on this item directly).

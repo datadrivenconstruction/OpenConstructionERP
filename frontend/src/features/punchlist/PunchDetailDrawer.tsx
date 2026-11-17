@@ -38,6 +38,7 @@ import { isLocalId } from '@/shared/lib/offline/offlineStore';
 import { overlayRecords } from '@/shared/lib/offline/recordSync';
 import { useOfflineRecords } from '@/shared/lib/offline/useOfflineSync';
 import { PunchLocationAssignment } from './PunchLocationFields';
+import { PinLocationSection } from '@/features/plan-room/PinLocationSection';
 import { AssigneeLabel } from './assignee';
 import {
   formatReworkCost,
@@ -405,6 +406,7 @@ export function PunchDetailDrawer({
 
         {/* ── Rework cost ─────────────────────────────────────────────── */}
         <PunchLocationAssignment key={`loc-${item.id}`} item={item} onSaved={refresh} />
+        <PinLocationSection projectId={item.project_id} kind="punch" recordId={item.id} />
         <PunchContractAssignment item={item} onSaved={refresh} />
         <ReworkCostSection
           key={item.id}

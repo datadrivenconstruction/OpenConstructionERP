@@ -91,6 +91,9 @@ class PlanRoomService:
         )
         punch_pins = await self._punch_pins(document_id, page)
         plan_pins = await self._plan_pins(document_id, page)
+        # A punch pin is drawn from the punch item itself (it carries priority and assignee).
+        punch_ids = {p.id for p in punch_pins}
+        plan_pins = [p for p in plan_pins if not (p.target_kind == "punch" and p.target_id in punch_ids)]
         return OverlaysResponse(
             document_id=document_id,
             page=page,
@@ -108,15 +111,25 @@ class PlanRoomService:
         except Exception:  # noqa: BLE001 - fail soft
             logger.debug("plan_room: plan-pin read failed", exc_info=True)
             return []
+        from app.modules.plan_room.pin_service import PinService
+
+        labels = await PinService(self.session).labels(rows)
         return [
             OverlayPin(
                 kind="plan",
                 id=str(p.id),
                 x=p.x,
                 y=p.y,
+                title=labels[f"{p.target_kind}:{p.target_id}"].label
+                if f"{p.target_kind}:{p.target_id}" in labels
+                else None,
                 note=p.note,
                 photo_ref=p.photo_ref,
                 file_version_id=p.file_version_id,
+                status=p.status,
+                target_kind=p.target_kind,
+                target_id=p.target_id,
+                revision_state=p.revision_state,
             )
             for p in rows
         ]
@@ -256,7 +269,15 @@ class PlanRoomService:
         rule_warnings = await gate_record(
             PLAN_ROOM_RULE_SET,
             "pin",
-            {"page": page, "note": data.note, "photo_ref": data.photo_ref, "file_version_id": data.file_version_id},
+            {
+                "page": page,
+                "note": data.note,
+                "photo_ref": data.photo_ref,
+                "file_version_id": data.file_version_id,
+                "document_id": document_id,
+                "x": data.x,
+                "y": data.y,
+            },
             PIN_FIELDS,
             operation="create",
             project_id=project_id,

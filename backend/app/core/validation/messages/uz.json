@@ -3052,6 +3052,42 @@
     "pin_bare": {
       "fail": "{page}-sahifadagi belgida na izoh, na surat bor.",
       "suggestion": "Belgi topilganini koʻrsatishi uchun izoh yoki surat qoʻshing."
+    },
+    "position_out_of_range": {
+      "fail": "Belgining {axis} koordinatasi {value} chizma tashqarisida.",
+      "suggestion": "Belgini chizmaga qoʻying; qiymatlar 0 dan 1 gacha."
+    },
+    "page_out_of_range": {
+      "fail": "Belgi {page}-sahifada, lekin hujjatda atigi {count} ta varaq bor.",
+      "suggestion": "Hujjatda mavjud sahifani tanlang."
+    },
+    "target_missing": {
+      "fail": "{kind} belgisi qaysi yozuvga tegishli ekanini koʻrsatmaydi.",
+      "suggestion": "Mavjud yozuvni bogʻlang yoki belgi uchun yangisini yarating."
+    },
+    "target_not_found": {
+      "fail": "{kind} yozuvi {target} bu loyihada yoʻq.",
+      "suggestion": "Shu loyihadagi yozuvni tanlang yoki yangisini yarating."
+    },
+    "location_ambiguous": {
+      "fail": "Belgi bir vaqtning oʻzida chizmada va model elementida turibdi.",
+      "suggestion": "Faqat bitta joylashuvni qoldiring: chizma sahifasi yoki model elementi."
+    },
+    "location_missing": {
+      "fail": "Belgining joylashuvi koʻrsatilmagan.",
+      "suggestion": "Uni chizma sahifasiga yoki model elementiga qoʻying."
+    },
+    "bim_element_not_found": {
+      "fail": "{element} model elementi bu loyihaning hech bir modelida yoʻq.",
+      "suggestion": "Shu loyihaga tegishli modelning elementini tanlang."
+    },
+    "superseded_revision": {
+      "fail": "Belgi almashtirilgan varaq reviziyasida turibdi.",
+      "suggestion": "Belgini joriy reviziyada tekshiring va tafsilot oʻzgargan boʻlsa, koʻchiring."
+    },
+    "record_closed": {
+      "fail": "{kind} yozuvi yopilgan, lekin uning belgisi hali ham chizmada.",
+      "suggestion": "Ish tugamagan boʻlsa, belgini oʻchiring yoki yozuvni qayta oching."
     }
   },
   "compliance_docs": {

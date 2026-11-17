@@ -72,6 +72,7 @@ import {
   type RFIFormData,
 } from './RFIPage';
 import { ApprovalInstanceCard } from '@/features/approval-routes';
+import { PinLocationSection } from '@/features/plan-room/PinLocationSection';
 import {
   COMPANY_PROFILE_KEY,
   getCompanyProfile,
@@ -824,6 +825,8 @@ export function RFIDetailPage() {
               </div>
             )}
           </Card>
+
+          {rfi && <PinLocationSection projectId={rfi.project_id} kind="rfi" recordId={rfi.id} />}
 
           {/* Attachments — resolved from linked_drawing_ids */}
           {linkedIds.length > 0 && (

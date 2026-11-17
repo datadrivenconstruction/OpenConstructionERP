@@ -84,6 +84,7 @@ import BIMRightPanelTabs from './BIMRightPanelTabs';
 import PropertySearchPanel from './PropertySearchPanel';
 import BIMDiffPanel from './BIMDiffPanel';
 import type { DiffChangeType } from './diffGrouping';
+import { BIMElementPin } from './BIMElementPin';
 import ElementAssetCard from './ElementAssetCard';
 import BIMSnapshotsPopover from './BIMSnapshotsPopover';
 import { useBIMViewerStore } from '@/stores/useBIMViewerStore';
@@ -4202,6 +4203,16 @@ export function BIMPage() {
           <BIMSnapshotsPopover
             projectId={projectId}
             onClose={() => setSnapshotsOpen(false)}
+          />
+        )}
+
+        {projectId && activeModelId && selectedElementId && selectedElementIds.length <= 1 && (
+          <BIMElementPin
+            key={selectedElementId}
+            projectId={projectId}
+            modelId={activeModelId}
+            elementId={selectedElementId}
+            elementName={elements.find((e) => e.id === selectedElementId)?.name}
           />
         )}
 

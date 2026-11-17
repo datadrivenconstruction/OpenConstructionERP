@@ -3052,6 +3052,42 @@
     "pin_bare": {
       "fail": "Ghim trên trang {page} không có ghi chú lẫn ảnh.",
       "suggestion": "Hãy thêm ghi chú hoặc ảnh để ghim cho biết đã phát hiện gì."
+    },
+    "position_out_of_range": {
+      "fail": "Vị trí {axis} của ghim, {value}, nằm ngoài bản vẽ.",
+      "suggestion": "Đặt ghim lên bản vẽ; giá trị vị trí từ 0 đến 1."
+    },
+    "page_out_of_range": {
+      "fail": "Ghim nằm ở trang {page}, nhưng tài liệu chỉ có {count} tờ bản vẽ.",
+      "suggestion": "Chọn một trang có trong tài liệu."
+    },
+    "target_missing": {
+      "fail": "Ghim {kind} không cho biết nó thuộc hồ sơ nào.",
+      "suggestion": "Liên kết với hồ sơ có sẵn hoặc tạo hồ sơ mới cho ghim."
+    },
+    "target_not_found": {
+      "fail": "Hồ sơ {kind} {target} không tồn tại trong dự án này.",
+      "suggestion": "Chọn hồ sơ của dự án này hoặc tạo hồ sơ mới."
+    },
+    "location_ambiguous": {
+      "fail": "Ghim đồng thời nằm trên bản vẽ và trên một cấu kiện mô hình.",
+      "suggestion": "Chỉ giữ một vị trí: trang bản vẽ hoặc cấu kiện mô hình."
+    },
+    "location_missing": {
+      "fail": "Ghim chưa có vị trí.",
+      "suggestion": "Đặt ghim trên trang bản vẽ hoặc trên cấu kiện mô hình."
+    },
+    "bim_element_not_found": {
+      "fail": "Cấu kiện mô hình {element} không có trong mô hình nào của dự án này.",
+      "suggestion": "Chọn cấu kiện từ mô hình thuộc dự án này."
+    },
+    "superseded_revision": {
+      "fail": "Ghim nằm trên bản sửa đổi của tờ bản vẽ đã bị thay thế.",
+      "suggestion": "Kiểm tra ghim trên bản sửa đổi hiện hành và di chuyển nếu chi tiết đã thay đổi."
+    },
+    "record_closed": {
+      "fail": "Hồ sơ {kind} đã đóng nhưng ghim vẫn còn trên bản vẽ.",
+      "suggestion": "Gỡ ghim, hoặc mở lại hồ sơ nếu công việc chưa hoàn thành."
     }
   },
   "compliance_docs": {

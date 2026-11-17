@@ -3052,6 +3052,42 @@
     "pin_bare": {
       "fail": "Markøren på side {page} har verken notat eller foto.",
       "suggestion": "Legg til et notat eller et foto slik at markøren viser hva som ble funnet."
+    },
+    "position_out_of_range": {
+      "fail": "Markørens {axis}-posisjon {value} ligger utenfor tegningen.",
+      "suggestion": "Plasser markøren på tegningen; posisjonene går fra 0 til 1."
+    },
+    "page_out_of_range": {
+      "fail": "Markøren ligger på side {page}, men dokumentet har bare {count} ark.",
+      "suggestion": "Velg en side som finnes i dokumentet."
+    },
+    "target_missing": {
+      "fail": "Markøren ({kind}) sier ikke hvilken post den tilhører.",
+      "suggestion": "Koble til en eksisterende post, eller opprett en ny for markøren."
+    },
+    "target_not_found": {
+      "fail": "Posten {kind} {target} finnes ikke i dette prosjektet.",
+      "suggestion": "Velg en post i dette prosjektet, eller opprett en ny."
+    },
+    "location_ambiguous": {
+      "fail": "Markøren ligger både på en tegning og på et modellelement.",
+      "suggestion": "Behold bare ett sted: tegningssiden eller modellelementet."
+    },
+    "location_missing": {
+      "fail": "Markøren har ingen plassering.",
+      "suggestion": "Plasser den på en tegningsside eller på et modellelement."
+    },
+    "bim_element_not_found": {
+      "fail": "Modellelementet {element} finnes ikke i en modell i dette prosjektet.",
+      "suggestion": "Velg et element fra en modell som hører til dette prosjektet."
+    },
+    "superseded_revision": {
+      "fail": "Markøren ligger på en tegningsrevisjon som er erstattet.",
+      "suggestion": "Gå gjennom markøren på gjeldende revisjon, og flytt den hvis detaljen er endret."
+    },
+    "record_closed": {
+      "fail": "Posten {kind} er lukket, men markøren ligger fortsatt på tegningen.",
+      "suggestion": "Fjern markøren, eller åpne posten igjen hvis arbeidet ikke er ferdig."
     }
   },
   "compliance_docs": {

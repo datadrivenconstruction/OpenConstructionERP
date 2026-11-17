@@ -64,6 +64,7 @@ from app.modules.field_diary.schemas import (
     FieldModuleGrantResponse,
     FieldNcrCreate,
     FieldOfflinePackResponse,
+    FieldPlanPinCreate,
     FieldPunchCreate,
     FieldSafetyObservationCreate,
     FieldScheduleProgressCreate,
@@ -604,6 +605,85 @@ async def field_today(
     )
 
 
+FIELD_SHEET_WIDTH_PX = 1100
+
+
+@router.get("/sheets/")
+async def field_sheets(
+    session: SessionDep,
+    field_session=Depends(_require_field_module_grant),
+    offset: int = Query(default=0, ge=0),
+    limit: int = Query(default=100, ge=1, le=200),
+) -> dict:
+    """The session project's drawings (PDFs) a worker can pin on, newest first, as an envelope."""
+    from sqlalchemy import func, or_, select
+
+    from app.modules.documents.models import Document, Sheet
+
+    is_pdf = or_(Document.mime_type == "application/pdf", func.lower(Document.name).like("%.pdf"))
+    where = (Document.project_id == field_session.project_id, is_pdf)
+    total = (await session.execute(select(func.count()).select_from(Document).where(*where))).scalar_one()
+    docs = (
+        (
+            await session.execute(
+                select(Document).where(*where).order_by(Document.created_at.desc()).offset(offset).limit(limit)
+            )
+        )
+        .scalars()
+        .all()
+    )
+    pages: dict[str, int] = {}
+    if docs:
+        rows = await session.execute(
+            select(Sheet.document_id, func.max(Sheet.page_number))
+            .where(Sheet.document_id.in_([str(d.id) for d in docs]))
+            .group_by(Sheet.document_id)
+        )
+        pages = {doc_id: int(top) for doc_id, top in rows.all() if top}
+    items = [
+        {
+            "document_id": str(d.id),
+            "name": d.name,
+            "revision_code": d.revision_code,
+            "pages": pages.get(str(d.id), 1),
+        }
+        for d in docs
+    ]
+    return {"items": items, "total": int(total), "offset": offset, "limit": limit}
+
+
+@router.get("/sheets/{document_id}/pages/{page}/image/")
+async def field_sheet_image(
+    document_id: uuid.UUID,
+    page: int,
+    session: SessionDep,
+    field_session=Depends(_require_field_module_grant),
+) -> Response:
+    """One drawing page as a PNG, for pinning offline. A document of another project is a 404."""
+    from app.core.pdf_reader import PdfReaderError, open_pdf
+    from app.core.storage import is_within_safe_root
+    from app.modules.documents.models import Document
+    from app.modules.documents.service import UPLOAD_BASE
+
+    doc = await session.get(Document, document_id)
+    if doc is None or doc.project_id != field_session.project_id or not doc.file_path:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Sheet not found")
+    upload_base = Path(UPLOAD_BASE).resolve()
+    raw = Path(doc.file_path)
+    path = (raw if raw.is_absolute() else upload_base / raw).resolve()
+    if not is_within_safe_root(path, extra_roots=[upload_base]) or path.is_symlink() or not path.is_file():
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Sheet not found")
+    try:
+        with open_pdf(path) as pdf:
+            if page < 1 or page > pdf.page_count:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Sheet not found")
+            sheet = pdf[page - 1]
+            png = sheet.render(zoom=FIELD_SHEET_WIDTH_PX / max(sheet.width, 1.0)).png()
+    except PdfReaderError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Sheet not found") from exc
+    return Response(content=png, media_type="image/png", headers={"Cache-Control": "private, max-age=86400"})
+
+
 @router.get("/offline-pack/", response_model=FieldOfflinePackResponse)
 async def field_offline_pack(
     session: SessionDep,
@@ -752,6 +832,20 @@ async def capture_haul_ticket(
 ) -> FieldCaptureResponse:
     """Record a haul ticket or delivery receipt from the gate. Idempotent on ``client_op_id``."""
     result = await FieldSyncService(session).capture_haul_ticket(field_session, payload)
+    if result.status == "rejected":
+        response.status_code = result.http_status
+    return result
+
+
+@router.post("/capture/plan-pin/", response_model=FieldCaptureResponse, status_code=201)
+async def capture_plan_pin(
+    payload: FieldPlanPinCreate,
+    session: SessionDep,
+    response: Response,
+    field_session=Depends(_require_field_module_grant),
+) -> FieldCaptureResponse:
+    """Drop a location pin on a drawing for a record. Idempotent on ``client_op_id``."""
+    result = await FieldSyncService(session).capture_plan_pin(field_session, payload)
     if result.status == "rejected":
         response.status_code = result.http_status
     return result
@@ -983,6 +1077,7 @@ async def sync_batch(
         "ncr": (FieldNcrCreate, svc.capture_ncr),
         "safety_observation": (FieldSafetyObservationCreate, svc.capture_safety_observation),
         "haul_ticket": (FieldHaulTicketCreate, svc.capture_haul_ticket),
+        "plan_pin": (FieldPlanPinCreate, svc.capture_plan_pin),
     }
     for op in payload.ops:
         extra = {k: v for k, v in (op.payload or {}).items() if k not in _envelope_keys}

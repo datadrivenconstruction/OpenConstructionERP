@@ -3052,6 +3052,42 @@
     "pin_bare": {
       "fail": "The pin on page {page} has neither a note nor a photo.",
       "suggestion": "Add a note or a photo so the pin says what was found."
+    },
+    "position_out_of_range": {
+      "fail": "The pin's {axis} position {value} is outside the sheet.",
+      "suggestion": "Place the pin on the drawing; positions run from 0 to 1."
+    },
+    "page_out_of_range": {
+      "fail": "The pin is on page {page}, but the document has only {count} sheet(s).",
+      "suggestion": "Pick a page that exists in the document."
+    },
+    "target_missing": {
+      "fail": "The {kind} pin does not say which record it belongs to.",
+      "suggestion": "Link an existing record or create a new one for the pin."
+    },
+    "target_not_found": {
+      "fail": "The {kind} record {target} does not exist in this project.",
+      "suggestion": "Pick a record of this project, or create a new one."
+    },
+    "location_ambiguous": {
+      "fail": "The pin is on a drawing and on a model element at once.",
+      "suggestion": "Keep one location: the drawing page or the model element."
+    },
+    "location_missing": {
+      "fail": "The pin has no location.",
+      "suggestion": "Place it on a drawing page or on a model element."
+    },
+    "bim_element_not_found": {
+      "fail": "The model element {element} is not in a model of this project.",
+      "suggestion": "Select an element of a model that belongs to this project."
+    },
+    "superseded_revision": {
+      "fail": "The pin sits on a sheet revision that has been superseded.",
+      "suggestion": "Review the pin on the current revision and move it if the detail changed."
+    },
+    "record_closed": {
+      "fail": "The {kind} record is closed, but its pin is still on the drawing.",
+      "suggestion": "Remove the pin, or reopen the record if the work is not finished."
     }
   },
   "compliance_docs": {

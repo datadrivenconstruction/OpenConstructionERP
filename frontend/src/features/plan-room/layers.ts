@@ -58,9 +58,20 @@ const PUNCH_PRIORITY_COLOR: Record<string, string> = {
   critical: '#ef4444',
 };
 
+/** Dot colour of a registry pin by the kind of record it points at. */
+export const PIN_KIND_COLOR: Record<string, string> = {
+  rfi: '#2563eb',
+  punch: '#ef4444',
+  inspection: '#0d9488',
+  ncr: '#ea580c',
+  photo: '#f59e0b',
+  observation: '#7c3aed',
+  note: '#6b7280',
+};
+
 /** Resolve the dot colour for a pin from its kind + priority. */
 export function pinColor(pin: OverlayPin): string {
-  if (pin.kind === 'plan') return PLAN_PIN_COLOR;
+  if (pin.kind === 'plan') return (pin.target_kind && PIN_KIND_COLOR[pin.target_kind]) || PLAN_PIN_COLOR;
   return (pin.priority && PUNCH_PRIORITY_COLOR[pin.priority]) || '#ef4444';
 }
 

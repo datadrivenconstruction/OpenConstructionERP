@@ -3052,6 +3052,42 @@
     "pin_bare": {
       "fail": "Pinezka na stronie {page} nie ma ani notatki, ani zdjęcia.",
       "suggestion": "Dodaj notatkę lub zdjęcie, aby pinezka pokazywała, co stwierdzono."
+    },
+    "position_out_of_range": {
+      "fail": "Pozycja pinezki na osi {axis} ({value}) leży poza rysunkiem.",
+      "suggestion": "Umieść pinezkę na rysunku; pozycje mieszczą się w zakresie od 0 do 1."
+    },
+    "page_out_of_range": {
+      "fail": "Pinezka jest na stronie {page}, ale dokument ma tylko {count} arkusz(y).",
+      "suggestion": "Wybierz stronę, która istnieje w dokumencie."
+    },
+    "target_missing": {
+      "fail": "Pinezka {kind} nie wskazuje, do którego wpisu należy.",
+      "suggestion": "Powiąż istniejący wpis albo utwórz dla pinezki nowy."
+    },
+    "target_not_found": {
+      "fail": "Wpis {kind} {target} nie istnieje w tym projekcie.",
+      "suggestion": "Wybierz wpis z tego projektu albo utwórz nowy."
+    },
+    "location_ambiguous": {
+      "fail": "Pinezka jest jednocześnie na rysunku i na elemencie modelu.",
+      "suggestion": "Zostaw jedno miejsce: stronę rysunku albo element modelu."
+    },
+    "location_missing": {
+      "fail": "Pinezka nie ma lokalizacji.",
+      "suggestion": "Umieść ją na stronie rysunku lub na elemencie modelu."
+    },
+    "bim_element_not_found": {
+      "fail": "Element modelu {element} nie występuje w żadnym modelu tego projektu.",
+      "suggestion": "Wybierz element z modelu należącego do tego projektu."
+    },
+    "superseded_revision": {
+      "fail": "Pinezka znajduje się na wersji arkusza, która została zastąpiona.",
+      "suggestion": "Sprawdź pinezkę na bieżącej wersji i przesuń ją, jeśli szczegół się zmienił."
+    },
+    "record_closed": {
+      "fail": "Wpis {kind} jest zamknięty, ale jego pinezka nadal jest na rysunku.",
+      "suggestion": "Usuń pinezkę albo otwórz wpis ponownie, jeśli praca nie jest skończona."
     }
   },
   "compliance_docs": {

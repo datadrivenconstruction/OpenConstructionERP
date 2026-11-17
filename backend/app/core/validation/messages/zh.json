@@ -3052,6 +3052,42 @@
     "pin_bare": {
       "fail": "第 {page} 页的标记既没有备注也没有照片。",
       "suggestion": "请添加备注或照片，让标记说明发现了什么。"
+    },
+    "position_out_of_range": {
+      "fail": "标记的{axis}位置 {value} 超出了图纸范围。",
+      "suggestion": "请将标记放在图纸上；位置取值范围为 0 到 1。"
+    },
+    "page_out_of_range": {
+      "fail": "标记位于第 {page} 页，但该文档只有 {count} 张图纸。",
+      "suggestion": "请选择文档中存在的页面。"
+    },
+    "target_missing": {
+      "fail": "{kind} 标记未指明其所属的记录。",
+      "suggestion": "请关联一条现有记录，或为该标记新建一条记录。"
+    },
+    "target_not_found": {
+      "fail": "项目中不存在 {kind} 记录 {target}。",
+      "suggestion": "请选择本项目的记录，或新建一条记录。"
+    },
+    "location_ambiguous": {
+      "fail": "标记同时位于图纸和模型构件上。",
+      "suggestion": "只保留一个位置：图纸页面或模型构件。"
+    },
+    "location_missing": {
+      "fail": "标记没有位置信息。",
+      "suggestion": "请将其放置在图纸页面或模型构件上。"
+    },
+    "bim_element_not_found": {
+      "fail": "模型构件 {element} 不在本项目的任何模型中。",
+      "suggestion": "请选择属于本项目模型的构件。"
+    },
+    "superseded_revision": {
+      "fail": "标记位于已被替换的图纸版本上。",
+      "suggestion": "请在当前版本上检查标记，若细节有变化请移动它。"
+    },
+    "record_closed": {
+      "fail": "{kind} 记录已关闭，但其标记仍在图纸上。",
+      "suggestion": "如工作未完成，请重新打开记录；否则请移除标记。"
     }
   },
   "compliance_docs": {

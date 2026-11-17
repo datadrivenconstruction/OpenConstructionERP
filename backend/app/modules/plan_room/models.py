@@ -18,7 +18,7 @@ convention so the two pin kinds composite onto the same overlay.
 
 import uuid
 
-from sqlalchemy import JSON, Float, ForeignKey, Integer, String, Text
+from sqlalchemy import JSON, Float, ForeignKey, Index, Integer, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database import GUID, Base
@@ -34,6 +34,11 @@ class PlanPin(Base):
     """
 
     __tablename__ = "oe_plan_pin"
+    __table_args__ = (
+        UniqueConstraint("project_id", "client_op_id", name="uq_plan_pin_project_client_op"),
+        Index("ix_plan_pin_project_sheet", "project_id", "sheet_id"),
+        Index("ix_plan_pin_target", "target_kind", "target_id"),
+    )
 
     project_id: Mapped[uuid.UUID] = mapped_column(
         GUID(),
@@ -41,14 +46,27 @@ class PlanPin(Base):
         nullable=False,
         index=True,
     )
-    document_id: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
+    # A pin has exactly one location: drawing (document_id + page + x/y) or BIM element.
+    # BIM pins leave the drawing columns at their defaults.
+    document_id: Mapped[str] = mapped_column(String(255), nullable=False, index=True, default="")
     page: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
-    x: Mapped[float] = mapped_column(Float, nullable=False)
-    y: Mapped[float] = mapped_column(Float, nullable=False)
+    x: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
+    y: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
     note: Mapped[str | None] = mapped_column(Text, nullable=True)
     photo_ref: Mapped[str | None] = mapped_column(String(500), nullable=True)
     file_version_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
     created_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
+    # The record this pin points at stays in its own module; the pin only references it.
+    target_kind: Mapped[str] = mapped_column(String(20), nullable=False, default="note", server_default="note")
+    target_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
+    sheet_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
+    bim_model_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
+    bim_element_id: Mapped[str | None] = mapped_column(String(36), nullable=True, index=True)
+    bim_xyz: Mapped[list | None] = mapped_column(JSON, nullable=True)
+    status: Mapped[str | None] = mapped_column(String(40), nullable=True)
+    revision_state: Mapped[str] = mapped_column(String(20), nullable=False, default="current", server_default="current")
+    carried_from_pin_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
+    client_op_id: Mapped[str | None] = mapped_column(String(128), nullable=True)
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         "metadata",
         JSON,
@@ -58,4 +76,4 @@ class PlanPin(Base):
     )
 
     def __repr__(self) -> str:
-        return f"<PlanPin doc={self.document_id} page={self.page} ({self.x:.3f},{self.y:.3f})>"
+        return f"<PlanPin {self.target_kind} doc={self.document_id} page={self.page} ({self.x:.3f},{self.y:.3f})>"

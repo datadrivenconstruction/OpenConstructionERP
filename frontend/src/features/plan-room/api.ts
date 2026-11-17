@@ -19,7 +19,7 @@
  * PlanRoomViewer for how each is projected onto the canvas).
  */
 
-import { apiGet, apiPost, apiDelete, type Page } from '@/shared/lib/api';
+import { apiGet, apiPost, apiPatch, apiDelete, type Page } from '@/shared/lib/api';
 
 /* ── Overlay composite (read) ──────────────────────────────────────────── */
 
@@ -42,6 +42,10 @@ export interface OverlayPin {
   assigned_to: string | null;
   photo_ref: string | null;
   file_version_id: string | null;
+  /** Set on registry pins: the record the pin points at. */
+  target_kind?: PinTargetKind | null;
+  target_id?: string | null;
+  revision_state?: PinRevisionState | null;
 }
 
 /** A single 2-D point after normalisation (see {@link parseOverlayPoints}). */
@@ -110,6 +114,94 @@ export interface OverlaysResponse {
   markups: OverlayMarkup[];
   measurements: OverlayMeasurement[];
   photos: OverlayPhoto[];
+}
+
+/* ── Pin registry ──────────────────────────────────────────────────────── */
+
+export type PinTargetKind = 'rfi' | 'punch' | 'inspection' | 'ncr' | 'photo' | 'observation' | 'note';
+export type PinRevisionState = 'current' | 'carried' | 'needs_review' | 'orphaned';
+
+/** A registry pin: one location (drawing page or BIM element) for one record. */
+export interface RegistryPin {
+  id: string;
+  project_id: string;
+  document_id: string;
+  page: number;
+  x: number;
+  y: number;
+  note: string | null;
+  target_kind: PinTargetKind;
+  target_id: string | null;
+  target_label: string | null;
+  sheet_id: string | null;
+  bim_model_id: string | null;
+  bim_element_id: string | null;
+  bim_xyz: number[] | null;
+  status: string | null;
+  revision_state: PinRevisionState;
+  client_op_id: string | null;
+  created_at: string;
+  validation_warnings?: { rule_id?: string; message?: string }[];
+}
+
+export interface RegistryPinCreate {
+  project_id: string;
+  target_kind: PinTargetKind;
+  target_id?: string | null;
+  document_id?: string;
+  page?: number;
+  x?: number;
+  y?: number;
+  bim_model_id?: string;
+  bim_element_id?: string;
+  bim_xyz?: number[];
+  note?: string | null;
+  client_op_id?: string;
+}
+
+export interface PinFilters {
+  document_id?: string;
+  target_kind?: PinTargetKind | '';
+  status?: string;
+  revision_state?: PinRevisionState | '';
+  limit?: number;
+}
+
+function qs(params: Record<string, string | number | undefined>): string {
+  const sp = new URLSearchParams();
+  for (const [k, v] of Object.entries(params)) if (v !== undefined && v !== '') sp.set(k, String(v));
+  return sp.toString();
+}
+
+/** The project's pins (envelope), filtered by sheet, record kind, status and revision state. */
+export async function fetchPins(projectId: string, f: PinFilters = {}): Promise<Page<RegistryPin>> {
+  if (!projectId) return { items: [], total: 0, offset: 0, limit: 0 };
+  return apiGet<Page<RegistryPin>>(`${BASE}/pins/?${qs({ project_id: projectId, ...f })}`);
+}
+
+/** The pins of one record, so its page can show where it is. */
+export async function fetchPinsByTarget(
+  projectId: string,
+  kind: PinTargetKind,
+  targetId: string,
+): Promise<Page<RegistryPin>> {
+  return apiGet<Page<RegistryPin>>(`${BASE}/pins/by-target/${kind}/${targetId}?${qs({ project_id: projectId })}`);
+}
+
+/** The pins sitting on the elements of one BIM model. */
+export async function fetchBimPins(modelId: string): Promise<Page<RegistryPin>> {
+  return apiGet<Page<RegistryPin>>(`${BASE}/bim/${modelId}/pins`);
+}
+
+export async function createRegistryPin(payload: RegistryPinCreate): Promise<RegistryPin> {
+  return apiPost<RegistryPin, RegistryPinCreate>(`${BASE}/pins/`, payload);
+}
+
+export async function updateRegistryPin(
+  pinId: string,
+  patch: Partial<Pick<RegistryPin, 'x' | 'y' | 'page' | 'revision_state' | 'note' | 'target_kind' | 'target_id'>>,
+): Promise<RegistryPin> {
+  return apiPatch<RegistryPin, typeof patch>(`${BASE}/pins/${pinId}`, patch);
 }
 
 /* ── Plan pin (create / delete) ────────────────────────────────────────── */

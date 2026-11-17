@@ -3052,6 +3052,42 @@
     "pin_bare": {
       "fail": "Špendlík na straně {page} nemá poznámku ani fotografii.",
       "suggestion": "Doplňte poznámku nebo fotografii, aby špendlík ukazoval, co bylo zjištěno."
+    },
+    "position_out_of_range": {
+      "fail": "Pozice špendlíku {axis} {value} leží mimo výkres.",
+      "suggestion": "Umístěte špendlík na výkres; pozice jsou v rozmezí 0 až 1."
+    },
+    "page_out_of_range": {
+      "fail": "Špendlík je na stránce {page}, ale dokument má jen {count} výkres(ů).",
+      "suggestion": "Vyberte stránku, která v dokumentu existuje."
+    },
+    "target_missing": {
+      "fail": "Špendlík typu {kind} neuvádí, ke kterému záznamu patří.",
+      "suggestion": "Propojte existující záznam nebo pro špendlík vytvořte nový."
+    },
+    "target_not_found": {
+      "fail": "Záznam {kind} {target} v tomto projektu neexistuje.",
+      "suggestion": "Vyberte záznam tohoto projektu, nebo vytvořte nový."
+    },
+    "location_ambiguous": {
+      "fail": "Špendlík je zároveň na výkresu i na prvku modelu.",
+      "suggestion": "Ponechte jen jedno umístění: stránku výkresu, nebo prvek modelu."
+    },
+    "location_missing": {
+      "fail": "Špendlík nemá umístění.",
+      "suggestion": "Umístěte jej na stránku výkresu nebo na prvek modelu."
+    },
+    "bim_element_not_found": {
+      "fail": "Prvek modelu {element} není v žádném modelu tohoto projektu.",
+      "suggestion": "Vyberte prvek z modelu patřícího k tomuto projektu."
+    },
+    "superseded_revision": {
+      "fail": "Špendlík je na revizi výkresu, která byla nahrazena.",
+      "suggestion": "Zkontrolujte špendlík na aktuální revizi a pokud se detail změnil, přesuňte ho."
+    },
+    "record_closed": {
+      "fail": "Záznam {kind} je uzavřen, ale jeho špendlík je stále na výkresu.",
+      "suggestion": "Odstraňte špendlík, nebo záznam znovu otevřete, pokud práce nejsou hotové."
     }
   },
   "compliance_docs": {

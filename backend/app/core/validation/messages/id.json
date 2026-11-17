@@ -3052,6 +3052,42 @@
     "pin_bare": {
       "fail": "Pin di halaman {page} tidak memiliki catatan maupun foto.",
       "suggestion": "Tambahkan catatan atau foto agar pin menunjukkan apa yang ditemukan."
+    },
+    "position_out_of_range": {
+      "fail": "Posisi pin pada sumbu {axis}, {value}, berada di luar gambar.",
+      "suggestion": "Letakkan pin pada gambar; posisi berkisar antara 0 sampai 1."
+    },
+    "page_out_of_range": {
+      "fail": "Pin berada di halaman {page}, tetapi dokumen hanya memiliki {count} lembar gambar.",
+      "suggestion": "Pilih halaman yang ada di dokumen."
+    },
+    "target_missing": {
+      "fail": "Pin {kind} tidak menyebutkan catatan mana yang menjadi miliknya.",
+      "suggestion": "Tautkan catatan yang sudah ada atau buat catatan baru untuk pin."
+    },
+    "target_not_found": {
+      "fail": "Catatan {kind} {target} tidak ada di proyek ini.",
+      "suggestion": "Pilih catatan dari proyek ini, atau buat yang baru."
+    },
+    "location_ambiguous": {
+      "fail": "Pin berada pada gambar dan sekaligus pada elemen model.",
+      "suggestion": "Pertahankan satu lokasi saja: halaman gambar atau elemen model."
+    },
+    "location_missing": {
+      "fail": "Pin tidak memiliki lokasi.",
+      "suggestion": "Letakkan pin pada halaman gambar atau pada elemen model."
+    },
+    "bim_element_not_found": {
+      "fail": "Elemen model {element} tidak ada dalam model mana pun di proyek ini.",
+      "suggestion": "Pilih elemen dari model yang termasuk proyek ini."
+    },
+    "superseded_revision": {
+      "fail": "Pin berada pada revisi lembar gambar yang sudah digantikan.",
+      "suggestion": "Periksa pin pada revisi terbaru dan pindahkan jika detailnya berubah."
+    },
+    "record_closed": {
+      "fail": "Catatan {kind} sudah ditutup, tetapi pinnya masih ada di gambar.",
+      "suggestion": "Hapus pin, atau buka kembali catatan jika pekerjaannya belum selesai."
     }
   },
   "compliance_docs": {

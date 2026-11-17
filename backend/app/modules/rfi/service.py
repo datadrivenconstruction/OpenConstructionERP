@@ -458,6 +458,7 @@ class RFIService:
                 "project_id": project_id_s,
                 "rfi_id": str(rfi_id),
                 "rfi_number": rfi_number_s,
+                "status": fresh.status if fresh is not None else new_status or old_status,
             },
             source_module="oe_rfi",
         )

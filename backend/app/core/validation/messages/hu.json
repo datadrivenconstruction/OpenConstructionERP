@@ -3052,6 +3052,42 @@
     "pin_bare": {
       "fail": "A(z) {page}. oldalon lévő jelölőnek nincs sem jegyzete, sem fotója.",
       "suggestion": "Adjon hozzá jegyzetet vagy fotót, hogy a jelölő megmutassa, mit találtak."
+    },
+    "position_out_of_range": {
+      "fail": "A jelölő {axis} koordinátája ({value}) a terven kívül esik.",
+      "suggestion": "Helyezze a jelölőt a tervre; a pozíciók 0 és 1 közöttiek."
+    },
+    "page_out_of_range": {
+      "fail": "A jelölő a(z) {page}. oldalon van, de a dokumentumban csak {count} lap van.",
+      "suggestion": "Válasszon a dokumentumban létező oldalt."
+    },
+    "target_missing": {
+      "fail": "A(z) {kind} jelölő nem mondja meg, melyik bejegyzéshez tartozik.",
+      "suggestion": "Kapcsoljon hozzá létező bejegyzést, vagy hozzon létre újat a jelölőhöz."
+    },
+    "target_not_found": {
+      "fail": "A(z) {kind} {target} bejegyzés nem létezik ebben a projektben.",
+      "suggestion": "Válasszon ennek a projektnek egy bejegyzését, vagy hozzon létre újat."
+    },
+    "location_ambiguous": {
+      "fail": "A jelölő egyszerre van terven és egy modellelemen.",
+      "suggestion": "Csak egy helyet tartson meg: a tervoldalt vagy a modellelemet."
+    },
+    "location_missing": {
+      "fail": "A jelölőnek nincs helye.",
+      "suggestion": "Helyezze tervoldalra vagy modellelemre."
+    },
+    "bim_element_not_found": {
+      "fail": "A(z) {element} modellelem nincs a projekt egyetlen modelljében sem.",
+      "suggestion": "Válasszon a projekthez tartozó modell egyik elemét."
+    },
+    "superseded_revision": {
+      "fail": "A jelölő olyan tervváltozaton van, amelyet felváltottak.",
+      "suggestion": "Ellenőrizze a jelölőt az aktuális változaton, és mozgassa, ha a részlet módosult."
+    },
+    "record_closed": {
+      "fail": "A(z) {kind} bejegyzés le van zárva, de a jelölője még a terven van.",
+      "suggestion": "Távolítsa el a jelölőt, vagy nyissa meg újra a bejegyzést, ha a munka nincs kész."
     }
   },
   "compliance_docs": {

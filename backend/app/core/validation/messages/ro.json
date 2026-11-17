@@ -3052,6 +3052,42 @@
     "pin_bare": {
       "fail": "Marcajul de pe pagina {page} nu are nici notă, nici fotografie.",
       "suggestion": "Adăugați o notă sau o fotografie ca marcajul să arate ce s-a constatat."
+    },
+    "position_out_of_range": {
+      "fail": "Poziția marcajului pe axa {axis}, {value}, se află în afara planșei.",
+      "suggestion": "Plasați marcajul pe planșă; pozițiile variază între 0 și 1."
+    },
+    "page_out_of_range": {
+      "fail": "Marcajul se află pe pagina {page}, dar documentul are doar {count} planșă/planșe.",
+      "suggestion": "Alegeți o pagină care există în document."
+    },
+    "target_missing": {
+      "fail": "Marcajul {kind} nu indică la ce înregistrare aparține.",
+      "suggestion": "Asociați o înregistrare existentă sau creați una nouă pentru marcaj."
+    },
+    "target_not_found": {
+      "fail": "Înregistrarea {kind} {target} nu există în acest proiect.",
+      "suggestion": "Alegeți o înregistrare din acest proiect sau creați una nouă."
+    },
+    "location_ambiguous": {
+      "fail": "Marcajul se află simultan pe o planșă și pe un element al modelului.",
+      "suggestion": "Păstrați o singură locație: pagina planșei sau elementul din model."
+    },
+    "location_missing": {
+      "fail": "Marcajul nu are nicio locație.",
+      "suggestion": "Plasați-l pe o pagină a planșei sau pe un element al modelului."
+    },
+    "bim_element_not_found": {
+      "fail": "Elementul din model {element} nu se află în niciun model al acestui proiect.",
+      "suggestion": "Selectați un element dintr-un model care aparține acestui proiect."
+    },
+    "superseded_revision": {
+      "fail": "Marcajul se află pe o revizie a planșei care a fost înlocuită.",
+      "suggestion": "Verificați marcajul pe revizia curentă și mutați-l dacă detaliul s-a schimbat."
+    },
+    "record_closed": {
+      "fail": "Înregistrarea {kind} este închisă, dar marcajul ei este încă pe planșă.",
+      "suggestion": "Eliminați marcajul sau redeschideți înregistrarea dacă lucrarea nu este terminată."
     }
   },
   "compliance_docs": {

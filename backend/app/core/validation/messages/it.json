@@ -3052,6 +3052,42 @@
     "pin_bare": {
       "fail": "Il segnaposto a pagina {page} non ha né nota né foto.",
       "suggestion": "Aggiungere una nota o una foto perché il segnaposto indichi cosa è stato rilevato."
+    },
+    "position_out_of_range": {
+      "fail": "La posizione {axis} del segnaposto, {value}, è fuori dalla tavola.",
+      "suggestion": "Posiziona il segnaposto sulla tavola; le posizioni vanno da 0 a 1."
+    },
+    "page_out_of_range": {
+      "fail": "Il segnaposto è a pagina {page}, ma il documento ha solo {count} tavola/e.",
+      "suggestion": "Scegli una pagina che esiste nel documento."
+    },
+    "target_missing": {
+      "fail": "Il segnaposto {kind} non indica a quale registrazione appartiene.",
+      "suggestion": "Collega una registrazione esistente o creane una nuova per il segnaposto."
+    },
+    "target_not_found": {
+      "fail": "La registrazione {kind} {target} non esiste in questo progetto.",
+      "suggestion": "Scegli una registrazione di questo progetto o creane una nuova."
+    },
+    "location_ambiguous": {
+      "fail": "Il segnaposto è contemporaneamente su una tavola e su un elemento del modello.",
+      "suggestion": "Mantieni una sola posizione: la pagina della tavola o l'elemento del modello."
+    },
+    "location_missing": {
+      "fail": "Il segnaposto non ha una posizione.",
+      "suggestion": "Posizionalo su una pagina della tavola o su un elemento del modello."
+    },
+    "bim_element_not_found": {
+      "fail": "L'elemento del modello {element} non è presente in nessun modello di questo progetto.",
+      "suggestion": "Seleziona un elemento di un modello che appartiene a questo progetto."
+    },
+    "superseded_revision": {
+      "fail": "Il segnaposto si trova su una revisione della tavola che è stata sostituita.",
+      "suggestion": "Verifica il segnaposto sulla revisione attuale e spostalo se il dettaglio è cambiato."
+    },
+    "record_closed": {
+      "fail": "La registrazione {kind} è chiusa, ma il suo segnaposto è ancora sulla tavola.",
+      "suggestion": "Rimuovi il segnaposto o riapri la registrazione se il lavoro non è finito."
     }
   },
   "compliance_docs": {

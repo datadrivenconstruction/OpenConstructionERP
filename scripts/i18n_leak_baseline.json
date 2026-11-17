@@ -12007,5 +12007,48 @@
       "uz",
       "vi"
     ]
+  },
+  "plan_room.kind_rfi": {
+    "en_value": "RFI",
+    "leaked_locales": [
+      "bg",
+      "bn",
+      "cs",
+      "da",
+      "de",
+      "el",
+      "es",
+      "es-CL",
+      "es-CO",
+      "es-MX",
+      "et",
+      "fi",
+      "fil",
+      "hi",
+      "hr",
+      "hu",
+      "id",
+      "it",
+      "ja",
+      "kk",
+      "ko",
+      "ky",
+      "mn",
+      "nl",
+      "no",
+      "pl",
+      "pt",
+      "pt-BR",
+      "ro",
+      "ru",
+      "sv",
+      "th",
+      "tr",
+      "uk",
+      "ur",
+      "uz",
+      "vi",
+      "zh"
+    ]
   }
 }

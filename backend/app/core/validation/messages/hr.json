@@ -3052,6 +3052,42 @@
     "pin_bare": {
       "fail": "Oznaka na stranici {page} nema ni bilješku ni fotografiju.",
       "suggestion": "Dodajte bilješku ili fotografiju kako bi oznaka pokazivala što je pronađeno."
+    },
+    "position_out_of_range": {
+      "fail": "Položaj oznake na osi {axis}, {value}, nalazi se izvan nacrta.",
+      "suggestion": "Postavite oznaku na nacrt; položaji idu od 0 do 1."
+    },
+    "page_out_of_range": {
+      "fail": "Oznaka je na stranici {page}, ali dokument ima samo {count} list(ova).",
+      "suggestion": "Odaberite stranicu koja postoji u dokumentu."
+    },
+    "target_missing": {
+      "fail": "Oznaka ({kind}) ne kaže kojem zapisu pripada.",
+      "suggestion": "Povežite postojeći zapis ili izradite novi za oznaku."
+    },
+    "target_not_found": {
+      "fail": "Zapis {kind} {target} ne postoji u ovom projektu.",
+      "suggestion": "Odaberite zapis ovog projekta ili izradite novi."
+    },
+    "location_ambiguous": {
+      "fail": "Oznaka je istodobno na nacrtu i na elementu modela.",
+      "suggestion": "Zadržite jedno mjesto: stranicu nacrta ili element modela."
+    },
+    "location_missing": {
+      "fail": "Oznaka nema mjesto.",
+      "suggestion": "Postavite je na stranicu nacrta ili na element modela."
+    },
+    "bim_element_not_found": {
+      "fail": "Element modela {element} nije u nijednom modelu ovog projekta.",
+      "suggestion": "Odaberite element modela koji pripada ovom projektu."
+    },
+    "superseded_revision": {
+      "fail": "Oznaka je na reviziji lista koja je zamijenjena.",
+      "suggestion": "Provjerite oznaku na aktualnoj reviziji i premjestite je ako se detalj promijenio."
+    },
+    "record_closed": {
+      "fail": "Zapis {kind} je zatvoren, ali njegova oznaka je i dalje na nacrtu.",
+      "suggestion": "Uklonite oznaku ili ponovno otvorite zapis ako radovi nisu završeni."
     }
   },
   "compliance_docs": {
