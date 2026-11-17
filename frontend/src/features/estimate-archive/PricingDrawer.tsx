@@ -37,11 +37,16 @@ export function PricingDrawer({
   sealId,
   position,
   currency,
+  variationRequestId,
+  onRecorded,
   onClose,
 }: {
   sealId: string;
   position: SealedPosition;
   currency: string;
+  /** Write the priced line into this variation's own bill, traced to the seal. */
+  variationRequestId?: string;
+  onRecorded?: () => void;
   onClose: () => void;
 }) {
   const { t } = useTranslation();
@@ -70,9 +75,16 @@ export function PricingDrawer({
   });
   const record = useMutation({
     mutationFn: () =>
-      archiveApi.recordDerivation(sealId, { ...request, reference_label: reference, basis_method: chosen }),
+      archiveApi.recordDerivation(sealId, {
+        ...request,
+        reference_label: reference,
+        basis_method: chosen,
+        variation_request_id: variationRequestId ?? null,
+        write_to_variation_bill: !!variationRequestId,
+      }),
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ['estimate-archive'] });
+      onRecorded?.();
       onClose();
     },
   });

@@ -72,6 +72,7 @@ import { ContractExpiryBadge } from './ContractExpiryBadge';
 import { ComplianceGate } from './ComplianceGate';
 import { ContractPartiesPanel } from './ContractPartiesPanel';
 import { ContractSecuritiesPanel } from './ContractSecuritiesPanel';
+import { ContractSealCard } from '@/features/estimate-archive/SealedEstimateEntry';
 import {
   RetentionReleasePanel,
   retentionEventLabel,
@@ -2760,6 +2761,10 @@ export function ContractDetailDrawer({
             contractId={contractId}
             currency={contract.currency}
           />
+
+          {contract.counterparty_type === 'client' && (
+            <ContractSealCard projectId={contract.project_id} contractId={contractId} />
+          )}
 
           {/* Retention, and the way it goes back. It sits under the bonds
               because a release at substantial completion regularly needs the

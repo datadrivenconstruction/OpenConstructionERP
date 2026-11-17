@@ -83,6 +83,7 @@ import { CostAllocationDrawer } from './CostAllocationDrawer';
 import { DrawingRefsDrawer } from './DrawingRefsDrawer';
 import { drawingRefViewerUrl, isOnOutdatedDrawing, useBoqDrawingRefs, type DrawingRef } from './drawingRefsApi';
 import { PdfCompareDrawer } from '@/features/takeoff/PdfCompareDrawer';
+import { SealAsBasisAction } from '@/features/estimate-archive/SealedEstimateEntry';
 import { takeoffApi } from '@/features/takeoff/api';
 import { CostAllocationCoverageBar, CostAllocationCoverageError } from './CostAllocationCoverage';
 import { PositionProcurementDrawer } from '@/features/procurement/PositionProcurementDrawer';
@@ -5377,6 +5378,7 @@ export function BOQEditorPage() {
                 {t('boq.create_budget', { defaultValue: 'Create Budget' })}
               </Button>
             )}
+            <SealAsBasisAction projectId={boq.project_id} boqId={boq.id} locked={!!boq.is_locked} />
             {/* Deep link OUT to the Validation dashboard, carrying this BOQ and
                 its project so the target lands pre-selected (2 clicks to a
                 result). The dashboard persists a server-side report; the

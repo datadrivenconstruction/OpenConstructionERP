@@ -26,12 +26,14 @@ const TONE = {
 export function SealModal({
   projectId,
   boqId,
+  contractId,
   supersedeId,
   onClose,
   onSealed,
 }: {
   projectId: string;
   boqId?: string;
+  contractId?: string;
   supersedeId?: string;
   onClose: () => void;
   onSealed: (sealId: string) => void;
@@ -41,6 +43,7 @@ export function SealModal({
   const boqs = useQuery({ queryKey: ['boqs', projectId], queryFn: () => boqApi.list(projectId) });
   const [form, setForm] = useState<SealCreate>({
     source_boq_id: boqId ?? '',
+    contract_id: contractId ?? null,
     basis_kind: 'award',
     label: '',
     deposit_mode: 'platform',
@@ -56,7 +59,7 @@ export function SealModal({
   }, [boqs.data, form.source_boq_id]);
 
   const preview = useQuery({
-    queryKey: ['estimate-archive', 'preview', form.source_boq_id, form.basis_kind],
+    queryKey: ['estimate-archive', 'preview', form.source_boq_id, form.contract_id ?? null, form.basis_kind],
     queryFn: () => archiveApi.preview(form),
     enabled: !!form.source_boq_id,
   });

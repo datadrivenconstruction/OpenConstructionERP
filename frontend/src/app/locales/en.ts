@@ -59098,6 +59098,14 @@ const resource = {
     "estimate_archive.verified_bad": "Does not match the sealed record",
     "estimate_archive.verified_ok": "Matches the sealed record",
     "estimate_archive.verify": "Verify fingerprint",
+    "estimate_archive.seal_as_basis": "Seal as contract basis",
+    "estimate_archive.contents_locked": "The contents stay sealed until a formal opening starts.",
+    "estimate_archive.entry.sealed_badge": "Sealed",
+    "estimate_archive.entry.contract_card": "Sealed estimate",
+    "estimate_archive.entry.openings_count": "Openings: {{count}}",
+    "estimate_archive.entry.no_seal": "No sealed estimate.",
+    "estimate_archive.entry.seal_award": "Seal the award estimate",
+    "estimate_archive.entry.add_from_seal": "Add from sealed estimate",
   }
 } as { translation: Record<string, string> };
 
