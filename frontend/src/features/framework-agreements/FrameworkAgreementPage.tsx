@@ -29,6 +29,7 @@ import { TabBar } from '@/shared/ui/TabBar';
 import { MoneyDisplay } from '@/shared/ui/MoneyDisplay';
 import { DateDisplay } from '@/shared/ui/DateDisplay';
 import { getErrorMessage } from '@/shared/lib/api';
+import { fmtNumber } from '@/shared/lib/formatters';
 import { useHasPermission } from '@/shared/lib/permissionGates';
 import { useToastStore } from '@/stores/useToastStore';
 import { fwkApi, fwkKeys, type AgreementDetail, type OrderSummary } from './api';
@@ -197,7 +198,7 @@ function Overview({ a }: { a: AgreementDetail }) {
                 <p className="text-sm text-content-primary">
                   {t('framework.cap.sentence', {
                     defaultValue: 'Headroom {{amount}} at {{pct}} % of the cap.',
-                    amount: `${Number(c.headroom).toLocaleString(undefined, { minimumFractionDigits: 2 })} ${a.currency}`,
+                    amount: `${fmtNumber(c.headroom, 2)} ${a.currency}`,
                     pct: c.pct,
                   })}
                 </p>

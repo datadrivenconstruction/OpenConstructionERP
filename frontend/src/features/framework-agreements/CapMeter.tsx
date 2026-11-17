@@ -9,6 +9,7 @@
 import clsx from 'clsx';
 import { AlertTriangle, CircleAlert } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { fmtPercent } from '@/shared/lib/formatters';
 import { capMeterGeometry, type CapMeterInput } from './capMeterGeometry';
 
 export interface CapMeterProps extends CapMeterInput {
@@ -31,12 +32,12 @@ const TONE_TEXT = {
 } as const;
 
 export function CapMeter({ valueText, compact, className, ...input }: CapMeterProps) {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const g = capMeterGeometry(input);
   const pctText =
     g.pct == null
       ? t('framework.cap.no_cap', { defaultValue: 'No cap' })
-      : new Intl.NumberFormat(i18n.language, { style: 'percent', maximumFractionDigits: compact ? 0 : 1 }).format(g.pct / 100);
+      : fmtPercent(g.pct, compact ? 0 : 1);
   const Icon = g.tone === 'error' ? CircleAlert : g.tone === 'warning' ? AlertTriangle : null;
   return (
     <div className={clsx('flex items-center gap-2 min-w-0', className)}>

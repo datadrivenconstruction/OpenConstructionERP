@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { DoorOpen } from 'lucide-react';
 import { Badge, DateDisplay, EmptyState } from '@/shared/ui';
 import type { Opening } from './api';
+import { fmtList } from '@/shared/lib/formatters';
 
 export function OpeningsTable({ rows, showSeal = false }: { rows: Opening[]; showSeal?: boolean }) {
   const { t } = useTranslation();
@@ -43,12 +44,12 @@ export function OpeningsTable({ rows, showSeal = false }: { rows: Opening[]; sho
                 {o.scope === 'full' ? (
                   t('estimate_archive.scope.full', { defaultValue: 'Full' })
                 ) : (
-                  <bdi dir="ltr" className="font-mono text-xs">{o.scope_ordinals.join(', ')}</bdi>
+                  <bdi dir="ltr" className="font-mono text-xs">{fmtList(o.scope_ordinals)}</bdi>
                 )}
               </td>
               <td className="px-3 py-2">{o.requested_by_name || '-'}</td>
               <td className="px-3 py-2 text-xs">
-                {o.attendees.map((a) => `${a.name}${a.organisation ? ` (${a.organisation})` : ''}`).join(', ')}
+                {fmtList(o.attendees.map((a) => `${a.name}${a.organisation ? ` (${a.organisation})` : ''}`))}
               </td>
               <td className="px-3 py-2"><DateDisplay value={o.opened_at} format="datetime" /></td>
               <td className="px-3 py-2"><DateDisplay value={o.closed_at} format="datetime" /></td>

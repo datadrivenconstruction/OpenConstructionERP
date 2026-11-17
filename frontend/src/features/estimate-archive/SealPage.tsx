@@ -33,6 +33,7 @@ import { OpeningsTable } from './OpeningsTable';
 import { PricingDrawer } from './PricingDrawer';
 import { SealModal } from './SealModal';
 import { receiptVariant, useArchiveTerm } from './labels';
+import { fmtList } from '@/shared/lib/formatters';
 
 type Tab = 'contents' | 'openings' | 'receipt' | 'audit';
 
@@ -248,7 +249,7 @@ function SessionBar({ opening, onChanged }: { opening: Opening; onChanged: () =>
           })}
         </span>
         {opening.scope === 'positions' && (
-          <bdi dir="ltr" className="font-mono text-xs">{opening.scope_ordinals.join(', ')}</bdi>
+          <bdi dir="ltr" className="font-mono text-xs">{fmtList(opening.scope_ordinals)}</bdi>
         )}
         <span className="ms-auto flex gap-2">
           {opening.status === 'requested' && (

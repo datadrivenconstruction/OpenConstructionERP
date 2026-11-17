@@ -50,6 +50,8 @@ import { resolveStaleProject } from './staleProject';
 import { isModuleI18nKey } from '@/modules/_i18n';
 import { EstimateCrumb } from '@/shared/ui/EstimateCrumb';
 
+type HeaderProjectRow = { id: string; name: string; color?: string | null; phase?: string | null; project_type?: string | null };
+
 /**
  * Map the English page titles passed from App.tsx routes to i18n keys.
  *
@@ -1825,10 +1827,7 @@ function ProjectSwitcher() {
   // ['projects'] may cache a partial list or an empty one on error.
   const { data: projects, isLoading, isError, isFetching, refetch } = useQuery({
     queryKey: ['projects'],
-    queryFn: () =>
-      fetchProjectList<
-        Array<{ id: string; name: string; color?: string | null; phase?: string | null; project_type?: string | null }>
-      >(),
+    queryFn: () => fetchProjectList<HeaderProjectRow[]>(),
     staleTime: 60_000,
     // Enabled as soon as the component mounts — the Header is always on
     // screen after login, so the list is warm by the time the user clicks.

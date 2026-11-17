@@ -14,6 +14,7 @@ import { getErrorMessage } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
 import { fwkApi, fwkKeys, type CreateAgreementBody } from './api';
 import { agreementPackInputs } from './status';
+import { fmtList } from '@/shared/lib/formatters';
 
 interface Props {
   projectId: string;
@@ -255,7 +256,7 @@ export function CreateAgreementModal({ projectId, onClose, onCreated }: Props) {
           <span role="alert" className="text-xs text-semantic-error">
             {t('framework.duplicates', {
               defaultValue: 'Codes listed twice: {{codes}}. Fix them before saving.',
-              codes: parsed.duplicates.join(', '),
+              codes: fmtList(parsed.duplicates),
             })}
           </span>
         )}

@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { History } from 'lucide-react';
 import { DateDisplay, EmptyState } from '@/shared/ui';
 import type { SealEvent } from './api';
+import { fmtList } from '@/shared/lib/formatters';
 
 /** Newest first; who (name and organisation, kept for good), when, what. */
 export function AuditTimeline({ events }: { events: SealEvent[] }) {
@@ -39,7 +40,7 @@ export function AuditTimeline({ events }: { events: SealEvent[] }) {
               )}
             </div>
             <div className="text-xs text-content-tertiary">
-              {[e.actor_name, e.actor_organisation].filter(Boolean).join(', ') || '-'} ·{' '}
+              {fmtList([e.actor_name ?? '', e.actor_organisation ?? '']) || '-'} ·{' '}
               <span title={e.created_at}>
                 <DateDisplay value={e.created_at} format="datetime" />
               </span>

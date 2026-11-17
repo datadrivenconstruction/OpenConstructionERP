@@ -18,6 +18,7 @@ import { DocTemplateEditor } from './DocTemplateEditor';
 import { DOCUMENT_LANGUAGES, STATUS_VARIANT } from './docTemplateText';
 import { DocumentManagersCard } from './DocumentManagersCard';
 import { languageLabel, useKindLabel, useModuleLabel } from './labels';
+import { fmtList } from '@/shared/lib/formatters';
 
 export function DocTemplatesList({
   channel,
@@ -182,7 +183,7 @@ export function DocTemplatesList({
                 <td className="px-4 py-2.5 font-medium text-content-primary">{kindLabel(r.key, r.label)}</td>
                 <td className="px-4 py-2.5 text-content-secondary">{moduleLabel(r.module)}</td>
                 <td className="px-4 py-2.5">
-                  <span title={r.error_rules.join(', ') || undefined}>
+                  <span title={fmtList(r.error_rules) || undefined}>
                     <Badge variant={STATUS_VARIANT[r.status]} size="sm">
                       {statusLabel(r)}
                     </Badge>

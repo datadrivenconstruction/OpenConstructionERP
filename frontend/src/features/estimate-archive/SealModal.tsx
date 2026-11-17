@@ -14,6 +14,7 @@ import { getErrorMessage } from '@/shared/lib/api';
 import { formatCurrency } from '@/shared/lib/money';
 import { boqApi } from '@/features/boq/api';
 import { archiveApi, type BasisKind, type SealCheck, type SealCreate } from './api';
+import { fmtList } from '@/shared/lib/formatters';
 
 const ICONS = { ok: CheckCircle2, warning: AlertTriangle, error: XCircle, info: Info } as const;
 const TONE = {
@@ -90,7 +91,7 @@ export function SealModal({
       return t('estimate_archive.check.markups_ok', {
         defaultValue: 'Markup stack ({{count}}): {{names}}',
         count: p.markup_names.length,
-        names: p.markup_names.join(', '),
+        names: fmtList(p.markup_names),
       });
     }
     return c.message;

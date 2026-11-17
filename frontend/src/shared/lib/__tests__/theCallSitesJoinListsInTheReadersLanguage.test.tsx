@@ -194,6 +194,7 @@ const KEPT_AS_PLAIN_COMMAS: readonly Excluded[] = [
   { file: 'features/subcontractors/SubcontractorsPage.tsx', sites: 1, why: 'round-trip form field' },
   { file: 'features/match-elements/StageAdjustSheet.tsx', sites: 2, why: 'round-trip form field' },
   { file: 'features/meetings/MeetingGlossaryDialog.tsx', sites: 2, why: 'round-trip form field' },
+  { file: 'features/estimate-archive/OpeningModal.tsx', sites: 1, why: 'round-trip form field' },
   { file: 'features/photos/model.ts', sites: 1, why: 'round-trip form field' },
   // `formatList` there reads like a display helper and is not one: its own test
   // asserts that `parseList(formatList(x))` round-trips. The name is the trap.
@@ -261,7 +262,7 @@ describe('the rest of the product', () => {
     // root, or a regex that quietly stopped matching, returns an empty map and
     // every assertion after this one passes while checking nothing at all.
     expect(files.length).toBeGreaterThan(2000);
-    expect([...found.values()].reduce((a, b) => a + b, 0)).toBe(38);
+    expect([...found.values()].reduce((a, b) => a + b, 0)).toBe(39);
   });
 
   it('routes every list a reader sees through the helper, except the recorded ones', () => {
