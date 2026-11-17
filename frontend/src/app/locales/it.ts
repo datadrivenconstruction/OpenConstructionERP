@@ -66092,6 +66092,14 @@ const resource = {
     "estimate_archive.verified_bad": "Non corrisponde al record sigillato",
     "estimate_archive.verified_ok": "Corrisponde al record sigillato",
     "estimate_archive.verify": "Verifica impronta",
+    "estimate_archive.seal_as_basis": "Sigilla come base contrattuale",
+    "estimate_archive.contents_locked": "Il contenuto resta sigillato fino all'avvio di un'apertura formale.",
+    "estimate_archive.entry.sealed_badge": "Sigillato",
+    "estimate_archive.entry.contract_card": "Stima sigillata",
+    "estimate_archive.entry.openings_count": "Aperture: {{count}}",
+    "estimate_archive.entry.no_seal": "Nessuna stima sigillata.",
+    "estimate_archive.entry.seal_award": "Sigilla la stima di aggiudicazione",
+    "estimate_archive.entry.add_from_seal": "Aggiungi dalla stima sigillata",
   }
 } as { translation: Record<string, string> };
 

@@ -64583,6 +64583,14 @@ const resource = {
     "estimate_archive.verified_bad": "ไม่ตรงกับบันทึกที่ผนึก",
     "estimate_archive.verified_ok": "ตรงกับบันทึกที่ผนึก",
     "estimate_archive.verify": "ตรวจลายนิ้วมือ",
+    "estimate_archive.seal_as_basis": "ปิดผนึกเป็นฐานของสัญญา",
+    "estimate_archive.contents_locked": "เนื้อหาจะยังคงถูกปิดผนึกจนกว่าจะเริ่มการเปิดซองอย่างเป็นทางการ",
+    "estimate_archive.entry.sealed_badge": "ปิดผนึกแล้ว",
+    "estimate_archive.entry.contract_card": "ประมาณการที่ปิดผนึก",
+    "estimate_archive.entry.openings_count": "จำนวนการเปิด: {{count}}",
+    "estimate_archive.entry.no_seal": "ไม่มีประมาณการที่ปิดผนึก",
+    "estimate_archive.entry.seal_award": "ปิดผนึกประมาณการที่ได้รับการคัดเลือก",
+    "estimate_archive.entry.add_from_seal": "เพิ่มจากประมาณการที่ปิดผนึก",
   }
 } as { translation: Record<string, string> };
 

@@ -64814,6 +64814,14 @@ const resource = {
     "estimate_archive.verified_bad": "سیل شدہ ریکارڈ سے نہیں ملتا",
     "estimate_archive.verified_ok": "سیل شدہ ریکارڈ سے ملتا ہے",
     "estimate_archive.verify": "فنگر پرنٹ کی تصدیق کریں",
+    "estimate_archive.seal_as_basis": "معاہدے کی بنیاد کے طور پر سیل کریں",
+    "estimate_archive.contents_locked": "رسمی کھولنے کا عمل شروع ہونے تک مواد سیل رہے گا۔",
+    "estimate_archive.entry.sealed_badge": "سیل شدہ",
+    "estimate_archive.entry.contract_card": "سیل شدہ تخمینہ",
+    "estimate_archive.entry.openings_count": "کھولنے کی تعداد: {{count}}",
+    "estimate_archive.entry.no_seal": "کوئی سیل شدہ تخمینہ نہیں۔",
+    "estimate_archive.entry.seal_award": "ایوارڈ کا تخمینہ سیل کریں",
+    "estimate_archive.entry.add_from_seal": "سیل شدہ تخمینے سے شامل کریں",
   }
 } as { translation: Record<string, string> };
 

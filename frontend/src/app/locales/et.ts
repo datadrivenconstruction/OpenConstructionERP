@@ -64798,6 +64798,14 @@ const resource = {
     "estimate_archive.verified_bad": "Ei vasta pitseeritud kirjele",
     "estimate_archive.verified_ok": "Vastab pitseeritud kirjele",
     "estimate_archive.verify": "Kontrolli sõrmejälge",
+    "estimate_archive.seal_as_basis": "Plommi lepingu aluseks",
+    "estimate_archive.contents_locked": "Sisu jääb suletuks, kuni algab ametlik avamine.",
+    "estimate_archive.entry.sealed_badge": "Plommitud",
+    "estimate_archive.entry.contract_card": "Plommitud kalkulatsioon",
+    "estimate_archive.entry.openings_count": "Avamisi: {{count}}",
+    "estimate_archive.entry.no_seal": "Plommitud kalkulatsioon puudub.",
+    "estimate_archive.entry.seal_award": "Plommi hankeotsuse kalkulatsioon",
+    "estimate_archive.entry.add_from_seal": "Lisa plommitud kalkulatsioonist",
   }
 } as { translation: Record<string, string> };
 

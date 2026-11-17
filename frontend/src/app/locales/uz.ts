@@ -65780,6 +65780,14 @@ const resource = {
     "estimate_archive.verified_bad": "Muhrlangan yozuvga mos kelmaydi",
     "estimate_archive.verified_ok": "Muhrlangan yozuvga mos keladi",
     "estimate_archive.verify": "Barmoq izini tekshirish",
+    "estimate_archive.seal_as_basis": "Shartnoma asosi sifatida muhrlash",
+    "estimate_archive.contents_locked": "Rasmiy ochish boshlanmaguncha mazmuni muhrlangan holatda qoladi.",
+    "estimate_archive.entry.sealed_badge": "Muhrlangan",
+    "estimate_archive.entry.contract_card": "Muhrlangan smeta",
+    "estimate_archive.entry.openings_count": "Ochishlar: {{count}}",
+    "estimate_archive.entry.no_seal": "Muhrlangan smeta yo'q.",
+    "estimate_archive.entry.seal_award": "G'olib smetasini muhrlash",
+    "estimate_archive.entry.add_from_seal": "Muhrlangan smetadan qo'shish",
   }
 } as { translation: Record<string, string> };
 

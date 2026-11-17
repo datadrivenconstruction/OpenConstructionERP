@@ -66187,6 +66187,14 @@ const resource = {
     "estimate_archive.verified_bad": "Neodpovídá zapečetěnému záznamu",
     "estimate_archive.verified_ok": "Odpovídá zapečetěnému záznamu",
     "estimate_archive.verify": "Ověřit otisk",
+    "estimate_archive.seal_as_basis": "Zapečetit jako základ smlouvy",
+    "estimate_archive.contents_locked": "Obsah zůstane zapečetěn, dokud nezačne formální otevírání.",
+    "estimate_archive.entry.sealed_badge": "Zapečetěno",
+    "estimate_archive.entry.contract_card": "Zapečetěný rozpočet",
+    "estimate_archive.entry.openings_count": "Otevření: {{count}}",
+    "estimate_archive.entry.no_seal": "Žádný zapečetěný rozpočet.",
+    "estimate_archive.entry.seal_award": "Zapečetit nabídkový rozpočet",
+    "estimate_archive.entry.add_from_seal": "Přidat ze zapečetěného rozpočtu",
   }
 } as { translation: Record<string, string> };
 

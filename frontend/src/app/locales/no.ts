@@ -64848,6 +64848,14 @@ const resource = {
     "estimate_archive.verified_bad": "Stemmer ikke med den forseglede posten",
     "estimate_archive.verified_ok": "Stemmer med den forseglede posten",
     "estimate_archive.verify": "Kontroller fingeravtrykk",
+    "estimate_archive.seal_as_basis": "Forsegl som kontraktsgrunnlag",
+    "estimate_archive.contents_locked": "Innholdet forblir forseglet til en formell åpning starter.",
+    "estimate_archive.entry.sealed_badge": "Forseglet",
+    "estimate_archive.entry.contract_card": "Forseglet kalkyle",
+    "estimate_archive.entry.openings_count": "Åpninger: {{count}}",
+    "estimate_archive.entry.no_seal": "Ingen forseglet kalkyle.",
+    "estimate_archive.entry.seal_award": "Forsegl tildelingskalkylen",
+    "estimate_archive.entry.add_from_seal": "Legg til fra forseglet kalkyle",
   }
 } as { translation: Record<string, string> };
 

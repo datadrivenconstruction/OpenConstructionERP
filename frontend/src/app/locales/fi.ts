@@ -64852,6 +64852,14 @@ const resource = {
     "estimate_archive.verified_bad": "Ei vastaa sinetöityä tietuetta",
     "estimate_archive.verified_ok": "Vastaa sinetöityä tietuetta",
     "estimate_archive.verify": "Tarkista sormenjälki",
+    "estimate_archive.seal_as_basis": "Sinetöi sopimusperusteeksi",
+    "estimate_archive.contents_locked": "Sisältö pysyy sinetöitynä, kunnes virallinen avaaminen alkaa.",
+    "estimate_archive.entry.sealed_badge": "Sinetöity",
+    "estimate_archive.entry.contract_card": "Sinetöity kustannusarvio",
+    "estimate_archive.entry.openings_count": "Avaukset: {{count}}",
+    "estimate_archive.entry.no_seal": "Ei sinetöityä kustannusarviota.",
+    "estimate_archive.entry.seal_award": "Sinetöi hankinnan kustannusarvio",
+    "estimate_archive.entry.add_from_seal": "Lisää sinetöidystä kustannusarviosta",
   }
 } as { translation: Record<string, string> };
 

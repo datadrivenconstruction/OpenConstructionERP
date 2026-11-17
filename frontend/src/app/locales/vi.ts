@@ -64591,6 +64591,14 @@ const resource = {
     "estimate_archive.verified_bad": "Không khớp với bản ghi niêm phong",
     "estimate_archive.verified_ok": "Khớp với bản ghi niêm phong",
     "estimate_archive.verify": "Xác minh dấu vân tay",
+    "estimate_archive.seal_as_basis": "Niêm phong làm cơ sở hợp đồng",
+    "estimate_archive.contents_locked": "Nội dung được giữ niêm phong cho đến khi bắt đầu mở thầu chính thức.",
+    "estimate_archive.entry.sealed_badge": "Đã niêm phong",
+    "estimate_archive.entry.contract_card": "Dự toán đã niêm phong",
+    "estimate_archive.entry.openings_count": "Số lần mở: {{count}}",
+    "estimate_archive.entry.no_seal": "Chưa có dự toán niêm phong.",
+    "estimate_archive.entry.seal_award": "Niêm phong dự toán trúng thầu",
+    "estimate_archive.entry.add_from_seal": "Thêm từ dự toán đã niêm phong",
   }
 } as { translation: Record<string, string> };
 

@@ -65729,6 +65729,14 @@ const resource = {
     "estimate_archive.verified_bad": "Mühürlü kayıtla eşleşmiyor",
     "estimate_archive.verified_ok": "Mühürlü kayıtla eşleşiyor",
     "estimate_archive.verify": "Parmak izini doğrula",
+    "estimate_archive.seal_as_basis": "Sözleşme esası olarak mühürle",
+    "estimate_archive.contents_locked": "Resmi açılış başlayana kadar içerik mühürlü kalır.",
+    "estimate_archive.entry.sealed_badge": "Mühürlü",
+    "estimate_archive.entry.contract_card": "Mühürlü keşif",
+    "estimate_archive.entry.openings_count": "Açılış sayısı: {{count}}",
+    "estimate_archive.entry.no_seal": "Mühürlü keşif yok.",
+    "estimate_archive.entry.seal_award": "İhale keşfini mühürle",
+    "estimate_archive.entry.add_from_seal": "Mühürlü keşiften ekle",
   }
 } as { translation: Record<string, string> };
 

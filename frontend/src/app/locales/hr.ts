@@ -65220,6 +65220,14 @@ const resource = {
     "estimate_archive.verified_bad": "Ne odgovara zapečaćenom zapisu",
     "estimate_archive.verified_ok": "Odgovara zapečaćenom zapisu",
     "estimate_archive.verify": "Provjeri otisak",
+    "estimate_archive.seal_as_basis": "Zapečati kao osnovu ugovora",
+    "estimate_archive.contents_locked": "Sadržaj ostaje zapečaćen dok ne započne službeno otvaranje.",
+    "estimate_archive.entry.sealed_badge": "Zapečaćeno",
+    "estimate_archive.entry.contract_card": "Zapečaćena procjena",
+    "estimate_archive.entry.openings_count": "Otvaranja: {{count}}",
+    "estimate_archive.entry.no_seal": "Nema zapečaćene procjene.",
+    "estimate_archive.entry.seal_award": "Zapečati procjenu za dodjelu",
+    "estimate_archive.entry.add_from_seal": "Dodaj iz zapečaćene procjene",
   }
 } as { translation: Record<string, string> };
 

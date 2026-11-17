@@ -65729,6 +65729,14 @@ const resource = {
     "estimate_archive.verified_bad": "Komt niet overeen met het verzegelde record",
     "estimate_archive.verified_ok": "Komt overeen met het verzegelde record",
     "estimate_archive.verify": "Vingerafdruk controleren",
+    "estimate_archive.seal_as_basis": "Verzegelen als contractbasis",
+    "estimate_archive.contents_locked": "De inhoud blijft verzegeld tot een formele opening start.",
+    "estimate_archive.entry.sealed_badge": "Verzegeld",
+    "estimate_archive.entry.contract_card": "Verzegelde raming",
+    "estimate_archive.entry.openings_count": "Openingen: {{count}}",
+    "estimate_archive.entry.no_seal": "Geen verzegelde raming.",
+    "estimate_archive.entry.seal_award": "Gunningsraming verzegelen",
+    "estimate_archive.entry.add_from_seal": "Toevoegen vanuit verzegelde raming",
   }
 } as { translation: Record<string, string> };
 

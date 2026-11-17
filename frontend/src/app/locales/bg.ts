@@ -64852,6 +64852,14 @@ const resource = {
     "estimate_archive.verified_bad": "Не съвпада със запечатания запис",
     "estimate_archive.verified_ok": "Съвпада със запечатания запис",
     "estimate_archive.verify": "Провери отпечатъка",
+    "estimate_archive.seal_as_basis": "Запечатване като основа на договора",
+    "estimate_archive.contents_locked": "Съдържанието остава запечатано, докато не започне официално отваряне.",
+    "estimate_archive.entry.sealed_badge": "Запечатано",
+    "estimate_archive.entry.contract_card": "Запечатана сметка",
+    "estimate_archive.entry.openings_count": "Отваряния: {{count}}",
+    "estimate_archive.entry.no_seal": "Няма запечатана сметка.",
+    "estimate_archive.entry.seal_award": "Запечатване на сметката за възлагане",
+    "estimate_archive.entry.add_from_seal": "Добавяне от запечатаната сметка",
   }
 } as { translation: Record<string, string> };
 

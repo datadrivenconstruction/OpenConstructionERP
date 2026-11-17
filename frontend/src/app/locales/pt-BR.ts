@@ -59734,6 +59734,14 @@ const resource = {
     "estimate_archive.verified_bad": "Não confere com o registro lacrado",
     "estimate_archive.verified_ok": "Confere com o registro lacrado",
     "estimate_archive.verify": "Verificar impressão digital",
+    "estimate_archive.seal_as_basis": "Selar como base contratual",
+    "estimate_archive.contents_locked": "O conteúdo permanece selado até o início da abertura formal.",
+    "estimate_archive.entry.sealed_badge": "Selado",
+    "estimate_archive.entry.contract_card": "Orçamento selado",
+    "estimate_archive.entry.openings_count": "Aberturas: {{count}}",
+    "estimate_archive.entry.no_seal": "Nenhum orçamento selado.",
+    "estimate_archive.entry.seal_award": "Selar o orçamento da adjudicação",
+    "estimate_archive.entry.add_from_seal": "Adicionar a partir do orçamento selado",
     // --- /Draft lender preparation ---
   }
 } as { translation: Record<string, string> };

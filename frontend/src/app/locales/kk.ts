@@ -64809,6 +64809,14 @@ const resource = {
     "estimate_archive.verified_bad": "Мөрленген жазбаға сәйкес емес",
     "estimate_archive.verified_ok": "Мөрленген жазбаға сәйкес",
     "estimate_archive.verify": "Саусақ ізін тексеру",
+    "estimate_archive.seal_as_basis": "Шарт негізі ретінде мөрлеу",
+    "estimate_archive.contents_locked": "Ресми ашу басталғанға дейін мазмұны мөрленген күйде қалады.",
+    "estimate_archive.entry.sealed_badge": "Мөрленген",
+    "estimate_archive.entry.contract_card": "Мөрленген смета",
+    "estimate_archive.entry.openings_count": "Ашылым саны: {{count}}",
+    "estimate_archive.entry.no_seal": "Мөрленген смета жоқ.",
+    "estimate_archive.entry.seal_award": "Жеңіп алған сметаны мөрлеу",
+    "estimate_archive.entry.add_from_seal": "Мөрленген сметадан қосу",
   }
 } as { translation: Record<string, string> };
 

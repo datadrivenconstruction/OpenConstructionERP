@@ -65210,6 +65210,14 @@ const resource = {
     "estimate_archive.verified_bad": "Nu corespunde înregistrării sigilate",
     "estimate_archive.verified_ok": "Corespunde înregistrării sigilate",
     "estimate_archive.verify": "Verificați amprenta",
+    "estimate_archive.seal_as_basis": "Sigilează ca bază contractuală",
+    "estimate_archive.contents_locked": "Conținutul rămâne sigilat până la începerea deschiderii formale.",
+    "estimate_archive.entry.sealed_badge": "Sigilat",
+    "estimate_archive.entry.contract_card": "Deviz sigilat",
+    "estimate_archive.entry.openings_count": "Deschideri: {{count}}",
+    "estimate_archive.entry.no_seal": "Niciun deviz sigilat.",
+    "estimate_archive.entry.seal_award": "Sigilează devizul câștigător",
+    "estimate_archive.entry.add_from_seal": "Adaugă din devizul sigilat",
   }
 } as { translation: Record<string, string> };
 

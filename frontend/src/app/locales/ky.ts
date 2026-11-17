@@ -64965,6 +64965,14 @@ const resource = {
     "estimate_archive.verified_bad": "Мөөрлөнгөн жазууга дал келбейт",
     "estimate_archive.verified_ok": "Мөөрлөнгөн жазууга дал келет",
     "estimate_archive.verify": "Манжа изин текшерүү",
+    "estimate_archive.seal_as_basis": "Келишимдин негизи катары мөөрлөө",
+    "estimate_archive.contents_locked": "Мазмуну расмий ачылыш башталмайынча мөөрлөнүп турат.",
+    "estimate_archive.entry.sealed_badge": "Мөөрлөнгөн",
+    "estimate_archive.entry.contract_card": "Мөөрлөнгөн смета",
+    "estimate_archive.entry.openings_count": "Ачылыштар: {{count}}",
+    "estimate_archive.entry.no_seal": "Мөөрлөнгөн смета жок.",
+    "estimate_archive.entry.seal_award": "Утуп алган сметаны мөөрлөө",
+    "estimate_archive.entry.add_from_seal": "Мөөрлөнгөн сметадан кошуу",
   }
 } as { translation: Record<string, string> };
 

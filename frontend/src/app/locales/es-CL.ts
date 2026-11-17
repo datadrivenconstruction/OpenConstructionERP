@@ -59698,6 +59698,14 @@ const resource = {
     "estimate_archive.verified_bad": "No coincide con el registro sellado",
     "estimate_archive.verified_ok": "Coincide con el registro sellado",
     "estimate_archive.verify": "Verificar huella",
+    "estimate_archive.seal_as_basis": "Sellar como base contractual",
+    "estimate_archive.contents_locked": "El contenido permanece sellado hasta iniciar una apertura formal.",
+    "estimate_archive.entry.sealed_badge": "Sellado",
+    "estimate_archive.entry.contract_card": "Presupuesto sellado",
+    "estimate_archive.entry.openings_count": "Aperturas: {{count}}",
+    "estimate_archive.entry.no_seal": "No hay presupuesto sellado.",
+    "estimate_archive.entry.seal_award": "Sellar el presupuesto de adjudicación",
+    "estimate_archive.entry.add_from_seal": "Agregar desde el presupuesto sellado",
     // --- /Draft lender preparation ---
   }
 } as { translation: Record<string, string> };
