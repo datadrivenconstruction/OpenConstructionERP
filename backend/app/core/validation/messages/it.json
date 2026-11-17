@@ -2232,5 +2232,55 @@
       "fail": "Codice punto {point_id} duplicato con coordinate diverse.",
       "suggestion": "Tenete una sola lettura: eliminate il set con quella errata e reimportatelo."
     }
+  },
+  "land_parcels": {
+    "area_mismatch": {
+      "fail": "Particella {id}: la superficie calcolata {a} m2 differisce da quella catastale {l} m2 oltre la tolleranza ({t}).",
+      "suggestion": "Controlla i punti di confine con la visura, o annota perché le due superfici differiscono."
+    },
+    "ring_invalid": {
+      "fail": "Particella {id}: contorno non chiuso o autointersecante.",
+      "suggestion": "Correggi i punti di confine in modo che girino una sola volta attorno alla particella senza incrociarsi."
+    },
+    "zone_not_acquired": {
+      "fail": "L'area di lavoro si sovrappone alla particella {id} non ancora acquisita ({area} m2).",
+      "suggestion": "Acquisisci la particella o concorda l'accesso prima dell'inizio dei lavori, oppure sposta l'area di lavoro."
+    },
+    "overlap": {
+      "fail": "Le particelle {a} e {b} si sovrappongono per {area} m2.",
+      "suggestion": "Correggi il confine comune in modo che entrambe le particelle usino gli stessi punti."
+    },
+    "gap": {
+      "fail": "Spazio di {gap} m tra le particelle {a} e {b}.",
+      "suggestion": "Fai usare gli stessi punti di confine a entrambe le particelle, o conferma che la fascia appartiene a un'altra particella."
+    },
+    "id_format": {
+      "fail": "L'identificativo {id} non rispetta il formato {label} (per esempio {example}).",
+      "suggestion": "Copia l'identificativo esattamente come lo scrive il registro."
+    },
+    "pdf": {
+      "title": "Piano particellare",
+      "project": "Progetto",
+      "crs": "Sistema di coordinate",
+      "method": "Metodo",
+      "method_value": "Superficie dalle coordinate di confine (formula di Gauss), arrotondata a {decimals} decimali, m2",
+      "printed": "Stampato da",
+      "legal": "Superficie catastale (m2)",
+      "computed": "Calcolata (m2)",
+      "diff": "Differenza (m2)",
+      "status": "Stato",
+      "rights": "Diritti",
+      "cost": "Costo",
+      "findings": "Rilievi",
+      "total": "Totale, {count} particelle",
+      "acquired_of": "Acquisite {acquired} di {total}",
+      "findings_title": "Rilievi",
+      "no_findings": "Nessun rilievo.",
+      "disclaimer": "Proprietari e diritti sono mostrati come registrati in questo progetto. Questo piano non è un parere legale né una visura.",
+      "status_needed": "Necessaria",
+      "status_negotiating": "In trattativa",
+      "status_acquired": "Acquisita",
+      "status_expropriation": "Esproprio"
+    }
   }
 }

@@ -2232,5 +2232,55 @@
       "fail": "Korduv punkti tunnus {point_id} erinevate koordinaatidega.",
       "suggestion": "Jätke üks mõõtmine: kustutage vale mõõtmisega punktikogu ja importige see uuesti."
     }
+  },
+  "land_parcels": {
+    "area_mismatch": {
+      "fail": "Üksus {id}: arvutatud pindala {a} m2 erineb registripindalast {l} m2 rohkem kui lubatud ({t}).",
+      "suggestion": "Kontrolli piiripunkte registriväljavõtte vastu või märgi, miks pindalad erinevad."
+    },
+    "ring_invalid": {
+      "fail": "Üksus {id}: piir pole suletud või lõikab iseennast.",
+      "suggestion": "Paranda piiripunktid nii, et need käiksid üksusest ühe korra ümber ilma ristumata."
+    },
+    "zone_not_acquired": {
+      "fail": "Tööala kattub veel omandamata üksusega {id} ({area} m2).",
+      "suggestion": "Omanda üksus või lepi juurdepääs kokku enne tööde algust või nihuta tööala."
+    },
+    "overlap": {
+      "fail": "Üksused {a} ja {b} kattuvad {area} m2 ulatuses.",
+      "suggestion": "Paranda ühine piir nii, et mõlemad üksused kasutaksid samu punkte."
+    },
+    "gap": {
+      "fail": "{gap} m vahe üksuste {a} ja {b} vahel.",
+      "suggestion": "Lase mõlemal üksusel kasutada samu piiripunkte või kinnita, et riba kuulub teisele üksusele."
+    },
+    "id_format": {
+      "fail": "Tunnus {id} ei vasta vormingule {label} (näiteks {example}).",
+      "suggestion": "Kopeeri tunnus täpselt nii, nagu register selle kirjutab."
+    },
+    "pdf": {
+      "title": "Katastriüksuste loend",
+      "project": "Projekt",
+      "crs": "Koordinaatsüsteem",
+      "method": "Meetod",
+      "method_value": "Pindala piirikoordinaatidest (Gaussi valem), ümardatud {decimals} kümnendkohani, m2",
+      "printed": "Prindis",
+      "legal": "Registripindala (m2)",
+      "computed": "Arvutatud (m2)",
+      "diff": "Vahe (m2)",
+      "status": "Olek",
+      "rights": "Õigused",
+      "cost": "Maksumus",
+      "findings": "Leiud",
+      "total": "Kokku, üksusi {count}",
+      "acquired_of": "Omandatud {acquired} / {total}",
+      "findings_title": "Leiud",
+      "no_findings": "Leide pole.",
+      "disclaimer": "Omanikud ja õigused on näidatud nii, nagu need on selles projektis kirjas. Loend ei ole õiguslik arvamus ega registriväljavõte.",
+      "status_needed": "Vajalik",
+      "status_negotiating": "Läbirääkimised",
+      "status_acquired": "Omandatud",
+      "status_expropriation": "Võõrandamine"
+    }
   }
 }

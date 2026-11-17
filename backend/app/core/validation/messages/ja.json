@@ -2232,5 +2232,55 @@
       "fail": "点番号 {point_id} が異なる座標で重複しています。",
       "suggestion": "測定値を一つ残してください。誤った値を含むセットを削除し、再度インポートしてください。"
     }
+  },
+  "land_parcels": {
+    "area_mismatch": {
+      "fail": "筆 {id}: 計算面積 {a} m2 と登記面積 {l} m2 の差が許容差を超えています ({t})。",
+      "suggestion": "境界点を登記事項証明と照合するか、面積が異なる理由を記録してください。"
+    },
+    "ring_invalid": {
+      "fail": "筆 {id}: 境界が閉じていないか、自己交差しています。",
+      "suggestion": "境界点が交差せずに筆を一周するよう修正してください。"
+    },
+    "zone_not_acquired": {
+      "fail": "作業範囲が未取得の筆 {id} に掛かっています ({area} m2)。",
+      "suggestion": "工事開始前に筆を取得するか立入りを合意する、または作業範囲を移してください。"
+    },
+    "overlap": {
+      "fail": "筆 {a} と {b} が {area} m2 重なっています。",
+      "suggestion": "両方の筆が同じ点を使うよう共通の境界を修正してください。"
+    },
+    "gap": {
+      "fail": "筆 {a} と {b} の間に {gap} m の隙間があります。",
+      "suggestion": "両方の筆で同じ境界点を使うか、その帯が別の筆に属することを確認してください。"
+    },
+    "id_format": {
+      "fail": "地番 {id} は {label} の形式に合いません (例: {example})。",
+      "suggestion": "地番は登記簿の表記どおりに写してください。"
+    },
+    "pdf": {
+      "title": "用地調書",
+      "project": "プロジェクト",
+      "crs": "座標系",
+      "method": "方法",
+      "method_value": "境界座標による面積 (座標法)、小数 {decimals} 桁に丸め、m2",
+      "printed": "印刷者",
+      "legal": "登記面積 (m2)",
+      "computed": "計算面積 (m2)",
+      "diff": "差 (m2)",
+      "status": "状況",
+      "rights": "権利",
+      "cost": "費用",
+      "findings": "指摘",
+      "total": "合計 {count} 筆",
+      "acquired_of": "取得済み {acquired} / {total}",
+      "findings_title": "指摘",
+      "no_findings": "指摘はありません。",
+      "disclaimer": "所有者と権利はこのプロジェクトに記録されたとおりに示しています。本調書は法的意見でも登記事項証明でもありません。",
+      "status_needed": "必要",
+      "status_negotiating": "交渉中",
+      "status_acquired": "取得済み",
+      "status_expropriation": "収用"
+    }
   }
 }

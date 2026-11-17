@@ -2232,5 +2232,55 @@
       "fail": "점 번호 {point_id}이(가) 서로 다른 좌표로 중복되었습니다.",
       "suggestion": "측정값 하나만 남기세요. 잘못된 값이 있는 세트를 삭제하고 다시 가져오세요."
     }
+  },
+  "land_parcels": {
+    "area_mismatch": {
+      "fail": "필지 {id}: 계산 면적 {a} m2가 대장 면적 {l} m2와 허용 오차보다 크게 다릅니다 ({t}).",
+      "suggestion": "경계점을 등록부 등본과 대조하거나 면적이 다른 이유를 기록하세요."
+    },
+    "ring_invalid": {
+      "fail": "필지 {id}: 경계가 닫히지 않았거나 스스로 교차합니다.",
+      "suggestion": "경계점이 교차 없이 필지를 한 바퀴 돌도록 고치세요."
+    },
+    "zone_not_acquired": {
+      "fail": "작업 구역이 아직 취득하지 않은 필지 {id}에 걸칩니다 ({area} m2).",
+      "suggestion": "공사 전에 필지를 취득하거나 출입을 합의하거나, 작업 구역을 옮기세요."
+    },
+    "overlap": {
+      "fail": "필지 {a}와 {b}가 {area} m2 겹칩니다.",
+      "suggestion": "두 필지가 같은 점을 쓰도록 공통 경계를 고치세요."
+    },
+    "gap": {
+      "fail": "필지 {a}와 {b} 사이에 {gap} m 틈이 있습니다.",
+      "suggestion": "두 필지가 같은 경계점을 쓰게 하거나 그 띠가 다른 필지에 속함을 확인하세요."
+    },
+    "id_format": {
+      "fail": "지번 {id}이(가) {label} 형식과 맞지 않습니다 (예: {example}).",
+      "suggestion": "지번을 등록부에 적힌 그대로 옮기세요."
+    },
+    "pdf": {
+      "title": "필지 조서",
+      "project": "프로젝트",
+      "crs": "좌표계",
+      "method": "방법",
+      "method_value": "경계 좌표로 면적 계산 (좌표법), 소수 {decimals}자리 반올림, m2",
+      "printed": "인쇄자",
+      "legal": "대장 면적 (m2)",
+      "computed": "계산 면적 (m2)",
+      "diff": "차이 (m2)",
+      "status": "상태",
+      "rights": "권리",
+      "cost": "비용",
+      "findings": "지적 사항",
+      "total": "합계, {count}필지",
+      "acquired_of": "취득 {acquired} / {total}",
+      "findings_title": "지적 사항",
+      "no_findings": "지적 사항이 없습니다.",
+      "disclaimer": "소유자와 권리는 이 프로젝트에 기록된 대로 표시됩니다. 이 조서는 법률 의견이나 등록부 등본이 아닙니다.",
+      "status_needed": "필요",
+      "status_negotiating": "협의 중",
+      "status_acquired": "취득",
+      "status_expropriation": "수용"
+    }
   }
 }

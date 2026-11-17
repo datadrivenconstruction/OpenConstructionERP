@@ -2232,5 +2232,55 @@
       "fail": "Pistetunnus {point_id} esiintyy kahdesti eri koordinaatein.",
       "suggestion": "Säilytä yksi mittaus: poista pistejoukko, jossa on väärä, ja tuo se uudelleen."
     }
+  },
+  "land_parcels": {
+    "area_mismatch": {
+      "fail": "Kiinteistö {id}: laskettu pinta-ala {a} m2 poikkeaa rekisteripinta-alasta {l} m2 enemmän kuin toleranssi ({t}).",
+      "suggestion": "Tarkista rajapisteet rekisteriotetta vasten tai kirjaa, miksi pinta-alat eroavat."
+    },
+    "ring_invalid": {
+      "fail": "Kiinteistö {id}: raja ei ole suljettu tai leikkaa itseään.",
+      "suggestion": "Korjaa rajapisteet niin, että ne kiertävät kiinteistön kerran risteämättä."
+    },
+    "zone_not_acquired": {
+      "fail": "Työalue ulottuu vielä hankkimattomalle kiinteistölle {id} ({area} m2).",
+      "suggestion": "Hanki kiinteistö tai sovi pääsystä ennen töiden alkua, tai siirrä työaluetta."
+    },
+    "overlap": {
+      "fail": "Kiinteistöt {a} ja {b} menevät päällekkäin {area} m2.",
+      "suggestion": "Korjaa yhteinen raja niin, että molemmat kiinteistöt käyttävät samoja pisteitä."
+    },
+    "gap": {
+      "fail": "{gap} m:n rako kiinteistöjen {a} ja {b} välillä.",
+      "suggestion": "Käytä molemmissa kiinteistöissä samoja rajapisteitä tai vahvista, että kaista kuuluu toiseen kiinteistöön."
+    },
+    "id_format": {
+      "fail": "Tunnus {id} ei vastaa muotoa {label} (esimerkiksi {example}).",
+      "suggestion": "Kopioi tunnus täsmälleen niin kuin rekisteri sen kirjoittaa."
+    },
+    "pdf": {
+      "title": "Kiinteistöluettelo",
+      "project": "Hanke",
+      "crs": "Koordinaattijärjestelmä",
+      "method": "Menetelmä",
+      "method_value": "Pinta-ala rajakoordinaateista (Gaussin kaava), pyöristetty {decimals} desimaaliin, m2",
+      "printed": "Tulostanut",
+      "legal": "Rekisteripinta-ala (m2)",
+      "computed": "Laskettu (m2)",
+      "diff": "Erotus (m2)",
+      "status": "Tila",
+      "rights": "Oikeudet",
+      "cost": "Kustannus",
+      "findings": "Havainnot",
+      "total": "Yhteensä, kiinteistöjä {count}",
+      "acquired_of": "Hankittu {acquired} / {total}",
+      "findings_title": "Havainnot",
+      "no_findings": "Ei havaintoja.",
+      "disclaimer": "Omistajat ja oikeudet näytetään sellaisina kuin ne on kirjattu tähän hankkeeseen. Luettelo ei ole oikeudellinen lausunto eikä rekisteriote.",
+      "status_needed": "Tarvitaan",
+      "status_negotiating": "Neuvottelu",
+      "status_acquired": "Hankittu",
+      "status_expropriation": "Lunastus"
+    }
   }
 }

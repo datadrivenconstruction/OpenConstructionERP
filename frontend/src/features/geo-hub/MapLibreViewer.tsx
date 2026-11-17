@@ -100,6 +100,8 @@ interface MapLibreViewerProps {
   /** While true a click on the map is handed to ``onMapClick``. */
   pickMode?: boolean;
   onMapClick?: (coords: { lat: number; lon: number }) => void;
+  /** Extra map layers (``Source``/``Layer``) drawn inside the map, e.g. survey parcels. */
+  children?: ReactNode;
 }
 
 // Initial camera: whole-world for the global view, tighter once we have a
@@ -162,6 +164,7 @@ export function MapLibreViewer({
   anchor,
   pickMode = false,
   onMapClick,
+  children,
 }: MapLibreViewerProps) {
   const { t } = useTranslation();
   const mapRef = useRef<MapRef>(null);
@@ -481,6 +484,8 @@ export function MapLibreViewer({
               </div>
             </Marker>
           )}
+
+        {children}
       </Map>
 
       {/* Floating chrome (rail / search / HUD / empty state) over the map. */}

@@ -2232,5 +2232,55 @@
       "fail": "{point_id} nuqta raqami turli koordinatalar bilan takrorlangan.",
       "suggestion": "Bitta o'lchovni qoldiring: xatosi bor to'plamni o'chirib, qayta import qiling."
     }
+  },
+  "land_parcels": {
+    "area_mismatch": {
+      "fail": "Uchastka {id}: hisoblangan maydon {a} m2 reyestr bo'yicha maydondan {l} m2 ruxsatdan ortiq farq qiladi ({t}).",
+      "suggestion": "Chegara nuqtalarini reyestr ko'chirmasi bilan solishtiring yoki maydonlar nega farq qilishini yozing."
+    },
+    "ring_invalid": {
+      "fail": "Uchastka {id}: chegara yopilmagan yoki o'zini kesadi.",
+      "suggestion": "Chegara nuqtalarini uchastkani kesishmasdan bir marta aylanib chiqadigan qilib tuzating."
+    },
+    "zone_not_acquired": {
+      "fail": "Ish hududi hali sotib olinmagan {id} uchastkasiga tushadi ({area} m2).",
+      "suggestion": "Ishlar boshlanishidan oldin uchastkani sotib oling yoki kirishni kelishing, yoki ish hududini suring."
+    },
+    "overlap": {
+      "fail": "{a} va {b} uchastkalari {area} m2 ustma-ust tushadi.",
+      "suggestion": "Ikkala uchastka bir xil nuqtalardan foydalanadigan qilib umumiy chegarani tuzating."
+    },
+    "gap": {
+      "fail": "{a} va {b} uchastkalari orasida {gap} m bo'shliq.",
+      "suggestion": "Ikkala uchastkaga bir xil chegara nuqtalarini bering yoki tasma boshqa uchastkaga tegishli ekanini tasdiqlang."
+    },
+    "id_format": {
+      "fail": "{id} raqami {label} formatiga mos kelmaydi (masalan {example}).",
+      "suggestion": "Raqamni reyestrda yozilganidek aynan ko'chiring."
+    },
+    "pdf": {
+      "title": "Uchastkalar ro'yxati",
+      "project": "Loyiha",
+      "crs": "Koordinatalar tizimi",
+      "method": "Usul",
+      "method_value": "Chegara koordinatalari bo'yicha maydon (Gauss formulasi), {decimals} xonagacha yaxlitlangan, m2",
+      "printed": "Chop etgan",
+      "legal": "Reyestr bo'yicha maydon (m2)",
+      "computed": "Hisoblangan (m2)",
+      "diff": "Farq (m2)",
+      "status": "Holati",
+      "rights": "Huquqlar",
+      "cost": "Qiymati",
+      "findings": "Izohlar",
+      "total": "Jami, uchastkalar: {count}",
+      "acquired_of": "Sotib olingan {acquired} / {total}",
+      "findings_title": "Izohlar",
+      "no_findings": "Izohlar yo'q.",
+      "disclaimer": "Mulkdorlar va huquqlar ushbu loyihada yozilganidek ko'rsatilgan. Bu ro'yxat yuridik xulosa yoki reyestr ko'chirmasi emas.",
+      "status_needed": "Kerak",
+      "status_negotiating": "Muzokara",
+      "status_acquired": "Sotib olingan",
+      "status_expropriation": "Olib qo'yish"
+    }
   }
 }

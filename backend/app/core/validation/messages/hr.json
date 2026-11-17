@@ -2232,5 +2232,55 @@
       "fail": "Dvostruka oznaka točke {point_id} s različitim koordinatama.",
       "suggestion": "Zadržite jedno mjerenje: izbrišite skup s pogrešnim i ponovno ga uvezite."
     }
+  },
+  "land_parcels": {
+    "area_mismatch": {
+      "fail": "Čestica {id}: izračunata površina {a} m2 razlikuje se od upisane {l} m2 više od tolerancije ({t}).",
+      "suggestion": "Provjerite lomne točke prema izvatku iz registra ili zabilježite zašto se površine razlikuju."
+    },
+    "ring_invalid": {
+      "fail": "Čestica {id}: obris nije zatvoren ili sam sebe siječe.",
+      "suggestion": "Ispravite lomne točke tako da jednom obiđu česticu bez presijecanja."
+    },
+    "zone_not_acquired": {
+      "fail": "Radna zona preklapa još nestečenu česticu {id} ({area} m2).",
+      "suggestion": "Steknite česticu ili dogovorite pristup prije početka radova, ili pomaknite radnu zonu."
+    },
+    "overlap": {
+      "fail": "Čestice {a} i {b} preklapaju se za {area} m2.",
+      "suggestion": "Ispravite zajedničku granicu tako da obje čestice koriste iste točke."
+    },
+    "gap": {
+      "fail": "Procjep od {gap} m između čestica {a} i {b}.",
+      "suggestion": "Neka obje čestice koriste iste lomne točke ili potvrdite da pojas pripada drugoj čestici."
+    },
+    "id_format": {
+      "fail": "Broj {id} ne odgovara formatu {label} (na primjer {example}).",
+      "suggestion": "Prepišite broj točno kako ga piše registar."
+    },
+    "pdf": {
+      "title": "Popis čestica",
+      "project": "Projekt",
+      "crs": "Koordinatni sustav",
+      "method": "Metoda",
+      "method_value": "Površina iz koordinata granice (Gaussova formula), zaokružena na {decimals} decimale, m2",
+      "printed": "Ispisao",
+      "legal": "Upisana površina (m2)",
+      "computed": "Izračunata (m2)",
+      "diff": "Razlika (m2)",
+      "status": "Status",
+      "rights": "Prava",
+      "cost": "Trošak",
+      "findings": "Nalazi",
+      "total": "Ukupno, čestica: {count}",
+      "acquired_of": "Stečeno {acquired} od {total}",
+      "findings_title": "Nalazi",
+      "no_findings": "Nema nalaza.",
+      "disclaimer": "Vlasnici i prava prikazani su kako su zabilježeni u ovom projektu. Popis nije pravno mišljenje niti izvadak iz registra.",
+      "status_needed": "Potrebno",
+      "status_negotiating": "Pregovori",
+      "status_acquired": "Stečeno",
+      "status_expropriation": "Izvlaštenje"
+    }
   }
 }

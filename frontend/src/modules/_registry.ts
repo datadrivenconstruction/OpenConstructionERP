@@ -44,6 +44,7 @@ import { manifest as pipelines } from './pipelines/manifest';
 import { manifest as estimateChecks } from './estimate-checks/manifest';
 import { manifest as lessonsLearned } from './lessons-learned/manifest';
 import { manifest as survey } from './survey/manifest';
+import { manifest as landParcels } from './land-parcels/manifest';
 
 /* ── Registry ──────────────────────────────────────────────────────── */
 
@@ -68,6 +69,7 @@ export const MODULE_REGISTRY: ModuleManifest[] = [
   estimateChecks,
   lessonsLearned,
   survey,
+  landParcels,
 ];
 
 /* ── Helper functions ──────────────────────────────────────────────── */

@@ -2232,5 +2232,55 @@
       "fail": "Doppelte Punktnummer {point_id} mit abweichenden Koordinaten.",
       "suggestion": "Behalten Sie eine Messung: Löschen Sie die Punktdatei mit der falschen und importieren Sie sie neu."
     }
+  },
+  "land_parcels": {
+    "area_mismatch": {
+      "fail": "Flurstück {id}: berechnete Fläche {a} m2 weicht von der amtlichen Fläche {l} m2 um mehr als die Toleranz ab ({t}).",
+      "suggestion": "Prüfen Sie die Grenzpunkte gegen den Registerauszug oder vermerken Sie, warum die Flächen abweichen."
+    },
+    "ring_invalid": {
+      "fail": "Flurstück {id}: Ring nicht geschlossen oder selbstüberschneidend.",
+      "suggestion": "Korrigieren Sie die Grenzpunkte, sodass sie das Flurstück einmal umlaufen, ohne sich zu kreuzen."
+    },
+    "zone_not_acquired": {
+      "fail": "Arbeitsbereich überschneidet das noch nicht erworbene Flurstück {id} ({area} m2).",
+      "suggestion": "Erwerben Sie das Flurstück oder vereinbaren Sie den Zugang vor Arbeitsbeginn, oder verschieben Sie den Arbeitsbereich."
+    },
+    "overlap": {
+      "fail": "Flurstücke {a} und {b} überlappen um {area} m2.",
+      "suggestion": "Korrigieren Sie die gemeinsame Grenze, sodass beide Flurstücke dieselben Punkte nutzen."
+    },
+    "gap": {
+      "fail": "Lücke von {gap} m zwischen den Flurstücken {a} und {b}.",
+      "suggestion": "Lassen Sie beide Flurstücke dieselben Grenzpunkte nutzen oder bestätigen Sie, dass der Streifen zu einem anderen Flurstück gehört."
+    },
+    "id_format": {
+      "fail": "Flurstücksnummer {id} entspricht nicht dem Format {label} (zum Beispiel {example}).",
+      "suggestion": "Übernehmen Sie die Nummer genau so, wie das Register sie schreibt."
+    },
+    "pdf": {
+      "title": "Flurstücksverzeichnis",
+      "project": "Projekt",
+      "crs": "Koordinatenbezugssystem",
+      "method": "Verfahren",
+      "method_value": "Fläche aus Grenzkoordinaten (Gaußsche Trapezformel), gerundet auf {decimals} Dezimalstellen, m2",
+      "printed": "Gedruckt von",
+      "legal": "Amtliche Fläche (m2)",
+      "computed": "Berechnet (m2)",
+      "diff": "Differenz (m2)",
+      "status": "Status",
+      "rights": "Rechte",
+      "cost": "Kosten",
+      "findings": "Befunde",
+      "total": "Summe, {count} Flurstücke",
+      "acquired_of": "Erworben {acquired} von {total}",
+      "findings_title": "Befunde",
+      "no_findings": "Keine Befunde.",
+      "disclaimer": "Eigentümer und Rechte werden so gezeigt, wie sie in diesem Projekt erfasst sind. Dieses Verzeichnis ist kein Rechtsgutachten und kein Registerauszug.",
+      "status_needed": "Benötigt",
+      "status_negotiating": "In Verhandlung",
+      "status_acquired": "Erworben",
+      "status_expropriation": "Enteignung"
+    }
   }
 }

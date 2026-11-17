@@ -1,0 +1,123 @@
+{
+ "type": "FeatureCollection",
+ "name": "Riverside Yard parcels",
+ "crs": {
+  "type": "name",
+  "properties": {
+   "name": "urn:ogc:def:crs:EPSG::32633"
+  }
+ },
+ "features": [
+  {
+   "type": "Feature",
+   "properties": {
+    "parcel_id": "P-001",
+    "name": "Riverside North",
+    "status": "acquired",
+    "legal_area": 1203,
+    "acquisition_cost": 48000
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       389000.0,
+       5819000.0
+      ],
+      [
+       389042.5,
+       5819003.2
+      ],
+      [
+       389045.1,
+       5819031.8
+      ],
+      [
+       389002.6,
+       5819028.4
+      ],
+      [
+       389000.0,
+       5819000.0
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "parcel_id": "P-002",
+    "name": "Riverside Middle",
+    "status": "acquired",
+    "legal_area": 1200,
+    "acquisition_cost": 45000
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       389050.0,
+       5819000.0
+      ],
+      [
+       389080.0,
+       5819000.0
+      ],
+      [
+       389080.0,
+       5819040.0
+      ],
+      [
+       389050.0,
+       5819040.0
+      ],
+      [
+       389050.0,
+       5819000.0
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "parcel_id": "P-003",
+    "name": "Road frontage",
+    "status": "negotiating",
+    "legal_area": 1000,
+    "acquisition_cost": 40000
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       389120.0,
+       5819000.0
+      ],
+      [
+       389145.0,
+       5819000.0
+      ],
+      [
+       389145.0,
+       5819040.0
+      ],
+      [
+       389120.0,
+       5819040.0
+      ],
+      [
+       389120.0,
+       5819000.0
+      ]
+     ]
+    ]
+   }
+  }
+ ]
+}

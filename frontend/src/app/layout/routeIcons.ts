@@ -28,6 +28,7 @@
  */
 import {
   Crosshair,
+  LandPlot,
   GitCompare,
   LayoutDashboard,
   FolderOpen,
@@ -172,6 +173,7 @@ const EXTRA_ROUTE_ICONS: Record<string, LucideIcon> = {
   '/data-explorer': TableProperties,
   '/geo': Globe,
   '/survey': Crosshair,
+  '/survey/parcels': LandPlot,
   // ── 5. Model Coordination ─────────────────────────────────────────
   '/coordination': LayoutDashboard,
   '/model-review': ScanEye,

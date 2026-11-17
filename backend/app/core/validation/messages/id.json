@@ -2232,5 +2232,55 @@
       "fail": "ID titik {point_id} ganda dengan koordinat berbeda.",
       "suggestion": "Simpan satu bacaan: hapus set titik yang berisi bacaan salah lalu impor ulang."
     }
+  },
+  "land_parcels": {
+    "area_mismatch": {
+      "fail": "Bidang {id}: luas hasil hitung {a} m2 berbeda dari luas sertifikat {l} m2 melebihi toleransi ({t}).",
+      "suggestion": "Periksa titik batas terhadap salinan register, atau catat mengapa kedua luas berbeda."
+    },
+    "ring_invalid": {
+      "fail": "Bidang {id}: batas tidak tertutup atau berpotongan sendiri.",
+      "suggestion": "Perbaiki titik batas agar mengelilingi bidang satu kali tanpa berpotongan."
+    },
+    "zone_not_acquired": {
+      "fail": "Zona kerja tumpang tindih dengan bidang {id} yang belum diperoleh ({area} m2).",
+      "suggestion": "Peroleh bidang atau sepakati akses sebelum pekerjaan dimulai, atau geser zona kerja."
+    },
+    "overlap": {
+      "fail": "Bidang {a} dan {b} tumpang tindih {area} m2.",
+      "suggestion": "Perbaiki batas bersama agar kedua bidang memakai titik yang sama."
+    },
+    "gap": {
+      "fail": "Celah {gap} m antara bidang {a} dan {b}.",
+      "suggestion": "Gunakan titik batas yang sama untuk kedua bidang, atau pastikan jalur itu milik bidang lain."
+    },
+    "id_format": {
+      "fail": "Nomor {id} tidak sesuai format {label} (misalnya {example}).",
+      "suggestion": "Salin nomor persis seperti yang tertulis di register."
+    },
+    "pdf": {
+      "title": "Daftar bidang tanah",
+      "project": "Proyek",
+      "crs": "Sistem koordinat",
+      "method": "Metode",
+      "method_value": "Luas dari koordinat batas (rumus Gauss), dibulatkan ke {decimals} desimal, m2",
+      "printed": "Dicetak oleh",
+      "legal": "Luas sertifikat (m2)",
+      "computed": "Hasil hitung (m2)",
+      "diff": "Selisih (m2)",
+      "status": "Status",
+      "rights": "Hak",
+      "cost": "Biaya",
+      "findings": "Temuan",
+      "total": "Total, {count} bidang",
+      "acquired_of": "Diperoleh {acquired} dari {total}",
+      "findings_title": "Temuan",
+      "no_findings": "Tidak ada temuan.",
+      "disclaimer": "Pemilik dan hak ditampilkan sebagaimana dicatat dalam proyek ini. Daftar ini bukan pendapat hukum maupun salinan register.",
+      "status_needed": "Dibutuhkan",
+      "status_negotiating": "Negosiasi",
+      "status_acquired": "Diperoleh",
+      "status_expropriation": "Pencabutan hak"
+    }
   }
 }
