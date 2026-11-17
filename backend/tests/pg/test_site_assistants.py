@@ -433,7 +433,9 @@ async def test_reject_writes_nothing_and_stores_verdicts(pg_session, with_llm) -
     user, project = await _world(pg_session)
     meeting = await _meeting(pg_session, project, MINUTES)
     out = await site.run_meeting_actions(pg_session, meeting_id=meeting.id, project_id=project, user_id=user)
-    res = await site.reject_proposal(pg_session, proposal_id=uuid.UUID(out["proposal_id"]), user_id=user, reason="noise")
+    res = await site.reject_proposal(
+        pg_session, proposal_id=uuid.UUID(out["proposal_id"]), user_id=user, reason="noise"
+    )
     assert res["status"] == "rejected"
     assert (await pg_session.execute(select(func.count()).select_from(MeetingActionItem))).scalar_one() == 0
     assert (await pg_session.execute(select(AIFeedback.note))).scalar_one() == "noise"

@@ -236,7 +236,9 @@ async def test_budgets_and_cost_codes_export_as_csv_and_xlsx(world) -> None:
     factory, a, _b, user = world
     async with factory() as s:
         conn, svc = await _conn(s, a), BatchService(s)
-        await svc.set_cost_codes(conn, [{"platform_code": "P-100", "standard": "project", "external_cost_center": "1000"}])
+        await svc.set_cost_codes(
+            conn, [{"platform_code": "P-100", "standard": "project", "external_cost_center": "1000"}]
+        )
         batch, _ = await svc.create(conn, _params("csv", ("budget", "cost_code")), key=None, user_id=user)
         text = batch.content.decode("utf-8")
         assert batch.row_count == 2 and "budget" in text and "cost_code" in text and "1200.00" in text
@@ -251,15 +253,15 @@ async def test_budgets_and_cost_codes_export_as_csv_and_xlsx(world) -> None:
 async def test_import_and_reconciliation_flag_one_mismatch(world) -> None:
     factory, a, _b, _user = world
     books = (
-        "Document;Date;Account;Debit;Credit;Status\r\n"
-        "AR-001;31.03.2026;1400;11.900,00;0;paid\r\n"
-        "AR-001;31.03.2026;8400;0;10.000,00;\r\n"
-        "AR-001;31.03.2026;1776;0;1.900,00;\r\n"
-        "SUB-17;02.04.2026;3400;5.000,10;0;\r\n"
-        "SUB-17;02.04.2026;1576;900,00;0;\r\n"
-        "SUB-17;02.04.2026;1600;0;5.900,10;\r\n"
-        "X-1;10.05.2026;4000;42,00;0;\r\n"
-    ).encode()
+        b"Document;Date;Account;Debit;Credit;Status\r\n"
+        b"AR-001;31.03.2026;1400;11.900,00;0;paid\r\n"
+        b"AR-001;31.03.2026;8400;0;10.000,00;\r\n"
+        b"AR-001;31.03.2026;1776;0;1.900,00;\r\n"
+        b"SUB-17;02.04.2026;3400;5.000,10;0;\r\n"
+        b"SUB-17;02.04.2026;1576;900,00;0;\r\n"
+        b"SUB-17;02.04.2026;1600;0;5.900,10;\r\n"
+        b"X-1;10.05.2026;4000;42,00;0;\r\n"
+    )
     async with factory() as s:
         conn, sync = await _conn(s, a), AccountingSyncService(s)
         result = await LedgerImportService(s).import_file(conn, io.BytesIO(books), "books.csv")
@@ -273,4 +275,6 @@ async def test_import_and_reconciliation_flag_one_mismatch(world) -> None:
         assert report["counts"] == {"matched": 1, "mismatches": 1, "platform_only": 0, "books_only": 1}
         assert report["matched"][0]["number"] == "AR-001" and report["matched"][0]["payment_status"] == "paid"
         bad = report["mismatches"][0]
-        assert bad["number"] == "SUB-17" and bad["difference"] == "-50.02" and report["books_only"][0]["number"] == "X-1"
+        assert (
+            bad["number"] == "SUB-17" and bad["difference"] == "-50.02" and report["books_only"][0]["number"] == "X-1"
+        )

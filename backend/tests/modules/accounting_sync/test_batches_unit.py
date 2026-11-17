@@ -202,7 +202,9 @@ def _snapshot(**over) -> dict:
                 "contact": {"name": "Steelworks AG", "tax_id": "DE811128135", "tax_id_valid": True},
             }
         ],
-        "records": [{"record_type": "ap_bill", "record_id": "r1", "number": "SUB-17", "currency": "EUR", "batch_no": None}],
+        "records": [
+            {"record_type": "ap_bill", "record_id": "r1", "number": "SUB-17", "currency": "EUR", "batch_no": None}
+        ],
     }
     snap.update(over)
     return snap
