@@ -1,0 +1,45 @@
+{
+ "type": "FeatureCollection",
+ "name": "Riverside Yard work zone",
+ "crs": {
+  "type": "name",
+  "properties": {
+   "name": "urn:ogc:def:crs:EPSG::32633"
+  }
+ },
+ "features": [
+  {
+   "type": "Feature",
+   "properties": {
+    "name": "Access road"
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       389100.0,
+       5819010.0
+      ],
+      [
+       389160.0,
+       5819010.0
+      ],
+      [
+       389160.0,
+       5819020.0
+      ],
+      [
+       389100.0,
+       5819020.0
+      ],
+      [
+       389100.0,
+       5819010.0
+      ]
+     ]
+    ]
+   }
+  }
+ ]
+}

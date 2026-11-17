@@ -2406,5 +2406,55 @@
       "d": "d (mm)",
       "dz": "dZ (mm)"
     }
+  },
+  "land_parcels": {
+    "area_mismatch": {
+      "fail": "Parsel {id}: hesaplanan alan {a} m2, tapu alanı {l} m2'den toleranstan fazla farklı ({t}).",
+      "suggestion": "Sınır noktalarını kayıt örneğiyle karşılaştırın veya alanların neden farklı olduğunu not edin."
+    },
+    "ring_invalid": {
+      "fail": "Parsel {id}: sınır kapalı değil veya kendini kesiyor.",
+      "suggestion": "Sınır noktalarını, parselin çevresinde kesişmeden bir kez dolaşacak şekilde düzeltin."
+    },
+    "zone_not_acquired": {
+      "fail": "Çalışma alanı henüz edinilmemiş {id} parseliyle çakışıyor ({area} m2).",
+      "suggestion": "İşler başlamadan parseli edinin veya erişim için anlaşın ya da çalışma alanını taşıyın."
+    },
+    "overlap": {
+      "fail": "{a} ve {b} parselleri {area} m2 çakışıyor.",
+      "suggestion": "Ortak sınırı, iki parsel de aynı noktaları kullanacak şekilde düzeltin."
+    },
+    "gap": {
+      "fail": "{a} ve {b} parselleri arasında {gap} m boşluk.",
+      "suggestion": "İki parselin de aynı sınır noktalarını kullanmasını sağlayın veya şeridin başka bir parsele ait olduğunu doğrulayın."
+    },
+    "id_format": {
+      "fail": "{id} numarası {label} biçimine uymuyor (örneğin {example}).",
+      "suggestion": "Numarayı kayıtta yazıldığı gibi aynen kopyalayın."
+    },
+    "pdf": {
+      "title": "Parsel listesi",
+      "project": "Proje",
+      "crs": "Koordinat sistemi",
+      "method": "Yöntem",
+      "method_value": "Sınır koordinatlarından alan (Gauss formülü), {decimals} ondalığa yuvarlanmış, m2",
+      "printed": "Yazdıran",
+      "legal": "Tapu alanı (m2)",
+      "computed": "Hesaplanan (m2)",
+      "diff": "Fark (m2)",
+      "status": "Durum",
+      "rights": "Haklar",
+      "cost": "Maliyet",
+      "findings": "Bulgular",
+      "total": "Toplam, {count} parsel",
+      "acquired_of": "Edinilen {acquired} / {total}",
+      "findings_title": "Bulgular",
+      "no_findings": "Bulgu yok.",
+      "disclaimer": "Malikler ve haklar bu projede kaydedildiği şekliyle gösterilir. Bu liste hukuki görüş veya tapu kaydı örneği değildir.",
+      "status_needed": "Gerekli",
+      "status_negotiating": "Müzakere",
+      "status_acquired": "Edinildi",
+      "status_expropriation": "Kamulaştırma"
+    }
   }
 }

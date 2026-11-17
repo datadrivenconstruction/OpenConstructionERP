@@ -2406,5 +2406,55 @@
       "d": "d (mm)",
       "dz": "dZ (mm)"
     }
+  },
+  "land_parcels": {
+    "area_mismatch": {
+      "fail": "Fastighet {id}: beräknad areal {a} m2 skiljer sig från registrerad areal {l} m2 med mer än toleransen ({t}).",
+      "suggestion": "Kontrollera gränspunkterna mot registerutdraget, eller notera varför arealerna skiljer sig."
+    },
+    "ring_invalid": {
+      "fail": "Fastighet {id}: gränslinjen är inte sluten eller korsar sig själv.",
+      "suggestion": "Rätta gränspunkterna så att de går ett varv runt fastigheten utan att korsas."
+    },
+    "zone_not_acquired": {
+      "fail": "Arbetsområdet överlappar fastighet {id} som ännu inte är förvärvad ({area} m2).",
+      "suggestion": "Förvärva fastigheten eller avtala tillträde innan arbetena startar, eller flytta arbetsområdet."
+    },
+    "overlap": {
+      "fail": "Fastigheterna {a} och {b} överlappar med {area} m2.",
+      "suggestion": "Rätta den gemensamma gränsen så att båda fastigheterna använder samma punkter."
+    },
+    "gap": {
+      "fail": "Glapp på {gap} m mellan fastigheterna {a} och {b}.",
+      "suggestion": "Låt båda fastigheterna använda samma gränspunkter, eller bekräfta att remsan hör till en annan fastighet."
+    },
+    "id_format": {
+      "fail": "Beteckningen {id} följer inte formatet {label} (till exempel {example}).",
+      "suggestion": "Skriv av beteckningen exakt som registret skriver den."
+    },
+    "pdf": {
+      "title": "Fastighetsförteckning",
+      "project": "Projekt",
+      "crs": "Koordinatsystem",
+      "method": "Metod",
+      "method_value": "Areal från gränskoordinater (Gauss formel), avrundad till {decimals} decimaler, m2",
+      "printed": "Utskriven av",
+      "legal": "Registrerad areal (m2)",
+      "computed": "Beräknad (m2)",
+      "diff": "Skillnad (m2)",
+      "status": "Status",
+      "rights": "Rättigheter",
+      "cost": "Kostnad",
+      "findings": "Anmärkningar",
+      "total": "Totalt, {count} fastigheter",
+      "acquired_of": "Förvärvade {acquired} av {total}",
+      "findings_title": "Anmärkningar",
+      "no_findings": "Inga anmärkningar.",
+      "disclaimer": "Ägare och rättigheter visas som de är registrerade i detta projekt. Förteckningen är varken ett juridiskt utlåtande eller ett registerutdrag.",
+      "status_needed": "Behövs",
+      "status_negotiating": "Förhandling",
+      "status_acquired": "Förvärvad",
+      "status_expropriation": "Expropriation"
+    }
   }
 }

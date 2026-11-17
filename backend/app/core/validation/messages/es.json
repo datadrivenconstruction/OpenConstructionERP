@@ -2406,5 +2406,55 @@
       "d": "d (mm)",
       "dz": "dZ (mm)"
     }
+  },
+  "land_parcels": {
+    "area_mismatch": {
+      "fail": "Parcela {id}: la superficie calculada {a} m2 difiere de la registral {l} m2 más de la tolerancia ({t}).",
+      "suggestion": "Compruebe los puntos del lindero con la nota del registro, o anote por qué difieren las superficies."
+    },
+    "ring_invalid": {
+      "fail": "Parcela {id}: contorno no cerrado o que se corta a sí mismo.",
+      "suggestion": "Corrija los puntos del lindero para que rodeen la parcela una sola vez sin cruzarse."
+    },
+    "zone_not_acquired": {
+      "fail": "La zona de obra se solapa con la parcela {id} aún no adquirida ({area} m2).",
+      "suggestion": "Adquiera la parcela o acuerde el acceso antes de empezar las obras, o mueva la zona de obra."
+    },
+    "overlap": {
+      "fail": "Las parcelas {a} y {b} se solapan {area} m2.",
+      "suggestion": "Corrija el lindero común para que ambas parcelas usen los mismos puntos."
+    },
+    "gap": {
+      "fail": "Hueco de {gap} m entre las parcelas {a} y {b}.",
+      "suggestion": "Haga que ambas parcelas usen los mismos puntos de lindero, o confirme que la franja pertenece a otra parcela."
+    },
+    "id_format": {
+      "fail": "La referencia {id} no sigue el formato {label} (por ejemplo {example}).",
+      "suggestion": "Copie la referencia exactamente como la escribe el registro."
+    },
+    "pdf": {
+      "title": "Relación de parcelas",
+      "project": "Proyecto",
+      "crs": "Sistema de coordenadas",
+      "method": "Método",
+      "method_value": "Superficie a partir de las coordenadas del lindero (fórmula del área de Gauss), redondeada a {decimals} decimales, m2",
+      "printed": "Impreso por",
+      "legal": "Superficie registral (m2)",
+      "computed": "Calculada (m2)",
+      "diff": "Diferencia (m2)",
+      "status": "Estado",
+      "rights": "Derechos",
+      "cost": "Coste",
+      "findings": "Hallazgos",
+      "total": "Total, {count} parcelas",
+      "acquired_of": "Adquiridas {acquired} de {total}",
+      "findings_title": "Hallazgos",
+      "no_findings": "Sin hallazgos.",
+      "disclaimer": "Los propietarios y derechos se muestran tal como constan en este proyecto. Esta relación no es un dictamen jurídico ni una nota del registro.",
+      "status_needed": "Necesaria",
+      "status_negotiating": "En negociación",
+      "status_acquired": "Adquirida",
+      "status_expropriation": "Expropiación"
+    }
   }
 }

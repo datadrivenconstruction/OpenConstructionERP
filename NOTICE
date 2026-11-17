@@ -60,6 +60,7 @@ Backend (base install via `pip install openconstructionerp`):
   * python-jose ......................... MIT
   * bcrypt .............................. Apache-2.0
   * ezdxf ............................... MIT
+  * pyshp ............................... MIT
   * trimesh ............................. MIT
   * defusedxml .......................... PSF-2.0
   * pyyaml .............................. MIT

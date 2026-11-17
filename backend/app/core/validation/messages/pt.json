@@ -2406,5 +2406,55 @@
       "d": "d (mm)",
       "dz": "dZ (mm)"
     }
+  },
+  "land_parcels": {
+    "area_mismatch": {
+      "fail": "Parcela {id}: a área calculada {a} m2 difere da área registada {l} m2 mais do que a tolerância ({t}).",
+      "suggestion": "Verifique os pontos de limite com a certidão do registo, ou anote porque as áreas diferem."
+    },
+    "ring_invalid": {
+      "fail": "Parcela {id}: contorno não fechado ou com autointerseção.",
+      "suggestion": "Corrija os pontos de limite para que rodeiem a parcela uma só vez sem se cruzarem."
+    },
+    "zone_not_acquired": {
+      "fail": "A zona de obra sobrepõe-se à parcela {id} ainda não adquirida ({area} m2).",
+      "suggestion": "Adquira a parcela ou acorde o acesso antes do início das obras, ou mova a zona de obra."
+    },
+    "overlap": {
+      "fail": "As parcelas {a} e {b} sobrepõem-se em {area} m2.",
+      "suggestion": "Corrija o limite comum para que ambas as parcelas usem os mesmos pontos."
+    },
+    "gap": {
+      "fail": "Intervalo de {gap} m entre as parcelas {a} e {b}.",
+      "suggestion": "Faça ambas as parcelas usarem os mesmos pontos de limite, ou confirme que a faixa pertence a outra parcela."
+    },
+    "id_format": {
+      "fail": "A referência {id} não segue o formato {label} (por exemplo {example}).",
+      "suggestion": "Copie a referência exatamente como o registo a escreve."
+    },
+    "pdf": {
+      "title": "Quadro de parcelas",
+      "project": "Projeto",
+      "crs": "Sistema de coordenadas",
+      "method": "Método",
+      "method_value": "Área a partir das coordenadas de limite (fórmula de Gauss), arredondada a {decimals} casas decimais, m2",
+      "printed": "Impresso por",
+      "legal": "Área registada (m2)",
+      "computed": "Calculada (m2)",
+      "diff": "Diferença (m2)",
+      "status": "Estado",
+      "rights": "Direitos",
+      "cost": "Custo",
+      "findings": "Constatações",
+      "total": "Total, {count} parcelas",
+      "acquired_of": "Adquiridas {acquired} de {total}",
+      "findings_title": "Constatações",
+      "no_findings": "Sem constatações.",
+      "disclaimer": "Os proprietários e direitos são mostrados tal como registados neste projeto. Este quadro não é um parecer jurídico nem uma certidão do registo.",
+      "status_needed": "Necessária",
+      "status_negotiating": "Em negociação",
+      "status_acquired": "Adquirida",
+      "status_expropriation": "Expropriação"
+    }
   }
 }

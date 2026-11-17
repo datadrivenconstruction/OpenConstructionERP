@@ -227,6 +227,8 @@ pypdfium2==5.9.0
     #   pdfplumber
 pyproj==3.8.0
     # via openconstructionerp (pyproject.toml)
+pyshp==3.1.9
+    # via openconstructionerp (pyproject.toml)
 python-bidi==0.6.11
     # via openconstructionerp (pyproject.toml)
 python-dateutil==2.9.0.post0

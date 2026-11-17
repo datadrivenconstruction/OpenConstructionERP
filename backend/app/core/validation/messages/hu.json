@@ -2406,5 +2406,55 @@
       "d": "d (mm)",
       "dz": "dZ (mm)"
     }
+  },
+  "land_parcels": {
+    "area_mismatch": {
+      "fail": "{id} földrészlet: a számított terület ({a} m2) a tűrésnél jobban eltér a nyilvántartottól ({l} m2) ({t}).",
+      "suggestion": "Vesse össze a töréspontokat a nyilvántartási kivonattal, vagy jegyezze fel, miért tér el a két terület."
+    },
+    "ring_invalid": {
+      "fail": "{id} földrészlet: a határ nem zárt vagy önmagát metszi.",
+      "suggestion": "Javítsa a töréspontokat, hogy egyszer, kereszteződés nélkül járják körül a földrészletet."
+    },
+    "zone_not_acquired": {
+      "fail": "A munkaterület átfed a még meg nem szerzett {id} földrészlettel ({area} m2).",
+      "suggestion": "Szerezze meg a földrészletet vagy egyeztesse a bejutást a munkák előtt, vagy helyezze át a munkaterületet."
+    },
+    "overlap": {
+      "fail": "A(z) {a} és {b} földrészlet {area} m2-en átfed.",
+      "suggestion": "Javítsa a közös határt, hogy mindkét földrészlet ugyanazokat a pontokat használja."
+    },
+    "gap": {
+      "fail": "{gap} m-es rés a(z) {a} és {b} földrészlet között.",
+      "suggestion": "Használja mindkét földrészlet ugyanazokat a töréspontokat, vagy erősítse meg, hogy a sáv egy másik földrészlethez tartozik."
+    },
+    "id_format": {
+      "fail": "A(z) {id} szám nem felel meg a(z) {label} formátumnak (például {example}).",
+      "suggestion": "Másolja a számot pontosan úgy, ahogy a nyilvántartás írja."
+    },
+    "pdf": {
+      "title": "Földrészlet-jegyzék",
+      "project": "Projekt",
+      "crs": "Koordináta-rendszer",
+      "method": "Módszer",
+      "method_value": "Terület a határkoordinátákból (Gauss-képlet), {decimals} tizedesjegyre kerekítve, m2",
+      "printed": "Nyomtatta",
+      "legal": "Nyilvántartott terület (m2)",
+      "computed": "Számított (m2)",
+      "diff": "Eltérés (m2)",
+      "status": "Állapot",
+      "rights": "Jogok",
+      "cost": "Költség",
+      "findings": "Észrevételek",
+      "total": "Összesen, {count} földrészlet",
+      "acquired_of": "Megszerzett {acquired} / {total}",
+      "findings_title": "Észrevételek",
+      "no_findings": "Nincs észrevétel.",
+      "disclaimer": "A tulajdonosok és jogok úgy szerepelnek, ahogy ebben a projektben rögzítették őket. A jegyzék nem jogi vélemény és nem nyilvántartási kivonat.",
+      "status_needed": "Szükséges",
+      "status_negotiating": "Tárgyalás",
+      "status_acquired": "Megszerzett",
+      "status_expropriation": "Kisajátítás"
+    }
   }
 }

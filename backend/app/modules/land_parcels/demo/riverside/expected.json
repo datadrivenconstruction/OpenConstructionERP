@@ -1,0 +1,25 @@
+{
+  "dataset": "riverside_yard",
+  "crs": {"epsg": 32633, "chip": "EPSG 32633"},
+  "offsets": {"e": 389000.0, "n": 5819000.0},
+  "land_parcels": {
+    "lesson_1": {"file": "parcels.geojson", "parcels": 3, "total_area_m2": "3402.67"},
+    "lesson_2": {
+      "parcel": "P-001",
+      "computed_area_m2": "1202.67",
+      "legal_area_m2": "1203",
+      "diff_m2": "0.33",
+      "findings": 0,
+      "area_tolerance_pct": "1"
+    },
+    "lesson_3": {"file": "work_zone.geojson", "finding": "PAR-003", "parcel": "P-003", "overlap_m2": "250.00", "blocking_works": 1},
+    "lesson_4": {"parcel": "P-003", "status": "acquired", "blocking_works": 0, "acquired": 3, "parcels": 3},
+    "lesson_5": {"export": "shapefile", "zip_features": 3, "pdf": "parcel_schedule.pdf"},
+    "cost_to_acquire": "133000.00",
+    "parcels": {
+      "P-001": {"legal_area_m2": "1203", "computed_area_m2": "1202.67", "status": "acquired"},
+      "P-002": {"legal_area_m2": "1200", "computed_area_m2": "1200.00", "status": "acquired"},
+      "P-003": {"legal_area_m2": "1000", "computed_area_m2": "1000.00", "status": "negotiating"}
+    }
+  }
+}

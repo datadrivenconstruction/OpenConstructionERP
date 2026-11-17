@@ -2406,5 +2406,55 @@
       "d": "d (mm)",
       "dz": "dZ (mm)"
     }
+  },
+  "land_parcels": {
+    "area_mismatch": {
+      "fail": "Parcelle {id} : la surface calculée {a} m2 diffère de la surface cadastrale {l} m2 de plus que la tolérance ({t}).",
+      "suggestion": "Vérifiez les points de limite par rapport à l'extrait du registre, ou notez pourquoi les deux surfaces diffèrent."
+    },
+    "ring_invalid": {
+      "fail": "Parcelle {id} : contour non fermé ou qui se recoupe.",
+      "suggestion": "Corrigez les points de limite pour qu'ils fassent une seule fois le tour de la parcelle sans se croiser."
+    },
+    "zone_not_acquired": {
+      "fail": "La zone de travaux recouvre la parcelle {id} non encore acquise ({area} m2).",
+      "suggestion": "Acquérez la parcelle ou convenez d'un accès avant le début des travaux, ou déplacez la zone de travaux."
+    },
+    "overlap": {
+      "fail": "Les parcelles {a} et {b} se chevauchent sur {area} m2.",
+      "suggestion": "Corrigez la limite commune pour que les deux parcelles utilisent les mêmes points."
+    },
+    "gap": {
+      "fail": "Interstice de {gap} m entre les parcelles {a} et {b}.",
+      "suggestion": "Faites utiliser les mêmes points de limite aux deux parcelles, ou confirmez que la bande appartient à une autre parcelle."
+    },
+    "id_format": {
+      "fail": "La référence {id} ne respecte pas le format {label} (par exemple {example}).",
+      "suggestion": "Recopiez la référence exactement comme le registre l'écrit."
+    },
+    "pdf": {
+      "title": "État parcellaire",
+      "project": "Projet",
+      "crs": "Système de coordonnées",
+      "method": "Méthode",
+      "method_value": "Surface depuis les coordonnées des limites (formule du lacet), arrondie à {decimals} décimales, m2",
+      "printed": "Imprimé par",
+      "legal": "Surface cadastrale (m2)",
+      "computed": "Calculée (m2)",
+      "diff": "Écart (m2)",
+      "status": "Statut",
+      "rights": "Droits",
+      "cost": "Coût",
+      "findings": "Constats",
+      "total": "Total, {count} parcelles",
+      "acquired_of": "Acquises {acquired} sur {total}",
+      "findings_title": "Constats",
+      "no_findings": "Aucun constat.",
+      "disclaimer": "Les propriétaires et les droits sont présentés tels qu'enregistrés dans ce projet. Cet état n'est ni un avis juridique ni un extrait du registre.",
+      "status_needed": "Nécessaire",
+      "status_negotiating": "En négociation",
+      "status_acquired": "Acquise",
+      "status_expropriation": "Expropriation"
+    }
   }
 }

@@ -30,6 +30,7 @@ import {
   Crosshair,
   Mountain,
   Target,
+  LandPlot,
   GitCompare,
   LayoutDashboard,
   FolderOpen,
@@ -177,6 +178,7 @@ const EXTRA_ROUTE_ICONS: Record<string, LucideIcon> = {
   '/survey': Crosshair,
   '/survey/volumes': Mountain,
   '/survey/setting-out': Target,
+  '/survey/parcels': LandPlot,
   // ── 5. Model Coordination ─────────────────────────────────────────
   '/coordination': LayoutDashboard,
   '/model-review': ScanEye,

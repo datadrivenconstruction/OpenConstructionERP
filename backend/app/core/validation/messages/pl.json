@@ -2406,5 +2406,55 @@
       "d": "d (mm)",
       "dz": "dZ (mm)"
     }
+  },
+  "land_parcels": {
+    "area_mismatch": {
+      "fail": "Działka {id}: obliczona powierzchnia {a} m2 różni się od ewidencyjnej {l} m2 o więcej niż tolerancja ({t}).",
+      "suggestion": "Sprawdź punkty graniczne z wypisem z rejestru lub zanotuj, dlaczego powierzchnie się różnią."
+    },
+    "ring_invalid": {
+      "fail": "Działka {id}: obwód niezamknięty lub samoprzecinający się.",
+      "suggestion": "Popraw punkty graniczne tak, aby obiegały działkę raz bez przecięć."
+    },
+    "zone_not_acquired": {
+      "fail": "Strefa robót nachodzi na jeszcze nienabytą działkę {id} ({area} m2).",
+      "suggestion": "Nabądź działkę lub uzgodnij dostęp przed rozpoczęciem robót albo przesuń strefę robót."
+    },
+    "overlap": {
+      "fail": "Działki {a} i {b} nakładają się na {area} m2.",
+      "suggestion": "Popraw wspólną granicę, aby obie działki używały tych samych punktów."
+    },
+    "gap": {
+      "fail": "Szczelina {gap} m między działkami {a} i {b}.",
+      "suggestion": "Niech obie działki używają tych samych punktów granicznych albo potwierdź, że pas należy do innej działki."
+    },
+    "id_format": {
+      "fail": "Numer {id} nie pasuje do formatu {label} (na przykład {example}).",
+      "suggestion": "Skopiuj numer dokładnie tak, jak zapisuje go rejestr."
+    },
+    "pdf": {
+      "title": "Wykaz działek",
+      "project": "Projekt",
+      "crs": "Układ współrzędnych",
+      "method": "Metoda",
+      "method_value": "Powierzchnia ze współrzędnych granicy (wzór Gaussa), zaokrąglona do {decimals} miejsc, m2",
+      "printed": "Wydrukował",
+      "legal": "Powierzchnia ewidencyjna (m2)",
+      "computed": "Obliczona (m2)",
+      "diff": "Różnica (m2)",
+      "status": "Status",
+      "rights": "Prawa",
+      "cost": "Koszt",
+      "findings": "Uwagi",
+      "total": "Razem, działki: {count}",
+      "acquired_of": "Nabyte {acquired} z {total}",
+      "findings_title": "Uwagi",
+      "no_findings": "Brak uwag.",
+      "disclaimer": "Właściciele i prawa są pokazane tak, jak zapisano je w tym projekcie. Wykaz nie jest opinią prawną ani wypisem z rejestru.",
+      "status_needed": "Potrzebna",
+      "status_negotiating": "Negocjacje",
+      "status_acquired": "Nabyta",
+      "status_expropriation": "Wywłaszczenie"
+    }
   }
 }

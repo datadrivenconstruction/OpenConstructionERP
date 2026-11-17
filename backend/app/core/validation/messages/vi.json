@@ -2406,5 +2406,55 @@
       "d": "d (mm)",
       "dz": "dZ (mm)"
     }
+  },
+  "land_parcels": {
+    "area_mismatch": {
+      "fail": "Thửa {id}: diện tích tính toán {a} m2 chênh với diện tích pháp lý {l} m2 quá dung sai ({t}).",
+      "suggestion": "Đối chiếu các điểm ranh giới với trích lục sổ đăng ký, hoặc ghi lại lý do hai diện tích khác nhau."
+    },
+    "ring_invalid": {
+      "fail": "Thửa {id}: ranh giới chưa khép kín hoặc tự cắt.",
+      "suggestion": "Sửa các điểm ranh giới để chúng đi quanh thửa một lần mà không cắt nhau."
+    },
+    "zone_not_acquired": {
+      "fail": "Vùng thi công chồng lên thửa {id} chưa thu hồi ({area} m2).",
+      "suggestion": "Thu hồi thửa hoặc thỏa thuận lối vào trước khi thi công, hoặc dời vùng thi công."
+    },
+    "overlap": {
+      "fail": "Thửa {a} và {b} chồng lấn {area} m2.",
+      "suggestion": "Sửa ranh giới chung để cả hai thửa dùng cùng các điểm."
+    },
+    "gap": {
+      "fail": "Khe hở {gap} m giữa thửa {a} và {b}.",
+      "suggestion": "Cho cả hai thửa dùng cùng điểm ranh giới, hoặc xác nhận dải đất thuộc thửa khác."
+    },
+    "id_format": {
+      "fail": "Số thửa {id} không đúng định dạng {label} (ví dụ {example}).",
+      "suggestion": "Chép số thửa đúng như sổ đăng ký ghi."
+    },
+    "pdf": {
+      "title": "Danh sách thửa đất",
+      "project": "Dự án",
+      "crs": "Hệ tọa độ",
+      "method": "Phương pháp",
+      "method_value": "Diện tích từ tọa độ ranh giới (công thức Gauss), làm tròn {decimals} chữ số thập phân, m2",
+      "printed": "Người in",
+      "legal": "Diện tích pháp lý (m2)",
+      "computed": "Tính toán (m2)",
+      "diff": "Chênh lệch (m2)",
+      "status": "Trạng thái",
+      "rights": "Quyền",
+      "cost": "Chi phí",
+      "findings": "Phát hiện",
+      "total": "Tổng, {count} thửa",
+      "acquired_of": "Đã thu hồi {acquired} / {total}",
+      "findings_title": "Phát hiện",
+      "no_findings": "Không có phát hiện.",
+      "disclaimer": "Chủ sở hữu và quyền được hiển thị như đã ghi trong dự án này. Danh sách này không phải ý kiến pháp lý hay trích lục sổ đăng ký.",
+      "status_needed": "Cần",
+      "status_negotiating": "Đang thương lượng",
+      "status_acquired": "Đã thu hồi",
+      "status_expropriation": "Trưng thu"
+    }
   }
 }

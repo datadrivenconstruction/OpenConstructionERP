@@ -106,6 +106,8 @@ interface MapLibreViewerProps {
   geojsonLayers?: GeoJsonLayer[];
   /** Fit the camera to ``geojsonLayers`` once their data arrives. */
   fitGeojson?: boolean;
+  /** Extra map layers (``Source``/``Layer``) drawn inside the map, e.g. survey parcels. */
+  children?: ReactNode;
 }
 
 export interface GeoJsonLayer {
@@ -204,6 +206,7 @@ export function MapLibreViewer({
   onMapClick,
   geojsonLayers,
   fitGeojson = false,
+  children,
 }: MapLibreViewerProps) {
   const { t } = useTranslation();
   const mapRef = useRef<MapRef>(null);
@@ -543,6 +546,8 @@ export function MapLibreViewer({
               </div>
             </Marker>
           )}
+
+        {children}
       </Map>
 
       {/* Floating chrome (rail / search / HUD / empty state) over the map. */}
