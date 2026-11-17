@@ -39,7 +39,7 @@ import {
   CollapsibleSection,
 } from '@/shared/ui';
 import { PageHeader } from '@/shared/ui/PageHeader';
-import { RegisterExportButton, RecordPdfButton } from '@/shared/ui/RegisterExport';
+import { RegisterExportButton } from '@/shared/ui/RegisterExport';
 import { IssueDocumentButton } from '@/features/doc-templates/IssueDocumentButton';
 import { TruncationNotice } from '@/shared/ui/TruncationNotice';
 import { InsightsPanel, InsightsToggleButton, useModuleInsights } from '@/features/insights';
@@ -58,7 +58,6 @@ import {
   addRecipient,
   deleteRecipient,
   downloadTransmittalRegister,
-  downloadTransmittalPdf,
   type Transmittal,
   type TransmittalStatus,
   type TransmittalPurpose,
@@ -753,12 +752,8 @@ const TransmittalRow = React.memo(function TransmittalRow({
 
           {/* Actions */}
           <div className="flex items-center gap-2 pt-1">
-            {/* The cover sheet. Outside the draft-only block on purpose: an
-                issued transmittal is the one that gets printed and signed. */}
-            <RecordPdfButton
-              download={(locale) => downloadTransmittalPdf(transmittal.id, locale, transmittal.transmittal_number)}
-              testId={`transmittal-pdf-${transmittal.id}`}
-            />
+            {/* The cover sheet, in the firm's template. Outside the draft-only block on purpose:
+                an issued transmittal is the one that gets printed and signed. */}
             <IssueDocumentButton
               kind="transmittals.transmittal"
               recordId={transmittal.id}

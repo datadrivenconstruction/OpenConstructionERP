@@ -166,26 +166,12 @@ describe('exporting the transmittal register', () => {
 });
 
 describe('printing the cover sheet of an issued transmittal', () => {
-  it('downloads its form from the expanded row, in the language picked', async () => {
+  it('offers one PDF action, the template-based document', async () => {
     routeGet([ROW]);
     renderPage();
     fireEvent.click(await screen.findByText('Mechanical shop drawings, level 2'));
 
-    const print = await screen.findByTestId('transmittal-pdf-t-1');
-    expect(print.textContent).toContain('Print / PDF');
-    fireEvent.click(print);
-    await waitFor(() => expect(api.downloadWithAuth).toHaveBeenCalledTimes(1));
-
-    fireEvent.click(screen.getByTestId('transmittal-pdf-t-1-more'));
-    pickDocumentLanguage('transmittal-pdf-t-1', 'Türkçe');
-    fireEvent.click(screen.getByTestId('transmittal-pdf-t-1-item-pdf'));
-    await waitFor(() => expect(api.downloadWithAuth).toHaveBeenCalledTimes(2));
-
-    expect(downloadedUrls()).toEqual([
-      '/api/v1/transmittals/t-1/export/pdf/?locale=en',
-      '/api/v1/transmittals/t-1/export/pdf/?locale=tr',
-    ]);
-    // The second argument is only a fallback; the server names the file.
-    expect(api.downloadWithAuth.mock.calls[0]?.[1]).toBe('TR-0007.pdf');
+    expect(await screen.findByTestId('transmittal-document-t-1')).toBeTruthy();
+    expect(screen.queryByTestId('transmittal-pdf-t-1')).toBeNull();
   });
 });

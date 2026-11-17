@@ -48,14 +48,12 @@ import {
 import { useConfirm } from '@/shared/hooks/useConfirm';
 import { TruncationNotice } from '@/shared/ui/TruncationNotice';
 import { RaiseNoticeButton } from '@/features/variations/RaiseNoticeButton';
-import { RecordPdfButton } from '@/shared/ui/RegisterExport';
 import { IssueDocumentButton } from '@/features/doc-templates/IssueDocumentButton';
 import { useToastStore } from '@/stores/useToastStore';
 import { apiGet, type Page } from '@/shared/lib/api';
 import { useAuthStore } from '@/stores/useAuthStore';
 import {
   closeRFI,
-  downloadRFIPdf,
   fetchRFIActivity,
   getRFI,
   respondToRFI,
@@ -262,7 +260,7 @@ function ActivityStatusToken({ status }: { status: string | null }) {
 /* ── Main Page ─────────────────────────────────────────────────────────── */
 
 export function RFIDetailPage() {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const qc = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
@@ -486,18 +484,6 @@ export function RFIDetailPage() {
       }),
   });
 
-  // The printable RFI form. The server names the file after the RFI number;
-  // any status can be printed. The form exists in every interface language,
-  // so the choice offered is the reader's own language and English, the one
-  // an RFI most often has to be sent in.
-  const rfiNumber = rfi?.rfi_number ?? '';
-  const downloadPdf = useCallback(
-    (locale: string) => downloadRFIPdf(rfiId as string, rfiNumber, locale),
-    [rfiId, rfiNumber],
-  );
-  const uiLanguage = (i18n.language || 'en').split('-')[0] || 'en';
-  const pdfLocales = useMemo(() => (uiLanguage === 'en' ? ['en'] : [uiLanguage, 'en']), [uiLanguage]);
-
   const { confirm, ...confirmProps } = useConfirm();
 
   const handleClose = useCallback(async () => {
@@ -690,12 +676,6 @@ export function RFIDetailPage() {
             sourceId={rfi.id}
             sourceRef={`RFI-${rfi.rfi_number}`}
             title={rfi.subject}
-          />
-          <RecordPdfButton
-            label={t('rfi.export_pdf', { defaultValue: 'Export PDF' })}
-            download={downloadPdf}
-            locales={pdfLocales}
-            testId="rfi-export-pdf"
           />
           <IssueDocumentButton
             kind="rfi.rfi"
