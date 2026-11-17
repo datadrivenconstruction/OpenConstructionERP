@@ -33768,6 +33768,7 @@ const resource = {
     "finance.inbox.mailbox_saved": "Nastavení schránky uloženo",
     "finance.inbox.mailbox_invalid": "Tato nastavení schránky nejsou platná",
     "finance.inbox.mailbox_last_polled": "Naposledy zkontrolováno",
+    "finance.inbox.mailbox_host_not_allowed": "Tato adresa serveru směřuje do privátní nebo interní sítě a není povolena. Použijte veřejnou IMAP adresu svého poskytovatele pošty.",
     "finance.summary_empty_add_budget": "Přidat rozpočtové řádky",
     "finance.summary_empty_add_invoice": "Vytvořit fakturu",
     "finance.summary_empty_desc": "Přidejte rozpočtové řádky nebo vytvořte fakturu, abyste začali sledovat náklady projektu zde.",

@@ -33283,6 +33283,7 @@ const resource = {
     "finance.inbox.mailbox_saved": "Postboksinnstillinger lagret",
     "finance.inbox.mailbox_invalid": "Disse postboksinnstillingene er ugyldige",
     "finance.inbox.mailbox_last_polled": "Sist kontrollert",
+    "finance.inbox.mailbox_host_not_allowed": "Denne serveradressen peker til et privat eller internt nettverk og er ikke tillatt. Bruk den offentlige IMAP-adressen til e-postleverandøren din.",
     "finance.summary_empty_add_budget": "Legg til budsjettlinjer",
     "finance.summary_empty_add_invoice": "Opprett en faktura",
     "finance.summary_empty_desc": "Legg til budsjettlinjer eller opprett en faktura for å begynne å spore prosjektkostnader her.",

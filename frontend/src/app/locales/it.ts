@@ -33674,6 +33674,7 @@ const resource = {
     "finance.inbox.mailbox_saved": "Impostazioni della casella salvate",
     "finance.inbox.mailbox_invalid": "Queste impostazioni della casella non sono valide",
     "finance.inbox.mailbox_last_polled": "Ultimo controllo",
+    "finance.inbox.mailbox_host_not_allowed": "Questo indirizzo del server punta a una rete privata o interna e non è consentito. Usa l'indirizzo IMAP pubblico del tuo provider di posta.",
     "finance.summary_empty_add_budget": "Aggiungi righe di bilancio",
     "finance.summary_empty_add_invoice": "Crea una fattura",
     "finance.summary_empty_desc": "Aggiungi righe di bilancio o crea una fattura per iniziare a tracciare i costi del progetto qui.",

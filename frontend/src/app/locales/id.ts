@@ -33078,6 +33078,7 @@ const resource = {
     "finance.inbox.mailbox_saved": "Pengaturan kotak surat disimpan",
     "finance.inbox.mailbox_invalid": "Pengaturan kotak surat ini tidak valid",
     "finance.inbox.mailbox_last_polled": "Terakhir diperiksa",
+    "finance.inbox.mailbox_host_not_allowed": "Alamat server ini mengarah ke jaringan privat atau internal dan tidak diizinkan. Gunakan alamat IMAP publik dari penyedia email Anda.",
     "finance.summary_empty_add_budget": "Tambah baris anggaran",
     "finance.summary_empty_add_invoice": "Buat faktur",
     "finance.summary_empty_desc": "Tambahkan baris anggaran atau buat faktur untuk mulai melacak biaya proyek di sini.",

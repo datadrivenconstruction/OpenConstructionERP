@@ -33221,6 +33221,7 @@ const resource = {
     "finance.inbox.mailbox_saved": "บันทึกการตั้งค่ากล่องจดหมายแล้ว",
     "finance.inbox.mailbox_invalid": "การตั้งค่ากล่องจดหมายนี้ไม่ถูกต้อง",
     "finance.inbox.mailbox_last_polled": "ตรวจสอบล่าสุด",
+    "finance.inbox.mailbox_host_not_allowed": "ที่อยู่เซิร์ฟเวอร์นี้ชี้ไปยังเครือข่ายส่วนตัวหรือเครือข่ายภายในและไม่อนุญาตให้ใช้งาน กรุณาใช้ที่อยู่ IMAP สาธารณะของผู้ให้บริการอีเมลของคุณ",
     "finance.summary_empty_add_budget": "เพิ่มรายการงบประมาณ",
     "finance.summary_empty_add_invoice": "สร้างบันทึก",
     "finance.summary_empty_desc": "เพิ่มรายการงบประมาณหรือสร้างบันทึกเพื่อเริ่มการติดตามต้นทุนโครงการที่นี่",

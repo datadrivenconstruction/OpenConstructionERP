@@ -43,3 +43,10 @@ export function mailboxDraftProblems(draft: MailboxDraft, hasStoredPassword: boo
   }
   return out;
 }
+
+/** True when the API refused the host as an internal/private address (422, code `host_not_allowed`). */
+export function isHostNotAllowed(error: unknown): boolean {
+  const body = (error as { body?: unknown } | null)?.body;
+  const detail = body && typeof body === 'object' ? (body as { detail?: unknown }).detail : undefined;
+  return Array.isArray(detail) && detail.some((d) => (d as { code?: unknown } | null)?.code === 'host_not_allowed');
+}

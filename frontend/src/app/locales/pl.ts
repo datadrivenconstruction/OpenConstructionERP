@@ -34206,6 +34206,7 @@ const resource = {
     "finance.inbox.mailbox_saved": "Ustawienia skrzynki zapisane",
     "finance.inbox.mailbox_invalid": "Te ustawienia skrzynki są nieprawidłowe",
     "finance.inbox.mailbox_last_polled": "Ostatnie sprawdzenie",
+    "finance.inbox.mailbox_host_not_allowed": "Ten adres serwera wskazuje na sieć prywatną lub wewnętrzną i nie jest dozwolony. Użyj publicznego adresu IMAP swojego dostawcy poczty.",
     "finance.summary_empty_add_budget": "Dodaj linie budżetu",
     "finance.summary_empty_add_invoice": "Utwórz fakturę",
     "finance.summary_empty_desc": "Dodaj linie budżetu lub utwórz fakturę, aby śledzić koszty projektu tutaj.",

@@ -33265,6 +33265,7 @@ const resource = {
     "finance.inbox.mailbox_saved": "Postilaatikon asetukset tallennettu",
     "finance.inbox.mailbox_invalid": "Nämä postilaatikon asetukset eivät kelpaa",
     "finance.inbox.mailbox_last_polled": "Viimeksi tarkistettu",
+    "finance.inbox.mailbox_host_not_allowed": "Tämä palvelinosoite viittaa yksityiseen tai sisäiseen verkkoon, eikä sitä sallita. Käytä sähköpostipalveluntarjoajasi julkista IMAP-osoitetta.",
     "finance.summary_empty_add_budget": "Lisää budjettirivit",
     "finance.summary_empty_add_invoice": "Luo lasku",
     "finance.summary_empty_desc": "Lisää budjettirivit tai luo lasku aloittaaksesi projektin kustannusten seurannan tässä.",

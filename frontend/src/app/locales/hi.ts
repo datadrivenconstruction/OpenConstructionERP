@@ -43818,6 +43818,7 @@ const resource = {
     "finance.inbox.mailbox_saved": "मेलबॉक्स सेटिंग सहेजी गईं",
     "finance.inbox.mailbox_invalid": "ये मेलबॉक्स सेटिंग मान्य नहीं हैं",
     "finance.inbox.mailbox_last_polled": "अंतिम जाँच",
+    "finance.inbox.mailbox_host_not_allowed": "यह सर्वर पता किसी निजी या आंतरिक नेटवर्क की ओर इशारा करता है और इसकी अनुमति नहीं है। अपने मेल प्रदाता का सार्वजनिक IMAP पता उपयोग करें।",
     "forms.na": "लागू नहीं",
     "forms.preview_empty": "फ़ॉर्म पूर्वावलोकन देखने के लिए एक फ़ील्ड जोड़ें।",
     "forms.untitled_section": "अनुभाग",

@@ -33779,6 +33779,7 @@ const resource = {
     "finance.inbox.mailbox_saved": "Настройки ящика сохранены",
     "finance.inbox.mailbox_invalid": "Настройки ящика некорректны",
     "finance.inbox.mailbox_last_polled": "Последняя проверка",
+    "finance.inbox.mailbox_host_not_allowed": "Этот адрес сервера указывает на частную или внутреннюю сеть и не допускается. Укажите публичный адрес IMAP вашего почтового провайдера.",
     "finance.summary_empty_add_budget": "Добавить бюджетные строки",
     "finance.summary_empty_add_invoice": "Создать счет-фактуру",
     "finance.summary_empty_desc": "Добавьте строки бюджета или создайте счет-фактуру, чтобы начать отслеживать затраты проекта здесь.",

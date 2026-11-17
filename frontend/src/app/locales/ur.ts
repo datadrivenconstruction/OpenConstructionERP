@@ -32484,6 +32484,7 @@ const resource = {
     "finance.inbox.mailbox_saved": "میل باکس کی ترتیبات محفوظ ہو گئیں",
     "finance.inbox.mailbox_invalid": "یہ میل باکس ترتیبات درست نہیں ہیں",
     "finance.inbox.mailbox_last_polled": "آخری جانچ",
+    "finance.inbox.mailbox_host_not_allowed": "یہ سرور پتہ کسی نجی یا اندرونی نیٹ ورک کی طرف اشارہ کرتا ہے اور اس کی اجازت نہیں ہے۔ اپنے میل فراہم کنندہ کا عوامی IMAP پتہ استعمال کریں۔",
     "finance.summary_empty_add_budget": "بجٹ لائنیں شامل کریں",
     "finance.summary_empty_add_invoice": "ایک invoice بنائیں",
     "finance.summary_empty_desc": "یہاں پروجیکٹ لاگت ٹریک کرنا شروع کرنے کے لیے بجٹ لائنیں شامل کریں یا ایک invoice بنائیں۔",

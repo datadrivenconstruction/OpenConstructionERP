@@ -33528,6 +33528,7 @@ const resource = {
     "finance.inbox.mailbox_saved": "Quti sozlamalari saqlandi",
     "finance.inbox.mailbox_invalid": "Bu quti sozlamalari yaroqsiz",
     "finance.inbox.mailbox_last_polled": "Oxirgi tekshiruv",
+    "finance.inbox.mailbox_host_not_allowed": "Ushbu server manzili shaxsiy yoki ichki tarmoqqa ishora qiladi va ruxsat etilmaydi. Pochta provayderingizning ochiq IMAP manzilidan foydalaning.",
     "finance.summary_empty_add_budget": "Byudjet qatorlarini qoʻshish",
     "finance.summary_empty_add_invoice": "Hisob-faktura yaratish",
     "finance.summary_empty_desc": "Loyiha xarajatlarini shu yerda kuzatishni boshlash uchun byudjet qatorlarini qoʻshing yoki hisob-faktura yarating.",
