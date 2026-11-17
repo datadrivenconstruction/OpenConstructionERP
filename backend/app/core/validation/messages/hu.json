@@ -2231,6 +2231,32 @@
     "duplicate_point": {
       "fail": "Ismétlődő pontazonosító {point_id} eltérő koordinátákkal.",
       "suggestion": "Tartson meg egy mérést: törölje a hibásat tartalmazó pontcsoportot, és importálja újra."
+    },
+    "traverse_misclosure": {
+      "fail": "A(z) {name} sokszögvonal 1:{r} záróhibával zárul, a profil minimuma (1:{min}) alatt.",
+      "suggestion": "Keressen durva hibát az oldalakban, mérje újra a leggyengébb oldalt, vagy erősítse meg a profil értékét."
+    },
+    "level_misclosure": {
+      "fail": "A szintezés záróhibája {f} mm meghaladja a k·√km értéket (k = {k} mm).",
+      "suggestion": "Ismételje meg a szintezést, vagy ellenőrizze a használt magassági alappontokat."
+    }
+  },
+  "volumes": {
+    "no_overlap": {
+      "fail": "A két felület csak a terület {p} %-án fedi egymást: a térfogat értelmetlen.",
+      "suggestion": "Ellenőrizze, hogy mindkét felület azonos koordináta-rendszerben van és ugyanazt a terepet fedi."
+    },
+    "low_coverage": {
+      "fail": "A terület csak {c} %-án van adat mindkét felületen (minimum {min} %).",
+      "suggestion": "Vegyen fel pontokat, ahol hiányzik a felület, vagy szűkítse a határt a lefedett területre."
+    },
+    "coarse_scan": {
+      "fail": "Durva szkennelés (LOA10) adja ezt a térfogatot indoklás nélkül.",
+      "suggestion": "Használjon geodéziai pontosságú szkennelést, vagy írja le, miért elég ez."
+    },
+    "bank_volume": {
+      "fail": "A mennyiség tömör térfogat (a talajban); a lazulási tényező nincs alkalmazva.",
+      "suggestion": "Küldje inkább a laza kitermelést, ha a költségvetési tétel laza anyagban mért."
     }
   }
 }

@@ -221,3 +221,63 @@ class RegisterSummary(BaseModel):
     point_sets: int = 0
     findings: int = 0
     last_import: datetime | None = None
+
+
+class TraverseCreate(BaseModel):
+    """A closed traverse from its legs file, or a level run from its misclosure."""
+
+    name: str = Field(min_length=1, max_length=255)
+    kind: Literal["traverse", "level"] = "traverse"
+    text: str = Field(default="", max_length=500_000)
+    distance_km: float | None = Field(default=None, ge=0, le=10_000)
+    misclosure_mm: float | None = Field(default=None, ge=-100_000, le=100_000)
+    k_mm: float | None = Field(default=None, gt=0, le=1_000)
+    note: str = Field(default="", max_length=2000)
+
+
+class TraverseLegOut(BaseModel):
+    leg: str
+    start: str = Field(default="", serialization_alias="from")
+    end: str = Field(default="", serialization_alias="to")
+    length_m: float
+    d_e: float
+    d_n: float
+    c_e: float
+    c_n: float
+
+
+class TraverseOut(BaseModel):
+    id: uuid.UUID
+    project_id: uuid.UUID
+    name: str
+    kind: str
+    method: str
+    legs: list[TraverseLegOut] = Field(default_factory=list)
+    length_m: float
+    f_e: float | None = None
+    f_n: float | None = None
+    misclosure_m: float | None = None
+    ratio: int | None = None
+    profile_ratio: int | None = None
+    distance_km: float | None = None
+    misclosure_mm: float | None = None
+    k_mm: float | None = None
+    allowed_mm: float | None = None
+    verdict: str
+    profile_label: str = ""
+    note: str = ""
+    created_at: datetime | None = None
+
+
+class SurveyProfileIn(BaseModel):
+    label: str = Field(default="", max_length=255)
+    traverse_min_ratio: int | None = Field(default=None, ge=100, le=10_000_000)
+    level_k_mm: float | None = Field(default=None, gt=0, le=1_000)
+    coverage_min_pct: float | None = Field(default=None, ge=0, le=100)
+
+
+class SurveyProfileOut(SurveyProfileIn):
+    """The profile in force for a project; ``scope`` says where it was found."""
+
+    scope: Literal["project", "workspace", "none"] = "none"
+    source: str = "user"

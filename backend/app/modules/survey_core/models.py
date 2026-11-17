@@ -10,13 +10,18 @@ Tables:
     oe_survey_point_set - one imported point file: source file, format,
         instrument, survey date, and the EPSG its coordinates were read in.
     oe_survey_point - one point of a set, stored in the project CRS.
+    oe_survey_traverse - a closed traverse or a level run with its misclosure
+        and the profile verdict it got when it was computed.
+    oe_survey_profile - survey thresholds: one row per project, or the
+        workspace default (project_id NULL). No core default value exists;
+        demo and pack rows carry a label saying where the numbers come from.
 """
 
 import uuid
 from datetime import date, datetime
 from decimal import Decimal
 
-from sqlalchemy import Boolean, Date, DateTime, Float, ForeignKey, Index, Integer, Numeric, String, Text
+from sqlalchemy import JSON, Boolean, Date, DateTime, Float, ForeignKey, Index, Integer, Numeric, String, Text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database import GUID, Base
@@ -105,3 +110,52 @@ class SurveyPoint(Base):
     sigma: Mapped[Decimal | None] = mapped_column(Numeric(8, 4), nullable=True)
     description: Mapped[str] = mapped_column(String(255), nullable=False, default="", server_default="")
     source_line: Mapped[int | None] = mapped_column(Integer, nullable=True)
+
+
+class SurveyTraverse(Base):
+    """A closed traverse (or, with ``kind='level'``, a level run) and its closure."""
+
+    __tablename__ = "oe_survey_traverse"
+    __table_args__ = (Index("ix_oe_survey_traverse_project", "project_id"),)
+
+    project_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(), ForeignKey("oe_projects_project.id", ondelete="CASCADE"), nullable=False
+    )
+    name: Mapped[str] = mapped_column(String(255), nullable=False)
+    # traverse | level
+    kind: Mapped[str] = mapped_column(String(20), nullable=False, default="traverse", server_default="traverse")
+    method: Mapped[str] = mapped_column(String(20), nullable=False, default="bowditch", server_default="bowditch")
+    # [{"leg", "from", "to", "length_m", "d_e", "d_n"}] as measured
+    legs: Mapped[list] = mapped_column(JSON, nullable=False, default=list)  # type: ignore[assignment]
+    length_m: Mapped[Decimal] = mapped_column(Numeric(14, 3), nullable=False, default=0)
+    f_e: Mapped[Decimal | None] = mapped_column(Numeric(10, 4), nullable=True)
+    f_n: Mapped[Decimal | None] = mapped_column(Numeric(10, 4), nullable=True)
+    misclosure_m: Mapped[Decimal | None] = mapped_column(Numeric(10, 4), nullable=True)
+    ratio: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    profile_ratio: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    distance_km: Mapped[Decimal | None] = mapped_column(Numeric(10, 4), nullable=True)
+    misclosure_mm: Mapped[Decimal | None] = mapped_column(Numeric(10, 2), nullable=True)
+    k_mm: Mapped[Decimal | None] = mapped_column(Numeric(8, 2), nullable=True)
+    allowed_mm: Mapped[Decimal | None] = mapped_column(Numeric(10, 2), nullable=True)
+    # pass | fail | no_profile
+    verdict: Mapped[str] = mapped_column(String(20), nullable=False, default="no_profile", server_default="no_profile")
+    profile_label: Mapped[str] = mapped_column(String(255), nullable=False, default="", server_default="")
+    note: Mapped[str] = mapped_column(Text, nullable=False, default="", server_default="")
+    created_by: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+
+
+class SurveyProfile(Base):
+    """Survey thresholds for one project, or the workspace default when ``project_id`` is NULL."""
+
+    __tablename__ = "oe_survey_profile"
+    __table_args__ = (Index("ix_oe_survey_profile_project", "project_id"),)
+
+    project_id: Mapped[uuid.UUID | None] = mapped_column(
+        GUID(), ForeignKey("oe_projects_project.id", ondelete="CASCADE"), nullable=True
+    )
+    label: Mapped[str] = mapped_column(String(255), nullable=False, default="", server_default="")
+    # user | demo | pack
+    source: Mapped[str] = mapped_column(String(20), nullable=False, default="user", server_default="user")
+    traverse_min_ratio: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    level_k_mm: Mapped[Decimal | None] = mapped_column(Numeric(8, 2), nullable=True)
+    coverage_min_pct: Mapped[Decimal | None] = mapped_column(Numeric(5, 2), nullable=True)

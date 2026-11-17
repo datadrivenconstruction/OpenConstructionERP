@@ -2231,6 +2231,32 @@
     "duplicate_point": {
       "fail": "Identificador de punto {point_id} duplicado con coordenadas distintas.",
       "suggestion": "Conserve una lectura: elimine el conjunto con la errónea e impórtelo de nuevo."
+    },
+    "traverse_misclosure": {
+      "fail": "La poligonal {name} cierra a 1:{r}, por debajo del mínimo del perfil 1:{min}.",
+      "suggestion": "Busque un error grosero en los tramos, vuelva a observar el tramo más débil o confirme el valor del perfil."
+    },
+    "level_misclosure": {
+      "fail": "El error de cierre de nivelación {f} mm supera k·√km con k = {k} mm.",
+      "suggestion": "Repita la nivelación o compruebe las cotas de los puntos de referencia usados."
+    }
+  },
+  "volumes": {
+    "no_overlap": {
+      "fail": "Las dos superficies solo se solapan en el {p} % del área: el volumen no tiene sentido.",
+      "suggestion": "Compruebe que ambas superficies están en el mismo sistema de coordenadas y cubren el mismo terreno."
+    },
+    "low_coverage": {
+      "fail": "Solo el {c} % del área tiene datos en ambas superficies (mínimo {min} %).",
+      "suggestion": "Añada puntos donde falte una superficie o reduzca el contorno al área cubierta."
+    },
+    "coarse_scan": {
+      "fail": "Un escaneo grueso (LOA10) alimenta este volumen sin motivo indicado.",
+      "suggestion": "Use un escaneo de precisión topográfica o explique por qué este escaneo basta."
+    },
+    "bank_volume": {
+      "fail": "La cantidad es volumen en banco (en el terreno); no se aplica el factor de esponjamiento.",
+      "suggestion": "Envíe el desmonte esponjado si la partida se mide como material suelto."
     }
   }
 }

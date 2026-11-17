@@ -82,6 +82,7 @@ _FIELD = ["fieldreports", "collaboration", "field_diary", "payroll"]
 _ESG = ["carbon"]
 _BI = ["bi_dashboards", "reporting", "project_controls"]
 _ENTERPRISE = ["enterprise_workflows", "full_evm", "rfq_bidding", "integrations"]
+_SURVEY = ["survey_core", "surfaces_volumes"]
 
 # Region-specific packs are chosen on the onboarding region step / via partner
 # packs, not by a company profile, so they are not part of any profile's set.
@@ -135,6 +136,7 @@ _ALL_FUNCTIONAL: list[str] = [
     *_ESG,
     *_BI,
     *_ENTERPRISE,
+    *_SURVEY,
 ]
 
 # The complete module registry the onboarding POST iterates over when it writes
@@ -230,6 +232,8 @@ COMPANY_PRESETS: dict[str, CompanyPreset] = {
             "bi_dashboards",  # project_controls depends on it
             "bim_hub",  # reporting depends on it
             "cad",  # takeoff depends on it
+            "survey_core",  # setting-out and as-built points on every site
+            "surfaces_volumes",
         ],
     ),
     "estimator": CompanyPreset(
@@ -508,6 +512,8 @@ COMPANY_PRESETS: dict[str, CompanyPreset] = {
             "rfi",  # same RFI cycle as a building site
             "submittals",  # same submittal cycle
             "meetings",  # same site meetings
+            "survey_core",  # earthworks are paid from surveyed volumes
+            "surfaces_volumes",
             "bi_dashboards",  # project_controls depends on it
             "bim_hub",  # reporting depends on it
         ],
@@ -901,6 +907,60 @@ COMPANY_PRESETS: dict[str, CompanyPreset] = {
             "project_controls",
             "bim_hub",  # reporting depends on it
             "procurement",  # rfq_bidding depends on it
+        ],
+    ),
+    "survey_company": CompanyPreset(
+        key="survey_company",
+        label="Survey / Geomatics Company",
+        description="We measure the ground - control, topo and as-built surveys, surfaces and earthwork volumes.",
+        icon="Crosshair",
+        tags=["Survey", "CRS", "Volumes", "As-built"],
+        enabled_modules=[
+            "survey_core",
+            "surfaces_volumes",
+            "boq",  # volumes are sent to BOQ lines
+            "validation",
+            "cad",
+            "documents",
+            "markups",
+            "tasks",
+            "schedule",
+            "daily_diary",
+            "field_diary",
+            "fieldreports",
+            "equipment",
+            "inspections",
+            "finance",
+            "contracts",
+        ],
+    ),
+    "mining_operator": CompanyPreset(
+        key="mining_operator",
+        label="Mining / Quarry Operator",
+        description="We move material - pit and stockpile surveys, monthly volumes, plant, safety and cost per tonne.",
+        icon="Mountain",
+        tags=["Volumes", "Stockpiles", "Plant", "HSE"],
+        enabled_modules=[
+            "survey_core",
+            "surfaces_volumes",
+            "boq",
+            "validation",
+            "equipment",
+            "resources",
+            "safety",
+            "hse_advanced",
+            "inspections",
+            "risk",
+            "daily_diary",
+            "field_diary",
+            "fieldreports",
+            "schedule",
+            "tasks",
+            "costmodel",
+            "finance",
+            "procurement",
+            "documents",
+            "carbon",
         ],
     ),
     "full_enterprise": CompanyPreset(

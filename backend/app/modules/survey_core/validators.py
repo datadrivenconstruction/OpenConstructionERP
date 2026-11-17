@@ -8,13 +8,16 @@ Rules run over a plain dict context built by the service::
         "crs": {"horizontal_epsg", "is_local_grid", "source", "detected_confidence", "confirmed"},
         "point_sets": [{"id", "name", "stored_epsg"}],
         "points": [{"point_id", "e", "n", "z", "set_id"}],
+        "traverses": [{"id", "name", "kind", "ratio", "profile_ratio", "misclosure_mm", "allowed_mm", "k_mm"}],
     }
 
 SRV-001 error: a point set with no coordinate system.
 SRV-002 warning: a detected project CRS nobody confirmed.
 SRV-003 error: one point id with two different positions.
-Traverse and level-run rules (SRV-010, SRV-011) come with the traverse slice;
-their thresholds are pack profiles with no core default.
+SRV-010 error: a traverse closes worse than the profile's 1:x.
+SRV-011 warning: a level run misses by more than k * sqrt(km).
+Both thresholds come from a survey profile (pack, demo or the user's own);
+there is no core default, so without a profile neither rule fires.
 """
 
 from __future__ import annotations
@@ -108,7 +111,58 @@ class DuplicatePointRule(_SurveyRule):
         return out or [self.ok()]
 
 
-SURVEY_RULES = (PointSetHasCrsRule, CrsConfirmedRule, DuplicatePointRule)
+class TraverseClosureRule(_SurveyRule):
+    """SRV-010: a closed traverse meets the profile's minimum ratio."""
+
+    rule_id = "SRV-010"
+    name = "Traverse closes within profile"
+    severity = Severity.ERROR
+    category = RuleCategory.COMPLIANCE
+    description = "Linear misclosure ratio 1:x against the profile's minimum"
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        out = []
+        for t in rows(context, "traverses"):
+            if t.get("kind", "traverse") != "traverse":
+                continue
+            ratio, minimum = _f(t.get("ratio")), _f(t.get("profile_ratio"))
+            if ratio is None or not minimum or ratio >= minimum:
+                continue
+            out.append(
+                self.fail(
+                    context,
+                    "traverse_misclosure",
+                    ref=str(t.get("id") or ""),
+                    name=str(t.get("name") or ""),
+                    r=f"{int(ratio):,}",
+                    min=f"{int(minimum):,}",
+                )
+            )
+        return out or [self.ok()]
+
+
+class LevelRunRule(_SurveyRule):
+    """SRV-011: a level run stays within k * sqrt(km)."""
+
+    rule_id = "SRV-011"
+    name = "Level run within allowance"
+    severity = Severity.WARNING
+    category = RuleCategory.COMPLIANCE
+    description = "Level misclosure against k * sqrt(distance in km)"
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        out = []
+        for t in rows(context, "traverses"):
+            if t.get("kind") != "level":
+                continue
+            f, allowed, k = _f(t.get("misclosure_mm")), _f(t.get("allowed_mm")), _f(t.get("k_mm"))
+            if f is None or allowed is None or not k or abs(f) <= allowed:
+                continue
+            out.append(self.fail(context, "level_misclosure", ref=str(t.get("id") or ""), f=f"{f:.1f}", k=f"{k:g}"))
+        return out or [self.ok()]
+
+
+SURVEY_RULES = (PointSetHasCrsRule, CrsConfirmedRule, DuplicatePointRule, TraverseClosureRule, LevelRunRule)
 
 
 def register_survey_validation_rules() -> None:

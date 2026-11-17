@@ -2231,6 +2231,32 @@
     "duplicate_point": {
       "fail": "Dubbel puntnummer {point_id} met verschillende coördinaten.",
       "suggestion": "Houd één meting: verwijder de puntenset met de foute en importeer die opnieuw."
+    },
+    "traverse_misclosure": {
+      "fail": "Veelhoek {name} sluit op 1:{r}, onder het profielminimum 1:{min}.",
+      "suggestion": "Zoek een grove fout in de zijden, meet de zwakste zijde opnieuw of bevestig de profielwaarde."
+    },
+    "level_misclosure": {
+      "fail": "Sluitfout van de waterpassing {f} mm overschrijdt k·√km met k = {k} mm.",
+      "suggestion": "Waterpas opnieuw of controleer de hoogten van de gebruikte peilmerken."
+    }
+  },
+  "volumes": {
+    "no_overlap": {
+      "fail": "De twee oppervlakken overlappen slechts {p} % van het gebied: het volume is zinloos.",
+      "suggestion": "Controleer of beide oppervlakken in hetzelfde coördinatenstelsel liggen en hetzelfde terrein dekken."
+    },
+    "low_coverage": {
+      "fail": "Slechts {c} % van het gebied heeft gegevens in beide oppervlakken (minimum {min} %).",
+      "suggestion": "Voeg meetpunten toe waar een oppervlak ontbreekt of verklein de begrenzing tot het gedekte gebied."
+    },
+    "coarse_scan": {
+      "fail": "Een grove scan (LOA10) voedt dit volume zonder opgegeven reden.",
+      "suggestion": "Gebruik een scan van meetkwaliteit of leg uit waarom deze scan volstaat."
+    },
+    "bank_volume": {
+      "fail": "De hoeveelheid is vast volume (in de grond); de opbulkingsfactor is niet toegepast.",
+      "suggestion": "Stuur in plaats daarvan de losse ontgraving als de bestekpost in losse grond wordt gemeten."
     }
   }
 }

@@ -2231,6 +2231,32 @@
     "duplicate_point": {
       "fail": "Doppelte Punktnummer {point_id} mit abweichenden Koordinaten.",
       "suggestion": "Behalten Sie eine Messung: Löschen Sie die Punktdatei mit der falschen und importieren Sie sie neu."
+    },
+    "traverse_misclosure": {
+      "fail": "Polygonzug {name} schließt mit 1:{r}, unter dem Profilminimum 1:{min}.",
+      "suggestion": "Prüfen Sie die Strecken auf grobe Fehler, messen Sie die schwächste Strecke neu oder bestätigen Sie den Profilwert."
+    },
+    "level_misclosure": {
+      "fail": "Nivellement-Widerspruch {f} mm überschreitet k·√km mit k = {k} mm.",
+      "suggestion": "Nivellement wiederholen oder die verwendeten Höhenfestpunkte prüfen."
+    }
+  },
+  "volumes": {
+    "no_overlap": {
+      "fail": "Die beiden Flächen überlappen nur auf {p} % der Fläche: das Volumen ist bedeutungslos.",
+      "suggestion": "Prüfen Sie, ob beide Flächen im selben Koordinatensystem liegen und dasselbe Gelände abdecken."
+    },
+    "low_coverage": {
+      "fail": "Nur {c} % der Fläche haben Daten in beiden Oberflächen (Minimum {min} %).",
+      "suggestion": "Ergänzen Sie Messpunkte, wo eine Oberfläche fehlt, oder verkleinern Sie die Begrenzung auf den abgedeckten Bereich."
+    },
+    "coarse_scan": {
+      "fail": "Ein grober Scan (LOA10) speist dieses Volumen, ohne dass ein Grund angegeben ist.",
+      "suggestion": "Verwenden Sie einen vermessungsgenauen Scan oder begründen Sie, warum dieser Scan genügt."
+    },
+    "bank_volume": {
+      "fail": "Die Menge ist festes Volumen (gewachsener Boden); der Auflockerungsfaktor ist nicht angewendet.",
+      "suggestion": "Senden Sie stattdessen den gelockerten Abtrag, wenn die LV-Position lose gemessen wird."
     }
   }
 }

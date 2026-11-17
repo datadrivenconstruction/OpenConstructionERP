@@ -16,6 +16,14 @@ Endpoints:
     POST   /projects/{project_id}/validate        - the ``survey_core`` rule set
     POST   /point-sets/{set_id}/declare-crs       - say which EPSG a set without one is in
     DELETE /point-sets/{set_id}                   - remove a point set and its points
+    GET    /projects/{project_id}/plan            - survey points as GeoJSON (WGS 84) for the map
+    GET    /projects/{project_id}/traverses       - closed traverses and level runs
+    POST   /projects/{project_id}/traverses       - compute a traverse from its legs, or a level run
+    DELETE /traverses/{traverse_id}               - remove a traverse
+    GET    /projects/{project_id}/profile         - survey thresholds in force for the project
+    PUT    /projects/{project_id}/profile         - the project's own thresholds (survey.confirm)
+    GET    /profile                               - the workspace default thresholds
+    PUT    /profile                               - set the workspace default (survey.confirm)
 """
 
 from __future__ import annotations
@@ -47,8 +55,12 @@ from app.modules.survey_core.schemas import (
     ProjectCrsSet,
     ProjectCrsState,
     RegisterSummary,
+    SurveyProfileIn,
+    SurveyProfileOut,
     TransformRequest,
     TransformResponse,
+    TraverseCreate,
+    TraverseOut,
     ValidationReportOut,
 )
 from app.modules.survey_core.service import SurveyService
@@ -182,3 +194,66 @@ async def delete_set(set_id: uuid.UUID, session: SessionDep, user_id: CurrentUse
     await verify_project_access(point_set.project_id, user_id, session)
     await service.delete_set(point_set)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@router.get("/projects/{project_id}/traverses", response_model=list[TraverseOut], dependencies=_READ)
+async def list_traverses(project_id: uuid.UUID, session: SessionDep, user_id: CurrentUserId) -> list[TraverseOut]:
+    await verify_project_access(project_id, user_id, session)
+    return await SurveyService(session).list_traverses(project_id)
+
+
+@router.post(
+    "/projects/{project_id}/traverses",
+    response_model=TraverseOut,
+    status_code=status.HTTP_201_CREATED,
+    dependencies=_WRITE,
+)
+async def create_traverse(
+    project_id: uuid.UUID, body: TraverseCreate, session: SessionDep, user_id: CurrentUserId
+) -> TraverseOut:
+    await verify_project_access(project_id, user_id, session)
+    return await SurveyService(session).create_traverse(project_id, body, user_id)
+
+
+@router.delete("/traverses/{traverse_id}", status_code=status.HTTP_204_NO_CONTENT, dependencies=_WRITE)
+async def delete_traverse(traverse_id: uuid.UUID, session: SessionDep, user_id: CurrentUserId) -> Response:
+    service = SurveyService(session)
+    row = await service.get_traverse(traverse_id)
+    await verify_project_access(row.project_id, user_id, session)
+    await service.delete_traverse(row)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@router.get("/projects/{project_id}/profile", response_model=SurveyProfileOut, dependencies=_READ)
+async def get_profile(project_id: uuid.UUID, session: SessionDep, user_id: CurrentUserId) -> SurveyProfileOut:
+    await verify_project_access(project_id, user_id, session)
+    return await SurveyService(session).profile(project_id)
+
+
+@router.put(
+    "/projects/{project_id}/profile",
+    response_model=SurveyProfileOut,
+    dependencies=[*_WRITE, Depends(require_survey_confirm)],
+)
+async def put_profile(
+    project_id: uuid.UUID, body: SurveyProfileIn, session: SessionDep, user_id: CurrentUserId
+) -> SurveyProfileOut:
+    await verify_project_access(project_id, user_id, session)
+    return await SurveyService(session).set_profile(project_id, body, user_id)
+
+
+@router.get("/profile", response_model=SurveyProfileOut, dependencies=_READ)
+async def get_default_profile(session: SessionDep) -> SurveyProfileOut:
+    """The workspace default (Settings > Modules > Survey & Land)."""
+    return await SurveyService(session).profile(None)
+
+
+@router.put("/profile", response_model=SurveyProfileOut, dependencies=[*_WRITE, Depends(require_survey_confirm)])
+async def put_default_profile(body: SurveyProfileIn, session: SessionDep, user_id: CurrentUserId) -> SurveyProfileOut:
+    return await SurveyService(session).set_profile(None, body, user_id)
+
+
+@router.get("/projects/{project_id}/plan", dependencies=_READ)
+async def plan(project_id: uuid.UUID, session: SessionDep, user_id: CurrentUserId) -> dict[str, Any]:
+    await verify_project_access(project_id, user_id, session)
+    return await SurveyService(session).plan(project_id)

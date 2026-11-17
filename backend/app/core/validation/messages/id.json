@@ -2231,6 +2231,32 @@
     "duplicate_point": {
       "fail": "ID titik {point_id} ganda dengan koordinat berbeda.",
       "suggestion": "Simpan satu bacaan: hapus set titik yang berisi bacaan salah lalu impor ulang."
+    },
+    "traverse_misclosure": {
+      "fail": "Poligon {name} menutup pada 1:{r}, di bawah minimum profil 1:{min}.",
+      "suggestion": "Periksa sisi-sisi dari kesalahan kasar, ukur ulang sisi terlemah, atau konfirmasi nilai profil."
+    },
+    "level_misclosure": {
+      "fail": "Salah penutup sipat datar {f} mm melebihi k·√km dengan k = {k} mm.",
+      "suggestion": "Ulangi sipat datar atau periksa elevasi titik tetap yang digunakan."
+    }
+  },
+  "volumes": {
+    "no_overlap": {
+      "fail": "Kedua permukaan hanya bertumpang tindih pada {p} % area: volume tidak bermakna.",
+      "suggestion": "Periksa bahwa kedua permukaan berada di sistem koordinat yang sama dan mencakup lahan yang sama."
+    },
+    "low_coverage": {
+      "fail": "Hanya {c} % area yang memiliki data di kedua permukaan (minimum {min} %).",
+      "suggestion": "Tambahkan titik ukur di tempat permukaan tidak ada, atau persempit batas ke area yang tercakup."
+    },
+    "coarse_scan": {
+      "fail": "Pindaian kasar (LOA10) menjadi dasar volume ini tanpa alasan.",
+      "suggestion": "Gunakan pindaian berakurasi survei atau tulis mengapa pindaian ini cukup."
+    },
+    "bank_volume": {
+      "fail": "Kuantitas adalah volume asli (di dalam tanah); faktor pengembangan tidak diterapkan.",
+      "suggestion": "Kirim galian lepas jika item BOQ diukur sebagai material lepas."
     }
   }
 }

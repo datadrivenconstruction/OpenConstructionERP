@@ -11,7 +11,7 @@ list the grids they need. Packs also contribute CRS suggestions through
 from __future__ import annotations
 
 import os
-from collections.abc import Iterable, Sequence
+from collections.abc import Callable, Iterable, Sequence
 from dataclasses import dataclass
 from functools import lru_cache
 
@@ -172,3 +172,20 @@ __all__ = [
     "transform_points",
     "utm_epsg_for",
 ]
+
+
+def wgs84_projector(epsg: int | None) -> Callable[[Sequence[float], Sequence[float]], list[tuple[float, float]]]:
+    """``f(e_values, n_values) -> [(lon, lat), ...]`` for map display.
+
+    A local grid (``None``) and WGS 84 pass through unchanged: a local plan is
+    drawn in its own metres, never pinned to a place it is not.
+    """
+    if epsg is None or int(epsg) == 4326:
+        return lambda e, n: [(round(float(a), 8), round(float(b), 8)) for a, b in zip(e, n, strict=True)]
+    tr = Transformer.from_crs(int(epsg), 4326, always_xy=True)
+
+    def run(e: Sequence[float], n: Sequence[float]) -> list[tuple[float, float]]:
+        lon, lat = tr.transform(list(map(float, e)), list(map(float, n)))
+        return [(round(float(a), 8), round(float(b), 8)) for a, b in zip(lon, lat, strict=True)]
+
+    return run
