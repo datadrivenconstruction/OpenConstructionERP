@@ -32172,11 +32172,11 @@
             },
             {
               "name": "grand_total",
-              "type": "Decimal"
+              "type": "FiniteDecimal"
             },
             {
               "name": "delta_vs_parent",
-              "type": "Decimal | None",
+              "type": "FiniteDecimal | None",
               "default": "None"
             },
             {
@@ -126473,12 +126473,12 @@
             },
             {
               "name": "consumption",
-              "type": "Decimal | None",
+              "type": "FiniteDecimal | None",
               "default": "None"
             },
             {
               "name": "unit_cost",
-              "type": "Decimal | None",
+              "type": "FiniteDecimal | None",
               "default": "None"
             },
             {
@@ -126512,11 +126512,11 @@
             },
             {
               "name": "consumption",
-              "type": "Decimal"
+              "type": "FiniteDecimal"
             },
             {
               "name": "unit_cost",
-              "type": "Decimal"
+              "type": "FiniteDecimal"
             },
             {
               "name": "price_date",
@@ -126545,7 +126545,7 @@
             },
             {
               "name": "quantity",
-              "type": "Decimal | None",
+              "type": "FiniteDecimal | None",
               "default": "None"
             },
             {
@@ -126562,11 +126562,11 @@
             },
             {
               "name": "current_unit_costs",
-              "type": "dict[str, Decimal]"
+              "type": "dict[str, FiniteDecimal]"
             },
             {
               "name": "agreed_rate",
-              "type": "Decimal | None",
+              "type": "FiniteDecimal | None",
               "default": "None"
             }
           ]
@@ -126762,7 +126762,7 @@
             },
             {
               "name": "original_rate",
-              "type": "Decimal"
+              "type": "FiniteDecimal"
             },
             {
               "name": "seal_id",
@@ -144627,7 +144627,7 @@
             },
             {
               "name": "base_rate",
-              "type": "Decimal"
+              "type": "Decimal18_4"
             },
             {
               "name": "classification",
@@ -144635,11 +144635,11 @@
             },
             {
               "name": "max_qty",
-              "type": "Decimal | None"
+              "type": "Decimal18_4 | None"
             },
             {
               "name": "estimated_qty",
-              "type": "Decimal | None"
+              "type": "Decimal18_4 | None"
             },
             {
               "name": "surcharge_flags",
@@ -144677,15 +144677,15 @@
             },
             {
               "name": "base_rate",
-              "type": "Decimal | None"
+              "type": "Decimal18_4 | None"
             },
             {
               "name": "max_qty",
-              "type": "Decimal | None"
+              "type": "Decimal18_4 | None"
             },
             {
               "name": "estimated_qty",
-              "type": "Decimal | None"
+              "type": "Decimal18_4 | None"
             },
             {
               "name": "surcharge_flags",
@@ -144835,11 +144835,11 @@
             },
             {
               "name": "fixed_part",
-              "type": "Decimal | None"
+              "type": "Decimal9_6 | None"
             },
             {
               "name": "fixed_factor",
-              "type": "Decimal | None"
+              "type": "Decimal12_6 | None"
             },
             {
               "name": "series_refs",
@@ -144847,7 +144847,7 @@
             },
             {
               "name": "rate_overrides",
-              "type": "dict[str, Decimal]"
+              "type": "dict[str, Decimal18_4]"
             }
           ]
         },
@@ -144949,7 +144949,7 @@
             },
             {
               "name": "value",
-              "type": "Decimal"
+              "type": "Decimal12_6"
             },
             {
               "name": "scope",
@@ -145057,15 +145057,15 @@
             },
             {
               "name": "cap_value",
-              "type": "Decimal | None"
+              "type": "Decimal18_2 | None"
             },
             {
               "name": "min_value",
-              "type": "Decimal | None"
+              "type": "Decimal18_2 | None"
             },
             {
               "name": "estimated_value",
-              "type": "Decimal | None"
+              "type": "Decimal18_2 | None"
             },
             {
               "name": "cap_basis",
@@ -145073,7 +145073,7 @@
             },
             {
               "name": "threshold_pct",
-              "type": "Decimal"
+              "type": "Decimal5_2"
             },
             {
               "name": "rounding",
@@ -145132,15 +145132,15 @@
             },
             {
               "name": "cap_value",
-              "type": "Decimal | None"
+              "type": "Decimal18_2 | None"
             },
             {
               "name": "min_value",
-              "type": "Decimal | None"
+              "type": "Decimal18_2 | None"
             },
             {
               "name": "estimated_value",
-              "type": "Decimal | None"
+              "type": "Decimal18_2 | None"
             },
             {
               "name": "cap_basis",
@@ -145148,7 +145148,7 @@
             },
             {
               "name": "threshold_pct",
-              "type": "Decimal | None"
+              "type": "Decimal5_2 | None"
             },
             {
               "name": "rounding",
@@ -145178,43 +145178,43 @@
           "fields": [
             {
               "name": "cap",
-              "type": "Decimal | None",
+              "type": "FiniteDecimal | None",
               "default": "None"
             },
             {
               "name": "min_value",
-              "type": "Decimal | None",
+              "type": "FiniteDecimal | None",
               "default": "None"
             },
             {
               "name": "committed",
-              "type": "Decimal"
+              "type": "FiniteDecimal"
             },
             {
               "name": "certified",
-              "type": "Decimal"
+              "type": "FiniteDecimal"
             },
             {
               "name": "invoiced",
-              "type": "Decimal"
+              "type": "FiniteDecimal"
             },
             {
               "name": "tested",
-              "type": "Decimal"
+              "type": "FiniteDecimal"
             },
             {
               "name": "headroom",
-              "type": "Decimal | None",
+              "type": "FiniteDecimal | None",
               "default": "None"
             },
             {
               "name": "pct",
-              "type": "Decimal | None",
+              "type": "FiniteDecimal | None",
               "default": "None"
             },
             {
               "name": "threshold_pct",
-              "type": "Decimal"
+              "type": "FiniteDecimal"
             },
             {
               "name": "cap_basis",
@@ -145223,7 +145223,7 @@
             },
             {
               "name": "term_elapsed_pct",
-              "type": "Decimal | None",
+              "type": "FiniteDecimal | None",
               "default": "None"
             },
             {
@@ -145385,7 +145385,7 @@
             },
             {
               "name": "quantity",
-              "type": "Decimal"
+              "type": "Decimal18_4"
             }
           ]
         },
@@ -145522,11 +145522,11 @@
             },
             {
               "name": "net",
-              "type": "Decimal"
+              "type": "FiniteDecimal"
             },
             {
               "name": "factor",
-              "type": "Decimal | None",
+              "type": "FiniteDecimal | None",
               "default": "None"
             },
             {
@@ -145558,12 +145558,12 @@
             },
             {
               "name": "per_rate_net",
-              "type": "Decimal | None",
+              "type": "FiniteDecimal | None",
               "default": "None"
             },
             {
               "name": "per_total_net",
-              "type": "Decimal | None",
+              "type": "FiniteDecimal | None",
               "default": "None"
             }
           ]
@@ -145767,7 +145767,7 @@
           "fields": [
             {
               "name": "measurements",
-              "type": "dict[str, Decimal]",
+              "type": "dict[str, Decimal18_4]",
               "description": "order line id -> measured quantity to date"
             }
           ]
@@ -145793,20 +145793,20 @@
             },
             {
               "name": "committed",
-              "type": "Decimal"
+              "type": "FiniteDecimal"
             },
             {
               "name": "certified",
-              "type": "Decimal"
+              "type": "FiniteDecimal"
             },
             {
               "name": "quantity",
-              "type": "Decimal | None",
+              "type": "FiniteDecimal | None",
               "default": "None"
             },
             {
               "name": "max_qty",
-              "type": "Decimal | None",
+              "type": "FiniteDecimal | None",
               "default": "None"
             }
           ]
@@ -212802,7 +212802,7 @@
             },
             {
               "name": "rate",
-              "type": "Decimal"
+              "type": "FiniteDecimal"
             },
             {
               "name": "currency",
@@ -290993,7 +290993,7 @@
             },
             {
               "name": "this_period_percent",
-              "type": "Decimal | None"
+              "type": "Decimal8_4 | None"
             }
           ]
         },
@@ -293085,37 +293085,37 @@
             },
             {
               "name": "scheduled_value",
-              "type": "Decimal"
+              "type": "FiniteDecimal"
             },
             {
               "name": "previous",
-              "type": "Decimal"
+              "type": "FiniteDecimal"
             },
             {
               "name": "this_period",
-              "type": "Decimal"
+              "type": "FiniteDecimal"
             },
             {
               "name": "this_period_percent",
-              "type": "Decimal | None",
+              "type": "FiniteDecimal | None",
               "default": "None"
             },
             {
               "name": "total_completed",
-              "type": "Decimal"
+              "type": "FiniteDecimal"
             },
             {
               "name": "percent_complete",
-              "type": "Decimal | None",
+              "type": "FiniteDecimal | None",
               "default": "None"
             },
             {
               "name": "retention",
-              "type": "Decimal"
+              "type": "FiniteDecimal"
             },
             {
               "name": "balance_to_finish",
-              "type": "Decimal"
+              "type": "FiniteDecimal"
             }
           ]
         },
@@ -293301,7 +293301,7 @@
             },
             {
               "name": "this_period_percent",
-              "type": "Decimal | None"
+              "type": "Decimal8_4 | None"
             }
           ]
         },
