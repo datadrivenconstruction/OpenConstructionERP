@@ -152,8 +152,8 @@ _TYPE_DISTRIBUTION: list[str] = [
 
 
 # Contracts another module's demo seeds complete on their own (the cash-flow forecast demo
-# writes its own invoices); backfilling them would grow on every reinstall.
-_OTHER_MODULE_SEEDS = frozenset({"cashflow_forecast_demo"})
+# writes its own invoices, framework agreements write their own call-off claims); backfilling them would grow on every reinstall.
+_OTHER_MODULE_SEEDS = frozenset({"cashflow_forecast_demo", "framework_agreements_demo"})
 
 
 def _seeded_by_another_module(contract: object) -> bool:

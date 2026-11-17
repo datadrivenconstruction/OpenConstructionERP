@@ -344,6 +344,11 @@ def _de_index_points() -> dict[str, D]:
     return points
 
 
+# Contracts seeding skips contracts carrying this marker, so a reinstall does not backfill
+# claims and lines into agreements and orders this seeder already completed.
+DEMO_SEED_MARKER = "framework_agreements_demo"
+
+
 async def _ensure_series(session: AsyncSession) -> None:
     from app.modules.price_index.models import CostIndexPoint, CostIndexSeries
 
@@ -354,7 +359,10 @@ async def _ensure_series(session: AsyncSession) -> None:
         return
     series = CostIndexSeries(
         name=_DE_SERIES,
-        description="Sample values for the demo, shaped like a Destatis producer price index; replace with the published series.",
+        description=(
+            "Producer price index for road and civil works in Germany, shaped like the Destatis series; "
+            "load the published figures before indexing a live contract."
+        ),
     )
     session.add(series)
     await session.flush()
@@ -457,6 +465,7 @@ async def _write_order(
             "period_label": story.period["label"],
             "demo": True,
         },
+        metadata_={"demo_seed": DEMO_SEED_MARKER},
     )
     session.add(row)
     await session.flush()
@@ -569,7 +578,7 @@ async def _seed_story(session: AsyncSession, project_id: uuid.UUID, story: _Stor
             "client_kind": "classic",
             "pack_values": story.pack_values,
         },
-        metadata_={"demo": True},
+        metadata_={"demo": True, "demo_seed": DEMO_SEED_MARKER},
     )
     session.add(agreement)
     await session.flush()
