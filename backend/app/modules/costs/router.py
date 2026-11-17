@@ -3488,11 +3488,12 @@ async def semantic_search(
             return []
         if len(candidates) <= _VECTOR_PREFILTER_MAX_IDS:
             hits = vector_search(query_vector, region=region, limit=limit, ids=candidates)
-        else:
-            wanted = set(candidates)
-            wide = vector_search(query_vector, region=region, limit=min(limit * _VECTOR_OVERSAMPLE, 2000))
-            hits = [h for h in wide if str(h.get("id")) in wanted][:limit]
-        return await cost_scope.visible_hits(session, hits)
+            return await cost_scope.visible_hits(session, hits)
+        wanted = set(candidates)
+        # Scope the wide window before truncating, so hidden hits cannot crowd out visible ones.
+        wide = vector_search(query_vector, region=region, limit=min(limit * _VECTOR_OVERSAMPLE, 2000))
+        wide = await cost_scope.visible_hits(session, wide)
+        return [h for h in wide if str(h.get("id")) in wanted][:limit]
     except (ImportError, ModuleNotFoundError, RuntimeError) as exc:
         from app.core.vector import embedder_status
 
