@@ -7,7 +7,9 @@ Mounted into the schedule module's main router, so these share the
 
 * ``POST /schedules/{id}/baselines/capture``          - snapshot the live schedule as B0, B1, ...;
 * ``POST /schedules/{id}/baselines/{bid}/approve``    - make it the one approved baseline;
-* ``GET  /schedules/{id}/gantt.pdf``                  - the Gantt chart as a printable PDF.
+* ``GET  /schedules/{id}/gantt.pdf``                  - the Gantt chart as a printable PDF;
+* ``GET  /schedules/{id}/revision-impact``            - revised activities with their BOQ positions,
+  variations, time and planned-cost deltas against a baseline.
 
 The older ``POST /baselines/`` (client-supplied snapshot) stays for
 compatibility; this capture is server-authoritative.
@@ -28,7 +30,7 @@ from app.core.document_locale import resolve_document_locale
 from app.core.register_context import document_download
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep, verify_project_access
 from app.modules.schedule.baseline_revisions import effective_baseline, next_baseline_label
-from app.modules.schedule.schemas import BaselineCaptureRequest, BaselineResponse
+from app.modules.schedule.schemas import BaselineCaptureRequest, BaselineResponse, RevisionImpactResponse
 from app.modules.schedule.service import ScheduleService
 
 baseline_router = APIRouter(tags=["schedule"])
@@ -238,3 +240,114 @@ async def export_gantt_pdf(
     )
     pdf = render_gantt_pdf(rows_out, meta, paper=paper, locale=lang)
     return document_download(pdf, _filename(schedule.name, today), lang, "application/pdf")
+
+
+async def _positions_and_variations(
+    session: SessionDep, project_id: uuid.UUID, ids: set[str]
+) -> tuple[dict[str, dict[str, Any]], dict[str, list[dict[str, Any]]]]:
+    """BOQ positions of this project by id, and the variation requests whose bill traces them."""
+    from app.modules.boq.models import BOQ, Position
+
+    uuids = []
+    for raw in ids:
+        try:
+            uuids.append(uuid.UUID(raw))
+        except ValueError:
+            continue
+    if not uuids:
+        return {}, {}
+    rows = await session.execute(
+        select(Position)
+        .join(BOQ, BOQ.id == Position.boq_id)
+        .where(Position.id.in_(uuids), BOQ.project_id == project_id)
+    )
+    positions = {
+        str(p.id): {
+            "ordinal": p.ordinal,
+            "description": p.description,
+            "unit": p.unit,
+            "quantity": p.quantity,
+            "total": p.total,
+            "boq_id": p.boq_id,
+        }
+        for p in rows.scalars().all()
+    }
+    variations: dict[str, list[dict[str, Any]]] = {}
+    try:
+        from app.modules.variations.models import VariationBOQTrace, VariationRequest
+    except ImportError:  # variations module not installed
+        return positions, variations
+    trace_rows = await session.execute(
+        select(VariationBOQTrace, VariationRequest)
+        .join(VariationRequest, VariationRequest.id == VariationBOQTrace.variation_request_id)
+        .where(
+            VariationRequest.project_id == project_id,
+            (VariationBOQTrace.source_position_id.in_(uuids)) | (VariationBOQTrace.position_id.in_(uuids)),
+        )
+    )
+    for trace, request in trace_rows.all():
+        entry = {
+            "id": str(request.id),
+            "code": request.code,
+            "title": request.title,
+            "status": request.status,
+            "change_kind": trace.change_kind,
+        }
+        for pid in {str(trace.source_position_id or ""), str(trace.position_id)} & ids:
+            bucket = variations.setdefault(pid, [])
+            if all(v["id"] != entry["id"] for v in bucket):
+                bucket.append(entry)
+    return positions, variations
+
+
+@baseline_router.get(
+    "/schedules/{schedule_id}/revision-impact",
+    response_model=RevisionImpactResponse,
+    summary="Revised activities with their BOQ positions, variations, time and cost deltas",
+    dependencies=[Depends(RequirePermission("schedule.read"))],
+)
+async def revision_impact(
+    schedule_id: uuid.UUID,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    base_baseline_id: uuid.UUID | None = Query(default=None, description="Defaults to the approved baseline"),
+    target_baseline_id: uuid.UUID | None = Query(default=None, description="Defaults to the live schedule"),
+) -> RevisionImpactResponse:
+    """Compare a baseline with the live plan (or a later baseline) and name what each change touches.
+
+    Reuses the schedule diff and the existing activity-to-BOQ links; read-only.
+    """
+    from app.modules.schedule.diff_engine import diff_snapshots
+    from app.modules.schedule.revision_impact import build_revision_impact, linked_position_ids
+    from app.modules.schedule.router import _load_activities_relationships, _load_baseline_for_project
+    from app.modules.schedule.snapshot_envelope import live_envelope, normalize_envelope
+
+    schedule = await _owned_schedule(session, schedule_id, user_id)
+    if base_baseline_id is not None:
+        base = await _load_baseline_for_project(session, base_baseline_id, schedule.project_id)
+    else:
+        rows = await _schedule_baselines(session, schedule_id)
+        picked = effective_baseline([_as_row(b) for b in rows])
+        base = next((b for b in rows if picked and b.id == picked["id"]), rows[-1] if rows else None)
+        if base is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="The schedule has no baseline yet.")
+    base_env = normalize_envelope(base.snapshot_data)
+    if target_baseline_id is not None:
+        target = await _load_baseline_for_project(session, target_baseline_id, schedule.project_id)
+        target_env, target_label = normalize_envelope(target.snapshot_data), target.name
+    else:
+        acts, rels = await _load_activities_relationships(session, schedule_id)
+        target_env, target_label = live_envelope(acts, rels), "current"
+
+    diff = diff_snapshots(base_env, target_env)
+    positions, variations = await _positions_and_variations(
+        session, schedule.project_id, linked_position_ids(base_env, target_env)
+    )
+    report = build_revision_impact(diff, base_env, target_env, positions=positions, variations=variations)
+    return RevisionImpactResponse(
+        schedule_id=schedule_id,
+        base_baseline_id=base.id,
+        base_label=base.name,
+        target_label=target_label,
+        **report,
+    )

@@ -2021,5 +2021,32 @@
       "fail": "Tällä aikataululla on useampi kuin yksi hyväksytty perusaikataulu ({baselines}).",
       "suggestion": "Hyväksy perusaikataulu, jonka pitää olla voimassa; yhden hyväksyminen peruu muiden hyväksynnän."
     }
+  },
+  "schedule_mspdi_import": {
+    "task_dates": {
+      "missing_dates": "Tehtävällä {ref} \"{name}\" ei ole alkamis- tai päättymispäivää.",
+      "finish_before_start": "Tehtävä {ref} \"{name}\" päättyy ({finish}) ennen kuin alkaa ({start}).",
+      "suggestion": "Korjaa päivämäärät lähdeaikataulussa ja vie se uudelleen. Päivämääriä ei koskaan arvata tuonnissa."
+    },
+    "unique_ids": {
+      "duplicate_uid": "Tehtävätunnus {ref} esiintyy useammin kuin kerran; vain ensimmäinen tehtävä säilytetään.",
+      "suggestion": "Anna jokaiselle tehtävälle yksilöllinen tunnus lähdeaikataulussa."
+    },
+    "links_resolve": {
+      "dangling_link": "Tehtävä {ref} \"{name}\": edeltäjää {predecessor} ei ole tiedostossa, linkki ohitetaan.",
+      "duplicate_link": "Tehtävä {ref} \"{name}\": toinen linkki edeltäjästä {predecessor} ohitetaan, paria kohden säilytetään yksi linkki.",
+      "self_link": "Tehtävä {ref} \"{name}\" on linkitetty itseensä, linkki ohitetaan.",
+      "unknown_link_type": "Tehtävä {ref} \"{name}\": linkkityyppi {type} on tuntematon ja luetaan lopusta alkuun -tyypiksi.",
+      "suggestion": "Tarkista lähdeaikataulun loogiset linkit."
+    },
+    "values_in_range": {
+      "percent_out_of_range": "Tehtävä {ref} \"{name}\": valmiusaste {value} % on alueen 0-100 ulkopuolella ja rajataan.",
+      "outline_gap": "Tehtävä {ref} \"{name}\" ohittaa jäsennystason ({level}); se sijoitetaan lähimmän yläpuolisen yhteenvetotehtävän alle.",
+      "suggestion": "Tarkista valmiusaste ja sisennykset lähdeaikataulussa."
+    },
+    "calendar_work_days": {
+      "calendar_no_work_days": "Kalenterissa {calendar} ei ole työpäiviä.",
+      "suggestion": "Merkitse tämän kalenterin työpäivät lähdeaikatauluun."
+    }
   }
 }

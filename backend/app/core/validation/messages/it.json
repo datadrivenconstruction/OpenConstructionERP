@@ -2021,5 +2021,32 @@
       "fail": "Questo cronoprogramma ha più di una baseline approvata ({baselines}).",
       "suggestion": "Approvi la baseline che deve valere; approvarne una ritira l'approvazione delle altre."
     }
+  },
+  "schedule_mspdi_import": {
+    "task_dates": {
+      "missing_dates": "L'attività {ref} «{name}» non ha data di inizio o di fine.",
+      "finish_before_start": "L'attività {ref} «{name}» finisce ({finish}) prima di iniziare ({start}).",
+      "suggestion": "Correggi le date nel cronoprogramma di origine ed esportalo di nuovo. Le date non vengono mai stimate durante l'importazione."
+    },
+    "unique_ids": {
+      "duplicate_uid": "L'ID attività {ref} compare più volte; viene mantenuta solo la prima attività.",
+      "suggestion": "Assegna a ogni attività un ID univoco nel cronoprogramma di origine."
+    },
+    "links_resolve": {
+      "dangling_link": "Attività {ref} «{name}»: la predecessora {predecessor} non è nel file, il collegamento viene ignorato.",
+      "duplicate_link": "Attività {ref} \"{name}\": un secondo legame dal predecessore {predecessor} viene ignorato, si mantiene un legame per coppia.",
+      "self_link": "L'attività {ref} «{name}» è collegata a se stessa, il collegamento viene ignorato.",
+      "unknown_link_type": "Attività {ref} «{name}»: il tipo di collegamento {type} è sconosciuto e viene letto come fine-inizio.",
+      "suggestion": "Controlla i collegamenti logici nel cronoprogramma di origine."
+    },
+    "values_in_range": {
+      "percent_out_of_range": "Attività {ref} «{name}»: {value}% completato è fuori da 0-100 e viene limitato.",
+      "outline_gap": "L'attività {ref} «{name}» salta un livello di struttura ({level}); viene posta sotto il riepilogo più vicino sopra.",
+      "suggestion": "Controlla la % completata e il rientro nel cronoprogramma di origine."
+    },
+    "calendar_work_days": {
+      "calendar_no_work_days": "Il calendario {calendar} non ha giorni lavorativi.",
+      "suggestion": "Indica i giorni lavorativi di questo calendario nel cronoprogramma di origine."
+    }
   }
 }

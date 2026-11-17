@@ -31,13 +31,10 @@ import csv
 import io
 import logging
 import uuid
-import xml.etree.ElementTree as ET  # noqa: S405 - types + output tree building only; parsing routed through defusedxml below
 from datetime import date
 from decimal import Decimal
 from typing import Any, Literal
 
-import defusedxml.ElementTree as safe_ET
-from defusedxml.common import DefusedXmlException
 from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, status
 from fastapi.responses import StreamingResponse
 
@@ -76,6 +73,7 @@ from app.modules.schedule.schemas import (
     ImportResult,
     LaborCostByPhaseResponse,
     LinkPositionRequest,
+    MspdiPreviewResponse,
     NextMilestone,
     ProgressUpdateCreate,
     ProgressUpdateEdit,
@@ -2057,42 +2055,32 @@ async def import_xer(
     )
 
 
-def _parse_msp_duration_to_days(duration_str: str) -> int:
-    """Parse MS Project XML duration string (e.g. 'PT48H0M0S', 'P5D') to days.
+@router.post(
+    "/schedule/import/msp-xml/preview/",
+    response_model=MspdiPreviewResponse,
+    dependencies=[Depends(RequirePermission("schedule.update"))],
+)
+async def preview_msp_xml(
+    _user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    schedule_id: uuid.UUID = Query(..., description="Schedule the file would be imported into"),
+    file: UploadFile = File(...),
+    session: SessionDep = None,
+    service: ScheduleService = Depends(_get_service),
+) -> MspdiPreviewResponse:
+    """Read an MS Project XML file and report what would be imported. Changes nothing.
 
-    MSP durations use ISO 8601 duration format:
-    - PT48H0M0S = 48 hours = 6 days (at 8h/day)
-    - P5DT0H0M0S = 5 days
-    - PT0H0M0S = 0 (milestone)
+    Returns the tasks with hierarchy, dates, links, calendars and baseline 0 as
+    they will land, plus the ``schedule_mspdi_import`` validation report;
+    ``can_apply`` is false while an error is open.
     """
-    if not duration_str:
-        return 0
+    from app.modules.schedule.mspdi_import_service import preview_document, read_or_400, validation_issues
 
-    total_hours = 0.0
-    total_days = 0
-
-    # Extract days (P...D)
-    d_part = duration_str.split("T")[0] if "T" in duration_str else duration_str
-    if "D" in d_part:
-        try:
-            d_val = d_part.replace("P", "").replace("D", "")
-            total_days = int(d_val)
-        except (ValueError, TypeError):
-            pass
-
-    # Extract hours from time part (T...H)
-    if "T" in duration_str:
-        t_part = duration_str.split("T")[1]
-        if "H" in t_part:
-            try:
-                h_val = t_part.split("H")[0]
-                total_hours = float(h_val)
-            except (ValueError, TypeError):
-                pass
-
-    # Convert hours to days (assuming 8h workday)
-    total_days += int(total_hours / 8)
-    return max(total_days, 0)
+    await _verify_schedule_owner(service, session, schedule_id, _user_id, payload)
+    raw = await file.read()
+    doc = await asyncio.to_thread(read_or_400, raw)
+    issues = await validation_issues(doc, schedule_id=schedule_id, locale=get_locale())
+    return MspdiPreviewResponse(filename=file.filename or "", **preview_document(doc, issues))
 
 
 @router.post(
@@ -2109,241 +2097,29 @@ async def import_msp_xml(
     session: SessionDep = None,
     service: ScheduleService = Depends(_get_service),
 ) -> ImportResult:
-    """Import an MS Project XML file into a schedule.
+    """Import an MS Project XML (MSPDI) file into a schedule.
 
-    Supports both MSP 2016 and MSP 2021 formats. Extracts Tasks and Links
-    (predecessor relationships) and maps them to Activity + ScheduleRelationship.
+    Tasks with their outline parents, links with type and lag, calendars and
+    baseline 0 (as an unapproved B<n>). A file the preview reports errors for
+    is refused with 422; nothing is guessed.
     """
-    from app.modules.schedule.models import Activity, ScheduleRelationship
+    from app.modules.schedule.mspdi_import_service import MspdiImportService
 
-    # Verify schedule exists
     schedule = await _verify_schedule_owner(service, session, schedule_id, _user_id, payload)
-    # A duration the file does not state is counted on the project's working
-    # week, the same one the activity write paths and BOQ generation use.
+    # A duration the file does not state is counted on the project's working week.
     project_region = await service.resolve_project_region(schedule.project_id)
-
     raw = await file.read()
-
-    try:
-        # Parsed from bytes on purpose. MSPDI, unlike XER, states its own
-        # encoding in the XML declaration, and ElementTree honours that only
-        # when it is handed bytes; a str has already been decoded and the
-        # declaration can no longer be acted on, so it is silently ignored.
-        # This used to decode utf-8 then latin-1 first, which cannot fail and
-        # therefore turned a windows-1256 file into mojibake that parsed
-        # perfectly well.
-        root = safe_ET.fromstring(raw)
-    except DefusedXmlException as e:
-        # Hostile payload (XXE / billion-laughs / external DTD): defusedxml
-        # raises EntitiesForbidden/DTDForbidden/ExternalReferenceForbidden,
-        # which are NOT ET.ParseError - reject cleanly instead of 500.
-        raise HTTPException(
-            status_code=400,
-            detail="XML rejected for security reasons",
-        ) from e
-    except ET.ParseError as e:
-        raise HTTPException(status_code=400, detail=f"Invalid XML: {e}") from e
-
-    warnings: list[str] = []
-
-    # Detect namespace (MSP 2003/2016 vs 2021+)
-    ns = ""
-    root_tag = root.tag
-    if "}" in root_tag:
-        ns = root_tag.split("}")[0] + "}"
-
-    def find(parent: ET.Element, tag: str) -> ET.Element | None:
-        """Find child element with or without namespace."""
-        result = parent.find(f"{ns}{tag}")
-        if result is None:
-            result = parent.find(tag)
-        return result
-
-    def findall(parent: ET.Element, tag: str) -> list[ET.Element]:
-        """Find all child elements with or without namespace."""
-        result = parent.findall(f"{ns}{tag}")
-        if not result:
-            result = parent.findall(tag)
-        return result
-
-    def findtext(parent: ET.Element, tag: str, default: str = "") -> str:
-        """Get text of child element with or without namespace."""
-        el = find(parent, tag)
-        return (el.text or default) if el is not None else default
-
-    # ── Parse Tasks ───────────────────────────────────────────────────────
-    tasks_elem = find(root, "Tasks")
-    if tasks_elem is None:
-        raise HTTPException(status_code=400, detail="No Tasks element found in MSP XML")
-
-    task_elements = findall(tasks_elem, "Task")
-    if not task_elements:
-        raise HTTPException(status_code=400, detail="No Task elements found in MSP XML")
-
-    # Map MSP UID -> our UUID
-    msp_uid_to_uuid: dict[str, uuid.UUID] = {}
-    created_ids: list[uuid.UUID] = []
-    activities_imported = 0
     max_seq = await service.activity_repo.get_max_activity_code_seq(schedule_id)
-
-    for task_idx, task_el in enumerate(task_elements):
-        uid = findtext(task_el, "UID", "")
-        name = findtext(task_el, "Name", "")
-        if not name:
-            continue
-
-        # Skip the root summary task (UID=0 in MSP)
-        if uid == "0":
-            continue
-
-        start = findtext(task_el, "Start", "")
-        finish = findtext(task_el, "Finish", "")
-        duration_str = findtext(task_el, "Duration", "")
-        pct_str = findtext(task_el, "PercentComplete", "0")
-        outline_level = findtext(task_el, "OutlineLevel", "1")
-        summary_flag = findtext(task_el, "Summary", "0")
-        milestone_flag = findtext(task_el, "Milestone", "0")
-        wbs = findtext(task_el, "WBS", "")
-
-        # Normalize dates: MSP XML uses "2026-05-01T08:00:00"
-        start_date = start[:10] if start else ""
-        end_date = finish[:10] if finish else ""
-
-        if not start_date or not end_date:
-            warnings.append(f"Task UID={uid} '{name}': missing dates, using defaults")
-            start_date = start_date or "2026-01-01"
-            end_date = end_date or "2026-01-15"
-
-        duration_days = _parse_msp_duration_to_days(duration_str)
-        if duration_days == 0 and start_date and end_date:
-            duration_days = max(0, compute_duration(start_date, end_date, project_region))
-
-        try:
-            pct = float(pct_str)
-        except (ValueError, TypeError):
-            pct = 0.0
-
-        # Determine activity type
-        if milestone_flag == "1" or duration_days == 0:
-            activity_type = "milestone"
-        elif summary_flag == "1":
-            activity_type = "summary"
-        else:
-            activity_type = "task"
-
-        # Constraint
-        constraint_type_str = findtext(task_el, "ConstraintType", "")
-        constraint_date_str = findtext(task_el, "ConstraintDate", "")
-        constraint_map = {
-            "0": "as_soon_as_possible",
-            "1": "must_start_on",
-            "2": "must_finish_on",
-            "3": "start_no_earlier",
-            "4": "start_no_later",
-            "5": "finish_no_earlier",
-            "6": "finish_no_later",
-            "7": "as_late_as_possible",
-        }
-        constraint_type = normalize_constraint(constraint_map.get(constraint_type_str))
-        constraint_date = constraint_date_str[:10] if constraint_date_str else None
-
-        max_seq += 1
-        activity_code = f"ACT-{max_seq:03d}"
-
-        activity = Activity(
-            schedule_id=schedule_id,
-            parent_id=None,
-            name=name[:255],
-            description=name,
-            wbs_code=wbs,
-            start_date=start_date,
-            end_date=end_date,
-            duration_days=duration_days,
-            progress_pct=str(pct),
-            status="completed" if pct >= 100 else ("in_progress" if pct > 0 else "not_started"),
-            activity_type=activity_type,
-            dependencies=[],
-            resources=[],
-            boq_position_ids=[],
-            color="#dc2626" if activity_type == "milestone" else "#0071e3",
-            sort_order=task_idx + 1,
-            activity_code=activity_code,
-            constraint_type=constraint_type,
-            constraint_date=constraint_date,
-            metadata_={
-                "source": "msp_xml_import",
-                "msp_uid": uid,
-                "outline_level": outline_level,
-            },
-        )
-        session.add(activity)
-        await session.flush()
-        msp_uid_to_uuid[uid] = activity.id
-        created_ids.append(activity.id)
-        activities_imported += 1
-
-    # ── Parse Links (predecessors) ────────────────────────────────────────
-    relationships_imported = 0
-
-    # MSP link types: 0=FF, 1=FS, 2=SF, 3=SS
-    msp_link_type_map = {
-        "0": "FF",
-        "1": "FS",
-        "2": "SF",
-        "3": "SS",
-    }
-
-    for task_el in task_elements:
-        uid = findtext(task_el, "UID", "")
-        succ_uuid = msp_uid_to_uuid.get(uid)
-        if succ_uuid is None:
-            continue
-
-        # Links can be nested under Task
-        pred_links = findall(task_el, "PredecessorLink")
-        for link_el in pred_links:
-            pred_uid = findtext(link_el, "PredecessorUID", "")
-            pred_uuid = msp_uid_to_uuid.get(pred_uid)
-            if pred_uuid is None:
-                warnings.append(f"Link: predecessor UID={pred_uid} not found for task UID={uid}")
-                continue
-
-            if pred_uuid == succ_uuid:
-                continue
-
-            link_type = findtext(link_el, "Type", "1")
-            rel_type = msp_link_type_map.get(link_type, "FS")
-
-            lag_str = findtext(link_el, "LinkLag", "0")
-            try:
-                # MSP stores lag in tenths of minutes; convert to days
-                lag_tenths = int(lag_str)
-                lag_days = lag_tenths // (10 * 60 * 8) if lag_tenths != 0 else 0
-            except (ValueError, TypeError):
-                lag_days = 0
-
-            rel = ScheduleRelationship(
-                schedule_id=schedule_id,
-                predecessor_id=pred_uuid,
-                successor_id=succ_uuid,
-                relationship_type=rel_type,
-                lag_days=lag_days,
-            )
-            session.add(rel)
-            relationships_imported += 1
-
-    await session.flush()
-
-    source = await ImportSourceService(session).record_import(
-        schedule_id, raw=raw, filename=file.filename or "", fmt="msp_xml", user_id=_user_id, activity_ids=created_ids
+    result = await MspdiImportService(session).apply(
+        schedule,
+        raw,
+        filename=file.filename or "",
+        user_id=_user_id,
+        region=project_region,
+        locale=get_locale(),
+        max_seq=max_seq,
     )
-    return ImportResult(
-        activities_imported=activities_imported,
-        relationships_imported=relationships_imported,
-        calendars_imported=0,
-        warnings=warnings,
-        source_document_id=source["document_id"],
-    )
+    return ImportResult(**result)
 
 
 def _render_schedule_csv(
@@ -2520,8 +2296,9 @@ async def export_schedule_msp_xml(
     """Export a schedule as a Microsoft Project XML (MSPDI) file.
 
     Round-trips with ``import_msp_xml``: tasks become ``<Task>`` rows (UID,
-    dates, 8h-day duration, percent complete, milestone/summary flags,
-    constraints) and both the relationship table and inline dependencies
+    outline level, dates, duration on the project calendar's day, percent
+    complete, milestone/summary flags, constraints, calendar, baseline 0 from
+    the approved baseline), calendars become ``<Calendar>`` rows, and both the relationship table and inline dependencies
     become ``<PredecessorLink>`` entries. Verifies the caller owns the parent
     project (admins bypass).
     """
@@ -2534,16 +2311,21 @@ async def export_schedule_msp_xml(
         MspdiProject,
         build_mspdi_xml,
     )
+    from app.modules.schedule.mspdi_export_context import calendar_uid_of, load_export_context, tree_order
 
     await _verify_schedule_owner(service, session, schedule_id, _user_id, payload)
     schedule = await service.get_schedule(schedule_id)
     activities, _ = await service.list_activities_for_schedule(schedule_id, limit=5000)
+    region = await service.resolve_project_region(schedule.project_id)
+    ctx = await load_export_context(session, schedule, activities, region=region)
 
     # An imported activity keeps the UID its file gave it, so a re-export
     # matches the original row for row; the rest are numbered after them.
     uid_by_act: dict[str, int] = stable_export_uids(activities)
     mspdi_acts: list[MspdiActivity] = []
-    for act in activities:
+    # Parents first with their depth, so OutlineLevel carries the hierarchy.
+    for act, level in tree_order(activities):
+        baseline = ctx.baseline_by_activity.get(str(act.id))
         mspdi_acts.append(
             MspdiActivity(
                 uid=uid_by_act[str(act.id)],
@@ -2554,8 +2336,13 @@ async def export_schedule_msp_xml(
                 progress_pct=_str_to_float(act.progress_pct),
                 activity_type=act.activity_type or "task",
                 wbs_code=act.wbs_code or "",
+                outline_level=level,
                 constraint_type=act.constraint_type,
                 constraint_date=act.constraint_date,
+                calendar_uid=calendar_uid_of(ctx, act.calendar_id),
+                baseline_start=baseline[0] if baseline else None,
+                baseline_end=baseline[1] if baseline else None,
+                baseline_duration_days=baseline[2] if baseline else None,
             )
         )
 
@@ -2612,6 +2399,9 @@ async def export_schedule_msp_xml(
             name=schedule.name or "Schedule",
             activities=mspdi_acts,
             predecessors_by_uid=preds_by_uid,
+            hours_per_day=ctx.hours_per_day,
+            calendars=ctx.calendars,
+            project_calendar_uid=ctx.project_calendar_uid,
         ),
     )
 

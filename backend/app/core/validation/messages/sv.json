@@ -2021,5 +2021,32 @@
       "fail": "Den här tidplanen har mer än en godkänd baslinje ({baselines}).",
       "suggestion": "Godkänn den baslinje som ska gälla; att godkänna en drar tillbaka godkännandet av de andra."
     }
+  },
+  "schedule_mspdi_import": {
+    "task_dates": {
+      "missing_dates": "Aktivitet {ref} \"{name}\" saknar start- eller slutdatum.",
+      "finish_before_start": "Aktivitet {ref} \"{name}\" slutar ({finish}) innan den börjar ({start}).",
+      "suggestion": "Rätta datumen i källplanen och exportera den igen. Datum gissas aldrig vid import."
+    },
+    "unique_ids": {
+      "duplicate_uid": "Aktivitets-ID {ref} förekommer mer än en gång; endast den första aktiviteten behålls.",
+      "suggestion": "Ge varje aktivitet ett unikt ID i källplanen."
+    },
+    "links_resolve": {
+      "dangling_link": "Aktivitet {ref} \"{name}\": föregångare {predecessor} finns inte i filen, länken hoppas över.",
+      "duplicate_link": "Aktivitet {ref} \"{name}\": en andra koppling från föregångare {predecessor} hoppas över, en koppling per par behålls.",
+      "self_link": "Aktivitet {ref} \"{name}\" är länkad till sig själv, länken hoppas över.",
+      "unknown_link_type": "Aktivitet {ref} \"{name}\": länktyp {type} är okänd och läses som slut-till-start.",
+      "suggestion": "Kontrollera de logiska länkarna i källplanen."
+    },
+    "values_in_range": {
+      "percent_out_of_range": "Aktivitet {ref} \"{name}\": {value} % färdigt ligger utanför 0-100 och begränsas.",
+      "outline_gap": "Aktivitet {ref} \"{name}\" hoppar över en dispositionsnivå ({level}); den placeras under närmaste sammanfattningsaktivitet ovanför.",
+      "suggestion": "Kontrollera % färdigt och indraget i källplanen."
+    },
+    "calendar_work_days": {
+      "calendar_no_work_days": "Kalendern {calendar} har ingen arbetsdag.",
+      "suggestion": "Markera kalenderns arbetsdagar i källplanen."
+    }
   }
 }

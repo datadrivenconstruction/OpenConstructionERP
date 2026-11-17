@@ -2021,5 +2021,32 @@
       "fail": "Denne planen har mer enn én godkjent basisplan ({baselines}).",
       "suggestion": "Godkjenn basisplanen som skal gjelde; å godkjenne én trekker tilbake godkjenningen av de andre."
     }
+  },
+  "schedule_mspdi_import": {
+    "task_dates": {
+      "missing_dates": "Aktivitet {ref} \"{name}\" har ingen start- eller sluttdato.",
+      "finish_before_start": "Aktivitet {ref} \"{name}\" slutter ({finish}) før den starter ({start}).",
+      "suggestion": "Rett datoene i kildeplanen og eksporter den på nytt. Datoer gjettes aldri ved import."
+    },
+    "unique_ids": {
+      "duplicate_uid": "Aktivitets-ID {ref} forekommer mer enn én gang; bare den første aktiviteten beholdes.",
+      "suggestion": "Gi hver aktivitet en unik ID i kildeplanen."
+    },
+    "links_resolve": {
+      "dangling_link": "Aktivitet {ref} \"{name}\": forgjenger {predecessor} finnes ikke i filen, koblingen hoppes over.",
+      "duplicate_link": "Aktivitet {ref} \"{name}\": en andre kobling fra forgjenger {predecessor} hoppes over, én kobling per par beholdes.",
+      "self_link": "Aktivitet {ref} \"{name}\" er koblet til seg selv, koblingen hoppes over.",
+      "unknown_link_type": "Aktivitet {ref} \"{name}\": koblingstype {type} er ukjent og leses som slutt-til-start.",
+      "suggestion": "Kontroller de logiske koblingene i kildeplanen."
+    },
+    "values_in_range": {
+      "percent_out_of_range": "Aktivitet {ref} \"{name}\": {value} % fullført er utenfor 0-100 og begrenses.",
+      "outline_gap": "Aktivitet {ref} \"{name}\" hopper over et disposisjonsnivå ({level}); den plasseres under nærmeste sammendragsaktivitet over.",
+      "suggestion": "Kontroller % fullført og innrykk i kildeplanen."
+    },
+    "calendar_work_days": {
+      "calendar_no_work_days": "Kalender {calendar} har ingen arbeidsdag.",
+      "suggestion": "Merk arbeidsdagene i denne kalenderen i kildeplanen."
+    }
   }
 }

@@ -2021,5 +2021,32 @@
       "fail": "Este cronograma tem mais de uma linha de base aprovada ({baselines}).",
       "suggestion": "Aprove a linha de base que deve valer; aprovar uma retira a aprovação das outras."
     }
+  },
+  "schedule_mspdi_import": {
+    "task_dates": {
+      "missing_dates": "A tarefa {ref} «{name}» não tem data de início ou de fim.",
+      "finish_before_start": "A tarefa {ref} «{name}» termina ({finish}) antes de começar ({start}).",
+      "suggestion": "Corrija as datas no cronograma de origem e exporte-o novamente. As datas nunca são adivinhadas na importação."
+    },
+    "unique_ids": {
+      "duplicate_uid": "O ID de tarefa {ref} aparece mais de uma vez; apenas a primeira tarefa é mantida.",
+      "suggestion": "Atribua a cada tarefa um ID único no cronograma de origem."
+    },
+    "links_resolve": {
+      "dangling_link": "Tarefa {ref} «{name}»: a predecessora {predecessor} não está no arquivo, a ligação é ignorada.",
+      "duplicate_link": "Tarefa {ref} \"{name}\": uma segunda ligação a partir do predecessor {predecessor} é ignorada, mantém-se uma ligação por par.",
+      "self_link": "A tarefa {ref} «{name}» está ligada a si mesma, a ligação é ignorada.",
+      "unknown_link_type": "Tarefa {ref} «{name}»: o tipo de ligação {type} é desconhecido e é lido como término-início.",
+      "suggestion": "Verifique as ligações lógicas no cronograma de origem."
+    },
+    "values_in_range": {
+      "percent_out_of_range": "Tarefa {ref} «{name}»: {value}% concluído está fora de 0-100 e é limitado.",
+      "outline_gap": "A tarefa {ref} «{name}» salta um nível de estrutura ({level}); é colocada sob o resumo mais próximo acima.",
+      "suggestion": "Verifique a % concluída e o recuo no cronograma de origem."
+    },
+    "calendar_work_days": {
+      "calendar_no_work_days": "O calendário {calendar} não tem nenhum dia útil.",
+      "suggestion": "Marque os dias úteis deste calendário no cronograma de origem."
+    }
   }
 }

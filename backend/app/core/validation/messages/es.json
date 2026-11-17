@@ -2021,5 +2021,32 @@
       "fail": "Este cronograma tiene más de una línea base aprobada ({baselines}).",
       "suggestion": "Apruebe la línea base que debe regir; aprobar una retira la aprobación de las demás."
     }
+  },
+  "schedule_mspdi_import": {
+    "task_dates": {
+      "missing_dates": "La tarea {ref} «{name}» no tiene fecha de inicio o de fin.",
+      "finish_before_start": "La tarea {ref} «{name}» termina ({finish}) antes de empezar ({start}).",
+      "suggestion": "Corrija las fechas en el programa de origen y vuelva a exportarlo. Las fechas nunca se suponen al importar."
+    },
+    "unique_ids": {
+      "duplicate_uid": "El ID de tarea {ref} aparece más de una vez; solo se conserva la primera tarea.",
+      "suggestion": "Asigne a cada tarea un ID único en el programa de origen."
+    },
+    "links_resolve": {
+      "dangling_link": "Tarea {ref} «{name}»: la predecesora {predecessor} no está en el archivo, el vínculo se omite.",
+      "duplicate_link": "Tarea {ref} \"{name}\": se omite un segundo vínculo desde el predecesor {predecessor}, se conserva un vínculo por par.",
+      "self_link": "La tarea {ref} «{name}» está vinculada a sí misma, el vínculo se omite.",
+      "unknown_link_type": "Tarea {ref} «{name}»: el tipo de vínculo {type} es desconocido y se lee como fin a comienzo.",
+      "suggestion": "Revise los vínculos lógicos en el programa de origen."
+    },
+    "values_in_range": {
+      "percent_out_of_range": "Tarea {ref} «{name}»: {value} % completado está fuera de 0-100 y se limita.",
+      "outline_gap": "La tarea {ref} «{name}» salta un nivel de esquema ({level}); se coloca bajo el resumen más cercano por encima.",
+      "suggestion": "Revise el % completado y la sangría en el programa de origen."
+    },
+    "calendar_work_days": {
+      "calendar_no_work_days": "El calendario {calendar} no tiene ningún día laborable.",
+      "suggestion": "Marque los días laborables de este calendario en el programa de origen."
+    }
   }
 }

@@ -2021,5 +2021,32 @@
       "fail": "This schedule has more than one approved baseline ({baselines}).",
       "suggestion": "Approve the baseline that should be current; approving one withdraws the approval of the others."
     }
+  },
+  "schedule_mspdi_import": {
+    "task_dates": {
+      "missing_dates": "Task {ref} \"{name}\" has no start or finish date.",
+      "finish_before_start": "Task {ref} \"{name}\" finishes ({finish}) before it starts ({start}).",
+      "suggestion": "Correct the dates in the source programme and export it again. Dates are never guessed on import."
+    },
+    "unique_ids": {
+      "duplicate_uid": "Task ID {ref} appears more than once; only the first task with it is kept.",
+      "suggestion": "Give every task a unique ID in the source programme."
+    },
+    "links_resolve": {
+      "dangling_link": "Task {ref} \"{name}\": predecessor {predecessor} is not in the file, the link is skipped.",
+      "duplicate_link": "Task {ref} \"{name}\": a second link from predecessor {predecessor} is skipped, one link per pair is kept.",
+      "self_link": "Task {ref} \"{name}\" is linked to itself, the link is skipped.",
+      "unknown_link_type": "Task {ref} \"{name}\": link type {type} is unknown and is read as finish-to-start.",
+      "suggestion": "Check the logic links in the source programme."
+    },
+    "values_in_range": {
+      "percent_out_of_range": "Task {ref} \"{name}\": {value}% complete is outside 0-100 and is capped.",
+      "outline_gap": "Task {ref} \"{name}\" skips an outline level ({level}); it is placed under the nearest summary above it.",
+      "suggestion": "Check % complete and the indentation in the source programme."
+    },
+    "calendar_work_days": {
+      "calendar_no_work_days": "Calendar {calendar} has no working weekday.",
+      "suggestion": "Mark the working weekdays of this calendar in the source programme."
+    }
   }
 }

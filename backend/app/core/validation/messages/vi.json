@@ -2021,5 +2021,32 @@
       "fail": "Tiến độ này có nhiều hơn một đường cơ sở đã duyệt ({baselines}).",
       "suggestion": "Hãy duyệt đường cơ sở cần áp dụng; duyệt một đường sẽ rút lại phê duyệt của các đường khác."
     }
+  },
+  "schedule_mspdi_import": {
+    "task_dates": {
+      "missing_dates": "Công việc {ref} \"{name}\" không có ngày bắt đầu hoặc kết thúc.",
+      "finish_before_start": "Công việc {ref} \"{name}\" kết thúc ({finish}) trước khi bắt đầu ({start}).",
+      "suggestion": "Sửa ngày trong tiến độ nguồn và xuất lại. Ngày không bao giờ được đoán khi nhập."
+    },
+    "unique_ids": {
+      "duplicate_uid": "Mã công việc {ref} xuất hiện nhiều lần; chỉ giữ công việc đầu tiên.",
+      "suggestion": "Gán cho mỗi công việc một mã duy nhất trong tiến độ nguồn."
+    },
+    "links_resolve": {
+      "dangling_link": "Công việc {ref} \"{name}\": công việc trước {predecessor} không có trong tệp, liên kết bị bỏ qua.",
+      "duplicate_link": "Công việc {ref} \"{name}\": bỏ qua liên kết thứ hai từ công việc trước {predecessor}, mỗi cặp chỉ giữ một liên kết.",
+      "self_link": "Công việc {ref} \"{name}\" liên kết với chính nó, liên kết bị bỏ qua.",
+      "unknown_link_type": "Công việc {ref} \"{name}\": loại liên kết {type} không xác định và được đọc là kết thúc-bắt đầu.",
+      "suggestion": "Kiểm tra các liên kết logic trong tiến độ nguồn."
+    },
+    "values_in_range": {
+      "percent_out_of_range": "Công việc {ref} \"{name}\": {value}% hoàn thành nằm ngoài 0-100 và được giới hạn.",
+      "outline_gap": "Công việc {ref} \"{name}\" bỏ qua một cấp phân cấp ({level}); được đặt dưới công việc tổng hợp gần nhất phía trên.",
+      "suggestion": "Kiểm tra % hoàn thành và thụt lề trong tiến độ nguồn."
+    },
+    "calendar_work_days": {
+      "calendar_no_work_days": "Lịch {calendar} không có ngày làm việc nào.",
+      "suggestion": "Đánh dấu các ngày làm việc của lịch này trong tiến độ nguồn."
+    }
   }
 }

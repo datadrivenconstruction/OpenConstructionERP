@@ -24,6 +24,7 @@ vi.mock('./api', async () => {
       exportMspXml: vi.fn(),
       exportCsv: vi.fn(),
       importMspXml: vi.fn(),
+      previewMspXml: vi.fn(),
       importXer: vi.fn(),
     },
   };
@@ -124,7 +125,16 @@ describe('ScheduleInterchangePanel', () => {
     );
   });
 
-  it('importing a .xml file calls importMspXml (#205)', async () => {
+  it('an .xml file is checked first and imported only after a clean check', async () => {
+    (scheduleApi.previewMspXml as any).mockResolvedValue({
+      filename: 'plan.xml', name: 'Plan', minutes_per_day: 480, task_count: 1, summary_count: 0,
+      milestone_count: 0, link_count: 0, calendar_count: 0, baseline_task_count: 0,
+      start: '2026-05-04', finish: '2026-05-08', error_count: 0, warning_count: 0, can_apply: true,
+      issues: [], calendars: [],
+      tasks: [{ uid: '1', name: 'Walls', wbs: '1', outline_level: 1, parent_uid: null, start: '2026-05-04',
+        finish: '2026-05-08', duration_days: 5, percent_complete: 0, activity_type: 'task',
+        baseline_start: null, baseline_finish: null, predecessor_count: 0 }],
+    });
     (scheduleApi.importMspXml as any).mockResolvedValue({
       activities_imported: 3,
       relationships_imported: 2,
@@ -136,12 +146,33 @@ describe('ScheduleInterchangePanel', () => {
     const input = screen.getByTestId('schedule-vendor-file-input');
     const file = new File(['<Project/>'], 'plan.xml', { type: 'application/xml' });
     fireEvent.change(input, { target: { files: [file] } });
+    expect(screen.getByTestId('schedule-vendor-import')).toBeDisabled();
+    fireEvent.click(screen.getByTestId('schedule-vendor-preview'));
+    expect(await screen.findByText('Walls')).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByTestId('schedule-vendor-import')).not.toBeDisabled());
     fireEvent.click(screen.getByTestId('schedule-vendor-import'));
 
     await waitFor(() =>
       expect(scheduleApi.importMspXml).toHaveBeenCalledWith('s1', file),
     );
     expect(scheduleApi.importXer).not.toHaveBeenCalled();
+  });
+
+  it('an .xml file with errors cannot be imported', async () => {
+    (scheduleApi.previewMspXml as any).mockResolvedValue({
+      filename: 'plan.xml', name: '', minutes_per_day: 480, task_count: 1, summary_count: 0,
+      milestone_count: 0, link_count: 0, calendar_count: 0, baseline_task_count: 0, start: null,
+      finish: null, error_count: 1, warning_count: 0, can_apply: false, calendars: [], tasks: [],
+      issues: [{ rule_id: 'schedule_mspdi_import.task_dates', code: 'missing_dates', severity: 'error',
+        ref: '1', message: 'Task 1 "Walls" has no start or finish date.' }],
+    });
+    renderPanel();
+    const file = new File(['<Project/>'], 'plan.xml', { type: 'application/xml' });
+    fireEvent.change(screen.getByTestId('schedule-vendor-file-input'), { target: { files: [file] } });
+    fireEvent.click(screen.getByTestId('schedule-vendor-preview'));
+    expect(await screen.findByText(/has no start or finish date/)).toBeInTheDocument();
+    expect(screen.getByTestId('schedule-vendor-import')).toBeDisabled();
+    expect(scheduleApi.importMspXml).not.toHaveBeenCalled();
   });
 
   it('importing a .xer file routes to importXer (#205)', async () => {

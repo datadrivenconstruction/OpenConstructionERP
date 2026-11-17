@@ -37,6 +37,7 @@ import {
   type DiffActivityChange,
   type DiffRelationshipChange,
 } from './api';
+import { RevisionImpactCard } from './RevisionImpactCard';
 
 interface ScheduleComparePanelProps {
   scheduleId: string;
@@ -75,6 +76,8 @@ export function ScheduleComparePanel({
   const [baseId, setBaseId] = useState<string>('');
   const [targetId, setTargetId] = useState<string>(LIVE);
   const [result, setResult] = useState<ScheduleDiff | null>(null);
+  // The pair the shown result was computed for, so the impact card matches it.
+  const [ran, setRan] = useState<{ base: string; target: string } | null>(null);
 
   const baselinesQ = useQuery<ScheduleBaseline[]>({
     queryKey: ['schedule', 'baselines', projectId],
@@ -111,6 +114,7 @@ export function ScheduleComparePanel({
       }),
     onSuccess: (data) => {
       setResult(data);
+      setRan({ base: effectiveBaseId, target: targetId });
       addToast({
         type: 'success',
         title: t('schedule.compare.run_done', { defaultValue: 'Comparison ready' }),
@@ -250,6 +254,15 @@ export function ScheduleComparePanel({
       {result && (
         <>
           <DiffSummaryCard diff={result} currency={currency} />
+
+          {ran && (
+            <RevisionImpactCard
+              scheduleId={scheduleId}
+              baseBaselineId={ran.base}
+              targetBaselineId={ran.target !== LIVE ? ran.target : undefined}
+              currency={currency}
+            />
+          )}
 
           <ActivityChangesCard changes={result.activities} nameFor={nameFor} />
 

@@ -577,6 +577,68 @@ export interface DiffSummary {
   largest_slips: Array<Record<string, unknown>>;
 }
 
+/** A variation request whose bill traces a BOQ position. */
+export interface RevisionImpactVariation {
+  id: string;
+  code: string;
+  title: string;
+  status: string;
+  change_kind: string;
+}
+
+/** A BOQ position linked to a revised activity. */
+export interface RevisionImpactPosition {
+  id: string;
+  missing: boolean;
+  ordinal?: string;
+  description?: string;
+  unit?: string;
+  quantity?: string | null;
+  total?: string | null;
+  boq_id?: string | null;
+  variations: RevisionImpactVariation[];
+}
+
+/** One revised activity with its time and planned-cost deltas. */
+export interface RevisionImpactActivity {
+  activity_id: string;
+  name: string;
+  wbs_code: string;
+  change_type: 'added' | 'removed' | 'modified' | string;
+  categories: string[];
+  start_before: string | null;
+  start_after: string | null;
+  finish_before: string | null;
+  finish_after: string | null;
+  finish_movement_days: number;
+  duration_before: number | null;
+  duration_after: number | null;
+  duration_delta_days: number | null;
+  cost_before: string | null;
+  cost_after: string | null;
+  cost_delta: string | null;
+  linked_value: string | null;
+  positions: RevisionImpactPosition[];
+}
+
+export interface RevisionImpact {
+  schedule_id: string;
+  base_baseline_id: string;
+  base_label: string;
+  target_label: string;
+  activities: RevisionImpactActivity[];
+  summary: {
+    activities_revised: number;
+    activities_linked: number;
+    activities_unlinked: number;
+    positions_linked: number;
+    variations_linked: number;
+    cost_delta_total: string | null;
+    linked_value_total: string | null;
+    net_finish_movement_days: number;
+  };
+}
+
 export interface ScheduleDiff {
   schedule_id: string;
   base_label: string;
@@ -1036,6 +1098,55 @@ export interface VendorImportResult {
   relationships_imported: number;
   calendars_imported: number;
   warnings: string[];
+  /** Unapproved baseline created from the file's baseline dates (MS Project XML). */
+  baseline_id?: string | null;
+}
+
+/** One finding of the MS Project XML import checks. */
+export interface MspdiIssue {
+  rule_id: string;
+  code: string;
+  severity: 'error' | 'warning' | string;
+  ref: string;
+  message: string;
+}
+
+/** One task of an MS Project XML file as it would be imported. */
+export interface MspdiPreviewTask {
+  uid: string;
+  name: string;
+  wbs: string;
+  outline_level: number;
+  parent_uid: string | null;
+  start: string | null;
+  finish: string | null;
+  duration_days: number | null;
+  percent_complete: number;
+  activity_type: string;
+  baseline_start: string | null;
+  baseline_finish: string | null;
+  predecessor_count: number;
+}
+
+/** What an MS Project XML file would import; nothing is written yet. */
+export interface MspdiPreview {
+  filename: string;
+  name: string;
+  minutes_per_day: number;
+  task_count: number;
+  summary_count: number;
+  milestone_count: number;
+  link_count: number;
+  calendar_count: number;
+  baseline_task_count: number;
+  start: string | null;
+  finish: string | null;
+  error_count: number;
+  warning_count: number;
+  can_apply: boolean;
+  issues: MspdiIssue[];
+  calendars: { uid: string; name: string; work_days: number[]; holiday_count: number }[];
+  tasks: MspdiPreviewTask[];
 }
 
 function scheduleFileHeaders(json: boolean): HeadersInit {
@@ -1071,6 +1182,19 @@ async function uploadScheduleFile(
     throw new Error(await readErrorDetail(res, `Import failed (${res.status})`));
   }
   return res.json() as Promise<VendorImportResult>;
+}
+
+async function previewScheduleFile(scheduleId: string, file: File): Promise<MspdiPreview> {
+  const form = new FormData();
+  form.append('file', file);
+  const res = await fetch(
+    `${SCHEDULE_FILE_BASE}/import/msp-xml/preview/?schedule_id=${encodeURIComponent(scheduleId)}`,
+    { method: 'POST', headers: scheduleFileHeaders(true), body: form },
+  );
+  if (!res.ok) {
+    throw new Error(await readErrorDetail(res, `Check failed (${res.status})`));
+  }
+  return res.json() as Promise<MspdiPreview>;
 }
 
 async function downloadScheduleExport(
@@ -1305,6 +1429,16 @@ export const scheduleApi = {
    * (``base_envelope``); target defaults to the live schedule, or another
    * baseline via ``target_baseline_id``.
    */
+  /** Revised activities against a baseline with their BOQ positions, variations, time and cost deltas. */
+  getRevisionImpact: (scheduleId: string, baseBaselineId?: string, targetBaselineId?: string) => {
+    const qs = new URLSearchParams();
+    if (baseBaselineId) qs.set('base_baseline_id', baseBaselineId);
+    if (targetBaselineId) qs.set('target_baseline_id', targetBaselineId);
+    const query = qs.toString() ? `?${qs}` : '';
+    return apiGet<RevisionImpact>(
+      `/v1/schedule/schedules/${encodeURIComponent(scheduleId)}/revision-impact${query}`,
+    );
+  },
   diffSchedule: (scheduleId: string, body: ScheduleDiffRequestBody) =>
     apiPost<ScheduleDiff, ScheduleDiffRequestBody>(
       `/v1/schedule/schedules/${encodeURIComponent(scheduleId)}/diff`,
@@ -1335,6 +1469,8 @@ export const scheduleApi = {
   /** Import a Microsoft Project XML file into an existing schedule. */
   importMspXml: (scheduleId: string, file: File) =>
     uploadScheduleFile('msp-xml', scheduleId, file),
+  /** Read a Microsoft Project XML file and report what it would import. Changes nothing. */
+  previewMspXml: (scheduleId: string, file: File) => previewScheduleFile(scheduleId, file),
   /** Import an XER schedule file into an existing schedule. */
   importXer: (scheduleId: string, file: File) =>
     uploadScheduleFile('xer', scheduleId, file),

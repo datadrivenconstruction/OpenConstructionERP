@@ -2021,5 +2021,32 @@
       "fail": "此进度计划有多个已批准的基线（{baselines}）。",
       "suggestion": "批准应当生效的基线；批准其中一个会撤销其他基线的批准。"
     }
+  },
+  "schedule_mspdi_import": {
+    "task_dates": {
+      "missing_dates": "任务 {ref}“{name}”没有开始或完成日期。",
+      "finish_before_start": "任务 {ref}“{name}”在开始 ({start}) 之前就完成 ({finish})。",
+      "suggestion": "请在源进度计划中更正日期后重新导出。导入时从不猜测日期。"
+    },
+    "unique_ids": {
+      "duplicate_uid": "任务 ID {ref} 出现多次；仅保留第一个任务。",
+      "suggestion": "请在源进度计划中为每个任务设置唯一 ID。"
+    },
+    "links_resolve": {
+      "dangling_link": "任务 {ref}“{name}”：前置任务 {predecessor} 不在文件中，已跳过该链接。",
+      "duplicate_link": "任务 {ref} \"{name}\"：来自前置任务 {predecessor} 的第二个链接已跳过，每对任务只保留一个链接。",
+      "self_link": "任务 {ref}“{name}”链接到自身，已跳过该链接。",
+      "unknown_link_type": "任务 {ref}“{name}”：链接类型 {type} 未知，按完成-开始读取。",
+      "suggestion": "请检查源进度计划中的逻辑链接。"
+    },
+    "values_in_range": {
+      "percent_out_of_range": "任务 {ref}“{name}”：完成百分比 {value}% 超出 0-100，已被限制。",
+      "outline_gap": "任务 {ref}“{name}”跳过了一个大纲级别 ({level})；已放在其上方最近的摘要任务下。",
+      "suggestion": "请检查源进度计划中的完成百分比和缩进。"
+    },
+    "calendar_work_days": {
+      "calendar_no_work_days": "日历 {calendar} 没有工作日。",
+      "suggestion": "请在源进度计划中标出此日历的工作日。"
+    }
   }
 }

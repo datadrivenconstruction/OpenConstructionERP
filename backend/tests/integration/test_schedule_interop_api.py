@@ -399,3 +399,163 @@ async def test_mspdi_reexport_keeps_the_source_uids(client, tenants) -> None:
     xml = exported.text
     assert "<UID>10</UID>" in xml and "<UID>20</UID>" in xml
     assert "<PredecessorUID>10</PredecessorUID>" in xml
+
+
+MSPDI_BAD = b"""<Project xmlns="http://schemas.microsoft.com/project"><Tasks>
+  <Task><UID>1</UID><Name>Undated</Name><OutlineLevel>1</OutlineLevel></Task>
+  <Task><UID>2</UID><Name>Dated</Name><OutlineLevel>1</OutlineLevel>
+    <Start>2026-05-04T08:00:00</Start><Finish>2026-05-08T17:00:00</Finish>
+    <PredecessorLink><PredecessorUID>77</PredecessorUID></PredecessorLink></Task>
+</Tasks></Project>"""
+
+
+def _xml(data: bytes) -> dict:
+    return {"file": ("programme.xml", data, "application/xml")}
+
+
+@pytest.mark.asyncio
+async def test_mspdi_preview_reports_errors_and_import_refuses_them(client, tenants) -> None:
+    a = tenants["a"]
+    sid = await _schedule(client, tenants, "Checked import")
+    preview = await client.post(
+        f"/api/v1/schedule/schedule/import/msp-xml/preview/?schedule_id={sid}", files=_xml(MSPDI_BAD), headers=a
+    )
+    assert preview.status_code == 200, preview.text
+    body = preview.json()
+    assert body["task_count"] == 2 and body["can_apply"] is False
+    assert body["error_count"] == 1 and body["warning_count"] == 1
+    codes = {(i["rule_id"], i["code"], i["ref"]) for i in body["issues"]}
+    assert ("schedule_mspdi_import.task_dates", "missing_dates", "1") in codes
+    assert ("schedule_mspdi_import.links_resolve", "dangling_link", "2") in codes
+
+    refused = await client.post(
+        f"/api/v1/schedule/schedule/import/msp-xml/?schedule_id={sid}", files=_xml(MSPDI_BAD), headers=a
+    )
+    assert refused.status_code == 422
+    gantt = await client.get(f"/api/v1/schedule/schedules/{sid}/activities/", headers=a)
+    assert gantt.status_code == 200, gantt.text
+    assert gantt.json()["total"] == 0
+
+    other = await client.post(
+        f"/api/v1/schedule/schedule/import/msp-xml/preview/?schedule_id={sid}",
+        files=_xml(MSPDI_BAD),
+        headers=tenants["b"],
+    )
+    assert other.status_code in (403, 404)
+
+
+@pytest.mark.asyncio
+async def test_mspdi_export_import_round_trip_keeps_tasks_links_dates_and_baseline(client, tenants) -> None:
+    from app.modules.schedule.mspdi_import import parse_mspdi
+    from tests.unit.test_mspdi_import import SAMPLE
+
+    a = tenants["a"]
+    first = await _schedule(client, tenants, "Round trip one")
+    res = await client.post(
+        f"/api/v1/schedule/schedule/import/msp-xml/?schedule_id={first}", files=_xml(SAMPLE), headers=a
+    )
+    assert res.status_code == 201, res.text
+    imported = res.json()
+    assert imported["activities_imported"] == 4 and imported["relationships_imported"] == 3
+    assert imported["calendars_imported"] == 1
+    assert imported["baseline_id"]
+
+    export_one = await client.get(f"/api/v1/schedule/schedule/export/msp-xml/?schedule_id={first}", headers=a)
+    assert export_one.status_code == 200
+    second = await _schedule(client, tenants, "Round trip two")
+    res2 = await client.post(
+        f"/api/v1/schedule/schedule/import/msp-xml/?schedule_id={second}", files=_xml(export_one.content), headers=a
+    )
+    assert res2.status_code == 201, res2.text
+    export_two = await client.get(f"/api/v1/schedule/schedule/export/msp-xml/?schedule_id={second}", headers=a)
+
+    source, one, two = parse_mspdi(SAMPLE), parse_mspdi(export_one.content), parse_mspdi(export_two.content)
+
+    def tasks(doc):
+        return [
+            (
+                t.uid,
+                t.name,
+                t.wbs,
+                t.parent_uid,
+                t.start,
+                t.finish,
+                t.duration_days,
+                t.activity_type,
+                t.percent_complete,
+            )
+            for t in doc.tasks
+        ]
+
+    def links(doc):
+        return sorted((lk.predecessor_uid, lk.successor_uid, lk.relationship_type, lk.lag_days) for lk in doc.links)
+
+    assert tasks(one) == tasks(source) == tasks(two)
+    assert links(one) == links(source) == links(two)
+    walls_bl = [(t.baseline_start, t.baseline_finish) for d in (source, one, two) for t in d.tasks if t.uid == "2"]
+    assert walls_bl == [("2026-05-04", "2026-05-07")] * 3
+    assert [c.work_days for c in two.calendars] == [[0, 1, 2, 3, 4]]
+    assert "2026-05-14" in two.calendars[0].holidays
+
+
+@pytest.mark.asyncio
+async def test_revision_impact_names_the_boq_positions_and_variations_of_a_slipped_activity(client, tenants) -> None:
+    from app.database import async_session_factory
+    from app.modules.boq.models import BOQ, Position
+    from app.modules.variations.models import VariationBOQTrace, VariationRequest
+
+    a = tenants["a"]
+    project_id = uuid.UUID(tenants["project_id"])
+    sid = await _schedule(client, tenants, "Revision impact")
+    excavation = await _activity(client, tenants, sid, "Excavation", "2026-05-04", "2026-05-08")
+    foundations = await _activity(client, tenants, sid, "Foundations", "2026-05-11", "2026-05-15")
+
+    async with async_session_factory() as s:
+        boq = BOQ(project_id=project_id, name=f"BOQ {uuid.uuid4().hex[:6]}")
+        s.add(boq)
+        await s.flush()
+        pos = Position(
+            boq_id=boq.id, ordinal="02.001", description="Strip foundation", unit="m3",
+            quantity="12", unit_rate="1000", total="12000",
+        )  # fmt: skip
+        s.add(pos)
+        await s.flush()
+        request = VariationRequest(project_id=project_id, code=f"VR-{uuid.uuid4().hex[:4]}", title="Deeper footing")
+        s.add(request)
+        await s.flush()
+        s.add(
+            VariationBOQTrace(
+                variation_request_id=request.id, boq_id=boq.id, position_id=uuid.uuid4(),
+                source_position_id=pos.id, origin="boq_position", change_kind="modified",
+            )
+        )  # fmt: skip
+        await s.commit()
+        pos_id, request_code = str(pos.id), request.code
+
+    linked = await client.post(
+        f"/api/v1/schedule/activities/{foundations}/link-position/", json={"boq_position_id": pos_id}, headers=a
+    )
+    assert linked.status_code in (200, 201), linked.text
+    captured = await client.post(
+        f"/api/v1/schedule/schedules/{sid}/baselines/capture", json={"approve": True}, headers=a
+    )
+    assert captured.status_code == 201, captured.text
+
+    moved = await client.patch(f"/api/v1/schedule/activities/{foundations}", json={"end_date": "2026-05-20"}, headers=a)
+    assert moved.status_code == 200, moved.text
+
+    res = await client.get(f"/api/v1/schedule/schedules/{sid}/revision-impact", headers=a)
+    assert res.status_code == 200, res.text
+    body = res.json()
+    assert body["base_label"] == "B0" and body["target_label"] == "current"
+    rows = {r["activity_id"]: r for r in body["activities"]}
+    assert excavation not in rows
+    row = rows[foundations]
+    assert row["finish_before"] == "2026-05-15" and row["finish_after"] == "2026-05-20"
+    assert row["finish_movement_days"] == 5
+    assert [p["ordinal"] for p in row["positions"]] == ["02.001"]
+    assert row["positions"][0]["variations"][0]["code"] == request_code
+    assert body["summary"]["positions_linked"] == 1 and body["summary"]["variations_linked"] == 1
+
+    foreign = await client.get(f"/api/v1/schedule/schedules/{sid}/revision-impact", headers=tenants["b"])
+    assert foreign.status_code in (403, 404)

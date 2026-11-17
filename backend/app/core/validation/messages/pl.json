@@ -2021,5 +2021,32 @@
       "fail": "Ten harmonogram ma więcej niż jeden zatwierdzony plan bazowy ({baselines}).",
       "suggestion": "Zatwierdź plan bazowy, który ma obowiązywać; zatwierdzenie jednego cofa zatwierdzenie pozostałych."
     }
+  },
+  "schedule_mspdi_import": {
+    "task_dates": {
+      "missing_dates": "Zadanie {ref} „{name}” nie ma daty rozpoczęcia ani zakończenia.",
+      "finish_before_start": "Zadanie {ref} „{name}” kończy się ({finish}) przed rozpoczęciem ({start}).",
+      "suggestion": "Popraw daty w harmonogramie źródłowym i wyeksportuj go ponownie. Daty nigdy nie są zgadywane przy imporcie."
+    },
+    "unique_ids": {
+      "duplicate_uid": "Identyfikator zadania {ref} występuje więcej niż raz; zachowywane jest tylko pierwsze zadanie.",
+      "suggestion": "Nadaj każdemu zadaniu unikalny identyfikator w harmonogramie źródłowym."
+    },
+    "links_resolve": {
+      "dangling_link": "Zadanie {ref} „{name}”: poprzednika {predecessor} nie ma w pliku, powiązanie jest pomijane.",
+      "duplicate_link": "Zadanie {ref} \"{name}\": drugie powiązanie z poprzednikiem {predecessor} pominięto, dla pary zostaje jedno powiązanie.",
+      "self_link": "Zadanie {ref} „{name}” jest powiązane samo ze sobą, powiązanie jest pomijane.",
+      "unknown_link_type": "Zadanie {ref} „{name}”: typ powiązania {type} jest nieznany i jest odczytywany jako zakończenie-rozpoczęcie.",
+      "suggestion": "Sprawdź powiązania logiczne w harmonogramie źródłowym."
+    },
+    "values_in_range": {
+      "percent_out_of_range": "Zadanie {ref} „{name}”: {value}% wykonania jest poza zakresem 0-100 i zostaje ograniczone.",
+      "outline_gap": "Zadanie {ref} „{name}” pomija poziom konspektu ({level}); zostaje umieszczone pod najbliższym zadaniem sumarycznym powyżej.",
+      "suggestion": "Sprawdź % wykonania i wcięcia w harmonogramie źródłowym."
+    },
+    "calendar_work_days": {
+      "calendar_no_work_days": "Kalendarz {calendar} nie ma żadnego dnia roboczego.",
+      "suggestion": "Zaznacz dni robocze tego kalendarza w harmonogramie źródłowym."
+    }
   }
 }

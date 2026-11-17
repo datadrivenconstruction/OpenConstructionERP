@@ -2021,5 +2021,32 @@
       "fail": "Bu iş programının birden fazla onaylı temel planı var ({baselines}).",
       "suggestion": "Geçerli olması gereken temel planı onaylayın; birini onaylamak diğerlerinin onayını geri alır."
     }
+  },
+  "schedule_mspdi_import": {
+    "task_dates": {
+      "missing_dates": "{ref} \"{name}\" görevinin başlangıç veya bitiş tarihi yok.",
+      "finish_before_start": "{ref} \"{name}\" görevi başlamadan ({start}) önce bitiyor ({finish}).",
+      "suggestion": "Kaynak programdaki tarihleri düzeltip yeniden dışa aktarın. İçe aktarmada tarihler asla tahmin edilmez."
+    },
+    "unique_ids": {
+      "duplicate_uid": "{ref} görev kimliği birden fazla kez geçiyor; yalnızca ilk görev tutulur.",
+      "suggestion": "Kaynak programda her göreve benzersiz bir kimlik verin."
+    },
+    "links_resolve": {
+      "dangling_link": "{ref} \"{name}\" görevi: {predecessor} öncülü dosyada yok, bağlantı atlanıyor.",
+      "duplicate_link": "Görev {ref} \"{name}\": {predecessor} öncülünden ikinci bağlantı atlandı, her çift için bir bağlantı tutulur.",
+      "self_link": "{ref} \"{name}\" görevi kendisine bağlı, bağlantı atlanıyor.",
+      "unknown_link_type": "{ref} \"{name}\" görevi: {type} bağlantı türü bilinmiyor ve bitiş-başlangıç olarak okunuyor.",
+      "suggestion": "Kaynak programdaki mantıksal bağlantıları kontrol edin."
+    },
+    "values_in_range": {
+      "percent_out_of_range": "{ref} \"{name}\" görevi: %{value} tamamlanma 0-100 aralığının dışında ve sınırlanıyor.",
+      "outline_gap": "{ref} \"{name}\" görevi bir anahat düzeyini atlıyor ({level}); üstündeki en yakın özet görevin altına yerleştiriliyor.",
+      "suggestion": "Kaynak programdaki tamamlanma yüzdesini ve girintileri kontrol edin."
+    },
+    "calendar_work_days": {
+      "calendar_no_work_days": "{calendar} takviminde çalışma günü yok.",
+      "suggestion": "Kaynak programda bu takvimin çalışma günlerini işaretleyin."
+    }
   }
 }

@@ -2021,5 +2021,32 @@
       "fail": "Tento harmonogram má více než jeden schválený směrný plán ({baselines}).",
       "suggestion": "Schvalte směrný plán, který má platit; schválením jednoho se schválení ostatních ruší."
     }
+  },
+  "schedule_mspdi_import": {
+    "task_dates": {
+      "missing_dates": "Úkol {ref} „{name}“ nemá datum zahájení ani dokončení.",
+      "finish_before_start": "Úkol {ref} „{name}“ končí ({finish}) dříve, než začne ({start}).",
+      "suggestion": "Opravte termíny ve zdrojovém harmonogramu a znovu jej exportujte. Termíny se při importu nikdy neodhadují."
+    },
+    "unique_ids": {
+      "duplicate_uid": "ID úkolu {ref} se vyskytuje vícekrát; ponechán je jen první úkol.",
+      "suggestion": "Přidělte ve zdrojovém harmonogramu každému úkolu jedinečné ID."
+    },
+    "links_resolve": {
+      "dangling_link": "Úkol {ref} „{name}“: předchůdce {predecessor} v souboru není, vazba se přeskočí.",
+      "duplicate_link": "Úkol {ref} \"{name}\": druhá vazba od předchůdce {predecessor} je vynechána, pro dvojici zůstává jedna vazba.",
+      "self_link": "Úkol {ref} „{name}“ je propojen sám se sebou, vazba se přeskočí.",
+      "unknown_link_type": "Úkol {ref} „{name}“: typ vazby {type} je neznámý a čte se jako konec-začátek.",
+      "suggestion": "Zkontrolujte logické vazby ve zdrojovém harmonogramu."
+    },
+    "values_in_range": {
+      "percent_out_of_range": "Úkol {ref} „{name}“: {value} % dokončení je mimo rozsah 0-100 a je omezeno.",
+      "outline_gap": "Úkol {ref} „{name}“ přeskakuje úroveň osnovy ({level}); je zařazen pod nejbližší souhrnný úkol nad ním.",
+      "suggestion": "Zkontrolujte % dokončení a odsazení ve zdrojovém harmonogramu."
+    },
+    "calendar_work_days": {
+      "calendar_no_work_days": "Kalendář {calendar} nemá žádný pracovní den.",
+      "suggestion": "Vyznačte ve zdrojovém harmonogramu pracovní dny tohoto kalendáře."
+    }
   }
 }

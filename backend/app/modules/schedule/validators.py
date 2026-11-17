@@ -642,6 +642,106 @@ class SingleApprovedBaselinePerSchedule(ValidationRule):
         return results
 
 
+# ── MS Project XML import ───────────────────────────────────────────────────
+
+#: Rule set for an uploaded MSPDI file before it is applied. Payload
+#: ``{"issues": [{"code", "ref", "name", ...params}]}`` from
+#: :meth:`MspdiDocument.validation_payload`; one failing result per issue whose
+#: ``element_ref`` is the task UID (or ``calendar:<uid>``).
+MSPDI_IMPORT_RULE_SET = "schedule_mspdi_import"
+
+
+class _MspdiIssueRule(ValidationRule):
+    standard = MSPDI_IMPORT_RULE_SET
+    category = RuleCategory.CONSISTENCY
+    codes: frozenset[str] = frozenset()
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        data = context.data if isinstance(context.data, dict) else {}
+        locale = _locale(context)
+        results: list[RuleResult] = []
+        for issue in data.get("issues") or []:
+            if not isinstance(issue, dict) or issue.get("code") not in self.codes:
+                continue
+            params = {k: str(v) for k, v in issue.items() if k not in ("code", "severity")}
+            params.setdefault("name", "")
+            results.append(
+                RuleResult(
+                    rule_id=self.rule_id,
+                    rule_name=self.name,
+                    severity=self.severity,
+                    category=self.category,
+                    passed=False,
+                    message=translate(f"{self.rule_id}.{issue['code']}", locale=locale, **params),
+                    element_ref=str(issue.get("ref") or ""),
+                    details={"code": issue["code"], **params},
+                    suggestion=translate(f"{self.rule_id}.suggestion", locale=locale),
+                )
+            )
+        if not results:
+            results.append(
+                RuleResult(
+                    rule_id=self.rule_id,
+                    rule_name=self.name,
+                    severity=self.severity,
+                    category=self.category,
+                    passed=True,
+                    message=translate("common.ok", locale=locale),
+                )
+            )
+        return results
+
+
+class MspdiTaskDates(_MspdiIssueRule):
+    """Every task states a start and a finish, in order. Missing dates are never invented."""
+
+    rule_id = "schedule_mspdi_import.task_dates"
+    name = "Imported tasks have valid dates"
+    severity = Severity.ERROR
+    description = "A task without a start or finish, or with the finish before the start."
+    codes = frozenset({"missing_dates", "finish_before_start"})
+
+
+class MspdiUniqueIds(_MspdiIssueRule):
+    """Task UIDs are unique, so links and re-exports point at one task."""
+
+    rule_id = "schedule_mspdi_import.unique_ids"
+    name = "Imported task IDs are unique"
+    severity = Severity.ERROR
+    description = "Two tasks in the file share one UID."
+    codes = frozenset({"duplicate_uid"})
+
+
+class MspdiLinksResolve(_MspdiIssueRule):
+    """Every predecessor link points at another task of the file with a known type."""
+
+    rule_id = "schedule_mspdi_import.links_resolve"
+    name = "Imported links resolve"
+    severity = Severity.WARNING
+    description = "A link to a task that is not in the file, a task linked to itself, or an unknown link type."
+    codes = frozenset({"dangling_link", "duplicate_link", "self_link", "unknown_link_type"})
+
+
+class MspdiValuesInRange(_MspdiIssueRule):
+    """Percent complete within 0..100 and an outline without skipped levels."""
+
+    rule_id = "schedule_mspdi_import.values_in_range"
+    name = "Imported values are in range"
+    severity = Severity.WARNING
+    description = "Percent complete outside 0-100, or an outline level that skips a level."
+    codes = frozenset({"percent_out_of_range", "outline_gap"})
+
+
+class MspdiCalendarWorkDays(_MspdiIssueRule):
+    """Each imported calendar has at least one working weekday."""
+
+    rule_id = "schedule_mspdi_import.calendar_work_days"
+    name = "Imported calendars have working days"
+    severity = Severity.WARNING
+    description = "A calendar in the file has no working weekday."
+    codes = frozenset({"calendar_no_work_days"})
+
+
 # ── Registration ────────────────────────────────────────────────────────────
 
 _SCHEDULE_RULES: tuple[ValidationRule, ...] = (
@@ -659,6 +759,13 @@ _PROGRESS_SHEET_RULES: tuple[ValidationRule, ...] = (
     ProgressSheetPlausibility(),
 )
 _BASELINE_RULES: tuple[ValidationRule, ...] = (SingleApprovedBaselinePerSchedule(),)
+_MSPDI_IMPORT_RULES: tuple[ValidationRule, ...] = (
+    MspdiTaskDates(),
+    MspdiUniqueIds(),
+    MspdiLinksResolve(),
+    MspdiValuesInRange(),
+    MspdiCalendarWorkDays(),
+)
 
 
 def register_schedule_rules() -> None:
@@ -675,6 +782,8 @@ def register_schedule_rules() -> None:
         rule_registry.register(rule, [PROGRESS_SHEET_RULE_SET])
     for rule in _BASELINE_RULES:
         rule_registry.register(rule, [BASELINE_RULE_SET])
+    for rule in _MSPDI_IMPORT_RULES:
+        rule_registry.register(rule, [MSPDI_IMPORT_RULE_SET])
     logger.debug("Registered %d schedule validation rules", len(_SCHEDULE_RULES) + len(_PROGRESS_SHEET_RULES))
 
 

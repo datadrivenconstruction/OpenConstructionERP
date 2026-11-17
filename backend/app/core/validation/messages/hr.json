@@ -2021,5 +2021,32 @@
       "fail": "Ovaj plan ima više od jednog odobrenog osnovnog plana ({baselines}).",
       "suggestion": "Odobrite osnovni plan koji treba vrijediti; odobrenje jednog povlači odobrenje ostalih."
     }
+  },
+  "schedule_mspdi_import": {
+    "task_dates": {
+      "missing_dates": "Zadatak {ref} „{name}” nema datum početka ili završetka.",
+      "finish_before_start": "Zadatak {ref} „{name}” završava ({finish}) prije nego što počinje ({start}).",
+      "suggestion": "Ispravite datume u izvornom planu i ponovno ga izvezite. Datumi se pri uvozu nikada ne pogađaju."
+    },
+    "unique_ids": {
+      "duplicate_uid": "ID zadatka {ref} pojavljuje se više puta; zadržava se samo prvi zadatak.",
+      "suggestion": "Dodijelite svakom zadatku jedinstveni ID u izvornom planu."
+    },
+    "links_resolve": {
+      "dangling_link": "Zadatak {ref} „{name}”: prethodnik {predecessor} nije u datoteci, veza se preskače.",
+      "duplicate_link": "Zadatak {ref} \"{name}\": druga veza od prethodnika {predecessor} je preskočena, za par ostaje jedna veza.",
+      "self_link": "Zadatak {ref} „{name}” povezan je sam sa sobom, veza se preskače.",
+      "unknown_link_type": "Zadatak {ref} „{name}”: vrsta veze {type} nije poznata i čita se kao završetak-početak.",
+      "suggestion": "Provjerite logičke veze u izvornom planu."
+    },
+    "values_in_range": {
+      "percent_out_of_range": "Zadatak {ref} „{name}”: {value}% dovršenosti izvan je raspona 0-100 i ograničava se.",
+      "outline_gap": "Zadatak {ref} „{name}” preskače razinu strukture ({level}); smješta se pod najbliži sažeti zadatak iznad.",
+      "suggestion": "Provjerite % dovršenosti i uvlake u izvornom planu."
+    },
+    "calendar_work_days": {
+      "calendar_no_work_days": "Kalendar {calendar} nema nijedan radni dan.",
+      "suggestion": "Označite radne dane ovog kalendara u izvornom planu."
+    }
   }
 }

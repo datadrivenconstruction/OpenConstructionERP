@@ -2021,5 +2021,32 @@
       "fail": "Acest grafic are mai multe planuri de referință aprobate ({baselines}).",
       "suggestion": "Aprobați planul de referință care trebuie să se aplice; aprobarea unuia retrage aprobarea celorlalte."
     }
+  },
+  "schedule_mspdi_import": {
+    "task_dates": {
+      "missing_dates": "Sarcina {ref} „{name}” nu are dată de început sau de sfârșit.",
+      "finish_before_start": "Sarcina {ref} „{name}” se termină ({finish}) înainte să înceapă ({start}).",
+      "suggestion": "Corectați datele în graficul sursă și exportați-l din nou. Datele nu sunt niciodată ghicite la import."
+    },
+    "unique_ids": {
+      "duplicate_uid": "ID-ul de sarcină {ref} apare de mai multe ori; se păstrează doar prima sarcină.",
+      "suggestion": "Dați fiecărei sarcini un ID unic în graficul sursă."
+    },
+    "links_resolve": {
+      "dangling_link": "Sarcina {ref} „{name}”: predecesorul {predecessor} nu este în fișier, legătura este omisă.",
+      "duplicate_link": "Sarcina {ref} \"{name}\": o a doua legătură de la predecesorul {predecessor} este omisă, se păstrează o legătură pe pereche.",
+      "self_link": "Sarcina {ref} „{name}” este legată de ea însăși, legătura este omisă.",
+      "unknown_link_type": "Sarcina {ref} „{name}”: tipul de legătură {type} este necunoscut și se citește ca sfârșit-început.",
+      "suggestion": "Verificați legăturile logice în graficul sursă."
+    },
+    "values_in_range": {
+      "percent_out_of_range": "Sarcina {ref} „{name}”: {value}% finalizat este în afara intervalului 0-100 și este limitat.",
+      "outline_gap": "Sarcina {ref} „{name}” sare un nivel de structură ({level}); este plasată sub cea mai apropiată sarcină rezumat de deasupra.",
+      "suggestion": "Verificați % finalizat și indentarea în graficul sursă."
+    },
+    "calendar_work_days": {
+      "calendar_no_work_days": "Calendarul {calendar} nu are nicio zi lucrătoare.",
+      "suggestion": "Marcați zilele lucrătoare ale acestui calendar în graficul sursă."
+    }
   }
 }

@@ -19,6 +19,7 @@ vi.mock('./api', async () => {
       ...actual.scheduleApi,
       listBaselines: vi.fn(),
       diffSchedule: vi.fn(),
+      getRevisionImpact: vi.fn(),
     },
   };
 });
@@ -125,6 +126,11 @@ function renderPanel() {
 describe('ScheduleComparePanel', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    (scheduleApi.getRevisionImpact as any).mockResolvedValue({
+      schedule_id: 's1', base_baseline_id: 'b1', base_label: 'B0', target_label: 'current', activities: [],
+      summary: { activities_revised: 0, activities_linked: 0, activities_unlinked: 0, positions_linked: 0,
+        variations_linked: 0, cost_delta_total: '0', linked_value_total: '0', net_finish_movement_days: 0 },
+    });
   });
 
   it('shows an empty state when the project has no baselines', async () => {
@@ -166,6 +172,32 @@ describe('ScheduleComparePanel', () => {
     expect(screen.getAllByText('Foundation').length).toBeGreaterThan(0);
     expect(screen.getByText('New inspection')).toBeInTheDocument();
     expect(screen.getByText(/Relationship changes/i)).toBeInTheDocument();
+  });
+
+  it('lists the BOQ positions and variations of revised activities under the summary', async () => {
+    (scheduleApi.listBaselines as any).mockResolvedValue(BASELINES);
+    (scheduleApi.diffSchedule as any).mockResolvedValue(DIFF);
+    (scheduleApi.getRevisionImpact as any).mockResolvedValue({
+      schedule_id: 's1', base_baseline_id: 'b1', base_label: 'B0', target_label: 'current',
+      summary: { activities_revised: 1, activities_linked: 1, activities_unlinked: 0, positions_linked: 1,
+        variations_linked: 1, cost_delta_total: '6000', linked_value_total: '12000', net_finish_movement_days: 5 },
+      activities: [{ activity_id: 'a2', name: 'Strip footing', wbs_code: '', change_type: 'modified',
+        categories: ['dates'], start_before: '2026-05-11', start_after: '2026-05-11',
+        finish_before: '2026-05-15', finish_after: '2026-05-20', finish_movement_days: 5,
+        duration_before: 5, duration_after: 8, duration_delta_days: 3, cost_before: '20000',
+        cost_after: '26000', cost_delta: '6000', linked_value: '12000',
+        positions: [{ id: 'p1', missing: false, ordinal: '02.001', description: 'Concrete C30/37',
+          unit: 'm3', quantity: '12', total: '12000', boq_id: 'q1',
+          variations: [{ id: 'v1', code: 'VR-003', title: 'Deeper', status: 'approved', change_kind: 'modified' }] }] }],
+    });
+    renderPanel();
+    await screen.findByLabelText(/Base \(from\)/i);
+    fireEvent.click(screen.getByRole('button', { name: /^compare$/i }));
+
+    expect(await screen.findByText('Strip footing')).toBeInTheDocument();
+    expect(screen.getByText('02.001')).toBeInTheDocument();
+    expect(screen.getByText('VR-003')).toBeInTheDocument();
+    expect(scheduleApi.getRevisionImpact).toHaveBeenCalledWith('s1', 'b1', undefined);
   });
 
   it('sends target_baseline_id when a second baseline is chosen as target', async () => {

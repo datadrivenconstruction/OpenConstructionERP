@@ -2021,5 +2021,32 @@
       "fail": "Bu jadvalda bittadan ortiq tasdiqlangan bazaviy reja bor ({baselines}).",
       "suggestion": "Amal qilishi kerak bo'lgan bazaviy rejani tasdiqlang; bittasini tasdiqlash qolganlarining tasdig'ini bekor qiladi."
     }
+  },
+  "schedule_mspdi_import": {
+    "task_dates": {
+      "missing_dates": "{ref} «{name}» vazifasining boshlanish yoki tugash sanasi yoʻq.",
+      "finish_before_start": "{ref} «{name}» vazifasi boshlanishidan ({start}) oldin tugaydi ({finish}).",
+      "suggestion": "Manba jadvalidagi sanalarni tuzating va qayta eksport qiling. Import paytida sanalar hech qachon taxmin qilinmaydi."
+    },
+    "unique_ids": {
+      "duplicate_uid": "{ref} vazifa identifikatori bir necha marta uchraydi; faqat birinchi vazifa saqlanadi.",
+      "suggestion": "Manba jadvalida har bir vazifaga noyob identifikator bering."
+    },
+    "links_resolve": {
+      "dangling_link": "{ref} «{name}» vazifasi: {predecessor} oldingi vazifasi faylda yoʻq, bogʻlanish oʻtkazib yuboriladi.",
+      "duplicate_link": "Vazifa {ref} \"{name}\": {predecessor} oldingi vazifadan ikkinchi bogʻlanish oʻtkazib yuborildi, har bir juftga bitta bogʻlanish qoldiriladi.",
+      "self_link": "{ref} «{name}» vazifasi oʻziga bogʻlangan, bogʻlanish oʻtkazib yuboriladi.",
+      "unknown_link_type": "{ref} «{name}» vazifasi: {type} bogʻlanish turi nomaʼlum va tugash-boshlanish sifatida oʻqiladi.",
+      "suggestion": "Manba jadvalidagi mantiqiy bogʻlanishlarni tekshiring."
+    },
+    "values_in_range": {
+      "percent_out_of_range": "{ref} «{name}» vazifasi: {value}% bajarilish 0-100 oraligʻidan tashqarida va cheklanadi.",
+      "outline_gap": "{ref} «{name}» vazifasi tuzilma darajasini oʻtkazib yuboradi ({level}); u yuqoridagi eng yaqin umumlashtiruvchi vazifa ostiga qoʻyiladi.",
+      "suggestion": "Manba jadvalidagi bajarilish foizi va chekinishlarni tekshiring."
+    },
+    "calendar_work_days": {
+      "calendar_no_work_days": "{calendar} taqvimida ish kuni yoʻq.",
+      "suggestion": "Manba jadvalida ushbu taqvimning ish kunlarini belgilang."
+    }
   }
 }
