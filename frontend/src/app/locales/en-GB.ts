@@ -1097,6 +1097,17 @@ const resource = {
     "analytics.col_project_status": "Project status",
     "analytics.filter_project_status": "Filter by project status",
     "analytics.all_project_statuses": "All project statuses",
+    "finance.inbox.take_photo": "Take photo",
+    "finance.inbox.drop_hint": "Drop several PDFs or photos here to capture them all at once.",
+    "finance.inbox.scan_help_title": "Scan to e-mail",
+    "finance.inbox.scan_help_body": "Set your scanner or copier to \"scan to e-mail\" and send invoices as PDF or image attachments. Each attachment becomes its own draft here for review. Files already captured are skipped.",
+    "finance.inbox.scan_help_address": "Send scans to: {{address}}",
+    "finance.inbox.scan_help_no_address": "No intake address is configured yet. Ask your administrator to set one up.",
+    "finance.inbox.col_source": "Source",
+    "finance.inbox.source_upload": "Upload",
+    "finance.inbox.source_camera": "Camera",
+    "finance.inbox.source_email": "E-mail",
+    "finance.inbox.captured_n": "Captured for review: {{count}}",
   }
 } as { translation: Record<string, string> };
 

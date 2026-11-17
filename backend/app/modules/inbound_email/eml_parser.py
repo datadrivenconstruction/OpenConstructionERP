@@ -30,7 +30,7 @@ from dataclasses import dataclass, field
 from email.message import EmailMessage
 from html.parser import HTMLParser
 
-__all__ = ["EmailAttachment", "ParsedEmail", "parse_eml"]
+__all__ = ["EmailAttachment", "ParsedEmail", "extract_attachment_payloads", "parse_eml"]
 
 
 @dataclass(frozen=True)
@@ -355,3 +355,27 @@ def _split_references(raw: object) -> list[str]:
     if raw is None:
         return []
     return [token for token in str(raw).split() if token]
+
+
+def extract_attachment_payloads(raw: str | bytes) -> list[tuple[str, str, bytes]]:
+    """Return ``(filename, content_type, bytes)`` for every non-empty attachment.
+
+    ``parse_eml`` keeps only attachment metadata; intake flows that must store
+    the original file (scan-to-email invoice capture) use this instead.
+    """
+    try:
+        msg = _parse_message(raw)
+    except Exception:
+        return []
+    parts = msg.walk() if msg.is_multipart() else iter([msg])
+    out: list[tuple[str, str, bytes]] = []
+    for part in parts:
+        try:
+            if part.is_multipart() or not _is_attachment(part):
+                continue
+        except Exception:
+            continue
+        data = _decoded_bytes(part)
+        if data:
+            out.append((str(part.get_filename() or "").strip(), _safe_content_type(part), data))
+    return out

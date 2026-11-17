@@ -20,6 +20,8 @@ Everything money is Decimal here; the router/schemas handle the string wire.
 
 from __future__ import annotations
 
+import hashlib
+import io
 import logging
 import uuid
 from datetime import UTC, datetime
@@ -69,6 +71,9 @@ EXTRACTED_TEXT_CAP = 20_000
 # keeps executables / archives out of the inbox.
 ALLOWED_INVOICE_TYPES = frozenset({"pdf", "png", "jpeg", "gif", "webp", "xml"})
 
+# Where a capture came from; stored in the row metadata (no schema change).
+CAPTURE_SOURCES = frozenset({"upload", "camera", "email"})
+
 # Status machine. A posted row is terminal and sealed (read-only).
 _CAPTURE_TRANSITIONS: dict[str, set[str]] = {
     "captured": {"coded", "queried", "rejected"},
@@ -78,6 +83,13 @@ _CAPTURE_TRANSITIONS: dict[str, set[str]] = {
     "rejected": {"captured"},
     "posted": set(),
 }
+
+
+def _source_metadata(source: str, sender: str | None) -> dict[str, str]:
+    meta = {"source": source if source in CAPTURE_SOURCES else "upload"}
+    if sender:
+        meta["sender"] = sender[:255]
+    return meta
 
 
 def _utcnow_iso() -> str:
@@ -147,6 +159,8 @@ class InvoiceCaptureService:
         file: UploadFile,
         user_id: str | None,
         doc_kind: str = "invoice",
+        source: str = "upload",
+        sender: str | None = None,
     ) -> CapturedInvoice:
         """Store the uploaded document unaltered, hash it, and extract a draft."""
         capture_id = uuid.uuid4()
@@ -194,6 +208,7 @@ class InvoiceCaptureService:
             extracted_text=(text or "")[:EXTRACTED_TEXT_CAP] or None,
             field_confidence=conf,
             created_by=uuid.UUID(user_id) if user_id else None,
+            metadata_=_source_metadata(source, sender),
         )
         self._apply_fields(row, fields)
         if fields.get("line_items"):
@@ -207,9 +222,72 @@ class InvoiceCaptureService:
             action="captured",
             to_status="captured",
             actor_id=user_id,
-            metadata={"engine": engine, "filename": filename, "sha256": sha},
+            metadata={"engine": engine, "filename": filename, "sha256": sha, "source": source},
         )
         return row
+
+    async def find_by_hash(self, project_id: uuid.UUID, sha256: str) -> CapturedInvoice | None:
+        stmt = (
+            select(CapturedInvoice)
+            .where(CapturedInvoice.project_id == project_id)
+            .where(CapturedInvoice.content_sha256 == sha256)
+            .limit(1)
+        )
+        return (await self.session.execute(stmt)).scalars().first()
+
+    async def capture_from_bytes(
+        self,
+        *,
+        project_id: uuid.UUID,
+        filename: str,
+        data: bytes,
+        user_id: str | None,
+        source: str,
+        sender: str | None = None,
+    ) -> tuple[CapturedInvoice, bool]:
+        """Capture a document held in memory; return ``(row, created)``.
+
+        A file whose SHA-256 is already captured in the project is not stored
+        again: the existing row comes back with ``created=False``.
+        """
+        existing = await self.find_by_hash(project_id, hashlib.sha256(data).hexdigest())
+        if existing is not None:
+            return existing, False
+        upload = UploadFile(file=io.BytesIO(data), filename=filename)
+        row = await self.capture_from_upload(
+            project_id=project_id, file=upload, user_id=user_id, source=source, sender=sender
+        )
+        return row, True
+
+    async def capture_from_email(self, *, project_id: uuid.UUID, raw: bytes, user_id: str | None) -> dict[str, Any]:
+        """Create one capture per invoice-like attachment of a raw RFC-822 message.
+
+        Attachments of other types are listed under ``rejected``; byte-identical
+        files already captured in the project under ``duplicates``. The extracted
+        fields stay suggestions: every row starts in ``captured`` for review.
+        """
+        from app.modules.inbound_email.eml_parser import extract_attachment_payloads, parse_eml
+
+        sender = parse_eml(raw).from_addr or None
+        created: list[CapturedInvoice] = []
+        duplicates: list[CapturedInvoice] = []
+        rejected: list[dict[str, str]] = []
+        seen: set[str] = set()
+        for filename, _ctype, data in extract_attachment_payloads(raw):
+            name = filename or "scan"
+            digest = hashlib.sha256(data).hexdigest()
+            if digest in seen:
+                continue
+            seen.add(digest)
+            try:
+                row, is_new = await self.capture_from_bytes(
+                    project_id=project_id, filename=name, data=data, user_id=user_id, source="email", sender=sender
+                )
+            except HTTPException as exc:
+                rejected.append({"filename": name, "reason": str(exc.detail)})
+                continue
+            (created if is_new else duplicates).append(row)
+        return {"sender": sender, "created": created, "duplicates": duplicates, "rejected": rejected}
 
     async def capture_manual(self, data: CaptureManualCreate, user_id: str | None) -> CapturedInvoice:
         """Create a captured invoice from hand-entered fields (no document)."""

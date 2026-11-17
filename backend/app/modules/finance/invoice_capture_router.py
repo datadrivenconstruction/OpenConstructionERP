@@ -43,12 +43,16 @@ from app.modules.finance.invoice_capture_schemas import (
     CaptureManualCreate,
     CaptureResponse,
     CaptureUpdate,
+    EmailIntakeResponse,
+    IntakeInfoResponse,
     PurchaseOrderLink,
     QueryInput,
     RejectInput,
 )
-from app.modules.finance.invoice_capture_service import InvoiceCaptureService
+from app.modules.finance.invoice_capture_service import MAX_UPLOAD_BYTES, InvoiceCaptureService
 from app.modules.finance.router import _require_project_access
+
+MAX_EMAIL_BYTES = MAX_UPLOAD_BYTES * 2
 
 capture_router = APIRouter(prefix="/inbox", tags=["finance-inbox"])
 
@@ -74,6 +78,9 @@ def _to_response(
 ) -> CaptureResponse:
     resp = CaptureResponse.model_validate(row)
     resp.has_document = bool(row.storage_key)
+    meta = row.metadata_ or {}
+    resp.source = str(meta.get("source") or "upload")
+    resp.source_sender = meta.get("sender") or None
     if validation is not None:
         resp.validation = [_finding_to_schema(f) for f in validation]
     if proposal is not None:
@@ -111,13 +118,60 @@ async def upload_capture(
     user_id: CurrentUserId,
     project_id: uuid.UUID = Query(...),
     doc_kind: str = Query(default="invoice"),
+    source: str = Query(default="upload", pattern="^(upload|camera)$"),
     file: UploadFile = File(...),
     _perm: None = Depends(RequirePermission("finance.capture.create")),
     service: InvoiceCaptureService = Depends(_get_capture_service),
 ) -> CaptureResponse:
     await _require_project_access(session, project_id, user_id)
-    row = await service.capture_from_upload(project_id=project_id, file=file, user_id=user_id, doc_kind=doc_kind)
+    row = await service.capture_from_upload(
+        project_id=project_id, file=file, user_id=user_id, doc_kind=doc_kind, source=source
+    )
     return await _detailed_response(service, row)
+
+
+@capture_router.get(
+    "/intake/info",
+    response_model=IntakeInfoResponse,
+    summary="Scan-to-email address",
+    description="The address a scanner sends invoices to, when the install has one configured.",
+)
+async def intake_info(
+    _perm: None = Depends(RequirePermission("finance.capture.read")),
+) -> IntakeInfoResponse:
+    from app.config import get_settings
+
+    return IntakeInfoResponse(address=get_settings().invoice_intake_address or None)
+
+
+@capture_router.post(
+    "/intake/email",
+    response_model=EmailIntakeResponse,
+    status_code=201,
+    summary="Capture invoices from a scan-to-email message",
+    description="Import a raw RFC-822 message (.eml) forwarded by the mail gateway. Every PDF or "
+    "image attachment becomes one capture with source=email and the sender recorded; files "
+    "already captured in the project (same SHA-256) are skipped.",
+)
+async def intake_email(
+    session: SessionDep,
+    user_id: CurrentUserId,
+    project_id: uuid.UUID = Query(...),
+    file: UploadFile = File(...),
+    _perm: None = Depends(RequirePermission("finance.capture.create")),
+    service: InvoiceCaptureService = Depends(_get_capture_service),
+) -> EmailIntakeResponse:
+    await _require_project_access(session, project_id, user_id)
+    raw = await file.read(MAX_EMAIL_BYTES + 1)
+    if not raw or len(raw) > MAX_EMAIL_BYTES:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "The message is empty or too large.")
+    result = await service.capture_from_email(project_id=project_id, raw=raw, user_id=user_id)
+    return EmailIntakeResponse(
+        sender=result["sender"],
+        created=[_to_response(r) for r in result["created"]],
+        duplicates=[_to_response(r) for r in result["duplicates"]],
+        rejected=result["rejected"],
+    )
 
 
 @capture_router.post(
