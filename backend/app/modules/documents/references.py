@@ -181,6 +181,32 @@ DOCUMENT_REFERENCES: tuple[DocumentReference, ...] = (
     DocumentReference("documents", "ProjectPhoto", "oe_documents_photo", "document_id", "scalar", "unlinks"),
     # NOT NULL: a sheet is a page OF the document, and cannot outlive it usefully.
     DocumentReference("documents", "Sheet", "oe_documents_sheet", "document_id", "scalar", "strands"),
+    # A seal keeps each file's name and hash, so the fingerprint survives the
+    # delete; what goes is the copy a reviewer would open to compare against it.
+    DocumentReference(
+        "estimate_archive",
+        "EstimateSealAttachment",
+        "oe_estimate_archive_attachment",
+        "document_id",
+        "scalar",
+        "unlinks",
+    ),
+    DocumentReference(
+        "estimate_archive",
+        "EstimateSealReceipt",
+        "oe_estimate_archive_receipt",
+        "receipt_document_id",
+        "scalar",
+        "unlinks",
+    ),
+    DocumentReference(
+        "estimate_archive",
+        "SealOpening",
+        "oe_estimate_archive_opening",
+        "minutes_document_id",
+        "scalar",
+        "unlinks",
+    ),
     DocumentReference("fieldreports", "FieldReport", "oe_fieldreports_report", "document_ids", "array", "unlinks"),
     DocumentReference("engineering_brief", "Study", "oe_engbrief_study", "document_id", "scalar", "unlinks"),
     DocumentReference(

@@ -170,6 +170,7 @@ class _StubInvoice:
 
     id = uuid.UUID("00000000-0000-0000-0000-0000000000aa")
     contact_id = None
+    project_id = None
     invoice_number = "AR-2026-014"
     invoice_direction = "receivable"
     invoice_date = "2026-04-15"

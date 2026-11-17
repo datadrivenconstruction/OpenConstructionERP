@@ -473,6 +473,7 @@ teach identifiers that were never rule sets at all.
 | `field_productivity` | Field productivity records |
 | `sheet_intake` | Drawing sheets at intake |
 | `subcontract_change` | Subcontract change orders |
+| `subcontract_pay_app` | Subcontractor payment application: no line negative or past 100% complete, required documents on file |
 | `workforce` | Workforce records |
 | `property_dev` | Development appraisal |
 | `pipeline` | Opportunity pipeline |

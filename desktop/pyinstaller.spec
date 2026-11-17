@@ -200,6 +200,7 @@ _MODULE_LAYERS = (
     "repairs",
     "schema",
     "billing_forms",
+    "hooks",
 )
 
 if modules_dir.is_dir():

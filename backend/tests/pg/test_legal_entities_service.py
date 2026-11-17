@@ -57,6 +57,9 @@ async def test_an_invalid_currency_is_refused_on_update(pg_session) -> None:
 
 async def test_branches_belong_to_their_entity_and_go_with_it(pg_session) -> None:
     service = LegalEntityService(pg_session)
+    # The default entity absorbs every project that names none, and the shared PG lane
+    # leaves such projects behind; keep LE-BR off the default so it owns nothing.
+    await service.create_entity(_entity("LE-BR-HOME", is_default=True))
     entity = await service.create_entity(_entity("LE-BR"))
     home, home_warnings = await service.create_branch(entity.id, {"code": "MUC", "name": "Munich"})
     abroad, abroad_warnings = await service.create_branch(

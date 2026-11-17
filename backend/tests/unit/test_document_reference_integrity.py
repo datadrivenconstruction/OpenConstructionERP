@@ -72,6 +72,11 @@ UNCONSTRAINED_DOCUMENT_REFERENCES: dict[str, tuple[str, ...]] = {
     "defects_liability": ("DlpWarranty.document_id",),
     "design_options": ("DesignOption.source_document_id",),
     "documents": ("ProjectPhoto.document_id", "Sheet.document_id"),
+    "estimate_archive": (
+        "EstimateSealAttachment.document_id",
+        "EstimateSealReceipt.receipt_document_id",
+        "SealOpening.minutes_document_id",
+    ),
     "fieldreports": ("FieldReport.document_ids",),
     "markups": ("Markup.document_id", "ScaleConfig.document_id"),
     "meetings": ("Meeting.document_ids",),
