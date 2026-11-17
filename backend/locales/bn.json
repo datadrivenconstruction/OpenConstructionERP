@@ -1689,6 +1689,33 @@
     },
     "furniture": {
       "footer_page": "পৃষ্ঠা {page} / {total}"
+    },
+    "gantt_pdf": {
+      "strings": {
+        "title": "সময়সূচি (গ্যান্ট চার্ট)",
+        "project": "প্রকল্প",
+        "schedule": "সময়সূচি",
+        "baseline": "বেসলাইন",
+        "no_baseline": "নেই",
+        "exported": "এক্সপোর্টের তারিখ",
+        "data_date": "ডেটা তারিখ",
+        "col_wbs": "WBS",
+        "col_activity": "কার্যক্রম",
+        "col_start": "শুরু",
+        "col_finish": "শেষ",
+        "col_duration": "দিন",
+        "legend_current": "বর্তমান পরিকল্পনা",
+        "legend_progress": "অগ্রগতি",
+        "legend_critical": "ক্রিটিক্যাল পাথ",
+        "legend_baseline": "বেসলাইন পরিকল্পনা",
+        "legend_actual": "প্রকৃত",
+        "legend_milestone": "মাইলস্টোন",
+        "legend_summary": "সারাংশ",
+        "week_short": "স{n}",
+        "quarter_short": "ত্রৈ{n}",
+        "sheet_of": "শীট {page} / {total}",
+        "no_activities": "এই সময়সূচিতে এখনও কোনো কার্যক্রম নেই।"
+      }
     }
   },
   "property_dev": {
