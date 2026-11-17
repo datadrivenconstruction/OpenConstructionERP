@@ -727,6 +727,10 @@ class Settings(BaseSettings):
     # Address scanners and offices e-mail supplier invoices to; shown in the
     # capture help. Empty hides the hint.
     invoice_intake_address: str = ""
+    # Let invoice mailboxes use an IMAP server on a private or loopback address
+    # (on-prem installs with an internal mail server). Off by default; link-local
+    # and cloud-metadata addresses stay refused. Binds OE_INVOICE_MAILBOX_ALLOW_INTERNAL.
+    invoice_mailbox_allow_internal: bool = False
     # Public URL used to build password-reset and notification links.
     # Falls back to the first CORS origin so dev installs work without
     # an explicit setting.

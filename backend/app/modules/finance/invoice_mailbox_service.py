@@ -14,7 +14,13 @@ from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.config import get_settings
 from app.core.crypto import decrypt_secret, encrypt_secret
+from app.core.url_safety import (
+    UnsafeUrlError,
+    resolve_and_validate_ai_provider_url,
+    resolve_and_validate_external_url,
+)
 from app.modules.finance import invoice_mailbox_logic as logic
 from app.modules.finance.invoice_capture_service import InvoiceCaptureService
 from app.modules.finance.invoice_mailbox_models import InvoiceMailbox
@@ -27,6 +33,24 @@ _ERROR_CAP = 500
 
 def _now_iso() -> str:
     return datetime.now(UTC).isoformat(timespec="seconds")
+
+
+async def assert_host_reachable(host: str) -> None:
+    """Resolve *host* now and refuse internal, link-local and metadata addresses.
+
+    Uses the platform's outbound-host guard. An administrator may open private and
+    loopback ranges with ``OE_INVOICE_MAILBOX_ALLOW_INTERNAL``; link-local and
+    cloud-metadata addresses stay refused either way. Resolved on every call, so a
+    changed DNS answer is caught at the next poll.
+    """
+    host = (host or "").strip()
+    if not host:
+        return
+    url = f"https://{host}"
+    if get_settings().invoice_mailbox_allow_internal:
+        await resolve_and_validate_ai_provider_url(url)
+    else:
+        await resolve_and_validate_external_url(url)
 
 
 def _config_of(row: InvoiceMailbox) -> logic.MailboxConfig:
@@ -69,6 +93,13 @@ class InvoiceMailboxService:
                 status.HTTP_422_UNPROCESSABLE_ENTITY,
                 detail=[{"field": f, "code": c} for f, c in errors],
             )
+        try:
+            await assert_host_reachable(data.host)
+        except UnsafeUrlError as exc:
+            raise HTTPException(
+                status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail=[{"field": "host", "code": "host_not_allowed", "message": str(exc)}],
+            ) from exc
         if row is None:
             row = InvoiceMailbox(project_id=project_id)
             self.session.add(row)
@@ -102,6 +133,10 @@ class InvoiceMailboxService:
         )
         if errors:
             return {"ok": False, "message_count": None, "error": ", ".join(f"{f}:{c}" for f, c in errors)}
+        try:
+            await assert_host_reachable(data.host)
+        except UnsafeUrlError as exc:
+            return {"ok": False, "message_count": None, "error": str(exc)[:_ERROR_CAP]}
         cfg = logic.MailboxConfig(
             host=data.host.strip(),
             port=data.port,
@@ -121,6 +156,7 @@ class InvoiceMailboxService:
         counts = {"messages": 0, "created": 0, "duplicates": 0, "rejected": 0, "failed": 0}
         cfg = _config_of(row)
         try:
+            await assert_host_reachable(row.host)
             fetched = await asyncio.to_thread(logic.fetch_unseen, cfg, self.client_factory)
             capture = InvoiceCaptureService(self.session)
             done: list[str] = []
