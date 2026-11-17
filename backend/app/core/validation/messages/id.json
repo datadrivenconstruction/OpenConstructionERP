@@ -2160,5 +2160,32 @@
       "fail": "Tarif sumber {code} berubah dari {old} menjadi {new} sejak disalin ke proyek.",
       "suggestion": "Ambil tarif sumber yang baru, atau pertahankan tarif lokal dengan sengaja."
     }
+  },
+  "schedule_mspdi_import": {
+    "task_dates": {
+      "missing_dates": "Tugas {ref} \"{name}\" tidak memiliki tanggal mulai atau selesai.",
+      "finish_before_start": "Tugas {ref} \"{name}\" selesai ({finish}) sebelum dimulai ({start}).",
+      "suggestion": "Perbaiki tanggal di jadwal sumber lalu ekspor ulang. Tanggal tidak pernah ditebak saat impor."
+    },
+    "unique_ids": {
+      "duplicate_uid": "ID tugas {ref} muncul lebih dari sekali; hanya tugas pertama yang disimpan.",
+      "suggestion": "Beri setiap tugas ID unik di jadwal sumber."
+    },
+    "links_resolve": {
+      "dangling_link": "Tugas {ref} \"{name}\": pendahulu {predecessor} tidak ada di file, tautan dilewati.",
+      "duplicate_link": "Tugas {ref} \"{name}\": tautan kedua dari pendahulu {predecessor} dilewati, satu tautan per pasangan dipertahankan.",
+      "self_link": "Tugas {ref} \"{name}\" tertaut ke dirinya sendiri, tautan dilewati.",
+      "unknown_link_type": "Tugas {ref} \"{name}\": jenis tautan {type} tidak dikenal dan dibaca sebagai selesai-ke-mulai.",
+      "suggestion": "Periksa tautan logika di jadwal sumber."
+    },
+    "values_in_range": {
+      "percent_out_of_range": "Tugas {ref} \"{name}\": {value}% selesai berada di luar 0-100 dan dibatasi.",
+      "outline_gap": "Tugas {ref} \"{name}\" melewati satu tingkat kerangka ({level}); ditempatkan di bawah tugas ringkasan terdekat di atasnya.",
+      "suggestion": "Periksa % selesai dan indentasi di jadwal sumber."
+    },
+    "calendar_work_days": {
+      "calendar_no_work_days": "Kalender {calendar} tidak memiliki hari kerja.",
+      "suggestion": "Tandai hari kerja kalender ini di jadwal sumber."
+    }
   }
 }

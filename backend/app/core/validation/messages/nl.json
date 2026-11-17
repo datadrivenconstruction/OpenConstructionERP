@@ -2160,5 +2160,32 @@
       "fail": "Het brontarief van {code} is gewijzigd van {old} naar {new} sinds het project het kopieerde.",
       "suggestion": "Neem het nieuwe brontarief over of behoud bewust het lokale tarief."
     }
+  },
+  "schedule_mspdi_import": {
+    "task_dates": {
+      "missing_dates": "Taak {ref} \"{name}\" heeft geen begin- of einddatum.",
+      "finish_before_start": "Taak {ref} \"{name}\" eindigt ({finish}) voordat hij begint ({start}).",
+      "suggestion": "Corrigeer de datums in de bronplanning en exporteer die opnieuw. Datums worden bij import nooit geraden."
+    },
+    "unique_ids": {
+      "duplicate_uid": "Taak-ID {ref} komt meer dan eens voor; alleen de eerste taak wordt behouden.",
+      "suggestion": "Geef elke taak een unieke ID in de bronplanning."
+    },
+    "links_resolve": {
+      "dangling_link": "Taak {ref} \"{name}\": voorganger {predecessor} staat niet in het bestand, de koppeling wordt overgeslagen.",
+      "duplicate_link": "Taak {ref} \"{name}\": een tweede koppeling vanaf voorganger {predecessor} wordt overgeslagen, per paar blijft één koppeling.",
+      "self_link": "Taak {ref} \"{name}\" is aan zichzelf gekoppeld, de koppeling wordt overgeslagen.",
+      "unknown_link_type": "Taak {ref} \"{name}\": koppelingstype {type} is onbekend en wordt gelezen als einde-begin.",
+      "suggestion": "Controleer de logische koppelingen in de bronplanning."
+    },
+    "values_in_range": {
+      "percent_out_of_range": "Taak {ref} \"{name}\": {value}% voltooid ligt buiten 0-100 en wordt begrensd.",
+      "outline_gap": "Taak {ref} \"{name}\" slaat een overzichtsniveau over ({level}); hij wordt onder de dichtstbijzijnde samenvattingstaak erboven geplaatst.",
+      "suggestion": "Controleer % voltooid en het inspringen in de bronplanning."
+    },
+    "calendar_work_days": {
+      "calendar_no_work_days": "Kalender {calendar} heeft geen werkdag.",
+      "suggestion": "Markeer de werkdagen van deze kalender in de bronplanning."
+    }
   }
 }

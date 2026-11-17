@@ -2160,5 +2160,32 @@
       "fail": "{code} の元単価は、プロジェクトにコピーした後に {old} から {new} に変わりました。",
       "suggestion": "新しい元単価を採用するか、意図してローカル単価を維持してください。"
     }
+  },
+  "schedule_mspdi_import": {
+    "task_dates": {
+      "missing_dates": "タスク {ref}「{name}」に開始日または終了日がありません。",
+      "finish_before_start": "タスク {ref}「{name}」は開始日 ({start}) より前に終了します ({finish})。",
+      "suggestion": "元の工程表で日付を修正し、再度エクスポートしてください。インポート時に日付を推測することはありません。"
+    },
+    "unique_ids": {
+      "duplicate_uid": "タスク ID {ref} が複数回出現します。最初のタスクのみ保持されます。",
+      "suggestion": "元の工程表ですべてのタスクに一意の ID を付けてください。"
+    },
+    "links_resolve": {
+      "dangling_link": "タスク {ref}「{name}」: 先行タスク {predecessor} がファイルにないため、リンクをスキップします。",
+      "duplicate_link": "タスク {ref} \"{name}\": 先行タスク {predecessor} からの 2 本目のリンクはスキップされます。ペアごとに 1 本のリンクを保持します。",
+      "self_link": "タスク {ref}「{name}」は自身にリンクされているため、リンクをスキップします。",
+      "unknown_link_type": "タスク {ref}「{name}」: リンクの種類 {type} は不明のため、終了-開始として読み込みます。",
+      "suggestion": "元の工程表の論理リンクを確認してください。"
+    },
+    "values_in_range": {
+      "percent_out_of_range": "タスク {ref}「{name}」: 達成率 {value}% が 0～100 の範囲外のため、上限で制限します。",
+      "outline_gap": "タスク {ref}「{name}」はアウトラインレベルを飛ばしています ({level})。上にある最も近いサマリータスクの下に配置します。",
+      "suggestion": "元の工程表で達成率とインデントを確認してください。"
+    },
+    "calendar_work_days": {
+      "calendar_no_work_days": "カレンダー {calendar} に稼働日がありません。",
+      "suggestion": "元の工程表でこのカレンダーの稼働日を指定してください。"
+    }
   }
 }

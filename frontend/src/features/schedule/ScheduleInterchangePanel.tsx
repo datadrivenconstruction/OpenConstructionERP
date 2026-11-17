@@ -42,7 +42,9 @@ import {
   type ScheduleImportResult,
   type InterchangeDocument,
   type VendorImportResult,
+  type MspdiPreview,
 } from './api';
+import { canImportChecked, fileKey, isMspXmlFile, splitIssues } from './scheduleInterop';
 
 interface ScheduleInterchangePanelProps {
   scheduleId: string;
@@ -132,6 +134,13 @@ export function ScheduleInterchangePanel({
   const vendorInputRef = useRef<HTMLInputElement>(null);
   const [vendorFile, setVendorFile] = useState<File | null>(null);
   const [vendorResult, setVendorResult] = useState<VendorImportResult | null>(null);
+  // MS Project XML is checked before it is applied; the check belongs to one file.
+  const [vendorPreview, setVendorPreview] = useState<MspdiPreview | null>(null);
+  const [checkedKey, setCheckedKey] = useState<string | null>(null);
+  const vendorIsXml = isMspXmlFile(vendorFile?.name);
+  const vendorImportAllowed = vendorIsXml
+    ? canImportChecked(vendorPreview, vendorFile, checkedKey)
+    : !!vendorFile;
 
   /* ── Export ──────────────────────────────────────────────────────────── */
   const exportMut = useMutation({
@@ -255,6 +264,25 @@ export function ScheduleInterchangePanel({
   const exportCsvMut = useMutation({
     mutationFn: () =>
       scheduleApi.exportCsv(scheduleId, `schedule-${scheduleId}.csv`),
+    onError: (e) => {
+      addToast({
+        type: 'error',
+        title: t('common.error', { defaultValue: 'Error' }),
+        message: getErrorMessage(e),
+      });
+    },
+  });
+
+  /* ── Check an MS Project XML file before importing it ────────────────── */
+  const vendorPreviewMut = useMutation({
+    mutationFn: () => {
+      if (!vendorFile) return Promise.reject(new Error('No file selected'));
+      return scheduleApi.previewMspXml(scheduleId, vendorFile);
+    },
+    onSuccess: (data) => {
+      setVendorPreview(data);
+      setCheckedKey(vendorFile ? fileKey(vendorFile) : null);
+    },
     onError: (e) => {
       addToast({
         type: 'error',
@@ -622,6 +650,8 @@ export function ScheduleInterchangePanel({
               data-testid="schedule-vendor-file-input"
               onChange={(e) => {
                 setVendorResult(null);
+                setVendorPreview(null);
+                setCheckedKey(null);
                 setVendorFile(e.target.files?.[0] ?? null);
               }}
               className="block w-full text-sm text-content-secondary file:mr-3 file:cursor-pointer file:rounded-lg file:border-0 file:bg-surface-secondary file:px-3 file:py-2 file:text-sm file:font-medium file:text-content-primary hover:file:bg-surface-secondary/70"
@@ -634,10 +664,30 @@ export function ScheduleInterchangePanel({
             )}
           </div>
 
+          <div className="flex flex-wrap items-center gap-2">
+          {vendorIsXml && (
+            <Button
+              variant="secondary"
+              onClick={() => vendorPreviewMut.mutate()}
+              disabled={!vendorFile || vendorPreviewMut.isPending}
+              data-testid="schedule-vendor-preview"
+              icon={
+                vendorPreviewMut.isPending ? (
+                  <Loader2 size={16} className="animate-spin" />
+                ) : (
+                  <ShieldCheck size={16} />
+                )
+              }
+            >
+              {vendorPreviewMut.isPending
+                ? t('schedule.mspdi.checking', { defaultValue: 'Checking...' })
+                : t('schedule.mspdi.check', { defaultValue: 'Check file' })}
+            </Button>
+          )}
           <Button
             variant="primary"
             onClick={() => vendorImportMut.mutate()}
-            disabled={!vendorFile || vendorImportMut.isPending}
+            disabled={!vendorImportAllowed || vendorImportMut.isPending}
             data-testid="schedule-vendor-import"
             icon={
               vendorImportMut.isPending ? (
@@ -653,7 +703,12 @@ export function ScheduleInterchangePanel({
                   defaultValue: 'Import into this schedule',
                 })}
           </Button>
+          </div>
         </div>
+
+        {vendorIsXml && vendorPreview && !vendorResult && (
+          <MspdiPreviewBlock preview={vendorPreview} />
+        )}
 
         {vendorResult && (
           <div className="mt-4 space-y-3 border-t border-border-light pt-4">
@@ -672,6 +727,14 @@ export function ScheduleInterchangePanel({
                 })}
               </Badge>
             </div>
+            {vendorResult.baseline_id && (
+              <p className="text-xs text-content-secondary">
+                {t('schedule.mspdi.baseline_created', {
+                  defaultValue:
+                    'The baseline dates of the file were saved as a new baseline. Approve it in the Gantt toolbar if it is the agreed plan.',
+                })}
+              </p>
+            )}
             {vendorResult.warnings.length > 0 && (
               <ul className="space-y-1 rounded-lg border border-semantic-warning/30 bg-semantic-warning-bg/40 p-2 text-xs text-content-secondary">
                 {vendorResult.warnings.slice(0, 20).map((w, i) => (
@@ -836,3 +899,137 @@ function StatTile({ label, value, tone }: { label: string; value: number; tone: 
 }
 
 export default ScheduleInterchangePanel;
+
+/* ── MS Project XML check result ─────────────────────────────────────── */
+
+const PREVIEW_ROWS = 50;
+
+function MspdiPreviewBlock({ preview }: { preview: MspdiPreview }) {
+  const { t } = useTranslation();
+  const { errors, warnings } = splitIssues(preview.issues);
+  const rows = preview.tasks.slice(0, PREVIEW_ROWS);
+  return (
+    <div className="mt-4 space-y-3 border-t border-border-light pt-4" data-testid="schedule-mspdi-preview">
+      <h4 className="text-sm font-semibold text-content-primary">
+        {t('schedule.mspdi.preview_title', { defaultValue: 'What will be imported' })}
+      </h4>
+      <div className="flex flex-wrap items-center gap-2">
+        <Badge variant="neutral">
+          {t('schedule.interchange.created_activities', {
+            defaultValue: '{{count}} activities',
+            count: preview.task_count,
+          })}
+        </Badge>
+        <Badge variant="neutral">
+          {t('schedule.interchange.created_relationships', {
+            defaultValue: '{{count}} links',
+            count: preview.link_count,
+          })}
+        </Badge>
+        <Badge variant="neutral">
+          {t('schedule.mspdi.calendars', { defaultValue: '{{count}} calendars', count: preview.calendar_count })}
+        </Badge>
+        {preview.baseline_task_count > 0 && (
+          <Badge variant="blue">
+            {t('schedule.mspdi.baseline_tasks', {
+              defaultValue: 'Baseline dates on {{count}} tasks',
+              count: preview.baseline_task_count,
+            })}
+          </Badge>
+        )}
+        {preview.start && preview.finish && (
+          <span className="text-xs tabular-nums text-content-tertiary">
+            {preview.start} - {preview.finish}
+          </span>
+        )}
+      </div>
+
+      {preview.can_apply ? (
+        <p className="flex items-center gap-1.5 text-xs text-semantic-success">
+          <CheckCircle2 size={14} />
+          {t('schedule.mspdi.ready', { defaultValue: 'No errors. Review the tasks below, then import.' })}
+        </p>
+      ) : (
+        <p className="flex items-center gap-1.5 text-xs text-semantic-error">
+          <AlertTriangle size={14} />
+          {t('schedule.mspdi.blocked', {
+            defaultValue: 'Fix the errors in the source file and check it again. Nothing has been changed.',
+          })}
+        </p>
+      )}
+
+      {(errors.length > 0 || warnings.length > 0) && (
+        <ul className="max-h-48 space-y-1 overflow-y-auto rounded-lg border border-border-light p-2 text-xs">
+          {[...errors, ...warnings].slice(0, 100).map((issue, i) => (
+            <li key={`${issue.rule_id}-${issue.ref}-${i}`} className="flex items-start gap-1.5">
+              <AlertTriangle
+                size={12}
+                className={
+                  issue.severity === 'error'
+                    ? 'mt-0.5 shrink-0 text-semantic-error'
+                    : 'mt-0.5 shrink-0 text-semantic-warning'
+                }
+              />
+              <span className="text-content-secondary">{issue.message}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <div className="max-h-72 overflow-auto rounded-lg border border-border-light">
+        <table className="w-full text-xs">
+          <thead className="sticky top-0 bg-surface-secondary text-content-tertiary">
+            <tr>
+              <th className="px-2 py-1.5 text-start font-medium">
+                {t('schedule.mspdi.col_task', { defaultValue: 'Task' })}
+              </th>
+              <th className="px-2 py-1.5 text-start font-medium">
+                {t('schedule.mspdi.col_dates', { defaultValue: 'Start - finish' })}
+              </th>
+              <th className="px-2 py-1.5 text-end font-medium">
+                {t('schedule.mspdi.col_duration', { defaultValue: 'Days' })}
+              </th>
+              <th className="px-2 py-1.5 text-end font-medium">%</th>
+              <th className="px-2 py-1.5 text-start font-medium">
+                {t('schedule.mspdi.col_baseline', { defaultValue: 'Baseline' })}
+              </th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-border-light">
+            {rows.map((task) => (
+              <tr key={task.uid}>
+                <td className="px-2 py-1 text-content-primary">
+                  <span style={{ paddingInlineStart: `${Math.max(0, task.outline_level - 1) * 12}px` }}>
+                    <span className={task.activity_type === 'summary' ? 'font-semibold' : undefined}>
+                      {task.wbs ? `${task.wbs} ` : ''}
+                      {task.name}
+                    </span>
+                  </span>
+                </td>
+                <td className="px-2 py-1 tabular-nums text-content-secondary">
+                  {task.start ?? '?'} - {task.finish ?? '?'}
+                </td>
+                <td className="px-2 py-1 text-end tabular-nums">{task.duration_days ?? ''}</td>
+                <td className="px-2 py-1 text-end tabular-nums">{Math.round(task.percent_complete)}</td>
+                <td className="px-2 py-1 tabular-nums text-content-tertiary">
+                  {task.baseline_start && task.baseline_finish
+                    ? `${task.baseline_start} - ${task.baseline_finish}`
+                    : ''}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      {preview.task_count > rows.length && (
+        <p className="text-xs text-content-tertiary">
+          {t('schedule.mspdi.more_rows', {
+            defaultValue: 'Showing the first {{shown}} of {{total}} tasks.',
+            shown: rows.length,
+            total: preview.task_count,
+          })}
+        </p>
+      )}
+    </div>
+  );
+}

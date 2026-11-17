@@ -1014,6 +1014,66 @@ class ImportResult(BaseModel):
     source_document_id: str | None = Field(
         default=None, description="The stored original file in the project's documents"
     )
+    baseline_id: str | None = Field(
+        default=None, description="Unapproved baseline created from the file's baseline 0 (MS Project XML only)"
+    )
+
+
+class MspdiIssueOut(BaseModel):
+    """One finding of the ``schedule_mspdi_import`` rules."""
+
+    rule_id: str
+    code: str
+    severity: str
+    ref: str = ""
+    message: str
+
+
+class MspdiPreviewTask(BaseModel):
+    """One task of an MS Project XML file as it would be imported."""
+
+    uid: str
+    name: str
+    wbs: str = ""
+    outline_level: int = 1
+    parent_uid: str | None = None
+    start: str | None = None
+    finish: str | None = None
+    duration_days: int | None = None
+    percent_complete: float = 0.0
+    activity_type: str = "task"
+    baseline_start: str | None = None
+    baseline_finish: str | None = None
+    predecessor_count: int = 0
+
+
+class MspdiPreviewCalendar(BaseModel):
+    uid: str
+    name: str
+    work_days: list[int] = Field(default_factory=list)
+    holiday_count: int = 0
+
+
+class MspdiPreviewResponse(BaseModel):
+    """What an MS Project XML file would import, and whether it may be applied."""
+
+    filename: str = ""
+    name: str = ""
+    minutes_per_day: int = 480
+    task_count: int = 0
+    summary_count: int = 0
+    milestone_count: int = 0
+    link_count: int = 0
+    calendar_count: int = 0
+    baseline_task_count: int = 0
+    start: str | None = None
+    finish: str | None = None
+    error_count: int = 0
+    warning_count: int = 0
+    can_apply: bool = False
+    issues: list[MspdiIssueOut] = Field(default_factory=list)
+    calendars: list[MspdiPreviewCalendar] = Field(default_factory=list)
+    tasks: list[MspdiPreviewTask] = Field(default_factory=list)
 
 
 # ── Schedule Relationship schemas (Phase 13) ──────────────────────────────
@@ -1143,6 +1203,22 @@ class BaselineCaptureRequest(BaseModel):
     name: str | None = Field(default=None, max_length=255, description="Defaults to the next B<n> label")
     approve: bool = False
     note: str | None = Field(default=None, max_length=1000)
+
+
+class RevisionImpactResponse(BaseModel):
+    """Revised activities between a baseline and the live plan (or a later baseline), with BOQ and variations.
+
+    Each activity row carries before/after dates, finish movement, duration and
+    planned-cost deltas, the linked BOQ positions and the variation requests on
+    them. Money values are decimal strings.
+    """
+
+    schedule_id: UUID
+    base_baseline_id: UUID
+    base_label: str
+    target_label: str
+    activities: list[dict[str, Any]] = Field(default_factory=list)
+    summary: dict[str, Any] = Field(default_factory=dict)
 
 
 class BaselineResponse(BaseModel):

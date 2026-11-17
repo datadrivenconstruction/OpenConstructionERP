@@ -2160,5 +2160,32 @@
       "fail": "Koodi {code} lähtehind on pärast projekti kopeerimist muutunud {old} pealt {new} peale.",
       "suggestion": "Võtke üle uus lähtehind või jätke teadlikult kohalik hind."
     }
+  },
+  "schedule_mspdi_import": {
+    "task_dates": {
+      "missing_dates": "Tööl {ref} \"{name}\" puudub algus- või lõppkuupäev.",
+      "finish_before_start": "Töö {ref} \"{name}\" lõpeb ({finish}) enne algust ({start}).",
+      "suggestion": "Parandage kuupäevad lähtegraafikus ja eksportige see uuesti. Importimisel kuupäevi kunagi ei oletata."
+    },
+    "unique_ids": {
+      "duplicate_uid": "Töö ID {ref} esineb mitu korda; alles jäetakse ainult esimene töö.",
+      "suggestion": "Andke lähtegraafikus igale tööle kordumatu ID."
+    },
+    "links_resolve": {
+      "dangling_link": "Töö {ref} \"{name}\": eelnevat tööd {predecessor} failis pole, seos jäetakse vahele.",
+      "duplicate_link": "Töö {ref} \"{name}\": teine seos eelkäijast {predecessor} jäetakse vahele, paari kohta jääb üks seos.",
+      "self_link": "Töö {ref} \"{name}\" on seotud iseendaga, seos jäetakse vahele.",
+      "unknown_link_type": "Töö {ref} \"{name}\": seose tüüp {type} on tundmatu ja seda loetakse lõpp-algus seoseks.",
+      "suggestion": "Kontrollige lähtegraafiku loogilisi seoseid."
+    },
+    "values_in_range": {
+      "percent_out_of_range": "Töö {ref} \"{name}\": valmidus {value}% on väljaspool vahemikku 0-100 ja seda piiratakse.",
+      "outline_gap": "Töö {ref} \"{name}\" jätab struktuuritaseme vahele ({level}); see paigutatakse lähima ülemise koondtöö alla.",
+      "suggestion": "Kontrollige valmidusprotsenti ja taandeid lähtegraafikus."
+    },
+    "calendar_work_days": {
+      "calendar_no_work_days": "Kalendris {calendar} pole ühtegi tööpäeva.",
+      "suggestion": "Märkige lähtegraafikus selle kalendri tööpäevad."
+    }
   }
 }

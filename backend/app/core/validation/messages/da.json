@@ -2160,5 +2160,32 @@
       "fail": "Kildeprisen for {code} er ændret fra {old} til {new}, siden projektet kopierede den.",
       "suggestion": "Overtag den nye kildepris, eller behold bevidst den lokale pris."
     }
+  },
+  "schedule_mspdi_import": {
+    "task_dates": {
+      "missing_dates": "Opgave {ref} \"{name}\" har ingen start- eller slutdato.",
+      "finish_before_start": "Opgave {ref} \"{name}\" slutter ({finish}) før den starter ({start}).",
+      "suggestion": "Ret datoerne i kildeplanen, og eksportér den igen. Datoer gættes aldrig ved import."
+    },
+    "unique_ids": {
+      "duplicate_uid": "Opgave-id {ref} forekommer mere end én gang; kun den første opgave beholdes.",
+      "suggestion": "Giv hver opgave et entydigt id i kildeplanen."
+    },
+    "links_resolve": {
+      "dangling_link": "Opgave {ref} \"{name}\": forgænger {predecessor} findes ikke i filen, kædningen springes over.",
+      "duplicate_link": "Opgave {ref} \"{name}\": en anden kæde fra forgænger {predecessor} springes over, der beholdes én kæde pr. par.",
+      "self_link": "Opgave {ref} \"{name}\" er kædet til sig selv, kædningen springes over.",
+      "unknown_link_type": "Opgave {ref} \"{name}\": kædningstype {type} er ukendt og læses som slut-til-start.",
+      "suggestion": "Kontrollér de logiske kædninger i kildeplanen."
+    },
+    "values_in_range": {
+      "percent_out_of_range": "Opgave {ref} \"{name}\": {value} % færdig ligger uden for 0-100 og begrænses.",
+      "outline_gap": "Opgave {ref} \"{name}\" springer et dispositionsniveau over ({level}); den placeres under nærmeste overordnede opgave.",
+      "suggestion": "Kontrollér % færdig og indrykningen i kildeplanen."
+    },
+    "calendar_work_days": {
+      "calendar_no_work_days": "Kalender {calendar} har ingen arbejdsdag.",
+      "suggestion": "Markér kalenderens arbejdsdage i kildeplanen."
+    }
   }
 }

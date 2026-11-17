@@ -2160,5 +2160,32 @@
       "fail": "Nagbago ang source rate ng {code} mula {old} tungong {new} mula nang kopyahin ito ng proyekto.",
       "suggestion": "Kunin ang bagong source rate, o sadyang panatilihin ang lokal na rate."
     }
+  },
+  "schedule_mspdi_import": {
+    "task_dates": {
+      "missing_dates": "Walang petsa ng simula o tapos ang gawain {ref} \"{name}\".",
+      "finish_before_start": "Natatapos ({finish}) ang gawain {ref} \"{name}\" bago ito magsimula ({start}).",
+      "suggestion": "Itama ang mga petsa sa pinagmulang iskedyul at i-export itong muli. Hindi kailanman hinuhulaan ang mga petsa sa pag-import."
+    },
+    "unique_ids": {
+      "duplicate_uid": "Lumalabas nang higit sa isang beses ang ID ng gawain na {ref}; ang unang gawain lamang ang pinapanatili.",
+      "suggestion": "Bigyan ang bawat gawain ng natatanging ID sa pinagmulang iskedyul."
+    },
+    "links_resolve": {
+      "dangling_link": "Gawain {ref} \"{name}\": wala sa file ang naunang gawain na {predecessor}, nilaktawan ang link.",
+      "duplicate_link": "Gawain {ref} \"{name}\": nilaktawan ang ikalawang link mula sa predecessor {predecessor}, isang link bawat pares ang itinatago.",
+      "self_link": "Naka-link sa sarili nito ang gawain {ref} \"{name}\", nilaktawan ang link.",
+      "unknown_link_type": "Gawain {ref} \"{name}\": hindi kilala ang uri ng link na {type} at binabasa bilang finish-to-start.",
+      "suggestion": "Suriin ang mga lohikal na link sa pinagmulang iskedyul."
+    },
+    "values_in_range": {
+      "percent_out_of_range": "Gawain {ref} \"{name}\": ang {value}% kumpleto ay labas sa 0-100 at nililimitahan.",
+      "outline_gap": "Lumalaktaw ng isang outline level ({level}) ang gawain {ref} \"{name}\"; inilalagay ito sa ilalim ng pinakamalapit na summary sa itaas.",
+      "suggestion": "Suriin ang % kumpleto at ang indentation sa pinagmulang iskedyul."
+    },
+    "calendar_work_days": {
+      "calendar_no_work_days": "Walang araw ng trabaho ang kalendaryong {calendar}.",
+      "suggestion": "Markahan ang mga araw ng trabaho ng kalendaryong ito sa pinagmulang iskedyul."
+    }
   }
 }

@@ -71,6 +71,11 @@ def _activity_row(activity: Any) -> dict[str, Any]:
         value = getattr(activity, key, None)
         if value is not None:
             row[key] = _scalar(value)
+    # BOQ links ride along (the diff ignores them) so a revision-impact report
+    # can name the positions of an activity the later plan removed.
+    links = getattr(activity, "boq_position_ids", None)
+    if isinstance(links, list) and links:
+        row["boq_position_ids"] = [str(x) for x in links]
     return row
 
 

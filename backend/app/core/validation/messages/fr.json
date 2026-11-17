@@ -2160,5 +2160,32 @@
       "fail": "Le prix source de {code} est passé de {old} à {new} depuis sa copie dans le projet.",
       "suggestion": "Reprenez le nouveau prix source ou conservez sciemment le prix local."
     }
+  },
+  "schedule_mspdi_import": {
+    "task_dates": {
+      "missing_dates": "La tâche {ref} « {name} » n'a pas de date de début ou de fin.",
+      "finish_before_start": "La tâche {ref} « {name} » se termine ({finish}) avant de commencer ({start}).",
+      "suggestion": "Corrigez les dates dans le planning source et exportez-le à nouveau. Les dates ne sont jamais devinées à l'import."
+    },
+    "unique_ids": {
+      "duplicate_uid": "L'identifiant de tâche {ref} apparaît plusieurs fois ; seule la première tâche est conservée.",
+      "suggestion": "Donnez à chaque tâche un identifiant unique dans le planning source."
+    },
+    "links_resolve": {
+      "dangling_link": "Tâche {ref} « {name} » : le prédécesseur {predecessor} n'est pas dans le fichier, le lien est ignoré.",
+      "duplicate_link": "Tâche {ref} \"{name}\" : un second lien depuis le prédécesseur {predecessor} est ignoré, un seul lien par paire est conservé.",
+      "self_link": "La tâche {ref} « {name} » est liée à elle-même, le lien est ignoré.",
+      "unknown_link_type": "Tâche {ref} « {name} » : le type de lien {type} est inconnu et est lu comme fin-début.",
+      "suggestion": "Vérifiez les liens logiques dans le planning source."
+    },
+    "values_in_range": {
+      "percent_out_of_range": "Tâche {ref} « {name} » : {value} % achevé est hors de 0-100 et est plafonné.",
+      "outline_gap": "La tâche {ref} « {name} » saute un niveau hiérarchique ({level}) ; elle est placée sous le récapitulatif le plus proche au-dessus.",
+      "suggestion": "Vérifiez le % achevé et l'indentation dans le planning source."
+    },
+    "calendar_work_days": {
+      "calendar_no_work_days": "Le calendrier {calendar} n'a aucun jour ouvré.",
+      "suggestion": "Indiquez les jours ouvrés de ce calendrier dans le planning source."
+    }
   }
 }

@@ -2160,5 +2160,32 @@
       "fail": "Der Quellpreis von {code} hat sich seit der Übernahme ins Projekt von {old} auf {new} geändert.",
       "suggestion": "Übernehmen Sie den neuen Quellpreis oder behalten Sie bewusst den lokalen Preis."
     }
+  },
+  "schedule_mspdi_import": {
+    "task_dates": {
+      "missing_dates": "Vorgang {ref} „{name}“ hat kein Anfangs- oder Enddatum.",
+      "finish_before_start": "Vorgang {ref} „{name}“ endet ({finish}) vor seinem Anfang ({start}).",
+      "suggestion": "Korrigieren Sie die Termine im Quellterminplan und exportieren Sie ihn erneut. Termine werden beim Import nie geschätzt."
+    },
+    "unique_ids": {
+      "duplicate_uid": "Die Vorgangs-ID {ref} kommt mehrfach vor; nur der erste Vorgang wird übernommen.",
+      "suggestion": "Vergeben Sie im Quellterminplan jedem Vorgang eine eindeutige ID."
+    },
+    "links_resolve": {
+      "dangling_link": "Vorgang {ref} „{name}“: Vorgänger {predecessor} fehlt in der Datei, die Verknüpfung wird übersprungen.",
+      "duplicate_link": "Vorgang {ref} \"{name}\": eine zweite Verknüpfung vom Vorgänger {predecessor} wird übersprungen, je Paar bleibt eine Verknüpfung.",
+      "self_link": "Vorgang {ref} „{name}“ ist mit sich selbst verknüpft, die Verknüpfung wird übersprungen.",
+      "unknown_link_type": "Vorgang {ref} „{name}“: Verknüpfungsart {type} ist unbekannt und wird als Ende-Anfang gelesen.",
+      "suggestion": "Prüfen Sie die Anordnungsbeziehungen im Quellterminplan."
+    },
+    "values_in_range": {
+      "percent_out_of_range": "Vorgang {ref} „{name}“: {value} % abgeschlossen liegt außerhalb von 0-100 und wird begrenzt.",
+      "outline_gap": "Vorgang {ref} „{name}“ überspringt eine Gliederungsebene ({level}); er wird unter den nächsten Sammelvorgang darüber gestellt.",
+      "suggestion": "Prüfen Sie % abgeschlossen und die Einrückung im Quellterminplan."
+    },
+    "calendar_work_days": {
+      "calendar_no_work_days": "Kalender {calendar} hat keinen Arbeitstag.",
+      "suggestion": "Markieren Sie die Arbeitstage dieses Kalenders im Quellterminplan."
+    }
   }
 }
