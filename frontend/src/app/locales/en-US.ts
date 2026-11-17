@@ -512,6 +512,8 @@ const resource = {
     "validation.select_boq_placeholder": "Choose a bid schedule...",
     "validation.subtitle": "Check a Bid Schedule against the rule sets configured for the project.",
     "users.modules.boq": "Bid Schedule",
+    "users.roles.surveyor": "Surveyor",
+    "users.role_surveyor_desc": "Can import, edit and confirm survey data; editor rights elsewhere",
     "payportal.retention": "Retainage",
     "payportal.retention_est": "Retainage ({{percent}}%)",
     "finance.boq_tip_desc": "Lock your bid schedule estimate, then use \"Create Budget from Estimate\" below to generate budget lines on the 5D Cost Model page.",
