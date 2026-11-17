@@ -43,7 +43,13 @@ async def login(client: AsyncClient, role: str) -> dict[str, str]:
     password = f"Survey{tag}9"
     registration = await client.post(
         "/api/v1/users/auth/register",
-        json={"email": email, "password": password, "full_name": f"Survey {tag}", "role": role},
+        # Self-registration knows four roles; a surveyor is made by an admin, so the row is changed below.
+        json={
+            "email": email,
+            "password": password,
+            "full_name": f"Survey {tag}",
+            "role": role if role in ("admin", "manager", "editor", "viewer") else "editor",
+        },
     )
     assert registration.status_code in (200, 201), registration.text
 
