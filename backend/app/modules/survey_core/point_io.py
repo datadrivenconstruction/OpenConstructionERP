@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import csv
 import json
+import math
 import re
 from dataclasses import dataclass, field
 
@@ -177,6 +178,17 @@ def _kind_for(code: str, raw_kind: str, default_kind: str) -> str:
     return CODE_KINDS.get(code.strip().upper(), default_kind)
 
 
+# Bounds from the Numeric columns on SurveyPoint (E/N 14,4; Z 10,4; sigma 8,4).
+_MAX_EN = 1e10
+_MAX_Z = 1e6
+_MAX_SIGMA = 1e4
+
+
+def _fits(e: float, n: float, z: float | None, sigma: float | None = None) -> bool:
+    vals = [(e, _MAX_EN), (n, _MAX_EN), (z, _MAX_Z), (sigma, _MAX_SIGMA)]
+    return all(v is None or (math.isfinite(v) and abs(v) < cap) for v, cap in vals)
+
+
 def _flag_duplicates(result: ParseResult) -> None:
     seen: dict[str, ParsedPoint] = {}
     flagged: set[str] = set()
@@ -235,6 +247,10 @@ def parse_points(
             continue
         code = cell("code")
         sigma_raw = cell("sigma")
+        sigma = _num(sigma_raw) if sigma_raw else None
+        if (sigma_raw and sigma is None) or not _fits(e, n, z, sigma):
+            result.problems.append(Problem("IMP-001", line_no, pid))
+            continue
         result.points.append(
             ParsedPoint(
                 line=line_no,
@@ -245,7 +261,7 @@ def parse_points(
                 code=code[:64],
                 description=cell("description")[:255],
                 kind=_kind_for(code, cell("kind"), default_kind),
-                sigma=_num(sigma_raw) if sigma_raw else None,
+                sigma=sigma,
             )
         )
     _flag_duplicates(result)
@@ -297,6 +313,9 @@ def parse_geojson(text: str, default_kind: str = "topo") -> tuple[ParseResult, i
                 e, n = float(c[0]), float(c[1])
                 z = float(c[2]) if len(c) > 2 and c[2] is not None else None
             except (TypeError, ValueError, IndexError):
+                result.problems.append(Problem("IMP-001", line_no, pid))
+                continue
+            if not _fits(e, n, z):
                 result.problems.append(Problem("IMP-001", line_no, pid))
                 continue
             code = str(props.get("code") or "")

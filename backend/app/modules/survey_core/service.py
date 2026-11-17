@@ -263,7 +263,10 @@ class SurveyService:
         delim_guess = None
         delimiter = req.delimiter
         if not delimiter:
-            d, c = detect_delimiter(req.text)
+            try:
+                d, c = detect_delimiter(req.text)
+            except ValueError as exc:
+                raise _bad_request(str(exc)) from exc
             delimiter, delim_guess = d, GuessOut(value=d, confidence=c)
         rows = [split_line(ln, delimiter) for ln in req.text.lstrip("﻿").splitlines()[:50] if ln.strip()]
         preset_guess = None
