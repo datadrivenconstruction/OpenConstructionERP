@@ -2232,5 +2232,41 @@
       "fail": "Matricule de point {point_id} en double avec des coordonnées différentes.",
       "suggestion": "Gardez une seule mesure : supprimez le semis contenant la mauvaise et réimportez-le."
     }
+  },
+  "setting_out": {
+    "stake_off": {
+      "fail": "Implantation {id} décalée de {d} mm, tolérance {t} mm",
+      "suggestion": "Implantez de nouveau le point et enregistrez-le, ou créez un brouillon de NCR."
+    },
+    "record_untraceable": {
+      "fail": "Le relevé d'implantation {id} n'indique ni instrument ni points d'appui.",
+      "suggestion": "Saisissez l'instrument et les points d'appui de la station."
+    },
+    "sheet": {
+      "title": "Fiche d'implantation",
+      "project": "Projet",
+      "crs": "Système de coordonnées",
+      "request": "Demande",
+      "tolerance": "Tolérance",
+      "element": "Élément",
+      "generated": "Généré le",
+      "point": "Point",
+      "design_e": "E projet",
+      "design_n": "N projet",
+      "design_z": "Z projet",
+      "measured_e": "E mesuré",
+      "measured_n": "N mesuré",
+      "verdict": "Résultat",
+      "by": "Mesuré par",
+      "verdict_pass": "Conforme",
+      "verdict_fail": "Non conforme",
+      "verdict_open": "Ouvert",
+      "verdict_no_tolerance": "Aucun profil",
+      "counts": "Conforme : {passed} · Non conforme : {failed} · Ouvert : {open}",
+      "findings": "Constats",
+      "no_profile": "Aucun profil, définissez-en un",
+      "d": "d (mm)",
+      "dz": "dZ (mm)"
+    }
   }
 }

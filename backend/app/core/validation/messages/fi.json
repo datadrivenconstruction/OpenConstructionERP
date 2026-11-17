@@ -2232,5 +2232,41 @@
       "fail": "Pistetunnus {point_id} esiintyy kahdesti eri koordinaatein.",
       "suggestion": "Säilytä yksi mittaus: poista pistejoukko, jossa on väärä, ja tuo se uudelleen."
     }
+  },
+  "setting_out": {
+    "stake_off": {
+      "fail": "Merkintäpiste {id} poikkeaa {d} mm, toleranssi {t} mm",
+      "suggestion": "Merkitse piste uudelleen ja kirjaa mittaus tai luo NCR-luonnos."
+    },
+    "record_untraceable": {
+      "fail": "Merkintätallenteesta {id} puuttuu koje tai kiintopisteet.",
+      "suggestion": "Anna koje ja kiintopisteet, joille asema orientoitiin."
+    },
+    "sheet": {
+      "title": "Merkintäpöytäkirja",
+      "project": "Projekti",
+      "crs": "Koordinaattijärjestelmä",
+      "request": "Pyyntö",
+      "tolerance": "Toleranssi",
+      "element": "Rakenneosa",
+      "generated": "Luotu",
+      "point": "Piste",
+      "design_e": "Suunniteltu E",
+      "design_n": "Suunniteltu N",
+      "design_z": "Suunniteltu Z",
+      "measured_e": "Mitattu E",
+      "measured_n": "Mitattu N",
+      "verdict": "Tulos",
+      "by": "Mittaaja",
+      "verdict_pass": "Hyväksytty",
+      "verdict_fail": "Hylätty",
+      "verdict_open": "Avoin",
+      "verdict_no_tolerance": "Ei profiilia",
+      "counts": "Hyväksytty: {passed} · Hylätty: {failed} · Avoin: {open}",
+      "findings": "Havainnot",
+      "no_profile": "Ei profiilia, aseta se",
+      "d": "d (mm)",
+      "dz": "dZ (mm)"
+    }
   }
 }

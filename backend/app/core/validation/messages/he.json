@@ -2232,5 +2232,41 @@
       "fail": "מזהה נקודה כפול {point_id} עם קואורדינטות שונות.",
       "suggestion": "השאירו מדידה אחת: מחקו את קבוצת הנקודות עם השגויה וייבאו אותה מחדש."
     }
+  },
+  "setting_out": {
+    "stake_off": {
+      "fail": "נקודת הסימון {id} סוטה ב-{d} מ\"מ, סבולת {t} מ\"מ",
+      "suggestion": "סמנו את הנקודה מחדש ותעדו אותה, או צרו טיוטת NCR."
+    },
+    "record_untraceable": {
+      "fail": "לרשומת הסימון {id} אין מכשיר או נקודות בקרה.",
+      "suggestion": "הזינו את המכשיר ואת נקודות הבקרה שעליהן הוצבה התחנה."
+    },
+    "sheet": {
+      "title": "גיליון סימון",
+      "project": "פרויקט",
+      "crs": "מערכת קואורדינטות",
+      "request": "בקשה",
+      "tolerance": "סבולת",
+      "element": "רכיב",
+      "generated": "נוצר",
+      "point": "נקודה",
+      "design_e": "E תכנון",
+      "design_n": "N תכנון",
+      "design_z": "Z תכנון",
+      "measured_e": "E נמדד",
+      "measured_n": "N נמדד",
+      "verdict": "תוצאה",
+      "by": "נמדד על ידי",
+      "verdict_pass": "תקין",
+      "verdict_fail": "חורג",
+      "verdict_open": "פתוח",
+      "verdict_no_tolerance": "ללא פרופיל",
+      "counts": "תקין: {passed} · חורג: {failed} · פתוח: {open}",
+      "findings": "ממצאים",
+      "no_profile": "אין פרופיל, הגדירו אחד",
+      "d": "d (mm)",
+      "dz": "dZ (mm)"
+    }
   }
 }

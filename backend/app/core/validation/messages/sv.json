@@ -2232,5 +2232,41 @@
       "fail": "Dubblerat punktnummer {point_id} med olika koordinater.",
       "suggestion": "Behåll en mätning: radera punktmängden med den felaktiga och importera den igen."
     }
+  },
+  "setting_out": {
+    "stake_off": {
+      "fail": "Utsättningspunkt {id} avviker {d} mm, tolerans {t} mm",
+      "suggestion": "Sätt ut punkten igen och registrera den, eller skapa ett NCR-utkast."
+    },
+    "record_untraceable": {
+      "fail": "Utsättningspost {id} saknar instrument eller anslutningspunkter.",
+      "suggestion": "Ange instrumentet och de stompunkter stationen etablerades på."
+    },
+    "sheet": {
+      "title": "Utsättningsprotokoll",
+      "project": "Projekt",
+      "crs": "Koordinatsystem",
+      "request": "Begäran",
+      "tolerance": "Tolerans",
+      "element": "Objekt",
+      "generated": "Skapad",
+      "point": "Punkt",
+      "design_e": "Projekterad E",
+      "design_n": "Projekterad N",
+      "design_z": "Projekterad Z",
+      "measured_e": "Uppmätt E",
+      "measured_n": "Uppmätt N",
+      "verdict": "Resultat",
+      "by": "Uppmätt av",
+      "verdict_pass": "Godkänd",
+      "verdict_fail": "Underkänd",
+      "verdict_open": "Öppen",
+      "verdict_no_tolerance": "Ingen profil",
+      "counts": "Godkända: {passed} · Underkända: {failed} · Öppna: {open}",
+      "findings": "Avvikelser",
+      "no_profile": "Ingen profil, ange en",
+      "d": "d (mm)",
+      "dz": "dZ (mm)"
+    }
   }
 }

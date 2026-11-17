@@ -2232,5 +2232,41 @@
       "fail": "点番号 {point_id} が異なる座標で重複しています。",
       "suggestion": "測定値を一つ残してください。誤った値を含むセットを削除し、再度インポートしてください。"
     }
+  },
+  "setting_out": {
+    "stake_off": {
+      "fail": "杭 {id} のずれ {d} mm、許容差 {t} mm",
+      "suggestion": "点を再度設置して記録するか、NCR 下書きを作成してください。"
+    },
+    "record_untraceable": {
+      "fail": "丁張記録 {id} に機器または基準点がありません。",
+      "suggestion": "使用した機器と器械点を設置した基準点を入力してください。"
+    },
+    "sheet": {
+      "title": "丁張シート",
+      "project": "プロジェクト",
+      "crs": "座標系",
+      "request": "依頼",
+      "tolerance": "許容差",
+      "element": "要素",
+      "generated": "作成日時",
+      "point": "点",
+      "design_e": "設計 E",
+      "design_n": "設計 N",
+      "design_z": "設計 Z",
+      "measured_e": "実測 E",
+      "measured_n": "実測 N",
+      "verdict": "判定",
+      "by": "測定者",
+      "verdict_pass": "合格",
+      "verdict_fail": "不合格",
+      "verdict_open": "未測定",
+      "verdict_no_tolerance": "プロファイルなし",
+      "counts": "合格: {passed} · 不合格: {failed} · 未測定: {open}",
+      "findings": "指摘事項",
+      "no_profile": "プロファイルがありません。設定してください",
+      "d": "d (mm)",
+      "dz": "dZ (mm)"
+    }
   }
 }

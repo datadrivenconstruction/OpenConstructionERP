@@ -2232,5 +2232,41 @@
       "fail": "Doppelte Punktnummer {point_id} mit abweichenden Koordinaten.",
       "suggestion": "Behalten Sie eine Messung: Löschen Sie die Punktdatei mit der falschen und importieren Sie sie neu."
     }
+  },
+  "setting_out": {
+    "stake_off": {
+      "fail": "Absteckpunkt {id} weicht um {d} mm ab, Toleranz {t} mm",
+      "suggestion": "Punkt erneut abstecken und erfassen oder einen NCR-Entwurf anlegen."
+    },
+    "record_untraceable": {
+      "fail": "Absteckprotokoll {id} ohne Instrument oder Anschlusspunkte.",
+      "suggestion": "Instrument und die Festpunkte der Stationierung eintragen."
+    },
+    "sheet": {
+      "title": "Absteckprotokoll",
+      "project": "Projekt",
+      "crs": "Koordinatensystem",
+      "request": "Auftrag",
+      "tolerance": "Toleranz",
+      "element": "Bauteil",
+      "generated": "Erstellt",
+      "point": "Punkt",
+      "design_e": "Soll E",
+      "design_n": "Soll N",
+      "design_z": "Soll Z",
+      "measured_e": "Ist E",
+      "measured_n": "Ist N",
+      "verdict": "Ergebnis",
+      "by": "Gemessen von",
+      "verdict_pass": "In Toleranz",
+      "verdict_fail": "Außer Toleranz",
+      "verdict_open": "Offen",
+      "verdict_no_tolerance": "Kein Profil",
+      "counts": "In Toleranz: {passed} · Außer Toleranz: {failed} · Offen: {open}",
+      "findings": "Befunde",
+      "no_profile": "Kein Profil, bitte festlegen",
+      "d": "d (mm)",
+      "dz": "dZ (mm)"
+    }
   }
 }

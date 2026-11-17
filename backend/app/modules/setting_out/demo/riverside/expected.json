@@ -1,0 +1,37 @@
+{
+  "dataset": "riverside_yard",
+  "project_name": "Riverside Yard (survey demo)",
+  "crs": {"epsg": 32633, "chip": "EPSG 32633"},
+  "demo_profiles_label": "Demo values, not a standard",
+  "setting_out": {
+    "lesson_1": {
+      "request": "Columns axis C",
+      "points": 2,
+      "tolerance_label": "Demo 10 mm",
+      "tolerance_mm": 10,
+      "alignment": "Axis C",
+      "chainage": {"C-03": 60.0, "C-04": 80.0}
+    },
+    "lesson_2": {
+      "point": "C-04",
+      "design": {"e": 389080.000, "n": 5819030.000, "z": 34.300},
+      "measured": {"e": 389080.004, "n": 5819029.997, "z": 34.298},
+      "d_mm": 5,
+      "dz_mm": -2,
+      "verdict": "pass"
+    },
+    "lesson_3": {
+      "point": "C-03",
+      "design": {"e": 389060.000, "n": 5819030.000, "z": 34.300},
+      "measured": {"e": 389060.012, "n": 5819029.991, "z": 34.302},
+      "d_mm": 15,
+      "dz_mm": 2,
+      "verdict": "fail",
+      "rule": "SET-001",
+      "finding": "Stake C-03 off by 15 mm, tolerance 10 mm",
+      "ncr_type": "workmanship"
+    },
+    "lesson_4": {"passed": 1, "failed": 1, "measured_by_listed": true},
+    "kpi_after_lessons": {"open": 0, "passed": 1, "failed": 1, "ncr_drafts": 1}
+  }
+}

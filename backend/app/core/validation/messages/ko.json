@@ -2232,5 +2232,41 @@
       "fail": "점 번호 {point_id}이(가) 서로 다른 좌표로 중복되었습니다.",
       "suggestion": "측정값 하나만 남기세요. 잘못된 값이 있는 세트를 삭제하고 다시 가져오세요."
     }
+  },
+  "setting_out": {
+    "stake_off": {
+      "fail": "측설점 {id} 편차 {d} mm, 허용오차 {t} mm",
+      "suggestion": "점을 다시 측설하고 기록하거나 NCR 초안을 만드세요."
+    },
+    "record_untraceable": {
+      "fail": "측설 기록 {id}에 장비나 기준점이 없습니다.",
+      "suggestion": "장비와 기계점을 설치한 기준점을 입력하세요."
+    },
+    "sheet": {
+      "title": "측설 시트",
+      "project": "프로젝트",
+      "crs": "좌표계",
+      "request": "요청",
+      "tolerance": "허용오차",
+      "element": "부재",
+      "generated": "생성",
+      "point": "점",
+      "design_e": "설계 E",
+      "design_n": "설계 N",
+      "design_z": "설계 Z",
+      "measured_e": "측정 E",
+      "measured_n": "측정 N",
+      "verdict": "판정",
+      "by": "측정자",
+      "verdict_pass": "합격",
+      "verdict_fail": "불합격",
+      "verdict_open": "미측정",
+      "verdict_no_tolerance": "프로필 없음",
+      "counts": "합격: {passed} · 불합격: {failed} · 미측정: {open}",
+      "findings": "지적 사항",
+      "no_profile": "프로필이 없습니다. 설정하세요",
+      "d": "d (mm)",
+      "dz": "dZ (mm)"
+    }
   }
 }

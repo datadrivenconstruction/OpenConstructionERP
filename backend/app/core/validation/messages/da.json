@@ -2232,5 +2232,41 @@
       "fail": "Dobbelt punktnummer {point_id} med forskellige koordinater.",
       "suggestion": "Behold én måling: slet punktsættet med den forkerte, og importér det igen."
     }
+  },
+  "setting_out": {
+    "stake_off": {
+      "fail": "Afsætningspunkt {id} afviger {d} mm, tolerance {t} mm",
+      "suggestion": "Afsæt punktet igen og registrer det, eller opret et NCR-udkast."
+    },
+    "record_untraceable": {
+      "fail": "Afsætningsregistrering {id} mangler instrument eller fikspunkter.",
+      "suggestion": "Angiv instrumentet og de fikspunkter, stationen blev opstillet på."
+    },
+    "sheet": {
+      "title": "Afsætningsskema",
+      "project": "Projekt",
+      "crs": "Koordinatsystem",
+      "request": "Anmodning",
+      "tolerance": "Tolerance",
+      "element": "Element",
+      "generated": "Oprettet",
+      "point": "Punkt",
+      "design_e": "Projekteret E",
+      "design_n": "Projekteret N",
+      "design_z": "Projekteret Z",
+      "measured_e": "Målt E",
+      "measured_n": "Målt N",
+      "verdict": "Resultat",
+      "by": "Målt af",
+      "verdict_pass": "Godkendt",
+      "verdict_fail": "Afvist",
+      "verdict_open": "Åben",
+      "verdict_no_tolerance": "Ingen profil",
+      "counts": "Godkendt: {passed} · Afvist: {failed} · Åben: {open}",
+      "findings": "Fund",
+      "no_profile": "Ingen profil, angiv en",
+      "d": "d (mm)",
+      "dz": "dZ (mm)"
+    }
   }
 }

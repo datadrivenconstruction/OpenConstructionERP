@@ -2232,5 +2232,41 @@
       "fail": "Mã điểm {point_id} bị trùng với tọa độ khác nhau.",
       "suggestion": "Giữ một lần đo: xóa tập điểm chứa giá trị sai và nhập lại."
     }
+  },
+  "setting_out": {
+    "stake_off": {
+      "fail": "Điểm cắm mốc {id} lệch {d} mm, dung sai {t} mm",
+      "suggestion": "Cắm lại điểm và ghi nhận, hoặc tạo bản nháp NCR."
+    },
+    "record_untraceable": {
+      "fail": "Bản ghi cắm mốc {id} không có máy đo hoặc điểm khống chế.",
+      "suggestion": "Nhập máy đo và các điểm khống chế nơi đặt trạm máy."
+    },
+    "sheet": {
+      "title": "Phiếu cắm mốc",
+      "project": "Dự án",
+      "crs": "Hệ tọa độ",
+      "request": "Yêu cầu",
+      "tolerance": "Dung sai",
+      "element": "Cấu kiện",
+      "generated": "Ngày tạo",
+      "point": "Điểm",
+      "design_e": "E thiết kế",
+      "design_n": "N thiết kế",
+      "design_z": "Z thiết kế",
+      "measured_e": "E đo",
+      "measured_n": "N đo",
+      "verdict": "Kết quả",
+      "by": "Người đo",
+      "verdict_pass": "Đạt",
+      "verdict_fail": "Không đạt",
+      "verdict_open": "Mở",
+      "verdict_no_tolerance": "Không có hồ sơ",
+      "counts": "Đạt: {passed} · Không đạt: {failed} · Mở: {open}",
+      "findings": "Phát hiện",
+      "no_profile": "Chưa có hồ sơ dung sai, hãy đặt một",
+      "d": "d (mm)",
+      "dz": "dZ (mm)"
+    }
   }
 }

@@ -2232,5 +2232,41 @@
       "fail": "点号 {point_id} 重复且坐标不同。",
       "suggestion": "只保留一个测量值：删除含有错误值的点集，然后重新导入。"
     }
+  },
+  "setting_out": {
+    "stake_off": {
+      "fail": "放样点 {id} 偏差 {d} mm，允许偏差 {t} mm",
+      "suggestion": "重新放样该点并记录，或创建 NCR 草稿。"
+    },
+    "record_untraceable": {
+      "fail": "放样记录 {id} 缺少仪器或控制点。",
+      "suggestion": "填写所用仪器以及设站所依据的控制点。"
+    },
+    "sheet": {
+      "title": "放样记录表",
+      "project": "项目",
+      "crs": "坐标系",
+      "request": "放样任务",
+      "tolerance": "允许偏差",
+      "element": "构件",
+      "generated": "生成时间",
+      "point": "点",
+      "design_e": "设计 E",
+      "design_n": "设计 N",
+      "design_z": "设计 Z",
+      "measured_e": "实测 E",
+      "measured_n": "实测 N",
+      "verdict": "结论",
+      "by": "测量人",
+      "verdict_pass": "合格",
+      "verdict_fail": "不合格",
+      "verdict_open": "未测",
+      "verdict_no_tolerance": "无偏差配置",
+      "counts": "合格：{passed} · 不合格：{failed} · 未测：{open}",
+      "findings": "问题",
+      "no_profile": "无偏差配置，请设置",
+      "d": "d (mm)",
+      "dz": "dZ (mm)"
+    }
   }
 }

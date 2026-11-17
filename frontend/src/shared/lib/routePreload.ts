@@ -61,6 +61,7 @@ const preloaders: Record<string, () => void> = {
   '/match-elements': () => void import('@/features/match-elements/MatchElementsPage'),
   '/geo': () => void import('@/features/geo-hub'),
   '/survey': () => void import('@/features/survey/SurveyRegisterPage'),
+  '/survey/setting-out': () => void import('@/features/setting-out/SettingOutPage'),
   '/assets': () => void import('@/features/bim/AssetsPage'),
   '/architecture': () => void import('@/features/architecture/ArchitectureMapPage'),
 

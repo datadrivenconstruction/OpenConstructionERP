@@ -2232,5 +2232,41 @@
       "fail": "Dobleng point id {point_id} na may magkaibang coordinate.",
       "suggestion": "Panatilihin ang isang sukat: burahin ang point set na may mali at i-import ito muli."
     }
+  },
+  "setting_out": {
+    "stake_off": {
+      "fail": "Ang stake {id} ay lihis nang {d} mm, tolerance {t} mm",
+      "suggestion": "I-stake muli ang punto at itala, o gumawa ng NCR draft."
+    },
+    "record_untraceable": {
+      "fail": "Walang instrumento o control point ang stakeout record {id}.",
+      "suggestion": "Ilagay ang instrumento at ang mga control point na pinagtayuan ng istasyon."
+    },
+    "sheet": {
+      "title": "Setting-out sheet",
+      "project": "Proyekto",
+      "crs": "Coordinate system",
+      "request": "Kahilingan",
+      "tolerance": "Tolerance",
+      "element": "Elemento",
+      "generated": "Ginawa",
+      "point": "Punto",
+      "design_e": "Disenyong E",
+      "design_n": "Disenyong N",
+      "design_z": "Disenyong Z",
+      "measured_e": "Sinukat na E",
+      "measured_n": "Sinukat na N",
+      "verdict": "Resulta",
+      "by": "Sinukat ni",
+      "verdict_pass": "Pasado",
+      "verdict_fail": "Bagsak",
+      "verdict_open": "Bukas",
+      "verdict_no_tolerance": "Walang profile",
+      "counts": "Pasado: {passed} · Bagsak: {failed} · Bukas: {open}",
+      "findings": "Mga natuklasan",
+      "no_profile": "Walang profile, magtakda ng isa",
+      "d": "d (mm)",
+      "dz": "dZ (mm)"
+    }
   }
 }

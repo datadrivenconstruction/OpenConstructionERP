@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LandXML xmlns="http://www.landxml.org/schema/LandXML-1.2" version="1.2" date="2026-10-12" time="08:00:00">
+  <Units>
+    <Metric linearUnit="meter" areaUnit="squareMeter" volumeUnit="cubicMeter" angularUnit="decimal degrees"/>
+  </Units>
+  <CoordinateSystem epsgCode="32633" name="WGS 84 / UTM zone 33N"/>
+  <Alignments name="Riverside Yard grid">
+    <Alignment name="Axis C" length="100.000" staStart="0.000">
+      <CoordGeom>
+        <Line length="100.000">
+          <Start>5819030.000 389000.000</Start>
+          <End>5819030.000 389100.000</End>
+        </Line>
+      </CoordGeom>
+    </Alignment>
+  </Alignments>
+</LandXML>
