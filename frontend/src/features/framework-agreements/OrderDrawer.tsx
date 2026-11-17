@@ -187,7 +187,7 @@ export function OrderDrawer({ orderId, agreement, canIssue, canOverride, onClose
                             <input
                               aria-label={t('framework.col.measured', { defaultValue: 'Measured' })}
                               inputMode="decimal"
-                              className="oe-input h-7 w-20 text-end"
+                              className="oe-input-sm w-20 text-end"
                               placeholder={l.measured_qty ?? ''}
                               value={measured[l.id] ?? ''}
                               onChange={(e) => setMeasured((m) => ({ ...m, [l.id]: e.target.value.replace(',', '.') }))}

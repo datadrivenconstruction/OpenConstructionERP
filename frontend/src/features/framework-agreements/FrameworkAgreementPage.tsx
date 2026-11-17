@@ -587,23 +587,23 @@ function ConditionsTab({ a, editable }: { a: AgreementDetail; editable: boolean 
           {editable && (
             <tr>
               <td className="px-4 py-2">
-                <input aria-label={t('framework.col.code', { defaultValue: 'Code' })} className="oe-input h-8 w-20" value={draft.code} onChange={(e) => setDraft({ ...draft, code: e.target.value })} />
+                <input aria-label={t('framework.col.code', { defaultValue: 'Code' })} className="oe-input w-20" value={draft.code} onChange={(e) => setDraft({ ...draft, code: e.target.value })} />
               </td>
               <td className="px-4 py-2">
-                <input aria-label={t('framework.col.label', { defaultValue: 'Label' })} className="oe-input h-8" value={draft.label} onChange={(e) => setDraft({ ...draft, label: e.target.value })} />
+                <input aria-label={t('framework.col.label', { defaultValue: 'Label' })} className="oe-input" value={draft.label} onChange={(e) => setDraft({ ...draft, label: e.target.value })} />
               </td>
               <td className="px-4 py-2">
-                <select aria-label={t('framework.col.kind', { defaultValue: 'Kind' })} className="oe-input h-8" value={draft.kind} onChange={(e) => setDraft({ ...draft, kind: e.target.value })}>
+                <select aria-label={t('framework.col.kind', { defaultValue: 'Kind' })} className="oe-input" value={draft.kind} onChange={(e) => setDraft({ ...draft, kind: e.target.value })}>
                   <option value="multiplier">{t('framework.kind.multiplier', { defaultValue: 'Multiplier' })}</option>
                   <option value="add_per_unit">{t('framework.kind.add_per_unit', { defaultValue: 'Add per unit' })}</option>
                   <option value="lump_sum">{t('framework.kind.lump_sum', { defaultValue: 'Lump sum' })}</option>
                 </select>
               </td>
               <td className="px-4 py-2">
-                <input aria-label={t('framework.col.value', { defaultValue: 'Value' })} inputMode="decimal" className="oe-input h-8 w-24 text-end" value={draft.value} onChange={(e) => setDraft({ ...draft, value: e.target.value.replace(',', '.') })} />
+                <input aria-label={t('framework.col.value', { defaultValue: 'Value' })} inputMode="decimal" className="oe-input w-24 text-end" value={draft.value} onChange={(e) => setDraft({ ...draft, value: e.target.value.replace(',', '.') })} />
               </td>
               <td className="px-4 py-2">
-                <input aria-label={t('framework.col.condition', { defaultValue: 'Condition' })} list="fwk-tags" className="oe-input h-8" value={draft.condition} onChange={(e) => setDraft({ ...draft, condition: e.target.value })} />
+                <input aria-label={t('framework.col.condition', { defaultValue: 'Condition' })} list="fwk-tags" className="oe-input" value={draft.condition} onChange={(e) => setDraft({ ...draft, condition: e.target.value })} />
                 <datalist id="fwk-tags">
                   {suggestions.map((s) => (
                     <option key={s} value={s} />

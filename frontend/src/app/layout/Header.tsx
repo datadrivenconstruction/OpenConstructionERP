@@ -140,6 +140,8 @@ export const TITLE_I18N_MAP: Record<string, string> = {
   'Bid Management': 'nav.bid_management',
   'Tendering': 'nav.tendering',
   'Variations': 'nav.variations',
+  'Sealed estimates': 'nav.estimate_archive',
+  'Sealed estimate': 'estimate_archive.term.neutral',
   'Supplier Catalogs': 'nav.supplier_catalogs',
   'Change Orders': 'nav.change_orders',
   // Property development

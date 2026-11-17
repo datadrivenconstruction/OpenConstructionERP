@@ -187,7 +187,7 @@ export function DocTemplateEditor({ kindKey, initialLocale, canEdit, emailEnable
       busy={busy}
       headerActions={
         <select
-          className="oe-input h-8 py-0"
+          className="oe-input py-0"
           value={locale}
           aria-label={t('settings.document_templates.language', { defaultValue: 'Language' })}
           onChange={(e) => {
@@ -578,7 +578,7 @@ function MoreOptions({
         <label className="flex items-center gap-2">
           <span className="oe-label">{t('settings.document_templates.font', { defaultValue: 'Typeface' })}</span>
           <select
-            className="oe-input h-8 py-0"
+            className="oe-input py-0"
             value={options.font}
             disabled={readOnly}
             onChange={(e) => setOptions({ ...options, font: e.target.value === 'serif' ? 'serif' : 'sans' })}
@@ -686,7 +686,7 @@ function PreviewPane({
       {state.has_records && (records.data?.items.length ?? 0) > 0 && (
         <label className="flex items-center gap-2 text-sm">
           <span className="oe-label">{t('settings.document_templates.preview_with', { defaultValue: 'Preview with' })}</span>
-          <select className="oe-input h-8 flex-1 py-0" value={recordId} onChange={(e) => setRecordId(e.target.value)}>
+          <select className="oe-input flex-1 py-0" value={recordId} onChange={(e) => setRecordId(e.target.value)}>
             <option value="">{t('settings.document_templates.sample_record', { defaultValue: 'Sample values' })}</option>
             {records.data?.items.map((r) => (
               <option key={r.id} value={r.id}>
