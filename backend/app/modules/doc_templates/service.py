@@ -652,6 +652,51 @@ async def issue(
     return pdf, doc.filename
 
 
+async def log_letter_issue(
+    session: AsyncSession,
+    kind_key: str,
+    record_id: str,
+    project_id: uuid.UUID | None,
+    locale: str | None,
+    user_id: str | None,
+    *,
+    wording: str | None = None,
+) -> None:
+    """Log the template version a tendering letter printed, as the other documents do.
+
+    ``wording`` names a source that bypassed the published template (``project`` for the
+    project's own text, ``override`` for one-off text); no version is logged for it.
+    Never raises: a letter does not fail on its log.
+    """
+    from app.modules.doc_templates.models import DocTemplateIssue
+
+    lang = normalise_locale(locale) if locale else "en"
+    try:
+        if wording is not None:
+            row = {"source": wording, "text_locale": lang, "template_version_id": None}
+        else:
+            resolved = await resolve(session, kind_key, lang)
+            if resolved is None:
+                return
+            row = {
+                "source": resolved.source,
+                "text_locale": resolved.text_locale,
+                "template_version_id": resolved.version_id,
+            }
+        session.add(
+            DocTemplateIssue(
+                kind=kind_key,
+                record_id=str(record_id),
+                project_id=project_id,
+                locale=lang,
+                issued_by=user_id,
+                **row,
+            )
+        )
+    except Exception:  # noqa: BLE001 - a letter never fails on its issue log
+        logger.warning("doc_templates: could not log the issue of %s", kind_key, exc_info=True)
+
+
 async def send_test(kind: DocumentKind, locale: str, blocks: Mapping[str, str], to: str) -> tuple[bool, str]:
     """Send the draft of an email kind to the signed-in user's own address, subject prefixed ``[Test]``."""
     from app.config import get_settings

@@ -208,3 +208,22 @@ async def test_records_outside_the_callers_projects_are_not_found(db_session, ge
     async with _http(_app(db_session, str(stranger.id), role="editor")) as c:
         r = await c.get(f"/dt/{INVOICE}/records/{inv.id}/pdf", params={"locale": "de"})
     assert r.status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_tender_letter_logs_the_template_version_it_printed(db_session) -> None:
+    from app.modules.doc_templates.service import log_letter_issue
+    from app.modules.tendering.letter_texts import AWARD_KEY
+
+    user = await _user(db_session)
+    async with _http(_app(db_session, str(user.id))) as c:
+        state = await _publish(c, AWARD_KEY, "en", {"subject": "Award for {{package}}", "body": "Congratulations."})
+    version_id = state["versions"][0]["id"]
+    await log_letter_issue(db_session, AWARD_KEY, "bid-1", None, "en", str(user.id))
+    await log_letter_issue(db_session, AWARD_KEY, "bid-2", None, "en", str(user.id), wording="override")
+    await db_session.flush()
+    log = (await db_session.execute(select(DocTemplateIssue).order_by(DocTemplateIssue.record_id))).scalars().all()
+    assert [(i.record_id, i.source, str(i.template_version_id) if i.template_version_id else None) for i in log] == [
+        ("bid-1", "published", version_id),
+        ("bid-2", "override", None),
+    ]

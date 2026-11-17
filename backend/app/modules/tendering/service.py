@@ -279,6 +279,7 @@ class TenderingService:
 
     #: Language of the last letter built, for the ``Content-Language`` header.
     last_letter_language: str = "en"
+    last_letter_wording: str | None = None
 
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
@@ -1528,7 +1529,8 @@ class TenderingService:
         from app.modules.letter_templates.service import resolve as resolve_letter
         from app.modules.tendering.letter_texts import INVITATION_KEY
 
-        invitation_text = (await resolve_letter(self.session, INVITATION_KEY, locale, package.project_id)).text
+        letter = await resolve_letter(self.session, INVITATION_KEY, locale, package.project_id)
+        invitation_text = letter.text
         try:
             sender_company = read_company_profile().get("legal_name", "") or ""
         except Exception:  # noqa: BLE001 - an email never fails on a missing profile
@@ -1678,6 +1680,19 @@ class TenderingService:
         if actor_id:
             meta["last_distributed_by"] = str(actor_id)
 
+        if any_sent:
+            from app.modules.doc_templates.service import log_letter_issue
+
+            await log_letter_issue(
+                self.session,
+                INVITATION_KEY,
+                str(package_id),
+                package.project_id,
+                letter.language,
+                actor_id,
+                wording="project" if letter.source == "project" else None,
+            )
+
         new_status = package.status
         if any_sent and package.status == "draft":
             new_status = "issued"
@@ -1771,12 +1786,15 @@ class TenderingService:
         project_id = getattr(package, "project_id", None)
         if session is None:
             self.last_letter_language = template_language(template, None)
+            self.last_letter_wording = "override" if override else None
             return override or default_text(template, self.last_letter_language)
         if override is not None:
             self.last_letter_language = template_language(template, await project_language(session, project_id))
+            self.last_letter_wording = "override"
             return override
         resolved = await resolve(session, key, None, project_id)
         self.last_letter_language = resolved.language
+        self.last_letter_wording = "project" if resolved.source == "project" else None
         return resolved.text
 
     async def build_award_letter_pdf(
