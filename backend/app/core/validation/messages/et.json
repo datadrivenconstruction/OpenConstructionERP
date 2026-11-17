@@ -2330,5 +2330,19 @@
       "fail": "{markup} on {percent} %; käibemaksu tavamäär riigis {country} on {rate} %.",
       "suggestion": "Seadke maksurida tavamäärale või märkige eelarvesse, miks kehtib muu määr või vabastus."
     }
+  },
+  "survey": {
+    "no_crs": {
+      "fail": "Punktikogul {name} puudub koordinaatsüsteem: määrake EPSG või kohalik võrk enne mahtude või katastriüksuste arvutamist.",
+      "suggestion": "Määrake projekti koordinaatsüsteem ja seejärel süsteem, milles see fail mõõdeti."
+    },
+    "crs_unconfirmed": {
+      "fail": "Koordinaatsüsteem tuvastati automaatselt (usaldusväärsus {confidence}); kinnitage enne kasutamist.",
+      "suggestion": "Avage projekti koordinaatsüsteemi määramine ja kinnitage leitud süsteem või valige muu."
+    },
+    "duplicate_point": {
+      "fail": "Korduv punkti tunnus {point_id} erinevate koordinaatidega.",
+      "suggestion": "Jätke üks mõõtmine: kustutage vale mõõtmisega punktikogu ja importige see uuesti."
+    }
   }
 }

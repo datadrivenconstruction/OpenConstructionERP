@@ -2330,5 +2330,19 @@
       "fail": "{markup} là {percent} %; thuế suất VAT tiêu chuẩn tại {country} là {rate} %.",
       "suggestion": "Đặt dòng thuế về thuế suất tiêu chuẩn, hoặc ghi trong dự toán lý do áp dụng thuế suất khác hay miễn thuế."
     }
+  },
+  "survey": {
+    "no_crs": {
+      "fail": "Tập điểm {name} chưa có hệ tọa độ: khai báo EPSG hoặc lưới cục bộ trước khi tính khối lượng hoặc thửa đất.",
+      "suggestion": "Đặt hệ tọa độ của dự án, rồi cho biết tệp này được đo trong hệ nào."
+    },
+    "crs_unconfirmed": {
+      "fail": "Hệ tọa độ được phát hiện tự động (độ tin cậy {confidence}); hãy xác nhận trước khi dùng.",
+      "suggestion": "Mở Đặt hệ tọa độ dự án và xác nhận hệ đã phát hiện hoặc chọn hệ khác."
+    },
+    "duplicate_point": {
+      "fail": "Mã điểm {point_id} bị trùng với tọa độ khác nhau.",
+      "suggestion": "Giữ một lần đo: xóa tập điểm chứa giá trị sai và nhập lại."
+    }
   }
 }

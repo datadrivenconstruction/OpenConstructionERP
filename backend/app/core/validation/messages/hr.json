@@ -2330,5 +2330,19 @@
       "fail": "{markup} iznosi {percent} %; opća stopa PDV-a u {country} je {rate} %.",
       "suggestion": "Postavite poreznu stavku na opću stopu ili u troškovniku navedite zašto vrijedi druga stopa ili oslobođenje."
     }
+  },
+  "survey": {
+    "no_crs": {
+      "fail": "Skup točaka {name} nema koordinatni sustav: zadajte EPSG ili lokalnu mrežu prije obujma ili čestica.",
+      "suggestion": "Postavite koordinatni sustav projekta, zatim navedite u kojem je sustavu datoteka izmjerena."
+    },
+    "crs_unconfirmed": {
+      "fail": "Koordinatni sustav prepoznat automatski (pouzdanost {confidence}); potvrdite prije uporabe.",
+      "suggestion": "Otvorite postavljanje koordinatnog sustava projekta i potvrdite prepoznati sustav ili odaberite drugi."
+    },
+    "duplicate_point": {
+      "fail": "Dvostruka oznaka točke {point_id} s različitim koordinatama.",
+      "suggestion": "Zadržite jedno mjerenje: izbrišite skup s pogrešnim i ponovno ga uvezite."
+    }
   }
 }

@@ -2330,5 +2330,19 @@
       "fail": "{markup} è al {percent} %; l'aliquota IVA ordinaria in {country} è {rate} %.",
       "suggestion": "Imposta la riga d'imposta all'aliquota ordinaria o indica nel computo perché si applica un'altra aliquota o un'esenzione."
     }
+  },
+  "survey": {
+    "no_crs": {
+      "fail": "Il set di punti {name} non ha un SR: dichiarate un EPSG o un sistema locale prima di volumi o particelle.",
+      "suggestion": "Impostate il sistema di coordinate del progetto, poi indicate in quale sistema è stato misurato il file."
+    },
+    "crs_unconfirmed": {
+      "fail": "SR rilevato automaticamente (affidabilità {confidence}); confermate prima dell'uso.",
+      "suggestion": "Aprite Imposta SR del progetto e confermate il sistema rilevato o sceglietene un altro."
+    },
+    "duplicate_point": {
+      "fail": "Codice punto {point_id} duplicato con coordinate diverse.",
+      "suggestion": "Tenete una sola lettura: eliminate il set con quella errata e reimportatelo."
+    }
   }
 }

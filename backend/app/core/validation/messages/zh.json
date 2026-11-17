@@ -2330,5 +2330,19 @@
       "fail": "{markup} 为 {percent} %；{country} 的标准增值税税率为 {rate} %。",
       "suggestion": "请将税额行设为标准税率，或在预算中注明适用其他税率或免税的原因。"
     }
+  },
+  "survey": {
+    "no_crs": {
+      "fail": "点集 {name} 没有坐标参考系：在计算土方量或宗地之前，请指定 EPSG 或局部坐标系。",
+      "suggestion": "请设置项目坐标系，然后指明此文件是在哪个坐标系中测量的。"
+    },
+    "crs_unconfirmed": {
+      "fail": "已自动检测到坐标系（置信度 {confidence}），使用前请确认。",
+      "suggestion": "打开“设置项目坐标系”，确认检测到的坐标系或选择其他坐标系。"
+    },
+    "duplicate_point": {
+      "fail": "点号 {point_id} 重复且坐标不同。",
+      "suggestion": "只保留一个测量值：删除含有错误值的点集，然后重新导入。"
+    }
   }
 }

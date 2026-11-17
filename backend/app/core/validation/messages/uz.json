@@ -2330,5 +2330,19 @@
       "fail": "{markup}: {percent} %; {country} da QQSning asosiy stavkasi {rate} %.",
       "suggestion": "Soliq qatorini asosiy stavkaga qo'ying yoki smetada nega boshqa stavka yoki imtiyoz qo'llanishini yozing."
     }
+  },
+  "survey": {
+    "no_crs": {
+      "fail": "{name} nuqtalar to'plamida koordinatalar tizimi yo'q: hajmlar yoki uchastkalardan oldin EPSG yoki mahalliy tizimni ko'rsating.",
+      "suggestion": "Loyiha koordinatalar tizimini o'rnating, so'ng fayl qaysi tizimda o'lchanganini ko'rsating."
+    },
+    "crs_unconfirmed": {
+      "fail": "Koordinatalar tizimi avtomatik aniqlandi (ishonchlilik {confidence}); foydalanishdan oldin tasdiqlang.",
+      "suggestion": "Loyiha koordinatalar tizimini o'rnatish oynasini ochib, aniqlangan tizimni tasdiqlang yoki boshqasini tanlang."
+    },
+    "duplicate_point": {
+      "fail": "{point_id} nuqta raqami turli koordinatalar bilan takrorlangan.",
+      "suggestion": "Bitta o'lchovni qoldiring: xatosi bor to'plamni o'chirib, qayta import qiling."
+    }
   }
 }

@@ -2330,5 +2330,19 @@
       "fail": "{markup} %{percent}; {country} için standart KDV oranı %{rate}.",
       "suggestion": "Vergi satırını standart orana ayarlayın veya keşifte neden başka bir oran ya da istisna uygulandığını kaydedin."
     }
+  },
+  "survey": {
+    "no_crs": {
+      "fail": "{name} nokta kümesinin koordinat sistemi yok: hacim veya parsel öncesinde EPSG ya da yerel ağ belirtin.",
+      "suggestion": "Projenin koordinat sistemini ayarlayın, ardından bu dosyanın hangi sistemde ölçüldüğünü belirtin."
+    },
+    "crs_unconfirmed": {
+      "fail": "Koordinat sistemi otomatik algılandı (güven {confidence}); kullanmadan önce onaylayın.",
+      "suggestion": "Proje koordinat sistemini ayarla penceresini açın ve algılanan sistemi onaylayın ya da başkasını seçin."
+    },
+    "duplicate_point": {
+      "fail": "Farklı koordinatlara sahip yinelenen nokta numarası {point_id}.",
+      "suggestion": "Tek bir ölçüm tutun: yanlış olanı içeren kümeyi silin ve yeniden içe aktarın."
+    }
   }
 }

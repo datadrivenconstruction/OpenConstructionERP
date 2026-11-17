@@ -2330,5 +2330,19 @@
       "fail": "{markup} está em {percent} %; a taxa normal de IVA em {country} é {rate} %.",
       "suggestion": "Defina a linha de imposto à taxa normal ou registe no orçamento porque se aplica outra taxa ou uma isenção."
     }
+  },
+  "survey": {
+    "no_crs": {
+      "fail": "O conjunto de pontos {name} não tem SRC: declare um EPSG ou uma grelha local antes de volumes ou lotes.",
+      "suggestion": "Defina o sistema de coordenadas do projeto e indique em que sistema este ficheiro foi medido."
+    },
+    "crs_unconfirmed": {
+      "fail": "SRC detetado automaticamente (confiança {confidence}); confirme antes de usar.",
+      "suggestion": "Abra Definir SRC do projeto e confirme o sistema detetado ou escolha outro."
+    },
+    "duplicate_point": {
+      "fail": "Identificador de ponto {point_id} duplicado com coordenadas diferentes.",
+      "suggestion": "Mantenha uma leitura: elimine o conjunto com a errada e importe-o novamente."
+    }
   }
 }

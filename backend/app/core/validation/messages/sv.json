@@ -2330,5 +2330,19 @@
       "fail": "{markup} är {percent} %; normalskattesatsen för moms i {country} är {rate} %.",
       "suggestion": "Sätt skatteraden till normalsatsen eller ange i kalkylen varför en annan sats eller ett undantag gäller."
     }
+  },
+  "survey": {
+    "no_crs": {
+      "fail": "Punktmängden {name} saknar koordinatsystem: ange EPSG eller lokalt nät före volymer eller fastigheter.",
+      "suggestion": "Ange projektets koordinatsystem och ange sedan i vilket system filen mättes."
+    },
+    "crs_unconfirmed": {
+      "fail": "Koordinatsystem identifierat automatiskt (säkerhet {confidence}); bekräfta före användning.",
+      "suggestion": "Öppna Ange projektets koordinatsystem och bekräfta det identifierade systemet eller välj ett annat."
+    },
+    "duplicate_point": {
+      "fail": "Dubblerat punktnummer {point_id} med olika koordinater.",
+      "suggestion": "Behåll en mätning: radera punktmängden med den felaktiga och importera den igen."
+    }
   }
 }

@@ -74,6 +74,8 @@ ROLE_ALIASES: dict[str, Role] = {
     "estimator": Role.EDITOR,
     "quantity_surveyor": Role.EDITOR,
     "qs": Role.EDITOR,
+    # Works as an editor; the survey modules also let it confirm results (survey.confirm).
+    "surveyor": Role.EDITOR,
     "user": Role.EDITOR,
     "superuser": Role.ADMIN,
     "owner": Role.ADMIN,

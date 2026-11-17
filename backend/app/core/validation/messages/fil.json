@@ -2330,5 +2330,19 @@
       "fail": "Ang {markup} ay {percent} %; ang karaniwang rate ng VAT sa {country} ay {rate} %.",
       "suggestion": "Itakda ang linya ng buwis sa karaniwang rate, o itala sa estimate kung bakit ibang rate o exemption ang umiiral."
     }
+  },
+  "survey": {
+    "no_crs": {
+      "fail": "Walang CRS ang point set na {name}: magtakda ng EPSG o lokal na grid bago ang volume o parcel.",
+      "suggestion": "Itakda ang coordinate system ng proyekto, saka sabihin kung saang system sinukat ang file na ito."
+    },
+    "crs_unconfirmed": {
+      "fail": "Awtomatikong natukoy ang CRS (kumpiyansa {confidence}); kumpirmahin bago gamitin.",
+      "suggestion": "Buksan ang Itakda ang CRS ng proyekto at kumpirmahin ang natukoy na system o pumili ng iba."
+    },
+    "duplicate_point": {
+      "fail": "Dobleng point id {point_id} na may magkaibang coordinate.",
+      "suggestion": "Panatilihin ang isang sukat: burahin ang point set na may mali at i-import ito muli."
+    }
   }
 }

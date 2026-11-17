@@ -2330,5 +2330,19 @@
       "fail": "{markup} is {percent} %; het standaard btw-tarief in {country} is {rate} %.",
       "suggestion": "Zet de belastingregel op het standaardtarief of leg in de begroting vast waarom een ander tarief of een vrijstelling geldt."
     }
+  },
+  "survey": {
+    "no_crs": {
+      "fail": "Puntenset {name} heeft geen CRS: geef een EPSG of lokaal stelsel op vóór volumes of percelen.",
+      "suggestion": "Stel het coördinatenstelsel van het project in en geef aan in welk stelsel dit bestand is gemeten."
+    },
+    "crs_unconfirmed": {
+      "fail": "CRS automatisch herkend (betrouwbaarheid {confidence}); bevestig vóór gebruik.",
+      "suggestion": "Open Project-CRS instellen en bevestig het herkende stelsel of kies een ander."
+    },
+    "duplicate_point": {
+      "fail": "Dubbel puntnummer {point_id} met verschillende coördinaten.",
+      "suggestion": "Houd één meting: verwijder de puntenset met de foute en importeer die opnieuw."
+    }
   }
 }

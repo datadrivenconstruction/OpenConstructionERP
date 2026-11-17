@@ -425,6 +425,17 @@ export const navGroups: NavGroup[] = [
       { labelKey: 'nav.cad_bim_explorer', to: '/data-explorer', icon: TableProperties, advancedOnly: true },
     ],
   },
+  // Survey and land: control points, point files, project CRS. Rows come
+  // from the survey module manifests, so the group stays hidden until one
+  // of them is enabled (Settings > Modules or a survey focus profile).
+  {
+    id: 'grp_survey',
+    labelKey: 'sidebar.group.survey',
+    defaultLabel: 'Survey & Land',
+    dynamicGroupKey: 'grp_survey',
+    defaultOpen: true,
+    items: [],
+  },
   // ── 6. MODEL COORDINATION ──────────────────────────────────────────
   // Multi-model BIM/CAD coordination: clash, federations, rule packs,
   // EIR matrix. Distinct from Takeoff so quantity-only users skip it.

@@ -2330,5 +2330,19 @@
       "fail": "{markup} je {percent} %; základní sazba DPH v {country} je {rate} %.",
       "suggestion": "Nastavte daňový řádek na základní sazbu, nebo v rozpočtu uveďte, proč platí jiná sazba či osvobození."
     }
+  },
+  "survey": {
+    "no_crs": {
+      "fail": "Sada bodů {name} nemá souřadnicový systém: zadejte EPSG nebo místní síť před výpočtem kubatur nebo parcel.",
+      "suggestion": "Nastavte souřadnicový systém projektu a pak určete, v jakém systému byl soubor měřen."
+    },
+    "crs_unconfirmed": {
+      "fail": "Souřadnicový systém rozpoznán automaticky (spolehlivost {confidence}); před použitím potvrďte.",
+      "suggestion": "Otevřete Nastavit souřadnicový systém projektu a potvrďte rozpoznaný systém nebo zvolte jiný."
+    },
+    "duplicate_point": {
+      "fail": "Duplicitní číslo bodu {point_id} s rozdílnými souřadnicemi.",
+      "suggestion": "Ponechte jedno měření: smažte sadu bodů s chybným a importujte ji znovu."
+    }
   }
 }

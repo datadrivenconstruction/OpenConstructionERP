@@ -2330,5 +2330,19 @@
       "fail": "{markup} er {percent} %; den alminnelige mva-satsen i {country} er {rate} %.",
       "suggestion": "Sett avgiftslinjen til den alminnelige satsen, eller noter i kalkylen hvorfor en annen sats eller et fritak gjelder."
     }
+  },
+  "survey": {
+    "no_crs": {
+      "fail": "Punktsettet {name} har ikke koordinatsystem: oppgi EPSG eller lokalt nett før volumer eller eiendommer.",
+      "suggestion": "Angi prosjektets koordinatsystem, og oppgi deretter hvilket system filen er målt i."
+    },
+    "crs_unconfirmed": {
+      "fail": "Koordinatsystem funnet automatisk (sikkerhet {confidence}); bekreft før bruk.",
+      "suggestion": "Åpne Angi prosjektets koordinatsystem, og bekreft systemet som ble funnet eller velg et annet."
+    },
+    "duplicate_point": {
+      "fail": "Duplisert punktnummer {point_id} med ulike koordinater.",
+      "suggestion": "Behold én måling: slett punktsettet med den feile og importer det på nytt."
+    }
   }
 }
