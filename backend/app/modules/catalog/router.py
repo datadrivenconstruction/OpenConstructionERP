@@ -50,6 +50,7 @@ from app.core.i18n import get_locale
 from app.core.validation.messages import translate
 from app.dependencies import (
     CurrentUserId,
+    CurrentUserPayload,
     OptionalUserPayload,
     RequirePermission,
     SessionDep,
@@ -995,8 +996,16 @@ async def search_catalog(
     max_price: float | None = Query(default=None, ge=0, description="Max base price"),
     limit: int = Query(default=50, ge=1, le=100),
     offset: int = Query(default=0, ge=0),
+    semantic: bool = Query(
+        default=False,
+        description="Rank the filtered subset by meaning; falls back to text search without a vector index",
+    ),
 ) -> CatalogSearchResponse:
-    """Search and list catalog resources with optional filters."""
+    """Search and list catalog resources with optional filters.
+
+    Type, category, region, unit and price filter in SQL first. With
+    ``semantic`` only that subset is ranked by vector similarity (#563).
+    """
     from app.modules.catalog.schemas import CatalogSearchQuery
 
     query = CatalogSearchQuery(
@@ -1009,14 +1018,38 @@ async def search_catalog(
         max_price=max_price,
         limit=limit,
         offset=offset,
+        semantic=semantic,
     )
-    items, total = await service.search_resources(query)
+    items, total, mode = await service.search_resources_ranked(query)
     return CatalogSearchResponse(
         items=[CatalogResourceResponse.model_validate(item) for item in items],
         total=total,
         limit=limit,
         offset=offset,
+        search_mode=mode,
     )
+
+
+@router.post("/vector/reindex/", dependencies=[Depends(RequirePermission("catalog.create"))])
+async def reindex_catalog_vectors(
+    session: SessionDep,
+    payload: CurrentUserPayload,
+    region: str | None = Query(default=None, description="Index one region only"),
+    purge_first: bool = Query(default=False),
+) -> dict[str, Any]:
+    """Embed catalogue resources so semantic search can rank them (administrators)."""
+    if not (payload and payload.get("role") == "admin"):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="A vector reindex requires an administrator.")
+    from sqlalchemy import select
+
+    from app.core.vector_routes import reindex_statement_in_pages
+    from app.modules.catalog.models import CatalogResource
+    from app.modules.catalog.vector_adapter import catalog_resource_adapter
+
+    stmt = select(CatalogResource).where(CatalogResource.is_active.is_(True))
+    if region:
+        stmt = stmt.where(CatalogResource.region == region)
+    return await reindex_statement_in_pages(session, catalog_resource_adapter, stmt, purge_first=purge_first)
 
 
 @router.get("/fx-view/", response_model=CatalogFxView)

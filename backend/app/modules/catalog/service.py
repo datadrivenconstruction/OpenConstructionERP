@@ -43,6 +43,11 @@ from app.modules.costs.models import CostItem
 
 logger = logging.getLogger(__name__)
 
+# Largest SQL-filtered subset handed to the vector store as an id list. Past
+# this the search ranks a wider window and keeps the hits inside the subset.
+VECTOR_PREFILTER_MAX_IDS = 5000
+VECTOR_OVERSAMPLE = 20
+
 # ── Categorization maps ──────────────────────────────────────────────────
 
 MATERIAL_CATEGORIES: list[tuple[list[str], str]] = [
@@ -196,6 +201,55 @@ class CatalogResourceService:
             offset=query.offset,
             limit=query.limit,
         )
+
+    async def search_resources_ranked(self, query: CatalogSearchQuery) -> tuple[list[CatalogResource], int, str]:
+        """Filter in SQL, then rank the subset by meaning; fall back to text search.
+
+        Returns ``(items, total, mode)`` with mode ``semantic`` or ``text``. The
+        fallback covers no vector store, an unindexed catalogue and no hits.
+        """
+        text = (query.q or "").strip()
+        if not query.semantic or len(text) < 2:
+            items, total = await self.search_resources(query)
+            return items, total, "text"
+
+        filters = {
+            "resource_type": query.resource_type,
+            "category": query.category,
+            "region": query.region,
+            "unit": query.unit,
+            "min_price": query.min_price,
+            "max_price": query.max_price,
+        }
+        ranked: list[str] = []
+        try:
+            from app.core.vector_index import search_collection
+            from app.modules.catalog.vector_adapter import catalog_resource_adapter
+
+            candidates = await self.repo.ids_matching(**filters)
+            if candidates:
+                window = query.offset + query.limit
+                if len(candidates) <= VECTOR_PREFILTER_MAX_IDS:
+                    hits = await search_collection(catalog_resource_adapter, text, limit=window, ids=candidates)
+                else:
+                    wanted = set(candidates)
+                    wide = await search_collection(
+                        catalog_resource_adapter, text, limit=min(window * VECTOR_OVERSAMPLE, 2000)
+                    )
+                    hits = [h for h in wide if h.id in wanted]
+                ranked = [h.id for h in hits]
+        except Exception:
+            logger.debug("Semantic catalogue search unavailable, using text search", exc_info=True)
+            ranked = []
+
+        if not ranked:
+            items, total = await self.search_resources(query)
+            return items, total, "text"
+
+        page_ids = ranked[query.offset : query.offset + query.limit]
+        by_id = await self.repo.get_active_by_ids(page_ids)
+        items = [by_id[i] for i in page_ids if i in by_id]
+        return items, len(ranked), "semantic"
 
     async def get_stats(self, region: str | None = None) -> CatalogStatsResponse:
         """Get aggregated statistics for the catalog.
