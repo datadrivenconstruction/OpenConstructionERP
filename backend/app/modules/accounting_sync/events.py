@@ -7,6 +7,11 @@ user reviews it and posts it (the platform suggests, a human confirms).
 
 Published by the service: ``accounting_sync.sync.failed`` with the connection id,
 provider and number of failed records (a notification goes to the connection owner).
+
+Export batches publish ``accounting_sync.batch.exported`` and ``.voided`` (connection id,
+batch id and number), ``accounting_sync.import.completed`` (line count) and
+``accounting_sync.reconciliation.mismatch`` (counts per class) when a reconciliation
+finds differences.
 """
 
 from __future__ import annotations

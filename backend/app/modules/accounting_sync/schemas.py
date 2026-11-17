@@ -12,7 +12,8 @@ from typing import Annotated, Any, Literal
 from pydantic import BaseModel, ConfigDict, Field, PlainSerializer
 
 Money = Annotated[Decimal | None, PlainSerializer(lambda v: None if v is None else str(v), return_type=str | None)]
-Provider = Literal["xero", "qbo", "datev", "journal", "saft"]
+#: Built-in: xero, qbo, datev, journal, saft; packs register more (checked against the provider registry).
+Provider = Annotated[str, Field(min_length=1, max_length=30)]
 
 
 class ConnectionCreate(BaseModel):

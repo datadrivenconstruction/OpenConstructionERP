@@ -10,6 +10,10 @@ ACCOUNTING_SYNC_PERMISSIONS: dict[str, Role] = {
     "accounting_sync.read": Role.MANAGER,
     "accounting_sync.write": Role.MANAGER,
     "accounting_sync.admin": Role.ADMIN,
+    "accounting_sync.export": Role.MANAGER,
+    "accounting_sync.import": Role.MANAGER,
+    # Voiding releases records for a second export: an admin decision.
+    "accounting_sync.void": Role.ADMIN,
 }
 
 

@@ -23,8 +23,10 @@ from app.dependencies import (
     verify_project_access,
 )
 from app.modules.accounting_sync import templates
+from app.modules.accounting_sync.batch_router import router as batch_router
 from app.modules.accounting_sync.exports.journal import JOURNAL_COLUMNS
 from app.modules.accounting_sync.models import AccountingConnection, SyncLogEntry
+from app.modules.accounting_sync.providers import all_providers
 from app.modules.accounting_sync.schemas import (
     AccountMappingRow,
     ConnectionCreate,
@@ -49,6 +51,7 @@ from app.modules.accounting_sync.schemas import (
 from app.modules.accounting_sync.service import AccountingSyncService
 
 router = APIRouter(tags=["accounting_sync"])
+router.include_router(batch_router)
 
 _READ = Depends(RequirePermission("accounting_sync.read"))
 _WRITE = Depends(RequirePermission("accounting_sync.write"))
@@ -108,6 +111,8 @@ async def list_connections(
 @router.post("/connections", response_model=ConnectionResponse, status_code=201, dependencies=[_ADMIN])
 async def create_connection(body: ConnectionCreate, session: SessionDep, user_id: CurrentUserId) -> ConnectionResponse:
     svc = AccountingSyncService(session)
+    if body.provider not in all_providers():
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, detail="Unknown provider")
     if body.chart_template and body.chart_template not in {
         t["key"] for t in templates.list_templates(body.country_code)
     }:

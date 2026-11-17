@@ -245,6 +245,9 @@ def register_accounting_sync_rules() -> None:
     """Register the rules with the core registry (idempotent)."""
     for rule in _RULES:
         rule_registry.register(rule, [RULE_SET])
+    from app.modules.accounting_sync.export_validators import register_export_rules
+
+    register_export_rules()
 
 
 async def evaluate(snapshot: dict[str, Any], *, target_id: str = "") -> list[RuleResult]:

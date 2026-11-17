@@ -29,8 +29,14 @@ def _amount(value: Decimal) -> str:
     return f"{money(value):.2f}".replace(".", ",")
 
 
-def _header(fmt: dict[str, Any], kind: dict[str, Any], settings: dict[str, Any], extra: list[str]) -> list[str]:
-    created = datetime.now(UTC).strftime("%Y%m%d%H%M%S%f")[:17]
+def _header(
+    fmt: dict[str, Any],
+    kind: dict[str, Any],
+    settings: dict[str, Any],
+    extra: list[str],
+    created_at: datetime | None = None,
+) -> list[str]:
+    created = (created_at or datetime.now(UTC)).strftime("%Y%m%d%H%M%S%f")[:17]
     return [
         '"EXTF"',
         str(fmt["format_version"]),
@@ -63,6 +69,7 @@ def buchungsstapel(
     period: tuple[date, date],
     skr: str,
     currency: str = "EUR",
+    created_at: datetime | None = None,
 ) -> bytes:
     """Encode a DATEV EXTF Buchungsstapel (category 21)."""
     fmt = file_format("datev_extf")
@@ -94,6 +101,7 @@ def buchungsstapel(
             '""',
             '""',
         ],
+        created_at,
     )
     rows = [header, list(columns)]
     idx = {name: i for i, name in enumerate(columns)}
