@@ -27647,6 +27647,7 @@ const resource = {
     "analytics.col_project_status": "Loyiha holati",
     "analytics.filter_project_status": "Loyiha holati bo‘yicha filtrlash",
     "analytics.all_project_statuses": "Barcha loyiha holatlari",
+    "analytics.filtered_hint": "Filtrlangan: {{total}} loyihadan {{shown}} tasi",
     "app.bug_log_downloaded": "Jurnal yuklab olindi",
     "app.bug_log_downloaded_desc": "Bu JSON faylni hisobotingizga biriktiring.",
     "app.report_bug": "Xatolik haqida xabar berish (jurnallar bilan)",

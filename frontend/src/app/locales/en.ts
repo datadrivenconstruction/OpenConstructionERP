@@ -25447,6 +25447,7 @@ const resource = {
     "analytics.col_project_status": "Project status",
     "analytics.filter_project_status": "Filter by project status",
     "analytics.all_project_statuses": "All project statuses",
+    "analytics.filtered_hint": "Filtered: {{shown}} of {{total}} projects",
     "approvalRoutes.analytics_pick_project": "Select a project to see its approval-cycle analytics.",
     "approvalRoutes.analytics_empty_title": "No approval workflows in range",
     "approvalRoutes.analytics_empty_desc": "Approval workflows on this project's routes will show cycle-time and breach analytics here.",

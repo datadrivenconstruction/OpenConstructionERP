@@ -27313,6 +27313,7 @@ const resource = {
     "analytics.col_project_status": "Projekti staatus",
     "analytics.filter_project_status": "Filtreeri projekti staatuse järgi",
     "analytics.all_project_statuses": "Kõik projekti staatused",
+    "analytics.filtered_hint": "Filtreeritud: {{shown}} / {{total}} projekti",
     "app.bug_log_downloaded": "Logi alla laaditud",
     "app.bug_log_downloaded_desc": "Lisage see JSON-fail oma vearaportile.",
     "app.report_bug": "Teata veast (koos logidega)",

@@ -27172,6 +27172,7 @@ const resource = {
     "analytics.col_project_status": "สถานะโครงการ",
     "analytics.filter_project_status": "กรองตามสถานะโครงการ",
     "analytics.all_project_statuses": "สถานะโครงการทั้งหมด",
+    "analytics.filtered_hint": "กรองแล้ว: {{shown}} จาก {{total}} โครงการ",
     "app.bug_log_downloaded": "ดาวน์โหลด Log",
     "app.bug_log_downloaded_desc": "แนบ JSON นี้กับรายงานของคุณ",
     "app.report_bug": "รายงานบัก (พร้อมบันทึก)",

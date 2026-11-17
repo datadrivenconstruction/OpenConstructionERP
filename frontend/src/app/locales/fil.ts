@@ -26298,6 +26298,7 @@ const resource = {
     "analytics.col_project_status": "Katayuan ng proyekto",
     "analytics.filter_project_status": "I-filter ayon sa katayuan ng proyekto",
     "analytics.all_project_statuses": "Lahat ng katayuan ng proyekto",
+    "analytics.filtered_hint": "Na-filter: {{shown}} sa {{total}} proyekto",
     "app.bug_log_downloaded": "Na-download ang log",
     "app.bug_log_downloaded_desc": "Ikabit ang JSON na ito sa ulat mo.",
     "app.report_bug": "Mag-ulat ng bug (may logs)",

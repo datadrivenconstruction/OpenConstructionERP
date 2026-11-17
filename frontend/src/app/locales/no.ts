@@ -27404,6 +27404,7 @@ const resource = {
     "analytics.col_project_status": "Prosjektstatus",
     "analytics.filter_project_status": "Filtrer etter prosjektstatus",
     "analytics.all_project_statuses": "Alle prosjektstatuser",
+    "analytics.filtered_hint": "Filtrert: {{shown}} av {{total}} prosjekter",
     "app.bug_log_downloaded": "Logg lastet ned",
     "app.bug_log_downloaded_desc": "Legg denne JSON ved rapporten din.",
     "app.report_bug": "Rapporter en feil (med logger)",

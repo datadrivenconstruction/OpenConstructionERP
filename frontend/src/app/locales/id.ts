@@ -27116,6 +27116,7 @@ const resource = {
     "analytics.col_project_status": "Status proyek",
     "analytics.filter_project_status": "Filter berdasarkan status proyek",
     "analytics.all_project_statuses": "Semua status proyek",
+    "analytics.filtered_hint": "Difilter: {{shown}} dari {{total}} proyek",
     "app.bug_log_downloaded": "Log diunduh",
     "app.bug_log_downloaded_desc": "Lampirkan JSON ini ke laporan Anda.",
     "app.report_bug": "Laporkan bug (dengan log)",

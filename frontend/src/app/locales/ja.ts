@@ -27126,6 +27126,7 @@ const resource = {
     "analytics.col_project_status": "プロジェクトステータス",
     "analytics.filter_project_status": "プロジェクトステータスで絞り込み",
     "analytics.all_project_statuses": "すべてのプロジェクトステータス",
+    "analytics.filtered_hint": "絞り込み中: {{total}} 件中 {{shown}} 件のプロジェクト",
     "app.bug_log_downloaded": "ログがダウンロードされました",
     "app.bug_log_downloaded_desc": "このJSONをレポートに添付してください。",
     "app.report_bug": "バグを報告(ログ付き)",

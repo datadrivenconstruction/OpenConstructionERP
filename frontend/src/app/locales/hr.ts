@@ -27498,6 +27498,7 @@ const resource = {
     "analytics.col_project_status": "Status projekta",
     "analytics.filter_project_status": "Filtriraj po statusu projekta",
     "analytics.all_project_statuses": "Svi statusi projekata",
+    "analytics.filtered_hint": "Filtrirano: {{shown}} od {{total}} projekata",
     "app.bug_log_downloaded": "Evidencija preuzeta",
     "app.bug_log_downloaded_desc": "Priložite ovaj JSON svojoj prijavi.",
     "app.report_bug": "Prijavite grešku (s evidencijama)",

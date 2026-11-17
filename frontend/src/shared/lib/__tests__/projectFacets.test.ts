@@ -4,6 +4,7 @@ import {
   EMPTY_FACETS,
   FACET_ALL,
   FACET_UNSET,
+  analyticsFacetParams,
   applyProjectFacets,
   facetOptions,
   isFacetFilterActive,
@@ -53,5 +54,13 @@ describe('project phase and type filters', () => {
     expect(matchesFacet('tender', undefined)).toBe(true);
     expect(isFacetFilterActive(EMPTY_FACETS)).toBe(false);
     expect(isFacetFilterActive({ phase: 'tender' })).toBe(true);
+  });
+
+  it('builds analytics query params only for active facets', () => {
+    expect(analyticsFacetParams(EMPTY_FACETS)).toBe('');
+    expect(analyticsFacetParams({ phase: 'tender', project_type: FACET_ALL })).toBe('?phase=tender');
+    expect(analyticsFacetParams({ phase: FACET_UNSET, project_type: 'Office block' })).toBe(
+      '?phase=__unset__&project_type=Office+block',
+    );
   });
 });

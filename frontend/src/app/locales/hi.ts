@@ -43308,6 +43308,7 @@ const resource = {
     "analytics.col_project_status": "परियोजना की स्थिति",
     "analytics.filter_project_status": "परियोजना की स्थिति से फ़िल्टर करें",
     "analytics.all_project_statuses": "सभी परियोजना स्थितियाँ",
+    "analytics.filtered_hint": "फ़िल्टर किया गया: {{total}} में से {{shown}} परियोजनाएँ",
     "approvalRoutes.analytics_pick_project": "अप्रूवल-साइकिल एनालिटिक्स देखने के लिए एक प्रोजेक्ट चुनें।",
     "approvalRoutes.analytics_empty_title": "रेंज में कोई अप्रूवल वर्कफ़्लो नहीं",
     "approvalRoutes.analytics_empty_desc": "इस प्रोजेक्ट के रूट पर अप्रूवल वर्कफ़्लो यहां साइकिल-टाइम और ब्रीच एनालिटिक्स दिखाएंगे।",

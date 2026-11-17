@@ -26436,6 +26436,7 @@ const resource = {
     "analytics.col_project_status": "وضعیت پروژه",
     "analytics.filter_project_status": "فیلتر بر اساس وضعیت پروژه",
     "analytics.all_project_statuses": "همه وضعیت‌های پروژه",
+    "analytics.filtered_hint": "فیلتر شده: {{shown}} از {{total}} پروژه",
     "app.bug_log_downloaded": "گزارش دانلود شد",
     "app.bug_log_downloaded_desc": "این JSON را به گزارش خود پیوست کنید.",
     "app.report_bug": "گزارش یک باگ (با گزارش‌ها)",
