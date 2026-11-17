@@ -23,6 +23,7 @@ certifi==2026.5.20
     # via
     #   httpcore
     #   httpx
+    #   pyproj
 cffi==2.0.0 ; platform_python_implementation != 'PyPy'
     # via cryptography
 charset-normalizer==3.4.7
@@ -224,6 +225,8 @@ pypdfium2==5.9.0
     # via
     #   openconstructionerp (pyproject.toml)
     #   pdfplumber
+pyproj==3.8.0
+    # via openconstructionerp (pyproject.toml)
 python-bidi==0.6.11
     # via openconstructionerp (pyproject.toml)
 python-dateutil==2.9.0.post0

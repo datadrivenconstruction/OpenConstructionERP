@@ -2218,5 +2218,19 @@
       "calendar_no_work_days": "Kalenterissa {calendar} ei ole työpäiviä.",
       "suggestion": "Merkitse tämän kalenterin työpäivät lähdeaikatauluun."
     }
+  },
+  "survey": {
+    "no_crs": {
+      "fail": "Pistejoukolla {name} ei ole koordinaattijärjestelmää: määritä EPSG tai paikallinen verkko ennen massoja tai kiinteistöjä.",
+      "suggestion": "Aseta projektin koordinaattijärjestelmä ja kerro sitten, missä järjestelmässä tiedosto on mitattu."
+    },
+    "crs_unconfirmed": {
+      "fail": "Koordinaattijärjestelmä tunnistettu automaattisesti (luotettavuus {confidence}); vahvista ennen käyttöä.",
+      "suggestion": "Avaa projektin koordinaattijärjestelmän asetus ja vahvista tunnistettu järjestelmä tai valitse toinen."
+    },
+    "duplicate_point": {
+      "fail": "Pistetunnus {point_id} esiintyy kahdesti eri koordinaatein.",
+      "suggestion": "Säilytä yksi mittaus: poista pistejoukko, jossa on väärä, ja tuo se uudelleen."
+    }
   }
 }

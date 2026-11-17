@@ -19,6 +19,7 @@ describe('menu groups', () => {
       'grp_estimating',
       'grp_drawings',
       'grp_reality',
+      'grp_survey',
       'grp_coordination',
       'grp_scheduling',
       'grp_cost_control',

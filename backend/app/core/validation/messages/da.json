@@ -2218,5 +2218,19 @@
       "calendar_no_work_days": "Kalender {calendar} har ingen arbejdsdag.",
       "suggestion": "Markér kalenderens arbejdsdage i kildeplanen."
     }
+  },
+  "survey": {
+    "no_crs": {
+      "fail": "Punktsættet {name} har intet koordinatsystem: angiv EPSG eller et lokalt net før mængder eller matrikler.",
+      "suggestion": "Angiv projektets koordinatsystem, og angiv derefter, i hvilket system filen er målt."
+    },
+    "crs_unconfirmed": {
+      "fail": "Koordinatsystem fundet automatisk (sikkerhed {confidence}); bekræft før brug.",
+      "suggestion": "Åbn Angiv projektets koordinatsystem, og bekræft det fundne system eller vælg et andet."
+    },
+    "duplicate_point": {
+      "fail": "Dobbelt punktnummer {point_id} med forskellige koordinater.",
+      "suggestion": "Behold én måling: slet punktsættet med den forkerte, og importér det igen."
+    }
   }
 }

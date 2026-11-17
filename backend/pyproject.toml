@@ -193,6 +193,8 @@ dependencies = [
     # a clean install otherwise cannot import those modules.
     "itsdangerous>=2.1.0,<3",
     "simpleeval>=0.9.13,<2",
+    # Survey modules store and transform coordinates per project CRS (EPSG); PROJ is MIT, network off, no grids shipped.
+    "pyproj>=3.6.1,<4",
 ]
 [project.scripts]
 openestimate = "app.cli:main"

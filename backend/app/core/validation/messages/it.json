@@ -2218,5 +2218,19 @@
       "calendar_no_work_days": "Il calendario {calendar} non ha giorni lavorativi.",
       "suggestion": "Indica i giorni lavorativi di questo calendario nel cronoprogramma di origine."
     }
+  },
+  "survey": {
+    "no_crs": {
+      "fail": "Il set di punti {name} non ha un SR: dichiarate un EPSG o un sistema locale prima di volumi o particelle.",
+      "suggestion": "Impostate il sistema di coordinate del progetto, poi indicate in quale sistema è stato misurato il file."
+    },
+    "crs_unconfirmed": {
+      "fail": "SR rilevato automaticamente (affidabilità {confidence}); confermate prima dell'uso.",
+      "suggestion": "Aprite Imposta SR del progetto e confermate il sistema rilevato o sceglietene un altro."
+    },
+    "duplicate_point": {
+      "fail": "Codice punto {point_id} duplicato con coordinate diverse.",
+      "suggestion": "Tenete una sola lettura: eliminate il set con quella errata e reimportatelo."
+    }
   }
 }

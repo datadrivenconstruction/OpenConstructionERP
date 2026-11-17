@@ -2218,5 +2218,19 @@
       "calendar_no_work_days": "Le calendrier {calendar} n'a aucun jour ouvré.",
       "suggestion": "Indiquez les jours ouvrés de ce calendrier dans le planning source."
     }
+  },
+  "survey": {
+    "no_crs": {
+      "fail": "Le semis de points {name} n'a pas de SCR : déclarez un EPSG ou un repère local avant les cubatures ou les parcelles.",
+      "suggestion": "Définissez le système de coordonnées du projet, puis indiquez dans quel système ce fichier a été mesuré."
+    },
+    "crs_unconfirmed": {
+      "fail": "SCR détecté automatiquement (confiance {confidence}) ; confirmez-le avant usage.",
+      "suggestion": "Ouvrez Définir le SCR du projet et confirmez le système détecté ou choisissez-en un autre."
+    },
+    "duplicate_point": {
+      "fail": "Matricule de point {point_id} en double avec des coordonnées différentes.",
+      "suggestion": "Gardez une seule mesure : supprimez le semis contenant la mauvaise et réimportez-le."
+    }
   }
 }

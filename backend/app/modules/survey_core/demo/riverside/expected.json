@@ -1,0 +1,34 @@
+{
+  "dataset": "riverside_yard",
+  "project_name": "Riverside Yard (survey demo)",
+  "crs": {"epsg": 32633, "name": "WGS 84 / UTM zone 33N", "chip": "EPSG 32633"},
+  "offsets": {"e": 389000.0, "n": 5819000.0},
+  "demo_profiles_label": "Demo values, not a standard",
+  "survey_register": {
+    "lesson_1": {"search": "32633", "chip": "EPSG 32633"},
+    "lesson_2": {"file": "control.csv", "preset": "PNEZD", "points": 4, "kind": "control"},
+    "lesson_3": {
+      "file": "existing_ground.csv",
+      "preset": "PNEZD",
+      "rows_read": 78,
+      "problems": 1,
+      "problem_rule": "SRV-003",
+      "problem_point": "EG-045",
+      "duplicate_policy": "keep_first",
+      "points_after_import": 77
+    },
+    "lesson_4": {
+      "length_m": 612.40,
+      "f_e_m": 0.042,
+      "f_n_m": -0.031,
+      "misclosure_m": 0.052,
+      "ratio": 11731,
+      "profile_ratio": 10000,
+      "verdict": "pass",
+      "bowditch_leg_m": 158.30,
+      "c_e_m": -0.011,
+      "c_n_m": 0.008
+    },
+    "lesson_5": {"point": "CP2", "e": 389110.000, "n": 5818990.000}
+  }
+}

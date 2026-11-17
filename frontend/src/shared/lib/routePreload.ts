@@ -60,6 +60,7 @@ const preloaders: Record<string, () => void> = {
   '/coordination': () => void import('@/features/coordination/CoordinationHubPage'),
   '/match-elements': () => void import('@/features/match-elements/MatchElementsPage'),
   '/geo': () => void import('@/features/geo-hub'),
+  '/survey': () => void import('@/features/survey/SurveyRegisterPage'),
   '/assets': () => void import('@/features/bim/AssetsPage'),
   '/architecture': () => void import('@/features/architecture/ArchitectureMapPage'),
 

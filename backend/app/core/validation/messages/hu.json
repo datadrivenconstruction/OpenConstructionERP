@@ -2218,5 +2218,19 @@
       "calendar_no_work_days": "A(z) {calendar} naptárban nincs munkanap.",
       "suggestion": "Jelölje meg a naptár munkanapjait a forrásütemtervben."
     }
+  },
+  "survey": {
+    "no_crs": {
+      "fail": "A(z) {name} pontcsoportnak nincs koordináta-rendszere: adjon meg EPSG-t vagy helyi hálózatot térfogat vagy telkek előtt.",
+      "suggestion": "Állítsa be a projekt koordináta-rendszerét, majd adja meg, melyik rendszerben mérték a fájlt."
+    },
+    "crs_unconfirmed": {
+      "fail": "Koordináta-rendszer automatikusan felismerve (megbízhatóság {confidence}); használat előtt erősítse meg.",
+      "suggestion": "Nyissa meg a projekt koordináta-rendszerének beállítását, és erősítse meg a felismert rendszert vagy válasszon másikat."
+    },
+    "duplicate_point": {
+      "fail": "Ismétlődő pontazonosító {point_id} eltérő koordinátákkal.",
+      "suggestion": "Tartson meg egy mérést: törölje a hibásat tartalmazó pontcsoportot, és importálja újra."
+    }
   }
 }

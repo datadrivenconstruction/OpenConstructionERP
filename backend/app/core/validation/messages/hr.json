@@ -2218,5 +2218,19 @@
       "calendar_no_work_days": "Kalendar {calendar} nema nijedan radni dan.",
       "suggestion": "Označite radne dane ovog kalendara u izvornom planu."
     }
+  },
+  "survey": {
+    "no_crs": {
+      "fail": "Skup točaka {name} nema koordinatni sustav: zadajte EPSG ili lokalnu mrežu prije obujma ili čestica.",
+      "suggestion": "Postavite koordinatni sustav projekta, zatim navedite u kojem je sustavu datoteka izmjerena."
+    },
+    "crs_unconfirmed": {
+      "fail": "Koordinatni sustav prepoznat automatski (pouzdanost {confidence}); potvrdite prije uporabe.",
+      "suggestion": "Otvorite postavljanje koordinatnog sustava projekta i potvrdite prepoznati sustav ili odaberite drugi."
+    },
+    "duplicate_point": {
+      "fail": "Dvostruka oznaka točke {point_id} s različitim koordinatama.",
+      "suggestion": "Zadržite jedno mjerenje: izbrišite skup s pogrešnim i ponovno ga uvezite."
+    }
   }
 }
