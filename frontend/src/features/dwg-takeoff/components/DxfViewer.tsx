@@ -175,6 +175,9 @@ interface Props {
    * the drawing's own size.
    */
   textDisplay?: TextDisplayState;
+  /** Draw lines at their authored weight (DXF 370) rather than all at 1 px.
+   *  Display only, like `textDisplay`. Omitted = shown. */
+  showLineWeights?: boolean;
 }
 
 export function DxfViewer({
@@ -200,6 +203,7 @@ export function DxfViewer({
   activeSearchBox,
   focusTarget,
   textDisplay,
+  showLineWeights = true,
 }: Props) {
   const drawingScaleRef = useRef(drawingScale);
   drawingScaleRef.current = drawingScale;
@@ -208,6 +212,8 @@ export function DxfViewer({
   // re-renders, which is what marks the canvas dirty (see `dirtyRef`).
   const textDisplayRef = useRef(textDisplay);
   textDisplayRef.current = textDisplay;
+  const showLineWeightsRef = useRef(showLineWeights);
+  showLineWeightsRef.current = showLineWeights;
   const calibrationOverlayRef = useRef(calibrationOverlay);
   calibrationOverlayRef.current = calibrationOverlay;
   const calibrationRef = useRef(calibration);
@@ -627,6 +633,11 @@ export function DxfViewer({
         ch,
         blockDefs,
         textDisplayRef.current,
+        {
+          visible: showLineWeightsRef.current,
+          // Weights are sized for the fitted view and grow as the reader zooms in.
+          refScale: extentsRef.current ? zoomToFit(extentsRef.current, cw, ch, 24).scale : undefined,
+        },
       );
 
       // Draw secondary selection halos for additional selected entities (multi-select)

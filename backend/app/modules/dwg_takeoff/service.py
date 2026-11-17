@@ -492,6 +492,9 @@ def _normalize_entity(raw: dict[str, Any], index: int) -> dict[str, Any]:
         result["layout"] = raw["layout"]
     if raw.get("block"):
         result["block"] = raw["block"]
+    # Millimetres; absent means ByBlock or default, which the viewer resolves.
+    if raw.get("lineweight") is not None:
+        result["lineweight"] = raw["lineweight"]
 
     if entity_type == "LINE":
         result["start"] = gd.get("start")
@@ -527,6 +530,12 @@ def _normalize_entity(raw: dict[str, Any], index: int) -> dict[str, Any]:
         # renders the drawing's real font instead of a generic fallback.
         result["style"] = gd.get("style", "")
         result["font"] = gd.get("font", "")
+        if entity_type == "MTEXT":
+            result["attachment_point"] = gd.get("attachment_point", 1)
+        elif gd.get("align_point"):
+            result["halign"] = gd.get("halign", 0)
+            result["valign"] = gd.get("valign", 0)
+            result["align_point"] = gd["align_point"]
     elif entity_type == "INSERT":
         result["start"] = gd.get("insert") or gd.get("insertion_point")
         result["block_name"] = gd.get("block_name") or gd.get("name", "")
@@ -547,8 +556,23 @@ def _normalize_entity(raw: dict[str, Any], index: int) -> dict[str, Any]:
         result["vertices"] = gd.get("points") or gd.get("control_points", [])
         result["closed"] = bool(gd.get("closed", False)) if gd.get("points") else False
     elif entity_type == "DIMENSION":
-        result["start"] = gd.get("start")
-        result["end"] = gd.get("end")
+        # Drawn through its *D block when that arrived, else from these points.
+        result["block_name"] = gd.get("block_name", "")
+        result["dimension_type"] = gd.get("dimension_type", 0)
+        result["measurement"] = gd.get("measurement")
+        result["text_override"] = gd.get("text_override", "")
+        result["start"] = gd.get("defpoint2") or gd.get("start")
+        result["end"] = gd.get("defpoint3") or gd.get("end")
+        result["dim_line_point"] = gd.get("defpoint")
+        result["text_position"] = gd.get("text_midpoint")
+        result["rotation"] = gd.get("angle", 0)
+        if gd.get("text_height"):
+            result["height"] = gd["text_height"]
+    elif entity_type in ("SOLID", "TRACE"):
+        result["type"] = "LWPOLYLINE"
+        result["vertices"] = gd.get("points", [])
+        result["closed"] = True
+        result["filled"] = True
 
     return result
 

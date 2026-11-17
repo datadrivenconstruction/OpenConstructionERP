@@ -82,8 +82,26 @@ export interface DxfEntity {
     | 'TEXT'
     | 'POINT'
     | 'INSERT'
-    | 'HATCH';
+    | 'HATCH'
+    | 'DIMENSION';
   layer: string;
+  /** Line weight in mm (DXF group 370, ByLayer resolved). Absent = ByBlock or default. */
+  lineweight?: number;
+  /** Closed outline drawn filled (SOLID / TRACE, e.g. dimension arrowheads). */
+  filled?: boolean;
+  /** TEXT justification (DXF 72/73) anchored on `align_point`. */
+  halign?: number;
+  valign?: number;
+  align_point?: { x: number; y: number };
+  /** MTEXT attachment point 1..9 (top-left .. bottom-right) at `start`. */
+  attachment_point?: number;
+  /** DIMENSION: measured value in drawing units, user text (`<>` = value). */
+  measurement?: number | null;
+  text_override?: string;
+  dimension_type?: number;
+  /** DIMENSION: a point on the dimension line, and where the text sits. */
+  dim_line_point?: { x: number; y: number } | null;
+  text_position?: { x: number; y: number } | null;
   /** Hex color string (e.g. "#ff0000") or ACI number */
   color: string | number;
   /** Line start / circle center / text insertion point */

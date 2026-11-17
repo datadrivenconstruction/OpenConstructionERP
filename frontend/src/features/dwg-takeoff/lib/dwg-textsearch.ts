@@ -16,6 +16,7 @@
  */
 
 import type { DxfEntity } from '../api';
+import { textWorldBox } from './viewport';
 
 /** Axis-aligned box in world (drawing) units. */
 export interface WorldBox {
@@ -43,36 +44,17 @@ export interface DwgTextMatch {
 const SNIPPET_RADIUS = 28;
 
 /**
- * Estimate the world-space box a single-line TEXT entity occupies.
+ * Estimate the world-space box a TEXT entity occupies, for the find overlay.
  *
- * DXF text grows up and to the right from its insertion point; glyph width
- * is font dependent, so we use the same 0.6*height-per-character heuristic
- * `viewport.textExtents` uses. That is where the resemblance ends, and the
- * gap is now wider than it was: this box is in world units at the authored
- * height, while the renderer draws every string clamped to a readable pixel
- * band, so at extreme zoom a highlight and its glyph are visibly different
- * sizes. It is a real defect and it is not this function's to fix alone - a
- * highlight that followed the drawn size would have to be computed in screen
- * space, which is a change to the find-text overlay rather than to an
- * estimate. Rotation is deliberately ignored here, unlike in the fit: a
- * highlight has to sit where the string is, so a rotated match is framed by
- * its axis-aligned box. Returns null if the entity has no insertion point or
- * no text.
+ * Shares `viewport.textWorldBox` with the renderer's layout, so justified
+ * text and MTEXT attachment frame where the glyphs are drawn, and a rotated
+ * label is framed by the axis-aligned box of its rotated rectangle. Glyph
+ * width stays the 0.6*height-per-character estimate. Returns null if the
+ * entity has no insertion point or no text.
  */
 export function textBoxForEntity(e: DxfEntity): WorldBox | null {
-  if (e.type !== 'TEXT' || !e.start || !e.text) return null;
-  const h = e.height && e.height > 0 ? e.height : 2.5;
-  // Longest line drives the width so multi-line MTEXT still frames sensibly.
-  const longest = e.text.split('\n').reduce((m, line) => Math.max(m, line.length), 0);
-  const width = Math.max(h, h * longest * 0.6);
-  const lines = e.text.split('\n').length;
-  const height = h * lines * 1.3;
-  return {
-    minX: e.start.x,
-    maxX: e.start.x + width,
-    minY: e.start.y,
-    maxY: e.start.y + height,
-  };
+  if (e.type !== 'TEXT') return null;
+  return textWorldBox(e);
 }
 
 /**
