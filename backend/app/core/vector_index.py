@@ -98,6 +98,7 @@ COLLECTION_COSTS = "oe_cost_items"
 # existing module table; the vectors live in LanceDB / Qdrant and the SQL
 # fallback in ``search.service`` covers the no-vector deploy path.
 COLLECTION_RFI = "oe_rfi_rfis"
+COLLECTION_CATALOG_RESOURCES = "oe_catalog_resources"
 COLLECTION_SUBMITTALS = "oe_submittals_submittals"
 COLLECTION_CORRESPONDENCE = "oe_correspondence_correspondence"
 # Change-management collections (change intelligence - make every change
@@ -607,8 +608,11 @@ async def search_collection(
     project_id: str | None = None,
     tenant_id: str | None = None,
     limit: int = 10,
+    ids: list[str] | None = None,
 ) -> list[VectorHit]:
     """Semantic search inside a single collection.
+
+    ``ids`` ranks only those rows (SQL prefilter by the caller).
 
     ``adapter_or_name`` accepts either an EmbeddingAdapter instance or a
     bare collection name string - useful when the unified search router
@@ -636,6 +640,7 @@ async def search_collection(
             project_id=project_id,
             tenant_id=tenant_id,
             limit=limit,
+            ids=ids,
         )
     except Exception as exc:
         logger.debug("search_collection(%s) failed: %s", collection, exc)

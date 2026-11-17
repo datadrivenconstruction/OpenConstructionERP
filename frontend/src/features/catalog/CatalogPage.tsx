@@ -214,6 +214,9 @@ function buildSearchUrl(
 ): string {
   const params = new URLSearchParams();
   if (q) params.set('q', q);
+  // Filters narrow in SQL first, then the subset is ranked by meaning (#563);
+  // the server falls back to text search when no vector index exists.
+  if (q.trim().length >= 2) params.set('semantic', 'true');
   if (resourceType) params.set('resource_type', resourceType);
   if (category) params.set('category', category);
   if (unit) params.set('unit', unit);

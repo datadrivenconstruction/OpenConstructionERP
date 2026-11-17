@@ -831,7 +831,8 @@ def _lancedb_search_generic(
     if extra_where:
         where_parts.append(extra_where)
     if where_parts:
-        q = q.where(" AND ".join(where_parts))
+        # An id list must narrow the candidates before the nearest-neighbour cut.
+        q = q.where(" AND ".join(where_parts), prefilter=bool(extra_where))
 
     results = q.to_list()
     return [
@@ -1295,21 +1296,28 @@ def vector_search_collection(
     project_id: str | None = None,
     tenant_id: str | None = None,
     limit: int = 10,
+    ids: list[str] | None = None,
 ) -> list[dict]:
     """Search ``collection_name`` for nearest neighbours.
+
+    ``ids`` restricts the ranking to those rows (an empty list matches nothing).
 
     Returns a list of hits with ``id, score, text, tenant_id, project_id,
     module, payload``.  ``payload`` is returned as a JSON string for
     LanceDB and as the original dict (re-serialised) for Qdrant - callers
     should treat it as opaque and let ``core/vector_index.py`` decode it.
     """
+    if ids is not None and not ids:
+        return []
     if _backend() == "qdrant":
         client = _get_qdrant()
         if client is None:
             return []
-        from qdrant_client.models import FieldCondition, Filter, MatchValue
+        from qdrant_client.models import FieldCondition, Filter, HasIdCondition, MatchValue
 
         must_clauses: list[Any] = []
+        if ids is not None:
+            must_clauses.append(HasIdCondition(has_id=list(ids)))
         if project_id:
             must_clauses.append(FieldCondition(key="project_id", match=MatchValue(value=project_id)))
         if tenant_id:
@@ -1364,7 +1372,16 @@ def vector_search_collection(
         project_id=project_id,
         tenant_id=tenant_id,
         limit=limit,
+        extra_where=_ids_where(ids),
     )
+
+
+def _ids_where(ids: list[str] | None) -> str | None:
+    """LanceDB predicate for an id restriction, or None when there is none."""
+    if ids is None:
+        return None
+    quoted = _safe_quote_ids(ids)
+    return f"id IN ({', '.join(quoted)})" if quoted else "1 = 0"
 
 
 def vector_delete_collection(collection_name: str, ids: list[str]) -> int:

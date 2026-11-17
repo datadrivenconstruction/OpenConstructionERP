@@ -8,6 +8,7 @@ No business logic - pure data access.
 
 import uuid
 from decimal import Decimal
+from typing import Any
 
 from sqlalchemy import func, or_, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -32,6 +33,32 @@ def _escape_like(term: str) -> str:
     the resulting pattern with ``.ilike(pattern, escape="\\")``.
     """
     return term.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+
+
+def _apply_structured_filters(
+    stmt: Any,
+    *,
+    resource_type: str | None = None,
+    category: str | None = None,
+    region: str | None = None,
+    unit: str | None = None,
+    min_price: float | Decimal | None = None,
+    max_price: float | Decimal | None = None,
+) -> Any:
+    """The deterministic filters shared by text search and the semantic prefilter."""
+    if resource_type:
+        stmt = stmt.where(CatalogResource.resource_type == resource_type)
+    if category:
+        stmt = stmt.where(CatalogResource.category == category)
+    if region:
+        stmt = stmt.where(CatalogResource.region == region)
+    if unit:
+        stmt = stmt.where(CatalogResource.unit == unit)
+    if min_price is not None:
+        stmt = stmt.where(numeric_value(CatalogResource.base_price) >= float(min_price))
+    if max_price is not None:
+        stmt = stmt.where(numeric_value(CatalogResource.base_price) <= float(max_price))
+    return stmt
 
 
 class CatalogResourceRepository:
@@ -96,23 +123,15 @@ class CatalogResourceRepository:
             if clauses:
                 base = base.where(or_(*clauses))
 
-        if resource_type:
-            base = base.where(CatalogResource.resource_type == resource_type)
-
-        if category:
-            base = base.where(CatalogResource.category == category)
-
-        if region:
-            base = base.where(CatalogResource.region == region)
-
-        if unit:
-            base = base.where(CatalogResource.unit == unit)
-
-        if min_price is not None:
-            base = base.where(numeric_value(CatalogResource.base_price) >= float(min_price))
-
-        if max_price is not None:
-            base = base.where(numeric_value(CatalogResource.base_price) <= float(max_price))
+        base = _apply_structured_filters(
+            base,
+            resource_type=resource_type,
+            category=category,
+            region=region,
+            unit=unit,
+            min_price=min_price,
+            max_price=max_price,
+        )
 
         # Count
         count_stmt = select(func.count()).select_from(base.subquery())
@@ -124,6 +143,36 @@ class CatalogResourceRepository:
         items = list(result.scalars().all())
 
         return items, total
+
+    async def ids_matching(
+        self,
+        *,
+        resource_type: str | None = None,
+        category: str | None = None,
+        region: str | None = None,
+        unit: str | None = None,
+        min_price: float | Decimal | None = None,
+        max_price: float | Decimal | None = None,
+    ) -> list[str]:
+        """Ids of the active resources a semantic search may rank, by the same filters as :meth:`search`."""
+        stmt = _apply_structured_filters(
+            select(CatalogResource.id).where(CatalogResource.is_active.is_(True)),
+            resource_type=resource_type,
+            category=category,
+            region=region,
+            unit=unit,
+            min_price=min_price,
+            max_price=max_price,
+        )
+        return [str(row[0]) for row in (await self.session.execute(stmt)).all()]
+
+    async def get_active_by_ids(self, ids: list[str]) -> dict[str, CatalogResource]:
+        """Active resources by id, keyed by the string id."""
+        if not ids:
+            return {}
+        parsed = [uuid.UUID(i) for i in ids]
+        stmt = select(CatalogResource).where(CatalogResource.id.in_(parsed), CatalogResource.is_active.is_(True))
+        return {str(r.id): r for r in (await self.session.execute(stmt)).scalars().all()}
 
     async def create(self, resource: CatalogResource) -> CatalogResource:
         """Insert a new catalog resource."""

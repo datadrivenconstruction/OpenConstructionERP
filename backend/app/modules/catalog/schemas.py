@@ -232,6 +232,7 @@ class CatalogSearchQuery(BaseModel):
     max_price: FiniteDecimal | None = Field(default=None, ge=0)
     limit: int = Field(default=50, ge=1, le=500)
     offset: int = Field(default=0, ge=0)
+    semantic: bool = Field(default=False, description="Rank the filtered subset by meaning when a vector store exists")
 
     @field_serializer("min_price", "max_price", when_used="json")
     def _ser_money(self, v: Decimal | None) -> str | None:
@@ -245,6 +246,7 @@ class CatalogSearchResponse(BaseModel):
     total: int
     limit: int
     offset: int
+    search_mode: str = Field(default="text", description="'semantic' when ranked by vector similarity, else 'text'")
 
 
 # ── Stats ─────────────────────────────────────────────────────────────────
