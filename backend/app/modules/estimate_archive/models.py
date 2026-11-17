@@ -15,8 +15,9 @@ variation, change order) are plain GUIDs: deleting a bill must never take its
 seal with it, and that is the whole point of a seal.
 
 Immutability (rule S2): the content columns of a seal are guarded twice. The
-ORM refuses a flush that changes them (``before_update`` below) and on
-PostgreSQL a trigger rejects UPDATE of those columns and every DELETE. Status
+ORM refuses a flush that changes them or deletes the row, and on PostgreSQL a
+trigger rejects UPDATE of those columns and every DELETE. The trigger is made
+with the table and again at module startup, so create_all installs carry it. Status
 moves (sealed -> opening requested -> open -> closed) are visibility events,
 not content, and stay writable.
 """
@@ -26,6 +27,7 @@ from __future__ import annotations
 import uuid
 from datetime import datetime
 from decimal import Decimal
+from typing import Any
 
 from sqlalchemy import JSON, Boolean, DateTime, ForeignKey, Index, Numeric, String, Text, event, inspect
 from sqlalchemy.orm import Mapped, mapped_column
@@ -103,6 +105,50 @@ def _refuse_content_change(_mapper: object, _connection: object, target: Estimat
     changed = [name for name in SEAL_CONTENT_COLUMNS if state.attrs[name].history.has_changes()]
     if changed:
         raise SealImmutableError(f"sealed estimate content is immutable: {', '.join(changed)}")
+
+
+@event.listens_for(EstimateSeal, "before_delete")
+def _refuse_delete(_mapper: object, _connection: object, target: EstimateSeal) -> None:
+    raise SealImmutableError(f"a sealed estimate cannot be deleted: {target.id}")
+
+
+def _guard_statements() -> list[str]:
+    table = EstimateSeal.__tablename__
+    changed = " OR ".join(f'NEW."{c}" IS DISTINCT FROM OLD."{c}"' for c in SEAL_CONTENT_COLUMNS if c != "payload")
+    return [
+        f"""
+        CREATE OR REPLACE FUNCTION oe_estimate_archive_seal_guard() RETURNS trigger AS $$
+        BEGIN
+            IF TG_OP = 'DELETE' THEN
+                RAISE EXCEPTION 'ARC_MUTATION_REFUSED: a sealed estimate cannot be deleted';
+            END IF;
+            IF {changed} OR NEW.payload::text IS DISTINCT FROM OLD.payload::text THEN
+                RAISE EXCEPTION 'ARC_MUTATION_REFUSED: sealed estimate content is immutable';
+            END IF;
+            RETURN NEW;
+        END;
+        $$ LANGUAGE plpgsql
+        """,
+        f'DROP TRIGGER IF EXISTS oe_estimate_archive_seal_guard ON "{table}"',
+        f'CREATE TRIGGER oe_estimate_archive_seal_guard BEFORE UPDATE OR DELETE ON "{table}" '
+        "FOR EACH ROW EXECUTE FUNCTION oe_estimate_archive_seal_guard()",
+    ]
+
+
+def install_seal_guard(connection: Any) -> None:
+    """Create the PostgreSQL immutability trigger; idempotent, a no-op on other dialects."""
+    if connection.dialect.name != "postgresql":
+        return
+    for sql in _guard_statements():
+        connection.exec_driver_sql(sql)
+
+
+def _guard_after_create(_table: object, connection: Any, **_kw: object) -> None:
+    install_seal_guard(connection)
+
+
+# create_all builds fresh installs and is then stamped, so the migration's trigger never runs there.
+event.listen(EstimateSeal.__table__, "after_create", _guard_after_create)
 
 
 class EstimateSealAttachment(Base):

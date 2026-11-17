@@ -2062,6 +2062,7 @@
     "arc_mutation_refused": {
       "fail": "Mühürlü bir keşif değiştirilemez veya silinemez. Yerine geçecek yeni bir sürüm mühürleyin."
     },
-    "contents_locked": "İçerik resmi bir açılış başlayana kadar mühürlü kalır."
+    "contents_locked": "İçerik resmi bir açılış başlayana kadar mühürlü kalır.",
+    "market_off": "Mühürlü keşifler bu projenin pazar profilinde yer almıyor."
   }
 }

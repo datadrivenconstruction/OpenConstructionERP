@@ -2062,6 +2062,7 @@
     "arc_mutation_refused": {
       "fail": "Pitseeritud eelarvet ei saa muuta ega kustutada. Pitseerige uus versioon, mis selle asendab."
     },
-    "contents_locked": "Sisu jääb pitseerituks, kuni algab ametlik avamine."
+    "contents_locked": "Sisu jääb pitseerituks, kuni algab ametlik avamine.",
+    "market_off": "Pitseeritud eelarved ei kuulu selle projekti turuprofiili."
   }
 }

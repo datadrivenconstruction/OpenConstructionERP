@@ -2,8 +2,8 @@
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 """The worked examples of the sealed-estimate spec as payloads.
 
-Shared by the tests and the demo seed, so the numbers a visitor sees on the
-demo projects are the numbers the tests prove.
+Position rates are net, as a bill stores them: the markup stack is applied on
+top once, so a sealed rate is net plus markups and never markups twice.
 """
 
 from __future__ import annotations
@@ -55,7 +55,7 @@ def example_de_trench() -> dict[str, Any]:
                 "parent_ordinal": "02.03",
                 "unit": "m3",
                 "quantity": "1250",
-                "unit_rate": "36.16",
+                "unit_rate": "28.88",
                 "description": "Rohrgraben ausheben, Tiefe bis 1,75 m",
                 "classification": {"din276": "311"},
                 "resources": [
@@ -68,7 +68,7 @@ def example_de_trench() -> dict[str, Any]:
                 "parent_ordinal": "02.03",
                 "unit": "m3",
                 "quantity": "420",
-                "unit_rate": "41.19",
+                "unit_rate": "33.24",
                 "description": "Rohrbettung Sand 0/2",
                 "resources": [
                     _res("labor", "L-TRENCH", "Facharbeiter Tiefbau", "h", "0.20", "52.80"),
@@ -115,7 +115,7 @@ def example_uk_trench() -> dict[str, Any]:
                 "parent_ordinal": "D20",
                 "unit": "m3",
                 "quantity": "640",
-                "unit_rate": "42.62",
+                "unit_rate": "37.88",
                 "description": "Trench excavation in clay, n.e. 2 m deep",
                 "resources": [
                     _res("labor", "LAB", "Groundworker", "h", "0.35", "32.00"),
@@ -152,7 +152,7 @@ def example_fidic_pipe_surround() -> dict[str, Any]:
                 "parent_ordinal": "4",
                 "unit": "m3",
                 "quantity": "310",
-                "unit_rate": "188.02",
+                "unit_rate": "165.80",
                 "description": "Concrete pipe surround",
                 "resources": [
                     _res("labor", "LAB", "Concrete gang", "h", "1.2", "46.00"),

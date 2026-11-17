@@ -2062,6 +2062,7 @@
     "arc_mutation_refused": {
       "fail": "Dự toán đã niêm phong không thể sửa hoặc xóa. Hãy niêm phong phiên bản mới thay thế."
     },
-    "contents_locked": "Nội dung vẫn được niêm phong cho đến khi bắt đầu mở chính thức."
+    "contents_locked": "Nội dung vẫn được niêm phong cho đến khi bắt đầu mở chính thức.",
+    "market_off": "Dự toán niêm phong không thuộc hồ sơ thị trường của dự án này."
   }
 }

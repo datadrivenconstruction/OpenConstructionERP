@@ -118,6 +118,10 @@ from app.modules.projects.schemas import (
 logger = logging.getLogger(__name__)
 
 
+#: Records that must outlive their project: a sealed estimate is kept for its retention period.
+_RETAINED_TABLE_PREFIXES: tuple[str, ...] = ("oe_estimate_archive_",)
+
+
 async def purge_project_children_without_cascade(
     session: AsyncSession,
     project_ids: list[uuid.UUID],
@@ -176,7 +180,7 @@ async def purge_project_children_without_cascade(
     except ImportError:
         logger.debug("approval_routes models unavailable - skipping approval instance purge")
     for table in reversed(Base.metadata.sorted_tables):
-        if table.name == Project.__tablename__:
+        if table.name == Project.__tablename__ or table.name.startswith(_RETAINED_TABLE_PREFIXES):
             continue
         col = table.c.get("project_id")
         if col is None:
@@ -1742,6 +1746,17 @@ class ProjectService:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="The typed name does not match the project name.",
+            )
+        try:
+            from app.modules.estimate_archive import service as estimate_archive
+
+            retained = await estimate_archive.seals_under_retention(self.session, [project_id])
+        except ImportError:
+            retained = 0
+        if retained:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="This project has a sealed estimate still under retention. Keep the project archived.",
             )
         project_name = project.name
         from app.core.demo_marker import demo_id_of, retire_demo_ids

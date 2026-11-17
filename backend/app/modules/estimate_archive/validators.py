@@ -105,7 +105,7 @@ class TotalMismatch(_ArchiveRule):
             return []
         seal, award = dec(d.get("seal_total")), dec(d.get("award_value"))
         diff = seal - award
-        if abs(diff) < _TOLERANCE:
+        if abs(diff) <= _TOLERANCE:
             return []
         cur = str(d.get("currency") or "")
         return [

@@ -99,6 +99,109 @@ def refused(detail_key: str = "estimate_archive.arc_mutation_refused.fail") -> H
     )
 
 
+def add_years(start: date, years: int) -> date:
+    """The same calendar day ``years`` later; 29 February falls back to the 28th."""
+    try:
+        return start.replace(year=start.year + years)
+    except ValueError:
+        return start.replace(year=start.year + years, day=28)
+
+
+#: Contract metadata keys naming the acceptance (taking-over, practical completion) date.
+_ACCEPTANCE_KEYS = ("acceptance_date", "taking_over_date", "practical_completion_date", "substantial_completion_date")
+
+
+def retention_start(contract: Any, sealed_at: datetime) -> date:
+    """Retention runs from acceptance of the works; before acceptance, from the seal date."""
+    meta = getattr(contract, "metadata_", None) or {}
+    for key in _ACCEPTANCE_KEYS:
+        day = _parse_day(meta.get(key)) if isinstance(meta, dict) else None
+        if day is not None:
+            return day
+    return (_aware(sealed_at) or _now()).date()
+
+
+async def seals_under_retention(
+    session: AsyncSession, project_ids: list[uuid.UUID], *, today: date | None = None
+) -> int:
+    """How many seals of these projects are still inside their retention period."""
+    from sqlalchemy import func, or_
+
+    day = (today or _now().date()).isoformat()
+    stmt = select(func.count(EstimateSeal.id)).where(
+        EstimateSeal.project_id.in_(project_ids),
+        or_(EstimateSeal.retention_until.is_(None), EstimateSeal.retention_until >= day),
+    )
+    return int((await session.execute(stmt)).scalar() or 0)
+
+
+def variation_bill_stmt(project_id: uuid.UUID, variation_request_id: uuid.UUID) -> Any:
+    """The variation's own bill, only when the variation is this project's and still a draft."""
+    from app.modules.boq.models import BOQ
+    from app.modules.variations.models import VariationRequest
+
+    return (
+        select(BOQ)
+        .join(VariationRequest, VariationRequest.id == BOQ.variation_request_id)
+        .where(
+            BOQ.variation_request_id == variation_request_id,
+            BOQ.project_id == project_id,
+            VariationRequest.project_id == project_id,
+            VariationRequest.status == "draft",
+        )
+        .limit(1)
+    )
+
+
+def pricing_data(
+    seal: EstimateSeal | None,
+    result: dict[str, Any],
+    basis_method: str | None,
+    *,
+    claimed_markups: list[str] | None = None,
+    benchmarks: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Validation input for one priced change line.
+
+    ``claimed_markups`` are the markups of the bill the line is carried into (the
+    sealed stack when it goes nowhere); ``benchmarks`` are cost-database rates by
+    resource code for the lines the change carries.
+    """
+    sealed_names = [str(s["name"]) for s in result.get("markup_steps") or []]
+    carried = []
+    for line in result.get("changed_lines") or []:
+        code = str(line.get("code") or "")
+        if code and benchmarks and benchmarks.get(code) not in (None, ""):
+            carried.append({"code": code, "unit_cost": line.get("unit_cost"), "benchmark": benchmarks[code]})
+    return {
+        "has_seal": seal is not None,
+        "basis_method": basis_method,
+        "code": result.get("ordinal"),
+        "deviations": engine.deviations(result),
+        "unevidenced": engine.unevidenced_additions(result),
+        "sealed_markups": sealed_names,
+        "claimed_markups": sealed_names if claimed_markups is None else list(claimed_markups),
+        "carried": sorted(carried, key=lambda r: r["code"]),
+    }
+
+
+def trace_checks(traces: list[Any], live_seal_ids: set[uuid.UUID]) -> list[dict[str, Any]]:
+    """Validation input for the original-basis lines of a variation: does a live seal stand behind each?"""
+    return [
+        {
+            "has_seal": t.sealed_seal_id is not None and t.sealed_seal_id in live_seal_ids,
+            "basis_method": "original_basis",
+            "code": t.note or str(t.id)[:8],
+        }
+        for t in traces
+        if t.basis_method == "original_basis"
+    ]
+
+
+def _attends(opening: Any, user_id: str | uuid.UUID) -> bool:
+    return any(str(a.get("user_id") or "") == str(user_id) for a in opening.attendees or [])
+
+
 class EstimateArchiveService:
     """Business logic of sealed estimates."""
 
@@ -355,6 +458,16 @@ class EstimateArchiveService:
         reason: str = "",
     ) -> EstimateSeal:
         preview = await self.preview(data, user_id)
+        if not preview.policy.enabled:
+            raise HTTPException(
+                status_code=403,
+                detail={
+                    "code": "MARKET_OFF",
+                    "message": translate("estimate_archive.market_off", locale=get_locale()),
+                },
+            )
+        if supersedes is not None and preview.project_id != supersedes.project_id:
+            raise HTTPException(status_code=422, detail="A seal can only be superseded by a seal of the same project")
         if not preview.can_seal:
             blocking = [c.message for c in preview.checks if c.blocking]
             raise HTTPException(status_code=422, detail={"code": "SEAL_BLOCKED", "checks": blocking})
@@ -365,7 +478,8 @@ class EstimateArchiveService:
         token, authority = await tsa.request_timestamp(digest)
         sealed_at = _now()
         pol = preview.policy
-        retention = date(sealed_at.year + pol.retention_years, sealed_at.month, min(sealed_at.day, 28)).isoformat()
+        contract = await self._contract(preview.contract_id)
+        retention = add_years(retention_start(contract, sealed_at), pol.retention_years).isoformat()
         seal = EstimateSeal(
             project_id=boq.project_id,
             contract_id=preview.contract_id,
@@ -551,6 +665,7 @@ class EstimateArchiveService:
         summary = (await self.summaries([seal]))[0]
         contract = await self._contract(seal.contract_id)
         open_rows = [o for o in await self.repo.openings(seal_ids=[seal.id]) if o.status == "open"]
+        await self._refresh_retention(seal, contract)
         return SealDetail(
             **summary.model_dump(),
             attachments=[AttachmentOut.model_validate(a) for a in await self.repo.attachments(seal.id)],
@@ -562,6 +677,16 @@ class EstimateArchiveService:
             supersede_reason=seal.supersede_reason,
             policy=await self.policy_for(seal.project_id, contract),
         )
+
+    async def _refresh_retention(self, seal: EstimateSeal, contract: Any) -> None:
+        """Move the retention end once the works are accepted; it never moves earlier."""
+        years = int(policy.policy_for(seal.profile).get("retention_years") or 0)
+        if contract is None or not years:
+            return
+        until = add_years(retention_start(contract, seal.sealed_at), years).isoformat()
+        if seal.retention_until is None or until > seal.retention_until:
+            seal.retention_until = until
+            await self.session.flush()
 
     async def contents(self, seal: EstimateSeal, user_id: str, user_payload: dict[str, Any]) -> ContentsOut:
         """The payload for an internal reader (logged), or the scope of an open session."""
@@ -577,7 +702,16 @@ class EstimateArchiveService:
                     "message": translate("estimate_archive.contents_locked", locale=get_locale()),
                 },
             )
-        opening = open_rows[0]
+        mine = [o for o in open_rows if _attends(o, user_id)]
+        if not mine:
+            raise HTTPException(
+                status_code=403,
+                detail={
+                    "code": "SEALED",
+                    "message": translate("estimate_archive.contents_locked", locale=get_locale()),
+                },
+            )
+        opening = mine[0]
         payload = dict(seal.payload)
         scope = None
         if opening.scope == "positions":
@@ -841,8 +975,12 @@ class EstimateArchiveService:
     async def derive(
         self, seal: EstimateSeal, req: DeriveRequest, user_id: str, user_payload: dict[str, Any]
     ) -> DeriveResult:
+        opening_id = None
         if not await self.may_read(seal, user_payload):
-            await self._require_open_scope(seal, [req.position_ordinal])
+            opening_id = await self._require_open_scope(seal, [req.position_ordinal], user_id)
+        await self.log(
+            seal, "read", user_id, opening_id=opening_id, detail={"ordinal": req.position_ordinal, "via": "derive"}
+        )
         contract = await self._contract(seal.contract_id)
         pol = await self.policy_for(seal.project_id, contract)
         cp_stack = policy.policy_for(pol.profile).get("cost_plus_stack")
@@ -860,38 +998,42 @@ class EstimateArchiveService:
             )
         except KeyError as exc:
             raise HTTPException(status_code=404, detail="Position not in the seal") from exc
-        findings = await self.pricing_findings(seal, result, None)
+        variation_id = getattr(req, "variation_request_id", None)
+        findings = await self.pricing_findings(
+            seal,
+            result,
+            getattr(req, "basis_method", None),
+            claimed_markups=await self.variation_markups(seal.project_id, variation_id) if variation_id else None,
+            benchmarks=await self._benchmarks(result),
+        )
         methods = [m for m in pol.methods if m in {x["method"] for x in result["methods"]}]
         methods += [x["method"] for x in result["methods"] if x["method"] not in methods]
         return DeriveResult(
             seal_id=seal.id, result=result, findings=findings, methods_order=methods, citations=pol.citations
         )
 
-    async def _require_open_scope(self, seal: EstimateSeal, ordinals: list[str]) -> None:
+    async def _require_open_scope(self, seal: EstimateSeal, ordinals: list[str], user_id: str | uuid.UUID) -> uuid.UUID:
+        """The open session this attendee may price from; 403 when there is none."""
         open_rows = [o for o in await self.repo.openings(seal_ids=[seal.id]) if o.status == "open"]
         for o in open_rows:
-            if o.scope == "full" or set(ordinals) <= set(o.scope_ordinals or []):
-                return
+            if _attends(o, user_id) and (o.scope == "full" or set(ordinals) <= set(o.scope_ordinals or [])):
+                return o.id
         raise HTTPException(
             status_code=403,
             detail={"code": "SEALED", "message": translate("estimate_archive.contents_locked", locale=get_locale())},
         )
 
     async def pricing_findings(
-        self, seal: EstimateSeal | None, result: dict[str, Any], basis_method: str | None
+        self,
+        seal: EstimateSeal | None,
+        result: dict[str, Any],
+        basis_method: str | None,
+        *,
+        claimed_markups: list[str] | None = None,
+        benchmarks: dict[str, Any] | None = None,
     ) -> list[Finding]:
-        sealed_names = [s["name"] for s in result.get("markup_steps") or []]
         report = await validation_engine.validate(
-            data={
-                "has_seal": seal is not None,
-                "basis_method": basis_method,
-                "code": result.get("ordinal"),
-                "deviations": engine.deviations(result),
-                "unevidenced": engine.unevidenced_additions(result),
-                "sealed_markups": sealed_names,
-                "claimed_markups": sealed_names,
-                "carried": [],
-            },
+            data=pricing_data(seal, result, basis_method, claimed_markups=claimed_markups, benchmarks=benchmarks),
             rule_sets=[PRICING_RULE_SET],
             target_type="estimate_seal_pricing",
             target_id=str(seal.id) if seal else "",
@@ -899,9 +1041,84 @@ class EstimateArchiveService:
         )
         return _findings(report)
 
+    async def variation_markups(self, project_id: uuid.UUID, variation_request_id: uuid.UUID) -> list[str] | None:
+        """Names of the active markups on the variation's own bill; None when it has no bill."""
+        from app.modules.boq.models import BOQMarkup
+
+        bill = (await self.session.execute(variation_bill_stmt(project_id, variation_request_id))).scalars().first()
+        if bill is None:
+            return None
+        rows = (
+            await self.session.execute(
+                select(BOQMarkup.name).where(BOQMarkup.boq_id == bill.id, BOQMarkup.is_active.is_(True))
+            )
+        ).all()
+        return [str(r[0]) for r in rows]
+
+    async def _benchmarks(self, result: dict[str, Any]) -> dict[str, str]:
+        """Cost-database rates for the resource codes a change carries (first active match per code)."""
+        from app.modules.costs.models import CostItem
+
+        codes = sorted({str(x.get("code")) for x in result.get("changed_lines") or [] if x.get("code")})
+        if not codes:
+            return {}
+        try:
+            rows = (
+                await self.session.execute(
+                    select(CostItem.code, CostItem.rate).where(CostItem.code.in_(codes), CostItem.is_active.is_(True))
+                )
+            ).all()
+        except Exception:  # noqa: BLE001 - a benchmark is a hint, never a blocker
+            logger.debug("Cost benchmarks unavailable", exc_info=True)
+            return {}
+        out: dict[str, str] = {}
+        for code, rate in rows:
+            out.setdefault(str(code), str(rate))
+        return out
+
+    async def variation_findings(self, variation_request_id: uuid.UUID, user_id: str) -> list[Finding]:
+        """Original-basis lines of a variation that no live seal stands behind (VAR_BASIS_NO_SEAL)."""
+        from app.modules.variations.models import VariationBOQTrace, VariationRequest
+
+        vr = await self.session.get(VariationRequest, variation_request_id)
+        if vr is None:
+            raise HTTPException(status_code=404, detail="Variation not found")
+        await verify_project_access(vr.project_id, user_id, self.session)
+        traces = list(
+            (
+                await self.session.execute(
+                    select(VariationBOQTrace).where(VariationBOQTrace.variation_request_id == variation_request_id)
+                )
+            )
+            .scalars()
+            .all()
+        )
+        live = {
+            s.id
+            for s in await self.repo.list_seals(project_ids=[vr.project_id], project_id=vr.project_id)
+            if s.status != "superseded"
+        }
+        out: list[Finding] = []
+        for data in trace_checks(traces, live):
+            report = await validation_engine.validate(
+                data=data,
+                rule_sets=[PRICING_RULE_SET],
+                target_type="estimate_seal_pricing",
+                target_id=str(variation_request_id),
+                metadata={"locale": get_locale()},
+            )
+            out.extend(f for f in _findings(report) if f.code == "VAR_BASIS_NO_SEAL")
+        return out
+
     async def record_derivation(
         self, seal: EstimateSeal, data: DerivationCreate, user_id: str, user_payload: dict[str, Any]
     ) -> SealDerivation:
+        if data.variation_request_id is not None:
+            from app.modules.variations.models import VariationRequest
+
+            vr = await self.session.get(VariationRequest, data.variation_request_id)
+            if vr is None or vr.project_id != seal.project_id:
+                raise HTTPException(status_code=404, detail="Variation not found")
         derived = await self.derive(seal, data, user_id, user_payload)
         result = derived.result
         rate = _method_rate(result, data.basis_method)
@@ -943,7 +1160,14 @@ class EstimateArchiveService:
         derivation.chosen_rate = _method_rate(derivation.result or {}, method)
         await self.session.flush()
         if derivation.variation_position_id is not None:
+            from app.modules.boq.models import Position
             from app.modules.variations.models import VariationBOQTrace
+
+            position = await self.session.get(Position, derivation.variation_position_id)
+            if position is not None and derivation.chosen_rate is not None:
+                position.unit_rate = engine.money(derivation.chosen_rate)
+                position.total = engine.money(derivation.chosen_rate * engine.dec(position.quantity))
+                await self.session.flush()
 
             trace = (
                 (
@@ -966,18 +1190,13 @@ class EstimateArchiveService:
 
     async def _write_variation_line(self, seal: EstimateSeal, row: SealDerivation) -> uuid.UUID | None:
         """Write the carried line into the variation's own bill, traced to the seal."""
-        from app.modules.boq.models import BOQ, Position
+        from app.modules.boq.models import Position
         from app.modules.variations.models import VariationBOQTrace
 
-        bill = (
-            (
-                await self.session.execute(
-                    select(BOQ).where(BOQ.variation_request_id == row.variation_request_id).limit(1)
-                )
-            )
-            .scalars()
-            .first()
-        )
+        if row.variation_request_id is None:
+            return None
+        stmt = variation_bill_stmt(seal.project_id, row.variation_request_id)
+        bill = (await self.session.execute(stmt)).scalars().first()
         if bill is None:
             return None
         result = row.result or {}
@@ -1038,7 +1257,8 @@ class EstimateArchiveService:
         position = engine.find_position(seal.payload or {}, ordinal)
         if position is None:
             raise HTTPException(status_code=404, detail="Position not in the seal")
-        rate = engine.dec(position.get("unit_rate"))
+        # The contract rate: the sealed net rate with the sealed markups applied, as the bill carries it.
+        rate = engine.dec(engine.derive_rate(seal.payload or {}, ordinal)["sealed_rate"])
         item.original_rate = rate
         meta = dict(item.metadata_ or {})
         meta["original_rate_source"] = {

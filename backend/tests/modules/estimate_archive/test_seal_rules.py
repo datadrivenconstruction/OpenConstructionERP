@@ -203,10 +203,13 @@ async def test_original_basis_without_a_seal_is_flagged() -> None:
 
 
 def test_every_demo_plan_prices_its_change_from_its_own_seal() -> None:
-    from app.modules.estimate_archive.seed import _PLAN
+    from app.modules.estimate_archive.seed import _PLAN, demo_change
 
-    for demo_id, (build, profile, ordinal, change, _ref, people) in _PLAN.items():
-        result = engine.derive_rate(build(), ordinal, **change)
+    for demo_id, (build, profile, _ref, people) in _PLAN.items():
+        payload = build()
+        picked = demo_change(payload)
+        assert picked is not None, demo_id
+        result = engine.derive_rate(payload, picked[0], **picked[1])
         assert {m["method"] for m in result["methods"]} >= {"original_basis"}, demo_id
         assert policy.policy_for(profile)["enabled"], demo_id
         assert {p[3] for p in people} == {"internal", "counterparty"}, demo_id

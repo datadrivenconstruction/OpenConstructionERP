@@ -2062,6 +2062,7 @@
     "arc_mutation_refused": {
       "fail": "Et forseglet overslag kan ikke ændres eller slettes. Forsegl en ny version, der erstatter det."
     },
-    "contents_locked": "Indholdet forbliver forseglet, indtil en formel åbning begynder."
+    "contents_locked": "Indholdet forbliver forseglet, indtil en formel åbning begynder.",
+    "market_off": "Forseglede kalkulationer indgår ikke i projektets markedsprofil."
   }
 }
