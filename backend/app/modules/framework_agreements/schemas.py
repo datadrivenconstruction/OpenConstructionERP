@@ -11,6 +11,15 @@ from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field, field_serializer
 
+from app.core.decimal_types import (
+    Decimal5_2,
+    Decimal9_6,
+    Decimal12_6,
+    Decimal18_2,
+    Decimal18_4,
+    FiniteDecimal,
+)
+
 _METHODS = "^(none|index_ratio|formula|fixed_table)$"
 _KINDS = "^(multiplier|add_per_unit|add_lump)$"
 _SCOPES = "^(all|flagged|items|group)$"
@@ -35,10 +44,10 @@ class RateItemIn(BaseModel):
     code: str = Field(..., min_length=1, max_length=80)
     description: str = Field(default="", max_length=5000)
     unit: str = Field(default="", max_length=20)
-    base_rate: Decimal = Field(..., ge=0)
+    base_rate: Decimal18_4 = Field(..., ge=0)
     classification: str | None = Field(default=None, max_length=80)
-    max_qty: Decimal | None = Field(default=None, ge=0)
-    estimated_qty: Decimal | None = Field(default=None, ge=0)
+    max_qty: Decimal18_4 | None = Field(default=None, ge=0)
+    estimated_qty: Decimal18_4 | None = Field(default=None, ge=0)
     surcharge_flags: list[str] = Field(default_factory=list, max_length=20)
     escalation_group: str | None = Field(default=None, max_length=40)
     is_active: bool = True
@@ -48,9 +57,9 @@ class RateItemIn(BaseModel):
 class RateItemUpdate(BaseModel):
     description: str | None = Field(default=None, max_length=5000)
     unit: str | None = Field(default=None, max_length=20)
-    base_rate: Decimal | None = Field(default=None, ge=0)
-    max_qty: Decimal | None = Field(default=None, ge=0)
-    estimated_qty: Decimal | None = Field(default=None, ge=0)
+    base_rate: Decimal18_4 | None = Field(default=None, ge=0)
+    max_qty: Decimal18_4 | None = Field(default=None, ge=0)
+    estimated_qty: Decimal18_4 | None = Field(default=None, ge=0)
     surcharge_flags: list[str] | None = None
     escalation_group: str | None = Field(default=None, max_length=40)
     is_active: bool | None = None
@@ -90,10 +99,10 @@ class RatePeriodIn(BaseModel):
     template_code: str | None = Field(default=None, max_length=40)
     base_period: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}$")
     fixed_price_until: date | None = None
-    fixed_part: Decimal | None = Field(default=None, ge=0, le=1)
-    fixed_factor: Decimal | None = Field(default=None, gt=0)
+    fixed_part: Decimal9_6 | None = Field(default=None, ge=0, le=1)
+    fixed_factor: Decimal12_6 | None = Field(default=None, gt=0)
     series_refs: list[dict[str, Any]] = Field(default_factory=list, max_length=20)
-    rate_overrides: dict[str, Decimal] = Field(default_factory=dict)
+    rate_overrides: dict[str, Decimal18_4] = Field(default_factory=dict)
 
 
 class RatePeriodOut(_Money):
@@ -118,7 +127,7 @@ class AdjustmentIn(BaseModel):
     code: str = Field(..., min_length=1, max_length=40)
     label: str = Field(default="", max_length=255)
     kind: str = Field(default="multiplier", pattern=_KINDS)
-    value: Decimal
+    value: Decimal12_6
     scope: str = Field(default="all", pattern=_SCOPES)
     scope_items: list[str] = Field(default_factory=list)
     scope_group: str | None = Field(default=None, max_length=40)
@@ -149,11 +158,11 @@ class AgreementCreate(BaseModel):
     start_date: date
     end_date: date
     currency: str = Field(default="", max_length=3)
-    cap_value: Decimal | None = Field(default=None, ge=0)
-    min_value: Decimal | None = Field(default=None, ge=0)
-    estimated_value: Decimal | None = Field(default=None, ge=0)
+    cap_value: Decimal18_2 | None = Field(default=None, ge=0)
+    min_value: Decimal18_2 | None = Field(default=None, ge=0)
+    estimated_value: Decimal18_2 | None = Field(default=None, ge=0)
     cap_basis: str = Field(default="committed", pattern="^(committed|certified|invoiced)$")
-    threshold_pct: Decimal = Field(default=Decimal("80"), gt=0, le=100)
+    threshold_pct: Decimal5_2 = Field(default=Decimal("80"), gt=0, le=100)
     rounding: str = Field(default="per_rate", pattern="^(per_rate|per_total)$")
     override_policy: str = Field(default="block", pattern="^(block|warn)$")
     numbering_pattern: str = Field(default="{agreement}-{yyyy}-{seq4}", max_length=80)
@@ -168,11 +177,11 @@ class AgreementUpdate(BaseModel):
     client_name: str | None = Field(default=None, max_length=255)
     start_date: date | None = None
     end_date: date | None = None
-    cap_value: Decimal | None = Field(default=None, ge=0)
-    min_value: Decimal | None = Field(default=None, ge=0)
-    estimated_value: Decimal | None = Field(default=None, ge=0)
+    cap_value: Decimal18_2 | None = Field(default=None, ge=0)
+    min_value: Decimal18_2 | None = Field(default=None, ge=0)
+    estimated_value: Decimal18_2 | None = Field(default=None, ge=0)
     cap_basis: str | None = Field(default=None, pattern="^(committed|certified|invoiced)$")
-    threshold_pct: Decimal | None = Field(default=None, gt=0, le=100)
+    threshold_pct: Decimal5_2 | None = Field(default=None, gt=0, le=100)
     rounding: str | None = Field(default=None, pattern="^(per_rate|per_total)$")
     override_policy: str | None = Field(default=None, pattern="^(block|warn)$")
     client_kind: str | None = Field(default=None, pattern="^(classic|sector)$")
@@ -180,17 +189,17 @@ class AgreementUpdate(BaseModel):
 
 
 class Consumption(_Money):
-    cap: Decimal | None = None
-    min_value: Decimal | None = None
-    committed: Decimal = Decimal("0")
-    certified: Decimal = Decimal("0")
-    invoiced: Decimal = Decimal("0")
-    tested: Decimal = Decimal("0")
-    headroom: Decimal | None = None
-    pct: Decimal | None = None
-    threshold_pct: Decimal = Decimal("80")
+    cap: FiniteDecimal | None = None
+    min_value: FiniteDecimal | None = None
+    committed: FiniteDecimal = Decimal("0")
+    certified: FiniteDecimal = Decimal("0")
+    invoiced: FiniteDecimal = Decimal("0")
+    tested: FiniteDecimal = Decimal("0")
+    headroom: FiniteDecimal | None = None
+    pct: FiniteDecimal | None = None
+    threshold_pct: FiniteDecimal = Decimal("80")
     cap_basis: str = "committed"
-    term_elapsed_pct: Decimal | None = None
+    term_elapsed_pct: FiniteDecimal | None = None
     orders: int = 0
 
 
@@ -235,7 +244,7 @@ class AgreementDetail(AgreementSummary):
 class OrderLineIn(BaseModel):
     item_id: uuid.UUID | None = None
     code: str | None = Field(default=None, max_length=80)
-    quantity: Decimal = Field(..., gt=0)
+    quantity: Decimal18_4 = Field(..., gt=0)
 
 
 class OrderQuoteRequest(BaseModel):
@@ -270,16 +279,16 @@ class PricedLineOut(_Money):
 
 class OrderQuote(_Money):
     lines: list[PricedLineOut]
-    net: Decimal
-    factor: Decimal | None = None
+    net: FiniteDecimal
+    factor: FiniteDecimal | None = None
     period_label: str | None = None
     rounding: str
     cap: dict[str, Any] = Field(default_factory=dict)
     findings: list[Finding] = Field(default_factory=list)
     blocking: bool = False
     over_cap: bool = False
-    per_rate_net: Decimal | None = None
-    per_total_net: Decimal | None = None
+    per_rate_net: FiniteDecimal | None = None
+    per_total_net: FiniteDecimal | None = None
 
 
 class OrderLineOut(_Money):
@@ -333,17 +342,17 @@ class OrderStatusRequest(BaseModel):
 
 
 class MeasurementIn(BaseModel):
-    measurements: dict[str, Decimal] = Field(..., description="order line id -> measured quantity to date")
+    measurements: dict[str, Decimal18_4] = Field(..., description="order line id -> measured quantity to date")
 
 
 class BreakdownRow(_Money):
     key: str
     label: str
     orders: int
-    committed: Decimal
-    certified: Decimal = Decimal("0")
-    quantity: Decimal | None = None
-    max_qty: Decimal | None = None
+    committed: FiniteDecimal
+    certified: FiniteDecimal = Decimal("0")
+    quantity: FiniteDecimal | None = None
+    max_qty: FiniteDecimal | None = None
 
 
 class BreakdownResponse(_Money):

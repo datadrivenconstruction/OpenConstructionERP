@@ -11,6 +11,8 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from app.core.decimal_types import FiniteDecimal
+
 BasisKind = Literal["tender", "award", "negotiated"]
 DepositMode = Literal["platform", "external"]
 OpeningReason = Literal["variation", "claim", "dispute", "final_account", "audit", "other"]
@@ -278,8 +280,8 @@ class ContentsOut(BaseModel):
 
 class ResourceChange(BaseModel):
     code: str = Field(max_length=120)
-    consumption: Decimal | None = None
-    unit_cost: Decimal | None = None
+    consumption: FiniteDecimal | None = None
+    unit_cost: FiniteDecimal | None = None
     note: str = Field(default="", max_length=2000)
 
 
@@ -288,8 +290,8 @@ class ResourceAddition(BaseModel):
     code: str = Field(default="", max_length=120)
     description: str = Field(min_length=1, max_length=500)
     unit: str = Field(default="", max_length=20)
-    consumption: Decimal = Decimal("1")
-    unit_cost: Decimal = Decimal("0")
+    consumption: FiniteDecimal = Decimal("1")
+    unit_cost: FiniteDecimal = Decimal("0")
     price_date: str = Field(default="", max_length=40)
     quote_ref: str = Field(default="", max_length=255)
     note: str = Field(default="", max_length=2000)
@@ -299,12 +301,12 @@ class DeriveRequest(BaseModel):
     """Price one sealed position for a change; nothing is written."""
 
     position_ordinal: str = Field(min_length=1, max_length=50)
-    quantity: Decimal | None = None
+    quantity: FiniteDecimal | None = None
     changes: list[ResourceChange] = Field(default_factory=list, max_length=200)
     additions: list[ResourceAddition] = Field(default_factory=list, max_length=200)
     removals: list[str] = Field(default_factory=list, max_length=200)
-    current_unit_costs: dict[str, Decimal] = Field(default_factory=dict)
-    agreed_rate: Decimal | None = None
+    current_unit_costs: dict[str, FiniteDecimal] = Field(default_factory=dict)
+    agreed_rate: FiniteDecimal | None = None
 
 
 class DeriveResult(BaseModel):
@@ -363,6 +365,6 @@ class ChangeOrderRateFill(BaseModel):
 
 class ChangeOrderRateFilled(BaseModel):
     change_order_item_id: uuid.UUID
-    original_rate: Decimal
+    original_rate: FiniteDecimal
     seal_id: uuid.UUID
     position_ordinal: str

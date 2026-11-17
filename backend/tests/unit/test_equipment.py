@@ -50,6 +50,7 @@ PROJECT_ID = uuid.uuid4()
 class _StubSession:
     def __init__(self) -> None:
         self._added: list[Any] = []
+        self.rows: dict[Any, Any] = {}
 
     def add(self, obj: Any) -> None:
         self._added.append(obj)
@@ -62,6 +63,9 @@ class _StubSession:
 
     async def execute(self, _stmt: Any) -> Any:
         return SimpleNamespace(scalars=lambda: _EmptyScalars(), scalar_one=lambda: 0)
+
+    async def get(self, _model: Any, ident: Any) -> Any:
+        return self.rows.get(ident)
 
     async def delete(self, obj: Any) -> None:
         pass
@@ -1072,7 +1076,11 @@ async def test_create_rental_happy_path_emits_assigned() -> None:
 
     svc = _make_service()
     eid = uuid.uuid4()
-    svc.equipment_repo.get_by_id = AsyncMock(return_value=_make_equipment(id=eid, status="active"))
+    equipment = _make_equipment(id=eid, status="active")
+    # Not linked to a rate catalogue, so the rental records no rate source.
+    equipment.rate_item_id = None
+    svc.equipment_repo.get_by_id = AsyncMock(return_value=equipment)
+    svc.session.rows[eid] = equipment
     svc.inspection_repo.list_for_equipment = AsyncMock(return_value=[])
 
     captured: list[str] = []

@@ -93,7 +93,7 @@ class BookingService:
         markets: list[str],
     ) -> tuple[AccountingConnectorConfig, dict[str, Any], BatchPlan]:
         if period_to < period_from:
-            raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, "The period ends before it starts")
+            raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, "The period ends before it starts")
         config = await self._config(config_id, markets)
         writer = WRITERS[config.connector_type]
         settings = dict(config.settings_ or {})
@@ -126,14 +126,14 @@ class BookingService:
         )
         if plan.blocked:
             raise HTTPException(
-                status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail={
                     "message": "Fix the issues first",
                     "issues": [f for f in plan.findings if f["severity"] == "error"],
                 },
             )
         if not plan.rows:
-            raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, "No approved invoices to export in this period")
+            raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, "No approved invoices to export in this period")
         writer = WRITERS[config.connector_type]
         content = writer.render(plan.rows, settings, period_from, period_to)
         codec = str(settings.get("encoding") or writer.encoding)

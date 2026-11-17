@@ -100,7 +100,7 @@ def test_lancedb_search_skips_where_on_unsafe_region(monkeypatch: pytest.MonkeyP
         def limit(self, _n: int) -> _FakeSearch:
             return self
 
-        def where(self, clause: str) -> _FakeSearch:
+        def where(self, clause: str, prefilter: bool = False) -> _FakeSearch:
             self._where = clause
             return self
 
@@ -138,7 +138,7 @@ def test_lancedb_search_applies_where_on_safe_region(monkeypatch: pytest.MonkeyP
         def limit(self, _n: int) -> _FakeSearch:
             return self
 
-        def where(self, clause: str) -> _FakeSearch:
+        def where(self, clause: str, prefilter: bool = False) -> _FakeSearch:
             self._where = clause
             return self
 

@@ -142,9 +142,9 @@ class PayrollService:
         project_ids: set[uuid.UUID] | None,
     ) -> Plan:
         if period_to < period_from:
-            raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, "The period ends before it starts")
+            raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, "The period ends before it starts")
         if (period_to - period_from).days > MAX_PERIOD_DAYS:
-            raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, "The period is longer than 400 days")
+            raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, "The period is longer than 400 days")
         profile_row = await self.get_profile(profile_id)
         profile = ExportProfile.from_dict({**profile_row.config, "name": profile_row.name})
         baseline = await self.repo.exported_baseline()
@@ -198,14 +198,14 @@ class PayrollService:
         plan = await self.plan(profile_id, period_from, period_to, project_ids)
         if plan.blocked:
             raise HTTPException(
-                status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail={
                     "message": "Fix the issues first",
                     "issues": [i for i in plan.issues if i["severity"] == "error"],
                 },
             )
         if not plan.rows:
-            raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, "No approved hours to export in this period")
+            raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, "No approved hours to export in this period")
         profile_row = await self.get_profile(profile_id)
         content = render(plan.rows, plan.profile)
         number = await self.repo.next_number()

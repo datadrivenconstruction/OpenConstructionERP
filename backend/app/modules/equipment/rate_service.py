@@ -208,7 +208,7 @@ class RateService:
         errors = [i for i in issues if i.severity == "error"]
         if errors:
             raise HTTPException(
-                status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail={"message": "Rate inputs failed validation", "issues": [i.model_dump() for i in errors]},
             )
         return issues
@@ -294,7 +294,7 @@ class RateService:
     def import_preview(self, filename: str, data: bytes, markets: list[str]) -> ImportPreviewResponse:
         rows = read_table(filename, data)
         if not rows:
-            raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, "The table is empty")
+            raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, "The table is empty")
         headers = rows[0]
         layouts = self.layouts(markets)
         suggested = suggest_mapping(headers)
@@ -324,11 +324,11 @@ class RateService:
         """New catalogue version from a clean dry run; rows with errors are never imported."""
         if result.error_rows:
             raise HTTPException(
-                status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail={"message": "Fix the rows with errors first", "issues": result.issues[:50]},
             )
         if not result.items:
-            raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, "No machines to import")
+            raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, "No machines to import")
         if family_id is not None:
             existing = [c for c in await self.repo.list_catalogues() if c.family_id == family_id]
             if not existing:

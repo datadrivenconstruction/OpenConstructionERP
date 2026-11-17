@@ -477,6 +477,7 @@ async def test_msp_xml_is_serialised_off_the_loop(monkeypatch: pytest.MonkeyPatc
             wbs_code="1.1",
             constraint_type=None,
             constraint_date=None,
+            calendar_id=None,
             dependencies=deps,
         )
 
@@ -485,7 +486,10 @@ async def test_msp_xml_is_serialised_off_the_loop(monkeypatch: pytest.MonkeyPatc
         activity(second, "Blinding concrete", [{"activity_id": str(first), "type": "FS", "lag_days": 1}]),
     ]
     service = SimpleNamespace(
-        get_schedule=AsyncMock(return_value=SimpleNamespace(name="Riverside programme")),
+        get_schedule=AsyncMock(
+            return_value=SimpleNamespace(id=uuid.uuid4(), name="Riverside programme", project_id=uuid.uuid4())
+        ),
+        resolve_project_region=AsyncMock(return_value=None),
         list_activities_for_schedule=AsyncMock(return_value=(activities, len(activities))),
     )
     no_relationships = MagicMock()

@@ -1734,9 +1734,9 @@ class BOQRevisionEntry(BaseModel):
     created_at: datetime
     created_by: UUID | None = None
     created_by_name: str | None = None
-    grand_total: Decimal
+    grand_total: FiniteDecimal
     #: Grand total minus the grand total of the revision this one was raised from.
-    delta_vs_parent: Decimal | None = None
+    delta_vs_parent: FiniteDecimal | None = None
     is_current: bool = False
 
 

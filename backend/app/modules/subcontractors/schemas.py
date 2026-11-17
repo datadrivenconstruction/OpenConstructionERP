@@ -12,7 +12,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
-from app.core.decimal_types import Decimal5_2, Decimal18_2, Decimal18_4, FiniteDecimal
+from app.core.decimal_types import Decimal5_2, Decimal8_4, Decimal18_2, Decimal18_4, FiniteDecimal
 
 # Upper bound for money fields - mirrors changeorders/full_evm/risk/punchlist.
 # A finite-but-absurd magnitude (e.g. 1e400) otherwise sums into gross and
@@ -694,7 +694,7 @@ class PaymentApplicationLineCreate(BaseModel):
     contract_line_id: UUID | None = None
     # This period as a percentage of the line's scheduled value. When given
     # it replaces ``claimed_amount`` (amount = scheduled value x percent).
-    this_period_percent: Decimal | None = Field(default=None, ge=0, le=1000)
+    this_period_percent: Decimal8_4 | None = Field(default=None, ge=0, le=1000)
 
 
 class PaymentApplicationLineUpdate(BaseModel):
@@ -1616,14 +1616,14 @@ class StatementLine(BaseModel):
 
     work_package_id: UUID
     name: str
-    scheduled_value: Decimal
-    previous: Decimal
-    this_period: Decimal
-    this_period_percent: Decimal | None = None
-    total_completed: Decimal
-    percent_complete: Decimal | None = None
-    retention: Decimal
-    balance_to_finish: Decimal
+    scheduled_value: FiniteDecimal
+    previous: FiniteDecimal
+    this_period: FiniteDecimal
+    this_period_percent: FiniteDecimal | None = None
+    total_completed: FiniteDecimal
+    percent_complete: FiniteDecimal | None = None
+    retention: FiniteDecimal
+    balance_to_finish: FiniteDecimal
 
 
 class StatementSummary(BaseModel):
@@ -1678,7 +1678,7 @@ class StatementPreviewLine(BaseModel):
 
     work_package_id: UUID
     claimed_amount: Decimal18_2 = Field(default=Decimal("0"), ge=0, le=_MONEY_MAX)
-    this_period_percent: Decimal | None = Field(default=None, ge=0, le=1000)
+    this_period_percent: Decimal8_4 | None = Field(default=None, ge=0, le=1000)
 
 
 class StatementPreviewRequest(BaseModel):
