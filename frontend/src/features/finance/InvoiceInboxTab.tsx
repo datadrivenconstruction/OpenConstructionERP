@@ -248,7 +248,8 @@ export function InvoiceInboxTab({ projectId }: { projectId: string }) {
       uploadBatch(files, (file) => uploadOne(file, source)),
     onSuccess: (out) => {
       invalidateAll();
-      if (out.captured.length === 1) setSelectedId(out.captured[0].id);
+      const only = out.captured.length === 1 ? out.captured[0] : undefined;
+      if (only) setSelectedId(only.id);
       if (out.captured.length > 0) {
         addToast({
           type: 'success',
