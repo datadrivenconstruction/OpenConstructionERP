@@ -277,6 +277,7 @@ export interface DerivedLine {
 }
 
 export interface MarkupStep {
+  key: string;
   name: string;
   percentage: string;
   amount: string;
@@ -390,6 +391,8 @@ export const archiveApi = {
     (await apiGet<{ items: Derivation[] }>(`${BASE}/derivations${qs({ seal_id: sealId })}`)).items,
   chooseMethod: (derivationId: string, method: BasisMethod) =>
     apiPost<Derivation>(`${BASE}/derivations/${derivationId}/method`, { basis_method: method }),
+  variationFindings: (variationRequestId: string) =>
+    apiGet<Finding[]>(`${BASE}/variations/${variationRequestId}/findings`),
   downloadPackage: (sealId: string) =>
     downloadWithAuth(`/api${BASE}/seals/${sealId}/package`, `sealed-estimate-${sealId.slice(0, 8)}.zip`),
 };

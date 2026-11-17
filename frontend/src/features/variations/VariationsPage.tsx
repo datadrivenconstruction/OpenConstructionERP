@@ -135,6 +135,7 @@ import {
   type ApprovalMode,
 } from './approvalDecision';
 import { VariationSourcePicker } from './VariationSourcePicker';
+import { VariationSealPricing } from '@/features/estimate-archive/SealedEstimateEntry';
 import { variationsGuide } from './variationsGuide';
 import { InsightsPanel, InsightsToggleButton, useModuleInsights } from '@/features/insights';
 import { SubcontractChangesPanel } from '@/features/subcontractors/SubcontractChangesPanel';
@@ -2075,6 +2076,13 @@ function PricedScope({
               </div>
             );
           })()}
+
+          <VariationSealPricing
+            projectId={request.project_id}
+            variationRequestId={request.id}
+            editable={request.status === 'draft'}
+            currency={boq.base_currency || request.currency || currency}
+          />
 
           {boq.is_mixed_currency && (
             <p className="flex items-start gap-1.5 text-xs text-content-secondary">

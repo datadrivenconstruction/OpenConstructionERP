@@ -67775,6 +67775,14 @@ const resource = {
     "estimate_archive.verified_bad": "Не совпадает с опечатанной записью",
     "estimate_archive.verified_ok": "Совпадает с опечатанной записью",
     "estimate_archive.verify": "Проверить отпечаток",
+    "estimate_archive.seal_as_basis": "Запечатать как основу договора",
+    "estimate_archive.contents_locked": "Содержимое остаётся запечатанным до начала официального вскрытия.",
+    "estimate_archive.entry.sealed_badge": "Запечатано",
+    "estimate_archive.entry.contract_card": "Запечатанная смета",
+    "estimate_archive.entry.openings_count": "Вскрытия: {{count}}",
+    "estimate_archive.entry.no_seal": "Запечатанной сметы нет.",
+    "estimate_archive.entry.seal_award": "Запечатать смету контракта",
+    "estimate_archive.entry.add_from_seal": "Добавить из запечатанной сметы",
   }
 } as { translation: Record<string, string> };
 

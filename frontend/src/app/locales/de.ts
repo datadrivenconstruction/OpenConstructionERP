@@ -67142,6 +67142,14 @@ const resource = {
     "estimate_archive.verified_bad": "Stimmt nicht mit dem versiegelten Datensatz überein",
     "estimate_archive.verified_ok": "Stimmt mit dem versiegelten Datensatz überein",
     "estimate_archive.verify": "Fingerabdruck prüfen",
+    "estimate_archive.seal_as_basis": "Als Vertragsgrundlage versiegeln",
+    "estimate_archive.contents_locked": "Der Inhalt bleibt versiegelt, bis eine förmliche Öffnung beginnt.",
+    "estimate_archive.entry.sealed_badge": "Versiegelt",
+    "estimate_archive.entry.contract_card": "Versiegelte Kalkulation",
+    "estimate_archive.entry.openings_count": "Öffnungen: {{count}}",
+    "estimate_archive.entry.no_seal": "Keine versiegelte Kalkulation.",
+    "estimate_archive.entry.seal_award": "Auftragskalkulation versiegeln",
+    "estimate_archive.entry.add_from_seal": "Aus versiegelter Kalkulation übernehmen",
   }
 } as { translation: Record<string, string> };
 
