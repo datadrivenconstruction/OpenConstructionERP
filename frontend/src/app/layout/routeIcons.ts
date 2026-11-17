@@ -172,6 +172,7 @@ const EXTRA_ROUTE_ICONS: Record<string, LucideIcon> = {
   '/data-explorer': TableProperties,
   '/geo': Globe,
   '/survey': Crosshair,
+  '/survey/monitoring': Activity,
   // ── 5. Model Coordination ─────────────────────────────────────────
   '/coordination': LayoutDashboard,
   '/model-review': ScanEye,
