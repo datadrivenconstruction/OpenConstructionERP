@@ -1787,6 +1787,33 @@
         "col_max": "Legnagyobb",
         "col_count": "Mérések"
       }
+    },
+    "gantt_pdf": {
+      "strings": {
+        "title": "Ütemterv (Gantt-diagram)",
+        "project": "Projekt",
+        "schedule": "Ütemterv",
+        "baseline": "Alapterv",
+        "no_baseline": "nincs",
+        "exported": "Exportálva",
+        "data_date": "Állapot dátuma",
+        "col_wbs": "WBS",
+        "col_activity": "Tevékenység",
+        "col_start": "Kezdés",
+        "col_finish": "Befejezés",
+        "col_duration": "Nap",
+        "legend_current": "Aktuális terv",
+        "legend_progress": "Előrehaladás",
+        "legend_critical": "Kritikus út",
+        "legend_baseline": "Alapterv",
+        "legend_actual": "Tényleges",
+        "legend_milestone": "Mérföldkő",
+        "legend_summary": "Összesítő",
+        "week_short": "H{n}",
+        "quarter_short": "N{n}",
+        "sheet_of": "{page}. lap / {total}",
+        "no_activities": "Ennek az ütemtervnek még nincsenek tevékenységei."
+      }
     }
   },
   "pdf_footer": {

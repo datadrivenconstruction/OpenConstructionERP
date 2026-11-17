@@ -1787,6 +1787,33 @@
         "col_max": "Макс.",
         "col_count": "Покази"
       }
+    },
+    "gantt_pdf": {
+      "strings": {
+        "title": "Графік робіт (діаграма Ганта)",
+        "project": "Проєкт",
+        "schedule": "Графік",
+        "baseline": "Базовий план",
+        "no_baseline": "немає",
+        "exported": "Вивантажено",
+        "data_date": "Дата звіту",
+        "col_wbs": "ІСР",
+        "col_activity": "Робота",
+        "col_start": "Початок",
+        "col_finish": "Закінчення",
+        "col_duration": "Дн.",
+        "legend_current": "Поточний план",
+        "legend_progress": "Виконання",
+        "legend_critical": "Критичний шлях",
+        "legend_baseline": "Базовий план",
+        "legend_actual": "Факт",
+        "legend_milestone": "Віха",
+        "legend_summary": "Сумарна робота",
+        "week_short": "Т{n}",
+        "quarter_short": "{n} кв.",
+        "sheet_of": "Аркуш {page} з {total}",
+        "no_activities": "У цьому графіку ще немає робіт."
+      }
     }
   },
   "pdf_footer": {

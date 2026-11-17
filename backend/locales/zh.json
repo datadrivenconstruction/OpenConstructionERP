@@ -1771,6 +1771,33 @@
         "col_max": "最高",
         "col_count": "读数"
       }
+    },
+    "gantt_pdf": {
+      "strings": {
+        "title": "进度计划（甘特图）",
+        "project": "项目",
+        "schedule": "进度计划",
+        "baseline": "基线",
+        "no_baseline": "无",
+        "exported": "导出日期",
+        "data_date": "数据日期",
+        "col_wbs": "WBS",
+        "col_activity": "作业",
+        "col_start": "开始",
+        "col_finish": "完成",
+        "col_duration": "天数",
+        "legend_current": "当前计划",
+        "legend_progress": "进度",
+        "legend_critical": "关键路径",
+        "legend_baseline": "基线计划",
+        "legend_actual": "实际",
+        "legend_milestone": "里程碑",
+        "legend_summary": "摘要",
+        "week_short": "第{n}周",
+        "quarter_short": "第{n}季度",
+        "sheet_of": "第{page}页，共{total}页",
+        "no_activities": "此进度计划还没有作业。"
+      }
     }
   },
   "pdf_footer": {

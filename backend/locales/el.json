@@ -1787,6 +1787,33 @@
         "col_max": "Μέγ.",
         "col_count": "Μετρήσεις"
       }
+    },
+    "gantt_pdf": {
+      "strings": {
+        "title": "Χρονοδιάγραμμα (διάγραμμα Gantt)",
+        "project": "Έργο",
+        "schedule": "Χρονοδιάγραμμα",
+        "baseline": "Βασικό πλάνο",
+        "no_baseline": "κανένα",
+        "exported": "Εξήχθη",
+        "data_date": "Ημερομηνία κατάστασης",
+        "col_wbs": "WBS",
+        "col_activity": "Δραστηριότητα",
+        "col_start": "Έναρξη",
+        "col_finish": "Λήξη",
+        "col_duration": "Ημέρες",
+        "legend_current": "Τρέχον πλάνο",
+        "legend_progress": "Πρόοδος",
+        "legend_critical": "Κρίσιμη διαδρομή",
+        "legend_baseline": "Βασικό πλάνο",
+        "legend_actual": "Πραγματικό",
+        "legend_milestone": "Ορόσημο",
+        "legend_summary": "Σύνοψη",
+        "week_short": "Ε{n}",
+        "quarter_short": "Τ{n}",
+        "sheet_of": "Φύλλο {page} από {total}",
+        "no_activities": "Αυτό το χρονοδιάγραμμα δεν έχει ακόμη δραστηριότητες."
+      }
     }
   },
   "pdf_footer": {

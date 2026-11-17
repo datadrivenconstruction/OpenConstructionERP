@@ -3091,6 +3091,12 @@ from app.modules.schedule.evm_snapshot_router import evm_snapshot_router as _evm
 
 router.include_router(_evm_snapshot_router)
 
+# Programme baselines B0/B1/... (server-side capture, approval) and the printable
+# Gantt PDF. Same /api/v1/schedule prefix.
+from app.modules.schedule.baseline_router import baseline_router as _baseline_router  # noqa: E402
+
+router.include_router(_baseline_router)
+
 # Schedule import from a spreadsheet (Excel / CSV): preview with column
 # mapping, then commit as a new schedule or into a draft. Same prefix.
 from app.modules.schedule.tabular_import_router import tabular_import_router as _tabular_import_router  # noqa: E402

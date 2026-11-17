@@ -1787,6 +1787,33 @@
         "col_max": "Макс.",
         "col_count": "Показания"
       }
+    },
+    "gantt_pdf": {
+      "strings": {
+        "title": "График (диаграма на Гант)",
+        "project": "Проект",
+        "schedule": "График",
+        "baseline": "Базов план",
+        "no_baseline": "няма",
+        "exported": "Експортирано",
+        "data_date": "Дата на състоянието",
+        "col_wbs": "СРР",
+        "col_activity": "Дейност",
+        "col_start": "Начало",
+        "col_finish": "Край",
+        "col_duration": "Дни",
+        "legend_current": "Текущ план",
+        "legend_progress": "Напредък",
+        "legend_critical": "Критичен път",
+        "legend_baseline": "Базов план",
+        "legend_actual": "Действително",
+        "legend_milestone": "Ключово събитие",
+        "legend_summary": "Обобщение",
+        "week_short": "С{n}",
+        "quarter_short": "Т{n}",
+        "sheet_of": "Лист {page} от {total}",
+        "no_activities": "Този график все още няма дейности."
+      }
     }
   },
   "pdf_footer": {

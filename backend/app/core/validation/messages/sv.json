@@ -2132,5 +2132,11 @@
       "fail": "Revision {label} kan fortfarande redigeras trots att {later} har skapats sedan dess; ändringar här förs inte över",
       "suggestion": "Lås {label} för att frysa den, eller fortsätt arbeta i den senaste revisionen"
     }
+  },
+  "schedule_baseline": {
+    "single_approved": {
+      "fail": "Den här tidplanen har mer än en godkänd baslinje ({baselines}).",
+      "suggestion": "Godkänn den baslinje som ska gälla; att godkänna en drar tillbaka godkännandet av de andra."
+    }
   }
 }

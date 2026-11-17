@@ -1787,6 +1787,33 @@
         "col_max": "최고",
         "col_count": "측정값"
       }
+    },
+    "gantt_pdf": {
+      "strings": {
+        "title": "공정표(간트 차트)",
+        "project": "프로젝트",
+        "schedule": "공정표",
+        "baseline": "기준 계획",
+        "no_baseline": "없음",
+        "exported": "내보낸 날짜",
+        "data_date": "데이터 날짜",
+        "col_wbs": "WBS",
+        "col_activity": "작업",
+        "col_start": "시작",
+        "col_finish": "종료",
+        "col_duration": "일수",
+        "legend_current": "현재 계획",
+        "legend_progress": "진척",
+        "legend_critical": "주공정선",
+        "legend_baseline": "기준 계획",
+        "legend_actual": "실적",
+        "legend_milestone": "마일스톤",
+        "legend_summary": "요약",
+        "week_short": "{n}주",
+        "quarter_short": "{n}분기",
+        "sheet_of": "{total}장 중 {page}장",
+        "no_activities": "이 공정표에는 아직 작업이 없습니다."
+      }
     }
   },
   "pdf_footer": {

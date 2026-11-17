@@ -2132,5 +2132,11 @@
       "fail": "Bản sửa đổi {label} vẫn có thể chỉnh sửa dù {later} đã được tạo sau đó; thay đổi ở đây không được chuyển sang",
       "suggestion": "Khóa {label} hoặc tiếp tục làm việc trong bản sửa đổi mới nhất"
     }
+  },
+  "schedule_baseline": {
+    "single_approved": {
+      "fail": "Tiến độ này có nhiều hơn một đường cơ sở đã duyệt ({baselines}).",
+      "suggestion": "Hãy duyệt đường cơ sở cần áp dụng; duyệt một đường sẽ rút lại phê duyệt của các đường khác."
+    }
   }
 }

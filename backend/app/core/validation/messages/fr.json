@@ -2132,5 +2132,11 @@
       "fail": "La révision {label} est encore modifiable alors que {later} a été créée depuis ; les modifications faites ici ne sont pas reportées",
       "suggestion": "Verrouillez {label} pour la figer, ou poursuivez dans la révision la plus récente"
     }
+  },
+  "schedule_baseline": {
+    "single_approved": {
+      "fail": "Ce planning a plus d'une référence approuvée ({baselines}).",
+      "suggestion": "Approuvez la référence qui doit s'appliquer ; en approuver une retire l'approbation des autres."
+    }
   }
 }

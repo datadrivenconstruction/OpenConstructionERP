@@ -2132,5 +2132,11 @@
       "fail": "Revisi {label} masih dapat diedit meskipun {later} sudah dibuat setelahnya; perubahan di sini tidak terbawa",
       "suggestion": "Kunci {label} atau lanjutkan bekerja di revisi terbaru"
     }
+  },
+  "schedule_baseline": {
+    "single_approved": {
+      "fail": "Jadwal ini memiliki lebih dari satu baseline yang disetujui ({baselines}).",
+      "suggestion": "Setujui baseline yang harus berlaku; menyetujui satu akan mencabut persetujuan yang lain."
+    }
   }
 }

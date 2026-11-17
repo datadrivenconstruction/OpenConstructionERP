@@ -2132,5 +2132,11 @@
       "fail": "La revisión {label} aún se puede editar aunque después se creó {later}; los cambios hechos aquí no se trasladan",
       "suggestion": "Bloquee {label} para congelarla o siga trabajando en la revisión más reciente"
     }
+  },
+  "schedule_baseline": {
+    "single_approved": {
+      "fail": "Este cronograma tiene más de una línea base aprobada ({baselines}).",
+      "suggestion": "Apruebe la línea base que debe regir; aprobar una retira la aprobación de las demás."
+    }
   }
 }

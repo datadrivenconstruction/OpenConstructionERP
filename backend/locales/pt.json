@@ -1787,6 +1787,33 @@
         "col_max": "Máx.",
         "col_count": "Leituras"
       }
+    },
+    "gantt_pdf": {
+      "strings": {
+        "title": "Cronograma (gráfico de Gantt)",
+        "project": "Projeto",
+        "schedule": "Cronograma",
+        "baseline": "Linha de base",
+        "no_baseline": "nenhuma",
+        "exported": "Exportado",
+        "data_date": "Data de status",
+        "col_wbs": "EAP",
+        "col_activity": "Atividade",
+        "col_start": "Início",
+        "col_finish": "Término",
+        "col_duration": "Dias",
+        "legend_current": "Plano atual",
+        "legend_progress": "Progresso",
+        "legend_critical": "Caminho crítico",
+        "legend_baseline": "Linha de base",
+        "legend_actual": "Real",
+        "legend_milestone": "Marco",
+        "legend_summary": "Resumo",
+        "week_short": "S{n}",
+        "quarter_short": "T{n}",
+        "sheet_of": "Folha {page} de {total}",
+        "no_activities": "Este cronograma ainda não tem atividades."
+      }
     }
   },
   "pdf_footer": {

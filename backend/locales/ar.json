@@ -1647,6 +1647,33 @@
         "col_max": "الأعلى",
         "col_count": "القراءات"
       }
+    },
+    "gantt_pdf": {
+      "strings": {
+        "title": "الجدول الزمني (مخطط جانت)",
+        "project": "المشروع",
+        "schedule": "الجدول الزمني",
+        "baseline": "خط الأساس",
+        "no_baseline": "لا يوجد",
+        "exported": "تاريخ التصدير",
+        "data_date": "تاريخ البيانات",
+        "col_wbs": "WBS",
+        "col_activity": "النشاط",
+        "col_start": "البداية",
+        "col_finish": "النهاية",
+        "col_duration": "أيام",
+        "legend_current": "الخطة الحالية",
+        "legend_progress": "التقدم",
+        "legend_critical": "المسار الحرج",
+        "legend_baseline": "خطة الأساس",
+        "legend_actual": "الفعلي",
+        "legend_milestone": "معلم رئيسي",
+        "legend_summary": "ملخص",
+        "week_short": "أ{n}",
+        "quarter_short": "ر{n}",
+        "sheet_of": "الورقة {page} من {total}",
+        "no_activities": "لا يحتوي هذا الجدول الزمني على أنشطة بعد."
+      }
     }
   },
   "cost_control": {

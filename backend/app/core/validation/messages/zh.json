@@ -2132,5 +2132,11 @@
       "fail": "修订 {label} 仍可编辑，但之后已创建 {later}；在此所做的更改不会带入后续修订",
       "suggestion": "锁定 {label}，或在最新修订中继续工作"
     }
+  },
+  "schedule_baseline": {
+    "single_approved": {
+      "fail": "此进度计划有多个已批准的基线（{baselines}）。",
+      "suggestion": "批准应当生效的基线；批准其中一个会撤销其他基线的批准。"
+    }
   }
 }

@@ -8,8 +8,11 @@ import {
   apiDelete,
   API_BASE,
   getAuthToken,
+  activeLanguageTag,
+  downloadWithAuth,
   type Page,
 } from '@/shared/lib/api';
+import { documentExportUrl } from '@/shared/lib/documentExport';
 
 export interface HolidayCoverage {
   year: number;
@@ -487,9 +490,19 @@ export interface ScheduleBaseline {
   snapshot_data: Record<string, unknown>;
   is_active: boolean;
   created_by: string | null;
+  /** Capture and approval stamps; the API names this field ``metadata_``. */
+  metadata_?: { label?: string; note?: string; approval?: { approved_by?: string; approved_at?: string } } & Record<string, unknown>;
   created_at: string;
   updated_at: string;
 }
+
+export interface BaselineCaptureBody {
+  name?: string;
+  approve?: boolean;
+  note?: string;
+}
+
+export type GanttPaper = 'A3' | 'A4' | 'LETTER' | 'LEGAL';
 
 /* ── Schedule comparison / diff (T1.3) ─────────────────────────────────────
  *
@@ -1255,6 +1268,30 @@ export const scheduleApi = {
     apiGet<ScheduleBaseline[] | { items: ScheduleBaseline[] }>(
       `/v1/schedule/baselines/?project_id=${encodeURIComponent(projectId)}`,
     ).then(unwrapList),
+
+  /** Snapshot the live schedule on the server as the next baseline (B0, B1, ...). */
+  captureBaseline: (scheduleId: string, body: BaselineCaptureBody) =>
+    apiPost<ScheduleBaseline, BaselineCaptureBody>(
+      `/v1/schedule/schedules/${encodeURIComponent(scheduleId)}/baselines/capture`,
+      body,
+    ),
+  /** Make one baseline the schedule's approved one; the others stop being approved. */
+  approveBaseline: (scheduleId: string, baselineId: string) =>
+    apiPost<ScheduleBaseline, Record<string, never>>(
+      `/v1/schedule/schedules/${encodeURIComponent(scheduleId)}/baselines/${encodeURIComponent(baselineId)}/approve`,
+      {},
+    ),
+  /** Download the printable Gantt chart (landscape PDF). */
+  downloadGanttPdf: (scheduleId: string, opts: { baselineId?: string | null; paper: GanttPaper; locale?: string }) =>
+    downloadWithAuth(
+      documentExportUrl(`/v1/schedule/schedules/${encodeURIComponent(scheduleId)}/gantt.pdf`, {
+        paper: opts.paper,
+        baseline_id: opts.baselineId ?? undefined,
+        include_baseline: opts.baselineId === null ? 'false' : undefined,
+        locale: opts.locale || activeLanguageTag() || undefined,
+      }),
+      `gantt-${scheduleId}.pdf`,
+    ),
 
   // Schedule comparison / diff (T1.3)
   /** Flatten the live schedule into the canonical diff envelope (e.g. to store as a baseline). */

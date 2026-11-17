@@ -2132,5 +2132,11 @@
       "fail": "A(z) {label} revízió még szerkeszthető, pedig azóta létrejött a(z) {later}; az itt végzett módosítások nem kerülnek át",
       "suggestion": "Zárolja a(z) {label} revíziót, vagy dolgozzon tovább a legújabb revízióban"
     }
+  },
+  "schedule_baseline": {
+    "single_approved": {
+      "fail": "Ennek az ütemtervnek egynél több jóváhagyott alapterve van ({baselines}).",
+      "suggestion": "Hagyja jóvá az érvényes alaptervet; egy jóváhagyása visszavonja a többiek jóváhagyását."
+    }
   }
 }

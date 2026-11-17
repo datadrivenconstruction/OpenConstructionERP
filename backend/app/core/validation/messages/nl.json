@@ -2132,5 +2132,11 @@
       "fail": "Revisie {label} is nog bewerkbaar terwijl daarna {later} is aangemaakt; wijzigingen hier worden niet overgenomen",
       "suggestion": "Vergrendel {label} om haar te bevriezen, of werk verder in de nieuwste revisie"
     }
+  },
+  "schedule_baseline": {
+    "single_approved": {
+      "fail": "Deze planning heeft meer dan één goedgekeurde basisplanning ({baselines}).",
+      "suggestion": "Keur de basisplanning goed die moet gelden; goedkeuren van één trekt de goedkeuring van de andere in."
+    }
   }
 }

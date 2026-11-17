@@ -1647,6 +1647,33 @@
         "col_max": "גבוה",
         "col_count": "קריאות"
       }
+    },
+    "gantt_pdf": {
+      "strings": {
+        "title": "לוח זמנים (תרשים גאנט)",
+        "project": "פרויקט",
+        "schedule": "לוח זמנים",
+        "baseline": "תוכנית בסיס",
+        "no_baseline": "אין",
+        "exported": "יוצא",
+        "data_date": "תאריך נתונים",
+        "col_wbs": "WBS",
+        "col_activity": "פעילות",
+        "col_start": "התחלה",
+        "col_finish": "סיום",
+        "col_duration": "ימים",
+        "legend_current": "תוכנית נוכחית",
+        "legend_progress": "התקדמות",
+        "legend_critical": "נתיב קריטי",
+        "legend_baseline": "תוכנית בסיס",
+        "legend_actual": "בפועל",
+        "legend_milestone": "אבן דרך",
+        "legend_summary": "סיכום",
+        "week_short": "ש{n}",
+        "quarter_short": "ר{n}",
+        "sheet_of": "גיליון {page} מתוך {total}",
+        "no_activities": "בלוח זמנים זה אין עדיין פעילויות."
+      }
     }
   },
   "cost_control": {

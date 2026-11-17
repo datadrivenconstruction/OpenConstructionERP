@@ -2132,5 +2132,11 @@
       "fail": "Revizia {label} poate fi încă editată deși între timp a fost creată {later}; modificările făcute aici nu se transferă",
       "suggestion": "Blocați {label} pentru a o îngheța sau continuați în cea mai recentă revizie"
     }
+  },
+  "schedule_baseline": {
+    "single_approved": {
+      "fail": "Acest grafic are mai multe planuri de referință aprobate ({baselines}).",
+      "suggestion": "Aprobați planul de referință care trebuie să se aplice; aprobarea unuia retrage aprobarea celorlalte."
+    }
   }
 }

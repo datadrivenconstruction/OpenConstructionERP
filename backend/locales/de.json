@@ -1626,6 +1626,33 @@
         "col_max": "Höchster",
         "col_count": "Messwerte"
       }
+    },
+    "gantt_pdf": {
+      "strings": {
+        "title": "Terminplan (Balkenplan)",
+        "project": "Projekt",
+        "schedule": "Terminplan",
+        "baseline": "Basisplan",
+        "no_baseline": "keiner",
+        "exported": "Exportiert",
+        "data_date": "Stichtag",
+        "col_wbs": "PSP",
+        "col_activity": "Vorgang",
+        "col_start": "Anfang",
+        "col_finish": "Ende",
+        "col_duration": "Tage",
+        "legend_current": "Aktueller Plan",
+        "legend_progress": "Fortschritt",
+        "legend_critical": "Kritischer Pfad",
+        "legend_baseline": "Basisplan",
+        "legend_actual": "Ist",
+        "legend_milestone": "Meilenstein",
+        "legend_summary": "Sammelvorgang",
+        "week_short": "KW{n}",
+        "quarter_short": "Q{n}",
+        "sheet_of": "Blatt {page} von {total}",
+        "no_activities": "Dieser Terminplan hat noch keine Vorgänge."
+      }
     }
   },
   "cost_control": {

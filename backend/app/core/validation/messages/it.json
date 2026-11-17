@@ -2132,5 +2132,11 @@
       "fail": "La revisione {label} è ancora modificabile anche se nel frattempo è stata creata {later}; le modifiche fatte qui non vengono riportate",
       "suggestion": "Blocca {label} per congelarla o continua a lavorare nell'ultima revisione"
     }
+  },
+  "schedule_baseline": {
+    "single_approved": {
+      "fail": "Questo cronoprogramma ha più di una baseline approvata ({baselines}).",
+      "suggestion": "Approvi la baseline che deve valere; approvarne una ritira l'approvazione delle altre."
+    }
   }
 }

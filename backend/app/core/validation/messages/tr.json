@@ -2132,5 +2132,11 @@
       "fail": "{label} revizyonu, sonrasında {later} oluşturulmuş olmasına rağmen hâlâ düzenlenebilir; burada yapılan değişiklikler aktarılmaz",
       "suggestion": "{label} revizyonunu kilitleyin veya en son revizyonda çalışmaya devam edin"
     }
+  },
+  "schedule_baseline": {
+    "single_approved": {
+      "fail": "Bu iş programının birden fazla onaylı temel planı var ({baselines}).",
+      "suggestion": "Geçerli olması gereken temel planı onaylayın; birini onaylamak diğerlerinin onayını geri alır."
+    }
   }
 }

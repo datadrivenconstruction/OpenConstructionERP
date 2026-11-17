@@ -2132,5 +2132,11 @@
       "fail": "Revision {label} ist noch bearbeitbar, obwohl seitdem {later} erstellt wurde; Änderungen hier werden nicht übernommen",
       "suggestion": "Sperren Sie {label}, um sie einzufrieren, oder arbeiten Sie in der neuesten Revision weiter"
     }
+  },
+  "schedule_baseline": {
+    "single_approved": {
+      "fail": "Dieser Terminplan hat mehr als einen freigegebenen Basisplan ({baselines}).",
+      "suggestion": "Geben Sie den Basisplan frei, der gelten soll; damit wird die Freigabe der anderen zurückgenommen."
+    }
   }
 }

@@ -1787,6 +1787,33 @@
         "col_max": "Najviša",
         "col_count": "Očitanja"
       }
+    },
+    "gantt_pdf": {
+      "strings": {
+        "title": "Vremenski plan (Ganttov dijagram)",
+        "project": "Projekt",
+        "schedule": "Vremenski plan",
+        "baseline": "Osnovni plan",
+        "no_baseline": "nema",
+        "exported": "Izvezeno",
+        "data_date": "Datum stanja",
+        "col_wbs": "WBS",
+        "col_activity": "Aktivnost",
+        "col_start": "Početak",
+        "col_finish": "Završetak",
+        "col_duration": "Dana",
+        "legend_current": "Trenutni plan",
+        "legend_progress": "Napredak",
+        "legend_critical": "Kritični put",
+        "legend_baseline": "Osnovni plan",
+        "legend_actual": "Stvarno",
+        "legend_milestone": "Ključni događaj",
+        "legend_summary": "Sažetak",
+        "week_short": "T{n}",
+        "quarter_short": "K{n}",
+        "sheet_of": "List {page} od {total}",
+        "no_activities": "Ovaj plan još nema aktivnosti."
+      }
     }
   },
   "pdf_footer": {

@@ -1787,6 +1787,33 @@
         "col_max": "Maks.",
         "col_count": "Odczyty"
       }
+    },
+    "gantt_pdf": {
+      "strings": {
+        "title": "Harmonogram (wykres Gantta)",
+        "project": "Projekt",
+        "schedule": "Harmonogram",
+        "baseline": "Plan bazowy",
+        "no_baseline": "brak",
+        "exported": "Wyeksportowano",
+        "data_date": "Data stanu",
+        "col_wbs": "WBS",
+        "col_activity": "Zadanie",
+        "col_start": "Początek",
+        "col_finish": "Koniec",
+        "col_duration": "Dni",
+        "legend_current": "Plan bieżący",
+        "legend_progress": "Postęp",
+        "legend_critical": "Ścieżka krytyczna",
+        "legend_baseline": "Plan bazowy",
+        "legend_actual": "Rzeczywiste",
+        "legend_milestone": "Kamień milowy",
+        "legend_summary": "Zadanie sumaryczne",
+        "week_short": "T{n}",
+        "quarter_short": "K{n}",
+        "sheet_of": "Arkusz {page} z {total}",
+        "no_activities": "Ten harmonogram nie ma jeszcze zadań."
+      }
     }
   },
   "pdf_footer": {

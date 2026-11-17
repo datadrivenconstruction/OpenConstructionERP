@@ -1129,6 +1129,22 @@ class BaselineUpdate(BaseModel):
     is_active: bool | None = None
 
 
+class BaselineCaptureRequest(BaseModel):
+    """Capture the live schedule as the next programme baseline (B0, B1, ...).
+
+    The server builds the snapshot itself, so the stored plan is exactly what
+    the schedule held at that moment. ``approve`` publishes it at once as the
+    schedule's one approved baseline; otherwise it is a saved version that can
+    be reviewed with the diff and approved later.
+    """
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    name: str | None = Field(default=None, max_length=255, description="Defaults to the next B<n> label")
+    approve: bool = False
+    note: str | None = Field(default=None, max_length=1000)
+
+
 class BaselineResponse(BaseModel):
     """Schedule baseline returned from the API."""
 

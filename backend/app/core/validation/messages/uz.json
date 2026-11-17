@@ -2132,5 +2132,11 @@
       "fail": "{label} reviziyasi hali ham tahrirlanadi, garchi undan keyin {later} yaratilgan bo'lsa ham; bu yerdagi o'zgarishlar unga o'tmaydi",
       "suggestion": "{label} ni qulflang yoki eng so'nggi reviziyada ishlashni davom ettiring"
     }
+  },
+  "schedule_baseline": {
+    "single_approved": {
+      "fail": "Bu jadvalda bittadan ortiq tasdiqlangan bazaviy reja bor ({baselines}).",
+      "suggestion": "Amal qilishi kerak bo'lgan bazaviy rejani tasdiqlang; bittasini tasdiqlash qolganlarining tasdig'ini bekor qiladi."
+    }
   }
 }

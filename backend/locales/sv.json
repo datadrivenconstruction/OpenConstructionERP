@@ -1787,6 +1787,33 @@
         "col_max": "Högsta",
         "col_count": "Mätvärden"
       }
+    },
+    "gantt_pdf": {
+      "strings": {
+        "title": "Tidplan (Gantt-schema)",
+        "project": "Projekt",
+        "schedule": "Tidplan",
+        "baseline": "Baslinje",
+        "no_baseline": "ingen",
+        "exported": "Exporterad",
+        "data_date": "Statusdatum",
+        "col_wbs": "WBS",
+        "col_activity": "Aktivitet",
+        "col_start": "Start",
+        "col_finish": "Slut",
+        "col_duration": "Dagar",
+        "legend_current": "Aktuell plan",
+        "legend_progress": "Framsteg",
+        "legend_critical": "Kritisk linje",
+        "legend_baseline": "Baslinje",
+        "legend_actual": "Utfall",
+        "legend_milestone": "Milstolpe",
+        "legend_summary": "Sammanfattning",
+        "week_short": "V{n}",
+        "quarter_short": "K{n}",
+        "sheet_of": "Blad {page} av {total}",
+        "no_activities": "Den här tidplanen har inga aktiviteter än."
+      }
     }
   },
   "pdf_footer": {

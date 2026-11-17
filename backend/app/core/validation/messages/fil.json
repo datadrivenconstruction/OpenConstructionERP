@@ -2132,5 +2132,11 @@
       "fail": "Maaari pang i-edit ang rebisyon {label} kahit nagawa na ang {later} pagkatapos nito; hindi madadala ang mga pagbabago rito",
       "suggestion": "I-lock ang {label} o magpatuloy sa pinakabagong rebisyon"
     }
+  },
+  "schedule_baseline": {
+    "single_approved": {
+      "fail": "Higit sa isa ang aprubadong baseline ng iskedyul na ito ({baselines}).",
+      "suggestion": "Aprubahan ang baseline na dapat umiral; ang pag-apruba sa isa ay bumabawi sa apruba ng iba."
+    }
   }
 }

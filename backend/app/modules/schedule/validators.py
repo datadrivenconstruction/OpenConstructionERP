@@ -590,6 +590,58 @@ class SnapshotCostCoverage(ValidationRule):
         ]
 
 
+# ── Programme baselines ─────────────────────────────────────────────────────
+
+#: Rule set for the baselines of a schedule. Payload: ``{"baselines": [{"id",
+#: "name", "schedule_id", "is_active"}, ...]}``.
+BASELINE_RULE_SET = "schedule_baseline"
+
+
+class SingleApprovedBaselinePerSchedule(ValidationRule):
+    """At most one approved (active) baseline per schedule.
+
+    The printed Gantt, the overlay and EVM read "the" baseline of a schedule;
+    with two approved ones the answer depends on sort order. Approving through
+    the API keeps one; rows from the older free-form form can still hold two.
+    """
+
+    rule_id = "schedule_baseline.single_approved"
+    name = "One approved baseline per schedule"
+    standard = BASELINE_RULE_SET
+    severity = Severity.ERROR
+    category = RuleCategory.CONSISTENCY
+    description = "A schedule with more than one approved baseline has no unambiguous plan to compare against."
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        data = context.data if isinstance(context.data, dict) else {}
+        rows = [b for b in data.get("baselines") or [] if isinstance(b, dict) and b.get("schedule_id")]
+        locale = _locale(context)
+        by_schedule: dict[str, list[str]] = {}
+        for row in rows:
+            names = by_schedule.setdefault(str(row["schedule_id"]), [])
+            if row.get("is_active"):
+                names.append(str(row.get("name") or row.get("id")))
+        results: list[RuleResult] = []
+        for schedule_id, names in by_schedule.items():
+            passed = len(names) <= 1
+            results.append(
+                RuleResult(
+                    rule_id=self.rule_id,
+                    rule_name=self.name,
+                    severity=self.severity,
+                    category=self.category,
+                    passed=passed,
+                    message=translate("common.ok", locale=locale)
+                    if passed
+                    else translate(f"{self.rule_id}.fail", locale=locale, baselines=", ".join(sorted(names))),
+                    element_ref=schedule_id,
+                    details={"baselines": sorted(names)},
+                    suggestion=None if passed else translate(f"{self.rule_id}.suggestion", locale=locale),
+                )
+            )
+        return results
+
+
 # ── Registration ────────────────────────────────────────────────────────────
 
 _SCHEDULE_RULES: tuple[ValidationRule, ...] = (
@@ -606,6 +658,7 @@ _PROGRESS_SHEET_RULES: tuple[ValidationRule, ...] = (
     ProgressSheetUnchangedSinceExport(),
     ProgressSheetPlausibility(),
 )
+_BASELINE_RULES: tuple[ValidationRule, ...] = (SingleApprovedBaselinePerSchedule(),)
 
 
 def register_schedule_rules() -> None:
@@ -620,6 +673,8 @@ def register_schedule_rules() -> None:
         rule_registry.register(rule, [SCHEDULE_RULE_SET])
     for rule in _PROGRESS_SHEET_RULES:
         rule_registry.register(rule, [PROGRESS_SHEET_RULE_SET])
+    for rule in _BASELINE_RULES:
+        rule_registry.register(rule, [BASELINE_RULE_SET])
     logger.debug("Registered %d schedule validation rules", len(_SCHEDULE_RULES) + len(_PROGRESS_SHEET_RULES))
 
 

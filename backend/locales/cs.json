@@ -1787,6 +1787,33 @@
         "col_max": "Max.",
         "col_count": "Měření"
       }
+    },
+    "gantt_pdf": {
+      "strings": {
+        "title": "Harmonogram (Ganttův diagram)",
+        "project": "Projekt",
+        "schedule": "Harmonogram",
+        "baseline": "Směrný plán",
+        "no_baseline": "žádný",
+        "exported": "Exportováno",
+        "data_date": "Datum stavu",
+        "col_wbs": "WBS",
+        "col_activity": "Činnost",
+        "col_start": "Začátek",
+        "col_finish": "Konec",
+        "col_duration": "Dny",
+        "legend_current": "Aktuální plán",
+        "legend_progress": "Průběh",
+        "legend_critical": "Kritická cesta",
+        "legend_baseline": "Směrný plán",
+        "legend_actual": "Skutečnost",
+        "legend_milestone": "Milník",
+        "legend_summary": "Souhrnná činnost",
+        "week_short": "T{n}",
+        "quarter_short": "Q{n}",
+        "sheet_of": "List {page} z {total}",
+        "no_activities": "Tento harmonogram zatím nemá žádné činnosti."
+      }
     }
   },
   "pdf_footer": {

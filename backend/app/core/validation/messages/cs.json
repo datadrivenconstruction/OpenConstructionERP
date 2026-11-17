@@ -2132,5 +2132,11 @@
       "fail": "Revize {label} je stále upravitelná, přestože mezitím vznikla {later}; změny provedené zde se nepřenesou",
       "suggestion": "Uzamkněte {label}, nebo pokračujte v nejnovější revizi"
     }
+  },
+  "schedule_baseline": {
+    "single_approved": {
+      "fail": "Tento harmonogram má více než jeden schválený směrný plán ({baselines}).",
+      "suggestion": "Schvalte směrný plán, který má platit; schválením jednoho se schválení ostatních ruší."
+    }
   }
 }

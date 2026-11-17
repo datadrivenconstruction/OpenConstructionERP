@@ -2132,5 +2132,11 @@
       "fail": "Revizija {label} još se može uređivati iako je u međuvremenu izrađena {later}; ovdje napravljene izmjene ne prenose se",
       "suggestion": "Zaključajte {label} ili nastavite rad u najnovijoj reviziji"
     }
+  },
+  "schedule_baseline": {
+    "single_approved": {
+      "fail": "Ovaj plan ima više od jednog odobrenog osnovnog plana ({baselines}).",
+      "suggestion": "Odobrite osnovni plan koji treba vrijediti; odobrenje jednog povlači odobrenje ostalih."
+    }
   }
 }

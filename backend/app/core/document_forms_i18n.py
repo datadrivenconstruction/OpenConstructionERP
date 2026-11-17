@@ -74,7 +74,7 @@ _DATE_KEYS = ("date_format", "datetime_format")
 #: the languages each one lists as unavailable besides :data:`REGISTER_UNRENDERABLE`.
 #: A bill's PDF labels are Chinese in part only and the PDF declares them English,
 #: so its list leaves Chinese out.
-_PLAIN_FORMS: dict[str, tuple[str, ...]] = {"boq_pdf": ("zh",), "report": (), "einvoice_pdf": ()}
+_PLAIN_FORMS: dict[str, tuple[str, ...]] = {"boq_pdf": ("zh",), "report": (), "einvoice_pdf": (), "gantt_pdf": ()}
 
 
 @cache

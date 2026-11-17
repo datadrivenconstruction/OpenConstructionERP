@@ -2132,5 +2132,11 @@
       "fail": "Revision {label} can still be edited although {later} has been raised since; changes made here do not carry over",
       "suggestion": "Lock {label} to freeze it, or open the latest revision to keep working"
     }
+  },
+  "schedule_baseline": {
+    "single_approved": {
+      "fail": "This schedule has more than one approved baseline ({baselines}).",
+      "suggestion": "Approve the baseline that should be current; approving one withdraws the approval of the others."
+    }
   }
 }

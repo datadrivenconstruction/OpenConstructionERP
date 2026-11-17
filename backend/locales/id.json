@@ -1787,6 +1787,33 @@
         "col_max": "Tertinggi",
         "col_count": "Pembacaan"
       }
+    },
+    "gantt_pdf": {
+      "strings": {
+        "title": "Jadwal (diagram Gantt)",
+        "project": "Proyek",
+        "schedule": "Jadwal",
+        "baseline": "Baseline",
+        "no_baseline": "tidak ada",
+        "exported": "Diekspor",
+        "data_date": "Tanggal data",
+        "col_wbs": "WBS",
+        "col_activity": "Aktivitas",
+        "col_start": "Mulai",
+        "col_finish": "Selesai",
+        "col_duration": "Hari",
+        "legend_current": "Rencana saat ini",
+        "legend_progress": "Progres",
+        "legend_critical": "Jalur kritis",
+        "legend_baseline": "Rencana baseline",
+        "legend_actual": "Aktual",
+        "legend_milestone": "Milestone",
+        "legend_summary": "Ringkasan",
+        "week_short": "M{n}",
+        "quarter_short": "K{n}",
+        "sheet_of": "Lembar {page} dari {total}",
+        "no_activities": "Jadwal ini belum memiliki aktivitas."
+      }
     }
   },
   "pdf_footer": {

@@ -1626,6 +1626,33 @@
         "col_max": "Макс.",
         "col_count": "Показания"
       }
+    },
+    "gantt_pdf": {
+      "strings": {
+        "title": "График работ (диаграмма Ганта)",
+        "project": "Проект",
+        "schedule": "График",
+        "baseline": "Базовый план",
+        "no_baseline": "нет",
+        "exported": "Выгружено",
+        "data_date": "Дата отчёта",
+        "col_wbs": "ИСР",
+        "col_activity": "Работа",
+        "col_start": "Начало",
+        "col_finish": "Окончание",
+        "col_duration": "Дн.",
+        "legend_current": "Текущий план",
+        "legend_progress": "Выполнение",
+        "legend_critical": "Критический путь",
+        "legend_baseline": "Базовый план",
+        "legend_actual": "Факт",
+        "legend_milestone": "Веха",
+        "legend_summary": "Суммарная работа",
+        "week_short": "Н{n}",
+        "quarter_short": "{n} кв.",
+        "sheet_of": "Лист {page} из {total}",
+        "no_activities": "В этом графике пока нет работ."
+      }
     }
   },
   "cost_control": {

@@ -1787,6 +1787,33 @@
         "col_max": "Hoogste",
         "col_count": "Metingen"
       }
+    },
+    "gantt_pdf": {
+      "strings": {
+        "title": "Planning (Gantt-diagram)",
+        "project": "Project",
+        "schedule": "Planning",
+        "baseline": "Basisplanning",
+        "no_baseline": "geen",
+        "exported": "Geëxporteerd",
+        "data_date": "Peildatum",
+        "col_wbs": "WBS",
+        "col_activity": "Activiteit",
+        "col_start": "Start",
+        "col_finish": "Einde",
+        "col_duration": "Dagen",
+        "legend_current": "Huidige planning",
+        "legend_progress": "Voortgang",
+        "legend_critical": "Kritiek pad",
+        "legend_baseline": "Basisplanning",
+        "legend_actual": "Werkelijk",
+        "legend_milestone": "Mijlpaal",
+        "legend_summary": "Samenvatting",
+        "week_short": "W{n}",
+        "quarter_short": "K{n}",
+        "sheet_of": "Blad {page} van {total}",
+        "no_activities": "Deze planning heeft nog geen activiteiten."
+      }
     }
   },
   "pdf_footer": {

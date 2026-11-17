@@ -2132,5 +2132,11 @@
       "fail": "Revision {label} kan stadig redigeres, selvom {later} er oprettet siden; ændringer her overføres ikke",
       "suggestion": "Lås {label} for at fastfryse den, eller arbejd videre i den nyeste revision"
     }
+  },
+  "schedule_baseline": {
+    "single_approved": {
+      "fail": "Denne tidsplan har mere end én godkendt basisplan ({baselines}).",
+      "suggestion": "Godkend den basisplan, der skal gælde; godkendelse af én trækker godkendelsen af de andre tilbage."
+    }
   }
 }

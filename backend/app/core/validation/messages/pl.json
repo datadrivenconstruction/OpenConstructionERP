@@ -2132,5 +2132,11 @@
       "fail": "Rewizja {label} nadal jest edytowalna, choć później utworzono {later}; zmiany wprowadzone tutaj nie zostaną przeniesione",
       "suggestion": "Zablokuj {label}, aby ją zamrozić, lub kontynuuj pracę w najnowszej rewizji"
     }
+  },
+  "schedule_baseline": {
+    "single_approved": {
+      "fail": "Ten harmonogram ma więcej niż jeden zatwierdzony plan bazowy ({baselines}).",
+      "suggestion": "Zatwierdź plan bazowy, który ma obowiązywać; zatwierdzenie jednego cofa zatwierdzenie pozostałych."
+    }
   }
 }

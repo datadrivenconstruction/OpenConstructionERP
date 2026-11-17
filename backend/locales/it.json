@@ -1787,6 +1787,33 @@
         "col_max": "Max.",
         "col_count": "Letture"
       }
+    },
+    "gantt_pdf": {
+      "strings": {
+        "title": "Cronoprogramma (diagramma di Gantt)",
+        "project": "Progetto",
+        "schedule": "Cronoprogramma",
+        "baseline": "Baseline",
+        "no_baseline": "nessuna",
+        "exported": "Esportato",
+        "data_date": "Data di stato",
+        "col_wbs": "WBS",
+        "col_activity": "Attività",
+        "col_start": "Inizio",
+        "col_finish": "Fine",
+        "col_duration": "Giorni",
+        "legend_current": "Piano attuale",
+        "legend_progress": "Avanzamento",
+        "legend_critical": "Percorso critico",
+        "legend_baseline": "Piano di riferimento",
+        "legend_actual": "Effettivo",
+        "legend_milestone": "Milestone",
+        "legend_summary": "Riepilogo",
+        "week_short": "S{n}",
+        "quarter_short": "T{n}",
+        "sheet_of": "Foglio {page} di {total}",
+        "no_activities": "Questo cronoprogramma non ha ancora attività."
+      }
     }
   },
   "pdf_footer": {

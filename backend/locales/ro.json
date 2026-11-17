@@ -1787,6 +1787,33 @@
         "col_max": "Max.",
         "col_count": "Citiri"
       }
+    },
+    "gantt_pdf": {
+      "strings": {
+        "title": "Grafic de execuție (diagramă Gantt)",
+        "project": "Proiect",
+        "schedule": "Grafic",
+        "baseline": "Plan de referință",
+        "no_baseline": "niciunul",
+        "exported": "Exportat",
+        "data_date": "Data stării",
+        "col_wbs": "WBS",
+        "col_activity": "Activitate",
+        "col_start": "Început",
+        "col_finish": "Sfârșit",
+        "col_duration": "Zile",
+        "legend_current": "Plan curent",
+        "legend_progress": "Progres",
+        "legend_critical": "Drum critic",
+        "legend_baseline": "Plan de referință",
+        "legend_actual": "Real",
+        "legend_milestone": "Jalon",
+        "legend_summary": "Rezumat",
+        "week_short": "S{n}",
+        "quarter_short": "T{n}",
+        "sheet_of": "Foaia {page} din {total}",
+        "no_activities": "Acest grafic nu are încă activități."
+      }
     }
   },
   "pdf_footer": {

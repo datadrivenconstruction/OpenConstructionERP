@@ -1647,6 +1647,33 @@
         "col_max": "بلند ترین",
         "col_count": "ریڈنگز"
       }
+    },
+    "gantt_pdf": {
+      "strings": {
+        "title": "شیڈول (گینٹ چارٹ)",
+        "project": "منصوبہ",
+        "schedule": "شیڈول",
+        "baseline": "بنیادی منصوبہ",
+        "no_baseline": "کوئی نہیں",
+        "exported": "برآمد کیا گیا",
+        "data_date": "ڈیٹا کی تاریخ",
+        "col_wbs": "WBS",
+        "col_activity": "سرگرمی",
+        "col_start": "آغاز",
+        "col_finish": "اختتام",
+        "col_duration": "دن",
+        "legend_current": "موجودہ منصوبہ",
+        "legend_progress": "پیش رفت",
+        "legend_critical": "اہم راستہ",
+        "legend_baseline": "بنیادی منصوبہ",
+        "legend_actual": "اصل",
+        "legend_milestone": "سنگ میل",
+        "legend_summary": "خلاصہ",
+        "week_short": "ہ{n}",
+        "quarter_short": "س{n}",
+        "sheet_of": "شیٹ {page} از {total}",
+        "no_activities": "اس شیڈول میں ابھی کوئی سرگرمی نہیں۔"
+      }
     }
   },
   "cost_control": {

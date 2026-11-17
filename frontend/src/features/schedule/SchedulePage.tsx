@@ -54,13 +54,15 @@ import { fetchProjectList } from '@/shared/lib/projectList';
 import { fmtDate, getIntlLocale } from '@/shared/lib/formatters';
 import { useToastStore } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
-import { scheduleApi, type GenerationPreview } from './api';
+import { scheduleApi, type GenerationPreview, type ScheduleBaseline } from './api';
 import { PlanningCrossLinks } from './PlanningCrossLinks';
 import { EvmPanel } from './EvmPanel';
 import { Snapshot4DView } from './Snapshot4DView';
 import { ScheduleQualityPanel } from './ScheduleQualityPanel';
 import { ScheduleRiskPanel } from './ScheduleRiskPanel';
 import { ScheduleComparePanel } from './ScheduleComparePanel';
+import { ScheduleBaselineBar } from './ScheduleBaselineBar';
+import { baselineDatesById } from './baselineOverlay';
 import { ScheduleInterchangePanel } from './ScheduleInterchangePanel';
 import { ProgressRigorPanel } from './ProgressRigorPanel';
 import { ScheduleDelayPanel } from './ScheduleDelayPanel';
@@ -1190,6 +1192,9 @@ export function ScheduleDetail({
   const [showProgressSheet, setShowProgressSheet] = useState(false);
   const [showAddActivity, setShowAddActivity] = useState(false);
   const [showBaseline, setShowBaseline] = useState(false);
+  // The baseline the Gantt overlay and the printed Gantt compare against.
+  const [overlayBaseline, setOverlayBaseline] = useState<ScheduleBaseline | null>(null);
+  const showBaselineOverlay = useCallback(() => setShowBaseline(true), []);
   // #348: activity whose dependency editor is open (click a Gantt bar to edit).
   const [selectedActivityId, setSelectedActivityId] = useState<string | null>(null);
   const [showGenerateBOQ, setShowGenerateBOQ] = useState(false);
@@ -1736,6 +1741,7 @@ export function ScheduleDetail({
     // A predecessor is named by its WBS code, else by its name, whether or not
     // a filter hides its row.
     const nameOf = new Map((ganttData?.activities ?? []).map((x) => [x.id, x.wbs_code || x.name]));
+    const baselineDates = baselineDatesById(overlayBaseline?.snapshot_data, ganttData?.activities ?? []);
     return filteredActivities.map((a) => ({
       wbs: a.wbs_code || undefined,
       durationDays: a.duration_days,
@@ -1763,8 +1769,10 @@ export function ScheduleDetail({
           .map((d) => [d.activity_id, d.type as GanttLinkType]),
       ),
       color: a.color || undefined,
+      baselineStart: baselineDates.get(a.id)?.start,
+      baselineEnd: baselineDates.get(a.id)?.end,
     }));
-  }, [filteredActivities, criticalActivityIds, ganttData]);
+  }, [filteredActivities, criticalActivityIds, ganttData, overlayBaseline]);
 
   return (
     <div className="animate-fade-in">
@@ -2239,6 +2247,15 @@ export function ScheduleDetail({
             ) : ganttData ? (
               viewMode === 'gantt' ? (
                 <>
+                <div className="mb-2">
+                  <ScheduleBaselineBar
+                    scheduleId={schedule.id}
+                    projectId={projectId}
+                    canEdit={canEditSchedule}
+                    onBaselineChange={setOverlayBaseline}
+                    onUserSelect={showBaselineOverlay}
+                  />
+                </div>
                 {canEditSchedule && svgGanttActivities.length > 1 && (
                   <p className="mb-2 text-xs text-content-tertiary" data-testid="gantt-link-hint">
                     {t('gantt.link_hint', {

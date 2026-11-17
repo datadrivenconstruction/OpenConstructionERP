@@ -2132,5 +2132,11 @@
       "fail": "Revisio {label} on yhä muokattavissa, vaikka sen jälkeen on luotu {later}; täällä tehdyt muutokset eivät siirry",
       "suggestion": "Lukitse {label} tai jatka työtä uusimmassa revisiossa"
     }
+  },
+  "schedule_baseline": {
+    "single_approved": {
+      "fail": "Tällä aikataululla on useampi kuin yksi hyväksytty perusaikataulu ({baselines}).",
+      "suggestion": "Hyväksy perusaikataulu, jonka pitää olla voimassa; yhden hyväksyminen peruu muiden hyväksynnän."
+    }
   }
 }
