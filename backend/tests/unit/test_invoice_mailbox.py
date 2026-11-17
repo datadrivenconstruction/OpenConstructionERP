@@ -16,9 +16,23 @@ from typing import Any
 
 import pytest
 
+from app.core.url_safety import UnsafeUrlError
 from app.modules.finance import invoice_mailbox_logic as logic
 from app.modules.finance import invoice_mailbox_service as svc_mod
 from app.modules.finance.invoice_mailbox_service import InvoiceMailboxService
+
+_REAL_GUARD = svc_mod.assert_host_reachable
+
+
+@pytest.fixture(autouse=True)
+def _no_dns(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Fixture hosts are not resolved; the guard has its own tests below."""
+
+    async def allow(_host: str) -> None:
+        return None
+
+    monkeypatch.setattr(svc_mod, "assert_host_reachable", allow)
+
 
 PDF = b"%PDF-1.4\n% scan\n%%EOF"
 
@@ -273,3 +287,87 @@ async def test_test_connection_reports_failure_as_a_result(monkeypatch: pytest.M
     assert bad["ok"] is False and "AUTHENTICATIONFAILED" in bad["error"]
     good = await InvoiceMailboxService(_Session(), lambda _c: FakeImap({"1": b"x"})).test(uuid.uuid4(), data)  # type: ignore[arg-type]
     assert good == {"ok": True, "message_count": 1, "error": None}
+
+
+# ── outbound-host guard ──────────────────────────────────────────────────────
+
+
+def _allow_internal(monkeypatch: pytest.MonkeyPatch, value: bool) -> None:
+    monkeypatch.setattr(svc_mod, "get_settings", lambda: SimpleNamespace(invoice_mailbox_allow_internal=value))
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "host", ["10.0.0.5", "192.168.1.20", "127.0.0.1", "169.254.169.254", "metadata.google.internal"]
+)
+async def test_internal_hosts_are_refused_by_default(monkeypatch: pytest.MonkeyPatch, host: str) -> None:
+    _allow_internal(monkeypatch, False)
+    with pytest.raises(UnsafeUrlError):
+        await _REAL_GUARD(host)
+
+
+@pytest.mark.asyncio
+async def test_a_public_address_passes(monkeypatch: pytest.MonkeyPatch) -> None:
+    _allow_internal(monkeypatch, False)
+    await _REAL_GUARD("93.184.216.34")
+
+
+@pytest.mark.asyncio
+async def test_the_opt_out_opens_private_ranges_but_never_metadata(monkeypatch: pytest.MonkeyPatch) -> None:
+    _allow_internal(monkeypatch, True)
+    await _REAL_GUARD("10.0.0.5")
+    await _REAL_GUARD("127.0.0.1")
+    with pytest.raises(UnsafeUrlError):
+        await _REAL_GUARD("169.254.169.254")
+
+
+@pytest.mark.asyncio
+async def test_saving_an_internal_host_is_refused(monkeypatch: pytest.MonkeyPatch) -> None:
+    from fastapi import HTTPException
+
+    from app.modules.finance.invoice_mailbox_schemas import MailboxUpdate
+
+    _allow_internal(monkeypatch, False)
+    monkeypatch.setattr(svc_mod, "assert_host_reachable", _REAL_GUARD)
+
+    async def no_row(self: Any, _pid: Any) -> None:
+        return None
+
+    monkeypatch.setattr(InvoiceMailboxService, "get", no_row)
+    data = MailboxUpdate(enabled=True, host="10.0.0.5", username="u", password="p")
+    with pytest.raises(HTTPException) as err:
+        await InvoiceMailboxService(_Session(), None).upsert(uuid.uuid4(), data)  # type: ignore[arg-type]
+    assert err.value.status_code == 422 and err.value.detail[0]["code"] == "host_not_allowed"
+
+
+@pytest.mark.asyncio
+async def test_test_connection_refuses_an_internal_host_without_connecting(monkeypatch: pytest.MonkeyPatch) -> None:
+    from app.modules.finance.invoice_mailbox_schemas import MailboxTest
+
+    _allow_internal(monkeypatch, False)
+    monkeypatch.setattr(svc_mod, "assert_host_reachable", _REAL_GUARD)
+
+    async def no_row(self: Any, _pid: Any) -> None:
+        return None
+
+    monkeypatch.setattr(InvoiceMailboxService, "get", no_row)
+    box = FakeImap({})
+    out = await InvoiceMailboxService(_Session(), lambda _c: box).test(  # type: ignore[arg-type]
+        uuid.uuid4(), MailboxTest(host="127.0.0.1", username="u", password="p")
+    )
+    assert out["ok"] is False and box.log == []
+
+
+@pytest.mark.asyncio
+async def test_each_poll_rechecks_the_host_so_a_dns_change_is_caught(monkeypatch: pytest.MonkeyPatch) -> None:
+    _patch_capture(monkeypatch)
+
+    async def refuse(_host: str) -> None:
+        raise UnsafeUrlError("resolves to a refused address")
+
+    monkeypatch.setattr(svc_mod, "assert_host_reachable", refuse)
+    box = FakeImap({"7": _mail()})
+    row = _row()
+    counts = await InvoiceMailboxService(_Session(), lambda _c: box).poll(row)  # type: ignore[arg-type]
+    assert counts["messages"] == 0 and box.log == []
+    assert "refused address" in row.last_error
