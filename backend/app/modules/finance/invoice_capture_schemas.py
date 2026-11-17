@@ -178,6 +178,9 @@ class CaptureResponse(BaseModel):
     file_size: int = 0
     content_sha256: str | None = None
     has_document: bool = False
+    # upload | camera | email; sender is the From address for e-mail intake.
+    source: str = "upload"
+    source_sender: str | None = None
 
     supplier_name: str = ""
     supplier_tax_id: str | None = None
@@ -266,3 +269,18 @@ class AuditEntryResponse(BaseModel):
 class AuditListResponse(BaseModel):
     items: list[AuditEntryResponse]
     total: int
+
+
+class EmailIntakeResponse(BaseModel):
+    """Outcome of importing one scan-to-email message."""
+
+    sender: str | None = None
+    created: list[CaptureResponse] = Field(default_factory=list)
+    duplicates: list[CaptureResponse] = Field(default_factory=list)
+    rejected: list[dict[str, str]] = Field(default_factory=list)
+
+
+class IntakeInfoResponse(BaseModel):
+    """Where a scanner should send invoices (empty when not configured)."""
+
+    address: str | None = None

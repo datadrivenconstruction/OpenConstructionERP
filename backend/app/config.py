@@ -724,6 +724,9 @@ class Settings(BaseSettings):
     smtp_password: str = ""
     smtp_from: str = "info@datadrivenconstruction.io"
     smtp_tls: bool = True
+    # Address scanners and offices e-mail supplier invoices to; shown in the
+    # capture help. Empty hides the hint.
+    invoice_intake_address: str = ""
     # Public URL used to build password-reset and notification links.
     # Falls back to the first CORS origin so dev installs work without
     # an explicit setting.

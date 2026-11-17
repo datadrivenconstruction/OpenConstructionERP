@@ -17,6 +17,8 @@ import {
   History,
   Sparkles,
   Info,
+  Camera,
+  Mail,
 } from 'lucide-react';
 import { Button, Card, Badge, EmptyState, SkeletonTable } from '@/shared/ui';
 import { WideModal } from '@/shared/ui/WideModal';
@@ -36,6 +38,7 @@ import {
 import { useToastStore } from '@/stores/useToastStore';
 import { InvoiceInboxOrderLink, hasOrderMismatch } from './InvoiceInboxOrderLink';
 import { getNumberLocale } from '@/stores/usePreferencesStore';
+import { captureSourceOf, uploadBatch, type CaptureSource } from './invoiceCaptureIntake';
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
 
@@ -64,6 +67,8 @@ interface Capture {
   doc_kind: string;
   original_filename: string;
   has_document: boolean;
+  source?: string;
+  source_sender?: string | null;
   supplier_name: string;
   supplier_tax_id: string | null;
   supplier_contact_id: string | null;
@@ -170,6 +175,8 @@ export function InvoiceInboxTab({ projectId }: { projectId: string }) {
   const queryClient = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
   const fileRef = useRef<HTMLInputElement>(null);
+  const cameraRef = useRef<HTMLInputElement>(null);
+  const [dragOver, setDragOver] = useState(false);
 
   const [statusFilter, setStatusFilter] = useState<string>('');
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -183,6 +190,13 @@ export function InvoiceInboxTab({ projectId }: { projectId: string }) {
       );
     },
   });
+
+  const intakeQuery = useQuery({
+    queryKey: ['finance-invoice-intake-info'],
+    queryFn: () => apiGet<{ address: string | null }>('/v1/finance/inbox/intake/info'),
+    staleTime: 5 * 60 * 1000,
+  });
+  const intakeAddress = intakeQuery.data?.address ?? null;
 
   const accountsQuery = useQuery({
     queryKey: ['finance-gl-accounts', projectId],
@@ -202,36 +216,52 @@ export function InvoiceInboxTab({ projectId }: { projectId: string }) {
     queryClient.invalidateQueries({ queryKey: ['finance', 'dashboard', projectId] });
   };
 
-  const uploadMut = useMutation({
-    mutationFn: async (file: File) => {
-      const fd = new FormData();
-      fd.append('file', file);
-      const res = await fetch(
-        `${API_BASE}/v1/finance/inbox/upload?project_id=${encodeURIComponent(projectId)}`,
-        {
-          method: 'POST',
-          headers: { Authorization: `Bearer ${getAuthToken() ?? ''}` },
-          body: fd,
-        },
-      );
-      if (!res.ok) {
-        let detail = t('finance.inbox.upload_failed', { defaultValue: 'Upload failed' });
-        try {
-          detail = extractErrorMessageFromBody(await res.json()) ?? detail;
-        } catch {
-          /* keep default */
-        }
-        throw new Error(detail);
+  const uploadOne = async (file: File, source: CaptureSource): Promise<Capture> => {
+    const fd = new FormData();
+    fd.append('file', file);
+    const res = await fetch(
+      `${API_BASE}/v1/finance/inbox/upload?project_id=${encodeURIComponent(projectId)}&source=${source}`,
+      {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${getAuthToken() ?? ''}` },
+        body: fd,
+      },
+    );
+    if (!res.ok) {
+      let detail = t('finance.inbox.upload_failed', { defaultValue: 'Upload failed' });
+      try {
+        detail = extractErrorMessageFromBody(await res.json()) ?? detail;
+      } catch {
+        /* keep default */
       }
-      return (await res.json()) as Capture;
-    },
-    onSuccess: (row) => {
+      throw new Error(detail);
+    }
+    return (await res.json()) as Capture;
+  };
+
+  const uploadMut = useMutation({
+    mutationFn: ({ files, source }: { files: File[]; source: CaptureSource }) =>
+      uploadBatch(files, (file) => uploadOne(file, source)),
+    onSuccess: (out) => {
       invalidateAll();
-      setSelectedId(row.id);
-      addToast({
-        type: 'success',
-        title: t('finance.inbox.captured', { defaultValue: 'Invoice captured for review' }),
-      });
+      if (out.captured.length === 1) setSelectedId(out.captured[0].id);
+      if (out.captured.length > 0) {
+        addToast({
+          type: 'success',
+          title: t('finance.inbox.captured_n', {
+            defaultValue: 'Captured for review: {{count}}',
+            count: out.captured.length,
+          }),
+        });
+      }
+      const problems = [...out.failed.map((f) => `${f.name}: ${f.message}`), ...out.skipped];
+      if (problems.length > 0) {
+        addToast({
+          type: 'error',
+          title: t('finance.inbox.upload_failed', { defaultValue: 'Upload failed' }),
+          message: problems.join('; '),
+        });
+      }
     },
     onError: (e: Error) =>
       addToast({
@@ -251,10 +281,25 @@ export function InvoiceInboxTab({ projectId }: { projectId: string }) {
     onError: (e: Error) => addToast({ type: 'error', title: e.message }),
   });
 
+  const startUpload = (list: FileList | null, source: CaptureSource) => {
+    const files = list ? Array.from(list) : [];
+    if (files.length > 0) uploadMut.mutate({ files, source });
+  };
+
   const onPickFile = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) uploadMut.mutate(file);
+    startUpload(e.target.files, 'upload');
     if (fileRef.current) fileRef.current.value = '';
+  };
+
+  const onPickPhoto = (e: React.ChangeEvent<HTMLInputElement>) => {
+    startUpload(e.target.files, 'camera');
+    if (cameraRef.current) cameraRef.current.value = '';
+  };
+
+  const onDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setDragOver(false);
+    startUpload(e.dataTransfer.files, 'upload');
   };
 
   const statusOptions: Array<{ value: string; label: string }> = [
@@ -269,7 +314,16 @@ export function InvoiceInboxTab({ projectId }: { projectId: string }) {
 
   return (
     <div className="space-y-4">
-      <Card className="p-4">
+      <Card
+        className={`p-4 ${dragOver ? 'ring-2 ring-oe-blue' : ''}`}
+        data-testid="invoice-capture-dropzone"
+        onDragOver={(e: React.DragEvent) => {
+          e.preventDefault();
+          setDragOver(true);
+        }}
+        onDragLeave={() => setDragOver(false)}
+        onDrop={onDrop}
+      >
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <h3 className="oe-card-title">
@@ -287,17 +341,65 @@ export function InvoiceInboxTab({ projectId }: { projectId: string }) {
               ref={fileRef}
               type="file"
               accept=".pdf,image/*,.xml,application/xml"
+              multiple
               className="hidden"
               onChange={onPickFile}
+            />
+            <input
+              ref={cameraRef}
+              type="file"
+              accept="image/*,application/pdf"
+              capture="environment"
+              className="hidden"
+              data-testid="invoice-capture-camera"
+              onChange={onPickPhoto}
             />
             <Button variant="secondary" onClick={() => manualMut.mutate()} disabled={manualMut.isPending}>
               <Plus size={16} />
               {t('finance.inbox.add_manual', { defaultValue: 'Add manually' })}
             </Button>
+            <Button
+              variant="secondary"
+              onClick={() => cameraRef.current?.click()}
+              disabled={uploadMut.isPending}
+            >
+              <Camera size={16} />
+              {t('finance.inbox.take_photo', { defaultValue: 'Take photo' })}
+            </Button>
             <Button onClick={() => fileRef.current?.click()} disabled={uploadMut.isPending}>
               {uploadMut.isPending ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />}
               {t('finance.inbox.upload', { defaultValue: 'Upload invoice' })}
             </Button>
+          </div>
+        </div>
+        <p className="mt-2 text-xs text-content-tertiary">
+          {t('finance.inbox.drop_hint', {
+            defaultValue: 'Drop several PDFs or photos here to capture them all at once.',
+          })}
+        </p>
+        <div className="mt-3 flex items-start gap-2 rounded-lg bg-surface-secondary p-3 text-sm text-content-secondary">
+          <Mail size={16} className="mt-0.5 shrink-0" />
+          <div>
+            <div className="font-medium text-content-primary">
+              {t('finance.inbox.scan_help_title', { defaultValue: 'Scan to e-mail' })}
+            </div>
+            <p>
+              {t('finance.inbox.scan_help_body', {
+                defaultValue:
+                  'Set your scanner or copier to "scan to e-mail" and send invoices as PDF or image attachments. Each attachment becomes its own draft here for review. Files already captured are skipped.',
+              })}
+            </p>
+            <p className="mt-1">
+              {intakeAddress
+                ? t('finance.inbox.scan_help_address', {
+                    defaultValue: 'Send scans to: {{address}}',
+                    address: intakeAddress,
+                  })
+                : t('finance.inbox.scan_help_no_address', {
+                    defaultValue:
+                      'No intake address is configured yet. Ask your administrator to set one up.',
+                  })}
+            </p>
           </div>
         </div>
       </Card>
@@ -352,6 +454,9 @@ export function InvoiceInboxTab({ projectId }: { projectId: string }) {
                     {t('finance.inbox.col_gross', { defaultValue: 'Gross' })}
                   </th>
                   <th>
+                    {t('finance.inbox.col_source', { defaultValue: 'Source' })}
+                  </th>
+                  <th>
                     {t('finance.inbox.col_status', { defaultValue: 'Status' })}
                   </th>
                   <th />
@@ -380,6 +485,11 @@ export function InvoiceInboxTab({ projectId }: { projectId: string }) {
                     </td>
                     <td className="text-right">
                       <MoneyDisplay amount={c.amount_gross} currency={c.currency_code || 'EUR'} />
+                    </td>
+                    <td className="text-content-secondary" title={c.source_sender ?? undefined}>
+                      {t(`finance.inbox.source_${captureSourceOf(c.source)}`, {
+                        defaultValue: captureSourceOf(c.source),
+                      })}
                     </td>
                     <td>
                       <Badge variant={CAPTURE_STATUS_COLORS[c.status] ?? 'neutral'} size="sm">
