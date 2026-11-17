@@ -928,7 +928,7 @@ def check_change_time_within_owner(change: dict[str, Any]) -> list[Finding]:
 # already billed. Money arrives as Decimal strings.
 
 
-def _pay_app_ref(payload: dict[str, Any]) -> str:
+def _statement_pay_app_ref(payload: dict[str, Any]) -> str:
     return str(payload.get("application_number") or payload.get("id") or "?")
 
 
@@ -996,7 +996,7 @@ def check_pay_app_within_agreement(payload: dict[str, Any]) -> list[Finding]:
         return []
     return [
         Finding(
-            element_ref=_pay_app_ref(payload),
+            element_ref=_statement_pay_app_ref(payload),
             params={"billed": _amount(billed, payload), "limit": _amount(limit, payload)},
             details={"billed": str(billed), "contract_sum_to_date": str(limit)},
         )
