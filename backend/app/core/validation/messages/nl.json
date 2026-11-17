@@ -2294,5 +2294,55 @@
       "d": "d (mm)",
       "dz": "dZ (mm)"
     }
+  },
+  "land_parcels": {
+    "area_mismatch": {
+      "fail": "Perceel {id}: berekende oppervlakte {a} m2 wijkt meer dan de tolerantie af van de kadastrale oppervlakte {l} m2 ({t}).",
+      "suggestion": "Controleer de grenspunten tegen het uittreksel uit het register, of noteer waarom de oppervlakten verschillen."
+    },
+    "ring_invalid": {
+      "fail": "Perceel {id}: contour niet gesloten of zelfdoorsnijdend.",
+      "suggestion": "Corrigeer de grenspunten zodat ze één keer rond het perceel lopen zonder te kruisen."
+    },
+    "zone_not_acquired": {
+      "fail": "Werkzone overlapt het nog niet verworven perceel {id} ({area} m2).",
+      "suggestion": "Verwerf het perceel of spreek toegang af vóór de start van het werk, of verplaats de werkzone."
+    },
+    "overlap": {
+      "fail": "Percelen {a} en {b} overlappen {area} m2.",
+      "suggestion": "Corrigeer de gemeenschappelijke grens zodat beide percelen dezelfde punten gebruiken."
+    },
+    "gap": {
+      "fail": "Kier van {gap} m tussen de percelen {a} en {b}.",
+      "suggestion": "Laat beide percelen dezelfde grenspunten gebruiken, of bevestig dat de strook bij een ander perceel hoort."
+    },
+    "id_format": {
+      "fail": "Perceelnummer {id} volgt het formaat {label} niet (bijvoorbeeld {example}).",
+      "suggestion": "Neem het nummer precies over zoals het register het schrijft."
+    },
+    "pdf": {
+      "title": "Perceelstaat",
+      "project": "Project",
+      "crs": "Coördinatenstelsel",
+      "method": "Methode",
+      "method_value": "Oppervlakte uit grenscoördinaten (formule van Gauss), afgerond op {decimals} decimalen, m2",
+      "printed": "Afgedrukt door",
+      "legal": "Kadastrale oppervlakte (m2)",
+      "computed": "Berekend (m2)",
+      "diff": "Verschil (m2)",
+      "status": "Status",
+      "rights": "Rechten",
+      "cost": "Kosten",
+      "findings": "Bevindingen",
+      "total": "Totaal, {count} percelen",
+      "acquired_of": "Verworven {acquired} van {total}",
+      "findings_title": "Bevindingen",
+      "no_findings": "Geen bevindingen.",
+      "disclaimer": "Eigenaren en rechten worden getoond zoals vastgelegd in dit project. Deze staat is geen juridisch advies en geen uittreksel uit het register.",
+      "status_needed": "Nodig",
+      "status_negotiating": "In onderhandeling",
+      "status_acquired": "Verworven",
+      "status_expropriation": "Onteigening"
+    }
   }
 }

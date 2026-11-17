@@ -2294,5 +2294,55 @@
       "d": "d (mm)",
       "dz": "dZ (mm)"
     }
+  },
+  "land_parcels": {
+    "area_mismatch": {
+      "fail": "Parcela {id}: suprafața calculată {a} m2 diferă de cea din acte {l} m2 cu mai mult decât toleranța ({t}).",
+      "suggestion": "Verificați punctele de contur cu extrasul din registru sau notați de ce diferă suprafețele."
+    },
+    "ring_invalid": {
+      "fail": "Parcela {id}: contur neînchis sau care se autointersectează.",
+      "suggestion": "Corectați punctele de contur astfel încât să ocolească parcela o singură dată fără să se intersecteze."
+    },
+    "zone_not_acquired": {
+      "fail": "Zona de lucru se suprapune cu parcela {id} încă neachiziționată ({area} m2).",
+      "suggestion": "Achiziționați parcela sau stabiliți accesul înainte de începerea lucrărilor, sau mutați zona de lucru."
+    },
+    "overlap": {
+      "fail": "Parcelele {a} și {b} se suprapun pe {area} m2.",
+      "suggestion": "Corectați limita comună astfel încât ambele parcele să folosească aceleași puncte."
+    },
+    "gap": {
+      "fail": "Spațiu de {gap} m între parcelele {a} și {b}.",
+      "suggestion": "Folosiți aceleași puncte de contur la ambele parcele sau confirmați că fâșia aparține altei parcele."
+    },
+    "id_format": {
+      "fail": "Numărul {id} nu respectă formatul {label} (de exemplu {example}).",
+      "suggestion": "Copiați numărul exact cum îl scrie registrul."
+    },
+    "pdf": {
+      "title": "Lista parcelelor",
+      "project": "Proiect",
+      "crs": "Sistem de coordonate",
+      "method": "Metodă",
+      "method_value": "Suprafață din coordonatele conturului (formula lui Gauss), rotunjită la {decimals} zecimale, m2",
+      "printed": "Tipărit de",
+      "legal": "Suprafață din acte (m2)",
+      "computed": "Calculată (m2)",
+      "diff": "Diferență (m2)",
+      "status": "Stare",
+      "rights": "Drepturi",
+      "cost": "Cost",
+      "findings": "Constatări",
+      "total": "Total, {count} parcele",
+      "acquired_of": "Achiziționate {acquired} din {total}",
+      "findings_title": "Constatări",
+      "no_findings": "Nicio constatare.",
+      "disclaimer": "Proprietarii și drepturile sunt afișate așa cum sunt înregistrate în acest proiect. Lista nu este o opinie juridică și nici un extras de carte funciară.",
+      "status_needed": "Necesară",
+      "status_negotiating": "Negociere",
+      "status_acquired": "Achiziționată",
+      "status_expropriation": "Expropriere"
+    }
   }
 }

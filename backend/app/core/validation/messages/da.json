@@ -2294,5 +2294,55 @@
       "d": "d (mm)",
       "dz": "dZ (mm)"
     }
+  },
+  "land_parcels": {
+    "area_mismatch": {
+      "fail": "Matrikel {id}: beregnet areal {a} m2 afviger fra registreret areal {l} m2 med mere end tolerancen ({t}).",
+      "suggestion": "Kontrollér skelpunkterne mod registerudskriften, eller notér hvorfor arealerne afviger."
+    },
+    "ring_invalid": {
+      "fail": "Matrikel {id}: skel ikke lukket eller krydser sig selv.",
+      "suggestion": "Ret skelpunkterne, så de går én gang rundt om matriklen uden at krydse."
+    },
+    "zone_not_acquired": {
+      "fail": "Arbejdsområdet overlapper matrikel {id}, der endnu ikke er erhvervet ({area} m2).",
+      "suggestion": "Erhverv matriklen eller aftal adgang før arbejdet starter, eller flyt arbejdsområdet."
+    },
+    "overlap": {
+      "fail": "Matrikel {a} og {b} overlapper med {area} m2.",
+      "suggestion": "Ret det fælles skel, så begge matrikler bruger de samme punkter."
+    },
+    "gap": {
+      "fail": "Mellemrum på {gap} m mellem matrikel {a} og {b}.",
+      "suggestion": "Lad begge matrikler bruge de samme skelpunkter, eller bekræft at bæltet hører til en anden matrikel."
+    },
+    "id_format": {
+      "fail": "Nummeret {id} følger ikke formatet {label} (for eksempel {example}).",
+      "suggestion": "Skriv nummeret af præcis som registret skriver det."
+    },
+    "pdf": {
+      "title": "Matrikelfortegnelse",
+      "project": "Projekt",
+      "crs": "Koordinatsystem",
+      "method": "Metode",
+      "method_value": "Areal fra skelkoordinater (Gauss' formel), afrundet til {decimals} decimaler, m2",
+      "printed": "Udskrevet af",
+      "legal": "Registreret areal (m2)",
+      "computed": "Beregnet (m2)",
+      "diff": "Forskel (m2)",
+      "status": "Status",
+      "rights": "Rettigheder",
+      "cost": "Omkostning",
+      "findings": "Fund",
+      "total": "I alt, {count} matrikler",
+      "acquired_of": "Erhvervet {acquired} af {total}",
+      "findings_title": "Fund",
+      "no_findings": "Ingen fund.",
+      "disclaimer": "Ejere og rettigheder vises som registreret i dette projekt. Fortegnelsen er hverken en juridisk vurdering eller en registerudskrift.",
+      "status_needed": "Nødvendig",
+      "status_negotiating": "Forhandling",
+      "status_acquired": "Erhvervet",
+      "status_expropriation": "Ekspropriation"
+    }
   }
 }

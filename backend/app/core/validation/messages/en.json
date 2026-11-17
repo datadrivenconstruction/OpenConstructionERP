@@ -2294,5 +2294,55 @@
       "d": "d (mm)",
       "dz": "dZ (mm)"
     }
+  },
+  "land_parcels": {
+    "area_mismatch": {
+      "fail": "Parcel {id}: computed area {a} m2 differs from legal area {l} m2 by more than tolerance ({t}).",
+      "suggestion": "Check the boundary points against the register extract, or note why the two areas differ."
+    },
+    "ring_invalid": {
+      "fail": "Parcel {id}: ring not closed or self-intersecting.",
+      "suggestion": "Fix the boundary points so they run once around the parcel without crossing."
+    },
+    "zone_not_acquired": {
+      "fail": "Work zone overlaps parcel {id} not yet acquired ({area} m2).",
+      "suggestion": "Acquire the parcel or agree access before the works start, or move the work zone."
+    },
+    "overlap": {
+      "fail": "Parcels {a} and {b} overlap by {area} m2.",
+      "suggestion": "Correct the shared boundary so both parcels use the same points."
+    },
+    "gap": {
+      "fail": "Gap of {gap} m between parcels {a} and {b}.",
+      "suggestion": "Make both parcels use the same boundary points, or confirm the strip belongs to another parcel."
+    },
+    "id_format": {
+      "fail": "Parcel ID {id} does not match the {label} format (for example {example}).",
+      "suggestion": "Copy the ID exactly as the register writes it."
+    },
+    "pdf": {
+      "title": "Parcel schedule",
+      "project": "Project",
+      "crs": "Coordinate system",
+      "method": "Method",
+      "method_value": "Area from boundary coordinates (shoelace), rounded to {decimals} decimals, m2",
+      "printed": "Printed by",
+      "legal": "Legal area (m2)",
+      "computed": "Computed (m2)",
+      "diff": "Diff (m2)",
+      "status": "Status",
+      "rights": "Rights",
+      "cost": "Cost",
+      "findings": "Findings",
+      "total": "Total, {count} parcels",
+      "acquired_of": "Acquired {acquired} of {total}",
+      "findings_title": "Findings",
+      "no_findings": "No findings.",
+      "disclaimer": "Owners and rights are shown as recorded in this project. This schedule is not a legal opinion or a register extract.",
+      "status_needed": "Needed",
+      "status_negotiating": "Negotiating",
+      "status_acquired": "Acquired",
+      "status_expropriation": "Expropriation"
+    }
   }
 }

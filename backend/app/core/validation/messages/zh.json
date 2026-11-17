@@ -2294,5 +2294,55 @@
       "d": "d (mm)",
       "dz": "dZ (mm)"
     }
+  },
+  "land_parcels": {
+    "area_mismatch": {
+      "fail": "宗地 {id}：计算面积 {a} m2 与登记面积 {l} m2 之差超出容差 ({t})。",
+      "suggestion": "请将界址点与登记簿摘录核对，或注明两者不同的原因。"
+    },
+    "ring_invalid": {
+      "fail": "宗地 {id}：界线未闭合或自相交。",
+      "suggestion": "修正界址点，使其不交叉地绕宗地一周。"
+    },
+    "zone_not_acquired": {
+      "fail": "施工区与尚未取得的宗地 {id} 重叠 ({area} m2)。",
+      "suggestion": "在施工前取得宗地或商定进入，或移动施工区。"
+    },
+    "overlap": {
+      "fail": "宗地 {a} 与 {b} 重叠 {area} m2。",
+      "suggestion": "修正共用界线，使两个宗地使用相同的点。"
+    },
+    "gap": {
+      "fail": "宗地 {a} 与 {b} 之间有 {gap} m 的缝隙。",
+      "suggestion": "让两个宗地使用相同的界址点，或确认该带属于另一宗地。"
+    },
+    "id_format": {
+      "fail": "宗地号 {id} 不符合 {label} 格式 (例如 {example})。",
+      "suggestion": "请严格按登记簿的写法复制宗地号。"
+    },
+    "pdf": {
+      "title": "宗地清单",
+      "project": "项目",
+      "crs": "坐标系",
+      "method": "方法",
+      "method_value": "按界址坐标计算面积 (坐标法)，保留 {decimals} 位小数，m2",
+      "printed": "打印人",
+      "legal": "登记面积 (m2)",
+      "computed": "计算面积 (m2)",
+      "diff": "差值 (m2)",
+      "status": "状态",
+      "rights": "权利",
+      "cost": "费用",
+      "findings": "问题",
+      "total": "合计，{count} 宗",
+      "acquired_of": "已取得 {acquired} / {total}",
+      "findings_title": "问题",
+      "no_findings": "没有问题。",
+      "disclaimer": "所有人和权利按本项目中的记录显示。本清单不是法律意见，也不是登记簿摘录。",
+      "status_needed": "需要",
+      "status_negotiating": "协商中",
+      "status_acquired": "已取得",
+      "status_expropriation": "征收"
+    }
   }
 }

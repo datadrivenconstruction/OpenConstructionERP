@@ -195,6 +195,8 @@ dependencies = [
     "simpleeval>=0.9.13,<2",
     # Survey modules store and transform coordinates per project CRS (EPSG); PROJ is MIT, network off, no grids shipped.
     "pyproj>=3.6.1,<4",
+    # Shapefile import/export of land parcels (land_parcels); pure Python, MIT, no dependencies.
+    "pyshp>=2.3.1,<4",
 ]
 [project.scripts]
 openestimate = "app.cli:main"

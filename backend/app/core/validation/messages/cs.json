@@ -2294,5 +2294,55 @@
       "d": "d (mm)",
       "dz": "dZ (mm)"
     }
+  },
+  "land_parcels": {
+    "area_mismatch": {
+      "fail": "Parcela {id}: vypočtená výměra {a} m2 se liší od katastrální {l} m2 o více než toleranci ({t}).",
+      "suggestion": "Porovnejte lomové body s výpisem z registru, nebo poznamenejte, proč se výměry liší."
+    },
+    "ring_invalid": {
+      "fail": "Parcela {id}: obvod není uzavřen nebo protíná sám sebe.",
+      "suggestion": "Opravte lomové body, aby obíhaly parcelu jednou bez křížení."
+    },
+    "zone_not_acquired": {
+      "fail": "Pracovní zóna zasahuje do dosud nenabyté parcely {id} ({area} m2).",
+      "suggestion": "Nabyjte parcelu nebo dohodněte přístup před zahájením prací, nebo posuňte pracovní zónu."
+    },
+    "overlap": {
+      "fail": "Parcely {a} a {b} se překrývají o {area} m2.",
+      "suggestion": "Opravte společnou hranici, aby obě parcely používaly stejné body."
+    },
+    "gap": {
+      "fail": "Mezera {gap} m mezi parcelami {a} a {b}.",
+      "suggestion": "Ať obě parcely používají stejné lomové body, nebo potvrďte, že pás patří jiné parcele."
+    },
+    "id_format": {
+      "fail": "Číslo {id} neodpovídá formátu {label} (například {example}).",
+      "suggestion": "Opište číslo přesně tak, jak je uvádí registr."
+    },
+    "pdf": {
+      "title": "Soupis parcel",
+      "project": "Projekt",
+      "crs": "Souřadnicový systém",
+      "method": "Metoda",
+      "method_value": "Výměra ze souřadnic hranice (Gaussův vzorec), zaokrouhleno na {decimals} desetinná místa, m2",
+      "printed": "Vytiskl",
+      "legal": "Výměra v katastru (m2)",
+      "computed": "Vypočtená (m2)",
+      "diff": "Rozdíl (m2)",
+      "status": "Stav",
+      "rights": "Práva",
+      "cost": "Náklady",
+      "findings": "Nálezy",
+      "total": "Celkem, parcely: {count}",
+      "acquired_of": "Nabyto {acquired} z {total}",
+      "findings_title": "Nálezy",
+      "no_findings": "Žádné nálezy.",
+      "disclaimer": "Vlastníci a práva jsou uvedeni tak, jak jsou zapsáni v tomto projektu. Soupis není právní posudek ani výpis z registru.",
+      "status_needed": "Potřeba",
+      "status_negotiating": "Jednání",
+      "status_acquired": "Nabyto",
+      "status_expropriation": "Vyvlastnění"
+    }
   }
 }

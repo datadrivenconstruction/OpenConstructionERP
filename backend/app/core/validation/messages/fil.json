@@ -2294,5 +2294,55 @@
       "d": "d (mm)",
       "dz": "dZ (mm)"
     }
+  },
+  "land_parcels": {
+    "area_mismatch": {
+      "fail": "Lote {id}: ang kinalkulang sukat na {a} m2 ay naiiba sa sukat sa titulo na {l} m2 nang higit sa tolerance ({t}).",
+      "suggestion": "Suriin ang mga punto ng hangganan laban sa kopya ng rehistro, o itala kung bakit magkaiba ang mga sukat."
+    },
+    "ring_invalid": {
+      "fail": "Lote {id}: hindi sarado ang hangganan o tumatawid sa sarili.",
+      "suggestion": "Ayusin ang mga punto para umikot nang isang beses sa lote nang hindi nagtatawiran."
+    },
+    "zone_not_acquired": {
+      "fail": "Sumasaklaw ang work zone sa loteng {id} na hindi pa nakukuha ({area} m2).",
+      "suggestion": "Kunin ang lote o magkasundo sa pagpasok bago magsimula ang gawain, o ilipat ang work zone."
+    },
+    "overlap": {
+      "fail": "Nagpapatong ang mga lote {a} at {b} nang {area} m2.",
+      "suggestion": "Ayusin ang magkasanib na hangganan para parehong lote ang gumamit ng parehong mga punto."
+    },
+    "gap": {
+      "fail": "Puwang na {gap} m sa pagitan ng mga lote {a} at {b}.",
+      "suggestion": "Gamitin ang parehong mga punto sa dalawang lote, o kumpirmahing ang guhit ay bahagi ng ibang lote."
+    },
+    "id_format": {
+      "fail": "Ang numerong {id} ay hindi tugma sa format na {label} (halimbawa {example}).",
+      "suggestion": "Kopyahin ang numero nang eksakto kung paano ito isinulat ng rehistro."
+    },
+    "pdf": {
+      "title": "Talaan ng lote",
+      "project": "Proyekto",
+      "crs": "Sistema ng coordinate",
+      "method": "Paraan",
+      "method_value": "Sukat mula sa mga coordinate ng hangganan (pormula ni Gauss), ni-round sa {decimals} decimal, m2",
+      "printed": "Inimprenta ni",
+      "legal": "Sukat sa titulo (m2)",
+      "computed": "Kinalkula (m2)",
+      "diff": "Pagkakaiba (m2)",
+      "status": "Katayuan",
+      "rights": "Mga karapatan",
+      "cost": "Gastos",
+      "findings": "Mga natuklasan",
+      "total": "Kabuuan, {count} lote",
+      "acquired_of": "Nakuha na {acquired} sa {total}",
+      "findings_title": "Mga natuklasan",
+      "no_findings": "Walang natuklasan.",
+      "disclaimer": "Ipinapakita ang mga may-ari at karapatan ayon sa pagkakatala sa proyektong ito. Hindi legal na opinyon o kopya ng rehistro ang talaang ito.",
+      "status_needed": "Kailangan",
+      "status_negotiating": "Nakikipag-usap",
+      "status_acquired": "Nakuha na",
+      "status_expropriation": "Ekspropriasyon"
+    }
   }
 }

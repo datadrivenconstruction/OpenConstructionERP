@@ -2294,5 +2294,55 @@
       "d": "d (mm)",
       "dz": "dZ (mm)"
     }
+  },
+  "land_parcels": {
+    "area_mismatch": {
+      "fail": "Eiendom {id}: beregnet areal {a} m2 avviker fra registrert areal {l} m2 med mer enn toleransen ({t}).",
+      "suggestion": "Kontroller grensepunktene mot registerutskriften, eller noter hvorfor arealene avviker."
+    },
+    "ring_invalid": {
+      "fail": "Eiendom {id}: grensen er ikke lukket eller krysser seg selv.",
+      "suggestion": "Rett grensepunktene slik at de går én gang rundt eiendommen uten å krysse."
+    },
+    "zone_not_acquired": {
+      "fail": "Arbeidsområdet overlapper eiendom {id} som ennå ikke er ervervet ({area} m2).",
+      "suggestion": "Erverv eiendommen eller avtal adgang før arbeidet starter, eller flytt arbeidsområdet."
+    },
+    "overlap": {
+      "fail": "Eiendommene {a} og {b} overlapper med {area} m2.",
+      "suggestion": "Rett den felles grensen slik at begge eiendommene bruker de samme punktene."
+    },
+    "gap": {
+      "fail": "Glipe på {gap} m mellom eiendommene {a} og {b}.",
+      "suggestion": "La begge eiendommene bruke de samme grensepunktene, eller bekreft at beltet hører til en annen eiendom."
+    },
+    "id_format": {
+      "fail": "Nummeret {id} følger ikke formatet {label} (for eksempel {example}).",
+      "suggestion": "Skriv av nummeret nøyaktig slik registeret skriver det."
+    },
+    "pdf": {
+      "title": "Eiendomsliste",
+      "project": "Prosjekt",
+      "crs": "Koordinatsystem",
+      "method": "Metode",
+      "method_value": "Areal fra grensekoordinater (Gauss' formel), avrundet til {decimals} desimaler, m2",
+      "printed": "Skrevet ut av",
+      "legal": "Registrert areal (m2)",
+      "computed": "Beregnet (m2)",
+      "diff": "Differanse (m2)",
+      "status": "Status",
+      "rights": "Rettigheter",
+      "cost": "Kostnad",
+      "findings": "Funn",
+      "total": "Totalt, {count} eiendommer",
+      "acquired_of": "Ervervet {acquired} av {total}",
+      "findings_title": "Funn",
+      "no_findings": "Ingen funn.",
+      "disclaimer": "Eiere og rettigheter vises slik de er registrert i dette prosjektet. Listen er verken en juridisk vurdering eller en registerutskrift.",
+      "status_needed": "Trengs",
+      "status_negotiating": "Forhandling",
+      "status_acquired": "Ervervet",
+      "status_expropriation": "Ekspropriasjon"
+    }
   }
 }
