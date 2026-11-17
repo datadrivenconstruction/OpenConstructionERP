@@ -1497,6 +1497,9 @@ async def _letter_response(
     text: Any = None,
 ) -> StreamingResponse:
     """Build an award letter or rejection notice, optionally from one-off wording."""
+    from app.modules.tendering.letter_texts import AWARD_KEY as AWARD_LETTER_KEY
+    from app.modules.tendering.letter_texts import REJECTION_KEY as REJECTION_LETTER_KEY
+
     award = kind == "award"
     await SealedTenderService(session).ensure_open(
         package_id, user_id=user_id, what="award_letter" if award else "rejection_letter"
@@ -1504,9 +1507,8 @@ async def _letter_response(
     if text is not None:
         from app.core.letter_templates import check_text
         from app.modules.letter_templates.service import require_template
-        from app.modules.tendering.letter_texts import AWARD_KEY, REJECTION_KEY
 
-        template = require_template(AWARD_KEY if award else REJECTION_KEY)
+        template = require_template(AWARD_LETTER_KEY if award else REJECTION_LETTER_KEY)
         errors = [i.__dict__ for i in check_text(template, text) if i.severity == "error"]
         if errors:
             raise HTTPException(
@@ -1524,6 +1526,18 @@ async def _letter_response(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to generate award letter" if award else "Failed to generate rejection notice",
         )
+    package = await service.get_package(package_id)
+    from app.modules.doc_templates.service import log_letter_issue
+
+    await log_letter_issue(
+        session,
+        AWARD_LETTER_KEY if award else REJECTION_LETTER_KEY,
+        str(bid_id),
+        package.project_id,
+        service.last_letter_language,
+        user_id,
+        wording=service.last_letter_wording,
+    )
     return StreamingResponse(
         io.BytesIO(pdf_bytes),
         media_type="application/pdf",
