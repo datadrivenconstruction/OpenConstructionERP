@@ -29,6 +29,7 @@ from __future__ import annotations
 import uuid
 from datetime import date
 from decimal import Decimal
+from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import Response
@@ -108,9 +109,15 @@ async def create_lease(
 @router.get("/export-profiles")
 async def list_export_profiles(
     _perm: None = Depends(RequirePermission("leasing.read")),
-) -> dict[str, list[str]]:
-    """Export profiles available: the generic ones and any a pack registered."""
-    return {"profiles": export_profiles()}
+) -> dict[str, Any]:
+    """Export profiles available: the generic ones, any a pack registered and the data-only national ones.
+
+    ``countries`` names the market a national profile belongs to; a profile without an entry is generic.
+    """
+    from app.modules.leasing.export_profiles import load_profiles
+
+    national = {name: str(p["country"]).upper() for name, p in load_profiles().items() if p.get("country")}
+    return {"profiles": sorted({*export_profiles(), *national}), "countries": national}
 
 
 @router.get("/rent-roll", response_model=RentRollResponse)

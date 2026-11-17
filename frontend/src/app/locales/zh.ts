@@ -65167,6 +65167,7 @@ const resource = {
     "leasing.col_paid": "已收",
     "leasing.col_outstanding": "未收",
     "leasing.rule_broker_licence": "租赁经纪人在租期开始日没有有效执照。",
+    "leasing.export_for": "导出为 {{name}} 格式",
     "module_packages.upload_failed": "归档文件已被拒绝",
     "module_packages.installed_active": "模块已安装并启用",
     "module_packages.installed_disabled": "模块已安装，但已关闭",

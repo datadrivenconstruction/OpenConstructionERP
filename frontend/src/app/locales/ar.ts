@@ -66074,6 +66074,7 @@ const resource = {
     "leasing.col_paid": "المدفوع",
     "leasing.col_outstanding": "المتبقي",
     "leasing.rule_broker_licence": "لا يحمل الوسيط العقاري ترخيصًا ساريًا في تاريخ بدء الإيجار.",
+    "leasing.export_for": "تصدير إلى {{name}}",
     "module_packages.upload_failed": "تم رفض الأرشيف",
     "module_packages.installed_active": "تم تثبيت الوحدة وهي مفعّلة",
     "module_packages.installed_disabled": "تم تثبيت الوحدة وهي متوقفة",

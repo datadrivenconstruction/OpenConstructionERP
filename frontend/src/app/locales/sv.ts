@@ -63563,6 +63563,7 @@ const resource = {
     "leasing.col_paid": "Betalt",
     "leasing.col_outstanding": "Utestående",
     "leasing.rule_broker_licence": "Uthyrningsmäklaren har ingen giltig licens på hyrans startdatum.",
+    "leasing.export_for": "Exportera för {{name}}",
     "module_packages.upload_failed": "Arkivet avvisades",
     "module_packages.installed_active": "Modulen är installerad och aktiv",
     "module_packages.installed_disabled": "Modulen är installerad men avstängd",

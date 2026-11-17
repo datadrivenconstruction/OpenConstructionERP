@@ -63065,6 +63065,7 @@ const resource = {
     "leasing.col_paid": "Төлөнгөн",
     "leasing.col_outstanding": "Төлөнбөгөн",
     "leasing.rule_broker_licence": "Ижара брокеринде ижара башталган күнү жарактуу лицензия жок.",
+    "leasing.export_for": "{{name}} үчүн экспорттоо",
     "module_packages.upload_failed": "Архив кабыл алынбады",
     "module_packages.installed_active": "Модуль орнотулду жана иштеп жатат",
     "module_packages.installed_disabled": "Модуль орнотулду, бирок өчүрүлгөн",

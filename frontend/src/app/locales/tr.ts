@@ -63829,6 +63829,7 @@ const resource = {
     "leasing.col_paid": "Ödenen",
     "leasing.col_outstanding": "Kalan",
     "leasing.rule_broker_licence": "Kiralama komisyoncusunun kira başlangıç tarihinde geçerli lisansı yok.",
+    "leasing.export_for": "{{name}} için dışa aktar",
     "module_packages.upload_failed": "Arşiv reddedildi",
     "module_packages.installed_active": "Modül kuruldu ve etkin",
     "module_packages.installed_disabled": "Modül kuruldu, ancak kapalı",

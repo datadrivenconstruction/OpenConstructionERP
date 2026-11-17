@@ -57167,6 +57167,7 @@ const resource = {
     "leasing.col_paid": "Paid",
     "leasing.col_outstanding": "Outstanding",
     "leasing.rule_broker_licence": "The letting broker holds no valid licence on the lease start date.",
+    "leasing.export_for": "Export for {{name}}",
     "module_packages.upload_failed": "The archive was refused",
     "module_packages.installed_active": "Module installed and active",
     "module_packages.installed_disabled": "Module installed, switched off",

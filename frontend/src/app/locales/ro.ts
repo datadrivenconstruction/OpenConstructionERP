@@ -63290,6 +63290,7 @@ const resource = {
     "leasing.col_paid": "Plătit",
     "leasing.col_outstanding": "Neachitat",
     "leasing.rule_broker_licence": "Brokerul închirierii nu are licență valabilă la data de început.",
+    "leasing.export_for": "Export pentru {{name}}",
     "module_packages.upload_failed": "Arhiva a fost refuzată",
     "module_packages.installed_active": "Modul instalat și activ",
     "module_packages.installed_disabled": "Modul instalat, dar dezactivat",

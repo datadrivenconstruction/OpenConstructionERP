@@ -62697,6 +62697,7 @@ const resource = {
     "leasing.col_paid": "Dibayar",
     "leasing.col_outstanding": "Belum dibayar",
     "leasing.rule_broker_licence": "Broker sewa tidak memiliki lisensi yang berlaku pada tanggal mulai sewa.",
+    "leasing.export_for": "Ekspor untuk {{name}}",
     "module_packages.upload_failed": "Arsip ditolak",
     "module_packages.installed_active": "Modul terpasang dan aktif",
     "module_packages.installed_disabled": "Modul terpasang, tetapi dinonaktifkan",

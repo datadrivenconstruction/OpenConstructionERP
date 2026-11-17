@@ -64174,6 +64174,7 @@ const resource = {
     "leasing.col_paid": "Pagato",
     "leasing.col_outstanding": "Residuo",
     "leasing.rule_broker_licence": "L'agente della locazione non ha una licenza valida alla data di inizio.",
+    "leasing.export_for": "Esporta per {{name}}",
     "module_packages.upload_failed": "L'archivio è stato rifiutato",
     "module_packages.installed_active": "Modulo installato e attivo",
     "module_packages.installed_disabled": "Modulo installato, disattivato",

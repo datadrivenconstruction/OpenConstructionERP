@@ -62952,6 +62952,7 @@ const resource = {
     "leasing.col_paid": "Платено",
     "leasing.col_outstanding": "Непогасено",
     "leasing.rule_broker_licence": "Брокерът по наема няма валиден лиценз към началната дата на наема.",
+    "leasing.export_for": "Експорт за {{name}}",
     "module_packages.upload_failed": "Архивът беше отхвърлен",
     "module_packages.installed_active": "Модулът е инсталиран и активен",
     "module_packages.installed_disabled": "Модулът е инсталиран, но е изключен",

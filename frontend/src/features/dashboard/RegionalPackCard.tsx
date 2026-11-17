@@ -53,7 +53,8 @@ import { SUPPORTED_LANGUAGES, normalizePackLocale } from '@/app/i18n';
 import { CountryFlag, Skeleton } from '@/shared/ui';
 import { usePartnerPack } from '@/shared/hooks/usePartnerPack';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
-import { packCountryCode, packNameSlug } from '@/shared/lib/regionalPack';
+import { packCountryCode, packNameSlug, packOutsideMarkets } from '@/shared/lib/regionalPack';
+import { useMarketScope } from '@/features/market/api';
 import { ruleSetLabel } from '@/features/validation/ruleSetLabels';
 
 /** Where a reader with no pack goes to pick one. Same destination the
@@ -123,6 +124,7 @@ export function RegionalPackCard() {
   const projectId = useProjectContextStore((s) => s.activeProjectId);
   const { data, isLoading, isError, refetch } = usePartnerPack(projectId);
   const [rulesOpen, setRulesOpen] = useState(false);
+  const { data: marketScope } = useMarketScope(true, projectId);
 
   // The card's own skeleton, in the card's own frame. Returning null here left
   // the cell blank until the answer came: the grid's WidgetSkeleton is a
@@ -223,6 +225,9 @@ export function RegionalPackCard() {
   }
 
   const country = packCountryCode(manifest);
+  // With no project open the card names the server's one applied pack; a workspace that works in
+  // another market has nothing to do with it, and the pack card for its own market is the only one it sees.
+  if (!projectId && packOutsideMarkets(country, marketScope)) return null;
   // The pack's own name, translated. Written as an inline template literal
   // inside t() because that is the only shape check_i18n_computed_keys.py can
   // see - see the note in @/shared/lib/regionalPack.

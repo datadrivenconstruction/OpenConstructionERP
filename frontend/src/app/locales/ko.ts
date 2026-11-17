@@ -63314,6 +63314,7 @@ const resource = {
     "leasing.col_paid": "납부액",
     "leasing.col_outstanding": "미납액",
     "leasing.rule_broker_licence": "임대 중개인이 임대 시작일에 유효한 면허를 보유하지 않았습니다.",
+    "leasing.export_for": "{{name}}용 내보내기",
     "module_packages.upload_failed": "아카이브가 거부되었습니다",
     "module_packages.installed_active": "모듈이 설치되었고 활성화되어 있습니다",
     "module_packages.installed_disabled": "모듈이 설치되었지만 꺼져 있습니다",

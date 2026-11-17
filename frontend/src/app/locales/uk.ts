@@ -65055,6 +65055,7 @@ const resource = {
     "leasing.col_paid": "Сплачено",
     "leasing.col_outstanding": "Залишок боргу",
     "leasing.rule_broker_licence": "Брокер оренди не має чинної ліцензії на дату початку оренди.",
+    "leasing.export_for": "Експорт для {{name}}",
     "module_packages.upload_failed": "Архів відхилено",
     "module_packages.installed_active": "Модуль встановлено і він активний",
     "module_packages.installed_disabled": "Модуль встановлено, але вимкнено",

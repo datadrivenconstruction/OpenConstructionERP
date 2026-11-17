@@ -2,7 +2,7 @@
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 
 import { describe, it, expect } from 'vitest';
-import { packCountryCode, packSummary, resolveMarketPacks } from './regionalPack';
+import { packCountryCode, packOutsideMarkets, packSummary, resolveMarketPacks } from './regionalPack';
 
 function pack(slug: string, country: string | null, locale = 'en-US') {
   return {
@@ -113,5 +113,22 @@ describe('packSummary', () => {
     expect(packSummary(null)).toBe('');
     expect(packSummary(undefined)).toBe('');
     expect(packSummary('   ')).toBe('');
+  });
+});
+
+describe('packOutsideMarkets', () => {
+  const sa = { markets: ['SA'], all_markets: false };
+
+  it('flags a pack from another market', () => {
+    expect(packOutsideMarkets('us', sa)).toBe(true);
+    expect(packOutsideMarkets('sa', sa)).toBe(false);
+  });
+
+  it('never flags a cross-region pack, an unknown country or an unscoped workspace', () => {
+    expect(packOutsideMarkets('xx', sa)).toBe(false);
+    expect(packOutsideMarkets(null, sa)).toBe(false);
+    expect(packOutsideMarkets('us', undefined)).toBe(false);
+    expect(packOutsideMarkets('us', { markets: [], all_markets: false })).toBe(false);
+    expect(packOutsideMarkets('us', { markets: ['SA'], all_markets: true })).toBe(false);
   });
 });

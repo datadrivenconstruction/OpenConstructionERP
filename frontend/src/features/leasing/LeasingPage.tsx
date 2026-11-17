@@ -20,12 +20,15 @@ import { getErrorMessage } from '@/shared/lib/api';
 import { fmtCurrency, fmtDate } from '@/shared/lib/formatters';
 import { useToastStore } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
+import { useMarketScope } from '@/features/market/api';
 import { InsightsPanel, InsightsToggleButton, useModuleInsights } from '@/features/insights';
 import {
   createLease,
   downloadExport,
   fetchArrears,
   fetchExportProfiles,
+  isNationalProfile,
+  visibleExportProfiles,
   fetchLeases,
   fetchRentRoll,
   runSchedule,
@@ -265,6 +268,8 @@ export function LeasingPage() {
   const rollQ = useQuery({ queryKey: ['leasing', 'roll', projectId], queryFn: () => fetchRentRoll(projectId), enabled: !!projectId && tab === 'rent_roll' });
   const arrearsQ = useQuery({ queryKey: ['leasing', 'arrears', projectId], queryFn: () => fetchArrears(projectId), enabled: !!projectId && tab === 'arrears' });
   const profilesQ = useQuery({ queryKey: ['leasing', 'profiles'], queryFn: fetchExportProfiles, staleTime: 3_600_000 });
+  const marketQ = useMarketScope(!!projectId, projectId || null);
+  const exportProfiles = visibleExportProfiles(profilesQ.data, marketQ.data?.markets);
 
   const leases = leasesQ.data ?? [];
   const insights = useModuleInsights('leasing', { defaultOpen: false });
@@ -300,9 +305,11 @@ export function LeasingPage() {
           projectId ? (
             <div className="flex flex-wrap items-center gap-2">
               <InsightsToggleButton open={insights.open} onClick={insights.toggle} />
-              {(profilesQ.data ?? []).map((p) => (
-                <Button key={p} variant="ghost" size="sm" icon={<Download size={14} />} onClick={() => void downloadExport(projectId, p)}>
-                  {t('leasing.export_as', { defaultValue: 'Export {{format}}', format: p.toUpperCase() })}
+              {exportProfiles.map((p) => (
+                <Button key={p} variant="ghost" size="sm" icon={<Download size={14} />} onClick={() => void downloadExport(projectId, p)} data-testid={`leasing-export-${p}`}>
+                  {isNationalProfile(profilesQ.data, p)
+                    ? t('leasing.export_for', { defaultValue: 'Export for {{name}}', name: p.charAt(0).toUpperCase() + p.slice(1) })
+                    : t('leasing.export_as', { defaultValue: 'Export {{format}}', format: p.toUpperCase() })}
                 </Button>
               ))}
               <Button variant="secondary" size="sm" icon={<Receipt size={14} />} disabled={run.isPending} onClick={() => run.mutate()} data-testid="leasing-run">

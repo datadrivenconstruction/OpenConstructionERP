@@ -65583,6 +65583,7 @@ const resource = {
     "leasing.col_paid": "Bezahlt",
     "leasing.col_outstanding": "Offen",
     "leasing.rule_broker_licence": "Der vermittelnde Makler hat zum Mietbeginn keine gültige Lizenz.",
+    "leasing.export_for": "Export für {{name}}",
     "module_packages.upload_failed": "Das Archiv wurde abgelehnt",
     "module_packages.installed_active": "Modul installiert und aktiv",
     "module_packages.installed_disabled": "Modul installiert, aber ausgeschaltet",

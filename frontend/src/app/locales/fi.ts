@@ -62952,6 +62952,7 @@ const resource = {
     "leasing.col_paid": "Maksettu",
     "leasing.col_outstanding": "Avoin",
     "leasing.rule_broker_licence": "Vuokravälittäjällä ei ole voimassa olevaa lupaa vuokran alkupäivänä.",
+    "leasing.export_for": "Vie kohteeseen {{name}}",
     "module_packages.upload_failed": "Arkisto hylättiin",
     "module_packages.installed_active": "Moduuli asennettu ja käytössä",
     "module_packages.installed_disabled": "Moduuli asennettu, mutta pois päältä",

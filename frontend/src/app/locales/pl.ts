@@ -64508,6 +64508,7 @@ const resource = {
     "leasing.col_paid": "Zapłacono",
     "leasing.col_outstanding": "Do zapłaty",
     "leasing.rule_broker_licence": "Pośrednik najmu nie ma ważnej licencji w dniu rozpoczęcia najmu.",
+    "leasing.export_for": "Eksport dla {{name}}",
     "module_packages.upload_failed": "Archiwum zostało odrzucone",
     "module_packages.installed_active": "Moduł zainstalowany i aktywny",
     "module_packages.installed_disabled": "Moduł zainstalowany, ale wyłączony",

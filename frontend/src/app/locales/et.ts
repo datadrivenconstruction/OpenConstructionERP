@@ -62898,6 +62898,7 @@ const resource = {
     "leasing.col_paid": "Makstud",
     "leasing.col_outstanding": "Tasumata",
     "leasing.rule_broker_licence": "Üürimaakleril ei ole üürilepingu alguskuupäeval kehtivat litsentsi.",
+    "leasing.export_for": "Eksport: {{name}}",
     "module_packages.upload_failed": "Arhiiv lükati tagasi",
     "module_packages.installed_active": "Moodul on paigaldatud ja aktiivne",
     "module_packages.installed_disabled": "Moodul on paigaldatud, kuid välja lülitatud",

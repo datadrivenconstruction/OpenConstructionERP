@@ -184,3 +184,11 @@ def test_export_profiles_are_pluggable():
 
     register_export_profile("demo", lambda rows: (b"x", "text/plain", "txt"))
     assert {"csv", "json", "demo"} <= set(export_profiles())
+
+
+async def test_export_profile_list_names_the_market_of_a_national_profile():
+    from app.modules.leasing.router import list_export_profiles
+
+    body = await list_export_profiles(_perm=None)
+    assert {"csv", "json", "ejar"} <= set(body["profiles"])
+    assert body["countries"] == {"ejar": "SA"}

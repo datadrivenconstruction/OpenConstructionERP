@@ -65866,6 +65866,7 @@ const resource = {
     "leasing.col_paid": "Pago",
     "leasing.col_outstanding": "Em aberto",
     "leasing.rule_broker_licence": "O corretor do arrendamento não tem licença válida na data de início.",
+    "leasing.export_for": "Exportar para {{name}}",
     "module_packages.upload_failed": "O ficheiro foi recusado",
     "module_packages.installed_active": "Módulo instalado e ativo",
     "module_packages.installed_disabled": "Módulo instalado, mas desligado",

@@ -63829,6 +63829,7 @@ const resource = {
     "leasing.col_paid": "Betaald",
     "leasing.col_outstanding": "Openstaand",
     "leasing.rule_broker_licence": "De verhuurmakelaar heeft op de ingangsdatum geen geldige vergunning.",
+    "leasing.export_for": "Exporteren voor {{name}}",
     "module_packages.upload_failed": "Het archief is geweigerd",
     "module_packages.installed_active": "Module geïnstalleerd en actief",
     "module_packages.installed_disabled": "Module geïnstalleerd, maar uitgeschakeld",

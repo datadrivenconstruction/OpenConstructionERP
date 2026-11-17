@@ -32,6 +32,8 @@ export interface PackageState {
   packaged: boolean;
   /** Pack slug (or `package:<id>`) the menu is focused on, or null. */
   focus_pack?: string | null;
+  /** Modules no pack can hide. Under a focus every other module the pack leaves off is hidden. */
+  core_modules?: string[];
 }
 
 /** What focusing on a pack turns on, and the facts its guided start uses. */

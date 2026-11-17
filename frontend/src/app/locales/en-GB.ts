@@ -1125,6 +1125,7 @@ const resource = {
     "finance.inbox.mailbox_saved": "Mailbox settings saved",
     "finance.inbox.mailbox_invalid": "These mailbox settings are not valid",
     "finance.inbox.mailbox_last_polled": "Last checked",
+    "leasing.export_for": "Export for {{name}}",
   }
 } as { translation: Record<string, string> };
 

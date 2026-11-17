@@ -64230,6 +64230,7 @@ const resource = {
     "leasing.col_paid": "入金済み",
     "leasing.col_outstanding": "未払い残高",
     "leasing.rule_broker_licence": "賃貸仲介業者は賃貸開始日に有効な免許を持っていません。",
+    "leasing.export_for": "{{name}} 用にエクスポート",
     "module_packages.upload_failed": "アーカイブは受け付けられませんでした",
     "module_packages.installed_active": "モジュールをインストールし、有効にしました",
     "module_packages.installed_disabled": "モジュールをインストールしましたが、オフになっています",

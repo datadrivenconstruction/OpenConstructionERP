@@ -62909,6 +62909,7 @@ const resource = {
     "leasing.col_paid": "Төленген",
     "leasing.col_outstanding": "Төленбеген",
     "leasing.rule_broker_licence": "Жалға беру брокерінде жалдау басталған күні жарамды лицензия жоқ.",
+    "leasing.export_for": "{{name}} үшін экспорттау",
     "module_packages.upload_failed": "Архив қабылданбады",
     "module_packages.installed_active": "Модуль орнатылды және белсенді",
     "module_packages.installed_disabled": "Модуль орнатылды, бірақ өшірулі",

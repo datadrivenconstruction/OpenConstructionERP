@@ -65878,6 +65878,7 @@ const resource = {
     "leasing.col_paid": "Pagado",
     "leasing.col_outstanding": "Pendiente",
     "leasing.rule_broker_licence": "El agente del arrendamiento no tiene licencia válida en la fecha de inicio.",
+    "leasing.export_for": "Exportar para {{name}}",
     "module_packages.upload_failed": "El archivo fue rechazado",
     "module_packages.installed_active": "Módulo instalado y activo",
     "module_packages.installed_disabled": "Módulo instalado, desactivado",

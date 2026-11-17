@@ -65873,6 +65873,7 @@ const resource = {
     "leasing.col_paid": "Payé",
     "leasing.col_outstanding": "Reste dû",
     "leasing.rule_broker_licence": "Le courtier de la location n'a pas de licence valide à la date de début du bail.",
+    "leasing.export_for": "Exporter pour {{name}}",
     "module_packages.upload_failed": "L'archive a été refusée",
     "module_packages.installed_active": "Module installé et actif",
     "module_packages.installed_disabled": "Module installé, désactivé",
