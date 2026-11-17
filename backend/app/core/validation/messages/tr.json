@@ -2370,5 +2370,41 @@
       "fail": "Miktar yerinde (zemindeki) hacimdir; kabarma katsayısı uygulanmadı.",
       "suggestion": "Keşif kalemi gevşek malzeme olarak ölçülüyorsa gevşek kazıyı gönderin."
     }
+  },
+  "setting_out": {
+    "stake_off": {
+      "fail": "Aplikasyon noktası {id} {d} mm sapmış, tolerans {t} mm",
+      "suggestion": "Noktayı yeniden aplike edip kaydedin veya NCR taslağı oluşturun."
+    },
+    "record_untraceable": {
+      "fail": "{id} aplikasyon kaydında alet veya poligon noktası yok.",
+      "suggestion": "Aleti ve istasyonun kurulduğu poligon noktalarını girin."
+    },
+    "sheet": {
+      "title": "Aplikasyon föyü",
+      "project": "Proje",
+      "crs": "Koordinat sistemi",
+      "request": "Talep",
+      "tolerance": "Tolerans",
+      "element": "Eleman",
+      "generated": "Oluşturuldu",
+      "point": "Nokta",
+      "design_e": "Proje E",
+      "design_n": "Proje N",
+      "design_z": "Proje Z",
+      "measured_e": "Ölçülen E",
+      "measured_n": "Ölçülen N",
+      "verdict": "Sonuç",
+      "by": "Ölçen",
+      "verdict_pass": "Uygun",
+      "verdict_fail": "Uygun değil",
+      "verdict_open": "Açık",
+      "verdict_no_tolerance": "Profil yok",
+      "counts": "Uygun: {passed} · Uygun değil: {failed} · Açık: {open}",
+      "findings": "Bulgular",
+      "no_profile": "Profil yok, bir tane belirleyin",
+      "d": "d (mm)",
+      "dz": "dZ (mm)"
+    }
   }
 }

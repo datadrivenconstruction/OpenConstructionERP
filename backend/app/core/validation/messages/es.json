@@ -2370,5 +2370,41 @@
       "fail": "La cantidad es volumen en banco (en el terreno); no se aplica el factor de esponjamiento.",
       "suggestion": "Envíe el desmonte esponjado si la partida se mide como material suelto."
     }
+  },
+  "setting_out": {
+    "stake_off": {
+      "fail": "Replanteo {id} desviado {d} mm, tolerancia {t} mm",
+      "suggestion": "Replantee de nuevo el punto y regístrelo, o cree un borrador de NCR."
+    },
+    "record_untraceable": {
+      "fail": "El registro de replanteo {id} no indica instrumento ni puntos de control.",
+      "suggestion": "Indique el instrumento y los puntos de control de la estación."
+    },
+    "sheet": {
+      "title": "Hoja de replanteo",
+      "project": "Proyecto",
+      "crs": "Sistema de coordenadas",
+      "request": "Solicitud",
+      "tolerance": "Tolerancia",
+      "element": "Elemento",
+      "generated": "Generado",
+      "point": "Punto",
+      "design_e": "E de diseño",
+      "design_n": "N de diseño",
+      "design_z": "Z de diseño",
+      "measured_e": "E medido",
+      "measured_n": "N medido",
+      "verdict": "Resultado",
+      "by": "Medido por",
+      "verdict_pass": "Conforme",
+      "verdict_fail": "No conforme",
+      "verdict_open": "Abierto",
+      "verdict_no_tolerance": "Sin perfil",
+      "counts": "Conforme: {passed} · No conforme: {failed} · Abierto: {open}",
+      "findings": "Hallazgos",
+      "no_profile": "Sin perfil, defina uno",
+      "d": "d (mm)",
+      "dz": "dZ (mm)"
+    }
   }
 }

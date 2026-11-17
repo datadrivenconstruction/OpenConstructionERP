@@ -2370,5 +2370,41 @@
       "fail": "Miqdor zich holatdagi hajm (gruntda); yumshash koeffitsiyenti qo'llanilmagan.",
       "suggestion": "Smeta bandi yumshoq material sifatida o'lchansa, yumshatilgan qazishni yuboring."
     }
+  },
+  "setting_out": {
+    "stake_off": {
+      "fail": "Nuqta {id} {d} mm ga siljigan, ruxsat {t} mm",
+      "suggestion": "Nuqtani qayta joylashtirib, o'lchovni yozing yoki NCR qoralamasini yarating."
+    },
+    "record_untraceable": {
+      "fail": "{id} joylashtirish yozuvida asbob yoki tayanch punktlari yo'q.",
+      "suggestion": "Asbob va stansiya o'rnatilgan tayanch punktlarini kiriting."
+    },
+    "sheet": {
+      "title": "Joyga ko'chirish varag'i",
+      "project": "Loyiha",
+      "crs": "Koordinatalar tizimi",
+      "request": "So'rov",
+      "tolerance": "Ruxsat",
+      "element": "Element",
+      "generated": "Yaratilgan",
+      "point": "Nuqta",
+      "design_e": "Loyiha E",
+      "design_n": "Loyiha N",
+      "design_z": "Loyiha Z",
+      "measured_e": "O'lchangan E",
+      "measured_n": "O'lchangan N",
+      "verdict": "Natija",
+      "by": "O'lchagan",
+      "verdict_pass": "Ruxsat ichida",
+      "verdict_fail": "Ruxsatdan tashqari",
+      "verdict_open": "Ochiq",
+      "verdict_no_tolerance": "Profil yo'q",
+      "counts": "Ruxsat ichida: {passed} · Tashqari: {failed} · Ochiq: {open}",
+      "findings": "Kamchiliklar",
+      "no_profile": "Profil yo'q, uni belgilang",
+      "d": "d (mm)",
+      "dz": "dZ (mm)"
+    }
   }
 }

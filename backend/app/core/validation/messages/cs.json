@@ -2370,5 +2370,41 @@
       "fail": "Množství je objem v rostlém stavu (v zemi); součinitel nakypření není použit.",
       "suggestion": "Pokud se položka rozpočtu měří v nakypřeném stavu, odešlete raději nakypřený výkop."
     }
+  },
+  "setting_out": {
+    "stake_off": {
+      "fail": "Bod {id} je odchýlen o {d} mm, tolerance {t} mm",
+      "suggestion": "Vytyčte bod znovu a zapište měření, nebo vytvořte koncept NCR."
+    },
+    "record_untraceable": {
+      "fail": "Záznam vytyčení {id} nemá přístroj ani body bodového pole.",
+      "suggestion": "Zadejte přístroj a body, na kterých stálo stanovisko."
+    },
+    "sheet": {
+      "title": "Protokol vytyčení",
+      "project": "Projekt",
+      "crs": "Souřadnicový systém",
+      "request": "Požadavek",
+      "tolerance": "Tolerance",
+      "element": "Prvek",
+      "generated": "Vytvořeno",
+      "point": "Bod",
+      "design_e": "Návrh E",
+      "design_n": "Návrh N",
+      "design_z": "Návrh Z",
+      "measured_e": "Měřeno E",
+      "measured_n": "Měřeno N",
+      "verdict": "Výsledek",
+      "by": "Změřil",
+      "verdict_pass": "V toleranci",
+      "verdict_fail": "Mimo toleranci",
+      "verdict_open": "Otevřeno",
+      "verdict_no_tolerance": "Bez profilu",
+      "counts": "V toleranci: {passed} · Mimo toleranci: {failed} · Otevřeno: {open}",
+      "findings": "Zjištění",
+      "no_profile": "Bez profilu, nastavte jej",
+      "d": "d (mm)",
+      "dz": "dZ (mm)"
+    }
   }
 }

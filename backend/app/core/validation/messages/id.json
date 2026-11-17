@@ -2370,5 +2370,41 @@
       "fail": "Kuantitas adalah volume asli (di dalam tanah); faktor pengembangan tidak diterapkan.",
       "suggestion": "Kirim galian lepas jika item BOQ diukur sebagai material lepas."
     }
+  },
+  "setting_out": {
+    "stake_off": {
+      "fail": "Titik stakeout {id} meleset {d} mm, toleransi {t} mm",
+      "suggestion": "Pasang ulang titik dan catat, atau buat draf NCR."
+    },
+    "record_untraceable": {
+      "fail": "Catatan stakeout {id} tidak memiliki alat atau titik kontrol.",
+      "suggestion": "Isi alat dan titik kontrol tempat stasiun didirikan."
+    },
+    "sheet": {
+      "title": "Lembar stakeout",
+      "project": "Proyek",
+      "crs": "Sistem koordinat",
+      "request": "Permintaan",
+      "tolerance": "Toleransi",
+      "element": "Elemen",
+      "generated": "Dibuat",
+      "point": "Titik",
+      "design_e": "E rencana",
+      "design_n": "N rencana",
+      "design_z": "Z rencana",
+      "measured_e": "E terukur",
+      "measured_n": "N terukur",
+      "verdict": "Hasil",
+      "by": "Diukur oleh",
+      "verdict_pass": "Lolos",
+      "verdict_fail": "Gagal",
+      "verdict_open": "Terbuka",
+      "verdict_no_tolerance": "Tanpa profil",
+      "counts": "Lolos: {passed} · Gagal: {failed} · Terbuka: {open}",
+      "findings": "Temuan",
+      "no_profile": "Tanpa profil, tetapkan satu",
+      "d": "d (mm)",
+      "dz": "dZ (mm)"
+    }
   }
 }

@@ -2370,5 +2370,41 @@
       "fail": "The quantity is bank volume (in the ground); the swell factor is not applied.",
       "suggestion": "Send the loose cut instead if the BOQ line is measured as loose material."
     }
+  },
+  "setting_out": {
+    "stake_off": {
+      "fail": "Stake {id} off by {d} mm, tolerance {t} mm",
+      "suggestion": "Stake the point again and record it, or create an NCR draft."
+    },
+    "record_untraceable": {
+      "fail": "Stakeout record {id} has no instrument or control reference.",
+      "suggestion": "Enter the instrument and the control points the station was set up on."
+    },
+    "sheet": {
+      "title": "Setting-out sheet",
+      "project": "Project",
+      "crs": "Coordinate system",
+      "request": "Request",
+      "tolerance": "Tolerance",
+      "element": "Element",
+      "generated": "Generated",
+      "point": "Point",
+      "design_e": "Design E",
+      "design_n": "Design N",
+      "design_z": "Design Z",
+      "measured_e": "Measured E",
+      "measured_n": "Measured N",
+      "verdict": "Verdict",
+      "by": "Measured by",
+      "verdict_pass": "Pass",
+      "verdict_fail": "Fail",
+      "verdict_open": "Open",
+      "verdict_no_tolerance": "No profile",
+      "counts": "Pass: {passed} · Fail: {failed} · Open: {open}",
+      "findings": "Findings",
+      "no_profile": "No profile, set one",
+      "d": "d (mm)",
+      "dz": "dZ (mm)"
+    }
   }
 }

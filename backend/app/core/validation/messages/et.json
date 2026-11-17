@@ -2370,5 +2370,41 @@
       "fail": "Kogus on tihe maht (pinnases); kobestusteguri ei rakendata.",
       "suggestion": "Saatke kobestatud kaevis, kui kuluarvestuse rida mõõdetakse kobedana."
     }
+  },
+  "setting_out": {
+    "stake_off": {
+      "fail": "Mahamärkimise punkt {id} kaldub {d} mm, tolerants {t} mm",
+      "suggestion": "Märgi punkt uuesti maha ja salvesta mõõtmine või loo NCR-i mustand."
+    },
+    "record_untraceable": {
+      "fail": "Mahamärkimise kirjel {id} puudub instrument või lähtepunktid.",
+      "suggestion": "Sisesta instrument ja lähtepunktid, millele jaam seati."
+    },
+    "sheet": {
+      "title": "Mahamärkimise leht",
+      "project": "Projekt",
+      "crs": "Koordinaatsüsteem",
+      "request": "Taotlus",
+      "tolerance": "Tolerants",
+      "element": "Element",
+      "generated": "Loodud",
+      "point": "Punkt",
+      "design_e": "Projekt E",
+      "design_n": "Projekt N",
+      "design_z": "Projekt Z",
+      "measured_e": "Mõõdetud E",
+      "measured_n": "Mõõdetud N",
+      "verdict": "Tulemus",
+      "by": "Mõõtja",
+      "verdict_pass": "Sobib",
+      "verdict_fail": "Ei sobi",
+      "verdict_open": "Avatud",
+      "verdict_no_tolerance": "Profiil puudub",
+      "counts": "Sobib: {passed} · Ei sobi: {failed} · Avatud: {open}",
+      "findings": "Leiud",
+      "no_profile": "Profiil puudub, määra see",
+      "d": "d (mm)",
+      "dz": "dZ (mm)"
+    }
   }
 }

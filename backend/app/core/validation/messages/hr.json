@@ -2370,5 +2370,41 @@
       "fail": "Količina je volumen u sraslom stanju (u tlu); koeficijent rastresitosti nije primijenjen.",
       "suggestion": "Pošaljite rastresiti iskop ako se stavka troškovnika mjeri u rastresitom stanju."
     }
+  },
+  "setting_out": {
+    "stake_off": {
+      "fail": "Točka {id} odstupa {d} mm, tolerancija {t} mm",
+      "suggestion": "Ponovno iskolčite točku i zabilježite je ili izradite nacrt NCR-a."
+    },
+    "record_untraceable": {
+      "fail": "Zapis iskolčenja {id} nema instrument ni točke osnove.",
+      "suggestion": "Unesite instrument i točke osnove na kojima je stajalo stajalište."
+    },
+    "sheet": {
+      "title": "Zapisnik iskolčenja",
+      "project": "Projekt",
+      "crs": "Koordinatni sustav",
+      "request": "Zahtjev",
+      "tolerance": "Tolerancija",
+      "element": "Element",
+      "generated": "Izrađeno",
+      "point": "Točka",
+      "design_e": "Projekt E",
+      "design_n": "Projekt N",
+      "design_z": "Projekt Z",
+      "measured_e": "Izmjereno E",
+      "measured_n": "Izmjereno N",
+      "verdict": "Rezultat",
+      "by": "Izmjerio",
+      "verdict_pass": "U toleranciji",
+      "verdict_fail": "Izvan tolerancije",
+      "verdict_open": "Otvoreno",
+      "verdict_no_tolerance": "Nema profila",
+      "counts": "U toleranciji: {passed} · Izvan tolerancije: {failed} · Otvoreno: {open}",
+      "findings": "Nalazi",
+      "no_profile": "Nema profila, postavite ga",
+      "d": "d (mm)",
+      "dz": "dZ (mm)"
+    }
   }
 }
