@@ -67,6 +67,13 @@ const UNRELEASED: ChangelogEntry | null = null;
 // carry the long form and are left alone as the record of what shipped.
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '19.8.0',
+    date: '2026-11-17',
+    tag: 'NEW',
+    summary:
+      'The original estimate can be sealed behind the contract rates, and framework agreements price call-off orders from the agreed rates with a cap meter. A bill of quantities gets numbered revisions to open and compare, and a schedule exports as a printable Gantt PDF, keeps approved baselines B0 and B1, and round-trips through MS Project XML with a revision impact on the bill. Invoices and letters are issued from templates, supplier invoices arrive by scan-to-email or camera, subcontract pay applications run against the schedule of values and subcontract documents get required-document checks, and a module that no longer loads can\'t stop the application from starting. The cost database and the resource catalogue narrow by region, catalogue and category before ranking by meaning, and projects filter by phase and type.',
+  },
+  {
     version: '19.7.0',
     date: '2026-11-16',
     tag: 'NEW',
