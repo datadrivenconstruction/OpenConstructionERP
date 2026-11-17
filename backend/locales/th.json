@@ -2720,5 +2720,30 @@
         "gap": "ส่วนต่าง"
       }
     }
-  }
+  },
+  "monitoring.crossed.fail": "จุด {id}: การเคลื่อนที่ {d} มม. หรืออัตรา {r} มม./วัน เกินระดับ {level}",
+  "monitoring.crossed.suggestion": "ตรวจสอบจุดและโครงสร้าง แล้วยืนยันการแจ้งเตือนพร้อมบันทึกหมายเหตุ",
+  "monitoring.level.ok": "OK",
+  "monitoring.level.alert": "เตือน",
+  "monitoring.level.action": "การดำเนินการ",
+  "monitoring.level.alarm": "แจ้งเตือนฉุกเฉิน",
+  "monitoring.risk.title": "จุดเฝ้าระวัง {id} ที่ระดับ {level}",
+  "monitoring.risk.description": "การเคลื่อนที่ {d} มม. อัตรา {r} มม./วัน เทียบกับ {profile} ระบบเฝ้าระวังเปิดฉบับร่างไว้ กรุณาตรวจสอบและระบุผู้รับผิดชอบ",
+  "monitoring.report.title": "รายงานการแจ้งเตือนการเฝ้าระวัง",
+  "monitoring.report.project": "โครงการ",
+  "monitoring.report.crs": "ระบบพิกัด",
+  "monitoring.report.profile": "โปรไฟล์ค่าจำกัด",
+  "monitoring.report.generated": "สร้างเมื่อ",
+  "monitoring.report.point": "จุด",
+  "monitoring.report.baseline": "ค่าอ้างอิง (ม.)",
+  "monitoring.report.latest": "ค่าล่าสุด (ม.)",
+  "monitoring.report.displacement": "การเคลื่อนที่ (มม.)",
+  "monitoring.report.rate": "อัตรา (มม./วัน)",
+  "monitoring.report.level": "ระดับ",
+  "monitoring.report.acknowledged": "ยืนยันแล้ว",
+  "monitoring.report.counts": "แจ้งเตือนฉุกเฉิน: {alarm} · การดำเนินการ: {action} · เตือน: {alert} · OK: {ok}",
+  "monitoring.report.findings": "ข้อค้นพบ",
+  "monitoring.report.no_profile": "ไม่มีโปรไฟล์ กรุณาตั้งค่า",
+  "monitoring.report.ack_yes": "ใช่",
+  "monitoring.report.ack_no": "ไม่ใช่"
 }

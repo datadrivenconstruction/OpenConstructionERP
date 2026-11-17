@@ -2726,5 +2726,30 @@
         "gap": "Διαφορά"
       }
     }
-  }
+  },
+  "monitoring.crossed.fail": "Σημείο {id}: μετατόπιση {d} mm ή ταχύτητα {r} mm/ημέρα ξεπέρασε το επίπεδο {level}",
+  "monitoring.crossed.suggestion": "Ελέγξτε το σημείο και τη κατασκευή, και επιβεβαιώστε την ειδοποίηση με σημείωση.",
+  "monitoring.level.ok": "OK",
+  "monitoring.level.alert": "Προειδοποίηση",
+  "monitoring.level.action": "Ενέργεια",
+  "monitoring.level.alarm": "Συναγερμός",
+  "monitoring.risk.title": "Σημείο παρακολούθησης {id} στο επίπεδο {level}",
+  "monitoring.risk.description": "Μετατόπιση {d} mm, ταχύτητα {r} mm/ημέρα σε σχέση με το {profile}. Το προσχέδιο άνοιξε από την παρακολούθηση: ελέγξτε το και ορίστε υπεύθυνο.",
+  "monitoring.report.title": "Αναφορά συναγερμού παρακολούθησης",
+  "monitoring.report.project": "Έργο",
+  "monitoring.report.crs": "Σύστημα συντεταγμένων",
+  "monitoring.report.profile": "Προφίλ ορίων",
+  "monitoring.report.generated": "Δημιουργήθηκε",
+  "monitoring.report.point": "Σημείο",
+  "monitoring.report.baseline": "Αρχική τιμή (μ)",
+  "monitoring.report.latest": "Τελευταία τιμή (μ)",
+  "monitoring.report.displacement": "Μετατόπιση (mm)",
+  "monitoring.report.rate": "Ταχύτητα (mm/ημέρα)",
+  "monitoring.report.level": "Επίπεδο",
+  "monitoring.report.acknowledged": "Επιβεβαιώθηκε",
+  "monitoring.report.counts": "Συναγερμός: {alarm} · Ενέργεια: {action} · Προειδοποίηση: {alert} · OK: {ok}",
+  "monitoring.report.findings": "Ευρήματα",
+  "monitoring.report.no_profile": "Δεν υπάρχει προφίλ, ορίστε ένα",
+  "monitoring.report.ack_yes": "Ναι",
+  "monitoring.report.ack_no": "Όχι"
 }

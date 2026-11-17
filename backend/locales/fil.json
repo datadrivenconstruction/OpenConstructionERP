@@ -2736,5 +2736,30 @@
         "gap": "Gap"
       }
     }
-  }
+  },
+  "monitoring.crossed.fail": "Punto {id}: displacement {d} mm o rate {r} mm/araw ang lumampas sa {level}",
+  "monitoring.crossed.suggestion": "Suriin ang punto at ang istruktura, at kumpirmahin ang alerto gamit ang tala.",
+  "monitoring.level.ok": "OK",
+  "monitoring.level.alert": "Babala",
+  "monitoring.level.action": "Aksyon",
+  "monitoring.level.alarm": "Alarma",
+  "monitoring.risk.title": "Punto ng pagmamanman {id} sa {level}",
+  "monitoring.risk.description": "Displacement {d} mm, rate {r} mm/araw laban sa {profile}. Binuksan ng monitoring ang draft: suriin ito at magtalaga ng may-ari.",
+  "monitoring.report.title": "Alarm report ng monitoring",
+  "monitoring.report.project": "Proyekto",
+  "monitoring.report.crs": "Coordinate system",
+  "monitoring.report.profile": "Threshold profile",
+  "monitoring.report.generated": "Nabuo",
+  "monitoring.report.point": "Punto",
+  "monitoring.report.baseline": "Baseline (m)",
+  "monitoring.report.latest": "Pinakahuli (m)",
+  "monitoring.report.displacement": "Displacement (mm)",
+  "monitoring.report.rate": "Rate (mm/araw)",
+  "monitoring.report.level": "Antas",
+  "monitoring.report.acknowledged": "Kinumpirma",
+  "monitoring.report.counts": "Alarma: {alarm} · Aksyon: {action} · Babala: {alert} · OK: {ok}",
+  "monitoring.report.findings": "Mga natuklasan",
+  "monitoring.report.no_profile": "Walang profile, magtakda ng isa",
+  "monitoring.report.ack_yes": "Oo",
+  "monitoring.report.ack_no": "Hindi"
 }

@@ -2725,5 +2725,30 @@
         "gap": "차액"
       }
     }
-  }
+  },
+  "monitoring.crossed.fail": "점 {id}: 변위 {d} mm 또는 속도 {r} mm/일이 {level} 단계를 넘었습니다",
+  "monitoring.crossed.suggestion": "점과 구조물을 확인한 뒤 메모와 함께 알림을 확인하세요.",
+  "monitoring.level.ok": "OK",
+  "monitoring.level.alert": "주의",
+  "monitoring.level.action": "조치",
+  "monitoring.level.alarm": "경보",
+  "monitoring.risk.title": "모니터링 점 {id}, 수준 {level}",
+  "monitoring.risk.description": "변위 {d} mm, 속도 {r} mm/일 ({profile} 기준). 모니터링이 초안을 열었습니다. 내용을 검토하고 담당자를 지정하세요.",
+  "monitoring.report.title": "모니터링 경보 보고서",
+  "monitoring.report.project": "프로젝트",
+  "monitoring.report.crs": "좌표계",
+  "monitoring.report.profile": "한계값 프로파일",
+  "monitoring.report.generated": "생성됨",
+  "monitoring.report.point": "점",
+  "monitoring.report.baseline": "기준값 (m)",
+  "monitoring.report.latest": "최근값 (m)",
+  "monitoring.report.displacement": "변위 (mm)",
+  "monitoring.report.rate": "속도 (mm/일)",
+  "monitoring.report.level": "수준",
+  "monitoring.report.acknowledged": "확인됨",
+  "monitoring.report.counts": "경보: {alarm} · 조치: {action} · 주의: {alert} · OK: {ok}",
+  "monitoring.report.findings": "결과",
+  "monitoring.report.no_profile": "프로파일이 없습니다. 하나를 설정하세요",
+  "monitoring.report.ack_yes": "예",
+  "monitoring.report.ack_no": "아니요"
 }

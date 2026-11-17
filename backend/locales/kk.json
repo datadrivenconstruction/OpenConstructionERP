@@ -2727,5 +2727,30 @@
       "file_missing": "'{name}' фотосының файлы сақтау орнында жоқ",
       "file_missing_fix": "Фотоны қайта жүктеңіз немесе сақтық көшірмеден қалпына келтіріңіз"
     }
-  }
+  },
+  "monitoring.crossed.fail": "{id} нүктесі: орын ауыстыру {d} мм немесе жылдамдық {r} мм/тәу {level} деңгейінен асты",
+  "monitoring.crossed.suggestion": "Нүкте мен құрылысты тексеріп, содан кейін ескертуді түсініктемемен растаңыз.",
+  "monitoring.level.ok": "OK",
+  "monitoring.level.alert": "Ескерту",
+  "monitoring.level.action": "Әрекет",
+  "monitoring.level.alarm": "Дабыл",
+  "monitoring.risk.title": "Бақылау нүктесі {id}, деңгейі {level}",
+  "monitoring.risk.description": "Орын ауыстыру {d} мм, жылдамдық {r} мм/тәу, {profile} бойынша. Жобаны бақылау бөлімі ашты: қарап шығып, жауаптыны тағайындаңыз.",
+  "monitoring.report.title": "Бақылау дабыл есебі",
+  "monitoring.report.project": "Жоба",
+  "monitoring.report.crs": "Координаттар жүйесі",
+  "monitoring.report.profile": "Шек профилі",
+  "monitoring.report.generated": "Жасалды",
+  "monitoring.report.point": "Нүкте",
+  "monitoring.report.baseline": "Бастапқы мән (м)",
+  "monitoring.report.latest": "Соңғы мән (м)",
+  "monitoring.report.displacement": "Орын ауыстыру (мм)",
+  "monitoring.report.rate": "Жылдамдық (мм/тәу)",
+  "monitoring.report.level": "Деңгей",
+  "monitoring.report.acknowledged": "Расталды",
+  "monitoring.report.counts": "Дабыл: {alarm} · Әрекет: {action} · Ескерту: {alert} · OK: {ok}",
+  "monitoring.report.findings": "Қорытындылар",
+  "monitoring.report.no_profile": "Профиль жоқ, біреуін орнатыңыз",
+  "monitoring.report.ack_yes": "Иә",
+  "monitoring.report.ack_no": "Жоқ"
 }

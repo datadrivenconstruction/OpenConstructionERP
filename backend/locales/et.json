@@ -2726,5 +2726,30 @@
         "gap": "Puudujääk"
       }
     }
-  }
+  },
+  "monitoring.crossed.fail": "Punkt {id}: nihe {d} mm või kiirus {r} mm/päev ületas taseme {level}",
+  "monitoring.crossed.suggestion": "Kontrollige punkti ja ehitist ning kinnitage seejärel häire märkmega.",
+  "monitoring.level.ok": "OK",
+  "monitoring.level.alert": "Hoiatus",
+  "monitoring.level.action": "Meede",
+  "monitoring.level.alarm": "Häire",
+  "monitoring.risk.title": "Jälgimispunkt {id}, tase {level}",
+  "monitoring.risk.description": "Nihe {d} mm, kiirus {r} mm/päev võrreldes profiiliga {profile}. Mustandi avas jälgimine: vaadake see üle ja määrake vastutaja.",
+  "monitoring.report.title": "Jälgimise häiretaruanne",
+  "monitoring.report.project": "Projekt",
+  "monitoring.report.crs": "Koordinaatsüsteem",
+  "monitoring.report.profile": "Piirväärtuste profiil",
+  "monitoring.report.generated": "Genereeritud",
+  "monitoring.report.point": "Punkt",
+  "monitoring.report.baseline": "Lähteväärtus (m)",
+  "monitoring.report.latest": "Viimane väärtus (m)",
+  "monitoring.report.displacement": "Nihe (mm)",
+  "monitoring.report.rate": "Kiirus (mm/päev)",
+  "monitoring.report.level": "Tase",
+  "monitoring.report.acknowledged": "Kinnitatud",
+  "monitoring.report.counts": "Häire: {alarm} · Meede: {action} · Hoiatus: {alert} · OK: {ok}",
+  "monitoring.report.findings": "Järeldused",
+  "monitoring.report.no_profile": "Profiil puudub, määrake see",
+  "monitoring.report.ack_yes": "Jah",
+  "monitoring.report.ack_no": "Ei"
 }

@@ -2726,5 +2726,30 @@
         "gap": "شکاف"
       }
     }
-  }
+  },
+  "monitoring.crossed.fail": "نقطه‌ی {id}: جابه‌جایی {d} میلی‌متر یا نرخ {r} میلی‌متر/روز از سطح {level} گذشت",
+  "monitoring.crossed.suggestion": "نقطه و سازه را بررسی کنید، سپس هشدار را با یادداشت تأیید کنید.",
+  "monitoring.level.ok": "OK",
+  "monitoring.level.alert": "هشدار",
+  "monitoring.level.action": "اقدام",
+  "monitoring.level.alarm": "هشدار بحرانی",
+  "monitoring.risk.title": "نقطه‌ی پایش {id} در سطح {level}",
+  "monitoring.risk.description": "جابه‌جایی {d} میلی‌متر، نرخ {r} میلی‌متر/روز نسبت به {profile}. پیش‌نویس توسط پایش باز شد: بررسی کنید و مسئول تعیین کنید.",
+  "monitoring.report.title": "گزارش هشدار پایش",
+  "monitoring.report.project": "پروژه",
+  "monitoring.report.crs": "سیستم مختصات",
+  "monitoring.report.profile": "پروفایل حدها",
+  "monitoring.report.generated": "تولیدشده",
+  "monitoring.report.point": "نقطه",
+  "monitoring.report.baseline": "مقدار پایه (متر)",
+  "monitoring.report.latest": "آخرین مقدار (متر)",
+  "monitoring.report.displacement": "جابه‌جایی (میلی‌متر)",
+  "monitoring.report.rate": "نرخ (میلی‌متر/روز)",
+  "monitoring.report.level": "سطح",
+  "monitoring.report.acknowledged": "تأییدشده",
+  "monitoring.report.counts": "هشدار: {alarm} · اقدام: {action} · هشدار: {alert} · OK: {ok}",
+  "monitoring.report.findings": "یافته‌ها",
+  "monitoring.report.no_profile": "پروفایلی نیست، یکی تعیین کنید",
+  "monitoring.report.ack_yes": "بله",
+  "monitoring.report.ack_no": "خیر"
 }

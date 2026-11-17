@@ -2703,5 +2703,30 @@
         "gap": "缺口"
       }
     }
-  }
+  },
+  "monitoring.crossed.fail": "测点 {id}：位移 {d} mm 或速率 {r} mm/天 超过 {level} 限值",
+  "monitoring.crossed.suggestion": "检查测点与结构，然后附注确认该预警。",
+  "monitoring.level.ok": "OK",
+  "monitoring.level.alert": "预警",
+  "monitoring.level.action": "处置",
+  "monitoring.level.alarm": "报警",
+  "monitoring.risk.title": "{level} 级监测点 {id}",
+  "monitoring.risk.description": "位移 {d} mm，速率 {r} mm/天，相对于 {profile}。监测模块已生成草稿：请复核并指定负责人。",
+  "monitoring.report.title": "监测报警报告",
+  "monitoring.report.project": "项目",
+  "monitoring.report.crs": "坐标系",
+  "monitoring.report.profile": "阈值剖面",
+  "monitoring.report.generated": "生成时间",
+  "monitoring.report.point": "测点",
+  "monitoring.report.baseline": "基准值 (m)",
+  "monitoring.report.latest": "最新值 (m)",
+  "monitoring.report.displacement": "位移 (mm)",
+  "monitoring.report.rate": "速率 (mm/天)",
+  "monitoring.report.level": "等级",
+  "monitoring.report.acknowledged": "已确认",
+  "monitoring.report.counts": "报警：{alarm} · 处置：{action} · 预警：{alert} · OK：{ok}",
+  "monitoring.report.findings": "结论",
+  "monitoring.report.no_profile": "没有剖面，请设置一个",
+  "monitoring.report.ack_yes": "是",
+  "monitoring.report.ack_no": "否"
 }
