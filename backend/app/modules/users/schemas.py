@@ -199,8 +199,8 @@ class UserCreate(BaseModel):
     )
     role: str = Field(
         default="editor",
-        pattern=r"^(admin|manager|editor|viewer)$",
-        description="User role. Must be one of: admin, manager, editor, viewer",
+        pattern=r"^(admin|manager|editor|surveyor|viewer)$",
+        description="User role. Must be one of: admin, manager, editor, surveyor, viewer",
     )
     locale: str = Field(default="en", max_length=10, description="Preferred locale code (e.g. en, de, fr)")
     company: str = Field(
@@ -275,9 +275,9 @@ class AdminUserCreate(BaseModel):
         max_length=255,
         description="Full display name (HTML tags are stripped)",
     )
-    role: Literal["admin", "manager", "editor", "viewer"] = Field(
+    role: Literal["admin", "manager", "editor", "surveyor", "viewer"] = Field(
         default="viewer",
-        description="User role. One of: admin, manager, editor, viewer.",
+        description="User role. One of: admin, manager, editor, surveyor, viewer.",
     )
     locale: str = Field(default="en", max_length=10)
     is_active: bool = Field(default=True)
@@ -318,7 +318,7 @@ class UserAdminUpdate(BaseModel):
     """Admin-level user update (role, active status)."""
 
     full_name: str | None = Field(default=None, min_length=1, max_length=255)
-    role: str | None = Field(default=None, pattern=r"^(admin|manager|editor|viewer)$")
+    role: str | None = Field(default=None, pattern=r"^(admin|manager|editor|surveyor|viewer)$")
     is_active: bool | None = None
     locale: str | None = Field(default=None, max_length=10)
 
