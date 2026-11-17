@@ -1787,6 +1787,33 @@
         "col_max": "สูงสุด",
         "col_count": "ค่าที่วัด"
       }
+    },
+    "gantt_pdf": {
+      "strings": {
+        "title": "แผนงาน (แผนภูมิแกนต์)",
+        "project": "โครงการ",
+        "schedule": "แผนงาน",
+        "baseline": "แผนฐาน",
+        "no_baseline": "ไม่มี",
+        "exported": "ส่งออกเมื่อ",
+        "data_date": "วันที่ข้อมูล",
+        "col_wbs": "WBS",
+        "col_activity": "กิจกรรม",
+        "col_start": "เริ่ม",
+        "col_finish": "สิ้นสุด",
+        "col_duration": "วัน",
+        "legend_current": "แผนปัจจุบัน",
+        "legend_progress": "ความคืบหน้า",
+        "legend_critical": "เส้นทางวิกฤต",
+        "legend_baseline": "แผนฐาน",
+        "legend_actual": "จริง",
+        "legend_milestone": "หมุดหมาย",
+        "legend_summary": "สรุป",
+        "week_short": "สัปดาห์ {n}",
+        "quarter_short": "ไตรมาส {n}",
+        "sheet_of": "แผ่นที่ {page} จาก {total}",
+        "no_activities": "แผนงานนี้ยังไม่มีกิจกรรม"
+      }
     }
   },
   "pdf_footer": {

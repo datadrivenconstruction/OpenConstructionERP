@@ -2015,5 +2015,11 @@
       "fail": "Na gradilištu je bila ekipa od {headcount}, ali nisu zabilježeni radovi, pregled ni zastoj.",
       "suggestion": "Dodajte što je ekipa radila ili zastoj koji je zaustavio radove."
     }
+  },
+  "schedule_baseline": {
+    "single_approved": {
+      "fail": "Ovaj plan ima više od jednog odobrenog osnovnog plana ({baselines}).",
+      "suggestion": "Odobrite osnovni plan koji treba vrijediti; odobrenje jednog povlači odobrenje ostalih."
+    }
   }
 }

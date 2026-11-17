@@ -1803,6 +1803,33 @@
         "col_max": "Eng ko'p",
         "col_count": "Ko'rsatkichlar"
       }
+    },
+    "gantt_pdf": {
+      "strings": {
+        "title": "Ish jadvali (Gant diagrammasi)",
+        "project": "Loyiha",
+        "schedule": "Jadval",
+        "baseline": "Bazaviy reja",
+        "no_baseline": "yo'q",
+        "exported": "Eksport qilingan",
+        "data_date": "Hisobot sanasi",
+        "col_wbs": "WBS",
+        "col_activity": "Ish",
+        "col_start": "Boshlanishi",
+        "col_finish": "Tugashi",
+        "col_duration": "Kun",
+        "legend_current": "Joriy reja",
+        "legend_progress": "Bajarilishi",
+        "legend_critical": "Kritik yo'l",
+        "legend_baseline": "Bazaviy reja",
+        "legend_actual": "Haqiqiy",
+        "legend_milestone": "Bosqich",
+        "legend_summary": "Yig'indi",
+        "week_short": "H{n}",
+        "quarter_short": "{n}-chor.",
+        "sheet_of": "{page}/{total}-varaq",
+        "no_activities": "Bu jadvalda hali ishlar yo'q."
+      }
     }
   },
   "pdf_footer": {

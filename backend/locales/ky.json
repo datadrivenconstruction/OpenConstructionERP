@@ -1803,6 +1803,33 @@
         "col_max": "Эң көп",
         "col_count": "Көрсөткүчтөр"
       }
+    },
+    "gantt_pdf": {
+      "strings": {
+        "title": "Иш графиги (Гант диаграммасы)",
+        "project": "Долбоор",
+        "schedule": "График",
+        "baseline": "Базалык план",
+        "no_baseline": "жок",
+        "exported": "Экспорттолду",
+        "data_date": "Отчёт күнү",
+        "col_wbs": "WBS",
+        "col_activity": "Иш",
+        "col_start": "Башталышы",
+        "col_finish": "Бүтүшү",
+        "col_duration": "Күн",
+        "legend_current": "Учурдагы план",
+        "legend_progress": "Аткарылышы",
+        "legend_critical": "Критикалык жол",
+        "legend_baseline": "Базалык план",
+        "legend_actual": "Факт",
+        "legend_milestone": "Этап",
+        "legend_summary": "Жыйынтык",
+        "week_short": "А{n}",
+        "quarter_short": "{n} чей.",
+        "sheet_of": "{total} барактын {page}-барагы",
+        "no_activities": "Бул графикте азырынча иштер жок."
+      }
     }
   },
   "pdf_footer": {

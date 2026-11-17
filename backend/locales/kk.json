@@ -1803,6 +1803,33 @@
         "col_max": "Ең көп",
         "col_count": "Көрсеткіштер"
       }
+    },
+    "gantt_pdf": {
+      "strings": {
+        "title": "Жұмыс кестесі (Гант диаграммасы)",
+        "project": "Жоба",
+        "schedule": "Кесте",
+        "baseline": "Базалық жоспар",
+        "no_baseline": "жоқ",
+        "exported": "Экспортталды",
+        "data_date": "Есеп күні",
+        "col_wbs": "WBS",
+        "col_activity": "Жұмыс",
+        "col_start": "Басталуы",
+        "col_finish": "Аяқталуы",
+        "col_duration": "Күн",
+        "legend_current": "Ағымдағы жоспар",
+        "legend_progress": "Орындалуы",
+        "legend_critical": "Критикалық жол",
+        "legend_baseline": "Базалық жоспар",
+        "legend_actual": "Нақты",
+        "legend_milestone": "Кезең",
+        "legend_summary": "Жиынтық",
+        "week_short": "А{n}",
+        "quarter_short": "{n} тоқ.",
+        "sheet_of": "{total} парақтың {page}-сі",
+        "no_activities": "Бұл кестеде әзірге жұмыстар жоқ."
+      }
     }
   },
   "pdf_footer": {

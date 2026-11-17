@@ -2015,5 +2015,11 @@
       "fail": "Regu {headcount} orang ada di lokasi tetapi tidak ada pekerjaan, inspeksi, atau keterlambatan yang dicatat.",
       "suggestion": "Tambahkan apa yang dikerjakan regu, atau keterlambatan yang menghentikan pekerjaan."
     }
+  },
+  "schedule_baseline": {
+    "single_approved": {
+      "fail": "Jadwal ini memiliki lebih dari satu baseline yang disetujui ({baselines}).",
+      "suggestion": "Setujui baseline yang harus berlaku; menyetujui satu akan mencabut persetujuan yang lain."
+    }
   }
 }

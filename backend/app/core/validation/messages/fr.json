@@ -2015,5 +2015,11 @@
       "fail": "Une équipe de {headcount} était sur le chantier mais aucun travail, contrôle ou arrêt n'est consigné.",
       "suggestion": "Ajouter ce que l'équipe a fait, ou l'arrêt qui a bloqué les travaux."
     }
+  },
+  "schedule_baseline": {
+    "single_approved": {
+      "fail": "Ce planning a plus d'une référence approuvée ({baselines}).",
+      "suggestion": "Approuvez la référence qui doit s'appliquer ; en approuver une retire l'approbation des autres."
+    }
   }
 }

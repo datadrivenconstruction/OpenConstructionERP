@@ -2015,5 +2015,11 @@
       "fail": "A helyszínen {headcount} fős brigád volt, de nincs rögzítve munka, ellenőrzés vagy akadályoztatás.",
       "suggestion": "Adja meg, mit csinált a brigád, vagy a munkát leállító akadályoztatást."
     }
+  },
+  "schedule_baseline": {
+    "single_approved": {
+      "fail": "Ennek az ütemtervnek egynél több jóváhagyott alapterve van ({baselines}).",
+      "suggestion": "Hagyja jóvá az érvényes alaptervet; egy jóváhagyása visszavonja a többiek jóváhagyását."
+    }
   }
 }

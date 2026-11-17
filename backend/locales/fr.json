@@ -1787,6 +1787,33 @@
         "col_max": "Max.",
         "col_count": "Mesures"
       }
+    },
+    "gantt_pdf": {
+      "strings": {
+        "title": "Planning (diagramme de Gantt)",
+        "project": "Projet",
+        "schedule": "Planning",
+        "baseline": "Référence",
+        "no_baseline": "aucune",
+        "exported": "Exporté le",
+        "data_date": "Date d'avancement",
+        "col_wbs": "WBS",
+        "col_activity": "Tâche",
+        "col_start": "Début",
+        "col_finish": "Fin",
+        "col_duration": "Jours",
+        "legend_current": "Planning actuel",
+        "legend_progress": "Avancement",
+        "legend_critical": "Chemin critique",
+        "legend_baseline": "Planning de référence",
+        "legend_actual": "Réel",
+        "legend_milestone": "Jalon",
+        "legend_summary": "Tâche récapitulative",
+        "week_short": "S{n}",
+        "quarter_short": "T{n}",
+        "sheet_of": "Feuille {page} sur {total}",
+        "no_activities": "Ce planning n'a encore aucune tâche."
+      }
     }
   },
   "pdf_footer": {

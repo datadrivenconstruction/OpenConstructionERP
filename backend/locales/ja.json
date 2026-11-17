@@ -1787,6 +1787,33 @@
         "col_max": "最大",
         "col_count": "計測数"
       }
+    },
+    "gantt_pdf": {
+      "strings": {
+        "title": "工程表（ガントチャート）",
+        "project": "プロジェクト",
+        "schedule": "工程表",
+        "baseline": "基準計画",
+        "no_baseline": "なし",
+        "exported": "出力日",
+        "data_date": "データ日付",
+        "col_wbs": "WBS",
+        "col_activity": "作業",
+        "col_start": "開始",
+        "col_finish": "終了",
+        "col_duration": "日数",
+        "legend_current": "現行計画",
+        "legend_progress": "進捗",
+        "legend_critical": "クリティカルパス",
+        "legend_baseline": "基準計画",
+        "legend_actual": "実績",
+        "legend_milestone": "マイルストーン",
+        "legend_summary": "サマリー",
+        "week_short": "第{n}週",
+        "quarter_short": "Q{n}",
+        "sheet_of": "{total}枚中{page}枚目",
+        "no_activities": "この工程表にはまだ作業がありません。"
+      }
     }
   },
   "pdf_footer": {

@@ -2015,5 +2015,11 @@
       "fail": "Obyektda {headcount} kishilik brigada bor edi, ammo ish, tekshiruv yoki toʻxtab qolish yozilmagan.",
       "suggestion": "Brigada nima qilganini yoki ishni toʻxtatgan toʻxtab qolishni qoʻshing."
     }
+  },
+  "schedule_baseline": {
+    "single_approved": {
+      "fail": "Bu jadvalda bittadan ortiq tasdiqlangan bazaviy reja bor ({baselines}).",
+      "suggestion": "Amal qilishi kerak bo'lgan bazaviy rejani tasdiqlang; bittasini tasdiqlash qolganlarining tasdig'ini bekor qiladi."
+    }
   }
 }

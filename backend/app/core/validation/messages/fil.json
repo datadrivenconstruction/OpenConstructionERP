@@ -2015,5 +2015,11 @@
       "fail": "May grupong {headcount} sa site pero walang naitalang trabaho, inspeksyon, o pagkaantala.",
       "suggestion": "Idagdag ang ginawa ng grupo, o ang pagkaantalang nagpatigil ng trabaho."
     }
+  },
+  "schedule_baseline": {
+    "single_approved": {
+      "fail": "Higit sa isa ang aprubadong baseline ng iskedyul na ito ({baselines}).",
+      "suggestion": "Aprubahan ang baseline na dapat umiral; ang pag-apruba sa isa ay bumabawi sa apruba ng iba."
+    }
   }
 }

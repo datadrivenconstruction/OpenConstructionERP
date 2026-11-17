@@ -2015,5 +2015,11 @@
       "fail": "Estava em obra uma equipa de {headcount} mas não há trabalho, inspeção nem atraso registado.",
       "suggestion": "Acrescente o que a equipa fez, ou o atraso que parou os trabalhos."
     }
+  },
+  "schedule_baseline": {
+    "single_approved": {
+      "fail": "Este cronograma tem mais de uma linha de base aprovada ({baselines}).",
+      "suggestion": "Aprove a linha de base que deve valer; aprovar uma retira a aprovação das outras."
+    }
   }
 }

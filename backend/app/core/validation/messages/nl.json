@@ -2015,5 +2015,11 @@
       "fail": "Een ploeg van {headcount} was op de bouwplaats, maar er is geen werk, keuring of vertraging vastgelegd.",
       "suggestion": "Voeg toe wat de ploeg deed, of de vertraging die het werk stillegde."
     }
+  },
+  "schedule_baseline": {
+    "single_approved": {
+      "fail": "Deze planning heeft meer dan één goedgekeurde basisplanning ({baselines}).",
+      "suggestion": "Keur de basisplanning goed die moet gelden; goedkeuren van één trekt de goedkeuring van de andere in."
+    }
   }
 }

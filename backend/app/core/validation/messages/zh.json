@@ -2015,5 +2015,11 @@
       "fail": "现场有 {headcount} 人的班组，但未记录施工、检查或延误。",
       "suggestion": "请补充班组所做工作，或导致停工的延误。"
     }
+  },
+  "schedule_baseline": {
+    "single_approved": {
+      "fail": "此进度计划有多个已批准的基线（{baselines}）。",
+      "suggestion": "批准应当生效的基线；批准其中一个会撤销其他基线的批准。"
+    }
   }
 }

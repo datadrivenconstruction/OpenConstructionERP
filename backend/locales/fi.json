@@ -1787,6 +1787,33 @@
         "col_max": "Suurin",
         "col_count": "Mittaukset"
       }
+    },
+    "gantt_pdf": {
+      "strings": {
+        "title": "Aikataulu (Gantt-kaavio)",
+        "project": "Projekti",
+        "schedule": "Aikataulu",
+        "baseline": "Perusaikataulu",
+        "no_baseline": "ei mitään",
+        "exported": "Viety",
+        "data_date": "Tilannepäivä",
+        "col_wbs": "WBS",
+        "col_activity": "Tehtävä",
+        "col_start": "Alku",
+        "col_finish": "Loppu",
+        "col_duration": "Päivää",
+        "legend_current": "Nykyinen suunnitelma",
+        "legend_progress": "Edistyminen",
+        "legend_critical": "Kriittinen polku",
+        "legend_baseline": "Perusaikataulu",
+        "legend_actual": "Toteuma",
+        "legend_milestone": "Välitavoite",
+        "legend_summary": "Yhteenveto",
+        "week_short": "V{n}",
+        "quarter_short": "Q{n}",
+        "sheet_of": "Arkki {page}/{total}",
+        "no_activities": "Tässä aikataulussa ei ole vielä tehtäviä."
+      }
     }
   },
   "pdf_footer": {

@@ -2015,5 +2015,11 @@
       "fail": "Työmaalla oli {headcount} hengen ryhmä, mutta työtä, tarkastusta tai viivästystä ei ole kirjattu.",
       "suggestion": "Lisää, mitä ryhmä teki, tai viivästys, joka pysäytti työn."
     }
+  },
+  "schedule_baseline": {
+    "single_approved": {
+      "fail": "Tällä aikataululla on useampi kuin yksi hyväksytty perusaikataulu ({baselines}).",
+      "suggestion": "Hyväksy perusaikataulu, jonka pitää olla voimassa; yhden hyväksyminen peruu muiden hyväksynnän."
+    }
   }
 }

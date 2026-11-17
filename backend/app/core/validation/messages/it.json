@@ -2015,5 +2015,11 @@
       "fail": "Una squadra di {headcount} era in cantiere ma non risultano lavori, ispezioni né ritardi.",
       "suggestion": "Aggiungere ciò che ha fatto la squadra o il ritardo che ha fermato i lavori."
     }
+  },
+  "schedule_baseline": {
+    "single_approved": {
+      "fail": "Questo cronoprogramma ha più di una baseline approvata ({baselines}).",
+      "suggestion": "Approvi la baseline che deve valere; approvarne una ritira l'approvazione delle altre."
+    }
   }
 }

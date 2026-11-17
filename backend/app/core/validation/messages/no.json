@@ -2015,5 +2015,11 @@
       "fail": "Et lag på {headcount} var på plassen, men ingen arbeid, kontroll eller forsinkelse er registrert.",
       "suggestion": "Legg til hva laget gjorde, eller forsinkelsen som stoppet arbeidet."
     }
+  },
+  "schedule_baseline": {
+    "single_approved": {
+      "fail": "Denne planen har mer enn én godkjent basisplan ({baselines}).",
+      "suggestion": "Godkjenn basisplanen som skal gjelde; å godkjenne én trekker tilbake godkjenningen av de andre."
+    }
   }
 }

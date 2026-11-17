@@ -2015,5 +2015,11 @@
       "fail": "Objektil oli {headcount} liikmeline brigaad, kuid tööd, kontrolli ega viivitust pole kirjendatud.",
       "suggestion": "Lisage, mida brigaad tegi, või viivitus, mis töö peatas."
     }
+  },
+  "schedule_baseline": {
+    "single_approved": {
+      "fail": "Sellel ajakaval on rohkem kui üks kinnitatud baasplaan ({baselines}).",
+      "suggestion": "Kinnitage baasplaan, mis peab kehtima; ühe kinnitamine tühistab teiste kinnituse."
+    }
   }
 }

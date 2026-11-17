@@ -2015,5 +2015,11 @@
       "fail": "Ett arbetslag på {headcount} fanns på plats men inget arbete, ingen kontroll och ingen försening är registrerad.",
       "suggestion": "Lägg till vad arbetslaget gjorde, eller förseningen som stoppade arbetet."
     }
+  },
+  "schedule_baseline": {
+    "single_approved": {
+      "fail": "Den här tidplanen har mer än en godkänd baslinje ({baselines}).",
+      "suggestion": "Godkänn den baslinje som ska gälla; att godkänna en drar tillbaka godkännandet av de andra."
+    }
   }
 }

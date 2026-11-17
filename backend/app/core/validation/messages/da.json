@@ -2015,5 +2015,11 @@
       "fail": "Et hold på {headcount} var på pladsen, men intet arbejde, ingen kontrol og ingen forsinkelse er registreret.",
       "suggestion": "Tilføj hvad holdet lavede, eller forsinkelsen der stoppede arbejdet."
     }
+  },
+  "schedule_baseline": {
+    "single_approved": {
+      "fail": "Denne tidsplan har mere end én godkendt basisplan ({baselines}).",
+      "suggestion": "Godkend den basisplan, der skal gælde; godkendelse af én trækker godkendelsen af de andre tilbage."
+    }
   }
 }

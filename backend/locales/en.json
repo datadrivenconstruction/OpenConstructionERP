@@ -1647,6 +1647,33 @@
         "page": "Page {page} of {total}",
         "generated": "Generated {timestamp}"
       }
+    },
+    "gantt_pdf": {
+      "strings": {
+        "title": "Schedule (Gantt chart)",
+        "project": "Project",
+        "schedule": "Schedule",
+        "baseline": "Baseline",
+        "no_baseline": "none",
+        "exported": "Exported",
+        "data_date": "Data date",
+        "col_wbs": "WBS",
+        "col_activity": "Activity",
+        "col_start": "Start",
+        "col_finish": "Finish",
+        "col_duration": "Days",
+        "legend_current": "Current plan",
+        "legend_progress": "Progress",
+        "legend_critical": "Critical path",
+        "legend_baseline": "Baseline plan",
+        "legend_actual": "Actual",
+        "legend_milestone": "Milestone",
+        "legend_summary": "Summary",
+        "week_short": "W{n}",
+        "quarter_short": "Q{n}",
+        "sheet_of": "Sheet {page} of {total}",
+        "no_activities": "This schedule has no activities yet."
+      }
     }
   },
   "cost_control": {

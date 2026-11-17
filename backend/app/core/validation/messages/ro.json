@@ -2015,5 +2015,11 @@
       "fail": "O echipă de {headcount} persoane era pe șantier, dar nu sunt consemnate lucrări, inspecții sau întârzieri.",
       "suggestion": "Adăugați ce a făcut echipa sau întârzierea care a oprit lucrările."
     }
+  },
+  "schedule_baseline": {
+    "single_approved": {
+      "fail": "Acest grafic are mai multe planuri de referință aprobate ({baselines}).",
+      "suggestion": "Aprobați planul de referință care trebuie să se aplice; aprobarea unuia retrage aprobarea celorlalte."
+    }
   }
 }

@@ -1766,6 +1766,33 @@
         "col_max": "En yüksek",
         "col_count": "Ölçümler"
       }
+    },
+    "gantt_pdf": {
+      "strings": {
+        "title": "İş programı (Gantt şeması)",
+        "project": "Proje",
+        "schedule": "İş programı",
+        "baseline": "Temel plan",
+        "no_baseline": "yok",
+        "exported": "Dışa aktarıldı",
+        "data_date": "Durum tarihi",
+        "col_wbs": "İKY",
+        "col_activity": "Faaliyet",
+        "col_start": "Başlangıç",
+        "col_finish": "Bitiş",
+        "col_duration": "Gün",
+        "legend_current": "Güncel plan",
+        "legend_progress": "İlerleme",
+        "legend_critical": "Kritik yol",
+        "legend_baseline": "Temel plan",
+        "legend_actual": "Gerçekleşen",
+        "legend_milestone": "Kilometre taşı",
+        "legend_summary": "Özet",
+        "week_short": "H{n}",
+        "quarter_short": "Ç{n}",
+        "sheet_of": "Sayfa {page} / {total}",
+        "no_activities": "Bu iş programında henüz faaliyet yok."
+      }
     }
   },
   "pdf_footer": {

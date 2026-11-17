@@ -1787,6 +1787,33 @@
         "col_max": "Cao nhất",
         "col_count": "Số đo"
       }
+    },
+    "gantt_pdf": {
+      "strings": {
+        "title": "Tiến độ (biểu đồ Gantt)",
+        "project": "Dự án",
+        "schedule": "Tiến độ",
+        "baseline": "Đường cơ sở",
+        "no_baseline": "không có",
+        "exported": "Xuất ngày",
+        "data_date": "Ngày dữ liệu",
+        "col_wbs": "WBS",
+        "col_activity": "Công việc",
+        "col_start": "Bắt đầu",
+        "col_finish": "Kết thúc",
+        "col_duration": "Ngày",
+        "legend_current": "Kế hoạch hiện tại",
+        "legend_progress": "Tiến độ thực hiện",
+        "legend_critical": "Đường găng",
+        "legend_baseline": "Kế hoạch cơ sở",
+        "legend_actual": "Thực tế",
+        "legend_milestone": "Mốc",
+        "legend_summary": "Tổng hợp",
+        "week_short": "T{n}",
+        "quarter_short": "Q{n}",
+        "sheet_of": "Tờ {page}/{total}",
+        "no_activities": "Tiến độ này chưa có công việc nào."
+      }
     }
   },
   "pdf_footer": {

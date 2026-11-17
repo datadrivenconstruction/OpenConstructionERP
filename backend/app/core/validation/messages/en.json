@@ -2015,5 +2015,11 @@
       "fail": "A crew of {headcount} was on site but no work, inspection or delay is recorded.",
       "suggestion": "Add what the crew did, or record the delay that stopped work."
     }
+  },
+  "schedule_baseline": {
+    "single_approved": {
+      "fail": "This schedule has more than one approved baseline ({baselines}).",
+      "suggestion": "Approve the baseline that should be current; approving one withdraws the approval of the others."
+    }
   }
 }

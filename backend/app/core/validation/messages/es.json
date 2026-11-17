@@ -2015,5 +2015,11 @@
       "fail": "Había una cuadrilla de {headcount} en obra pero no consta trabajo, inspección ni retraso.",
       "suggestion": "Añada lo que hizo la cuadrilla o el retraso que paralizó el trabajo."
     }
+  },
+  "schedule_baseline": {
+    "single_approved": {
+      "fail": "Este cronograma tiene más de una línea base aprobada ({baselines}).",
+      "suggestion": "Apruebe la línea base que debe regir; aprobar una retira la aprobación de las demás."
+    }
   }
 }

@@ -1787,6 +1787,33 @@
         "col_max": "Højeste",
         "col_count": "Målinger"
       }
+    },
+    "gantt_pdf": {
+      "strings": {
+        "title": "Tidsplan (Gantt-diagram)",
+        "project": "Projekt",
+        "schedule": "Tidsplan",
+        "baseline": "Basisplan",
+        "no_baseline": "ingen",
+        "exported": "Eksporteret",
+        "data_date": "Statusdato",
+        "col_wbs": "WBS",
+        "col_activity": "Aktivitet",
+        "col_start": "Start",
+        "col_finish": "Slut",
+        "col_duration": "Dage",
+        "legend_current": "Aktuel plan",
+        "legend_progress": "Fremdrift",
+        "legend_critical": "Kritisk vej",
+        "legend_baseline": "Basisplan",
+        "legend_actual": "Faktisk",
+        "legend_milestone": "Milepæl",
+        "legend_summary": "Sammenfatning",
+        "week_short": "U{n}",
+        "quarter_short": "K{n}",
+        "sheet_of": "Ark {page} af {total}",
+        "no_activities": "Denne tidsplan har endnu ingen aktiviteter."
+      }
     }
   },
   "pdf_footer": {

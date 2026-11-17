@@ -1803,6 +1803,33 @@
         "col_max": "उच्चतम",
         "col_count": "रीडिंग"
       }
+    },
+    "gantt_pdf": {
+      "strings": {
+        "title": "कार्यक्रम (गैंट चार्ट)",
+        "project": "परियोजना",
+        "schedule": "कार्यक्रम",
+        "baseline": "बेसलाइन",
+        "no_baseline": "कोई नहीं",
+        "exported": "निर्यात",
+        "data_date": "डेटा तिथि",
+        "col_wbs": "WBS",
+        "col_activity": "गतिविधि",
+        "col_start": "प्रारंभ",
+        "col_finish": "समाप्ति",
+        "col_duration": "दिन",
+        "legend_current": "वर्तमान योजना",
+        "legend_progress": "प्रगति",
+        "legend_critical": "क्रिटिकल पाथ",
+        "legend_baseline": "बेसलाइन योजना",
+        "legend_actual": "वास्तविक",
+        "legend_milestone": "माइलस्टोन",
+        "legend_summary": "सारांश",
+        "week_short": "स{n}",
+        "quarter_short": "ति{n}",
+        "sheet_of": "शीट {page} / {total}",
+        "no_activities": "इस कार्यक्रम में अभी कोई गतिविधि नहीं है।"
+      }
     }
   },
   "pdf_footer": {

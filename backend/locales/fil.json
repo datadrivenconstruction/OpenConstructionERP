@@ -1787,6 +1787,33 @@
         "col_max": "Pinakamataas",
         "col_count": "Mga reading"
       }
+    },
+    "gantt_pdf": {
+      "strings": {
+        "title": "Iskedyul (Gantt chart)",
+        "project": "Proyekto",
+        "schedule": "Iskedyul",
+        "baseline": "Baseline",
+        "no_baseline": "wala",
+        "exported": "Na-export",
+        "data_date": "Petsa ng datos",
+        "col_wbs": "WBS",
+        "col_activity": "Gawain",
+        "col_start": "Simula",
+        "col_finish": "Tapos",
+        "col_duration": "Araw",
+        "legend_current": "Kasalukuyang plano",
+        "legend_progress": "Progreso",
+        "legend_critical": "Critical path",
+        "legend_baseline": "Baseline na plano",
+        "legend_actual": "Aktwal",
+        "legend_milestone": "Milestone",
+        "legend_summary": "Buod",
+        "week_short": "L{n}",
+        "quarter_short": "Q{n}",
+        "sheet_of": "Pahina {page} ng {total}",
+        "no_activities": "Wala pang gawain ang iskedyul na ito."
+      }
     }
   },
   "pdf_footer": {

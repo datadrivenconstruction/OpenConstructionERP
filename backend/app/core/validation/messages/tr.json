@@ -2015,5 +2015,11 @@
       "fail": "Sahada {headcount} kişilik bir ekip vardı ancak iş, kontrol veya gecikme kaydı yok.",
       "suggestion": "Ekibin ne yaptığını veya işi durduran gecikmeyi ekleyin."
     }
+  },
+  "schedule_baseline": {
+    "single_approved": {
+      "fail": "Bu iş programının birden fazla onaylı temel planı var ({baselines}).",
+      "suggestion": "Geçerli olması gereken temel planı onaylayın; birini onaylamak diğerlerinin onayını geri alır."
+    }
   }
 }

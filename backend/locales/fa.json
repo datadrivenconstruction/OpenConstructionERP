@@ -1647,6 +1647,33 @@
         "col_max": "بیشترین",
         "col_count": "قرائت‌ها"
       }
+    },
+    "gantt_pdf": {
+      "strings": {
+        "title": "برنامه زمان‌بندی (نمودار گانت)",
+        "project": "پروژه",
+        "schedule": "برنامه زمان‌بندی",
+        "baseline": "خط مبنا",
+        "no_baseline": "هیچ",
+        "exported": "تاریخ خروجی",
+        "data_date": "تاریخ داده",
+        "col_wbs": "WBS",
+        "col_activity": "فعالیت",
+        "col_start": "شروع",
+        "col_finish": "پایان",
+        "col_duration": "روز",
+        "legend_current": "برنامه فعلی",
+        "legend_progress": "پیشرفت",
+        "legend_critical": "مسیر بحرانی",
+        "legend_baseline": "برنامه مبنا",
+        "legend_actual": "واقعی",
+        "legend_milestone": "نقطه عطف",
+        "legend_summary": "خلاصه",
+        "week_short": "ه{n}",
+        "quarter_short": "ف{n}",
+        "sheet_of": "برگه {page} از {total}",
+        "no_activities": "این برنامه هنوز فعالیتی ندارد."
+      }
     }
   },
   "cost_control": {

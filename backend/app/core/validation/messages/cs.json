@@ -2015,5 +2015,11 @@
       "fail": "Na stavbě byla četa {headcount} lidí, ale není zapsána práce, kontrola ani prostoj.",
       "suggestion": "Doplňte, co četa dělala, nebo prostoj, který práci zastavil."
     }
+  },
+  "schedule_baseline": {
+    "single_approved": {
+      "fail": "Tento harmonogram má více než jeden schválený směrný plán ({baselines}).",
+      "suggestion": "Schvalte směrný plán, který má platit; schválením jednoho se schválení ostatních ruší."
+    }
   }
 }

@@ -1787,6 +1787,33 @@
         "col_max": "Suurim",
         "col_count": "Näidud"
       }
+    },
+    "gantt_pdf": {
+      "strings": {
+        "title": "Ajakava (Gantti diagramm)",
+        "project": "Projekt",
+        "schedule": "Ajakava",
+        "baseline": "Baasplaan",
+        "no_baseline": "puudub",
+        "exported": "Eksporditud",
+        "data_date": "Seisuga",
+        "col_wbs": "WBS",
+        "col_activity": "Tegevus",
+        "col_start": "Algus",
+        "col_finish": "Lõpp",
+        "col_duration": "Päevi",
+        "legend_current": "Kehtiv plaan",
+        "legend_progress": "Edenemine",
+        "legend_critical": "Kriitiline tee",
+        "legend_baseline": "Baasplaan",
+        "legend_actual": "Tegelik",
+        "legend_milestone": "Verstapost",
+        "legend_summary": "Kokkuvõte",
+        "week_short": "N{n}",
+        "quarter_short": "K{n}",
+        "sheet_of": "Leht {page}/{total}",
+        "no_activities": "Selles ajakavas pole veel tegevusi."
+      }
     }
   },
   "pdf_footer": {
