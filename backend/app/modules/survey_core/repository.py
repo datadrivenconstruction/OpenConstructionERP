@@ -11,7 +11,13 @@ from typing import Any
 from sqlalchemy import Select, delete, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.modules.survey_core.models import SurveyPoint, SurveyPointSet, SurveyProjectCrs
+from app.modules.survey_core.models import (
+    SurveyPoint,
+    SurveyPointSet,
+    SurveyProfile,
+    SurveyProjectCrs,
+    SurveyTraverse,
+)
 
 
 class SurveyRepository:
@@ -137,3 +143,26 @@ class SurveyRepository:
     async def add_points(self, points: list[SurveyPoint]) -> None:
         self.session.add_all(points)
         await self.session.flush()
+
+    # ── Traverses and profiles ─────────────────────────────────────────────
+
+    async def list_traverses(self, project_id: uuid.UUID) -> list[SurveyTraverse]:
+        rows = await self.session.execute(
+            select(SurveyTraverse)
+            .where(SurveyTraverse.project_id == project_id)
+            .order_by(SurveyTraverse.created_at.desc(), SurveyTraverse.id)
+        )
+        return list(rows.scalars().all())
+
+    async def get_traverse(self, traverse_id: uuid.UUID) -> SurveyTraverse | None:
+        return await self.session.get(SurveyTraverse, traverse_id)
+
+    async def delete(self, obj: Any) -> None:
+        await self.session.delete(obj)
+        await self.session.flush()
+
+    async def get_profile(self, project_id: uuid.UUID | None) -> SurveyProfile | None:
+        """The project's own profile row, or the workspace default when ``project_id`` is None."""
+        cond = SurveyProfile.project_id.is_(None) if project_id is None else SurveyProfile.project_id == project_id
+        rows = await self.session.execute(select(SurveyProfile).where(cond).order_by(SurveyProfile.created_at))
+        return rows.scalars().first()

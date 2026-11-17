@@ -2231,6 +2231,32 @@
     "duplicate_point": {
       "fail": "Codice punto {point_id} duplicato con coordinate diverse.",
       "suggestion": "Tenete una sola lettura: eliminate il set con quella errata e reimportatelo."
+    },
+    "traverse_misclosure": {
+      "fail": "La poligonale {name} chiude a 1:{r}, sotto il minimo del profilo 1:{min}.",
+      "suggestion": "Cercate un errore grossolano nei lati, riosservate il lato più debole o confermate il valore del profilo."
+    },
+    "level_misclosure": {
+      "fail": "L'errore di chiusura della livellazione {f} mm supera k·√km con k = {k} mm.",
+      "suggestion": "Ripetete la livellazione o controllate le quote dei capisaldi usati."
+    }
+  },
+  "volumes": {
+    "no_overlap": {
+      "fail": "Le due superfici si sovrappongono solo sul {p} % dell'area: il volume non ha senso.",
+      "suggestion": "Verificate che entrambe le superfici siano nello stesso sistema di coordinate e coprano lo stesso terreno."
+    },
+    "low_coverage": {
+      "fail": "Solo il {c} % dell'area ha dati in entrambe le superfici (minimo {min} %).",
+      "suggestion": "Aggiungete punti dove manca una superficie o restringete il contorno all'area coperta."
+    },
+    "coarse_scan": {
+      "fail": "Una scansione grossolana (LOA10) alimenta questo volume senza motivo indicato.",
+      "suggestion": "Usate una scansione di precisione topografica o spiegate perché questa basta."
+    },
+    "bank_volume": {
+      "fail": "La quantità è volume in sito (nel terreno); il fattore di rigonfiamento non è applicato.",
+      "suggestion": "Inviate invece lo scavo rigonfiato se la voce del computo è misurata come materiale sciolto."
     }
   }
 }

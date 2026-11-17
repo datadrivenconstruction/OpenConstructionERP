@@ -30,6 +30,8 @@ export const COMPANY_PROFILE_ORDER: readonly string[] = [
   'subcontractor',
   'mep_contractor',
   'civil_infrastructure',
+  'survey_company',
+  'mining_operator',
   'homebuilder',
   'design_build',
   'real_estate_developer',

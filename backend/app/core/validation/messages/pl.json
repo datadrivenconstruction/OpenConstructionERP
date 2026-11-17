@@ -2231,6 +2231,32 @@
     "duplicate_point": {
       "fail": "Powtórzony numer punktu {point_id} z różnymi współrzędnymi.",
       "suggestion": "Zostaw jeden pomiar: usuń zbiór z błędnym i zaimportuj go ponownie."
+    },
+    "traverse_misclosure": {
+      "fail": "Ciąg {name} zamyka się z odchyłką 1:{r}, poniżej minimum profilu 1:{min}.",
+      "suggestion": "Sprawdź boki pod kątem błędu grubego, pomierz ponownie najsłabszy bok lub potwierdź wartość profilu."
+    },
+    "level_misclosure": {
+      "fail": "Odchyłka niwelacji {f} mm przekracza k·√km przy k = {k} mm.",
+      "suggestion": "Powtórz niwelację lub sprawdź wysokości użytych reperów."
+    }
+  },
+  "volumes": {
+    "no_overlap": {
+      "fail": "Obie powierzchnie pokrywają się tylko na {p} % obszaru: objętość nie ma sensu.",
+      "suggestion": "Sprawdź, czy obie powierzchnie są w tym samym układzie współrzędnych i obejmują ten sam teren."
+    },
+    "low_coverage": {
+      "fail": "Tylko {c} % obszaru ma dane w obu powierzchniach (minimum {min} %).",
+      "suggestion": "Dodaj punkty tam, gdzie brakuje powierzchni, lub zawęź granicę do pokrytego obszaru."
+    },
+    "coarse_scan": {
+      "fail": "Ta objętość pochodzi z grubego skanu (LOA10) bez podanego powodu.",
+      "suggestion": "Użyj skanu o dokładności geodezyjnej lub napisz, dlaczego ten skan wystarcza."
+    },
+    "bank_volume": {
+      "fail": "Ilość to objętość w stanie rodzimym (w gruncie); współczynnik spulchnienia nie jest zastosowany.",
+      "suggestion": "Wyślij urobek spulchniony, jeśli pozycja przedmiaru jest mierzona w stanie luźnym."
     }
   }
 }

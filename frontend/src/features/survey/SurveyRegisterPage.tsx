@@ -7,9 +7,8 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Crosshair, Database, FileUp, ListChecks, MapPin } from 'lucide-react';
+import { Crosshair, Database, FileUp, ListChecks, MapPin, Route } from 'lucide-react';
 import {
   Breadcrumb,
   Button,
@@ -42,13 +41,16 @@ import { crsChipText } from './crsPicker';
 import { CrsDialog } from './CrsDialog';
 import { SurveyImportDialog } from './SurveyImportDialog';
 import { surveyGuide } from './surveyGuide';
+import { SurveyPlan } from './SurveyPlan';
+import { TraverseDrawer, VerdictBadge, ratioText } from './TraverseDrawer';
+import { useOpenSurveyDemo } from './useOpenSurveyDemo';
+import { deleteTraverse, getRegisterPlan, listTraverses, type Traverse } from './volumesApi';
 
-type Tab = 'points' | 'sets';
+type Tab = 'points' | 'sets' | 'traverses' | 'plan';
 const coord = (v: number | null | undefined) => (v == null ? '' : v.toFixed(3));
 
 export default function SurveyRegisterPage() {
   const { t, i18n } = useTranslation();
-  const navigate = useNavigate();
   const qc = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
   const projectId = useProjectContextStore((s) => s.activeProjectId);
@@ -59,6 +61,9 @@ export default function SurveyRegisterPage() {
   const [kind, setKind] = useState('');
   const [setFilter, setSetFilter] = useState('');
   const [q, setQ] = useState('');
+  const [traverseOpen, setTraverseOpen] = useState(false);
+  const [shownTraverse, setShownTraverse] = useState<Traverse | null>(null);
+  const demo = useOpenSurveyDemo('/survey');
 
   const enabled = !!projectId;
   const crs = useQuery({ queryKey: ['survey', 'crs', projectId], queryFn: () => getProjectCrs(projectId!), enabled });
@@ -73,6 +78,22 @@ export default function SurveyRegisterPage() {
     queryKey: ['survey', 'findings', projectId, i18n.language],
     queryFn: () => validateRegister(projectId!, i18n.language),
     enabled,
+  });
+
+  const traverses = useQuery({
+    queryKey: ['survey', 'traverses', projectId],
+    queryFn: () => listTraverses(projectId!),
+    enabled: enabled && tab === 'traverses',
+  });
+  const plan = useQuery({
+    queryKey: ['survey', 'plan', projectId],
+    queryFn: () => getRegisterPlan(projectId!),
+    enabled: enabled && tab === 'plan',
+  });
+  const removeTraverse = useMutation({
+    mutationFn: (tr: Traverse) => deleteTraverse(tr.id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['survey'] }),
+    onError: (e) => addToast({ type: 'error', title: getErrorMessage(e) }),
   });
 
   const noCrs = crs.isSuccess && !crs.data.crs;
@@ -97,7 +118,7 @@ export default function SurveyRegisterPage() {
         <EmptyState
           icon={<Crosshair size={24} />}
           title={t('survey.no_project', { defaultValue: 'Open a project to see its survey points.' })}
-          action={{ label: t('survey.action.open_demo', { defaultValue: 'Open demo project' }), onClick: () => navigate('/onboarding/demo') }}
+          action={{ label: t('survey.action.open_demo', { defaultValue: 'Open demo project' }), onClick: () => void demo.open() }}
         />
       </div>
     );
@@ -107,6 +128,17 @@ export default function SurveyRegisterPage() {
     <div className="flex flex-wrap gap-2">
       <Button variant="primary" icon={<FileUp size={16} />} onClick={() => setImportOpen(true)} data-testid="survey-import">
         {t('survey.action.import_points', { defaultValue: 'Import points' })}
+      </Button>
+      <Button
+        variant="secondary"
+        icon={<Route size={16} />}
+        onClick={() => {
+          setShownTraverse(null);
+          setTraverseOpen(true);
+        }}
+        data-testid="survey-new-traverse"
+      >
+        {t('survey.action.new_traverse', { defaultValue: 'New traverse' })}
       </Button>
       <ModuleGuideButton content={surveyGuide} />
     </div>
@@ -197,6 +229,8 @@ export default function SurveyRegisterPage() {
         tabs={[
           { id: 'points', label: t('survey.tab.points', { defaultValue: 'Points' }) },
           { id: 'sets', label: t('survey.tab.point_sets', { defaultValue: 'Point sets' }) },
+          { id: 'traverses', label: t('survey.tab.traverses', { defaultValue: 'Traverses' }) },
+          { id: 'plan', label: t('survey.tab.plan', { defaultValue: 'Plan' }) },
         ]}
       />
 
@@ -236,7 +270,7 @@ export default function SurveyRegisterPage() {
                   <Button variant="primary" onClick={() => setImportOpen(true)}>
                     {t('survey.action.import_points', { defaultValue: 'Import points' })}
                   </Button>
-                  <Button variant="secondary" onClick={() => navigate('/onboarding/demo')}>
+                  <Button variant="secondary" loading={demo.busy} onClick={() => void demo.open()} data-testid="survey-open-demo">
                     {t('survey.action.open_demo', { defaultValue: 'Open demo project' })}
                   </Button>
                 </div>
@@ -341,6 +375,82 @@ export default function SurveyRegisterPage() {
         </Card>
       )}
 
+      {tab === 'traverses' && (
+        <Card className="p-0 overflow-hidden">
+          {traverses.isLoading ? (
+            <Skeleton className="h-32 m-3" />
+          ) : (traverses.data ?? []).length === 0 ? (
+            <EmptyState
+              icon={<Route size={24} />}
+              title={t('survey.traverse.empty', { defaultValue: 'No traverses yet. Paste the legs of a closed loop to check its misclosure.' })}
+              action={{ label: t('survey.action.new_traverse', { defaultValue: 'New traverse' }), onClick: () => setTraverseOpen(true) }}
+            />
+          ) : (
+            <table className="oe-table w-full text-sm">
+              <thead>
+                <tr>
+                  <th>{t('common.name', { defaultValue: 'Name' })}</th>
+                  <th>{t('survey.traverse.kind', { defaultValue: 'Kind' })}</th>
+                  <th className="text-right">{t('survey.traverse.ratio', { defaultValue: 'Ratio' })}</th>
+                  <th>{t('survey.traverse.verdict', { defaultValue: 'Against the profile' })}</th>
+                  <th />
+                </tr>
+              </thead>
+              <tbody>
+                {(traverses.data ?? []).map((tr) => (
+                  <tr key={tr.id}>
+                    <td>
+                      <button
+                        type="button"
+                        className="text-start hover:underline"
+                        onClick={() => {
+                          setShownTraverse(tr);
+                          setTraverseOpen(true);
+                        }}
+                      >
+                        {tr.name}
+                      </button>
+                    </td>
+                    <td>
+                      {tr.kind === 'level'
+                        ? t('survey.traverse.kind_level', { defaultValue: 'Level run' })
+                        : t('survey.traverse.kind_traverse', { defaultValue: 'Closed traverse' })}
+                    </td>
+                    <td className="text-right">
+                      <bdi dir="ltr">
+                        {tr.kind === 'level'
+                          ? `${tr.misclosure_mm ?? '-'} / ${tr.allowed_mm ?? '-'} mm`
+                          : ratioText(tr.ratio, i18n.language)}
+                      </bdi>
+                    </td>
+                    <td><VerdictBadge verdict={tr.verdict} /></td>
+                    <td className="text-right">
+                      <Button size="sm" variant="ghost" onClick={() => removeTraverse.mutate(tr)}>
+                        {t('common.delete', { defaultValue: 'Delete' })}
+                      </Button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </Card>
+      )}
+
+      {tab === 'plan' && (
+        <SurveyPlan plan={plan.data} isLoading={plan.isLoading} error={plan.error} onRetry={() => plan.refetch()} />
+      )}
+
+      <TraverseDrawer
+        open={traverseOpen}
+        projectId={projectId}
+        isAdvanced={isAdvanced}
+        shown={shownTraverse}
+        onClose={() => {
+          setTraverseOpen(false);
+          setShownTraverse(null);
+        }}
+      />
       <CrsDialog open={crsOpen} required={noCrs} projectId={projectId} state={crs.data} onClose={() => setCrsOpen(false)} />
       <SurveyImportDialog
         open={importOpen}

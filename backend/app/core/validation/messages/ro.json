@@ -2231,6 +2231,32 @@
     "duplicate_point": {
       "fail": "Număr de punct {point_id} duplicat cu coordonate diferite.",
       "suggestion": "Păstrați o singură citire: ștergeți setul cu cea greșită și importați-l din nou."
+    },
+    "traverse_misclosure": {
+      "fail": "Drumuirea {name} se închide la 1:{r}, sub minimul profilului 1:{min}.",
+      "suggestion": "Căutați o greșeală grosolană pe laturi, remăsurați latura cea mai slabă sau confirmați valoarea profilului."
+    },
+    "level_misclosure": {
+      "fail": "Neînchiderea nivelmentului {f} mm depășește k·√km cu k = {k} mm.",
+      "suggestion": "Refaceți nivelmentul sau verificați cotele reperelor folosite."
+    }
+  },
+  "volumes": {
+    "no_overlap": {
+      "fail": "Cele două suprafețe se suprapun doar pe {p} % din zonă: volumul nu are sens.",
+      "suggestion": "Verificați că ambele suprafețe sunt în același sistem de coordonate și acoperă același teren."
+    },
+    "low_coverage": {
+      "fail": "Doar {c} % din zonă are date în ambele suprafețe (minim {min} %).",
+      "suggestion": "Adăugați puncte unde lipsește o suprafață sau restrângeți conturul la zona acoperită."
+    },
+    "coarse_scan": {
+      "fail": "O scanare grosieră (LOA10) alimentează acest volum fără motiv declarat.",
+      "suggestion": "Folosiți o scanare de precizie topografică sau scrieți de ce aceasta ajunge."
+    },
+    "bank_volume": {
+      "fail": "Cantitatea este volum în stare naturală (în teren); coeficientul de afânare nu este aplicat.",
+      "suggestion": "Trimiteți săpătura afânată dacă articolul din antemăsurătoare se măsoară afânat."
     }
   }
 }
