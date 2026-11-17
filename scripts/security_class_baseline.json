@@ -69,6 +69,7 @@
     "backend/app/modules/documents/router.py::POST /share-links/{token}/access/",
     "backend/app/modules/dwg_takeoff/router.py::GET /offline-readiness/",
     "backend/app/modules/equipment/telematics_router.py::POST /ingest/",
+    "backend/app/modules/field_diary/router.py::GET /briefing/",
     "backend/app/modules/field_diary/router.py::GET /entries/",
     "backend/app/modules/field_diary/router.py::GET /entries/{entry_id}/",
     "backend/app/modules/field_diary/router.py::GET /offline-pack/",

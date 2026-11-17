@@ -16,5 +16,6 @@ def register_ai_agents_permissions() -> None:
             # accepting or rejecting a draft is an editor action.
             "ai_agents.configure": Role.MANAGER,
             "ai_agents.review": Role.EDITOR,
+            "ai_agents.site.run": Role.EDITOR,
         },
     )

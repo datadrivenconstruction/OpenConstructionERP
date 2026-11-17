@@ -96,3 +96,6 @@ def register_ai_agent_rules() -> None:
     """Register the rule set; idempotent."""
     for rule in _RULES:
         rule_registry.register(rule, [AI_AGENT_DRAFTS_RULE_SET])
+    from app.modules.ai_agents.site_rules import register_ai_site_rules
+
+    register_ai_site_rules()

@@ -31,6 +31,7 @@ export const PERMISSION_MIN_ROLE = {
   'payroll.read': 'manager',
   'certified_payroll.read': 'manager',
   'ai.estimate': 'editor',
+  'ai_agents.site.run': 'editor',
   'audit.view': 'manager',
   'estimate_basis.generate': 'editor',
   'estimate_basis.write': 'editor',

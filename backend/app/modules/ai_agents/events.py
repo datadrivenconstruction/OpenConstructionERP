@@ -173,3 +173,29 @@ def _make_handler(trigger: str):  # type: ignore[no-untyped-def]
 # Register one handler per mapped event at import time (module-load contract).
 for _event_name, _trigger in _EVENT_TO_TRIGGER.items():
     event_bus.subscribe(_event_name, _make_handler(_trigger))
+
+
+async def _notify_briefing_ready(event: Event) -> None:
+    """Tell the user a scheduled morning briefing is ready (on-demand runs notify nobody)."""
+    data = event.data or {}
+    if data.get("trigger") != "schedule":
+        return
+    try:
+        from app.modules.notifications.service import NotificationService
+
+        async with async_session_factory() as session:
+            await NotificationService(session).notify_users(
+                [data["user_id"]],
+                "info",
+                "notification.site_briefing_ready_title",
+                entity_type="project",
+                entity_id=str(data.get("project_id")),
+                action_url=f"/projects/{data.get('project_id')}",
+            )
+            await session.commit()
+    except Exception:  # noqa: BLE001 - bus handlers must never raise out
+        logger.exception("site briefing notification failed")
+
+
+_notify_briefing_ready.__qualname__ = "ai_agents.on_site_briefing_ready"
+event_bus.subscribe("ai_agents.site.briefing.ready", _notify_briefing_ready)

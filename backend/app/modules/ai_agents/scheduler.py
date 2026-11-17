@@ -158,6 +158,12 @@ async def fire_due_runs(now: _dt.datetime | None = None) -> int:
             await _fire_due_agent(service, agent_id, agent_user_id, agent_agent_name, auto, now)
             fired += 1
         await session.commit()
+    from app.modules.ai_agents.site import fire_due_briefings
+
+    try:
+        fired += await fire_due_briefings(now)
+    except Exception:
+        logger.exception("site briefing tick failed")
     return fired
 
 

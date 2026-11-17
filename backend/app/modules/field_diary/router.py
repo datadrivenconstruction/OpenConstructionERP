@@ -542,6 +542,29 @@ async def upload_attachment(
 # ── Field Today screen ─────────────────────────────────────────────────────
 
 
+@router.get("/briefing/")
+async def field_briefing(
+    session: SessionDep,
+    field_session=Depends(_require_field_module_grant),
+) -> dict:
+    """The session user's latest morning briefing for the session project (read only, never generated here)."""
+    from datetime import date
+
+    from app.modules.ai_agents import site
+
+    found = await site.latest_briefing(session, field_session.project_id, field_session.user_id)
+    if found is None:
+        return {
+            "exists": False,
+            "is_today": False,
+            "provider_used": None,
+            "degraded": True,
+            "items": [],
+            "confidence": 1.0,
+        }
+    return {**found, "exists": True, "is_today": found.get("day") == date.today().isoformat()}
+
+
 @router.get("/today/", response_model=FieldTodayResponse)
 async def field_today(
     session: SessionDep,
