@@ -83,7 +83,7 @@ describe('menu groups', () => {
         '/videos', '/courses', '/cases', '/packs',
         '/', '/projects', '/files', '/inbox', '/timeline',
         '/takeoff?tab=measurements', '/dwg-takeoff', '/bim', '/bim/rules', '/quantities',
-        '/costs', '/catalog', '/cost-explorer', '/assemblies', '/cost-match', '/fx',
+        '/costs', '/catalog', '/project-catalogue', '/cost-explorer', '/assemblies', '/cost-match', '/fx',
         '/boq', '/templates', '/regional-exchange', '/match-elements', '/project-intelligence', '/rom-estimate',
         '/methodologies',
         '/sheets',

@@ -6,6 +6,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Loader2, Mail } from 'lucide-react';
 import { Button } from '@/shared/ui';
 import { apiGet, apiPost, apiPut } from '@/shared/lib/api';
+import { fmtList } from '@/shared/lib/formatters';
 import { useToastStore } from '@/stores/useToastStore';
 import { mailboxDraftProblems, type MailboxDraft } from './invoiceMailboxRules';
 
@@ -163,7 +164,7 @@ export function InvoiceMailboxSettings({ projectId }: { projectId: string }) {
       {problems.length > 0 && (
         <p className="mt-2 text-xs text-semantic-warning">
           {label('invalid', 'These mailbox settings are not valid')}:{' '}
-          {problems.map((p) => label(p, p)).join(', ')}
+          {fmtList(problems.map((p) => label(p, p)))}
         </p>
       )}
       {testResult && (

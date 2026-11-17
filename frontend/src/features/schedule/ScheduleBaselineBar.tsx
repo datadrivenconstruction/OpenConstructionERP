@@ -210,7 +210,7 @@ export function ScheduleBaselineBar({
           }}
         >
           <input
-            className="oe-input h-8 w-40 text-xs"
+            className="oe-input w-40 text-xs"
             value={name}
             maxLength={255}
             onChange={(e) => setName(e.target.value)}
@@ -218,7 +218,7 @@ export function ScheduleBaselineBar({
             aria-label={t('schedule.baselines.name_placeholder', { defaultValue: 'Name (optional)' })}
           />
           <input
-            className="oe-input h-8 min-w-[14rem] flex-1 text-xs"
+            className="oe-input min-w-[14rem] flex-1 text-xs"
             value={note}
             maxLength={1000}
             onChange={(e) => setNote(e.target.value)}

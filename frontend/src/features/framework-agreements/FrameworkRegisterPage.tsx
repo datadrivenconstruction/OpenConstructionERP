@@ -141,7 +141,7 @@ export function FrameworkRegisterPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder={t('framework.search', { defaultValue: 'Agreement, client or code' })}
-            className="oe-input h-8 w-64 ps-8 text-sm"
+            className="oe-input w-64 ps-8 text-sm"
           />
         </label>
         {(['open', 'exhausted', 'closed', 'all'] as const).map((s) => (

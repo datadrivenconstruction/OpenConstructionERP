@@ -97,7 +97,7 @@ export function DocTemplatesList({
           <label className="flex items-center gap-2 text-sm">
             <span className="oe-label">{t('settings.document_templates.language', { defaultValue: 'Language' })}</span>
             <select
-              className="oe-input h-8 py-0"
+              className="oe-input py-0"
               value={language}
               onChange={(e) => setLanguage(e.target.value)}
               data-testid="doc-templates-language"
@@ -113,7 +113,7 @@ export function DocTemplatesList({
             <Search size={14} className="pointer-events-none absolute start-2.5 top-2.5 text-content-tertiary" />
             <input
               type="search"
-              className="oe-input h-8 w-full ps-8"
+              className="oe-input w-full ps-8"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder={t('settings.document_templates.search', { defaultValue: 'Search' })}

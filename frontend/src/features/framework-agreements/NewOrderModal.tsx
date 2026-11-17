@@ -358,7 +358,7 @@ export function NewOrderModal({ agreement, canOverride, onClose, onCreated }: Pr
                       }}
                       aria-label={t('framework.col.qty', { defaultValue: 'Qty' })}
                       inputMode="decimal"
-                      className="oe-input h-7 w-20 text-end"
+                      className="oe-input-sm w-20 text-end"
                       value={l.quantity}
                       onChange={(e) => {
                         const v = e.target.value.replace(',', '.');
