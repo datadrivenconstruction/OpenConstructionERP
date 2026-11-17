@@ -122,7 +122,7 @@ export function AcademyMark({ className }: { className?: string }) {
 /* ── App lockup ────────────────────────────────────────────────────────── */
 
 const LOCKUP = {
-  nav: { mark: '20px', text: '13px', gap: 'gap-1.5' },
+  nav: { mark: '16px', text: '13px', gap: 'gap-1' },
   lg: { mark: '32px', text: '20px', gap: 'gap-2.5' },
 } as const;
 
