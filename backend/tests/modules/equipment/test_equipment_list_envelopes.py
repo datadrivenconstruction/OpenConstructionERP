@@ -179,3 +179,43 @@ async def test_the_taxonomy_never_claims_to_be_truncated() -> None:
     # could ask past. Anything smaller would make the picker look truncated.
     assert result.limit == len(result.items)
     assert result.offset == 0
+
+
+@pytest.mark.parametrize("path", ["/rate-catalogues/", "/rate-catalogues/profiles/"])
+def test_the_rate_catalogue_lists_answer_with_an_envelope(path: str) -> None:
+    from app.modules.equipment import rate_router
+
+    route = next(
+        r for r in rate_router.router.routes if getattr(r, "path", None) == path and "GET" in getattr(r, "methods", ())
+    )
+    model = route.response_model
+    assert isinstance(model, type) and issubclass(model, BaseModel)
+    assert set(model.model_fields) >= ENVELOPE_FIELDS
+
+
+@pytest.mark.asyncio
+async def test_the_rate_profile_page_counts_every_profile() -> None:
+    from app.modules.equipment.rate_router import list_profiles
+
+    now = datetime.now(UTC)
+    rows = [
+        SimpleNamespace(
+            id=uuid.uuid4(),
+            name=f"P{i}",
+            layout_key="own",
+            mapping={},
+            decimal_comma=False,
+            percent_fields=[],
+            created_at=now,
+            updated_at=now,
+        )
+        for i in range(3)
+    ]
+
+    class _Stub:
+        async def list_profiles(self) -> list[Any]:
+            return rows
+
+    page = await list_profiles(_Stub(), offset=1, limit=1)  # type: ignore[arg-type]
+    assert [p.name for p in page.items] == ["P1"]
+    assert (page.total, page.offset, page.limit) == (3, 1, 1)

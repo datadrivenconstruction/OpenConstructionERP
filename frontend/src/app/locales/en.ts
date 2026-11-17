@@ -50693,6 +50693,9 @@ const resource = {
     "modules.catalog.offers": "Customer offers",
     "modules.catalog.letter_templates": "Letter Templates",
     "modules.catalog.project_catalogue": "Project Catalogue",
+    "modules.catalog.doc_templates": "Documents & templates",
+    "modules.catalog.estimate_archive": "Sealed Estimates",
+    "modules.catalog.framework_agreements": "Framework Agreements",
     "modules.pp_name_pakistan_pk": "Pakistan Construction Pack",
     "modules.pp_name_peru_pe": "Peru Construction Pack",
     // stakeholders (module 8) frontend keys: start

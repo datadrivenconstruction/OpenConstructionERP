@@ -29,6 +29,7 @@ from app.dependencies import (
     CurrentUserId,
     CurrentUserPayload,
     RequirePermission,
+    RequireRole,
     SessionDep,
     accessible_project_ids,
 )
@@ -41,10 +42,12 @@ from app.modules.doc_templates.schemas import (
     KindListResponse,
     KindSummary,
     ManagerIn,
+    ManagerListResponse,
     ManagerOut,
     PreviewEmailOut,
     PreviewIn,
     PublishIn,
+    RecordListResponse,
     RecordOut,
     TestSendOut,
 )
@@ -71,11 +74,6 @@ async def _require_manager(session: Any, user_id: str, payload: dict[str, Any]) 
     return user
 
 
-def _require_admin(payload: dict[str, Any]) -> None:
-    if (payload.get("role") or "") != "admin":
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admins grant the Document manager role")
-
-
 async def _state(session: Any, kind_key: str, locale: str, payload: dict[str, Any], user_id: str) -> EditorState:
     kind = service.require_kind(kind_key)
     countries = await service.workspace_countries(session, payload, user_id)
@@ -98,20 +96,23 @@ async def list_kinds(session: SessionDep, user_id: CurrentUserId, payload: Curre
     )
 
 
-@router.get("/managers", response_model=list[ManagerOut], dependencies=_READ)
-async def list_managers(session: SessionDep, payload: CurrentUserPayload) -> list[ManagerOut]:
+@router.get("/managers", response_model=ManagerListResponse, dependencies=[*_READ, Depends(RequireRole("admin"))])
+async def list_managers(
+    session: SessionDep,
+    offset: int = Query(0, ge=0),
+    limit: int = Query(500, ge=1, le=500),
+) -> ManagerListResponse:
     """Active users and whether each holds the Document manager role."""
-    from sqlalchemy import select
+    from sqlalchemy import func, select
 
     from app.modules.users.models import User
 
-    _require_admin(payload)
+    active = (User.is_active.is_(True), User.deleted_at.is_(None))
+    total = (await session.execute(select(func.count()).select_from(User).where(*active))).scalar_one()
     rows = (
-        await session.execute(
-            select(User).where(User.is_active.is_(True), User.deleted_at.is_(None)).order_by(User.email).limit(500)
-        )
+        await session.execute(select(User).where(*active).order_by(User.email).offset(offset).limit(limit))
     ).scalars()
-    return [
+    items = [
         ManagerOut(
             user_id=u.id,
             email=u.email,
@@ -121,16 +122,14 @@ async def list_managers(session: SessionDep, payload: CurrentUserPayload) -> lis
         )
         for u in rows
     ]
+    return ManagerListResponse(items=items, total=total, offset=offset, limit=limit)
 
 
-@router.put("/managers/{target_id}", response_model=ManagerOut, dependencies=_READ)
-async def set_manager(
-    target_id: uuid.UUID, body: ManagerIn, session: SessionDep, user_id: CurrentUserId, payload: CurrentUserPayload
-) -> ManagerOut:
+@router.put("/managers/{target_id}", response_model=ManagerOut, dependencies=[*_READ, Depends(RequireRole("admin"))])
+async def set_manager(target_id: uuid.UUID, body: ManagerIn, session: SessionDep, user_id: CurrentUserId) -> ManagerOut:
     """Grant or revoke the Document manager role. Admins hold it implicitly."""
     from app.core.audit import audit_log
 
-    _require_admin(payload)
     target = await _user(session, str(target_id))
     metadata = dict(target.metadata_ or {})
     if body.is_manager:
@@ -235,14 +234,15 @@ async def reset(
     return await _state(session, kind_key, locale, payload, user_id)
 
 
-@router.get("/{kind_key}/records", response_model=list[RecordOut], dependencies=_READ)
-async def records(kind_key: str, session: SessionDep, user_id: CurrentUserId) -> list[RecordOut]:
+@router.get("/{kind_key}/records", response_model=RecordListResponse, dependencies=_READ)
+async def records(kind_key: str, session: SessionDep, user_id: CurrentUserId) -> RecordListResponse:
     """Records of projects the caller can open that "Preview with" can use."""
     kind = service.require_kind(kind_key)
-    if kind.records is None:
-        return []
-    ids = await accessible_project_ids(session, user_id)
-    return [RecordOut(id=rid, label=label) for rid, label in await kind.records(session, ids)]
+    items: list[RecordOut] = []
+    if kind.records is not None:
+        ids = await accessible_project_ids(session, user_id)
+        items = [RecordOut(id=rid, label=label) for rid, label in await kind.records(session, ids)]
+    return RecordListResponse(items=items, total=len(items), limit=max(len(items), 50))
 
 
 @router.get("/{kind_key}/records/{record_id}/pdf", response_model=None, dependencies=_READ)

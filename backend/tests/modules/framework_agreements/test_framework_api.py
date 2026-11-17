@@ -71,7 +71,8 @@ async def agreement(client: AsyncClient, admin_auth, project_id) -> dict:
     assert body["pack"]["term_variant"] == "de" and body["pack"]["term_limit"]["years"] == 4
     agreement_id = body["id"]
     periods = (await client.get(f"/api/v1/framework-agreements/{agreement_id}/periods", headers=header)).json()
-    period = periods[0]
+    assert periods["total"] == len(periods["items"])
+    period = periods["items"][0]
     put = await client.put(
         f"/api/v1/framework-agreements/{agreement_id}/periods/{period['id']}",
         json={
@@ -210,3 +211,24 @@ async def test_duplicate_codes_are_refused_on_import(client: AsyncClient, admin_
     )
     assert resp.status_code == 422
     assert resp.json()["detail"]["codes"] == ["02.010"]
+
+
+@pytest.mark.asyncio
+async def test_child_lists_are_paged_and_closed_to_other_projects(client: AsyncClient, admin_auth, agreement) -> None:
+    from tests.modules.framework_agreements.conftest import _register_user
+
+    _, header = admin_auth
+    base = f"/api/v1/framework-agreements/{agreement['id']}"
+    for child in ("items", "periods", "adjustments"):
+        page = (await client.get(f"{base}/{child}", headers=header)).json()
+        assert page["total"] == len(page["items"]) and page["offset"] == 0, child
+    order = (await client.post(f"{base}/orders", json=_ORDER, headers=header)).json()
+    extras = (await client.get(f"/api/v1/framework-agreements/orders/{order['id']}/extras", headers=header)).json()
+    assert extras["total"] == len(extras["items"])
+
+    _, _email, stranger = await _register_user(client, role="editor")
+    for path in (base, f"{base}/items", f"{base}/periods", f"/api/v1/framework-agreements/orders/{order['id']}"):
+        resp = await client.get(path, headers=stranger)
+        assert resp.status_code in (403, 404), (path, resp.status_code)
+    listed = (await client.get("/api/v1/framework-agreements/", headers=stranger)).json()
+    assert agreement["id"] not in {row["id"] for row in listed["items"]}

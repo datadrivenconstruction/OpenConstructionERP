@@ -1830,7 +1830,7 @@ async def update_user(
 
 @router.get(
     "/{user_id}/verification-link/",
-    dependencies=[Depends(RequirePermission("users.update"))],
+    dependencies=[Depends(RequirePermission("users.update")), Depends(RequireRole("admin"))],
 )
 async def get_verification_link(
     user_id: uuid.UUID,

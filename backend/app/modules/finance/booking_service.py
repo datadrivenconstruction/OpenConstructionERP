@@ -11,7 +11,7 @@ from decimal import Decimal
 from typing import Any
 
 from fastapi import HTTPException, status
-from sqlalchemy import func, select
+from sqlalchemy import exists, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.active_markets import pack_active
@@ -185,9 +185,31 @@ class BookingService:
         await self.session.flush()
         return batch
 
-    async def list(self, limit: int = 50) -> list[BookingExportBatch]:
-        stmt = select(BookingExportBatch).order_by(BookingExportBatch.number.desc()).limit(limit)
-        return list((await self.session.execute(stmt)).scalars().all())
+    async def page(
+        self, allowed: set[uuid.UUID] | None, offset: int, limit: int
+    ) -> tuple[list[BookingExportBatch], int]:
+        """Batches newest first; with ``allowed`` only those whose every invoice is in one of those projects."""
+        stmt = select(BookingExportBatch)
+        if allowed is not None:
+            foreign = (
+                select(BookingExportItem.id)
+                .join(CapturedInvoice, CapturedInvoice.id == BookingExportItem.invoice_id)
+                .where(BookingExportItem.batch_id == BookingExportBatch.id, CapturedInvoice.project_id.notin_(allowed))
+            )
+            stmt = stmt.where(~exists(foreign))
+        total = int((await self.session.execute(select(func.count()).select_from(stmt.subquery()))).scalar() or 0)
+        stmt = stmt.order_by(BookingExportBatch.number.desc()).offset(offset).limit(limit)
+        return list((await self.session.execute(stmt)).scalars().all()), total
+
+    async def project_ids(self, batch_id: uuid.UUID) -> set[uuid.UUID]:
+        """The projects of the invoices a batch carries."""
+        stmt = (
+            select(CapturedInvoice.project_id)
+            .join(BookingExportItem, BookingExportItem.invoice_id == CapturedInvoice.id)
+            .where(BookingExportItem.batch_id == batch_id)
+            .distinct()
+        )
+        return set((await self.session.execute(stmt)).scalars().all())
 
     async def file(self, batch_id: uuid.UUID) -> tuple[BookingExportBatch, bytes]:
         batch = await self.session.get(BookingExportBatch, batch_id)

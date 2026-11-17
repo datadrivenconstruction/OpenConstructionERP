@@ -28,6 +28,15 @@ class _Money(BaseModel):
         return value
 
 
+class Page[T](BaseModel):
+    """A child list of one agreement or order, read whole: ``total`` equals ``len(items)``."""
+
+    items: list[T]
+    total: int
+    offset: int = 0
+    limit: int = 0
+
+
 # ── Price list ──────────────────────────────────────────────────────────────
 
 

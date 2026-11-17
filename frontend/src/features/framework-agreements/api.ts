@@ -5,7 +5,7 @@
  * Money and factors travel as decimal strings; the UI formats, never recomputes.
  */
 
-import { apiDelete, apiGet, apiPost, apiPut, apiPatch } from '@/shared/lib/api';
+import { apiDelete, apiGet, apiPost, apiPut, apiPatch, type Page } from '@/shared/lib/api';
 
 const BASE = '/v1/framework-agreements';
 
@@ -256,10 +256,10 @@ export const fwkApi = {
   get: (id: string) => apiGet<AgreementDetail>(`${BASE}/${id}`),
   setStatus: (id: string, status: 'active' | 'closed') =>
     apiPost<AgreementDetail>(`${BASE}/${id}/status`, { status }),
-  items: (id: string) => apiGet<RateItem[]>(`${BASE}/${id}/items`),
+  items: (id: string) => apiGet<Page<RateItem>>(`${BASE}/${id}/items`).then((p) => p.items),
   updateItem: (id: string, itemId: string, body: Partial<Pick<RateItem, 'base_rate' | 'is_active' | 'max_qty'>>) =>
     apiPatch<Record<string, string | null>>(`${BASE}/${id}/items/${itemId}`, body),
-  periods: (id: string) => apiGet<RatePeriod[]>(`${BASE}/${id}/periods`),
+  periods: (id: string) => apiGet<Page<RatePeriod>>(`${BASE}/${id}/periods`).then((p) => p.items),
   activatePeriod: (id: string, period: RatePeriod) =>
     apiPut<RatePeriod>(`${BASE}/${id}/periods/${period.id}?activate=true`, {
       label: period.label,
@@ -274,7 +274,7 @@ export const fwkApi = {
       series_refs: period.series_refs,
       rate_overrides: period.rate_overrides,
     }),
-  adjustments: (id: string) => apiGet<Adjustment[]>(`${BASE}/${id}/adjustments`),
+  adjustments: (id: string) => apiGet<Page<Adjustment>>(`${BASE}/${id}/adjustments`).then((p) => p.items),
   addAdjustment: (id: string, body: Omit<Adjustment, 'id'>) => apiPost<Adjustment>(`${BASE}/${id}/adjustments`, body),
   deleteAdjustment: (id: string, adjId: string) => apiDelete(`${BASE}/${id}/adjustments/${adjId}`),
   quote: (id: string, body: QuoteRequest) => apiPost<OrderQuote, QuoteRequest>(`${BASE}/${id}/quote`, body),
@@ -287,7 +287,7 @@ export const fwkApi = {
     apiPost<OrderDetail>(`${BASE}/orders/${orderId}/status`, { status }),
   measure: (orderId: string, measurements: Record<string, string>) =>
     apiPost<OrderDetail>(`${BASE}/orders/${orderId}/measurements`, { measurements }),
-  extras: (orderId: string) => apiGet<Extra[]>(`${BASE}/orders/${orderId}/extras`),
+  extras: (orderId: string) => apiGet<Page<Extra>>(`${BASE}/orders/${orderId}/extras`).then((p) => p.items),
   raiseExtra: (orderId: string, body: { title: string; description?: string; amount: string }) =>
     apiPost<{ id: string; code: string; status: string }>(`${BASE}/orders/${orderId}/extras`, body),
   breakdown: (id: string, by: 'site' | 'item' | 'month') =>

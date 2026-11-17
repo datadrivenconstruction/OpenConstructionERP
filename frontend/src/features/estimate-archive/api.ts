@@ -5,7 +5,7 @@
  * (backend/app/modules/estimate_archive/router.py).
  */
 
-import { apiGet, apiPost, downloadWithAuth } from '@/shared/lib/api';
+import { apiGet, apiPost, downloadWithAuth, type Page } from '@/shared/lib/api';
 
 const BASE = '/v1/estimate-archive';
 
@@ -393,7 +393,7 @@ export const archiveApi = {
   chooseMethod: (derivationId: string, method: BasisMethod) =>
     apiPost<Derivation>(`${BASE}/derivations/${derivationId}/method`, { basis_method: method }),
   variationFindings: (variationRequestId: string) =>
-    apiGet<Finding[]>(`${BASE}/variations/${variationRequestId}/findings`),
+    apiGet<Page<Finding>>(`${BASE}/variations/${variationRequestId}/findings`),
   downloadPackage: (sealId: string) =>
     downloadWithAuth(`/api${BASE}/seals/${sealId}/package`, `sealed-estimate-${sealId.slice(0, 8)}.zip`),
 };

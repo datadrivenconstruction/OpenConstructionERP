@@ -61,6 +61,8 @@ export function FrameworkAgreementPage() {
   const [openOrder, setOpenOrder] = useState<string | null>(null);
   const canIssue = useHasPermission('framework.issue_order');
   const canOverride = useHasPermission('framework.override_cap');
+  const canEditRates = useHasPermission('framework.edit_rates');
+  const canAccept = useHasPermission('framework.accept_order');
   const qc = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
 
@@ -106,7 +108,7 @@ export function FrameworkAgreementPage() {
                 {t('framework.new_order', { defaultValue: 'New order' })}
               </Button>
             )}
-            {a.status === 'draft' && canIssue && (
+            {a.status === 'draft' && canAccept && (
               <Button variant="primary" loading={activate.isPending} onClick={() => activate.mutate('active')}>
                 {t('framework.activate', { defaultValue: 'Activate' })}
               </Button>
@@ -138,8 +140,8 @@ export function FrameworkAgreementPage() {
       {tab === 'overview' && <Overview a={a} />}
       {tab === 'orders' && <OrdersTab a={a} onOpen={setOpenOrder} onNew={orderingOpen ? () => setOrdering(true) : undefined} />}
       {tab === 'price_list' && <PriceListTab a={a} />}
-      {tab === 'rates' && <RatesTab a={a} />}
-      {tab === 'conditions' && <ConditionsTab a={a} editable={canIssue} />}
+      {tab === 'rates' && <RatesTab a={a} editable={canEditRates} />}
+      {tab === 'conditions' && <ConditionsTab a={a} editable={canEditRates} />}
       {tab === 'terms' && <TermsTab a={a} />}
 
       {ordering && (
@@ -455,7 +457,7 @@ function PriceListTab({ a }: { a: AgreementDetail }) {
   );
 }
 
-function RatesTab({ a }: { a: AgreementDetail }) {
+function RatesTab({ a, editable }: { a: AgreementDetail; editable: boolean }) {
   const { t } = useTranslation();
   const qc = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
@@ -495,7 +497,7 @@ function RatesTab({ a }: { a: AgreementDetail }) {
                   t('framework.period.factor_today', { defaultValue: 'Factor today: {{factor}}', factor: p.factor_today ?? '1' })
                 )}
               </div>
-              {p.status === 'draft' && (
+              {p.status === 'draft' && editable && (
                 <Button size="sm" variant="secondary" loading={activate.isPending} onClick={() => activate.mutate(p)}>
                   {t('framework.period.activate', { defaultValue: 'Activate period' })}
                 </Button>

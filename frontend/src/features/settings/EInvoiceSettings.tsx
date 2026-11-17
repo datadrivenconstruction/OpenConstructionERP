@@ -114,14 +114,9 @@ export function EInvoiceSettings() {
     const fromUrl = typeof window === 'undefined' ? null : new URLSearchParams(window.location.search).get('scope');
     return fromUrl && /^entity:[0-9a-fA-F-]{36}$/.test(fromUrl) ? fromUrl : 'default';
   });
-  const settingsUrl =
-    scope === 'default'
-      ? '/api/v1/finance/einvoice-settings'
-      : `/api/v1/finance/einvoice-settings?scope=${encodeURIComponent(scope)}`;
-
   const { data, isLoading } = useQuery<EInvoiceSettingsPayload>({
     queryKey: scope === 'default' ? ['finance', 'einvoice-settings'] : ['finance', 'einvoice-settings', scope],
-    queryFn: () => apiGet(settingsUrl),
+    queryFn: () => apiGet(`/api/v1/finance/einvoice-settings?scope=${encodeURIComponent(scope)}`),
   });
 
   // The form is seeded while rendering rather than from an effect, and the state
@@ -139,7 +134,8 @@ export function EInvoiceSettings() {
   }
 
   const save = useMutation({
-    mutationFn: (body: FormState) => apiPut(settingsUrl, body),
+    mutationFn: (body: FormState) =>
+      apiPut(`/api/v1/finance/einvoice-settings?scope=${encodeURIComponent(scope)}`, body),
     onSuccess: () => {
       setFieldError(null);
       queryClient.invalidateQueries({ queryKey: ['finance', 'einvoice-settings'] });

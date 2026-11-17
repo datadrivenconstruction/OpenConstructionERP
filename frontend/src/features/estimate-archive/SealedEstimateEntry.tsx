@@ -173,7 +173,7 @@ export function VariationSealPricing({
     retry: false,
   });
   if (!enabled) return null;
-  const warnings = findings.data ?? [];
+  const warnings = findings.data?.items ?? [];
   if (!seal && !warnings.length) return null;
   const scope = contents.data?.scope_ordinals;
   const positions = (contents.data?.payload.positions ?? []).filter(

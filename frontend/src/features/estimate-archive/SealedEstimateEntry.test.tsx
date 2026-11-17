@@ -131,9 +131,14 @@ describe('variation bill entry', () => {
   it('offers pricing from the seal and lists lines without a live seal', async () => {
     vi.spyOn(archiveApi, 'policy').mockResolvedValue(policy(true));
     vi.spyOn(archiveApi, 'seals').mockResolvedValue([seal]);
-    vi.spyOn(archiveApi, 'variationFindings').mockResolvedValue([
-      { rule_id: 'estimate_archive.var_basis_no_seal', code: 'VAR_BASIS_NO_SEAL', severity: 'warning', message: 'Line L1 claims original basis but the contract has no seal.' },
-    ]);
+    vi.spyOn(archiveApi, 'variationFindings').mockResolvedValue({
+      items: [
+        { rule_id: 'estimate_archive.var_basis_no_seal', code: 'VAR_BASIS_NO_SEAL', severity: 'warning', message: 'Line L1 claims original basis but the contract has no seal.' },
+      ],
+      total: 1,
+      offset: 0,
+      limit: 500,
+    });
     mount(<VariationSealPricing projectId="p1" variationRequestId="v1" editable currency="EUR" />);
     expect(await screen.findByRole('button', { name: /Add from sealed estimate/ })).toBeTruthy();
     expect(await screen.findByText(/Line L1 claims original basis/)).toBeTruthy();
@@ -142,7 +147,7 @@ describe('variation bill entry', () => {
   it('hides the source when the project has no live seal', async () => {
     vi.spyOn(archiveApi, 'policy').mockResolvedValue(policy(true));
     vi.spyOn(archiveApi, 'seals').mockResolvedValue([{ ...seal, status: 'superseded' }]);
-    vi.spyOn(archiveApi, 'variationFindings').mockResolvedValue([]);
+    vi.spyOn(archiveApi, 'variationFindings').mockResolvedValue({ items: [], total: 0, offset: 0, limit: 500 });
     mount(<VariationSealPricing projectId="p1" variationRequestId="v1" editable currency="EUR" />);
     await waitFor(() => expect(archiveApi.seals).toHaveBeenCalled());
     expect(screen.queryByRole('button', { name: /Add from sealed estimate/ })).toBeNull();

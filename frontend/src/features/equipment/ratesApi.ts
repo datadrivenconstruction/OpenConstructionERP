@@ -7,7 +7,7 @@
  * backend/app/modules/equipment/rate_router.py. Decimals are strings.
  */
 
-import { API_BASE, ApiError, apiGet, apiPost, fetchWithAuth } from '@/shared/lib/api';
+import { API_BASE, ApiError, apiGet, apiPost, fetchWithAuth, type Page } from '@/shared/lib/api';
 
 export interface RateCatalogue {
   id: string;
@@ -97,7 +97,7 @@ export interface RateImportResult {
 
 const BASE = '/v1/equipment/rate-catalogues';
 
-export const listRateCatalogues = () => apiGet<RateCatalogue[]>(`${BASE}/`);
+export const listRateCatalogues = () => apiGet<Page<RateCatalogue>>(`${BASE}/`);
 export const getRateCatalogue = (id: string) => apiGet<RateCatalogueDetail>(`${BASE}/${id}/`);
 export const loadDemoCatalogue = (currency: string) => apiPost<RateCatalogue>(`${BASE}/demo/?currency=${currency}`);
 export const createEmptyCatalogue = (name: string, currency: string) =>

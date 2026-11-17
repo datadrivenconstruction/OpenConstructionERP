@@ -35,7 +35,7 @@ export function BookingExportPanel({ configId }: { configId: string }) {
     queryFn: () => previewBooking(request),
     enabled: from <= to,
   });
-  const batches = useQuery({ queryKey: ['booking-batches'], queryFn: listBookingBatches });
+  const batches = useQuery({ queryKey: ['booking-batches'], queryFn: listBookingBatches, select: (p) => p.items });
   const create = useMutation({
     mutationFn: () => createBooking(request),
     onSuccess: (batch) => {

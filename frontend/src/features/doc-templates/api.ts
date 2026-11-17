@@ -2,7 +2,7 @@
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 /** Documents & templates API (/api/v1/doc-templates/). */
 
-import { API_BASE, apiDelete, apiGet, apiPost, apiPut, fetchWithAuth } from '@/shared/lib/api';
+import { API_BASE, apiDelete, apiGet, apiPost, apiPut, fetchWithAuth, type Page } from '@/shared/lib/api';
 
 export type Channel = 'pdf' | 'email';
 export type WordingStatus = 'default' | 'custom' | 'draft' | 'error';
@@ -103,23 +103,27 @@ export interface DocManager {
 
 const base = '/v1/doc-templates';
 const k = (key: string) => encodeURIComponent(key);
-const loc = (locale: string) => `?locale=${encodeURIComponent(locale)}`;
 
 export const listDocKinds = () => apiGet<DocKindList>(`${base}/`);
-export const getEditor = (key: string, locale: string) => apiGet<EditorState>(`${base}/${k(key)}${loc(locale)}`);
+export const getEditor = (key: string, locale: string) =>
+  apiGet<EditorState>(`${base}/${k(key)}?locale=${encodeURIComponent(locale)}`);
 export const saveDraft = (key: string, locale: string, blocks: Record<string, string>, options?: TemplateOptions) =>
-  apiPut<EditorState>(`${base}/${k(key)}/draft${loc(locale)}`, { blocks, options });
-export const discardDraft = (key: string, locale: string) => apiDelete(`${base}/${k(key)}/draft${loc(locale)}`);
+  apiPut<EditorState>(`${base}/${k(key)}/draft?locale=${encodeURIComponent(locale)}`, { blocks, options });
+export const discardDraft = (key: string, locale: string) =>
+  apiDelete(`${base}/${k(key)}/draft?locale=${encodeURIComponent(locale)}`);
 export const publishTemplate = (key: string, locale: string, note = '') =>
-  apiPost<EditorState>(`${base}/${k(key)}/publish${loc(locale)}`, { note });
+  apiPost<EditorState>(`${base}/${k(key)}/publish?locale=${encodeURIComponent(locale)}`, { note });
 export const restoreVersion = (key: string, locale: string, versionId: string) =>
-  apiPost<EditorState>(`${base}/${k(key)}/versions/${versionId}/restore${loc(locale)}`, {});
+  apiPost<EditorState>(`${base}/${k(key)}/versions/${versionId}/restore?locale=${encodeURIComponent(locale)}`, {});
 export const resetTemplate = (key: string, locale: string) =>
-  apiPost<EditorState>(`${base}/${k(key)}/reset${loc(locale)}`, {});
-export const listRecords = (key: string) => apiGet<{ id: string; label: string }[]>(`${base}/${k(key)}/records`);
+  apiPost<EditorState>(`${base}/${k(key)}/reset?locale=${encodeURIComponent(locale)}`, {});
+export const listRecords = (key: string) => apiGet<Page<{ id: string; label: string }>>(`${base}/${k(key)}/records`);
 export const sendTest = (key: string, locale: string, blocks: Record<string, string>) =>
-  apiPost<{ sent: boolean; to: string; detail: string }>(`${base}/${k(key)}/test-send${loc(locale)}`, { blocks });
-export const listManagers = () => apiGet<DocManager[]>(`${base}/managers`);
+  apiPost<{ sent: boolean; to: string; detail: string }>(
+    `${base}/${k(key)}/test-send?locale=${encodeURIComponent(locale)}`,
+    { blocks },
+  );
+export const listManagers = () => apiGet<Page<DocManager>>(`${base}/managers`);
 export const setManager = (userId: string, isManager: boolean) =>
   apiPut<DocManager>(`${base}/managers/${userId}`, { is_manager: isManager });
 
@@ -132,7 +136,7 @@ export async function fetchPreview(
   recordId: string | null,
   signal?: AbortSignal,
 ): Promise<{ pdf: Blob } | { email: EmailPreview }> {
-  const r = await fetchWithAuth(`${API_BASE}${base}/${k(key)}/preview${loc(locale)}`, {
+  const r = await fetchWithAuth(`${API_BASE}${base}/${k(key)}/preview?locale=${encodeURIComponent(locale)}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ blocks, options, record_id: recordId }),

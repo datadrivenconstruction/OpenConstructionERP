@@ -59138,6 +59138,9 @@ const resource = {
     "modules.catalog.offers": "Kundenangebote",
     "modules.catalog.letter_templates": "Briefvorlagen",
     "modules.catalog.project_catalogue": "Projektkatalog",
+    "modules.catalog.doc_templates": "Dokumente & Vorlagen",
+    "modules.catalog.estimate_archive": "Versiegelte Kalkulationen",
+    "modules.catalog.framework_agreements": "Rahmenverträge",
     "modules.pp_name_pakistan_pk": "Pakistan-Baupaket",
     "modules.pp_name_peru_pe": "Peru-Baupaket",
     // stakeholders (module 8) frontend keys: start

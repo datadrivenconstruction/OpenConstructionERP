@@ -6,7 +6,17 @@
  * Backed by /api/v1/subcontractors/ — see backend/app/modules/subcontractors/router.py
  */
 
-import { apiGet, apiPost, apiPatch, apiPut, apiDelete, isTruncated, type Page } from '@/shared/lib/api';
+import {
+  API_BASE,
+  apiGet,
+  apiPost,
+  apiPatch,
+  apiPut,
+  apiDelete,
+  downloadWithAuth,
+  isTruncated,
+  type Page,
+} from '@/shared/lib/api';
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
 
@@ -1130,8 +1140,15 @@ export interface DocumentPolicyView extends DocumentPolicy {
   presets: { role: string; signed?: boolean; label?: string; reference?: string }[];
 }
 
-export function listAgreementDocuments(agreementId: string): Promise<AgreementDocument[]> {
-  return apiGet<AgreementDocument[]>(`/v1/subcontractors/agreements/${agreementId}/documents`);
+export function listAgreementDocuments(agreementId: string): Promise<Page<AgreementDocument>> {
+  return apiGet<Page<AgreementDocument>>(`/v1/subcontractors/agreements/${agreementId}/documents?limit=500`);
+}
+
+export function downloadAgreementDocument(agreementId: string, doc: AgreementDocument): Promise<void> {
+  return downloadWithAuth(
+    `${API_BASE}/v1/subcontractors/agreements/${agreementId}/documents/${doc.id}/download`,
+    doc.filename || 'document',
+  );
 }
 
 export function deleteAgreementDocument(agreementId: string, documentId: string): Promise<void> {

@@ -241,8 +241,19 @@ class PayrollService:
         ]
         return await self.repo.add_run(run, run_lines)
 
-    async def list_runs(self) -> list[PayrollExportRun]:
-        return await self.repo.list_runs()
+    async def page_runs(
+        self, allowed: set[uuid.UUID] | None, offset: int, limit: int
+    ) -> tuple[list[PayrollExportRun], int]:
+        return await self.repo.page_runs(allowed, offset, limit)
+
+    async def get_run(self, run_id: uuid.UUID) -> PayrollExportRun:
+        run = await self.repo.get_run(run_id)
+        if run is None:
+            raise HTTPException(status.HTTP_404_NOT_FOUND, "Export run not found")
+        return run
+
+    async def run_project_ids(self, run_id: uuid.UUID) -> set[uuid.UUID]:
+        return await self.repo.run_project_ids(run_id)
 
     async def run_file(self, run_id: uuid.UUID) -> tuple[PayrollExportRun, bytes]:
         run = await self.repo.get_run(run_id)

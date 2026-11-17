@@ -2196,17 +2196,24 @@ async def create_revision(
 async def get_revision_lineage(
     boq_id: uuid.UUID,
     user_id: CurrentUserId,
-    payload: CurrentUserPayload,
     session: SessionDep,
 ) -> BOQRevisionLineage:
     """Every formal revision linked to this BOQ (R0 to Rn), oldest first, with totals.
 
-    Pure read. The walk stays inside the BOQ's own project, so the owner check
-    on this BOQ covers every revision returned.
+    Pure read. The walk stays inside the BOQ's own project, so the access check
+    on this BOQ's project covers every revision returned.
     """
+    from sqlalchemy import select
+
+    from app.modules.boq.models import BOQ
     from app.modules.boq.revisions import RevisionService
 
-    await _verify_boq_owner(session, boq_id, user_id, payload)
+    project_id = (await session.execute(select(BOQ.project_id).where(BOQ.id == boq_id))).scalar_one_or_none()
+    if project_id is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=translate("errors.boq_not_found", locale=get_locale())
+        )
+    await verify_project_access(project_id, user_id, session)
     return await RevisionService(session).lineage(boq_id)
 
 

@@ -226,3 +226,34 @@ def test_registered_rules_report_through_the_engine() -> None:
         "payexp.period_overlap",
         "payexp.negative_total",
     }
+
+
+class _RunService:
+    def __init__(self, projects: set) -> None:
+        self.projects = projects
+
+    async def get_run(self, run_id):
+        return object()
+
+    async def run_project_ids(self, run_id):
+        return self.projects
+
+
+async def test_a_run_file_needs_every_project_it_carries(monkeypatch) -> None:
+    import uuid
+
+    import pytest
+    from fastapi import HTTPException
+
+    from app.modules.field_time import payroll_router
+
+    mine, other = uuid.uuid4(), uuid.uuid4()
+
+    async def allowed(session, user_id, live_only=False):
+        return {mine}
+
+    monkeypatch.setattr(payroll_router, "accessible_project_ids", allowed)
+    await payroll_router._require_run_access(None, "u", _RunService({mine}), uuid.uuid4())
+    with pytest.raises(HTTPException) as exc:
+        await payroll_router._require_run_access(None, "u", _RunService({mine, other}), uuid.uuid4())
+    assert exc.value.status_code == 404

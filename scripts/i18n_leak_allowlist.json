@@ -2283,5 +2283,10 @@
     "en_value": "{{n}}. {{title}}, {{duration}}, {{status}}",
     "note": "screen-reader label assembled only from placeholders and punctuation; every word comes from already translated values",
     "reason_category": "template_only"
+  },
+  "legal_entities.tax_scheme.ein": {
+    "en_value": "EIN",
+    "note": "US Employer Identification Number, the legal name of the identifier; written the same way in every locale including ru, en-US inherits it",
+    "reason_category": "standard_code"
   }
 }

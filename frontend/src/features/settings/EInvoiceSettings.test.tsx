@@ -177,7 +177,7 @@ describe('EInvoiceSettings', () => {
 
     await waitFor(() => expect(apiPutMock).toHaveBeenCalledTimes(1));
     const [url, body] = apiPutMock.mock.calls[0]!;
-    expect(url).toBe('/api/v1/finance/einvoice-settings');
+    expect(url).toBe('/api/v1/finance/einvoice-settings?scope=default');
     // Present and empty, not absent: a patch could not express a removal.
     expect(body).toHaveProperty('payee_iban', '');
     expect(body).toHaveProperty('seller_name', 'Hochbau Nord GmbH');

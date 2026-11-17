@@ -191,6 +191,14 @@ CANNOT_TRUNCATE: frozenset[str] = frozenset(
         # is built under exactly one of them, so a short answer would hide the
         # statute a worker's pay has to follow, a correctness bug.
         "payroll/period_router.py::rule_profiles",
+        # Plant rate import layouts: the built-in "own" layout plus the one each
+        # active country pack ships, read from pack configs with no query. A
+        # hidden layout could not be chosen for an import.
+        "equipment/rate_router.py::list_layouts",
+        # The equip_rate.* rule results for every machine of one catalogue, not
+        # a register of rows. A short answer would read as a cleaner catalogue
+        # than the one stored, so an error would pass unseen.
+        "equipment/rate_router.py::validate_catalogue",
     }
 )
 

@@ -106,7 +106,8 @@ async def test_worked_example_1_publish_restore_and_real_record_preview(db_sessi
         v2 = next(v for v in state["versions"] if v["number"] == 2)
 
         records = (await c.get(f"/dt/{AWARD}/records")).json()
-        assert any(r["id"] == str(bid.id) and "Rohbau Haus B" in r["label"] for r in records)
+        assert records["total"] == len(records["items"])
+        assert any(r["id"] == str(bid.id) and "Rohbau Haus B" in r["label"] for r in records["items"])
         r = await c.post(
             f"/dt/{AWARD}/preview",
             params={"locale": "de"},
@@ -199,6 +200,8 @@ async def test_editor_needs_document_manager_role(db_session) -> None:
     async with _http(_app(db_session, str(admin.id))) as c:
         r = await c.put(f"/dt/managers/{editor.id}", json={"is_manager": True})
         assert r.status_code == 200 and r.json()["is_manager"] is True
+        page = (await c.get("/dt/managers", params={"limit": 1})).json()
+        assert len(page["items"]) == 1 and page["total"] >= 2 and page["limit"] == 1
     async with _http(_app(db_session, str(editor.id), role="editor")) as c:
         r = await c.put(f"/dt/{AWARD}/draft", params={"locale": "en"}, json={"blocks": {"body": "x {{package.name}}"}})
         assert r.status_code == 200

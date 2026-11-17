@@ -10,7 +10,7 @@ from datetime import date
 from decimal import Decimal
 from typing import Any
 
-from sqlalchemy import func, select
+from sqlalchemy import exists, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.field_time.models import FieldTimesheet, FieldTimesheetLine
@@ -46,9 +46,24 @@ class PayrollRepository:
         await self.session.flush()
 
     # runs
-    async def list_runs(self, limit: int = 50) -> list[PayrollExportRun]:
-        stmt = select(PayrollExportRun).order_by(PayrollExportRun.number.desc()).limit(limit)
-        return list((await self.session.execute(stmt)).scalars().all())
+    async def page_runs(
+        self, allowed: set[uuid.UUID] | None, offset: int, limit: int
+    ) -> tuple[list[PayrollExportRun], int]:
+        """Runs newest first; with ``allowed`` only those whose every line is in one of those projects."""
+        stmt = select(PayrollExportRun)
+        if allowed is not None:
+            foreign = select(PayrollExportRunLine.id).where(
+                PayrollExportRunLine.run_id == PayrollExportRun.id,
+                PayrollExportRunLine.project_id.notin_(allowed),
+            )
+            stmt = stmt.where(~exists(foreign))
+        total = int((await self.session.execute(select(func.count()).select_from(stmt.subquery()))).scalar() or 0)
+        stmt = stmt.order_by(PayrollExportRun.number.desc()).offset(offset).limit(limit)
+        return list((await self.session.execute(stmt)).scalars().all()), total
+
+    async def run_project_ids(self, run_id: uuid.UUID) -> set[uuid.UUID]:
+        stmt = select(PayrollExportRunLine.project_id).where(PayrollExportRunLine.run_id == run_id).distinct()
+        return set((await self.session.execute(stmt)).scalars().all())
 
     async def get_run(self, run_id: uuid.UUID) -> PayrollExportRun | None:
         return await self.session.get(PayrollExportRun, run_id)

@@ -119,3 +119,24 @@ class RunResponse(BaseModel):
     filename: str
     sha256: str
     created_at: datetime
+
+
+class ExampleListResponse(BaseModel):
+    items: list[ExampleOut]
+    total: int
+    offset: int = 0
+    limit: int = 100
+
+
+class ProfileListResponse(BaseModel):
+    items: list[ProfileResponse]
+    total: int
+    offset: int = 0
+    limit: int = 200
+
+
+class RunListResponse(BaseModel):
+    items: list[RunResponse]
+    total: int
+    offset: int = 0
+    limit: int = 50

@@ -22,7 +22,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.i18n import get_locale
 from app.core.validation.engine import validation_engine
-from app.dependencies import accessible_project_ids, verify_project_access
+from app.dependencies import verify_project_access
 from app.modules.contracts.models import Contract, ContractLine
 from app.modules.framework_agreements import pricing
 from app.modules.framework_agreements.models import FrameworkAdjustment, FrameworkRateItem, FrameworkRatePeriod
@@ -99,27 +99,24 @@ class FrameworkService:
 
     # ── Access ──────────────────────────────────────────────────────────────
 
-    async def agreement(self, agreement_id: uuid.UUID, user_id: str) -> Contract:
+    async def agreement(self, agreement_id: uuid.UUID) -> Contract:
+        """Load an agreement; the router verifies project access on it."""
         row = await self.session.get(Contract, agreement_id)
         if row is None or row.contract_type != AGREEMENT:
             raise HTTPException(status.HTTP_404_NOT_FOUND, "Framework agreement not found")
-        await verify_project_access(row.project_id, user_id, self.session)
         return row
 
-    async def order(self, order_id: uuid.UUID, user_id: str) -> tuple[Contract, Contract]:
+    async def order(self, order_id: uuid.UUID) -> tuple[Contract, Contract]:
+        """Load a call-off order and its agreement; the router verifies access on the agreement."""
         row = await self.session.get(Contract, order_id)
         if row is None or row.contract_type != CALL_OFF or row.parent_contract_id is None:
             raise HTTPException(status.HTTP_404_NOT_FOUND, "Order not found")
-        return row, await self.agreement(row.parent_contract_id, user_id)
+        return row, await self.agreement(row.parent_contract_id)
 
     # ── Agreements ──────────────────────────────────────────────────────────
 
-    async def list_agreements(self, user_id: str, project_id: uuid.UUID | None) -> list[dict[str, Any]]:
-        if project_id is not None:
-            await verify_project_access(project_id, user_id, self.session)
-            ids = None
-        else:
-            ids = await accessible_project_ids(self.session, user_id, live_only=True)
+    async def list_agreements(self, ids: set[uuid.UUID] | None, project_id: uuid.UUID | None) -> list[dict[str, Any]]:
+        """Agreements of one project, or of the projects in ``ids``; the router resolves access."""
         rows = await self.repo.list_agreements(ids, project_id)
         use = await self.repo.consumption([r.id for r in rows])
         month = date.today().strftime("%Y-%m")

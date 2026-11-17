@@ -123,3 +123,35 @@ def test_the_datev_type_is_listed_only_where_the_pack_is_active() -> None:
     assert registry.list_types(["US"]) == []
     assert registry.list_types(["*"]) == []
     assert pack_active(["CH"], DatevWriter.required_markets)
+
+
+async def test_a_batch_file_needs_every_project_it_carries(monkeypatch) -> None:
+    import uuid
+    from types import SimpleNamespace
+
+    import pytest
+    from fastapi import HTTPException
+
+    from app.modules.finance import booking_router
+
+    mine, other = uuid.uuid4(), uuid.uuid4()
+
+    class _Svc:
+        def __init__(self, projects: set) -> None:
+            self.projects = projects
+
+        async def file(self, batch_id):
+            return SimpleNamespace(encoding="utf-8", filename="b.csv"), b"x"
+
+        async def project_ids(self, batch_id):
+            return self.projects
+
+    async def allowed(session, user_id, live_only=False):
+        return {mine}
+
+    monkeypatch.setattr(booking_router, "accessible_project_ids", allowed)
+    ok = await booking_router.batch_file(uuid.uuid4(), _Svc({mine}), None, "u")
+    assert ok.body == b"x"
+    with pytest.raises(HTTPException) as exc:
+        await booking_router.batch_file(uuid.uuid4(), _Svc({mine, other}), None, "u")
+    assert exc.value.status_code == 404

@@ -5,7 +5,7 @@
  * (backend/app/modules/finance/booking_router.py). Amounts are decimal strings.
  */
 
-import { API_BASE, apiGet, apiPost, fetchWithAuth, triggerDownload } from '@/shared/lib/api';
+import { API_BASE, apiGet, apiPost, fetchWithAuth, triggerDownload, type Page } from '@/shared/lib/api';
 
 export interface BookingFinding {
   rule_id: string;
@@ -51,7 +51,7 @@ export interface BookingRequest {
 
 export const previewBooking = (body: BookingRequest) => apiPost<BookingPreview>(`${BASE}/preview/`, body);
 export const createBooking = (body: BookingRequest) => apiPost<BookingBatch>(`${BASE}/`, body);
-export const listBookingBatches = () => apiGet<BookingBatch[]>(`${BASE}/`);
+export const listBookingBatches = () => apiGet<Page<BookingBatch>>(`${BASE}/`);
 
 export async function downloadBookingBatch(batch: BookingBatch): Promise<void> {
   const res = await fetchWithAuth(`${API_BASE}${BASE}/${batch.id}/file`);

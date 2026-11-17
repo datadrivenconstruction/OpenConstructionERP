@@ -46,7 +46,7 @@ export function RateCatalogueTab() {
   const [open, setOpen] = useState<RateItem | null>(null);
 
   const list = useQuery({ queryKey: ['rate-catalogues'], queryFn: listRateCatalogues });
-  const activeId = chosen ?? list.data?.[0]?.id ?? null;
+  const activeId = chosen ?? list.data?.items[0]?.id ?? null;
   const detail = useQuery({
     queryKey: ['rate-catalogue', activeId],
     queryFn: () => getRateCatalogue(activeId as string),
@@ -70,7 +70,7 @@ export function RateCatalogueTab() {
       />
     );
   }
-  const catalogues = list.data ?? [];
+  const catalogues = list.data?.items ?? [];
   const current = detail.data;
 
   return (

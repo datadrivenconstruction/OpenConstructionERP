@@ -156,6 +156,15 @@ class RecordOut(BaseModel):
     label: str
 
 
+class RecordListResponse(BaseModel):
+    """Records for "Preview with"; each kind's lister returns its newest few, so ``total`` counts that sample."""
+
+    items: list[RecordOut]
+    total: int
+    offset: int = 0
+    limit: int = 50
+
+
 class TestSendOut(BaseModel):
     """Outcome of a test send to the signed-in user."""
 
@@ -172,6 +181,15 @@ class ManagerOut(BaseModel):
     full_name: str
     role: str
     is_manager: bool
+
+
+class ManagerListResponse(BaseModel):
+    """One page of active users with their Document manager flag; ``total`` counts every active user."""
+
+    items: list[ManagerOut]
+    total: int
+    offset: int = 0
+    limit: int = 50
 
 
 class ManagerIn(BaseModel):

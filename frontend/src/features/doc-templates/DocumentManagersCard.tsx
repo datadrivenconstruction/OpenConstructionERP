@@ -29,7 +29,7 @@ export function DocumentManagersCard() {
     onError: (e) => addToast({ type: 'error', title: getErrorMessage(e) }),
   });
   if (!isAdmin || !q.data) return null;
-  const others = q.data.filter((u) => u.role !== 'admin');
+  const others = q.data.items.filter((u) => u.role !== 'admin');
   return (
     <Card padding="md" data-testid="doc-managers">
       <div className="flex items-start gap-2">

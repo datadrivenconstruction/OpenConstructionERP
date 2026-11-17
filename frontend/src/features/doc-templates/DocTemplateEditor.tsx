@@ -683,12 +683,12 @@ function PreviewPane({
 
   return (
     <div className="space-y-2">
-      {state.has_records && (records.data?.length ?? 0) > 0 && (
+      {state.has_records && (records.data?.items.length ?? 0) > 0 && (
         <label className="flex items-center gap-2 text-sm">
           <span className="oe-label">{t('settings.document_templates.preview_with', { defaultValue: 'Preview with' })}</span>
           <select className="oe-input h-8 flex-1 py-0" value={recordId} onChange={(e) => setRecordId(e.target.value)}>
             <option value="">{t('settings.document_templates.sample_record', { defaultValue: 'Sample values' })}</option>
-            {records.data?.map((r) => (
+            {records.data?.items.map((r) => (
               <option key={r.id} value={r.id}>
                 {r.label}
               </option>

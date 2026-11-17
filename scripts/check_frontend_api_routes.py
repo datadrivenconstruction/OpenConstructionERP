@@ -108,7 +108,9 @@ NAVIGATION_CALLEES = frozenset({"href", "src", "window.open", "EventSource"})
 # 227: three field capture paths in a table chosen by kind (fieldKinds.ts), a feed URL builder that returns a
 # string for a link (DataFeedsSettings.tsx), and two multipart upload wrappers that add a path per call
 # (haul-tickets, owner-schedule). None has a single call to hand the literal to; the routes they reach exist.
-MAX_PREFIX_ONLY = 227
+# 234: the module base const of seven new api.ts files (doc-templates, equipment rate-catalogues, estimate-archive,
+# payroll-export, booking-exports, framework-agreements, project-catalogue); every call built on it is checked in full.
+MAX_PREFIX_ONLY = 234
 
 # Known unmatched calls that are right as they are. Key format:
 #   "<VERDICT> <METHOD|*> <path as written> @ <file under frontend/src>"

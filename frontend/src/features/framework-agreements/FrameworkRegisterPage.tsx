@@ -28,6 +28,7 @@ import type { KpiBandItem } from '@/shared/ui';
 import { DateDisplay } from '@/shared/ui/DateDisplay';
 import { MoneyDisplay } from '@/shared/ui/MoneyDisplay';
 import { useActiveProjectId } from '@/shared/hooks/useActiveProjectId';
+import { useHasPermission } from '@/shared/lib/permissionGates';
 import { fwkApi, fwkKeys, type AgreementSummary } from './api';
 import { CapMeter } from './CapMeter';
 import { CreateAgreementModal } from './CreateAgreementModal';
@@ -98,6 +99,7 @@ export function FrameworkRegisterPage() {
     ];
   }, [rows, t]);
 
+  const mayCreate = useHasPermission('framework.create');
   const canCreate = Boolean(routeProjectId || activeProjectId);
   const crumbs = [
     { label: t('nav.dashboard', { defaultValue: 'Dashboard' }), to: '/' },
@@ -114,9 +116,11 @@ export function FrameworkRegisterPage() {
         })}
         actions={
           <>
-            <Button variant="primary" icon={<Plus size={16} />} disabled={!canCreate} onClick={() => setCreating(true)}>
-              {t('framework.new_agreement', { defaultValue: 'New agreement' })}
-            </Button>
+            {mayCreate && (
+              <Button variant="primary" icon={<Plus size={16} />} disabled={!canCreate} onClick={() => setCreating(true)}>
+                {t('framework.new_agreement', { defaultValue: 'New agreement' })}
+              </Button>
+            )}
             <ModuleGuideButton content={frameworkGuide} />
           </>
         }
@@ -177,7 +181,7 @@ export function FrameworkRegisterPage() {
               defaultValue: 'Create one with its price list; orders are priced from it.',
             })}
             action={
-              canCreate ? (
+              canCreate && mayCreate ? (
                 <Button variant="primary" icon={<Plus size={16} />} onClick={() => setCreating(true)}>
                   {t('framework.new_agreement', { defaultValue: 'New agreement' })}
                 </Button>

@@ -2,7 +2,7 @@
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 """Plant rate catalogue routes (mounted under /api/v1/equipment/rate-catalogues/).
 
-GET    /                          - Catalogue versions, newest first
+GET    /                          - Catalogue versions, newest first (page envelope)
 POST   /                          - Start an empty catalogue
 POST   /demo/                     - Load the five synthetic demo machines (currency=EUR|USD)
 GET    /layouts/                  - Import layouts: own, plus those of the active packs
@@ -32,6 +32,7 @@ from app.modules.equipment.rate_import import ColumnProfile
 from app.modules.equipment.rate_schemas import (
     CatalogueCreate,
     CatalogueDetailResponse,
+    CatalogueListResponse,
     CatalogueResponse,
     CatalogueUpdate,
     ChargePreviewRequest,
@@ -46,6 +47,7 @@ from app.modules.equipment.rate_schemas import (
     PreviewRequest,
     PreviewResponse,
     ProfileCreate,
+    ProfileListResponse,
     ProfileResponse,
     RentalDefaults,
 )
@@ -66,11 +68,14 @@ def _service(session: SessionDep) -> RateService:
 
 
 Service = Annotated[RateService, Depends(_service)]
+_Offset = Annotated[int, Query(ge=0)]
+_Limit = Annotated[int, Query(ge=1, le=500)]
 
 
-@router.get("/", response_model=list[CatalogueResponse], dependencies=[Read])
-async def list_catalogues(service: Service) -> list[CatalogueResponse]:
-    return await service.list_catalogues()
+@router.get("/", response_model=CatalogueListResponse, dependencies=[Read])
+async def list_catalogues(service: Service, offset: _Offset = 0, limit: _Limit = 200) -> CatalogueListResponse:
+    rows = await service.list_catalogues()
+    return CatalogueListResponse(items=rows[offset : offset + limit], total=len(rows), offset=offset, limit=limit)
 
 
 @router.post("/", response_model=CatalogueResponse, status_code=201, dependencies=[Create])
@@ -92,9 +97,11 @@ async def list_layouts(service: Service, markets: ActiveMarkets) -> list[LayoutO
     return service.layouts(markets)
 
 
-@router.get("/profiles/", response_model=list[ProfileResponse], dependencies=[Read])
-async def list_profiles(service: Service) -> list[Any]:
-    return [ProfileResponse.model_validate(p) for p in await service.list_profiles()]
+@router.get("/profiles/", response_model=ProfileListResponse, dependencies=[Read])
+async def list_profiles(service: Service, offset: _Offset = 0, limit: _Limit = 200) -> ProfileListResponse:
+    rows = await service.list_profiles()
+    items = [ProfileResponse.model_validate(p) for p in rows[offset : offset + limit]]
+    return ProfileListResponse(items=items, total=len(rows), offset=offset, limit=limit)
 
 
 @router.post("/profiles/", response_model=ProfileResponse, status_code=201, dependencies=[Write])

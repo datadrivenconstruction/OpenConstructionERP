@@ -16,8 +16,10 @@ from app.dependencies import (
     CurrentUserPayload,
     RequirePermission,
     SessionDep,
+    accessible_project_ids,
     verify_project_access,
 )
+from app.modules.contracts.models import Contract
 from app.modules.framework_agreements.packs import pack_profile
 from app.modules.framework_agreements.schemas import (
     AdjustmentIn,
@@ -36,6 +38,7 @@ from app.modules.framework_agreements.schemas import (
     OrderQuote,
     OrderQuoteRequest,
     OrderStatusRequest,
+    Page,
     RateItemOut,
     RateItemUpdate,
     RatePeriodIn,
@@ -48,6 +51,24 @@ router = APIRouter(tags=["framework_agreements"])
 
 def _service(session: SessionDep) -> FrameworkService:
     return FrameworkService(session)
+
+
+async def _agreement(svc: FrameworkService, agreement_id: uuid.UUID, user_id: str) -> Contract:
+    """The agreement, once the caller is proven to reach the project it lives in."""
+    row = await svc.agreement(agreement_id)
+    await verify_project_access(row.project_id, user_id, svc.session)
+    return row
+
+
+async def _order(svc: FrameworkService, order_id: uuid.UUID, user_id: str) -> tuple[Contract, Contract]:
+    """A call-off order and its agreement; access follows the agreement's project, as for every order."""
+    order, row = await svc.order(order_id)
+    await verify_project_access(row.project_id, user_id, svc.session)
+    return order, row
+
+
+def _page[T](rows: list[T]) -> Page[T]:
+    return Page(items=rows, total=len(rows), offset=0, limit=len(rows))
 
 
 def _can_override(payload: dict[str, Any]) -> bool:
@@ -80,7 +101,12 @@ async def list_agreements(
     _perm: None = Depends(RequirePermission("framework.read")),
     svc: FrameworkService = Depends(_service),
 ) -> AgreementListResponse:
-    rows = await svc.list_agreements(user_id, project_id)
+    ids: set[uuid.UUID] | None = None
+    if project_id is not None:
+        await verify_project_access(project_id, user_id, svc.session)
+    else:
+        ids = await accessible_project_ids(svc.session, user_id, live_only=True)
+    rows = await svc.list_agreements(ids, project_id)
     return AgreementListResponse(items=rows, total=len(rows))
 
 
@@ -121,7 +147,7 @@ async def get_order(
     _perm: None = Depends(RequirePermission("framework.read")),
     svc: FrameworkService = Depends(_service),
 ) -> OrderDetail:
-    order, row = await svc.order(order_id, user_id)
+    order, row = await _order(svc, order_id, user_id)
     return OrderDetail(**await svc.order_detail(order, row))
 
 
@@ -134,7 +160,7 @@ async def issue_order(
     _perm: None = Depends(RequirePermission("framework.issue_order")),
     svc: FrameworkService = Depends(_service),
 ) -> OrderDetail:
-    order, row = await svc.order(order_id, user_id)
+    order, row = await _order(svc, order_id, user_id)
     await svc.issue_order(order, row, data.override_reason, user_id, _can_override(payload))
     return OrderDetail(**await svc.order_detail(order, row))
 
@@ -147,7 +173,7 @@ async def set_order_status(
     _perm: None = Depends(RequirePermission("framework.issue_order")),
     svc: FrameworkService = Depends(_service),
 ) -> OrderDetail:
-    order, row = await svc.order(order_id, user_id)
+    order, row = await _order(svc, order_id, user_id)
     await svc.set_order_status(order, data.status)
     return OrderDetail(**await svc.order_detail(order, row))
 
@@ -160,20 +186,20 @@ async def record_measurements(
     _perm: None = Depends(RequirePermission("framework.issue_order")),
     svc: FrameworkService = Depends(_service),
 ) -> OrderDetail:
-    order, row = await svc.order(order_id, user_id)
+    order, row = await _order(svc, order_id, user_id)
     await svc.record_measurements(order, data.measurements)
     return OrderDetail(**await svc.order_detail(order, row))
 
 
-@router.get("/orders/{order_id}/extras")
+@router.get("/orders/{order_id}/extras", response_model=Page[dict[str, Any]])
 async def list_extras(
     order_id: uuid.UUID,
     user_id: CurrentUserId,
     _perm: None = Depends(RequirePermission("framework.read")),
     svc: FrameworkService = Depends(_service),
-) -> list[dict[str, Any]]:
-    order, _row = await svc.order(order_id, user_id)
-    return [{**e, "amount": format(Decimal(e["amount"] or 0), "f")} for e in await svc.list_extras(order)]
+) -> Page[dict[str, Any]]:
+    order, _row = await _order(svc, order_id, user_id)
+    return _page([{**e, "amount": format(Decimal(e["amount"] or 0), "f")} for e in await svc.list_extras(order)])
 
 
 @router.post("/orders/{order_id}/extras", status_code=201)
@@ -184,7 +210,7 @@ async def raise_extra(
     _perm: None = Depends(RequirePermission("framework.issue_order")),
     svc: FrameworkService = Depends(_service),
 ) -> dict[str, Any]:
-    order, _row = await svc.order(order_id, user_id)
+    order, _row = await _order(svc, order_id, user_id)
     vr = await svc.raise_extra(order, data.title, data.description, data.amount, user_id)
     return {"id": str(vr.id), "code": vr.code, "status": vr.status}
 
@@ -196,7 +222,7 @@ async def get_agreement(
     _perm: None = Depends(RequirePermission("framework.read")),
     svc: FrameworkService = Depends(_service),
 ) -> AgreementDetail:
-    return AgreementDetail(**await svc.detail(await svc.agreement(agreement_id, user_id)))
+    return AgreementDetail(**await svc.detail(await _agreement(svc, agreement_id, user_id)))
 
 
 @router.patch("/{agreement_id}", response_model=AgreementDetail)
@@ -207,7 +233,7 @@ async def update_agreement(
     _perm: None = Depends(RequirePermission("framework.edit_rates")),
     svc: FrameworkService = Depends(_service),
 ) -> AgreementDetail:
-    row = await svc.update_agreement(await svc.agreement(agreement_id, user_id), data)
+    row = await svc.update_agreement(await _agreement(svc, agreement_id, user_id), data)
     return AgreementDetail(**await svc.detail(row))
 
 
@@ -219,18 +245,18 @@ async def set_agreement_status(
     _perm: None = Depends(RequirePermission("framework.accept_order")),
     svc: FrameworkService = Depends(_service),
 ) -> AgreementDetail:
-    row = await svc.set_agreement_status(await svc.agreement(agreement_id, user_id), data.status)
+    row = await svc.set_agreement_status(await _agreement(svc, agreement_id, user_id), data.status)
     return AgreementDetail(**await svc.detail(row))
 
 
-@router.get("/{agreement_id}/items", response_model=list[RateItemOut])
+@router.get("/{agreement_id}/items", response_model=Page[RateItemOut])
 async def list_items(
     agreement_id: uuid.UUID,
     user_id: CurrentUserId,
     _perm: None = Depends(RequirePermission("framework.read")),
     svc: FrameworkService = Depends(_service),
-) -> list[RateItemOut]:
-    return [RateItemOut(**i) for i in await svc.list_items(await svc.agreement(agreement_id, user_id))]
+) -> Page[RateItemOut]:
+    return _page([RateItemOut(**i) for i in await svc.list_items(await _agreement(svc, agreement_id, user_id))])
 
 
 @router.post("/{agreement_id}/items/import")
@@ -241,7 +267,7 @@ async def import_items(
     _perm: None = Depends(RequirePermission("framework.edit_rates")),
     svc: FrameworkService = Depends(_service),
 ) -> dict[str, int]:
-    row = await svc.agreement(agreement_id, user_id)
+    row = await _agreement(svc, agreement_id, user_id)
     return {"imported": await svc.import_items(row, data.items, data.replace)}
 
 
@@ -254,18 +280,18 @@ async def update_item(
     _perm: None = Depends(RequirePermission("framework.edit_rates")),
     svc: FrameworkService = Depends(_service),
 ) -> dict[str, Any]:
-    out = await svc.update_item(await svc.agreement(agreement_id, user_id), item_id, data)
+    out = await svc.update_item(await _agreement(svc, agreement_id, user_id), item_id, data)
     return {k: (str(v) if v is not None else None) for k, v in out.items()}
 
 
-@router.get("/{agreement_id}/periods", response_model=list[RatePeriodOut])
+@router.get("/{agreement_id}/periods", response_model=Page[RatePeriodOut])
 async def list_periods(
     agreement_id: uuid.UUID,
     user_id: CurrentUserId,
     _perm: None = Depends(RequirePermission("framework.read")),
     svc: FrameworkService = Depends(_service),
-) -> list[RatePeriodOut]:
-    return [RatePeriodOut(**p) for p in await svc.list_periods(await svc.agreement(agreement_id, user_id))]
+) -> Page[RatePeriodOut]:
+    return _page([RatePeriodOut(**p) for p in await svc.list_periods(await _agreement(svc, agreement_id, user_id))])
 
 
 @router.post("/{agreement_id}/periods", response_model=RatePeriodOut, status_code=201)
@@ -276,7 +302,7 @@ async def add_period(
     _perm: None = Depends(RequirePermission("framework.edit_rates")),
     svc: FrameworkService = Depends(_service),
 ) -> RatePeriodOut:
-    period = await svc.add_period(await svc.agreement(agreement_id, user_id), data)
+    period = await svc.add_period(await _agreement(svc, agreement_id, user_id), data)
     return RatePeriodOut.model_validate(period)
 
 
@@ -290,19 +316,19 @@ async def update_period(
     _perm: None = Depends(RequirePermission("framework.edit_rates")),
     svc: FrameworkService = Depends(_service),
 ) -> RatePeriodOut:
-    period = await svc.update_period(await svc.agreement(agreement_id, user_id), period_id, data, activate)
+    period = await svc.update_period(await _agreement(svc, agreement_id, user_id), period_id, data, activate)
     return RatePeriodOut.model_validate(period)
 
 
-@router.get("/{agreement_id}/adjustments", response_model=list[AdjustmentOut])
+@router.get("/{agreement_id}/adjustments", response_model=Page[AdjustmentOut])
 async def list_adjustments(
     agreement_id: uuid.UUID,
     user_id: CurrentUserId,
     _perm: None = Depends(RequirePermission("framework.read")),
     svc: FrameworkService = Depends(_service),
-) -> list[AdjustmentOut]:
-    rows = await svc.list_adjustments(await svc.agreement(agreement_id, user_id))
-    return [AdjustmentOut.model_validate(r) for r in rows]
+) -> Page[AdjustmentOut]:
+    rows = await svc.list_adjustments(await _agreement(svc, agreement_id, user_id))
+    return _page([AdjustmentOut.model_validate(r) for r in rows])
 
 
 @router.post("/{agreement_id}/adjustments", response_model=AdjustmentOut, status_code=201)
@@ -313,7 +339,7 @@ async def add_adjustment(
     _perm: None = Depends(RequirePermission("framework.edit_rates")),
     svc: FrameworkService = Depends(_service),
 ) -> AdjustmentOut:
-    adj = await svc.add_adjustment(await svc.agreement(agreement_id, user_id), data)
+    adj = await svc.add_adjustment(await _agreement(svc, agreement_id, user_id), data)
     return AdjustmentOut.model_validate(adj)
 
 
@@ -325,7 +351,7 @@ async def delete_adjustment(
     _perm: None = Depends(RequirePermission("framework.edit_rates")),
     svc: FrameworkService = Depends(_service),
 ) -> None:
-    await svc.delete_adjustment(await svc.agreement(agreement_id, user_id), adjustment_id)
+    await svc.delete_adjustment(await _agreement(svc, agreement_id, user_id), adjustment_id)
 
 
 @router.post("/{agreement_id}/quote", response_model=OrderQuote)
@@ -336,7 +362,7 @@ async def quote_order(
     _perm: None = Depends(RequirePermission("framework.read")),
     svc: FrameworkService = Depends(_service),
 ) -> OrderQuote:
-    return OrderQuote(**await svc.quote(await svc.agreement(agreement_id, user_id), data))
+    return OrderQuote(**await svc.quote(await _agreement(svc, agreement_id, user_id), data))
 
 
 @router.get("/{agreement_id}/orders", response_model=OrderListResponse)
@@ -346,7 +372,7 @@ async def list_orders(
     _perm: None = Depends(RequirePermission("framework.read")),
     svc: FrameworkService = Depends(_service),
 ) -> OrderListResponse:
-    rows = await svc.list_orders(await svc.agreement(agreement_id, user_id))
+    rows = await svc.list_orders(await _agreement(svc, agreement_id, user_id))
     return OrderListResponse(items=rows, total=len(rows))
 
 
@@ -359,7 +385,7 @@ async def create_order(
     _perm: None = Depends(RequirePermission("framework.issue_order")),
     svc: FrameworkService = Depends(_service),
 ) -> OrderDetail:
-    row = await svc.agreement(agreement_id, user_id)
+    row = await _agreement(svc, agreement_id, user_id)
     order = await svc.create_order(row, data, user_id, _can_override(payload))
     return OrderDetail(**await svc.order_detail(order, row))
 
@@ -372,5 +398,5 @@ async def breakdown(
     _perm: None = Depends(RequirePermission("framework.read")),
     svc: FrameworkService = Depends(_service),
 ) -> BreakdownResponse:
-    rows = await svc.breakdown(await svc.agreement(agreement_id, user_id), by)
+    rows = await svc.breakdown(await _agreement(svc, agreement_id, user_id), by)
     return BreakdownResponse(by=by, rows=rows)

@@ -20,6 +20,7 @@ vi.mock('./api', async (importOriginal) => {
     listAgreementDocuments: vi.fn(),
     getRequiredDocumentStatus: vi.fn(),
     getPayAppStatement: vi.fn(),
+    downloadAgreementDocument: vi.fn(),
   };
 });
 
@@ -36,7 +37,7 @@ function wrap(ui: React.ReactElement) {
 }
 
 beforeEach(() => {
-  vi.mocked(api.listAgreementDocuments).mockResolvedValue([]);
+  vi.mocked(api.listAgreementDocuments).mockResolvedValue({ items: [], total: 0, offset: 0, limit: 500 });
   vi.mocked(api.getRequiredDocumentStatus).mockResolvedValue({
     agreement_id: 'ag-1',
     enforcement: 'warn',
@@ -70,6 +71,21 @@ describe('AgreementDocumentsPanel', () => {
     const body = (init as RequestInit).body as FormData;
     expect(body.get('doc_role')).toBe('insurance');
     expect((body.get('file') as File).name).toBe('cert.pdf');
+  });
+
+  it('downloads through the authenticated helper, not a bare link', async () => {
+    const doc = {
+      id: 'doc-1',
+      agreement_id: 'ag-1',
+      doc_role: 'insurance',
+      title: 'Cert',
+      filename: 'cert.pdf',
+      created_at: '2026-11-01T00:00:00Z',
+    } as api.AgreementDocument;
+    vi.mocked(api.listAgreementDocuments).mockResolvedValue({ items: [doc], total: 1, offset: 0, limit: 500 });
+    wrap(<AgreementDocumentsPanel agreement={agreement} />);
+    fireEvent.click(await screen.findByTestId('doc-download-doc-1'));
+    await waitFor(() => expect(api.downloadAgreementDocument).toHaveBeenCalledWith('ag-1', doc));
   });
 });
 

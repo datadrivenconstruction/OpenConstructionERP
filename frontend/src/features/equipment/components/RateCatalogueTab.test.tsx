@@ -12,7 +12,7 @@ vi.mock('../ratesApi', async () => {
   const actual = await vi.importActual('../ratesApi');
   return {
     ...actual,
-    listRateCatalogues: vi.fn().mockResolvedValue([catalogue]),
+    listRateCatalogues: vi.fn().mockResolvedValue({ items: [catalogue], total: 1, offset: 0, limit: 500 }),
     getRateCatalogue: vi.fn().mockResolvedValue({
       ...catalogue,
       items: [{

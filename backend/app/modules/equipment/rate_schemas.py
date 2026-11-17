@@ -198,6 +198,20 @@ class ProfileResponse(ProfileCreate):
     id: UUID
 
 
+class ProfileListResponse(BaseModel):
+    items: list[ProfileResponse]
+    total: int
+    offset: int = 0
+    limit: int = 50
+
+
+class CatalogueListResponse(BaseModel):
+    items: list[CatalogueResponse]
+    total: int
+    offset: int = 0
+    limit: int = 50
+
+
 class LayoutOut(BaseModel):
     key: str
     label_key: str

@@ -75,6 +75,7 @@ export const PERMISSION_MIN_ROLE = {
   'framework.create': 'editor',
   'framework.edit_rates': 'editor',
   'framework.issue_order': 'editor',
+  'framework.accept_order': 'manager',
   'framework.override_cap': 'manager',
 } as const satisfies Record<string, RankedRole>;
 

@@ -312,6 +312,11 @@ _UNRESOLVED_BASELINE: frozenset[tuple[str, str]] = frozenset(
             "v92_costmodel_cost_structure.py",
             "bind.execute(sa.select(acct.c.id, acct.c.project_id, acct.c.parent_id, acct.c.code, acct.c.name, acct.c.title, acct.c.level, acct.c.classification_standard))",
         ),
+        # DDL: defines the immutability trigger function for the new sealed-estimate table; touches no rows.
+        (
+            "vea01_estimate_archive.py",
+            "op.execute(f\"\\n            CREATE OR REPLACE FUNCTION oe_estimate_archive_seal_guard() RETURNS trigger AS $$\\n            BEGIN\\n                IF TG_OP = 'DELETE' THEN\\n                    RAISE EXCEPTION 'ARC_MUTATION_REFUSED: a sealed estimate cannot be deleted';\\n                END IF;\\n                IF {changed} OR NEW.payload::text IS DISTINCT FROM OLD.payload::text THEN\\n                    RAISE EXCEPTION 'ARC_MUTATION_REFUSED: sealed estimate content is immutable';\\n                END IF;\\n                RETURN NEW;\\n            END;\\n            $$ LANGUAGE plpgsql;\\n            \")",
+        ),
     }
 )
 

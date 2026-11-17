@@ -1707,6 +1707,15 @@ class AgreementDocumentResponse(BaseModel):
     created_at: datetime
 
 
+class AgreementDocumentListResponse(BaseModel):
+    """One page of the files attached to an agreement."""
+
+    items: list[AgreementDocumentResponse]
+    total: int
+    offset: int = 0
+    limit: int = 200
+
+
 class RequiredDocument(BaseModel):
     """One entry of the required-documents list."""
 

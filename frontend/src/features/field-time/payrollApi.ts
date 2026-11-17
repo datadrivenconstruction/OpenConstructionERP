@@ -6,7 +6,16 @@
  * Hours are never money: nothing here prices or computes pay.
  */
 
-import { API_BASE, apiDelete, apiGet, apiPost, apiPut, fetchWithAuth, triggerDownload } from '@/shared/lib/api';
+import {
+  API_BASE,
+  apiDelete,
+  apiGet,
+  apiPost,
+  apiPut,
+  fetchWithAuth,
+  triggerDownload,
+  type Page,
+} from '@/shared/lib/api';
 
 export interface PayrollColumn {
   header: string;
@@ -77,9 +86,9 @@ export interface PayrollRun {
 
 const BASE = '/v1/field-time/payroll-export';
 
-export const listPayrollProfiles = () => apiGet<PayrollProfile[]>(`${BASE}/profiles/`);
-export const listPayrollExamples = () => apiGet<PayrollExample[]>(`${BASE}/examples/`);
-export const listPayrollRuns = () => apiGet<PayrollRun[]>(`${BASE}/runs/`);
+export const listPayrollProfiles = () => apiGet<Page<PayrollProfile>>(`${BASE}/profiles/?limit=500`);
+export const listPayrollExamples = () => apiGet<Page<PayrollExample>>(`${BASE}/examples/?limit=500`);
+export const listPayrollRuns = () => apiGet<Page<PayrollRun>>(`${BASE}/runs/`);
 export const deletePayrollProfile = (id: string) => apiDelete(`${BASE}/profiles/${id}`);
 
 export const savePayrollProfile = (name: string, config: PayrollProfileConfig, isSample = false) =>

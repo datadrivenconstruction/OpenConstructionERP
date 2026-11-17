@@ -34,9 +34,9 @@ export function PayrollExportCard() {
   const [to, setTo] = useState(week.to);
   const [profileId, setProfileId] = useState<string | null>(null);
 
-  const profiles = useQuery({ queryKey: ['payroll-profiles'], queryFn: listPayrollProfiles });
-  const examples = useQuery({ queryKey: ['payroll-examples'], queryFn: listPayrollExamples });
-  const runs = useQuery({ queryKey: ['payroll-runs'], queryFn: listPayrollRuns });
+  const profiles = useQuery({ queryKey: ['payroll-profiles'], queryFn: listPayrollProfiles, select: (p) => p.items });
+  const examples = useQuery({ queryKey: ['payroll-examples'], queryFn: listPayrollExamples, select: (p) => p.items });
+  const runs = useQuery({ queryKey: ['payroll-runs'], queryFn: listPayrollRuns, select: (p) => p.items });
   const activeId = profileId ?? profiles.data?.[0]?.id ?? null;
   const active = profiles.data?.find((p) => p.id === activeId);
   const preview = useQuery({

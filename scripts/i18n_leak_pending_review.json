@@ -3542,5 +3542,14 @@
     "en_value": "µg/m³",
     "n": 32,
     "reason": "Site sensors unit abbreviation: Latin in most locales, Cyrillic in the Cyrillic-script ones. Identical text is the correct translation where it matches; left for a per-locale review rather than allowlisted because it is not identical everywhere."
+  },
+  "framework.pack_field.leitweg_id": {
+    "added_by": "wip/integrate-1980 (2026-11-17)",
+    "differs_in": [
+      "zh"
+    ],
+    "en_value": "Leitweg-ID (XRechnung BT-10)",
+    "n": 41,
+    "reason": "German e-invoicing routing identifier and its XRechnung term code, kept untranslated by design. Identical in every locale including ru except zh, which writes the same text with full-width brackets; that is Chinese typography, not a translation, but it keeps the key out of the allowlist, which needs identity in every locale."
   }
 }

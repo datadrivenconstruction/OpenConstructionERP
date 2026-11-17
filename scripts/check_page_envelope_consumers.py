@@ -270,6 +270,7 @@ MIGRATED_ENDPOINTS: dict[str, str] = {
     # builds the URL on a `${BASE}` prefix this scan cannot read, so it is not
     # listed rather than listed at zero call sites.
     "/v1/subcontractors/unlinked-twins/": "subcontract twin pairs",
+    "/v1/subcontractors/agreements/{}/documents": "subcontract agreement documents",
     "/v1/schedule/scheduling-profiles/": "scheduling profiles",
 }
 

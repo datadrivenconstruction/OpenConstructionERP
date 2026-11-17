@@ -9,15 +9,17 @@ from __future__ import annotations
 
 import uuid
 
-from fastapi import APIRouter, Depends, Query, Response
+from fastapi import APIRouter, Depends, HTTPException, Query, Response
 
 from app.dependencies import (
     CurrentUserId,
     CurrentUserPayload,
     RequirePermission,
     SessionDep,
+    accessible_project_ids,
     verify_project_access,
 )
+from app.modules.estimate_archive.models import EstimateSeal
 from app.modules.estimate_archive.schemas import (
     ChangeOrderRateFill,
     ChangeOrderRateFilled,
@@ -31,7 +33,7 @@ from app.modules.estimate_archive.schemas import (
     EventList,
     EventOut,
     ExternalReceiptCreate,
-    Finding,
+    FindingPage,
     OpeningClose,
     OpeningCreate,
     OpeningList,
@@ -54,6 +56,41 @@ router = APIRouter(tags=["estimate_archive"])
 
 def _service(session: SessionDep) -> EstimateArchiveService:
     return EstimateArchiveService(session)
+
+
+async def _seal(svc: EstimateArchiveService, seal_id: uuid.UUID, user_id: str) -> EstimateSeal:
+    """The seal, once the caller is shown to reach its project; 404 otherwise."""
+    seal = await svc.repo.get_seal(seal_id)
+    if seal is None:
+        raise HTTPException(status_code=404, detail="Sealed estimate not found")
+    await verify_project_access(seal.project_id, user_id, svc.session)
+    return seal
+
+
+async def _opening(svc: EstimateArchiveService, opening_id: uuid.UUID, user_id: str) -> None:
+    opening = await svc.repo.get_opening(opening_id)
+    if opening is None:
+        raise HTTPException(status_code=404, detail="Opening not found")
+    await _seal(svc, opening.seal_id, user_id)
+
+
+async def _listed_seals(
+    svc: EstimateArchiveService,
+    user_id: str,
+    *,
+    project_id: uuid.UUID | None = None,
+    contract_id: uuid.UUID | None = None,
+    status: str | None = None,
+) -> list[EstimateSeal]:
+    """Seals of the projects the caller reaches, narrowed to ``project_id`` when one is named."""
+    if project_id is not None:
+        await verify_project_access(project_id, user_id, svc.session)
+    return await svc.repo.list_seals(
+        project_ids=await accessible_project_ids(svc.session, user_id),
+        project_id=project_id,
+        contract_id=contract_id,
+        status=status,
+    )
 
 
 async def _derivation_out(svc: EstimateArchiveService, row: object) -> DerivationOut:
@@ -88,7 +125,7 @@ async def list_seals(
     _perm: None = Depends(RequirePermission("estimate_archive.read")),
     svc: EstimateArchiveService = Depends(_service),
 ) -> SealList:
-    seals = await svc.list_seals(user_id, project_id=project_id, contract_id=contract_id, status=status)
+    seals = await _listed_seals(svc, user_id, project_id=project_id, contract_id=contract_id, status=status)
     return SealList(items=await svc.summaries(seals), total=len(seals))
 
 
@@ -99,7 +136,7 @@ async def kpis(
     _perm: None = Depends(RequirePermission("estimate_archive.read")),
     svc: EstimateArchiveService = Depends(_service),
 ) -> SealKpis:
-    return await svc.kpis(await svc.list_seals(user_id, project_id=project_id))
+    return await svc.kpis(await _listed_seals(svc, user_id, project_id=project_id))
 
 
 @router.post("/seals/preview", response_model=SealPreview)
@@ -132,13 +169,18 @@ async def get_seal(
     _perm: None = Depends(RequirePermission("estimate_archive.read")),
     svc: EstimateArchiveService = Depends(_service),
 ) -> SealDetail:
-    return await svc.detail(await svc.get_seal_for_user(seal_id, user_id), payload)
+    return await svc.detail(await _seal(svc, seal_id, user_id), payload)
 
 
 @router.patch("/seals/{seal_id}", status_code=409)
 @router.put("/seals/{seal_id}", status_code=409)
 @router.delete("/seals/{seal_id}", status_code=409)
-async def mutate_seal(seal_id: uuid.UUID, user_id: CurrentUserId) -> None:
+async def mutate_seal(
+    seal_id: uuid.UUID,
+    user_id: CurrentUserId,
+    svc: EstimateArchiveService = Depends(_service),
+) -> None:
+    await _seal(svc, seal_id, user_id)
     raise refused()
 
 
@@ -151,7 +193,7 @@ async def supersede_seal(
     _perm: None = Depends(RequirePermission("estimate_archive.seal")),
     svc: EstimateArchiveService = Depends(_service),
 ) -> SealDetail:
-    old = await svc.get_seal_for_user(seal_id, user_id)
+    old = await _seal(svc, seal_id, user_id)
     if old.status == "superseded":
         raise refused()
     seal = await svc.create_seal(data, user_id, supersedes=old, reason=data.reason)
@@ -165,7 +207,7 @@ async def verify_seal(
     _perm: None = Depends(RequirePermission("estimate_archive.read")),
     svc: EstimateArchiveService = Depends(_service),
 ) -> VerifyResult:
-    return await svc.verify(await svc.get_seal_for_user(seal_id, user_id), user_id)
+    return await svc.verify(await _seal(svc, seal_id, user_id), user_id)
 
 
 @router.post("/seals/{seal_id}/attachments/{attachment_id}/verify")
@@ -176,7 +218,7 @@ async def verify_attachment(
     _perm: None = Depends(RequirePermission("estimate_archive.read")),
     svc: EstimateArchiveService = Depends(_service),
 ) -> dict:
-    return await svc.check_attachment(await svc.get_seal_for_user(seal_id, user_id), attachment_id, user_id)
+    return await svc.check_attachment(await _seal(svc, seal_id, user_id), attachment_id, user_id)
 
 
 @router.get("/seals/{seal_id}/contents", response_model=ContentsOut)
@@ -187,7 +229,7 @@ async def seal_contents(
     _perm: None = Depends(RequirePermission("estimate_archive.read")),
     svc: EstimateArchiveService = Depends(_service),
 ) -> ContentsOut:
-    return await svc.contents(await svc.get_seal_for_user(seal_id, user_id), user_id, payload)
+    return await svc.contents(await _seal(svc, seal_id, user_id), user_id, payload)
 
 
 @router.post("/seals/{seal_id}/positions/{ordinal}/viewed", status_code=204)
@@ -198,7 +240,7 @@ async def position_viewed(
     _perm: None = Depends(RequirePermission("estimate_archive.read")),
     svc: EstimateArchiveService = Depends(_service),
 ) -> Response:
-    await svc.log_position_view(await svc.get_seal_for_user(seal_id, user_id), ordinal, user_id)
+    await svc.log_position_view(await _seal(svc, seal_id, user_id), ordinal, user_id)
     return Response(status_code=204)
 
 
@@ -209,7 +251,7 @@ async def seal_events(
     _perm: None = Depends(RequirePermission("estimate_archive.read")),
     svc: EstimateArchiveService = Depends(_service),
 ) -> EventList:
-    seal = await svc.get_seal_for_user(seal_id, user_id)
+    seal = await _seal(svc, seal_id, user_id)
     rows = await svc.repo.events(seal_ids=[seal.id])
     return EventList(items=[EventOut.model_validate(r) for r in rows], total=len(rows))
 
@@ -223,7 +265,7 @@ async def all_events(
     _perm: None = Depends(RequirePermission("estimate_archive.read")),
     svc: EstimateArchiveService = Depends(_service),
 ) -> EventList:
-    seals = await svc.list_seals(user_id, project_id=project_id)
+    seals = await _listed_seals(svc, user_id, project_id=project_id)
     rows = await svc.repo.events(seal_ids=[s.id for s in seals], event_type=event_type, actor_id=actor_id)
     return EventList(items=[EventOut.model_validate(r) for r in rows], total=len(rows))
 
@@ -235,7 +277,7 @@ async def deposit_package(
     _perm: None = Depends(RequirePermission("estimate_archive.read_sealed")),
     svc: EstimateArchiveService = Depends(_service),
 ) -> Response:
-    seal = await svc.get_seal_for_user(seal_id, user_id)
+    seal = await _seal(svc, seal_id, user_id)
     body = await svc.deposit_package(seal, user_id)
     return Response(
         content=body,
@@ -254,7 +296,7 @@ async def request_receipt(
     _perm: None = Depends(RequirePermission("estimate_archive.seal")),
     svc: EstimateArchiveService = Depends(_service),
 ) -> ReceiptOut:
-    seal = await svc.get_seal_for_user(seal_id, user_id)
+    seal = await _seal(svc, seal_id, user_id)
     return ReceiptOut.model_validate(await svc.request_receipt(seal, user_id))
 
 
@@ -266,7 +308,7 @@ async def external_receipt(
     _perm: None = Depends(RequirePermission("estimate_archive.seal")),
     svc: EstimateArchiveService = Depends(_service),
 ) -> ReceiptOut:
-    seal = await svc.get_seal_for_user(seal_id, user_id)
+    seal = await _seal(svc, seal_id, user_id)
     row = await svc.record_external_receipt(seal, data.external_reference, data.receipt_document_id, user_id)
     return ReceiptOut.model_validate(row)
 
@@ -284,9 +326,9 @@ async def list_openings(
     svc: EstimateArchiveService = Depends(_service),
 ) -> OpeningList:
     if seal_id is not None:
-        seal_ids = [(await svc.get_seal_for_user(seal_id, user_id)).id]
+        seal_ids = [(await _seal(svc, seal_id, user_id)).id]
     else:
-        seal_ids = [s.id for s in await svc.list_seals(user_id, project_id=project_id)]
+        seal_ids = [s.id for s in await _listed_seals(svc, user_id, project_id=project_id)]
     rows = await svc.repo.openings(seal_ids=seal_ids, status=status) if seal_ids else []
     return OpeningList(items=await svc.opening_out(rows), total=len(rows))
 
@@ -299,7 +341,7 @@ async def request_opening(
     _perm: None = Depends(RequirePermission("estimate_archive.request_opening")),
     svc: EstimateArchiveService = Depends(_service),
 ) -> OpeningOut:
-    seal = await svc.get_seal_for_user(seal_id, user_id)
+    seal = await _seal(svc, seal_id, user_id)
     return (await svc.opening_out([await svc.request_opening(seal, data, user_id)]))[0]
 
 
@@ -311,6 +353,7 @@ async def start_opening(
     _perm: None = Depends(RequirePermission("estimate_archive.attend")),
     svc: EstimateArchiveService = Depends(_service),
 ) -> OpeningOut:
+    await _opening(svc, opening_id, user_id)
     return (await svc.opening_out([await svc.start_opening(opening_id, data.present, user_id)]))[0]
 
 
@@ -322,6 +365,7 @@ async def close_opening(
     _perm: None = Depends(RequirePermission("estimate_archive.attend")),
     svc: EstimateArchiveService = Depends(_service),
 ) -> OpeningOut:
+    await _opening(svc, opening_id, user_id)
     return (await svc.opening_out([await svc.close_opening(opening_id, data.minutes_document_id, user_id)]))[0]
 
 
@@ -337,7 +381,7 @@ async def derive(
     _perm: None = Depends(RequirePermission("estimate_archive.price")),
     svc: EstimateArchiveService = Depends(_service),
 ) -> DeriveResult:
-    return await svc.derive(await svc.get_seal_for_user(seal_id, user_id), data, user_id, payload)
+    return await svc.derive(await _seal(svc, seal_id, user_id), data, user_id, payload)
 
 
 @router.post("/seals/{seal_id}/derivations", response_model=DerivationOut, status_code=201)
@@ -349,7 +393,7 @@ async def record_derivation(
     _perm: None = Depends(RequirePermission("estimate_archive.price")),
     svc: EstimateArchiveService = Depends(_service),
 ) -> DerivationOut:
-    seal = await svc.get_seal_for_user(seal_id, user_id)
+    seal = await _seal(svc, seal_id, user_id)
     return await _derivation_out(svc, await svc.record_derivation(seal, data, user_id, payload))
 
 
@@ -361,7 +405,7 @@ async def list_derivations(
     _perm: None = Depends(RequirePermission("estimate_archive.read")),
     svc: EstimateArchiveService = Depends(_service),
 ) -> DerivationList:
-    allowed = {s.id for s in await svc.list_seals(user_id)}
+    allowed = {s.id for s in await _listed_seals(svc, user_id)}
     rows = [
         r
         for r in await svc.repo.derivations(seal_id=seal_id, variation_request_id=variation_request_id)
@@ -380,9 +424,8 @@ async def choose_method(
 ) -> DerivationOut:
     row = await svc.repo.get_derivation(derivation_id)
     if row is None:
-        from fastapi import HTTPException
-
         raise HTTPException(status_code=404, detail="Derivation not found")
+    await _seal(svc, row.seal_id, user_id)
     return await _derivation_out(svc, await svc.choose_method(row, data.basis_method, user_id))
 
 
@@ -395,19 +438,28 @@ async def fill_change_order_rate(
     _perm: None = Depends(RequirePermission("estimate_archive.price")),
     svc: EstimateArchiveService = Depends(_service),
 ) -> ChangeOrderRateFilled:
-    seal = await svc.get_seal_for_user(seal_id, user_id)
+    seal = await _seal(svc, seal_id, user_id)
     _, rate = await svc.fill_change_order_rate(seal, item_id, data.position_ordinal, user_id)
     return ChangeOrderRateFilled(
         change_order_item_id=item_id, original_rate=rate, seal_id=seal.id, position_ordinal=data.position_ordinal
     )
 
 
-@router.get("/variations/{variation_request_id}/findings", response_model=list[Finding])
+@router.get("/variations/{variation_request_id}/findings", response_model=FindingPage)
 async def variation_findings(
     variation_request_id: uuid.UUID,
     user_id: CurrentUserId,
+    offset: int = Query(default=0, ge=0),
+    limit: int = Query(default=500, ge=1, le=2000),
     _perm: None = Depends(RequirePermission("estimate_archive.read")),
     svc: EstimateArchiveService = Depends(_service),
-) -> list[Finding]:
+) -> FindingPage:
     """Lines of a variation priced on the original basis with no live seal behind them."""
-    return await svc.variation_findings(variation_request_id, user_id)
+    from app.modules.variations.models import VariationRequest
+
+    vr = await svc.session.get(VariationRequest, variation_request_id)
+    if vr is None:
+        raise HTTPException(status_code=404, detail="Variation not found")
+    await verify_project_access(vr.project_id, user_id, svc.session)
+    rows = await svc.variation_findings(variation_request_id, user_id)
+    return FindingPage(items=rows[offset : offset + limit], total=len(rows), offset=offset, limit=limit)

@@ -4,8 +4,8 @@
 
 POST /preview/       - Rows, counts and findings for a period; writes nothing
 POST /               - Create an immutable batch file and stamp its invoices
-GET  /               - Recent batches, newest first
-GET  /{id}/file      - The file of a batch, exactly as created
+GET  /               - Recent batches the caller can open in full, newest first (paged)
+GET  /{id}/file      - The file of a batch, exactly as created, if every project in it is the caller's
 """
 
 from __future__ import annotations
@@ -15,7 +15,7 @@ from datetime import date, datetime
 from decimal import Decimal
 from typing import Annotated, Any
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from fastapi.responses import Response
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -78,6 +78,13 @@ class BatchOut(BaseModel):
     created_at: datetime
 
 
+class BatchListOut(BaseModel):
+    items: list[BatchOut]
+    total: int
+    offset: int = 0
+    limit: int = 50
+
+
 def _service(session: SessionDep) -> BookingService:
     return BookingService(session)
 
@@ -127,14 +134,25 @@ async def create_batch(
     return BatchOut.model_validate(batch)
 
 
-@booking_router.get("/", response_model=list[BatchOut], dependencies=[Read])
-async def list_batches(service: Service) -> list[BatchOut]:
-    return [BatchOut.model_validate(b) for b in await service.list()]
+@booking_router.get("/", response_model=BatchListOut, dependencies=[Read])
+async def list_batches(
+    service: Service,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    offset: int = Query(0, ge=0),
+    limit: int = Query(50, ge=1, le=500),
+) -> BatchListOut:
+    allowed = await accessible_project_ids(session, user_id)
+    rows, total = await service.page(allowed, offset, limit)
+    return BatchListOut(items=[BatchOut.model_validate(b) for b in rows], total=total, offset=offset, limit=limit)
 
 
 @booking_router.get("/{batch_id}/file", dependencies=[Read])
-async def batch_file(batch_id: uuid.UUID, service: Service) -> Response:
+async def batch_file(batch_id: uuid.UUID, service: Service, session: SessionDep, user_id: CurrentUserId) -> Response:
     batch, content = await service.file(batch_id)
+    allowed = await accessible_project_ids(session, user_id)
+    if allowed is not None and not (await service.project_ids(batch_id)) <= allowed:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Export batch not found")
     return Response(
         content=content,
         media_type=f"text/csv; charset={batch.encoding}",

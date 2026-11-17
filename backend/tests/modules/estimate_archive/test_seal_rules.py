@@ -17,6 +17,7 @@ from sqlalchemy.orm import make_transient_to_detached
 from app.core.validation.engine import validation_engine
 from app.dependencies import get_current_user_id
 from app.modules.estimate_archive import engine, fixtures, policy, tsa
+from app.modules.estimate_archive import router as archive_router
 from app.modules.estimate_archive.models import EstimateSeal, SealImmutableError, _refuse_content_change
 from app.modules.estimate_archive.router import router
 from app.modules.estimate_archive.service import receipt_status
@@ -65,10 +66,17 @@ def test_status_and_verification_moves_are_allowed() -> None:
     _refuse_content_change(None, None, seal)
 
 
-def test_every_mutating_verb_on_a_seal_answers_409() -> None:
+def test_every_mutating_verb_on_a_seal_answers_409(monkeypatch: pytest.MonkeyPatch) -> None:
+    seal = _persisted_seal()
+
+    async def reachable_seal(svc: object, seal_id: uuid.UUID, user_id: str) -> EstimateSeal:
+        return seal
+
+    monkeypatch.setattr(archive_router, "_seal", reachable_seal)
     app = FastAPI()
     app.include_router(router, prefix="/api/v1/estimate-archive")
     app.dependency_overrides[get_current_user_id] = lambda: str(uuid.uuid4())
+    app.dependency_overrides[archive_router._service] = lambda: None
     client = TestClient(app)
     url = f"/api/v1/estimate-archive/seals/{uuid.uuid4()}"
     for verb in ("patch", "put", "delete"):

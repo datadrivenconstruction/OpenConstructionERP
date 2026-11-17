@@ -26,6 +26,15 @@ class Finding(BaseModel):
     message: str
 
 
+class FindingPage(BaseModel):
+    """A page of findings; ``total`` counts every finding, not just this page."""
+
+    items: list[Finding]
+    total: int
+    offset: int
+    limit: int
+
+
 class Policy(BaseModel):
     """The market profile a project's seals follow."""
 

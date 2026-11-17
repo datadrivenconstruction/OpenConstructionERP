@@ -21,6 +21,7 @@ import { apiDelete, getAuthToken, API_BASE, getErrorMessage } from '@/shared/lib
 import { useToastStore } from '@/stores/useToastStore';
 import {
   DOCUMENT_ROLES,
+  downloadAgreementDocument,
   getRequiredDocumentStatus,
   listAgreementDocuments,
   type Agreement,
@@ -104,7 +105,15 @@ export function AgreementDocumentsPanel({ agreement }: { agreement: Agreement })
     }
   };
 
-  const docs = docsQ.data ?? [];
+  const download = async (doc: AgreementDocument) => {
+    try {
+      await downloadAgreementDocument(agreement.id, doc);
+    } catch (err) {
+      addToast({ type: 'error', title: getErrorMessage(err) });
+    }
+  };
+
+  const docs = docsQ.data?.items ?? [];
   const gaps = statusQ.data?.gaps ?? [];
   const blocks = statusQ.data?.enforcement === 'block';
 
@@ -135,14 +144,14 @@ export function AgreementDocumentsPanel({ agreement }: { agreement: Agreement })
                 {d.valid_until ? ` (${d.valid_until})` : ''}
               </span>
               <span className="flex items-center gap-1">
-                <a
+                <button
+                  type="button"
                   className="text-oe-blue hover:underline"
-                  href={`${API_BASE}/v1/subcontractors/agreements/${agreement.id}/documents/${d.id}/download`}
-                  target="_blank"
-                  rel="noreferrer"
+                  data-testid={`doc-download-${d.id}`}
+                  onClick={() => void download(d)}
                 >
                   {t('common.download', { defaultValue: 'Download' })}
-                </a>
+                </button>
                 <button
                   type="button"
                   aria-label={t('common.delete', { defaultValue: 'Delete' })}

@@ -565,13 +565,24 @@ Noto Naskh Arabic
     Font License, Version 1.1, on the same terms, and covered by the
     same trademark statement. The unhinted build of release 2.021.
 
+Noto Serif
+    backend/app/core/fonts/noto/NotoSerif-Regular.ttf
+    backend/app/core/fonts/noto/NotoSerif-Bold.ttf
+    Licence text:
+    backend/app/core/fonts/noto/NotoSerif-OFL.txt
+
+    Copyright 2022 The Noto Project Authors
+    (https://github.com/notofonts/latin-greek-cyrillic). Licensed under
+    the SIL Open Font License, Version 1.1, on the same terms, and
+    covered by the same trademark statement.
+
     No Noto face here declares a Reserved Font Name. The names are not
     reserved by the licence, which is checked rather than assumed:
     clause 3 restricts only names "specified as such after the
     copyright statement(s)", and no copyright line specifies any.
     The restraint on renaming above rests on trademark, not on clause 3.
 
-    All three faces are committed whole, as their authors published them.
+    All four faces are committed whole, as their authors published them.
     Subsetting at embed time is ordinary use and reportlab already does
     it, so a generated PDF carries only the glyphs it needs. Subsetting
     the committed file is a different act: the OFL binds "in part or in

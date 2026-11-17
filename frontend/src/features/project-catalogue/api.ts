@@ -106,7 +106,7 @@ export interface OwnRatePayload {
 }
 
 export const listItems = (projectId: string, status = '') =>
-  apiGet<CatalogueList>(`${BASE}/projects/${projectId}/items?limit=500${status ? `&status=${status}` : ''}`);
+  apiGet<CatalogueList>(`${BASE}/projects/${projectId}/items?limit=500&status=${encodeURIComponent(status)}`);
 
 export const createItem = (projectId: string, payload: OwnRatePayload) =>
   apiPost<CatalogueItem>(`${BASE}/projects/${projectId}/items`, payload);

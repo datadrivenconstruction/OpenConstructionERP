@@ -69,6 +69,7 @@ from app.modules.subcontractors.models import LienWaiver, SubcontractDocument
 from app.modules.subcontractors.repository import PrimeContractReader
 from app.modules.subcontractors.schemas import (
     AgreementCreate,
+    AgreementDocumentListResponse,
     AgreementDocumentResponse,
     AgreementResponse,
     AgreementUpdate,
@@ -2144,19 +2145,26 @@ def _optional_date(raw: str | None, field: str):  # noqa: ANN202
 
 @router.get(
     "/agreements/{agreement_id}/documents",
-    response_model=list[AgreementDocumentResponse],
+    response_model=AgreementDocumentListResponse,
 )
 async def list_agreement_documents(
     agreement_id: uuid.UUID,
     session: SessionDep,
     user_id: CurrentUserId,
+    offset: int = Query(0, ge=0),
+    limit: int = Query(200, ge=1, le=500),
     _perm: None = Depends(RequirePermission("subcontractors.read")),
-) -> list[AgreementDocumentResponse]:
+) -> AgreementDocumentListResponse:
     """Files attached to a subcontract agreement, newest first."""
     svc = SubcontractorService(session)
     await _verify_agreement_project(agreement_id, user_id, session, svc)
     rows = await svc.agreement_documents.list_for_agreement(agreement_id)
-    return [AgreementDocumentResponse.model_validate(r) for r in rows]
+    return AgreementDocumentListResponse(
+        items=[AgreementDocumentResponse.model_validate(r) for r in rows[offset : offset + limit]],
+        total=len(rows),
+        offset=offset,
+        limit=limit,
+    )
 
 
 @router.post(
