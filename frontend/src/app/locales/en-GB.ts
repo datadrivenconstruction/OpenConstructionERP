@@ -1438,6 +1438,8 @@ const resource = {
     "changeorders.document_title": "Change order",
     "letter_templates.company_template": "Company template and look",
     "property_dev.doc_templates.company_layouts_link": "Layouts and clauses of the other company documents",
+    "users.roles.surveyor": "Surveyor",
+    "users.role_surveyor_desc": "Can import, edit and confirm survey data; editor rights elsewhere",
   }
 } as { translation: Record<string, string> };
 

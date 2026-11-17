@@ -6,7 +6,7 @@
 
 import { apiGet, apiPatch, apiPost, apiDelete } from '@/shared/lib/api';
 
-export type UserRole = 'admin' | 'manager' | 'editor' | 'viewer';
+export type UserRole = 'admin' | 'manager' | 'editor' | 'surveyor' | 'viewer';
 export type ModuleAccessLevel = 'none' | 'view' | 'edit' | 'full';
 
 export interface User {
