@@ -14,10 +14,11 @@
 # Caddyfile first and here second. Editing this file to make CI green ships a
 # route that still 404s for every visitor.
 #
-# Extracted from: Caddyfile.live (sha256 af336bc96186eea19f2077fce9c218dc0aff8c0a3dea96b70f752a8f05c0d257)
-# Segments: 229
+# Extracted from: Caddyfile.new (sha256 2e422907f9c7d1f4d816a86dee629a65f0f23d22f484aa3dd052906c10a2e9d3)
+# Segments: 239
 5d
 about
+academy-courses
 accommodation
 accounting-sync
 admin
@@ -41,6 +42,7 @@ bid-management
 bim
 boq
 br-sinapi-exchange
+brand
 buyer-portal
 ca-boq-exchange
 cad-explorer
@@ -48,9 +50,11 @@ cad-takeoff
 capital-plan
 carbon
 cases
+cases-art
 catalog
 cde
 certified-payroll
+cesium
 change-intelligence
 change-orders
 changeorders
@@ -67,6 +71,7 @@ connectors
 construction-control
 contacts
 contracts
+contributors
 coordination
 correspondence
 cost-benchmarks
@@ -98,6 +103,7 @@ einvoice-clearance
 equipment
 es-pbc-exchange
 esg
+estimate-archive
 estimate-basis
 estimate-checks
 estimate-copilot
@@ -112,6 +118,7 @@ forgot-password
 forms
 formwork
 fr-dpgf-exchange
+framework-agreements
 full-evm
 funding
 fx
@@ -173,6 +180,7 @@ price-index
 procurement
 profile
 progress
+project-catalogue
 project-controls
 project-intelligence
 project-route
@@ -180,6 +188,7 @@ projects
 property-dev
 punch-list
 punchlist
+pwa
 qms
 quantities
 quotes
@@ -197,6 +206,7 @@ rfi
 rfq-bidding
 risk-analysis
 risks
+roles
 rom-estimate
 ru-gesn-exchange
 safety
