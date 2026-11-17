@@ -79,6 +79,10 @@ KNOWN_ABSENT_FROM_HUB: dict[str, str] = {
         "ConcreteMix is a concrete mix design with its maturity calibration, not a defect. "
         "The census matches it by name only; sensor alerts are threshold readings, not a defect register."
     ),
+    "doc_templates": (
+        "DocTemplateIssue records one issued document and the template wording it printed, so a reprint "
+        "can tell what was sent. It is an issuance, not a defect; the module holds no defect register."
+    ),
     "delivery_model": (
         "DecisionCriterion is a weighted selection criterion for comparing delivery forms, "
         "not a defect. The census matches it by name only; the module holds no defect register."

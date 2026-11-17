@@ -1,11 +1,11 @@
 """​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Regression tests for XML XXE / billion-laughs hardening on the schedule
 import path.
 
-The schedule router accepts user-uploaded MS Project XML schedules and used
+The schedule import accepts user-uploaded MS Project XML schedules and used
 to feed them straight into stdlib ``xml.etree.ElementTree``. That parser is
 vulnerable to entity-expansion ("billion laughs") and external-entity
 (XXE) attacks. We migrated the parse call to ``defusedxml.ElementTree``
-(see app/modules/schedule/router.py:1506).
+(see app/modules/schedule/mspdi_import.py).
 
 These tests pin that behaviour: feeding a billion-laughs payload to the
 parser used by the import endpoint must raise an EntitiesForbidden-style
@@ -21,10 +21,9 @@ import pytest
 from defusedxml import EntitiesForbidden
 from defusedxml.common import DefusedXmlException
 
-# This is the exact alias used by the schedule router for parsing.
-# Importing it from the router module guarantees the test fails if the
-# router is rewritten to bypass defusedxml.
-from app.modules.schedule.router import safe_ET
+# This is the exact alias the MSPDI reader parses uploads with. Importing it
+# from that module guarantees the test fails if the reader bypasses defusedxml.
+from app.modules.schedule.mspdi_import import safe_ET
 
 # Classic billion-laughs payload — defines a chain of entities each
 # referencing the previous one ten times. A vulnerable parser would
