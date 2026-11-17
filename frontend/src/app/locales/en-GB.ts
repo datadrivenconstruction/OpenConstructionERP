@@ -1139,6 +1139,8 @@ const resource = {
     "finance.inbox.mailbox_invalid": "These mailbox settings are not valid",
     "finance.inbox.mailbox_last_polled": "Last checked",
     "leasing.export_for": "Export for {{name}}",
+    "users.roles.surveyor": "Surveyor",
+    "users.role_surveyor_desc": "Can import, edit and confirm survey data; editor rights elsewhere",
   }
 } as { translation: Record<string, string> };
 

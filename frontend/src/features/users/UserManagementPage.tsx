@@ -6,7 +6,7 @@
  * Features:
  * - User list with role badges and status
  * - Invite new users
- * - Change roles (admin/manager/editor/viewer)
+ * - Change roles (admin/manager/editor/surveyor/viewer)
  * - Activate/deactivate users
  * - Per-user module access matrix (visible + access level per module)
  * - Custom role names
@@ -30,6 +30,7 @@ import {
   Crown,
   Eye,
   Edit3,
+  ClipboardCheck,
   ChevronDown,
   Settings2,
   Lock,
@@ -108,6 +109,12 @@ const ROLE_CONFIG: Record<UserRole, RoleConfigEntry> = {
     color: 'text-blue-600 dark:text-blue-400',
     variant: 'blue',
   },
+  surveyor: {
+    icon: ClipboardCheck,
+    labelKey: 'surveyor',
+    color: 'text-teal-600 dark:text-teal-400',
+    variant: 'success',
+  },
   viewer: {
     icon: Eye,
     labelKey: 'viewer',
@@ -116,7 +123,7 @@ const ROLE_CONFIG: Record<UserRole, RoleConfigEntry> = {
   },
 };
 
-const ROLES: UserRole[] = ['admin', 'manager', 'editor', 'viewer'];
+const ROLES: UserRole[] = ['admin', 'manager', 'editor', 'surveyor', 'viewer'];
 
 // Privilege ranking (higher = more access). Used to detect a role DOWNGRADE,
 // which is treated as a destructive action and gated behind a confirmation.
@@ -124,6 +131,7 @@ const ROLE_RANK: Record<UserRole, number> = {
   admin: 3,
   manager: 2,
   editor: 1,
+  surveyor: 1,
   viewer: 0,
 };
 
@@ -1235,7 +1243,12 @@ export function UserManagementPage() {
                   ? t('users.role_manager_desc', { defaultValue: 'Project management' })
                   : r === 'editor'
                     ? t('users.role_editor_desc', { defaultValue: 'Create & edit' })
-                    : t('users.role_viewer_desc', { defaultValue: 'Read-only' })}
+                    : r === 'surveyor'
+                      ? t('users.role_surveyor_desc', {
+                          defaultValue:
+                            'Can import, edit and confirm survey data; editor rights elsewhere',
+                        })
+                      : t('users.role_viewer_desc', { defaultValue: 'Read-only' })}
             </span>
           );
         })}
