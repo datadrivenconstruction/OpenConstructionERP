@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LandXML xmlns="http://www.landxml.org/schema/LandXML-1.2" version="1.2" date="2026-10-12" time="09:00:00">
+  <Units>
+    <Metric linearUnit="meter" areaUnit="squareMeter" volumeUnit="cubicMeter" angularUnit="decimal degrees" />
+  </Units>
+  <CoordinateSystem name="WGS 84 / UTM zone 33N" epsgCode="32633" />
+  <Project name="Riverside Yard" />
+  <Surfaces>
+    <Surface name="Pad" desc="Design platform, flat at 34.300">
+      <Definition surfType="TIN" area2DSurf="6000.0" elevMin="34.3" elevMax="34.3">
+        <Pnts>
+          <P id="1">5819000.000 389000.000 34.300</P>
+          <P id="2">5819000.000 389100.000 34.300</P>
+          <P id="3">5819060.000 389100.000 34.300</P>
+          <P id="4">5819060.000 389000.000 34.300</P>
+        </Pnts>
+        <Faces>
+          <F>1 2 3</F>
+          <F>1 3 4</F>
+        </Faces>
+      </Definition>
+    </Surface>
+  </Surfaces>
+</LandXML>

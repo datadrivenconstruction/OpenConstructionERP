@@ -2343,6 +2343,32 @@
     "duplicate_point": {
       "fail": "Matricule de point {point_id} en double avec des coordonnées différentes.",
       "suggestion": "Gardez une seule mesure : supprimez le semis contenant la mauvaise et réimportez-le."
+    },
+    "traverse_misclosure": {
+      "fail": "Le cheminement {name} ferme à 1:{r}, sous le minimum du profil 1:{min}.",
+      "suggestion": "Cherchez une faute sur les côtés, réobservez le côté le plus faible ou confirmez la valeur du profil."
+    },
+    "level_misclosure": {
+      "fail": "L'écart de fermeture du nivellement {f} mm dépasse k·√km avec k = {k} mm.",
+      "suggestion": "Refaites le nivellement ou vérifiez les altitudes des repères utilisés."
+    }
+  },
+  "volumes": {
+    "no_overlap": {
+      "fail": "Les deux surfaces ne se recouvrent que sur {p} % de la zone : le volume n'a pas de sens.",
+      "suggestion": "Vérifiez que les deux surfaces sont dans le même système de coordonnées et couvrent le même terrain."
+    },
+    "low_coverage": {
+      "fail": "Seuls {c} % de la zone ont des données dans les deux surfaces (minimum {min} %).",
+      "suggestion": "Ajoutez des points là où une surface manque ou réduisez le contour à la zone couverte."
+    },
+    "coarse_scan": {
+      "fail": "Un scan grossier (LOA10) alimente ce volume sans raison indiquée.",
+      "suggestion": "Utilisez un scan de précision topographique ou expliquez pourquoi ce scan suffit."
+    },
+    "bank_volume": {
+      "fail": "La quantité est un volume en place (dans le sol) ; le foisonnement n'est pas appliqué.",
+      "suggestion": "Envoyez plutôt le déblai foisonné si la ligne du métré est mesurée en matériau foisonné."
     }
   }
 }

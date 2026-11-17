@@ -2343,6 +2343,32 @@
     "duplicate_point": {
       "fail": "Duplicitní číslo bodu {point_id} s rozdílnými souřadnicemi.",
       "suggestion": "Ponechte jedno měření: smažte sadu bodů s chybným a importujte ji znovu."
+    },
+    "traverse_misclosure": {
+      "fail": "Polygonový pořad {name} se uzavírá 1:{r}, pod minimem profilu 1:{min}.",
+      "suggestion": "Zkontrolujte strany na hrubou chybu, přeměřte nejslabší stranu nebo potvrďte hodnotu profilu."
+    },
+    "level_misclosure": {
+      "fail": "Uzávěr nivelace {f} mm překračuje k·√km při k = {k} mm.",
+      "suggestion": "Opakujte nivelaci nebo zkontrolujte výšky použitých nivelačních bodů."
+    }
+  },
+  "volumes": {
+    "no_overlap": {
+      "fail": "Obě plochy se překrývají jen na {p} % území: objem nemá smysl.",
+      "suggestion": "Zkontrolujte, že obě plochy jsou ve stejném souřadnicovém systému a pokrývají stejný terén."
+    },
+    "low_coverage": {
+      "fail": "Jen {c} % území má data v obou plochách (minimum {min} %).",
+      "suggestion": "Doplňte body tam, kde plocha chybí, nebo zužte hranici na pokryté území."
+    },
+    "coarse_scan": {
+      "fail": "Tento objem vychází z hrubého skenu (LOA10) bez uvedeného důvodu.",
+      "suggestion": "Použijte sken geodetické přesnosti nebo uveďte, proč tento sken stačí."
+    },
+    "bank_volume": {
+      "fail": "Množství je objem v rostlém stavu (v zemi); součinitel nakypření není použit.",
+      "suggestion": "Pokud se položka rozpočtu měří v nakypřeném stavu, odešlete raději nakypřený výkop."
     }
   }
 }

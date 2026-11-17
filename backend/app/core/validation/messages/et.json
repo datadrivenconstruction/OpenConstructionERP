@@ -2343,6 +2343,32 @@
     "duplicate_point": {
       "fail": "Korduv punkti tunnus {point_id} erinevate koordinaatidega.",
       "suggestion": "Jätke üks mõõtmine: kustutage vale mõõtmisega punktikogu ja importige see uuesti."
+    },
+    "traverse_misclosure": {
+      "fail": "Polügoonkäik {name} sulgub 1:{r}, alla profiili miinimumi 1:{min}.",
+      "suggestion": "Kontrollige külgi jämeda vea suhtes, mõõtke nõrgim külg uuesti või kinnitage profiili väärtus."
+    },
+    "level_misclosure": {
+      "fail": "Nivelleerimise sulgemisviga {f} mm ületab k·√km, kui k = {k} mm.",
+      "suggestion": "Korrake nivelleerimist või kontrollige kasutatud reeperite kõrgusi."
+    }
+  },
+  "volumes": {
+    "no_overlap": {
+      "fail": "Pinnad kattuvad vaid {p} % alast: maht on mõttetu.",
+      "suggestion": "Kontrollige, et mõlemad pinnad oleksid samas koordinaatsüsteemis ja kataksid sama maastikku."
+    },
+    "low_coverage": {
+      "fail": "Vaid {c} % alast on andmed mõlemas pinnas (miinimum {min} %).",
+      "suggestion": "Lisage punkte, kus pind puudub, või kitsendage piiri kaetud alale."
+    },
+    "coarse_scan": {
+      "fail": "Selle mahu aluseks on jäme skaneering (LOA10) ilma põhjuseta.",
+      "suggestion": "Kasutage geodeetilise täpsusega skaneeringut või kirjutage, miks see skaneering sobib."
+    },
+    "bank_volume": {
+      "fail": "Kogus on tihe maht (pinnases); kobestusteguri ei rakendata.",
+      "suggestion": "Saatke kobestatud kaevis, kui kuluarvestuse rida mõõdetakse kobedana."
     }
   }
 }

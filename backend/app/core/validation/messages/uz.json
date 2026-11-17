@@ -2343,6 +2343,32 @@
     "duplicate_point": {
       "fail": "{point_id} nuqta raqami turli koordinatalar bilan takrorlangan.",
       "suggestion": "Bitta o'lchovni qoldiring: xatosi bor to'plamni o'chirib, qayta import qiling."
+    },
+    "traverse_misclosure": {
+      "fail": "{name} yo'li 1:{r} bilan yopiladi, profil minimumi 1:{min} dan past.",
+      "suggestion": "Tomonlarni qo'pol xatoga tekshiring, eng zaif tomonni qayta o'lchang yoki profil qiymatini tasdiqlang."
+    },
+    "level_misclosure": {
+      "fail": "Nivelirlash yopilish xatosi {f} mm k·√km qiymatidan oshadi (k = {k} mm).",
+      "suggestion": "Nivelirlashni takrorlang yoki ishlatilgan reperlar balandliklarini tekshiring."
+    }
+  },
+  "volumes": {
+    "no_overlap": {
+      "fail": "Ikki sirt maydonning faqat {p} % qismida ustma-ust tushadi: hajm ma'nosiz.",
+      "suggestion": "Ikki sirt bir koordinatalar tizimida ekanini va bir hududni qoplashini tekshiring."
+    },
+    "low_coverage": {
+      "fail": "Maydonning faqat {c} % qismida ikkala sirtda ham ma'lumot bor (minimum {min} %).",
+      "suggestion": "Sirt yo'q joyga nuqtalar qo'shing yoki chegarani qoplangan hududgacha toraytiring."
+    },
+    "coarse_scan": {
+      "fail": "Bu hajm sababsiz qo'pol skandan (LOA10) olingan.",
+      "suggestion": "Geodezik aniqlikdagi skandan foydalaning yoki bu skan nega yetarli ekanini yozing."
+    },
+    "bank_volume": {
+      "fail": "Miqdor zich holatdagi hajm (gruntda); yumshash koeffitsiyenti qo'llanilmagan.",
+      "suggestion": "Smeta bandi yumshoq material sifatida o'lchansa, yumshatilgan qazishni yuboring."
     }
   }
 }

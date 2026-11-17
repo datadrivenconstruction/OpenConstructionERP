@@ -56,6 +56,7 @@ export const MODULE_GROUPS: ModuleGroup[] = [
   { id: 'sustainability_esg', labelKey: 'onboarding.mod_group_sustainability_esg' },
   { id: 'bi_analytics', labelKey: 'onboarding.mod_group_bi_analytics' },
   { id: 'enterprise', labelKey: 'onboarding.mod_group_enterprise' },
+  { id: 'survey', labelKey: 'onboarding.mod_group_survey' },
   { id: 'regional', labelKey: 'onboarding.mod_group_regional' },
   { id: 'platform', labelKey: 'onboarding.mod_group_platform' },
 ];
@@ -182,6 +183,10 @@ export const ALL_MODULES: ModuleDef[] = [
   { key: 'carbon', labelKey: 'onboarding.mod_carbon', descriptionKey: 'onboarding.mod_carbon_desc', group: 'sustainability_esg' },
   { key: 'sustainability', labelKey: 'nav.sustainability', descriptionKey: 'onboarding.mod_sustainability_desc', group: 'sustainability_esg' },
   { key: 'esg', labelKey: 'nav.esg', descriptionKey: 'onboarding.mod_esg_desc', group: 'sustainability_esg' },
+
+  // ── Survey & Land ───────────────────────────────────────────────────
+  { key: 'survey_core', labelKey: 'survey.page.register', descriptionKey: 'onboarding.mod_survey_core_desc', group: 'survey' },
+  { key: 'surfaces_volumes', labelKey: 'volumes.page.title', descriptionKey: 'onboarding.mod_surfaces_volumes_desc', group: 'survey' },
 
   // ── BI & Analytics ──────────────────────────────────────────────────
   { key: 'bi_dashboards', labelKey: 'onboarding.mod_bi_dashboards', descriptionKey: 'onboarding.mod_bi_dashboards_desc', group: 'bi_analytics' },

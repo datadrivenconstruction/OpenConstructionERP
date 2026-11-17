@@ -1,12 +1,27 @@
 {
   "dataset": "riverside_yard",
   "project_name": "Riverside Yard (survey demo)",
-  "crs": {"epsg": 32633, "name": "WGS 84 / UTM zone 33N", "chip": "EPSG 32633"},
-  "offsets": {"e": 389000.0, "n": 5819000.0},
+  "crs": {
+    "epsg": 32633,
+    "name": "WGS 84 / UTM zone 33N",
+    "chip": "EPSG 32633"
+  },
+  "offsets": {
+    "e": 389000.0,
+    "n": 5819000.0
+  },
   "demo_profiles_label": "Demo values, not a standard",
   "survey_register": {
-    "lesson_1": {"search": "32633", "chip": "EPSG 32633"},
-    "lesson_2": {"file": "control.csv", "preset": "PNEZD", "points": 4, "kind": "control"},
+    "lesson_1": {
+      "search": "32633",
+      "chip": "EPSG 32633"
+    },
+    "lesson_2": {
+      "file": "control.csv",
+      "preset": "PNEZD",
+      "points": 4,
+      "kind": "control"
+    },
     "lesson_3": {
       "file": "existing_ground.csv",
       "preset": "PNEZD",
@@ -18,17 +33,68 @@
       "points_after_import": 77
     },
     "lesson_4": {
-      "length_m": 612.40,
+      "length_m": 612.4,
       "f_e_m": 0.042,
       "f_n_m": -0.031,
       "misclosure_m": 0.052,
       "ratio": 11731,
       "profile_ratio": 10000,
       "verdict": "pass",
-      "bowditch_leg_m": 158.30,
+      "bowditch_leg_m": 158.3,
       "c_e_m": -0.011,
-      "c_n_m": 0.008
+      "c_n_m": 0.008,
+      "file": "traverse_legs.csv"
     },
-    "lesson_5": {"point": "CP2", "e": 389110.000, "n": 5818990.000}
+    "lesson_5": {
+      "point": "CP2",
+      "e": 389110.0,
+      "n": 5818990.0
+    }
+  },
+  "volumes": {
+    "lesson_1": {
+      "surface": "Existing ground",
+      "point_set": "existing_ground.csv",
+      "points": 77,
+      "area_m2": 6000.0
+    },
+    "lesson_2": {
+      "file": "design_pad.xml",
+      "surface": "Pad",
+      "area_m2": 6000.0,
+      "z": 34.3
+    },
+    "lesson_3": {
+      "name": "Platform earthworks",
+      "code": "V-001",
+      "base": "Existing ground",
+      "compare": "Pad",
+      "method": "grid",
+      "cell_size_m": 10.0,
+      "cut_m3": 1470.0,
+      "fill_m3": 270.0,
+      "net_m3": 1200.0,
+      "net_side": "cut",
+      "coverage_pct": 100
+    },
+    "lesson_4": {
+      "boq_position": "Bulk excavation",
+      "unit": "m3",
+      "quantity": "1470.000",
+      "formula": "survey.volume(V-001)",
+      "finding": "VOL-004"
+    },
+    "lesson_5": {
+      "progress_m3": 1470.0
+    },
+    "lesson_6": {
+      "swell_factor": 1.25,
+      "loose_cut_m3": 1837.5
+    }
+  },
+  "profiles": {
+    "traverse_min_ratio": 10000,
+    "coverage_min_pct": 90,
+    "label": "Demo values, not a standard"
   }
 }

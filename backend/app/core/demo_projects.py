@@ -15144,6 +15144,14 @@ async def install_demo_project(
                 module_data.update(await seed_real_estate_demo(session, project.id, owner_id, demo_id))
     except Exception:
         logger.warning("Demo real estate data not seeded for %s", demo_id, exc_info=True)
+    try:
+        from app.modules.surfaces_volumes.demo import SURVEY_DEMOS, seed_survey_demo
+
+        if demo_id in SURVEY_DEMOS:
+            async with session.begin_nested():
+                module_data.update(await seed_survey_demo(session, project.id, str(owner_id)))
+    except Exception:
+        logger.warning("Demo survey data not seeded for %s", demo_id, exc_info=True)
 
     # ── 14. Real BIM geometry + downloadable PDF (baked assets, no convert) ─
     # Attach a real BIM model with real geometry and a real plan-set PDF from

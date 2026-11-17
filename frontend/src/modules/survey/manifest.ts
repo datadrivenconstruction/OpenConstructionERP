@@ -7,7 +7,7 @@ import type { ModuleManifest } from '../_types';
 const Page = lazy(() => import('@/features/survey/SurveyRegisterPage'));
 
 export const manifest: ModuleManifest = {
-  id: 'survey',
+  id: 'survey_core',
   name: 'survey.page.register',
   description: 'survey.module_description',
   version: '0.1.0',

@@ -2343,6 +2343,32 @@
     "duplicate_point": {
       "fail": "Duplicate point id {point_id} with different coordinates.",
       "suggestion": "Keep one reading: delete the point set with the wrong one and import it again."
+    },
+    "traverse_misclosure": {
+      "fail": "Traverse {name} closes at 1:{r}, below the profile minimum 1:{min}.",
+      "suggestion": "Check the legs for a blunder, re-observe the weakest leg, or confirm the profile value."
+    },
+    "level_misclosure": {
+      "fail": "Level run misclosure {f} mm exceeds k·√km with k = {k} mm.",
+      "suggestion": "Re-run the levels or check the benchmark heights used."
+    }
+  },
+  "volumes": {
+    "no_overlap": {
+      "fail": "The two surfaces overlap on only {p} % of the area: the volume is meaningless.",
+      "suggestion": "Check that both surfaces are in the same coordinate system and cover the same ground."
+    },
+    "low_coverage": {
+      "fail": "Only {c} % of the area has data in both surfaces (minimum {min} %).",
+      "suggestion": "Add survey points where a surface is missing, or narrow the boundary to the covered area."
+    },
+    "coarse_scan": {
+      "fail": "A coarse scan (LOA10) feeds this volume and no reason is given.",
+      "suggestion": "Use a survey-grade scan, or write why this scan is good enough."
+    },
+    "bank_volume": {
+      "fail": "The quantity is bank volume (in the ground); the swell factor is not applied.",
+      "suggestion": "Send the loose cut instead if the BOQ line is measured as loose material."
     }
   }
 }

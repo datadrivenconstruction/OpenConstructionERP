@@ -2343,6 +2343,32 @@
     "duplicate_point": {
       "fail": "Farklı koordinatlara sahip yinelenen nokta numarası {point_id}.",
       "suggestion": "Tek bir ölçüm tutun: yanlış olanı içeren kümeyi silin ve yeniden içe aktarın."
+    },
+    "traverse_misclosure": {
+      "fail": "{name} poligonu 1:{r} ile kapanıyor, profil minimumu 1:{min} altında.",
+      "suggestion": "Kenarlarda kaba hata arayın, en zayıf kenarı yeniden ölçün veya profil değerini onaylayın."
+    },
+    "level_misclosure": {
+      "fail": "Nivelman kapanma hatası {f} mm, k = {k} mm ile k·√km değerini aşıyor.",
+      "suggestion": "Nivelmanı tekrarlayın veya kullanılan röper kotlarını kontrol edin."
+    }
+  },
+  "volumes": {
+    "no_overlap": {
+      "fail": "İki yüzey alanın yalnızca %{p} kadarında örtüşüyor: hacim anlamsız.",
+      "suggestion": "İki yüzeyin aynı koordinat sisteminde olduğunu ve aynı araziyi kapsadığını kontrol edin."
+    },
+    "low_coverage": {
+      "fail": "Alanın yalnızca %{c} kadarında iki yüzeyde de veri var (minimum %{min}).",
+      "suggestion": "Yüzeyin eksik olduğu yerlere nokta ekleyin veya sınırı kapsanan alana daraltın."
+    },
+    "coarse_scan": {
+      "fail": "Bu hacmi gerekçe belirtilmeden kaba bir tarama (LOA10) besliyor.",
+      "suggestion": "Ölçme hassasiyetinde bir tarama kullanın veya bu taramanın neden yeterli olduğunu yazın."
+    },
+    "bank_volume": {
+      "fail": "Miktar yerinde (zemindeki) hacimdir; kabarma katsayısı uygulanmadı.",
+      "suggestion": "Keşif kalemi gevşek malzeme olarak ölçülüyorsa gevşek kazıyı gönderin."
     }
   }
 }

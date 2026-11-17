@@ -2343,6 +2343,32 @@
     "duplicate_point": {
       "fail": "点号 {point_id} 重复且坐标不同。",
       "suggestion": "只保留一个测量值：删除含有错误值的点集，然后重新导入。"
+    },
+    "traverse_misclosure": {
+      "fail": "导线 {name} 闭合比为 1:{r}，低于配置最低值 1:{min}。",
+      "suggestion": "检查各边是否有粗差，重测最弱的边，或确认配置值。"
+    },
+    "level_misclosure": {
+      "fail": "水准路线闭合差 {f} mm 超过 k·√km（k = {k} mm）。",
+      "suggestion": "重新进行水准测量，或检查所用水准点的高程。"
+    }
+  },
+  "volumes": {
+    "no_overlap": {
+      "fail": "两个曲面仅在 {p} % 的面积上重叠：体积没有意义。",
+      "suggestion": "检查两个曲面是否在同一坐标系中并覆盖同一地块。"
+    },
+    "low_coverage": {
+      "fail": "仅 {c} % 的面积在两个曲面中都有数据（最低 {min} %）。",
+      "suggestion": "在缺少曲面的地方补充测点，或把边界缩小到已覆盖区域。"
+    },
+    "coarse_scan": {
+      "fail": "此体积来自粗精度扫描（LOA10），且未说明原因。",
+      "suggestion": "使用测量级扫描，或写明为何此扫描足够。"
+    },
+    "bank_volume": {
+      "fail": "数量为自然方（原状土）；未应用松散系数。",
+      "suggestion": "如果清单项按松方计量，请改为发送松方挖方。"
     }
   }
 }

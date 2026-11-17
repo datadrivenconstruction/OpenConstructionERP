@@ -52,6 +52,8 @@ import {
   Leaf,
   Building,
   Landmark,
+  Crosshair,
+  Mountain,
   Palette,
   X,
   type LucideIcon,
@@ -588,7 +590,7 @@ interface ApiCompanyPreset {
 const PRESET_ICON_MAP: Record<string, LucideIcon> = {
   Building2, Calculator, ClipboardList, Pencil, Home, Boxes, HardHat, Briefcase, Box,
   Construction, Wrench, PencilRuler, House, Handshake, Truck, CalendarClock, Hammer,
-  BadgeCheck, ShieldCheck, Leaf, Building, Landmark,
+  BadgeCheck, ShieldCheck, Leaf, Building, Landmark, Crosshair, Mountain,
 };
 
 function presetIcon(name: string): LucideIcon {

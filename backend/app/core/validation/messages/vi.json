@@ -2343,6 +2343,32 @@
     "duplicate_point": {
       "fail": "Mã điểm {point_id} bị trùng với tọa độ khác nhau.",
       "suggestion": "Giữ một lần đo: xóa tập điểm chứa giá trị sai và nhập lại."
+    },
+    "traverse_misclosure": {
+      "fail": "Đường chuyền {name} khép ở 1:{r}, dưới mức tối thiểu của hồ sơ 1:{min}.",
+      "suggestion": "Kiểm tra các cạnh tìm sai số thô, đo lại cạnh yếu nhất hoặc xác nhận giá trị hồ sơ."
+    },
+    "level_misclosure": {
+      "fail": "Sai số khép thủy chuẩn {f} mm vượt k·√km với k = {k} mm.",
+      "suggestion": "Đo lại thủy chuẩn hoặc kiểm tra cao độ các mốc đã dùng."
+    }
+  },
+  "volumes": {
+    "no_overlap": {
+      "fail": "Hai bề mặt chỉ chồng lên nhau trên {p} % diện tích: khối lượng không có ý nghĩa.",
+      "suggestion": "Kiểm tra hai bề mặt cùng một hệ tọa độ và phủ cùng một khu đất."
+    },
+    "low_coverage": {
+      "fail": "Chỉ {c} % diện tích có dữ liệu ở cả hai bề mặt (tối thiểu {min} %).",
+      "suggestion": "Thêm điểm đo nơi thiếu bề mặt hoặc thu hẹp ranh giới về vùng được phủ."
+    },
+    "coarse_scan": {
+      "fail": "Một bản quét thô (LOA10) tạo ra khối lượng này mà không nêu lý do.",
+      "suggestion": "Dùng bản quét đạt độ chính xác trắc địa hoặc ghi lý do bản quét này đủ dùng."
+    },
+    "bank_volume": {
+      "fail": "Khối lượng là thể tích nguyên thổ (trong đất); hệ số nở rời chưa được áp dụng.",
+      "suggestion": "Gửi khối lượng đào nở rời nếu hạng mục dự toán được đo theo vật liệu rời."
     }
   }
 }

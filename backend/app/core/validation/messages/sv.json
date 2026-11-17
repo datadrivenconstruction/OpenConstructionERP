@@ -2343,6 +2343,32 @@
     "duplicate_point": {
       "fail": "Dubblerat punktnummer {point_id} med olika koordinater.",
       "suggestion": "Behåll en mätning: radera punktmängden med den felaktiga och importera den igen."
+    },
+    "traverse_misclosure": {
+      "fail": "Polygontåget {name} sluter på 1:{r}, under profilens minimum 1:{min}.",
+      "suggestion": "Kontrollera sidorna för grova fel, mät om den svagaste sidan eller bekräfta profilvärdet."
+    },
+    "level_misclosure": {
+      "fail": "Avvägningens slutfel {f} mm överstiger k·√km med k = {k} mm.",
+      "suggestion": "Gör om avvägningen eller kontrollera höjderna på de använda fixpunkterna."
+    }
+  },
+  "volumes": {
+    "no_overlap": {
+      "fail": "De två ytorna överlappar bara på {p} % av området: volymen är meningslös.",
+      "suggestion": "Kontrollera att båda ytorna är i samma koordinatsystem och täcker samma terräng."
+    },
+    "low_coverage": {
+      "fail": "Bara {c} % av området har data i båda ytorna (minimum {min} %).",
+      "suggestion": "Lägg till mätpunkter där en yta saknas eller minska avgränsningen till det täckta området."
+    },
+    "coarse_scan": {
+      "fail": "En grov skanning (LOA10) ger denna volym utan angivet skäl.",
+      "suggestion": "Använd en skanning med mätnoggrannhet eller skriv varför denna skanning räcker."
+    },
+    "bank_volume": {
+      "fail": "Mängden är fast volym (i marken); svällningsfaktorn är inte tillämpad.",
+      "suggestion": "Skicka i stället lös schaktmassa om mängdförteckningens post mäts som löst material."
     }
   }
 }

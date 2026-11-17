@@ -2343,6 +2343,32 @@
     "duplicate_point": {
       "fail": "Dobbelt punktnummer {point_id} med forskellige koordinater.",
       "suggestion": "Behold én måling: slet punktsættet med den forkerte, og importér det igen."
+    },
+    "traverse_misclosure": {
+      "fail": "Polygondraget {name} lukker med 1:{r}, under profilens minimum 1:{min}.",
+      "suggestion": "Kontrollér siderne for grove fejl, genmål den svageste side eller bekræft profilværdien."
+    },
+    "level_misclosure": {
+      "fail": "Nivellementets slutfejl {f} mm overstiger k·√km med k = {k} mm.",
+      "suggestion": "Gentag nivellementet eller kontrollér koterne på de anvendte fikspunkter."
+    }
+  },
+  "volumes": {
+    "no_overlap": {
+      "fail": "De to flader overlapper kun på {p} % af arealet: volumenet er meningsløst.",
+      "suggestion": "Kontrollér, at begge flader er i samme koordinatsystem og dækker samme terræn."
+    },
+    "low_coverage": {
+      "fail": "Kun {c} % af arealet har data i begge flader (minimum {min} %).",
+      "suggestion": "Tilføj målepunkter, hvor en flade mangler, eller indsnævr afgrænsningen til det dækkede areal."
+    },
+    "coarse_scan": {
+      "fail": "En grov scanning (LOA10) indgår i dette volumen uden angivet grund.",
+      "suggestion": "Brug en scanning i opmålingskvalitet, eller skriv hvorfor denne scanning er god nok."
+    },
+    "bank_volume": {
+      "fail": "Mængden er fast volumen (i jorden); opluckningsfaktoren er ikke anvendt.",
+      "suggestion": "Send i stedet den løse afgravning, hvis tilbudslisteposten måles som løst materiale."
     }
   }
 }

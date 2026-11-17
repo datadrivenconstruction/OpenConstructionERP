@@ -16,6 +16,21 @@ const STABLE: Record<string, string> = {
   'survey.import.rows_read_one': '{{rows}} rows read, {{count}} problem',
   'survey.import.rows_read_other': '{{rows}} rows read, {{count}} problems',
   'sidebar.group.survey': 'Survey & Land',
+  'survey.action.new_traverse': 'New traverse',
+  'survey.status.pass': 'Pass',
+  'survey.status.fail': 'Fail',
+  'volumes.page.title': 'Volumes',
+  'volumes.action.new_surface': 'New surface',
+  'volumes.action.new_volume': 'New volume',
+  'volumes.action.confirm': 'Confirm result',
+  'volumes.action.send_to_boq': 'Send to BOQ',
+  'volumes.action.record_progress': 'Record progress',
+  'volumes.action.print_report': 'Print report',
+  'volumes.action.duplicate': 'Duplicate',
+  'volumes.action.acknowledge': 'Acknowledge',
+  'volumes.status.draft': 'Draft',
+  'volumes.status.confirmed': 'Confirmed',
+  'volumes.status.sent': 'Sent',
 };
 
 describe('survey stable names', () => {

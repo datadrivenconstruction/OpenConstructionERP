@@ -2343,6 +2343,32 @@
     "duplicate_point": {
       "fail": "Pistetunnus {point_id} esiintyy kahdesti eri koordinaatein.",
       "suggestion": "Säilytä yksi mittaus: poista pistejoukko, jossa on väärä, ja tuo se uudelleen."
+    },
+    "traverse_misclosure": {
+      "fail": "Monikulmiojono {name} sulkeutuu 1:{r}, alle profiilin minimin 1:{min}.",
+      "suggestion": "Tarkista sivut karkean virheen varalta, mittaa heikoin sivu uudelleen tai vahvista profiilin arvo."
+    },
+    "level_misclosure": {
+      "fail": "Vaaituksen sulkuvirhe {f} mm ylittää k·√km, kun k = {k} mm.",
+      "suggestion": "Toista vaaitus tai tarkista käytettyjen korkeuskiintopisteiden korkeudet."
+    }
+  },
+  "volumes": {
+    "no_overlap": {
+      "fail": "Pinnat menevät päällekkäin vain {p} %:lla alueesta: tilavuus on merkityksetön.",
+      "suggestion": "Tarkista, että molemmat pinnat ovat samassa koordinaatistossa ja kattavat saman maaston."
+    },
+    "low_coverage": {
+      "fail": "Vain {c} %:lla alueesta on tietoa molemmista pinnoista (vähintään {min} %).",
+      "suggestion": "Lisää mittauspisteitä, missä pinta puuttuu, tai rajaa alue katettuun osaan."
+    },
+    "coarse_scan": {
+      "fail": "Karkea skannaus (LOA10) tuottaa tämän tilavuuden ilman ilmoitettua syytä.",
+      "suggestion": "Käytä mittaustarkkaa skannausta tai kirjoita, miksi tämä skannaus riittää."
+    },
+    "bank_volume": {
+      "fail": "Määrä on kiintotilavuutta (maassa); löyhtymiskerrointa ei ole käytetty.",
+      "suggestion": "Lähetä sen sijaan löyhä kaivumassa, jos määräluettelon nimike mitataan löyhänä."
     }
   }
 }

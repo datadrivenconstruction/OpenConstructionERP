@@ -2343,6 +2343,32 @@
     "duplicate_point": {
       "fail": "Identificador de ponto {point_id} duplicado com coordenadas diferentes.",
       "suggestion": "Mantenha uma leitura: elimine o conjunto com a errada e importe-o novamente."
+    },
+    "traverse_misclosure": {
+      "fail": "A poligonal {name} fecha a 1:{r}, abaixo do mínimo do perfil 1:{min}.",
+      "suggestion": "Procure um erro grosseiro nos lados, reobserve o lado mais fraco ou confirme o valor do perfil."
+    },
+    "level_misclosure": {
+      "fail": "O erro de fecho do nivelamento {f} mm excede k·√km com k = {k} mm.",
+      "suggestion": "Repita o nivelamento ou verifique as cotas das referências de nível usadas."
+    }
+  },
+  "volumes": {
+    "no_overlap": {
+      "fail": "As duas superfícies sobrepõem-se apenas em {p} % da área: o volume não tem sentido.",
+      "suggestion": "Verifique se ambas as superfícies estão no mesmo sistema de coordenadas e cobrem o mesmo terreno."
+    },
+    "low_coverage": {
+      "fail": "Apenas {c} % da área tem dados em ambas as superfícies (mínimo {min} %).",
+      "suggestion": "Adicione pontos onde falta uma superfície ou reduza o limite à área coberta."
+    },
+    "coarse_scan": {
+      "fail": "Um levantamento grosseiro (LOA10) alimenta este volume sem motivo indicado.",
+      "suggestion": "Use um levantamento de precisão topográfica ou explique porque este basta."
+    },
+    "bank_volume": {
+      "fail": "A quantidade é volume no corte (no terreno); o fator de empolamento não é aplicado.",
+      "suggestion": "Envie o corte empolado se a linha do orçamento for medida como material solto."
     }
   }
 }

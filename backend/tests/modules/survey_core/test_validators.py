@@ -101,15 +101,14 @@ async def test_messages_answer_in_the_callers_language() -> None:
     assert "Koordinatensystem" in result.message
 
 
+_SURVEY_KEYS = ("no_crs", "crs_unconfirmed", "duplicate_point", "traverse_misclosure", "level_misclosure")
+
+
 def test_every_locale_carries_every_survey_message() -> None:
-    keys = [
-        f"survey.{k}.{part}"
-        for k in ("no_crs", "crs_unconfirmed", "duplicate_point")
-        for part in ("fail", "suggestion")
-    ]
+    keys = [f"survey.{k}.{part}" for k in _SURVEY_KEYS for part in ("fail", "suggestion")]
     for path in MESSAGES.glob("*.json"):
         bundle = json.loads(path.read_text(encoding="utf-8"))
-        assert set(bundle["survey"]) == {"no_crs", "crs_unconfirmed", "duplicate_point"}, path.name
+        assert set(bundle["survey"]) == set(_SURVEY_KEYS), path.name
         for key in keys:
             assert is_key_present(key, path.stem), (path.name, key)
 

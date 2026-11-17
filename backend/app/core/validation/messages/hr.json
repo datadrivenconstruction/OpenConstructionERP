@@ -2343,6 +2343,32 @@
     "duplicate_point": {
       "fail": "Dvostruka oznaka točke {point_id} s različitim koordinatama.",
       "suggestion": "Zadržite jedno mjerenje: izbrišite skup s pogrešnim i ponovno ga uvezite."
+    },
+    "traverse_misclosure": {
+      "fail": "Poligonski vlak {name} zatvara se s 1:{r}, ispod minimuma profila 1:{min}.",
+      "suggestion": "Provjerite strane zbog grube pogreške, ponovno izmjerite najslabiju stranu ili potvrdite vrijednost profila."
+    },
+    "level_misclosure": {
+      "fail": "Odstupanje nivelmana {f} mm premašuje k·√km uz k = {k} mm.",
+      "suggestion": "Ponovite nivelman ili provjerite visine korištenih repera."
+    }
+  },
+  "volumes": {
+    "no_overlap": {
+      "fail": "Dvije se plohe preklapaju samo na {p} % površine: volumen nema smisla.",
+      "suggestion": "Provjerite jesu li obje plohe u istom koordinatnom sustavu i pokrivaju li isti teren."
+    },
+    "low_coverage": {
+      "fail": "Samo {c} % površine ima podatke u obje plohe (minimum {min} %).",
+      "suggestion": "Dodajte točke gdje ploha nedostaje ili suzite granicu na pokriveno područje."
+    },
+    "coarse_scan": {
+      "fail": "Grubo skeniranje (LOA10) daje ovaj volumen bez navedenog razloga.",
+      "suggestion": "Upotrijebite skeniranje geodetske točnosti ili napišite zašto je ovo dovoljno."
+    },
+    "bank_volume": {
+      "fail": "Količina je volumen u sraslom stanju (u tlu); koeficijent rastresitosti nije primijenjen.",
+      "suggestion": "Pošaljite rastresiti iskop ako se stavka troškovnika mjeri u rastresitom stanju."
     }
   }
 }

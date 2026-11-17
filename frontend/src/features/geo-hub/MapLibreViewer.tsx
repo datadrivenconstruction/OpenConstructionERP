@@ -44,10 +44,12 @@ import Map, {
   NavigationControl,
   ScaleControl,
   AttributionControl,
+  type LayerProps,
   type MapRef,
   type MapLayerMouseEvent,
   type ViewStateChangeEvent,
 } from 'react-map-gl/maplibre';
+import type { FeatureCollection } from 'geojson';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import '@/shared/lib/mapLibre';
 
@@ -100,6 +102,41 @@ interface MapLibreViewerProps {
   /** While true a click on the map is handed to ``onMapClick``. */
   pickMode?: boolean;
   onMapClick?: (coords: { lat: number; lon: number }) => void;
+  /** Vector data drawn above the basemap (survey plans), each with its own layer styles. */
+  geojsonLayers?: GeoJsonLayer[];
+  /** Fit the camera to ``geojsonLayers`` once their data arrives. */
+  fitGeojson?: boolean;
+}
+
+export interface GeoJsonLayer {
+  id: string;
+  data: FeatureCollection;
+  layers: Array<Omit<LayerProps, 'source'> & { id: string }>;
+}
+
+/** [[west, south], [east, north]] of every coordinate in the collections, or null. */
+export function geojsonBounds(sets: GeoJsonLayer[]): [[number, number], [number, number]] | null {
+  let w = Infinity;
+  let s = Infinity;
+  let e = -Infinity;
+  let n = -Infinity;
+  const walk = (c: unknown): void => {
+    if (!Array.isArray(c)) return;
+    if (typeof c[0] === 'number' && typeof c[1] === 'number') {
+      w = Math.min(w, c[0]);
+      e = Math.max(e, c[0]);
+      s = Math.min(s, c[1]);
+      n = Math.max(n, c[1]);
+      return;
+    }
+    for (const x of c) walk(x);
+  };
+  for (const set of sets) {
+    for (const f of set.data.features) {
+      if (f.geometry && 'coordinates' in f.geometry) walk(f.geometry.coordinates);
+    }
+  }
+  return Number.isFinite(w) ? [[w, s], [e, n]] : null;
 }
 
 // Initial camera: whole-world for the global view, tighter once we have a
@@ -162,6 +199,8 @@ export function MapLibreViewer({
   anchor,
   pickMode = false,
   onMapClick,
+  geojsonLayers,
+  fitGeojson = false,
 }: MapLibreViewerProps) {
   const { t } = useTranslation();
   const mapRef = useRef<MapRef>(null);
@@ -291,6 +330,18 @@ export function MapLibreViewer({
     });
   }, [searchPin]);
 
+  const geoBounds = useMemo(() => (fitGeojson && geojsonLayers ? geojsonBounds(geojsonLayers) : null), [fitGeojson, geojsonLayers]);
+  const geoBoundsKey = geoBounds ? geoBounds.flat().join(',') : '';
+  useEffect(() => {
+    if (!geoBounds) return;
+    const map = mapRef.current;
+    if (!map) return;
+    const fit = () => map.fitBounds(geoBounds, { padding: 40, maxZoom: 19, duration: 0 });
+    if (map.loaded()) fit();
+    else map.once('load', fit);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [geoBoundsKey]);
+
   useEffect(() => {
     return () => {
       if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
@@ -381,6 +432,14 @@ export function MapLibreViewer({
               type="raster"
               paint={{ 'raster-opacity': Number(o.opacity) || 1 }}
             />
+          </Source>
+        ))}
+
+        {(geojsonLayers ?? []).map((set) => (
+          <Source key={set.id} id={`oe-geojson-${set.id}`} type="geojson" data={set.data}>
+            {set.layers.map((layer) => (
+              <Layer key={layer.id} {...(layer as LayerProps)} />
+            ))}
           </Source>
         ))}
 

@@ -20,7 +20,13 @@ from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.survey_core import crs as crs_lib
-from app.modules.survey_core.models import SurveyPoint, SurveyPointSet, SurveyProjectCrs
+from app.modules.survey_core.models import (
+    SurveyPoint,
+    SurveyPointSet,
+    SurveyProfile,
+    SurveyProjectCrs,
+    SurveyTraverse,
+)
 from app.modules.survey_core.point_io import (
     PRESETS,
     ParsedPoint,
@@ -51,11 +57,17 @@ from app.modules.survey_core.schemas import (
     ProjectCrsSet,
     ProjectCrsState,
     RegisterSummary,
+    SurveyProfileIn,
+    SurveyProfileOut,
     TransformRequest,
     TransformResponse,
+    TraverseCreate,
+    TraverseLegOut,
+    TraverseOut,
     ValidationReportOut,
 )
 from app.modules.survey_core.survey_math import same_position
+from app.modules.survey_core.traverse import close_traverse, level_verdict, parse_legs, traverse_verdict
 from app.modules.survey_core.validators import SURVEY_RULE_SET
 
 logger = logging.getLogger(__name__)
@@ -235,14 +247,21 @@ class SurveyService:
         await self._audit("approve", project_id, user_id, {"new": out.model_dump(mode="json")})
         return out
 
-    async def _audit(self, action: str, project_id: uuid.UUID, user_id: str, details: dict[str, Any]) -> None:
+    async def _audit(
+        self,
+        action: str,
+        project_id: uuid.UUID,
+        user_id: str,
+        details: dict[str, Any],
+        entity_type: str = "survey_project_crs",
+    ) -> None:
         try:
             from app.core.audit import audit_log  # noqa: PLC0415
 
             await audit_log(
                 self.session,
                 action=action,
-                entity_type="survey_project_crs",
+                entity_type=entity_type,
                 entity_id=str(project_id),
                 user_id=str(_uuid(user_id)) if _uuid(user_id) else None,
                 details=details,
@@ -476,6 +495,19 @@ class SurveyService:
                 {"point_id": pid, "e": e, "n": n, "z": z, "set_id": sid}
                 for pid, e, n, z, sid in await self.repo.point_positions(project_id)
             ],
+            "traverses": [
+                {
+                    "id": str(t.id),
+                    "name": t.name,
+                    "kind": t.kind,
+                    "ratio": t.ratio,
+                    "profile_ratio": t.profile_ratio,
+                    "misclosure_mm": _f(t.misclosure_mm),
+                    "allowed_mm": _f(t.allowed_mm),
+                    "k_mm": _f(t.k_mm),
+                }
+                for t in await self.repo.list_traverses(project_id)
+            ],
         }
 
     async def validate(self, project_id: uuid.UUID, locale: str = "en") -> ValidationReportOut:
@@ -519,6 +551,158 @@ class SurveyService:
             last_import=await self.repo.last_import(project_id),
         )
 
+    # ── Plan ───────────────────────────────────────────────────────────────
+
+    async def plan(self, project_id: uuid.UUID, limit: int = 5000) -> dict[str, Any]:
+        """Survey points as GeoJSON in WGS 84 for the map; a local grid stays in its own metres."""
+        from sqlalchemy import select  # noqa: PLC0415
+
+        from app.modules.survey_core import crs as crs_lib  # noqa: PLC0415
+
+        row = await self.repo.get_crs(project_id)
+        epsg = row.horizontal_epsg if row and not row.is_local_grid else None
+        rows = (
+            await self.session.execute(
+                select(SurveyPoint.point_id, SurveyPoint.e, SurveyPoint.n, SurveyPoint.z, SurveyPoint.kind)
+                .where(SurveyPoint.project_id == project_id)
+                .order_by(SurveyPoint.point_id)
+                .limit(limit)
+            )
+        ).all()
+        to_ll = crs_lib.wgs84_projector(epsg)
+        ll = to_ll([float(r[1]) for r in rows], [float(r[2]) for r in rows]) if rows else []
+        features = [
+            {
+                "type": "Feature",
+                "geometry": {"type": "Point", "coordinates": [lon, lat]},
+                "properties": {
+                    "layer": "points",
+                    "id": r[0],
+                    "kind": r[4],
+                    "e": float(r[1]),
+                    "n": float(r[2]),
+                    "z": float(r[3]) if r[3] is not None else None,
+                },
+            }
+            for r, (lon, lat) in zip(rows, ll, strict=True)
+        ]
+        return {
+            "type": "FeatureCollection",
+            "features": features,
+            "properties": {"epsg": epsg, "local_grid": epsg is None},
+        }
+
+    # ── Profiles ───────────────────────────────────────────────────────────
+
+    async def profile(self, project_id: uuid.UUID | None) -> SurveyProfileOut:
+        """The thresholds in force: the project's own row, else the workspace default, else none."""
+        row = await self.repo.get_profile(project_id) if project_id is not None else None
+        scope = "project"
+        if row is None:
+            row = await self.repo.get_profile(None)
+            scope = "workspace"
+        if row is None:
+            return SurveyProfileOut(scope="none")
+        return SurveyProfileOut(
+            scope=scope,  # type: ignore[arg-type]
+            source=row.source,
+            label=row.label,
+            traverse_min_ratio=row.traverse_min_ratio,
+            level_k_mm=_f(row.level_k_mm),
+            coverage_min_pct=_f(row.coverage_min_pct),
+        )
+
+    async def set_profile(
+        self, project_id: uuid.UUID | None, data: SurveyProfileIn, user_id: str, source: str = "user"
+    ) -> SurveyProfileOut:
+        """Write the project's profile, or the workspace default when ``project_id`` is None (audited)."""
+        row = await self.repo.get_profile(project_id)
+        old = None
+        if row is None:
+            row = SurveyProfile(project_id=project_id)
+            self.session.add(row)
+        else:
+            old = {
+                "label": row.label,
+                "traverse_min_ratio": row.traverse_min_ratio,
+                "level_k_mm": _f(row.level_k_mm),
+                "coverage_min_pct": _f(row.coverage_min_pct),
+            }
+        row.label = data.label
+        row.source = source
+        row.traverse_min_ratio = data.traverse_min_ratio
+        row.level_k_mm = _d(data.level_k_mm, "0.01")
+        row.coverage_min_pct = _d(data.coverage_min_pct, "0.01")
+        await self.session.flush()
+        await self._audit(
+            "update" if old else "create",
+            project_id or uuid.UUID(int=0),
+            user_id,
+            {"old": old, "new": data.model_dump(mode="json")},
+            entity_type="survey_profile",
+        )
+        return await self.profile(project_id)
+
+    # ── Traverses and level runs ───────────────────────────────────────────
+
+    async def create_traverse(self, project_id: uuid.UUID, data: TraverseCreate, user_id: str) -> TraverseOut:
+        """Compute and keep a closed traverse or a level run, judged against the profile in force."""
+        prof = await self.profile(project_id)
+        row = SurveyTraverse(project_id=project_id, name=data.name.strip(), kind=data.kind, note=data.note)
+        row.created_by = _uuid(user_id)
+        row.profile_label = prof.label
+        if data.kind == "traverse":
+            try:
+                legs = parse_legs(data.text)
+                result = close_traverse(legs)
+            except ValueError as exc:
+                raise _bad_request(str(exc)) from exc
+            row.legs = [
+                {
+                    "leg": leg.leg,
+                    "from": leg.start,
+                    "to": leg.end,
+                    "length_m": leg.length_m,
+                    "d_e": leg.d_e,
+                    "d_n": leg.d_n,
+                }
+                for leg in legs
+            ]
+            row.length_m = _d(result.length_m, "0.001")  # type: ignore[assignment]
+            row.f_e = _d(result.f_e)
+            row.f_n = _d(result.f_n)
+            row.misclosure_m = _d(result.misclosure_m)
+            row.ratio = result.ratio
+            row.profile_ratio = prof.traverse_min_ratio
+            row.verdict = traverse_verdict(result.ratio, prof.traverse_min_ratio)
+        else:
+            if data.distance_km is None or data.misclosure_mm is None:
+                raise _bad_request("A level run needs its distance (km) and misclosure (mm)")
+            k = data.k_mm if data.k_mm is not None else prof.level_k_mm
+            allowed, verdict = level_verdict(data.misclosure_mm, data.distance_km, k)
+            row.legs = []
+            row.length_m = _d(data.distance_km * 1000.0, "0.001")  # type: ignore[assignment]
+            row.distance_km = _d(data.distance_km)
+            row.misclosure_mm = _d(data.misclosure_mm, "0.01")
+            row.k_mm = _d(k, "0.01")
+            row.allowed_mm = _d(allowed, "0.01")
+            row.verdict = verdict
+        self.session.add(row)
+        await self.session.flush()
+        return _traverse_out(row)
+
+    async def list_traverses(self, project_id: uuid.UUID) -> list[TraverseOut]:
+        return [_traverse_out(t) for t in await self.repo.list_traverses(project_id)]
+
+    async def get_traverse(self, traverse_id: uuid.UUID) -> SurveyTraverse:
+        row = await self.repo.get_traverse(traverse_id)
+        if row is None:
+            raise not_found()
+        return row
+
+    async def delete_traverse(self, row: SurveyTraverse) -> None:
+        await self.repo.delete(row)
+
     @staticmethod
     def transform(req: TransformRequest) -> TransformResponse:
         pts = [(float(p[0]), float(p[1]), (p[2] if len(p) > 2 else None)) for p in req.points]
@@ -527,6 +711,48 @@ class SurveyService:
             return TransformResponse(source=_info(req.source_epsg), target=_info(req.target_epsg), points=moved)
         except ValueError as exc:
             raise _bad_request(str(exc)) from exc
+
+
+def _traverse_out(t: SurveyTraverse) -> TraverseOut:
+    length = float(t.length_m or 0)
+    f_e, f_n = _f(t.f_e) or 0.0, _f(t.f_n) or 0.0
+    legs = []
+    for leg in t.legs or []:
+        share = float(leg.get("length_m") or 0) / length if length > 0 else 0.0
+        legs.append(
+            TraverseLegOut(
+                leg=str(leg.get("leg") or ""),
+                start=str(leg.get("from") or ""),
+                end=str(leg.get("to") or ""),
+                length_m=float(leg.get("length_m") or 0),
+                d_e=float(leg.get("d_e") or 0),
+                d_n=float(leg.get("d_n") or 0),
+                c_e=round(-f_e * share, 4),
+                c_n=round(-f_n * share, 4),
+            )
+        )
+    return TraverseOut(
+        id=t.id,
+        project_id=t.project_id,
+        name=t.name,
+        kind=t.kind,
+        method=t.method,
+        legs=legs,
+        length_m=length,
+        f_e=_f(t.f_e),
+        f_n=_f(t.f_n),
+        misclosure_m=_f(t.misclosure_m),
+        ratio=t.ratio,
+        profile_ratio=t.profile_ratio,
+        distance_km=_f(t.distance_km),
+        misclosure_mm=_f(t.misclosure_mm),
+        k_mm=_f(t.k_mm),
+        allowed_mm=_f(t.allowed_mm),
+        verdict=t.verdict,
+        profile_label=t.profile_label,
+        note=t.note,
+        created_at=t.created_at,
+    )
 
 
 def _uuid(value: str | None) -> uuid.UUID | None:
