@@ -1197,3 +1197,7 @@ def _serialise_run(run: Any, *, steps: list[Any]) -> AgentRunResponse:
 from app.modules.ai_agents.catalogue_router import router as _catalogue_router  # noqa: E402
 
 router.include_router(_catalogue_router)
+
+from app.modules.ai_agents.site_router import router as _site_router  # noqa: E402
+
+router.include_router(_site_router)

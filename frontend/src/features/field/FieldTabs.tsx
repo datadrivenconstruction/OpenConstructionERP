@@ -25,7 +25,9 @@ import {
   writeCachedRoster,
   type CrewRosterMember,
 } from './crewRosterStore';
+import { SiteBriefingCard } from '@/features/ai-site/SiteBriefingCard';
 import {
+  fetchFieldBriefing,
   listEntries,
   listRoster,
   todayIso,
@@ -70,6 +72,11 @@ export function TodayTab({ session }: { session: FieldSession | null }) {
 
   return (
     <div className="flex w-full flex-col gap-3 px-4 py-4">
+      <SiteBriefingCard
+        projectId={session.projectId}
+        loader={() => fetchFieldBriefing(session)}
+        compact
+      />
       <div className="flex items-center justify-between">
         <h2 className="text-base font-semibold text-content-primary">
           {t('field.today_title', { defaultValue: "Today's diary" })}

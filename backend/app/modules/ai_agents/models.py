@@ -291,3 +291,18 @@ class AgentDraft(Base):
     reviewed_at: Mapped[str | None] = mapped_column(String(40), nullable=True)
     review_note: Mapped[str | None] = mapped_column(Text, nullable=True)
     applied_record_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
+
+
+class SiteAssistantPref(Base):
+    """One user's morning-briefing settings on one project."""
+
+    __tablename__ = "oe_ai_agents_site_pref"
+    __table_args__ = (UniqueConstraint("project_id", "user_id", name="uq_ai_agents_site_pref"),)
+
+    project_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(), ForeignKey("oe_projects_project.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    user_id: Mapped[uuid.UUID] = mapped_column(GUID(), nullable=False, index=True)
+    briefing_time: Mapped[str] = mapped_column(String(5), nullable=False, default="06:30", server_default="06:30")
+    enabled: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default="0")
+    enabled_sections: Mapped[list] = mapped_column(JSON, nullable=False, default=list)  # type: ignore[type-arg]

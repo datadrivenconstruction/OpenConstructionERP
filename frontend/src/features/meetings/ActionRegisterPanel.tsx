@@ -11,9 +11,11 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { AlertTriangle, ArrowUpRight, ListChecks, Loader2, Plus, Trash2 } from 'lucide-react';
+import { AlertTriangle, ArrowUpRight, ListChecks, Loader2, Plus, Sparkles, Trash2 } from 'lucide-react';
 import { Badge, Button } from '@/shared/ui';
 import { useToastStore } from '@/stores/useToastStore';
+import { useHasPermission } from '@/shared/lib/permissionGates';
+import { MeetingActionsDialog } from '@/features/ai-site/MeetingActionsDialog';
 import {
   ACTION_STATUSES,
   addMeetingAction,
@@ -164,6 +166,8 @@ export function ActionRegisterPanel({ meetingId, seriesId }: ActionRegisterPanel
   const qc = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
   const [showSeries, setShowSeries] = useState(false);
+  const [extractOpen, setExtractOpen] = useState(false);
+  const canExtract = useHasPermission('ai_agents.site.run');
 
   const [desc, setDesc] = useState('');
   const [owner, setOwner] = useState('');
@@ -248,6 +252,28 @@ export function ActionRegisterPanel({ meetingId, seriesId }: ActionRegisterPanel
             </span>
           )}
         </p>
+        {canExtract && (
+          <Button
+            variant="secondary"
+            size="sm"
+            icon={<Sparkles size={12} />}
+            onClick={(e) => {
+              e.stopPropagation();
+              setExtractOpen(true);
+            }}
+            data-testid="meeting-extract-actions"
+          >
+            {t('site_ai.actions.extract', { defaultValue: 'Extract actions' })}
+          </Button>
+        )}
+        {canExtract && (
+          <MeetingActionsDialog
+            open={extractOpen}
+            onClose={() => setExtractOpen(false)}
+            meetingId={meetingId}
+            onSaved={() => invalidate()}
+          />
+        )}
         {seriesId && (
           <Button
             variant="secondary"

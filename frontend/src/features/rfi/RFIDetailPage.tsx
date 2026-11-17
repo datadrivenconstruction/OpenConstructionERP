@@ -51,6 +51,7 @@ import { RaiseNoticeButton } from '@/features/variations/RaiseNoticeButton';
 import { IssueDocumentButton } from '@/features/doc-templates/IssueDocumentButton';
 import { useToastStore } from '@/stores/useToastStore';
 import { apiGet, type Page } from '@/shared/lib/api';
+import { RfiSendDialog } from '@/features/ai-site/RfiSendDialog';
 import { useAuthStore } from '@/stores/useAuthStore';
 import {
   closeRFI,
@@ -466,11 +467,15 @@ export function RFIDetailPage() {
       }),
   });
 
+  const canCheckRfi = useHasPermission('ai_agents.site.run');
+  const [checkOpen, setCheckOpen] = useState(false);
+
   // Publish a drafted RFI: draft -> open. The backend validates the
   // transition, so this affordance is only shown while status === 'draft'.
   const openMut = useMutation({
     mutationFn: () => updateRFI(rfiId as string, { status: 'open' }),
     onSuccess: () => {
+      setCheckOpen(false);
       invalidate();
       addToast({
         type: 'success',
@@ -697,7 +702,7 @@ export function RFIDetailPage() {
             <Button
               variant="primary"
               size="sm"
-              onClick={() => openMut.mutate()}
+              onClick={() => (canCheckRfi ? setCheckOpen(true) : openMut.mutate())}
               disabled={openMut.isPending}
               icon={
                 openMut.isPending ? (
@@ -1174,6 +1179,16 @@ export function RFIDetailPage() {
           isPending={updateMut.isPending}
           projectName={project?.name}
           projectId={rfi.project_id}
+        />
+      )}
+
+      {canCheckRfi && (
+        <RfiSendDialog
+          open={checkOpen}
+          rfiId={rfiId as string}
+          onClose={() => setCheckOpen(false)}
+          onSend={() => openMut.mutate()}
+          sending={openMut.isPending}
         />
       )}
 

@@ -1,6 +1,8 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 import { PhotoStrip } from '@/features/photos/components/PhotoStrip';
+import { DiaryDraftDialog } from '@/features/ai-site/DiaryDraftDialog';
+import { useHasPermission } from '@/shared/lib/permissionGates';
 import { useState, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -36,6 +38,7 @@ import {
   Orbit,
   Search,
   Check,
+  Sparkles,
   Loader2,
   Image as ImageIcon,
 } from 'lucide-react';
@@ -257,6 +260,9 @@ export function DailyDiaryPage() {
   const [tab, setTab] = useState<Tab>('diaries');
   const activeProjectId = useActiveProjectId();
   const [projectId, setProjectId] = useState<string>('');
+  const qcMain = useQueryClient();
+  const canDraftAi = useHasPermission('ai_agents.site.run');
+  const [draftOpen, setDraftOpen] = useState(false);
   const today = new Date();
   const [year, setYear] = useState(today.getFullYear());
   const [month, setMonth] = useState(today.getMonth());
@@ -440,6 +446,18 @@ export function DailyDiaryPage() {
               </Button>
             )}
             <VideoHint topic="daily-diary" className="self-center" />
+            {canDraftAi && (
+              <Button
+                variant="secondary"
+                size="sm"
+                icon={<Sparkles size={14} />}
+                onClick={() => setDraftOpen(true)}
+                disabled={!projectId}
+                data-testid="daily-diary-draft-ai"
+              >
+                {t('site_ai.diary.button', { defaultValue: 'Draft with AI' })}
+              </Button>
+            )}
             <Button
               variant="primary"
               size="sm"
@@ -661,6 +679,15 @@ export function DailyDiaryPage() {
       >
         <Plus size={22} />
       </button>
+      {canDraftAi && projectId && (
+        <DiaryDraftDialog
+          open={draftOpen}
+          onClose={() => setDraftOpen(false)}
+          projectId={projectId}
+          diaryDate={todayIso()}
+          onSaved={() => void qcMain.invalidateQueries({ queryKey: ['daily-diary'] })}
+        />
+      )}
     </div>
   );
 }

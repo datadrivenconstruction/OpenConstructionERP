@@ -105,6 +105,7 @@ import { DeleteAccountDialog } from './DeleteAccountDialog';
 import { DemoLeftoversPanel } from './DemoLeftoversPanel';
 import { ReferenceDataPanel } from './ReferenceDataPanel';
 import { invalidateProjectLists } from '@/features/projects/invalidateProjectLists';
+import { SiteAssistantsSettings } from '@/features/ai-site/SiteAssistantsSettings';
 
 // Audit log now lives as a Settings section (moved out of the sidebar admin
 // grid). We reuse the exact same page component - lazy-loaded so its filter /
@@ -2208,6 +2209,7 @@ export function SettingsPage() {
                 />
               </div>
               <AIConfigurationCard />
+              <SiteAssistantsSettings />
               <div className="lg:col-span-2">
                 <VectorStatusCard />
               </div>

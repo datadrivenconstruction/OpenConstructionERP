@@ -3275,5 +3275,23 @@
       "fail": "A scheduled report needs at least one recipient.",
       "suggestion": "Add a recipient or switch the schedule off."
     }
+  },
+  "ai_site_assistants": {
+    "minutes_min_length": {
+      "suggestion": "Write or paste the minutes first, then extract the actions.",
+      "fail": "The minutes have {length} characters; at least {minimum} are needed."
+    },
+    "project_in_scope": {
+      "suggestion": "Open the record from the project it belongs to.",
+      "fail": "The record does not belong to this project."
+    },
+    "diary_date_not_future": {
+      "suggestion": "Pick today or an earlier day.",
+      "fail": "The diary date {diary_date} is not valid or is in the future."
+    },
+    "rfi_in_draft": {
+      "suggestion": "Only a draft RFI can be checked before sending.",
+      "fail": "The RFI is {status}, not a draft."
+    }
   }
 }

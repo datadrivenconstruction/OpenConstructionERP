@@ -11,6 +11,7 @@
  */
 
 import type { CrewRosterMember } from './crewRosterStore';
+import type { BriefingEnvelope } from '@/features/ai-site/api';
 
 /** The field session, persisted by the PIN-redemption screen into sessionStorage. */
 export interface FieldSession {
@@ -155,4 +156,11 @@ export async function listActivities(
   if (!res.ok) return [];
   const data = (await res.json()) as { activities?: DiaryActivity[] } | null;
   return Array.isArray(data?.activities) ? (data?.activities ?? []) : [];
+}
+
+/** Latest morning briefing of the field user, or an empty envelope when there is none. */
+export async function fetchFieldBriefing(session: FieldSession): Promise<BriefingEnvelope> {
+  const res = await fetch('/api/v1/field-diary/briefing/', { headers: authHeaders(session) });
+  if (!res.ok) throw new Error(`briefing ${res.status}`);
+  return (await res.json()) as BriefingEnvelope;
 }
