@@ -32637,6 +32637,7 @@ const resource = {
     "finance.inbox.mailbox_saved": "הגדרות התיבה נשמרו",
     "finance.inbox.mailbox_invalid": "הגדרות התיבה אינן תקינות",
     "finance.inbox.mailbox_last_polled": "נבדק לאחרונה",
+    "finance.inbox.mailbox_host_not_allowed": "כתובת השרת הזו מפנה לרשת פרטית או פנימית ואינה מותרת. השתמשו בכתובת IMAP הציבורית של ספק הדואר שלכם.",
     "finance.summary_empty_add_budget": "הוספת שורות תקציב",
     "finance.summary_empty_add_invoice": "יצירת חשבונית",
     "finance.summary_empty_desc": "הוסיפו שורות תקציב או צרו חשבונית כדי להתחיל לעקוב אחר עלויות הפרויקט כאן.",

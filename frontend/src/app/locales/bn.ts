@@ -32268,6 +32268,7 @@ const resource = {
     "finance.inbox.mailbox_saved": "মেলবক্স সেটিংস সংরক্ষিত হয়েছে",
     "finance.inbox.mailbox_invalid": "এই মেলবক্স সেটিংস বৈধ নয়",
     "finance.inbox.mailbox_last_polled": "সর্বশেষ পরীক্ষা",
+    "finance.inbox.mailbox_host_not_allowed": "এই সার্ভার ঠিকানাটি একটি ব্যক্তিগত বা অভ্যন্তরীণ নেটওয়ার্ক নির্দেশ করে এবং এটি অনুমোদিত নয়। আপনার মেইল প্রদানকারীর পাবলিক IMAP ঠিকানা ব্যবহার করুন।",
     "finance.summary_empty_add_budget": "বাজেট লাইন যোগ করুন",
     "finance.summary_empty_add_invoice": "একটি ইনভয়েস তৈরি করুন",
     "finance.summary_empty_desc": "এখানে প্রজেক্টের খরচ ট্র্যাক করা শুরু করতে বাজেট লাইন যোগ করুন বা একটি ইনভয়েস তৈরি করুন।",

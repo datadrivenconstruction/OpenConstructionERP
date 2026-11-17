@@ -32333,6 +32333,7 @@ const resource = {
     "finance.inbox.mailbox_saved": "Жәшік параметрлері сақталды",
     "finance.inbox.mailbox_invalid": "Бұл жәшік параметрлері жарамсыз",
     "finance.inbox.mailbox_last_polled": "Соңғы тексеру",
+    "finance.inbox.mailbox_host_not_allowed": "Бұл сервер мекенжайы жеке немесе ішкі желіге сілтейді және рұқсат етілмейді. Пошта провайдерінің ашық IMAP мекенжайын пайдаланыңыз.",
     "finance.summary_empty_add_budget": "Смета жолдарын қосу",
     "finance.summary_empty_add_invoice": "Шот-фактура жасау",
     "finance.summary_empty_desc": "Жоба шығындарын мұнда бақылауды бастау үшін смета жолдарын қосыңыз немесе шот-фактура жасаңыз.",

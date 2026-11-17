@@ -33382,6 +33382,7 @@ const resource = {
     "finance.inbox.mailbox_saved": "Настройките на кутията са запазени",
     "finance.inbox.mailbox_invalid": "Тези настройки на кутията не са валидни",
     "finance.inbox.mailbox_last_polled": "Последна проверка",
+    "finance.inbox.mailbox_host_not_allowed": "Този адрес на сървър сочи към частна или вътрешна мрежа и не е разрешен. Използвайте публичния IMAP адрес на вашия пощенски доставчик.",
     "finance.summary_empty_add_budget": "Добави редове на бюджета",
     "finance.summary_empty_add_invoice": "Създай фактура",
     "finance.summary_empty_desc": "Добави редове на бюджета или създай фактура за начало на проследяване на разходите на проекта тук.",

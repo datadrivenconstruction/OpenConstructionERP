@@ -32268,6 +32268,7 @@ const resource = {
     "finance.inbox.mailbox_saved": "Na-save ang mga setting ng mailbox",
     "finance.inbox.mailbox_invalid": "Hindi valid ang mga setting ng mailbox na ito",
     "finance.inbox.mailbox_last_polled": "Huling sinuri",
+    "finance.inbox.mailbox_host_not_allowed": "Ang address ng server na ito ay tumuturo sa pribado o internal na network at hindi pinapayagan. Gamitin ang pampublikong IMAP address ng iyong mail provider.",
     "finance.summary_empty_add_budget": "Magdagdag ng mga linya ng budget",
     "finance.summary_empty_add_invoice": "Gumawa ng invoice",
     "finance.summary_empty_desc": "Magdagdag ng mga linya ng budget o gumawa ng invoice para simulan ang pagsubaybay sa gastos ng proyekto dito.",

@@ -32423,6 +32423,7 @@ const resource = {
     "finance.inbox.mailbox_saved": "تنظیمات صندوق ذخیره شد",
     "finance.inbox.mailbox_invalid": "این تنظیمات صندوق معتبر نیست",
     "finance.inbox.mailbox_last_polled": "آخرین بررسی",
+    "finance.inbox.mailbox_host_not_allowed": "این نشانی سرور به یک شبکهٔ خصوصی یا داخلی اشاره می‌کند و مجاز نیست. از نشانی عمومی IMAP ارائه‌دهندهٔ ایمیل خود استفاده کنید.",
     "finance.summary_empty_add_budget": "افزودن خطوط بودجه",
     "finance.summary_empty_add_invoice": "ایجاد فاکتور",
     "finance.summary_empty_desc": "برای شروع پیگیری هزینه‌های پروژه اینجا، خطوط بودجه اضافه کنید یا یک فاکتور ایجاد کنید.",

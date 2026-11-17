@@ -33665,6 +33665,7 @@ const resource = {
     "finance.inbox.mailbox_saved": "Paramètres de la boîte enregistrés",
     "finance.inbox.mailbox_invalid": "Ces paramètres de boîte ne sont pas valides",
     "finance.inbox.mailbox_last_polled": "Dernière vérification",
+    "finance.inbox.mailbox_host_not_allowed": "Cette adresse de serveur pointe vers un réseau privé ou interne et n'est pas autorisée. Utilisez l'adresse IMAP publique de votre fournisseur de messagerie.",
     "finance.summary_empty_add_budget": "Ajouter des lignes budgétaires",
     "finance.summary_empty_add_invoice": "Créer une facture",
     "finance.summary_empty_desc": "Ajoutez des lignes budgétaires ou créez une facture pour commencer à suivre les coûts du projet ici.",

@@ -33889,6 +33889,7 @@ const resource = {
     "finance.inbox.mailbox_saved": "Posta kutusu ayarları kaydedildi",
     "finance.inbox.mailbox_invalid": "Bu posta kutusu ayarları geçerli değil",
     "finance.inbox.mailbox_last_polled": "Son kontrol",
+    "finance.inbox.mailbox_host_not_allowed": "Bu sunucu adresi özel veya dahili bir ağa işaret ediyor ve izin verilmiyor. Posta sağlayıcınızın genel IMAP adresini kullanın.",
     "finance.summary_empty_add_budget": "Bütçe satırları ekle",
     "finance.summary_empty_add_invoice": "Fatura oluştur",
     "finance.summary_empty_desc": "Proje maliyetlerini burada izlemeye başlamak için bütçe satırları ekleyin veya fatura oluşturun.",

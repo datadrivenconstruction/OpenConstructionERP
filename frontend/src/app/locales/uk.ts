@@ -34088,6 +34088,7 @@ const resource = {
     "finance.inbox.mailbox_saved": "Налаштування скриньки збережено",
     "finance.inbox.mailbox_invalid": "Налаштування скриньки некоректні",
     "finance.inbox.mailbox_last_polled": "Остання перевірка",
+    "finance.inbox.mailbox_host_not_allowed": "Цей адрес сервера вказує на приватну або внутрішню мережу й не дозволений. Використовуйте публічну IMAP-адресу вашого поштового провайдера.",
     "finance.summary_empty_add_budget": "Додати бюджетні рядки",
     "finance.summary_empty_add_invoice": "Створити рахунок",
     "finance.summary_empty_desc": "Додайте бюджетні рядки або створіть рахунок, щоб почати відстежувати витрати проєкту тут.",

@@ -32090,6 +32090,7 @@ const resource = {
     "finance.inbox.mailbox_saved": "Configuración del buzón guardada",
     "finance.inbox.mailbox_invalid": "La configuración del buzón no es válida",
     "finance.inbox.mailbox_last_polled": "Última comprobación",
+    "finance.inbox.mailbox_host_not_allowed": "Esta dirección de servidor apunta a una red privada o interna y no está permitida. Utilice la dirección IMAP pública de su proveedor de correo.",
     "finance.summary_empty_add_budget": "Agregar líneas de presupuesto",
     "finance.summary_empty_add_invoice": "Crear una factura",
     "finance.summary_empty_desc": "Agrega líneas de presupuesto o crea una factura para comenzar a rastrear costos de proyecto aquí.",

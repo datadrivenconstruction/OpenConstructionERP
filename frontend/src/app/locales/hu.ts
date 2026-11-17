@@ -33214,6 +33214,7 @@ const resource = {
     "finance.inbox.mailbox_saved": "A postafiók beállításai mentve",
     "finance.inbox.mailbox_invalid": "Ezek a postafiók-beállítások érvénytelenek",
     "finance.inbox.mailbox_last_polled": "Utolsó ellenőrzés",
+    "finance.inbox.mailbox_host_not_allowed": "Ez a szerverczím privát vagy belső hálózatra mutat, ezért nem engedélyezett. Használja a levelezőszolgáltatója nyilvános IMAP-címét.",
     "finance.summary_empty_add_budget": "Költségkeret-sorok hozzáadása",
     "finance.summary_empty_add_invoice": "Számla létrehozása",
     "finance.summary_empty_desc": "Adjon hozzá költségkeret-sorokat vagy hozzon létre egy számlát a projektköltségek nyomon követéséhez.",

@@ -33393,6 +33393,7 @@ const resource = {
     "finance.inbox.mailbox_saved": "Mailboxinstellingen opgeslagen",
     "finance.inbox.mailbox_invalid": "Deze mailboxinstellingen zijn ongeldig",
     "finance.inbox.mailbox_last_polled": "Laatst gecontroleerd",
+    "finance.inbox.mailbox_host_not_allowed": "Dit serveradres verwijst naar een privénetwerk of intern netwerk en is niet toegestaan. Gebruik het openbare IMAP-adres van je mailprovider.",
     "finance.summary_empty_add_budget": "Begrotingsregels toevoegen",
     "finance.summary_empty_add_invoice": "Een factuur maken",
     "finance.summary_empty_desc": "Voeg begrotingsregels toe of maak een factuur om projectkosten hier bij te houden.",

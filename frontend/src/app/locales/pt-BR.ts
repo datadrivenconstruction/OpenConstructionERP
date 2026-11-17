@@ -32096,6 +32096,7 @@ const resource = {
     "finance.inbox.mailbox_saved": "Configurações da caixa salvas",
     "finance.inbox.mailbox_invalid": "Estas configurações da caixa não são válidas",
     "finance.inbox.mailbox_last_polled": "Última verificação",
+    "finance.inbox.mailbox_host_not_allowed": "Este endereço de servidor aponta para uma rede privada ou interna e não é permitido. Use o endereço IMAP público do seu provedor de e-mail.",
     "finance.summary_empty_add_budget": "Adicionar linhas de orçamento",
     "finance.summary_empty_add_invoice": "Criar uma fatura",
     "finance.summary_empty_desc": "Adicione linhas de orçamento ou crie uma fatura para começar a rastrear os custos do projeto aqui.",

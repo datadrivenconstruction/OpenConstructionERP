@@ -33174,6 +33174,7 @@ const resource = {
     "finance.inbox.mailbox_saved": "메일함 설정을 저장했습니다",
     "finance.inbox.mailbox_invalid": "이 메일함 설정이 올바르지 않습니다",
     "finance.inbox.mailbox_last_polled": "마지막 확인",
+    "finance.inbox.mailbox_host_not_allowed": "이 서버 주소는 사설 또는 내부 네트워크를 가리키고 있어 허용되지 않습니다. 메일 제공업체의 공개 IMAP 주소를 사용하세요.",
     "finance.summary_empty_add_budget": "예산 라인 추가",
     "finance.summary_empty_add_invoice": "송장 만들기",
     "finance.summary_empty_desc": "예산 라인을 추가하거나 송장을 만들어 여기서 프로젝트 비용을 추적합니다.",

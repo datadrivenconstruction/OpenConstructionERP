@@ -33496,6 +33496,7 @@ const resource = {
     "finance.inbox.mailbox_saved": "Postfach-Einstellungen gespeichert",
     "finance.inbox.mailbox_invalid": "Diese Postfach-Einstellungen sind ungültig",
     "finance.inbox.mailbox_last_polled": "Zuletzt geprüft",
+    "finance.inbox.mailbox_host_not_allowed": "Diese Serveradresse verweist auf ein privates oder internes Netzwerk und ist nicht zulässig. Verwenden Sie die öffentliche IMAP-Adresse Ihres Mailanbieters.",
     "finance.summary_empty_add_budget": "Budgetpositionen hinzufügen",
     "finance.summary_empty_add_invoice": "Erstellen Sie eine Rechnung",
     "finance.summary_empty_desc": "Fügen Sie Budgetpositionen hinzu oder erstellen Sie eine Rechnung, um die Projektkosten hier zu verfolgen.",

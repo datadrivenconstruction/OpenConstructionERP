@@ -34280,6 +34280,7 @@ const resource = {
     "finance.inbox.mailbox_saved": "تم حفظ إعدادات صندوق البريد",
     "finance.inbox.mailbox_invalid": "إعدادات صندوق البريد هذه غير صالحة",
     "finance.inbox.mailbox_last_polled": "آخر فحص",
+    "finance.inbox.mailbox_host_not_allowed": "عنوان الخادم هذا يشير إلى شبكة خاصة أو داخلية وغير مسموح به. استخدم عنوان IMAP العام لمزود البريد الخاص بك.",
     "finance.summary_empty_add_budget": "إضافة أسطر الميزانية",
     "finance.summary_empty_add_invoice": "إنشاء فاتورة",
     "finance.summary_empty_desc": "أضف أسطر الميزانية أو أنشئ فاتورة لبدء تتبع تكاليف المشروع هنا.",

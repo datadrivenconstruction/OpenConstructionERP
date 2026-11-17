@@ -32761,6 +32761,7 @@ const resource = {
     "finance.inbox.mailbox_saved": "Хайрцгийн тохиргоо хадгалагдлаа",
     "finance.inbox.mailbox_invalid": "Эдгээр хайрцгийн тохиргоо буруу байна",
     "finance.inbox.mailbox_last_polled": "Сүүлд шалгасан",
+    "finance.inbox.mailbox_host_not_allowed": "Энэ серверийн хаяг нь хувийн эсвэл дотоод сүлжээг заасан бөгөөд зөвшөөрөгдөөгүй. Шуудангийн үйлчилгээ үзүүлэгчийн нийтийн IMAP хаягийг ашиглана уу.",
     "finance.summary_empty_add_budget": "Төлөвлөгөө мөрүүдийг нэмэх",
     "finance.summary_empty_add_invoice": "Баримт үүсгэх",
     "finance.summary_empty_desc": "Төслийн зардлыг сүүлүүсэнд хянахын тулд төлөвлөгөөн мөр эсвэл баримт нэмнэ.",

@@ -33270,6 +33270,7 @@ const resource = {
     "finance.inbox.mailbox_saved": "Postkasti seaded salvestatud",
     "finance.inbox.mailbox_invalid": "Need postkasti seaded ei kehti",
     "finance.inbox.mailbox_last_polled": "Viimati kontrollitud",
+    "finance.inbox.mailbox_host_not_allowed": "See serveriaadress viitab privaatsele või sisevõrgule ja ei ole lubatud. Kasutage oma postiteenuse pakkuja avalikku IMAP-aadressi.",
     "finance.summary_empty_add_budget": "Lisa eelverered",
     "finance.summary_empty_add_invoice": "Loo arve",
     "finance.summary_empty_desc": "Lisa eelverered või loo arve, et hakata siin projekti kulusid jälgima.",
