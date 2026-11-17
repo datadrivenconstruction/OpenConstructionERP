@@ -148,7 +148,7 @@ describe('ScheduleInterchangePanel', () => {
     fireEvent.change(input, { target: { files: [file] } });
     expect(screen.getByTestId('schedule-vendor-import')).toBeDisabled();
     fireEvent.click(screen.getByTestId('schedule-vendor-preview'));
-    expect(await screen.findByText('Walls')).toBeInTheDocument();
+    expect(await screen.findByText('1 Walls')).toBeInTheDocument();
     await waitFor(() => expect(screen.getByTestId('schedule-vendor-import')).not.toBeDisabled());
     fireEvent.click(screen.getByTestId('schedule-vendor-import'));
 

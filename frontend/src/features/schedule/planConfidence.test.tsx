@@ -19,7 +19,10 @@ const { fill } = vi.hoisted(() => ({
   fill: (key: string, options?: Record<string, unknown>) =>
     String(options?.defaultValue ?? key).replace(/\{\{(\w+)\}\}/g, (_, field: string) => String(options?.[field] ?? '')),
 }));
-vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: fill }) }));
+vi.mock('react-i18next', () => ({
+  useTranslation: () => ({ t: fill }),
+  initReactI18next: { type: '3rdParty', init: () => undefined },
+}));
 const t = fill as unknown as TFunction;
 
 afterEach(cleanup);
