@@ -2258,5 +2258,41 @@
       "fail": "De hoeveelheid is vast volume (in de grond); de opbulkingsfactor is niet toegepast.",
       "suggestion": "Stuur in plaats daarvan de losse ontgraving als de bestekpost in losse grond wordt gemeten."
     }
+  },
+  "setting_out": {
+    "stake_off": {
+      "fail": "Uitzetpunt {id} wijkt {d} mm af, tolerantie {t} mm",
+      "suggestion": "Zet het punt opnieuw uit en leg het vast, of maak een NCR-concept."
+    },
+    "record_untraceable": {
+      "fail": "Uitzetregistratie {id} heeft geen instrument of aansluitpunten.",
+      "suggestion": "Vul het instrument en de vaste punten van de opstelling in."
+    },
+    "sheet": {
+      "title": "Uitzetstaat",
+      "project": "Project",
+      "crs": "Coördinatenstelsel",
+      "request": "Opdracht",
+      "tolerance": "Tolerantie",
+      "element": "Element",
+      "generated": "Gemaakt",
+      "point": "Punt",
+      "design_e": "Ontwerp E",
+      "design_n": "Ontwerp N",
+      "design_z": "Ontwerp Z",
+      "measured_e": "Gemeten E",
+      "measured_n": "Gemeten N",
+      "verdict": "Uitslag",
+      "by": "Gemeten door",
+      "verdict_pass": "Goed",
+      "verdict_fail": "Afgekeurd",
+      "verdict_open": "Open",
+      "verdict_no_tolerance": "Geen profiel",
+      "counts": "Goed: {passed} · Afgekeurd: {failed} · Open: {open}",
+      "findings": "Bevindingen",
+      "no_profile": "Geen profiel, stel er een in",
+      "d": "d (mm)",
+      "dz": "dZ (mm)"
+    }
   }
 }

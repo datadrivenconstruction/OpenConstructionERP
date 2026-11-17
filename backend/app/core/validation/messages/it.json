@@ -2258,5 +2258,41 @@
       "fail": "La quantità è volume in sito (nel terreno); il fattore di rigonfiamento non è applicato.",
       "suggestion": "Inviate invece lo scavo rigonfiato se la voce del computo è misurata come materiale sciolto."
     }
+  },
+  "setting_out": {
+    "stake_off": {
+      "fail": "Picchetto {id} fuori di {d} mm, tolleranza {t} mm",
+      "suggestion": "Ripicchetta il punto e registralo, oppure crea una bozza di NCR."
+    },
+    "record_untraceable": {
+      "fail": "Il rilievo di tracciamento {id} non indica strumento né punti di appoggio.",
+      "suggestion": "Inserisci lo strumento e i punti di appoggio della stazione."
+    },
+    "sheet": {
+      "title": "Scheda di tracciamento",
+      "project": "Progetto",
+      "crs": "Sistema di coordinate",
+      "request": "Richiesta",
+      "tolerance": "Tolleranza",
+      "element": "Elemento",
+      "generated": "Generato",
+      "point": "Punto",
+      "design_e": "E progetto",
+      "design_n": "N progetto",
+      "design_z": "Z progetto",
+      "measured_e": "E misurato",
+      "measured_n": "N misurato",
+      "verdict": "Esito",
+      "by": "Misurato da",
+      "verdict_pass": "Conforme",
+      "verdict_fail": "Non conforme",
+      "verdict_open": "Aperto",
+      "verdict_no_tolerance": "Nessun profilo",
+      "counts": "Conformi: {passed} · Non conformi: {failed} · Aperti: {open}",
+      "findings": "Rilievi",
+      "no_profile": "Nessun profilo, impostane uno",
+      "d": "d (mm)",
+      "dz": "dZ (mm)"
+    }
   }
 }

@@ -2258,5 +2258,41 @@
       "fail": "Mengden er faste masser (i grunnen); svellfaktoren er ikke brukt.",
       "suggestion": "Send heller løse masser fra utgraving hvis posten måles som løst materiale."
     }
+  },
+  "setting_out": {
+    "stake_off": {
+      "fail": "Utsettingspunkt {id} avviker {d} mm, toleranse {t} mm",
+      "suggestion": "Sett ut punktet på nytt og registrer det, eller lag et NCR-utkast."
+    },
+    "record_untraceable": {
+      "fail": "Utsettingsregistrering {id} mangler instrument eller fastmerker.",
+      "suggestion": "Oppgi instrumentet og fastmerkene stasjonen ble etablert på."
+    },
+    "sheet": {
+      "title": "Utsettingsskjema",
+      "project": "Prosjekt",
+      "crs": "Koordinatsystem",
+      "request": "Forespørsel",
+      "tolerance": "Toleranse",
+      "element": "Element",
+      "generated": "Laget",
+      "point": "Punkt",
+      "design_e": "Prosjektert E",
+      "design_n": "Prosjektert N",
+      "design_z": "Prosjektert Z",
+      "measured_e": "Målt E",
+      "measured_n": "Målt N",
+      "verdict": "Resultat",
+      "by": "Målt av",
+      "verdict_pass": "Godkjent",
+      "verdict_fail": "Avvist",
+      "verdict_open": "Åpen",
+      "verdict_no_tolerance": "Ingen profil",
+      "counts": "Godkjent: {passed} · Avvist: {failed} · Åpen: {open}",
+      "findings": "Funn",
+      "no_profile": "Ingen profil, angi en",
+      "d": "d (mm)",
+      "dz": "dZ (mm)"
+    }
   }
 }

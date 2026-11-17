@@ -2258,5 +2258,41 @@
       "fail": "A mennyiség tömör térfogat (a talajban); a lazulási tényező nincs alkalmazva.",
       "suggestion": "Küldje inkább a laza kitermelést, ha a költségvetési tétel laza anyagban mért."
     }
+  },
+  "setting_out": {
+    "stake_off": {
+      "fail": "A(z) {id} kitűzési pont eltérése {d} mm, tűrés {t} mm",
+      "suggestion": "Tűzze ki újra a pontot és rögzítse, vagy hozzon létre NCR-tervezetet."
+    },
+    "record_untraceable": {
+      "fail": "A(z) {id} kitűzési rekordból hiányzik a műszer vagy az alappont.",
+      "suggestion": "Adja meg a műszert és az alappontokat, amelyekre az állomás tájékozott."
+    },
+    "sheet": {
+      "title": "Kitűzési jegyzőkönyv",
+      "project": "Projekt",
+      "crs": "Koordináta-rendszer",
+      "request": "Kérés",
+      "tolerance": "Tűrés",
+      "element": "Elem",
+      "generated": "Készült",
+      "point": "Pont",
+      "design_e": "Terv E",
+      "design_n": "Terv N",
+      "design_z": "Terv Z",
+      "measured_e": "Mért E",
+      "measured_n": "Mért N",
+      "verdict": "Eredmény",
+      "by": "Mérte",
+      "verdict_pass": "Megfelel",
+      "verdict_fail": "Nem felel meg",
+      "verdict_open": "Nyitott",
+      "verdict_no_tolerance": "Nincs profil",
+      "counts": "Megfelel: {passed} · Nem felel meg: {failed} · Nyitott: {open}",
+      "findings": "Megállapítások",
+      "no_profile": "Nincs profil, adjon meg egyet",
+      "d": "d (mm)",
+      "dz": "dZ (mm)"
+    }
   }
 }

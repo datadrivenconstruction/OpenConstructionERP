@@ -2258,5 +2258,41 @@
       "fail": "A quantidade é volume no corte (no terreno); o fator de empolamento não é aplicado.",
       "suggestion": "Envie o corte empolado se a linha do orçamento for medida como material solto."
     }
+  },
+  "setting_out": {
+    "stake_off": {
+      "fail": "Locação {id} desviada {d} mm, tolerância {t} mm",
+      "suggestion": "Loque o ponto novamente e registe-o, ou crie um rascunho de NCR."
+    },
+    "record_untraceable": {
+      "fail": "O registo de locação {id} não indica instrumento nem pontos de apoio.",
+      "suggestion": "Indique o instrumento e os pontos de apoio da estação."
+    },
+    "sheet": {
+      "title": "Folha de locação",
+      "project": "Projeto",
+      "crs": "Sistema de coordenadas",
+      "request": "Pedido",
+      "tolerance": "Tolerância",
+      "element": "Elemento",
+      "generated": "Gerado",
+      "point": "Ponto",
+      "design_e": "E de projeto",
+      "design_n": "N de projeto",
+      "design_z": "Z de projeto",
+      "measured_e": "E medido",
+      "measured_n": "N medido",
+      "verdict": "Resultado",
+      "by": "Medido por",
+      "verdict_pass": "Conforme",
+      "verdict_fail": "Não conforme",
+      "verdict_open": "Aberto",
+      "verdict_no_tolerance": "Sem perfil",
+      "counts": "Conforme: {passed} · Não conforme: {failed} · Aberto: {open}",
+      "findings": "Constatações",
+      "no_profile": "Sem perfil, defina um",
+      "d": "d (mm)",
+      "dz": "dZ (mm)"
+    }
   }
 }

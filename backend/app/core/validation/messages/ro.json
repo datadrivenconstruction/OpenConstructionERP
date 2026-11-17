@@ -2258,5 +2258,41 @@
       "fail": "Cantitatea este volum în stare naturală (în teren); coeficientul de afânare nu este aplicat.",
       "suggestion": "Trimiteți săpătura afânată dacă articolul din antemăsurătoare se măsoară afânat."
     }
+  },
+  "setting_out": {
+    "stake_off": {
+      "fail": "Punctul trasat {id} deviază {d} mm, toleranță {t} mm",
+      "suggestion": "Trasați din nou punctul și înregistrați-l sau creați o ciornă NCR."
+    },
+    "record_untraceable": {
+      "fail": "Înregistrarea de trasare {id} nu are instrument sau puncte de sprijin.",
+      "suggestion": "Introduceți instrumentul și punctele de sprijin ale stației."
+    },
+    "sheet": {
+      "title": "Fișă de trasare",
+      "project": "Proiect",
+      "crs": "Sistem de coordonate",
+      "request": "Cerere",
+      "tolerance": "Toleranță",
+      "element": "Element",
+      "generated": "Generat",
+      "point": "Punct",
+      "design_e": "E proiect",
+      "design_n": "N proiect",
+      "design_z": "Z proiect",
+      "measured_e": "E măsurat",
+      "measured_n": "N măsurat",
+      "verdict": "Rezultat",
+      "by": "Măsurat de",
+      "verdict_pass": "Conform",
+      "verdict_fail": "Neconform",
+      "verdict_open": "Deschis",
+      "verdict_no_tolerance": "Fără profil",
+      "counts": "Conform: {passed} · Neconform: {failed} · Deschis: {open}",
+      "findings": "Constatări",
+      "no_profile": "Fără profil, setați unul",
+      "d": "d (mm)",
+      "dz": "dZ (mm)"
+    }
   }
 }

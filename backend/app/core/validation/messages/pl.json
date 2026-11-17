@@ -2258,5 +2258,41 @@
       "fail": "Ilość to objętość w stanie rodzimym (w gruncie); współczynnik spulchnienia nie jest zastosowany.",
       "suggestion": "Wyślij urobek spulchniony, jeśli pozycja przedmiaru jest mierzona w stanie luźnym."
     }
+  },
+  "setting_out": {
+    "stake_off": {
+      "fail": "Punkt {id} odchylony o {d} mm, tolerancja {t} mm",
+      "suggestion": "Wytycz punkt ponownie i zapisz pomiar albo utwórz szkic NCR."
+    },
+    "record_untraceable": {
+      "fail": "Zapis tyczenia {id} nie ma instrumentu ani punktów osnowy.",
+      "suggestion": "Wpisz instrument i punkty osnowy, na których stało stanowisko."
+    },
+    "sheet": {
+      "title": "Arkusz tyczenia",
+      "project": "Projekt",
+      "crs": "Układ współrzędnych",
+      "request": "Zlecenie",
+      "tolerance": "Tolerancja",
+      "element": "Element",
+      "generated": "Wygenerowano",
+      "point": "Punkt",
+      "design_e": "Projekt E",
+      "design_n": "Projekt N",
+      "design_z": "Projekt Z",
+      "measured_e": "Pomiar E",
+      "measured_n": "Pomiar N",
+      "verdict": "Wynik",
+      "by": "Zmierzył",
+      "verdict_pass": "W tolerancji",
+      "verdict_fail": "Poza tolerancją",
+      "verdict_open": "Otwarte",
+      "verdict_no_tolerance": "Brak profilu",
+      "counts": "W tolerancji: {passed} · Poza tolerancją: {failed} · Otwarte: {open}",
+      "findings": "Ustalenia",
+      "no_profile": "Brak profilu, ustaw go",
+      "d": "d (mm)",
+      "dz": "dZ (mm)"
+    }
   }
 }

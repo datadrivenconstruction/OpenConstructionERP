@@ -29,6 +29,7 @@
 import {
   Crosshair,
   Mountain,
+  Target,
   GitCompare,
   LayoutDashboard,
   FolderOpen,
@@ -174,6 +175,7 @@ const EXTRA_ROUTE_ICONS: Record<string, LucideIcon> = {
   '/geo': Globe,
   '/survey': Crosshair,
   '/survey/volumes': Mountain,
+  '/survey/setting-out': Target,
   // ── 5. Model Coordination ─────────────────────────────────────────
   '/coordination': LayoutDashboard,
   '/model-review': ScanEye,
