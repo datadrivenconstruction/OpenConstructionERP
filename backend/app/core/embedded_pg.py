@@ -392,6 +392,10 @@ def boot(data_dir: Path | str) -> bool:
         logger.error("%s", conflict.message)
         return False
 
+    # Debris from an initdb killed after bootstrap carries a PG_VERSION, so it
+    # reads as created, initdb is skipped and the postmaster refuses it forever.
+    _set_aside_never_started_cluster(pgdata)
+
     # pixeltable-pgserver hard-codes a 10s ``pg_ctl start -w`` timeout
     # (postgres_server.py). After an unclean shutdown (force-kill, crash, power
     # loss) PostgreSQL replays its WAL on the next boot. On a large cluster that
@@ -1453,6 +1457,37 @@ def _cluster_has_run(pgdata: Path) -> bool:
     which is the debris the reporting machine was left with.
     """
     return (pgdata / "postmaster.opts").is_file()
+
+
+def _set_aside_never_started_cluster(pgdata: Path) -> Path | None:
+    """Move a cluster that initdb created but no postmaster ever started out of the way.
+
+    initdb killed after its bootstrap leaves ``PG_VERSION``, so the cluster reads
+    as created, initdb is skipped and the postmaster refuses it on every start.
+    Without ``postmaster.opts`` nothing has ever written to it, so it holds no
+    user data; it is renamed, not deleted, and a fresh initdb follows. A
+    ``postmaster.pid`` defers to the pidfile logic, which owns that case.
+
+    Returns:
+        Where the folder was moved, or ``None`` when it was left in place.
+    """
+    if not (pgdata / "PG_VERSION").is_file():
+        return None
+    if _cluster_has_run(pgdata) or (pgdata / "postmaster.pid").exists():
+        return None
+    aside = pgdata.with_name(f"{pgdata.name}.incomplete-{int(time.time())}")
+    try:
+        pgdata.rename(aside)
+    except OSError as exc:
+        logger.warning("could not move the never-started database folder %s aside: %r", pgdata, exc)
+        return None
+    logger.warning(
+        "the database folder %s was created but never started (an interrupted initialisation); "
+        "moved it to %s and creating the database again",
+        pgdata,
+        aside,
+    )
+    return aside
 
 
 def cluster_path_must_be_ascii() -> bool:
