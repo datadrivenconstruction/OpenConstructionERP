@@ -3,6 +3,7 @@
 """Sealed estimate module manifest."""
 
 from app.core.module_loader import ModuleManifest
+from app.modules.estimate_archive.policy import markets
 
 manifest = ModuleManifest(
     name="oe_estimate_archive",
@@ -15,6 +16,8 @@ manifest = ModuleManifest(
     author="OpenConstructionERP Core Team",
     category="business",
     depends=["oe_users", "oe_projects", "oe_boq", "oe_contracts", "oe_documents", "oe_signing", "oe_variations"],
+    # Markets come from the profile data; elsewhere the Modules toggle still turns it on.
+    markets=markets(),
     auto_install=True,
     enabled=True,
 )
