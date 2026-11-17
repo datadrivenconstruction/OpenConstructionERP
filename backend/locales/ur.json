@@ -2729,5 +2729,30 @@
         "gap": "فرق"
       }
     }
-  }
+  },
+  "monitoring.crossed.fail": "نقطہ {id}: نقل مکانی {d} ملی میٹر یا شرح {r} ملی میٹر/دن نے سطح {level} عبور کی",
+  "monitoring.crossed.suggestion": "نقطہ اور ڈھانچہ دیکھیں، پھر نوٹ کے ساتھ الرٹ کی تصدیق کریں۔",
+  "monitoring.level.ok": "OK",
+  "monitoring.level.alert": "انتباہ",
+  "monitoring.level.action": "کارروائی",
+  "monitoring.level.alarm": "الارم",
+  "monitoring.risk.title": "مانیٹرنگ نقطہ {id}، سطح {level} پر",
+  "monitoring.risk.description": "نقل مکانی {d} ملی میٹر، شرح {r} ملی میٹر/دن، {profile} کے مقابلے میں۔ مسودہ مانیٹرنگ نے کھولا: اسے دیکھیں اور ذمہ دار مقرر کریں۔",
+  "monitoring.report.title": "مانیٹرنگ الارم رپورٹ",
+  "monitoring.report.project": "منصوبہ",
+  "monitoring.report.crs": "کوآرڈینیٹ نظام",
+  "monitoring.report.profile": "حد کا پروفائل",
+  "monitoring.report.generated": "تیار کردہ",
+  "monitoring.report.point": "نقطہ",
+  "monitoring.report.baseline": "بنیادی قدر (م)",
+  "monitoring.report.latest": "تازہ ترین قدر (م)",
+  "monitoring.report.displacement": "نقل مکانی (ملی میٹر)",
+  "monitoring.report.rate": "شرح (ملی میٹر/دن)",
+  "monitoring.report.level": "سطح",
+  "monitoring.report.acknowledged": "تصدیق شدہ",
+  "monitoring.report.counts": "الارم: {alarm} · کارروائی: {action} · انتباہ: {alert} · OK: {ok}",
+  "monitoring.report.findings": "نتائج",
+  "monitoring.report.no_profile": "کوئی پروفائل نہیں، ایک مقرر کریں",
+  "monitoring.report.ack_yes": "ہاں",
+  "monitoring.report.ack_no": "نہیں"
 }

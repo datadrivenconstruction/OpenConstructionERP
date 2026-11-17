@@ -2699,5 +2699,30 @@
         "gap": "Tekort"
       }
     }
-  }
+  },
+  "monitoring.crossed.fail": "Punt {id}: verplaatsing {d} mm of snelheid {r} mm/dag overschreed niveau {level}",
+  "monitoring.crossed.suggestion": "Controleer het punt en de constructie en bevestig daarna de waarschuwing met een notitie.",
+  "monitoring.level.ok": "OK",
+  "monitoring.level.alert": "Waarschuwing",
+  "monitoring.level.action": "Actie",
+  "monitoring.level.alarm": "Alarm",
+  "monitoring.risk.title": "Meetpunt {id} op niveau {level}",
+  "monitoring.risk.description": "Verplaatsing {d} mm, snelheid {r} mm/dag ten opzichte van {profile}. Concept geopend door monitoring: controleer het en wijs een verantwoordelijke aan.",
+  "monitoring.report.title": "Alarmrapport monitoring",
+  "monitoring.report.project": "Project",
+  "monitoring.report.crs": "Coördinatenstelsel",
+  "monitoring.report.profile": "Grenswaardenprofiel",
+  "monitoring.report.generated": "Gegenereerd",
+  "monitoring.report.point": "Punt",
+  "monitoring.report.baseline": "Referentie (m)",
+  "monitoring.report.latest": "Laatste waarde (m)",
+  "monitoring.report.displacement": "Verplaatsing (mm)",
+  "monitoring.report.rate": "Snelheid (mm/dag)",
+  "monitoring.report.level": "Niveau",
+  "monitoring.report.acknowledged": "Bevestigd",
+  "monitoring.report.counts": "Alarm: {alarm} · Actie: {action} · Waarschuwing: {alert} · OK: {ok}",
+  "monitoring.report.findings": "Bevindingen",
+  "monitoring.report.no_profile": "Geen profiel, stel er een in",
+  "monitoring.report.ack_yes": "Ja",
+  "monitoring.report.ack_no": "Nee"
 }

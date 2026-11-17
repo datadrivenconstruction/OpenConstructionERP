@@ -2706,5 +2706,30 @@
         "gap": "Brecha"
       }
     }
-  }
+  },
+  "monitoring.crossed.fail": "Punto {id}: desplazamiento {d} mm o velocidad {r} mm/día superó {level}",
+  "monitoring.crossed.suggestion": "Revise el punto y la estructura y, después, confirme la alerta con una nota.",
+  "monitoring.level.ok": "OK",
+  "monitoring.level.alert": "Alerta",
+  "monitoring.level.action": "Acción",
+  "monitoring.level.alarm": "Alarma",
+  "monitoring.risk.title": "Punto de monitoreo {id} en nivel {level}",
+  "monitoring.risk.description": "Desplazamiento {d} mm, velocidad {r} mm/día frente a {profile}. Borrador abierto por monitoreo: revíselo y asigne un responsable.",
+  "monitoring.report.title": "Informe de alarmas de monitoreo",
+  "monitoring.report.project": "Proyecto",
+  "monitoring.report.crs": "Sistema de coordenadas",
+  "monitoring.report.profile": "Perfil de umbrales",
+  "monitoring.report.generated": "Generado",
+  "monitoring.report.point": "Punto",
+  "monitoring.report.baseline": "Línea base (m)",
+  "monitoring.report.latest": "Última lectura (m)",
+  "monitoring.report.displacement": "Desplazamiento (mm)",
+  "monitoring.report.rate": "Velocidad (mm/día)",
+  "monitoring.report.level": "Nivel",
+  "monitoring.report.acknowledged": "Confirmado",
+  "monitoring.report.counts": "Alarma: {alarm} · Acción: {action} · Alerta: {alert} · OK: {ok}",
+  "monitoring.report.findings": "Hallazgos",
+  "monitoring.report.no_profile": "Sin perfil, defina uno",
+  "monitoring.report.ack_yes": "Sí",
+  "monitoring.report.ack_no": "No"
 }

@@ -2122,5 +2122,30 @@
       "file_missing": "ছবি '{name}'-এর ফাইল স্টোরেজে নেই",
       "file_missing_fix": "ছবিটি আবার আপলোড করুন বা ব্যাকআপ থেকে ফিরিয়ে আনুন"
     }
-  }
+  },
+  "monitoring.crossed.fail": "পয়েন্ট {id}: সরণ {d} মিমি বা হার {r} মিমি/দিন {level} স্তর অতিক্রম করেছে",
+  "monitoring.crossed.suggestion": "বিন্দু ও কাঠামো যাচাই করুন, তারপর একটি নোট দিয়ে সতর্কতা নিশ্চিত করুন।",
+  "monitoring.level.ok": "OK",
+  "monitoring.level.alert": "সতর্কতা",
+  "monitoring.level.action": "ব্যবস্থা",
+  "monitoring.level.alarm": "অ্যালার্ম",
+  "monitoring.risk.title": "মনিটরিং বিন্দু {id}, স্তর {level}",
+  "monitoring.risk.description": "সরণ {d} মিমি, হার {r} মিমি/দিন, {profile} অনুযায়ী। মনিটরিং থেকে খসড়া খোলা হয়েছে: পর্যালোচনা করে একজন দায়িত্বপ্রাপ্ত ব্যক্তি নির্ধারণ করুন।",
+  "monitoring.report.title": "মনিটরিং অ্যালার্ম প্রতিবেদন",
+  "monitoring.report.project": "প্রকল্প",
+  "monitoring.report.crs": "স্থানাঙ্ক ব্যবস্থা",
+  "monitoring.report.profile": "সীমা প্রোফাইল",
+  "monitoring.report.generated": "তৈরির সময়",
+  "monitoring.report.point": "বিন্দু",
+  "monitoring.report.baseline": "ভিত্তি মান (মি)",
+  "monitoring.report.latest": "সর্বশেষ মান (মি)",
+  "monitoring.report.displacement": "সরণ (মিমি)",
+  "monitoring.report.rate": "হার (মিমি/দিন)",
+  "monitoring.report.level": "স্তর",
+  "monitoring.report.acknowledged": "নিশ্চিত করা হয়েছে",
+  "monitoring.report.counts": "অ্যালার্ম: {alarm} · ব্যবস্থা: {action} · সতর্কতা: {alert} · OK: {ok}",
+  "monitoring.report.findings": "পর্যবেক্ষণ",
+  "monitoring.report.no_profile": "কোনো প্রোফাইল নেই, একটি ঠিক করুন",
+  "monitoring.report.ack_yes": "হ্যাঁ",
+  "monitoring.report.ack_no": "না"
 }

@@ -2728,5 +2728,30 @@
         "gap": "العجز"
       }
     }
-  }
+  },
+  "monitoring.crossed.fail": "النقطة {id}: الإزاحة {d} مم أو المعدل {r} مم/يوم تجاوزت {level}",
+  "monitoring.crossed.suggestion": "تحقّق من النقطة والمنشأة، ثم أكِّد التنبيه بملاحظة.",
+  "monitoring.level.ok": "OK",
+  "monitoring.level.alert": "تحذير",
+  "monitoring.level.action": "إجراء",
+  "monitoring.level.alarm": "إنذار",
+  "monitoring.risk.title": "نقطة الرصد {id} عند مستوى {level}",
+  "monitoring.risk.description": "الإزاحة {d} مم، والمعدل {r} مم/يوم مقارنةً بـ {profile}. أُنشئت المسودة من الرصد: راجعها وعيّن مسؤولاً.",
+  "monitoring.report.title": "تقرير إنذار الرصد",
+  "monitoring.report.project": "المشروع",
+  "monitoring.report.crs": "نظام الإحداثيات",
+  "monitoring.report.profile": "ملف الحدود",
+  "monitoring.report.generated": "تاريخ الإنشاء",
+  "monitoring.report.point": "النقطة",
+  "monitoring.report.baseline": "خط الأساس (م)",
+  "monitoring.report.latest": "آخر قراءة (م)",
+  "monitoring.report.displacement": "الإزاحة (مم)",
+  "monitoring.report.rate": "المعدل (مم/يوم)",
+  "monitoring.report.level": "المستوى",
+  "monitoring.report.acknowledged": "تم التأكيد",
+  "monitoring.report.counts": "الإنذار: {alarm} · الإجراء: {action} · التحذير: {alert} · OK: {ok}",
+  "monitoring.report.findings": "النتائج",
+  "monitoring.report.no_profile": "لا يوجد ملف، حدد واحداً",
+  "monitoring.report.ack_yes": "نعم",
+  "monitoring.report.ack_no": "لا"
 }

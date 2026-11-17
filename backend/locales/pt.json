@@ -2704,5 +2704,30 @@
         "gap": "Défice"
       }
     }
-  }
+  },
+  "monitoring.crossed.fail": "Ponto {id}: deslocamento {d} mm ou taxa {r} mm/dia ultrapassou o nível {level}",
+  "monitoring.crossed.suggestion": "Verifique o ponto e a estrutura e, depois, confirme o alerta com uma nota.",
+  "monitoring.level.ok": "OK",
+  "monitoring.level.alert": "Alerta",
+  "monitoring.level.action": "Ação",
+  "monitoring.level.alarm": "Alarme",
+  "monitoring.risk.title": "Ponto de monitorização {id} no nível {level}",
+  "monitoring.risk.description": "Deslocamento {d} mm, taxa {r} mm/dia face a {profile}. Rascunho aberto pela monitorização: reveja-o e indique um responsável.",
+  "monitoring.report.title": "Relatório de alarme de monitorização",
+  "monitoring.report.project": "Projeto",
+  "monitoring.report.crs": "Sistema de coordenadas",
+  "monitoring.report.profile": "Perfil de limites",
+  "monitoring.report.generated": "Gerado",
+  "monitoring.report.point": "Ponto",
+  "monitoring.report.baseline": "Referência (m)",
+  "monitoring.report.latest": "Última leitura (m)",
+  "monitoring.report.displacement": "Deslocamento (mm)",
+  "monitoring.report.rate": "Taxa (mm/dia)",
+  "monitoring.report.level": "Nível",
+  "monitoring.report.acknowledged": "Confirmado",
+  "monitoring.report.counts": "Alarme: {alarm} · Ação: {action} · Alerta: {alert} · OK: {ok}",
+  "monitoring.report.findings": "Conclusões",
+  "monitoring.report.no_profile": "Sem perfil, defina um",
+  "monitoring.report.ack_yes": "Sim",
+  "monitoring.report.ack_no": "Não"
 }

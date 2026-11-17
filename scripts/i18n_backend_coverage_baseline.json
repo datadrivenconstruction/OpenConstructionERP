@@ -1,5 +1,5 @@
 {
-  "english_keys": 2096,
+  "english_keys": 2144,
   "locales": {
     "ar": {
       "missing": 0,
@@ -10,8 +10,8 @@
       "digest": "e3b0c44298fc1c14"
     },
     "bn": {
-      "missing": 468,
-      "digest": "2e06ac0f33795dba"
+      "missing": 491,
+      "digest": "c44c5e9635e9c1e2"
     },
     "cs": {
       "missing": 0,

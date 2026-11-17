@@ -2722,5 +2722,30 @@
         "gap": "Chênh lệch"
       }
     }
-  }
+  },
+  "monitoring.crossed.fail": "Điểm {id}: dịch chuyển {d} mm hoặc tốc độ {r} mm/ngày đã vượt mức {level}",
+  "monitoring.crossed.suggestion": "Kiểm tra điểm và công trình, sau đó xác nhận cảnh báo kèm ghi chú.",
+  "monitoring.level.ok": "OK",
+  "monitoring.level.alert": "Cảnh báo",
+  "monitoring.level.action": "Hành động",
+  "monitoring.level.alarm": "Báo động",
+  "monitoring.risk.title": "Điểm giám sát {id} ở mức {level}",
+  "monitoring.risk.description": "Dịch chuyển {d} mm, tốc độ {r} mm/ngày so với {profile}. Bản nháp do giám sát mở: hãy xem xét và chỉ định người phụ trách.",
+  "monitoring.report.title": "Báo cáo cảnh báo giám sát",
+  "monitoring.report.project": "Dự án",
+  "monitoring.report.crs": "Hệ tọa độ",
+  "monitoring.report.profile": "Hồ sơ ngưỡng",
+  "monitoring.report.generated": "Đã tạo",
+  "monitoring.report.point": "Điểm",
+  "monitoring.report.baseline": "Giá trị gốc (m)",
+  "monitoring.report.latest": "Giá trị gần nhất (m)",
+  "monitoring.report.displacement": "Dịch chuyển (mm)",
+  "monitoring.report.rate": "Tốc độ (mm/ngày)",
+  "monitoring.report.level": "Mức",
+  "monitoring.report.acknowledged": "Đã xác nhận",
+  "monitoring.report.counts": "Báo động: {alarm} · Hành động: {action} · Cảnh báo: {alert} · OK: {ok}",
+  "monitoring.report.findings": "Kết luận",
+  "monitoring.report.no_profile": "Chưa có hồ sơ, hãy đặt một hồ sơ",
+  "monitoring.report.ack_yes": "Có",
+  "monitoring.report.ack_no": "Không"
 }

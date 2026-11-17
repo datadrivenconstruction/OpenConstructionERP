@@ -2725,5 +2725,30 @@
         "gap": "Manjak"
       }
     }
-  }
+  },
+  "monitoring.crossed.fail": "Točka {id}: pomak {d} mm ili brzina {r} mm/dan prekoračila je razinu {level}",
+  "monitoring.crossed.suggestion": "Provjerite točku i građevinu, zatim potvrdite upozorenje bilješkom.",
+  "monitoring.level.ok": "OK",
+  "monitoring.level.alert": "Upozorenje",
+  "monitoring.level.action": "Intervencija",
+  "monitoring.level.alarm": "Alarm",
+  "monitoring.risk.title": "Točka praćenja {id} na razini {level}",
+  "monitoring.risk.description": "Pomak {d} mm, brzina {r} mm/dan u odnosu na {profile}. Nacrt je otvorio sustav praćenja: pregledajte ga i odredite odgovornu osobu.",
+  "monitoring.report.title": "Izvješće o alarmima praćenja",
+  "monitoring.report.project": "Projekt",
+  "monitoring.report.crs": "Koordinatni sustav",
+  "monitoring.report.profile": "Profil granica",
+  "monitoring.report.generated": "Generirano",
+  "monitoring.report.point": "Točka",
+  "monitoring.report.baseline": "Početna vrijednost (m)",
+  "monitoring.report.latest": "Zadnja vrijednost (m)",
+  "monitoring.report.displacement": "Pomak (mm)",
+  "monitoring.report.rate": "Brzina (mm/dan)",
+  "monitoring.report.level": "Razina",
+  "monitoring.report.acknowledged": "Potvrđeno",
+  "monitoring.report.counts": "Alarm: {alarm} · Intervencija: {action} · Upozorenje: {alert} · OK: {ok}",
+  "monitoring.report.findings": "Nalazi",
+  "monitoring.report.no_profile": "Nema profila, postavite ga",
+  "monitoring.report.ack_yes": "Da",
+  "monitoring.report.ack_no": "Ne"
 }

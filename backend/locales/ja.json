@@ -2720,5 +2720,30 @@
         "gap": "過不足"
       }
     }
-  }
+  },
+  "monitoring.crossed.fail": "測点 {id}: 変位 {d} mm または速度 {r} mm/日 が {level} の限界を超えました",
+  "monitoring.crossed.suggestion": "測点と構造物を確認し、そのうえでメモを添えてアラートを確認してください。",
+  "monitoring.level.ok": "OK",
+  "monitoring.level.alert": "注意",
+  "monitoring.level.action": "対応",
+  "monitoring.level.alarm": "アラーム",
+  "monitoring.risk.title": "監視点 {id}、レベル {level}",
+  "monitoring.risk.description": "変位 {d} mm、速度 {r} mm/日（{profile} に対して）。監視機能が下書きを作成しました。内容を確認し、担当者を決めてください。",
+  "monitoring.report.title": "監視アラームレポート",
+  "monitoring.report.project": "プロジェクト",
+  "monitoring.report.crs": "座標系",
+  "monitoring.report.profile": "しきい値プロファイル",
+  "monitoring.report.generated": "作成日時",
+  "monitoring.report.point": "点",
+  "monitoring.report.baseline": "基準値 (m)",
+  "monitoring.report.latest": "最新値 (m)",
+  "monitoring.report.displacement": "変位 (mm)",
+  "monitoring.report.rate": "速度 (mm/日)",
+  "monitoring.report.level": "レベル",
+  "monitoring.report.acknowledged": "確認済み",
+  "monitoring.report.counts": "アラーム: {alarm} · 対応: {action} · 注意: {alert} · OK: {ok}",
+  "monitoring.report.findings": "所見",
+  "monitoring.report.no_profile": "プロファイルがありません。設定してください",
+  "monitoring.report.ack_yes": "はい",
+  "monitoring.report.ack_no": "いいえ"
 }

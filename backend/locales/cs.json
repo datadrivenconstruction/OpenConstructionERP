@@ -2729,5 +2729,30 @@
         "gap": "Schodek"
       }
     }
-  }
+  },
+  "monitoring.crossed.fail": "Bod {id}: posun {d} mm nebo rychlost {r} mm/den překročila úroveň {level}",
+  "monitoring.crossed.suggestion": "Zkontrolujte bod a konstrukci a poté výstrahu potvrďte poznámkou.",
+  "monitoring.level.ok": "OK",
+  "monitoring.level.alert": "Výstraha",
+  "monitoring.level.action": "Zásah",
+  "monitoring.level.alarm": "Poplach",
+  "monitoring.risk.title": "Monitorovací bod {id} na úrovni {level}",
+  "monitoring.risk.description": "Posun {d} mm, rychlost {r} mm/den oproti {profile}. Koncept otevřel monitoring: zkontrolujte jej a určete odpovědnou osobu.",
+  "monitoring.report.title": "Poplachová zpráva monitoringu",
+  "monitoring.report.project": "Projekt",
+  "monitoring.report.crs": "Souřadnicový systém",
+  "monitoring.report.profile": "Profil limitů",
+  "monitoring.report.generated": "Vygenerováno",
+  "monitoring.report.point": "Bod",
+  "monitoring.report.baseline": "Výchozí hodnota (m)",
+  "monitoring.report.latest": "Poslední hodnota (m)",
+  "monitoring.report.displacement": "Posun (mm)",
+  "monitoring.report.rate": "Rychlost (mm/den)",
+  "monitoring.report.level": "Úroveň",
+  "monitoring.report.acknowledged": "Potvrzeno",
+  "monitoring.report.counts": "Poplach: {alarm} · Zásah: {action} · Výstraha: {alert} · OK: {ok}",
+  "monitoring.report.findings": "Zjištění",
+  "monitoring.report.no_profile": "Žádný profil, nastavte ho",
+  "monitoring.report.ack_yes": "Ano",
+  "monitoring.report.ack_no": "Ne"
 }
