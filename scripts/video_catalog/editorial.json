@@ -237,13 +237,45 @@
       "channel": "academy",
       "order": 86
     },
+    "playbook-vietnam": {
+      "title": "Builder's Playbook Việt Nam: dự toán và hợp đồng xây nhà",
+      "language": "vi",
+      "market": "VN",
+      "playlist": "PLKmnwe8BRoNc",
+      "channel": "academy",
+      "order": 88
+    },
+    "playbook-indonesia": {
+      "title": "Builder's Playbook Indonesia: RAB dan kontrak rumah",
+      "language": "id",
+      "market": "ID",
+      "playlist": "PLD-789hbzDsc",
+      "channel": "academy",
+      "order": 90
+    },
+    "playbook-india": {
+      "title": "Builder's Playbook भारत: घर बनाने का खर्चा, ठेका और बिल",
+      "language": "hi",
+      "market": "IN",
+      "playlist": "PLRwew5qHBFVA",
+      "channel": "academy",
+      "order": 92
+    },
+    "playbook-russia": {
+      "title": "Builder's Playbook Россия: смета и договор частного дома",
+      "language": "ru",
+      "market": "RU",
+      "playlist": "PLRym5GPIX8ro",
+      "channel": "academy",
+      "order": 94
+    },
     "ddc-walkthroughs": {
       "title": "Product walkthroughs and talks",
       "titleKey": "videos.series.walkthroughs",
       "language": "en",
       "market": null,
       "channel": "ddc",
-      "order": 90
+      "order": 100
     }
   },
   "gallery_series": {
@@ -1340,6 +1372,226 @@
       "cases": ["assess-and-price-a-variation", "change-to-paid-variation", "change-register-and-impact"],
       "result": "change",
       "provenance": "videos-refresh-2026-11-06"
+    },
+    "VN01": {
+      "youtubeId": "8eWSMK_fXjc",
+      "series": "playbook-vietnam",
+      "seriesOrder": 1,
+      "stage": "estimate",
+      "roles": ["estimator", "quantity-surveyor"],
+      "market": "VN",
+      "cases": ["measure-the-drawing-into-a-coded-bill-item", "estimate-from-cost-database", "validate-estimate"],
+      "result": "bill",
+      "provenance": "videos-refresh-2026-11-17"
+    },
+    "VN02": {
+      "youtubeId": "BFer60dLNI8",
+      "series": "playbook-vietnam",
+      "seriesOrder": 2,
+      "stage": "procure",
+      "roles": ["estimator", "procurement-buyer"],
+      "market": "VN",
+      "cases": ["compare-bids-and-award", "level-bids-to-a-common-scope", "tender-from-boq"],
+      "result": "award",
+      "provenance": "videos-refresh-2026-11-17"
+    },
+    "VN03": {
+      "youtubeId": "dRdYFzYndmE",
+      "series": "playbook-vietnam",
+      "seriesOrder": 3,
+      "stage": "plan",
+      "roles": ["contract-administrator", "commercial-manager"],
+      "market": "VN",
+      "cases": ["build-a-milestone-payment-schedule", "manage-retention-across-the-supply-chain", "forecast-project-cash-flow"],
+      "result": "order",
+      "provenance": "videos-refresh-2026-11-17"
+    },
+    "VN04": {
+      "youtubeId": "zh_PBOJPH50",
+      "series": "playbook-vietnam",
+      "seriesOrder": 4,
+      "stage": "build",
+      "roles": ["quantity-surveyor", "accountant"],
+      "market": "VN",
+      "cases": ["prepare-an-interim-payment-application", "value-the-month-and-certify-the-progress-payment", "manage-retention-across-the-supply-chain"],
+      "result": "invoice",
+      "provenance": "videos-refresh-2026-11-17"
+    },
+    "VN05": {
+      "youtubeId": "w5PhSznRqNw",
+      "series": "playbook-vietnam",
+      "seriesOrder": 5,
+      "stage": "handover",
+      "roles": ["commercial-manager", "contract-administrator"],
+      "market": "VN",
+      "cases": ["assess-and-price-a-variation", "change-to-paid-variation", "agree-the-final-account-and-release-retention"],
+      "result": "handover",
+      "provenance": "videos-refresh-2026-11-17"
+    },
+    "ID01": {
+      "youtubeId": "zJ0VVl9nF68",
+      "series": "playbook-indonesia",
+      "seriesOrder": 1,
+      "stage": "estimate",
+      "roles": ["estimator", "quantity-surveyor"],
+      "market": "ID",
+      "cases": ["measure-the-drawing-into-a-coded-bill-item", "estimate-from-cost-database", "validate-estimate"],
+      "result": "bill",
+      "provenance": "videos-refresh-2026-11-17"
+    },
+    "ID02": {
+      "youtubeId": "pBWmaOlDWtQ",
+      "series": "playbook-indonesia",
+      "seriesOrder": 2,
+      "stage": "procure",
+      "roles": ["estimator", "procurement-buyer"],
+      "market": "ID",
+      "cases": ["compare-bids-and-award", "level-bids-to-a-common-scope", "tender-from-boq"],
+      "result": "award",
+      "provenance": "videos-refresh-2026-11-17"
+    },
+    "ID03": {
+      "youtubeId": "O_o5bdauaTo",
+      "series": "playbook-indonesia",
+      "seriesOrder": 3,
+      "stage": "plan",
+      "roles": ["contract-administrator", "commercial-manager"],
+      "market": "ID",
+      "cases": ["build-a-milestone-payment-schedule", "manage-retention-across-the-supply-chain", "forecast-project-cash-flow"],
+      "result": "order",
+      "provenance": "videos-refresh-2026-11-17"
+    },
+    "ID04": {
+      "youtubeId": "rI6wyyT0sdo",
+      "series": "playbook-indonesia",
+      "seriesOrder": 4,
+      "stage": "build",
+      "roles": ["quantity-surveyor", "accountant"],
+      "market": "ID",
+      "cases": ["prepare-an-interim-payment-application", "value-the-month-and-certify-the-progress-payment", "manage-retention-across-the-supply-chain"],
+      "result": "invoice",
+      "provenance": "videos-refresh-2026-11-17"
+    },
+    "ID05": {
+      "youtubeId": "Bg8xsRKARY8",
+      "series": "playbook-indonesia",
+      "seriesOrder": 5,
+      "stage": "handover",
+      "roles": ["commercial-manager", "contract-administrator"],
+      "market": "ID",
+      "cases": ["assess-and-price-a-variation", "change-to-paid-variation", "agree-the-final-account-and-release-retention"],
+      "result": "handover",
+      "provenance": "videos-refresh-2026-11-17"
+    },
+    "HI01": {
+      "youtubeId": "NUnADzlgAlQ",
+      "series": "playbook-india",
+      "seriesOrder": 1,
+      "stage": "estimate",
+      "roles": ["estimator", "quantity-surveyor"],
+      "market": "IN",
+      "cases": ["measure-the-drawing-into-a-coded-bill-item", "estimate-from-cost-database", "validate-estimate"],
+      "result": "bill",
+      "provenance": "videos-refresh-2026-11-17"
+    },
+    "HI02": {
+      "youtubeId": "rxl3DChsF2U",
+      "series": "playbook-india",
+      "seriesOrder": 2,
+      "stage": "procure",
+      "roles": ["estimator", "procurement-buyer"],
+      "market": "IN",
+      "cases": ["compare-bids-and-award", "level-bids-to-a-common-scope", "tender-from-boq"],
+      "result": "award",
+      "provenance": "videos-refresh-2026-11-17"
+    },
+    "HI03": {
+      "youtubeId": "6KMjjYriI5A",
+      "series": "playbook-india",
+      "seriesOrder": 3,
+      "stage": "plan",
+      "roles": ["contract-administrator", "commercial-manager"],
+      "market": "IN",
+      "cases": ["build-a-milestone-payment-schedule", "manage-retention-across-the-supply-chain", "forecast-project-cash-flow"],
+      "result": "order",
+      "provenance": "videos-refresh-2026-11-17"
+    },
+    "HI04": {
+      "youtubeId": "yArrQJpWS1E",
+      "series": "playbook-india",
+      "seriesOrder": 4,
+      "stage": "build",
+      "roles": ["quantity-surveyor", "accountant"],
+      "market": "IN",
+      "cases": ["prepare-an-interim-payment-application", "value-the-month-and-certify-the-progress-payment", "manage-retention-across-the-supply-chain"],
+      "result": "invoice",
+      "provenance": "videos-refresh-2026-11-17"
+    },
+    "HI05": {
+      "youtubeId": "j139TGE3M2I",
+      "series": "playbook-india",
+      "seriesOrder": 5,
+      "stage": "handover",
+      "roles": ["commercial-manager", "contract-administrator"],
+      "market": "IN",
+      "cases": ["assess-and-price-a-variation", "change-to-paid-variation", "agree-the-final-account-and-release-retention"],
+      "result": "handover",
+      "provenance": "videos-refresh-2026-11-17"
+    },
+    "RU01": {
+      "youtubeId": "PhQhb4OsVgI",
+      "series": "playbook-russia",
+      "seriesOrder": 1,
+      "stage": "estimate",
+      "roles": ["estimator", "quantity-surveyor"],
+      "market": "RU",
+      "cases": ["measure-the-drawing-into-a-coded-bill-item", "estimate-from-cost-database", "validate-estimate"],
+      "result": "bill",
+      "provenance": "videos-refresh-2026-11-17"
+    },
+    "RU02": {
+      "youtubeId": "Cz7XcSbIka4",
+      "series": "playbook-russia",
+      "seriesOrder": 2,
+      "stage": "procure",
+      "roles": ["estimator", "procurement-buyer"],
+      "market": "RU",
+      "cases": ["compare-bids-and-award", "level-bids-to-a-common-scope", "tender-from-boq"],
+      "result": "award",
+      "provenance": "videos-refresh-2026-11-17"
+    },
+    "RU03": {
+      "youtubeId": "7h79CJJ1v5M",
+      "series": "playbook-russia",
+      "seriesOrder": 3,
+      "stage": "plan",
+      "roles": ["contract-administrator", "commercial-manager"],
+      "market": "RU",
+      "cases": ["build-a-milestone-payment-schedule", "manage-retention-across-the-supply-chain", "forecast-project-cash-flow"],
+      "result": "order",
+      "provenance": "videos-refresh-2026-11-17"
+    },
+    "RU04": {
+      "youtubeId": "p7GMZ37XpbI",
+      "series": "playbook-russia",
+      "seriesOrder": 4,
+      "stage": "build",
+      "roles": ["quantity-surveyor", "accountant"],
+      "market": "RU",
+      "cases": ["prepare-an-interim-payment-application", "value-the-month-and-certify-the-progress-payment", "manage-retention-across-the-supply-chain"],
+      "result": "invoice",
+      "provenance": "videos-refresh-2026-11-17"
+    },
+    "RU05": {
+      "youtubeId": "Y1OO6JD4mto",
+      "series": "playbook-russia",
+      "seriesOrder": 5,
+      "stage": "handover",
+      "roles": ["commercial-manager", "contract-administrator"],
+      "market": "RU",
+      "cases": ["assess-and-price-a-variation", "change-to-paid-variation", "agree-the-final-account-and-release-retention"],
+      "result": "handover",
+      "provenance": "videos-refresh-2026-11-17"
     }
   },
   "extras": [

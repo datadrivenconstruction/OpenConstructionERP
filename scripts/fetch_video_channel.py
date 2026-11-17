@@ -19,7 +19,7 @@ public, and exits 1 if there is any. It reads only the uploads list, so the
 weekly workflow can run it without the video production files.
 
 Usage:
-    py -3.14 scripts/fetch_video_channel.py [--out FILE] [--check]
+    py -3.14 scripts/fetch_video_channel.py [--out FILE] [--check] [--reuse]
 """
 
 from __future__ import annotations
@@ -29,6 +29,8 @@ import html
 import json
 import re
 import sys
+import time
+import urllib.error
 import urllib.request
 from pathlib import Path
 
@@ -50,8 +52,15 @@ CHAPTER_LINE = re.compile(r"^((?:\d+:)?\d{1,2}:\d{2})\s+(.+)$", re.MULTILINE)
 def get(url: str) -> str:
     """Fetch a public YouTube page as text."""
     request = urllib.request.Request(url, headers=HEADERS)
-    with urllib.request.urlopen(request, timeout=40) as response:
-        return response.read().decode("utf-8")
+    for attempt in range(5):
+        try:
+            with urllib.request.urlopen(request, timeout=40) as response:
+                return response.read().decode("utf-8")
+        except urllib.error.HTTPError as error:
+            if error.code != 429 or attempt == 4:
+                raise
+            time.sleep(30 * (attempt + 1))
+    raise AssertionError("unreachable")
 
 
 def unique(pattern: re.Pattern[str], text: str) -> list[str]:
@@ -70,6 +79,16 @@ def clock_to_seconds(clock: str) -> int:
 def first_paragraph(text: str) -> str:
     """The first paragraph of a description, joined onto one line."""
     return " ".join(text.strip().split("\n\n")[0].split())
+
+
+def first_chapter_block(chapters: list[dict]) -> list[dict]:
+    """The first run of strictly rising chapter times; a description that repeats its list keeps one copy."""
+    kept: list[dict] = []
+    for chapter in chapters:
+        if kept and chapter["t"] <= kept[-1]["t"]:
+            break
+        kept.append(chapter)
+    return kept
 
 
 def walk_video_ids(node: object, found: list[str]) -> None:
@@ -163,9 +182,12 @@ def video_details(youtube_id: str) -> dict:
         "youtubeId": youtube_id,
         "title": details.get("title", ""),
         "summary": first_paragraph(description),
-        "chapters": [
-            {"t": clock_to_seconds(m.group(1)), "title": m.group(2).strip()} for m in CHAPTER_LINE.finditer(description)
-        ],
+        "chapters": first_chapter_block(
+            [
+                {"t": clock_to_seconds(m.group(1)), "title": m.group(2).strip()}
+                for m in CHAPTER_LINE.finditer(description)
+            ]
+        ),
         "duration": int(details.get("lengthSeconds") or 0),
         "published": (micro.get("publishDate") or "")[:10],
     }
@@ -179,6 +201,11 @@ def main() -> None:
         "--check",
         action="store_true",
         help="Write nothing; fail if the catalogue is behind the channel.",
+    )
+    parser.add_argument(
+        "--reuse",
+        action="store_true",
+        help="Keep the details of videos already in the output file; read only the new watch pages.",
     )
     args = parser.parse_args()
 
@@ -205,7 +232,10 @@ def main() -> None:
             }
         )
 
-    videos = sorted((video_details(v) for v in uploads), key=lambda v: (v["published"], v["title"]))
+    known: dict[str, dict] = {}
+    if args.reuse and Path(args.out).exists():
+        known = {v["youtubeId"]: v for v in json.loads(Path(args.out).read_text(encoding="utf-8"))["videos"]}
+    videos = sorted((known.get(v) or video_details(v) for v in uploads), key=lambda v: (v["published"], v["title"]))
     snapshot = {
         "_note": "Written by scripts/fetch_video_channel.py from the public channel pages. Do not edit by hand.",
         "channelId": CHANNEL_ID,
@@ -218,7 +248,9 @@ def main() -> None:
         encoding="utf-8",
         newline="\n",
     )
-    sys.stdout.reconfigure(encoding="utf-8")
+    reconfigure = getattr(sys.stdout, "reconfigure", None)
+    if reconfigure:
+        reconfigure(encoding="utf-8")
     print(f"{len(videos)} public videos, {len(playlists)} playlists -> {out}")
 
 
