@@ -27351,6 +27351,7 @@ const resource = {
     "analytics.col_project_status": "Projektin tila",
     "analytics.filter_project_status": "Suodata projektin tilan mukaan",
     "analytics.all_project_statuses": "Kaikki projektin tilat",
+    "analytics.filtered_hint": "Suodatettu: {{shown}} / {{total}} hanketta",
     "app.bug_log_downloaded": "Loki ladattu",
     "app.bug_log_downloaded_desc": "Liitä tämä JSON raporttiin.",
     "app.report_bug": "Ilmoita virheestä (lokien kanssa)",

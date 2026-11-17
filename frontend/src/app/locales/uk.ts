@@ -28243,6 +28243,7 @@ const resource = {
     "analytics.col_project_status": "Статус проєкту",
     "analytics.filter_project_status": "Фільтрувати за статусом проєкту",
     "analytics.all_project_statuses": "Усі статуси проєктів",
+    "analytics.filtered_hint": "Відфільтровано: {{shown}} із {{total}} проєктів",
     "app.bug_log_downloaded": "Лог завантажено",
     "app.bug_log_downloaded_desc": "Прикріпіть цей JSON до вашого звіту.",
     "app.report_bug": "Повідомити про баг (з логами)",

@@ -27275,6 +27275,7 @@ const resource = {
     "analytics.col_project_status": "Projekt állapota",
     "analytics.filter_project_status": "Szűrés projekt állapot szerint",
     "analytics.all_project_statuses": "Összes projektállapot",
+    "analytics.filtered_hint": "Szűrve: {{shown}} / {{total}} projekt",
     "app.bug_log_downloaded": "Napló letöltve",
     "app.bug_log_downloaded_desc": "Csatolja ezt a JSON-fájlt a hibajegyhez.",
     "app.report_bug": "Hiba bejelentése (naplóval)",

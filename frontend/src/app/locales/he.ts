@@ -26620,6 +26620,7 @@ const resource = {
     "analytics.col_project_status": "סטטוס פרויקט",
     "analytics.filter_project_status": "סינון לפי סטטוס פרויקט",
     "analytics.all_project_statuses": "כל סטטוסי הפרויקט",
+    "analytics.filtered_hint": "מסונן: {{shown}} מתוך {{total}} פרויקטים",
     "app.bug_log_downloaded": "היומן הורד",
     "app.bug_log_downloaded_desc": "צרפו את קובץ ה-JSON הזה לדיווח שלכם.",
     "app.report_bug": "דיווח על באג (עם יומנים)",

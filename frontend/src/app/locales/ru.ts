@@ -27933,6 +27933,7 @@ const resource = {
     "analytics.col_project_status": "Статус проекта",
     "analytics.filter_project_status": "Фильтр по статусу проекта",
     "analytics.all_project_statuses": "Все статусы проектов",
+    "analytics.filtered_hint": "Отфильтровано: {{shown}} из {{total}} проектов",
     "app.bug_log_downloaded": "Журнал загружен",
     "app.bug_log_downloaded_desc": "Прикрепите этот JSON к вашему отчёту.",
     "app.report_bug": "Сообщить об ошибке (с журналами)",

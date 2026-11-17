@@ -27450,6 +27450,7 @@ const resource = {
     "analytics.col_project_status": "Projektstatus",
     "analytics.filter_project_status": "Filtrer efter projektstatus",
     "analytics.all_project_statuses": "Alle projektstatusser",
+    "analytics.filtered_hint": "Filtreret: {{shown}} af {{total}} projekter",
     "app.bug_log_downloaded": "Log hentet",
     "app.bug_log_downloaded_desc": "Vedhæft denne JSON til din rapport.",
     "app.report_bug": "Rapporter en fejl (med logs)",

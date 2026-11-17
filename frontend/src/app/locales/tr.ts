@@ -27959,6 +27959,7 @@ const resource = {
     "analytics.col_project_status": "Proje durumu",
     "analytics.filter_project_status": "Proje durumuna göre filtrele",
     "analytics.all_project_statuses": "Tüm proje durumları",
+    "analytics.filtered_hint": "Filtrelendi: {{total}} projeden {{shown}} tanesi",
     "app.bug_log_downloaded": "Günlük indirildi",
     "app.bug_log_downloaded_desc": "Bunu raporunuza ekleyin.",
     "app.report_bug": "Bir hata bildirin (günlüklerle)",

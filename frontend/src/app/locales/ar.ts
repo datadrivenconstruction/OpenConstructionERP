@@ -28232,6 +28232,7 @@ const resource = {
     "analytics.col_project_status": "حالة المشروع",
     "analytics.filter_project_status": "التصفية حسب حالة المشروع",
     "analytics.all_project_statuses": "كل حالات المشروع",
+    "analytics.filtered_hint": "مصفّى: {{shown}} من {{total}} مشروعًا",
     "app.bug_log_downloaded": "تم تنزيل السجل",
     "app.bug_log_downloaded_desc": "أرفق هذا JSON برتقريرك.",
     "app.report_bug": "الإبلاغ عن خطأ (مع السجلات)",

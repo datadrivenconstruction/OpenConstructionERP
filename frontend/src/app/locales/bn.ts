@@ -26298,6 +26298,7 @@ const resource = {
     "analytics.col_project_status": "প্রকল্পের অবস্থা",
     "analytics.filter_project_status": "প্রকল্পের অবস্থা অনুযায়ী ফিল্টার করুন",
     "analytics.all_project_statuses": "সব প্রকল্পের অবস্থা",
+    "analytics.filtered_hint": "ফিল্টার করা: {{total}}টির মধ্যে {{shown}}টি প্রকল্প",
     "app.bug_log_downloaded": "লগ ডাউনলোড হয়েছে",
     "app.bug_log_downloaded_desc": "আপনার রিপোর্টে এই JSON সংযুক্ত করুন।",
     "app.report_bug": "একটি বাগ রিপোর্ট করুন (লগসহ)",

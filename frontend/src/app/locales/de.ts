@@ -27647,6 +27647,7 @@ const resource = {
     "analytics.col_project_status": "Projektstatus",
     "analytics.filter_project_status": "Nach Projektstatus filtern",
     "analytics.all_project_statuses": "Alle Projektstatus",
+    "analytics.filtered_hint": "Gefiltert: {{shown}} von {{total}} Projekten",
     "app.bug_log_downloaded": "Protokoll heruntergeladen",
     "app.bug_log_downloaded_desc": "Fügen Sie dieses JSON an Ihren Bericht an.",
     "app.report_bug": "Einen Fehler melden (mit Protokollen)",

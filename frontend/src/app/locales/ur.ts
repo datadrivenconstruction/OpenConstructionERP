@@ -26478,6 +26478,7 @@ const resource = {
     "analytics.col_project_status": "پروجیکٹ کی حیثیت",
     "analytics.filter_project_status": "حیثیت کے لحاظ سے فلٹر کریں",
     "analytics.all_project_statuses": "تمام پروجیکٹ کی حیثیتیں",
+    "analytics.filtered_hint": "فلٹر شدہ: {{total}} میں سے {{shown}} منصوبے",
     "app.bug_log_downloaded": "لاگ ڈاؤن لوڈ ہوا",
     "app.bug_log_downloaded_desc": "یہ JSON اپنی رپورٹ کے ساتھ منسلک کریں۔",
     "app.report_bug": "بگ رپورٹ کریں (logs کے ساتھ)",

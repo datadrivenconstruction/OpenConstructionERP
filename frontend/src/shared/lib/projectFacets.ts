@@ -60,3 +60,12 @@ export function isFacetFilterActive(filters: Partial<ProjectFacetFilters> | unde
     (!!filters.project_type && filters.project_type !== FACET_ALL)
   );
 }
+
+/** Query string (with leading ?) that makes the analytics endpoint total only the filtered projects. */
+export function analyticsFacetParams(filters: Partial<ProjectFacetFilters>): string {
+  const params = new URLSearchParams();
+  if (filters.phase && filters.phase !== FACET_ALL) params.set('phase', filters.phase);
+  if (filters.project_type && filters.project_type !== FACET_ALL) params.set('project_type', filters.project_type);
+  const qs = params.toString();
+  return qs ? `?${qs}` : '';
+}

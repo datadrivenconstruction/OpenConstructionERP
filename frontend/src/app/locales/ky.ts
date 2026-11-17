@@ -25925,6 +25925,7 @@ const resource = {
     "analytics.col_project_status": "Долбоордун абалы",
     "analytics.filter_project_status": "Долбоордун абалы боюнча чыпкалоо",
     "analytics.all_project_statuses": "Бардык долбоор абалдары",
+    "analytics.filtered_hint": "Чыпкаланды: {{total}} долбоордун {{shown}}-и",
     "approvalRoutes.analytics_pick_project": "Анын бекитүү циклинин аналитикасын көрүү үчүн долбоорду тандаңыз.",
     "approvalRoutes.analytics_empty_title": "Мөөнөттө бекитүү иш агымдары жок",
     "approvalRoutes.analytics_empty_desc": "Бул долбоордун жолдорундагы бекитүү иш агымдары бул жерде цикл убактысын жана бузуу аналитикасын көрсөтөт.",

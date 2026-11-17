@@ -26465,6 +26465,7 @@ const resource = {
     "analytics.col_project_status": "Κατάσταση έργου",
     "analytics.filter_project_status": "Φιλτράρισμα βάσει κατάστασης έργου",
     "analytics.all_project_statuses": "Όλες οι καταστάσεις έργων",
+    "analytics.filtered_hint": "Φιλτραρισμένα: {{shown}} από {{total}} έργα",
     "app.bug_log_downloaded": "Το αρχείο καταγραφής λήφθηκε",
     "app.bug_log_downloaded_desc": "Επισυνάψτε αυτό το JSON στην αναφορά σας.",
     "app.report_bug": "Αναφορά σφάλματος (με αρχεία καταγραφής)",

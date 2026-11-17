@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiGet, ApiError } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
 import { fmtCurrency, fmtNumber, fmtPercent } from '@/shared/lib/formatters';
@@ -33,7 +33,7 @@ import { getNumberLocale } from '@/stores/usePreferencesStore';
 import { compareNames } from '@/shared/lib/collator';
 import { PerformanceTab } from './PerformanceTab';
 import { downloadCsv } from './performance';
-import { EMPTY_FACETS, applyProjectFacets, isFacetFilterActive, type ProjectFacetFilters } from '@/shared/lib/projectFacets';
+import { EMPTY_FACETS, analyticsFacetParams, applyProjectFacets, isFacetFilterActive, type ProjectFacetFilters } from '@/shared/lib/projectFacets';
 import { ProjectFacetSelects } from '@/shared/ui/ProjectFacetSelects';
 import { useProjectStatusLabel } from '@/features/projects/ProjectStatusBadge';
 
@@ -92,6 +92,10 @@ interface CurrencyTotal {
 
 interface AnalyticsOverview {
   total_projects: number;
+  /** Projects in scope before the phase/type filter. */
+  unfiltered_total?: number;
+  /** Phase/type of every in-scope project, so the filter options do not shrink with the filter. */
+  facet_projects?: { phase?: string | null; project_type?: string | null }[];
   projects_with_budget: number;
   total_planned: number;
   total_actual: number;
@@ -156,8 +160,10 @@ export function AnalyticsPage() {
   );
 
   const { data, isLoading, isError, refetch, isFetching } = useQuery<AnalyticsOverview>({
-    queryKey: ['analytics', 'overview'],
-    queryFn: () => apiGet<AnalyticsOverview>('/v1/projects/analytics/overview/'),
+    // Phase/type go to the server so every summary card is totalled over the same project set as the rows.
+    queryKey: ['analytics', 'overview', facets.phase, facets.project_type],
+    queryFn: () => apiGet<AnalyticsOverview>(`/v1/projects/analytics/overview/${analyticsFacetParams(facets)}`),
+    placeholderData: keepPreviousData,
   });
 
   // Debounce the search box (300ms), mirroring the costs browser pattern.
@@ -338,7 +344,7 @@ export function AnalyticsPage() {
   }
 
   /* ── No data at all — guide the user ────────────────────────────────── */
-  if (!data || data.total_projects === 0) {
+  if (!data || (data.total_projects === 0 && !isFacetFilterActive(facets))) {
     return (
       <div className="space-y-6">
         <Breadcrumb
@@ -459,6 +465,15 @@ export function AnalyticsPage() {
         </div>
       ) : (
       <div role="tabpanel" id="analytics-panel-overview" aria-labelledby="analytics-tab-overview" className="space-y-5">
+      {isFacetFilterActive(facets) && (
+        <p className="text-xs text-content-secondary" data-testid="analytics-filtered-hint">
+          {t('analytics.filtered_hint', {
+            defaultValue: 'Filtered: {{shown}} of {{total}} projects',
+            shown: data?.total_projects ?? 0,
+            total: data?.unfiltered_total ?? data?.total_projects ?? 0,
+          })}
+        </p>
+      )}
       {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <KPICard
@@ -619,7 +634,7 @@ export function AnalyticsPage() {
             </select>
           )}
           <ProjectFacetSelects
-            projects={data?.projects ?? []}
+            projects={data?.facet_projects ?? data?.projects ?? []}
             value={facets}
             onChange={setFacets}
             selectClassName="oe-select w-44"

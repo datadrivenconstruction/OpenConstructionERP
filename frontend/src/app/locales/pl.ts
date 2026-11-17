@@ -28205,6 +28205,7 @@ const resource = {
     "analytics.col_project_status": "Status projektu",
     "analytics.filter_project_status": "Filtruj według statusu projektu",
     "analytics.all_project_statuses": "Wszystkie statusy projektów",
+    "analytics.filtered_hint": "Przefiltrowano: {{shown}} z {{total}} projektów",
     "app.bug_log_downloaded": "Log pobrany",
     "app.bug_log_downloaded_desc": "Dołącz ten JSON do raportu.",
     "app.report_bug": "Zgłoś błąd (z logami)",

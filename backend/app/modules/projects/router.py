@@ -2242,10 +2242,14 @@ async def analytics_overview(
     session: SessionDep,
     _user_id: CurrentUserId,
     payload: CurrentUserPayload,
+    phase: str | None = Query(default=None, max_length=50, description="Phase filter; '__unset__' = no phase."),
+    project_type: str | None = Query(default=None, max_length=50, description="Project type filter."),
 ) -> dict:
     """Cross-project analytics - aggregated KPIs across all projects.
 
     Scoped to the current user's owned projects; admins see every project.
+    ``phase`` / ``project_type`` narrow the project set once, so the headline
+    totals, currency subtotals and rows are all computed from the same set.
     """
     from sqlalchemy import func, select
 
@@ -2273,7 +2277,10 @@ async def analytics_overview(
             return {}
         proj_stmt = proj_stmt.where((Project.owner_id == _uid) | (Project.id.in_(member_project_ids_subquery(_uid))))
     proj_result = await session.execute(proj_stmt)
-    all_projects = list(proj_result.scalars().all())
+    in_scope_projects = list(proj_result.scalars().all())
+    from app.modules.projects.facets import filter_by_facets
+
+    all_projects = filter_by_facets(in_scope_projects, phase, project_type)
 
     project_ids = [p.id for p in all_projects]
     proj_count = len(all_projects)
@@ -2476,6 +2483,12 @@ async def analytics_overview(
 
     return {
         "total_projects": proj_count,
+        "unfiltered_total": len(in_scope_projects),
+        # Phase/type of every in-scope project, so the filter options do not shrink with the filter.
+        "facet_projects": [
+            {"phase": getattr(p, "phase", None), "project_type": getattr(p, "project_type", None)}
+            for p in in_scope_projects
+        ],
         "projects_with_budget": projects_with_budget,
         # Legacy flat scalars kept for backward compatibility. When
         # ``multi_currency`` is true these mix currencies and must NOT be

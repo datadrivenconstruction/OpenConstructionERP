@@ -26416,6 +26416,7 @@ const resource = {
     "analytics.col_project_status": "Жоба күйі",
     "analytics.filter_project_status": "Жоба күйі бойынша сүзу",
     "analytics.all_project_statuses": "Барлық жоба күйлері",
+    "analytics.filtered_hint": "Сүзгіленген: {{total}} жобаның {{shown}}-і",
     "app.bug_log_downloaded": "Журнал жүктелді",
     "app.bug_log_downloaded_desc": "Есебіңізге осы JSON-ды тіркеңіз.",
     "app.report_bug": "Қатені хабарлау (журналдармен)",

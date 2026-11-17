@@ -27462,6 +27462,7 @@ const resource = {
     "analytics.col_project_status": "Projektstatus",
     "analytics.filter_project_status": "Filtrera efter projektstatus",
     "analytics.all_project_statuses": "Alla projektstatusar",
+    "analytics.filtered_hint": "Filtrerat: {{shown}} av {{total}} projekt",
     "app.bug_log_downloaded": "Logg hämtad",
     "app.bug_log_downloaded_desc": "Bifoga denna JSON till din rapport.",
     "app.report_bug": "Rapportera en bugg (med loggar)",

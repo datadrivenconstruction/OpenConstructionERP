@@ -27633,6 +27633,7 @@ const resource = {
     "analytics.col_project_status": "Starea proiectului",
     "analytics.filter_project_status": "Filtrează după starea proiectului",
     "analytics.all_project_statuses": "Toate stările proiectelor",
+    "analytics.filtered_hint": "Filtrat: {{shown}} din {{total}} proiecte",
     "app.bug_log_downloaded": "Jurnal descărcat",
     "app.bug_log_downloaded_desc": "Atașați acest JSON la raportul dvs.",
     "app.report_bug": "Raportare bug (cu jurnale)",

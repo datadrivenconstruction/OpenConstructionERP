@@ -27787,6 +27787,7 @@ const resource = {
     "analytics.col_project_status": "Stav projektu",
     "analytics.filter_project_status": "Filtrovat podle stavu projektu",
     "analytics.all_project_statuses": "Všechny stavy projektu",
+    "analytics.filtered_hint": "Filtrováno: {{shown}} z {{total}} projektů",
     "app.bug_log_downloaded": "Protokol stažen",
     "app.bug_log_downloaded_desc": "Připojte tento JSON k vaší zprávě.",
     "app.report_bug": "Nahlásit chybu (s protokoly)",

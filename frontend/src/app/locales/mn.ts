@@ -27325,6 +27325,7 @@ const resource = {
     "analytics.col_project_status": "Project status",
     "analytics.filter_project_status": "Filter by project status",
     "analytics.all_project_statuses": "All project statuses",
+    "analytics.filtered_hint": "Шүүсэн: {{total}} төслөөс {{shown}}",
     "app.bug_log_downloaded": "Бүртгэлийг татаж авсан",
     "app.bug_log_downloaded_desc": "Энэ JSON-ийг таны тайлан-д оруулалт болгоно уу.",
     "app.report_bug": "Алдаа (эхлүүр бүртгэл-н хамт) мэдээлэх",

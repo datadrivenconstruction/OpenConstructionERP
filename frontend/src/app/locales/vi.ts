@@ -27238,6 +27238,7 @@ const resource = {
     "analytics.col_project_status": "Trạng thái dự án",
     "analytics.filter_project_status": "Lọc theo trạng thái dự án",
     "analytics.all_project_statuses": "Tất cả trạng thái dự án",
+    "analytics.filtered_hint": "Đã lọc: {{shown}} trên {{total}} dự án",
     "app.bug_log_downloaded": "Nhật ký đã tải xuống",
     "app.bug_log_downloaded_desc": "Đính kèm JSON này vào báo cáo của bạn.",
     "app.report_bug": "Báo cáo lỗi (có nhật ký)",

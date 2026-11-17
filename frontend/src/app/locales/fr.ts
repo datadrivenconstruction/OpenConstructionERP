@@ -27676,6 +27676,7 @@ const resource = {
     "analytics.col_project_status": "Statut du projet",
     "analytics.filter_project_status": "Filtrer par statut du projet",
     "analytics.all_project_statuses": "Tous les statuts de projet",
+    "analytics.filtered_hint": "Filtré : {{shown}} projets sur {{total}}",
     "app.bug_log_downloaded": "Journal téléchargé",
     "app.bug_log_downloaded_desc": "Joignez ce JSON à votre rapport.",
     "app.report_bug": "Signaler un bug (avec logs)",

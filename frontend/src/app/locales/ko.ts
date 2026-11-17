@@ -27184,6 +27184,7 @@ const resource = {
     "analytics.col_project_status": "프로젝트 상태",
     "analytics.filter_project_status": "프로젝트 상태별 필터",
     "analytics.all_project_statuses": "모든 프로젝트 상태",
+    "analytics.filtered_hint": "필터링됨: 프로젝트 {{total}}개 중 {{shown}}개",
     "app.bug_log_downloaded": "로그 다운로드됨",
     "app.bug_log_downloaded_desc": "이 JSON을 보고서에 첨부하세요.",
     "app.report_bug": "버그 신고 (로그 포함)",

@@ -27224,6 +27224,7 @@ const resource = {
     "analytics.col_project_status": "项目状态",
     "analytics.filter_project_status": "按项目状态筛选",
     "analytics.all_project_statuses": "全部项目状态",
+    "analytics.filtered_hint": "已筛选：{{total}} 个项目中的 {{shown}} 个",
     "app.bug_log_downloaded": "日志已下载",
     "app.bug_log_downloaded_desc": "将此 JSON 附加到您的报告。",
     "app.report_bug": "报告 bug（含日志）",

@@ -27474,6 +27474,7 @@ const resource = {
     "analytics.col_project_status": "Статус на проекта",
     "analytics.filter_project_status": "Филтриране по статус на проекта",
     "analytics.all_project_statuses": "Всички статуси на проекти",
+    "analytics.filtered_hint": "Филтрирано: {{shown}} от {{total}} проекта",
     "app.bug_log_downloaded": "Дневник изтегнат",
     "app.bug_log_downloaded_desc": "Присъединете този JSON към вашия доклад.",
     "app.report_bug": "Докладване на грешка (с дневници)",
