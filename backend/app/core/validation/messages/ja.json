@@ -2015,5 +2015,27 @@
       "fail": "現場に {headcount} 人の班がいましたが、作業、検査、遅延の記録がありません。",
       "suggestion": "班の作業内容、または作業を止めた遅延を追加してください。"
     }
+  },
+  "project_catalogue": {
+    "unit_present": {
+      "fail": "単価 {code} に単位がありません。",
+      "suggestion": "単価の基準となる単位を入力してください(例: m2、m3、h)。"
+    },
+    "duplicate_code": {
+      "fail": "コード {code} はこのプロジェクトで複数の単価に使われています。",
+      "suggestion": "コードごとに単価を1つにするか、別案に独自のコードを付けてください。"
+    },
+    "currency_differs": {
+      "fail": "単価 {code} は {currency} ですが、プロジェクトは {project_currency} で積算されています。",
+      "suggestion": "単価をプロジェクト通貨に換算するか、外貨が意図したものであることを確認してください。"
+    },
+    "override_far": {
+      "fail": "{code} のローカル単価は元単価 {source_rate} から {percent} % 離れています。",
+      "suggestion": "小数点のずれがないか確認するか、このプロジェクトで別の価格が必要な理由を記録してください。"
+    },
+    "source_changed": {
+      "fail": "{code} の元単価は、プロジェクトにコピーした後に {old} から {new} に変わりました。",
+      "suggestion": "新しい元単価を採用するか、意図してローカル単価を維持してください。"
+    }
   }
 }

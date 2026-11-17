@@ -97,6 +97,7 @@ export const TITLE_I18N_MAP: Record<string, string> = {
   // only catch a module that still ships the English literal.
   'GAEB Exchange': 'nav.gaeb_exchange',
   'Resource Catalog': 'catalog.title',
+  'Project Catalogue': 'project_catalogue.title',
   'Assemblies': 'nav.assemblies',
   'New Assembly': 'assemblies.new_assembly',
   // No locale names the single-assembly editor, so it takes the module's own
@@ -1409,6 +1410,7 @@ const ROUTE_COMPONENT_MAP: ReadonlyArray<readonly [string, string]> = [
   ['/templates', 'BOQ Templates'],
   ['/costs', 'Cost Database'],
   ['/catalog', 'Resource Catalog'],
+  ['/project-catalogue', 'Project Catalogue'],
   ['/assemblies', 'Assemblies'],
   ['/validation', 'Validation'],
   // `/compliance` itself mounts nothing; it is the prefix the Rule Builder

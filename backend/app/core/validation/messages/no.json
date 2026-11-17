@@ -2015,5 +2015,27 @@
       "fail": "Et lag på {headcount} var på plassen, men ingen arbeid, kontroll eller forsinkelse er registrert.",
       "suggestion": "Legg til hva laget gjorde, eller forsinkelsen som stoppet arbeidet."
     }
+  },
+  "project_catalogue": {
+    "unit_present": {
+      "fail": "Prisen {code} har ingen enhet.",
+      "suggestion": "Oppgi enheten prisen gjelder for, for eksempel m2, m3 eller t."
+    },
+    "duplicate_code": {
+      "fail": "Koden {code} brukes av mer enn én pris i dette prosjektet.",
+      "suggestion": "Behold én pris per kode, eller gi varianten en egen kode."
+    },
+    "currency_differs": {
+      "fail": "Prisen {code} er i {currency}, men prosjektet er kalkulert i {project_currency}.",
+      "suggestion": "Regn om prisen til prosjektets valuta, eller bekreft at den utenlandske valutaen er tilsiktet."
+    },
+    "override_far": {
+      "fail": "Den lokale prisen for {code} avviker {percent} % fra kildeprisen {source_rate}.",
+      "suggestion": "Sjekk om et desimaltegn er flyttet, eller noter hvorfor prosjektet trenger en annen pris."
+    },
+    "source_changed": {
+      "fail": "Kildeprisen for {code} er endret fra {old} til {new} siden prosjektet kopierte den.",
+      "suggestion": "Ta i bruk den nye kildeprisen, eller behold bevisst den lokale prisen."
+    }
   }
 }

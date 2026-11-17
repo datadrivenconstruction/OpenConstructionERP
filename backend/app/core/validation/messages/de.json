@@ -2015,5 +2015,27 @@
       "fail": "Eine Mannschaft von {headcount} war auf der Baustelle, aber weder Arbeit, Prüfung noch Behinderung ist erfasst.",
       "suggestion": "Ergänzen, was die Mannschaft getan hat, oder die Behinderung erfassen, die die Arbeit stoppte."
     }
+  },
+  "project_catalogue": {
+    "unit_present": {
+      "fail": "Die Position {code} hat keine Einheit.",
+      "suggestion": "Geben Sie die Einheit an, auf die sich der Preis bezieht, etwa m2, m3 oder h."
+    },
+    "duplicate_code": {
+      "fail": "Der Code {code} wird in diesem Projekt von mehr als einem Preis verwendet.",
+      "suggestion": "Behalten Sie einen Preis je Code oder geben Sie der Variante einen eigenen Code."
+    },
+    "currency_differs": {
+      "fail": "Der Preis {code} ist in {currency}, das Projekt wird aber in {project_currency} kalkuliert.",
+      "suggestion": "Rechnen Sie den Preis in die Projektwährung um oder bestätigen Sie, dass die Fremdwährung gewollt ist."
+    },
+    "override_far": {
+      "fail": "Der lokale Preis von {code} weicht um {percent} % vom Quellpreis {source_rate} ab.",
+      "suggestion": "Prüfen Sie auf ein verrutschtes Komma oder vermerken Sie, warum dieses Projekt einen anderen Preis braucht."
+    },
+    "source_changed": {
+      "fail": "Der Quellpreis von {code} hat sich seit der Übernahme ins Projekt von {old} auf {new} geändert.",
+      "suggestion": "Übernehmen Sie den neuen Quellpreis oder behalten Sie bewusst den lokalen Preis."
+    }
   }
 }

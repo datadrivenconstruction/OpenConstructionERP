@@ -2015,5 +2015,27 @@
       "fail": "Ett arbetslag på {headcount} fanns på plats men inget arbete, ingen kontroll och ingen försening är registrerad.",
       "suggestion": "Lägg till vad arbetslaget gjorde, eller förseningen som stoppade arbetet."
     }
+  },
+  "project_catalogue": {
+    "unit_present": {
+      "fail": "Priset {code} saknar enhet.",
+      "suggestion": "Ange den enhet priset gäller, till exempel m2, m3 eller h."
+    },
+    "duplicate_code": {
+      "fail": "Koden {code} används av mer än ett pris i det här projektet.",
+      "suggestion": "Behåll ett pris per kod eller ge varianten en egen kod."
+    },
+    "currency_differs": {
+      "fail": "Priset {code} är i {currency}, men projektet kalkyleras i {project_currency}.",
+      "suggestion": "Räkna om priset till projektets valuta eller bekräfta att den utländska valutan är avsedd."
+    },
+    "override_far": {
+      "fail": "Det lokala priset för {code} avviker {percent} % från källpriset {source_rate}.",
+      "suggestion": "Kontrollera om ett decimaltecken har hamnat fel, eller notera varför projektet behöver ett annat pris."
+    },
+    "source_changed": {
+      "fail": "Källpriset för {code} har ändrats från {old} till {new} sedan projektet kopierade det.",
+      "suggestion": "Ta över det nya källpriset eller behåll medvetet det lokala priset."
+    }
   }
 }

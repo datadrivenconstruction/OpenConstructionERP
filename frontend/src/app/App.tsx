@@ -125,6 +125,9 @@ const ReportsPage = lazy(() =>
 const CatalogPage = lazy(() =>
   import('@/features/catalog/CatalogPage').then((m) => ({ default: m.CatalogPage }))
 );
+const ProjectCataloguePage = lazy(() =>
+  import('@/features/project-catalogue').then((m) => ({ default: m.ProjectCataloguePage }))
+);
 const AdvisorPage = lazy(() =>
   import('@/features/ai/AdvisorPage').then((m) => ({ default: m.AdvisorPage }))
 );
@@ -1488,6 +1491,7 @@ export default function App() {
         <Route path="/costs/import" element={<P title="Import Cost Database"><ImportDatabasePage /></P>} />
 
         <Route path="/catalog" element={<P title="Resource Catalog"><CatalogPage /></P>} />
+        <Route path="/project-catalogue" element={<P title="Project Catalogue"><ProjectCataloguePage /></P>} />
         <Route path="/cost-explorer" element={<P title="Cost Explorer"><CostExplorerPage /></P>} />
 
         <Route path="/rom-estimate" element={<P title="Conceptual Estimate"><RomEstimatePage /></P>} />

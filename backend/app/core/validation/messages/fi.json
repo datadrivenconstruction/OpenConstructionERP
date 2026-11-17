@@ -2015,5 +2015,27 @@
       "fail": "Työmaalla oli {headcount} hengen ryhmä, mutta työtä, tarkastusta tai viivästystä ei ole kirjattu.",
       "suggestion": "Lisää, mitä ryhmä teki, tai viivästys, joka pysäytti työn."
     }
+  },
+  "project_catalogue": {
+    "unit_present": {
+      "fail": "Hinnalla {code} ei ole yksikköä.",
+      "suggestion": "Anna yksikkö, jota hinta koskee, esimerkiksi m2, m3 tai h."
+    },
+    "duplicate_code": {
+      "fail": "Koodia {code} käyttää tässä projektissa useampi kuin yksi hinta.",
+      "suggestion": "Pidä yksi hinta koodia kohden tai anna variantille oma koodi."
+    },
+    "currency_differs": {
+      "fail": "Hinta {code} on valuutassa {currency}, mutta projekti lasketaan valuutassa {project_currency}.",
+      "suggestion": "Muunna hinta projektin valuuttaan tai vahvista, että vieras valuutta on tarkoituksellinen."
+    },
+    "override_far": {
+      "fail": "Kohteen {code} paikallinen hinta poikkeaa {percent} % lähdehinnasta {source_rate}.",
+      "suggestion": "Tarkista, onko desimaalierotin siirtynyt, tai kirjaa, miksi projekti tarvitsee eri hinnan."
+    },
+    "source_changed": {
+      "fail": "Kohteen {code} lähdehinta on muuttunut arvosta {old} arvoon {new} sen jälkeen, kun projekti kopioi sen.",
+      "suggestion": "Ota uusi lähdehinta käyttöön tai pidä tietoisesti paikallinen hinta."
+    }
   }
 }

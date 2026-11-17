@@ -2015,5 +2015,27 @@
       "fail": "Estava em obra uma equipa de {headcount} mas não há trabalho, inspeção nem atraso registado.",
       "suggestion": "Acrescente o que a equipa fez, ou o atraso que parou os trabalhos."
     }
+  },
+  "project_catalogue": {
+    "unit_present": {
+      "fail": "O preço {code} não tem unidade.",
+      "suggestion": "Indique a unidade a que o preço se refere, por exemplo m2, m3 ou h."
+    },
+    "duplicate_code": {
+      "fail": "O código {code} é usado por mais de um preço neste projeto.",
+      "suggestion": "Mantenha um preço por código ou dê à variante um código próprio."
+    },
+    "currency_differs": {
+      "fail": "O preço {code} está em {currency}, mas o projeto é orçado em {project_currency}.",
+      "suggestion": "Converta o preço para a moeda do projeto ou confirme que a moeda estrangeira é intencional."
+    },
+    "override_far": {
+      "fail": "O preço local de {code} está {percent} % distante do preço de origem {source_rate}.",
+      "suggestion": "Verifique se há uma vírgula deslocada ou registe porque este projeto precisa de outro preço."
+    },
+    "source_changed": {
+      "fail": "O preço de origem de {code} mudou de {old} para {new} desde que o projeto o copiou.",
+      "suggestion": "Adote o novo preço de origem ou mantenha conscientemente o preço local."
+    }
   }
 }

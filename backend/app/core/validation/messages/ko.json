@@ -2015,5 +2015,27 @@
       "fail": "현장에 {headcount}명의 작업반이 있었지만 작업, 검사, 지연이 기록되지 않았습니다.",
       "suggestion": "작업반이 한 일 또는 작업을 멈춘 지연을 추가하세요."
     }
+  },
+  "project_catalogue": {
+    "unit_present": {
+      "fail": "단가 {code}에 단위가 없습니다.",
+      "suggestion": "단가의 기준 단위를 입력하세요. 예: m2, m3, h."
+    },
+    "duplicate_code": {
+      "fail": "코드 {code}가 이 프로젝트에서 둘 이상의 단가에 사용되고 있습니다.",
+      "suggestion": "코드당 단가를 하나만 두거나 변형 항목에 별도 코드를 지정하세요."
+    },
+    "currency_differs": {
+      "fail": "단가 {code}는 {currency} 기준이지만 프로젝트는 {project_currency}로 산정됩니다.",
+      "suggestion": "단가를 프로젝트 통화로 환산하거나 외화 사용이 의도된 것인지 확인하세요."
+    },
+    "override_far": {
+      "fail": "{code}의 로컬 단가가 원본 단가 {source_rate}와 {percent} % 차이가 납니다.",
+      "suggestion": "소수점이 잘못 찍혔는지 확인하거나 이 프로젝트에 다른 가격이 필요한 이유를 기록하세요."
+    },
+    "source_changed": {
+      "fail": "{code}의 원본 단가가 프로젝트에 복사된 후 {old}에서 {new}로 바뀌었습니다.",
+      "suggestion": "새 원본 단가를 적용하거나 로컬 단가를 의도적으로 유지하세요."
+    }
   }
 }

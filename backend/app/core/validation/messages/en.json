@@ -2015,5 +2015,27 @@
       "fail": "A crew of {headcount} was on site but no work, inspection or delay is recorded.",
       "suggestion": "Add what the crew did, or record the delay that stopped work."
     }
+  },
+  "project_catalogue": {
+    "unit_present": {
+      "fail": "The rate {code} has no unit.",
+      "suggestion": "Enter the unit the rate is priced per, such as m2, m3 or h."
+    },
+    "duplicate_code": {
+      "fail": "The code {code} is used by more than one rate in this project.",
+      "suggestion": "Keep one rate per code, or give the variant a code of its own."
+    },
+    "currency_differs": {
+      "fail": "The rate {code} is in {currency}, but the project is priced in {project_currency}.",
+      "suggestion": "Convert the rate to the project currency, or confirm that the foreign currency is intended."
+    },
+    "override_far": {
+      "fail": "The local rate of {code} is {percent} % away from its source rate {source_rate}.",
+      "suggestion": "Check for a misplaced decimal point, or note why this project needs a different price."
+    },
+    "source_changed": {
+      "fail": "The source rate of {code} changed from {old} to {new} since the project copied it.",
+      "suggestion": "Take the new source rate, or keep the local rate on purpose."
+    }
   }
 }

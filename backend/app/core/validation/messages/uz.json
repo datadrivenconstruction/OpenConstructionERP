@@ -2015,5 +2015,27 @@
       "fail": "Obyektda {headcount} kishilik brigada bor edi, ammo ish, tekshiruv yoki toʻxtab qolish yozilmagan.",
       "suggestion": "Brigada nima qilganini yoki ishni toʻxtatgan toʻxtab qolishni qoʻshing."
     }
+  },
+  "project_catalogue": {
+    "unit_present": {
+      "fail": "{code} narxida o‘lchov birligi yo‘q.",
+      "suggestion": "Narx qaysi birlik uchun berilganini kiriting, masalan m2, m3 yoki soat."
+    },
+    "duplicate_code": {
+      "fail": "{code} kodi ushbu loyihada bir nechta narxda ishlatilgan.",
+      "suggestion": "Har bir kod uchun bitta narx qoldiring yoki variantga alohida kod bering."
+    },
+    "currency_differs": {
+      "fail": "{code} narxi {currency} valyutasida, loyiha esa {project_currency} valyutasida hisoblanadi.",
+      "suggestion": "Narxni loyiha valyutasiga o‘giring yoki xorijiy valyuta ataylab tanlanganini tasdiqlang."
+    },
+    "override_far": {
+      "fail": "{code} mahalliy narxi manba narxi {source_rate} dan {percent} % farq qiladi.",
+      "suggestion": "Vergul siljib ketmaganini tekshiring yoki loyihaga nega boshqa narx kerakligini yozib qo‘ying."
+    },
+    "source_changed": {
+      "fail": "{code} manba narxi loyihaga nusxalangandan beri {old} dan {new} ga o‘zgardi.",
+      "suggestion": "Yangi manba narxini qabul qiling yoki mahalliy narxni ongli ravishda saqlang."
+    }
   }
 }

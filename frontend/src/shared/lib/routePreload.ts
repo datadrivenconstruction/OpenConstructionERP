@@ -15,6 +15,7 @@ const preloaders: Record<string, () => void> = {
   '/takeoff': () => void import('@/features/takeoff/TakeoffPage'),
   '/dwg-takeoff': () => void import('@/features/dwg-takeoff/DwgTakeoffPage'),
   '/catalog': () => void import('@/features/catalog/CatalogPage'),
+  '/project-catalogue': () => void import('@/features/project-catalogue/ProjectCataloguePage'),
   '/norm-expansion': () => void import('@/features/norm-expansion/NormExpansionPage'),
   '/labor-rates': () => void import('@/features/labor-rates/LaborRatesPage'),
   '/waste-factors': () => void import('@/features/waste-factors/WasteFactorsPage'),

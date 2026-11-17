@@ -2015,5 +2015,27 @@
       "fail": "Tổ đội {headcount} người có mặt nhưng không ghi công việc, kiểm tra hay chậm trễ.",
       "suggestion": "Thêm việc tổ đã làm, hoặc chậm trễ đã dừng công việc."
     }
+  },
+  "project_catalogue": {
+    "unit_present": {
+      "fail": "Đơn giá {code} không có đơn vị tính.",
+      "suggestion": "Nhập đơn vị mà giá áp dụng, ví dụ m2, m3 hoặc giờ."
+    },
+    "duplicate_code": {
+      "fail": "Mã {code} được dùng cho nhiều hơn một đơn giá trong dự án này.",
+      "suggestion": "Giữ một đơn giá cho mỗi mã, hoặc đặt mã riêng cho phương án."
+    },
+    "currency_differs": {
+      "fail": "Đơn giá {code} tính bằng {currency}, nhưng dự án được lập giá bằng {project_currency}.",
+      "suggestion": "Quy đổi đơn giá sang tiền tệ của dự án, hoặc xác nhận việc dùng ngoại tệ là có chủ ý."
+    },
+    "override_far": {
+      "fail": "Đơn giá cục bộ của {code} lệch {percent} % so với đơn giá nguồn {source_rate}.",
+      "suggestion": "Kiểm tra dấu thập phân bị lệch, hoặc ghi lý do dự án cần một mức giá khác."
+    },
+    "source_changed": {
+      "fail": "Đơn giá nguồn của {code} đã đổi từ {old} thành {new} kể từ khi dự án sao chép.",
+      "suggestion": "Áp dụng đơn giá nguồn mới, hoặc chủ động giữ đơn giá cục bộ."
+    }
   }
 }
