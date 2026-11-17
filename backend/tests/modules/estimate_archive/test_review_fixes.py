@@ -453,3 +453,15 @@ def test_uk_retention_names_its_source() -> None:
     from app.modules.estimate_archive import policy
 
     assert "Limitation Act 1980" in str(policy.policy_for("uk").get("retention_note"))
+
+
+# ── 9. Only markets whose profile uses seals see the module ───────────────────
+
+
+def test_module_is_tagged_with_the_markets_that_seal() -> None:
+    from app.modules.estimate_archive import policy
+    from app.modules.estimate_archive.manifest import manifest
+
+    assert {"DE", "GB", "US", "AE"} <= set(manifest.markets)
+    assert "FR" not in manifest.markets
+    assert all(policy.policy_for(policy.resolve_profile_id(c))["enabled"] for c in manifest.markets)

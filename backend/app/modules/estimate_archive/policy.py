@@ -28,6 +28,12 @@ def profile_ids() -> list[str]:
     return sorted(_data()["profiles"])
 
 
+def markets() -> list[str]:
+    """Countries whose profile seals estimates; the module is shown only there."""
+    data = _data()
+    return sorted(c for c, pid in data["countries"].items() if data["profiles"].get(pid, {}).get("enabled"))
+
+
 def contract_form(contract: Any) -> str:
     """The standard form a contract names, lower case, or ``""``."""
     if contract is None:
