@@ -64461,6 +64461,14 @@ const resource = {
     "estimate_archive.verified_bad": "با سابقه مهرشده مطابقت ندارد",
     "estimate_archive.verified_ok": "با سابقه مهرشده مطابقت دارد",
     "estimate_archive.verify": "بررسی اثر انگشت",
+    "estimate_archive.seal_as_basis": "مهروموم به‌عنوان مبنای قرارداد",
+    "estimate_archive.contents_locked": "محتوا تا آغاز بازگشایی رسمی مهروموم باقی می‌ماند.",
+    "estimate_archive.entry.sealed_badge": "مهروموم‌شده",
+    "estimate_archive.entry.contract_card": "برآورد مهروموم‌شده",
+    "estimate_archive.entry.openings_count": "تعداد بازگشایی: {{count}}",
+    "estimate_archive.entry.no_seal": "برآورد مهروموم‌شده‌ای وجود ندارد.",
+    "estimate_archive.entry.seal_award": "مهروموم برآورد برنده",
+    "estimate_archive.entry.add_from_seal": "افزودن از برآورد مهروموم‌شده",
   }
 } as { translation: Record<string, string> };
 

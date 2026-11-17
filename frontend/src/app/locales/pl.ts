@@ -66101,6 +66101,14 @@ const resource = {
     "estimate_archive.verified_bad": "Nie zgadza się z zapieczętowanym zapisem",
     "estimate_archive.verified_ok": "Zgadza się z zapieczętowanym zapisem",
     "estimate_archive.verify": "Sprawdź odcisk",
+    "estimate_archive.seal_as_basis": "Zapieczętuj jako podstawę kontraktu",
+    "estimate_archive.contents_locked": "Zawartość pozostaje zapieczętowana do rozpoczęcia formalnego otwarcia.",
+    "estimate_archive.entry.sealed_badge": "Zapieczętowany",
+    "estimate_archive.entry.contract_card": "Zapieczętowany kosztorys",
+    "estimate_archive.entry.openings_count": "Otwarcia: {{count}}",
+    "estimate_archive.entry.no_seal": "Brak zapieczętowanego kosztorysu.",
+    "estimate_archive.entry.seal_award": "Zapieczętuj kosztorys z przetargu",
+    "estimate_archive.entry.add_from_seal": "Dodaj z zapieczętowanego kosztorysu",
   }
 } as { translation: Record<string, string> };
 

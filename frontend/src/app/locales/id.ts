@@ -64235,6 +64235,14 @@ const resource = {
     "estimate_archive.verified_bad": "Tidak cocok dengan catatan bersegel",
     "estimate_archive.verified_ok": "Cocok dengan catatan bersegel",
     "estimate_archive.verify": "Verifikasi sidik jari",
+    "estimate_archive.seal_as_basis": "Segel sebagai dasar kontrak",
+    "estimate_archive.contents_locked": "Isi tetap disegel sampai pembukaan formal dimulai.",
+    "estimate_archive.entry.sealed_badge": "Tersegel",
+    "estimate_archive.entry.contract_card": "Estimasi tersegel",
+    "estimate_archive.entry.openings_count": "Pembukaan: {{count}}",
+    "estimate_archive.entry.no_seal": "Tidak ada estimasi tersegel.",
+    "estimate_archive.entry.seal_award": "Segel estimasi pemenang",
+    "estimate_archive.entry.add_from_seal": "Tambah dari estimasi tersegel",
   }
 } as { translation: Record<string, string> };
 

@@ -64822,6 +64822,14 @@ const resource = {
     "estimate_archive.verified_bad": "אינו תואם את הרשומה החתומה",
     "estimate_archive.verified_ok": "תואם את הרשומה החתומה",
     "estimate_archive.verify": "אימות טביעת האצבע",
+    "estimate_archive.seal_as_basis": "חותם כבסיס לחוזה",
+    "estimate_archive.contents_locked": "התוכן נשאר חתום עד שפתיחה רשמית מתחילה.",
+    "estimate_archive.entry.sealed_badge": "חתום",
+    "estimate_archive.entry.contract_card": "אומדן חתום",
+    "estimate_archive.entry.openings_count": "פתיחות: {{count}}",
+    "estimate_archive.entry.no_seal": "אין אומדן חתום.",
+    "estimate_archive.entry.seal_award": "חתום את אומדן הזכייה",
+    "estimate_archive.entry.add_from_seal": "הוסף מאומדן חתום",
   }
 } as { translation: Record<string, string> };
 

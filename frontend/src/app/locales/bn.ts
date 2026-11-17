@@ -64771,6 +64771,14 @@ const resource = {
     "estimate_archive.verified_bad": "সিল করা রেকর্ডের সাথে মেলে না",
     "estimate_archive.verified_ok": "সিল করা রেকর্ডের সাথে মেলে",
     "estimate_archive.verify": "ফিঙ্গারপ্রিন্ট যাচাই করুন",
+    "estimate_archive.seal_as_basis": "চুক্তির ভিত্তি হিসেবে সিল করুন",
+    "estimate_archive.contents_locked": "আনুষ্ঠানিক উন্মুক্তকরণ শুরু না হওয়া পর্যন্ত বিষয়বস্তু সিলবদ্ধ থাকবে।",
+    "estimate_archive.entry.sealed_badge": "সিলবদ্ধ",
+    "estimate_archive.entry.contract_card": "সিলবদ্ধ প্রাক্কলন",
+    "estimate_archive.entry.openings_count": "উন্মুক্তকরণ: {{count}}",
+    "estimate_archive.entry.no_seal": "কোনো সিলবদ্ধ প্রাক্কলন নেই।",
+    "estimate_archive.entry.seal_award": "বরাদ্দের প্রাক্কলন সিল করুন",
+    "estimate_archive.entry.add_from_seal": "সিলবদ্ধ প্রাক্কলন থেকে যোগ করুন",
   }
 } as { translation: Record<string, string> };
 

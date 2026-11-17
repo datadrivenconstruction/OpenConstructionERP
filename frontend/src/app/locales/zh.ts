@@ -66705,6 +66705,14 @@ const resource = {
     "estimate_archive.verified_bad": "与封存记录不一致",
     "estimate_archive.verified_ok": "与封存记录一致",
     "estimate_archive.verify": "验证指纹",
+    "estimate_archive.seal_as_basis": "作为合同依据封存",
+    "estimate_archive.contents_locked": "内容在正式开标前保持封存。",
+    "estimate_archive.entry.sealed_badge": "已封存",
+    "estimate_archive.entry.contract_card": "封存报价",
+    "estimate_archive.entry.openings_count": "开启次数：{{count}}",
+    "estimate_archive.entry.no_seal": "没有封存的报价。",
+    "estimate_archive.entry.seal_award": "封存中标估算",
+    "estimate_archive.entry.add_from_seal": "从封存报价添加",
   }
 } as { translation: Record<string, string> };
 

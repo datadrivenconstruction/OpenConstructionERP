@@ -67707,6 +67707,14 @@ const resource = {
     "estimate_archive.verified_bad": "لا يطابق السجل المختوم",
     "estimate_archive.verified_ok": "يطابق السجل المختوم",
     "estimate_archive.verify": "تحقق من البصمة",
+    "estimate_archive.seal_as_basis": "ختم كأساس للعقد",
+    "estimate_archive.contents_locked": "تبقى المحتويات مختومة حتى تبدأ عملية الفتح الرسمية.",
+    "estimate_archive.entry.sealed_badge": "مختوم",
+    "estimate_archive.entry.contract_card": "التقدير المختوم",
+    "estimate_archive.entry.openings_count": "عدد مرات الفتح: {{count}}",
+    "estimate_archive.entry.no_seal": "لا يوجد تقدير مختوم.",
+    "estimate_archive.entry.seal_award": "ختم تقدير الترسية",
+    "estimate_archive.entry.add_from_seal": "إضافة من التقدير المختوم",
   }
 } as { translation: Record<string, string> };
 

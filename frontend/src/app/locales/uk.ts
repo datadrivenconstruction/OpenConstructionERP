@@ -66648,6 +66648,14 @@ const resource = {
     "estimate_archive.verified_bad": "Не збігається з опечатаним записом",
     "estimate_archive.verified_ok": "Збігається з опечатаним записом",
     "estimate_archive.verify": "Перевірити відбиток",
+    "estimate_archive.seal_as_basis": "Опечатати як основу договору",
+    "estimate_archive.contents_locked": "Вміст залишається опечатаним, доки не почнеться офіційне розкриття.",
+    "estimate_archive.entry.sealed_badge": "Опечатано",
+    "estimate_archive.entry.contract_card": "Опечатаний кошторис",
+    "estimate_archive.entry.openings_count": "Розкриттів: {{count}}",
+    "estimate_archive.entry.no_seal": "Немає опечатаного кошторису.",
+    "estimate_archive.entry.seal_award": "Опечатати кошторис переможця",
+    "estimate_archive.entry.add_from_seal": "Додати з опечатаного кошторису",
   }
 } as { translation: Record<string, string> };
 

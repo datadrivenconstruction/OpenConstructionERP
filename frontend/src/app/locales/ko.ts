@@ -64852,6 +64852,14 @@ const resource = {
     "estimate_archive.verified_bad": "봉인된 기록과 일치하지 않습니다",
     "estimate_archive.verified_ok": "봉인된 기록과 일치합니다",
     "estimate_archive.verify": "지문 검증",
+    "estimate_archive.seal_as_basis": "계약 기준으로 봉인",
+    "estimate_archive.contents_locked": "정식 개봉이 시작될 때까지 내용은 봉인된 상태로 유지됩니다.",
+    "estimate_archive.entry.sealed_badge": "봉인됨",
+    "estimate_archive.entry.contract_card": "봉인된 견적",
+    "estimate_archive.entry.openings_count": "개봉 횟수: {{count}}",
+    "estimate_archive.entry.no_seal": "봉인된 견적이 없습니다.",
+    "estimate_archive.entry.seal_award": "낙찰 견적 봉인",
+    "estimate_archive.entry.add_from_seal": "봉인된 견적에서 추가",
   }
 } as { translation: Record<string, string> };
 

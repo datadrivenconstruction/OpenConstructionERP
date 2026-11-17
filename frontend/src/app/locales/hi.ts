@@ -64504,6 +64504,14 @@ const resource = {
     "estimate_archive.verified_bad": "सील किए गए रिकॉर्ड से मेल नहीं खाता",
     "estimate_archive.verified_ok": "सील किए गए रिकॉर्ड से मेल खाता है",
     "estimate_archive.verify": "फ़िंगरप्रिंट सत्यापित करें",
+    "estimate_archive.seal_as_basis": "अनुबंध आधार के रूप में सील करें",
+    "estimate_archive.contents_locked": "औपचारिक खोलने की प्रक्रिया शुरू होने तक सामग्री सील्ड रहेगी।",
+    "estimate_archive.entry.sealed_badge": "सील्ड",
+    "estimate_archive.entry.contract_card": "सील्ड अनुमान",
+    "estimate_archive.entry.openings_count": "खुलने की संख्या: {{count}}",
+    "estimate_archive.entry.no_seal": "कोई सील्ड अनुमान नहीं।",
+    "estimate_archive.entry.seal_award": "अनुबंध-प्रदान अनुमान सील करें",
+    "estimate_archive.entry.add_from_seal": "सील्ड अनुमान से जोड़ें",
   }
 } as { translation: Record<string, string> };
 

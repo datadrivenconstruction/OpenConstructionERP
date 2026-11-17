@@ -67066,6 +67066,14 @@ const resource = {
     "estimate_archive.verified_bad": "Nem egyezik a lepecsételt rekorddal",
     "estimate_archive.verified_ok": "Egyezik a lepecsételt rekorddal",
     "estimate_archive.verify": "Ujjlenyomat ellenőrzése",
+    "estimate_archive.seal_as_basis": "Lezárás szerződési alapként",
+    "estimate_archive.contents_locked": "A tartalom lezárva marad, amíg a formális felbontás meg nem kezdődik.",
+    "estimate_archive.entry.sealed_badge": "Lezárva",
+    "estimate_archive.entry.contract_card": "Lezárt költségvetés",
+    "estimate_archive.entry.openings_count": "Felbontások: {{count}}",
+    "estimate_archive.entry.no_seal": "Nincs lezárt költségvetés.",
+    "estimate_archive.entry.seal_award": "Nyertes költségvetés lezárása",
+    "estimate_archive.entry.add_from_seal": "Hozzáadás a lezárt költségvetésből",
   }
 } as { translation: Record<string, string> };
 

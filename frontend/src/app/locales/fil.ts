@@ -64459,6 +64459,14 @@ const resource = {
     "estimate_archive.verified_bad": "Hindi tugma sa nakaselyong tala",
     "estimate_archive.verified_ok": "Tugma sa nakaselyong tala",
     "estimate_archive.verify": "I-verify ang fingerprint",
+    "estimate_archive.seal_as_basis": "I-seal bilang batayan ng kontrata",
+    "estimate_archive.contents_locked": "Mananatiling naka-seal ang nilalaman hanggang magsimula ang pormal na pagbubukas.",
+    "estimate_archive.entry.sealed_badge": "Naka-seal",
+    "estimate_archive.entry.contract_card": "Naka-sealed na estimate",
+    "estimate_archive.entry.openings_count": "Mga pagbubukas: {{count}}",
+    "estimate_archive.entry.no_seal": "Walang naka-sealed na estimate.",
+    "estimate_archive.entry.seal_award": "I-seal ang estimate ng award",
+    "estimate_archive.entry.add_from_seal": "Idagdag mula sa naka-sealed na estimate",
   }
 } as { translation: Record<string, string> };
 

@@ -65768,6 +65768,14 @@ const resource = {
     "estimate_archive.verified_bad": "封印された記録と一致しません",
     "estimate_archive.verified_ok": "封印された記録と一致します",
     "estimate_archive.verify": "指紋を検証",
+    "estimate_archive.seal_as_basis": "契約根拠として封印",
+    "estimate_archive.contents_locked": "正式な開封が始まるまで内容は封印されたままです。",
+    "estimate_archive.entry.sealed_badge": "封印済み",
+    "estimate_archive.entry.contract_card": "封印済み見積",
+    "estimate_archive.entry.openings_count": "開封回数: {{count}}",
+    "estimate_archive.entry.no_seal": "封印済み見積はありません。",
+    "estimate_archive.entry.seal_award": "落札見積を封印",
+    "estimate_archive.entry.add_from_seal": "封印済み見積から追加",
   }
 } as { translation: Record<string, string> };
 

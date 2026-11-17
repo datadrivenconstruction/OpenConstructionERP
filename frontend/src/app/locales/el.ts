@@ -64461,6 +64461,14 @@ const resource = {
     "estimate_archive.verified_bad": "Δεν συμφωνεί με τη σφραγισμένη εγγραφή",
     "estimate_archive.verified_ok": "Συμφωνεί με τη σφραγισμένη εγγραφή",
     "estimate_archive.verify": "Έλεγχος αποτυπώματος",
+    "estimate_archive.seal_as_basis": "Σφράγισε ως βάση σύμβασης",
+    "estimate_archive.contents_locked": "Το περιεχόμενο παραμένει σφραγισμένο έως ότου ξεκινήσει το επίσημο άνοιγμα.",
+    "estimate_archive.entry.sealed_badge": "Σφραγισμένο",
+    "estimate_archive.entry.contract_card": "Σφραγισμένος προϋπολογισμός",
+    "estimate_archive.entry.openings_count": "Αποσφραγίσεις: {{count}}",
+    "estimate_archive.entry.no_seal": "Δεν υπάρχει σφραγισμένος προϋπολογισμός.",
+    "estimate_archive.entry.seal_award": "Σφράγισε τον προϋπολογισμό της κατακύρωσης",
+    "estimate_archive.entry.add_from_seal": "Προσθήκη από σφραγισμένο προϋπολογισμό",
   }
 } as { translation: Record<string, string> };
 

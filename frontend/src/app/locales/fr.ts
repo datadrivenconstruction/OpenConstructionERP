@@ -67444,6 +67444,14 @@ const resource = {
     "estimate_archive.verified_bad": "Ne correspond pas à l'enregistrement scellé",
     "estimate_archive.verified_ok": "Correspond à l'enregistrement scellé",
     "estimate_archive.verify": "Vérifier l'empreinte",
+    "estimate_archive.seal_as_basis": "Sceller comme base contractuelle",
+    "estimate_archive.contents_locked": "Le contenu reste scellé jusqu'à l'ouverture formelle.",
+    "estimate_archive.entry.sealed_badge": "Scellé",
+    "estimate_archive.entry.contract_card": "Estimation scellée",
+    "estimate_archive.entry.openings_count": "Ouvertures : {{count}}",
+    "estimate_archive.entry.no_seal": "Aucune estimation scellée.",
+    "estimate_archive.entry.seal_award": "Sceller l'estimation de l'adjudication",
+    "estimate_archive.entry.add_from_seal": "Ajouter depuis l'estimation scellée",
   }
 } as { translation: Record<string, string> };
 

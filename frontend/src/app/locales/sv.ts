@@ -65116,6 +65116,14 @@ const resource = {
     "estimate_archive.verified_bad": "Stämmer inte med den förseglade posten",
     "estimate_archive.verified_ok": "Stämmer med den förseglade posten",
     "estimate_archive.verify": "Kontrollera fingeravtryck",
+    "estimate_archive.seal_as_basis": "Försegla som kontraktsunderlag",
+    "estimate_archive.contents_locked": "Innehållet förblir förseglat tills en formell öppning inleds.",
+    "estimate_archive.entry.sealed_badge": "Förseglad",
+    "estimate_archive.entry.contract_card": "Förseglad kalkyl",
+    "estimate_archive.entry.openings_count": "Öppningar: {{count}}",
+    "estimate_archive.entry.no_seal": "Ingen förseglad kalkyl.",
+    "estimate_archive.entry.seal_award": "Försegla tilldelningskalkylen",
+    "estimate_archive.entry.add_from_seal": "Lägg till från förseglad kalkyl",
   }
 } as { translation: Record<string, string> };
 
