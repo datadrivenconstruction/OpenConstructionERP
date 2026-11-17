@@ -2511,6 +2511,42 @@
     "pin_bare": {
       "fail": "O marcador da página {page} não tem nota nem foto.",
       "suggestion": "Adicione uma nota ou uma foto para que o marcador indique o que foi encontrado."
+    },
+    "position_out_of_range": {
+      "fail": "A posição {axis} do marcador, {value}, está fora da prancha.",
+      "suggestion": "Posicione o marcador sobre a prancha; as posições vão de 0 a 1."
+    },
+    "page_out_of_range": {
+      "fail": "O marcador está na página {page}, mas o documento tem apenas {count} prancha(s).",
+      "suggestion": "Escolha uma página que exista no documento."
+    },
+    "target_missing": {
+      "fail": "O marcador {kind} não indica a qual registro pertence.",
+      "suggestion": "Vincule um registro existente ou crie um novo para o marcador."
+    },
+    "target_not_found": {
+      "fail": "O registro {kind} {target} não existe neste projeto.",
+      "suggestion": "Escolha um registro deste projeto ou crie um novo."
+    },
+    "location_ambiguous": {
+      "fail": "O marcador está ao mesmo tempo em uma prancha e em um elemento do modelo.",
+      "suggestion": "Mantenha apenas uma localização: a página da prancha ou o elemento do modelo."
+    },
+    "location_missing": {
+      "fail": "O marcador não tem localização.",
+      "suggestion": "Posicione-o em uma página da prancha ou em um elemento do modelo."
+    },
+    "bim_element_not_found": {
+      "fail": "O elemento do modelo {element} não está em nenhum modelo deste projeto.",
+      "suggestion": "Selecione um elemento de um modelo que pertença a este projeto."
+    },
+    "superseded_revision": {
+      "fail": "O marcador está em uma revisão da prancha que foi substituída.",
+      "suggestion": "Revise o marcador na revisão atual e mova-o se o detalhe mudou."
+    },
+    "record_closed": {
+      "fail": "O registro {kind} está fechado, mas o marcador dele ainda está na prancha.",
+      "suggestion": "Remova o marcador ou reabra o registro se o serviço não estiver concluído."
     }
   },
   "compliance_docs": {

@@ -2511,6 +2511,42 @@
     "pin_bare": {
       "fail": "Leheküljel {page} oleval märgil pole ei märkust ega fotot.",
       "suggestion": "Lisage märkus või foto, et märk näitaks, mida leiti."
+    },
+    "position_out_of_range": {
+      "fail": "Märgi asend {axis} {value} jääb joonisest välja.",
+      "suggestion": "Asetage märgis joonisele; asendid on vahemikus 0 kuni 1."
+    },
+    "page_out_of_range": {
+      "fail": "Märgis on lehel {page}, aga dokumendis on ainult {count} joonislehte.",
+      "suggestion": "Valige dokumendis olemasolev lehekülg."
+    },
+    "target_missing": {
+      "fail": "Märgis ({kind}) ei näita, millisele kirjele see kuulub.",
+      "suggestion": "Seostage olemasolev kirje või looge märgise jaoks uus."
+    },
+    "target_not_found": {
+      "fail": "Kirjet {kind} {target} selles projektis ei ole.",
+      "suggestion": "Valige selle projekti kirje või looge uus."
+    },
+    "location_ambiguous": {
+      "fail": "Märk asub korraga joonisel ja mudeli elemendil.",
+      "suggestion": "Jätke üks asukoht: joonise leht või mudeli element."
+    },
+    "location_missing": {
+      "fail": "Märgil puudub asukoht.",
+      "suggestion": "Asetage see joonise lehele või mudeli elemendile."
+    },
+    "bim_element_not_found": {
+      "fail": "Mudeli element {element} ei ole selle projekti üheski mudelis.",
+      "suggestion": "Valige selle projekti mudeli element."
+    },
+    "superseded_revision": {
+      "fail": "Märk asub joonise versioonil, mis on asendatud.",
+      "suggestion": "Kontrollige märki kehtival versioonil ja liigutage, kui detail on muutunud."
+    },
+    "record_closed": {
+      "fail": "Kirje {kind} on suletud, kuid selle märk on joonisel veel.",
+      "suggestion": "Eemaldage märk või avage kirje uuesti, kui töö ei ole lõpetatud."
     }
   },
   "compliance_docs": {

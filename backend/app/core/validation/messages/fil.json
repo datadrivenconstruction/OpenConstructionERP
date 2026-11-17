@@ -2511,6 +2511,42 @@
     "pin_bare": {
       "fail": "Ang pin sa pahina {page} ay walang tala o larawan.",
       "suggestion": "Magdagdag ng tala o larawan para ipakita ng pin kung ano ang natagpuan."
+    },
+    "position_out_of_range": {
+      "fail": "Nasa labas ng drowing ang posisyon ng pin sa {axis} na {value}.",
+      "suggestion": "Ilagay ang pin sa drowing; mula 0 hanggang 1 ang mga posisyon."
+    },
+    "page_out_of_range": {
+      "fail": "Nasa pahina {page} ang pin, pero {count} sheet lang ang dokumento.",
+      "suggestion": "Pumili ng pahinang umiiral sa dokumento."
+    },
+    "target_missing": {
+      "fail": "Hindi tinutukoy ng {kind} na pin kung aling record ito nabibilang.",
+      "suggestion": "I-link ang umiiral na record o gumawa ng bago para sa pin."
+    },
+    "target_not_found": {
+      "fail": "Wala sa proyektong ito ang {kind} record na {target}.",
+      "suggestion": "Pumili ng record ng proyektong ito, o gumawa ng bago."
+    },
+    "location_ambiguous": {
+      "fail": "Nasa drowing at nasa elemento ng modelo nang sabay ang pin.",
+      "suggestion": "Panatilihin ang isang lokasyon lamang: ang pahina ng drowing o ang elemento ng modelo."
+    },
+    "location_missing": {
+      "fail": "Walang lokasyon ang pin.",
+      "suggestion": "Ilagay ito sa pahina ng drowing o sa elemento ng modelo."
+    },
+    "bim_element_not_found": {
+      "fail": "Wala sa alinmang modelo ng proyektong ito ang elemento ng modelong {element}.",
+      "suggestion": "Pumili ng elemento mula sa modelong kabilang sa proyektong ito."
+    },
+    "superseded_revision": {
+      "fail": "Nasa sheet revision na pinalitan na ang pin.",
+      "suggestion": "Suriin ang pin sa kasalukuyang revision at ilipat ito kung nagbago ang detalye."
+    },
+    "record_closed": {
+      "fail": "Sarado na ang {kind} record, pero nasa drowing pa rin ang pin nito.",
+      "suggestion": "Alisin ang pin, o buksang muli ang record kung hindi pa tapos ang trabaho."
     }
   },
   "compliance_docs": {

@@ -2511,6 +2511,42 @@
     "pin_bare": {
       "fail": "{page}ページのピンにはメモも写真もありません。",
       "suggestion": "ピンが確認内容を示すよう、メモか写真を追加してください。"
+    },
+    "position_out_of_range": {
+      "fail": "ピンの{axis}位置 {value} が図面の範囲外です。",
+      "suggestion": "ピンを図面上に置いてください。位置は 0～1 の範囲です。"
+    },
+    "page_out_of_range": {
+      "fail": "ピンはページ {page} にありますが、この文書の図面は {count} 枚しかありません。",
+      "suggestion": "文書内に存在するページを選んでください。"
+    },
+    "target_missing": {
+      "fail": "{kind} のピンが、どの記録に属するかを示していません。",
+      "suggestion": "既存の記録を紐付けるか、このピン用の新しい記録を作成してください。"
+    },
+    "target_not_found": {
+      "fail": "{kind} 記録 {target} はこのプロジェクトに存在しません。",
+      "suggestion": "このプロジェクトの記録を選ぶか、新しく作成してください。"
+    },
+    "location_ambiguous": {
+      "fail": "ピンが図面とモデル要素の両方に同時に置かれています。",
+      "suggestion": "図面のページかモデル要素のどちらか一方の位置だけにしてください。"
+    },
+    "location_missing": {
+      "fail": "ピンに位置情報がありません。",
+      "suggestion": "図面のページまたはモデル要素の上に配置してください。"
+    },
+    "bim_element_not_found": {
+      "fail": "モデル要素 {element} は、このプロジェクトのどのモデルにも含まれていません。",
+      "suggestion": "このプロジェクトに属するモデルの要素を選んでください。"
+    },
+    "superseded_revision": {
+      "fail": "ピンが、差し替え済みの図面改訂版の上にあります。",
+      "suggestion": "現行の改訂版でピンを確認し、詳細が変わっていれば移動してください。"
+    },
+    "record_closed": {
+      "fail": "{kind} 記録は閉じられていますが、そのピンがまだ図面に残っています。",
+      "suggestion": "作業が終わっていなければ記録を開き直すか、ピンを削除してください。"
     }
   },
   "compliance_docs": {

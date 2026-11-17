@@ -2511,6 +2511,42 @@
     "pin_bare": {
       "fail": "De pin op pagina {page} heeft geen notitie en geen foto.",
       "suggestion": "Voeg een notitie of foto toe zodat de pin laat zien wat is aangetroffen."
+    },
+    "position_out_of_range": {
+      "fail": "De positie van de pin op as {axis}, {value}, valt buiten de tekening.",
+      "suggestion": "Plaats de pin op de tekening; posities lopen van 0 tot 1."
+    },
+    "page_out_of_range": {
+      "fail": "De pin staat op pagina {page}, maar het document heeft maar {count} blad(en).",
+      "suggestion": "Kies een pagina die in het document bestaat."
+    },
+    "target_missing": {
+      "fail": "De pin ({kind}) geeft niet aan bij welk registratie-item hij hoort.",
+      "suggestion": "Koppel een bestaand item of maak een nieuw item voor de pin."
+    },
+    "target_not_found": {
+      "fail": "Het {kind}-item {target} bestaat niet in dit project.",
+      "suggestion": "Kies een item van dit project of maak een nieuw item aan."
+    },
+    "location_ambiguous": {
+      "fail": "De pin staat tegelijk op een tekening en op een modelelement.",
+      "suggestion": "Houd één locatie aan: de tekeningpagina of het modelelement."
+    },
+    "location_missing": {
+      "fail": "De pin heeft geen locatie.",
+      "suggestion": "Plaats hem op een tekeningpagina of op een modelelement."
+    },
+    "bim_element_not_found": {
+      "fail": "Modelelement {element} staat niet in een model van dit project.",
+      "suggestion": "Selecteer een element uit een model dat bij dit project hoort."
+    },
+    "superseded_revision": {
+      "fail": "De pin staat op een bladrevisie die is vervangen.",
+      "suggestion": "Controleer de pin op de huidige revisie en verplaats hem als het detail is gewijzigd."
+    },
+    "record_closed": {
+      "fail": "Het {kind}-item is gesloten, maar de pin staat nog op de tekening.",
+      "suggestion": "Verwijder de pin, of heropen het item als het werk niet af is."
     }
   },
   "compliance_docs": {

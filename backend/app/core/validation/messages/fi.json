@@ -2511,6 +2511,42 @@
     "pin_bare": {
       "fail": "Sivun {page} merkinnällä ei ole muistiinpanoa eikä valokuvaa.",
       "suggestion": "Lisää muistiinpano tai valokuva, jotta merkintä kertoo, mitä löydettiin."
+    },
+    "position_out_of_range": {
+      "fail": "Merkin {axis}-sijainti {value} on piirustuksen ulkopuolella.",
+      "suggestion": "Aseta merkki piirustukselle; sijainnit ovat välillä 0–1."
+    },
+    "page_out_of_range": {
+      "fail": "Merkki on sivulla {page}, mutta asiakirjassa on vain {count} piirustuslehteä.",
+      "suggestion": "Valitse asiakirjassa oleva sivu."
+    },
+    "target_missing": {
+      "fail": "Merkki ({kind}) ei kerro, mihin kirjaukseen se kuuluu.",
+      "suggestion": "Linkitä olemassa oleva kirjaus tai luo merkille uusi."
+    },
+    "target_not_found": {
+      "fail": "Kirjausta {kind} {target} ei ole tässä projektissa.",
+      "suggestion": "Valitse tämän projektin kirjaus tai luo uusi."
+    },
+    "location_ambiguous": {
+      "fail": "Merkki on samanaikaisesti piirustuksella ja mallin elementillä.",
+      "suggestion": "Säilytä yksi sijainti: piirustussivu tai mallin elementti."
+    },
+    "location_missing": {
+      "fail": "Merkillä ei ole sijaintia.",
+      "suggestion": "Aseta se piirustussivulle tai mallin elementille."
+    },
+    "bim_element_not_found": {
+      "fail": "Mallin elementtiä {element} ei ole tämän projektin mallissa.",
+      "suggestion": "Valitse elementti mallista, joka kuuluu tähän projektiin."
+    },
+    "superseded_revision": {
+      "fail": "Merkki on piirustuslehden versiossa, joka on korvattu uudella.",
+      "suggestion": "Tarkista merkki nykyisestä versiosta ja siirrä se, jos yksityiskohta on muuttunut."
+    },
+    "record_closed": {
+      "fail": "Kirjaus {kind} on suljettu, mutta sen merkki on yhä piirustuksella.",
+      "suggestion": "Poista merkki tai avaa kirjaus uudelleen, jos työ ei ole valmis."
     }
   },
   "compliance_docs": {

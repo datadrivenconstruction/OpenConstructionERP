@@ -2511,6 +2511,42 @@
     "pin_bare": {
       "fail": "Markören på sidan {page} har varken anteckning eller foto.",
       "suggestion": "Lägg till en anteckning eller ett foto så att markören visar vad som hittats."
+    },
+    "position_out_of_range": {
+      "fail": "Markörens {axis}-position {value} ligger utanför ritningen.",
+      "suggestion": "Placera markören på ritningen; positionerna går från 0 till 1."
+    },
+    "page_out_of_range": {
+      "fail": "Markören ligger på sida {page}, men dokumentet har bara {count} blad.",
+      "suggestion": "Välj en sida som finns i dokumentet."
+    },
+    "target_missing": {
+      "fail": "Markören ({kind}) anger inte vilken post den tillhör.",
+      "suggestion": "Koppla en befintlig post eller skapa en ny för markören."
+    },
+    "target_not_found": {
+      "fail": "Posten {kind} {target} finns inte i detta projekt.",
+      "suggestion": "Välj en post i detta projekt, eller skapa en ny."
+    },
+    "location_ambiguous": {
+      "fail": "Markören ligger både på en ritning och på ett modellelement.",
+      "suggestion": "Behåll bara en plats: ritningssidan eller modellelementet."
+    },
+    "location_missing": {
+      "fail": "Markören saknar plats.",
+      "suggestion": "Placera den på en ritningssida eller på ett modellelement."
+    },
+    "bim_element_not_found": {
+      "fail": "Modellelementet {element} finns inte i någon modell i detta projekt.",
+      "suggestion": "Välj ett element från en modell som hör till detta projekt."
+    },
+    "superseded_revision": {
+      "fail": "Markören sitter på en ritningsrevision som har ersatts.",
+      "suggestion": "Granska markören på den aktuella revisionen och flytta den om detaljen har ändrats."
+    },
+    "record_closed": {
+      "fail": "Posten {kind} är stängd, men markören ligger kvar på ritningen.",
+      "suggestion": "Ta bort markören, eller öppna posten igen om arbetet inte är klart."
     }
   },
   "compliance_docs": {

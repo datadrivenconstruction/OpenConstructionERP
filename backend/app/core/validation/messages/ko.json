@@ -2511,6 +2511,42 @@
     "pin_bare": {
       "fail": "{page}페이지의 핀에는 메모도 사진도 없습니다.",
       "suggestion": "핀이 발견 내용을 보여 주도록 메모나 사진을 추가하세요."
+    },
+    "position_out_of_range": {
+      "fail": "핀의 {axis} 위치 {value}이(가) 도면 범위를 벗어났습니다.",
+      "suggestion": "핀을 도면 위에 놓으세요. 위치 값은 0에서 1 사이입니다."
+    },
+    "page_out_of_range": {
+      "fail": "핀은 {page} 페이지에 있지만, 문서에는 도면이 {count}장뿐입니다.",
+      "suggestion": "문서에 있는 페이지를 선택하세요."
+    },
+    "target_missing": {
+      "fail": "{kind} 핀이 어느 기록에 속하는지 지정되어 있지 않습니다.",
+      "suggestion": "기존 기록을 연결하거나 이 핀용 새 기록을 만드세요."
+    },
+    "target_not_found": {
+      "fail": "{kind} 기록 {target}이(가) 이 프로젝트에 없습니다.",
+      "suggestion": "이 프로젝트의 기록을 선택하거나 새로 만드세요."
+    },
+    "location_ambiguous": {
+      "fail": "핀이 도면과 모델 요소 위에 동시에 있습니다.",
+      "suggestion": "위치는 하나만 남기세요: 도면 페이지 또는 모델 요소."
+    },
+    "location_missing": {
+      "fail": "핀에 위치 정보가 없습니다.",
+      "suggestion": "도면 페이지나 모델 요소 위에 배치하세요."
+    },
+    "bim_element_not_found": {
+      "fail": "모델 요소 {element}이(가) 이 프로젝트의 어떤 모델에도 없습니다.",
+      "suggestion": "이 프로젝트에 속한 모델의 요소를 선택하세요."
+    },
+    "superseded_revision": {
+      "fail": "핀이 이미 대체된 도면 개정본에 있습니다.",
+      "suggestion": "현재 개정본에서 핀을 확인하고, 상세가 바뀌었다면 옮기세요."
+    },
+    "record_closed": {
+      "fail": "{kind} 기록은 닫혔지만 해당 핀이 아직 도면에 남아 있습니다.",
+      "suggestion": "작업이 끝나지 않았다면 기록을 다시 열거나, 핀을 제거하세요."
     }
   },
   "compliance_docs": {

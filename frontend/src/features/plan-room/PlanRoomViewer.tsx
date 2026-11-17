@@ -30,7 +30,9 @@ import { closePdf, openPdf, type PageViewport, type PDFDocumentProxy, type Rende
 import {
   ChevronLeft,
   ChevronRight,
+  Check,
   Crosshair,
+  ExternalLink,
   Loader2,
   Lock,
   MapPin,
@@ -49,7 +51,10 @@ import {
   type OverlayPin,
   type OverlaysResponse,
 } from './api';
+import { Link } from 'react-router-dom';
 import { pinColor, statusBadgeVariant, type LayerKey } from './layers';
+import { EMPTY_PIN_DRAFT, PinDraftForm, type PinDraftValue } from './PinDraftForm';
+import { kindMeta, recordPath } from './pinKinds';
 
 const ZOOM_LEVELS = [0.5, 0.75, 1.0, 1.25, 1.5, 2.0];
 const BASE_SCALE = 1.3;
@@ -63,6 +68,7 @@ interface PageView {
 }
 
 interface Props {
+  projectId: string;
   documentId: string;
   /** 1-based page currently shown (owned by the parent - it keys the query). */
   page: number;
@@ -79,12 +85,15 @@ interface Props {
   placing: boolean;
   onStartPlacing: () => void;
   onCancelPlacing: () => void;
-  onCreatePin: (x: number, y: number, note: string) => void;
+  onCreatePin: (x: number, y: number, draft: PinDraftValue) => void;
   onDeletePin: (pin: OverlayPin) => void;
+  /** A carried pin was checked against the new revision: it is current again. */
+  onConfirmPin?: (pin: OverlayPin) => void;
   isSaving: boolean;
 }
 
 export function PlanRoomViewer({
+  projectId,
   documentId,
   page,
   onPageChange,
@@ -97,6 +106,7 @@ export function PlanRoomViewer({
   onCancelPlacing,
   onCreatePin,
   onDeletePin,
+  onConfirmPin,
   isSaving,
 }: Props) {
   const { t } = useTranslation();
@@ -109,7 +119,7 @@ export function PlanRoomViewer({
   const [selectedPin, setSelectedPin] = useState<OverlayPin | null>(null);
   // A point clicked in placing mode, awaiting a note before it is saved.
   const [draft, setDraft] = useState<{ x: number; y: number } | null>(null);
-  const [draftNote, setDraftNote] = useState('');
+  const [draftForm, setDraftForm] = useState<PinDraftValue>(EMPTY_PIN_DRAFT);
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -207,12 +217,12 @@ export function PlanRoomViewer({
   useEffect(() => {
     if (!placing) {
       setDraft(null);
-      setDraftNote('');
+      setDraftForm(EMPTY_PIN_DRAFT);
     }
   }, [placing]);
   useEffect(() => {
     setDraft(null);
-    setDraftNote('');
+    setDraftForm(EMPTY_PIN_DRAFT);
     setSelectedPin(null);
   }, [page, documentId]);
 
@@ -234,22 +244,22 @@ export function PlanRoomViewer({
       const y = Math.min(1, Math.max(0, (e.clientY - rect.top) / rect.height));
       setSelectedPin(null);
       setDraft({ x, y });
-      setDraftNote('');
+      setDraftForm(EMPTY_PIN_DRAFT);
     },
     [],
   );
 
   const saveDraft = useCallback(() => {
     if (!draft) return;
-    onCreatePin(draft.x, draft.y, draftNote.trim());
+    onCreatePin(draft.x, draft.y, draftForm);
     setDraft(null);
-    setDraftNote('');
+    setDraftForm(EMPTY_PIN_DRAFT);
     onCancelPlacing();
-  }, [draft, draftNote, onCreatePin, onCancelPlacing]);
+  }, [draft, draftForm, onCreatePin, onCancelPlacing]);
 
   const cancelDraft = useCallback(() => {
     setDraft(null);
-    setDraftNote('');
+    setDraftForm(EMPTY_PIN_DRAFT);
     onCancelPlacing();
   }, [onCancelPlacing]);
 
@@ -434,6 +444,8 @@ export function PlanRoomViewer({
                   setSelectedPin(pin);
                 }}
                 title={pin.title ?? pin.note ?? undefined}
+                data-pin-kind={pin.target_kind ?? pin.kind}
+                data-revision-state={pin.revision_state ?? undefined}
                 style={{
                   left: `${pin.x * 100}%`,
                   top: `${pin.y * 100}%`,
@@ -443,6 +455,7 @@ export function PlanRoomViewer({
                   'absolute z-20 flex h-6 w-6 -translate-x-1/2 -translate-y-full items-center justify-center',
                   'rounded-full rounded-bl-none border-2 border-white text-white shadow-md',
                   placing ? 'pointer-events-none opacity-70' : 'hover:scale-110',
+                  pin.revision_state && pin.revision_state !== 'current' && 'ring-2 ring-offset-1 ring-amber-400',
                 )}
               >
                 <MapPin size={12} />
@@ -473,35 +486,19 @@ export function PlanRoomViewer({
             {draft && (
               <div
                 style={{ left: `${draft.x * 100}%`, top: `${draft.y * 100}%` }}
-                className="absolute z-popover w-64 -translate-x-1/2 translate-y-2 rounded-lg border border-border bg-surface-primary p-3 shadow-lg"
+                className="absolute z-popover w-72 -translate-x-1/2 translate-y-2 rounded-lg border border-border bg-surface-primary p-3 shadow-lg"
               >
                 <h5 className="mb-1.5 text-xs font-semibold text-content-primary">
-                  {t('plan_room.new_pin', { defaultValue: 'New plan pin' })}
+                  {t('plan_room.new_pin', { defaultValue: 'New pin' })}
                 </h5>
-                <textarea
-                  value={draftNote}
-                  onChange={(e) => setDraftNote(e.target.value)}
-                  rows={3}
-                  autoFocus
-                  placeholder={t('plan_room.note_placeholder', {
-                    defaultValue: 'Add a note (optional)...',
-                  })}
-                  className="w-full resize-none oe-textarea"
+                <PinDraftForm
+                  projectId={projectId}
+                  value={draftForm}
+                  onChange={setDraftForm}
+                  onSave={saveDraft}
+                  onCancel={cancelDraft}
+                  isSaving={isSaving}
                 />
-                <div className="mt-2 flex justify-end gap-2">
-                  <Button variant="ghost" size="sm" onClick={cancelDraft} disabled={isSaving}>
-                    {t('common.cancel', { defaultValue: 'Cancel' })}
-                  </Button>
-                  <Button
-                    variant="primary"
-                    size="sm"
-                    onClick={saveDraft}
-                    disabled={isSaving}
-                    icon={isSaving ? <Loader2 size={14} className="animate-spin" /> : undefined}
-                  >
-                    {t('plan_room.save_pin', { defaultValue: 'Save pin' })}
-                  </Button>
-                </div>
               </div>
             )}
 
@@ -515,6 +512,14 @@ export function PlanRoomViewer({
                   onDeletePin(selectedPin);
                   setSelectedPin(null);
                 }}
+                onConfirm={
+                  onConfirmPin
+                    ? () => {
+                        onConfirmPin(selectedPin);
+                        setSelectedPin(null);
+                      }
+                    : undefined
+                }
               />
             )}
           </div>
@@ -672,11 +677,13 @@ function PinPopover({
   canWrite,
   onClose,
   onDelete,
+  onConfirm,
 }: {
   pin: OverlayPin;
   canWrite: boolean;
   onClose: () => void;
   onDelete: () => void;
+  onConfirm?: () => void;
 }) {
   const { t } = useTranslation();
   const heading =
@@ -704,10 +711,17 @@ function PinPopover({
 
       <div className="flex flex-wrap items-center gap-1.5">
         <Badge variant={pin.kind === 'punch' ? 'error' : 'blue'} size="sm">
-          {pin.kind === 'punch'
-            ? t('plan_room.layer_punch', { defaultValue: 'Punch pins' })
-            : t('plan_room.layer_plan', { defaultValue: 'Plan pins' })}
+          {pin.kind === 'plan' && pin.target_kind
+            ? t(kindMeta(pin.target_kind).labelKey, { defaultValue: kindMeta(pin.target_kind).defaultLabel })
+            : pin.kind === 'punch'
+              ? t('plan_room.layer_punch', { defaultValue: 'Punch pins' })
+              : t('plan_room.layer_plan', { defaultValue: 'Plan pins' })}
         </Badge>
+        {pin.revision_state && pin.revision_state !== 'current' && (
+          <Badge variant="warning" size="sm">
+            {t(`plan_room.rev_${pin.revision_state}`, { defaultValue: pin.revision_state })}
+          </Badge>
+        )}
         {pin.status && (
           <Badge variant={statusBadgeVariant(pin.status)} size="sm">
             {pin.status}
@@ -725,6 +739,28 @@ function PinPopover({
         <p className="mt-1.5 text-xs text-content-tertiary">
           {t('plan_room.assigned_to', { defaultValue: 'Assigned to' })}: {pin.assigned_to}
         </p>
+      )}
+
+      {(() => {
+        const kind = pin.kind === 'punch' ? 'punch' : pin.target_kind;
+        const path = kind ? recordPath(kind, pin.kind === 'punch' ? pin.id : pin.target_id) : null;
+        return path ? (
+          <Link
+            to={path}
+            className="mt-2.5 inline-flex items-center gap-1 text-sm font-medium text-oe-blue hover:underline"
+          >
+            <ExternalLink size={14} aria-hidden />
+            {t('plan_room.open_record', { defaultValue: 'Open record' })}
+          </Link>
+        ) : null;
+      })()}
+      {pin.revision_state === 'needs_review' && canWrite && onConfirm && (
+        <div className="mt-2 flex items-center justify-between gap-2 rounded-lg bg-amber-50 px-2 py-1.5 text-xs text-amber-800">
+          <span>{t('plan_room.review_hint', { defaultValue: 'Carried from the older sheet. Check the position.' })}</span>
+          <Button variant="secondary" size="sm" icon={<Check size={14} />} onClick={onConfirm}>
+            {t('plan_room.confirm_position', { defaultValue: 'Looks right' })}
+          </Button>
+        </div>
       )}
 
       {/* Delete is only offered for plan pins (this module owns them) to write

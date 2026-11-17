@@ -2511,6 +2511,42 @@
     "pin_bare": {
       "fail": "El marcador de la página {page} no tiene nota ni foto.",
       "suggestion": "Añada una nota o una foto para que el marcador indique lo encontrado."
+    },
+    "position_out_of_range": {
+      "fail": "La posición {axis} del marcador, {value}, está fuera del plano.",
+      "suggestion": "Coloque el marcador sobre el plano; las posiciones van de 0 a 1."
+    },
+    "page_out_of_range": {
+      "fail": "El marcador está en la página {page}, pero el documento solo tiene {count} lámina(s).",
+      "suggestion": "Elija una página que exista en el documento."
+    },
+    "target_missing": {
+      "fail": "El marcador de {kind} no indica a qué registro pertenece.",
+      "suggestion": "Vincule un registro existente o cree uno nuevo para el marcador."
+    },
+    "target_not_found": {
+      "fail": "El registro de {kind} {target} no existe en este proyecto.",
+      "suggestion": "Elija un registro de este proyecto o cree uno nuevo."
+    },
+    "location_ambiguous": {
+      "fail": "El marcador está a la vez en un plano y en un elemento del modelo.",
+      "suggestion": "Mantenga una sola ubicación: la página del plano o el elemento del modelo."
+    },
+    "location_missing": {
+      "fail": "El marcador no tiene ubicación.",
+      "suggestion": "Colóquelo en una página del plano o en un elemento del modelo."
+    },
+    "bim_element_not_found": {
+      "fail": "El elemento del modelo {element} no está en ningún modelo de este proyecto.",
+      "suggestion": "Seleccione un elemento de un modelo que pertenezca a este proyecto."
+    },
+    "superseded_revision": {
+      "fail": "El marcador está en una revisión de lámina que ha sido sustituida.",
+      "suggestion": "Revise el marcador en la revisión vigente y muévalo si el detalle ha cambiado."
+    },
+    "record_closed": {
+      "fail": "El registro de {kind} está cerrado, pero su marcador sigue en el plano.",
+      "suggestion": "Retire el marcador o reabra el registro si el trabajo no ha terminado."
     }
   },
   "compliance_docs": {

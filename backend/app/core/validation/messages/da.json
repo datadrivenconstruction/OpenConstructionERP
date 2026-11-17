@@ -2511,6 +2511,42 @@
     "pin_bare": {
       "fail": "Markøren på side {page} har hverken note eller foto.",
       "suggestion": "Tilføj en note eller et foto, så markøren viser, hvad der blev fundet."
+    },
+    "position_out_of_range": {
+      "fail": "Markørens {axis}-position {value} ligger uden for tegningen.",
+      "suggestion": "Placér markøren på tegningen; positionerne går fra 0 til 1."
+    },
+    "page_out_of_range": {
+      "fail": "Markøren er på side {page}, men dokumentet har kun {count} ark.",
+      "suggestion": "Vælg en side, der findes i dokumentet."
+    },
+    "target_missing": {
+      "fail": "Markøren ({kind}) angiver ikke, hvilken registrering den hører til.",
+      "suggestion": "Tilknyt en eksisterende registrering, eller opret en ny til markøren."
+    },
+    "target_not_found": {
+      "fail": "Registreringen {target} ({kind}) findes ikke i dette projekt.",
+      "suggestion": "Vælg en registrering i dette projekt, eller opret en ny."
+    },
+    "location_ambiguous": {
+      "fail": "Markøren ligger både på en tegning og på et modelelement.",
+      "suggestion": "Behold kun én placering: tegningssiden eller modelelementet."
+    },
+    "location_missing": {
+      "fail": "Markøren har ingen placering.",
+      "suggestion": "Placér den på en tegningsside eller på et modelelement."
+    },
+    "bim_element_not_found": {
+      "fail": "Modelelementet {element} findes ikke i en model i dette projekt.",
+      "suggestion": "Vælg et element fra en model, der hører til dette projekt."
+    },
+    "superseded_revision": {
+      "fail": "Markøren sidder på en tegningsrevision, der er erstattet.",
+      "suggestion": "Gennemgå markøren på den aktuelle revision, og flyt den hvis detaljen er ændret."
+    },
+    "record_closed": {
+      "fail": "Registreringen ({kind}) er lukket, men markøren står stadig på tegningen.",
+      "suggestion": "Fjern markøren, eller genåbn registreringen, hvis arbejdet ikke er færdigt."
     }
   },
   "compliance_docs": {

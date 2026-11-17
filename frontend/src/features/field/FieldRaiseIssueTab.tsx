@@ -43,6 +43,8 @@ import {
 } from '@/shared/lib/offline';
 import type { PunchPriority } from '../punchlist/api';
 import type { FieldSession } from './fieldApi';
+import { FieldPinPicker } from './FieldPinPicker';
+import { buildPlanPinOp, type PinPlacement } from './pinOnDrawing';
 import {
   RAISE_ISSUE_KIND,
   buildPunchCreateBody,
@@ -134,6 +136,7 @@ export function FieldRaiseIssueTab({
   const [geoBusy, setGeoBusy] = useState(false);
   const [geoError, setGeoError] = useState<string | null>(null);
   const [savedAt, setSavedAt] = useState<number | null>(null);
+  const [placement, setPlacement] = useState<PinPlacement | null>(null);
   const [records, setRecords] = useState<RaisedIssueRecord[]>([]);
 
   const reconcilingRef = useRef(false);
@@ -295,6 +298,11 @@ export function FieldRaiseIssueTab({
       }),
     });
 
+    // The pin follows its defect in the queue and names it by client op id.
+    if (placement) {
+      await enqueue(buildPlanPinOp(newClientOpId(), 'punch', clientOpId, placement));
+    }
+
     // 2) Park the issue (and its photo, if any) as a durable record so the tab
     //    shows it across a reload and the photo uploads on the next sync.
     await saveRaisedIssue({
@@ -314,12 +322,13 @@ export function FieldRaiseIssueTab({
     setPriority('medium');
     clearPhoto();
     setGeo(null);
+    setPlacement(null);
     setGeoError(null);
     setSavedAt(Date.now());
     await refresh();
     // If we are already online the create may drain immediately; try the photo.
     void reconcilePhotos();
-  }, [session, title, note, priority, geo, photoFile, enqueue, clearPhoto, refresh, reconcilePhotos]);
+  }, [session, title, note, priority, geo, placement, photoFile, enqueue, clearPhoto, refresh, reconcilePhotos]);
 
   if (!session) {
     return (
@@ -399,6 +408,8 @@ export function FieldRaiseIssueTab({
           className="oe-textarea"
         />
       </label>
+
+      <FieldPinPicker session={session} value={placement} onChange={setPlacement} />
 
       {/* Photo */}
       <div className="flex flex-col gap-2 text-sm">

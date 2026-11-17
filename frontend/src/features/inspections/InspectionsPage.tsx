@@ -73,6 +73,7 @@ import { inspectionsGuide } from './inspectionsGuide';
 import { InsightsPanel, InsightsToggleButton, useModuleInsights } from '@/features/insights';
 import { buildInspectionsInsights } from './inspectionsInsights';
 import { AssessmentModal } from '@/features/condition/AssessmentModal';
+import { PinLocationSection } from '@/features/plan-room/PinLocationSection';
 
 /* -- Constants ------------------------------------------------------------- */
 
@@ -852,6 +853,7 @@ const InspectionRow = React.memo(function InspectionRow({
       {expanded && (
         <div className="px-4 pb-4 pl-12 space-y-3 animate-fade-in">
           <MergeHistoryList kind="inspection" id={inspection.id} />
+          <PinLocationSection projectId={inspection.project_id} kind="inspection" recordId={inspection.id} />
           {/* Checklist */}
           {inspection.checklist && inspection.checklist.length > 0 && (
             <div className="rounded-lg bg-surface-secondary p-3">

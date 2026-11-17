@@ -57,6 +57,7 @@ from app.modules.field_diary.schemas import (
     FieldInspectionCreate,
     FieldModuleGrantCreate,
     FieldNcrCreate,
+    FieldPlanPinCreate,
     FieldPunchCreate,
     FieldSafetyObservationCreate,
     FieldScheduleProgressCreate,
@@ -1511,6 +1512,80 @@ class FieldSyncService:
             http_status=201 if created else 200,
             warning_code=self._capture_warning(data) if created else None,
         )
+
+    # Ledger result types of the records a pin can follow in the same queue, and the pin kind each is.
+    _PIN_RECORD_TYPES = {
+        "punchlist_item": "punch",
+        "inspection": "inspection",
+        "ncr": "ncr",
+        "safety_observation": "observation",
+    }
+
+    async def capture_plan_pin(self, field_session: FieldSession, data: FieldPlanPinCreate) -> FieldCaptureResponse:
+        """Drop a location pin from a field capture, idempotently, through the plan room pin registry."""
+        from app.modules.plan_room.pin_service import PinService
+        from app.modules.plan_room.schemas import PinCreate
+
+        project_id = field_session.project_id
+
+        def _reply(state: str, http: int, result_id: uuid.UUID | None = None, reason: str | None = None):
+            return FieldCaptureResponse(
+                client_op_id=data.client_op_id,
+                status=state,  # type: ignore[arg-type]
+                target_module="plan_room",
+                target_kind="plan_pin",
+                result_id=result_id,
+                http_status=http,
+                reason_code=reason,
+            )
+
+        prior = await self._seen_result(data.client_op_id, "plan_pin", project_id)
+        if prior is not None:
+            return _reply("applied", 200, prior)
+        stale = await self._stale_rejection(
+            data, target_module="plan_room", target_kind="plan_pin", project_id=project_id
+        )
+        if stale is not None:
+            return stale
+
+        kind, record_id = data.record_kind, data.record_id
+        if data.record_client_op_id:
+            seen = await self.ledger_repo.get_by_client_op_id(data.record_client_op_id, project_id)
+            mapped = self._PIN_RECORD_TYPES.get(seen.result_type) if seen is not None else None
+            if seen is None or seen.result_id is None or mapped is None:
+                # The record's own op has not been applied (or was refused): the pin must not float free.
+                return _reply("rejected", 422, reason="record_not_synced")
+            kind, record_id = mapped, seen.result_id
+        if kind != "note" and record_id is None:
+            return _reply("rejected", 422, reason="record_missing")
+
+        try:
+            pin = await PinService(self.session).create(
+                PinCreate(
+                    project_id=project_id,
+                    target_kind=kind,
+                    target_id=str(record_id) if record_id else None,
+                    document_id=data.document_id,
+                    page=data.page,
+                    x=data.x,
+                    y=data.y,
+                    note=data.note,
+                    client_op_id=data.client_op_id,
+                    metadata={"field_capture": self._capture_metadata(data)},
+                ),
+                str(field_session.user_id),
+            )
+        except HTTPException as exc:
+            return _reply("rejected", exc.status_code, reason="pin_rejected")
+        await self.field_svc._record_op(
+            data.client_op_id,
+            project_id=project_id,
+            user_id=field_session.user_id,
+            op_kind="field.capture.plan_pin",
+            result_type="plan_pin",
+            result_id=pin.id,
+        )
+        return _reply("applied", 201, pin.id)
 
     @staticmethod
     def _capture_warning(data: FieldCapture) -> str | None:

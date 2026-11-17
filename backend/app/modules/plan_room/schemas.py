@@ -37,8 +37,12 @@ class PlanPinCreate(BaseModel):
     metadata: dict[str, Any] = Field(default_factory=dict)
 
 
+PIN_TARGET_KINDS = ("rfi", "punch", "inspection", "ncr", "photo", "observation", "note")
+PIN_REVISION_STATES = ("current", "carried", "needs_review", "orphaned")
+
+
 class PlanPinResponse(BaseModel):
-    """A positioned photo / note pin returned from the API."""
+    """A pin returned from the API."""
 
     model_config = ConfigDict(from_attributes=True, populate_by_name=True)
 
@@ -52,11 +56,73 @@ class PlanPinResponse(BaseModel):
     photo_ref: str | None = None
     file_version_id: str | None = None
     created_by: str | None = None
+    target_kind: str = "note"
+    target_id: str | None = None
+    target_label: str | None = None
+    sheet_id: str | None = None
+    bim_model_id: str | None = None
+    bim_element_id: str | None = None
+    bim_xyz: list[float] | None = None
+    status: str | None = None
+    revision_state: str = "current"
+    carried_from_pin_id: str | None = None
+    client_op_id: str | None = None
     metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="metadata_")
     created_at: datetime
     updated_at: datetime
     # Non-blocking findings of the plan_room rule set for the write that produced this response.
     validation_warnings: list[dict[str, Any]] = Field(default_factory=list)
+
+
+class PinCreate(BaseModel):
+    """Create a pin on a drawing page or on a BIM element (exactly one of the two)."""
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    project_id: UUID
+    target_kind: str = Field(default="note", pattern=r"^(rfi|punch|inspection|ncr|photo|observation|note)$")
+    target_id: str | None = Field(default=None, max_length=36)
+    document_id: str | None = Field(default=None, max_length=255)
+    page: int | None = Field(default=None, ge=1)
+    x: float | None = Field(default=None, ge=0.0, le=1.0)
+    y: float | None = Field(default=None, ge=0.0, le=1.0)
+    sheet_id: str | None = Field(default=None, max_length=36)
+    bim_model_id: str | None = Field(default=None, max_length=36)
+    bim_element_id: str | None = Field(default=None, max_length=36)
+    bim_xyz: list[float] | None = Field(default=None, min_length=3, max_length=3)
+    note: str | None = None
+    photo_ref: str | None = Field(default=None, max_length=500)
+    file_version_id: str | None = Field(default=None, max_length=36)
+    client_op_id: str | None = Field(default=None, min_length=8, max_length=128)
+    metadata: dict[str, Any] = Field(default_factory=dict)
+
+
+class PinUpdate(BaseModel):
+    """Move, relink or review a pin. Only the fields sent change."""
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    document_id: str | None = Field(default=None, max_length=255)
+    page: int | None = Field(default=None, ge=1)
+    x: float | None = Field(default=None, ge=0.0, le=1.0)
+    y: float | None = Field(default=None, ge=0.0, le=1.0)
+    sheet_id: str | None = Field(default=None, max_length=36)
+    bim_model_id: str | None = Field(default=None, max_length=36)
+    bim_element_id: str | None = Field(default=None, max_length=36)
+    bim_xyz: list[float] | None = Field(default=None, min_length=3, max_length=3)
+    target_kind: str | None = Field(default=None, pattern=r"^(rfi|punch|inspection|ncr|photo|observation|note)$")
+    target_id: str | None = Field(default=None, max_length=36)
+    revision_state: str | None = Field(default=None, pattern=r"^(current|carried|needs_review|orphaned)$")
+    note: str | None = None
+
+
+class PinListResponse(BaseModel):
+    """Envelope for a list of pins."""
+
+    items: list[PlanPinResponse]
+    total: int
+    offset: int = 0
+    limit: int = 200
 
 
 # -- Overlay composite pieces -----------------------------------------------
@@ -81,6 +147,9 @@ class OverlayPin(BaseModel):
     assigned_to: str | None = None
     photo_ref: str | None = None
     file_version_id: str | None = None
+    target_kind: str | None = None
+    target_id: str | None = None
+    revision_state: str | None = None
 
 
 class OverlayMarkup(BaseModel):

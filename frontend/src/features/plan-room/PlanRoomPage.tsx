@@ -40,8 +40,10 @@ import { useAuthStore } from '@/stores/useAuthStore';
 import { useToastStore } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import {
-  createPlanPin,
+  createRegistryPin,
   deletePlanPin,
+  updateRegistryPin,
+  type RegistryPin,
   fetchOverlays,
   fetchPlanRoomDrawings,
   type OverlayPhoto,
@@ -52,6 +54,9 @@ import {
 import { allLayersVisible, type LayerKey } from './layers';
 import { LayerPanel } from './LayerPanel';
 import { PlanRoomViewer } from './PlanRoomViewer';
+import { PinListPanel } from './PinListPanel';
+import { createRecordForPin } from './pinKinds';
+import type { PinDraftValue } from './PinDraftForm';
 import { SheetCompletenessPanel } from './SheetCompletenessPanel';
 import { getIntlLocale } from '@/shared/lib/formatters';
 
@@ -169,13 +174,27 @@ export function PlanRoomPage({ documentId: documentIdProp, initialPage }: PlanRo
   const [placing, setPlacing] = useState(false);
 
   const createMut = useMutation({
-    mutationFn: (vars: { x: number; y: number; note: string }) =>
-      createPlanPin(selectedDocId, page, {
+    mutationFn: async (vars: { x: number; y: number; draft: PinDraftValue }) => {
+      const { draft } = vars;
+      let targetId: string | null = null;
+      if (draft.kind !== 'note') {
+        // A new record goes through its own module, so that module's write permission and rules apply.
+        targetId =
+          draft.mode === 'link'
+            ? draft.targetId
+            : await createRecordForPin(draft.kind, projectId, draft.title.trim(), draft.note.trim());
+      }
+      return createRegistryPin({
+        project_id: projectId,
+        target_kind: draft.kind,
+        target_id: targetId,
+        document_id: selectedDocId,
         page,
         x: vars.x,
         y: vars.y,
-        note: vars.note || null,
-      }),
+        note: draft.note.trim() || null,
+      });
+    },
     onMutate: async (vars) => {
       await qc.cancelQueries({ queryKey: overlaysKey });
       const prev = qc.getQueryData<OverlaysResponse>(overlaysKey);
@@ -185,13 +204,16 @@ export function PlanRoomPage({ documentId: documentIdProp, initialPage }: PlanRo
           id: `temp-${Date.now()}`,
           x: vars.x,
           y: vars.y,
-          title: null,
-          note: vars.note || null,
+          title: vars.draft.title || null,
+          note: vars.draft.note || null,
           status: null,
           priority: null,
           assigned_to: null,
           photo_ref: null,
           file_version_id: null,
+          target_kind: vars.draft.kind,
+          target_id: null,
+          revision_state: 'current',
         };
         qc.setQueryData<OverlaysResponse>(overlaysKey, {
           ...prev,
@@ -213,7 +235,11 @@ export function PlanRoomPage({ documentId: documentIdProp, initialPage }: PlanRo
         type: 'success',
         title: t('plan_room.pin_placed', { defaultValue: 'Pin placed on the drawing' }),
       }),
-    onSettled: () => qc.invalidateQueries({ queryKey: overlaysKey }),
+    onSettled: () => {
+      qc.invalidateQueries({ queryKey: overlaysKey });
+      qc.invalidateQueries({ queryKey: ['plan-room-pins'] });
+      qc.invalidateQueries({ queryKey: ['plan-room-pin-statuses'] });
+    },
   });
 
   const deleteMut = useMutation({
@@ -242,8 +268,27 @@ export function PlanRoomPage({ documentId: documentIdProp, initialPage }: PlanRo
         type: 'success',
         title: t('plan_room.pin_deleted', { defaultValue: 'Pin removed' }),
       }),
-    onSettled: () => qc.invalidateQueries({ queryKey: overlaysKey }),
+    onSettled: () => {
+      qc.invalidateQueries({ queryKey: overlaysKey });
+      qc.invalidateQueries({ queryKey: ['plan-room-pins'] });
+    },
   });
+
+  const confirmMut = useMutation({
+    mutationFn: (pinId: string) => updateRegistryPin(pinId, { revision_state: 'current' }),
+    onSettled: () => {
+      qc.invalidateQueries({ queryKey: overlaysKey });
+      qc.invalidateQueries({ queryKey: ['plan-room-pins'] });
+    },
+  });
+
+  /** A row of the pin list: open that sheet at that page. */
+  const openPinSheet = (pin: RegistryPin) => {
+    if (!pin.document_id) return;
+    setSelectedDocId(pin.document_id);
+    setPage(pin.page);
+    setPlacing(false);
+  };
 
   const handleDeletePin = (pin: OverlayPin) => {
     // Only plan pins are owned here; the viewer never offers delete on a punch
@@ -389,6 +434,7 @@ export function PlanRoomPage({ documentId: documentIdProp, initialPage }: PlanRo
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_300px]">
             {/* The sheet with its marks */}
             <PlanRoomViewer
+              projectId={projectId}
               documentId={selectedDocId}
               page={page}
               onPageChange={(p) => {
@@ -401,7 +447,8 @@ export function PlanRoomPage({ documentId: documentIdProp, initialPage }: PlanRo
               placing={placing}
               onStartPlacing={() => setPlacing(true)}
               onCancelPlacing={() => setPlacing(false)}
-              onCreatePin={(x, y, note) => createMut.mutate({ x, y, note })}
+              onCreatePin={(x, y, draft) => createMut.mutate({ x, y, draft })}
+              onConfirmPin={(pin) => confirmMut.mutate(pin.id)}
               onDeletePin={handleDeletePin}
               isSaving={createMut.isPending}
             />
@@ -409,6 +456,8 @@ export function PlanRoomPage({ documentId: documentIdProp, initialPage }: PlanRo
             {/* Side panel: layers + photos */}
             <div className="space-y-4">
               <LayerPanel visibility={visibility} counts={counts} onToggle={toggleLayer} />
+
+              {projectId && <PinListPanel projectId={projectId} onSelect={openPinSheet} />}
 
               {/* Nothing on this page yet (the sheet still renders). */}
               {overlaysQuery.isSuccess && totalOverlays === 0 && (

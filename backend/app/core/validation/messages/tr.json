@@ -2511,6 +2511,42 @@
     "pin_bare": {
       "fail": "{page}. sayfadaki işaretin ne notu ne de fotoğrafı var.",
       "suggestion": "İşaretin bulunanı göstermesi için bir not veya fotoğraf ekleyin."
+    },
+    "position_out_of_range": {
+      "fail": "İşaretin {axis} konumu {value} çizim alanının dışında.",
+      "suggestion": "İşareti çizimin üzerine yerleştirin; konumlar 0 ile 1 arasındadır."
+    },
+    "page_out_of_range": {
+      "fail": "İşaret {page} sayfasında, ancak belgede yalnızca {count} pafta var.",
+      "suggestion": "Belgede bulunan bir sayfa seçin."
+    },
+    "target_missing": {
+      "fail": "{kind} işareti hangi kayda ait olduğunu belirtmiyor.",
+      "suggestion": "Mevcut bir kaydı bağlayın veya işaret için yeni bir kayıt oluşturun."
+    },
+    "target_not_found": {
+      "fail": "{kind} kaydı {target} bu projede yok.",
+      "suggestion": "Bu projenin bir kaydını seçin veya yeni bir kayıt oluşturun."
+    },
+    "location_ambiguous": {
+      "fail": "İşaret hem bir çizimde hem de bir model öğesinde aynı anda bulunuyor.",
+      "suggestion": "Yalnızca bir konum bırakın: çizim sayfası veya model öğesi."
+    },
+    "location_missing": {
+      "fail": "İşaretin konumu yok.",
+      "suggestion": "İşareti bir çizim sayfasına veya bir model öğesine yerleştirin."
+    },
+    "bim_element_not_found": {
+      "fail": "{element} model öğesi bu projenin hiçbir modelinde yok.",
+      "suggestion": "Bu projeye ait bir modelin öğesini seçin."
+    },
+    "superseded_revision": {
+      "fail": "İşaret, yerine geçen bir pafta revizyonunda duruyor.",
+      "suggestion": "İşareti güncel revizyonda kontrol edin; ayrıntı değiştiyse taşıyın."
+    },
+    "record_closed": {
+      "fail": "{kind} kaydı kapalı, ama işareti hâlâ çizimde.",
+      "suggestion": "İş bitmediyse işareti kaldırın veya kaydı yeniden açın."
     }
   },
   "compliance_docs": {

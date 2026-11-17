@@ -60,6 +60,7 @@ import { ncrGuide } from './ncrGuide';
 import { InsightsPanel, InsightsToggleButton, useModuleInsights } from '@/features/insights';
 import { buildNCRInsights } from './ncrInsights';
 import { IssueHubLink } from '@/features/issues/IssueHubLink';
+import { PinLocationSection } from '@/features/plan-room/PinLocationSection';
 import { RaiseBackCharge } from '@/features/cost-recovery/RaiseBackCharge';
 
 // English fallbacks for the computed `ncr.severity_*` keys. The default used to be
@@ -582,6 +583,8 @@ const NCRRow = React.memo(function NCRRow({
             </p>
             <p className="text-sm text-content-primary whitespace-pre-wrap">{ncr.description}</p>
           </div>
+
+          <PinLocationSection projectId={ncr.project_id} kind="ncr" recordId={ncr.id} />
 
           {/* Root Cause */}
           {ncr.root_cause && (

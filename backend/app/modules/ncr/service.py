@@ -404,6 +404,19 @@ class NCRService:
             except Exception:
                 logger.debug("FSM audit log skipped for NCR %s update", ncr_id)
 
+        if new_status is not None and new_status != prior_status:
+            publish_after_commit(
+                self.session,
+                "ncr.status_changed",
+                {
+                    "project_id": str(ncr.project_id),
+                    "ncr_id": str(ncr_id),
+                    "from_status": prior_status,
+                    "to_status": new_status,
+                },
+                source_module="oe_ncr",
+            )
+
         logger.info("NCR updated: %s (fields=%s)", ncr_id, list(fields.keys()))
         ncr.validation_warnings = warning_findings(report)  # type: ignore[attr-defined]
         return ncr

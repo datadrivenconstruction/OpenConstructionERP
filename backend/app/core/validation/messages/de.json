@@ -2511,6 +2511,42 @@
     "pin_bare": {
       "fail": "Der Pin auf Seite {page} hat weder eine Notiz noch ein Foto.",
       "suggestion": "Ergänzen Sie eine Notiz oder ein Foto, damit der Pin zeigt, was gefunden wurde."
+    },
+    "position_out_of_range": {
+      "fail": "Die {axis}-Position {value} des Pins liegt außerhalb des Plans.",
+      "suggestion": "Pin auf dem Plan setzen; die Positionen liegen zwischen 0 und 1."
+    },
+    "page_out_of_range": {
+      "fail": "Der Pin liegt auf Seite {page}, das Dokument enthält aber nur {count} Blatt.",
+      "suggestion": "Eine vorhandene Seite des Dokuments wählen."
+    },
+    "target_missing": {
+      "fail": "Der Pin ({kind}) ist keinem Eintrag zugeordnet.",
+      "suggestion": "Einen vorhandenen Eintrag verknüpfen oder einen neuen für den Pin anlegen."
+    },
+    "target_not_found": {
+      "fail": "Der Eintrag {kind} {target} existiert in diesem Projekt nicht.",
+      "suggestion": "Einen Eintrag dieses Projekts wählen oder einen neuen anlegen."
+    },
+    "location_ambiguous": {
+      "fail": "Der Pin liegt gleichzeitig auf einem Plan und auf einem Modellelement.",
+      "suggestion": "Nur einen Ort behalten: die Planseite oder das Modellelement."
+    },
+    "location_missing": {
+      "fail": "Der Pin hat keinen Ort.",
+      "suggestion": "Den Pin auf einer Planseite oder einem Modellelement platzieren."
+    },
+    "bim_element_not_found": {
+      "fail": "Das Modellelement {element} ist in keinem Modell dieses Projekts enthalten.",
+      "suggestion": "Ein Element aus einem Modell dieses Projekts wählen."
+    },
+    "superseded_revision": {
+      "fail": "Der Pin steht auf einer Planrevision, die ersetzt wurde.",
+      "suggestion": "Den Pin auf der aktuellen Revision prüfen und verschieben, falls sich das Detail geändert hat."
+    },
+    "record_closed": {
+      "fail": "Der Eintrag {kind} ist geschlossen, sein Pin liegt aber noch auf dem Plan.",
+      "suggestion": "Pin entfernen oder den Eintrag wieder öffnen, falls die Arbeit nicht fertig ist."
     }
   },
   "compliance_docs": {

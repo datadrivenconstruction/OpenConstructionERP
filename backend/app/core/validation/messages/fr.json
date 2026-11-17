@@ -2511,6 +2511,42 @@
     "pin_bare": {
       "fail": "Le repère de la page {page} n’a ni note ni photo.",
       "suggestion": "Ajoutez une note ou une photo pour que le repère indique ce qui a été constaté."
+    },
+    "position_out_of_range": {
+      "fail": "La position {axis} du repère, {value}, se situe hors du plan.",
+      "suggestion": "Placez le repère sur le plan ; les positions vont de 0 à 1."
+    },
+    "page_out_of_range": {
+      "fail": "Le repère est sur la page {page}, mais le document ne compte que {count} plan(s).",
+      "suggestion": "Choisissez une page qui existe dans le document."
+    },
+    "target_missing": {
+      "fail": "Le repère {kind} n’indique pas à quel enregistrement il appartient.",
+      "suggestion": "Liez un enregistrement existant ou créez-en un nouveau pour ce repère."
+    },
+    "target_not_found": {
+      "fail": "L’enregistrement {kind} {target} n’existe pas dans ce projet.",
+      "suggestion": "Choisissez un enregistrement de ce projet, ou créez-en un nouveau."
+    },
+    "location_ambiguous": {
+      "fail": "Le repère est à la fois sur un plan et sur un élément de maquette.",
+      "suggestion": "Ne gardez qu’une localisation : la page du plan ou l’élément de maquette."
+    },
+    "location_missing": {
+      "fail": "Le repère n’a pas de localisation.",
+      "suggestion": "Placez-le sur une page de plan ou sur un élément de maquette."
+    },
+    "bim_element_not_found": {
+      "fail": "L’élément de maquette {element} ne figure dans aucune maquette de ce projet.",
+      "suggestion": "Sélectionnez un élément d’une maquette rattachée à ce projet."
+    },
+    "superseded_revision": {
+      "fail": "Le repère se trouve sur un indice de plan qui a été remplacé.",
+      "suggestion": "Vérifiez le repère sur l’indice en vigueur et déplacez-le si le détail a changé."
+    },
+    "record_closed": {
+      "fail": "L’enregistrement {kind} est clos, mais son repère est toujours sur le plan.",
+      "suggestion": "Supprimez le repère, ou rouvrez l’enregistrement si le travail n’est pas terminé."
     }
   },
   "compliance_docs": {
