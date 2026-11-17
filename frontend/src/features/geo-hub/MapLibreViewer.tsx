@@ -111,8 +111,11 @@ interface MapLibreViewerProps {
 export interface GeoJsonLayer {
   id: string;
   data: FeatureCollection;
-  layers: Array<Omit<LayerProps, 'source'> & { id: string }>;
+  layers: GeoJsonLayerSpec[];
 }
+
+/** Omit applied per member, so each layer type keeps its own paint and layout. */
+export type GeoJsonLayerSpec = LayerProps extends infer L ? (L extends unknown ? Omit<L, 'source'> & { id: string } : never) : never;
 
 /** [[west, south], [east, north]] of every coordinate in the collections, or null. */
 export function geojsonBounds(sets: GeoJsonLayer[]): [[number, number], [number, number]] | null {
