@@ -2126,5 +2126,11 @@
     },
     "contents_locked": "Isi tetap tersegel sampai pembukaan resmi dimulai.",
     "market_off": "Estimasi bersegel bukan bagian dari profil pasar proyek ini."
+  },
+  "boq_revision": {
+    "superseded_still_editable": {
+      "fail": "Revisi {label} masih dapat diedit meskipun {later} sudah dibuat setelahnya; perubahan di sini tidak terbawa",
+      "suggestion": "Kunci {label} atau lanjutkan bekerja di revisi terbaru"
+    }
   }
 }

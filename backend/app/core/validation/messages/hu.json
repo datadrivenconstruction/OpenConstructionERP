@@ -2126,5 +2126,11 @@
     },
     "contents_locked": "A tartalom lepecsételve marad, amíg hivatalos bontás nem kezdődik.",
     "market_off": "A lepecsételt költségvetések nem részei a projekt piaci profiljának."
+  },
+  "boq_revision": {
+    "superseded_still_editable": {
+      "fail": "A(z) {label} revízió még szerkeszthető, pedig azóta létrejött a(z) {later}; az itt végzett módosítások nem kerülnek át",
+      "suggestion": "Zárolja a(z) {label} revíziót, vagy dolgozzon tovább a legújabb revízióban"
+    }
   }
 }

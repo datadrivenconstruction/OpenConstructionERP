@@ -2126,5 +2126,11 @@
     },
     "contents_locked": "Sisältö pysyy sinetöitynä, kunnes virallinen avaus alkaa.",
     "market_off": "Sinetöidyt laskelmat eivät kuulu tämän hankkeen markkinaprofiiliin."
+  },
+  "boq_revision": {
+    "superseded_still_editable": {
+      "fail": "Revisio {label} on yhä muokattavissa, vaikka sen jälkeen on luotu {later}; täällä tehdyt muutokset eivät siirry",
+      "suggestion": "Lukitse {label} tai jatka työtä uusimmassa revisiossa"
+    }
   }
 }

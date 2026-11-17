@@ -2126,5 +2126,11 @@
     },
     "contents_locked": "Der Inhalt bleibt versiegelt, bis eine förmliche Öffnung beginnt.",
     "market_off": "Versiegelte Kalkulationen gehören nicht zum Marktprofil dieses Projekts."
+  },
+  "boq_revision": {
+    "superseded_still_editable": {
+      "fail": "Revision {label} ist noch bearbeitbar, obwohl seitdem {later} erstellt wurde; Änderungen hier werden nicht übernommen",
+      "suggestion": "Sperren Sie {label}, um sie einzufrieren, oder arbeiten Sie in der neuesten Revision weiter"
+    }
   }
 }

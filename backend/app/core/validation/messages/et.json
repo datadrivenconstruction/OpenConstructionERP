@@ -2126,5 +2126,11 @@
     },
     "contents_locked": "Sisu jääb pitseerituks, kuni algab ametlik avamine.",
     "market_off": "Pitseeritud eelarved ei kuulu selle projekti turuprofiili."
+  },
+  "boq_revision": {
+    "superseded_still_editable": {
+      "fail": "Revisjon {label} on endiselt muudetav, kuigi pärast seda on loodud {later}; siin tehtud muudatused üle ei kandu",
+      "suggestion": "Lukusta {label} või jätka tööd uusimas revisjonis"
+    }
   }
 }

@@ -2126,5 +2126,11 @@
     },
     "contents_locked": "Sadržaj ostaje zapečaćen dok ne počne službeno otvaranje.",
     "market_off": "Zapečaćeni troškovnici nisu dio tržišnog profila ovog projekta."
+  },
+  "boq_revision": {
+    "superseded_still_editable": {
+      "fail": "Revizija {label} još se može uređivati iako je u međuvremenu izrađena {later}; ovdje napravljene izmjene ne prenose se",
+      "suggestion": "Zaključajte {label} ili nastavite rad u najnovijoj reviziji"
+    }
   }
 }

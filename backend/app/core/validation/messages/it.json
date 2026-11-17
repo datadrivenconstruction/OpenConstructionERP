@@ -2126,5 +2126,11 @@
     },
     "contents_locked": "Il contenuto resta sigillato finché non inizia un'apertura formale.",
     "market_off": "I computi sigillati non fanno parte del profilo di mercato di questo progetto."
+  },
+  "boq_revision": {
+    "superseded_still_editable": {
+      "fail": "La revisione {label} è ancora modificabile anche se nel frattempo è stata creata {later}; le modifiche fatte qui non vengono riportate",
+      "suggestion": "Blocca {label} per congelarla o continua a lavorare nell'ultima revisione"
+    }
   }
 }

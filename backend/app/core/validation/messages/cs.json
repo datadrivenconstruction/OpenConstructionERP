@@ -2126,5 +2126,11 @@
     },
     "contents_locked": "Obsah zůstává zapečetěn, dokud nezačne formální otevření.",
     "market_off": "Zapečetěné rozpočty nejsou součástí tržního profilu tohoto projektu."
+  },
+  "boq_revision": {
+    "superseded_still_editable": {
+      "fail": "Revize {label} je stále upravitelná, přestože mezitím vznikla {later}; změny provedené zde se nepřenesou",
+      "suggestion": "Uzamkněte {label}, nebo pokračujte v nejnovější revizi"
+    }
   }
 }

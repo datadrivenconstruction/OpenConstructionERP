@@ -2126,5 +2126,11 @@
     },
     "contents_locked": "Rasmiy ochilish boshlanguncha tarkib muhrlangan holda qoladi.",
     "market_off": "Muhrlangan smetalar bu loyihaning bozor profiliga kirmaydi."
+  },
+  "boq_revision": {
+    "superseded_still_editable": {
+      "fail": "{label} reviziyasi hali ham tahrirlanadi, garchi undan keyin {later} yaratilgan bo'lsa ham; bu yerdagi o'zgarishlar unga o'tmaydi",
+      "suggestion": "{label} ni qulflang yoki eng so'nggi reviziyada ishlashni davom ettiring"
+    }
   }
 }

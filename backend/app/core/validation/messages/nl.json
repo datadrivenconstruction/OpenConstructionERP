@@ -2126,5 +2126,11 @@
     },
     "contents_locked": "De inhoud blijft verzegeld tot een formele opening begint.",
     "market_off": "Verzegelde begrotingen horen niet bij het marktprofiel van dit project."
+  },
+  "boq_revision": {
+    "superseded_still_editable": {
+      "fail": "Revisie {label} is nog bewerkbaar terwijl daarna {later} is aangemaakt; wijzigingen hier worden niet overgenomen",
+      "suggestion": "Vergrendel {label} om haar te bevriezen, of werk verder in de nieuwste revisie"
+    }
   }
 }

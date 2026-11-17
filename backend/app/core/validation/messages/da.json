@@ -2126,5 +2126,11 @@
     },
     "contents_locked": "Indholdet forbliver forseglet, indtil en formel åbning begynder.",
     "market_off": "Forseglede kalkulationer indgår ikke i projektets markedsprofil."
+  },
+  "boq_revision": {
+    "superseded_still_editable": {
+      "fail": "Revision {label} kan stadig redigeres, selvom {later} er oprettet siden; ændringer her overføres ikke",
+      "suggestion": "Lås {label} for at fastfryse den, eller arbejd videre i den nyeste revision"
+    }
   }
 }

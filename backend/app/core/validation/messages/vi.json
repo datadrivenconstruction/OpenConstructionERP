@@ -2126,5 +2126,11 @@
     },
     "contents_locked": "Nội dung vẫn được niêm phong cho đến khi bắt đầu mở chính thức.",
     "market_off": "Dự toán niêm phong không thuộc hồ sơ thị trường của dự án này."
+  },
+  "boq_revision": {
+    "superseded_still_editable": {
+      "fail": "Bản sửa đổi {label} vẫn có thể chỉnh sửa dù {later} đã được tạo sau đó; thay đổi ở đây không được chuyển sang",
+      "suggestion": "Khóa {label} hoặc tiếp tục làm việc trong bản sửa đổi mới nhất"
+    }
   }
 }

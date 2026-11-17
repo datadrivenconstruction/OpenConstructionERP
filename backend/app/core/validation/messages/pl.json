@@ -2126,5 +2126,11 @@
     },
     "contents_locked": "Treść pozostaje opieczętowana do rozpoczęcia formalnego otwarcia.",
     "market_off": "Zapieczętowane kosztorysy nie należą do profilu rynkowego tego projektu."
+  },
+  "boq_revision": {
+    "superseded_still_editable": {
+      "fail": "Rewizja {label} nadal jest edytowalna, choć później utworzono {later}; zmiany wprowadzone tutaj nie zostaną przeniesione",
+      "suggestion": "Zablokuj {label}, aby ją zamrozić, lub kontynuuj pracę w najnowszej rewizji"
+    }
   }
 }

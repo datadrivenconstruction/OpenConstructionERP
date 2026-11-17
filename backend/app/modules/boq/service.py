@@ -7297,6 +7297,8 @@ class BOQService:
         source_base_date = source_boq.base_date
         source_tax_date = source_boq.tax_date
         source_metadata = dict(source_boq.metadata_) if source_boq.metadata_ else {}
+        # A copy is not the source's formal revision; only "Create revision" numbers one.
+        source_metadata.pop("revision", None)
         # Issue #435: a revision or scenario of a variation request's bill is
         # still that request's bill. Dropping the link here would quietly turn
         # the copy into a bill of the project at large - it would appear in the
@@ -9346,12 +9348,16 @@ class BOQService:
         await self.get_boq(boq_id)
 
         entries, total = await self.activity_repo.list_for_boq(boq_id, offset=offset, limit=limit)
+        from app.modules.boq.revisions import display_names
+
+        names = await display_names(self.session, (e.user_id for e in entries))
         items = [
             ActivityLogResponse(
                 id=e.id,
                 project_id=e.project_id,
                 boq_id=e.boq_id,
                 user_id=e.user_id,
+                user_name=names.get(e.user_id) if e.user_id else None,
                 action=e.action,
                 target_type=e.target_type,
                 target_id=e.target_id,

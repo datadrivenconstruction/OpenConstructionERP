@@ -2126,5 +2126,11 @@
     },
     "contents_locked": "正式な開封が始まるまで内容は封印されたままです。",
     "market_off": "封印された見積はこのプロジェクトの市場プロファイルに含まれていません。"
+  },
+  "boq_revision": {
+    "superseded_still_editable": {
+      "fail": "改訂 {label} はまだ編集できますが、その後 {later} が作成されています。ここでの変更は引き継がれません",
+      "suggestion": "{label} をロックするか、最新の改訂で作業を続けてください"
+    }
   }
 }

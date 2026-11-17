@@ -2126,5 +2126,11 @@
     },
     "contents_locked": "Mananatiling selyado ang nilalaman hanggang magsimula ang pormal na pagbubukas.",
     "market_off": "Hindi bahagi ng market profile ng proyektong ito ang mga nakaselyong tantiya."
+  },
+  "boq_revision": {
+    "superseded_still_editable": {
+      "fail": "Maaari pang i-edit ang rebisyon {label} kahit nagawa na ang {later} pagkatapos nito; hindi madadala ang mga pagbabago rito",
+      "suggestion": "I-lock ang {label} o magpatuloy sa pinakabagong rebisyon"
+    }
   }
 }

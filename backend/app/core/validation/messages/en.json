@@ -2126,5 +2126,11 @@
     },
     "contents_locked": "The contents stay sealed until a formal opening starts.",
     "market_off": "Sealed estimates are not part of this project's market profile."
+  },
+  "boq_revision": {
+    "superseded_still_editable": {
+      "fail": "Revision {label} can still be edited although {later} has been raised since; changes made here do not carry over",
+      "suggestion": "Lock {label} to freeze it, or open the latest revision to keep working"
+    }
   }
 }

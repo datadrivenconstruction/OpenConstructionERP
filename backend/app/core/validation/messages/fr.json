@@ -2126,5 +2126,11 @@
     },
     "contents_locked": "Le contenu reste scellé jusqu'au début d'une ouverture formelle.",
     "market_off": "Les devis scellés ne font pas partie du profil de marché de ce projet."
+  },
+  "boq_revision": {
+    "superseded_still_editable": {
+      "fail": "La révision {label} est encore modifiable alors que {later} a été créée depuis ; les modifications faites ici ne sont pas reportées",
+      "suggestion": "Verrouillez {label} pour la figer, ou poursuivez dans la révision la plus récente"
+    }
   }
 }

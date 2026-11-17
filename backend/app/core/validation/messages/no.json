@@ -2126,5 +2126,11 @@
     },
     "contents_locked": "Innholdet forblir forseglet til en formell åpning starter.",
     "market_off": "Forseglede kalkyler er ikke en del av prosjektets markedsprofil."
+  },
+  "boq_revision": {
+    "superseded_still_editable": {
+      "fail": "Revisjon {label} kan fortsatt redigeres selv om {later} er opprettet siden; endringer her overføres ikke",
+      "suggestion": "Lås {label} for å fryse den, eller arbeid videre i den nyeste revisjonen"
+    }
   }
 }

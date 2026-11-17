@@ -2126,5 +2126,11 @@
     },
     "contents_locked": "El contenido sigue sellado hasta que empiece una apertura formal.",
     "market_off": "Los presupuestos sellados no forman parte del perfil de mercado de este proyecto."
+  },
+  "boq_revision": {
+    "superseded_still_editable": {
+      "fail": "La revisión {label} aún se puede editar aunque después se creó {later}; los cambios hechos aquí no se trasladan",
+      "suggestion": "Bloquee {label} para congelarla o siga trabajando en la revisión más reciente"
+    }
   }
 }

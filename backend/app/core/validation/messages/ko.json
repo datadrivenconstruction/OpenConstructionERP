@@ -2126,5 +2126,11 @@
     },
     "contents_locked": "공식 개봉이 시작될 때까지 내용은 봉인 상태로 유지됩니다.",
     "market_off": "봉인 견적은 이 프로젝트의 시장 프로필에 포함되지 않습니다."
+  },
+  "boq_revision": {
+    "superseded_still_editable": {
+      "fail": "{label} 개정은 아직 편집할 수 있지만 이후 {later}이(가) 생성되었습니다. 여기서의 변경은 반영되지 않습니다",
+      "suggestion": "{label}을(를) 잠그거나 최신 개정에서 계속 작업하세요"
+    }
   }
 }

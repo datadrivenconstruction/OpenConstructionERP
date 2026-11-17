@@ -2126,5 +2126,11 @@
     },
     "contents_locked": "İçerik resmi bir açılış başlayana kadar mühürlü kalır.",
     "market_off": "Mühürlü keşifler bu projenin pazar profilinde yer almıyor."
+  },
+  "boq_revision": {
+    "superseded_still_editable": {
+      "fail": "{label} revizyonu, sonrasında {later} oluşturulmuş olmasına rağmen hâlâ düzenlenebilir; burada yapılan değişiklikler aktarılmaz",
+      "suggestion": "{label} revizyonunu kilitleyin veya en son revizyonda çalışmaya devam edin"
+    }
   }
 }

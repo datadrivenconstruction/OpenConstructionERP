@@ -980,6 +980,49 @@ _BOQ_BRANCH_RULES: tuple[ValidationRule, ...] = (
 )
 
 
+class RevisionSupersededStillEditable(ValidationRule):
+    """An older formal revision that is still editable invites edits that never reach the newer one."""
+
+    rule_id = "boq.revision.superseded_still_editable"
+    name = "A superseded revision is locked"
+    standard = "universal"
+    severity = Severity.WARNING
+    category = RuleCategory.CONSISTENCY
+    description = (
+        "Once a later revision has been raised, changes made to an earlier one do not carry "
+        "over; lock the earlier revision or keep working in the latest one."
+    )
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        """Flag an unlocked bill that has a later revision in its lineage."""
+        data = context.data
+        block = data.get("revision") if isinstance(data, dict) else None
+        if not isinstance(block, dict) or block.get("is_locked"):
+            return []
+        later = [str(label) for label in block.get("later_labels") or []]
+        if not later:
+            return []
+        locale = _locale(context)
+        label = str(block.get("label") or "")
+        return [
+            RuleResult(
+                rule_id=self.rule_id,
+                rule_name=self.name,
+                severity=self.severity,
+                category=self.category,
+                passed=False,
+                message=translate(
+                    "boq_revision.superseded_still_editable.fail", locale, label=label, later=", ".join(later)
+                ),
+                suggestion=translate("boq_revision.superseded_still_editable.suggestion", locale, label=label),
+                details={"label": label, "later_labels": later},
+            )
+        ]
+
+
+_BOQ_REVISION_RULES: tuple[ValidationRule, ...] = (RevisionSupersededStillEditable(),)
+
+
 # ── Excel round-trip review rules ───────────────────────────────────────────
 #
 # These read ``context.data["roundtrip"]["issues"]``: one dict per finding the
@@ -1127,10 +1170,12 @@ def register_boq_roundtrip_rules() -> None:
 
 
 def register_boq_branch_rules() -> None:
-    """Register the estimate-branch rules under the same universal set."""
-    for rule in _BOQ_BRANCH_RULES:
+    """Register the estimate-branch and formal-revision rules under the same universal set."""
+    for rule in (*_BOQ_BRANCH_RULES, *_BOQ_REVISION_RULES):
         rule_registry.register(rule, [BOQ_MARKUP_RULE_SET])
-    logger.debug("Registered %d boq branch validation rules", len(_BOQ_BRANCH_RULES))
+    logger.debug(
+        "Registered %d boq branch and revision validation rules", len(_BOQ_BRANCH_RULES) + len(_BOQ_REVISION_RULES)
+    )
 
 
 register_boq_markup_rules()

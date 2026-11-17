@@ -2126,5 +2126,11 @@
     },
     "contents_locked": "Innehållet förblir förseglat tills en formell öppning börjar.",
     "market_off": "Förseglade kalkyler ingår inte i projektets marknadsprofil."
+  },
+  "boq_revision": {
+    "superseded_still_editable": {
+      "fail": "Revision {label} kan fortfarande redigeras trots att {later} har skapats sedan dess; ändringar här förs inte över",
+      "suggestion": "Lås {label} för att frysa den, eller fortsätt arbeta i den senaste revisionen"
+    }
   }
 }

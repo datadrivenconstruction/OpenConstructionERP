@@ -2126,5 +2126,11 @@
     },
     "contents_locked": "Conținutul rămâne sigilat până începe o deschidere formală.",
     "market_off": "Devizele sigilate nu fac parte din profilul de piață al acestui proiect."
+  },
+  "boq_revision": {
+    "superseded_still_editable": {
+      "fail": "Revizia {label} poate fi încă editată deși între timp a fost creată {later}; modificările făcute aici nu se transferă",
+      "suggestion": "Blocați {label} pentru a o îngheța sau continuați în cea mai recentă revizie"
+    }
   }
 }
