@@ -101,3 +101,22 @@ async def test_reinstall_replaces_only_the_installing_owners_rows() -> None:
         again = await install_demo_project(session, _DEMO, owner_id=second_owner, force_reinstall=True)
         assert await _footprint(session, first_pid) == before
         assert await _footprint(session, uuid.UUID(again["project_id"])) == before
+
+
+async def test_purging_one_owners_demo_keeps_the_other_owners_global_rows() -> None:
+    from app.modules.projects.service import purge_demo_tagged_global_rows
+    from tests._pg import transactional_session
+
+    async with transactional_session() as session:
+        first_owner = await _user(session, "first")
+        second_owner = await _user(session, "second")
+        first_pid = uuid.UUID((await install_demo_project(session, _DEMO, owner_id=first_owner))["project_id"])
+        second_pid = uuid.UUID((await install_demo_project(session, _DEMO, owner_id=second_owner))["project_id"])
+        before = await _footprint(session, second_pid)
+
+        deleted = await purge_demo_tagged_global_rows(session, {_DEMO}, {str(first_owner)})
+
+        assert deleted.get("oe_equipment_equipment") == 2
+        assert (await _footprint(session, first_pid))["equipment"] == 0
+        assert (await _footprint(session, first_pid))["subcontractors"] == 0
+        assert await _footprint(session, second_pid) == before
