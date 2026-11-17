@@ -154,6 +154,38 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       "playlistId": "PLO8UfCu9nokM"
     },
     {
+      "id": "playbook-vietnam",
+      "title": "Builder's Playbook Việt Nam: dự toán và hợp đồng xây nhà",
+      "language": "vi",
+      "market": "VN",
+      "channel": "academy",
+      "playlistId": "PLKmnwe8BRoNc"
+    },
+    {
+      "id": "playbook-indonesia",
+      "title": "Builder's Playbook Indonesia: RAB dan kontrak rumah",
+      "language": "id",
+      "market": "ID",
+      "channel": "academy",
+      "playlistId": "PLD-789hbzDsc"
+    },
+    {
+      "id": "playbook-india",
+      "title": "Builder's Playbook भारत: घर बनाने का खर्चा, ठेका और बिल",
+      "language": "hi",
+      "market": "IN",
+      "channel": "academy",
+      "playlistId": "PLRwew5qHBFVA"
+    },
+    {
+      "id": "playbook-russia",
+      "title": "Builder's Playbook Россия: смета и договор частного дома",
+      "language": "ru",
+      "market": "RU",
+      "channel": "academy",
+      "playlistId": "PLRym5GPIX8ro"
+    },
+    {
       "id": "ddc-walkthroughs",
       "title": "Product walkthroughs and talks",
       "titleKey": "videos.series.walkthroughs",
@@ -7469,6 +7501,1062 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         {
           "t": 284,
           "title": "الفوترة الإلكترونية"
+        }
+      ]
+    },
+    {
+      "id": "VN01",
+      "youtubeId": "8eWSMK_fXjc",
+      "status": "published",
+      "channel": "academy",
+      "language": "vi",
+      "market": "VN",
+      "series": "playbook-vietnam",
+      "seriesOrder": 1,
+      "stage": "estimate",
+      "roles": [
+        "estimator",
+        "quantity-surveyor"
+      ],
+      "cases": [
+        "measure-the-drawing-into-a-coded-bill-item",
+        "estimate-from-cost-database",
+        "validate-estimate"
+      ],
+      "routes": [
+        "/takeoff",
+        "/quantities",
+        "/boq",
+        "/validation",
+        "/cost-explorer",
+        "/assemblies",
+        "/reports"
+      ],
+      "result": "bill",
+      "title": "Xây nhà 3 tầng 1 tum hết bao nhiêu tiền? Tự lập dự toán nhà phố 5×20 (2026)",
+      "description": "Nhà thầu báo 6 triệu/m² trọn gói, căn nhà phố 3 tầng 1 tum được tính thành 344 m², tức 2,064 tỷ đồng. Nhưng sàn thật chỉ có 264 m². Tính lại, mỗi mét vuông sàn thật là hơn 7,8 triệu, vượt chi phí xây dựng bình quân cả nước mà Bộ Xây dựng công bố (7.536.000 đ/m² sàn, đã gồm hoàn thiện, điện nước trong nhà và VAT 10 %, giá quý IV/2025). Cao hay hợp lý thì phải lập dự toán từng hạng mục.",
+      "duration": 510,
+      "cover": "https://i.ytimg.com/vi/8eWSMK_fXjc/maxresdefault.jpg",
+      "chapters": [
+        {
+          "t": 0,
+          "title": "Báo giá theo m²"
+        },
+        {
+          "t": 58,
+          "title": "Cách tính % diện tích"
+        },
+        {
+          "t": 109,
+          "title": "Suất vốn Bộ Xây dựng"
+        },
+        {
+          "t": 162,
+          "title": "Dự toán từng hạng mục"
+        },
+        {
+          "t": 346,
+          "title": "Bao nhiêu tấn thép"
+        },
+        {
+          "t": 419,
+          "title": "So sánh và 3 câu cần hỏi"
+        }
+      ]
+    },
+    {
+      "id": "VN02",
+      "youtubeId": "BFer60dLNI8",
+      "status": "published",
+      "channel": "academy",
+      "language": "vi",
+      "market": "VN",
+      "series": "playbook-vietnam",
+      "seriesOrder": 2,
+      "stage": "procure",
+      "roles": [
+        "estimator",
+        "procurement-buyer"
+      ],
+      "cases": [
+        "compare-bids-and-award",
+        "level-bids-to-a-common-scope",
+        "tender-from-boq"
+      ],
+      "routes": [
+        "/tendering",
+        "/bid-management",
+        "/reports",
+        "/boq"
+      ],
+      "result": "award",
+      "title": "Xây nhà trọn gói hay phần thô? So 3 báo giá, người rẻ nhất lại không rẻ (2026)",
+      "description": "Ba nhà thầu báo giá cùng một căn nhà: 1,09 tỷ, 1,24 tỷ và gần 1,38 tỷ đồng. Người rẻ nhất để trống hai dòng, ép cọc và chống thấm. Hỏi đủ giá, người đó lên 1,255 tỷ và không còn rẻ nhất nữa.",
+      "duration": 576,
+      "cover": "https://i.ytimg.com/vi/BFer60dLNI8/maxresdefault.jpg",
+      "chapters": [
+        {
+          "t": 0,
+          "title": "Bẫy giá mét vuông"
+        },
+        {
+          "t": 124,
+          "title": "Ba báo giá trong phần mềm"
+        },
+        {
+          "t": 244,
+          "title": "Dòng bỏ trống"
+        },
+        {
+          "t": 349,
+          "title": "Trọn gói hay phần thô"
+        },
+        {
+          "t": 496,
+          "title": "Trao thầu"
+        }
+      ]
+    },
+    {
+      "id": "VN03",
+      "youtubeId": "dRdYFzYndmE",
+      "status": "published",
+      "channel": "academy",
+      "language": "vi",
+      "market": "VN",
+      "series": "playbook-vietnam",
+      "seriesOrder": 3,
+      "stage": "plan",
+      "roles": [
+        "contract-administrator",
+        "commercial-manager"
+      ],
+      "cases": [
+        "build-a-milestone-payment-schedule",
+        "manage-retention-across-the-supply-chain",
+        "forecast-project-cash-flow"
+      ],
+      "routes": [
+        "/schedule",
+        "/contracts",
+        "/finance",
+        "/subcontractors",
+        "/reconciliation",
+        "/reports"
+      ],
+      "result": "order",
+      "title": "Hợp đồng xây nhà: lịch trả tiền thế nào để tiền không chạy trước việc (2026)",
+      "description": "Nhà thầu đề nghị 20 % khi ký, 20 % khi xong móng. Tính ra, lúc xong sàn tầng 3, gia đình đã trả 870 triệu mà phần việc mới đáng 453 triệu: tiền chạy trước việc 417 triệu. Cùng căn nhà, cùng giá, viết lại lịch trả tiền thì khoảng cách đó còn 56 triệu.",
+      "duration": 493,
+      "cover": "https://i.ytimg.com/vi/dRdYFzYndmE/maxresdefault.jpg",
+      "chapters": [
+        {
+          "t": 0,
+          "title": "Tiền chạy trước việc"
+        },
+        {
+          "t": 44,
+          "title": "Luật nói gì"
+        },
+        {
+          "t": 92,
+          "title": "Hợp đồng trong phần mềm"
+        },
+        {
+          "t": 190,
+          "title": "Đo khoảng cách"
+        },
+        {
+          "t": 237,
+          "title": "Lịch trả tiền mới"
+        },
+        {
+          "t": 399,
+          "title": "Phạt chậm và ký"
+        }
+      ]
+    },
+    {
+      "id": "VN04",
+      "youtubeId": "zh_PBOJPH50",
+      "status": "published",
+      "channel": "academy",
+      "language": "vi",
+      "market": "VN",
+      "series": "playbook-vietnam",
+      "seriesOrder": 4,
+      "stage": "build",
+      "roles": [
+        "quantity-surveyor",
+        "accountant"
+      ],
+      "cases": [
+        "prepare-an-interim-payment-application",
+        "value-the-month-and-certify-the-progress-payment",
+        "manage-retention-across-the-supply-chain"
+      ],
+      "routes": [
+        "/boq",
+        "/value",
+        "/finance",
+        "/reports",
+        "/reconciliation",
+        "/contracts",
+        "/inspections",
+        "/progress",
+        "/payment-clock",
+        "/subcontractors"
+      ],
+      "result": "invoice",
+      "title": "Nghiệm thu xây nhà: kiểm tra cốt thép trước khi đổ bê tông, rồi mới trả tiền (2026)",
+      "description": "Bê tông đã đổ xuống thì cốt thép bên trong không ai nhìn thấy nữa. Vì vậy có những lúc phải dừng lại kiểm tra trước. Trong ví dụ này, thép sàn tầng 2 thưa hơn bản vẽ: phát hiện trước khi đổ, thợ sửa mất một ngày.",
+      "duration": 448,
+      "cover": "https://i.ytimg.com/vi/zh_PBOJPH50/maxresdefault.jpg",
+      "chapters": [
+        {
+          "t": 0,
+          "title": "Trước khi che lấp"
+        },
+        {
+          "t": 86,
+          "title": "Kiểm tra, sửa, kiểm tra lại"
+        },
+        {
+          "t": 247,
+          "title": "Đợt thanh toán 2"
+        },
+        {
+          "t": 323,
+          "title": "Giữ lại và bảo hành"
+        }
+      ]
+    },
+    {
+      "id": "VN05",
+      "youtubeId": "w5PhSznRqNw",
+      "status": "published",
+      "channel": "academy",
+      "language": "vi",
+      "market": "VN",
+      "series": "playbook-vietnam",
+      "seriesOrder": 5,
+      "stage": "handover",
+      "roles": [
+        "commercial-manager",
+        "contract-administrator"
+      ],
+      "cases": [
+        "assess-and-price-a-variation",
+        "change-to-paid-variation",
+        "agree-the-final-account-and-release-retention"
+      ],
+      "routes": [
+        "/changeorders",
+        "/boq",
+        "/value",
+        "/contracts",
+        "/reports",
+        "/finance"
+      ],
+      "result": "handover",
+      "title": "Xây nhà bị phát sinh: tính thế nào cho đúng? Quyết toán đến đồng cuối cùng (2026)",
+      "description": "Bốn khoản phát sinh trên một căn nhà: cọc dài thêm vì đất yếu, thêm một phòng vệ sinh, bỏ một tường ngăn, và một khoản làm xong mới báo. Ba khoản được tính bằng đơn giá đã ký, một khoản bị từ chối. Hợp đồng 1.243.262.600 đồng chỉ tăng 23.071.700 đồng.",
+      "duration": 564,
+      "cover": "https://i.ytimg.com/vi/w5PhSznRqNw/maxresdefault.jpg",
+      "chapters": [
+        {
+          "t": 0,
+          "title": "Bốn khoản phát sinh"
+        },
+        {
+          "t": 125,
+          "title": "Lệnh thay đổi trong phần mềm"
+        },
+        {
+          "t": 273,
+          "title": "Quyết toán"
+        },
+        {
+          "t": 416,
+          "title": "Giấy tờ, giữ lại, nhìn lại"
+        }
+      ]
+    },
+    {
+      "id": "ID01",
+      "youtubeId": "zJ0VVl9nF68",
+      "status": "published",
+      "channel": "academy",
+      "language": "id",
+      "market": "ID",
+      "series": "playbook-indonesia",
+      "seriesOrder": 1,
+      "stage": "estimate",
+      "roles": [
+        "estimator",
+        "quantity-surveyor"
+      ],
+      "cases": [
+        "measure-the-drawing-into-a-coded-bill-item",
+        "estimate-from-cost-database",
+        "validate-estimate"
+      ],
+      "routes": [
+        "/takeoff",
+        "/quantities",
+        "/boq",
+        "/validation",
+        "/cost-explorer",
+        "/assemblies",
+        "/reports"
+      ],
+      "result": "bill",
+      "title": "Biaya Bangun Rumah 2 Lantai 2026: Cara Hitung RAB Sendiri (Volume × Harga Satuan)",
+      "description": "Rp 725.760.000: begitu hasilnya kalau rumah 2 lantai 108 m² di Jakarta Timur dihitung dengan standar harga satuan tertinggi (SHST) Pemprov DKI 2026 untuk rumah negara (Rp 6.720.000/m² × 108 m²). Tapi itu angka untuk bangunan negara, dan angka per meter belum RAB. Angka itu tidak memberi tahu berapa harga beton, besi, atau dinding, jadi tidak bisa dipakai untuk menawar.",
+      "duration": 511,
+      "cover": "https://i.ytimg.com/vi/zJ0VVl9nF68/maxresdefault.jpg",
+      "chapters": [
+        {
+          "t": 0,
+          "title": "Harga per meter"
+        },
+        {
+          "t": 106,
+          "title": "AHSP dan koefisien"
+        },
+        {
+          "t": 230,
+          "title": "Volume dan RAB"
+        },
+        {
+          "t": 380,
+          "title": "Biaya umum dan PPN"
+        }
+      ]
+    },
+    {
+      "id": "ID02",
+      "youtubeId": "pBWmaOlDWtQ",
+      "status": "published",
+      "channel": "academy",
+      "language": "id",
+      "market": "ID",
+      "series": "playbook-indonesia",
+      "seriesOrder": 2,
+      "stage": "procure",
+      "roles": [
+        "estimator",
+        "procurement-buyer"
+      ],
+      "cases": [
+        "compare-bids-and-award",
+        "level-bids-to-a-common-scope",
+        "tender-from-boq"
+      ],
+      "routes": [
+        "/tendering",
+        "/bid-management",
+        "/reports",
+        "/boq"
+      ],
+      "result": "award",
+      "title": "Borongan Penuh, Borongan Tenaga, atau Harian? Hitung Mana yang Lebih Murah",
+      "description": "Rumah yang sama bisa beda Rp 56 juta, hanya karena cara membangunnya. Di video ini satu RAB rumah 2 lantai 108 m² di Duren Sawit, Jakarta Timur, kita hitung dengan tiga cara: borongan penuh, borongan tenaga, dan harian. Lingkupnya struktur dan dinding, dengan harga dasar daftar resmi DKI tahun 2024.",
+      "duration": 522,
+      "cover": "https://i.ytimg.com/vi/pBWmaOlDWtQ/maxresdefault.jpg",
+      "chapters": [
+        {
+          "t": 0,
+          "title": "Tiga cara membangun"
+        },
+        {
+          "t": 85,
+          "title": "Harga tiap cara"
+        },
+        {
+          "t": 317,
+          "title": "Adu di program"
+        },
+        {
+          "t": 372,
+          "title": "Pajak dan pilihan"
+        }
+      ]
+    },
+    {
+      "id": "ID03",
+      "youtubeId": "O_o5bdauaTo",
+      "status": "published",
+      "channel": "academy",
+      "language": "id",
+      "market": "ID",
+      "series": "playbook-indonesia",
+      "seriesOrder": 3,
+      "stage": "plan",
+      "roles": [
+        "contract-administrator",
+        "commercial-manager"
+      ],
+      "cases": [
+        "build-a-milestone-payment-schedule",
+        "manage-retention-across-the-supply-chain",
+        "forecast-project-cash-flow"
+      ],
+      "routes": [
+        "/schedule",
+        "/contracts",
+        "/finance",
+        "/subcontractors",
+        "/reconciliation",
+        "/reports"
+      ],
+      "result": "order",
+      "title": "Kontrak Borongan Rumah: DP, Termin, dan Jadwal yang Aman untuk Pemilik",
+      "description": "DP 30 % untuk rumah contoh kita berarti Rp 84 juta keluar sebelum pekerjaan mulai, padahal tahap pertamanya cuma bernilai Rp 27 juta. Di video ini kita susun kontrak borongan rumah 2 lantai 108 m² di Duren Sawit supaya uang mengikuti pekerjaan. Nilainya Rp 279,8 juta sebelum PPN, lingkupnya struktur dan dinding, dengan harga dasar 2024.",
+      "duration": 510,
+      "cover": "https://i.ytimg.com/vi/O_o5bdauaTo/maxresdefault.jpg",
+      "chapters": [
+        {
+          "t": 0,
+          "title": "Kontrak borongan"
+        },
+        {
+          "t": 146,
+          "title": "Bobot dan DP"
+        },
+        {
+          "t": 239,
+          "title": "Termin dan retensi"
+        },
+        {
+          "t": 337,
+          "title": "Jadwal dan kurva S"
+        },
+        {
+          "t": 409,
+          "title": "Denda, tanda tangan, PBG"
+        }
+      ]
+    },
+    {
+      "id": "ID04",
+      "youtubeId": "rI6wyyT0sdo",
+      "status": "published",
+      "channel": "academy",
+      "language": "id",
+      "market": "ID",
+      "series": "playbook-indonesia",
+      "seriesOrder": 4,
+      "stage": "build",
+      "roles": [
+        "quantity-surveyor",
+        "accountant"
+      ],
+      "cases": [
+        "prepare-an-interim-payment-application",
+        "value-the-month-and-certify-the-progress-payment",
+        "manage-retention-across-the-supply-chain"
+      ],
+      "routes": [
+        "/boq",
+        "/value",
+        "/finance",
+        "/reports",
+        "/reconciliation",
+        "/contracts",
+        "/inspections",
+        "/progress",
+        "/payment-clock",
+        "/subcontractors"
+      ],
+      "result": "invoice",
+      "title": "Opname Pekerjaan dan Bayar Termin: Cara Hitung Retensi dan PPN yang Benar",
+      "description": "Kontraktor bilang pondasi sudah beres dan minta transfer Rp 26 juta. Meteran bilang 7 meter slof belum dicor. Di video ini kita ukur tahap pertama rumah 2 lantai di Duren Sawit, baris per baris, lalu hitung sampai ketemu angka transfer yang benar: Rp 25.933.848.",
+      "duration": 496,
+      "cover": "https://i.ytimg.com/vi/rI6wyyT0sdo/maxresdefault.jpg",
+      "chapters": [
+        {
+          "t": 0,
+          "title": "Opname di lapangan"
+        },
+        {
+          "t": 212,
+          "title": "Nilai, DP, retensi"
+        },
+        {
+          "t": 285,
+          "title": "PPN dan transfer"
+        },
+        {
+          "t": 383,
+          "title": "Semua termin"
+        }
+      ]
+    },
+    {
+      "id": "ID05",
+      "youtubeId": "Bg8xsRKARY8",
+      "status": "published",
+      "channel": "academy",
+      "language": "id",
+      "market": "ID",
+      "series": "playbook-indonesia",
+      "seriesOrder": 5,
+      "stage": "handover",
+      "roles": [
+        "commercial-manager",
+        "contract-administrator"
+      ],
+      "cases": [
+        "assess-and-price-a-variation",
+        "change-to-paid-variation",
+        "agree-the-final-account-and-release-retention"
+      ],
+      "routes": [
+        "/changeorders",
+        "/boq",
+        "/value",
+        "/contracts",
+        "/reports",
+        "/finance"
+      ],
+      "result": "handover",
+      "title": "Pekerjaan Tambah Kurang, Serah Terima, dan SLF Rumah Tinggal",
+      "description": "\"Sekalian aja, Pak.\" Satu kalimat di lokasi bisa jadi tagihan yang tidak tertulis di mana pun. Di video terakhir seri ini, rumah 2 lantai di Duren Sawit berubah rencana: ada sekat kamar baru dan jendela lebih besar. Kita hitung tambah dan kurangnya dari harga satuan kontrak, buat tertulis, lalu selesaikan rumahnya sampai serah terima dan SLF.",
+      "duration": 486,
+      "cover": "https://i.ytimg.com/vi/Bg8xsRKARY8/maxresdefault.jpg",
+      "chapters": [
+        {
+          "t": 0,
+          "title": "Hitung perubahan"
+        },
+        {
+          "t": 129,
+          "title": "Tertulis dan di program"
+        },
+        {
+          "t": 257,
+          "title": "Serah terima"
+        },
+        {
+          "t": 376,
+          "title": "Tutup dan SLF"
+        }
+      ]
+    },
+    {
+      "id": "HI01",
+      "youtubeId": "NUnADzlgAlQ",
+      "status": "published",
+      "channel": "academy",
+      "language": "hi",
+      "market": "IN",
+      "series": "playbook-india",
+      "seriesOrder": 1,
+      "stage": "estimate",
+      "roles": [
+        "estimator",
+        "quantity-surveyor"
+      ],
+      "cases": [
+        "measure-the-drawing-into-a-coded-bill-item",
+        "estimate-from-cost-database",
+        "validate-estimate"
+      ],
+      "routes": [
+        "/takeoff",
+        "/quantities",
+        "/boq",
+        "/validation",
+        "/cost-explorer",
+        "/assemblies",
+        "/reports"
+      ],
+      "result": "bill",
+      "title": "घर बनाने का खर्चा 2026: रेट per sq ft बनाम असली BOQ (30×40 प्लॉट, G+2 घर)",
+      "description": "केंद्र सरकार की CPWD रेट बुक (Plinth Area Rates 2023) में RCC घर का रेट ₹23,530 प्रति m² है, यानी करीब ₹2,186 प्रति sq ft। 1,500 sq ft के G+2 घर पर ये करीब ₹32.8 लाख बैठता है। पर ये दिल्ली के सरकारी क्वार्टर का औसत है; इस एक नंबर से न बजट बनता है, न ठेकेदार का भाव जँचता है।",
+      "duration": 501,
+      "cover": "https://i.ytimg.com/vi/NUnADzlgAlQ/maxresdefault.jpg",
+      "chapters": [
+        {
+          "t": 0,
+          "title": "रेट और प्लॉट"
+        },
+        {
+          "t": 96,
+          "title": "BOQ और SSR"
+        },
+        {
+          "t": 174,
+          "title": "ऐप में BOQ"
+        },
+        {
+          "t": 367,
+          "title": "टोटल और तुलना"
+        }
+      ]
+    },
+    {
+      "id": "HI02",
+      "youtubeId": "rxl3DChsF2U",
+      "status": "published",
+      "channel": "academy",
+      "language": "hi",
+      "market": "IN",
+      "series": "playbook-india",
+      "seriesOrder": 2,
+      "stage": "procure",
+      "roles": [
+        "estimator",
+        "procurement-buyer"
+      ],
+      "cases": [
+        "compare-bids-and-award",
+        "level-bids-to-a-common-scope",
+        "tender-from-boq"
+      ],
+      "routes": [
+        "/tendering",
+        "/bid-management",
+        "/reports",
+        "/boq"
+      ],
+      "result": "award",
+      "title": "ठेकेदार कैसे चुनें? 3 कोटेशन की सही तुलना, लेबर ठेका या मटीरियल के साथ",
+      "description": "एक ठेकेदार ₹1,000 प्रति स्क्वेयर फ़ुट बोलता है, दूसरा ₹1,295 + GST, तीसरा ₹1,500 GST सहित। इन नंबरों को सीधे मिलाएँगे, तो ग़लत ठेकेदार चुन लेंगे।",
+      "duration": 515,
+      "cover": "https://i.ytimg.com/vi/rxl3DChsF2U/maxresdefault.jpg",
+      "chapters": [
+        {
+          "t": 0,
+          "title": "कोटेशन भेजना"
+        },
+        {
+          "t": 108,
+          "title": "भाव की तुलना"
+        },
+        {
+          "t": 235,
+          "title": "जोखिम"
+        },
+        {
+          "t": 393,
+          "title": "GST और ठेका"
+        }
+      ]
+    },
+    {
+      "id": "HI03",
+      "youtubeId": "6KMjjYriI5A",
+      "status": "published",
+      "channel": "academy",
+      "language": "hi",
+      "market": "IN",
+      "series": "playbook-india",
+      "seriesOrder": 3,
+      "stage": "plan",
+      "roles": [
+        "contract-administrator",
+        "commercial-manager"
+      ],
+      "cases": [
+        "build-a-milestone-payment-schedule",
+        "manage-retention-across-the-supply-chain",
+        "forecast-project-cash-flow"
+      ],
+      "routes": [
+        "/schedule",
+        "/contracts",
+        "/finance",
+        "/subcontractors",
+        "/reconciliation",
+        "/reports"
+      ],
+      "result": "order",
+      "title": "घर बनाने का एग्रीमेंट और स्टेज पेमेंट: ठेकेदार को पैसे कब और कितने दें",
+      "description": "\"हर महीने दो लाख देते जाइए\" वाली शर्त पर चलेंगे, तो पैसा काम से आगे निकल जाता है। ठेकेदार को पैसा उतना ही मिले, जितना काम नपा।",
+      "duration": 501,
+      "cover": "https://i.ytimg.com/vi/6KMjjYriI5A/maxresdefault.jpg",
+      "chapters": [
+        {
+          "t": 0,
+          "title": "कागज़ और काम"
+        },
+        {
+          "t": 115,
+          "title": "ऐप में ठेका"
+        },
+        {
+          "t": 257,
+          "title": "पेमेंट की सीढ़ी"
+        },
+        {
+          "t": 401,
+          "title": "शर्तें और साइन"
+        }
+      ]
+    },
+    {
+      "id": "HI04",
+      "youtubeId": "yArrQJpWS1E",
+      "status": "published",
+      "channel": "academy",
+      "language": "hi",
+      "market": "IN",
+      "series": "playbook-india",
+      "seriesOrder": 4,
+      "stage": "build",
+      "roles": [
+        "quantity-surveyor",
+        "accountant"
+      ],
+      "cases": [
+        "prepare-an-interim-payment-application",
+        "value-the-month-and-certify-the-progress-payment",
+        "manage-retention-across-the-supply-chain"
+      ],
+      "routes": [
+        "/boq",
+        "/value",
+        "/finance",
+        "/reports",
+        "/reconciliation",
+        "/contracts",
+        "/inspections",
+        "/progress",
+        "/payment-clock",
+        "/subcontractors"
+      ],
+      "result": "invoice",
+      "title": "RA बिल क्या होता है? मेज़रमेंट बुक, रिटेंशन, GST: घर के काम का बिल कैसे जाँचें",
+      "description": "बिल देखने में बिल्कुल ठीक था, फिर भी स्लैब की दो लाइनों में ₹25,859 ज़्यादा लिखे थे। ये रकम नापने के टेप से पकड़ी गई।",
+      "duration": 487,
+      "cover": "https://i.ytimg.com/vi/yArrQJpWS1E/maxresdefault.jpg",
+      "chapters": [
+        {
+          "t": 0,
+          "title": "नाप की किताब (MB)"
+        },
+        {
+          "t": 132,
+          "title": "लाइनें और नाप"
+        },
+        {
+          "t": 244,
+          "title": "सरिया और अग्रिम"
+        },
+        {
+          "t": 367,
+          "title": "GST और नेट बिल"
+        }
+      ]
+    },
+    {
+      "id": "HI05",
+      "youtubeId": "j139TGE3M2I",
+      "status": "published",
+      "channel": "academy",
+      "language": "hi",
+      "market": "IN",
+      "series": "playbook-india",
+      "seriesOrder": 5,
+      "stage": "handover",
+      "roles": [
+        "commercial-manager",
+        "contract-administrator"
+      ],
+      "cases": [
+        "assess-and-price-a-variation",
+        "change-to-paid-variation",
+        "agree-the-final-account-and-release-retention"
+      ],
+      "routes": [
+        "/changeorders",
+        "/boq",
+        "/value",
+        "/contracts",
+        "/reports",
+        "/finance"
+      ],
+      "result": "handover",
+      "title": "एक्स्ट्रा काम और फ़ाइनल बिल: बजट से बाहर खर्चा कैसे रोकें",
+      "description": "ठेकेदार ने छत की वॉटरप्रूफ़िंग के ₹1,900 प्रति स्क्वेयर मीटर माँगे। रेट एनालिसिस और SSR के हिसाब से ₹1,213 बैठता है, ठेकेदार के मुनाफ़े के साथ। 47 m² की छत पर करीब ₹33,000 का फ़र्क़।",
+      "duration": 503,
+      "cover": "https://i.ytimg.com/vi/j139TGE3M2I/maxresdefault.jpg",
+      "chapters": [
+        {
+          "t": 0,
+          "title": "बदलाव के प्रकार"
+        },
+        {
+          "t": 105,
+          "title": "माँग और हिसाब"
+        },
+        {
+          "t": 228,
+          "title": "कंट्रोल और क्लेम"
+        },
+        {
+          "t": 384,
+          "title": "फ़ाइनल और बंद"
+        }
+      ]
+    },
+    {
+      "id": "RU01",
+      "youtubeId": "PhQhb4OsVgI",
+      "status": "published",
+      "channel": "academy",
+      "language": "ru",
+      "market": "RU",
+      "series": "playbook-russia",
+      "seriesOrder": 1,
+      "stage": "estimate",
+      "roles": [
+        "estimator",
+        "quantity-surveyor"
+      ],
+      "cases": [
+        "measure-the-drawing-into-a-coded-bill-item",
+        "estimate-from-cost-database",
+        "validate-estimate"
+      ],
+      "routes": [
+        "/takeoff",
+        "/quantities",
+        "/boq",
+        "/validation",
+        "/cost-explorer",
+        "/assemblies",
+        "/reports"
+      ],
+      "result": "bill",
+      "title": "Сколько стоит построить дом из газобетона в 2026: смета на коробку по позициям",
+      "description": "Средняя цена частного дома в конце июня 2026 года: 7 560 000 ₽ за 107 м², около 70 000 ₽ за квадратный метр. Удобная цифра, но по ней не проверишь ни одного подрядчика. Проверить можно только смету, строку за строкой.",
+      "duration": 464,
+      "cover": "https://i.ytimg.com/vi/PhQhb4OsVgI/maxresdefault.jpg",
+      "chapters": [
+        {
+          "t": 0,
+          "title": "Дом и площадь"
+        },
+        {
+          "t": 103,
+          "title": "Нормы и объёмы"
+        },
+        {
+          "t": 239,
+          "title": "Смета в программе"
+        },
+        {
+          "t": 371,
+          "title": "Накладные и НДС"
+        }
+      ]
+    },
+    {
+      "id": "RU02",
+      "youtubeId": "Cz7XcSbIka4",
+      "status": "published",
+      "channel": "academy",
+      "language": "ru",
+      "market": "RU",
+      "series": "playbook-russia",
+      "seriesOrder": 2,
+      "stage": "procure",
+      "roles": [
+        "estimator",
+        "procurement-buyer"
+      ],
+      "cases": [
+        "compare-bids-and-award",
+        "level-bids-to-a-common-scope",
+        "tender-from-boq"
+      ],
+      "routes": [
+        "/tendering",
+        "/bid-management",
+        "/reports",
+        "/boq"
+      ],
+      "result": "award",
+      "title": "Три сметы на один дом: как сравнить подрядчиков и что в них спрятано",
+      "description": "Три подрядчика считают одну и ту же коробку дома: 1 174 717 ₽, 1 568 970 ₽ и 1 980 948 ₽. Разница больше 800 000 рублей. Самая низкая сумма ещё не значит самую низкую цену, и в этом видео мы это проверяем строка за строкой.",
+      "duration": 552,
+      "cover": "https://i.ytimg.com/vi/Cz7XcSbIka4/maxresdefault.jpg",
+      "chapters": [
+        {
+          "t": 0,
+          "title": "Один список"
+        },
+        {
+          "t": 91,
+          "title": "Три ответа"
+        },
+        {
+          "t": 154,
+          "title": "Ловушки"
+        },
+        {
+          "t": 466,
+          "title": "Выбор"
+        }
+      ]
+    },
+    {
+      "id": "RU03",
+      "youtubeId": "7h79CJJ1v5M",
+      "status": "published",
+      "channel": "academy",
+      "language": "ru",
+      "market": "RU",
+      "series": "playbook-russia",
+      "seriesOrder": 3,
+      "stage": "plan",
+      "roles": [
+        "contract-administrator",
+        "commercial-manager"
+      ],
+      "cases": [
+        "build-a-milestone-payment-schedule",
+        "manage-retention-across-the-supply-chain",
+        "forecast-project-cash-flow"
+      ],
+      "routes": [
+        "/schedule",
+        "/contracts",
+        "/finance",
+        "/subcontractors",
+        "/reconciliation",
+        "/reports"
+      ],
+      "result": "order",
+      "title": "Договор подряда на строительство дома в 2026: эскроу, этапы оплаты, что проверить",
+      "description": "Подрядчик присылает договор на две страницы, а внизу фраза «оплата по договорённости». В этом видео превращаем смету на 1 568 970 ₽ в договор, по которому деньги идут за сделанную работу.",
+      "duration": 537,
+      "cover": "https://i.ytimg.com/vi/7h79CJJ1v5M/maxresdefault.jpg",
+      "chapters": [
+        {
+          "t": 0,
+          "title": "Что в договоре"
+        },
+        {
+          "t": 204,
+          "title": "Два пути денег"
+        },
+        {
+          "t": 320,
+          "title": "Эскроу"
+        },
+        {
+          "t": 430,
+          "title": "До начала стройки"
+        }
+      ]
+    },
+    {
+      "id": "RU04",
+      "youtubeId": "p7GMZ37XpbI",
+      "status": "published",
+      "channel": "academy",
+      "language": "ru",
+      "market": "RU",
+      "series": "playbook-russia",
+      "seriesOrder": 4,
+      "stage": "build",
+      "roles": [
+        "quantity-surveyor",
+        "accountant"
+      ],
+      "cases": [
+        "prepare-an-interim-payment-application",
+        "value-the-month-and-certify-the-progress-payment",
+        "manage-retention-across-the-supply-chain"
+      ],
+      "routes": [
+        "/boq",
+        "/value",
+        "/finance",
+        "/reports",
+        "/reconciliation",
+        "/contracts",
+        "/inspections",
+        "/progress",
+        "/payment-clock",
+        "/subcontractors"
+      ],
+      "result": "invoice",
+      "title": "КС-2 и КС-3: что это и нужны ли при строительстве частного дома",
+      "description": "Подрядчик приносит КС-2 и КС-3 и просит подписать прямо на объекте. Что это за бумаги, обязательны ли они для частного заказчика и что проверить до подписи?",
+      "duration": 414,
+      "cover": "https://i.ytimg.com/vi/p7GMZ37XpbI/maxresdefault.jpg",
+      "chapters": [
+        {
+          "t": 0,
+          "title": "Что за бумаги"
+        },
+        {
+          "t": 97,
+          "title": "Приёмка"
+        },
+        {
+          "t": 214,
+          "title": "Акт в программе"
+        },
+        {
+          "t": 322,
+          "title": "Второй акт"
+        }
+      ]
+    },
+    {
+      "id": "RU05",
+      "youtubeId": "Y1OO6JD4mto",
+      "status": "published",
+      "channel": "academy",
+      "language": "ru",
+      "market": "RU",
+      "series": "playbook-russia",
+      "seriesOrder": 5,
+      "stage": "handover",
+      "roles": [
+        "commercial-manager",
+        "contract-administrator"
+      ],
+      "cases": [
+        "assess-and-price-a-variation",
+        "change-to-paid-variation",
+        "agree-the-final-account-and-release-retention"
+      ],
+      "routes": [
+        "/changeorders",
+        "/boq",
+        "/value",
+        "/contracts",
+        "/reports",
+        "/finance"
+      ],
+      "result": "handover",
+      "title": "Допработы по договору подряда: допсоглашение, окончательный расчёт, гарантия",
+      "description": "На финише подрядчик приносит ещё одну бумагу: перемычки, перегородка, гидроизоляция, 81 450 ₽ сверх твёрдой цены. Две строки мы оплатим, одну нет, и в этом видео объясняем, по какому правилу.",
+      "duration": 433,
+      "cover": "https://i.ytimg.com/vi/Y1OO6JD4mto/maxresdefault.jpg",
+      "chapters": [
+        {
+          "t": 0,
+          "title": "Три бумаги"
+        },
+        {
+          "t": 64,
+          "title": "Допработы"
+        },
+        {
+          "t": 235,
+          "title": "Окончательный расчёт"
+        },
+        {
+          "t": 301,
+          "title": "После стройки"
         }
       ]
     },
