@@ -179,6 +179,7 @@ const EXTRA_ROUTE_ICONS: Record<string, LucideIcon> = {
   '/survey/volumes': Mountain,
   '/survey/setting-out': Target,
   '/survey/parcels': LandPlot,
+  '/survey/monitoring': Activity,
   // ── 5. Model Coordination ─────────────────────────────────────────
   '/coordination': LayoutDashboard,
   '/model-review': ScanEye,

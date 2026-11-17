@@ -137,6 +137,11 @@ _TEMPLATES: dict[str, str] = {
     "notifications.approval.escalated.body": "Step {step_ordinal} on this {target_kind} escalated to you (level {level}).",
     "notifications.approval.reassigned.title": "Approval reassigned to you",
     "notifications.approval.reassigned.body": "Step {step_ordinal} on this {target_kind} is now yours to decide.",
+    # ── Deformation monitoring (a point crossed a level) ───────────────
+    "notifications.monitoring.alert.title": "Monitoring alert",
+    "notifications.monitoring.action.title": "Monitoring action level",
+    "notifications.monitoring.alarm.title": "Monitoring alarm",
+    "notifications.monitoring.crossed.body": "Point {point}: {displacement} mm, {rate} mm/day.",
     # ── Cross-module overdue escalation (deadlines, item #18) ─────────
     "notifications.deadline.overdue.title": "Overdue: {title}",
     "notifications.deadline.overdue.body": '{module} item "{title}" is {days_overdue} day(s) past due.',
@@ -292,6 +297,10 @@ _TYPE_TO_ICON: dict[str, str] = {
     "approval_overdue": "warning",
     "approval_escalated": "error",
     "approval_reassigned": "info",
+    # Deformation monitoring - a crossed level asks for a look, from action up it is urgent
+    "monitoring_alert": "warning",
+    "monitoring_action": "error",
+    "monitoring_alarm": "error",
     # Cross-module deadline sweep (item #18) - overdue warns, escalation errors
     "deadline_overdue": "warning",
     "deadline_escalated": "error",

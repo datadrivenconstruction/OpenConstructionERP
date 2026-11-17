@@ -56,9 +56,10 @@ describe('Survey & Land menu group', () => {
     expect(rowsInGroup(useModuleStore.getState().isModuleEnabled)).toEqual([]);
   });
 
-  it('is filled by survey manifests only, never by another module', () => {
-    const publishers = MODULE_REGISTRY.filter((m) => m.navItems.some((i) => i.group === GROUP)).map((m) => m.id);
-    expect(publishers).toEqual(['survey']);
+  it('is filled by the survey register and the modules that depend on it, never by another module', () => {
+    const publishers = MODULE_REGISTRY.filter((m) => m.navItems.some((i) => i.group === GROUP));
+    expect(publishers.map((m) => m.id)).toContain('survey');
+    for (const m of publishers) expect(m.id === 'survey' || (m.depends ?? []).includes('survey'), m.id).toBe(true);
   });
 
   it('is not part of the always-on core modules, so Settings > Modules can switch it off', () => {
