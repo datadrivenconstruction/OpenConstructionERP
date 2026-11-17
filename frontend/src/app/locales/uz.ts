@@ -65915,9 +65915,9 @@ const resource = {
     "estimate_archive.entry.sealed_badge": "Muhrlangan",
     "estimate_archive.entry.contract_card": "Muhrlangan smeta",
     "estimate_archive.entry.openings_count": "Ochishlar: {{count}}",
-    "estimate_archive.entry.no_seal": "Muhrlangan smeta yo'q.",
-    "estimate_archive.entry.seal_award": "G'olib smetasini muhrlash",
-    "estimate_archive.entry.add_from_seal": "Muhrlangan smetadan qo'shish",
+    "estimate_archive.entry.no_seal": "Muhrlangan smeta yoʻq.",
+    "estimate_archive.entry.seal_award": "Gʻolib smetasini muhrlash",
+    "estimate_archive.entry.add_from_seal": "Muhrlangan smetadan qoʻshish",
   }
 } as { translation: Record<string, string> };
 
