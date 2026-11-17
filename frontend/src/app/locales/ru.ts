@@ -66092,6 +66092,7 @@ const resource = {
     "leasing.col_paid": "Оплачено",
     "leasing.col_outstanding": "Остаток долга",
     "leasing.rule_broker_licence": "У брокера аренды нет действующей лицензии на дату начала аренды.",
+    "leasing.export_for": "Экспорт для {{name}}",
     "module_packages.upload_failed": "Архив отклонён",
     "module_packages.installed_active": "Модуль установлен и активен",
     "module_packages.installed_disabled": "Модуль установлен, но выключен",

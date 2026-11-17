@@ -58,6 +58,21 @@ export function packCountryCode(pack: RegionalPackFacts): string | null {
 }
 
 /**
+ * True when the workspace works in named markets and a pack's country is none of them.
+ *
+ * The installed pack is one per server, so before a project is open a Saudi workspace would
+ * still be told about the US pack someone else applied. A pack with no single market (`xx`),
+ * no country at all, or a workspace that is not narrowed to markets is never outside.
+ */
+export function packOutsideMarkets(
+  country: string | null,
+  scope: { markets: readonly string[]; all_markets: boolean } | undefined,
+): boolean {
+  if (!country || country === 'xx' || !scope || scope.all_markets || scope.markets.length === 0) return false;
+  return !scope.markets.some((m) => m.toLowerCase() === country);
+}
+
+/**
  * A pack's slug, spelled the way the `modules.pp_name_*` i18n family spells it.
  *
  * There is deliberately no `packNameKey(slug)` helper next to this, and the

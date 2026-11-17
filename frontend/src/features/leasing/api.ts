@@ -191,8 +191,25 @@ export const fetchArrears = (projectId: string) =>
     `/v1/leasing/arrears?project_id=${projectId}`,
   );
 
-export const fetchExportProfiles = () =>
-  apiGet<{ profiles: string[] }>(`/v1/leasing/export-profiles`).then((r) => r.profiles);
+export interface ExportProfiles {
+  profiles: string[];
+  /** Market of each national profile (e.g. `ejar` -> `SA`); a profile without an entry is generic. */
+  countries?: Record<string, string>;
+}
+
+export const fetchExportProfiles = () => apiGet<ExportProfiles>(`/v1/leasing/export-profiles`);
+
+/** Generic profiles always; a national one only while its market is in the project's scope. */
+export function visibleExportProfiles(data: ExportProfiles | undefined, markets: readonly string[] | undefined): string[] {
+  if (!data) return [];
+  const active = new Set((markets ?? []).map((m) => m.toUpperCase()));
+  return data.profiles.filter((p) => {
+    const country = data.countries?.[p];
+    return !country || active.has(country.toUpperCase());
+  });
+}
+
+export const isNationalProfile = (data: ExportProfiles | undefined, name: string): boolean => !!data?.countries?.[name];
 
 export const downloadExport = (projectId: string, format: string) =>
   downloadWithAuth(`${API_BASE}/v1/leasing/export?project_id=${projectId}&format=${format}`, `leases.${format}`);

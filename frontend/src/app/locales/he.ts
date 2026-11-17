@@ -63165,6 +63165,7 @@ const resource = {
     "leasing.col_paid": "שולם",
     "leasing.col_outstanding": "יתרה לתשלום",
     "leasing.rule_broker_licence": "למתווך השכירות אין רישיון בתוקף במועד תחילת השכירות.",
+    "leasing.export_for": "ייצוא עבור {{name}}",
     "module_packages.upload_failed": "הארכיון נדחה",
     "module_packages.installed_active": "המודול הותקן ופעיל",
     "module_packages.installed_disabled": "המודול הותקן אך כבוי",

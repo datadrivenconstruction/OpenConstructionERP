@@ -64,6 +64,24 @@ describe('solution package rules', () => {
     expect(isRouteHiddenByPackages(['oe_a', 'oe_b'], state({ a: false, b: false }))).toBe(true);
   });
 
+  it('under a pack focus hides every module the pack leaves off except core', () => {
+    const focused = (modules: Record<string, boolean>): PackageState => ({
+      installed: [],
+      optional: [],
+      modules,
+      packaged: true,
+      focus_pack: 'package:real_estate_gcc',
+      core_modules: ['projects', 'contacts'],
+    });
+    // A module the pack never listed is off, not unknown.
+    expect(isRouteHiddenByPackages('oe_rom_estimate', focused({ leasing: true }))).toBe(true);
+    expect(isRouteHiddenByPackages('oe_leasing', focused({ leasing: true }))).toBe(false);
+    expect(isRouteHiddenByPackages('oe_contacts', focused({ leasing: true }))).toBe(false);
+    expect(isRouteHiddenByPackages(['oe_rom_estimate', 'oe_leasing'], focused({ leasing: true }))).toBe(false);
+    // Without a focus, an unlisted module still hides nothing.
+    expect(isRouteHiddenByPackages('oe_rom_estimate', state({ leasing: true }))).toBe(false);
+  });
+
   it('names the enabled modules that depend on one', () => {
     const graph = [
       { key: 'clash', depends: ['bim_hub'] },

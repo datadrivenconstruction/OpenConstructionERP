@@ -58,14 +58,21 @@ export function mergedWidgets(packages: SolutionPackage[], ids: string[]): strin
  *
  * `owner` is the route's backend module (`oe_<dir>`) or several of them; the
  * route stays while any owner is on. No packages, or a module the packages say
- * nothing about, hides nothing.
+ * nothing about, hides nothing - except under a pack focus, where a module that
+ * is neither switched on nor core is off: the focus promises only the pack's
+ * modules plus core, and many optional modules are not in the gateable list.
  */
 export function isRouteHiddenByPackages(
   owner: string | readonly string[] | undefined,
   state: PackageState | undefined,
 ): boolean {
   if (!owner || !state?.packaged) return false;
-  const off = (name: string) => state.modules[name.replace(/^oe_/, '')] === false;
+  const core = state.focus_pack && state.core_modules ? new Set(state.core_modules) : null;
+  const off = (name: string) => {
+    const key = name.replace(/^oe_/, '');
+    if (core) return state.modules[key] !== true && !core.has(key);
+    return state.modules[key] === false;
+  };
   return typeof owner === 'string' ? off(owner) : owner.length > 0 && owner.every(off);
 }
 

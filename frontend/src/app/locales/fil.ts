@@ -62822,6 +62822,7 @@ const resource = {
     "leasing.col_paid": "Bayad",
     "leasing.col_outstanding": "Hindi pa bayad",
     "leasing.rule_broker_licence": "Walang balidong lisensya ang broker ng upa sa petsa ng pagsisimula.",
+    "leasing.export_for": "I-export para sa {{name}}",
     "module_packages.upload_failed": "Tinanggihan ang archive",
     "module_packages.installed_active": "Naka-install at aktibo ang module",
     "module_packages.installed_disabled": "Naka-install ang module, pero naka-off",

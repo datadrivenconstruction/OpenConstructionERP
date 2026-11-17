@@ -76,6 +76,8 @@ def _state_payload(metadata: dict[str, Any]) -> dict[str, Any]:
         "modules": state["modules"],
         "packaged": bool(state["modules"]),
         "focus_pack": state["focus_pack"],
+        # Never gated; a focused menu keeps these and hides every other module the pack leaves off.
+        "core_modules": sorted(sp._CORE_MODULES),
     }
 
 

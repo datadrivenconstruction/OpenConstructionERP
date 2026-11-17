@@ -58037,6 +58037,7 @@ const resource = {
     "leasing.col_age": "Atraso",
     "leasing.col_paid": "Pago",
     "leasing.col_outstanding": "Em aberto",
+    "leasing.export_for": "Exportar para {{name}}",
     "module_packages.upload_failed": "O arquivo foi recusado",
     "module_packages.installed_active": "Módulo instalado e ativo",
     "module_packages.installed_disabled": "Módulo instalado, mas desligado",

@@ -19,6 +19,7 @@ import uuid
 from dataclasses import dataclass, field
 from datetime import UTC, date, datetime, timedelta
 from decimal import ROUND_HALF_UP, Decimal
+from typing import Any
 
 from sqlalchemy import delete, func, or_, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -3498,6 +3499,44 @@ def _register_module_rule_sets(rule_sets: list[str]) -> None:
             getattr(module, f"register_{name}_validation_rules")()
         except (ImportError, AttributeError):
             logger.debug("No module registers rule set %s", name)
+
+
+async def _project_owner_ids(session: AsyncSession) -> dict[str, str]:
+    rows = (await session.execute(select(Project.id, Project.owner_id))).all()
+    return {str(pid): str(oid) for pid, oid in rows}
+
+
+async def _claim_global_codes(
+    session: AsyncSession,
+    model: Any,
+    base_codes: list[str],
+    *,
+    owner_id: uuid.UUID,
+    owners_of: Any,
+    legacy_like: tuple[str, ...] = (),
+) -> list[str]:
+    """Clear the installing owner's earlier rows and return the codes this run may write.
+
+    Assemblies, equipment, resources and contracts share registries whose ``code`` is globally
+    unique and which carry no owner of their own, so a second owner installing the same demo used
+    to delete the first owner's rows by code. Rows held by another owner are left alone; when one
+    of them already holds a base code, this owner's codes get a short owner tag instead.
+
+    ``owners_of`` maps the fetched rows to ``{row.id: owner id | None}``; ``None`` means nobody
+    owns the row any more (its project was deleted), which is the stale case the cleanup exists for.
+    """
+    owner_str = str(owner_id)
+    tag = owner_id.hex[:6].upper()
+    tagged = [f"{code}-{tag}" for code in base_codes]
+    clauses = [model.code.in_([*base_codes, *tagged]), *(model.code.like(p) for p in legacy_like)]
+    rows = (await session.execute(select(model).where(or_(*clauses)))).scalars().all()
+    owners = await owners_of(rows)
+    mine = [r.id for r in rows if owners.get(r.id) in (None, owner_str)]
+    foreign_base = any(r.id not in mine and r.code in base_codes for r in rows)
+    if mine:
+        await session.execute(delete(model).where(model.id.in_(mine)))
+        await session.flush()
+    return tagged if foreign_base else list(base_codes)
 
 
 async def _get_or_create_owner(session: AsyncSession) -> uuid.UUID:
@@ -12118,6 +12157,19 @@ async def _seed_module_data(
         from app.modules.contracts.models import Contract, ContractParty
 
         contract_list = generated.get("contracts", [])
+        _ct_base = [str(ct["code"]) for ct in contract_list if ct.get("code")]
+        if _ct_base:
+            _ct_project_owner = await _project_owner_ids(session)
+
+            async def _contract_owners(rows: list[Any]) -> dict[Any, str | None]:
+                return {r.id: r.created_by or _ct_project_owner.get(str(r.project_id)) for r in rows}
+
+            _ct_use = await _claim_global_codes(
+                session, Contract, _ct_base, owner_id=owner_id, owners_of=_contract_owners
+            )
+            _ct_code_map = dict(zip(_ct_base, _ct_use, strict=True))
+        else:
+            _ct_code_map = {}
         for ct in contract_list:
             ct_slot = int(ct.get("party_index", 0) or 0)
             ct_cycle = bool(ct.get("party_cycle"))
@@ -12159,7 +12211,7 @@ async def _seed_module_data(
                 Contract(
                     id=contract_pk,
                     project_id=project_id,
-                    code=ct["code"],
+                    code=_ct_code_map.get(str(ct["code"]), ct["code"]),
                     title=ct_title,
                     contract_type=ct.get("contract_type", "lump_sum"),
                     counterparty_type=ct.get("counterparty_type", "client"),
@@ -12230,13 +12282,22 @@ async def _seed_module_data(
         # the dependent resource rows (assignments, skills, etc.).
         res_codes = [r["code"] for r in res_list if r.get("code")]
         if res_codes:
-            await session.execute(delete(Resource).where(Resource.code.in_(res_codes)))
-            await session.flush()
+            _res_owner_of = await _project_owner_ids(session)
+
+            async def _resource_owners(rows: list[Any]) -> dict[Any, str | None]:
+                return {r.id: _res_owner_of.get(str(r.home_project_id)) for r in rows}
+
+            _res_use = await _claim_global_codes(
+                session, Resource, res_codes, owner_id=owner_id, owners_of=_resource_owners
+            )
+            _res_code_map = dict(zip(res_codes, _res_use, strict=True))
+        else:
+            _res_code_map = {}
         for r in res_list:
             session.add(
                 Resource(
                     id=_id(),
-                    code=r["code"],
+                    code=_res_code_map.get(r["code"], r["code"]),
                     name=r["name"],
                     resource_type=r.get("resource_type", "person"),
                     home_project_id=project_id,
@@ -12423,16 +12484,18 @@ async def _seed_module_data(
             ),
         ]
         _asm_codes = [f"{_demo_slug}-ASM{i + 1}" for i in range(len(_asm_specs))]
-        await session.execute(
-            delete(Assembly).where(
-                or_(
-                    Assembly.code.in_(_asm_codes),
-                    Assembly.code.like(f"{_legacy_code_prefix}ASM%"),
-                    Assembly.code.like(f"{_legacy_slug_prefix}ASM%"),
-                ),
-            ),
+
+        async def _assembly_owners(rows: list[Any]) -> dict[Any, str | None]:
+            return {r.id: str(r.owner_id) if r.owner_id else None for r in rows}
+
+        _asm_codes = await _claim_global_codes(
+            session,
+            Assembly,
+            _asm_codes,
+            owner_id=owner_id,
+            owners_of=_assembly_owners,
+            legacy_like=(f"{_legacy_code_prefix}ASM%", f"{_legacy_slug_prefix}ASM%"),
         )
-        await session.flush()
         asm_count = 0
         for a_idx, (a_name, a_unit, comps) in enumerate(_asm_specs):
             a_total = Decimal("0")
@@ -12501,16 +12564,34 @@ async def _seed_module_data(
         # equipment unit. Clear by code to keep the re-seed idempotent, and
         # clear the pre-slug codes too so an existing install does not keep a
         # fleet unit this run will never write to again.
-        await session.execute(
-            delete(Equipment).where(
-                or_(
-                    Equipment.code.in_(_eq_codes),
-                    Equipment.code.like(f"{_legacy_code_prefix}EQ%"),
-                    Equipment.code.like(f"{_legacy_slug_prefix}EQ%"),
-                ),
-            ),
+        _eq_project_owner = await _project_owner_ids(session)
+
+        async def _equipment_owners(rows: list[Any]) -> dict[Any, str | None]:
+            ids = [r.id for r in rows]
+            rented = (
+                (
+                    await session.execute(
+                        select(EquipmentRental.equipment_id, EquipmentRental.project_id).where(
+                            EquipmentRental.equipment_id.in_(ids)
+                        )
+                    )
+                ).all()
+                if ids
+                else []
+            )
+            out: dict[Any, str | None] = {}
+            for eq_id, rental_project in rented:
+                out.setdefault(eq_id, _eq_project_owner.get(str(rental_project)))
+            return out
+
+        _eq_codes = await _claim_global_codes(
+            session,
+            Equipment,
+            _eq_codes,
+            owner_id=owner_id,
+            owners_of=_equipment_owners,
+            legacy_like=(f"{_legacy_code_prefix}EQ%", f"{_legacy_slug_prefix}EQ%"),
         )
-        await session.flush()
         rental_count = 0
         for e_idx, (e_name, e_type, day_rate, hour_rate) in enumerate(_eq_specs):
             eq = Equipment(
@@ -12575,7 +12656,11 @@ async def _seed_module_data(
         # on the project id also cleans up after a force_reinstall, which mints
         # a new project and used to leave the previous row behind.
         _prior_subs = (await session.execute(select(Subcontractor))).scalars().all()
-        _stale_sub_ids = [s.id for s in _prior_subs if (s.metadata_ or {}).get("demo_id") == demo_id]
+        _stale_sub_ids = [
+            s.id
+            for s in _prior_subs
+            if (s.metadata_ or {}).get("demo_id") == demo_id and s.created_by in (None, owner_str)
+        ]
         if _stale_sub_ids:
             await session.execute(delete(Subcontractor).where(Subcontractor.id.in_(_stale_sub_ids)))
             await session.flush()

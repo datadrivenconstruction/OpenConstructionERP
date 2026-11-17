@@ -63796,6 +63796,7 @@ const resource = {
     "leasing.col_paid": "To‘langan",
     "leasing.col_outstanding": "To‘lanmagan",
     "leasing.rule_broker_licence": "Ijara brokerida ijara boshlanish sanasida amaldagi litsenziya yo‘q.",
+    "leasing.export_for": "{{name}} uchun eksport",
     "module_packages.upload_failed": "Arxiv rad etildi",
     "module_packages.installed_active": "Modul o‘rnatildi va faol",
     "module_packages.installed_disabled": "Modul o‘rnatildi, lekin o‘chirilgan",

@@ -469,6 +469,8 @@ async def seed_real_estate_demo(
     from app.modules.service_charges.schemas import AssociationCreate, BudgetCreate, BudgetLineIn, KeyCreate, KeyLineIn
     from app.modules.service_charges.service import ServiceChargesService
 
+    # The package profile declares a standard VAT rate only; it carries no rule that taxes or exempts
+    # association service charges, and the service-charges module has no tax field, so none is applied.
     svc = ServiceChargesService(session)
     assoc = await svc.create_association(
         AssociationCreate(

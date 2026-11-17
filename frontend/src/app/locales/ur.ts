@@ -62830,6 +62830,7 @@ const resource = {
     "leasing.col_paid": "ادا شدہ",
     "leasing.col_outstanding": "بقایا",
     "leasing.rule_broker_licence": "کرایہ کے بروکر کے پاس آغازِ کرایہ کی تاریخ پر درست لائسنس نہیں ہے۔",
+    "leasing.export_for": "{{name}} کے لیے برآمد کریں",
     "module_packages.upload_failed": "آرکائیو مسترد کر دیا گیا",
     "module_packages.installed_active": "ماڈیول انسٹال ہو گیا اور فعال ہے",
     "module_packages.installed_disabled": "ماڈیول انسٹال ہو گیا، مگر بند ہے",

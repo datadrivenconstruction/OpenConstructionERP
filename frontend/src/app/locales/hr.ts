@@ -63216,6 +63216,7 @@ const resource = {
     "leasing.col_paid": "Plaćeno",
     "leasing.col_outstanding": "Nepodmireno",
     "leasing.rule_broker_licence": "Posrednik najma nema valjanu licencu na datum početka najma.",
+    "leasing.export_for": "Izvoz za {{name}}",
     "module_packages.upload_failed": "Arhiva je odbijena",
     "module_packages.installed_active": "Modul je instaliran i aktivan",
     "module_packages.installed_disabled": "Modul je instaliran, ali isključen",

@@ -62401,6 +62401,7 @@ const resource = {
     "leasing.col_paid": "Төлсөн",
     "leasing.col_outstanding": "Төлөгдөөгүй",
     "leasing.rule_broker_licence": "Түрээсийн зуучлагч түрээс эхлэх өдөр хүчинтэй тусгай зөвшөөрөлгүй байна.",
+    "leasing.export_for": "{{name}}-д экспортлох",
     "module_packages.upload_failed": "Архивыг хүлээн авахгүй",
     "module_packages.installed_active": "Модуль суулгагдаж, идэвхтэй байна",
     "module_packages.installed_disabled": "Модуль суулгагдсан ч унтраалттай байна",

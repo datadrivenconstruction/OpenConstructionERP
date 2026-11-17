@@ -65429,6 +65429,7 @@ const resource = {
     "leasing.col_paid": "Fizetve",
     "leasing.col_outstanding": "Nyitott",
     "leasing.rule_broker_licence": "A bérbeadást közvetítő brókernek nincs érvényes engedélye a bérlet kezdőnapján.",
+    "leasing.export_for": "Exportálás: {{name}}",
     "module_packages.upload_failed": "Az archívumot elutasítottuk",
     "module_packages.installed_active": "A modul telepítve és aktív",
     "module_packages.installed_disabled": "A modul telepítve, de ki van kapcsolva",

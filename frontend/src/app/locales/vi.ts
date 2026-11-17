@@ -62622,6 +62622,7 @@ const resource = {
     "leasing.col_paid": "Đã thu",
     "leasing.col_outstanding": "Còn phải thu",
     "leasing.rule_broker_licence": "Môi giới cho thuê không có giấy phép hợp lệ vào ngày bắt đầu thuê.",
+    "leasing.export_for": "Xuất cho {{name}}",
     "module_packages.upload_failed": "Kho lưu trữ đã bị từ chối",
     "module_packages.installed_active": "Mô-đun đã được cài đặt và đang hoạt động",
     "module_packages.installed_disabled": "Mô-đun đã cài đặt nhưng đang tắt",

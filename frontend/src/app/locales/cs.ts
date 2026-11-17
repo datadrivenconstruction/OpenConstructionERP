@@ -64163,6 +64163,7 @@ const resource = {
     "leasing.col_paid": "Zaplaceno",
     "leasing.col_outstanding": "Nezaplaceno",
     "leasing.rule_broker_licence": "Zprostředkovatel nájmu nemá ke dni zahájení nájmu platnou licenci.",
+    "leasing.export_for": "Export pro {{name}}",
     "module_packages.upload_failed": "Archiv byl odmítnut",
     "module_packages.installed_active": "Modul je nainstalován a aktivní",
     "module_packages.installed_disabled": "Modul je nainstalován, ale vypnutý",

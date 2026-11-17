@@ -63134,6 +63134,7 @@ const resource = {
     "leasing.col_paid": "পরিশোধিত",
     "leasing.col_outstanding": "বাকি",
     "leasing.rule_broker_licence": "ইজারা শুরুর তারিখে ভাড়া দেওয়া দালালের কোনো বৈধ লাইসেন্স নেই।",
+    "leasing.export_for": "{{name}} এর জন্য এক্সপোর্ট",
     "module_packages.upload_failed": "আর্কাইভটি গ্রহণ করা হয়নি",
     "module_packages.installed_active": "মডিউল ইনস্টল হয়েছে এবং সক্রিয়",
     "module_packages.installed_disabled": "মডিউল ইনস্টল হয়েছে, তবে বন্ধ রাখা আছে",

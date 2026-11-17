@@ -1097,6 +1097,7 @@ const resource = {
     "analytics.col_project_status": "Project status",
     "analytics.filter_project_status": "Filter by project status",
     "analytics.all_project_statuses": "All project statuses",
+    "leasing.export_for": "Export for {{name}}",
   }
 } as { translation: Record<string, string> };
 

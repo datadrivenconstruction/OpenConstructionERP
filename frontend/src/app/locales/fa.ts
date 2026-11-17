@@ -62824,6 +62824,7 @@ const resource = {
     "leasing.col_paid": "پرداخت‌شده",
     "leasing.col_outstanding": "مانده",
     "leasing.rule_broker_licence": "کارگزار اجاره در تاریخ شروع اجاره مجوز معتبر ندارد.",
+    "leasing.export_for": "خروجی برای {{name}}",
     "module_packages.upload_failed": "بایگانی رد شد",
     "module_packages.installed_active": "ماژول نصب و فعال شد",
     "module_packages.installed_disabled": "ماژول نصب شد، اما خاموش است",

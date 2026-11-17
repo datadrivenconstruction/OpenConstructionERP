@@ -62864,6 +62864,7 @@ const resource = {
     "leasing.col_paid": "Betalt",
     "leasing.col_outstanding": "Utestående",
     "leasing.rule_broker_licence": "Utleiemegleren har ingen gyldig lisens på leiens startdato.",
+    "leasing.export_for": "Eksporter for {{name}}",
     "module_packages.upload_failed": "Arkivet ble avvist",
     "module_packages.installed_active": "Modulen er installert og aktiv",
     "module_packages.installed_disabled": "Modulen er installert, men slått av",

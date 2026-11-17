@@ -62867,6 +62867,7 @@ const resource = {
     "leasing.col_paid": "चुकाया गया",
     "leasing.col_outstanding": "शेष",
     "leasing.rule_broker_licence": "पट्टे की आरंभ तिथि पर किराया दलाल के पास वैध लाइसेंस नहीं है।",
+    "leasing.export_for": "{{name}} के लिए निर्यात",
     "module_packages.upload_failed": "आर्काइव अस्वीकार किया गया",
     "module_packages.installed_active": "मॉड्यूल इंस्टॉल हो गया और सक्रिय है",
     "module_packages.installed_disabled": "मॉड्यूल इंस्टॉल हो गया, पर बंद है",

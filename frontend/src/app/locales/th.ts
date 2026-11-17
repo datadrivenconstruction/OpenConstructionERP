@@ -62614,6 +62614,7 @@ const resource = {
     "leasing.col_paid": "ชำระแล้ว",
     "leasing.col_outstanding": "คงค้าง",
     "leasing.rule_broker_licence": "นายหน้าการเช่าไม่มีใบอนุญาตที่ใช้ได้ ณ วันเริ่มเช่า",
+    "leasing.export_for": "ส่งออกสำหรับ {{name}}",
     "module_packages.upload_failed": "ปฏิเสธไฟล์เก็บถาวร",
     "module_packages.installed_active": "ติดตั้งโมดูลแล้วและใช้งานอยู่",
     "module_packages.installed_disabled": "ติดตั้งโมดูลแล้ว แต่ปิดอยู่",

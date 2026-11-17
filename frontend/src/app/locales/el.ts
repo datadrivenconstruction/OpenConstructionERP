@@ -62824,6 +62824,7 @@ const resource = {
     "leasing.col_paid": "Πληρωμένο",
     "leasing.col_outstanding": "Απλήρωτο",
     "leasing.rule_broker_licence": "Ο μεσίτης της μίσθωσης δεν έχει έγκυρη άδεια κατά την ημερομηνία έναρξης.",
+    "leasing.export_for": "Εξαγωγή για {{name}}",
     "module_packages.upload_failed": "Το αρχείο απορρίφθηκε",
     "module_packages.installed_active": "Το module εγκαταστάθηκε και είναι ενεργό",
     "module_packages.installed_disabled": "Το module εγκαταστάθηκε, αλλά είναι απενεργοποιημένο",
