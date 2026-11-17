@@ -13,7 +13,7 @@ models. Inspector-guarded, so a re-run or a downgrade on a database without
 the tables changes nothing.
 
 Revision ID: vdt01_doc_templates
-Revises: vbt01_boq_templates
+Revises: vea01_estimate_archive
 Create Date: 2026-11-16
 """
 
@@ -26,7 +26,7 @@ import sqlalchemy as sa
 from alembic import op
 
 revision: str = "vdt01_doc_templates"
-down_revision: Union[str, Sequence[str], None] = "vbt01_boq_templates"
+down_revision: Union[str, Sequence[str], None] = "vea01_estimate_archive"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

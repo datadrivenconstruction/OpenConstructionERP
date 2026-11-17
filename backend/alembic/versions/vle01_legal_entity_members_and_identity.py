@@ -16,7 +16,7 @@ membership sees exactly the projects they saw before; a project that names no
 entity keeps falling back to the default one, so its documents do not change.
 
 Revision ID: vle01_legal_entity_members_and_identity
-Revises: vbt01_boq_templates
+Revises: vfwk01_framework_agreements
 Create Date: 2026-11-16
 """
 
@@ -28,7 +28,7 @@ import sqlalchemy as sa
 from alembic import op
 
 revision: str = "vle01_legal_entity_members_and_identity"
-down_revision: str | Sequence[str] | None = "vbt01_boq_templates"
+down_revision: str | Sequence[str] | None = "vfwk01_framework_agreements"
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 

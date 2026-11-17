@@ -14,7 +14,7 @@ immutability; without it the ORM guard and the API (409 on every change) still
 refuse.
 
 Revision ID: vea01_estimate_archive
-Revises: vbt01_boq_templates
+Revises: vdx01_booking_export
 Create Date: 2026-11-16
 """
 
@@ -26,7 +26,7 @@ import sqlalchemy as sa
 from alembic import op
 
 revision: str = "vea01_estimate_archive"
-down_revision: str | Sequence[str] | None = "vbt01_boq_templates"
+down_revision: str | Sequence[str] | None = "vdx01_booking_export"
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 

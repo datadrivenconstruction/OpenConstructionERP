@@ -7,7 +7,7 @@ boot picks it up without ``alembic upgrade``. Every step is guarded so it is saf
 database that ``create_all`` already built.
 
 Revision ID: vrc01_equipment_rate_catalogue
-Revises: vbt01_boq_templates
+Revises: vle01_legal_entity_members_and_identity
 Create Date: 2026-11-16
 """
 
@@ -19,7 +19,7 @@ import sqlalchemy as sa
 from alembic import op
 
 revision: str = "vrc01_equipment_rate_catalogue"
-down_revision: str | Sequence[str] | None = "vbt01_boq_templates"
+down_revision: str | Sequence[str] | None = "vle01_legal_entity_members_and_identity"
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 
