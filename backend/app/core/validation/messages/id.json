@@ -2218,5 +2218,19 @@
       "calendar_no_work_days": "Kalender {calendar} tidak memiliki hari kerja.",
       "suggestion": "Tandai hari kerja kalender ini di jadwal sumber."
     }
+  },
+  "survey": {
+    "no_crs": {
+      "fail": "Set titik {name} tidak memiliki CRS: tetapkan EPSG atau grid lokal sebelum volume atau persil.",
+      "suggestion": "Atur sistem koordinat proyek, lalu tentukan sistem tempat file ini diukur."
+    },
+    "crs_unconfirmed": {
+      "fail": "CRS terdeteksi otomatis (keyakinan {confidence}); konfirmasi sebelum digunakan.",
+      "suggestion": "Buka Atur CRS proyek lalu konfirmasi sistem yang terdeteksi atau pilih yang lain."
+    },
+    "duplicate_point": {
+      "fail": "ID titik {point_id} ganda dengan koordinat berbeda.",
+      "suggestion": "Simpan satu bacaan: hapus set titik yang berisi bacaan salah lalu impor ulang."
+    }
   }
 }

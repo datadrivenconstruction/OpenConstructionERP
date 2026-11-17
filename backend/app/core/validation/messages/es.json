@@ -2218,5 +2218,19 @@
       "calendar_no_work_days": "El calendario {calendar} no tiene ningún día laborable.",
       "suggestion": "Marque los días laborables de este calendario en el programa de origen."
     }
+  },
+  "survey": {
+    "no_crs": {
+      "fail": "El conjunto de puntos {name} no tiene SRC: declare un EPSG o una red local antes de volúmenes o parcelas.",
+      "suggestion": "Defina el sistema de coordenadas del proyecto y luego indique en qué sistema se midió este archivo."
+    },
+    "crs_unconfirmed": {
+      "fail": "SRC detectado automáticamente (confianza {confidence}); confírmelo antes de usarlo.",
+      "suggestion": "Abra Definir SRC del proyecto y confirme el sistema detectado o elija otro."
+    },
+    "duplicate_point": {
+      "fail": "Identificador de punto {point_id} duplicado con coordenadas distintas.",
+      "suggestion": "Conserve una lectura: elimine el conjunto con la errónea e impórtelo de nuevo."
+    }
   }
 }

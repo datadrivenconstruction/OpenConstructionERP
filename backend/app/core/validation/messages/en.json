@@ -2218,5 +2218,19 @@
       "calendar_no_work_days": "Calendar {calendar} has no working weekday.",
       "suggestion": "Mark the working weekdays of this calendar in the source programme."
     }
+  },
+  "survey": {
+    "no_crs": {
+      "fail": "Point set {name} has no CRS: declare EPSG or a local grid before volumes or parcels.",
+      "suggestion": "Set the project coordinate system, then declare which system this file was measured in."
+    },
+    "crs_unconfirmed": {
+      "fail": "CRS auto-detected (confidence {confidence}); confirm before use.",
+      "suggestion": "Open Set project CRS and confirm the detected system or choose another."
+    },
+    "duplicate_point": {
+      "fail": "Duplicate point id {point_id} with different coordinates.",
+      "suggestion": "Keep one reading: delete the point set with the wrong one and import it again."
+    }
   }
 }

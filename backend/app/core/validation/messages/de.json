@@ -2218,5 +2218,19 @@
       "calendar_no_work_days": "Kalender {calendar} hat keinen Arbeitstag.",
       "suggestion": "Markieren Sie die Arbeitstage dieses Kalenders im Quellterminplan."
     }
+  },
+  "survey": {
+    "no_crs": {
+      "fail": "Punktdatei {name} hat kein Koordinatensystem: EPSG oder lokales Netz angeben, bevor Mengen oder Flurstücke berechnet werden.",
+      "suggestion": "Legen Sie das Projekt-Koordinatensystem fest und geben Sie an, in welchem System diese Datei gemessen wurde."
+    },
+    "crs_unconfirmed": {
+      "fail": "Koordinatensystem automatisch erkannt (Konfidenz {confidence}); vor der Verwendung bestätigen.",
+      "suggestion": "Öffnen Sie „Projekt-KRS festlegen“ und bestätigen Sie das erkannte System oder wählen Sie ein anderes."
+    },
+    "duplicate_point": {
+      "fail": "Doppelte Punktnummer {point_id} mit abweichenden Koordinaten.",
+      "suggestion": "Behalten Sie eine Messung: Löschen Sie die Punktdatei mit der falschen und importieren Sie sie neu."
+    }
   }
 }

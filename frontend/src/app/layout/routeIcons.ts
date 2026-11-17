@@ -27,6 +27,7 @@
  * `useIconOverridesVersion()` from `./menuIcons`.
  */
 import {
+  Crosshair,
   GitCompare,
   LayoutDashboard,
   FolderOpen,
@@ -170,6 +171,7 @@ const EXTRA_ROUTE_ICONS: Record<string, LucideIcon> = {
   '/bim': Box,
   '/data-explorer': TableProperties,
   '/geo': Globe,
+  '/survey': Crosshair,
   // ── 5. Model Coordination ─────────────────────────────────────────
   '/coordination': LayoutDashboard,
   '/model-review': ScanEye,

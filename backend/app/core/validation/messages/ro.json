@@ -2218,5 +2218,19 @@
       "calendar_no_work_days": "Calendarul {calendar} nu are nicio zi lucrătoare.",
       "suggestion": "Marcați zilele lucrătoare ale acestui calendar în graficul sursă."
     }
+  },
+  "survey": {
+    "no_crs": {
+      "fail": "Setul de puncte {name} nu are sistem de coordonate: declarați un EPSG sau o rețea locală înainte de volume sau parcele.",
+      "suggestion": "Setați sistemul de coordonate al proiectului, apoi indicați în ce sistem a fost măsurat fișierul."
+    },
+    "crs_unconfirmed": {
+      "fail": "Sistem de coordonate detectat automat (încredere {confidence}); confirmați înainte de utilizare.",
+      "suggestion": "Deschideți Setare sistem de coordonate al proiectului și confirmați sistemul detectat sau alegeți altul."
+    },
+    "duplicate_point": {
+      "fail": "Număr de punct {point_id} duplicat cu coordonate diferite.",
+      "suggestion": "Păstrați o singură citire: ștergeți setul cu cea greșită și importați-l din nou."
+    }
   }
 }

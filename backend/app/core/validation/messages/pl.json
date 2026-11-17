@@ -2218,5 +2218,19 @@
       "calendar_no_work_days": "Kalendarz {calendar} nie ma żadnego dnia roboczego.",
       "suggestion": "Zaznacz dni robocze tego kalendarza w harmonogramie źródłowym."
     }
+  },
+  "survey": {
+    "no_crs": {
+      "fail": "Zbiór punktów {name} nie ma układu współrzędnych: podaj EPSG lub układ lokalny przed obliczeniem objętości lub działek.",
+      "suggestion": "Ustaw układ współrzędnych projektu, a następnie wskaż, w jakim układzie pomierzono plik."
+    },
+    "crs_unconfirmed": {
+      "fail": "Układ współrzędnych wykryty automatycznie (pewność {confidence}); potwierdź przed użyciem.",
+      "suggestion": "Otwórz Ustaw układ projektu i potwierdź wykryty układ lub wybierz inny."
+    },
+    "duplicate_point": {
+      "fail": "Powtórzony numer punktu {point_id} z różnymi współrzędnymi.",
+      "suggestion": "Zostaw jeden pomiar: usuń zbiór z błędnym i zaimportuj go ponownie."
+    }
   }
 }

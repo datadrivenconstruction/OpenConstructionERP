@@ -43,6 +43,7 @@ import { manifest as ddcRvtConverter } from './ddc-rvt-converter/manifest';
 import { manifest as pipelines } from './pipelines/manifest';
 import { manifest as estimateChecks } from './estimate-checks/manifest';
 import { manifest as lessonsLearned } from './lessons-learned/manifest';
+import { manifest as survey } from './survey/manifest';
 
 /* ── Registry ──────────────────────────────────────────────────────── */
 
@@ -66,6 +67,7 @@ export const MODULE_REGISTRY: ModuleManifest[] = [
   pipelines,
   estimateChecks,
   lessonsLearned,
+  survey,
 ];
 
 /* ── Helper functions ──────────────────────────────────────────────── */
