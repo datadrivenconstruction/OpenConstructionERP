@@ -203,7 +203,7 @@ async def test_unmapped_account_is_a_red_finding_and_blocks_the_batch(world) -> 
         row = (
             await s.execute(
                 select(AccountMapping).where(
-                    AccountMapping.connection_id == a, AccountMapping.category == "subcontract_cost"
+                    AccountMapping.connection_id == a, AccountMapping.category == "material_cost"
                 )
             )
         ).scalar_one()
@@ -211,7 +211,7 @@ async def test_unmapped_account_is_a_red_finding_and_blocks_the_batch(world) -> 
         await s.flush()
         preview = await svc.preview(conn, _params())
         red = [f for f in preview["findings"] if f["rule_id"] == "accounting_sync.unmapped_account"]
-        assert red and red[0]["severity"] == "error" and "subcontract_cost" in red[0]["message"]
+        assert red and red[0]["severity"] == "error" and "material_cost" in red[0]["message"]
         with pytest.raises(HTTPException) as err:
             await svc.create(conn, _params(), key=None, user_id=user)
         assert err.value.status_code == 422
