@@ -64776,6 +64776,7 @@ const resource = {
     "estimate_archive.entry.no_seal": "Tidak ada estimasi tersegel.",
     "estimate_archive.entry.seal_award": "Segel estimasi pemenang",
     "estimate_archive.entry.add_from_seal": "Tambah dari estimasi tersegel",
+    "estimate_archive.seal_needs_contract": "Diperlukan kontrak klien sebelum estimasi dapat disegel sebagai dasar kontrak.",
     "project_catalogue.title": "Katalog proyek",
     "project_catalogue.subtitle": "Harga satuan milik proyek ini, disalin dari basis data biaya dan diedit tanpa mengubahnya.",
     "project_catalogue.add_from_source": "Tambah dari basis data",

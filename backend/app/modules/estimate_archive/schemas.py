@@ -42,6 +42,7 @@ class Policy(BaseModel):
     attachment_presets: list[str] = Field(default_factory=list)
     citations: list[str] = Field(default_factory=list)
     tsa_configured: bool = False
+    has_contract: bool = False
 
 
 class SealCheck(BaseModel):

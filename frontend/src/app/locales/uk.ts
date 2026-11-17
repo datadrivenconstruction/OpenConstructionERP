@@ -67189,6 +67189,7 @@ const resource = {
     "estimate_archive.entry.no_seal": "Немає опечатаного кошторису.",
     "estimate_archive.entry.seal_award": "Опечатати кошторис переможця",
     "estimate_archive.entry.add_from_seal": "Додати з опечатаного кошторису",
+    "estimate_archive.seal_needs_contract": "Щоб опечатати кошторис як основу договору, потрібен договір із замовником.",
     "project_catalogue.title": "Каталог проєкту",
     "project_catalogue.subtitle": "Власні розцінки проєкту: скопійовані з бази цін і змінюються без зміни самої бази.",
     "project_catalogue.add_from_source": "Додати з бази",

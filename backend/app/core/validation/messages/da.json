@@ -2125,7 +2125,8 @@
       "fail": "Et forseglet overslag kan ikke ændres eller slettes. Forsegl en ny version, der erstatter det."
     },
     "contents_locked": "Indholdet forbliver forseglet, indtil en formel åbning begynder.",
-    "market_off": "Forseglede kalkulationer indgår ikke i projektets markedsprofil."
+    "market_off": "Forseglede kalkulationer indgår ikke i projektets markedsprofil.",
+    "contract_required": "Der skal være en kundekontrakt, før et overslag kan forsegles som kontraktgrundlag."
   },
   "boq_revision": {
     "superseded_still_editable": {

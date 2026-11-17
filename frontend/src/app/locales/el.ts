@@ -65002,6 +65002,7 @@ const resource = {
     "estimate_archive.entry.no_seal": "Δεν υπάρχει σφραγισμένος προϋπολογισμός.",
     "estimate_archive.entry.seal_award": "Σφράγισε τον προϋπολογισμό της κατακύρωσης",
     "estimate_archive.entry.add_from_seal": "Προσθήκη από σφραγισμένο προϋπολογισμό",
+    "estimate_archive.seal_needs_contract": "Απαιτείται σύμβαση πελάτη πριν σφραγιστεί η εκτίμηση ως βάση της σύμβασης.",
     "project_catalogue.title": "Κατάλογος έργου",
     "project_catalogue.subtitle": "Οι δικές τιμές του έργου, αντιγραμμένες από τη βάση κόστους και επεξεργασμένες χωρίς να αλλάζει εκείνη.",
     "project_catalogue.add_from_source": "Προσθήκη από τη βάση",

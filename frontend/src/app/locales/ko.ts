@@ -65393,6 +65393,7 @@ const resource = {
     "estimate_archive.entry.no_seal": "봉인된 견적이 없습니다.",
     "estimate_archive.entry.seal_award": "낙찰 견적 봉인",
     "estimate_archive.entry.add_from_seal": "봉인된 견적에서 추가",
+    "estimate_archive.seal_needs_contract": "견적을 계약 기준으로 봉인하려면 고객 계약이 필요합니다.",
     "project_catalogue.title": "프로젝트 카탈로그",
     "project_catalogue.subtitle": "이 프로젝트 고유의 단가로, 원가 데이터베이스에서 복사하여 원본을 바꾸지 않고 편집합니다.",
     "project_catalogue.add_from_source": "데이터베이스에서 추가",

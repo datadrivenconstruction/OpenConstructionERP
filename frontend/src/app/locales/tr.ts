@@ -65923,6 +65923,7 @@ const resource = {
     "estimate_archive.entry.no_seal": "Mühürlü keşif yok.",
     "estimate_archive.entry.seal_award": "İhale keşfini mühürle",
     "estimate_archive.entry.add_from_seal": "Mühürlü keşiften ekle",
+    "estimate_archive.seal_needs_contract": "Tahmini maliyeti sözleşme esası olarak mühürlemeden önce bir müşteri sözleşmesi gerekir.",
     "project_catalogue.title": "Proje kataloğu",
     "project_catalogue.subtitle": "Bu projenin kendi fiyatları; maliyet veritabanından kopyalanır ve onu değiştirmeden düzenlenir.",
     "project_catalogue.add_from_source": "Veritabanından ekle",

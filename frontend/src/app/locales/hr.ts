@@ -65414,6 +65414,7 @@ const resource = {
     "estimate_archive.entry.no_seal": "Nema zapečaćene procjene.",
     "estimate_archive.entry.seal_award": "Zapečati procjenu za dodjelu",
     "estimate_archive.entry.add_from_seal": "Dodaj iz zapečaćene procjene",
+    "estimate_archive.seal_needs_contract": "Prije pečaćenja procjene kao osnove ugovora potreban je ugovor s klijentom.",
     "project_catalogue.title": "Katalog projekta",
     "project_catalogue.subtitle": "Vlastite cijene ovog projekta, kopirane iz baze troškova i uređene bez njezine izmjene.",
     "project_catalogue.add_from_source": "Dodaj iz baze",

@@ -64785,6 +64785,7 @@ const resource = {
     "estimate_archive.entry.no_seal": "Chưa có dự toán niêm phong.",
     "estimate_archive.entry.seal_award": "Niêm phong dự toán trúng thầu",
     "estimate_archive.entry.add_from_seal": "Thêm từ dự toán đã niêm phong",
+    "estimate_archive.seal_needs_contract": "Cần có hợp đồng với khách hàng trước khi niêm phong dự toán làm cơ sở hợp đồng.",
     "project_catalogue.title": "Danh mục dự án",
     "project_catalogue.subtitle": "Đơn giá riêng của dự án này, sao chép từ cơ sở dữ liệu chi phí và chỉnh sửa mà không thay đổi nó.",
     "project_catalogue.add_from_source": "Thêm từ cơ sở dữ liệu",

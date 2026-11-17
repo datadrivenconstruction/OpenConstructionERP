@@ -65046,6 +65046,7 @@ const resource = {
     "estimate_archive.entry.no_seal": "Няма запечатана сметка.",
     "estimate_archive.entry.seal_award": "Запечатване на сметката за възлагане",
     "estimate_archive.entry.add_from_seal": "Добавяне от запечатаната сметка",
+    "estimate_archive.seal_needs_contract": "За запечатване на сметката като основа на договора е необходим договор с клиента.",
     "project_catalogue.title": "Каталог на проекта",
     "project_catalogue.subtitle": "Собствените цени на проекта, копирани от ценовата база и редактирани, без да се променя тя.",
     "project_catalogue.add_from_source": "Добави от базата",

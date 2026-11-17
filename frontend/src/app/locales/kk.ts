@@ -65003,6 +65003,7 @@ const resource = {
     "estimate_archive.entry.no_seal": "Мөрленген смета жоқ.",
     "estimate_archive.entry.seal_award": "Жеңіп алған сметаны мөрлеу",
     "estimate_archive.entry.add_from_seal": "Мөрленген сметадан қосу",
+    "estimate_archive.seal_needs_contract": "Сметаны шарттың негізі ретінде мөрлеу үшін тапсырыс берушімен шарт қажет.",
     "project_catalogue.title": "Жоба каталогы",
     "project_catalogue.subtitle": "Жобаның өз бағалары: шығын базасынан көшіріліп, базаны өзгертпей өңделеді.",
     "project_catalogue.add_from_source": "Базадан қосу",

@@ -64402,6 +64402,7 @@ const resource = {
     "estimate_archive.verified_bad": "Битүүмжилсэн бичлэгтэй таарахгүй",
     "estimate_archive.verified_ok": "Битүүмжилсэн бичлэгтэй таарч байна",
     "estimate_archive.verify": "Хурууны хээг шалгах",
+    "estimate_archive.seal_needs_contract": "Тооцоог гэрээний үндэс болгон битүүмжлэхийн өмнө захиалагчтай байгуулсан гэрээ шаардлагатай.",
     "project_catalogue.title": "Төслийн каталог",
     "project_catalogue.subtitle": "Энэ төслийн өөрийн үнэ: зардлын сангаас хуулж, санг өөрчлөхгүйгээр засварлана.",
     "project_catalogue.add_from_source": "Сангаас нэмэх",

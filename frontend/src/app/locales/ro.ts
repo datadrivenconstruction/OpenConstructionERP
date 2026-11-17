@@ -65404,6 +65404,7 @@ const resource = {
     "estimate_archive.entry.no_seal": "Niciun deviz sigilat.",
     "estimate_archive.entry.seal_award": "Sigilează devizul câștigător",
     "estimate_archive.entry.add_from_seal": "Adaugă din devizul sigilat",
+    "estimate_archive.seal_needs_contract": "Este necesar un contract cu clientul înainte de sigilarea devizului ca bază a contractului.",
     "project_catalogue.title": "Catalogul proiectului",
     "project_catalogue.subtitle": "Prețurile proprii ale acestui proiect, copiate din baza de costuri și editate fără a o modifica.",
     "project_catalogue.add_from_source": "Adaugă din bază",

@@ -65312,6 +65312,7 @@ const resource = {
     "estimate_archive.entry.no_seal": "কোনো সিলবদ্ধ প্রাক্কলন নেই।",
     "estimate_archive.entry.seal_award": "বরাদ্দের প্রাক্কলন সিল করুন",
     "estimate_archive.entry.add_from_seal": "সিলবদ্ধ প্রাক্কলন থেকে যোগ করুন",
+    "estimate_archive.seal_needs_contract": "প্রাক্কলনকে চুক্তির ভিত্তি হিসেবে সিল করার আগে ক্লায়েন্টের সঙ্গে একটি চুক্তি প্রয়োজন।",
     "project_catalogue.title": "প্রকল্প ক্যাটালগ",
     "project_catalogue.subtitle": "এই প্রকল্পের নিজস্ব দর, খরচ ডেটাবেস থেকে কপি করা এবং সেটি না বদলে সম্পাদিত।",
     "project_catalogue.add_from_source": "ডেটাবেস থেকে যোগ করুন",

@@ -2125,7 +2125,8 @@
       "fail": "Lepecsételt költségvetés nem módosítható és nem törölhető. Pecsételjen le egy új, azt felváltó változatot."
     },
     "contents_locked": "A tartalom lepecsételve marad, amíg hivatalos bontás nem kezdődik.",
-    "market_off": "A lepecsételt költségvetések nem részei a projekt piaci profiljának."
+    "market_off": "A lepecsételt költségvetések nem részei a projekt piaci profiljának.",
+    "contract_required": "A költségvetés szerződéses alapként való lezárásához ügyfélszerződés szükséges."
   },
   "boq_revision": {
     "superseded_still_editable": {

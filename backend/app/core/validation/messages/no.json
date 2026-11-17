@@ -2125,7 +2125,8 @@
       "fail": "En forseglet kalkyle kan ikke endres eller slettes. Forsegl en ny versjon som erstatter den."
     },
     "contents_locked": "Innholdet forblir forseglet til en formell åpning starter.",
-    "market_off": "Forseglede kalkyler er ikke en del av prosjektets markedsprofil."
+    "market_off": "Forseglede kalkyler er ikke en del av prosjektets markedsprofil.",
+    "contract_required": "Det trengs en kundekontrakt før et overslag kan forsegles som kontraktsgrunnlag."
   },
   "boq_revision": {
     "superseded_still_editable": {

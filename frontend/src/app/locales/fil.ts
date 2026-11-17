@@ -65000,6 +65000,7 @@ const resource = {
     "estimate_archive.entry.no_seal": "Walang naka-sealed na estimate.",
     "estimate_archive.entry.seal_award": "I-seal ang estimate ng award",
     "estimate_archive.entry.add_from_seal": "Idagdag mula sa naka-sealed na estimate",
+    "estimate_archive.seal_needs_contract": "Kailangan ng kontrata sa kliyente bago ma-seal ang estimate bilang batayan ng kontrata.",
     "project_catalogue.title": "Katalogo ng proyekto",
     "project_catalogue.subtitle": "Sariling mga presyo ng proyektong ito, kinopya mula sa cost database at in-edit nang hindi ito binabago.",
     "project_catalogue.add_from_source": "Magdagdag mula sa database",

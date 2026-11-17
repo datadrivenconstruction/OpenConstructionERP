@@ -65974,6 +65974,7 @@ const resource = {
     "estimate_archive.entry.no_seal": "Muhrlangan smeta yoʻq.",
     "estimate_archive.entry.seal_award": "Gʻolib smetasini muhrlash",
     "estimate_archive.entry.add_from_seal": "Muhrlangan smetadan qoʻshish",
+    "estimate_archive.seal_needs_contract": "Smetani shartnoma asosi sifatida muhrlashdan oldin buyurtmachi bilan shartnoma kerak.",
     "project_catalogue.title": "Loyiha katalogi",
     "project_catalogue.subtitle": "Loyihaning oʻz narxlari: xarajatlar bazasidan nusxa olinib, bazani oʻzgartirmasdan tahrirlanadi.",
     "project_catalogue.add_from_source": "Bazadan qoʻshish",

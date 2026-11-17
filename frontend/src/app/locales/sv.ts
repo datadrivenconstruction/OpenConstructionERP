@@ -65657,6 +65657,7 @@ const resource = {
     "estimate_archive.entry.no_seal": "Ingen förseglad kalkyl.",
     "estimate_archive.entry.seal_award": "Försegla tilldelningskalkylen",
     "estimate_archive.entry.add_from_seal": "Lägg till från förseglad kalkyl",
+    "estimate_archive.seal_needs_contract": "Ett kundavtal behövs innan en kalkyl kan förseglas som avtalsgrund.",
     "project_catalogue.title": "Projektkatalog",
     "project_catalogue.subtitle": "Projektets egna priser, kopierade från kostnadsdatabasen och redigerade utan att ändra den.",
     "project_catalogue.add_from_source": "Lägg till från databas",

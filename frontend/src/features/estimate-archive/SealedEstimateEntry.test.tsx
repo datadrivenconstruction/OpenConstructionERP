@@ -16,7 +16,7 @@ vi.mock('react-i18next', async (importOriginal) => ({
   }),
 }));
 
-const policy = (enabled: boolean): Policy => ({
+const policy = (enabled: boolean, hasContract = true): Policy => ({
   profile: enabled ? 'de' : 'neutral',
   enabled,
   term: 'Urkalkulation',
@@ -30,6 +30,7 @@ const policy = (enabled: boolean): Policy => ({
   attachment_presets: [],
   citations: [],
   tsa_configured: false,
+  has_contract: hasContract,
 });
 
 const seal: SealSummary = {
@@ -79,6 +80,15 @@ describe('estimate editor entry', () => {
     vi.spyOn(archiveApi, 'seals').mockResolvedValue([]);
     mount(<SealAsBasisAction projectId="p1" boqId="b1" locked />);
     expect(await screen.findByRole('button', { name: /Seal as contract basis/ })).toBeTruthy();
+  });
+
+  it('disables the action with a hint when the project has no client contract', async () => {
+    vi.spyOn(archiveApi, 'policy').mockResolvedValue(policy(true, false));
+    vi.spyOn(archiveApi, 'seals').mockResolvedValue([]);
+    mount(<SealAsBasisAction projectId="p1" boqId="b1" locked />);
+    const btn = (await screen.findByRole('button', { name: /Seal as contract basis/ })) as HTMLButtonElement;
+    expect(btn.disabled).toBe(true);
+    expect(btn.getAttribute('title')).toMatch(/client contract/);
   });
 
   it('shows the seal instead of the action once the estimate is sealed', async () => {

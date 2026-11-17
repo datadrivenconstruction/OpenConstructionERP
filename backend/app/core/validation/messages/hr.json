@@ -2125,7 +2125,8 @@
       "fail": "Zapečaćeni troškovnik ne može se mijenjati ni brisati. Zapečatite novu verziju koja ga zamjenjuje."
     },
     "contents_locked": "Sadržaj ostaje zapečaćen dok ne počne službeno otvaranje.",
-    "market_off": "Zapečaćeni troškovnici nisu dio tržišnog profila ovog projekta."
+    "market_off": "Zapečaćeni troškovnici nisu dio tržišnog profila ovog projekta.",
+    "contract_required": "Prije pečaćenja procjene kao osnove ugovora potreban je ugovor s klijentom."
   },
   "boq_revision": {
     "superseded_still_editable": {

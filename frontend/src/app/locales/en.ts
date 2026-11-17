@@ -59292,6 +59292,7 @@ const resource = {
     "estimate_archive.entry.no_seal": "No sealed estimate.",
     "estimate_archive.entry.seal_award": "Seal the award estimate",
     "estimate_archive.entry.add_from_seal": "Add from sealed estimate",
+    "estimate_archive.seal_needs_contract": "A client contract is needed before an estimate can be sealed as the contract basis.",
     "project_catalogue.title": "Project Catalogue",
     "project_catalogue.subtitle": "This project's own rates, copied from the cost database and edited without changing it.",
     "project_catalogue.add_from_source": "Add from database",

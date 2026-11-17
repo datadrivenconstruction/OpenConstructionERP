@@ -2125,7 +2125,8 @@
       "fail": "Sinetöityä laskelmaa ei voi muuttaa eikä poistaa. Sinetöi uusi versio, joka korvaa sen."
     },
     "contents_locked": "Sisältö pysyy sinetöitynä, kunnes virallinen avaus alkaa.",
-    "market_off": "Sinetöidyt laskelmat eivät kuulu tämän hankkeen markkinaprofiiliin."
+    "market_off": "Sinetöidyt laskelmat eivät kuulu tämän hankkeen markkinaprofiiliin.",
+    "contract_required": "Asiakassopimus tarvitaan, ennen kuin arvio voidaan sinetöidä sopimuksen perusteeksi."
   },
   "boq_revision": {
     "superseded_still_editable": {

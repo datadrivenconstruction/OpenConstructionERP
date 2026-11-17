@@ -2125,7 +2125,8 @@
       "fail": "Um orçamento selado não pode ser alterado nem apagado. Sele uma nova versão que o substitua."
     },
     "contents_locked": "O conteúdo continua selado até começar uma abertura formal.",
-    "market_off": "Os orçamentos selados não fazem parte do perfil de mercado deste projeto."
+    "market_off": "Os orçamentos selados não fazem parte do perfil de mercado deste projeto.",
+    "contract_required": "É necessário um contrato com o cliente antes de selar um orçamento como base do contrato."
   },
   "boq_revision": {
     "superseded_still_editable": {

@@ -2125,7 +2125,8 @@
       "fail": "已封存的预算不能修改或删除。请封存一个替代它的新版本。"
     },
     "contents_locked": "在正式开启之前，内容保持封存。",
-    "market_off": "封存预算不属于本项目的市场配置。"
+    "market_off": "封存预算不属于本项目的市场配置。",
+    "contract_required": "将估算封存为合同依据之前，需要先有客户合同。"
   },
   "boq_revision": {
     "superseded_still_editable": {

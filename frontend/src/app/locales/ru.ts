@@ -68310,6 +68310,7 @@ const resource = {
     "estimate_archive.entry.no_seal": "Запечатанной сметы нет.",
     "estimate_archive.entry.seal_award": "Запечатать смету контракта",
     "estimate_archive.entry.add_from_seal": "Добавить из запечатанной сметы",
+    "estimate_archive.seal_needs_contract": "Чтобы опечатать смету как основу договора, нужен договор с заказчиком.",
     "project_catalogue.title": "Каталог проекта",
     "project_catalogue.subtitle": "Собственные расценки проекта: скопированы из базы цен и изменяются без правки самой базы.",
     "project_catalogue.add_from_source": "Добавить из базы",

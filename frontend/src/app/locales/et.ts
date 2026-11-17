@@ -64992,6 +64992,7 @@ const resource = {
     "estimate_archive.entry.no_seal": "Plommitud kalkulatsioon puudub.",
     "estimate_archive.entry.seal_award": "Plommi hankeotsuse kalkulatsioon",
     "estimate_archive.entry.add_from_seal": "Lisa plommitud kalkulatsioonist",
+    "estimate_archive.seal_needs_contract": "Enne hinnangu pitseerimist lepingu aluseks on vaja kliendilepingut.",
     "project_catalogue.title": "Projekti kataloog",
     "project_catalogue.subtitle": "Projekti omad hinnad, kopeeritud kulude andmebaasist ja muudetud ilma seda muutmata.",
     "project_catalogue.add_from_source": "Lisa andmebaasist",

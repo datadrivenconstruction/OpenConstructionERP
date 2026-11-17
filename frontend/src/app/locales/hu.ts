@@ -67607,6 +67607,7 @@ const resource = {
     "estimate_archive.entry.no_seal": "Nincs lezárt költségvetés.",
     "estimate_archive.entry.seal_award": "Nyertes költségvetés lezárása",
     "estimate_archive.entry.add_from_seal": "Hozzáadás a lezárt költségvetésből",
+    "estimate_archive.seal_needs_contract": "A költségvetés szerződéses alapként való lezárásához ügyfélszerződés szükséges.",
     "project_catalogue.title": "Projektkatalógus",
     "project_catalogue.subtitle": "A projekt saját árai, a költségadatbázisból másolva és annak módosítása nélkül szerkesztve.",
     "project_catalogue.add_from_source": "Hozzáadás adatbázisból",

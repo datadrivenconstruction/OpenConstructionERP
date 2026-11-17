@@ -65042,6 +65042,7 @@ const resource = {
     "estimate_archive.entry.no_seal": "Ingen forseglet kalkyle.",
     "estimate_archive.entry.seal_award": "Forsegl tildelingskalkylen",
     "estimate_archive.entry.add_from_seal": "Legg til fra forseglet kalkyle",
+    "estimate_archive.seal_needs_contract": "Det trengs en kundekontrakt før et overslag kan forsegles som kontraktsgrunnlag.",
     "project_catalogue.title": "Prosjektkatalog",
     "project_catalogue.subtitle": "Prosjektets egne priser, kopiert fra kostnadsdatabasen og redigert uten å endre den.",
     "project_catalogue.add_from_source": "Legg til fra database",

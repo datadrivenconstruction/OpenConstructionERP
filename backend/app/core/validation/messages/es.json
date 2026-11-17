@@ -2125,7 +2125,8 @@
       "fail": "Un presupuesto sellado no se puede cambiar ni borrar. Selle una nueva versión que lo sustituya."
     },
     "contents_locked": "El contenido sigue sellado hasta que empiece una apertura formal.",
-    "market_off": "Los presupuestos sellados no forman parte del perfil de mercado de este proyecto."
+    "market_off": "Los presupuestos sellados no forman parte del perfil de mercado de este proyecto.",
+    "contract_required": "Se necesita un contrato con el cliente antes de sellar un presupuesto como base del contrato."
   },
   "boq_revision": {
     "superseded_still_editable": {

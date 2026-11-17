@@ -67677,6 +67677,7 @@ const resource = {
     "estimate_archive.entry.no_seal": "Keine versiegelte Kalkulation.",
     "estimate_archive.entry.seal_award": "Auftragskalkulation versiegeln",
     "estimate_archive.entry.add_from_seal": "Aus versiegelter Kalkulation übernehmen",
+    "estimate_archive.seal_needs_contract": "Zum Versiegeln einer Kalkulation als Vertragsgrundlage wird ein Auftraggebervertrag benötigt.",
     "project_catalogue.title": "Projektkatalog",
     "project_catalogue.subtitle": "Eigene Preise dieses Projekts, aus der Kostendatenbank kopiert und bearbeitet, ohne sie zu ändern.",
     "project_catalogue.add_from_source": "Aus Datenbank hinzufügen",

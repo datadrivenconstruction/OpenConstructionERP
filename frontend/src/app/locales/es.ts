@@ -67990,6 +67990,7 @@ const resource = {
     "estimate_archive.entry.no_seal": "No hay presupuesto sellado.",
     "estimate_archive.entry.seal_award": "Sellar el presupuesto de adjudicación",
     "estimate_archive.entry.add_from_seal": "Añadir desde el presupuesto sellado",
+    "estimate_archive.seal_needs_contract": "Se necesita un contrato con el cliente antes de sellar un presupuesto como base del contrato.",
     "project_catalogue.title": "Catálogo del proyecto",
     "project_catalogue.subtitle": "Los precios propios de este proyecto, copiados de la base de costes y editados sin modificarla.",
     "project_catalogue.add_from_source": "Añadir desde la base",

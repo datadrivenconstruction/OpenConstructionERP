@@ -65923,6 +65923,7 @@ const resource = {
     "estimate_archive.entry.no_seal": "Geen verzegelde raming.",
     "estimate_archive.entry.seal_award": "Gunningsraming verzegelen",
     "estimate_archive.entry.add_from_seal": "Toevoegen vanuit verzegelde raming",
+    "estimate_archive.seal_needs_contract": "Er is een opdrachtgeverscontract nodig voordat een raming als contractbasis kan worden verzegeld.",
     "project_catalogue.title": "Projectcatalogus",
     "project_catalogue.subtitle": "De eigen prijzen van dit project, gekopieerd uit de kostendatabase en bewerkt zonder die te wijzigen.",
     "project_catalogue.add_from_source": "Toevoegen uit database",

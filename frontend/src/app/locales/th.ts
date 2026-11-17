@@ -64777,6 +64777,7 @@ const resource = {
     "estimate_archive.entry.no_seal": "ไม่มีประมาณการที่ปิดผนึก",
     "estimate_archive.entry.seal_award": "ปิดผนึกประมาณการที่ได้รับการคัดเลือก",
     "estimate_archive.entry.add_from_seal": "เพิ่มจากประมาณการที่ปิดผนึก",
+    "estimate_archive.seal_needs_contract": "ต้องมีสัญญากับลูกค้าก่อนจึงจะผนึกประมาณการเป็นฐานของสัญญาได้",
     "project_catalogue.title": "แคตตาล็อกโครงการ",
     "project_catalogue.subtitle": "ราคาต่อหน่วยของโครงการนี้เอง คัดลอกจากฐานข้อมูลต้นทุนและแก้ไขได้โดยไม่เปลี่ยนฐานข้อมูล",
     "project_catalogue.add_from_source": "เพิ่มจากฐานข้อมูล",

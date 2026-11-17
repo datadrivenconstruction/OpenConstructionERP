@@ -65002,6 +65002,7 @@ const resource = {
     "estimate_archive.entry.no_seal": "برآورد مهروموم‌شده‌ای وجود ندارد.",
     "estimate_archive.entry.seal_award": "مهروموم برآورد برنده",
     "estimate_archive.entry.add_from_seal": "افزودن از برآورد مهروموم‌شده",
+    "estimate_archive.seal_needs_contract": "پیش از مهر کردن برآورد به عنوان مبنای قرارداد، قرارداد با کارفرما لازم است.",
     "project_catalogue.title": "کاتالوگ پروژه",
     "project_catalogue.subtitle": "نرخ‌های خود این پروژه که از پایگاه داده هزینه کپی شده و بدون تغییر آن ویرایش می‌شوند.",
     "project_catalogue.add_from_source": "افزودن از پایگاه داده",

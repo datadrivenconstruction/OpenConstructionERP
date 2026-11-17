@@ -2125,7 +2125,8 @@
       "fail": "Hindi mababago o mabubura ang selyadong estimate. Magselyo ng bagong bersyon na papalit dito."
     },
     "contents_locked": "Mananatiling selyado ang nilalaman hanggang magsimula ang pormal na pagbubukas.",
-    "market_off": "Hindi bahagi ng market profile ng proyektong ito ang mga nakaselyong tantiya."
+    "market_off": "Hindi bahagi ng market profile ng proyektong ito ang mga nakaselyong tantiya.",
+    "contract_required": "Kailangan ng kontrata sa kliyente bago ma-seal ang estimate bilang batayan ng kontrata."
   },
   "boq_revision": {
     "superseded_still_editable": {

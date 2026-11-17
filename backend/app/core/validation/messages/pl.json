@@ -2125,7 +2125,8 @@
       "fail": "Opieczętowanego kosztorysu nie można zmienić ani usunąć. Opieczętuj nową wersję, która go zastąpi."
     },
     "contents_locked": "Treść pozostaje opieczętowana do rozpoczęcia formalnego otwarcia.",
-    "market_off": "Zapieczętowane kosztorysy nie należą do profilu rynkowego tego projektu."
+    "market_off": "Zapieczętowane kosztorysy nie należą do profilu rynkowego tego projektu.",
+    "contract_required": "Aby zapieczętować kosztorys jako podstawę umowy, potrzebna jest umowa z klientem."
   },
   "boq_revision": {
     "superseded_still_editable": {

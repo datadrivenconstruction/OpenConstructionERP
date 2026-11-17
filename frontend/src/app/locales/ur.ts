@@ -65008,6 +65008,7 @@ const resource = {
     "estimate_archive.entry.no_seal": "کوئی سیل شدہ تخمینہ نہیں۔",
     "estimate_archive.entry.seal_award": "ایوارڈ کا تخمینہ سیل کریں",
     "estimate_archive.entry.add_from_seal": "سیل شدہ تخمینے سے شامل کریں",
+    "estimate_archive.seal_needs_contract": "تخمینے کو معاہدے کی بنیاد کے طور پر سیل کرنے سے پہلے کلائنٹ کا معاہدہ درکار ہے۔",
     "project_catalogue.title": "پروجیکٹ کیٹلاگ",
     "project_catalogue.subtitle": "اس پروجیکٹ کے اپنے ریٹ، لاگت ڈیٹا بیس سے نقل کیے گئے اور اسے بدلے بغیر ترمیم کیے گئے۔",
     "project_catalogue.add_from_source": "ڈیٹا بیس سے شامل کریں",

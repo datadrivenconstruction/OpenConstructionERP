@@ -68248,6 +68248,7 @@ const resource = {
     "estimate_archive.entry.no_seal": "لا يوجد تقدير مختوم.",
     "estimate_archive.entry.seal_award": "ختم تقدير الترسية",
     "estimate_archive.entry.add_from_seal": "إضافة من التقدير المختوم",
+    "estimate_archive.seal_needs_contract": "يلزم وجود عقد مع العميل قبل ختم التقدير كأساس للعقد.",
     "project_catalogue.title": "كتالوج المشروع",
     "project_catalogue.subtitle": "أسعار هذا المشروع الخاصة، منسوخة من قاعدة بيانات التكاليف ومعدلة دون تغييرها.",
     "project_catalogue.add_from_source": "إضافة من قاعدة البيانات",

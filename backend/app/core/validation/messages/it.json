@@ -2125,7 +2125,8 @@
       "fail": "Un computo sigillato non può essere modificato né eliminato. Sigillare una nuova versione che lo sostituisca."
     },
     "contents_locked": "Il contenuto resta sigillato finché non inizia un'apertura formale.",
-    "market_off": "I computi sigillati non fanno parte del profilo di mercato di questo progetto."
+    "market_off": "I computi sigillati non fanno parte del profilo di mercato di questo progetto.",
+    "contract_required": "Serve un contratto con il cliente prima di sigillare una stima come base contrattuale."
   },
   "boq_revision": {
     "superseded_still_editable": {

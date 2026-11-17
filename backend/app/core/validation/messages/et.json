@@ -2125,7 +2125,8 @@
       "fail": "Pitseeritud eelarvet ei saa muuta ega kustutada. Pitseerige uus versioon, mis selle asendab."
     },
     "contents_locked": "Sisu jääb pitseerituks, kuni algab ametlik avamine.",
-    "market_off": "Pitseeritud eelarved ei kuulu selle projekti turuprofiili."
+    "market_off": "Pitseeritud eelarved ei kuulu selle projekti turuprofiili.",
+    "contract_required": "Enne hinnangu pitseerimist lepingu aluseks on vaja kliendilepingut."
   },
   "boq_revision": {
     "superseded_still_editable": {

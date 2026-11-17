@@ -67985,6 +67985,7 @@ const resource = {
     "estimate_archive.entry.no_seal": "Aucune estimation scellée.",
     "estimate_archive.entry.seal_award": "Sceller l'estimation de l'adjudication",
     "estimate_archive.entry.add_from_seal": "Ajouter depuis l'estimation scellée",
+    "estimate_archive.seal_needs_contract": "Un contrat client est nécessaire avant de sceller un estimatif comme base du contrat.",
     "project_catalogue.title": "Catalogue du projet",
     "project_catalogue.subtitle": "Les prix propres à ce projet, copiés de la base de coûts et modifiés sans la changer.",
     "project_catalogue.add_from_source": "Ajouter depuis la base",

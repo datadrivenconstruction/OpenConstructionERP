@@ -2125,7 +2125,8 @@
       "fail": "Mühürlü bir keşif değiştirilemez veya silinemez. Yerine geçecek yeni bir sürüm mühürleyin."
     },
     "contents_locked": "İçerik resmi bir açılış başlayana kadar mühürlü kalır.",
-    "market_off": "Mühürlü keşifler bu projenin pazar profilinde yer almıyor."
+    "market_off": "Mühürlü keşifler bu projenin pazar profilinde yer almıyor.",
+    "contract_required": "Tahmini maliyeti sözleşme esası olarak mühürlemeden önce bir müşteri sözleşmesi gerekir."
   },
   "boq_revision": {
     "superseded_still_editable": {
