@@ -8061,7 +8061,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       "cases": [
         "measure-the-drawing-into-a-coded-bill-item",
         "estimate-from-cost-database",
-        "validate-estimate"
+        "analyse-a-schedule-rate-into-labour-material-and-machinery"
       ],
       "routes": [
         "/takeoff",
@@ -8070,7 +8070,9 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "/validation",
         "/cost-explorer",
         "/assemblies",
-        "/reports"
+        "/costs",
+        "/norm-expansion",
+        "/labor-rates"
       ],
       "result": "bill",
       "title": "घर बनाने का खर्चा 2026: रेट per sq ft बनाम असली BOQ (30×40 प्लॉट, G+2 घर)",
@@ -8212,7 +8214,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       ],
       "cases": [
         "prepare-an-interim-payment-application",
-        "value-the-month-and-certify-the-progress-payment",
+        "bill-a-running-account-from-the-measurement-book",
         "manage-retention-across-the-supply-chain"
       ],
       "routes": [
@@ -8221,10 +8223,11 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "/finance",
         "/reports",
         "/reconciliation",
-        "/contracts",
+        "/quantities",
         "/inspections",
-        "/progress",
+        "/signing",
         "/payment-clock",
+        "/contracts",
         "/subcontractors"
       ],
       "result": "invoice",
@@ -8267,7 +8270,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       ],
       "cases": [
         "assess-and-price-a-variation",
-        "change-to-paid-variation",
+        "analyse-a-schedule-rate-into-labour-material-and-machinery",
         "agree-the-final-account-and-release-retention"
       ],
       "routes": [
@@ -8276,6 +8279,11 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "/value",
         "/contracts",
         "/reports",
+        "/costs",
+        "/norm-expansion",
+        "/labor-rates",
+        "/assemblies",
+        "/cost-explorer",
         "/finance"
       ],
       "result": "handover",
@@ -8319,7 +8327,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       "cases": [
         "measure-the-drawing-into-a-coded-bill-item",
         "estimate-from-cost-database",
-        "validate-estimate"
+        "build-a-smeta-on-the-gesn-norms-with-the-resource-method"
       ],
       "routes": [
         "/takeoff",
@@ -8328,7 +8336,10 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "/validation",
         "/cost-explorer",
         "/assemblies",
-        "/reports"
+        "/costs",
+        "/norm-expansion",
+        "/catalog",
+        "/resource-summary"
       ],
       "result": "bill",
       "title": "Сколько стоит построить дом из газобетона в 2026: смета на коробку по позициям",
@@ -8471,7 +8482,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       "cases": [
         "prepare-an-interim-payment-application",
         "value-the-month-and-certify-the-progress-payment",
-        "manage-retention-across-the-supply-chain"
+        "close-the-month-with-a-ks-2-act-and-a-ks-3-certificate"
       ],
       "routes": [
         "/boq",
@@ -8483,7 +8494,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "/inspections",
         "/progress",
         "/payment-clock",
-        "/subcontractors"
+        "/governance"
       ],
       "result": "invoice",
       "title": "КС-2 и КС-3: что это и нужны ли при строительстве частного дома",
@@ -8526,7 +8537,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       "cases": [
         "assess-and-price-a-variation",
         "change-to-paid-variation",
-        "agree-the-final-account-and-release-retention"
+        "settle-the-avans-and-release-the-guarantee-retention"
       ],
       "routes": [
         "/changeorders",
@@ -8534,7 +8545,9 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "/value",
         "/contracts",
         "/reports",
-        "/finance"
+        "/finance",
+        "/tax-rates",
+        "/payment-clock"
       ],
       "result": "handover",
       "title": "Допработы по договору подряда: допсоглашение, окончательный расчёт, гарантия",
@@ -8661,6 +8674,19 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "/reports"
       ]
     },
+    "analyse-a-schedule-rate-into-labour-material-and-machinery": {
+      "titleKey": "cases.analyse_a_schedule_rate_into_labour_material_and_machinery.title",
+      "titleDefault": "Analyse a schedule rate into labour, material and machinery",
+      "region": "IN",
+      "stage": "estimate",
+      "routes": [
+        "/costs",
+        "/norm-expansion",
+        "/labor-rates",
+        "/assemblies",
+        "/cost-explorer"
+      ]
+    },
     "answer-a-gaeb-inquiry-as-a-subcontractor": {
       "titleKey": "cases.answer_a_gaeb_inquiry_as_a_subcontractor.title",
       "titleDefault": "Answer a GAEB inquiry as a subcontractor",
@@ -8746,6 +8772,19 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "/portfolio",
         "/portfolio/capacity",
         "/portfolio/leveling"
+      ]
+    },
+    "bill-a-running-account-from-the-measurement-book": {
+      "titleKey": "cases.bill_a_running_account_from_the_measurement_book.title",
+      "titleDefault": "Bill a running account from the measurement book",
+      "region": "IN",
+      "stage": "build",
+      "routes": [
+        "/quantities",
+        "/inspections",
+        "/finance",
+        "/signing",
+        "/payment-clock"
       ]
     },
     "bill-the-monthly-draw-with-holdback-and-a-declaration": {
@@ -8843,6 +8882,20 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "/subcontractors",
         "/procurement",
         "/reports"
+      ]
+    },
+    "build-a-smeta-on-the-gesn-norms-with-the-resource-method": {
+      "titleKey": "cases.build_a_smeta_on_the_gesn_norms_with_the_resource_method.title",
+      "titleDefault": "Build a smeta on the GESN norms with the resource method",
+      "region": "RU",
+      "stage": "estimate",
+      "routes": [
+        "/costs",
+        "/norm-expansion",
+        "/catalog",
+        "/assemblies",
+        "/boq",
+        "/resource-summary"
       ]
     },
     "build-an-all-in-labour-rate": {
@@ -9019,6 +9072,20 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "/contracts",
         "/finance",
         "/reports"
+      ]
+    },
+    "close-the-month-with-a-ks-2-act-and-a-ks-3-certificate": {
+      "titleKey": "cases.close_the_month_with_a_ks_2_act_and_a_ks_3_certificate.title",
+      "titleDefault": "Close the month with a KS-2 act and a KS-3 certificate",
+      "region": "RU",
+      "stage": "build",
+      "routes": [
+        "/progress",
+        "/boq",
+        "/governance",
+        "/finance",
+        "/payment-clock",
+        "/reconciliation"
       ]
     },
     "close-the-works-and-hand-over-the-libro-del-edificio": {
@@ -10004,6 +10071,18 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "/files",
         "/signing",
         "/reports"
+      ]
+    },
+    "settle-the-avans-and-release-the-guarantee-retention": {
+      "titleKey": "cases.settle_the_avans_and_release_the_guarantee_retention.title",
+      "titleDefault": "Settle the advance payment (avans) and release the guarantee retention",
+      "region": "RU",
+      "stage": "build",
+      "routes": [
+        "/contracts",
+        "/finance",
+        "/tax-rates",
+        "/payment-clock"
       ]
     },
     "subcontractor-package": {

@@ -82,9 +82,14 @@ describe('the generated academy items', () => {
     const app = readFileSync(resolve(ROOT, 'frontend/src/app/App.tsx'), 'utf8');
     const paths = [...app.matchAll(/<Route\s+path="([^"]+)"/g)].map((m) => m[1]!);
     const routes: RouteObject[] = [...paths, ...getAllModuleRoutes().map((r) => r.path)].map((path) => ({ path }));
+    const rendered = new Map<string, boolean>();
+    const renders = (r: string) => {
+      if (!rendered.has(r)) rendered.set(r, matchRoutes(routes, r) !== null);
+      return rendered.get(r)!;
+    };
     for (const i of ACADEMY_ITEMS) {
       expect(i.routes.length, i.id).toBeGreaterThan(0);
-      for (const r of i.routes) expect(matchRoutes(routes, r), `${i.id} -> ${r}`).not.toBeNull();
+      for (const r of i.routes) expect(renders(r), `${i.id} -> ${r}`).toBe(true);
     }
   });
 

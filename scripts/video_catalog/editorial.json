@@ -1490,7 +1490,7 @@
       "stage": "estimate",
       "roles": ["estimator", "quantity-surveyor"],
       "market": "IN",
-      "cases": ["measure-the-drawing-into-a-coded-bill-item", "estimate-from-cost-database", "validate-estimate"],
+      "cases": ["measure-the-drawing-into-a-coded-bill-item", "estimate-from-cost-database", "analyse-a-schedule-rate-into-labour-material-and-machinery"],
       "result": "bill",
       "provenance": "videos-refresh-2026-11-17"
     },
@@ -1523,7 +1523,7 @@
       "stage": "build",
       "roles": ["quantity-surveyor", "accountant"],
       "market": "IN",
-      "cases": ["prepare-an-interim-payment-application", "value-the-month-and-certify-the-progress-payment", "manage-retention-across-the-supply-chain"],
+      "cases": ["prepare-an-interim-payment-application", "bill-a-running-account-from-the-measurement-book", "manage-retention-across-the-supply-chain"],
       "result": "invoice",
       "provenance": "videos-refresh-2026-11-17"
     },
@@ -1534,7 +1534,7 @@
       "stage": "handover",
       "roles": ["commercial-manager", "contract-administrator"],
       "market": "IN",
-      "cases": ["assess-and-price-a-variation", "change-to-paid-variation", "agree-the-final-account-and-release-retention"],
+      "cases": ["assess-and-price-a-variation", "analyse-a-schedule-rate-into-labour-material-and-machinery", "agree-the-final-account-and-release-retention"],
       "result": "handover",
       "provenance": "videos-refresh-2026-11-17"
     },
@@ -1545,7 +1545,7 @@
       "stage": "estimate",
       "roles": ["estimator", "quantity-surveyor"],
       "market": "RU",
-      "cases": ["measure-the-drawing-into-a-coded-bill-item", "estimate-from-cost-database", "validate-estimate"],
+      "cases": ["measure-the-drawing-into-a-coded-bill-item", "estimate-from-cost-database", "build-a-smeta-on-the-gesn-norms-with-the-resource-method"],
       "result": "bill",
       "provenance": "videos-refresh-2026-11-17"
     },
@@ -1578,7 +1578,7 @@
       "stage": "build",
       "roles": ["quantity-surveyor", "accountant"],
       "market": "RU",
-      "cases": ["prepare-an-interim-payment-application", "value-the-month-and-certify-the-progress-payment", "manage-retention-across-the-supply-chain"],
+      "cases": ["prepare-an-interim-payment-application", "value-the-month-and-certify-the-progress-payment", "close-the-month-with-a-ks-2-act-and-a-ks-3-certificate"],
       "result": "invoice",
       "provenance": "videos-refresh-2026-11-17"
     },
@@ -1589,7 +1589,7 @@
       "stage": "handover",
       "roles": ["commercial-manager", "contract-administrator"],
       "market": "RU",
-      "cases": ["assess-and-price-a-variation", "change-to-paid-variation", "agree-the-final-account-and-release-retention"],
+      "cases": ["assess-and-price-a-variation", "change-to-paid-variation", "settle-the-avans-and-release-the-guarantee-retention"],
       "result": "handover",
       "provenance": "videos-refresh-2026-11-17"
     }
