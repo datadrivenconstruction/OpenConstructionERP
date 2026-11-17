@@ -32,7 +32,7 @@ function labels(code: string): Record<string, string> {
   const out: Record<string, string> = {};
   for (const type of TYPES) {
     const match = text.match(new RegExp(`"contacts\\.type_${type}":\\s*(["'])((?:\\\\.|(?!\\1).)*)\\1`));
-    if (match) out[type] = match[2];
+    if (match?.[2] !== undefined) out[type] = match[2];
   }
   return out;
 }
