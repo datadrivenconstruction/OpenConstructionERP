@@ -231,8 +231,14 @@ def _remove_project_files(project_id: uuid.UUID, file_paths: list[str]) -> int:
 async def purge_demo_tagged_global_rows(
     session: AsyncSession,
     demo_ids: set[str],
+    owner_ids: set[str] | None = None,
 ) -> dict[str, int]:
     """Delete company-global demo rows tagged for the given demo projects.
+
+    With ``owner_ids`` only rows that belong to those owners go: a row's owner is its
+    ``created_by``, or for a fleet unit the owner of the project it is rented to. Two owners
+    can hold the same demo, and purging one must not take the other's rows. A row nobody
+    owns any more is still swept.
 
     A few company-level registries (the equipment fleet and the
     subcontractor roster) live in tables that carry NO ``project_id`` - a
@@ -276,6 +282,13 @@ async def purge_demo_tagged_global_rows(
         # the rows that point at a contact do so with SET NULL or no key.
         ("app.modules.contacts.models", "Contact"),
     )
+    project_owner: dict[str, str] = {}
+    if owner_ids is not None:
+        from app.modules.projects.models import Project as _Project
+
+        project_owner = {
+            str(pid): str(oid) for pid, oid in (await session.execute(sa_select(_Project.id, _Project.owner_id))).all()
+        }
     for module_path, attr in _targets:
         try:
             import importlib
@@ -290,6 +303,26 @@ async def purge_demo_tagged_global_rows(
             for r in rows
             if isinstance(getattr(r, "metadata_", None), dict) and r.metadata_.get("demo_id") in demo_ids
         ]
+        if owner_ids is not None and pks:
+            rental_owner: dict[Any, str | None] = {}
+            if attr == "Equipment":
+                from app.modules.equipment.models import EquipmentRental
+
+                for eq_id, rental_project in (
+                    await session.execute(
+                        sa_select(EquipmentRental.equipment_id, EquipmentRental.project_id).where(
+                            EquipmentRental.equipment_id.in_(pks)
+                        )
+                    )
+                ).all():
+                    rental_owner.setdefault(eq_id, project_owner.get(str(rental_project)))
+            by_id = {r.id: r for r in rows}
+            pks = [
+                pk
+                for pk in pks
+                if (rental_owner.get(pk) if attr == "Equipment" else getattr(by_id[pk], "created_by", None))
+                in (None, *owner_ids)
+            ]
         if not pks:
             continue
         await session.execute(sa_delete(model).where(model.id.in_(pks)))
@@ -1694,7 +1727,9 @@ class ProjectService:
         # Company-global rows tagged for these demo projects (no project_id,
         # so missed by the sweep above). Shared-by-design registries seeded
         # at boot carry no demo_id and are intentionally left alone.
-        global_deleted = await purge_demo_tagged_global_rows(self.session, demo_ids)
+        global_deleted = await purge_demo_tagged_global_rows(
+            self.session, demo_ids, {str(p.owner_id) for p in rows if p.owner_id}
+        )
 
         result = await self.session.execute(sa_delete(Project).where(Project.id.in_(demo_pks)))
         await self.session.flush()
@@ -1771,7 +1806,7 @@ class ProjectService:
 
         await purge_project_children_without_cascade(self.session, [project_id])
         if demo_id:
-            await purge_demo_tagged_global_rows(self.session, {demo_id})
+            await purge_demo_tagged_global_rows(self.session, {demo_id}, {str(project.owner_id)})
         await self.session.execute(sa_delete(Project).where(Project.id == project_id))
         await self.session.flush()
         self.session.expire_all()

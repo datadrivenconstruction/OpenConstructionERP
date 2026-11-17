@@ -1475,7 +1475,11 @@ async def _delete_demo_projects(session: Any, projects: list[Any]) -> None:
     if not ids:
         return
     await purge_project_children_without_cascade(session, ids)
-    await purge_demo_tagged_global_rows(session, {d for p in projects if (d := demo_id_of(p.metadata_))})
+    await purge_demo_tagged_global_rows(
+        session,
+        {d for p in projects if (d := demo_id_of(p.metadata_))},
+        {str(p.owner_id) for p in projects if p.owner_id},
+    )
     await session.execute(sa_delete(Project).where(Project.id.in_(ids)))
     await session.flush()
     session.expire_all()
