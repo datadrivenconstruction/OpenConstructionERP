@@ -29,6 +29,10 @@ async def on_startup() -> None:
     register_finance_rules()
     _register_invoice_tax_source()
 
+    from app.modules.finance.invoice_mailbox_jobs import register_jobs
+
+    register_jobs()
+
 
 async def _invoice_project(session: object, source_id: object) -> object:
     """The project an invoice belongs to, ``None`` when there is no such invoice."""

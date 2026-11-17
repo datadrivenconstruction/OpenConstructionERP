@@ -50,6 +50,13 @@ from app.modules.finance.invoice_capture_schemas import (
     RejectInput,
 )
 from app.modules.finance.invoice_capture_service import MAX_UPLOAD_BYTES, InvoiceCaptureService
+from app.modules.finance.invoice_mailbox_schemas import (
+    MailboxResponse,
+    MailboxTest,
+    MailboxTestResult,
+    MailboxUpdate,
+)
+from app.modules.finance.invoice_mailbox_service import InvoiceMailboxService
 from app.modules.finance.router import _require_project_access
 
 MAX_EMAIL_BYTES = MAX_UPLOAD_BYTES * 2
@@ -137,11 +144,77 @@ async def upload_capture(
     description="The address a scanner sends invoices to, when the install has one configured.",
 )
 async def intake_info(
+    session: SessionDep,
+    user_id: CurrentUserId,
+    project_id: uuid.UUID | None = Query(default=None),
     _perm: None = Depends(RequirePermission("finance.capture.read")),
 ) -> IntakeInfoResponse:
     from app.config import get_settings
 
-    return IntakeInfoResponse(address=get_settings().invoice_intake_address or None)
+    address = ""
+    if project_id is not None:
+        await _require_project_access(session, project_id, user_id)
+        box = await InvoiceMailboxService(session).get(project_id)
+        address = (box.intake_address if box else "") or ""
+    return IntakeInfoResponse(address=address or get_settings().invoice_intake_address or None)
+
+
+def _mailbox_response(project_id: uuid.UUID, row) -> MailboxResponse:
+    if row is None:
+        return MailboxResponse(project_id=project_id)
+    resp = MailboxResponse.model_validate(row)
+    resp.has_password = bool(row.password_encrypted)
+    return resp
+
+
+@capture_router.get(
+    "/mailbox",
+    response_model=MailboxResponse,
+    summary="Invoice mailbox settings",
+    description="The IMAP mailbox polled for scan-to-email invoices. The password is never returned.",
+)
+async def get_mailbox(
+    session: SessionDep,
+    user_id: CurrentUserId,
+    project_id: uuid.UUID = Query(...),
+    _perm: None = Depends(RequirePermission("finance.capture.configure")),
+) -> MailboxResponse:
+    await _require_project_access(session, project_id, user_id)
+    return _mailbox_response(project_id, await InvoiceMailboxService(session).get(project_id))
+
+
+@capture_router.put(
+    "/mailbox",
+    response_model=MailboxResponse,
+    summary="Save invoice mailbox settings",
+    description="Validate and store the mailbox settings; the password is stored encrypted.",
+)
+async def put_mailbox(
+    data: MailboxUpdate,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    project_id: uuid.UUID = Query(...),
+    _perm: None = Depends(RequirePermission("finance.capture.configure")),
+) -> MailboxResponse:
+    await _require_project_access(session, project_id, user_id)
+    return _mailbox_response(project_id, await InvoiceMailboxService(session).upsert(project_id, data))
+
+
+@capture_router.post(
+    "/mailbox/test",
+    response_model=MailboxTestResult,
+    summary="Test the mailbox connection",
+    description="Log in and open the folder read-only; nothing is changed or fetched.",
+)
+async def test_mailbox(
+    data: MailboxTest,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    project_id: uuid.UUID = Query(...),
+    _perm: None = Depends(RequirePermission("finance.capture.configure")),
+) -> MailboxTestResult:
+    await _require_project_access(session, project_id, user_id)
+    return MailboxTestResult(**await InvoiceMailboxService(session).test(project_id, data))
 
 
 @capture_router.post(

@@ -38,6 +38,7 @@ import {
 import { useToastStore } from '@/stores/useToastStore';
 import { InvoiceInboxOrderLink, hasOrderMismatch } from './InvoiceInboxOrderLink';
 import { getNumberLocale } from '@/stores/usePreferencesStore';
+import { InvoiceMailboxSettings } from './InvoiceMailboxSettings';
 import { captureSourceOf, uploadBatch, type CaptureSource } from './invoiceCaptureIntake';
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
@@ -192,8 +193,11 @@ export function InvoiceInboxTab({ projectId }: { projectId: string }) {
   });
 
   const intakeQuery = useQuery({
-    queryKey: ['finance-invoice-intake-info'],
-    queryFn: () => apiGet<{ address: string | null }>('/v1/finance/inbox/intake/info'),
+    queryKey: ['finance-invoice-intake-info', projectId],
+    queryFn: () =>
+      apiGet<{ address: string | null }>(
+        `/v1/finance/inbox/intake/info?project_id=${encodeURIComponent(projectId)}`,
+      ),
     staleTime: 5 * 60 * 1000,
   });
   const intakeAddress = intakeQuery.data?.address ?? null;
@@ -400,6 +404,7 @@ export function InvoiceInboxTab({ projectId }: { projectId: string }) {
                       'No intake address is configured yet. Ask your administrator to set one up.',
                   })}
             </p>
+            <InvoiceMailboxSettings projectId={projectId} />
           </div>
         </div>
       </Card>

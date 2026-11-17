@@ -67,5 +67,7 @@ def register_finance_permissions() -> None:
             # roles, so the DMS ties into the same financial-commitment gate.
             "finance.capture.create": Role.EDITOR,
             "finance.capture.read": Role.VIEWER,
+            # Mailbox credentials for scan-to-email intake.
+            "finance.capture.configure": Role.MANAGER,
         },
     )
