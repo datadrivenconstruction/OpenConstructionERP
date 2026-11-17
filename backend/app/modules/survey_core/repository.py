@@ -81,8 +81,14 @@ class SurveyRepository:
         if code:
             stmt = stmt.where(SurveyPoint.code == code)
         if q:
-            like = f"%{q}%"
-            stmt = stmt.where(or_(SurveyPoint.point_id.ilike(like), SurveyPoint.description.ilike(like)))
+            escaped = q.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+            like = f"%{escaped}%"
+            stmt = stmt.where(
+                or_(
+                    SurveyPoint.point_id.ilike(like, escape="\\"),
+                    SurveyPoint.description.ilike(like, escape="\\"),
+                )
+            )
         return stmt
 
     async def list_points(
