@@ -931,6 +931,36 @@
     "change_time_within_owner": {
       "fail": "{code} 的分包工期影响合计 {sub_days} 天，超过业主批准的 {owner_days} 天",
       "suggestion": "请核对分包商的工期索赔，或向业主申请相应的延期"
+    },
+    "pay_app_over_complete": {
+      "fail": "明细 {line} 在本期后达到计划价值的 {percent}%（{scheduled} 中的 {completed}）",
+      "suggestion": "请降低本期金额，或记录超出计划价值计价的原因"
+    },
+    "pay_app_line_negative": {
+      "fail": "明细 {line} 的累计将为 {completed}，低于零"
+    },
+    "pay_app_within_agreement": {
+      "fail": "付款申请合计 {billed}，超过合同价值加已批准变更之和（{limit}）"
+    },
+    "pay_app_correct": {
+      "suggestion": "请更正本付款申请的金额，或通过已批准的变更提高合同价值"
+    },
+    "required_documents": {
+      "fail": "必需文件：{document}（{state}）",
+      "suggestion": "请将已签署且有效的文件附到分包合同上",
+      "states": {
+        "missing": "缺失",
+        "unsigned": "未签署",
+        "expired": "已过期"
+      }
+    },
+    "document_roles": {
+      "terms_and_conditions": "合同条款",
+      "safety_agreement": "安全协议",
+      "safety_plan": "安全计划",
+      "insurance": "保险",
+      "method_statement": "施工方案",
+      "other": "其他文件"
     }
   },
   "submittal": {

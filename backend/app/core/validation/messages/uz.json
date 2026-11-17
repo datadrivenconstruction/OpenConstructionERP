@@ -931,6 +931,36 @@
     "change_time_within_owner": {
       "fail": "{code} bo'yicha pudratchilarning vaqtga ta'siri jami {sub_days} kun, buyurtmachi bergan {owner_days} kundan ko'p",
       "suggestion": "Pudratchilarning muddat talablarini tekshiring yoki buyurtmachidan mos uzaytirishni so'rang"
+    },
+    "pay_app_over_complete": {
+      "fail": "{line} qatori shu davrdan keyin rejadagi qiymatning {percent}% ga yetadi ({scheduled} dan {completed})",
+      "suggestion": "Davr summasini kamaytiring yoki rejadagi qiymatdan oshiq hisob-kitob sababini yozing"
+    },
+    "pay_app_line_negative": {
+      "fail": "{line} qatori bugungacha {completed} bo'lardi, ya'ni noldan kam"
+    },
+    "pay_app_within_agreement": {
+      "fail": "To'lov so'rovlari jami {billed}, bu shartnoma qiymati va tasdiqlangan o'zgarishlardan ({limit}) oshadi"
+    },
+    "pay_app_correct": {
+      "suggestion": "Ushbu to'lov so'rovidagi summalarni to'g'rilang yoki tasdiqlangan o'zgarish bilan shartnoma qiymatini oshiring"
+    },
+    "required_documents": {
+      "fail": "Majburiy hujjat: {document} ({state})",
+      "suggestion": "Hujjatni, imzolangan va amaldagi holda, pudrat osti shartnomasiga biriktiring",
+      "states": {
+        "missing": "yo'q",
+        "unsigned": "imzolanmagan",
+        "expired": "muddati tugagan"
+      }
+    },
+    "document_roles": {
+      "terms_and_conditions": "Shartlar va qoidalar",
+      "safety_agreement": "Xavfsizlik kelishuvi",
+      "safety_plan": "Xavfsizlik rejasi",
+      "insurance": "Sug'urta",
+      "method_statement": "Ish usuli bayoni",
+      "other": "Boshqa hujjat"
     }
   },
   "submittal": {

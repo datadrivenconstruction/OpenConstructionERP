@@ -931,6 +931,36 @@
     "change_time_within_owner": {
       "fail": "{code}의 하도급 공기 영향은 총 {sub_days}일로, 발주자가 인정한 {owner_days}일보다 많습니다",
       "suggestion": "하도급업체의 공기 청구를 확인하거나 발주자에게 동일한 연장을 요청하십시오"
+    },
+    "pay_app_over_complete": {
+      "fail": "{line} 항목은 이번 기간 이후 예정 금액의 {percent}%에 도달합니다 ({scheduled} 중 {completed})",
+      "suggestion": "이번 기간 금액을 낮추거나 예정 금액을 초과해 청구하는 사유를 기록하세요"
+    },
+    "pay_app_line_negative": {
+      "fail": "{line} 항목의 누계는 {completed}이(가) 되어 0보다 작습니다"
+    },
+    "pay_app_within_agreement": {
+      "fail": "기성 청구 합계 {billed}이(가) 계약 금액과 승인된 변경의 합({limit})을 초과합니다"
+    },
+    "pay_app_correct": {
+      "suggestion": "이 기성 청구의 금액을 수정하거나 승인된 변경으로 계약 금액을 늘리세요"
+    },
+    "required_documents": {
+      "fail": "필수 문서: {document} ({state})",
+      "suggestion": "서명되고 유효한 문서를 하도급 계약에 첨부하세요",
+      "states": {
+        "missing": "없음",
+        "unsigned": "서명되지 않음",
+        "expired": "만료됨"
+      }
+    },
+    "document_roles": {
+      "terms_and_conditions": "계약 조건",
+      "safety_agreement": "안전 협약",
+      "safety_plan": "안전 계획",
+      "insurance": "보험",
+      "method_statement": "시공 방법서",
+      "other": "기타 문서"
     }
   },
   "submittal": {

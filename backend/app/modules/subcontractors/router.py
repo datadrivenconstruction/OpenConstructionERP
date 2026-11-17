@@ -11,6 +11,7 @@ from __future__ import annotations
 import asyncio
 import io
 import logging
+import re
 import uuid
 from decimal import Decimal, InvalidOperation
 from pathlib import Path
@@ -64,10 +65,11 @@ from app.modules.subcontractors.change_chain import (
     SubcontractChangeService,
     SubcontractChangeUpdate,
 )
-from app.modules.subcontractors.models import LienWaiver
+from app.modules.subcontractors.models import LienWaiver, SubcontractDocument
 from app.modules.subcontractors.repository import PrimeContractReader
 from app.modules.subcontractors.schemas import (
     AgreementCreate,
+    AgreementDocumentResponse,
     AgreementResponse,
     AgreementUpdate,
     AwardEligibility,
@@ -77,6 +79,8 @@ from app.modules.subcontractors.schemas import (
     CertificateUpdate,
     ClaimSubRollupResponse,
     DismissTwinRequest,
+    DocumentPolicy,
+    DocumentPolicyResponse,
     ExpiryAlert,
     IncludePaymentApplicationsRequest,
     InsuranceExpiryEntry,
@@ -85,6 +89,7 @@ from app.modules.subcontractors.schemas import (
     LienWaiverFormFields,
     LienWaiverResponse,
     MonthlyRatingComputeRequest,
+    PayAppStatementResponse,
     PaymentApplicationCreate,
     PaymentApplicationFinanceApproval,
     PaymentApplicationLineListResponse,
@@ -102,9 +107,11 @@ from app.modules.subcontractors.schemas import (
     ProjectInsuranceDashboard,
     RatingCreate,
     RatingResponse,
+    RequiredDocumentStatus,
     RetentionLedgerEntryResponse,
     RetentionReleasePayload,
     SOVSummaryResponse,
+    StatementPreviewRequest,
     SubcontractorContactCreate,
     SubcontractorContactResponse,
     SubcontractorContactUpdate,
@@ -2069,3 +2076,269 @@ async def validate_subcontract_change(
     """Run the subcontract-change checks (owner link, amount, margin); read-only."""
     svc = await _change_service(session, user_id, change_id)
     return SubcontractorService._agreement_report_to_dict(await svc.validate(change_id))
+
+
+# ── Progress statement of a pay application ──────────────────────────────
+
+
+@router.get(
+    "/payment-applications/{payment_id}/statement",
+    response_model=PayAppStatementResponse,
+)
+async def get_pay_application_statement(
+    payment_id: uuid.UUID,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    _perm: None = Depends(RequirePermission("subcontractors.read")),
+) -> PayAppStatementResponse:
+    """Schedule-of-values statement of one pay application, and what the rules say about it.
+
+    Per line: scheduled value, previous applications, this period, total
+    completed to date, percent complete, retention and balance to finish. The
+    previous figures come from the earlier approved pay applications of the same
+    agreement only. The summary block carries the original sum, change orders,
+    completed to date, retention held, previous certified and the amount due.
+    """
+    svc = SubcontractorService(session)
+    await _verify_payment_application_project(payment_id, user_id, session, svc)
+    return PayAppStatementResponse.model_validate(await svc.pay_app_statement(payment_id))
+
+
+@router.post(
+    "/agreements/{agreement_id}/statement-preview",
+    response_model=PayAppStatementResponse,
+)
+async def preview_pay_application_statement(
+    agreement_id: uuid.UUID,
+    data: StatementPreviewRequest,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    _perm: None = Depends(RequirePermission("subcontractors.read")),
+) -> PayAppStatementResponse:
+    """The statement a new pay application would carry for the typed lines. Saves nothing."""
+    svc = SubcontractorService(session)
+    await _verify_agreement_project(agreement_id, user_id, session, svc)
+    return PayAppStatementResponse.model_validate(await svc.preview_statement(agreement_id, data))
+
+
+# ── Agreement documents and the required-documents policy ────────────────
+
+AGREEMENT_DOCUMENT_MAX_BYTES: int = 50 * 1024 * 1024
+AGREEMENT_DOCUMENTS_DIR: Path = module_uploads_dir("subcontractors", "agreement_documents")
+_ROLE_SLUG = re.compile(r"^[a-z0-9][a-z0-9_]{0,39}$")
+
+
+def _optional_date(raw: str | None, field: str):  # noqa: ANN202
+    from datetime import date as _date  # noqa: PLC0415
+
+    if not raw:
+        return None
+    try:
+        return _date.fromisoformat(raw)
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail=f"{field} is not a valid ISO date: {raw!r}",
+        ) from None
+
+
+@router.get(
+    "/agreements/{agreement_id}/documents",
+    response_model=list[AgreementDocumentResponse],
+)
+async def list_agreement_documents(
+    agreement_id: uuid.UUID,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    _perm: None = Depends(RequirePermission("subcontractors.read")),
+) -> list[AgreementDocumentResponse]:
+    """Files attached to a subcontract agreement, newest first."""
+    svc = SubcontractorService(session)
+    await _verify_agreement_project(agreement_id, user_id, session, svc)
+    rows = await svc.agreement_documents.list_for_agreement(agreement_id)
+    return [AgreementDocumentResponse.model_validate(r) for r in rows]
+
+
+@router.post(
+    "/agreements/{agreement_id}/documents/upload",
+    response_model=AgreementDocumentResponse,
+    status_code=201,
+)
+async def upload_agreement_document(
+    agreement_id: uuid.UUID,
+    user_id: CurrentUserId,
+    session: SessionDep,
+    doc_role: str = Form(default="other"),
+    file: UploadFile = File(...),
+    title: str | None = Form(default=None),
+    signed_date: str | None = Form(default=None),
+    valid_until: str | None = Form(default=None),
+    notes: str | None = Form(default=None),
+    _perm: None = Depends(RequirePermission("subcontractors.update")),
+) -> AgreementDocumentResponse:
+    """Attach a file to an agreement under a document role.
+
+    Magic-byte gated like a lien waiver: the first bytes are sniffed against
+    :data:`ALLOWED_DOCUMENT_TYPES` (415 outside it), and the stored MIME type is
+    the detected one, never the request header.
+    """
+    role = (doc_role or "other").strip().lower()
+    if not _ROLE_SLUG.match(role):
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="invalid document role")
+    signed = _optional_date(signed_date, "signed_date")
+    until = _optional_date(valid_until, "valid_until")
+
+    raw = await file.read(AGREEMENT_DOCUMENT_MAX_BYTES + 1)
+    if len(raw) > AGREEMENT_DOCUMENT_MAX_BYTES:
+        raise HTTPException(
+            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            detail=f"file exceeds maximum size of {AGREEMENT_DOCUMENT_MAX_BYTES} bytes",
+        )
+    if not raw:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="file body is empty")
+    try:
+        detected = require_signature(
+            raw[:SIGNATURE_BYTES_REQUIRED],
+            ALLOWED_DOCUMENT_TYPES,
+            filename=file.filename,
+        )
+    except FileSignatureMismatch as exc:
+        raise HTTPException(status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE, detail=str(exc)) from exc
+
+    svc = SubcontractorService(session)
+    # IDOR-safe and before any disk write: an unknown agreement leaves no orphan file.
+    await _verify_agreement_project(agreement_id, user_id, session, svc)
+    if await svc.agreements.get_by_id(agreement_id) is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agreement not found")
+
+    ext = Path(file.filename or "document.pdf").suffix[:12] or ".pdf"
+    stored = f"{role}_{uuid.uuid4().hex[:10]}{ext}"
+    target_dir = AGREEMENT_DOCUMENTS_DIR / str(agreement_id)
+    try:
+        target_dir.mkdir(parents=True, exist_ok=True)
+        (target_dir / stored).write_bytes(raw)
+    except OSError:
+        logger.exception("Failed to persist agreement document for %s", agreement_id)
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="storage error") from None
+
+    entity = await svc.create_agreement_document(
+        agreement_id=agreement_id,
+        doc_role=role,
+        title=(title or Path(file.filename or "").stem)[:500],
+        filename=Path(file.filename or stored).name[:500],
+        document_url=f"subcontractors/agreement_documents/{agreement_id}/{stored}",
+        mime_type=mime_for_signature(detected),
+        file_size=len(raw),
+        signed_date=signed,
+        valid_until=until,
+        notes=notes,
+        uploaded_by=user_id,
+    )
+    await session.commit()
+    await session.refresh(entity)
+    return AgreementDocumentResponse.model_validate(entity)
+
+
+async def _agreement_document_or_404(
+    svc: SubcontractorService, agreement_id: uuid.UUID, document_id: uuid.UUID
+) -> SubcontractDocument:
+    entity = await svc.agreement_documents.get_by_id(document_id)
+    if entity is None or entity.agreement_id != agreement_id:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found")
+    return entity
+
+
+@router.get("/agreements/{agreement_id}/documents/{document_id}/download")
+async def download_agreement_document(
+    agreement_id: uuid.UUID,
+    document_id: uuid.UUID,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    _perm: None = Depends(RequirePermission("subcontractors.read")),
+) -> StreamingResponse:
+    """Download one attached file. The row, not the URL, decides which file is read."""
+    svc = SubcontractorService(session)
+    await _verify_agreement_project(agreement_id, user_id, session, svc)
+    entity = await _agreement_document_or_404(svc, agreement_id, document_id)
+    path = AGREEMENT_DOCUMENTS_DIR / str(agreement_id) / Path(entity.document_url).name
+    try:
+        data = await asyncio.to_thread(path.read_bytes)
+    except OSError:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="File not found") from None
+    return StreamingResponse(
+        io.BytesIO(data),
+        media_type=entity.mime_type or "application/octet-stream",
+        headers={
+            "Content-Disposition": attachment_disposition(entity.filename or path.name),
+            "X-Content-Type-Options": "nosniff",
+        },
+    )
+
+
+@router.delete("/agreements/{agreement_id}/documents/{document_id}", status_code=204)
+async def delete_agreement_document(
+    agreement_id: uuid.UUID,
+    document_id: uuid.UUID,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    _perm: None = Depends(RequirePermission("subcontractors.delete")),
+) -> None:
+    """Remove the record (the file stays on disk for audit, like a lien waiver)."""
+    svc = SubcontractorService(session)
+    await _verify_agreement_project(agreement_id, user_id, session, svc)
+    await _agreement_document_or_404(svc, agreement_id, document_id)
+    await svc.agreement_documents.delete(document_id)
+    await session.commit()
+
+
+@router.get(
+    "/agreements/{agreement_id}/required-documents",
+    response_model=RequiredDocumentStatus,
+)
+async def get_required_documents_status(
+    agreement_id: uuid.UUID,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    _perm: None = Depends(RequirePermission("subcontractors.read")),
+) -> RequiredDocumentStatus:
+    """Which required documents this agreement lacks, and whether a gap blocks."""
+    svc = SubcontractorService(session)
+    await _verify_agreement_project(agreement_id, user_id, session, svc)
+    return RequiredDocumentStatus.model_validate(await svc.required_documents_status(agreement_id))
+
+
+@router.get("/document-policy", response_model=DocumentPolicyResponse)
+async def get_document_policy(
+    session: SessionDep,
+    user_id: CurrentUserId,
+    project_id: uuid.UUID | None = Query(default=None),
+    _perm: None = Depends(RequirePermission("subcontractors.read")),
+) -> DocumentPolicyResponse:
+    """The required-documents policy, the roles the platform names, and national presets for a project."""
+    from app.modules.subcontractors.validators import DOCUMENT_ROLES  # noqa: PLC0415
+
+    svc = SubcontractorService(session)
+    if project_id is not None:
+        await verify_project_access(project_id, user_id, session)
+    policy = await svc.document_policy()
+    return DocumentPolicyResponse(
+        required=policy.required,
+        enforcement=policy.enforcement,
+        is_default=await svc.document_policy_is_default(),
+        roles=list(DOCUMENT_ROLES),
+        presets=await svc.document_presets(project_id),
+    )
+
+
+@router.put("/document-policy", response_model=DocumentPolicy)
+async def put_document_policy(
+    data: DocumentPolicy,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    _perm: None = Depends(RequirePermission("subcontractors.configure_documents")),
+) -> DocumentPolicy:
+    """Set which documents every subcontract needs and whether a gap warns or blocks."""
+    svc = SubcontractorService(session)
+    policy = await svc.set_document_policy(data, user_id)
+    await session.commit()
+    return policy

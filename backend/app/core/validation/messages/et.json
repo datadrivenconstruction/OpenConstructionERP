@@ -931,6 +931,36 @@
     "change_time_within_owner": {
       "fail": "Alltöövõtjate ajamõju muudatusel {code} on kokku {sub_days} päeva, rohkem kui tellija antud {owner_days} päeva",
       "suggestion": "Kontrollige alltöövõtjate ajanõudeid või taotlege tellijalt vastavat pikendust"
+    },
+    "pay_app_over_complete": {
+      "fail": "Rida {line} jõuab pärast seda perioodi {percent} %-ni plaanitud väärtusest ({completed} / {scheduled})",
+      "suggestion": "Vähendage selle perioodi summat või märkige põhjus, miks arveldatakse üle plaanitud väärtuse"
+    },
+    "pay_app_line_negative": {
+      "fail": "Rea {line} summa oleks seni {completed}, ehk alla nulli"
+    },
+    "pay_app_within_agreement": {
+      "fail": "Maksetaotlused kokku {billed} ületavad lepingu väärtust koos kinnitatud muudatustega ({limit})"
+    },
+    "pay_app_correct": {
+      "suggestion": "Parandage selle maksetaotluse summad või suurendage lepingu väärtust kinnitatud muudatusega"
+    },
+    "required_documents": {
+      "fail": "Nõutav dokument: {document} ({state})",
+      "suggestion": "Lisage dokument, allkirjastatud ja kehtiv, alltöövõtulepingule",
+      "states": {
+        "missing": "puudub",
+        "unsigned": "allkirjastamata",
+        "expired": "aegunud"
+      }
+    },
+    "document_roles": {
+      "terms_and_conditions": "Üldtingimused",
+      "safety_agreement": "Ohutuskokkulepe",
+      "safety_plan": "Ohutuskava",
+      "insurance": "Kindlustus",
+      "method_statement": "Töömeetod",
+      "other": "Muu dokument"
     }
   },
   "submittal": {

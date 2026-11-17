@@ -56,6 +56,8 @@ import { PrequalModal } from './PrequalModal';
 import { RatingStars } from './RatingStars';
 import { ScorecardTile } from './ScorecardTile';
 import { LienWaiverPanel } from './LienWaiverPanel';
+import { AgreementDocumentsPanel } from './AgreementDocumentsPanel';
+import { DocumentPolicyPanel } from './DocumentPolicyPanel';
 import { AwardEligibilityBanner } from './AwardEligibilityBanner';
 import { InsuranceStatusPanel } from './InsuranceStatusPanel';
 import { PaymentRowActions } from './PaymentInsuranceGate';
@@ -1304,6 +1306,9 @@ function ScopeTab({
           {agreements.map((a) => (
             <AgreementRow key={a.id} agreement={a} />
           ))}
+          <Card padding="sm">
+            <DocumentPolicyPanel projectId={agreements[0]?.project_id} />
+          </Card>
         </>
       )}
       {creating && (
@@ -1354,6 +1359,7 @@ function AgreementRow({ agreement }: { agreement: Agreement }) {
       </div>
       <LienWaiverRequirementToggle agreement={agreement} />
       <AgreementChangesSection agreementId={agreement.id} />
+      <AgreementDocumentsPanel agreement={agreement} />
       {packages.length > 0 && (
         <div className="mt-3 border-t border-border-light pt-3 space-y-1.5">
           {packages.map((wp) => (

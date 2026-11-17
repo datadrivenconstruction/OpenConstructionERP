@@ -931,6 +931,36 @@
     "change_time_within_owner": {
       "fail": "Impacturile de timp ale subcontractelor pentru {code} însumează {sub_days} zile, mai mult decât cele {owner_days} zile acordate de beneficiar",
       "suggestion": "Verificați cererile de timp ale subcontractorilor sau cereți beneficiarului o prelungire echivalentă"
+    },
+    "pay_app_over_complete": {
+      "fail": "Linia {line} atinge {percent}% din valoarea programată după această perioadă ({completed} din {scheduled})",
+      "suggestion": "Reduceți suma acestei perioade sau consemnați motivul facturării peste valoarea programată"
+    },
+    "pay_app_line_negative": {
+      "fail": "Linia {line} ar totaliza {completed} până acum, adică sub zero"
+    },
+    "pay_app_within_agreement": {
+      "fail": "Situațiile de plată însumează {billed}, peste valoarea contractului plus modificările aprobate de {limit}"
+    },
+    "pay_app_correct": {
+      "suggestion": "Corectați sumele acestei situații de plată sau măriți valoarea contractului printr-o modificare aprobată"
+    },
+    "required_documents": {
+      "fail": "Document necesar: {document} ({state})",
+      "suggestion": "Atașați documentul, semnat și valabil, la contractul de subcontractare",
+      "states": {
+        "missing": "lipsește",
+        "unsigned": "nesemnat",
+        "expired": "expirat"
+      }
+    },
+    "document_roles": {
+      "terms_and_conditions": "Termeni și condiții",
+      "safety_agreement": "Acord de securitate",
+      "safety_plan": "Plan de securitate",
+      "insurance": "Asigurare",
+      "method_statement": "Metodă de execuție",
+      "other": "Alt document"
     }
   },
   "submittal": {

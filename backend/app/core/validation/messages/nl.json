@@ -931,6 +931,36 @@
     "change_time_within_owner": {
       "fail": "De tijdseffecten van onderaannemers voor {code} bedragen samen {sub_days} dagen, meer dan de {owner_days} dagen die de opdrachtgever toekende",
       "suggestion": "Controleer de tijdsclaims van de onderaannemers of vraag de opdrachtgever om een gelijkwaardige verlenging"
+    },
+    "pay_app_over_complete": {
+      "fail": "Regel {line} bereikt na deze periode {percent}% van de geplande waarde ({completed} van {scheduled})",
+      "suggestion": "Verlaag het bedrag van deze periode of leg de reden vast voor facturering boven de geplande waarde"
+    },
+    "pay_app_line_negative": {
+      "fail": "Regel {line} zou tot nu toe {completed} bedragen, dus minder dan nul"
+    },
+    "pay_app_within_agreement": {
+      "fail": "De betalingsaanvragen bedragen samen {billed}, meer dan de overeenkomstwaarde plus goedgekeurde meerwerken van {limit}"
+    },
+    "pay_app_correct": {
+      "suggestion": "Corrigeer de bedragen van deze betalingsaanvraag of verhoog de overeenkomstwaarde via goedgekeurd meerwerk"
+    },
+    "required_documents": {
+      "fail": "Vereist document: {document} ({state})",
+      "suggestion": "Voeg het document, ondertekend en geldig, toe aan de onderaannemingsovereenkomst",
+      "states": {
+        "missing": "ontbreekt",
+        "unsigned": "niet ondertekend",
+        "expired": "verlopen"
+      }
+    },
+    "document_roles": {
+      "terms_and_conditions": "Algemene voorwaarden",
+      "safety_agreement": "Veiligheidsovereenkomst",
+      "safety_plan": "Veiligheidsplan",
+      "insurance": "Verzekering",
+      "method_statement": "Werkmethode",
+      "other": "Overig document"
     }
   },
   "submittal": {

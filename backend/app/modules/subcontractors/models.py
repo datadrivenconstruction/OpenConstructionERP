@@ -733,6 +733,81 @@ class LienWaiver(Base):
         return f"<LienWaiver sub={self.subcontractor_id} type={self.waiver_type} amount={self.amount}>"
 
 
+class SubcontractDocument(Base):
+    """A file attached to a subcontract agreement under a document role.
+
+    The role says what the paper is (terms and conditions, safety agreement,
+    safety plan, insurance, method statement, or ``other``), which is what the
+    required-documents rule reads. The file goes in through the same
+    magic-byte-gated upload as a lien waiver; ``document_url`` is only ever
+    written by that endpoint, never taken from a request body.
+    """
+
+    __tablename__ = "oe_subcontractors_agreement_document"
+
+    agreement_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(),
+        ForeignKey("oe_subcontractors_agreement.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    # A short slug. The listed roles are the platform's own; ``other`` or any
+    # other slug is a free role a tenant may name in its required list.
+    doc_role: Mapped[str] = mapped_column(
+        String(40), nullable=False, default="other", server_default="other", index=True
+    )
+    title: Mapped[str] = mapped_column(String(500), nullable=False, default="", server_default="")
+    filename: Mapped[str] = mapped_column(String(500), nullable=False, default="", server_default="")
+    document_url: Mapped[str] = mapped_column(String(1000), nullable=False)
+    mime_type: Mapped[str | None] = mapped_column(String(120), nullable=True)
+    file_size: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    # When the paper was signed by both sides; empty for an unsigned draft.
+    signed_date: Mapped[date | None] = mapped_column(Date, nullable=True)
+    # The last day the paper is valid; empty for one that does not expire.
+    valid_until: Mapped[date | None] = mapped_column(Date, nullable=True, index=True)
+    notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+    uploaded_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
+    metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
+        "metadata",
+        JSON,
+        nullable=False,
+        default=dict,
+        server_default="{}",
+    )
+
+    def __repr__(self) -> str:
+        return f"<SubcontractDocument agreement={self.agreement_id} role={self.doc_role}>"
+
+
+class SubcontractDocumentPolicy(Base):
+    """Which documents every subcontract needs on file, and whether a gap blocks.
+
+    One row for the installation (``scope`` is always ``installation``: the
+    platform has no tenant entity, the owner of the install is the tenant). No
+    row means the built-in default list applies, in warn mode.
+    """
+
+    __tablename__ = "oe_subcontractors_document_policy"
+    __table_args__ = (UniqueConstraint("scope", name="uq_oe_subcontractors_document_policy_scope"),)
+
+    scope: Mapped[str] = mapped_column(
+        String(20), nullable=False, default="installation", server_default="installation"
+    )
+    # ``[{"role": str, "signed": bool}]``.
+    required: Mapped[list] = mapped_column(  # type: ignore[assignment]
+        JSON,
+        nullable=False,
+        default=list,
+        server_default="[]",
+    )
+    # ``warn`` reports a gap; ``block`` refuses activation and approval.
+    enforcement: Mapped[str] = mapped_column(String(10), nullable=False, default="warn", server_default="warn")
+    updated_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
+
+    def __repr__(self) -> str:
+        return f"<SubcontractDocumentPolicy {self.enforcement} required={len(self.required or [])}>"
+
+
 # OCR auto-extraction hook stub: deferred per Module 4 backend scope.
 # When implemented, parse certificate PDFs and populate Certificate fields.
 async def ocr_extract_certificate_hook(  # pragma: no cover - stub

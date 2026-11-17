@@ -931,6 +931,36 @@
     "change_time_within_owner": {
       "fail": "Wpływ podwykonawców na termin dla {code} wynosi łącznie {sub_days} dni, więcej niż {owner_days} dni przyznanych przez inwestora",
       "suggestion": "Sprawdź roszczenia podwykonawców dotyczące czasu lub poproś inwestora o odpowiednie przedłużenie"
+    },
+    "pay_app_over_complete": {
+      "fail": "Pozycja {line} osiąga po tym okresie {percent}% wartości planowanej ({completed} z {scheduled})",
+      "suggestion": "Zmniejsz kwotę tego okresu lub zapisz powód fakturowania powyżej wartości planowanej"
+    },
+    "pay_app_line_negative": {
+      "fail": "Pozycja {line} wyniosłaby dotąd {completed}, czyli mniej niż zero"
+    },
+    "pay_app_within_agreement": {
+      "fail": "Wnioski o płatność łącznie wynoszą {billed}, powyżej wartości umowy powiększonej o zatwierdzone zmiany w wysokości {limit}"
+    },
+    "pay_app_correct": {
+      "suggestion": "Popraw kwoty tego wniosku o płatność lub zwiększ wartość umowy zatwierdzoną zmianą"
+    },
+    "required_documents": {
+      "fail": "Wymagany dokument: {document} ({state})",
+      "suggestion": "Dołącz dokument, podpisany i aktualny, do umowy podwykonawczej",
+      "states": {
+        "missing": "brak",
+        "unsigned": "niepodpisany",
+        "expired": "wygasł"
+      }
+    },
+    "document_roles": {
+      "terms_and_conditions": "Warunki umowy",
+      "safety_agreement": "Umowa o bezpieczeństwie",
+      "safety_plan": "Plan bezpieczeństwa",
+      "insurance": "Ubezpieczenie",
+      "method_statement": "Opis metody wykonania",
+      "other": "Inny dokument"
     }
   },
   "submittal": {

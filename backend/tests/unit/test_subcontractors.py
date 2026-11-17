@@ -364,6 +364,14 @@ class _Repo:
         # moves to the approved gross.
         return [r for r in self.rows.values() if getattr(r, "payment_application_id", None) == payment_application_id]
 
+    async def approved_changes_total(self, _ag_id: uuid.UUID) -> Decimal:
+        # The progress statement reads what approved changes added to the value.
+        return Decimal("0")
+
+    async def get_installation(self) -> Any:
+        # The required-documents policy: no row, so the default list applies.
+        return None
+
     async def next_application_number(self, _ag_id: uuid.UUID) -> str:
         self._counter += 1
         return f"PA-{self._counter:04d}"
@@ -416,6 +424,8 @@ def _make_service() -> Any:
     svc.payment_lines = _Repo()
     svc.retention = _Repo()
     svc.ratings = _Repo()
+    svc.agreement_documents = _Repo()
+    svc.document_policy_repo = _Repo()
     return svc
 
 
@@ -561,6 +571,7 @@ async def test_a_line_approved_below_its_claim_is_what_is_paid_and_what_retentio
         PaymentApplicationCreate,
         PaymentApplicationLineCreate,
         SubcontractorCreate,
+        WorkPackageCreate,
     )
 
     svc = _make_service()
@@ -585,12 +596,15 @@ async def test_a_line_approved_below_its_claim_is_what_is_paid_and_what_retentio
             ),
         )
         await svc.update_agreement(agreement.id, AgreementUpdate(status="active"))
+        package = await svc.create_work_package(
+            WorkPackageCreate(agreement_id=agreement.id, name="Footings", planned_value=Decimal("5000"))
+        )
         pa = await svc.submit_payment_application(
             PaymentApplicationCreate(
                 agreement_id=agreement.id,
                 gross_amount=Decimal("2000"),
                 currency="EUR",
-                lines=[PaymentApplicationLineCreate(work_package_id=uuid.uuid4(), claimed_amount=Decimal("2000"))],
+                lines=[PaymentApplicationLineCreate(work_package_id=package.id, claimed_amount=Decimal("2000"))],
             ),
             user_id="u1",
         )

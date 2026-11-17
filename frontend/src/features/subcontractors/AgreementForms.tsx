@@ -28,8 +28,10 @@ import {
 } from '@/features/contracts/ContractPaymentTerms';
 import {
   createAgreement,
+  listWorkPackages,
   submitPaymentApplication,
   updateAgreement,
+  type SubmitPaymentApplicationLine,
   type Agreement,
 } from './api';
 import { gateErrorMessage } from './complianceReasons';
@@ -385,10 +387,25 @@ export function PaymentApplicationFormModal({
   const [gross, setGross] = useState('');
   const [periodStart, setPeriodStart] = useState('');
   const [periodEnd, setPeriodEnd] = useState('');
+  // Per schedule-of-values line: what is billed this period, as an amount or as a percent of the scheduled value.
+  const [amounts, setAmounts] = useState<Record<string, string>>({});
+  const [percents, setPercents] = useState<Record<string, string>>({});
+  const [overageReason, setOverageReason] = useState('');
+  const packagesQ = useQuery({
+    queryKey: ['subcontractors', 'workPackages', agreement.id],
+    queryFn: () => listWorkPackages(agreement.id),
+  });
+  const packages = packagesQ.data ?? [];
+  const lineAmount = (id: string, planned: number): number => {
+    if (percents[id]) return round2((planned * toNum(percents[id])) / 100);
+    return toNum(amounts[id]);
+  };
+  const linesGross = round2(packages.reduce((sum, wp) => sum + lineAmount(wp.id, toNum(wp.planned_value)), 0));
+  const hasLines = packages.some((wp) => !!percents[wp.id] || !!amounts[wp.id]);
 
   // What the server will book, shown before it is sent: retention at the
   // agreement's rate on the gross, and the net after it.
-  const grossNum = toNum(gross);
+  const grossNum = hasLines ? linesGross : toNum(gross);
   const retention = round2((grossNum * toNum(agreement.retention_percent)) / 100);
   const net = round2(grossNum - retention);
 
@@ -400,6 +417,16 @@ export function PaymentApplicationFormModal({
         period_start: periodStart || undefined,
         period_end: periodEnd || undefined,
         currency: agreement.currency || undefined,
+        lines: hasLines
+          ? packages
+              .filter((wp) => !!percents[wp.id] || !!amounts[wp.id])
+              .map((wp): SubmitPaymentApplicationLine =>
+                percents[wp.id]
+                  ? { work_package_id: wp.id, this_period_percent: percents[wp.id] }
+                  : { work_package_id: wp.id, claimed_amount: amounts[wp.id] },
+              )
+          : undefined,
+        overage_reason: overageReason.trim() || undefined,
       }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['subcontractors'] });
@@ -459,14 +486,56 @@ export function PaymentApplicationFormModal({
             type="number"
             min="0"
             step="0.01"
-            value={gross}
+            value={hasLines ? String(linesGross) : gross}
             onChange={(e) => setGross(e.target.value)}
             onFocus={selectOnFocus}
+            disabled={hasLines}
             className={inputCls}
             data-testid="pay-app-gross"
           />
         </WideModalField>
       </WideModalSection>
+      {packages.length > 0 && (
+        <WideModalSection title={t('subcontractors.sov_lines_title', { defaultValue: 'Schedule of values, this period' })} columns={1}>
+          <div className="space-y-1.5" data-testid="pay-app-sov-lines">
+            {packages.map((wp) => (
+              <div key={wp.id} className="grid grid-cols-[1fr_7rem_5rem] items-center gap-2 text-xs">
+                <span className="truncate">{wp.name}</span>
+                <input
+                  type="number"
+                  step="0.01"
+                  className={inputCls}
+                  value={percents[wp.id] ? String(lineAmount(wp.id, toNum(wp.planned_value))) : (amounts[wp.id] ?? '')}
+                  disabled={!!percents[wp.id]}
+                  onChange={(e) => setAmounts((m) => ({ ...m, [wp.id]: e.target.value }))}
+                  onFocus={selectOnFocus}
+                  aria-label={t('subcontractors.sov_line_amount', { defaultValue: 'Amount this period' })}
+                  data-testid={`sov-amount-${wp.id}`}
+                />
+                <input
+                  type="number"
+                  step="0.01"
+                  className={inputCls}
+                  value={percents[wp.id] ?? ''}
+                  placeholder="%"
+                  onChange={(e) => setPercents((m) => ({ ...m, [wp.id]: e.target.value }))}
+                  onFocus={selectOnFocus}
+                  aria-label={t('subcontractors.sov_line_percent', { defaultValue: 'Percent of scheduled value this period' })}
+                  data-testid={`sov-percent-${wp.id}`}
+                />
+              </div>
+            ))}
+          </div>
+          <WideModalField label={t('subcontractors.overage_reason', { defaultValue: 'Reason for billing above the scheduled value' })} span={2}>
+            <input
+              className={inputCls}
+              value={overageReason}
+              onChange={(e) => setOverageReason(e.target.value)}
+              data-testid="pay-app-overage-reason"
+            />
+          </WideModalField>
+        </WideModalSection>
+      )}
       <dl className="mt-2 space-y-1 text-sm" data-testid="pay-app-preview">
         <div className="flex justify-between">
           <dt className="text-content-secondary">

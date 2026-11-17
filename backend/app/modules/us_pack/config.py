@@ -283,6 +283,29 @@ PACK_CONFIG: dict[str, Any] = {
                 "source": "industry_practice",
                 "statute_reference": "AIA A201-2017 § 9.3.1",
                 "effective_date": "2017",
+                # Optional subcontract document roles a US general contractor
+                # often asks for. Offered as presets on the document policy;
+                # nothing is required until the tenant adds one to its list.
+                "document_presets": [
+                    {
+                        "role": "osha_safety_program",
+                        "signed": False,
+                        "label": "OSHA safety and health program",
+                        "reference": "29 CFR 1926.20",
+                    },
+                    {
+                        "role": "osha_training_records",
+                        "signed": False,
+                        "label": "OSHA training records",
+                        "reference": "29 CFR 1926.21",
+                    },
+                    {
+                        "role": "w9_tax_form",
+                        "signed": True,
+                        "label": "IRS Form W-9",
+                        "reference": "IRS Form W-9",
+                    },
+                ],
                 "requirements": [
                     {
                         "code": "insurance_certificate",

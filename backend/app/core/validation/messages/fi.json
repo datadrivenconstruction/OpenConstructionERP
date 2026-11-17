@@ -931,6 +931,36 @@
     "change_time_within_owner": {
       "fail": "Aliurakoitsijoiden aikavaikutukset kohteessa {code} ovat yhteensä {sub_days} päivää, enemmän kuin tilaajan myöntämät {owner_days} päivää",
       "suggestion": "Tarkista aliurakoitsijoiden aikavaatimukset tai pyydä tilaajalta vastaava jatkoaika"
+    },
+    "pay_app_over_complete": {
+      "fail": "Rivi {line} saavuttaa tämän jakson jälkeen {percent} % suunnitellusta arvostaan ({completed} / {scheduled})",
+      "suggestion": "Pienennä tämän jakson summaa tai kirjaa syy laskutukseen suunnitellun arvon yli"
+    },
+    "pay_app_line_negative": {
+      "fail": "Rivin {line} summa olisi tähän mennessä {completed}, eli alle nollan"
+    },
+    "pay_app_within_agreement": {
+      "fail": "Maksuerät yhteensä {billed}, mikä ylittää sopimusarvon ja hyväksytyt muutokset ({limit})"
+    },
+    "pay_app_correct": {
+      "suggestion": "Korjaa tämän maksuerän summat tai korota sopimusarvoa hyväksytyllä muutoksella"
+    },
+    "required_documents": {
+      "fail": "Vaadittu asiakirja: {document} ({state})",
+      "suggestion": "Liitä asiakirja, allekirjoitettuna ja voimassa olevana, alihankintasopimukseen",
+      "states": {
+        "missing": "puuttuu",
+        "unsigned": "allekirjoittamaton",
+        "expired": "vanhentunut"
+      }
+    },
+    "document_roles": {
+      "terms_and_conditions": "Sopimusehdot",
+      "safety_agreement": "Turvallisuussopimus",
+      "safety_plan": "Turvallisuussuunnitelma",
+      "insurance": "Vakuutus",
+      "method_statement": "Työselostus",
+      "other": "Muu asiakirja"
     }
   },
   "submittal": {

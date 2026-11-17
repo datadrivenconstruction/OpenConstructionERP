@@ -31,5 +31,7 @@ def register_subcontractors_permissions() -> None:
             "subcontractors.override_insurance": Role.MANAGER,
             # Approving a subcontract change moves the agreement value and the commitment.
             "subcontractors.approve_change": Role.MANAGER,
+            # Which documents every subcontract needs on file, and whether a gap blocks.
+            "subcontractors.configure_documents": Role.MANAGER,
         },
     )

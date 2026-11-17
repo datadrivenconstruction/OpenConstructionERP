@@ -931,6 +931,36 @@
     "change_time_within_owner": {
       "fail": "Tác động thời gian của các thầu phụ cho {code} tổng cộng {sub_days} ngày, nhiều hơn {owner_days} ngày chủ đầu tư đã chấp thuận",
       "suggestion": "Kiểm tra các yêu cầu về thời gian của thầu phụ hoặc đề nghị chủ đầu tư gia hạn tương ứng"
+    },
+    "pay_app_over_complete": {
+      "fail": "Hạng mục {line} sau kỳ này đạt {percent}% giá trị theo lịch ({completed} trên {scheduled})",
+      "suggestion": "Giảm số tiền của kỳ này hoặc ghi lại lý do thanh toán vượt giá trị theo lịch"
+    },
+    "pay_app_line_negative": {
+      "fail": "Hạng mục {line} sẽ có tổng lũy kế {completed}, tức là nhỏ hơn không"
+    },
+    "pay_app_within_agreement": {
+      "fail": "Các đề nghị thanh toán cộng lại là {billed}, vượt giá trị hợp đồng cộng các thay đổi đã duyệt ({limit})"
+    },
+    "pay_app_correct": {
+      "suggestion": "Sửa số tiền trong đề nghị thanh toán này hoặc tăng giá trị hợp đồng bằng một thay đổi đã duyệt"
+    },
+    "required_documents": {
+      "fail": "Tài liệu bắt buộc: {document} ({state})",
+      "suggestion": "Đính kèm tài liệu, đã ký và còn hiệu lực, vào hợp đồng thầu phụ",
+      "states": {
+        "missing": "thiếu",
+        "unsigned": "chưa ký",
+        "expired": "hết hạn"
+      }
+    },
+    "document_roles": {
+      "terms_and_conditions": "Điều khoản và điều kiện",
+      "safety_agreement": "Thỏa thuận an toàn",
+      "safety_plan": "Kế hoạch an toàn",
+      "insurance": "Bảo hiểm",
+      "method_statement": "Biện pháp thi công",
+      "other": "Tài liệu khác"
     }
   },
   "submittal": {

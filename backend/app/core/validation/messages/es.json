@@ -949,6 +949,36 @@
     "change_time_within_owner": {
       "fail": "Los impactos de plazo de los subcontratos de {code} suman {sub_days} días, más de los {owner_days} días concedidos por el propietario",
       "suggestion": "Revise las reclamaciones de plazo de los subcontratistas o solicite al propietario una ampliación equivalente"
+    },
+    "pay_app_over_complete": {
+      "fail": "La partida {line} alcanza el {percent} % de su valor programado tras este periodo ({completed} de {scheduled})",
+      "suggestion": "Reduzca el importe de este periodo o registre el motivo de facturar por encima del valor programado"
+    },
+    "pay_app_line_negative": {
+      "fail": "La partida {line} sumaría {completed} a la fecha, por debajo de cero"
+    },
+    "pay_app_within_agreement": {
+      "fail": "Las certificaciones suman {billed}, por encima del valor del contrato más las modificaciones aprobadas de {limit}"
+    },
+    "pay_app_correct": {
+      "suggestion": "Corrija los importes de esta certificación o aumente el valor del contrato mediante una modificación aprobada"
+    },
+    "required_documents": {
+      "fail": "Documento requerido: {document} ({state})",
+      "suggestion": "Adjunte el documento, firmado y vigente, al contrato de subcontratación",
+      "states": {
+        "missing": "falta",
+        "unsigned": "sin firmar",
+        "expired": "vencido"
+      }
+    },
+    "document_roles": {
+      "terms_and_conditions": "Términos y condiciones",
+      "safety_agreement": "Acuerdo de seguridad",
+      "safety_plan": "Plan de seguridad",
+      "insurance": "Seguro",
+      "method_statement": "Método de trabajo",
+      "other": "Otro documento"
     }
   },
   "submittal": {

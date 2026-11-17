@@ -12291,6 +12291,119 @@ class SubcontractContactLinked(_SubcontractRule):
     check_name = "check_contact_linked"
 
 
+# ── Subcontract pay applications (progress billing) and required documents ──
+#
+# One pay application is judged against the schedule of values of its
+# agreement: a line over 100 percent warns (the person says why and goes on),
+# a negative cumulative or a total above the agreement value plus approved
+# variations is an error. Required documents warn by default and block when
+# the tenant's policy says so, at agreement activation and at pay application
+# approval.
+
+
+class _SubcontractPayAppRule(_SubcontractRule):
+    """Pay application rule: shares one suggestion where the fix is the same."""
+
+    def _message_key(self, suffix: str) -> str:
+        if suffix == "suggestion" and self.severity is Severity.ERROR:
+            return "subcontract.pay_app_correct.suggestion"
+        return super()._message_key(suffix)
+
+
+class SubcontractPayAppLineOverComplete(_SubcontractPayAppRule):
+    """This period must not take a schedule-of-values line above 100 percent."""
+
+    rule_id = "subcontract.pay_app_over_complete"
+    name = "Subcontract Pay Application Line Over 100 Percent"
+    severity = Severity.WARNING
+    category = RuleCategory.CONSISTENCY
+    description = "Flags a line whose total completed to date exceeds its scheduled value, unless a reason is recorded."
+    check_name = "check_pay_app_line_over_complete"
+
+
+class SubcontractPayAppLineNegative(_SubcontractPayAppRule):
+    """The cumulative amount of a line cannot go negative."""
+
+    rule_id = "subcontract.pay_app_line_negative"
+    name = "Subcontract Pay Application Line Not Negative"
+    severity = Severity.ERROR
+    category = RuleCategory.CONSISTENCY
+    description = "Flags a line whose total completed to date is below zero."
+    check_name = "check_pay_app_line_negative"
+
+
+class SubcontractPayAppWithinAgreement(_SubcontractPayAppRule):
+    """All pay applications together stay within the agreement value plus approved variations."""
+
+    rule_id = "subcontract.pay_app_within_agreement"
+    name = "Subcontract Pay Applications Within Agreement Value"
+    severity = Severity.ERROR
+    category = RuleCategory.CONSISTENCY
+    description = "Flags pay applications that together bill more than the agreement value plus approved variations."
+    check_name = "check_pay_app_within_agreement"
+
+
+class SubcontractRequiredDocuments(ValidationRule):
+    """A required subcontract document must be on file, signed where asked, and not expired.
+
+    Warns by default; the payload's ``enforcement`` set to ``block`` turns each
+    finding into an error, which stops the agreement going live or the pay
+    application being approved.
+    """
+
+    rule_id = "subcontract.required_documents"
+    name = "Subcontract Required Documents"
+    severity = Severity.WARNING
+    category = RuleCategory.COMPLIANCE
+    standard = "subcontract"
+    description = "Flags a required subcontract document that is missing, unsigned or expired."
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        locale = _get_locale(context)
+        payload = context.data if isinstance(context.data, dict) else {}
+        if not payload or not payload.get("required_documents"):
+            return []
+        from app.modules.subcontractors import validators as sub_checks
+
+        severity = Severity.ERROR if payload.get("enforcement") == "block" else Severity.WARNING
+        findings = sub_checks.check_required_documents(payload)
+        if not findings:
+            return [
+                RuleResult(
+                    rule_id=self.rule_id,
+                    rule_name=self.name,
+                    severity=severity,
+                    category=self.category,
+                    passed=True,
+                    message=_ok(locale),
+                )
+            ]
+        results: list[RuleResult] = []
+        for finding in findings:
+            role = finding.params["role"]
+            role_key = f"subcontract.document_roles.{role}"
+            document = translate(role_key, locale=locale)
+            if document == role_key:
+                document = role.replace("_", " ")
+            state = translate(f"subcontract.required_documents.states.{finding.params['state']}", locale=locale)
+            results.append(
+                RuleResult(
+                    rule_id=self.rule_id,
+                    rule_name=self.name,
+                    severity=severity,
+                    category=self.category,
+                    passed=False,
+                    message=translate(
+                        "subcontract.required_documents.fail", locale=locale, document=document, state=state
+                    ),
+                    element_ref=finding.element_ref,
+                    details=dict(finding.details),
+                    suggestion=translate("subcontract.required_documents.suggestion", locale=locale),
+                )
+            )
+        return results
+
+
 # ── Submittals (submission gate) ────────────────────────────────────────────
 #
 # Submission is where a submittal stops being a draft and starts consuming
@@ -13083,6 +13196,11 @@ def register_builtin_rules() -> None:
         (SubcontractInsuranceValidAtStart(), ["subcontract"]),
         (SubcontractUnlinkedContractTwin(), ["subcontract"]),
         (SubcontractContactLinked(), ["subcontract"]),
+        (SubcontractRequiredDocuments(), ["subcontract", "subcontract_pay_app"]),
+        # Subcontract pay applications (progress billing against the schedule of values)
+        (SubcontractPayAppLineOverComplete(), ["subcontract_pay_app"]),
+        (SubcontractPayAppLineNegative(), ["subcontract_pay_app"]),
+        (SubcontractPayAppWithinAgreement(), ["subcontract_pay_app"]),
         # Subcontract changes (owner change -> subcontract change chain)
         (SubcontractChangeOwnerLinked(), ["subcontract_change"]),
         (SubcontractChangeAmountSet(), ["subcontract_change"]),

@@ -931,6 +931,36 @@
     "change_time_within_owner": {
       "fail": "{code}-এর সাবকন্ট্রাক্ট সময়ের প্রভাব মোট {sub_days} দিন, মালিকের দেওয়া {owner_days} দিনের চেয়ে বেশি",
       "suggestion": "সাবকন্ট্রাক্টরদের সময়ের দাবি পরীক্ষা করুন অথবা মালিকের কাছে সমপরিমাণ সময় বাড়ানোর অনুরোধ করুন"
+    },
+    "pay_app_over_complete": {
+      "fail": "লাইন {line} এই সময়ের পর নির্ধারিত মূল্যের {percent}% এ পৌঁছায় ({scheduled} এর মধ্যে {completed})",
+      "suggestion": "এই সময়ের পরিমাণ কমান অথবা নির্ধারিত মূল্যের বেশি বিল করার কারণ লিখে রাখুন"
+    },
+    "pay_app_line_negative": {
+      "fail": "লাইন {line} এ পর্যন্ত মোট {completed} হতো, অর্থাৎ শূন্যের নিচে"
+    },
+    "pay_app_within_agreement": {
+      "fail": "পেমেন্ট আবেদনগুলি মিলিয়ে {billed}, যা চুক্তির মূল্য ও অনুমোদিত পরিবর্তন ({limit}) এর চেয়ে বেশি"
+    },
+    "pay_app_correct": {
+      "suggestion": "এই পেমেন্ট আবেদনের পরিমাণ সংশোধন করুন অথবা অনুমোদিত পরিবর্তনের মাধ্যমে চুক্তির মূল্য বাড়ান"
+    },
+    "required_documents": {
+      "fail": "প্রয়োজনীয় নথি: {document} ({state})",
+      "suggestion": "নথিটি, স্বাক্ষরিত ও বৈধ অবস্থায়, সাব-কন্ট্রাক্ট চুক্তির সাথে সংযুক্ত করুন",
+      "states": {
+        "missing": "নেই",
+        "unsigned": "স্বাক্ষরিত নয়",
+        "expired": "মেয়াদোত্তীর্ণ"
+      }
+    },
+    "document_roles": {
+      "terms_and_conditions": "শর্তাবলি",
+      "safety_agreement": "নিরাপত্তা চুক্তি",
+      "safety_plan": "নিরাপত্তা পরিকল্পনা",
+      "insurance": "বিমা",
+      "method_statement": "কাজের পদ্ধতির বিবরণ",
+      "other": "অন্যান্য নথি"
     }
   },
   "submittal": {

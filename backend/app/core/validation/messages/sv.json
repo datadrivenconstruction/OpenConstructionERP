@@ -931,6 +931,36 @@
     "change_time_within_owner": {
       "fail": "Underentreprenörernas tidspåverkan för {code} uppgår till {sub_days} dagar, mer än de {owner_days} dagar beställaren beviljat",
       "suggestion": "Kontrollera underentreprenörernas tidskrav eller begär motsvarande förlängning från beställaren"
+    },
+    "pay_app_over_complete": {
+      "fail": "Rad {line} når {percent} % av sitt planerade värde efter denna period ({completed} av {scheduled})",
+      "suggestion": "Sänk beloppet för denna period eller ange skälet till fakturering över det planerade värdet"
+    },
+    "pay_app_line_negative": {
+      "fail": "Rad {line} skulle uppgå till {completed} hittills, alltså under noll"
+    },
+    "pay_app_within_agreement": {
+      "fail": "Betalningsansökningarna uppgår tillsammans till {billed}, över avtalsvärdet plus godkända ändringar på {limit}"
+    },
+    "pay_app_correct": {
+      "suggestion": "Korrigera beloppen i denna betalningsansökan eller höj avtalsvärdet genom en godkänd ändring"
+    },
+    "required_documents": {
+      "fail": "Obligatoriskt dokument: {document} ({state})",
+      "suggestion": "Bifoga dokumentet, undertecknat och giltigt, till underentreprenadavtalet",
+      "states": {
+        "missing": "saknas",
+        "unsigned": "ej undertecknat",
+        "expired": "utgånget"
+      }
+    },
+    "document_roles": {
+      "terms_and_conditions": "Avtalsvillkor",
+      "safety_agreement": "Säkerhetsavtal",
+      "safety_plan": "Säkerhetsplan",
+      "insurance": "Försäkring",
+      "method_statement": "Metodbeskrivning",
+      "other": "Annat dokument"
     }
   },
   "submittal": {

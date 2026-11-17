@@ -6,7 +6,7 @@
  * Backed by /api/v1/subcontractors/ — see backend/app/modules/subcontractors/router.py
  */
 
-import { apiGet, apiPost, apiPatch, apiDelete, isTruncated, type Page } from '@/shared/lib/api';
+import { apiGet, apiPost, apiPatch, apiPut, apiDelete, isTruncated, type Page } from '@/shared/lib/api';
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
 
@@ -419,12 +419,22 @@ export function listPaymentApplications(params: {
   return apiGet<PaymentApplication[]>(`/v1/subcontractors/payment-applications/?${qs.toString()}`);
 }
 
+/** One line of the schedule of values on a new pay application: an amount, or a percent of the scheduled value. */
+export interface SubmitPaymentApplicationLine {
+  work_package_id: string;
+  claimed_amount?: string;
+  this_period_percent?: string;
+}
+
 export interface SubmitPaymentApplicationPayload {
   agreement_id: string;
   gross_amount: string;
   period_start?: string;
   period_end?: string;
   currency?: string;
+  lines?: SubmitPaymentApplicationLine[];
+  /** Why a line is billed above its scheduled value. */
+  overage_reason?: string;
 }
 
 /** Submit a payment application; the server works out retention and net. */
@@ -994,4 +1004,149 @@ export function getProjectInsurance(projectId: string): Promise<ProjectInsurance
 
 export function runInsuranceAlerts(): Promise<{ sent: number }> {
   return apiPost<{ sent: number }>('/v1/subcontractors/insurance/alerts/run', {});
+}
+
+/* ── Progress statement (schedule of values) ───────────────────────────── */
+
+export interface StatementLine {
+  work_package_id: string;
+  name: string;
+  scheduled_value: string;
+  previous: string;
+  this_period: string;
+  this_period_percent: string | null;
+  total_completed: string;
+  percent_complete: string | null;
+  retention: string;
+  balance_to_finish: string;
+}
+
+export interface StatementSummary {
+  original_contract_sum: string;
+  change_orders: string;
+  contract_sum_to_date: string;
+  scheduled_total: string;
+  previous_completed: string;
+  this_period: string;
+  completed_to_date: string;
+  percent_complete: string | null;
+  retention_percent: string;
+  retention_held: string;
+  previous_certified: string;
+  current_due: string;
+  balance_to_finish: string;
+  previous_gross_billed: string;
+  this_gross: string;
+}
+
+export interface StatementFinding {
+  rule_id: string;
+  severity: 'error' | 'warning' | 'info';
+  passed: boolean;
+  message: string;
+  element_ref?: string | null;
+  suggestion?: string | null;
+}
+
+export interface PayAppStatement {
+  payment_application_id: string | null;
+  agreement_id: string;
+  application_number: string;
+  status: string;
+  period_start: string | null;
+  period_end: string | null;
+  currency: string;
+  override_reason: string | null;
+  lines: StatementLine[];
+  summary: StatementSummary;
+  findings: StatementFinding[];
+}
+
+/** The statement of a saved pay application, with what the rules say about it. */
+export function getPayAppStatement(paymentId: string): Promise<PayAppStatement> {
+  return apiGet<PayAppStatement>(`/v1/subcontractors/payment-applications/${paymentId}/statement`);
+}
+
+/** The statement a pay application would carry for the lines being typed. Saves nothing. */
+export function previewPayAppStatement(
+  agreementId: string,
+  body: { lines: SubmitPaymentApplicationLine[]; overage_reason?: string },
+): Promise<PayAppStatement> {
+  return apiPost<PayAppStatement>(`/v1/subcontractors/agreements/${agreementId}/statement-preview`, body);
+}
+
+/* ── Agreement documents and the required list ─────────────────────────── */
+
+export const DOCUMENT_ROLES = [
+  'terms_and_conditions',
+  'safety_agreement',
+  'safety_plan',
+  'insurance',
+  'method_statement',
+  'other',
+] as const;
+
+export interface AgreementDocument {
+  id: string;
+  agreement_id: string;
+  doc_role: string;
+  title: string;
+  filename: string;
+  mime_type: string | null;
+  file_size: number | null;
+  signed_date: string | null;
+  valid_until: string | null;
+  notes: string | null;
+  created_at: string;
+}
+
+export interface RequiredDocument {
+  role: string;
+  signed: boolean;
+}
+
+export interface RequiredDocumentGap {
+  role: string;
+  /** 'missing' | 'unsigned' | 'expired' */
+  state: string;
+}
+
+export interface RequiredDocumentStatus {
+  agreement_id: string;
+  enforcement: 'warn' | 'block';
+  required: RequiredDocument[];
+  gaps: RequiredDocumentGap[];
+}
+
+export interface DocumentPolicy {
+  required: RequiredDocument[];
+  enforcement: 'warn' | 'block';
+}
+
+export interface DocumentPolicyView extends DocumentPolicy {
+  is_default: boolean;
+  roles: string[];
+  /** Optional presets the project's national pack offers; empty elsewhere. */
+  presets: { role: string; signed?: boolean; label?: string; reference?: string }[];
+}
+
+export function listAgreementDocuments(agreementId: string): Promise<AgreementDocument[]> {
+  return apiGet<AgreementDocument[]>(`/v1/subcontractors/agreements/${agreementId}/documents`);
+}
+
+export function deleteAgreementDocument(agreementId: string, documentId: string): Promise<void> {
+  return apiDelete(`/v1/subcontractors/agreements/${agreementId}/documents/${documentId}`);
+}
+
+export function getRequiredDocumentStatus(agreementId: string): Promise<RequiredDocumentStatus> {
+  return apiGet<RequiredDocumentStatus>(`/v1/subcontractors/agreements/${agreementId}/required-documents`);
+}
+
+export function getDocumentPolicy(projectId?: string): Promise<DocumentPolicyView> {
+  const qs = projectId ? `?project_id=${encodeURIComponent(projectId)}` : '';
+  return apiGet<DocumentPolicyView>(`/v1/subcontractors/document-policy${qs}`);
+}
+
+export function putDocumentPolicy(policy: DocumentPolicy): Promise<DocumentPolicy> {
+  return apiPut<DocumentPolicy>('/v1/subcontractors/document-policy', policy);
 }

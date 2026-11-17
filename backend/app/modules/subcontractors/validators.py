@@ -918,3 +918,163 @@ def check_change_time_within_owner(change: dict[str, Any]) -> list[Finding]:
             details={"sub_days": int(linked), "owner_days": int(owner_days)},
         )
     ]
+
+
+# ── Progress billing checks (one pay application against the schedule of values) ──
+#
+# These read the statement of one pay application: the payload the service
+# builds from :func:`app.modules.subcontractors.progress_billing.build_statement`
+# plus the agreement's contract sum and what earlier approved applications
+# already billed. Money arrives as Decimal strings.
+
+
+def _pay_app_ref(payload: dict[str, Any]) -> str:
+    return str(payload.get("application_number") or payload.get("id") or "?")
+
+
+def _statement_lines(payload: dict[str, Any]) -> list[dict[str, Any]]:
+    lines = payload.get("lines")
+    return [line for line in lines if isinstance(line, dict)] if isinstance(lines, list) else []
+
+
+def check_pay_app_line_over_complete(payload: dict[str, Any]) -> list[Finding]:
+    """This period must not push a line above 100 percent of its scheduled value.
+
+    A warning, not a stop: a line is sometimes legitimately billed over its
+    scheduled value (a quantity overrun the change order has not caught up
+    with). The person submitting says why in ``override_reason``; with a reason
+    recorded the line is accepted and the check passes.
+    """
+    if str(payload.get("override_reason") or "").strip():
+        return []
+    findings: list[Finding] = []
+    for index, line in enumerate(_statement_lines(payload)):
+        scheduled = _money(line.get("scheduled_value"))
+        completed = _money(line.get("total_completed"))
+        if _money(line.get("this_period")) <= 0 or completed - scheduled <= MONEY_TOLERANCE:
+            continue
+        percent = (completed * 100 / scheduled).quantize(Decimal("0.01")) if scheduled > 0 else None
+        findings.append(
+            Finding(
+                element_ref=package_label(index, line),
+                params={
+                    "line": package_label(index, line),
+                    "percent": _fmt(percent) if percent is not None else "-",
+                    "scheduled": _amount(scheduled, payload),
+                    "completed": _amount(completed, payload),
+                },
+                details={"scheduled_value": str(scheduled), "total_completed": str(completed)},
+            )
+        )
+    return findings
+
+
+def check_pay_app_line_negative(payload: dict[str, Any]) -> list[Finding]:
+    """The cumulative amount of a line cannot go below zero."""
+    findings: list[Finding] = []
+    for index, line in enumerate(_statement_lines(payload)):
+        completed = _money(line.get("total_completed"))
+        if completed >= 0:
+            continue
+        findings.append(
+            Finding(
+                element_ref=package_label(index, line),
+                params={"line": package_label(index, line), "completed": _amount(completed, payload)},
+                details={"total_completed": str(completed)},
+            )
+        )
+    return findings
+
+
+def check_pay_app_within_agreement(payload: dict[str, Any]) -> list[Finding]:
+    """All pay applications together cannot exceed the agreement value plus approved variations."""
+    limit = _money(payload.get("contract_sum_to_date"))
+    billed = _money(payload.get("previous_gross_billed")) + _money(payload.get("this_gross"))
+    # An agreement with no value has nothing to compare against; the activation
+    # rule on the contract value owns that case.
+    if limit <= 0 or billed - limit <= MONEY_TOLERANCE:
+        return []
+    return [
+        Finding(
+            element_ref=_pay_app_ref(payload),
+            params={"billed": _amount(billed, payload), "limit": _amount(limit, payload)},
+            details={"billed": str(billed), "contract_sum_to_date": str(limit)},
+        )
+    ]
+
+
+# ── Required subcontract documents ───────────────────────────────────────────
+
+#: Roles a subcontract document can carry. ``other`` is the free role; the
+#: others name the paper a general contractor usually asks every sub for.
+DOCUMENT_ROLES: tuple[str, ...] = (
+    "terms_and_conditions",
+    "safety_agreement",
+    "safety_plan",
+    "insurance",
+    "method_statement",
+    "other",
+)
+
+#: What a tenant requires until it configures its own list.
+DEFAULT_REQUIRED_DOCUMENTS: tuple[dict[str, Any], ...] = (
+    {"role": "terms_and_conditions", "signed": True},
+    {"role": "safety_plan", "signed": False},
+)
+
+
+def document_state(
+    held: list[dict[str, Any]],
+    role: str,
+    *,
+    require_signed: bool,
+    as_at: date | None,
+) -> str:
+    """``ok``, ``missing``, ``unsigned`` or ``expired`` for one required role.
+
+    The question is asked per role, not per file, so a renewal works: an expired
+    safety plan followed by a fresh one passes on the fresh one. A document that
+    expires on a date is still valid on it.
+    """
+    of_role = [doc for doc in held if str(doc.get("role") or "") == role]
+    if not of_role:
+        return "missing"
+    signed = [doc for doc in of_role if parse_date(doc.get("signed_date")) is not None] if require_signed else of_role
+    if not signed:
+        return "unsigned"
+    for doc in signed:
+        until = parse_date(doc.get("valid_until"))
+        if until is None or as_at is None or until >= as_at:
+            return "ok"
+    return "expired"
+
+
+def check_required_documents(payload: dict[str, Any]) -> list[Finding]:
+    """Every required subcontract document must be on file, signed where asked, and not expired.
+
+    The payload carries ``required_documents`` (``[{"role", "signed"}]``),
+    ``documents`` (what is on file) and ``as_of``. Nothing is required when the
+    list is empty. The checks run per role; a role the tenant lists twice is
+    judged once.
+    """
+    required = payload.get("required_documents")
+    held = [d for d in payload.get("documents") or [] if isinstance(d, dict)]
+    as_at = _as_of(payload)
+    findings: list[Finding] = []
+    seen: set[str] = set()
+    for entry in required if isinstance(required, list) else []:
+        role = str(entry.get("role") or "").strip() if isinstance(entry, dict) else ""
+        if not role or role in seen:
+            continue
+        seen.add(role)
+        state = document_state(held, role, require_signed=bool(entry.get("signed")), as_at=as_at)
+        if state == "ok":
+            continue
+        findings.append(
+            Finding(
+                element_ref=str(payload.get("title") or payload.get("application_number") or payload.get("id") or "?"),
+                params={"role": role, "state": state},
+                details={"role": role, "state": state},
+            )
+        )
+    return findings

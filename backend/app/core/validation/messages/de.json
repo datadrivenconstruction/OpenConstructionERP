@@ -949,6 +949,36 @@
     "change_time_within_owner": {
       "fail": "Die Fristverlängerungen der Nachunternehmer zu {code} betragen {sub_days} Tage, mehr als die vom Auftraggeber gewährten {owner_days} Tage",
       "suggestion": "Die Fristansprüche der Nachunternehmer prüfen oder beim Auftraggeber eine entsprechende Verlängerung beantragen"
+    },
+    "pay_app_over_complete": {
+      "fail": "Position {line} erreicht nach dieser Periode {percent} % ihres Soll-Werts ({completed} von {scheduled})",
+      "suggestion": "Den Betrag dieser Periode senken oder den Grund für die Abrechnung über dem Soll-Wert festhalten"
+    },
+    "pay_app_line_negative": {
+      "fail": "Position {line} ergäbe bis heute {completed}, also weniger als null"
+    },
+    "pay_app_within_agreement": {
+      "fail": "Die Abschlagsrechnungen ergeben zusammen {billed}, mehr als der Vertragswert zuzüglich genehmigter Nachträge von {limit}"
+    },
+    "pay_app_correct": {
+      "suggestion": "Die Beträge dieser Abschlagsrechnung korrigieren oder den Vertragswert über einen genehmigten Nachtrag erhöhen"
+    },
+    "required_documents": {
+      "fail": "Erforderliches Dokument: {document} ({state})",
+      "suggestion": "Das Dokument, unterzeichnet und gültig, dem Nachunternehmervertrag beifügen",
+      "states": {
+        "missing": "fehlt",
+        "unsigned": "nicht unterzeichnet",
+        "expired": "abgelaufen"
+      }
+    },
+    "document_roles": {
+      "terms_and_conditions": "Vertragsbedingungen",
+      "safety_agreement": "Sicherheitsvereinbarung",
+      "safety_plan": "Sicherheitsplan",
+      "insurance": "Versicherung",
+      "method_statement": "Ausführungsbeschreibung",
+      "other": "Sonstiges Dokument"
     }
   },
   "submittal": {

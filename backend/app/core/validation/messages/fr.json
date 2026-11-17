@@ -931,6 +931,36 @@
     "change_time_within_owner": {
       "fail": "Les impacts de délai des sous-traitants pour {code} totalisent {sub_days} jours, soit plus que les {owner_days} jours accordés par le maître d'ouvrage",
       "suggestion": "Vérifiez les demandes de délai des sous-traitants ou demandez au maître d'ouvrage une prolongation équivalente"
+    },
+    "pay_app_over_complete": {
+      "fail": "La ligne {line} atteint {percent} % de sa valeur prévue après cette période ({completed} sur {scheduled})",
+      "suggestion": "Réduire le montant de cette période ou consigner la raison de la facturation au-delà de la valeur prévue"
+    },
+    "pay_app_line_negative": {
+      "fail": "La ligne {line} totaliserait {completed} à ce jour, soit moins que zéro"
+    },
+    "pay_app_within_agreement": {
+      "fail": "Les situations de travaux totalisent {billed}, au-dessus de la valeur du contrat augmentée des avenants approuvés de {limit}"
+    },
+    "pay_app_correct": {
+      "suggestion": "Corriger les montants de cette situation ou relever la valeur du contrat par un avenant approuvé"
+    },
+    "required_documents": {
+      "fail": "Document requis : {document} ({state})",
+      "suggestion": "Joindre le document, signé et à jour, au contrat de sous-traitance",
+      "states": {
+        "missing": "manquant",
+        "unsigned": "non signé",
+        "expired": "expiré"
+      }
+    },
+    "document_roles": {
+      "terms_and_conditions": "Conditions générales",
+      "safety_agreement": "Accord de sécurité",
+      "safety_plan": "Plan de sécurité",
+      "insurance": "Assurance",
+      "method_statement": "Mémoire technique",
+      "other": "Autre document"
     }
   },
   "submittal": {

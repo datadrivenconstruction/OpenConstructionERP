@@ -126,6 +126,7 @@ async def test_activating_a_complete_agreement_logs_nothing(
     """The hook must stay quiet on a clean record, or the log is noise."""
     from app.modules.subcontractors.models import (
         SubcontractAgreement,
+        SubcontractDocument,
         Subcontractor,
         WorkPackage,
     )
@@ -154,6 +155,20 @@ async def test_activating_a_complete_agreement_logs_nothing(
             planned_value=Decimal("100000"),
         ),
     )
+    await session.flush()
+    from datetime import date
+
+    for role, signed in (("terms_and_conditions", date(2026, 1, 5)), ("safety_plan", None)):
+        session.add(
+            SubcontractDocument(
+                agreement_id=agreement.id,
+                doc_role=role,
+                title=role,
+                filename=f"{role}.pdf",
+                document_url=f"/x/{role}.pdf",
+                signed_date=signed,
+            ),
+        )
     await session.flush()
 
     svc = SubcontractorService(session)
@@ -412,7 +427,7 @@ def test_every_rule_id_resolves_in_all_four_locales() -> None:
         }
     rule_ids = {rid for rid in rule_ids if rid.split(".")[0] in _MESSAGE_SECTIONS}
     # 27 since subcontract.contact_linked joined the subcontract set.
-    assert len(rule_ids) == 27, f"expected 27 core rules across {_RULE_SETS}, found {len(rule_ids)}"
+    assert len(rule_ids) == 28, f"expected 28 core rules across {_RULE_SETS}, found {len(rule_ids)}"
 
     base = pathlib.Path(__file__).resolve().parents[2] / "app" / "core" / "validation" / "messages"
     docs = {loc: json.loads((base / f"{loc}.json").read_text(encoding="utf-8")) for loc in ("en", "de", "es", "ru")}

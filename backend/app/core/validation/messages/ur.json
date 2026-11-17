@@ -931,6 +931,36 @@
     "change_time_within_owner": {
       "fail": "{code} کے ذیلی ٹھیکوں کا وقتی اثر کل {sub_days} دن ہے، جو مالک کے دیے ہوئے {owner_days} دنوں سے زیادہ ہے",
       "suggestion": "ذیلی ٹھیکیداروں کے وقت کے دعوے جانچیں یا مالک سے مساوی توسیع طلب کریں"
+    },
+    "pay_app_over_complete": {
+      "fail": "لائن {line} اس مدت کے بعد اپنی طے شدہ قیمت کے {percent}% تک پہنچ جاتی ہے ({completed} از {scheduled})",
+      "suggestion": "اس مدت کی رقم کم کریں یا طے شدہ قیمت سے زیادہ بل بنانے کی وجہ درج کریں"
+    },
+    "pay_app_line_negative": {
+      "fail": "لائن {line} آج تک {completed} بنتی، یعنی صفر سے کم"
+    },
+    "pay_app_within_agreement": {
+      "fail": "ادائیگی کی درخواستیں مل کر {billed} بنتی ہیں، جو معاہدے کی قیمت اور منظور شدہ تبدیلیوں ({limit}) سے زیادہ ہے"
+    },
+    "pay_app_correct": {
+      "suggestion": "اس ادائیگی کی درخواست کی رقوم درست کریں یا منظور شدہ تبدیلی کے ذریعے معاہدے کی قیمت بڑھائیں"
+    },
+    "required_documents": {
+      "fail": "مطلوبہ دستاویز: {document} ({state})",
+      "suggestion": "دستاویز کو، دستخط شدہ اور درست، ذیلی ٹھیکے کے معاہدے کے ساتھ لگائیں",
+      "states": {
+        "missing": "غائب",
+        "unsigned": "دستخط شدہ نہیں",
+        "expired": "میعاد ختم"
+      }
+    },
+    "document_roles": {
+      "terms_and_conditions": "شرائط و ضوابط",
+      "safety_agreement": "حفاظتی معاہدہ",
+      "safety_plan": "حفاظتی منصوبہ",
+      "insurance": "انشورنس",
+      "method_statement": "طریقۂ کار کا بیان",
+      "other": "دیگر دستاویز"
     }
   },
   "submittal": {

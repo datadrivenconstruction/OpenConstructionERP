@@ -931,6 +931,36 @@
     "change_time_within_owner": {
       "fail": "مجموع الأثر الزمني لتغييرات المقاولين من الباطن في {code} هو {sub_days} يومًا، أكثر من {owner_days} يومًا منحها المالك",
       "suggestion": "راجع مطالبات المدة الزمنية للمقاولين من الباطن أو اطلب من المالك تمديدًا مماثلًا"
+    },
+    "pay_app_over_complete": {
+      "fail": "يصل البند {line} بعد هذه الفترة إلى {percent}% من قيمته المجدولة ({completed} من {scheduled})",
+      "suggestion": "خفّض مبلغ هذه الفترة أو سجّل سبب الفوترة بما يتجاوز القيمة المجدولة"
+    },
+    "pay_app_line_negative": {
+      "fail": "سيبلغ إجمالي البند {line} حتى الآن {completed}، أي أقل من الصفر"
+    },
+    "pay_app_within_agreement": {
+      "fail": "مجموع طلبات الدفع {billed}، وهو أعلى من قيمة العقد مضافًا إليها التغييرات المعتمدة ({limit})"
+    },
+    "pay_app_correct": {
+      "suggestion": "صحّح مبالغ طلب الدفع هذا أو ارفع قيمة العقد بتغيير معتمد"
+    },
+    "required_documents": {
+      "fail": "مستند مطلوب: {document} ({state})",
+      "suggestion": "أرفق المستند، موقّعًا وساريًا، بعقد المقاول من الباطن",
+      "states": {
+        "missing": "مفقود",
+        "unsigned": "غير موقّع",
+        "expired": "منتهي الصلاحية"
+      }
+    },
+    "document_roles": {
+      "terms_and_conditions": "الشروط والأحكام",
+      "safety_agreement": "اتفاقية السلامة",
+      "safety_plan": "خطة السلامة",
+      "insurance": "التأمين",
+      "method_statement": "بيان طريقة التنفيذ",
+      "other": "مستند آخر"
     }
   },
   "submittal": {
