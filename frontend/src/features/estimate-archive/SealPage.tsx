@@ -26,6 +26,7 @@ import {
 } from '@/shared/ui';
 import { getErrorMessage } from '@/shared/lib/api';
 import { archiveApi, shortHash, type Opening, type SealDetail, type SealedPosition } from './api';
+import { fmtDecimal, fmtRate, fmtStepPercent } from './format';
 import { AuditTimeline } from './AuditTimeline';
 import { OpeningModal } from './OpeningModal';
 import { OpeningsTable } from './OpeningsTable';
@@ -372,8 +373,8 @@ function ContentsTab({
                     </button>
                   </td>
                   <td className="px-2 py-1.5">{p.description}</td>
-                  <td className="px-2 py-1.5 text-end font-mono text-xs" dir="ltr">{p.quantity} {p.unit}</td>
-                  <td className="px-2 py-1.5 text-end font-mono text-xs" dir="ltr">{p.unit_rate}</td>
+                  <td className="px-2 py-1.5 text-end font-mono text-xs" dir="ltr">{fmtDecimal(p.quantity)} {p.unit}</td>
+                  <td className="px-2 py-1.5 text-end font-mono text-xs" dir="ltr">{fmtRate(p.unit_rate)}</td>
                   <td className="px-2 py-1.5 text-end"><MoneyDisplay amount={p.total} currency={seal.currency} /></td>
                   <td className="px-2 py-1.5 text-end">
                     {priced && p.resources.length > 0 && seal.status !== 'superseded' && (
@@ -390,8 +391,8 @@ function ContentsTab({
                       <td className="px-2 py-1 ps-6">
                         {r.description} <bdi dir="ltr" className="font-mono text-content-tertiary">{r.code}</bdi>
                       </td>
-                      <td className="px-2 py-1 text-end font-mono" dir="ltr">{r.consumption} {r.unit}</td>
-                      <td className="px-2 py-1 text-end font-mono" dir="ltr">{r.unit_cost}</td>
+                      <td className="px-2 py-1 text-end font-mono" dir="ltr">{fmtDecimal(r.consumption)} {r.unit}</td>
+                      <td className="px-2 py-1 text-end font-mono" dir="ltr">{fmtRate(r.unit_cost)}</td>
                       <td colSpan={2} className="px-2 py-1 text-content-tertiary">{[r.quote_ref, r.price_date].filter(Boolean).join(' · ')}</td>
                     </tr>
                   ))}
@@ -400,9 +401,14 @@ function ContentsTab({
           })}
         </tbody>
       </table>
-      <p className="mt-3 text-xs text-content-secondary">
-        {t('estimate_archive.price.markups', { defaultValue: 'Markups (sealed stack, read-only)' })}:{' '}
-        {markups.filter((m) => m.is_active).map((m) => `${m.name} ${m.percentage} %`).join(' › ')}
+      <p className="mt-3 flex flex-wrap items-center gap-1 text-xs text-content-secondary">
+        <span>{t('estimate_archive.price.markups', { defaultValue: 'Markups (sealed stack, read-only)' })}:</span>
+        {markups.filter((m) => m.is_active).map((m, i) => (
+          <span key={`${m.key}-${i}`} className="inline-flex items-center gap-1">
+            {i > 0 && <ChevronRight size={12} aria-hidden className="rtl:rotate-180" />}
+            {m.name} {fmtStepPercent(m.percentage)}
+          </span>
+        ))}
       </p>
       {pricing && (
         <PricingDrawer sealId={seal.id} position={pricing} currency={seal.currency} onClose={() => setPricing(null)} />

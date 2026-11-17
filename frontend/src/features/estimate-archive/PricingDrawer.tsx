@@ -9,7 +9,7 @@
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Plus } from 'lucide-react';
+import { ChevronRight, Plus } from 'lucide-react';
 import { Button, MoneyDisplay, SideDrawer } from '@/shared/ui';
 import { getErrorMessage } from '@/shared/lib/api';
 import {
@@ -20,6 +20,7 @@ import {
   type ResourceChange,
   type SealedPosition,
 } from './api';
+import { fmtDecimal, fmtRate, fmtStepPercent } from './format';
 
 const blankAddition = (): ResourceAddition => ({
   kind: 'other',
@@ -140,7 +141,7 @@ export function PricingDrawer({
                     <bdi dir="ltr" className="font-mono text-xs text-content-tertiary">{res.code} · {res.unit}</bdi>
                   </td>
                   <td className="px-2 py-1.5 text-end font-mono text-xs" dir="ltr">
-                    {res.consumption} × {res.unit_cost} = {sealed?.amount ?? ''}
+                    {fmtDecimal(res.consumption)} × {fmtRate(res.unit_cost)} = {fmtRate(sealed?.amount)}
                   </td>
                   <td className="px-2 py-1.5">
                     <div className="flex items-center gap-1 font-mono text-xs" dir="ltr">
@@ -161,7 +162,7 @@ export function PricingDrawer({
                           setChange(res.code, { unit_cost: e.target.value === res.unit_cost ? null : e.target.value })
                         }
                       />
-                      = {changed?.amount ?? ''}
+                      = {fmtRate(changed?.amount)}
                     </div>
                   </td>
                   <td className="px-2 py-1.5">
@@ -226,17 +227,22 @@ export function PricingDrawer({
         {r && (
           <dl className="grid grid-cols-3 gap-2 rounded-lg border border-border-light p-3 text-sm">
             <dt className="text-content-secondary">{t('estimate_archive.price.net', { defaultValue: 'Net' })}</dt>
-            <dd className="text-end font-mono" dir="ltr">{r.sealed_net}</dd>
-            <dd className="text-end font-mono" dir="ltr">{r.changed_net}</dd>
+            <dd className="text-end font-mono" dir="ltr">{fmtRate(r.sealed_net)}</dd>
+            <dd className="text-end font-mono" dir="ltr">{fmtRate(r.changed_net)}</dd>
             <dt className="text-content-secondary">
               {t('estimate_archive.price.markups', { defaultValue: 'Markups (sealed stack, read-only)' })}
             </dt>
-            <dd className="col-span-2 text-end text-xs">
-              {r.markup_steps.map((s) => `${s.name} ${s.percentage} %`).join(' › ')}
+            <dd className="col-span-2 flex flex-wrap items-center justify-end gap-1 text-xs">
+              {r.markup_steps.map((s, i) => (
+                <span key={`${s.key}-${i}`} className="inline-flex items-center gap-1">
+                  {i > 0 && <ChevronRight size={12} aria-hidden className="text-content-tertiary rtl:rotate-180" />}
+                  {s.name} {fmtStepPercent(s.percentage)}
+                </span>
+              ))}
             </dd>
             <dt className="text-content-secondary">{t('estimate_archive.price.rate', { defaultValue: 'Rate' })}</dt>
-            <dd className="text-end font-mono" dir="ltr">{r.sealed_rate}</dd>
-            <dd className="text-end font-mono font-semibold" dir="ltr">{r.original_basis_rate}</dd>
+            <dd className="text-end font-mono" dir="ltr">{fmtRate(r.sealed_rate)}</dd>
+            <dd className="text-end font-mono font-semibold" dir="ltr">{fmtRate(r.original_basis_rate)}</dd>
           </dl>
         )}
         <div className="grid gap-3 sm:grid-cols-2">
@@ -244,7 +250,7 @@ export function PricingDrawer({
             <div key={m.method} className="rounded-lg border border-border-light p-3">
               <div className="text-sm font-medium">{methodLabel(m.method)}</div>
               <div className="mt-1 font-mono text-sm" dir="ltr">
-                {m.rate} × {r?.quantity} = <MoneyDisplay amount={m.total} currency={currency} />
+                {fmtRate(m.rate)} × {fmtDecimal(r?.quantity)} = <MoneyDisplay amount={m.total} currency={currency} />
               </div>
               <Button
                 className="mt-2"
