@@ -2125,6 +2125,7 @@
       "fail": "Dự toán đã niêm phong không thể sửa hoặc xóa. Hãy niêm phong phiên bản mới thay thế."
     },
     "contents_locked": "Nội dung vẫn được niêm phong cho đến khi bắt đầu mở chính thức.",
-    "market_off": "Dự toán niêm phong không thuộc hồ sơ thị trường của dự án này."
+    "market_off": "Dự toán niêm phong không thuộc hồ sơ thị trường của dự án này.",
+    "contract_required": "Cần có hợp đồng với khách hàng trước khi niêm phong dự toán làm cơ sở hợp đồng."
   }
 }

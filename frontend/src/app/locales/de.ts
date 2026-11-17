@@ -67621,6 +67621,7 @@ const resource = {
     "estimate_archive.entry.no_seal": "Keine versiegelte Kalkulation.",
     "estimate_archive.entry.seal_award": "Auftragskalkulation versiegeln",
     "estimate_archive.entry.add_from_seal": "Aus versiegelter Kalkulation übernehmen",
+    "estimate_archive.seal_needs_contract": "Zum Versiegeln einer Kalkulation als Vertragsgrundlage wird ein Auftraggebervertrag benötigt.",
   }
 } as { translation: Record<string, string> };
 

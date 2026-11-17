@@ -64986,6 +64986,7 @@ const resource = {
     "estimate_archive.entry.no_seal": "Ingen forseglet kalkyle.",
     "estimate_archive.entry.seal_award": "Forsegl tildelingskalkylen",
     "estimate_archive.entry.add_from_seal": "Legg til fra forseglet kalkyle",
+    "estimate_archive.seal_needs_contract": "Det trengs en kundekontrakt før et overslag kan forsegles som kontraktsgrunnlag.",
   }
 } as { translation: Record<string, string> };
 

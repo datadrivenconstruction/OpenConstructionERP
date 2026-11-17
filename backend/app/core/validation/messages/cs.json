@@ -2125,6 +2125,7 @@
       "fail": "Zapečetěný rozpočet nelze změnit ani smazat. Zapečeťte novou verzi, která jej nahradí."
     },
     "contents_locked": "Obsah zůstává zapečetěn, dokud nezačne formální otevření.",
-    "market_off": "Zapečetěné rozpočty nejsou součástí tržního profilu tohoto projektu."
+    "market_off": "Zapečetěné rozpočty nejsou součástí tržního profilu tohoto projektu.",
+    "contract_required": "Před zapečetěním rozpočtu jako základu smlouvy je nutná smlouva s klientem."
   }
 }

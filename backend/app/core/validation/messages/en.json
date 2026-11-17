@@ -2125,6 +2125,7 @@
       "fail": "A sealed estimate cannot be changed or deleted. Seal a new version that supersedes it."
     },
     "contents_locked": "The contents stay sealed until a formal opening starts.",
-    "market_off": "Sealed estimates are not part of this project's market profile."
+    "market_off": "Sealed estimates are not part of this project's market profile.",
+    "contract_required": "A client contract is needed before an estimate can be sealed as the contract basis."
   }
 }

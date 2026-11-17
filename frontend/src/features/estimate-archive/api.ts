@@ -37,6 +37,7 @@ export interface Policy {
   attachment_presets: string[];
   citations: string[];
   tsa_configured: boolean;
+  has_contract: boolean;
 }
 
 export interface SealCheck {

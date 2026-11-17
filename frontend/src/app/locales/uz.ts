@@ -65918,6 +65918,7 @@ const resource = {
     "estimate_archive.entry.no_seal": "Muhrlangan smeta yoʻq.",
     "estimate_archive.entry.seal_award": "Gʻolib smetasini muhrlash",
     "estimate_archive.entry.add_from_seal": "Muhrlangan smetadan qoʻshish",
+    "estimate_archive.seal_needs_contract": "Smetani shartnoma asosi sifatida muhrlashdan oldin buyurtmachi bilan shartnoma kerak.",
   }
 } as { translation: Record<string, string> };
 

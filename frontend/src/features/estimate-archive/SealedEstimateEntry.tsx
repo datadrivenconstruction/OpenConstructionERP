@@ -27,6 +27,7 @@ function useProjectSeals(projectId: string | undefined) {
     staleTime: 60_000,
   });
   const enabled = !!policy.data?.enabled;
+  const hasContract = !!policy.data?.has_contract;
   const seals = useQuery({
     queryKey: ['estimate-archive', 'seals', projectId],
     queryFn: () => archiveApi.seals(projectId),
@@ -34,7 +35,7 @@ function useProjectSeals(projectId: string | undefined) {
     retry: false,
   });
   const live = (seals.data ?? []).filter((s) => s.status !== 'superseded');
-  return { enabled, live };
+  return { enabled, hasContract, live };
 }
 
 const newest = (rows: SealSummary[]) =>
@@ -44,7 +45,7 @@ const newest = (rows: SealSummary[]) =>
 export function SealAsBasisAction({ projectId, boqId, locked }: { projectId: string; boqId: string; locked: boolean }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { enabled, live } = useProjectSeals(projectId);
+  const { enabled, hasContract, live } = useProjectSeals(projectId);
   const [open, setOpen] = useState(false);
   if (!enabled) return null;
   const seal = newest(live.filter((s) => s.source_boq_id === boqId));
@@ -63,7 +64,18 @@ export function SealAsBasisAction({ projectId, boqId, locked }: { projectId: str
   if (!locked) return null;
   return (
     <>
-      <Button variant="secondary" onClick={() => setOpen(true)}>
+      <Button
+        variant="secondary"
+        disabled={!hasContract}
+        title={
+          hasContract
+            ? undefined
+            : t('estimate_archive.seal_needs_contract', {
+                defaultValue: 'A client contract is needed before an estimate can be sealed as the contract basis.',
+              })
+        }
+        onClick={() => setOpen(true)}
+      >
         <Lock size={14} className="mr-1" />
         {t('estimate_archive.seal_as_basis', { defaultValue: 'Seal as contract basis' })}
       </Button>

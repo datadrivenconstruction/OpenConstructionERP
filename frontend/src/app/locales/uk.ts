@@ -67133,6 +67133,7 @@ const resource = {
     "estimate_archive.entry.no_seal": "Немає опечатаного кошторису.",
     "estimate_archive.entry.seal_award": "Опечатати кошторис переможця",
     "estimate_archive.entry.add_from_seal": "Додати з опечатаного кошторису",
+    "estimate_archive.seal_needs_contract": "Щоб опечатати кошторис як основу договору, потрібен договір із замовником.",
   }
 } as { translation: Record<string, string> };
 

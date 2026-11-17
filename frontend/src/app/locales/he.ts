@@ -65307,6 +65307,7 @@ const resource = {
     "estimate_archive.entry.no_seal": "אין אומדן חתום.",
     "estimate_archive.entry.seal_award": "חתום את אומדן הזכייה",
     "estimate_archive.entry.add_from_seal": "הוסף מאומדן חתום",
+    "estimate_archive.seal_needs_contract": "נדרש חוזה עם הלקוח לפני חתימת האומדן כבסיס החוזה.",
   }
 } as { translation: Record<string, string> };
 

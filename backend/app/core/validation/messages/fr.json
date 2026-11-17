@@ -2125,6 +2125,7 @@
       "fail": "Un devis scellé ne peut être ni modifié ni supprimé. Scellez une nouvelle version qui le remplace."
     },
     "contents_locked": "Le contenu reste scellé jusqu'au début d'une ouverture formelle.",
-    "market_off": "Les devis scellés ne font pas partie du profil de marché de ce projet."
+    "market_off": "Les devis scellés ne font pas partie du profil de marché de ce projet.",
+    "contract_required": "Un contrat client est nécessaire avant de sceller un estimatif comme base du contrat."
   }
 }

@@ -67934,6 +67934,7 @@ const resource = {
     "estimate_archive.entry.no_seal": "No hay presupuesto sellado.",
     "estimate_archive.entry.seal_award": "Sellar el presupuesto de adjudicación",
     "estimate_archive.entry.add_from_seal": "Añadir desde el presupuesto sellado",
+    "estimate_archive.seal_needs_contract": "Se necesita un contrato con el cliente antes de sellar un presupuesto como base del contrato.",
   }
 } as { translation: Record<string, string> };
 

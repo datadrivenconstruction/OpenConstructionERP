@@ -2125,6 +2125,7 @@
       "fail": "En förseglad kalkyl kan inte ändras eller raderas. Försegla en ny version som ersätter den."
     },
     "contents_locked": "Innehållet förblir förseglat tills en formell öppning börjar.",
-    "market_off": "Förseglade kalkyler ingår inte i projektets marknadsprofil."
+    "market_off": "Förseglade kalkyler ingår inte i projektets marknadsprofil.",
+    "contract_required": "Ett kundavtal behövs innan en kalkyl kan förseglas som avtalsgrund."
   }
 }

@@ -65358,6 +65358,7 @@ const resource = {
     "estimate_archive.entry.no_seal": "Nema zapečaćene procjene.",
     "estimate_archive.entry.seal_award": "Zapečati procjenu za dodjelu",
     "estimate_archive.entry.add_from_seal": "Dodaj iz zapečaćene procjene",
+    "estimate_archive.seal_needs_contract": "Prije pečaćenja procjene kao osnove ugovora potreban je ugovor s klijentom.",
   }
 } as { translation: Record<string, string> };
 

@@ -64989,6 +64989,7 @@ const resource = {
     "estimate_archive.entry.no_seal": "कोई सील्ड अनुमान नहीं।",
     "estimate_archive.entry.seal_award": "अनुबंध-प्रदान अनुमान सील करें",
     "estimate_archive.entry.add_from_seal": "सील्ड अनुमान से जोड़ें",
+    "estimate_archive.seal_needs_contract": "अनुमान को अनुबंध के आधार के रूप में सील करने से पहले ग्राहक अनुबंध आवश्यक है।",
   }
 } as { translation: Record<string, string> };
 

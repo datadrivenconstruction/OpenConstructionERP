@@ -350,8 +350,14 @@ async def test_derive_logs_a_read() -> None:
 # ── 9 and 12. Sealing needs the market and, to supersede, the same project ───
 
 
-def _preview(project_id: uuid.UUID, enabled: bool = True) -> SimpleNamespace:
-    return SimpleNamespace(project_id=project_id, can_seal=True, checks=[], policy=SimpleNamespace(enabled=enabled))
+def _preview(project_id: uuid.UUID, enabled: bool = True, contract_id: uuid.UUID | None = None) -> SimpleNamespace:
+    return SimpleNamespace(
+        project_id=project_id,
+        contract_id=contract_id or uuid.uuid4(),
+        can_seal=True,
+        checks=[],
+        policy=SimpleNamespace(enabled=enabled),
+    )
 
 
 async def test_sealing_is_refused_where_the_market_does_not_use_it(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -364,6 +370,21 @@ async def test_sealing_is_refused_where_the_market_does_not_use_it(monkeypatch: 
     with pytest.raises(HTTPException) as exc:
         await svc.create_seal(svc_mod.SealCreate(source_boq_id=uuid.uuid4()), str(uuid.uuid4()))
     assert exc.value.status_code == 403
+
+
+async def test_sealing_needs_a_client_contract(monkeypatch: pytest.MonkeyPatch) -> None:
+    svc, _events = _service()
+
+    async def preview(_data: Any, _uid: Any) -> Any:
+        prev = _preview(uuid.uuid4())
+        prev.contract_id = None
+        return prev
+
+    monkeypatch.setattr(svc, "preview", preview)
+    with pytest.raises(HTTPException) as exc:
+        await svc.create_seal(svc_mod.SealCreate(source_boq_id=uuid.uuid4()), str(uuid.uuid4()))
+    assert exc.value.status_code == 422
+    assert exc.value.detail["code"] == "CONTRACT_REQUIRED"
 
 
 async def test_superseding_needs_the_same_project(monkeypatch: pytest.MonkeyPatch) -> None:

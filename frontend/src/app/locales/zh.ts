@@ -67190,6 +67190,7 @@ const resource = {
     "estimate_archive.entry.no_seal": "没有封存的报价。",
     "estimate_archive.entry.seal_award": "封存中标估算",
     "estimate_archive.entry.add_from_seal": "从封存报价添加",
+    "estimate_archive.seal_needs_contract": "将估算封存为合同依据之前，需要先有客户合同。",
   }
 } as { translation: Record<string, string> };
 

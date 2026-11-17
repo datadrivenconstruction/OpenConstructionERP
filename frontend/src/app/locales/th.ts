@@ -64721,6 +64721,7 @@ const resource = {
     "estimate_archive.entry.no_seal": "ไม่มีประมาณการที่ปิดผนึก",
     "estimate_archive.entry.seal_award": "ปิดผนึกประมาณการที่ได้รับการคัดเลือก",
     "estimate_archive.entry.add_from_seal": "เพิ่มจากประมาณการที่ปิดผนึก",
+    "estimate_archive.seal_needs_contract": "ต้องมีสัญญากับลูกค้าก่อนจึงจะผนึกประมาณการเป็นฐานของสัญญาได้",
   }
 } as { translation: Record<string, string> };
 

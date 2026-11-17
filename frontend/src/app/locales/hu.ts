@@ -67551,6 +67551,7 @@ const resource = {
     "estimate_archive.entry.no_seal": "Nincs lezárt költségvetés.",
     "estimate_archive.entry.seal_award": "Nyertes költségvetés lezárása",
     "estimate_archive.entry.add_from_seal": "Hozzáadás a lezárt költségvetésből",
+    "estimate_archive.seal_needs_contract": "A költségvetés szerződéses alapként való lezárásához ügyfélszerződés szükséges.",
   }
 } as { translation: Record<string, string> };
 

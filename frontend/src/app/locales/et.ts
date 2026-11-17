@@ -64936,6 +64936,7 @@ const resource = {
     "estimate_archive.entry.no_seal": "Plommitud kalkulatsioon puudub.",
     "estimate_archive.entry.seal_award": "Plommi hankeotsuse kalkulatsioon",
     "estimate_archive.entry.add_from_seal": "Lisa plommitud kalkulatsioonist",
+    "estimate_archive.seal_needs_contract": "Enne hinnangu pitseerimist lepingu aluseks on vaja kliendilepingut.",
   }
 } as { translation: Record<string, string> };
 

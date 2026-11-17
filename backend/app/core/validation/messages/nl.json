@@ -2125,6 +2125,7 @@
       "fail": "Een verzegelde begroting kan niet worden gewijzigd of verwijderd. Verzegel een nieuwe versie die haar vervangt."
     },
     "contents_locked": "De inhoud blijft verzegeld tot een formele opening begint.",
-    "market_off": "Verzegelde begrotingen horen niet bij het marktprofiel van dit project."
+    "market_off": "Verzegelde begrotingen horen niet bij het marktprofiel van dit project.",
+    "contract_required": "Er is een opdrachtgeverscontract nodig voordat een raming als contractbasis kan worden verzegeld."
   }
 }

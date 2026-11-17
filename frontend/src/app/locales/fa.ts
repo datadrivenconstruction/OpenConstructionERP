@@ -64946,6 +64946,7 @@ const resource = {
     "estimate_archive.entry.no_seal": "برآورد مهروموم‌شده‌ای وجود ندارد.",
     "estimate_archive.entry.seal_award": "مهروموم برآورد برنده",
     "estimate_archive.entry.add_from_seal": "افزودن از برآورد مهروموم‌شده",
+    "estimate_archive.seal_needs_contract": "پیش از مهر کردن برآورد به عنوان مبنای قرارداد، قرارداد با کارفرما لازم است.",
   }
 } as { translation: Record<string, string> };
 

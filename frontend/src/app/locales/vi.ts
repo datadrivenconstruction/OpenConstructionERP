@@ -64729,6 +64729,7 @@ const resource = {
     "estimate_archive.entry.no_seal": "Chưa có dự toán niêm phong.",
     "estimate_archive.entry.seal_award": "Niêm phong dự toán trúng thầu",
     "estimate_archive.entry.add_from_seal": "Thêm từ dự toán đã niêm phong",
+    "estimate_archive.seal_needs_contract": "Cần có hợp đồng với khách hàng trước khi niêm phong dự toán làm cơ sở hợp đồng.",
   }
 } as { translation: Record<string, string> };
 

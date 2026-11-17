@@ -65103,6 +65103,7 @@ const resource = {
     "estimate_archive.entry.no_seal": "Мөөрлөнгөн смета жок.",
     "estimate_archive.entry.seal_award": "Утуп алган сметаны мөөрлөө",
     "estimate_archive.entry.add_from_seal": "Мөөрлөнгөн сметадан кошуу",
+    "estimate_archive.seal_needs_contract": "Сметаны келишимдин негизи катары мөөрлөө үчүн буйрутмачы менен келишим керек.",
   }
 } as { translation: Record<string, string> };
 

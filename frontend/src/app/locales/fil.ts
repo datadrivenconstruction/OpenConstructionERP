@@ -64944,6 +64944,7 @@ const resource = {
     "estimate_archive.entry.no_seal": "Walang naka-sealed na estimate.",
     "estimate_archive.entry.seal_award": "I-seal ang estimate ng award",
     "estimate_archive.entry.add_from_seal": "Idagdag mula sa naka-sealed na estimate",
+    "estimate_archive.seal_needs_contract": "Kailangan ng kontrata sa kliyente bago ma-seal ang estimate bilang batayan ng kontrata.",
   }
 } as { translation: Record<string, string> };
 

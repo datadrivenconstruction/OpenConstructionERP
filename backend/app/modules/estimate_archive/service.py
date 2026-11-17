@@ -265,6 +265,7 @@ class EstimateArchiveService:
             attachment_presets=list(data.get("attachment_presets") or []),
             citations=list(data.get("citations") or []),
             tsa_configured=bool(tsa.tsa_url()),
+            has_contract=contract is not None,
         )
 
     async def log(
@@ -468,6 +469,14 @@ class EstimateArchiveService:
             )
         if supersedes is not None and preview.project_id != supersedes.project_id:
             raise HTTPException(status_code=422, detail="A seal can only be superseded by a seal of the same project")
+        if preview.contract_id is None:
+            raise HTTPException(
+                status_code=422,
+                detail={
+                    "code": "CONTRACT_REQUIRED",
+                    "message": translate("estimate_archive.contract_required", locale=get_locale()),
+                },
+            )
         if not preview.can_seal:
             blocking = [c.message for c in preview.checks if c.blocking]
             raise HTTPException(status_code=422, detail={"code": "SEAL_BLOCKED", "checks": blocking})

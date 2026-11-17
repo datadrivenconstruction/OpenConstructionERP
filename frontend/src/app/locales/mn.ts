@@ -64346,6 +64346,7 @@ const resource = {
     "estimate_archive.verified_bad": "Битүүмжилсэн бичлэгтэй таарахгүй",
     "estimate_archive.verified_ok": "Битүүмжилсэн бичлэгтэй таарч байна",
     "estimate_archive.verify": "Хурууны хээг шалгах",
+    "estimate_archive.seal_needs_contract": "Тооцоог гэрээний үндэс болгон битүүмжлэхийн өмнө захиалагчтай байгуулсан гэрээ шаардлагатай.",
   }
 } as { translation: Record<string, string> };
 

@@ -59236,6 +59236,7 @@ const resource = {
     "estimate_archive.entry.no_seal": "No sealed estimate.",
     "estimate_archive.entry.seal_award": "Seal the award estimate",
     "estimate_archive.entry.add_from_seal": "Add from sealed estimate",
+    "estimate_archive.seal_needs_contract": "A client contract is needed before an estimate can be sealed as the contract basis.",
   }
 } as { translation: Record<string, string> };
 

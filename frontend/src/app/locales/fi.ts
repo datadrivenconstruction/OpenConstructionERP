@@ -64990,6 +64990,7 @@ const resource = {
     "estimate_archive.entry.no_seal": "Ei sinetöityä kustannusarviota.",
     "estimate_archive.entry.seal_award": "Sinetöi hankinnan kustannusarvio",
     "estimate_archive.entry.add_from_seal": "Lisää sinetöidystä kustannusarviosta",
+    "estimate_archive.seal_needs_contract": "Asiakassopimus tarvitaan, ennen kuin arvio voidaan sinetöidä sopimuksen perusteeksi.",
   }
 } as { translation: Record<string, string> };
 

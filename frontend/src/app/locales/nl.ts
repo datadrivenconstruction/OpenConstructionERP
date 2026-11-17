@@ -65867,6 +65867,7 @@ const resource = {
     "estimate_archive.entry.no_seal": "Geen verzegelde raming.",
     "estimate_archive.entry.seal_award": "Gunningsraming verzegelen",
     "estimate_archive.entry.add_from_seal": "Toevoegen vanuit verzegelde raming",
+    "estimate_archive.seal_needs_contract": "Er is een opdrachtgeverscontract nodig voordat een raming als contractbasis kan worden verzegeld.",
   }
 } as { translation: Record<string, string> };
 

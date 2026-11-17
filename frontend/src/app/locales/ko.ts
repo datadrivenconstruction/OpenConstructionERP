@@ -65337,6 +65337,7 @@ const resource = {
     "estimate_archive.entry.no_seal": "봉인된 견적이 없습니다.",
     "estimate_archive.entry.seal_award": "낙찰 견적 봉인",
     "estimate_archive.entry.add_from_seal": "봉인된 견적에서 추가",
+    "estimate_archive.seal_needs_contract": "견적을 계약 기준으로 봉인하려면 고객 계약이 필요합니다.",
   }
 } as { translation: Record<string, string> };
 

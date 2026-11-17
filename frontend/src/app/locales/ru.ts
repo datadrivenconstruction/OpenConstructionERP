@@ -68254,6 +68254,7 @@ const resource = {
     "estimate_archive.entry.no_seal": "Запечатанной сметы нет.",
     "estimate_archive.entry.seal_award": "Запечатать смету контракта",
     "estimate_archive.entry.add_from_seal": "Добавить из запечатанной сметы",
+    "estimate_archive.seal_needs_contract": "Чтобы опечатать смету как основу договора, нужен договор с заказчиком.",
   }
 } as { translation: Record<string, string> };
 

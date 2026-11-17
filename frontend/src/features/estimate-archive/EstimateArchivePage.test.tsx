@@ -32,6 +32,7 @@ const policy = (enabled: boolean, profile = 'de'): Policy => ({
   attachment_presets: [],
   citations: [],
   tsa_configured: false,
+  has_contract: true,
 });
 
 const seal: SealSummary = {

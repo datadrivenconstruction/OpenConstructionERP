@@ -64720,6 +64720,7 @@ const resource = {
     "estimate_archive.entry.no_seal": "Tidak ada estimasi tersegel.",
     "estimate_archive.entry.seal_award": "Segel estimasi pemenang",
     "estimate_archive.entry.add_from_seal": "Tambah dari estimasi tersegel",
+    "estimate_archive.seal_needs_contract": "Diperlukan kontrak klien sebelum estimasi dapat disegel sebagai dasar kontrak.",
   }
 } as { translation: Record<string, string> };
 

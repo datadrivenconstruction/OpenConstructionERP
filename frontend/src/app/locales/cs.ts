@@ -66325,6 +66325,7 @@ const resource = {
     "estimate_archive.entry.no_seal": "Žádný zapečetěný rozpočet.",
     "estimate_archive.entry.seal_award": "Zapečetit nabídkový rozpočet",
     "estimate_archive.entry.add_from_seal": "Přidat ze zapečetěného rozpočtu",
+    "estimate_archive.seal_needs_contract": "Před zapečetěním rozpočtu jako základu smlouvy je nutná smlouva s klientem.",
   }
 } as { translation: Record<string, string> };
 

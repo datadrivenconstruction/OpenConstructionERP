@@ -66253,6 +66253,7 @@ const resource = {
     "estimate_archive.entry.no_seal": "封印済み見積はありません。",
     "estimate_archive.entry.seal_award": "落札見積を封印",
     "estimate_archive.entry.add_from_seal": "封印済み見積から追加",
+    "estimate_archive.seal_needs_contract": "見積を契約の基礎として封印するには、発注者との契約が必要です。",
   }
 } as { translation: Record<string, string> };
 

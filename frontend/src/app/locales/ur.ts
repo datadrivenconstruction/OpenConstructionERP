@@ -64952,6 +64952,7 @@ const resource = {
     "estimate_archive.entry.no_seal": "کوئی سیل شدہ تخمینہ نہیں۔",
     "estimate_archive.entry.seal_award": "ایوارڈ کا تخمینہ سیل کریں",
     "estimate_archive.entry.add_from_seal": "سیل شدہ تخمینے سے شامل کریں",
+    "estimate_archive.seal_needs_contract": "تخمینے کو معاہدے کی بنیاد کے طور پر سیل کرنے سے پہلے کلائنٹ کا معاہدہ درکار ہے۔",
   }
 } as { translation: Record<string, string> };
 

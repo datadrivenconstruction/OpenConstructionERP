@@ -65601,6 +65601,7 @@ const resource = {
     "estimate_archive.entry.no_seal": "Ingen förseglad kalkyl.",
     "estimate_archive.entry.seal_award": "Försegla tilldelningskalkylen",
     "estimate_archive.entry.add_from_seal": "Lägg till från förseglad kalkyl",
+    "estimate_archive.seal_needs_contract": "Ett kundavtal behövs innan en kalkyl kan förseglas som avtalsgrund.",
   }
 } as { translation: Record<string, string> };
 

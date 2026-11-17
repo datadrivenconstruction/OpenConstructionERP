@@ -66230,6 +66230,7 @@ const resource = {
     "estimate_archive.entry.no_seal": "Nessuna stima sigillata.",
     "estimate_archive.entry.seal_award": "Sigilla la stima di aggiudicazione",
     "estimate_archive.entry.add_from_seal": "Aggiungi dalla stima sigillata",
+    "estimate_archive.seal_needs_contract": "Serve un contratto con il cliente prima di sigillare una stima come base contrattuale.",
   }
 } as { translation: Record<string, string> };
 

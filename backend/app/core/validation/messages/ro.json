@@ -2125,6 +2125,7 @@
       "fail": "Un deviz sigilat nu poate fi modificat sau șters. Sigilați o versiune nouă care îl înlocuiește."
     },
     "contents_locked": "Conținutul rămâne sigilat până începe o deschidere formală.",
-    "market_off": "Devizele sigilate nu fac parte din profilul de piață al acestui proiect."
+    "market_off": "Devizele sigilate nu fac parte din profilul de piață al acestui proiect.",
+    "contract_required": "Este necesar un contract cu clientul înainte de sigilarea devizului ca bază a contractului."
   }
 }

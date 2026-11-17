@@ -65867,6 +65867,7 @@ const resource = {
     "estimate_archive.entry.no_seal": "Mühürlü keşif yok.",
     "estimate_archive.entry.seal_award": "İhale keşfini mühürle",
     "estimate_archive.entry.add_from_seal": "Mühürlü keşiften ekle",
+    "estimate_archive.seal_needs_contract": "Tahmini maliyeti sözleşme esası olarak mühürlemeden önce bir müşteri sözleşmesi gerekir.",
   }
 } as { translation: Record<string, string> };
 

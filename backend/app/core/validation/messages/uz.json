@@ -2125,6 +2125,7 @@
       "fail": "Muhrlangan smetani o'zgartirib yoki o'chirib bo'lmaydi. Uning o'rniga yangi versiyani muhrlang."
     },
     "contents_locked": "Rasmiy ochilish boshlanguncha tarkib muhrlangan holda qoladi.",
-    "market_off": "Muhrlangan smetalar bu loyihaning bozor profiliga kirmaydi."
+    "market_off": "Muhrlangan smetalar bu loyihaning bozor profiliga kirmaydi.",
+    "contract_required": "Smetani shartnoma asosi sifatida muhrlashdan oldin buyurtmachi bilan shartnoma kerak."
   }
 }

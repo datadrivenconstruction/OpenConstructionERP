@@ -66586,6 +66586,7 @@ const resource = {
     "estimate_archive.entry.no_seal": "Brak zapieczętowanego kosztorysu.",
     "estimate_archive.entry.seal_award": "Zapieczętuj kosztorys z przetargu",
     "estimate_archive.entry.add_from_seal": "Dodaj z zapieczętowanego kosztorysu",
+    "estimate_archive.seal_needs_contract": "Aby zapieczętować kosztorys jako podstawę umowy, potrzebna jest umowa z klientem.",
   }
 } as { translation: Record<string, string> };
 

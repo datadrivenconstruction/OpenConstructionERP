@@ -2125,6 +2125,7 @@
       "fail": "Eine versiegelte Kalkulation kann weder geändert noch gelöscht werden. Versiegeln Sie eine neue Fassung, die sie ersetzt."
     },
     "contents_locked": "Der Inhalt bleibt versiegelt, bis eine förmliche Öffnung beginnt.",
-    "market_off": "Versiegelte Kalkulationen gehören nicht zum Marktprofil dieses Projekts."
+    "market_off": "Versiegelte Kalkulationen gehören nicht zum Marktprofil dieses Projekts.",
+    "contract_required": "Zum Versiegeln einer Kalkulation als Vertragsgrundlage wird ein Auftraggebervertrag benötigt."
   }
 }
