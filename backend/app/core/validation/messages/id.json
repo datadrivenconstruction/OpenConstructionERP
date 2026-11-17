@@ -2016,6 +2016,68 @@
       "suggestion": "Tambahkan apa yang dikerjakan regu, atau keterlambatan yang menghentikan pekerjaan."
     }
   },
+  "framework_agreement": {
+    "item_not_in_agreement": {
+      "fail": "Baris {code} bukan item aktif dari perjanjian {agreement}; catat sebagai pekerjaan tambahan.",
+      "suggestion": "Hapus baris dari pesanan dan catat pekerjaan sebagai tambahan pada pesanan."
+    },
+    "rate_deviates": {
+      "fail": "Harga baris {code} {rate} berbeda dengan harga perjanjian {expected}.",
+      "suggestion": "Harga pesanan berasal dari perjanjian; hitung ulang harga baris dari daftar harga."
+    },
+    "order_outside_validity": {
+      "fail": "Tanggal pesanan {date} di luar masa berlaku perjanjian {from} sampai {to}.",
+      "suggestion": "Beri tanggal pesanan dalam masa berlaku, atau perpanjang perjanjian dulu."
+    },
+    "rate_period_gap": {
+      "fail": "Tidak ada periode harga yang mencakup {date}.",
+      "suggestion": "Tambahkan periode harga yang mencakup tanggal ini di tab Harga dan eskalasi."
+    },
+    "escalation_unresolved": {
+      "fail": "Indeks {series} tidak punya nilai untuk {period}; harga tidak bisa disesuaikan.",
+      "suggestion": "Isi nilai indeks bulan tersebut di Indeks harga, lalu hitung ulang harga pesanan."
+    },
+    "cap_exceeded": {
+      "fail": "Pesanan ini membuat perjanjian mencapai {total} dari batas {cap}; sisa {headroom}.",
+      "suggestion": "Kurangi pesanan sesuai sisa, atau terbitkan dengan pengecualian beralasan."
+    },
+    "cap_threshold": {
+      "fail": "Pemakaian perjanjian sudah mencapai {pct} % dari batas.",
+      "suggestion": "Beri tahu klien lebih awal agar perjanjian lanjutan bisa disiapkan."
+    },
+    "item_max_qty": {
+      "fail": "Item {code}: {qty} sudah dipesan sampai saat ini, melebihi maksimum yang ditetapkan {max}.",
+      "suggestion": "Sepakati volume tambahan dengan klien sebelum pesanan berikutnya."
+    },
+    "min_at_risk": {
+      "fail": "Tersisa {days} hari dan {pct} % dari minimum yang dijamin sudah dipesan.",
+      "suggestion": "Sampaikan kekurangan ke klien selagi masih ada waktu untuk memesan."
+    },
+    "currency_mismatch": {
+      "fail": "Mata uang pesanan {cur} berbeda dengan mata uang perjanjian {agr}.",
+      "suggestion": "Pesanan dihargai dalam mata uang perjanjian."
+    },
+    "adjustment_unknown": {
+      "fail": "Kondisi {tag} tidak punya penyesuaian dalam perjanjian ini.",
+      "suggestion": "Tambahkan penyesuaian di tab Kondisi, atau hapus kondisi dari pesanan."
+    },
+    "direct_claim": {
+      "fail": "Klaim diajukan pada pesanan, bukan pada perjanjian kerangka.",
+      "suggestion": "Buka pesanan tempat pekerjaan dilakukan, lalu ajukan klaim di sana."
+    },
+    "duplicate_item": {
+      "fail": "Kode item {code} muncul dua kali dalam periode harga {period}.",
+      "suggestion": "Simpan satu baris per kode item sebelum menyimpan daftar harga."
+    },
+    "measured_over_ordered": {
+      "fail": "Volume terukur {m} melebihi volume dipesan {o} pada baris {code}; pertimbangkan tambahan.",
+      "suggestion": "Catat volume tambahan sebagai perubahan pada pesanan."
+    },
+    "term_over_legal_max": {
+      "fail": "Jangka waktu {years} tahun melampaui batas {max} tahun menurut {source} (paket).",
+      "suggestion": "Periksa jangka waktu dengan klien; batas tercantum di paket, tetapi tidak dipaksakan."
+    }
+  },
   "estimate_archive": {
     "arc_hash_mismatch": {
       "fail": "Sidik jari tidak cocok: catatan memberi {actual}, segel menyebut {sealed}. Anggap catatan telah diubah."

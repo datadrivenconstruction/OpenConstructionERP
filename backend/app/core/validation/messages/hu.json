@@ -2016,6 +2016,68 @@
       "suggestion": "Adja meg, mit csinált a brigád, vagy a munkát leállító akadályoztatást."
     }
   },
+  "framework_agreement": {
+    "item_not_in_agreement": {
+      "fail": "A(z) {code} tétel nem aktív tétele a(z) {agreement} keretmegállapodásnak; vegye fel pótmunkaként.",
+      "suggestion": "Távolítsa el a tételt a megrendelésből, és a munkát pótmunkaként vegye fel a megrendelésre."
+    },
+    "rate_deviates": {
+      "fail": "A(z) {code} tétel egységára ({rate}) eltér a keretmegállapodás árától ({expected}).",
+      "suggestion": "A megrendelés árai a keretmegállapodásból származnak; az árjegyzékből árazza újra a tételt."
+    },
+    "order_outside_validity": {
+      "fail": "A(z) {date} megrendelési dátum a keretmegállapodás {from} – {to} közötti érvényességén kívül esik.",
+      "suggestion": "A megrendelést az érvényességi időn belül keltezze, vagy előbb hosszabbítsa meg a keretmegállapodást."
+    },
+    "rate_period_gap": {
+      "fail": "Egyetlen árperiódus sem fedi le a(z) {date} dátumot.",
+      "suggestion": "Adjon hozzá a dátumot lefedő árperiódust az Árak és indexálás fülön."
+    },
+    "escalation_unresolved": {
+      "fail": "A(z) {series} indexhez nincs érték a(z) {period} időszakra; az ár nem igazítható.",
+      "suggestion": "Adja meg az adott hónap indexértékét az Árindex mezőben, majd árazza újra a megrendelést."
+    },
+    "cap_exceeded": {
+      "fail": "Ez a megrendelés a keretmegállapodást {total} összegre emeli a(z) {cap} keretből; fennmaradó keret {headroom}.",
+      "suggestion": "Csökkentse a megrendelést a fennmaradó keretre, vagy indokolt eltéréssel adja ki."
+    },
+    "cap_threshold": {
+      "fail": "A keretmegállapodás felhasználása elérte a keret {pct} %-át.",
+      "suggestion": "Időben tájékoztassa a megrendelőt, hogy a következő keretmegállapodás elkészülhessen."
+    },
+    "item_max_qty": {
+      "fail": "A(z) {code} tétel eddig rendelt mennyisége ({qty}) meghaladja a megadott maximumot ({max}).",
+      "suggestion": "A következő megrendelés előtt egyeztesse a többletmennyiséget a megrendelővel."
+    },
+    "min_at_risk": {
+      "fail": "{days} nap van hátra, és a garantált minimum {pct} %-a már le van hívva.",
+      "suggestion": "Még van idő a megrendelésre, ezért vesse fel a hiányt a megrendelőnél."
+    },
+    "currency_mismatch": {
+      "fail": "A megrendelés pénzneme ({cur}) eltér a keretmegállapodás pénznemétől ({agr}).",
+      "suggestion": "A megrendelések a keretmegállapodás pénznemében árazandók."
+    },
+    "adjustment_unknown": {
+      "fail": "A(z) {tag} feltételhez nincs kiigazítás ebben a keretmegállapodásban.",
+      "suggestion": "Vegyen fel kiigazítást a Feltételek fülön, vagy távolítsa el a feltételt a megrendelésről."
+    },
+    "direct_claim": {
+      "fail": "Követelést lehívó megrendelésekre lehet benyújtani, nem magára a keretmegállapodásra.",
+      "suggestion": "Nyissa meg azt a megrendelést, amelyre a munka készült, és ott nyújtsa be a követelést."
+    },
+    "duplicate_item": {
+      "fail": "A(z) {code} tételkód kétszer szerepel a(z) {period} árperiódusban.",
+      "suggestion": "Árjegyzék mentése előtt tételkódonként csak egy sor maradjon."
+    },
+    "measured_over_ordered": {
+      "fail": "A mért mennyiség ({m}) meghaladja a rendelt mennyiséget ({o}) a(z) {code} soron; fontolja meg pótmunka felvételét.",
+      "suggestion": "A többletmennyiséget a megrendelés módosításaként vegye fel."
+    },
+    "term_over_legal_max": {
+      "fail": "A(z) {years} éves időtartam meghaladja a(z) {source} (csomag) szerinti {max} éves korlátot.",
+      "suggestion": "Egyeztesse az időtartamot a megrendelővel; a korlátot a csomag közli, de nem kényszerítő erejű."
+    }
+  },
   "estimate_archive": {
     "arc_hash_mismatch": {
       "fail": "Az ujjlenyomat eltér: a rekord {actual}, a pecsét {sealed}. Tekintse a rekordot módosítottnak."

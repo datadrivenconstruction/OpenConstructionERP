@@ -2016,6 +2016,68 @@
       "suggestion": "Lisage, mida brigaad tegi, või viivitus, mis töö peatas."
     }
   },
+  "framework_agreement": {
+    "item_not_in_agreement": {
+      "fail": "Rida {code} ei ole lepingu {agreement} aktiivne positsioon; lisage see lisatööna.",
+      "suggestion": "Eemaldage rida tellimusest ja lisage töö tellimusele lisatööna."
+    },
+    "rate_deviates": {
+      "fail": "Rea {code} hind {rate} erineb lepingu hinnast {expected}.",
+      "suggestion": "Tellimuse hinnad tulevad raamlepingust; hinnastage rida uuesti hinnakirja järgi."
+    },
+    "order_outside_validity": {
+      "fail": "Tellimuse kuupäev {date} jääb lepingu kehtivusajast {from} kuni {to} välja.",
+      "suggestion": "Dateerige tellimus kehtivusaja sisse või pikendage kõigepealt lepingut."
+    },
+    "rate_period_gap": {
+      "fail": "Ükski hinnaperiood ei kata kuupäeva {date}.",
+      "suggestion": "Lisage vahekaardil Hinnad ja indekseerimine periood, mis katab selle kuupäeva."
+    },
+    "escalation_unresolved": {
+      "fail": "Indeksil {series} puudub väärtus perioodile {period}; hinda ei saa korrigeerida.",
+      "suggestion": "Sisestage selle kuu indeksiväärtus hinnaindeksisse ja hinnastage tellimus uuesti."
+    },
+    "cap_exceeded": {
+      "fail": "See tellimus viib lepingu summani {total} piirmäära {cap} juures; vaba ruumi jääk {headroom}.",
+      "suggestion": "Vähendage tellimust jäägini või esitage see põhjendatud erandiga."
+    },
+    "cap_threshold": {
+      "fail": "Lepingu kasutus on jõudnud {pct} %-ni piirmäärast.",
+      "suggestion": "Teavitage klienti varakult, et järgleping saaks valmistada."
+    },
+    "item_max_qty": {
+      "fail": "Positsioon {code}: tellitud on seni {qty}, mis ületab märgitud maksimumi {max}.",
+      "suggestion": "Kokku leppige lisakogus kliendiga enne järgmist tellimust."
+    },
+    "min_at_risk": {
+      "fail": "Jäänud on {days} päeva ja tellitud on {pct} % garanteeritud miinimumist.",
+      "suggestion": "Tooge puudujääk kliendi ette, kuni tellimiseks veel aega on."
+    },
+    "currency_mismatch": {
+      "fail": "Tellimuse valuuta {cur} erineb lepingu valuutast {agr}.",
+      "suggestion": "Tellimused hinnastatakse lepingu valuutas."
+    },
+    "adjustment_unknown": {
+      "fail": "Tingimusel {tag} puudub selle lepingu korrigeerimine.",
+      "suggestion": "Lisage korrigeerimine vahekaardil Tingimused või eemaldage tingimus tellimusest."
+    },
+    "direct_claim": {
+      "fail": "Nõuded esitatakse tellimuste alusel, mitte raamlepingu alusel.",
+      "suggestion": "Avage tellimus, mille alusel töö tehti, ja esitage nõue seal."
+    },
+    "duplicate_item": {
+      "fail": "Positsiooni kood {code} esineb hinnaperioodis {period} kaks korda.",
+      "suggestion": "Jätke hinnakirja salvestamisel igale positsioonikoodile üks rida."
+    },
+    "measured_over_ordered": {
+      "fail": "Mõõdetud {m} ületab tellitud {o} real {code}; kaaluge lisatööd.",
+      "suggestion": "Esitage lisakogus tellimuse muudatusena."
+    },
+    "term_over_legal_max": {
+      "fail": "Kestus {years} aastat ületab {source} (pakett) piiri {max} aastat.",
+      "suggestion": "Kontrollige kestust kliendiga; piiri esitab pakett, kuid seda ei rakendata."
+    }
+  },
   "estimate_archive": {
     "arc_hash_mismatch": {
       "fail": "Sõrmejälg ei klapi: kirje annab {actual}, pitser näitab {sealed}. Pidage kirjet muudetuks."

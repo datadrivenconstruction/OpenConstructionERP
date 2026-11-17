@@ -2016,6 +2016,68 @@
       "suggestion": "Dodaj, co robiła brygada, lub opóźnienie, które wstrzymało roboty."
     }
   },
+  "framework_agreement": {
+    "item_not_in_agreement": {
+      "fail": "Pozycja {code} nie jest aktywną pozycją umowy {agreement}; zgłoś ją jako roboty dodatkowe.",
+      "suggestion": "Usuń pozycję z zamówienia i zgłoś pracę jako roboty dodatkowe do zamówienia."
+    },
+    "rate_deviates": {
+      "fail": "Stawka {rate} pozycji {code} różni się od stawki z umowy {expected}.",
+      "suggestion": "Stawki zamówienia pochodzą z umowy ramowej; przelicz pozycję według cennika."
+    },
+    "order_outside_validity": {
+      "fail": "Data zamówienia {date} jest poza okresem obowiązywania umowy: {from} – {to}.",
+      "suggestion": "Datuj zamówienie w ramach obowiązywania lub najpierw przedłuż umowę."
+    },
+    "rate_period_gap": {
+      "fail": "Żaden okres cenowy nie obejmuje daty {date}.",
+      "suggestion": "Dodaj okres cenowy obejmujący tę datę w zakładce Stawki i waloryzacja."
+    },
+    "escalation_unresolved": {
+      "fail": "Wskaźnik {series} nie ma wartości dla okresu {period}; stawki nie można zwaloryzować.",
+      "suggestion": "Wpisz wartość wskaźnika za ten miesiąc we Wskaźniku cen i przelicz zamówienie."
+    },
+    "cap_exceeded": {
+      "fail": "To zamówienie podnosi wykorzystanie umowy do {total} przy limicie {cap}; pozostało {headroom}.",
+      "suggestion": "Zmniejsz zamówienie do pozostałej kwoty albo wystaw je z uzasadnionym wyjątkiem."
+    },
+    "cap_threshold": {
+      "fail": "Wykorzystanie umowy osiągnęło {pct} % limitu.",
+      "suggestion": "Poinformuj zamawiającego z wyprzedzeniem, aby przygotować umowę następczą."
+    },
+    "item_max_qty": {
+      "fail": "Pozycja {code}: zamówiono dotąd {qty}, co przekracza podany maksimum {max}.",
+      "suggestion": "Uzgodnij dodatkową ilość z zamawiającym przed kolejnym zamówieniem."
+    },
+    "min_at_risk": {
+      "fail": "Pozostało {days} dni, a zamówiono {pct} % gwarantowanego minimum.",
+      "suggestion": "Zgłoś zamawiającemu niedobór, dopóki jest jeszcze czas na zamówienie."
+    },
+    "currency_mismatch": {
+      "fail": "Waluta zamówienia {cur} różni się od waluty umowy {agr}.",
+      "suggestion": "Zamówienia wycenia się w walucie umowy."
+    },
+    "adjustment_unknown": {
+      "fail": "Warunek {tag} nie ma w tej umowie żadnej korekty.",
+      "suggestion": "Dodaj korektę w zakładce Warunki albo usuń warunek z zamówienia."
+    },
+    "direct_claim": {
+      "fail": "Roszczenia zgłasza się w zamówieniach wykonawczych, a nie w umowie ramowej.",
+      "suggestion": "Otwórz zamówienie, w ramach którego wykonano pracę, i zgłoś roszczenie tam."
+    },
+    "duplicate_item": {
+      "fail": "Kod pozycji {code} występuje dwukrotnie w okresie cenowym {period}.",
+      "suggestion": "Przed zapisaniem cennika zostaw jeden wiersz dla każdego kodu pozycji."
+    },
+    "measured_over_ordered": {
+      "fail": "Zmierzone {m} przekracza zamówione {o} w wierszu {code}; rozważ roboty dodatkowe.",
+      "suggestion": "Zgłoś dodatkową ilość jako zmianę zamówienia."
+    },
+    "term_over_legal_max": {
+      "fail": "Okres {years} lat przekracza limit {max} lat wg {source} (pakiet).",
+      "suggestion": "Sprawdź okres z zamawiającym; limit podaje pakiet, ale nie jest on egzekwowany."
+    }
+  },
   "estimate_archive": {
     "arc_hash_mismatch": {
       "fail": "Odcisk się nie zgadza: zapis daje {actual}, pieczęć mówi {sealed}. Traktuj zapis jako zmieniony."

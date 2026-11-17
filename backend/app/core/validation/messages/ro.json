@@ -2016,6 +2016,68 @@
       "suggestion": "Adăugați ce a făcut echipa sau întârzierea care a oprit lucrările."
     }
   },
+  "framework_agreement": {
+    "item_not_in_agreement": {
+      "fail": "Rândul {code} nu este un articol activ al acordului {agreement}; înregistrați-l ca lucrare suplimentară.",
+      "suggestion": "Eliminați rândul din comandă și înregistrați lucrarea ca suplimentar la comandă."
+    },
+    "rate_deviates": {
+      "fail": "Prețul {rate} al rândului {code} diferă de prețul din acord {expected}.",
+      "suggestion": "Prețurile din comandă provin din acordul-cadru; reprețuiți rândul din lista de prețuri."
+    },
+    "order_outside_validity": {
+      "fail": "Data comenzii {date} este în afara perioadei acordului, de la {from} la {to}.",
+      "suggestion": "Datați comanda în perioada de valabilitate sau prelungiți întâi acordul."
+    },
+    "rate_period_gap": {
+      "fail": "Nicio perioadă de prețuri nu acoperă {date}.",
+      "suggestion": "Adăugați o perioadă de prețuri care acoperă această dată în fila Prețuri și indexare."
+    },
+    "escalation_unresolved": {
+      "fail": "Indicele {series} nu are valoare pentru {period}; prețul nu poate fi ajustat.",
+      "suggestion": "Introduceți valoarea indicelui pentru luna respectivă în Indicele prețurilor și reprețuiți comanda."
+    },
+    "cap_exceeded": {
+      "fail": "Această comandă duce acordul la {total} dintr-un plafon de {cap}; disponibil {headroom}.",
+      "suggestion": "Reduceți comanda la disponibilul rămas sau emiteți-o cu o derogare motivată."
+    },
+    "cap_threshold": {
+      "fail": "Utilizarea acordului a atins {pct} % din plafon.",
+      "suggestion": "Anunțați clientul din timp, pentru a pregăti un acord ulterior."
+    },
+    "item_max_qty": {
+      "fail": "Articolul {code}: {qty} comandate până acum, depășind maximul declarat {max}.",
+      "suggestion": "Conveniți cu clientul cantitatea suplimentară înainte de următoarea comandă."
+    },
+    "min_at_risk": {
+      "fail": "Au rămas {days} zile și {pct} % din minimul garantat este comandat.",
+      "suggestion": "Discutați cu clientul despre deficit cât mai există timp pentru comandă."
+    },
+    "currency_mismatch": {
+      "fail": "Moneda comenzii {cur} diferă de moneda acordului {agr}.",
+      "suggestion": "Comenzile se prețuiesc în moneda acordului."
+    },
+    "adjustment_unknown": {
+      "fail": "Condiția {tag} nu are o ajustare în acest acord.",
+      "suggestion": "Adăugați ajustarea în fila Condiții sau eliminați condiția din comandă."
+    },
+    "direct_claim": {
+      "fail": "Pretențiile se înregistrează pe comenzi subsecvente, nu pe acordul-cadru.",
+      "suggestion": "Deschideți comanda sub care s-a executat lucrarea și înregistrați pretenția acolo."
+    },
+    "duplicate_item": {
+      "fail": "Codul articolului {code} apare de două ori în perioada de prețuri {period}.",
+      "suggestion": "Păstrați un singur rând pentru fiecare cod de articol înainte de a salva lista de prețuri."
+    },
+    "measured_over_ordered": {
+      "fail": "Cantitatea măsurată {m} depășește cantitatea comandată {o} la rândul {code}; luați în calcul un suplimentar.",
+      "suggestion": "Înregistrați cantitatea suplimentară ca modificare a comenzii."
+    },
+    "term_over_legal_max": {
+      "fail": "Durata de {years} ani depășește limita de {max} ani din {source} (pachet).",
+      "suggestion": "Verificați durata cu clientul; limita este indicată de pachet, dar nu este impusă."
+    }
+  },
   "estimate_archive": {
     "arc_hash_mismatch": {
       "fail": "Amprenta nu corespunde: înregistrarea dă {actual}, sigiliul indică {sealed}. Considerați înregistrarea modificată."

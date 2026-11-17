@@ -2016,6 +2016,68 @@
       "suggestion": "Doplňte, co četa dělala, nebo prostoj, který práci zastavil."
     }
   },
+  "framework_agreement": {
+    "item_not_in_agreement": {
+      "fail": "Položka {code} není aktivní položkou rámcové smlouvy {agreement}; zapište ji jako vícepráce.",
+      "suggestion": "Položku odeberte z objednávky a práci zapište jako vícepráci k objednávce."
+    },
+    "rate_deviates": {
+      "fail": "Cena {rate} položky {code} se liší od smluvní ceny {expected}.",
+      "suggestion": "Ceny v objednávce vycházejí z rámcové smlouvy; položku přeoceňte podle ceníku."
+    },
+    "order_outside_validity": {
+      "fail": "Datum objednávky {date} je mimo platnost smlouvy {from} až {to}.",
+      "suggestion": "Objednávku datujte v rámci platnosti, nebo nejprve prodlužte smlouvu."
+    },
+    "rate_period_gap": {
+      "fail": "Žádné cenové období nepokrývá {date}.",
+      "suggestion": "Na záložce Ceny a indexace přidejte cenové období pro toto datum."
+    },
+    "escalation_unresolved": {
+      "fail": "Index {series} nemá hodnotu pro {period}; cenu nelze upravit.",
+      "suggestion": "Zadejte hodnotu indexu za tento měsíc v cenovém indexu a objednávku přepočítejte."
+    },
+    "cap_exceeded": {
+      "fail": "Tato objednávka dostane smlouvu na {total} z limitu {cap}; zbývá {headroom}.",
+      "suggestion": "Snižte objednávku na zbývající částku, nebo ji vystavte s odůvodněnou výjimkou."
+    },
+    "cap_threshold": {
+      "fail": "Čerpání smlouvy dosáhlo {pct} % limitu.",
+      "suggestion": "Včas informujte klienta, aby bylo možné připravit navazující smlouvu."
+    },
+    "item_max_qty": {
+      "fail": "Položka {code}: dosud objednáno {qty}, což překračuje uvedené maximum {max}.",
+      "suggestion": "Navýšení množství projednejte s klientem před další objednávkou."
+    },
+    "min_at_risk": {
+      "fail": "Zbývá {days} dní a objednáno je {pct} % garantovaného minima.",
+      "suggestion": "Nedostatek projednejte s klientem, dokud ještě lze objednávat."
+    },
+    "currency_mismatch": {
+      "fail": "Měna objednávky {cur} se liší od měny smlouvy {agr}.",
+      "suggestion": "Objednávky se oceňují v měně smlouvy."
+    },
+    "adjustment_unknown": {
+      "fail": "Podmínka {tag} nemá v této smlouvě žádnou úpravu.",
+      "suggestion": "Doplňte úpravu na záložce Podmínky, nebo podmínku z objednávky odeberte."
+    },
+    "direct_claim": {
+      "fail": "Nároky se uplatňují na objednávkách, ne na rámcové smlouvě.",
+      "suggestion": "Otevřete objednávku, pod kterou byla práce provedena, a nárok uplatněte tam."
+    },
+    "duplicate_item": {
+      "fail": "Kód položky {code} se v cenovém období {period} objevuje dvakrát.",
+      "suggestion": "Před uložením ceníku ponechte jeden řádek na každý kód položky."
+    },
+    "measured_over_ordered": {
+      "fail": "Naměřeno {m} přesahuje objednané {o} u řádku {code}; zvažte vícepráci.",
+      "suggestion": "Navýšení zapište jako změnu objednávky."
+    },
+    "term_over_legal_max": {
+      "fail": "Délka {years} let překračuje limit {max} let podle {source} (balíček).",
+      "suggestion": "Délku ověřte s klientem; limit uvádí balíček, ale nevynucuje ho."
+    }
+  },
   "estimate_archive": {
     "arc_hash_mismatch": {
       "fail": "Otisk nesouhlasí: záznam dává {actual}, pečeť uvádí {sealed}. Považujte záznam za změněný."

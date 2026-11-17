@@ -2016,6 +2016,68 @@
       "suggestion": "Thêm việc tổ đã làm, hoặc chậm trễ đã dừng công việc."
     }
   },
+  "framework_agreement": {
+    "item_not_in_agreement": {
+      "fail": "Dòng {code} không phải hạng mục đang hiệu lực của thỏa thuận {agreement}; hãy ghi nhận như phát sinh.",
+      "suggestion": "Xóa dòng khỏi đơn hàng và ghi công việc vào đơn hàng như phát sinh."
+    },
+    "rate_deviates": {
+      "fail": "Đơn giá {rate} của dòng {code} khác đơn giá trong thỏa thuận {expected}.",
+      "suggestion": "Đơn giá đơn hàng lấy từ thỏa thuận khung; hãy tính lại đơn giá dòng theo bảng giá."
+    },
+    "order_outside_validity": {
+      "fail": "Ngày đơn hàng {date} nằm ngoài thời hạn thỏa thuận từ {from} đến {to}.",
+      "suggestion": "Ghi ngày đơn hàng trong thời hạn, hoặc gia hạn thỏa thuận trước."
+    },
+    "rate_period_gap": {
+      "fail": "Không có kỳ đơn giá nào bao phủ {date}.",
+      "suggestion": "Thêm kỳ đơn giá bao phủ ngày này ở thẻ Đơn giá và điều chỉnh giá."
+    },
+    "escalation_unresolved": {
+      "fail": "Chỉ số {series} chưa có giá trị cho {period}; không thể điều chỉnh đơn giá.",
+      "suggestion": "Nhập giá trị chỉ số của tháng đó trong Chỉ số giá, rồi tính lại đơn hàng."
+    },
+    "cap_exceeded": {
+      "fail": "Đơn hàng này đưa thỏa thuận lên {total} trên mức trần {cap}; còn lại {headroom}.",
+      "suggestion": "Giảm đơn hàng xuống phần còn lại, hoặc phát hành kèm ngoại lệ có lý do."
+    },
+    "cap_threshold": {
+      "fail": "Việc sử dụng thỏa thuận đã đạt {pct} % mức trần.",
+      "suggestion": "Thông báo sớm cho chủ đầu tư để chuẩn bị thỏa thuận kế tiếp."
+    },
+    "item_max_qty": {
+      "fail": "Hạng mục {code}: đã đặt {qty} đến nay, vượt mức tối đa {max}.",
+      "suggestion": "Thống nhất khối lượng phát sinh với chủ đầu tư trước đơn hàng tiếp theo."
+    },
+    "min_at_risk": {
+      "fail": "Còn {days} ngày và {pct} % khối lượng tối thiểu cam kết đã được đặt.",
+      "suggestion": "Trao đổi với chủ đầu tư về phần thiếu khi vẫn còn thời gian đặt hàng."
+    },
+    "currency_mismatch": {
+      "fail": "Tiền tệ đơn hàng {cur} khác tiền tệ thỏa thuận {agr}.",
+      "suggestion": "Đơn hàng được định giá bằng tiền tệ của thỏa thuận."
+    },
+    "adjustment_unknown": {
+      "fail": "Điều kiện {tag} không có điều chỉnh trong thỏa thuận này.",
+      "suggestion": "Thêm điều chỉnh ở thẻ Điều kiện, hoặc xóa điều kiện khỏi đơn hàng."
+    },
+    "direct_claim": {
+      "fail": "Yêu cầu thanh toán được lập trên đơn hàng, không lập trên thỏa thuận khung.",
+      "suggestion": "Mở đơn hàng đã thực hiện công việc và lập yêu cầu thanh toán tại đó."
+    },
+    "duplicate_item": {
+      "fail": "Mã hạng mục {code} xuất hiện hai lần trong kỳ đơn giá {period}.",
+      "suggestion": "Trước khi lưu bảng giá, giữ một dòng cho mỗi mã hạng mục."
+    },
+    "measured_over_ordered": {
+      "fail": "Khối lượng đo {m} vượt khối lượng đã đặt {o} ở dòng {code}; cân nhắc phát sinh.",
+      "suggestion": "Ghi khối lượng thêm như một thay đổi của đơn hàng."
+    },
+    "term_over_legal_max": {
+      "fail": "Thời hạn {years} năm vượt giới hạn {max} năm theo {source} (gói).",
+      "suggestion": "Kiểm tra thời hạn với chủ đầu tư; giới hạn do gói đưa ra nhưng không bắt buộc."
+    }
+  },
   "estimate_archive": {
     "arc_hash_mismatch": {
       "fail": "Dấu vân tay không khớp: bản ghi cho {actual}, niêm phong ghi {sealed}. Coi bản ghi là đã bị sửa."

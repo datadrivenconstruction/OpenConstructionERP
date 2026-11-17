@@ -2016,6 +2016,68 @@
       "suggestion": "Voeg toe wat de ploeg deed, of de vertraging die het werk stillegde."
     }
   },
+  "framework_agreement": {
+    "item_not_in_agreement": {
+      "fail": "Regel {code} is geen actief item van overeenkomst {agreement}; voer het in als meerwerk.",
+      "suggestion": "Verwijder de regel uit de order en registreer het werk als meerwerk op de order."
+    },
+    "rate_deviates": {
+      "fail": "Tarief {rate} van regel {code} wijkt af van het overeenkomsttarief {expected}.",
+      "suggestion": "Tarieven op een order komen uit de raamovereenkomst; herprijs de regel vanuit de prijslijst."
+    },
+    "order_outside_validity": {
+      "fail": "Orderdatum {date} valt buiten de looptijd van {from} tot {to}.",
+      "suggestion": "Dateer de order binnen de looptijd, of verleng eerst de overeenkomst."
+    },
+    "rate_period_gap": {
+      "fail": "Geen tariefperiode dekt {date}.",
+      "suggestion": "Voeg op het tabblad Tarieven en indexering een tariefperiode toe die deze datum dekt."
+    },
+    "escalation_unresolved": {
+      "fail": "Index {series} heeft geen waarde voor {period}; het tarief kan niet worden aangepast.",
+      "suggestion": "Vul de indexwaarde van die maand in bij Prijsindex en herprijs daarna de order."
+    },
+    "cap_exceeded": {
+      "fail": "Deze order brengt de overeenkomst op {total} van een plafond van {cap}; ruimte {headroom}.",
+      "suggestion": "Verklein de order tot de beschikbare ruimte, of geef hem uit met een gemotiveerde uitzondering."
+    },
+    "cap_threshold": {
+      "fail": "Het gebruik van de overeenkomst heeft {pct} % van het plafond bereikt.",
+      "suggestion": "Meld dit tijdig aan de opdrachtgever zodat een vervolgovereenkomst kan worden voorbereid."
+    },
+    "item_max_qty": {
+      "fail": "Item {code}: tot nu toe {qty} besteld, boven het opgegeven maximum {max}.",
+      "suggestion": "Stem de extra hoeveelheid af met de opdrachtgever vóór de volgende order."
+    },
+    "min_at_risk": {
+      "fail": "Nog {days} dagen en {pct} % van het gegarandeerde minimum is besteld.",
+      "suggestion": "Bespreek het tekort met de opdrachtgever zolang er nog tijd is om te bestellen."
+    },
+    "currency_mismatch": {
+      "fail": "Valuta van de order {cur} wijkt af van de valuta van de overeenkomst {agr}.",
+      "suggestion": "Orders worden geprijsd in de valuta van de overeenkomst."
+    },
+    "adjustment_unknown": {
+      "fail": "Voorwaarde {tag} heeft in deze overeenkomst geen aanpassing.",
+      "suggestion": "Voeg de aanpassing toe op het tabblad Voorwaarden, of verwijder de voorwaarde uit de order."
+    },
+    "direct_claim": {
+      "fail": "Claims worden ingediend op afroeporders, niet op de raamovereenkomst.",
+      "suggestion": "Open de order waaronder het werk is uitgevoerd en dien de claim daar in."
+    },
+    "duplicate_item": {
+      "fail": "Itemcode {code} komt twee keer voor in tariefperiode {period}.",
+      "suggestion": "Houd vóór het opslaan van de prijslijst één regel per itemcode."
+    },
+    "measured_over_ordered": {
+      "fail": "Opgemeten {m} overschrijdt besteld {o} op regel {code}; overweeg meerwerk.",
+      "suggestion": "Registreer de extra hoeveelheid als wijziging op de order."
+    },
+    "term_over_legal_max": {
+      "fail": "Looptijd van {years} jaar overschrijdt de limiet van {max} jaar in {source} (pakket).",
+      "suggestion": "Controleer de looptijd met de opdrachtgever; de limiet staat in het pakket maar wordt niet afgedwongen."
+    }
+  },
   "estimate_archive": {
     "arc_hash_mismatch": {
       "fail": "Vingerafdruk wijkt af: het record geeft {actual}, het zegel zegt {sealed}. Beschouw het record als gewijzigd."

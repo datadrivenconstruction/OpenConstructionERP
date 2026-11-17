@@ -2016,6 +2016,68 @@
       "suggestion": "Acrescente o que a equipa fez, ou o atraso que parou os trabalhos."
     }
   },
+  "framework_agreement": {
+    "item_not_in_agreement": {
+      "fail": "A linha {code} não é um artigo ativo do acordo {agreement}; registe-a como trabalho adicional.",
+      "suggestion": "Remova a linha da encomenda e registe o trabalho como adicional à encomenda."
+    },
+    "rate_deviates": {
+      "fail": "O preço {rate} da linha {code} difere do preço do acordo {expected}.",
+      "suggestion": "Os preços da encomenda vêm do acordo-quadro; recalcule a linha a partir da lista de preços."
+    },
+    "order_outside_validity": {
+      "fail": "A data da encomenda {date} está fora da vigência do acordo, de {from} a {to}.",
+      "suggestion": "Data a encomenda dentro da vigência ou prolongue primeiro o acordo."
+    },
+    "rate_period_gap": {
+      "fail": "Nenhum período de preços abrange {date}.",
+      "suggestion": "Acrescente um período de preços que abranja esta data no separador Preços e revisão."
+    },
+    "escalation_unresolved": {
+      "fail": "O índice {series} não tem valor para {period}; o preço não pode ser atualizado.",
+      "suggestion": "Introduza o valor do índice desse mês em Índice de preços e recalcule a encomenda."
+    },
+    "cap_exceeded": {
+      "fail": "Esta encomenda leva o acordo a {total} de um limite de {cap}; margem disponível {headroom}.",
+      "suggestion": "Reduza a encomenda à margem disponível ou emita-a com uma exceção fundamentada."
+    },
+    "cap_threshold": {
+      "fail": "A utilização do acordo atingiu {pct} % do limite.",
+      "suggestion": "Avise o cliente cedo para que se possa preparar um acordo subsequente."
+    },
+    "item_max_qty": {
+      "fail": "Artigo {code}: {qty} encomendados até à data, acima do máximo indicado de {max}.",
+      "suggestion": "Acorde a quantidade adicional com o cliente antes da próxima encomenda."
+    },
+    "min_at_risk": {
+      "fail": "Faltam {days} dias e foram encomendados {pct} % do mínimo garantido.",
+      "suggestion": "Trate o défice com o cliente enquanto ainda há tempo para encomendar."
+    },
+    "currency_mismatch": {
+      "fail": "A moeda da encomenda {cur} difere da moeda do acordo {agr}.",
+      "suggestion": "As encomendas são valorizadas na moeda do acordo."
+    },
+    "adjustment_unknown": {
+      "fail": "A condição {tag} não tem ajustamento neste acordo.",
+      "suggestion": "Acrescente o ajustamento no separador Condições ou retire a condição da encomenda."
+    },
+    "direct_claim": {
+      "fail": "As reclamações são apresentadas em encomendas, não no acordo-quadro.",
+      "suggestion": "Abra a encomenda ao abrigo da qual o trabalho foi feito e apresente a reclamação aí."
+    },
+    "duplicate_item": {
+      "fail": "O código de artigo {code} aparece duas vezes no período de preços {period}.",
+      "suggestion": "Mantenha uma linha por código de artigo antes de guardar a lista de preços."
+    },
+    "measured_over_ordered": {
+      "fail": "A quantidade medida {m} excede a encomendada {o} na linha {code}; considere um adicional.",
+      "suggestion": "Registe a quantidade extra como uma alteração à encomenda."
+    },
+    "term_over_legal_max": {
+      "fail": "O prazo de {years} anos excede o limite de {max} anos previsto em {source} (pacote).",
+      "suggestion": "Verifique o prazo com o cliente; o limite é indicado pelo pacote, mas não é imposto."
+    }
+  },
   "estimate_archive": {
     "arc_hash_mismatch": {
       "fail": "A impressão digital não coincide: o registo dá {actual}, o selo indica {sealed}. Considere o registo alterado."

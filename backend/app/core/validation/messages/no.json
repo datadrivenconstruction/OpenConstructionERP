@@ -2016,6 +2016,68 @@
       "suggestion": "Legg til hva laget gjorde, eller forsinkelsen som stoppet arbeidet."
     }
   },
+  "framework_agreement": {
+    "item_not_in_agreement": {
+      "fail": "Linje {code} er ikke et aktivt punkt i avtalen {agreement}; registrer det som tilleggsarbeid.",
+      "suggestion": "Fjern linjen fra bestillingen og registrer arbeidet som tilleggsarbeid på bestillingen."
+    },
+    "rate_deviates": {
+      "fail": "Linje {code} har pris {rate} som avviker fra avtalepris {expected}.",
+      "suggestion": "Priser på en avropsordre hentes fra rammeavtalen; priskalkuler linjen på nytt fra prislisten."
+    },
+    "order_outside_validity": {
+      "fail": "Bestillingsdato {date} er utenfor avtaleperioden {from} til {to}.",
+      "suggestion": "Sett bestillingsdatoen innenfor perioden, eller forleng rammeavtalen først."
+    },
+    "rate_period_gap": {
+      "fail": "Ingen prisperiode dekker {date}.",
+      "suggestion": "Legg til en prisperiode som dekker denne datoen under fanen Priser og indeksregulering."
+    },
+    "escalation_unresolved": {
+      "fail": "Indeks {series} har ingen verdi for {period}; prisen kan ikke justeres.",
+      "suggestion": "Legg inn indeksverdien for måneden under Prisindeks, og beregn bestillingen på nytt."
+    },
+    "cap_exceeded": {
+      "fail": "Denne bestillingen tar avtalen til {total} av et tak på {cap}; gjenstående {headroom}.",
+      "suggestion": "Reduser bestillingen til det som er igjen, eller utsted den med en begrunnet overskridelse."
+    },
+    "cap_threshold": {
+      "fail": "Bruken av avtalen har nådd {pct} % av taket.",
+      "suggestion": "Si fra til oppdragsgiver tidlig, slik at en oppfølgende avtale kan forberedes."
+    },
+    "item_max_qty": {
+      "fail": "Post {code}: {qty} bestilt så langt, over oppgitt maksimum {max}.",
+      "suggestion": "Avtal den ekstra mengden med oppdragsgiver før neste bestilling."
+    },
+    "min_at_risk": {
+      "fail": "{days} dager igjen, og {pct} % av garantert minimum er bestilt.",
+      "suggestion": "Ta opp mangelen med oppdragsgiver mens det fortsatt er tid til å bestille."
+    },
+    "currency_mismatch": {
+      "fail": "Valutaen på bestillingen {cur} avviker fra avtalens valuta {agr}.",
+      "suggestion": "Bestillinger prises i avtalens valuta."
+    },
+    "adjustment_unknown": {
+      "fail": "Betingelse {tag} har ingen justering i denne avtalen.",
+      "suggestion": "Legg til justeringen under fanen Betingelser, eller fjern betingelsen fra bestillingen."
+    },
+    "direct_claim": {
+      "fail": "Krav fremsettes på avropsordrer, ikke på rammeavtalen.",
+      "suggestion": "Åpne bestillingen arbeidet ble utført under, og fremsett kravet der."
+    },
+    "duplicate_item": {
+      "fail": "Postkode {code} forekommer to ganger i prisperiode {period}.",
+      "suggestion": "Behold én rad per postkode før prislisten lagres."
+    },
+    "measured_over_ordered": {
+      "fail": "Målt {m} overstiger bestilt {o} på linje {code}; vurder tilleggsarbeid.",
+      "suggestion": "Registrer den ekstra mengden som en endring på bestillingen."
+    },
+    "term_over_legal_max": {
+      "fail": "Varighet på {years} år overskrider grensen på {max} år i {source} (pakke).",
+      "suggestion": "Sjekk varigheten med oppdragsgiver; grensen er oppgitt i pakken, men håndheves ikke."
+    }
+  },
   "estimate_archive": {
     "arc_hash_mismatch": {
       "fail": "Fingeravtrykket stemmer ikke: posten gir {actual}, forseglingen sier {sealed}. Behandle posten som endret."

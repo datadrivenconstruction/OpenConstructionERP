@@ -2016,6 +2016,68 @@
       "suggestion": "Lisää, mitä ryhmä teki, tai viivästys, joka pysäytti työn."
     }
   },
+  "framework_agreement": {
+    "item_not_in_agreement": {
+      "fail": "Rivi {code} ei ole sopimuksen {agreement} aktiivinen kohta; lisää se lisätyönä.",
+      "suggestion": "Poista rivi tilauksesta ja kirjaa työ tilaukselle lisätyönä."
+    },
+    "rate_deviates": {
+      "fail": "Rivin {code} hinta {rate} poikkeaa sopimushinnasta {expected}.",
+      "suggestion": "Tilauksen hinnat tulevat puitesopimuksesta; hinnoittele rivi uudelleen hinnastosta."
+    },
+    "order_outside_validity": {
+      "fail": "Tilauspäivä {date} on sopimuskauden {from}–{to} ulkopuolella.",
+      "suggestion": "Päivää tilaus sopimuskauden sisälle tai pidennä sopimusta ensin."
+    },
+    "rate_period_gap": {
+      "fail": "Mikään hintakausi ei kata päivää {date}.",
+      "suggestion": "Lisää välilehdelle Hinnat ja indeksikorotus hintakausi, joka kattaa tämän päivän."
+    },
+    "escalation_unresolved": {
+      "fail": "Indeksillä {series} ei ole arvoa kaudelle {period}; hintaa ei voi tarkistaa.",
+      "suggestion": "Syötä kuukauden indeksiarvo Hintaindeksi-kohtaan ja hinnoittele tilaus uudelleen."
+    },
+    "cap_exceeded": {
+      "fail": "Tämä tilaus nostaa sopimuksen käytön {total} tasolle, kun katto on {cap}; jäljellä {headroom}.",
+      "suggestion": "Pienennä tilaus jäljelle jäävään määrään tai tee se perustellulla poikkeuksella."
+    },
+    "cap_threshold": {
+      "fail": "Sopimuksen käyttö on saavuttanut {pct} % katosta.",
+      "suggestion": "Ilmoita asiakkaalle ajoissa, jotta seuraava sopimus voidaan valmistella."
+    },
+    "item_max_qty": {
+      "fail": "Kohde {code}: tilattu tähän mennessä {qty} ylittää ilmoitetun enimmäismäärän {max}.",
+      "suggestion": "Sovi lisämäärästä asiakkaan kanssa ennen seuraavaa tilausta."
+    },
+    "min_at_risk": {
+      "fail": "Aikaa on {days} päivää ja {pct} % taatusta vähimmäismäärästä on tilattu.",
+      "suggestion": "Ota vajaus esille asiakkaan kanssa, kun tilaamiseen on vielä aikaa."
+    },
+    "currency_mismatch": {
+      "fail": "Tilauksen valuutta {cur} poikkeaa sopimuksen valuutasta {agr}.",
+      "suggestion": "Tilaukset hinnoitellaan sopimuksen valuutassa."
+    },
+    "adjustment_unknown": {
+      "fail": "Ehdolle {tag} ei ole tämän sopimuksen mukaista korjausta.",
+      "suggestion": "Lisää korjaus välilehdelle Ehdot tai poista ehto tilaukselta."
+    },
+    "direct_claim": {
+      "fail": "Vaatimukset tehdään tilauksille, ei puitesopimukselle.",
+      "suggestion": "Avaa tilaus, jonka alla työ tehtiin, ja tee vaatimus siellä."
+    },
+    "duplicate_item": {
+      "fail": "Kohdekoodi {code} esiintyy kahdesti hintakaudella {period}.",
+      "suggestion": "Pidä yksi rivi kutakin kohdekoodia kohden ennen hinnaston tallennusta."
+    },
+    "measured_over_ordered": {
+      "fail": "Mitattu määrä {m} ylittää tilatun {o} rivillä {code}; harkitse lisätyötä.",
+      "suggestion": "Kirjaa lisämäärä tilauksen muutoksena."
+    },
+    "term_over_legal_max": {
+      "fail": "Kesto {years} vuotta ylittää {source}-paketin mukaisen {max} vuoden rajan.",
+      "suggestion": "Tarkista kesto asiakkaan kanssa; paketti ilmoittaa rajan, mutta sitä ei valvota."
+    }
+  },
   "estimate_archive": {
     "arc_hash_mismatch": {
       "fail": "Sormenjälki ei täsmää: tietue antaa {actual}, sinetti ilmoittaa {sealed}. Pidä tietuetta muutettuna."

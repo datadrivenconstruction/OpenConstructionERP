@@ -2016,6 +2016,68 @@
       "suggestion": "Idagdag ang ginawa ng grupo, o ang pagkaantalang nagpatigil ng trabaho."
     }
   },
+  "framework_agreement": {
+    "item_not_in_agreement": {
+      "fail": "Ang linyang {code} ay hindi aktibong item ng kasunduan na {agreement}; itala ito bilang extra.",
+      "suggestion": "Alisin ang linya sa order at itala ang trabaho bilang extra sa order."
+    },
+    "rate_deviates": {
+      "fail": "Ang rate ng linyang {code} na {rate} ay iba sa rate ng kasunduan na {expected}.",
+      "suggestion": "Galing sa kasunduan ang mga rate ng order; i-reprice ang linya mula sa price list."
+    },
+    "order_outside_validity": {
+      "fail": "Ang petsa ng order na {date} ay wala sa termino ng kasunduan mula {from} hanggang {to}.",
+      "suggestion": "Lagyan ng petsa ang order sa loob ng termino, o palawigin muna ang kasunduan."
+    },
+    "rate_period_gap": {
+      "fail": "Walang rate period na sumasaklaw sa {date}.",
+      "suggestion": "Magdagdag ng rate period na sumasaklaw sa petsang ito sa tab na Rates and escalation."
+    },
+    "escalation_unresolved": {
+      "fail": "Walang value ang index na {series} para sa {period}; hindi maisaayos ang rate.",
+      "suggestion": "Ilagay ang index value ng buwang iyon sa Price index, saka i-price muli ang order."
+    },
+    "cap_exceeded": {
+      "fail": "Dadalhin ng order na ito ang kasunduan sa {total} ng {cap} na cap; headroom {headroom}.",
+      "suggestion": "Bawasan ang order hanggang sa headroom, o ilabas ito na may makatwirang override."
+    },
+    "cap_threshold": {
+      "fail": "Naabot na ng paggamit ng kasunduan ang {pct} % ng cap.",
+      "suggestion": "Sabihan nang maaga ang kliyente para maihanda ang kasunod na kasunduan."
+    },
+    "item_max_qty": {
+      "fail": "Item {code}: {qty} na ang naorder hanggang ngayon, lampas sa nakasaad na maximum na {max}.",
+      "suggestion": "Pagkasunduan sa kliyente ang dagdag na dami bago ang susunod na order."
+    },
+    "min_at_risk": {
+      "fail": "{days} na araw na lang at {pct} % ng guaranteed minimum ang naorder na.",
+      "suggestion": "Ipaalam sa kliyente ang kakulangan habang may panahon pa para mag-order."
+    },
+    "currency_mismatch": {
+      "fail": "Ang currency ng order na {cur} ay iba sa currency ng kasunduan na {agr}.",
+      "suggestion": "Ang mga order ay pinepresyuhan sa currency ng kasunduan."
+    },
+    "adjustment_unknown": {
+      "fail": "Ang kondisyong {tag} ay walang adjustment sa kasunduang ito.",
+      "suggestion": "Idagdag ang adjustment sa tab na Conditions, o alisin ang kondisyon sa order."
+    },
+    "direct_claim": {
+      "fail": "Sa call-off order itinataas ang claim, hindi sa kasunduan mismo.",
+      "suggestion": "Buksan ang order kung saan ginawa ang trabaho at doon mag-claim."
+    },
+    "duplicate_item": {
+      "fail": "Lumilitaw nang dalawang beses ang item code na {code} sa rate period na {period}.",
+      "suggestion": "Magtira ng isang row bawat item code bago i-save ang price list."
+    },
+    "measured_over_ordered": {
+      "fail": "Ang sinukat na {m} ay lampas sa naorder na {o} sa linyang {code}; isaalang-alang ang extra.",
+      "suggestion": "Itala ang dagdag na dami bilang variation sa order."
+    },
+    "term_over_legal_max": {
+      "fail": "Ang termino na {years} taon ay lampas sa limitasyong {max} taon ayon sa {source} (pack).",
+      "suggestion": "I-check ang termino sa kliyente; ipinapakita ng pack ang limitasyon pero hindi ito ipinatutupad."
+    }
+  },
   "estimate_archive": {
     "arc_hash_mismatch": {
       "fail": "Hindi tugma ang fingerprint: ang rekord ay {actual}, ang selyo ay {sealed}. Ituring na binago ang rekord."

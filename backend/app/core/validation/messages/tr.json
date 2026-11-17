@@ -2016,6 +2016,68 @@
       "suggestion": "Ekibin ne yaptığını veya işi durduran gecikmeyi ekleyin."
     }
   },
+  "framework_agreement": {
+    "item_not_in_agreement": {
+      "fail": "{code} kalemi {agreement} anlaşmasında aktif bir kalem değil; ek iş olarak girin.",
+      "suggestion": "Kalemi siparişten çıkarın ve işi siparişe ek iş olarak kaydedin."
+    },
+    "rate_deviates": {
+      "fail": "{code} kaleminin birim fiyatı {rate}, anlaşma fiyatı {expected} ile farklı.",
+      "suggestion": "Siparişteki fiyatlar çerçeve anlaşmadan gelir; kalemi fiyat listesinden yeniden fiyatlandırın."
+    },
+    "order_outside_validity": {
+      "fail": "Sipariş tarihi {date}, {from} – {to} anlaşma süresinin dışında.",
+      "suggestion": "Siparişi süre içine tarihleyin veya önce anlaşmayı uzatın."
+    },
+    "rate_period_gap": {
+      "fail": "Hiçbir fiyat dönemi {date} tarihini kapsamıyor.",
+      "suggestion": "Fiyatlar ve endeksleme sekmesine bu tarihi kapsayan bir fiyat dönemi ekleyin."
+    },
+    "escalation_unresolved": {
+      "fail": "{series} endeksinin {period} dönemi için değeri yok; birim fiyat düzeltilemiyor.",
+      "suggestion": "Fiyat endeksine o ayın endeks değerini girin, ardından siparişi yeniden fiyatlandırın."
+    },
+    "cap_exceeded": {
+      "fail": "Bu sipariş anlaşmayı {cap} tavanın {total} tutarına çıkarıyor; kalan limit {headroom}.",
+      "suggestion": "Siparişi kalan limite indirin veya gerekçeli bir istisnayla düzenleyin."
+    },
+    "cap_threshold": {
+      "fail": "Anlaşma kullanımı tavanın %{pct} seviyesine ulaştı.",
+      "suggestion": "Devam anlaşmasının hazırlanabilmesi için müşteriyi erken bilgilendirin."
+    },
+    "item_max_qty": {
+      "fail": "{code} kalemi: şimdiye kadar {qty} sipariş verildi; belirtilen en fazla {max} miktarını aşıyor.",
+      "suggestion": "Bir sonraki siparişten önce ek miktarı müşteriyle kararlaştırın."
+    },
+    "min_at_risk": {
+      "fail": "{days} gün kaldı ve garantili asgari miktarın %{pct} kadarı sipariş edildi.",
+      "suggestion": "Sipariş verme süresi dolmadan eksikliği müşteriyle görüşün."
+    },
+    "currency_mismatch": {
+      "fail": "Sipariş para birimi {cur}, anlaşma para birimi {agr} ile farklı.",
+      "suggestion": "Siparişler anlaşmanın para biriminde fiyatlandırılır."
+    },
+    "adjustment_unknown": {
+      "fail": "{tag} koşulu bu anlaşmada bir düzeltmeye sahip değil.",
+      "suggestion": "Düzeltmeyi Koşullar sekmesine ekleyin veya koşulu siparişten çıkarın."
+    },
+    "direct_claim": {
+      "fail": "Hak talepleri çerçeve anlaşmaya değil, çağrılı siparişlere yapılır.",
+      "suggestion": "İşin yapıldığı siparişi açın ve talebi orada yapın."
+    },
+    "duplicate_item": {
+      "fail": "{code} kalem kodu {period} fiyat döneminde iki kez geçiyor.",
+      "suggestion": "Fiyat listesini kaydetmeden önce her kalem kodu için tek satır bırakın."
+    },
+    "measured_over_ordered": {
+      "fail": "{code} satırında ölçülen {m}, sipariş edilen {o} miktarını aşıyor; ek iş düşünün.",
+      "suggestion": "Fazla miktarı siparişte değişiklik olarak kaydedin."
+    },
+    "term_over_legal_max": {
+      "fail": "{years} yıllık süre, {source} (paket) kapsamındaki {max} yıllık sınırı aşıyor.",
+      "suggestion": "Süreyi müşteriyle kontrol edin; sınırı paket belirtir ancak zorunlu değildir."
+    }
+  },
   "estimate_archive": {
     "arc_hash_mismatch": {
       "fail": "Parmak izi uyuşmuyor: kayıt {actual} veriyor, mühür {sealed} diyor. Kaydı değiştirilmiş sayın."

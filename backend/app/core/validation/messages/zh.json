@@ -2016,6 +2016,68 @@
       "suggestion": "请补充班组所做工作，或导致停工的延误。"
     }
   },
+  "framework_agreement": {
+    "item_not_in_agreement": {
+      "fail": "行 {code} 不是协议 {agreement} 的有效项目；请作为增项录入。",
+      "suggestion": "从订单中删除该行，并将工作作为增项记录在订单上。"
+    },
+    "rate_deviates": {
+      "fail": "行 {code} 的单价 {rate} 与协议单价 {expected} 不一致。",
+      "suggestion": "订单单价来自框架协议；请按价目表重新计价该行。"
+    },
+    "order_outside_validity": {
+      "fail": "订单日期 {date} 不在协议期限 {from} 至 {to} 之内。",
+      "suggestion": "将订单日期改为期限之内，或先延长协议。"
+    },
+    "rate_period_gap": {
+      "fail": "没有单价期间覆盖 {date}。",
+      "suggestion": "请在“单价与调价”页签中添加覆盖该日期的单价期间。"
+    },
+    "escalation_unresolved": {
+      "fail": "指数 {series} 在 {period} 没有数值，无法调整单价。",
+      "suggestion": "请在价格指数中录入该月的指数值，然后重新计价订单。"
+    },
+    "cap_exceeded": {
+      "fail": "本订单使协议累计达到 {total}，而上限为 {cap}；剩余额度 {headroom}。",
+      "suggestion": "将订单减少到剩余额度以内，或附说明理由的超限批准后再下达。"
+    },
+    "cap_threshold": {
+      "fail": "协议已使用 {pct}% 的上限。",
+      "suggestion": "请尽早告知业主，以便准备后续协议。"
+    },
+    "item_max_qty": {
+      "fail": "项目 {code}：目前已订购 {qty}，超过规定的最大数量 {max}。",
+      "suggestion": "下一份订单之前，请与业主商定增加的数量。"
+    },
+    "min_at_risk": {
+      "fail": "剩余 {days} 天，保证最低量的 {pct}% 已订购。",
+      "suggestion": "趁仍可下单的时间，与业主沟通尚缺的数量。"
+    },
+    "currency_mismatch": {
+      "fail": "订单币种 {cur} 与协议币种 {agr} 不一致。",
+      "suggestion": "订单按协议币种计价。"
+    },
+    "adjustment_unknown": {
+      "fail": "条件 {tag} 在本协议中没有对应的调整。",
+      "suggestion": "请在“条件”页签中添加调整，或从订单中删除该条件。"
+    },
+    "direct_claim": {
+      "fail": "索赔应在调用订单上提出，而不是在框架协议上。",
+      "suggestion": "请打开完成该工作所依据的订单，并在那里提出索赔。"
+    },
+    "duplicate_item": {
+      "fail": "项目编码 {code} 在单价期间 {period} 中出现两次。",
+      "suggestion": "保存价目表前，请确保每个项目编码只保留一行。"
+    },
+    "measured_over_ordered": {
+      "fail": "行 {code} 的实测量 {m} 超过订购量 {o}；请考虑增项。",
+      "suggestion": "请将增加的数量作为订单变更登记。"
+    },
+    "term_over_legal_max": {
+      "fail": "工期 {years} 年超过了 {source}（数据包）规定的 {max} 年上限。",
+      "suggestion": "请与业主核实工期；上限由数据包给出，系统不强制执行。"
+    }
+  },
   "estimate_archive": {
     "arc_hash_mismatch": {
       "fail": "指纹不一致：记录为 {actual}，封存值为 {sealed}。请视为记录已被改动。"

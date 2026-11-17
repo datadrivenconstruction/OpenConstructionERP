@@ -2016,6 +2016,68 @@
       "suggestion": "Tilføj hvad holdet lavede, eller forsinkelsen der stoppede arbejdet."
     }
   },
+  "framework_agreement": {
+    "item_not_in_agreement": {
+      "fail": "Linje {code} er ikke et aktivt punkt i rammeaftale {agreement}; opret det som tillægsarbejde.",
+      "suggestion": "Fjern linjen fra ordren, og opret arbejdet som tillæg til ordren."
+    },
+    "rate_deviates": {
+      "fail": "Linje {code}: prisen {rate} afviger fra rammeaftalens pris {expected}.",
+      "suggestion": "Priser på en afropsordre kommer fra rammeaftalen; genpris linjen fra prislisten."
+    },
+    "order_outside_validity": {
+      "fail": "Ordredatoen {date} ligger uden for aftaleperioden {from} til {to}.",
+      "suggestion": "Datér ordren inden for perioden, eller forlæng rammeaftalen først."
+    },
+    "rate_period_gap": {
+      "fail": "Ingen prisperiode dækker {date}.",
+      "suggestion": "Tilføj en prisperiode, der dækker datoen, på fanen Priser og indeksering."
+    },
+    "escalation_unresolved": {
+      "fail": "Indeks {series} har ingen værdi for {period}; prisen kan ikke reguleres.",
+      "suggestion": "Indtast indeksværdien for måneden under Prisindeks, og genberegn ordren."
+    },
+    "cap_exceeded": {
+      "fail": "Ordren bringer rammeaftalen op på {total} af loft {cap}; råderum {headroom}.",
+      "suggestion": "Reducer ordren til råderummet, eller udsted den med en begrundet undtagelse."
+    },
+    "cap_threshold": {
+      "fail": "Brugen af rammeaftalen har nået {pct} % af loftet.",
+      "suggestion": "Informér kunden tidligt, så en opfølgende aftale kan forberedes."
+    },
+    "item_max_qty": {
+      "fail": "Punkt {code}: {qty} bestilt til dato overskrider det angivne maksimum {max}.",
+      "suggestion": "Aftal den ekstra mængde med kunden før næste ordre."
+    },
+    "min_at_risk": {
+      "fail": "{days} dage tilbage, og {pct} % af den garanterede minimumsmængde er bestilt.",
+      "suggestion": "Tag manglen op med kunden, mens der stadig er tid til at bestille."
+    },
+    "currency_mismatch": {
+      "fail": "Ordrens valuta {cur} afviger fra rammeaftalens valuta {agr}.",
+      "suggestion": "Ordrer prissættes i rammeaftalens valuta."
+    },
+    "adjustment_unknown": {
+      "fail": "Betingelse {tag} har ingen regulering i denne aftale.",
+      "suggestion": "Tilføj reguleringen på fanen Betingelser, eller fjern betingelsen fra ordren."
+    },
+    "direct_claim": {
+      "fail": "Krav oprettes på afropsordrer, ikke på rammeaftalen.",
+      "suggestion": "Åbn den ordre, arbejdet blev udført under, og gør kravet gældende der."
+    },
+    "duplicate_item": {
+      "fail": "Punktkode {code} forekommer to gange i prisperiode {period}.",
+      "suggestion": "Behold én række pr. punktkode, før prislisten gemmes."
+    },
+    "measured_over_ordered": {
+      "fail": "Opmålt {m} overstiger bestilt {o} på linje {code}; overvej et tillæg.",
+      "suggestion": "Registrer den ekstra mængde som en ændring til ordren."
+    },
+    "term_over_legal_max": {
+      "fail": "Løbetiden på {years} år overskrider grænsen på {max} år i {source} (pakke).",
+      "suggestion": "Tjek løbetiden med kunden; grænsen er angivet af pakken, men håndhæves ikke."
+    }
+  },
   "estimate_archive": {
     "arc_hash_mismatch": {
       "fail": "Fingeraftrykket passer ikke: posten giver {actual}, forseglingen siger {sealed}. Betragt posten som ændret."

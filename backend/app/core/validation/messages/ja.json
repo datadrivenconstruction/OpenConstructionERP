@@ -2016,6 +2016,68 @@
       "suggestion": "班の作業内容、または作業を止めた遅延を追加してください。"
     }
   },
+  "framework_agreement": {
+    "item_not_in_agreement": {
+      "fail": "行 {code} は契約 {agreement} の有効な項目ではありません。追加工事として登録してください。",
+      "suggestion": "発注書からこの行を削除し、作業を発注書の追加工事として登録してください。"
+    },
+    "rate_deviates": {
+      "fail": "行 {code} の単価 {rate} が契約単価 {expected} と異なります。",
+      "suggestion": "発注の単価は基本契約から取得されます。単価表から行を再計算してください。"
+    },
+    "order_outside_validity": {
+      "fail": "発注日 {date} が契約期間 {from} から {to} の外にあります。",
+      "suggestion": "発注日を期間内にするか、先に契約を延長してください。"
+    },
+    "rate_period_gap": {
+      "fail": "{date} を含む単価期間がありません。",
+      "suggestion": "「単価・スライド」タブで、この日付を含む単価期間を追加してください。"
+    },
+    "escalation_unresolved": {
+      "fail": "指数 {series} の {period} の値がないため、単価を調整できません。",
+      "suggestion": "価格指数にその月の指数値を入力し、発注を再計算してください。"
+    },
+    "cap_exceeded": {
+      "fail": "この発注により契約額が上限 {cap} のうち {total} に達します。残額は {headroom} です。",
+      "suggestion": "発注を残額以内に減らすか、理由を付けた例外承認で発行してください。"
+    },
+    "cap_threshold": {
+      "fail": "契約の利用が上限の {pct} % に達しました。",
+      "suggestion": "次の契約を準備できるよう、早めに発注者へお伝えください。"
+    },
+    "item_max_qty": {
+      "fail": "項目 {code}: これまでの発注数量 {qty} が、定められた上限 {max} を超えています。",
+      "suggestion": "次の発注の前に、追加数量を発注者と合意してください。"
+    },
+    "min_at_risk": {
+      "fail": "残り {days} 日で、保証最低数量の {pct} % が発注済みです。",
+      "suggestion": "発注できるうちに、不足分を発注者と話し合ってください。"
+    },
+    "currency_mismatch": {
+      "fail": "発注の通貨 {cur} が契約通貨 {agr} と異なります。",
+      "suggestion": "発注は契約通貨で単価計算されます。"
+    },
+    "adjustment_unknown": {
+      "fail": "条件 {tag} に対応する調整がこの契約にありません。",
+      "suggestion": "「条件」タブで調整を追加するか、発注から条件を削除してください。"
+    },
+    "direct_claim": {
+      "fail": "請求は契約ではなく個別発注に対して行います。",
+      "suggestion": "作業を行った発注を開き、そこで請求してください。"
+    },
+    "duplicate_item": {
+      "fail": "項目コード {code} が単価期間 {period} で2回登録されています。",
+      "suggestion": "単価表を保存する前に、項目コードごとに1行にしてください。"
+    },
+    "measured_over_ordered": {
+      "fail": "行 {code} の実測 {m} が発注数量 {o} を超えています。追加工事を検討してください。",
+      "suggestion": "追加数量を発注の変更として登録してください。"
+    },
+    "term_over_legal_max": {
+      "fail": "期間 {years} 年が、{source}（パック）に定める {max} 年の上限を超えています。",
+      "suggestion": "期間を発注者と確認してください。上限はパックが示すもので、強制はされません。"
+    }
+  },
   "estimate_archive": {
     "arc_hash_mismatch": {
       "fail": "フィンガープリントが一致しません。記録は {actual}、封印は {sealed} です。記録は改変されたものとして扱ってください。"

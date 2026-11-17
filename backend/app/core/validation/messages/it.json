@@ -2016,6 +2016,68 @@
       "suggestion": "Aggiungere ciò che ha fatto la squadra o il ritardo che ha fermato i lavori."
     }
   },
+  "framework_agreement": {
+    "item_not_in_agreement": {
+      "fail": "La voce {code} non è una voce attiva dell'accordo quadro {agreement}; inseriscila come extra.",
+      "suggestion": "Rimuovi la riga dall'ordine e registra il lavoro come extra sull'ordine."
+    },
+    "rate_deviates": {
+      "fail": "La tariffa {rate} della voce {code} differisce dalla tariffa dell'accordo {expected}.",
+      "suggestion": "Le tariffe degli ordini derivano dall'accordo quadro; riprezza la riga dal listino."
+    },
+    "order_outside_validity": {
+      "fail": "La data dell'ordine {date} è fuori dalla durata dell'accordo, da {from} a {to}.",
+      "suggestion": "Data l'ordine entro la durata, oppure prolunga prima l'accordo."
+    },
+    "rate_period_gap": {
+      "fail": "Nessun periodo tariffario copre {date}.",
+      "suggestion": "Aggiungi un periodo tariffario che copra questa data nella scheda Tariffe e adeguamenti."
+    },
+    "escalation_unresolved": {
+      "fail": "L'indice {series} non ha valore per {period}; la tariffa non può essere adeguata.",
+      "suggestion": "Inserisci il valore dell'indice di quel mese in Indice prezzi, poi riprezza l'ordine."
+    },
+    "cap_exceeded": {
+      "fail": "Questo ordine porta l'accordo a {total} su un massimale di {cap}; disponibilità residua {headroom}.",
+      "suggestion": "Riduci l'ordine alla disponibilità residua, oppure emettilo con una deroga motivata."
+    },
+    "cap_threshold": {
+      "fail": "L'utilizzo dell'accordo ha raggiunto il {pct} % del massimale.",
+      "suggestion": "Avvisa il committente per tempo, così da preparare un accordo successivo."
+    },
+    "item_max_qty": {
+      "fail": "Voce {code}: ordinati finora {qty}, oltre il massimo indicato di {max}.",
+      "suggestion": "Concorda con il committente la quantità aggiuntiva prima del prossimo ordine."
+    },
+    "min_at_risk": {
+      "fail": "Restano {days} giorni e il {pct} % del minimo garantito è già ordinato.",
+      "suggestion": "Porta il recupero con il committente finché c'è ancora tempo per ordinare."
+    },
+    "currency_mismatch": {
+      "fail": "La valuta dell'ordine {cur} differisce da quella dell'accordo {agr}.",
+      "suggestion": "Gli ordini si prezzano nella valuta dell'accordo."
+    },
+    "adjustment_unknown": {
+      "fail": "La condizione {tag} non ha un adeguamento in questo accordo.",
+      "suggestion": "Aggiungi l'adeguamento nella scheda Condizioni, oppure rimuovi la condizione dall'ordine."
+    },
+    "direct_claim": {
+      "fail": "Le richieste si presentano sugli ordini, non sull'accordo quadro.",
+      "suggestion": "Apri l'ordine sotto cui è stato eseguito il lavoro e presenta la richiesta lì."
+    },
+    "duplicate_item": {
+      "fail": "Il codice voce {code} compare due volte nel periodo tariffario {period}.",
+      "suggestion": "Prima di salvare il listino, tieni una sola riga per ogni codice voce."
+    },
+    "measured_over_ordered": {
+      "fail": "Il misurato {m} supera l'ordinato {o} alla riga {code}; valuta un extra.",
+      "suggestion": "Registra la quantità in più come variante sull'ordine."
+    },
+    "term_over_legal_max": {
+      "fail": "La durata di {years} anni supera il limite di {max} anni previsto da {source} (pacchetto).",
+      "suggestion": "Verifica la durata con il committente; il limite è indicato dal pacchetto ma non è imposto."
+    }
+  },
   "estimate_archive": {
     "arc_hash_mismatch": {
       "fail": "Impronta diversa: il record dà {actual}, il sigillo indica {sealed}. Considerare il record alterato."

@@ -2016,6 +2016,68 @@
       "suggestion": "Dodajte što je ekipa radila ili zastoj koji je zaustavio radove."
     }
   },
+  "framework_agreement": {
+    "item_not_in_agreement": {
+      "fail": "Stavka {code} nije aktivna stavka okvirnog sporazuma {agreement}; evidentirajte je kao dodatne radove.",
+      "suggestion": "Uklonite stavku iz narudžbe i evidentirajte rad kao dodatni rad na narudžbi."
+    },
+    "rate_deviates": {
+      "fail": "Cijena {rate} stavke {code} razlikuje se od cijene iz sporazuma {expected}.",
+      "suggestion": "Cijene narudžbe dolaze iz okvirnog sporazuma; ponovno obračunajte stavku prema cjeniku."
+    },
+    "order_outside_validity": {
+      "fail": "Datum narudžbe {date} izvan je roka sporazuma od {from} do {to}.",
+      "suggestion": "Datirajte narudžbu unutar roka ili prvo produljite sporazum."
+    },
+    "rate_period_gap": {
+      "fail": "Nijedno razdoblje cijena ne obuhvaća {date}.",
+      "suggestion": "Dodajte razdoblje cijena koje obuhvaća ovaj datum na kartici Cijene i indeksacija."
+    },
+    "escalation_unresolved": {
+      "fail": "Indeks {series} nema vrijednost za {period}; cijenu nije moguće prilagoditi.",
+      "suggestion": "Unesite vrijednost indeksa za taj mjesec u Indeks cijena, pa ponovno izračunajte narudžbu."
+    },
+    "cap_exceeded": {
+      "fail": "Ova narudžba podiže sporazum na {total} od ograničenja {cap}; preostalo {headroom}.",
+      "suggestion": "Smanjite narudžbu na preostali iznos ili je izdajte uz obrazloženu iznimku."
+    },
+    "cap_threshold": {
+      "fail": "Korištenje sporazuma dosegnulo je {pct} % ograničenja.",
+      "suggestion": "Javite naručitelju na vrijeme kako bi se pripremio sljedeći sporazum."
+    },
+    "item_max_qty": {
+      "fail": "Stavka {code}: dosad naručeno {qty}, što premašuje navedeni maksimum {max}.",
+      "suggestion": "Dogovorite dodatnu količinu s naručiteljem prije sljedeće narudžbe."
+    },
+    "min_at_risk": {
+      "fail": "Preostalo je {days} dana, a naručeno je {pct} % zajamčenog minimuma.",
+      "suggestion": "Otvorite manjak s naručiteljem dok još ima vremena za narudžbu."
+    },
+    "currency_mismatch": {
+      "fail": "Valuta narudžbe {cur} razlikuje se od valute sporazuma {agr}.",
+      "suggestion": "Narudžbe se obračunavaju u valuti sporazuma."
+    },
+    "adjustment_unknown": {
+      "fail": "Uvjet {tag} nema prilagodbu u ovom sporazumu.",
+      "suggestion": "Dodajte prilagodbu na kartici Uvjeti ili uklonite uvjet iz narudžbe."
+    },
+    "direct_claim": {
+      "fail": "Zahtjevi se podnose na narudžbama, a ne na okvirnom sporazumu.",
+      "suggestion": "Otvorite narudžbu u sklopu koje je rad obavljen i podnesite zahtjev tamo."
+    },
+    "duplicate_item": {
+      "fail": "Šifra stavke {code} pojavljuje se dvaput u razdoblju cijena {period}.",
+      "suggestion": "Prije spremanja cjenika zadržite jedan redak po šifri stavke."
+    },
+    "measured_over_ordered": {
+      "fail": "Izmjereno {m} premašuje naručeno {o} na stavci {code}; razmotrite dodatni rad.",
+      "suggestion": "Unesite dodatnu količinu kao izmjenu narudžbe."
+    },
+    "term_over_legal_max": {
+      "fail": "Trajanje od {years} godina premašuje ograničenje od {max} godina prema {source} (paket).",
+      "suggestion": "Provjerite trajanje s naručiteljem; ograničenje navodi paket, ali se ne provodi."
+    }
+  },
   "estimate_archive": {
     "arc_hash_mismatch": {
       "fail": "Otisak se ne podudara: zapis daje {actual}, pečat navodi {sealed}. Smatrajte zapis izmijenjenim."

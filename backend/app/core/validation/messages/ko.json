@@ -2016,6 +2016,68 @@
       "suggestion": "작업반이 한 일 또는 작업을 멈춘 지연을 추가하세요."
     }
   },
+  "framework_agreement": {
+    "item_not_in_agreement": {
+      "fail": "항목 {code}는 계약 {agreement}의 활성 항목이 아닙니다. 추가 공사로 등록하세요.",
+      "suggestion": "발주서에서 해당 행을 삭제하고, 작업을 발주서의 추가 공사로 등록하세요."
+    },
+    "rate_deviates": {
+      "fail": "항목 {code}의 단가 {rate}가 계약 단가 {expected}와 다릅니다.",
+      "suggestion": "발주 단가는 기본계약에서 가져옵니다. 단가표에서 해당 행의 단가를 다시 산정하세요."
+    },
+    "order_outside_validity": {
+      "fail": "발주일 {date}이(가) 계약 기간 {from}~{to}을(를) 벗어났습니다.",
+      "suggestion": "발주일을 계약 기간 안으로 맞추거나, 먼저 계약을 연장하세요."
+    },
+    "rate_period_gap": {
+      "fail": "{date}을(를) 포함하는 단가 기간이 없습니다.",
+      "suggestion": "단가·물가연동 탭에서 이 날짜를 포함하는 단가 기간을 추가하세요."
+    },
+    "escalation_unresolved": {
+      "fail": "지수 {series}에 {period} 값이 없어 단가를 조정할 수 없습니다.",
+      "suggestion": "물가지수에 해당 월의 지수 값을 입력한 뒤 발주를 다시 산정하세요."
+    },
+    "cap_exceeded": {
+      "fail": "이 발주로 계약 누계가 상한 {cap}의 {total}에 이릅니다. 잔여 한도는 {headroom}입니다.",
+      "suggestion": "발주를 잔여 한도 이내로 줄이거나, 사유를 밝힌 예외 승인으로 발행하세요."
+    },
+    "cap_threshold": {
+      "fail": "계약 사용액이 상한의 {pct} %에 도달했습니다.",
+      "suggestion": "후속 계약을 준비할 수 있도록 발주처에 미리 알리세요."
+    },
+    "item_max_qty": {
+      "fail": "항목 {code}: 현재까지 {qty}을(를) 발주했으며, 명시된 최대 수량 {max}을(를) 넘었습니다.",
+      "suggestion": "다음 발주 전에 추가 수량을 발주처와 합의하세요."
+    },
+    "min_at_risk": {
+      "fail": "남은 기간 {days}일, 보장 최소 물량의 {pct} %가 발주되었습니다.",
+      "suggestion": "발주가 가능한 동안 부족분을 발주처와 협의하세요."
+    },
+    "currency_mismatch": {
+      "fail": "발주 통화 {cur}이(가) 계약 통화 {agr}과(와) 다릅니다.",
+      "suggestion": "발주는 계약 통화로 단가가 산정됩니다."
+    },
+    "adjustment_unknown": {
+      "fail": "조건 {tag}에 대한 조정이 이 계약에 없습니다.",
+      "suggestion": "조건 탭에 조정을 추가하거나, 발주에서 해당 조건을 삭제하세요."
+    },
+    "direct_claim": {
+      "fail": "청구는 기본계약이 아니라 개별 발주에서 합니다.",
+      "suggestion": "작업이 수행된 발주를 열고 그곳에서 청구하세요."
+    },
+    "duplicate_item": {
+      "fail": "항목 코드 {code}이(가) 단가 기간 {period}에 두 번 나타납니다.",
+      "suggestion": "단가표를 저장하기 전에 항목 코드마다 한 행만 남기세요."
+    },
+    "measured_over_ordered": {
+      "fail": "라인 {code}의 실측 {m}이(가) 발주 {o}을(를) 초과합니다. 추가 공사를 검토하세요.",
+      "suggestion": "추가 수량은 발주 변경으로 등록하세요."
+    },
+    "term_over_legal_max": {
+      "fail": "계약 기간 {years}년이 {source}(패키지)의 {max}년 한도를 넘습니다.",
+      "suggestion": "계약 기간을 발주처와 확인하세요. 한도는 패키지가 안내하는 값이며 강제되지 않습니다."
+    }
+  },
   "estimate_archive": {
     "arc_hash_mismatch": {
       "fail": "지문이 일치하지 않습니다: 기록은 {actual}, 봉인은 {sealed}입니다. 기록이 변경된 것으로 간주하십시오."

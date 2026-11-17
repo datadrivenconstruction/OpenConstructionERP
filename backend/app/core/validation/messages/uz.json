@@ -2016,6 +2016,68 @@
       "suggestion": "Brigada nima qilganini yoki ishni toʻxtatgan toʻxtab qolishni qoʻshing."
     }
   },
+  "framework_agreement": {
+    "item_not_in_agreement": {
+      "fail": "{code} qatori {agreement} shartnomasining faol pozitsiyasi emas; uni qo'shimcha ish sifatida kiriting.",
+      "suggestion": "Qatorni buyurtmadan olib tashlang va ishni buyurtmaga qo'shimcha ish sifatida qayd eting."
+    },
+    "rate_deviates": {
+      "fail": "{code} qatorining narxi {rate} shartnoma narxi {expected} dan farq qiladi.",
+      "suggestion": "Buyurtma narxlari ramkaviy shartnomadan olinadi; qatorni narxlar ro'yxati bo'yicha qayta baholang."
+    },
+    "order_outside_validity": {
+      "fail": "Buyurtma sanasi {date} shartnoma muddatidan tashqarida: {from} dan {to} gacha.",
+      "suggestion": "Buyurtmani muddat ichidagi sanaga qo'ying yoki avval shartnomani uzaytiring."
+    },
+    "rate_period_gap": {
+      "fail": "Hech bir narx davri {date} ni qamramaydi.",
+      "suggestion": "Narxlar va indeksatsiya yorlig'iga ushbu sanani qamrab oluvchi narx davrini qo'shing."
+    },
+    "escalation_unresolved": {
+      "fail": "{series} indeksida {period} uchun qiymat yo'q; narxni tuzatib bo'lmaydi.",
+      "suggestion": "Narx indeksiga o'sha oy qiymatini kiriting, so'ng buyurtmani qayta baholang."
+    },
+    "cap_exceeded": {
+      "fail": "Bu buyurtma shartnomani {cap} limitidan {total} ga olib chiqadi; qoldiq {headroom}.",
+      "suggestion": "Buyurtmani qoldiq miqdorgacha kamaytiring yoki asoslangan istisno bilan rasmiylashtiring."
+    },
+    "cap_threshold": {
+      "fail": "Shartnomadan foydalanish limitning {pct} % iga yetdi.",
+      "suggestion": "Keyingi shartnoma tayyorlanishi uchun mijozni oldindan xabardor qiling."
+    },
+    "item_max_qty": {
+      "fail": "{code} pozitsiyasi: hozircha {qty} buyurtma berilgan, bu ko'rsatilgan {max} maksimumidan oshdi.",
+      "suggestion": "Keyingi buyurtmadan oldin qo'shimcha hajm bo'yicha mijoz bilan kelishing."
+    },
+    "min_at_risk": {
+      "fail": "{days} kun qoldi va kafolatlangan minimumning {pct} % i buyurtma qilingan.",
+      "suggestion": "Buyurtma berish imkoni qolganda kamomadni mijoz bilan muhokama qiling."
+    },
+    "currency_mismatch": {
+      "fail": "Buyurtma valyutasi {cur} shartnoma valyutasi {agr} dan farq qiladi.",
+      "suggestion": "Buyurtmalar shartnoma valyutasida narxlanadi."
+    },
+    "adjustment_unknown": {
+      "fail": "{tag} sharti ushbu shartnomada tuzatishga ega emas.",
+      "suggestion": "Tuzatishni Shartlar yorlig'iga qo'shing yoki shartni buyurtmadan olib tashlang."
+    },
+    "direct_claim": {
+      "fail": "Da'volar shartnomaga emas, chaqiriladigan buyurtmalarga beriladi.",
+      "suggestion": "Ish bajarilgan buyurtmani oching va da'voni o'sha yerda rasmiylashtiring."
+    },
+    "duplicate_item": {
+      "fail": "{code} pozitsiya kodi {period} narx davrida ikki marta uchraydi.",
+      "suggestion": "Narxlar ro'yxatini saqlashdan oldin har bir pozitsiya kodi uchun bitta qator qoldiring."
+    },
+    "measured_over_ordered": {
+      "fail": "{code} qatoridagi o'lchangan {m} buyurtma qilingan {o} dan oshadi; qo'shimcha ishni ko'rib chiqing.",
+      "suggestion": "Qo'shimcha hajmni buyurtmaga o'zgarish sifatida kiriting."
+    },
+    "term_over_legal_max": {
+      "fail": "{years} yillik muddat {source} (paket) bo'yicha {max} yillik chegaradan oshadi.",
+      "suggestion": "Muddatni mijoz bilan tekshiring; chegarani paket ko'rsatadi, lekin u majburiy emas."
+    }
+  },
   "estimate_archive": {
     "arc_hash_mismatch": {
       "fail": "Barmoq izi mos emas: yozuv {actual} beradi, muhrda {sealed}. Yozuvni o'zgartirilgan deb hisoblang."
