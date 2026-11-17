@@ -931,6 +931,36 @@
     "change_time_within_owner": {
       "fail": "Gli impatti sui tempi dei subappalti per {code} sommano {sub_days} giorni, più dei {owner_days} giorni concessi dal committente",
       "suggestion": "Verificare le richieste di tempo dei subappaltatori o chiedere al committente una proroga equivalente"
+    },
+    "pay_app_over_complete": {
+      "fail": "La voce {line} raggiunge il {percent} % del valore previsto dopo questo periodo ({completed} su {scheduled})",
+      "suggestion": "Ridurre l'importo di questo periodo o registrare il motivo della fatturazione oltre il valore previsto"
+    },
+    "pay_app_line_negative": {
+      "fail": "La voce {line} totalizzerebbe {completed} a oggi, cioè meno di zero"
+    },
+    "pay_app_within_agreement": {
+      "fail": "Gli stati di avanzamento totalizzano {billed}, oltre il valore del contratto più le varianti approvate di {limit}"
+    },
+    "pay_app_correct": {
+      "suggestion": "Correggere gli importi di questo stato di avanzamento o aumentare il valore del contratto con una variante approvata"
+    },
+    "required_documents": {
+      "fail": "Documento richiesto: {document} ({state})",
+      "suggestion": "Allegare il documento, firmato e valido, al contratto di subappalto",
+      "states": {
+        "missing": "mancante",
+        "unsigned": "non firmato",
+        "expired": "scaduto"
+      }
+    },
+    "document_roles": {
+      "terms_and_conditions": "Termini e condizioni",
+      "safety_agreement": "Accordo sulla sicurezza",
+      "safety_plan": "Piano di sicurezza",
+      "insurance": "Assicurazione",
+      "method_statement": "Metodologia di esecuzione",
+      "other": "Altro documento"
     }
   },
   "submittal": {

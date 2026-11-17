@@ -931,6 +931,36 @@
     "change_time_within_owner": {
       "fail": "{code} के उप-ठेकों का समय प्रभाव कुल {sub_days} दिन है, जो मालिक द्वारा दिए गए {owner_days} दिनों से अधिक है",
       "suggestion": "उप-ठेकेदारों के समय दावों की जाँच करें या मालिक से समान विस्तार का अनुरोध करें"
+    },
+    "pay_app_over_complete": {
+      "fail": "पंक्ति {line} इस अवधि के बाद अपने निर्धारित मूल्य का {percent}% हो जाती है ({completed} में से {scheduled})",
+      "suggestion": "इस अवधि की राशि घटाएँ या निर्धारित मूल्य से अधिक बिल करने का कारण दर्ज करें"
+    },
+    "pay_app_line_negative": {
+      "fail": "पंक्ति {line} अब तक {completed} होती, यानी शून्य से कम"
+    },
+    "pay_app_within_agreement": {
+      "fail": "भुगतान आवेदनों का कुल {billed} है, जो अनुबंध मूल्य और स्वीकृत परिवर्तनों ({limit}) से अधिक है"
+    },
+    "pay_app_correct": {
+      "suggestion": "इस भुगतान आवेदन की राशियाँ सुधारें या स्वीकृत परिवर्तन के ज़रिये अनुबंध मूल्य बढ़ाएँ"
+    },
+    "required_documents": {
+      "fail": "आवश्यक दस्तावेज़: {document} ({state})",
+      "suggestion": "दस्तावेज़ को, हस्ताक्षरित और मान्य, उप-ठेका अनुबंध के साथ संलग्न करें",
+      "states": {
+        "missing": "अनुपलब्ध",
+        "unsigned": "हस्ताक्षरित नहीं",
+        "expired": "समाप्त"
+      }
+    },
+    "document_roles": {
+      "terms_and_conditions": "नियम और शर्तें",
+      "safety_agreement": "सुरक्षा समझौता",
+      "safety_plan": "सुरक्षा योजना",
+      "insurance": "बीमा",
+      "method_statement": "कार्यविधि विवरण",
+      "other": "अन्य दस्तावेज़"
     }
   },
   "submittal": {

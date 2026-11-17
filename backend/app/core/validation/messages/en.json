@@ -967,6 +967,36 @@
     "change_time_within_owner": {
       "fail": "Subcontract time impacts for {code} total {sub_days} days, more than the {owner_days} days the owner granted",
       "suggestion": "Check the subcontract time claims or request a matching extension from the owner"
+    },
+    "pay_app_over_complete": {
+      "fail": "Line {line} reaches {percent}% of its scheduled value after this period ({completed} of {scheduled})",
+      "suggestion": "Lower this period's amount, or record the reason for billing above the scheduled value"
+    },
+    "pay_app_line_negative": {
+      "fail": "Line {line} would total {completed} to date, which is below zero"
+    },
+    "pay_app_within_agreement": {
+      "fail": "Pay applications together total {billed}, above the agreement value plus approved variations of {limit}"
+    },
+    "pay_app_correct": {
+      "suggestion": "Correct the amounts on this pay application, or raise the agreement value through an approved variation"
+    },
+    "required_documents": {
+      "fail": "Required document: {document} ({state})",
+      "suggestion": "Attach the document, signed and current, to the subcontract agreement",
+      "states": {
+        "missing": "missing",
+        "unsigned": "not signed",
+        "expired": "expired"
+      }
+    },
+    "document_roles": {
+      "terms_and_conditions": "Terms and conditions",
+      "safety_agreement": "Safety agreement",
+      "safety_plan": "Safety plan",
+      "insurance": "Insurance",
+      "method_statement": "Method statement",
+      "other": "Other document"
     }
   },
   "submittal": {

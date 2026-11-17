@@ -931,6 +931,36 @@
     "change_time_within_owner": {
       "fail": "ผลกระทบด้านเวลาของผู้รับเหมาช่วงสำหรับ {code} รวม {sub_days} วัน มากกว่า {owner_days} วันที่เจ้าของงานให้",
       "suggestion": "ตรวจสอบการเรียกร้องเวลาของผู้รับเหมาช่วง หรือขอให้เจ้าของงานขยายเวลาให้เท่ากัน"
+    },
+    "pay_app_over_complete": {
+      "fail": "รายการ {line} หลังงวดนี้จะถึง {percent}% ของมูลค่าที่กำหนด ({completed} จาก {scheduled})",
+      "suggestion": "ลดยอดของงวดนี้ หรือบันทึกเหตุผลที่เรียกเก็บเกินมูลค่าที่กำหนด"
+    },
+    "pay_app_line_negative": {
+      "fail": "รายการ {line} จะรวมเป็น {completed} จนถึงปัจจุบัน ซึ่งต่ำกว่าศูนย์"
+    },
+    "pay_app_within_agreement": {
+      "fail": "ใบขอเบิกจ่ายรวมกันเป็น {billed} เกินมูลค่าสัญญารวมงานเพิ่มลดที่อนุมัติแล้ว ({limit})"
+    },
+    "pay_app_correct": {
+      "suggestion": "แก้ไขจำนวนเงินในใบขอเบิกจ่ายนี้ หรือเพิ่มมูลค่าสัญญาด้วยงานเพิ่มลดที่อนุมัติ"
+    },
+    "required_documents": {
+      "fail": "เอกสารที่จำเป็น: {document} ({state})",
+      "suggestion": "แนบเอกสารที่ลงนามแล้วและยังมีผล ไว้กับสัญญาผู้รับเหมาช่วง",
+      "states": {
+        "missing": "ขาด",
+        "unsigned": "ยังไม่ได้ลงนาม",
+        "expired": "หมดอายุ"
+      }
+    },
+    "document_roles": {
+      "terms_and_conditions": "ข้อกำหนดและเงื่อนไข",
+      "safety_agreement": "ข้อตกลงด้านความปลอดภัย",
+      "safety_plan": "แผนความปลอดภัย",
+      "insurance": "ประกันภัย",
+      "method_statement": "วิธีการทำงาน",
+      "other": "เอกสารอื่น"
     }
   },
   "submittal": {

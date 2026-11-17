@@ -931,6 +931,36 @@
     "change_time_within_owner": {
       "fail": "Vremenski utjecaji podugovora za {code} ukupno iznose {sub_days} dana, više od {owner_days} dana koje je odobrio naručitelj",
       "suggestion": "Provjerite zahtjeve podizvođača za vrijeme ili od naručitelja zatražite odgovarajuće produljenje"
+    },
+    "pay_app_over_complete": {
+      "fail": "Stavka {line} nakon ovog razdoblja doseže {percent} % planirane vrijednosti ({completed} od {scheduled})",
+      "suggestion": "Smanjite iznos ovog razdoblja ili zabilježite razlog naplate iznad planirane vrijednosti"
+    },
+    "pay_app_line_negative": {
+      "fail": "Stavka {line} do danas bi iznosila {completed}, dakle manje od nule"
+    },
+    "pay_app_within_agreement": {
+      "fail": "Zahtjevi za plaćanje zajedno iznose {billed}, više od vrijednosti ugovora uvećane za odobrene izmjene od {limit}"
+    },
+    "pay_app_correct": {
+      "suggestion": "Ispravite iznose ovog zahtjeva za plaćanje ili povećajte vrijednost ugovora odobrenom izmjenom"
+    },
+    "required_documents": {
+      "fail": "Potreban dokument: {document} ({state})",
+      "suggestion": "Priložite dokument, potpisan i važeći, ugovoru s podizvođačem",
+      "states": {
+        "missing": "nedostaje",
+        "unsigned": "nije potpisan",
+        "expired": "istekao"
+      }
+    },
+    "document_roles": {
+      "terms_and_conditions": "Uvjeti poslovanja",
+      "safety_agreement": "Sporazum o sigurnosti",
+      "safety_plan": "Plan sigurnosti",
+      "insurance": "Osiguranje",
+      "method_statement": "Opis metode rada",
+      "other": "Ostali dokument"
     }
   },
   "submittal": {

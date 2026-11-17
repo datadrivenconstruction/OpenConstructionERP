@@ -42,6 +42,7 @@ import {
   type PaymentApplication,
 } from './api';
 import { PayAppLinesDialog } from './PayAppLinesDialog';
+import { PayAppStatementDialog } from './PayAppStatementDialog';
 import { describeComplianceReasons } from './complianceReasons';
 import {
   HakedisDialog,
@@ -125,6 +126,7 @@ export function PaymentApprovalActions({
   const [reason, setReason] = useState('');
   const [dialog, setDialog] = useState<'view' | 'approve' | null>(null);
   const [certificateOpen, setCertificateOpen] = useState(false);
+  const [statementOpen, setStatementOpen] = useState(false);
   const hakedisSource: HakedisSource = { kind: 'sub_payment_application', id: payment.id };
 
   const may = (step: Step) => rank >= REQUIRED_RANK[step];
@@ -210,6 +212,16 @@ export function PaymentApprovalActions({
       >
         {t('subcontractors.pay_app_lines', { defaultValue: 'Lines' })}
       </Button>
+      <Button
+        variant="ghost"
+        size="sm"
+        icon={<FileText size={12} />}
+        onClick={() => setStatementOpen(true)}
+        data-testid="pay-app-statement-open"
+      >
+        {t('subcontractors.statement.open', { defaultValue: 'Statement' })}
+      </Button>
+      {statementOpen && <PayAppStatementDialog payment={payment} onClose={() => setStatementOpen(false)} />}
       {hakedisAvailable && (
         <Button
           variant="ghost"

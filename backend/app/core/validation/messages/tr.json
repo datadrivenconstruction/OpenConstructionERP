@@ -931,6 +931,36 @@
     "change_time_within_owner": {
       "fail": "{code} için alt yüklenicilerin süre etkileri toplam {sub_days} gündür; işverenin verdiği {owner_days} günden fazladır",
       "suggestion": "Alt yüklenicilerin süre taleplerini kontrol edin veya işverenden eşdeğer bir uzatma isteyin"
+    },
+    "pay_app_over_complete": {
+      "fail": "{line} kalemi bu dönemden sonra planlanan değerinin %{percent} düzeyine ulaşıyor ({completed} / {scheduled})",
+      "suggestion": "Bu dönemin tutarını düşürün veya planlanan değerin üzerinde fatura edilme nedenini kaydedin"
+    },
+    "pay_app_line_negative": {
+      "fail": "{line} kalemi bugüne kadar {completed} tutarında olurdu, yani sıfırın altında"
+    },
+    "pay_app_within_agreement": {
+      "fail": "Hakedişlerin toplamı {billed}, sözleşme bedeli ile onaylı değişikliklerin toplamını ({limit}) aşıyor"
+    },
+    "pay_app_correct": {
+      "suggestion": "Bu hakedişin tutarlarını düzeltin veya sözleşme bedelini onaylı bir değişiklikle artırın"
+    },
+    "required_documents": {
+      "fail": "Gerekli belge: {document} ({state})",
+      "suggestion": "Belgeyi, imzalı ve geçerli olarak, alt yüklenici sözleşmesine ekleyin",
+      "states": {
+        "missing": "eksik",
+        "unsigned": "imzalanmamış",
+        "expired": "süresi dolmuş"
+      }
+    },
+    "document_roles": {
+      "terms_and_conditions": "Şartlar ve koşullar",
+      "safety_agreement": "İş güvenliği sözleşmesi",
+      "safety_plan": "İş güvenliği planı",
+      "insurance": "Sigorta",
+      "method_statement": "Yöntem bildirimi",
+      "other": "Diğer belge"
     }
   },
   "submittal": {

@@ -931,6 +931,36 @@
     "change_time_within_owner": {
       "fail": "A {code} alvállalkozói időhatásai összesen {sub_days} napot tesznek ki, többet a megrendelő által megadott {owner_days} napnál",
       "suggestion": "Ellenőrizze az alvállalkozók időigényeit, vagy kérjen a megrendelőtől megfelelő hosszabbítást"
+    },
+    "pay_app_over_complete": {
+      "fail": "A(z) {line} tétel ezen időszak után eléri az ütemezett érték {percent} %-át ({completed} / {scheduled})",
+      "suggestion": "Csökkentse az időszak összegét, vagy rögzítse az ütemezett érték feletti számlázás okát"
+    },
+    "pay_app_line_negative": {
+      "fail": "A(z) {line} tétel eddigi összege {completed} lenne, azaz nulla alatti"
+    },
+    "pay_app_within_agreement": {
+      "fail": "A fizetési igények együtt {billed} összegűek, ami meghaladja a szerződéses értéket és a jóváhagyott módosítások összegét ({limit})"
+    },
+    "pay_app_correct": {
+      "suggestion": "Javítsa e fizetési igény összegeit, vagy emelje a szerződéses értéket jóváhagyott módosítással"
+    },
+    "required_documents": {
+      "fail": "Kötelező dokumentum: {document} ({state})",
+      "suggestion": "Csatolja a dokumentumot, aláírva és érvényesen, az alvállalkozói szerződéshez",
+      "states": {
+        "missing": "hiányzik",
+        "unsigned": "nincs aláírva",
+        "expired": "lejárt"
+      }
+    },
+    "document_roles": {
+      "terms_and_conditions": "Szerződési feltételek",
+      "safety_agreement": "Biztonsági megállapodás",
+      "safety_plan": "Biztonsági terv",
+      "insurance": "Biztosítás",
+      "method_statement": "Módszerleírás",
+      "other": "Egyéb dokumentum"
     }
   },
   "submittal": {

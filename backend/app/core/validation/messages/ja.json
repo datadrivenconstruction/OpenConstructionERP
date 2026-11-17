@@ -931,6 +931,36 @@
     "change_time_within_owner": {
       "fail": "{code} の下請の工期影響は合計 {sub_days} 日で、発注者が認めた {owner_days} 日を超えています",
       "suggestion": "下請業者の工期の請求を確認するか、発注者に同等の延長を依頼してください"
+    },
+    "pay_app_over_complete": {
+      "fail": "明細 {line} は今期で予定額の {percent}% に達します（{scheduled} 中 {completed}）",
+      "suggestion": "今期の金額を下げるか、予定額を超えて請求する理由を記録してください"
+    },
+    "pay_app_line_negative": {
+      "fail": "明細 {line} の累計は {completed} となり、ゼロを下回ります"
+    },
+    "pay_app_within_agreement": {
+      "fail": "出来高請求の合計 {billed} が、契約額と承認済み変更の合計 ({limit}) を超えています"
+    },
+    "pay_app_correct": {
+      "suggestion": "この出来高請求の金額を修正するか、承認済みの変更で契約額を引き上げてください"
+    },
+    "required_documents": {
+      "fail": "必須書類: {document} ({state})",
+      "suggestion": "署名済みで有効な書類を下請契約に添付してください",
+      "states": {
+        "missing": "未提出",
+        "unsigned": "未署名",
+        "expired": "期限切れ"
+      }
+    },
+    "document_roles": {
+      "terms_and_conditions": "契約条件",
+      "safety_agreement": "安全協定",
+      "safety_plan": "安全計画",
+      "insurance": "保険",
+      "method_statement": "施工方法書",
+      "other": "その他の書類"
     }
   },
   "submittal": {

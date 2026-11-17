@@ -931,6 +931,36 @@
     "change_time_within_owner": {
       "fail": "Underentreprenørenes tidspåvirkning for {code} er til sammen {sub_days} dager, mer enn de {owner_days} dagene byggherren har gitt",
       "suggestion": "Kontroller underentreprenørenes tidskrav, eller be byggherren om en tilsvarende forlengelse"
+    },
+    "pay_app_over_complete": {
+      "fail": "Linje {line} når {percent} % av planlagt verdi etter denne perioden ({completed} av {scheduled})",
+      "suggestion": "Reduser beløpet for denne perioden, eller noter årsaken til fakturering over planlagt verdi"
+    },
+    "pay_app_line_negative": {
+      "fail": "Linje {line} ville til nå utgjort {completed}, altså under null"
+    },
+    "pay_app_within_agreement": {
+      "fail": "Betalingsanmodningene utgjør til sammen {billed}, over avtaleverdien pluss godkjente endringer på {limit}"
+    },
+    "pay_app_correct": {
+      "suggestion": "Rett beløpene i denne betalingsanmodningen, eller øk avtaleverdien med en godkjent endring"
+    },
+    "required_documents": {
+      "fail": "Påkrevd dokument: {document} ({state})",
+      "suggestion": "Legg ved dokumentet, signert og gyldig, til underentreprisekontrakten",
+      "states": {
+        "missing": "mangler",
+        "unsigned": "ikke signert",
+        "expired": "utløpt"
+      }
+    },
+    "document_roles": {
+      "terms_and_conditions": "Vilkår og betingelser",
+      "safety_agreement": "Sikkerhetsavtale",
+      "safety_plan": "Sikkerhetsplan",
+      "insurance": "Forsikring",
+      "method_statement": "Metodebeskrivelse",
+      "other": "Annet dokument"
     }
   },
   "submittal": {

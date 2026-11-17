@@ -931,6 +931,36 @@
     "change_time_within_owner": {
       "fail": "اثر زمانی پیمان‌کاران دست‌دوم برای {code} در مجموع {sub_days} روز است، بیش از {owner_days} روزی که کارفرما پذیرفته است",
       "suggestion": "ادعاهای زمانی پیمان‌کاران دست‌دوم را بررسی کنید یا از کارفرما تمدید متناسب بخواهید"
+    },
+    "pay_app_over_complete": {
+      "fail": "ردیف {line} پس از این دوره به {percent}٪ ارزش برنامه‌ریزی‌شده می‌رسد ({completed} از {scheduled})",
+      "suggestion": "مبلغ این دوره را کاهش دهید یا دلیل صورت‌حساب بیش از ارزش برنامه‌ریزی‌شده را ثبت کنید"
+    },
+    "pay_app_line_negative": {
+      "fail": "مجموع ردیف {line} تا امروز {completed} می‌شد، یعنی کمتر از صفر"
+    },
+    "pay_app_within_agreement": {
+      "fail": "درخواست‌های پرداخت روی هم {billed} است، بیشتر از ارزش قرارداد به‌علاوه تغییرات تأییدشده ({limit})"
+    },
+    "pay_app_correct": {
+      "suggestion": "مبالغ این درخواست پرداخت را اصلاح کنید یا ارزش قرارداد را با یک تغییر تأییدشده افزایش دهید"
+    },
+    "required_documents": {
+      "fail": "سند مورد نیاز: {document} ({state})",
+      "suggestion": "سند را، امضاشده و معتبر، به قرارداد پیمانکار دست‌دوم پیوست کنید",
+      "states": {
+        "missing": "موجود نیست",
+        "unsigned": "امضا نشده",
+        "expired": "منقضی شده"
+      }
+    },
+    "document_roles": {
+      "terms_and_conditions": "شرایط و ضوابط",
+      "safety_agreement": "توافق‌نامه ایمنی",
+      "safety_plan": "طرح ایمنی",
+      "insurance": "بیمه",
+      "method_statement": "شرح روش اجرا",
+      "other": "سند دیگر"
     }
   },
   "submittal": {

@@ -931,6 +931,36 @@
     "change_time_within_owner": {
       "fail": "Časové dopady subdodávek u {code} činí celkem {sub_days} dní, více než {owner_days} dní přiznaných investorem",
       "suggestion": "Zkontrolujte nároky subdodavatelů na čas nebo požádejte investora o odpovídající prodloužení"
+    },
+    "pay_app_over_complete": {
+      "fail": "Položka {line} dosáhne po tomto období {percent} % plánované hodnoty ({completed} z {scheduled})",
+      "suggestion": "Snižte částku tohoto období nebo uveďte důvod fakturace nad plánovanou hodnotu"
+    },
+    "pay_app_line_negative": {
+      "fail": "Položka {line} by k dnešku činila {completed}, tedy méně než nula"
+    },
+    "pay_app_within_agreement": {
+      "fail": "Žádosti o platbu celkem činí {billed}, tedy více než hodnota smlouvy navýšená o schválené změny ve výši {limit}"
+    },
+    "pay_app_correct": {
+      "suggestion": "Opravte částky v této žádosti o platbu nebo zvyšte hodnotu smlouvy schválenou změnou"
+    },
+    "required_documents": {
+      "fail": "Požadovaný dokument: {document} ({state})",
+      "suggestion": "Přiložte dokument, podepsaný a platný, ke smlouvě se subdodavatelem",
+      "states": {
+        "missing": "chybí",
+        "unsigned": "nepodepsáno",
+        "expired": "vypršelo"
+      }
+    },
+    "document_roles": {
+      "terms_and_conditions": "Obchodní podmínky",
+      "safety_agreement": "Dohoda o bezpečnosti",
+      "safety_plan": "Bezpečnostní plán",
+      "insurance": "Pojištění",
+      "method_statement": "Technologický postup",
+      "other": "Jiný dokument"
     }
   },
   "submittal": {

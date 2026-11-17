@@ -931,6 +931,36 @@
     "change_time_within_owner": {
       "fail": "Dampak waktu subkontrak untuk {code} berjumlah {sub_days} hari, lebih dari {owner_days} hari yang diberikan pemilik",
       "suggestion": "Periksa klaim waktu subkontraktor atau minta perpanjangan yang sepadan dari pemilik"
+    },
+    "pay_app_over_complete": {
+      "fail": "Baris {line} mencapai {percent}% dari nilai terjadwalnya setelah periode ini ({completed} dari {scheduled})",
+      "suggestion": "Turunkan jumlah periode ini atau catat alasan penagihan di atas nilai terjadwal"
+    },
+    "pay_app_line_negative": {
+      "fail": "Baris {line} akan berjumlah {completed} sampai saat ini, yaitu di bawah nol"
+    },
+    "pay_app_within_agreement": {
+      "fail": "Permohonan pembayaran berjumlah {billed}, melebihi nilai perjanjian ditambah variasi yang disetujui sebesar {limit}"
+    },
+    "pay_app_correct": {
+      "suggestion": "Perbaiki jumlah pada permohonan pembayaran ini atau naikkan nilai perjanjian lewat variasi yang disetujui"
+    },
+    "required_documents": {
+      "fail": "Dokumen wajib: {document} ({state})",
+      "suggestion": "Lampirkan dokumen yang sudah ditandatangani dan berlaku pada perjanjian subkontrak",
+      "states": {
+        "missing": "tidak ada",
+        "unsigned": "belum ditandatangani",
+        "expired": "kedaluwarsa"
+      }
+    },
+    "document_roles": {
+      "terms_and_conditions": "Syarat dan ketentuan",
+      "safety_agreement": "Perjanjian keselamatan",
+      "safety_plan": "Rencana keselamatan",
+      "insurance": "Asuransi",
+      "method_statement": "Metode kerja",
+      "other": "Dokumen lain"
     }
   },
   "submittal": {

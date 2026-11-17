@@ -931,6 +931,36 @@
     "change_time_within_owner": {
       "fail": "Ang kabuuang epekto sa oras ng mga subcontract para sa {code} ay {sub_days} araw, mas marami kaysa sa {owner_days} araw na ibinigay ng may-ari",
       "suggestion": "Suriin ang mga claim sa oras ng mga subcontractor o humiling sa may-ari ng katumbas na extension"
+    },
+    "pay_app_over_complete": {
+      "fail": "Ang linya {line} ay aabot sa {percent}% ng nakatakdang halaga pagkatapos ng panahong ito ({completed} sa {scheduled})",
+      "suggestion": "Bawasan ang halaga ng panahong ito o itala ang dahilan ng paniningil nang higit sa nakatakdang halaga"
+    },
+    "pay_app_line_negative": {
+      "fail": "Ang linya {line} ay magiging {completed} hanggang ngayon, na mas mababa sa zero"
+    },
+    "pay_app_within_agreement": {
+      "fail": "Ang mga aplikasyon sa bayad ay umaabot sa {billed}, higit sa halaga ng kasunduan at aprubadong pagbabago ({limit})"
+    },
+    "pay_app_correct": {
+      "suggestion": "Ituwid ang mga halaga sa aplikasyon sa bayad na ito o itaas ang halaga ng kasunduan sa pamamagitan ng aprubadong pagbabago"
+    },
+    "required_documents": {
+      "fail": "Kinakailangang dokumento: {document} ({state})",
+      "suggestion": "Ikabit ang dokumento, nilagdaan at may bisa, sa kasunduan sa subkontrata",
+      "states": {
+        "missing": "kulang",
+        "unsigned": "hindi nilagdaan",
+        "expired": "nag-expire na"
+      }
+    },
+    "document_roles": {
+      "terms_and_conditions": "Mga tuntunin at kundisyon",
+      "safety_agreement": "Kasunduan sa kaligtasan",
+      "safety_plan": "Plano sa kaligtasan",
+      "insurance": "Seguro",
+      "method_statement": "Paraan ng paggawa",
+      "other": "Ibang dokumento"
     }
   },
   "submittal": {

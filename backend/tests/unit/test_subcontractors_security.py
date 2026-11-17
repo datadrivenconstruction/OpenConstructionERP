@@ -96,6 +96,12 @@ class _Repo:
     ) -> list[Any]:
         return [r for r in self.rows.values() if getattr(r, "agreement_id", None) == ag_id]
 
+    async def approved_changes_total(self, _ag_id: uuid.UUID) -> Decimal:
+        return Decimal("0")
+
+    async def get_installation(self) -> Any:
+        return None
+
     async def next_application_number(self, _ag_id: uuid.UUID) -> str:
         self._counter += 1
         return f"PA-{self._counter:04d}"
@@ -190,6 +196,8 @@ def _make_service() -> Any:
     svc.payment_lines = _Repo()
     svc.retention = _Repo()
     svc.ratings = _Repo()
+    svc.agreement_documents = _Repo()
+    svc.document_policy_repo = _Repo()
     return svc
 
 

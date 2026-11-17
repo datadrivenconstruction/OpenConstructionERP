@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import uuid
 from datetime import date, timedelta
+from decimal import Decimal
 from typing import Any
 
 from sqlalchemy import func, select, update
@@ -22,6 +23,9 @@ from app.modules.subcontractors.models import (
     PrequalificationApplication,
     RetentionLedger,
     SubcontractAgreement,
+    SubcontractChange,
+    SubcontractDocument,
+    SubcontractDocumentPolicy,
     Subcontractor,
     SubcontractorContact,
     SubcontractorRating,
@@ -318,6 +322,15 @@ class AgreementRepository(_BaseRepo):
     """CRUD for SubcontractAgreement."""
 
     model = SubcontractAgreement
+
+    async def approved_changes_total(self, agreement_id: uuid.UUID) -> Decimal:
+        """What approved changes added to the agreement value (``applied_amount``, set once on approval)."""
+        stmt = select(func.coalesce(func.sum(SubcontractChange.applied_amount), 0)).where(
+            SubcontractChange.agreement_id == agreement_id,
+            SubcontractChange.status == "approved",
+            SubcontractChange.applied_amount.is_not(None),
+        )
+        return Decimal(str((await self.session.execute(stmt)).scalar_one()))
 
     async def list_for_subcontractor(
         self,
@@ -740,3 +753,27 @@ class PrimeContractReader:
         from app.modules.contracts.repository import ProgressClaimRepository  # noqa: PLC0415
 
         return await ProgressClaimRepository(self.session).paid_total(contract_id)
+
+
+class SubcontractDocumentRepository(_BaseRepo):
+    """CRUD for the files attached to a subcontract agreement."""
+
+    model = SubcontractDocument
+
+    async def list_for_agreement(self, agreement_id: uuid.UUID) -> list[SubcontractDocument]:
+        stmt = (
+            select(SubcontractDocument)
+            .where(SubcontractDocument.agreement_id == agreement_id)
+            .order_by(SubcontractDocument.created_at.desc())
+        )
+        return list((await self.session.execute(stmt)).scalars().all())
+
+
+class SubcontractDocumentPolicyRepository(_BaseRepo):
+    """The single installation policy row."""
+
+    model = SubcontractDocumentPolicy
+
+    async def get_installation(self) -> SubcontractDocumentPolicy | None:
+        stmt = select(SubcontractDocumentPolicy).where(SubcontractDocumentPolicy.scope == "installation")
+        return (await self.session.execute(stmt)).scalars().first()

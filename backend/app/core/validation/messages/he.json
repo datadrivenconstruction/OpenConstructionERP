@@ -931,6 +931,36 @@
     "change_time_within_owner": {
       "fail": "השפעות הזמן של קבלני המשנה עבור {code} מסתכמות ב-{sub_days} ימים, יותר מ-{owner_days} הימים שהמזמין העניק",
       "suggestion": "בדקו את תביעות הזמן של קבלני המשנה או בקשו מהמזמין הארכה מקבילה"
+    },
+    "pay_app_over_complete": {
+      "fail": "שורה {line} מגיעה אחרי תקופה זו ל-{percent}% מערכה המתוכנן ({completed} מתוך {scheduled})",
+      "suggestion": "הקטן את סכום התקופה או רשום את הסיבה לחיוב מעל הערך המתוכנן"
+    },
+    "pay_app_line_negative": {
+      "fail": "שורה {line} תסתכם עד היום ב-{completed}, כלומר מתחת לאפס"
+    },
+    "pay_app_within_agreement": {
+      "fail": "בקשות התשלום מסתכמות יחד ב-{billed}, מעל ערך ההסכם בתוספת שינויים מאושרים של {limit}"
+    },
+    "pay_app_correct": {
+      "suggestion": "תקן את הסכומים בבקשת תשלום זו או הגדל את ערך ההסכם באמצעות שינוי מאושר"
+    },
+    "required_documents": {
+      "fail": "מסמך נדרש: {document} ({state})",
+      "suggestion": "צרף את המסמך, חתום ובתוקף, להסכם קבלן המשנה",
+      "states": {
+        "missing": "חסר",
+        "unsigned": "לא חתום",
+        "expired": "פג תוקף"
+      }
+    },
+    "document_roles": {
+      "terms_and_conditions": "תנאים והגבלות",
+      "safety_agreement": "הסכם בטיחות",
+      "safety_plan": "תוכנית בטיחות",
+      "insurance": "ביטוח",
+      "method_statement": "הצהרת שיטת עבודה",
+      "other": "מסמך אחר"
     }
   },
   "submittal": {
