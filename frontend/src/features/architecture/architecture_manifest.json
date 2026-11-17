@@ -207082,6 +207082,808 @@
       ]
     },
     {
+      "module_id": "project_catalogue",
+      "module_label": "Project Catalogue",
+      "module_category": "core",
+      "files": [
+        "__init__.py",
+        "catalogue_math.py",
+        "manifest.py",
+        "models.py",
+        "permissions.py",
+        "repository.py",
+        "router.py",
+        "schemas.py",
+        "service.py",
+        "validators.py"
+      ],
+      "manifest": {
+        "name": "oe_project_catalogue",
+        "version": "0.1.0",
+        "display_name": "Project Catalogue",
+        "description": "A project's own set of rates and resources, copied from the cost database or the company library and edited for this job without touching the master data. Each copy keeps its source, shows when the source price moves, and lets the estimator take the new price or keep the local one. Bill lines priced from it can be refreshed in one step.",
+        "author": "OpenConstructionERP Core Team",
+        "category": "core",
+        "depends": [
+          "oe_projects",
+          "oe_costs",
+          "oe_boq"
+        ],
+        "auto_install": true,
+        "enabled": true
+      },
+      "models": [
+        {
+          "class_name": "ProjectCatalogueItem",
+          "tablename": "oe_project_catalogue_item",
+          "docstring": "A project's own rate, copied from a source or typed by the estimator.",
+          "columns": [
+            {
+              "name": "project_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_projects_project.id"
+            },
+            {
+              "name": "code",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "description",
+              "annotation": "Mapped[str]",
+              "sql_type": "Text",
+              "nullable": false
+            },
+            {
+              "name": "unit",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "item_type",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "rate",
+              "annotation": "Mapped[Decimal]",
+              "sql_type": "Numeric",
+              "nullable": false
+            },
+            {
+              "name": "currency",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "note",
+              "annotation": "Mapped[str]",
+              "sql_type": "Text",
+              "nullable": false
+            },
+            {
+              "name": "source_type",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "source_id",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "source_label",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "source_code",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "source_rate",
+              "annotation": "Mapped[Decimal | None]",
+              "sql_type": "Numeric",
+              "nullable": true
+            },
+            {
+              "name": "source_currency",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "source_synced_at",
+              "annotation": "Mapped[datetime | None]",
+              "sql_type": "DateTime",
+              "nullable": true
+            },
+            {
+              "name": "created_by",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            }
+          ],
+          "relationships": []
+        }
+      ],
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/projects/{project_id}/items",
+          "handler": "list_items",
+          "response_model": "ItemListResponse"
+        },
+        {
+          "method": "POST",
+          "path": "/projects/{project_id}/items",
+          "handler": "create_item",
+          "response_model": "ItemResponse",
+          "request_schema": "ItemCreate"
+        },
+        {
+          "method": "POST",
+          "path": "/projects/{project_id}/items/import",
+          "handler": "import_items",
+          "response_model": "ImportResult",
+          "request_schema": "ImportRequest"
+        },
+        {
+          "method": "POST",
+          "path": "/projects/{project_id}/items/sync",
+          "handler": "sync_items",
+          "response_model": "SyncResult",
+          "request_schema": "SyncRequest"
+        },
+        {
+          "method": "GET",
+          "path": "/projects/{project_id}/sources",
+          "handler": "search_sources",
+          "response_model": "SourceSearchResponse"
+        },
+        {
+          "method": "POST",
+          "path": "/projects/{project_id}/validate",
+          "handler": "validate_catalogue",
+          "response_model": "ValidationReportOut"
+        },
+        {
+          "method": "PATCH",
+          "path": "/items/{item_id}",
+          "handler": "update_item",
+          "response_model": "ItemResponse",
+          "request_schema": "ItemUpdate"
+        },
+        {
+          "method": "DELETE",
+          "path": "/items/{item_id}",
+          "handler": "delete_item"
+        },
+        {
+          "method": "GET",
+          "path": "/items/{item_id}/positions",
+          "handler": "position_candidates",
+          "response_model": "CandidateListResponse"
+        },
+        {
+          "method": "POST",
+          "path": "/items/{item_id}/apply",
+          "handler": "apply_item",
+          "response_model": "ApplyResult",
+          "request_schema": "ApplyRequest"
+        },
+        {
+          "method": "POST",
+          "path": "/items/{item_id}/push",
+          "handler": "push_item",
+          "response_model": "ApplyResult"
+        }
+      ],
+      "schemas": [
+        {
+          "class_name": "ItemCreate",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "A rate typed by the estimator for this project only.",
+          "fields": [
+            {
+              "name": "code",
+              "type": "str"
+            },
+            {
+              "name": "description",
+              "type": "str"
+            },
+            {
+              "name": "unit",
+              "type": "str"
+            },
+            {
+              "name": "item_type",
+              "type": "ItemType",
+              "default": "'work'"
+            },
+            {
+              "name": "rate",
+              "type": "FiniteDecimal"
+            },
+            {
+              "name": "currency",
+              "type": "str"
+            },
+            {
+              "name": "note",
+              "type": "str"
+            }
+          ]
+        },
+        {
+          "class_name": "ItemUpdate",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "A partial edit of a project rate. The source it came from is never written.",
+          "fields": [
+            {
+              "name": "code",
+              "type": "str | None"
+            },
+            {
+              "name": "description",
+              "type": "str | None"
+            },
+            {
+              "name": "unit",
+              "type": "str | None"
+            },
+            {
+              "name": "item_type",
+              "type": "ItemType | None",
+              "default": "None"
+            },
+            {
+              "name": "rate",
+              "type": "FiniteDecimal | None",
+              "default": "None"
+            },
+            {
+              "name": "currency",
+              "type": "str | None"
+            },
+            {
+              "name": "note",
+              "type": "str | None"
+            }
+          ]
+        },
+        {
+          "class_name": "ImportRequest",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Copy rows of the cost database or the resource catalogue into the project.",
+          "fields": [
+            {
+              "name": "source_type",
+              "type": "SourceType"
+            },
+            {
+              "name": "source_ids",
+              "type": "list[UUID]"
+            }
+          ]
+        },
+        {
+          "class_name": "SyncRequest",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Decide on moved source prices; no ids means every item whose source moved.",
+          "fields": [
+            {
+              "name": "action",
+              "type": "SyncAction"
+            },
+            {
+              "name": "item_ids",
+              "type": "list[UUID] | None"
+            }
+          ]
+        },
+        {
+          "class_name": "ApplyRequest",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Price these bill lines from one project rate.",
+          "fields": [
+            {
+              "name": "position_ids",
+              "type": "list[UUID]"
+            }
+          ]
+        },
+        {
+          "class_name": "ItemResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "A project rate with its provenance and where it stands against its source.",
+          "fields": [
+            {
+              "name": "id",
+              "type": "UUID"
+            },
+            {
+              "name": "project_id",
+              "type": "UUID"
+            },
+            {
+              "name": "code",
+              "type": "str"
+            },
+            {
+              "name": "description",
+              "type": "str"
+            },
+            {
+              "name": "unit",
+              "type": "str"
+            },
+            {
+              "name": "item_type",
+              "type": "str"
+            },
+            {
+              "name": "rate",
+              "type": "Decimal"
+            },
+            {
+              "name": "currency",
+              "type": "str"
+            },
+            {
+              "name": "note",
+              "type": "str"
+            },
+            {
+              "name": "source_type",
+              "type": "str"
+            },
+            {
+              "name": "source_id",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "source_label",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "source_code",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "source_rate",
+              "type": "Decimal | None",
+              "default": "None"
+            },
+            {
+              "name": "source_currency",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "source_synced_at",
+              "type": "datetime | None",
+              "default": "None"
+            },
+            {
+              "name": "current_source_rate",
+              "type": "Decimal | None",
+              "default": "None"
+            },
+            {
+              "name": "status",
+              "type": "str",
+              "default": "'manual'"
+            },
+            {
+              "name": "deviation_percent",
+              "type": "Decimal | None",
+              "default": "None"
+            },
+            {
+              "name": "linked_positions",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "stale_positions",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "created_at",
+              "type": "datetime"
+            },
+            {
+              "name": "updated_at",
+              "type": "datetime"
+            },
+            {
+              "name": "warnings",
+              "type": "list[dict]"
+            }
+          ]
+        },
+        {
+          "class_name": "CatalogueSummary",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Counts the page shows above the list.",
+          "fields": [
+            {
+              "name": "total",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "in_sync",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "overridden",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "source_changed",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "source_missing",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "manual",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "linked_positions",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "stale_positions",
+              "type": "int",
+              "default": "0"
+            }
+          ]
+        },
+        {
+          "class_name": "ItemListResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "One page of a project catalogue.",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[ItemResponse]"
+            },
+            {
+              "name": "total",
+              "type": "int"
+            },
+            {
+              "name": "offset",
+              "type": "int"
+            },
+            {
+              "name": "limit",
+              "type": "int"
+            },
+            {
+              "name": "summary",
+              "type": "CatalogueSummary"
+            }
+          ]
+        },
+        {
+          "class_name": "SourceHit",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "A row of the cost database or resource catalogue that can be copied in.",
+          "fields": [
+            {
+              "name": "source_type",
+              "type": "str"
+            },
+            {
+              "name": "source_id",
+              "type": "str"
+            },
+            {
+              "name": "code",
+              "type": "str"
+            },
+            {
+              "name": "description",
+              "type": "str"
+            },
+            {
+              "name": "unit",
+              "type": "str"
+            },
+            {
+              "name": "rate",
+              "type": "Decimal"
+            },
+            {
+              "name": "currency",
+              "type": "str"
+            },
+            {
+              "name": "label",
+              "type": "str"
+            },
+            {
+              "name": "already_added",
+              "type": "bool",
+              "default": "False"
+            }
+          ]
+        },
+        {
+          "class_name": "SourceSearchResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "One page of source search results.",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[SourceHit]"
+            },
+            {
+              "name": "total",
+              "type": "int"
+            },
+            {
+              "name": "offset",
+              "type": "int"
+            },
+            {
+              "name": "limit",
+              "type": "int"
+            }
+          ]
+        },
+        {
+          "class_name": "PositionCandidate",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "A bill line of the project that a rate can price.",
+          "fields": [
+            {
+              "name": "id",
+              "type": "str"
+            },
+            {
+              "name": "boq_id",
+              "type": "str"
+            },
+            {
+              "name": "boq_name",
+              "type": "str"
+            },
+            {
+              "name": "ordinal",
+              "type": "str"
+            },
+            {
+              "name": "description",
+              "type": "str"
+            },
+            {
+              "name": "unit",
+              "type": "str"
+            },
+            {
+              "name": "quantity",
+              "type": "str"
+            },
+            {
+              "name": "unit_rate",
+              "type": "str"
+            },
+            {
+              "name": "linked_item_id",
+              "type": "str | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "CandidateListResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "One page of bill lines.",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[PositionCandidate]"
+            },
+            {
+              "name": "total",
+              "type": "int"
+            },
+            {
+              "name": "offset",
+              "type": "int"
+            },
+            {
+              "name": "limit",
+              "type": "int"
+            }
+          ]
+        },
+        {
+          "class_name": "ImportResult",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "What a copy from a source did.",
+          "fields": [
+            {
+              "name": "added",
+              "type": "int"
+            },
+            {
+              "name": "skipped",
+              "type": "int"
+            },
+            {
+              "name": "items",
+              "type": "list[ItemResponse]"
+            }
+          ]
+        },
+        {
+          "class_name": "SyncResult",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "What a decision on moved source prices did.",
+          "fields": [
+            {
+              "name": "updated",
+              "type": "int"
+            },
+            {
+              "name": "skipped",
+              "type": "int"
+            }
+          ]
+        },
+        {
+          "class_name": "ApplyResult",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "What pricing bill lines from a project rate did.",
+          "fields": [
+            {
+              "name": "applied",
+              "type": "int"
+            },
+            {
+              "name": "skipped",
+              "type": "int"
+            },
+            {
+              "name": "position_ids",
+              "type": "list[str]"
+            }
+          ]
+        },
+        {
+          "class_name": "Finding",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "One failed rule.",
+          "fields": [
+            {
+              "name": "rule_id",
+              "type": "str"
+            },
+            {
+              "name": "severity",
+              "type": "str"
+            },
+            {
+              "name": "message",
+              "type": "str"
+            },
+            {
+              "name": "suggestion",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "element_ref",
+              "type": "str | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "ValidationReportOut",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "The ``project_catalogue`` rule set over one project's catalogue.",
+          "fields": [
+            {
+              "name": "status",
+              "type": "str"
+            },
+            {
+              "name": "error_count",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "warning_count",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "info_count",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "findings",
+              "type": "list[Finding]"
+            }
+          ]
+        }
+      ],
+      "import_dependencies": [
+        "boq",
+        "catalog",
+        "costs",
+        "projects"
+      ]
+    },
+    {
       "module_id": "project_controls",
       "module_label": "Project Controls",
       "module_category": "extension",
@@ -316766,6 +317568,13 @@
       "total_files": 5
     },
     {
+      "name": "project-catalogue",
+      "ts_files": 4,
+      "css_files": 0,
+      "test_files": 1,
+      "total_files": 4
+    },
+    {
       "name": "project-controls",
       "ts_files": 10,
       "css_files": 0,
@@ -318604,6 +319413,12 @@
       "field_time",
       "projects"
     ],
+    "project_catalogue": [
+      "boq",
+      "catalog",
+      "costs",
+      "projects"
+    ],
     "project_controls": [
       "bi_dashboards",
       "projects",
@@ -319134,17 +319949,17 @@
     ]
   },
   "statistics": {
-    "backend_modules": 245,
-    "modules_with_manifests": 245,
-    "total_models": 909,
-    "total_columns": 10668,
+    "backend_modules": 246,
+    "modules_with_manifests": 246,
+    "total_models": 910,
+    "total_columns": 10684,
     "total_relationships": 261,
-    "total_routes": 5225,
-    "total_schemas": 4735,
-    "total_python_files": 3373,
-    "frontend_features": 239,
-    "frontend_ts_files": 4204,
-    "frontend_backend_mapped": 214
+    "total_routes": 5236,
+    "total_schemas": 4752,
+    "total_python_files": 3383,
+    "frontend_features": 240,
+    "frontend_ts_files": 4208,
+    "frontend_backend_mapped": 215
   },
   "frontend_backend_mapping": {
     "about": null,
@@ -319316,6 +320131,7 @@
     "procurement": "procurement",
     "procurement_concept": "procurement_concept",
     "progress": "progress",
+    "project-catalogue": "project_catalogue",
     "project-controls": "project_controls",
     "project-intelligence": "project_intelligence",
     "project-route": "project_route",

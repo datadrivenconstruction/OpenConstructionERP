@@ -2138,5 +2138,27 @@
       "fail": "Higit sa isa ang aprubadong baseline ng iskedyul na ito ({baselines}).",
       "suggestion": "Aprubahan ang baseline na dapat umiral; ang pag-apruba sa isa ay bumabawi sa apruba ng iba."
     }
+  },
+  "project_catalogue": {
+    "unit_present": {
+      "fail": "Walang yunit ang rate na {code}.",
+      "suggestion": "Ilagay ang yunit kung saan nakapresyo ang rate, gaya ng m2, m3 o oras."
+    },
+    "duplicate_code": {
+      "fail": "Ginagamit ang code na {code} ng higit sa isang rate sa proyektong ito.",
+      "suggestion": "Panatilihin ang isang rate bawat code, o bigyan ang variant ng sariling code."
+    },
+    "currency_differs": {
+      "fail": "Nasa {currency} ang rate na {code}, pero naka-presyo ang proyekto sa {project_currency}.",
+      "suggestion": "I-convert ang rate sa currency ng proyekto, o kumpirmahing sinadya ang dayuhang currency."
+    },
+    "override_far": {
+      "fail": "Ang lokal na rate ng {code} ay {percent} % ang layo sa source rate na {source_rate}.",
+      "suggestion": "Suriin kung nausog ang decimal point, o itala kung bakit kailangan ng proyekto ng ibang presyo."
+    },
+    "source_changed": {
+      "fail": "Nagbago ang source rate ng {code} mula {old} tungong {new} mula nang kopyahin ito ng proyekto.",
+      "suggestion": "Kunin ang bagong source rate, o sadyang panatilihin ang lokal na rate."
+    }
   }
 }

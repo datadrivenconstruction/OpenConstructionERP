@@ -2138,5 +2138,27 @@
       "fail": "Bu iş programının birden fazla onaylı temel planı var ({baselines}).",
       "suggestion": "Geçerli olması gereken temel planı onaylayın; birini onaylamak diğerlerinin onayını geri alır."
     }
+  },
+  "project_catalogue": {
+    "unit_present": {
+      "fail": "{code} birim fiyatının birimi yok.",
+      "suggestion": "Fiyatın ait olduğu birimi girin, örneğin m2, m3 veya sa."
+    },
+    "duplicate_code": {
+      "fail": "{code} kodu bu projede birden fazla fiyat tarafından kullanılıyor.",
+      "suggestion": "Kod başına bir fiyat tutun veya varyanta kendi kodunu verin."
+    },
+    "currency_differs": {
+      "fail": "{code} fiyatı {currency} cinsinden, ancak proje {project_currency} ile fiyatlandırılıyor.",
+      "suggestion": "Fiyatı proje para birimine çevirin veya yabancı para biriminin bilinçli olduğunu onaylayın."
+    },
+    "override_far": {
+      "fail": "{code} için yerel fiyat, kaynak fiyat {source_rate} değerinden % {percent} sapıyor.",
+      "suggestion": "Kaymış bir ondalık ayırıcı olup olmadığını kontrol edin veya projenin neden farklı bir fiyata ihtiyaç duyduğunu not edin."
+    },
+    "source_changed": {
+      "fail": "{code} kaynak fiyatı, proje kopyaladığından beri {old} değerinden {new} değerine değişti.",
+      "suggestion": "Yeni kaynak fiyatı alın veya yerel fiyatı bilinçli olarak koruyun."
+    }
   }
 }

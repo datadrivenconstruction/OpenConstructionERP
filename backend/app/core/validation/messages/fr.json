@@ -2138,5 +2138,27 @@
       "fail": "Ce planning a plus d'une référence approuvée ({baselines}).",
       "suggestion": "Approuvez la référence qui doit s'appliquer ; en approuver une retire l'approbation des autres."
     }
+  },
+  "project_catalogue": {
+    "unit_present": {
+      "fail": "Le prix {code} n'a pas d'unité.",
+      "suggestion": "Indiquez l'unité à laquelle le prix se rapporte, par exemple m2, m3 ou h."
+    },
+    "duplicate_code": {
+      "fail": "Le code {code} est utilisé par plusieurs prix dans ce projet.",
+      "suggestion": "Gardez un prix par code ou donnez à la variante son propre code."
+    },
+    "currency_differs": {
+      "fail": "Le prix {code} est en {currency}, mais le projet est chiffré en {project_currency}.",
+      "suggestion": "Convertissez le prix dans la devise du projet ou confirmez que la devise étrangère est voulue."
+    },
+    "override_far": {
+      "fail": "Le prix local de {code} s'écarte de {percent} % de son prix source {source_rate}.",
+      "suggestion": "Vérifiez une virgule mal placée ou notez pourquoi ce projet a besoin d'un autre prix."
+    },
+    "source_changed": {
+      "fail": "Le prix source de {code} est passé de {old} à {new} depuis sa copie dans le projet.",
+      "suggestion": "Reprenez le nouveau prix source ou conservez sciemment le prix local."
+    }
   }
 }

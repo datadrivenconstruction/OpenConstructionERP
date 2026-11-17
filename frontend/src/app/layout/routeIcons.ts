@@ -38,6 +38,7 @@ import {
   BrainCircuit,
   Database,
   Boxes,
+  BookCopy,
   Compass,
   Layers,
   BarChart3,
@@ -157,6 +158,7 @@ const EXTRA_ROUTE_ICONS: Record<string, LucideIcon> = {
   // ── 3. Cost Data ──────────────────────────────────────────────────
   '/costs': Database,
   '/catalog': Boxes,
+  '/project-catalogue': BookCopy,
   '/cost-explorer': Compass,
   '/assemblies': Layers,
   '/benchmarks': BarChart3,

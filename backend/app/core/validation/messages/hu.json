@@ -2138,5 +2138,27 @@
       "fail": "Ennek az ütemtervnek egynél több jóváhagyott alapterve van ({baselines}).",
       "suggestion": "Hagyja jóvá az érvényes alaptervet; egy jóváhagyása visszavonja a többiek jóváhagyását."
     }
+  },
+  "project_catalogue": {
+    "unit_present": {
+      "fail": "A(z) {code} egységárnak nincs mértékegysége.",
+      "suggestion": "Adja meg, milyen egységre vonatkozik az ár, például m2, m3 vagy óra."
+    },
+    "duplicate_code": {
+      "fail": "A(z) {code} kódot ebben a projektben több egységár is használja.",
+      "suggestion": "Kódonként egy árat tartson meg, vagy adjon a változatnak saját kódot."
+    },
+    "currency_differs": {
+      "fail": "A(z) {code} egységár {currency} pénznemben van, a projekt viszont {project_currency} pénznemben készül.",
+      "suggestion": "Számítsa át az árat a projekt pénznemére, vagy erősítse meg, hogy a külföldi pénznem szándékos."
+    },
+    "override_far": {
+      "fail": "A(z) {code} helyi ára {percent} %-kal tér el a forrásártól ({source_rate}).",
+      "suggestion": "Ellenőrizze, nem csúszott-e el a tizedesjel, vagy jegyezze fel, miért kell más ár ennek a projektnek."
+    },
+    "source_changed": {
+      "fail": "A(z) {code} forrásbeli ára {old} értékről {new} értékre változott, mióta a projekt átvette.",
+      "suggestion": "Vegye át az új forrásárat, vagy tudatosan tartsa meg a helyi árat."
+    }
   }
 }

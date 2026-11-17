@@ -2138,5 +2138,27 @@
       "fail": "Ovaj plan ima više od jednog odobrenog osnovnog plana ({baselines}).",
       "suggestion": "Odobrite osnovni plan koji treba vrijediti; odobrenje jednog povlači odobrenje ostalih."
     }
+  },
+  "project_catalogue": {
+    "unit_present": {
+      "fail": "Cijena {code} nema jedinicu mjere.",
+      "suggestion": "Unesite jedinicu na koju se cijena odnosi, na primjer m2, m3 ili h."
+    },
+    "duplicate_code": {
+      "fail": "Šifru {code} u ovom projektu koristi više od jedne cijene.",
+      "suggestion": "Zadržite jednu cijenu po šifri ili varijanti dodijelite vlastitu šifru."
+    },
+    "currency_differs": {
+      "fail": "Cijena {code} je u {currency}, a projekt se procjenjuje u {project_currency}.",
+      "suggestion": "Preračunajte cijenu u valutu projekta ili potvrdite da je strana valuta namjerna."
+    },
+    "override_far": {
+      "fail": "Lokalna cijena za {code} odstupa {percent} % od izvorne cijene {source_rate}.",
+      "suggestion": "Provjerite je li decimalni zarez pomaknut ili zabilježite zašto projektu treba druga cijena."
+    },
+    "source_changed": {
+      "fail": "Izvorna cijena za {code} promijenila se s {old} na {new} otkako ju je projekt preuzeo.",
+      "suggestion": "Preuzmite novu izvornu cijenu ili svjesno zadržite lokalnu."
+    }
   }
 }

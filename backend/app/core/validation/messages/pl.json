@@ -2138,5 +2138,27 @@
       "fail": "Ten harmonogram ma więcej niż jeden zatwierdzony plan bazowy ({baselines}).",
       "suggestion": "Zatwierdź plan bazowy, który ma obowiązywać; zatwierdzenie jednego cofa zatwierdzenie pozostałych."
     }
+  },
+  "project_catalogue": {
+    "unit_present": {
+      "fail": "Stawka {code} nie ma jednostki.",
+      "suggestion": "Podaj jednostkę, do której odnosi się cena, na przykład m2, m3 lub h."
+    },
+    "duplicate_code": {
+      "fail": "Kod {code} jest używany przez więcej niż jedną stawkę w tym projekcie.",
+      "suggestion": "Zostaw jedną stawkę na kod albo nadaj wariantowi własny kod."
+    },
+    "currency_differs": {
+      "fail": "Stawka {code} jest w {currency}, a projekt jest wyceniany w {project_currency}.",
+      "suggestion": "Przelicz stawkę na walutę projektu albo potwierdź, że obca waluta jest zamierzona."
+    },
+    "override_far": {
+      "fail": "Lokalna stawka {code} odbiega o {percent} % od stawki źródłowej {source_rate}.",
+      "suggestion": "Sprawdź, czy nie przesunął się przecinek, albo zapisz, dlaczego ten projekt potrzebuje innej ceny."
+    },
+    "source_changed": {
+      "fail": "Stawka źródłowa {code} zmieniła się z {old} na {new} od skopiowania do projektu.",
+      "suggestion": "Przyjmij nową stawkę źródłową albo świadomie zachowaj stawkę lokalną."
+    }
   }
 }

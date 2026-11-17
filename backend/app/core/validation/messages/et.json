@@ -2138,5 +2138,27 @@
       "fail": "Sellel ajakaval on rohkem kui üks kinnitatud baasplaan ({baselines}).",
       "suggestion": "Kinnitage baasplaan, mis peab kehtima; ühe kinnitamine tühistab teiste kinnituse."
     }
+  },
+  "project_catalogue": {
+    "unit_present": {
+      "fail": "Hinnal {code} puudub ühik.",
+      "suggestion": "Sisestage ühik, mille kohta hind kehtib, näiteks m2, m3 või h."
+    },
+    "duplicate_code": {
+      "fail": "Koodi {code} kasutab selles projektis rohkem kui üks hind.",
+      "suggestion": "Jätke ühe koodi kohta üks hind või andke variandile oma kood."
+    },
+    "currency_differs": {
+      "fail": "Hind {code} on valuutas {currency}, kuid projekt arvestatakse valuutas {project_currency}.",
+      "suggestion": "Arvestage hind ümber projekti valuutasse või kinnitage, et võõrvaluuta on taotluslik."
+    },
+    "override_far": {
+      "fail": "Koodi {code} kohalik hind erineb lähtehinnast {source_rate} {percent} %.",
+      "suggestion": "Kontrollige, kas koma on nihkunud, või märkige, miks projekt vajab teist hinda."
+    },
+    "source_changed": {
+      "fail": "Koodi {code} lähtehind on pärast projekti kopeerimist muutunud {old} pealt {new} peale.",
+      "suggestion": "Võtke üle uus lähtehind või jätke teadlikult kohalik hind."
+    }
   }
 }

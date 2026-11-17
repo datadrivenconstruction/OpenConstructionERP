@@ -26,6 +26,7 @@ import {
   Bot,
   Layers,
   Boxes,
+  BookCopy,
   Compass,
   Box,
   ShieldCheck,
@@ -306,6 +307,7 @@ export const navGroups: NavGroup[] = [
     items: [
       { labelKey: 'costs.title', to: '/costs', icon: Database, tourId: 'costs' },
       { labelKey: 'catalog.title', to: '/catalog', icon: Boxes },
+      { labelKey: 'project_catalogue.title', to: '/project-catalogue', icon: BookCopy },
       { labelKey: 'nav.cost_explorer', to: '/cost-explorer', icon: Compass },
       { labelKey: 'nav.assemblies', to: '/assemblies', icon: Layers },
       { labelKey: 'nav.cost_match', to: '/cost-match', icon: Link2 },

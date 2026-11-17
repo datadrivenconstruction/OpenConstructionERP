@@ -2138,5 +2138,27 @@
       "fail": "Denne tidsplan har mere end én godkendt basisplan ({baselines}).",
       "suggestion": "Godkend den basisplan, der skal gælde; godkendelse af én trækker godkendelsen af de andre tilbage."
     }
+  },
+  "project_catalogue": {
+    "unit_present": {
+      "fail": "Prisen {code} har ingen enhed.",
+      "suggestion": "Angiv den enhed, prisen gælder for, fx m2, m3 eller h."
+    },
+    "duplicate_code": {
+      "fail": "Koden {code} bruges af mere end én pris i dette projekt.",
+      "suggestion": "Behold én pris pr. kode, eller giv varianten sin egen kode."
+    },
+    "currency_differs": {
+      "fail": "Prisen {code} er i {currency}, men projektet er kalkuleret i {project_currency}.",
+      "suggestion": "Omregn prisen til projektets valuta, eller bekræft at den fremmede valuta er tilsigtet."
+    },
+    "override_far": {
+      "fail": "Den lokale pris for {code} afviger {percent} % fra kildeprisen {source_rate}.",
+      "suggestion": "Tjek for et forskudt komma, eller noter hvorfor projektet har brug for en anden pris."
+    },
+    "source_changed": {
+      "fail": "Kildeprisen for {code} er ændret fra {old} til {new}, siden projektet kopierede den.",
+      "suggestion": "Overtag den nye kildepris, eller behold bevidst den lokale pris."
+    }
   }
 }

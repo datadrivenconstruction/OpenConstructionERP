@@ -2138,5 +2138,27 @@
       "fail": "Tento harmonogram má více než jeden schválený směrný plán ({baselines}).",
       "suggestion": "Schvalte směrný plán, který má platit; schválením jednoho se schválení ostatních ruší."
     }
+  },
+  "project_catalogue": {
+    "unit_present": {
+      "fail": "Sazba {code} nemá jednotku.",
+      "suggestion": "Zadejte jednotku, ke které se cena vztahuje, například m2, m3 nebo h."
+    },
+    "duplicate_code": {
+      "fail": "Kód {code} používá v tomto projektu více než jedna sazba.",
+      "suggestion": "Ponechte jednu sazbu na kód, nebo dejte variantě vlastní kód."
+    },
+    "currency_differs": {
+      "fail": "Sazba {code} je v {currency}, ale projekt se oceňuje v {project_currency}.",
+      "suggestion": "Přepočtěte sazbu na měnu projektu, nebo potvrďte, že cizí měna je záměrná."
+    },
+    "override_far": {
+      "fail": "Místní sazba {code} se od zdrojové sazby {source_rate} liší o {percent} %.",
+      "suggestion": "Zkontrolujte posunutou desetinnou čárku, nebo poznamenejte, proč projekt potřebuje jinou cenu."
+    },
+    "source_changed": {
+      "fail": "Zdrojová sazba {code} se od zkopírování do projektu změnila z {old} na {new}.",
+      "suggestion": "Převezměte novou zdrojovou sazbu, nebo vědomě ponechte místní sazbu."
+    }
   }
 }

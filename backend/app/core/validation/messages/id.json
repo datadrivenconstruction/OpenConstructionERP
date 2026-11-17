@@ -2138,5 +2138,27 @@
       "fail": "Jadwal ini memiliki lebih dari satu baseline yang disetujui ({baselines}).",
       "suggestion": "Setujui baseline yang harus berlaku; menyetujui satu akan mencabut persetujuan yang lain."
     }
+  },
+  "project_catalogue": {
+    "unit_present": {
+      "fail": "Tarif {code} tidak memiliki satuan.",
+      "suggestion": "Isi satuan yang menjadi dasar harga, misalnya m2, m3, atau jam."
+    },
+    "duplicate_code": {
+      "fail": "Kode {code} dipakai oleh lebih dari satu tarif dalam proyek ini.",
+      "suggestion": "Pertahankan satu tarif per kode, atau beri varian kode tersendiri."
+    },
+    "currency_differs": {
+      "fail": "Tarif {code} dalam {currency}, tetapi proyek dihitung dalam {project_currency}.",
+      "suggestion": "Konversikan tarif ke mata uang proyek, atau pastikan mata uang asing memang disengaja."
+    },
+    "override_far": {
+      "fail": "Tarif lokal {code} berselisih {percent} % dari tarif sumber {source_rate}.",
+      "suggestion": "Periksa koma desimal yang bergeser, atau catat mengapa proyek ini memerlukan harga lain."
+    },
+    "source_changed": {
+      "fail": "Tarif sumber {code} berubah dari {old} menjadi {new} sejak disalin ke proyek.",
+      "suggestion": "Ambil tarif sumber yang baru, atau pertahankan tarif lokal dengan sengaja."
+    }
   }
 }

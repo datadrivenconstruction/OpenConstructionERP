@@ -2138,5 +2138,27 @@
       "fail": "Deze planning heeft meer dan één goedgekeurde basisplanning ({baselines}).",
       "suggestion": "Keur de basisplanning goed die moet gelden; goedkeuren van één trekt de goedkeuring van de andere in."
     }
+  },
+  "project_catalogue": {
+    "unit_present": {
+      "fail": "Het tarief {code} heeft geen eenheid.",
+      "suggestion": "Vul de eenheid in waarop het tarief betrekking heeft, bijvoorbeeld m2, m3 of h."
+    },
+    "duplicate_code": {
+      "fail": "De code {code} wordt in dit project door meer dan één tarief gebruikt.",
+      "suggestion": "Houd één tarief per code aan of geef de variant een eigen code."
+    },
+    "currency_differs": {
+      "fail": "Het tarief {code} staat in {currency}, maar het project wordt begroot in {project_currency}.",
+      "suggestion": "Reken het tarief om naar de projectvaluta of bevestig dat de vreemde valuta bedoeld is."
+    },
+    "override_far": {
+      "fail": "Het lokale tarief van {code} wijkt {percent} % af van het brontarief {source_rate}.",
+      "suggestion": "Controleer op een verschoven komma of noteer waarom dit project een ander tarief nodig heeft."
+    },
+    "source_changed": {
+      "fail": "Het brontarief van {code} is gewijzigd van {old} naar {new} sinds het project het kopieerde.",
+      "suggestion": "Neem het nieuwe brontarief over of behoud bewust het lokale tarief."
+    }
   }
 }

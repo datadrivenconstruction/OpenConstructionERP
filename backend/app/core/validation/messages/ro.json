@@ -2138,5 +2138,27 @@
       "fail": "Acest grafic are mai multe planuri de referință aprobate ({baselines}).",
       "suggestion": "Aprobați planul de referință care trebuie să se aplice; aprobarea unuia retrage aprobarea celorlalte."
     }
+  },
+  "project_catalogue": {
+    "unit_present": {
+      "fail": "Tariful {code} nu are unitate de măsură.",
+      "suggestion": "Introduceți unitatea la care se referă prețul, de exemplu m2, m3 sau h."
+    },
+    "duplicate_code": {
+      "fail": "Codul {code} este folosit de mai multe tarife în acest proiect.",
+      "suggestion": "Păstrați un tarif pe cod sau dați variantei un cod propriu."
+    },
+    "currency_differs": {
+      "fail": "Tariful {code} este în {currency}, dar proiectul este evaluat în {project_currency}.",
+      "suggestion": "Convertiți tariful în moneda proiectului sau confirmați că moneda străină este intenționată."
+    },
+    "override_far": {
+      "fail": "Tariful local pentru {code} diferă cu {percent} % de tariful sursă {source_rate}.",
+      "suggestion": "Verificați dacă virgula zecimală s-a deplasat sau notați de ce proiectul are nevoie de alt preț."
+    },
+    "source_changed": {
+      "fail": "Tariful sursă pentru {code} s-a schimbat de la {old} la {new} de când proiectul l-a copiat.",
+      "suggestion": "Preluați noul tarif sursă sau păstrați în mod deliberat tariful local."
+    }
   }
 }

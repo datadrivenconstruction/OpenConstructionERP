@@ -2138,5 +2138,27 @@
       "fail": "Questo cronoprogramma ha più di una baseline approvata ({baselines}).",
       "suggestion": "Approvi la baseline che deve valere; approvarne una ritira l'approvazione delle altre."
     }
+  },
+  "project_catalogue": {
+    "unit_present": {
+      "fail": "Il prezzo {code} non ha un'unità di misura.",
+      "suggestion": "Indicare l'unità a cui si riferisce il prezzo, ad esempio m2, m3 o h."
+    },
+    "duplicate_code": {
+      "fail": "Il codice {code} è usato da più di un prezzo in questo progetto.",
+      "suggestion": "Mantenere un prezzo per codice o assegnare alla variante un codice proprio."
+    },
+    "currency_differs": {
+      "fail": "Il prezzo {code} è in {currency}, ma il progetto è stimato in {project_currency}.",
+      "suggestion": "Convertire il prezzo nella valuta del progetto o confermare che la valuta estera è voluta."
+    },
+    "override_far": {
+      "fail": "Il prezzo locale di {code} si discosta del {percent} % dal prezzo di origine {source_rate}.",
+      "suggestion": "Verificare una virgola fuori posto o annotare perché questo progetto richiede un prezzo diverso."
+    },
+    "source_changed": {
+      "fail": "Il prezzo di origine di {code} è cambiato da {old} a {new} da quando il progetto lo ha copiato.",
+      "suggestion": "Adottare il nuovo prezzo di origine o mantenere consapevolmente quello locale."
+    }
   }
 }

@@ -2138,5 +2138,27 @@
       "fail": "此进度计划有多个已批准的基线（{baselines}）。",
       "suggestion": "批准应当生效的基线；批准其中一个会撤销其他基线的批准。"
     }
+  },
+  "project_catalogue": {
+    "unit_present": {
+      "fail": "单价 {code} 没有计量单位。",
+      "suggestion": "请输入单价对应的单位,例如 m2、m3 或 h。"
+    },
+    "duplicate_code": {
+      "fail": "编码 {code} 在本项目中被多个单价使用。",
+      "suggestion": "每个编码只保留一个单价,或为变体指定单独的编码。"
+    },
+    "currency_differs": {
+      "fail": "单价 {code} 以 {currency} 计价,但项目以 {project_currency} 计价。",
+      "suggestion": "请将单价换算为项目币种,或确认使用外币是有意为之。"
+    },
+    "override_far": {
+      "fail": "{code} 的本地单价与来源单价 {source_rate} 相差 {percent} %。",
+      "suggestion": "检查小数点是否错位,或注明本项目需要不同价格的原因。"
+    },
+    "source_changed": {
+      "fail": "{code} 的来源单价自复制到项目后已从 {old} 变为 {new}。",
+      "suggestion": "采用新的来源单价,或有意保留本地单价。"
+    }
   }
 }
