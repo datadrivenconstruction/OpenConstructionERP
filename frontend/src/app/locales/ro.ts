@@ -33526,6 +33526,7 @@ const resource = {
     "finance.inbox.mailbox_saved": "Setările căsuței au fost salvate",
     "finance.inbox.mailbox_invalid": "Aceste setări ale căsuței nu sunt valide",
     "finance.inbox.mailbox_last_polled": "Ultima verificare",
+    "finance.inbox.mailbox_host_not_allowed": "Această adresă de server indică o rețea privată sau internă și nu este permisă. Folosiți adresa IMAP publică a furnizorului dvs. de e-mail.",
     "finance.summary_empty_add_budget": "Adăugare linii buget",
     "finance.summary_empty_add_invoice": "Creare factură",
     "finance.summary_empty_desc": "Adăugați linii de buget sau creați o factură pentru a începe urmărirea costurilor proiectului aici.",

@@ -33339,6 +33339,7 @@ const resource = {
     "finance.inbox.mailbox_saved": "Brevlådeinställningar sparade",
     "finance.inbox.mailbox_invalid": "Dessa brevlådeinställningar är ogiltiga",
     "finance.inbox.mailbox_last_polled": "Senast kontrollerad",
+    "finance.inbox.mailbox_host_not_allowed": "Den här serveradressen pekar på ett privat eller internt nätverk och är inte tillåten. Använd den publika IMAP-adressen från din e-postleverantör.",
     "finance.summary_empty_add_budget": "Lägg till budgetrader",
     "finance.summary_empty_add_invoice": "Skapa en faktura",
     "finance.summary_empty_desc": "Lägg till budgetrader eller skapa en faktura för att börja spåra projektets kostnader här.",

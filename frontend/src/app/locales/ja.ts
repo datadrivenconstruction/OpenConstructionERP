@@ -33167,6 +33167,7 @@ const resource = {
     "finance.inbox.mailbox_saved": "メールボックス設定を保存しました",
     "finance.inbox.mailbox_invalid": "このメールボックス設定は無効です",
     "finance.inbox.mailbox_last_polled": "最終確認",
+    "finance.inbox.mailbox_host_not_allowed": "このサーバーアドレスはプライベートネットワークまたは社内ネットワークを指しているため、使用できません。メールプロバイダーの公開IMAPアドレスを使用してください。",
     "finance.summary_empty_add_budget": "予算行を追加",
     "finance.summary_empty_add_invoice": "請求書を作成",
     "finance.summary_empty_desc": "予算行を追加するか請求書を作成して、ここでプロジェクト費用の追跡を開始します。",

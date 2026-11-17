@@ -1,7 +1,8 @@
+// @vitest-environment node
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 import { describe, it, expect } from 'vitest';
-import { mailboxDraftProblems, type MailboxDraft } from '../invoiceMailboxRules';
+import { isHostNotAllowed, mailboxDraftProblems, type MailboxDraft } from '../invoiceMailboxRules';
 
 const ok: MailboxDraft = {
   enabled: true,
@@ -33,5 +34,18 @@ describe('mailboxDraftProblems', () => {
     expect(mailboxDraftProblems({ ...ok, host: 'localhost', use_ssl: false }, true)).toEqual([]);
     expect(mailboxDraftProblems({ ...ok, processed_folder: 'inbox' }, true)).toEqual(['processed_folder']);
     expect(mailboxDraftProblems({ ...ok, intake_address: 'nope' }, true)).toEqual(['intake_address']);
+  });
+});
+
+describe('isHostNotAllowed', () => {
+  const err = (detail: unknown) => ({ status: 422, body: { detail } });
+  it('recognises the refused-host error', () => {
+    expect(isHostNotAllowed(err([{ field: 'host', code: 'host_not_allowed', message: 'x' }]))).toBe(true);
+  });
+  it('ignores other field errors and non-API errors', () => {
+    expect(isHostNotAllowed(err([{ field: 'port', code: 'port_invalid' }]))).toBe(false);
+    expect(isHostNotAllowed(err('boom'))).toBe(false);
+    expect(isHostNotAllowed(new Error('x'))).toBe(false);
+    expect(isHostNotAllowed(null)).toBe(false);
   });
 });

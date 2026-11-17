@@ -33230,6 +33230,7 @@ const resource = {
     "finance.inbox.mailbox_saved": "Đã lưu cài đặt hộp thư",
     "finance.inbox.mailbox_invalid": "Cài đặt hộp thư này không hợp lệ",
     "finance.inbox.mailbox_last_polled": "Kiểm tra lần cuối",
+    "finance.inbox.mailbox_host_not_allowed": "Địa chỉ máy chủ này trỏ tới mạng riêng hoặc mạng nội bộ và không được phép. Hãy dùng địa chỉ IMAP công khai của nhà cung cấp email của bạn.",
     "finance.summary_empty_add_budget": "Thêm dòng ngân sách",
     "finance.summary_empty_add_invoice": "Tạo hóa đơn",
     "finance.summary_empty_desc": "Thêm dòng ngân sách hoặc tạo hóa đơn để bắt đầu theo dõi chi phí dự án ở đây.",

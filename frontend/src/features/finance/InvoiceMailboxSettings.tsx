@@ -8,7 +8,7 @@ import { Button } from '@/shared/ui';
 import { apiGet, apiPost, apiPut } from '@/shared/lib/api';
 import { fmtList } from '@/shared/lib/formatters';
 import { useToastStore } from '@/stores/useToastStore';
-import { mailboxDraftProblems, type MailboxDraft } from './invoiceMailboxRules';
+import { isHostNotAllowed, mailboxDraftProblems, type MailboxDraft } from './invoiceMailboxRules';
 
 interface MailboxSettings extends Omit<MailboxDraft, 'password'> {
   has_password: boolean;
@@ -60,6 +60,7 @@ export function InvoiceMailboxSettings({ projectId }: { projectId: string }) {
 
   const set = <K extends keyof MailboxDraft>(key: K, value: MailboxDraft[K]) =>
     setDraft((d) => ({ ...d, [key]: value }));
+  const [hostRefused, setHostRefused] = useState(false);
 
   const saveMut = useMutation({
     mutationFn: () =>
@@ -69,12 +70,17 @@ export function InvoiceMailboxSettings({ projectId }: { projectId: string }) {
       queryClient.invalidateQueries({ queryKey: ['finance-invoice-intake-info', projectId] });
       addToast({ type: 'success', title: t('finance.inbox.mailbox_saved', { defaultValue: 'Mailbox settings saved' }) });
     },
-    onError: (e: Error) =>
+    onError: (e: Error) => {
+      if (isHostNotAllowed(e)) {
+        setHostRefused(true);
+        return;
+      }
       addToast({
         type: 'error',
         title: t('finance.inbox.mailbox_invalid', { defaultValue: 'These mailbox settings are not valid' }),
         message: e.message,
-      }),
+      });
+    },
   });
 
   const testMut = useMutation({
@@ -88,7 +94,14 @@ export function InvoiceMailboxSettings({ projectId }: { projectId: string }) {
         folder: draft.folder,
       }),
     onSuccess: setTestResult,
-    onError: (e: Error) => setTestResult({ ok: false, message_count: null, error: e.message }),
+    onError: (e: Error) => {
+      if (isHostNotAllowed(e)) {
+        setHostRefused(true);
+        setTestResult(null);
+        return;
+      }
+      setTestResult({ ok: false, message_count: null, error: e.message });
+    },
   });
 
   // No permission (or no project access): the section does not exist for this user.
@@ -110,7 +123,23 @@ export function InvoiceMailboxSettings({ projectId }: { projectId: string }) {
         </label>
         <label className="text-sm">
           {label('host', 'IMAP server')}
-          <input className={inputCls} value={draft.host} onChange={(e) => set('host', e.target.value)} />
+          <input
+            className={inputCls}
+            value={draft.host}
+            aria-invalid={hostRefused}
+            onChange={(e) => {
+              setHostRefused(false);
+              set('host', e.target.value);
+            }}
+          />
+          {hostRefused && (
+            <span role="alert" className="mt-1 block text-xs text-semantic-error" data-testid="mailbox-host-refused">
+              {label(
+                'host_not_allowed',
+                'This server address points to a private or internal network and is not allowed. Use the public IMAP address of your mail provider.',
+              )}
+            </span>
+          )}
         </label>
         <label className="text-sm">
           {label('port', 'Port')}

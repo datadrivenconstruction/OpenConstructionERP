@@ -33492,6 +33492,7 @@ const resource = {
     "finance.inbox.mailbox_saved": "Postavke sandučića spremljene",
     "finance.inbox.mailbox_invalid": "Ove postavke sandučića nisu valjane",
     "finance.inbox.mailbox_last_polled": "Zadnja provjera",
+    "finance.inbox.mailbox_host_not_allowed": "Ova adresa poslužitelja upućuje na privatnu ili internu mrežu i nije dopuštena. Upotrijebite javnu IMAP adresu svog pružatelja pošte.",
     "finance.summary_empty_add_budget": "Dodaj redove proračuna",
     "finance.summary_empty_add_invoice": "Kreiraj račun",
     "finance.summary_empty_desc": "Dodajte redove proračuna ili kreirajte račun da počnete pratiti troškove projekta ovdje.",

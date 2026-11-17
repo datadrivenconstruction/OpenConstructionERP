@@ -33215,6 +33215,7 @@ const resource = {
     "finance.inbox.mailbox_saved": "邮箱设置已保存",
     "finance.inbox.mailbox_invalid": "这些邮箱设置无效",
     "finance.inbox.mailbox_last_polled": "上次检查",
+    "finance.inbox.mailbox_host_not_allowed": "该服务器地址指向私有或内部网络，不允许使用。请使用邮件服务商公开的 IMAP 地址。",
     "finance.summary_empty_add_budget": "添加预算行",
     "finance.summary_empty_add_invoice": "创建发票",
     "finance.summary_empty_desc": "添加预算行或创建发票以开始在此处跟踪项目成本。",

@@ -1142,6 +1142,7 @@ const resource = {
     "finance.inbox.mailbox_invalid": "These mailbox settings are not valid",
     "finance.inbox.mailbox_last_polled": "Last checked",
     "leasing.export_for": "Export for {{name}}",
+    "finance.inbox.mailbox_host_not_allowed": "This server address points to a private or internal network and is not allowed. Use the public IMAP address of your mail provider.",
   }
 } as { translation: Record<string, string> };
 
