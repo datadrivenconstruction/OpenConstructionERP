@@ -84,3 +84,26 @@ export function saveTextDisplay(state: TextDisplayState): void {
     // Ignore — localStorage is best-effort.
   }
 }
+
+/** Key for the line-weight display toggle; global for the same reason as text. */
+export const LINE_WEIGHTS_KEY = 'dwg:line_weights';
+
+/** Whether lines are drawn at their authored weight. Defaults to shown. */
+export function loadLineWeights(): boolean {
+  try {
+    if (typeof localStorage === 'undefined') return true;
+    return localStorage.getItem(LINE_WEIGHTS_KEY) !== 'off';
+  } catch {
+    return true;
+  }
+}
+
+/** Persist the line-weight toggle; storage errors degrade to in-memory. */
+export function saveLineWeights(visible: boolean): void {
+  try {
+    if (typeof localStorage === 'undefined') return;
+    localStorage.setItem(LINE_WEIGHTS_KEY, visible ? 'on' : 'off');
+  } catch {
+    // Ignore: localStorage is best-effort.
+  }
+}

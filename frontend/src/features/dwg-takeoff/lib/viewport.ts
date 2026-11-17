@@ -170,7 +170,8 @@ export function computeExtents(entities: DxfEntity[]): Extents {
  * use it. Multi-line strings are as wide as their longest line and stack
  * *downwards*, matching how `renderText` lays them out; the box turns with
  * `rotation`, since a half-turn string runs to the left of its insertion
- * point; justification is ignored because the renderer ignores it too.
+ * point; justification is ignored here, which a rough fallback box can afford
+ * (`textWorldBox` honours it for the find overlay).
  */
 function textExtents(e: DxfEntity): Extents | null {
   if (e.type !== 'TEXT' || !e.start || !e.text) return null;
@@ -193,6 +194,99 @@ function textExtents(e: DxfEntity): Extents | null {
     for (const across of [up, -down]) {
       const x = e.start.x + along * cos - across * sin;
       const y = e.start.y + along * sin + across * cos;
+      if (x < minX) minX = x;
+      if (y < minY) minY = y;
+      if (x > maxX) maxX = x;
+      if (y > maxY) maxY = y;
+    }
+  }
+  return { minX, minY, maxX, maxY };
+}
+
+/** Where a text entity is anchored and how its lines hang from that anchor. */
+export interface TextLayout {
+  /** `entity.start` itself unless the text is justified on another point. */
+  anchor: { x: number; y: number };
+  align: 'left' | 'center' | 'right';
+  baseline: 'alphabetic' | 'bottom' | 'middle' | 'top';
+  /** How a multi-line block sits on the anchor: below it, centred, or above. */
+  stack: 'down' | 'middle' | 'up';
+}
+
+const COLUMN_ALIGN: TextLayout['align'][] = ['left', 'center', 'right'];
+const ROW_STACK: TextLayout['stack'][] = ['down', 'middle', 'up'];
+const VALIGN_BASELINE: TextLayout['baseline'][] = ['alphabetic', 'bottom', 'middle', 'top'];
+
+/**
+ * Justification of a TEXT or MTEXT entity. MTEXT hangs from its attachment
+ * point (1 top-left .. 9 bottom-right); justified TEXT sits on its alignment
+ * point by DXF 72/73. Plain left-baseline TEXT keeps the viewer's long-standing
+ * placement, glyphs standing on the insertion point.
+ */
+export function textLayout(e: DxfEntity): TextLayout {
+  const start = e.start ?? { x: 0, y: 0 };
+  const ap = e.attachment_point;
+  if (ap != null && ap >= 1 && ap <= 9) {
+    return {
+      anchor: start,
+      align: COLUMN_ALIGN[(ap - 1) % 3]!,
+      baseline: 'top',
+      stack: ROW_STACK[Math.floor((ap - 1) / 3)]!,
+    };
+  }
+  const h = e.halign ?? 0;
+  const v = e.valign ?? 0;
+  if (e.align_point && (h || v)) {
+    return {
+      anchor: e.align_point,
+      align: h === 2 ? 'right' : h === 1 || h === 4 ? 'center' : 'left',
+      baseline: h === 4 ? 'middle' : (VALIGN_BASELINE[v] ?? 'alphabetic'),
+      stack: 'down',
+    };
+  }
+  return { anchor: start, align: 'left', baseline: 'bottom', stack: 'down' };
+}
+
+/**
+ * Estimated world box of a text entity, justification and rotation included:
+ * `0.6 * height` per character, the rotated rectangle's axis-aligned bounds.
+ * Plain unrotated TEXT keeps the box the find overlay always drew.
+ */
+export function textWorldBox(e: DxfEntity): Extents | null {
+  if (!e.start || !e.text) return null;
+  const h = e.height && e.height > 0 ? e.height : 2.5;
+  const lines = e.text.split('\n');
+  const longest = lines.reduce((m, line) => Math.max(m, line.length), 0);
+  const w = Math.max(h, h * longest * 0.6);
+  const layout = textLayout(e);
+  const x0 = layout.align === 'center' ? -w / 2 : layout.align === 'right' ? -w : 0;
+  let y0: number;
+  let y1: number;
+  if (layout.anchor === e.start && e.attachment_point == null) {
+    y0 = 0;
+    y1 = h * lines.length * 1.3;
+  } else {
+    const total = h * ((lines.length - 1) * 1.25 + 1);
+    if (e.attachment_point != null) {
+      [y0, y1] = layout.stack === 'down' ? [-total, 0] : layout.stack === 'middle' ? [-total / 2, total / 2] : [0, total];
+    } else {
+      const extra = (lines.length - 1) * 1.25 * h;
+      if (layout.baseline === 'middle') [y0, y1] = [-h / 2 - extra, h / 2];
+      else if (layout.baseline === 'top') [y0, y1] = [-h - extra, 0];
+      else [y0, y1] = [-extra, h];
+    }
+  }
+  const rot = e.rotation ?? 0;
+  const cos = Math.cos(rot);
+  const sin = Math.sin(rot);
+  let minX = Infinity;
+  let minY = Infinity;
+  let maxX = -Infinity;
+  let maxY = -Infinity;
+  for (const lx of [x0, x0 + w]) {
+    for (const ly of [y0, y1]) {
+      const x = layout.anchor.x + lx * cos - ly * sin;
+      const y = layout.anchor.y + lx * sin + ly * cos;
       if (x < minX) minX = x;
       if (y < minY) minY = y;
       if (x > maxX) maxX = x;

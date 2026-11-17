@@ -125,7 +125,7 @@ import {
 import { aggregateEntities } from './lib/group-aggregation';
 import { getNumberLocale } from '@/stores/usePreferencesStore';
 import { effectiveLayout, layoutNames, sceneEntities } from './lib/dxf-renderer';
-import { groupBlockDefinitions } from './lib/blocks';
+import { expandBlockReferences, groupBlockDefinitions } from './lib/blocks';
 import { findTextMatches, type DwgTextMatch } from './lib/dwg-textsearch';
 import {
   quantifyByLayer,
@@ -175,7 +175,7 @@ import { LayerPanel } from './components/LayerPanel';
 import { EntityNameFilter, entityDisplayName } from './components/EntityNameFilter';
 import { TextDisplayControl } from './components/TextDisplayControl';
 import type { TextDisplayState } from './lib/text-display-store';
-import { loadTextDisplay, saveTextDisplay } from './lib/text-display-store';
+import { loadLineWeights, loadTextDisplay, saveLineWeights, saveTextDisplay } from './lib/text-display-store';
 import CreateTaskFromDwgModal from './CreateTaskFromDwgModal';
 import LinkDocumentToDwgModal from './LinkDocumentToDwgModal';
 import LinkActivityToDwgModal from './LinkActivityToDwgModal';
@@ -795,6 +795,10 @@ export function DwgTakeoffPage() {
    * the file. Display only - the entity list the viewer measures, hit-tests
    * and quantifies is the same list either way. */
   const [textDisplay, setTextDisplay] = useState<TextDisplayState>(() => loadTextDisplay());
+  const [showLineWeights, setShowLineWeights] = useState<boolean>(() => loadLineWeights());
+  useEffect(() => {
+    saveLineWeights(showLineWeights);
+  }, [showLineWeights]);
   useEffect(() => {
     saveTextDisplay(textDisplay);
   }, [textDisplay]);
@@ -1956,9 +1960,13 @@ export function DwgTakeoffPage() {
 
   const textMatches = useMemo<DwgTextMatch[]>(() => {
     if (!findOpen || !findQuery.trim()) return [];
-    const searchable = viewerEntities.filter((e) => visibleLayers.has(e.layer));
-    return findTextMatches(searchable, findQuery);
-  }, [findOpen, findQuery, viewerEntities, visibleLayers]);
+    const searchable = viewerEntities.filter((e) => !e.block && visibleLayers.has(e.layer));
+    // Text inside blocks (room tags, title blocks, dimension values) is found
+    // where its INSERT or dimension places it, not at block-local coordinates.
+    const placedText =
+      blockDefs.size > 0 ? expandBlockReferences(searchable, blockDefs).filter((e) => e.type === 'TEXT') : [];
+    return findTextMatches(placedText.length > 0 ? searchable.concat(placedText) : searchable, findQuery);
+  }, [findOpen, findQuery, viewerEntities, visibleLayers, blockDefs]);
 
   // Reset to the first hit (and zoom to it) whenever the query changes.
   useEffect(() => {
@@ -3593,6 +3601,7 @@ export function DwgTakeoffPage() {
                 activeSearchBox={activeMatch ? activeMatch.box : null}
                 focusTarget={findFocusTarget}
                 textDisplay={textDisplay}
+                showLineWeights={showLineWeights}
               />
 
               {/* Onion-skin overlay (Item 17) - a dim wash over the current
@@ -3771,7 +3780,12 @@ export function DwgTakeoffPage() {
                       a drawing tool still selected, and a trip to a side tab
                       to unbury the wall you are tracing is a trip too far. */}
                   <div className="pointer-events-auto">
-                    <TextDisplayControl value={textDisplay} onChange={setTextDisplay} />
+                    <TextDisplayControl
+                      value={textDisplay}
+                      onChange={setTextDisplay}
+                      lineWeights={showLineWeights}
+                      onLineWeightsChange={setShowLineWeights}
+                    />
                   </div>
                 </div>
 

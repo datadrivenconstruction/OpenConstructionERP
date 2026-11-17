@@ -151,10 +151,36 @@ def _collect_xrefs(doc: Any, entities: list[dict[str, Any]]) -> list[dict[str, A
     return sorted(found.values(), key=lambda x: str(x["name"]))
 
 
+def _resolve_lineweight(
+    raw: Any,
+    layer_name: str,
+    layer_lineweights: dict[str, int] | None,
+    in_block: bool,
+) -> float | None:
+    """Group 370 resolved to millimetres, or None when the viewer should decide.
+
+    ByBlock, and ByLayer on layer "0" inside a block, take the placing INSERT's
+    weight, which only the viewer knows; "default" is the viewer's default.
+    """
+    try:
+        value = int(raw)
+    except (TypeError, ValueError):
+        return None
+    if value == -1:  # ByLayer
+        if in_block and layer_name == "0":
+            return None
+        value = (layer_lineweights or {}).get(layer_name, -3)
+    if value < 0:
+        return None
+    return value / 100.0
+
+
 def _serialize_entity(
     entity: Any,
     layer_colors: dict[str, str] | None = None,
     styles: dict[str, str] | None = None,
+    layer_lineweights: dict[str, int] | None = None,
+    in_block: bool = False,
 ) -> dict[str, Any]:
     """Convert an ezdxf entity to a JSON-serializable dict.
 
@@ -180,6 +206,9 @@ def _serialize_entity(
         "color": color,
         "geometry_data": {},
     }
+    lineweight = _resolve_lineweight(dxf.get("lineweight", -1), layer_name, layer_lineweights, in_block)
+    if lineweight is not None:
+        result["lineweight"] = lineweight
 
     entity_type = entity.dxftype()
 
@@ -220,6 +249,15 @@ def _serialize_entity(
             "style": style_name,
             "font": styles.get(style_name, ""),
         }
+        halign = int(dxf.get("halign", 0))
+        valign = int(dxf.get("valign", 0))
+        align = dxf.get("align_point", None)
+        # Justified text is placed by its alignment point; ALIGNED (3) and FIT (5)
+        # stretch between both points and still start at the insert.
+        if (halign or valign) and halign not in (3, 5) and align is not None:
+            result["geometry_data"].update(
+                {"halign": halign, "valign": valign, "align_point": {"x": align.x, "y": align.y}}
+            )
     elif entity_type == "MTEXT":
         insert = dxf.get("insert", None)
         style_name = dxf.get("style", "Standard")
@@ -229,6 +267,8 @@ def _serialize_entity(
             # otherwise read a ``\M+`` sequence as an unknown format code.
             "text": plain_mtext(decode_dxf_text(entity.text)),
             "height": dxf.get("char_height", 1.0),
+            "rotation": math.radians(_mtext_rotation_degrees(entity)),
+            "attachment_point": int(dxf.get("attachment_point", 1)),
             "style": style_name,
             "font": styles.get(style_name, ""),
         }
@@ -284,12 +324,68 @@ def _serialize_entity(
         except Exception:
             logger.debug("HATCH boundary extraction failed", exc_info=True)
     elif entity_type == "DIMENSION":
-        result["geometry_data"] = {
-            "dimension_type": dxf.get("dimtype", 0),
-            "text_override": dxf.get("text", ""),
-        }
+        result["geometry_data"] = _dimension_geometry(entity)
+    elif entity_type in ("SOLID", "TRACE"):
+        # Corners are stored in Z order, so the outline runs 0, 1, 3, 2.
+        corners = [dxf.get(f"vtx{i}", None) for i in (0, 1, 3, 2)]
+        pts = [(float(c[0]), float(c[1])) for c in corners if c is not None]
+        pts, _ = _close_ring(pts, True)
+        if len(pts) >= 2 and math.dist(pts[0], pts[-1]) <= 1e-9:
+            pts.pop()
+        result["geometry_data"] = {"points": [{"x": x, "y": y} for x, y in pts], "closed": True}
 
     return result
+
+
+def _mtext_rotation_degrees(entity: Any) -> float:
+    try:
+        return float(entity.get_rotation())
+    except Exception:  # noqa: BLE001 - malformed text direction: draw it upright
+        return float(entity.dxf.get("rotation", 0.0))
+
+
+def _point(value: Any) -> dict[str, float] | None:
+    return None if value is None else {"x": float(value[0]), "y": float(value[1])}
+
+
+def _dimension_geometry(entity: Any) -> dict[str, Any]:
+    """What a DIMENSION needs to be drawn: its rendered block, or the raw points.
+
+    The ``*D`` block named in group 2 holds the lines, arrowheads and text the
+    authoring CAD drew; the definition points and measurement are the fallback
+    when a writer left that block out.
+    """
+    dxf = entity.dxf
+    measurement = dxf.get("actual_measurement", None)
+    if measurement is None:
+        try:
+            measurement = entity.get_measurement()
+        except Exception:  # noqa: BLE001 - angular/ordinate oddities: no value, still drawn
+            measurement = None
+    if not isinstance(measurement, int | float):
+        measurement = None  # angular dimensions can answer with vectors
+    text_height = None
+    try:
+        override = entity.override()
+        dimtxt = override.get("dimtxt", None)
+        if dimtxt:
+            text_height = float(dimtxt) * float(override.get("dimscale", 1.0) or 1.0)
+    except Exception:  # noqa: BLE001 - unreadable dimstyle: the viewer has a default
+        text_height = None
+    out: dict[str, Any] = {
+        "dimension_type": int(dxf.get("dimtype", 0)) & 0x0F,
+        "text_override": dxf.get("text", ""),
+        "block_name": dxf.get("geometry", "") or "",
+        "measurement": float(measurement) if measurement is not None else None,
+        "defpoint": _point(dxf.get("defpoint", None)),
+        "defpoint2": _point(dxf.get("defpoint2", None)),
+        "defpoint3": _point(dxf.get("defpoint3", None)),
+        "text_midpoint": _point(dxf.get("text_midpoint", None)),
+        "angle": math.radians(float(dxf.get("angle", 0.0))),
+    }
+    if text_height:
+        out["text_height"] = text_height
+    return out
 
 
 # Arcs and splines are flattened to a sagitta of this share of the entity's
@@ -391,6 +487,7 @@ def _serialize_block_definitions(
     placed_entities: list[dict[str, Any]],
     layer_colors: dict[str, str],
     styles: dict[str, str],
+    layer_lineweights: dict[str, int] | None = None,
 ) -> list[dict[str, Any]]:
     """Serialize the contents of every block definition an INSERT actually places.
 
@@ -425,7 +522,8 @@ def _serialize_block_definitions(
     """
     pending: list[str] = []
     for entity in placed_entities:
-        if entity.get("entity_type") == "INSERT":
+        # A DIMENSION places its ``*D`` block exactly as an INSERT would.
+        if entity.get("entity_type") in ("INSERT", "DIMENSION"):
             block_name = entity.get("geometry_data", {}).get("block_name")
             if block_name:
                 pending.append(str(block_name))
@@ -445,13 +543,13 @@ def _serialize_block_definitions(
             continue
         for entity in block:
             try:
-                serialized = _serialize_entity(entity, layer_colors, styles)
+                serialized = _serialize_entity(entity, layer_colors, styles, layer_lineweights, in_block=True)
             except Exception:  # noqa: BLE001 - skip one unreadable member, keep the block
                 logger.debug("Skipping unprocessable block entity in %s", name)
                 continue
             serialized["block"] = name
             out.append(serialized)
-            if serialized["entity_type"] == "INSERT":
+            if serialized["entity_type"] in ("INSERT", "DIMENSION"):
                 nested = serialized.get("geometry_data", {}).get("block_name")
                 if nested:
                     pending.append(str(nested))
@@ -514,6 +612,12 @@ def parse_dxf(file_path: str) -> dict[str, Any]:
 
     # Build layer color map for ByLayer color resolution
     layer_color_map: dict[str, str] = {layer["name"]: layer["color"] for layer in layers}
+    layer_lineweights: dict[str, int] = {}
+    for layer in doc.layers:
+        try:
+            layer_lineweights[layer.dxf.name] = int(layer.dxf.get("lineweight", -3))
+        except Exception:  # noqa: BLE001 - a malformed layer keeps the default weight
+            continue
 
     # Read the STYLE table once: map each text-style name to the font it
     # references so TEXT/MTEXT entities can carry the drawing's real font
@@ -544,7 +648,7 @@ def parse_dxf(file_path: str) -> dict[str, Any]:
         for entity in layout:
             total_count += 1
             try:
-                serialized = _serialize_entity(entity, layer_color_map, styles)
+                serialized = _serialize_entity(entity, layer_color_map, styles, layer_lineweights)
                 serialized["layout"] = layout_name
                 entities.append(serialized)
                 layer_name = serialized.get("layer", "0")
@@ -558,7 +662,7 @@ def parse_dxf(file_path: str) -> dict[str, Any]:
     # are records on the wire, but deliberately NOT in ``layer_counts``: the
     # layer panel governs what a toggle removes, and a block's members are
     # governed by the INSERT that places them, not by their own layer.
-    entities.extend(_serialize_block_definitions(doc, entities, layer_color_map, styles))
+    entities.extend(_serialize_block_definitions(doc, entities, layer_color_map, styles, layer_lineweights))
     xrefs = _collect_xrefs(doc, entities)
 
     if total_count > 0 and skipped_count / total_count > 0.10:

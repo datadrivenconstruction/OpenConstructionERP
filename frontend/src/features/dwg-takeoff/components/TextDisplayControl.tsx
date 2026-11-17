@@ -18,7 +18,7 @@
 
 import { useTranslation } from 'react-i18next';
 import clsx from 'clsx';
-import { Eye, EyeOff, Minus, Plus, RotateCcw } from 'lucide-react';
+import { Eye, EyeOff, Minus, PenLine, Plus, RotateCcw } from 'lucide-react';
 import type { TextDisplayState } from '../lib/text-display-store';
 import {
   DEFAULT_TEXT_DISPLAY,
@@ -30,9 +30,12 @@ import {
 interface Props {
   value: TextDisplayState;
   onChange: (next: TextDisplayState) => void;
+  /** Line weights shown; the toggle appears only when a handler is given. */
+  lineWeights?: boolean;
+  onLineWeightsChange?: (next: boolean) => void;
 }
 
-export function TextDisplayControl({ value, onChange }: Props) {
+export function TextDisplayControl({ value, onChange, lineWeights = true, onLineWeightsChange }: Props) {
   const { t } = useTranslation();
   const { visible, scale } = value;
   const percent = Math.round(scale * 100);
@@ -121,6 +124,32 @@ export function TextDisplayControl({ value, onChange }: Props) {
       >
         <RotateCcw size={14} />
       </button>
+
+      {onLineWeightsChange && (
+        <>
+          <div className="mx-1 h-5 w-px bg-border" />
+          <button
+            type="button"
+            onClick={() => onLineWeightsChange(!lineWeights)}
+            data-testid="dwg-lineweight-toggle"
+            title={
+              lineWeights
+                ? t('dwg_takeoff.lineweights_hide', { defaultValue: 'Draw all lines thin' })
+                : t('dwg_takeoff.lineweights_show', { defaultValue: 'Show line weights from the drawing' })
+            }
+            aria-pressed={lineWeights}
+            className={clsx(
+              'flex h-7 items-center gap-1 rounded-md px-2 text-xs transition-colors',
+              lineWeights ? 'bg-semantic-success/20 text-semantic-success' : 'text-content-secondary hover:bg-surface-secondary',
+            )}
+          >
+            <PenLine size={14} />
+            <span className="font-semibold">
+              {t('dwg_takeoff.lineweights_label', { defaultValue: 'Line weights' })}
+            </span>
+          </button>
+        </>
+      )}
     </div>
   );
 }

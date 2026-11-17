@@ -133,6 +133,8 @@ function placeEntity(member: DxfEntity, p: Placement, insert: DxfEntity, id: str
     color: member.color === 0 ? insert.color : member.color,
     layout: insert.layout,
   };
+  // No weight of its own means ByBlock (or layer 0 ByLayer): the insert's.
+  if (member.lineweight == null && insert.lineweight != null) placed.lineweight = insert.lineweight;
   delete placed.block;
 
   if (member.start) {
@@ -144,6 +146,12 @@ function placeEntity(member: DxfEntity, p: Placement, insert: DxfEntity, id: str
   if (member.vertices) {
     placed.vertices = member.vertices.map((v) => ({ ...v, ...place(p, v.x, v.y) }));
   }
+  const placeRing = (ring: { x: number; y: number }[]) => ring.map((v) => place(p, v.x, v.y));
+  if (member.holes) placed.holes = member.holes.map(placeRing);
+  if (member.extra_loops) placed.extra_loops = member.extra_loops.map(placeRing);
+  if (member.align_point) placed.align_point = place(p, member.align_point.x, member.align_point.y);
+  if (member.dim_line_point) placed.dim_line_point = place(p, member.dim_line_point.x, member.dim_line_point.y);
+  if (member.text_position) placed.text_position = place(p, member.text_position.x, member.text_position.y);
 
   switch (member.type) {
     case 'CIRCLE':
@@ -240,7 +248,12 @@ export function expandBlockReferences(entities: DxfEntity[], blockDefs: BlockDef
     for (const member of members) {
       const id = `${insert.id}/${member.id}`;
       if (member.type === 'INSERT') {
-        walk({ ...member, id, layer: insert.layer, layout: insert.layout }, compose(p, member), depth + 1, chain);
+        const lineweight = member.lineweight ?? insert.lineweight;
+        walk({ ...member, id, layer: insert.layer, layout: insert.layout, lineweight }, compose(p, member), depth + 1, chain);
+        continue;
+      }
+      if (member.type === 'DIMENSION' && member.block_name && blockDefs.has(member.block_name)) {
+        walk({ ...member, id, layer: insert.layer, layout: insert.layout }, p, depth + 1, chain);
         continue;
       }
       const placed = placeEntity(member, p, insert, id);
@@ -250,8 +263,10 @@ export function expandBlockReferences(entities: DxfEntity[], blockDefs: BlockDef
   };
 
   for (const e of entities) {
-    if (e.type !== 'INSERT' || e.block) continue;
-    walk(e, compose(IDENTITY, e), 0, new Set<string>());
+    if (e.block) continue;
+    // A dimension's *D block is drawn in world coordinates: placed at the origin.
+    if (e.type === 'DIMENSION') walk(e, IDENTITY, 0, new Set<string>());
+    else if (e.type === 'INSERT') walk(e, compose(IDENTITY, e), 0, new Set<string>());
   }
 
   return out;
@@ -259,7 +274,7 @@ export function expandBlockReferences(entities: DxfEntity[], blockDefs: BlockDef
 
 /** True when this INSERT resolved to geometry, so its marker is redundant. */
 export function isResolvedInsert(entity: DxfEntity, blockDefs: BlockDefs): boolean {
-  if (entity.type !== 'INSERT' || !entity.block_name) return false;
+  if ((entity.type !== 'INSERT' && entity.type !== 'DIMENSION') || !entity.block_name) return false;
   const members = blockDefs.get(entity.block_name);
   return !!members && members.length > 0;
 }

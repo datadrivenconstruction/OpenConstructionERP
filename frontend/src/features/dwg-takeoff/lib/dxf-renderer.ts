@@ -13,7 +13,7 @@ import { isResolvedInsert } from './blocks';
 import type { TextDisplayState } from './text-display-store';
 import { DEFAULT_TEXT_DISPLAY } from './text-display-store';
 import type { ViewportState } from './viewport';
-import { ellipseSweep, worldToScreen } from './viewport';
+import { ellipseSweep, textLayout, worldToScreen } from './viewport';
 
 /* ── CAD Color Index → CSS hex ─────────────────────────────────────── */
 
@@ -180,6 +180,46 @@ function isInViewport(
   return true;
 }
 
+/* ── Line weights ─────────────────────────────────────────────────────────── */
+
+/** How line weights are drawn: on or off, and the zoom they are sized for. */
+export interface LineWeightDisplay {
+  /** False draws every line at one pixel, the way the viewer always did. */
+  visible: boolean;
+  /** Viewport scale at fit-to-drawing. Weights grow from there as the reader
+   *  zooms in, so a plotted 0.7 mm wall reads heavier the closer you look. */
+  refScale?: number;
+}
+
+/** CAD's own default weight, used when an entity says ByBlock or default. */
+export const DEFAULT_LINEWEIGHT_MM = 0.25;
+const PX_PER_MM = 96 / 25.4;
+const MIN_LINE_PX = 1;
+const MAX_LINE_PX = 16;
+
+/**
+ * Screen width in px of a line authored at `lwMm` millimetres.
+ *
+ * At the fitted zoom a weight is drawn at its plotted size on a 96 dpi screen
+ * (0.25 mm and below land on one pixel, as in a CAD viewer). Zooming scales it
+ * by the square root of the zoom ratio: heavy lines stay heavy without a deep
+ * zoom turning a wall outline into a filled band. Quarter-pixel steps keep
+ * the batch key stable between neighbouring frames.
+ */
+export function lineWeightPx(
+  lwMm: number | undefined,
+  scale: number,
+  refScale: number | undefined,
+  visible: boolean,
+): number {
+  if (!visible) return MIN_LINE_PX;
+  const mm = lwMm != null && lwMm >= 0 ? lwMm : DEFAULT_LINEWEIGHT_MM;
+  const zoom = refScale && refScale > 0 && scale > 0 ? Math.sqrt(scale / refScale) : 1;
+  const amp = Math.min(4, Math.max(0.5, zoom));
+  const px = Math.min(MAX_LINE_PX, Math.max(MIN_LINE_PX, mm * PX_PER_MM * amp));
+  return Math.round(px * 4) / 4;
+}
+
 /* ── Entity rendering ──────────────────────────────────────────────────── */
 
 export function renderEntities(
@@ -192,17 +232,20 @@ export function renderEntities(
   canvasHeight?: number,
   blockDefs?: BlockDefs,
   textDisplay?: TextDisplayState,
+  lineWeights?: LineWeightDisplay,
 ): void {
   const cw = canvasWidth ?? ctx.canvas.width / (window.devicePixelRatio || 1);
   const ch = canvasHeight ?? ctx.canvas.height / (window.devicePixelRatio || 1);
   const td = textDisplay ?? DEFAULT_TEXT_DISPLAY;
+  const lw = lineWeights ?? { visible: true };
+  const widthOf = (e: DxfEntity): number => lineWeightPx(e.lineweight, vp.scale, lw.refScale, lw.visible);
 
   // Render hatches first (background fill)
   for (const entity of entities) {
     if (entity.block) continue;
     if (entity.type === 'HATCH' && visibleLayers.has(entity.layer)) {
       if (!isInViewport(entity, vp, cw, ch)) continue;
-      applyStyle(ctx, entity, selectedId);
+      applyStyle(ctx, entity, selectedId, widthOf(entity));
       renderHatch(ctx, entity, vp);
     }
   }
@@ -242,12 +285,22 @@ export function renderEntities(
     if (entity.type === 'HATCH') continue; // already rendered
     if (!isInViewport(entity, vp, cw, ch)) continue;
 
+    if (entity.filled && entity.vertices && entity.vertices.length >= 3) {
+      flush();
+      applyStyle(ctx, entity, selectedId, widthOf(entity));
+      ctx.beginPath();
+      pathPolyline(ctx, entity, vp);
+      ctx.fill();
+      continue;
+    }
+
     const path = pathBuilderFor(entity.type);
     if (path) {
-      const style = strokeStyleKey(entity, selectedId);
+      const width = widthOf(entity);
+      const style = strokeStyleKey(entity, selectedId, width);
       if (style !== openBatch) {
         flush();
-        applyStyle(ctx, entity, selectedId);
+        applyStyle(ctx, entity, selectedId, width);
         ctx.beginPath();
         openBatch = style;
       }
@@ -258,7 +311,7 @@ export function renderEntities(
     // Anything that fills, draws text, or opens a path of its own has to see a
     // finished batch, not a half-built one.
     flush();
-    applyStyle(ctx, entity, selectedId);
+    applyStyle(ctx, entity, selectedId, widthOf(entity));
 
     switch (entity.type) {
       case 'TEXT':
@@ -273,6 +326,11 @@ export function renderEntities(
         break;
       case 'INSERT':
         renderInsert(ctx, entity, vp, blockDefs, td);
+        break;
+      case 'DIMENSION':
+        // The *D block, when it arrived, is drawn by block expansion.
+        if (blockDefs && isResolvedInsert(entity, blockDefs)) break;
+        renderDimension(ctx, entity, vp, td);
         break;
     }
   }
@@ -291,20 +349,21 @@ export function renderEntities(
  */
 const SELECTED_STROKE_KEY = 'selected';
 
-function strokeStyleKey(entity: DxfEntity, selectedId?: string | null): string {
-  return entity.id === selectedId ? SELECTED_STROKE_KEY : resolveColor(entity.color);
+function strokeStyleKey(entity: DxfEntity, selectedId?: string | null, width = 1): string {
+  return entity.id === selectedId ? SELECTED_STROKE_KEY : `${resolveColor(entity.color)}|${width}`;
 }
 
 function applyStyle(
   ctx: CanvasRenderingContext2D,
   entity: DxfEntity,
   selectedId?: string | null,
+  width = 1,
 ): void {
   const isSelected = entity.id === selectedId;
   if (isSelected) {
     ctx.strokeStyle = '#60a5fa';
     ctx.fillStyle = '#60a5fa';
-    ctx.lineWidth = 2.5;
+    ctx.lineWidth = Math.max(2.5, width + 1);
     // Glow effect via shadow
     ctx.shadowColor = 'rgba(96, 165, 250, 0.5)';
     ctx.shadowBlur = 8;
@@ -312,7 +371,7 @@ function applyStyle(
     const color = resolveColor(entity.color);
     ctx.strokeStyle = color;
     ctx.fillStyle = color;
-    ctx.lineWidth = 1;
+    ctx.lineWidth = width;
     ctx.shadowColor = 'transparent';
     ctx.shadowBlur = 0;
   }
@@ -604,6 +663,23 @@ export function renderHatch(
     if (p.y > maxY) maxY = p.y;
   }
   ctx.closePath();
+  // Islands and further pieces join the same path; even-odd turns a ring
+  // nested inside the boundary into a hole and a disjoint ring into a fill.
+  const rings = [...(entity.extra_loops ?? []), ...(entity.holes ?? [])];
+  for (const ring of rings) {
+    if (ring.length < 3) continue;
+    ring.forEach((v, i) => {
+      const p = worldToScreen(v.x, v.y, vp);
+      if (i === 0) ctx.moveTo(p.x, p.y);
+      else ctx.lineTo(p.x, p.y);
+    });
+    ctx.closePath();
+  }
+  const fillRule: CanvasFillRule | undefined = rings.length > 0 ? 'evenodd' : undefined;
+  const fillRegion = (): void => {
+    if (fillRule) ctx.fill(fillRule);
+    else ctx.fill();
+  };
 
   ctx.save();
 
@@ -613,7 +689,7 @@ export function renderHatch(
   if (entity.is_solid || patternName === 'SOLID') {
     // Solid fill
     ctx.globalAlpha = 0.15;
-    ctx.fill();
+    fillRegion();
   } else if (patternName === 'ANSI31' || patternName === 'ANSI32' || patternName === 'ANSI37') {
     // Diagonal line patterns
     const color = ctx.fillStyle as string;
@@ -621,19 +697,19 @@ export function renderHatch(
     if (pattern) {
       ctx.globalAlpha = 0.35;
       ctx.fillStyle = pattern;
-      ctx.fill();
+      fillRegion();
     } else {
       ctx.globalAlpha = 0.1;
-      ctx.fill();
+      fillRegion();
     }
   } else if (patternName) {
     // Other named patterns — use slightly higher opacity fill as fallback
     ctx.globalAlpha = 0.1;
-    ctx.fill();
+    fillRegion();
   } else {
     // Unknown / default
     ctx.globalAlpha = 0.15;
-    ctx.fill();
+    fillRegion();
   }
 
   // Always stroke the boundary
@@ -749,16 +825,23 @@ export function renderText(
   // string), and canvas fillText ignores "\n", so render each line stacked.
   const lines = entity.text.split('\n');
   const lineH = fontSize * 1.25;
+  // Justification decides which point of the string sits on the anchor:
+  // TEXT by its alignment point, MTEXT by its attachment point.
+  const layout = textLayout(entity);
+  const anchor = layout.anchor === entity.start ? pos : worldToScreen(layout.anchor.x, layout.anchor.y, vp);
+  const blockPx = (lines.length - 1) * lineH + fontSize;
+  const y0 = layout.stack === 'middle' ? -blockPx / 2 : layout.stack === 'up' ? -blockPx : 0;
 
   ctx.save();
   ctx.font = `${fontSize}px ${resolveFontFamily(entity)}`;
-  ctx.textBaseline = 'bottom';
+  ctx.textAlign = layout.align;
+  ctx.textBaseline = layout.baseline;
   if (entity.rotation) {
-    ctx.translate(pos.x, pos.y);
+    ctx.translate(anchor.x, anchor.y);
     ctx.rotate(-entity.rotation); // negate for screen Y-flip
-    lines.forEach((ln, i) => ctx.fillText(ln, 0, i * lineH));
+    lines.forEach((ln, i) => ctx.fillText(ln, 0, y0 + i * lineH));
   } else {
-    lines.forEach((ln, i) => ctx.fillText(ln, pos.x, pos.y + i * lineH));
+    lines.forEach((ln, i) => ctx.fillText(ln, anchor.x, anchor.y + y0 + i * lineH));
   }
   ctx.restore();
 }
@@ -861,6 +944,114 @@ export function renderInsert(
       pos.x + INSERT_MARKER_PX + 2,
       pos.y - INSERT_MARKER_PX,
     );
+  }
+  ctx.restore();
+}
+
+/* ── Dimensions ─────────────────────────────────────────────────────────── */
+
+/** Strip MTEXT inline formatting (font, height, colour switches, braces). */
+function stripMtextCodes(text: string): string {
+  return text
+    .replace(/\\P/g, '\n')
+    .replace(/\\[A-Za-z][^;\\{}]*;/g, '')
+    .replace(/\\[LlOoKk]/g, '')
+    .replace(/[{}]/g, '')
+    .trim();
+}
+
+function formatMeasurement(value: number): string {
+  return String(Math.round(value * 100) / 100);
+}
+
+/**
+ * The text a dimension shows. An empty override or `<>` means the measured
+ * value, `<>` inside a longer override is replaced by it, a single space
+ * suppresses the text, and anything else is the drafter's own words.
+ */
+export function dimensionLabel(measurement: number | null | undefined, override: string | undefined): string {
+  const raw = override ?? '';
+  if (raw === ' ') return '';
+  const value = measurement != null && Number.isFinite(measurement) ? formatMeasurement(measurement) : '';
+  if (raw === '' || raw === '<>') return value;
+  return stripMtextCodes(raw.includes('<>') ? raw.split('<>').join(value) : raw);
+}
+
+/** Half-length in px of the tick drawn where a dimension line meets an extension line. */
+const DIM_TICK_PX = 4;
+
+/**
+ * Draw a dimension from its definition points, for drawings whose writer left
+ * out the rendered `*D` block. Linear and aligned dimensions get extension
+ * lines, the dimension line, ticks and the value; other kinds get the value
+ * at its text position, which is the part an estimator reads.
+ */
+export function renderDimension(
+  ctx: CanvasRenderingContext2D,
+  entity: DxfEntity,
+  vp: ViewportState,
+  textDisplay?: TextDisplayState,
+): void {
+  const td = textDisplay ?? DEFAULT_TEXT_DISPLAY;
+  const kind = entity.dimension_type ?? 0;
+  const p1 = entity.start;
+  const p2 = entity.end;
+  const d = entity.dim_line_point;
+  let textAngle = 0;
+  let mid: { x: number; y: number } | null = entity.text_position ?? null;
+
+  if ((kind === 0 || kind === 1) && p1 && p2 && d) {
+    const angle = kind === 1 ? Math.atan2(p2.y - p1.y, p2.x - p1.x) : (entity.rotation ?? 0);
+    const ux = Math.cos(angle);
+    const uy = Math.sin(angle);
+    const proj = (p: { x: number; y: number }) => {
+      const t = (p.x - d.x) * ux + (p.y - d.y) * uy;
+      return { x: d.x + ux * t, y: d.y + uy * t };
+    };
+    const q1 = proj(p1);
+    const q2 = proj(p2);
+    const a1 = worldToScreen(p1.x, p1.y, vp);
+    const b1 = worldToScreen(q1.x, q1.y, vp);
+    const a2 = worldToScreen(p2.x, p2.y, vp);
+    const b2 = worldToScreen(q2.x, q2.y, vp);
+    ctx.beginPath();
+    ctx.moveTo(a1.x, a1.y);
+    ctx.lineTo(b1.x, b1.y);
+    ctx.moveTo(a2.x, a2.y);
+    ctx.lineTo(b2.x, b2.y);
+    ctx.moveTo(b1.x, b1.y);
+    ctx.lineTo(b2.x, b2.y);
+    // Architectural ticks at 45 degrees to the dimension line, fixed in px;
+    // screen y is flipped, so the world direction (ux, uy) is (ux, -uy) here.
+    const tx = (ux - uy) * DIM_TICK_PX * Math.SQRT1_2;
+    const ty = (-uy - ux) * DIM_TICK_PX * Math.SQRT1_2;
+    for (const b of [b1, b2]) {
+      ctx.moveTo(b.x - tx, b.y - ty);
+      ctx.lineTo(b.x + tx, b.y + ty);
+    }
+    ctx.stroke();
+    textAngle = angle;
+    mid = mid ?? { x: (q1.x + q2.x) / 2, y: (q1.y + q2.y) / 2 };
+  }
+
+  const label = dimensionLabel(entity.measurement, entity.text_override);
+  if (!td.visible || !label || !mid) return;
+  const fontSize = textFontSize(entity, vp, td.scale);
+  if (fontSize < MIN_TEXT_PX) return;
+  // Keep the value readable: never upside down.
+  let rot = textAngle;
+  if (Math.cos(rot) < -1e-9) rot += Math.PI;
+  const pos = worldToScreen(mid.x, mid.y, vp);
+  ctx.save();
+  ctx.font = `${fontSize}px ${SANS_STACK}`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  if (rot) {
+    ctx.translate(pos.x, pos.y);
+    ctx.rotate(-rot);
+    ctx.fillText(label, 0, 0);
+  } else {
+    ctx.fillText(label, pos.x, pos.y);
   }
   ctx.restore();
 }
