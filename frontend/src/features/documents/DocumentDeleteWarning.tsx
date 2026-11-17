@@ -50,6 +50,7 @@ const MODULE_LABEL_KEYS: Record<string, string> = {
   design_options: 'nav.design_options',
   documents: 'documents.title',
   engineering_brief: 'engineeringBrief.title',
+  estimate_archive: 'nav.estimate_archive',
   fieldreports: 'fieldreports.title',
   guarantees: 'guarantees.title',
   hse_frame: 'hseFrame.title',

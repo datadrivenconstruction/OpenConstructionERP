@@ -47,6 +47,7 @@ async def _billed_pay_app(svc: Any) -> tuple[Any, Any]:
         PaymentApplicationCreate,
         PaymentApplicationLineCreate,
         SubcontractorCreate,
+        WorkPackageCreate,
     )
 
     sub = await svc.create_subcontractor(SubcontractorCreate(legal_name="Suhi zid d.o.o."))
@@ -67,6 +68,9 @@ async def _billed_pay_app(svc: Any) -> tuple[Any, Any]:
         )
     )
     await svc.update_agreement(agreement.id, AgreementUpdate(status="active"))
+    package = await svc.create_work_package(
+        WorkPackageCreate(agreement_id=agreement.id, name="Partitions", planned_value=Decimal("120000"))
+    )
     pa = await svc.submit_payment_application(
         PaymentApplicationCreate(
             agreement_id=agreement.id,
@@ -74,7 +78,7 @@ async def _billed_pay_app(svc: Any) -> tuple[Any, Any]:
             currency="EUR",
             lines=[
                 PaymentApplicationLineCreate(
-                    work_package_id=uuid.uuid4(),
+                    work_package_id=package.id,
                     claimed_amount=Decimal("36000"),
                     approved_amount=Decimal("36000"),
                 )

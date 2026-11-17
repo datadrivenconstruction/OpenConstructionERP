@@ -79,7 +79,7 @@ def qdrant_models_available(monkeypatch: pytest.MonkeyPatch) -> None:
     summary reads exactly like a pass.
 
     So the real module is used wherever it is installed, and only where it
-    is not does a minimal stand-in get installed for the three names
+    is not does a minimal stand-in get installed for the four names
     ``vector_search`` constructs. Those objects are only built and handed to
     the client, never inspected, so nothing under test depends on their
     behaviour - which is what makes substituting them honest here and would
@@ -93,7 +93,7 @@ def qdrant_models_available(monkeypatch: pytest.MonkeyPatch) -> None:
 
         pkg = types.ModuleType("qdrant_client")
         models = types.ModuleType("qdrant_client.models")
-        for name in ("FieldCondition", "Filter", "MatchValue"):
+        for name in ("FieldCondition", "Filter", "HasIdCondition", "MatchValue"):
             setattr(models, name, type(name, (), {"__init__": lambda self, **kw: None}))
         pkg.models = models
         monkeypatch.setitem(sys.modules, "qdrant_client", pkg)

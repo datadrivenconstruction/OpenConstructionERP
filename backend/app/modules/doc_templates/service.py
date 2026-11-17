@@ -587,7 +587,7 @@ async def build_record_pdf(
     issues = [*check_mandatory(kind, doc.values), *legal_issues]
     if strict and has_errors(issues):
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail={"message": "Mandatory document data is missing", "issues": [i.as_dict() for i in issues]},
         )
     defaults = kind.default_blocks(lang)

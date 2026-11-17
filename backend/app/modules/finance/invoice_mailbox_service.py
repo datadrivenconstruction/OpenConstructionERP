@@ -90,14 +90,14 @@ class InvoiceMailboxService:
         )
         if errors:
             raise HTTPException(
-                status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail=[{"field": f, "code": c} for f, c in errors],
             )
         try:
             await assert_host_reachable(data.host)
         except UnsafeUrlError as exc:
             raise HTTPException(
-                status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail=[{"field": "host", "code": "host_not_allowed", "message": str(exc)}],
             ) from exc
         if row is None:

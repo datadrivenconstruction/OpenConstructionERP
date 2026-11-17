@@ -146,7 +146,7 @@ class SourceHit(BaseModel):
     code: str
     description: str
     unit: str
-    rate: Decimal
+    rate: FiniteDecimal
     currency: str
     label: str
     already_added: bool = False
