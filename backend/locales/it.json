@@ -2698,5 +2698,30 @@
         "gap": "Divario"
       }
     }
-  }
+  },
+  "monitoring.crossed.fail": "Punto {id}: spostamento {d} mm o velocità {r} mm/giorno ha superato il livello {level}",
+  "monitoring.crossed.suggestion": "Verifica il punto e la struttura, poi conferma l'avviso con una nota.",
+  "monitoring.level.ok": "OK",
+  "monitoring.level.alert": "Allerta",
+  "monitoring.level.action": "Intervento",
+  "monitoring.level.alarm": "Allarme",
+  "monitoring.risk.title": "Punto di monitoraggio {id} al livello {level}",
+  "monitoring.risk.description": "Spostamento {d} mm, velocità {r} mm/giorno rispetto a {profile}. Bozza aperta dal monitoraggio: verificala e indica un responsabile.",
+  "monitoring.report.title": "Rapporto allarmi di monitoraggio",
+  "monitoring.report.project": "Progetto",
+  "monitoring.report.crs": "Sistema di coordinate",
+  "monitoring.report.profile": "Profilo di soglia",
+  "monitoring.report.generated": "Generato",
+  "monitoring.report.point": "Punto",
+  "monitoring.report.baseline": "Riferimento (m)",
+  "monitoring.report.latest": "Ultimo valore (m)",
+  "monitoring.report.displacement": "Spostamento (mm)",
+  "monitoring.report.rate": "Velocità (mm/giorno)",
+  "monitoring.report.level": "Livello",
+  "monitoring.report.acknowledged": "Confermato",
+  "monitoring.report.counts": "Allarme: {alarm} · Intervento: {action} · Allerta: {alert} · OK: {ok}",
+  "monitoring.report.findings": "Risultanze",
+  "monitoring.report.no_profile": "Nessun profilo, impostane uno",
+  "monitoring.report.ack_yes": "Sì",
+  "monitoring.report.ack_no": "No"
 }

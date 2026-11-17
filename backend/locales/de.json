@@ -2703,5 +2703,30 @@
         "gap": "Deckungslücke"
       }
     }
-  }
+  },
+  "monitoring.crossed.fail": "Punkt {id}: Verschiebung {d} mm oder Geschwindigkeit {r} mm/Tag hat Stufe {level} überschritten",
+  "monitoring.crossed.suggestion": "Prüfen Sie den Punkt und das Bauwerk und bestätigen Sie den Alarm danach mit einer Notiz.",
+  "monitoring.level.ok": "OK",
+  "monitoring.level.alert": "Warnung",
+  "monitoring.level.action": "Eingriff",
+  "monitoring.level.alarm": "Alarm",
+  "monitoring.risk.title": "Überwachungspunkt {id} auf Stufe {level}",
+  "monitoring.risk.description": "Verschiebung {d} mm, Geschwindigkeit {r} mm/Tag gegen {profile}. Entwurf von der Überwachung angelegt: bitte prüfen und einen Verantwortlichen benennen.",
+  "monitoring.report.title": "Alarmbericht Überwachung",
+  "monitoring.report.project": "Projekt",
+  "monitoring.report.crs": "Koordinatensystem",
+  "monitoring.report.profile": "Grenzwertprofil",
+  "monitoring.report.generated": "Erstellt",
+  "monitoring.report.point": "Punkt",
+  "monitoring.report.baseline": "Ausgangswert (m)",
+  "monitoring.report.latest": "Letzter Wert (m)",
+  "monitoring.report.displacement": "Verschiebung (mm)",
+  "monitoring.report.rate": "Geschwindigkeit (mm/Tag)",
+  "monitoring.report.level": "Stufe",
+  "monitoring.report.acknowledged": "Bestätigt",
+  "monitoring.report.counts": "Alarm: {alarm} · Eingriff: {action} · Warnung: {alert} · OK: {ok}",
+  "monitoring.report.findings": "Befunde",
+  "monitoring.report.no_profile": "Kein Profil, bitte festlegen",
+  "monitoring.report.ack_yes": "Ja",
+  "monitoring.report.ack_no": "Nein"
 }

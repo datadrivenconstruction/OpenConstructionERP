@@ -2704,5 +2704,30 @@
         "gap": "Luka"
       }
     }
-  }
+  },
+  "monitoring.crossed.fail": "Punkt {id}: przemieszczenie {d} mm lub prędkość {r} mm/dzień przekroczyło poziom {level}",
+  "monitoring.crossed.suggestion": "Sprawdź punkt i konstrukcję, a następnie potwierdź alert notatką.",
+  "monitoring.level.ok": "OK",
+  "monitoring.level.alert": "Ostrzeżenie",
+  "monitoring.level.action": "Interwencja",
+  "monitoring.level.alarm": "Alarm",
+  "monitoring.risk.title": "Punkt monitoringu {id} na poziomie {level}",
+  "monitoring.risk.description": "Przemieszczenie {d} mm, prędkość {r} mm/dzień względem {profile}. Szkic otworzył monitoring: sprawdź go i wskaż osobę odpowiedzialną.",
+  "monitoring.report.title": "Raport alarmowy monitoringu",
+  "monitoring.report.project": "Projekt",
+  "monitoring.report.crs": "Układ współrzędnych",
+  "monitoring.report.profile": "Profil progów",
+  "monitoring.report.generated": "Wygenerowano",
+  "monitoring.report.point": "Punkt",
+  "monitoring.report.baseline": "Wartość bazowa (m)",
+  "monitoring.report.latest": "Ostatnia wartość (m)",
+  "monitoring.report.displacement": "Przemieszczenie (mm)",
+  "monitoring.report.rate": "Prędkość (mm/dzień)",
+  "monitoring.report.level": "Poziom",
+  "monitoring.report.acknowledged": "Potwierdzono",
+  "monitoring.report.counts": "Alarm: {alarm} · Interwencja: {action} · Ostrzeżenie: {alert} · OK: {ok}",
+  "monitoring.report.findings": "Ustalenia",
+  "monitoring.report.no_profile": "Brak profilu, ustaw go",
+  "monitoring.report.ack_yes": "Tak",
+  "monitoring.report.ack_no": "Nie"
 }

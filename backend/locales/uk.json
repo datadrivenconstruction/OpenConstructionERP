@@ -2726,5 +2726,30 @@
         "gap": "Дефіцит"
       }
     }
-  }
+  },
+  "monitoring.crossed.fail": "Точка {id}: зміщення {d} мм або швидкість {r} мм/добу перевищили рівень «{level}»",
+  "monitoring.crossed.suggestion": "Перевірте точку та споруду, потім підтвердіть попередження приміткою.",
+  "monitoring.level.ok": "OK",
+  "monitoring.level.alert": "Попередження",
+  "monitoring.level.action": "Дія",
+  "monitoring.level.alarm": "Тривога",
+  "monitoring.risk.title": "Точка моніторингу {id}, рівень «{level}»",
+  "monitoring.risk.description": "Зміщення {d} мм, швидкість {r} мм/добу відносно профілю «{profile}». Чернетку відкрив моніторинг: перегляньте її та призначте відповідального.",
+  "monitoring.report.title": "Звіт про тривоги моніторингу",
+  "monitoring.report.project": "Проєкт",
+  "monitoring.report.crs": "Система координат",
+  "monitoring.report.profile": "Профіль меж",
+  "monitoring.report.generated": "Сформовано",
+  "monitoring.report.point": "Точка",
+  "monitoring.report.baseline": "Базове значення (м)",
+  "monitoring.report.latest": "Останнє значення (м)",
+  "monitoring.report.displacement": "Зміщення (мм)",
+  "monitoring.report.rate": "Швидкість (мм/добу)",
+  "monitoring.report.level": "Рівень",
+  "monitoring.report.acknowledged": "Підтверджено",
+  "monitoring.report.counts": "Тривога: {alarm} · Дія: {action} · Попередження: {alert} · OK: {ok}",
+  "monitoring.report.findings": "Висновки",
+  "monitoring.report.no_profile": "Профілю немає, задайте його",
+  "monitoring.report.ack_yes": "Так",
+  "monitoring.report.ack_no": "Ні"
 }

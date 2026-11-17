@@ -2732,5 +2732,30 @@
       "file_missing": "फ़ोटो '{name}' की फ़ाइल स्टोरेज में नहीं है",
       "file_missing_fix": "फ़ोटो दोबारा अपलोड करें या बैकअप से बहाल करें"
     }
-  }
+  },
+  "monitoring.crossed.fail": "बिंदु {id}: विस्थापन {d} मिमि या दर {r} मिमि/दिन ने {level} सीमा पार की",
+  "monitoring.crossed.suggestion": "बिंदु और संरचना की जाँच करें, फिर नोट के साथ अलर्ट स्वीकार करें।",
+  "monitoring.level.ok": "OK",
+  "monitoring.level.alert": "चेतावनी",
+  "monitoring.level.action": "कार्रवाई",
+  "monitoring.level.alarm": "अलार्म",
+  "monitoring.risk.title": "मॉनिटरिंग बिंदु {id}, स्तर {level} पर",
+  "monitoring.risk.description": "विस्थापन {d} मिमि, दर {r} मिमि/दिन, {profile} के मुकाबले। मॉनिटरिंग ने मसौदा खोला: उसकी समीक्षा करें और ज़िम्मेदार व्यक्ति तय करें।",
+  "monitoring.report.title": "मॉनिटरिंग अलार्म रिपोर्ट",
+  "monitoring.report.project": "प्रोजेक्ट",
+  "monitoring.report.crs": "निर्देशांक प्रणाली",
+  "monitoring.report.profile": "सीमा प्रोफ़ाइल",
+  "monitoring.report.generated": "बनाई गई",
+  "monitoring.report.point": "बिंदु",
+  "monitoring.report.baseline": "आधार मान (मी)",
+  "monitoring.report.latest": "नवीनतम मान (मी)",
+  "monitoring.report.displacement": "विस्थापन (मिमि)",
+  "monitoring.report.rate": "दर (मिमि/दिन)",
+  "monitoring.report.level": "स्तर",
+  "monitoring.report.acknowledged": "स्वीकृत",
+  "monitoring.report.counts": "अलार्म: {alarm} · कार्रवाई: {action} · चेतावनी: {alert} · OK: {ok}",
+  "monitoring.report.findings": "निष्कर्ष",
+  "monitoring.report.no_profile": "कोई प्रोफ़ाइल नहीं, एक तय करें",
+  "monitoring.report.ack_yes": "हाँ",
+  "monitoring.report.ack_no": "नहीं"
 }

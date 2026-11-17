@@ -2745,5 +2745,30 @@
         "gap": "Gap"
       }
     }
-  }
+  },
+  "monitoring.crossed.fail": "Point {id} displacement {d} mm or rate {r} mm/day crossed {level}",
+  "monitoring.crossed.suggestion": "Check the point and the structure, then acknowledge the alert with a note.",
+  "monitoring.level.ok": "OK",
+  "monitoring.level.alert": "Alert",
+  "monitoring.level.action": "Action",
+  "monitoring.level.alarm": "Alarm",
+  "monitoring.risk.title": "Monitoring point {id} at {level}",
+  "monitoring.risk.description": "Displacement {d} mm, rate {r} mm/day against {profile}. Draft opened by monitoring: review it and name an owner.",
+  "monitoring.report.title": "Monitoring alarm report",
+  "monitoring.report.project": "Project",
+  "monitoring.report.crs": "Coordinate system",
+  "monitoring.report.profile": "Threshold profile",
+  "monitoring.report.generated": "Generated",
+  "monitoring.report.point": "Point",
+  "monitoring.report.baseline": "Baseline (m)",
+  "monitoring.report.latest": "Latest (m)",
+  "monitoring.report.displacement": "Displacement (mm)",
+  "monitoring.report.rate": "Rate (mm/day)",
+  "monitoring.report.level": "Level",
+  "monitoring.report.acknowledged": "Acknowledged",
+  "monitoring.report.counts": "Alarm: {alarm} · Action: {action} · Alert: {alert} · OK: {ok}",
+  "monitoring.report.findings": "Findings",
+  "monitoring.report.no_profile": "No profile, set one",
+  "monitoring.report.ack_yes": "Yes",
+  "monitoring.report.ack_no": "No"
 }

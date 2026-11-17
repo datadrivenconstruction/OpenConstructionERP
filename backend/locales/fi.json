@@ -2730,5 +2730,30 @@
         "gap": "Aukko"
       }
     }
-  }
+  },
+  "monitoring.crossed.fail": "Piste {id}: siirtymä {d} mm tai nopeus {r} mm/vrk ylitti tason {level}",
+  "monitoring.crossed.suggestion": "Tarkista piste ja rakenne ja vahvista hälytys sitten merkinnällä.",
+  "monitoring.level.ok": "OK",
+  "monitoring.level.alert": "Varoitus",
+  "monitoring.level.action": "Toimenpide",
+  "monitoring.level.alarm": "Hälytys",
+  "monitoring.risk.title": "Seurantapiste {id} tasolla {level}",
+  "monitoring.risk.description": "Siirtymä {d} mm, nopeus {r} mm/vrk suhteessa profiiliin {profile}. Luonnoksen avasi seuranta: tarkista se ja nimeä vastuuhenkilö.",
+  "monitoring.report.title": "Seurannan hälytysraportti",
+  "monitoring.report.project": "Projekti",
+  "monitoring.report.crs": "Koordinaattijärjestelmä",
+  "monitoring.report.profile": "Rajaprofiili",
+  "monitoring.report.generated": "Luotu",
+  "monitoring.report.point": "Piste",
+  "monitoring.report.baseline": "Lähtöarvo (m)",
+  "monitoring.report.latest": "Viimeisin arvo (m)",
+  "monitoring.report.displacement": "Siirtymä (mm)",
+  "monitoring.report.rate": "Nopeus (mm/vrk)",
+  "monitoring.report.level": "Taso",
+  "monitoring.report.acknowledged": "Vahvistettu",
+  "monitoring.report.counts": "Hälytys: {alarm} · Toimenpide: {action} · Varoitus: {alert} · OK: {ok}",
+  "monitoring.report.findings": "Havainnot",
+  "monitoring.report.no_profile": "Ei profiilia, aseta profiili",
+  "monitoring.report.ack_yes": "Kyllä",
+  "monitoring.report.ack_no": "Ei"
 }

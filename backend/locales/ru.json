@@ -2698,5 +2698,30 @@
         "gap": "Разрыв"
       }
     }
-  }
+  },
+  "monitoring.crossed.fail": "Точка {id}: смещение {d} мм или скорость {r} мм/сут превысили уровень «{level}»",
+  "monitoring.crossed.suggestion": "Проверьте точку и конструкцию, затем подтвердите предупреждение с комментарием.",
+  "monitoring.level.ok": "OK",
+  "monitoring.level.alert": "Предупреждение",
+  "monitoring.level.action": "Действие",
+  "monitoring.level.alarm": "Тревога",
+  "monitoring.risk.title": "Точка мониторинга {id}, уровень «{level}»",
+  "monitoring.risk.description": "Смещение {d} мм, скорость {r} мм/сут относительно профиля «{profile}». Черновик создан службой мониторинга: проверьте его и назначьте ответственного.",
+  "monitoring.report.title": "Отчёт о тревогах мониторинга",
+  "monitoring.report.project": "Проект",
+  "monitoring.report.crs": "Система координат",
+  "monitoring.report.profile": "Профиль пределов",
+  "monitoring.report.generated": "Сформировано",
+  "monitoring.report.point": "Точка",
+  "monitoring.report.baseline": "Исходная отметка (м)",
+  "monitoring.report.latest": "Последняя отметка (м)",
+  "monitoring.report.displacement": "Смещение (мм)",
+  "monitoring.report.rate": "Скорость (мм/сут)",
+  "monitoring.report.level": "Уровень",
+  "monitoring.report.acknowledged": "Подтверждено",
+  "monitoring.report.counts": "Тревога: {alarm} · Действие: {action} · Предупреждение: {alert} · OK: {ok}",
+  "monitoring.report.findings": "Выводы",
+  "monitoring.report.no_profile": "Профиля нет, задайте его",
+  "monitoring.report.ack_yes": "Да",
+  "monitoring.report.ack_no": "Нет"
 }

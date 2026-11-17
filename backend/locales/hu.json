@@ -2726,5 +2726,30 @@
         "gap": "Hiány"
       }
     }
-  }
+  },
+  "monitoring.crossed.fail": "{id} pont: a {d} mm-es elmozdulás vagy a {r} mm/nap sebesség átlépte a(z) {level} szintet",
+  "monitoring.crossed.suggestion": "Ellenőrizze a pontot és a szerkezetet, majd nyugtázza a riasztást megjegyzéssel.",
+  "monitoring.level.ok": "OK",
+  "monitoring.level.alert": "Figyelmeztetés",
+  "monitoring.level.action": "Beavatkozás",
+  "monitoring.level.alarm": "Riasztás",
+  "monitoring.risk.title": "{id} megfigyelési pont, {level} szint",
+  "monitoring.risk.description": "Elmozdulás {d} mm, sebesség {r} mm/nap, ehhez képest: {profile}. A tervezetet a monitoring nyitotta: nézze át, és nevezzen meg felelőst.",
+  "monitoring.report.title": "Monitoring riasztási jelentés",
+  "monitoring.report.project": "Projekt",
+  "monitoring.report.crs": "Koordináta-rendszer",
+  "monitoring.report.profile": "Határértékprofil",
+  "monitoring.report.generated": "Létrehozva",
+  "monitoring.report.point": "Pont",
+  "monitoring.report.baseline": "Kiindulási érték (m)",
+  "monitoring.report.latest": "Legutóbbi érték (m)",
+  "monitoring.report.displacement": "Elmozdulás (mm)",
+  "monitoring.report.rate": "Sebesség (mm/nap)",
+  "monitoring.report.level": "Szint",
+  "monitoring.report.acknowledged": "Nyugtázva",
+  "monitoring.report.counts": "Riasztás: {alarm} · Beavatkozás: {action} · Figyelmeztetés: {alert} · OK: {ok}",
+  "monitoring.report.findings": "Megállapítások",
+  "monitoring.report.no_profile": "Nincs profil, állítson be egyet",
+  "monitoring.report.ack_yes": "Igen",
+  "monitoring.report.ack_no": "Nem"
 }

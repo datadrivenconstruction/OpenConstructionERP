@@ -2728,5 +2728,30 @@
       "file_missing": "'{name}' сүрөтүнүн файлы сактоочуда жок",
       "file_missing_fix": "Сүрөттү кайра жүктөңүз же камдык нускадан калыбына келтириңиз"
     }
-  }
+  },
+  "monitoring.crossed.fail": "Чекит {id}: жылышуу {d} мм же ылдамдык {r} мм/күн {level} деңгээлинен ашты",
+  "monitoring.crossed.suggestion": "Чекитти жана имаратты текшериңиз, андан кийин эскертүүнү эскертме менен ырастаңыз.",
+  "monitoring.level.ok": "OK",
+  "monitoring.level.alert": "Эскертүү",
+  "monitoring.level.action": "Аракет",
+  "monitoring.level.alarm": "Аларм",
+  "monitoring.risk.title": "Көзөмөл чекити {id}, деңгээл {level}",
+  "monitoring.risk.description": "Жылышуу {d} мм, ылдамдык {r} мм/күн, {profile} боюнча. Жобону көзөмөл ачты: карап чыгып, жоопкерди аныктаңыз.",
+  "monitoring.report.title": "Көзөмөлдүн аларм отчету",
+  "monitoring.report.project": "Долбоор",
+  "monitoring.report.crs": "Координаталар системасы",
+  "monitoring.report.profile": "Чектер профили",
+  "monitoring.report.generated": "Түзүлдү",
+  "monitoring.report.point": "Чекит",
+  "monitoring.report.baseline": "Баштапкы маани (м)",
+  "monitoring.report.latest": "Акыркы маани (м)",
+  "monitoring.report.displacement": "Жылышуу (мм)",
+  "monitoring.report.rate": "Ылдамдык (мм/күн)",
+  "monitoring.report.level": "Деңгээл",
+  "monitoring.report.acknowledged": "Ырасталды",
+  "monitoring.report.counts": "Аларм: {alarm} · Аракет: {action} · Эскертүү: {alert} · OK: {ok}",
+  "monitoring.report.findings": "Корутундулар",
+  "monitoring.report.no_profile": "Профиль жок, бирин коюңуз",
+  "monitoring.report.ack_yes": "Ооба",
+  "monitoring.report.ack_no": "Жок"
 }

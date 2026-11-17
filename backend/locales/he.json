@@ -2729,5 +2729,30 @@
         "gap": "פער"
       }
     }
-  }
+  },
+  "monitoring.crossed.fail": "נקודה {id}: תזוזה {d} מ״מ או קצב {r} מ״מ/יום חצו את הרמה {level}",
+  "monitoring.crossed.suggestion": "בדקו את הנקודה ואת המבנה, ואשרו את ההתראה בהערה.",
+  "monitoring.level.ok": "OK",
+  "monitoring.level.alert": "אזהרה",
+  "monitoring.level.action": "פעולה",
+  "monitoring.level.alarm": "אזעקה",
+  "monitoring.risk.title": "נקודת ניטור {id} ברמה {level}",
+  "monitoring.risk.description": "תזוזה {d} מ״מ, קצב {r} מ״מ/יום מול {profile}. טיוטה נפתחה על ידי הניטור: עברו עליה ומנו אחראי.",
+  "monitoring.report.title": "דוח אזעקות ניטור",
+  "monitoring.report.project": "פרויקט",
+  "monitoring.report.crs": "מערכת קואורדינטות",
+  "monitoring.report.profile": "פרופיל סף",
+  "monitoring.report.generated": "נוצר",
+  "monitoring.report.point": "נקודה",
+  "monitoring.report.baseline": "ערך בסיס (מ׳)",
+  "monitoring.report.latest": "ערך אחרון (מ׳)",
+  "monitoring.report.displacement": "תזוזה (מ״מ)",
+  "monitoring.report.rate": "קצב (מ״מ/יום)",
+  "monitoring.report.level": "רמה",
+  "monitoring.report.acknowledged": "אושר",
+  "monitoring.report.counts": "אזעקה: {alarm} · פעולה: {action} · אזהרה: {alert} · OK: {ok}",
+  "monitoring.report.findings": "ממצאים",
+  "monitoring.report.no_profile": "אין פרופיל, הגדירו אחד",
+  "monitoring.report.ack_yes": "כן",
+  "monitoring.report.ack_no": "לא"
 }

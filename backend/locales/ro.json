@@ -2727,5 +2727,30 @@
         "gap": "Diferență"
       }
     }
-  }
+  },
+  "monitoring.crossed.fail": "Punctul {id}: deplasarea {d} mm sau viteza {r} mm/zi a depășit nivelul {level}",
+  "monitoring.crossed.suggestion": "Verificați punctul și construcția, apoi confirmați alerta cu o notă.",
+  "monitoring.level.ok": "OK",
+  "monitoring.level.alert": "Atenționare",
+  "monitoring.level.action": "Acțiune",
+  "monitoring.level.alarm": "Alarmă",
+  "monitoring.risk.title": "Punctul de monitorizare {id} la nivelul {level}",
+  "monitoring.risk.description": "Deplasare {d} mm, viteză {r} mm/zi față de {profile}. Ciornă deschisă de monitorizare: verificați-o și desemnați un responsabil.",
+  "monitoring.report.title": "Raport de alarmă monitorizare",
+  "monitoring.report.project": "Proiect",
+  "monitoring.report.crs": "Sistem de coordonate",
+  "monitoring.report.profile": "Profil de limite",
+  "monitoring.report.generated": "Generat",
+  "monitoring.report.point": "Punct",
+  "monitoring.report.baseline": "Valoare de referință (m)",
+  "monitoring.report.latest": "Ultima valoare (m)",
+  "monitoring.report.displacement": "Deplasare (mm)",
+  "monitoring.report.rate": "Viteză (mm/zi)",
+  "monitoring.report.level": "Nivel",
+  "monitoring.report.acknowledged": "Confirmat",
+  "monitoring.report.counts": "Alarmă: {alarm} · Acțiune: {action} · Atenționare: {alert} · OK: {ok}",
+  "monitoring.report.findings": "Constatări",
+  "monitoring.report.no_profile": "Niciun profil, setați unul",
+  "monitoring.report.ack_yes": "Da",
+  "monitoring.report.ack_no": "Nu"
 }

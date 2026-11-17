@@ -2726,5 +2726,30 @@
       "file_missing": "'{name}' rasmining fayli saqlash joyida yo'q",
       "file_missing_fix": "Rasmni qayta yuklang yoki zaxira nusxadan tiklang"
     }
-  }
+  },
+  "monitoring.crossed.fail": "Nuqta {id}: siljish {d} mm yoki tezlik {r} mm/kun {level} darajasidan oshdi",
+  "monitoring.crossed.suggestion": "Nuqta va inshootni tekshiring, soʻng ogohlantirishni izoh bilan tasdiqlang.",
+  "monitoring.level.ok": "OK",
+  "monitoring.level.alert": "Ogohlantirish",
+  "monitoring.level.action": "Chora",
+  "monitoring.level.alarm": "Signal",
+  "monitoring.risk.title": "{level} darajadagi monitoring nuqtasi {id}",
+  "monitoring.risk.description": "{profile} profiliga nisbatan siljish {d} mm, tezlik {r} mm/kun. Qoralamani monitoring ochdi: uni koʻrib chiqing va masʼul shaxsni belgilang.",
+  "monitoring.report.title": "Monitoring signal hisoboti",
+  "monitoring.report.project": "Loyiha",
+  "monitoring.report.crs": "Koordinatalar tizimi",
+  "monitoring.report.profile": "Chegara profili",
+  "monitoring.report.generated": "Yaratilgan",
+  "monitoring.report.point": "Nuqta",
+  "monitoring.report.baseline": "Boshlangʻich qiymat (m)",
+  "monitoring.report.latest": "Soʻnggi qiymat (m)",
+  "monitoring.report.displacement": "Siljish (mm)",
+  "monitoring.report.rate": "Tezlik (mm/kun)",
+  "monitoring.report.level": "Daraja",
+  "monitoring.report.acknowledged": "Tasdiqlangan",
+  "monitoring.report.counts": "Signal: {alarm} · Chora: {action} · Ogohlantirish: {alert} · OK: {ok}",
+  "monitoring.report.findings": "Xulosalar",
+  "monitoring.report.no_profile": "Profil yoʻq, bittasini belgilang",
+  "monitoring.report.ack_yes": "Ha",
+  "monitoring.report.ack_no": "Yoʻq"
 }

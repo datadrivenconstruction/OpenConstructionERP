@@ -2729,5 +2729,30 @@
         "gap": "Недостиг"
       }
     }
-  }
+  },
+  "monitoring.crossed.fail": "Точка {id}: преместване {d} мм или скорост {r} мм/ден премина {level}",
+  "monitoring.crossed.suggestion": "Проверете точката и съоръжението, после потвърдете сигнала с бележка.",
+  "monitoring.level.ok": "OK",
+  "monitoring.level.alert": "Предупреждение",
+  "monitoring.level.action": "Действие",
+  "monitoring.level.alarm": "Аларма",
+  "monitoring.risk.title": "Точка за наблюдение {id} на ниво {level}",
+  "monitoring.risk.description": "Преместване {d} мм, скорост {r} мм/ден спрямо {profile}. Черновата е създадена от мониторинга: прегледайте я и посочете отговорен.",
+  "monitoring.report.title": "Аларменен доклад за мониторинг",
+  "monitoring.report.project": "Проект",
+  "monitoring.report.crs": "Координатна система",
+  "monitoring.report.profile": "Профил с граници",
+  "monitoring.report.generated": "Генериран",
+  "monitoring.report.point": "Точка",
+  "monitoring.report.baseline": "Базова стойност (м)",
+  "monitoring.report.latest": "Последна стойност (м)",
+  "monitoring.report.displacement": "Преместване (мм)",
+  "monitoring.report.rate": "Скорост (мм/ден)",
+  "monitoring.report.level": "Ниво",
+  "monitoring.report.acknowledged": "Потвърдено",
+  "monitoring.report.counts": "Аларма: {alarm} · Действие: {action} · Предупреждение: {alert} · OK: {ok}",
+  "monitoring.report.findings": "Констатации",
+  "monitoring.report.no_profile": "Няма профил, задайте такъв",
+  "monitoring.report.ack_yes": "Да",
+  "monitoring.report.ack_no": "Не"
 }

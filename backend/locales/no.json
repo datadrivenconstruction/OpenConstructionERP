@@ -2727,5 +2727,30 @@
         "gap": "Gap"
       }
     }
-  }
+  },
+  "monitoring.crossed.fail": "Punkt {id}: forskyvning {d} mm eller hastighet {r} mm/døgn overskred nivå {level}",
+  "monitoring.crossed.suggestion": "Kontroller punktet og konstruksjonen, og bekreft deretter varselet med et notat.",
+  "monitoring.level.ok": "OK",
+  "monitoring.level.alert": "Varsel",
+  "monitoring.level.action": "Tiltak",
+  "monitoring.level.alarm": "Alarm",
+  "monitoring.risk.title": "Målepunkt {id} på nivå {level}",
+  "monitoring.risk.description": "Forskyvning {d} mm, hastighet {r} mm/døgn mot {profile}. Utkast åpnet av overvåking: gjennomgå det og utpek en ansvarlig.",
+  "monitoring.report.title": "Alarmrapport for overvåking",
+  "monitoring.report.project": "Prosjekt",
+  "monitoring.report.crs": "Koordinatsystem",
+  "monitoring.report.profile": "Grenseverdiprofil",
+  "monitoring.report.generated": "Generert",
+  "monitoring.report.point": "Punkt",
+  "monitoring.report.baseline": "Referanseverdi (m)",
+  "monitoring.report.latest": "Siste verdi (m)",
+  "monitoring.report.displacement": "Forskyvning (mm)",
+  "monitoring.report.rate": "Hastighet (mm/døgn)",
+  "monitoring.report.level": "Nivå",
+  "monitoring.report.acknowledged": "Bekreftet",
+  "monitoring.report.counts": "Alarm: {alarm} · Tiltak: {action} · Varsel: {alert} · OK: {ok}",
+  "monitoring.report.findings": "Funn",
+  "monitoring.report.no_profile": "Ingen profil, angi en",
+  "monitoring.report.ack_yes": "Ja",
+  "monitoring.report.ack_no": "Nei"
 }

@@ -2688,5 +2688,30 @@
         "gap": "Açık"
       }
     }
-  }
+  },
+  "monitoring.crossed.fail": "Nokta {id}: {d} mm yer değiştirme veya {r} mm/gün hız {level} seviyesini aştı",
+  "monitoring.crossed.suggestion": "Noktayı ve yapıyı kontrol edin, ardından uyarıyı bir notla onaylayın.",
+  "monitoring.level.ok": "OK",
+  "monitoring.level.alert": "Uyarı",
+  "monitoring.level.action": "Müdahale",
+  "monitoring.level.alarm": "Alarm",
+  "monitoring.risk.title": "{level} seviyesindeki izleme noktası {id}",
+  "monitoring.risk.description": "{profile} profiline göre {d} mm yer değiştirme, {r} mm/gün hız. Taslak izleme tarafından açıldı: gözden geçirin ve bir sorumlu atayın.",
+  "monitoring.report.title": "İzleme alarm raporu",
+  "monitoring.report.project": "Proje",
+  "monitoring.report.crs": "Koordinat sistemi",
+  "monitoring.report.profile": "Sınır profili",
+  "monitoring.report.generated": "Oluşturuldu",
+  "monitoring.report.point": "Nokta",
+  "monitoring.report.baseline": "Referans (m)",
+  "monitoring.report.latest": "Son değer (m)",
+  "monitoring.report.displacement": "Yer değiştirme (mm)",
+  "monitoring.report.rate": "Hız (mm/gün)",
+  "monitoring.report.level": "Seviye",
+  "monitoring.report.acknowledged": "Onaylandı",
+  "monitoring.report.counts": "Alarm: {alarm} · Müdahale: {action} · Uyarı: {alert} · OK: {ok}",
+  "monitoring.report.findings": "Bulgular",
+  "monitoring.report.no_profile": "Profil yok, bir profil belirleyin",
+  "monitoring.report.ack_yes": "Evet",
+  "monitoring.report.ack_no": "Hayır"
 }
