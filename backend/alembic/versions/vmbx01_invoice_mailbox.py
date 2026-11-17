@@ -6,7 +6,7 @@ Additive table only; a fresh install gets it from create_all, an existing one
 from this revision.
 
 Revision ID: vmbx01_invoice_mailbox
-Revises: vdt02_doc_template_issues
+Revises: vpcat01_project_catalogue
 Create Date: 2026-11-17
 """
 
@@ -18,7 +18,7 @@ import sqlalchemy as sa
 from alembic import op
 
 revision: str = "vmbx01_invoice_mailbox"
-down_revision: str | Sequence[str] | None = "vdt02_doc_template_issues"
+down_revision: str | Sequence[str] | None = "vpcat01_project_catalogue"
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 
