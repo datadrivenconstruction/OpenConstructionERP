@@ -138,7 +138,7 @@ describe('invoice inbox approve', () => {
     ]);
     const approve = (await openReview()) as HTMLButtonElement;
     expect(approve.disabled).toBe(true);
-    fireEvent.click(await screen.findByRole('checkbox'));
+    fireEvent.click(within(await screen.findByTestId('inbox-po-ack')).getByRole('checkbox'));
     expect(approve.disabled).toBe(false);
     fireEvent.click(approve);
     await screen.findByRole('alertdialog');

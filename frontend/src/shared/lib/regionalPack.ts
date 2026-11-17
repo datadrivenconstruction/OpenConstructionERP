@@ -68,7 +68,7 @@ export function packOutsideMarkets(
   country: string | null,
   scope: { markets: readonly string[]; all_markets: boolean } | undefined,
 ): boolean {
-  if (!country || country === 'xx' || !scope || scope.all_markets || scope.markets.length === 0) return false;
+  if (!country || country === 'xx' || !scope || scope.all_markets || !scope.markets?.length) return false;
   return !scope.markets.some((m) => m.toLowerCase() === country);
 }
 
