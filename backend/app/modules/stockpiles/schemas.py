@@ -154,3 +154,10 @@ class StockpileSummary(BaseModel):
 
 class AdjustmentConfirm(BaseModel):
     note: str = Field(default="", max_length=2000)
+
+
+class StockpileListResponse(BaseModel):
+    items: list[StockpileOut]
+    total: int
+    offset: int = 0
+    limit: int = 50

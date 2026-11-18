@@ -2103,7 +2103,11 @@
       "notifications.portal.message_received.title": "มีข้อความใหม่ในพอร์ทัล",
       "notifications.portal.message_received.body": "{buyer_name} ส่งข้อความมา",
       "dispatch.notify.plan_title": "Your daily plan is ready",
-      "dispatch.notify.plan_body": "Plan for {day}: {lines} lines."
+      "dispatch.notify.plan_body": "Plan for {day}: {lines} lines.",
+      "notifications.monitoring.alert.title": "การแจ้งเตือนการตรวจวัด",
+      "notifications.monitoring.action.title": "ระดับดำเนินการการตรวจวัด",
+      "notifications.monitoring.alarm.title": "สัญญาณเตือนการตรวจวัด",
+      "notifications.monitoring.crossed.body": "จุด {point}: {displacement} mm, {rate} mm/day."
     },
     "schedule_headers": {
       "headers": {

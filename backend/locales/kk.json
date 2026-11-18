@@ -2119,7 +2119,11 @@
       "notifications.portal.message_received.title": "Порталдан жаңа хабарлама",
       "notifications.portal.message_received.body": "{buyer_name} хабарлама жіберді.",
       "dispatch.notify.plan_title": "Your daily plan is ready",
-      "dispatch.notify.plan_body": "Plan for {day}: {lines} lines."
+      "dispatch.notify.plan_body": "Plan for {day}: {lines} lines.",
+      "notifications.monitoring.alert.title": "Бақылау ескертуі",
+      "notifications.monitoring.action.title": "Бақылау әрекет деңгейі",
+      "notifications.monitoring.alarm.title": "Бақылау дабылы",
+      "notifications.monitoring.crossed.body": "Нүкте {point}: {displacement} mm, {rate} mm/day."
     },
     "schedule_headers": {
       "headers": {

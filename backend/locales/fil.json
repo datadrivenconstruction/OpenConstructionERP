@@ -2103,7 +2103,11 @@
       "notifications.portal.message_received.title": "Bagong mensahe sa portal",
       "notifications.portal.message_received.body": "Nagpadala ng mensahe si {buyer_name}.",
       "dispatch.notify.plan_title": "Your daily plan is ready",
-      "dispatch.notify.plan_body": "Plan for {day}: {lines} lines."
+      "dispatch.notify.plan_body": "Plan for {day}: {lines} lines.",
+      "notifications.monitoring.alert.title": "Babala ng monitoring",
+      "notifications.monitoring.action.title": "Antas ng aksyon sa monitoring",
+      "notifications.monitoring.alarm.title": "Alarma ng monitoring",
+      "notifications.monitoring.crossed.body": "Punto {point}: {displacement} mm, {rate} mm/day."
     },
     "schedule_headers": {
       "headers": {

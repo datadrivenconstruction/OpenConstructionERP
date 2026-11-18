@@ -43,7 +43,7 @@ async def _import(client: AsyncClient, header: dict, project_id: str, name: str,
 async def _parcels(client: AsyncClient, header: dict, project_id: str) -> dict[str, dict]:
     r = await client.get(f"{BASE}/projects/{project_id}/parcels", headers=header)
     assert r.status_code == 200, r.text
-    return {p["parcel_ref"]: p for p in r.json()}
+    return {p["parcel_ref"]: p for p in r.json()["items"]}
 
 
 async def _summary(client: AsyncClient, header: dict, project_id: str) -> dict:

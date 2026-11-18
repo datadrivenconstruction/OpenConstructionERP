@@ -2276,7 +2276,7 @@
       "tolerance": "Tolérance",
       "element": "Élément",
       "generated": "Généré le",
-      "point": "Point",
+      "point": "Point implanté",
       "design_e": "E projet",
       "design_n": "N projet",
       "design_z": "Z projet",
@@ -2342,7 +2342,42 @@
       "status_needed": "Nécessaire",
       "status_negotiating": "En négociation",
       "status_acquired": "Acquise",
-      "status_expropriation": "Expropriation"
+      "status_expropriation": "Procédure d'expropriation"
+    }
+  },
+  "monitoring": {
+    "crossed": {
+      "fail": "Point {id} : déplacement {d} mm ou vitesse {r} mm/day a dépassé {level}",
+      "suggestion": "Vérifiez le point et l'ouvrage, puis accusez réception de l'alerte avec une note."
+    },
+    "level": {
+      "ok": "Conforme",
+      "alert": "Alerte",
+      "action": "Seuil d'action",
+      "alarm": "Alarme"
+    },
+    "risk": {
+      "title": "Point de surveillance {id} au niveau {level}",
+      "description": "Déplacement {d} mm, vitesse {r} mm/day par rapport à {profile}. Brouillon ouvert par la surveillance : vérifiez-le et désignez un responsable."
+    },
+    "report": {
+      "title": "Rapport d'alarmes de surveillance",
+      "project": "Projet",
+      "crs": "Système de coordonnées",
+      "profile": "Profil de seuils",
+      "generated": "Généré",
+      "point": "Point de mesure",
+      "baseline": "Référence (m)",
+      "latest": "Dernière (m)",
+      "displacement": "Déplacement (mm)",
+      "rate": "Vitesse (mm/day)",
+      "level": "Niveau",
+      "acknowledged": "Pris en compte",
+      "counts": "Alarme : {alarm} · Seuil d'action : {action} · Alerte : {alert} · Conforme : {ok}",
+      "findings": "Constats",
+      "no_profile": "Aucun profil, en définir un",
+      "ack_yes": "Oui",
+      "ack_no": "Non"
     }
   },
   "stockpiles": {

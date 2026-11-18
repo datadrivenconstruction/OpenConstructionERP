@@ -2103,7 +2103,11 @@
       "notifications.portal.message_received.title": "Nuovo messaggio nel portale",
       "notifications.portal.message_received.body": "{buyer_name} ha inviato un messaggio.",
       "dispatch.notify.plan_title": "Your daily plan is ready",
-      "dispatch.notify.plan_body": "Plan for {day}: {lines} lines."
+      "dispatch.notify.plan_body": "Plan for {day}: {lines} lines.",
+      "notifications.monitoring.alert.title": "Avviso di monitoraggio",
+      "notifications.monitoring.action.title": "Livello di azione del monitoraggio",
+      "notifications.monitoring.alarm.title": "Allarme di monitoraggio",
+      "notifications.monitoring.crossed.body": "Punto {point}: {displacement} mm, {rate} mm/day."
     },
     "schedule_headers": {
       "headers": {

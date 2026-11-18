@@ -24,13 +24,15 @@ import uuid
 
 from fastapi import APIRouter, Depends, Query, Response, status
 
+from app.core.document_locale import normalize_document_locale
+from app.core.i18n import SUPPORTED_LOCALES
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep, verify_project_access
 from app.modules.stockpiles.schemas import (
     AdjustmentConfirm,
     AdjustmentOut,
     StockpileCreate,
     StockpileDetail,
-    StockpileOut,
+    StockpileListResponse,
     StockpileSummary,
     StockpileUpdate,
     SurveyCreate,
@@ -61,12 +63,18 @@ async def _survey(survey_id: uuid.UUID, session: SessionDep, user_id: str):
     return service, s
 
 
-@router.get("/projects/{project_id}/stockpiles", response_model=list[StockpileOut], dependencies=_READ)
+@router.get("/projects/{project_id}/stockpiles", response_model=StockpileListResponse, dependencies=_READ)
 async def list_stockpiles(
-    project_id: uuid.UUID, session: SessionDep, user_id: CurrentUserId, locale: str = _LOCALE
-) -> list[StockpileOut]:
+    project_id: uuid.UUID,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    locale: str = _LOCALE,
+    offset: int = Query(0, ge=0),
+    limit: int = Query(1000, ge=1, le=5000),
+) -> StockpileListResponse:
     await verify_project_access(project_id, user_id, session)
-    return await StockpileService(session).list_stockpiles(project_id, locale)
+    rows = await StockpileService(session).list_stockpiles(project_id, locale)
+    return StockpileListResponse(items=rows[offset : offset + limit], total=len(rows), offset=offset, limit=limit)
 
 
 @router.post(
@@ -197,5 +205,8 @@ async def report_pdf(
     return Response(
         content=pdf,
         media_type="application/pdf",
-        headers={"Content-Disposition": f'attachment; filename="{data["stockpile"]["code"]}-{s.surveyed_on}.pdf"'},
+        headers={
+            "Content-Disposition": f'attachment; filename="{data["stockpile"]["code"]}-{s.surveyed_on}.pdf"',
+            "Content-Language": normalize_document_locale(locale, SUPPORTED_LOCALES, "en"),
+        },
     )

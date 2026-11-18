@@ -31,7 +31,7 @@ export interface Guess<T> {
 
 function dataLines(text: string): string[] {
   return text
-    .replace(/^﻿/, '')
+    .replace(/^/, '')
     .split(/\r?\n/)
     .filter((l) => l.trim() !== '' && !l.trimStart().startsWith('#'));
 }

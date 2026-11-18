@@ -2345,6 +2345,41 @@
       "status_expropriation": "Trưng thu"
     }
   },
+  "monitoring": {
+    "crossed": {
+      "fail": "Điểm {id}: dịch chuyển {d} mm hoặc tốc độ {r} mm/day vượt ngưỡng {level}",
+      "suggestion": "Kiểm tra điểm đo và kết cấu, sau đó xác nhận cảnh báo kèm ghi chú."
+    },
+    "level": {
+      "ok": "Bình thường",
+      "alert": "Cảnh báo",
+      "action": "Hành động",
+      "alarm": "Báo động"
+    },
+    "risk": {
+      "title": "Điểm quan trắc {id} ở mức {level}",
+      "description": "Dịch chuyển {d} mm, tốc độ {r} mm/day so với {profile}. Bản nháp do quan trắc mở: hãy xem xét và chỉ định người phụ trách."
+    },
+    "report": {
+      "title": "Báo cáo cảnh báo quan trắc",
+      "project": "Dự án",
+      "crs": "Hệ tọa độ",
+      "profile": "Hồ sơ ngưỡng",
+      "generated": "Thời điểm tạo",
+      "point": "Điểm",
+      "baseline": "Giá trị ban đầu (m)",
+      "latest": "Giá trị mới nhất (m)",
+      "displacement": "Dịch chuyển (mm)",
+      "rate": "Tốc độ (mm/day)",
+      "level": "Mức",
+      "acknowledged": "Đã xác nhận",
+      "counts": "Báo động: {alarm} · Hành động: {action} · Cảnh báo: {alert} · Bình thường: {ok}",
+      "findings": "Phát hiện",
+      "no_profile": "Chưa có hồ sơ, hãy thiết lập",
+      "ack_yes": "Có",
+      "ack_no": "Không"
+    }
+  },
   "stockpiles": {
     "density_assumed": {
       "fail": "Khối lượng riêng là giả định, không phải đo được: số tấn chỉ đáng tin bằng ước lượng đó.",

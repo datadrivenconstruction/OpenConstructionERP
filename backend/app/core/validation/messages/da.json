@@ -2273,8 +2273,8 @@
       "project": "Projekt",
       "crs": "Koordinatsystem",
       "request": "Anmodning",
-      "tolerance": "Tolerance",
-      "element": "Element",
+      "tolerance": "Tolerancegrænse",
+      "element": "Bygningselement",
       "generated": "Oprettet",
       "point": "Punkt",
       "design_e": "Projekteret E",
@@ -2330,7 +2330,7 @@
       "legal": "Registreret areal (m2)",
       "computed": "Beregnet (m2)",
       "diff": "Forskel (m2)",
-      "status": "Status",
+      "status": "Parcelstatus",
       "rights": "Rettigheder",
       "cost": "Omkostning",
       "findings": "Fund",
@@ -2343,6 +2343,41 @@
       "status_negotiating": "Forhandling",
       "status_acquired": "Erhvervet",
       "status_expropriation": "Ekspropriation"
+    }
+  },
+  "monitoring": {
+    "crossed": {
+      "fail": "Punkt {id}: forskydning {d} mm eller hastighed {r} mm/day overskred {level}",
+      "suggestion": "Kontrollér punktet og konstruktionen, og kvittér derefter alarmen med en note."
+    },
+    "level": {
+      "ok": "Normal",
+      "alert": "Advarsel",
+      "action": "Handling",
+      "alarm": "Alarmniveau"
+    },
+    "risk": {
+      "title": "Overvågningspunkt {id} ved {level}",
+      "description": "Forskydning {d} mm, hastighed {r} mm/day mod {profile}. Kladden er oprettet af overvågningen: gennemgå den og angiv en ansvarlig."
+    },
+    "report": {
+      "title": "Overvågningsalarmrapport",
+      "project": "Projekt",
+      "crs": "Koordinatsystem",
+      "profile": "Tærskelprofil",
+      "generated": "Genereret",
+      "point": "Punkt",
+      "baseline": "Udgangsværdi (m)",
+      "latest": "Seneste (m)",
+      "displacement": "Forskydning (mm)",
+      "rate": "Hastighed (mm/day)",
+      "level": "Niveau",
+      "acknowledged": "Kvitteret",
+      "counts": "Alarmniveau: {alarm} · Handling: {action} · Advarsel: {alert} · Normal: {ok}",
+      "findings": "Fund",
+      "no_profile": "Ingen profil, angiv en",
+      "ack_yes": "Ja",
+      "ack_no": "Nej"
     }
   },
   "stockpiles": {

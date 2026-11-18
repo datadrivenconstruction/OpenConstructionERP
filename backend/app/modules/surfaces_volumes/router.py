@@ -29,9 +29,11 @@ import uuid
 
 from fastapi import APIRouter, Depends, Query, Response, status
 
+from app.core.document_locale import normalize_document_locale
+from app.core.i18n import SUPPORTED_LOCALES
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep, verify_project_access
 from app.modules.surfaces_volumes.schemas import (
-    BoqPositionHit,
+    BoqPositionHitListResponse,
     ConfirmRequest,
     LandXmlImport,
     LandXmlResult,
@@ -40,12 +42,13 @@ from app.modules.surfaces_volumes.schemas import (
     SendToBoq,
     SendToBoqResult,
     SurfaceFromPoints,
+    SurfaceListResponse,
     SurfaceOut,
     VolumeCreate,
     VolumeDetail,
     VolumeDuplicate,
-    VolumeEventOut,
-    VolumeOut,
+    VolumeEventListResponse,
+    VolumeListResponse,
     VolumeSummary,
     VolumeUpdate,
 )
@@ -69,10 +72,17 @@ async def _volume(volume_id: uuid.UUID, session: SessionDep, user_id: str):
 # ── Surfaces ───────────────────────────────────────────────────────────────
 
 
-@router.get("/projects/{project_id}/surfaces", response_model=list[SurfaceOut], dependencies=_READ)
-async def list_surfaces(project_id: uuid.UUID, session: SessionDep, user_id: CurrentUserId) -> list[SurfaceOut]:
+@router.get("/projects/{project_id}/surfaces", response_model=SurfaceListResponse, dependencies=_READ)
+async def list_surfaces(
+    project_id: uuid.UUID,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    offset: int = Query(0, ge=0),
+    limit: int = Query(1000, ge=1, le=5000),
+) -> SurfaceListResponse:
     await verify_project_access(project_id, user_id, session)
-    return await VolumesService(session).list_surfaces(project_id)
+    rows = await VolumesService(session).list_surfaces(project_id)
+    return SurfaceListResponse(items=rows[offset : offset + limit], total=len(rows), offset=offset, limit=limit)
 
 
 @router.post(
@@ -113,12 +123,18 @@ async def delete_surface(surface_id: uuid.UUID, session: SessionDep, user_id: Cu
 # ── Project views ──────────────────────────────────────────────────────────
 
 
-@router.get("/projects/{project_id}/volumes", response_model=list[VolumeOut], dependencies=_READ)
+@router.get("/projects/{project_id}/volumes", response_model=VolumeListResponse, dependencies=_READ)
 async def list_volumes(
-    project_id: uuid.UUID, session: SessionDep, user_id: CurrentUserId, locale: str = _LOCALE
-) -> list[VolumeOut]:
+    project_id: uuid.UUID,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    locale: str = _LOCALE,
+    offset: int = Query(0, ge=0),
+    limit: int = Query(1000, ge=1, le=5000),
+) -> VolumeListResponse:
     await verify_project_access(project_id, user_id, session)
-    return await VolumesService(session).list_volumes(project_id, locale)
+    rows = await VolumesService(session).list_volumes(project_id, locale)
+    return VolumeListResponse(items=rows[offset : offset + limit], total=len(rows), offset=offset, limit=limit)
 
 
 @router.post(
@@ -151,16 +167,19 @@ async def plan(
     return await VolumesService(session).plan(project_id, volume_id)
 
 
-@router.get("/projects/{project_id}/boq-positions", response_model=list[BoqPositionHit], dependencies=_READ)
+@router.get("/projects/{project_id}/boq-positions", response_model=BoqPositionHitListResponse, dependencies=_READ)
 async def boq_positions(
     project_id: uuid.UUID,
     session: SessionDep,
     user_id: CurrentUserId,
     q: str = Query("", max_length=100),
     unit: str = Query("m3", max_length=10),
-) -> list[BoqPositionHit]:
+    offset: int = Query(0, ge=0),
+    limit: int = Query(1000, ge=1, le=5000),
+) -> BoqPositionHitListResponse:
     await verify_project_access(project_id, user_id, session)
-    return await VolumesService(session).search_positions(project_id, q.strip(), unit.strip())
+    rows = await VolumesService(session).search_positions(project_id, q.strip(), unit.strip())
+    return BoqPositionHitListResponse(items=rows[offset : offset + limit], total=len(rows), offset=offset, limit=limit)
 
 
 # ── One calculation ────────────────────────────────────────────────────────
@@ -238,10 +257,17 @@ async def record_progress(
     return await service.record_progress(v, body, user_id)
 
 
-@router.get("/volumes/{volume_id}/history", response_model=list[VolumeEventOut], dependencies=_READ)
-async def history(volume_id: uuid.UUID, session: SessionDep, user_id: CurrentUserId) -> list[VolumeEventOut]:
+@router.get("/volumes/{volume_id}/history", response_model=VolumeEventListResponse, dependencies=_READ)
+async def history(
+    volume_id: uuid.UUID,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    offset: int = Query(0, ge=0),
+    limit: int = Query(1000, ge=1, le=5000),
+) -> VolumeEventListResponse:
     service, v = await _volume(volume_id, session, user_id)
-    return await service.history(v)
+    rows = await service.history(v)
+    return VolumeEventListResponse(items=rows[offset : offset + limit], total=len(rows), offset=offset, limit=limit)
 
 
 @router.get("/volumes/{volume_id}/report.pdf", dependencies=_READ)
@@ -260,5 +286,8 @@ async def report_pdf(
     return Response(
         content=pdf,
         media_type="application/pdf",
-        headers={"Content-Disposition": f'attachment; filename="{v.code}.pdf"'},
+        headers={
+            "Content-Disposition": f'attachment; filename="{v.code}.pdf"',
+            "Content-Language": normalize_document_locale(locale, SUPPORTED_LOCALES, "en"),
+        },
     )

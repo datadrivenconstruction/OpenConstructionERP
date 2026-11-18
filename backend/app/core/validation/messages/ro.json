@@ -2274,7 +2274,7 @@
       "crs": "Sistem de coordonate",
       "request": "Cerere",
       "tolerance": "Toleranță",
-      "element": "Element",
+      "element": "Element de construcție",
       "generated": "Generat",
       "point": "Punct",
       "design_e": "E proiect",
@@ -2332,7 +2332,7 @@
       "diff": "Diferență (m2)",
       "status": "Stare",
       "rights": "Drepturi",
-      "cost": "Cost",
+      "cost": "Cost total",
       "findings": "Constatări",
       "total": "Total, {count} parcele",
       "acquired_of": "Achiziționate {acquired} din {total}",
@@ -2343,6 +2343,41 @@
       "status_negotiating": "Negociere",
       "status_acquired": "Achiziționată",
       "status_expropriation": "Expropriere"
+    }
+  },
+  "monitoring": {
+    "crossed": {
+      "fail": "Punctul {id}: deplasare {d} mm sau viteză {r} mm/day a depășit {level}",
+      "suggestion": "Verificați punctul și structura, apoi confirmați alerta cu o notă."
+    },
+    "level": {
+      "ok": "Normal",
+      "alert": "Alertă",
+      "action": "Acțiune",
+      "alarm": "Alarmă"
+    },
+    "risk": {
+      "title": "Punct de monitorizare {id} la {level}",
+      "description": "Deplasare {d} mm, viteză {r} mm/day față de {profile}. Ciorna a fost deschisă de monitorizare: verificați-o și desemnați un responsabil."
+    },
+    "report": {
+      "title": "Raport de alarme de monitorizare",
+      "project": "Proiect",
+      "crs": "Sistem de coordonate",
+      "profile": "Profil de praguri",
+      "generated": "Generat",
+      "point": "Punct",
+      "baseline": "Valoare inițială (m)",
+      "latest": "Ultima (m)",
+      "displacement": "Deplasare (mm)",
+      "rate": "Viteză (mm/day)",
+      "level": "Nivel",
+      "acknowledged": "Confirmat",
+      "counts": "Alarmă: {alarm} · Acțiune: {action} · Alertă: {alert} · Normal: {ok}",
+      "findings": "Constatări",
+      "no_profile": "Niciun profil, setați unul",
+      "ack_yes": "Da",
+      "ack_no": "Nu"
     }
   },
   "stockpiles": {

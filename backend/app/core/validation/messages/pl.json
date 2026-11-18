@@ -2274,7 +2274,7 @@
       "crs": "Układ współrzędnych",
       "request": "Zlecenie",
       "tolerance": "Tolerancja",
-      "element": "Element",
+      "element": "Element konstrukcyjny",
       "generated": "Wygenerowano",
       "point": "Punkt",
       "design_e": "Projekt E",
@@ -2330,7 +2330,7 @@
       "legal": "Powierzchnia ewidencyjna (m2)",
       "computed": "Obliczona (m2)",
       "diff": "Różnica (m2)",
-      "status": "Status",
+      "status": "Status działki",
       "rights": "Prawa",
       "cost": "Koszt",
       "findings": "Uwagi",
@@ -2343,6 +2343,41 @@
       "status_negotiating": "Negocjacje",
       "status_acquired": "Nabyta",
       "status_expropriation": "Wywłaszczenie"
+    }
+  },
+  "monitoring": {
+    "crossed": {
+      "fail": "Punkt {id}: przemieszczenie {d} mm lub prędkość {r} mm/day przekroczyło próg: {level}",
+      "suggestion": "Sprawdź punkt i konstrukcję, a następnie potwierdź alarm notatką."
+    },
+    "level": {
+      "ok": "W normie",
+      "alert": "Ostrzeżenie",
+      "action": "Interwencja",
+      "alarm": "Poziom alarmowy"
+    },
+    "risk": {
+      "title": "Punkt pomiarowy {id}: {level}",
+      "description": "Przemieszczenie {d} mm, prędkość {r} mm/day względem {profile}. Szkic otworzył monitoring: sprawdź go i wskaż osobę odpowiedzialną."
+    },
+    "report": {
+      "title": "Raport alarmów monitoringu",
+      "project": "Projekt",
+      "crs": "Układ współrzędnych",
+      "profile": "Profil progów",
+      "generated": "Wygenerowano",
+      "point": "Punkt",
+      "baseline": "Wartość wyjściowa (m)",
+      "latest": "Ostatnia (m)",
+      "displacement": "Przemieszczenie (mm)",
+      "rate": "Prędkość (mm/day)",
+      "level": "Poziom",
+      "acknowledged": "Potwierdzono",
+      "counts": "Poziom alarmowy: {alarm} · Interwencja: {action} · Ostrzeżenie: {alert} · W normie: {ok}",
+      "findings": "Ustalenia",
+      "no_profile": "Brak profilu, ustaw go",
+      "ack_yes": "Tak",
+      "ack_no": "Nie"
     }
   },
   "stockpiles": {

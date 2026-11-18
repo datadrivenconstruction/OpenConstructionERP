@@ -45,11 +45,13 @@ from app.dependencies import (
 from app.modules.survey_core.crs import search
 from app.modules.survey_core.permissions import can_confirm, require_survey_confirm
 from app.modules.survey_core.schemas import (
+    CrsInfoListResponse,
     CrsInfoOut,
     ImportPreview,
     ImportRequest,
     ImportResult,
     PointListResponse,
+    PointSetListResponse,
     PointSetOut,
     ProjectCrsOut,
     ProjectCrsSet,
@@ -60,6 +62,7 @@ from app.modules.survey_core.schemas import (
     TransformRequest,
     TransformResponse,
     TraverseCreate,
+    TraverseListResponse,
     TraverseOut,
     ValidationReportOut,
 )
@@ -78,10 +81,11 @@ class DeclareCrs(BaseModel):
     epsg: int = Field(ge=1000, le=999999)
 
 
-@router.get("/crs/search", response_model=list[CrsInfoOut], dependencies=_READ)
-async def crs_search(q: str = Query("", max_length=100), limit: int = Query(20, ge=1, le=50)) -> list[CrsInfoOut]:
+@router.get("/crs/search", response_model=CrsInfoListResponse, dependencies=_READ)
+async def crs_search(q: str = Query("", max_length=100), limit: int = Query(20, ge=1, le=50)) -> CrsInfoListResponse:
     """EPSG systems whose code or name matches what the person typed."""
-    return [CrsInfoOut(**vars(i)) for i in search(q, limit)]
+    rows = [CrsInfoOut(**vars(i)) for i in search(q, limit)]
+    return CrsInfoListResponse(items=rows, total=len(rows), offset=0, limit=limit)
 
 
 @router.post("/transform", response_model=TransformResponse, dependencies=_READ)
@@ -156,10 +160,17 @@ async def list_points(
     )
 
 
-@router.get("/projects/{project_id}/point-sets", response_model=list[PointSetOut], dependencies=_READ)
-async def list_sets(project_id: uuid.UUID, session: SessionDep, user_id: CurrentUserId) -> list[PointSetOut]:
+@router.get("/projects/{project_id}/point-sets", response_model=PointSetListResponse, dependencies=_READ)
+async def list_sets(
+    project_id: uuid.UUID,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    offset: int = Query(0, ge=0),
+    limit: int = Query(1000, ge=1, le=5000),
+) -> PointSetListResponse:
     await verify_project_access(project_id, user_id, session)
-    return await SurveyService(session).list_sets(project_id)
+    rows = await SurveyService(session).list_sets(project_id)
+    return PointSetListResponse(items=rows[offset : offset + limit], total=len(rows), offset=offset, limit=limit)
 
 
 @router.get("/projects/{project_id}/summary", response_model=RegisterSummary, dependencies=_READ)
@@ -196,10 +207,17 @@ async def delete_set(set_id: uuid.UUID, session: SessionDep, user_id: CurrentUse
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
-@router.get("/projects/{project_id}/traverses", response_model=list[TraverseOut], dependencies=_READ)
-async def list_traverses(project_id: uuid.UUID, session: SessionDep, user_id: CurrentUserId) -> list[TraverseOut]:
+@router.get("/projects/{project_id}/traverses", response_model=TraverseListResponse, dependencies=_READ)
+async def list_traverses(
+    project_id: uuid.UUID,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    offset: int = Query(0, ge=0),
+    limit: int = Query(1000, ge=1, le=5000),
+) -> TraverseListResponse:
     await verify_project_access(project_id, user_id, session)
-    return await SurveyService(session).list_traverses(project_id)
+    rows = await SurveyService(session).list_traverses(project_id)
+    return TraverseListResponse(items=rows[offset : offset + limit], total=len(rows), offset=offset, limit=limit)
 
 
 @router.post(

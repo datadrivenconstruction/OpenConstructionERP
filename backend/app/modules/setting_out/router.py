@@ -31,6 +31,8 @@ import uuid
 from fastapi import APIRouter, Depends, Query, Response, status
 
 from app.core.active_markets import ActiveMarkets
+from app.core.document_locale import normalize_document_locale
+from app.core.i18n import SUPPORTED_LOCALES
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep, verify_project_access
 from app.modules.setting_out.schemas import (
     ChainageAnswer,
@@ -41,15 +43,18 @@ from app.modules.setting_out.schemas import (
     MeasuredImportResult,
     NcrDraftOut,
     RecordCreate,
+    RecordListResponse,
     RecordOut,
     RequestCreate,
     RequestDetail,
+    RequestListResponse,
     RequestOut,
     RequestUpdate,
     SettingOutSummary,
     StakeCreate,
     StakeOut,
     ToleranceProfileCreate,
+    ToleranceProfileListResponse,
     ToleranceProfileOut,
     ValidationReportOut,
 )
@@ -69,12 +74,20 @@ async def _request(request_id: uuid.UUID, session: SessionDep, user_id: CurrentU
     return service, req
 
 
-@router.get("/projects/{project_id}/profiles", response_model=list[ToleranceProfileOut], dependencies=_READ)
+@router.get("/projects/{project_id}/profiles", response_model=ToleranceProfileListResponse, dependencies=_READ)
 async def list_profiles(
-    project_id: uuid.UUID, session: SessionDep, user_id: CurrentUserId, markets: ActiveMarkets
-) -> list[ToleranceProfileOut]:
+    project_id: uuid.UUID,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    markets: ActiveMarkets,
+    offset: int = Query(0, ge=0),
+    limit: int = Query(1000, ge=1, le=5000),
+) -> ToleranceProfileListResponse:
     await verify_project_access(project_id, user_id, session)
-    return await SettingOutService(session).profiles(project_id, markets)
+    rows = await SettingOutService(session).profiles(project_id, markets)
+    return ToleranceProfileListResponse(
+        items=rows[offset : offset + limit], total=len(rows), offset=offset, limit=limit
+    )
 
 
 @router.post(
@@ -90,10 +103,17 @@ async def create_profile(
     return await SettingOutService(session).create_profile(project_id, body, user_id)
 
 
-@router.get("/projects/{project_id}/requests", response_model=list[RequestOut], dependencies=_READ)
-async def list_requests(project_id: uuid.UUID, session: SessionDep, user_id: CurrentUserId) -> list[RequestOut]:
+@router.get("/projects/{project_id}/requests", response_model=RequestListResponse, dependencies=_READ)
+async def list_requests(
+    project_id: uuid.UUID,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    offset: int = Query(0, ge=0),
+    limit: int = Query(1000, ge=1, le=5000),
+) -> RequestListResponse:
     await verify_project_access(project_id, user_id, session)
-    return await SettingOutService(session).list_requests(project_id)
+    rows = await SettingOutService(session).list_requests(project_id)
+    return RequestListResponse(items=rows[offset : offset + limit], total=len(rows), offset=offset, limit=limit)
 
 
 @router.post(
@@ -199,7 +219,10 @@ async def sheet_pdf(
     return Response(
         content=pdf,
         media_type="application/pdf",
-        headers={"Content-Disposition": f'attachment; filename="setting-out-{req.code}.pdf"'},
+        headers={
+            "Content-Disposition": f'attachment; filename="setting-out-{req.code}.pdf"',
+            "Content-Language": normalize_document_locale(locale, SUPPORTED_LOCALES, "en"),
+        },
     )
 
 
@@ -218,10 +241,17 @@ async def add_record(stake_id: uuid.UUID, body: RecordCreate, session: SessionDe
     return await service.add_record(stake, body, user_id)
 
 
-@router.get("/stakes/{stake_id}/records", response_model=list[RecordOut], dependencies=_READ)
-async def history(stake_id: uuid.UUID, session: SessionDep, user_id: CurrentUserId) -> list[RecordOut]:
+@router.get("/stakes/{stake_id}/records", response_model=RecordListResponse, dependencies=_READ)
+async def history(
+    stake_id: uuid.UUID,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    offset: int = Query(0, ge=0),
+    limit: int = Query(1000, ge=1, le=5000),
+) -> RecordListResponse:
     service, stake = await _stake(stake_id, session, user_id)
-    return await service.history(stake)
+    rows = await service.history(stake)
+    return RecordListResponse(items=rows[offset : offset + limit], total=len(rows), offset=offset, limit=limit)
 
 
 @router.post(

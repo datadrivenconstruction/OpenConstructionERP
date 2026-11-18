@@ -226,4 +226,8 @@ TEMPLATES_TR: dict[str, str] = {
     "notifications.portal.user_invited.body": "{portal_user_email} davet edildi, rol: {portal_role}.",
     "notifications.portal.message_received.title": "Yeni portal mesajı",
     "notifications.portal.message_received.body": "Gönderen: {buyer_name}. Yeni bir mesajınız var.",
+    "notifications.monitoring.alert.title": "İzleme uyarısı",
+    "notifications.monitoring.action.title": "İzleme eylem seviyesi",
+    "notifications.monitoring.alarm.title": "İzleme alarmı",
+    "notifications.monitoring.crossed.body": "Nokta {point}: {displacement} mm, {rate} mm/day.",
 }

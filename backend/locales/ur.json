@@ -2103,7 +2103,11 @@
       "notifications.portal.message_received.title": "پورٹل پر نیا پیغام",
       "notifications.portal.message_received.body": "{buyer_name} نے پیغام بھیجا۔",
       "dispatch.notify.plan_title": "Your daily plan is ready",
-      "dispatch.notify.plan_body": "Plan for {day}: {lines} lines."
+      "dispatch.notify.plan_body": "Plan for {day}: {lines} lines.",
+      "notifications.monitoring.alert.title": "نگرانی کا انتباہ",
+      "notifications.monitoring.action.title": "نگرانی کی کارروائی کی سطح",
+      "notifications.monitoring.alarm.title": "نگرانی کا الارم",
+      "notifications.monitoring.crossed.body": "نقطہ {point}: {displacement} mm، {rate} mm/day۔"
     },
     "schedule_headers": {
       "headers": {

@@ -15,6 +15,8 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_serializer
 
+from app.core.decimal_types import Decimal6_3, Decimal8_3, Decimal18_2, finite_decimal
+
 ParcelStatus = Literal["needed", "negotiating", "acquired", "expropriation"]
 RightKind = Literal["ownership", "lease", "easement", "servitude", "mortgage", "restriction", "other"]
 PartyKind = Literal["person", "organisation", "public"]
@@ -38,9 +40,9 @@ class BoundaryPointOut(BoundaryPointIn):
 class ParcelCreate(BaseModel):
     parcel_ref: str = Field(min_length=1, max_length=100)
     name: str = Field("", max_length=255)
-    legal_area: Decimal | None = Field(None, ge=0)
+    legal_area: finite_decimal(16, 4) | None = Field(None, ge=0)
     status: ParcelStatus = "needed"
-    acquisition_cost: Decimal | None = Field(None, ge=0)
+    acquisition_cost: Decimal18_2 | None = Field(None, ge=0)
     acquired_on: date | None = None
     note: str = Field("", max_length=4000)
     points: list[BoundaryPointIn] = Field(default_factory=list, max_length=2000)
@@ -49,9 +51,9 @@ class ParcelCreate(BaseModel):
 class ParcelUpdate(BaseModel):
     parcel_ref: str | None = Field(None, min_length=1, max_length=100)
     name: str | None = Field(None, max_length=255)
-    legal_area: Decimal | None = Field(None, ge=0)
+    legal_area: finite_decimal(16, 4) | None = Field(None, ge=0)
     status: ParcelStatus | None = None
-    acquisition_cost: Decimal | None = Field(None, ge=0)
+    acquisition_cost: Decimal18_2 | None = Field(None, ge=0)
     acquired_on: date | None = None
     note: str | None = Field(None, max_length=4000)
     #: Explicit nulls clear these fields; omitted fields stay.
@@ -158,8 +160,8 @@ class SettingsOut(BaseModel):
 
 
 class SettingsIn(BaseModel):
-    area_tolerance_pct: Decimal = Field(ge=0, le=100)
-    gap_tolerance_m: Decimal = Field(ge=0, le=10)
+    area_tolerance_pct: Decimal6_3 = Field(ge=0, le=100)
+    gap_tolerance_m: Decimal8_3 = Field(ge=0, le=10)
 
 
 class ParcelSummary(BaseModel):
@@ -242,3 +244,31 @@ class ValidationReportOut(BaseModel):
     warning_count: int = 0
     info_count: int = 0
     findings: list[FindingOut] = Field(default_factory=list)
+
+
+class ParcelListResponse(BaseModel):
+    items: list[ParcelOut]
+    total: int
+    offset: int = 0
+    limit: int = 50
+
+
+class PartyListResponse(BaseModel):
+    items: list[PartyOut]
+    total: int
+    offset: int = 0
+    limit: int = 50
+
+
+class RightListResponse(BaseModel):
+    items: list[RightOut]
+    total: int
+    offset: int = 0
+    limit: int = 50
+
+
+class WorkZoneListResponse(BaseModel):
+    items: list[WorkZoneOut]
+    total: int
+    offset: int = 0
+    limit: int = 50

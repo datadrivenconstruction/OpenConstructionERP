@@ -2345,6 +2345,41 @@
       "status_expropriation": "収用"
     }
   },
+  "monitoring": {
+    "crossed": {
+      "fail": "点 {id} の変位 {d} mm または変化速度 {r} mm/day が {level} を超過",
+      "suggestion": "測点と構造物を確認のうえ、メモを添えてアラートを確認してください。"
+    },
+    "level": {
+      "ok": "正常",
+      "alert": "注意値",
+      "action": "管理値",
+      "alarm": "限界値"
+    },
+    "risk": {
+      "title": "計測点 {id}（{level}）",
+      "description": "変位 {d} mm、変化速度 {r} mm/day（{profile} 基準）。監視により下書きが作成されました。内容を確認し、担当者を指定してください。"
+    },
+    "report": {
+      "title": "計測管理 警報レポート",
+      "project": "プロジェクト",
+      "crs": "座標系",
+      "profile": "管理基準プロファイル",
+      "generated": "作成日時",
+      "point": "計測点",
+      "baseline": "基準値 (m)",
+      "latest": "最新値 (m)",
+      "displacement": "変位 (mm)",
+      "rate": "変化速度 (mm/day)",
+      "level": "レベル",
+      "acknowledged": "確認済み",
+      "counts": "限界値: {alarm} · 管理値: {action} · 注意値: {alert} · 正常: {ok}",
+      "findings": "所見",
+      "no_profile": "プロファイル未設定、設定してください",
+      "ack_yes": "はい",
+      "ack_no": "いいえ"
+    }
+  },
   "stockpiles": {
     "density_assumed": {
       "fail": "密度は仮定であり実測ではありません。トン数はその推定と同程度の信頼性です。",

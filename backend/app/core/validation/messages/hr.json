@@ -2274,7 +2274,7 @@
       "crs": "Koordinatni sustav",
       "request": "Zahtjev",
       "tolerance": "Tolerancija",
-      "element": "Element",
+      "element": "Građevinski element",
       "generated": "Izrađeno",
       "point": "Točka",
       "design_e": "Projekt E",
@@ -2330,7 +2330,7 @@
       "legal": "Upisana površina (m2)",
       "computed": "Izračunata (m2)",
       "diff": "Razlika (m2)",
-      "status": "Status",
+      "status": "Status čestice",
       "rights": "Prava",
       "cost": "Trošak",
       "findings": "Nalazi",
@@ -2343,6 +2343,41 @@
       "status_negotiating": "Pregovori",
       "status_acquired": "Stečeno",
       "status_expropriation": "Izvlaštenje"
+    }
+  },
+  "monitoring": {
+    "crossed": {
+      "fail": "Točka {id}: pomak {d} mm ili brzina {r} mm/day prešla je razinu {level}",
+      "suggestion": "Provjerite točku i konstrukciju, zatim potvrdite upozorenje bilješkom."
+    },
+    "level": {
+      "ok": "Normalno",
+      "alert": "Upozorenje",
+      "action": "Djelovanje",
+      "alarm": "Razina alarma"
+    },
+    "risk": {
+      "title": "Mjerna točka {id} na razini {level}",
+      "description": "Pomak {d} mm, brzina {r} mm/day u odnosu na {profile}. Nacrt je otvorio monitoring: pregledajte ga i odredite odgovornu osobu."
+    },
+    "report": {
+      "title": "Izvješće o alarmima monitoringa",
+      "project": "Projekt",
+      "crs": "Koordinatni sustav",
+      "profile": "Profil graničnih vrijednosti",
+      "generated": "Generirano",
+      "point": "Točka",
+      "baseline": "Polazna vrijednost (m)",
+      "latest": "Posljednja (m)",
+      "displacement": "Pomak (mm)",
+      "rate": "Brzina (mm/day)",
+      "level": "Razina",
+      "acknowledged": "Potvrđeno",
+      "counts": "Razina alarma: {alarm} · Djelovanje: {action} · Upozorenje: {alert} · Normalno: {ok}",
+      "findings": "Nalazi",
+      "no_profile": "Nema profila, postavite ga",
+      "ack_yes": "Da",
+      "ack_no": "Ne"
     }
   },
   "stockpiles": {

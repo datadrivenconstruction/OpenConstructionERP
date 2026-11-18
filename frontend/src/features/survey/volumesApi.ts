@@ -185,7 +185,7 @@ export type SurveyPlan = FeatureCollection & { properties?: { epsg: number | nul
 
 const p = (projectId: string) => `${BASE}/projects/${projectId}`;
 
-export const listSurfaces = (projectId: string) => apiGet<Surface[]>(`${p(projectId)}/surfaces`);
+export const listSurfaces = (projectId: string) => apiGet<{ items: Surface[] }>(`${p(projectId)}/surfaces`).then((r) => r.items);
 export const surfaceFromPoints = (projectId: string, body: { name: string; point_set_ids: string[] }) =>
   apiPost<Surface>(`${p(projectId)}/surfaces/from-points`, body);
 export const importLandXml = (projectId: string, body: { text: string; filename: string; name?: string }) =>
@@ -193,7 +193,7 @@ export const importLandXml = (projectId: string, body: { text: string; filename:
 export const deleteSurface = (id: string) => apiDelete(`${BASE}/surfaces/${id}`);
 
 export const listVolumes = (projectId: string, locale: string) =>
-  apiGet<Volume[]>(`${p(projectId)}/volumes?locale=${encodeURIComponent(locale)}`);
+  apiGet<{ items: Volume[] }>(`${p(projectId)}/volumes?locale=${encodeURIComponent(locale)}`).then((r) => r.items);
 export const getVolumeSummary = (projectId: string) => apiGet<VolumeSummary>(`${p(projectId)}/summary`);
 export const createVolume = (projectId: string, body: VolumeInput) => apiPost<Volume>(`${p(projectId)}/volumes`, body);
 export const updateVolume = (id: string, body: Partial<VolumeInput> & { cell_auto?: boolean }) =>
@@ -210,16 +210,16 @@ export const recordProgress = (id: string, body: { position_id?: string; quantit
     `${BASE}/volumes/${id}/record-progress`,
     body,
   );
-export const volumeHistory = (id: string) => apiGet<VolumeEvent[]>(`${BASE}/volumes/${id}/history`);
+export const volumeHistory = (id: string) => apiGet<{ items: VolumeEvent[] }>(`${BASE}/volumes/${id}/history`).then((r) => r.items);
 export const searchBoqPositions = (projectId: string, q: string) =>
-  apiGet<BoqPositionHit[]>(`${p(projectId)}/boq-positions?q=${encodeURIComponent(q)}&unit=m3`);
+  apiGet<{ items: BoqPositionHit[] }>(`${p(projectId)}/boq-positions?q=${encodeURIComponent(q)}&unit=m3`).then((r) => r.items);
 export const volumeReportUrl = (id: string, locale: string) =>
   `/api${BASE}/volumes/${id}/report.pdf?locale=${encodeURIComponent(locale)}`;
 export const getVolumesPlan = (projectId: string, volumeId?: string | null) =>
   apiGet<SurveyPlan>(`${p(projectId)}/plan${volumeId ? `?volume_id=${volumeId}` : ''}`);
 
 export const getRegisterPlan = (projectId: string) => apiGet<SurveyPlan>(`${CORE}/projects/${projectId}/plan`);
-export const listTraverses = (projectId: string) => apiGet<Traverse[]>(`${CORE}/projects/${projectId}/traverses`);
+export const listTraverses = (projectId: string) => apiGet<{ items: Traverse[] }>(`${CORE}/projects/${projectId}/traverses`).then((r) => r.items);
 export const createTraverse = (projectId: string, body: TraverseInput) =>
   apiPost<Traverse>(`${CORE}/projects/${projectId}/traverses`, body);
 export const deleteTraverse = (id: string) => apiDelete(`${CORE}/traverses/${id}`);

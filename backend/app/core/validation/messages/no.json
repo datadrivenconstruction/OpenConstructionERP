@@ -2274,7 +2274,7 @@
       "crs": "Koordinatsystem",
       "request": "Forespørsel",
       "tolerance": "Toleranse",
-      "element": "Element",
+      "element": "Bygningsdel",
       "generated": "Laget",
       "point": "Punkt",
       "design_e": "Prosjektert E",
@@ -2330,7 +2330,7 @@
       "legal": "Registrert areal (m2)",
       "computed": "Beregnet (m2)",
       "diff": "Differanse (m2)",
-      "status": "Status",
+      "status": "Eiendomsstatus",
       "rights": "Rettigheter",
       "cost": "Kostnad",
       "findings": "Funn",
@@ -2343,6 +2343,41 @@
       "status_negotiating": "Forhandling",
       "status_acquired": "Ervervet",
       "status_expropriation": "Ekspropriasjon"
+    }
+  },
+  "monitoring": {
+    "crossed": {
+      "fail": "Punkt {id}: forskyvning {d} mm eller hastighet {r} mm/day passerte {level}",
+      "suggestion": "Kontroller punktet og konstruksjonen, og bekreft deretter varselet med en merknad."
+    },
+    "level": {
+      "ok": "Normal",
+      "alert": "Varsel",
+      "action": "Tiltak",
+      "alarm": "Alarmnivå"
+    },
+    "risk": {
+      "title": "Målepunkt {id} ved {level}",
+      "description": "Forskyvning {d} mm, hastighet {r} mm/day mot {profile}. Utkastet ble åpnet av overvåkingen: gå gjennom det og utpek en ansvarlig."
+    },
+    "report": {
+      "title": "Alarmrapport for overvåking",
+      "project": "Prosjekt",
+      "crs": "Koordinatsystem",
+      "profile": "Terskelprofil",
+      "generated": "Generert",
+      "point": "Punkt",
+      "baseline": "Referanseverdi (m)",
+      "latest": "Siste (m)",
+      "displacement": "Forskyvning (mm)",
+      "rate": "Hastighet (mm/day)",
+      "level": "Nivå",
+      "acknowledged": "Bekreftet",
+      "counts": "Alarmnivå: {alarm} · Tiltak: {action} · Varsel: {alert} · Normal: {ok}",
+      "findings": "Funn",
+      "no_profile": "Ingen profil, velg en",
+      "ack_yes": "Ja",
+      "ack_no": "Nei"
     }
   },
   "stockpiles": {

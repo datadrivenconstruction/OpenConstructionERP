@@ -281,3 +281,24 @@ class SurveyProfileOut(SurveyProfileIn):
 
     scope: Literal["project", "workspace", "none"] = "none"
     source: str = "user"
+
+
+class PointSetListResponse(BaseModel):
+    items: list[PointSetOut]
+    total: int
+    offset: int = 0
+    limit: int = 50
+
+
+class TraverseListResponse(BaseModel):
+    items: list[TraverseOut]
+    total: int
+    offset: int = 0
+    limit: int = 50
+
+
+class CrsInfoListResponse(BaseModel):
+    items: list[CrsInfoOut]
+    total: int
+    offset: int = 0
+    limit: int = 50

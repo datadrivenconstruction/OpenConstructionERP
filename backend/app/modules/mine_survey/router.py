@@ -29,6 +29,8 @@ import uuid
 
 from fastapi import APIRouter, Depends, Query, Response, status
 
+from app.core.document_locale import normalize_document_locale
+from app.core.i18n import SUPPORTED_LOCALES
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep, verify_project_access
 from app.modules.mine_survey.schemas import (
     AddToClaim,
@@ -40,12 +42,14 @@ from app.modules.mine_survey.schemas import (
     EntryUpdate,
     PeriodCreate,
     PeriodDetail,
+    PeriodListResponse,
     PeriodOut,
     PeriodUpdate,
     PlanImport,
     PlanImportResult,
     TruckLoadsImport,
     UnitCreate,
+    UnitListResponse,
     UnitOut,
     UnitUpdate,
 )
@@ -77,10 +81,17 @@ async def _entry(entry_id: uuid.UUID, session: SessionDep, user_id: str):
 # ── Units ──────────────────────────────────────────────────────────────────
 
 
-@router.get("/projects/{project_id}/units", response_model=list[UnitOut], dependencies=_READ)
-async def list_units(project_id: uuid.UUID, session: SessionDep, user_id: CurrentUserId) -> list[UnitOut]:
+@router.get("/projects/{project_id}/units", response_model=UnitListResponse, dependencies=_READ)
+async def list_units(
+    project_id: uuid.UUID,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    offset: int = Query(0, ge=0),
+    limit: int = Query(1000, ge=1, le=5000),
+) -> UnitListResponse:
     await verify_project_access(project_id, user_id, session)
-    return await MineService(session).list_units(project_id)
+    rows = await MineService(session).list_units(project_id)
+    return UnitListResponse(items=rows[offset : offset + limit], total=len(rows), offset=offset, limit=limit)
 
 
 @router.post(
@@ -111,10 +122,17 @@ async def delete_unit(unit_id: uuid.UUID, session: SessionDep, user_id: CurrentU
 # ── Periods ────────────────────────────────────────────────────────────────
 
 
-@router.get("/projects/{project_id}/periods", response_model=list[PeriodOut], dependencies=_READ)
-async def list_periods(project_id: uuid.UUID, session: SessionDep, user_id: CurrentUserId) -> list[PeriodOut]:
+@router.get("/projects/{project_id}/periods", response_model=PeriodListResponse, dependencies=_READ)
+async def list_periods(
+    project_id: uuid.UUID,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    offset: int = Query(0, ge=0),
+    limit: int = Query(1000, ge=1, le=5000),
+) -> PeriodListResponse:
     await verify_project_access(project_id, user_id, session)
-    return await MineService(session).list_periods(project_id)
+    rows = await MineService(session).list_periods(project_id)
+    return PeriodListResponse(items=rows[offset : offset + limit], total=len(rows), offset=offset, limit=limit)
 
 
 @router.post(
@@ -235,5 +253,8 @@ async def report_pdf(
     return Response(
         content=pdf,
         media_type="application/pdf",
-        headers={"Content-Disposition": f'attachment; filename="mine-period-{p.label}.pdf"'},
+        headers={
+            "Content-Disposition": f'attachment; filename="mine-period-{p.label}.pdf"',
+            "Content-Language": normalize_document_locale(locale, SUPPORTED_LOCALES, "en"),
+        },
     )

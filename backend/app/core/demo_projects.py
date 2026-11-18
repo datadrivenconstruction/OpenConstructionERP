@@ -2943,6 +2943,7 @@ _PACK_DEMO_TYPE: dict[str, str] = {
     "consultancy-riyadh": "Residential",
     "contractor-jeddah": "Residential",
     "site-development-dammam": "Infrastructure",
+    "survey-riverside-yard": "Infrastructure",
     "full-showcase-riyadh": "Mixed-use",
     "mixed-use-johannesburg": "Mixed-use",
     "mixed-use-mexico-city": "Mixed-use",

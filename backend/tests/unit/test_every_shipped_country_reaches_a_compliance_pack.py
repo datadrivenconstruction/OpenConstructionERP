@@ -114,6 +114,12 @@ _MODULE_RECORD_CHECKS = (
     "whatever its country; the contract-signature gate is a different decision"
 )
 
+# The survey modules check their own registers (points, volumes, piles, periods) wherever they run.
+_SURVEY_RECORD_CHECKS = (
+    "checks a survey module's own records, on every project that uses the module, "
+    "whatever its country; the contract-signature gate is a different decision"
+)
+
 NON_JURISDICTION_RULE_SETS: dict[str, str] = {
     "formwork": (
         "Registered by the formwork module's own validators and run by that "
@@ -144,6 +150,10 @@ NON_JURISDICTION_RULE_SETS: dict[str, str] = {
     "engineering_brief": _MODULE_RECORD_CHECKS,
     "hse_frame": _MODULE_RECORD_CHECKS,
     "project_handbook": _MODULE_RECORD_CHECKS,
+    "survey_core": _SURVEY_RECORD_CHECKS,
+    "surfaces_volumes": _SURVEY_RECORD_CHECKS,
+    "stockpiles": _SURVEY_RECORD_CHECKS,
+    "mine_survey": _SURVEY_RECORD_CHECKS,
 }
 
 

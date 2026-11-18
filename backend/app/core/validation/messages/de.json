@@ -2330,7 +2330,7 @@
       "legal": "Amtliche Fläche (m2)",
       "computed": "Berechnet (m2)",
       "diff": "Differenz (m2)",
-      "status": "Status",
+      "status": "Grundstücksstatus",
       "rights": "Rechte",
       "cost": "Kosten",
       "findings": "Befunde",
@@ -2343,6 +2343,41 @@
       "status_negotiating": "In Verhandlung",
       "status_acquired": "Erworben",
       "status_expropriation": "Enteignung"
+    }
+  },
+  "monitoring": {
+    "crossed": {
+      "fail": "Messpunkt {id}: Verschiebung {d} mm oder Geschwindigkeit {r} mm/day hat {level} überschritten",
+      "suggestion": "Prüfen Sie Messpunkt und Bauwerk und quittieren Sie dann die Meldung mit einer Notiz."
+    },
+    "level": {
+      "ok": "Normal",
+      "alert": "Warnwert",
+      "action": "Maßnahmenwert",
+      "alarm": "Alarmwert"
+    },
+    "risk": {
+      "title": "Messpunkt {id} bei {level}",
+      "description": "Verschiebung {d} mm, Geschwindigkeit {r} mm/day gegenüber {profile}. Der Entwurf wurde durch das Monitoring eröffnet: prüfen und einen Verantwortlichen benennen."
+    },
+    "report": {
+      "title": "Alarmbericht Monitoring",
+      "project": "Projekt",
+      "crs": "Koordinatensystem",
+      "profile": "Schwellenwertprofil",
+      "generated": "Erstellt",
+      "point": "Punkt",
+      "baseline": "Ausgangswert (m)",
+      "latest": "Letzter Wert (m)",
+      "displacement": "Verschiebung (mm)",
+      "rate": "Geschwindigkeit (mm/day)",
+      "level": "Stufe",
+      "acknowledged": "Quittiert",
+      "counts": "Alarmwert: {alarm} · Maßnahmenwert: {action} · Warnwert: {alert} · Normal: {ok}",
+      "findings": "Befunde",
+      "no_profile": "Kein Profil, bitte festlegen",
+      "ack_yes": "Ja",
+      "ack_no": "Nein"
     }
   },
   "stockpiles": {

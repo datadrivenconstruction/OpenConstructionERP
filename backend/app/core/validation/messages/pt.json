@@ -2345,6 +2345,41 @@
       "status_expropriation": "Expropriação"
     }
   },
+  "monitoring": {
+    "crossed": {
+      "fail": "Ponto {id}: deslocamento {d} mm ou taxa {r} mm/day ultrapassou {level}",
+      "suggestion": "Verifique o ponto e a estrutura e depois reconheça o alerta com uma observação."
+    },
+    "level": {
+      "ok": "Normal",
+      "alert": "Alerta",
+      "action": "Ação",
+      "alarm": "Alarme"
+    },
+    "risk": {
+      "title": "Ponto de monitoramento {id} em {level}",
+      "description": "Deslocamento {d} mm, taxa {r} mm/day em relação a {profile}. Rascunho aberto pelo monitoramento: revise e defina um responsável."
+    },
+    "report": {
+      "title": "Relatório de alarmes de monitoramento",
+      "project": "Projeto",
+      "crs": "Sistema de coordenadas",
+      "profile": "Perfil de limites",
+      "generated": "Gerado em",
+      "point": "Ponto",
+      "baseline": "Linha de base (m)",
+      "latest": "Última leitura (m)",
+      "displacement": "Deslocamento (mm)",
+      "rate": "Taxa (mm/day)",
+      "level": "Nível",
+      "acknowledged": "Reconhecido",
+      "counts": "Alarme: {alarm} · Ação: {action} · Alerta: {alert} · Normal: {ok}",
+      "findings": "Achados",
+      "no_profile": "Sem perfil, defina um",
+      "ack_yes": "Sim",
+      "ack_no": "Não"
+    }
+  },
   "stockpiles": {
     "density_assumed": {
       "fail": "A densidade é assumida, não medida: as toneladas são tão fiáveis quanto essa estimativa.",

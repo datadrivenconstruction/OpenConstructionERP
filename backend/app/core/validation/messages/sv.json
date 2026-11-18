@@ -2330,7 +2330,7 @@
       "legal": "Registrerad areal (m2)",
       "computed": "Beräknad (m2)",
       "diff": "Skillnad (m2)",
-      "status": "Status",
+      "status": "Fastighetsstatus",
       "rights": "Rättigheter",
       "cost": "Kostnad",
       "findings": "Anmärkningar",
@@ -2342,7 +2342,42 @@
       "status_needed": "Behövs",
       "status_negotiating": "Förhandling",
       "status_acquired": "Förvärvad",
-      "status_expropriation": "Expropriation"
+      "status_expropriation": "Expropriationsförfarande"
+    }
+  },
+  "monitoring": {
+    "crossed": {
+      "fail": "Punkt {id}: förskjutning {d} mm eller hastighet {r} mm/day överskred {level}",
+      "suggestion": "Kontrollera punkten och konstruktionen och kvittera sedan larmet med en notering."
+    },
+    "level": {
+      "ok": "Normal",
+      "alert": "Varning",
+      "action": "Åtgärd",
+      "alarm": "Larm"
+    },
+    "risk": {
+      "title": "Mätpunkt {id} vid {level}",
+      "description": "Förskjutning {d} mm, hastighet {r} mm/day mot {profile}. Utkastet öppnades av övervakningen: granska det och utse en ansvarig."
+    },
+    "report": {
+      "title": "Larmrapport för övervakning",
+      "project": "Projekt",
+      "crs": "Koordinatsystem",
+      "profile": "Tröskelprofil",
+      "generated": "Genererad",
+      "point": "Punkt",
+      "baseline": "Referensvärde (m)",
+      "latest": "Senaste (m)",
+      "displacement": "Förskjutning (mm)",
+      "rate": "Hastighet (mm/day)",
+      "level": "Nivå",
+      "acknowledged": "Kvitterad",
+      "counts": "Larm: {alarm} · Åtgärd: {action} · Varning: {alert} · Normal: {ok}",
+      "findings": "Iakttagelser",
+      "no_profile": "Ingen profil, ange en",
+      "ack_yes": "Ja",
+      "ack_no": "Nej"
     }
   },
   "stockpiles": {

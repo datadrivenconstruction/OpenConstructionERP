@@ -2345,6 +2345,41 @@
       "status_expropriation": "سلب مالکیت"
     }
   },
+  "monitoring": {
+    "crossed": {
+      "fail": "نقطهٔ {id}: جابه‌جایی {d} mm یا نرخ {r} mm/day از {level} عبور کرد",
+      "suggestion": "نقطه و سازه را بررسی کنید، سپس هشدار را با یادداشت تأیید کنید."
+    },
+    "level": {
+      "ok": "سالم",
+      "alert": "هشدار",
+      "action": "اقدام",
+      "alarm": "آلارم"
+    },
+    "risk": {
+      "title": "نقطهٔ پایش {id} در سطح {level}",
+      "description": "جابه‌جایی {d} mm، نرخ {r} mm/day نسبت به {profile}. پیش‌نویس توسط پایش باز شد: آن را بررسی کنید و مسئول تعیین کنید."
+    },
+    "report": {
+      "title": "گزارش آلارم پایش",
+      "project": "پروژه",
+      "crs": "سیستم مختصات",
+      "profile": "پروفایل آستانه",
+      "generated": "تاریخ تولید",
+      "point": "نقطه",
+      "baseline": "مبنا (m)",
+      "latest": "آخرین (m)",
+      "displacement": "جابه‌جایی (mm)",
+      "rate": "نرخ (mm/day)",
+      "level": "سطح",
+      "acknowledged": "تأییدشده",
+      "counts": "آلارم: {alarm} · اقدام: {action} · هشدار: {alert} · سالم: {ok}",
+      "findings": "یافته‌ها",
+      "no_profile": "پروفایل ندارد، یکی تنظیم کنید",
+      "ack_yes": "بله",
+      "ack_no": "خیر"
+    }
+  },
   "stockpiles": {
     "density_assumed": {
       "fail": "چگالی فرضی است نه اندازه‌گیری‌شده: تن‌ها به اندازه همین برآورد معتبرند.",

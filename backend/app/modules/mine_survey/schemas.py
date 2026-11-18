@@ -224,3 +224,17 @@ class PeriodOut(BaseModel):
 class PeriodDetail(PeriodOut):
     entries: list[EntryOut]
     totals: Totals
+
+
+class PeriodListResponse(BaseModel):
+    items: list[PeriodOut]
+    total: int
+    offset: int = 0
+    limit: int = 50
+
+
+class UnitListResponse(BaseModel):
+    items: list[UnitOut]
+    total: int
+    offset: int = 0
+    limit: int = 50

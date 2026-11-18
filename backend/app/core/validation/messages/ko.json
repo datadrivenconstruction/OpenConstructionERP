@@ -2345,6 +2345,41 @@
       "status_expropriation": "수용"
     }
   },
+  "monitoring": {
+    "crossed": {
+      "fail": "점 {id}의 변위 {d} mm 또는 변화율 {r} mm/day가 {level} 기준을 초과했습니다",
+      "suggestion": "측점과 구조물을 점검한 뒤 메모와 함께 경보를 확인하십시오."
+    },
+    "level": {
+      "ok": "정상",
+      "alert": "주의",
+      "action": "관리",
+      "alarm": "경보"
+    },
+    "risk": {
+      "title": "계측점 {id}, {level} 단계",
+      "description": "변위 {d} mm, 변화율 {r} mm/day ({profile} 기준). 모니터링이 초안을 열었습니다. 검토하고 담당자를 지정하십시오."
+    },
+    "report": {
+      "title": "계측 경보 보고서",
+      "project": "프로젝트",
+      "crs": "좌표계",
+      "profile": "기준값 프로파일",
+      "generated": "생성일",
+      "point": "계측점",
+      "baseline": "기준값 (m)",
+      "latest": "최신값 (m)",
+      "displacement": "변위 (mm)",
+      "rate": "변화율 (mm/day)",
+      "level": "단계",
+      "acknowledged": "확인됨",
+      "counts": "경보: {alarm} · 관리: {action} · 주의: {alert} · 정상: {ok}",
+      "findings": "발견 사항",
+      "no_profile": "프로파일이 없습니다. 설정하십시오",
+      "ack_yes": "예",
+      "ack_no": "아니오"
+    }
+  },
   "stockpiles": {
     "density_assumed": {
       "fail": "밀도는 가정이며 실측이 아닙니다. 톤은 그 추정만큼만 믿을 수 있습니다.",

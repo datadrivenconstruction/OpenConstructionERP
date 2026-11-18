@@ -2087,7 +2087,11 @@
       "notifications.portal.message_received.title": "门户有新消息",
       "notifications.portal.message_received.body": "{buyer_name} 发来一条消息。",
       "dispatch.notify.plan_title": "Your daily plan is ready",
-      "dispatch.notify.plan_body": "Plan for {day}: {lines} lines."
+      "dispatch.notify.plan_body": "Plan for {day}: {lines} lines.",
+      "notifications.monitoring.alert.title": "监测预警",
+      "notifications.monitoring.action.title": "监测行动级别",
+      "notifications.monitoring.alarm.title": "监测报警",
+      "notifications.monitoring.crossed.body": "测点 {point}：{displacement} mm，{rate} mm/day。"
     },
     "schedule_headers": {
       "headers": {

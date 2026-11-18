@@ -36,7 +36,7 @@ async def _import_file(client: AsyncClient, header: dict, project_id: str, name:
 async def _points(client: AsyncClient, header: dict, project_id: str) -> dict[str, dict]:
     response = await client.get(f"{BASE}/projects/{project_id}/points", headers=header)
     assert response.status_code == 200, response.text
-    return {p["code"]: p for p in response.json()}
+    return {p["code"]: p for p in response.json()["items"]}
 
 
 async def test_demo_setup_is_idempotent_and_has_no_readings_yet(
@@ -198,7 +198,7 @@ async def test_switching_the_profile_rejudges_the_history(client: AsyncClient, h
     assert profile.status_code == 201, profile.text
     key = profile.json()["key"]
     assert key.startswith("project:")
-    keys = [p["key"] for p in (await client.get(f"{BASE}/projects/{project_id}/profiles", headers=header)).json()]
+    keys = [p["key"] for p in (await client.get(f"{BASE}/projects/{project_id}/profiles", headers=header)).json()["items"]]
     assert keys[0] == "demo" and key in keys
     switched = await client.put(f"{BASE}/projects/{project_id}/settings", json={"profile_key": key}, headers=header)
     assert switched.status_code == 200

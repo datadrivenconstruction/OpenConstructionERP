@@ -157,8 +157,8 @@ export interface Summary {
   ncr_drafts: number;
 }
 
-export const listProfiles = (projectId: string) => apiGet<ToleranceProfile[]>(`${BASE}/projects/${projectId}/profiles`);
-export const listRequests = (projectId: string) => apiGet<StakeoutRequest[]>(`${BASE}/projects/${projectId}/requests`);
+export const listProfiles = (projectId: string) => apiGet<{ items: ToleranceProfile[] }>(`${BASE}/projects/${projectId}/profiles`).then((r) => r.items);
+export const listRequests = (projectId: string) => apiGet<{ items: StakeoutRequest[] }>(`${BASE}/projects/${projectId}/requests`).then((r) => r.items);
 export const createRequest = (projectId: string, body: RequestInput) =>
   apiPost<StakeoutRequest, RequestInput>(`${BASE}/projects/${projectId}/requests`, body);
 export const getSummary = (projectId: string) => apiGet<Summary>(`${BASE}/projects/${projectId}/summary`);
@@ -176,7 +176,7 @@ export const importDesign = (id: string, body: DesignImportInput) =>
   apiPost<StakeoutRequestDetail, DesignImportInput>(`${BASE}/requests/${id}/design`, body);
 export const recordStake = (stakeId: string, body: RecordInput) =>
   apiPost<StakeRecord, RecordInput>(`${BASE}/stakes/${stakeId}/records`, body);
-export const stakeHistory = (stakeId: string) => apiGet<StakeRecord[]>(`${BASE}/stakes/${stakeId}/records`);
+export const stakeHistory = (stakeId: string) => apiGet<{ items: StakeRecord[] }>(`${BASE}/stakes/${stakeId}/records`).then((r) => r.items);
 export const createNcrDraft = (recordId: string, locale: string) =>
   apiPost<{ ncr_id: string; ncr_number: string; record_id: string }>(
     `${BASE}/records/${recordId}/ncr?locale=${encodeURIComponent(locale)}`,

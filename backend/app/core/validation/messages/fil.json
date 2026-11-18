@@ -2269,11 +2269,11 @@
       "suggestion": "Ilagay ang instrumento at ang mga control point na pinagtayuan ng istasyon."
     },
     "sheet": {
-      "title": "Setting-out sheet",
+      "title": "Sheet ng pagtatakda",
       "project": "Proyekto",
-      "crs": "Coordinate system",
+      "crs": "Sistema ng koordinado",
       "request": "Kahilingan",
-      "tolerance": "Tolerance",
+      "tolerance": "Pinahihintulutang paglihis",
       "element": "Elemento",
       "generated": "Ginawa",
       "point": "Punto",
@@ -2343,6 +2343,41 @@
       "status_negotiating": "Nakikipag-usap",
       "status_acquired": "Nakuha na",
       "status_expropriation": "Ekspropriasyon"
+    }
+  },
+  "monitoring": {
+    "crossed": {
+      "fail": "Lumampas sa {level} ang punto {id}: paggalaw {d} mm o bilis {r} mm/day",
+      "suggestion": "Suriin ang punto at estruktura, saka kumpirmahin ang alerto gamit ang tala."
+    },
+    "level": {
+      "ok": "Normal",
+      "alert": "Alerto",
+      "action": "Aksyon",
+      "alarm": "Alarma"
+    },
+    "risk": {
+      "title": "Punto ng monitoring {id} sa {level}",
+      "description": "Paggalaw {d} mm, bilis {r} mm/day laban sa {profile}. Binuksan ng monitoring ang draft: suriin ito at magtalaga ng may-ari."
+    },
+    "report": {
+      "title": "Ulat ng alarma sa monitoring",
+      "project": "Proyekto",
+      "crs": "Sistema ng coordinate",
+      "profile": "Profile ng threshold",
+      "generated": "Nabuo noong",
+      "point": "Punto",
+      "baseline": "Batayan (m)",
+      "latest": "Pinakabago (m)",
+      "displacement": "Paggalaw (mm)",
+      "rate": "Bilis (mm/day)",
+      "level": "Antas",
+      "acknowledged": "Kinilala",
+      "counts": "Alarma: {alarm} · Aksyon: {action} · Alerto: {alert} · Normal: {ok}",
+      "findings": "Mga natuklasan",
+      "no_profile": "Walang profile, magtakda ng isa",
+      "ack_yes": "Oo",
+      "ack_no": "Hindi"
     }
   },
   "stockpiles": {

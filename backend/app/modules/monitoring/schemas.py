@@ -212,3 +212,17 @@ class MonitoringSummary(BaseModel):
     alarm: int
     unacknowledged: int
     last_epoch: datetime | None = None
+
+
+class PointListResponse(BaseModel):
+    items: list[PointOut]
+    total: int
+    offset: int = 0
+    limit: int = 50
+
+
+class ProfileListResponse(BaseModel):
+    items: list[ProfileOut]
+    total: int
+    offset: int = 0
+    limit: int = 50

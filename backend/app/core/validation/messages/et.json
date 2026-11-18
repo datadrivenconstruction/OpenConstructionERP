@@ -2274,7 +2274,7 @@
       "crs": "Koordinaatsüsteem",
       "request": "Taotlus",
       "tolerance": "Tolerants",
-      "element": "Element",
+      "element": "Ehituselement",
       "generated": "Loodud",
       "point": "Punkt",
       "design_e": "Projekt E",
@@ -2343,6 +2343,41 @@
       "status_negotiating": "Läbirääkimised",
       "status_acquired": "Omandatud",
       "status_expropriation": "Võõrandamine"
+    }
+  },
+  "monitoring": {
+    "crossed": {
+      "fail": "Punkt {id}: nihe {d} mm või kiirus {r} mm/day ületas taseme {level}",
+      "suggestion": "Kontrollige punkti ja konstruktsiooni ning kinnitage seejärel hoiatus märkusega."
+    },
+    "level": {
+      "ok": "Normaalne",
+      "alert": "Hoiatus",
+      "action": "Meetmed",
+      "alarm": "Alarmtase"
+    },
+    "risk": {
+      "title": "Jälgimispunkt {id} tasemel {level}",
+      "description": "Nihe {d} mm, kiirus {r} mm/day võrreldes profiiliga {profile}. Mustandi avas jälgimine: vaadake see üle ja määrake vastutaja."
+    },
+    "report": {
+      "title": "Jälgimise alarmiaruanne",
+      "project": "Projekt",
+      "crs": "Koordinaatsüsteem",
+      "profile": "Piirväärtuste profiil",
+      "generated": "Loodud",
+      "point": "Punkt",
+      "baseline": "Lähteväärtus (m)",
+      "latest": "Viimane (m)",
+      "displacement": "Nihe (mm)",
+      "rate": "Kiirus (mm/day)",
+      "level": "Tase",
+      "acknowledged": "Kinnitatud",
+      "counts": "Alarmtase: {alarm} · Meetmed: {action} · Hoiatus: {alert} · Normaalne: {ok}",
+      "findings": "Leiud",
+      "no_profile": "Profiil puudub, määrake see",
+      "ack_yes": "Jah",
+      "ack_no": "Ei"
     }
   },
   "stockpiles": {

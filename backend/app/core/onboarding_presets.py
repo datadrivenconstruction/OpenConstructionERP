@@ -82,7 +82,7 @@ _FIELD = ["fieldreports", "collaboration", "field_diary", "payroll"]
 _ESG = ["carbon"]
 _BI = ["bi_dashboards", "reporting", "project_controls"]
 _ENTERPRISE = ["enterprise_workflows", "full_evm", "rfq_bidding", "integrations"]
-_SURVEY = ["survey_core", "surfaces_volumes", "stockpiles"]
+_SURVEY = ["survey_core", "surfaces_volumes", "stockpiles", "mine_survey"]
 
 # Region-specific packs are chosen on the onboarding region step / via partner
 # packs, not by a company profile, so they are not part of any profile's set.

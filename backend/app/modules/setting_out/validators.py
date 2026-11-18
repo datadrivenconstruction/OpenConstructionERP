@@ -99,3 +99,7 @@ def register_setting_out_validation_rules() -> None:
 
 
 __all__ = ["SETTING_OUT_RULES", "SETTING_OUT_RULE_SET", "register_setting_out_validation_rules"]
+
+
+# Registered at import so a process that only loads this module still knows the rule set.
+register_setting_out_validation_rules()

@@ -2119,7 +2119,11 @@
       "notifications.portal.message_received.title": "Порталдан жаңы билдирүү",
       "notifications.portal.message_received.body": "{buyer_name} билдирүү жөнөттү.",
       "dispatch.notify.plan_title": "Your daily plan is ready",
-      "dispatch.notify.plan_body": "Plan for {day}: {lines} lines."
+      "dispatch.notify.plan_body": "Plan for {day}: {lines} lines.",
+      "notifications.monitoring.alert.title": "Байкоо эскертүүсү",
+      "notifications.monitoring.action.title": "Байкоонун аракет деңгээли",
+      "notifications.monitoring.alarm.title": "Байкоо дабышы",
+      "notifications.monitoring.crossed.body": "Чекит {point}: {displacement} mm, {rate} mm/day."
     },
     "schedule_headers": {
       "headers": {

@@ -243,3 +243,24 @@ class ChainageAnswer(BaseModel):
     n: float
     chainage: float
     offset_m: float
+
+
+class RecordListResponse(BaseModel):
+    items: list[RecordOut]
+    total: int
+    offset: int = 0
+    limit: int = 50
+
+
+class ToleranceProfileListResponse(BaseModel):
+    items: list[ToleranceProfileOut]
+    total: int
+    offset: int = 0
+    limit: int = 50
+
+
+class RequestListResponse(BaseModel):
+    items: list[RequestOut]
+    total: int
+    offset: int = 0
+    limit: int = 50

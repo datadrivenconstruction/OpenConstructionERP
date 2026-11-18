@@ -35,6 +35,8 @@ from fastapi import APIRouter, Depends, Query, Response, status
 from pydantic import BaseModel, Field
 
 from app.core.active_markets import ActiveMarkets
+from app.core.document_locale import normalize_document_locale
+from app.core.i18n import SUPPORTED_LOCALES
 from app.dependencies import (
     CurrentUserId,
     RequirePermission,
@@ -49,20 +51,22 @@ from app.modules.land_parcels.schemas import (
     ImportResult,
     ParcelCreate,
     ParcelDetail,
-    ParcelOut,
+    ParcelListResponse,
     ParcelSummary,
     ParcelUpdate,
     PartyIn,
+    PartyListResponse,
     PartyOut,
     ProfileOut,
     RightIn,
+    RightListResponse,
     RightOut,
     SendToBoqRequest,
     SendToBoqResult,
     SettingsIn,
     SettingsOut,
     ValidationReportOut,
-    WorkZoneOut,
+    WorkZoneListResponse,
 )
 from app.modules.land_parcels.service import ParcelService
 from app.modules.survey_core.permissions import require_survey_confirm
@@ -113,12 +117,19 @@ async def put_settings(
     return await ParcelService(session).set_settings(project_id, body, user_id)
 
 
-@router.get("/projects/{project_id}/parcels", response_model=list[ParcelOut], dependencies=_READ)
+@router.get("/projects/{project_id}/parcels", response_model=ParcelListResponse, dependencies=_READ)
 async def list_parcels(
-    project_id: uuid.UUID, session: SessionDep, user_id: CurrentUserId, markets: ActiveMarkets, locale: Locale = "en"
-) -> list[ParcelOut]:
+    project_id: uuid.UUID,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    markets: ActiveMarkets,
+    locale: Locale = "en",
+    offset: int = Query(0, ge=0),
+    limit: int = Query(1000, ge=1, le=5000),
+) -> ParcelListResponse:
     await verify_project_access(project_id, user_id, session)
-    return await ParcelService(session).list_parcels(project_id, markets, locale)
+    rows = await ParcelService(session).list_parcels(project_id, markets, locale)
+    return ParcelListResponse(items=rows[offset : offset + limit], total=len(rows), offset=offset, limit=limit)
 
 
 @router.post(
@@ -204,7 +215,10 @@ async def schedule_pdf(
     return Response(
         content=data,
         media_type="application/pdf",
-        headers={"Content-Disposition": 'attachment; filename="parcel_schedule.pdf"'},
+        headers={
+            "Content-Disposition": 'attachment; filename="parcel_schedule.pdf"',
+            "Content-Language": normalize_document_locale(locale, SUPPORTED_LOCALES, "en"),
+        },
     )
 
 
@@ -214,10 +228,17 @@ async def plan(project_id: uuid.UUID, session: SessionDep, user_id: CurrentUserI
     return await ParcelService(session).plan(project_id, markets)
 
 
-@router.get("/projects/{project_id}/parties", response_model=list[PartyOut], dependencies=_READ)
-async def list_parties(project_id: uuid.UUID, session: SessionDep, user_id: CurrentUserId) -> list[PartyOut]:
+@router.get("/projects/{project_id}/parties", response_model=PartyListResponse, dependencies=_READ)
+async def list_parties(
+    project_id: uuid.UUID,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    offset: int = Query(0, ge=0),
+    limit: int = Query(1000, ge=1, le=5000),
+) -> PartyListResponse:
     await verify_project_access(project_id, user_id, session)
-    return await ParcelService(session).list_parties(project_id)
+    rows = await ParcelService(session).list_parties(project_id)
+    return PartyListResponse(items=rows[offset : offset + limit], total=len(rows), offset=offset, limit=limit)
 
 
 @router.post(
@@ -228,16 +249,30 @@ async def create_party(project_id: uuid.UUID, body: PartyIn, session: SessionDep
     return await ParcelService(session).create_party(project_id, body, user_id)
 
 
-@router.get("/projects/{project_id}/rights", response_model=list[RightOut], dependencies=_READ)
-async def list_rights(project_id: uuid.UUID, session: SessionDep, user_id: CurrentUserId) -> list[RightOut]:
+@router.get("/projects/{project_id}/rights", response_model=RightListResponse, dependencies=_READ)
+async def list_rights(
+    project_id: uuid.UUID,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    offset: int = Query(0, ge=0),
+    limit: int = Query(1000, ge=1, le=5000),
+) -> RightListResponse:
     await verify_project_access(project_id, user_id, session)
-    return await ParcelService(session).list_rights(project_id)
+    rows = await ParcelService(session).list_rights(project_id)
+    return RightListResponse(items=rows[offset : offset + limit], total=len(rows), offset=offset, limit=limit)
 
 
-@router.get("/projects/{project_id}/work-zones", response_model=list[WorkZoneOut], dependencies=_READ)
-async def list_zones(project_id: uuid.UUID, session: SessionDep, user_id: CurrentUserId) -> list[WorkZoneOut]:
+@router.get("/projects/{project_id}/work-zones", response_model=WorkZoneListResponse, dependencies=_READ)
+async def list_zones(
+    project_id: uuid.UUID,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    offset: int = Query(0, ge=0),
+    limit: int = Query(1000, ge=1, le=5000),
+) -> WorkZoneListResponse:
     await verify_project_access(project_id, user_id, session)
-    return await ParcelService(session).list_zones(project_id)
+    rows = await ParcelService(session).list_zones(project_id)
+    return WorkZoneListResponse(items=rows[offset : offset + limit], total=len(rows), offset=offset, limit=limit)
 
 
 @router.get("/parcels/{parcel_id}", response_model=ParcelDetail, dependencies=_READ)

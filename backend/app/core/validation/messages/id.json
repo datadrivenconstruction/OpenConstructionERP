@@ -2330,7 +2330,7 @@
       "legal": "Luas sertifikat (m2)",
       "computed": "Hasil hitung (m2)",
       "diff": "Selisih (m2)",
-      "status": "Status",
+      "status": "Status bidang",
       "rights": "Hak",
       "cost": "Biaya",
       "findings": "Temuan",
@@ -2343,6 +2343,41 @@
       "status_negotiating": "Negosiasi",
       "status_acquired": "Diperoleh",
       "status_expropriation": "Pencabutan hak"
+    }
+  },
+  "monitoring": {
+    "crossed": {
+      "fail": "Titik {id}: pergeseran {d} mm atau laju {r} mm/day melewati {level}",
+      "suggestion": "Periksa titik dan strukturnya, lalu akui peringatan dengan catatan."
+    },
+    "level": {
+      "ok": "Normal",
+      "alert": "Peringatan",
+      "action": "Tindakan",
+      "alarm": "Batas alarm"
+    },
+    "risk": {
+      "title": "Titik monitoring {id} pada {level}",
+      "description": "Pergeseran {d} mm, laju {r} mm/day terhadap {profile}. Draf dibuka oleh monitoring: tinjau dan tetapkan penanggung jawab."
+    },
+    "report": {
+      "title": "Laporan alarm monitoring",
+      "project": "Proyek",
+      "crs": "Sistem koordinat",
+      "profile": "Profil ambang batas",
+      "generated": "Dibuat",
+      "point": "Titik",
+      "baseline": "Acuan (m)",
+      "latest": "Terbaru (m)",
+      "displacement": "Pergeseran (mm)",
+      "rate": "Laju (mm/day)",
+      "level": "Tingkat",
+      "acknowledged": "Diakui",
+      "counts": "Batas alarm: {alarm} · Tindakan: {action} · Peringatan: {alert} · Normal: {ok}",
+      "findings": "Temuan",
+      "no_profile": "Tidak ada profil, atur satu",
+      "ack_yes": "Ya",
+      "ack_no": "Tidak"
     }
   },
   "stockpiles": {

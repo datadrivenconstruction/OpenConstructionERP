@@ -98,7 +98,7 @@ const p = (projectId: string) => `${BASE}/projects/${projectId}`;
 
 export const getStockpileSummary = (projectId: string) => apiGet<StockpileSummary>(`${p(projectId)}/summary`);
 export const listStockpiles = (projectId: string, locale: string) =>
-  apiGet<Stockpile[]>(`${p(projectId)}/stockpiles?locale=${encodeURIComponent(locale)}`);
+  apiGet<{ items: Stockpile[] }>(`${p(projectId)}/stockpiles?locale=${encodeURIComponent(locale)}`).then((r) => r.items);
 export const getStockpile = (id: string, locale: string) =>
   apiGet<StockpileDetail>(`${BASE}/stockpiles/${id}?locale=${encodeURIComponent(locale)}`);
 export const createStockpile = (projectId: string, body: StockpileInput) =>
