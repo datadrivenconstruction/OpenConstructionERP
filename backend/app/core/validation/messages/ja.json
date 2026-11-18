@@ -2218,5 +2218,31 @@
       "calendar_no_work_days": "カレンダー {calendar} に稼働日がありません。",
       "suggestion": "元の工程表でこのカレンダーの稼働日を指定してください。"
     }
+  },
+  "schedule_pdf_import": {
+    "no_text_layer": {
+      "fail": "PDFにテキストレイヤーがないため、表を読み取れません。",
+      "suggestion": "工程表を MS Project XML、Primavera XER または Excel で書き出し、そのファイルをインポートしてください。"
+    },
+    "dates_parsed": {
+      "fail": "{row} 行目: 開始日または終了日が日付ではありません。",
+      "suggestion": "日付列と日/月の順序を確認するか、元データの日付を修正してください。"
+    },
+    "finish_before_start": {
+      "fail": "{row} 行目: 終了日が開始日より前です。",
+      "suggestion": "元の工程表の日付を修正してください。"
+    },
+    "duration_mismatch": {
+      "fail": "{row} 行目: 印刷された期間が開始日から終了日までの稼働日数と一致しません。",
+      "suggestion": "日付はそのまま使います。期間列とプロジェクトカレンダーを確認してください。"
+    },
+    "unique_ids": {
+      "fail": "{row} 行目: 作業IDが他の行と重複しています。",
+      "suggestion": "元の工程表で各作業に一意のIDを付けてください。"
+    },
+    "links_resolve": {
+      "fail": "{row} 行目: 先行作業が表の作業ではありません。",
+      "suggestion": "先行作業列を確認してください。解決できないリンクはスキップされます。"
+    }
   }
 }

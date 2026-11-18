@@ -742,6 +742,113 @@ class MspdiCalendarWorkDays(_MspdiIssueRule):
     codes = frozenset({"calendar_no_work_days"})
 
 
+# ── Schedule PDF import rules ───────────────────────────────────────────────
+# Run on the preview of a printed schedule PDF before anything is written.
+# Payload ``{"issues": [...]}``: the preview's issues (``TabularPreview.issues``
+# as dicts, each with ``code``, ``row`` and ``params``); one failing result per
+# matching issue, ``element_ref`` the 1-based row of the table.
+
+PDF_IMPORT_RULE_SET = "schedule_pdf_import"
+
+
+class _PdfIssueRule(ValidationRule):
+    standard = PDF_IMPORT_RULE_SET
+    category = RuleCategory.CONSISTENCY
+    codes: frozenset[str] = frozenset()
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        data = context.data if isinstance(context.data, dict) else {}
+        locale = _locale(context)
+        results: list[RuleResult] = []
+        for issue in data.get("issues") or []:
+            if not isinstance(issue, dict) or issue.get("code") not in self.codes:
+                continue
+            row = issue.get("row")
+            results.append(
+                RuleResult(
+                    rule_id=self.rule_id,
+                    rule_name=self.name,
+                    severity=self.severity,
+                    category=self.category,
+                    passed=False,
+                    message=translate(f"{self.rule_id}.fail", locale=locale, row=row if row is not None else "-"),
+                    element_ref=str(row) if row is not None else None,
+                    details={"code": issue["code"], "row": row},
+                    suggestion=translate(f"{self.rule_id}.suggestion", locale=locale),
+                )
+            )
+        return results or [
+            RuleResult(
+                rule_id=self.rule_id,
+                rule_name=self.name,
+                severity=self.severity,
+                category=self.category,
+                passed=True,
+                message=translate("common.ok", locale=locale),
+            )
+        ]
+
+
+class PdfImportNoTextLayer(_PdfIssueRule):
+    """The PDF carries text; a scan is refused and the other imports are named."""
+
+    rule_id = "schedule_pdf_import.no_text_layer"
+    name = "PDF has a text layer"
+    severity = Severity.ERROR
+    description = "The PDF is a scan or an image, so its table cannot be read without guessing."
+    codes = frozenset({"pdf_no_text_layer"})
+
+
+class PdfImportDatesParsed(_PdfIssueRule):
+    """Every start and finish in the table reads as a date."""
+
+    rule_id = "schedule_pdf_import.dates_parsed"
+    name = "PDF dates are readable"
+    severity = Severity.ERROR
+    description = "A start or finish in the table that is not a date, or a row without any date."
+    codes = frozenset({"date_invalid", "dates_missing"})
+
+
+class PdfImportFinishBeforeStart(_PdfIssueRule):
+    """Each row finishes on or after its start."""
+
+    rule_id = "schedule_pdf_import.finish_before_start"
+    name = "Finish is not before start"
+    severity = Severity.ERROR
+    description = "A row of the table finishes before it starts."
+    codes = frozenset({"finish_before_start"})
+
+
+class PdfImportDurationMismatch(_PdfIssueRule):
+    """The printed duration agrees with the dates on the project's working week."""
+
+    rule_id = "schedule_pdf_import.duration_mismatch"
+    name = "Duration agrees with the dates"
+    severity = Severity.WARNING
+    description = "The printed duration differs from the working days between start and finish."
+    codes = frozenset({"duration_mismatch"})
+
+
+class PdfImportUniqueIds(_PdfIssueRule):
+    """Activity IDs in the table are unique."""
+
+    rule_id = "schedule_pdf_import.unique_ids"
+    name = "Activity IDs are unique"
+    severity = Severity.ERROR
+    description = "Two rows of the table share one activity ID."
+    codes = frozenset({"duplicate_id"})
+
+
+class PdfImportLinksResolve(_PdfIssueRule):
+    """Every predecessor names an activity of the table."""
+
+    rule_id = "schedule_pdf_import.links_resolve"
+    name = "Predecessors resolve"
+    severity = Severity.WARNING
+    description = "A predecessor that is not an activity of the table, or that cannot be read."
+    codes = frozenset({"predecessor_unknown", "predecessor_invalid", "self_dependency"})
+
+
 # ── Registration ────────────────────────────────────────────────────────────
 
 _SCHEDULE_RULES: tuple[ValidationRule, ...] = (
@@ -766,6 +873,14 @@ _MSPDI_IMPORT_RULES: tuple[ValidationRule, ...] = (
     MspdiValuesInRange(),
     MspdiCalendarWorkDays(),
 )
+_PDF_IMPORT_RULES: tuple[ValidationRule, ...] = (
+    PdfImportNoTextLayer(),
+    PdfImportDatesParsed(),
+    PdfImportFinishBeforeStart(),
+    PdfImportDurationMismatch(),
+    PdfImportUniqueIds(),
+    PdfImportLinksResolve(),
+)
 
 
 def register_schedule_rules() -> None:
@@ -784,6 +899,8 @@ def register_schedule_rules() -> None:
         rule_registry.register(rule, [BASELINE_RULE_SET])
     for rule in _MSPDI_IMPORT_RULES:
         rule_registry.register(rule, [MSPDI_IMPORT_RULE_SET])
+    for rule in _PDF_IMPORT_RULES:
+        rule_registry.register(rule, [PDF_IMPORT_RULE_SET])
     logger.debug("Registered %d schedule validation rules", len(_SCHEDULE_RULES) + len(_PROGRESS_SHEET_RULES))
 
 

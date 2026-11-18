@@ -2218,5 +2218,31 @@
       "calendar_no_work_days": "Kalender {calendar} har ingen arbeidsdag.",
       "suggestion": "Merk arbeidsdagene i denne kalenderen i kildeplanen."
     }
+  },
+  "schedule_pdf_import": {
+    "no_text_layer": {
+      "fail": "PDF-en har ikke noe tekstlag, så tabellen kan ikke leses.",
+      "suggestion": "Eksporter fremdriftsplanen som MS Project XML, Primavera XER eller Excel, og importer den filen."
+    },
+    "dates_parsed": {
+      "fail": "Rad {row}: en start eller slutt er ikke en dato.",
+      "suggestion": "Kontroller datokolonnene og rekkefølgen dag/måned, eller rett datoen i kilden."
+    },
+    "finish_before_start": {
+      "fail": "Rad {row}: slutt er før start.",
+      "suggestion": "Rett datoene i kildeplanen."
+    },
+    "duration_mismatch": {
+      "fail": "Rad {row}: den trykte varigheten avviker fra arbeidsdagene mellom start og slutt.",
+      "suggestion": "Datoene beholdes; kontroller varighetskolonnen og prosjektkalenderen."
+    },
+    "unique_ids": {
+      "fail": "Rad {row}: aktivitets-ID-en brukes av en annen rad.",
+      "suggestion": "Gi hver aktivitet en unik ID i kildeplanen."
+    },
+    "links_resolve": {
+      "fail": "Rad {row}: en forgjenger er ikke en aktivitet i tabellen.",
+      "suggestion": "Kontroller forgjengerkolonnen; uløste koblinger hoppes over."
+    }
   }
 }

@@ -2218,5 +2218,31 @@
       "calendar_no_work_days": "Calendarul {calendar} nu are nicio zi lucrătoare.",
       "suggestion": "Marcați zilele lucrătoare ale acestui calendar în graficul sursă."
     }
+  },
+  "schedule_pdf_import": {
+    "no_text_layer": {
+      "fail": "PDF-ul nu are strat de text, tabelul nu poate fi citit.",
+      "suggestion": "Exportați graficul ca XML MS Project, XER Primavera sau Excel și importați acel fișier."
+    },
+    "dates_parsed": {
+      "fail": "Rândul {row}: un început sau un sfârșit nu este o dată.",
+      "suggestion": "Verificați coloanele de dată și ordinea zi/lună sau corectați data în sursă."
+    },
+    "finish_before_start": {
+      "fail": "Rândul {row}: sfârșitul este înaintea începutului.",
+      "suggestion": "Corectați datele în graficul sursă."
+    },
+    "duration_mismatch": {
+      "fail": "Rândul {row}: durata tipărită diferă de zilele lucrătoare dintre început și sfârșit.",
+      "suggestion": "Datele se păstrează; verificați coloana de durată și calendarul proiectului."
+    },
+    "unique_ids": {
+      "fail": "Rândul {row}: ID-ul activității este folosit de alt rând.",
+      "suggestion": "Dați fiecărei activități un ID unic în graficul sursă."
+    },
+    "links_resolve": {
+      "fail": "Rândul {row}: un predecesor nu este o activitate din tabel.",
+      "suggestion": "Verificați coloana de predecesori; legăturile nerezolvate sunt omise."
+    }
   }
 }

@@ -2218,5 +2218,31 @@
       "calendar_no_work_days": "Kalender {calendar} tidak memiliki hari kerja.",
       "suggestion": "Tandai hari kerja kalender ini di jadwal sumber."
     }
+  },
+  "schedule_pdf_import": {
+    "no_text_layer": {
+      "fail": "PDF tidak memiliki lapisan teks, sehingga tabelnya tidak dapat dibaca.",
+      "suggestion": "Ekspor jadwal sebagai MS Project XML, Primavera XER, atau Excel lalu impor file tersebut."
+    },
+    "dates_parsed": {
+      "fail": "Baris {row}: tanggal mulai atau selesai bukan tanggal.",
+      "suggestion": "Periksa kolom tanggal dan urutan hari/bulan, atau perbaiki tanggal di sumber."
+    },
+    "finish_before_start": {
+      "fail": "Baris {row}: tanggal selesai sebelum tanggal mulai.",
+      "suggestion": "Perbaiki tanggal di jadwal sumber."
+    },
+    "duration_mismatch": {
+      "fail": "Baris {row}: durasi tercetak berbeda dari hari kerja antara mulai dan selesai.",
+      "suggestion": "Tanggal tetap dipakai; periksa kolom durasi dan kalender proyek."
+    },
+    "unique_ids": {
+      "fail": "Baris {row}: ID aktivitas dipakai oleh baris lain.",
+      "suggestion": "Beri setiap aktivitas ID unik di jadwal sumber."
+    },
+    "links_resolve": {
+      "fail": "Baris {row}: predecessor bukan aktivitas di tabel.",
+      "suggestion": "Periksa kolom predecessor; tautan yang tidak ditemukan dilewati."
+    }
   }
 }

@@ -2218,5 +2218,31 @@
       "calendar_no_work_days": "Kalender {calendar} har ingen arbejdsdag.",
       "suggestion": "Markér kalenderens arbejdsdage i kildeplanen."
     }
+  },
+  "schedule_pdf_import": {
+    "no_text_layer": {
+      "fail": "PDF'en har intet tekstlag, så tabellen kan ikke læses.",
+      "suggestion": "Eksportér tidsplanen som MS Project XML, Primavera XER eller Excel, og importér den fil."
+    },
+    "dates_parsed": {
+      "fail": "Række {row}: en start eller slut er ikke en dato.",
+      "suggestion": "Kontrollér datokolonnerne og rækkefølgen dag/måned, eller ret datoen i kilden."
+    },
+    "finish_before_start": {
+      "fail": "Række {row}: slut ligger før start.",
+      "suggestion": "Ret datoerne i kildetidsplanen."
+    },
+    "duration_mismatch": {
+      "fail": "Række {row}: den trykte varighed afviger fra arbejdsdagene mellem start og slut.",
+      "suggestion": "Datoerne bevares; kontrollér varighedskolonnen og projektkalenderen."
+    },
+    "unique_ids": {
+      "fail": "Række {row}: aktivitets-ID'et bruges af en anden række.",
+      "suggestion": "Giv hver aktivitet et unikt ID i kildetidsplanen."
+    },
+    "links_resolve": {
+      "fail": "Række {row}: en forgænger er ikke en aktivitet i tabellen.",
+      "suggestion": "Kontrollér forgængerkolonnen; uløste forbindelser springes over."
+    }
   }
 }

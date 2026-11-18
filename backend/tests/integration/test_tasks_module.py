@@ -161,15 +161,27 @@ async def test_list_tasks_for_project(client, auth, project_id):
 
 @pytest.mark.asyncio
 async def test_illegal_status_transition_rejected(client, auth, project_id):
-    """draft -> in_progress is NOT allowed (draft can only go to open)."""
+    """in_progress -> draft is NOT allowed: work under way is not un-issued."""
     created = (await _create_task(client, auth, project_id)).json()
+    started = await client.patch(f"{TASKS}/{created['id']}", json={"status": "in_progress"}, headers=auth)
+    assert started.status_code == 200, started.text
     resp = await client.patch(
         f"{TASKS}/{created['id']}",
-        json={"status": "in_progress"},
+        json={"status": "draft"},
         headers=auth,
     )
     assert resp.status_code == 400
     assert "transition" in resp.text.lower()
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("target", ["open", "in_progress", "completed"])
+async def test_draft_moves_to_any_forward_status(client, auth, project_id, target):
+    """A draft dragged on the board or picked in the menu reaches open, in progress or completed."""
+    created = (await _create_task(client, auth, project_id)).json()
+    resp = await client.patch(f"{TASKS}/{created['id']}", json={"status": target}, headers=auth)
+    assert resp.status_code == 200, resp.text
+    assert resp.json()["status"] == target
 
 
 @pytest.mark.asyncio

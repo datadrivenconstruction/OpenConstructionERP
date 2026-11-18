@@ -511,3 +511,52 @@ async def test_template_falls_back_to_english_for_an_unknown_language(http_clien
     resp = await http_client.get(f"{PREFIX}/template/", params={"lang": "xx", "format": "csv"}, headers=tenants["b"])
     assert resp.status_code == 200
     assert resp.content.decode("utf-8-sig").startswith("ID,Name,WBS")
+
+
+# ── PDF activity table ─────────────────────────────────────────────────────
+
+
+@pytest.mark.asyncio
+async def test_pdf_preview_writes_nothing_and_commit_records_the_source(http_client, tenants):
+    from sqlalchemy import select
+
+    from app.database import async_session_factory
+    from app.modules.schedule.models import Activity, Schedule
+    from tests.unit.test_schedule_pdf_import import ROWS, _schedule_pdf
+
+    headers = tenants["a"]
+    project_id = await _project(http_client, headers)
+    data = _schedule_pdf([ROWS], indent={"Excavation": 1, "Foundations": 1})
+
+    preview = await _preview(http_client, headers, project_id, data, "programme.pdf")
+    assert preview.status_code == 200, preview.text
+    body = preview.json()
+    assert body["file_format"] == "pdf"
+    assert body["activity_count"] == 4
+    assert body["validation"]["errors"] == 0
+    assert await _schedule_count(project_id) == 0
+
+    commit = await _commit(http_client, headers, project_id, data, filename="programme.pdf")
+    assert commit.status_code == 201, commit.text
+    schedule_id = uuid.UUID(commit.json()["schedule_id"])
+    async with async_session_factory() as s:
+        schedule = await s.get(Schedule, schedule_id)
+        assert schedule.metadata_["import_source"]["format"] == "pdf"
+        acts = (await s.execute(select(Activity).where(Activity.schedule_id == schedule_id))).scalars().all()
+    by_name = {a.name: a for a in acts}
+    assert by_name["Foundations"].start_date == "2026-02-09"
+    assert by_name["Foundations"].end_date == "2026-02-20"
+    assert by_name["Excavation"].parent_id == by_name["Site works"].id
+
+
+@pytest.mark.asyncio
+async def test_pdf_scan_is_refused_in_the_preview(http_client, tenants):
+    from tests.unit.test_schedule_pdf_import import _scanned_pdf
+
+    headers = tenants["a"]
+    project_id = await _project(http_client, headers)
+    preview = await _preview(http_client, headers, project_id, _scanned_pdf(), "scan.pdf")
+    assert preview.status_code == 200, preview.text
+    body = preview.json()
+    assert [i["code"] for i in body["issues"]] == ["pdf_no_text_layer"]
+    assert body["validation"]["findings"][0]["rule_id"] == "schedule_pdf_import.no_text_layer"

@@ -2218,5 +2218,31 @@
       "calendar_no_work_days": "{calendar} taqvimida ish kuni yoʻq.",
       "suggestion": "Manba jadvalida ushbu taqvimning ish kunlarini belgilang."
     }
+  },
+  "schedule_pdf_import": {
+    "no_text_layer": {
+      "fail": "PDF faylida matn qatlami yo'q, shuning uchun jadvalni o'qib bo'lmaydi.",
+      "suggestion": "Jadvalni MS Project XML, Primavera XER yoki Excel sifatida eksport qiling va o'sha faylni import qiling."
+    },
+    "dates_parsed": {
+      "fail": "{row}-qator: boshlanish yoki tugash sana emas.",
+      "suggestion": "Sana ustunlarini va kun/oy tartibini tekshiring yoki manbadagi sanani tuzating."
+    },
+    "finish_before_start": {
+      "fail": "{row}-qator: tugash boshlanishdan oldin.",
+      "suggestion": "Manba jadvaldagi sanalarni tuzating."
+    },
+    "duration_mismatch": {
+      "fail": "{row}-qator: bosilgan davomiylik boshlanish va tugash orasidagi ish kunlaridan farq qiladi.",
+      "suggestion": "Sanalar saqlanadi; davomiylik ustunini va loyiha taqvimini tekshiring."
+    },
+    "unique_ids": {
+      "fail": "{row}-qator: ish ID'si boshqa qatorda ishlatilgan.",
+      "suggestion": "Manba jadvalda har bir ishga noyob ID bering."
+    },
+    "links_resolve": {
+      "fail": "{row}-qator: oldingi ish jadvaldagi ish emas.",
+      "suggestion": "Oldingi ishlar ustunini tekshiring; aniqlanmagan bog'lanishlar o'tkazib yuboriladi."
+    }
   }
 }

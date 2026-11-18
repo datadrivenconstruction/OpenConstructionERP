@@ -2218,5 +2218,31 @@
       "calendar_no_work_days": "Kalender {calendar} hat keinen Arbeitstag.",
       "suggestion": "Markieren Sie die Arbeitstage dieses Kalenders im Quellterminplan."
     }
+  },
+  "schedule_pdf_import": {
+    "no_text_layer": {
+      "fail": "Das PDF hat keine Textebene, die Tabelle kann nicht gelesen werden.",
+      "suggestion": "Exportieren Sie den Terminplan als MS-Project-XML, Primavera-XER oder Excel und importieren Sie diese Datei."
+    },
+    "dates_parsed": {
+      "fail": "Zeile {row}: Anfang oder Ende ist kein Datum.",
+      "suggestion": "Prüfen Sie die Datumsspalten und die Reihenfolge Tag/Monat oder korrigieren Sie das Datum in der Quelle."
+    },
+    "finish_before_start": {
+      "fail": "Zeile {row}: Das Ende liegt vor dem Anfang.",
+      "suggestion": "Korrigieren Sie die Termine im Quellterminplan."
+    },
+    "duration_mismatch": {
+      "fail": "Zeile {row}: Die gedruckte Dauer weicht von den Arbeitstagen zwischen Anfang und Ende ab.",
+      "suggestion": "Die Termine bleiben erhalten; prüfen Sie die Dauerspalte und den Projektkalender."
+    },
+    "unique_ids": {
+      "fail": "Zeile {row}: Die Vorgangs-ID wird von einer anderen Zeile verwendet.",
+      "suggestion": "Geben Sie jedem Vorgang im Quellterminplan eine eindeutige ID."
+    },
+    "links_resolve": {
+      "fail": "Zeile {row}: Ein Vorgänger ist kein Vorgang der Tabelle.",
+      "suggestion": "Prüfen Sie die Vorgängerspalte; nicht auflösbare Verknüpfungen werden übersprungen."
+    }
   }
 }

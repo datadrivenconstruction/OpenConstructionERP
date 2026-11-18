@@ -27,6 +27,7 @@ import { ClientMilestonePicker } from './ClientMilestonePicker';
 import { ColumnMappingTable } from './ColumnMappingTable';
 import { DateOrderChoice } from './DateOrderChoice';
 import { ImportIssuesList } from './ImportIssuesList';
+import { ParsedRowsTable } from './ParsedRowsTable';
 import { errorText } from './labels';
 import {
   TEMPLATE_LANGUAGES,
@@ -44,7 +45,7 @@ import {
   type TemplateLanguage,
 } from './tabularImport';
 
-const ACCEPT = '.xlsx,.xls,.csv,.txt,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,text/csv';
+const ACCEPT = '.xlsx,.xls,.csv,.txt,.pdf,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,text/csv,application/pdf';
 
 export interface ScheduleSpreadsheetImportDialogProps {
   open: boolean;
@@ -423,6 +424,11 @@ export function ScheduleSpreadsheetImportDialog({
               onChange={(e) => pickFile(e.target.files?.[0])}
               className="block w-full text-sm text-content-secondary file:mr-3 file:cursor-pointer file:rounded-lg file:border-0 file:bg-surface-secondary file:px-3 file:py-2 file:text-sm file:font-medium file:text-content-primary hover:file:bg-surface-secondary/70"
             />
+            <p className="mt-1 text-2xs text-content-tertiary">
+              {t('schedule.tabular_import.pdf_hint', {
+                defaultValue: 'A schedule printed to PDF works too, if it keeps its text: the activity table is read for you to check before anything is imported.',
+              })}
+            </p>
             {file && (
               <span className="mt-1.5 inline-flex items-center gap-1.5 text-xs text-content-secondary">
                 <FileSpreadsheet size={14} className="text-oe-blue" />
@@ -587,6 +593,18 @@ export function ScheduleSpreadsheetImportDialog({
                 required={unconfirmed !== null}
                 disabled={busy}
               />
+            )}
+
+            {parsed && parsed.activities.length > 0 && (
+              <WideModalSection
+                title={t('schedule.tabular_import.rows_title', { defaultValue: 'Activities as read' })}
+                description={t('schedule.tabular_import.rows_desc', {
+                  defaultValue: 'Check the dates and durations of every row. Nothing is written until you import.',
+                })}
+                columns={1}
+              >
+                <ParsedRowsTable preview={preview} />
+              </WideModalSection>
             )}
 
             <WideModalSection

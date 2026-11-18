@@ -2218,5 +2218,31 @@
       "calendar_no_work_days": "Kalender {calendar} heeft geen werkdag.",
       "suggestion": "Markeer de werkdagen van deze kalender in de bronplanning."
     }
+  },
+  "schedule_pdf_import": {
+    "no_text_layer": {
+      "fail": "De PDF heeft geen tekstlaag, de tabel kan niet worden gelezen.",
+      "suggestion": "Exporteer de planning als MS Project-XML, Primavera-XER of Excel en importeer dat bestand."
+    },
+    "dates_parsed": {
+      "fail": "Rij {row}: een begin of einde is geen datum.",
+      "suggestion": "Controleer de datumkolommen en de volgorde dag/maand, of corrigeer de datum in de bron."
+    },
+    "finish_before_start": {
+      "fail": "Rij {row}: het einde ligt vóór het begin.",
+      "suggestion": "Corrigeer de datums in de bronplanning."
+    },
+    "duration_mismatch": {
+      "fail": "Rij {row}: de afgedrukte duur wijkt af van de werkdagen tussen begin en einde.",
+      "suggestion": "De datums blijven behouden; controleer de duurkolom en de projectkalender."
+    },
+    "unique_ids": {
+      "fail": "Rij {row}: de activiteit-ID wordt door een andere rij gebruikt.",
+      "suggestion": "Geef elke activiteit een unieke ID in de bronplanning."
+    },
+    "links_resolve": {
+      "fail": "Rij {row}: een voorganger is geen activiteit uit de tabel.",
+      "suggestion": "Controleer de kolom voorgangers; onopgeloste koppelingen worden overgeslagen."
+    }
   }
 }

@@ -16,6 +16,7 @@ import {
   issueParams,
   previewSpreadsheet,
   readMapping,
+  rowChecks,
   templateLanguageFor,
 } from './tabularImport';
 import { readExample } from './DateOrderChoice';
@@ -118,5 +119,32 @@ describe('tabularImport helpers', () => {
     expect(readExample('13/04/2026', 'mdy')).toBeNull();
     expect(readExample('next week', 'dmy')).toBeNull();
     expect(readExample(null, 'dmy')).toBeNull();
+  });
+});
+
+describe('rowChecks', () => {
+  const preview = {
+    columns: [
+      { index: 0, header: 'ID', field: 'id', confidence: 1, tier: 'exact' },
+      { index: 1, header: 'Task Name', field: 'name', confidence: 0.8, tier: 'synonym' },
+      { index: 2, header: 'Start', field: 'start', confidence: 1, tier: 'exact' },
+      { index: 3, header: 'Finish', field: 'finish', confidence: 1, tier: 'exact' },
+    ],
+    mapping: { id: 0, name: 1, start: 2, finish: 3 },
+    issues: [
+      { code: 'finish_before_start', severity: 'error', row: 3, column: 3, message: '', params: {} },
+      { code: 'duration_mismatch', severity: 'warning', row: 4, column: 4, message: '', params: {} },
+      { code: 'date_order_detected', severity: 'info', row: 5, column: 2, message: '', params: {} },
+    ],
+  };
+
+  it('takes the weakest mapped column for a clean row', () => {
+    expect(rowChecks(preview)(2)).toMatchObject({ confidence: 0.8, status: 'ok' });
+    expect(rowChecks(preview)(5)).toMatchObject({ confidence: 0.8, status: 'ok' });
+  });
+
+  it('drops to zero on an error and lowers a warning row', () => {
+    expect(rowChecks(preview)(3)).toMatchObject({ confidence: 0, status: 'error' });
+    expect(rowChecks(preview)(4)).toMatchObject({ confidence: 0.48, status: 'warning' });
   });
 });

@@ -2218,5 +2218,31 @@
       "calendar_no_work_days": "Le calendrier {calendar} n'a aucun jour ouvré.",
       "suggestion": "Indiquez les jours ouvrés de ce calendrier dans le planning source."
     }
+  },
+  "schedule_pdf_import": {
+    "no_text_layer": {
+      "fail": "Le PDF n'a pas de couche texte, son tableau ne peut pas être lu.",
+      "suggestion": "Exportez le planning en XML MS Project, XER Primavera ou Excel et importez ce fichier."
+    },
+    "dates_parsed": {
+      "fail": "Ligne {row} : un début ou une fin n'est pas une date.",
+      "suggestion": "Vérifiez les colonnes de dates et l'ordre jour/mois, ou corrigez la date dans la source."
+    },
+    "finish_before_start": {
+      "fail": "Ligne {row} : la fin est antérieure au début.",
+      "suggestion": "Corrigez les dates dans le planning source."
+    },
+    "duration_mismatch": {
+      "fail": "Ligne {row} : la durée imprimée diffère des jours ouvrés entre le début et la fin.",
+      "suggestion": "Les dates sont conservées ; vérifiez la colonne de durée et le calendrier du projet."
+    },
+    "unique_ids": {
+      "fail": "Ligne {row} : l'ID de la tâche est utilisé par une autre ligne.",
+      "suggestion": "Donnez un ID unique à chaque tâche dans le planning source."
+    },
+    "links_resolve": {
+      "fail": "Ligne {row} : un prédécesseur n'est pas une tâche du tableau.",
+      "suggestion": "Vérifiez la colonne des prédécesseurs ; les liens non résolus sont ignorés."
+    }
   }
 }

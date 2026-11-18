@@ -2218,5 +2218,31 @@
       "calendar_no_work_days": "달력 {calendar}에 근무일이 없습니다.",
       "suggestion": "원본 공정표에서 이 달력의 근무일을 지정하세요."
     }
+  },
+  "schedule_pdf_import": {
+    "no_text_layer": {
+      "fail": "PDF에 텍스트 레이어가 없어 표를 읽을 수 없습니다.",
+      "suggestion": "일정을 MS Project XML, Primavera XER 또는 Excel로 내보낸 뒤 그 파일을 가져오세요."
+    },
+    "dates_parsed": {
+      "fail": "{row}행: 시작일 또는 종료일이 날짜가 아닙니다.",
+      "suggestion": "날짜 열과 일/월 순서를 확인하거나 원본의 날짜를 수정하세요."
+    },
+    "finish_before_start": {
+      "fail": "{row}행: 종료일이 시작일보다 앞섭니다.",
+      "suggestion": "원본 공정표의 날짜를 수정하세요."
+    },
+    "duration_mismatch": {
+      "fail": "{row}행: 인쇄된 기간이 시작일과 종료일 사이의 작업일 수와 다릅니다.",
+      "suggestion": "날짜는 유지됩니다. 기간 열과 프로젝트 달력을 확인하세요."
+    },
+    "unique_ids": {
+      "fail": "{row}행: 작업 ID가 다른 행에서 사용 중입니다.",
+      "suggestion": "원본 공정표에서 모든 작업에 고유 ID를 지정하세요."
+    },
+    "links_resolve": {
+      "fail": "{row}행: 선행 작업이 표에 있는 작업이 아닙니다.",
+      "suggestion": "선행 작업 열을 확인하세요. 확인되지 않는 연결은 건너뜁니다."
+    }
   }
 }

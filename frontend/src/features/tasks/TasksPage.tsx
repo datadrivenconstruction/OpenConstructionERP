@@ -65,6 +65,7 @@ import { initialFilter } from '@/shared/lib/defaultFilters';
 import { VoiceEntry, getField } from '@/features/voice';
 import { InsightsPanel, InsightsToggleButton, useModuleInsights } from '@/features/insights';
 import { buildTasksInsights } from './tasksInsights';
+import { BUILTIN_STATUSES, canMoveStatus, statusOptionsFor } from './statusTransitions';
 
 /* ── Constants ─────────────────────────────────────────────────────────── */
 
@@ -155,32 +156,6 @@ function saveCustomStatuses(statuses: CustomStatus[]): void {
   } catch { /* Ignore */ }
 }
 
-const BUILTIN_STATUSES: TaskStatus[] = ['draft', 'open', 'in_progress', 'completed'];
-
-/**
- * Allowed status transitions — kept in lockstep with the backend state
- * machine (`backend/app/modules/tasks/service.py:_TASK_STATUS_TRANSITIONS`).
- * The dropdown only offers the current status plus its legal targets so
- * the UI never produces a transition the server rejects with HTTP 400.
- */
-const STATUS_TRANSITIONS: Record<TaskStatus, TaskStatus[]> = {
-  draft: ['open'],
-  open: ['in_progress', 'completed', 'draft'],
-  in_progress: ['completed', 'open'],
-  completed: ['open', 'in_progress'],
-};
-
-/** Built-in status options to show for a task currently in `current`:
- *  the current value itself plus every legal next state. */
-function STATUS_OPTIONS_FOR(current: string): TaskStatus[] {
-  const cur = current as TaskStatus;
-  const targets = STATUS_TRANSITIONS[cur] ?? [];
-  const known = BUILTIN_STATUSES.includes(cur);
-  // For an unknown/custom current status keep the full built-in list so
-  // the user can move the task back onto a standard track.
-  const base = known ? [cur, ...targets] : [...BUILTIN_STATUSES];
-  return Array.from(new Set(base));
-}
 
 /** Get the color class for any task type, including custom categories. */
 function getTypeColor(taskType: string, customCategories: CustomCategory[]): string {
@@ -746,7 +721,7 @@ const TaskCard = React.memo(function TaskCard({
                 aria-label={t('tasks.change_status', { defaultValue: 'Change status' })}
                 className="oe-select oe-input-sm h-4"
               >
-                {STATUS_OPTIONS_FOR(task.status).map((s) => (
+                {statusOptionsFor(task.status).map((s) => (
                   <option key={s} value={s}>
                     {t(`tasks.status_${s}`, {
                       defaultValue: s
@@ -1313,12 +1288,8 @@ export function TasksPage() {
       // statuses have no server-side state machine, so any move that
       // touches a non-built-in status is allowed through.
       const curStatus = (current?.status ?? '') as TaskStatus;
-      const bothBuiltin =
-        BUILTIN_STATUSES.includes(curStatus) &&
-        BUILTIN_STATUSES.includes(status as TaskStatus);
-      if (current && bothBuiltin) {
-        const allowed = STATUS_TRANSITIONS[curStatus] ?? [];
-        if (!allowed.includes(status as TaskStatus)) {
+      if (current) {
+        if (!canMoveStatus(curStatus, status)) {
           addToast({
             type: 'warning',
             title: t('tasks.illegal_transition', {

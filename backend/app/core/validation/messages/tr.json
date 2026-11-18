@@ -2218,5 +2218,31 @@
       "calendar_no_work_days": "{calendar} takviminde çalışma günü yok.",
       "suggestion": "Kaynak programda bu takvimin çalışma günlerini işaretleyin."
     }
+  },
+  "schedule_pdf_import": {
+    "no_text_layer": {
+      "fail": "PDF'de metin katmanı yok, tablo okunamıyor.",
+      "suggestion": "Programı MS Project XML, Primavera XER veya Excel olarak dışa aktarın ve o dosyayı içe aktarın."
+    },
+    "dates_parsed": {
+      "fail": "Satır {row}: bir başlangıç veya bitiş tarih değil.",
+      "suggestion": "Tarih sütunlarını ve gün/ay sırasını kontrol edin ya da kaynaktaki tarihi düzeltin."
+    },
+    "finish_before_start": {
+      "fail": "Satır {row}: bitiş başlangıçtan önce.",
+      "suggestion": "Kaynak programdaki tarihleri düzeltin."
+    },
+    "duration_mismatch": {
+      "fail": "Satır {row}: basılı süre, başlangıç ile bitiş arasındaki iş günlerinden farklı.",
+      "suggestion": "Tarihler korunur; süre sütununu ve proje takvimini kontrol edin."
+    },
+    "unique_ids": {
+      "fail": "Satır {row}: faaliyet kimliği başka bir satırda kullanılıyor.",
+      "suggestion": "Kaynak programda her faaliyete benzersiz bir kimlik verin."
+    },
+    "links_resolve": {
+      "fail": "Satır {row}: bir öncül tablodaki bir faaliyet değil.",
+      "suggestion": "Öncül sütununu kontrol edin; çözülemeyen bağlantılar atlanır."
+    }
   }
 }

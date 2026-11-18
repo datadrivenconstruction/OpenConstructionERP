@@ -2218,5 +2218,31 @@
       "calendar_no_work_days": "Kalendris {calendar} pole ühtegi tööpäeva.",
       "suggestion": "Märkige lähtegraafikus selle kalendri tööpäevad."
     }
+  },
+  "schedule_pdf_import": {
+    "no_text_layer": {
+      "fail": "PDF-il puudub tekstikiht, seega tabelit ei saa lugeda.",
+      "suggestion": "Eksportige ajakava MS Project XML-, Primavera XER- või Excel-vormingusse ja importige see fail."
+    },
+    "dates_parsed": {
+      "fail": "Rida {row}: algus või lõpp ei ole kuupäev.",
+      "suggestion": "Kontrollige kuupäevaveerge ja järjekorda päev/kuu või parandage kuupäev allikas."
+    },
+    "finish_before_start": {
+      "fail": "Rida {row}: lõpp on enne algust.",
+      "suggestion": "Parandage kuupäevad lähteajakavas."
+    },
+    "duration_mismatch": {
+      "fail": "Rida {row}: trükitud kestus erineb alguse ja lõpu vahelistest tööpäevadest.",
+      "suggestion": "Kuupäevad säilivad; kontrollige kestuse veergu ja projekti kalendrit."
+    },
+    "unique_ids": {
+      "fail": "Rida {row}: tegevuse ID-d kasutab teine rida.",
+      "suggestion": "Andke lähteajakavas igale tegevusele unikaalne ID."
+    },
+    "links_resolve": {
+      "fail": "Rida {row}: eelnev tegevus ei ole tabeli tegevus.",
+      "suggestion": "Kontrollige eelnevate veergu; lahendamata seosed jäetakse vahele."
+    }
   }
 }

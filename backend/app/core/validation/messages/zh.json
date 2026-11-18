@@ -2218,5 +2218,31 @@
       "calendar_no_work_days": "日历 {calendar} 没有工作日。",
       "suggestion": "请在源进度计划中标出此日历的工作日。"
     }
+  },
+  "schedule_pdf_import": {
+    "no_text_layer": {
+      "fail": "该 PDF 没有文本层，无法读取其表格。",
+      "suggestion": "请将进度计划导出为 MS Project XML、Primavera XER 或 Excel，然后导入该文件。"
+    },
+    "dates_parsed": {
+      "fail": "第 {row} 行：开始或完成不是日期。",
+      "suggestion": "请检查日期列和日/月顺序，或在源文件中更正日期。"
+    },
+    "finish_before_start": {
+      "fail": "第 {row} 行：完成日期早于开始日期。",
+      "suggestion": "请在源进度计划中更正日期。"
+    },
+    "duration_mismatch": {
+      "fail": "第 {row} 行：打印的工期与开始和完成之间的工作日不一致。",
+      "suggestion": "日期保持不变；请检查工期列和项目日历。"
+    },
+    "unique_ids": {
+      "fail": "第 {row} 行：作业编号已被其他行使用。",
+      "suggestion": "请在源进度计划中为每项作业指定唯一编号。"
+    },
+    "links_resolve": {
+      "fail": "第 {row} 行：某个紧前作业不是表中的作业。",
+      "suggestion": "请检查紧前作业列；无法匹配的关系将被跳过。"
+    }
   }
 }
