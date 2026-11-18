@@ -373,6 +373,23 @@ describe('editing an order past draft', () => {
     expect(within(dialog).getByLabelText('Currency')).toBeEnabled();
     expect(within(dialog).getByRole('button', { name: 'Add Item' })).toBeInTheDocument();
   });
+
+  it('shows a labelled Edit to an editor, who holds procurement.update', async () => {
+    useAuthStore.setState({ userRole: 'editor' });
+    servePO('draft');
+    renderProcurementPage();
+    expect(await screen.findByRole('button', { name: 'Edit' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Edit purchase order' })).toBeInTheDocument();
+  });
+
+  it('shows no Edit to a viewer', async () => {
+    useAuthStore.setState({ userRole: 'viewer' });
+    servePO('draft');
+    renderProcurementPage();
+    await screen.findByText('PO-0001');
+    expect(screen.queryByRole('button', { name: 'Edit' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Edit purchase order' })).toBeNull();
+  });
 });
 
 describe('the VAT rate a new order starts with (issue #515)', () => {
