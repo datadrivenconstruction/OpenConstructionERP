@@ -23,15 +23,23 @@ MANIFEST = PartnerPackManifest(
     cwicr_regions=[],
     default_currency="HKD",
     default_tax_template=None,
-    default_methodology=None,
+    default_methodology="hong-kong",
     validation_rule_packs=[
         "hk_sopo",
         "hk_levies",
     ],
     validation_rule_sets=["hongkong", "boq_quality"],
-    default_modules=["boq", "contracts", "payment_clock", "progress", "finance", "price_index", "validation"],
+    default_modules=[
+        "oe_boq",
+        "oe_contracts",
+        "oe_payment_clock",
+        "oe_progress",
+        "oe_finance",
+        "oe_price_index",
+        "oe_validation",
+    ],
     hidden_modules=[],
-    demo_template_ids=["hk-gov-office-fitout"],
+    demo_template_ids=["hk-gov-office-fitout", "hk-residential-tuen-mun"],
     branding=PartnerBranding(
         primary_color="#DE2910",  # Hong Kong SAR flag red
         accent_color="#FFFFFF",
@@ -83,6 +91,8 @@ MANIFEST = PartnerPackManifest(
             "Sch. 4) and the levy rates from cic.hk. Retention figures and the NEC4 default are working defaults, "
             "never enforced. The zh-HK wording and the glossary are pending review by a Hong Kong quantity surveyor."
         ),
+        # Ships as a preview: the wording, glossary and rates still wait for a Hong Kong review.
+        "release_stage": "preview",
         "support_email": "info@datadrivenconstruction.io",
     },
 )

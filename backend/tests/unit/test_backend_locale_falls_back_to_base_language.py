@@ -23,6 +23,7 @@ import pytest
 from app.core.i18n import (
     get_all_translations,
     get_available_locales,
+    is_traditional_chinese,
     load_translations,
     t,
 )
@@ -65,6 +66,12 @@ def test_every_regional_code_the_ui_offers_reads_its_base_language() -> None:
             # no string can tell the two paths apart. Assert what can be told:
             # that it is the English catalogue itself and not a copy.
             assert get_all_translations(code) is get_all_translations("en")
+            continue
+        if is_traditional_chinese(code):
+            # zh is Simplified, which a Traditional reader must never be served;
+            # with no Traditional catalogue the backend answers in English.
+            key = _key_that_really_differs(base)
+            assert t(key, code) == t(key, "en") != t(key, base), f"{code} was served Simplified Chinese"
             continue
         key = _key_that_really_differs(base)
         assert t(key, code) == t(key, base), (

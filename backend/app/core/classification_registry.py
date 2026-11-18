@@ -187,7 +187,8 @@ COUNTRY_TO_STANDARD: Mapping[str, str] = MappingProxyType(
         "GH": "nrm",
         "UG": "nrm",
         "TZ": "nrm",
-        "HK": "nrm",
+        # Hong Kong bills are measured under HKSMM4 (HKIS), which the hongkong-hk pack codes.
+        "HK": "hksmm4",
         "SG": "nrm",
         "MY": "nrm",
         # ── MasterFormat, CSI-aligned ────────────────────────────────

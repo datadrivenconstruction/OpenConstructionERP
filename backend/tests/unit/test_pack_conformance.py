@@ -480,6 +480,11 @@ DEMOS_IN_ANOTHER_LANGUAGE_BY_CHOICE: dict[str, str] = {
         "The UAE pack works in English, the working language of its contracts, and ships one "
         "demo in Arabic, the official language, so the right-to-left interface is exercised."
     ),
+    "hk-gov-office-fitout": (
+        "The Hong Kong pack defaults to Traditional Chinese. This demo is a government contract, and the "
+        "General Conditions, the bills and the valuations of a Hong Kong public works contract are written "
+        "in English; the pack's private residential demo is the one in Chinese."
+    ),
     "residential-lausanne": (
         "Switzerland has more than one official language and the Swiss pack defaults to German. "
         "This demo is a project in Vaud, which is French-speaking, and its bill is written in French, "
