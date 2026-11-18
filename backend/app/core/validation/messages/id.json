@@ -2324,5 +2324,11 @@
       "fail": "{funding}: material {material} pada baris {ordinal} punya {count} dari {required} penawaran harga dan tanpa analisis harga.",
       "suggestion": "Catat penawaran pemasok untuk material atau lampirkan laporan analisis harga."
     }
+  },
+  "vat_rate": {
+    "standard_rate": {
+      "fail": "{markup} sebesar {percent} %; tarif PPN standar di {country} adalah {rate} %.",
+      "suggestion": "Atur baris pajak ke tarif standar, atau catat di RAB mengapa tarif lain atau pembebasan berlaku."
+    }
   }
 }

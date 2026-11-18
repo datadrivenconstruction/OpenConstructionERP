@@ -5,7 +5,7 @@
 // funding classes, labour location factors) and what the project chose.
 // Money and coefficients arrive as decimal strings and stay strings.
 
-import { apiGet, apiPut } from '@/shared/lib/api';
+import { API_BASE, apiGet, apiPost, apiPut, downloadWithAuth } from '@/shared/lib/api';
 
 export type EstimateRole = 'investor' | 'contractor';
 
@@ -40,6 +40,7 @@ export interface NormBaseInfo {
   code_example: string;
   types: { prefix: string; title: string | null; collections: number | null }[];
   legacy_prefixes: Record<string, string>;
+  grade_field: string;
 }
 
 export interface PricingProfile {
@@ -52,6 +53,8 @@ export interface PricingProfile {
   grades: string[];
   base_grade: string | null;
   grading_status: string | null;
+  grading_source: string | null;
+  has_export_layout: boolean;
   default_monthly_hours: string | null;
   settings: EstimatePricingSettings;
 }
@@ -75,7 +78,46 @@ export interface LabourRates {
   missing_grades: string[];
 }
 
+export interface WritebackRow {
+  position_id: string;
+  ordinal: string;
+  description: string;
+  resource_index: number;
+  resource_name: string;
+  grade: string;
+  current_rate: string | null;
+  proposed_rate: string;
+  derivation: LabourRate;
+}
+
+export interface WritebackSkip {
+  position_id: string;
+  ordinal: string;
+  resource_index: number;
+  resource_name: string;
+  reason: 'no_grade' | 'grade_off_scale';
+  grade: string | null;
+}
+
+export interface WritebackPreview {
+  boq_id: string;
+  estimate_wage: string;
+  monthly_hours: string;
+  location_factor: string;
+  changes: WritebackRow[];
+  unchanged: number;
+  skipped: WritebackSkip[];
+}
+
+export interface WritebackItem {
+  position_id: string;
+  resource_index: number;
+  rate: string;
+}
+
 const BASE = '/v1/norm_pricing';
+const q = (projectId: string, boqId: string) =>
+  `project_id=${encodeURIComponent(projectId)}&boq_id=${encodeURIComponent(boqId)}`;
 
 export const normPricingApi = {
   profile: (projectId: string, locale?: string) =>
@@ -90,6 +132,18 @@ export const normPricingApi = {
   labourRates: (projectId: string, grades: string[]) =>
     apiGet<LabourRates>(
       `${BASE}/labour-rates?project_id=${encodeURIComponent(projectId)}&grades=${encodeURIComponent(grades.join(','))}`,
+    ),
+  writebackPreview: (projectId: string, boqId: string) =>
+    apiGet<WritebackPreview>(`${BASE}/labour-writeback?${q(projectId, boqId)}`),
+  writebackApply: (projectId: string, boqId: string, items: WritebackItem[]) =>
+    apiPost<{ updated_positions: number; updated_resources: number }, { items: WritebackItem[] }>(
+      `${BASE}/labour-writeback?${q(projectId, boqId)}`,
+      { items },
+    ),
+  exportSheet: (projectId: string, boqId: string, locale?: string) =>
+    downloadWithAuth(
+      `${API_BASE}${BASE}/export/xlsx?${q(projectId, boqId)}${locale ? `&locale=${encodeURIComponent(locale)}` : ''}`,
+      'estimate.xlsx',
     ),
 };
 
@@ -106,3 +160,5 @@ export function rateDerivation(r: LabourRate, rates: Pick<LabourRates, 'estimate
   const one = `V1 = ${r.base_rate} / ${r.base_coefficient} = ${r.grade_one_rate}`;
   return `${base}; ${one}; V${r.grade} = ${r.grade_one_rate} × ${r.coefficient} = ${r.rate}`;
 }
+
+export { averageLabourGrade } from './grade';

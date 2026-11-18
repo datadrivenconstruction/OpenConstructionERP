@@ -61,6 +61,8 @@ class NormBaseOut(BaseModel):
     code_example: str
     types: list[NormTypeOut]
     legacy_prefixes: dict[str, str]
+    #: The resource field that carries a labour grade.
+    grade_field: str = "grade"
 
 
 class PricingProfile(BaseModel):
@@ -79,6 +81,9 @@ class PricingProfile(BaseModel):
     grades: list[str] = []
     base_grade: str | None = None
     grading_status: str | None = None
+    grading_source: str | None = None
+    #: True when the pack lays out the market's estimate sheet for the Excel export.
+    has_export_layout: bool = False
     default_monthly_hours: str | None = None
     settings: EstimatePricingSettings = Field(default_factory=EstimatePricingSettings)
 
@@ -114,3 +119,56 @@ class CodeCheckOut(BaseModel):
     suggested: str | None = None
     old_prefix: str | None = None
     new_prefix: str | None = None
+    #: The norm's name where the pack's source quotes it: a code known to exist.
+    title: str | None = None
+
+
+class WritebackRow(BaseModel):
+    """One labour resource whose rate would change, with the figures behind the new rate."""
+
+    position_id: str
+    ordinal: str
+    description: str
+    resource_index: int
+    resource_name: str
+    grade: str
+    current_rate: str | None
+    proposed_rate: str
+    derivation: RateOut
+
+
+class WritebackSkip(BaseModel):
+    position_id: str
+    ordinal: str
+    resource_index: int
+    resource_name: str
+    reason: Literal["no_grade", "grade_off_scale"]
+    grade: str | None = None
+
+
+class WritebackPreview(BaseModel):
+    """What applying the project's labour rates to a bill would change. Nothing is written."""
+
+    boq_id: str
+    estimate_wage: str
+    monthly_hours: str
+    location_factor: str
+    changes: list[WritebackRow]
+    unchanged: int = 0
+    skipped: list[WritebackSkip] = []
+
+
+class WritebackItem(BaseModel):
+    position_id: str = Field(min_length=1, max_length=64)
+    resource_index: int = Field(ge=0, le=10_000)
+    #: The rate the person saw in the preview; a different server figure means the preview is stale.
+    rate: str = Field(min_length=1, max_length=32)
+
+
+class WritebackApply(BaseModel):
+    items: list[WritebackItem] = Field(min_length=1, max_length=5000)
+
+
+class WritebackResult(BaseModel):
+    updated_positions: int
+    updated_resources: int

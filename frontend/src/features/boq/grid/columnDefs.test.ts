@@ -264,6 +264,23 @@ describe('unit_rate column editability', () => {
     expect(getValue({ data: { _isSection: true, classification: { gesn: '06-01-001-01' } }, context })).toBe('');
   });
 
+  it('adds norm code and grade columns only when a pack declares a norm base', () => {
+    const ids = (c: BOQColumnContext) => getColumnDefs(c).map((col) => col.colId ?? col.field);
+    expect(ids(ctx)).not.toContain('norm_code');
+    expect(ids(ctx)).not.toContain('labour_grade');
+    const context = { ...ctx, normBase: { classificationKey: 'knu', gradeField: 'grade' } };
+    const cols = getColumnDefs(context);
+    const value = (id: string, data: Record<string, unknown>) =>
+      (cols.find((c) => c.colId === id)?.valueGetter as (p: { data: Record<string, unknown> }) => string)({ data });
+    const line = {
+      classification: { knu: 'КБ1-13-2' },
+      metadata: { resources: [{ type: 'labor', quantity: 3, grade: '3.0' }, { type: 'labor', quantity: 1, grade: '4.0' }] },
+    };
+    expect(value('norm_code', line)).toBe('КБ1-13-2');
+    expect(value('labour_grade', line)).toBe('3.3');
+    expect(value('norm_code', { ...line, _isSection: true })).toBe('');
+  });
+
   it('is editable for a position with no resources', () => {
     expect(isEditable({ id: 'p1', unit_rate: 10, metadata: {} })).toBe(true);
   });

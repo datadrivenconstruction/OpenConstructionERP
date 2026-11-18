@@ -2324,5 +2324,11 @@
       "fail": "{funding}: {ordinal}. satırdaki {material} malzemesinin {required} fiyat teklifinden {count} tanesi var ve fiyat analizi yok.",
       "suggestion": "Malzeme için tedarikçi tekliflerini kaydedin veya fiyat analizi raporunu ekleyin."
     }
+  },
+  "vat_rate": {
+    "standard_rate": {
+      "fail": "{markup} %{percent}; {country} için standart KDV oranı %{rate}.",
+      "suggestion": "Vergi satırını standart orana ayarlayın veya keşifte neden başka bir oran ya da istisna uygulandığını kaydedin."
+    }
   }
 }

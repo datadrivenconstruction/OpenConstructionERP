@@ -94,13 +94,34 @@ the electronic procurement system, under the martial law procedure of поста
   a pre-2023 prefix (Е, ЕН, ЕД, РН, М, В, П, СН) is flagged with its current
   form, and a code of another shape is a warning, not an error, because the
   shape comes from secondary literature citing a ministry letter we have not
-  read. The collection index carries numbers and type titles only
+  read. КБМ codes have their own shape, such as КБМ206-0202 (formerly
+  СН206-202). Type titles follow Іськов's textbook, table 2.1: КВ is the РЕКН
+  collections for restoration work (КНУ РЕКНрв), КБМ the collection of resource
+  norms for running construction machines (КНУ РКНЕМ). The collection index
+  names a few collections, and only КБ1-13-1 to КБ1-13-3 (bulk excavation by a
+  0.4 m3 excavator to spoil, soil groups 1 to 3, per 1000 m3) carry a norm
+  title, quoted from the same textbook
 - **Graded labour rates** (`estimate_pricing.json`): the hourly rate of a grade
   from the estimate wage, the monthly hours and the coefficient table of
-  Додаток 15, with base grade 3.8. Whole-grade coefficients 1 to 7 and linear
-  steps between them reproduce every value the source quotes; grades above 7.0
-  are not shipped until the annex row for grade 8 is read. 174 hours a month is
-  a 2026 default, never enforced
+  Додаток 15, with base grade 3.8. The table ships as published, 71 values
+  from grade 1.0 (1.000) to 8.0 (2.394) in steps of 0.1, read on 18.11.2026 in
+  the 2021 published text (https://radnuk.com.ua/wp-content/uploads/2021/12/dodatok-15.pdf);
+  it may have been revised by later changes. 174 hours a month is a 2026
+  default, never enforced
+- **Labour rates written to a bill**: from the same card, a bill's labour
+  resources that carry a grade get their rate from this table. A preview lists
+  each change with its derivation; only the rows left ticked are written, and a
+  stale preview is refused
+- **BOQ columns**: a project of this pack shows a norm code column and the
+  average labour grade of each line (weighted by hours) in the bill grid.
+  Projects of other markets do not see them
+- **Estimate sheet export**: the pack supplies the column order of the local
+  estimate form (Додаток 1 of the Настанова: ordinal, norm code, description,
+  unit, quantity, unit cost and total split into labour and machines, labour
+  hours) and the exporter writes the bill as an Excel sheet in that order
+- **ПДВ rate check** (the neutral `vat_rate` rule set): a tax markup on the
+  bill that differs from the dated standard rate, 20 percent, is an error
+  unless the bill records a ПДВ treatment or exemption
 - **Funding caps** (the neutral `public_funding` rule set): on budget or state
   money, general production costs 10, administrative costs 3 and profit 15
   percent of direct costs (постанова КМУ №1512, п. 1 пп. 4) are caps for a
@@ -114,9 +135,14 @@ The wage, hours, funding type, who prices the estimate and the combat-zone flag
 are set per project under Settings, in a card that only appears for a project
 whose country pack supplies norm pricing.
 
-No CWICR cost database covers Ukraine yet, so the pack preloads none, and no
-material carries a price from a cost base: price evidence stays empty until a
-user records supplier offers.
+No CWICR cost database covers Ukraine yet, so the pack preloads none and
+ships no price data. For the same reason it does not check price evidence (the
+three supplier offers of public funding): there is no Ukrainian price base to
+check against, and the requirement stays in the reference documents.
+
+The demo lines cite KNU codes. Only КБ1-13-2 on bulk excavation is a real norm
+quoted by name; the other codes are illustrative of the shape and must be
+replaced by a кошторисник from the collections before any use.
 
 ## Demo price levels
 
@@ -140,6 +166,10 @@ not the investor's estimate.
 - Наказ Мінрегіону №281 of 01.11.2021: https://zakon.rada.gov.ua/laws/show/v0281914-21
 - Entry into force on 08.11.2021:
   http://ukrbudex.org.ua/galuzevi-novini-ta-podiyi/novunu/koshtorisni-normi-ukrayini-nabrali-chinnosti-08-listopada-20-110
+- Додаток 15, grade coefficients, 2021 published text, read 18.11.2026:
+  https://radnuk.com.ua/wp-content/uploads/2021/12/dodatok-15.pdf
+- Іськов, textbook on estimating under КНУ (table 2.1 of norm types, the
+  local estimate form of Додаток 1, norm КБ1-13)
 - Зміна №2, chapters of the summary estimate:
   https://radnuk.com.ua/wp-content/uploads/2023/05/knu-zmina-2.pdf
 - Додатки 25, 27 and 28 (profit, administrative costs, risk):

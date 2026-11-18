@@ -13037,6 +13037,7 @@ def register_builtin_rules() -> None:
     from app.core.validation.rules.pakistan_boq import PAKISTAN_RULES
     from app.core.validation.rules.peru_presupuesto import PERU_RULES
     from app.core.validation.rules.project_completeness import PROJECT_COMPLETENESS_RULES
+    from app.core.validation.rules.vat_rate import VAT_RATE_RULES
 
     rules: list[tuple[ValidationRule, list[str] | None]] = [
         # BOQ Quality (universal)
@@ -13356,6 +13357,8 @@ def register_builtin_rules() -> None:
         *((rule_class(), None) for rule_class in PERU_RULES),
         # Norm bases and public funding caps (neutral; values from the country pack)
         *((rule_class(), None) for rule_class in NORM_BASE_RULES),
+        # Tax line at the standard VAT rate of the dated tax seed (neutral)
+        *((rule_class(), None) for rule_class in VAT_RATE_RULES),
     ]
 
     for rule, sets in rules:

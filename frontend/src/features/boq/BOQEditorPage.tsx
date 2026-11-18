@@ -3,6 +3,7 @@
 import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useNormBaseColumns } from '@/features/norm-pricing/useNormBaseColumns';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useUnitsSystem } from '@/features/market/api';
 // lucide-react icons used by sub-components (BOQToolbar, BOQGrid, etc.) — none needed directly here
@@ -273,6 +274,9 @@ export function BOQEditorPage() {
   });
 
   /* ── Load project for region/currency/locale settings ────────────── */
+
+  // Norm code and grade columns, only where the project's country pack declares a norm base.
+  const normBaseColumns = useNormBaseColumns(boq?.project_id);
 
   const { data: project } = useQuery({
     queryKey: ['project', boq?.project_id],
@@ -5888,6 +5892,7 @@ export function BOQEditorPage() {
           onShowProcurementTrace={setProcurementPositionId}
           onShowMeasurement={setMeasurementPositionId}
           classificationStandard={project?.classification_standard}
+          normBase={normBaseColumns}
           onTraceLine={variationRequestId ? setTracePositionId : undefined}
           variationTraces={variationTraceBadges}
           variationUntracedBadge={variationUntracedBadge}

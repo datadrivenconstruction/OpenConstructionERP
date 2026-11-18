@@ -2324,5 +2324,11 @@
       "fail": "{funding}: materialet {material} på rad {ordinal} har {count} av {required} prisofferter och ingen prisanalys.",
       "suggestion": "Registrera leverantörernas offerter för materialet eller bifoga prisanalysrapporten."
     }
+  },
+  "vat_rate": {
+    "standard_rate": {
+      "fail": "{markup} är {percent} %; normalskattesatsen för moms i {country} är {rate} %.",
+      "suggestion": "Sätt skatteraden till normalsatsen eller ange i kalkylen varför en annan sats eller ett undantag gäller."
+    }
   }
 }

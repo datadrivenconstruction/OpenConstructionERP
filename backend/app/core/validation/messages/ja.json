@@ -2324,5 +2324,11 @@
       "fail": "{funding}: {ordinal} 行目の材料 {material} の見積は {required} 件中 {count} 件で、価格分析がありません。",
       "suggestion": "材料の供給者見積を記録するか、価格分析報告書を添付してください。"
     }
+  },
+  "vat_rate": {
+    "standard_rate": {
+      "fail": "{markup} は {percent} % です。{country} の付加価値税の標準税率は {rate} % です。",
+      "suggestion": "税の行を標準税率にするか、別の税率や免税が適用される理由を見積に記録してください。"
+    }
   }
 }

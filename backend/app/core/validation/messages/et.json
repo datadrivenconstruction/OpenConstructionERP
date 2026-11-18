@@ -2324,5 +2324,11 @@
       "fail": "{funding}: rea {ordinal} materjalil {material} on {count}/{required} hinnapakkumist ja hinnaanalüüs puudub.",
       "suggestion": "Salvestage materjali tarnijapakkumised või lisage hinnaanalüüsi aruanne."
     }
+  },
+  "vat_rate": {
+    "standard_rate": {
+      "fail": "{markup} on {percent} %; käibemaksu tavamäär riigis {country} on {rate} %.",
+      "suggestion": "Seadke maksurida tavamäärale või märkige eelarvesse, miks kehtib muu määr või vabastus."
+    }
   }
 }

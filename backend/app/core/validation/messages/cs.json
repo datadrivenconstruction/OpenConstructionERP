@@ -2324,5 +2324,11 @@
       "fail": "{funding}: materiál {material} na řádku {ordinal} má {count} z {required} cenových nabídek a žádnou analýzu cen.",
       "suggestion": "Zaznamenejte nabídky dodavatelů k materiálu nebo připojte zprávu o analýze cen."
     }
+  },
+  "vat_rate": {
+    "standard_rate": {
+      "fail": "{markup} je {percent} %; základní sazba DPH v {country} je {rate} %.",
+      "suggestion": "Nastavte daňový řádek na základní sazbu, nebo v rozpočtu uveďte, proč platí jiná sazba či osvobození."
+    }
   }
 }

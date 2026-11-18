@@ -1,5 +1,6 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
+import { averageLabourGrade } from '@/features/norm-pricing/grade';
 import type {
   ColDef,
   ITooltipParams,
@@ -171,6 +172,12 @@ export interface BOQColumnContext {
    * instead of whichever key happens to be first by insertion order.
    */
   classificationStandard?: string;
+  /**
+   * Set only when the project's country pack declares a norm base: adds the
+   * norm code and average labour grade columns. Absent for every other market,
+   * so their bills never see the columns.
+   */
+  normBase?: { classificationKey: string; gradeField: string } | null;
 }
 
 /**
@@ -527,6 +534,47 @@ export function tierRateValueParser(params: Pick<ValueParserParams, 'newValue' |
   return normalizeDecimalSeparators(text);
 }
 
+/** Norm code and average labour grade, read-only, present only when a pack declares a norm base. */
+function normBaseColumns(context: BOQColumnContext): ColDef[] {
+  const base = context.normBase;
+  if (!base) return [];
+  const { t } = context;
+  const plain = (d: Record<string, unknown> | undefined) =>
+    !!d && !d._isSection && !d._isFooter && !d._isResource && !d._isAddResource && !d._isVariantHeader && !d._isLangtext;
+  return [
+    {
+      headerName: t('boq.norm_code', { defaultValue: 'Norm code' }),
+      headerTooltip: t('boq.norm_code_tip', {
+        defaultValue: 'The norm this line is priced against, from the norm base of the country pack.',
+      }),
+      colId: 'norm_code',
+      width: 110,
+      editable: false,
+      valueGetter: (params) => {
+        const d = params.data as Record<string, unknown> | undefined;
+        if (!plain(d)) return '';
+        const cls = d?.classification as Record<string, unknown> | undefined;
+        return String(cls?.[base.classificationKey] ?? '');
+      },
+      cellClass: 'text-xs font-mono',
+    },
+    {
+      headerName: t('boq.labour_grade', { defaultValue: 'Grade' }),
+      headerTooltip: t('boq.labour_grade_tip', {
+        defaultValue: 'Average labour grade of the line, weighted by the hours of its labour resources.',
+      }),
+      colId: 'labour_grade',
+      width: 72,
+      editable: false,
+      valueGetter: (params) => {
+        const d = params.data as Record<string, unknown> | undefined;
+        return plain(d) ? (averageLabourGrade(d?.metadata, base.gradeField) ?? '') : '';
+      },
+      cellClass: 'text-xs tabular-nums text-right',
+    },
+  ];
+}
+
 export function getColumnDefs(context: BOQColumnContext): ColDef[] {
   const { t } = context;
 
@@ -734,6 +782,7 @@ export function getColumnDefs(context: BOQColumnContext): ColDef[] {
       },
       cellClass: 'text-xs font-mono text-content-secondary',
     },
+    ...normBaseColumns(context),
     {
       headerName: t('boq.unit', { defaultValue: 'Unit' }),
       field: 'unit',

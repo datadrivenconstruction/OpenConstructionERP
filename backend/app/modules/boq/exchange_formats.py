@@ -377,6 +377,7 @@ _WORKBOOK_FORMATS: tuple[ExchangeFormat, ...] = (
         reader="excel",
         writer="excel",
         header_language="uk",
+        rule_packs=("norm_base",),
     ),
     ExchangeFormat(
         format_id="tr_birim_fiyat",

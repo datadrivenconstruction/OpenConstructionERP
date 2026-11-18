@@ -2324,5 +2324,11 @@
       "fail": "{funding}: materiał {material} w pozycji {ordinal} ma {count} z {required} ofert cenowych i brak analizy cen.",
       "suggestion": "Zapisz oferty dostawców dla materiału albo dołącz raport z analizy cen."
     }
+  },
+  "vat_rate": {
+    "standard_rate": {
+      "fail": "{markup} wynosi {percent} %; podstawowa stawka VAT w {country} to {rate} %.",
+      "suggestion": "Ustaw w pozycji podatku stawkę podstawową albo zapisz w kosztorysie, dlaczego obowiązuje inna stawka lub zwolnienie."
+    }
   }
 }

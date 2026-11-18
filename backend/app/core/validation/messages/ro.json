@@ -2324,5 +2324,11 @@
       "fail": "{funding}: materialul {material} pe linia {ordinal} are {count} din {required} oferte de preț și nicio analiză de preț.",
       "suggestion": "Înregistrați ofertele furnizorilor pentru material sau atașați raportul de analiză a prețurilor."
     }
+  },
+  "vat_rate": {
+    "standard_rate": {
+      "fail": "{markup} este {percent} %; cota standard de TVA în {country} este {rate} %.",
+      "suggestion": "Setați linia de taxă la cota standard sau notați în deviz de ce se aplică altă cotă sau o scutire."
+    }
   }
 }

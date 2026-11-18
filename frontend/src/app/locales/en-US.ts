@@ -1171,6 +1171,7 @@ const resource = {
     "boq.provenance_catalogue_short": "Catalog",
     "boq.provenance_catalogue": "Priced from a cost catalog.",
     "boq.total_tip_resources": "Total is the sum of this position's resources (labor, material, equipment).",
+    "boq.labour_grade_tip": "Average labor grade of the line, weighted by the hours of its labor resources.",
     "explorer.feat_pivot_desc": "Group elements by story, discipline, or type. Aggregate volumes, areas, and counts.",
     "explorer.thresholds_subtitle": "Color pivot cells by value. Add up to {{max}} rules - one per numeric column.",
     "explorer.thresholds_empty_hint": "Add a rule to color cells red / amber / green based on their value.",
@@ -1738,6 +1739,13 @@ const resource = {
     "commercial_control.save_quantities": "Save quantities",
     "commercial_control.save_quantities_failed": "Could not save the quantities",
     "commercial_control.record_valuation": "Record valuation",
+    "normPricing.subtitle": "Hourly labor rates from the estimate wage and the grade table of {{base}}, and the markup caps of the funding type. Lines cite norm codes like {{example}}.",
+    "normPricing.location": "Labor location factor",
+    "normPricing.location_hint": "Applies to labor only. The list of territories changes by official order, so check it and set the flag yourself.",
+    "normPricing.rates_title": "Hourly labor rates by grade",
+    "normPricing.preview": "Preview labor rates",
+    "normPricing.preview_empty": "Every graded labor rate in this bill already matches.",
+    "normPricing.skipped": "Labor rows left out (no grade, or a grade off the scale): {{count}}",
   }
 } as { translation: Record<string, string> };
 

@@ -2324,5 +2324,11 @@
       "fail": "{funding} : le matériau {material} à la ligne {ordinal} a {count} offres de prix sur {required} et aucune analyse de prix.",
       "suggestion": "Enregistrez les offres des fournisseurs pour le matériau ou joignez le rapport d'analyse des prix."
     }
+  },
+  "vat_rate": {
+    "standard_rate": {
+      "fail": "{markup} est à {percent} % ; le taux normal de TVA en {country} est de {rate} %.",
+      "suggestion": "Mettez la ligne de taxe au taux normal, ou indiquez sur le devis pourquoi un autre taux ou une exonération s'applique."
+    }
   }
 }

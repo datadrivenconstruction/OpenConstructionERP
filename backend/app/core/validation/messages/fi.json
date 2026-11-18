@@ -2324,5 +2324,11 @@
       "fail": "{funding}: rivin {ordinal} materiaalilla {material} on {count}/{required} hintatarjousta eikä hinta-analyysiä.",
       "suggestion": "Kirjaa toimittajien tarjoukset materiaalille tai liitä hinta-analyysiraportti."
     }
+  },
+  "vat_rate": {
+    "standard_rate": {
+      "fail": "{markup} on {percent} %; yleinen arvonlisäverokanta maassa {country} on {rate} %.",
+      "suggestion": "Aseta verorivi yleiseen verokantaan tai kirjaa laskelmaan, miksi muu verokanta tai verovapaus koskee sitä."
+    }
   }
 }
