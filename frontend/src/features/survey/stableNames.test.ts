@@ -31,6 +31,13 @@ const STABLE: Record<string, string> = {
   'volumes.status.draft': 'Draft',
   'volumes.status.confirmed': 'Confirmed',
   'volumes.status.sent': 'Sent',
+  'stockpiles.page.title': 'Stockpiles',
+  'stockpiles.action.new_stockpile': 'New stockpile',
+  'stockpiles.action.add_survey': 'Add survey',
+  'stockpiles.action.propose': 'Propose adjustment',
+  'stockpiles.action.confirm_adjustment': 'Confirm adjustment',
+  'stockpiles.density.measured': 'Measured',
+  'stockpiles.density.assumed': 'Assumed',
 };
 
 describe('survey stable names', () => {

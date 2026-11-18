@@ -2456,5 +2456,15 @@
       "status_acquired": "Nakuha na",
       "status_expropriation": "Ekspropriasyon"
     }
+  },
+  "stockpiles": {
+    "density_assumed": {
+      "fail": "Ipinagpalagay ang density, hindi sinukat: ang tonelada ay kasing-lakas lang ng hulang iyon.",
+      "suggestion": "Magtimbang ng sample o kunin ang density sa delivery notes ng supplier."
+    },
+    "variance_high": {
+      "fail": "Ang survey ay {v} % ang pagitan sa book stock, higit sa tolerance na {t} %.",
+      "suggestion": "Suriin ang density at base surface, saka magmungkahi ng adjustment at kumpirmahin kung totoo ang pagkakaiba."
+    }
   }
 }

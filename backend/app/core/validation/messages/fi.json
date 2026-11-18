@@ -2456,5 +2456,15 @@
       "status_acquired": "Hankittu",
       "status_expropriation": "Lunastus"
     }
+  },
+  "stockpiles": {
+    "density_assumed": {
+      "fail": "Tiheys on oletettu, ei mitattu: tonnit ovat yhtä luotettavia kuin tämä arvio.",
+      "suggestion": "Punnitse näyte tai ota tiheys toimittajan lähetysluettelosta."
+    },
+    "variance_high": {
+      "fail": "Mittaus poikkeaa kirjanpitosaldosta {v} %, yli {t} %:n toleranssin.",
+      "suggestion": "Tarkista tiheys ja pohjapinta, ehdota sitten korjausta ja vahvista se, jos ero on todellinen."
+    }
   }
 }

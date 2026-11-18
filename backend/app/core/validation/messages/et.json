@@ -2456,5 +2456,15 @@
       "status_acquired": "Omandatud",
       "status_expropriation": "Võõrandamine"
     }
+  },
+  "stockpiles": {
+    "density_assumed": {
+      "fail": "Tihedus on eeldatud, mitte mõõdetud: tonnid on sama usaldusväärsed kui see hinnang.",
+      "suggestion": "Kaaluge proov või võtke tihedus tarnija saatelehtedelt."
+    },
+    "variance_high": {
+      "fail": "Mõõdistus erineb raamatupidamuslikust jäägist {v} %, ületades {t} % tolerantsi.",
+      "suggestion": "Kontrollige tihedust ja aluspinda, seejärel tehke korrektuuriettepanek ja kinnitage see, kui vahe on tõeline."
+    }
   }
 }

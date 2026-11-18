@@ -2456,5 +2456,15 @@
       "status_acquired": "Nabyta",
       "status_expropriation": "Wywłaszczenie"
     }
+  },
+  "stockpiles": {
+    "density_assumed": {
+      "fail": "Gęstość jest założona, nie zmierzona: tony są tak wiarygodne jak to założenie.",
+      "suggestion": "Zważ próbkę lub weź gęstość z dokumentów dostawy."
+    },
+    "variance_high": {
+      "fail": "Pomiar różni się od stanu księgowego o {v} %, powyżej tolerancji {t} %.",
+      "suggestion": "Sprawdź gęstość i powierzchnię bazową, potem zaproponuj korektę i potwierdź ją, jeśli różnica jest realna."
+    }
   }
 }

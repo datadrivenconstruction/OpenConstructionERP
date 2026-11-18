@@ -2456,5 +2456,15 @@
       "status_acquired": "Ervervet",
       "status_expropriation": "Ekspropriasjon"
     }
+  },
+  "stockpiles": {
+    "density_assumed": {
+      "fail": "Tettheten er antatt, ikke målt: tonnene er bare så pålitelige som antakelsen.",
+      "suggestion": "Veie en prøve eller hent tettheten fra leverandørens følgesedler."
+    },
+    "variance_high": {
+      "fail": "Oppmålingen avviker {v} % fra bokført beholdning, over toleransen på {t} %.",
+      "suggestion": "Kontroller tettheten og basisflaten, foreslå deretter en justering og bekreft den hvis forskjellen er reell."
+    }
   }
 }

@@ -2456,5 +2456,15 @@
       "status_acquired": "Adquirida",
       "status_expropriation": "Expropiación"
     }
+  },
+  "stockpiles": {
+    "density_assumed": {
+      "fail": "La densidad es supuesta, no medida: las toneladas son tan fiables como esa estimación.",
+      "suggestion": "Pese una muestra o tome la densidad de los albaranes del proveedor."
+    },
+    "variance_high": {
+      "fail": "El levantamiento difiere del stock contable en {v} %, por encima de la tolerancia de {t} %.",
+      "suggestion": "Compruebe la densidad y la superficie base, luego proponga un ajuste y confírmelo si la diferencia es real."
+    }
   }
 }

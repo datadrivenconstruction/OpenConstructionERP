@@ -2456,5 +2456,15 @@
       "status_acquired": "Verworven",
       "status_expropriation": "Onteigening"
     }
+  },
+  "stockpiles": {
+    "density_assumed": {
+      "fail": "De dichtheid is aangenomen, niet gemeten: de tonnen zijn zo betrouwbaar als die schatting.",
+      "suggestion": "Weeg een monster of neem de dichtheid uit de leveringsbonnen van de leverancier."
+    },
+    "variance_high": {
+      "fail": "De meting wijkt {v} % af van de boekvoorraad, boven de tolerantie van {t} %.",
+      "suggestion": "Controleer de dichtheid en het basisvlak, stel dan een correctie voor en bevestig die als het verschil echt is."
+    }
   }
 }

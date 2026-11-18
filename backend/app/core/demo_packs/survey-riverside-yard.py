@@ -35,7 +35,7 @@ TEMPLATE = DemoTemplate(
         "lat": 52.5101,
         "lng": 13.3651,
     },
-    validation_rule_sets=["boq_quality", "survey_core", "surfaces_volumes"],
+    validation_rule_sets=["boq_quality", "survey_core", "surfaces_volumes", "stockpiles"],
     boq_name="Earthworks - Riverside Yard",
     boq_description="Earthworks bill for the yard platform; the excavation quantity comes from survey volume V-001.",
     boq_metadata={"phase": "Survey course", "price_level": "Demo rates (EUR, excl VAT)"},

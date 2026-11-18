@@ -2456,5 +2456,15 @@
       "status_acquired": "Edinildi",
       "status_expropriation": "Kamulaştırma"
     }
+  },
+  "stockpiles": {
+    "density_assumed": {
+      "fail": "Yoğunluk varsayılmış, ölçülmemiş: tonlar bu tahmin kadar güvenilirdir.",
+      "suggestion": "Bir numune tartın veya yoğunluğu tedarikçinin irsaliyelerinden alın."
+    },
+    "variance_high": {
+      "fail": "Ölçüm kayıtlı stoktan %{v} sapıyor, %{t} toleransın üzerinde.",
+      "suggestion": "Yoğunluğu ve taban yüzeyini kontrol edin, ardından düzeltme önerin ve fark gerçekse onaylayın."
+    }
   }
 }

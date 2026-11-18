@@ -2456,5 +2456,15 @@
       "status_acquired": "Diperoleh",
       "status_expropriation": "Pencabutan hak"
     }
+  },
+  "stockpiles": {
+    "density_assumed": {
+      "fail": "Kerapatan diasumsikan, bukan diukur: ton hanya seandal perkiraan itu.",
+      "suggestion": "Timbang sampel atau ambil kerapatan dari surat jalan pemasok."
+    },
+    "variance_high": {
+      "fail": "Survei berbeda {v} % dari stok buku, melampaui toleransi {t} %.",
+      "suggestion": "Periksa kerapatan dan permukaan dasar, lalu usulkan penyesuaian dan konfirmasikan jika selisihnya nyata."
+    }
   }
 }
