@@ -4396,6 +4396,19 @@ class BOQService:
         # update (PositionUpdate documents it as ignored). Drop it before it
         # reaches the column writer.
         fields.pop("link_mode", None)
+        # Langtext lives in ``metadata.gaeb_long_text`` (GAEB export, bid portal
+        # read it there); the top-level field saves it without a metadata echo.
+        if "long_text" in fields:
+            long_text = (fields.pop("long_text") or "").replace("\r\n", "\n").strip()
+            sent_meta = fields.get("metadata")
+            stored_meta = position.metadata_ if isinstance(position.metadata_, dict) else {}
+            merged_meta = dict(sent_meta if isinstance(sent_meta, dict) else stored_meta)
+            if long_text:
+                merged_meta["gaeb_long_text"] = long_text
+            else:
+                merged_meta.pop("gaeb_long_text", None)
+            if merged_meta != stored_meta or isinstance(sent_meta, dict):
+                fields["metadata"] = merged_meta
         # Which DEFINITION fields did the client explicitly set? (used for
         # propagate-from-master / unlink-instance). Snapshot the *requested*
         # keys now, before the metadata/cost-item merge logic mutates

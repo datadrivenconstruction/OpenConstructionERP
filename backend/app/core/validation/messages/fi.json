@@ -299,6 +299,10 @@
     "unit_exportable": {
       "fail": "Nimike {ordinal}: yksikkö '{unit}' ei mahdu 4 merkin GAEB-kenttään QU ja katkaistaan viennissä",
       "suggestion": "Käytä enintään 4 merkin GAEB-yksikkökoodia (m, m2, m3, St, h, psch, kg, t)"
+    },
+    "short_text_length": {
+      "fail": "Nimike {ordinal}: lyhyessä tekstissä on {length} merkkiä; GAEB-vienti lyhentää sen 70 merkkiin",
+      "suggestion": "Lyhennä lyhyt teksti 70 merkkiin ja jätä yksityiskohdat pitkään tekstiin"
     }
   },
   "nrm": {

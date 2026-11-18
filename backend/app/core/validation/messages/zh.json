@@ -299,6 +299,10 @@
     "unit_exportable": {
       "fail": "条目 {ordinal}：单位“{unit}”超出 GAEB QU 字段的 4 个字符，导出时会被截断",
       "suggestion": "请使用不超过 4 个字符的 GAEB 单位代码（m、m2、m3、St、h、psch、kg、t）"
+    },
+    "short_text_length": {
+      "fail": "条目 {ordinal}：短文本有 {length} 个字符；GAEB 导出会截断为 70 个",
+      "suggestion": "将短文本缩短到 70 个字符以内，详细内容保留在长文本中"
     }
   },
   "nrm": {

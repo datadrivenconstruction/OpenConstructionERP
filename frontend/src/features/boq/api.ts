@@ -522,6 +522,9 @@ export interface UpdatePositionData {
   /** Issue #127 — set/change the reusable code on an existing position. */
   reference_code?: string | null;
   link_mode?: LinkMode | null;
+  /** Langtext of a position or section, stored as metadata.gaeb_long_text;
+   *  an empty string removes it. */
+  long_text?: string;
 }
 
 /**

@@ -299,6 +299,10 @@
     "unit_exportable": {
       "fail": "Hạng mục {ordinal}: đơn vị '{unit}' không vừa trường GAEB QU 4 ký tự và sẽ bị cắt khi xuất",
       "suggestion": "Dùng mã đơn vị GAEB tối đa 4 ký tự (m, m2, m3, St, h, psch, kg, t)"
+    },
+    "short_text_length": {
+      "fail": "Hạng mục {ordinal}: văn bản ngắn có {length} ký tự; xuất GAEB sẽ cắt còn 70",
+      "suggestion": "Rút gọn văn bản ngắn còn 70 ký tự và giữ chi tiết trong văn bản dài"
     }
   },
   "nrm": {

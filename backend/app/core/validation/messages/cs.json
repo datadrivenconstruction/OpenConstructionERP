@@ -299,6 +299,10 @@
     "unit_exportable": {
       "fail": "Položka {ordinal}: jednotka '{unit}' se nevejde do 4znakového pole GAEB QU a při exportu by byla zkrácena",
       "suggestion": "Použijte kód jednotky GAEB s nejvýše 4 znaky (m, m2, m3, St, h, psch, kg, t)"
+    },
+    "short_text_length": {
+      "fail": "Položka {ordinal}: krátký text má {length} znaků; export GAEB jej zkrátí na 70",
+      "suggestion": "Zkraťte krátký text na 70 znaků a podrobnosti ponechte v dlouhém textu"
     }
   },
   "nrm": {

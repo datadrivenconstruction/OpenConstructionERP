@@ -299,6 +299,10 @@
     "unit_exportable": {
       "fail": "Item {ordinal}: satuan '{unit}' tidak muat di kolom GAEB QU 4 karakter dan akan terpotong saat ekspor",
       "suggestion": "Gunakan kode satuan GAEB maksimal 4 karakter (m, m2, m3, St, h, psch, kg, t)"
+    },
+    "short_text_length": {
+      "fail": "Item {ordinal}: teks pendek berisi {length} karakter; ekspor GAEB memotongnya menjadi 70",
+      "suggestion": "Persingkat teks pendek menjadi 70 karakter dan simpan detail di teks panjang"
     }
   },
   "nrm": {

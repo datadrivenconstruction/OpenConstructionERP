@@ -310,7 +310,8 @@ def test_gaeb_import_reports_unread_elements_attachments_and_cut_text() -> None:
     report = analyze_import("gaeb_xml", imported, content)
     tags = {(i.kind, i.field) for i in report.items}
     assert ("unsupported_element", "SubDescr") in tags
-    assert ("unsupported_element", "Remark") in tags
+    # A Remark (Hinweistext) is read into the section Langtext, so it is no longer lost.
+    assert ("unsupported_element", "Remark") not in tags
     assert ("attachment_skipped", "Attachment") in tags
     assert ("truncated_text", "description") in tags
 

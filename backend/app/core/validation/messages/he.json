@@ -299,6 +299,10 @@
     "unit_exportable": {
       "fail": "סעיף {ordinal}: היחידה '{unit}' אינה נכנסת לשדה GAEB QU בן 4 התווים ותיחתך בייצוא",
       "suggestion": "השתמשו בקוד יחידה GAEB של עד 4 תווים (m, m2, m3, St, h, psch, kg, t)"
+    },
+    "short_text_length": {
+      "fail": "סעיף {ordinal}: לטקסט הקצר יש {length} תווים; ייצוא GAEB חותך אותו ל-70",
+      "suggestion": "קצרו את הטקסט הקצר ל-70 תווים והשאירו את הפרטים בטקסט המלא"
     }
   },
   "nrm": {

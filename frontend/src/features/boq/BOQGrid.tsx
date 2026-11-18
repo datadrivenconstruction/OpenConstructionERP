@@ -21,6 +21,7 @@ import type {
   IsFullWidthRowParams,
   RowHeightParams,
   CellContextMenuEvent,
+  IRowNode,
 } from 'ag-grid-community';
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-quartz.css';
@@ -54,6 +55,7 @@ import {
   Scale,
   Lock,
   LockOpen,
+  FileText,
 } from 'lucide-react';
 
 import {
@@ -120,8 +122,14 @@ import {
 import type { ResourceQuantityBasis, UnitsSystem } from './boqHelpers';
 import { CURRENCY_GROUPS } from '@/features/projects/CreateProjectPage';
 import { useToastStore } from '@/stores/useToastStore';
-import { getGaebLongText, langtextBlockHeight } from './grid/longText';
-import { useBoqDescDensityStore, BOQ_DESC_ROW_HEIGHT } from '@/stores/useBoqDescDensityStore';
+import {
+  getGaebLongText,
+  positionRowHeight,
+  sectionRowHeight,
+  visibleTextLines,
+} from './grid/longText';
+import { LangtextEditor, type LangtextTexts } from './grid/LangtextEditor';
+import { useBoqDescDensityStore } from '@/stores/useBoqDescDensityStore';
 import { getNumberLocale } from '@/stores/usePreferencesStore';
 import { useDisplayQuantity } from '@/shared/hooks/useDisplayQuantity';
 import { VariantPicker } from '@/features/costs/VariantPicker';
@@ -185,7 +193,7 @@ const BOQ_ROW_SELECTION = {
   selectAll: 'filtered',
   enableClickSelection: false,
   isRowSelectable: (node: { data?: Record<string, unknown> }) =>
-    !node.data?._isFooter && !node.data?._isResource && !node.data?._isAddResource && !node.data?._isLangtext,
+    !node.data?._isFooter && !node.data?._isResource && !node.data?._isAddResource,
 } as const;
 
 /**
@@ -361,27 +369,12 @@ interface CopilotRow {
   total: number;
 }
 
-/** GAEB Langtext block shown above the resources of an expanded position. */
-interface LangtextRow {
-  _isLangtext: true;
-  _parentPositionId: string;
-  _langtext: string;
-  id: string;
-  description: string;
-  ordinal: string;
-  unit: string;
-  quantity: number;
-  unit_rate: number;
-  total: number;
-}
-
 type GridRow =
   | (Position & Partial<SectionRow>)
   | (FooterRow & Record<string, unknown>)
   | (ResourceRow & Record<string, unknown>)
   | (AddResourceRow & Record<string, unknown>)
   | (VariantHeaderRow & Record<string, unknown>)
-  | (LangtextRow & Record<string, unknown>)
   | (CopilotRow & Record<string, unknown>);
 
 export interface ManualResource {
@@ -705,6 +698,9 @@ export interface BOQGridHandle {
    * repaint effect fires for a bulk change exactly as it does for one row.
    */
   setAllResourcesExpanded: (expanded: boolean) => void;
+  /** Open the Kurztext / Langtext editor on the focused row (Alt+L).
+   *  Returns false when no position or section row has focus. */
+  openTextEditorForFocused: () => boolean;
 }
 
 /* ── Component ─────────────────────────────────────────────────────── */
@@ -1009,6 +1005,37 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
 
   /* ── Expanded resource positions ─────────────────────────────────── */
   const [expandedPositions, setExpandedPositions] = useState<Set<string>>(new Set());
+  const expandedPositionsRef = useRef(expandedPositions);
+  expandedPositionsRef.current = expandedPositions;
+
+  /* ── Langtext: per-section unfold and the text editor panel ───────── */
+  const [expandedSectionTexts, setExpandedSectionTexts] = useState<Set<string>>(new Set());
+  const expandedSectionTextsRef = useRef(expandedSectionTexts);
+  expandedSectionTextsRef.current = expandedSectionTexts;
+  const toggleSectionText = useCallback((sectionId: string) => {
+    setExpandedSectionTexts((prev) => {
+      const next = new Set(prev);
+      if (next.has(sectionId)) next.delete(sectionId);
+      else next.add(sectionId);
+      return next;
+    });
+  }, []);
+  const [textEditor, setTextEditor] = useState<{ id: string; focus: 'short' | 'long' } | null>(null);
+  const openTextEditor = useCallback((rowId: string, focus: 'short' | 'long' = 'long') => {
+    gridApiRef.current?.stopEditing(true);
+    setTextEditor({ id: rowId, focus });
+  }, []);
+  // Re-measure rows when a row or a section unfolds or folds its Langtext.
+  useEffect(() => {
+    const api = gridApiRef.current;
+    if (!api) return;
+    api.resetRowHeights();
+    const sectionNodes: IRowNode[] = [];
+    api.forEachNode((n) => {
+      if ((n.data as { _isSection?: boolean } | undefined)?._isSection) sectionNodes.push(n);
+    });
+    if (sectionNodes.length > 0) api.redrawRows({ rowNodes: sectionNodes });
+  }, [expandedPositions, expandedSectionTexts]);
 
   /** True while an invalid ordinal edit is being reverted in place, so the
    *  re-entrant cellValueChanged event is ignored (not persisted/undoable). */
@@ -1284,6 +1311,17 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
 
   /* ── Imperative handle for parent components ───────────────────── */
   useImperativeHandle(ref, () => ({
+    openTextEditorForFocused: () => {
+      const api = gridApiRef.current;
+      const cell = api?.getFocusedCell();
+      if (!api || !cell) return false;
+      const d = api.getDisplayedRowAtIndex(cell.rowIndex)?.data as Record<string, unknown> | undefined;
+      if (!d || typeof d.id !== 'string' || d._isFooter || d._isResource || d._isAddResource || d._isVariantHeader || d._isCopilot) {
+        return false;
+      }
+      openTextEditor(d.id, 'long');
+      return true;
+    },
     setAllResourcesExpanded: (expanded: boolean) => {
       // Mirrors toggleResources: an open editor left behind by a bulk
       // expansion keeps its cell in edit mode over rows that just moved.
@@ -1511,6 +1549,9 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
       boqVariablesMap,
       customColumns,
       descDensity,
+      onOpenTextEditor: openTextEditor,
+      expandedSectionTexts,
+      onToggleSectionText: toggleSectionText,
       // Issue #285: imperial-units display seam consumed by the Qty / Unit /
       // Unit-rate renderers and the inline resource / variant editors.
       displayQuantity,
@@ -1524,7 +1565,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
       projectId: projectId ?? null,
       unitsSystem,
     }) as FullGridContext,
-    [descDensity, currencySymbol, currencyCode, fxRates, onUpsertProjectFxRate, displayCurrency, onOpenFxRateSettings, locale, fmt, t, collapsedSections, onToggleSection, onAddPosition, onAddSubSection,
+    [descDensity, openTextEditor, expandedSectionTexts, toggleSectionText, currencySymbol, currencyCode, fxRates, onUpsertProjectFxRate, displayCurrency, onOpenFxRateSettings, locale, fmt, t, collapsedSections, onToggleSection, onAddPosition, onAddSubSection,
      expandedPositions, toggleResources, onRemoveResource, onUpdateResource, onUpdateResourceFields, onSetResourceBasis,
      onSaveResourceToCatalog, onSaveVariantHeaderToCatalog, onOpenCostDbForPosition, onOpenCatalogForPosition, onRepickResourceVariant,
      openVariantPickerSignal, openVariantPickerFor, clearOpenVariantPicker, openPositionVariantPicker, onUpdateVariantHeader,
@@ -1747,22 +1788,6 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
 
     const meta = (pos.metadata ?? {}) as Record<string, unknown>;
 
-    const longText = getGaebLongText(meta);
-    if (longText) {
-      const ltRow: LangtextRow = {
-        _isLangtext: true,
-        _parentPositionId: pos.id,
-        _langtext: longText,
-        id: `${pos.id}_langtext`,
-        description: '',
-        ordinal: '',
-        unit: '',
-        quantity: 0,
-        unit_rate: 0,
-        total: 0,
-      };
-      rows.push(ltRow as GridRow);
-    }
 
     // Synthetic variant-header row — only for positions that carry
     // ``cost_item_variants`` at position level (legacy CWICR position-mode).
@@ -2251,11 +2276,11 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
     if (params.data?._isFooter) {
       classes.push('bg-surface-tertiary/50', 'border-t', 'border-border');
     }
-    if (params.data?._isResource || params.data?._isAddResource || params.data?._isVariantHeader || params.data?._isLangtext) {
+    if (params.data?._isResource || params.data?._isAddResource || params.data?._isVariantHeader) {
       classes.push('oe-resource-row');
     }
     // Add 'group' to regular position rows so hover actions (save/delete) appear on hover
-    if (!params.data?._isSection && !params.data?._isFooter && !params.data?._isResource && !params.data?._isAddResource && !params.data?._isVariantHeader && !params.data?._isLangtext) {
+    if (!params.data?._isSection && !params.data?._isFooter && !params.data?._isResource && !params.data?._isAddResource && !params.data?._isVariantHeader) {
       classes.push('group');
 
       // Highlight unpriced positions (unit_rate is 0/empty) so the user can
@@ -2300,23 +2325,47 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
   const isFullWidthRow = useCallback(
     (params: IsFullWidthRowParams) => {
       const d = params.rowNode.data;
-      return !!d?._isSection || !!d?._isResource || !!d?._isAddResource || !!d?._isVariantHeader || !!d?._isLangtext || !!d?._isCopilot;
+      return !!d?._isSection || !!d?._isResource || !!d?._isAddResource || !!d?._isVariantHeader || !!d?._isCopilot;
     },
     [],
   );
 
   const getRowHeight = useCallback((params: RowHeightParams) => {
-    if (params.data?._isSection) return 38;
+    // Text rows grow with the Langtext mode; the width the text wraps in is the
+    // description column less its padding and the edit pencil.
+    const descWidth = (gridApiRef.current?.getColumn('description')?.getActualWidth() ?? 480) - 44;
+    if (params.data?._isSection) {
+      const longText = getGaebLongText(params.data.metadata);
+      if (!longText) return sectionRowHeight(0);
+      const { longLines } = visibleTextLines({
+        shortText: '',
+        longText,
+        mode: descDensityRef.current,
+        expanded: expandedSectionTextsRef.current.has(params.data.id as string),
+        // A section's Langtext spans the full row, not just the description column.
+        widthPx: Math.max(descWidth, (gridWrapperRef.current?.clientWidth ?? 1200) - 160),
+      });
+      return sectionRowHeight(longLines);
+    }
     if (params.data?._isResource) return 28;
     if (params.data?._isAddResource) return 30;
     if (params.data?._isVariantHeader) return 36;
-    if (params.data?._isLangtext) return langtextBlockHeight(params.data._langtext as string);
     if (params.data?._isCopilot) return BOQ_COPILOT_ROW_HEIGHT;
     const compact = tightRowsRef.current;
     if (params.data?._isFooter) return densityRowHeight(32, compact);
-    // Position rows grow with the description-density preference so a long
-    // Langtext is readable inline; compact keeps the historical 32px row.
-    return densityRowHeight(BOQ_DESC_ROW_HEIGHT[descDensityRef.current] ?? 32, compact);
+    // Position rows grow with the Langtext mode (and when unfolded by their
+    // chevron); with the mode off a row keeps the historical 32px.
+    const base = densityRowHeight(32, compact);
+    if (!params.data || params.data._isResource || params.data._isAddResource) return base;
+    const depth = typeof params.data._depth === 'number' ? params.data._depth : 0;
+    const lines = visibleTextLines({
+      shortText: String(params.data.description ?? ''),
+      longText: getGaebLongText(params.data.metadata),
+      mode: descDensityRef.current,
+      expanded: expandedPositionsRef.current.has(params.data.id as string),
+      widthPx: descWidth - (depth > 1 ? (depth - 1) * 18 : 0),
+    });
+    return positionRowHeight(base, lines);
   }, []);
 
   /* ── Editing started: acquire the collaboration row lock ─────── */
@@ -2570,7 +2619,12 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
 
   /* ── Column resize → persist widths to localStorage ──────────── */
   const handleColumnResized = useCallback((event: ColumnResizedEvent) => {
-    if (!event.finished || !event.column) return;
+    if (!event.finished) return;
+    // A wider or narrower description column wraps the texts to other heights.
+    if (descDensityRef.current !== 'compact' || expandedPositionsRef.current.size > 0 || expandedSectionTextsRef.current.size > 0) {
+      event.api.resetRowHeights();
+    }
+    if (!event.column) return;
     const colId = event.column.getColId();
     const width = event.column.getActualWidth();
     const existing = loadColumnWidths();
@@ -3287,8 +3341,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
               !data._isFooter &&
               !data._isResource &&
               !data._isAddResource &&
-              !data._isVariantHeader &&
-              !data._isLangtext
+              !data._isVariantHeader
             ) {
               onActiveRowChange?.(data.id as string);
             } else {
@@ -3324,8 +3377,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
               !d._isFooter &&
               !d._isResource &&
               !d._isAddResource &&
-              !d._isVariantHeader &&
-              !d._isLangtext
+              !d._isVariantHeader
             ) {
               onActiveRowChange(d.id as string);
             }
@@ -3402,6 +3454,10 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
               const cmtCount = countComments(meta);
               const costItemId = meta?.cost_item_id as string | undefined;
               return <>
+                <CtxItem icon={<FileText size={14}/>}
+                  label={t('boq.edit_texts', { defaultValue: 'Edit Kurztext and Langtext' })}
+                  onClick={() => { openTextEditor(d.id as string, 'long'); closeContextMenu(); }}
+                />
                 {/* Resources section */}
                 {hasResources && (
                   <CtxItem icon={isExpanded ? <ChevronDown size={14}/> : <ChevronRight size={14}/>}
@@ -3701,6 +3757,10 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
               const isCollapsed = collapsedSections.has(d.id as string);
               const sectionCapped = childWouldExceedCap(d.id as string);
               return <>
+                <CtxItem icon={<FileText size={14}/>}
+                  label={t('boq.edit_section_texts', { defaultValue: 'Edit title and Langtext' })}
+                  onClick={() => { openTextEditor(d.id as string, 'long'); closeContextMenu(); }}
+                />
                 {!readOnly && <>
                 <CtxItem icon={<Plus size={14}/>}
                   label={t('boq.add_position', { defaultValue: 'Add Position' })}
@@ -4013,6 +4073,57 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
         </div>,
         document.body,
       )}
+
+      {/* ── Kurztext / Langtext editor ──────────────────────────────── */}
+      {(() => {
+        const row = textEditor ? positions.find((p) => p.id === textEditor.id) : undefined;
+        const order: string[] = [];
+        if (row) {
+          gridApiRef.current?.forEachNodeAfterFilterAndSort((n) => {
+            const d = n.data as Record<string, unknown> | undefined;
+            if (d && typeof d.id === 'string' && !d._isFooter && !d._isResource && !d._isAddResource && !d._isVariantHeader && !d._isCopilot) {
+              order.push(d.id);
+            }
+          });
+        }
+        const idx = row ? order.indexOf(row.id) : -1;
+        return (
+          <LangtextEditor
+            row={row ? {
+              id: row.id,
+              ordinal: row.ordinal ?? '',
+              description: row.description ?? '',
+              metadata: row.metadata as Record<string, unknown> | undefined,
+              isSection: isSection(row),
+            } : null}
+            focus={textEditor?.focus ?? 'long'}
+            readOnly={readOnly}
+            hasPrev={idx > 0}
+            hasNext={idx >= 0 && idx < order.length - 1}
+            onNavigate={(dir) => {
+              const nextId = order[idx + dir];
+              if (!nextId) return;
+              setTextEditor({ id: nextId, focus: 'long' });
+              const node = gridApiRef.current?.getRowNode(nextId);
+              if (node) gridApiRef.current?.ensureNodeVisible(node, 'middle');
+            }}
+            onSave={(id: string, next: LangtextTexts, old: LangtextTexts) => {
+              const changed: UpdatePositionData = {};
+              const prev: UpdatePositionData = {};
+              if (next.description !== old.description.trim() && next.description) {
+                changed.description = next.description;
+                prev.description = old.description;
+              }
+              if (next.long_text !== old.long_text.trim()) {
+                changed.long_text = next.long_text;
+                prev.long_text = old.long_text;
+              }
+              if (Object.keys(changed).length > 0) onUpdatePosition(id, changed, prev);
+            }}
+            onClose={() => setTextEditor(null)}
+          />
+        );
+      })()}
 
       {/* ── Position-level Variant Picker ─────────────────────────────
        *   Renders only when the description-cell "V" icon was clicked

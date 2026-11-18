@@ -299,6 +299,10 @@
     "unit_exportable": {
       "fail": "{ordinal} kalemi: '{unit}' birimi 4 karakterlik GAEB QU alanına sığmaz ve dışa aktarımda kesilir",
       "suggestion": "En fazla 4 karakterlik bir GAEB birim kodu kullanın (m, m2, m3, St, h, psch, kg, t)"
+    },
+    "short_text_length": {
+      "fail": "Poz {ordinal}: kısa metin {length} karakter; GAEB dışa aktarımı onu 70 karaktere kısaltır",
+      "suggestion": "Kısa metni 70 karaktere indirin, ayrıntıları uzun metinde bırakın"
     }
   },
   "nrm": {

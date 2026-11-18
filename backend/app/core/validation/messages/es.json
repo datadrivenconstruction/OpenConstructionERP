@@ -299,6 +299,10 @@
     "unit_exportable": {
       "fail": "Partida {ordinal}: la unidad '{unit}' no cabe en el campo GAEB QU de 4 caracteres y se recortaría al exportar",
       "suggestion": "Use un código de unidad GAEB de 4 caracteres como máximo (m, m2, m3, St, h, psch, kg, t)"
+    },
+    "short_text_length": {
+      "fail": "Partida {ordinal}: el texto corto tiene {length} caracteres; la exportación GAEB lo recorta a 70",
+      "suggestion": "Acorte el texto corto a 70 caracteres y deje los detalles en el texto largo"
     }
   },
   "nrm": {

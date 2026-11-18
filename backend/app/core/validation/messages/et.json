@@ -299,6 +299,10 @@
     "unit_exportable": {
       "fail": "Positsioon {ordinal}: ühik '{unit}' ei mahu 4-märgilisse GAEB välja QU ja lõigatakse ekspordil",
       "suggestion": "Kasutage kuni 4-märgilist GAEB ühikukoodi (m, m2, m3, St, h, psch, kg, t)"
+    },
+    "short_text_length": {
+      "fail": "Positsioon {ordinal}: lühitekstis on {length} märki; GAEB-eksport lõikab selle 70-ni",
+      "suggestion": "Lühendage lühitekst 70 märgini ja jätke üksikasjad pikka teksti"
     }
   },
   "nrm": {

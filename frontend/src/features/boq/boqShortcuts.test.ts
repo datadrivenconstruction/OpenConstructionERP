@@ -162,6 +162,11 @@ describe('the rest of the editor keys', () => {
     expect(resolveBoqShortcut(altGr('KeyI', 'í'), idle)).toBeNull();
     expect(resolveBoqShortcut({ key: 'i', code: 'KeyI', altKey: true }, editing)).toBeNull();
   });
+  it('Alt+L opens the text editor, AltGr+L and Ctrl+L do not', () => {
+    expect(resolveBoqShortcut({ key: 'l', code: 'KeyL', altKey: true }, idle)).toBe('edit_texts');
+    expect(resolveBoqShortcut(altGr('KeyL', 'ł'), idle)).toBeNull();
+    expect(resolveBoqShortcut({ key: 'l', code: 'KeyL', ctrlKey: true }, idle)).toBe('toggle_lock');
+  });
 
   it('Delete removes the selection only when rows are ticked and nothing is being edited', () => {
     expect(resolveBoqShortcut({ key: 'Delete' }, { isEditing: false, hasSelection: true })).toBe('delete_selected');
