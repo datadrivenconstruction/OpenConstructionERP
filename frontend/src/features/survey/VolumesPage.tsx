@@ -54,6 +54,7 @@ import {
   type SendResult,
   type Volume,
 } from './volumesApi';
+import { fmtFixed } from '@/shared/lib/formatters';
 
 type Tab = 'calculations' | 'surfaces' | 'plan';
 
@@ -318,7 +319,7 @@ export default function VolumesPage() {
                     <td className="text-right">{sf.point_count}</td>
                     <td className="text-right"><bdi dir="ltr">{formatM3(sf.area_m2, lang)}</bdi></td>
                     <td className="text-right">
-                      <bdi dir="ltr">{sf.z_min?.toFixed(3)} - {sf.z_max?.toFixed(3)}</bdi>
+                      <bdi dir="ltr">{sf.z_min != null ? fmtFixed(sf.z_min, 3) : ''} - {sf.z_max != null ? fmtFixed(sf.z_max, 3) : ''}</bdi>
                     </td>
                     <td className="text-right">
                       <Button
@@ -369,7 +370,7 @@ export default function VolumesPage() {
                 </>
               )}
               <dt className="text-content-secondary">{t('volumes.field.coverage', { defaultValue: 'Coverage' })}</dt>
-              <dd>{selected.coverage_pct.toFixed(1)} %</dd>
+              <dd>{fmtFixed(selected.coverage_pct, 1)} %</dd>
               <dt className="text-content-secondary">{t('volumes.field.confidence', { defaultValue: 'Confidence' })}</dt>
               <dd><ConfidenceBadge score={selected.confidence ?? 0} showScore size="sm" /></dd>
               <dt className="text-content-secondary">{t('volumes.field.method', { defaultValue: 'Method' })}</dt>

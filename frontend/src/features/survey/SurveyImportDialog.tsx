@@ -39,6 +39,7 @@ import {
   type Guess,
   type PresetName,
 } from './importMapping';
+import { fmtFixed } from '@/shared/lib/formatters';
 
 const LABEL = 'oe-label';
 const INPUT = 'oe-input w-full';
@@ -53,7 +54,7 @@ interface Props {
 
 type Step = 1 | 2 | 3;
 
-const fmt = (v: number | null) => (v == null ? '' : v.toFixed(3));
+const fmt = (v: number | null) => (v == null ? '' : fmtFixed(v, 3));
 
 export function SurveyImportDialog({ open, projectId, projectEpsg, onClose }: Props) {
   const { t } = useTranslation();

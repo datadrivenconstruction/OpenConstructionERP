@@ -48,6 +48,7 @@ import { NewRequestDialog } from './NewRequestDialog';
 import { StakeCard, VerdictBadge } from './StakeCard';
 import { settingOutGuide } from './settingOutGuide';
 import { fmtCoord, fmtMm } from './verdict';
+import { fmtFixed } from '@/shared/lib/formatters';
 
 type View = 'table' | 'field';
 
@@ -277,7 +278,7 @@ export default function SettingOutPage() {
                         {t('survey.setting_out.alignment_found', {
                           defaultValue: 'Alignment {{name}}, {{length}} m',
                           name: req.alignment.name,
-                          length: req.alignment.length.toFixed(3),
+                          length: fmtFixed(req.alignment.length, 3),
                         })}
                       </span>
                     )}

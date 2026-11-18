@@ -45,9 +45,10 @@ import { SurveyPlan } from './SurveyPlan';
 import { TraverseDrawer, VerdictBadge, ratioText } from './TraverseDrawer';
 import { useOpenSurveyDemo } from './useOpenSurveyDemo';
 import { deleteTraverse, getRegisterPlan, listTraverses, type Traverse } from './volumesApi';
+import { fmtFixed } from '@/shared/lib/formatters';
 
 type Tab = 'points' | 'sets' | 'traverses' | 'plan';
-const coord = (v: number | null | undefined) => (v == null ? '' : v.toFixed(3));
+const coord = (v: number | null | undefined) => (v == null ? '' : fmtFixed(v, 3));
 
 export default function SurveyRegisterPage() {
   const { t, i18n } = useTranslation();

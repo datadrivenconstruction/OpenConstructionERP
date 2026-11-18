@@ -14,6 +14,7 @@ import { getErrorMessage } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
 import { importDesign, previewDesign, type DesignImportInput, type DesignPreview } from './api';
 import { fmtCoord } from './verdict';
+import { fmtFixed } from '@/shared/lib/formatters';
 
 export function DesignImportDialog({ open, requestId, onClose }: { open: boolean; requestId: string; onClose: () => void }) {
   const { t } = useTranslation();
@@ -83,7 +84,7 @@ export function DesignImportDialog({ open, requestId, onClose }: { open: boolean
                   {t('survey.setting_out.alignment_found', {
                     defaultValue: 'Alignment {{name}}, {{length}} m',
                     name: preview.alignment.name,
-                    length: preview.alignment.length.toFixed(3),
+                    length: fmtFixed(preview.alignment.length, 3),
                   })}
                 </span>
               )}

@@ -172,6 +172,9 @@ const COMPANY_THUMB_ALIASES: Record<string, string> = {
   // registers. No photo was shot for it, and the site office is where that
   // person sits, so it shares the site supervisor's.
   'site-records': 'site-supervisor',
+  // Survey and mining profiles: no photo shot yet, the civil site is the nearest scene.
+  'survey-company': 'civil-infrastructure',
+  'mining-operator': 'civil-infrastructure',
 };
 
 /** Positive modulo, so a caller passing a negative index still lands inside

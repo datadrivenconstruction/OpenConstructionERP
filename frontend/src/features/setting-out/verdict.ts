@@ -8,6 +8,7 @@
  */
 
 import type { Verdict } from './api';
+import { fmtFixed } from '@/shared/lib/formatters';
 
 export interface InstantDelta {
   d_mm: number;
@@ -39,5 +40,5 @@ export function instantDelta(
 }
 
 /** "5" for whole millimetres, "4.6" otherwise. */
-export const fmtMm = (v: number | null | undefined) => (v == null ? '' : Number.isInteger(v) ? String(v) : v.toFixed(1));
-export const fmtCoord = (v: number | null | undefined) => (v == null ? '' : v.toFixed(3));
+export const fmtMm = (v: number | null | undefined) => (v == null ? '' : Number.isInteger(v) ? String(v) : fmtFixed(v, 1));
+export const fmtCoord = (v: number | null | undefined) => (v == null ? '' : fmtFixed(v, 3));

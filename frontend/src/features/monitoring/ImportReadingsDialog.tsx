@@ -13,6 +13,7 @@ import { Button, WideModal } from '@/shared/ui';
 import { getErrorMessage } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
 import { importReadings, previewReadings, type ImportProblem } from './api';
+import { fmtList } from '@/shared/lib/formatters';
 
 const MAX_BYTES = 5 * 1024 * 1024;
 
@@ -140,7 +141,7 @@ export function ImportReadingsDialog({ open, projectId, onClose }: Props) {
             </div>
             {p.new_points.length > 0 && (
               <div className="text-sm text-content-secondary">
-                {t('survey.monitoring.import.new_points', { defaultValue: 'New points: {{list}}', list: p.new_points.join(', ') })}
+                {t('survey.monitoring.import.new_points', { defaultValue: 'New points: {{list}}', list: fmtList(p.new_points) })}
               </div>
             )}
             {p.already_imported > 0 && (

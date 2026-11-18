@@ -15,7 +15,7 @@ export const manifest: ModuleManifest = {
   category: 'tools',
   // Off until a survey focus profile or Settings > Modules turns it on.
   defaultEnabled: false,
-  depends: ['survey'],
+  depends: ['survey_core'],
   routes: [{ path: '/survey/setting-out', title: 'survey.page.setting_out', component: Page }],
   navItems: [{ labelKey: 'survey.page.setting_out', to: '/survey/setting-out', icon: Target, group: 'grp_survey' }],
 };

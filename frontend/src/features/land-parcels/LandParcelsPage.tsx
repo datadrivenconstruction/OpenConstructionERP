@@ -50,6 +50,7 @@ import { ParcelDrawer } from './ParcelDrawer';
 import { ParcelImportDialog } from './ParcelImportDialog';
 import { STATUS_VARIANT, ruleIds } from './parcelFormat';
 import { parcelsGuide } from './parcelsGuide';
+import { fmtList } from '@/shared/lib/formatters';
 
 const ParcelPlan = lazy(() => import('./ParcelPlan'));
 
@@ -236,7 +237,7 @@ export default function LandParcelsPage() {
                 <StatusDot variant={STATUS_VARIANT[p.status]} label={statusLabel(p.status)} />
                 <span className="ms-2">{statusLabel(p.status)}</span>
               </td>
-              <td>{p.rights_kinds.map((k) => t(`survey.parcels.right.${k}`, { defaultValue: k })).join(', ')}</td>
+              <td>{fmtList(p.rights_kinds.map((k) => t(`survey.parcels.right.${k}`, { defaultValue: k })))}</td>
               <td className="text-right">{p.acquisition_cost ? <MoneyDisplay amount={p.acquisition_cost} currency={p.currency} /> : '-'}</td>
               <td>
                 {ruleIds(p.findings).map((id) => (

@@ -68377,7 +68377,7 @@ const resource = {
     "survey.no_project": "Öffnen Sie ein Projekt, um seine Vermessungspunkte zu sehen.",
     "survey.page.register": "Vermessungsregister",
     "survey.page.setting_out": "Absteckung",
-    "survey.page.monitoring": "Monitoring",
+    "survey.page.monitoring": "Überwachung",
     "survey.register.how_1": "Legen Sie das Projekt-KBS einmal fest: den EPSG-Code Ihres Vermessers.",
     "survey.register.how_2": "Importieren Sie zuerst die Festpunkte, dann die Geländepunkte, jede Datei als ein Punktsatz.",
     "survey.register.how_3": "Beheben Sie die Befunde: eine doppelte Punkt-ID oder eine Datei mit unbekanntem System.",

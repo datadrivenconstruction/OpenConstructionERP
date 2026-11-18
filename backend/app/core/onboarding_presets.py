@@ -952,7 +952,6 @@ COMPANY_PRESETS: dict[str, CompanyPreset] = {
             "equipment",
             "resources",
             "safety",
-            "hse_advanced",
             "inspections",
             "risk",
             "daily_diary",
