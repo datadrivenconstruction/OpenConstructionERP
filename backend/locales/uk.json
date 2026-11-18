@@ -1816,6 +1816,54 @@
         "sheet_of": "Аркуш {page} з {total}",
         "no_activities": "У цьому графіку ще немає робіт."
       }
+    },
+    "contracts": {
+      "strings": {
+        "doc_title": "Договір",
+        "col_code": "Код",
+        "col_title": "Найменування",
+        "col_type": "Тип договору",
+        "col_role": "Сторона договору",
+        "col_counterparty": "Контрагент",
+        "col_original_value": "Початкова вартість",
+        "col_total_value": "Вартість договору",
+        "col_retention": "Гарантійне утримання",
+        "col_start": "Дата початку",
+        "col_end": "Дата завершення",
+        "col_signed": "Дата підписання",
+        "line_code": "Код",
+        "line_description": "Опис",
+        "line_unit": "Од. вим.",
+        "line_quantity": "Кількість",
+        "line_unit_rate": "Ціна за одиницю",
+        "lines": "Відомість вартості робіт",
+        "signer_company": "Від імені компанії"
+      },
+      "labels": {
+        "status": {
+          "draft": "Чернетка",
+          "active": "Діє",
+          "suspended": "Призупинено",
+          "completed": "Виконано",
+          "terminated": "Розірвано"
+        },
+        "type": {
+          "lump_sum": "Тверда ціна",
+          "gmp": "GMP",
+          "cost_plus": "Витрати плюс винагорода",
+          "tm": "Час і матеріали",
+          "unit_price": "За одиничними розцінками",
+          "design_build": "Проєктування та будівництво",
+          "combination": "Комбінований",
+          "remeasurement": "З перемірами",
+          "framework": "Рамковий договір",
+          "call_off": "Замовлення за рамковим договором"
+        },
+        "party": {
+          "client": "Договір із замовником",
+          "subcontractor": "Договір субпідряду"
+        }
+      }
     }
   },
   "pdf_footer": {

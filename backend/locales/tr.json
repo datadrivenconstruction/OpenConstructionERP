@@ -1795,6 +1795,54 @@
         "sheet_of": "Sayfa {page} / {total}",
         "no_activities": "Bu iş programında henüz faaliyet yok."
       }
+    },
+    "contracts": {
+      "strings": {
+        "doc_title": "Sözleşme",
+        "col_code": "Kod",
+        "col_title": "Başlık",
+        "col_type": "Sözleşme türü",
+        "col_role": "Sözleşme tarafı",
+        "col_counterparty": "Karşı taraf",
+        "col_original_value": "İlk bedel",
+        "col_total_value": "Sözleşme bedeli",
+        "col_retention": "Teminat kesintisi",
+        "col_start": "Başlangıç tarihi",
+        "col_end": "Bitiş tarihi",
+        "col_signed": "İmza tarihi",
+        "line_code": "Kod",
+        "line_description": "Açıklama",
+        "line_unit": "Birim",
+        "line_quantity": "Miktar",
+        "line_unit_rate": "Birim fiyat",
+        "lines": "İş kalemleri bedel cetveli",
+        "signer_company": "Şirket adına"
+      },
+      "labels": {
+        "status": {
+          "draft": "Taslak",
+          "active": "Aktif",
+          "suspended": "Askıya alındı",
+          "completed": "Tamamlandı",
+          "terminated": "Feshedildi"
+        },
+        "type": {
+          "lump_sum": "Götürü bedel",
+          "gmp": "GMP",
+          "cost_plus": "Maliyet artı kâr",
+          "tm": "Zaman ve malzeme",
+          "unit_price": "Birim fiyat",
+          "design_build": "Tasarla ve yap",
+          "combination": "Karma",
+          "remeasurement": "Yeniden ölçüm",
+          "framework": "Çerçeve sözleşme",
+          "call_off": "Çağrı siparişi"
+        },
+        "party": {
+          "client": "İşveren sözleşmesi",
+          "subcontractor": "Alt yüklenici sözleşmesi"
+        }
+      }
     }
   },
   "pdf_footer": {

@@ -1816,6 +1816,54 @@
         "sheet_of": "{total}枚中{page}枚目",
         "no_activities": "この工程表にはまだ作業がありません。"
       }
+    },
+    "contracts": {
+      "strings": {
+        "doc_title": "契約書",
+        "col_code": "コード",
+        "col_title": "件名",
+        "col_type": "契約種別",
+        "col_role": "契約区分",
+        "col_counterparty": "相手方",
+        "col_original_value": "当初金額",
+        "col_total_value": "契約金額",
+        "col_retention": "留保金",
+        "col_start": "開始日",
+        "col_end": "終了日",
+        "col_signed": "署名日",
+        "line_code": "コード",
+        "line_description": "内容",
+        "line_unit": "単位",
+        "line_quantity": "数量",
+        "line_unit_rate": "単価",
+        "lines": "内訳明細",
+        "signer_company": "当社署名欄"
+      },
+      "labels": {
+        "status": {
+          "draft": "下書き",
+          "active": "有効",
+          "suspended": "中断",
+          "completed": "完了",
+          "terminated": "解除"
+        },
+        "type": {
+          "lump_sum": "総価契約",
+          "gmp": "GMP",
+          "cost_plus": "コストプラス",
+          "tm": "タイム・アンド・マテリアル",
+          "unit_price": "単価契約",
+          "design_build": "設計施工",
+          "combination": "複合",
+          "remeasurement": "再測定",
+          "framework": "基本契約",
+          "call_off": "個別発注"
+        },
+        "party": {
+          "client": "発注者との契約",
+          "subcontractor": "下請契約"
+        }
+      }
     }
   },
   "pdf_footer": {

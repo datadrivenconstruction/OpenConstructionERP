@@ -1816,6 +1816,54 @@
         "sheet_of": "Blad {page} van {total}",
         "no_activities": "Deze planning heeft nog geen activiteiten."
       }
+    },
+    "contracts": {
+      "strings": {
+        "doc_title": "Overeenkomst",
+        "col_code": "Code",
+        "col_title": "Titel",
+        "col_type": "Contracttype",
+        "col_role": "Zijde van het contract",
+        "col_counterparty": "Wederpartij",
+        "col_original_value": "Oorspronkelijke waarde",
+        "col_total_value": "Contractwaarde",
+        "col_retention": "Inhouding",
+        "col_start": "Startdatum",
+        "col_end": "Einddatum",
+        "col_signed": "Ondertekend op",
+        "line_code": "Code",
+        "line_description": "Omschrijving",
+        "line_unit": "Eenheid",
+        "line_quantity": "Hoeveelheid",
+        "line_unit_rate": "Eenheidsprijs",
+        "lines": "Waardeverdeling",
+        "signer_company": "Namens het bedrijf"
+      },
+      "labels": {
+        "status": {
+          "draft": "Concept",
+          "active": "Actief",
+          "suspended": "Opgeschort",
+          "completed": "Afgerond",
+          "terminated": "Beëindigd"
+        },
+        "type": {
+          "lump_sum": "Vaste prijs",
+          "gmp": "GMP",
+          "cost_plus": "Kostprijs plus",
+          "tm": "Regie (tijd en materiaal)",
+          "unit_price": "Eenheidsprijzen",
+          "design_build": "Ontwerp en bouw",
+          "combination": "Combinatie",
+          "remeasurement": "Nameting",
+          "framework": "Raamovereenkomst",
+          "call_off": "Afroep"
+        },
+        "party": {
+          "client": "Opdrachtgeverscontract",
+          "subcontractor": "Onderaannemingscontract"
+        }
+      }
     }
   },
   "pdf_footer": {

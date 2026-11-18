@@ -1800,6 +1800,54 @@
         "sheet_of": "第{page}页，共{total}页",
         "no_activities": "此进度计划还没有作业。"
       }
+    },
+    "contracts": {
+      "strings": {
+        "doc_title": "合同",
+        "col_code": "编码",
+        "col_title": "名称",
+        "col_type": "合同类型",
+        "col_role": "合同方向",
+        "col_counterparty": "对方单位",
+        "col_original_value": "原合同金额",
+        "col_total_value": "合同金额",
+        "col_retention": "质保金",
+        "col_start": "开始日期",
+        "col_end": "结束日期",
+        "col_signed": "签订日期",
+        "line_code": "编码",
+        "line_description": "项目描述",
+        "line_unit": "单位",
+        "line_quantity": "数量",
+        "line_unit_rate": "单价",
+        "lines": "价值明细表",
+        "signer_company": "公司签署"
+      },
+      "labels": {
+        "status": {
+          "draft": "草稿",
+          "active": "生效中",
+          "suspended": "已暂停",
+          "completed": "已完成",
+          "terminated": "已终止"
+        },
+        "type": {
+          "lump_sum": "总价合同",
+          "gmp": "GMP",
+          "cost_plus": "成本加酬金",
+          "tm": "时间与材料",
+          "unit_price": "单价合同",
+          "design_build": "设计施工",
+          "combination": "组合合同",
+          "remeasurement": "重新计量",
+          "framework": "框架协议",
+          "call_off": "框架协议订单"
+        },
+        "party": {
+          "client": "业主合同",
+          "subcontractor": "分包合同"
+        }
+      }
     }
   },
   "pdf_footer": {

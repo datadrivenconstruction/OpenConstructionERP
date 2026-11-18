@@ -1816,6 +1816,54 @@
         "sheet_of": "Arkki {page}/{total}",
         "no_activities": "Tässä aikataulussa ei ole vielä tehtäviä."
       }
+    },
+    "contracts": {
+      "strings": {
+        "doc_title": "Sopimus",
+        "col_code": "Koodi",
+        "col_title": "Nimike",
+        "col_type": "Sopimustyyppi",
+        "col_role": "Sopimuksen osapuoli",
+        "col_counterparty": "Vastapuoli",
+        "col_original_value": "Alkuperäinen arvo",
+        "col_total_value": "Sopimuksen arvo",
+        "col_retention": "Takuupidätys",
+        "col_start": "Aloituspäivä",
+        "col_end": "Päättymispäivä",
+        "col_signed": "Allekirjoituspäivä",
+        "line_code": "Koodi",
+        "line_description": "Kuvaus",
+        "line_unit": "Yksikkö",
+        "line_quantity": "Määrä",
+        "line_unit_rate": "Yksikköhinta",
+        "lines": "Urakkasumman erittely",
+        "signer_company": "Yhtiön puolesta"
+      },
+      "labels": {
+        "status": {
+          "draft": "Luonnos",
+          "active": "Voimassa",
+          "suspended": "Keskeytetty",
+          "completed": "Valmis",
+          "terminated": "Purettu"
+        },
+        "type": {
+          "lump_sum": "Kokonaishintaurakka",
+          "gmp": "GMP",
+          "cost_plus": "Kustannukset plus",
+          "tm": "Työ- ja materiaalikustannusperusteinen",
+          "unit_price": "Yksikköhintaurakka",
+          "design_build": "Suunnittele ja rakenna",
+          "combination": "Yhdistelmä",
+          "remeasurement": "Jälkimittaus",
+          "framework": "Puitesopimus",
+          "call_off": "Puitesopimuksen tilaus"
+        },
+        "party": {
+          "client": "Tilaajan sopimus",
+          "subcontractor": "Alihankintasopimus"
+        }
+      }
     }
   },
   "pdf_footer": {

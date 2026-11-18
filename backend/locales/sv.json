@@ -1816,6 +1816,54 @@
         "sheet_of": "Blad {page} av {total}",
         "no_activities": "Den här tidplanen har inga aktiviteter än."
       }
+    },
+    "contracts": {
+      "strings": {
+        "doc_title": "Avtal",
+        "col_code": "Kod",
+        "col_title": "Benämning",
+        "col_type": "Avtalstyp",
+        "col_role": "Avtalspart",
+        "col_counterparty": "Motpart",
+        "col_original_value": "Ursprungligt värde",
+        "col_total_value": "Avtalsvärde",
+        "col_retention": "Innehållning",
+        "col_start": "Startdatum",
+        "col_end": "Slutdatum",
+        "col_signed": "Undertecknat",
+        "line_code": "Kod",
+        "line_description": "Beskrivning",
+        "line_unit": "Enhet",
+        "line_quantity": "Mängd",
+        "line_unit_rate": "Enhetspris",
+        "lines": "Värdeförteckning",
+        "signer_company": "För företaget"
+      },
+      "labels": {
+        "status": {
+          "draft": "Utkast",
+          "active": "Aktivt",
+          "suspended": "Vilande",
+          "completed": "Slutfört",
+          "terminated": "Uppsagt"
+        },
+        "type": {
+          "lump_sum": "Fast pris",
+          "gmp": "GMP",
+          "cost_plus": "Kostnad plus",
+          "tm": "Löpande räkning",
+          "unit_price": "À-pris",
+          "design_build": "Totalentreprenad",
+          "combination": "Kombination",
+          "remeasurement": "Ommätning",
+          "framework": "Ramavtal",
+          "call_off": "Avrop"
+        },
+        "party": {
+          "client": "Beställarkontrakt",
+          "subcontractor": "Underentreprenadavtal"
+        }
+      }
     }
   },
   "pdf_footer": {

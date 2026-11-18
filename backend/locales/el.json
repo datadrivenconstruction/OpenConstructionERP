@@ -1816,6 +1816,54 @@
         "sheet_of": "Φύλλο {page} από {total}",
         "no_activities": "Αυτό το χρονοδιάγραμμα δεν έχει ακόμη δραστηριότητες."
       }
+    },
+    "contracts": {
+      "strings": {
+        "doc_title": "Σύμβαση",
+        "col_code": "Κωδικός",
+        "col_title": "Τίτλος",
+        "col_type": "Τύπος σύμβασης",
+        "col_role": "Πλευρά σύμβασης",
+        "col_counterparty": "Αντισυμβαλλόμενος",
+        "col_original_value": "Αρχική αξία",
+        "col_total_value": "Αξία σύμβασης",
+        "col_retention": "Παρακράτηση",
+        "col_start": "Ημερομηνία έναρξης",
+        "col_end": "Ημερομηνία λήξης",
+        "col_signed": "Υπογράφηκε στις",
+        "line_code": "Κωδικός",
+        "line_description": "Περιγραφή",
+        "line_unit": "Μονάδα",
+        "line_quantity": "Ποσότητα",
+        "line_unit_rate": "Τιμή μονάδας",
+        "lines": "Πίνακας αξιών",
+        "signer_company": "Για την εταιρεία"
+      },
+      "labels": {
+        "status": {
+          "draft": "Πρόχειρο",
+          "active": "Ενεργή",
+          "suspended": "Σε αναστολή",
+          "completed": "Ολοκληρωμένη",
+          "terminated": "Καταγγελθείσα"
+        },
+        "type": {
+          "lump_sum": "Κατ’ αποκοπή",
+          "gmp": "GMP",
+          "cost_plus": "Κόστος πλέον",
+          "tm": "Χρόνος και υλικά",
+          "unit_price": "Τιμή μονάδας",
+          "design_build": "Μελέτη και κατασκευή",
+          "combination": "Συνδυασμός",
+          "remeasurement": "Επαναμέτρηση",
+          "framework": "Συμφωνία πλαίσιο",
+          "call_off": "Εκτελεστική παραγγελία"
+        },
+        "party": {
+          "client": "Σύμβαση με τον κύριο του έργου",
+          "subcontractor": "Υπεργολαβία"
+        }
+      }
     }
   },
   "pdf_footer": {

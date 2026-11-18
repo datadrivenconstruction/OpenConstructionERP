@@ -1816,6 +1816,54 @@
         "sheet_of": "List {page} od {total}",
         "no_activities": "Ovaj plan još nema aktivnosti."
       }
+    },
+    "contracts": {
+      "strings": {
+        "doc_title": "Ugovor",
+        "col_code": "Šifra",
+        "col_title": "Naziv",
+        "col_type": "Vrsta ugovora",
+        "col_role": "Strana ugovora",
+        "col_counterparty": "Druga ugovorna strana",
+        "col_original_value": "Izvorna vrijednost",
+        "col_total_value": "Vrijednost ugovora",
+        "col_retention": "Zadržano jamstvo",
+        "col_start": "Datum početka",
+        "col_end": "Datum završetka",
+        "col_signed": "Datum potpisa",
+        "line_code": "Šifra",
+        "line_description": "Opis",
+        "line_unit": "Jedinica",
+        "line_quantity": "Količina",
+        "line_unit_rate": "Jedinična cijena",
+        "lines": "Raspored vrijednosti",
+        "signer_company": "Za tvrtku"
+      },
+      "labels": {
+        "status": {
+          "draft": "Nacrt",
+          "active": "Aktivan",
+          "suspended": "Obustavljen",
+          "completed": "Završen",
+          "terminated": "Raskinut"
+        },
+        "type": {
+          "lump_sum": "Paušalni iznos",
+          "gmp": "GMP",
+          "cost_plus": "Troškovi plus",
+          "tm": "Vrijeme i materijal",
+          "unit_price": "Jedinične cijene",
+          "design_build": "Projektiraj i izgradi",
+          "combination": "Kombinirani",
+          "remeasurement": "Obračun po izmjeri",
+          "framework": "Okvirni ugovor",
+          "call_off": "Narudžba iz okvirnog ugovora"
+        },
+        "party": {
+          "client": "Ugovor s naručiteljem",
+          "subcontractor": "Podugovor"
+        }
+      }
     }
   },
   "pdf_footer": {

@@ -1816,6 +1816,54 @@
         "sheet_of": "{total}장 중 {page}장",
         "no_activities": "이 공정표에는 아직 작업이 없습니다."
       }
+    },
+    "contracts": {
+      "strings": {
+        "doc_title": "계약서",
+        "col_code": "코드",
+        "col_title": "제목",
+        "col_type": "계약 유형",
+        "col_role": "계약 구분",
+        "col_counterparty": "상대방",
+        "col_original_value": "최초 금액",
+        "col_total_value": "계약 금액",
+        "col_retention": "유보금",
+        "col_start": "시작일",
+        "col_end": "종료일",
+        "col_signed": "서명일",
+        "line_code": "코드",
+        "line_description": "내용",
+        "line_unit": "단위",
+        "line_quantity": "수량",
+        "line_unit_rate": "단가",
+        "lines": "금액 내역서",
+        "signer_company": "당사 서명"
+      },
+      "labels": {
+        "status": {
+          "draft": "초안",
+          "active": "진행 중",
+          "suspended": "일시 중지",
+          "completed": "완료",
+          "terminated": "해지"
+        },
+        "type": {
+          "lump_sum": "총액 계약",
+          "gmp": "GMP",
+          "cost_plus": "실비정산 보수가산",
+          "tm": "시간 및 자재",
+          "unit_price": "단가 계약",
+          "design_build": "설계시공 일괄",
+          "combination": "복합",
+          "remeasurement": "재측정",
+          "framework": "기본 계약",
+          "call_off": "개별 발주"
+        },
+        "party": {
+          "client": "발주자 계약",
+          "subcontractor": "하도급 계약"
+        }
+      }
     }
   },
   "pdf_footer": {

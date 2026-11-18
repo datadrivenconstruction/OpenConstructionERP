@@ -1816,6 +1816,54 @@
         "sheet_of": "Foaia {page} din {total}",
         "no_activities": "Acest grafic nu are încă activități."
       }
+    },
+    "contracts": {
+      "strings": {
+        "doc_title": "Contract",
+        "col_code": "Cod",
+        "col_title": "Titlu",
+        "col_type": "Tip contract",
+        "col_role": "Partea contractului",
+        "col_counterparty": "Contraparte",
+        "col_original_value": "Valoare inițială",
+        "col_total_value": "Valoarea contractului",
+        "col_retention": "Reținere",
+        "col_start": "Data începerii",
+        "col_end": "Data finalizării",
+        "col_signed": "Semnat la data de",
+        "line_code": "Cod",
+        "line_description": "Descriere",
+        "line_unit": "UM",
+        "line_quantity": "Cantitate",
+        "line_unit_rate": "Preț unitar",
+        "lines": "Situația valorilor",
+        "signer_company": "Pentru societate"
+      },
+      "labels": {
+        "status": {
+          "draft": "Ciornă",
+          "active": "Activ",
+          "suspended": "Suspendat",
+          "completed": "Finalizat",
+          "terminated": "Reziliat"
+        },
+        "type": {
+          "lump_sum": "Sumă forfetară",
+          "gmp": "GMP",
+          "cost_plus": "Cost plus",
+          "tm": "Timp și materiale",
+          "unit_price": "Preț unitar",
+          "design_build": "Proiectare și execuție",
+          "combination": "Combinat",
+          "remeasurement": "Remăsurare",
+          "framework": "Acord-cadru",
+          "call_off": "Comandă subsecventă"
+        },
+        "party": {
+          "client": "Contract cu beneficiarul",
+          "subcontractor": "Subcontract"
+        }
+      }
     }
   },
   "pdf_footer": {

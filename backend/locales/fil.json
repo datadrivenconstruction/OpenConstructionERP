@@ -1816,6 +1816,54 @@
         "sheet_of": "Pahina {page} ng {total}",
         "no_activities": "Wala pang gawain ang iskedyul na ito."
       }
+    },
+    "contracts": {
+      "strings": {
+        "doc_title": "Kontrata",
+        "col_code": "Code",
+        "col_title": "Pamagat",
+        "col_type": "Uri ng kontrata",
+        "col_role": "Panig ng kontrata",
+        "col_counterparty": "Katapat na partido",
+        "col_original_value": "Orihinal na halaga",
+        "col_total_value": "Halaga ng kontrata",
+        "col_retention": "Retention",
+        "col_start": "Petsa ng simula",
+        "col_end": "Petsa ng pagtatapos",
+        "col_signed": "Petsa ng lagda",
+        "line_code": "Code",
+        "line_description": "Paglalarawan",
+        "line_unit": "Yunit",
+        "line_quantity": "Dami",
+        "line_unit_rate": "Halaga kada yunit",
+        "lines": "Schedule of values",
+        "signer_company": "Para sa kompanya"
+      },
+      "labels": {
+        "status": {
+          "draft": "Draft",
+          "active": "Aktibo",
+          "suspended": "Nakasuspinde",
+          "completed": "Tapos na",
+          "terminated": "Winakasan"
+        },
+        "type": {
+          "lump_sum": "Lump sum",
+          "gmp": "GMP",
+          "cost_plus": "Cost plus",
+          "tm": "Time and materials",
+          "unit_price": "Unit price",
+          "design_build": "Design and build",
+          "combination": "Kombinasyon",
+          "remeasurement": "Remeasurement",
+          "framework": "Framework",
+          "call_off": "Call-off"
+        },
+        "party": {
+          "client": "Kontrata sa kliyente",
+          "subcontractor": "Subkontrata"
+        }
+      }
     }
   },
   "pdf_footer": {

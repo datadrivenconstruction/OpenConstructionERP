@@ -1655,6 +1655,54 @@
         "sheet_of": "Лист {page} из {total}",
         "no_activities": "В этом графике пока нет работ."
       }
+    },
+    "contracts": {
+      "strings": {
+        "doc_title": "Договор",
+        "col_code": "Код",
+        "col_title": "Наименование",
+        "col_type": "Тип договора",
+        "col_role": "Роль в договоре",
+        "col_counterparty": "Контрагент",
+        "col_original_value": "Первоначальная стоимость",
+        "col_total_value": "Стоимость договора",
+        "col_retention": "Гарантийное удержание",
+        "col_start": "Дата начала",
+        "col_end": "Дата окончания",
+        "col_signed": "Дата подписания",
+        "line_code": "Код",
+        "line_description": "Описание",
+        "line_unit": "Ед. изм.",
+        "line_quantity": "Количество",
+        "line_unit_rate": "Цена за единицу",
+        "lines": "Ведомость стоимости работ",
+        "signer_company": "От имени компании"
+      },
+      "labels": {
+        "status": {
+          "draft": "Черновик",
+          "active": "Действует",
+          "suspended": "Приостановлен",
+          "completed": "Выполнен",
+          "terminated": "Расторгнут"
+        },
+        "type": {
+          "lump_sum": "Твёрдая цена",
+          "gmp": "GMP",
+          "cost_plus": "Затраты плюс вознаграждение",
+          "tm": "Время и материалы",
+          "unit_price": "По единичным расценкам",
+          "design_build": "Проектирование и строительство",
+          "combination": "Комбинированный",
+          "remeasurement": "С перемерами",
+          "framework": "Рамочный договор",
+          "call_off": "Заказ по рамочному договору"
+        },
+        "party": {
+          "client": "Договор с заказчиком",
+          "subcontractor": "Договор субподряда"
+        }
+      }
     }
   },
   "cost_control": {

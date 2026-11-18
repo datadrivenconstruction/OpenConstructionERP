@@ -1816,6 +1816,54 @@
         "sheet_of": "Лист {page} от {total}",
         "no_activities": "Този график все още няма дейности."
       }
+    },
+    "contracts": {
+      "strings": {
+        "doc_title": "Договор",
+        "col_code": "Код",
+        "col_title": "Наименование",
+        "col_type": "Вид договор",
+        "col_role": "Страна по договора",
+        "col_counterparty": "Контрагент",
+        "col_original_value": "Първоначална стойност",
+        "col_total_value": "Стойност на договора",
+        "col_retention": "Удръжка",
+        "col_start": "Начална дата",
+        "col_end": "Крайна дата",
+        "col_signed": "Подписан на",
+        "line_code": "Код",
+        "line_description": "Описание",
+        "line_unit": "Мярка",
+        "line_quantity": "Количество",
+        "line_unit_rate": "Единична цена",
+        "lines": "Количествено-стойностна сметка",
+        "signer_company": "За дружеството"
+      },
+      "labels": {
+        "status": {
+          "draft": "Чернова",
+          "active": "Действащ",
+          "suspended": "Спрян",
+          "completed": "Приключен",
+          "terminated": "Прекратен"
+        },
+        "type": {
+          "lump_sum": "Фиксирана цена",
+          "gmp": "GMP",
+          "cost_plus": "Разходи плюс",
+          "tm": "Време и материали",
+          "unit_price": "Единични цени",
+          "design_build": "Проектиране и изпълнение",
+          "combination": "Комбиниран",
+          "remeasurement": "Преизмерване",
+          "framework": "Рамков договор",
+          "call_off": "Заявка по рамков договор"
+        },
+        "party": {
+          "client": "Договор с възложител",
+          "subcontractor": "Договор с подизпълнител"
+        }
+      }
     }
   },
   "pdf_footer": {

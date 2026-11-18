@@ -1816,6 +1816,54 @@
         "sheet_of": "Folha {page} de {total}",
         "no_activities": "Este cronograma ainda não tem atividades."
       }
+    },
+    "contracts": {
+      "strings": {
+        "doc_title": "Contrato",
+        "col_code": "Código",
+        "col_title": "Título",
+        "col_type": "Tipo de contrato",
+        "col_role": "Parte do contrato",
+        "col_counterparty": "Contraparte",
+        "col_original_value": "Valor original",
+        "col_total_value": "Valor do contrato",
+        "col_retention": "Retenção",
+        "col_start": "Data de início",
+        "col_end": "Data de término",
+        "col_signed": "Assinado em",
+        "line_code": "Código",
+        "line_description": "Descrição",
+        "line_unit": "Unidade",
+        "line_quantity": "Quantidade",
+        "line_unit_rate": "Preço unitário",
+        "lines": "Planilha de valores",
+        "signer_company": "Pela empresa"
+      },
+      "labels": {
+        "status": {
+          "draft": "Rascunho",
+          "active": "Ativo",
+          "suspended": "Suspenso",
+          "completed": "Concluído",
+          "terminated": "Rescindido"
+        },
+        "type": {
+          "lump_sum": "Preço global",
+          "gmp": "GMP",
+          "cost_plus": "Custo mais taxa",
+          "tm": "Tempo e materiais",
+          "unit_price": "Preço unitário",
+          "design_build": "Projeto e construção",
+          "combination": "Combinado",
+          "remeasurement": "Remedição",
+          "framework": "Contrato-quadro",
+          "call_off": "Pedido sob demanda"
+        },
+        "party": {
+          "client": "Contrato com o cliente",
+          "subcontractor": "Subcontrato"
+        }
+      }
     }
   },
   "pdf_footer": {

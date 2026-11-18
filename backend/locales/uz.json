@@ -1832,6 +1832,54 @@
         "sheet_of": "{page}/{total}-varaq",
         "no_activities": "Bu jadvalda hali ishlar yo'q."
       }
+    },
+    "contracts": {
+      "strings": {
+        "doc_title": "Shartnoma",
+        "col_code": "Kod",
+        "col_title": "Nomi",
+        "col_type": "Shartnoma turi",
+        "col_role": "Shartnoma tomoni",
+        "col_counterparty": "Kontragent",
+        "col_original_value": "Dastlabki qiymat",
+        "col_total_value": "Shartnoma qiymati",
+        "col_retention": "Ushlab qolingan summa",
+        "col_start": "Boshlanish sanasi",
+        "col_end": "Tugash sanasi",
+        "col_signed": "Imzolangan sana",
+        "line_code": "Kod",
+        "line_description": "Tavsif",
+        "line_unit": "Oʻlchov birligi",
+        "line_quantity": "Miqdor",
+        "line_unit_rate": "Birlik narxi",
+        "lines": "Ishlar qiymati roʻyxati",
+        "signer_company": "Kompaniya nomidan"
+      },
+      "labels": {
+        "status": {
+          "draft": "Qoralama",
+          "active": "Amalda",
+          "suspended": "Toʻxtatilgan",
+          "completed": "Bajarilgan",
+          "terminated": "Bekor qilingan"
+        },
+        "type": {
+          "lump_sum": "Qatʼiy summa",
+          "gmp": "GMP",
+          "cost_plus": "Xarajatlar plyus",
+          "tm": "Vaqt va materiallar",
+          "unit_price": "Birlik narxlari boʻyicha",
+          "design_build": "Loyihalash va qurish",
+          "combination": "Aralash",
+          "remeasurement": "Qayta oʻlchash",
+          "framework": "Ramka shartnoma",
+          "call_off": "Ramka shartnoma boʻyicha buyurtma"
+        },
+        "party": {
+          "client": "Buyurtmachi shartnomasi",
+          "subcontractor": "Subpudrat shartnomasi"
+        }
+      }
     }
   },
   "pdf_footer": {

@@ -1832,6 +1832,54 @@
         "sheet_of": "{total} парақтың {page}-сі",
         "no_activities": "Бұл кестеде әзірге жұмыстар жоқ."
       }
+    },
+    "contracts": {
+      "strings": {
+        "doc_title": "Шарт",
+        "col_code": "Код",
+        "col_title": "Атауы",
+        "col_type": "Шарт түрі",
+        "col_role": "Шарт тарабы",
+        "col_counterparty": "Контрагент",
+        "col_original_value": "Бастапқы құны",
+        "col_total_value": "Шарттың құны",
+        "col_retention": "Ұсталатын сома",
+        "col_start": "Басталу күні",
+        "col_end": "Аяқталу күні",
+        "col_signed": "Қол қойылған күні",
+        "line_code": "Код",
+        "line_description": "Сипаттама",
+        "line_unit": "Өлшем бірлігі",
+        "line_quantity": "Саны",
+        "line_unit_rate": "Бірлік бағасы",
+        "lines": "Жұмыстар құнының бөлінісі",
+        "signer_company": "Компания атынан"
+      },
+      "labels": {
+        "status": {
+          "draft": "Жоба",
+          "active": "Жарамды",
+          "suspended": "Тоқтатылған",
+          "completed": "Орындалған",
+          "terminated": "Бұзылған"
+        },
+        "type": {
+          "lump_sum": "Тұтас сома",
+          "gmp": "GMP",
+          "cost_plus": "Шығындар плюс",
+          "tm": "Уақыт және материалдар",
+          "unit_price": "Бірлік бағасы бойынша",
+          "design_build": "Жобалау және салу",
+          "combination": "Аралас",
+          "remeasurement": "Қайта өлшеу",
+          "framework": "Негіздемелік шарт",
+          "call_off": "Негіздемелік шарт бойынша тапсырыс"
+        },
+        "party": {
+          "client": "Тапсырыс беруші шарты",
+          "subcontractor": "Қосалқы мердігерлік шарты"
+        }
+      }
     }
   },
   "pdf_footer": {

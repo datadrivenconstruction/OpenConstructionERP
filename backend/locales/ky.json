@@ -1832,6 +1832,54 @@
         "sheet_of": "{total} барактын {page}-барагы",
         "no_activities": "Бул графикте азырынча иштер жок."
       }
+    },
+    "contracts": {
+      "strings": {
+        "doc_title": "Келишим",
+        "col_code": "Код",
+        "col_title": "Аталышы",
+        "col_type": "Келишим түрү",
+        "col_role": "Келишим тарабы",
+        "col_counterparty": "Контрагент",
+        "col_original_value": "Баштапкы наркы",
+        "col_total_value": "Келишимдин наркы",
+        "col_retention": "Кармалып калуучу сумма",
+        "col_start": "Башталган күнү",
+        "col_end": "Аяктаган күнү",
+        "col_signed": "Кол коюлган күнү",
+        "line_code": "Код",
+        "line_description": "Сүрөттөмө",
+        "line_unit": "Өлчөө бирдиги",
+        "line_quantity": "Саны",
+        "line_unit_rate": "Бирдик баасы",
+        "lines": "Иштердин наркынын бөлүштүрүлүшү",
+        "signer_company": "Компаниянын атынан"
+      },
+      "labels": {
+        "status": {
+          "draft": "Долбоор",
+          "active": "Күчүндө",
+          "suspended": "Токтотулган",
+          "completed": "Аткарылган",
+          "terminated": "Бузулган"
+        },
+        "type": {
+          "lump_sum": "Топтолгон сумма",
+          "gmp": "GMP",
+          "cost_plus": "Чыгымдар плюс",
+          "tm": "Убакыт жана материалдар",
+          "unit_price": "Бирдик баасы боюнча",
+          "design_build": "Долбоорлоо жана куруу",
+          "combination": "Айкалыштырылган",
+          "remeasurement": "Кайра ченөө",
+          "framework": "Алкактык келишим",
+          "call_off": "Алкактык келишим боюнча заказ"
+        },
+        "party": {
+          "client": "Буйрутмачынын келишими",
+          "subcontractor": "Субподряддык келишим"
+        }
+      }
     }
   },
   "pdf_footer": {

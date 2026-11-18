@@ -1816,6 +1816,54 @@
         "sheet_of": "List {page} z {total}",
         "no_activities": "Tento harmonogram zatím nemá žádné činnosti."
       }
+    },
+    "contracts": {
+      "strings": {
+        "doc_title": "Smlouva",
+        "col_code": "Kód",
+        "col_title": "Název",
+        "col_type": "Typ smlouvy",
+        "col_role": "Strana smlouvy",
+        "col_counterparty": "Protistrana",
+        "col_original_value": "Původní hodnota",
+        "col_total_value": "Hodnota smlouvy",
+        "col_retention": "Pozastávka",
+        "col_start": "Datum zahájení",
+        "col_end": "Datum ukončení",
+        "col_signed": "Datum podpisu",
+        "line_code": "Kód",
+        "line_description": "Popis",
+        "line_unit": "Jednotka",
+        "line_quantity": "Množství",
+        "line_unit_rate": "Jednotková cena",
+        "lines": "Soupis hodnot prací",
+        "signer_company": "Za společnost"
+      },
+      "labels": {
+        "status": {
+          "draft": "Koncept",
+          "active": "Platná",
+          "suspended": "Pozastavená",
+          "completed": "Dokončená",
+          "terminated": "Ukončená"
+        },
+        "type": {
+          "lump_sum": "Pevná cena",
+          "gmp": "GMP",
+          "cost_plus": "Náklady plus",
+          "tm": "Čas a materiál",
+          "unit_price": "Jednotkové ceny",
+          "design_build": "Návrh a výstavba",
+          "combination": "Kombinovaná",
+          "remeasurement": "Přeměřování",
+          "framework": "Rámcová smlouva",
+          "call_off": "Dílčí objednávka"
+        },
+        "party": {
+          "client": "Smlouva s objednatelem",
+          "subcontractor": "Subdodavatelská smlouva"
+        }
+      }
     }
   },
   "pdf_footer": {

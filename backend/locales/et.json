@@ -1816,6 +1816,54 @@
         "sheet_of": "Leht {page}/{total}",
         "no_activities": "Selles ajakavas pole veel tegevusi."
       }
+    },
+    "contracts": {
+      "strings": {
+        "doc_title": "Leping",
+        "col_code": "Kood",
+        "col_title": "Nimetus",
+        "col_type": "Lepingu liik",
+        "col_role": "Lepingu pool",
+        "col_counterparty": "Vastaspool",
+        "col_original_value": "Algne maksumus",
+        "col_total_value": "Lepingu maksumus",
+        "col_retention": "Garantiipidatis",
+        "col_start": "Alguskuupäev",
+        "col_end": "Lõppkuupäev",
+        "col_signed": "Allkirjastamise kuupäev",
+        "line_code": "Kood",
+        "line_description": "Kirjeldus",
+        "line_unit": "Ühik",
+        "line_quantity": "Kogus",
+        "line_unit_rate": "Ühikuhind",
+        "lines": "Tööde maksumuse jaotus",
+        "signer_company": "Ettevõtte nimel"
+      },
+      "labels": {
+        "status": {
+          "draft": "Mustand",
+          "active": "Kehtiv",
+          "suspended": "Peatatud",
+          "completed": "Täidetud",
+          "terminated": "Üles öeldud"
+        },
+        "type": {
+          "lump_sum": "Kindlasummaline",
+          "gmp": "GMP",
+          "cost_plus": "Kulu pluss",
+          "tm": "Aja- ja materjalikulupõhine",
+          "unit_price": "Ühikuhinnaline",
+          "design_build": "Projekteeri ja ehita",
+          "combination": "Kombineeritud",
+          "remeasurement": "Järelmõõdistamine",
+          "framework": "Raamleping",
+          "call_off": "Hange raamlepingu alusel"
+        },
+        "party": {
+          "client": "Tellijaleping",
+          "subcontractor": "Alltöövõtuleping"
+        }
+      }
     }
   },
   "pdf_footer": {

@@ -1816,6 +1816,54 @@
         "sheet_of": "{page}. lap / {total}",
         "no_activities": "Ennek az ütemtervnek még nincsenek tevékenységei."
       }
+    },
+    "contracts": {
+      "strings": {
+        "doc_title": "Szerződés",
+        "col_code": "Kód",
+        "col_title": "Megnevezés",
+        "col_type": "Szerződés típusa",
+        "col_role": "Szerződő fél szerepe",
+        "col_counterparty": "Szerződő partner",
+        "col_original_value": "Eredeti érték",
+        "col_total_value": "Szerződéses érték",
+        "col_retention": "Visszatartás",
+        "col_start": "Kezdés dátuma",
+        "col_end": "Befejezés dátuma",
+        "col_signed": "Aláírás dátuma",
+        "line_code": "Kód",
+        "line_description": "Leírás",
+        "line_unit": "Mértékegység",
+        "line_quantity": "Mennyiség",
+        "line_unit_rate": "Egységár",
+        "lines": "Tételes értékjegyzék",
+        "signer_company": "A cég részéről"
+      },
+      "labels": {
+        "status": {
+          "draft": "Tervezet",
+          "active": "Hatályos",
+          "suspended": "Felfüggesztett",
+          "completed": "Teljesített",
+          "terminated": "Felmondott"
+        },
+        "type": {
+          "lump_sum": "Átalányáras",
+          "gmp": "GMP",
+          "cost_plus": "Költség plusz",
+          "tm": "Idő- és anyagalapú",
+          "unit_price": "Egységáras",
+          "design_build": "Tervezés és kivitelezés",
+          "combination": "Kombinált",
+          "remeasurement": "Újramérés",
+          "framework": "Keretszerződés",
+          "call_off": "Lehívás"
+        },
+        "party": {
+          "client": "Megrendelői szerződés",
+          "subcontractor": "Alvállalkozói szerződés"
+        }
+      }
     }
   },
   "pdf_footer": {

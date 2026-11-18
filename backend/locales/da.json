@@ -1816,6 +1816,54 @@
         "sheet_of": "Ark {page} af {total}",
         "no_activities": "Denne tidsplan har endnu ingen aktiviteter."
       }
+    },
+    "contracts": {
+      "strings": {
+        "doc_title": "Kontrakt",
+        "col_code": "Kode",
+        "col_title": "Titel",
+        "col_type": "Kontrakttype",
+        "col_role": "Kontraktside",
+        "col_counterparty": "Modpart",
+        "col_original_value": "Oprindelig værdi",
+        "col_total_value": "Kontraktværdi",
+        "col_retention": "Tilbageholdelse",
+        "col_start": "Startdato",
+        "col_end": "Slutdato",
+        "col_signed": "Underskrevet den",
+        "line_code": "Kode",
+        "line_description": "Beskrivelse",
+        "line_unit": "Enhed",
+        "line_quantity": "Mængde",
+        "line_unit_rate": "Enhedspris",
+        "lines": "Værdiopgørelse",
+        "signer_company": "For virksomheden"
+      },
+      "labels": {
+        "status": {
+          "draft": "Kladde",
+          "active": "Aktiv",
+          "suspended": "Suspenderet",
+          "completed": "Afsluttet",
+          "terminated": "Opsagt"
+        },
+        "type": {
+          "lump_sum": "Fast pris",
+          "gmp": "GMP",
+          "cost_plus": "Omkostninger plus",
+          "tm": "Tid og materialer",
+          "unit_price": "Enhedspriser",
+          "design_build": "Totalentreprise",
+          "combination": "Kombination",
+          "remeasurement": "Afregning efter opmåling",
+          "framework": "Rammeaftale",
+          "call_off": "Afrop"
+        },
+        "party": {
+          "client": "Bygherrekontrakt",
+          "subcontractor": "Underentreprisekontrakt"
+        }
+      }
     }
   },
   "pdf_footer": {

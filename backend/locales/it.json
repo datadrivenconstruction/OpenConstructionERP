@@ -1816,6 +1816,54 @@
         "sheet_of": "Foglio {page} di {total}",
         "no_activities": "Questo cronoprogramma non ha ancora attività."
       }
+    },
+    "contracts": {
+      "strings": {
+        "doc_title": "Contratto",
+        "col_code": "Codice",
+        "col_title": "Titolo",
+        "col_type": "Tipo di contratto",
+        "col_role": "Parte del contratto",
+        "col_counterparty": "Controparte",
+        "col_original_value": "Valore originario",
+        "col_total_value": "Valore contrattuale",
+        "col_retention": "Ritenuta a garanzia",
+        "col_start": "Data di inizio",
+        "col_end": "Data di fine",
+        "col_signed": "Data di firma",
+        "line_code": "Codice",
+        "line_description": "Descrizione",
+        "line_unit": "Unità",
+        "line_quantity": "Quantità",
+        "line_unit_rate": "Prezzo unitario",
+        "lines": "Quadro dei valori",
+        "signer_company": "Per la società"
+      },
+      "labels": {
+        "status": {
+          "draft": "Bozza",
+          "active": "Attivo",
+          "suspended": "Sospeso",
+          "completed": "Completato",
+          "terminated": "Risolto"
+        },
+        "type": {
+          "lump_sum": "A corpo",
+          "gmp": "GMP",
+          "cost_plus": "Costo più compenso",
+          "tm": "In economia",
+          "unit_price": "A misura",
+          "design_build": "Progettazione e costruzione",
+          "combination": "Misto",
+          "remeasurement": "Rimisurazione",
+          "framework": "Accordo quadro",
+          "call_off": "Ordine attuativo"
+        },
+        "party": {
+          "client": "Contratto con il committente",
+          "subcontractor": "Subappalto"
+        }
+      }
     }
   },
   "pdf_footer": {

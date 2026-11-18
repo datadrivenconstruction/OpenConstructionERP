@@ -1816,6 +1816,54 @@
         "sheet_of": "Hoja {page} de {total}",
         "no_activities": "Este cronograma aún no tiene actividades."
       }
+    },
+    "contracts": {
+      "strings": {
+        "doc_title": "Contrato",
+        "col_code": "Código",
+        "col_title": "Título",
+        "col_type": "Tipo de contrato",
+        "col_role": "Parte del contrato",
+        "col_counterparty": "Contraparte",
+        "col_original_value": "Valor original",
+        "col_total_value": "Valor del contrato",
+        "col_retention": "Retención",
+        "col_start": "Fecha de inicio",
+        "col_end": "Fecha de finalización",
+        "col_signed": "Fecha de firma",
+        "line_code": "Código",
+        "line_description": "Descripción",
+        "line_unit": "Unidad",
+        "line_quantity": "Cantidad",
+        "line_unit_rate": "Precio unitario",
+        "lines": "Relación valorada",
+        "signer_company": "Por la empresa"
+      },
+      "labels": {
+        "status": {
+          "draft": "Borrador",
+          "active": "Vigente",
+          "suspended": "Suspendido",
+          "completed": "Finalizado",
+          "terminated": "Rescindido"
+        },
+        "type": {
+          "lump_sum": "Precio alzado",
+          "gmp": "GMP",
+          "cost_plus": "Costo más honorarios",
+          "tm": "Tiempo y materiales",
+          "unit_price": "Precios unitarios",
+          "design_build": "Diseño y construcción",
+          "combination": "Mixto",
+          "remeasurement": "Remedición",
+          "framework": "Contrato marco",
+          "call_off": "Pedido derivado"
+        },
+        "party": {
+          "client": "Contrato con el cliente",
+          "subcontractor": "Subcontrato"
+        }
+      }
     }
   },
   "pdf_footer": {

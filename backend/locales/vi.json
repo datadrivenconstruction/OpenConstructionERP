@@ -1816,6 +1816,54 @@
         "sheet_of": "Tờ {page}/{total}",
         "no_activities": "Tiến độ này chưa có công việc nào."
       }
+    },
+    "contracts": {
+      "strings": {
+        "doc_title": "Hợp đồng",
+        "col_code": "Mã",
+        "col_title": "Tiêu đề",
+        "col_type": "Loại hợp đồng",
+        "col_role": "Bên hợp đồng",
+        "col_counterparty": "Đối tác",
+        "col_original_value": "Giá trị ban đầu",
+        "col_total_value": "Giá trị hợp đồng",
+        "col_retention": "Tiền giữ lại",
+        "col_start": "Ngày bắt đầu",
+        "col_end": "Ngày kết thúc",
+        "col_signed": "Ngày ký",
+        "line_code": "Mã",
+        "line_description": "Mô tả",
+        "line_unit": "Đơn vị",
+        "line_quantity": "Khối lượng",
+        "line_unit_rate": "Đơn giá",
+        "lines": "Bảng giá trị công việc",
+        "signer_company": "Đại diện công ty"
+      },
+      "labels": {
+        "status": {
+          "draft": "Bản nháp",
+          "active": "Đang hiệu lực",
+          "suspended": "Tạm dừng",
+          "completed": "Hoàn thành",
+          "terminated": "Chấm dứt"
+        },
+        "type": {
+          "lump_sum": "Trọn gói",
+          "gmp": "GMP",
+          "cost_plus": "Chi phí cộng phí",
+          "tm": "Theo thời gian và vật liệu",
+          "unit_price": "Đơn giá",
+          "design_build": "Thiết kế và thi công",
+          "combination": "Kết hợp",
+          "remeasurement": "Đo lại khối lượng",
+          "framework": "Hợp đồng khung",
+          "call_off": "Đơn đặt hàng theo hợp đồng khung"
+        },
+        "party": {
+          "client": "Hợp đồng với chủ đầu tư",
+          "subcontractor": "Hợp đồng thầu phụ"
+        }
+      }
     }
   },
   "pdf_footer": {

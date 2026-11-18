@@ -1676,6 +1676,54 @@
         "sheet_of": "شیٹ {page} از {total}",
         "no_activities": "اس شیڈول میں ابھی کوئی سرگرمی نہیں۔"
       }
+    },
+    "contracts": {
+      "strings": {
+        "doc_title": "معاہدہ",
+        "col_code": "کوڈ",
+        "col_title": "عنوان",
+        "col_type": "معاہدے کی قسم",
+        "col_role": "معاہدے کا فریق",
+        "col_counterparty": "دوسرا فریق",
+        "col_original_value": "ابتدائی مالیت",
+        "col_total_value": "معاہدے کی مالیت",
+        "col_retention": "روکی گئی رقم",
+        "col_start": "آغاز کی تاریخ",
+        "col_end": "اختتام کی تاریخ",
+        "col_signed": "دستخط کی تاریخ",
+        "line_code": "کوڈ",
+        "line_description": "تفصیل",
+        "line_unit": "اکائی",
+        "line_quantity": "مقدار",
+        "line_unit_rate": "فی اکائی نرخ",
+        "lines": "کام کی قدر کا شیڈول",
+        "signer_company": "کمپنی کی جانب سے"
+      },
+      "labels": {
+        "status": {
+          "draft": "مسودہ",
+          "active": "فعال",
+          "suspended": "معطل",
+          "completed": "مکمل",
+          "terminated": "فسخ شدہ"
+        },
+        "type": {
+          "lump_sum": "یکمشت رقم",
+          "gmp": "GMP",
+          "cost_plus": "لاگت جمع منافع",
+          "tm": "وقت اور مواد",
+          "unit_price": "فی اکائی قیمت",
+          "design_build": "ڈیزائن اور تعمیر",
+          "combination": "مخلوط",
+          "remeasurement": "دوبارہ پیمائش",
+          "framework": "فریم ورک معاہدہ",
+          "call_off": "کال آف آرڈر"
+        },
+        "party": {
+          "client": "کلائنٹ معاہدہ",
+          "subcontractor": "ذیلی معاہدہ"
+        }
+      }
     }
   },
   "cost_control": {

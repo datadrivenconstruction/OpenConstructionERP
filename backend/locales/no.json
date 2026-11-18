@@ -1816,6 +1816,54 @@
         "sheet_of": "Ark {page} av {total}",
         "no_activities": "Denne planen har ingen aktiviteter ennå."
       }
+    },
+    "contracts": {
+      "strings": {
+        "doc_title": "Kontrakt",
+        "col_code": "Kode",
+        "col_title": "Tittel",
+        "col_type": "Kontrakttype",
+        "col_role": "Kontraktside",
+        "col_counterparty": "Motpart",
+        "col_original_value": "Opprinnelig verdi",
+        "col_total_value": "Kontraktsverdi",
+        "col_retention": "Tilbakehold",
+        "col_start": "Startdato",
+        "col_end": "Sluttdato",
+        "col_signed": "Signert",
+        "line_code": "Kode",
+        "line_description": "Beskrivelse",
+        "line_unit": "Enhet",
+        "line_quantity": "Mengde",
+        "line_unit_rate": "Enhetspris",
+        "lines": "Verdifordeling",
+        "signer_company": "For selskapet"
+      },
+      "labels": {
+        "status": {
+          "draft": "Utkast",
+          "active": "Aktiv",
+          "suspended": "Suspendert",
+          "completed": "Fullført",
+          "terminated": "Hevet"
+        },
+        "type": {
+          "lump_sum": "Fastpris",
+          "gmp": "GMP",
+          "cost_plus": "Kostnader pluss",
+          "tm": "Timer og materialer",
+          "unit_price": "Enhetspriser",
+          "design_build": "Totalentreprise",
+          "combination": "Kombinasjon",
+          "remeasurement": "Ommåling",
+          "framework": "Rammeavtale",
+          "call_off": "Avrop"
+        },
+        "party": {
+          "client": "Byggherrekontrakt",
+          "subcontractor": "Underentreprise"
+        }
+      }
     }
   },
   "pdf_footer": {

@@ -1816,6 +1816,54 @@
         "sheet_of": "แผ่นที่ {page} จาก {total}",
         "no_activities": "แผนงานนี้ยังไม่มีกิจกรรม"
       }
+    },
+    "contracts": {
+      "strings": {
+        "doc_title": "สัญญา",
+        "col_code": "รหัส",
+        "col_title": "เรื่อง",
+        "col_type": "ประเภทสัญญา",
+        "col_role": "ฝ่ายของสัญญา",
+        "col_counterparty": "คู่สัญญาอีกฝ่าย",
+        "col_original_value": "มูลค่าเดิม",
+        "col_total_value": "มูลค่าสัญญา",
+        "col_retention": "เงินประกันผลงาน",
+        "col_start": "วันที่เริ่ม",
+        "col_end": "วันที่สิ้นสุด",
+        "col_signed": "วันที่ลงนาม",
+        "line_code": "รหัส",
+        "line_description": "รายละเอียด",
+        "line_unit": "หน่วย",
+        "line_quantity": "ปริมาณ",
+        "line_unit_rate": "ราคาต่อหน่วย",
+        "lines": "ตารางมูลค่างาน",
+        "signer_company": "ในนามบริษัท"
+      },
+      "labels": {
+        "status": {
+          "draft": "ร่าง",
+          "active": "มีผลบังคับ",
+          "suspended": "ระงับชั่วคราว",
+          "completed": "เสร็จสมบูรณ์",
+          "terminated": "บอกเลิกสัญญา"
+        },
+        "type": {
+          "lump_sum": "ราคาเหมารวม",
+          "gmp": "GMP",
+          "cost_plus": "ต้นทุนบวกกำไร",
+          "tm": "ค่าแรงและวัสดุ",
+          "unit_price": "ราคาต่อหน่วย",
+          "design_build": "ออกแบบและก่อสร้าง",
+          "combination": "แบบผสม",
+          "remeasurement": "วัดปริมาณงานใหม่",
+          "framework": "สัญญากรอบ",
+          "call_off": "ใบสั่งตามสัญญากรอบ"
+        },
+        "party": {
+          "client": "สัญญากับผู้ว่าจ้าง",
+          "subcontractor": "สัญญาจ้างช่วง"
+        }
+      }
     }
   },
   "pdf_footer": {

@@ -1722,6 +1722,54 @@
         "sheet_of": "শীট {page} / {total}",
         "no_activities": "এই সময়সূচিতে এখনও কোনো কার্যক্রম নেই।"
       }
+    },
+    "contracts": {
+      "strings": {
+        "doc_title": "চুক্তি",
+        "col_code": "কোড",
+        "col_title": "শিরোনাম",
+        "col_type": "চুক্তির ধরন",
+        "col_role": "চুক্তির পক্ষ",
+        "col_counterparty": "প্রতিপক্ষ",
+        "col_original_value": "মূল মূল্য",
+        "col_total_value": "চুক্তির মূল্য",
+        "col_retention": "রিটেনশন",
+        "col_start": "শুরুর তারিখ",
+        "col_end": "শেষের তারিখ",
+        "col_signed": "স্বাক্ষরের তারিখ",
+        "line_code": "কোড",
+        "line_description": "বিবরণ",
+        "line_unit": "একক",
+        "line_quantity": "পরিমাণ",
+        "line_unit_rate": "একক দর",
+        "lines": "কাজের মূল্যের তালিকা",
+        "signer_company": "কোম্পানির পক্ষে"
+      },
+      "labels": {
+        "status": {
+          "draft": "খসড়া",
+          "active": "সক্রিয়",
+          "suspended": "স্থগিত",
+          "completed": "সম্পন্ন",
+          "terminated": "বাতিল"
+        },
+        "type": {
+          "lump_sum": "একমুঠো অঙ্ক",
+          "gmp": "GMP",
+          "cost_plus": "খরচ-প্লাস",
+          "tm": "সময় ও উপকরণ",
+          "unit_price": "একক দর",
+          "design_build": "ডিজাইন ও নির্মাণ",
+          "combination": "সমন্বিত",
+          "remeasurement": "পুনঃপরিমাপ",
+          "framework": "ফ্রেমওয়ার্ক চুক্তি",
+          "call_off": "কল-অফ আদেশ"
+        },
+        "party": {
+          "client": "ক্লায়েন্ট চুক্তি",
+          "subcontractor": "সাবকন্ট্রাক্ট"
+        }
+      }
     }
   },
   "property_dev": {

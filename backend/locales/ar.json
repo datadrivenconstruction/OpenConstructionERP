@@ -1676,6 +1676,54 @@
         "sheet_of": "الورقة {page} من {total}",
         "no_activities": "لا يحتوي هذا الجدول الزمني على أنشطة بعد."
       }
+    },
+    "contracts": {
+      "strings": {
+        "doc_title": "عقد",
+        "col_code": "الرمز",
+        "col_title": "العنوان",
+        "col_type": "نوع العقد",
+        "col_role": "صفة العقد",
+        "col_counterparty": "الطرف المقابل",
+        "col_original_value": "القيمة الأصلية",
+        "col_total_value": "قيمة العقد",
+        "col_retention": "المبالغ المحتجزة",
+        "col_start": "تاريخ البدء",
+        "col_end": "تاريخ الانتهاء",
+        "col_signed": "تاريخ التوقيع",
+        "line_code": "الرمز",
+        "line_description": "الوصف",
+        "line_unit": "الوحدة",
+        "line_quantity": "الكمية",
+        "line_unit_rate": "سعر الوحدة",
+        "lines": "جدول قيم الأعمال",
+        "signer_company": "عن الشركة"
+      },
+      "labels": {
+        "status": {
+          "draft": "مسودة",
+          "active": "ساري",
+          "suspended": "معلّق",
+          "completed": "مكتمل",
+          "terminated": "مُنهى"
+        },
+        "type": {
+          "lump_sum": "مبلغ مقطوع",
+          "gmp": "GMP",
+          "cost_plus": "التكلفة زائد",
+          "tm": "الوقت والمواد",
+          "unit_price": "أسعار الوحدات",
+          "design_build": "التصميم والبناء",
+          "combination": "مختلط",
+          "remeasurement": "إعادة القياس",
+          "framework": "اتفاقية إطارية",
+          "call_off": "أمر توريد عند الطلب"
+        },
+        "party": {
+          "client": "عقد العميل",
+          "subcontractor": "عقد من الباطن"
+        }
+      }
     }
   },
   "cost_control": {

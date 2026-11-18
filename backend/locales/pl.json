@@ -1816,6 +1816,54 @@
         "sheet_of": "Arkusz {page} z {total}",
         "no_activities": "Ten harmonogram nie ma jeszcze zadań."
       }
+    },
+    "contracts": {
+      "strings": {
+        "doc_title": "Umowa",
+        "col_code": "Kod",
+        "col_title": "Tytuł",
+        "col_type": "Rodzaj umowy",
+        "col_role": "Strona umowy",
+        "col_counterparty": "Kontrahent",
+        "col_original_value": "Wartość pierwotna",
+        "col_total_value": "Wartość umowy",
+        "col_retention": "Kaucja gwarancyjna",
+        "col_start": "Data rozpoczęcia",
+        "col_end": "Data zakończenia",
+        "col_signed": "Data podpisania",
+        "line_code": "Kod",
+        "line_description": "Opis",
+        "line_unit": "Jednostka",
+        "line_quantity": "Ilość",
+        "line_unit_rate": "Cena jednostkowa",
+        "lines": "Zestawienie wartości robót",
+        "signer_company": "Za spółkę"
+      },
+      "labels": {
+        "status": {
+          "draft": "Projekt",
+          "active": "Obowiązująca",
+          "suspended": "Zawieszona",
+          "completed": "Zakończona",
+          "terminated": "Rozwiązana"
+        },
+        "type": {
+          "lump_sum": "Ryczałt",
+          "gmp": "GMP",
+          "cost_plus": "Koszt plus",
+          "tm": "Czas i materiały",
+          "unit_price": "Ceny jednostkowe",
+          "design_build": "Projektuj i buduj",
+          "combination": "Mieszana",
+          "remeasurement": "Obmiar powykonawczy",
+          "framework": "Umowa ramowa",
+          "call_off": "Zamówienie wykonawcze"
+        },
+        "party": {
+          "client": "Umowa z zamawiającym",
+          "subcontractor": "Umowa podwykonawcza"
+        }
+      }
     }
   },
   "pdf_footer": {

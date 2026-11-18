@@ -1676,6 +1676,54 @@
         "sheet_of": "برگه {page} از {total}",
         "no_activities": "این برنامه هنوز فعالیتی ندارد."
       }
+    },
+    "contracts": {
+      "strings": {
+        "doc_title": "قرارداد",
+        "col_code": "کد",
+        "col_title": "عنوان",
+        "col_type": "نوع قرارداد",
+        "col_role": "سمت قرارداد",
+        "col_counterparty": "طرف مقابل",
+        "col_original_value": "مبلغ اولیه",
+        "col_total_value": "مبلغ قرارداد",
+        "col_retention": "کسورات حسن انجام کار",
+        "col_start": "تاریخ شروع",
+        "col_end": "تاریخ پایان",
+        "col_signed": "تاریخ امضا",
+        "line_code": "کد",
+        "line_description": "شرح",
+        "line_unit": "واحد",
+        "line_quantity": "مقدار",
+        "line_unit_rate": "بهای واحد",
+        "lines": "جدول ارزش اقلام",
+        "signer_company": "از طرف شرکت"
+      },
+      "labels": {
+        "status": {
+          "draft": "پیش‌نویس",
+          "active": "فعال",
+          "suspended": "معلق",
+          "completed": "تکمیل‌شده",
+          "terminated": "فسخ‌شده"
+        },
+        "type": {
+          "lump_sum": "مبلغ مقطوع",
+          "gmp": "GMP",
+          "cost_plus": "هزینه به‌علاوه",
+          "tm": "زمان و مصالح",
+          "unit_price": "قیمت واحد",
+          "design_build": "طرح و ساخت",
+          "combination": "ترکیبی",
+          "remeasurement": "متره مجدد",
+          "framework": "قرارداد چارچوب",
+          "call_off": "سفارش بر پایه قرارداد چارچوب"
+        },
+        "party": {
+          "client": "قرارداد با کارفرما",
+          "subcontractor": "قرارداد با پیمانکار جزء"
+        }
+      }
     }
   },
   "cost_control": {

@@ -1816,6 +1816,54 @@
         "sheet_of": "Lembar {page} dari {total}",
         "no_activities": "Jadwal ini belum memiliki aktivitas."
       }
+    },
+    "contracts": {
+      "strings": {
+        "doc_title": "Kontrak",
+        "col_code": "Kode",
+        "col_title": "Judul",
+        "col_type": "Jenis kontrak",
+        "col_role": "Posisi kontrak",
+        "col_counterparty": "Pihak lawan",
+        "col_original_value": "Nilai awal",
+        "col_total_value": "Nilai kontrak",
+        "col_retention": "Retensi",
+        "col_start": "Tanggal mulai",
+        "col_end": "Tanggal selesai",
+        "col_signed": "Tanggal penandatanganan",
+        "line_code": "Kode",
+        "line_description": "Uraian",
+        "line_unit": "Satuan",
+        "line_quantity": "Volume",
+        "line_unit_rate": "Harga satuan",
+        "lines": "Rincian nilai pekerjaan",
+        "signer_company": "Untuk perusahaan"
+      },
+      "labels": {
+        "status": {
+          "draft": "Draf",
+          "active": "Aktif",
+          "suspended": "Ditangguhkan",
+          "completed": "Selesai",
+          "terminated": "Diputus"
+        },
+        "type": {
+          "lump_sum": "Harga pasti",
+          "gmp": "GMP",
+          "cost_plus": "Biaya plus",
+          "tm": "Waktu dan material",
+          "unit_price": "Harga satuan",
+          "design_build": "Rancang dan bangun",
+          "combination": "Kombinasi",
+          "remeasurement": "Pengukuran ulang",
+          "framework": "Kontrak payung",
+          "call_off": "Pesanan panggilan"
+        },
+        "party": {
+          "client": "Kontrak dengan pemberi tugas",
+          "subcontractor": "Subkontrak"
+        }
+      }
     }
   },
   "pdf_footer": {

@@ -1676,6 +1676,54 @@
         "sheet_of": "גיליון {page} מתוך {total}",
         "no_activities": "בלוח זמנים זה אין עדיין פעילויות."
       }
+    },
+    "contracts": {
+      "strings": {
+        "doc_title": "חוזה",
+        "col_code": "קוד",
+        "col_title": "כותרת",
+        "col_type": "סוג החוזה",
+        "col_role": "צד בחוזה",
+        "col_counterparty": "הצד שכנגד",
+        "col_original_value": "ערך מקורי",
+        "col_total_value": "ערך החוזה",
+        "col_retention": "עיכבון",
+        "col_start": "תאריך התחלה",
+        "col_end": "תאריך סיום",
+        "col_signed": "תאריך חתימה",
+        "line_code": "קוד",
+        "line_description": "תיאור",
+        "line_unit": "יחידה",
+        "line_quantity": "כמות",
+        "line_unit_rate": "מחיר יחידה",
+        "lines": "לוח ערכים",
+        "signer_company": "בשם החברה"
+      },
+      "labels": {
+        "status": {
+          "draft": "טיוטה",
+          "active": "פעיל",
+          "suspended": "מושהה",
+          "completed": "הושלם",
+          "terminated": "בוטל"
+        },
+        "type": {
+          "lump_sum": "מחיר גלובלי",
+          "gmp": "GMP",
+          "cost_plus": "עלות פלוס",
+          "tm": "זמן וחומרים",
+          "unit_price": "מחירי יחידה",
+          "design_build": "תכנון וביצוע",
+          "combination": "משולב",
+          "remeasurement": "מדידה מחדש",
+          "framework": "הסכם מסגרת",
+          "call_off": "הזמנה מהסכם מסגרת"
+        },
+        "party": {
+          "client": "חוזה עם מזמין",
+          "subcontractor": "חוזה קבלן משנה"
+        }
+      }
     }
   },
   "cost_control": {

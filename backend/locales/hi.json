@@ -1832,6 +1832,54 @@
         "sheet_of": "शीट {page} / {total}",
         "no_activities": "इस कार्यक्रम में अभी कोई गतिविधि नहीं है।"
       }
+    },
+    "contracts": {
+      "strings": {
+        "doc_title": "अनुबंध",
+        "col_code": "कोड",
+        "col_title": "शीर्षक",
+        "col_type": "अनुबंध का प्रकार",
+        "col_role": "अनुबंध पक्ष",
+        "col_counterparty": "प्रतिपक्ष",
+        "col_original_value": "मूल मूल्य",
+        "col_total_value": "अनुबंध मूल्य",
+        "col_retention": "रिटेंशन राशि",
+        "col_start": "आरंभ तिथि",
+        "col_end": "समाप्ति तिथि",
+        "col_signed": "हस्ताक्षर की तिथि",
+        "line_code": "कोड",
+        "line_description": "विवरण",
+        "line_unit": "इकाई",
+        "line_quantity": "मात्रा",
+        "line_unit_rate": "इकाई दर",
+        "lines": "कार्य मूल्य अनुसूची",
+        "signer_company": "कंपनी की ओर से"
+      },
+      "labels": {
+        "status": {
+          "draft": "मसौदा",
+          "active": "सक्रिय",
+          "suspended": "निलंबित",
+          "completed": "पूर्ण",
+          "terminated": "समाप्त किया गया"
+        },
+        "type": {
+          "lump_sum": "एकमुश्त राशि",
+          "gmp": "GMP",
+          "cost_plus": "लागत-प्लस",
+          "tm": "समय और सामग्री",
+          "unit_price": "इकाई दर",
+          "design_build": "डिज़ाइन और निर्माण",
+          "combination": "संयुक्त",
+          "remeasurement": "पुनर्मापन",
+          "framework": "फ्रेमवर्क अनुबंध",
+          "call_off": "कॉल-ऑफ आदेश"
+        },
+        "party": {
+          "client": "क्लाइंट अनुबंध",
+          "subcontractor": "उप-अनुबंध"
+        }
+      }
     }
   },
   "pdf_footer": {
