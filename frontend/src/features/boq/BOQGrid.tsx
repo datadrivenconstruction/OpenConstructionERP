@@ -524,6 +524,8 @@ export interface BOQGridProps {
    * the project's own standard when a row carries more than one.
    */
   classificationStandard?: string;
+  /** Norm code and grade columns; set only when the project's country pack declares a norm base. */
+  normBase?: { classificationKey: string; gradeField: string } | null;
   /** Project whose market narrows the unit picker and remembers its extra units. */
   projectId?: string | null;
   /** Units system of the project's market; the tenant default when absent. */
@@ -753,6 +755,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
   onShowProcurementTrace,
   onShowMeasurement,
   classificationStandard,
+  normBase,
   projectId,
   unitsSystem,
   onTraceLine,
@@ -1554,7 +1557,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
   const customColumnPositions = customColumns && customColumns.length > 0 ? positions : NO_POSITIONS;
   const columnPrefs = boqColumnPref.use();
   const columnDefs = useMemo(() => {
-    const defs = getColumnDefs({ currencySymbol, currencyCode, locale, fmt, t: tRef.current, displayCurrency: displayCurrency ?? null, showResourceSplit, showCostAllocation, showDrawingRefs, displayQuantity, maxOrdinalChars });
+    const defs = getColumnDefs({ currencySymbol, currencyCode, locale, fmt, t: tRef.current, displayCurrency: displayCurrency ?? null, showResourceSplit, showCostAllocation, showDrawingRefs, displayQuantity, maxOrdinalChars, normBase: normBase ?? null });
     // Override ordinal column with custom renderer
     const ordinalCol = defs.find((c) => c.field === 'ordinal');
     if (ordinalCol) {
@@ -1595,7 +1598,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
     // A locked bill: no column opens an editor and no row drags.
     if (readOnly) return placed.map((c) => ({ ...c, editable: false, rowDrag: false }));
     return placed;
-  }, [columnPrefs, currencySymbol, currencyCode, locale, fmt, i18n.language, customColumns, customColumnPositions, boqVariablesMap, displayCurrency, showResourceSplit, showCostAllocation, showDrawingRefs, displayQuantity, maxOrdinalChars, readOnly]);
+  }, [columnPrefs, currencySymbol, currencyCode, locale, fmt, i18n.language, customColumns, customColumnPositions, boqVariablesMap, displayCurrency, showResourceSplit, showCostAllocation, showDrawingRefs, displayQuantity, maxOrdinalChars, readOnly, normBase]);
 
   /* ── Calculated-column refresh on positions change ──────────────────
    * AG Grid re-runs `valueGetter` on every refresh; for cross-position

@@ -2250,5 +2250,11 @@
       "fail": "{funding}：第 {ordinal} 行的材料 {material} 有 {count}/{required} 份报价，且没有价格分析。",
       "suggestion": "请记录该材料的供应商报价，或附上价格分析报告。"
     }
+  },
+  "vat_rate": {
+    "standard_rate": {
+      "fail": "{markup} 为 {percent} %；{country} 的标准增值税税率为 {rate} %。",
+      "suggestion": "请将税额行设为标准税率，或在预算中注明适用其他税率或免税的原因。"
+    }
   }
 }

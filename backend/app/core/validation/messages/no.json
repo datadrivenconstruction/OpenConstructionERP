@@ -2250,5 +2250,11 @@
       "fail": "{funding}: materialet {material} på linje {ordinal} har {count} av {required} pristilbud og ingen prisanalyse.",
       "suggestion": "Registrer leverandørtilbudene for materialet, eller legg ved prisanalyserapporten."
     }
+  },
+  "vat_rate": {
+    "standard_rate": {
+      "fail": "{markup} er {percent} %; den alminnelige mva-satsen i {country} er {rate} %.",
+      "suggestion": "Sett avgiftslinjen til den alminnelige satsen, eller noter i kalkylen hvorfor en annen sats eller et fritak gjelder."
+    }
   }
 }

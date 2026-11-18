@@ -22,6 +22,7 @@ import {
   type EstimateRole,
   type PricingProfile,
 } from './api';
+import { NormBillActions } from './NormBillActions';
 
 interface Draft {
   wage: string;
@@ -249,15 +250,16 @@ export function NormPricingCard({ projectId }: { projectId: string }) {
             </tbody>
           </table>
         )}
-        {profile.grading_status === 'derived' && (
-          <p className="mt-2 text-xs text-content-tertiary md:max-w-xl">
-            {t('normPricing.grading_derived', {
-              defaultValue:
-                'Grade coefficients between whole grades are interpolated and pending a check against the official table. Hover a row to see how its rate was derived.',
+        {profile.grading_source && (
+          <p className="mt-2 text-xs text-content-tertiary md:max-w-xl" data-testid="norm-pricing-source">
+            {t('normPricing.grading_source', {
+              defaultValue: 'Grade coefficients: {{source}}. Hover a row to see how its rate was derived.',
+              source: profile.grading_source,
             })}
           </p>
         )}
       </div>
+      <NormBillActions projectId={projectId} profile={profile} />
     </Card>
   );
 }

@@ -2250,5 +2250,11 @@
       "fail": "{funding}: Material {material} in Zeile {ordinal} hat {count} von {required} Preisangeboten und keine Preisanalyse.",
       "suggestion": "Erfassen Sie die Lieferantenangebote zum Material oder hängen Sie den Preisanalysebericht an."
     }
+  },
+  "vat_rate": {
+    "standard_rate": {
+      "fail": "{markup} beträgt {percent} %; der Regelsteuersatz in {country} ist {rate} %.",
+      "suggestion": "Setzen Sie die Steuerzeile auf den Regelsatz oder vermerken Sie am LV, warum ein anderer Satz oder eine Befreiung gilt."
+    }
   }
 }

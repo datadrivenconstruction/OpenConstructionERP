@@ -22,9 +22,11 @@ from app.core.demo_projects import DemoTemplate
 # Додаток 28, table 2, row 3, housing, 1.8 percent.
 #
 # The construction lines also cite a KNU norm under ``knu`` (кошторисні норми
-# України): the prefix and collection are those of the work, the group and norm
-# numbers are illustrative and not checked against the РЕКН tables, and the
-# rates stay all-in. No CWICR region covers Ukraine, so no line carries a
+# України). Bulk excavation cites КБ1-13-2, a norm the pack's source quotes by
+# name (Збірник КБ1, Земляні роботи, group 13, ground group 2). On the other
+# lines the prefix and collection are those of the work and the group and norm
+# numbers are illustrative, not checked against the РЕКН tables; the rates
+# stay all-in. No CWICR region covers Ukraine, so no line carries a
 # resource price from a cost base.
 # ---------------------------------------------------------------------------
 
@@ -81,7 +83,7 @@ TEMPLATE = DemoTemplate(
             "Глава 2 - Земляні роботи і фундаменти (Earthworks and foundations)",
             {"din276": "320", "zkr": "2"},
             [
-                ("2.01", "Розробка ґрунту в котловані екскаватором (Bulk excavation)", "m3", 14000, 185, {"din276": "311", "zkr": "2", "knu": "КБ1-13-1"}),
+                ("2.01", "Розробка ґрунту в котловані екскаватором (Bulk excavation)", "m3", 14000, 185, {"din276": "311", "zkr": "2", "knu": "КБ1-13-2"}),
                 ("2.02", "Зворотна засипка пазух котловану (Backfill)", "m3", 4200, 140, {"din276": "311", "zkr": "2", "knu": "КБ1-29-1"}),
                 ("2.03", "Навантаження і вивезення ґрунту (Load and cart away spoil)", "m3", 9800, 210, {"din276": "311", "zkr": "2", "knu": "КБ1-21-1"}),
                 ("2.04", "Буронабивні палі діаметром 620 мм (Bored piles, 620 mm)", "m", 3600, 3000, {"din276": "323", "zkr": "2", "knu": "КБ5-38-1"}),

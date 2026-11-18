@@ -45151,6 +45151,7 @@ const resource = {
   "validation.doctpl.locale_fallback": "Sin traducción: se imprime el texto en {{fallback}}.",
   "validation.doctpl.legal_data_missing": "Falta {{field}} en este documento de {{country}} ({{source}}). Añádalo en {{where}}.",
   "validation.doctpl.draft_unpublished": "Un borrador aún no está publicado.",
+  "validation.rs_label_public_funding": "Topes de financiamiento pública",
     "modules.tab_profiles": "Perfiles de empresa",
     "modules.tab_packs": "Paquetes",
     "modules.tab_data_packages": "Paquetes de datos",
@@ -59950,6 +59951,10 @@ const resource = {
     "estimate_archive.entry.no_seal": "No hay presupuesto sellado.",
     "estimate_archive.entry.seal_award": "Sellar el presupuesto de adjudicación",
     "estimate_archive.entry.add_from_seal": "Agregar desde el presupuesto sellado",
+    "normPricing.subtitle": "Tarifas horarias de mano de obra a partir del salario de presupuesto y la tabla de categorías de {{base}}, y los topes de recargo según el tipo de financiamiento. Las partidas citan códigos de norma como {{example}}.",
+    "normPricing.funding": "Financiamiento",
+    "normPricing.caps": "Topes, % de los costos directos:",
+    "normPricing.rates_need_wage": "Ingrese y guarde el salario de presupuesto para ver las tarifas.",
     // --- /Draft lender preparation ---
   }
 } as { translation: Record<string, string> };

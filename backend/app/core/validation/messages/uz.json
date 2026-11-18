@@ -2250,5 +2250,11 @@
       "fail": "{funding}: {ordinal}-qatordagi {material} materialida {required} ta narx taklifidan {count} tasi bor, narx tahlili yo'q.",
       "suggestion": "Material bo'yicha yetkazib beruvchilar takliflarini qayd eting yoki narx tahlili hisobotini ilova qiling."
     }
+  },
+  "vat_rate": {
+    "standard_rate": {
+      "fail": "{markup}: {percent} %; {country} da QQSning asosiy stavkasi {rate} %.",
+      "suggestion": "Soliq qatorini asosiy stavkaga qo'ying yoki smetada nega boshqa stavka yoki imtiyoz qo'llanishini yozing."
+    }
   }
 }

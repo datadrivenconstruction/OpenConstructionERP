@@ -9,25 +9,25 @@
     "grade_step": "0.1",
     "coefficients": {
       "1.0": "1.000",
-      "1.1": "1.009",
-      "1.2": "1.017",
-      "1.3": "1.026",
-      "1.4": "1.034",
-      "1.5": "1.043",
-      "1.6": "1.051",
-      "1.7": "1.060",
-      "1.8": "1.068",
-      "1.9": "1.077",
-      "2.0": "1.085",
-      "2.1": "1.095",
-      "2.2": "1.105",
-      "2.3": "1.115",
-      "2.4": "1.125",
-      "2.5": "1.136",
-      "2.6": "1.146",
-      "2.7": "1.156",
-      "2.8": "1.166",
-      "2.9": "1.176",
+      "1.1": "1.008",
+      "1.2": "1.016",
+      "1.3": "1.024",
+      "1.4": "1.032",
+      "1.5": "1.040",
+      "1.6": "1.048",
+      "1.7": "1.056",
+      "1.8": "1.064",
+      "1.9": "1.072",
+      "2.0": "1.080",
+      "2.1": "1.091",
+      "2.2": "1.101",
+      "2.3": "1.112",
+      "2.4": "1.122",
+      "2.5": "1.133",
+      "2.6": "1.144",
+      "2.7": "1.154",
+      "2.8": "1.165",
+      "2.9": "1.175",
       "3.0": "1.186",
       "3.1": "1.201",
       "3.2": "1.217",
@@ -49,30 +49,42 @@
       "4.8": "1.501",
       "4.9": "1.522",
       "5.0": "1.542",
-      "5.1": "1.567",
+      "5.1": "1.568",
       "5.2": "1.593",
-      "5.3": "1.618",
+      "5.3": "1.619",
       "5.4": "1.644",
-      "5.5": "1.669",
-      "5.6": "1.694",
-      "5.7": "1.720",
-      "5.8": "1.745",
-      "5.9": "1.771",
-      "6.0": "1.796",
-      "6.1": "1.824",
-      "6.2": "1.852",
+      "5.5": "1.670",
+      "5.6": "1.695",
+      "5.7": "1.721",
+      "5.8": "1.746",
+      "5.9": "1.772",
+      "6.0": "1.797",
+      "6.1": "1.825",
+      "6.2": "1.853",
       "6.3": "1.880",
       "6.4": "1.908",
       "6.5": "1.936",
-      "6.6": "1.963",
-      "6.7": "1.991",
+      "6.6": "1.964",
+      "6.7": "1.992",
       "6.8": "2.019",
       "6.9": "2.047",
-      "7.0": "2.075"
+      "7.0": "2.075",
+      "7.1": "2.107",
+      "7.2": "2.139",
+      "7.3": "2.171",
+      "7.4": "2.203",
+      "7.5": "2.235",
+      "7.6": "2.266",
+      "7.7": "2.298",
+      "7.8": "2.330",
+      "7.9": "2.362",
+      "8.0": "2.394"
     },
-    "source": "Настанова з визначення вартості будівництва, Додаток 15; base grade 3.8 per Іськов (ЖДТУ 2026) 3.3.2",
-    "status": "derived",
-    "note": "Whole-grade coefficients 1 to 7 with linear steps of 0.1 between them, rounded half up to three places. They reproduce every value quoted in the source (1.263, 1.308, 1.593, 2.075). Grades 7.1 to 8.0 are not shipped until the annex row for grade 8 is read; check the table against Додаток 15 before a public tender."
+    "source": "Настанова з визначення вартості будівництва (наказ Мінрегіону №281 від 01.11.2021), Додаток 15 «Міжрозрядні коефіцієнти по розрядах робіт у будівництві», grades 1.0 to 8.0; base grade 3.8 per Іськов (ЖДТУ 2026) 3.3.2",
+    "status": "sourced",
+    "note": "All 71 values transcribed from the published annex (2021 text). The annex says the coefficients are for ordinary construction conditions and may be refined where conditions differ.",
+    "source_url": "https://radnuk.com.ua/wp-content/uploads/2021/12/dodatok-15.pdf",
+    "source_read": "2026-11-18"
   },
   "defaults": {
     "monthly_hours": "174",
@@ -127,10 +139,8 @@
         }
       ],
       "investor_estimate_at_cap": true,
-      "price_evidence": {
-        "min_quotes": 3,
-        "source": "Мінрозвитку, explanation of постанова №1512: a price analysis report per resource, three offers"
-      }
+      "price_evidence": null,
+      "price_evidence_note": "Мінрозвитку asks for a price analysis report with three offers per material on public funds. Not checked by the pack: no cost base covers Ukraine, so there is nothing to record offers against yet."
     },
     {
       "key": "private",
@@ -169,5 +179,137 @@
       "source": "Мінрозвитку, explanation of постанова КМУ №1512"
     }
   ],
-  "location_note": "The list of territories changes by ministry order, so the project carries a flag a person sets; nothing looks the territory up."
+  "location_note": "The list of territories changes by ministry order, so the project carries a flag a person sets; nothing looks the territory up.",
+  "export_layout": {
+    "key": "ua_local_estimate",
+    "title": {
+      "uk": "Локальний кошторис на будівельні роботи",
+      "en": "Local estimate for construction works"
+    },
+    "source": "Настанова, Додаток 1, form of the local estimate, columns 1 to 12; the stacked cells of columns 6, 7 and 10 get a column each",
+    "columns": [
+      {
+        "field": "ordinal",
+        "form_column": "1",
+        "label": {
+          "uk": "№ п/п",
+          "en": "No."
+        }
+      },
+      {
+        "field": "norm_code",
+        "form_column": "2",
+        "label": {
+          "uk": "Обґрунтування (шифр норми)",
+          "en": "Basis (norm code)"
+        }
+      },
+      {
+        "field": "description",
+        "form_column": "3",
+        "label": {
+          "uk": "Найменування робіт і витрат",
+          "en": "Works and costs"
+        }
+      },
+      {
+        "field": "unit",
+        "form_column": "4",
+        "label": {
+          "uk": "Одиниця виміру",
+          "en": "Unit"
+        }
+      },
+      {
+        "field": "quantity",
+        "form_column": "5",
+        "label": {
+          "uk": "Кількість",
+          "en": "Quantity"
+        }
+      },
+      {
+        "field": "unit_rate",
+        "form_column": "6",
+        "label": {
+          "uk": "Вартість одиниці, всього, грн",
+          "en": "Unit cost, total"
+        }
+      },
+      {
+        "field": "unit_labour",
+        "form_column": "6",
+        "label": {
+          "uk": "Вартість одиниці, заробітна плата, грн",
+          "en": "Unit cost, wages"
+        }
+      },
+      {
+        "field": "unit_machine",
+        "form_column": "7",
+        "label": {
+          "uk": "Вартість одиниці, експлуатація машин, грн",
+          "en": "Unit cost, machines"
+        }
+      },
+      {
+        "field": "total",
+        "form_column": "8",
+        "label": {
+          "uk": "Загальна вартість, всього, грн",
+          "en": "Total cost"
+        }
+      },
+      {
+        "field": "total_labour",
+        "form_column": "9",
+        "label": {
+          "uk": "Загальна вартість, заробітна плата, грн",
+          "en": "Total wages"
+        }
+      },
+      {
+        "field": "total_machine",
+        "form_column": "10",
+        "label": {
+          "uk": "Загальна вартість, експлуатація машин, грн",
+          "en": "Total machines"
+        }
+      },
+      {
+        "field": "labour_hours_unit",
+        "form_column": "11",
+        "label": {
+          "uk": "Витрати труда робітників, люд.-год, на одиницю",
+          "en": "Labour hours per unit"
+        }
+      },
+      {
+        "field": "labour_hours_total",
+        "form_column": "12",
+        "label": {
+          "uk": "Витрати труда робітників, люд.-год, всього",
+          "en": "Labour hours total"
+        }
+      }
+    ],
+    "summary": {
+      "direct": {
+        "uk": "Разом прямі витрати",
+        "en": "Total direct costs"
+      },
+      "materials": {
+        "uk": "в тому числі вартість матеріалів, виробів і комплектів",
+        "en": "of which materials"
+      },
+      "labour": {
+        "uk": "всього заробітна плата",
+        "en": "of which wages"
+      },
+      "grand_total": {
+        "uk": "Всього по кошторису",
+        "en": "Estimate total"
+      }
+    }
+  }
 }

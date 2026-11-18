@@ -2250,5 +2250,11 @@
       "fail": "{funding}: material {material} on line {ordinal} has {count} of {required} price offers and no price analysis.",
       "suggestion": "Record the supplier offers on the material or attach the price analysis report."
     }
+  },
+  "vat_rate": {
+    "standard_rate": {
+      "fail": "{markup} is {percent} %; the standard VAT rate in {country} is {rate} %.",
+      "suggestion": "Set the tax line to the standard rate, or record on the bill why another rate or an exemption applies."
+    }
   }
 }

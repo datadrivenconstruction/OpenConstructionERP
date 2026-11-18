@@ -2250,5 +2250,11 @@
       "fail": "{funding}: vật liệu {material} ở dòng {ordinal} có {count} trên {required} báo giá và không có phân tích giá.",
       "suggestion": "Ghi nhận báo giá của nhà cung cấp cho vật liệu hoặc đính kèm báo cáo phân tích giá."
     }
+  },
+  "vat_rate": {
+    "standard_rate": {
+      "fail": "{markup} là {percent} %; thuế suất VAT tiêu chuẩn tại {country} là {rate} %.",
+      "suggestion": "Đặt dòng thuế về thuế suất tiêu chuẩn, hoặc ghi trong dự toán lý do áp dụng thuế suất khác hay miễn thuế."
+    }
   }
 }

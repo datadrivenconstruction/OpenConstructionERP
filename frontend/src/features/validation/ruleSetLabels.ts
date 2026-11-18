@@ -50,6 +50,7 @@ export function ruleSetLabel(ruleSet: string, t: Translate): string {
     project_completeness: t('validation.rs_label_completeness', { defaultValue: 'Completeness' }),
     norm_base: t('validation.rs_label_norm_base', { defaultValue: 'Norm codes' }),
     public_funding: t('validation.rs_label_public_funding', { defaultValue: 'Public funding caps' }),
+    vat_rate: t('validation.rs_label_vat_rate', { defaultValue: 'VAT rate' }),
   };
   return map[ruleSet] ?? ruleSet.replace(/_/g, ' ');
 }

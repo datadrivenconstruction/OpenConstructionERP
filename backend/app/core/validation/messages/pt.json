@@ -2250,5 +2250,11 @@
       "fail": "{funding}: o material {material} na linha {ordinal} tem {count} de {required} propostas de preço e nenhuma análise de preços.",
       "suggestion": "Registe as propostas dos fornecedores do material ou anexe o relatório de análise de preços."
     }
+  },
+  "vat_rate": {
+    "standard_rate": {
+      "fail": "{markup} está em {percent} %; a taxa normal de IVA em {country} é {rate} %.",
+      "suggestion": "Defina a linha de imposto à taxa normal ou registe no orçamento porque se aplica outra taxa ou uma isenção."
+    }
   }
 }

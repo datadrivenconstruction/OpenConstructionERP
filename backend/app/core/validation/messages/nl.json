@@ -2250,5 +2250,11 @@
       "fail": "{funding}: materiaal {material} op regel {ordinal} heeft {count} van {required} prijsoffertes en geen prijsanalyse.",
       "suggestion": "Leg de offertes van leveranciers voor het materiaal vast of voeg het prijsanalyserapport toe."
     }
+  },
+  "vat_rate": {
+    "standard_rate": {
+      "fail": "{markup} is {percent} %; het standaard btw-tarief in {country} is {rate} %.",
+      "suggestion": "Zet de belastingregel op het standaardtarief of leg in de begroting vast waarom een ander tarief of een vrijstelling geldt."
+    }
   }
 }

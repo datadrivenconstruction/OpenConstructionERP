@@ -2250,5 +2250,11 @@
       "fail": "{funding}: il materiale {material} alla riga {ordinal} ha {count} offerte di prezzo su {required} e nessuna analisi dei prezzi.",
       "suggestion": "Registri le offerte dei fornitori per il materiale o alleghi la relazione di analisi dei prezzi."
     }
+  },
+  "vat_rate": {
+    "standard_rate": {
+      "fail": "{markup} è al {percent} %; l'aliquota IVA ordinaria in {country} è {rate} %.",
+      "suggestion": "Imposta la riga d'imposta all'aliquota ordinaria o indica nel computo perché si applica un'altra aliquota o un'esenzione."
+    }
   }
 }

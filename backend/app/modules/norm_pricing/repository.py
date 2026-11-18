@@ -46,3 +46,30 @@ class NormPricingRepository:
         # A new dict, so the JSON column sees the change without flag_modified.
         project.metadata_ = meta
         await self.session.flush()
+
+    async def boq_project(self, boq_id: uuid.UUID) -> uuid.UUID | None:
+        """The project a bill belongs to, or ``None`` when the bill does not exist."""
+        from app.modules.boq.models import BOQ
+
+        return (await self.session.execute(select(BOQ.project_id).where(BOQ.id == boq_id))).scalar_one_or_none()
+
+    async def boq_lines(self, boq_id: uuid.UUID) -> list[dict[str, Any]]:
+        """Every line of a bill with its resources, in bill order (plain values, no ORM rows)."""
+        from app.modules.boq.models import Position
+
+        rows = (
+            await self.session.execute(
+                select(Position.id, Position.ordinal, Position.description, Position.metadata_)
+                .where(Position.boq_id == boq_id)
+                .order_by(Position.sort_order, Position.ordinal)
+            )
+        ).all()
+        return [
+            {
+                "id": str(r.id),
+                "ordinal": r.ordinal,
+                "description": r.description,
+                "metadata": dict(r.metadata_) if isinstance(r.metadata_, dict) else {},
+            }
+            for r in rows
+        ]

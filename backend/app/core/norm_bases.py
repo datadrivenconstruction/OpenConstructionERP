@@ -95,6 +95,7 @@ class CodeCheck:
     old_prefix: str | None = None
     new_prefix: str | None = None
     suggested: str | None = None
+    title: str | None = None
 
 
 @dataclass(frozen=True)
@@ -112,6 +113,8 @@ class NormBase:
     labour_resource_type: str = "labor"
     grade_field: str = "grade"
     pack_slug: str | None = None
+    #: Codes the pack's source quotes with a name: a code known to exist, not just well formed.
+    norms: dict[str, str] = field(default_factory=dict, compare=False)
 
     @classmethod
     def from_document(cls, doc: dict[str, Any], *, pack_slug: str | None = None) -> NormBase:
@@ -140,6 +143,11 @@ class NormBase:
             labour_resource_type=str(labour.get("resource_type") or "labor"),
             grade_field=str(labour.get("grade_field") or "grade"),
             pack_slug=pack_slug,
+            norms={
+                str(n["code"]): str(n.get("title") or "")
+                for n in doc.get("norms") or []
+                if isinstance(n, dict) and n.get("code")
+            },
         )
 
     def normalise(self, code: Any) -> str:
@@ -155,7 +163,7 @@ class NormBase:
         """Classify a code as current, retired prefix or wrong shape."""
         norm = self.normalise(code)
         if self.code_pattern.match(norm):
-            return CodeCheck(status="ok", code=norm)
+            return CodeCheck(status="ok", code=norm, title=self.norms.get(norm) or None)
         for old, new in self.legacy_prefixes:
             if norm.startswith(old):
                 candidate = new + norm[len(old) :]
@@ -177,6 +185,7 @@ class LabourGrading:
     grade_step: Decimal
     coefficients: dict[Decimal, Decimal]
     status: str = "sourced"
+    source: str = ""
 
     def coefficient(self, grade: Decimal) -> Decimal | None:
         """The coefficient the table holds for ``grade``, or ``None``."""
@@ -234,6 +243,8 @@ class EstimatePricing:
     funding_classes: tuple[FundingClass, ...]
     location_factors: tuple[LocationFactor, ...]
     pack_slug: str | None = None
+    #: Column layout of the market's estimate sheet, read by the neutral exporter.
+    export_layout: dict[str, Any] | None = field(default=None, compare=False)
     raw: dict[str, Any] = field(default_factory=dict, compare=False, repr=False)
 
     @classmethod
@@ -257,7 +268,9 @@ class EstimatePricing:
             base, lo, hi, step = parts  # type: ignore[misc]
             if base not in coeffs:
                 raise ValueError(f"estimate pricing {key!r}: the base grade has no coefficient")
-            grading = LabourGrading(base, lo, hi, step, coeffs, str(g.get("status") or "sourced"))
+            grading = LabourGrading(
+                base, lo, hi, step, coeffs, str(g.get("status") or "sourced"), str(g.get("source") or "")
+            )
         classes = []
         for fc in doc.get("funding_classes") or []:
             caps = tuple(
@@ -299,6 +312,7 @@ class EstimatePricing:
             funding_classes=tuple(classes),
             location_factors=factors,
             pack_slug=pack_slug,
+            export_layout=doc["export_layout"] if isinstance(doc.get("export_layout"), dict) else None,
             raw=doc,
         )
 

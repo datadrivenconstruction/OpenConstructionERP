@@ -2250,5 +2250,11 @@
       "fail": "{funding}: {ordinal}행의 자재 {material}는 견적 {required}건 중 {count}건이며 가격 분석이 없습니다.",
       "suggestion": "자재의 공급업체 견적을 기록하거나 가격 분석 보고서를 첨부하세요."
     }
+  },
+  "vat_rate": {
+    "standard_rate": {
+      "fail": "{markup}이(가) {percent} %입니다. {country}의 표준 부가가치세율은 {rate} %입니다.",
+      "suggestion": "세금 행을 표준 세율로 설정하거나, 다른 세율이나 면세가 적용되는 이유를 견적에 기록하십시오."
+    }
   }
 }

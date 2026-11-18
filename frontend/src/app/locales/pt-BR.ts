@@ -50976,6 +50976,7 @@ const resource = {
     "boq.priced_from_published_rates": "Os preços são preços unitários publicados",
     "boq.priced_from_published_rates_hint": "Já incluem BDI (despesas indiretas e lucro). A validação avisa se uma margem os adiciona de novo.",
     "boq.gaeb_long_text": "Texto longo",
+    "boq.labour_grade_tip": "Categoria média da linha, ponderada pelas horas de seus recursos de mão de obra.",
     // --- /Learn ---
     "schedule.calendar.week_fallback": "A semana de trabalho regional não está disponível. É utilizada uma semana de planejamento padrão.",
     "schedule.calendar.holidays_missing": "Os feriados não estão disponíveis para {{years}}. Verifique o calendário antes de se basear nestas datas.",
@@ -59996,6 +59997,10 @@ const resource = {
     "estimate_archive.entry.no_seal": "Nenhum orçamento selado.",
     "estimate_archive.entry.seal_award": "Selar o orçamento da adjudicação",
     "estimate_archive.entry.add_from_seal": "Adicionar a partir do orçamento selado",
+    "normPricing.role_investor": "Contratante (estimativa do investidor)",
+    "normPricing.role_contractor": "Construtora (preço de proposta)",
+    "normPricing.rates_need_wage": "Insira e salve o salário de orçamento para ver as taxas.",
+    "normPricing.preview": "Visualizar taxas de mão de obra",
     // --- /Draft lender preparation ---
   }
 } as { translation: Record<string, string> };

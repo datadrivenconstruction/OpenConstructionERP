@@ -2250,5 +2250,11 @@
       "fail": "{funding}: el material {material} en la línea {ordinal} tiene {count} de {required} ofertas de precio y ningún análisis de precios.",
       "suggestion": "Registre las ofertas de proveedores del material o adjunte el informe de análisis de precios."
     }
+  },
+  "vat_rate": {
+    "standard_rate": {
+      "fail": "{markup} es {percent} %; el tipo general de IVA en {country} es {rate} %.",
+      "suggestion": "Ponga la línea de impuesto al tipo general o indique en el presupuesto por qué se aplica otro tipo o una exención."
+    }
   }
 }

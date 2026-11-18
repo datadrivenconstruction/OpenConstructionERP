@@ -2250,5 +2250,11 @@
       "fail": "{funding}: ang materyal na {material} sa linya {ordinal} ay may {count} sa {required} alok na presyo at walang pagsusuri ng presyo.",
       "suggestion": "Itala ang mga alok ng supplier para sa materyal o ilakip ang ulat ng pagsusuri ng presyo."
     }
+  },
+  "vat_rate": {
+    "standard_rate": {
+      "fail": "Ang {markup} ay {percent} %; ang karaniwang rate ng VAT sa {country} ay {rate} %.",
+      "suggestion": "Itakda ang linya ng buwis sa karaniwang rate, o itala sa estimate kung bakit ibang rate o exemption ang umiiral."
+    }
   }
 }

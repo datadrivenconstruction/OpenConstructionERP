@@ -2250,5 +2250,11 @@
       "fail": "{funding}: a(z) {ordinal}. tétel {material} anyagához {count}/{required} árajánlat tartozik, árelemzés nincs.",
       "suggestion": "Rögzítse az anyag szállítói ajánlatait, vagy csatolja az árelemzési jelentést."
     }
+  },
+  "vat_rate": {
+    "standard_rate": {
+      "fail": "{markup}: {percent} %; az általános ÁFA-kulcs itt: {country}, {rate} %.",
+      "suggestion": "Állítsa az adósort az általános kulcsra, vagy rögzítse a költségvetésben, miért más kulcs vagy mentesség érvényes."
+    }
   }
 }

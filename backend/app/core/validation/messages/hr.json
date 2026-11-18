@@ -2250,5 +2250,11 @@
       "fail": "{funding}: materijal {material} u stavci {ordinal} ima {count} od {required} ponuda cijena i nema analize cijena.",
       "suggestion": "Zabilježite ponude dobavljača za materijal ili priložite izvješće o analizi cijena."
     }
+  },
+  "vat_rate": {
+    "standard_rate": {
+      "fail": "{markup} iznosi {percent} %; opća stopa PDV-a u {country} je {rate} %.",
+      "suggestion": "Postavite poreznu stavku na opću stopu ili u troškovniku navedite zašto vrijedi druga stopa ili oslobođenje."
+    }
   }
 }
