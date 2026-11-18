@@ -5,6 +5,7 @@ from __future__ import annotations
 import uuid
 
 from sqlalchemy import func, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.offers.models import Offer, OfferSettings, OfferTextBlock
@@ -82,7 +83,15 @@ class OfferRepository:
             await self.session.execute(select(OfferSettings).where(OfferSettings.key == "default"))
         ).scalar_one_or_none()
         if row is None:
+            # Two first reads in flight (the settings page asks twice) both see no row; the loser of the
+            # unique key must read the winner's row, not fail the request.
             row = OfferSettings(key="default")
-            self.session.add(row)
-            await self.session.flush()
+            try:
+                async with self.session.begin_nested():
+                    self.session.add(row)
+                    await self.session.flush()
+            except IntegrityError:
+                row = (
+                    await self.session.execute(select(OfferSettings).where(OfferSettings.key == "default"))
+                ).scalar_one()
         return row

@@ -42967,6 +42967,8 @@ const resource = {
     "procurement.gr_document": "Recepción de mercancía",
     "procurement.delivery_address": "Dirección de entrega",
     "procurement.delivery_address_placeholder": "Dirección de la obra, acceso, contacto en obra",
+    "procurement.cost_code_placeholder": "Centro de costos / código de costo",
+    "procurement.cost_code_for": "Centro o código de costo de la línea {{line}}",
     "contracts.insights.title": "Información de contratos",
     "contracts.insights.ds_contracts": "Registro de contratos",
     "contracts.insights.f_title": "Contrato",
