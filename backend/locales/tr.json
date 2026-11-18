@@ -1694,7 +1694,8 @@
         "gross_settled": "Brüt kapatılan tutar",
         "no_withholding": "Bu ödemeden herhangi bir kesinti yapılmadı.",
         "counterparty_tax_id": "Vergi no.",
-        "counterparty_address": "Adres"
+        "counterparty_address": "Adres",
+        "supply_date": "Teslim tarihi"
       },
       "labels": {
         "invoice_status": {

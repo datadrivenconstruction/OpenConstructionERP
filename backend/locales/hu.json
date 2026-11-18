@@ -1718,7 +1718,8 @@
         "gross_settled": "Elszámolt bruttó összeg",
         "no_withholding": "Ebből a kifizetésből nem tartottunk vissza semmit.",
         "counterparty_tax_id": "Adószám",
-        "counterparty_address": "Cím"
+        "counterparty_address": "Cím",
+        "supply_date": "Teljesítés dátuma"
       },
       "labels": {
         "invoice_status": {

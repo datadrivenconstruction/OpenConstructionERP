@@ -1718,7 +1718,8 @@
         "gross_settled": "決済総額",
         "no_withholding": "この支払から控除はありません。",
         "counterparty_tax_id": "税務番号",
-        "counterparty_address": "住所"
+        "counterparty_address": "住所",
+        "supply_date": "供給日"
       },
       "labels": {
         "invoice_status": {

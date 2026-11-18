@@ -862,7 +862,8 @@
         "gross_settled": "סכום ברוטו שסולק",
         "no_withholding": "לא נוכה עכבון מתשלום זה.",
         "counterparty_tax_id": "מספר עוסק / מזהה מס",
-        "counterparty_address": "כתובת"
+        "counterparty_address": "כתובת",
+        "supply_date": "תאריך אספקה"
       },
       "labels": {
         "invoice_status": {

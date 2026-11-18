@@ -1718,7 +1718,8 @@
         "gross_settled": "Importo lordo saldato",
         "no_withholding": "Nessuna ritenuta trattenuta su questo pagamento.",
         "counterparty_tax_id": "Codice fiscale / P.IVA",
-        "counterparty_address": "Indirizzo"
+        "counterparty_address": "Indirizzo",
+        "supply_date": "Data di fornitura"
       },
       "labels": {
         "invoice_status": {

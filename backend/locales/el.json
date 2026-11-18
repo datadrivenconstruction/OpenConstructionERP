@@ -1718,7 +1718,8 @@
         "gross_settled": "Ακαθάριστο διακανονισμένο ποσό",
         "no_withholding": "Δεν παρακρατήθηκε τίποτα από την πληρωμή αυτή.",
         "counterparty_tax_id": "ΑΦΜ",
-        "counterparty_address": "Διεύθυνση"
+        "counterparty_address": "Διεύθυνση",
+        "supply_date": "Ημερομηνία παράδοσης"
       },
       "labels": {
         "invoice_status": {

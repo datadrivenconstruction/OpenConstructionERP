@@ -862,7 +862,8 @@
         "gross_settled": "طے شدہ مجموعی رقم",
         "no_withholding": "اس ادائیگی سے کوئی رقم نہیں روکی گئی۔",
         "counterparty_tax_id": "ٹیکس شناختی نمبر",
-        "counterparty_address": "پتہ"
+        "counterparty_address": "پتہ",
+        "supply_date": "فراہمی کی تاریخ"
       },
       "labels": {
         "invoice_status": {

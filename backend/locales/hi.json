@@ -1734,7 +1734,8 @@
         "gross_settled": "निपटाई गई सकल राशि",
         "no_withholding": "इस भुगतान में से कोई राशि नहीं रोकी गई।",
         "counterparty_tax_id": "कर पहचान संख्या",
-        "counterparty_address": "पता"
+        "counterparty_address": "पता",
+        "supply_date": "आपूर्ति की तिथि"
       },
       "labels": {
         "invoice_status": {

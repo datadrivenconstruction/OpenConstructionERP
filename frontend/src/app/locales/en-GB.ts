@@ -1145,6 +1145,8 @@ const resource = {
     "finance.inbox.mailbox_saved": "Mailbox settings saved",
     "finance.inbox.mailbox_invalid": "These mailbox settings are not valid",
     "finance.inbox.mailbox_last_polled": "Last checked",
+    "finance.invoice_document": "Invoice",
+    "finance.payment_document": "Payment record",
     "leasing.export_for": "Export for {{name}}",
     "doc_layout.locked_reason": "Required by {{source}}",
     "doc_layout.insert_field": "Insert field",
@@ -1378,6 +1380,7 @@ const resource = {
     "doc_layout.variant_create": "Create",
     "doc_layout.delete_variant_confirm": "Delete this variant and its versions? Documents already issued keep their record.",
     "doc_layout.record_missing": "{{field}} is missing on this record ({{source}})",
+    "changeorders.document_title": "Change order",
   }
 } as { translation: Record<string, string> };
 

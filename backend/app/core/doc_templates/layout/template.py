@@ -291,12 +291,18 @@ def _block(raw: Any, ids: _Ids, *, nested: bool = False) -> dict[str, Any] | Non
                 column["expr"] = str(entry.get("expr") or "")[:300]
             if entry.get("hidden"):
                 column["hidden"] = True
+            if entry.get("omit_empty"):
+                column["omit_empty"] = True
             columns.append(column)
         block["columns"] = columns
         group_by = str(raw.get("group_by") or "").strip().lower()
         if _ID_RE.match(group_by):
             block["group_by"] = group_by
             block["subtotals"] = bool(raw.get("subtotals"))
+        if raw.get("total_row"):
+            block["total_row"] = True
+        if raw.get("omit_empty"):
+            block["omit_empty"] = True
         empty = _i18n(raw.get("empty_text"))
         if empty:
             block["empty_text"] = empty

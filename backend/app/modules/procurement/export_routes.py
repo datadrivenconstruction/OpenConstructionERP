@@ -78,10 +78,9 @@ async def _issue(
     variant: str | None,
     version: uuid.UUID | None,
 ) -> RecordDocument:
-    from app.modules.doc_templates.layout_service import clean_variant, issue_document
-    from app.modules.doc_templates.service import workspace_countries
+    from app.modules.doc_templates.layout_service import issue_for_user
 
-    return await issue_document(
+    return await issue_for_user(
         session,
         spec,
         ctx,
@@ -89,9 +88,9 @@ async def _issue(
         record_id=record_id,
         project_id=project_id,
         user_id=user_id,
-        variant=clean_variant(variant) if variant else None,
+        payload=payload,
+        variant=variant,
         version_id=version,
-        countries=await workspace_countries(session, payload, user_id),
     )
 
 

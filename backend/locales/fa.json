@@ -862,7 +862,8 @@
         "gross_settled": "مبلغ ناخالص تسویه‌شده",
         "no_withholding": "از این پرداخت چیزی کسر نشده است.",
         "counterparty_tax_id": "شناسه مالیاتی",
-        "counterparty_address": "نشانی"
+        "counterparty_address": "نشانی",
+        "supply_date": "تاریخ تحویل"
       },
       "labels": {
         "invoice_status": {

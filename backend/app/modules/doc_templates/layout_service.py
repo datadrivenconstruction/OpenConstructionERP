@@ -54,6 +54,7 @@ __all__ = [
     "data_issues",
     "diff_templates",
     "issue_document",
+    "issue_for_user",
     "layout_visible",
     "published_layout",
     "require_layout",
@@ -76,13 +77,21 @@ def layout_visible(spec: LayoutSpec) -> bool:
         return True
 
 
-def _register_known() -> None:
-    try:
-        from app.modules.procurement.layouts import register_procurement_layouts
+_KNOWN_PROVIDERS = (
+    ("app.modules.procurement.layouts", "register_procurement_layouts"),
+    ("app.modules.finance.layouts", "register_finance_layouts"),
+    ("app.modules.changeorders.layouts", "register_changeorder_layouts"),
+)
 
-        register_procurement_layouts()
-    except Exception:  # noqa: BLE001 - procurement may be absent
-        logger.debug("doc_templates: procurement layouts unavailable", exc_info=True)
+
+def _register_known() -> None:
+    import importlib
+
+    for module, name in _KNOWN_PROVIDERS:
+        try:
+            getattr(importlib.import_module(module), name)()
+        except Exception:  # noqa: BLE001 - the module may be absent
+            logger.debug("doc_templates: layouts of %s unavailable", module, exc_info=True)
 
 
 def visible_layouts() -> list[LayoutSpec]:
@@ -742,6 +751,41 @@ async def issue_document(
         logger.debug("doc_templates: layout issue log failed", exc_info=True)
     return document
 
+
+async def issue_for_user(
+    session: AsyncSession,
+    spec: LayoutSpec,
+    ctx: LayoutContext,
+    *,
+    standard: Mapping[str, Any],
+    record_id: str,
+    project_id: uuid.UUID | None,
+    user_id: str,
+    payload: Mapping[str, Any] | None,
+    variant: str | None = None,
+    version_id: uuid.UUID | None = None,
+    legal: bool = True,
+) -> Any:
+    """:func:`issue_document` for a download route: the variant cleaned, the packs of the user's workspace.
+
+    ``legal=False`` skips the packs, for a document the workspace receives rather than issues
+    (a supplier's invoice is not held to the rules of an invoice the firm sends).
+    """
+    from app.modules.doc_templates.service import workspace_countries
+
+    countries = await workspace_countries(session, dict(payload or {}), user_id) if legal else ()
+    return await issue_document(
+        session,
+        spec,
+        ctx,
+        standard=standard,
+        record_id=record_id,
+        project_id=project_id,
+        user_id=user_id,
+        variant=clean_variant(variant) if variant else None,
+        version_id=version_id,
+        countries=countries,
+    )
 
 
 async def preview_context(

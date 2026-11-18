@@ -1718,7 +1718,8 @@
         "gross_settled": "Afgewikkeld bruto bedrag",
         "no_withholding": "Van deze betaling is niets ingehouden.",
         "counterparty_tax_id": "btw-nummer",
-        "counterparty_address": "Adres"
+        "counterparty_address": "Adres",
+        "supply_date": "Leveringsdatum"
       },
       "labels": {
         "invoice_status": {

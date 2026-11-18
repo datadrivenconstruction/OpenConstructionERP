@@ -1718,7 +1718,8 @@
         "gross_settled": "Jumlah bruto yang diselesaikan",
         "no_withholding": "Tidak ada yang ditahan dari pembayaran ini.",
         "counterparty_tax_id": "NPWP",
-        "counterparty_address": "Alamat"
+        "counterparty_address": "Alamat",
+        "supply_date": "Tanggal penyerahan"
       },
       "labels": {
         "invoice_status": {

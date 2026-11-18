@@ -1734,7 +1734,8 @@
         "gross_settled": "Жалпы төлөнгөн сумма",
         "no_withholding": "Бул төлөмдөн эч нерсе кармалган жок.",
         "counterparty_tax_id": "Салык ID",
-        "counterparty_address": "Дареги"
+        "counterparty_address": "Дареги",
+        "supply_date": "Жеткирүү күнү"
       },
       "labels": {
         "invoice_status": {

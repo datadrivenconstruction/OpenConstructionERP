@@ -1718,7 +1718,8 @@
         "gross_settled": "Bruttosumma suoritettu",
         "no_withholding": "Tästä maksusta ei ole pidätetty mitään.",
         "counterparty_tax_id": "ALV-tunnus",
-        "counterparty_address": "Osoite"
+        "counterparty_address": "Osoite",
+        "supply_date": "Toimituspäivä"
       },
       "labels": {
         "invoice_status": {

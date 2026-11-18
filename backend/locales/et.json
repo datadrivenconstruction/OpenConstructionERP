@@ -1718,7 +1718,8 @@
         "gross_settled": "Tasutud brutosumma",
         "no_withholding": "Sellest maksest ei ole midagi kinni peetud.",
         "counterparty_tax_id": "KMKR",
-        "counterparty_address": "Aadress"
+        "counterparty_address": "Aadress",
+        "supply_date": "Tarnekuupäev"
       },
       "labels": {
         "invoice_status": {

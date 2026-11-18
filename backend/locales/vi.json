@@ -1718,7 +1718,8 @@
         "gross_settled": "Tổng giá trị đã quyết toán",
         "no_withholding": "Không giữ lại khoản nào từ lần thanh toán này.",
         "counterparty_tax_id": "Mã số thuế",
-        "counterparty_address": "Địa chỉ"
+        "counterparty_address": "Địa chỉ",
+        "supply_date": "Ngày cung ứng"
       },
       "labels": {
         "invoice_status": {

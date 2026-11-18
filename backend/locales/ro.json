@@ -1718,7 +1718,8 @@
         "gross_settled": "Valoare brută decontată",
         "no_withholding": "Nu s-a reținut nimic din această plată.",
         "counterparty_tax_id": "CUI/CIF",
-        "counterparty_address": "Adresă"
+        "counterparty_address": "Adresă",
+        "supply_date": "Data livrării"
       },
       "labels": {
         "invoice_status": {

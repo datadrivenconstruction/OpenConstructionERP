@@ -1718,7 +1718,8 @@
         "gross_settled": "Bruto podmireni iznos",
         "no_withholding": "Od ove uplate ništa nije zadržano.",
         "counterparty_tax_id": "OIB",
-        "counterparty_address": "Adresa"
+        "counterparty_address": "Adresa",
+        "supply_date": "Datum isporuke"
       },
       "labels": {
         "invoice_status": {

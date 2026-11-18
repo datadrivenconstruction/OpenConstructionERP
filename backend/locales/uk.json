@@ -1718,7 +1718,8 @@
         "gross_settled": "Сума з урахуванням утримання",
         "no_withholding": "З цього платежу нічого не утримано.",
         "counterparty_tax_id": "ІПН / ЄДРПОУ",
-        "counterparty_address": "Адреса"
+        "counterparty_address": "Адреса",
+        "supply_date": "Дата постачання"
       },
       "labels": {
         "invoice_status": {
