@@ -213,6 +213,11 @@ export interface ProgressClaimLine {
    */
   retention_to_date?: number | string | null;
   retention_stored_to_date?: number | string | null;
+  /** The payer's assessed and certified quantity; submitted is ``period_completed_qty``. */
+  assessed_qty?: number | string;
+  certified_qty?: number | string;
+  /** Translated ``valuation.*`` findings for this line (assessed above submitted, and so on). */
+  findings?: Array<{ rule_id: string; severity: string; element_ref: string | null; message: string; suggestion: string | null }>;
   retention_rate?: number | string | null;
   created_at: string;
   updated_at: string;
@@ -820,7 +825,7 @@ export function createClaimLine(data: {
 export function updateClaimLine(
   lineId: string,
   data: {
-    period_completed_qty?: number;
+    period_completed_qty?: number | string;
     period_completed_value?: number;
     period_completed_pct?: number;
     cumulative_completed_value?: number;
@@ -830,6 +835,14 @@ export function updateClaimLine(
     `/v1/contracts/progress-claim-lines/${lineId}`,
     data,
   );
+}
+
+/** Record the assessed and/or certified quantity of a claim line (open until approved / certified). */
+export function updateClaimLineQuantities(
+  lineId: string,
+  data: { assessed_qty?: string; certified_qty?: string },
+): Promise<ProgressClaimLine> {
+  return apiPatch<ProgressClaimLine>(`/v1/contracts/progress-claim-lines/${lineId}/quantities`, data);
 }
 
 /* ── Progress bridge (Gap I) ──────────────────────────────────────────── */

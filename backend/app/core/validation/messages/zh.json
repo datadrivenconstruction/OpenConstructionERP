@@ -2218,5 +2218,50 @@
       "calendar_no_work_days": "日历 {calendar} 没有工作日。",
       "suggestion": "请在源进度计划中标出此日历的工作日。"
     }
+  },
+  "commercial_control": {
+    "ok": "已检查，未发现问题",
+    "cvr": {
+      "target_rate_basis": {
+        "fail": "{total} 个已计价清单项中有 {missing} 个没有目标单价，按销售单价计入预算（例如 {sample}）",
+        "suggestion": "请为这些清单项填写目标成本单价，使预算成为现场必须控制的成本"
+      },
+      "unmapped_cost": {
+        "fail": "{kind} {label} 没有 WBS 或成本编码：已承诺 {committed}，实际 {actual}",
+        "suggestion": "请将订单行、分包或发票归入一个 WBS 元素，以便成本价值核对表能够归集"
+      }
+    },
+    "procurement": {
+      "line_over_committed": {
+        "fail": "清单项 {ordinal} 超额承诺：已订 {committed_qty}，预算量 {budget_qty}；金额 {committed_value}，预算 {budget_value}",
+        "suggestion": "继续承诺前请检查是否重复订货，或登记变更或预算调拨"
+      }
+    },
+    "approval_routes": {
+      "bands_contiguous": {
+        "gap": {
+          "fail": "{low} 至 {high}（不含）之间的金额没有任何审批人（步骤 {step}）",
+          "suggestion": "请扩大相邻区间或增加步骤，使每个金额都有审批人"
+        },
+        "overlap": {
+          "fail": "步骤 {step} 与较低区间 {low} 至 {high}（不含）重叠，这些金额需两位审批人都签字",
+          "suggestion": "除非两位都应签字，否则请让每个区间从上一个区间结束处开始"
+        },
+        "empty": {
+          "fail": "步骤 {step} 的区间 {low} 至 {high} 不包含任何金额",
+          "suggestion": "请将最小值设为小于最大值，或将最大值留空表示无上限"
+        }
+      }
+    },
+    "valuation": {
+      "assessed_within_submitted": {
+        "fail": "第 {line} 行：审核数量 {assessed} 大于申报数量 {submitted}",
+        "suggestion": "审核数量不应超过申报数量，额外工作请登记为变更"
+      },
+      "certified_within_assessed": {
+        "fail": "第 {line} 行：核定数量 {certified} 大于审核数量 {assessed}",
+        "suggestion": "核定数量不应超过审核数量，或先重新审核该行"
+      }
+    }
   }
 }

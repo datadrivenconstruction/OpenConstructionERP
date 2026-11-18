@@ -2218,5 +2218,50 @@
       "calendar_no_work_days": "El calendario {calendar} no tiene ningún día laborable.",
       "suggestion": "Marque los días laborables de este calendario en el programa de origen."
     }
+  },
+  "commercial_control": {
+    "ok": "Revisado, sin incidencias",
+    "cvr": {
+      "target_rate_basis": {
+        "fail": "{missing} de {total} partidas valoradas no tienen precio objetivo y se presupuestan a precio de venta (por ejemplo {sample})",
+        "suggestion": "Introduzca el precio de coste objetivo en estas partidas para que el presupuesto sea el coste exigido a la obra"
+      },
+      "unmapped_cost": {
+        "fail": "{kind} {label} no tiene EDT ni código de coste: comprometido {committed}, real {actual}",
+        "suggestion": "Asigne la línea de pedido, el subcontrato o la factura a un elemento de la EDT para que el CVR pueda ubicarlo"
+      }
+    },
+    "procurement": {
+      "line_over_committed": {
+        "fail": "La partida {ordinal} está sobrecomprometida: {committed_qty} de {budget_qty} pedidos, {committed_value} frente a un presupuesto de {budget_value}",
+        "suggestion": "Compruebe si hay un pedido duplicado o registre una modificación o traspaso de presupuesto antes de comprometer más"
+      }
+    },
+    "approval_routes": {
+      "bands_contiguous": {
+        "gap": {
+          "fail": "Los importes desde {low} hasta {high} no llegan a ningún aprobador (paso {step})",
+          "suggestion": "Amplíe una franja vecina o añada un paso para que cada importe tenga aprobador"
+        },
+        "overlap": {
+          "fail": "El paso {step} se solapa con una franja inferior desde {low} hasta {high}; ambos aprobadores firman esos importes",
+          "suggestion": "Haga que cada franja empiece donde termina la anterior, salvo que deban firmar ambos"
+        },
+        "empty": {
+          "fail": "El paso {step} tiene una franja de {low} a {high} que no contiene ningún importe",
+          "suggestion": "Ponga el mínimo por debajo del máximo o deje el máximo vacío para no tener límite"
+        }
+      }
+    },
+    "valuation": {
+      "assessed_within_submitted": {
+        "fail": "Línea {line}: la cantidad evaluada {assessed} supera la presentada {submitted}",
+        "suggestion": "Evalúe como máximo lo presentado y registre el trabajo adicional como modificación"
+      },
+      "certified_within_assessed": {
+        "fail": "Línea {line}: la cantidad certificada {certified} supera la evaluada {assessed}",
+        "suggestion": "Certifique como máximo lo evaluado o vuelva a evaluar la línea"
+      }
+    }
   }
 }

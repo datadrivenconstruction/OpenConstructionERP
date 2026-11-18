@@ -94,6 +94,7 @@ from app.modules.subcontractors.schemas import (
     PaymentApplicationCreate,
     PaymentApplicationFinanceApproval,
     PaymentApplicationLineListResponse,
+    PaymentApplicationLineQuantities,
     PaymentApplicationLineResponse,
     PaymentApplicationLineUpdate,
     PaymentApplicationResponse,
@@ -1043,6 +1044,48 @@ async def update_payment_application_line(
     await _verify_payment_application_project(line.payment_application_id, user_id, session, svc)
     entity = await svc.update_payment_application_line(line_id, data)
     return PaymentApplicationLineResponse.model_validate(entity)
+
+
+def _valuation_findings_input(rows: list[object]) -> dict[str, object]:
+    return {
+        "valuation_lines": [
+            {
+                "id": str(r.id),  # type: ignore[attr-defined]
+                "label": str(r.work_package_id),  # type: ignore[attr-defined]
+                "submitted": str(r.claimed_qty),  # type: ignore[attr-defined]
+                "assessed": str(r.assessed_qty),  # type: ignore[attr-defined]
+                "certified": str(r.certified_qty),  # type: ignore[attr-defined]
+            }
+            for r in rows
+        ]
+    }
+
+
+@router.patch(
+    "/payment-application-lines/{line_id}/quantities",
+    response_model=PaymentApplicationLineResponse,
+)
+async def update_payment_application_line_quantities(
+    line_id: uuid.UUID,
+    data: PaymentApplicationLineQuantities,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    _perm: None = Depends(RequirePermission("subcontractors.update")),
+) -> PaymentApplicationLineResponse:
+    """Save the claimed, assessed and certified quantity of one pay-application line."""
+    from app.core.validation.rules.commercial_control import evaluate
+
+    svc = SubcontractorService(session)
+    line = await svc.payment_lines.get_by_id(line_id)
+    if line is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Payment application line not found")
+    await _verify_payment_application_project(line.payment_application_id, user_id, session, svc)
+    entity = await svc.update_payment_application_line_quantities(line_id, data, actor_id=user_id)
+    resp = PaymentApplicationLineResponse.model_validate(entity)
+    resp.findings = await evaluate(
+        _valuation_findings_input([entity]), target_type="subcontract_payment_line", target_id=str(line_id)
+    )
+    return resp
 
 
 # ── GC claim rollup ────────────────────────────────────────────────────

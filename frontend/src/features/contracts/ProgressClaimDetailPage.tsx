@@ -486,6 +486,7 @@ export function ProgressClaimDetailPage() {
           lines={linesQ.data ?? []}
           currency={claim.currency}
           editable={linesEditable}
+          claimStatus={claim.status}
           isLoading={linesQ.isLoading}
           contractLines={sovQ.data ?? []}
         />

@@ -2218,5 +2218,50 @@
       "calendar_no_work_days": "Kalendern {calendar} har ingen arbetsdag.",
       "suggestion": "Markera kalenderns arbetsdagar i källplanen."
     }
+  },
+  "commercial_control": {
+    "ok": "Kontrollerat, inga anmärkningar",
+    "cvr": {
+      "target_rate_basis": {
+        "fail": "{missing} av {total} prissatta poster saknar målpris och budgeteras till försäljningspris (till exempel {sample})",
+        "suggestion": "Ange målkostnaden på dessa poster så att budgeten blir den kostnad bygget hålls till"
+      },
+      "unmapped_cost": {
+        "fail": "{kind} {label} saknar WBS och kostnadskod: åtaget {committed}, utfall {actual}",
+        "suggestion": "Kontera orderraden, underentreprenaden eller fakturan på ett WBS-element så att CVR kan placera den"
+      }
+    },
+    "procurement": {
+      "line_over_committed": {
+        "fail": "Post {ordinal} är överåtagen: {committed_qty} av {budget_qty} beställt, {committed_value} mot en budget på {budget_value}",
+        "suggestion": "Kontrollera dubbelbeställning eller registrera en ändring eller budgetomföring innan ni åtar er mer"
+      }
+    },
+    "approval_routes": {
+      "bands_contiguous": {
+        "gap": {
+          "fail": "Belopp från {low} upp till {high} når ingen godkännare (steg {step})",
+          "suggestion": "Utöka ett angränsande intervall eller lägg till ett steg så att varje belopp har en godkännare"
+        },
+        "overlap": {
+          "fail": "Steg {step} överlappar ett lägre intervall från {low} upp till {high}; båda godkännarna signerar de beloppen",
+          "suggestion": "Låt varje intervall börja där det föregående slutar, om inte båda ska signera"
+        },
+        "empty": {
+          "fail": "Steg {step} har ett intervall från {low} till {high} som inte innehåller något belopp",
+          "suggestion": "Sätt minimum under maximum, eller lämna maximum tomt för inget tak"
+        }
+      }
+    },
+    "valuation": {
+      "assessed_within_submitted": {
+        "fail": "Rad {line}: bedömd mängd {assessed} överstiger inlämnad {submitted}",
+        "suggestion": "Bedöm högst det som lämnats in och registrera extra arbete som ändring"
+      },
+      "certified_within_assessed": {
+        "fail": "Rad {line}: certifierad mängd {certified} överstiger bedömd {assessed}",
+        "suggestion": "Certifiera högst det som bedömts, eller bedöm raden på nytt först"
+      }
+    }
   }
 }

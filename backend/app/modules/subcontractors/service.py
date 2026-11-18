@@ -73,6 +73,7 @@ from app.modules.subcontractors.schemas import (
     CurrencyAmount,
     ExpiryAlert,
     PaymentApplicationCreate,
+    PaymentApplicationLineQuantities,
     PaymentApplicationLineUpdate,
     PaymentApplicationUpdate,
     PaymentBlockResult,
@@ -2927,6 +2928,52 @@ class SubcontractorService(ProgressBillingMixin):
         if fields:
             await self.payment_lines.update_fields(line_id, **fields)
         return line
+
+    #: A pay application past these statuses has had its quantities acted on.
+    _QTY_EDITABLE_STATUSES = frozenset({"submitted", "foreman_approved"})
+
+    async def update_payment_application_line_quantities(
+        self,
+        line_id: uuid.UUID,
+        data: PaymentApplicationLineQuantities,
+        *,
+        actor_id: str | None = None,
+    ) -> PaymentApplicationLine:
+        """Record the claimed, assessed and certified quantity of one line.
+
+        Open while the pay application is submitted or foreman-approved. Once
+        finance has approved it, it is paid or rejected, the quantities are what
+        the money was decided on and stay as they are. The change is audited.
+        """
+        line = await self.payment_lines.get_by_id(line_id)
+        if line is None:
+            raise HTTPException(status_code=404, detail="Payment application line not found")
+        pay_app = await self.payments.get_by_id(line.payment_application_id)
+        if pay_app is not None and pay_app.status not in self._QTY_EDITABLE_STATUSES:
+            raise self._refuse(
+                status.HTTP_409_CONFLICT,
+                "quantities_locked",
+                f"The pay application is {pay_app.status!r}; its quantities can no longer change.",
+                pay_app_status=pay_app.status,
+            )
+        fields = {k: v for k, v in data.model_dump(exclude_unset=True).items() if v is not None}
+        if not fields:
+            return line
+        before = {k: str(getattr(line, k)) for k in fields}
+        await self.payment_lines.update_fields(line_id, **fields)
+        from app.core.audit_log import log_activity  # noqa: PLC0415
+
+        await log_activity(
+            self.session,
+            actor_id=actor_id,
+            entity_type="subcontract_payment_line",
+            entity_id=str(line_id),
+            action="quantities_updated",
+            module="subcontractors",
+            metadata={k: {"from": before[k], "to": str(v)} for k, v in fields.items()},
+        )
+        refreshed = await self.payment_lines.get_by_id(line_id)
+        return refreshed if refreshed is not None else line
 
     async def suggested_claim_lines(self, claim_id: uuid.UUID) -> dict[str, Any]:
         """Claim lines derived from the subs' approved amounts, for the preview.

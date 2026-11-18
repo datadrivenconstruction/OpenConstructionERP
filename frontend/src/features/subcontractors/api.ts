@@ -191,6 +191,12 @@ export interface PaymentApplicationLine {
   claimed_amount: number | string;
   certified_amount: number | string;
   approved_amount: number | string;
+  /** Valuation quantities: what the sub claimed, what was assessed, what is certified. */
+  claimed_qty?: number | string;
+  assessed_qty?: number | string;
+  certified_qty?: number | string;
+  /** Translated ``valuation.*`` findings returned by the quantities save. */
+  findings?: Array<{ rule_id: string; severity: string; element_ref: string | null; message: string; suggestion: string | null }>;
 }
 
 export interface PaymentApplication {
@@ -893,6 +899,17 @@ export function updatePaymentApplicationLine(
 ): Promise<PaymentApplicationLine> {
   return apiPatch<PaymentApplicationLine>(
     `/v1/subcontractors/payment-application-lines/${lineId}`,
+    data,
+  );
+}
+
+/** Save the claimed, assessed and certified quantity of one pay-application line. */
+export function updatePaymentApplicationLineQuantities(
+  lineId: string,
+  data: { claimed_qty?: string; assessed_qty?: string; certified_qty?: string },
+): Promise<PaymentApplicationLine> {
+  return apiPatch<PaymentApplicationLine>(
+    `/v1/subcontractors/payment-application-lines/${lineId}/quantities`,
     data,
   );
 }

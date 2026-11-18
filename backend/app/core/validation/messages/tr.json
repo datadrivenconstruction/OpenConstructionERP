@@ -2218,5 +2218,50 @@
       "calendar_no_work_days": "{calendar} takviminde çalışma günü yok.",
       "suggestion": "Kaynak programda bu takvimin çalışma günlerini işaretleyin."
     }
+  },
+  "commercial_control": {
+    "ok": "Kontrol edildi, sorun yok",
+    "cvr": {
+      "target_rate_basis": {
+        "fail": "Fiyatlı {total} pozdan {missing} tanesinin hedef birim fiyatı yok ve satış fiyatıyla bütçelenmiş (örneğin {sample})",
+        "suggestion": "Bütçenin şantiyenin bağlı olduğu maliyet olması için bu pozlara hedef maliyet fiyatını girin"
+      },
+      "unmapped_cost": {
+        "fail": "{kind} {label} için WBS veya maliyet kodu yok: taahhüt {committed}, gerçekleşen {actual}",
+        "suggestion": "CVR'nin yerleştirebilmesi için sipariş satırını, taşeron sözleşmesini veya faturayı bir WBS öğesine atayın"
+      }
+    },
+    "procurement": {
+      "line_over_committed": {
+        "fail": "{ordinal} pozu bütçeyi aşan taahhüt içeriyor: {budget_qty} içinden {committed_qty} sipariş edildi, {budget_value} bütçeye karşı {committed_value}",
+        "suggestion": "Daha fazla taahhütten önce çift siparişi kontrol edin veya bir değişiklik ya da bütçe aktarımı kaydedin"
+      }
+    },
+    "approval_routes": {
+      "bands_contiguous": {
+        "gap": {
+          "fail": "{low} ile {high} arasındaki tutarlar hiçbir onaylayıcıya ulaşmıyor (adım {step})",
+          "suggestion": "Her tutarın bir onaylayıcısı olması için komşu aralığı genişletin veya bir adım ekleyin"
+        },
+        "overlap": {
+          "fail": "{step}. adım {low} ile {high} arasındaki alt aralıkla çakışıyor; bu tutarları iki onaylayıcı da imzalar",
+          "suggestion": "İkisinin de imzalaması gerekmiyorsa her aralık bir öncekinin bittiği yerde başlasın"
+        },
+        "empty": {
+          "fail": "{step}. adımın {low} ile {high} arasındaki aralığı hiçbir tutar içermiyor",
+          "suggestion": "Minimumu maksimumun altına ayarlayın veya üst sınır yoksa maksimumu boş bırakın"
+        }
+      }
+    },
+    "valuation": {
+      "assessed_within_submitted": {
+        "fail": "{line} satırı: değerlendirilen miktar {assessed}, sunulan {submitted} miktarından fazla",
+        "suggestion": "En fazla sunulanı değerlendirin ve ek işi değişiklik olarak kaydedin"
+      },
+      "certified_within_assessed": {
+        "fail": "{line} satırı: onaylanan miktar {certified}, değerlendirilen {assessed} miktarından fazla",
+        "suggestion": "En fazla değerlendirileni onaylayın veya satırı önce yeniden değerlendirin"
+      }
+    }
   }
 }

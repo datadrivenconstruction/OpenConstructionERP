@@ -48,6 +48,10 @@ export interface RouteStep {
    *  when the author did not declare a quorum. */
   required_approver_count: number | null;
   sla_hours: number | null;
+  /** Amount band in the project currency, ``amount_min <= amount < amount_max``.
+   *  Both null: the step applies to every amount. Decimal strings. */
+  amount_min?: string | null;
+  amount_max?: string | null;
 }
 
 /** A reusable approval-route template scoped to a project (or global). */
@@ -75,6 +79,8 @@ export interface RouteStepPayload {
   approver_user_id?: string | null;
   mode: RouteStepMode;
   sla_hours?: number | null;
+  amount_min?: string | null;
+  amount_max?: string | null;
 }
 
 export interface ApprovalRouteCreatePayload {

@@ -27,7 +27,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
-import { Plus, Trash2, Lock, TrendingUp, TrendingDown, AlertTriangle, Pencil, Download, HardHat } from 'lucide-react';
+import { Plus, Trash2, Lock, TrendingUp, TrendingDown, AlertTriangle, Pencil, Download, HardHat, GitMerge } from 'lucide-react';
 import {
   Button,
   Card,
@@ -56,6 +56,7 @@ import {
   fetchCvrLines,
   createCvrLine,
   importFieldLabourLine,
+  populateCvrFromSpine,
   updateCvrLine,
   deleteCvrLine,
   fetchCashflowSeries,
@@ -75,7 +76,10 @@ import {
   type CashflowPoint,
   type PaymentApplication,
   type PaymentApplicationStatus,
+  type CommercialFinding,
 } from './api';
+import { CommercialFindings } from './CommercialFindings';
+import { CommitmentGridCard } from './CommitmentGridCard';
 import { InsightsPanel, InsightsToggleButton, useModuleInsights } from '@/features/insights';
 import { buildCvrInsights } from './cvrInsights';
 import { payappDraftFromClaim, progressClaimLabel } from './payappFromClaim';
@@ -258,6 +262,9 @@ function LinesTable({
 }) {
   const { t } = useTranslation();
 
+  // Budget and committed columns appear once a line carries them (filled from the cost spine).
+  const showSpine = lines.some((l) => toNum(l.budget_cost ?? '0') !== 0 || toNum(l.committed_cost ?? '0') !== 0);
+
   if (lines.length === 0) {
     return (
       <EmptyState
@@ -276,6 +283,8 @@ function LinesTable({
           <tr className="text-left text-2xs">
             <th className="pr-3">{t('cvr.col_code', { defaultValue: 'Code' })}</th>
             <th className="pr-3">{t('cvr.col_description', { defaultValue: 'Description' })}</th>
+            {showSpine && <th className="pr-3 text-right">{t('commercial_control.col_budget', { defaultValue: 'Budget' })}</th>}
+            {showSpine && <th className="pr-3 text-right">{t('commercial_control.col_committed', { defaultValue: 'Committed' })}</th>}
             <th className="pr-3 text-right">{t('cvr.col_cost_to_date', { defaultValue: 'Cost to date' })}</th>
             <th className="pr-3 text-right">{t('cvr.col_value_to_date', { defaultValue: 'Value to date' })}</th>
             <th className="pr-3 text-right">{t('cvr.col_forecast_cost', { defaultValue: 'Forecast cost' })}</th>
@@ -300,6 +309,8 @@ function LinesTable({
                     )}
                   </span>
                 </td>
+                {showSpine && <td className="pr-3 text-right tabular-nums text-content-tertiary">{formatCurrency(line.budget_cost ?? '0', currency)}</td>}
+                {showSpine && <td className="pr-3 text-right tabular-nums text-content-tertiary">{formatCurrency(line.committed_cost ?? '0', currency)}</td>}
                 <td className="pr-3 text-right tabular-nums text-content-secondary">{formatCurrency(line.cost_to_date, currency)}</td>
                 <td className="pr-3 text-right tabular-nums text-content-secondary">{formatCurrency(line.value_to_date, currency)}</td>
                 <td className="pr-3 text-right tabular-nums text-content-tertiary">{formatCurrency(line.forecast_cost, currency)}</td>
@@ -337,6 +348,8 @@ function LinesTable({
           <tfoot>
             <tr>
               <td className="pr-3" colSpan={2}>{t('cvr.totals', { defaultValue: 'Totals' })}</td>
+              {showSpine && <td className="pr-3 text-right tabular-nums">{formatCurrency(summary.total_budget_cost ?? '0', currency)}</td>}
+              {showSpine && <td className="pr-3 text-right tabular-nums">{formatCurrency(summary.total_committed_cost ?? '0', currency)}</td>}
               <td className="pr-3 text-right tabular-nums">{formatCurrency(summary.total_cost_to_date, currency)}</td>
               <td className="pr-3 text-right tabular-nums">{formatCurrency(summary.total_value_to_date, currency)}</td>
               <td className="pr-3 text-right tabular-nums">{formatCurrency(summary.total_forecast_cost, currency)}</td>
@@ -583,6 +596,27 @@ export function CvrPage() {
       addToast({ type: 'error', title: t('cvr.field_labour_import_failed', { defaultValue: 'Could not import field labour' }), message: getErrorMessage(err) }),
   });
 
+  // Budget, commitments, actuals and forecast by WBS from the bill and the
+  // cost records; hand-edited figures on those lines are kept by the server.
+  const [spineFindings, setSpineFindings] = useState<CommercialFinding[]>([]);
+  const spineMut = useMutation({
+    mutationFn: () => populateCvrFromSpine(selectedReportId),
+    onSuccess: (res) => {
+      invalidateReport();
+      setSpineFindings(res.findings);
+      addToast({
+        type: 'success',
+        title: t('cvr.spine_filled', {
+          defaultValue: '{{created}} cost heads added, {{updated}} refreshed from the cost spine',
+          created: res.created,
+          updated: res.updated,
+        }),
+      });
+    },
+    onError: (err) =>
+      addToast({ type: 'error', title: t('cvr.spine_fill_failed', { defaultValue: 'Could not fill the report from the cost spine' }), message: getErrorMessage(err) }),
+  });
+
   const deleteLineMut = useMutation({
     mutationFn: (lineId: string) => deleteCvrLine(lineId),
     onSuccess: () => invalidateReport(),
@@ -826,6 +860,18 @@ export function CvrPage() {
                 <Button
                   variant="ghost"
                   size="sm"
+                  onClick={() => spineMut.mutate()}
+                  disabled={!canEdit || !selectedReportId || spineMut.isPending}
+                  title={t('cvr.spine_fill_hint', {
+                    defaultValue: 'One cost head per WBS element: budget at target cost, orders and subcontracts, actual cost and claimed value. Your own edits are kept.',
+                  })}
+                >
+                  <GitMerge size={14} className="mr-1 shrink-0" />
+                  {t('cvr.spine_fill', { defaultValue: 'Fill from cost spine' })}
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
                   onClick={() => importLabourMut.mutate()}
                   disabled={!canEdit || !selectedReportId || importLabourMut.isPending}
                   title={t('cvr.field_labour_hint', { defaultValue: 'Labour hours x rate from approved field timesheets of this month' })}
@@ -844,6 +890,11 @@ export function CvrPage() {
                 </Button>
               </div>
             </div>
+            {spineFindings.length > 0 && (
+              <div className="mb-3">
+                <CommercialFindings findings={spineFindings} />
+              </div>
+            )}
             <LinesTable
               lines={lines}
               summary={summary}
@@ -860,6 +911,8 @@ export function CvrPage() {
           </Card>
         </>
       )}
+
+      {projectId && <CommitmentGridCard projectId={projectId} />}
 
       {/* Cashflow S-curve (project-scoped) */}
       <Card padding="md">

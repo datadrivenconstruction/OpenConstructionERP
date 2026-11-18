@@ -2218,5 +2218,50 @@
       "calendar_no_work_days": "Le calendrier {calendar} n'a aucun jour ouvré.",
       "suggestion": "Indiquez les jours ouvrés de ce calendrier dans le planning source."
     }
+  },
+  "commercial_control": {
+    "ok": "Vérifié, aucun problème",
+    "cvr": {
+      "target_rate_basis": {
+        "fail": "{missing} sur {total} postes chiffrés n'ont pas de prix objectif et sont budgétés au prix de vente (par exemple {sample})",
+        "suggestion": "Saisissez le prix de revient objectif sur ces postes pour que le budget corresponde au coût imposé au chantier"
+      },
+      "unmapped_cost": {
+        "fail": "{kind} {label} n'a ni WBS ni code de coût : engagé {committed}, réel {actual}",
+        "suggestion": "Imputez la ligne de commande, la sous-traitance ou la facture à un élément du WBS pour que le CVR puisse la placer"
+      }
+    },
+    "procurement": {
+      "line_over_committed": {
+        "fail": "Le poste {ordinal} est surengagé : {committed_qty} sur {budget_qty} commandés, {committed_value} pour un budget de {budget_value}",
+        "suggestion": "Vérifiez une éventuelle double commande ou enregistrez un avenant ou un transfert de budget avant d'engager davantage"
+      }
+    },
+    "approval_routes": {
+      "bands_contiguous": {
+        "gap": {
+          "fail": "Les montants de {low} jusqu'à {high} n'atteignent aucun approbateur (étape {step})",
+          "suggestion": "Élargissez une tranche voisine ou ajoutez une étape pour que chaque montant ait un approbateur"
+        },
+        "overlap": {
+          "fail": "L'étape {step} chevauche une tranche inférieure de {low} jusqu'à {high} ; les deux approbateurs signent ces montants",
+          "suggestion": "Faites commencer chaque tranche là où finit la précédente, sauf si les deux doivent signer"
+        },
+        "empty": {
+          "fail": "L'étape {step} a une tranche de {low} à {high} qui ne contient aucun montant",
+          "suggestion": "Mettez le minimum sous le maximum, ou laissez le maximum vide pour aucun plafond"
+        }
+      }
+    },
+    "valuation": {
+      "assessed_within_submitted": {
+        "fail": "Ligne {line} : la quantité évaluée {assessed} dépasse la quantité présentée {submitted}",
+        "suggestion": "Évaluez au plus ce qui a été présenté et enregistrez les travaux en plus comme avenant"
+      },
+      "certified_within_assessed": {
+        "fail": "Ligne {line} : la quantité certifiée {certified} dépasse la quantité évaluée {assessed}",
+        "suggestion": "Certifiez au plus ce qui a été évalué, ou réévaluez d'abord la ligne"
+      }
+    }
   }
 }

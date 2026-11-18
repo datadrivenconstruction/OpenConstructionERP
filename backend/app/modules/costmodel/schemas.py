@@ -966,3 +966,52 @@ class PositionActualsResponse(BaseModel):
     rows: list[PositionActualsRow] = Field(default_factory=list)
     totals: dict[str, str] = Field(default_factory=dict)
     positions_off_spine: int = 0
+
+
+# ── Commitment grid (bill line: budget, committed, remaining, received) ─────
+
+
+class CommitmentGridRow(BaseModel):
+    """One priced bill position against what has been bought for it.
+
+    ``budget_*`` is the cost budget, quantity x target rate when the position has
+    one (``budget_basis = "target"``), else quantity x unit rate. Committed is
+    issued purchase orders plus live subcontracts; remaining is budget minus
+    committed and goes negative when the line is over-committed.
+    """
+
+    model_config = ConfigDict(from_attributes=True)
+
+    boq_position_id: UUID
+    boq_id: UUID | None = None
+    ordinal: str = ""
+    description: str = ""
+    unit: str = ""
+    wbs_id: str | None = None
+    cost_line_id: UUID | None = None
+    budget_basis: str
+    budget_rate: FiniteDecimal
+    budget_qty: FiniteDecimal
+    budget_value: FiniteDecimal
+    po_committed_qty: FiniteDecimal
+    po_committed_value: FiniteDecimal
+    subcontract_committed_qty: FiniteDecimal
+    subcontract_committed_value: FiniteDecimal
+    committed_qty: FiniteDecimal
+    committed_value: FiniteDecimal
+    remaining_qty: FiniteDecimal
+    remaining_value: FiniteDecimal
+    received_qty: FiniteDecimal
+    received_value: FiniteDecimal
+    on_cost_spine: bool = False
+    over_committed_qty: bool = False
+    over_committed_value: bool = False
+
+
+class CommitmentGridResponse(BaseModel):
+    """The commitment grid of a project, its totals and the rule findings."""
+
+    currency: str = ""
+    rows: list[CommitmentGridRow] = Field(default_factory=list)
+    totals: dict[str, FiniteDecimal] = Field(default_factory=dict)
+    findings: list[dict[str, Any]] = Field(default_factory=list)

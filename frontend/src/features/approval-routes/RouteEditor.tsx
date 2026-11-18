@@ -104,6 +104,9 @@ interface DraftStep {
   approver_user_id: string;
   mode: RouteStepMode;
   sla_hours: string;
+  /** Amount band, empty = no bound. */
+  amount_min: string;
+  amount_max: string;
 }
 
 function newLocalId(): string {
@@ -111,15 +114,26 @@ function newLocalId(): string {
   return `step-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
 }
 
-function toDraft(step: { approver_role: string | null; approver_user_id: string | null; mode: RouteStepMode; sla_hours: number | null }): DraftStep {
+function toDraft(step: {
+  approver_role: string | null;
+  approver_user_id: string | null;
+  mode: RouteStepMode;
+  sla_hours: number | null;
+  amount_min?: string | null;
+  amount_max?: string | null;
+}): DraftStep {
   return {
     localId: newLocalId(),
     approver_role: step.approver_role ?? '',
     approver_user_id: step.approver_user_id ?? '',
     mode: step.mode,
     sla_hours: step.sla_hours != null ? String(step.sla_hours) : '',
+    amount_min: step.amount_min != null ? String(step.amount_min) : '',
+    amount_max: step.amount_max != null ? String(step.amount_max) : '',
   };
 }
+
+const AMOUNT_RE = /^\d+(\.\d{1,2})?$/;
 
 /** Draft rows as the API wants them. Lives at module scope so an edit can run
  *  it a second time over the route as it was loaded and get the baseline to
@@ -137,6 +151,8 @@ function toStepPayloads(steps: DraftStep[]): RouteStepPayload[] {
       approver_user_id: s.approver_user_id.trim() || null,
       mode,
       sla_hours: s.sla_hours ? parseInt(s.sla_hours, 10) : null,
+      amount_min: s.amount_min.trim() || null,
+      amount_max: s.amount_max.trim() || null,
     };
   });
 }
@@ -148,6 +164,8 @@ function emptyDraftStep(): DraftStep {
     approver_user_id: '',
     mode: 'all',
     sla_hours: '',
+    amount_min: '',
+    amount_max: '',
   };
 }
 
@@ -325,6 +343,20 @@ export function RouteEditor({
       if (s.sla_hours && !/^\d+$/.test(s.sla_hours)) {
         return t('approvalRoutes.error_sla_integer', {
           defaultValue: 'Step {{n}}: SLA must be a whole number of hours.',
+          n: i + 1,
+        });
+      }
+      const lo = s.amount_min.trim();
+      const hi = s.amount_max.trim();
+      if ((lo && !AMOUNT_RE.test(lo)) || (hi && !AMOUNT_RE.test(hi))) {
+        return t('approvalRoutes.error_amount_format', {
+          defaultValue: 'Step {{n}}: amounts are plain numbers with up to two decimals.',
+          n: i + 1,
+        });
+      }
+      if (lo && hi && Number(hi) <= Number(lo)) {
+        return t('approvalRoutes.error_amount_order', {
+          defaultValue: 'Step {{n}}: the upper amount must be above the lower one.',
           n: i + 1,
         });
       }
@@ -747,6 +779,42 @@ function StepEditorRow({
             placeholder="—"
             className="oe-input w-full tabular-nums"
           />
+        </div>
+
+        {/* Amount band: the step signs amounts from the lower bound up to (not including) the upper one. */}
+        <div className="sm:col-span-12">
+          <label className="block text-2xs font-medium text-content-tertiary uppercase tracking-wide mb-1">
+            {t('approvalRoutes.amount_band', { defaultValue: 'Applies to amounts' })}
+          </label>
+          <div className="flex flex-wrap items-center gap-2 text-xs text-content-secondary">
+            <span>{t('approvalRoutes.amount_from', { defaultValue: 'from' })}</span>
+            <input
+              type="text"
+              inputMode="decimal"
+              value={step.amount_min}
+              onChange={(e) => onChange('amount_min', e.target.value)}
+              placeholder="0"
+              className="oe-input w-32 tabular-nums"
+              aria-label={t('approvalRoutes.amount_min', { defaultValue: 'Lowest amount' })}
+              data-testid="route-step-amount-min"
+            />
+            <span>{t('approvalRoutes.amount_below', { defaultValue: 'up to, not including' })}</span>
+            <input
+              type="text"
+              inputMode="decimal"
+              value={step.amount_max}
+              onChange={(e) => onChange('amount_max', e.target.value)}
+              placeholder={t('approvalRoutes.amount_no_limit', { defaultValue: 'no limit' })}
+              className="oe-input w-32 tabular-nums"
+              aria-label={t('approvalRoutes.amount_max', { defaultValue: 'Upper amount' })}
+              data-testid="route-step-amount-max"
+            />
+            <span className="text-content-tertiary">
+              {t('approvalRoutes.amount_band_hint', {
+                defaultValue: 'Leave both empty for a step that signs every amount. Amounts are in the project currency.',
+              })}
+            </span>
+          </div>
         </div>
       </div>
     </div>

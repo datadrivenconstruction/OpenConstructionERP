@@ -2218,5 +2218,50 @@
       "calendar_no_work_days": "Walang araw ng trabaho ang kalendaryong {calendar}.",
       "suggestion": "Markahan ang mga araw ng trabaho ng kalendaryong ito sa pinagmulang iskedyul."
     }
+  },
+  "commercial_control": {
+    "ok": "Nasuri, walang isyu",
+    "cvr": {
+      "target_rate_basis": {
+        "fail": "{missing} sa {total} na may presyong item ang walang target rate at naka-budget sa presyo ng benta (halimbawa {sample})",
+        "suggestion": "Ilagay ang target na gastos sa mga item na ito para ang budget ay ang gastos na pinanghahawakan ng site"
+      },
+      "unmapped_cost": {
+        "fail": "Walang WBS o cost code ang {kind} {label}: committed {committed}, aktwal {actual}",
+        "suggestion": "I-book ang order line, subcontract o invoice sa isang WBS element para mailagay ito ng CVR"
+      }
+    },
+    "procurement": {
+      "line_over_committed": {
+        "fail": "Sobra ang commitment sa item {ordinal}: {committed_qty} sa {budget_qty} ang na-order, {committed_value} laban sa budget na {budget_value}",
+        "suggestion": "Suriin kung may dobleng order, o magtala ng variation o budget transfer bago mag-commit pa"
+      }
+    },
+    "approval_routes": {
+      "bands_contiguous": {
+        "gap": {
+          "fail": "Ang mga halagang mula {low} hanggang {high} ay walang naaabot na approver (hakbang {step})",
+          "suggestion": "Palawakin ang katabing band o magdagdag ng hakbang para may approver ang bawat halaga"
+        },
+        "overlap": {
+          "fail": "Nagsasapaw ang hakbang {step} sa mas mababang band mula {low} hanggang {high}, kaya parehong approver ang pipirma sa mga halagang iyon",
+          "suggestion": "Simulan ang bawat band kung saan nagtatapos ang nauna, maliban kung dapat pumirma ang dalawa"
+        },
+        "empty": {
+          "fail": "Ang hakbang {step} ay may band mula {low} hanggang {high} na walang lamang halaga",
+          "suggestion": "Itakda ang minimum na mas mababa sa maximum, o iwanang blangko ang maximum kung walang kisame"
+        }
+      }
+    },
+    "valuation": {
+      "assessed_within_submitted": {
+        "fail": "Linya {line}: ang tinasang dami na {assessed} ay lampas sa isinumiteng {submitted}",
+        "suggestion": "Tasahin nang hindi lalampas sa isinumite at itala ang dagdag na gawa bilang variation"
+      },
+      "certified_within_assessed": {
+        "fail": "Linya {line}: ang sertipikadong dami na {certified} ay lampas sa tinasang {assessed}",
+        "suggestion": "Sertipikahan nang hindi lalampas sa tinasa, o tasahin muna muli ang linya"
+      }
+    }
   }
 }

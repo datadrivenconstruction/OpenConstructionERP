@@ -2218,5 +2218,50 @@
       "calendar_no_work_days": "Calendar {calendar} has no working weekday.",
       "suggestion": "Mark the working weekdays of this calendar in the source programme."
     }
+  },
+  "commercial_control": {
+    "ok": "Checked, no issues",
+    "cvr": {
+      "target_rate_basis": {
+        "fail": "{missing} of {total} priced positions have no target rate and are budgeted at their sale rate (for example {sample})",
+        "suggestion": "Enter the target cost rate on these positions so the budget is the cost the site is held to"
+      },
+      "unmapped_cost": {
+        "fail": "{kind} {label} has no WBS or cost code: committed {committed}, actual {actual}",
+        "suggestion": "Book the order line, subcontract or invoice to a WBS element so the CVR can place it"
+      }
+    },
+    "procurement": {
+      "line_over_committed": {
+        "fail": "Line {ordinal} is over-committed: {committed_qty} of {budget_qty} ordered, {committed_value} against a budget of {budget_value}",
+        "suggestion": "Check for a double order, or raise a variation or budget transfer before committing more"
+      }
+    },
+    "approval_routes": {
+      "bands_contiguous": {
+        "gap": {
+          "fail": "Amounts from {low} up to {high} reach no approver (step {step})",
+          "suggestion": "Extend a neighbouring band or add a step so every amount has an approver"
+        },
+        "overlap": {
+          "fail": "Step {step} overlaps a lower band from {low} up to {high}, so both approvers sign those amounts",
+          "suggestion": "Let each band start where the one before it ends, unless both approvers should sign"
+        },
+        "empty": {
+          "fail": "Step {step} has a band from {low} to {high}, which contains no amount",
+          "suggestion": "Set the minimum below the maximum, or leave the maximum empty for no ceiling"
+        }
+      }
+    },
+    "valuation": {
+      "assessed_within_submitted": {
+        "fail": "Line {line}: assessed quantity {assessed} is above the submitted {submitted}",
+        "suggestion": "Assess at most what was submitted and record extra work as a variation"
+      },
+      "certified_within_assessed": {
+        "fail": "Line {line}: certified quantity {certified} is above the assessed {assessed}",
+        "suggestion": "Certify at most what was assessed, or reassess the line first"
+      }
+    }
   }
 }

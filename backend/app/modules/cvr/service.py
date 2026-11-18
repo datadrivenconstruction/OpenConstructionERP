@@ -49,6 +49,7 @@ from app.modules.cvr.schemas import (
     PaymentApplicationUpdate,
     ProgressClaimOption,
 )
+from app.modules.cvr.spine_rollup import SPINE_FIELDS
 from app.modules.cvr.validators import CvrValidationError, assert_single_currency
 
 logger = logging.getLogger(__name__)
@@ -229,6 +230,8 @@ class CvrService:
             accruals=_money(data.accruals),
             forecast_cost=_money(data.forecast_cost),
             forecast_value=_money(data.forecast_value),
+            budget_cost=_money(data.budget_cost),
+            committed_cost=_money(data.committed_cost),
             sort_order=data.sort_order,
             metadata_=data.metadata,
         )
@@ -293,6 +296,101 @@ class CvrService:
         )
         return await self.line_repo.create(line)
 
+    async def populate_from_spine(self, report_id: uuid.UUID) -> dict[str, Any]:
+        """Fill the report by WBS from the bill, commitments and actuals.
+
+        One line per WBS element, marked ``metadata.source = "cost_spine"`` and
+        refreshed in place on the next run. Figures a person has edited by hand
+        (``metadata.overrides``) are left as they are. Cost with no WBS goes to
+        one unallocated line so the report totals equal the module totals.
+        """
+        from app.core.validation.rules.commercial_control import evaluate
+        from app.modules.cvr.spine_rollup import UNMAPPED, load_rollup, wbs_labels
+
+        report = await self.get_report(report_id)
+        self._reject_if_final(report)
+        rollup, base = await load_rollup(self.session, report.project_id)
+        if report.currency and base and report.currency != base:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=(
+                    f"The project is costed in {base} but this report is in {report.currency}. "
+                    "Create the report in the project currency to fill it from the cost spine."
+                ),
+            )
+        labels = await wbs_labels(self.session, report.project_id)
+        existing: dict[str, CvrLine] = {}
+        for line in await self.line_repo.list_for_report(report_id):
+            meta = line.metadata_ or {}
+            if meta.get("source") == "cost_spine":
+                existing[str(meta.get("wbs_key", ""))] = line
+
+        created = updated = kept = 0
+        for key in sorted(rollup.by_wbs, key=lambda k: (k == UNMAPPED, labels.get(k, ("", "", 0))[2], k)):
+            fig = rollup.by_wbs[key]
+            values = {
+                "budget_cost": fig.budget_cost,
+                "committed_cost": fig.committed_cost,
+                "cost_to_date": fig.cost_to_date,
+                "value_to_date": fig.value_to_date,
+                "forecast_cost": fig.forecast_cost,
+                "forecast_value": fig.forecast_value,
+            }
+            code, name, order = labels.get(key, ("", "", 0))
+            meta = {
+                "source": "cost_spine",
+                "wbs_key": key,
+                "positions": fig.positions,
+                "target_positions": fig.target_positions,
+            }
+            line = existing.get(key)
+            if line is not None:
+                overrides = set((line.metadata_ or {}).get("overrides") or [])
+                for field_name, value in values.items():
+                    if field_name in overrides:
+                        kept += 1
+                        continue
+                    setattr(line, field_name, _money(value))
+                line.metadata_ = merge_metadata(line.metadata_, meta)
+                updated += 1
+                continue
+            wbs_uuid: uuid.UUID | None = None
+            if key != UNMAPPED:
+                try:
+                    wbs_uuid = uuid.UUID(key)
+                except ValueError:
+                    wbs_uuid = None
+            await self.line_repo.create(
+                CvrLine(
+                    report_id=report_id,
+                    cost_code=(code or key)[:100] if key != UNMAPPED else "UNALLOCATED",
+                    wbs_id=wbs_uuid,
+                    description=(name or ("Cost without a WBS element" if key == UNMAPPED else key))[:500],
+                    accruals=_money(0),
+                    sort_order=order if key != UNMAPPED else 9999,
+                    metadata_=meta,
+                    **{k: _money(v) for k, v in values.items()},
+                )
+            )
+            created += 1
+        await self.session.flush()
+
+        findings = await evaluate(
+            {"budget_positions": rollup.budget_positions, "unmapped_sources": rollup.unmapped_sources},
+            target_type="cvr_report",
+            target_id=str(report_id),
+        )
+        return {
+            "report_id": report_id,
+            "currency": base or report.currency,
+            "created": created,
+            "updated": updated,
+            "kept_overrides": kept,
+            "lines": await self.line_repo.list_for_report(report_id),
+            "totals": {k: _money(v) for k, v in rollup.totals().items()},
+            "findings": findings,
+        }
+
     async def get_line(self, line_id: uuid.UUID) -> CvrLine:
         """Get a line by ID. Raises 404 if not found."""
         line = await self.line_repo.get_by_id(line_id)
@@ -315,7 +413,15 @@ class CvrService:
         fields: dict[str, Any] = data.model_dump(exclude_unset=True)
         # currency is a guard-only field, never a stored column on a line.
         fields.pop("currency", None)
-        for money_field in ("cost_to_date", "value_to_date", "accruals", "forecast_cost", "forecast_value"):
+        for money_field in (
+            "cost_to_date",
+            "value_to_date",
+            "accruals",
+            "forecast_cost",
+            "forecast_value",
+            "budget_cost",
+            "committed_cost",
+        ):
             if money_field in fields and fields[money_field] is not None:
                 fields[money_field] = _money(fields[money_field])
         if "metadata" in fields:
@@ -323,6 +429,13 @@ class CvrService:
             fields["metadata_"] = (
                 merge_metadata(getattr(line, "metadata_", None), incoming) if isinstance(incoming, dict) else incoming
             )
+        # A hand edit of a figure the spine fills is kept on every later refresh.
+        current_meta = fields.get("metadata_", getattr(line, "metadata_", None)) or {}
+        if isinstance(current_meta, dict) and current_meta.get("source") == "cost_spine":
+            edited = sorted(f for f in SPINE_FIELDS if f in fields)
+            if edited:
+                overrides = sorted(set(current_meta.get("overrides") or []) | set(edited))
+                fields["metadata_"] = merge_metadata(current_meta, {"overrides": overrides})
         if not fields:
             return line
 

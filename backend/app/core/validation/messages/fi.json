@@ -2218,5 +2218,50 @@
       "calendar_no_work_days": "Kalenterissa {calendar} ei ole työpäiviä.",
       "suggestion": "Merkitse tämän kalenterin työpäivät lähdeaikatauluun."
     }
+  },
+  "commercial_control": {
+    "ok": "Tarkistettu, ei huomautettavaa",
+    "cvr": {
+      "target_rate_basis": {
+        "fail": "{missing}/{total} hinnoitellulla nimikkeellä ei ole tavoitehintaa, ja ne budjetoidaan myyntihintaan (esim. {sample})",
+        "suggestion": "Syötä näille nimikkeille tavoitekustannus, jotta budjetti on kustannus, johon työmaa sitoutuu"
+      },
+      "unmapped_cost": {
+        "fail": "{kind} {label}: ei WBS-elementtiä eikä kustannuskoodia, sidottu {committed}, toteutunut {actual}",
+        "suggestion": "Kohdista tilausrivi, aliurakka tai lasku WBS-elementtiin, jotta CVR voi sijoittaa sen"
+      }
+    },
+    "procurement": {
+      "line_over_committed": {
+        "fail": "Nimike {ordinal} on ylisidottu: tilattu {committed_qty}/{budget_qty}, {committed_value} budjetin ollessa {budget_value}",
+        "suggestion": "Tarkista kaksoistilaus tai kirjaa muutos tai budjettisiirto ennen kuin sidot lisää"
+      }
+    },
+    "approval_routes": {
+      "bands_contiguous": {
+        "gap": {
+          "fail": "Summat {low}–{high} eivät tavoita yhtään hyväksyjää (vaihe {step})",
+          "suggestion": "Laajenna viereistä väliä tai lisää vaihe, jotta jokaisella summalla on hyväksyjä"
+        },
+        "overlap": {
+          "fail": "Vaihe {step} menee päällekkäin alemman välin kanssa {low}–{high}; molemmat hyväksyjät allekirjoittavat nämä summat",
+          "suggestion": "Aloita kukin väli siitä, mihin edellinen päättyy, ellei molempien kuulu allekirjoittaa"
+        },
+        "empty": {
+          "fail": "Vaiheella {step} on väli {low}–{high}, johon ei mahdu yhtään summaa",
+          "suggestion": "Aseta minimi maksimia pienemmäksi tai jätä maksimi tyhjäksi, jos kattoa ei ole"
+        }
+      }
+    },
+    "valuation": {
+      "assessed_within_submitted": {
+        "fail": "Rivi {line}: arvioitu määrä {assessed} ylittää esitetyn {submitted}",
+        "suggestion": "Arvioi enintään esitetty määrä ja kirjaa lisätyöt muutoksena"
+      },
+      "certified_within_assessed": {
+        "fail": "Rivi {line}: varmennettu määrä {certified} ylittää arvioidun {assessed}",
+        "suggestion": "Varmenna enintään arvioitu määrä tai arvioi rivi ensin uudelleen"
+      }
+    }
   }
 }

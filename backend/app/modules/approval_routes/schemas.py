@@ -5,10 +5,13 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Literal
+from decimal import Decimal
+from typing import Any, Literal
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
+
+from app.core.decimal_types import FiniteDecimal
 
 # Mirrors the model-level whitelists so the API surface and the DB stay
 # in lockstep without two sources of truth for the literal lists.
@@ -55,6 +58,11 @@ class StepCreate(BaseModel):
     # in service._maybe_advance for the fallback.
     required_approver_count: int | None = Field(default=None, ge=1, le=100)
     sla_hours: int | None = Field(default=None, ge=1, le=720)
+    # Amount band in the project currency, ``amount_min <= amount < amount_max``.
+    # Both empty: the step applies to every amount. Gaps and overlaps between
+    # the bands of one route are checked by ``approval_routes.bands_contiguous``.
+    amount_min: FiniteDecimal | None = Field(default=None, ge=0, le=Decimal("1e15"))
+    amount_max: FiniteDecimal | None = Field(default=None, gt=0, le=Decimal("1e15"))
 
     @model_validator(mode="after")
     def _exactly_one_approver(self) -> StepCreate:
@@ -78,6 +86,8 @@ class StepResponse(BaseModel):
     mode: str
     required_approver_count: int | None
     sla_hours: int | None
+    amount_min: FiniteDecimal | None = None
+    amount_max: FiniteDecimal | None = None
 
 
 # ── Route payloads ───────────────────────────────────────────────────
@@ -167,6 +177,9 @@ class RouteResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
     steps: list[StepResponse] = Field(default_factory=list)
+    # Failed ``approval_routes.bands_contiguous`` findings of the steps' amount
+    # bands (overlaps are warnings; gaps are refused on save and never stored).
+    band_findings: list[dict[str, Any]] = Field(default_factory=list)
 
 
 # ── Instance payloads ────────────────────────────────────────────────
@@ -195,6 +208,10 @@ class InstanceCreate(BaseModel):
     route_id: UUID
     target_kind: TargetKindLiteral
     target_id: UUID
+    # The amount to route, in the project currency. For a target the engine can
+    # read itself (a purchase order) the stored figure wins over this one.
+    amount: FiniteDecimal | None = Field(default=None, ge=0, le=Decimal("1e15"))
+    amount_currency: str | None = Field(default=None, max_length=3)
 
 
 class InstanceResponse(BaseModel):
@@ -215,6 +232,10 @@ class InstanceResponse(BaseModel):
     # means the step's own approver / role (or its resolved out-of-office
     # delegate) is responsible; a value is a one-tap reassignment override.
     current_assignee_user_id: UUID | None = None
+    # The routed amount and the steps its band left out, for the audit trail.
+    amount: FiniteDecimal | None = None
+    amount_currency: str | None = None
+    skipped_step_ordinals: list[int] = Field(default_factory=list)
     created_at: datetime
     updated_at: datetime
     step_states: list[StepStateResponse] = Field(default_factory=list)

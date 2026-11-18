@@ -884,6 +884,17 @@ class ProgressClaimLineUpdate(BaseModel):
     certified_qty: Decimal18_4 | None = Field(default=None, gt=-_MONEY_LIMIT, lt=_MONEY_LIMIT)
 
 
+class ProgressClaimLineQuantities(BaseModel):
+    """The payer's side of a valuation line: the assessed and certified quantity.
+
+    The submitted quantity is ``period_completed_qty`` and is edited with the
+    line while the claim is a draft. These two are recorded after it is sent.
+    """
+
+    assessed_qty: Decimal18_4 | None = Field(default=None, ge=0, lt=_MONEY_LIMIT)
+    certified_qty: Decimal18_4 | None = Field(default=None, ge=0, lt=_MONEY_LIMIT)
+
+
 class ProgressClaimLineResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -907,6 +918,8 @@ class ProgressClaimLineResponse(BaseModel):
     certified_qty: Decimal
     created_at: datetime
     updated_at: datetime
+    # ``valuation.*`` findings for this line (assessed above submitted, and so on).
+    findings: list[dict[str, Any]] = Field(default_factory=list)
 
 
 class AutoGenerateClaimRequest(BaseModel):

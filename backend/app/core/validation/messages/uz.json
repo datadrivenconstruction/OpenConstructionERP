@@ -2218,5 +2218,50 @@
       "calendar_no_work_days": "{calendar} taqvimida ish kuni yoʻq.",
       "suggestion": "Manba jadvalida ushbu taqvimning ish kunlarini belgilang."
     }
+  },
+  "commercial_control": {
+    "ok": "Tekshirildi, muammo yo'q",
+    "cvr": {
+      "target_rate_basis": {
+        "fail": "Narxlangan {total} pozitsiyadan {missing} tasida maqsadli narx yo'q va sotuv narxida byudjetga kiritilgan (masalan, {sample})",
+        "suggestion": "Byudjet obyekt baholanadigan xarajat bo'lishi uchun bu pozitsiyalarga maqsadli tannarxni kiriting"
+      },
+      "unmapped_cost": {
+        "fail": "{kind} {label} uchun WBS yoki xarajat kodi yo'q: majburiyat {committed}, haqiqiy {actual}",
+        "suggestion": "CVR uni hisobga olishi uchun buyurtma qatori, subpudrat yoki hisob-fakturani WBS elementiga biriktiring"
+      }
+    },
+    "procurement": {
+      "line_over_committed": {
+        "fail": "{ordinal} pozitsiyasi byudjetdan ortiq majburiyatga ega: {budget_qty} dan {committed_qty} buyurtma qilindi, {budget_value} byudjetga nisbatan {committed_value}",
+        "suggestion": "Ko'proq majburiyat olishdan oldin ikki marta buyurtmani tekshiring yoki o'zgarish yoki byudjet o'tkazmasini qayd eting"
+      }
+    },
+    "approval_routes": {
+      "bands_contiguous": {
+        "gap": {
+          "fail": "{low} dan {high} gacha bo'lgan summalar hech bir tasdiqlovchiga yetmaydi ({step}-qadam)",
+          "suggestion": "Har bir summaning tasdiqlovchisi bo'lishi uchun qo'shni oraliqni kengaytiring yoki qadam qo'shing"
+        },
+        "overlap": {
+          "fail": "{step}-qadam {low} dan {high} gacha bo'lgan pastki oraliq bilan ustma-ust tushadi, bu summalarga ikkala tasdiqlovchi ham imzo chekadi",
+          "suggestion": "Ikkalasi ham imzo chekishi shart bo'lmasa, har bir oraliqni oldingisi tugagan joydan boshlang"
+        },
+        "empty": {
+          "fail": "{step}-qadamning {low} dan {high} gacha oralig'ida hech qanday summa yo'q",
+          "suggestion": "Minimumni maksimumdan past qo'ying yoki chegara bo'lmasa, maksimumni bo'sh qoldiring"
+        }
+      }
+    },
+    "valuation": {
+      "assessed_within_submitted": {
+        "fail": "{line} qator: baholangan miqdor {assessed} taqdim etilgan {submitted} dan ko'p",
+        "suggestion": "Ko'pi bilan taqdim etilganini baholang, qo'shimcha ishni o'zgarish sifatida qayd eting"
+      },
+      "certified_within_assessed": {
+        "fail": "{line} qator: tasdiqlangan miqdor {certified} baholangan {assessed} dan ko'p",
+        "suggestion": "Ko'pi bilan baholanganini tasdiqlang yoki avval qatorni qayta baholang"
+      }
+    }
   }
 }

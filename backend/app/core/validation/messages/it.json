@@ -2218,5 +2218,50 @@
       "calendar_no_work_days": "Il calendario {calendar} non ha giorni lavorativi.",
       "suggestion": "Indica i giorni lavorativi di questo calendario nel cronoprogramma di origine."
     }
+  },
+  "commercial_control": {
+    "ok": "Verificato, nessun problema",
+    "cvr": {
+      "target_rate_basis": {
+        "fail": "{missing} di {total} voci prezzate non hanno un prezzo obiettivo e sono a budget al prezzo di vendita (ad esempio {sample})",
+        "suggestion": "Inserite il costo obiettivo su queste voci perché il budget sia il costo assegnato al cantiere"
+      },
+      "unmapped_cost": {
+        "fail": "{kind} {label} non ha WBS né codice di costo: impegnato {committed}, consuntivo {actual}",
+        "suggestion": "Imputate la riga d'ordine, il subappalto o la fattura a un elemento WBS perché il CVR possa collocarla"
+      }
+    },
+    "procurement": {
+      "line_over_committed": {
+        "fail": "La voce {ordinal} è sovraimpegnata: ordinati {committed_qty} su {budget_qty}, {committed_value} a fronte di un budget di {budget_value}",
+        "suggestion": "Verificate un doppio ordine oppure registrate una variante o uno storno di budget prima di impegnare altro"
+      }
+    },
+    "approval_routes": {
+      "bands_contiguous": {
+        "gap": {
+          "fail": "Gli importi da {low} fino a {high} non raggiungono alcun approvatore (passo {step})",
+          "suggestion": "Estendete una fascia vicina o aggiungete un passo perché ogni importo abbia un approvatore"
+        },
+        "overlap": {
+          "fail": "Il passo {step} si sovrappone a una fascia inferiore da {low} fino a {high}; entrambi gli approvatori firmano quegli importi",
+          "suggestion": "Fate iniziare ogni fascia dove finisce la precedente, salvo che debbano firmare entrambi"
+        },
+        "empty": {
+          "fail": "Il passo {step} ha una fascia da {low} a {high} che non contiene alcun importo",
+          "suggestion": "Impostate il minimo sotto il massimo, o lasciate vuoto il massimo per nessun tetto"
+        }
+      }
+    },
+    "valuation": {
+      "assessed_within_submitted": {
+        "fail": "Riga {line}: quantità valutata {assessed} superiore a quella presentata {submitted}",
+        "suggestion": "Valutate al massimo quanto presentato e registrate il lavoro in più come variante"
+      },
+      "certified_within_assessed": {
+        "fail": "Riga {line}: quantità certificata {certified} superiore a quella valutata {assessed}",
+        "suggestion": "Certificate al massimo quanto valutato, oppure rivalutate prima la riga"
+      }
+    }
   }
 }

@@ -708,6 +708,18 @@ class PaymentApplicationLineUpdate(BaseModel):
     contract_line_id: UUID | None = None
 
 
+class PaymentApplicationLineQuantities(BaseModel):
+    """The three quantities of one valuation line: claimed, assessed, certified.
+
+    The subcontractor claims, the quantity surveyor assesses (measures) and the
+    certifier certifies. Each is optional; a field left out keeps its value.
+    """
+
+    claimed_qty: Decimal18_4 | None = Field(default=None, ge=0)
+    assessed_qty: Decimal18_4 | None = Field(default=None, ge=0)
+    certified_qty: Decimal18_4 | None = Field(default=None, ge=0)
+
+
 class ApprovedLineAmount(BaseModel):
     """What finance approves on one line of the pay application it approves."""
 
@@ -743,6 +755,8 @@ class PaymentApplicationLineResponse(BaseModel):
     assessed_qty: Decimal = Decimal("0")
     certified_qty: Decimal = Decimal("0")
     contract_line_id: UUID | None = None
+    # ``valuation.*`` findings for this line (assessed above claimed, and so on).
+    findings: list[dict[str, Any]] = Field(default_factory=list)
 
 
 class PaymentApplicationLineListResponse(BaseModel):

@@ -2218,5 +2218,50 @@
       "calendar_no_work_days": "Calendarul {calendar} nu are nicio zi lucrătoare.",
       "suggestion": "Marcați zilele lucrătoare ale acestui calendar în graficul sursă."
     }
+  },
+  "commercial_control": {
+    "ok": "Verificat, fără probleme",
+    "cvr": {
+      "target_rate_basis": {
+        "fail": "{missing} din {total} articole evaluate nu au preț țintă și sunt bugetate la prețul de vânzare (de exemplu {sample})",
+        "suggestion": "Introduceți costul țintă la aceste articole, ca bugetul să fie costul impus șantierului"
+      },
+      "unmapped_cost": {
+        "fail": "{kind} {label} nu are WBS sau cod de cost: angajat {committed}, realizat {actual}",
+        "suggestion": "Alocați linia de comandă, subcontractul sau factura unui element WBS ca CVR să o poată încadra"
+      }
+    },
+    "procurement": {
+      "line_over_committed": {
+        "fail": "Articolul {ordinal} este supraangajat: comandat {committed_qty} din {budget_qty}, {committed_value} față de un buget de {budget_value}",
+        "suggestion": "Verificați o comandă dublă sau înregistrați o modificare ori un transfer de buget înainte de a angaja mai mult"
+      }
+    },
+    "approval_routes": {
+      "bands_contiguous": {
+        "gap": {
+          "fail": "Sumele de la {low} până la {high} nu ajung la niciun aprobator (pasul {step})",
+          "suggestion": "Extindeți o bandă vecină sau adăugați un pas ca fiecare sumă să aibă aprobator"
+        },
+        "overlap": {
+          "fail": "Pasul {step} se suprapune cu o bandă inferioară de la {low} până la {high}; ambii aprobatori semnează aceste sume",
+          "suggestion": "Faceți ca fiecare bandă să înceapă unde se termină cea anterioară, dacă nu trebuie să semneze amândoi"
+        },
+        "empty": {
+          "fail": "Pasul {step} are o bandă de la {low} la {high} care nu conține nicio sumă",
+          "suggestion": "Setați minimul sub maxim sau lăsați maximul gol pentru nicio limită"
+        }
+      }
+    },
+    "valuation": {
+      "assessed_within_submitted": {
+        "fail": "Linia {line}: cantitatea evaluată {assessed} depășește cea depusă {submitted}",
+        "suggestion": "Evaluați cel mult cât s-a depus și înregistrați lucrările suplimentare ca modificare"
+      },
+      "certified_within_assessed": {
+        "fail": "Linia {line}: cantitatea certificată {certified} depășește cea evaluată {assessed}",
+        "suggestion": "Certificați cel mult cât s-a evaluat sau reevaluați mai întâi linia"
+      }
+    }
   }
 }

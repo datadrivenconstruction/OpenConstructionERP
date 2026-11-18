@@ -28,6 +28,7 @@ import logging
 import uuid
 from collections import defaultdict
 from datetime import UTC, datetime, timedelta
+from decimal import Decimal, InvalidOperation
 
 from fastapi import HTTPException, status
 from sqlalchemy import select
@@ -35,6 +36,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.audit_log import log_activity
+from app.core.commercial_checks import check_bands_contiguous, step_applies
 from app.core.events import event_bus
 from app.core.permissions import ROLE_HIERARCHY, _resolve_role
 from app.modules.approval_routes import analytics, delegation_engine
@@ -159,6 +161,39 @@ def _validate_step_quorum(step: StepCreate) -> None:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=conflict)
 
 
+def _validate_bands(steps: list[StepCreate]) -> None:
+    """Refuse amount bands that leave an amount without an approver.
+
+    ``approval_routes.bands_contiguous`` errors (a gap, or an empty band) are a
+    422 here because a route saved with them would let money through unsigned.
+    Overlaps are warnings: the route saves and the response lists them.
+    """
+    findings = check_bands_contiguous(
+        {"route_steps": [{"ordinal": s.ordinal, "amount_min": s.amount_min, "amount_max": s.amount_max} for s in steps]}
+    )
+    errors = [f for f in findings if f.severity == "error"]
+    if errors:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail={
+                "rule_id": "approval_routes.bands_contiguous",
+                "message": "Approval amount bands leave amounts without an approver",
+                "findings": [{"element_ref": f.element_ref, **f.params} for f in errors],
+            },
+        )
+
+
+def applicable_ordinals(steps: list[Step], amount: Decimal | None) -> list[int]:
+    """Ordinals of the steps that take part in routing ``amount``, ascending."""
+    return sorted(s.ordinal for s in steps if step_applies(amount, s.amount_min, s.amount_max))
+
+
+def next_ordinal_after(steps: list[Step], amount: Decimal | None, ordinal: int) -> int | None:
+    """The next step after ``ordinal`` that ``amount`` routes through, or None when the chain is done."""
+    later = [o for o in applicable_ordinals(steps, amount) if o > ordinal]
+    return later[0] if later else None
+
+
 def _safe_publish(name: str, data: dict[str, object]) -> None:
     """Fire-and-forget a lifecycle event without coupling to consumers.
 
@@ -258,6 +293,7 @@ class ApprovalRouteService:
         for step in payload.steps:
             _validate_step_mode(step.mode)
             _validate_step_quorum(step)
+        _validate_bands(payload.steps)
 
         route = Route(
             project_id=payload.project_id,
@@ -277,6 +313,8 @@ class ApprovalRouteService:
                 mode=s.mode,
                 required_approver_count=s.required_approver_count,
                 sla_hours=s.sla_hours,
+                amount_min=s.amount_min,
+                amount_max=s.amount_max,
             )
             for s in payload.steps
         ]
@@ -335,6 +373,8 @@ class ApprovalRouteService:
                     mode=s.mode,
                     required_approver_count=s.required_approver_count,
                     sla_hours=s.sla_hours,
+                    amount_min=s.amount_min,
+                    amount_max=s.amount_max,
                 )
                 for s in source_steps
             ],
@@ -371,6 +411,7 @@ class ApprovalRouteService:
             for step in payload.steps:
                 _validate_step_mode(step.mode)
                 _validate_step_quorum(step)
+            _validate_bands(payload.steps)
             existing = await self.repo.list_instances(route_id=route_id, limit=1)
             if existing:
                 raise HTTPException(
@@ -388,6 +429,8 @@ class ApprovalRouteService:
                     mode=s.mode,
                     required_approver_count=s.required_approver_count,
                     sla_hours=s.sla_hours,
+                    amount_min=s.amount_min,
+                    amount_max=s.amount_max,
                 )
                 for s in payload.steps
             ]
@@ -697,6 +740,15 @@ class ApprovalRouteService:
                 detail="Route has no steps",
             )
 
+        amount, amount_currency, amount_source = await self._routed_amount(payload)
+        applicable = applicable_ordinals(steps, amount)
+        if not applicable:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                detail=f"No step of this route covers the amount {amount}; widen a band or add a step",
+            )
+        skipped = sorted(s.ordinal for s in steps if s.ordinal not in applicable)
+
         # Reject duplicate workflow on the same target row.
         active = await self.repo.list_instances(
             target_kind=payload.target_kind,
@@ -715,11 +767,13 @@ class ApprovalRouteService:
             route_id=route.id,
             target_kind=payload.target_kind,
             target_id=payload.target_id,
-            current_step_ordinal=1,
+            current_step_ordinal=applicable[0],
             status="pending",
             started_at=now,
             completed_at=None,
             started_by=started_by,
+            amount=amount,
+            amount_currency=amount_currency,
         )
         await self.repo.add_instance(instance)
 
@@ -736,6 +790,11 @@ class ApprovalRouteService:
                 "target_kind": payload.target_kind,
                 "target_id": str(payload.target_id),
                 "step_count": len(steps),
+                "amount": str(amount) if amount is not None else None,
+                "amount_currency": amount_currency,
+                "amount_source": amount_source,
+                "applicable_step_ordinals": applicable,
+                "skipped_step_ordinals": skipped,
             },
         )
         _safe_publish(
@@ -750,6 +809,32 @@ class ApprovalRouteService:
             },
         )
         return instance
+
+    async def _routed_amount(self, payload: InstanceCreate) -> tuple[Decimal | None, str | None, str]:
+        """The amount that decides which banded steps apply, and where it came from.
+
+        A purchase order is read from its own row (net of tax, the commitment)
+        so the starter cannot route a large order past an approver by typing a
+        smaller figure. Any other target takes the amount from the request.
+        """
+        if payload.target_kind == "purchase_order":
+            try:
+                from app.modules.procurement.models import PurchaseOrder
+            except ImportError:  # pragma: no cover - procurement not installed
+                PurchaseOrder = None  # noqa: N806
+            if PurchaseOrder is not None:
+                po = await self.session.get(PurchaseOrder, payload.target_id)
+                if po is not None:
+                    try:
+                        value = Decimal(str(po.amount_subtotal or "0"))
+                    except (InvalidOperation, ValueError):
+                        value = None
+                    if value is not None and value.is_finite():
+                        return value, (po.currency_code or "").strip().upper() or None, "purchase_order"
+        if payload.amount is None:
+            return None, None, "none"
+        currency = (payload.amount_currency or "").strip().upper() or None
+        return Decimal(payload.amount), currency, "request"
 
     async def submit_decision(
         self,
@@ -929,7 +1014,9 @@ class ApprovalRouteService:
             else:
                 # Move to next step - the next step starts with its own
                 # approver, so any per-step override is cleared.
-                instance.current_step_ordinal = step.ordinal + 1
+                instance.current_step_ordinal = next_ordinal_after(
+                    await self.repo.list_steps(instance.route_id), instance.amount, step.ordinal
+                ) or (step.ordinal + 1)
                 instance.current_assignee_user_id = None
                 events_to_fire.append(("approval_routes.instance.advanced", {**base_event, "status": "pending"}))
 
@@ -1455,11 +1542,10 @@ class ApprovalRouteService:
         if not cleared:
             return None
 
-        # Check whether there is a next step.
+        # Check whether there is a next step that this amount routes through;
+        # a step whose band leaves the amount out is skipped, never waited on.
         steps = await self.repo.list_steps(instance.route_id)
-        next_ordinal = step.ordinal + 1
-        has_next = any(s.ordinal == next_ordinal for s in steps)
-        return not has_next  # True == finished, False == has next step
+        return next_ordinal_after(steps, instance.amount, step.ordinal) is None
 
 
 def _group_step_states_by_step(

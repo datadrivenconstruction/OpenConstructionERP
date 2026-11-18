@@ -15,7 +15,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Pencil, Check, X, Plus } from 'lucide-react';
+import { Pencil, Check, X, Plus, AlertTriangle } from 'lucide-react';
 
 import { Button, EmptyState } from '@/shared/ui';
 import { MoneyDisplay } from '@/shared/ui/MoneyDisplay';
@@ -23,6 +23,7 @@ import { useToastStore } from '@/stores/useToastStore';
 import { getErrorMessage } from '@/shared/lib/api';
 import {
   updateClaimLine,
+  updateClaimLineQuantities,
   createClaimLine,
   type ProgressClaimLine,
   type ContractLine,
@@ -50,7 +51,14 @@ export interface ProgressClaimLineTableProps {
   /** Contract lines for description lookup (OC-30). When provided the
    *  "Line" column shows the description instead of a truncated UUID. */
   contractLines?: ContractLine[];
+  /** Claim status: the assessed quantity stays open until the claim is
+   *  approved and the certified one until it is certified. */
+  claimStatus?: string;
 }
+
+// The payer assesses and certifies after the claim is sent; a draft edits what is submitted.
+const ASSESS_OPEN = new Set(['submitted']);
+const CERTIFY_OPEN = new Set(['submitted', 'approved']);
 
 export function ProgressClaimLineTable({
   claimId,
@@ -59,6 +67,7 @@ export function ProgressClaimLineTable({
   editable,
   isLoading = false,
   contractLines,
+  claimStatus,
 }: ProgressClaimLineTableProps) {
   const { t } = useTranslation();
   const [adding, setAdding] = useState(false);
@@ -73,6 +82,10 @@ export function ProgressClaimLineTable({
   const pickable = (contractLines ?? []).filter(
     (cl) => !lines.some((l) => l.contract_line_id === cl.id),
   );
+  const status = claimStatus ?? (editable ? 'draft' : '');
+  const canAssess = ASSESS_OPEN.has(status);
+  const canCertify = CERTIFY_OPEN.has(status);
+  const rowEditable = editable || canAssess || canCertify;
 
   if (isLoading) {
     return (
@@ -129,7 +142,13 @@ export function ProgressClaimLineTable({
               {t('contracts.line', { defaultValue: 'Line' })}
             </th>
             <th className="text-right">
-              {t('contracts.qty', { defaultValue: 'Qty' })}
+              {t('commercial_control.qty_submitted', { defaultValue: 'Submitted qty' })}
+            </th>
+            <th className="text-right">
+              {t('commercial_control.qty_assessed', { defaultValue: 'Assessed qty' })}
+            </th>
+            <th className="text-right">
+              {t('commercial_control.qty_certified', { defaultValue: 'Certified qty' })}
             </th>
             <th className="text-right">
               {t('contracts.pct_complete', { defaultValue: '% complete' })}
@@ -137,7 +156,7 @@ export function ProgressClaimLineTable({
             <th className="text-right">
               {t('contracts.period_value', { defaultValue: 'Period value' })}
             </th>
-            {editable && <th className="text-right" />}
+            {rowEditable && <th className="text-right" />}
           </tr>
         </thead>
         <tbody>
@@ -148,6 +167,8 @@ export function ProgressClaimLineTable({
               line={line}
               currency={currency}
               editable={editable}
+              canAssess={canAssess}
+              canCertify={canCertify}
               clMap={clMap}
             />
           ))}
@@ -162,7 +183,7 @@ export function ProgressClaimLineTable({
               />
             ) : (
               <tr>
-                <td colSpan={5} className="pt-2">
+                <td colSpan={7} className="pt-2">
                   <Button
                     size="sm"
                     variant="ghost"
@@ -301,12 +322,16 @@ function ClaimLineRow({
   line,
   currency,
   editable,
+  canAssess,
+  canCertify,
   clMap,
 }: {
   claimId: string;
   line: ProgressClaimLine;
   currency: string;
   editable: boolean;
+  canAssess: boolean;
+  canCertify: boolean;
   clMap: Map<string, ContractLine>;
 }) {
   const { t } = useTranslation();
@@ -315,17 +340,30 @@ function ClaimLineRow({
   const [editing, setEditing] = useState(false);
   const [pct, setPct] = useState(String(toNum(line.period_completed_pct)));
   const [value, setValue] = useState(String(toNum(line.period_completed_value)));
+  const [qty, setQty] = useState(String(toNum(line.period_completed_qty)));
+  const [assessed, setAssessed] = useState(String(toNum(line.assessed_qty)));
+  const [certified, setCertified] = useState(String(toNum(line.certified_qty)));
 
   const saveMut = useMutation({
-    mutationFn: () =>
-      updateClaimLine(line.id, {
-        period_completed_pct: Number(pct) || 0,
-        period_completed_value: Number(value) || 0,
-        // cumulative_completed_value is cumulative-to-date and is recomputed
-        // server-side from prior non-rejected periods; the client must not
-        // author it (sending the period value here corrupted earned-value and
-        // the AIA 'previous' column).
-      }),
+    mutationFn: async () => {
+      let saved: ProgressClaimLine | undefined;
+      if (editable) {
+        saved = await updateClaimLine(line.id, {
+          period_completed_qty: qty.trim() || '0',
+          period_completed_pct: Number(pct) || 0,
+          period_completed_value: Number(value) || 0,
+          // cumulative_completed_value is cumulative-to-date and is recomputed
+          // server-side from prior non-rejected periods; the client must not
+          // author it (sending the period value here corrupted earned-value and
+          // the AIA 'previous' column).
+        });
+      }
+      const quantities: { assessed_qty?: string; certified_qty?: string } = {};
+      if (canAssess) quantities.assessed_qty = assessed.trim() || '0';
+      if (canCertify) quantities.certified_qty = certified.trim() || '0';
+      if (Object.keys(quantities).length > 0) saved = await updateClaimLineQuantities(line.id, quantities);
+      return saved;
+    },
     onSuccess: () => {
       // The line is not the only thing that moved: the claim's stored gross,
       // retention and net follow its lines, and so do the G702 face and the
@@ -343,19 +381,52 @@ function ClaimLineRow({
   const startEdit = () => {
     setPct(String(toNum(line.period_completed_pct)));
     setValue(String(toNum(line.period_completed_value)));
+    setQty(String(toNum(line.period_completed_qty)));
+    setAssessed(String(toNum(line.assessed_qty)));
+    setCertified(String(toNum(line.certified_qty)));
     setEditing(true);
   };
+  const rowEditable = editable || canAssess || canCertify;
+  const findings = line.findings ?? [];
+  const qtyInput = (val: string, set: (v: string) => void, label: string) => (
+    <input
+      type="text"
+      inputMode="decimal"
+      value={val}
+      onChange={(e) => set(e.target.value)}
+      className={inputCls}
+      aria-label={label}
+    />
+  );
+  const qtyText = (v: number | string | undefined) => toNum(v).toLocaleString(getIntlLocale());
 
   return (
     <tr className="border-t border-border-light hover:bg-surface-secondary">
       <td className="px-3 py-2 font-mono text-xs text-content-secondary">
         {clMap.get(line.contract_line_id)?.description || clMap.get(line.contract_line_id)?.code || line.contract_line_id.slice(0, 8)}
+        {findings.length > 0 && (
+          <span className="ml-1 inline-flex align-middle" title={findings.map((f) => f.message).join(' ')}>
+            <AlertTriangle size={12} className="text-semantic-warning" />
+          </span>
+        )}
       </td>
       <td className="px-3 py-2 text-right text-content-secondary">
-        {toNum(line.period_completed_qty).toLocaleString(getIntlLocale())}
+        {editing && editable
+          ? qtyInput(qty, setQty, t('commercial_control.qty_submitted', { defaultValue: 'Submitted qty' }))
+          : qtyText(line.period_completed_qty)}
+      </td>
+      <td className="px-3 py-2 text-right text-content-secondary">
+        {editing && canAssess
+          ? qtyInput(assessed, setAssessed, t('commercial_control.qty_assessed', { defaultValue: 'Assessed qty' }))
+          : qtyText(line.assessed_qty)}
+      </td>
+      <td className="px-3 py-2 text-right text-content-secondary">
+        {editing && canCertify
+          ? qtyInput(certified, setCertified, t('commercial_control.qty_certified', { defaultValue: 'Certified qty' }))
+          : qtyText(line.certified_qty)}
       </td>
       <td className="px-3 py-2 text-right">
-        {editing ? (
+        {editing && editable ? (
           <input
             type="number"
             min={0}
@@ -371,7 +442,7 @@ function ClaimLineRow({
         )}
       </td>
       <td className="px-3 py-2 text-right font-medium">
-        {editing ? (
+        {editing && editable ? (
           <input
             type="number"
             min={0}
@@ -388,7 +459,7 @@ function ClaimLineRow({
           />
         )}
       </td>
-      {editable && (
+      {rowEditable && (
         <td className="px-3 py-2 text-right">
           {editing ? (
             <div className="flex justify-end gap-1">
@@ -418,7 +489,9 @@ function ClaimLineRow({
               icon={<Pencil size={12} />}
               onClick={startEdit}
             >
-              {t('common.edit', { defaultValue: 'Edit' })}
+              {editable
+                ? t('common.edit', { defaultValue: 'Edit' })
+                : t('commercial_control.record_valuation', { defaultValue: 'Record valuation' })}
             </Button>
           )}
         </td>

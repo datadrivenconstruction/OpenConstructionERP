@@ -2218,5 +2218,50 @@
       "calendar_no_work_days": "Kalender {calendar} tidak memiliki hari kerja.",
       "suggestion": "Tandai hari kerja kalender ini di jadwal sumber."
     }
+  },
+  "commercial_control": {
+    "ok": "Diperiksa, tidak ada masalah",
+    "cvr": {
+      "target_rate_basis": {
+        "fail": "{missing} dari {total} item berharga tidak punya harga target dan dianggarkan dengan harga jual (misalnya {sample})",
+        "suggestion": "Isi harga biaya target pada item ini agar anggaran adalah biaya yang menjadi patokan proyek"
+      },
+      "unmapped_cost": {
+        "fail": "{kind} {label} tidak punya WBS atau kode biaya: komitmen {committed}, aktual {actual}",
+        "suggestion": "Bebankan baris pesanan, subkontrak, atau faktur ke elemen WBS agar CVR dapat menempatkannya"
+      }
+    },
+    "procurement": {
+      "line_over_committed": {
+        "fail": "Item {ordinal} melebihi komitmen: dipesan {committed_qty} dari {budget_qty}, {committed_value} terhadap anggaran {budget_value}",
+        "suggestion": "Periksa pesanan ganda atau catat perubahan atau pengalihan anggaran sebelum menambah komitmen"
+      }
+    },
+    "approval_routes": {
+      "bands_contiguous": {
+        "gap": {
+          "fail": "Jumlah dari {low} hingga {high} tidak sampai ke pemberi persetujuan mana pun (langkah {step})",
+          "suggestion": "Perluas rentang di sebelahnya atau tambahkan langkah agar setiap jumlah punya pemberi persetujuan"
+        },
+        "overlap": {
+          "fail": "Langkah {step} tumpang tindih dengan rentang lebih rendah dari {low} hingga {high}; kedua pemberi persetujuan menandatangani jumlah itu",
+          "suggestion": "Mulailah tiap rentang di tempat rentang sebelumnya berakhir, kecuali keduanya memang harus menandatangani"
+        },
+        "empty": {
+          "fail": "Langkah {step} memiliki rentang dari {low} sampai {high} yang tidak memuat jumlah apa pun",
+          "suggestion": "Atur minimum di bawah maksimum, atau kosongkan maksimum jika tanpa batas atas"
+        }
+      }
+    },
+    "valuation": {
+      "assessed_within_submitted": {
+        "fail": "Baris {line}: kuantitas dinilai {assessed} melebihi yang diajukan {submitted}",
+        "suggestion": "Nilai paling banyak yang diajukan dan catat pekerjaan tambahan sebagai perubahan"
+      },
+      "certified_within_assessed": {
+        "fail": "Baris {line}: kuantitas tersertifikasi {certified} melebihi yang dinilai {assessed}",
+        "suggestion": "Sertifikasi paling banyak yang dinilai, atau nilai ulang barisnya dahulu"
+      }
+    }
   }
 }
