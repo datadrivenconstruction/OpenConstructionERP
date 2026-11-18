@@ -330,6 +330,7 @@ export const TITLE_I18N_MAP: Record<string, string> = {
   'E-Signatures': 'signing.title',
   // Finance & analytics
   'Payment Clock': 'nav.payment_clock',
+  'China VAT': 'nav.china_tax',
   'Cost-Value Reconciliation': 'nav.cvr',
   'Earned Value': 'nav.full_evm',
   'EAC Block Editor': 'eac.editor.title',

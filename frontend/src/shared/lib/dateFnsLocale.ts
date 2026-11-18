@@ -56,6 +56,7 @@ import {
   uz,
   vi,
   zhCN,
+  zhHK,
 } from 'date-fns/locale';
 import i18next from 'i18next';
 
@@ -123,6 +124,7 @@ const DATE_FNS_LOCALE_MAP: Record<string, Locale> = {
   uz,
   vi,
   zh: zhCN,
+  'zh-HK': zhHK,
 };
 
 /** Returns the date-fns locale for an explicit i18next language code. */

@@ -189,7 +189,7 @@ describe('#200 counted keys carry every plural form their own language uses', ()
     const otherOnly = localeFiles
       .map(([locale]) => locale)
       .filter((locale) => new Intl.PluralRules(locale).resolvedOptions().pluralCategories.length === 1);
-    expect(otherOnly.sort()).toEqual(['id', 'ja', 'ko', 'th', 'vi', 'zh']);
+    expect(otherOnly.sort()).toEqual(['id', 'ja', 'ko', 'th', 'vi', 'zh', 'zh-HK']);
   });
 
   for (const [locale, text] of localeFiles) {

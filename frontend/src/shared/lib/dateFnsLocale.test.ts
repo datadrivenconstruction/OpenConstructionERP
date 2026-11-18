@@ -37,6 +37,7 @@ const EXPECTED: Record<string, string> = {
   'pt-BR': 'pt-BR',
   ru: 'ru',
   zh: 'zh-CN',
+  'zh-HK': 'zh-HK',
   ar: 'ar',
   hi: 'hi',
   tr: 'tr',

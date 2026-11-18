@@ -8,13 +8,14 @@ import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import { Card, EmptyState, RecoveryCard, SkeletonTable, Badge } from '@/shared/ui';
+import { fmtNumber } from '@/shared/lib/formatters';
 import { formatCurrency, toNum } from '@/shared/lib/money';
 import { fetchCommitmentGrid } from './api';
 import { CommercialFindings } from './CommercialFindings';
 
 function qty(value: string): string {
   const n = toNum(value);
-  return Number.isFinite(n) ? n.toLocaleString(undefined, { maximumFractionDigits: 3 }) : value;
+  return Number.isFinite(n) ? fmtNumber(n, 3) : value;
 }
 
 export function CommitmentGridCard({ projectId }: { projectId: string }) {

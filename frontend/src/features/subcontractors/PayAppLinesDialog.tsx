@@ -23,6 +23,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AlertTriangle, CheckCheck, Loader2, Save } from 'lucide-react';
 
 import { Button } from '@/shared/ui';
+import { fmtNumber } from '@/shared/lib/formatters';
 import { WideModal, WideModalSection } from '@/shared/ui/WideModal';
 import { MoneyDisplay } from '@/shared/ui/MoneyDisplay';
 import {
@@ -161,7 +162,7 @@ export function PayAppLinesDialog({
         data-testid={`pay-app-${field}`}
       />
     ) : (
-      toNum(ln[field]).toLocaleString()
+      fmtNumber(toNum(ln[field]), 0)
     );
 
   // Approve mode starts each line at what it already has approved, or at the

@@ -91,6 +91,7 @@ export const FALLBACK_FIRST_DAY: Readonly<Record<string, CldrFirstDay>> = {
   fil: 7,
   ur: 7,
   he: 7,
+  'zh-HK': 7,
   // Monday-first, and named rather than left to inherit, because its base
   // answers differently. Britain starts its week on Monday where unqualified
   // English is Sunday-first, so `en-GB` falling through to the `en` above
