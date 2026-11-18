@@ -155,7 +155,9 @@ async def test_profiles_show_demo_and_project_only(client: AsyncClient, header: 
         headers=header,
     )
     assert made.status_code == 201, made.text
-    keys = [p["key"] for p in (await client.get(f"{BASE}/projects/{project_id}/profiles", headers=header)).json()["items"]]
+    keys = [
+        p["key"] for p in (await client.get(f"{BASE}/projects/{project_id}/profiles", headers=header)).json()["items"]
+    ]
     assert keys[0] == "demo"
     assert made.json()["key"] in keys
     assert not any(k.startswith("pack:") for k in keys)

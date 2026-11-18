@@ -198,7 +198,9 @@ async def test_switching_the_profile_rejudges_the_history(client: AsyncClient, h
     assert profile.status_code == 201, profile.text
     key = profile.json()["key"]
     assert key.startswith("project:")
-    keys = [p["key"] for p in (await client.get(f"{BASE}/projects/{project_id}/profiles", headers=header)).json()["items"]]
+    keys = [
+        p["key"] for p in (await client.get(f"{BASE}/projects/{project_id}/profiles", headers=header)).json()["items"]
+    ]
     assert keys[0] == "demo" and key in keys
     switched = await client.put(f"{BASE}/projects/{project_id}/settings", json={"profile_key": key}, headers=header)
     assert switched.status_code == 200
