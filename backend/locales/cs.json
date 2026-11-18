@@ -1644,7 +1644,8 @@
         "no_rejections": "Nic nebylo zamítnuto.",
         "sig_delivered_by": "Dodal",
         "counterparty_tax_id": "DIČ",
-        "counterparty_address": "Adresa"
+        "counterparty_address": "Adresa",
+        "delivery_address": "Dodací adresa"
       },
       "labels": {
         "po_status": {

@@ -60103,6 +60103,8 @@ const resource = {
     "procurement.item_requires_inspection": "آمدہ معائنہ",
     "procurement.po_document": "خریداری آرڈر",
     "procurement.gr_document": "مال کی وصولی کی رسید",
+    "procurement.delivery_address": "ترسیل کا پتہ",
+    "procurement.delivery_address_placeholder": "سائٹ کا پتہ، گیٹ، سائٹ پر رابطہ کار",
     "portal.deliveries.submitted": "ڈیلیوری تصدیق کے لیے سائٹ کو بھیج دی گئی",
     "portal.deliveries.no_orders": "آپ کے ساتھ خریداری آرڈر شیئر نہیں کیا گیا",
     "portal.deliveries.no_orders_desc": "جب خریدار آپ کے ساتھ خریداری آرڈر شیئر کرے گا تو آپ یہاں اس کی ڈیلیوریوں کا اعلان کر سکیں گے۔",
@@ -65456,6 +65458,11 @@ const resource = {
     "doc_layout.tab_layout": "خاکہ",
     "doc_layout.tab_branding": "بصری شناخت",
     "doc_layout.tab_history": "تاریخچہ",
+    "doc_layout.legal_notes": "قانونی نوٹس",
+    "doc_layout.legal_note_title": "قانونی نوٹ ({{country}})",
+    "doc_layout.legal_note_when": "لاگو ہونے پر چھپتا ہے",
+    "doc_layout.variant_create": "بنائیں",
+    "doc_layout.delete_variant_confirm": "یہ ویریئنٹ اور اس کے ورژن حذف کریں؟ پہلے جاری شدہ دستاویزات کا ریکارڈ برقرار رہے گا۔",
   }
 } as { translation: Record<string, string> };
 

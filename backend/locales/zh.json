@@ -1628,7 +1628,8 @@
         "no_rejections": "无拒收。",
         "sig_delivered_by": "送货人",
         "counterparty_tax_id": "税号",
-        "counterparty_address": "地址"
+        "counterparty_address": "地址",
+        "delivery_address": "交货地址"
       },
       "labels": {
         "po_status": {

@@ -126,6 +126,8 @@ class PurchaseOrder(Base):
     invoice_tolerance_pct: Mapped[str | None] = mapped_column(String(20), nullable=True)
     invoice_tolerance_abs: Mapped[str | None] = mapped_column(String(50), nullable=True)
     payment_terms: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    # Where the goods go (site, gate, contact); printed on the order the supplier receives.
+    delivery_address: Mapped[str | None] = mapped_column(String(500), nullable=True)
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_by: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]

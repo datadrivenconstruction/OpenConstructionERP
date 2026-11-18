@@ -61668,6 +61668,8 @@ const resource = {
     "procurement.item_requires_inspection": "Kontrola przyjęciowa",
     "procurement.po_document": "Zamówienie zakupu",
     "procurement.gr_document": "Przyjęcie towaru",
+    "procurement.delivery_address": "Adres dostawy",
+    "procurement.delivery_address_placeholder": "Adres budowy, brama, osoba kontaktowa na budowie",
     "portal.deliveries.submitted": "Dostawa wysłana na budowę do potwierdzenia",
     "portal.deliveries.no_orders": "Nie udostępniono ci żadnych zamówień",
     "portal.deliveries.no_orders_desc": "Gdy kupujący udostępni ci zamówienie, możesz tutaj zgłaszać jego dostawy.",
@@ -67090,6 +67092,12 @@ const resource = {
     "doc_layout.tab_layout": "Układ",
     "doc_layout.tab_branding": "Identyfikacja wizualna",
     "doc_layout.tab_history": "Historia",
+    "doc_layout.legal_notes": "Informacje prawne",
+    "doc_layout.legal_note_title": "Informacja prawna ({{country}})",
+    "doc_layout.legal_note_when": "drukowana, gdy ma zastosowanie",
+    "doc_layout.variant_create": "Utwórz",
+    "doc_layout.delete_variant_confirm": "Usunąć ten wariant i jego wersje? Wydane już dokumenty zachowują swój zapis.",
+    "doc_layout.record_missing": "W tym rekordzie brakuje: {{field}} ({{source}})",
   }
 } as { translation: Record<string, string> };
 

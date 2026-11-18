@@ -1644,7 +1644,8 @@
         "no_rejections": "ไม่มีการปฏิเสธสินค้า",
         "sig_delivered_by": "ส่งมอบโดย",
         "counterparty_tax_id": "เลขประจำตัวผู้เสียภาษี",
-        "counterparty_address": "ที่อยู่"
+        "counterparty_address": "ที่อยู่",
+        "delivery_address": "ที่อยู่สำหรับจัดส่ง"
       },
       "labels": {
         "po_status": {

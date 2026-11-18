@@ -1620,7 +1620,8 @@
         "no_rejections": "Hiçbir şey reddedilmedi.",
         "sig_delivered_by": "Teslim eden",
         "counterparty_tax_id": "Vergi no.",
-        "counterparty_address": "Adres"
+        "counterparty_address": "Adres",
+        "delivery_address": "Teslimat adresi"
       },
       "labels": {
         "po_status": {

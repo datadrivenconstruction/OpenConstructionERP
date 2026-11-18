@@ -60465,6 +60465,8 @@ const resource = {
     "procurement.item_requires_inspection": "Inspecție la recepție",
     "procurement.po_document": "Comandă de achiziție",
     "procurement.gr_document": "Recepție de marfă",
+    "procurement.delivery_address": "Adresa de livrare",
+    "procurement.delivery_address_placeholder": "Adresa șantierului, poarta, persoana de contact de pe șantier",
     "portal.deliveries.submitted": "Livrarea a fost trimisă pe șantier pentru confirmare",
     "portal.deliveries.no_orders": "Nu ți-a fost partajată nicio comandă de achiziție",
     "portal.deliveries.no_orders_desc": "Când un cumpărător îți partajează o comandă de achiziție, poți anunța aici livrările acesteia.",
@@ -65852,6 +65854,12 @@ const resource = {
     "doc_layout.tab_layout": "Machetă",
     "doc_layout.tab_branding": "Identitate vizuală",
     "doc_layout.tab_history": "Istoric",
+    "doc_layout.legal_notes": "Mențiuni legale",
+    "doc_layout.legal_note_title": "Mențiune legală ({{country}})",
+    "doc_layout.legal_note_when": "se tipărește când se aplică",
+    "doc_layout.variant_create": "Creează",
+    "doc_layout.delete_variant_confirm": "Ștergeți această variantă și versiunile ei? Documentele deja emise își păstrează înregistrarea.",
+    "doc_layout.record_missing": "Lipsește {{field}} din această înregistrare ({{source}})",
   }
 } as { translation: Record<string, string> };
 

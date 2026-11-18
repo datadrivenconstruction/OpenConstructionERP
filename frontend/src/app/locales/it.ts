@@ -61348,6 +61348,8 @@ const resource = {
     "procurement.item_requires_inspection": "Controllo in accettazione",
     "procurement.po_document": "Ordine di acquisto",
     "procurement.gr_document": "Bolla di entrata merce",
+    "procurement.delivery_address": "Indirizzo di consegna",
+    "procurement.delivery_address_placeholder": "Indirizzo del cantiere, accesso, referente in cantiere",
     "portal.deliveries.submitted": "Consegna inviata al cantiere per la conferma",
     "portal.deliveries.no_orders": "Nessun ordine d'acquisto condiviso con te",
     "portal.deliveries.no_orders_desc": "Quando un acquirente condivide con te un ordine d'acquisto, puoi annunciarne qui le consegne.",
@@ -66734,6 +66736,12 @@ const resource = {
     "doc_layout.tab_layout": "Impaginazione",
     "doc_layout.tab_branding": "Identità visiva",
     "doc_layout.tab_history": "Cronologia",
+    "doc_layout.legal_notes": "Note legali",
+    "doc_layout.legal_note_title": "Nota legale ({{country}})",
+    "doc_layout.legal_note_when": "stampata quando si applica",
+    "doc_layout.variant_create": "Crea",
+    "doc_layout.delete_variant_confirm": "Eliminare questa variante e le sue versioni? I documenti già emessi conservano la loro registrazione.",
+    "doc_layout.record_missing": "Manca {{field}} in questo record ({{source}})",
   }
 } as { translation: Record<string, string> };
 

@@ -788,7 +788,8 @@
         "no_rejections": "Nothing was rejected.",
         "sig_delivered_by": "Delivered by",
         "counterparty_tax_id": "Tax ID",
-        "counterparty_address": "Address"
+        "counterparty_address": "Address",
+        "delivery_address": "Delivery address"
       },
       "labels": {
         "po_status": {

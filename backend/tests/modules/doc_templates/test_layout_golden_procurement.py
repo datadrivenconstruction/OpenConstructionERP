@@ -117,6 +117,7 @@ def _cases() -> Iterator[tuple[str, Callable[[], Any]]]:
     yield "po-no-currency", po(currency_code=None)
     yield "po-unknown-vendor", po(vendor_contact_id=None, created_by=None)
     yield "po-draft-status", po(status=None)
+    yield "po-delivery-address", po(delivery_address="Riverside Block B, gate 2, 10115 Berlin")
     yield "gr-no-items", gr(items=[])
     yield "gr-no-notes", gr(notes=None)
     yield (

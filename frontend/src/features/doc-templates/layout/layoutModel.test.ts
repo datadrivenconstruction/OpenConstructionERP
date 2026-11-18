@@ -10,6 +10,7 @@ import {
   historyRedo,
   historyUndo,
   moveItem,
+  variantKey,
   removeBlock,
   setText,
   textIn,
@@ -97,5 +98,11 @@ describe('layout model', () => {
     h = historyPush(historyUndo(h), 4);
     expect(h.future).toEqual([]);
     expect(historyUndo(historyOf(1)).present).toBe(1);
+  });
+
+  it('turns a typed variant name into a key, empty when nothing usable is left', () => {
+    expect(variantKey('  Short form (EN) ')).toBe('short_form_en');
+    expect(variantKey('***')).toBe('');
+    expect(variantKey('x'.repeat(60))).toHaveLength(40);
   });
 });

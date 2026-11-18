@@ -1644,7 +1644,8 @@
         "no_rejections": "Mitään ei hylätty.",
         "sig_delivered_by": "Toimittaja",
         "counterparty_tax_id": "ALV-tunnus",
-        "counterparty_address": "Osoite"
+        "counterparty_address": "Osoite",
+        "delivery_address": "Toimitusosoite"
       },
       "labels": {
         "po_status": {

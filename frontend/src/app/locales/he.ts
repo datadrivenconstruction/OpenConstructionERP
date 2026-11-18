@@ -60421,6 +60421,8 @@ const resource = {
     "procurement.item_requires_inspection": "בדיקת קבלה",
     "procurement.po_document": "הזמנת רכש",
     "procurement.gr_document": "קבלת סחורה",
+    "procurement.delivery_address": "כתובת אספקה",
+    "procurement.delivery_address_placeholder": "כתובת האתר, שער, איש קשר באתר",
     "portal.deliveries.submitted": "המשלוח נשלח לאתר לאישור",
     "portal.deliveries.no_orders": "לא שותפו איתך הזמנות רכש",
     "portal.deliveries.no_orders_desc": "כאשר קונה משתף איתך הזמנת רכש, תוכל להכריז כאן על המשלוחים שלה.",
@@ -65811,6 +65813,12 @@ const resource = {
     "doc_layout.tab_layout": "פריסה",
     "doc_layout.tab_branding": "זהות חזותית",
     "doc_layout.tab_history": "היסטוריה",
+    "doc_layout.legal_notes": "הערות משפטיות",
+    "doc_layout.legal_note_title": "הערה משפטית ({{country}})",
+    "doc_layout.legal_note_when": "מודפסת כאשר היא חלה",
+    "doc_layout.variant_create": "יצירה",
+    "doc_layout.delete_variant_confirm": "למחוק את הגרסה החלופית הזו ואת הגרסאות שלה? מסמכים שכבר הונפקו שומרים על הרישום שלהם.",
+    "doc_layout.record_missing": "{{field}} חסר ברשומה זו ({{source}})",
   }
 } as { translation: Record<string, string> };
 

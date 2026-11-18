@@ -60509,6 +60509,8 @@ const resource = {
     "procurement.item_requires_inspection": "입고 검사",
     "procurement.po_document": "발주서",
     "procurement.gr_document": "입고 전표",
+    "procurement.delivery_address": "납품 주소",
+    "procurement.delivery_address_placeholder": "현장 주소, 출입구, 현장 담당자",
     "portal.deliveries.submitted": "납품이 현장 확인을 위해 전송되었습니다",
     "portal.deliveries.no_orders": "나와 공유된 발주서가 없습니다",
     "portal.deliveries.no_orders_desc": "구매자가 발주서를 공유하면 여기에서 해당 납품을 등록할 수 있습니다.",
@@ -65841,6 +65843,12 @@ const resource = {
     "doc_layout.tab_layout": "레이아웃",
     "doc_layout.tab_branding": "시각 정체성",
     "doc_layout.tab_history": "기록",
+    "doc_layout.legal_notes": "법정 기재 사항",
+    "doc_layout.legal_note_title": "법정 기재 ({{country}})",
+    "doc_layout.legal_note_when": "해당될 때 인쇄",
+    "doc_layout.variant_create": "만들기",
+    "doc_layout.delete_variant_confirm": "이 변형과 버전을 삭제할까요? 이미 발행된 문서의 기록은 유지됩니다.",
+    "doc_layout.record_missing": "이 레코드에 {{field}}이(가) 없습니다 ({{source}})",
   }
 } as { translation: Record<string, string> };
 

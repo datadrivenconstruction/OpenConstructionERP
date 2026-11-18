@@ -1644,7 +1644,8 @@
         "no_rejections": "Aucun refus.",
         "sig_delivered_by": "Livré par",
         "counterparty_tax_id": "N° TVA",
-        "counterparty_address": "Adresse"
+        "counterparty_address": "Adresse",
+        "delivery_address": "Adresse de livraison"
       },
       "labels": {
         "po_status": {

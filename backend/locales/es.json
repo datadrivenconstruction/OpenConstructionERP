@@ -1644,7 +1644,8 @@
         "no_rejections": "No se rechazó ningún material.",
         "sig_delivered_by": "Entregado por",
         "counterparty_tax_id": "NIF/CIF",
-        "counterparty_address": "Dirección"
+        "counterparty_address": "Dirección",
+        "delivery_address": "Dirección de entrega"
       },
       "labels": {
         "po_status": {

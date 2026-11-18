@@ -1644,7 +1644,8 @@
         "no_rejections": "Không có hàng bị từ chối.",
         "sig_delivered_by": "Người giao hàng",
         "counterparty_tax_id": "Mã số thuế",
-        "counterparty_address": "Địa chỉ"
+        "counterparty_address": "Địa chỉ",
+        "delivery_address": "Địa chỉ giao hàng"
       },
       "labels": {
         "po_status": {

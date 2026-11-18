@@ -1644,7 +1644,8 @@
         "no_rejections": "Nada foi rejeitado.",
         "sig_delivered_by": "Entregue por",
         "counterparty_tax_id": "NIF",
-        "counterparty_address": "Morada"
+        "counterparty_address": "Morada",
+        "delivery_address": "Endereço de entrega"
       },
       "labels": {
         "po_status": {

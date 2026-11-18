@@ -788,7 +788,8 @@
         "no_rejections": "לא נפסל דבר.",
         "sig_delivered_by": "נמסר על ידי",
         "counterparty_tax_id": "מספר עוסק / מזהה מס",
-        "counterparty_address": "כתובת"
+        "counterparty_address": "כתובת",
+        "delivery_address": "כתובת אספקה"
       },
       "labels": {
         "po_status": {

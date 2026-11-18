@@ -1644,7 +1644,8 @@
         "no_rejections": "Nessun articolo respinto.",
         "sig_delivered_by": "Consegnato da",
         "counterparty_tax_id": "Codice fiscale / P.IVA",
-        "counterparty_address": "Indirizzo"
+        "counterparty_address": "Indirizzo",
+        "delivery_address": "Indirizzo di consegna"
       },
       "labels": {
         "po_status": {

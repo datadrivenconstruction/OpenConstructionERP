@@ -60097,6 +60097,8 @@ const resource = {
     "procurement.item_requires_inspection": "بازرسی ورودی",
     "procurement.po_document": "سفارش خرید",
     "procurement.gr_document": "رسید دریافت کالا",
+    "procurement.delivery_address": "نشانی تحویل",
+    "procurement.delivery_address_placeholder": "نشانی کارگاه، درِ ورودی، فرد رابط در کارگاه",
     "portal.deliveries.submitted": "تحویل برای تأیید به کارگاه ارسال شد",
     "portal.deliveries.no_orders": "هیچ سفارش خریدی با شما به اشتراک گذاشته نشده است",
     "portal.deliveries.no_orders_desc": "وقتی خریدار سفارش خریدی را با شما به اشتراک بگذارد، می‌توانید تحویل‌های آن را اینجا اعلام کنید.",
@@ -65450,6 +65452,12 @@ const resource = {
     "doc_layout.tab_layout": "طرح‌بندی",
     "doc_layout.tab_branding": "هویت بصری",
     "doc_layout.tab_history": "تاریخچه",
+    "doc_layout.legal_notes": "یادداشت‌های حقوقی",
+    "doc_layout.legal_note_title": "یادداشت حقوقی ({{country}})",
+    "doc_layout.legal_note_when": "در صورت شمول چاپ می‌شود",
+    "doc_layout.variant_create": "ایجاد",
+    "doc_layout.delete_variant_confirm": "این نسخهٔ جایگزین و نگارش‌های آن حذف شود؟ سندهای صادرشده سابقهٔ خود را نگه می‌دارند.",
+    "doc_layout.record_missing": "{{field}} در این رکورد وجود ندارد ({{source}})",
   }
 } as { translation: Record<string, string> };
 

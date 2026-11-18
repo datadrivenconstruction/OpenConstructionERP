@@ -1644,7 +1644,8 @@
         "no_rejections": "Nem utasítottunk vissza semmit.",
         "sig_delivered_by": "Szállította",
         "counterparty_tax_id": "Adószám",
-        "counterparty_address": "Cím"
+        "counterparty_address": "Cím",
+        "delivery_address": "Szállítási cím"
       },
       "labels": {
         "po_status": {

@@ -63204,6 +63204,8 @@ const resource = {
     "procurement.item_requires_inspection": "فحص الاستلام",
     "procurement.po_document": "أمر الشراء",
     "procurement.gr_document": "إيصال استلام البضائع",
+    "procurement.delivery_address": "عنوان التسليم",
+    "procurement.delivery_address_placeholder": "عنوان الموقع، البوابة، جهة الاتصال في الموقع",
     "portal.deliveries.submitted": "أُرسل التسليم إلى الموقع للتأكيد",
     "portal.deliveries.no_orders": "لا توجد أوامر شراء مشاركة معك",
     "portal.deliveries.no_orders_desc": "عندما يشارك المشتري أمر شراء معك، يمكنك الإعلان عن تسليماته هنا.",
@@ -68696,6 +68698,12 @@ const resource = {
     "doc_layout.tab_layout": "التخطيط",
     "doc_layout.tab_branding": "الهوية البصرية",
     "doc_layout.tab_history": "السجل",
+    "doc_layout.legal_notes": "ملاحظات قانونية",
+    "doc_layout.legal_note_title": "ملاحظة قانونية ({{country}})",
+    "doc_layout.legal_note_when": "تُطبع عند انطباقها",
+    "doc_layout.variant_create": "إنشاء",
+    "doc_layout.delete_variant_confirm": "هل تريد حذف هذا الإصدار البديل ونسخه؟ تحتفظ المستندات الصادرة بسجلها.",
+    "doc_layout.record_missing": "{{field}} غير موجود في هذا السجل ({{source}})",
   }
 } as { translation: Record<string, string> };
 

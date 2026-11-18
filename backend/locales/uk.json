@@ -1644,7 +1644,8 @@
         "no_rejections": "Нічого не відхилено.",
         "sig_delivered_by": "Доставив",
         "counterparty_tax_id": "ІПН / ЄДРПОУ",
-        "counterparty_address": "Адреса"
+        "counterparty_address": "Адреса",
+        "delivery_address": "Адреса доставки"
       },
       "labels": {
         "po_status": {

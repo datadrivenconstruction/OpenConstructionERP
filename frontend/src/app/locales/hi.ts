@@ -60140,6 +60140,8 @@ const resource = {
     "procurement.item_requires_inspection": "आने वाले माल का निरीक्षण",
     "procurement.po_document": "खरीद आदेश",
     "procurement.gr_document": "माल प्राप्ति रसीद",
+    "procurement.delivery_address": "डिलीवरी का पता",
+    "procurement.delivery_address_placeholder": "साइट का पता, गेट, साइट पर संपर्क व्यक्ति",
     "portal.deliveries.submitted": "पुष्टि के लिए डिलीवरी साइट पर भेजी गई",
     "portal.deliveries.no_orders": "आपके साथ कोई खरीद ऑर्डर साझा नहीं किया गया है",
     "portal.deliveries.no_orders_desc": "जब कोई खरीदार आपके साथ खरीद ऑर्डर साझा करेगा, तो आप यहाँ उसकी डिलीवरी की घोषणा कर सकते हैं।",
@@ -65493,6 +65495,12 @@ const resource = {
     "doc_layout.tab_layout": "लेआउट",
     "doc_layout.tab_branding": "दृश्य पहचान",
     "doc_layout.tab_history": "इतिहास",
+    "doc_layout.legal_notes": "कानूनी टिप्पणियाँ",
+    "doc_layout.legal_note_title": "कानूनी टिप्पणी ({{country}})",
+    "doc_layout.legal_note_when": "लागू होने पर छपती है",
+    "doc_layout.variant_create": "बनाएँ",
+    "doc_layout.delete_variant_confirm": "यह वैरिएंट और इसके संस्करण हटाएँ? पहले जारी दस्तावेज़ों का रिकॉर्ड बना रहेगा।",
+    "doc_layout.record_missing": "इस रिकॉर्ड में {{field}} नहीं है ({{source}})",
   }
 } as { translation: Record<string, string> };
 

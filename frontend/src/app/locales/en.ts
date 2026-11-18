@@ -54328,6 +54328,8 @@ const resource = {
     "procurement.item_requires_inspection": "Incoming inspection",
     "procurement.po_document": "Purchase order",
     "procurement.gr_document": "Goods receipt",
+    "procurement.delivery_address": "Delivery address",
+    "procurement.delivery_address_placeholder": "Site address, gate, contact on site",
     "portal.deliveries.submitted": "Delivery sent to the site for confirmation",
     "portal.deliveries.no_orders": "No purchase orders shared with you",
     "portal.deliveries.no_orders_desc": "When a buyer shares a purchase order with you, you can announce its deliveries here.",
@@ -59849,6 +59851,12 @@ const resource = {
     "doc_layout.tab_layout": "Layout",
     "doc_layout.tab_branding": "Branding",
     "doc_layout.tab_history": "History",
+    "doc_layout.legal_notes": "Legal notes",
+    "doc_layout.legal_note_title": "Legal note ({{country}})",
+    "doc_layout.legal_note_when": "printed when it applies",
+    "doc_layout.variant_create": "Create",
+    "doc_layout.delete_variant_confirm": "Delete this variant and its versions? Documents already issued keep their record.",
+    "doc_layout.record_missing": "{{field}} is missing on this record ({{source}})",
   }
 } as { translation: Record<string, string> };
 

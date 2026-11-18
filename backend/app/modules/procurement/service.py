@@ -1075,6 +1075,7 @@ class ProcurementService:
                 amount_total=computed_total,
                 status=data.status,
                 payment_terms=data.payment_terms,
+                delivery_address=data.delivery_address,
                 notes=data.notes,
                 invoice_tolerance_pct=data.invoice_tolerance_pct,
                 invoice_tolerance_abs=data.invoice_tolerance_abs,

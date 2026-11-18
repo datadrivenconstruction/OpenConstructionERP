@@ -63040,6 +63040,8 @@ const resource = {
     "procurement.item_requires_inspection": "Inspeção de recebimento",
     "procurement.po_document": "Encomenda de compra",
     "procurement.gr_document": "Guia de receção de materiais",
+    "procurement.delivery_address": "Endereço de entrega",
+    "procurement.delivery_address_placeholder": "Endereço da obra, portão, contacto na obra",
     "portal.deliveries.submitted": "Entrega enviada à obra para confirmação",
     "portal.deliveries.no_orders": "Nenhum pedido de compra compartilhado com você",
     "portal.deliveries.no_orders_desc": "Quando um comprador compartilhar um pedido de compra com você, você poderá anunciar as entregas aqui.",
@@ -68426,6 +68428,12 @@ const resource = {
     "doc_layout.tab_layout": "Esquema",
     "doc_layout.tab_branding": "Identidade visual",
     "doc_layout.tab_history": "Histórico",
+    "doc_layout.legal_notes": "Menções legais",
+    "doc_layout.legal_note_title": "Menção legal ({{country}})",
+    "doc_layout.legal_note_when": "impressa quando se aplica",
+    "doc_layout.variant_create": "Criar",
+    "doc_layout.delete_variant_confirm": "Eliminar esta variante e as suas versões? Os documentos já emitidos mantêm o seu registo.",
+    "doc_layout.record_missing": "Falta {{field}} neste registo ({{source}})",
   }
 } as { translation: Record<string, string> };
 

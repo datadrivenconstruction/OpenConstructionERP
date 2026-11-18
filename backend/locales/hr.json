@@ -1644,7 +1644,8 @@
         "no_rejections": "Ništa nije odbijeno.",
         "sig_delivered_by": "Isporučio",
         "counterparty_tax_id": "OIB",
-        "counterparty_address": "Adresa"
+        "counterparty_address": "Adresa",
+        "delivery_address": "Adresa isporuke"
       },
       "labels": {
         "po_status": {

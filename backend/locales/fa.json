@@ -788,7 +788,8 @@
         "no_rejections": "هیچ قلمی مردود نشد.",
         "sig_delivered_by": "تحویل‌دهنده",
         "counterparty_tax_id": "شناسه مالیاتی",
-        "counterparty_address": "نشانی"
+        "counterparty_address": "نشانی",
+        "delivery_address": "نشانی تحویل"
       },
       "labels": {
         "po_status": {

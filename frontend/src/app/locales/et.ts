@@ -60087,6 +60087,8 @@ const resource = {
     "procurement.item_requires_inspection": "Sissetuleva kauba kontroll",
     "procurement.po_document": "Ostutellimus",
     "procurement.gr_document": "Kauba vastuvõtt",
+    "procurement.delivery_address": "Tarneaadress",
+    "procurement.delivery_address_placeholder": "Objekti aadress, värav, kontaktisik objektil",
     "portal.deliveries.submitted": "Tarne saadeti objektile kinnitamiseks",
     "portal.deliveries.no_orders": "Sinuga pole ühtegi ostutellimust jagatud",
     "portal.deliveries.no_orders_desc": "Kui ostja jagab sinuga ostutellimuse, saad siin teatada selle tarnetest.",
@@ -65440,6 +65442,12 @@ const resource = {
     "doc_layout.tab_layout": "Paigutus",
     "doc_layout.tab_branding": "Visuaalne identiteet",
     "doc_layout.tab_history": "Ajalugu",
+    "doc_layout.legal_notes": "Õiguslikud märkused",
+    "doc_layout.legal_note_title": "Õiguslik märkus ({{country}})",
+    "doc_layout.legal_note_when": "trükitakse, kui see kehtib",
+    "doc_layout.variant_create": "Loo",
+    "doc_layout.delete_variant_confirm": "Kas kustutada see variant ja selle versioonid? Juba väljastatud dokumentide kirje jääb alles.",
+    "doc_layout.record_missing": "Sellel kirjel puudub {{field}} ({{source}})",
   }
 } as { translation: Record<string, string> };
 

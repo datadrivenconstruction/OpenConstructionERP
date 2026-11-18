@@ -61425,6 +61425,8 @@ const resource = {
     "procurement.item_requires_inspection": "受入検査",
     "procurement.po_document": "発注書",
     "procurement.gr_document": "入荷伝票",
+    "procurement.delivery_address": "納入先住所",
+    "procurement.delivery_address_placeholder": "現場住所、ゲート、現場の連絡先",
     "portal.deliveries.submitted": "納品を現場の確定のため送信しました",
     "portal.deliveries.no_orders": "共有された発注書はありません",
     "portal.deliveries.no_orders_desc": "購入者から発注書が共有されると、ここで納品を通知できます。",
@@ -66757,6 +66759,12 @@ const resource = {
     "doc_layout.tab_layout": "レイアウト",
     "doc_layout.tab_branding": "ビジュアルアイデンティティ",
     "doc_layout.tab_history": "履歴",
+    "doc_layout.legal_notes": "法定記載事項",
+    "doc_layout.legal_note_title": "法定記載 ({{country}})",
+    "doc_layout.legal_note_when": "該当する場合に印刷",
+    "doc_layout.variant_create": "作成",
+    "doc_layout.delete_variant_confirm": "このバリエーションとそのバージョンを削除しますか？発行済みの書類の記録は残ります。",
+    "doc_layout.record_missing": "このレコードに{{field}}がありません（{{source}}）",
   }
 } as { translation: Record<string, string> };
 

@@ -60475,6 +60475,8 @@ const resource = {
     "procurement.item_requires_inspection": "Ulazni pregled",
     "procurement.po_document": "Narudžbenica",
     "procurement.gr_document": "Primka robe",
+    "procurement.delivery_address": "Adresa isporuke",
+    "procurement.delivery_address_placeholder": "Adresa gradilišta, ulaz, kontakt na gradilištu",
     "portal.deliveries.submitted": "Isporuka poslana na gradilište na potvrdu",
     "portal.deliveries.no_orders": "Nema narudžbenica podijeljenih s vama",
     "portal.deliveries.no_orders_desc": "Kad kupac podijeli narudžbenicu s vama, ovdje možete najaviti njezine isporuke.",
@@ -65862,6 +65864,12 @@ const resource = {
     "doc_layout.tab_layout": "Raspored",
     "doc_layout.tab_branding": "Vizualni identitet",
     "doc_layout.tab_history": "Povijest",
+    "doc_layout.legal_notes": "Pravne napomene",
+    "doc_layout.legal_note_title": "Pravna napomena ({{country}})",
+    "doc_layout.legal_note_when": "ispisuje se kad je primjenjivo",
+    "doc_layout.variant_create": "Stvori",
+    "doc_layout.delete_variant_confirm": "Izbrisati ovu varijantu i njezine verzije? Već izdani dokumenti zadržavaju svoj zapis.",
+    "doc_layout.record_missing": "Na ovom zapisu nedostaje {{field}} ({{source}})",
   }
 } as { translation: Record<string, string> };
 

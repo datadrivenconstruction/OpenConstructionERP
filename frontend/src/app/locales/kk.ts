@@ -60098,6 +60098,8 @@ const resource = {
     "procurement.item_requires_inspection": "Кіріс бақылауы",
     "procurement.po_document": "Сатып алу тапсырысы",
     "procurement.gr_document": "Тауарды қабылдау қолхаты",
+    "procurement.delivery_address": "Жеткізу мекенжайы",
+    "procurement.delivery_address_placeholder": "Нысан мекенжайы, қақпа, нысандағы байланыс тұлғасы",
     "portal.deliveries.submitted": "Жеткізу растау үшін нысанға жіберілді",
     "portal.deliveries.no_orders": "Сізбен бөлісілген сатып алу тапсырыстары жоқ",
     "portal.deliveries.no_orders_desc": "Сатып алушы сізбен тапсырысты бөлісе салысымен, осында оның жеткізулерін хабарлауға болады.",
@@ -65451,6 +65453,12 @@ const resource = {
     "doc_layout.tab_layout": "Макет",
     "doc_layout.tab_branding": "Визуалды бейне",
     "doc_layout.tab_history": "Тарих",
+    "doc_layout.legal_notes": "Құқықтық ескертпелер",
+    "doc_layout.legal_note_title": "Құқықтық ескертпе ({{country}})",
+    "doc_layout.legal_note_when": "қолданылған кезде басылады",
+    "doc_layout.variant_create": "Құру",
+    "doc_layout.delete_variant_confirm": "Осы нұсқаны және оның нұсқаларын жою керек пе? Бұрын шығарылған құжаттардың жазбасы сақталады.",
+    "doc_layout.record_missing": "Бұл жазбада {{field}} жоқ ({{source}})",
   }
 } as { translation: Record<string, string> };
 

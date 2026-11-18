@@ -1644,7 +1644,8 @@
         "no_rejections": "Walang tinanggihan.",
         "sig_delivered_by": "Inihatid ni",
         "counterparty_tax_id": "Tax ID",
-        "counterparty_address": "Address"
+        "counterparty_address": "Address",
+        "delivery_address": "Address ng paghahatid"
       },
       "labels": {
         "po_status": {

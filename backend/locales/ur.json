@@ -788,7 +788,8 @@
         "no_rejections": "کچھ بھی مسترد نہیں ہوا۔",
         "sig_delivered_by": "ترسیل کنندہ",
         "counterparty_tax_id": "ٹیکس شناختی نمبر",
-        "counterparty_address": "پتہ"
+        "counterparty_address": "پتہ",
+        "delivery_address": "ترسیل کا پتہ"
       },
       "labels": {
         "po_status": {

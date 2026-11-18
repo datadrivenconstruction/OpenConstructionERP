@@ -197,6 +197,7 @@ interface POResponse {
   amount_total: string | number;
   status: string;
   payment_terms: string | null;
+  delivery_address?: string | null;
   notes: string | null;
   invoice_tolerance_pct?: string | null;
   invoice_tolerance_abs?: string | null;
@@ -264,6 +265,7 @@ interface POFormState {
   delivery_date: string;
   currency: string;
   payment_terms: string;
+  delivery_address: string;
   notes: string;
   // How far a supplier invoice may run past the order before the match warns.
   // Empty means no allowance beyond rounding.
@@ -295,6 +297,7 @@ function poFormFromResponse(po: POResponse, projectCurrency: string): POFormStat
     delivery_date: po.delivery_date ?? '',
     currency: po.currency_code || projectCurrency || '',
     payment_terms: payTermMatch?.[1] ?? '30',
+    delivery_address: po.delivery_address ?? '',
     notes: po.notes ?? '',
     invoice_tolerance_pct: po.invoice_tolerance_pct ?? '',
     invoice_tolerance_abs: po.invoice_tolerance_abs ?? '',
@@ -776,6 +779,7 @@ function PurchaseOrdersTab({
     delivery_date: '',
     currency: '',
     payment_terms: '30',
+    delivery_address: '',
     notes: '',
     invoice_tolerance_pct: '',
     invoice_tolerance_abs: '',
@@ -797,7 +801,7 @@ function PurchaseOrdersTab({
   const emptyPoForm = {
     vendor_contact_id: '', vendor_display: '', po_type: 'standard' as 'standard' | 'blanket' | 'service',
     delivery_date: '', currency: '', payment_terms: '30',
-    notes: '', invoice_tolerance_pct: '', invoice_tolerance_abs: '',
+    delivery_address: '', notes: '', invoice_tolerance_pct: '', invoice_tolerance_abs: '',
     items: [{ ...emptyLine }] as POLineItemForm[],
   };
 
@@ -965,6 +969,7 @@ function PurchaseOrdersTab({
         ...(poRate !== null ? { tax_rate_pct: poRateText } : { tax_amount: poTaxInput || '0' }),
         amount_total: String(poTotal.toFixed(2)),
         payment_terms: `Net ${data.payment_terms}`,
+        delivery_address: data.delivery_address.trim() || undefined,
         notes: data.notes || undefined,
         invoice_tolerance_pct: data.invoice_tolerance_pct.trim() || undefined,
         invoice_tolerance_abs: data.invoice_tolerance_abs.trim() || undefined,
@@ -1033,6 +1038,7 @@ function PurchaseOrdersTab({
       if (data.payment_terms !== base.payment_terms) {
         body.payment_terms = `Net ${data.payment_terms}`;
       }
+      if (data.delivery_address !== base.delivery_address) body.delivery_address = data.delivery_address.trim();
       if (data.notes !== base.notes) body.notes = data.notes || undefined;
       // An emptied allowance is sent as '' so the server clears it.
       if (data.invoice_tolerance_pct !== base.invoice_tolerance_pct) {
@@ -1677,6 +1683,22 @@ function PurchaseOrdersTab({
                       className={inputCls}
                     />
                   </div>
+                </div>
+                {/* Where the goods go: printed on the order the supplier receives. */}
+                <div>
+                  <label htmlFor="po-delivery-address" className="oe-label">
+                    {t('procurement.delivery_address', { defaultValue: 'Delivery address' })}
+                  </label>
+                  <textarea
+                    id="po-delivery-address"
+                    value={poForm.delivery_address}
+                    onChange={(e) => setPoForm((f) => ({ ...f, delivery_address: e.target.value }))}
+                    rows={2}
+                    maxLength={500}
+                    className={clsx('oe-textarea', 'resize-none')}
+                    placeholder={t('procurement.delivery_address_placeholder', { defaultValue: 'Site address, gate, contact on site' })}
+                    data-testid="po-delivery-address"
+                  />
                 </div>
                 {/* Notes */}
                 <div>

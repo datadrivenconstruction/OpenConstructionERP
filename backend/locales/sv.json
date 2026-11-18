@@ -1644,7 +1644,8 @@
         "no_rejections": "Inget reklamerades.",
         "sig_delivered_by": "Levererad av",
         "counterparty_tax_id": "Momsreg.nr",
-        "counterparty_address": "Adress"
+        "counterparty_address": "Adress",
+        "delivery_address": "Leveransadress"
       },
       "labels": {
         "po_status": {

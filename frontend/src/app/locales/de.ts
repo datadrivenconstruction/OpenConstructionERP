@@ -62773,6 +62773,8 @@ const resource = {
     "procurement.item_requires_inspection": "Wareneingangsprüfung",
     "procurement.po_document": "Bestellung",
     "procurement.gr_document": "Wareneingang",
+    "procurement.delivery_address": "Lieferadresse",
+    "procurement.delivery_address_placeholder": "Baustellenadresse, Tor, Ansprechpartner vor Ort",
     "portal.deliveries.submitted": "Lieferung zur Bestätigung an die Baustelle gesendet",
     "portal.deliveries.no_orders": "Keine Bestellungen mit Ihnen geteilt",
     "portal.deliveries.no_orders_desc": "Sobald ein Einkäufer eine Bestellung mit Ihnen teilt, können Sie hier deren Lieferungen ankündigen.",
@@ -68234,6 +68236,12 @@ const resource = {
     "doc_layout.tab_layout": "Seite",
     "doc_layout.tab_branding": "Gestaltung",
     "doc_layout.tab_history": "Verlauf",
+    "doc_layout.legal_notes": "Rechtliche Hinweise",
+    "doc_layout.legal_note_title": "Rechtlicher Hinweis ({{country}})",
+    "doc_layout.legal_note_when": "wird gedruckt, wenn zutreffend",
+    "doc_layout.variant_create": "Anlegen",
+    "doc_layout.delete_variant_confirm": "Diese Variante mit ihren Versionen löschen? Bereits ausgestellte Dokumente behalten ihren Nachweis.",
+    "doc_layout.record_missing": "{{field}} fehlt in diesem Datensatz ({{source}})",
   }
 } as { translation: Record<string, string> };
 

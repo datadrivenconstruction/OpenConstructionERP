@@ -60120,6 +60120,8 @@ const resource = {
     "procurement.item_requires_inspection": "Ирсэн материалын шалгалт",
     "procurement.po_document": "Худалдан авалтын захиалга",
     "procurement.gr_document": "Бараа хүлээн авсан баримт",
+    "procurement.delivery_address": "Хүргэх хаяг",
+    "procurement.delivery_address_placeholder": "Талбайн хаяг, хаалга, талбай дээрх холбоо барих хүн",
     "portal.deliveries.submitted": "Хүргэлтийг баталгаажуулахаар талбайд илгээлээ",
     "portal.deliveries.no_orders": "Танд хуваалцсан худалдан авалтын захиалга алга",
     "portal.deliveries.no_orders_desc": "Худалдан авагч танд худалдан авалтын захиалга хуваалцах үед энд түүний хүргэлтийг мэдэгдэж болно.",
@@ -65511,6 +65513,12 @@ const resource = {
     "doc_layout.tab_layout": "Загвар",
     "doc_layout.tab_branding": "Визуал таних тэмдэг",
     "doc_layout.tab_history": "Түүх",
+    "doc_layout.legal_notes": "Хууль эрх зүйн тэмдэглэл",
+    "doc_layout.legal_note_title": "Хууль эрх зүйн тэмдэглэл ({{country}})",
+    "doc_layout.legal_note_when": "хамаарах үед хэвлэгдэнэ",
+    "doc_layout.variant_create": "Үүсгэх",
+    "doc_layout.delete_variant_confirm": "Энэ хувилбар болон түүний хувилбаруудыг устгах уу? Аль хэдийн гаргасан баримтын бүртгэл хадгалагдана.",
+    "doc_layout.record_missing": "Энэ бичлэгт {{field}} алга ({{source}})",
   }
 } as { translation: Record<string, string> };
 

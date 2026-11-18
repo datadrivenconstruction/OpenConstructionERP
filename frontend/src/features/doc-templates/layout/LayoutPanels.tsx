@@ -294,6 +294,31 @@ export function ContentPanel(props: PanelProps) {
           </ul>
         </SortableContext>
       </DndContext>
+      {(spec.legal ?? []).length > 0 && (
+        <ul className="space-y-1.5" aria-label={t('doc_layout.legal_notes', { defaultValue: 'Legal notes' })} data-testid="layout-legal-blocks">
+          {(spec.legal ?? []).map((note) => (
+            <li
+              key={`${note.country}-${note.id}`}
+              aria-disabled="true"
+              className="flex items-start gap-1 rounded-md border border-border-light bg-surface-secondary px-2 py-1.5"
+            >
+              <LockBadge reason={note.source} />
+              <div className="min-w-0 flex-1 text-xs">
+                <p className="font-medium text-content-primary">
+                  {t('doc_layout.legal_note_title', { defaultValue: 'Legal note ({{country}})', country: note.country })}
+                  {note.when && (
+                    <span className="ms-1 font-normal text-content-tertiary">
+                      {t('doc_layout.legal_note_when', { defaultValue: 'printed when it applies' })}
+                    </span>
+                  )}
+                </p>
+                <p className="mt-0.5 whitespace-pre-line text-content-secondary">{note.text}</p>
+                <p className="mt-0.5 text-content-tertiary">{t('doc_layout.locked_reason', { defaultValue: 'Required by {{source}}', source: note.source })}</p>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
       {!readOnly && (
         <div>
           <p className={LABEL}>{t('doc_layout.add_block', { defaultValue: 'Add block' })}</p>

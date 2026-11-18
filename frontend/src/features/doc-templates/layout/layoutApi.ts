@@ -163,7 +163,17 @@ export interface LayoutSpecInfo {
   collections: { id: string; label: string; columns: LayoutColumnInfo[] }[];
   sections: { id: string; label: string; heading: string; required: boolean; builtin: boolean }[];
   locks: LayoutLocks;
+  /** Fixed notes the country packs print in the legal zone; never editable here. */
+  legal?: LegalBlock[];
   standard: LayoutTemplate;
+}
+
+export interface LegalBlock {
+  id: string;
+  country: string;
+  text: string;
+  source: string;
+  when: string;
 }
 
 export interface LayoutVersion {
@@ -275,7 +285,7 @@ export const importLayout = (t: LayoutTarget, file: Record<string, unknown>) =>
 export const listLayoutRecords = (key: string) =>
   apiGet<{ items: { id: string; label: string }[]; total: number }>(`${base}/${k(key)}/records`);
 export const getLayoutValues = (key: string, locale: string, recordId: string | null) =>
-  apiGet<{ values: Record<string, string>; status: string; rows: Record<string, number> }>(
+  apiGet<{ values: Record<string, string>; status: string; rows: Record<string, number>; issues?: DocIssue[] }>(
     `${base}/${k(key)}/values?locale=${encodeURIComponent(locale)}${recordId ? `&record_id=${encodeURIComponent(recordId)}` : ''}`,
   );
 export const listClauses = () => apiGet<{ items: Clause[]; total: number }>(`${base}/clauses`);

@@ -1644,7 +1644,8 @@
         "no_rejections": "Δεν απορρίφθηκε τίποτα.",
         "sig_delivered_by": "Παραδόθηκε από",
         "counterparty_tax_id": "ΑΦΜ",
-        "counterparty_address": "Διεύθυνση"
+        "counterparty_address": "Διεύθυνση",
+        "delivery_address": "Διεύθυνση παράδοσης"
       },
       "labels": {
         "po_status": {

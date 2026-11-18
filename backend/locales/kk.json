@@ -1660,7 +1660,8 @@
         "no_rejections": "Ештеңе қайтарылмады.",
         "sig_delivered_by": "Жеткізген",
         "counterparty_tax_id": "Салық төлеуші нөмірі (СТН)",
-        "counterparty_address": "Мекенжайы"
+        "counterparty_address": "Мекенжайы",
+        "delivery_address": "Жеткізу мекенжайы"
       },
       "labels": {
         "po_status": {

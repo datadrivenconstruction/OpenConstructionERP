@@ -1644,7 +1644,8 @@
         "no_rejections": "Нищо не е отхвърлено.",
         "sig_delivered_by": "Доставил",
         "counterparty_tax_id": "ИН по ДДС",
-        "counterparty_address": "Адрес"
+        "counterparty_address": "Адрес",
+        "delivery_address": "Адрес за доставка"
       },
       "labels": {
         "po_status": {

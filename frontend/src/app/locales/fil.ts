@@ -60095,6 +60095,8 @@ const resource = {
     "procurement.item_requires_inspection": "Inspeksyon sa pagdating",
     "procurement.po_document": "Purchase order",
     "procurement.gr_document": "Resibo ng pagtanggap ng materyales",
+    "procurement.delivery_address": "Address ng paghahatid",
+    "procurement.delivery_address_placeholder": "Address ng site, gate, contact sa site",
     "portal.deliveries.submitted": "Naipadala na ang paghahatid sa site para sa kumpirmasyon",
     "portal.deliveries.no_orders": "Walang purchase order na ibinahagi sa iyo",
     "portal.deliveries.no_orders_desc": "Kapag nagbahagi ang buyer ng purchase order sa iyo, maaari mong ianunsyo dito ang mga paghahatid nito.",
@@ -65448,6 +65450,12 @@ const resource = {
     "doc_layout.tab_layout": "Layout",
     "doc_layout.tab_branding": "Visual identity",
     "doc_layout.tab_history": "Kasaysayan",
+    "doc_layout.legal_notes": "Mga legal na paalala",
+    "doc_layout.legal_note_title": "Legal na paalala ({{country}})",
+    "doc_layout.legal_note_when": "ini-print kapag naaangkop",
+    "doc_layout.variant_create": "Gumawa",
+    "doc_layout.delete_variant_confirm": "Burahin ang variant na ito at ang mga bersyon nito? Mananatili ang tala ng mga dokumentong nailabas na.",
+    "doc_layout.record_missing": "Walang {{field}} sa record na ito ({{source}})",
   }
 } as { translation: Record<string, string> };
 

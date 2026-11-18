@@ -764,7 +764,8 @@
         "no_rejections": "Отклонений нет.",
         "sig_delivered_by": "Сдающая сторона",
         "counterparty_tax_id": "ИНН",
-        "counterparty_address": "Адрес"
+        "counterparty_address": "Адрес",
+        "delivery_address": "Адрес доставки"
       },
       "labels": {
         "po_status": {

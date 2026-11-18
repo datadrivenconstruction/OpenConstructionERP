@@ -1660,7 +1660,8 @@
         "no_rejections": "कुछ भी अस्वीकृत नहीं हुआ।",
         "sig_delivered_by": "वितरित किया",
         "counterparty_tax_id": "कर पहचान संख्या",
-        "counterparty_address": "पता"
+        "counterparty_address": "पता",
+        "delivery_address": "डिलीवरी का पता"
       },
       "labels": {
         "po_status": {

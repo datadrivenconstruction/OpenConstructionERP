@@ -61018,6 +61018,8 @@ const resource = {
     "procurement.item_requires_inspection": "Giriş kontrolü",
     "procurement.po_document": "Satın alma siparişi",
     "procurement.gr_document": "Mal kabul belgesi",
+    "procurement.delivery_address": "Teslimat adresi",
+    "procurement.delivery_address_placeholder": "Şantiye adresi, giriş kapısı, şantiyedeki irtibat kişisi",
     "portal.deliveries.submitted": "Teslimat onay için şantiyeye gönderildi",
     "portal.deliveries.no_orders": "Sizinle paylaşılan satınalma siparişi yok",
     "portal.deliveries.no_orders_desc": "Bir alıcı sizinle satınalma siparişi paylaştığında, bu siparişin teslimatlarını burada bildirebilirsiniz.",
@@ -66371,6 +66373,11 @@ const resource = {
     "doc_layout.tab_layout": "Düzen",
     "doc_layout.tab_branding": "Kurumsal kimlik",
     "doc_layout.tab_history": "Geçmiş",
+    "doc_layout.legal_notes": "Yasal notlar",
+    "doc_layout.legal_note_title": "Yasal not ({{country}})",
+    "doc_layout.legal_note_when": "geçerli olduğunda basılır",
+    "doc_layout.variant_create": "Oluştur",
+    "doc_layout.delete_variant_confirm": "Bu varyant ve sürümleri silinsin mi? Daha önce düzenlenen belgelerin kaydı korunur.",
   }
 } as { translation: Record<string, string> };
 
