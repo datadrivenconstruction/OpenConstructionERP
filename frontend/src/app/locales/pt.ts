@@ -31310,6 +31310,8 @@ const resource = {
   "contacts.prequal_approved": "Aprovado",
   "contacts.prequal_pending": "Pendente",
   "contacts.field_state": "Distrito / região",
+  "contacts.picker_project_team": "Equipa do projeto",
+  "contacts.picker_company_contacts": "Contactos da empresa",
     "contracts.flow_1_desc": "Crie um contrato ciente do tipo com seu cronograma de valores e retenção.",
     "contracts.flow_1_title": "Configurar",
     "contracts.flow_2_desc": "Limpe o portão de conformidade e depois assine para ativá-lo.",

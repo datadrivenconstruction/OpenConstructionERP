@@ -29987,6 +29987,8 @@ const resource = {
     "contacts.prequal_approved": "অনুমোদিত",
     "contacts.prequal_pending": "মুলতুবি",
     "contacts.field_state": "রাজ্য / অঞ্চল",
+    "contacts.picker_project_team": "প্রকল্প দল",
+    "contacts.picker_company_contacts": "কোম্পানির পরিচিতি",
     "contracts.flow_1_desc": "এর ভ্যালুর শিডিউল ও রিটেনশনসহ একটি টাইপ-সচেতন চুক্তি তৈরি করুন।",
     "contracts.flow_1_title": "সেট আপ করুন",
     "contracts.flow_2_desc": "কমপ্লায়েন্স গেট পরিষ্কার করুন, তারপর এটি সক্রিয় করতে স্বাক্ষর করুন।",

@@ -7,13 +7,11 @@ import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-vi.mock('@/features/contacts/api', () => ({ fetchContacts: vi.fn() }));
 vi.mock('@/shared/lib/api', async () => {
   const actual = await vi.importActual<typeof import('@/shared/lib/api')>('@/shared/lib/api');
   return { ...actual, apiGet: vi.fn() };
 });
 
-import { fetchContacts } from '@/features/contacts/api';
 import { apiGet } from '@/shared/lib/api';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { AssigneePicker } from './AssigneePicker';
@@ -38,11 +36,16 @@ function renderPicker() {
 describe('AssigneePicker', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    (fetchContacts as any).mockResolvedValue({
-      items: [{ id: 'k1', first_name: 'Ana', last_name: 'Lopez', company_name: 'Site Crew GmbH', primary_email: null }],
-      total: 1,
-    });
-    (apiGet as any).mockResolvedValue([{ id: 'u1', email: 'max@example.com', full_name: 'Max Manager' }]);
+    (apiGet as any).mockImplementation(async (url: string) =>
+      url.startsWith('/v1/contacts/pickable/')
+        ? {
+            team: [{ id: 't1', first_name: 'Tom', last_name: 'Team', company_name: null, primary_email: null }],
+            company: [
+              { id: 'k1', first_name: 'Ana', last_name: 'Lopez', company_name: 'Site Crew GmbH', primary_email: null },
+            ],
+          }
+        : [{ id: 'u1', email: 'max@example.com', full_name: 'Max Manager' }],
+    );
   });
 
   it('offers contacts to an editor without asking for the users list', async () => {
@@ -50,7 +53,7 @@ describe('AssigneePicker', () => {
     renderPicker();
     fireEvent.focus(screen.getByTestId('task-assignee-input'));
     const option = await screen.findByTestId('task-assignee-option-contact-k1');
-    expect(apiGet).not.toHaveBeenCalled();
+    expect(apiGet).not.toHaveBeenCalledWith(expect.stringContaining('/v1/users/'));
 
     fireEvent.click(option);
     expect(last).toEqual({ name: 'Ana Lopez', userId: '', contactId: 'k1' });
@@ -58,6 +61,17 @@ describe('AssigneePicker', () => {
     expect(assigneeFields({ assigned_to: last.name, assignee_user_id: '', assignee_contact_id: 'k1' })).toEqual({
       assignee_contact_id: 'k1',
     });
+  });
+
+  it('lists the project team before the company contacts, each under its heading', async () => {
+    useAuthStore.setState({ userRole: 'editor' });
+    renderPicker();
+    fireEvent.focus(screen.getByTestId('task-assignee-input'));
+    await screen.findByTestId('task-assignee-option-contact-k1');
+    const ids = screen.getAllByRole('option').map((o) => o.getAttribute('data-testid'));
+    expect(ids).toEqual(['task-assignee-option-contact-t1', 'task-assignee-option-contact-k1']);
+    expect(screen.getByText('Project team')).toBeInTheDocument();
+    expect(screen.getByText('Company contacts')).toBeInTheDocument();
   });
 
   it('offers users next to contacts to a manager', async () => {
@@ -103,13 +117,15 @@ describe('assigneeFields', () => {
 });
 
 describe('AssigneePicker search', () => {
-  it('finds a contact past the first page through the contacts search', async () => {
+  it('finds a contact past the first page by asking the server with the typed text', async () => {
     useAuthStore.setState({ userRole: 'editor' });
-    (fetchContacts as any).mockResolvedValue({ items: [], total: 500 });
     (apiGet as any).mockImplementation(async (url: string) =>
-      url.startsWith('/v1/contacts/search/')
-        ? { items: [{ id: 'k9', first_name: 'Zoe', last_name: 'Late', company_name: null, primary_email: null }], total: 1 }
-        : [],
+      url.startsWith('/v1/contacts/pickable/') && url.includes('q=Zoe')
+        ? {
+            team: [],
+            company: [{ id: 'k9', first_name: 'Zoe', last_name: 'Late', company_name: null, primary_email: null }],
+          }
+        : { team: [], company: [] },
     );
     renderPicker();
     const input = screen.getByTestId('task-assignee-input');

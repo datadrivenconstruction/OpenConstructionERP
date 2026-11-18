@@ -31044,6 +31044,8 @@ const resource = {
   "contacts.prequal_approved": "Godkänd",
   "contacts.prequal_pending": "Väntande",
   "contacts.field_state": "Län / region",
+  "contacts.picker_project_team": "Projektteam",
+  "contacts.picker_company_contacts": "Företagets kontakter",
     "contracts.flow_1_desc": "Skapa ett typmedvetet kontrakt med dess värdeschema och retentioner.",
     "contracts.flow_1_title": "Konfigurera",
     "contracts.flow_2_desc": "Rensa efterlevnadsporten och signera sedan för att aktivera den.",

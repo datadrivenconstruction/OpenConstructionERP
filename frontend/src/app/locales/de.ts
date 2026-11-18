@@ -31306,6 +31306,8 @@ const resource = {
   "contacts.prequal_approved": "Genehmigt",
   "contacts.prequal_pending": "Ausstehend",
   "contacts.field_state": "Bundesland / Region",
+  "contacts.picker_project_team": "Projektteam",
+  "contacts.picker_company_contacts": "Firmenkontakte",
     "contracts.flow_1_desc": "Erstellen Sie einen typbewussten Vertrag mit seinem Leistungsplan und Sicherheitsleistung.",
     "contracts.flow_1_title": "Einrichten",
     "contracts.flow_2_desc": "Löschen Sie das Compliance-Gate und unterzeichnen Sie dann, um es zu aktivieren.",

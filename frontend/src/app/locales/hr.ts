@@ -31192,6 +31192,8 @@ const resource = {
   "contacts.prequal_approved": "Odobreno",
   "contacts.prequal_pending": "Na čekanju",
   "contacts.field_state": "Županija / regija",
+  "contacts.picker_project_team": "Projektni tim",
+  "contacts.picker_company_contacts": "Kontakti tvrtke",
     "contracts.flow_1_desc": "Kreiraj ugovor s nasljeđem odgovarajućeg tipa i zadržavanjem.",
     "contracts.flow_1_title": "Postavka",
     "contracts.flow_2_desc": "Očisti kapiju sukladnosti, zatim potpišite da ga aktivira.",

@@ -251,3 +251,23 @@ class ContactStatsResponse(BaseModel):
     by_type: dict[str, int] = Field(default_factory=dict)
     by_country_top10: dict[str, int] = Field(default_factory=dict)
     with_expiring_prequalification: int = 0
+
+
+class PickableContact(BaseModel):
+    """The few fields a picker shows; nothing private leaves the address book."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    contact_type: str
+    first_name: str | None = None
+    last_name: str | None = None
+    company_name: str | None = None
+    primary_email: str | None = None
+
+
+class PickableContactsResponse(BaseModel):
+    """Picker groups: members of the project team, then the rest of the company."""
+
+    team: list[PickableContact]
+    company: list[PickableContact]

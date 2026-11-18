@@ -30052,6 +30052,8 @@ const resource = {
     "contacts.prequal_approved": "Бекітілді",
     "contacts.prequal_pending": "Күтуде",
     "contacts.field_state": "Облыс / өңір",
+    "contacts.picker_project_team": "Жоба тобы",
+    "contacts.picker_company_contacts": "Компания контактілері",
     "contracts.flow_1_desc": "Құндылықтар кестесі мен кепілдік ұстауымен түрге сай келісімшарт жасаңыз.",
     "contracts.flow_1_title": "Орнату",
     "contracts.flow_2_desc": "Сәйкестік қақпасын тазартып, содан кейін оны белсенді ету үшін қол қойыңыз.",

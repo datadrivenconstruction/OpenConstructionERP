@@ -31576,6 +31576,8 @@ const resource = {
   "contacts.prequal_approved": "Одобрен",
   "contacts.prequal_pending": "На рассмотрении",
   "contacts.field_state": "Область / регион",
+  "contacts.picker_project_team": "Команда проекта",
+  "contacts.picker_company_contacts": "Контакты компании",
     "contracts.flow_1_desc": "Создайте контракт с осведомлённостью типа с его графиком стоимости и удержанием.",
     "contracts.flow_1_title": "Установить",
     "contracts.flow_2_desc": "Очистите шлюз соответствия, затем подпишите, чтобы активировать.",

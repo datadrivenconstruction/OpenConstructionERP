@@ -30887,6 +30887,8 @@ const resource = {
   "contacts.prequal_approved": "승인됨",
   "contacts.prequal_pending": "대기 중",
   "contacts.field_state": "시·도 / 지역",
+  "contacts.picker_project_team": "프로젝트 팀",
+  "contacts.picker_company_contacts": "회사 연락처",
     "contracts.flow_1_desc": "해당 가치 일정 및 유보금이 있는 유형별 계약을 생성합니다.",
     "contracts.flow_1_title": "설정",
     "contracts.flow_2_desc": "규정 준수 게이트를 해제한 다음 서명하여 활성화하세요.",

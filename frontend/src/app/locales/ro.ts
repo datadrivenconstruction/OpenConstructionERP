@@ -31221,6 +31221,8 @@ const resource = {
   "contacts.prequal_approved": "Aprobat",
   "contacts.prequal_pending": "În așteptare",
   "contacts.field_state": "Județ / regiune",
+  "contacts.picker_project_team": "Echipa proiectului",
+  "contacts.picker_company_contacts": "Contactele companiei",
     "contracts.flow_1_desc": "Creați un contract conștient de tip cu calendarul lui de valori și reținerea.",
     "contracts.flow_1_title": "Configurare",
     "contracts.flow_2_desc": "Curățați poarta de conformitate, apoi semnați pentru a-l face activ.",

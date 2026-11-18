@@ -31614,6 +31614,8 @@ const resource = {
   "contacts.prequal_approved": "Onaylandı",
   "contacts.prequal_pending": "Beklemede",
   "contacts.field_state": "İl / bölge",
+  "contacts.picker_project_team": "Proje ekibi",
+  "contacts.picker_company_contacts": "Şirket kişileri",
     "contracts.flow_1_desc": "Değerlerin takvimi ve tutma ile tür farkı olan bir sözleşme oluşturun.",
     "contracts.flow_1_title": "Kur",
     "contracts.flow_2_desc": "Uyum kapısını temizle, ardından etkinleştirmek için imzala.",

@@ -30083,6 +30083,8 @@ const resource = {
     "contacts.prequal_approved": "Εγκρίθηκε",
     "contacts.prequal_pending": "Εκκρεμεί",
     "contacts.field_state": "Πολιτεία / περιφέρεια",
+    "contacts.picker_project_team": "Ομάδα έργου",
+    "contacts.picker_company_contacts": "Επαφές εταιρείας",
     "contracts.flow_1_desc": "Δημιουργήστε σύμβαση με γνώση τύπου, με το πρόγραμμα αξιών και την παρακράτησή της.",
     "contracts.flow_1_title": "Ρύθμιση",
     "contracts.flow_2_desc": "Εκκαθαρίστε την πύλη συμμόρφωσης, μετά υπογράψτε για να την ενεργοποιήσετε.",

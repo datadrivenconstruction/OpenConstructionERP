@@ -31912,6 +31912,8 @@ const resource = {
   "contacts.prequal_approved": "Zatwierdzone",
   "contacts.prequal_pending": "Oczekujące",
   "contacts.field_state": "Województwo / region",
+  "contacts.picker_project_team": "Zespół projektu",
+  "contacts.picker_company_contacts": "Kontakty firmy",
     "contracts.flow_1_desc": "Utwórz umowę świadomą typu z jej harmonogramem wartości i utrzymaniem.",
     "contracts.flow_1_title": "Skonfiguruj",
     "contracts.flow_2_desc": "Wyczyść bramę zgodności, a następnie podpisz, aby ją uaktywnić.",

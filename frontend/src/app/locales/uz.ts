@@ -31357,6 +31357,8 @@ const resource = {
     "contacts.prequal_approved": "Tasdiqlangan",
     "contacts.prequal_pending": "Kutilmoqda",
     "contacts.field_state": "Viloyat / mintaqa",
+    "contacts.picker_project_team": "Loyiha jamoasi",
+    "contacts.picker_company_contacts": "Kompaniya kontaktlari",
     "contracts.flow_1_desc": "Turini hisobga oluvchi shartnomani uning qiymatlar jadvali va ushlab qolish summasi bilan yarating.",
     "contracts.flow_1_title": "Sozlash",
     "contracts.flow_2_desc": "Muvofiqlik nazorat nuqtasini tozalang, soʻng uni faollashtirish uchun imzolang.",

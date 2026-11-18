@@ -39310,6 +39310,8 @@ const resource = {
   "contacts.prequal_approved": "Бекитилди",
   "contacts.prequal_pending": "Күтүүдө",
   "contacts.field_state": "Облус / аймак",
+  "contacts.picker_project_team": "Долбоор тобу",
+  "contacts.picker_company_contacts": "Компаниянын байланыштары",
     "dwg_upload.title": "DWG жүктөөлөр",
     "dwg_upload.failed": "Жүктөө ишке ашкан жок",
     "dwg_upload.open": "Ачуу",

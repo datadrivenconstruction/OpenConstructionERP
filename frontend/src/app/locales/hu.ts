@@ -30934,6 +30934,8 @@ const resource = {
     "contacts.prequal_approved": "Jóváhagyva",
     "contacts.prequal_pending": "Függőben",
     "contacts.field_state": "Megye / régió",
+    "contacts.picker_project_team": "Projektcsapat",
+    "contacts.picker_company_contacts": "Cég kapcsolatai",
     "contracts.flow_1_desc": "Hozzon létre típusfüggő szerződést az értékbontásával és a visszatartásával együtt.",
     "contracts.flow_1_title": "Beállítás",
     "contracts.flow_2_desc": "Oldja fel a megfelelőségi kaput, majd írja alá az aktiváláshoz.",

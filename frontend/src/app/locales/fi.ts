@@ -30971,6 +30971,8 @@ const resource = {
   "contacts.prequal_approved": "Hyväksytty",
   "contacts.prequal_pending": "Odottaa",
   "contacts.field_state": "Osavaltio / alue",
+  "contacts.picker_project_team": "Projektitiimi",
+  "contacts.picker_company_contacts": "Yrityksen yhteystiedot",
     "contracts.flow_1_desc": "Luo tyyppitietoinen sopimus sen arvoluokituksella ja pidätyksellä.",
     "contracts.flow_1_title": "Konfiguroi",
     "contracts.flow_2_desc": "Tyhjennä vaatimustenmukaisuusportti, allekirjoita sitten sen tekeminen aktiiviseksi.",

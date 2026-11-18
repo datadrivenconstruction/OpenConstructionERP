@@ -736,6 +736,7 @@ export function ActivityGrid({
                     </td>
                     <td className="min-w-[180px]">
                       <GridAssigneeCell
+                        projectId={projectId}
                         activity={a}
                         disabled={cellsDisabled}
                         onCommit={(body) => updateMutation.mutate({ id: a.id, body })}
@@ -838,7 +839,7 @@ export function ActivityGrid({
 }
 
 /**
- * The assignee cell: a contact picked from the caller's contacts, searchable
+ * The assignee cell: a contact picked from the company's contacts (project team first), searchable
  * past the first page, or a name typed for someone who is not a contact.
  *
  * The name shown for a stored assignee comes from the server
@@ -850,10 +851,12 @@ export function ActivityGrid({
  */
 function GridAssigneeCell({
   activity,
+  projectId,
   disabled,
   onCommit,
 }: {
   activity: Activity;
+  projectId: string;
   disabled: boolean;
   onCommit: (body: { assignee_id?: string | null; assignee_text?: string | null }) => void;
 }) {
@@ -877,6 +880,7 @@ function GridAssigneeCell({
     <AssigneePicker
       value={value}
       includeUsers={false}
+      projectId={projectId}
       testIdPrefix={`grid-assignee-${activity.id}`}
       ariaLabel={t('schedule.assignee', { defaultValue: 'Assignee' })}
       placeholder={t('schedule.no_assignee', { defaultValue: 'Unassigned' })}

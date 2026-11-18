@@ -31112,6 +31112,8 @@ const resource = {
     "contacts.prequal_approved": "已批准",
     "contacts.prequal_pending": "待處理",
     "contacts.field_state": "省 / 地區",
+    "contacts.picker_project_team": "項目團隊",
+    "contacts.picker_company_contacts": "公司聯絡人",
     "contracts.flow_1_desc": "建立類型感知合約及其價值計劃和保留金。",
     "contracts.flow_1_title": "設定",
     "contracts.flow_2_desc": "清除合規門,然後簽署使其生效。",

@@ -30495,6 +30495,8 @@ const resource = {
   "contacts.prequal_approved": "Батлагдсан",
   "contacts.prequal_pending": "Хүлээгдэж буй",
   "contacts.field_state": "Аймаг / бүс нутаг",
+  "contacts.picker_project_team": "Төслийн баг",
+  "contacts.picker_company_contacts": "Компанийн харилцагчид",
     "contracts.flow_1_desc": "Төрөл мэдэрдэг гэрээ үүсгэх, түүний үнэ хуваарь ба сахих дүнгээр.",
     "contracts.flow_1_title": "Төлөвлөгөө",
     "contracts.flow_2_desc": "Нийцлийн хаалгыг цэвэрлэх дараа гарын үсэг зурж идэвхтэй болгоно.",

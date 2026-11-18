@@ -30349,6 +30349,8 @@ const resource = {
     "contacts.prequal_approved": "אושר",
     "contacts.prequal_pending": "ממתין",
     "contacts.field_state": "מדינה / אזור",
+    "contacts.picker_project_team": "צוות הפרויקט",
+    "contacts.picker_company_contacts": "אנשי הקשר של החברה",
     "contracts.flow_1_desc": "יצירת חוזה מודע-סוג עם לוח כמויות ומחירים וניכוי עיכבון.",
     "contracts.flow_1_title": "הקמה",
     "contracts.flow_2_desc": "עברו את שער הציות, ואז חתמו כדי להפעיל אותו.",

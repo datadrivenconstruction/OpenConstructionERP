@@ -39452,6 +39452,8 @@ const resource = {
   "contacts.prequal_approved": "Approved",
   "contacts.prequal_pending": "Pending",
   "contacts.field_state": "State / region",
+  "contacts.picker_project_team": "Project team",
+  "contacts.picker_company_contacts": "Company contacts",
     "dwg_upload.title": "DWG Uploads",
     "dwg_upload.failed": "Upload failed",
     "dwg_upload.open": "Open",

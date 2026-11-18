@@ -22,12 +22,15 @@ vi.mock('@/features/resources/api', () => ({
   listResources: vi.fn(),
 }));
 vi.mock('@/features/schedule-advanced/api', () => ({ listCalendars: vi.fn() }));
-vi.mock('@/features/contacts/api', () => ({ fetchContacts: vi.fn() }));
+vi.mock('@/shared/lib/api', async () => {
+  const actual = await vi.importActual<typeof import('@/shared/lib/api')>('@/shared/lib/api');
+  return { ...actual, apiGet: vi.fn() };
+});
 
 import { scheduleApi } from './api';
 import { listAssignmentsForActivity, listResources } from '@/features/resources/api';
 import { listCalendars } from '@/features/schedule-advanced/api';
-import { fetchContacts } from '@/features/contacts/api';
+import { apiGet } from '@/shared/lib/api';
 import { ActivityGrid } from './ActivityGrid';
 import { hideCollapsed, parentIdsOf } from './activityTree';
 
@@ -97,9 +100,9 @@ describe('ActivityGrid sections and assignee', () => {
     (listCalendars as any).mockResolvedValue([]);
     (listResources as any).mockResolvedValue({ items: [], total: 0, offset: 0, limit: 500 });
     (listAssignmentsForActivity as any).mockResolvedValue([]);
-    (fetchContacts as any).mockResolvedValue({
-      items: [{ id: 'k1', first_name: 'Ana', last_name: 'Lopez', company_name: null, primary_email: null }],
-      total: 500,
+    (apiGet as any).mockResolvedValue({
+      team: [],
+      company: [{ id: 'k1', first_name: 'Ana', last_name: 'Lopez', company_name: null, primary_email: null }],
     });
   });
 

@@ -30202,6 +30202,8 @@ const resource = {
     "contacts.prequal_approved": "منظور",
     "contacts.prequal_pending": "زیرِ التوا",
     "contacts.field_state": "صوبہ / علاقہ",
+    "contacts.picker_project_team": "پروجیکٹ ٹیم",
+    "contacts.picker_company_contacts": "کمپنی کے رابطے",
     "contracts.flow_1_desc": "اپنے schedule of values اور retention کے ساتھ ایک type-aware contract بنائیں۔",
     "contracts.flow_1_title": "قائم کریں",
     "contracts.flow_2_desc": "Compliance gate صاف کریں، پھر اسے فعال بنانے کے لیے دستخط کریں۔",
