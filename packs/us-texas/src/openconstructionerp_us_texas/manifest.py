@@ -35,6 +35,7 @@ MANIFEST = PartnerPackManifest(
     default_tax_template=None,
     default_methodology="united_states",
     validation_rule_packs=[
+        "tx_statutory_checks",
         "tx_sales_tax_contracts",
         "tx_prevailing_wage_2258",
         "tx_retainage_2252",
@@ -43,11 +44,28 @@ MANIFEST = PartnerPackManifest(
     # No engine rule set reads Texas law yet; the bill itself is coded in
     # MasterFormat, the set the US country row already runs.
     validation_rule_sets=["masterformat"],
-    default_modules=[],  # empty = show all
+    # A general contractor's working set on a US state job: estimate and bill,
+    # programme, buy and subcontract, bill and hold retainage, certify payroll,
+    # track lien and payment deadlines, and run the field record.
+    default_modules=[
+        "oe_costs",
+        "oe_boq",
+        "oe_schedule",
+        "oe_procurement",
+        "oe_subcontractors",
+        "oe_contracts",
+        "oe_payment_clock",
+        "oe_certified_payroll",
+        "oe_deadlines",
+        "oe_statutory",
+        "oe_documents",
+        "oe_rfi",
+        "oe_changeorders",
+        "oe_daily_diary",
+        "oe_safety",
+    ],
     hidden_modules=[],
-    # Left empty on purpose. The demo estate is owned elsewhere and a template
-    # id claimed here would fight whatever that work lands.
-    demo_template_ids=[],
+    demo_template_ids=["medical-us", "warehouse-houston"],
     branding=PartnerBranding(
         primary_color="#002868",  # Texas flag blue
         accent_color="#BF0A30",  # Texas flag red

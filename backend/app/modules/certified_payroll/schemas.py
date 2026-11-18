@@ -406,3 +406,29 @@ class WeekValidationResponse(BaseModel):
     warning_count: int
     can_certify: bool
     findings: list[ValidationFindingResponse] = Field(default_factory=list)
+
+
+class ExportProfileResponse(BaseModel):
+    """An agency file format a week can be exported to."""
+
+    code: str
+    label: str
+    media_type: str
+    extension: str
+    extra_fields: list[str] = Field(default_factory=list)
+
+
+class WeekExportRequest(BaseModel):
+    """Agency ids typed at export time; the platform does not keep them on the week."""
+
+    extra: dict[str, str] = Field(default_factory=dict)
+
+
+class WeekExportResponse(BaseModel):
+    """The rendered file, and what the person filing still has to supply."""
+
+    profile: str
+    filename: str
+    media_type: str
+    content: str
+    missing: list[str] = Field(default_factory=list)

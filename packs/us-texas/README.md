@@ -68,6 +68,23 @@ department contracts.
   is a day of a month rather than a count of days. Suit to foreclose follows
   within a year of that last day, extendable to two by recorded agreement.
 
+### Statutory checks, worked
+
+The statutory engines compute the Texas tables for one project and turn them
+into findings (document `tx_statutory_checks`). Worked examples, 8.25 percent
+combined rate:
+
+- Lump sum, 500,000 dollars of materials: the contractor pays 41,250 at
+  purchase and charges no tax. A separated contract pricing the same materials
+  at 550,000 charges the owner 45,375.
+- A subcontractor unpaid for May 2026 work on a nonresidential job sends its
+  notice of claim by 15 August 2026 (Property Code § 53.056(a-1)(1)); the
+  finding turns into an error the next day.
+- The original contractor's lien affidavit after completion on 20 October 2026
+  is due on 15 February 2027, and suit by 15 February 2028.
+- The owner of a 1.2 million dollar private contract holds 120,000 as the
+  statutory reserve for 30 days after completion (§ 53.101).
+
 ### No state income tax
 
 The Texas constitution prohibits a tax on individual net income outright, so a
@@ -109,3 +126,9 @@ where the rate comes from, and you import the one your contract names.
 The figures are current as at the pack version and every one names its statute
 so it can be checked. They are a working reference, not legal advice, and a
 project of any size should confirm the position with its own counsel.
+
+## Open items
+
+- Senate Bill 1530 (89th Legislature) is not reflected. No figure from it ships
+  until it is read against the enrolled text and the amended sections of
+  Property Code Chapter 53.

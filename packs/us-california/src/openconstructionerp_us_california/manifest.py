@@ -36,6 +36,7 @@ MANIFEST = PartnerPackManifest(
     default_tax_template=None,
     default_methodology="united_states",
     validation_rule_packs=[
+        "ca_statutory_checks",
         "ca_sales_tax_contractors",
         "ca_prevailing_wage_labor_code",
         "ca_retention_caps",
@@ -44,11 +45,28 @@ MANIFEST = PartnerPackManifest(
     # No engine rule set reads California law yet; the bill itself is coded
     # in MasterFormat, the set the US country row already runs.
     validation_rule_sets=["masterformat"],
-    default_modules=[],  # empty = show all
+    # A general contractor's working set on a US state job: estimate and bill,
+    # programme, buy and subcontract, bill and hold retainage, certify payroll,
+    # track lien and payment deadlines, and run the field record.
+    default_modules=[
+        "oe_costs",
+        "oe_boq",
+        "oe_schedule",
+        "oe_procurement",
+        "oe_subcontractors",
+        "oe_contracts",
+        "oe_payment_clock",
+        "oe_certified_payroll",
+        "oe_deadlines",
+        "oe_statutory",
+        "oe_documents",
+        "oe_rfi",
+        "oe_changeorders",
+        "oe_daily_diary",
+        "oe_safety",
+    ],
     hidden_modules=[],
-    # Left empty on purpose. The demo estate is owned elsewhere and a template
-    # id claimed here would fight whatever that work lands.
-    demo_template_ids=[],
+    demo_template_ids=["commercial-sacramento", "school-fresno"],
     branding=PartnerBranding(
         primary_color="#1D4E89",  # California state blue
         accent_color="#FFB81C",  # California state gold
@@ -74,7 +92,7 @@ MANIFEST = PartnerPackManifest(
             "California Public Contract Code § 7107 (release of retention)",
             "California Public Contract Code § 20104.50 (local agency progress payments)",
             "California Civil Code § 8811 (private works retention cap, from 1 January 2026)",
-            "California Civil Code §§ 8200, 8412, 8414 and 8460 (mechanics lien)",
+            "California Civil Code §§ 8204, 8412, 8414 and 8460 (preliminary notice and mechanics lien)",
             "California Business and Professions Code § 7108.5 (payment to subcontractors)",
         ],
         # The rules the application actually reads live in the backend module

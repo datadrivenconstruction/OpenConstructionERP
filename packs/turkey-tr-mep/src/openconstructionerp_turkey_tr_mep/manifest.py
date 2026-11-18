@@ -199,6 +199,8 @@ MANIFEST = _derive(
         "oe_uk_pack",
         "oe_us_ca_pack",
         "oe_us_tx_pack",
+        "oe_us_ny_pack",
+        "oe_us_fl_pack",
         "oe_us_pack",
     ],
     branding=PartnerBranding(

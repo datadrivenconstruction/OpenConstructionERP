@@ -270,7 +270,7 @@ def test_the_module_reader_sees_the_tree_it_is_asked_about() -> None:
 
 def test_the_two_lists_are_non_empty_distinct_and_disjoint() -> None:
     pack = _pack()
-    assert len(pack.hidden_modules) == 24
+    assert len(pack.hidden_modules) == 26
     assert pack.default_modules
     assert len(set(pack.hidden_modules)) == len(pack.hidden_modules)
     assert len(set(pack.default_modules)) == len(pack.default_modules)

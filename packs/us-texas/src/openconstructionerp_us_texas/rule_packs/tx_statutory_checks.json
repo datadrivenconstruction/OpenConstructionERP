@@ -1,0 +1,18 @@
+{
+  "rule_pack_id": "tx_statutory_checks",
+  "name": "Texas statutory deadline, reserve and tax checks",
+  "standard": "Texas Property Code §§ 53.052, 53.056, 53.101, 53.158, 28.002; Government Code §§ 2251.021, 2252.032; 34 TAC §§ 3.291, 3.357",
+  "jurisdiction": "US-TX",
+  "edition": "Statutes as in force on 1 November 2026",
+  "description": "Runs the checks the statutory engines compute from the Texas tables: the monthly notice of claim due on the 15th of the third month after the work (second for residential), the lien affidavit and the suit a year after it, an owner holding less than the 10 percent statutory reserve, public retainage above the cap for the contract price, an estimate with no contract form chosen, and nonresidential repair labor priced tax-free.",
+  "issuer": "State legislature",
+  "enables_rule_ids": [
+    "us.retainage.over_cap",
+    "us.tax.rate_is_state_base",
+    "us.lien.notice_due",
+    "tx.tax.contract_form_missing",
+    "tx.tax.nonres_repair_labor_untaxed",
+    "tx.lien.owner_reserve_missing"
+  ],
+  "planned_not_built_rule_ids": []
+}

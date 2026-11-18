@@ -1,0 +1,17 @@
+{
+  "rule_pack_id": "ca_statutory_checks",
+  "name": "California statutory deadline, retention and tax checks",
+  "standard": "California Civil Code §§ 8204, 8412, 8414, 8460, 8811, 8812; Public Contract Code §§ 7107, 7201; 18 CCR 1521; Labor Code § 1771",
+  "jurisdiction": "US-CA",
+  "edition": "Statutes as in force on 1 November 2026",
+  "description": "Runs the checks the statutory engines compute from the California tables: retention above the public or private 5 percent cap, an estimate priced at the 7.25 percent statewide base as if it were the jobsite rate, an installed item not classified as a material or a fixture, a public work carrying only a federal wage determination, and every preliminary notice, lien recording and retention release deadline, which turns into an error the day after it passes.",
+  "issuer": "State legislature",
+  "enables_rule_ids": [
+    "us.retainage.over_cap",
+    "us.tax.rate_is_state_base",
+    "us.lien.notice_due",
+    "ca.tax.item_unclassified",
+    "ca.pw.federal_only"
+  ],
+  "planned_not_built_rule_ids": []
+}

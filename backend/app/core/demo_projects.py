@@ -2751,6 +2751,8 @@ PACK_DEMO_PROJECT: dict[str, str] = {
     # demos located in their own state (see ``_country_fill``).
     "us-texas": "medical-us",
     "us-california": "commercial-sacramento",
+    "us-newyork": "residential-bronx",
+    "us-florida": "condo-miami",
     # 10 country packs added 2026-09-11. Each maps to its flagship demo.
     "germany-de": "residential-berlin",
     "france-fr": "school-paris",
@@ -2953,6 +2955,10 @@ _PACK_DEMO_TYPE: dict[str, str] = {
     "commercial-london": "Commercial",
     "commercial-denver": "Commercial",
     "commercial-sacramento": "Commercial",
+    "school-fresno": "Education",
+    "warehouse-houston": "Industrial",
+    "residential-bronx": "Residential",
+    "condo-miami": "Residential",
     "hospital-lyon": "Healthcare",
     "bhu-punjab": "Healthcare",
     "school-karachi": "Education",

@@ -28,11 +28,13 @@ Endpoints (all manager-scoped and project-access checked):
     POST   /weeks/{week_id}/certify/                         - sign and freeze
     GET    /weeks/{week_id}/form.json                        - the weekly form
     GET    /weeks/{week_id}/form.csv                         - the weekly form as CSV
+    GET    /export-profiles/                                 - agency file formats on offer
+    POST   /weeks/{week_id}/export/{profile}/                - the week in one agency's format
 """
 
 import uuid
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from fastapi.responses import StreamingResponse
 
 from app.dependencies import (
@@ -41,6 +43,7 @@ from app.dependencies import (
     SessionDep,
     verify_project_access,
 )
+from app.modules.certified_payroll.export_profiles import available_profiles, get_profile
 from app.modules.certified_payroll.schemas import (
     AssignmentCreate,
     AssignmentResponse,
@@ -51,12 +54,15 @@ from app.modules.certified_payroll.schemas import (
     CertifiedWeekResponse,
     CertifiedWeekUpdate,
     CertifyRequest,
+    ExportProfileResponse,
     ValidationFindingResponse,
     WageClassificationCreate,
     WageClassificationResponse,
     WageDeterminationCreate,
     WageDeterminationResponse,
     WageDeterminationUpdate,
+    WeekExportRequest,
+    WeekExportResponse,
     WeekValidationResponse,
 )
 from app.modules.certified_payroll.service import CertifiedPayrollService
@@ -465,4 +471,65 @@ async def week_form_csv(
         iter([render_csv(form)]),
         media_type="text/csv",
         headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
+
+
+# ── Agency export profiles ──────────────────────────────────────────────────
+
+
+@router.get(
+    "/export-profiles/",
+    response_model=list[ExportProfileResponse],
+    dependencies=[Depends(RequirePermission("certified_payroll.read"))],
+)
+async def list_export_profiles(
+    user_id: CurrentUserId,
+    jurisdiction: str | None = Query(default=None, max_length=10),
+) -> list[ExportProfileResponse]:
+    """Formats on offer; with ``jurisdiction`` (``US-CA``), the ones that state's pack lists."""
+    codes: list[str] | None = None
+    if jurisdiction:
+        from app.core.jurisdiction_rules import get_jurisdiction
+
+        table = get_jurisdiction(jurisdiction)
+        codes = list(table.get("payroll_export_profiles") or []) if table else ["us_wh347_csv"]
+    return [
+        ExportProfileResponse(
+            code=p.code,
+            label=p.label,
+            media_type=p.media_type,
+            extension=p.extension,
+            extra_fields=list(p.extra_fields),
+        )
+        for p in available_profiles(codes)
+    ]
+
+
+@router.post(
+    "/weeks/{week_id}/export/{profile}/",
+    response_model=WeekExportResponse,
+    dependencies=[Depends(RequirePermission("certified_payroll.read"))],
+)
+async def export_week(
+    week_id: uuid.UUID,
+    profile: str,
+    data: WeekExportRequest,
+    session: SessionDep,
+    user_id: CurrentUserId,
+) -> WeekExportResponse:
+    """Render the week in ``profile``'s format and list the fields still to supply."""
+    chosen = get_profile(profile)
+    if chosen is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Unknown export profile {profile!r}.")
+    service = _get_service(session)
+    week = await service.get_week(week_id)
+    await verify_project_access(week.project_id, user_id, session)
+    header, lines = await service.week_export_input(week)
+    result = chosen.render(header, lines, data.extra)
+    return WeekExportResponse(
+        profile=chosen.code,
+        filename=f"certified-payroll-{week.week_ending or 'week'}.{chosen.extension}",
+        media_type=chosen.media_type,
+        content=result.content,
+        missing=result.missing,
     )

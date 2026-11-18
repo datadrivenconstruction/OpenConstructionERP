@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Florida Construction Pack">
+  <title>Florida Construction Pack</title>
+  <defs>
+    <linearGradient id="florida_bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0b5394"/>
+      <stop offset="1" stop-color="#073763"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="12" fill="url(#florida_bg)"/>
+  <path d="M12 48 V28 H22 V48 M26 48 V18 H38 V48 M42 48 V32 H52 V48" fill="none" stroke="#f28c28" stroke-width="4" stroke-linejoin="round"/>
+  <line x1="8" y1="50" x2="56" y2="50" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
+</svg>

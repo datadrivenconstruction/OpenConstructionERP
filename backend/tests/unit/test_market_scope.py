@@ -33,7 +33,17 @@ def _tenant(country: str, tagged, packs) -> dict:
 def test_german_tenant_sees_no_uk_us_or_saudi_rows(tagged, packs) -> None:
     scope = _tenant("DE", tagged, packs)
     hidden = set(scope["hidden_modules"])
-    for foreign in ("uk_pack", "us_pack", "us_ca_pack", "us_tx_pack", "middle_east_pack", "sa_pack", "china_pack"):
+    for foreign in (
+        "uk_pack",
+        "us_pack",
+        "us_ca_pack",
+        "us_tx_pack",
+        "us_ny_pack",
+        "us_fl_pack",
+        "middle_east_pack",
+        "sa_pack",
+        "china_pack",
+    ):
         assert foreign in hidden
     assert "dach_pack" not in hidden
     # German regimes live in these, so they stay.
@@ -62,7 +72,7 @@ def test_saudi_tenant_sees_gcc(tagged, packs) -> None:
 def test_us_tenant_sees_aia_and_imperial(tagged, packs) -> None:
     scope = _tenant("US", tagged, packs)
     hidden = set(scope["hidden_modules"])
-    assert {"us_pack", "us_ca_pack", "us_tx_pack", "tax_withholding"}.isdisjoint(hidden)
+    assert {"us_pack", "us_ca_pack", "us_tx_pack", "us_ny_pack", "us_fl_pack", "tax_withholding"}.isdisjoint(hidden)
     assert {"dach_pack", "uk_pack", "middle_east_pack"} <= hidden
     assert any(code.startswith("AIA") for code in scope["options"]["contract_forms"])
     assert scope["units_system"] == "imperial"

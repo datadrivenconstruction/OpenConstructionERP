@@ -54,6 +54,8 @@ PACK_CONFIG_MODULES: tuple[str, ...] = (
     "app.modules.sa_pack.config",
     "app.modules.uk_pack.config",
     "app.modules.us_ca_pack.config",
+    "app.modules.us_fl_pack.config",
+    "app.modules.us_ny_pack.config",
     "app.modules.us_pack.config",
     "app.modules.us_tx_pack.config",
 )

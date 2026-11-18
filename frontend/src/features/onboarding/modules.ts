@@ -200,6 +200,8 @@ export const ALL_MODULES: ModuleDef[] = [
   { key: 'us_pack', labelKey: 'onboarding.mod_us_pack', descriptionKey: 'onboarding.mod_us_pack_desc', group: 'regional' },
   { key: 'us_tx_pack', labelKey: 'onboarding.mod_us_tx_pack', descriptionKey: 'onboarding.mod_us_tx_pack_desc', group: 'regional' },
   { key: 'us_ca_pack', labelKey: 'onboarding.mod_us_ca_pack', descriptionKey: 'onboarding.mod_us_ca_pack_desc', group: 'regional' },
+  { key: 'us_ny_pack', labelKey: 'onboarding.mod_us_ny_pack', descriptionKey: 'onboarding.mod_us_ny_pack_desc', group: 'regional' },
+  { key: 'us_fl_pack', labelKey: 'onboarding.mod_us_fl_pack', descriptionKey: 'onboarding.mod_us_fl_pack_desc', group: 'regional' },
   { key: 'india_pack', labelKey: 'onboarding.mod_india_pack', descriptionKey: 'onboarding.mod_india_pack_desc', group: 'regional' },
   { key: 'middle_east_pack', labelKey: 'onboarding.mod_middle_east_pack', descriptionKey: 'onboarding.mod_middle_east_pack_desc', group: 'regional' },
   { key: 'latam_pack', labelKey: 'onboarding.mod_latam_pack', descriptionKey: 'onboarding.mod_latam_pack_desc', group: 'regional' },

@@ -42,6 +42,10 @@ import pytest
 from app.modules.payment_clock.data import PAYMENT_REGIMES, REGIME_CODES
 from app.modules.us_ca_pack.config import PACK_CONFIG as CA_CFG
 from app.modules.us_ca_pack.config import STATE_RULES as CA_RULES
+from app.modules.us_fl_pack.config import PACK_CONFIG as FL_CFG
+from app.modules.us_fl_pack.config import STATE_RULES as FL_RULES
+from app.modules.us_ny_pack.config import PACK_CONFIG as NY_CFG
+from app.modules.us_ny_pack.config import STATE_RULES as NY_RULES
 from app.modules.us_tx_pack.config import PACK_CONFIG as TX_CFG
 from app.modules.us_tx_pack.config import STATE_RULES as TX_RULES
 
@@ -56,7 +60,12 @@ _EFFECTIVE_DATE_RX = re.compile(r"^\d{4}(-\d{2}(-\d{2})?)?$")
 _STATES: list[tuple[str, dict[str, Any], dict[str, list[dict[str, Any]]], str]] = [
     ("TX", TX_CFG, TX_RULES, "us-texas"),
     ("CA", CA_CFG, CA_RULES, "us-california"),
+    ("NY", NY_CFG, NY_RULES, "us-newyork"),
+    ("FL", FL_CFG, FL_RULES, "us-florida"),
 ]
+
+_SLUGS = [slug for _s, _c, _r, slug in _STATES]
+_SUBDIVISION_BY_SLUG = {slug: cfg["subdivision_code"] for _s, cfg, _r, slug in _STATES}
 
 # Every rule dict, flattened to (state, topic, rule) so a failure names the one
 # entry that broke rather than the whole topic.
@@ -67,7 +76,22 @@ _ALL_RULES: list[tuple[str, str, dict[str, Any]]] = [
     for rule in entries
 ]
 
-_US_REGIME_CODES = ("us_tx_public_2251", "us_tx_private_ch28", "us_ca_public_20104", "us_ca_private_8800")
+# The single-date regimes the convention tests below were written for.
+_US_REGIME_CODES = (
+    "us_tx_public_2251",
+    "us_tx_private_ch28",
+    "us_ca_public_20104",
+    "us_ca_private_8800",
+)
+# Every regime a state pack seeds; New York and Florida split approval from
+# payment and use a prescribed rate, so they only join the presence check.
+_STATE_PACK_REGIME_CODES = (
+    *_US_REGIME_CODES,
+    "us_ny_public_state_179f",
+    "us_ny_public_local_106b",
+    "us_ny_private_756a",
+    "us_fl_public_local_218735",
+)
 
 
 def _rule_id(item: tuple[str, str, dict[str, Any]]) -> str:
@@ -80,7 +104,7 @@ def _rule_id(item: tuple[str, str, dict[str, Any]]) -> str:
 
 def test_both_states_carry_rules() -> None:
     """A sweep that reached no rule is not a clean sweep."""
-    assert len(_STATES) == 2, "expected exactly the Texas and California configs"
+    assert len(_STATES) == 4, "expected the Texas, California, New York and Florida configs"
     for state, _cfg, rules, _slug in _STATES:
         assert rules, f"{state} carries no state rules at all"
 
@@ -233,7 +257,7 @@ def test_rules_that_point_at_a_regime_point_at_a_real_one() -> None:
 def test_every_us_regime_is_claimed_by_a_state_pack() -> None:
     """The reverse direction: a US regime nobody names is a regime nobody reaches."""
     claimed = {code for _s, cfg, _r, _slug in _STATES for code in cfg["payment_clock_regimes"]}
-    for code in _US_REGIME_CODES:
+    for code in _STATE_PACK_REGIME_CODES:
         assert code in claimed, f"payment clock regime {code!r} is shipped but no state pack names it"
 
 
@@ -305,7 +329,7 @@ def _load_pack_manifest(slug: str) -> Any:
     return module.MANIFEST
 
 
-@pytest.mark.parametrize("slug", ["us-texas", "us-california"])
+@pytest.mark.parametrize("slug", _SLUGS)
 def test_pack_has_the_files_the_house_shape_requires(slug: str) -> None:
     """Discovery finds a pack by these paths; a missing one makes it invisible."""
     pack = _pack_dir(slug)
@@ -317,7 +341,7 @@ def test_pack_has_the_files_the_house_shape_requires(slug: str) -> None:
     assert sorted((pkg / "rule_packs").glob("*.json")), f"{slug} ships no rule packs"
 
 
-@pytest.mark.parametrize("slug", ["us-texas", "us-california"])
+@pytest.mark.parametrize("slug", _SLUGS)
 def test_pack_manifest_loads_and_declares_itself(slug: str) -> None:
     """The manifest validates against the core schema and names the right slug."""
     manifest = _load_pack_manifest(slug)
@@ -326,10 +350,10 @@ def test_pack_manifest_loads_and_declares_itself(slug: str) -> None:
     assert manifest.default_currency == "USD"
     assert manifest.default_locale == "en-US"
     assert manifest.metadata["country"] == "US"
-    assert manifest.metadata["subdivision"] in {"US-TX", "US-CA"}
+    assert manifest.metadata["subdivision"] == _SUBDIVISION_BY_SLUG[slug]
 
 
-@pytest.mark.parametrize("slug", ["us-texas", "us-california"])
+@pytest.mark.parametrize("slug", _SLUGS)
 def test_pack_entry_point_matches_its_package(slug: str) -> None:
     """A mistyped entry point makes a pip-installed pack silently undiscoverable."""
     data = tomllib.loads((_pack_dir(slug) / "pyproject.toml").read_text(encoding="utf-8"))
@@ -341,7 +365,7 @@ def test_pack_entry_point_matches_its_package(slug: str) -> None:
     )
 
 
-@pytest.mark.parametrize("slug", ["us-texas", "us-california"])
+@pytest.mark.parametrize("slug", _SLUGS)
 def test_declared_rule_packs_exist_on_disk(slug: str) -> None:
     """Every slug the manifest enables resolves to a rule-pack file it ships."""
     manifest = _load_pack_manifest(slug)
@@ -353,10 +377,10 @@ def test_declared_rule_packs_exist_on_disk(slug: str) -> None:
     )
 
 
-@pytest.mark.parametrize("slug", ["us-texas", "us-california"])
+@pytest.mark.parametrize("slug", _SLUGS)
 def test_rule_pack_files_are_valid_and_state_their_jurisdiction(slug: str) -> None:
     """A rule pack that does not name its state is one a reader cannot place."""
-    expected_jurisdiction = "US-TX" if slug == "us-texas" else "US-CA"
+    expected_jurisdiction = _SUBDIVISION_BY_SLUG[slug]
     for path in sorted((_pkg_dir(slug) / "rule_packs").glob("*.json")):
         data = json.loads(path.read_text(encoding="utf-8"))
         assert data["rule_pack_id"] == path.stem, f"{path.name} disagrees with its own filename"

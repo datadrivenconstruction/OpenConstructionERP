@@ -134,7 +134,7 @@ def test_a_known_subdivision_attaches_its_retainage_rules() -> None:
     [
         {"country_code": "US"},
         {"country_code": "US", "subdivision_code": ""},
-        {"country_code": "US", "subdivision_code": "US-NY"},
+        {"country_code": "US", "subdivision_code": "US-OH"},
         {"country_code": "DE", "subdivision_code": "US-CA"},
     ],
     ids=lambda value: repr(value),

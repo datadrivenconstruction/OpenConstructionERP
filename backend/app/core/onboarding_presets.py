@@ -113,6 +113,8 @@ _REGIONAL = [
     "sa_pack",
     "uk_pack",
     "us_ca_pack",
+    "us_fl_pack",
+    "us_ny_pack",
     "us_pack",
     "us_tx_pack",
 ]

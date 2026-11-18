@@ -35,6 +35,8 @@ Money and rates are strings, in line with the platform money convention.
 
 from typing import Any
 
+from app.modules.us_pack.statutory import US_CLAIMANT_ROLES, US_SECTORS, VERIFY_NOTE, common_bindings
+
 # The state rate has stood at 6.25 percent since 1990; local jurisdictions may
 # stack up to 2 percent on top, which is why 8.25 is the ceiling a Texas bid
 # ever has to price and 6.25 is the floor.
@@ -440,6 +442,39 @@ STATE_RULES: dict[str, list[dict[str, Any]]] = {
             "statute_reference": "Texas Property Code Chapter 53, as amended by Acts 2021, 87th Leg., H.B. 2237",
             "effective_date": "2022-01-01",
         },
+        {
+            "code": "tx_lien_subcontractor_notice",
+            "name": "Notice of claim for unpaid labor or materials",
+            "description": (
+                "A claimant other than the original contractor must send a notice of claim to the owner and the "
+                "original contractor for each month of unpaid work: by the 15th day of the third month after the "
+                "month the labor or materials were provided on non-residential projects, and by the 15th day of "
+                "the second month on residential construction projects. Each month of work starts its own clock, "
+                "so a subcontractor on a long job carries a notice deadline every month."
+            ),
+            "value": "3",
+            "unit": "months_to_fifteenth_day",
+            "residential_months": "2",
+            "statute_reference": "Texas Property Code § 53.056(a-1)",
+            "source_url": "https://texas.public.law/statutes/tex._prop._code_section_53.056",
+            "effective_date": "2022-01-01",
+        },
+        {
+            "code": "tx_owner_statutory_reserve",
+            "name": "Owner's statutory retainage reserve",
+            "description": (
+                "During the performance of an original contract on which a lien may be claimed, and for 30 days "
+                "after the work is completed, the owner must reserve 10 percent of the contract price, or 10 "
+                "percent of the value of the work done. An owner that holds less is personally liable to "
+                "claimants who perfect their liens, up to the amount that should have been reserved."
+            ),
+            "value": "10",
+            "unit": "percent",
+            "hold_days_after_completion": "30",
+            "statute_reference": "Texas Property Code § 53.101",
+            "source_url": "https://texas.public.law/statutes/tex._prop._code_section_53.101",
+            "effective_date": None,
+        },
     ],
 }
 
@@ -479,4 +514,240 @@ PACK_CONFIG: dict[str, Any] = {
     # No federal VAT in the United States. Empty dict is the explicit opt-out
     # signal the cross-pack completeness check reads, same as us_pack.
     "vat_rates": {},
+}
+
+# ── Statutory tables for the neutral engines ─────────────────────────────────
+# Read by ``app.core.jurisdiction_rules``. The same statutes as STATE_RULES, in
+# the shape the notice calendar, the retention limits, the tax treatment engine
+# and the statutory checks evaluate. The local rate is an input, never stored.
+_PROP_53_056 = "https://texas.public.law/statutes/tex._prop._code_section_53.056"
+_PROP_53_052 = "https://texas.public.law/statutes/tex._prop._code_section_53.052"
+_SUBS = ["subcontractor", "supplier"]
+
+
+def _tx_affidavit(
+    code: str, event: str, months: int, roles: list[str], project_type: str, subsection: str
+) -> list[dict[str, Any]]:
+    """The affidavit rule and the suit deadline that runs a year from it (§ 53.158)."""
+    return [
+        {
+            "code": code,
+            "name": "File lien affidavit",
+            "kind": "lien",
+            "rule_type": "nth_day_of_mth_month",
+            "event": event,
+            "months": months,
+            "day_of_month": 15,
+            "claimant_roles": roles,
+            "project_types": [project_type],
+            "source": f"Tex. Prop. Code § 53.052{subsection}",
+            "source_url": _PROP_53_052,
+        },
+        {
+            "code": f"{code}_suit",
+            "name": "Sue to foreclose the lien",
+            "kind": "suit",
+            "rule_type": "months_after_event",
+            "event": f"rule:{code}",
+            "months": 12,
+            "claimant_roles": roles,
+            "project_types": [project_type],
+            "source": "Tex. Prop. Code § 53.158(a)",
+        },
+    ]
+
+
+JURISDICTION_RULES: dict[str, Any] = {
+    "code": "US-TX",
+    "name": "Texas",
+    "country": "US",
+    "backend_module": "oe_us_tx_pack",
+    "verify_note": VERIFY_NOTE,
+    "sectors": US_SECTORS,
+    "claimant_roles": US_CLAIMANT_ROLES,
+    "project_types": ["nonresidential", "residential"],
+    "notice_calendar": [
+        {
+            "code": "tx_monthly_notice_nonresidential",
+            "name": "Notice of claim for unpaid work",
+            "kind": "notice",
+            "rule_type": "nth_day_of_mth_month",
+            "event": "work_month",
+            "months": 3,
+            "day_of_month": 15,
+            "claimant_roles": _SUBS,
+            "project_types": ["nonresidential"],
+            "source": "Tex. Prop. Code § 53.056(a-1)(1)",
+            "source_url": _PROP_53_056,
+        },
+        {
+            "code": "tx_monthly_notice_residential",
+            "name": "Notice of claim for unpaid work",
+            "kind": "notice",
+            "rule_type": "nth_day_of_mth_month",
+            "event": "work_month",
+            "months": 2,
+            "day_of_month": 15,
+            "claimant_roles": _SUBS,
+            "project_types": ["residential"],
+            "source": "Tex. Prop. Code § 53.056(a-1)(2)",
+            "source_url": _PROP_53_056,
+        },
+        *_tx_affidavit(
+            "tx_affidavit_original_nonresidential", "completion", 4, ["direct_contractor"], "nonresidential", "(a)(1)"
+        ),
+        *_tx_affidavit(
+            "tx_affidavit_original_residential", "completion", 3, ["direct_contractor"], "residential", "(a)(2)"
+        ),
+        *_tx_affidavit("tx_affidavit_claimant_nonresidential", "last_work", 4, _SUBS, "nonresidential", "(b)"),
+        *_tx_affidavit("tx_affidavit_claimant_residential", "last_work", 3, _SUBS, "residential", "(c)"),
+        {
+            "code": "tx_owner_reserve_release",
+            "name": "Hold the statutory reserve until",
+            "kind": "retention",
+            "rule_type": "days_after_event",
+            "event": "completion",
+            "days": 30,
+            "sectors": ["private"],
+            "source": "Tex. Prop. Code § 53.101",
+        },
+        {
+            "code": "tx_private_owner_payment",
+            "name": "Owner pays the contractor",
+            "kind": "payment",
+            "rule_type": "days_after_event",
+            "event": "pay_request_received",
+            "days": 35,
+            "sectors": ["private"],
+            "source": "Tex. Prop. Code § 28.002(a)",
+        },
+        {
+            "code": "tx_private_sub_payment",
+            "name": "Contractor pays the subcontractor",
+            "kind": "payment",
+            "rule_type": "days_after_event",
+            "event": "payment_received",
+            "days": 7,
+            "sectors": ["private"],
+            "source": "Tex. Prop. Code § 28.002(b)",
+        },
+        {
+            "code": "tx_public_owner_payment",
+            "name": "Governmental entity pays the contractor",
+            "kind": "payment",
+            "rule_type": "days_after_event",
+            "event": "pay_request_received",
+            "days": 30,
+            "sectors": ["public"],
+            "source": "Tex. Gov. Code § 2251.021(a)",
+        },
+        {
+            "code": "tx_public_sub_payment",
+            "name": "Contractor pays the subcontractor",
+            "kind": "payment",
+            "rule_type": "days_after_event",
+            "event": "payment_received",
+            "days": 10,
+            "sectors": ["public"],
+            "source": "Tex. Gov. Code § 2251.022",
+        },
+    ],
+    "retention": [
+        {
+            "code": "tx_public_retainage_cap_below_threshold",
+            "kind": "cap",
+            "pct": "10",
+            "sectors": ["public"],
+            "min_contract_value": TX_RETAINAGE_SUBCHAPTER_FLOOR_USD,
+            "max_contract_value": TX_RETAINAGE_THRESHOLD_USD,
+            "source": "Tex. Gov. Code §§ 2252.032, 2252.033",
+            "note": "Above 5 percent the retainage goes to an interest-bearing account.",
+        },
+        {
+            "code": "tx_public_retainage_cap_at_or_above_threshold",
+            "kind": "cap",
+            "pct": "5",
+            "sectors": ["public"],
+            "min_contract_value": TX_RETAINAGE_THRESHOLD_USD,
+            "source": "Tex. Gov. Code § 2252.032",
+        },
+        {
+            "code": "tx_owner_statutory_reserve",
+            "kind": "floor",
+            "pct": "10",
+            "sectors": ["private"],
+            "source": "Tex. Prop. Code § 53.101",
+            "note": "Held during the work and for 30 days after completion.",
+        },
+    ],
+    "tax": {
+        "base_rate_pct": TX_STATE_SALES_TAX_PCT,
+        "rate_lookup_url": "https://comptroller.texas.gov/taxes/sales/",
+        "item_classes": ["material", "fixture", "labor", "equipment"],
+        "contract_forms": {
+            "lump_sum": {
+                "label": "Lump sum",
+                "source": "34 Tex. Admin. Code § 3.291",
+                "description": "The contractor is the consumer of materials and pays tax on them; no tax line.",
+                "treatment": {
+                    "material": "consumer",
+                    "fixture": "consumer",
+                    "labor": "untaxed",
+                    "equipment": "consumer",
+                    "other": "consumer",
+                },
+            },
+            "separated": {
+                "label": "Separated contract",
+                "source": "34 Tex. Admin. Code § 3.291",
+                "description": "The contractor resells materials and collects tax on the materials charge.",
+                "treatment": {
+                    "material": "retailer_collected",
+                    "fixture": "retailer_collected",
+                    "labor": "untaxed",
+                    "equipment": "consumer",
+                    "other": "consumer",
+                },
+            },
+            "nonresidential_repair": {
+                "label": "Nonresidential repair or remodel",
+                "source": "34 Tex. Admin. Code § 3.357",
+                "description": "The whole charge is taxable, labor included.",
+                "treatment": {
+                    "material": "retailer_collected",
+                    "fixture": "retailer_collected",
+                    "labor": "retailer_collected",
+                    "equipment": "retailer_collected",
+                    "other": "retailer_collected",
+                },
+            },
+        },
+    },
+    "payroll_export_profiles": ["us_wh347_csv"],
+    "links": [{"label": "Tax rate lookup", "url": "https://comptroller.texas.gov/taxes/sales/"}],
+    "validation_rules": [
+        *common_bindings(),
+        {
+            "id": "tx.tax.contract_form_missing",
+            "check": "tax.contract_form_missing",
+            "severity": "error",
+            "name": "Texas contract form not chosen",
+            "message": "Choose lump sum or separated contract; it decides who owes tax on materials.",
+        },
+        {
+            "id": "tx.tax.nonres_repair_labor_untaxed",
+            "check": "tax.taxable_line_priced_free",
+            "severity": "error",
+            "name": "Nonresidential repair labor priced tax-free",
+            "message": "Nonresidential repair: labor is taxable but priced tax-free.",
+            "params": {"kinds": ["labor"], "contract_forms": ["nonresidential_repair"]},
+        },
+        {
+            "id": "tx.lien.owner_reserve_missing",
+            "check": "retention.below_floor",
+            "severity": "warning",
+            "name": "Owner reserve below 10 percent",
+            "message": "Owner holds less than the 10% statutory reserve for 30 days after completion.",
+        },
+    ],
 }

@@ -157,6 +157,12 @@ _ALLOWED_UNITS = {
     # Portugal
     "cj",  # conjunto (set)
     "gl",  # global / lump sum (Portuguese)
+    # US customary, the tokens app.modules.boq.units canonicalises
+    "ft2",
+    "ft",
+    "cy",
+    "ea",
+    "ton_us",
 }
 
 _CATALOG_BY_ID = {c["demo_id"]: c for c in DEMO_CATALOG}
@@ -184,10 +190,9 @@ def test_mapped_demo_ids_resolve_to_templates() -> None:
 #: one, a Jeddah hospital in the Turkish one), in another currency and
 #: validated as another country, which is the opposite of the in-market
 #: guarantee this test exists for. turkey-tr-mep is derived from turkey-tr and
-#: is in the same market, so it has the same one demo. The two US state packs
-#: are markets of one state: California installs its Sacramento office and
-#: Texas its Houston medical centre, and neither is padded with the Denver
-#: office any more.
+#: is in the same market, so it has the same one demo. A US state pack is a
+#: market of one state and is never padded with another state's project:
+#: California and Texas have two in-state demos each, New York and Florida one.
 PACKS_WITH_ONE_IN_MARKET_DEMO = frozenset(
     {
         "egypt-eg",
@@ -197,8 +202,8 @@ PACKS_WITH_ONE_IN_MARKET_DEMO = frozenset(
         "spain-es",
         "turkey-tr",
         "turkey-tr-mep",
-        "us-california",
-        "us-texas",
+        "us-florida",
+        "us-newyork",
     }
 )
 

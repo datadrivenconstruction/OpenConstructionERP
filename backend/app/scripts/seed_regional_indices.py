@@ -5,7 +5,8 @@
 Inserts ~50 sample rows into ``oe_regional_indices`` - 8 cities × 6
 trade categories. Factors are 1.0-baselined on Berlin, with values
 calibrated against open published city cost indices (a UK cost index,
-a US cost index, Eurostat construction price index for EU). They are
+Eurostat construction price index for EU). US metro rows are derived from
+BLS wage data, see ``_US_LABOR_WAGES``. They are
 representative averages - production deployments should overwrite the
 ``OE_v3.12_seed_2026Q2`` rows with audited indices.
 
@@ -43,9 +44,9 @@ _SEED_DATE = date(2026, 4, 1)
 #   * Munich is ~12 % above Berlin on average (German cost index 2026Q1).
 #   * London is ~18 % above Berlin (UK cost index, general).
 #   * Manchester is ~95 % of London (UK cost index, regional).
-#   * NYC is the canonical US cost-index 100 baseline → ~45 % above Berlin
-#     in EUR-equivalent terms (US cost index 2026 + FX 1.08 USD/EUR).
-#   * LA tracks NYC at ~88 % (US city cost index).
+#   * US rows are not in this matrix: they are derived below from public
+#     BLS wage data and baselined on the US national average, because the
+#     catalogue they adjust is the national USD one.
 #   * Paris is ~8 % above Berlin (FFB 2026).
 #   * Madrid is ~85 % of Berlin (Eurostat 2026).
 _FACTORS: dict[str, dict[str, float]] = {
@@ -81,22 +82,6 @@ _FACTORS: dict[str, dict[str, float]] = {
         "finishes": 1.04,
         "sitework": 0.98,
     },
-    "US_NYC": {
-        "concrete": 1.40,
-        "steel": 1.35,
-        "labor": 1.65,
-        "mep": 1.42,
-        "finishes": 1.45,
-        "sitework": 1.30,
-    },
-    "US_LA": {
-        "concrete": 1.30,
-        "steel": 1.28,
-        "labor": 1.42,
-        "mep": 1.35,
-        "finishes": 1.33,
-        "sitework": 1.20,
-    },
     "FR_PARIS": {
         "concrete": 1.06,
         "steel": 1.05,
@@ -116,6 +101,60 @@ _FACTORS: dict[str, dict[str, float]] = {
 }
 
 
+# US metro factors, derived from public data and baselined on the US national
+# average (US_NATIONAL = 1.00), the price level of the national USD catalogue.
+#
+# Source: U.S. Bureau of Labor Statistics, Occupational Employment and Wage
+# Statistics (OEWS), May 2025, annual mean wage of SOC 47-0000 "Construction
+# and Extraction Occupations", per metropolitan statistical area. Public domain
+# (17 U.S.C. § 105). Series ids follow ``OEUM<area>000000470000004``; the
+# national series is ``OEUN000000000000047000004``.
+#
+# Method: the labour factor of a metro is its wage over the national wage.
+# Materials and plant are priced nationally, so a category's factor moves
+# only by its labour share: factor = 1 + share x (labour factor - 1). The
+# shares are the stated assumptions of the method, not measurements; an
+# installation that knows its own mix overwrites the rows.
+_US_SEED_SOURCE = "BLS_OEWS_2025_05_SOC47"
+# A later date than the matrix above, so the derived rows read as the latest.
+_US_SEED_DATE = date(2026, 5, 1)
+_US_NATIONAL_WAGE = 65360
+_US_LABOR_WAGES: dict[str, tuple[str, int]] = {
+    "US_NYC": ("35620", 82140),
+    "US_LA": ("31080", 77100),
+    "US_SF": ("41860", 90820),
+    "US_SACRAMENTO": ("40900", 75820),
+    "US_HOUSTON": ("26420", 57020),
+    "US_DALLAS": ("19100", 56210),
+    "US_MIAMI": ("33100", 58140),
+    "US_ORLANDO": ("36740", 54850),
+    "US_DENVER": ("19740", 68640),
+    "US_CHICAGO": ("16980", 85000),
+    "US_ATLANTA": ("12060", 58770),
+}
+#: Labour share of installed cost per category (assumption of the method).
+_US_LABOR_SHARE: dict[str, Decimal] = {
+    "concrete": Decimal("0.40"),
+    "steel": Decimal("0.35"),
+    "labor": Decimal("1.00"),
+    "mep": Decimal("0.45"),
+    "finishes": Decimal("0.50"),
+    "sitework": Decimal("0.35"),
+}
+
+
+def us_metro_factors() -> dict[str, dict[str, Decimal]]:
+    """The US metro factor matrix derived from the BLS wages above."""
+    out: dict[str, dict[str, Decimal]] = {"US_NATIONAL": dict.fromkeys(_US_LABOR_SHARE, Decimal("1.00"))}
+    for region, (_area, wage) in _US_LABOR_WAGES.items():
+        labour = Decimal(wage) / Decimal(_US_NATIONAL_WAGE)
+        out[region] = {
+            category: (Decimal(1) + share * (labour - Decimal(1))).quantize(Decimal("0.01"))
+            for category, share in _US_LABOR_SHARE.items()
+        }
+    return out
+
+
 def _rows() -> list[dict[str, object]]:
     """Materialise the factor matrix as flat dicts for bulk insert."""
     out: list[dict[str, object]] = []
@@ -131,12 +170,24 @@ def _rows() -> list[dict[str, object]]:
                     "effective_date": _SEED_DATE,
                 }
             )
+    for region, by_category in us_metro_factors().items():
+        for category, factor in by_category.items():
+            out.append(
+                {
+                    "region_code": region,
+                    "category": category,
+                    "subcategory": None,
+                    "factor": factor,
+                    "source": _US_SEED_SOURCE,
+                    "effective_date": _US_SEED_DATE,
+                }
+            )
     return out
 
 
 async def main() -> int:
     """Run the seed. Returns the count of NEW rows inserted (skipped rows excluded)."""
-    from sqlalchemy import and_, func, select
+    from sqlalchemy import and_, delete, func, select
 
     from app.database import Base, async_session_factory, engine
     from app.modules.costs.models import RegionalIndex
@@ -154,6 +205,14 @@ async def main() -> int:
     skipped = 0
 
     async with async_session_factory() as session:
+        # Earlier seeds shipped US rows calibrated on a commercial index; the
+        # BLS-derived rows replace them.
+        await session.execute(
+            delete(RegionalIndex).where(
+                RegionalIndex.source == _SEED_SOURCE,
+                RegionalIndex.region_code.like(r"US\_%", escape="\\"),
+            )
+        )
         for row in rows:
             # Composite-key existence check (subcategory is NULL here
             # so we use IS NULL explicitly - SQLAlchemy expands ``==

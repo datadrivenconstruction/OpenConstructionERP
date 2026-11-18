@@ -1,7 +1,7 @@
 {
   "rule_pack_id": "ca_payment_and_lien_clocks",
   "name": "California payment and mechanics lien deadlines",
-  "standard": "California Public Contract Code § 20104.50; California Civil Code §§ 8200, 8412, 8414, 8460, 8800 and 8812; Business and Professions Code § 7108.5",
+  "standard": "California Public Contract Code § 20104.50; California Civil Code §§ 8204, 8412, 8414, 8460, 8800 and 8812; Business and Professions Code § 7108.5",
   "jurisdiction": "US-CA",
   "edition": "As in force at pack release",
   "description": "Enables the deadline checks for California payment and lien rights. A local agency owes interest at the legal rate on judgments if it does not pay a progress payment within 30 days of an undisputed and properly submitted request, and must return an improper request within 7 days, with every day over that coming off its own 30. On private work the owner pays within 30 days of the contractual notice demanding payment, though that period is a default the owner and direct contractor may vary in writing, and wrongful withholding runs at 2 percent a month in place of interest. Down the chain a prime pays a subcontractor within 7 days of receipt at the same 2 percent a month, with disputed withholding capped at 150 percent of the amount in dispute. On the lien side the preliminary notice reaches back only 20 days, the claim of lien is recorded within 90 days of completion unless a notice of completion cuts that to 60 days for the direct contractor and 30 for every other claimant, and suit follows within 90 days of recording. None of the lien deadlines can be tolled, so the rules treat a recorded notice of completion as an event that shortens live deadlines rather than as a document to file.",

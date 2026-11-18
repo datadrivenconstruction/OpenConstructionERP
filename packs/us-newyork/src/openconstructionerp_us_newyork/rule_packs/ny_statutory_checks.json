@@ -1,0 +1,17 @@
+{
+  "rule_pack_id": "ny_statutory_checks",
+  "name": "New York statutory deadline, retainage and tax checks",
+  "standard": "New York Lien Law § 10; General Business Law §§ 756-c, 757; Tax Law § 1105(c)(3); Labor Law § 220",
+  "jurisdiction": "US-NY",
+  "edition": "Statutes as in force on 1 November 2026",
+  "description": "Runs the checks the statutory engines compute from the New York tables: retainage above 5 percent on a private contract of 150 thousand dollars or more entered into from 17 November 2023, or on public work; a capital improvement priced tax-free with no ST-124 on file; a public work without a schedule from the state labor department or the city Comptroller; an estimate at the 4 percent state rate; and the 8 month (4 month single family) lien filing window.",
+  "issuer": "State legislature",
+  "enables_rule_ids": [
+    "us.retainage.over_cap",
+    "us.tax.rate_is_state_base",
+    "us.lien.notice_due",
+    "ny.tax.capital_improvement_no_st124",
+    "ny.pw.schedule_missing"
+  ],
+  "planned_not_built_rule_ids": []
+}

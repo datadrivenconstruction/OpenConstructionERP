@@ -30,6 +30,7 @@ import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { fetchDeadlines, type DeadlineItem, type DeadlineStatusFilter } from './api';
 import { buildDeadlinesInsights } from './deadlinesInsights';
 import { PageHeader } from '@/shared/ui/PageHeader';
+import { StatutoryChecksSection } from '@/features/statutory';
 
 const FILTERS: DeadlineStatusFilter[] = ['all', 'overdue', 'approaching'];
 
@@ -340,6 +341,8 @@ export function DeadlinesPage() {
       <div className="mb-4">
         <HowDeadlinesWork />
       </div>
+
+      {projectId && <StatutoryChecksSection projectId={projectId} />}
 
       <InsightsPanel
         open={insights.open}

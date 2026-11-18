@@ -1,0 +1,65 @@
+# Florida Construction Pack - first-login onboarding wizard.
+# Streamed by /api/v1/partner-pack/onboarding-script and rendered by
+# the OnboardingWizard React component in place of the default steps.
+#
+# The questions are the ones whose answers change a Florida number: the
+# contract form decides who pays sales tax on materials; the county decides
+# the surtax; public or private decides the retainage cap and the payment
+# clock; and your place in the chain decides whether you must serve a notice
+# to owner.
+
+version: 1
+pack: us-florida
+locale: en-US
+estimated_minutes: 6
+title: "Welcome to OpenConstructionERP, Florida edition"
+subtitle: "Five steps: licence, sales tax and surtax, wages, retainage, and the lien and payment clocks."
+
+steps:
+  - id: company_profile
+    title: "Licence"
+    body: "Florida licenses general, building and residential contractors at state level, either certified for the whole state or registered for one locality. The platform records the number and does not verify it."
+    fields:
+      - { key: company_name,      label: "Company name",                  type: text, required: true }
+      - { key: federal_ein,       label: "Federal EIN (Tax ID)",          type: text, required: false, placeholder: "XX-XXXXXXX" }
+      - { key: cilb_licence_number, label: "State contractor licence number", type: text, required: false,
+          help: "For example CGC or CBC followed by digits." }
+
+  - id: sales_tax_position
+    title: "Sales tax and the county surtax"
+    body: "Under a lump sum contract you are the ultimate consumer of the materials you install and pay tax when you buy them; the customer sees no tax line. Under a retail sale plus installation contract you collect tax from the customer on the goods. The state rate is 6 percent, and the county surtax reaches only the first 5,000 dollars of any single item."
+    fields:
+      - { key: usual_contract_form, label: "Your usual contract form", type: radio, required: true, default: "Lump sum",
+          options: ["Lump sum", "Retail sale plus installation", "Decide per project"] }
+      - { key: primary_county, label: "County you mostly work in", type: text, required: false,
+          help: "Its surtax rate is published each year on form DR-15DSS." }
+      - { key: cap_surtax_per_item, label: "Cap the county surtax at the first 5,000 dollars of each single item", type: checkbox, default: true }
+
+  - id: wages
+    title: "Wages on public work"
+    body: "Florida has no state prevailing wage law. Federal Davis-Bacon rates apply where federal money funds the work. From 30 September 2026 a local government may not use its contracts to set the wages its contractors pay."
+    fields:
+      - { key: track_certified_payroll, label: "Track certified payroll on federally funded work", type: checkbox, default: true }
+      - { key: flag_local_wage_clause, label: "Flag local wage clauses in public contracts dated from 30 September 2026", type: checkbox, default: true }
+
+  - id: retainage
+    title: "Retainage"
+    body: "Local and state public owners may hold no more than 5 percent of each payment on a contract over 200 thousand dollars. On private work the contract governs, and the balance is due within 14 days after completion is certified."
+    fields:
+      - { key: enforce_public_cap, label: "Enforce the 5 percent public cap", type: checkbox, default: true }
+
+  - id: lien_and_payment
+    title: "Lien and payment clocks"
+    body: "A lienor not in privity with the owner serves a notice to owner within 45 days of first furnishing. The claim of lien is recorded within 90 days of final furnishing and served within 15 days, and the lien lapses after one year without an action. Every date is computed from the statute cited beside it; check it with counsel before relying on it."
+    fields:
+      - { key: track_notice_to_owner, label: "Track the 45 day notice to owner", type: checkbox, default: true }
+      - { key: enable_payment_clock, label: "Track the local government 20 business day payment clock", type: checkbox, default: true }
+      - { key: lien_reminder_days, label: "Remind me this many days before a lien deadline", type: number, required: false, min: 1, max: 90, default: 10 }
+
+  - id: units_and_output
+    title: "Units and printed output"
+    body: "Florida practice is imperial and US Letter. Change it here if your clients ask for something else."
+    fields:
+      - { key: measurement_system, label: "Measurement system", type: radio, required: true, default: "Imperial", options: ["Imperial", "Metric"] }
+      - { key: paper_size, label: "Paper size", type: radio, required: true, default: "Letter", options: ["Letter", "A4"] }
+      - { key: currency, label: "Currency", type: select, required: true, default: "USD", options: ["USD"] }

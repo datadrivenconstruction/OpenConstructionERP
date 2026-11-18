@@ -780,6 +780,11 @@ class CertifiedPayrollService:
 
     async def render_week_form(self, week: CertifiedPayrollWeek) -> dict[str, Any]:
         """Render the week as the standard weekly payroll form payload."""
+        header, lines = await self.week_export_input(week)
+        return render_form(header, lines)
+
+    async def week_export_input(self, week: CertifiedPayrollWeek) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+        """The header and worker lines every export profile renders from."""
         lines, _derived = await self.week_lines(week)
         header = {
             "week_ending": week.week_ending,
@@ -802,4 +807,4 @@ class CertifiedPayrollService:
             "fringe_election": week.fringe_election,
             "fringe_exception_note": week.fringe_exception_note,
         }
-        return render_form(header, lines)
+        return header, lines

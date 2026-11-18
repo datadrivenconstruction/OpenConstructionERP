@@ -54,6 +54,9 @@ vi.mock('@/stores/useProjectContextStore', () => ({
     selector({ activeProjectId: 'proj-1' }),
 }));
 
+// The statutory section has its own suite; here it would share the api mock.
+vi.mock('@/features/statutory', () => ({ StatutoryChecksSection: () => null }));
+
 import { DeadlinesPage } from '../DeadlinesPage';
 import type { DeadlineItem, DeadlineRegister } from '../api';
 

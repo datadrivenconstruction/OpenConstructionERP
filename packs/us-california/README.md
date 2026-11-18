@@ -82,6 +82,30 @@ department, which is a separate thing from the contractor licence.
   to 60 days for the direct contractor and 30 for everyone else. Suit follows
   within 90 days of recording, and none of these can be tolled.
 
+### Statutory checks, worked
+
+The statutory engines compute the California tables for one project and turn
+them into findings (document `ca_statutory_checks`). Worked examples:
+
+- Lump sum, 9.75 percent jobsite rate, 360,000 dollars of materials and 80,000
+  of fixtures at cost: 35,100 paid to suppliers plus 7,800 reported as the
+  retailer of the fixtures, 42,900 of tax inside the bid.
+- Private agreement dated 2 March 2026, 20,000 held on a 200,000 dollar
+  payment: an error, because the cap is 10,000 (Civil Code § 8811).
+- Preliminary notice for first furnishing on 6 April 2026 is due on 26 April
+  (Civil Code § 8204). Completion on 30 November 2026 gives a lien recording
+  deadline of 28 February 2027, cut to 3 January 2027 for a subcontractor (and
+  2 February for the direct contractor) by a notice of completion recorded on
+  4 December 2026.
+
+Weekly certified payroll on public works exports in the DIR eCPR version 2
+XML. The export names every field the week does not hold: the public works
+registration number, the DIR project id and each worker's address and tax id.
+
+Awarding bodies with an approved labour compliance programme may elect the
+25,000 dollar (construction) and 15,000 dollar (maintenance) exemptions of
+Labor Code § 1725.5(f); the pack carries them as a rule with the condition.
+
 ## Contractor licensing
 
 California licenses contractors at state level and a licence is required to

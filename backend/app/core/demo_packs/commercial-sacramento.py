@@ -20,8 +20,8 @@ from app.core.demo_projects import DemoTemplate
 # about 1.12 of the US national average (the Denver demo uses ~0.98, so every
 # unit rate is the Denver rate x 1.12 / 0.98, rounded), and adds the seismic
 # bracing a Seismic Design Category D site needs. Codes: California Building
-# Code 2022 (based on IBC 2021), ASCE 7-22, AISC 341-22 / 360-22, ACI 318-19,
-# California Electrical Code 2022 (NEC 2020), Title 24 Part 6 energy, CALGreen.
+# Code 2025 (based on IBC 2024), ASCE 7-22, AISC 341-22 / 360-22, ACI 318-19,
+# California Electrical Code 2025 (NEC 2023), Title 24 Part 6 energy, CALGreen.
 # Headline base construction cost ~ USD 42.3M.
 #
 # NOTE on tax: a California construction contractor is the consumer of the
@@ -44,7 +44,7 @@ TEMPLATE = DemoTemplate(
         "special concentrically braced frames (AISC 341-22) and composite "
         "metal-deck floors above, unitised aluminium curtain wall envelope. "
         "Core-and-shell base building with one spec tenant fit-out floor; "
-        "remainder warm shell. Designed to the California Building Code 2022, "
+        "remainder warm shell. Designed to the California Building Code 2025, "
         "ASCE 7-22 (Seismic Design Category D, Risk Category II), Title 24 "
         "Part 6 and CALGreen. Estimated base construction cost approx. "
         "USD 42.3M."
@@ -66,7 +66,7 @@ TEMPLATE = DemoTemplate(
     boq_name="K Street & 15th - Schematic Cost Estimate (division-based)",
     boq_description=(
         "Detailed core-and-shell + spec fit-out cost estimate to standard "
-        "division numbering, Sacramento 2026 regional pricing, CBC 2022."
+        "division numbering, Sacramento 2026 regional pricing, CBC 2025."
     ),
     boq_metadata={
         "standard": "Division-based work-results classification",
@@ -273,10 +273,10 @@ TEMPLATE = DemoTemplate(
                 ("23.100", "Building automation system, DDC (BAS/DDC)", "m2", 12200, 27.50, {"masterformat": "23 09 23"}),
             ],
         ),
-        # -- 26 Electrical (CEC 2022) ------------------------------------------
+        # -- 26 Electrical (CEC 2025) ------------------------------------------
         (
             "26",
-            "26 - Power distribution and lighting systems (CEC 2022)",
+            "26 - Power distribution and lighting systems (CEC 2025)",
             {"masterformat": "26"},
             [
                 ("26.010", "Utility service, 2500A 480/277V switchgear (Service/switchgear)", "lsum", 1, 554300.00, {"masterformat": "26 24 13"}),
@@ -366,12 +366,12 @@ TEMPLATE = DemoTemplate(
             "frames, composite metal deck"
         ),
         "building_codes": [
-            "CBC 2022 (IBC 2021 base)",
+            "CBC 2025 (IBC 2024 base)",
             "ASCE 7-22",
             "AISC 341-22",
             "AISC 360-22",
             "ACI 318-19",
-            "CEC 2022 (NEC 2020 base)",
+            "CEC 2025 (NEC 2023 base)",
             "Title 24 Part 6",
             "CALGreen",
             "Cal/OSHA Title 8",

@@ -34,6 +34,8 @@ Money and rates are strings, in line with the platform money convention.
 
 from typing import Any
 
+from app.modules.us_pack.statutory import US_CLAIMANT_ROLES, US_SECTORS, VERIFY_NOTE, common_bindings
+
 # The statewide base is 6.00 state plus 1.00 local jurisdiction plus 0.25 local
 # transportation fund. District taxes stack on top of that base, they do not
 # replace it, which is why the base is the floor and never the answer.
@@ -46,6 +48,10 @@ CA_STATEWIDE_BASE_SALES_TAX_PCT = "7.25"
 CA_PREVAILING_WAGE_THRESHOLD_USD = "1000"
 CA_PREVAILING_WAGE_LCP_CONSTRUCTION_EXEMPTION_USD = "25000"
 CA_PREVAILING_WAGE_LCP_ALTERATION_EXEMPTION_USD = "15000"
+# Lab. Code 1725.5(f) small project exemption, as the DIR SB 854 page states it.
+# It differs from the LCP election above in what counts toward the 25k.
+CA_SMALL_PROJECT_CONSTRUCTION_USD = "25000"
+CA_SMALL_PROJECT_MAINTENANCE_USD = "15000"
 
 STATE_RULES: dict[str, list[dict[str, Any]]] = {
     # ── Sales and use tax ────────────────────────────────────────────────────
@@ -179,6 +185,24 @@ STATE_RULES: dict[str, list[dict[str, Any]]] = {
             "alteration_repair_maintenance_threshold_usd": CA_PREVAILING_WAGE_LCP_ALTERATION_EXEMPTION_USD,
             "requires_approved_labour_compliance_programme": True,
             "statute_reference": "California Labor Code § 1771.5",
+            "effective_date": None,
+        },
+        {
+            "code": "ca_public_works_small_project_exemption",
+            "name": "Small project exemption from registration and electronic certified payroll",
+            "description": (
+                "A contractor on a public works project of 25 thousand dollars or less for new construction, "
+                "alteration, installation, demolition or repair, or 15 thousand dollars or less for maintenance, "
+                "is exempt from the public works registration and from submitting certified payroll records "
+                "electronically to the Labor Commissioner. Prevailing wage still applies above 1,000 dollars; "
+                "the exemption is from the paperwork, not from the wage."
+            ),
+            "value": CA_SMALL_PROJECT_CONSTRUCTION_USD,
+            "unit": "usd",
+            "construction_threshold_usd": CA_SMALL_PROJECT_CONSTRUCTION_USD,
+            "maintenance_threshold_usd": CA_SMALL_PROJECT_MAINTENANCE_USD,
+            "statute_reference": "California Labor Code § 1725.5(f); Department of Industrial Relations, SB 854 page",
+            "source_url": "https://www.dir.ca.gov/Public-Works/PublicWorksSB854.html",
             "effective_date": None,
         },
     ],
@@ -396,7 +420,7 @@ STATE_RULES: dict[str, list[dict[str, Any]]] = {
             ),
             "value": "20",
             "unit": "days",
-            "statute_reference": "California Civil Code § 8200",
+            "statute_reference": "California Civil Code § 8204",
             "effective_date": None,
         },
         {
@@ -478,4 +502,169 @@ PACK_CONFIG: dict[str, Any] = {
     # No federal VAT in the United States. Empty dict is the explicit opt-out
     # signal the cross-pack completeness check reads, same as us_pack.
     "vat_rates": {},
+}
+
+# ── Statutory tables for the neutral engines ─────────────────────────────────
+# Read by ``app.core.jurisdiction_rules``: the notice calendar in ``deadlines``,
+# the retention limits in ``contracts``, the tax treatment engine and the
+# statutory checks. The same statutes as STATE_RULES above, in the shape the
+# engines evaluate. Rates are never here: the address rate is an input.
+
+_CC_8414_URL = "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=CIV&sectionNum=8414"
+
+JURISDICTION_RULES: dict[str, Any] = {
+    "code": "US-CA",
+    "name": "California",
+    "country": "US",
+    "backend_module": "oe_us_ca_pack",
+    "verify_note": VERIFY_NOTE,
+    "sectors": US_SECTORS,
+    "claimant_roles": US_CLAIMANT_ROLES,
+    "project_types": ["nonresidential", "residential", "residential_4_storeys_or_fewer"],
+    "notice_calendar": [
+        {
+            "code": "ca_preliminary_notice",
+            "name": "Preliminary notice",
+            "kind": "notice",
+            "rule_type": "days_after_event",
+            "event": "first_furnishing",
+            "days": 20,
+            "claimant_roles": ["subcontractor", "supplier"],
+            "source": "Cal. Civ. Code § 8204",
+        },
+        {
+            "code": "ca_lien_record_no_noc",
+            "name": "Record claim of lien",
+            "kind": "lien",
+            "rule_type": "days_after_event",
+            "event": "completion",
+            "days": 90,
+            "source": "Cal. Civ. Code §§ 8412, 8414",
+            "source_url": _CC_8414_URL,
+        },
+        {
+            "code": "ca_lien_record_after_noc_direct",
+            "name": "Record claim of lien (notice of completion recorded)",
+            "kind": "lien",
+            "rule_type": "days_after_event",
+            "event": "notice_of_completion_recorded",
+            "days": 60,
+            "claimant_roles": ["direct_contractor"],
+            "supersedes": ["ca_lien_record_no_noc"],
+            "source": "Cal. Civ. Code § 8412",
+        },
+        {
+            "code": "ca_lien_record_after_noc_other",
+            "name": "Record claim of lien (notice of completion recorded)",
+            "kind": "lien",
+            "rule_type": "days_after_event",
+            "event": "notice_of_completion_recorded",
+            "days": 30,
+            "claimant_roles": ["subcontractor", "supplier"],
+            "supersedes": ["ca_lien_record_no_noc"],
+            "source": "Cal. Civ. Code § 8414",
+            "source_url": _CC_8414_URL,
+        },
+        {
+            "code": "ca_lien_foreclosure_suit",
+            "name": "Sue to enforce the lien",
+            "kind": "suit",
+            "rule_type": "days_after_event",
+            "event": "claim_recorded",
+            "days": 90,
+            "source": "Cal. Civ. Code § 8460",
+        },
+        {
+            "code": "ca_private_retention_release",
+            "name": "Release private retention",
+            "kind": "retention",
+            "rule_type": "days_after_event",
+            "event": "completion",
+            "days": 45,
+            "sectors": ["private"],
+            "source": "Cal. Civ. Code § 8812",
+        },
+        {
+            "code": "ca_public_retention_release",
+            "name": "Release public retention",
+            "kind": "retention",
+            "rule_type": "days_after_event",
+            "event": "completion",
+            "days": 60,
+            "sectors": ["public"],
+            "source": "Cal. Pub. Cont. Code § 7107",
+        },
+    ],
+    "retention": [
+        {
+            "code": "ca_public_retention_cap",
+            "kind": "cap",
+            "pct": "5",
+            "sectors": ["public"],
+            "agreement_date_from": "2012-01-01",
+            "source": "Cal. Pub. Cont. Code § 7201",
+            "note": "Higher only with a substantially complex finding stated in the bid documents.",
+        },
+        {
+            "code": "ca_private_retention_cap",
+            "kind": "cap",
+            "pct": "5",
+            "sectors": ["private"],
+            "agreement_date_from": "2026-01-01",
+            "excluded_project_types": ["residential_4_storeys_or_fewer"],
+            "source": "Cal. Civ. Code § 8811 (SB 61)",
+        },
+    ],
+    "tax": {
+        "base_rate_pct": CA_STATEWIDE_BASE_SALES_TAX_PCT,
+        "rate_lookup_url": "https://cdtfa.ca.gov/taxes-and-fees/rates.aspx",
+        "item_classes": ["material", "fixture", "labor", "equipment"],
+        "contract_forms": {
+            "lump_sum": {
+                "label": "Lump sum",
+                "source": "18 CCR § 1521",
+                "treatment": {
+                    "material": "consumer",
+                    "fixture": "retailer_in_price",
+                    "labor": "untaxed",
+                    "equipment": "consumer",
+                    "other": "consumer",
+                },
+            },
+            "time_and_material": {
+                "label": "Time and material",
+                "source": "18 CCR § 1521",
+                "treatment": {
+                    "material": "consumer",
+                    "fixture": "retailer_collected",
+                    "labor": "untaxed",
+                    "equipment": "consumer",
+                    "other": "consumer",
+                },
+            },
+        },
+    },
+    "payroll_export_profiles": ["ca_dir_ecpr_v2"],
+    "links": [
+        {"label": "Tax rate lookup", "url": "https://cdtfa.ca.gov/taxes-and-fees/rates.aspx"},
+        {"label": "eCPR", "url": "https://www.dir.ca.gov/Public-Works/Certified-Payroll-Reporting.html"},
+    ],
+    "validation_rules": [
+        *common_bindings(),
+        {
+            "id": "ca.tax.item_unclassified",
+            "check": "tax.item_unclassified",
+            "severity": "warning",
+            "name": "Installed item without a material or fixture class",
+            "message": "Installed item has no material/fixture class; tax measure unknown.",
+        },
+        {
+            "id": "ca.pw.federal_only",
+            "check": "wage.determination_missing",
+            "severity": "error",
+            "name": "California public work with only a federal determination",
+            "message": "California public work carries only a federal wage determination.",
+            "params": {"accepted_authorities": ["state"], "only_when_present": ["federal"]},
+        },
+    ],
 }

@@ -1,0 +1,17 @@
+{
+  "rule_pack_id": "fl_statutory_checks",
+  "name": "Florida statutory deadline, retainage and tax checks",
+  "standard": "Florida Statutes §§ 212.054, 218.077, 218.735, 255.078, 713.06, 713.08, 713.22; Rule 12A-1.051",
+  "jurisdiction": "US-FL",
+  "edition": "Statutes as in force on 1 November 2026",
+  "description": "Runs the checks the statutory engines compute from the Florida tables: the 45 day notice to owner, the 90 day claim of lien and its 15 day service, the one year enforcement window, public retainage above 5 percent on a contract over 200 thousand dollars, county surtax charged above the first 5,000 dollars of a single item, an estimate at the 6 percent state rate, and a local wage clause in a public contract dated from 30 September 2026.",
+  "issuer": "State legislature",
+  "enables_rule_ids": [
+    "us.retainage.over_cap",
+    "us.tax.rate_is_state_base",
+    "us.lien.notice_due",
+    "fl.tax.surtax_over_item_cap",
+    "fl.pw.local_wage_clause"
+  ],
+  "planned_not_built_rule_ids": []
+}

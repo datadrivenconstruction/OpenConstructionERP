@@ -1,0 +1,68 @@
+# New York Construction Pack - first-login onboarding wizard.
+# Streamed by /api/v1/partner-pack/onboarding-script and rendered by
+# the OnboardingWizard React component in place of the default steps.
+#
+# The questions are the ones whose answers change a New York number: whether
+# the work is a capital improvement or a repair decides who pays sales tax on
+# what; public or private decides the wage schedule, the retainage cap and the
+# payment clock; and the contract value and date decide whether the private
+# retainage cap applies.
+
+version: 1
+pack: us-newyork
+locale: en-US
+estimated_minutes: 6
+title: "Welcome to OpenConstructionERP, New York edition"
+subtitle: "Five steps: your company, capital improvement or repair, prevailing wage and payroll, retainage, and the payment and lien clocks."
+
+steps:
+  - id: company_profile
+    title: "Your company"
+    body: "New York does not license general contractors at state level. New York City registers and licenses contractors through its Department of Buildings, and other cities and counties run their own schemes."
+    fields:
+      - { key: company_name,       label: "Company name",                 type: text, required: true }
+      - { key: federal_ein,        label: "Federal EIN (Tax ID)",         type: text, required: false, placeholder: "XX-XXXXXXX" }
+      - { key: sales_tax_vendor_id, label: "Sales tax certificate of authority number", type: text, required: false }
+      - { key: nyc_dob_registration, label: "NYC Department of Buildings registration number", type: text, required: false,
+          help: "Only if you work inside the five boroughs." }
+
+  - id: sales_tax_position
+    title: "Capital improvement or repair"
+    body: "A capital improvement is not taxed to the customer once Form ST-124 is on file, and you pay tax on the materials you buy with no credit. A repair or maintenance job is taxed on the whole bill, labor included, at the combined rate of the jobsite. The combined rate is a property of the address."
+    fields:
+      - { key: usual_contract_form, label: "Your usual work", type: radio, required: true, default: "Capital improvement",
+          options: ["Capital improvement", "Repair or maintenance", "Decide per project"] }
+      - { key: require_st124, label: "Block a capital improvement priced tax-free until the ST-124 is on file", type: checkbox, default: true }
+      - { key: resolve_rate_per_site, label: "Resolve the tax rate per jobsite address rather than one company rate", type: checkbox, default: true }
+
+  - id: prevailing_wage
+    title: "Prevailing wage and certified payroll"
+    body: "Public work pays the Article 8 prevailing rate. Outside New York City the schedule comes from the state labor department; inside the city the Comptroller publishes it. Certified payroll is filed electronically, and the platform exports the department's XML file for you to upload."
+    fields:
+      - { key: bids_public_work, label: "Do you bid New York public work?", type: checkbox, default: true }
+      - { key: track_certified_payroll, label: "Track certified payroll and export the state labor department file", type: checkbox, default: true }
+      - { key: warn_schedule_missing, label: "Warn when a public work has no state or city wage schedule", type: checkbox, default: true }
+
+  - id: retainage
+    title: "Retainage"
+    body: "On a private contract of 150 thousand dollars or more entered into from 17 November 2023, retainage may not exceed 5 percent of each payment, all the way down the chain, and a clause above the cap is void. Public owners hold no more than 5 percent."
+    fields:
+      - { key: enforce_private_cap, label: "Enforce the 5 percent private cap where it applies", type: checkbox, default: true }
+      - { key: enforce_public_cap, label: "Enforce the 5 percent public cap", type: checkbox, default: true }
+
+  - id: payment_and_lien
+    title: "Payment and lien clocks"
+    body: "A notice of lien may be filed within 8 months of the last work, or 4 months for a single family dwelling. Every date is computed from the statute cited beside it; check it with counsel before relying on it."
+    fields:
+      - { key: enable_payment_clock, label: "Track statutory payment deadlines on New York projects", type: checkbox, default: true }
+      - { key: default_payment_regime, label: "Default regime for new New York projects", type: select, required: true, default: "Private, General Business Law Article 35-E",
+          options: ["Private, General Business Law Article 35-E", "State agency, State Finance Law section 179-f", "Local public owner, General Municipal Law section 106-b", "Ask per project"] }
+      - { key: lien_reminder_days, label: "Remind me this many days before a lien deadline", type: number, required: false, min: 1, max: 90, default: 21 }
+
+  - id: units_and_output
+    title: "Units and printed output"
+    body: "New York practice is imperial and US Letter. Change it here if your clients ask for something else."
+    fields:
+      - { key: measurement_system, label: "Measurement system", type: radio, required: true, default: "Imperial", options: ["Imperial", "Metric"] }
+      - { key: paper_size, label: "Paper size", type: radio, required: true, default: "Letter", options: ["Letter", "A4"] }
+      - { key: currency, label: "Currency", type: select, required: true, default: "USD", options: ["USD"] }
