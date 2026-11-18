@@ -170,6 +170,7 @@ def register_tendering_validation_rules() -> None:
         rule_registry.register(rule, [SEALED_RULE_SET])
     register_tendering_addenda_rules()
     register_tendering_parties_rules()
+    register_tendering_contents_rules()
 
 
 # ── Addenda, revisions, questions and bid bonds ─────────────────────────────
@@ -331,3 +332,123 @@ class BidderHasParty(_SealedRule):
 def register_tendering_parties_rules() -> None:
     """Register the party rules with the platform rule registry."""
     rule_registry.register(BidderHasParty(), [PARTIES_RULE_SET])
+
+
+# ── Package contents: lines, budget, resource scope ─────────────────────────
+# Reads the payload built by ``package_contents_payload``:
+# ``{"item_count", "budget_computed", "budget_override",
+#    "lines": [{"id", "ordinal", "split", "unsplittable", "budget_total"}]}``.
+
+CONTENTS_RULE_SET = "tendering_contents"
+
+#: Share by which a hand-entered budget may differ from the sum before it is flagged.
+OVERRIDE_TOLERANCE = 0.25
+
+
+def package_contents_payload(preview: Any) -> dict[str, Any]:
+    """The rule payload of a :class:`PackagePreviewResponse`."""
+    return {
+        "item_count": preview.item_count,
+        "budget_computed": float(preview.budget_computed),
+        "budget_override": float(preview.budget_override) if preview.budget_override is not None else None,
+        "scope_active": preview.scope_active,
+        "lines": [
+            {
+                "id": line.id,
+                "ordinal": line.ordinal,
+                "split": line.split,
+                "unsplittable": line.unsplittable,
+                "budget_total": float(line.budget_total or 0),
+            }
+            for line in preview.lines
+            if line.kind == "item"
+        ],
+    }
+
+
+class PackageHasLines(_SealedRule):
+    rule_id = "tendering_contents.has_lines"
+    name = "Package has lines to price"
+    description = "A package goes out with at least one line for the bidders to price."
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        ok = int(_data(context).get("item_count") or 0) > 0
+        return [
+            self._result(
+                ok,
+                "package",
+                "The package has no lines to price",
+                "Link the package to a BOQ, or choose the sections it covers",
+            )
+        ]
+
+
+class BudgetOverrideNearComputed(_SealedRule):
+    rule_id = "tendering_contents.override_near_computed"
+    name = "Entered budget is near the computed one"
+    description = "A budget entered by hand that differs from the sum of the lines by more than 25% is flagged."
+    severity = Severity.WARNING
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        data = _data(context)
+        override = data.get("budget_override")
+        computed = float(data.get("budget_computed") or 0)
+        if override is None or computed <= 0:
+            return []
+        ok = abs(float(override) - computed) / computed <= OVERRIDE_TOLERANCE
+        return [
+            self._result(
+                ok,
+                "budget",
+                "The entered budget differs from the sum of the lines by more than 25%",
+                "Check the entered budget, or clear it to use the computed sum",
+            )
+        ]
+
+
+class ScopeLeavesCostOnLine(_SealedRule):
+    rule_id = "tendering_contents.scope_leaves_cost"
+    name = "Every line keeps something to price"
+    description = "A resource scope that takes every component of a line out leaves the bidder nothing to price."
+    severity = Severity.WARNING
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        if not _data(context).get("scope_active"):
+            return []
+        return [
+            self._result(
+                not (line.get("split") and float(line.get("budget_total") or 0) <= 0),
+                f"line:{line.get('id', '')}",
+                f"Line {line.get('ordinal') or line.get('id')} has no component left in the package",
+                "Include at least one component of the line, or take the line out of the package",
+            )
+            for line in _data(context).get("lines") or []
+            if isinstance(line, dict) and line.get("split")
+        ]
+
+
+class ScopeCanSplitLine(_SealedRule):
+    rule_id = "tendering_contents.scope_can_split"
+    name = "Scoped lines have cost components"
+    description = "A line without priced components cannot be split by cost kind and is budgeted in full."
+    severity = Severity.WARNING
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        if not _data(context).get("scope_active"):
+            return []
+        return [
+            self._result(
+                False,
+                f"line:{line.get('id', '')}",
+                f"Line {line.get('ordinal') or line.get('id')} has no cost components and is budgeted in full",
+                "Add the line's resources in the BOQ, or enter the package budget by hand",
+            )
+            for line in _data(context).get("lines") or []
+            if isinstance(line, dict) and line.get("unsplittable")
+        ]
+
+
+def register_tendering_contents_rules() -> None:
+    """Register the package-contents rules with the platform rule registry."""
+    for rule in (PackageHasLines(), BudgetOverrideNearComputed(), ScopeLeavesCostOnLine(), ScopeCanSplitLine()):
+        rule_registry.register(rule, [CONTENTS_RULE_SET])

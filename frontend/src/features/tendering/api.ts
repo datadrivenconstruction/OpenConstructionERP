@@ -9,6 +9,7 @@
 import {
   API_BASE,
   apiGet,
+  apiPatch,
   apiPost,
   apiPut,
   apiDelete,
@@ -648,4 +649,122 @@ export async function importX84Bid<T>(
   const payload = await response.json().catch(() => null);
   if (!response.ok) throw new Error(extractErrorMessageFromBody(payload) ?? `HTTP ${response.status}`);
   return payload as T;
+}
+
+/* ── Package contents: preview, budget, resource scope (#571, #576) ────── */
+
+export type ScopeKind = 'labor' | 'material' | 'machinery' | 'equipment' | 'subcontractor' | 'other';
+
+export const SCOPE_KINDS: ScopeKind[] = ['labor', 'material', 'machinery', 'equipment', 'subcontractor', 'other'];
+
+export interface PackagePreviewComponent {
+  key: string;
+  name: string;
+  code: string | null;
+  kind: ScopeKind;
+  unit: string;
+  /** Per unit of the line, decimal strings. */
+  quantity: string;
+  unit_cost: string;
+  included: boolean;
+}
+
+export interface PackagePreviewLine {
+  id: string;
+  kind: 'section' | 'item';
+  ordinal: string;
+  short_text: string;
+  long_text: string;
+  unit: string;
+  quantity: string;
+  depth: number;
+  supplied_by_others: string[];
+  budget_rate: string | null;
+  budget_total: string | null;
+  split: boolean;
+  unsplittable: boolean;
+  components: PackagePreviewComponent[];
+}
+
+export interface PackagePreviewRecipient {
+  company_name: string;
+  email: string;
+  status: string;
+  link_status: string | null;
+}
+
+export interface PackagePreviewDocument {
+  addendum_revision: number;
+  addendum_title: string;
+  published: boolean;
+  title: string;
+  drawing_number: string;
+  revision: string;
+  document_id: string | null;
+}
+
+export interface PackagePreviewIssue {
+  rule_id: string;
+  severity: string;
+  message: string;
+  element_ref: string | null;
+  suggestion: string | null;
+}
+
+export interface PackagePreview {
+  package_id: string;
+  name: string;
+  description: string;
+  status: string;
+  deadline: string | null;
+  currency: string;
+  lines: PackagePreviewLine[];
+  item_count: number;
+  budget_computed: string;
+  budget_override: string | null;
+  budget_total: string;
+  scope_kinds: ScopeKind[];
+  scope_active: boolean;
+  recipients: PackagePreviewRecipient[];
+  documents: PackagePreviewDocument[];
+  bid_count: number;
+  validation: PackagePreviewIssue[];
+}
+
+export function packagePreviewQueryKey(packageId: string) {
+  return ['tendering-package-preview', packageId] as const;
+}
+
+export function getPackagePreview(packageId: string): Promise<PackagePreview> {
+  return apiGet<PackagePreview>(`/v1/tendering/packages/${packageId}/preview/`);
+}
+
+export interface PackageBudgetPatch {
+  /** Decimal string, or null to clear and use the computed sum. */
+  budget_override?: string | null;
+  /** Null restores whole lines. */
+  resource_scope?: { kinds: ScopeKind[]; excluded: Record<string, string[]> } | null;
+}
+
+export function patchPackageBudget(packageId: string, body: PackageBudgetPatch): Promise<unknown> {
+  return apiPatch(`/v1/tendering/packages/${packageId}`, body);
+}
+
+/* ── Delete or cancel a package (#575) ─────────────────────────────────── */
+
+export function deletePackage(packageId: string): Promise<void> {
+  return apiDelete(`/v1/tendering/packages/${packageId}`);
+}
+
+export function cancelPackage(packageId: string, reason: string): Promise<unknown> {
+  return apiPost(`/v1/tendering/packages/${packageId}/cancel/`, { reason });
+}
+
+/* ── Bids entered by the buyer (#573) ──────────────────────────────────── */
+
+export function putBuyerPrices(
+  bidId: string,
+  body: { unit_prices: Record<string, string>; notes?: string },
+): Promise<unknown> {
+  return apiPut(`/v1/tendering/bids/${bidId}/prices/`, body);
 }

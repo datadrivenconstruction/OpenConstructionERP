@@ -10,7 +10,7 @@ export interface AwardResult {
   bid_id: string;
   positions_updated: number;
   /** Why no rate went into the bill, or null when rates were written. */
-  rates_skipped_reason?: 'boq_locked' | 'no_line_rates' | null;
+  rates_skipped_reason?: 'boq_locked' | 'no_line_rates' | 'partial_scope' | null;
   /** The package's lines that kept the bill's rate because the bid did not price them. */
   positions_unpriced?: number;
   boq_id: string;
@@ -40,6 +40,11 @@ export function awardRatesMessage(result: AwardResult | undefined, t: TFunction)
     case 'boq_locked':
       return t('tendering.award_rates_locked', {
         defaultValue: 'The BOQ is locked, so its rates were left as approved.',
+      });
+    case 'partial_scope':
+      return t('tendering.award_rates_partial_scope', {
+        defaultValue:
+          'This package covers only part of each line (some components are supplied by others), so the BOQ rates were not changed.',
       });
     case 'no_line_rates':
       // The count is the one the confirm dialog showed, so the two agree.

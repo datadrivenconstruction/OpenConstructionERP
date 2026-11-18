@@ -53,12 +53,15 @@ from app.modules.tendering.schemas import (
     BidPortalView,
     BidResponse,
     BidUpdate,
+    BuyerPricesRequest,
     CreatePackageFromBOQData,
     DistributeRequest,
     DistributeResponse,
     LevelBidsResponse,
     LevelingMatrixResponse,
+    PackageCancel,
     PackageCreate,
+    PackagePreviewResponse,
     PackageResponse,
     PackageScopeResponse,
     PackageUpdate,
@@ -445,6 +448,78 @@ async def update_package(
     return _package_to_response(package, await SealedTenderService(session).get(package_id))
 
 
+@router.get("/packages/{package_id}/preview/", response_model=PackagePreviewResponse)
+async def get_package_preview(
+    package_id: uuid.UUID,
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    service: TenderingService = Depends(_get_service),
+    _perm: None = Depends(RequirePermission("tendering.read")),
+) -> PackagePreviewResponse:
+    """The whole content of a package before it goes out.
+
+    Lines as the bidder link shows them with the budget beside each, the
+    package budget (computed, entered, in force), the documents, the firms on
+    the distribution list, and the ``tendering_contents`` rule results.
+    """
+    from app.core.validation.engine import ValidationContext, rule_registry  # noqa: PLC0415
+    from app.modules.tendering.validators import CONTENTS_RULE_SET, package_contents_payload  # noqa: PLC0415
+
+    package = await _verify_package_owner(service, session, package_id, user_id, payload)
+    preview = await service.package_preview(package_id)
+    context = ValidationContext(data=package_contents_payload(preview), project_id=str(package.project_id))  # type: ignore[attr-defined]
+    for rule in rule_registry.get_rules_for_sets([CONTENTS_RULE_SET]):
+        for result in await rule.validate(context):
+            if result.passed:
+                continue
+            preview.validation.append(
+                {
+                    "rule_id": result.rule_id,
+                    "severity": str(result.severity),
+                    "message": result.message,
+                    "element_ref": result.element_ref,
+                    "suggestion": result.suggestion,
+                }
+            )
+    return preview
+
+
+@router.delete("/packages/{package_id}", status_code=204)
+async def delete_package(
+    package_id: uuid.UUID,
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    service: TenderingService = Depends(_get_service),
+    _perm: None = Depends(RequirePermission("tendering.delete")),
+) -> Response:
+    """Delete a draft package that never reached a firm.
+
+    A package with bids, links or a sent invitation answers 409
+    ``package_in_use``; it is cancelled instead (``POST .../cancel/``).
+    """
+    await _verify_package_owner(service, session, package_id, user_id, payload)
+    await service.delete_package(package_id, actor_id=user_id)
+    return Response(status_code=204)
+
+
+@router.post("/packages/{package_id}/cancel/", response_model=PackageResponse)
+async def cancel_package(
+    package_id: uuid.UUID,
+    data: PackageCancel,
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    service: TenderingService = Depends(_get_service),
+    _perm: None = Depends(RequirePermission("tendering.delete")),
+) -> PackageResponse:
+    """Cancel a tender that went out: it is closed with the reason, and kept."""
+    await _verify_package_owner(service, session, package_id, user_id, payload)
+    package = await service.cancel_package(package_id, data.reason, actor_id=user_id)
+    return _package_to_response(package, await SealedTenderService(session).get(package_id))
+
+
 # ── Bid Endpoints ────────────────────────────────────────────────────────────
 
 
@@ -578,6 +653,40 @@ async def update_bid(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to update bid",
         )
+
+
+@router.put("/bids/{bid_id}/prices/", response_model=BidResponse)
+async def put_buyer_prices(
+    bid_id: uuid.UUID,
+    data: BuyerPricesRequest,
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    service: TenderingService = Depends(_get_service),
+    _perm: None = Depends(RequirePermission("tendering.bid.update")),
+) -> BidResponse:
+    """Enter a bid's unit prices line by line, from a quote received outside the link.
+
+    Quantities and texts come from the package; the total is the sum of the lines.
+    """
+    await _verify_bid_access(service, session, bid_id, user_id, payload)
+    bid = await _get_bid_portal(session).buyer_prices(bid_id, data.unit_prices, data.notes)
+    return _bid_to_response(bid)
+
+
+@router.post("/bids/{bid_id}/bid-link/", response_model=BidInvitationCreated, status_code=201)
+async def create_link_for_bid(
+    bid_id: uuid.UUID,
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    service: TenderingService = Depends(_get_service),
+    _perm: None = Depends(RequirePermission("tendering.distribute")),
+    reopen: bool = Query(default=False, description="Let a firm that already submitted revise its bid"),
+) -> BidInvitationCreated:
+    """A price-entry link for a bid entered by hand; the firm's submission updates this bid."""
+    await _verify_bid_access(service, session, bid_id, user_id, payload)
+    return await _get_bid_portal(session).link_for_bid(bid_id, actor_id=user_id, reopen=reopen)
 
 
 # ── Comparison Endpoint ──────────────────────────────────────────────────────
@@ -1101,6 +1210,22 @@ async def bid_portal_view(
     enforce_rate_limit(request, write=False)
     _public_headers(response)
     return await _get_bid_portal(session).public_view(token)
+
+
+@router.get("/bid-portal/{token}/logo/")
+async def bid_portal_logo(token: str, request: Request, session: SessionDep) -> Response:
+    """Public: the issuing company's document logo, 404 when it has none."""
+    enforce_rate_limit(request, write=False)
+    found = await _get_bid_portal(session).logo(token)
+    if found is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="no_logo")
+    content, media_type = found
+    response = Response(content=content, media_type=media_type)
+    _public_headers(response)
+    # An SVG opened on its own must not run anything.
+    response.headers["Content-Security-Policy"] = "default-src 'none'; style-src 'unsafe-inline'; sandbox"
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    return response
 
 
 @router.put("/bid-portal/{token}/draft/", response_model=BidPortalView)

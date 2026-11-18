@@ -83,6 +83,50 @@ class PackageUpdate(BaseModel):
     )
     deadline: str | None = None
     metadata: dict[str, Any] | None = None
+    # A budget entered by hand; null clears it and the computed sum applies.
+    budget_override: FiniteDecimal | None = None
+    resource_scope: "ResourceScopeIn | None" = None
+
+    @field_validator("budget_override")
+    @classmethod
+    def _check_override(cls, v: Decimal | None) -> Decimal | None:
+        if v is not None and v < 0:
+            raise ValueError("budget_override must not be negative")
+        return v
+
+
+class ResourceScopeIn(BaseModel):
+    """Which cost components of its lines a package covers.
+
+    ``kinds`` are the cost kinds in the package (labor, material, machinery,
+    equipment, subcontractor, other); ``excluded`` takes single components out
+    line by line (position id to component keys), for rows the owner supplies.
+    All kinds and no exclusions is the whole line, the default.
+    """
+
+    kinds: list[Literal["labor", "material", "machinery", "equipment", "subcontractor", "other"]] = Field(
+        ..., min_length=1, max_length=6
+    )
+    excluded: dict[str, list[str]] = Field(default_factory=dict, max_length=50000)
+
+    @field_validator("excluded")
+    @classmethod
+    def _check_excluded(cls, v: dict[str, list[str]]) -> dict[str, list[str]]:
+        for keys in v.values():
+            if len(keys) > 500 or any(len(k) > 64 for k in keys):
+                raise ValueError("too many or too long component keys on one line")
+        return v
+
+
+PackageUpdate.model_rebuild()
+
+
+class PackageCancel(BaseModel):
+    """Cancel a tender that already went out: it is closed and kept, not deleted."""
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    reason: str = Field(default="", max_length=2000)
 
 
 class PackageResponse(BaseModel):
@@ -334,6 +378,10 @@ class BidComparisonResponse(BaseModel):
     bid_count: int = 0
     bid_companies: list[str] = Field(default_factory=list)
     budget_total: Decimal = Decimal("0")
+    # ``budget_total`` is the budget in force: the buyer's override when one is
+    # set. The sum of the package's lines stays readable beside it.
+    budget_computed: Decimal = Decimal("0")
+    budget_override: Decimal | None = None
     # Budget of the Bedarfspositionen ohne Gesamtbetrag, shown apart from
     # ``budget_total`` which never includes them.
     budget_provis_total: Decimal = Decimal("0")
@@ -344,8 +392,8 @@ class BidComparisonResponse(BaseModel):
     current_boq_revision: int = 0
     published_addenda: int = 0
 
-    @field_serializer("budget_total", "budget_provis_total", when_used="json")
-    def _ser_budget_total(self, v: Decimal) -> str | None:
+    @field_serializer("budget_total", "budget_computed", "budget_override", "budget_provis_total", when_used="json")
+    def _ser_budget_total(self, v: Decimal | None) -> str | None:
         return _serialise_money(v)
 
 
@@ -454,6 +502,100 @@ class PackageScopeResponse(BaseModel):
     included_position_count: int = 0
     boq_position_count: int = 0
     sections: list[PackageScopeSection] = Field(default_factory=list)
+
+
+# ── Package preview (what goes out, before it does) ─────────────────────────
+
+
+class PackagePreviewComponent(BaseModel):
+    """One cost component of a line: per line unit, in or out of the package."""
+
+    key: str
+    name: str
+    code: str | None = None
+    kind: str
+    unit: str = ""
+    quantity: Decimal = Decimal("0")
+    unit_cost: Decimal = Decimal("0")
+    included: bool = True
+
+    @field_serializer("quantity", "unit_cost", when_used="json")
+    def _ser(self, v: Decimal) -> str | None:
+        return _serialise_money(v)
+
+
+class PackagePreviewLine(BaseModel):
+    """A row as the bidder sees it, with the buyer's budget beside it."""
+
+    id: str
+    kind: str  # "section" | "item"
+    ordinal: str = ""
+    short_text: str = ""
+    long_text: str = ""
+    unit: str = ""
+    quantity: str = ""
+    depth: int = 0
+    supplied_by_others: list[str] = Field(default_factory=list)
+    budget_rate: Decimal | None = None
+    budget_total: Decimal | None = None
+    # The scope left part of this line's components with the owner.
+    split: bool = False
+    # The scope names cost kinds but this line has no priced components.
+    unsplittable: bool = False
+    components: list[PackagePreviewComponent] = Field(default_factory=list)
+
+    @field_serializer("budget_rate", "budget_total", when_used="json")
+    def _ser(self, v: Decimal | None) -> str | None:
+        return _serialise_money(v)
+
+
+class PackagePreviewRecipient(BaseModel):
+    """A firm on the distribution list."""
+
+    company_name: str
+    email: str
+    status: str
+    # State of its newest bidder link, None when it has none.
+    link_status: str | None = None
+
+
+class PackagePreviewDocument(BaseModel):
+    """A document an addendum issues or replaces."""
+
+    addendum_revision: int
+    addendum_title: str
+    published: bool = False
+    title: str = ""
+    drawing_number: str = ""
+    revision: str = ""
+    document_id: str | None = None
+
+
+class PackagePreviewResponse(BaseModel):
+    """The whole content of a package as it goes out."""
+
+    package_id: UUID
+    name: str
+    description: str = ""
+    status: str
+    deadline: str | None = None
+    currency: str = ""
+    lines: list[PackagePreviewLine] = Field(default_factory=list)
+    item_count: int = 0
+    budget_computed: Decimal = Decimal("0")
+    budget_override: Decimal | None = None
+    budget_total: Decimal = Decimal("0")
+    scope_kinds: list[str] = Field(default_factory=list)
+    scope_active: bool = False
+    recipients: list[PackagePreviewRecipient] = Field(default_factory=list)
+    documents: list[PackagePreviewDocument] = Field(default_factory=list)
+    bid_count: int = 0
+    # Results of the ``tendering_contents`` rule set.
+    validation: list[dict[str, Any]] = Field(default_factory=list)
+
+    @field_serializer("budget_computed", "budget_override", "budget_total", when_used="json")
+    def _ser(self, v: Decimal | None) -> str | None:
+        return _serialise_money(v)
 
 
 # ── Distribution (issue the package to subcontractors) ───────────────────────
@@ -1017,6 +1159,8 @@ class BidPortalLine(BaseModel):
     # Decimal as a string; empty for a section heading.
     quantity: str = ""
     depth: int = 0
+    # Components of the line another party supplies (owner-supplied materials).
+    supplied_by_others: list[str] = Field(default_factory=list)
 
 
 class BidPortalDraft(BaseModel):
@@ -1038,6 +1182,8 @@ class BidPortalView(BaseModel):
     currency: str = ""
     project_name: str = ""
     buyer_name: str = ""
+    # The issuing company has a document logo; the page loads it from ``logo/``.
+    buyer_logo: bool = False
     bidder_company: str = ""
     expires_at: datetime
     lines: list[BidPortalLine] = Field(default_factory=list)
@@ -1071,6 +1217,13 @@ class BidPortalPricesRequest(BaseModel):
 
 
 # -- GAEB X84 bid return --------------------------------------------------------
+
+
+class BuyerPricesRequest(BaseModel):
+    """Unit prices the buyer enters for a bid, per line id, as decimal strings."""
+
+    unit_prices: dict[str, str] = Field(default_factory=dict, max_length=50000)
+    notes: str | None = Field(default=None, max_length=10000)
 
 
 class X84LineCheck(BaseModel):

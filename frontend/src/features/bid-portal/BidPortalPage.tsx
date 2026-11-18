@@ -31,6 +31,7 @@ import { useNumberLocale } from '@/stores/usePreferencesStore';
 
 import {
   BidPortalError,
+  bidPortalLogoUrl,
   fetchBidPortal,
   saveBidDraft,
   submitBid,
@@ -234,7 +235,7 @@ export function BidPortalPage() {
   const deadlineText = v.deadline ? formatDateValue(v.deadline, { dateStyle: 'medium' }) : '';
 
   return (
-    <Shell>
+    <Shell logoUrl={v.buyer_logo ? bidPortalLogoUrl(token) : undefined} buyerName={v.buyer_name}>
       <section className="space-y-1">
         {(v.buyer_name || v.project_name) && (
           <p className="flex flex-wrap gap-x-3 text-xs uppercase tracking-wide text-content-tertiary">
@@ -383,6 +384,14 @@ export function BidPortalPage() {
                     <label htmlFor={inputId} className="block">
                       {line.short_text}
                     </label>
+                    {(line.supplied_by_others?.length ?? 0) > 0 && (
+                      <p className="mt-0.5 text-xs text-content-tertiary" data-testid={`bid-portal-supplied-${line.id}`}>
+                        {t('bid_portal.supplied_by_others', {
+                          defaultValue: 'Supplied by others, not to be priced: {{items}}',
+                          items: (line.supplied_by_others ?? []).join(', '),
+                        })}
+                      </p>
+                    )}
                     {line.long_text && (
                       <>
                         <button
@@ -580,8 +589,17 @@ function LinkProblem({ code }: { code: BidPortalErrorCode }) {
   );
 }
 
-function Shell({ children }: { children: React.ReactNode }) {
+function Shell({
+  children,
+  logoUrl,
+  buyerName,
+}: {
+  children: React.ReactNode;
+  logoUrl?: string;
+  buyerName?: string;
+}) {
   const { t, i18n } = useTranslation();
+  const [logoFailed, setLogoFailed] = useState(false);
   const currentLang =
     SUPPORTED_LANGUAGES.find((l) => i18n.language === l.code)?.code ??
     SUPPORTED_LANGUAGES.find((l) => i18n.language.startsWith(l.code))?.code ??
@@ -590,7 +608,16 @@ function Shell({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen bg-surface-secondary">
       <header className="w-full border-b border-border-light bg-surface-primary">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3 sm:px-6">
-          <span className="text-sm font-medium text-content-primary">
+          <span className="flex items-center gap-3 text-sm font-medium text-content-primary">
+            {logoUrl && !logoFailed && (
+              <img
+                src={logoUrl}
+                alt={buyerName || t('bid_portal.logo_alt', { defaultValue: 'Company logo' })}
+                className="h-10 max-w-[180px] object-contain"
+                onError={() => setLogoFailed(true)}
+                data-testid="bid-portal-logo"
+              />
+            )}
             {t('bid_portal.brand', { defaultValue: 'Price entry' })}
           </span>
           <label className="flex items-center gap-2 text-xs text-content-secondary">
