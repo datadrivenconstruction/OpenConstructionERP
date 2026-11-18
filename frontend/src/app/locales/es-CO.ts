@@ -21357,6 +21357,8 @@ const resource = {
     "contracts.payment_terms.source.standard_form": "Formulario de contrato tipo",
     "contracts.payment_terms.source.industry_practice": "Práctica habitual",
     "contracts.payment_terms.source.regional_pack": "Paquete regional",
+    "contracts.payment_terms.pay_when_paid": "El pago depende de que el pagador haya cobrado (pay-when-paid)",
+    "contracts.payment_terms.pay_when_paid_hint": "Algunas leyes de garantía de pago anulan esta cláusula. El informe de validación lo indica cuando afecta a su contrato.",
     "contracts.country_defaults.AE.retention_percent.note": "El Contract Data indica el porcentaje que se retiene de cada pago parcial; diez por ciento es el valor de entrada habitual en el Golfo, retenido hasta alcanzar el límite de retención.",
     "contracts.country_defaults.AE.retention_cap_percent.note": "La retención se detiene en el límite que indica el Contract Data, normalmente cinco por ciento del Accepted Contract Amount, de modo que el tipo del diez por ciento deja de aplicarse a la mitad del valor del contrato.",
     "contracts.country_defaults.AE.retention_release_split.note": "La mitad se devuelve al emitirse el Taking-Over Certificate y el resto al vencer la Defects Notification Period.",

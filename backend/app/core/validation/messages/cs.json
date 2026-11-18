@@ -2511,5 +2511,46 @@
       "fail": "Tuny podle počtu jízd se liší od zaměřených tun o {v} %, tedy nad kontrolou {t} %.",
       "suggestion": "Zkontrolujte užitečné zatížení jedné jízdy a hustotu a poté znovu porovnejte oba povrchy."
     }
+  },
+  "hongkong": {
+    "sopo_applicability": {
+      "fail": "Na smlouvu se vztahuje Cap. 652 (Security of Payment): odpověď do 30 dnů, platba do 60 dnů od nároku"
+    },
+    "sopo_private_scope_check": {
+      "fail": "Soukromá smlouva spadá pod Cap. 652 jen u nové budovy nebo prací se schválením Building Authority: potvrďte rozsah"
+    },
+    "sopo_response_late": {
+      "fail": "Do {date} nebyla doručena odpověď na nárok: částka je sporná a může jít k adjudikaci"
+    },
+    "sopo_payment_term_exceeds_60": {
+      "fail": "Lhůta splatnosti {n} dnů překračuje 60 dnů povolených Cap. 652"
+    },
+    "sopo_response_term_exceeds_30": {
+      "fail": "Lhůta odpovědi {n} dnů překračuje 30 dnů povolených Cap. 652"
+    },
+    "sopo_adjudication_window": {
+      "fail": "Vznikl platební spor: doručte oznámení o adjudikaci do {date}"
+    },
+    "contract_pay_when_paid": {
+      "fail": "Doložka pay-when-paid: Cap. 652 činí podmíněnou platbu nevymahatelnou"
+    },
+    "levy_missing": {
+      "fail": "Práce přesahují HK$3,000,000, ale rozpočet nemá poplatek CIC (0,5 %) nebo poplatek CWR (0,03 %)"
+    },
+    "levy_below_threshold": {
+      "fail": "Práce nepřesahují HK$3,000,000: poplatky CIC a CWR se neplatí"
+    },
+    "tax_nonzero": {
+      "fail": "Je účtován řádek DPH nebo GST, ale Hongkong takovou daň nemá: nastavte nulu"
+    },
+    "retention_over_limit": {
+      "fail": "Zádržné {x} překračuje smluvní limit {limit}"
+    },
+    "pc_sum_no_attendance": {
+      "fail": "Částka prime cost nemá položky zisku a obsluhy"
+    },
+    "index_attribution": {
+      "fail": "Cenový index ArchSD neuvádí zdroj: uveďte Architectural Services Department"
+    }
   }
 }

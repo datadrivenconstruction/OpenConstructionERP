@@ -2511,5 +2511,46 @@
       "fail": "Tonase hitungan truk berbeda {v} % dari tonase survei, melebihi pemeriksaan {t} %.",
       "suggestion": "Periksa muatan per rit dan densitas, lalu bandingkan kembali kedua permukaan."
     }
+  },
+  "hongkong": {
+    "sopo_applicability": {
+      "fail": "Kontrak ini tunduk pada Cap. 652 (Security of Payment): tanggapan dalam 30 hari, pembayaran dalam 60 hari sejak klaim"
+    },
+    "sopo_private_scope_check": {
+      "fail": "Kontrak swasta hanya tunduk pada Cap. 652 untuk bangunan baru atau pekerjaan yang perlu persetujuan Building Authority: konfirmasi cakupannya"
+    },
+    "sopo_response_late": {
+      "fail": "Tidak ada tanggapan pembayaran sebelum {date}: jumlah klaim disengketakan dan dapat dibawa ke ajudikasi"
+    },
+    "sopo_payment_term_exceeds_60": {
+      "fail": "Jangka pembayaran {n} hari melebihi 60 hari yang diizinkan Cap. 652"
+    },
+    "sopo_response_term_exceeds_30": {
+      "fail": "Jangka tanggapan {n} hari melebihi 30 hari yang diizinkan Cap. 652"
+    },
+    "sopo_adjudication_window": {
+      "fail": "Sengketa pembayaran timbul: sampaikan pemberitahuan ajudikasi sebelum {date}"
+    },
+    "contract_pay_when_paid": {
+      "fail": "Klausul pay-when-paid: Cap. 652 membuat pembayaran bersyarat tidak dapat dilaksanakan"
+    },
+    "levy_missing": {
+      "fail": "Pekerjaan melebihi HK$3,000,000 tetapi RAB tidak memuat pungutan CIC (0,5%) atau pungutan CWR (0,03%)"
+    },
+    "levy_below_threshold": {
+      "fail": "Pekerjaan paling banyak HK$3,000,000: tidak ada pungutan CIC atau CWR"
+    },
+    "tax_nonzero": {
+      "fail": "Baris PPN atau GST dikenakan, padahal Hong Kong tidak memiliki pajak itu: jadikan nol"
+    },
+    "retention_over_limit": {
+      "fail": "Retensi {x} melebihi batas kontrak {limit}"
+    },
+    "pc_sum_no_attendance": {
+      "fail": "Jumlah prime cost tidak memiliki item laba dan pelayanan"
+    },
+    "index_attribution": {
+      "fail": "Indeks harga ArchSD tidak mencantumkan sumber: sebutkan Architectural Services Department"
+    }
   }
 }

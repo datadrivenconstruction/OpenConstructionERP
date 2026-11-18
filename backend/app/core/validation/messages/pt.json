@@ -2511,5 +2511,46 @@
       "fail": "As toneladas pela contagem de camiões diferem {v} % das toneladas levantadas, acima da verificação de {t} %.",
       "suggestion": "Verifique a carga útil por viagem e a densidade e compare de novo as duas superfícies."
     }
+  },
+  "hongkong": {
+    "sopo_applicability": {
+      "fail": "Cap. 652 (Security of Payment) abrange este contrato: resposta em 30 dias e pagamento em 60 dias após a reclamação"
+    },
+    "sopo_private_scope_check": {
+      "fail": "Um contrato privado só é abrangido pelo Cap. 652 para edifício novo ou obras que exigem aprovação da Building Authority: confirme o âmbito"
+    },
+    "sopo_response_late": {
+      "fail": "Nenhuma resposta de pagamento foi notificada até {date}: o valor reclamado está em disputa e pode ir a adjudicação"
+    },
+    "sopo_payment_term_exceeds_60": {
+      "fail": "O prazo de pagamento de {n} dias excede os 60 dias permitidos pelo Cap. 652"
+    },
+    "sopo_response_term_exceeds_30": {
+      "fail": "O prazo de resposta de {n} dias excede os 30 dias permitidos pelo Cap. 652"
+    },
+    "sopo_adjudication_window": {
+      "fail": "Surgiu uma disputa de pagamento: notifique a adjudicação até {date}"
+    },
+    "contract_pay_when_paid": {
+      "fail": "Cláusula pay-when-paid: o Cap. 652 torna inexequíveis os pagamentos condicionais"
+    },
+    "levy_missing": {
+      "fail": "As obras excedem HK$3,000,000 mas o orçamento não tem a taxa CIC (0,5%) ou a taxa CWR (0,03%)"
+    },
+    "levy_below_threshold": {
+      "fail": "As obras não excedem HK$3,000,000: não há taxa CIC ou CWR"
+    },
+    "tax_nonzero": {
+      "fail": "Uma linha de IVA ou GST é cobrada, mas Hong Kong não tem esse imposto: defina zero"
+    },
+    "retention_over_limit": {
+      "fail": "A retenção de {x} excede o limite contratual de {limit}"
+    },
+    "pc_sum_no_attendance": {
+      "fail": "Uma soma prime cost não tem itens de lucro e assistência"
+    },
+    "index_attribution": {
+      "fail": "O índice de preços ArchSD não indica a fonte: cite o Architectural Services Department"
+    }
   }
 }

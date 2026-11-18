@@ -112,19 +112,32 @@ def _expected_bases(lines: list[dict[str, object]]) -> list[list[str]]:
     Deliberately not imported from the producer. ``direct_cost`` prices the
     direct cost alone; ``cumulative`` and its alias ``subtotal`` price the
     direct cost plus every line already added, which written out as explicit
-    tokens is the direct composite followed by every preceding step key.
+    tokens is the direct composite followed by every preceding step key. A line
+    marked ``not_compounded`` (a levy on the contract value) is in no later base.
     """
     keys = [f"s{index + 1}_{line['category']}" for index, line in enumerate(lines)]
     bases: list[list[str]] = []
     for index, line in enumerate(lines):
         if str(line.get("apply_to", "direct_cost")).lower() in ("cumulative", "subtotal"):
-            bases.append(["direct", *keys[:index]])
+            bases.append(
+                ["direct", *(k for k, prev in zip(keys[:index], lines, strict=False) if not prev.get("not_compounded"))]
+            )
         else:
             bases.append(["direct"])
     return bases
 
 
-def _boq_total(lines: list[dict[str, object]]) -> Decimal:
+def _seeded_metadata(line: dict[str, object]) -> dict[str, object]:
+    """The levy metadata ``apply_default_markups`` copies onto a seeded line."""
+    meta: dict[str, object] = {}
+    if line.get("threshold_amount") not in (None, ""):
+        meta["threshold_amount"] = str(line["threshold_amount"])
+    if line.get("not_compounded"):
+        meta["not_compounded"] = True
+    return meta
+
+
+def _boq_total(lines: list[dict[str, object]], direct: Decimal = _DIRECT_COST) -> Decimal:
     """Price the same lines through the bill engine, as a seeded bill would."""
     markups = [
         BOQMarkup(
@@ -136,10 +149,11 @@ def _boq_total(lines: list[dict[str, object]]) -> Decimal:
             apply_to=str(line.get("apply_to", "direct_cost")),
             sort_order=int(line["sort_order"]),  # type: ignore[arg-type]
             is_active=True,
+            metadata_=_seeded_metadata(line),
         )
         for line in lines
     ]
-    return _DIRECT_COST + sum((amount for _, amount in _calculate_markup_amounts(_DIRECT_COST, markups)), Decimal("0"))
+    return direct + sum((amount for _, amount in _calculate_markup_amounts(direct, markups)), Decimal("0"))
 
 
 def _tolerance(steps: int, decimals: int) -> Decimal:
@@ -411,3 +425,16 @@ def test_the_brazilian_bill_does_not_charge_the_rate_twice() -> None:
     assert all(rate != Decimal("18") for rate in tax.values()), (
         f"a project rate stood in for a statutory Brazilian levy: {tax}"
     )
+
+
+def test_hong_kong_levies_agree_in_both_engines_above_the_threshold() -> None:
+    """Below HK$3M both engines charge no levy (the parametrised test); above it both charge it in full."""
+    template = _template_for("HK")
+    lines = region_lines_for_country("HK", vat_rate=template.get("vat_rate"))
+    assert lines is not None
+    bases = {key: value * 40 for key, value in _BASES.items()}
+    spec = build_cascade_spec_from_template(str(template["slug"]))
+    result = compute_cascade(spec, bases)
+    levies = [step.amount for step in result.steps if step.category == "other"]
+    assert all(amount > 0 for amount in levies) and len(levies) == 2
+    assert abs(result.grand_total - _boq_total(lines, sum(bases.values(), Decimal("0")))) <= _tolerance(len(lines), 2)

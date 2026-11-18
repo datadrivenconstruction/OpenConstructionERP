@@ -2511,5 +2511,46 @@
       "fail": "A fuvarszámlálás szerinti tonna {v} %-kal tér el a felmért tonnától, ami meghaladja a {t} % ellenőrzési határt.",
       "suggestion": "Ellenőrizze a fuvaronkénti terhelést és a sűrűséget, majd hasonlítsa össze újra a két felületet."
     }
+  },
+  "hongkong": {
+    "sopo_applicability": {
+      "fail": "A szerződésre a Cap. 652 (Security of Payment) vonatkozik: válasz 30 napon, fizetés 60 napon belül"
+    },
+    "sopo_private_scope_check": {
+      "fail": "Magánszerződés csak új épületnél vagy Building Authority jóváhagyást igénylő munkánál tartozik a Cap. 652 alá: erősítse meg a kört"
+    },
+    "sopo_response_late": {
+      "fail": "{date} napig nem kézbesítettek fizetési választ: a követelt összeg vitatott, adjudikációra vihető"
+    },
+    "sopo_payment_term_exceeds_60": {
+      "fail": "A(z) {n} napos fizetési határidő meghaladja a Cap. 652 szerinti 60 napot"
+    },
+    "sopo_response_term_exceeds_30": {
+      "fail": "A(z) {n} napos válaszhatáridő meghaladja a Cap. 652 szerinti 30 napot"
+    },
+    "sopo_adjudication_window": {
+      "fail": "Fizetési vita keletkezett: az adjudikációs értesítést {date} napig kézbesítse"
+    },
+    "contract_pay_when_paid": {
+      "fail": "Pay-when-paid kikötés: a Cap. 652 szerint a feltételes fizetés nem érvényesíthető"
+    },
+    "levy_missing": {
+      "fail": "A munkák meghaladják a HK$3,000,000 összeget, de hiányzik a CIC-járulék (0,5%) vagy a CWR-járulék (0,03%)"
+    },
+    "levy_below_threshold": {
+      "fail": "A munkák legfeljebb HK$3,000,000: nincs CIC- vagy CWR-járulék"
+    },
+    "tax_nonzero": {
+      "fail": "ÁFA vagy GST sor van felszámítva, de Hongkongban nincs ilyen adó: állítsa nullára"
+    },
+    "retention_over_limit": {
+      "fail": "A visszatartás ({x}) meghaladja a szerződéses korlátot ({limit})"
+    },
+    "pc_sum_no_attendance": {
+      "fail": "A prime cost összeghez nincs nyereség- és kiszolgálási tétel"
+    },
+    "index_attribution": {
+      "fail": "Az ArchSD árindexnél hiányzik a forrás: tüntesse fel az Architectural Services Department-et"
+    }
   }
 }

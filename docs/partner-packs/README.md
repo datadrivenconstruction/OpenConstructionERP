@@ -488,6 +488,7 @@ teach identifiers that were never rule sets at all.
 | `bc3` | FIEBDC-3 / BC3 (ES) |
 | `mexico` | Mexican estimating conventions |
 | `pakistan` | Pakistani sales tax line and known rates (federal GST, provincial services tax) (PK) |
+| `hongkong` | Hong Kong Security of Payment Ordinance (Cap. 652) scope and dates, pay-when-paid, CIC and CWR levies, zero tax, retention limit, PC sum attendance, ArchSD index attribution (HK) |
 | `sinapi` | SINAPI codes (BR) |
 | `nbr` | ABNT NBR (BR) |
 | `cpwd` | CPWD and IS 1200 (IN) |

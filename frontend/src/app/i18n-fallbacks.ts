@@ -46,6 +46,7 @@ import pt from './locales/pt';
 import ptBR from './locales/pt-BR';
 import ru from './locales/ru';
 import zh from './locales/zh';
+import zhHK from './locales/zh-HK';
 import ar from './locales/ar';
 import hi from './locales/hi';
 import tr from './locales/tr';
@@ -91,6 +92,7 @@ export const fallbackResources = {
   'pt-BR': ptBR,
   ru,
   zh,
+  'zh-HK': zhHK,
   ar,
   hi,
   tr,

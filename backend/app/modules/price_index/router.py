@@ -21,7 +21,7 @@ from __future__ import annotations
 
 import uuid
 
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
+from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
 
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep, verify_project_access
 from app.modules.price_index.models import CostIndexSeries
@@ -64,6 +64,8 @@ def _series_response(series: CostIndexSeries, point_count: int) -> CostIndexSeri
         id=series.id,
         name=series.name,
         description=series.description,
+        source_attribution=series.source_attribution or "",
+        source_url=series.source_url or "",
         point_count=point_count,
         created_at=series.created_at,
         updated_at=series.updated_at,
@@ -76,6 +78,8 @@ def _series_detail(series: CostIndexSeries) -> CostIndexSeriesDetail:
         id=series.id,
         name=series.name,
         description=series.description,
+        source_attribution=series.source_attribution or "",
+        source_url=series.source_url or "",
         point_count=len(points),
         created_at=series.created_at,
         updated_at=series.updated_at,
@@ -108,6 +112,55 @@ async def create_series(
     service = PriceIndexService(session)
     series = await service.create_series(data)
     return _series_response(series, 0)
+
+
+@router.post("/import/quarterly/", dependencies=[_MANAGE])
+async def import_quarterly(
+    session: SessionDep,
+    _user_id: CurrentUserId,
+    file: UploadFile = File(..., description="CSV or JSON rows with Year, Quarter and one index value column"),
+    name: str = Form(..., min_length=1, max_length=255),
+    source_attribution: str = Form(..., max_length=2000),
+    source_url: str = Form(default="", max_length=500),
+    description: str = Form(default="", max_length=5000),
+    value_column: str | None = Form(default=None, max_length=255),
+) -> dict[str, object]:
+    """Import a quarterly published index into one series, with its publisher's attribution.
+
+    Refused without an attribution. Quarters land on their first month; values
+    that are not a positive number are skipped and listed. Nothing is fetched.
+    """
+    from app.modules.price_index.quarterly_import import (  # noqa: PLC0415
+        MAX_BYTES,
+        QuarterlyImportError,
+        import_quarterly_series,
+        parse_quarterly_file,
+    )
+
+    content = await file.read(MAX_BYTES + 1)
+    try:
+        points, skipped = parse_quarterly_file(content, value_column)
+        summary = await import_quarterly_series(
+            session,
+            name=name.strip(),
+            points=points,
+            source_attribution=source_attribution,
+            source_url=source_url,
+            description=description,
+        )
+    except QuarterlyImportError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail={"problem": exc.problem, "message": str(exc)},
+        ) from exc
+    return {
+        "series_id": summary.series_id,
+        "series_created": summary.created,
+        "points_created": summary.points_created,
+        "points_updated": summary.points_updated,
+        "points_unchanged": summary.points_unchanged,
+        "skipped": skipped[:200],
+    }
 
 
 @router.post("/import/statssa-p0151/", dependencies=[_MANAGE])

@@ -2511,5 +2511,46 @@
       "fail": "Ang tonelada mula sa bilang ng trak ay may {v} % na pagkakaiba sa tonelada ng survey, lampas sa {t} % na tseke.",
       "suggestion": "Suriin ang karga bawat biyahe at ang density, saka ihambing muli ang dalawang surface."
     }
+  },
+  "hongkong": {
+    "sopo_applicability": {
+      "fail": "Saklaw ng Cap. 652 (Security of Payment) ang kontratang ito: tugon sa loob ng 30 araw, bayad sa loob ng 60 araw mula sa claim"
+    },
+    "sopo_private_scope_check": {
+      "fail": "Saklaw lang ng Cap. 652 ang pribadong kontrata para sa bagong gusali o gawaing kailangan ng pag-apruba ng Building Authority: kumpirmahin ang saklaw"
+    },
+    "sopo_response_late": {
+      "fail": "Walang tugon sa bayad na naihatid bago ang {date}: pinagtatalunan ang halaga at maaaring dalhin sa adjudication"
+    },
+    "sopo_payment_term_exceeds_60": {
+      "fail": "Ang {n} araw na panahon ng bayad ay lampas sa 60 araw na pinapayagan ng Cap. 652"
+    },
+    "sopo_response_term_exceeds_30": {
+      "fail": "Ang {n} araw na panahon ng tugon ay lampas sa 30 araw na pinapayagan ng Cap. 652"
+    },
+    "sopo_adjudication_window": {
+      "fail": "May alitan sa bayad: ihatid ang abiso ng adjudication bago ang {date}"
+    },
+    "contract_pay_when_paid": {
+      "fail": "Sugnay na pay-when-paid: ginagawang hindi maipapatupad ng Cap. 652 ang kondisyonal na bayad"
+    },
+    "levy_missing": {
+      "fail": "Lampas sa HK$3,000,000 ang gawa ngunit walang CIC levy (0.5%) o CWR levy (0.03%) ang bill"
+    },
+    "levy_below_threshold": {
+      "fail": "Hindi lampas sa HK$3,000,000 ang gawa: walang CIC o CWR levy"
+    },
+    "tax_nonzero": {
+      "fail": "May linya ng VAT o GST, ngunit walang ganitong buwis sa Hong Kong: gawing zero"
+    },
+    "retention_over_limit": {
+      "fail": "Ang retention na {x} ay lampas sa limitasyon ng kontrata na {limit}"
+    },
+    "pc_sum_no_attendance": {
+      "fail": "Walang item ng tubo at attendance ang prime cost sum"
+    },
+    "index_attribution": {
+      "fail": "Walang source attribution ang ArchSD price index: banggitin ang Architectural Services Department"
+    }
   }
 }

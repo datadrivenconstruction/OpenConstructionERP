@@ -102,6 +102,8 @@ export interface ContractItem {
   currency: string;
   retention_percent: number | string;
   retention_release_event: RetentionReleaseEvent;
+  /** Payment is conditional on the payer being paid; void where a security-of-payment law says so. */
+  pay_when_paid?: boolean;
   status: ContractStatus;
   signed_at: string | null;
   /**
@@ -335,6 +337,7 @@ export interface ContractCreatePayload {
   retention_cap_percent?: number | null;
   retention_release_split?: ReleaseSplitStep[] | null;
   payment_period_days?: number | null;
+  pay_when_paid?: boolean;
   valuation_interval?: ValuationInterval | null;
   certificate_name?: string | null;
   status?: ContractStatus;

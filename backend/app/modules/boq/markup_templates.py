@@ -1858,6 +1858,69 @@ DEFAULT_MARKUP_TEMPLATES: dict[str, list[dict[str, object]]] = {
             "sort_order": 4,
         },
     ],
+    # ── Hong Kong SAR ───────────────────────────────────────────────────
+    # Bills are measured to the Hong Kong Standard Method of Measurement for
+    # Building Elements (HKSMM4) in the same lineage as the SG and KE blocks:
+    # preliminaries are a measured section, so the percentage here stands in
+    # for that section on a bill that has not measured it.
+    #
+    # TWO STATUTORY LEVIES ARE THE REASON THIS COUNTRY GETS A ROW. The
+    # Construction Industry Council Ordinance (Cap. 587) levies 0.5 percent and
+    # the Construction Workers Registration Ordinance (Cap. 583) 0.03 percent of
+    # the value of construction operations, paid by the contractor, on works
+    # whose value exceeds HK$3,000,000 (raised from HK$1,000,000 for works
+    # tendered or begun from 30 July 2018; cic.hk, Construction Industry Levy).
+    # Above the threshold the levy is on the whole value, not on the excess,
+    # which is what ``threshold_amount`` does. Both lines are ``not_compounded``:
+    # each is a percentage of the same contract value, so neither enters the
+    # other's base, and 50,000,000 carries 250,000 plus 15,000.
+    #
+    # Hong Kong has no VAT or GST and profits tax is not a bill item, so the
+    # stack has no tax line (see NON_SINGLE_TAX_REGIONS).
+    #
+    # Overhead 10, profit 8 and contingency 5 are working defaults, not
+    # published figures.
+    "HK": [
+        {
+            "name": "Preliminaries",
+            "category": "overhead",
+            "percentage": "10.0",
+            "apply_to": "direct_cost",
+            "sort_order": 0,
+        },
+        {
+            "name": "Main Contractor's Overheads and Profit",
+            "category": "profit",
+            "percentage": "8.0",
+            "apply_to": "direct_cost",
+            "sort_order": 1,
+        },
+        {
+            "name": "Contingency Sum",
+            "category": "contingency",
+            "percentage": "5.0",
+            "apply_to": "direct_cost",
+            "sort_order": 2,
+        },
+        {
+            "name": "Construction Industry Council Levy (Cap. 587)",
+            "category": "other",
+            "percentage": "0.5",
+            "apply_to": "cumulative",
+            "sort_order": 3,
+            "threshold_amount": "3000000",
+            "not_compounded": True,
+        },
+        {
+            "name": "Construction Workers Registration Levy (Cap. 583)",
+            "category": "other",
+            "percentage": "0.03",
+            "apply_to": "cumulative",
+            "sort_order": 4,
+            "threshold_amount": "3000000",
+            "not_compounded": True,
+        },
+    ],
     # ── Morocco ─────────────────────────────────────────────────────────
     # Decree 2-22-431 on public procurement, which prescribes the bordereau des
     # prix and the détail estimatif and the sous-détail des prix behind them;
@@ -2935,6 +2998,7 @@ REGION_BY_COUNTRY: dict[str, str] = {
     "KE": "KE",
     "MA": "MA",
     "SG": "SG",
+    "HK": "HK",
     "ID": "ID",
     "VN": "VN",
     "MY": "MY",
@@ -3082,6 +3146,7 @@ NON_SINGLE_TAX_REGIONS: dict[str, str] = {
         "at a rate each province sets (16 percent in Punjab, 15 in Sindh and Khyber Pakhtunkhwa as read) "
         "and lower again for government civil works, so no single number is right for every bill"
     ),
+    "HK": "Hong Kong levies no VAT or GST and profits tax is not a bill item, so the stack carries no tax line",
     "DEFAULT": (
         "the neutral stack names no jurisdiction, so it names no consumption tax either; a caller "
         "that knows the country gets that country's own tax line appended instead, see "

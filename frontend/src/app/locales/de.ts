@@ -22401,6 +22401,8 @@ const resource = {
     "contracts.payment_terms.source.standard_form": "Vertragsmusterformular",
     "contracts.payment_terms.source.industry_practice": "Übliche Praxis",
     "contracts.payment_terms.source.regional_pack": "Regionales Regelpaket",
+    "contracts.payment_terms.pay_when_paid": "Zahlung erst nach Zahlungseingang beim Zahlenden (pay-when-paid)",
+    "contracts.payment_terms.pay_when_paid_hint": "Manche Zahlungssicherungsgesetze erklären eine solche Klausel für unwirksam. Der Prüfbericht weist darauf hin, wenn das für Ihren Vertrag gilt.",
     "contracts.country_defaults.AE.retention_percent.note": "Die Contract Data gibt den Prozentsatz an, der von jeder Abschlagszahlung einbehalten wird; zehn Prozent ist der übliche Golf-Einstiegswert, einbehalten bis die Grenze des Einbehalts erreicht ist.",
     "contracts.country_defaults.AE.retention_cap_percent.note": "Der Einbehalt endet an der in den Contract Data genannten Grenze, meist fünf Prozent der Accepted Contract Amount, sodass der Zehn-Prozent-Satz bei der Hälfte des Vertragswerts zu greifen aufhört.",
     "contracts.country_defaults.AE.retention_release_split.note": "Die Hälfte wird bei Ausstellung des Taking-Over Certificate zurückgezahlt, der Rest beim Ablauf der Defects Notification Period.",
@@ -59182,6 +59184,7 @@ const resource = {
     "modules.catalog.monitoring": "Bauwerksüberwachung",
     "modules.pp_name_pakistan_pk": "Pakistan-Baupaket",
     "modules.pp_name_peru_pe": "Peru-Baupaket",
+    "modules.pp_name_hongkong_hk": "Hongkong-Baupaket",
     // stakeholders (module 8) frontend keys: start
     "notifications.stakeholders.commitment_overdue.body": "Zusage {{code}} war am {{due}} fällig.",
     "notifications.stakeholders.commitment_overdue.title": "Eine Zusage hat ihren Termin überschritten",

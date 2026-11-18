@@ -2511,5 +2511,46 @@
       "fail": "Die Tonnen nach Fahrtenzählung weichen um {v} % von den vermessenen Tonnen ab, über der Prüfgrenze von {t} %.",
       "suggestion": "Nutzlast je Fahrt und Dichte prüfen, danach die beiden Oberflächen erneut vergleichen."
     }
+  },
+  "hongkong": {
+    "sopo_applicability": {
+      "fail": "Cap. 652 (Security of Payment) gilt für diesen Vertrag: Zahlungsantwort binnen 30 Tagen, Zahlung binnen 60 Tagen nach der Forderung"
+    },
+    "sopo_private_scope_check": {
+      "fail": "Ein privater Vertrag fällt nur bei einem Neubau oder genehmigungspflichtigen Arbeiten (Building Authority) unter Cap. 652: Umfang bestätigen"
+    },
+    "sopo_response_late": {
+      "fail": "Bis {date} wurde keine Zahlungsantwort zugestellt: der geforderte Betrag ist strittig und kann zur Adjudikation gehen"
+    },
+    "sopo_payment_term_exceeds_60": {
+      "fail": "Die Zahlungsfrist von {n} Tagen überschreitet die nach Cap. 652 zulässigen 60 Tage"
+    },
+    "sopo_response_term_exceeds_30": {
+      "fail": "Die Antwortfrist von {n} Tagen überschreitet die nach Cap. 652 zulässigen 30 Tage"
+    },
+    "sopo_adjudication_window": {
+      "fail": "Ein Zahlungsstreit ist entstanden: die Adjudikationsanzeige bis {date} zustellen"
+    },
+    "contract_pay_when_paid": {
+      "fail": "Pay-when-paid-Klausel: Cap. 652 erklärt bedingte Zahlungsklauseln für unwirksam"
+    },
+    "levy_missing": {
+      "fail": "Die Arbeiten übersteigen HK$3,000,000, aber im Leistungsverzeichnis fehlt die CIC-Abgabe (0,5%) oder die CWR-Abgabe (0,03%)"
+    },
+    "levy_below_threshold": {
+      "fail": "Die Arbeiten betragen höchstens HK$3,000,000: keine CIC- oder CWR-Abgabe fällig"
+    },
+    "tax_nonzero": {
+      "fail": "Eine Mehrwertsteuer- oder GST-Zeile wird berechnet, Hongkong erhebt keine solche Steuer: auf null setzen"
+    },
+    "retention_over_limit": {
+      "fail": "Der Einbehalt {x} übersteigt die vertragliche Grenze {limit}"
+    },
+    "pc_sum_no_attendance": {
+      "fail": "Eine Prime-Cost-Summe hat keine Positionen für Gewinn und Beistellung"
+    },
+    "index_attribution": {
+      "fail": "Der ArchSD-Baupreisindex hat keine Quellenangabe: das Architectural Services Department als Quelle nennen"
+    }
   }
 }

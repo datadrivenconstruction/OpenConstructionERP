@@ -78,9 +78,10 @@ class MarkupStepSchema(BaseModel):
     rate: FiniteDecimal = Field(default=Decimal("0"))
     amount: FiniteDecimal = Field(default=Decimal("0"))
     base: list[str] = Field(default_factory=list)
+    threshold: FiniteDecimal | None = None
 
-    @field_serializer("rate", "amount", when_used="json")
-    def _ser_rate(self, v: Decimal) -> str | None:
+    @field_serializer("rate", "amount", "threshold", when_used="json")
+    def _ser_rate(self, v: Decimal | None) -> str | None:
         return _serialise_money(v)
 
 

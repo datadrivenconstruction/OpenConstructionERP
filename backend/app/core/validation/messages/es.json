@@ -2511,5 +2511,46 @@
       "fail": "Las toneladas por conteo de camiones difieren {v} % de las toneladas levantadas, por encima del control del {t} %.",
       "suggestion": "Revise la carga útil por viaje y la densidad, y compare de nuevo las dos superficies."
     }
+  },
+  "hongkong": {
+    "sopo_applicability": {
+      "fail": "Cap. 652 (Security of Payment) cubre este contrato: respuesta en 30 días y pago en 60 días desde la reclamación"
+    },
+    "sopo_private_scope_check": {
+      "fail": "Un contrato privado está cubierto por Cap. 652 solo si es un edificio nuevo u obras que requieren aprobación de la Building Authority: confirme el alcance"
+    },
+    "sopo_response_late": {
+      "fail": "No se notificó respuesta de pago antes del {date}: el importe reclamado está en disputa y puede ir a adjudicación"
+    },
+    "sopo_payment_term_exceeds_60": {
+      "fail": "El plazo de pago de {n} días supera los 60 días que permite Cap. 652"
+    },
+    "sopo_response_term_exceeds_30": {
+      "fail": "El plazo de respuesta de {n} días supera los 30 días que permite Cap. 652"
+    },
+    "sopo_adjudication_window": {
+      "fail": "Ha surgido una disputa de pago: notifique la adjudicación antes del {date}"
+    },
+    "contract_pay_when_paid": {
+      "fail": "Cláusula pay-when-paid: Cap. 652 hace inexigibles los pagos condicionados"
+    },
+    "levy_missing": {
+      "fail": "Las obras superan HK$3,000,000 pero el presupuesto no tiene la tasa CIC (0,5%) o la tasa CWR (0,03%)"
+    },
+    "levy_below_threshold": {
+      "fail": "Las obras no superan HK$3,000,000: no se devengan tasas CIC ni CWR"
+    },
+    "tax_nonzero": {
+      "fail": "Se cobra una línea de IVA o GST, pero Hong Kong no tiene ese impuesto: póngala a cero"
+    },
+    "retention_over_limit": {
+      "fail": "La retención de {x} supera el límite contractual de {limit}"
+    },
+    "pc_sum_no_attendance": {
+      "fail": "Una suma prime cost no tiene partidas de beneficio y asistencia"
+    },
+    "index_attribution": {
+      "fail": "El índice de precios ArchSD no indica su fuente: cite al Architectural Services Department"
+    }
   }
 }

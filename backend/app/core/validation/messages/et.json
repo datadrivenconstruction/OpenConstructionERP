@@ -2511,5 +2511,46 @@
       "fail": "Veokite loenduse tonnid erinevad mõõdistuse tonnidest {v} %, mis ületab kontrollpiiri {t} %.",
       "suggestion": "Kontrollige koormat ühe sõidu kohta ja tihedust ning võrrelge kaht pinda uuesti."
     }
+  },
+  "hongkong": {
+    "sopo_applicability": {
+      "fail": "Lepingule kehtib Cap. 652 (Security of Payment): vastus 30 päeva, makse 60 päeva jooksul nõudest"
+    },
+    "sopo_private_scope_check": {
+      "fail": "Eraleping kuulub Cap. 652 alla ainult uue hoone või Building Authority heakskiitu vajavate tööde puhul: kinnitage ulatus"
+    },
+    "sopo_response_late": {
+      "fail": "{date} ei esitatud maksevastust: nõutud summa on vaidlusalune ja võib minna adjudikatsiooni"
+    },
+    "sopo_payment_term_exceeds_60": {
+      "fail": "Maksetähtaeg {n} päeva ületab Cap. 652 lubatud 60 päeva"
+    },
+    "sopo_response_term_exceeds_30": {
+      "fail": "Vastamistähtaeg {n} päeva ületab Cap. 652 lubatud 30 päeva"
+    },
+    "sopo_adjudication_window": {
+      "fail": "Tekkis maksevaidlus: esitage adjudikatsiooniteade {date}"
+    },
+    "contract_pay_when_paid": {
+      "fail": "Pay-when-paid-tingimus: Cap. 652 muudab tingimusliku makse täitmatuks"
+    },
+    "levy_missing": {
+      "fail": "Tööd ületavad HK$3,000,000, kuid eelarves puudub CIC-tasu (0,5%) või CWR-tasu (0,03%)"
+    },
+    "levy_below_threshold": {
+      "fail": "Tööd on kuni HK$3,000,000: CIC- ega CWR-tasu ei maksta"
+    },
+    "tax_nonzero": {
+      "fail": "Arvestatakse käibemaksu või GST rida, kuid Hongkongis sellist maksu pole: määrake null"
+    },
+    "retention_over_limit": {
+      "fail": "Kinnipeetud summa {x} ületab lepingu piiri {limit}"
+    },
+    "pc_sum_no_attendance": {
+      "fail": "Prime cost summal puuduvad kasumi ja teeninduse read"
+    },
+    "index_attribution": {
+      "fail": "ArchSD hinnaindeksil puudub allikaviide: märkige Architectural Services Department"
+    }
   }
 }

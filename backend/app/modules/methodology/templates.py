@@ -1333,6 +1333,17 @@ _MORE_COUNTRY_TEMPLATES: list[dict[str, Any]] = [
         profit="10",
         tax_label="VAT",
     ),
+    # Hong Kong has no consumption tax; the regional table supplies the stack and its two levies.
+    _flat_country_template(
+        slug="hong-kong",
+        name="Hong Kong SAR",
+        country_code="HK",
+        currency="HKD",
+        vat="0",
+        overhead="10",
+        profit="8",
+        tax_label="no consumption tax",
+    ),
     _flat_country_template(
         slug="morocco",
         name="Morocco",
@@ -2343,18 +2354,21 @@ def _derived_steps(lines: list[dict[str, Any]]) -> list[dict[str, Any]]:
     for index, line in enumerate(lines):
         key = f"s{index + 1}_{line['category']}"
         cumulative = str(line.get("apply_to", "direct_cost")).lower() in ("cumulative", "subtotal")
-        steps.append(
-            {
-                "key": key,
-                "label": str(line["name"]),
-                "category": str(line["category"]),
-                "kind": "percentage",
-                "rate": str(line["percentage"]),
-                "amount": "0",
-                "base": ["direct", *preceding] if cumulative else ["direct"],
-            }
-        )
-        preceding.append(key)
+        step: dict[str, Any] = {
+            "key": key,
+            "label": str(line["name"]),
+            "category": str(line["category"]),
+            "kind": "percentage",
+            "rate": str(line["percentage"]),
+            "amount": "0",
+            "base": ["direct", *preceding] if cumulative else ["direct"],
+        }
+        if line.get("threshold_amount") not in (None, ""):
+            step["threshold"] = str(line["threshold_amount"])
+        steps.append(step)
+        # A levy on the contract value is not in the base of a later line, as in the bill engine.
+        if not line.get("not_compounded"):
+            preceding.append(key)
     return steps
 
 
@@ -2527,6 +2541,7 @@ def build_cascade_spec(
                 rate=Decimal(str(raw.get("rate", "0") or "0")),
                 amount=Decimal(str(raw.get("amount", "0") or "0")),
                 base=tuple(str(token) for token in base_raw),
+                threshold=(Decimal(str(raw["threshold"])) if raw.get("threshold") not in (None, "") else None),
             )
         )
 

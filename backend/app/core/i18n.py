@@ -186,10 +186,30 @@ def locale_candidates(locale: str) -> tuple[str, ...]:
     in lower case and every list in this module is written in lower case, so a
     code that arrives capitalised is the same request, not a different one.
     """
-    lowered = locale.strip().lower()
+    lowered = locale.strip().lower().replace("_", "-")
     if "-" in lowered:
+        if is_traditional_chinese(lowered):
+            # Simplified is not a fallback for a Traditional reader; English is.
+            return (lowered, "zh-hk") if lowered != "zh-hk" else (lowered,)
         return (lowered, lowered.split("-", 1)[0])
     return (lowered,)
+
+
+#: Regions whose written Chinese is Traditional when the tag names no script.
+_TRADITIONAL_CHINESE_REGIONS = frozenset({"hk", "mo", "tw"})
+
+
+def is_traditional_chinese(locale: str) -> bool:
+    """True for zh-Hant-*, zh-HK, zh-MO and zh-TW: a reader who must never be served Simplified Chinese."""
+    parts = locale.strip().lower().replace("_", "-").split("-")
+    if parts[0] != "zh" or len(parts) == 1:
+        return False
+    rest = parts[1:]
+    if "hant" in rest:
+        return True
+    if "hans" in rest:
+        return False
+    return any(p in _TRADITIONAL_CHINESE_REGIONS for p in rest)
 
 
 def resolve_locale(locale: str) -> str | None:

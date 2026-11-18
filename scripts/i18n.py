@@ -247,10 +247,11 @@ def cmd_import(args: argparse.Namespace) -> int:
     added = updated = 0
     for key, value in patch.items():
         source = en.get(key)
-        if source is None:
+        # Importing into en itself is how a batch of new source keys lands.
+        if source is None and args.lang != "en":
             print(f"skip '{key}': not in en.ts", file=sys.stderr)
             continue
-        if not args.force and _placeholders(source) != _placeholders(value):
+        if source is not None and not args.force and _placeholders(source) != _placeholders(value):
             print(f"skip '{key}': placeholders differ from English (use --force)", file=sys.stderr)
             continue
         if key in bundle.index:

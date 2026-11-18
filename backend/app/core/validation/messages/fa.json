@@ -2511,5 +2511,46 @@
       "fail": "تن‌های شمارش کامیون {v} % با تن‌های برداشت تفاوت دارد و از حد کنترل {t} % بیشتر است.",
       "suggestion": "بار مفید هر سفر و چگالی را بررسی کنید و دو سطح را دوباره مقایسه کنید."
     }
+  },
+  "hongkong": {
+    "sopo_applicability": {
+      "fail": "این قرارداد مشمول Cap. 652 (Security of Payment) است: پاسخ ظرف 30 روز و پرداخت ظرف 60 روز از مطالبه"
+    },
+    "sopo_private_scope_check": {
+      "fail": "قرارداد خصوصی فقط برای ساختمان جدید یا کارهای نیازمند تأیید Building Authority مشمول Cap. 652 است: دامنه را تأیید کنید"
+    },
+    "sopo_response_late": {
+      "fail": "تا {date} پاسخ پرداخت ابلاغ نشد: مبلغ مطالبه مورد اختلاف است و می‌تواند به داوری برود"
+    },
+    "sopo_payment_term_exceeds_60": {
+      "fail": "مهلت پرداخت {n} روزه از 60 روز مجاز Cap. 652 بیشتر است"
+    },
+    "sopo_response_term_exceeds_30": {
+      "fail": "مهلت پاسخ {n} روزه از 30 روز مجاز Cap. 652 بیشتر است"
+    },
+    "sopo_adjudication_window": {
+      "fail": "اختلاف پرداخت پیش آمده است: اخطار داوری را تا {date} ابلاغ کنید"
+    },
+    "contract_pay_when_paid": {
+      "fail": "بند pay-when-paid: طبق Cap. 652 پرداخت مشروط قابل اجرا نیست"
+    },
+    "levy_missing": {
+      "fail": "کارها از HK$3,000,000 بیشتر است اما عوارض CIC (0.5%) یا عوارض CWR (0.03%) در برآورد نیست"
+    },
+    "levy_below_threshold": {
+      "fail": "کارها حداکثر HK$3,000,000 است: عوارض CIC یا CWR تعلق نمی‌گیرد"
+    },
+    "tax_nonzero": {
+      "fail": "ردیف مالیات بر ارزش افزوده یا GST محاسبه شده اما هنگ‌کنگ چنین مالیاتی ندارد: صفر کنید"
+    },
+    "retention_over_limit": {
+      "fail": "مبلغ نگه‌داشته {x} از سقف قرارداد {limit} بیشتر است"
+    },
+    "pc_sum_no_attendance": {
+      "fail": "مبلغ prime cost فاقد اقلام سود و خدمات است"
+    },
+    "index_attribution": {
+      "fail": "شاخص قیمت ArchSD منبع ندارد: Architectural Services Department را ذکر کنید"
+    }
   }
 }

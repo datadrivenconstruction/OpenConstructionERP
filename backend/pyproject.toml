@@ -646,6 +646,7 @@ artifacts = ["app/scripts/flagship_assets/site_photos/*.jpg"]
 "../packs/france-fr/src" = "packs/france-fr/src"
 "../packs/germany-de/src" = "packs/germany-de/src"
 "../packs/greece-gr/src" = "packs/greece-gr/src"
+"../packs/hongkong-hk/src" = "packs/hongkong-hk/src"
 "../packs/hungary-hu/src" = "packs/hungary-hu/src"
 "../packs/india-cpwd/src" = "packs/india-cpwd/src"
 "../packs/indonesia-id/src" = "packs/indonesia-id/src"

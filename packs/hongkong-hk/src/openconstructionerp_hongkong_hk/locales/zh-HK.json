@@ -1,0 +1,23 @@
+{
+  "_meta": {
+    "locale": "zh-HK",
+    "name_native": "繁體中文（香港）",
+    "name_english": "Chinese (Traditional, Hong Kong)",
+    "direction": "ltr",
+    "pack": "hongkong-hk",
+    "version": "0.1.0",
+    "note": "Partial override with the Hong Kong construction terms. The core 'zh-HK' bundle supplies the rest; missing keys fall back to English, never to Simplified Chinese."
+  },
+  "common.project": "項目",
+  "common.boq": "工料清單",
+  "common.save": "儲存",
+  "common.cancel": "取消",
+  "common.delete": "刪除",
+  "common.total": "總額",
+  "common.validation": "驗證",
+  "common.export": "匯出",
+  "common.import": "匯入",
+  "common.upload": "上載",
+  "common.search": "搜尋",
+  "common.settings": "設定"
+}

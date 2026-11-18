@@ -113,6 +113,10 @@ class Contract(Base):
         nullable=False,
         default="substantial_completion",
     )
+    # The contract makes payment conditional on the payer being paid by a third
+    # party (pay-when-paid). Several security-of-payment statutes void such a
+    # clause; the payment regime says which (PaymentRegime.conditional_payment_void).
+    pay_when_paid: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default="false")
     status: Mapped[str] = mapped_column(
         String(40),
         nullable=False,

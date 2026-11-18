@@ -13032,6 +13032,7 @@ def register_builtin_rules() -> None:
     from app.core.validation.rules.commercial_control import COMMERCIAL_CONTROL_RULES
     from app.core.validation.rules.field_clock import FIELD_CLOCK_RULES
     from app.core.validation.rules.field_productivity import PRODUCTIVITY_RULES
+    from app.core.validation.rules.hongkong import HONGKONG_RULES
     from app.core.validation.rules.italy_prezzario import ITALY_PREZZARIO_RULES
     from app.core.validation.rules.norm_base import NORM_BASE_RULES
     from app.core.validation.rules.pakistan_boq import PAKISTAN_RULES
@@ -13353,6 +13354,7 @@ def register_builtin_rules() -> None:
         *((rule_class(), None) for rule_class in ITALY_PREZZARIO_RULES),
         # Pakistan (sales tax line and rate)
         *((rule_class(), None) for rule_class in PAKISTAN_RULES),
+        *((rule_class(), None) for rule_class in HONGKONG_RULES),
         # Peru (IGV line and rate, gastos generales and utilidad)
         *((rule_class(), None) for rule_class in PERU_RULES),
         # Norm bases and public funding caps (neutral; values from the country pack)

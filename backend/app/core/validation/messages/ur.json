@@ -2511,5 +2511,46 @@
       "fail": "ٹرک گنتی کے ٹن سروے کے ٹن سے {v} % مختلف ہیں، جو {t} % کی جانچ حد سے زیادہ ہے۔",
       "suggestion": "فی چکر وزن اور کثافت جانچیں، پھر دونوں سطحوں کا دوبارہ موازنہ کریں۔"
     }
+  },
+  "hongkong": {
+    "sopo_applicability": {
+      "fail": "یہ معاہدہ Cap. 652 (Security of Payment) کے تحت ہے: دعوے سے 30 دن میں جواب، 60 دن میں ادائیگی"
+    },
+    "sopo_private_scope_check": {
+      "fail": "نجی معاہدہ صرف نئی عمارت یا Building Authority کی منظوری والے کام پر Cap. 652 کے تحت آتا ہے: دائرہ کی تصدیق کریں"
+    },
+    "sopo_response_late": {
+      "fail": "{date} تک ادائیگی کا جواب نہیں دیا گیا: دعویٰ کی رقم متنازع ہے اور ثالثی میں جا سکتی ہے"
+    },
+    "sopo_payment_term_exceeds_60": {
+      "fail": "{n} دن کی ادائیگی کی مدت Cap. 652 کی اجازت کردہ 60 دن سے زیادہ ہے"
+    },
+    "sopo_response_term_exceeds_30": {
+      "fail": "{n} دن کی جواب کی مدت Cap. 652 کی اجازت کردہ 30 دن سے زیادہ ہے"
+    },
+    "sopo_adjudication_window": {
+      "fail": "ادائیگی کا تنازع پیدا ہو گیا: {date} تک ثالثی کا نوٹس دیں"
+    },
+    "contract_pay_when_paid": {
+      "fail": "pay-when-paid شق: Cap. 652 مشروط ادائیگی کو ناقابل نفاذ بناتا ہے"
+    },
+    "levy_missing": {
+      "fail": "کام HK$3,000,000 سے زیادہ ہے مگر تخمینے میں CIC لیوی (0.5%) یا CWR لیوی (0.03%) نہیں"
+    },
+    "levy_below_threshold": {
+      "fail": "کام HK$3,000,000 یا کم ہے: CIC یا CWR لیوی واجب نہیں"
+    },
+    "tax_nonzero": {
+      "fail": "VAT یا GST کی لائن لگائی گئی ہے مگر ہانگ کانگ میں یہ ٹیکس نہیں: صفر کریں"
+    },
+    "retention_over_limit": {
+      "fail": "روکی گئی رقم {x} معاہدے کی حد {limit} سے زیادہ ہے"
+    },
+    "pc_sum_no_attendance": {
+      "fail": "prime cost رقم کے ساتھ منافع اور خدمت کے آئٹم نہیں"
+    },
+    "index_attribution": {
+      "fail": "ArchSD قیمت اشاریے میں ماخذ درج نہیں: Architectural Services Department کا حوالہ دیں"
+    }
   }
 }

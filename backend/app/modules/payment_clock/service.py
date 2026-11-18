@@ -96,7 +96,11 @@ def regime_spec(regime: PaymentRegime) -> dict[str, Any]:
         if column.name in _NON_SPEC_COLUMNS:
             continue
         value = getattr(regime, column.name, None)
-        spec[column.name] = format(value, "f") if isinstance(value, Decimal) else value
+        if isinstance(value, Decimal):
+            value = format(value, "f")
+        elif isinstance(value, date):
+            value = value.isoformat()
+        spec[column.name] = value
     return spec
 
 

@@ -2511,5 +2511,46 @@
       "fail": "Les tonnes comptées par camions diffèrent de {v} % des tonnes levées, au-delà du contrôle de {t} %.",
       "suggestion": "Vérifiez la charge utile par voyage et la densité, puis comparez de nouveau les deux surfaces."
     }
+  },
+  "hongkong": {
+    "sopo_applicability": {
+      "fail": "Cap. 652 (Security of Payment) s'applique à ce contrat : réponse sous 30 jours, paiement sous 60 jours après la demande"
+    },
+    "sopo_private_scope_check": {
+      "fail": "Un contrat privé relève de Cap. 652 seulement pour un bâtiment neuf ou des travaux soumis à l'accord de la Building Authority : confirmez le périmètre"
+    },
+    "sopo_response_late": {
+      "fail": "Aucune réponse de paiement signifiée avant le {date} : le montant demandé est contesté et peut aller en adjudication"
+    },
+    "sopo_payment_term_exceeds_60": {
+      "fail": "Le délai de paiement de {n} jours dépasse les 60 jours admis par Cap. 652"
+    },
+    "sopo_response_term_exceeds_30": {
+      "fail": "Le délai de réponse de {n} jours dépasse les 30 jours admis par Cap. 652"
+    },
+    "sopo_adjudication_window": {
+      "fail": "Un litige de paiement est né : signifiez l'avis d'adjudication avant le {date}"
+    },
+    "contract_pay_when_paid": {
+      "fail": "Clause pay-when-paid : Cap. 652 rend les clauses de paiement conditionnel inopposables"
+    },
+    "levy_missing": {
+      "fail": "Les travaux dépassent HK$3,000,000 mais le devis n'a pas la taxe CIC (0,5 %) ou la taxe CWR (0,03 %)"
+    },
+    "levy_below_threshold": {
+      "fail": "Les travaux ne dépassent pas HK$3,000,000 : aucune taxe CIC ou CWR n'est due"
+    },
+    "tax_nonzero": {
+      "fail": "Une ligne TVA ou GST est facturée, mais Hong Kong n'a pas cette taxe : mettez-la à zéro"
+    },
+    "retention_over_limit": {
+      "fail": "La retenue de {x} dépasse la limite contractuelle de {limit}"
+    },
+    "pc_sum_no_attendance": {
+      "fail": "Une somme prime cost n'a pas de postes de bénéfice et d'assistance"
+    },
+    "index_attribution": {
+      "fail": "L'indice des prix ArchSD n'indique pas sa source : citez l'Architectural Services Department"
+    }
   }
 }

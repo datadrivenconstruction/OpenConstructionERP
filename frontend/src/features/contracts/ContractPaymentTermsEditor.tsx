@@ -54,6 +54,7 @@ interface TermsForm {
   payment_period_days: string;
   valuation_interval: string;
   certificate_name: string;
+  pay_when_paid: string;
 }
 
 function formFrom(contract: ContractItem): TermsForm {
@@ -66,6 +67,7 @@ function formFrom(contract: ContractItem): TermsForm {
     payment_period_days: terms.payment_period_days != null ? String(terms.payment_period_days) : '',
     valuation_interval: terms.valuation_interval ?? '',
     certificate_name: terms.certificate_name ?? '',
+    pay_when_paid: contract.pay_when_paid ? 'yes' : '',
   };
 }
 
@@ -116,6 +118,9 @@ function paymentTermsChanges(before: TermsForm, after: TermsForm): ContractUpdat
   }
   if (before.certificate_name.trim() !== after.certificate_name.trim()) {
     payload.certificate_name = after.certificate_name.trim() || null;
+  }
+  if (before.pay_when_paid !== after.pay_when_paid) {
+    payload.pay_when_paid = after.pay_when_paid === 'yes';
   }
   return Object.keys(payload).length > 0 ? payload : null;
 }
@@ -270,6 +275,26 @@ function PaymentTermsEditor({ contract, onDone }: { contract: ContractItem; onDo
             />
           </Labelled>
         </div>
+        <label className="col-span-2 flex items-start gap-2 text-sm text-content-primary">
+          <input
+            type="checkbox"
+            checked={form.pay_when_paid === 'yes'}
+            onChange={(e) => set('pay_when_paid', e.target.checked ? 'yes' : '')}
+            data-testid="edit-pay-when-paid"
+            className="mt-0.5"
+          />
+          <span>
+            {t('contracts.payment_terms.pay_when_paid', {
+              defaultValue: 'Payment depends on the payer being paid (pay-when-paid)',
+            })}
+            <span className="block text-xs text-content-tertiary">
+              {t('contracts.payment_terms.pay_when_paid_hint', {
+                defaultValue:
+                  'Some security-of-payment laws make such a clause void. The validation report says so when yours does.',
+              })}
+            </span>
+          </span>
+        </label>
       </div>
       {!valid && (
         <p className="mt-2 text-xs text-semantic-error" data-testid="payment-terms-invalid">

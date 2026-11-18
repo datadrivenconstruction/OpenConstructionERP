@@ -336,6 +336,7 @@ BUNDLE_MAP: dict[str, str] = {
     "hospital-lyon": "commercial_rvt",
     "bhu-punjab": "commercial_rvt",
     "school-karachi": "commercial_rvt",
+    "hk-gov-office-fitout": "commercial_rvt",
     "infrastructure-capetown": "commercial_rvt",
     "it-park-bangalore": "commercial_rvt",
     "mixed-use-barcelona": "commercial_rvt",

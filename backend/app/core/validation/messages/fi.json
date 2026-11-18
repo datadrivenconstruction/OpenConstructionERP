@@ -2511,5 +2511,46 @@
       "fail": "Ajokertojen laskennan tonnit poikkeavat mitatuista tonneista {v} %, yli {t} % tarkistusrajan.",
       "suggestion": "Tarkista kuorma ajoa kohti ja tiheys ja vertaa sitten kahta pintaa uudelleen."
     }
+  },
+  "hongkong": {
+    "sopo_applicability": {
+      "fail": "Cap. 652 (Security of Payment) koskee sopimusta: vastaus 30 päivässä, maksu 60 päivässä vaatimuksesta"
+    },
+    "sopo_private_scope_check": {
+      "fail": "Yksityinen sopimus kuuluu Cap. 652:n piiriin vain uudisrakennuksessa tai Building Authorityn hyväksyntää vaativissa töissä: vahvista laajuus"
+    },
+    "sopo_response_late": {
+      "fail": "Maksuvastausta ei toimitettu {date} mennessä: vaadittu summa on riitainen ja voidaan viedä adjudikaatioon"
+    },
+    "sopo_payment_term_exceeds_60": {
+      "fail": "{n} päivän maksuaika ylittää Cap. 652:n sallimat 60 päivää"
+    },
+    "sopo_response_term_exceeds_30": {
+      "fail": "{n} päivän vastausaika ylittää Cap. 652:n sallimat 30 päivää"
+    },
+    "sopo_adjudication_window": {
+      "fail": "Maksuriita on syntynyt: toimita adjudikaatioilmoitus {date} mennessä"
+    },
+    "contract_pay_when_paid": {
+      "fail": "Pay-when-paid-ehto: Cap. 652 tekee ehdollisen maksun täytäntöönpanokelvottomaksi"
+    },
+    "levy_missing": {
+      "fail": "Työt ylittävät HK$3,000,000, mutta laskelmasta puuttuu CIC-maksu (0,5 %) tai CWR-maksu (0,03 %)"
+    },
+    "levy_below_threshold": {
+      "fail": "Työt ovat enintään HK$3,000,000: CIC- tai CWR-maksua ei makseta"
+    },
+    "tax_nonzero": {
+      "fail": "ALV- tai GST-rivi veloitetaan, mutta Hongkongissa ei ole tällaista veroa: aseta nollaksi"
+    },
+    "retention_over_limit": {
+      "fail": "Pidätys {x} ylittää sopimuksen rajan {limit}"
+    },
+    "pc_sum_no_attendance": {
+      "fail": "Prime cost -summalta puuttuvat voitto- ja avustusnimikkeet"
+    },
+    "index_attribution": {
+      "fail": "ArchSD-hintaindeksistä puuttuu lähde: mainitse Architectural Services Department"
+    }
   }
 }

@@ -2511,5 +2511,46 @@
       "fail": "ट्रक गिनती के टन सर्वे के टन से {v} % अलग हैं, जो {t} % की जाँच सीमा से अधिक है।",
       "suggestion": "प्रति फेरा भार और घनत्व जाँचें, फिर दोनों सतहों की फिर से तुलना करें।"
     }
+  },
+  "hongkong": {
+    "sopo_applicability": {
+      "fail": "यह अनुबंध Cap. 652 (Security of Payment) के अंतर्गत है: दावे से 30 दिन में जवाब, 60 दिन में भुगतान"
+    },
+    "sopo_private_scope_check": {
+      "fail": "निजी अनुबंध केवल नए भवन या Building Authority अनुमोदन वाले कार्य पर Cap. 652 के अंतर्गत आता है: दायरा पुष्टि करें"
+    },
+    "sopo_response_late": {
+      "fail": "{date} तक भुगतान जवाब नहीं दिया गया: दावा राशि विवादित है और न्यायनिर्णय में जा सकती है"
+    },
+    "sopo_payment_term_exceeds_60": {
+      "fail": "{n} दिन की भुगतान अवधि Cap. 652 द्वारा अनुमत 60 दिन से अधिक है"
+    },
+    "sopo_response_term_exceeds_30": {
+      "fail": "{n} दिन की जवाब अवधि Cap. 652 द्वारा अनुमत 30 दिन से अधिक है"
+    },
+    "sopo_adjudication_window": {
+      "fail": "भुगतान विवाद उत्पन्न हुआ है: {date} तक न्यायनिर्णय सूचना दें"
+    },
+    "contract_pay_when_paid": {
+      "fail": "pay-when-paid खंड: Cap. 652 सशर्त भुगतान को अप्रवर्तनीय बनाता है"
+    },
+    "levy_missing": {
+      "fail": "कार्य HK$3,000,000 से अधिक है पर अनुमान में CIC लेवी (0.5%) या CWR लेवी (0.03%) नहीं है"
+    },
+    "levy_below_threshold": {
+      "fail": "कार्य HK$3,000,000 या कम है: CIC या CWR लेवी देय नहीं"
+    },
+    "tax_nonzero": {
+      "fail": "VAT या GST पंक्ति लगाई गई है, पर हांगकांग में ऐसा कर नहीं: शून्य करें"
+    },
+    "retention_over_limit": {
+      "fail": "रोकी गई राशि {x} अनुबंध सीमा {limit} से अधिक है"
+    },
+    "pc_sum_no_attendance": {
+      "fail": "prime cost राशि के साथ लाभ और सेवा मद नहीं हैं"
+    },
+    "index_attribution": {
+      "fail": "ArchSD मूल्य सूचकांक में स्रोत नहीं: Architectural Services Department का उल्लेख करें"
+    }
   }
 }

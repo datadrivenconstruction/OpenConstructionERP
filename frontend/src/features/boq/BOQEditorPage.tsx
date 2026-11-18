@@ -98,6 +98,7 @@ import { changeKindLabel } from '@/features/variations/VariationSourcePicker';
 import { SensitivityChart } from './SensitivityChart';
 import { CostRiskPanel } from './CostRiskPanel';
 import { MarkupPanel } from './MarkupPanel';
+import { levyAdjusted } from './markupLevy';
 import BOQGrid from './BOQGrid';
 import type { BOQGridHandle } from './BOQGrid';
 import { allResourcesExpanded, type ResourceExpansionState } from './resourceExpansion';
@@ -2600,7 +2601,10 @@ export function BOQEditorPage() {
         } else {
           amount = directCost * (m.percentage / 100);
         }
-        running += amount;
+        const base = m.apply_to === 'cumulative' || m.apply_to === 'subtotal' ? running : directCost;
+        const levy = levyAdjusted(m.metadata, base, amount);
+        amount = levy.amount;
+        if (levy.compounds) running += amount;
         return { ...m, amount, runningTotal: running };
       });
   }, [directCost, markups]);

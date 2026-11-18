@@ -49,7 +49,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "bim.quick_boq": {
@@ -168,7 +169,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "enterprise_workflows.all_statuses": {
@@ -211,7 +213,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "enterprise_workflows.approve_error": {
@@ -254,7 +257,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "enterprise_workflows.create_error": {
@@ -297,7 +301,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "enterprise_workflows.deactivate": {
@@ -340,7 +345,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "enterprise_workflows.delete_error": {
@@ -383,7 +389,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "enterprise_workflows.description": {
@@ -426,7 +433,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "enterprise_workflows.description_placeholder": {
@@ -469,7 +477,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "enterprise_workflows.entity_type": {
@@ -512,7 +521,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "enterprise_workflows.entity_type_placeholder": {
@@ -539,7 +549,8 @@
       "th",
       "uk",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "enterprise_workflows.flow_intro": {
@@ -585,7 +596,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "enterprise_workflows.flow_related": {
@@ -677,7 +689,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "enterprise_workflows.flow_step_1_desc": {
@@ -739,7 +752,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "enterprise_workflows.flow_step_2_desc": {
@@ -785,7 +799,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "enterprise_workflows.flow_step_3": {
@@ -831,7 +846,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "enterprise_workflows.flow_step_3_desc": {
@@ -877,7 +893,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "enterprise_workflows.flow_step_4": {
@@ -923,7 +940,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "enterprise_workflows.flow_step_4_desc": {
@@ -969,7 +987,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "enterprise_workflows.flow_title": {
@@ -1015,7 +1034,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "enterprise_workflows.load_error": {
@@ -1058,7 +1078,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "enterprise_workflows.mod_contracts": {
@@ -1099,7 +1120,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "enterprise_workflows.mod_timeline": {
@@ -1145,7 +1167,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "enterprise_workflows.name_placeholder": {
@@ -1204,7 +1227,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "enterprise_workflows.no_requests_desc": {
@@ -1247,7 +1271,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "enterprise_workflows.no_workflows_desc": {
@@ -1290,7 +1315,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "enterprise_workflows.reject_error": {
@@ -1333,7 +1359,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "enterprise_workflows.request_approved": {
@@ -1376,7 +1403,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "enterprise_workflows.request_rejected": {
@@ -1419,7 +1447,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "enterprise_workflows.stat_active": {
@@ -1462,7 +1491,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "enterprise_workflows.stat_pending": {
@@ -1505,7 +1535,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "enterprise_workflows.stat_total": {
@@ -1548,7 +1579,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "enterprise_workflows.status_approved": {
@@ -1591,7 +1623,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "enterprise_workflows.status_pending": {
@@ -1634,7 +1667,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "enterprise_workflows.status_rejected": {
@@ -1677,7 +1711,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "enterprise_workflows.step": {
@@ -1720,7 +1755,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "enterprise_workflows.steps_count": {
@@ -1763,7 +1799,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "enterprise_workflows.subtitle": {
@@ -1806,7 +1843,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "enterprise_workflows.tabs_label": {
@@ -1849,7 +1887,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "enterprise_workflows.title": {
@@ -1892,7 +1931,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "enterprise_workflows.toggle_error": {
@@ -1935,7 +1975,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "enterprise_workflows.workflow_activated": {
@@ -1978,7 +2019,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "enterprise_workflows.workflow_created": {
@@ -2021,7 +2063,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "enterprise_workflows.workflow_deactivated": {
@@ -2064,7 +2107,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "enterprise_workflows.workflow_deleted": {
@@ -2107,7 +2151,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "enterprise_workflows.workflow_name": {
@@ -2150,7 +2195,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "field.task_opt.mep": {
@@ -2188,7 +2234,8 @@
       "th",
       "ur",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "jobs.all_kinds": {
@@ -2231,7 +2278,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "jobs.all_statuses": {
@@ -2274,7 +2322,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "jobs.cancel_failed": {
@@ -2317,7 +2366,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "jobs.cancel_success": {
@@ -2360,7 +2410,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "jobs.col_actions": {
@@ -2403,7 +2454,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "jobs.col_created": {
@@ -2446,7 +2498,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "jobs.col_duration": {
@@ -2489,7 +2542,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "jobs.col_kind": {
@@ -2532,7 +2586,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "jobs.col_progress": {
@@ -2575,7 +2630,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "jobs.col_status": {
@@ -2619,7 +2675,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "jobs.detail_celery_id": {
@@ -2662,7 +2719,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "jobs.detail_created": {
@@ -2705,7 +2763,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "jobs.detail_duration": {
@@ -2748,7 +2807,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "jobs.detail_error": {
@@ -2791,7 +2851,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "jobs.detail_finished": {
@@ -2834,7 +2895,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "jobs.detail_id": {
@@ -2878,7 +2940,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "jobs.detail_kind": {
@@ -2921,7 +2984,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "jobs.detail_progress": {
@@ -2964,7 +3028,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "jobs.detail_result": {
@@ -3007,7 +3072,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "jobs.detail_started": {
@@ -3050,7 +3116,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "jobs.detail_status": {
@@ -3094,7 +3161,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "jobs.detail_title": {
@@ -3137,7 +3205,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "jobs.empty": {
@@ -3180,7 +3249,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "jobs.empty_desc": {
@@ -3223,7 +3293,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "jobs.export_result": {
@@ -3266,7 +3337,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "jobs.flow_intro": {
@@ -3312,7 +3384,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "jobs.flow_related": {
@@ -3404,7 +3477,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "jobs.flow_step_1_desc": {
@@ -3450,7 +3524,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "jobs.flow_step_2": {
@@ -3496,7 +3571,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "jobs.flow_step_2_desc": {
@@ -3542,7 +3618,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "jobs.flow_step_3": {
@@ -3588,7 +3665,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "jobs.flow_step_3_desc": {
@@ -3634,7 +3712,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "jobs.flow_step_4": {
@@ -3680,7 +3759,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "jobs.flow_step_4_desc": {
@@ -3726,7 +3806,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "jobs.flow_title": {
@@ -3772,7 +3853,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "jobs.load_error": {
@@ -3815,7 +3897,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "jobs.mod_schedule": {
@@ -3845,7 +3928,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "jobs.mod_settings": {
@@ -3891,7 +3975,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "jobs.mod_timeline": {
@@ -3937,7 +4022,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "jobs.search": {
@@ -3980,7 +4066,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "jobs.showing": {
@@ -4023,7 +4110,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "jobs.subtitle": {
@@ -4066,7 +4154,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "jobs.waiting": {
@@ -4109,7 +4198,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "match_elements.stage.09_MEP": {
@@ -4158,7 +4248,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "moc.vr_open": {
@@ -4196,7 +4287,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "modules.catalog.global_presence": {
@@ -4242,7 +4334,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "nav.rfq_bidding": {
@@ -4313,7 +4406,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rebar_schedule.bar_count": {
@@ -4356,7 +4450,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rebar_schedule.bar_mark": {
@@ -4399,7 +4494,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rebar_schedule.confirm_import": {
@@ -4442,7 +4538,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rebar_schedule.cutting_list": {
@@ -4485,7 +4582,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rebar_schedule.delete_message": {
@@ -4528,7 +4626,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rebar_schedule.delete_title": {
@@ -4571,7 +4670,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rebar_schedule.drop_abs": {
@@ -4614,7 +4714,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rebar_schedule.empty": {
@@ -4657,7 +4758,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rebar_schedule.empty_desc": {
@@ -4700,7 +4802,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rebar_schedule.flow_intro": {
@@ -4746,7 +4849,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rebar_schedule.flow_related": {
@@ -4838,7 +4942,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rebar_schedule.flow_step_1_desc": {
@@ -4884,7 +4989,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rebar_schedule.flow_step_2": {
@@ -4930,7 +5036,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rebar_schedule.flow_step_2_desc": {
@@ -4976,7 +5083,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rebar_schedule.flow_step_3": {
@@ -5022,7 +5130,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rebar_schedule.flow_step_3_desc": {
@@ -5068,7 +5177,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rebar_schedule.flow_step_4": {
@@ -5114,7 +5224,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rebar_schedule.flow_step_4_desc": {
@@ -5160,7 +5271,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rebar_schedule.flow_title": {
@@ -5206,7 +5318,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rebar_schedule.invalid_file": {
@@ -5249,7 +5362,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rebar_schedule.length": {
@@ -5292,7 +5406,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rebar_schedule.member": {
@@ -5335,7 +5450,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rebar_schedule.mod_boq": {
@@ -5421,7 +5537,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rebar_schedule.mod_quantities": {
@@ -5467,7 +5584,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rebar_schedule.no_project": {
@@ -5510,7 +5628,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rebar_schedule.no_project_desc": {
@@ -5553,7 +5672,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rebar_schedule.or_browse": {
@@ -5596,7 +5716,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rebar_schedule.preview_subtitle": {
@@ -5639,7 +5760,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rebar_schedule.quantity": {
@@ -5682,7 +5804,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rebar_schedule.shape_code": {
@@ -5725,7 +5848,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rebar_schedule.shapes_short": {
@@ -5768,7 +5892,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rebar_schedule.stat_diameters": {
@@ -5811,7 +5936,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rebar_schedule.stat_filename": {
@@ -5854,7 +5980,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rebar_schedule.stat_imported": {
@@ -5897,7 +6024,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rebar_schedule.stat_imports": {
@@ -5940,7 +6068,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rebar_schedule.stat_shapes": {
@@ -5983,7 +6112,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rebar_schedule.stat_weight": {
@@ -6026,7 +6156,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rebar_schedule.subtitle": {
@@ -6069,7 +6200,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rebar_schedule.title": {
@@ -6112,7 +6244,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rebar_schedule.total": {
@@ -6155,7 +6288,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rebar_schedule.upload_label": {
@@ -6198,7 +6332,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rebar_schedule.warnings": {
@@ -6241,7 +6376,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rebar_schedule.weight_col": {
@@ -6284,7 +6420,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rfq_bidding.all_statuses": {
@@ -6327,7 +6464,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rfq_bidding.award_action": {
@@ -6542,7 +6680,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rfq_bidding.choose_rfq": {
@@ -6585,7 +6724,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rfq_bidding.compare": {
@@ -6628,7 +6768,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rfq_bidding.compare_bids": {
@@ -6671,7 +6812,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rfq_bidding.create": {
@@ -6714,7 +6856,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rfq_bidding.create_dialog_title": {
@@ -6757,7 +6900,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rfq_bidding.create_submit": {
@@ -6800,7 +6944,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rfq_bidding.created_error": {
@@ -6843,7 +6988,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rfq_bidding.created_success": {
@@ -6886,7 +7032,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rfq_bidding.delete_action": {
@@ -6929,7 +7076,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rfq_bidding.deleted_error": {
@@ -6972,7 +7120,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rfq_bidding.deleted_success": {
@@ -7015,7 +7164,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rfq_bidding.due": {
@@ -7048,7 +7198,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rfq_bidding.empty": {
@@ -7091,7 +7242,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rfq_bidding.empty_desc": {
@@ -7134,7 +7286,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rfq_bidding.field_description": {
@@ -7177,7 +7330,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rfq_bidding.field_description_placeholder": {
@@ -7220,7 +7374,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rfq_bidding.field_due_date": {
@@ -7253,7 +7408,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rfq_bidding.field_title": {
@@ -7296,7 +7452,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rfq_bidding.field_title_placeholder": {
@@ -7339,7 +7496,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rfq_bidding.flow_intro": {
@@ -7385,7 +7543,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rfq_bidding.flow_related": {
@@ -7477,7 +7636,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rfq_bidding.flow_step_1_desc": {
@@ -7523,7 +7683,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rfq_bidding.flow_step_2": {
@@ -7569,7 +7730,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rfq_bidding.flow_step_2_desc": {
@@ -7615,7 +7777,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rfq_bidding.flow_step_3": {
@@ -7661,7 +7824,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rfq_bidding.flow_step_3_desc": {
@@ -7707,7 +7871,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rfq_bidding.flow_step_4": {
@@ -7753,7 +7918,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rfq_bidding.flow_step_4_desc": {
@@ -7799,7 +7965,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rfq_bidding.flow_title": {
@@ -7845,7 +8012,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rfq_bidding.issue_action": {
@@ -7888,7 +8056,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rfq_bidding.issued_error": {
@@ -7931,7 +8100,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rfq_bidding.issued_success": {
@@ -7974,7 +8144,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rfq_bidding.load_error": {
@@ -8017,7 +8188,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rfq_bidding.lowest": {
@@ -8060,7 +8232,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rfq_bidding.mod_bid_management": {
@@ -8282,7 +8455,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rfq_bidding.no_awards_desc": {
@@ -8325,7 +8499,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rfq_bidding.no_bids": {
@@ -8368,7 +8543,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rfq_bidding.no_bids_desc": {
@@ -8411,7 +8587,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rfq_bidding.no_project": {
@@ -8454,7 +8631,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rfq_bidding.no_project_desc": {
@@ -8497,7 +8675,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rfq_bidding.no_rfq_selected": {
@@ -8540,7 +8719,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rfq_bidding.no_rfq_selected_desc": {
@@ -8583,7 +8763,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rfq_bidding.page_title": {
@@ -8611,7 +8792,8 @@
       "sv",
       "uk",
       "ur",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rfq_bidding.scope_line": {
@@ -8654,7 +8836,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rfq_bidding.search": {
@@ -8697,7 +8880,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rfq_bidding.select_rfq": {
@@ -8740,7 +8924,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rfq_bidding.stat_awarded": {
@@ -8783,7 +8968,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rfq_bidding.stat_open": {
@@ -8826,7 +9012,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rfq_bidding.stat_total": {
@@ -8869,7 +9056,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rfq_bidding.status_awarded": {
@@ -8912,7 +9100,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rfq_bidding.status_closed": {
@@ -8949,7 +9138,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rfq_bidding.status_draft": {
@@ -8988,7 +9178,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rfq_bidding.status_evaluating": {
@@ -9031,7 +9222,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rfq_bidding.status_issued": {
@@ -9074,7 +9266,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rfq_bidding.subtitle": {
@@ -9117,7 +9310,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rfq_bidding.tab_list": {
@@ -9160,7 +9354,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rfq_bidding.tabs_label": {
@@ -9289,7 +9484,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "rfq_bidding.vendors_count": {
@@ -9332,7 +9528,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "saved_views.all_entities": {
@@ -9375,7 +9572,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "saved_views.all_scopes": {
@@ -9418,7 +9616,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "saved_views.delete_failed": {
@@ -9461,7 +9660,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "saved_views.delete_message": {
@@ -9504,7 +9704,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "saved_views.delete_title": {
@@ -9547,7 +9748,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "saved_views.deleted": {
@@ -9590,7 +9792,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "saved_views.empty": {
@@ -9633,7 +9836,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "saved_views.empty_desc": {
@@ -9676,7 +9880,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "saved_views.flow_intro": {
@@ -9719,7 +9924,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "saved_views.flow_step_1": {
@@ -9762,7 +9968,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "saved_views.flow_step_1_desc": {
@@ -9805,7 +10012,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "saved_views.flow_step_2": {
@@ -9848,7 +10056,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "saved_views.flow_step_2_desc": {
@@ -9891,7 +10100,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "saved_views.flow_step_3": {
@@ -9934,7 +10144,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "saved_views.flow_step_3_desc": {
@@ -9977,7 +10188,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "saved_views.flow_step_4": {
@@ -10020,7 +10232,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "saved_views.flow_step_4_desc": {
@@ -10063,7 +10276,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "saved_views.flow_title": {
@@ -10106,7 +10320,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "saved_views.load_error": {
@@ -10149,7 +10364,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "saved_views.no_project": {
@@ -10192,7 +10408,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "saved_views.no_project_desc": {
@@ -10274,7 +10491,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "saved_views.scope_private": {
@@ -10317,7 +10535,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "saved_views.scope_project": {
@@ -10360,7 +10579,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "saved_views.scope_team": {
@@ -10404,7 +10624,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "saved_views.scope_workspace": {
@@ -10447,7 +10668,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "saved_views.search": {
@@ -10490,7 +10712,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "saved_views.stale": {
@@ -10533,7 +10756,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "saved_views.subtitle": {
@@ -10576,7 +10800,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "schedule.cpm.col_ef": {
@@ -10614,7 +10839,8 @@
       "tr",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "schedule.cpm.col_es": {
@@ -10652,7 +10878,8 @@
       "tr",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "schedule.cpm.col_lf": {
@@ -10690,7 +10917,8 @@
       "tr",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "schedule.cpm.col_ls": {
@@ -10728,7 +10956,8 @@
       "tr",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "schedule.cpm.col_wbs": {
@@ -10766,7 +10995,8 @@
       "tr",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "settings.governance_validation": {
@@ -10812,7 +11042,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "takeoff_viewer.width_unit_ftin": {
@@ -10916,7 +11147,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "timeline.flow_related": {
@@ -11008,7 +11240,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "timeline.flow_step_1_desc": {
@@ -11054,7 +11287,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "timeline.flow_step_2": {
@@ -11100,7 +11334,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "timeline.flow_step_2_desc": {
@@ -11146,7 +11381,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "timeline.flow_step_3": {
@@ -11192,7 +11428,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "timeline.flow_step_3_desc": {
@@ -11238,7 +11475,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "timeline.flow_step_4": {
@@ -11284,7 +11522,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "timeline.flow_step_4_desc": {
@@ -11330,7 +11569,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "timeline.flow_title": {
@@ -11376,7 +11616,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "timeline.go_to_record": {
@@ -11422,7 +11663,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "timeline.mod_correspondence": {
@@ -11462,7 +11704,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "timeline.mod_deadlines": {
@@ -11508,7 +11751,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "timeline.mod_jobs": {
@@ -11554,7 +11798,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "timeline.showing": {
@@ -11600,7 +11845,8 @@
       "ur",
       "uz",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "variations.contract_value_card_title": {
@@ -11730,7 +11976,8 @@
       "tr",
       "uk",
       "vi",
-      "zh"
+      "zh",
+      "zh-HK"
     ]
   },
   "variations.submitting_pricing": {

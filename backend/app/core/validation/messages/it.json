@@ -2511,5 +2511,46 @@
       "fail": "Le tonnellate dal conteggio dei camion differiscono del {v} % da quelle rilevate, oltre il controllo del {t} %.",
       "suggestion": "Controlli il carico utile per viaggio e la densità, poi confronti di nuovo le due superfici."
     }
+  },
+  "hongkong": {
+    "sopo_applicability": {
+      "fail": "Cap. 652 (Security of Payment) si applica al contratto: risposta entro 30 giorni, pagamento entro 60 giorni dalla richiesta"
+    },
+    "sopo_private_scope_check": {
+      "fail": "Un contratto privato rientra nel Cap. 652 solo per un edificio nuovo o lavori soggetti ad approvazione della Building Authority: confermare l'ambito"
+    },
+    "sopo_response_late": {
+      "fail": "Nessuna risposta di pagamento notificata entro il {date}: l'importo richiesto è contestato e può andare ad adjudication"
+    },
+    "sopo_payment_term_exceeds_60": {
+      "fail": "Il termine di pagamento di {n} giorni supera i 60 giorni ammessi dal Cap. 652"
+    },
+    "sopo_response_term_exceeds_30": {
+      "fail": "Il termine di risposta di {n} giorni supera i 30 giorni ammessi dal Cap. 652"
+    },
+    "sopo_adjudication_window": {
+      "fail": "È sorta una controversia di pagamento: notificare l'avviso di adjudication entro il {date}"
+    },
+    "contract_pay_when_paid": {
+      "fail": "Clausola pay-when-paid: il Cap. 652 rende inefficaci i pagamenti condizionati"
+    },
+    "levy_missing": {
+      "fail": "I lavori superano HK$3,000,000 ma il computo non ha il contributo CIC (0,5%) o il contributo CWR (0,03%)"
+    },
+    "levy_below_threshold": {
+      "fail": "I lavori non superano HK$3,000,000: nessun contributo CIC o CWR dovuto"
+    },
+    "tax_nonzero": {
+      "fail": "È addebitata una riga IVA o GST, ma Hong Kong non ha tale imposta: impostarla a zero"
+    },
+    "retention_over_limit": {
+      "fail": "La ritenuta di {x} supera il limite contrattuale di {limit}"
+    },
+    "pc_sum_no_attendance": {
+      "fail": "Una somma prime cost non ha voci di utile e assistenza"
+    },
+    "index_attribution": {
+      "fail": "L'indice dei prezzi ArchSD non indica la fonte: citare l'Architectural Services Department"
+    }
   }
 }

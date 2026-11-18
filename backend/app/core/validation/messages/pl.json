@@ -2511,5 +2511,46 @@
       "fail": "Tony według liczenia kursów różnią się o {v} % od zmierzonych, powyżej kontroli {t} %.",
       "suggestion": "Sprawdź ładunek na kurs i gęstość, a następnie ponownie porównaj obie powierzchnie."
     }
+  },
+  "hongkong": {
+    "sopo_applicability": {
+      "fail": "Cap. 652 (Security of Payment) obejmuje tę umowę: odpowiedź w ciągu 30 dni, zapłata w ciągu 60 dni od roszczenia"
+    },
+    "sopo_private_scope_check": {
+      "fail": "Umowa prywatna podlega Cap. 652 tylko przy nowym budynku lub robotach wymagających zgody Building Authority: potwierdź zakres"
+    },
+    "sopo_response_late": {
+      "fail": "Do {date} nie doręczono odpowiedzi na roszczenie: kwota jest sporna i może trafić do adjudykacji"
+    },
+    "sopo_payment_term_exceeds_60": {
+      "fail": "Termin zapłaty {n} dni przekracza 60 dni dozwolone przez Cap. 652"
+    },
+    "sopo_response_term_exceeds_30": {
+      "fail": "Termin odpowiedzi {n} dni przekracza 30 dni dozwolone przez Cap. 652"
+    },
+    "sopo_adjudication_window": {
+      "fail": "Powstał spór o zapłatę: doręcz zawiadomienie o adjudykacji do {date}"
+    },
+    "contract_pay_when_paid": {
+      "fail": "Klauzula pay-when-paid: Cap. 652 czyni warunkową zapłatę nieskuteczną"
+    },
+    "levy_missing": {
+      "fail": "Roboty przekraczają HK$3,000,000, ale w kosztorysie brak opłaty CIC (0,5%) lub opłaty CWR (0,03%)"
+    },
+    "levy_below_threshold": {
+      "fail": "Roboty nie przekraczają HK$3,000,000: opłaty CIC i CWR nie są należne"
+    },
+    "tax_nonzero": {
+      "fail": "Naliczono pozycję VAT lub GST, ale w Hongkongu nie ma takiego podatku: ustaw zero"
+    },
+    "retention_over_limit": {
+      "fail": "Zatrzymanie {x} przekracza umowny limit {limit}"
+    },
+    "pc_sum_no_attendance": {
+      "fail": "Suma prime cost nie ma pozycji zysku i obsługi"
+    },
+    "index_attribution": {
+      "fail": "Indeks cen ArchSD nie podaje źródła: wskaż Architectural Services Department"
+    }
   }
 }

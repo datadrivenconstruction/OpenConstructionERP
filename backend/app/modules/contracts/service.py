@@ -1380,6 +1380,7 @@ class ContractsService:
             currency=data.currency,
             retention_percent=retention_percent,
             retention_release_event=release_event,
+            pay_when_paid=bool(data.pay_when_paid),
             status="draft",
             signed_at=None,
             terms=terms,
@@ -1681,6 +1682,8 @@ class ContractsService:
                 },
             )
         fields.pop("status", None)
+        if fields.get("pay_when_paid") is None:
+            fields.pop("pay_when_paid", None)
         # original_contract_value is set internally when the contract
         # leaves draft and must never be edited through the API.
         fields.pop("original_contract_value", None)

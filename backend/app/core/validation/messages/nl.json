@@ -2511,5 +2511,46 @@
       "fail": "De tonnen volgens vrachtentelling wijken {v} % af van de gemeten tonnen, boven de controle van {t} %.",
       "suggestion": "Controleer de lading per rit en de dichtheid en vergelijk daarna de twee oppervlakken opnieuw."
     }
+  },
+  "hongkong": {
+    "sopo_applicability": {
+      "fail": "Cap. 652 (Security of Payment) geldt voor dit contract: antwoord binnen 30 dagen, betaling binnen 60 dagen na de claim"
+    },
+    "sopo_private_scope_check": {
+      "fail": "Een privécontract valt alleen onder Cap. 652 bij nieuwbouw of werken met goedkeuring van de Building Authority: bevestig de omvang"
+    },
+    "sopo_response_late": {
+      "fail": "Vóór {date} is geen betalingsantwoord betekend: het geclaimde bedrag is betwist en kan naar adjudicatie"
+    },
+    "sopo_payment_term_exceeds_60": {
+      "fail": "De betalingstermijn van {n} dagen overschrijdt de 60 dagen die Cap. 652 toestaat"
+    },
+    "sopo_response_term_exceeds_30": {
+      "fail": "De antwoordtermijn van {n} dagen overschrijdt de 30 dagen die Cap. 652 toestaat"
+    },
+    "sopo_adjudication_window": {
+      "fail": "Er is een betalingsgeschil ontstaan: betekent de adjudicatiekennisgeving vóór {date}"
+    },
+    "contract_pay_when_paid": {
+      "fail": "Pay-when-paid-clausule: Cap. 652 maakt voorwaardelijke betaling onafdwingbaar"
+    },
+    "levy_missing": {
+      "fail": "Het werk overschrijdt HK$3,000,000 maar de begroting mist de CIC-heffing (0,5%) of de CWR-heffing (0,03%)"
+    },
+    "levy_below_threshold": {
+      "fail": "Het werk bedraagt ten hoogste HK$3,000,000: geen CIC- of CWR-heffing verschuldigd"
+    },
+    "tax_nonzero": {
+      "fail": "Er wordt btw of GST berekend, maar Hongkong kent die belasting niet: zet op nul"
+    },
+    "retention_over_limit": {
+      "fail": "De inhouding van {x} overschrijdt de contractuele grens van {limit}"
+    },
+    "pc_sum_no_attendance": {
+      "fail": "Een prime-cost-som heeft geen posten voor winst en bijstand"
+    },
+    "index_attribution": {
+      "fail": "De ArchSD-prijsindex vermeldt geen bron: vermeld het Architectural Services Department"
+    }
   }
 }
