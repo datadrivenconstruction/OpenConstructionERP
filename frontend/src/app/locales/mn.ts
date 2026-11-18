@@ -36939,6 +36939,7 @@ const resource = {
     "property_dev.doc_templates.variables_empty": "Хувьсагчийн баримт байхгүй - энэ хуудсыг үл хөдлөх хөрөнгөний хөгжлүүдийн идэвхтэй байдал хүүхэл эзэмшлийн нь нээнэ үү.",
     "property_dev.doc_templates.variables_intro": "Эдгээр placeholder-ы .docx / .html загваруудын дотор ашигла. Баримтын үүсгэлтийн үйл явдлууд идэвхтэй бүтээн байгуулалт, байр, худалдан авагч, гэрээ, нөөцөлсөн хүсэлт, төлбөрийн хэсэг болон даатгалын явцаас эргүүлэлттэй байна.",
     "property_dev.doc_templates.variables_title": "Загварын хувьсагчид",
+    "property_dev.doc_templates.company_layouts_link": "Компанийн бусад баримтын загвар ба заалтууд",
     "property_dev.house_type.add_new": "Шинэ нэмэх...",
     "property_dev.house_type.area_typical_col": "Ердийн {{unit}}",
     "property_dev.house_type.area_typical_label": "Ердийн талбай (м²)",
@@ -64783,6 +64784,7 @@ const resource = {
     "letter_templates.one_off_hint": "Өөрчлөлт зөвхөн энэ захидалд хамаарна.",
     "letter_templates.save_as_template": "Энэ хэлний загвар болгон бас хадгалах",
     "letter_templates.download": "PDF татах",
+    "letter_templates.company_template": "Компанийн загвар ба харагдах байдал",
     "demo_market.label": "Хэл ба зах зээл",
     "demo_market.hint": "Интерфейсийн хэлийг сольж, тухайн улсын өөрийн өгөгдөл ба стандарттай демог нээнэ.",
     "boot.starting_title": "OpenConstructionERP-ийг тохируулж байна",
@@ -65441,6 +65443,12 @@ const resource = {
     "doc_layout.clause_library_hint": "Баримтын загвар заалтын блокод хэвлэх дахин ашиглах бичвэрүүд, хэл тус бүрд нэг бичвэр. Таны улсын багцын заалтууд зөвхөн унших боломжтой.",
     "doc_layout.clause_new": "Шинэ заалт",
     "doc_layout.clause_key": "Түлхүүр",
+    "doc_layout.clause_category": "Ангилал",
+    "doc_layout.clause_language": "Хэл",
+    "doc_layout.clause_title": "Гарчиг",
+    "doc_layout.clause_text": "Бичвэр",
+    "doc_layout.clause_saved": "Заалт хадгалагдлаа",
+    "doc_layout.clause_delete": "Заалт устгах",
   }
 } as { translation: Record<string, string> };
 

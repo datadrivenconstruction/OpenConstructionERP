@@ -34445,6 +34445,7 @@ const resource = {
     "property_dev.doc_templates.locale_json_label": "Котормо JSON",
     "property_dev.doc_templates.locale_hint": "Кеңеш: англис тилин баштапкы катары жүктөңүз, жалбырак маанилерин которуңуз, ачкычтарды сактаңыз, анан сактаңыз. Бош ачкычтар көрсөтүү убактысында англис тилине эч кандай көйгөйсүз кайтып келет.",
     "property_dev.doc_templates.locale_revert": "Үстүнөн жазууну жок кылуу",
+    "property_dev.doc_templates.company_layouts_link": "Компаниянын башка документтеринин макеттери жана шарттары",
     "propdev.edit.error_full_name_required": "Толук аты талап кылынат",
     "propdev.edit.error_email_invalid": "Жарактуу электрондук почта дарегин киргизиңиз",
     "propdev.edit.error_currency_iso": "Валюта 3 тамгадан турган ISO код болушу керек (мис. EUR)",
@@ -64879,6 +64880,7 @@ const resource = {
     "letter_templates.one_off_hint": "Өзгөртүүлөр ушул катка гана тиешелүү.",
     "letter_templates.save_as_template": "Ушул тилдин үлгүсү катары да сактоо",
     "letter_templates.download": "PDF жүктөө",
+    "letter_templates.company_template": "Компаниянын үлгүсү жана көрүнүшү",
     "demo_market.label": "Тил жана рынок",
     "demo_market.hint": "Интерфейстин тилин которуп, ошол өлкөнүн өз маалыматтары жана стандарттары менен демосун ачат.",
     "boot.starting_title": "OpenConstructionERP орнотулууда",
@@ -65537,6 +65539,12 @@ const resource = {
     "doc_layout.clause_library_hint": "Документтин макети шарт блогунда басып чыгарган кайра колдонулуучу тексттер, ар бир тилге бир текст. Өлкөңүздүн пакетиндеги шарттар окуу үчүн гана.",
     "doc_layout.clause_new": "Жаңы шарт",
     "doc_layout.clause_key": "Ачкыч",
+    "doc_layout.clause_category": "Категория",
+    "doc_layout.clause_language": "Тил",
+    "doc_layout.clause_title": "Аталышы",
+    "doc_layout.clause_text": "Текст",
+    "doc_layout.clause_saved": "Шарт сакталды",
+    "doc_layout.clause_delete": "Шартты өчүрүү",
   }
 } as { translation: Record<string, string> };
 

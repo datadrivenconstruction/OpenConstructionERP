@@ -44348,6 +44348,7 @@ const resource = {
     "project_route.showing_count": "{{count}} évaluations",
     "property_dev.doc_templates.editor_cta_title": "Créer ou modifier des modèles dans votre navigateur",
     "property_dev.doc_templates.locale_editor_title": "Traductions de modèles de documents",
+    "property_dev.doc_templates.company_layouts_link": "Mises en page et clauses des autres documents de l'entreprise",
     "propdev.phase.sequence": "#",
     "propdev.matrix.rules_title": "Règles",
     "propdev.cancel_buyer_title": "Annuler l'acheteur ?",
@@ -67705,6 +67706,7 @@ const resource = {
     "letter_templates.one_off_hint": "Les modifications s'appliquent uniquement à cette lettre.",
     "letter_templates.save_as_template": "Enregistrer aussi comme modèle pour cette langue",
     "letter_templates.download": "Télécharger le PDF",
+    "letter_templates.company_template": "Modèle et apparence de l'entreprise",
     "demo_market.label": "Langue et marché",
     "demo_market.hint": "Change la langue de l'interface et ouvre la démo de ce pays, avec ses propres données et normes.",
     "boot.starting_title": "Configuration d'OpenConstructionERP",
@@ -68363,6 +68365,12 @@ const resource = {
     "doc_layout.clause_library_hint": "Textes réutilisables qu'une mise en page de document imprime dans un bloc de clause, un texte par langue. Les clauses de votre pack pays sont en lecture seule.",
     "doc_layout.clause_new": "Nouvelle clause",
     "doc_layout.clause_key": "Clé",
+    "doc_layout.clause_category": "Catégorie",
+    "doc_layout.clause_language": "Langue",
+    "doc_layout.clause_title": "Titre",
+    "doc_layout.clause_text": "Texte",
+    "doc_layout.clause_saved": "Clause enregistrée",
+    "doc_layout.clause_delete": "Supprimer la clause",
   }
 } as { translation: Record<string, string> };
 

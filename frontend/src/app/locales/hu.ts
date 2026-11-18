@@ -37438,6 +37438,7 @@ const resource = {
     "property_dev.doc_templates.variables_empty": "Nincs elérhető változó-dokumentáció - töltse be ezt az oldalt egy olyan bérlőtől, amelyen az ingatlanfejlesztés engedélyezve van.",
     "property_dev.doc_templates.variables_intro": "Használja ezeket a helyőrzőket a .docx / .html sablonjaiban. A dokumentumgenerálási események renderelés közben behelyettesítik ezeket az aktív fejlesztésből, telekből, vevőből, szerződésből, foglalásból, részletből és átadásból.",
     "property_dev.doc_templates.variables_title": "Sablonváltozók",
+    "property_dev.doc_templates.company_layouts_link": "A többi céges dokumentum elrendezései és záradékai",
     "property_dev.house_type.add_new": "Új hozzáadása...",
     "property_dev.house_type.area_typical_col": "Jellemző {{unit}}",
     "property_dev.house_type.area_typical_label": "Jellemző terület (m²)",
@@ -67327,6 +67328,7 @@ const resource = {
     "letter_templates.one_off_hint": "A módosítás csak erre a levélre vonatkozik.",
     "letter_templates.save_as_template": "Mentés sablonként is ehhez a nyelvhez",
     "letter_templates.download": "PDF letöltése",
+    "letter_templates.company_template": "Céges sablon és megjelenés",
     "demo_market.label": "Nyelv és piac",
     "demo_market.hint": "Átállítja a felület nyelvét, és megnyitja az adott ország demóját saját adatokkal és szabványokkal.",
     "boot.starting_title": "Az OpenConstructionERP beállítása",
@@ -67985,6 +67987,12 @@ const resource = {
     "doc_layout.clause_library_hint": "Újrahasznosítható szövegek, amelyeket a dokumentumelrendezés záradékblokkban nyomtat, nyelvenként egy szöveg. Az országcsomag záradékai csak olvashatók.",
     "doc_layout.clause_new": "Új záradék",
     "doc_layout.clause_key": "Kulcs",
+    "doc_layout.clause_category": "Kategória",
+    "doc_layout.clause_language": "Nyelv",
+    "doc_layout.clause_title": "Cím",
+    "doc_layout.clause_text": "Szöveg",
+    "doc_layout.clause_saved": "Záradék mentve",
+    "doc_layout.clause_delete": "Záradék törlése",
   }
 } as { translation: Record<string, string> };
 

@@ -1384,7 +1384,16 @@ const resource = {
     "doc_layout.clause_library_hint": "Reusable texts a document layout prints in a clause block, one text per language. Clauses from your country pack are read-only.",
     "doc_layout.clause_new": "New clause",
     "doc_layout.clause_key": "Key",
+    "doc_layout.clause_category": "Category",
+    "doc_layout.clause_language": "Language",
+    "doc_layout.clause_title": "Title",
+    "doc_layout.clause_text": "Text",
+    "doc_layout.clause_saved": "Clause saved",
+    "doc_layout.clause_delete": "Delete clause",
+    "doc_layout.clause_delete_confirm": "Delete the clause \"{{name}}\"? Layouts that use it print nothing in its place.",
     "changeorders.document_title": "Change order",
+    "letter_templates.company_template": "Company template and look",
+    "property_dev.doc_templates.company_layouts_link": "Layouts and clauses of the other company documents",
   }
 } as { translation: Record<string, string> };
 

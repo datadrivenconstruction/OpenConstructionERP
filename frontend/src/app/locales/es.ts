@@ -37855,6 +37855,7 @@ const resource = {
     "property_dev.doc_templates.variables_empty": "No hay documentación de variables disponible - carga esta página desde un inquilino con propiedad-dev habilitada.",
     "property_dev.doc_templates.variables_intro": "Usa estos marcadores dentro de tus plantillas .docx / .html. Los eventos de generación de documentos los interpolan en el momento de la representación desde el desarrollo activo, lote, comprador, contrato, reserva, cuota y entrega.",
     "property_dev.doc_templates.variables_title": "Variables de plantilla",
+    "property_dev.doc_templates.company_layouts_link": "Diseños y cláusulas de los demás documentos de la empresa",
     "property_dev.house_type.add_new": "Agregar nuevo...",
     "property_dev.house_type.area_typical_col": "Típico {{unit}}",
     "property_dev.house_type.area_typical_label": "Área típica (m²)",
@@ -67710,6 +67711,7 @@ const resource = {
     "letter_templates.one_off_hint": "Los cambios se aplican solo a esta carta.",
     "letter_templates.save_as_template": "Guardar también como plantilla para este idioma",
     "letter_templates.download": "Descargar PDF",
+    "letter_templates.company_template": "Plantilla y aspecto de la empresa",
     "demo_market.label": "Idioma y mercado",
     "demo_market.hint": "Cambia el idioma de la interfaz y abre la demo de ese país, con sus propios datos y normas.",
     "boot.starting_title": "Configurando OpenConstructionERP",
@@ -68368,6 +68370,13 @@ const resource = {
     "doc_layout.clause_library_hint": "Textos reutilizables que un diseño de documento imprime en un bloque de cláusula, un texto por idioma. Las cláusulas del paquete de su país son de solo lectura.",
     "doc_layout.clause_new": "Nueva cláusula",
     "doc_layout.clause_key": "Clave",
+    "doc_layout.clause_category": "Categoría",
+    "doc_layout.clause_language": "Idioma",
+    "doc_layout.clause_title": "Título",
+    "doc_layout.clause_text": "Texto",
+    "doc_layout.clause_saved": "Cláusula guardada",
+    "doc_layout.clause_delete": "Eliminar cláusula",
+    "doc_layout.clause_delete_confirm": "¿Eliminar la cláusula «{{name}}»? Los diseños que la usan no imprimirán nada en su lugar.",
   }
 } as { translation: Record<string, string> };
 

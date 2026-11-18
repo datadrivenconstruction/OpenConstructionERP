@@ -36753,6 +36753,7 @@ const resource = {
     "property_dev.doc_templates.variables_empty": "אין תיעוד משתנים זמין - טען עמוד זה משוכר עם מודול פיתוח נדל\"ן מופעל.",
     "property_dev.doc_templates.variables_intro": "השתמש בפלייסהולדרים אלה בתוך תבניות ה-.docx / .html שלך. אירועי יצירת המסמכים ממלאים אותם בזמן העיבוד מהפיתוח, החלקה, הרוכש, החוזה, ההזמנה, התשלום והמסירה הפעילים.",
     "property_dev.doc_templates.variables_title": "משתני תבנית",
+    "property_dev.doc_templates.company_layouts_link": "פריסות וסעיפים של שאר מסמכי החברה",
     "property_dev.house_type.add_new": "הוסף חדש...",
     "property_dev.house_type.area_typical_col": "{{unit}} טיפוסי",
     "property_dev.house_type.area_typical_label": "שטח טיפוסי (מ\"ר)",
@@ -65083,6 +65084,7 @@ const resource = {
     "letter_templates.one_off_hint": "השינויים חלים על מכתב זה בלבד.",
     "letter_templates.save_as_template": "לשמור גם כתבנית לשפה זו",
     "letter_templates.download": "הורדת PDF",
+    "letter_templates.company_template": "תבנית ומראה של החברה",
     "demo_market.label": "שפה ושוק",
     "demo_market.hint": "מחליף את שפת הממשק ופותח את ההדגמה של אותה מדינה, עם הנתונים והתקנים שלה.",
     "boot.starting_title": "מגדירים את OpenConstructionERP",
@@ -65741,6 +65743,12 @@ const resource = {
     "doc_layout.clause_library_hint": "טקסטים לשימוש חוזר שפריסת מסמך מדפיסה בגוש סעיף, טקסט אחד לכל שפה. סעיפים מחבילת המדינה שלך הם לקריאה בלבד.",
     "doc_layout.clause_new": "סעיף חדש",
     "doc_layout.clause_key": "מפתח",
+    "doc_layout.clause_category": "קטגוריה",
+    "doc_layout.clause_language": "שפה",
+    "doc_layout.clause_title": "כותרת",
+    "doc_layout.clause_text": "טקסט",
+    "doc_layout.clause_saved": "הסעיף נשמר",
+    "doc_layout.clause_delete": "מחיקת סעיף",
   }
 } as { translation: Record<string, string> };
 

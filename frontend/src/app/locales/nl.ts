@@ -44170,6 +44170,7 @@ const resource = {
     "project.settings.folder.invalid": "Begin met http://, https://, file://, smb:// of een netwerkpad zoals \\\\server\\share.",
     "project.folder_link": "Projectmap",
     "property_dev.doc_templates.editor_cta_title": "Maak of bewerk sjablonen in uw browser",
+    "property_dev.doc_templates.company_layouts_link": "Indelingen en clausules van de overige bedrijfsdocumenten",
     "propdev.phase.sequence": "#",
     "propdev.development.launch_date": "Verkoopstart",
   "propdev.lead_status_converted": "Geconverteerd",
@@ -65643,6 +65644,7 @@ const resource = {
     "letter_templates.one_off_hint": "Wijzigingen gelden alleen voor deze brief.",
     "letter_templates.save_as_template": "Ook opslaan als sjabloon voor deze taal",
     "letter_templates.download": "PDF downloaden",
+    "letter_templates.company_template": "Bedrijfssjabloon en opmaak",
     "demo_market.label": "Taal en markt",
     "demo_market.hint": "Zet de taal van de interface om en opent de demo van dat land, met eigen gegevens en normen.",
     "boot.starting_title": "OpenConstructionERP wordt ingesteld",
@@ -66301,6 +66303,12 @@ const resource = {
     "doc_layout.clause_library_hint": "Herbruikbare teksten die een documentindeling in een clausuleblok afdrukt, één tekst per taal. Clausules uit uw landenpakket zijn alleen-lezen.",
     "doc_layout.clause_new": "Nieuwe clausule",
     "doc_layout.clause_key": "Sleutel",
+    "doc_layout.clause_category": "Categorie",
+    "doc_layout.clause_language": "Taal",
+    "doc_layout.clause_title": "Titel",
+    "doc_layout.clause_text": "Tekst",
+    "doc_layout.clause_saved": "Clausule opgeslagen",
+    "doc_layout.clause_delete": "Clausule verwijderen",
   }
 } as { translation: Record<string, string> };
 

@@ -44181,6 +44181,7 @@ const resource = {
     "project_route.showing_count": "{{count}} arviota",
     "property_dev.doc_templates.editor_cta_title": "Luo tai muokkaa malleja selaimessasi",
     "property_dev.doc_templates.locale_editor_title": "Dokumenttimallien käännökset",
+    "property_dev.doc_templates.company_layouts_link": "Muiden yritysasiakirjojen asettelut ja ehdot",
     "propdev.phase.sequence": "#",
     "propdev.cancel_buyer_title": "Peruta ostaja?",
   "propdev.lead_status_converted": "Muunnettu",
@@ -64766,6 +64767,7 @@ const resource = {
     "letter_templates.one_off_hint": "Muutokset koskevat vain tätä kirjettä.",
     "letter_templates.save_as_template": "Tallenna myös tämän kielen pohjaksi",
     "letter_templates.download": "Lataa PDF",
+    "letter_templates.company_template": "Yrityksen pohja ja ulkoasu",
     "demo_market.label": "Kieli ja markkina",
     "demo_market.hint": "Vaihtaa käyttöliittymän kielen ja avaa sen maan demon omine tietoineen ja standardeineen.",
     "boot.starting_title": "OpenConstructionERP:n käyttöönotto",
@@ -65424,6 +65426,13 @@ const resource = {
     "doc_layout.clause_library_hint": "Uudelleenkäytettävät tekstit, jotka asiakirjan asettelu tulostaa ehtolohkoon, yksi teksti kieltä kohden. Maapaketin ehdot ovat vain luku -tilassa.",
     "doc_layout.clause_new": "Uusi ehto",
     "doc_layout.clause_key": "Avain",
+    "doc_layout.clause_category": "Luokka",
+    "doc_layout.clause_language": "Kieli",
+    "doc_layout.clause_title": "Otsikko",
+    "doc_layout.clause_text": "Teksti",
+    "doc_layout.clause_saved": "Ehto tallennettu",
+    "doc_layout.clause_delete": "Poista ehto",
+    "doc_layout.clause_delete_confirm": "Poistetaanko ehto \"{{name}}\"? Sitä käyttävät asettelut eivät tulosta sen tilalle mitään.",
   }
 } as { translation: Record<string, string> };
 

@@ -37479,6 +37479,7 @@ const resource = {
     "property_dev.doc_templates.variables_empty": "Muutujate dokumentatsioon pole saadaval - laadige see leht rentnikult, kellel on kinnisvaraarenduse moodul lubatud.",
     "property_dev.doc_templates.variables_intro": "Kasutage neid kohatäiteid oma .docx / .html mallides. Dokumendigenereerimise sündmused sisestavad need renderdamisel aktiivsest arendusest, krundist, ostjast, lepingust, broneeringust, osamaksest ja üleandmisest.",
     "property_dev.doc_templates.variables_title": "Malli muutujad",
+    "property_dev.doc_templates.company_layouts_link": "Ettevõtte teiste dokumentide paigutused ja klauslid",
     "property_dev.house_type.add_new": "Lisa uus...",
     "property_dev.house_type.area_typical_col": "Tüüpiline {{unit}}",
     "property_dev.house_type.area_typical_label": "Tüüpiline pindala (m²)",
@@ -64712,6 +64713,7 @@ const resource = {
     "letter_templates.one_off_hint": "Muudatused kehtivad ainult selle kirja kohta.",
     "letter_templates.save_as_template": "Salvesta ka selle keele mallina",
     "letter_templates.download": "Laadi PDF alla",
+    "letter_templates.company_template": "Ettevõtte mall ja välimus",
     "demo_market.label": "Keel ja turg",
     "demo_market.hint": "Vahetab liidese keele ja avab selle riigi demo koos tema enda andmete ja standarditega.",
     "boot.starting_title": "OpenConstructionERP seadistamine",
@@ -65370,6 +65372,13 @@ const resource = {
     "doc_layout.clause_library_hint": "Korduvkasutatavad tekstid, mida dokumendi paigutus prindib klausliplokis, üks tekst keele kohta. Teie riigipaketi klauslid on kirjutuskaitstud.",
     "doc_layout.clause_new": "Uus klausel",
     "doc_layout.clause_key": "Võti",
+    "doc_layout.clause_category": "Kategooria",
+    "doc_layout.clause_language": "Keel",
+    "doc_layout.clause_title": "Pealkiri",
+    "doc_layout.clause_text": "Tekst",
+    "doc_layout.clause_saved": "Klausel salvestatud",
+    "doc_layout.clause_delete": "Kustuta klausel",
+    "doc_layout.clause_delete_confirm": "Kas kustutada klausel „{{name}}”? Seda kasutavad paigutused ei prindi selle asemele midagi.",
   }
 } as { translation: Record<string, string> };
 

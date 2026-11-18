@@ -36584,6 +36584,7 @@ const resource = {
     "property_dev.doc_templates.variables_empty": "کوئی variable دستاویزات دستیاب نہیں - property-dev فعال والے tenant سے یہ صفحہ لوڈ کریں۔",
     "property_dev.doc_templates.variables_intro": "اپنی .docx / .html ٹیمپلیٹس کے اندر یہ placeholders استعمال کریں۔ document-generation events انہیں render وقت پر فعال development، پلاٹ، خریدار، معاہدہ، ریزرویشن، قسط اور handover سے interpolate کرتے ہیں۔",
     "property_dev.doc_templates.variables_title": "ٹیمپلیٹ variables",
+    "property_dev.doc_templates.company_layouts_link": "کمپنی کی دیگر دستاویزات کی ترتیبیں اور شقیں",
     "property_dev.house_type.add_new": "نیا شامل کریں...",
     "property_dev.house_type.area_typical_col": "عمومی {{unit}}",
     "property_dev.house_type.area_typical_label": "عمومی رقبہ (m²)",
@@ -64728,6 +64729,7 @@ const resource = {
     "letter_templates.one_off_hint": "تبدیلیاں صرف اس خط پر لاگو ہوں گی۔",
     "letter_templates.save_as_template": "اس زبان کے سانچے کے طور پر بھی محفوظ کریں",
     "letter_templates.download": "PDF ڈاؤن لوڈ کریں",
+    "letter_templates.company_template": "کمپنی کا سانچہ اور انداز",
     "demo_market.label": "زبان اور مارکیٹ",
     "demo_market.hint": "انٹرفیس کی زبان بدلتا ہے اور اس ملک کا ڈیمو اس کے اپنے ڈیٹا اور معیارات کے ساتھ کھولتا ہے۔",
     "boot.starting_title": "OpenConstructionERP ترتیب دیا جا رہا ہے",
@@ -65381,6 +65383,17 @@ const resource = {
     "doc_layout.legal_note_when": "لاگو ہونے پر چھپتا ہے",
     "doc_layout.variant_create": "بنائیں",
     "doc_layout.delete_variant_confirm": "یہ ویریئنٹ اور اس کے ورژن حذف کریں؟ پہلے جاری شدہ دستاویزات کا ریکارڈ برقرار رہے گا۔",
+    "doc_layout.clause_saved": "شق محفوظ ہو گئی",
+    "doc_layout.clause_delete": "شق حذف کریں",
+    "doc_layout.clause_library": "شقوں کی لائبریری",
+    "doc_layout.clause_library_hint": "دوبارہ استعمال ہونے والی عبارتیں جو دستاویز کا خاکہ شق کے بلاک میں چھاپتا ہے، ہر زبان کے لیے ایک عبارت۔ ملکی پیکیج کی شقیں صرف پڑھنے کے لیے ہیں۔",
+    "doc_layout.clause_new": "نئی شق",
+    "doc_layout.clause_key": "کلید",
+    "doc_layout.clause_category": "زمرہ",
+    "doc_layout.clause_language": "زبان",
+    "doc_layout.clause_title": "عنوان",
+    "doc_layout.clause_text": "متن",
+    "doc_layout.clause_delete_confirm": "کیا شق \"{{name}}\" حذف کریں؟ جو خاکے اسے استعمال کرتے ہیں وہ اس کی جگہ کچھ نہیں چھاپیں گے۔",
   }
 } as { translation: Record<string, string> };
 

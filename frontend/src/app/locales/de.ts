@@ -44258,6 +44258,7 @@ const resource = {
     "project.settings.component_tax.treatment_hint": "Gilt für Komponenten ohne eigene Wahl. Prüfen Sie die Regeln des Landes und der Vertragsart.",
     "project.folder_link": "Projektordner",
     "property_dev.doc_templates.editor_cta_title": "Vorlagen im Browser erstellen oder bearbeiten",
+    "property_dev.doc_templates.company_layouts_link": "Layouts und Klauseln der übrigen Firmendokumente",
     "propdev.phase.sequence": "#",
     "propdev.cancel_buyer_title": "Käufer stornieren?",
   "propdev.lead_status_converted": "Konvertiert",
@@ -67397,6 +67398,7 @@ const resource = {
     "letter_templates.one_off_hint": "Änderungen gelten nur für diesen Brief.",
     "letter_templates.save_as_template": "Auch als Vorlage für diese Sprache speichern",
     "letter_templates.download": "PDF herunterladen",
+    "letter_templates.company_template": "Firmenvorlage und Erscheinungsbild",
     "demo_market.label": "Sprache und Markt",
     "demo_market.hint": "Stellt die Sprache der Oberfläche um und öffnet die Demo dieses Landes mit eigenen Daten und Normen.",
     "boot.starting_title": "OpenConstructionERP wird eingerichtet",
@@ -68055,6 +68057,13 @@ const resource = {
     "doc_layout.clause_library_hint": "Wiederverwendbare Texte, die ein Dokumentlayout in einem Klauselblock druckt, ein Text je Sprache. Klauseln aus Ihrem Länderpaket sind schreibgeschützt.",
     "doc_layout.clause_new": "Neue Klausel",
     "doc_layout.clause_key": "Schlüssel",
+    "doc_layout.clause_category": "Kategorie",
+    "doc_layout.clause_language": "Sprache",
+    "doc_layout.clause_title": "Titel",
+    "doc_layout.clause_text": "Text",
+    "doc_layout.clause_saved": "Klausel gespeichert",
+    "doc_layout.clause_delete": "Klausel löschen",
+    "doc_layout.clause_delete_confirm": "Klausel \"{{name}}\" löschen? Layouts, die sie verwenden, drucken an ihrer Stelle nichts.",
   }
 } as { translation: Record<string, string> };
 

@@ -36477,6 +36477,7 @@ const resource = {
     "property_dev.doc_templates.variables_empty": "কোনো ভেরিয়েবল ডকুমেন্টেশন উপলব্ধ নেই - property-dev সক্ষম একটি টেন্যান্ট থেকে এই পৃষ্ঠাটি লোড করুন।",
     "property_dev.doc_templates.variables_intro": "আপনার .docx / .html টেমপ্লেটের ভেতরে এই প্লেসহোল্ডার ব্যবহার করুন। ডকুমেন্ট-তৈরি ইভেন্ট সক্রিয় ডেভেলপমেন্ট, প্লট, ক্রেতা, চুক্তি, রিজার্ভেশন, কিস্তি ও হস্তান্তর থেকে রেন্ডারের সময় এগুলো ইন্টারপোলেট করে।",
     "property_dev.doc_templates.variables_title": "টেমপ্লেট ভেরিয়েবল",
+    "property_dev.doc_templates.company_layouts_link": "কোম্পানির অন্যান্য নথির বিন্যাস ও ধারা",
     "property_dev.house_type.add_new": "নতুন যোগ করুন...",
     "property_dev.house_type.area_typical_col": "সাধারণ {{unit}}",
     "property_dev.house_type.area_typical_label": "সাধারণ এলাকা (m²)",
@@ -65032,6 +65033,7 @@ const resource = {
     "letter_templates.one_off_hint": "পরিবর্তন শুধু এই চিঠিতে প্রযোজ্য।",
     "letter_templates.save_as_template": "এই ভাষার টেমপ্লেট হিসেবেও সংরক্ষণ করুন",
     "letter_templates.download": "PDF ডাউনলোড",
+    "letter_templates.company_template": "কোম্পানির টেমপ্লেট ও চেহারা",
     "demo_market.label": "ভাষা ও বাজার",
     "demo_market.hint": "ইন্টারফেসের ভাষা বদলায় এবং সেই দেশের ডেমো তার নিজস্ব ডেটা ও মান সহ খোলে।",
     "boot.starting_title": "OpenConstructionERP সেট আপ হচ্ছে",
@@ -65690,6 +65692,13 @@ const resource = {
     "doc_layout.clause_library_hint": "পুনরায় ব্যবহারযোগ্য লেখা যা নথির বিন্যাস একটি ধারা ব্লকে ছাপে, প্রতি ভাষায় একটি লেখা। আপনার দেশের প্যাকের ধারাগুলি শুধু পড়ার জন্য।",
     "doc_layout.clause_new": "নতুন ধারা",
     "doc_layout.clause_key": "কী",
+    "doc_layout.clause_category": "শ্রেণি",
+    "doc_layout.clause_language": "ভাষা",
+    "doc_layout.clause_title": "শিরোনাম",
+    "doc_layout.clause_text": "লেখা",
+    "doc_layout.clause_saved": "ধারা সংরক্ষিত হয়েছে",
+    "doc_layout.clause_delete": "ধারা মুছুন",
+    "doc_layout.clause_delete_confirm": "\"{{name}}\" ধারাটি মুছবেন? যে বিন্যাসগুলি এটি ব্যবহার করে সেগুলি এর জায়গায় কিছু ছাপবে না।",
   }
 } as { translation: Record<string, string> };
 

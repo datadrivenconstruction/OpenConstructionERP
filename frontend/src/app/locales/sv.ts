@@ -37596,6 +37596,7 @@ const resource = {
     "property_dev.doc_templates.variables_empty": "Ingen variabeldokumentation är tillgänglig - ladda denna sida från en hyresgäst med property-dev aktiverad.",
     "property_dev.doc_templates.variables_intro": "Använd dessa platshållare i dina .docx / .html-mallar. Dokumentgenereringshändelserna interpolerar dem vid rendring från den aktiva utveckling, tomt, köpare, kontrakt, reservation, avbetalning och överlämning.",
     "property_dev.doc_templates.variables_title": "Mallvariabler",
+    "property_dev.doc_templates.company_layouts_link": "Layouter och klausuler för övriga företagsdokument",
     "property_dev.house_type.add_new": "Lägg till ny...",
     "property_dev.house_type.area_typical_col": "Typisk {{unit}}",
     "property_dev.house_type.area_typical_label": "Typisk område (m²)",
@@ -65377,6 +65378,7 @@ const resource = {
     "letter_templates.one_off_hint": "Ändringarna gäller bara det här brevet.",
     "letter_templates.save_as_template": "Spara också som mall för det här språket",
     "letter_templates.download": "Ladda ner PDF",
+    "letter_templates.company_template": "Företagsmall och utseende",
     "demo_market.label": "Språk och marknad",
     "demo_market.hint": "Byter gränssnittets språk och öppnar demon för det landet, med egna data och standarder.",
     "boot.starting_title": "Konfigurerar OpenConstructionERP",
@@ -66031,6 +66033,17 @@ const resource = {
     "doc_layout.variant_create": "Skapa",
     "doc_layout.delete_variant_confirm": "Ta bort den här varianten och dess versioner? Redan utfärdade dokument behåller sin registrering.",
     "doc_layout.record_missing": "{{field}} saknas i den här posten ({{source}})",
+    "doc_layout.clause_saved": "Klausul sparad",
+    "doc_layout.clause_delete": "Ta bort klausul",
+    "doc_layout.clause_library": "Klausulbibliotek",
+    "doc_layout.clause_library_hint": "Återanvändbara texter som en dokumentlayout skriver ut i ett klausulblock, en text per språk. Klausuler från landspaketet är skrivskyddade.",
+    "doc_layout.clause_new": "Ny klausul",
+    "doc_layout.clause_key": "Nyckel",
+    "doc_layout.clause_category": "Kategori",
+    "doc_layout.clause_language": "Språk",
+    "doc_layout.clause_title": "Titel",
+    "doc_layout.clause_text": "Text",
+    "doc_layout.clause_delete_confirm": "Ta bort klausulen ”{{name}}”? Layouter som använder den skriver inte ut något i dess ställe.",
   }
 } as { translation: Record<string, string> };
 

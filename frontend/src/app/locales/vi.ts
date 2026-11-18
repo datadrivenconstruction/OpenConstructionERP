@@ -44102,6 +44102,7 @@ const resource = {
     "project.folder_link": "Thư mục dự án",
     "property_dev.doc_templates.editor_cta_title": "Tạo hoặc chỉnh sửa mẫu trong trình duyệt của bạn",
     "property_dev.doc_templates.locale_editor_title": "Bản dịch mẫu tài liệu",
+    "property_dev.doc_templates.company_layouts_link": "Bố cục và điều khoản của các tài liệu công ty khác",
     "propdev.phase.sequence": "#",
     "propdev.cancel_buyer_title": "Hủy người mua?",
   "propdev.lead_status_converted": "Đã chốt",
@@ -64505,6 +64506,7 @@ const resource = {
     "letter_templates.one_off_hint": "Thay đổi chỉ áp dụng cho thư này.",
     "letter_templates.save_as_template": "Đồng thời lưu làm mẫu cho ngôn ngữ này",
     "letter_templates.download": "Tải PDF",
+    "letter_templates.company_template": "Mẫu và giao diện công ty",
     "demo_market.label": "Ngôn ngữ và thị trường",
     "demo_market.hint": "Đổi ngôn ngữ giao diện và mở bản demo của quốc gia đó với dữ liệu và tiêu chuẩn riêng.",
     "boot.starting_title": "Đang thiết lập OpenConstructionERP",
@@ -65158,6 +65160,17 @@ const resource = {
     "doc_layout.legal_note_when": "được in khi áp dụng",
     "doc_layout.variant_create": "Tạo",
     "doc_layout.delete_variant_confirm": "Xóa biến thể này và các phiên bản của nó? Các tài liệu đã phát hành vẫn giữ bản ghi.",
+    "doc_layout.clause_saved": "Đã lưu điều khoản",
+    "doc_layout.clause_delete": "Xóa điều khoản",
+    "doc_layout.clause_library": "Thư viện điều khoản",
+    "doc_layout.clause_library_hint": "Các văn bản dùng lại mà bố cục tài liệu in trong khối điều khoản, mỗi ngôn ngữ một văn bản. Điều khoản từ gói quốc gia chỉ có thể xem.",
+    "doc_layout.clause_new": "Điều khoản mới",
+    "doc_layout.clause_key": "Khóa",
+    "doc_layout.clause_category": "Danh mục",
+    "doc_layout.clause_language": "Ngôn ngữ",
+    "doc_layout.clause_title": "Tiêu đề",
+    "doc_layout.clause_text": "Văn bản",
+    "doc_layout.clause_delete_confirm": "Xóa điều khoản \"{{name}}\"? Các bố cục sử dụng nó sẽ không in gì ở vị trí đó.",
   }
 } as { translation: Record<string, string> };
 

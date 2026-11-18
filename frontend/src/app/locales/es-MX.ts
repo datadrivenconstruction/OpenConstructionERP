@@ -41786,6 +41786,7 @@ const resource = {
     "project_route.no_entries_hint": "Clasifique su primer tipo de trabajo para obtener una ruta sugerida.",
     "project_route.showing_count": "{{count}} evaluaciones",
     "property_dev.doc_templates.editor_cta_title": "Cree o edite plantillas en su navegador",
+    "property_dev.doc_templates.company_layouts_link": "Diseños y cláusulas de los demás documentos de la empresa",
     "propdev.phase.sequence": "#",
   "propdev.lead_status_converted": "Convertido",
   "propdev.lead_status_disqualified": "Descalificado",
@@ -60193,6 +60194,14 @@ const resource = {
     "doc_layout.clause_library_hint": "Textos reutilizables que un diseño de documento imprime en un bloque de cláusula, un texto por idioma. Las cláusulas del paquete de su país son de solo lectura.",
     "doc_layout.clause_new": "Nueva cláusula",
     "doc_layout.clause_key": "Clave",
+    "doc_layout.clause_category": "Categoría",
+    "doc_layout.clause_language": "Idioma",
+    "doc_layout.clause_title": "Título",
+    "doc_layout.clause_text": "Texto",
+    "doc_layout.clause_saved": "Cláusula guardada",
+    "doc_layout.clause_delete": "Eliminar cláusula",
+    "doc_layout.clause_delete_confirm": "¿Eliminar la cláusula «{{name}}»? Los diseños que la usan no imprimirán nada en su lugar.",
+    "letter_templates.company_template": "Plantilla y aspecto de la empresa",
     // --- /Draft lender preparation ---
   }
 } as { translation: Record<string, string> };

@@ -44909,6 +44909,7 @@ const resource = {
     "project.settings.folder.invalid": "Почніть з http://, https://, file://, smb:// або мережевого шляху на кшталт \\\\server\\share.",
     "project.folder_link": "Тека проєкту",
     "property_dev.doc_templates.editor_cta_title": "Створюйте або редагуйте шаблони прямо в браузері",
+    "property_dev.doc_templates.company_layouts_link": "Макети й умови інших документів компанії",
     "propdev.phase.sequence": "№",
     "propdev.cancel_buyer_title": "Скасувати покупця?",
     "propdev.lead_status_converted": "Конвертовано",
@@ -66909,6 +66910,7 @@ const resource = {
     "letter_templates.one_off_hint": "Зміни стосуються лише цього листа.",
     "letter_templates.save_as_template": "Також зберегти як шаблон для цієї мови",
     "letter_templates.download": "Завантажити PDF",
+    "letter_templates.company_template": "Шаблон і оформлення компанії",
     "demo_market.label": "Мова і ринок",
     "demo_market.hint": "Перемикає мову інтерфейсу та відкриває демо цієї країни з її даними та стандартами.",
     "boot.starting_title": "Налаштування OpenConstructionERP",
@@ -67562,6 +67564,17 @@ const resource = {
     "doc_layout.legal_note_when": "друкується, коли застосовно",
     "doc_layout.variant_create": "Створити",
     "doc_layout.delete_variant_confirm": "Видалити цей варіант і його версії? Уже видані документи зберігають свій запис.",
+    "doc_layout.clause_saved": "Умову збережено",
+    "doc_layout.clause_delete": "Видалити умову",
+    "doc_layout.clause_library": "Бібліотека пунктів",
+    "doc_layout.clause_library_hint": "Тексти для повторного використання, які макет документа друкує в блоці пункту, по одному тексту на мову. Пункти з пакета країни доступні лише для читання.",
+    "doc_layout.clause_new": "Новий пункт",
+    "doc_layout.clause_key": "Ключ",
+    "doc_layout.clause_category": "Категорія",
+    "doc_layout.clause_language": "Мова",
+    "doc_layout.clause_title": "Назва",
+    "doc_layout.clause_text": "Текст",
+    "doc_layout.clause_delete_confirm": "Видалити пункт «{{name}}»? Макети, які його використовують, нічого не надрукують на його місці.",
   }
 } as { translation: Record<string, string> };
 

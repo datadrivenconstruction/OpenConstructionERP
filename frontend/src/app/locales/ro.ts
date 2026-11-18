@@ -44381,6 +44381,7 @@ const resource = {
     "project_route.no_entries_hint": "Clasificați primul tip de lucrare pentru a obține o rută sugerată.",
     "project_route.showing_count": "{{count}} evaluări",
     "property_dev.doc_templates.editor_cta_title": "Creează sau editează șabloane în browserul tău",
+    "property_dev.doc_templates.company_layouts_link": "Aspectele și clauzele celorlalte documente ale companiei",
     "propdev.phase.sequence": "#",
   "propdev.lead_status_converted": "Convertit",
   "propdev.lead_status_disqualified": "Descalificat",
@@ -65124,6 +65125,7 @@ const resource = {
     "letter_templates.one_off_hint": "Modificările se aplică doar acestei scrisori.",
     "letter_templates.save_as_template": "Salvează și ca șablon pentru această limbă",
     "letter_templates.download": "Descarcă PDF",
+    "letter_templates.company_template": "Șablonul și aspectul companiei",
     "demo_market.label": "Limbă și piață",
     "demo_market.hint": "Schimbă limba interfeței și deschide demo-ul acelei țări, cu datele și standardele proprii.",
     "boot.starting_title": "Se configurează OpenConstructionERP",
@@ -65778,6 +65780,17 @@ const resource = {
     "doc_layout.variant_create": "Creează",
     "doc_layout.delete_variant_confirm": "Ștergeți această variantă și versiunile ei? Documentele deja emise își păstrează înregistrarea.",
     "doc_layout.record_missing": "Lipsește {{field}} din această înregistrare ({{source}})",
+    "doc_layout.clause_saved": "Clauză salvată",
+    "doc_layout.clause_delete": "Șterge clauza",
+    "doc_layout.clause_library": "Bibliotecă de clauze",
+    "doc_layout.clause_library_hint": "Texte reutilizabile pe care un șablon de document le tipărește într-un bloc de clauză, câte un text pe limbă. Clauzele din pachetul de țară sunt doar pentru citire.",
+    "doc_layout.clause_new": "Clauză nouă",
+    "doc_layout.clause_key": "Cheie",
+    "doc_layout.clause_category": "Categorie",
+    "doc_layout.clause_language": "Limbă",
+    "doc_layout.clause_title": "Titlu",
+    "doc_layout.clause_text": "Text",
+    "doc_layout.clause_delete_confirm": "Ștergeți clauza „{{name}}”? Șabloanele care o folosesc nu vor tipări nimic în locul ei.",
   }
 } as { translation: Record<string, string> };
 
