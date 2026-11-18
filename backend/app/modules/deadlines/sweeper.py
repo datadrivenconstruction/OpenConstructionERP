@@ -22,7 +22,9 @@ notifying, the sweep reads the notification store for ``deadline_overdue``
 rows on the same entity. One inside :data:`RENOTIFY_WINDOW_HOURS` silences
 this tick; :data:`MAX_OVERDUE_NUDGES` of them silence the item for good, which
 is what stops an item nobody resolves from being nudged forever.
-The escalation tier reconstructs from the ``deadline_escalated`` notifications'
+Because both of those live in a table that others may clear, an item more than
+:data:`NUDGE_HORIZON_DAYS` late is not nudged at all; that bound is read from
+the item, not from any store. The escalation tier reconstructs from the ``deadline_escalated`` notifications'
 ``metadata.level`` so a target is escalated at most once. This reuses the
 *technique* of ``escalation_service`` (notification-store tier dedup), not the
 service itself, which is bound to approval Instance/Route/Step and not reusable.
@@ -77,6 +79,14 @@ RENOTIFY_WINDOW_HOURS = 20.0
 # sweep re-sent the same reminders twice a day until the mail host disabled
 # outbound sending for the whole account.
 MAX_OVERDUE_NUDGES = 3
+
+# ...and only while the item is at most this many days late. The two limits
+# above are counted from stored notification rows, so anything that clears
+# that table (the public demo restores its data every night) hands every
+# overdue item a fresh allowance. This one is read off the item's own due
+# date, so no truncate, restore or restart can reopen it. Three nudges 20
+# hours apart fit well inside a week, so on an untouched store it never bites.
+NUDGE_HORIZON_DAYS = 7
 
 # Notification types carry the word "overdue"/"escalated" so the inbox severity
 # classifier promotes them (see notifications/templates.py:_TYPE_TO_ICON).
@@ -429,6 +439,9 @@ async def _maybe_escalate(session: AsyncSession, item: DeadlineItem, now: dateti
     """
     if item.days_overdue <= ESCALATE_GRACE_DAYS:
         return False
+    if item.days_overdue > ESCALATE_GRACE_DAYS + NUDGE_HORIZON_DAYS:
+        # "Exactly once" is a stored row too; see NUDGE_HORIZON_DAYS.
+        return False
     if await _already_escalated(session, item):
         return False
     project_id = _as_uuid(item.project_id)
@@ -614,12 +627,19 @@ async def sweep_overdue(session: AsyncSession, *, now: datetime | None = None) -
         logger.exception("Payment-plan forecast heal failed")
     actioned = 0
     for item in overdue:
+        if item.days_overdue > ESCALATE_GRACE_DAYS + NUDGE_HORIZON_DAYS:
+            # Past both horizons: neither a nudge nor an escalation can fire.
+            continue
         notified = False
         outbox: list[tuple[str, dict[str, object]]] = []
         try:
             async with session.begin_nested():
                 recipients = await _overdue_recipients(session, item)
-                if recipients and not await _already_notified(session, item, now):
+                if (
+                    recipients
+                    and item.days_overdue <= NUDGE_HORIZON_DAYS
+                    and not await _already_notified(session, item, now)
+                ):
                     await _notify_overdue(session, item, recipients, outbox)
                     notified = True
         except Exception:

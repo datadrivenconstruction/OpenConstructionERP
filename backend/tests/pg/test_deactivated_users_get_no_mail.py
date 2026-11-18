@@ -137,7 +137,7 @@ async def _one_overdue_item(session) -> None:
             title="Late item",
             description="",
             status="open",
-            due_date=datetime.now(UTC) - timedelta(days=14),
+            due_date=datetime.now(UTC) - timedelta(days=5),
             assigned_to=str(owner.id),
         )
     )

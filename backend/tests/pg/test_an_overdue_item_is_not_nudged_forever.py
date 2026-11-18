@@ -32,8 +32,9 @@ import uuid
 from datetime import UTC, datetime, timedelta
 
 import pytest
-from sqlalchemy import select, update
+from sqlalchemy import delete, select, update
 
+from app.core.events import event_bus
 from app.modules.deadlines import sweeper
 from app.modules.notifications.models import Notification
 from app.modules.projects.models import Project
@@ -43,7 +44,7 @@ from app.modules.users.models import User
 pytestmark = pytest.mark.asyncio
 
 _NOW = datetime.now(UTC)
-_DUE = _NOW - timedelta(days=14)
+_DUE = _NOW - timedelta(days=5)
 
 # Comfortably past the window, so ageing the rows by this much makes the next
 # sweep a fresh one as far as the rate limit is concerned and only the ceiling
@@ -51,7 +52,7 @@ _DUE = _NOW - timedelta(days=14)
 _A_DAY_LATER = timedelta(hours=sweeper.RENOTIFY_WINDOW_HOURS + 4)
 
 
-async def _a_project_with_one_overdue_item(session) -> None:
+async def _a_project_with_one_overdue_item(session, due: datetime = _DUE) -> None:
     owner = User(
         id=uuid.uuid4(),
         email=f"{uuid.uuid4().hex[:12]}@example.com",
@@ -70,7 +71,7 @@ async def _a_project_with_one_overdue_item(session) -> None:
             title="Nobody ever closes this",
             description="",
             status="open",
-            due_date=_DUE,
+            due_date=due,
             assigned_to=str(owner.id),
         )
     )
@@ -130,3 +131,47 @@ async def test_a_second_sweep_inside_the_window_still_changes_nothing(pg_session
     await sweeper.sweep_overdue(pg_session, now=_NOW + timedelta(hours=1))
 
     assert await _nudge_count(pg_session) == 1
+
+
+async def _nightly_restore(session) -> None:
+    """What the public demo's reset does to the de-duplication record: it is gone."""
+    await session.execute(delete(Notification))
+
+
+async def test_a_long_overdue_item_is_never_mailed_even_when_the_store_is_wiped_nightly(pg_session, monkeypatch):
+    """The demo shape: frozen due dates months back, notification table cleared every night.
+
+    The window and the ceiling are both counted from the cleared table, so on
+    their own they allowed two bursts a day for ever. The horizon is read from
+    the due date and does not care what was cleared.
+    """
+    published: list[str] = []
+    monkeypatch.setattr(
+        event_bus, "publish_detached", lambda name, data=None, source_module=None: published.append(name)
+    )
+    await _a_project_with_one_overdue_item(pg_session, due=_NOW - timedelta(days=200))
+
+    for _ in range(5):
+        await sweeper.sweep_overdue(pg_session, now=_NOW)
+        await _nightly_restore(pg_session)
+
+    assert await _nudge_count(pg_session) == 0
+    assert published.count("notifications.dispatch.email") == 0
+    rows = await pg_session.execute(
+        select(Notification).where(Notification.notification_type == sweeper.ESCALATED_TYPE)
+    )
+    assert list(rows.scalars().all()) == []
+
+
+async def test_an_item_inside_the_horizon_is_still_nudged_after_a_wipe(pg_session, monkeypatch):
+    """Control: the horizon must not be silence. A fresh overdue item is still told."""
+    published: list[str] = []
+    monkeypatch.setattr(
+        event_bus, "publish_detached", lambda name, data=None, source_module=None: published.append(name)
+    )
+    await _a_project_with_one_overdue_item(pg_session, due=_NOW - timedelta(days=sweeper.NUDGE_HORIZON_DAYS))
+
+    await sweeper.sweep_overdue(pg_session, now=_NOW)
+
+    assert await _nudge_count(pg_session) == 1
+    assert published.count("notifications.dispatch.email") == 1

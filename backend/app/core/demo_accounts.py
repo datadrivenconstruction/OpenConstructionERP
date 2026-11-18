@@ -71,6 +71,16 @@ SEEDED_ADMIN_EMAILS: frozenset[str] = frozenset(
 #: same answer for three addresses; they are not the same question.
 NON_MAILBOX_LOGINS: frozenset[str] = DEMO_ACCOUNT_EMAILS | SEEDED_ADMIN_EMAILS
 
+#: Domains the seeders mint logins on, each with the mailboxes that really
+#: exist there. An address on one of these domains that is not listed is a
+#: login somebody made up for a demo, and it bounces like the ones above. The
+#: exact-address list alone missed every demo user named outside it.
+#: ``openestimator.io`` has no MX record at all, so it holds no mailbox.
+SEEDED_LOGIN_DOMAIN_MAILBOXES: dict[str, frozenset[str]] = {
+    "openconstructionerp.com": frozenset({"info@openconstructionerp.com"}),
+    "openestimator.io": frozenset(),
+}
+
 
 #: Top-level names that can never hold a mailbox (RFC 2606, RFC 6761).
 RESERVED_MAIL_TLDS: frozenset[str] = frozenset({"invalid", "test", "example", "localhost"})
@@ -117,4 +127,12 @@ def is_non_mailbox_login(email: str | None) -> bool:
     """
     if not email:
         return False
-    return email.strip().lower() in NON_MAILBOX_LOGINS
+    normalized = email.strip().lower()
+    if normalized in NON_MAILBOX_LOGINS:
+        return True
+    if "@" not in normalized:
+        return False
+    local, domain = normalized.rsplit("@", 1)
+    domain = domain.rstrip(".")
+    mailboxes = SEEDED_LOGIN_DOMAIN_MAILBOXES.get(domain)
+    return mailboxes is not None and f"{local}@{domain}" not in mailboxes

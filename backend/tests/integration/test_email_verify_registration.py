@@ -110,3 +110,28 @@ async def test_a_reset_token_is_not_a_verification_link(session, outbox):
     with pytest.raises(HTTPException):
         await svc.verify_email(create_reset_token(user, svc.settings))
     assert (await svc.get_user(user.id)).is_active is False
+
+
+@pytest.mark.asyncio
+async def test_with_no_mail_transport_a_verify_mode_sign_up_is_let_in_not_stranded(session, monkeypatch):
+    """EMAIL_BACKEND=noop under email-verify: the account is active and no mail is attempted."""
+    from app.config import get_settings
+    from app.modules.users.schemas import UserCreate
+
+    backend = MemoryEmailBackend()
+    monkeypatch.setattr("app.modules.users.service.get_email_service", lambda: get_email_service(backend=backend))
+    settings = get_settings()
+    monkeypatch.setattr(settings, "registration_mode", "email-verify")
+    monkeypatch.setattr(settings, "email_backend", "noop")
+
+    svc = _service(session)
+    await svc.register(
+        UserCreate(email=f"admin-{uuid.uuid4().hex[:6]}@verify.io", password="VerifyAdm99!", full_name="Admin")
+    )
+    user = await svc.register(
+        UserCreate(email=f"site-{uuid.uuid4().hex[:6]}@verify.io", password="VerifySite99!", full_name="Site Lead")
+    )
+
+    assert user.is_active is True, "a sign-up must not wait for a mail nothing can send"
+    assert backend.sent == []
+    assert (await svc.registration_status())["mode"] == "open"

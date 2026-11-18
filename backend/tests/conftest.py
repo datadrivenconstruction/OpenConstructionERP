@@ -792,6 +792,16 @@ def _semantic_switch_state_in_tmp(tmp_path, monkeypatch):
 
 
 @pytest.fixture(autouse=True)
+def _fresh_notification_mail_budget():
+    """Each test starts with an untouched daily mail budget; the counters are process-wide."""
+    from app.core.email.budget import reset_notification_mail_budget
+
+    reset_notification_mail_budget()
+    yield
+    reset_notification_mail_budget()
+
+
+@pytest.fixture(autouse=True)
 def _no_outbound_http(request, monkeypatch):
     """Turn a real call to a third-party host into a named test failure.
 

@@ -225,6 +225,14 @@ async def _on_dispatch_email(event: Event) -> None:
         )
         return
 
+    from app.core.demo_accounts import is_non_mailbox_login
+    from app.core.email.budget import notification_mail_budget
+
+    # A seeded login is refused by the transport anyway, so it must not use up
+    # the day's budget that real recipients share.
+    if not is_non_mailbox_login(to) and not notification_mail_budget().admit(to, event_type=event_type):
+        return
+
     subject, body_text = render_email_parts(event_type, payload, locale, await _reader_date_format(user_id))
 
     from app.config import get_settings
