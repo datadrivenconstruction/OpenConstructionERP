@@ -679,8 +679,7 @@ def test_the_unmapped_standards_are_labelled_and_unreachable_on_purpose() -> Non
     """
     unmapped = sorted(set(CLASSIFICATION_STANDARD_LABELS) - set(KNOWN_CLASSIFICATION_STANDARDS))
     # bkp, bsab, ns3451 and sfb_ccs are the national codings the Swiss,
-    # Swedish, Norwegian and Danish packs name as their own; hksmm4 is the
-    # Hong Kong pack's measurement standard, labelled the same way. knr was on this
+    # Swedish, Norwegian and Danish packs name as their own. knr was on this
     # list until Poland was mapped to it in 2026-10. They are
     # labelled so a pack's metadata names a standard the platform can print,
     # and deliberately left unmapped: which standard a country's projects
@@ -690,7 +689,6 @@ def test_the_unmapped_standards_are_labelled_and_unreachable_on_purpose() -> Non
         "bkp",
         "bsab",
         "gaeb",
-        "hksmm4",
         "ns3451",
         "omniclass",
         "onorm",

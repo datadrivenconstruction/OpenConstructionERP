@@ -400,7 +400,6 @@ def test_the_registry_and_its_labels_are_two_different_lists() -> None:
         "bkp",
         "bsab",
         "gaeb",
-        "hksmm4",
         "ns3451",
         "omniclass",
         "onorm",
