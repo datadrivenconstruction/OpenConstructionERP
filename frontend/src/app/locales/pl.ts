@@ -58238,6 +58238,7 @@ const resource = {
     "modules.catalog.land_parcels": "Grunty i działki",
     "modules.catalog.stockpiles": "Zwały",
     "modules.catalog.mine_survey": "Pomiary kopalniane",
+    "modules.catalog.monitoring": "Monitoring deformacji",
     "modules.pp_desc_eleven_areas_framework": "Zarządzanie projektem po stronie inwestora w jedenastu obszarach zarządzania, w dwóch fazach, rozwoju projektu i realizacji budowy, z jedną bramką między nimi i jednym zatwierdzonym dokumentem ramowym dla każdego obszaru.",
     "modules.pp_name_pakistan_pk": "Pakiet budowlany Pakistan",
     "modules.pp_name_peru_pe": "Pakiet budowlany Peru",

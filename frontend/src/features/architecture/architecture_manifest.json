@@ -169332,7 +169332,7 @@
           "method": "GET",
           "path": "/projects/{project_id}/parcels",
           "handler": "list_parcels",
-          "response_model": "list[ParcelOut]",
+          "response_model": "ParcelListResponse",
           "request_schema": "ActiveMarkets"
         },
         {
@@ -169395,7 +169395,7 @@
           "method": "GET",
           "path": "/projects/{project_id}/parties",
           "handler": "list_parties",
-          "response_model": "list[PartyOut]"
+          "response_model": "PartyListResponse"
         },
         {
           "method": "POST",
@@ -169408,13 +169408,13 @@
           "method": "GET",
           "path": "/projects/{project_id}/rights",
           "handler": "list_rights",
-          "response_model": "list[RightOut]"
+          "response_model": "RightListResponse"
         },
         {
           "method": "GET",
           "path": "/projects/{project_id}/work-zones",
           "handler": "list_zones",
-          "response_model": "list[WorkZoneOut]"
+          "response_model": "WorkZoneListResponse"
         },
         {
           "method": "GET",
@@ -169540,7 +169540,7 @@
             },
             {
               "name": "legal_area",
-              "type": "Decimal | None"
+              "type": "finite_decimal(16, 4) | None"
             },
             {
               "name": "status",
@@ -169549,7 +169549,7 @@
             },
             {
               "name": "acquisition_cost",
-              "type": "Decimal | None"
+              "type": "Decimal18_2 | None"
             },
             {
               "name": "acquired_on",
@@ -169583,7 +169583,7 @@
             },
             {
               "name": "legal_area",
-              "type": "Decimal | None"
+              "type": "finite_decimal(16, 4) | None"
             },
             {
               "name": "status",
@@ -169592,7 +169592,7 @@
             },
             {
               "name": "acquisition_cost",
-              "type": "Decimal | None"
+              "type": "Decimal18_2 | None"
             },
             {
               "name": "acquired_on",
@@ -169966,11 +169966,11 @@
           "fields": [
             {
               "name": "area_tolerance_pct",
-              "type": "Decimal"
+              "type": "Decimal6_3"
             },
             {
               "name": "gap_tolerance_m",
-              "type": "Decimal"
+              "type": "Decimal8_3"
             }
           ]
         },
@@ -170287,6 +170287,114 @@
             {
               "name": "findings",
               "type": "list[FindingOut]"
+            }
+          ]
+        },
+        {
+          "class_name": "ParcelListResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[ParcelOut]"
+            },
+            {
+              "name": "total",
+              "type": "int"
+            },
+            {
+              "name": "offset",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "limit",
+              "type": "int",
+              "default": "50"
+            }
+          ]
+        },
+        {
+          "class_name": "PartyListResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[PartyOut]"
+            },
+            {
+              "name": "total",
+              "type": "int"
+            },
+            {
+              "name": "offset",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "limit",
+              "type": "int",
+              "default": "50"
+            }
+          ]
+        },
+        {
+          "class_name": "RightListResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[RightOut]"
+            },
+            {
+              "name": "total",
+              "type": "int"
+            },
+            {
+              "name": "offset",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "limit",
+              "type": "int",
+              "default": "50"
+            }
+          ]
+        },
+        {
+          "class_name": "WorkZoneListResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[WorkZoneOut]"
+            },
+            {
+              "name": "total",
+              "type": "int"
+            },
+            {
+              "name": "offset",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "limit",
+              "type": "int",
+              "default": "50"
             }
           ]
         }
@@ -182385,7 +182493,7 @@
           "method": "GET",
           "path": "/projects/{project_id}/units",
           "handler": "list_units",
-          "response_model": "list[UnitOut]"
+          "response_model": "UnitListResponse"
         },
         {
           "method": "POST",
@@ -182410,7 +182518,7 @@
           "method": "GET",
           "path": "/projects/{project_id}/periods",
           "handler": "list_periods",
-          "response_model": "list[PeriodOut]"
+          "response_model": "PeriodListResponse"
         },
         {
           "method": "POST",
@@ -183179,6 +183287,60 @@
             {
               "name": "totals",
               "type": "Totals"
+            }
+          ]
+        },
+        {
+          "class_name": "PeriodListResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[PeriodOut]"
+            },
+            {
+              "name": "total",
+              "type": "int"
+            },
+            {
+              "name": "offset",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "limit",
+              "type": "int",
+              "default": "50"
+            }
+          ]
+        },
+        {
+          "class_name": "UnitListResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[UnitOut]"
+            },
+            {
+              "name": "total",
+              "type": "int"
+            },
+            {
+              "name": "offset",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "limit",
+              "type": "int",
+              "default": "50"
             }
           ]
         }
@@ -185077,7 +185239,7 @@
           "method": "GET",
           "path": "/projects/{project_id}/profiles",
           "handler": "list_profiles",
-          "response_model": "list[ProfileOut]",
+          "response_model": "ProfileListResponse",
           "request_schema": "ActiveMarkets"
         },
         {
@@ -185105,7 +185267,7 @@
           "method": "GET",
           "path": "/projects/{project_id}/points",
           "handler": "list_points",
-          "response_model": "list[PointOut]",
+          "response_model": "PointListResponse",
           "request_schema": "ActiveMarkets"
         },
         {
@@ -185835,6 +185997,60 @@
               "name": "last_epoch",
               "type": "datetime | None",
               "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "PointListResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[PointOut]"
+            },
+            {
+              "name": "total",
+              "type": "int"
+            },
+            {
+              "name": "offset",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "limit",
+              "type": "int",
+              "default": "50"
+            }
+          ]
+        },
+        {
+          "class_name": "ProfileListResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[ProfileOut]"
+            },
+            {
+              "name": "total",
+              "type": "int"
+            },
+            {
+              "name": "offset",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "limit",
+              "type": "int",
+              "default": "50"
             }
           ]
         }
@@ -279124,7 +279340,7 @@
           "method": "GET",
           "path": "/projects/{project_id}/profiles",
           "handler": "list_profiles",
-          "response_model": "list[ToleranceProfileOut]",
+          "response_model": "ToleranceProfileListResponse",
           "request_schema": "ActiveMarkets"
         },
         {
@@ -279138,7 +279354,7 @@
           "method": "GET",
           "path": "/projects/{project_id}/requests",
           "handler": "list_requests",
-          "response_model": "list[RequestOut]"
+          "response_model": "RequestListResponse"
         },
         {
           "method": "POST",
@@ -279233,7 +279449,7 @@
           "method": "GET",
           "path": "/stakes/{stake_id}/records",
           "handler": "history",
-          "response_model": "list[RecordOut]"
+          "response_model": "RecordListResponse"
         },
         {
           "method": "POST",
@@ -280041,6 +280257,87 @@
             {
               "name": "offset_m",
               "type": "float"
+            }
+          ]
+        },
+        {
+          "class_name": "RecordListResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[RecordOut]"
+            },
+            {
+              "name": "total",
+              "type": "int"
+            },
+            {
+              "name": "offset",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "limit",
+              "type": "int",
+              "default": "50"
+            }
+          ]
+        },
+        {
+          "class_name": "ToleranceProfileListResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[ToleranceProfileOut]"
+            },
+            {
+              "name": "total",
+              "type": "int"
+            },
+            {
+              "name": "offset",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "limit",
+              "type": "int",
+              "default": "50"
+            }
+          ]
+        },
+        {
+          "class_name": "RequestListResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[RequestOut]"
+            },
+            {
+              "name": "total",
+              "type": "int"
+            },
+            {
+              "name": "offset",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "limit",
+              "type": "int",
+              "default": "50"
             }
           ]
         }
@@ -293023,7 +293320,7 @@
           "method": "GET",
           "path": "/projects/{project_id}/stockpiles",
           "handler": "list_stockpiles",
-          "response_model": "list[StockpileOut]"
+          "response_model": "StockpileListResponse"
         },
         {
           "method": "POST",
@@ -293606,6 +293903,33 @@
             {
               "name": "note",
               "type": "str"
+            }
+          ]
+        },
+        {
+          "class_name": "StockpileListResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[StockpileOut]"
+            },
+            {
+              "name": "total",
+              "type": "int"
+            },
+            {
+              "name": "offset",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "limit",
+              "type": "int",
+              "default": "50"
             }
           ]
         }
@@ -306112,7 +306436,7 @@
           "method": "GET",
           "path": "/projects/{project_id}/surfaces",
           "handler": "list_surfaces",
-          "response_model": "list[SurfaceOut]"
+          "response_model": "SurfaceListResponse"
         },
         {
           "method": "POST",
@@ -306136,7 +306460,7 @@
           "method": "GET",
           "path": "/projects/{project_id}/volumes",
           "handler": "list_volumes",
-          "response_model": "list[VolumeOut]"
+          "response_model": "VolumeListResponse"
         },
         {
           "method": "POST",
@@ -306160,7 +306484,7 @@
           "method": "GET",
           "path": "/projects/{project_id}/boq-positions",
           "handler": "boq_positions",
-          "response_model": "list[BoqPositionHit]"
+          "response_model": "BoqPositionHitListResponse"
         },
         {
           "method": "GET",
@@ -306212,7 +306536,7 @@
           "method": "GET",
           "path": "/volumes/{volume_id}/history",
           "handler": "history",
-          "response_model": "list[VolumeEventOut]"
+          "response_model": "VolumeEventListResponse"
         },
         {
           "method": "GET",
@@ -307028,6 +307352,114 @@
               "type": "str"
             }
           ]
+        },
+        {
+          "class_name": "BoqPositionHitListResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[BoqPositionHit]"
+            },
+            {
+              "name": "total",
+              "type": "int"
+            },
+            {
+              "name": "offset",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "limit",
+              "type": "int",
+              "default": "50"
+            }
+          ]
+        },
+        {
+          "class_name": "VolumeEventListResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[VolumeEventOut]"
+            },
+            {
+              "name": "total",
+              "type": "int"
+            },
+            {
+              "name": "offset",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "limit",
+              "type": "int",
+              "default": "50"
+            }
+          ]
+        },
+        {
+          "class_name": "SurfaceListResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[SurfaceOut]"
+            },
+            {
+              "name": "total",
+              "type": "int"
+            },
+            {
+              "name": "offset",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "limit",
+              "type": "int",
+              "default": "50"
+            }
+          ]
+        },
+        {
+          "class_name": "VolumeListResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[VolumeOut]"
+            },
+            {
+              "name": "total",
+              "type": "int"
+            },
+            {
+              "name": "offset",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "limit",
+              "type": "int",
+              "default": "50"
+            }
+          ]
         }
       ],
       "import_dependencies": [
@@ -307527,7 +307959,7 @@
           "method": "GET",
           "path": "/crs/search",
           "handler": "crs_search",
-          "response_model": "list[CrsInfoOut]"
+          "response_model": "CrsInfoListResponse"
         },
         {
           "method": "POST",
@@ -307580,7 +308012,7 @@
           "method": "GET",
           "path": "/projects/{project_id}/point-sets",
           "handler": "list_sets",
-          "response_model": "list[PointSetOut]"
+          "response_model": "PointSetListResponse"
         },
         {
           "method": "GET",
@@ -307610,7 +308042,7 @@
           "method": "GET",
           "path": "/projects/{project_id}/traverses",
           "handler": "list_traverses",
-          "response_model": "list[TraverseOut]"
+          "response_model": "TraverseListResponse"
         },
         {
           "method": "POST",
@@ -308646,6 +309078,87 @@
               "name": "source",
               "type": "str",
               "default": "'user'"
+            }
+          ]
+        },
+        {
+          "class_name": "PointSetListResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[PointSetOut]"
+            },
+            {
+              "name": "total",
+              "type": "int"
+            },
+            {
+              "name": "offset",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "limit",
+              "type": "int",
+              "default": "50"
+            }
+          ]
+        },
+        {
+          "class_name": "TraverseListResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[TraverseOut]"
+            },
+            {
+              "name": "total",
+              "type": "int"
+            },
+            {
+              "name": "offset",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "limit",
+              "type": "int",
+              "default": "50"
+            }
+          ]
+        },
+        {
+          "class_name": "CrsInfoListResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[CrsInfoOut]"
+            },
+            {
+              "name": "total",
+              "type": "int"
+            },
+            {
+              "name": "offset",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "limit",
+              "type": "int",
+              "default": "50"
             }
           ]
         }
@@ -335096,7 +335609,7 @@
     "total_columns": 11204,
     "total_relationships": 261,
     "total_routes": 5454,
-    "total_schemas": 5001,
+    "total_schemas": 5020,
     "total_python_files": 3555,
     "frontend_features": 247,
     "frontend_ts_files": 4347,
