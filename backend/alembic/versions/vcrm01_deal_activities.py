@@ -30,6 +30,8 @@ depends_on: Union[str, Sequence[str], None] = None
 _ACT = "oe_crm_activity"
 _STAGE = "oe_crm_pipeline_stage"
 
+# data-rewrite-ack: table=oe_crm_pipeline_stage growth=bounded rows=a fixed list of pipeline stages per install, configured by hand, not a per-deal log
+
 
 def upgrade() -> None:
     """Add the assignee column and the bidding stage."""

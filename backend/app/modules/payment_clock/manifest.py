@@ -40,6 +40,7 @@ manifest = ModuleManifest(
         "EU",
         "FR",
         "GB",
+        "HK",
         "HU",
         "IE",
         "IN",

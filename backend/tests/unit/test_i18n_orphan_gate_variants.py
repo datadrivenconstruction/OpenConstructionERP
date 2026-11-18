@@ -111,4 +111,7 @@ def test_the_real_tree_derives_the_bases_the_app_declares() -> None:
         "pt-BR": "pt",
         "en-GB": "en",
         "en-US": "en",
+        # Derived from the code, as every variant is. i18n.ts sends zh-HK to English, not
+        # Simplified zh, so a key zh-HK.ts lacks still renders English there.
+        "zh-HK": "zh",
     }

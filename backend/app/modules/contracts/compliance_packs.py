@@ -325,7 +325,7 @@ RULE_PACKS: dict[str, dict[str, Any]] = {
         "quality baseline.",
         "jurisdiction": "UA",
         "enforced_workflows": [WORKFLOW_CONTRACT_SIGNATURE],
-        "rule_sets": ["boq_quality", "din276", "ukraine"],
+        "rule_sets": ["boq_quality", "din276", "ukraine", "norm_base", "public_funding", "vat_rate"],
     },
     "eg_compliance": {
         "id": "eg_compliance",
