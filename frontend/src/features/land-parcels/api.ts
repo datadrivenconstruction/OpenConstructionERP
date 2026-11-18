@@ -183,10 +183,10 @@ const lang = (locale: string) => `locale=${encodeURIComponent(locale)}`;
 export const getProfile = (projectId: string) => apiGet<ParcelProfile>(`${p(projectId)}/profile`);
 export const getSettings = (projectId: string) => apiGet<ParcelSettings>(`${p(projectId)}/settings`);
 export const putSettings = (projectId: string, body: ParcelSettings) => apiPut<ParcelSettings, ParcelSettings>(`${p(projectId)}/settings`, body);
-export const listParcels = (projectId: string, locale: string) => apiGet<Parcel[]>(`${p(projectId)}/parcels?${lang(locale)}`);
+export const listParcels = (projectId: string, locale: string) => apiGet<{ items: Parcel[] }>(`${p(projectId)}/parcels?${lang(locale)}`).then((r) => r.items);
 export const getSummary = (projectId: string) => apiGet<ParcelSummary>(`${p(projectId)}/summary`);
 export const getPlan = (projectId: string) => apiGet<PlanCollection>(`${p(projectId)}/plan`);
-export const listZones = (projectId: string) => apiGet<WorkZone[]>(`${p(projectId)}/work-zones`);
+export const listZones = (projectId: string) => apiGet<{ items: WorkZone[] }>(`${p(projectId)}/work-zones`).then((r) => r.items);
 export const deleteZone = (zoneId: string) => apiDelete(`${BASE}/work-zones/${zoneId}`);
 export const previewImport = (projectId: string, body: ImportBody) => apiPost<ImportPreview, ImportBody>(`${p(projectId)}/import/preview`, body);
 export const importFile = (projectId: string, body: ImportBody) => apiPost<ImportResult, ImportBody>(`${p(projectId)}/import`, body);
@@ -194,10 +194,10 @@ export const getParcel = (parcelId: string, locale: string) => apiGet<ParcelDeta
 export const updateParcel = (parcelId: string, body: Record<string, unknown>, locale: string) =>
   apiPatch<ParcelDetail, Record<string, unknown>>(`${BASE}/parcels/${parcelId}?${lang(locale)}`, body);
 export const deleteParcel = (parcelId: string) => apiDelete(`${BASE}/parcels/${parcelId}`);
-export const listParties = (projectId: string) => apiGet<Party[]>(`${p(projectId)}/parties`);
+export const listParties = (projectId: string) => apiGet<{ items: Party[] }>(`${p(projectId)}/parties`).then((r) => r.items);
 export const createParty = (projectId: string, body: Omit<Party, 'id'>) => apiPost<Party, Omit<Party, 'id'>>(`${p(projectId)}/parties`, body);
 export const deleteParty = (partyId: string) => apiDelete(`${BASE}/parties/${partyId}`);
-export const listRights = (projectId: string) => apiGet<Right[]>(`${p(projectId)}/rights`);
+export const listRights = (projectId: string) => apiGet<{ items: Right[] }>(`${p(projectId)}/rights`).then((r) => r.items);
 export const addRight = (parcelId: string, body: Partial<Right>) => apiPost<Right, Partial<Right>>(`${BASE}/parcels/${parcelId}/rights`, body);
 export const deleteRight = (rightId: string) => apiDelete(`${BASE}/rights/${rightId}`);
 export const listBoqs = (projectId: string) => apiGet<BoqRow[]>(`/v1/boq/boqs/?project_id=${projectId}`);

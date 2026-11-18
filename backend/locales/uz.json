@@ -2121,7 +2121,11 @@
       "notifications.portal.message_received.title": "Portalda yangi xabar",
       "notifications.portal.message_received.body": "{buyer_name} xabar yubordi.",
       "dispatch.notify.plan_title": "Your daily plan is ready",
-      "dispatch.notify.plan_body": "Plan for {day}: {lines} lines."
+      "dispatch.notify.plan_body": "Plan for {day}: {lines} lines.",
+      "notifications.monitoring.alert.title": "Kuzatuv ogohlantirishi",
+      "notifications.monitoring.action.title": "Kuzatuv harakat darajasi",
+      "notifications.monitoring.alarm.title": "Kuzatuv signali",
+      "notifications.monitoring.crossed.body": "Nuqta {point}: {displacement} mm, {rate} mm/day."
     },
     "schedule_headers": {
       "headers": {

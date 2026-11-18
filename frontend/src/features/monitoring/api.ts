@@ -147,11 +147,11 @@ const project = (id: string) => `${BASE}/projects/${encodeURIComponent(id)}`;
 const point = (id: string) => `${BASE}/points/${encodeURIComponent(id)}`;
 const loc = (locale: string) => `locale=${encodeURIComponent(locale)}`;
 
-export const listPoints = (projectId: string) => apiGet<MonitoringPoint[]>(`${project(projectId)}/points`);
+export const listPoints = (projectId: string) => apiGet<{ items: MonitoringPoint[] }>(`${project(projectId)}/points`).then((r) => r.items);
 export const getPoint = (id: string) => apiGet<PointDetail>(point(id));
 export const getSummary = (projectId: string) => apiGet<Summary>(`${project(projectId)}/summary`);
 export const getSettings = (projectId: string) => apiGet<Settings>(`${project(projectId)}/settings`);
-export const listProfiles = (projectId: string) => apiGet<Profile[]>(`${project(projectId)}/profiles`);
+export const listProfiles = (projectId: string) => apiGet<{ items: Profile[] }>(`${project(projectId)}/profiles`).then((r) => r.items);
 export const setProfile = (projectId: string, profile_key: string) =>
   apiPut<Settings, { profile_key: string }>(`${project(projectId)}/settings`, { profile_key });
 export const validateMonitoring = (projectId: string, locale: string) =>

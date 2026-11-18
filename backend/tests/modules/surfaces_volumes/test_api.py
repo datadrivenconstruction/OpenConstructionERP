@@ -150,12 +150,12 @@ async def test_lessons_4_to_6_on_the_demo(client: AsyncClient, header: dict) -> 
     installed = await client.post("/api/demo/install/survey-riverside-yard", headers=header)
     assert installed.status_code in (200, 201), installed.text
     pid = installed.json()["project_id"]
-    [v] = (await client.get(f"{BASE}/projects/{pid}/volumes", headers=header)).json()
+    [v] = (await client.get(f"{BASE}/projects/{pid}/volumes", headers=header)).json()["items"]
     assert v["code"] == "V-001"
     assert v["cut_m3"] == EXPECTED["lesson_3"]["cut_m3"]
     profile = (await client.get(f"{CORE}/projects/{pid}/profile", headers=header)).json()
     assert profile["label"] == "Demo values, not a standard"
-    [trav] = (await client.get(f"{CORE}/projects/{pid}/traverses", headers=header)).json()
+    [trav] = (await client.get(f"{CORE}/projects/{pid}/traverses", headers=header)).json()["items"]
     assert trav["ratio"] == 11731
     assert trav["verdict"] == "pass"
 
@@ -164,7 +164,7 @@ async def test_lessons_4_to_6_on_the_demo(client: AsyncClient, header: dict) -> 
     assert confirmed.status_code == 200, confirmed.text
     [pos] = (
         await client.get(f"{BASE}/projects/{pid}/boq-positions", params={"q": lesson["boq_position"]}, headers=header)
-    ).json()
+    ).json()["items"]
     sent = await client.post(
         f"{BASE}/volumes/{v['id']}/send-to-boq", json={"position_id": pos["id"], "quantity": "cut"}, headers=header
     )
@@ -184,7 +184,7 @@ async def test_lessons_4_to_6_on_the_demo(client: AsyncClient, header: dict) -> 
     assert dup.status_code == 201, dup.text
     assert dup.json()["loose_cut_m3"] == EXPECTED["lesson_6"]["loose_cut_m3"]
 
-    history = (await client.get(f"{BASE}/volumes/{v['id']}/history", headers=header)).json()
+    history = (await client.get(f"{BASE}/volumes/{v['id']}/history", headers=header)).json()["items"]
     assert [h["action"] for h in history] == ["computed", "confirmed", "sent_boq", "progress", "duplicated"]
     pdf = await client.get(f"{BASE}/volumes/{v['id']}/report.pdf", headers=header)
     assert pdf.status_code == 200

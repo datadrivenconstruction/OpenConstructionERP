@@ -156,7 +156,7 @@ export interface RegisterSummary {
   last_import: string | null;
 }
 
-export const searchCrs = (q: string) => apiGet<CrsInfo[]>(`${BASE}/crs/search?q=${encodeURIComponent(q)}`);
+export const searchCrs = (q: string) => apiGet<{ items: CrsInfo[] }>(`${BASE}/crs/search?q=${encodeURIComponent(q)}`).then((r) => r.items);
 export const getProjectCrs = (projectId: string) => apiGet<ProjectCrsState>(`${BASE}/projects/${projectId}/crs`);
 export const setProjectCrs = (projectId: string, body: ProjectCrsInput) =>
   apiPut<ProjectCrs>(`${BASE}/projects/${projectId}/crs`, body);
@@ -176,7 +176,7 @@ export const listPoints = (projectId: string, params: { kind?: string; set_id?: 
   if (params.q) qs.set('q', params.q);
   return apiGet<{ items: SurveyPoint[]; total: number }>(`${BASE}/projects/${projectId}/points?${qs.toString()}`);
 };
-export const listPointSets = (projectId: string) => apiGet<PointSet[]>(`${BASE}/projects/${projectId}/point-sets`);
+export const listPointSets = (projectId: string) => apiGet<{ items: PointSet[] }>(`${BASE}/projects/${projectId}/point-sets`).then((r) => r.items);
 export const deletePointSet = (setId: string) => apiDelete(`${BASE}/point-sets/${setId}`);
 export const declareSetCrs = (setId: string, epsg: number) =>
   apiPost<PointSet>(`${BASE}/point-sets/${setId}/declare-crs`, { epsg });

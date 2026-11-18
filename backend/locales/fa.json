@@ -2105,7 +2105,11 @@
       "notifications.portal.message_received.title": "پیام جدید در پورتال",
       "notifications.portal.message_received.body": "{buyer_name} پیامی ارسال کرد.",
       "dispatch.notify.plan_title": "Your daily plan is ready",
-      "dispatch.notify.plan_body": "Plan for {day}: {lines} lines."
+      "dispatch.notify.plan_body": "Plan for {day}: {lines} lines.",
+      "notifications.monitoring.alert.title": "هشدار پایش",
+      "notifications.monitoring.action.title": "سطح اقدام پایش",
+      "notifications.monitoring.alarm.title": "آلارم پایش",
+      "notifications.monitoring.crossed.body": "نقطه {point}: {displacement} mm، {rate} mm/day."
     },
     "schedule_headers": {
       "headers": {

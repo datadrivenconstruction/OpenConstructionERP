@@ -2105,7 +2105,11 @@
       "notifications.portal.message_received.title": "Új üzenet a portálon",
       "notifications.portal.message_received.body": "{buyer_name} üzenetet küldött.",
       "dispatch.notify.plan_title": "Your daily plan is ready",
-      "dispatch.notify.plan_body": "Plan for {day}: {lines} lines."
+      "dispatch.notify.plan_body": "Plan for {day}: {lines} lines.",
+      "notifications.monitoring.alert.title": "Monitoring riasztás",
+      "notifications.monitoring.action.title": "Monitoring beavatkozási szint",
+      "notifications.monitoring.alarm.title": "Monitoring riadó",
+      "notifications.monitoring.crossed.body": "{point} pont: {displacement} mm, {rate} mm/day."
     },
     "schedule_headers": {
       "headers": {

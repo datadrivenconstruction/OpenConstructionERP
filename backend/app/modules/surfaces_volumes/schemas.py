@@ -235,3 +235,31 @@ class BoqPositionHit(BaseModel):
     description: str
     unit: str
     quantity: str
+
+
+class BoqPositionHitListResponse(BaseModel):
+    items: list[BoqPositionHit]
+    total: int
+    offset: int = 0
+    limit: int = 50
+
+
+class VolumeEventListResponse(BaseModel):
+    items: list[VolumeEventOut]
+    total: int
+    offset: int = 0
+    limit: int = 50
+
+
+class SurfaceListResponse(BaseModel):
+    items: list[SurfaceOut]
+    total: int
+    offset: int = 0
+    limit: int = 50
+
+
+class VolumeListResponse(BaseModel):
+    items: list[VolumeOut]
+    total: int
+    offset: int = 0
+    limit: int = 50

@@ -2457,6 +2457,41 @@
       "status_expropriation": "征收"
     }
   },
+  "monitoring": {
+    "crossed": {
+      "fail": "测点 {id} 位移 {d} mm 或速率 {r} mm/day 超过 {level}",
+      "suggestion": "请检查测点和结构，然后附注确认该预警。"
+    },
+    "level": {
+      "ok": "正常",
+      "alert": "预警值",
+      "action": "控制值",
+      "alarm": "报警值"
+    },
+    "risk": {
+      "title": "监测点 {id} 达到 {level}",
+      "description": "位移 {d} mm，速率 {r} mm/day，对照 {profile}。监测系统已生成草稿：请复核并指定负责人。"
+    },
+    "report": {
+      "title": "监测报警报告",
+      "project": "项目",
+      "crs": "坐标系",
+      "profile": "阈值方案",
+      "generated": "生成时间",
+      "point": "测点",
+      "baseline": "初始值 (m)",
+      "latest": "最新值 (m)",
+      "displacement": "位移 (mm)",
+      "rate": "速率 (mm/day)",
+      "level": "等级",
+      "acknowledged": "已确认",
+      "counts": "报警值: {alarm} · 控制值: {action} · 预警值: {alert} · 正常: {ok}",
+      "findings": "发现",
+      "no_profile": "无阈值方案，请设置",
+      "ack_yes": "是",
+      "ack_no": "否"
+    }
+  },
   "stockpiles": {
     "density_assumed": {
       "fail": "密度是假定的，不是实测：吨数的可靠性只有这个估计那么高。",

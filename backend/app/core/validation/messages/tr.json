@@ -2457,6 +2457,41 @@
       "status_expropriation": "Kamulaştırma"
     }
   },
+  "monitoring": {
+    "crossed": {
+      "fail": "{id} noktasında {d} mm yer değiştirme veya {r} mm/day hız {level} eşiğini aştı",
+      "suggestion": "Noktayı ve yapıyı kontrol edin, ardından uyarıyı bir notla onaylayın."
+    },
+    "level": {
+      "ok": "Uygun",
+      "alert": "Uyarı",
+      "action": "Eylem",
+      "alarm": "Alarm seviyesi"
+    },
+    "risk": {
+      "title": "{id} izleme noktası, {level} seviyesinde",
+      "description": "Yer değiştirme {d} mm, hız {r} mm/day, {profile} değerine göre. Taslak izleme tarafından açıldı: inceleyin ve bir sorumlu atayın."
+    },
+    "report": {
+      "title": "İzleme alarm raporu",
+      "project": "Proje",
+      "crs": "Koordinat sistemi",
+      "profile": "Eşik profili",
+      "generated": "Oluşturulma",
+      "point": "Nokta",
+      "baseline": "Başlangıç (m)",
+      "latest": "Son (m)",
+      "displacement": "Yer değiştirme (mm)",
+      "rate": "Hız (mm/day)",
+      "level": "Seviye",
+      "acknowledged": "Onaylandı",
+      "counts": "Alarm seviyesi: {alarm} · Eylem: {action} · Uyarı: {alert} · Uygun: {ok}",
+      "findings": "Bulgular",
+      "no_profile": "Profil yok, bir profil belirleyin",
+      "ack_yes": "Evet",
+      "ack_no": "Hayır"
+    }
+  },
   "stockpiles": {
     "density_assumed": {
       "fail": "Yoğunluk varsayılmış, ölçülmemiş: tonlar bu tahmin kadar güvenilirdir.",

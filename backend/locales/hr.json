@@ -2105,7 +2105,11 @@
       "notifications.portal.message_received.title": "Nova poruka u portalu",
       "notifications.portal.message_received.body": "{buyer_name} je poslao poruku.",
       "dispatch.notify.plan_title": "Your daily plan is ready",
-      "dispatch.notify.plan_body": "Plan for {day}: {lines} lines."
+      "dispatch.notify.plan_body": "Plan for {day}: {lines} lines.",
+      "notifications.monitoring.alert.title": "Upozorenje praćenja",
+      "notifications.monitoring.action.title": "Razina djelovanja praćenja",
+      "notifications.monitoring.alarm.title": "Alarm praćenja",
+      "notifications.monitoring.crossed.body": "Točka {point}: {displacement} mm, {rate} mm/day."
     },
     "schedule_headers": {
       "headers": {

@@ -2105,7 +2105,11 @@
       "notifications.portal.message_received.title": "Uusi portaaliviesti",
       "notifications.portal.message_received.body": "{buyer_name} lähetti viestin.",
       "dispatch.notify.plan_title": "Your daily plan is ready",
-      "dispatch.notify.plan_body": "Plan for {day}: {lines} lines."
+      "dispatch.notify.plan_body": "Plan for {day}: {lines} lines.",
+      "notifications.monitoring.alert.title": "Seurantahälytys",
+      "notifications.monitoring.action.title": "Seurannan toimintataso",
+      "notifications.monitoring.alarm.title": "Seurannan hälytys",
+      "notifications.monitoring.crossed.body": "Piste {point}: {displacement} mm, {rate} mm/day."
     },
     "schedule_headers": {
       "headers": {

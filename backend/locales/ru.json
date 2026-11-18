@@ -2084,7 +2084,11 @@
       "notifications.portal.message_received.title": "Новое сообщение в портале",
       "notifications.portal.message_received.body": "{buyer_name} отправил(а) сообщение.",
       "dispatch.notify.plan_title": "Your daily plan is ready",
-      "dispatch.notify.plan_body": "Plan for {day}: {lines} lines."
+      "dispatch.notify.plan_body": "Plan for {day}: {lines} lines.",
+      "notifications.monitoring.alert.title": "Предупреждение мониторинга",
+      "notifications.monitoring.action.title": "Порог действия мониторинга",
+      "notifications.monitoring.alarm.title": "Тревога мониторинга",
+      "notifications.monitoring.crossed.body": "Точка {point}: {displacement} mm, {rate} mm/day."
     },
     "schedule_headers": {
       "headers": {

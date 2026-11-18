@@ -43,7 +43,7 @@ async def test_lesson_1_crs_search_and_chip(client: AsyncClient, header: dict, p
     lesson = EXPECTED["lesson_1"]
     hits = await client.get(f"{BASE}/crs/search", params={"q": lesson["search"]}, headers=header)
     assert hits.status_code == 200, hits.text
-    assert hits.json()[0]["epsg"] == 32633
+    assert hits.json()["items"][0]["epsg"] == 32633
     state = await client.get(f"{BASE}/projects/{project_id}/crs", headers=header)
     assert state.json()["crs"] is None
     assert any(s["epsg"] == 4326 and s["reason"] == "geographic" for s in state.json()["suggestions"])

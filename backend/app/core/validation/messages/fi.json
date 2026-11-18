@@ -2457,6 +2457,41 @@
       "status_expropriation": "Lunastus"
     }
   },
+  "monitoring": {
+    "crossed": {
+      "fail": "Piste {id}: siirtymä {d} mm tai nopeus {r} mm/day ylitti tason {level}",
+      "suggestion": "Tarkista piste ja rakenne ja kuittaa hälytys sitten merkinnällä."
+    },
+    "level": {
+      "ok": "Normaali",
+      "alert": "Varoitustaso",
+      "action": "Toimenpidetaso",
+      "alarm": "Hälytystaso"
+    },
+    "risk": {
+      "title": "Mittauspiste {id} tasolla {level}",
+      "description": "Siirtymä {d} mm, nopeus {r} mm/day suhteessa profiiliin {profile}. Luonnoksen avasi seuranta: tarkista se ja nimeä vastuuhenkilö."
+    },
+    "report": {
+      "title": "Seurannan hälytysraportti",
+      "project": "Hanke",
+      "crs": "Koordinaatisto",
+      "profile": "Raja-arvoprofiili",
+      "generated": "Luotu",
+      "point": "Piste",
+      "baseline": "Lähtötaso (m)",
+      "latest": "Viimeisin (m)",
+      "displacement": "Siirtymä (mm)",
+      "rate": "Nopeus (mm/day)",
+      "level": "Taso",
+      "acknowledged": "Kuitattu",
+      "counts": "Hälytystaso: {alarm} · Toimenpidetaso: {action} · Varoitustaso: {alert} · Normaali: {ok}",
+      "findings": "Havainnot",
+      "no_profile": "Ei profiilia, määritä profiili",
+      "ack_yes": "Kyllä",
+      "ack_no": "Ei"
+    }
+  },
   "stockpiles": {
     "density_assumed": {
       "fail": "Tiheys on oletettu, ei mitattu: tonnit ovat yhtä luotettavia kuin tämä arvio.",

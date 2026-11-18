@@ -2385,7 +2385,7 @@
       "project": "Projekt",
       "crs": "Souřadnicový systém",
       "request": "Požadavek",
-      "tolerance": "Tolerance",
+      "tolerance": "Přípustná odchylka",
       "element": "Prvek",
       "generated": "Vytvořeno",
       "point": "Bod",
@@ -2455,6 +2455,41 @@
       "status_negotiating": "Jednání",
       "status_acquired": "Nabyto",
       "status_expropriation": "Vyvlastnění"
+    }
+  },
+  "monitoring": {
+    "crossed": {
+      "fail": "Bod {id}: posun {d} mm nebo rychlost {r} mm/day překročil úroveň {level}",
+      "suggestion": "Zkontrolujte bod a konstrukci, poté potvrďte upozornění poznámkou."
+    },
+    "level": {
+      "ok": "V pořádku",
+      "alert": "Výstraha",
+      "action": "Zásah",
+      "alarm": "Poplach"
+    },
+    "risk": {
+      "title": "Monitorovací bod {id} na úrovni {level}",
+      "description": "Posun {d} mm, rychlost {r} mm/day vůči {profile}. Koncept otevřel monitoring: prohlédněte ho a určete odpovědnou osobu."
+    },
+    "report": {
+      "title": "Hlášení poplachů monitoringu",
+      "project": "Projekt",
+      "crs": "Souřadnicový systém",
+      "profile": "Profil prahových hodnot",
+      "generated": "Vygenerováno",
+      "point": "Bod",
+      "baseline": "Výchozí hodnota (m)",
+      "latest": "Poslední hodnota (m)",
+      "displacement": "Posun (mm)",
+      "rate": "Rychlost (mm/day)",
+      "level": "Úroveň",
+      "acknowledged": "Potvrzeno",
+      "counts": "Poplach: {alarm} · Zásah: {action} · Výstraha: {alert} · V pořádku: {ok}",
+      "findings": "Zjištění",
+      "no_profile": "Chybí profil, nastavte jej",
+      "ack_yes": "Ano",
+      "ack_no": "Ne"
     }
   },
   "stockpiles": {

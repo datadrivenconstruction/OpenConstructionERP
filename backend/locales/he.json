@@ -2105,7 +2105,11 @@
       "notifications.portal.message_received.title": "הודעה חדשה בפורטל",
       "notifications.portal.message_received.body": "{buyer_name} שלח הודעה.",
       "dispatch.notify.plan_title": "Your daily plan is ready",
-      "dispatch.notify.plan_body": "Plan for {day}: {lines} lines."
+      "dispatch.notify.plan_body": "Plan for {day}: {lines} lines.",
+      "notifications.monitoring.alert.title": "התראת ניטור",
+      "notifications.monitoring.action.title": "רמת פעולה בניטור",
+      "notifications.monitoring.alarm.title": "אזעקת ניטור",
+      "notifications.monitoring.crossed.body": "נקודה {point}: {displacement} mm, {rate} mm/day."
     },
     "schedule_headers": {
       "headers": {

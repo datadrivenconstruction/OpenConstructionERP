@@ -172,3 +172,7 @@ def register_survey_validation_rules() -> None:
 
 
 __all__ = ["SURVEY_RULES", "SURVEY_RULE_SET", "register_survey_validation_rules"]
+
+
+# Registered at import so a process that only loads this module still knows the rule set.
+register_survey_validation_rules()

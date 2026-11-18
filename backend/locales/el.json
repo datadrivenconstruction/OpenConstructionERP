@@ -2105,7 +2105,11 @@
       "notifications.portal.message_received.title": "Νέο μήνυμα στην πύλη",
       "notifications.portal.message_received.body": "Μήνυμα από: {buyer_name}.",
       "dispatch.notify.plan_title": "Your daily plan is ready",
-      "dispatch.notify.plan_body": "Plan for {day}: {lines} lines."
+      "dispatch.notify.plan_body": "Plan for {day}: {lines} lines.",
+      "notifications.monitoring.alert.title": "Ειδοποίηση παρακολούθησης",
+      "notifications.monitoring.action.title": "Επίπεδο δράσης παρακολούθησης",
+      "notifications.monitoring.alarm.title": "Συναγερμός παρακολούθησης",
+      "notifications.monitoring.crossed.body": "Σημείο {point}: {displacement} mm, {rate} mm/day."
     },
     "schedule_headers": {
       "headers": {

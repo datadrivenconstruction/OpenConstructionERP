@@ -2403,8 +2403,8 @@
       "counts": "Pass: {passed} · Fail: {failed} · Open: {open}",
       "findings": "Findings",
       "no_profile": "No profile, set one",
-      "d": "d (mm)",
-      "dz": "dZ (mm)"
+      "d": "Offset d (mm)",
+      "dz": "Offset dZ (mm)"
     }
   },
   "land_parcels": {

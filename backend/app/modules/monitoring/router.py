@@ -28,15 +28,19 @@ import uuid
 from fastapi import APIRouter, Depends, Query, Response, status
 
 from app.core.active_markets import ActiveMarkets
+from app.core.document_locale import normalize_document_locale
+from app.core.i18n import SUPPORTED_LOCALES
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep, verify_project_access
 from app.modules.monitoring.schemas import (
     Acknowledge,
     MonitoringSummary,
     PointCreate,
     PointDetail,
+    PointListResponse,
     PointOut,
     PointUpdate,
     ProfileCreate,
+    ProfileListResponse,
     ProfileOut,
     ReadingsImport,
     ReadingsPreview,
@@ -63,12 +67,18 @@ async def _point(point_id: uuid.UUID, session: SessionDep, user_id: CurrentUserI
     return service, point
 
 
-@router.get("/projects/{project_id}/profiles", response_model=list[ProfileOut], dependencies=_READ)
+@router.get("/projects/{project_id}/profiles", response_model=ProfileListResponse, dependencies=_READ)
 async def list_profiles(
-    project_id: uuid.UUID, session: SessionDep, user_id: CurrentUserId, markets: ActiveMarkets
-) -> list[ProfileOut]:
+    project_id: uuid.UUID,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    markets: ActiveMarkets,
+    offset: int = Query(0, ge=0),
+    limit: int = Query(1000, ge=1, le=5000),
+) -> ProfileListResponse:
     await verify_project_access(project_id, user_id, session)
-    return await MonitoringService(session).profiles(project_id, markets)
+    rows = await MonitoringService(session).profiles(project_id, markets)
+    return ProfileListResponse(items=rows[offset : offset + limit], total=len(rows), offset=offset, limit=limit)
 
 
 @router.post(
@@ -100,12 +110,18 @@ async def set_settings(
     return await MonitoringService(session).set_settings(project_id, body, user_id, markets)
 
 
-@router.get("/projects/{project_id}/points", response_model=list[PointOut], dependencies=_READ)
+@router.get("/projects/{project_id}/points", response_model=PointListResponse, dependencies=_READ)
 async def list_points(
-    project_id: uuid.UUID, session: SessionDep, user_id: CurrentUserId, markets: ActiveMarkets
-) -> list[PointOut]:
+    project_id: uuid.UUID,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    markets: ActiveMarkets,
+    offset: int = Query(0, ge=0),
+    limit: int = Query(1000, ge=1, le=5000),
+) -> PointListResponse:
     await verify_project_access(project_id, user_id, session)
-    return await MonitoringService(session).list_points(project_id, markets)
+    rows = await MonitoringService(session).list_points(project_id, markets)
+    return PointListResponse(items=rows[offset : offset + limit], total=len(rows), offset=offset, limit=limit)
 
 
 @router.post(
@@ -164,7 +180,10 @@ async def report_pdf(
     return Response(
         content=pdf,
         media_type="application/pdf",
-        headers={"Content-Disposition": 'attachment; filename="monitoring-alarm-report.pdf"'},
+        headers={
+            "Content-Disposition": 'attachment; filename="monitoring-alarm-report.pdf"',
+            "Content-Language": normalize_document_locale(locale, SUPPORTED_LOCALES, "en"),
+        },
     )
 
 

@@ -2386,7 +2386,7 @@
       "crs": "Koordinatalar tizimi",
       "request": "So'rov",
       "tolerance": "Ruxsat",
-      "element": "Element",
+      "element": "Konstruktiv element",
       "generated": "Yaratilgan",
       "point": "Nuqta",
       "design_e": "Loyiha E",
@@ -2455,6 +2455,41 @@
       "status_negotiating": "Muzokara",
       "status_acquired": "Sotib olingan",
       "status_expropriation": "Olib qo'yish"
+    }
+  },
+  "monitoring": {
+    "crossed": {
+      "fail": "{id} nuqtada {d} mm siljish yoki {r} mm/day tezlik {level} chegarasidan oshdi",
+      "suggestion": "Nuqta va inshootni tekshiring, so'ngra ogohlantirishni izoh bilan tasdiqlang."
+    },
+    "level": {
+      "ok": "Normal",
+      "alert": "Ogohlantirish",
+      "action": "Choralar ko'rish",
+      "alarm": "Xavf signali"
+    },
+    "risk": {
+      "title": "{id} kuzatuv nuqtasi, {level} darajasida",
+      "description": "Siljish {d} mm, tezlik {r} mm/day, {profile} bo'yicha. Qoralama monitoring tomonidan ochildi: uni ko'rib chiqing va mas'ulni belgilang."
+    },
+    "report": {
+      "title": "Monitoring signallari hisoboti",
+      "project": "Loyiha",
+      "crs": "Koordinatalar tizimi",
+      "profile": "Chegaraviy qiymatlar profili",
+      "generated": "Yaratilgan",
+      "point": "Nuqta",
+      "baseline": "Boshlang'ich qiymat (m)",
+      "latest": "Oxirgi (m)",
+      "displacement": "Siljish (mm)",
+      "rate": "Tezlik (mm/day)",
+      "level": "Daraja",
+      "acknowledged": "Tasdiqlangan",
+      "counts": "Xavf signali: {alarm} · Choralar: {action} · Ogohlantirish: {alert} · Normal: {ok}",
+      "findings": "Xulosalar",
+      "no_profile": "Profil yo'q, bittasini belgilang",
+      "ack_yes": "Ha",
+      "ack_no": "Yo'q"
     }
   },
   "stockpiles": {

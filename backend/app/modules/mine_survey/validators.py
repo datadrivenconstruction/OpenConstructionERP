@@ -91,3 +91,7 @@ def register_mine_validation_rules() -> None:
 
 
 __all__ = ["MINE_RULES", "MINE_RULE_SET", "register_mine_validation_rules"]
+
+
+# Registered at import so a process that only loads this module still knows the rule set.
+register_mine_validation_rules()

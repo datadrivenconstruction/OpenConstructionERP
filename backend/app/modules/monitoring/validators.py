@@ -74,3 +74,7 @@ def register_monitoring_validation_rules() -> None:
 
 
 __all__ = ["MONITORING_RULES", "MONITORING_RULE_SET", "register_monitoring_validation_rules"]
+
+
+# Registered at import so a process that only loads this module still knows the rule set.
+register_monitoring_validation_rules()

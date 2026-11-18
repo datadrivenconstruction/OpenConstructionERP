@@ -1156,7 +1156,11 @@
       "notifications.portal.message_received.title": "পোর্টালে নতুন বার্তা",
       "notifications.portal.message_received.body": "{buyer_name} একটি বার্তা পাঠিয়েছেন।",
       "dispatch.notify.plan_title": "Your daily plan is ready",
-      "dispatch.notify.plan_body": "Plan for {day}: {lines} lines."
+      "dispatch.notify.plan_body": "Plan for {day}: {lines} lines.",
+      "notifications.monitoring.alert.title": "মনিটরিং সতর্কতা",
+      "notifications.monitoring.action.title": "মনিটরিং অ্যাকশন স্তর",
+      "notifications.monitoring.alarm.title": "মনিটরিং অ্যালার্ম",
+      "notifications.monitoring.crossed.body": "পয়েন্ট {point}: {displacement} mm, {rate} mm/day।"
     },
     "schedule_headers": {
       "headers": {

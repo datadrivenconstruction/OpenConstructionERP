@@ -2457,6 +2457,41 @@
       "status_expropriation": "Kisajátítás"
     }
   },
+  "monitoring": {
+    "crossed": {
+      "fail": "{id} pont: {d} mm elmozdulás vagy {r} mm/day sebesség átlépte a(z) {level} szintet",
+      "suggestion": "Ellenőrizze a pontot és a szerkezetet, majd megjegyzéssel nyugtázza a riasztást."
+    },
+    "level": {
+      "ok": "Normális",
+      "alert": "Figyelmeztetés",
+      "action": "Beavatkozás",
+      "alarm": "Riasztás"
+    },
+    "risk": {
+      "title": "{id} mérőpont {level} szinten",
+      "description": "Elmozdulás {d} mm, sebesség {r} mm/day, a(z) {profile} szerint. A piszkozatot a monitoring nyitotta: nézze át, és nevezzen meg felelőst."
+    },
+    "report": {
+      "title": "Monitoring riasztási jelentés",
+      "project": "Projekt",
+      "crs": "Koordinátarendszer",
+      "profile": "Küszöbprofil",
+      "generated": "Létrehozva",
+      "point": "Pont",
+      "baseline": "Kiindulási érték (m)",
+      "latest": "Legutóbbi (m)",
+      "displacement": "Elmozdulás (mm)",
+      "rate": "Sebesség (mm/day)",
+      "level": "Szint",
+      "acknowledged": "Nyugtázva",
+      "counts": "Riasztás: {alarm} · Beavatkozás: {action} · Figyelmeztetés: {alert} · Normális: {ok}",
+      "findings": "Megállapítások",
+      "no_profile": "Nincs profil, állítson be egyet",
+      "ack_yes": "Igen",
+      "ack_no": "Nem"
+    }
+  },
   "stockpiles": {
     "density_assumed": {
       "fail": "A sűrűség feltételezett, nem mért: a tonna csak annyira megbízható, mint ez a becslés.",

@@ -2457,6 +2457,41 @@
       "status_expropriation": "הפקעה"
     }
   },
+  "monitoring": {
+    "crossed": {
+      "fail": "נקודה {id}: הסטייה {d} mm או הקצב {r} mm/day חצו את {level}",
+      "suggestion": "בדקו את הנקודה ואת המבנה, ואז אשרו את ההתראה עם הערה."
+    },
+    "level": {
+      "ok": "תקין",
+      "alert": "אזהרה",
+      "action": "פעולה",
+      "alarm": "אזעקה"
+    },
+    "risk": {
+      "title": "נקודת ניטור {id} ברמת {level}",
+      "description": "הסטייה {d} mm, קצב {r} mm/day מול {profile}. הטיוטה נפתחה על ידי הניטור: יש לבדוק אותה ולמנות אחראי."
+    },
+    "report": {
+      "title": "דוח אזעקות ניטור",
+      "project": "פרויקט",
+      "crs": "מערכת קואורדינטות",
+      "profile": "פרופיל סף",
+      "generated": "נוצר",
+      "point": "נקודה",
+      "baseline": "קו בסיס (m)",
+      "latest": "אחרון (m)",
+      "displacement": "הסטייה (mm)",
+      "rate": "קצב (mm/day)",
+      "level": "רמה",
+      "acknowledged": "אושר",
+      "counts": "אזעקה: {alarm} · פעולה: {action} · אזהרה: {alert} · תקין: {ok}",
+      "findings": "ממצאים",
+      "no_profile": "אין פרופיל, יש להגדיר",
+      "ack_yes": "כן",
+      "ack_no": "לא"
+    }
+  },
   "stockpiles": {
     "density_assumed": {
       "fail": "הצפיפות משוערת ולא נמדדה: הטונות אמינות רק כמו ההערכה הזאת.",

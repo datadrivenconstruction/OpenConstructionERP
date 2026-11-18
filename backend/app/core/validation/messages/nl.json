@@ -2382,11 +2382,11 @@
     },
     "sheet": {
       "title": "Uitzetstaat",
-      "project": "Project",
+      "project": "Projectnaam",
       "crs": "Coördinatenstelsel",
       "request": "Opdracht",
       "tolerance": "Tolerantie",
-      "element": "Element",
+      "element": "Bouwdeel",
       "generated": "Gemaakt",
       "point": "Punt",
       "design_e": "Ontwerp E",
@@ -2398,7 +2398,7 @@
       "by": "Gemeten door",
       "verdict_pass": "Goed",
       "verdict_fail": "Afgekeurd",
-      "verdict_open": "Open",
+      "verdict_open": "Nog open",
       "verdict_no_tolerance": "Geen profiel",
       "counts": "Goed: {passed} · Afgekeurd: {failed} · Open: {open}",
       "findings": "Bevindingen",
@@ -2434,7 +2434,7 @@
     },
     "pdf": {
       "title": "Perceelstaat",
-      "project": "Project",
+      "project": "Projectnaam",
       "crs": "Coördinatenstelsel",
       "method": "Methode",
       "method_value": "Oppervlakte uit grenscoördinaten (formule van Gauss), afgerond op {decimals} decimalen, m2",
@@ -2442,7 +2442,7 @@
       "legal": "Kadastrale oppervlakte (m2)",
       "computed": "Berekend (m2)",
       "diff": "Verschil (m2)",
-      "status": "Status",
+      "status": "Perceelstatus",
       "rights": "Rechten",
       "cost": "Kosten",
       "findings": "Bevindingen",
@@ -2455,6 +2455,41 @@
       "status_negotiating": "In onderhandeling",
       "status_acquired": "Verworven",
       "status_expropriation": "Onteigening"
+    }
+  },
+  "monitoring": {
+    "crossed": {
+      "fail": "Meetpunt {id}: verplaatsing {d} mm of snelheid {r} mm/day overschreed {level}",
+      "suggestion": "Controleer het meetpunt en de constructie en bevestig daarna de melding met een notitie."
+    },
+    "level": {
+      "ok": "Normaal",
+      "alert": "Signaalwaarde",
+      "action": "Actiewaarde",
+      "alarm": "Alarmwaarde"
+    },
+    "risk": {
+      "title": "Meetpunt {id} bij {level}",
+      "description": "Verplaatsing {d} mm, snelheid {r} mm/day ten opzichte van {profile}. Concept geopend door monitoring: beoordeel het en wijs een eigenaar aan."
+    },
+    "report": {
+      "title": "Alarmrapport monitoring",
+      "project": "Bouwproject",
+      "crs": "Coördinatenstelsel",
+      "profile": "Drempelprofiel",
+      "generated": "Gegenereerd",
+      "point": "Meetpunt",
+      "baseline": "Nulmeting (m)",
+      "latest": "Laatste (m)",
+      "displacement": "Verplaatsing (mm)",
+      "rate": "Snelheid (mm/day)",
+      "level": "Niveau",
+      "acknowledged": "Bevestigd",
+      "counts": "Alarmwaarde: {alarm} · Actiewaarde: {action} · Signaalwaarde: {alert} · Normaal: {ok}",
+      "findings": "Bevindingen",
+      "no_profile": "Geen profiel, stel er een in",
+      "ack_yes": "Ja",
+      "ack_no": "Nee"
     }
   },
   "stockpiles": {

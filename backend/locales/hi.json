@@ -2121,7 +2121,11 @@
       "notifications.portal.message_received.title": "पोर्टल पर नया संदेश",
       "notifications.portal.message_received.body": "{buyer_name} ने संदेश भेजा है।",
       "dispatch.notify.plan_title": "Your daily plan is ready",
-      "dispatch.notify.plan_body": "Plan for {day}: {lines} lines."
+      "dispatch.notify.plan_body": "Plan for {day}: {lines} lines.",
+      "notifications.monitoring.alert.title": "मॉनिटरिंग अलर्ट",
+      "notifications.monitoring.action.title": "मॉनिटरिंग एक्शन स्तर",
+      "notifications.monitoring.alarm.title": "मॉनिटरिंग अलार्म",
+      "notifications.monitoring.crossed.body": "बिंदु {point}: {displacement} mm, {rate} mm/day।"
     },
     "schedule_headers": {
       "headers": {

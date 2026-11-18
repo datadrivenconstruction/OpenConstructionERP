@@ -107,7 +107,7 @@ async def test_measured_csv_import_and_history(client: AsyncClient, header: dict
     await _measure(
         client, header, c03, EXPECTED["lesson_2"] | {"measured": {"e": 389060.001, "n": 5819030.0, "z": 34.3}}
     )
-    history = (await client.get(f"{BASE}/stakes/{c03}/records", headers=header)).json()
+    history = (await client.get(f"{BASE}/stakes/{c03}/records", headers=header)).json()["items"]
     assert [r["verdict"] for r in history] == ["pass", "fail"]
     assert history[1]["measured_by"] == "Demo surveyor"
 
@@ -155,7 +155,7 @@ async def test_profiles_show_demo_and_project_only(client: AsyncClient, header: 
         headers=header,
     )
     assert made.status_code == 201, made.text
-    keys = [p["key"] for p in (await client.get(f"{BASE}/projects/{project_id}/profiles", headers=header)).json()]
+    keys = [p["key"] for p in (await client.get(f"{BASE}/projects/{project_id}/profiles", headers=header)).json()["items"]]
     assert keys[0] == "demo"
     assert made.json()["key"] in keys
     assert not any(k.startswith("pack:") for k in keys)

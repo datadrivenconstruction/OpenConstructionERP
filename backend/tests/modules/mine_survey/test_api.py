@@ -28,7 +28,7 @@ async def _demo(client: AsyncClient, header: dict) -> tuple[str, dict, dict]:
     installed = await client.post("/api/demo/install/survey-riverside-yard", headers=header)
     assert installed.status_code in (200, 201), installed.text
     pid = installed.json()["project_id"]
-    [period] = (await client.get(f"{BASE}/projects/{pid}/periods", headers=header)).json()
+    [period] = (await client.get(f"{BASE}/projects/{pid}/periods", headers=header)).json()["items"]
     detail = (await client.get(f"{BASE}/periods/{period['id']}", headers=header)).json()
     return pid, period, detail
 
@@ -48,7 +48,7 @@ async def test_lesson_1_the_demo_seeds_the_october_plan(client: AsyncClient, hea
 async def test_lessons_2_to_5_actual_compliance_trucks_and_claim(client: AsyncClient, header: dict) -> None:
     pid, _, detail = await _demo(client, header)
     entry = detail["entries"][0]
-    surfaces = (await client.get(f"{VOL}/projects/{pid}/surfaces", headers=header)).json()
+    surfaces = (await client.get(f"{VOL}/projects/{pid}/surfaces", headers=header)).json()["items"]
     by_name = {s["name"]: s["id"] for s in surfaces}
 
     l2 = EXPECTED["lesson_2"]
@@ -95,7 +95,7 @@ async def test_lessons_2_to_5_actual_compliance_trucks_and_claim(client: AsyncCl
 
     [pos] = (
         await client.get(f"{VOL}/projects/{pid}/boq-positions", params={"q": "Bulk excavation"}, headers=header)
-    ).json()
+    ).json()["items"]
     claim = await client.post(
         f"{BASE}/entries/{entry['id']}/add-to-claim", json={"position_id": pos["id"]}, headers=header
     )

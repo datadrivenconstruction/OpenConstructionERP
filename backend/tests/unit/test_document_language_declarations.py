@@ -61,6 +61,12 @@ RENDERING_ROUTES: dict[str, set[str]] = {
         "export_variation_pdf",
         "export_variation_register",
     },
+    "modules/land_parcels/router.py": {"schedule_pdf"},
+    "modules/mine_survey/router.py": {"report_pdf"},
+    "modules/monitoring/router.py": {"report_pdf"},
+    "modules/setting_out/router.py": {"sheet_pdf"},
+    "modules/stockpiles/router.py": {"report_pdf"},
+    "modules/surfaces_volumes/router.py": {"report_pdf"},
     "modules/doc_templates/router.py": {"issue_pdf", "preview"},
     "core/branding_router.py": {"get_document_appearance_sample", "get_document_type_sample"},
     # The Excel export is not a PDF, but it builds a document in the request, and

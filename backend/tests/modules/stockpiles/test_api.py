@@ -27,7 +27,7 @@ async def _demo(client: AsyncClient, header: dict) -> tuple[str, dict]:
     installed = await client.post("/api/demo/install/survey-riverside-yard", headers=header)
     assert installed.status_code in (200, 201), installed.text
     pid = installed.json()["project_id"]
-    [pile] = (await client.get(f"{BASE}/projects/{pid}/stockpiles", headers=header)).json()
+    [pile] = (await client.get(f"{BASE}/projects/{pid}/stockpiles", headers=header)).json()["items"]
     return pid, pile
 
 

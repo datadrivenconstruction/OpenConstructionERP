@@ -2457,6 +2457,41 @@
       "status_expropriation": "نزع ملكية"
     }
   },
+  "monitoring": {
+    "crossed": {
+      "fail": "النقطة {id}: الإزاحة {d} mm أو المعدل {r} mm/day تجاوزت {level}",
+      "suggestion": "تحقق من النقطة والمنشأ، ثم أقر بالتنبيه مع ملاحظة."
+    },
+    "level": {
+      "ok": "سليم",
+      "alert": "تنبيه",
+      "action": "إجراء",
+      "alarm": "إنذار"
+    },
+    "risk": {
+      "title": "نقطة المراقبة {id} عند {level}",
+      "description": "الإزاحة {d} mm، والمعدل {r} mm/day مقارنة بـ {profile}. فُتحت المسودة من نظام المراقبة: راجعها وعيّن مسؤولاً."
+    },
+    "report": {
+      "title": "تقرير إنذارات المراقبة",
+      "project": "المشروع",
+      "crs": "نظام الإحداثيات",
+      "profile": "ملف العتبات",
+      "generated": "تاريخ الإنشاء",
+      "point": "النقطة",
+      "baseline": "خط الأساس (m)",
+      "latest": "أحدث قراءة (m)",
+      "displacement": "الإزاحة (mm)",
+      "rate": "المعدل (mm/day)",
+      "level": "المستوى",
+      "acknowledged": "تم الإقرار",
+      "counts": "إنذار: {alarm} · إجراء: {action} · تنبيه: {alert} · سليم: {ok}",
+      "findings": "الملاحظات",
+      "no_profile": "لا يوجد ملف، حدده",
+      "ack_yes": "نعم",
+      "ack_no": "لا"
+    }
+  },
   "stockpiles": {
     "density_assumed": {
       "fail": "الكثافة مفترضة وليست مقيسة: الأطنان موثوقة بقدر هذا التقدير.",

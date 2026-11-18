@@ -134,7 +134,7 @@ async def test_a_viewer_reads_everything_and_changes_nothing(
         await client.delete(f"{BASE}/point-sets/{set_id}", headers=viewer),
     ]
     assert [r.status_code for r in refused] == [403] * 5
-    sets = (await client.get(f"{BASE}/projects/{project_id}/point-sets", headers=header)).json()
+    sets = (await client.get(f"{BASE}/projects/{project_id}/point-sets", headers=header)).json()["items"]
     assert [s["id"] for s in sets] == [set_id]
     assert sets[0]["stored_epsg"] == 32633
 
@@ -167,7 +167,7 @@ async def test_a_user_outside_the_project_reaches_nothing_of_it(
     # nothing changed
     assert (await client.get(f"{p}/crs", headers=header)).json()["crs"]["horizontal_epsg"] == 32633
     assert (await client.get(f"{p}/points", headers=header)).json()["total"] == 2
-    assert (await client.get(f"{p}/point-sets", headers=header)).json()[0]["stored_epsg"] == 32633
+    assert (await client.get(f"{p}/point-sets", headers=header)).json()["items"][0]["stored_epsg"] == 32633
 
 
 async def test_a_missing_project_and_someone_elses_look_the_same(
@@ -269,7 +269,7 @@ async def test_an_unreadable_file_is_a_422_with_nothing_saved(
     await _crs(client, header, project_id)
     response = await client.post(f"{BASE}/projects/{project_id}/import", json=body, headers=header)
     assert response.status_code == 422, response.text
-    assert (await client.get(f"{BASE}/projects/{project_id}/point-sets", headers=header)).json() == []
+    assert (await client.get(f"{BASE}/projects/{project_id}/point-sets", headers=header)).json()["items"] == []
 
 
 @pytest.mark.parametrize(
@@ -465,7 +465,7 @@ async def test_right_to_left_names_round_trip_through_the_register(
         surveyed_by="דנה",
     )
     assert result.status_code == 201, result.text
-    sets = (await client.get(f"{BASE}/projects/{project_id}/point-sets", headers=header)).json()
+    sets = (await client.get(f"{BASE}/projects/{project_id}/point-sets", headers=header)).json()["items"]
     assert (sets[0]["name"], sets[0]["instrument"], sets[0]["surveyed_by"]) == ("مسح الموقع", "محطة شاملة", "דנה")
     items = (await client.get(f"{BASE}/projects/{project_id}/points", params={"q": "نقطة"}, headers=header)).json()[
         "items"
@@ -497,7 +497,7 @@ async def test_an_empty_project_has_an_empty_register(client: AsyncClient, heade
     state = (await client.get(f"{p}/crs", headers=header)).json()
     assert (state["crs"], state["point_count"]) == (None, 0)
     assert (await client.get(f"{p}/points", headers=header)).json() == {"items": [], "total": 0}
-    assert (await client.get(f"{p}/point-sets", headers=header)).json() == []
+    assert (await client.get(f"{p}/point-sets", headers=header)).json()["items"] == []
     summary = (await client.get(f"{p}/summary", headers=header)).json()
     assert (summary["points"], summary["point_sets"], summary["findings"], summary["last_import"]) == (0, 0, 0, None)
     report = (await client.post(f"{p}/validate", headers=header)).json()

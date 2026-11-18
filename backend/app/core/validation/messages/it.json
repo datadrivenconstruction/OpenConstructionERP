@@ -2457,6 +2457,41 @@
       "status_expropriation": "Esproprio"
     }
   },
+  "monitoring": {
+    "crossed": {
+      "fail": "Punto {id}: spostamento {d} mm o velocità {r} mm/day ha superato {level}",
+      "suggestion": "Verifichi il punto e la struttura, poi confermi l'allerta con una nota."
+    },
+    "level": {
+      "ok": "Normale",
+      "alert": "Allerta",
+      "action": "Azione",
+      "alarm": "Allarme"
+    },
+    "risk": {
+      "title": "Punto di monitoraggio {id} a livello {level}",
+      "description": "Spostamento {d} mm, velocità {r} mm/day rispetto a {profile}. Bozza aperta dal monitoraggio: la verifichi e indichi un responsabile."
+    },
+    "report": {
+      "title": "Rapporto allarmi di monitoraggio",
+      "project": "Progetto",
+      "crs": "Sistema di coordinate",
+      "profile": "Profilo di soglia",
+      "generated": "Generato",
+      "point": "Punto",
+      "baseline": "Riferimento (m)",
+      "latest": "Ultimo valore (m)",
+      "displacement": "Spostamento (mm)",
+      "rate": "Velocità (mm/day)",
+      "level": "Livello",
+      "acknowledged": "Confermato",
+      "counts": "Allarme: {alarm} · Azione: {action} · Allerta: {alert} · Normale: {ok}",
+      "findings": "Riscontri",
+      "no_profile": "Nessun profilo, impostarne uno",
+      "ack_yes": "Sì",
+      "ack_no": "Non confermato"
+    }
+  },
   "stockpiles": {
     "density_assumed": {
       "fail": "La densità è ipotizzata, non misurata: le tonnellate sono affidabili quanto quella stima.",
