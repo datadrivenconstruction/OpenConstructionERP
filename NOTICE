@@ -61,6 +61,7 @@ Backend (base install via `pip install openconstructionerp`):
   * bcrypt .............................. Apache-2.0
   * ezdxf ............................... MIT
   * pyshp ............................... MIT
+  * pyproj .............................. MIT
   * trimesh ............................. MIT
   * defusedxml .......................... PSF-2.0
   * pyyaml .............................. MIT
@@ -118,7 +119,6 @@ carry the package named.
                                           both of them
   * [s3]      aioboto3 .................. Apache-2.0
   * [pointcloud] pye57 .................. MIT
-  * [geo]     pyproj .................... MIT
 
 Two things about that list are worth stating rather than leaving to be
 inferred. Pillow is not confined to an extra; it arrives in every install
