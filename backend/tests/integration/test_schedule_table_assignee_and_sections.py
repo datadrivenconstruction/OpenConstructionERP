@@ -141,6 +141,50 @@ async def test_assignee_is_stored_and_read_back_where_the_table_reads_it(http_cl
 
 
 @pytest.mark.asyncio
+async def test_a_typed_name_is_saved_and_a_contact_pick_replaces_it(http_client):
+    """A responsible person who is not in the contacts is kept as typed."""
+    headers = await _admin_headers(http_client)
+    schedule_id = await _schedule(http_client, headers)
+    contact = await http_client.post(
+        "/api/v1/contacts/",
+        json={"contact_type": "subcontractor", "company_name": "Roof Crew", "first_name": "Olena"},
+        headers=headers,
+    )
+    assert contact.status_code in (200, 201), contact.text
+    contact_id = contact.json()["id"]
+    act = await _activity(http_client, headers, schedule_id, name="Roofing")
+    url = f"/api/v1/schedule/activities/{act['id']}"
+
+    typed = await http_client.patch(url, json={"assignee_text": "  Ivan Petrenko "}, headers=headers)
+    assert typed.status_code == 200, typed.text
+    assert typed.json()["assignee_text"] == "Ivan Petrenko"
+    assert typed.json()["assignee_id"] is None
+    row = next(a for a in await _gantt(http_client, headers, schedule_id) if a["id"] == act["id"])
+    assert row["assignee_name"] == "Ivan Petrenko"
+    assert row["assignee_id"] is None
+
+    # Picking a contact replaces the typed name, and the reverse.
+    picked = await http_client.patch(url, json={"assignee_id": contact_id}, headers=headers)
+    assert picked.status_code == 200, picked.text
+    row = next(a for a in await _gantt(http_client, headers, schedule_id) if a["id"] == act["id"])
+    assert (row["assignee_id"], row["assignee_name"], row["assignee_text"]) == (contact_id, "Olena", None)
+
+    retyped = await http_client.patch(url, json={"assignee_text": "Site foreman"}, headers=headers)
+    assert retyped.status_code == 200, retyped.text
+    row = next(a for a in await _gantt(http_client, headers, schedule_id) if a["id"] == act["id"])
+    assert (row["assignee_id"], row["assignee_name"]) == (None, "Site foreman")
+
+    # Clearing the cell unassigns whichever kind was stored.
+    cleared = await http_client.patch(url, json={"assignee_id": None, "assignee_text": None}, headers=headers)
+    assert cleared.status_code == 200, cleared.text
+    row = next(a for a in await _gantt(http_client, headers, schedule_id) if a["id"] == act["id"])
+    assert (row["assignee_id"], row["assignee_name"], row["assignee_text"]) == (None, None, None)
+
+    too_long = await http_client.patch(url, json={"assignee_text": "x" * 256}, headers=headers)
+    assert too_long.status_code == 422, too_long.text
+
+
+@pytest.mark.asyncio
 async def test_new_activity_lands_inside_its_section_with_the_next_code(http_client):
     headers = await _admin_headers(http_client)
     schedule_id = await _schedule(http_client, headers)

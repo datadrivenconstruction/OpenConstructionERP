@@ -311,6 +311,8 @@ class ActivityCreate(BaseModel):
     installed_units: Decimal18_4 | None = Field(default=None, ge=0)
     # Contact responsible for the activity (id in the contacts module).
     assignee_id: UUID | None = None
+    # Or a person named as typed; ignored when ``assignee_id`` is given.
+    assignee_text: str | None = Field(default=None, max_length=255)
     metadata: dict[str, Any] = Field(default_factory=dict)
 
     @field_validator("cost_planned", "cost_actual", "budgeted_units", "installed_units", mode="after")
@@ -417,6 +419,9 @@ class ActivityUpdate(BaseModel):
     installed_units: Decimal18_4 | None = Field(default=None, ge=0)
     # Contact responsible for the activity; an explicit null unassigns it.
     assignee_id: UUID | None = None
+    # Or a person named as typed. Setting one clears the other; a contact id
+    # wins when both are sent, and a blank text clears the typed name.
+    assignee_text: str | None = Field(default=None, max_length=255)
     metadata: dict[str, Any] | None = None
 
     @field_validator("cost_planned", "cost_actual", "budgeted_units", "installed_units", mode="after")
@@ -490,6 +495,8 @@ class ActivityResponse(BaseModel):
     calendar_id: UUID | None = None
     # Contact responsible for the activity. None -> unassigned.
     assignee_id: UUID | None = None
+    # A responsible person named as typed, when not a contact.
+    assignee_text: str | None = None
 
     # ── Cost-loaded / progress-rigor columns ──────────────────────────────
     # ``cost_planned`` is the activity's share of BAC, so a client that cannot
@@ -714,8 +721,10 @@ class GanttActivity(BaseModel):
     # Contact responsible for the activity, read by the table's assignee cell.
     assignee_id: UUID | None = None
     # That contact's display name, resolved on the server so every project
-    # member sees it, not only the one whose contact list holds it.
+    # member sees it, not only the one whose contact list holds it; for a
+    # person named as typed, that text.
     assignee_name: str | None = None
+    assignee_text: str | None = None
     # Shown to the client in the portal's upcoming milestones.
     client_visible: bool = False
     # Scheduling constraint, so the table and the bar's detail panel can show

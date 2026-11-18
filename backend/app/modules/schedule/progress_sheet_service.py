@@ -138,7 +138,7 @@ class ProgressSheetService:
                     activity_ref=act.activity_code or act.wbs_code or str(act.id)[:8],
                     name=act.name or "",
                     wbs_code=act.wbs_code or "",
-                    responsible=names.get(act.assignee_id, "") if act.assignee_id else "",
+                    responsible=names.get(act.assignee_id, "") if act.assignee_id else act.assignee_text or "",
                     planned_start=act.start_date,
                     planned_finish=act.end_date,
                     percent_complete=round(_str_to_float(act.progress_pct), 2),

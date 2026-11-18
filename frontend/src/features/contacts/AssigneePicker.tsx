@@ -74,6 +74,8 @@ export function AssigneePicker({
   disabled = false,
   noMatchesText,
   onDismiss,
+  onCancel,
+  onCommitText,
 }: {
   value: AssigneeValue;
   onChange: (next: AssigneeValue) => void;
@@ -88,6 +90,11 @@ export function AssigneePicker({
   noMatchesText?: string;
   /** Called when the list closes without a pick (outside click, Escape). */
   onDismiss?: () => void;
+  /** Called on Escape instead of ``onDismiss``: drop what was typed. */
+  onCancel?: () => void;
+  /** Called with the typed name when the field is left without a pick, or on
+   *  Enter when no option matches, for callers that save a name as typed. */
+  onCommitText?: (name: string) => void;
 }) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
@@ -225,12 +232,17 @@ export function AssigneePicker({
             setOpen(true);
           }}
           onFocus={() => setOpen(true)}
+          // A pick keeps focus (options swallow mousedown), so a blur means the field was left.
+          onBlur={() => {
+            if (onCommitText && !value.userId && !value.contactId) onCommitText(value.name.trim());
+          }}
           aria-label={ariaLabel}
           disabled={disabled}
           onKeyDown={(e) => {
             if (e.key === 'Escape') {
               setOpen(false);
-              onDismiss?.();
+              if (onCancel) onCancel();
+              else onDismiss?.();
             } else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
               e.preventDefault();
               setOpen(true);
@@ -240,6 +252,10 @@ export function AssigneePicker({
               // Enter takes the highlighted match, so a typed name is never left unsaved.
               e.preventDefault();
               pick(options[active]);
+            } else if (e.key === 'Enter' && onCommitText && !value.userId && !value.contactId) {
+              e.preventDefault();
+              setOpen(false);
+              onCommitText(value.name.trim());
             }
           }}
           className={`${inputClassName}${linked ? ' ps-9' : ''}${value.name ? ' pe-8' : ''}`}
