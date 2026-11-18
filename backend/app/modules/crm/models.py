@@ -333,6 +333,12 @@ class CrmActivity(Base):
         nullable=True,
         index=True,
     )
+    assigned_user_id: Mapped[uuid.UUID | None] = mapped_column(
+        GUID(),
+        ForeignKey("oe_users_user.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
+    )
     kind: Mapped[str] = mapped_column(String(32), nullable=False, default="note", server_default="note")
     subject: Mapped[str] = mapped_column(String(500), nullable=False, default="")
     body: Mapped[str] = mapped_column(Text, nullable=False, default="", server_default="")

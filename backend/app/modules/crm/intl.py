@@ -52,6 +52,7 @@ STAGE_LABELS: dict[str, dict[str, str]] = {
     "lead": {"en": "Lead", "de": "Lead", "ru": "Лид"},
     "qualification": {"en": "Qualification", "de": "Qualifizierung", "ru": "Квалификация"},
     "qualified": {"en": "Qualified", "de": "Qualifiziert", "ru": "Квалифицирован"},
+    "bidding": {"en": "Bidding", "de": "Angebotsphase", "ru": "Торги"},
     "proposal": {"en": "Proposal", "de": "Angebot", "ru": "Предложение"},
     "negotiation": {"en": "Negotiation", "de": "Verhandlung", "ru": "Переговоры"},
     "won": {"en": "Won", "de": "Gewonnen", "ru": "Выиграно"},

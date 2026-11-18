@@ -456,7 +456,7 @@ async def list_stages(
     _perm: None = Depends(RequirePermission("crm.read")),
     service: CrmService = Depends(_get_service),
 ) -> list[PipelineStageResponse]:
-    items = await service.stage_repo.list_all()
+    items = await service.list_stages()
     return [PipelineStageResponse.model_validate(s) for s in items]
 
 
