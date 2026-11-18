@@ -239,6 +239,9 @@ class Activity(Base):
     revision: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
     # Contact-based assignee (plain GUID, no DB FK - same pattern as calendar_id)
     assignee_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, index=True)
+    # A responsible person named as typed, for one who is not in the contacts.
+    # Holds a value only while ``assignee_id`` is empty.
+    assignee_text: Mapped[str | None] = mapped_column(String(255), nullable=True)
 
     # Relationships
     schedule: Mapped[Schedule] = relationship(back_populates="activities")

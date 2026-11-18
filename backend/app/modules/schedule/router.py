@@ -212,6 +212,7 @@ def _activity_to_response(activity: object) -> ActivityResponse:
         # Per-activity work calendar (#348)
         calendar_id=getattr(activity, "calendar_id", None),
         assignee_id=getattr(activity, "assignee_id", None),
+        assignee_text=getattr(activity, "assignee_text", None),
         # Cost-loaded / progress-rigor columns. Built by hand like everything
         # else here, so a field added to ActivityResponse alone would still
         # come back null through every route that goes through this helper.

@@ -281,6 +281,8 @@ export interface Activity {
   /** That contact's name, resolved by the server (Gantt payload), so it shows
    *  for every viewer, not only one whose contact list holds it. */
   assignee_name?: string | null;
+  /** A responsible person named as typed, when not a contact. */
+  assignee_text?: string | null;
   /** A milestone the client sees in the portal's upcoming milestones. */
   client_visible?: boolean;
   /** Scheduling constraint (neutral name) and its ISO date; null = none. */

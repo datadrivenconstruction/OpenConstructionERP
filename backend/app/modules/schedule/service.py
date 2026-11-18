@@ -161,6 +161,30 @@ def _str_to_float(value: str | None) -> float:
     return number if math.isfinite(number) else 0.0
 
 
+def _clean_assignee_text(value: str | None) -> str | None:
+    """A typed responsible name, trimmed; blank means none."""
+    text = (value or "").strip()
+    return text or None
+
+
+def _apply_assignee_choice(fields: dict) -> None:
+    """Keep one kind of assignee: a contact, or a name as typed.
+
+    A contact id in the update clears the typed name; a typed name (sent
+    without a contact) clears the contact; an explicit null contact clears
+    both, so unassigning leaves the cell empty.
+    """
+    if "assignee_id" in fields and fields["assignee_id"] is not None:
+        fields["assignee_text"] = None
+        return
+    if "assignee_text" in fields:
+        fields["assignee_text"] = _clean_assignee_text(fields["assignee_text"])
+        if fields["assignee_text"] is not None:
+            fields["assignee_id"] = None
+    if "assignee_id" in fields and fields["assignee_id"] is None:
+        fields.setdefault("assignee_text", None)
+
+
 def _money_decimal(value: object) -> Decimal | None:
     """A stored money value as an exact decimal; ``None`` when it is no number."""
     if value is None:
@@ -2001,6 +2025,7 @@ class ScheduleService:
             budgeted_units=data.budgeted_units,
             installed_units=data.installed_units,
             assignee_id=data.assignee_id,
+            assignee_text=None if data.assignee_id is not None else _clean_assignee_text(data.assignee_text),
         )
         activity = await self.activity_repo.create(activity)
         activity_id = activity.id  # snapshot before update_fields() expires the instance
@@ -2474,6 +2499,7 @@ class ScheduleService:
         # hold duplicate codes that must stay editable.
         if fields.get("assignee_id") is not None and fields["assignee_id"] != activity.assignee_id:
             await self._assert_assignee_exists(fields["assignee_id"], actor_id)
+        _apply_assignee_choice(fields)
         new_code = (fields.get("wbs_code") or "").strip()
         new_parent = fields.get("parent_id")
         code_changes = bool(new_code) and new_code != (activity.wbs_code or "").strip()
@@ -3488,7 +3514,10 @@ class ScheduleService:
                     status=effective_status,
                     calendar_id=act.calendar_id,
                     assignee_id=act.assignee_id,
-                    assignee_name=assignee_names.get(act.assignee_id) if act.assignee_id else None,
+                    assignee_name=(
+                        assignee_names.get(act.assignee_id) if act.assignee_id else act.assignee_text or None
+                    ),
+                    assignee_text=act.assignee_text,
                     client_visible=bool(act.client_visible),
                     constraint_type=normalize_constraint(act.constraint_type),
                     constraint_date=act.constraint_date,

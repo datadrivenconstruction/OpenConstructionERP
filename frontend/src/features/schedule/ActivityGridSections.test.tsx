@@ -130,13 +130,15 @@ describe('ActivityGrid sections and assignee', () => {
     fireEvent.click(await screen.findByTestId('grid-assignee-o1-option-contact-k1'));
     await waitFor(() => expect(scheduleApi.updateActivity).toHaveBeenCalledWith('o1', { assignee_id: 'k1' }));
 
-    // Typing alone saves nothing.
+    // Typing alone saves nothing until the cell is left.
     (scheduleApi.updateActivity as any).mockClear();
     fireEvent.change(screen.getByTestId('grid-assignee-c1-input'), { target: { value: 'An' } });
     expect(scheduleApi.updateActivity).not.toHaveBeenCalled();
 
     fireEvent.click(within(screen.getByTestId('grid-row-o1')).getByRole('button', { name: /Clear/i }));
-    await waitFor(() => expect(scheduleApi.updateActivity).toHaveBeenCalledWith('o1', { assignee_id: null }));
+    await waitFor(() =>
+      expect(scheduleApi.updateActivity).toHaveBeenCalledWith('o1', { assignee_id: null, assignee_text: null }),
+    );
   });
 
   it('opens the contact list outside the scrolling table so it is not clipped', async () => {
@@ -148,7 +150,7 @@ describe('ActivityGrid sections and assignee', () => {
     expect(list.style.position).toBe('fixed');
   });
 
-  it('saves the highlighted contact on Enter and drops unmatched typed text', async () => {
+  it('saves the highlighted contact on Enter and drops typed text on Escape', async () => {
     renderHarness();
     const input = screen.getByTestId('grid-assignee-c1-input') as HTMLInputElement;
     fireEvent.change(input, { target: { value: 'Ana' } });
@@ -160,9 +162,50 @@ describe('ActivityGrid sections and assignee', () => {
     const other = screen.getByTestId('grid-assignee-o1-input') as HTMLInputElement;
     fireEvent.change(other, { target: { value: 'Nobody here' } });
     fireEvent.keyDown(other, { key: 'Escape' });
-    // Not saved, so the cell shows the stored assignee again instead of pretending.
+    // Escape cancels, so the cell shows the stored assignee again.
     expect(other.value).toBe('Site Crew GmbH');
+    fireEvent.blur(other);
     expect(scheduleApi.updateActivity).not.toHaveBeenCalled();
+  });
+
+  it('saves a name typed for someone who is not a contact, once, on leaving the cell or on Enter', async () => {
+    renderHarness();
+    const input = screen.getByTestId('grid-assignee-c1-input') as HTMLInputElement;
+    fireEvent.focus(input);
+    fireEvent.change(input, { target: { value: '  Ivan Petrenko ' } });
+    fireEvent.blur(input);
+    await waitFor(() =>
+      expect(scheduleApi.updateActivity).toHaveBeenCalledWith('c1', { assignee_text: 'Ivan Petrenko' }),
+    );
+
+    (scheduleApi.updateActivity as any).mockClear();
+    const other = screen.getByTestId('grid-assignee-o1-input') as HTMLInputElement;
+    fireEvent.change(other, { target: { value: 'Zed Foreman' } });
+    await waitFor(() => expect(screen.getByTestId('grid-assignee-o1-listbox')).toHaveTextContent(/kept as written/i));
+    fireEvent.keyDown(other, { key: 'Enter' });
+    fireEvent.blur(other);
+    await waitFor(() =>
+      expect(scheduleApi.updateActivity).toHaveBeenCalledWith('o1', { assignee_text: 'Zed Foreman' }),
+    );
+    expect(scheduleApi.updateActivity).toHaveBeenCalledTimes(1);
+  });
+
+  it('shows a stored typed name as the assignee', () => {
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    render(
+      <QueryClientProvider client={client}>
+        <MemoryRouter>
+          <ActivityGrid
+            scheduleId="s"
+            projectId=""
+            activities={[{ ...CHILD, parent_id: null, assignee_id: null, assignee_text: 'Ivan', assignee_name: 'Ivan' }]}
+            onEditDependencies={vi.fn()}
+            onAddActivity={vi.fn()}
+          />
+        </MemoryRouter>
+      </QueryClientProvider>,
+    );
+    expect((screen.getByTestId('grid-assignee-c1-input') as HTMLInputElement).value).toBe('Ivan');
   });
 
   it('moves a row into a section, never into its own subtree', async () => {
