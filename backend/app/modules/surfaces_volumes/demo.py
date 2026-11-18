@@ -87,7 +87,11 @@ async def seed_survey_demo(session: AsyncSession, project_id: uuid.UUID, user_id
         ),
         user_id,
     )
+    from app.modules.stockpiles.demo import seed_stockpile_demo
+
+    piles = await seed_stockpile_demo(session, project_id, user_id)
     return {
+        **piles,
         "survey_points": ground.imported + 4,
         "survey_surfaces": 2,
         "survey_volumes": 1,

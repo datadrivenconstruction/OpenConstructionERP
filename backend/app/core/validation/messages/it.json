@@ -2344,5 +2344,15 @@
       "status_acquired": "Acquisita",
       "status_expropriation": "Esproprio"
     }
+  },
+  "stockpiles": {
+    "density_assumed": {
+      "fail": "La densità è ipotizzata, non misurata: le tonnellate sono affidabili quanto quella stima.",
+      "suggestion": "Pesate un campione o prendete la densità dai documenti di consegna del fornitore."
+    },
+    "variance_high": {
+      "fail": "Il rilievo si discosta dalla giacenza contabile del {v} %, oltre la tolleranza del {t} %.",
+      "suggestion": "Controllate la densità e la superficie di base, poi proponete una rettifica e confermatela se la differenza è reale."
+    }
   }
 }

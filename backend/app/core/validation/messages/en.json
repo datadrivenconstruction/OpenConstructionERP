@@ -2379,5 +2379,15 @@
       "ack_yes": "Yes",
       "ack_no": "No"
     }
+  },
+  "stockpiles": {
+    "density_assumed": {
+      "fail": "The density is assumed, not measured: the tonnes are only as reliable as that guess.",
+      "suggestion": "Weigh a sample or take the density from the supplier's delivery notes."
+    },
+    "variance_high": {
+      "fail": "The survey differs from the book stock by {v} %, beyond the {t} % tolerance.",
+      "suggestion": "Check the density and the base surface, then propose an adjustment and confirm it if the gap is real."
+    }
   }
 }

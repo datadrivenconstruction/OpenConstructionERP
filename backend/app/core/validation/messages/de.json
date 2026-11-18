@@ -2344,5 +2344,15 @@
       "status_acquired": "Erworben",
       "status_expropriation": "Enteignung"
     }
+  },
+  "stockpiles": {
+    "density_assumed": {
+      "fail": "Die Dichte ist angenommen, nicht gemessen: Die Tonnen sind nur so verlässlich wie diese Schätzung.",
+      "suggestion": "Eine Probe wiegen oder die Dichte den Lieferscheinen des Lieferanten entnehmen."
+    },
+    "variance_high": {
+      "fail": "Das Aufmaß weicht um {v} % vom Buchbestand ab, über der Toleranz von {t} %.",
+      "suggestion": "Dichte und Basisfläche prüfen, dann eine Korrektur vorschlagen und bei echter Differenz bestätigen."
+    }
   }
 }

@@ -2344,5 +2344,15 @@
       "status_acquired": "Megszerzett",
       "status_expropriation": "Kisajátítás"
     }
+  },
+  "stockpiles": {
+    "density_assumed": {
+      "fail": "A sűrűség feltételezett, nem mért: a tonna csak annyira megbízható, mint ez a becslés.",
+      "suggestion": "Mérjen le egy mintát, vagy vegye a sűrűséget a szállító szállítólevelein."
+    },
+    "variance_high": {
+      "fail": "A felmérés {v} %-kal tér el a könyv szerinti készlettől, a {t} % tűrés felett.",
+      "suggestion": "Ellenőrizze a sűrűséget és az alapfelületet, majd javasoljon korrekciót, és hagyja jóvá, ha a különbség valós."
+    }
   }
 }

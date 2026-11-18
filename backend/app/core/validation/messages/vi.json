@@ -2344,5 +2344,15 @@
       "status_acquired": "Đã thu hồi",
       "status_expropriation": "Trưng thu"
     }
+  },
+  "stockpiles": {
+    "density_assumed": {
+      "fail": "Khối lượng riêng là giả định, không phải đo được: số tấn chỉ đáng tin bằng ước lượng đó.",
+      "suggestion": "Cân một mẫu hoặc lấy khối lượng riêng từ phiếu giao hàng của nhà cung cấp."
+    },
+    "variance_high": {
+      "fail": "Lần đo lệch {v} % so với tồn kho sổ sách, vượt dung sai {t} %.",
+      "suggestion": "Kiểm tra khối lượng riêng và mặt nền, rồi đề xuất điều chỉnh và xác nhận nếu chênh lệch là thật."
+    }
   }
 }

@@ -2344,5 +2344,15 @@
       "status_acquired": "Acquise",
       "status_expropriation": "Expropriation"
     }
+  },
+  "stockpiles": {
+    "density_assumed": {
+      "fail": "La densité est supposée et non mesurée : les tonnes ne valent que ce que vaut cette estimation.",
+      "suggestion": "Pesez un échantillon ou prenez la densité sur les bons de livraison du fournisseur."
+    },
+    "variance_high": {
+      "fail": "Le relevé s'écarte du stock comptable de {v} %, au-delà de la tolérance de {t} %.",
+      "suggestion": "Vérifiez la densité et la surface de base, puis proposez un ajustement et confirmez-le si l'écart est réel."
+    }
   }
 }

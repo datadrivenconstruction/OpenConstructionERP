@@ -2344,5 +2344,15 @@
       "status_acquired": "Nabyto",
       "status_expropriation": "Vyvlastnění"
     }
+  },
+  "stockpiles": {
+    "density_assumed": {
+      "fail": "Hustota je předpokládaná, ne změřená: tuny jsou tak spolehlivé jako tento odhad.",
+      "suggestion": "Zvažte vzorek nebo převezměte hustotu z dodacích listů dodavatele."
+    },
+    "variance_high": {
+      "fail": "Zaměření se liší od účetního stavu o {v} %, nad tolerancí {t} %.",
+      "suggestion": "Zkontrolujte hustotu a základní plochu, pak navrhněte korekci a potvrďte ji, je-li rozdíl skutečný."
+    }
   }
 }

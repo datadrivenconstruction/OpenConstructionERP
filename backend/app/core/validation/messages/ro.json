@@ -2344,5 +2344,15 @@
       "status_acquired": "Achiziționată",
       "status_expropriation": "Expropriere"
     }
+  },
+  "stockpiles": {
+    "density_assumed": {
+      "fail": "Densitatea este presupusă, nu măsurată: tonele sunt la fel de sigure ca această estimare.",
+      "suggestion": "Cântăriți o probă sau luați densitatea din avizele furnizorului."
+    },
+    "variance_high": {
+      "fail": "Măsurătoarea diferă de stocul contabil cu {v} %, peste toleranța de {t} %.",
+      "suggestion": "Verificați densitatea și suprafața de bază, apoi propuneți o ajustare și confirmați-o dacă diferența e reală."
+    }
   }
 }

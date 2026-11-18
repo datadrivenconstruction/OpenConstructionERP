@@ -2344,5 +2344,15 @@
       "status_acquired": "取得済み",
       "status_expropriation": "収用"
     }
+  },
+  "stockpiles": {
+    "density_assumed": {
+      "fail": "密度は仮定であり実測ではありません。トン数はその推定と同程度の信頼性です。",
+      "suggestion": "試料を量るか、供給元の納品書から密度を取ってください。"
+    },
+    "variance_high": {
+      "fail": "測量は帳簿在庫と {v} % 異なり、許容値 {t} % を超えています。",
+      "suggestion": "密度と基準サーフェスを確認し、差異が実際のものなら調整を提案して確認してください。"
+    }
   }
 }

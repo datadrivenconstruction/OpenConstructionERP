@@ -96,5 +96,46 @@
     "traverse_min_ratio": 10000,
     "coverage_min_pct": 90,
     "label": "Demo values, not a standard"
+  },
+  "stockpiles": {
+    "name": "Stockpile A",
+    "code": "SP-001",
+    "material": "Aggregate 0/32",
+    "book_tonnes": 8400.0,
+    "base_file": "stockpile_A_base.csv",
+    "survey_file": "stockpile_A_2026-10-12.csv",
+    "surveyed_on": "2026-10-12",
+    "lesson_1": {
+      "book_tonnes": 8400.0
+    },
+    "lesson_2": {
+      "density_t_m3": 1.6,
+      "density_source": "assumed",
+      "cell_size_m": 5.0,
+      "coverage_pct": 100,
+      "volume_m3": 4992.0,
+      "tonnes": 7987.2,
+      "variance_t": -412.8,
+      "variance_pct": -4.91,
+      "finding": "STK-001"
+    },
+    "lesson_3": {
+      "density_t_m3": 1.62,
+      "density_source": "measured",
+      "tonnes": 8087.04,
+      "variance_t": -312.96,
+      "variance_pct": -3.73,
+      "finding": "STK-002",
+      "tolerance_pct": 3
+    },
+    "lesson_4": {
+      "movement": "WASTE",
+      "quantity_t": 312.96,
+      "signed_t": -312.96,
+      "book_after_t": 8087.04
+    },
+    "lesson_5": {
+      "report_density_source": "measured"
+    }
   }
 }

@@ -2344,5 +2344,15 @@
       "status_acquired": "취득",
       "status_expropriation": "수용"
     }
+  },
+  "stockpiles": {
+    "density_assumed": {
+      "fail": "밀도는 가정이며 실측이 아닙니다. 톤은 그 추정만큼만 믿을 수 있습니다.",
+      "suggestion": "시료를 달아 보거나 공급업체 납품서에서 밀도를 가져오세요."
+    },
+    "variance_high": {
+      "fail": "측량이 장부 재고와 {v} % 다르며 허용치 {t} %를 넘습니다.",
+      "suggestion": "밀도와 기준 표면을 확인한 뒤, 차이가 실제라면 조정을 제안하고 확인하세요."
+    }
   }
 }

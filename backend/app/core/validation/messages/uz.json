@@ -2344,5 +2344,15 @@
       "status_acquired": "Sotib olingan",
       "status_expropriation": "Olib qo'yish"
     }
+  },
+  "stockpiles": {
+    "density_assumed": {
+      "fail": "Zichlik taxminiy, oʻlchangan emas: tonnalar shu taxmin qadar ishonchli.",
+      "suggestion": "Namunani tortib koʻring yoki zichlikni yetkazib beruvchining hujjatlaridan oling."
+    },
+    "variance_high": {
+      "fail": "Oʻlchov buxgalteriya qoldigʻidan {v} % farq qiladi, {t} % chegaradan oshadi.",
+      "suggestion": "Zichlik va asos sirtni tekshiring, soʻng tuzatish taklif qiling va farq haqiqiy boʻlsa, tasdiqlang."
+    }
   }
 }
