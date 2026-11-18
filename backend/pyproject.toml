@@ -354,24 +354,9 @@ cv = [
 pointcloud = [
     "pye57>=0.4.0,<1",
 ]
-# Coordinate transforms outside the built-in pairs, plus upstream EPSG display
-# names. Two shipped modules already read pyproj and both degrade rather than
-# crash without it: geo_hub/coord_transforms falls through to it for any pair it
-# has no built-in fast path for, and cad/crs_detector uses it to label a
-# detected CRS from the EPSG registry instead of the built-in name table.
-#
-# This adds no dependency. pyproj was already what those two ask for, and
-# coord_transforms has been telling operators to run
-# ``pip install openconstructionerp[geo]`` since before any such extra existed,
-# which pip answers with a warning and no package - so the instruction read as
-# followed and the capability was still missing. The extra gives the thing they
-# were already being sent to fetch a name they can actually ask for.
-#
-# The floor is measured rather than guessed: 3.6.1 is the first release with
-# cp312 wheels, and this backend requires Python >= 3.12.
-geo = [
-    "pyproj>=3.6.1,<4",
-]
+# Kept as an alias since pyproj became a base dependency for the survey modules, so
+# ``pip install openconstructionerp[geo]`` in older hints still resolves.
+geo = []
 # Deprecated alias since v2.5.0 - `duckdb` is in base deps now.
 # Kept so existing `pip install openconstructionerp[analytics]` commands
 # continue to work without failing.
