@@ -174,6 +174,9 @@ def report_email_config_at_startup(settings: Settings) -> None:
     log without a single ERROR line, or the ERROR lines that matter stop being
     read.
     """
+    registration = registration_without_mail_notice(settings)
+    if registration is not None:
+        logger.warning("[email] %s", registration)
     problem = diagnose_email_config(settings)
     if problem is None:
         return
@@ -181,6 +184,22 @@ def report_email_config_at_startup(settings: Settings) -> None:
         logger.warning("[email] %s", problem)
     else:
         logger.error("[email] %s", problem)
+
+
+def registration_without_mail_notice(settings: Settings) -> str | None:
+    """Say so when e-mail verification was asked for and nothing can deliver it.
+
+    ``effective_registration_mode`` already lets such sign-ups in as ``open``
+    rather than leaving them dormant behind a mail that never comes; this is
+    the line that tells the operator verification is not happening.
+    """
+    if settings.registration_mode != "email-verify" or email_delivery_enabled(settings):
+        return None
+    return (
+        f"OE_REGISTRATION_MODE=email-verify, but EMAIL_BACKEND={settings.email_backend!r} delivers no mail, so "
+        f"new self-registered accounts are activated without e-mail confirmation. Configure SMTP to verify "
+        f"addresses, or set OE_REGISTRATION_MODE=admin-approve to review sign-ups by hand. See {EMAIL_SETUP_DOC}."
+    )
 
 
 def _resolve_backend(settings: Settings) -> EmailBackend:

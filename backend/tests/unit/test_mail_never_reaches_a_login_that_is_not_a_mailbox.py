@@ -124,3 +124,55 @@ def test_is_demo_account_says_no_to_a_lookalike() -> None:
     assert is_demo_account("info@openconstructionerp.com") is False
     assert is_demo_account(None) is False
     assert is_demo_account("") is False
+
+
+MAIN_PY = Path(__file__).resolve().parents[2] / "app" / "main.py"
+
+
+def test_every_demo_login_the_boot_seeds_is_unmailable() -> None:
+    """The sign-in tiles' accounts come from ``demo_account_specs`` in main.py, read from there."""
+    after = MAIN_PY.read_text(encoding="utf-8").split("demo_account_specs", 1)[1]
+    block = after.split("= [", 1)[1].split("\n    ]", 1)[0]
+    seeded = re.findall(r'"email":\s*"([^"]+)"', block)
+
+    assert len(seeded) >= 3, "the demo account specs were not found, so this test proves nothing"
+    assert [a for a in seeded if not is_non_mailbox_login(a)] == []
+
+
+@pytest.mark.parametrize(
+    "address",
+    [
+        "trainee@openconstructionerp.com",
+        "Site.Lead@OpenConstructionERP.com",
+        "demo.user@openconstructionerp.com.",
+        "anyone@openestimator.io",
+    ],
+)
+def test_a_made_up_login_on_a_seeded_domain_is_unmailable(address: str) -> None:
+    """Demo users named outside the exact list bounce the same way; the domain rule catches them."""
+    assert is_non_mailbox_login(address) is True
+
+
+@pytest.mark.asyncio
+async def test_the_one_real_mailbox_on_the_demo_domain_still_receives() -> None:
+    """Negative control for the domain rule: info@ is a real inbox and must not be refused."""
+    backend = MemoryEmailBackend()
+    service = EmailService(backend)
+
+    result = await service.send(_message(" Info@OpenConstructionERP.com "))
+
+    assert is_non_mailbox_login("info@openconstructionerp.com") is False
+    assert result.ok is True
+    assert len(backend.sent) == 1
+
+
+def test_seeded_demo_people_sit_on_domains_the_smtp_transport_refuses() -> None:
+    """Governance and portal demo people are not in the login list; the reserved-domain rule covers them."""
+    from app.core.demo_accounts import is_reserved_mail_domain
+    from app.modules.portal.seed import _USERS
+    from app.modules.project_governance.seed_people import person_email
+
+    addresses = [row[0] for row in _USERS] + [person_email("Jörg Bauleiter")]
+
+    assert addresses, "no seeded demo people were found, so this test proves nothing"
+    assert [a for a in addresses if not (is_reserved_mail_domain(a) or is_non_mailbox_login(a))] == []

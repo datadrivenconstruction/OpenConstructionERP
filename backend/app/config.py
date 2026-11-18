@@ -724,6 +724,12 @@ class Settings(BaseSettings):
     smtp_password: str = ""
     smtp_from: str = "info@datadrivenconstruction.io"
     smtp_tls: bool = True
+    # Daily ceiling on automatic notification mail (reminders, digests,
+    # escalations), per recipient address and per instance, UTC day. Mail over
+    # a cap is logged and dropped; the in-app notification stays. Verification,
+    # password-reset and other mail a person asks for is never counted. 0 = no cap.
+    notification_email_daily_cap_per_recipient: int = Field(default=20, ge=0)
+    notification_email_daily_cap_per_instance: int = Field(default=300, ge=0)
     # Address scanners and offices e-mail supplier invoices to; shown in the
     # capture help. Empty hides the hint.
     invoice_intake_address: str = ""

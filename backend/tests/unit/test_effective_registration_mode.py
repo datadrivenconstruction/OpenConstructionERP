@@ -46,3 +46,25 @@ def test_server_default_stays_admin_approve(monkeypatch):
 def test_closed_is_never_loosened(monkeypatch):
     s = _settings(monkeypatch, OE_DESKTOP="1", OE_REGISTRATION_MODE="closed")
     assert effective_registration_mode(s) == "closed"
+
+
+def test_email_verify_on_noop_is_open_and_the_operator_is_told(monkeypatch):
+    from app.core.email.service import registration_without_mail_notice
+
+    s = _settings(monkeypatch, OE_REGISTRATION_MODE="email-verify", OE_EMAIL_BACKEND="noop")
+
+    assert effective_registration_mode(s) == "open"
+    notice = registration_without_mail_notice(s)
+    assert notice is not None
+    assert "without e-mail confirmation" in notice and "'noop'" in notice
+
+
+def test_no_notice_when_mail_can_be_delivered_or_verification_was_not_asked(monkeypatch):
+    from app.core.email.service import registration_without_mail_notice
+
+    smtp = _settings(
+        monkeypatch, OE_REGISTRATION_MODE="email-verify", OE_EMAIL_BACKEND="smtp", OE_SMTP_HOST="mail.example.org"
+    )
+    assert registration_without_mail_notice(smtp) is None
+    approve = _settings(monkeypatch, OE_REGISTRATION_MODE="admin-approve", OE_EMAIL_BACKEND="noop")
+    assert registration_without_mail_notice(approve) is None

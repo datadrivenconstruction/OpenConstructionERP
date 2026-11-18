@@ -46,6 +46,8 @@ Put these in `backend/.env`, or set them as environment variables on the service
 | `SMTP_USER` | empty | Login name. Usually the full mailbox address. |
 | `SMTP_PASSWORD` | empty | Password for that login. Note the full word `PASSWORD`. |
 | `SMTP_FROM` | `info@datadrivenconstruction.io` | Address messages are sent from. Change this to your own. |
+| `NOTIFICATION_EMAIL_DAILY_CAP_PER_RECIPIENT` | `20` | Most automatic notification mails (reminders, escalations, digests) one address gets per UTC day. Over it the mail is logged and dropped; the in-app notification stays. `0` turns the cap off. |
+| `NOTIFICATION_EMAIL_DAILY_CAP_PER_INSTANCE` | `300` | The same ceiling for the whole server. Verification, password-reset and other mail a person asks for is never counted against either cap. |
 
 Two things about the names themselves, because both cost people an evening:
 

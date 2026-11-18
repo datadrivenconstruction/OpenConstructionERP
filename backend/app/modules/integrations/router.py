@@ -202,13 +202,16 @@ def _email_configuration_report() -> TestNotificationResponse:
             ),
         )
 
+    from app.core.email.service import registration_without_mail_notice
+
+    message = problem or (
+        "Outbound email is not configured on this server. It is set with the EMAIL_BACKEND and "
+        f"SMTP_* environment variables rather than on this screen. See {EMAIL_SETUP_DOC}."
+    )
+    registration = registration_without_mail_notice(settings)
     return TestNotificationResponse(
         success=False,
-        message=problem
-        or (
-            "Outbound email is not configured on this server. It is set with the EMAIL_BACKEND and "
-            f"SMTP_* environment variables rather than on this screen. See {EMAIL_SETUP_DOC}."
-        ),
+        message=f"{message} {registration}" if registration else message,
     )
 
 

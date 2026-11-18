@@ -35,9 +35,10 @@ from app.modules.users.models import User
 
 pytestmark = pytest.mark.asyncio
 
-# A fixed clock a fortnight past the due date, so the rows below land as overdue
+# A fixed clock five days past the due date (inside the nudge horizon and past
+# the escalation grace), so the rows below land as overdue
 # whatever day the suite runs.
-_NOW = datetime(2026, 3, 15, 9, 0, tzinfo=UTC)
+_NOW = datetime(2026, 3, 6, 9, 0, tzinfo=UTC)
 _DUE = datetime(2026, 3, 1, 9, 0, tzinfo=UTC)
 
 
