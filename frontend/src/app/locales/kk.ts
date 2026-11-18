@@ -56716,6 +56716,8 @@ const resource = {
     "modules.catalog.monitoring": "Мониторинг",
     "modules.catalog.stockpiles": "Үйінділер",
     "modules.catalog.mine_survey": "Кен маркшейдерлігі",
+    "modules.catalog.norm_pricing": "Нормалар бойынша баға белгілеу",
+    "modules.catalog.project_tax": "Жобаның салық профилі",
     "modules.pp_desc_eleven_areas_framework": "Иеленушінің жағынан жобаны басқару он бір басқару саласында, екі кезеңде: жобаны әзірлеу және құрылысты орындау. Олардың арасында бір қақпа және әр сала үшін бекітілген бір негіздеме құжаты бар.",
     "modules.pp_name_pakistan_pk": "Пәкістан құрылыс пакеті",
     "modules.pp_name_peru_pe": "Перу құрылыс пакеті",
@@ -66196,6 +66198,16 @@ const resource = {
     "china_tax.tender_total": "Тендер жиыны",
     "china_tax.vat": "ҚҚС",
     "china_tax.vat_base": "ҚҚС базасы",
+    "china_tax.fees_option_zone": "Аймақ",
+    "china_tax.fees_option_safety_grade": "Қауіпсіздік деңгейі",
+    "china_tax.fees_option_ring": "5-сақинаға қатысты орналасуы",
+    "china_tax.fees_option_project_class": "Жоба сыныбы",
+    "china_tax.fees_option_site_standard": "Үлгілі алаң үшін үстеме",
+    "doc_templates.kind.changeorders.change_order": "Өзгерту бұйрығы",
+    "doc_templates.kind.finance.invoice": "Шот-фактура",
+    "doc_templates.kind.finance.payment": "Төлем жазбасы",
+    "doc_templates.kind.procurement.purchase_order": "Сатып алу тапсырысы",
+    "doc_templates.kind.procurement.goods_receipt": "Тауарды қабылдау",
   }
 } as { translation: Record<string, string> };
 

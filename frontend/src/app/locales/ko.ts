@@ -57127,6 +57127,8 @@ const resource = {
     "modules.catalog.monitoring": "모니터링",
     "modules.catalog.stockpiles": "야적 더미",
     "modules.catalog.mine_survey": "광산 측량",
+    "modules.catalog.norm_pricing": "품셈 기반 가격 산정",
+    "modules.catalog.project_tax": "프로젝트 세무 프로필",
     "modules.pp_desc_eleven_areas_framework": "발주자 측에서 수행하는 프로젝트 관리로, 프로젝트 개발과 시공 실행의 두 단계에 걸쳐 11개 관리 영역에서 진행됩니다. 두 단계 사이에는 게이트 하나가 있고, 영역마다 승인된 기본 문서가 하나씩 있습니다.",
     "modules.pp_name_pakistan_pk": "파키스탄 건설 팩",
     "modules.pp_name_peru_pe": "페루 건설 패키지",
@@ -66584,6 +66586,16 @@ const resource = {
     "china_tax.tender_total": "입찰 합계",
     "china_tax.vat": "부가세",
     "china_tax.vat_base": "부가세 과세표준",
+    "china_tax.fees_option_zone": "지역",
+    "china_tax.fees_option_safety_grade": "안전 등급",
+    "china_tax.fees_option_ring": "5환로 기준 위치",
+    "china_tax.fees_option_project_class": "공사 등급",
+    "china_tax.fees_option_site_standard": "모범 현장 할증",
+    "doc_templates.kind.changeorders.change_order": "변경 지시",
+    "doc_templates.kind.finance.invoice": "청구서",
+    "doc_templates.kind.finance.payment": "지급 기록",
+    "doc_templates.kind.procurement.purchase_order": "구매 주문",
+    "doc_templates.kind.procurement.goods_receipt": "입고",
   }
 } as { translation: Record<string, string> };
 

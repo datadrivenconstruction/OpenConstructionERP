@@ -56511,6 +56511,8 @@ const resource = {
     "modules.catalog.monitoring": "การเฝ้าระวัง",
     "modules.catalog.stockpiles": "กองวัสดุ",
     "modules.catalog.mine_survey": "การสำรวจเหมือง",
+    "modules.catalog.norm_pricing": "การกำหนดราคาตามบรรทัดฐาน",
+    "modules.catalog.project_tax": "โปรไฟล์ภาษีของโครงการ",
     "modules.pp_desc_eleven_areas_framework": "การบริหารโครงการจากฝั่งเจ้าของใน 11 ด้านการจัดการ แบ่งเป็นสองระยะ ได้แก่การพัฒนาโครงการและการดำเนินการก่อสร้าง มีจุดตรวจสอบหนึ่งจุดคั่นกลาง และเอกสารกรอบที่ได้รับอนุมัติหนึ่งฉบับต่อด้าน",
     "modules.pp_name_pakistan_pk": "แพ็กก่อสร้างปากีสถาน",
     "modules.pp_name_peru_pe": "แพ็กเกจก่อสร้างเปรู",
@@ -65968,6 +65970,16 @@ const resource = {
     "china_tax.tender_total": "ยอดรวมใบเสนอราคา",
     "china_tax.vat": "ภาษีมูลค่าเพิ่ม",
     "china_tax.vat_base": "ฐานภาษีมูลค่าเพิ่ม",
+    "china_tax.fees_option_zone": "พื้นที่",
+    "china_tax.fees_option_safety_grade": "ระดับความปลอดภัย",
+    "china_tax.fees_option_ring": "ตำแหน่งเทียบกับถนนวงแหวนที่ 5",
+    "china_tax.fees_option_project_class": "ประเภทโครงการ",
+    "china_tax.fees_option_site_standard": "ค่าเพิ่มไซต์ต้นแบบ",
+    "doc_templates.kind.changeorders.change_order": "คำสั่งเปลี่ยนแปลง",
+    "doc_templates.kind.finance.invoice": "ใบแจ้งหนี้",
+    "doc_templates.kind.finance.payment": "บันทึกการชำระเงิน",
+    "doc_templates.kind.procurement.purchase_order": "ใบสั่งซื้อ",
+    "doc_templates.kind.procurement.goods_receipt": "การรับสินค้า",
   }
 } as { translation: Record<string, string> };
 

@@ -49,7 +49,7 @@ The frontend is a React 18 + TypeScript single-page application.
 
 - **~180 feature directories** under `frontend/src/features/` (pages, panels, dialogs)
 - **17 plugin modules** under `frontend/src/modules/` (self-registering extensions)
-- **45 locale files** under `frontend/src/app/locales/`, 44 languages offered in the UI
+- **46 locale files** under `frontend/src/app/locales/`, 45 languages offered in the UI
 - State management via Zustand, server state via React Query, tables via AG Grid, 3D via Three.js
 
 ## Stack

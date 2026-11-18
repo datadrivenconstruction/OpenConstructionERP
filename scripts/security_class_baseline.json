@@ -249,6 +249,8 @@
     "backend/app/core/data_repairs.py::_DISCOVERY_FAILURES",
     "backend/app/core/data_repairs.py::_REGISTRY",
     "backend/app/core/demo_projects.py::DEMO_CATALOG",
+    "backend/app/core/doc_templates/layout/spec.py::_LAYOUTS",
+    "backend/app/core/doc_templates/layout/spec.py::_PROVIDERS",
     "backend/app/core/doc_templates/registry.py::_PROVIDERS",
     "backend/app/core/doc_templates/registry.py::_REGISTRY",
     "backend/app/core/event_handlers.py::_evm_project_generations",

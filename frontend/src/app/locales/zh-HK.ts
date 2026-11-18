@@ -58931,6 +58931,8 @@ const resource = {
     "modules.catalog.doc_templates": "文檔與範本",
     "modules.catalog.estimate_archive": "已封存估算",
     "modules.catalog.framework_agreements": "框架協議",
+    "modules.catalog.norm_pricing": "定額計價",
+    "modules.catalog.project_tax": "項目稅務配置",
     "modules.pp_desc_eleven_areas_framework": "業主方在十一個管理領域開展項目管理，分為項目開發和施工實施兩個階段，兩階段之間設一個關口，每個領域有一份經批准的框架文件。",
     "modules.pp_name_pakistan_pk": "巴基斯坦建築數據包",
     "modules.pp_name_peru_pe": "秘魯建設包",
@@ -68025,6 +68027,16 @@ const resource = {
     "workforce.more_findings_other": "及另外 {{count}} 項",
     "workforce.row_sub_one": "{{count}} 個可用 · 最大短缺 {{short}}",
     "workforce.row_sub_other": "{{count}} 個可用 · 最大短缺 {{short}}",
+    "doc_templates.kind.changeorders.change_order": "變更指令",
+    "doc_templates.kind.finance.invoice": "發票",
+    "doc_templates.kind.finance.payment": "付款記錄",
+    "doc_templates.kind.procurement.purchase_order": "採購訂單",
+    "doc_templates.kind.procurement.goods_receipt": "收貨單",
+    "china_tax.fees_option_zone": "地區",
+    "china_tax.fees_option_safety_grade": "安全文明等級",
+    "china_tax.fees_option_ring": "五環位置",
+    "china_tax.fees_option_project_class": "工程類別",
+    "china_tax.fees_option_site_standard": "標化工地增加費",
   }
 } as { translation: Record<string, string> };
 

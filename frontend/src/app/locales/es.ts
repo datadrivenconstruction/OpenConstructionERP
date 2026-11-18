@@ -59666,6 +59666,8 @@ const resource = {
     "modules.catalog.monitoring": "Monitoreo",
     "modules.catalog.stockpiles": "Acopios",
     "modules.catalog.mine_survey": "Topografía de mina",
+    "modules.catalog.norm_pricing": "Precios por normas",
+    "modules.catalog.project_tax": "Perfil fiscal del proyecto",
     "modules.pp_desc_eleven_areas_framework": "Gestión del proyecto por parte de la propiedad en once áreas de gestión, en dos fases, desarrollo del proyecto y ejecución de la obra, con una puerta de control entre ambas y un documento marco aprobado por área.",
     "modules.pp_name_pakistan_pk": "Paquete de Construcción de Pakistán",
     "modules.pp_name_peru_pe": "Paquete de construcción Perú",
@@ -69188,6 +69190,16 @@ const resource = {
     "china_tax.tender_total": "Total de la oferta",
     "china_tax.vat": "IVA",
     "china_tax.vat_base": "Base del IVA",
+    "china_tax.fees_option_zone": "Zona",
+    "china_tax.fees_option_safety_grade": "Grado de seguridad",
+    "china_tax.fees_option_ring": "Ubicación respecto al 5.º anillo",
+    "china_tax.fees_option_project_class": "Clase de proyecto",
+    "china_tax.fees_option_site_standard": "Recargo por obra modelo",
+    "doc_templates.kind.changeorders.change_order": "Orden de cambio",
+    "doc_templates.kind.finance.invoice": "Factura",
+    "doc_templates.kind.finance.payment": "Registro de pago",
+    "doc_templates.kind.procurement.purchase_order": "Orden de compra",
+    "doc_templates.kind.procurement.goods_receipt": "Recepción de mercancías",
   }
 } as { translation: Record<string, string> };
 

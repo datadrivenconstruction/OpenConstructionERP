@@ -56759,6 +56759,8 @@ const resource = {
     "modules.catalog.monitoring": "Мониторинг",
     "modules.catalog.stockpiles": "Купчини",
     "modules.catalog.mine_survey": "Минно измерване",
+    "modules.catalog.norm_pricing": "Ценообразуване по норми",
+    "modules.catalog.project_tax": "Данъчен профил на проекта",
     "modules.pp_desc_eleven_areas_framework": "Управление на проекта от страна на инвеститора в единадесет области на управление през два етапа - развитие на проекта и изпълнение на строителството, с един гейт между тях и по един одобрен рамков документ за всяка област.",
     "modules.pp_name_pakistan_pk": "Строителен пакет Пакистан",
     "modules.pp_name_peru_pe": "Строителен пакет Перу",
@@ -66239,6 +66241,16 @@ const resource = {
     "china_tax.tender_total": "Общо по офертата",
     "china_tax.vat": "ДДС",
     "china_tax.vat_base": "Основа за ДДС",
+    "china_tax.fees_option_zone": "Зона",
+    "china_tax.fees_option_safety_grade": "Степен на безопасност",
+    "china_tax.fees_option_ring": "Разположение спрямо 5-и пръстен",
+    "china_tax.fees_option_project_class": "Клас на обекта",
+    "china_tax.fees_option_site_standard": "Надбавка за образцова площадка",
+    "doc_templates.kind.changeorders.change_order": "Заповед за промяна",
+    "doc_templates.kind.finance.invoice": "Фактура",
+    "doc_templates.kind.finance.payment": "Запис за плащане",
+    "doc_templates.kind.procurement.purchase_order": "Поръчка за покупка",
+    "doc_templates.kind.procurement.goods_receipt": "Приемане на стоки",
   }
 } as { translation: Record<string, string> };
 

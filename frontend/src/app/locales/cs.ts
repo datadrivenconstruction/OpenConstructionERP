@@ -58017,6 +58017,8 @@ const resource = {
     "modules.catalog.stockpiles": "Skládky",
     "modules.catalog.mine_survey": "Důlní měření",
     "modules.catalog.monitoring": "Monitoring deformací",
+    "modules.catalog.norm_pricing": "Oceňování podle norem",
+    "modules.catalog.project_tax": "Daňový profil projektu",
     "modules.pp_desc_eleven_areas_framework": "Řízení projektu ze strany investora v jedenácti oblastech řízení ve dvou fázích, vývoj projektu a realizace stavby, s jednou branou mezi nimi a jedním schváleným rámcovým dokumentem pro každou oblast.",
     "modules.pp_name_pakistan_pk": "Stavební balíček Pákistánu",
     "modules.pp_name_peru_pe": "Stavební balíček Peru",
@@ -67584,6 +67586,16 @@ const resource = {
     "china_tax.tender_total": "Celkem nabídka",
     "china_tax.vat": "DPH",
     "china_tax.vat_base": "Základ DPH",
+    "china_tax.fees_option_zone": "Oblast",
+    "china_tax.fees_option_safety_grade": "Stupeň bezpečnosti",
+    "china_tax.fees_option_ring": "Poloha vůči 5. okruhu",
+    "china_tax.fees_option_project_class": "Třída stavby",
+    "china_tax.fees_option_site_standard": "Příplatek za vzorové staveniště",
+    "doc_templates.kind.changeorders.change_order": "Změnový list",
+    "doc_templates.kind.finance.invoice": "Faktura",
+    "doc_templates.kind.finance.payment": "Záznam o platbě",
+    "doc_templates.kind.procurement.purchase_order": "Objednávka",
+    "doc_templates.kind.procurement.goods_receipt": "Příjemka zboží",
   }
 } as { translation: Record<string, string> };
 

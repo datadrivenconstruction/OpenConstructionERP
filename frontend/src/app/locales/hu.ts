@@ -59320,6 +59320,8 @@ const resource = {
     "modules.catalog.stockpiles": "Depók",
     "modules.catalog.mine_survey": "Bányamérés",
     "modules.catalog.monitoring": "Deformációfigyelés",
+    "modules.catalog.norm_pricing": "Normaalapú árazás",
+    "modules.catalog.project_tax": "Projekt adóprofilja",
     "modules.pp_desc_eleven_areas_framework": "Projektirányítás a megrendelő oldalán tizenegy irányítási területen, két szakaszban, a projektfejlesztés és a kivitelezés során, köztük egy kapuval és területenként egy jóváhagyott keretdokumentummal.",
     "modules.pp_name_pakistan_pk": "Építőipari csomag: Pakisztán",
     "modules.pp_name_peru_pe": "Peru építési csomag",
@@ -68800,6 +68802,16 @@ const resource = {
     "china_tax.tender_total": "Ajánlat összesen",
     "china_tax.vat": "ÁFA",
     "china_tax.vat_base": "ÁFA-alap",
+    "china_tax.fees_option_zone": "Terület",
+    "china_tax.fees_option_safety_grade": "Biztonsági fokozat",
+    "china_tax.fees_option_ring": "Elhelyezkedés az 5. körgyűrűhöz képest",
+    "china_tax.fees_option_project_class": "Projektosztály",
+    "china_tax.fees_option_site_standard": "Mintaépítési terület pótlék",
+    "doc_templates.kind.changeorders.change_order": "Változtatási megrendelés",
+    "doc_templates.kind.finance.invoice": "Számla",
+    "doc_templates.kind.finance.payment": "Fizetési bizonylat",
+    "doc_templates.kind.procurement.purchase_order": "Beszerzési megrendelés",
+    "doc_templates.kind.procurement.goods_receipt": "Áruátvétel",
   }
 } as { translation: Record<string, string> };
 

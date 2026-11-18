@@ -144,11 +144,10 @@ export interface ValidationReport {
 }
 
 const project = (id: string) => `${BASE}/projects/${encodeURIComponent(id)}`;
-const point = (id: string) => `${BASE}/points/${encodeURIComponent(id)}`;
 const loc = (locale: string) => `locale=${encodeURIComponent(locale)}`;
 
 export const listPoints = (projectId: string) => apiGet<{ items: MonitoringPoint[] }>(`${project(projectId)}/points`).then((r) => r.items);
-export const getPoint = (id: string) => apiGet<PointDetail>(point(id));
+export const getPoint = (id: string) => apiGet<PointDetail>(`${BASE}/points/${encodeURIComponent(id)}`);
 export const getSummary = (projectId: string) => apiGet<Summary>(`${project(projectId)}/summary`);
 export const getSettings = (projectId: string) => apiGet<Settings>(`${project(projectId)}/settings`);
 export const listProfiles = (projectId: string) => apiGet<{ items: Profile[] }>(`${project(projectId)}/profiles`).then((r) => r.items);
@@ -164,11 +163,11 @@ export const importReadings = (projectId: string, text: string, filename: string
     filename,
   });
 export const acknowledge = (pointId: string, note: string, locale: string) =>
-  apiPost<PointDetail, { note: string }>(`${point(pointId)}/acknowledge?${loc(locale)}`, { note });
+  apiPost<PointDetail, { note: string }>(`${BASE}/points/${encodeURIComponent(pointId)}/acknowledge?${loc(locale)}`, { note });
 export const loadDemo = (projectId: string) => apiPost<MonitoringPoint[]>(`${project(projectId)}/demo/riverside?epochs=3`);
 export const updatePoint = (id: string, body: { name?: string; location?: string }) =>
-  apiPatch<MonitoringPoint, typeof body>(point(id), body);
-export const deletePoint = (id: string) => apiDelete(point(id));
+  apiPatch<MonitoringPoint, typeof body>(`${BASE}/points/${encodeURIComponent(id)}`, body);
+export const deletePoint = (id: string) => apiDelete(`${BASE}/points/${encodeURIComponent(id)}`);
 
 export async function downloadReport(projectId: string): Promise<void> {
   const lang = activeLanguageTag();

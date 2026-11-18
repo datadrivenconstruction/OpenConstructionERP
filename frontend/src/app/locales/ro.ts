@@ -57079,6 +57079,8 @@ const resource = {
     "modules.catalog.monitoring": "Monitorizare",
     "modules.catalog.stockpiles": "Depozite de material",
     "modules.catalog.mine_survey": "Măsurători miniere",
+    "modules.catalog.norm_pricing": "Prețuri pe bază de norme",
+    "modules.catalog.project_tax": "Profilul fiscal al proiectului",
     "modules.pp_desc_eleven_areas_framework": "Managementul proiectului din partea beneficiarului în unsprezece arii de management, în două faze, dezvoltarea proiectului și execuția lucrărilor, cu o poartă între ele și un document-cadru aprobat pentru fiecare arie.",
     "modules.pp_name_pakistan_pk": "Pachet de construcții Pakistan",
     "modules.pp_name_peru_pe": "Pachet construcții Peru",
@@ -66602,6 +66604,16 @@ const resource = {
     "china_tax.tender_total": "Total ofertă",
     "china_tax.vat": "TVA",
     "china_tax.vat_base": "Baza TVA",
+    "china_tax.fees_option_zone": "Zonă",
+    "china_tax.fees_option_safety_grade": "Grad de siguranță",
+    "china_tax.fees_option_ring": "Poziția față de inelul 5",
+    "china_tax.fees_option_project_class": "Clasa proiectului",
+    "china_tax.fees_option_site_standard": "Spor pentru șantier model",
+    "doc_templates.kind.changeorders.change_order": "Dispoziție de modificare",
+    "doc_templates.kind.finance.invoice": "Factură",
+    "doc_templates.kind.finance.payment": "Înregistrare de plată",
+    "doc_templates.kind.procurement.purchase_order": "Comandă de achiziție",
+    "doc_templates.kind.procurement.goods_receipt": "Recepție de mărfuri",
   }
 } as { translation: Record<string, string> };
 

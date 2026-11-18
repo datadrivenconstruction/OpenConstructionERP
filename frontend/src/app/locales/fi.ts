@@ -56759,6 +56759,8 @@ const resource = {
     "modules.catalog.monitoring": "Seuranta",
     "modules.catalog.stockpiles": "Kasat",
     "modules.catalog.mine_survey": "Kaivosmittaus",
+    "modules.catalog.norm_pricing": "Normihinnoittelu",
+    "modules.catalog.project_tax": "Projektin veroprofiili",
     "modules.pp_desc_eleven_areas_framework": "Hankkeen ohjaus tilaajan puolelta yhdessätoista ohjausalueessa kahdessa vaiheessa, hankkeen kehittämisessä ja rakentamisen toteutuksessa, niiden välissä yksi porttivaihe ja yksi hyväksytty kehysasiakirja kullekin alueelle.",
     "modules.pp_name_pakistan_pk": "Rakennuspaketti: Pakistan",
     "modules.pp_name_peru_pe": "Perun rakennuspaketti",
@@ -66239,6 +66241,16 @@ const resource = {
     "china_tax.tender_total": "Tarjouksen loppusumma",
     "china_tax.vat": "ALV",
     "china_tax.vat_base": "ALV:n perusta",
+    "china_tax.fees_option_zone": "Alue",
+    "china_tax.fees_option_safety_grade": "Turvallisuusluokka",
+    "china_tax.fees_option_ring": "Sijainti suhteessa 5. kehätiehen",
+    "china_tax.fees_option_project_class": "Hankeluokka",
+    "china_tax.fees_option_site_standard": "Mallityömaan lisä",
+    "doc_templates.kind.changeorders.change_order": "Muutostilaus",
+    "doc_templates.kind.finance.invoice": "Lasku",
+    "doc_templates.kind.finance.payment": "Maksutosite",
+    "doc_templates.kind.procurement.purchase_order": "Ostotilaus",
+    "doc_templates.kind.procurement.goods_receipt": "Tavaran vastaanotto",
   }
 } as { translation: Record<string, string> };
 

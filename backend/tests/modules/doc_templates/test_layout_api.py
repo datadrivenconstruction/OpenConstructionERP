@@ -172,7 +172,19 @@ async def test_layout_lifecycle(db_session) -> None:
 
         r = await c.get(f"/dt/layouts/{PO}/versions/{company_version}/diff")
         assert ("intro", "added") in {(x["id"], x["change"]) for x in r.json()["changes"]}
+        r = await c.get(f"/dt/layouts/{PO}/versions/{project_version}")
+        assert r.status_code == 200, r.text
 
+    # A project layout's versions stay inside the project: an outsider cannot read or diff them.
+    outsider = await _user(db_session, role="viewer")
+    async with _http(_app(db_session, str(outsider.id), role="viewer")) as c:
+        r = await c.get(f"/dt/layouts/{PO}/versions/{project_version}")
+        assert r.status_code in (403, 404), r.text
+        r = await c.get(f"/dt/layouts/{PO}/versions/{company_version}/diff", params={"against": project_version})
+        assert r.status_code in (403, 404), r.text
+        r = await c.get(f"/dt/layouts/{PO}/versions/{company_version}")
+        assert r.status_code == 200, r.text
+    async with _http(_app(db_session, str(admin.id))) as c:
         r = await c.post(f"/dt/layouts/{PO}/preview", json={"template": standard, "record_id": str(po.id)})
         assert r.status_code == 200 and r.content.startswith(b"%PDF")
         r = await c.get(f"/dt/layouts/{PO}/values", params={"record_id": str(po.id)})

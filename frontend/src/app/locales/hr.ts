@@ -57089,6 +57089,8 @@ const resource = {
     "modules.catalog.monitoring": "Praćenje",
     "modules.catalog.stockpiles": "Deponiji",
     "modules.catalog.mine_survey": "Rudarsko mjerenje",
+    "modules.catalog.norm_pricing": "Određivanje cijena po normama",
+    "modules.catalog.project_tax": "Porezni profil projekta",
     "modules.pp_desc_eleven_areas_framework": "Upravljanje projektom od strane investitora u jedanaest područja upravljanja u dvije faze, razvoj projekta i izvedba građenja, s jednom prekretnicom između njih i jednim odobrenim okvirnim dokumentom za svako područje.",
     "modules.pp_name_pakistan_pk": "Građevinski paket Pakistan",
     "modules.pp_name_peru_pe": "Građevinski paket Peru",
@@ -66612,6 +66614,16 @@ const resource = {
     "china_tax.tender_total": "Ukupno ponuda",
     "china_tax.vat": "PDV",
     "china_tax.vat_base": "Osnovica PDV-a",
+    "china_tax.fees_option_zone": "Područje",
+    "china_tax.fees_option_safety_grade": "Stupanj sigurnosti",
+    "china_tax.fees_option_ring": "Položaj prema 5. prstenu",
+    "china_tax.fees_option_project_class": "Razred projekta",
+    "china_tax.fees_option_site_standard": "Dodatak za ogledno gradilište",
+    "doc_templates.kind.changeorders.change_order": "Nalog za izmjenu",
+    "doc_templates.kind.finance.invoice": "Račun",
+    "doc_templates.kind.finance.payment": "Zapis o plaćanju",
+    "doc_templates.kind.procurement.purchase_order": "Narudžbenica",
+    "doc_templates.kind.procurement.goods_receipt": "Primka robe",
   }
 } as { translation: Record<string, string> };
 

@@ -198,9 +198,9 @@ verify by switching language rather than by watching a gate go green.
 Do not open or hand-edit the locale bundles; they run 4 to 9 MB each. Use `scripts/i18n.py`: `get KEY [--lang xx]`, `add KEY --en "..." [--de "..."]`, `set KEY --lang xx "..."`, `missing --lang xx [--prefix p]`, `rename OLD NEW`, and `export` / `import` for a translator working on a small JSON file instead of the bundle. It touches only the lines it changes, places a new key next to its namespace siblings, and leaves the rest of the file byte-identical.
 
 Counting the languages is worth doing carefully, because the obvious numbers disagree and every
-one of them is correct about something. There are 45 locale files in `frontend/src/app/locales/`,
-44 entries in the `SUPPORTED_LANGUAGES` list in `frontend/src/app/i18n.ts`, and 38 distinct
-languages, because four of those entries are regional variants of Spanish, Portuguese or English
+one of them is correct about something. There are 46 locale files in `frontend/src/app/locales/`,
+45 entries in the `SUPPORTED_LANGUAGES` list in `frontend/src/app/i18n.ts`, and 38 distinct
+languages, because seven of those entries are regional variants of Spanish, Portuguese, English or Chinese
 rather than languages of their own. The gap between the first two numbers is one file that exists
 and is deliberately not offered: `mn` is held back until a native speaker has read it, after five
 invented roots passed every gate in it, and the comment beside its place in the list says so. So
@@ -218,7 +218,7 @@ the question is to run it.
 
 Backend validation messages are a separate bundle with a separate and much smaller reach.
 `backend/app/core/validation/messages/` ships `en.json`, `de.json`, `es.json` and `ru.json`, and
-that is all of them. Four languages on the backend against 44 offered on the frontend. Nothing in
+that is all of them. Four languages on the backend against 45 offered on the frontend. Nothing in
 the interface tells a user this, and a validation report in, say, Polish will come back with
 English message text. The resolution order is the requested locale, then English, then a
 humanised form of the key, so it degrades quietly rather than breaking.

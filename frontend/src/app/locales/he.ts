@@ -57035,6 +57035,8 @@ const resource = {
     "modules.catalog.monitoring": "ניטור",
     "modules.catalog.stockpiles": "ערימות",
     "modules.catalog.mine_survey": "מדידות מכרה",
+    "modules.catalog.norm_pricing": "תמחור לפי תקנים",
+    "modules.catalog.project_tax": "פרופיל המס של הפרויקט",
     "modules.pp_desc_eleven_areas_framework": "ניהול הפרויקט מצד הבעלים באחד-עשר תחומי ניהול, בשני שלבים, פיתוח הפרויקט וביצוע הבנייה, עם שער החלטה אחד ביניהם ומסמך מסגרת מאושר אחד לכל תחום.",
     "modules.pp_name_pakistan_pk": "חבילת בנייה לפקיסטן",
     "modules.pp_name_peru_pe": "חבילת בנייה פרו",
@@ -66564,6 +66566,16 @@ const resource = {
     "china_tax.tender_total": "סה״כ ההצעה",
     "china_tax.vat": "מע״מ",
     "china_tax.vat_base": "בסיס המע״מ",
+    "china_tax.fees_option_zone": "אזור",
+    "china_tax.fees_option_safety_grade": "דרגת בטיחות",
+    "china_tax.fees_option_ring": "מיקום ביחס לטבעת החמישית",
+    "china_tax.fees_option_project_class": "סיווג הפרויקט",
+    "china_tax.fees_option_site_standard": "תוספת אתר לדוגמה",
+    "doc_templates.kind.changeorders.change_order": "פקודת שינוי",
+    "doc_templates.kind.finance.invoice": "חשבונית",
+    "doc_templates.kind.finance.payment": "רישום תשלום",
+    "doc_templates.kind.procurement.purchase_order": "הזמנת רכש",
+    "doc_templates.kind.procurement.goods_receipt": "קבלת סחורה",
   }
 } as { translation: Record<string, string> };
 

@@ -56733,6 +56733,8 @@ const resource = {
     "modules.catalog.monitoring": "Мониторинг",
     "modules.catalog.stockpiles": "Овоолго",
     "modules.catalog.mine_survey": "Уурхайн хэмжилт",
+    "modules.catalog.norm_pricing": "Нормоор үнэ тогтоох",
+    "modules.catalog.project_tax": "Төслийн татварын тохиргоо",
     "modules.pp_desc_eleven_areas_framework": "Захиалагчийн талаас төслийг арван нэгэн удирдлагын салбарт, хоёр үе шатанд удирдах: төслийн хөгжүүлэлт ба барилгын гүйцэтгэл. Хоёрын хооронд нэг гарц, салбар бүрт нэг батлагдсан төлөвлөгөөний баримт бичигтэй.",
     "modules.pp_name_pakistan_pk": "Барилгын багц: Пакистан",
     "modules.pp_name_peru_pe": "Перугийн барилгын багц",
@@ -66256,6 +66258,16 @@ const resource = {
     "china_tax.tender_total": "Тендерийн нийт дүн",
     "china_tax.vat": "НӨАТ",
     "china_tax.vat_base": "НӨАТ-ын суурь",
+    "china_tax.fees_option_zone": "Бүс",
+    "china_tax.fees_option_safety_grade": "Аюулгүй байдлын зэрэг",
+    "china_tax.fees_option_ring": "5-р тойрогтой харьцуулсан байршил",
+    "china_tax.fees_option_project_class": "Төслийн ангилал",
+    "china_tax.fees_option_site_standard": "Үлгэрчилсэн талбайн нэмэгдэл",
+    "doc_templates.kind.changeorders.change_order": "Өөрчлөлтийн захиалга",
+    "doc_templates.kind.finance.invoice": "Нэхэмжлэх",
+    "doc_templates.kind.finance.payment": "Төлбөрийн бүртгэл",
+    "doc_templates.kind.procurement.purchase_order": "Худалдан авах захиалга",
+    "doc_templates.kind.procurement.goods_receipt": "Бараа хүлээн авалт",
   }
 } as { translation: Record<string, string> };
 

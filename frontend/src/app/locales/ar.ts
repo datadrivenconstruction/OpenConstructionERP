@@ -59801,6 +59801,8 @@ const resource = {
     "modules.catalog.monitoring": "المراقبة",
     "modules.catalog.stockpiles": "أكوام المواد",
     "modules.catalog.mine_survey": "مساحة المناجم",
+    "modules.catalog.norm_pricing": "التسعير بالمعايير",
+    "modules.catalog.project_tax": "الملف الضريبي للمشروع",
     "modules.pp_desc_eleven_areas_framework": "إطار إدارة المشروع من جهة المالك عبر أحد عشر مجالاً إدارياً على مرحلتين، هما تطوير المشروع وتنفيذ البناء، مع بوابة واحدة بينهما ووثيقة إطار معتمدة واحدة لكل مجال.",
     "modules.pp_name_pakistan_pk": "حزمة إنشاءات باكستان",
     "modules.pp_name_peru_pe": "حزمة إنشاءات بيرو",
@@ -69461,6 +69463,16 @@ const resource = {
     "china_tax.tender_total": "إجمالي العطاء",
     "china_tax.vat": "ضريبة القيمة المضافة",
     "china_tax.vat_base": "وعاء ضريبة القيمة المضافة",
+    "china_tax.fees_option_zone": "المنطقة",
+    "china_tax.fees_option_safety_grade": "درجة السلامة",
+    "china_tax.fees_option_ring": "الموقع بالنسبة للطريق الدائري الخامس",
+    "china_tax.fees_option_project_class": "فئة المشروع",
+    "china_tax.fees_option_site_standard": "علاوة الموقع النموذجي",
+    "doc_templates.kind.changeorders.change_order": "أمر تغيير",
+    "doc_templates.kind.finance.invoice": "فاتورة",
+    "doc_templates.kind.finance.payment": "سجل الدفع",
+    "doc_templates.kind.procurement.purchase_order": "أمر شراء",
+    "doc_templates.kind.procurement.goods_receipt": "استلام البضائع",
   }
 } as { translation: Record<string, string> };
 

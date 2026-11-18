@@ -59654,6 +59654,8 @@ const resource = {
     "modules.catalog.stockpiles": "Pilhas de material",
     "modules.catalog.mine_survey": "Topografia de mina",
     "modules.catalog.surfaces_volumes": "Superfícies e volumes",
+    "modules.catalog.norm_pricing": "Orçamentação por normas",
+    "modules.catalog.project_tax": "Perfil fiscal do projeto",
     "modules.pp_desc_eleven_areas_framework": "Gestão do projeto pelo lado do dono de obra em onze áreas de gestão, em duas fases, desenvolvimento do projeto e execução da obra, com um gate entre ambas e um documento-quadro aprovado para cada área.",
     "modules.pp_name_pakistan_pk": "Pacote de Construção: Paquistão",
     "modules.pp_name_peru_pe": "Pacote de construção Peru",
@@ -69176,6 +69178,16 @@ const resource = {
     "china_tax.tender_total": "Total da proposta",
     "china_tax.vat": "IVA",
     "china_tax.vat_base": "Base do IVA",
+    "china_tax.fees_option_zone": "Zona",
+    "china_tax.fees_option_safety_grade": "Grau de segurança",
+    "china_tax.fees_option_ring": "Localização face ao 5.º anel",
+    "china_tax.fees_option_project_class": "Classe do projeto",
+    "china_tax.fees_option_site_standard": "Acréscimo de estaleiro modelo",
+    "doc_templates.kind.changeorders.change_order": "Ordem de alteração",
+    "doc_templates.kind.finance.invoice": "Fatura",
+    "doc_templates.kind.finance.payment": "Registo de pagamento",
+    "doc_templates.kind.procurement.purchase_order": "Ordem de compra",
+    "doc_templates.kind.procurement.goods_receipt": "Receção de mercadorias",
   }
 } as { translation: Record<string, string> };
 

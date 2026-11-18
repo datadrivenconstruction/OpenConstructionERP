@@ -118,10 +118,9 @@ export interface ClaimResult {
 }
 
 const loc = (locale: string) => `locale=${encodeURIComponent(locale)}`;
-const p = (projectId: string) => `${BASE}/projects/${projectId}`;
 
-export const listPeriods = (projectId: string) => apiGet<{ items: MinePeriod[] }>(`${p(projectId)}/periods`).then((r) => r.items);
-export const createPeriod = (projectId: string, body: PeriodInput) => apiPost<MinePeriod>(`${p(projectId)}/periods`, body);
+export const listPeriods = (projectId: string) => apiGet<{ items: MinePeriod[] }>(`${BASE}/projects/${projectId}/periods`).then((r) => r.items);
+export const createPeriod = (projectId: string, body: PeriodInput) => apiPost<MinePeriod>(`${BASE}/projects/${projectId}/periods`, body);
 export const getPeriod = (id: string, locale: string) => apiGet<MinePeriodDetail>(`${BASE}/periods/${id}?${loc(locale)}`);
 export const deletePeriod = (id: string) => apiDelete(`${BASE}/periods/${id}`);
 export const addEntry = (periodId: string, body: EntryInput, locale: string) =>

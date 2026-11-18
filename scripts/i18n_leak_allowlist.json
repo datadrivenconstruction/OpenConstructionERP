@@ -2403,5 +2403,25 @@
     "en_value": "Instrument",
     "note": "Instrument is the same word in the locales that keep it, as construction_control.field.instrument",
     "reason_category": "cognate_loanword"
+  },
+  "doc_layout.block.text": {
+    "en_value": "Text",
+    "note": "\"Text\" is the native word in cs/de/ro/sv (and en-GB spells it the same); fil/id/nl hold distinct translations (Teksto/Teks/Tekst), so the shared set is a true cognate, not a copied fallback",
+    "reason_category": "cognate_loanword"
+  },
+  "doc_layout.clause_text": {
+    "en_value": "Text",
+    "note": "\"Text\" is the native word in cs/de/ro/sv (and en-GB spells it the same); fil/id/nl hold distinct translations (Teksto/Teks/Tekst), so the shared set is a true cognate, not a copied fallback",
+    "reason_category": "cognate_loanword"
+  },
+  "doc_layout.format_text": {
+    "en_value": "Text",
+    "note": "\"Text\" is the native word in cs/de/ro/sv (and en-GB spells it the same); fil/id/nl hold distinct translations (Teksto/Teks/Tekst), so the shared set is a true cognate, not a copied fallback",
+    "reason_category": "cognate_loanword"
+  },
+  "doc_layout.text": {
+    "en_value": "Text",
+    "note": "\"Text\" is the native word in cs/de/ro/sv (and en-GB spells it the same); fil/id/nl hold distinct translations (Teksto/Teks/Tekst), so the shared set is a true cognate, not a copied fallback",
+    "reason_category": "cognate_loanword"
   }
 }

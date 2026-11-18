@@ -259465,6 +259465,7 @@
       "module_category": "enterprise",
       "files": [
         "__init__.py",
+        "boq_resources.py",
         "comparison.py",
         "constants.py",
         "manifest.py",
@@ -260096,6 +260097,13 @@
         },
         {
           "method": "GET",
+          "path": "/boq-resources/",
+          "handler": "list_boq_resources",
+          "response_model": "BoqResourceOptionListResponse",
+          "request_schema": "RFQService"
+        },
+        {
+          "method": "GET",
           "path": "/bids/",
           "handler": "list_bids",
           "response_model": "BidListResponse",
@@ -260299,6 +260307,15 @@
             {
               "name": "lines",
               "type": "list['RFQLineCreate']"
+            },
+            {
+              "name": "boq_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "boq_resource_keys",
+              "type": "list[str] | None"
             },
             {
               "name": "metadata",
@@ -260974,6 +260991,65 @@
           ]
         },
         {
+          "class_name": "BoqResourceOptionResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "One BOQ resource, summed over the positions using it, offered as a scope line.",
+          "fields": [
+            {
+              "name": "key",
+              "type": "str"
+            },
+            {
+              "name": "name",
+              "type": "str"
+            },
+            {
+              "name": "code",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "category",
+              "type": "str"
+            },
+            {
+              "name": "unit",
+              "type": "str"
+            },
+            {
+              "name": "quantity",
+              "type": "Decimal"
+            },
+            {
+              "name": "position_count",
+              "type": "int"
+            }
+          ]
+        },
+        {
+          "class_name": "BoqResourceOptionListResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "The resources of one BOQ an RFQ can be created from.",
+          "fields": [
+            {
+              "name": "boq_id",
+              "type": "UUID"
+            },
+            {
+              "name": "items",
+              "type": "list[BoqResourceOptionResponse]"
+            },
+            {
+              "name": "total",
+              "type": "int"
+            }
+          ]
+        },
+        {
           "class_name": "RFQListResponse",
           "bases": [
             "BaseModel"
@@ -261465,7 +261541,9 @@
       ],
       "import_dependencies": [
         "bid_management",
+        "boq",
         "contacts",
+        "price_breakdown",
         "projects"
       ]
     },
@@ -335554,10 +335632,10 @@
     },
     {
       "name": "rfq-bidding",
-      "ts_files": 10,
+      "ts_files": 12,
       "css_files": 0,
-      "test_files": 6,
-      "total_files": 10
+      "test_files": 7,
+      "total_files": 12
     },
     {
       "name": "risk",
@@ -337557,7 +337635,9 @@
     ],
     "rfq_bidding": [
       "bid_management",
+      "boq",
       "contacts",
+      "price_breakdown",
       "procurement",
       "projects",
       "users"
@@ -337899,11 +337979,11 @@
     "total_models": 960,
     "total_columns": 11270,
     "total_relationships": 261,
-    "total_routes": 5481,
-    "total_schemas": 5061,
-    "total_python_files": 3592,
+    "total_routes": 5482,
+    "total_schemas": 5063,
+    "total_python_files": 3593,
     "frontend_features": 249,
-    "frontend_ts_files": 4376,
+    "frontend_ts_files": 4378,
     "frontend_backend_mapped": 223
   },
   "frontend_backend_mapping": {

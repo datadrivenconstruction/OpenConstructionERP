@@ -57370,6 +57370,8 @@ const resource = {
     "modules.catalog.monitoring": "Övervakning",
     "modules.catalog.stockpiles": "Upplag",
     "modules.catalog.mine_survey": "Gruvmätning",
+    "modules.catalog.norm_pricing": "Normprissättning",
+    "modules.catalog.project_tax": "Projektets skatteprofil",
     "modules.pp_desc_eleven_areas_framework": "Byggherrens projektstyrning i elva styrningsområden under två faser, projektutveckling och genomförande, med en gate mellan dem och ett godkänt ramdokument per område.",
     "modules.pp_name_pakistan_pk": "Byggpaket Pakistan",
     "modules.pp_name_peru_pe": "Byggpaket Peru",
@@ -66850,6 +66852,16 @@ const resource = {
     "china_tax.tender_total": "Anbudssumma",
     "china_tax.vat": "Moms",
     "china_tax.vat_base": "Momsunderlag",
+    "china_tax.fees_option_zone": "Område",
+    "china_tax.fees_option_safety_grade": "Säkerhetsnivå",
+    "china_tax.fees_option_ring": "Läge i förhållande till 5:e ringleden",
+    "china_tax.fees_option_project_class": "Projektklass",
+    "china_tax.fees_option_site_standard": "Tillägg för mönsterarbetsplats",
+    "doc_templates.kind.changeorders.change_order": "Ändringsorder",
+    "doc_templates.kind.finance.invoice": "Faktura",
+    "doc_templates.kind.finance.payment": "Betalningspost",
+    "doc_templates.kind.procurement.purchase_order": "Inköpsorder",
+    "doc_templates.kind.procurement.goods_receipt": "Godsmottagning",
   }
 } as { translation: Record<string, string> };
 

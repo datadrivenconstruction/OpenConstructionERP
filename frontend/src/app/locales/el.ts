@@ -56715,6 +56715,8 @@ const resource = {
     "modules.catalog.monitoring": "Παρακολούθηση",
     "modules.catalog.stockpiles": "Αποθέματα σωρών",
     "modules.catalog.mine_survey": "Μετρήσεις ορυχείου",
+    "modules.catalog.norm_pricing": "Τιμολόγηση με πρότυπα",
+    "modules.catalog.project_tax": "Φορολογικό προφίλ έργου",
     "modules.pp_desc_eleven_areas_framework": "Διαχείριση του έργου από την πλευρά του κυρίου του έργου σε έντεκα τομείς διαχείρισης, σε δύο φάσεις, την ανάπτυξη του έργου και την εκτέλεση της κατασκευής, με μία πύλη μεταξύ τους και ένα εγκεκριμένο πλαίσιο εγγράφου για κάθε τομέα.",
     "modules.pp_name_pakistan_pk": "Πακέτο Κατασκευών: Πακιστάν",
     "modules.pp_name_peru_pe": "Πακέτο κατασκευών Περού",
@@ -66195,6 +66197,16 @@ const resource = {
     "china_tax.tender_total": "Σύνολο προσφοράς",
     "china_tax.vat": "ΦΠΑ",
     "china_tax.vat_base": "Βάση ΦΠΑ",
+    "china_tax.fees_option_zone": "Περιοχή",
+    "china_tax.fees_option_safety_grade": "Βαθμός ασφάλειας",
+    "china_tax.fees_option_ring": "Θέση ως προς τον 5ο δακτύλιο",
+    "china_tax.fees_option_project_class": "Κατηγορία έργου",
+    "china_tax.fees_option_site_standard": "Προσαύξηση πρότυπου εργοταξίου",
+    "doc_templates.kind.changeorders.change_order": "Εντολή αλλαγής",
+    "doc_templates.kind.finance.invoice": "Τιμολόγιο",
+    "doc_templates.kind.finance.payment": "Εγγραφή πληρωμής",
+    "doc_templates.kind.procurement.purchase_order": "Εντολή αγοράς",
+    "doc_templates.kind.procurement.goods_receipt": "Παραλαβή αγαθών",
   }
 } as { translation: Record<string, string> };
 

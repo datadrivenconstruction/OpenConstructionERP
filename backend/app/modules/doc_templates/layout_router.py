@@ -80,6 +80,13 @@ async def _scope(session: Any, user_id: str, project_id: uuid.UUID | None) -> st
     return ls.scope_for(project_id)
 
 
+async def _version_access(session: Any, user_id: str, spec: Any, version_id: uuid.UUID) -> None:
+    """A project layout's versions are readable only by members of that project."""
+    scope = await ls.version_scope(session, spec, version_id)
+    if scope.startswith("project:"):
+        await verify_project_access(uuid.UUID(scope.split(":", 1)[1]), user_id, session)
+
+
 async def _editor(session: Any, user_id: str, payload: dict[str, Any], project_id: uuid.UUID | None) -> str:
     scope = await _scope(session, user_id, project_id)
     if not await _can_edit(session, user_id, payload):
@@ -322,9 +329,12 @@ async def delete_variant(
 
 
 @layout_router.get("/{key}/versions/{version_id}", dependencies=_READ)
-async def get_version(version_id: uuid.UUID, session: SessionDep, key: str = _KEY) -> dict[str, Any]:
+async def get_version(
+    version_id: uuid.UUID, session: SessionDep, user_id: CurrentUserId, key: str = _KEY
+) -> dict[str, Any]:
     """The template one version printed."""
     spec = ls.require_layout(key)
+    await _version_access(session, user_id, spec, version_id)
     return {"template": await ls.version_document(session, spec, version_id)}
 
 
@@ -332,11 +342,15 @@ async def get_version(version_id: uuid.UUID, session: SessionDep, key: str = _KE
 async def diff_version(
     version_id: uuid.UUID,
     session: SessionDep,
+    user_id: CurrentUserId,
     key: str = _KEY,
     against: uuid.UUID | None = Query(None, description="Older version; the standard template when absent"),
 ) -> dict[str, Any]:
     """Block-level changes a version makes to *against* (the standard template by default)."""
     spec = ls.require_layout(key)
+    await _version_access(session, user_id, spec, version_id)
+    if against:
+        await _version_access(session, user_id, spec, against)
     new = await ls.version_document(session, spec, version_id)
     old = await ls.version_document(session, spec, against) if against else ls.normalise(ls.standard_template(spec))
     return {"changes": ls.diff_templates(old, new)}

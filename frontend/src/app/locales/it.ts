@@ -57962,6 +57962,8 @@ const resource = {
     "modules.catalog.monitoring": "Monitoraggio",
     "modules.catalog.stockpiles": "Cumuli",
     "modules.catalog.mine_survey": "Rilievo di miniera",
+    "modules.catalog.norm_pricing": "Prezzi a norma",
+    "modules.catalog.project_tax": "Profilo fiscale del progetto",
     "modules.pp_desc_eleven_areas_framework": "Gestione del progetto dal lato committente in undici ambiti gestionali su due fasi, sviluppo del progetto ed esecuzione dei lavori, con un gate tra le due e un documento quadro approvato per ciascun ambito.",
     "modules.pp_name_pakistan_pk": "Pacchetto Costruzioni Pakistan",
     "modules.pp_name_peru_pe": "Pacchetto costruzioni Perù",
@@ -67484,6 +67486,16 @@ const resource = {
     "china_tax.tender_total": "Totale dell'offerta",
     "china_tax.vat": "IVA",
     "china_tax.vat_base": "Base IVA",
+    "china_tax.fees_option_zone": "Zona",
+    "china_tax.fees_option_safety_grade": "Livello di sicurezza",
+    "china_tax.fees_option_ring": "Posizione rispetto al 5º anello",
+    "china_tax.fees_option_project_class": "Classe del progetto",
+    "china_tax.fees_option_site_standard": "Maggiorazione cantiere modello",
+    "doc_templates.kind.changeorders.change_order": "Ordine di variazione",
+    "doc_templates.kind.finance.invoice": "Fattura",
+    "doc_templates.kind.finance.payment": "Registrazione del pagamento",
+    "doc_templates.kind.procurement.purchase_order": "Ordine di acquisto",
+    "doc_templates.kind.procurement.goods_receipt": "Ricevimento merci",
   }
 } as { translation: Record<string, string> };
 

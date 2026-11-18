@@ -59661,6 +59661,8 @@ const resource = {
     "modules.catalog.mine_survey": "Levé de mine",
     "modules.catalog.monitoring": "Suivi des déformations",
     "modules.catalog.surfaces_volumes": "Surfaces et volumes",
+    "modules.catalog.norm_pricing": "Tarification par normes",
+    "modules.catalog.project_tax": "Profil fiscal du projet",
     "modules.pp_desc_eleven_areas_framework": "Pilotage du projet côté maître d'ouvrage sur onze domaines de management, en deux phases, développement du projet et exécution des travaux, avec un jalon de décision entre les deux et un document-cadre approuvé par domaine.",
     "modules.pp_name_pakistan_pk": "Pack Construction Pakistan",
     "modules.pp_name_peru_pe": "Pack construction Pérou",
@@ -69183,6 +69185,16 @@ const resource = {
     "china_tax.tender_total": "Total de l'offre",
     "china_tax.vat": "TVA",
     "china_tax.vat_base": "Assiette de TVA",
+    "china_tax.fees_option_zone": "Zone",
+    "china_tax.fees_option_safety_grade": "Niveau de sécurité",
+    "china_tax.fees_option_ring": "Position par rapport au 5e périphérique",
+    "china_tax.fees_option_project_class": "Catégorie de projet",
+    "china_tax.fees_option_site_standard": "Majoration chantier modèle",
+    "doc_templates.kind.changeorders.change_order": "Ordre de modification",
+    "doc_templates.kind.finance.invoice": "Facture",
+    "doc_templates.kind.finance.payment": "Enregistrement de paiement",
+    "doc_templates.kind.procurement.purchase_order": "Bon de commande",
+    "doc_templates.kind.procurement.goods_receipt": "Réception de marchandises",
   }
 } as { translation: Record<string, string> };
 

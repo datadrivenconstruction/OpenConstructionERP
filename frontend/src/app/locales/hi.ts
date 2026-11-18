@@ -56758,6 +56758,8 @@ const resource = {
     "modules.catalog.monitoring": "मॉनिटरिंग",
     "modules.catalog.stockpiles": "स्टॉकपाइल",
     "modules.catalog.mine_survey": "खदान सर्वेक्षण",
+    "modules.catalog.norm_pricing": "मानक-आधारित मूल्य निर्धारण",
+    "modules.catalog.project_tax": "परियोजना कर प्रोफ़ाइल",
     "modules.pp_desc_eleven_areas_framework": "ग्यारह प्रबंधन क्षेत्रों में स्वामी की ओर से परियोजना प्रबंधन, दो चरणों में, परियोजना विकास और निर्माण निष्पादन, जिनके बीच एक गेट और प्रत्येक क्षेत्र के लिए एक स्वीकृत ढाँचा दस्तावेज़।",
     "modules.pp_name_pakistan_pk": "पाकिस्तान निर्माण पैक",
     "modules.pp_name_peru_pe": "पेरू निर्माण पैक",
@@ -66238,6 +66240,16 @@ const resource = {
     "china_tax.tender_total": "निविदा कुल",
     "china_tax.vat": "वैट",
     "china_tax.vat_base": "वैट आधार",
+    "china_tax.fees_option_zone": "क्षेत्र",
+    "china_tax.fees_option_safety_grade": "सुरक्षा श्रेणी",
+    "china_tax.fees_option_ring": "5वीं रिंग रोड के सापेक्ष स्थिति",
+    "china_tax.fees_option_project_class": "परियोजना वर्ग",
+    "china_tax.fees_option_site_standard": "आदर्श साइट अधिभार",
+    "doc_templates.kind.changeorders.change_order": "परिवर्तन आदेश",
+    "doc_templates.kind.finance.invoice": "चालान",
+    "doc_templates.kind.finance.payment": "भुगतान रिकॉर्ड",
+    "doc_templates.kind.procurement.purchase_order": "क्रय आदेश",
+    "doc_templates.kind.procurement.goods_receipt": "माल प्राप्ति",
   }
 } as { translation: Record<string, string> };
 

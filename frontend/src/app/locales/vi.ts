@@ -56519,6 +56519,8 @@ const resource = {
     "modules.catalog.monitoring": "Giám sát",
     "modules.catalog.stockpiles": "Bãi tập kết",
     "modules.catalog.mine_survey": "Trắc địa mỏ",
+    "modules.catalog.norm_pricing": "Định giá theo định mức",
+    "modules.catalog.project_tax": "Hồ sơ thuế dự án",
     "modules.pp_desc_eleven_areas_framework": "Quản lý dự án từ phía chủ đầu tư gồm mười một lĩnh vực quản lý, chia hai giai đoạn là phát triển dự án và thi công xây dựng, giữa hai giai đoạn có một cổng kiểm soát và mỗi lĩnh vực có một tài liệu khung đã được phê duyệt.",
     "modules.pp_name_pakistan_pk": "Gói Xây dựng Pakistan",
     "modules.pp_name_peru_pe": "Gói xây dựng Peru",
@@ -65976,6 +65978,16 @@ const resource = {
     "china_tax.tender_total": "Tổng giá dự thầu",
     "china_tax.vat": "VAT",
     "china_tax.vat_base": "Cơ sở tính VAT",
+    "china_tax.fees_option_zone": "Khu vực",
+    "china_tax.fees_option_safety_grade": "Cấp an toàn",
+    "china_tax.fees_option_ring": "Vị trí so với vành đai 5",
+    "china_tax.fees_option_project_class": "Hạng mục dự án",
+    "china_tax.fees_option_site_standard": "Phụ phí công trường mẫu",
+    "doc_templates.kind.changeorders.change_order": "Lệnh thay đổi",
+    "doc_templates.kind.finance.invoice": "Hóa đơn",
+    "doc_templates.kind.finance.payment": "Bản ghi thanh toán",
+    "doc_templates.kind.procurement.purchase_order": "Đơn đặt hàng",
+    "doc_templates.kind.procurement.goods_receipt": "Nhận hàng",
   }
 } as { translation: Record<string, string> };
 

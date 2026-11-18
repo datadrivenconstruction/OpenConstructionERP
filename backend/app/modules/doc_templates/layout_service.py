@@ -504,6 +504,16 @@ async def delete_variant(session: AsyncSession, spec: LayoutSpec, *, scope: str,
     )
 
 
+async def version_scope(session: AsyncSession, spec: LayoutSpec, version_id: uuid.UUID) -> str:
+    """The scope (``workspace`` or ``project:<uuid>``) of the layout a version belongs to; 404 when unknown."""
+    repo = DocLayoutRepository(session)
+    version = await repo.version(version_id)
+    row = await session.get(DocLayout, version.layout_id) if version is not None else None
+    if version is None or row is None or row.kind != spec.key:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Version not found")
+    return row.scope
+
+
 async def version_document(session: AsyncSession, spec: LayoutSpec, version_id: uuid.UUID) -> dict[str, Any]:
     """The template one version printed; the standard template for a reset version."""
     repo = DocLayoutRepository(session)

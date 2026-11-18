@@ -137,6 +137,7 @@ SCRIPTS: dict[str, tuple[str, ...]] = {
     "ur": ("arabic",),
     "vi": (),
     "zh": ("han",),
+    "zh-HK": ("han",),
 }
 
 # One key and its value on one line, which is how these files are written.

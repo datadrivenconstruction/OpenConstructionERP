@@ -1,9 +1,9 @@
 {
   "note": "Number of case keys each offered locale does not answer, per playbook, recorded so that the number can be seen to grow. The check fails when any playbook count in any locale is higher than recorded: a key the locale had and lost, or a case that shipped without its strings. Lower is always fine and --update records it; --update never raises a number and never removes a locale from card_complete, so the debt here only shrinks and any exception has to be a hand edit that shows in the diff. The numbers are measured from the committed blobs at measured_at and never from the working tree: a floor once banked from a dirty checkout recorded translations nobody had committed, and the gate failed every push for a regression that had not happened. Regional variants (es-MX, es-CL, es-CO, pt-BR) are counted through their base language, the way i18n.ts resolves them. card_complete lists the base locales whose catalogue text (title, description, and long description where the English has one) is complete for every playbook, and scripts/check_case_playbook_catalogue_locales.py holds those locales to it. A locale joins that list when --update finds it complete.",
-  "updated": "2026-09-09",
-  "measured_at": "40cc6fea6615a4beeaa2c7e2c6a17c517b29f35f",
-  "playbooks": 293,
-  "references": 10671,
+  "updated": "2026-11-18",
+  "measured_at": "59ea9f15d85a4b9223640849316b70a6184cf071",
+  "playbooks": 312,
+  "references": 11298,
   "card_complete": [
     "ar",
     "bg",
@@ -44,8 +44,8 @@
   ],
   "locales": {
     "ar": {
-      "cards": 293,
-      "missing": 4781,
+      "cards": 312,
+      "missing": 4620,
       "gaps": {
         "administer-a-variation-under-nzs-3910": 49,
         "agree-a-precio-extraordinario-for-work-outside-the-catalogo": 49,
@@ -79,11 +79,9 @@
         "compose-the-bdi-under-acordao-2622-2013-tcu": 42,
         "evaluate-a-government-tender-against-the-estimated-cost": 32,
         "evidence-saudi-building-code-compliance": 49,
-        "export-a-boq-to-fiebdc3": 28,
         "file-the-building-permit-in-etdr-and-clear-the-hianypotlas": 49,
         "file-the-nbr-12721-quadros-for-an-incorporacao": 42,
         "get-the-teljesitesigazolas-signed-and-invoice-the-period": 49,
-        "hand-over-a-cobie-facility-export": 28,
         "hold-retention-money-on-trust-under-the-construction-contracts-act": 49,
         "hold-the-concrete-to-is-456-from-pour-card-to-cube-result": 31,
         "hold-the-estimate-to-the-sanctioned-amount": 32,
@@ -119,14 +117,12 @@
         "price-a-variation-under-as-4000": 42,
         "price-the-orcamento-de-referencia-from-the-sinapi-base": 42,
         "produce-an-elemental-cost-plan-to-the-australian-cost-management-manual": 42,
-        "reconcile-a-drawing-issue-against-the-index": 28,
         "reconcile-materials-on-form-m-29": 49,
         "recover-contract-price-adjustment-on-the-cpap-indices": 49,
         "register-and-grade-with-the-cidb-before-you-tender": 42,
         "register-the-obra-with-imss-and-check-repse-before-subcontracting": 49,
         "register-the-project-under-rera-and-file-the-quarterly-report": 33,
         "report-every-szamla-to-nav-online-szamla": 42,
-        "review-ai-takeoff-proposals": 28,
         "run-a-contract-on-hijri-and-gregorian-dates": 49,
         "run-a-tender-under-the-as-4120-code-of-tendering": 42,
         "run-overlapping-pcbu-duties-on-a-shared-site": 49,
@@ -135,7 +131,6 @@
         "run-the-vob-payment-clock": 51,
         "run-the-wage-protection-system-month": 49,
         "score-a-tender-on-price-and-preference-under-the-pppfa": 49,
-        "see-every-field-mark-on-one-sheet": 28,
         "sell-off-plan-under-wafi-and-draw-from-the-escrow-account": 49,
         "serve-a-payment-claim-under-the-construction-contracts-act": 56,
         "set-the-contract-up-on-as-4000-or-as-2124": 42,
@@ -152,14 +147,13 @@
         "take-a-building-from-permit-to-final-acceptance": 49,
         "take-off-in-metric-and-buy-in-imperial": 33,
         "takeoff-quantities-from-a-pdf-plan": 49,
-        "turn-a-document-into-a-tracked-action": 21,
         "value-the-month-and-certify-the-progress-payment": 44,
         "walk-the-estimate-from-class-d-to-class-a": 35,
         "win-a-gaeb-tender-from-lv-to-angebot": 49
       }
     },
     "bg": {
-      "cards": 293,
+      "cards": 312,
       "missing": 6360,
       "gaps": {
         "adjust-a-material-price-with-a-cost-index": 31,
@@ -318,7 +312,7 @@
       }
     },
     "bn": {
-      "cards": 293,
+      "cards": 312,
       "missing": 6048,
       "gaps": {
         "adjust-a-material-price-with-a-cost-index": 31,
@@ -467,7 +461,7 @@
       }
     },
     "cs": {
-      "cards": 293,
+      "cards": 312,
       "missing": 5745,
       "gaps": {
         "administer-a-variation-under-nzs-3910": 49,
@@ -608,7 +602,7 @@
       }
     },
     "da": {
-      "cards": 293,
+      "cards": 312,
       "missing": 6360,
       "gaps": {
         "adjust-a-material-price-with-a-cost-index": 31,
@@ -767,7 +761,7 @@
       }
     },
     "de": {
-      "cards": 293,
+      "cards": 312,
       "missing": 3788,
       "gaps": {
         "administer-a-variation-under-nzs-3910": 49,
@@ -854,7 +848,7 @@
       }
     },
     "el": {
-      "cards": 293,
+      "cards": 312,
       "missing": 6360,
       "gaps": {
         "adjust-a-material-price-with-a-cost-index": 31,
@@ -1013,7 +1007,7 @@
       }
     },
     "es": {
-      "cards": 293,
+      "cards": 312,
       "missing": 3788,
       "gaps": {
         "administer-a-variation-under-nzs-3910": 49,
@@ -1100,7 +1094,7 @@
       }
     },
     "es-CL": {
-      "cards": 293,
+      "cards": 312,
       "missing": 3788,
       "gaps": {
         "administer-a-variation-under-nzs-3910": 49,
@@ -1187,7 +1181,7 @@
       }
     },
     "es-CO": {
-      "cards": 293,
+      "cards": 312,
       "missing": 3788,
       "gaps": {
         "administer-a-variation-under-nzs-3910": 49,
@@ -1274,7 +1268,7 @@
       }
     },
     "es-MX": {
-      "cards": 293,
+      "cards": 312,
       "missing": 3738,
       "gaps": {
         "administer-a-variation-under-nzs-3910": 49,
@@ -1360,7 +1354,7 @@
       }
     },
     "et": {
-      "cards": 293,
+      "cards": 312,
       "missing": 6360,
       "gaps": {
         "adjust-a-material-price-with-a-cost-index": 31,
@@ -1519,7 +1513,7 @@
       }
     },
     "fa": {
-      "cards": 293,
+      "cards": 312,
       "missing": 6360,
       "gaps": {
         "adjust-a-material-price-with-a-cost-index": 31,
@@ -1678,7 +1672,7 @@
       }
     },
     "fi": {
-      "cards": 293,
+      "cards": 312,
       "missing": 6360,
       "gaps": {
         "adjust-a-material-price-with-a-cost-index": 31,
@@ -1837,7 +1831,7 @@
       }
     },
     "fil": {
-      "cards": 293,
+      "cards": 312,
       "missing": 6360,
       "gaps": {
         "adjust-a-material-price-with-a-cost-index": 31,
@@ -1996,7 +1990,7 @@
       }
     },
     "fr": {
-      "cards": 293,
+      "cards": 312,
       "missing": 3788,
       "gaps": {
         "administer-a-variation-under-nzs-3910": 49,
@@ -2083,7 +2077,7 @@
       }
     },
     "he": {
-      "cards": 293,
+      "cards": 312,
       "missing": 6360,
       "gaps": {
         "adjust-a-material-price-with-a-cost-index": 31,
@@ -2242,7 +2236,7 @@
       }
     },
     "hi": {
-      "cards": 293,
+      "cards": 312,
       "missing": 6360,
       "gaps": {
         "adjust-a-material-price-with-a-cost-index": 31,
@@ -2401,7 +2395,7 @@
       }
     },
     "hr": {
-      "cards": 293,
+      "cards": 312,
       "missing": 6360,
       "gaps": {
         "adjust-a-material-price-with-a-cost-index": 31,
@@ -2560,7 +2554,7 @@
       }
     },
     "hu": {
-      "cards": 220,
+      "cards": 239,
       "missing": 3865,
       "gaps": {
         "administer-a-variation-under-nzs-3910": 52,
@@ -2644,7 +2638,7 @@
       }
     },
     "id": {
-      "cards": 293,
+      "cards": 312,
       "missing": 6360,
       "gaps": {
         "adjust-a-material-price-with-a-cost-index": 31,
@@ -2803,7 +2797,7 @@
       }
     },
     "it": {
-      "cards": 293,
+      "cards": 312,
       "missing": 5485,
       "gaps": {
         "administer-a-variation-under-nzs-3910": 49,
@@ -2937,7 +2931,7 @@
       }
     },
     "ja": {
-      "cards": 293,
+      "cards": 312,
       "missing": 4831,
       "gaps": {
         "administer-a-variation-under-nzs-3910": 49,
@@ -3053,7 +3047,7 @@
       }
     },
     "kk": {
-      "cards": 293,
+      "cards": 312,
       "missing": 6360,
       "gaps": {
         "adjust-a-material-price-with-a-cost-index": 31,
@@ -3212,7 +3206,7 @@
       }
     },
     "ko": {
-      "cards": 293,
+      "cards": 312,
       "missing": 5745,
       "gaps": {
         "administer-a-variation-under-nzs-3910": 49,
@@ -3353,7 +3347,7 @@
       }
     },
     "ky": {
-      "cards": 293,
+      "cards": 312,
       "missing": 6360,
       "gaps": {
         "adjust-a-material-price-with-a-cost-index": 31,
@@ -3512,7 +3506,7 @@
       }
     },
     "nl": {
-      "cards": 293,
+      "cards": 312,
       "missing": 5485,
       "gaps": {
         "administer-a-variation-under-nzs-3910": 49,
@@ -3646,7 +3640,7 @@
       }
     },
     "no": {
-      "cards": 293,
+      "cards": 312,
       "missing": 6360,
       "gaps": {
         "adjust-a-material-price-with-a-cost-index": 31,
@@ -3805,7 +3799,7 @@
       }
     },
     "pl": {
-      "cards": 293,
+      "cards": 312,
       "missing": 5485,
       "gaps": {
         "administer-a-variation-under-nzs-3910": 49,
@@ -3939,7 +3933,7 @@
       }
     },
     "pt": {
-      "cards": 293,
+      "cards": 312,
       "missing": 3788,
       "gaps": {
         "administer-a-variation-under-nzs-3910": 49,
@@ -4026,7 +4020,7 @@
       }
     },
     "pt-BR": {
-      "cards": 293,
+      "cards": 312,
       "missing": 3746,
       "gaps": {
         "administer-a-variation-under-nzs-3910": 49,
@@ -4112,7 +4106,7 @@
       }
     },
     "ro": {
-      "cards": 293,
+      "cards": 312,
       "missing": 6360,
       "gaps": {
         "adjust-a-material-price-with-a-cost-index": 31,
@@ -4271,7 +4265,7 @@
       }
     },
     "ru": {
-      "cards": 293,
+      "cards": 312,
       "missing": 3893,
       "gaps": {
         "administer-a-variation-under-nzs-3910": 49,
@@ -4362,7 +4356,7 @@
       }
     },
     "sv": {
-      "cards": 293,
+      "cards": 312,
       "missing": 5745,
       "gaps": {
         "administer-a-variation-under-nzs-3910": 49,
@@ -4503,7 +4497,7 @@
       }
     },
     "th": {
-      "cards": 293,
+      "cards": 312,
       "missing": 6360,
       "gaps": {
         "adjust-a-material-price-with-a-cost-index": 31,
@@ -4662,7 +4656,7 @@
       }
     },
     "tr": {
-      "cards": 293,
+      "cards": 312,
       "missing": 5485,
       "gaps": {
         "administer-a-variation-under-nzs-3910": 49,
@@ -4796,7 +4790,7 @@
       }
     },
     "uk": {
-      "cards": 293,
+      "cards": 312,
       "missing": 4888,
       "gaps": {
         "administer-a-variation-under-nzs-3910": 49,
@@ -4915,7 +4909,7 @@
       }
     },
     "ur": {
-      "cards": 293,
+      "cards": 312,
       "missing": 6360,
       "gaps": {
         "adjust-a-material-price-with-a-cost-index": 31,
@@ -5074,7 +5068,7 @@
       }
     },
     "uz": {
-      "cards": 293,
+      "cards": 312,
       "missing": 5503,
       "gaps": {
         "adjust-a-material-price-with-a-cost-index": 31,
@@ -5211,7 +5205,7 @@
       }
     },
     "vi": {
-      "cards": 293,
+      "cards": 312,
       "missing": 6360,
       "gaps": {
         "adjust-a-material-price-with-a-cost-index": 31,
@@ -5370,7 +5364,7 @@
       }
     },
     "zh": {
-      "cards": 293,
+      "cards": 312,
       "missing": 3893,
       "gaps": {
         "administer-a-variation-under-nzs-3910": 49,
@@ -5459,7 +5453,90 @@
         "take-a-building-from-permit-to-final-acceptance": 49,
         "turn-a-document-into-a-tracked-action": 21
       }
+    },
+    "zh-HK": {
+      "cards": 312,
+      "missing": 3646,
+      "gaps": {
+        "administer-a-variation-under-nzs-3910": 49,
+        "agree-a-precio-extraordinario-for-work-outside-the-catalogo": 49,
+        "amortise-the-anticipo-before-the-last-estimacion": 42,
+        "answer-a-payment-claim-with-a-payment-schedule": 42,
+        "apply-the-annual-reajustamento-to-a-brazilian-contract": 42,
+        "assemble-the-svodnyy-smetnyy-raschet-for-state-expertise": 56,
+        "back-the-estimacion-with-its-numeros-generadores": 42,
+        "bid-a-state-contract-under-44-fz": 49,
+        "bid-for-a-government-works-contract-under-the-tenders-law": 56,
+        "bid-for-a-public-works-contract-under-the-kbt": 56,
+        "budget-development-contributions-for-a-territorial-authority": 42,
+        "build-a-composicao-de-custo-unitario-propria": 48,
+        "build-a-smeta-on-the-gesn-norms-with-the-resource-method": 49,
+        "build-the-cronograma-fisico-financeiro-from-the-orcamento": 42,
+        "charge-gst-on-a-progress-payment-at-the-right-time": 42,
+        "check-sro-membership-before-anyone-starts-work": 42,
+        "check-the-kivitelezoi-nyilvantartas-before-you-sign": 49,
+        "choose-the-building-code-compliance-path-for-b1-and-e2": 42,
+        "claim-ajuste-de-costos-on-a-public-works-contract": 42,
+        "claim-an-extension-of-time-under-as-4000": 49,
+        "clear-a-standard-invoice-through-zatca-phase-two": 49,
+        "close-the-month-with-a-ks-2-act-and-a-ks-3-certificate": 42,
+        "close-the-object-and-take-the-vvod-v-ekspluatatsiyu": 49,
+        "close-the-obra-with-the-acta-de-entrega-recepcion-and-the-finiquito": 49,
+        "compose-the-bdi-under-acordao-2622-2013-tcu": 42,
+        "evidence-saudi-building-code-compliance": 49,
+        "file-the-building-permit-in-etdr-and-clear-the-hianypotlas": 49,
+        "file-the-nbr-12721-quadros-for-an-incorporacao": 42,
+        "get-the-teljesitesigazolas-signed-and-invoice-the-period": 49,
+        "hold-retention-money-on-trust-under-the-construction-contracts-act": 49,
+        "invoice-a-subcontract-under-forditott-adozas": 42,
+        "issue-a-tax-invoice-and-attribute-gst-on-a-progress-payment": 42,
+        "issue-the-interim-payment-certificate-and-get-paid-on-it": 56,
+        "keep-jotallas-apart-from-szavatossag-and-release-the-retention": 49,
+        "keep-the-e-epitesi-naplo-as-the-legal-record": 49,
+        "keep-the-latent-defects-period-alive-for-five-years": 42,
+        "keep-the-orcamento-estimado-sigiloso-under-lei-14133": 42,
+        "lodge-regulated-designs-under-the-design-and-building-practitioners-act": 49,
+        "measure-a-bill-of-quantities-to-asmm-6": 42,
+        "measure-a-bill-of-quantities-to-nzs-4202": 42,
+        "measure-a-building-bill-to-the-asaqs-standard-system": 49,
+        "open-a-project-trust-account-under-the-building-industry-fairness-act": 42,
+        "open-a-site-under-the-construction-regulations": 49,
+        "package-a-subcontract-under-saudization-and-local-content": 49,
+        "pay-davis-bacon-wages-and-file-the-certified-payroll": 49,
+        "pay-your-own-labour-and-file-the-month-end-returns": 49,
+        "place-the-three-fianzas-and-release-them-in-order": 42,
+        "price-a-base-year-smeta-with-the-minstroy-index": 42,
+        "price-a-compensation-event-and-a-jbcc-contract-instruction": 49,
+        "price-a-lopsrm-tender-and-integrate-the-precios-unitarios": 56,
+        "price-a-road-orcamento-from-the-sicro-base": 42,
+        "price-a-teteles-koltsegvetes-from-norm-and-rezsioradij": 49,
+        "price-a-variation-under-as-4000": 42,
+        "price-the-orcamento-de-referencia-from-the-sinapi-base": 42,
+        "produce-an-elemental-cost-plan-to-the-australian-cost-management-manual": 42,
+        "reconcile-materials-on-form-m-29": 49,
+        "recover-contract-price-adjustment-on-the-cpap-indices": 49,
+        "register-and-grade-with-the-cidb-before-you-tender": 42,
+        "register-the-obra-with-imss-and-check-repse-before-subcontracting": 49,
+        "report-every-szamla-to-nav-online-szamla": 42,
+        "run-a-contract-on-hijri-and-gregorian-dates": 49,
+        "run-a-tender-under-the-as-4120-code-of-tendering": 42,
+        "run-overlapping-pcbu-duties-on-a-shared-site": 49,
+        "run-the-contract-through-the-epittetoi-fedezetkezelo": 49,
+        "run-the-security-of-payment-clock-on-a-progress-claim": 49,
+        "run-the-wage-protection-system-month": 49,
+        "score-a-tender-on-price-and-preference-under-the-pppfa": 49,
+        "sell-off-plan-under-wafi-and-draw-from-the-escrow-account": 49,
+        "serve-a-payment-claim-under-the-construction-contracts-act": 56,
+        "set-the-contract-up-on-as-4000-or-as-2124": 42,
+        "set-the-encargos-sociais-and-decide-on-desoneracao": 42,
+        "set-the-securities-and-work-through-to-final-completion": 49,
+        "set-the-vat-treatment-on-a-saudi-construction-contract": 49,
+        "settle-the-avans-and-release-the-guarantee-retention": 49,
+        "sign-the-akt-skrytykh-rabot-before-the-work-is-covered": 49,
+        "stamp-a-cfdi-4-0-with-the-right-iva-and-retenciones": 49,
+        "take-a-building-consent-through-to-code-compliance": 49,
+        "take-a-building-from-permit-to-final-acceptance": 49
+      }
     }
-  },
-  "raised_by_hand": "1600 locale and playbook pairs holding 76720 step keys were recorded by hand at c5c54b26f for 17.1.0, under the rule the checker states when it refuses: a case that must ship ahead of its strings has its number raised here so the decision is visible in the diff. Those cases ship with their case cards translated and their step text in English in every locale but the source. The number can only fall from here, because --update refuses to raise one. A second raise of 1353 locale and playbook pairs holding 60615 step keys was recorded the same way at 40cc6fea6 for the thirty three cases added for Australia, New Zealand, Brazil and six single markets. Their case cards are translated into all 36 offered languages and their step text is English everywhere but the source, which is the state every wave of cases has landed in."
+  }
 }

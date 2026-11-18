@@ -57025,6 +57025,8 @@ const resource = {
     "modules.catalog.monitoring": "মনিটরিং",
     "modules.catalog.stockpiles": "স্টকপাইল",
     "modules.catalog.mine_survey": "খনি জরিপ",
+    "modules.catalog.norm_pricing": "মানদণ্ড-ভিত্তিক মূল্য নির্ধারণ",
+    "modules.catalog.project_tax": "প্রকল্পের কর প্রোফাইল",
     "modules.pp_desc_eleven_areas_framework": "মালিকপক্ষের প্রকল্প ব্যবস্থাপনা এগারোটি ব্যবস্থাপনা ক্ষেত্রে, দুটি পর্যায়ে - প্রকল্প উন্নয়ন ও নির্মাণ বাস্তবায়ন, এদের মাঝে একটি গেট এবং প্রতিটি ক্ষেত্রের জন্য একটি অনুমোদিত কাঠামো নথি।",
     "modules.pp_name_pakistan_pk": "পাকিস্তান নির্মাণ প্যাক",
     "modules.pp_name_peru_pe": "পেরু নির্মাণ প্যাক",
@@ -66505,6 +66507,16 @@ const resource = {
     "china_tax.tender_total": "দরপত্রের মোট",
     "china_tax.vat": "ভ্যাট",
     "china_tax.vat_base": "ভ্যাট ভিত্তি",
+    "china_tax.fees_option_zone": "এলাকা",
+    "china_tax.fees_option_safety_grade": "নিরাপত্তা গ্রেড",
+    "china_tax.fees_option_ring": "৫ম রিং রোডের সাপেক্ষে অবস্থান",
+    "china_tax.fees_option_project_class": "প্রকল্পের শ্রেণি",
+    "china_tax.fees_option_site_standard": "আদর্শ সাইট বাবদ অতিরিক্ত",
+    "doc_templates.kind.changeorders.change_order": "পরিবর্তন আদেশ",
+    "doc_templates.kind.finance.invoice": "চালান",
+    "doc_templates.kind.finance.payment": "পরিশোধের রেকর্ড",
+    "doc_templates.kind.procurement.purchase_order": "ক্রয় আদেশ",
+    "doc_templates.kind.procurement.goods_receipt": "পণ্য গ্রহণ",
   }
 } as { translation: Record<string, string> };
 

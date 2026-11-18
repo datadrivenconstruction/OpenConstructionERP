@@ -56872,6 +56872,8 @@ const resource = {
     "modules.catalog.monitoring": "Мониторинг",
     "modules.catalog.stockpiles": "Үймөктөр",
     "modules.catalog.mine_survey": "Тоо-кен маркшейдерлиги",
+    "modules.catalog.norm_pricing": "Нормалар боюнча баа белгилөө",
+    "modules.catalog.project_tax": "Долбоордун салык профили",
     "modules.pp_desc_eleven_areas_framework": "Иеси тарабынан долбоорду башкаруу он бир башкаруу тармагында, эки этапта: долбоорду иштеп чыгуу жана курулушту аткаруу. Экөөнүн ортосунда бир дарбаза жана ар бир тармак үчүн бир бекитилген алкактык документ бар.",
     "modules.pp_name_pakistan_pk": "Пакистан курулуш пакети",
     "modules.pp_name_peru_pe": "Перу курулуш пакети",
@@ -66352,6 +66354,16 @@ const resource = {
     "china_tax.tender_total": "Тендер жыйынтыгы",
     "china_tax.vat": "КНС",
     "china_tax.vat_base": "КНС базасы",
+    "china_tax.fees_option_zone": "Аймак",
+    "china_tax.fees_option_safety_grade": "Коопсуздук деңгээли",
+    "china_tax.fees_option_ring": "5-шакекчеге карата жайгашуусу",
+    "china_tax.fees_option_project_class": "Долбоордун классы",
+    "china_tax.fees_option_site_standard": "Үлгүлүү аянт үчүн кошумча",
+    "doc_templates.kind.changeorders.change_order": "Өзгөртүү буйругу",
+    "doc_templates.kind.finance.invoice": "Эсеп-фактура",
+    "doc_templates.kind.finance.payment": "Төлөм жазуусу",
+    "doc_templates.kind.procurement.purchase_order": "Сатып алуу буйрутмасы",
+    "doc_templates.kind.procurement.goods_receipt": "Товарды кабыл алуу",
   }
 } as { translation: Record<string, string> };
 

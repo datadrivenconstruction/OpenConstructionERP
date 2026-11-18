@@ -53684,6 +53684,8 @@ const resource = {
     "modules.catalog.monitoring": "Monitoreo",
     "modules.catalog.stockpiles": "Acopios",
     "modules.catalog.mine_survey": "Topografía de mina",
+    "modules.catalog.norm_pricing": "Precios por normas",
+    "modules.catalog.project_tax": "Perfil fiscal del proyecto",
     "modules.pp_desc_eleven_areas_framework": "Gestión del proyecto por parte de la propiedad en once áreas de gestión, en dos fases, desarrollo del proyecto y ejecución de la obra, con una puerta de control entre ambas y un documento marco aprobado por área.",
     "notifications.stakeholders.commitment_overdue.body": "El compromiso {{code}} vencía el {{due}}.",
     "notifications.stakeholders.commitment_overdue.title": "Un compromiso ha pasado su fecha límite",
@@ -60448,6 +60450,16 @@ const resource = {
     "mine.guide.period_body": "Abra el mes, añada una línea por unidad con su plan y fije la banda de cumplimiento.",
     "mine.guide.actual_body": "Elija la superficie al inicio y al final del mes. El real es el corte entre ambas, nunca escrito.",
     "mine.guide.claim_body": "Confirme el resultado y añádalo a la certificación contra una partida del presupuesto.",
+    "doc_templates.kind.changeorders.change_order": "Orden de cambio",
+    "doc_templates.kind.finance.invoice": "Factura",
+    "doc_templates.kind.finance.payment": "Registro de pago",
+    "doc_templates.kind.procurement.purchase_order": "Orden de compra",
+    "doc_templates.kind.procurement.goods_receipt": "Recepción de mercancías",
+    "china_tax.fees_option_zone": "Zona",
+    "china_tax.fees_option_safety_grade": "Grado de seguridad",
+    "china_tax.fees_option_ring": "Ubicación respecto al 5.º anillo",
+    "china_tax.fees_option_project_class": "Clase de proyecto",
+    "china_tax.fees_option_site_standard": "Recargo por obra modelo",
     // --- /Draft lender preparation ---
   }
 } as { translation: Record<string, string> };

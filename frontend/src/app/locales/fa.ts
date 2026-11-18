@@ -56715,6 +56715,8 @@ const resource = {
     "modules.catalog.monitoring": "پایش",
     "modules.catalog.stockpiles": "انبارهای خاک و مصالح",
     "modules.catalog.mine_survey": "نقشه‌برداری معدن",
+    "modules.catalog.norm_pricing": "قیمت‌گذاری بر پایه فهرست‌بها",
+    "modules.catalog.project_tax": "پروفایل مالیاتی پروژه",
     "modules.pp_desc_eleven_areas_framework": "مدیریت پروژه از سوی کارفرما در یازده حوزه مدیریتی و در دو فاز، توسعه پروژه و اجرای ساخت، با یک گیت میان آن‌ها و یک سند چارچوب تأییدشده برای هر حوزه.",
     "modules.pp_name_pakistan_pk": "بسته ساخت‌وساز پاکستان",
     "modules.pp_name_peru_pe": "بسته ساخت‌وساز پرو",
@@ -66195,6 +66197,16 @@ const resource = {
     "china_tax.tender_total": "جمع پیشنهاد",
     "china_tax.vat": "مالیات بر ارزش افزوده",
     "china_tax.vat_base": "مبنای مالیات بر ارزش افزوده",
+    "china_tax.fees_option_zone": "منطقه",
+    "china_tax.fees_option_safety_grade": "درجه ایمنی",
+    "china_tax.fees_option_ring": "موقعیت نسبت به کمربندی پنجم",
+    "china_tax.fees_option_project_class": "رده پروژه",
+    "china_tax.fees_option_site_standard": "افزایش کارگاه نمونه",
+    "doc_templates.kind.changeorders.change_order": "دستور تغییر",
+    "doc_templates.kind.finance.invoice": "فاکتور",
+    "doc_templates.kind.finance.payment": "سابقه پرداخت",
+    "doc_templates.kind.procurement.purchase_order": "سفارش خرید",
+    "doc_templates.kind.procurement.goods_receipt": "رسید کالا",
   }
 } as { translation: Record<string, string> };
 

@@ -58980,6 +58980,8 @@ const resource = {
     "modules.catalog.monitoring": "监测",
     "modules.catalog.stockpiles": "料堆",
     "modules.catalog.mine_survey": "矿山测量",
+    "modules.catalog.norm_pricing": "定额计价",
+    "modules.catalog.project_tax": "项目税务配置",
     "modules.pp_desc_eleven_areas_framework": "业主方在十一个管理领域开展项目管理，分为项目开发和施工实施两个阶段，两阶段之间设一个关口，每个领域有一份经批准的框架文件。",
     "modules.pp_name_pakistan_pk": "巴基斯坦建筑数据包",
     "modules.pp_name_peru_pe": "秘鲁建设包",
@@ -68466,6 +68468,11 @@ const resource = {
     "mine.guide.period_body": "打开月份，为每个单元添加带计划的行，并设置完成率区间。",
     "mine.guide.actual_body": "选择月初和月末的曲面。实际值是两者之间的开挖量，不手工输入。",
     "mine.guide.claim_body": "确认结果，然后按清单项加入进度申报。",
+    "doc_templates.kind.changeorders.change_order": "变更指令",
+    "doc_templates.kind.finance.invoice": "发票",
+    "doc_templates.kind.finance.payment": "付款记录",
+    "doc_templates.kind.procurement.purchase_order": "采购订单",
+    "doc_templates.kind.procurement.goods_receipt": "收货单",
   }
 } as { translation: Record<string, string> };
 

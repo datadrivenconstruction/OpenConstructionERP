@@ -58825,6 +58825,8 @@ const resource = {
     "modules.catalog.monitoring": "Моніторинг",
     "modules.catalog.stockpiles": "Штабелі",
     "modules.catalog.mine_survey": "Маркшейдерія",
+    "modules.catalog.norm_pricing": "Ціноутворення за нормами",
+    "modules.catalog.project_tax": "Податковий профіль проєкту",
     "modules.pp_desc_eleven_areas_framework": "Управління проєктом із боку замовника в одинадцяти сферах управління, у два етапи: розвиток проєкту та будівельне виконання. Між ними один гейт і один затверджений рамковий документ на кожну сферу.",
     "modules.pp_name_pakistan_pk": "Будівельний пакет Пакистан",
     "modules.pp_name_peru_pe": "Будівельний пакет Перу",
@@ -68392,6 +68394,16 @@ const resource = {
     "china_tax.tender_total": "Підсумок пропозиції",
     "china_tax.vat": "ПДВ",
     "china_tax.vat_base": "База ПДВ",
+    "china_tax.fees_option_zone": "Зона",
+    "china_tax.fees_option_safety_grade": "Рівень безпеки",
+    "china_tax.fees_option_ring": "Розташування щодо 5-го кільця",
+    "china_tax.fees_option_project_class": "Клас обʼєкта",
+    "china_tax.fees_option_site_standard": "Надбавка за зразковий майданчик",
+    "doc_templates.kind.changeorders.change_order": "Розпорядження про зміну",
+    "doc_templates.kind.finance.invoice": "Рахунок",
+    "doc_templates.kind.finance.payment": "Запис про платіж",
+    "doc_templates.kind.procurement.purchase_order": "Замовлення на закупівлю",
+    "doc_templates.kind.procurement.goods_receipt": "Приймання товару",
   }
 } as { translation: Record<string, string> };
 

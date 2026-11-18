@@ -53447,6 +53447,8 @@ const resource = {
     "modules.catalog.stockpiles": "Pilhas de material",
     "modules.catalog.mine_survey": "Topografia de mina",
     "modules.catalog.surfaces_volumes": "Superfícies e volumes",
+    "modules.catalog.norm_pricing": "Orçamentação por normas",
+    "modules.catalog.project_tax": "Perfil fiscal do projeto",
     "modules.pp_desc_eleven_areas_framework": "Gestão do projeto pelo lado do contratante em onze áreas de gestão, em duas fases, desenvolvimento do projeto e execução da obra, com um gate entre elas e um documento-quadro aprovado para cada área.",
     "modules.pp_name_peru_pe": "Pacote de construção Peru",
     "notifications.stakeholders.commitment_overdue.body": "O compromisso {{code}} tinha prazo em {{due}}.",
@@ -60485,6 +60487,16 @@ const resource = {
     "mine.guide.period_body": "Abra o mês, adicione uma linha por unidade com o plano e defina a faixa de conformidade.",
     "mine.guide.actual_body": "Escolha a superfície no início e no fim do mês. O real é a escavação entre elas, nunca digitado.",
     "mine.guide.claim_body": "Confirme o resultado e inclua na medição em uma linha do orçamento.",
+    "doc_templates.kind.changeorders.change_order": "Ordem de alteração",
+    "doc_templates.kind.finance.invoice": "Nota fiscal",
+    "doc_templates.kind.finance.payment": "Registro de pagamento",
+    "doc_templates.kind.procurement.purchase_order": "Pedido de compra",
+    "doc_templates.kind.procurement.goods_receipt": "Recebimento de mercadorias",
+    "china_tax.fees_option_zone": "Zona",
+    "china_tax.fees_option_safety_grade": "Grau de segurança",
+    "china_tax.fees_option_ring": "Localização em relação ao 5º anel",
+    "china_tax.fees_option_project_class": "Classe do projeto",
+    "china_tax.fees_option_site_standard": "Adicional de canteiro modelo",
     // --- /Draft lender preparation ---
   }
 } as { translation: Record<string, string> };

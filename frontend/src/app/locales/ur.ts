@@ -56721,6 +56721,8 @@ const resource = {
     "modules.catalog.monitoring": "مانیٹرنگ",
     "modules.catalog.stockpiles": "ذخائر کے ڈھیر",
     "modules.catalog.mine_survey": "کان کا سروے",
+    "modules.catalog.norm_pricing": "معیارات پر مبنی قیمت گذاری",
+    "modules.catalog.project_tax": "منصوبے کا ٹیکس پروفائل",
     "modules.pp_desc_eleven_areas_framework": "مالک کی جانب سے گیارہ انتظامی شعبوں میں پروجیکٹ مینجمنٹ، دو مراحل میں: پروجیکٹ کی ترقی اور تعمیراتی عمل درآمد، ان کے درمیان ایک گیٹ اور ہر شعبے کے لیے ایک منظور شدہ فریم ورک دستاویز۔",
     "modules.pp_name_pakistan_pk": "پاکستان تعمیراتی پیکج",
     "modules.pp_name_peru_pe": "پیرو تعمیراتی پیکیج",
@@ -66201,6 +66203,16 @@ const resource = {
     "china_tax.tender_total": "ٹینڈر کا کل",
     "china_tax.vat": "ویلیو ایڈڈ ٹیکس",
     "china_tax.vat_base": "ٹیکس کی بنیاد",
+    "china_tax.fees_option_zone": "علاقہ",
+    "china_tax.fees_option_safety_grade": "حفاظتی درجہ",
+    "china_tax.fees_option_ring": "پانچویں رنگ روڈ کے لحاظ سے مقام",
+    "china_tax.fees_option_project_class": "منصوبے کی قسم",
+    "china_tax.fees_option_site_standard": "مثالی سائٹ اضافہ",
+    "doc_templates.kind.changeorders.change_order": "تبدیلی کا حکم",
+    "doc_templates.kind.finance.invoice": "انوائس",
+    "doc_templates.kind.finance.payment": "ادائیگی کا ریکارڈ",
+    "doc_templates.kind.procurement.purchase_order": "خریداری کا آرڈر",
+    "doc_templates.kind.procurement.goods_receipt": "سامان کی وصولی",
   }
 } as { translation: Record<string, string> };
 

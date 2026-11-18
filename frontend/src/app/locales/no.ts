@@ -56755,6 +56755,8 @@ const resource = {
     "modules.catalog.monitoring": "Overvåking",
     "modules.catalog.stockpiles": "Lagre",
     "modules.catalog.mine_survey": "Gruvemåling",
+    "modules.catalog.norm_pricing": "Normprising",
+    "modules.catalog.project_tax": "Prosjektets skatteprofil",
     "modules.pp_desc_eleven_areas_framework": "Byggherrens prosjektstyring i elleve styringsområder over to faser, prosjektutvikling og utførelse, med én gate mellom og ett godkjent rammedokument per område.",
     "modules.pp_name_pakistan_pk": "Byggepakke Pakistan",
     "modules.pp_name_peru_pe": "Byggepakke Peru",
@@ -66235,6 +66237,16 @@ const resource = {
     "china_tax.tender_total": "Tilbudssum",
     "china_tax.vat": "MVA",
     "china_tax.vat_base": "MVA-grunnlag",
+    "china_tax.fees_option_zone": "Område",
+    "china_tax.fees_option_safety_grade": "Sikkerhetsnivå",
+    "china_tax.fees_option_ring": "Plassering i forhold til 5. ringvei",
+    "china_tax.fees_option_project_class": "Prosjektklasse",
+    "china_tax.fees_option_site_standard": "Tillegg for mønsterbyggeplass",
+    "doc_templates.kind.changeorders.change_order": "Endringsordre",
+    "doc_templates.kind.finance.invoice": "Faktura",
+    "doc_templates.kind.finance.payment": "Betalingspost",
+    "doc_templates.kind.procurement.purchase_order": "Innkjøpsordre",
+    "doc_templates.kind.procurement.goods_receipt": "Varemottak",
   }
 } as { translation: Record<string, string> };
 

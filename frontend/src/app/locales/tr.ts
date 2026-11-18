@@ -57636,6 +57636,8 @@ const resource = {
     "modules.catalog.monitoring": "İzleme",
     "modules.catalog.stockpiles": "Yığınlar",
     "modules.catalog.mine_survey": "Maden ölçümü",
+    "modules.catalog.norm_pricing": "Normlara göre fiyatlandırma",
+    "modules.catalog.project_tax": "Proje vergi profili",
     "modules.pp_desc_eleven_areas_framework": "Proje yönetimi işveren tarafından on bir yönetim alanında, iki aşamada yürütülür: proje geliştirme ve yapım uygulaması. Aralarında bir kapı ve her alan için onaylanmış bir çerçeve belge bulunur.",
     "modules.pp_name_pakistan_pk": "Pakistan İnşaat Paketi",
     "modules.pp_name_peru_pe": "Peru İnşaat Paketi",
@@ -67116,6 +67118,16 @@ const resource = {
     "china_tax.tender_total": "Teklif toplamı",
     "china_tax.vat": "KDV",
     "china_tax.vat_base": "KDV matrahı",
+    "china_tax.fees_option_zone": "Bölge",
+    "china_tax.fees_option_safety_grade": "Güvenlik derecesi",
+    "china_tax.fees_option_ring": "5. çevre yoluna göre konum",
+    "china_tax.fees_option_project_class": "Proje sınıfı",
+    "china_tax.fees_option_site_standard": "Örnek şantiye ek ücreti",
+    "doc_templates.kind.changeorders.change_order": "Değişiklik emri",
+    "doc_templates.kind.finance.invoice": "Fatura",
+    "doc_templates.kind.finance.payment": "Ödeme kaydı",
+    "doc_templates.kind.procurement.purchase_order": "Satın alma siparişi",
+    "doc_templates.kind.procurement.goods_receipt": "Mal kabul",
   }
 } as { translation: Record<string, string> };
 

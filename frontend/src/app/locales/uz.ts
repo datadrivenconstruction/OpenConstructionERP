@@ -57687,6 +57687,8 @@ const resource = {
     "modules.catalog.stockpiles": "Uyumlar",
     "modules.catalog.mine_survey": "Konchilik surati",
     "modules.catalog.monitoring": "Deformatsiya monitoringi",
+    "modules.catalog.norm_pricing": "Normalar boʻyicha narxlash",
+    "modules.catalog.project_tax": "Loyihaning soliq profili",
     "modules.pp_desc_eleven_areas_framework": "Loyihani buyurtmachi tomonidan oʻn bir boshqaruv sohasida, ikki bosqichda boshqarish: loyihani ishlab chiqish va qurilishni amalga oshirish. Ular orasida bitta gate va har bir soha uchun bitta tasdiqlangan ramka hujjati bor.",
     "modules.pp_name_pakistan_pk": "Pokiston qurilish paketi",
     "modules.pp_name_peru_pe": "Peru qurilish paketi",
@@ -67167,6 +67169,16 @@ const resource = {
     "china_tax.tender_total": "Tender jami",
     "china_tax.vat": "QQS",
     "china_tax.vat_base": "QQS asosi",
+    "china_tax.fees_option_zone": "Hudud",
+    "china_tax.fees_option_safety_grade": "Xavfsizlik darajasi",
+    "china_tax.fees_option_ring": "5-halqa yoʻlga nisbatan joylashuv",
+    "china_tax.fees_option_project_class": "Loyiha toifasi",
+    "china_tax.fees_option_site_standard": "Namunaviy maydon uchun qoʻshimcha",
+    "doc_templates.kind.changeorders.change_order": "Oʻzgartirish buyrugʻi",
+    "doc_templates.kind.finance.invoice": "Hisob-faktura",
+    "doc_templates.kind.finance.payment": "Toʻlov yozuvi",
+    "doc_templates.kind.procurement.purchase_order": "Xarid buyurtmasi",
+    "doc_templates.kind.procurement.goods_receipt": "Tovarni qabul qilish",
   }
 } as { translation: Record<string, string> };
 

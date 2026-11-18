@@ -58278,6 +58278,8 @@ const resource = {
     "modules.catalog.stockpiles": "Zwały",
     "modules.catalog.mine_survey": "Pomiary kopalniane",
     "modules.catalog.monitoring": "Monitoring deformacji",
+    "modules.catalog.norm_pricing": "Wycena według norm",
+    "modules.catalog.project_tax": "Profil podatkowy projektu",
     "modules.pp_desc_eleven_areas_framework": "Zarządzanie projektem po stronie inwestora w jedenastu obszarach zarządzania, w dwóch fazach, rozwoju projektu i realizacji budowy, z jedną bramką między nimi i jednym zatwierdzonym dokumentem ramowym dla każdego obszaru.",
     "modules.pp_name_pakistan_pk": "Pakiet budowlany Pakistan",
     "modules.pp_name_peru_pe": "Pakiet budowlany Peru",
@@ -67845,6 +67847,16 @@ const resource = {
     "china_tax.tender_total": "Suma oferty",
     "china_tax.vat": "VAT",
     "china_tax.vat_base": "Podstawa VAT",
+    "china_tax.fees_option_zone": "Strefa",
+    "china_tax.fees_option_safety_grade": "Stopień bezpieczeństwa",
+    "china_tax.fees_option_ring": "Położenie względem 5. obwodnicy",
+    "china_tax.fees_option_project_class": "Klasa obiektu",
+    "china_tax.fees_option_site_standard": "Dodatek za wzorcowy plac budowy",
+    "doc_templates.kind.changeorders.change_order": "Polecenie zmiany",
+    "doc_templates.kind.finance.invoice": "Faktura",
+    "doc_templates.kind.finance.payment": "Zapis płatności",
+    "doc_templates.kind.procurement.purchase_order": "Zamówienie zakupu",
+    "doc_templates.kind.procurement.goods_receipt": "Przyjęcie towaru",
   }
 } as { translation: Record<string, string> };
 

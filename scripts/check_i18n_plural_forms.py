@@ -135,6 +135,7 @@ CATEGORIES: dict[str, tuple[str, ...]] = {
     "uz": ("one", "other"),
     "vi": ("other",),
     "zh": ("other",),
+    "zh-HK": ("other",),
 }
 
 _SUFFIXES = ("zero", "one", "two", "few", "many", "other")

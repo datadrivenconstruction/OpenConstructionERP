@@ -56705,6 +56705,8 @@ const resource = {
     "modules.catalog.monitoring": "Jälgimine",
     "modules.catalog.stockpiles": "Hunnikud",
     "modules.catalog.mine_survey": "Kaevandusmõõdistus",
+    "modules.catalog.norm_pricing": "Normipõhine hinnastamine",
+    "modules.catalog.project_tax": "Projekti maksuprofiil",
     "modules.pp_desc_eleven_areas_framework": "Tellija poolne projektijuhtimine üheteistkümnes juhtimisvaldkonnas kahes faasis, projekti arendus ja ehitusteostus, nende vahel üks värav ning iga valdkonna kohta üks kinnitatud raamdokument.",
     "modules.pp_name_pakistan_pk": "Ehituspakett: Pakistan",
     "modules.pp_name_peru_pe": "Peruu ehituspakett",
@@ -66185,6 +66187,16 @@ const resource = {
     "china_tax.tender_total": "Pakkumise kogusumma",
     "china_tax.vat": "Käibemaks",
     "china_tax.vat_base": "Käibemaksu alus",
+    "china_tax.fees_option_zone": "Piirkond",
+    "china_tax.fees_option_safety_grade": "Ohutusaste",
+    "china_tax.fees_option_ring": "Asukoht 5. ringtee suhtes",
+    "china_tax.fees_option_project_class": "Projekti klass",
+    "china_tax.fees_option_site_standard": "Näidisehitusplatsi lisatasu",
+    "doc_templates.kind.changeorders.change_order": "Muudatustellimus",
+    "doc_templates.kind.finance.invoice": "Arve",
+    "doc_templates.kind.finance.payment": "Makse kirje",
+    "doc_templates.kind.procurement.purchase_order": "Ostutellimus",
+    "doc_templates.kind.procurement.goods_receipt": "Kauba vastuvõtt",
   }
 } as { translation: Record<string, string> };
 

@@ -94,15 +94,14 @@ export interface SurveyInput {
   density_source: DensitySource;
 }
 
-const p = (projectId: string) => `${BASE}/projects/${projectId}`;
 
-export const getStockpileSummary = (projectId: string) => apiGet<StockpileSummary>(`${p(projectId)}/summary`);
+export const getStockpileSummary = (projectId: string) => apiGet<StockpileSummary>(`${BASE}/projects/${projectId}/summary`);
 export const listStockpiles = (projectId: string, locale: string) =>
-  apiGet<{ items: Stockpile[] }>(`${p(projectId)}/stockpiles?locale=${encodeURIComponent(locale)}`).then((r) => r.items);
+  apiGet<{ items: Stockpile[] }>(`${BASE}/projects/${projectId}/stockpiles?locale=${encodeURIComponent(locale)}`).then((r) => r.items);
 export const getStockpile = (id: string, locale: string) =>
   apiGet<StockpileDetail>(`${BASE}/stockpiles/${id}?locale=${encodeURIComponent(locale)}`);
 export const createStockpile = (projectId: string, body: StockpileInput) =>
-  apiPost<StockpileDetail>(`${p(projectId)}/stockpiles`, body);
+  apiPost<StockpileDetail>(`${BASE}/projects/${projectId}/stockpiles`, body);
 export const updateStockpile = (id: string, body: Partial<StockpileInput>) =>
   apiPatch<StockpileDetail>(`${BASE}/stockpiles/${id}`, body);
 export const deleteStockpile = (id: string) => apiDelete(`${BASE}/stockpiles/${id}`);
