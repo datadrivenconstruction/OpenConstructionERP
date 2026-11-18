@@ -31091,6 +31091,8 @@ const resource = {
   "contacts.prequal_approved": "Одобрен",
   "contacts.prequal_pending": "Чакащ",
   "contacts.field_state": "Област / регион",
+  "contacts.picker_project_team": "Екип на проекта",
+  "contacts.picker_company_contacts": "Контакти на компанията",
     "contracts.flow_1_desc": "Създайте договор, ориентиран към типа, със своя график на стойности и задържане.",
     "contracts.flow_1_title": "Настройка",
     "contracts.flow_2_desc": "Изчистете вратата за съответствие, след това подпишете, за да я активирате.",

@@ -30932,6 +30932,8 @@ const resource = {
   "contacts.prequal_approved": "อนุมัติแล้ว",
   "contacts.prequal_pending": "รอดำเนินการ",
   "contacts.field_state": "รัฐ / ภูมิภาค",
+  "contacts.picker_project_team": "ทีมโครงการ",
+  "contacts.picker_company_contacts": "รายชื่อติดต่อของบริษัท",
     "contracts.flow_1_desc": "สร้างสัญญาที่รู้จักประเภทกับตารางค่าและการหักไว้ของมัน",
     "contracts.flow_1_title": "ตั้งค่า",
     "contracts.flow_2_desc": "ล้างเกตการปฏิสัมพันธ์ จากนั้นลงนามเพื่อให้มันทำงาน",

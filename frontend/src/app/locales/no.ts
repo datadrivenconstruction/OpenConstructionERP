@@ -30987,6 +30987,8 @@ const resource = {
   "contacts.prequal_approved": "Godkjent",
   "contacts.prequal_pending": "Venter",
   "contacts.field_state": "Fylke / region",
+  "contacts.picker_project_team": "Prosjektteam",
+  "contacts.picker_company_contacts": "Bedriftens kontakter",
     "contracts.flow_1_desc": "Opprett en typeklar kontrakt med dens verdiskjema og oppbetaling.",
     "contracts.flow_1_title": "Sett opp",
     "contracts.flow_2_desc": "Fjern samsvarsporten, og signer deretter for å gjøre den aktiv.",

@@ -31372,6 +31372,8 @@ const resource = {
   "contacts.prequal_approved": "Approvato",
   "contacts.prequal_pending": "In attesa",
   "contacts.field_state": "Provincia / regione",
+  "contacts.picker_project_team": "Team di progetto",
+  "contacts.picker_company_contacts": "Contatti aziendali",
     "contracts.flow_1_desc": "Crea un contratto consapevole del tipo con il suo calendario dei valori e della ritenzione.",
     "contracts.flow_1_title": "Configurazione",
     "contracts.flow_2_desc": "Cancella il cancello di conformità, quindi firma per renderlo attivo.",

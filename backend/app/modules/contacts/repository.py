@@ -216,6 +216,37 @@ class ContactRepository:
 
         return contacts, total
 
+    async def list_pickable(
+        self,
+        *,
+        search: str | None,
+        team_contact_ids: list[uuid.UUID],
+        limit: int,
+    ) -> tuple[list[Contact], list[Contact]]:
+        """Contacts a picker offers: project team first, then every other active contact.
+
+        Read-only and deliberately not owner-scoped: a company's address book is
+        shared for picking. Writes keep going through the owner-or-admin gate.
+        """
+        base = self._filtered(
+            contact_type=None,
+            country_code=None,
+            search=search,
+            is_active=True,
+            owner_id=None,
+            tags=None,
+        )
+        order = (func.lower(func.coalesce(Contact.last_name, Contact.company_name, "")), Contact.id)
+        team: list[Contact] = []
+        if team_contact_ids:
+            res = await self.session.execute(base.where(Contact.id.in_(team_contact_ids)).order_by(*order).limit(limit))
+            team = list(res.scalars().all())
+        rest = base.order_by(*order).limit(limit)
+        if team_contact_ids:
+            rest = base.where(Contact.id.notin_(team_contact_ids)).order_by(*order).limit(limit)
+        company = list((await self.session.execute(rest)).scalars().all())
+        return team, company
+
     async def create(self, contact: Contact) -> Contact:
         """Insert a new contact."""
         self.session.add(contact)

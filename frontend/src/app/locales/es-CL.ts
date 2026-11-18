@@ -29828,6 +29828,8 @@ const resource = {
   "contacts.prequal_approved": "Aprobado",
   "contacts.prequal_pending": "Pendiente",
   "contacts.field_state": "Región",
+  "contacts.picker_project_team": "Equipo del proyecto",
+  "contacts.picker_company_contacts": "Contactos de la empresa",
     "contracts.flow_1_desc": "Cree un contrato consciente del tipo con su cronograma de valores y retención.",
     "contracts.flow_1_title": "Configurar",
     "contracts.flow_2_desc": "Despeje la puerta de cumplimiento, luego firme para hacerla activa.",

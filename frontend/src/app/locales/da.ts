@@ -31107,6 +31107,8 @@ const resource = {
   "contacts.prequal_approved": "Godkendt",
   "contacts.prequal_pending": "Afventer",
   "contacts.field_state": "Delstat / region",
+  "contacts.picker_project_team": "Projektteam",
+  "contacts.picker_company_contacts": "Virksomhedens kontakter",
     "contracts.flow_1_desc": "Opret en typebewusst kontrakt med dens værdiberegning og tilbageholdelse.",
     "contracts.flow_1_title": "Opsætning",
     "contracts.flow_2_desc": "Ryd overensstemmelses porten, derefter underskriv for at gøre den aktiv.",

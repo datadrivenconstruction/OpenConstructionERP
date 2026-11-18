@@ -30142,6 +30142,8 @@ const resource = {
     "contacts.prequal_approved": "تأییدشده",
     "contacts.prequal_pending": "در انتظار",
     "contacts.field_state": "استان / منطقه",
+    "contacts.picker_project_team": "تیم پروژه",
+    "contacts.picker_company_contacts": "مخاطبان شرکت",
     "contracts.flow_1_desc": "یک قرارداد نوع‌آگاه را همراه با جدول ارزش‌ها و نگهداشت آن ایجاد کنید.",
     "contracts.flow_1_title": "برپایی",
     "contracts.flow_2_desc": "دروازه انطباق را پاک کنید، سپس برای فعال‌شدن امضا کنید.",

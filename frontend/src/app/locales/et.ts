@@ -30989,6 +30989,8 @@ const resource = {
     "contacts.prequal_approved": "Kinnitatud",
     "contacts.prequal_pending": "Ootel",
     "contacts.field_state": "Maakond / piirkond",
+    "contacts.picker_project_team": "Projektimeeskond",
+    "contacts.picker_company_contacts": "Ettevõtte kontaktid",
     "contracts.flow_1_desc": "Loo tüübiteadlik leping koos väärtuste ajakava ja kinnipeetava tagatisega.",
     "contracts.flow_1_title": "Seadista",
     "contracts.flow_2_desc": "Läbi vastavuskontroll ja allkirjasta, et leping muutuks aktiivseks.",

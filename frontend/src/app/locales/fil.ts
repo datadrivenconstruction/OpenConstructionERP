@@ -29987,6 +29987,8 @@ const resource = {
     "contacts.prequal_approved": "Aprubado",
     "contacts.prequal_pending": "Nakabinbin",
     "contacts.field_state": "Estado / rehiyon",
+    "contacts.picker_project_team": "Pangkat ng proyekto",
+    "contacts.picker_company_contacts": "Mga contact ng kumpanya",
     "contracts.flow_1_desc": "Gumawa ng type-aware na kontrata na may schedule of values at retention nito.",
     "contracts.flow_1_title": "Itatag",
     "contracts.flow_2_desc": "Linisin ang compliance gate, pagkatapos ay pirmahan para gawing aktibo.",

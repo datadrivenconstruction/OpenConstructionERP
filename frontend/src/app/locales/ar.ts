@@ -31958,6 +31958,8 @@ const resource = {
   "contacts.prequal_approved": "معتمد",
   "contacts.prequal_pending": "قيد الانتظار",
   "contacts.field_state": "الولاية / المنطقة",
+  "contacts.picker_project_team": "فريق المشروع",
+  "contacts.picker_company_contacts": "جهات اتصال الشركة",
     "contracts.flow_1_desc": "إنشاء عقد يدرك النوع مع جدول القيم والاحتجاز.",
     "contracts.flow_1_title": "الإعداد",
     "contracts.flow_2_desc": "امسح بوابة الامتثال، ثم وقّع لتفعيله.",

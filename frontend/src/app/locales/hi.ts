@@ -30604,6 +30604,8 @@ const resource = {
   "contacts.prequal_approved": "स्वीकृत",
   "contacts.prequal_pending": "लंबित",
   "contacts.field_state": "राज्य / क्षेत्र",
+  "contacts.picker_project_team": "परियोजना टीम",
+  "contacts.picker_company_contacts": "कंपनी संपर्क",
     "contracts.flow_1_desc": "इसके मूल्य के शेड्यूल और प्रतिधारण के साथ एक प्रकार-जागरूक अनुबंध बनाएं।",
     "contracts.flow_1_title": "सेट अप करें",
     "contracts.flow_2_desc": "अनुपालन गेट को साफ़ करें, फिर इसे सक्रिय करने के लिए साइन करें।",

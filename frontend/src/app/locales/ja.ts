@@ -30882,6 +30882,8 @@ const resource = {
   "contacts.prequal_approved": "承認済み",
   "contacts.prequal_pending": "保留中",
   "contacts.field_state": "都道府県 / 地域",
+  "contacts.picker_project_team": "プロジェクトチーム",
+  "contacts.picker_company_contacts": "会社の連絡先",
     "contracts.flow_1_desc": "スケジュール・オブ・バリューと保持金を含む、タイプを認識できる契約を作成します。",
     "contracts.flow_1_title": "設定",
     "contracts.flow_2_desc": "適合ゲートをクリアしてから署名して有効にします。",

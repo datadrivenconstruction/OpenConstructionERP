@@ -47,6 +47,8 @@ from app.modules.contacts.schemas import (
     ContactResponse,
     ContactStatsResponse,
     ContactUpdate,
+    PickableContact,
+    PickableContactsResponse,
 )
 from app.modules.contacts.service import ContactService
 
@@ -282,6 +284,49 @@ async def search_contacts(
         total=total,
         offset=offset,
         limit=limit,
+    )
+
+
+@router.get(
+    "/pickable/",
+    response_model=PickableContactsResponse,
+    summary="Contacts for a picker",
+    description="Every active contact of the company, for choosing an assignee. With project_id the "
+    "members of that project's team come first in a separate group. Read-only: editing and "
+    "deleting stay with the author or an admin.",
+)
+async def pickable_contacts(
+    session: SessionDep,
+    q: str | None = Query(default=None, max_length=200),
+    project_id: uuid.UUID | None = Query(default=None),
+    limit: int = Query(default=200, ge=1, le=500),
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    _perm: None = Depends(RequirePermission("contacts.read")),
+    service: ContactService = Depends(_get_service),
+) -> PickableContactsResponse:
+    """List contacts for an assignee picker, project team first."""
+    team_ids: list[uuid.UUID] = []
+    if project_id is not None:
+        await verify_project_access(project_id, str(user_id), session)
+        try:
+            from app.modules.teams.models import RosterMember
+        except ImportError:  # teams module not installed: no team group
+            RosterMember = None  # noqa: N806
+        if RosterMember is not None:
+            rows = await session.execute(
+                select(RosterMember.contact_id).where(
+                    RosterMember.project_id == project_id,
+                    RosterMember.is_active.is_(True),
+                    RosterMember.contact_id.is_not(None),
+                )
+            )
+            team_ids = list({r[0] for r in rows.all()})
+    team, company = await service.repo.list_pickable(
+        search=q.strip() if q and q.strip() else None, team_contact_ids=team_ids, limit=limit
+    )
+    return PickableContactsResponse(
+        team=[PickableContact.model_validate(c) for c in team],
+        company=[PickableContact.model_validate(c) for c in company],
     )
 
 

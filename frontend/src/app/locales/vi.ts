@@ -30941,6 +30941,8 @@ const resource = {
   "contacts.prequal_approved": "Đã duyệt",
   "contacts.prequal_pending": "Đang chờ",
   "contacts.field_state": "Tỉnh / vùng",
+  "contacts.picker_project_team": "Nhóm dự án",
+  "contacts.picker_company_contacts": "Danh bạ công ty",
     "contracts.flow_1_desc": "Tạo một hợp đồng nhận thức về loại với lịch trình giá trị và giữ lại của nó.",
     "contracts.flow_1_title": "Thiết lập",
     "contracts.flow_2_desc": "Xóa cổng tuân thủ, sau đó ký để làm cho nó hoạt động.",

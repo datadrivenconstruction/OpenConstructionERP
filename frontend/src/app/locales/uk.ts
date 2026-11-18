@@ -31886,6 +31886,8 @@ const resource = {
     "contacts.prequal_approved": "Схвалено",
     "contacts.prequal_pending": "На розгляді",
     "contacts.field_state": "Область / регіон",
+    "contacts.picker_project_team": "Команда проєкту",
+    "contacts.picker_company_contacts": "Контакти компанії",
     "contracts.flow_1_desc": "Створіть контракт з урахуванням типу, графіком вартості та утриманням.",
     "contracts.flow_1_title": "Налаштування",
     "contracts.flow_2_desc": "Пройдіть перевірку відповідності, а потім підпишіть, щоб активувати.",

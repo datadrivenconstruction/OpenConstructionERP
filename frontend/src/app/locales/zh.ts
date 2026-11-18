@@ -30924,6 +30924,8 @@ const resource = {
   "contacts.prequal_approved": "已批准",
   "contacts.prequal_pending": "待处理",
   "contacts.field_state": "省 / 地区",
+  "contacts.picker_project_team": "项目团队",
+  "contacts.picker_company_contacts": "公司联系人",
     "contracts.flow_1_desc": "创建类型感知合同及其价值计划和保留金。",
     "contracts.flow_1_title": "设置",
     "contracts.flow_2_desc": "清除合规门,然后签署使其生效。",

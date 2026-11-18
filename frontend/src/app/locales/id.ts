@@ -30788,6 +30788,8 @@ const resource = {
   "contacts.prequal_approved": "Disetujui",
   "contacts.prequal_pending": "Menunggu",
   "contacts.field_state": "Provinsi / wilayah",
+  "contacts.picker_project_team": "Tim proyek",
+  "contacts.picker_company_contacts": "Kontak perusahaan",
     "contracts.flow_1_desc": "Buat kontrak yang sadar tipe dengan jadwal nilai dan retensiannya.",
     "contracts.flow_1_title": "Siapkan",
     "contracts.flow_2_desc": "Bersihkan gerbang kepatuhan, kemudian tanda tangan untuk membuatnya aktif.",

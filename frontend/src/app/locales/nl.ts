@@ -31097,6 +31097,8 @@ const resource = {
   "contacts.prequal_approved": "Goedgekeurd",
   "contacts.prequal_pending": "In behandeling",
   "contacts.field_state": "Provincie / regio",
+  "contacts.picker_project_team": "Projectteam",
+  "contacts.picker_company_contacts": "Bedrijfscontacten",
     "contracts.flow_1_desc": "Maak een type-bewust contract met zijn waardeplan en retentie.",
     "contracts.flow_1_title": "Instellen",
     "contracts.flow_2_desc": "Wis de nalevingsgate, onderteken vervolgens om deze actief te maken.",

@@ -31459,6 +31459,8 @@ const resource = {
   "contacts.prequal_approved": "Schváleno",
   "contacts.prequal_pending": "Čeká na vyřízení",
   "contacts.field_state": "Kraj / region",
+  "contacts.picker_project_team": "Projektový tým",
+  "contacts.picker_company_contacts": "Kontakty společnosti",
     "contracts.flow_1_desc": "Vytvořte smlouvu s vědomím typu se svým harmonogramem hodnot a zadržením.",
     "contracts.flow_1_title": "Nastavit",
     "contracts.flow_2_desc": "Vyčistěte bránu dodržování předpisů a poté ji podepište, aby se aktivovala.",

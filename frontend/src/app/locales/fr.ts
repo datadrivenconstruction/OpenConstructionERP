@@ -31362,6 +31362,8 @@ const resource = {
   "contacts.prequal_approved": "Approuvé",
   "contacts.prequal_pending": "En attente",
   "contacts.field_state": "État / région",
+  "contacts.picker_project_team": "Équipe du projet",
+  "contacts.picker_company_contacts": "Contacts de l'entreprise",
     "contracts.flow_1_desc": "Créez un contrat conscient du type avec son échéancier et sa retenue.",
     "contracts.flow_1_title": "Configurer",
     "contracts.flow_2_desc": "Effacez le verrou de conformité, puis signez pour l'activer.",
