@@ -21,6 +21,8 @@ export interface BidPortalLine {
   /** Decimal as a string; empty for a section heading. */
   quantity: string;
   depth: number;
+  /** Components of the line another party supplies (owner-supplied materials). */
+  supplied_by_others?: string[];
 }
 
 export interface BidPortalDraft {
@@ -40,6 +42,8 @@ export interface BidPortalView {
   currency: string;
   project_name: string;
   buyer_name: string;
+  /** The issuing company has a document logo, served at ``logo/``. */
+  buyer_logo?: boolean;
   bidder_company: string;
   expires_at: string;
   lines: BidPortalLine[];
@@ -129,6 +133,11 @@ async function callJson<T>(token: string, path: string, init?: RequestInit): Pro
 
 function call(token: string, path: string, init?: RequestInit): Promise<BidPortalView> {
   return callJson<BidPortalView>(token, path, init);
+}
+
+/** Address of the issuing company's logo for a bidder link. */
+export function bidPortalLogoUrl(token: string): string {
+  return `/api/v1/tendering/bid-portal/${encodeURIComponent(token)}/logo/`;
 }
 
 export function fetchBidPortal(token: string): Promise<BidPortalView> {

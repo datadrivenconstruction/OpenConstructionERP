@@ -112,6 +112,28 @@ describe('the bidder price-entry page', () => {
     expect(screen.getByText(/soil class 3-5/)).toBeTruthy();
   });
 
+  it('shows the buyer logo only when the buyer has one', async () => {
+    fetchMock.mockResolvedValue(makeView({ buyer_logo: true }));
+    const { unmount } = renderPage();
+    const logo = await screen.findByTestId('bid-portal-logo');
+    expect(logo.getAttribute('src')).toContain('bidder-link-token');
+    unmount();
+
+    fetchMock.mockResolvedValue(makeView());
+    renderPage();
+    await screen.findByTestId('bid-portal-table');
+    expect(screen.queryByTestId('bid-portal-logo')).toBeNull();
+  });
+
+  it('tells the bidder which parts of a line others supply', async () => {
+    const view = makeView();
+    view.lines[1] = { ...view.lines[1]!, supplied_by_others: ['Rebar B500'] };
+    fetchMock.mockResolvedValue(view);
+    renderPage();
+    await screen.findByTestId('bid-portal-table');
+    expect(screen.getByText(/Rebar B500/)).toBeTruthy();
+  });
+
   it('writes the unit the way the bill editor does, not as the stored code', async () => {
     fetchMock.mockResolvedValue(makeView());
     renderPage();

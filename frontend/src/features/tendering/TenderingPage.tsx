@@ -38,6 +38,8 @@ import {
   Upload,
   Scale,
   Timer,
+  Link2,
+  Ban,
 } from 'lucide-react';
 import { Button, Card, Badge, EmptyState, RecoveryCard, DismissibleInfo, IntroRichText, SkeletonTable, Breadcrumb, ConfirmDialog, ModuleGuideButton, CollapsibleSection } from '@/shared/ui';
 import { RequiresProject } from '@/shared/auth/RequiresProject';
@@ -79,9 +81,15 @@ import {
   removeRecipient,
   distributePackage,
   getPackageScope,
+  deletePackage,
+  cancelPackage,
+  sealedErrorCode,
   type Recipient,
   type DistributeResponse,
 } from './api';
+import { PackageContentsPanel } from './PackageContentsPanel';
+import { BuyerPricesDialog } from './BuyerPricesDialog';
+import { createBidLinkForBid } from './bidInvitations';
 import { fmtList, fmtPercent, formatDateValue } from '@/shared/lib/formatters';
 import {
   listSubcontractors,
@@ -199,6 +207,9 @@ interface BidComparison {
   bid_count: number;
   bid_companies: string[];
   budget_total: number;
+  /** Sum of the package's lines; ``budget_total`` is the override when one is set. */
+  budget_computed?: number | string;
+  budget_override?: number | string | null;
   rows: BidComparisonRow[];
   bid_totals: {
     bid_id: string;
@@ -1515,9 +1526,12 @@ function DistributionPanel({ packageId }: { packageId: string }) {
 function PackageDetail({
   packageId,
   currency,
+  onDeleted,
 }: {
   packageId: string;
   currency: string;
+  /** The package is gone (deleted); the page drops the selection. */
+  onDeleted?: () => void;
 }) {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
@@ -1534,8 +1548,10 @@ function PackageDetail({
   // only loads when its tab is opened, so a package nobody keeps a record for
   // costs no request and stores nothing.
   const [activeTab, setActiveTab] = useState<
-    'bids' | 'distribution' | 'addenda' | 'clarifications' | 'leveling' | 'award-record'
+    'contents' | 'bids' | 'distribution' | 'addenda' | 'clarifications' | 'leveling' | 'award-record'
   >('bids');
+  // A bid entered by hand, being priced line by line by the buyer.
+  const [pricingBid, setPricingBid] = useState<BidData | null>(null);
 
   // Fetch package with bids
   const { data: pkg, isLoading: pkgLoading, isError: pkgError } = useQuery({
@@ -1664,6 +1680,102 @@ function PackageDetail({
     },
     onError: (error: Error) => {
       addToast({ type: 'error', title: t('toasts.error', { defaultValue: 'Error' }), message: error.message });
+    },
+  });
+
+  // Delete a draft nobody has seen; a tender that reached a firm is cancelled
+  // instead (closed with its reason and kept), which the server insists on.
+  const cancelMutation = useMutation({
+    mutationFn: (reason: string) => cancelPackage(packageId, reason),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tendering-package', packageId] });
+      queryClient.invalidateQueries({ queryKey: ['tendering-packages'] });
+      addToast({ type: 'success', title: t('tendering.cancelled', { defaultValue: 'Tender cancelled' }) });
+    },
+    onError: (error: Error) => {
+      addToast({ type: 'error', title: t('toasts.error', { defaultValue: 'Error' }), message: error.message });
+    },
+  });
+
+  const askCancel = useCallback(async () => {
+    const ok = await confirm({
+      title: t('tendering.cancel_title', { defaultValue: 'Cancel this tender?' }),
+      message: t('tendering.cancel_message', {
+        defaultValue:
+          'The package has gone out to bidders, so it is kept for the record: it is closed, its bidder links stop taking prices, and its bids stay readable.',
+      }),
+      confirmLabel: t('tendering.cancel_confirm', { defaultValue: 'Cancel tender' }),
+      variant: 'danger',
+    });
+    if (ok) cancelMutation.mutate('');
+  }, [confirm, cancelMutation, t]);
+
+  const deleteMutation = useMutation({
+    mutationFn: () => deletePackage(packageId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tendering-packages'] });
+      addToast({ type: 'success', title: t('tendering.deleted', { defaultValue: 'Tender package deleted' }) });
+      onDeleted?.();
+    },
+    onError: (error: Error) => {
+      if (sealedErrorCode(error) === 'package_in_use') {
+        void askCancel();
+        return;
+      }
+      addToast({ type: 'error', title: t('toasts.error', { defaultValue: 'Error' }), message: error.message });
+    },
+  });
+
+  const askDelete = useCallback(async () => {
+    const ok = await confirm({
+      title: t('tendering.delete_title', { defaultValue: 'Delete this package?' }),
+      message: t('tendering.delete_message', {
+        defaultValue: 'The draft package and its distribution list are deleted. The BOQ is not touched.',
+      }),
+      confirmLabel: t('common.delete', { defaultValue: 'Delete' }),
+      variant: 'danger',
+    });
+    if (ok) deleteMutation.mutate();
+  }, [confirm, deleteMutation, t]);
+
+  // A link for a bid the buyer entered by hand: the firm fills in its own
+  // prices and its submission updates this bid.
+  const bidLinkMutation = useMutation({
+    mutationFn: (bidId: string) => createBidLinkForBid(bidId),
+    onSuccess: async (created) => {
+      queryClient.invalidateQueries({ queryKey: bidInvitationsQueryKey(packageId) });
+      queryClient.invalidateQueries({ queryKey: ['tendering-recipients', packageId] });
+      const url = created.url.startsWith('/') ? `${window.location.origin}${created.url}` : created.url;
+      try {
+        await navigator.clipboard.writeText(url);
+        addToast({
+          type: 'success',
+          title: t('tendering.bid_link.copied', { defaultValue: 'Bidder link copied' }),
+          message: t('tendering.bid_link.copied_hint', {
+            defaultValue: 'Paste it into your email to the firm. It opens the bill without an account.',
+          }),
+        });
+      } catch {
+        addToast(
+          {
+            type: 'info',
+            title: t('tendering.bid_link.manual_copy', { defaultValue: 'Bidder link, copy it by hand' }),
+            message: url,
+          },
+          { duration: 15000 },
+        );
+      }
+    },
+    onError: (error: Error) => {
+      const code = sealedErrorCode(error);
+      addToast({
+        type: 'error',
+        title: t('tendering.bid_link.failed', { defaultValue: 'Could not make the bidder link' }),
+        message:
+          code === 'bid_without_email'
+            ? t('tendering.bid_link.needs_email', { defaultValue: 'Add the contact email of the firm first.' })
+            : error.message,
+      });
     },
   });
 
@@ -2133,6 +2245,33 @@ function PackageDetail({
                 {t('tendering.close_package', 'Close')}
               </Button>
             )}
+            {pkg.status === 'draft' && (
+              <Button
+                variant="ghost"
+                size="sm"
+                icon={<Trash2 size={14} />}
+                loading={deleteMutation.isPending}
+                onClick={() => void askDelete()}
+                data-testid="package-delete"
+                title={t('tendering.delete_hint', {
+                  defaultValue: 'Delete a draft that has not gone out. A sent tender is cancelled instead.',
+                })}
+              >
+                {t('common.delete', { defaultValue: 'Delete' })}
+              </Button>
+            )}
+            {pkg.status !== 'draft' && pkg.status !== 'awarded' && pkg.status !== 'closed' && (
+              <Button
+                variant="ghost"
+                size="sm"
+                icon={<Ban size={14} />}
+                loading={cancelMutation.isPending}
+                onClick={() => void askCancel()}
+                data-testid="package-cancel"
+              >
+                {t('tendering.cancel_confirm', { defaultValue: 'Cancel tender' })}
+              </Button>
+            )}
           </div>
         </div>
       </Card>
@@ -2144,6 +2283,7 @@ function PackageDetail({
           always shown. */}
       <div className="flex items-center gap-1 border-b border-border-light">
         {([
+          { id: 'contents' as const, label: t('tendering.tab_contents', { defaultValue: 'Package contents' }) },
           { id: 'bids' as const, label: t('tendering.tab_bids', 'Bids & Comparison') },
           { id: 'distribution' as const, label: t('tendering.tab_distribution', { defaultValue: 'Distribution' }) },
           { id: 'addenda' as const, label: t('tendering.tab_addenda', 'Addenda') },
@@ -2168,6 +2308,14 @@ function PackageDetail({
           </button>
         ))}
       </div>
+
+      {/* Package contents: what goes out, before it does */}
+      {activeTab === 'contents' && (
+        <PackageContentsPanel
+          packageId={packageId}
+          editable={pkg.status !== 'awarded' && pkg.status !== 'closed'}
+        />
+      )}
 
       {/* Bids list */}
       {activeTab === 'bids' && <SealedTenderPanel packageId={packageId} pkg={pkg} />}
@@ -2227,6 +2375,39 @@ function PackageDetail({
                 <Badge variant={STATUS_COLORS[bid.status] || 'neutral'} size="sm">
                   {translateStatus(bid.status, t)}
                 </Badge>
+                {/* A bid entered by hand: the buyer prices it line by line, or
+                    sends the firm a link to fill in its own prices. */}
+                {!bid.sealed && bid.metadata?.source !== 'bid_portal' && pkg.status !== 'awarded' && pkg.status !== 'closed' && (
+                  <>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      icon={<PenLine size={14} />}
+                      onClick={() => setPricingBid(bid)}
+                      data-testid={`bid-enter-prices-${bid.id}`}
+                      title={t('tendering.buyer_prices.open_hint', {
+                        defaultValue: 'Enter the unit prices of this bid line by line',
+                      })}
+                    >
+                      {t('tendering.buyer_prices.open', { defaultValue: 'Enter prices' })}
+                    </Button>
+                    {bid.contact_email && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        icon={<Link2 size={14} />}
+                        loading={bidLinkMutation.isPending}
+                        onClick={() => bidLinkMutation.mutate(bid.id)}
+                        data-testid={`bid-link-${bid.id}`}
+                        title={t('tendering.bid_link.copy_hint', {
+                          defaultValue: 'A personal link where this firm enters its unit prices online',
+                        })}
+                      >
+                        {t('tendering.bid_link.copy', { defaultValue: 'Copy bidder link' })}
+                      </Button>
+                    )}
+                  </>
+                )}
                 {bid.status !== 'accepted' && bid.status !== 'rejected' && awardablePackage && (
                   <Button
                     variant="ghost"
@@ -2361,6 +2542,15 @@ function PackageDetail({
           />
         ) : comparison ? (
           <>
+            {comparison.budget_override != null && (
+              <p className="mb-2 text-xs text-content-tertiary" data-testid="comparison-budget-override">
+                {t('tendering.contents.budget_override_note', {
+                  defaultValue: 'Budget entered by hand: {{entered}} (computed from the lines: {{computed}})',
+                  entered: formatCurrency(comparison.budget_override, currency),
+                  computed: formatCurrency(comparison.budget_computed ?? 0, currency),
+                })}
+              </p>
+            )}
             <BidComparisonChart
               bidTotals={comparison.bid_totals}
               budgetTotal={comparison.budget_total}
@@ -2468,6 +2658,9 @@ function PackageDetail({
           onClose={() => setShowAddBid(false)}
           onCreated={handleBidCreated}
         />
+      )}
+      {pricingBid && (
+        <BuyerPricesDialog packageId={packageId} bid={pricingBid} onClose={() => setPricingBid(null)} />
       )}
       <X84ImportDialog
         open={showX84}
@@ -2869,6 +3062,7 @@ export function TenderingPage() {
             <PackageDetail
               packageId={selectedPackageId}
               currency={currency}
+              onDeleted={() => setSelectedPackageId('')}
             />
           )}
         </div>

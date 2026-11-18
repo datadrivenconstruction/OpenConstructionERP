@@ -90,3 +90,9 @@ export function decidePartySuggestion(reviewId: string, confirm: boolean): Promi
     ? apiPost(`/v1/contacts/parties/review/${reviewId}/confirm/`, {})
     : apiPost(`/v1/contacts/parties/review/${reviewId}/reject/`, {});
 }
+
+/** A link for a bid the buyer entered by hand; the firm's submission updates that bid. */
+export function createBidLinkForBid(bidId: string, options: { reopen?: boolean } = {}): Promise<BidInvitationCreated> {
+  const query = options.reopen ? '?reopen=true' : '';
+  return apiPost<BidInvitationCreated>(`/v1/tendering/bids/${bidId}/bid-link/${query}`, {});
+}

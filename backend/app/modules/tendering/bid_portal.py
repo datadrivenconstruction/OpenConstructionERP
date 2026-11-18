@@ -43,6 +43,8 @@ being installed.
 
 from __future__ import annotations
 
+import base64
+import binascii
 import hashlib
 import logging
 import secrets
@@ -276,6 +278,9 @@ def bidder_lines(positions: list[Any], metadata: Mapping[str, Any] | None) -> tu
                 headings.add(str(parent_id))
             parent_id = getattr(parent, "parent_id", None)
 
+    from app.modules.tendering.package_contents import line_components, read_scope
+
+    scope = read_scope(metadata)
     lines: list[dict] = []
     for position in positions:
         pid = str(position.id)
@@ -295,6 +300,12 @@ def bidder_lines(positions: list[Any], metadata: Mapping[str, Any] | None) -> tu
                 "unit": str(getattr(position, "unit", "") or "") if kind == "item" else "",
                 "quantity": _decimal_text(getattr(position, "quantity", "")) if kind == "item" else "",
                 "depth": depth(pid),
+                # Components of the line the bidder is not asked to price.
+                "supplied_by_others": (
+                    [c.name for c in line_components(position, scope) if not c.included]
+                    if scope is not None and kind == "item"
+                    else []
+                ),
             }
         )
     return lines, priceable
@@ -359,6 +370,60 @@ def validate_unit_prices(raw_prices: Mapping[str, object], priceable: Mapping[st
             detail={"code": "invalid_unit_prices", "errors": errors[:200]},
         )
     return priced
+
+
+def price_lines(
+    priceable: Mapping[str, Any], priced: Mapping[str, Decimal]
+) -> tuple[list[BidLineItem], str, list[str]]:
+    """Bid line items from unit prices, every other field from the server's own position.
+
+    Returns ``(line_items, amount, unpriced_ids)``. Lines left blank are not
+    priced and stay out of the items, so leveling imputes them instead of
+    reading a zero. The amount is rounded to cents.
+    """
+    from app.modules.boq.gaeb_common import is_excluded_from_total
+
+    line_items: list[BidLineItem] = []
+    bid_sum = Decimal("0")
+    # Bill order, and every field from the server's own position.
+    for pid, position in priceable.items():
+        if pid not in priced:
+            continue
+        unit_price = priced[pid]
+        quantity = Decimal(_decimal_text(getattr(position, "quantity", "")) or "0")
+        line_sum = unit_price * quantity
+        # A Bedarfsposition ohne Gesamtbetrag is priced but never summed.
+        if not is_excluded_from_total(position):
+            bid_sum += line_sum
+        line_items.append(
+            BidLineItem(
+                position_id=str(position.id),
+                description=position.description or "",
+                unit=position.unit or "",
+                quantity=float(quantity),
+                unit_rate=unit_price,
+                # Exact product, not rounded: leveling reads a gap above
+                # 0.01 between rate x quantity and the line sum as a scaled
+                # line.
+                total=float(line_sum),
+            )
+        )
+    unpriced = [pid for pid in priceable if pid not in priced]
+    return line_items, format(bid_sum.quantize(Decimal("0.01")), "f"), unpriced
+
+
+def decode_logo(data_url: object) -> tuple[bytes, str] | None:
+    """(bytes, media type) of a ``data:image/...;base64,`` logo, None when there is none or it is unreadable."""
+    if not isinstance(data_url, str) or not data_url.startswith("data:image/"):
+        return None
+    head, _, payload = data_url.partition(",")
+    if ";base64" not in head or not payload:
+        return None
+    media = head[len("data:") :].split(";", 1)[0]
+    try:
+        return base64.b64decode(payload, validate=True), media
+    except (binascii.Error, ValueError):
+        return None
 
 
 def enforce_rate_limit(request: Request, *, write: bool) -> None:
@@ -665,9 +730,12 @@ class BidPortalService:
         else:
             state = "open"
         try:
-            buyer_name = read_company_profile().get("legal_name", "") or ""
+            profile = read_company_profile()
+            buyer_name = profile.get("legal_name", "") or ""
+            buyer_logo = bool(profile.get("document_logo_data_url"))
         except Exception:  # noqa: BLE001 - a missing letterhead is not a reason to refuse the page
             buyer_name = ""
+            buyer_logo = False
         return BidPortalView(
             state=state,
             package_name=package.name,
@@ -676,6 +744,7 @@ class BidPortalService:
             currency=currency,
             project_name=project_name,
             buyer_name=buyer_name,
+            buyer_logo=buyer_logo,
             bidder_company=invitation.company_name,
             expires_at=effective_expiry(invitation, package.deadline),
             lines=[BidPortalLine(**line) for line in lines],
@@ -794,6 +863,95 @@ class BidPortalService:
                 return bid
         return None
 
+    async def logo(self, token: str) -> tuple[bytes, str] | None:
+        """The issuing company's document logo for a live link: (bytes, media type), or None."""
+        from app.core.company_profile import read_company_profile
+
+        await self._resolve(token)
+        try:
+            profile = read_company_profile()
+        except Exception:  # noqa: BLE001 - no letterhead, no logo
+            return None
+        return decode_logo(profile.get("document_logo_data_url", ""))
+
+    async def buyer_prices(self, bid_id: uuid.UUID, unit_prices: Mapping[str, object], notes: str | None = None) -> Any:
+        """Price a bid line by line on the buyer's side, from a quote received by mail or phone.
+
+        The lines and quantities come from the package exactly as the bidder
+        link shows them; only the unit prices are the buyer's. Staff rules of
+        :meth:`TenderingService.update_bid` apply (sealed packages refuse it,
+        a decided package keeps its figures).
+
+        Raises:
+            HTTPException 404: the bid does not exist.
+            HTTPException 422: a price is not a number, or names a line that is not in the package.
+        """
+        bid = await self.tendering.get_bid(bid_id)
+        package = await self.tendering.get_package(bid.package_id)
+        positions = await self.tendering.package_positions(package)
+        _lines, priceable = bidder_lines(positions, package.metadata_)
+        priced = validate_unit_prices(unit_prices, priceable)
+        line_items, amount, unpriced = price_lines(priceable, priced)
+        meta: dict[str, Any] = {
+            "priced_by_buyer_at": _utc_stamp(datetime.now(UTC)),
+            "unpriced_position_ids": unpriced,
+            "unpriced_count": len(unpriced),
+        }
+        extra = {"notes": notes} if notes is not None else {}
+        update = BidUpdate(line_items=line_items, total_amount=amount, metadata=meta, **extra)
+        return await self.tendering.update_bid(bid_id, update)
+
+    async def link_for_bid(
+        self, bid_id: uuid.UUID, *, actor_id: str | None, reopen: bool = False
+    ) -> BidInvitationCreated:
+        """A price-entry link for a bid the buyer entered by hand.
+
+        The firm is put on the distribution list (or found there by its email)
+        and gets a link bound to this bid, prefilled with the prices already on
+        it, so what it submits updates this bid instead of adding a second one.
+
+        Raises:
+            HTTPException 404: the bid does not exist.
+            HTTPException 409: the package is decided, or the bid came through a link of another firm.
+            HTTPException 422: ``bid_without_email``, the bid names no email to send the link to.
+        """
+        bid = await self.tendering.get_bid(bid_id)
+        package = await self.tendering.get_package(bid.package_id)
+        if package.status in _CLOSED_PACKAGE_STATES:
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="tender_closed")
+        email = (bid.contact_email or "").strip()
+        if not email:
+            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="bid_without_email")
+        from app.modules.tendering.schemas import RecipientCreate
+
+        recipient = await self.tendering.add_recipient(
+            package.id, RecipientCreate(company_name=bid.company_name, email=email)
+        )
+        meta = bid.metadata_ if isinstance(bid.metadata_, dict) else {}
+        bound_to = meta.get("recipient_id")
+        if bound_to and str(bound_to) != recipient.id:
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="bid_of_another_recipient")
+        package = await self.tendering.get_package(package.id)
+        entry = next(
+            r for r in self.tendering._read_recipients(package) if usable_recipient_id(r.get("id")) == recipient.id
+        )
+        invitation, token = await self.mint(package, entry, actor_id=actor_id, reopen=reopen)
+        invitation.bid_id = bid.id
+        if not (invitation.draft or {}).get("unit_prices"):
+            invitation.draft = {
+                "unit_prices": {
+                    str(item.get("position_id")): str(item.get("unit_rate"))
+                    for item in bid.line_items or []
+                    if isinstance(item, dict) and item.get("position_id") and item.get("unit_rate") not in (None, "")
+                },
+                "notes": "",
+            }
+        await self.session.flush()
+        replaced = await self.retire_others(package.id, invitation.recipient_id, keep=invitation.id)
+        logger.info("Bidder link made for a manual bid: package=%s bid=%s by=%s", package.id, bid.id, actor_id)
+        base = self.to_response(invitation, package.deadline)
+        return BidInvitationCreated(**base.model_dump(), url=bid_link_url(token), replaced_count=replaced)
+
     async def submit(self, token: str, body: BidPortalPricesRequest) -> BidPortalView:
         """Submit the bid: write the ``TenderBid`` and make the link read-only.
 
@@ -801,8 +959,6 @@ class BidPortalService:
         ``line_items``, so leveling imputes them instead of reading a zero; the
         bid's metadata names them. A submission with nothing priced is refused.
         """
-        from app.modules.boq.gaeb_common import is_excluded_from_total
-
         invitation = await self._resolve(token, for_update=True)
         package, project_name, currency, lines, priceable = await self._context(invitation)
         is_sealed = await self._check_writable(invitation, package, currency, body)
@@ -811,33 +967,7 @@ class BidPortalService:
             raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="nothing_priced")
 
         now = datetime.now(UTC)
-        line_items: list[BidLineItem] = []
-        bid_sum = Decimal("0")
-        # Bill order, and every field from the server's own position.
-        for pid, position in priceable.items():
-            if pid not in priced:
-                continue
-            unit_price = priced[pid]
-            quantity = Decimal(_decimal_text(getattr(position, "quantity", "")) or "0")
-            line_sum = unit_price * quantity
-            # A Bedarfsposition ohne Gesamtbetrag is priced but never summed.
-            if not is_excluded_from_total(position):
-                bid_sum += line_sum
-            line_items.append(
-                BidLineItem(
-                    position_id=str(position.id),
-                    description=position.description or "",
-                    unit=position.unit or "",
-                    quantity=float(quantity),
-                    unit_rate=unit_price,
-                    # Exact product, not rounded: leveling reads a gap above
-                    # 0.01 between rate x quantity and the line sum as a scaled
-                    # line.
-                    total=float(line_sum),
-                )
-            )
-        unpriced = [pid for pid in priceable if pid not in priced]
-        amount = format(bid_sum.quantize(Decimal("0.01")), "f")
+        line_items, amount, unpriced = price_lines(priceable, priced)
         # The bid is in the tender's currency, never in one the bidder names:
         # with none known on the GC side it stays "" (unknown), which every
         # currency check here reads as "cannot prove a mismatch".

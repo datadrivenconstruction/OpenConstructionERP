@@ -25,6 +25,7 @@ from __future__ import annotations
 import hashlib
 import uuid
 from datetime import UTC, datetime, timedelta
+from decimal import Decimal
 
 import pytest
 import pytest_asyncio
@@ -930,3 +931,129 @@ async def test_distribution_emails_the_public_link_in_the_project_language(clien
     view = await client.get(f"/api/v1/tendering/bid-portal/{token}/")
     assert view.status_code == 200, view.text
     assert view.json()["bidder_company"] == "Mail Bau"
+
+
+# ── Package contents, delete and cancel, buyer-priced bids (#571 #573 #575 #576) ──
+
+
+async def test_the_preview_shows_lines_budget_and_invited_firms_before_sending(client, staff, bill):
+    package_id = await _fresh_package(client, staff, bill, "Preview package", 14)
+    await _recipient(client, staff, package_id, "Preview Firm")
+
+    resp = await client.get(f"/api/v1/tendering/packages/{package_id}/preview/", headers=staff)
+    assert resp.status_code == 200, resp.text
+    body = resp.json()
+    items = [line for line in body["lines"] if line["kind"] == "item"]
+    assert [line["ordinal"] for line in items] == ["01.001", "01.002", "01.003"]
+    assert body["item_count"] == 3
+    assert body["budget_override"] is None
+    assert body["budget_total"] == body["budget_computed"]
+    assert [r["company_name"] for r in body["recipients"]] == ["Preview Firm"]
+    assert body["recipients"][0]["link_status"] is None
+
+
+async def test_a_budget_entered_by_hand_wins_and_the_computed_one_stays_visible(client, staff, bill):
+    package_id = await _fresh_package(client, staff, bill, "Override package", 14)
+    resp = await client.patch(
+        f"/api/v1/tendering/packages/{package_id}", json={"budget_override": "150000"}, headers=staff
+    )
+    assert resp.status_code == 200, resp.text
+
+    comparison = await client.get(f"/api/v1/tendering/packages/{package_id}/comparison/", headers=staff)
+    assert comparison.status_code == 200, comparison.text
+    body = comparison.json()
+    assert Decimal(body["budget_total"]) == Decimal("150000")
+    assert Decimal(body["budget_computed"]) > 0
+    assert Decimal(body["budget_override"]) == Decimal("150000")
+
+    cleared = await client.patch(
+        f"/api/v1/tendering/packages/{package_id}", json={"budget_override": None}, headers=staff
+    )
+    assert cleared.status_code == 200, cleared.text
+    preview = (await client.get(f"/api/v1/tendering/packages/{package_id}/preview/", headers=staff)).json()
+    assert preview["budget_override"] is None
+
+
+async def test_a_draft_that_never_went_out_is_deleted(client, staff, bill):
+    package_id = await _fresh_package(client, staff, bill, "Throwaway draft", 14)
+    await _recipient(client, staff, package_id, "Never Sent")
+
+    resp = await client.delete(f"/api/v1/tendering/packages/{package_id}", headers=staff)
+    assert resp.status_code == 204, resp.text
+    gone = await client.get(f"/api/v1/tendering/packages/{package_id}", headers=staff)
+    assert gone.status_code == 404
+
+
+async def test_a_package_with_a_link_is_cancelled_not_deleted(client, staff, bill):
+    package_id = await _fresh_package(client, staff, bill, "Sent package", 14)
+    token, _ = await _link(client, staff, package_id, "Linked Firm")
+
+    refused = await client.delete(f"/api/v1/tendering/packages/{package_id}", headers=staff)
+    assert refused.status_code == 409, refused.text
+    assert refused.json()["detail"]["code"] == "package_in_use"
+
+    cancelled = await client.post(
+        f"/api/v1/tendering/packages/{package_id}/cancel/", json={"reason": "Scope moved"}, headers=staff
+    )
+    assert cancelled.status_code == 200, cancelled.text
+    assert cancelled.json()["status"] == "closed"
+    assert cancelled.json()["metadata"]["cancel_reason"] == "Scope moved"
+
+    submit = await client.post(
+        f"/api/v1/tendering/bid-portal/{token}/submit/", json={"unit_prices": {bill["ids"]["01.001"]: "1"}}
+    )
+    assert submit.status_code in (403, 409, 410), submit.text
+
+
+async def test_the_buyer_prices_a_manual_bid_and_can_hand_it_to_the_firm(client, staff, bill):
+    ids = bill["ids"]
+    package_id = await _fresh_package(client, staff, bill, "Manual bid package", 14)
+    bid = await client.post(
+        f"/api/v1/tendering/packages/{package_id}/bids/",
+        json={"company_name": "Phone Quote Ltd", "contact_email": "quote@sub.test", "currency": "EUR"},
+        headers=staff,
+    )
+    assert bid.status_code == 201, bid.text
+    bid_id = bid.json()["id"]
+
+    priced = await client.put(
+        f"/api/v1/tendering/bids/{bid_id}/prices/",
+        json={"unit_prices": {ids["01.001"]: "10", ids["01.002"]: "2.5"}},
+        headers=staff,
+    )
+    assert priced.status_code == 200, priced.text
+    # 120.5 m3 x 10 + 80 m3 x 2.5
+    assert Decimal(priced.json()["total_amount"]) == Decimal("1405")
+
+    link = await client.post(f"/api/v1/tendering/bids/{bid_id}/bid-link/", headers=staff)
+    assert link.status_code == 201, link.text
+    token = link.json()["url"].rsplit("/bid/", 1)[1]
+    view = (await client.get(f"/api/v1/tendering/bid-portal/{token}/")).json()
+    assert Decimal(view["draft"]["unit_prices"][ids["01.001"]]) == Decimal("10")
+
+    submit = await client.post(
+        f"/api/v1/tendering/bid-portal/{token}/submit/",
+        json={"unit_prices": {ids["01.001"]: "11", ids["01.002"]: "2.5", ids["01.003"]: "4"}},
+    )
+    assert submit.status_code == 200, submit.text
+    bids = await _bids_of(client, staff, package_id, "Phone Quote Ltd")
+    assert len(bids) == 1
+    assert Decimal(bids[0]["total_amount"]) == Decimal("1585.5")
+
+
+async def test_a_bid_without_an_email_gets_no_link(client, staff, bill):
+    package_id = await _fresh_package(client, staff, bill, "No email package", 14)
+    bid = await client.post(
+        f"/api/v1/tendering/packages/{package_id}/bids/", json={"company_name": "Paper Quote"}, headers=staff
+    )
+    resp = await client.post(f"/api/v1/tendering/bids/{bid.json()['id']}/bid-link/", headers=staff)
+    assert resp.status_code == 422, resp.text
+
+
+async def test_the_portal_has_no_logo_until_the_buyer_sets_one(client, staff, bill):
+    package_id = await _fresh_package(client, staff, bill, "Logo package", 14)
+    token, _ = await _link(client, staff, package_id, "Logo Firm")
+    view = (await client.get(f"/api/v1/tendering/bid-portal/{token}/")).json()
+    assert view["buyer_logo"] is False
+    logo = await client.get(f"/api/v1/tendering/bid-portal/{token}/logo/")
+    assert logo.status_code == 404

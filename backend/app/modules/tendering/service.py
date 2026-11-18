@@ -58,6 +58,26 @@ _BID_MONEY_FIELDS: tuple[str, ...] = ("total_amount", "currency", "line_items")
 _CENTS = Decimal("0.01")
 
 
+def delete_refusal(package_status: str, bids: int, sent: int, links: int, linked_bid_packages: int) -> str | None:
+    """Why a package may not be deleted outright, or None when it may.
+
+    A package that reached any firm (an email sent, a bidder link made, a bid
+    entered) or that a bid-management package points at is part of the
+    tender's record; it is cancelled instead, which closes it and keeps it.
+    """
+    if package_status != "draft":
+        return "not_draft"
+    if bids:
+        return "has_bids"
+    if sent:
+        return "sent"
+    if links:
+        return "has_links"
+    if linked_bid_packages:
+        return "linked_bid_package"
+    return None
+
+
 #: Package metadata flag that puts the winning sum into rejection notices.
 #: Off by default; a package under a regime that requires disclosure sets it.
 DISCLOSE_AWARD_SUM_KEY = "disclose_award_sum"
@@ -260,6 +280,11 @@ from app.modules.tendering.schemas import (
     LevelingMatrixResponse,
     LevelingMatrixRow,
     PackageCreate,
+    PackagePreviewComponent,
+    PackagePreviewDocument,
+    PackagePreviewLine,
+    PackagePreviewRecipient,
+    PackagePreviewResponse,
     PackageScopeResponse,
     PackageUpdate,
     RecipientCreate,
@@ -559,6 +584,7 @@ class TenderingService:
 
         fields = data.model_dump(exclude_unset=True)
         await SealedTenderService(self.session).guard_package_update(package, fields)
+        self._fold_budget_fields(package, fields)
 
         # Map schema field 'metadata' to model column 'metadata_'. Merge a
         # partial metadata patch into the existing column instead of replacing
@@ -627,6 +653,228 @@ class TenderingService:
         logger.info("Tender package updated: %s (fields=%s)", package_id, list(fields.keys()))
 
         # Re-fetch to return updated data with relationships
+        return await self.get_package(package_id)
+
+    @staticmethod
+    def _fold_budget_fields(package: TenderPackage, fields: dict) -> None:
+        """Move ``budget_override`` and ``resource_scope`` of a patch into the metadata.
+
+        Both decide what the bids are measured against, so they are fixed once
+        the package is decided, like the bids' own figures.
+        """
+        from app.modules.tendering.package_contents import OVERRIDE_KEY, SCOPE_KEY, scope_to_metadata
+
+        touched = [k for k in ("budget_override", "resource_scope") if k in fields]
+        if not touched:
+            return
+        if package.status in _BID_FIGURES_FROZEN_STATES:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=f"Package is '{package.status}'; its budget and scope are fixed",
+            )
+        meta = dict(fields.get("metadata") or {})
+        if "budget_override" in fields:
+            value = fields.pop("budget_override")
+            meta[OVERRIDE_KEY] = format(Decimal(str(value)), "f") if value is not None else None
+        if "resource_scope" in fields:
+            raw = fields.pop("resource_scope")
+            meta[SCOPE_KEY] = scope_to_metadata(raw["kinds"], raw.get("excluded") or {}) if raw else None
+        fields["metadata"] = meta
+
+    async def package_positions(self, package: TenderPackage) -> list:
+        """The bill positions of a package's BOQ in bill order, [] when it has none or it is gone."""
+        if package.boq_id is None:
+            return []
+        from app.modules.boq.repository import PositionRepository
+
+        return list(await PositionRepository(self.session).list_all_for_boq(package.boq_id))
+
+    async def package_preview(self, package_id: uuid.UUID) -> PackagePreviewResponse:
+        """Everything that goes out with a package, readable before it does.
+
+        The lines are the ones the bidder link shows, with the buyer's budget
+        beside each, the cost components of each line marked in or out of the
+        package, the documents (addenda and the document changes they issue),
+        and the firms on the distribution list with the state of their link.
+        """
+        from app.modules.tendering.bid_portal import BidPortalService, bidder_lines
+        from app.modules.tendering.package_contents import package_budget, read_scope, scoped_line
+
+        package = await self.get_package(package_id)
+        positions = await self.package_positions(package)
+        lines, priceable = bidder_lines(positions, package.metadata_)
+        scope = read_scope(package.metadata_)
+        budget = package_budget(priceable.values(), package.metadata_)
+        _project_name, currency = await self._project_name_and_currency(package)
+
+        out_lines: list[PackagePreviewLine] = []
+        for line in lines:
+            position = priceable.get(line["id"])
+            if position is None:
+                out_lines.append(PackagePreviewLine(**line))
+                continue
+            scoped = scoped_line(position, scope)
+            out_lines.append(
+                PackagePreviewLine(
+                    **line,
+                    budget_rate=scoped.unit_rate,
+                    budget_total=scoped.total,
+                    split=scoped.split,
+                    unsplittable=scoped.unsplittable,
+                    components=[
+                        PackagePreviewComponent(
+                            key=c.key,
+                            name=c.name,
+                            code=c.code,
+                            kind=c.kind,
+                            unit=c.unit,
+                            quantity=c.quantity,
+                            unit_cost=c.unit_cost,
+                            included=c.included,
+                        )
+                        for c in scoped.components
+                    ],
+                )
+            )
+
+        invitations = await BidPortalService(self.session).list_invitations(package_id)
+        latest: dict[str, str] = {}
+        for inv in invitations:
+            latest.setdefault(inv.recipient_id, inv.status)
+        recipients = [
+            PackagePreviewRecipient(
+                company_name=str(r.get("company_name", "")),
+                email=str(r.get("email", "")),
+                status=str(r.get("status", "pending")),
+                link_status=latest.get(str(r.get("id", ""))),
+            )
+            for r in self._read_recipients(package)
+        ]
+        documents = [
+            PackagePreviewDocument(
+                addendum_revision=a.revision_no,
+                addendum_title=a.title,
+                published=a.published_at is not None,
+                title=str(d.get("title") or d.get("drawing_number") or ""),
+                drawing_number=str(d.get("drawing_number") or ""),
+                revision=str(d.get("revision") or ""),
+                document_id=str(d.get("document_id")) if d.get("document_id") else None,
+            )
+            for a in await self.list_addenda(package_id)
+            for d in (a.document_changes or [])
+            if isinstance(d, dict)
+        ]
+        from app.modules.tendering.package_contents import SCOPE_KINDS
+
+        return PackagePreviewResponse(
+            package_id=package_id,
+            name=package.name,
+            description=package.description or "",
+            status=package.status,
+            deadline=package.deadline,
+            currency=currency,
+            lines=out_lines,
+            item_count=len(priceable),
+            budget_computed=budget.computed,
+            budget_override=budget.override,
+            budget_total=budget.effective,
+            scope_kinds=sorted(scope.kinds) if scope is not None else list(SCOPE_KINDS),
+            scope_active=scope is not None,
+            recipients=recipients,
+            documents=documents,
+            bid_count=len(package.bids or []),
+        )
+
+    async def delete_package(self, package_id: uuid.UUID, *, actor_id: str | None = None) -> None:
+        """Delete a package that never left the office.
+
+        Only a draft with no bid, no link made and nothing sent may go: once a
+        firm has the invitation, the tender is part of the record and is
+        cancelled instead (:meth:`cancel_package`).
+
+        Raises:
+            HTTPException 404: the package does not exist.
+            HTTPException 409: ``{"code": "package_in_use", ...}`` naming why.
+        """
+        from sqlalchemy import func, select
+
+        from app.modules.tendering.models import TenderBidInvitation
+
+        package = await self.get_package(package_id)
+        sent = sum(1 for r in self._read_recipients(package) if r.get("status") == "sent" or r.get("sent_at"))
+        links = (
+            await self.session.execute(
+                select(func.count())
+                .select_from(TenderBidInvitation)
+                .where(TenderBidInvitation.package_id == package_id)
+            )
+        ).scalar_one()
+        linked = 0
+        try:
+            from app.modules.bid_management.models import BidPackage
+
+            linked = (
+                await self.session.execute(
+                    select(func.count()).select_from(BidPackage).where(BidPackage.tender_id == package_id)
+                )
+            ).scalar_one()
+        except ImportError:  # pragma: no cover - bid management not installed
+            linked = 0
+        reason = delete_refusal(package.status, len(package.bids or []), sent, int(links or 0), int(linked or 0))
+        if reason is not None:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail={
+                    "code": "package_in_use",
+                    "reason": reason,
+                    "status": package.status,
+                    "bids": len(package.bids or []),
+                    "sent": sent,
+                },
+            )
+        await self.repo.delete_package(package_id)
+        await _safe_publish(
+            "tendering.package.deleted",
+            {"package_id": str(package_id), "project_id": str(package.project_id)},
+            source_module="oe_tendering",
+        )
+        logger.info("Tender package deleted: %s by=%s", package_id, actor_id)
+
+    async def cancel_package(
+        self, package_id: uuid.UUID, reason: str = "", *, actor_id: str | None = None
+    ) -> TenderPackage:
+        """Cancel a tender: close it, record why, keep everything.
+
+        The bidder links then answer that the tender is closed. An awarded
+        package is not cancelled: the award has consequences (contract, order,
+        rates in the bill) that a cancel would not undo, so it is closed instead.
+
+        Raises:
+            HTTPException 409: the package is awarded or already closed.
+        """
+        package = await self.get_package(package_id)
+        if package.status in _BID_FIGURES_FROZEN_STATES:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail={"code": "package_decided", "status": package.status},
+            )
+        meta = dict(package.metadata_ or {})
+        now = datetime.now(UTC).isoformat()
+        meta.update(
+            {
+                "cancelled_at": now,
+                "cancelled_by": str(actor_id) if actor_id else None,
+                "cancel_reason": reason,
+                "closed_at": meta.get("closed_at") or now,
+            }
+        )
+        await self.repo.update_package_fields(package_id, status="closed", metadata_=meta)
+        await _safe_publish(
+            "tendering.package.cancelled",
+            {"package_id": str(package_id), "project_id": str(package.project_id), "reason": reason},
+            source_module="oe_tendering",
+        )
+        logger.info("Tender package cancelled: %s by=%s", package_id, actor_id)
         return await self.get_package(package_id)
 
     # ── Bids ─────────────────────────────────────────────────────────────
@@ -818,15 +1066,20 @@ class TenderingService:
 
         # Build position map from BOQ (exact Decimal arithmetic).
         from app.modules.boq.gaeb_common import is_excluded_from_total, provis_kind
+        from app.modules.tendering.package_contents import package_budget, read_scope, scoped_line
 
+        scope = read_scope(package.metadata_)
         position_map: dict[str, dict] = {}
         budget_total = Decimal("0")
         budget_provis_total = Decimal("0")
         for pos in budget_positions:
             pid = str(pos.id)
             qty = _to_decimal(pos.quantity)
-            rate = _to_decimal(pos.unit_rate)
-            total = _to_decimal(pos.total) if pos.total else qty * rate
+            # The package's share of the line: the whole line unless a resource
+            # scope leaves some of its components with the owner.
+            scoped = scoped_line(pos, scope)
+            rate = scoped.unit_rate
+            total = scoped.total
             position_map[pid] = {
                 "position_id": pid,
                 "description": pos.description or "",
@@ -949,6 +1202,13 @@ class TenderingService:
                 )
             )
 
+        # A budget the buyer entered by hand replaces the sum for the bid
+        # totals; the line rows keep the bill's figures.
+        computed_total = budget_total
+        budget = package_budget([], package.metadata_)
+        if budget.override is not None:
+            budget_total = budget.override
+
         compliance = addenda_logic.bid_compliance(package.metadata_, bids)
         # Build bid totals - never compute a deviation against the budget for
         # a bid quoted in a different currency (mixed-currency comparison is a
@@ -987,6 +1247,8 @@ class TenderingService:
             bid_count=len(bids),
             bid_companies=[b.company_name for b in bids],
             budget_total=_round2(budget_total),
+            budget_computed=_round2(computed_total),
+            budget_override=_round2(budget.override) if budget.override is not None else None,
             budget_provis_total=_round2(budget_provis_total),
             rows=rows,
             bid_totals=bid_totals,
@@ -1153,6 +1415,15 @@ class TenderingService:
             rate_lines = []
         elif not rate_lines:
             rates_skipped_reason = "no_line_rates"
+        else:
+            from app.modules.tendering.package_contents import read_scope
+
+            if read_scope(package.metadata_) is not None:
+                # The bid prices part of each line (labour without the owner's
+                # materials, say); written as the line's rate it would drop the
+                # rest of the line's cost from the estimate.
+                rates_skipped_reason = "partial_scope"
+                rate_lines = []
 
         # How many of the package's lines keep the bill's rate because the
         # winner did not price them, so the caller can say so. Section headers
@@ -2237,10 +2508,11 @@ class TenderingService:
                 boq_name = getattr(boq_data, "name", "") or ""
                 described = _scope_sections(positions, package.metadata_)
                 described["boq_position_count"] = len(positions)
-                for pos in _positions_in_scope(positions, package.metadata_):
-                    qty = _to_decimal(pos.quantity)
-                    rate = _to_decimal(pos.unit_rate)
-                    budget_total += _to_decimal(pos.total) if pos.total else qty * rate
+                from app.modules.tendering.package_contents import package_budget
+
+                budget_total = package_budget(
+                    _positions_in_scope(positions, package.metadata_), package.metadata_
+                ).effective
 
         # The evaluation section states the levelled figures rather than the raw
         # sums, because those are what the bids were actually compared on. Only
@@ -2397,11 +2669,15 @@ class TenderingService:
             ref_positions = []
 
         # Reference line index → (position_id, code, description, unit, qty, rate, total)
+        from app.modules.tendering.package_contents import read_scope, scoped_line
+
+        ref_scope = read_scope(package.metadata_)
         ref_rows: list[dict] = []
         for pos in ref_positions:
             qty = _to_decimal(pos.quantity)
-            rate = _to_decimal(pos.unit_rate)
-            total = _to_decimal(pos.total) if pos.total else qty * rate
+            scoped = scoped_line(pos, ref_scope)
+            rate = scoped.unit_rate
+            total = scoped.total
             ref_rows.append(
                 {
                     "position_id": str(pos.id),
