@@ -1,5 +1,6 @@
 {
   "country": "DE",
+  "severity": "warning",
   "kinds": {
     "finance.invoice": {
       "blocks": [

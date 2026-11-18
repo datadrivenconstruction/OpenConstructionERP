@@ -112,3 +112,25 @@ def test_editor_lists_pack_notes_as_locked_blocks(pack: None) -> None:
     assert [b["id"] for b in described["legal"]] == ["po_site_rules", "po_supplier_tax"]
     assert described["legal"][0]["source"] == "Test pack § 1"
     assert ls.describe(PURCHASE_ORDER, "en", [])["legal"] == []
+
+
+def test_a_pack_that_marks_its_data_as_a_warning_lets_the_document_issue(monkeypatch: pytest.MonkeyPatch) -> None:
+    soft = LegalRequirement(**{**_DATA.__dict__, "severity": "warning"})
+    monkeypatch.setattr(legal, "_all_requirements", lambda: (soft,))
+    _notes, issues = ls.data_issues(PURCHASE_ORDER, _ctx(), ["XX"])
+    assert any(i.block == "po_supplier_tax" and i.severity == "warning" for i in issues)
+    assert not [i for i in issues if i.severity == "error"]
+    ls._refuse_issue(issues)
+
+
+def test_the_german_pack_warns_on_missing_invoice_data_instead_of_blocking() -> None:
+    parsed = legal._parse(
+        {
+            "country": "DE",
+            "severity": "warning",
+            "kinds": {"finance.invoice": {"blocks": [{"id": "x", "required_fields": ["doc.supply_date"]}]}},
+        },
+        "DE",
+    )
+    assert [r.severity for r in parsed] == ["warning"]
+    assert [r.severity for r in legal._parse({"kinds": {"k": {"blocks": [{"id": "y"}]}}}, "XX")] == ["error"]

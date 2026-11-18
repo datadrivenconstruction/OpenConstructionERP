@@ -23,7 +23,7 @@ import sqlalchemy as sa
 from alembic import op
 
 revision: str = "vcrm01_deal_activities"
-down_revision: Union[str, Sequence[str], None] = "vsub01_agreement_documents"
+down_revision: Union[str, Sequence[str], None] = "vhk01_sop_applicability"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

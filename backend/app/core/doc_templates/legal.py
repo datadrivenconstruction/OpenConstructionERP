@@ -25,8 +25,8 @@ Core holds no country values. A kind gets legal blocks only for the countries
 the workspace's market profile names and whose pack carries the file; with no
 pack nothing appears. Users cannot remove, hide or reorder these blocks: they
 are not template blocks at all, the generator prints them in a fixed zone.
-A required field that is empty raises ``doctpl.legal_data_missing``, which
-blocks issuing the document.
+A required field that is empty raises ``doctpl.legal_data_missing``. It blocks issuing
+unless the pack (or the block) sets ``"severity": "warning"``, then it only warns.
 """
 
 from __future__ import annotations
@@ -71,6 +71,7 @@ class LegalRequirement:
     required_fields: tuple[str, ...] = ()
     where: str = ""
     labels: Mapping[str, str] = field(default_factory=dict)
+    severity: str = "error"
 
     def text_in(self, locale: str) -> str:
         """The note in *locale*, else English, else the first one shipped."""
@@ -97,6 +98,7 @@ def _parse(raw: object, country: str) -> list[LegalRequirement]:
                     required_fields=tuple(str(f) for f in block.get("required_fields") or ()),
                     where=str(block.get("where") or ""),
                     labels={str(k): str(v) for k, v in (block.get("labels") or {}).items()},
+                    severity="warning" if (block.get("severity") or raw.get("severity")) == "warning" else "error",
                 )
             )
     return out
@@ -275,7 +277,7 @@ def legal_notes(
                 issues.append(
                     Issue(
                         LEGAL_DATA_MISSING,
-                        "error",
+                        req.severity,
                         req.id,
                         {
                             "field": req.labels.get(path, path),

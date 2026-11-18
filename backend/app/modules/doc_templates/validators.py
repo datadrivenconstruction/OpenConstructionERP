@@ -11,7 +11,7 @@ finding of :func:`app.core.doc_templates.rules.check_blocks` or
 * ``doctpl.email_subject_empty`` - ERROR, email subject is empty.
 * ``doctpl.unsafe_link``         - ERROR, a link that is not https:// or mailto:.
 * ``doctpl.raw_html``            - ERROR, HTML typed into a block.
-* ``doctpl.legal_data_missing``  - ERROR, a pack-mandatory value is empty (pack).
+* ``doctpl.legal_data_missing``  - ERROR (WARNING when the pack says so), a pack-mandatory value is empty.
 
 A document layout is checked with ``{"layout": key, "template": {...}}`` and
 optionally ``"countries"`` for pack locks; it shares the merge field and HTML
