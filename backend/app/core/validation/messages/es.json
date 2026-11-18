@@ -2292,5 +2292,37 @@
         "suggestion": "Certifique como máximo lo evaluado o vuelva a evaluar la línea"
       }
     }
+  },
+  "norm_base": {
+    "code_present": {
+      "fail": "La línea {ordinal} no cita ningún código de norma {base}. Un presupuesto por normas cita una norma en cada línea.",
+      "suggestion": "Introduzca el código de norma en la clasificación {classification} de la línea."
+    },
+    "code_shape": {
+      "fail": "«{code}» en la línea {ordinal} no es un código {base}. Se espera un código como {example}."
+    },
+    "legacy_prefix": {
+      "fail": "«{code}» en la línea {ordinal} usa el prefijo retirado {old}. El código vigente es {new}."
+    },
+    "resource_breakdown": {
+      "fail": "La línea de norma {code} no tiene horas de mano de obra o no tiene categoría media.",
+      "suggestion": "Añada el recurso de mano de obra con sus horas por unidad y la categoría media de la norma."
+    },
+    "grade_range": {
+      "fail": "La categoría {grade} en la línea {ordinal} está fuera de {min} a {max} o no va en pasos de {step}."
+    }
+  },
+  "public_funding": {
+    "markup_cap": {
+      "fail": "{funding}: {markup} es {percent} %, el tope es {cap} % de los costes directos ({source}).",
+      "suggestion": "Reduzca el recargo al tope o indique financiación privada si ningún fondo público paga la obra."
+    },
+    "investor_exact": {
+      "fail": "Presupuesto del cliente con {funding}: {markup} debe ser exactamente {cap} % ({source})."
+    },
+    "material_price_evidence": {
+      "fail": "{funding}: el material {material} en la línea {ordinal} tiene {count} de {required} ofertas de precio y ningún análisis de precios.",
+      "suggestion": "Registre las ofertas de proveedores del material o adjunte el informe de análisis de precios."
+    }
   }
 }

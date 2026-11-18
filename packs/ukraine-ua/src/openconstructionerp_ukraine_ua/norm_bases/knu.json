@@ -1,0 +1,65 @@
+{
+  "key": "knu",
+  "name": "Кошторисні норми України (KNU)",
+  "standard": "Наказ Мінрегіону №281 від 01.11.2021",
+  "classification_key": "knu",
+  "code_pattern": "^(КБ|КР|КМ|КВ|КП|КБМ)\\d{1,2}-\\d{1,3}-\\d{1,3}$",
+  "code_example": "КБ1-13-1",
+  "code_char_map": {
+    "K": "К",
+    "B": "В",
+    "M": "М",
+    "P": "Р",
+    "E": "Е",
+    "H": "Н",
+    "C": "С"
+  },
+  "legacy_prefixes": {
+    "Е": "КБ",
+    "ЕН": "КБ",
+    "ЕД": "КБ",
+    "РН": "КР",
+    "М": "КМ",
+    "В": "КВ",
+    "П": "КП",
+    "СН": "КБМ"
+  },
+  "legacy_note": "Prefixes of the РЕКН collections before 2023, Іськов, Кошторисна справа у будівництві (ЖДТУ 2026), table 2.1.",
+  "types": [
+    {
+      "prefix": "КБ",
+      "title": "Кошторисні норми на будівельні роботи",
+      "collections": 47
+    },
+    {
+      "prefix": "КР",
+      "title": "Кошторисні норми на ремонтно-будівельні роботи",
+      "collections": 20
+    },
+    {
+      "prefix": "КМ",
+      "title": "Кошторисні норми на монтаж устаткування",
+      "collections": 40
+    },
+    {
+      "prefix": "КВ",
+      "title": null,
+      "collections": 27
+    },
+    {
+      "prefix": "КП",
+      "title": "Кошторисні норми на пусконалагоджувальні роботи",
+      "collections": 9
+    },
+    {
+      "prefix": "КБМ",
+      "title": null,
+      "collections": null
+    }
+  ],
+  "types_note": "Collection counts from Іськов (ЖДТУ 2026) section 2.3. Numbers and titles only; no norm content, consumption or price is shipped. Titles left null are pending a check against the collection list on ЄДЕССБ.",
+  "labour": {
+    "resource_type": "labor",
+    "grade_field": "grade"
+  }
+}

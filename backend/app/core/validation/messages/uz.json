@@ -2292,5 +2292,37 @@
         "suggestion": "Ko'pi bilan baholanganini tasdiqlang yoki avval qatorni qayta baholang"
       }
     }
+  },
+  "norm_base": {
+    "code_present": {
+      "fail": "{ordinal}-qatorda {base} normasi shifri yo'q. Normalarga asoslangan smetada har bir qator normaga tayanadi.",
+      "suggestion": "Norma shifrini qatorning {classification} tasnifiga kiriting."
+    },
+    "code_shape": {
+      "fail": "{ordinal}-qatordagi «{code}» {base} shifri emas. {example} kabi shifr kutiladi."
+    },
+    "legacy_prefix": {
+      "fail": "{ordinal}-qatordagi «{code}» eskirgan {old} prefiksidan foydalanadi. Amaldagi shifr: {new}."
+    },
+    "resource_breakdown": {
+      "fail": "{code} norma qatorida mehnat sarfi yoki o'rtacha razryad yo'q.",
+      "suggestion": "Birlik uchun kishi-soatlar va normaning o'rtacha razryadi bilan mehnat resursini qo'shing."
+    },
+    "grade_range": {
+      "fail": "{ordinal}-qatordagi {grade} razryadi {min}–{max} oralig'idan tashqarida yoki {step} qadamiga karrali emas."
+    }
+  },
+  "public_funding": {
+    "markup_cap": {
+      "fail": "{funding}: {markup} {percent} %, chegara to'g'ridan-to'g'ri xarajatlarning {cap} % ({source}).",
+      "suggestion": "Ustamani chegaragacha kamaytiring yoki ish davlat mablag'idan to'lanmasa, xususiy moliyalashtirishni belgilang."
+    },
+    "investor_exact": {
+      "fail": "{funding} hisobidan buyurtmachi smetasi: {markup} aynan {cap} % bo'lishi kerak ({source})."
+    },
+    "material_price_evidence": {
+      "fail": "{funding}: {ordinal}-qatordagi {material} materialida {required} ta narx taklifidan {count} tasi bor, narx tahlili yo'q.",
+      "suggestion": "Material bo'yicha yetkazib beruvchilar takliflarini qayd eting yoki narx tahlili hisobotini ilova qiling."
+    }
   }
 }

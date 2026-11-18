@@ -2292,5 +2292,37 @@
         "suggestion": "En fazla değerlendirileni onaylayın veya satırı önce yeniden değerlendirin"
       }
     }
+  },
+  "norm_base": {
+    "code_present": {
+      "fail": "{ordinal}. satır {base} norm kodu belirtmiyor. Norma dayalı bir keşifte her satır bir norma dayanır.",
+      "suggestion": "Norm kodunu satırın {classification} sınıflandırmasına girin."
+    },
+    "code_shape": {
+      "fail": "{ordinal}. satırdaki \"{code}\" bir {base} kodu değil. {example} gibi bir kod beklenir."
+    },
+    "legacy_prefix": {
+      "fail": "{ordinal}. satırdaki \"{code}\" kaldırılmış {old} önekini kullanıyor. Geçerli kod {new}."
+    },
+    "resource_breakdown": {
+      "fail": "{code} norm satırında işçilik saati veya ortalama işçi derecesi yok.",
+      "suggestion": "İşçilik kaynağını birim başına saatleri ve normun ortalama derecesiyle ekleyin."
+    },
+    "grade_range": {
+      "fail": "{ordinal}. satırdaki {grade} derecesi {min}–{max} aralığının dışında veya {step} adımlı değil."
+    }
+  },
+  "public_funding": {
+    "markup_cap": {
+      "fail": "{funding}: {markup} %{percent}, üst sınır doğrudan maliyetlerin %{cap} kadarı ({source}).",
+      "suggestion": "Kesintiyi üst sınıra indirin veya iş kamu kaynağıyla ödenmiyorsa finansmanı özel olarak ayarlayın."
+    },
+    "investor_exact": {
+      "fail": "İşveren keşfi, {funding}: {markup} tam olarak %{cap} olmalı ({source})."
+    },
+    "material_price_evidence": {
+      "fail": "{funding}: {ordinal}. satırdaki {material} malzemesinin {required} fiyat teklifinden {count} tanesi var ve fiyat analizi yok.",
+      "suggestion": "Malzeme için tedarikçi tekliflerini kaydedin veya fiyat analizi raporunu ekleyin."
+    }
   }
 }

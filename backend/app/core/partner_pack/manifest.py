@@ -206,6 +206,26 @@ class PartnerPackManifest(BaseModel):
             "replaces one. Read by :mod:`app.core.code_lists`."
         ),
     )
+    norm_bases: list[str] = Field(
+        default_factory=list,
+        description=(
+            "Paths inside the pack package to norm-base JSON files: the national "
+            "collection of estimating norms a line cites (code pattern, retired "
+            "prefixes and their current form, collection index). The neutral "
+            "``norm_base`` rule set checks codes against them. Read by "
+            ":mod:`app.core.norm_bases`."
+        ),
+    )
+    estimate_pricing: str | None = Field(
+        default=None,
+        description=(
+            "Path inside the pack package to an estimate-pricing JSON file: "
+            "labour grade coefficients for an hourly rate derived from a monthly "
+            "wage, markup caps per funding class, labour location factors and "
+            "the price evidence a funding class requires. Read by "
+            ":mod:`app.core.norm_bases`; checked by the ``public_funding`` rule set."
+        ),
+    )
     condition_scales: list[str] = Field(
         default_factory=list,
         description=(

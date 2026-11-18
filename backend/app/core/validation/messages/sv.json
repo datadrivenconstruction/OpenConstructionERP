@@ -2292,5 +2292,37 @@
         "suggestion": "Certifiera högst det som bedömts, eller bedöm raden på nytt först"
       }
     }
+  },
+  "norm_base": {
+    "code_present": {
+      "fail": "Rad {ordinal} anger ingen normkod från {base}. En normbaserad kalkyl anger en norm på varje rad.",
+      "suggestion": "Ange normkoden under radens klassificering {classification}."
+    },
+    "code_shape": {
+      "fail": "”{code}” på rad {ordinal} är ingen kod från {base}. En kod som {example} förväntas."
+    },
+    "legacy_prefix": {
+      "fail": "”{code}” på rad {ordinal} använder det upphörda prefixet {old}. Gällande kod är {new}."
+    },
+    "resource_breakdown": {
+      "fail": "Normraden {code} saknar arbetstimmar eller genomsnittlig lönegrupp.",
+      "suggestion": "Lägg till arbetsresursen med timmar per enhet och normens genomsnittliga lönegrupp."
+    },
+    "grade_range": {
+      "fail": "Lönegrupp {grade} på rad {ordinal} ligger utanför {min} till {max} eller inte i steg om {step}."
+    }
+  },
+  "public_funding": {
+    "markup_cap": {
+      "fail": "{funding}: {markup} är {percent} %, taket är {cap} % av de direkta kostnaderna ({source}).",
+      "suggestion": "Sänk påslaget till taket, eller ange privat finansiering om inga offentliga medel betalar arbetet."
+    },
+    "investor_exact": {
+      "fail": "Beställarens kalkyl med {funding}: {markup} bör vara exakt {cap} % ({source})."
+    },
+    "material_price_evidence": {
+      "fail": "{funding}: materialet {material} på rad {ordinal} har {count} av {required} prisofferter och ingen prisanalys.",
+      "suggestion": "Registrera leverantörernas offerter för materialet eller bifoga prisanalysrapporten."
+    }
   }
 }

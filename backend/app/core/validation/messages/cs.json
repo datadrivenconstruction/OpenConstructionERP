@@ -2292,5 +2292,37 @@
         "suggestion": "Certifikujte nejvýše posouzené množství, nebo řádek nejprve znovu posuďte"
       }
     }
+  },
+  "norm_base": {
+    "code_present": {
+      "fail": "Řádek {ordinal} neuvádí kód normy {base}. Rozpočet podle norem uvádí normu na každém řádku.",
+      "suggestion": "Zadejte kód normy v klasifikaci {classification} tohoto řádku."
+    },
+    "code_shape": {
+      "fail": "„{code}“ na řádku {ordinal} není kód {base}. Očekává se kód jako {example}."
+    },
+    "legacy_prefix": {
+      "fail": "„{code}“ na řádku {ordinal} používá zrušenou předponu {old}. Platný kód je {new}."
+    },
+    "resource_breakdown": {
+      "fail": "Řádek normy {code} nemá hodiny práce nebo průměrnou tarifní třídu.",
+      "suggestion": "Doplňte pracovní zdroj s hodinami na jednotku a průměrnou tarifní třídou normy."
+    },
+    "grade_range": {
+      "fail": "Tarifní třída {grade} na řádku {ordinal} je mimo rozsah {min} až {max} nebo není po krocích {step}."
+    }
+  },
+  "public_funding": {
+    "markup_cap": {
+      "fail": "{funding}: {markup} činí {percent} %, strop je {cap} % přímých nákladů ({source}).",
+      "suggestion": "Snižte přirážku na strop, nebo nastavte soukromé financování, pokud práce neplatí veřejné prostředky."
+    },
+    "investor_exact": {
+      "fail": "Rozpočet objednatele z prostředků {funding}: {markup} má činit přesně {cap} % ({source})."
+    },
+    "material_price_evidence": {
+      "fail": "{funding}: materiál {material} na řádku {ordinal} má {count} z {required} cenových nabídek a žádnou analýzu cen.",
+      "suggestion": "Zaznamenejte nabídky dodavatelů k materiálu nebo připojte zprávu o analýze cen."
+    }
   }
 }

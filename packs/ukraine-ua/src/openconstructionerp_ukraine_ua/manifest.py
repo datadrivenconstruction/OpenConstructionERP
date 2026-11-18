@@ -45,7 +45,15 @@ MANIFEST = PartnerPackManifest(
     validation_rule_sets=[
         "ukraine",
         "din276",
+        # KNU norm codes and graded labour, checked against norm_bases/knu.json.
+        "norm_base",
+        # Caps of постанова КМУ №1512 and price evidence, per the project's funding class.
+        "public_funding",
     ],
+    # Neutral slots the core reads: the KNU code shape, retired prefixes and
+    # collection index; grade coefficients, funding caps and combat-zone factors.
+    norm_bases=["norm_bases/knu.json"],
+    estimate_pricing="estimate_pricing.json",
     default_modules=[],  # empty = show all
     hidden_modules=[],
     demo_template_ids=["residential-lviv", "school-kyiv"],

@@ -2292,5 +2292,37 @@
         "suggestion": "Sertifikasi paling banyak yang dinilai, atau nilai ulang barisnya dahulu"
       }
     }
+  },
+  "norm_base": {
+    "code_present": {
+      "fail": "Baris {ordinal} tidak mencantumkan kode norma {base}. Estimasi berbasis norma mencantumkan norma di setiap baris.",
+      "suggestion": "Masukkan kode norma pada klasifikasi {classification} baris tersebut."
+    },
+    "code_shape": {
+      "fail": "\"{code}\" pada baris {ordinal} bukan kode {base}. Diharapkan kode seperti {example}."
+    },
+    "legacy_prefix": {
+      "fail": "\"{code}\" pada baris {ordinal} memakai awalan lama {old}. Kode yang berlaku adalah {new}."
+    },
+    "resource_breakdown": {
+      "fail": "Baris norma {code} tidak memiliki jam kerja atau tingkat rata-rata.",
+      "suggestion": "Tambahkan sumber daya tenaga kerja dengan jam per satuan dan tingkat rata-rata norma."
+    },
+    "grade_range": {
+      "fail": "Tingkat {grade} pada baris {ordinal} di luar {min} sampai {max} atau tidak berkelipatan {step}."
+    }
+  },
+  "public_funding": {
+    "markup_cap": {
+      "fail": "{funding}: {markup} sebesar {percent} %, batasnya {cap} % dari biaya langsung ({source}).",
+      "suggestion": "Turunkan tambahan sampai batas, atau atur pendanaan swasta jika pekerjaan tidak dibayar dengan dana publik."
+    },
+    "investor_exact": {
+      "fail": "Estimasi pemilik dengan {funding}: {markup} harus tepat {cap} % ({source})."
+    },
+    "material_price_evidence": {
+      "fail": "{funding}: material {material} pada baris {ordinal} punya {count} dari {required} penawaran harga dan tanpa analisis harga.",
+      "suggestion": "Catat penawaran pemasok untuk material atau lampirkan laporan analisis harga."
+    }
   }
 }

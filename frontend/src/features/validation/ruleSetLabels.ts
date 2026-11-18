@@ -48,6 +48,8 @@ export function ruleSetLabel(ruleSet: string, t: Translate): string {
     hse_frame: t('validation.rs_label_hse_frame', { defaultValue: 'HSE frame' }),
     project_handbook: t('validation.rs_label_project_handbook', { defaultValue: 'Project handbook' }),
     project_completeness: t('validation.rs_label_completeness', { defaultValue: 'Completeness' }),
+    norm_base: t('validation.rs_label_norm_base', { defaultValue: 'Norm codes' }),
+    public_funding: t('validation.rs_label_public_funding', { defaultValue: 'Public funding caps' }),
   };
   return map[ruleSet] ?? ruleSet.replace(/_/g, ' ');
 }

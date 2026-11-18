@@ -2292,5 +2292,37 @@
         "suggestion": "核定数量不应超过审核数量，或先重新审核该行"
       }
     }
+  },
+  "norm_base": {
+    "code_present": {
+      "fail": "第 {ordinal} 行未引用 {base} 定额编号。按定额编制的预算每一行都应引用定额。",
+      "suggestion": "请在该行的 {classification} 分类中填写定额编号。"
+    },
+    "code_shape": {
+      "fail": "第 {ordinal} 行的“{code}”不是 {base} 编号。应为类似 {example} 的编号。"
+    },
+    "legacy_prefix": {
+      "fail": "第 {ordinal} 行的“{code}”使用了已废止的前缀 {old}。现行编号为 {new}。"
+    },
+    "resource_breakdown": {
+      "fail": "定额行 {code} 缺少人工工时或平均等级。",
+      "suggestion": "请添加人工资源，并填写每单位工时和定额的平均等级。"
+    },
+    "grade_range": {
+      "fail": "第 {ordinal} 行的等级 {grade} 超出 {min} 至 {max} 范围，或不是 {step} 的整数倍。"
+    }
+  },
+  "public_funding": {
+    "markup_cap": {
+      "fail": "{funding}：{markup} 为 {percent} %，上限为直接费的 {cap} %（{source}）。",
+      "suggestion": "请将费率降至上限；如工程不由公共资金支付，请将资金类型设为私人。"
+    },
+    "investor_exact": {
+      "fail": "{funding} 的业主预算：{markup} 应恰好为 {cap} %（{source}）。"
+    },
+    "material_price_evidence": {
+      "fail": "{funding}：第 {ordinal} 行的材料 {material} 有 {count}/{required} 份报价，且没有价格分析。",
+      "suggestion": "请记录该材料的供应商报价，或附上价格分析报告。"
+    }
   }
 }

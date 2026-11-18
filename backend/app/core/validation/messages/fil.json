@@ -2292,5 +2292,37 @@
         "suggestion": "Sertipikahan nang hindi lalampas sa tinasa, o tasahin muna muli ang linya"
       }
     }
+  },
+  "norm_base": {
+    "code_present": {
+      "fail": "Walang code ng pamantayang {base} ang linya {ordinal}. Ang tantiyang batay sa pamantayan ay may pamantayan sa bawat linya.",
+      "suggestion": "Ilagay ang code ng pamantayan sa klasipikasyong {classification} ng linya."
+    },
+    "code_shape": {
+      "fail": "Ang \"{code}\" sa linya {ordinal} ay hindi code ng {base}. Inaasahan ang code na tulad ng {example}."
+    },
+    "legacy_prefix": {
+      "fail": "Ang \"{code}\" sa linya {ordinal} ay gumagamit ng retiradong prefix na {old}. Ang kasalukuyang code ay {new}."
+    },
+    "resource_breakdown": {
+      "fail": "Walang oras ng paggawa o karaniwang grado ang linya ng pamantayang {code}.",
+      "suggestion": "Idagdag ang resource ng paggawa kasama ang oras bawat yunit at ang karaniwang grado ng pamantayan."
+    },
+    "grade_range": {
+      "fail": "Ang gradong {grade} sa linya {ordinal} ay labas sa {min} hanggang {max} o hindi pa-{step}."
+    }
+  },
+  "public_funding": {
+    "markup_cap": {
+      "fail": "{funding}: ang {markup} ay {percent} %, ang hangganan ay {cap} % ng direktang gastos ({source}).",
+      "suggestion": "Ibaba ang dagdag hanggang sa hangganan, o itakda sa pribado ang pondo kung walang pampublikong pera ang nagbabayad sa trabaho."
+    },
+    "investor_exact": {
+      "fail": "Tantiya ng may-ari gamit ang {funding}: ang {markup} ay dapat eksaktong {cap} % ({source})."
+    },
+    "material_price_evidence": {
+      "fail": "{funding}: ang materyal na {material} sa linya {ordinal} ay may {count} sa {required} alok na presyo at walang pagsusuri ng presyo.",
+      "suggestion": "Itala ang mga alok ng supplier para sa materyal o ilakip ang ulat ng pagsusuri ng presyo."
+    }
   }
 }
