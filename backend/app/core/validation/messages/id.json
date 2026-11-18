@@ -2354,5 +2354,15 @@
       "fail": "Survei berbeda {v} % dari stok buku, melampaui toleransi {t} %.",
       "suggestion": "Periksa kerapatan dan permukaan dasar, lalu usulkan penyesuaian dan konfirmasikan jika selisihnya nyata."
     }
+  },
+  "mine_survey": {
+    "compliance_outside": {
+      "fail": "Kepatuhan periode {c} % berada di luar rentang {lo}-{hi} %.",
+      "suggestion": "Periksa rencana dan survei, lalu jelaskan selisihnya di catatan periode sebelum klaim."
+    },
+    "truck_differs": {
+      "fail": "Tonase hitungan truk berbeda {v} % dari tonase survei, melebihi pemeriksaan {t} %.",
+      "suggestion": "Periksa muatan per rit dan densitas, lalu bandingkan kembali kedua permukaan."
+    }
   }
 }

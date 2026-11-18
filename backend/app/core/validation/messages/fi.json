@@ -2354,5 +2354,15 @@
       "fail": "Mittaus poikkeaa kirjanpitosaldosta {v} %, yli {t} %:n toleranssin.",
       "suggestion": "Tarkista tiheys ja pohjapinta, ehdota sitten korjausta ja vahvista se, jos ero on todellinen."
     }
+  },
+  "mine_survey": {
+    "compliance_outside": {
+      "fail": "Jakson toteuma {c} % on vaihteluvälin {lo}-{hi} % ulkopuolella.",
+      "suggestion": "Tarkista suunnitelma ja mittaus ja selitä ero jakson huomautuksessa ennen laskutusta."
+    },
+    "truck_differs": {
+      "fail": "Ajokertojen laskennan tonnit poikkeavat mitatuista tonneista {v} %, yli {t} % tarkistusrajan.",
+      "suggestion": "Tarkista kuorma ajoa kohti ja tiheys ja vertaa sitten kahta pintaa uudelleen."
+    }
   }
 }

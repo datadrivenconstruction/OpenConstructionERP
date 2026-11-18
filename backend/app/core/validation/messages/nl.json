@@ -2354,5 +2354,15 @@
       "fail": "De meting wijkt {v} % af van de boekvoorraad, boven de tolerantie van {t} %.",
       "suggestion": "Controleer de dichtheid en het basisvlak, stel dan een correctie voor en bevestig die als het verschil echt is."
     }
+  },
+  "mine_survey": {
+    "compliance_outside": {
+      "fail": "De uitvoering van de periode, {c} %, ligt buiten de bandbreedte {lo}-{hi} %.",
+      "suggestion": "Controleer het plan en de meting en leg het verschil uit in de periodenotitie vóór de claim."
+    },
+    "truck_differs": {
+      "fail": "De tonnen volgens vrachtentelling wijken {v} % af van de gemeten tonnen, boven de controle van {t} %.",
+      "suggestion": "Controleer de lading per rit en de dichtheid en vergelijk daarna de twee oppervlakken opnieuw."
+    }
   }
 }

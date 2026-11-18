@@ -2354,5 +2354,15 @@
       "fail": "O levantamento difere do stock contabilístico em {v} %, acima da tolerância de {t} %.",
       "suggestion": "Verifique a densidade e a superfície base, depois proponha um ajuste e confirme-o se a diferença for real."
     }
+  },
+  "mine_survey": {
+    "compliance_outside": {
+      "fail": "A conformidade do período, {c} %, está fora da faixa {lo}-{hi} %.",
+      "suggestion": "Verifique o plano e o levantamento e explique a diferença na nota do período antes do pedido de pagamento."
+    },
+    "truck_differs": {
+      "fail": "As toneladas pela contagem de camiões diferem {v} % das toneladas levantadas, acima da verificação de {t} %.",
+      "suggestion": "Verifique a carga útil por viagem e a densidade e compare de novo as duas superfícies."
+    }
   }
 }

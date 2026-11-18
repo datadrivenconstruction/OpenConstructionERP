@@ -2354,5 +2354,15 @@
       "fail": "Izmjera odstupa od knjigovodstvenog stanja za {v} %, iznad tolerancije od {t} %.",
       "suggestion": "Provjerite gustoću i osnovnu plohu, zatim predložite korekciju i potvrdite je ako je razlika stvarna."
     }
+  },
+  "mine_survey": {
+    "compliance_outside": {
+      "fail": "Ispunjenje razdoblja {c} % izvan je raspona {lo}-{hi} %.",
+      "suggestion": "Provjerite plan i izmjeru te objasnite razliku u napomeni razdoblja prije potraživanja."
+    },
+    "truck_differs": {
+      "fail": "Tone prema brojanju vožnji razlikuju se od izmjerenih tona za {v} %, iznad provjere od {t} %.",
+      "suggestion": "Provjerite nosivost po vožnji i gustoću, a zatim ponovno usporedite dvije plohe."
+    }
   }
 }

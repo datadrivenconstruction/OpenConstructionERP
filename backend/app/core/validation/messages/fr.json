@@ -2354,5 +2354,15 @@
       "fail": "Le relevé s'écarte du stock comptable de {v} %, au-delà de la tolérance de {t} %.",
       "suggestion": "Vérifiez la densité et la surface de base, puis proposez un ajustement et confirmez-le si l'écart est réel."
     }
+  },
+  "mine_survey": {
+    "compliance_outside": {
+      "fail": "La conformité de la période, {c} %, est hors de la plage {lo}-{hi} %.",
+      "suggestion": "Vérifiez le plan et le levé, puis expliquez l'écart dans la note de période avant la situation."
+    },
+    "truck_differs": {
+      "fail": "Les tonnes comptées par camions diffèrent de {v} % des tonnes levées, au-delà du contrôle de {t} %.",
+      "suggestion": "Vérifiez la charge utile par voyage et la densité, puis comparez de nouveau les deux surfaces."
+    }
   }
 }

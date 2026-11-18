@@ -2354,5 +2354,15 @@
       "fail": "Ang survey ay {v} % ang pagitan sa book stock, higit sa tolerance na {t} %.",
       "suggestion": "Suriin ang density at base surface, saka magmungkahi ng adjustment at kumpirmahin kung totoo ang pagkakaiba."
     }
+  },
+  "mine_survey": {
+    "compliance_outside": {
+      "fail": "Ang compliance ng panahon na {c} % ay labas sa saklaw na {lo}-{hi} %.",
+      "suggestion": "Suriin ang plano at ang survey, at ipaliwanag ang pagkakaiba sa tala ng panahon bago ang claim."
+    },
+    "truck_differs": {
+      "fail": "Ang tonelada mula sa bilang ng trak ay may {v} % na pagkakaiba sa tonelada ng survey, lampas sa {t} % na tseke.",
+      "suggestion": "Suriin ang karga bawat biyahe at ang density, saka ihambing muli ang dalawang surface."
+    }
   }
 }

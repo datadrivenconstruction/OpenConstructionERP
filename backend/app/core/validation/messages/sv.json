@@ -2354,5 +2354,15 @@
       "fail": "Inmätningen avviker {v} % från bokfört lager, över toleransen på {t} %.",
       "suggestion": "Kontrollera densiteten och basytan, föreslå sedan en justering och bekräfta den om skillnaden är verklig."
     }
+  },
+  "mine_survey": {
+    "compliance_outside": {
+      "fail": "Periodens måluppfyllelse {c} % ligger utanför bandet {lo}-{hi} %.",
+      "suggestion": "Kontrollera planen och inmätningen och förklara avvikelsen i periodens anteckning före kravet."
+    },
+    "truck_differs": {
+      "fail": "Ton enligt lastbilsräkning avviker {v} % från inmätta ton, över kontrollen på {t} %.",
+      "suggestion": "Kontrollera nyttolasten per tur och densiteten och jämför sedan de två ytorna igen."
+    }
   }
 }

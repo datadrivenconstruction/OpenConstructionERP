@@ -2354,5 +2354,15 @@
       "fail": "Pomiar różni się od stanu księgowego o {v} %, powyżej tolerancji {t} %.",
       "suggestion": "Sprawdź gęstość i powierzchnię bazową, potem zaproponuj korektę i potwierdź ją, jeśli różnica jest realna."
     }
+  },
+  "mine_survey": {
+    "compliance_outside": {
+      "fail": "Realizacja okresu {c} % jest poza pasmem {lo}-{hi} %.",
+      "suggestion": "Sprawdź plan i pomiar, a przed rozliczeniem wyjaśnij różnicę w notatce do okresu."
+    },
+    "truck_differs": {
+      "fail": "Tony według liczenia kursów różnią się o {v} % od zmierzonych, powyżej kontroli {t} %.",
+      "suggestion": "Sprawdź ładunek na kurs i gęstość, a następnie ponownie porównaj obie powierzchnie."
+    }
   }
 }

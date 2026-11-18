@@ -2354,5 +2354,15 @@
       "fail": "Mõõdistus erineb raamatupidamuslikust jäägist {v} %, ületades {t} % tolerantsi.",
       "suggestion": "Kontrollige tihedust ja aluspinda, seejärel tehke korrektuuriettepanek ja kinnitage see, kui vahe on tõeline."
     }
+  },
+  "mine_survey": {
+    "compliance_outside": {
+      "fail": "Perioodi täitmine {c} % jääb vahemikust {lo}-{hi} % välja.",
+      "suggestion": "Kontrollige plaani ja mõõdistust ning selgitage erinevust perioodi märkuses enne nõuet."
+    },
+    "truck_differs": {
+      "fail": "Veokite loenduse tonnid erinevad mõõdistuse tonnidest {v} %, mis ületab kontrollpiiri {t} %.",
+      "suggestion": "Kontrollige koormat ühe sõidu kohta ja tihedust ning võrrelge kaht pinda uuesti."
+    }
   }
 }

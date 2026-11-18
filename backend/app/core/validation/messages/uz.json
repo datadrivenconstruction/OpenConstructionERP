@@ -2354,5 +2354,15 @@
       "fail": "Oʻlchov buxgalteriya qoldigʻidan {v} % farq qiladi, {t} % chegaradan oshadi.",
       "suggestion": "Zichlik va asos sirtni tekshiring, soʻng tuzatish taklif qiling va farq haqiqiy boʻlsa, tasdiqlang."
     }
+  },
+  "mine_survey": {
+    "compliance_outside": {
+      "fail": "Davr bajarilishi {c} % {lo}-{hi} % oraligʻidan tashqarida.",
+      "suggestion": "Reja va oʻlchovni tekshiring, daʼvodan oldin farqni davr izohida tushuntiring."
+    },
+    "truck_differs": {
+      "fail": "Yuk mashinalarini sanash boʻyicha tonna oʻlchangan tonnadan {v} % farq qiladi, bu {t} % tekshiruv chegarasidan yuqori.",
+      "suggestion": "Har bir reysdagi yuk va zichlikni tekshiring, soʻng ikki sirtni yana solishtiring."
+    }
   }
 }

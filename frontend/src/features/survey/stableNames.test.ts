@@ -38,6 +38,11 @@ const STABLE: Record<string, string> = {
   'stockpiles.action.confirm_adjustment': 'Confirm adjustment',
   'stockpiles.density.measured': 'Measured',
   'stockpiles.density.assumed': 'Assumed',
+  'mine.page.title': 'Mine survey',
+  'mine.action.new_period': 'New period',
+  'mine.action.compute_actual': 'Compute actual',
+  'mine.action.add_to_claim': 'Add to claim',
+  'mine.action.print_report': 'Print period report',
 };
 
 describe('survey stable names', () => {

@@ -946,6 +946,7 @@ COMPANY_PRESETS: dict[str, CompanyPreset] = {
             "survey_core",
             "surfaces_volumes",
             "stockpiles",
+            "mine_survey",
             "boq",
             "validation",
             "equipment",
