@@ -16,3 +16,8 @@ async def on_startup() -> None:
 
     register_contracts_permissions()
     register_contracts_validation_rules()
+
+    from app.core.doc_templates.layout.spec import register_layout_provider
+    from app.modules.contracts.layouts import register_contract_layouts
+
+    register_layout_provider(register_contract_layouts)

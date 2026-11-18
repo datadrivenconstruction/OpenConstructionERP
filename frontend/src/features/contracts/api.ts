@@ -22,6 +22,7 @@ import {
   triggerDownload,
 } from '@/shared/lib/api';
 import type { Page } from '@/shared/lib/api';
+import { downloadRecordPdf } from '@/shared/lib/documentExport';
 
 /* ── Enums / unions ───────────────────────────────────────────────────── */
 
@@ -607,6 +608,15 @@ export function updateContract(
  */
 export function deleteContract(id: string): Promise<void> {
   return apiDelete(`/v1/contracts/contracts/${id}`);
+}
+
+/** Download the printable form of one contract (GET /contracts/{id}/export/pdf/). */
+export function downloadContractPdf(id: string, locale: string, code?: string): Promise<void> {
+  return downloadRecordPdf(
+    `/v1/contracts/contracts/${encodeURIComponent(id)}/export/pdf/`,
+    locale,
+    code || 'contract',
+  );
 }
 
 /** Why the server refused to delete a contract. */

@@ -81,6 +81,7 @@ _KNOWN_PROVIDERS = (
     ("app.modules.procurement.layouts", "register_procurement_layouts"),
     ("app.modules.finance.layouts", "register_finance_layouts"),
     ("app.modules.changeorders.layouts", "register_changeorder_layouts"),
+    ("app.modules.contracts.layouts", "register_contract_layouts"),
 )
 
 

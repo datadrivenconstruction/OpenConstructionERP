@@ -3268,3 +3268,8 @@ async def export_form_application_pdf(
             "Content-Language": form.language,
         },
     )
+
+
+from app.modules.contracts.export_routes import export_router  # noqa: E402
+
+router.include_router(export_router)

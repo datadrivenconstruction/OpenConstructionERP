@@ -62212,6 +62212,11 @@ const resource = {
     "contracts.lender_preparation.no_period": "Dieser Zahlungsantrag hat keine Zeitraumdaten. Zahlungsanträge der Nachunternehmer werden nicht nach Datum zugeordnet.",
     "contracts.type_call_off": "Abruf",
     "contracts.type_framework": "Rahmenvertrag",
+    "contracts.side_client": "Auftraggeberverträge",
+    "contracts.side_subcontract": "Nachunternehmerverträge",
+    "contracts.delete_row": "Vertrag {{code}} löschen",
+    "contracts.delete_only_draft": "Nur ein Entwurf kann gelöscht werden. Einen unterzeichneten Vertrag schließen oder kündigen Sie stattdessen.",
+    "contracts.delete_row_message": "Vertragsentwurf {{code}} löschen? Dabei werden der Entwurf und alles darunter gelöscht, einschließlich Positionen, Nachträge, Abschlagsrechnungen und Sicherheitseinbehalt. Diese Aktion kann nicht rückgängig gemacht werden.",
     // --- /Draft lender preparation ---
     // --- Project handbook ---
     "projectHandbook.open_module": "Öffnen",
