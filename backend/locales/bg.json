@@ -1718,7 +1718,8 @@
         "gross_settled": "Уредена брутна сума",
         "no_withholding": "От това плащане не е удържано задържане.",
         "counterparty_tax_id": "ИН по ДДС",
-        "counterparty_address": "Адрес"
+        "counterparty_address": "Адрес",
+        "supply_date": "Дата на доставка"
       },
       "labels": {
         "invoice_status": {

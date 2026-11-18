@@ -27,6 +27,11 @@ async def on_startup() -> None:
     from app.modules.finance.validators import register_finance_rules
 
     register_finance_rules()
+
+    from app.core.doc_templates.layout.spec import register_layout_provider
+    from app.modules.finance.layouts import register_finance_layouts
+
+    register_layout_provider(register_finance_layouts)
     _register_invoice_tax_source()
 
     from app.modules.finance.invoice_mailbox_jobs import register_jobs

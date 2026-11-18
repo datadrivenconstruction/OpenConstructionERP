@@ -1718,7 +1718,8 @@
         "gross_settled": "จำนวนเงินรวมที่ชำระแล้ว",
         "no_withholding": "ไม่มีการหักเงินจากการชำระครั้งนี้",
         "counterparty_tax_id": "เลขประจำตัวผู้เสียภาษี",
-        "counterparty_address": "ที่อยู่"
+        "counterparty_address": "ที่อยู่",
+        "supply_date": "วันที่ส่งมอบ"
       },
       "labels": {
         "invoice_status": {

@@ -862,7 +862,8 @@
         "gross_settled": "المبلغ الإجمالي المسدَّد",
         "no_withholding": "لم يُستقطع أي مبلغ من هذه الدفعة.",
         "counterparty_tax_id": "الرقم الضريبي",
-        "counterparty_address": "العنوان"
+        "counterparty_address": "العنوان",
+        "supply_date": "تاريخ التوريد"
       },
       "labels": {
         "invoice_status": {

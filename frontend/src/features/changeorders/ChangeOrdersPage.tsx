@@ -37,6 +37,7 @@ import { SubcontractChangesPanel } from '@/features/subcontractors/SubcontractCh
 import { PageHeader } from '@/shared/ui/PageHeader';
 import { RegisterExportButton, RecordPdfButton } from '@/shared/ui/RegisterExport';
 import { IssueDocumentButton } from '@/features/doc-templates/IssueDocumentButton';
+import { useLayoutCustomizer } from '@/features/doc-templates';
 import type { DocumentExportItem } from '@/shared/ui/DocumentExportMenu';
 import { TruncationNotice } from '@/shared/ui/TruncationNotice';
 import { RequiresProject } from '@/shared/auth/RequiresProject';
@@ -1476,6 +1477,10 @@ function DetailView({
   onBack: () => void;
 }) {
   const { t } = useTranslation();
+  const orderLayout = useLayoutCustomizer(
+    'changeorders.change_order',
+    t('changeorders.document_title', { defaultValue: 'Change order' }),
+  );
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
@@ -1733,6 +1738,7 @@ function DetailView({
 
   return (
     <div>
+      {orderLayout.drawer}
       {/* Header */}
       <div className="mb-6">
         <nav className="flex items-center gap-1.5 text-sm mb-4" aria-label={t('common.breadcrumb', { defaultValue: 'Breadcrumb' })}>
@@ -1906,6 +1912,7 @@ function DetailView({
             <RecordPdfButton
               download={(locale) => downloadChangeOrderPdf(order.id, locale, order.code)}
               testId="changeorder-pdf"
+              onCustomize={orderLayout.open({ recordId: order.id, projectId: order.project_id })}
             />
             <IssueDocumentButton
               kind="changeorders.change_order"

@@ -1734,7 +1734,8 @@
         "gross_settled": "Жалпы өтелген сома",
         "no_withholding": "Бұл төлемнен ештеңе ұсталмады.",
         "counterparty_tax_id": "Салық төлеуші нөмірі (СТН)",
-        "counterparty_address": "Мекенжайы"
+        "counterparty_address": "Мекенжайы",
+        "supply_date": "Жеткізу күні"
       },
       "labels": {
         "invoice_status": {

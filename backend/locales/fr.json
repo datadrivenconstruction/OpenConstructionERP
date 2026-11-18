@@ -1718,7 +1718,8 @@
         "gross_settled": "Montant brut réglé",
         "no_withholding": "Aucune retenue prélevée sur ce paiement.",
         "counterparty_tax_id": "N° TVA",
-        "counterparty_address": "Adresse"
+        "counterparty_address": "Adresse",
+        "supply_date": "Date de livraison"
       },
       "labels": {
         "invoice_status": {

@@ -1702,7 +1702,8 @@
         "gross_settled": "结算总额",
         "no_withholding": "本次付款未扣留任何款项。",
         "counterparty_tax_id": "税号",
-        "counterparty_address": "地址"
+        "counterparty_address": "地址",
+        "supply_date": "供货日期"
       },
       "labels": {
         "invoice_status": {

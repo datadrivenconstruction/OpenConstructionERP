@@ -1718,7 +1718,8 @@
         "gross_settled": "정산 총액",
         "no_withholding": "이 지급에서 공제된 금액이 없습니다.",
         "counterparty_tax_id": "사업자등록번호",
-        "counterparty_address": "주소"
+        "counterparty_address": "주소",
+        "supply_date": "공급일"
       },
       "labels": {
         "invoice_status": {

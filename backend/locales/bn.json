@@ -1666,7 +1666,8 @@
         "gross_settled": "নিষ্পন্ন স্থূল পরিমাণ",
         "no_withholding": "এই পরিশোধ থেকে কিছু কাটা হয়নি।",
         "counterparty_tax_id": "করদাতা শনাক্তকরণ নম্বর",
-        "counterparty_address": "ঠিকানা"
+        "counterparty_address": "ঠিকানা",
+        "supply_date": "সরবরাহের তারিখ"
       },
       "labels": {
         "invoice_status": {

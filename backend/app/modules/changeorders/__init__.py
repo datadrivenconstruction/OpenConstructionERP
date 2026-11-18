@@ -17,3 +17,8 @@ async def on_startup() -> None:
     from app.modules.changeorders.validators import register_changeorders_validation_rules
 
     register_changeorders_validation_rules()
+
+    from app.core.doc_templates.layout.spec import register_layout_provider
+    from app.modules.changeorders.layouts import register_changeorder_layouts
+
+    register_layout_provider(register_changeorder_layouts)

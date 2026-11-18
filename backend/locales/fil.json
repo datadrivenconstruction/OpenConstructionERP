@@ -1718,7 +1718,8 @@
         "gross_settled": "Kabuuang halagang nabayaran",
         "no_withholding": "Walang ibinawas sa pagbabayad na ito.",
         "counterparty_tax_id": "Tax ID",
-        "counterparty_address": "Address"
+        "counterparty_address": "Address",
+        "supply_date": "Petsa ng paghahatid"
       },
       "labels": {
         "invoice_status": {

@@ -243,6 +243,8 @@ class _Compiler:
             return []
         title = self.word(block.get("title"), self.label(f"section:{block['id']}"))
         rows = self.ctx.collections.get(collection.id, [])
+        if not rows and block.get("omit_empty"):
+            return []
         if not rows:
             empty = self.word(block.get("empty_text"), self.label(f"empty:{block['id']}"))
             return [RecordBlock(title, empty_text=empty)]
@@ -253,6 +255,10 @@ class _Compiler:
             declared = collection.column(column["id"])
             if declared is None and not column["id"].startswith("calc_"):
                 continue
+            if column.get("omit_empty") and declared is not None:
+                # A column no row has a value for drops out (the VAT rate on an invoice without rates).
+                if all((row.get(column["id"]) or (None, ""))[0] is None for row in rows):
+                    continue
             fmt = column.get("format") or (declared.format if declared else "number")
             heading = self.word(column.get("label"), self.label(f"column:{collection.id}.{column['id']}", column["id"]))
             weight = _WIDTH_WEIGHTS.get(column.get("width") or "", declared.weight if declared else 1.0)
@@ -271,6 +277,7 @@ class _Compiler:
             groups = [("", list(rows))]
         out: list[RecordBlock] = []
         index = 0
+        grand: dict[int, Decimal] = {}
         for group_title, group_rows in groups:
             table: list[list[str]] = [[c[3] for c in columns]]
             sums: dict[int, Decimal] = {}
@@ -295,6 +302,7 @@ class _Compiler:
                     number = _dec(raw) if fmt in _NUMERIC else None
                     if number is not None:
                         sums[pos] = sums.get(pos, Decimal(0)) + number
+                        grand[pos] = grand.get(pos, Decimal(0)) + number
                 table.append(cells)
             total_rows = 0
             if group_by and block.get("subtotals"):
@@ -305,6 +313,15 @@ class _Compiler:
                         total[pos] = self.ctx.format(columns[pos][2], value)
                 table.append(total)
                 total_rows = 1
+            if block.get("total_row") and group_title == groups[-1][0]:
+                # One grand total under the last group: money columns only, a sum of rates says nothing.
+                total = [""] * len(columns)
+                total[0] = self.label("total", "Total")
+                for pos, column in enumerate(columns):
+                    if pos and column[2] == "money":
+                        total[pos] = self.ctx.format("money", grand.get(pos, Decimal(0)))
+                table.append(total)
+                total_rows += 1
             out.append(
                 RecordBlock(
                     f"{title} · {group_title}" if group_title and title else (group_title or title),

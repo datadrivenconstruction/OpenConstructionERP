@@ -862,7 +862,8 @@
         "gross_settled": "Gross amount settled",
         "no_withholding": "Nothing was withheld from this payment.",
         "counterparty_tax_id": "Tax ID",
-        "counterparty_address": "Address"
+        "counterparty_address": "Address",
+        "supply_date": "Date of supply"
       },
       "labels": {
         "invoice_status": {

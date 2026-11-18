@@ -13,8 +13,10 @@ separators of the project's market. A register can hold orders in more than
 one currency, so the currency is a column of its own rather than a line in
 the header.
 
-The builders are pure, like :mod:`app.modules.rfi.pdf_export`. The layout is
-the shared one in :mod:`app.core.register_export`.
+The builders are pure, like :mod:`app.modules.rfi.pdf_export`. The register's
+layout is the shared one in :mod:`app.core.register_export`; the form of one
+order is a document layout (:mod:`app.modules.changeorders.layouts`) whose
+standard template prints it as it always printed.
 """
 
 from __future__ import annotations
@@ -24,6 +26,7 @@ from collections.abc import Mapping, Sequence
 from decimal import Decimal, InvalidOperation
 from typing import Any
 
+from app.core.doc_templates.layout.spec import LayoutContext
 from app.core.regional_format import NumberStyle, format_number
 from app.core.register_export import (
     ProjectHeader,
@@ -37,16 +40,22 @@ from app.core.register_export import (
     caps,
     format_amount,
     format_stored_date,
-    grid_rows,
     person_name,
     printed_currency,
 )
-from app.modules.changeorders.pdf_translations import CATALOGUE, DEFAULT_PDF_LOCALE, normalize_pdf_locale, tr
+from app.modules.changeorders.pdf_translations import (
+    CATALOGUE,
+    DEFAULT_PDF_LOCALE,
+    change_order_pdf_filename,
+    normalize_pdf_locale,
+    tr,
+)
 
 __all__ = [
     "build_change_order_pdf",
     "build_change_order_register_pdf",
     "build_change_order_register_xlsx",
+    "change_order_context",
     "change_order_record",
     "change_order_register",
 ]
@@ -173,15 +182,34 @@ def build_change_order_register_xlsx(orders: Sequence[Any], **context: Any) -> i
     return build_register_xlsx(change_order_register(orders, **context))
 
 
-def change_order_record(
+def _formatter(style: NumberStyle, date_format: str) -> Any:
+    """``(format, raw) -> text`` in the project's number style, for computed and reformatted columns."""
+
+    def _format(fmt: str, value: Any) -> str:
+        if value is None or value == "":
+            return "-"
+        if fmt == "money":
+            return format_amount(value, style)
+        if fmt in {"quantity", "number"}:
+            return _quantity(value, style)
+        if fmt == "percent":
+            return f"{_trimmed(value, style, least=0, most=2)} %"
+        if fmt == "date":
+            return format_stored_date(value, date_format)
+        return str(value).strip() or "-"
+
+    return _format
+
+
+def change_order_context(
     order: Any,
     *,
     project: ProjectHeader,
     people: Mapping[str, str] | None = None,
     locale: str = DEFAULT_PDF_LOCALE,
     generated: str = "",
-) -> RecordDocument:
-    """Describe the printable form of one change order with its items.
+) -> LayoutContext:
+    """One change order's data for its document layout, formatted in the document language.
 
     Args:
         order: The change order row with its ``items`` loaded, or any object
@@ -190,10 +218,9 @@ def change_order_record(
         people: Display names keyed by ``str(id)`` for who submitted and approved.
         locale: Document language; unsupported values fall back to English.
         generated: The timestamp printed in the footer.
-
-    Returns:
-        The form, ready for the PDF renderer.
     """
+    from app.core.doc_templates.seller import resolve_seller
+
     locale = normalize_pdf_locale(locale)
     date_format = CATALOGUE.date_format(locale, project)
     style = project.number_style
@@ -207,113 +234,175 @@ def change_order_record(
 
     submitter = person_name(getattr(order, "submitted_by", None), people)
     approver = person_name(getattr(order, "approved_by", None), people)
-    # The project is in the line under the title, so the grid does not say it
-    # again; a row of its own cost the form a line and told the reader nothing.
-    grid = grid_rows(
-        [
-            (tr(locale, "col_reason"), CATALOGUE.label("reason", getattr(order, "reason_category", None), locale)),
-            (
-                tr(locale, "col_instrument"),
-                CATALOGUE.label("instrument", getattr(order, "variation_type", None), locale),
-            ),
-            (tr(locale, "col_contractor_amount"), _money("contractor_amount")),
-            (tr(locale, "col_engineer_amount"), _money("engineer_amount")),
-            (tr(locale, "col_approved_amount"), _money("approved_amount")),
-            (tr(locale, "col_cost_impact"), _money("cost_impact")),
-            # The value carries its own unit ("5 days"), so the label does not.
-            (tr(locale, "time_impact"), CATALOGUE.days(_time_impact(order), locale)),
-            (tr(locale, "approved_time"), CATALOGUE.days(getattr(order, "approved_time_days", None), locale)),
-            (tr(locale, "col_submitted"), _date("submitted_at")),
-            (tr(locale, "submitted_by"), submitter),
-            (tr(locale, "col_approved"), _date("approved_at")),
-            (tr(locale, "approved_by"), approver),
-        ]
-    )
-    blocks = [
-        RecordBlock(
-            tr(locale, "description"),
-            text=str(getattr(order, "description", None) or ""),
-            empty_text=tr(locale, "no_description"),
-        )
-    ]
+    status_code = getattr(order, "status", None) or "draft"
+    status = CATALOGUE.label("status", status_code, locale)
+    description = str(getattr(order, "description", None) or "")
+    values = {
+        **resolve_seller().as_fields(),
+        "project.name": project.name or "",
+        "project.code": project.code or "",
+        "project.label": project.label,
+        "doc.generated": generated,
+        "doc.number": str(getattr(order, "code", "") or ""),
+        "doc.title": str(getattr(order, "title", "") or ""),
+        "doc.description": description,
+        "doc.reason": CATALOGUE.label("reason", getattr(order, "reason_category", None), locale),
+        "doc.instrument": CATALOGUE.label("instrument", getattr(order, "variation_type", None), locale),
+        "doc.status": status,
+        "doc.currency": currency,
+        "doc.contractor_amount": _money("contractor_amount"),
+        "doc.engineer_amount": _money("engineer_amount"),
+        "doc.approved_amount": _money("approved_amount"),
+        "doc.cost_impact": _money("cost_impact"),
+        # The value carries its own unit ("5 days"), so the label does not.
+        "doc.time_impact": CATALOGUE.days(_time_impact(order), locale),
+        "doc.approved_time": CATALOGUE.days(getattr(order, "approved_time_days", None), locale),
+        "doc.submitted_at": _date("submitted_at"),
+        "doc.submitted_by": submitter,
+        "doc.approved_at": _date("approved_at"),
+        "doc.approved_by": approver,
+    }
+    raw = {
+        "doc.number": values["doc.number"] or None,
+        "doc.title": values["doc.title"] or None,
+        "doc.description": description or None,
+        "doc.reason": getattr(order, "reason_category", None),
+        "doc.instrument": getattr(order, "variation_type", None),
+        "doc.status": status_code,
+        "doc.currency": currency or None,
+        "doc.contractor_amount": _decimal(getattr(order, "contractor_amount", None)),
+        "doc.engineer_amount": _decimal(getattr(order, "engineer_amount", None)),
+        "doc.approved_amount": _decimal(getattr(order, "approved_amount", None)),
+        "doc.cost_impact": _decimal(getattr(order, "cost_impact", None)),
+        "doc.time_impact": _decimal(_time_impact(order)),
+        "doc.approved_time": _decimal(getattr(order, "approved_time_days", None)),
+        "doc.submitted_at": getattr(order, "submitted_at", None),
+        "doc.approved_at": getattr(order, "approved_at", None),
+        "project.name": project.name or None,
+    }
     items = sorted(getattr(order, "items", None) or [], key=lambda item: getattr(item, "sort_order", 0) or 0)
-    if items:
-        # A portrait page has room for the six figures or for a readable
-        # description, not for both and a column of "Added" beside them. The
-        # kind of change is one word, so it goes on a line of its own under
-        # the description and the description gets that column's width.
-        header = [
-            f"{tr(locale, 'item_description')} / {tr(locale, 'item_change')}",
-            tr(locale, "item_unit"),
-            tr(locale, "item_original_quantity"),
-            tr(locale, "item_new_quantity"),
-            tr(locale, "item_original_rate"),
-            tr(locale, "item_new_rate"),
-            f"{tr(locale, 'item_cost_delta')} ({printed_currency(currency, locale)})"
-            if currency
-            else tr(locale, "item_cost_delta"),
-        ]
-        item_rows = [header]
-        total = Decimal(0)
-        for item in items:
-            delta = _decimal(getattr(item, "cost_delta", None))
-            if delta is not None:
-                total += delta
-            item_rows.append(
-                [
-                    "\n".join(
-                        part
-                        for part in (
-                            str(getattr(item, "description", "") or "").strip(),
-                            CATALOGUE.label("change", getattr(item, "change_type", None), locale),
-                        )
-                        if part and part != "-"
-                    )
-                    or "-",
-                    str(getattr(item, "unit", "") or "-"),
+    rows = []
+    for item in items:
+        delta = _decimal(getattr(item, "cost_delta", None))
+        # The kind of change is one word, so it goes on a line of its own under the description.
+        text = "\n".join(
+            part
+            for part in (
+                str(getattr(item, "description", "") or "").strip(),
+                CATALOGUE.label("change", getattr(item, "change_type", None), locale),
+            )
+            if part and part != "-"
+        )
+        rows.append(
+            {
+                "description": (getattr(item, "description", None), text or "-"),
+                "unit": (getattr(item, "unit", None), str(getattr(item, "unit", "") or "-")),
+                "original_quantity": (
+                    _decimal(getattr(item, "original_quantity", None)),
                     _quantity(getattr(item, "original_quantity", None), style),
+                ),
+                "new_quantity": (
+                    _decimal(getattr(item, "new_quantity", None)),
                     _quantity(getattr(item, "new_quantity", None), style),
+                ),
+                "original_rate": (
+                    _decimal(getattr(item, "original_rate", None)),
                     _rate(getattr(item, "original_rate", None), style),
-                    _rate(getattr(item, "new_rate", None), style),
-                    format_amount(delta, style),
-                ]
-            )
-        # The items are all in the order's one currency, so one total is the
-        # whole sum and nothing is added across currencies.
-        item_rows.append([tr(locale, "total"), "", "", "", "", "", format_amount(total, style)])
-        blocks.append(
-            RecordBlock(
-                tr(locale, "items"),
-                kind="table",
-                rows=item_rows,
-                weights=[4.4, 0.8, 1.1, 1.1, 1.3, 1.3, 1.5],
-                right_aligned=[False, False, True, True, True, True, True],
-                keep_together=[False, True, True, True, True, True, True],
-                total_rows=1,
-            )
+                ),
+                "new_rate": (_decimal(getattr(item, "new_rate", None)), _rate(getattr(item, "new_rate", None), style)),
+                "cost_delta": (delta, format_amount(delta, style)),
+            }
         )
-    blocks.append(
-        RecordBlock(
-            tr(locale, "signatures"),
-            kind="signatures",
-            rows=CATALOGUE.signature_rows(
-                locale, [(tr(locale, "submitted_by"), submitter), (tr(locale, "approved_by"), approver)]
-            ),
-        )
-    )
-    status = CATALOGUE.label("status", getattr(order, "status", None) or "draft", locale)
-    return RecordDocument(
+    delta_label = tr(locale, "item_cost_delta")
+    labels = {
+        "field:doc.number": tr(locale, "col_code"),
+        "field:doc.title": tr(locale, "col_title"),
+        "field:doc.description": tr(locale, "description"),
+        "field:doc.reason": tr(locale, "col_reason"),
+        "field:doc.instrument": tr(locale, "col_instrument"),
+        "field:doc.contractor_amount": tr(locale, "col_contractor_amount"),
+        "field:doc.engineer_amount": tr(locale, "col_engineer_amount"),
+        "field:doc.approved_amount": tr(locale, "col_approved_amount"),
+        "field:doc.cost_impact": tr(locale, "col_cost_impact"),
+        "field:doc.time_impact": tr(locale, "time_impact"),
+        "field:doc.approved_time": tr(locale, "approved_time"),
+        "field:doc.submitted_at": tr(locale, "col_submitted"),
+        "field:doc.submitted_by": tr(locale, "submitted_by"),
+        "field:doc.approved_at": tr(locale, "col_approved"),
+        "field:doc.approved_by": tr(locale, "approved_by"),
+        "column:items.description": f"{tr(locale, 'item_description')} / {tr(locale, 'item_change')}",
+        "column:items.unit": tr(locale, "item_unit"),
+        "column:items.original_quantity": tr(locale, "item_original_quantity"),
+        "column:items.new_quantity": tr(locale, "item_new_quantity"),
+        "column:items.original_rate": tr(locale, "item_original_rate"),
+        "column:items.new_rate": tr(locale, "item_new_rate"),
+        "column:items.cost_delta": f"{delta_label} ({printed_currency(currency, locale)})" if currency else delta_label,
+        "section:items": tr(locale, "items"),
+        "section:signatures": tr(locale, "signatures"),
+        "signer:doc.submitted_by": tr(locale, "submitted_by"),
+        "signer:doc.approved_by": tr(locale, "approved_by"),
+        "total": tr(locale, "total"),
+        "subtotal": tr(locale, "total"),
+    }
+    base = RecordDocument(
         title=tr(locale, "doc_title"),
-        number=str(getattr(order, "code", "") or ""),
+        number=values["doc.number"],
         project_label=project.label,
         status_text=caps(status, locale),
-        subject=str(getattr(order, "title", "") or ""),
-        grid=grid,
-        blocks=blocks,
+        subject=values["doc.title"],
         page_label=tr(locale, "footer_page"),
         generated_label=tr(locale, "footer_generated"),
         generated=generated,
     )
+    return LayoutContext(
+        locale=locale,
+        values=values,
+        raw=raw,
+        labels=labels,
+        collections={"items": rows},
+        sections={
+            "description": [
+                RecordBlock(tr(locale, "description"), text=description, empty_text=tr(locale, "no_description"))
+            ]
+        },
+        base=base,
+        status=str(status_code).lower(),
+        format=_formatter(style, date_format),
+        signature_rows=lambda signers: CATALOGUE.signature_rows(locale, list(signers)),
+        project_id=getattr(order, "project_id", None),
+        filename=change_order_pdf_filename(getattr(order, "code", None)),
+        empty="-",
+    )
+
+
+def change_order_record(
+    order: Any,
+    *,
+    project: ProjectHeader,
+    people: Mapping[str, str] | None = None,
+    locale: str = DEFAULT_PDF_LOCALE,
+    generated: str = "",
+    template: Mapping[str, Any] | None = None,
+) -> RecordDocument:
+    """Describe the printable form of one change order with its items.
+
+    Args:
+        order: The change order row with its ``items`` loaded, or any object
+            with the same attributes.
+        project: The owning project.
+        people: Display names keyed by ``str(id)`` for who submitted and approved.
+        locale: Document language; unsupported values fall back to English.
+        generated: The timestamp printed in the footer.
+        template: A published document layout; the standard one when ``None``.
+
+    Returns:
+        The form, ready for the PDF renderer.
+    """
+    from app.core.doc_templates.layout.compile import compile_layout
+    from app.modules.changeorders.layouts import CHANGE_ORDER, change_order_standard
+
+    ctx = change_order_context(order, project=project, people=people, locale=locale, generated=generated)
+    return compile_layout(template or change_order_standard(), CHANGE_ORDER, ctx)
 
 
 def build_change_order_pdf(order: Any, **context: Any) -> bytes:

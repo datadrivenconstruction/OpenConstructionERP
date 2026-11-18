@@ -20,7 +20,6 @@ from fastapi import APIRouter, Depends, Query
 from fastapi.responses import StreamingResponse
 from sqlalchemy import select
 
-from app.core.party_names import resolve_party_names
 from app.core.register_context import (
     AcceptLanguageHeader,
     FormatQuery,
@@ -30,9 +29,9 @@ from app.core.register_context import (
     record_download,
     register_download,
 )
-from app.dependencies import CurrentUserId, RequirePermission, SessionDep, verify_project_access
+from app.dependencies import CurrentUserId, CurrentUserPayload, RequirePermission, SessionDep, verify_project_access
 from app.modules.changeorders.models import ChangeOrder
-from app.modules.changeorders.pdf_export import change_order_record, change_order_register
+from app.modules.changeorders.pdf_export import change_order_register
 from app.modules.changeorders.pdf_translations import (
     change_order_pdf_filename,
     change_order_register_filename,
@@ -86,20 +85,31 @@ async def export_change_order_register(
 async def export_change_order_pdf(
     order_id: uuid.UUID,
     user_id: CurrentUserId,
+    payload: CurrentUserPayload,
     session: SessionDep,
     locale: LocaleQuery = None,
     accept_language: AcceptLanguageHeader = None,
+    variant: str | None = Query(None, max_length=40, description="Named layout variant; the default one when absent"),
+    layout_version: uuid.UUID | None = Query(None, description="Print with this published layout version (reprint)"),
 ) -> StreamingResponse:
     """Download one change order as a printable PDF form with its items."""
+    from app.modules.changeorders.layouts import CHANGE_ORDER, change_order_layout_context, change_order_standard
+    from app.modules.doc_templates.layout_service import issue_for_user
+
     order = await ChangeOrderService(session).get_order(order_id)
     await verify_project_access(order.project_id, str(user_id), session)
     doc_locale = resolve_pdf_locale(locale, accept_language)
-    project = await load_project_header(session, order.project_id)
-    document = change_order_record(
-        order,
-        project=project,
-        people=await resolve_party_names(session, [order.submitted_by, order.approved_by]),
-        locale=doc_locale,
-        generated=generated_now(tr(doc_locale, "datetime_format"), project),
+    document = await issue_for_user(
+        session,
+        CHANGE_ORDER,
+        await change_order_layout_context(session, order, doc_locale),
+        standard=change_order_standard(),
+        record_id=str(order.id),
+        project_id=order.project_id,
+        user_id=str(user_id),
+        payload=payload,
+        variant=variant,
+        version_id=layout_version,
     )
+    await session.commit()
     return await record_download(document, change_order_pdf_filename(order.code), doc_locale)

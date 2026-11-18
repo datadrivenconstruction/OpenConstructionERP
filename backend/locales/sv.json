@@ -1718,7 +1718,8 @@
         "gross_settled": "Reglerat bruttobelopp",
         "no_withholding": "Inget har innehållits från denna betalning.",
         "counterparty_tax_id": "Momsreg.nr",
-        "counterparty_address": "Adress"
+        "counterparty_address": "Adress",
+        "supply_date": "Leveransdatum"
       },
       "labels": {
         "invoice_status": {

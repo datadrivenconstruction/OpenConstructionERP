@@ -838,7 +838,8 @@
         "gross_settled": "Abgerechneter Bruttobetrag",
         "no_withholding": "Von dieser Zahlung wurde nichts einbehalten.",
         "counterparty_tax_id": "Steuer-Nr. / USt-IdNr.",
-        "counterparty_address": "Anschrift"
+        "counterparty_address": "Anschrift",
+        "supply_date": "Leistungsdatum"
       },
       "labels": {
         "invoice_status": {

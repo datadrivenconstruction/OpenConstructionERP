@@ -1718,7 +1718,8 @@
         "gross_settled": "Montante bruto liquidado",
         "no_withholding": "Nada foi retido neste pagamento.",
         "counterparty_tax_id": "NIF",
-        "counterparty_address": "Morada"
+        "counterparty_address": "Morada",
+        "supply_date": "Data de fornecimento"
       },
       "labels": {
         "invoice_status": {

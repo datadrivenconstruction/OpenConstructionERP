@@ -1718,7 +1718,8 @@
         "gross_settled": "Importe bruto liquidado",
         "no_withholding": "No se practicó ninguna retención en este pago.",
         "counterparty_tax_id": "NIF/CIF",
-        "counterparty_address": "Dirección"
+        "counterparty_address": "Dirección",
+        "supply_date": "Fecha de suministro"
       },
       "labels": {
         "invoice_status": {

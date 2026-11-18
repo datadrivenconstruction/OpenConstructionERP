@@ -1718,7 +1718,8 @@
         "gross_settled": "Bruttobeløb afregnet",
         "no_withholding": "Der blev ikke tilbageholdt noget fra denne betaling.",
         "counterparty_tax_id": "CVR-/momsnr.",
-        "counterparty_address": "Adresse"
+        "counterparty_address": "Adresse",
+        "supply_date": "Leveringsdato"
       },
       "labels": {
         "invoice_status": {

@@ -1718,7 +1718,8 @@
         "gross_settled": "Bruttobeløp oppgjort",
         "no_withholding": "Det er ikke holdt tilbake noe fra denne betalingen.",
         "counterparty_tax_id": "Org.nr.",
-        "counterparty_address": "Adresse"
+        "counterparty_address": "Adresse",
+        "supply_date": "Leveringsdato"
       },
       "labels": {
         "invoice_status": {

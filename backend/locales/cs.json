@@ -1718,7 +1718,8 @@
         "gross_settled": "Vyrovnaná hrubá částka",
         "no_withholding": "Z této platby nebyla nic zadržena.",
         "counterparty_tax_id": "DIČ",
-        "counterparty_address": "Adresa"
+        "counterparty_address": "Adresa",
+        "supply_date": "Datum dodání"
       },
       "labels": {
         "invoice_status": {

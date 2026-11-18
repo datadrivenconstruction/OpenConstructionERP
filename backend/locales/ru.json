@@ -838,7 +838,8 @@
         "gross_settled": "Погашено всего",
         "no_withholding": "Удержаний по этому платежу нет.",
         "counterparty_tax_id": "ИНН",
-        "counterparty_address": "Адрес"
+        "counterparty_address": "Адрес",
+        "supply_date": "Дата поставки"
       },
       "labels": {
         "invoice_status": {

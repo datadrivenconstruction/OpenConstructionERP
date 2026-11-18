@@ -1734,7 +1734,8 @@
         "gross_settled": "Yalpi hisob-kitob summasi",
         "no_withholding": "Ushbu to'lovdan hech narsa ushlab qolinmagan.",
         "counterparty_tax_id": "STIR",
-        "counterparty_address": "Manzil"
+        "counterparty_address": "Manzil",
+        "supply_date": "Yetkazib berish sanasi"
       },
       "labels": {
         "invoice_status": {
