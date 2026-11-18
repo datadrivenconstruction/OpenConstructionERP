@@ -34,7 +34,7 @@ SET, PROF, PT, EP, RD, AL = (
     "oe_monitoring_alert",
 )
 _TABLES = (SET, PROF, PT, EP, RD, AL)
-PARENT = "vsrv01_survey_core"
+PARENT = "vlpc01_land_parcels"
 
 
 def _load():
@@ -78,7 +78,9 @@ def _matches_the_models(connection) -> None:
                     table.name,
                     column.name,
                 )
-        model_indexes = {i.name for i in table.indexes}
+        # Declared indexes only: create_all's performance-index hook attaches more to the shared Table.
+        model_indexes = {a.name for a in getattr(cls, "__table_args__", ()) if isinstance(a, sa.Index)}
+        model_indexes |= {f"ix_{table.name}_{c.name}" for c in table.columns if c.index}
         assert model_indexes <= {i["name"] for i in inspect(connection).get_indexes(table.name)}, table.name
 
 
