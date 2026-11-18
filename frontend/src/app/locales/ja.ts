@@ -66683,6 +66683,10 @@ const resource = {
     "doc_layout.variant_create": "作成",
     "doc_layout.delete_variant_confirm": "このバリエーションとそのバージョンを削除しますか？発行済みの書類の記録は残ります。",
     "doc_layout.record_missing": "このレコードに{{field}}がありません（{{source}}）",
+    "doc_layout.clause_library": "条項ライブラリ",
+    "doc_layout.clause_library_hint": "文書レイアウトが条項ブロックに印刷する再利用可能なテキスト。言語ごとに1つ。国別パックの条項は読み取り専用です。",
+    "doc_layout.clause_new": "新しい条項",
+    "doc_layout.clause_key": "キー",
   }
 } as { translation: Record<string, string> };
 

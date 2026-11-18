@@ -65737,6 +65737,10 @@ const resource = {
     "doc_layout.variant_create": "יצירה",
     "doc_layout.delete_variant_confirm": "למחוק את הגרסה החלופית הזו ואת הגרסאות שלה? מסמכים שכבר הונפקו שומרים על הרישום שלהם.",
     "doc_layout.record_missing": "{{field}} חסר ברשומה זו ({{source}})",
+    "doc_layout.clause_library": "ספריית סעיפים",
+    "doc_layout.clause_library_hint": "טקסטים לשימוש חוזר שפריסת מסמך מדפיסה בגוש סעיף, טקסט אחד לכל שפה. סעיפים מחבילת המדינה שלך הם לקריאה בלבד.",
+    "doc_layout.clause_new": "סעיף חדש",
+    "doc_layout.clause_key": "מפתח",
   }
 } as { translation: Record<string, string> };
 

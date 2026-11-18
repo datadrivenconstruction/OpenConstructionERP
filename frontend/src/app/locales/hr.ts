@@ -65788,6 +65788,10 @@ const resource = {
     "doc_layout.variant_create": "Stvori",
     "doc_layout.delete_variant_confirm": "Izbrisati ovu varijantu i njezine verzije? Već izdani dokumenti zadržavaju svoj zapis.",
     "doc_layout.record_missing": "Na ovom zapisu nedostaje {{field}} ({{source}})",
+    "doc_layout.clause_library": "Biblioteka klauzula",
+    "doc_layout.clause_library_hint": "Tekstovi za višekratnu upotrebu koje izgled dokumenta ispisuje u bloku klauzule, jedan tekst po jeziku. Klauzule iz paketa vaše zemlje samo su za čitanje.",
+    "doc_layout.clause_new": "Nova klauzula",
+    "doc_layout.clause_key": "Ključ",
   }
 } as { translation: Record<string, string> };
 

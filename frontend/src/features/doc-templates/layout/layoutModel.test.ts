@@ -11,6 +11,8 @@ import {
   historyUndo,
   moveItem,
   variantKey,
+  clauseKey,
+  clauseText,
   removeBlock,
   setText,
   textIn,
@@ -104,5 +106,17 @@ describe('layout model', () => {
     expect(variantKey('  Short form (EN) ')).toBe('short_form_en');
     expect(variantKey('***')).toBe('');
     expect(variantKey('x'.repeat(60))).toHaveLength(40);
+  });
+
+  it('keeps a typed clause key valid for the server while it is typed', () => {
+    expect(clauseKey('Payment Terms')).toBe('payment_terms');
+    expect(clauseKey('12 retention')).toBe('retention');
+    expect(clauseKey('a'.repeat(50))).toHaveLength(40);
+  });
+
+  it('shows a clause in the reader language, else English, else the first text written', () => {
+    expect(clauseText({ en: 'Warranty', de: 'Gewährleistung' }, 'de-AT')).toBe('Gewährleistung');
+    expect(clauseText({ en: 'Warranty' }, 'fr')).toBe('Warranty');
+    expect(clauseText({ pl: 'Gwarancja' }, 'fr')).toBe('Gwarancja');
   });
 });

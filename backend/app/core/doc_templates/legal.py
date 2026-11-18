@@ -10,6 +10,13 @@ A country pack may ship ``document_requirements.json`` beside its manifest::
          "text": {"de": "Steuerschuldnerschaft des Leistungsempfängers (§ 13b UStG)", "en": "..."},
          "required_fields": ["recipient.vat_id"], "source": "UStG § 13b", "where": "invoice"}]}}}
 
+The same file may carry the pack's clause library, read-only for every firm::
+
+    {"clauses": [{"key": "de_vob_b_warranty", "category": "warranty",
+                  "title": {"de": "Mängelansprüche", "en": "Claims for defects"},
+                  "text": {"de": "Für Mängelansprüche gilt § 13 VOB/B.", "en": "..."},
+                  "source": "VOB/B § 13"}]}
+
 ``required_fields`` entries may name alternatives, ``entity.vat_id|entity.tax_number``:
 one of them filled satisfies the requirement. ``text`` may be omitted for a
 data-only requirement.
@@ -37,9 +44,11 @@ from app.core.doc_templates.rules import LEGAL_DATA_MISSING, Issue, filled
 
 __all__ = [
     "LegalRequirement",
+    "PackClause",
     "clear_cache",
     "legal_blocks_for_editor",
     "legal_notes",
+    "pack_clauses",
     "pack_layout_locks",
     "requirements_for",
 ]
@@ -173,10 +182,64 @@ def _all_requirements() -> tuple[LegalRequirement, ...]:
     return tuple(out)
 
 
+@dataclass(frozen=True)
+class PackClause:
+    """A clause a country pack ships: printed like a firm's clause, never edited by one."""
+
+    key: str
+    country: str
+    category: str
+    title: Mapping[str, str]
+    text: Mapping[str, str]
+    source: str = ""
+
+
+def _texts(value: object) -> dict[str, str]:
+    if not isinstance(value, dict):
+        return {}
+    return {str(k)[:10]: str(v)[:4000] for k, v in value.items() if isinstance(v, str) and v.strip()}
+
+
+@lru_cache(maxsize=1)
+def _all_pack_clauses() -> tuple[PackClause, ...]:
+    import re
+
+    key_re = re.compile(r"^[a-z][a-z0-9_]{0,39}$")
+    out: list[PackClause] = []
+    for country, raw in _pack_files():
+        for entry in raw.get("clauses") or []:
+            if not isinstance(entry, dict) or not key_re.match(str(entry.get("key") or "")):
+                continue
+            text = _texts(entry.get("text"))
+            if not text:
+                continue
+            out.append(
+                PackClause(
+                    key=str(entry["key"]),
+                    country=country,
+                    category=str(entry.get("category") or "")[:40],
+                    title=_texts(entry.get("title")),
+                    text=text,
+                    source=str(entry.get("source") or "")[:120],
+                )
+            )
+    return tuple(out)
+
+
+def pack_clauses(countries: Iterable[str], extra: Iterable[PackClause] | None = None) -> list[PackClause]:
+    """Clauses the packs of *countries* ship. ``extra`` lets tests inject pack data."""
+    wanted = {c.strip().upper() for c in countries if c and c.strip() and c != "*"}
+    if not wanted:
+        return []
+    pool = tuple(extra) if extra is not None else _all_pack_clauses()
+    return [c for c in pool if c.country in wanted]
+
+
 def clear_cache() -> None:
     """Forget the parsed pack files (tests, pack installed at runtime)."""
     _all_requirements.cache_clear()
     _all_layout_locks.cache_clear()
+    _all_pack_clauses.cache_clear()
 
 
 def requirements_for(

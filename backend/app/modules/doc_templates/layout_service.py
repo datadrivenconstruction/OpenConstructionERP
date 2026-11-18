@@ -550,20 +550,64 @@ def diff_templates(old: Mapping[str, Any], new: Mapping[str, Any]) -> list[dict[
 
 
 def _clause_out(c: DocClause) -> dict[str, Any]:
-    return {"key": c.key, "category": c.category, "title": dict(c.title or {}), "text": dict(c.text or {})}
+    return {
+        "key": c.key,
+        "category": c.category,
+        "title": dict(c.title or {}),
+        "text": dict(c.text or {}),
+        "locked": False,
+    }
 
 
-async def list_clauses(session: AsyncSession) -> list[dict[str, Any]]:
-    """The clause library."""
-    return [_clause_out(c) for c in await DocLayoutRepository(session).clauses()]
+def _pack_clause_out(c: Any) -> dict[str, Any]:
+    return {
+        "key": c.key,
+        "category": c.category,
+        "title": dict(c.title),
+        "text": dict(c.text),
+        "locked": True,
+        "country": c.country,
+        "source": c.source,
+    }
+
+
+async def list_clauses(session: AsyncSession, countries: Sequence[str] = ()) -> list[dict[str, Any]]:
+    """The clause library: the firm's own clauses, then the read-only ones of the workspace's packs."""
+    from app.core.doc_templates.legal import pack_clauses
+
+    pack = [_pack_clause_out(c) for c in pack_clauses(countries)]
+    taken = {c["key"] for c in pack}
+    own = [_clause_out(c) for c in await DocLayoutRepository(session).clauses() if c.key not in taken]
+    return own + pack
+
+
+def refuse_pack_clause(key: str, countries: Sequence[str]) -> None:
+    """A clause a country pack ships is read-only (409): the firm copies it under a key of its own."""
+    from app.core.doc_templates.legal import pack_clauses
+
+    hit = next((c for c in pack_clauses(countries) if c.key == key), None)
+    if hit is not None:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail={"message": "This clause comes from a country pack and cannot be changed", "source": hit.source},
+        )
 
 
 async def save_clause(
-    session: AsyncSession, key: str, category: str, title: Mapping[str, str], text: Mapping[str, str], user_id: str
+    session: AsyncSession,
+    key: str,
+    category: str,
+    title: Mapping[str, str],
+    text: Mapping[str, str],
+    user_id: str,
+    countries: Sequence[str] = (),
 ) -> dict[str, Any]:
     """Create or replace one clause. Text is the same markdown subset as template blocks."""
     from app.core.doc_templates.markup import has_raw_html
 
+    refuse_pack_clause(key, countries)
+    if not any(str(v).strip() for v in text.values()):
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="A clause needs its text")
     if any(has_raw_html(str(v)) for v in (*title.values(), *text.values())):
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="Use the text format, not HTML")
     repo = DocLayoutRepository(session)
@@ -579,22 +623,28 @@ async def save_clause(
     return _clause_out(clause)
 
 
-async def delete_clause(session: AsyncSession, key: str) -> None:
+async def delete_clause(session: AsyncSession, key: str, countries: Sequence[str] = ()) -> None:
     """Delete one clause; blocks that used it print their own text or nothing."""
+    refuse_pack_clause(key, countries)
     clause = await DocLayoutRepository(session).clause(key)
     if clause is not None:
         await session.delete(clause)
         await session.flush()
 
 
-async def clause_map(session: AsyncSession) -> dict[str, dict[str, Any]]:
-    """``key -> {"title", "text"}`` for the compiler."""
+async def clause_map(session: AsyncSession, countries: Sequence[str] = ()) -> dict[str, dict[str, Any]]:
+    """``key -> {"title", "text"}`` for the compiler; a pack's clause wins over a firm's of the same key."""
+    from app.core.doc_templates.legal import pack_clauses
+
     try:
-        return {
+        out = {
             c.key: {"title": c.title or {}, "text": c.text or {}} for c in await DocLayoutRepository(session).clauses()
         }
     except Exception:  # noqa: BLE001 - a missing clause table never stops a document
-        return {}
+        out = {}
+    for c in pack_clauses(countries):
+        out[c.key] = {"title": dict(c.title), "text": dict(c.text)}
+    return out
 
 
 # ── Resolve, preview and issue ───────────────────────────────────────────
@@ -731,7 +781,7 @@ async def issue_document(
     _refuse_issue(problems)
     resolved = await published_layout(session, spec.key, project_id=project_id, variant=variant, version_id=version_id)
     template = resolved.template if resolved is not None else None
-    clauses = await clause_map(session) if template is not None else {}
+    clauses = await clause_map(session, countries) if template is not None else {}
     document = render(spec, template, ctx, standard=standard, clauses=clauses, legal=notes)
     try:
         session.add(
@@ -820,7 +870,7 @@ async def preview_pdf(
 
     ctx = await preview_context(session, spec, locale, record_id, project_ids)
     notes, _problems = data_issues(spec, ctx, countries)
-    document = render(spec, normalise(template), ctx, clauses=await clause_map(session), legal=notes)
+    document = render(spec, normalise(template), ctx, clauses=await clause_map(session, countries), legal=notes)
     return await asyncio.to_thread(build_record_pdf, document)
 
 

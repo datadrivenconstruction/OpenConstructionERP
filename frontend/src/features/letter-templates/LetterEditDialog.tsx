@@ -11,7 +11,8 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Download } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Download, SlidersHorizontal } from 'lucide-react';
 import { Button, SkeletonText } from '@/shared/ui';
 import { WideModal } from '@/shared/ui/WideModal';
 import { getErrorMessage, triggerDownload } from '@/shared/lib/api';
@@ -99,6 +100,17 @@ export function LetterEditDialog({ open, onClose, packageId, projectId, bidId, k
               />
               {t('letter_templates.save_as_template', { defaultValue: 'Also save as the template for this language' })}
             </label>
+          )}
+          {canSaveTemplate && (
+            // The firm-wide wording and look of this letter live with every other document's.
+            <Link
+              to={`/settings?tab=company&sub=documents&kind=${encodeURIComponent(key)}`}
+              className="inline-flex items-center gap-1 text-xs text-content-tertiary hover:text-oe-blue hover:underline"
+              data-testid="letter-company-template"
+            >
+              <SlidersHorizontal size={12} />
+              {t('letter_templates.company_template', { defaultValue: 'Company template and look' })}
+            </Link>
           )}
           <Button variant="secondary" onClick={onClose} disabled={busy}>
             {t('common.cancel', { defaultValue: 'Cancel' })}

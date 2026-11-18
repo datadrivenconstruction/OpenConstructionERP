@@ -65416,6 +65416,10 @@ const resource = {
     "doc_layout.variant_create": "Opprett",
     "doc_layout.delete_variant_confirm": "Slette denne varianten og versjonene? Dokumenter som allerede er utstedt, beholder registreringen sin.",
     "doc_layout.record_missing": "{{field}} mangler på denne posten ({{source}})",
+    "doc_layout.clause_library": "Klausulbibliotek",
+    "doc_layout.clause_library_hint": "Gjenbrukbare tekster som et dokumentoppsett skriver ut i en klausulblokk, én tekst per språk. Klausuler fra landspakken din er skrivebeskyttet.",
+    "doc_layout.clause_new": "Ny klausul",
+    "doc_layout.clause_key": "Nøkkel",
   }
 } as { translation: Record<string, string> };
 

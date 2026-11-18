@@ -65686,6 +65686,10 @@ const resource = {
     "doc_layout.variant_create": "তৈরি করুন",
     "doc_layout.delete_variant_confirm": "এই ভ্যারিয়েন্ট ও এর সংস্করণগুলো মুছবেন? আগে জারি করা নথির রেকর্ড থেকে যাবে।",
     "doc_layout.record_missing": "এই রেকর্ডে {{field}} নেই ({{source}})",
+    "doc_layout.clause_library": "ধারা লাইব্রেরি",
+    "doc_layout.clause_library_hint": "পুনরায় ব্যবহারযোগ্য লেখা যা নথির বিন্যাস একটি ধারা ব্লকে ছাপে, প্রতি ভাষায় একটি লেখা। আপনার দেশের প্যাকের ধারাগুলি শুধু পড়ার জন্য।",
+    "doc_layout.clause_new": "নতুন ধারা",
+    "doc_layout.clause_key": "কী",
   }
 } as { translation: Record<string, string> };
 

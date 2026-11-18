@@ -65376,6 +65376,10 @@ const resource = {
     "doc_layout.variant_create": "ایجاد",
     "doc_layout.delete_variant_confirm": "این نسخهٔ جایگزین و نگارش‌های آن حذف شود؟ سندهای صادرشده سابقهٔ خود را نگه می‌دارند.",
     "doc_layout.record_missing": "{{field}} در این رکورد وجود ندارد ({{source}})",
+    "doc_layout.clause_library": "کتابخانه بندها",
+    "doc_layout.clause_library_hint": "متن‌های قابل استفاده مجدد که چیدمان سند در بلوک بند چاپ می‌کند، یک متن برای هر زبان. بندهای بسته کشور شما فقط‌خواندنی هستند.",
+    "doc_layout.clause_new": "بند جدید",
+    "doc_layout.clause_key": "کلید",
   }
 } as { translation: Record<string, string> };
 

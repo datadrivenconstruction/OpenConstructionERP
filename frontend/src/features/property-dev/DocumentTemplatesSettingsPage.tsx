@@ -38,6 +38,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { Link } from 'react-router-dom';
 import DOMPurify from 'isomorphic-dompurify';
 import {
   AlertOctagon,
@@ -447,6 +448,17 @@ export function DocumentTemplatesSettingsPage() {
           the setting that applies to all of them, and to every other PDF
           the platform generates. */}
       <DocumentAppearancePanel />
+      <p className="-mt-2 mb-4 text-xs text-content-tertiary">
+        <Link
+          to="/settings?tab=company&sub=documents"
+          className="hover:text-oe-blue hover:underline"
+          data-testid="propdev-company-layouts-link"
+        >
+          {t('property_dev.doc_templates.company_layouts_link', {
+            defaultValue: 'Layouts and clauses of the other company documents',
+          })}
+        </Link>
+      </p>
 
       {/* Upload custom template */}
       <UploadCustomTemplateForm

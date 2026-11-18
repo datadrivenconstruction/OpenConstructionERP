@@ -65533,6 +65533,10 @@ const resource = {
     "doc_layout.variant_create": "Түзүү",
     "doc_layout.delete_variant_confirm": "Бул вариантты жана анын версияларын өчүрөсүзбү? Мурда берилген документтердин жазуусу сакталат.",
     "doc_layout.record_missing": "Бул жазууда {{field}} жок ({{source}})",
+    "doc_layout.clause_library": "Шарттар китепканасы",
+    "doc_layout.clause_library_hint": "Документтин макети шарт блогунда басып чыгарган кайра колдонулуучу тексттер, ар бир тилге бир текст. Өлкөңүздүн пакетиндеги шарттар окуу үчүн гана.",
+    "doc_layout.clause_new": "Жаңы шарт",
+    "doc_layout.clause_key": "Ачкыч",
   }
 } as { translation: Record<string, string> };
 

@@ -59666,6 +59666,10 @@ const resource = {
     "doc_layout.variant_create": "Create",
     "doc_layout.delete_variant_confirm": "Delete this variant and its versions? Documents already issued keep their record.",
     "doc_layout.record_missing": "{{field}} is missing on this record ({{source}})",
+    "doc_layout.clause_library": "Clause library",
+    "doc_layout.clause_library_hint": "Reusable texts a document layout prints in a clause block, one text per language. Clauses from your country pack are read-only.",
+    "doc_layout.clause_new": "New clause",
+    "doc_layout.clause_key": "Key",
   }
 } as { translation: Record<string, string> };
 

@@ -65420,6 +65420,10 @@ const resource = {
     "doc_layout.variant_create": "Създаване",
     "doc_layout.delete_variant_confirm": "Да се изтрие ли този вариант и версиите му? Вече издадените документи запазват записа си.",
     "doc_layout.record_missing": "{{field}} липсва в този запис ({{source}})",
+    "doc_layout.clause_library": "Библиотека с клаузи",
+    "doc_layout.clause_library_hint": "Текстове за многократна употреба, които оформлението на документа отпечатва в блок клауза, по един текст на език. Клаузите от пакета на вашата държава са само за четене.",
+    "doc_layout.clause_new": "Нова клауза",
+    "doc_layout.clause_key": "Ключ",
   }
 } as { translation: Record<string, string> };
 

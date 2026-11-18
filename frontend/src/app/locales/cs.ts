@@ -66755,6 +66755,10 @@ const resource = {
     "doc_layout.variant_create": "Vytvořit",
     "doc_layout.delete_variant_confirm": "Smazat tuto variantu a její verze? Již vydané dokumenty si svůj záznam ponechají.",
     "doc_layout.record_missing": "{{field}} v tomto záznamu chybí ({{source}})",
+    "doc_layout.clause_library": "Knihovna doložek",
+    "doc_layout.clause_library_hint": "Opakovaně použitelné texty, které rozvržení dokumentu tiskne v bloku doložky, jeden text na jazyk. Doložky z balíčku vaší země jsou jen pro čtení.",
+    "doc_layout.clause_new": "Nová doložka",
+    "doc_layout.clause_key": "Klíč",
   }
 } as { translation: Record<string, string> };
 
