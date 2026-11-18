@@ -28,7 +28,7 @@ import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { BookUser, User, X } from 'lucide-react';
-import { apiGet, type Page } from '@/shared/lib/api';
+import { apiGet } from '@/shared/lib/api';
 import { normalizeRole, ROLE_RANK } from '@/shared/lib/roles';
 import { matchesSearch } from '@/shared/lib/highlightMatch';
 import { useAuthStore } from '@/stores/useAuthStore';
