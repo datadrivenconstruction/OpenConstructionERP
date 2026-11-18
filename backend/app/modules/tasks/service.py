@@ -61,7 +61,9 @@ async def _safe_audit(
 # ── Allowed task status transitions ───────────────────────────────────────────
 
 _TASK_STATUS_TRANSITIONS: dict[str, set[str]] = {
-    "draft": {"open"},
+    # Moving a draft straight to work or to done issues it on the way; the board
+    # and the complete endpoint already offer those moves, so the PATCH accepts them too.
+    "draft": {"open", "in_progress", "completed"},
     "open": {"in_progress", "completed", "draft"},
     "in_progress": {"completed", "open"},
     # Allow reopening completed tasks for rework / scope change scenarios.

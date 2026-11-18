@@ -2218,5 +2218,31 @@
       "calendar_no_work_days": "Lịch {calendar} không có ngày làm việc nào.",
       "suggestion": "Đánh dấu các ngày làm việc của lịch này trong tiến độ nguồn."
     }
+  },
+  "schedule_pdf_import": {
+    "no_text_layer": {
+      "fail": "PDF không có lớp văn bản nên không thể đọc bảng.",
+      "suggestion": "Hãy xuất tiến độ dưới dạng MS Project XML, Primavera XER hoặc Excel và nhập tệp đó."
+    },
+    "dates_parsed": {
+      "fail": "Dòng {row}: ngày bắt đầu hoặc kết thúc không phải là ngày.",
+      "suggestion": "Kiểm tra các cột ngày và thứ tự ngày/tháng, hoặc sửa ngày trong nguồn."
+    },
+    "finish_before_start": {
+      "fail": "Dòng {row}: ngày kết thúc trước ngày bắt đầu.",
+      "suggestion": "Sửa các ngày trong tiến độ gốc."
+    },
+    "duration_mismatch": {
+      "fail": "Dòng {row}: thời lượng in ra khác số ngày làm việc giữa bắt đầu và kết thúc.",
+      "suggestion": "Các ngày được giữ nguyên; kiểm tra cột thời lượng và lịch dự án."
+    },
+    "unique_ids": {
+      "fail": "Dòng {row}: mã công việc đã được dòng khác sử dụng.",
+      "suggestion": "Đặt mã duy nhất cho mỗi công việc trong tiến độ gốc."
+    },
+    "links_resolve": {
+      "fail": "Dòng {row}: một công việc trước không thuộc bảng.",
+      "suggestion": "Kiểm tra cột công việc trước; các liên kết không xác định sẽ bị bỏ qua."
+    }
   }
 }

@@ -2218,5 +2218,31 @@
       "calendar_no_work_days": "El calendario {calendar} no tiene ningún día laborable.",
       "suggestion": "Marque los días laborables de este calendario en el programa de origen."
     }
+  },
+  "schedule_pdf_import": {
+    "no_text_layer": {
+      "fail": "El PDF no tiene capa de texto, no se puede leer su tabla.",
+      "suggestion": "Exporte el cronograma como XML de MS Project, XER de Primavera o Excel e importe ese archivo."
+    },
+    "dates_parsed": {
+      "fail": "Fila {row}: un inicio o un fin no es una fecha.",
+      "suggestion": "Revise las columnas de fecha y el orden día/mes, o corrija la fecha en el origen."
+    },
+    "finish_before_start": {
+      "fail": "Fila {row}: el fin es anterior al inicio.",
+      "suggestion": "Corrija las fechas en el cronograma de origen."
+    },
+    "duration_mismatch": {
+      "fail": "Fila {row}: la duración impresa difiere de los días laborables entre inicio y fin.",
+      "suggestion": "Se conservan las fechas; revise la columna de duración y el calendario del proyecto."
+    },
+    "unique_ids": {
+      "fail": "Fila {row}: otra fila usa el mismo ID de actividad.",
+      "suggestion": "Asigne un ID único a cada actividad en el cronograma de origen."
+    },
+    "links_resolve": {
+      "fail": "Fila {row}: un predecesor no es una actividad de la tabla.",
+      "suggestion": "Revise la columna de predecesoras; los vínculos sin resolver se omiten."
+    }
   }
 }

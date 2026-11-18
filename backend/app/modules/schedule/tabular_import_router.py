@@ -75,6 +75,10 @@ class TabularPreviewResponse(BaseModel):
         ),
     )
     document: dict[str, Any] | None = None
+    validation: dict[str, Any] | None = Field(
+        default=None,
+        description="Findings of the schedule_pdf_import rule set; only for a PDF upload",
+    )
     duplicate_of: list[uuid.UUID] = Field(
         default_factory=list,
         description="Schedules of the project already imported from these exact bytes",

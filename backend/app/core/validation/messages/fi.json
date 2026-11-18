@@ -2218,5 +2218,31 @@
       "calendar_no_work_days": "Kalenterissa {calendar} ei ole työpäiviä.",
       "suggestion": "Merkitse tämän kalenterin työpäivät lähdeaikatauluun."
     }
+  },
+  "schedule_pdf_import": {
+    "no_text_layer": {
+      "fail": "PDF:ssä ei ole tekstikerrosta, joten taulukkoa ei voi lukea.",
+      "suggestion": "Vie aikataulu MS Project XML-, Primavera XER- tai Excel-muotoon ja tuo se tiedosto."
+    },
+    "dates_parsed": {
+      "fail": "Rivi {row}: alku tai loppu ei ole päivämäärä.",
+      "suggestion": "Tarkista päivämääräsarakkeet ja järjestys päivä/kuukausi tai korjaa päivämäärä lähteessä."
+    },
+    "finish_before_start": {
+      "fail": "Rivi {row}: loppu on ennen alkua.",
+      "suggestion": "Korjaa päivämäärät lähdeaikataulussa."
+    },
+    "duration_mismatch": {
+      "fail": "Rivi {row}: tulostettu kesto poikkeaa alun ja lopun välisistä työpäivistä.",
+      "suggestion": "Päivämäärät säilytetään; tarkista kestosarake ja projektin kalenteri."
+    },
+    "unique_ids": {
+      "fail": "Rivi {row}: tehtävän tunnus on käytössä toisella rivillä.",
+      "suggestion": "Anna jokaiselle tehtävälle yksilöllinen tunnus lähdeaikataulussa."
+    },
+    "links_resolve": {
+      "fail": "Rivi {row}: edeltäjä ei ole taulukon tehtävä.",
+      "suggestion": "Tarkista edeltäjäsarake; ratkaisemattomat linkit ohitetaan."
+    }
   }
 }

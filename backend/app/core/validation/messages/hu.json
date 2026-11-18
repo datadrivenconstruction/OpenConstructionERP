@@ -2218,5 +2218,31 @@
       "calendar_no_work_days": "A(z) {calendar} naptárban nincs munkanap.",
       "suggestion": "Jelölje meg a naptár munkanapjait a forrásütemtervben."
     }
+  },
+  "schedule_pdf_import": {
+    "no_text_layer": {
+      "fail": "A PDF-nek nincs szövegrétege, a táblázat nem olvasható.",
+      "suggestion": "Exportálja az ütemtervet MS Project XML, Primavera XER vagy Excel formátumba, és azt importálja."
+    },
+    "dates_parsed": {
+      "fail": "{row}. sor: a kezdés vagy a befejezés nem dátum.",
+      "suggestion": "Ellenőrizze a dátumoszlopokat és a nap/hónap sorrendet, vagy javítsa a dátumot a forrásban."
+    },
+    "finish_before_start": {
+      "fail": "{row}. sor: a befejezés a kezdés előtt van.",
+      "suggestion": "Javítsa a dátumokat a forrás ütemtervben."
+    },
+    "duration_mismatch": {
+      "fail": "{row}. sor: a nyomtatott időtartam eltér a kezdés és befejezés közötti munkanapoktól.",
+      "suggestion": "A dátumok megmaradnak; ellenőrizze az időtartam oszlopot és a projektnaptárt."
+    },
+    "unique_ids": {
+      "fail": "{row}. sor: a tevékenység azonosítóját egy másik sor is használja.",
+      "suggestion": "Adjon minden tevékenységnek egyedi azonosítót a forrás ütemtervben."
+    },
+    "links_resolve": {
+      "fail": "{row}. sor: egy előd nem a táblázat tevékenysége.",
+      "suggestion": "Ellenőrizze az elődök oszlopát; a fel nem oldható kapcsolatok kimaradnak."
+    }
   }
 }

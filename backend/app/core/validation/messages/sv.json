@@ -2218,5 +2218,31 @@
       "calendar_no_work_days": "Kalendern {calendar} har ingen arbetsdag.",
       "suggestion": "Markera kalenderns arbetsdagar i källplanen."
     }
+  },
+  "schedule_pdf_import": {
+    "no_text_layer": {
+      "fail": "PDF:en saknar textlager, så tabellen kan inte läsas.",
+      "suggestion": "Exportera tidplanen som MS Project XML, Primavera XER eller Excel och importera den filen."
+    },
+    "dates_parsed": {
+      "fail": "Rad {row}: en start eller ett slut är inte ett datum.",
+      "suggestion": "Kontrollera datumkolumnerna och ordningen dag/månad, eller rätta datumet i källan."
+    },
+    "finish_before_start": {
+      "fail": "Rad {row}: slutet ligger före starten.",
+      "suggestion": "Rätta datumen i källtidplanen."
+    },
+    "duration_mismatch": {
+      "fail": "Rad {row}: den tryckta varaktigheten skiljer sig från arbetsdagarna mellan start och slut.",
+      "suggestion": "Datumen behålls; kontrollera varaktighetskolumnen och projektkalendern."
+    },
+    "unique_ids": {
+      "fail": "Rad {row}: aktivitets-ID:t används av en annan rad.",
+      "suggestion": "Ge varje aktivitet ett unikt ID i källtidplanen."
+    },
+    "links_resolve": {
+      "fail": "Rad {row}: en föregångare är inte en aktivitet i tabellen.",
+      "suggestion": "Kontrollera föregångarkolumnen; olösta länkar hoppas över."
+    }
   }
 }

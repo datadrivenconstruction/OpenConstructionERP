@@ -143,7 +143,7 @@ class TabularPreview:
 
     sha256: str
     filename: str
-    file_format: str | None = None  # "xlsx" | "xls" | "csv"
+    file_format: str | None = None  # "xlsx" | "xls" | "csv" | "pdf"
     encoding: str | None = None
     delimiter: str | None = None
     sheet: str | None = None
@@ -160,6 +160,8 @@ class TabularPreview:
     #: Refs of the activities the sheet marks for the client. A suggestion only:
     #: every activity in ``document`` stays hidden until a commit names it.
     client_visible_suggested: list[str] = field(default_factory=list)
+    #: Findings of the ``schedule_pdf_import`` rule set, set by the service for a PDF.
+    validation: dict[str, Any] | None = None
 
     @property
     def has_errors(self) -> bool:
@@ -199,6 +201,7 @@ class TabularPreview:
             "issues": [issue.to_dict() for issue in self.issues],
             "client_visible_suggested": list(self.client_visible_suggested),
             "document": self.document,
+            "validation": self.validation,
         }
 
 
@@ -937,7 +940,8 @@ def preview(
     """Read a schedule spreadsheet and report what an import would create.
 
     Args:
-        data: The uploaded bytes (.xlsx, .xls or a delimited text file).
+        data: The uploaded bytes (.xlsx, .xls, a delimited text file, or a
+            schedule PDF with a text layer, read by :mod:`.pdf_table`).
         filename: The uploaded name; its extension only breaks ties.
         column_mapping: ``{column index: field}`` overrides of the detected
             mapping, an empty field unmaps the column. Indices are those of
@@ -1093,6 +1097,9 @@ def _open(result: TabularPreview, issues: _Issues, data: bytes, filename: str) -
             issues.add("unsupported_file_type", "error", "The file is not a spreadsheet or a CSV")
             return None
         file_format = "csv"
+    elif signature == "pdf":
+        result.file_format = "pdf"
+        return _read_pdf(data, issues)
     else:
         issues.add(
             "unsupported_file_type",
@@ -1138,6 +1145,20 @@ def _open(result: TabularPreview, issues: _Issues, data: bytes, filename: str) -
         return None
     result.sheet = sheet.name
     return sheet
+
+
+def _read_pdf(data: bytes, issues: _Issues) -> _Sheet | None:
+    """The activity table of a printed schedule PDF as one sheet; a scan is refused with its reason."""
+    from app.modules.schedule.pdf_table import PdfTableError, read_pdf_table
+
+    try:
+        table = read_pdf_table(data)
+    except PdfTableError as exc:
+        issues.add(exc.code, "error", exc.message)
+        return None
+    rows = [_trim(row) for row in table.rows]
+    truncated = len(rows) > _row_cap()
+    return _Sheet(None, rows[: _row_cap()], table.indents[: _row_cap()], truncated)
 
 
 def _data_rows(

@@ -2218,5 +2218,31 @@
       "calendar_no_work_days": "Kalendar {calendar} nema nijedan radni dan.",
       "suggestion": "Označite radne dane ovog kalendara u izvornom planu."
     }
+  },
+  "schedule_pdf_import": {
+    "no_text_layer": {
+      "fail": "PDF nema tekstualni sloj, tablica se ne može pročitati.",
+      "suggestion": "Izvezite terminski plan kao MS Project XML, Primavera XER ili Excel i uvezite tu datoteku."
+    },
+    "dates_parsed": {
+      "fail": "Redak {row}: početak ili završetak nije datum.",
+      "suggestion": "Provjerite stupce datuma i redoslijed dan/mjesec ili ispravite datum u izvoru."
+    },
+    "finish_before_start": {
+      "fail": "Redak {row}: završetak je prije početka.",
+      "suggestion": "Ispravite datume u izvornom planu."
+    },
+    "duration_mismatch": {
+      "fail": "Redak {row}: ispisano trajanje razlikuje se od radnih dana između početka i završetka.",
+      "suggestion": "Datumi se zadržavaju; provjerite stupac trajanja i kalendar projekta."
+    },
+    "unique_ids": {
+      "fail": "Redak {row}: ID aktivnosti koristi drugi redak.",
+      "suggestion": "Dodijelite svakoj aktivnosti jedinstveni ID u izvornom planu."
+    },
+    "links_resolve": {
+      "fail": "Redak {row}: prethodnik nije aktivnost iz tablice.",
+      "suggestion": "Provjerite stupac prethodnika; neriješene veze se preskaču."
+    }
   }
 }

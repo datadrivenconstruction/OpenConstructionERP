@@ -181,7 +181,39 @@ class ScheduleTabularImportService:
         await verify_project_access(project_id, user_id, self.session)
         week = await self.project_week(project_id)
         result = await self._parse(week, data, filename, column_mapping, date_order)
+        if result.file_format == "pdf":
+            result.validation = await self._validate_pdf(result, project_id, week.region)
         return result, await self.duplicates(project_id, result.sha256)
+
+    async def _validate_pdf(self, result: TabularPreview, project_id: uuid.UUID, region: str | None) -> dict[str, Any]:
+        """Run the ``schedule_pdf_import`` rules over the preview's issues, findings keyed to table rows."""
+        from app.core.validation.engine import validation_engine
+        from app.modules.schedule.validators import PDF_IMPORT_RULE_SET
+
+        report = await validation_engine.validate(
+            {"issues": [issue.to_dict() for issue in result.issues]},
+            [PDF_IMPORT_RULE_SET],
+            target_type="schedule_import",
+            project_id=str(project_id),
+            region=region,
+        )
+        failed = [r for r in report.results if not r.passed]
+        return {
+            "rule_sets": list(report.rule_sets_applied),
+            "errors": len(report.errors),
+            "warnings": len(report.warnings),
+            "findings": [
+                {
+                    "rule_id": r.rule_id,
+                    "severity": getattr(r.severity, "value", str(r.severity)),
+                    "message": r.message,
+                    "element_ref": r.element_ref,
+                    "row": int(r.element_ref) if (r.element_ref or "").isdigit() else None,
+                    "suggestion": r.suggestion,
+                }
+                for r in failed[:500]
+            ],
+        }
 
     # ── Commit ───────────────────────────────────────────────────────────
 
@@ -294,7 +326,11 @@ class ScheduleTabularImportService:
         from app.modules.schedule.import_source import ImportSourceService
 
         await ImportSourceService(self.session).record_import(
-            new_id, raw=data, filename=filename, fmt="spreadsheet", user_id=user_id
+            new_id,
+            raw=data,
+            filename=filename,
+            fmt="pdf" if parsed_file.file_format == "pdf" else "spreadsheet",
+            user_id=user_id,
         )
 
         # CPM ends in expire_all(): nothing below may read an ORM attribute,

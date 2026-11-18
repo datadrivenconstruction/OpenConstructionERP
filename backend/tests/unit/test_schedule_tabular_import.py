@@ -775,7 +775,9 @@ def test_empty_file() -> None:
 
 
 def test_binary_files_are_refused() -> None:
-    assert _codes(preview(b"%PDF-1.7\n...", "plan.csv")) == ["unsupported_file_type"]
+    # A PDF goes to the PDF table reader; a damaged one is unreadable, not a CSV.
+    assert _codes(preview(b"%PDF-1.7\n...", "plan.csv")) == ["file_unreadable"]
+    assert _codes(preview(b"\x89PNG\r\n\x1a\n0000", "plan.csv")) == ["unsupported_file_type"]
     assert _codes(preview(b"Name\nA\n", "plan.xlsx")) == ["file_type_mismatch"]
 
 

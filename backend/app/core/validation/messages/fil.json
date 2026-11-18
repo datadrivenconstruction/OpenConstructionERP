@@ -2218,5 +2218,31 @@
       "calendar_no_work_days": "Walang araw ng trabaho ang kalendaryong {calendar}.",
       "suggestion": "Markahan ang mga araw ng trabaho ng kalendaryong ito sa pinagmulang iskedyul."
     }
+  },
+  "schedule_pdf_import": {
+    "no_text_layer": {
+      "fail": "Walang text layer ang PDF, kaya hindi mabasa ang talahanayan nito.",
+      "suggestion": "I-export ang iskedyul bilang MS Project XML, Primavera XER o Excel at i-import ang file na iyon."
+    },
+    "dates_parsed": {
+      "fail": "Hilera {row}: ang simula o pagtatapos ay hindi petsa.",
+      "suggestion": "Suriin ang mga column ng petsa at ang ayos ng araw/buwan, o itama ang petsa sa pinagmulan."
+    },
+    "finish_before_start": {
+      "fail": "Hilera {row}: ang pagtatapos ay bago ang simula.",
+      "suggestion": "Itama ang mga petsa sa pinagmulang iskedyul."
+    },
+    "duration_mismatch": {
+      "fail": "Hilera {row}: ang nakalimbag na tagal ay iba sa mga araw ng trabaho mula simula hanggang pagtatapos.",
+      "suggestion": "Pinapanatili ang mga petsa; suriin ang column ng tagal at ang kalendaryo ng proyekto."
+    },
+    "unique_ids": {
+      "fail": "Hilera {row}: ginagamit ng ibang hilera ang ID ng aktibidad.",
+      "suggestion": "Bigyan ng natatanging ID ang bawat aktibidad sa pinagmulang iskedyul."
+    },
+    "links_resolve": {
+      "fail": "Hilera {row}: ang isang predecessor ay hindi aktibidad ng talahanayan.",
+      "suggestion": "Suriin ang column ng predecessor; nilalaktawan ang mga link na hindi matukoy."
+    }
   }
 }

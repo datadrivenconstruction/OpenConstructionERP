@@ -2218,5 +2218,31 @@
       "calendar_no_work_days": "Il calendario {calendar} non ha giorni lavorativi.",
       "suggestion": "Indica i giorni lavorativi di questo calendario nel cronoprogramma di origine."
     }
+  },
+  "schedule_pdf_import": {
+    "no_text_layer": {
+      "fail": "Il PDF non ha un livello di testo, la tabella non può essere letta.",
+      "suggestion": "Esporta il cronoprogramma come XML di MS Project, XER di Primavera o Excel e importa quel file."
+    },
+    "dates_parsed": {
+      "fail": "Riga {row}: un inizio o una fine non è una data.",
+      "suggestion": "Controlla le colonne delle date e l'ordine giorno/mese, oppure correggi la data nella fonte."
+    },
+    "finish_before_start": {
+      "fail": "Riga {row}: la fine è precedente all'inizio.",
+      "suggestion": "Correggi le date nel cronoprogramma di origine."
+    },
+    "duration_mismatch": {
+      "fail": "Riga {row}: la durata stampata differisce dai giorni lavorativi tra inizio e fine.",
+      "suggestion": "Le date vengono mantenute; controlla la colonna della durata e il calendario del progetto."
+    },
+    "unique_ids": {
+      "fail": "Riga {row}: l'ID dell'attività è usato da un'altra riga.",
+      "suggestion": "Assegna un ID univoco a ogni attività nel cronoprogramma di origine."
+    },
+    "links_resolve": {
+      "fail": "Riga {row}: un predecessore non è un'attività della tabella.",
+      "suggestion": "Controlla la colonna dei predecessori; i collegamenti non risolti vengono ignorati."
+    }
   }
 }

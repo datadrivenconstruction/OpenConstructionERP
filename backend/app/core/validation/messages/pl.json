@@ -2218,5 +2218,31 @@
       "calendar_no_work_days": "Kalendarz {calendar} nie ma żadnego dnia roboczego.",
       "suggestion": "Zaznacz dni robocze tego kalendarza w harmonogramie źródłowym."
     }
+  },
+  "schedule_pdf_import": {
+    "no_text_layer": {
+      "fail": "PDF nie ma warstwy tekstowej, tabeli nie można odczytać.",
+      "suggestion": "Wyeksportuj harmonogram jako XML MS Project, XER Primavera lub Excel i zaimportuj ten plik."
+    },
+    "dates_parsed": {
+      "fail": "Wiersz {row}: początek lub koniec nie jest datą.",
+      "suggestion": "Sprawdź kolumny dat i kolejność dzień/miesiąc albo popraw datę w źródle."
+    },
+    "finish_before_start": {
+      "fail": "Wiersz {row}: koniec jest przed początkiem.",
+      "suggestion": "Popraw daty w harmonogramie źródłowym."
+    },
+    "duration_mismatch": {
+      "fail": "Wiersz {row}: wydrukowany czas trwania różni się od dni roboczych między początkiem a końcem.",
+      "suggestion": "Daty zostają zachowane; sprawdź kolumnę czasu trwania i kalendarz projektu."
+    },
+    "unique_ids": {
+      "fail": "Wiersz {row}: ID czynności jest używane w innym wierszu.",
+      "suggestion": "Nadaj każdej czynności unikalne ID w harmonogramie źródłowym."
+    },
+    "links_resolve": {
+      "fail": "Wiersz {row}: poprzednik nie jest czynnością z tabeli.",
+      "suggestion": "Sprawdź kolumnę poprzedników; nierozpoznane powiązania są pomijane."
+    }
   }
 }

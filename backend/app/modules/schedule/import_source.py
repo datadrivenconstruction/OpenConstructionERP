@@ -46,7 +46,12 @@ IMPORT_SOURCE_KEY = "import_source"
 SOURCE_DOCUMENT_TAG = "schedule-import-source"
 #: Metadata keys importers store a source identifier under, in lookup order.
 SOURCE_ID_KEYS: tuple[str, ...] = ("msp_uid", "xer_task_id", "import_row")
-_MEDIA_TYPES = {"xer": "text/plain", "msp_xml": "application/xml", "spreadsheet": "application/octet-stream"}
+_MEDIA_TYPES = {
+    "xer": "text/plain",
+    "msp_xml": "application/xml",
+    "spreadsheet": "application/octet-stream",
+    "pdf": "application/pdf",
+}
 
 
 def _day(value: object) -> date | None:

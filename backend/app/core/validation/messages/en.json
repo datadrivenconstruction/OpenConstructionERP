@@ -2218,5 +2218,31 @@
       "calendar_no_work_days": "Calendar {calendar} has no working weekday.",
       "suggestion": "Mark the working weekdays of this calendar in the source programme."
     }
+  },
+  "schedule_pdf_import": {
+    "no_text_layer": {
+      "fail": "The PDF has no text layer, so its table cannot be read.",
+      "suggestion": "Export the schedule as MS Project XML, Primavera XER or Excel and import that file instead."
+    },
+    "dates_parsed": {
+      "fail": "Row {row}: a start or finish is not a date.",
+      "suggestion": "Check the date columns and the day/month order, or correct the date in the source."
+    },
+    "finish_before_start": {
+      "fail": "Row {row}: the finish is before the start.",
+      "suggestion": "Correct the dates in the source programme."
+    },
+    "duration_mismatch": {
+      "fail": "Row {row}: the printed duration differs from the working days between start and finish.",
+      "suggestion": "The dates are kept; check the duration column and the project calendar."
+    },
+    "unique_ids": {
+      "fail": "Row {row}: the activity ID is used by another row.",
+      "suggestion": "Give every activity a unique ID in the source programme."
+    },
+    "links_resolve": {
+      "fail": "Row {row}: a predecessor is not an activity of the table.",
+      "suggestion": "Check the predecessor column; links that do not resolve are skipped."
+    }
   }
 }

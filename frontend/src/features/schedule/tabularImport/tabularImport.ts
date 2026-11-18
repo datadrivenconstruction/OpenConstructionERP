@@ -84,7 +84,7 @@ export interface ImportDocument {
 export interface TabularPreview {
   sha256: string;
   filename: string;
-  file_format: 'xlsx' | 'xls' | 'csv' | null;
+  file_format: 'xlsx' | 'xls' | 'csv' | 'pdf' | null;
   encoding: string | null;
   delimiter: string | null;
   sheet: string | null;
@@ -103,6 +103,8 @@ export interface TabularPreview {
   /** Refs the sheet marks for the client. A suggestion: only a confirmed list is applied. */
   client_visible_suggested: string[];
   document: ImportDocument | null;
+  /** Findings of the `schedule_pdf_import` rule set; set for a PDF upload only. */
+  validation?: { rule_sets: string[]; errors: number; warnings: number; findings: ValidationFinding[] } | null;
   /** Schedules of the project already imported from these exact bytes. */
   duplicate_of: string[];
 }
@@ -258,4 +260,33 @@ export function readMapping(columns: ImportColumn[]): Record<string, string> {
   const read: Record<string, string> = {};
   for (const column of columns) read[String(column.index)] = column.field ?? '';
   return read;
+}
+
+
+/** How sure the import is about one parsed row, and the worst problem on it. */
+export interface RowCheck {
+  /** 0..1: the weakest column match among name, dates and duration, lowered by a warning, 0 on an error. */
+  confidence: number;
+  status: 'ok' | 'warning' | 'error';
+  issues: ImportIssue[];
+}
+
+const ROW_FIELDS = ['name', 'start', 'finish', 'duration'] as const;
+
+/** Confidence and status per sheet row, for the parsed-rows grid. */
+export function rowChecks(preview: Pick<TabularPreview, 'columns' | 'issues' | 'mapping'>): (row: number | undefined) => RowCheck {
+  const byIndex = new Map(preview.columns.map((c) => [c.index, c.confidence]));
+  const mapped = ROW_FIELDS.map((f) => preview.mapping[f]).filter((i): i is number => i !== undefined);
+  const base = mapped.length ? Math.min(...mapped.map((i) => byIndex.get(i) ?? 1)) : 1;
+  const byRow = new Map<number, ImportIssue[]>();
+  for (const issue of preview.issues) {
+    if (issue.row == null || issue.severity === 'info') continue;
+    byRow.set(issue.row, [...(byRow.get(issue.row) ?? []), issue]);
+  }
+  return (row) => {
+    const issues = row === undefined ? [] : byRow.get(row) ?? [];
+    if (issues.some((i) => i.severity === 'error')) return { confidence: 0, status: 'error', issues };
+    if (issues.length) return { confidence: Math.round(base * 0.6 * 100) / 100, status: 'warning', issues };
+    return { confidence: base, status: 'ok', issues };
+  };
 }

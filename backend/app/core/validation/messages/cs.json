@@ -2218,5 +2218,31 @@
       "calendar_no_work_days": "Kalendář {calendar} nemá žádný pracovní den.",
       "suggestion": "Vyznačte ve zdrojovém harmonogramu pracovní dny tohoto kalendáře."
     }
+  },
+  "schedule_pdf_import": {
+    "no_text_layer": {
+      "fail": "PDF nemá textovou vrstvu, tabulku nelze přečíst.",
+      "suggestion": "Exportujte harmonogram jako MS Project XML, Primavera XER nebo Excel a importujte tento soubor."
+    },
+    "dates_parsed": {
+      "fail": "Řádek {row}: začátek nebo konec není datum.",
+      "suggestion": "Zkontrolujte sloupce dat a pořadí den/měsíc, nebo opravte datum ve zdroji."
+    },
+    "finish_before_start": {
+      "fail": "Řádek {row}: konec je před začátkem.",
+      "suggestion": "Opravte data ve zdrojovém harmonogramu."
+    },
+    "duration_mismatch": {
+      "fail": "Řádek {row}: vytištěná doba trvání se liší od pracovních dnů mezi začátkem a koncem.",
+      "suggestion": "Data zůstávají; zkontrolujte sloupec doby trvání a kalendář projektu."
+    },
+    "unique_ids": {
+      "fail": "Řádek {row}: ID činnosti používá jiný řádek.",
+      "suggestion": "Přidělte každé činnosti ve zdrojovém harmonogramu jedinečné ID."
+    },
+    "links_resolve": {
+      "fail": "Řádek {row}: předchůdce není činností tabulky.",
+      "suggestion": "Zkontrolujte sloupec předchůdců; nevyřešené vazby se přeskočí."
+    }
   }
 }
