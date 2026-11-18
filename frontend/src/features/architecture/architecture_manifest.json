@@ -66273,6 +66273,7 @@
         "compliance_packs.py",
         "country_defaults.py",
         "events.py",
+        "export_routes.py",
         "final_account.py",
         "hakedis.py",
         "hakedis_document.py",
@@ -66281,12 +66282,15 @@
         "hakedis_rules.py",
         "hakedis_xlsx.py",
         "intl.py",
+        "layouts.py",
         "manifest.py",
         "messages/__init__.py",
         "models.py",
         "pay_application.py",
         "pay_application_forms.py",
         "payment_plan.py",
+        "pdf_export.py",
+        "pdf_translations.py",
         "periods.py",
         "permissions.py",
         "price_adjustment.py",
@@ -73769,6 +73773,7 @@
         "changeorders",
         "contacts",
         "costmodel",
+        "doc_templates",
         "finance",
         "guarantees",
         "i18n_foundation",
@@ -319683,6 +319688,7 @@
         "letter_texts.py",
         "manifest.py",
         "models.py",
+        "package_contents.py",
         "parties.py",
         "pdf_documents.py",
         "permissions.py",
@@ -320204,6 +320210,26 @@
           "request_schema": "PackageUpdate"
         },
         {
+          "method": "GET",
+          "path": "/packages/{package_id}/preview/",
+          "handler": "get_package_preview",
+          "response_model": "PackagePreviewResponse",
+          "request_schema": "TenderingService"
+        },
+        {
+          "method": "DELETE",
+          "path": "/packages/{package_id}",
+          "handler": "delete_package",
+          "request_schema": "TenderingService"
+        },
+        {
+          "method": "POST",
+          "path": "/packages/{package_id}/cancel/",
+          "handler": "cancel_package",
+          "response_model": "PackageResponse",
+          "request_schema": "PackageCancel"
+        },
+        {
           "method": "POST",
           "path": "/packages/{package_id}/bids/",
           "handler": "create_bid",
@@ -320237,6 +320263,20 @@
           "handler": "update_bid",
           "response_model": "BidResponse",
           "request_schema": "BidUpdate"
+        },
+        {
+          "method": "PUT",
+          "path": "/bids/{bid_id}/prices/",
+          "handler": "put_buyer_prices",
+          "response_model": "BidResponse",
+          "request_schema": "BuyerPricesRequest"
+        },
+        {
+          "method": "POST",
+          "path": "/bids/{bid_id}/bid-link/",
+          "handler": "create_link_for_bid",
+          "response_model": "BidInvitationCreated",
+          "request_schema": "TenderingService"
         },
         {
           "method": "GET",
@@ -320370,6 +320410,12 @@
           "path": "/bid-portal/{token}/",
           "handler": "bid_portal_view",
           "response_model": "BidPortalView",
+          "request_schema": "Request"
+        },
+        {
+          "method": "GET",
+          "path": "/bid-portal/{token}/logo/",
+          "handler": "bid_portal_logo",
           "request_schema": "Request"
         },
         {
@@ -320585,6 +320631,46 @@
               "name": "metadata",
               "type": "dict[str, Any] | None",
               "default": "None"
+            },
+            {
+              "name": "budget_override",
+              "type": "FiniteDecimal | None",
+              "default": "None"
+            },
+            {
+              "name": "resource_scope",
+              "type": "'ResourceScopeIn | None'",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "ResourceScopeIn",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Which cost components of its lines a package covers.\n\n``kinds`` are the cost kinds in the package (labor, material, machinery,\nequipment, subcontractor, other); ``excluded`` takes single components out\nline by line (position id to component keys), for rows the owner supplies.\nAll kinds and no exclusions is the whole line, the default.",
+          "fields": [
+            {
+              "name": "kinds",
+              "type": "list[Literal['labor', 'material', 'machinery', 'equipment', 'subcontractor', 'other']]"
+            },
+            {
+              "name": "excluded",
+              "type": "dict[str, list[str]]"
+            }
+          ]
+        },
+        {
+          "class_name": "PackageCancel",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Cancel a tender that already went out: it is closed and kept, not deleted.",
+          "fields": [
+            {
+              "name": "reason",
+              "type": "str"
             }
           ]
         },
@@ -321139,6 +321225,15 @@
               "type": "Decimal"
             },
             {
+              "name": "budget_computed",
+              "type": "Decimal"
+            },
+            {
+              "name": "budget_override",
+              "type": "Decimal | None",
+              "default": "None"
+            },
+            {
               "name": "budget_provis_total",
               "type": "Decimal"
             },
@@ -321397,6 +321492,277 @@
             {
               "name": "sections",
               "type": "list[PackageScopeSection]"
+            }
+          ]
+        },
+        {
+          "class_name": "PackagePreviewComponent",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "One cost component of a line: per line unit, in or out of the package.",
+          "fields": [
+            {
+              "name": "key",
+              "type": "str"
+            },
+            {
+              "name": "name",
+              "type": "str"
+            },
+            {
+              "name": "code",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "kind",
+              "type": "str"
+            },
+            {
+              "name": "unit",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "quantity",
+              "type": "Decimal"
+            },
+            {
+              "name": "unit_cost",
+              "type": "Decimal"
+            },
+            {
+              "name": "included",
+              "type": "bool",
+              "default": "True"
+            }
+          ]
+        },
+        {
+          "class_name": "PackagePreviewLine",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "A row as the bidder sees it, with the buyer's budget beside it.",
+          "fields": [
+            {
+              "name": "id",
+              "type": "str"
+            },
+            {
+              "name": "kind",
+              "type": "str"
+            },
+            {
+              "name": "ordinal",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "short_text",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "long_text",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "unit",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "quantity",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "depth",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "supplied_by_others",
+              "type": "list[str]"
+            },
+            {
+              "name": "budget_rate",
+              "type": "Decimal | None",
+              "default": "None"
+            },
+            {
+              "name": "budget_total",
+              "type": "Decimal | None",
+              "default": "None"
+            },
+            {
+              "name": "split",
+              "type": "bool",
+              "default": "False"
+            },
+            {
+              "name": "unsplittable",
+              "type": "bool",
+              "default": "False"
+            },
+            {
+              "name": "components",
+              "type": "list[PackagePreviewComponent]"
+            }
+          ]
+        },
+        {
+          "class_name": "PackagePreviewRecipient",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "A firm on the distribution list.",
+          "fields": [
+            {
+              "name": "company_name",
+              "type": "str"
+            },
+            {
+              "name": "email",
+              "type": "str"
+            },
+            {
+              "name": "status",
+              "type": "str"
+            },
+            {
+              "name": "link_status",
+              "type": "str | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "PackagePreviewDocument",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "A document an addendum issues or replaces.",
+          "fields": [
+            {
+              "name": "addendum_revision",
+              "type": "int"
+            },
+            {
+              "name": "addendum_title",
+              "type": "str"
+            },
+            {
+              "name": "published",
+              "type": "bool",
+              "default": "False"
+            },
+            {
+              "name": "title",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "drawing_number",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "revision",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "document_id",
+              "type": "str | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "PackagePreviewResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "The whole content of a package as it goes out.",
+          "fields": [
+            {
+              "name": "package_id",
+              "type": "UUID"
+            },
+            {
+              "name": "name",
+              "type": "str"
+            },
+            {
+              "name": "description",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "status",
+              "type": "str"
+            },
+            {
+              "name": "deadline",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "currency",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "lines",
+              "type": "list[PackagePreviewLine]"
+            },
+            {
+              "name": "item_count",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "budget_computed",
+              "type": "Decimal"
+            },
+            {
+              "name": "budget_override",
+              "type": "Decimal | None",
+              "default": "None"
+            },
+            {
+              "name": "budget_total",
+              "type": "Decimal"
+            },
+            {
+              "name": "scope_kinds",
+              "type": "list[str]"
+            },
+            {
+              "name": "scope_active",
+              "type": "bool",
+              "default": "False"
+            },
+            {
+              "name": "recipients",
+              "type": "list[PackagePreviewRecipient]"
+            },
+            {
+              "name": "documents",
+              "type": "list[PackagePreviewDocument]"
+            },
+            {
+              "name": "bid_count",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "validation",
+              "type": "list[dict[str, Any]]"
             }
           ]
         },
@@ -322746,6 +323112,10 @@
               "name": "depth",
               "type": "int",
               "default": "0"
+            },
+            {
+              "name": "supplied_by_others",
+              "type": "list[str]"
             }
           ]
         },
@@ -322811,6 +323181,11 @@
               "name": "buyer_name",
               "type": "str",
               "default": "''"
+            },
+            {
+              "name": "buyer_logo",
+              "type": "bool",
+              "default": "False"
             },
             {
               "name": "bidder_company",
@@ -322883,6 +323258,23 @@
             },
             {
               "name": "currency",
+              "type": "str | None"
+            }
+          ]
+        },
+        {
+          "class_name": "BuyerPricesRequest",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Unit prices the buyer enters for a bid, per line id, as decimal strings.",
+          "fields": [
+            {
+              "name": "unit_prices",
+              "type": "dict[str, str]"
+            },
+            {
+              "name": "notes",
               "type": "str | None"
             }
           ]
@@ -323024,12 +323416,14 @@
         }
       ],
       "import_dependencies": [
+        "bid_management",
         "boq",
         "contacts",
         "doc_templates",
         "guarantees",
         "letter_templates",
         "notifications",
+        "price_breakdown",
         "projects",
         "teams",
         "users"
@@ -334665,10 +335059,10 @@
     },
     {
       "name": "contracts",
-      "ts_files": 89,
+      "ts_files": 90,
       "css_files": 0,
-      "test_files": 39,
-      "total_files": 89
+      "test_files": 40,
+      "total_files": 90
     },
     {
       "name": "coordination",
@@ -335533,10 +335927,10 @@
     },
     {
       "name": "procurement",
-      "ts_files": 40,
+      "ts_files": 43,
       "css_files": 0,
-      "test_files": 15,
-      "total_files": 40
+      "test_files": 16,
+      "total_files": 43
     },
     {
       "name": "procurement_concept",
@@ -335974,10 +336368,10 @@
     },
     {
       "name": "tendering",
-      "ts_files": 34,
+      "ts_files": 37,
       "css_files": 0,
-      "test_files": 13,
-      "total_files": 34
+      "test_files": 14,
+      "total_files": 37
     },
     {
       "name": "timeline",
@@ -336508,6 +336902,7 @@
       "changeorders",
       "contacts",
       "costmodel",
+      "doc_templates",
       "finance",
       "guarantees",
       "i18n_foundation",
@@ -337979,12 +338374,14 @@
       "users"
     ],
     "tendering": [
+      "bid_management",
       "boq",
       "contacts",
       "doc_templates",
       "guarantees",
       "letter_templates",
       "notifications",
+      "price_breakdown",
       "projects",
       "teams",
       "users"
@@ -338070,11 +338467,11 @@
     "total_models": 960,
     "total_columns": 11271,
     "total_relationships": 261,
-    "total_routes": 5483,
-    "total_schemas": 5065,
-    "total_python_files": 3593,
+    "total_routes": 5489,
+    "total_schemas": 5073,
+    "total_python_files": 3598,
     "frontend_features": 249,
-    "frontend_ts_files": 4380,
+    "frontend_ts_files": 4387,
     "frontend_backend_mapped": 223
   },
   "frontend_backend_mapping": {
