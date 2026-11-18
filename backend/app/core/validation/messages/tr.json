@@ -2218,5 +2218,46 @@
       "calendar_no_work_days": "{calendar} takviminde çalışma günü yok.",
       "suggestion": "Kaynak programda bu takvimin çalışma günlerini işaretleyin."
     }
+  },
+  "hongkong": {
+    "sopo_applicability": {
+      "fail": "Sözleşme Cap. 652 (Security of Payment) kapsamında: talepten itibaren 30 gün içinde yanıt, 60 gün içinde ödeme"
+    },
+    "sopo_private_scope_check": {
+      "fail": "Özel sözleşme yalnızca yeni bina veya Building Authority onayı gereken işlerde Cap. 652 kapsamındadır: kapsamı doğrulayın"
+    },
+    "sopo_response_late": {
+      "fail": "{date} tarihine kadar ödeme yanıtı tebliğ edilmedi: talep edilen tutar ihtilaflı, hakem kararına gidebilir"
+    },
+    "sopo_payment_term_exceeds_60": {
+      "fail": "{n} günlük ödeme süresi Cap. 652'nin izin verdiği 60 günü aşıyor"
+    },
+    "sopo_response_term_exceeds_30": {
+      "fail": "{n} günlük yanıt süresi Cap. 652'nin izin verdiği 30 günü aşıyor"
+    },
+    "sopo_adjudication_window": {
+      "fail": "Ödeme uyuşmazlığı doğdu: hakem kararı bildirimini {date} tarihine kadar tebliğ edin"
+    },
+    "contract_pay_when_paid": {
+      "fail": "Pay-when-paid maddesi: Cap. 652 koşullu ödemeyi uygulanamaz kılar"
+    },
+    "levy_missing": {
+      "fail": "İşler HK$3,000,000'u aşıyor ancak keşifte CIC harcı (%0,5) veya CWR harcı (%0,03) yok"
+    },
+    "levy_below_threshold": {
+      "fail": "İşler en fazla HK$3,000,000: CIC veya CWR harcı yok"
+    },
+    "tax_nonzero": {
+      "fail": "KDV veya GST satırı uygulanmış, ancak Hong Kong'da böyle bir vergi yok: sıfır yapın"
+    },
+    "retention_over_limit": {
+      "fail": "Tutulan teminat {x}, sözleşme sınırı {limit} değerini aşıyor"
+    },
+    "pc_sum_no_attendance": {
+      "fail": "Prime cost tutarında kâr ve hizmet kalemleri yok"
+    },
+    "index_attribution": {
+      "fail": "ArchSD fiyat endeksinde kaynak belirtilmemiş: Architectural Services Department'ı belirtin"
+    }
   }
 }

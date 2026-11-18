@@ -2218,5 +2218,46 @@
       "calendar_no_work_days": "Kalendar {calendar} nema nijedan radni dan.",
       "suggestion": "Označite radne dane ovog kalendara u izvornom planu."
     }
+  },
+  "hongkong": {
+    "sopo_applicability": {
+      "fail": "Ugovor je obuhvaćen Cap. 652 (Security of Payment): odgovor u 30 dana, plaćanje u 60 dana od zahtjeva"
+    },
+    "sopo_private_scope_check": {
+      "fail": "Privatni ugovor obuhvaćen je Cap. 652 samo za novu zgradu ili radove uz odobrenje Building Authority: potvrdite opseg"
+    },
+    "sopo_response_late": {
+      "fail": "Do {date} nije dostavljen odgovor na zahtjev: traženi iznos je sporan i može ići na adjudikaciju"
+    },
+    "sopo_payment_term_exceeds_60": {
+      "fail": "Rok plaćanja od {n} dana premašuje 60 dana dopuštenih Cap. 652"
+    },
+    "sopo_response_term_exceeds_30": {
+      "fail": "Rok odgovora od {n} dana premašuje 30 dana dopuštenih Cap. 652"
+    },
+    "sopo_adjudication_window": {
+      "fail": "Nastao je spor o plaćanju: dostavite obavijest o adjudikaciji do {date}"
+    },
+    "contract_pay_when_paid": {
+      "fail": "Klauzula pay-when-paid: Cap. 652 čini uvjetno plaćanje neprovedivim"
+    },
+    "levy_missing": {
+      "fail": "Radovi premašuju HK$3,000,000, ali troškovnik nema pristojbu CIC (0,5%) ili pristojbu CWR (0,03%)"
+    },
+    "levy_below_threshold": {
+      "fail": "Radovi nisu veći od HK$3,000,000: pristojbe CIC i CWR se ne plaćaju"
+    },
+    "tax_nonzero": {
+      "fail": "Obračunata je stavka PDV-a ili GST-a, ali Hong Kong nema takav porez: postavite nulu"
+    },
+    "retention_over_limit": {
+      "fail": "Zadržani iznos {x} premašuje ugovorno ograničenje {limit}"
+    },
+    "pc_sum_no_attendance": {
+      "fail": "Iznos prime cost nema stavke dobiti i opsluživanja"
+    },
+    "index_attribution": {
+      "fail": "Indeks cijena ArchSD nema naveden izvor: navedite Architectural Services Department"
+    }
   }
 }

@@ -1,0 +1,12 @@
+{
+  "_meta": {
+    "locale": "en-HK",
+    "name_native": "English (Hong Kong)",
+    "name_english": "English (Hong Kong)",
+    "direction": "ltr",
+    "pack": "hongkong-hk",
+    "version": "0.1.0",
+    "note": "Partial override on British English. The core 'en' bundle supplies the rest."
+  },
+  "common.boq": "Bills of Quantities"
+}

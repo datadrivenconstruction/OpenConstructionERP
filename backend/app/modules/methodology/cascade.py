@@ -79,6 +79,9 @@ class MarkupStep:
         base: Tokens this step applies to. Each token is a leaf base key, a
             composite key, or the key of an EARLIER step. May be empty for a
             fixed step (a fixed step does not need a base).
+        threshold: Optional floor for a percentage step: when the step's base is
+            at or below it the step charges nothing, above it the full rate on
+            the whole base (a statutory levy on works over a stated value).
     """
 
     key: str
@@ -88,6 +91,7 @@ class MarkupStep:
     rate: Decimal = Decimal("0")
     amount: Decimal = Decimal("0")
     base: tuple[str, ...] = ()
+    threshold: Decimal | None = None
 
 
 @dataclass(frozen=True)
@@ -293,6 +297,8 @@ def compute_cascade(spec: CascadeSpec, bases: Mapping[str, Decimal]) -> CascadeR
 
         if step.kind == KIND_PERCENTAGE:
             amount = _round(base_amount * step.rate / Decimal(100), quant)
+            if step.threshold is not None and base_amount <= step.threshold:
+                amount = Decimal(0)
             applied_rate = step.rate
         elif step.kind == KIND_GROSS_UP:
             if step.rate >= Decimal(100):

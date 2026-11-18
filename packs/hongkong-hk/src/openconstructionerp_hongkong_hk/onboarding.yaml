@@ -1,0 +1,29 @@
+# Hong Kong SAR Construction Pack - first-login onboarding wizard.
+version: 2
+locale: en-GB
+title: "Welcome to OpenConstructionERP - Hong Kong SAR"
+subtitle: "Three steps to line the workspace up with Hong Kong practice: contract form, payment terms under Cap. 652, Hong Kong dollar."
+
+steps:
+  - id: company_profile
+    title: "Company details"
+    body: "Used on bills, valuations, payment claims and invoices."
+    fields:
+      - { key: company_name, label: "Company name", type: text, required: true }
+      - { key: br_number, label: "Business Registration number", type: text, required: false, placeholder: "12345678" }
+      - { key: cic_registered, label: "We are registered with the Construction Industry Council", type: checkbox, default: true }
+
+  - id: contract_type
+    title: "Contract and payment"
+    body: "Contracts made on or after 28 August 2025 may fall under the Security of Payment Ordinance (Cap. 652): payment response within 30 days and payment within 60 days of a payment claim. A pay-when-paid clause has no effect under it."
+    fields:
+      - { key: works_in_public_sector, label: "We build public works", type: checkbox, default: false, help: "Public works default to the General Conditions of Contract for Building Works; NEC4 is common too. Shown for review, never enforced." }
+      - { key: monthly_valuations, label: "Value the works monthly", type: checkbox, default: true }
+      - { key: retention_percent, label: "Retention held on each valuation (percent)", type: text, required: false, default: "10" }
+      - { key: retention_limit_percent, label: "Retention limit (percent of the contract sum)", type: text, required: false, default: "5" }
+
+  - id: money
+    title: "Money"
+    body: "Hong Kong dollar at two decimals. Hong Kong has no VAT or GST. The CIC levy (0.5 percent) and the CWR levy (0.03 percent) are added on works over HK$3,000,000."
+    fields:
+      - { key: currency, label: "Currency", type: select, required: true, default: "HKD (HK$)", options: ["HKD (HK$)", "USD ($) - for contracts priced in dollars"] }

@@ -111,6 +111,8 @@ CLASSIFICATION_STANDARD_LABELS: Mapping[str, str] = MappingProxyType(
         "sfb_ccs": "SfB/CCS",
         "ns3451": "NS 3451",
         "bsab": "BSAB",
+        # Hong Kong SMM, 4th edition (HKIS). Codes only: the method text is the publisher's.
+        "hksmm4": "HKSMM4",
     }
 )
 

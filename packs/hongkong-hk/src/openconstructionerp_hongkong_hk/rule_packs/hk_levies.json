@@ -1,0 +1,35 @@
+{
+  "rule_pack_id": "hk_levies",
+  "name": "Construction Industry Levy and Construction Workers Registration Levy",
+  "name_zh_hk": "建造業徵款及建造業工人註冊徵款",
+  "standard": "Construction Industry Council Ordinance (Cap. 587); Construction Workers Registration Ordinance (Cap. 583)",
+  "jurisdiction": "HK",
+  "applies_to": [
+    "estimate",
+    "validation"
+  ],
+  "review_status": "Rates and threshold from cic.hk (Construction Industry Levy). Pending review by a Hong Kong quantity surveyor.",
+  "scope_note": "Due on construction operations whose value exceeds HK$3,000,000 (works tendered or begun from 30 July 2018; HK$1,000,000 before). Above the threshold the levy is on the whole value.",
+  "description": "Construction Industry Levy 0.5 percent and Construction Workers Registration Levy 0.03 percent of the value of the construction operations, 0.53 percent together. Hong Kong has no VAT or GST, so a bill carries no tax line.",
+  "rates": [
+    {
+      "code": "CIC",
+      "rate_percent": 0.5,
+      "threshold_hkd": 3000000
+    },
+    {
+      "code": "CWR",
+      "rate_percent": 0.03,
+      "threshold_hkd": 3000000
+    }
+  ],
+  "sources": [
+    "https://www.cic.hk/eng/main/levy/"
+  ],
+  "enables_rule_ids": [
+    "hk.levy.missing",
+    "hk.levy.below_threshold",
+    "hk.tax.nonzero"
+  ],
+  "regulator": "Construction Industry Council"
+}

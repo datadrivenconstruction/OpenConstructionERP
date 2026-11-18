@@ -2218,5 +2218,46 @@
       "calendar_no_work_days": "달력 {calendar}에 근무일이 없습니다.",
       "suggestion": "원본 공정표에서 이 달력의 근무일을 지정하세요."
     }
+  },
+  "hongkong": {
+    "sopo_applicability": {
+      "fail": "Cap. 652(지급보장)가 이 계약에 적용됩니다: 청구 후 30일 이내 지급 회신, 60일 이내 지급"
+    },
+    "sopo_private_scope_check": {
+      "fail": "민간 계약은 신축 또는 Building Authority 승인이 필요한 공사일 때만 Cap. 652 대상입니다: 범위를 확인하세요"
+    },
+    "sopo_response_late": {
+      "fail": "{date}까지 지급 회신이 송달되지 않았습니다: 청구액은 분쟁 상태이며 재정에 회부할 수 있습니다"
+    },
+    "sopo_payment_term_exceeds_60": {
+      "fail": "지급 기간 {n}일이 Cap. 652가 허용하는 60일을 초과합니다"
+    },
+    "sopo_response_term_exceeds_30": {
+      "fail": "지급 회신 기간 {n}일이 Cap. 652가 허용하는 30일을 초과합니다"
+    },
+    "sopo_adjudication_window": {
+      "fail": "지급 분쟁이 발생했습니다: {date}까지 재정 신청 통지를 송달하세요"
+    },
+    "contract_pay_when_paid": {
+      "fail": "pay-when-paid 조항: Cap. 652는 조건부 지급 조항을 무효로 합니다"
+    },
+    "levy_missing": {
+      "fail": "공사가 HK$3,000,000을 초과하지만 내역서에 CIC 부담금(0.5%) 또는 CWR 부담금(0.03%)이 없습니다"
+    },
+    "levy_below_threshold": {
+      "fail": "공사가 HK$3,000,000 이하입니다: CIC 및 CWR 부담금이 없습니다"
+    },
+    "tax_nonzero": {
+      "fail": "VAT 또는 GST 행이 부과되었으나 홍콩에는 해당 세금이 없습니다: 0으로 설정하세요"
+    },
+    "retention_over_limit": {
+      "fail": "유보금 {x}이 계약 한도 {limit}를 초과합니다"
+    },
+    "pc_sum_no_attendance": {
+      "fail": "프라임 코스트 금액에 이윤 및 관리(attendance) 항목이 없습니다"
+    },
+    "index_attribution": {
+      "fail": "ArchSD 입찰가격지수에 출처 표시가 없습니다: Architectural Services Department를 명시하세요"
+    }
   }
 }

@@ -2218,5 +2218,46 @@
       "calendar_no_work_days": "{calendar} календарында иш күнү жок.",
       "suggestion": "Баштапкы графикте бул календардын иш күндөрүн белгилеңиз."
     }
+  },
+  "hongkong": {
+    "sopo_applicability": {
+      "fail": "Келишимге Cap. 652 (Security of Payment) колдонулат: талаптан кийин 30 күндө жооп, 60 күндө төлөм"
+    },
+    "sopo_private_scope_check": {
+      "fail": "Жеке келишим жаңы имаратка же Building Authority макулдугун талап кылган иштерге гана Cap. 652 боюнча камтылат: көлөмүн ырастаңыз"
+    },
+    "sopo_response_late": {
+      "fail": "{date} чейин төлөм жообу тапшырылган жок: талап суммасы талаштуу жана адъюдикацияга берилиши мүмкүн"
+    },
+    "sopo_payment_term_exceeds_60": {
+      "fail": "{n} күндүк төлөм мөөнөтү Cap. 652 уруксат берген 60 күндөн ашат"
+    },
+    "sopo_response_term_exceeds_30": {
+      "fail": "{n} күндүк жооп мөөнөтү Cap. 652 уруксат берген 30 күндөн ашат"
+    },
+    "sopo_adjudication_window": {
+      "fail": "Төлөм талашы чыкты: адъюдикация кабарламасын {date} чейин тапшырыңыз"
+    },
+    "contract_pay_when_paid": {
+      "fail": "pay-when-paid шарты: Cap. 652 шарттуу төлөмдү аткарылгыс кылат"
+    },
+    "levy_missing": {
+      "fail": "Иштер HK$3,000,000 ашат, бирок сметада CIC жыйымы (0,5%) же CWR жыйымы (0,03%) жок"
+    },
+    "levy_below_threshold": {
+      "fail": "Иштер HK$3,000,000 ашпайт: CIC же CWR жыйымы төлөнбөйт"
+    },
+    "tax_nonzero": {
+      "fail": "КНС же GST сабы эсептелген, бирок Гонконгдо мындай салык жок: нөлгө коюңуз"
+    },
+    "retention_over_limit": {
+      "fail": "Кармалган сумма {x} келишим чегинен {limit} ашат"
+    },
+    "pc_sum_no_attendance": {
+      "fail": "prime cost суммасында пайда жана тейлөө позициялары жок"
+    },
+    "index_attribution": {
+      "fail": "ArchSD баа индексинде булак көрсөтүлгөн эмес: Architectural Services Department көрсөтүңүз"
+    }
   }
 }

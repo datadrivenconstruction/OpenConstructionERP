@@ -1709,10 +1709,28 @@ def _is_import_deductions_line(markup: BOQMarkup) -> bool:
     return isinstance(meta, dict) and meta.get("role") == IMPORT_DEDUCTIONS_ROLE and markup.scope_position_id is None
 
 
+def _markup_threshold(markup: BOQMarkup) -> Decimal | None:
+    """The value a line's base must exceed before the line charges anything, or None.
+
+    A statutory levy charged only on works above a value (``metadata.threshold_amount``)
+    is zero at or below it and charged on the whole base above it, not on the excess.
+    """
+    meta = markup.metadata_ if isinstance(markup.metadata_, dict) else {}
+    raw = meta.get("threshold_amount")
+    if raw in (None, ""):
+        return None
+    try:
+        return Decimal(str(raw))
+    except (InvalidOperation, ValueError, TypeError):
+        return None
+
+
 def _calculate_markup_amounts(
     direct_cost: Decimal,
     markups: list[BOQMarkup],
     escalation_factors: Mapping[uuid.UUID, Decimal] | None = None,
+    threshold_bases: Mapping[int, Decimal] | None = None,
+    bases_out: dict[int, Decimal] | None = None,
 ) -> list[tuple[BOQMarkup, Decimal]]:
     """Compute the dollar amount for each active markup line.
 
@@ -1818,7 +1836,20 @@ def _calculate_markup_amounts(
             # per_unit and unknown types default to zero
             amount = Decimal("0")
 
-        running_sum += amount
+        if bases_out is not None:
+            bases_out[id(markup)] = base
+        threshold = _markup_threshold(markup)
+        if threshold is not None:
+            # A scoped bill measures the threshold against the whole bill's base for the line.
+            measured = (threshold_bases or {}).get(id(markup), base)
+            if measured <= threshold:
+                amount = Decimal("0")
+
+        # A levy on the contract value is not part of the value a later line is a
+        # percentage of (``metadata.not_compounded``).
+        meta = markup.metadata_ if isinstance(markup.metadata_, dict) else {}
+        if not meta.get("not_compounded"):
+            running_sum += amount
         results.append((markup, amount))
 
     return results
@@ -2000,9 +2031,11 @@ def _calculate_markup_amounts_scoped(
     # across bucket stacks, and a caller may hand us lines that were never
     # flushed and so have no id yet.
     earned: dict[int, Decimal] = {id(m): Decimal("0") for m in markups}
+    bill_bases: dict[int, Decimal] = {}
+    _calculate_markup_amounts(direct_cost, bill_wide, escalation_factors, bases_out=bill_bases)
     for key, bucket_cost in buckets.items():
         stack = _effective_stack(bill_wide, overrides_by_scope, key)
-        for markup, amount in _calculate_markup_amounts(bucket_cost, stack, escalation_factors):
+        for markup, amount in _calculate_markup_amounts(bucket_cost, stack, escalation_factors, bill_bases):
             earned[id(markup)] = earned.get(id(markup), Decimal("0")) + amount
 
     return [(m, earned.get(id(m), Decimal("0"))) for m in markups]
@@ -7122,6 +7155,10 @@ class BOQService:
             metadata: dict[str, object] = {}
             if entry["vat_override"]:
                 metadata["vat_override"] = True
+            if entry.get("threshold_amount") not in (None, ""):
+                metadata["threshold_amount"] = str(entry["threshold_amount"])
+            if entry.get("not_compounded"):
+                metadata["not_compounded"] = True
             if entry["category"] == "tax":
                 metadata["vat_rate_source"] = rate_source if entry["vat_override"] else "region_template"
                 if unanswered_on is not None and not entry["vat_override"]:

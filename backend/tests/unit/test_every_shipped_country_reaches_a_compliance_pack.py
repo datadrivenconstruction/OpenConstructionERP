@@ -371,6 +371,7 @@ NATIONAL_RULE_SET_BY_COUNTRY: dict[str, str] = {
     "FR": "dpgf",
     "GB": "nrm",
     "GR": "greece",
+    "HK": "hongkong",
     "HU": "hungary",
     "IN": "cpwd",
     "IT": "italy",

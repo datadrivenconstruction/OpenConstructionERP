@@ -2218,5 +2218,46 @@
       "calendar_no_work_days": "カレンダー {calendar} に稼働日がありません。",
       "suggestion": "元の工程表でこのカレンダーの稼働日を指定してください。"
     }
+  },
+  "hongkong": {
+    "sopo_applicability": {
+      "fail": "Cap. 652（支払保証）がこの契約に適用されます：請求から30日以内に支払回答、60日以内に支払い"
+    },
+    "sopo_private_scope_check": {
+      "fail": "民間契約は新築または Building Authority の承認を要する工事の場合のみ Cap. 652 の対象です：範囲を確認してください"
+    },
+    "sopo_response_late": {
+      "fail": "{date} までに支払回答が送達されていません：請求額は争議となり裁定に付すことができます"
+    },
+    "sopo_payment_term_exceeds_60": {
+      "fail": "支払期間 {n} 日は Cap. 652 が認める60日を超えています"
+    },
+    "sopo_response_term_exceeds_30": {
+      "fail": "支払回答期間 {n} 日は Cap. 652 が認める30日を超えています"
+    },
+    "sopo_adjudication_window": {
+      "fail": "支払争議が発生しました：{date} までに裁定通知を送達してください"
+    },
+    "contract_pay_when_paid": {
+      "fail": "pay-when-paid 条項：Cap. 652 は条件付き支払条項を無効とします"
+    },
+    "levy_missing": {
+      "fail": "工事は HK$3,000,000 を超えていますが、CIC 賦課金（0.5%）または CWR 賦課金（0.03%）がありません"
+    },
+    "levy_below_threshold": {
+      "fail": "工事は HK$3,000,000 以下です：CIC・CWR 賦課金は不要です"
+    },
+    "tax_nonzero": {
+      "fail": "VAT または GST の行が計上されていますが、香港にはその税はありません：ゼロにしてください"
+    },
+    "retention_over_limit": {
+      "fail": "保留金 {x} が契約上限 {limit} を超えています"
+    },
+    "pc_sum_no_attendance": {
+      "fail": "プライムコスト金額に利益とアテンダンス項目がありません"
+    },
+    "index_attribution": {
+      "fail": "ArchSD 入札価格指数に出典表示がありません：Architectural Services Department を明記してください"
+    }
   }
 }

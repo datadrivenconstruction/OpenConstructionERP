@@ -52,6 +52,10 @@ class CostIndexSeries(Base):
         default="",
         server_default="",
     )
+    # Who publishes the series and under which terms, as the publisher asks to
+    # be credited. Required for an imported official index.
+    source_attribution: Mapped[str] = mapped_column(Text, nullable=False, default="", server_default="")
+    source_url: Mapped[str] = mapped_column(String(500), nullable=False, default="", server_default="")
 
     points: Mapped[list[CostIndexPoint]] = relationship(
         back_populates="series",

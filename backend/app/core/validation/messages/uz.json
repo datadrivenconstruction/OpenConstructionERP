@@ -2218,5 +2218,46 @@
       "calendar_no_work_days": "{calendar} taqvimida ish kuni yoʻq.",
       "suggestion": "Manba jadvalida ushbu taqvimning ish kunlarini belgilang."
     }
+  },
+  "hongkong": {
+    "sopo_applicability": {
+      "fail": "Shartnomaga Cap. 652 (Security of Payment) qo'llaniladi: talabdan keyin 30 kunda javob, 60 kunda to'lov"
+    },
+    "sopo_private_scope_check": {
+      "fail": "Xususiy shartnoma faqat yangi bino yoki Building Authority tasdig'ini talab qiluvchi ishlarda Cap. 652 ga kiradi: hajmini tasdiqlang"
+    },
+    "sopo_response_late": {
+      "fail": "{date} gacha to'lov javobi topshirilmadi: talab summasi bahsli va adyudikatsiyaga berilishi mumkin"
+    },
+    "sopo_payment_term_exceeds_60": {
+      "fail": "{n} kunlik to'lov muddati Cap. 652 ruxsat bergan 60 kundan oshadi"
+    },
+    "sopo_response_term_exceeds_30": {
+      "fail": "{n} kunlik javob muddati Cap. 652 ruxsat bergan 30 kundan oshadi"
+    },
+    "sopo_adjudication_window": {
+      "fail": "To'lov nizosi yuzaga keldi: adyudikatsiya bildirishnomasini {date} gacha topshiring"
+    },
+    "contract_pay_when_paid": {
+      "fail": "pay-when-paid sharti: Cap. 652 shartli to'lovni ijro etib bo'lmaydigan qiladi"
+    },
+    "levy_missing": {
+      "fail": "Ishlar HK$3,000,000 dan oshadi, lekin smetada CIC yig'imi (0,5%) yoki CWR yig'imi (0,03%) yo'q"
+    },
+    "levy_below_threshold": {
+      "fail": "Ishlar HK$3,000,000 dan oshmaydi: CIC yoki CWR yig'imi to'lanmaydi"
+    },
+    "tax_nonzero": {
+      "fail": "QQS yoki GST qatori hisoblangan, ammo Gonkongda bunday soliq yo'q: nolga qo'ying"
+    },
+    "retention_over_limit": {
+      "fail": "Ushlab qolingan summa {x} shartnoma chegarasidan {limit} oshadi"
+    },
+    "pc_sum_no_attendance": {
+      "fail": "prime cost summasida foyda va xizmat ko'rsatish bandlari yo'q"
+    },
+    "index_attribution": {
+      "fail": "ArchSD narx indeksida manba ko'rsatilmagan: Architectural Services Department ni ko'rsating"
+    }
   }
 }

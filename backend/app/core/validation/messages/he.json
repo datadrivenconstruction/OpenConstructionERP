@@ -2218,5 +2218,46 @@
       "calendar_no_work_days": "בלוח השנה {calendar} אין יום עבודה.",
       "suggestion": "סמנו את ימי העבודה של לוח שנה זה בלוח הזמנים המקורי."
     }
+  },
+  "hongkong": {
+    "sopo_applicability": {
+      "fail": "החוזה כפוף ל-Cap. 652 (Security of Payment): מענה תוך 30 יום ותשלום תוך 60 יום מהדרישה"
+    },
+    "sopo_private_scope_check": {
+      "fail": "חוזה פרטי כפוף ל-Cap. 652 רק לבניין חדש או לעבודות הדורשות אישור Building Authority: אשרו את ההיקף"
+    },
+    "sopo_response_late": {
+      "fail": "לא נמסר מענה לדרישת התשלום עד {date}: הסכום שנוי במחלוקת וניתן להעבירו להכרעה"
+    },
+    "sopo_payment_term_exceeds_60": {
+      "fail": "תקופת התשלום של {n} ימים חורגת מ-60 הימים המותרים לפי Cap. 652"
+    },
+    "sopo_response_term_exceeds_30": {
+      "fail": "תקופת המענה של {n} ימים חורגת מ-30 הימים המותרים לפי Cap. 652"
+    },
+    "sopo_adjudication_window": {
+      "fail": "נוצרה מחלוקת תשלום: מסרו הודעת הכרעה עד {date}"
+    },
+    "contract_pay_when_paid": {
+      "fail": "סעיף pay-when-paid: Cap. 652 הופך תשלום מותנה לבלתי אכיף"
+    },
+    "levy_missing": {
+      "fail": "העבודות עולות על HK$3,000,000 אך בכתב הכמויות חסר היטל CIC (0.5%) או היטל CWR (0.03%)"
+    },
+    "levy_below_threshold": {
+      "fail": "העבודות אינן עולות על HK$3,000,000: אין היטל CIC או CWR"
+    },
+    "tax_nonzero": {
+      "fail": "מחויבת שורת מע\"מ או GST, אך בהונג קונג אין מס כזה: קבעו אפס"
+    },
+    "retention_over_limit": {
+      "fail": "העיכבון {x} חורג ממגבלת החוזה {limit}"
+    },
+    "pc_sum_no_attendance": {
+      "fail": "לסכום prime cost אין פריטי רווח וטיפול"
+    },
+    "index_attribution": {
+      "fail": "מדד המחירים של ArchSD ללא ציון מקור: ציינו את Architectural Services Department"
+    }
   }
 }

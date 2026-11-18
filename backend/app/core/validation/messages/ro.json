@@ -2218,5 +2218,46 @@
       "calendar_no_work_days": "Calendarul {calendar} nu are nicio zi lucrătoare.",
       "suggestion": "Marcați zilele lucrătoare ale acestui calendar în graficul sursă."
     }
+  },
+  "hongkong": {
+    "sopo_applicability": {
+      "fail": "Contractul intră sub Cap. 652 (Security of Payment): răspuns în 30 de zile, plată în 60 de zile de la cerere"
+    },
+    "sopo_private_scope_check": {
+      "fail": "Un contract privat intră sub Cap. 652 doar pentru o clădire nouă sau lucrări cu aprobarea Building Authority: confirmați domeniul"
+    },
+    "sopo_response_late": {
+      "fail": "Nu s-a comunicat niciun răspuns de plată până la {date}: suma cerută este contestată și poate merge la adjudecare"
+    },
+    "sopo_payment_term_exceeds_60": {
+      "fail": "Termenul de plată de {n} zile depășește cele 60 de zile permise de Cap. 652"
+    },
+    "sopo_response_term_exceeds_30": {
+      "fail": "Termenul de răspuns de {n} zile depășește cele 30 de zile permise de Cap. 652"
+    },
+    "sopo_adjudication_window": {
+      "fail": "A apărut un litigiu de plată: comunicați notificarea de adjudecare până la {date}"
+    },
+    "contract_pay_when_paid": {
+      "fail": "Clauză pay-when-paid: Cap. 652 face plata condiționată inaplicabilă"
+    },
+    "levy_missing": {
+      "fail": "Lucrările depășesc HK$3,000,000, dar devizul nu are taxa CIC (0,5%) sau taxa CWR (0,03%)"
+    },
+    "levy_below_threshold": {
+      "fail": "Lucrările nu depășesc HK$3,000,000: nu se datorează taxă CIC sau CWR"
+    },
+    "tax_nonzero": {
+      "fail": "Se aplică o linie de TVA sau GST, dar Hong Kong nu are această taxă: setați zero"
+    },
+    "retention_over_limit": {
+      "fail": "Reținerea de {x} depășește limita contractuală de {limit}"
+    },
+    "pc_sum_no_attendance": {
+      "fail": "O sumă prime cost nu are poziții de profit și asistență"
+    },
+    "index_attribution": {
+      "fail": "Indicele de prețuri ArchSD nu are sursa: menționați Architectural Services Department"
+    }
   }
 }

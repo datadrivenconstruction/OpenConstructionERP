@@ -80,7 +80,12 @@ class PriceIndexService:
         return await self.session.get(CostIndexSeries, series_id)
 
     async def create_series(self, data: CostIndexSeriesCreate) -> CostIndexSeries:
-        obj = CostIndexSeries(name=data.name, description=data.description)
+        obj = CostIndexSeries(
+            name=data.name,
+            description=data.description,
+            source_attribution=data.source_attribution,
+            source_url=data.source_url,
+        )
         self.session.add(obj)
         await self.session.flush()
         return obj

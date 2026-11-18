@@ -7,6 +7,7 @@ import { boqApi, type Markup, type CreateMarkupData, type UpdateMarkupData } fro
 import { fmtWithCurrency } from './boqHelpers';
 import { markupRegionLabel, type MarkupRegion } from './markupRegionLabel';
 import { toNum } from '@/shared/lib/money';
+import { levyAdjusted } from './markupLevy';
 import { parseDecimalInput } from '@/shared/lib/parseDecimal';
 import { useToastStore } from '@/stores/useToastStore';
 import clsx from 'clsx';
@@ -350,7 +351,9 @@ export function MarkupPanel({ boqId, markups, directCost, currencySymbol, curren
         } else {
           amount = directCost * (pct / 100);
         }
-        running += amount;
+        const levy = levyAdjusted(m.metadata, base, amount);
+        amount = levy.amount;
+        if (levy.compounds) running += amount;
         return { id: m.id, amount };
       });
     return { calcMap: new Map(calculated.map((c) => [c.id, c.amount])), grandTotal: running, calculated };

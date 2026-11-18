@@ -2218,5 +2218,46 @@
       "calendar_no_work_days": "日历 {calendar} 没有工作日。",
       "suggestion": "请在源进度计划中标出此日历的工作日。"
     }
+  },
+  "hongkong": {
+    "sopo_applicability": {
+      "fail": "本合同受 Cap. 652（付款保障）规管：须于付款申索后 30 天内回应，60 天内付款"
+    },
+    "sopo_private_scope_check": {
+      "fail": "私人合同仅在新建建筑或需屋宇署批准的工程时受 Cap. 652 规管：请确认范围"
+    },
+    "sopo_response_late": {
+      "fail": "{date} 前未送达付款回应：申索金额已成争议，可提交审裁"
+    },
+    "sopo_payment_term_exceeds_60": {
+      "fail": "{n} 天的付款期超过 Cap. 652 允许的 60 天"
+    },
+    "sopo_response_term_exceeds_30": {
+      "fail": "{n} 天的付款回应期超过 Cap. 652 允许的 30 天"
+    },
+    "sopo_adjudication_window": {
+      "fail": "已产生付款争议：须于 {date} 前送达审裁通知"
+    },
+    "contract_pay_when_paid": {
+      "fail": "有条件付款条款：Cap. 652 规定此类条款不可执行"
+    },
+    "levy_missing": {
+      "fail": "工程超过 HK$3,000,000，但工程量清单缺少 CIC 征款（0.5%）或 CWR 征款（0.03%）"
+    },
+    "levy_below_threshold": {
+      "fail": "工程不超过 HK$3,000,000：无须缴付 CIC 或 CWR 征款"
+    },
+    "tax_nonzero": {
+      "fail": "计算了增值税或 GST 行，但香港没有此类税项：请设为零"
+    },
+    "retention_over_limit": {
+      "fail": "保留金 {x} 超过合同上限 {limit}"
+    },
+    "pc_sum_no_attendance": {
+      "fail": "主要成本金额缺少利润及照料项目"
+    },
+    "index_attribution": {
+      "fail": "ArchSD 投标价格指数未注明来源：请注明建筑署"
+    }
   }
 }

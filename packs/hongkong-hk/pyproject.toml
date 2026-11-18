@@ -1,0 +1,60 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "openconstructionerp-hongkong-hk"
+version = "0.1.0"
+description = "Country pack for Hong Kong SAR: Security of Payment Ordinance (Cap. 652) payment clock, CIC and CWR levies, zero tax, GCC retention defaults, HKSMM4 code skeleton, ArchSD tender price indices, Traditional Chinese (Hong Kong) and English (Hong Kong), HKD."
+readme = "README.md"
+license = { text = "AGPL-3.0-or-later" }
+requires-python = ">=3.11"
+authors = [
+    { name = "OpenConstructionERP", email = "info@datadrivenconstruction.io" },
+]
+keywords = [
+    "openconstructionerp",
+    "ocerp",
+    "country-pack",
+    "hong-kong",
+    "sopo",
+    "cap-652",
+    "cic-levy",
+    "hksmm4",
+    "archsd",
+    "hkd",
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)",
+    "Operating System :: OS Independent",
+    "Intended Audience :: Other Audience",
+    "Topic :: Office/Business",
+    "Natural Language :: Chinese (Traditional)",
+    "Natural Language :: English",
+]
+dependencies = [
+    "openconstructionerp>=18.8.1",
+]
+
+[project.urls]
+Source = "https://github.com/DataDrivenConstruction/openconstructionerp"
+
+[project.entry-points."openconstructionerp.partner_packs"]
+hongkong-hk = "openconstructionerp_hongkong_hk:MANIFEST"
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+openconstructionerp_hongkong_hk = [
+    "onboarding.yaml",
+    "rule_packs/*.json",
+    "locales/*.json",
+    "data/*.json",
+]

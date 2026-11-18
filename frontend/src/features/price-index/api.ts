@@ -20,6 +20,9 @@ export interface CostIndexSeries {
   id: string;
   name: string;
   description: string;
+  /** The publisher's credit line, shown wherever the series is (required for imported official indices). */
+  source_attribution?: string;
+  source_url?: string;
   point_count: number;
   created_at: string;
   updated_at: string;

@@ -35,6 +35,10 @@ export const SUPPORTED_LANGUAGES = [
   { code: 'pt-BR', name: 'Português (Brasil)', english: 'Portuguese (Brazil)', flag: '🇧🇷', country: 'br' },
   { code: 'ru', name: 'Русский', english: 'Russian', flag: '🇷🇺', country: 'ru' },
   { code: 'zh', name: '简体中文', english: 'Chinese (Simplified)', flag: '🇨🇳', country: 'cn' },
+  // Traditional Chinese as written in Hong Kong. Also the answer for zh-MO,
+  // zh-TW and zh-Hant browsers until a Taiwan locale exists: a Traditional
+  // reader falls back to English, never to the Simplified entry above.
+  { code: 'zh-HK', name: '繁體中文（香港）', english: 'Chinese (Traditional, Hong Kong)', flag: '🇭🇰', country: 'hk' },
   { code: 'ar', name: 'العربية', english: 'Arabic', flag: '🇸🇦', country: 'sa', dir: 'rtl' },
   { code: 'hi', name: 'हिन्दी', english: 'Hindi', flag: '🇮🇳', country: 'in' },
   { code: 'tr', name: 'Türkçe', english: 'Turkish', flag: '🇹🇷', country: 'tr' },
@@ -149,9 +153,30 @@ const ENGLISH_DAY_FIRST_REGIONS: ReadonlySet<string> = new Set([
   'PK', 'QA', 'SA', 'SG', 'TZ', 'UG', 'ZA', 'ZM', 'ZW',
 ]);
 
+/** Regions whose written Chinese is Traditional when the tag names no script. */
+const TRADITIONAL_CHINESE_REGIONS: ReadonlySet<string> = new Set(['HK', 'MO', 'TW']);
+
+/**
+ * True for zh-Hant-*, zh-HK, zh-MO and zh-TW: a reader who must never be
+ * answered with Simplified Chinese. An explicit script subtag wins over the
+ * region, so zh-Hans-HK is Simplified and zh-Hant-SG is Traditional.
+ */
+export function isTraditionalChinese(raw: string | null | undefined): boolean {
+  if (!raw) return false;
+  const parts = raw.trim().replace(/_/g, '-').split('-').map((p) => p.toUpperCase());
+  if (parts[0] !== 'ZH' || parts.length < 2) return false;
+  const rest = parts.slice(1);
+  if (rest.includes('HANT')) return true;
+  if (rest.includes('HANS')) return false;
+  return rest.some((p) => TRADITIONAL_CHINESE_REGIONS.has(p));
+}
+
 export function matchSupportedLanguage(raw: string | null | undefined): string | null {
   if (!raw) return null;
-  const parts = raw.trim().split('-');
+  if (isTraditionalChinese(raw)) {
+    return SUPPORTED_LANGUAGES.some((l) => l.code === 'zh-HK') ? 'zh-HK' : null;
+  }
+  const parts = raw.trim().replace(/_/g, '-').split('-');
   if (parts.length >= 2 && parts[1]) {
     const regional = `${parts[0]!.toLowerCase()}-${parts[1]!.toUpperCase()}`;
     if (SUPPORTED_LANGUAGES.some((l) => l.code === regional)) return regional;
@@ -394,7 +419,8 @@ export function isLocaleLoaded(code: string): boolean {
  * they still get the variant's own strings.
  */
 export async function loadLocaleResource(code: string): Promise<void> {
-  const base = code.includes('-') ? code.split('-')[0]! : null;
+  // A Traditional Chinese code has no base worth loading: `zh` is Simplified.
+  const base = code.includes('-') && !isTraditionalChinese(code) ? code.split('-')[0]! : null;
   const [variantAdded, baseAdded] = await Promise.all([
     loadLocaleChunk(code),
     base ? loadLocaleChunk(base) : Promise.resolve(false),
@@ -597,8 +623,13 @@ i18n
       'es-CL': ['es', 'en'],
       'es-CO': ['es', 'en'],
       'pt-BR': ['pt', 'en'],
+      'zh-HK': ['en'],
       default: ['en'],
     },
+    // Resolve the active code and then the fallback map only. The default
+    // ('all') would put the bare language between them, so zh-HK would read a
+    // loaded Simplified `zh` bundle before English.
+    load: 'currentOnly',
     // All translation keys are stored as flat strings with literal dots
     // (e.g. "match_elements.title"). Disable the dot-as-namespace
     // separator so lookups don't try to walk a nested object path that

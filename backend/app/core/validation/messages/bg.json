@@ -2218,5 +2218,46 @@
       "calendar_no_work_days": "Календар {calendar} няма работни дни.",
       "suggestion": "Отбележете работните дни на този календар в изходния график."
     }
+  },
+  "hongkong": {
+    "sopo_applicability": {
+      "fail": "Договорът попада под Cap. 652 (Security of Payment): отговор до 30 дни, плащане до 60 дни от искането"
+    },
+    "sopo_private_scope_check": {
+      "fail": "Частен договор попада под Cap. 652 само при нова сграда или работи с одобрение на Building Authority: потвърдете обхвата"
+    },
+    "sopo_response_late": {
+      "fail": "До {date} не е връчен отговор за плащане: исканата сума е спорна и може да отиде на адюдикация"
+    },
+    "sopo_payment_term_exceeds_60": {
+      "fail": "Срокът за плащане от {n} дни надвишава 60-те дни по Cap. 652"
+    },
+    "sopo_response_term_exceeds_30": {
+      "fail": "Срокът за отговор от {n} дни надвишава 30-те дни по Cap. 652"
+    },
+    "sopo_adjudication_window": {
+      "fail": "Възникна спор за плащане: връчете уведомление за адюдикация до {date}"
+    },
+    "contract_pay_when_paid": {
+      "fail": "Клауза pay-when-paid: Cap. 652 прави условното плащане неприложимо"
+    },
+    "levy_missing": {
+      "fail": "Работите надвишават HK$3,000,000, но в сметката липсва таксата CIC (0,5%) или таксата CWR (0,03%)"
+    },
+    "levy_below_threshold": {
+      "fail": "Работите са до HK$3,000,000: не се дължи такса CIC или CWR"
+    },
+    "tax_nonzero": {
+      "fail": "Начислен е ред ДДС или GST, но Хонконг няма такъв данък: задайте нула"
+    },
+    "retention_over_limit": {
+      "fail": "Задържаната сума {x} надвишава договорния лимит {limit}"
+    },
+    "pc_sum_no_attendance": {
+      "fail": "Сума prime cost няма позиции за печалба и обслужване"
+    },
+    "index_attribution": {
+      "fail": "Ценовият индекс ArchSD няма посочен източник: посочете Architectural Services Department"
+    }
   }
 }

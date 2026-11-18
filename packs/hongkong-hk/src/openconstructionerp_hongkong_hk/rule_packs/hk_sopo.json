@@ -1,0 +1,29 @@
+{
+  "rule_pack_id": "hk_sopo",
+  "name": "Construction Industry Security of Payment Ordinance (Cap. 652)",
+  "name_zh_hk": "《建造業付款保障條例》（第652章）",
+  "standard": "Construction Industry Security of Payment Ordinance (Cap. 652), s.12, s.15, s.18, s.20, s.21, s.23, s.24 and Schedule 4",
+  "jurisdiction": "HK",
+  "applies_to": [
+    "contract",
+    "payment_claim",
+    "validation"
+  ],
+  "review_status": "Read from the Ordinance text (DoJ open data release of the Laws of Hong Kong). Pending review by a Hong Kong construction lawyer.",
+  "scope_note": "Contracts made on or after 28 August 2025. Public contracts: works of HK$5,000,000 or more, or supply of goods or services only of HK$500,000 or more. Private contracts: only new buildings or works needing Building Authority approval under Cap. 123. A subcontract is covered at any value when its main contract is.",
+  "description": "The payment response is due by the earlier of the contract date and 30 days after the claim is served; payment is due by the earlier of the contract date and 60 days after the claim. A claim served before the billing date is taken to be served on the billing date. With no response, the claimed amount is disputed from the day after the response deadline, and the adjudication notice must be served within 28 days beginning on that day. A pay-when-paid provision has no effect.",
+  "sources": [
+    "https://www.elegislation.gov.hk/hk/cap652",
+    "https://data.gov.hk/en-data/dataset/hk-doj-hkel-legislation-current"
+  ],
+  "enables_rule_ids": [
+    "hk.sopo.applicability",
+    "hk.sopo.private_scope_check",
+    "hk.sopo.response_late",
+    "hk.sopo.payment_term_exceeds_60",
+    "hk.sopo.response_term_exceeds_30",
+    "hk.sopo.adjudication_window",
+    "hk.contract.pay_when_paid"
+  ],
+  "regulator": "Development Bureau, HKSAR Government"
+}

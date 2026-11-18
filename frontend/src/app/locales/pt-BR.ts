@@ -21393,6 +21393,8 @@ const resource = {
     "contracts.payment_terms.source.standard_form": "Modelo de contrato padrão",
     "contracts.payment_terms.source.industry_practice": "Prática habitual",
     "contracts.payment_terms.source.regional_pack": "Pacote regional",
+    "contracts.payment_terms.pay_when_paid": "O pagamento depende de o pagador ter recebido (pay-when-paid)",
+    "contracts.payment_terms.pay_when_paid_hint": "Algumas leis de garantia de pagamento tornam essa cláusula nula. O relatório de validação avisa quando isso se aplica ao seu contrato.",
     "contracts.country_defaults.AE.retention_percent.note": "O Contract Data indica a porcentagem retida de cada pagamento intermédio; dez por cento é o valor de entrada habitual no Golfo, retido até se alcançar o limite de retenção.",
     "contracts.country_defaults.AE.retention_cap_percent.note": "A retenção para no limite indicado no Contract Data, geralmente cinco por cento do Accepted Contract Amount, pelo que a taxa de dez por cento deixa de se aplicar a meio do valor do contrato.",
     "contracts.country_defaults.AE.retention_release_split.note": "Metade é devolvida na emissão do Taking-Over Certificate e o resto no termo da Defects Notification Period.",

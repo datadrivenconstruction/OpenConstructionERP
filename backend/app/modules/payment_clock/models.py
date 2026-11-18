@@ -193,6 +193,23 @@ class PaymentRegime(Base):
 
     notes: Mapped[str] = mapped_column(Text, nullable=False, default="", server_default="")
 
+    # Applicability. A statute that covers only contracts above a value, made
+    # after a date, or (for private work) only some kinds of work, says so here;
+    # all null or empty means the regime covers every contract in its country.
+    applies_from: Mapped[date | None] = mapped_column(Date, nullable=True)
+    min_contract_value: Mapped[Decimal | None] = mapped_column(Numeric(18, 2), nullable=True)
+    min_contract_value_supply: Mapped[Decimal | None] = mapped_column(Numeric(18, 2), nullable=True)
+    private_scope_rule: Mapped[str] = mapped_column(String(48), nullable=False, default="", server_default="")
+    # A claim served before the billing date counts as served on it.
+    early_claim_counts_from_billing_date: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=False, server_default="false"
+    )
+    adjudication_window_days: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    # The statute makes a pay-when-paid (conditional payment) clause unenforceable.
+    conditional_payment_void: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=False, server_default="false"
+    )
+
     def __repr__(self) -> str:
         return f"<PaymentRegime {self.code} {self.jurisdiction}>"
 

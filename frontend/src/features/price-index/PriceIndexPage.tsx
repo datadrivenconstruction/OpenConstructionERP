@@ -322,6 +322,21 @@ function PriceIndexContent() {
                 ))
               )}
             </div>
+            {(() => {
+              const selected = seriesList.find((s) => s.id === selectedSeriesId);
+              if (!selected?.source_attribution) return null;
+              return (
+                <p className="mt-2 text-xs text-content-tertiary" data-testid="series-attribution">
+                  {selected.source_url ? (
+                    <a href={selected.source_url} target="_blank" rel="noreferrer" className="underline">
+                      {selected.source_attribution}
+                    </a>
+                  ) : (
+                    selected.source_attribution
+                  )}
+                </p>
+              );
+            })()}
 
             <div className="flex items-end gap-2">
               <div className="flex-1">

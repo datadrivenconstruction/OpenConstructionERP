@@ -48,7 +48,7 @@ describe('document direction follows the active language', () => {
     // expectations.
     expect(
       `${RTL.length} of ${SUPPORTED_LANGUAGES.length} offered languages are RTL: ${RTL.join(', ')}`,
-    ).toBe('4 of 44 offered languages are RTL: ar, ur, fa, he');
+    ).toBe('4 of 45 offered languages are RTL: ar, ur, fa, he');
   });
 
   it('resolves rtl for every right-to-left language', () => {
@@ -60,7 +60,7 @@ describe('document direction follows the active language', () => {
     // to answer 'rtl' for everything - or for one language by accident - the
     // assertion above would still pass and this one would fail.
     const wrong = LTR.filter((code) => resolveDirection(code) !== 'ltr');
-    expect({ checked: LTR.length, wrong }).toEqual({ checked: 40, wrong: [] });
+    expect({ checked: LTR.length, wrong }).toEqual({ checked: 41, wrong: [] });
   });
 
   it('writes dir and lang onto <html> for each right-to-left language', () => {

@@ -823,6 +823,45 @@ COUNTRY_CONTRACT_DEFAULTS: dict[str, dict[str, Any]] = {
             "The Engineer certifies each interim payment on an Interim Payment Certificate.",
         ),
     },
+    "HK": {
+        "standard_form": "General Conditions of Contract for Building Works (Hong Kong Government, 1999 edition)",
+        "retention_percent": _figure(
+            "10",
+            "industry_practice",
+            "General Conditions of Contract for Building Works, clause 79 (retention); the figures are set in the Appendix",
+            "Ten percent of the value of each valuation is a common default, set per contract in the Appendix; it is a starting figure, not a rule.",
+        ),
+        "retention_cap_percent": _figure(
+            "5",
+            "industry_practice",
+            "General Conditions of Contract for Building Works, clause 79 (retention); the limit is set in the Appendix",
+            "Retention commonly stops at five percent of the contract sum; the contract states its own limit.",
+        ),
+        "retention_release_split": _figure(
+            None,
+            "industry_practice",
+            "General Conditions of Contract for Building Works, clause 79",
+            "Release events differ by contract, so no split is proposed.",
+        ),
+        "payment_period_days": _figure(
+            60,
+            "statute",
+            "Construction Industry Security of Payment Ordinance (Cap. 652), section 15",
+            "Sixty days after the payment claim is the latest payment deadline the Ordinance allows on a contract it covers; the contract may set an earlier date.",
+        ),
+        "valuation_interval": _figure(
+            "monthly",
+            "statute",
+            "Construction Industry Security of Payment Ordinance (Cap. 652), section 12",
+            "Where the contract names no billing date, a payment claim may be made on the last day of each calendar month.",
+        ),
+        "certificate_name": _figure(
+            "Interim Payment Certificate",
+            "industry_practice",
+            "General Conditions of Contract for Building Works",
+            "The certificate the Architect or Surveyor issues after each valuation; under Cap. 652 it counts as the payment response.",
+        ),
+    },
 }
 
 

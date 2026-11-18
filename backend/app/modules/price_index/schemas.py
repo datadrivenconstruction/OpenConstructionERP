@@ -72,6 +72,8 @@ class CostIndexSeriesCreate(BaseModel):
 
     name: str = Field(..., min_length=1, max_length=255)
     description: str = Field(default="", max_length=5000)
+    source_attribution: str = Field(default="", max_length=2000)
+    source_url: str = Field(default="", max_length=500)
 
 
 class CostIndexSeriesUpdate(BaseModel):
@@ -81,6 +83,8 @@ class CostIndexSeriesUpdate(BaseModel):
 
     name: str | None = Field(default=None, min_length=1, max_length=255)
     description: str | None = Field(default=None, max_length=5000)
+    source_attribution: str | None = Field(default=None, max_length=2000)
+    source_url: str | None = Field(default=None, max_length=500)
 
 
 class CostIndexSeriesResponse(BaseModel):
@@ -91,6 +95,8 @@ class CostIndexSeriesResponse(BaseModel):
     id: UUID
     name: str
     description: str
+    source_attribution: str = ""
+    source_url: str = ""
     point_count: int = 0
     created_at: datetime
     updated_at: datetime

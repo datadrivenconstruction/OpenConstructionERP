@@ -2218,5 +2218,46 @@
       "calendar_no_work_days": "ปฏิทิน {calendar} ไม่มีวันทำงาน",
       "suggestion": "ระบุวันทำงานของปฏิทินนี้ในแผนงานต้นทาง"
     }
+  },
+  "hongkong": {
+    "sopo_applicability": {
+      "fail": "สัญญานี้อยู่ภายใต้ Cap. 652 (Security of Payment): ตอบภายใน 30 วัน ชำระภายใน 60 วันนับจากคำขอ"
+    },
+    "sopo_private_scope_check": {
+      "fail": "สัญญาเอกชนอยู่ภายใต้ Cap. 652 เฉพาะอาคารใหม่หรืองานที่ต้องได้รับอนุมัติจาก Building Authority: โปรดยืนยันขอบเขต"
+    },
+    "sopo_response_late": {
+      "fail": "ไม่มีการส่งคำตอบการชำระเงินภายใน {date}: จำนวนที่เรียกร้องเป็นข้อพิพาทและเข้าสู่การชี้ขาดได้"
+    },
+    "sopo_payment_term_exceeds_60": {
+      "fail": "ระยะเวลาชำระ {n} วันเกิน 60 วันที่ Cap. 652 อนุญาต"
+    },
+    "sopo_response_term_exceeds_30": {
+      "fail": "ระยะเวลาตอบ {n} วันเกิน 30 วันที่ Cap. 652 อนุญาต"
+    },
+    "sopo_adjudication_window": {
+      "fail": "เกิดข้อพิพาทการชำระเงิน: ส่งหนังสือแจ้งการชี้ขาดภายใน {date}"
+    },
+    "contract_pay_when_paid": {
+      "fail": "ข้อ pay-when-paid: Cap. 652 ทำให้การชำระแบบมีเงื่อนไขใช้บังคับไม่ได้"
+    },
+    "levy_missing": {
+      "fail": "งานเกิน HK$3,000,000 แต่ใบประมาณราคาไม่มีเงินเรียกเก็บ CIC (0.5%) หรือ CWR (0.03%)"
+    },
+    "levy_below_threshold": {
+      "fail": "งานไม่เกิน HK$3,000,000: ไม่ต้องชำระเงินเรียกเก็บ CIC หรือ CWR"
+    },
+    "tax_nonzero": {
+      "fail": "มีการคิดภาษีมูลค่าเพิ่มหรือ GST แต่ฮ่องกงไม่มีภาษีนี้: ตั้งเป็นศูนย์"
+    },
+    "retention_over_limit": {
+      "fail": "เงินประกันผลงาน {x} เกินวงเงินตามสัญญา {limit}"
+    },
+    "pc_sum_no_attendance": {
+      "fail": "ยอด prime cost ไม่มีรายการกำไรและการดูแล"
+    },
+    "index_attribution": {
+      "fail": "ดัชนีราคา ArchSD ไม่ระบุแหล่งที่มา: ระบุ Architectural Services Department"
+    }
   }
 }

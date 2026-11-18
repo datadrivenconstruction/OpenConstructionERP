@@ -1582,6 +1582,7 @@ const resource = {
     "onboarding.mod_portfolio_desc": "Schedule tree across projects with cross-schedule links and rollup CPM",
     "contracts.retention_release": "Retainage release",
     "contracts.tpl_family_hint": "Free text used to group the catalog, not a fixed list.",
+    "contracts.payment_terms.pay_when_paid_hint": "Some prompt-payment laws make such a clause void. The validation report says so when yours does.",
     "credentials.empty_desc": "Add the licenses, certifications and training the people and firms on this project hold, and the register starts warning you before any of them lapse.",
     "credentials.flow_1_desc": "Licenses, certifications, statutory memberships, indemnity cover, registrations and training, each with the authority that issued it and the dates it runs between.",
     "credentials.page_subtitle": "Licenses, certifications and training on this project, what the project requires of whom, and who that leaves unable to work today.",

@@ -2218,5 +2218,46 @@
       "calendar_no_work_days": "Kalender {calendar} har ingen arbeidsdag.",
       "suggestion": "Merk arbeidsdagene i denne kalenderen i kildeplanen."
     }
+  },
+  "hongkong": {
+    "sopo_applicability": {
+      "fail": "Cap. 652 (Security of Payment) gjelder kontrakten: svar innen 30 dager, betaling innen 60 dager fra kravet"
+    },
+    "sopo_private_scope_check": {
+      "fail": "En privat kontrakt omfattes av Cap. 652 bare ved nybygg eller arbeider som krever Building Authority-godkjenning: bekreft omfanget"
+    },
+    "sopo_response_late": {
+      "fail": "Intet betalingssvar ble forkynt før {date}: det krevde beløpet er omtvistet og kan gå til adjudikasjon"
+    },
+    "sopo_payment_term_exceeds_60": {
+      "fail": "Betalingsfristen på {n} dager overstiger de 60 dagene Cap. 652 tillater"
+    },
+    "sopo_response_term_exceeds_30": {
+      "fail": "Svarfristen på {n} dager overstiger de 30 dagene Cap. 652 tillater"
+    },
+    "sopo_adjudication_window": {
+      "fail": "En betalingstvist har oppstått: forkynn adjudikasjonsvarselet før {date}"
+    },
+    "contract_pay_when_paid": {
+      "fail": "Pay-when-paid-klausul: Cap. 652 gjør betinget betaling uten virkning"
+    },
+    "levy_missing": {
+      "fail": "Arbeidene overstiger HK$3,000,000, men kalkylen mangler CIC-avgiften (0,5 %) eller CWR-avgiften (0,03 %)"
+    },
+    "levy_below_threshold": {
+      "fail": "Arbeidene er høyst HK$3,000,000: ingen CIC- eller CWR-avgift"
+    },
+    "tax_nonzero": {
+      "fail": "En mva- eller GST-linje belastes, men Hongkong har ingen slik skatt: sett til null"
+    },
+    "retention_over_limit": {
+      "fail": "Tilbakeholdt beløp {x} overstiger kontraktens grense {limit}"
+    },
+    "pc_sum_no_attendance": {
+      "fail": "En prime cost-sum mangler poster for fortjeneste og bistand"
+    },
+    "index_attribution": {
+      "fail": "ArchSD-prisindeksen mangler kildeangivelse: oppgi Architectural Services Department"
+    }
   }
 }

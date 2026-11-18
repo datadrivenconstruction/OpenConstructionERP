@@ -143,6 +143,7 @@ class ContractCreate(ContractPaymentTermFields):
         default=None,
         pattern=rf"^({RETENTION_RELEASE_EVENTS})$",
     )
+    pay_when_paid: bool = False
     status: str = Field(default="draft", pattern=rf"^({CONTRACT_STATUSES})$")
     signed_at: str | None = None
     terms: ContractTerms = Field(default_factory=dict)
@@ -177,6 +178,7 @@ class ContractUpdate(ContractPaymentTermFields):
         default=None,
         pattern=rf"^({RETENTION_RELEASE_EVENTS})$",
     )
+    pay_when_paid: bool | None = None
     status: str | None = Field(default=None, pattern=rf"^({CONTRACT_STATUSES})$")
     signed_at: str | None = None
     terms: ContractTerms | None = None
@@ -204,6 +206,7 @@ class ContractResponse(BaseModel):
     retention_percent: Decimal
     # Rows stored before the vocabulary was unified still hold an alias.
     retention_release_event: ReleaseEvent
+    pay_when_paid: bool = False
     status: str
     signed_at: str | None = None
     terms: dict[str, Any] = Field(default_factory=dict)

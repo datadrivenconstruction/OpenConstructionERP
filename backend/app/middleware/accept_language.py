@@ -25,7 +25,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 from starlette.responses import Response
 
-from app.core.i18n import SUPPORTED_LOCALES, set_locale
+from app.core.i18n import SUPPORTED_LOCALES, is_traditional_chinese, set_locale
 from app.core.regional_format import reset_document_digits, set_document_digits
 
 __all__ = [
@@ -107,6 +107,13 @@ def match_locale(
         if tag_lower in available:
             return tag_lower
 
+        # A Traditional Chinese reader (zh-HK, zh-MO, zh-TW, zh-Hant) is never
+        # served Simplified: zh-hk if it is there, otherwise the next tag.
+        if is_traditional_chinese(tag_lower):
+            if "zh-hk" in available:
+                return "zh-hk"
+            continue
+
         # 2. Prefix match (e.g. "de-DE" → "de", "zh-CN" → "zh")
         prefix = tag_lower.split("-")[0]
         if prefix in available:
@@ -173,10 +180,14 @@ class AcceptLanguageMiddleware(BaseHTTPMiddleware):
             normalized = query_locale.strip().lower()
             if normalized in SUPPORTED_LOCALES:
                 return normalized
-            # Try prefix (e.g. "de-DE" → "de")
-            prefix = normalized.split("-")[0]
-            if prefix in SUPPORTED_LOCALES:
-                return prefix
+            if is_traditional_chinese(normalized):
+                if "zh-hk" in SUPPORTED_LOCALES:
+                    return "zh-hk"
+            else:
+                # Try prefix (e.g. "de-DE" → "de")
+                prefix = normalized.split("-")[0]
+                if prefix in SUPPORTED_LOCALES:
+                    return prefix
 
         # 2. Accept-Language header
         accept = request.headers.get("accept-language", "")

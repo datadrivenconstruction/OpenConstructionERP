@@ -208,6 +208,15 @@ def compute_schedule(
     statute = str(regime.get("statute") or "the applicable statute")
     derivation: list[str] = []
 
+    # Where the statute says so, a claim served before the billing date is taken
+    # to be served on it; the period end is the billing date the application records.
+    if regime.get("early_claim_counts_from_billing_date") and period_end is not None and application_date < period_end:
+        derivation.append(
+            f"Claim served {application_date.isoformat()} before the billing date {period_end.isoformat()}: "
+            f"taken to be served on the billing date under {statute}."
+        )
+        application_date = period_end
+
     due_basis = str(regime.get("due_date_basis") or "application_date")
     due_days = _int_or_none(regime.get("due_date_days")) or 0
     due_day_basis = str(regime.get("due_date_day_basis") or "calendar")

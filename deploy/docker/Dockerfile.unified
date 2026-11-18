@@ -139,6 +139,7 @@ COPY packs/eleven-areas-framework/src/ packs/eleven-areas-framework/src/
 COPY packs/france-fr/src/ packs/france-fr/src/
 COPY packs/germany-de/src/ packs/germany-de/src/
 COPY packs/greece-gr/src/ packs/greece-gr/src/
+COPY packs/hongkong-hk/src/ packs/hongkong-hk/src/
 COPY packs/hungary-hu/src/ packs/hungary-hu/src/
 COPY packs/india-cpwd/src/ packs/india-cpwd/src/
 COPY packs/indonesia-id/src/ packs/indonesia-id/src/

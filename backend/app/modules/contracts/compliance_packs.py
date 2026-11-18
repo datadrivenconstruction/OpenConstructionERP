@@ -97,6 +97,15 @@ RULE_PACKS: dict[str, dict[str, Any]] = {
         "enforced_workflows": [WORKFLOW_CONTRACT_SIGNATURE],
         "rule_sets": ["boq_quality", "pakistan"],
     },
+    "hk_compliance": {
+        "id": "hk_compliance",
+        "name": "Hong Kong SAR Compliance",
+        "description": "Security of Payment Ordinance (Cap. 652) scope and payment dates, the void pay-when-paid "
+        "clause, the CIC and CWR levies over HK$3,000,000, no tax line, plus the universal quality baseline.",
+        "jurisdiction": "HK",
+        "enforced_workflows": [WORKFLOW_CONTRACT_SIGNATURE],
+        "rule_sets": ["boq_quality", "hongkong"],
+    },
     "mx_compliance": {
         "id": "mx_compliance",
         "name": "Mexico Compliance",
@@ -488,6 +497,10 @@ PACK_BY_LABEL: dict[str, str] = {
     "poland": "pl_compliance",
     "polska": "pl_compliance",
     "pakistan": "pk_compliance",
+    "hong kong": "hk_compliance",
+    "hong kong sar": "hk_compliance",
+    "hongkong": "hk_compliance",
+    "香港": "hk_compliance",
     "italy": "it_compliance",
     "italia": "it_compliance",
     "china": "cn_compliance",

@@ -2218,5 +2218,46 @@
       "calendar_no_work_days": "ক্যালেন্ডার {calendar}-এ কোনো কর্মদিবস নেই।",
       "suggestion": "উৎস সময়সূচিতে এই ক্যালেন্ডারের কর্মদিবসগুলো চিহ্নিত করুন।"
     }
+  },
+  "hongkong": {
+    "sopo_applicability": {
+      "fail": "এই চুক্তি Cap. 652 (Security of Payment)-এর আওতায়: দাবির 30 দিনের মধ্যে উত্তর, 60 দিনের মধ্যে পরিশোধ"
+    },
+    "sopo_private_scope_check": {
+      "fail": "বেসরকারি চুক্তি কেবল নতুন ভবন বা Building Authority অনুমোদন লাগে এমন কাজে Cap. 652-এর আওতায়: পরিধি নিশ্চিত করুন"
+    },
+    "sopo_response_late": {
+      "fail": "{date}-এর মধ্যে পরিশোধ উত্তর দেওয়া হয়নি: দাবিকৃত অর্থ বিরোধপূর্ণ এবং নিষ্পত্তিতে যেতে পারে"
+    },
+    "sopo_payment_term_exceeds_60": {
+      "fail": "{n} দিনের পরিশোধ সময় Cap. 652-এর অনুমোদিত 60 দিন ছাড়িয়েছে"
+    },
+    "sopo_response_term_exceeds_30": {
+      "fail": "{n} দিনের উত্তর সময় Cap. 652-এর অনুমোদিত 30 দিন ছাড়িয়েছে"
+    },
+    "sopo_adjudication_window": {
+      "fail": "পরিশোধ বিরোধ দেখা দিয়েছে: {date}-এর মধ্যে নিষ্পত্তির নোটিশ দিন"
+    },
+    "contract_pay_when_paid": {
+      "fail": "pay-when-paid ধারা: Cap. 652 শর্তসাপেক্ষ পরিশোধ অকার্যকর করে"
+    },
+    "levy_missing": {
+      "fail": "কাজ HK$3,000,000 ছাড়িয়েছে কিন্তু হিসাবে CIC লেভি (0.5%) বা CWR লেভি (0.03%) নেই"
+    },
+    "levy_below_threshold": {
+      "fail": "কাজ HK$3,000,000 বা কম: CIC বা CWR লেভি দেয় নয়"
+    },
+    "tax_nonzero": {
+      "fail": "VAT বা GST লাইন ধরা হয়েছে, কিন্তু হংকংয়ে এমন কর নেই: শূন্য করুন"
+    },
+    "retention_over_limit": {
+      "fail": "ধরে রাখা অর্থ {x} চুক্তির সীমা {limit} ছাড়িয়েছে"
+    },
+    "pc_sum_no_attendance": {
+      "fail": "prime cost অঙ্কের সাথে মুনাফা ও সেবা আইটেম নেই"
+    },
+    "index_attribution": {
+      "fail": "ArchSD মূল্য সূচকে উৎস নেই: Architectural Services Department উল্লেখ করুন"
+    }
   }
 }

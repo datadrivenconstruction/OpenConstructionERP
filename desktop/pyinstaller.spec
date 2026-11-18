@@ -312,6 +312,7 @@ _COMMUNITY_PACKS = (
     "france-fr",
     "germany-de",
     "greece-gr",
+    "hongkong-hk",
     "hungary-hu",
     "india-cpwd",
     "indonesia-id",

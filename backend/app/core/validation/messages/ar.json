@@ -2218,5 +2218,46 @@
       "calendar_no_work_days": "التقويم {calendar} لا يحتوي على أي يوم عمل.",
       "suggestion": "حدد أيام العمل لهذا التقويم في البرنامج الزمني المصدر."
     }
+  },
+  "hongkong": {
+    "sopo_applicability": {
+      "fail": "يخضع هذا العقد لـ Cap. 652 (Security of Payment): رد خلال 30 يومًا ودفع خلال 60 يومًا من المطالبة"
+    },
+    "sopo_private_scope_check": {
+      "fail": "العقد الخاص يخضع لـ Cap. 652 فقط لمبنى جديد أو أعمال تتطلب موافقة Building Authority: أكّد النطاق"
+    },
+    "sopo_response_late": {
+      "fail": "لم يُبلَّغ رد على المطالبة حتى {date}: المبلغ المطالب به متنازع عليه ويمكن إحالته إلى الفصل"
+    },
+    "sopo_payment_term_exceeds_60": {
+      "fail": "مدة الدفع {n} يومًا تتجاوز 60 يومًا يسمح بها Cap. 652"
+    },
+    "sopo_response_term_exceeds_30": {
+      "fail": "مدة الرد {n} يومًا تتجاوز 30 يومًا يسمح بها Cap. 652"
+    },
+    "sopo_adjudication_window": {
+      "fail": "نشأ نزاع على الدفع: بلّغ إشعار الفصل قبل {date}"
+    },
+    "contract_pay_when_paid": {
+      "fail": "شرط الدفع عند القبض: يجعل Cap. 652 شروط الدفع المشروط غير قابلة للتنفيذ"
+    },
+    "levy_missing": {
+      "fail": "تتجاوز الأعمال HK$3,000,000 لكن الكشف يخلو من رسم CIC (0.5%) أو رسم CWR (0.03%)"
+    },
+    "levy_below_threshold": {
+      "fail": "الأعمال لا تتجاوز HK$3,000,000: لا يستحق رسم CIC أو CWR"
+    },
+    "tax_nonzero": {
+      "fail": "يُحتسب بند ضريبة قيمة مضافة أو GST، لكن هونغ كونغ لا تفرض هذه الضريبة: اجعله صفرًا"
+    },
+    "retention_over_limit": {
+      "fail": "المحتجز {x} يتجاوز حد العقد {limit}"
+    },
+    "pc_sum_no_attendance": {
+      "fail": "مبلغ prime cost بلا بنود ربح وخدمة"
+    },
+    "index_attribution": {
+      "fail": "مؤشر أسعار ArchSD بلا إسناد للمصدر: اذكر Architectural Services Department"
+    }
   }
 }

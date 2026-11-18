@@ -28,6 +28,9 @@ from pydantic import BaseModel, ConfigDict, Field, field_serializer, field_valid
 from app.core.decimal_types import Decimal6_3, Decimal18_2
 
 DayBasisLiteral = Literal["calendar", "business"]
+# "" = no private-works restriction; the named rule is evaluated by
+# app.modules.payment_clock.applicability.
+PrivateScopeRuleLiteral = Literal["", "new_structure_or_building_permit"]
 DateBasisLiteral = Literal["application_date", "period_end", "due_date"]
 NoNoticeEffectLiteral = Literal[
     "applied_sum_becomes_notified_sum",
@@ -122,6 +125,13 @@ class RegimeResponse(BaseModel):
     interest_fixed_percent: Decimal | None
     interest_statute: str
     notes: str
+    applies_from: date | None = None
+    min_contract_value: Decimal | None = None
+    min_contract_value_supply: Decimal | None = None
+    private_scope_rule: str = ""
+    early_claim_counts_from_billing_date: bool = False
+    adjudication_window_days: int | None = None
+    conditional_payment_void: bool = False
     # Filled by the router from the pure clock helper, not stored: the interest
     # clause as one readable sentence.
     interest_description: str = ""
@@ -176,6 +186,13 @@ class RegimeSeedRow(BaseModel):
     interest_fixed_percent: Decimal6_3 | None = None
     interest_statute: str = ""
     notes: str = ""
+    applies_from: date | None = None
+    min_contract_value: Decimal18_2 | None = None
+    min_contract_value_supply: Decimal18_2 | None = None
+    private_scope_rule: PrivateScopeRuleLiteral = ""
+    early_claim_counts_from_billing_date: bool = False
+    adjudication_window_days: int | None = None
+    conditional_payment_void: bool = False
 
 
 # ── Application ──────────────────────────────────────────────────────────────

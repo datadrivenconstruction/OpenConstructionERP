@@ -2218,5 +2218,46 @@
       "calendar_no_work_days": "Lịch {calendar} không có ngày làm việc nào.",
       "suggestion": "Đánh dấu các ngày làm việc của lịch này trong tiến độ nguồn."
     }
+  },
+  "hongkong": {
+    "sopo_applicability": {
+      "fail": "Hợp đồng này thuộc Cap. 652 (Security of Payment): phản hồi trong 30 ngày, thanh toán trong 60 ngày kể từ yêu cầu"
+    },
+    "sopo_private_scope_check": {
+      "fail": "Hợp đồng tư nhân chỉ thuộc Cap. 652 khi là công trình mới hoặc công việc cần Building Authority phê duyệt: xác nhận phạm vi"
+    },
+    "sopo_response_late": {
+      "fail": "Chưa tống đạt phản hồi thanh toán trước {date}: số tiền yêu cầu bị tranh chấp và có thể đưa ra phân xử"
+    },
+    "sopo_payment_term_exceeds_60": {
+      "fail": "Thời hạn thanh toán {n} ngày vượt quá 60 ngày Cap. 652 cho phép"
+    },
+    "sopo_response_term_exceeds_30": {
+      "fail": "Thời hạn phản hồi {n} ngày vượt quá 30 ngày Cap. 652 cho phép"
+    },
+    "sopo_adjudication_window": {
+      "fail": "Đã phát sinh tranh chấp thanh toán: tống đạt thông báo phân xử trước {date}"
+    },
+    "contract_pay_when_paid": {
+      "fail": "Điều khoản pay-when-paid: Cap. 652 khiến thanh toán có điều kiện không có hiệu lực thi hành"
+    },
+    "levy_missing": {
+      "fail": "Công việc vượt HK$3,000,000 nhưng dự toán thiếu phí CIC (0,5%) hoặc phí CWR (0,03%)"
+    },
+    "levy_below_threshold": {
+      "fail": "Công việc không quá HK$3,000,000: không phải nộp phí CIC hoặc CWR"
+    },
+    "tax_nonzero": {
+      "fail": "Có dòng VAT hoặc GST, nhưng Hồng Kông không có thuế này: đặt bằng không"
+    },
+    "retention_over_limit": {
+      "fail": "Tiền giữ lại {x} vượt giới hạn hợp đồng {limit}"
+    },
+    "pc_sum_no_attendance": {
+      "fail": "Khoản prime cost thiếu hạng mục lợi nhuận và phục vụ"
+    },
+    "index_attribution": {
+      "fail": "Chỉ số giá ArchSD thiếu ghi nguồn: ghi Architectural Services Department"
+    }
   }
 }

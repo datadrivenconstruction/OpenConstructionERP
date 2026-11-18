@@ -209,6 +209,7 @@ def _make_markup(
     category: str,
     sort_order: int,
     apply_to: str = "direct_cost",
+    metadata: dict[str, object] | None = None,
 ) -> BOQMarkup:
     return BOQMarkup(
         id=_id(),
@@ -221,7 +222,7 @@ def _make_markup(
         apply_to=apply_to,
         sort_order=sort_order,
         is_active=True,
-        metadata_={},
+        metadata_=dict(metadata or {}),
     )
 
 
@@ -501,7 +502,9 @@ class DemoTemplate:
     boq_description: str
     boq_metadata: dict
     sections: list[SectionDef]
-    markups: list[tuple[str, float, str, str]]  # (name, percentage, category, apply_to)
+    # (name, percentage, category, apply_to), optionally a fifth item: the markup metadata
+    # (``threshold_amount``, ``not_compounded``) a statutory levy line carries.
+    markups: list[tuple]
     total_months: int
     tender_name: str
     tender_companies: list[tuple[str, str, float]]  # (company, email, factor)
@@ -2735,6 +2738,7 @@ PACK_DEMO_PROJECT: dict[str, str] = {
     "india-cpwd": "govt-building-delhi",
     "mexico-mx": "mixed-use-mexico-city",
     "pakistan-pk": "bhu-punjab",
+    "hongkong-hk": "hk-gov-office-fitout",
     "peru-pe": "hospital-lima",
     "modular-prefab": "modular-housing",
     "renewables-epc": "solar-bess-epc",
@@ -2955,6 +2959,7 @@ _PACK_DEMO_TYPE: dict[str, str] = {
     "commercial-sacramento": "Commercial",
     "hospital-lyon": "Healthcare",
     "bhu-punjab": "Healthcare",
+    "hk-gov-office-fitout": "Commercial",
     "school-karachi": "Education",
     "tower-abudhabi": "Mixed-use",
     "condo-toronto": "Residential",
@@ -13308,7 +13313,8 @@ async def install_demo_project(
 
     # ── 4. Markups ────────────────────────────────────────────────────
     markups: list[BOQMarkup] = []
-    for idx, (m_name, m_pct, m_cat, m_apply) in enumerate(template.markups):
+    for idx, entry in enumerate(template.markups):
+        m_name, m_pct, m_cat, m_apply = entry[:4]
         mu = _make_markup(
             boq_id=boq_id,
             name=m_name,
@@ -13316,6 +13322,7 @@ async def install_demo_project(
             category=m_cat,
             sort_order=idx + 1,
             apply_to=m_apply,
+            metadata=entry[4] if len(entry) > 4 else None,
         )
         markups.append(mu)
         session.add(mu)
@@ -13409,7 +13416,8 @@ async def install_demo_project(
 
         # The budget bill is the approved version of the detailed one, so it carries the same markups
         # unless the template words its own.
-        for idx, (m_name, m_pct, m_cat, m_apply) in enumerate(template.budget_markups or template.markups):
+        for idx, entry in enumerate(template.budget_markups or template.markups):
+            m_name, m_pct, m_cat, m_apply = entry[:4]
             session.add(
                 _make_markup(
                     boq_id=budget_boq_id,
@@ -13418,6 +13426,7 @@ async def install_demo_project(
                     category=m_cat,
                     sort_order=idx + 1,
                     apply_to=m_apply,
+                    metadata=entry[4] if len(entry) > 4 else None,
                 )
             )
 

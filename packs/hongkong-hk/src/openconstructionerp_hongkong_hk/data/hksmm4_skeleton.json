@@ -1,0 +1,130 @@
+{
+ "_meta": {
+  "standard": "hksmm4",
+  "name": "Hong Kong Standard Method of Measurement (4th edition) code skeleton",
+  "copyright": "HKSMM4 is published by the Hong Kong Institute of Surveyors and is copyrighted. This file holds section codes and our own short descriptions only, never the method text.",
+  "review_status": "Section order and numbering pending confirmation against the HKIS publication by a Hong Kong quantity surveyor."
+ },
+ "codes": [
+  {
+   "code": "HKSMM4-01",
+   "title_en": "General rules",
+   "description_en": "Rules that apply to every section",
+   "title_zh_hk": "一般規則"
+  },
+  {
+   "code": "HKSMM4-02",
+   "title_en": "Preliminaries",
+   "description_en": "Site establishment, management, insurances, temporary works",
+   "title_zh_hk": "開辦費"
+  },
+  {
+   "code": "HKSMM4-03",
+   "title_en": "Demolition and alterations",
+   "description_en": "Taking down, cutting out, making good",
+   "title_zh_hk": "拆卸及改建"
+  },
+  {
+   "code": "HKSMM4-04",
+   "title_en": "Site formation and excavation",
+   "description_en": "Clearance, excavation, filling, disposal",
+   "title_zh_hk": "地盤平整及挖掘"
+  },
+  {
+   "code": "HKSMM4-05",
+   "title_en": "Piling",
+   "description_en": "Piles, pile caps preparation, testing",
+   "title_zh_hk": "打樁"
+  },
+  {
+   "code": "HKSMM4-06",
+   "title_en": "Concrete work",
+   "description_en": "In-situ and precast concrete, formwork, reinforcement",
+   "title_zh_hk": "混凝土工程"
+  },
+  {
+   "code": "HKSMM4-07",
+   "title_en": "Masonry",
+   "description_en": "Brick and block walling",
+   "title_zh_hk": "砌磚工程"
+  },
+  {
+   "code": "HKSMM4-08",
+   "title_en": "Waterproofing",
+   "description_en": "Membranes, tanking, roofing waterproofing",
+   "title_zh_hk": "防水工程"
+  },
+  {
+   "code": "HKSMM4-09",
+   "title_en": "Roofing",
+   "description_en": "Roof coverings and associated work",
+   "title_zh_hk": "屋面工程"
+  },
+  {
+   "code": "HKSMM4-10",
+   "title_en": "Carpentry and joinery",
+   "description_en": "Timber framing, doors, fittings",
+   "title_zh_hk": "木工"
+  },
+  {
+   "code": "HKSMM4-11",
+   "title_en": "Structural steelwork",
+   "description_en": "Steel frames and connections",
+   "title_zh_hk": "結構鋼工程"
+  },
+  {
+   "code": "HKSMM4-12",
+   "title_en": "Metalwork",
+   "description_en": "Balustrades, railings, miscellaneous metal",
+   "title_zh_hk": "金屬工程"
+  },
+  {
+   "code": "HKSMM4-13",
+   "title_en": "Finishes",
+   "description_en": "Floor, wall and ceiling finishes, screeds, plaster",
+   "title_zh_hk": "飾面工程"
+  },
+  {
+   "code": "HKSMM4-14",
+   "title_en": "Glazing and curtain wall",
+   "description_en": "Glass, windows, curtain walling",
+   "title_zh_hk": "玻璃及幕牆工程"
+  },
+  {
+   "code": "HKSMM4-15",
+   "title_en": "Painting and decorating",
+   "description_en": "Painting and protective coatings",
+   "title_zh_hk": "油漆工程"
+  },
+  {
+   "code": "HKSMM4-16",
+   "title_en": "Plumbing and drainage",
+   "description_en": "Above-ground plumbing and below-ground drainage",
+   "title_zh_hk": "水喉及渠務工程"
+  },
+  {
+   "code": "HKSMM4-17",
+   "title_en": "Building services",
+   "description_en": "Mechanical, electrical, fire services installations",
+   "title_zh_hk": "屋宇裝備工程"
+  },
+  {
+   "code": "HKSMM4-18",
+   "title_en": "External works",
+   "description_en": "Paving, landscaping, fencing",
+   "title_zh_hk": "外部工程"
+  },
+  {
+   "code": "HKSMM4-19",
+   "title_en": "Prime cost and provisional sums",
+   "description_en": "PC sums with profit and attendance, provisional sums",
+   "title_zh_hk": "主要成本金額及暫定金額"
+  },
+  {
+   "code": "HKSMM4-20",
+   "title_en": "Daywork",
+   "description_en": "Labour, plant and materials at daywork rates",
+   "title_zh_hk": "計日工"
+  }
+ ]
+}

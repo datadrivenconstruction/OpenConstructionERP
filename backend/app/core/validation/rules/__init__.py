@@ -12947,6 +12947,7 @@ def register_builtin_rules() -> None:
     from app.core.validation.rules.broker_licence import BROKER_LICENCE_RULES
     from app.core.validation.rules.field_clock import FIELD_CLOCK_RULES
     from app.core.validation.rules.field_productivity import PRODUCTIVITY_RULES
+    from app.core.validation.rules.hongkong import HONGKONG_RULES
     from app.core.validation.rules.italy_prezzario import ITALY_PREZZARIO_RULES
     from app.core.validation.rules.pakistan_boq import PAKISTAN_RULES
     from app.core.validation.rules.peru_presupuesto import PERU_RULES
@@ -13262,6 +13263,7 @@ def register_builtin_rules() -> None:
         *((rule_class(), None) for rule_class in ITALY_PREZZARIO_RULES),
         # Pakistan (sales tax line and rate)
         *((rule_class(), None) for rule_class in PAKISTAN_RULES),
+        *((rule_class(), None) for rule_class in HONGKONG_RULES),
         # Peru (IGV line and rate, gastos generales and utilidad)
         *((rule_class(), None) for rule_class in PERU_RULES),
     ]
