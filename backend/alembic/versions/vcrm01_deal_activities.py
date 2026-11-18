@@ -31,6 +31,7 @@ _ACT = "oe_crm_activity"
 _STAGE = "oe_crm_pipeline_stage"
 
 # data-rewrite-ack: table=oe_crm_pipeline_stage growth=bounded rows=a fixed list of pipeline stages per install, configured by hand, not a per-deal log
+# boot-repair: none - CrmService.list_stages inserts the bidding stage on older installs at runtime
 
 
 def upgrade() -> None:
