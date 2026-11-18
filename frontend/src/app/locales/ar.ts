@@ -68707,6 +68707,10 @@ const resource = {
     "doc_layout.variant_create": "إنشاء",
     "doc_layout.delete_variant_confirm": "هل تريد حذف هذا الإصدار البديل ونسخه؟ تحتفظ المستندات الصادرة بسجلها.",
     "doc_layout.record_missing": "{{field}} غير موجود في هذا السجل ({{source}})",
+    "doc_layout.clause_library": "مكتبة البنود",
+    "doc_layout.clause_library_hint": "نصوص قابلة لإعادة الاستخدام يطبعها تخطيط المستند في كتلة بند، نص واحد لكل لغة. البنود الواردة من حزمة بلدك للقراءة فقط.",
+    "doc_layout.clause_new": "بند جديد",
+    "doc_layout.clause_key": "المفتاح",
   }
 } as { translation: Record<string, string> };
 

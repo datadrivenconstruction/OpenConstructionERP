@@ -71,5 +71,33 @@
         }
       ]
     }
-  }
+  },
+  "clauses": [
+    {
+      "key": "de_vob_b_warranty",
+      "category": "warranty",
+      "title": {
+        "de": "Mängelansprüche",
+        "en": "Claims for defects"
+      },
+      "text": {
+        "de": "Für Mängelansprüche gilt § 13 VOB/B.",
+        "en": "Claims for defects are governed by § 13 VOB/B."
+      },
+      "source": "VOB/B § 13"
+    },
+    {
+      "key": "de_vob_b_payment",
+      "category": "payment",
+      "title": {
+        "de": "Zahlung",
+        "en": "Payment"
+      },
+      "text": {
+        "de": "Abschlags- und Schlusszahlungen richten sich nach § 16 VOB/B.",
+        "en": "Instalment and final payments follow § 16 VOB/B."
+      },
+      "source": "VOB/B § 16"
+    }
+  ]
 }

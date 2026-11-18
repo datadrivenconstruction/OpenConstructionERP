@@ -68066,6 +68066,10 @@ const resource = {
     "doc_layout.variant_create": "Létrehozás",
     "doc_layout.delete_variant_confirm": "Törli ezt a változatot és a verzióit? A már kiadott dokumentumok nyilvántartása megmarad.",
     "doc_layout.record_missing": "Ebből a rekordból hiányzik: {{field}} ({{source}})",
+    "doc_layout.clause_library": "Záradéktár",
+    "doc_layout.clause_library_hint": "Újrahasznosítható szövegek, amelyeket a dokumentumelrendezés záradékblokkban nyomtat, nyelvenként egy szöveg. Az országcsomag záradékai csak olvashatók.",
+    "doc_layout.clause_new": "Új záradék",
+    "doc_layout.clause_key": "Kulcs",
   }
 } as { translation: Record<string, string> };
 

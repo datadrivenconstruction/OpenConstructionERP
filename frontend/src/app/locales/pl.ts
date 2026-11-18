@@ -67101,6 +67101,10 @@ const resource = {
     "doc_layout.variant_create": "Utwórz",
     "doc_layout.delete_variant_confirm": "Usunąć ten wariant i jego wersje? Wydane już dokumenty zachowują swój zapis.",
     "doc_layout.record_missing": "W tym rekordzie brakuje: {{field}} ({{source}})",
+    "doc_layout.clause_library": "Biblioteka klauzul",
+    "doc_layout.clause_library_hint": "Teksty wielokrotnego użytku, które układ dokumentu drukuje w bloku klauzuli, jeden tekst na język. Klauzule z pakietu Twojego kraju są tylko do odczytu.",
+    "doc_layout.clause_new": "Nowa klauzula",
+    "doc_layout.clause_key": "Klucz",
   }
 } as { translation: Record<string, string> };
 

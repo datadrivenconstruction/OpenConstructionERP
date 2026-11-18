@@ -65505,6 +65505,10 @@ const resource = {
     "doc_layout.variant_create": "Luo",
     "doc_layout.delete_variant_confirm": "Poistetaanko tämä muunnelma ja sen versiot? Jo annetut asiakirjat säilyttävät tietonsa.",
     "doc_layout.record_missing": "Tästä tietueesta puuttuu {{field}} ({{source}})",
+    "doc_layout.clause_library": "Ehtokirjasto",
+    "doc_layout.clause_library_hint": "Uudelleenkäytettävät tekstit, jotka asiakirjan asettelu tulostaa ehtolohkoon, yksi teksti kieltä kohden. Maapaketin ehdot ovat vain luku -tilassa.",
+    "doc_layout.clause_new": "Uusi ehto",
+    "doc_layout.clause_key": "Avain",
   }
 } as { translation: Record<string, string> };
 

@@ -65235,6 +65235,10 @@ const resource = {
     "doc_layout.variant_create": "Buat",
     "doc_layout.delete_variant_confirm": "Hapus varian ini beserta versinya? Dokumen yang sudah diterbitkan tetap menyimpan catatannya.",
     "doc_layout.record_missing": "{{field}} belum ada pada catatan ini ({{source}})",
+    "doc_layout.clause_library": "Pustaka klausul",
+    "doc_layout.clause_library_hint": "Teks yang dapat digunakan ulang yang dicetak tata letak dokumen dalam blok klausul, satu teks per bahasa. Klausul dari paket negara Anda hanya-baca.",
+    "doc_layout.clause_new": "Klausul baru",
+    "doc_layout.clause_key": "Kunci",
   }
 } as { translation: Record<string, string> };
 

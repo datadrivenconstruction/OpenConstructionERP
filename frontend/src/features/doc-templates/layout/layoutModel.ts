@@ -232,3 +232,18 @@ export function variantKey(name: string): string {
     .replace(/^_+|_+$/g, '')
     .slice(0, 40);
 }
+
+/** A clause key as typed: lower case, starts with a letter, at most 40 of `[a-z0-9_]`. */
+export function clauseKey(typed: string): string {
+  return typed
+    .toLowerCase()
+    .replace(/[^a-z0-9_]+/g, '_')
+    .replace(/^[^a-z]+/, '')
+    .slice(0, 40);
+}
+
+/** A clause's wording in the reader's language, else English, else the first one written. */
+export function clauseText(value: I18nText, locale: string): string {
+  const own = textIn(value, locale)?.trim();
+  return own || Object.values(value).find((v) => v.trim())?.trim() || '';
+}

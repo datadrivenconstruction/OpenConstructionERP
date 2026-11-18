@@ -65852,6 +65852,10 @@ const resource = {
     "doc_layout.variant_create": "만들기",
     "doc_layout.delete_variant_confirm": "이 변형과 버전을 삭제할까요? 이미 발행된 문서의 기록은 유지됩니다.",
     "doc_layout.record_missing": "이 레코드에 {{field}}이(가) 없습니다 ({{source}})",
+    "doc_layout.clause_library": "조항 라이브러리",
+    "doc_layout.clause_library_hint": "문서 레이아웃이 조항 블록에 인쇄하는 재사용 텍스트로, 언어마다 하나씩입니다. 국가 팩의 조항은 읽기 전용입니다.",
+    "doc_layout.clause_new": "새 조항",
+    "doc_layout.clause_key": "키",
   }
 } as { translation: Record<string, string> };
 

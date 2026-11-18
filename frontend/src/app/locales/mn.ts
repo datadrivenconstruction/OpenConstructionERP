@@ -65522,6 +65522,10 @@ const resource = {
     "doc_layout.variant_create": "Үүсгэх",
     "doc_layout.delete_variant_confirm": "Энэ хувилбар болон түүний хувилбаруудыг устгах уу? Аль хэдийн гаргасан баримтын бүртгэл хадгалагдана.",
     "doc_layout.record_missing": "Энэ бичлэгт {{field}} алга ({{source}})",
+    "doc_layout.clause_library": "Заалтын сан",
+    "doc_layout.clause_library_hint": "Баримтын загвар заалтын блокод хэвлэх дахин ашиглах бичвэрүүд, хэл тус бүрд нэг бичвэр. Таны улсын багцын заалтууд зөвхөн унших боломжтой.",
+    "doc_layout.clause_new": "Шинэ заалт",
+    "doc_layout.clause_key": "Түлхүүр",
   }
 } as { translation: Record<string, string> };
 

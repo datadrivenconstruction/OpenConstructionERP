@@ -68437,6 +68437,10 @@ const resource = {
     "doc_layout.variant_create": "Criar",
     "doc_layout.delete_variant_confirm": "Eliminar esta variante e as suas versões? Os documentos já emitidos mantêm o seu registo.",
     "doc_layout.record_missing": "Falta {{field}} neste registo ({{source}})",
+    "doc_layout.clause_library": "Biblioteca de cláusulas",
+    "doc_layout.clause_library_hint": "Textos reutilizáveis que um layout de documento imprime num bloco de cláusula, um texto por idioma. As cláusulas do pacote do seu país são só de leitura.",
+    "doc_layout.clause_new": "Nova cláusula",
+    "doc_layout.clause_key": "Chave",
   }
 } as { translation: Record<string, string> };
 

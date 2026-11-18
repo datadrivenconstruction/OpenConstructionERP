@@ -65462,6 +65462,10 @@ const resource = {
     "doc_layout.variant_create": "Құру",
     "doc_layout.delete_variant_confirm": "Осы нұсқаны және оның нұсқаларын жою керек пе? Бұрын шығарылған құжаттардың жазбасы сақталады.",
     "doc_layout.record_missing": "Бұл жазбада {{field}} жоқ ({{source}})",
+    "doc_layout.clause_library": "Шарттар кітапханасы",
+    "doc_layout.clause_library_hint": "Құжат макеті шарт блогында басып шығаратын қайта қолданылатын мәтіндер, әр тілге бір мәтін. Еліңіздің пакетіндегі шарттар тек оқуға арналған.",
+    "doc_layout.clause_new": "Жаңа шарт",
+    "doc_layout.clause_key": "Кілт",
   }
 } as { translation: Record<string, string> };
 

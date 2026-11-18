@@ -65451,6 +65451,10 @@ const resource = {
     "doc_layout.variant_create": "Loo",
     "doc_layout.delete_variant_confirm": "Kas kustutada see variant ja selle versioonid? Juba väljastatud dokumentide kirje jääb alles.",
     "doc_layout.record_missing": "Sellel kirjel puudub {{field}} ({{source}})",
+    "doc_layout.clause_library": "Klauslite teek",
+    "doc_layout.clause_library_hint": "Korduvkasutatavad tekstid, mida dokumendi paigutus prindib klausliplokis, üks tekst keele kohta. Teie riigipaketi klauslid on kirjutuskaitstud.",
+    "doc_layout.clause_new": "Uus klausel",
+    "doc_layout.clause_key": "Võti",
   }
 } as { translation: Record<string, string> };
 

@@ -65461,6 +65461,10 @@ const resource = {
     "doc_layout.variant_create": "Δημιουργία",
     "doc_layout.delete_variant_confirm": "Διαγραφή αυτής της παραλλαγής και των εκδόσεών της; Τα έγγραφα που έχουν ήδη εκδοθεί διατηρούν την εγγραφή τους.",
     "doc_layout.record_missing": "Λείπει το {{field}} σε αυτή την εγγραφή ({{source}})",
+    "doc_layout.clause_library": "Βιβλιοθήκη όρων",
+    "doc_layout.clause_library_hint": "Επαναχρησιμοποιήσιμα κείμενα που μια διάταξη εγγράφου τυπώνει σε μπλοκ όρου, ένα κείμενο ανά γλώσσα. Οι όροι από το πακέτο της χώρας σας είναι μόνο για ανάγνωση.",
+    "doc_layout.clause_new": "Νέος όρος",
+    "doc_layout.clause_key": "Κλειδί",
   }
 } as { translation: Record<string, string> };
 

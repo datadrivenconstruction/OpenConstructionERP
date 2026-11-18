@@ -68444,6 +68444,10 @@ const resource = {
     "doc_layout.variant_create": "Créer",
     "doc_layout.delete_variant_confirm": "Supprimer cette variante et ses versions ? Les documents déjà émis conservent leur trace.",
     "doc_layout.record_missing": "{{field}} manque sur cet enregistrement ({{source}})",
+    "doc_layout.clause_library": "Bibliothèque de clauses",
+    "doc_layout.clause_library_hint": "Textes réutilisables qu'une mise en page de document imprime dans un bloc de clause, un texte par langue. Les clauses de votre pack pays sont en lecture seule.",
+    "doc_layout.clause_new": "Nouvelle clause",
+    "doc_layout.clause_key": "Clé",
   }
 } as { translation: Record<string, string> };
 

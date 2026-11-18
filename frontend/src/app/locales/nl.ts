@@ -66382,6 +66382,10 @@ const resource = {
     "doc_layout.variant_create": "Aanmaken",
     "doc_layout.delete_variant_confirm": "Deze variant en de versies ervan verwijderen? Al uitgegeven documenten behouden hun registratie.",
     "doc_layout.record_missing": "{{field}} ontbreekt in deze record ({{source}})",
+    "doc_layout.clause_library": "Clausulebibliotheek",
+    "doc_layout.clause_library_hint": "Herbruikbare teksten die een documentindeling in een clausuleblok afdrukt, één tekst per taal. Clausules uit uw landenpakket zijn alleen-lezen.",
+    "doc_layout.clause_new": "Nieuwe clausule",
+    "doc_layout.clause_key": "Sleutel",
   }
 } as { translation: Record<string, string> };
 

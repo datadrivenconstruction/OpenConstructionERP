@@ -238,6 +238,10 @@ export interface Clause {
   category: string;
   title: I18nText;
   text: I18nText;
+  /** Shipped by a country pack: printed, never edited. */
+  locked?: boolean;
+  country?: string;
+  source?: string;
 }
 
 /** Where a layout lives: the company default or one project's override, under one variant. */
@@ -288,8 +292,8 @@ export const getLayoutValues = (key: string, locale: string, recordId: string | 
   apiGet<{ values: Record<string, string>; status: string; rows: Record<string, number>; issues?: DocIssue[] }>(
     `${base}/${k(key)}/values?locale=${encodeURIComponent(locale)}${recordId ? `&record_id=${encodeURIComponent(recordId)}` : ''}`,
   );
-export const listClauses = () => apiGet<{ items: Clause[]; total: number }>(`${base}/clauses`);
-export const saveClause = (key: string, clause: Omit<Clause, 'key'>) =>
+export const listClauses = () => apiGet<{ items: Clause[]; total: number; languages?: string[]; can_edit?: boolean }>(`${base}/clauses`);
+export const saveClause = (key: string, clause: Pick<Clause, 'category' | 'title' | 'text'>) =>
   apiPut<Clause>(`${base}/clauses/${encodeURIComponent(key)}`, clause);
 export const deleteClause = (key: string) => apiDelete(`${base}/clauses/${encodeURIComponent(key)}`);
 

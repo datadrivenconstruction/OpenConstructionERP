@@ -115,10 +115,18 @@ async def list_layouts(session: SessionDep, user_id: CurrentUserId, payload: Cur
 
 
 @layout_router.get("/clauses", dependencies=_READ)
-async def list_clauses(session: SessionDep) -> dict[str, Any]:
-    """The clause library a clause block can print."""
-    items = await ls.list_clauses(session)
-    return {"items": items, "total": len(items)}
+async def list_clauses(session: SessionDep, user_id: CurrentUserId, payload: CurrentUserPayload) -> dict[str, Any]:
+    """The clause library a clause block can print, with the read-only clauses of the workspace's packs."""
+    from app.modules.doc_templates.service import workspace_countries
+
+    items = await ls.list_clauses(session, await workspace_countries(session, dict(payload), user_id))
+    languages = sorted({lang for spec in ls.visible_layouts() for lang in spec.languages} | {"en"})
+    return {
+        "items": items,
+        "total": len(items),
+        "languages": languages,
+        "can_edit": await _can_edit(session, user_id, payload),
+    }
 
 
 @layout_router.put("/clauses/{clause_key}", dependencies=_READ)
@@ -131,7 +139,10 @@ async def save_clause(
 ) -> dict[str, Any]:
     """Create or replace one clause."""
     await _editor(session, user_id, payload, None)
-    out = await ls.save_clause(session, clause_key, body.category, body.title, body.text, user_id)
+    from app.modules.doc_templates.service import workspace_countries
+
+    countries = await workspace_countries(session, dict(payload), user_id)
+    out = await ls.save_clause(session, clause_key, body.category, body.title, body.text, user_id, countries)
     await session.commit()
     return out
 
@@ -142,7 +153,9 @@ async def delete_clause(
 ) -> Response:
     """Delete one clause."""
     await _editor(session, user_id, payload, None)
-    await ls.delete_clause(session, clause_key)
+    from app.modules.doc_templates.service import workspace_countries
+
+    await ls.delete_clause(session, clause_key, await workspace_countries(session, dict(payload), user_id))
     await session.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 

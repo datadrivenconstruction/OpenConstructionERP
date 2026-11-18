@@ -65459,6 +65459,10 @@ const resource = {
     "doc_layout.variant_create": "Gumawa",
     "doc_layout.delete_variant_confirm": "Burahin ang variant na ito at ang mga bersyon nito? Mananatili ang tala ng mga dokumentong nailabas na.",
     "doc_layout.record_missing": "Walang {{field}} sa record na ito ({{source}})",
+    "doc_layout.clause_library": "Aklatan ng mga sugnay",
+    "doc_layout.clause_library_hint": "Mga muling magagamit na teksto na ipinapi-print ng layout ng dokumento sa isang bloke ng sugnay, isang teksto bawat wika. Read-only ang mga sugnay mula sa country pack mo.",
+    "doc_layout.clause_new": "Bagong sugnay",
+    "doc_layout.clause_key": "Key",
   }
 } as { translation: Record<string, string> };
 

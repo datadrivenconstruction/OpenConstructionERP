@@ -68245,6 +68245,10 @@ const resource = {
     "doc_layout.variant_create": "Anlegen",
     "doc_layout.delete_variant_confirm": "Diese Variante mit ihren Versionen löschen? Bereits ausgestellte Dokumente behalten ihren Nachweis.",
     "doc_layout.record_missing": "{{field}} fehlt in diesem Datensatz ({{source}})",
+    "doc_layout.clause_library": "Klauselbibliothek",
+    "doc_layout.clause_library_hint": "Wiederverwendbare Texte, die ein Dokumentlayout in einem Klauselblock druckt, ein Text je Sprache. Klauseln aus Ihrem Länderpaket sind schreibgeschützt.",
+    "doc_layout.clause_new": "Neue Klausel",
+    "doc_layout.clause_key": "Schlüssel",
   }
 } as { translation: Record<string, string> };
 

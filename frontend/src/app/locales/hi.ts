@@ -65504,6 +65504,10 @@ const resource = {
     "doc_layout.variant_create": "बनाएँ",
     "doc_layout.delete_variant_confirm": "यह वैरिएंट और इसके संस्करण हटाएँ? पहले जारी दस्तावेज़ों का रिकॉर्ड बना रहेगा।",
     "doc_layout.record_missing": "इस रिकॉर्ड में {{field}} नहीं है ({{source}})",
+    "doc_layout.clause_library": "खंड पुस्तकालय",
+    "doc_layout.clause_library_hint": "पुन: प्रयोज्य पाठ जिन्हें दस्तावेज़ लेआउट खंड ब्लॉक में छापता है, प्रति भाषा एक पाठ। आपके देश पैक के खंड केवल पढ़ने के लिए हैं।",
+    "doc_layout.clause_new": "नया खंड",
+    "doc_layout.clause_key": "कुंजी",
   }
 } as { translation: Record<string, string> };
 

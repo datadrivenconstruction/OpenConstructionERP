@@ -40,7 +40,7 @@ import {
   Upload,
 } from 'lucide-react';
 import { Button, Card, Input, SkeletonText, TabBar } from '@/shared/ui';
-import { DocTemplatesList, DocumentLayoutsCard } from '@/features/doc-templates';
+import { ClauseLibraryCard, DocTemplatesList, DocumentLayoutsCard } from '@/features/doc-templates';
 import { ApiError, getErrorMessage, triggerDownload } from '@/shared/lib/api';
 import { fmtFixed, fmtList } from '@/shared/lib/formatters';
 import { useAuthStore } from '@/stores/useAuthStore';
@@ -233,6 +233,7 @@ export function CompanyDocumentsSettings() {
       {sub === 'documents' && (
         <>
           <DocumentLayoutsCard />
+          <ClauseLibraryCard />
           <DocTemplatesList channel="pdf" initialKind={params.get('kind')} />
         </>
       )}
