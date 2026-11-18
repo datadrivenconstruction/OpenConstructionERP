@@ -31,6 +31,12 @@ from app.core.fsm.registry import RFQ_FSM
 from app.core.i18n import get_locale
 from app.core.json_merge import merge_metadata
 from app.core.validation.engine import ValidationReport, validation_engine
+from app.modules.rfq_bidding.boq_resources import (
+    MAX_TRACKED_POSITIONS,
+    BoqResourceOption,
+    boq_project_id,
+    load_boq_resources,
+)
 from app.modules.rfq_bidding.comparison import ComparisonResult, compare
 from app.modules.rfq_bidding.constants import (
     BID_STATUS_DISQUALIFIED,
@@ -167,10 +173,65 @@ class RFQService:
         )
         for position, line in enumerate(data.lines, start=1):
             rfq.lines.append(self._build_line(line, line_no=line.line_no or position))
+        if data.boq_resource_keys is not None and data.boq_id is not None:
+            next_no = max((line.line_no for line in rfq.lines), default=0) + 1
+            for offset, line in enumerate(
+                await self._lines_from_boq_resources(data.project_id, data.boq_id, data.boq_resource_keys)
+            ):
+                rfq.lines.append(self._build_line(line, line_no=next_no + offset))
         self._reject_duplicate_line_numbers(rfq.lines)
         rfq = await self.rfqs.create(rfq)
         logger.info("RFQ created: %s (%s)", rfq.rfq_number, rfq.title[:50])
         return rfq
+
+    async def list_boq_resources(self, boq_id: uuid.UUID) -> list[BoqResourceOption]:
+        """The resources of one BOQ an RFQ can be created from."""
+        return await load_boq_resources(self.session, boq_id)
+
+    async def _lines_from_boq_resources(
+        self,
+        project_id: uuid.UUID,
+        boq_id: uuid.UUID,
+        keys: list[str],
+    ) -> list[RFQLineCreate]:
+        """Scope lines for the picked resources of a BOQ of this RFQ's project.
+
+        Quantities and units come from the BOQ, never from the request, and a
+        BOQ of another project or a key the BOQ does not hold is refused.
+        """
+        if await boq_project_id(self.session, boq_id) != project_id:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="The selected BOQ does not belong to this project",
+            )
+        options = {option.key: option for option in await load_boq_resources(self.session, boq_id)}
+        unknown = [key for key in keys if key not in options]
+        if unknown:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail=(
+                    f"{len(unknown)} selected resource(s) are no longer in this BOQ; reload the list and select again"
+                ),
+            )
+        lines: list[RFQLineCreate] = []
+        for key in keys:
+            option = options[key]
+            lines.append(
+                RFQLineCreate(
+                    code=(option.code or "")[:50] or None,
+                    description=option.name[:5_000],
+                    unit=option.unit[:20],
+                    quantity=option.quantity,
+                    metadata={
+                        "source": "boq_resource",
+                        "boq_id": str(boq_id),
+                        "resource_key": option.key,
+                        "category": option.category,
+                        "position_ids": option.position_ids[:MAX_TRACKED_POSITIONS],
+                    },
+                )
+            )
+        return lines
 
     # ── Scope lines ─────────────────────────────────────────────────────────
 
