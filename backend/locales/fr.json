@@ -1816,6 +1816,54 @@
         "sheet_of": "Feuille {page} sur {total}",
         "no_activities": "Ce planning n'a encore aucune tâche."
       }
+    },
+    "contracts": {
+      "strings": {
+        "doc_title": "Contrat",
+        "col_code": "Code",
+        "col_title": "Intitulé",
+        "col_type": "Type de contrat",
+        "col_role": "Nature du contrat",
+        "col_counterparty": "Cocontractant",
+        "col_original_value": "Montant initial",
+        "col_total_value": "Montant du contrat",
+        "col_retention": "Retenue de garantie",
+        "col_start": "Date de début",
+        "col_end": "Date de fin",
+        "col_signed": "Signé le",
+        "line_code": "Code",
+        "line_description": "Désignation",
+        "line_unit": "Unité",
+        "line_quantity": "Quantité",
+        "line_unit_rate": "Prix unitaire",
+        "lines": "Bordereau de prix",
+        "signer_company": "Pour l'entreprise"
+      },
+      "labels": {
+        "status": {
+          "draft": "Brouillon",
+          "active": "En cours",
+          "suspended": "Suspendu",
+          "completed": "Terminé",
+          "terminated": "Résilié"
+        },
+        "type": {
+          "lump_sum": "Forfait",
+          "gmp": "Prix maximum garanti",
+          "cost_plus": "Remboursement des coûts",
+          "tm": "Régie",
+          "unit_price": "Prix unitaires",
+          "design_build": "Conception-réalisation",
+          "combination": "Mixte",
+          "remeasurement": "Métré",
+          "framework": "Accord-cadre",
+          "call_off": "Bon de commande"
+        },
+        "party": {
+          "client": "Contrat client",
+          "subcontractor": "Sous-traitance"
+        }
+      }
     }
   },
   "pdf_footer": {

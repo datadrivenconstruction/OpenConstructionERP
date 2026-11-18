@@ -1655,6 +1655,54 @@
         "sheet_of": "Blatt {page} von {total}",
         "no_activities": "Dieser Terminplan hat noch keine Vorgänge."
       }
+    },
+    "contracts": {
+      "strings": {
+        "doc_title": "Vertrag",
+        "col_code": "Nummer",
+        "col_title": "Bezeichnung",
+        "col_type": "Vertragsart",
+        "col_role": "Vertragsseite",
+        "col_counterparty": "Vertragspartner",
+        "col_original_value": "Ursprüngliche Summe",
+        "col_total_value": "Vertragssumme",
+        "col_retention": "Sicherheitseinbehalt",
+        "col_start": "Beginn",
+        "col_end": "Ende",
+        "col_signed": "Unterzeichnet am",
+        "line_code": "Pos.",
+        "line_description": "Beschreibung",
+        "line_unit": "Einheit",
+        "line_quantity": "Menge",
+        "line_unit_rate": "Einheitspreis",
+        "lines": "Leistungsverzeichnis",
+        "signer_company": "Für das Unternehmen"
+      },
+      "labels": {
+        "status": {
+          "draft": "Entwurf",
+          "active": "Aktiv",
+          "suspended": "Ruht",
+          "completed": "Abgeschlossen",
+          "terminated": "Gekündigt"
+        },
+        "type": {
+          "lump_sum": "Pauschalvertrag",
+          "gmp": "GMP",
+          "cost_plus": "Selbstkostenerstattung",
+          "tm": "Stundenlohn",
+          "unit_price": "Einheitspreisvertrag",
+          "design_build": "Planen und Bauen",
+          "combination": "Kombination",
+          "remeasurement": "Aufmaßvertrag",
+          "framework": "Rahmenvertrag",
+          "call_off": "Abruf"
+        },
+        "party": {
+          "client": "Auftraggebervertrag",
+          "subcontractor": "Nachunternehmervertrag"
+        }
+      }
     }
   },
   "cost_control": {

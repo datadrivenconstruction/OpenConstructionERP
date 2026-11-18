@@ -53773,6 +53773,11 @@ const resource = {
     "contracts.lender_preparation.no_period": "This claim has no period dates. Subcontractor payment applications are not matched by date.",
     "contracts.type_call_off": "Call-off order",
     "contracts.type_framework": "Framework agreement",
+    "contracts.side_client": "Client contracts",
+    "contracts.side_subcontract": "Subcontracts",
+    "contracts.delete_row": "Delete contract {{code}}",
+    "contracts.delete_only_draft": "Only a draft can be deleted. Close or terminate a signed contract instead.",
+    "contracts.delete_row_message": "Delete draft contract {{code}}? This removes the draft and everything held under it, including its lines, variations, progress claims and retention. This action cannot be undone.",
     // --- /Draft lender preparation ---
     // --- Project handbook ---
     "projectHandbook.open_module": "Open",
