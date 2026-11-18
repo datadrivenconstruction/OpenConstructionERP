@@ -76,10 +76,15 @@ class RFQRepository:
         return items, total
 
     async def create(self, rfq: RFQ) -> RFQ:
-        """Insert a new RFQ."""
+        """Insert a new RFQ and return it with ``lines`` and ``bids`` loaded.
+
+        A flushed new row has neither collection loaded, so the response reading
+        them lazy-loaded outside the async context and the create answered 500.
+        """
         self.session.add(rfq)
         await self.session.flush()
-        return rfq
+        loaded = await self.get(rfq.id)
+        return loaded if loaded is not None else rfq
 
     async def update(self, rfq_id: uuid.UUID, **fields: object) -> None:
         """Update specific fields on an RFQ."""

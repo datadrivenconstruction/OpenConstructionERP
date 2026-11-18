@@ -13,7 +13,7 @@ from decimal import Decimal, InvalidOperation
 from typing import Any
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field, field_serializer, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_serializer, field_validator, model_validator
 
 from app.core.decimal_types import Decimal5_2, Decimal18_4, Decimal18_6, Decimal18_8, FiniteDecimal
 from app.modules.rfq_bidding.constants import (
@@ -185,7 +185,23 @@ class RFQCreate(BaseModel):
     technical_weight: Decimal5_2 = Field(default=Decimal("0"))
     require_full_scope: bool = True
     lines: list["RFQLineCreate"] = Field(default_factory=list, max_length=2_000)
+    # Scope taken from a BOQ: the resources picked from ``GET /boq-resources/``.
+    # The server recomputes their quantities from the BOQ; the client sends keys.
+    boq_id: UUID | None = None
+    boq_resource_keys: list[str] | None = Field(default=None, max_length=2_000)
     metadata: dict[str, Any] = Field(default_factory=dict)
+
+    @model_validator(mode="after")
+    def _check_boq_selection(self) -> "RFQCreate":
+        if self.boq_resource_keys is None:
+            return self
+        if self.boq_id is None:
+            raise ValueError("boq_id is required when BOQ resources are selected")
+        if not self.boq_resource_keys:
+            raise ValueError("Select at least one BOQ resource, or create the RFQ without BOQ resources")
+        if len(set(self.boq_resource_keys)) != len(self.boq_resource_keys):
+            raise ValueError("Each BOQ resource can be selected only once")
+        return self
 
     @field_validator("rfq_number", "title", "description", "scope_of_work")
     @classmethod
@@ -534,6 +550,32 @@ class RFQResponse(BaseModel):
     @field_serializer("technical_weight", when_used="json")
     def _ser_weight(self, v: Decimal) -> str | None:
         return _serialise_decimal(v)
+
+
+class BoqResourceOptionResponse(BaseModel):
+    """One BOQ resource, summed over the positions using it, offered as a scope line."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    key: str
+    name: str
+    code: str | None = None
+    category: str
+    unit: str
+    quantity: Decimal
+    position_count: int
+
+    @field_serializer("quantity", when_used="json")
+    def _ser_quantity(self, v: Decimal) -> str | None:
+        return _serialise_decimal(v)
+
+
+class BoqResourceOptionListResponse(BaseModel):
+    """The resources of one BOQ an RFQ can be created from."""
+
+    boq_id: UUID
+    items: list[BoqResourceOptionResponse]
+    total: int
 
 
 class RFQListResponse(BaseModel):

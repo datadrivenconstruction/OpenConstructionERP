@@ -78,6 +78,29 @@ export interface RFQCreatePayload {
   description?: string;
   submission_deadline?: string;
   currency_code?: string;
+  /** With `boq_resource_keys`: the BOQ the picked resources come from. */
+  boq_id?: string;
+  /** Keys from `fetchBoqResources`; the server turns each into a scope line. */
+  boq_resource_keys?: string[];
+}
+
+/** A BOQ of the project, as the RFQ dialog lists it. */
+export interface RfqBoqOption {
+  id: string;
+  name: string;
+}
+
+/** One BOQ resource summed over the positions using it (BoqResourceOptionResponse). */
+export interface BoqResourceOption {
+  key: string;
+  name: string;
+  code: string | null;
+  /** labor, material, machinery, equipment, subcontractor or other. */
+  category: string;
+  unit: string;
+  /** Decimal string: total quantity for the whole BOQ. */
+  quantity: string;
+  position_count: number;
 }
 
 /** RFQUpdate. */
@@ -258,6 +281,20 @@ export async function fetchRFQ(id: string): Promise<RFQ> {
 
 export async function createRFQ(payload: RFQCreatePayload): Promise<RFQ> {
   return apiPost<RFQ, RFQCreatePayload>('/v1/rfq-bidding/', payload);
+}
+
+export async function fetchProjectBoqs(projectId: string): Promise<RfqBoqOption[]> {
+  const page = await apiGet<RfqBoqOption[] | { items: RfqBoqOption[] }>(
+    `/v1/boq/boqs/?project_id=${encodeURIComponent(projectId)}`,
+  );
+  return normalizeListResponse(page);
+}
+
+export async function fetchBoqResources(boqId: string): Promise<BoqResourceOption[]> {
+  const page = await apiGet<{ items: BoqResourceOption[] }>(
+    `/v1/rfq-bidding/boq-resources/?boq_id=${encodeURIComponent(boqId)}`,
+  );
+  return normalizeListResponse(page);
 }
 
 export async function updateRFQ(id: string, payload: RFQUpdatePayload): Promise<RFQ> {

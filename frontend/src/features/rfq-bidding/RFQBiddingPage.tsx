@@ -30,6 +30,7 @@ import type { TabBarTab } from '@/shared/ui/TabBar';
 import { MoneyDisplay } from '@/shared/ui/MoneyDisplay';
 import { useActiveProjectId } from '@/shared/hooks/useActiveProjectId';
 import { useToastStore } from '@/stores/useToastStore';
+import { getErrorMessage } from '@/shared/lib/api';
 import { fetchContacts, type Contact } from '@/features/contacts/api';
 import {
   fetchRFQs,
@@ -49,6 +50,7 @@ import {
   type QuoteComparison,
 } from './api';
 import { useRfqAwardOrders, type RfqOrderLookup } from './useRfqAwardOrders';
+import { BoqResourcePicker } from './BoqResourcePicker';
 import type { AwardLookup, AwardOrderLite } from '@/shared/hooks/useAwardOutcome';
 
 /** A bidder is stored as a contact id; this is how the page names it. */
@@ -314,8 +316,12 @@ export function RFQBiddingPage() {
       setShowCreate(false);
       addToast({ type: 'success', title: t('rfq_bidding.created_success', { defaultValue: 'RFQ created successfully' }) });
     },
-    onError: () => {
-      addToast({ type: 'error', title: t('rfq_bidding.created_error', { defaultValue: 'Failed to create RFQ' }) });
+    onError: (err: unknown) => {
+      addToast({
+        type: 'error',
+        title: t('rfq_bidding.created_error', { defaultValue: 'Failed to create RFQ' }),
+        message: getErrorMessage(err),
+      });
     },
   });
 
@@ -1390,26 +1396,32 @@ function CreateRFQDialog({
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [dueDate, setDueDate] = useState('');
+  const [scopeSource, setScopeSource] = useState<'empty' | 'boq'>('empty');
+  const [boqId, setBoqId] = useState('');
+  const [selectedResources, setSelectedResources] = useState<Set<string>>(new Set());
+  const fromBoq = scopeSource === 'boq';
+  const canSubmit = !!title.trim() && (!fromBoq || selectedResources.size > 0);
 
   const handleSubmit = useCallback(
     (e: React.FormEvent) => {
       e.preventDefault();
-      if (!title.trim()) return;
+      if (!canSubmit) return;
       onSubmit({
         project_id: projectId,
         title: title.trim(),
         description: description.trim() || undefined,
         submission_deadline: dueDate || undefined,
+        ...(fromBoq ? { boq_id: boqId, boq_resource_keys: [...selectedResources] } : {}),
       });
     },
-    [projectId, title, description, dueDate, onSubmit],
+    [projectId, title, description, dueDate, onSubmit, canSubmit, fromBoq, boqId, selectedResources],
   );
 
   return (
     <WideModal
       open
       onClose={onClose}
-      size="sm"
+      size={fromBoq ? 'lg' : 'sm'}
       busy={loading}
       title={t('rfq_bidding.create_dialog_title', { defaultValue: 'Create RFQ' })}
       footer={
@@ -1417,7 +1429,7 @@ function CreateRFQDialog({
           <Button variant="ghost" onClick={onClose} type="button">
             {t('common.cancel', { defaultValue: 'Cancel' })}
           </Button>
-          <Button variant="primary" type="submit" form="rfq-create-form" disabled={!title.trim() || loading} loading={loading}>
+          <Button variant="primary" type="submit" form="rfq-create-form" disabled={!canSubmit || loading} loading={loading}>
             {t('rfq_bidding.create_submit', { defaultValue: 'Create RFQ' })}
           </Button>
         </>
@@ -1466,6 +1478,49 @@ function CreateRFQDialog({
               className="oe-input"
             />
           </div>
+
+          <fieldset>
+            <legend className="oe-label">
+              {t('rfq_bidding.scope_source_label', { defaultValue: 'Scope' })}
+            </legend>
+            <div className="flex flex-wrap gap-4 text-sm text-content-primary">
+              <label className="flex items-center gap-1.5">
+                <input
+                  type="radio"
+                  name="rfq-scope-source"
+                  checked={!fromBoq}
+                  onChange={() => setScopeSource('empty')}
+                />
+                {t('rfq_bidding.scope_source_empty', { defaultValue: 'Empty, I will add lines later' })}
+              </label>
+              <label className="flex items-center gap-1.5">
+                <input
+                  type="radio"
+                  name="rfq-scope-source"
+                  checked={fromBoq}
+                  onChange={() => setScopeSource('boq')}
+                />
+                {t('rfq_bidding.scope_source_boq', { defaultValue: 'From BOQ resources' })}
+              </label>
+            </div>
+          </fieldset>
+
+          {fromBoq && (
+            <BoqResourcePicker
+              projectId={projectId}
+              boqId={boqId}
+              onBoqChange={setBoqId}
+              selected={selectedResources}
+              onSelectedChange={setSelectedResources}
+              t={t}
+            />
+          )}
+
+          {fromBoq && selectedResources.size === 0 && (
+            <p className="text-xs text-content-tertiary">
+              {t('rfq_bidding.boq_pick_at_least_one', { defaultValue: 'Select at least one resource.' })}
+            </p>
+          )}
         </form>
     </WideModal>
   );

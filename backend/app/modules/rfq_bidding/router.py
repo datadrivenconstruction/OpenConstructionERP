@@ -5,6 +5,7 @@
 Endpoints:
     GET    /                       - List RFQs (requires rfq.read + project access)
     POST   /                       - Create RFQ (requires rfq.create + project access)
+    GET    /boq-resources          - Resources of a BOQ to pick RFQ scope lines from
     GET    /{id}                   - Get single RFQ (requires rfq.read + project access)
     PATCH  /{id}                   - Update RFQ (requires rfq.update + project access)
     DELETE /{id}                   - Delete RFQ (requires rfq.delete + project access)
@@ -40,6 +41,7 @@ from app.dependencies import (
     SessionDep,
     verify_project_access,
 )
+from app.modules.rfq_bidding.boq_resources import boq_project_id
 from app.modules.rfq_bidding.schemas import (
     BidAdjustmentCreate,
     BidAwardRequest,
@@ -48,6 +50,8 @@ from app.modules.rfq_bidding.schemas import (
     BidEvaluation,
     BidListResponse,
     BidScopeConfirmation,
+    BoqResourceOptionListResponse,
+    BoqResourceOptionResponse,
     ComparisonResponse,
     RFQAwardResponse,
     RFQBidResponse,
@@ -78,10 +82,9 @@ async def _verify_project_access(
     """Allow the project owner, admins and project team members (404 otherwise).
 
     Delegates to the shared helper tendering uses; write routes stay behind
-    their own ``rfq.*`` permissions.
+    their own ``rfq.*`` permissions. Admins pass too, but only for a project
+    that exists: an RFQ on a missing project is a 404, not a foreign-key 500.
     """
-    if payload and payload.get("role") == "admin":
-        return
     await verify_project_access(project_id, user_id, session)
 
 
@@ -180,6 +183,42 @@ async def create_rfq(
     await _verify_project_access(session, data.project_id, user_id, payload)
     rfq = await service.create_rfq(data, user_id=user_id)
     return RFQResponse.model_validate(rfq)
+
+
+@router.get(
+    "/boq-resources/",
+    response_model=BoqResourceOptionListResponse,
+    dependencies=[Depends(RequirePermission("rfq.read"))],
+)
+async def list_boq_resources(
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    boq_id: uuid.UUID = Query(..., description="The BOQ whose resources are offered"),
+    service: RFQService = Depends(_get_service),
+) -> BoqResourceOptionListResponse:
+    """The resources of a BOQ, summed per resource, to pick RFQ scope lines from."""
+    project_id = await boq_project_id(session, boq_id)
+    if project_id is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="BOQ not found")
+    await _verify_project_access(session, project_id, user_id, payload)
+    options = await service.list_boq_resources(boq_id)
+    return BoqResourceOptionListResponse(
+        boq_id=boq_id,
+        items=[
+            BoqResourceOptionResponse(
+                key=o.key,
+                name=o.name,
+                code=o.code,
+                category=o.category,
+                unit=o.unit,
+                quantity=o.quantity,
+                position_count=len(o.position_ids),
+            )
+            for o in options
+        ],
+        total=len(options),
+    )
 
 
 # ── Bids ────────────────────────────────────────────────────────────────────
