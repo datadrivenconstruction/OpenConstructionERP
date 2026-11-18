@@ -1704,10 +1704,16 @@ def _without_unresolved_escalation(markups: list[BOQMarkup], unresolved: Mapping
 IMPORT_DEDUCTIONS_ROLE = "import_deductions"
 
 
+def _markup_meta(markup: BOQMarkup) -> dict:
+    """A markup's ``metadata_`` dict, or ``{}`` when the row has none (or is a lightweight stand-in)."""
+    meta = getattr(markup, "metadata_", None)
+    return meta if isinstance(meta, dict) else {}
+
+
 def _is_import_deductions_line(markup: BOQMarkup) -> bool:
     """Whether a markup is the bill-wide deductions line an import wrote."""
-    meta = markup.metadata_
-    return isinstance(meta, dict) and meta.get("role") == IMPORT_DEDUCTIONS_ROLE and markup.scope_position_id is None
+    meta = _markup_meta(markup)
+    return meta.get("role") == IMPORT_DEDUCTIONS_ROLE and getattr(markup, "scope_position_id", None) is None
 
 
 def _markup_threshold(markup: BOQMarkup) -> Decimal | None:
@@ -1716,7 +1722,7 @@ def _markup_threshold(markup: BOQMarkup) -> Decimal | None:
     A statutory levy charged only on works above a value (``metadata.threshold_amount``)
     is zero at or below it and charged on the whole base above it, not on the excess.
     """
-    meta = markup.metadata_ if isinstance(markup.metadata_, dict) else {}
+    meta = _markup_meta(markup)
     raw = meta.get("threshold_amount")
     if raw in (None, ""):
         return None
@@ -1834,7 +1840,7 @@ def _calculate_markup_amounts(
         elif markup_type == "fixed":
             amount = Decimal(str(markup.fixed_amount or "0"))
         elif markup_type == "banded":
-            amount = _banded_amount(base, markup.metadata_)
+            amount = _banded_amount(base, _markup_meta(markup))
         elif markup_type == "escalation":
             # ``factor - 1`` because the markup line IS the increase. The base
             # is already in the bill; multiplying by the factor outright would
@@ -1856,7 +1862,7 @@ def _calculate_markup_amounts(
 
         # A levy on the contract value is not part of the value a later line is a
         # percentage of (``metadata.not_compounded``).
-        meta = markup.metadata_ if isinstance(markup.metadata_, dict) else {}
+        meta = _markup_meta(markup)
         if not meta.get("not_compounded"):
             running_sum += amount
         results.append((markup, amount))

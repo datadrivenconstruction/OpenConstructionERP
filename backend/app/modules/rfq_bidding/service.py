@@ -201,14 +201,14 @@ class RFQService:
         """
         if await boq_project_id(self.session, boq_id) != project_id:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail="The selected BOQ does not belong to this project",
             )
         options = {option.key: option for option in await load_boq_resources(self.session, boq_id)}
         unknown = [key for key in keys if key not in options]
         if unknown:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail=(
                     f"{len(unknown)} selected resource(s) are no longer in this BOQ; reload the list and select again"
                 ),

@@ -99,6 +99,11 @@ ALLOWLIST: dict[str, tuple[frozenset[str], str]] = {
         frozenset({"422"}),
         "the demo contacts lack the buyer name, country and city EN 16931 requires; the route lists what is missing",
     ),
+    "/api/v1/china-pack/invoices/{invoice_id}/fapiao/": (
+        frozenset({"422"}),
+        "the walker hands it any demo invoice; one without the site location and project name a construction "
+        "fapiao must carry is refused, and the route lists what is missing",
+    ),
     "/api/v1/bim-hub/models/{model_id}/download/": (
         frozenset({"timeout", "slow"}),
         "streams the model file; the test transport buffers the whole body, so a large model reaches the ceiling",

@@ -123,7 +123,7 @@ def _wage_and_hours(pricing: norm_bases.EstimatePricing, settings: dict[str, Any
     except (InvalidOperation, ValueError, TypeError):
         wage = hours = Decimal("NaN")
     if not wage.is_finite() or not hours.is_finite() or hours <= 0:
-        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, "Set the estimate wage and monthly hours first")
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, "Set the estimate wage and monthly hours first")
     return wage, hours
 
 
@@ -300,10 +300,10 @@ class NormPricingService:
         if pricing is None:
             raise HTTPException(status.HTTP_409_CONFLICT, "No pack supplies pricing rules for this project's country")
         if body.funding_class and pricing.funding_class(body.funding_class) is None:
-            raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, f"Unknown funding class {body.funding_class!r}")
+            raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, f"Unknown funding class {body.funding_class!r}")
         if body.labour_location and pricing.location_factor(body.labour_location) is None:
             raise HTTPException(
-                status.HTTP_422_UNPROCESSABLE_ENTITY, f"Unknown labour location {body.labour_location!r}"
+                status.HTTP_422_UNPROCESSABLE_CONTENT, f"Unknown labour location {body.labour_location!r}"
             )
         stored = {k: v for k, v in body.model_dump(mode="json").items() if v is not None}
         await self.repo.save_settings(project_id, stored)
@@ -376,6 +376,6 @@ class NormPricingService:
                 locale=locale,
             )
         except ValueError as exc:
-            raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, str(exc)) from None
+            raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, str(exc)) from None
         name = str(payload.get("name") or "estimate")
         return render_xlsx(sheet, heading=name), f"{name}.xlsx"

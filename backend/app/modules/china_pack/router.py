@@ -162,7 +162,7 @@ async def get_fapiao(
     try:
         data = await fapiao.load_fapiao_data(session, invoice_id)
     except fapiao.FapiaoDataError as exc:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)) from exc
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(exc)) from exc
     if fmt == "xml":
         return Response(fapiao.to_xml(data), media_type="application/xml; charset=utf-8")
     return Response(fapiao.to_json(data), media_type="application/json; charset=utf-8")

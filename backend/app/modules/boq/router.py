@@ -3872,7 +3872,7 @@ _COUNTRY_RULE_SETS: dict[str, list[str]] = {
     "FR": ["dpgf"],
     "BR": ["sinapi"],
     "RU": ["gesn"],
-    "CN": ["gbt50500"],
+    "CN": ["gbt50500", "cn_vat"],
     "IN": ["cpwd"],
     "TR": ["birimfiyat"],
     "JP": ["sekisan"],
@@ -3912,7 +3912,7 @@ _COUNTRY_RULE_SETS: dict[str, list[str]] = {
     # neither.
     "RO": ["romania", "din276"],
     "GR": ["greece", "din276"],
-    "UA": ["ukraine", "din276", "norm_base", "public_funding"],
+    "UA": ["ukraine", "din276", "norm_base", "public_funding", "vat_rate"],
     "HR": ["din276"],
     "CZ": ["din276"],
     "BE": ["din276"],

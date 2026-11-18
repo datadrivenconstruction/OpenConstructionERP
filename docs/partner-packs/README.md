@@ -477,7 +477,11 @@ teach identifiers that were never rule sets at all.
 | `workforce` | Workforce records |
 | `property_dev` | Development appraisal |
 | `pipeline` | Opportunity pipeline |
+| `commercial_control` | Commercial control: commitment grid, cost value reconciliation, approval routes and valuations |
 | `offline_sync` | Offline merge from a device: every conflicting field resolved before the merge applies |
+| `vat_rate` | The bill's tax line at the country's standard VAT rate from the dated tax seed, unless the bill records its VAT treatment |
+| `norm_base` | Norm codes on leaf lines: present, shaped as the country's norm base prescribes, no retired prefix, labour grade on the scale |
+| `public_funding` | Publicly funded estimates: capped markups under the cap of the funding class, price evidence on client estimates |
 | `din276` | DIN 276 cost groups (DE) |
 | `gaeb` | GAEB LV structure and ordinals (DE) |
 | `onorm` | ÖNORM (AT) |
