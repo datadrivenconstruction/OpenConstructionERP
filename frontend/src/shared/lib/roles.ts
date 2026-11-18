@@ -33,6 +33,7 @@ export const ROLE_ALIASES: Readonly<Record<string, string>> = {
   estimator: 'editor',
   quantity_surveyor: 'editor',
   qs: 'editor',
+  surveyor: 'editor',
   user: 'editor',
   superuser: 'admin',
   owner: 'admin',

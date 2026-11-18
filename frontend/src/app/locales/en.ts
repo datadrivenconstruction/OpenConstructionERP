@@ -50728,6 +50728,13 @@ const resource = {
     "modules.catalog.doc_templates": "Documents & templates",
     "modules.catalog.estimate_archive": "Sealed Estimates",
     "modules.catalog.framework_agreements": "Framework Agreements",
+    "modules.catalog.survey_core": "Survey Register",
+    "modules.catalog.surfaces_volumes": "Surfaces & Volumes",
+    "modules.catalog.setting_out": "Setting-out",
+    "modules.catalog.land_parcels": "Land & Parcels",
+    "modules.catalog.monitoring": "Deformation Monitoring",
+    "modules.catalog.stockpiles": "Stockpiles",
+    "modules.catalog.mine_survey": "Mine Survey",
     "modules.pp_name_pakistan_pk": "Pakistan Construction Pack",
     "modules.pp_name_peru_pe": "Peru Construction Pack",
     // stakeholders (module 8) frontend keys: start
