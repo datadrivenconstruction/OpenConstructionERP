@@ -127,9 +127,19 @@ export interface RecordPdfButtonProps {
   successTitle?: string;
   testId?: string;
   className?: string;
+  /** Opens the document's layout editor; adds "Customize document" to the menu. */
+  onCustomize?: (locale: string) => void;
 }
 
-export function RecordPdfButton({ download, label, locales, successTitle, testId, className }: RecordPdfButtonProps) {
+export function RecordPdfButton({
+  download,
+  label,
+  locales,
+  successTitle,
+  testId,
+  className,
+  onCustomize,
+}: RecordPdfButtonProps) {
   const { t } = useTranslation();
   const items = useMemo<DocumentExportItem[]>(
     () => [
@@ -151,6 +161,7 @@ export function RecordPdfButton({ download, label, locales, successTitle, testId
       icon={<Printer size={14} />}
       testId={testId}
       className={className}
+      onCustomize={onCustomize}
     />
   );
 }

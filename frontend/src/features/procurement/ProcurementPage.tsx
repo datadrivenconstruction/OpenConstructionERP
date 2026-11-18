@@ -55,6 +55,7 @@ import {
 } from './api';
 import { PURCHASING_DOCUMENT_LOCALES } from '@/shared/lib/documentExport';
 import { RecordPdfButton } from '@/shared/ui/RegisterExport';
+import { useLayoutCustomizer } from '@/features/doc-templates';
 import { PORemovalDialog, removalVerbFor } from './PORemovalDialog';
 import { procurementGuide } from './procurementGuide';
 import { SupplierScorecardModal } from './SupplierScorecardModal';
@@ -697,6 +698,10 @@ function PurchaseOrdersTab({
   focusPoId: string | null;
 }) {
   const { t } = useTranslation();
+  const poLayout = useLayoutCustomizer(
+    'procurement.purchase_order',
+    t('procurement.po_document', { defaultValue: 'Purchase order' }),
+  );
   const queryClient = useQueryClient();
   const [search, setSearch] = useState('');
   const addToast = useToastStore((s) => s.addToast);
@@ -1726,6 +1731,7 @@ function PurchaseOrdersTab({
 
   return (
     <>
+      {poLayout.drawer}
     <Card padding="none">
       {/* Search + New PO button */}
       <div className="px-4 py-3 border-b border-border-light flex flex-col sm:flex-row sm:items-center gap-2">
@@ -1962,6 +1968,7 @@ function PurchaseOrdersTab({
                       download={(locale) => downloadPurchaseOrderPdf(po.id, locale, po.po_number)}
                       locales={PURCHASING_DOCUMENT_LOCALES}
                       testId={`po-pdf-${po.id}`}
+                      onCustomize={poLayout.open({ recordId: po.id, projectId: projectId || null })}
                     />
                   {isManager && (
                   <>
@@ -2237,6 +2244,10 @@ function GoodsReceiptsTab({
   onGoToPurchaseOrders: () => void;
 }) {
   const { t } = useTranslation();
+  const grLayout = useLayoutCustomizer(
+    'procurement.goods_receipt',
+    t('procurement.gr_document', { defaultValue: 'Goods receipt' }),
+  );
   const userRole = useAuthStore((s) => s.userRole);
   // Recording + confirming a goods receipt are EDITOR-level permissions
   // (procurement.create / procurement.confirm_receipt), so the controls are
@@ -2329,6 +2340,7 @@ function GoodsReceiptsTab({
 
   return (
     <>
+      {grLayout.drawer}
     <Card padding="none">
       {/* Search + Record Delivery */}
       <div className="px-4 py-3 border-b border-border-light flex flex-col sm:flex-row sm:items-center gap-2">
@@ -2446,6 +2458,7 @@ function GoodsReceiptsTab({
                       }
                       locales={PURCHASING_DOCUMENT_LOCALES}
                       testId={`gr-pdf-${gr.id}`}
+                      onCustomize={grLayout.open({ recordId: gr.id, projectId: projectId || null })}
                     />
                     {/* A draft goods receipt is awaiting confirmation - the
                         load-bearing step that rolls the PO up and moves the

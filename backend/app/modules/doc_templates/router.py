@@ -15,6 +15,7 @@ GET    /{kind}/records                - records "Preview with" can use
 GET    /{kind}/records/{id}/pdf       - issue a record's document (logs the version)
 POST   /{kind}/preview?locale=        - PDF or email HTML of an unsaved text
 POST   /{kind}/test-send?locale=      - email kinds: send to the caller's own address
+/layouts/...                          - block layouts of record documents (see layout_router)
 """
 
 from __future__ import annotations
@@ -34,6 +35,7 @@ from app.dependencies import (
     accessible_project_ids,
 )
 from app.modules.doc_templates import service
+from app.modules.doc_templates.layout_router import layout_router
 from app.modules.doc_templates.permissions import DOC_MANAGER_KEY, is_doc_manager
 from app.modules.doc_templates.schemas import (
     DraftIn,
@@ -53,6 +55,8 @@ from app.modules.doc_templates.schemas import (
 )
 
 router = APIRouter(tags=["doc_templates"])
+# Layout routes first: ``/layouts/...`` would otherwise match ``/{kind_key}``.
+router.include_router(layout_router, prefix="/layouts")
 
 _READ = [Depends(RequirePermission("doc_templates.read"))]
 _LOCALE = Query("en", max_length=10)

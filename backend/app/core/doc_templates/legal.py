@@ -40,6 +40,7 @@ __all__ = [
     "clear_cache",
     "legal_blocks_for_editor",
     "legal_notes",
+    "pack_layout_locks",
     "requirements_for",
 ]
 
@@ -92,6 +93,59 @@ def _parse(raw: object, country: str) -> list[LegalRequirement]:
     return out
 
 
+def _pack_files() -> list[tuple[str, dict]]:
+    """``(country, parsed file)`` of every pack that ships the file."""
+    try:
+        from app.core.partner_pack.discovery import discover_packs, read_pack_file
+    except Exception:  # noqa: BLE001
+        return []
+    try:
+        packs = discover_packs()
+    except Exception:  # noqa: BLE001 - packs are optional
+        logger.debug("doc_templates: pack discovery failed", exc_info=True)
+        return []
+    out: list[tuple[str, dict]] = []
+    for pack in packs:
+        try:
+            data = read_pack_file(pack.slug, FILENAME)
+            if not data:
+                continue
+            raw = json.loads(data.decode("utf-8"))
+        except Exception:  # noqa: BLE001 - one broken pack file costs only that pack
+            logger.warning("doc_templates: unreadable %s in pack %s", FILENAME, getattr(pack, "slug", "?"))
+            continue
+        country = str(raw.get("country") or (pack.metadata or {}).get("country") or "").upper()
+        if country and isinstance(raw, dict):
+            out.append((country, raw))
+    return out
+
+
+@lru_cache(maxsize=1)
+def _all_layout_locks() -> tuple[tuple[str, str, dict], ...]:
+    out: list[tuple[str, str, dict]] = []
+    for country, raw in _pack_files():
+        for kind, spec in (raw.get("kinds") or {}).items():
+            locks = (spec or {}).get("locks") if isinstance(spec, dict) else None
+            if isinstance(locks, dict):
+                out.append((country, str(kind), locks))
+    return tuple(out)
+
+
+def pack_layout_locks(
+    kind_key: str, countries: Iterable[str], extra: Iterable[tuple[str, str, dict]] | None = None
+) -> list[dict]:
+    """``locks`` a pack declares for a document layout: sections, columns and fields that may not be hidden.
+
+    File shape: ``{"kinds": {"procurement.purchase_order": {"locks": {"sections": [...],
+    "columns": {"items": [...]}, "fields": [...], "source": "..."}}}}``.
+    """
+    wanted = {c.strip().upper() for c in countries if c and c.strip() and c != "*"}
+    if not wanted:
+        return []
+    pool = tuple(extra) if extra is not None else _all_layout_locks()
+    return [locks for country, kind, locks in pool if kind == kind_key and country in wanted]
+
+
 @lru_cache(maxsize=1)
 def _all_requirements() -> tuple[LegalRequirement, ...]:
     try:
@@ -122,6 +176,7 @@ def _all_requirements() -> tuple[LegalRequirement, ...]:
 def clear_cache() -> None:
     """Forget the parsed pack files (tests, pack installed at runtime)."""
     _all_requirements.cache_clear()
+    _all_layout_locks.cache_clear()
 
 
 def requirements_for(

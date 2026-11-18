@@ -13,6 +13,16 @@ finding of :func:`app.core.doc_templates.rules.check_blocks` or
 * ``doctpl.raw_html``            - ERROR, HTML typed into a block.
 * ``doctpl.legal_data_missing``  - ERROR, a pack-mandatory value is empty (pack).
 
+A document layout is checked with ``{"layout": key, "template": {...}}`` and
+optionally ``"countries"`` for pack locks; it shares the merge field and HTML
+rules above and adds:
+
+* ``doctpl.required_section_hidden`` - ERROR, a locked section is hidden or deleted.
+* ``doctpl.required_column_hidden``  - ERROR, a locked table column is hidden or removed.
+* ``doctpl.required_field_removed``  - ERROR, a locked field is hidden or removed.
+* ``doctpl.invalid_expression``      - ERROR, a computed value or condition does not parse.
+* ``doctpl.custom_block_limit``      - ERROR, more blocks than a document may hold.
+
 Publishing calls the same checks directly and refuses errors.
 """
 
@@ -33,6 +43,8 @@ from app.core.validation.engine import (
 
 def _issues(context: ValidationContext, rule_id: str) -> list[Issue]:
     data = context.data if isinstance(context.data, dict) else {}
+    if data.get("layout"):
+        return _layout_issues(data, rule_id)
     kind = get_kind(str(data.get("kind") or ""))
     if kind is None:
         return []
@@ -43,6 +55,18 @@ def _issues(context: ValidationContext, rule_id: str) -> list[Issue]:
     raw = data.get("blocks") if isinstance(data.get("blocks"), dict) else {}
     blocks = {k: str(v or "") for k, v in raw.items()}
     return [i for i in check_blocks(kind, blocks) if i.rule_id == rule_id]
+
+
+def _layout_issues(data: dict, rule_id: str) -> list[Issue]:
+    from app.core.doc_templates.layout.spec import get_layout
+    from app.core.doc_templates.layout.template import check, locks_for, normalise
+
+    spec = get_layout(str(data.get("layout") or ""))
+    if spec is None:
+        return []
+    template = normalise(data.get("template") or {})
+    locks = locks_for(spec, [str(c) for c in data.get("countries") or []])
+    return [i for i in check(template, spec, locks) if i.rule_id == rule_id]
 
 
 class _DocRule(ValidationRule):
@@ -107,7 +131,58 @@ class LegalDataMissing(_DocRule):
     description = "A value the country requires on this document is empty."
 
 
-_RULES = (UnknownMergeField(), EmailSubjectEmpty(), UnsafeLink(), RawHtml(), LegalDataMissing())
+class RequiredSectionHidden(_DocRule):
+    rule_id = "doctpl.required_section_hidden"
+    name = "Required section hidden"
+    severity = Severity.ERROR
+    category = RuleCategory.COMPLIANCE
+    description = "This section is required on this document and cannot be hidden."
+
+
+class RequiredColumnHidden(_DocRule):
+    rule_id = "doctpl.required_column_hidden"
+    name = "Required column hidden"
+    severity = Severity.ERROR
+    category = RuleCategory.COMPLIANCE
+    description = "This column is required on this document and cannot be hidden."
+
+
+class RequiredFieldRemoved(_DocRule):
+    rule_id = "doctpl.required_field_removed"
+    name = "Required field removed"
+    severity = Severity.ERROR
+    category = RuleCategory.COMPLIANCE
+    description = "This field is required on this document and cannot be removed."
+
+
+class InvalidExpression(_DocRule):
+    rule_id = "doctpl.invalid_expression"
+    name = "Invalid formula"
+    severity = Severity.ERROR
+    category = RuleCategory.CONSISTENCY
+    description = "This formula or condition cannot be read. Use fields, numbers and + - * / only."
+
+
+class CustomBlockLimit(_DocRule):
+    rule_id = "doctpl.custom_block_limit"
+    name = "Too many blocks"
+    severity = Severity.ERROR
+    category = RuleCategory.QUALITY
+    description = "This document holds more blocks than a document may have."
+
+
+_RULES = (
+    UnknownMergeField(),
+    EmailSubjectEmpty(),
+    UnsafeLink(),
+    RawHtml(),
+    LegalDataMissing(),
+    RequiredSectionHidden(),
+    RequiredColumnHidden(),
+    RequiredFieldRemoved(),
+    InvalidExpression(),
+    CustomBlockLimit(),
+)
 
 
 def register_doc_template_rules() -> None:

@@ -13,7 +13,7 @@ from __future__ import annotations
 import uuid
 from datetime import datetime
 
-from sqlalchemy import JSON, DateTime, ForeignKey, Integer, String, UniqueConstraint
+from sqlalchemy import JSON, Boolean, DateTime, ForeignKey, Integer, String, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database import GUID, Base
@@ -84,3 +84,64 @@ class DocTemplateIssue(Base):
 
     def __repr__(self) -> str:
         return f"<DocTemplateIssue {self.kind} {self.record_id}>"
+
+
+class DocLayout(Base):
+    """A firm's layout of one record document in one scope, under one variant name.
+
+    ``scope`` is ``workspace`` (the company default) or ``project:<uuid>`` (that
+    project's override). ``variant`` names one of several layouts of the same
+    document ("short", "full terms"); one per scope is the default.
+    """
+
+    __tablename__ = "oe_doc_templates_layout"
+    __table_args__ = (UniqueConstraint("kind", "scope", "variant", name="uq_doc_templates_layout_kind_scope_variant"),)
+
+    kind: Mapped[str] = mapped_column(String(120), nullable=False, index=True)
+    scope: Mapped[str] = mapped_column(String(60), nullable=False, default=WORKSPACE_SCOPE, server_default="workspace")
+    variant: Mapped[str] = mapped_column(String(40), nullable=False, default="standard", server_default="standard")
+    name: Mapped[str] = mapped_column(String(120), nullable=False, default="", server_default="")
+    is_default: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default="false")
+    draft: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    draft_updated_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
+    draft_updated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    published_version_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+
+    def __repr__(self) -> str:
+        return f"<DocLayout {self.kind} {self.scope} {self.variant}>"
+
+
+class DocLayoutVersion(Base):
+    """An immutable published layout. ``action`` is ``publish``, ``restore``, ``reset`` or ``import``."""
+
+    __tablename__ = "oe_doc_templates_layout_version"
+    __table_args__ = (UniqueConstraint("layout_id", "number", name="uq_doc_templates_layout_version_number"),)
+
+    layout_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(), ForeignKey("oe_doc_templates_layout.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    number: Mapped[int] = mapped_column(Integer, nullable=False)
+    document: Mapped[dict] = mapped_column(JSON, nullable=False, default=dict, server_default="{}")
+    action: Mapped[str] = mapped_column(String(20), nullable=False, default="publish", server_default="publish")
+    note: Mapped[str] = mapped_column(String(500), nullable=False, default="", server_default="")
+    author_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
+    author_name: Mapped[str] = mapped_column(String(255), nullable=False, default="", server_default="")
+
+    def __repr__(self) -> str:
+        return f"<DocLayoutVersion {self.layout_id} v{self.number}>"
+
+
+class DocClause(Base):
+    """A reusable clause (payment terms, warranty, retention) a layout's clause block prints, per language."""
+
+    __tablename__ = "oe_doc_templates_clause"
+    __table_args__ = (UniqueConstraint("key", name="uq_doc_templates_clause_key"),)
+
+    key: Mapped[str] = mapped_column(String(40), nullable=False)
+    category: Mapped[str] = mapped_column(String(40), nullable=False, default="", server_default="")
+    title: Mapped[dict] = mapped_column(JSON, nullable=False, default=dict, server_default="{}")
+    text: Mapped[dict] = mapped_column(JSON, nullable=False, default=dict, server_default="{}")
+    updated_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
+
+    def __repr__(self) -> str:
+        return f"<DocClause {self.key}>"

@@ -44,6 +44,23 @@ APP_ROOT = pathlib.Path(app_pkg.__file__).resolve().parent
 #: Routes that render a document in the request and must declare its language.
 #: Each entry is ``module path relative to app/`` -> function name.
 RENDERING_ROUTES: dict[str, set[str]] = {
+    # Routes outside router.py files and routes that return a shared download builder.
+    "modules/changeorders/export_routes.py": {"export_change_order_pdf", "export_change_order_register"},
+    "modules/claims_evidence/export_routes.py": {"export_evidence_pack", "export_reconstructed_pack_document"},
+    "modules/correspondence/export_routes.py": {"export_correspondence_pdf", "export_correspondence_register"},
+    "modules/cutting/router.py": {"export_plan"},
+    "modules/doc_templates/layout_router.py": {"preview"},
+    "modules/procurement/export_routes.py": {"export_goods_receipt_pdf", "export_purchase_order_pdf"},
+    "modules/rfi/export_routes.py": {"export_rfi_register"},
+    "modules/schedule/baseline_router.py": {"export_gantt_pdf"},
+    "modules/submittals/export_routes.py": {"export_submittal_pdf", "export_submittal_register"},
+    "modules/transmittals/export_routes.py": {"export_transmittal_pdf", "export_transmittal_register"},
+    "modules/variations/export_routes.py": {
+        "export_claim_register",
+        "export_notice_register",
+        "export_variation_pdf",
+        "export_variation_register",
+    },
     "modules/doc_templates/router.py": {"issue_pdf", "preview"},
     "core/branding_router.py": {"get_document_appearance_sample", "get_document_type_sample"},
     # The Excel export is not a PDF, but it builds a document in the request, and
@@ -71,7 +88,13 @@ RENDERING_ROUTES: dict[str, set[str]] = {
     # ``_export_tr_einvoice`` writes XML, not a PDF; the search finds it through the
     # sentence that refuses the hybrid PDF. It builds the document in the request and
     # always writes it in Turkish, so it belongs with the routes that say so.
-    "modules/finance/router.py": {"export_invoice_br_pdf", "export_invoice_einvoice", "_export_tr_einvoice"},
+    "modules/finance/router.py": {
+        "export_invoice_br_pdf",
+        "export_invoice_einvoice",
+        "_export_tr_einvoice",
+        "export_invoice_pdf",
+        "export_payment_pdf",
+    },
     "modules/forms/router.py": {"export_submission_pdf"},
     "modules/meetings/router.py": {"export_meeting_pdf", "export_minutes_pdf"},
     "modules/methodology/router.py": {"export_methodology_pdf"},
@@ -129,6 +152,22 @@ SERVES_STORED_ROUTES: dict[str, set[str]] = {
 }
 
 
+#: Shared download builders that set ``Content-Language`` themselves; a route that returns one declares.
+DECLARING_HELPERS: dict[str, tuple[str, ...]] = {
+    "core/register_context.py": ("record_download", "register_download", "document_download"),
+}
+_HELPER_CALLS = tuple(f"{name}(" for names in DECLARING_HELPERS.values() for name in names)
+_ROUTE_VERBS = frozenset({"get", "post", "put", "patch", "delete", "api_route"})
+
+
+def _is_route(node: ast.FunctionDef | ast.AsyncFunctionDef) -> bool:
+    for decorator in node.decorator_list:
+        target = decorator.func if isinstance(decorator, ast.Call) else decorator
+        if isinstance(target, ast.Attribute) and target.attr in _ROUTE_VERBS:
+            return True
+    return False
+
+
 def _function_source(path: pathlib.Path, name: str) -> str:
     tree = ast.parse(path.read_text(encoding="utf-8", errors="replace"))
     lines = path.read_text(encoding="utf-8", errors="replace").splitlines()
@@ -147,15 +186,31 @@ def test_a_rendering_route_declares_the_language_it_produced(rel: str, func: str
     builder = HEADERS_BUILT_BY.get(f"{rel}::{func}")
     if builder:
         source += _function_source(APP_ROOT / rel, builder)
-    assert "Content-Language" in source, (
+    assert "Content-Language" in source or any(call in source for call in _HELPER_CALLS), (
         f"{rel}::{func} renders a document and sets no Content-Language, so the "
         "Accept-Language middleware will label its bytes with the language the "
         "reader asked for rather than the one they were written in"
     )
 
 
+@pytest.mark.parametrize(
+    ("rel", "func"), sorted((rel, func) for rel, funcs in DECLARING_HELPERS.items() for func in funcs)
+)
+def test_a_shared_download_builder_declares_the_language(rel: str, func: str) -> None:
+    source = _function_source(APP_ROOT / rel, func)
+    delegates = any(f"{other}(" in source for other in DECLARING_HELPERS[rel] if other != func)
+    assert "Content-Language" in source or delegates, (
+        f"{rel}::{func} is trusted to declare the document language for every route that returns it"
+    )
+
+
 def test_no_pdf_route_escapes_classification() -> None:
-    """A new PDF route must be classified rather than merely appear."""
+    """A new PDF route must be classified rather than merely appear.
+
+    Router files are read whole (their helpers too); every other file under
+    ``app/`` is read for decorated routes, so a route in ``export_routes.py``
+    or a sub-router is found like one in ``router.py``.
+    """
     known = {
         f"{rel}::{func}"
         for table in (RENDERING_ROUTES, SERVES_STORED_ROUTES)
@@ -164,19 +219,23 @@ def test_no_pdf_route_escapes_classification() -> None:
     }
 
     found: set[str] = set()
-    for path in sorted(APP_ROOT.rglob("*router*.py")):
+    for path in sorted(APP_ROOT.rglob("*.py")):
         src = path.read_text(encoding="utf-8", errors="replace")
         if "pdf" not in src.lower():
             continue
+        router_file = "router" in path.name
         rel = path.relative_to(APP_ROOT).as_posix()
         lines = src.splitlines()
         for node in ast.walk(ast.parse(src)):
             if not isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef):
                 continue
             body = "\n".join(lines[node.lineno - 1 : (node.end_lineno or node.lineno)])
-            if "Response(" not in body or "pdf" not in body.lower():
+            if not router_file and not _is_route(node):
                 continue
-            if "media_type" not in body:
+            if "pdf" not in body.lower():
+                continue
+            via_helper = any(call in body for call in _HELPER_CALLS)
+            if not via_helper and ("Response(" not in body or "media_type" not in body):
                 continue
             found.add(f"{rel}::{node.name}")
 
