@@ -32,6 +32,7 @@ import {
   Target,
   LandPlot,
   Warehouse,
+  Pickaxe,
   GitCompare,
   LayoutDashboard,
   FolderOpen,
@@ -182,6 +183,7 @@ const EXTRA_ROUTE_ICONS: Record<string, LucideIcon> = {
   '/survey/parcels': LandPlot,
   '/survey/monitoring': Activity,
   '/survey/stockpiles': Warehouse,
+  '/survey/mine': Pickaxe,
   // ── 5. Model Coordination ─────────────────────────────────────────
   '/coordination': LayoutDashboard,
   '/model-review': ScanEye,

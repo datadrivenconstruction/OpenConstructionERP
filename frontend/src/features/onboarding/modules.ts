@@ -188,6 +188,7 @@ export const ALL_MODULES: ModuleDef[] = [
   { key: 'survey_core', labelKey: 'survey.page.register', descriptionKey: 'onboarding.mod_survey_core_desc', group: 'survey' },
   { key: 'surfaces_volumes', labelKey: 'volumes.page.title', descriptionKey: 'onboarding.mod_surfaces_volumes_desc', group: 'survey' },
   { key: 'stockpiles', labelKey: 'stockpiles.page.title', descriptionKey: 'onboarding.mod_stockpiles_desc', group: 'survey' },
+  { key: 'mine_survey', labelKey: 'mine.page.title', descriptionKey: 'onboarding.mod_mine_survey_desc', group: 'survey' },
 
   // ── BI & Analytics ──────────────────────────────────────────────────
   { key: 'bi_dashboards', labelKey: 'onboarding.mod_bi_dashboards', descriptionKey: 'onboarding.mod_bi_dashboards_desc', group: 'bi_analytics' },

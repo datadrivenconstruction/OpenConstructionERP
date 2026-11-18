@@ -2466,5 +2466,15 @@
       "fail": "Zaměření se liší od účetního stavu o {v} %, nad tolerancí {t} %.",
       "suggestion": "Zkontrolujte hustotu a základní plochu, pak navrhněte korekci a potvrďte ji, je-li rozdíl skutečný."
     }
+  },
+  "mine_survey": {
+    "compliance_outside": {
+      "fail": "Plnění za období {c} % je mimo pásmo {lo}-{hi} %.",
+      "suggestion": "Zkontrolujte plán a zaměření a před nárokem vysvětlete rozdíl v poznámce k období."
+    },
+    "truck_differs": {
+      "fail": "Tuny podle počtu jízd se liší od zaměřených tun o {v} %, tedy nad kontrolou {t} %.",
+      "suggestion": "Zkontrolujte užitečné zatížení jedné jízdy a hustotu a poté znovu porovnejte oba povrchy."
+    }
   }
 }

@@ -2466,5 +2466,15 @@
       "fail": "Il rilievo si discosta dalla giacenza contabile del {v} %, oltre la tolleranza del {t} %.",
       "suggestion": "Controllate la densità e la superficie di base, poi proponete una rettifica e confermatela se la differenza è reale."
     }
+  },
+  "mine_survey": {
+    "compliance_outside": {
+      "fail": "La conformità del periodo, {c} %, è fuori dalla fascia {lo}-{hi} %.",
+      "suggestion": "Controlli il piano e il rilievo e spieghi lo scarto nella nota del periodo prima dello stato avanzamento."
+    },
+    "truck_differs": {
+      "fail": "Le tonnellate dal conteggio dei camion differiscono del {v} % da quelle rilevate, oltre il controllo del {t} %.",
+      "suggestion": "Controlli il carico utile per viaggio e la densità, poi confronti di nuovo le due superfici."
+    }
   }
 }

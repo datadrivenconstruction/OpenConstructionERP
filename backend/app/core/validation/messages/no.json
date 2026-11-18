@@ -2466,5 +2466,15 @@
       "fail": "Oppmålingen avviker {v} % fra bokført beholdning, over toleransen på {t} %.",
       "suggestion": "Kontroller tettheten og basisflaten, foreslå deretter en justering og bekreft den hvis forskjellen er reell."
     }
+  },
+  "mine_survey": {
+    "compliance_outside": {
+      "fail": "Periodens oppfyllelse {c} % ligger utenfor båndet {lo}-{hi} %.",
+      "suggestion": "Kontroller planen og oppmålingen, og forklar avviket i periodenotatet før kravet."
+    },
+    "truck_differs": {
+      "fail": "Tonn etter lastebiltelling avviker {v} % fra oppmålte tonn, over kontrollen på {t} %.",
+      "suggestion": "Kontroller nyttelasten per tur og tettheten, og sammenlign deretter de to flatene på nytt."
+    }
   }
 }

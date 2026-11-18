@@ -2466,5 +2466,15 @@
       "fail": "El levantamiento difiere del stock contable en {v} %, por encima de la tolerancia de {t} %.",
       "suggestion": "Compruebe la densidad y la superficie base, luego proponga un ajuste y confírmelo si la diferencia es real."
     }
+  },
+  "mine_survey": {
+    "compliance_outside": {
+      "fail": "El cumplimiento del periodo, {c} %, queda fuera de la banda {lo}-{hi} %.",
+      "suggestion": "Revise el plan y el levantamiento y explique la diferencia en la nota del periodo antes de la certificación."
+    },
+    "truck_differs": {
+      "fail": "Las toneladas por conteo de camiones difieren {v} % de las toneladas levantadas, por encima del control del {t} %.",
+      "suggestion": "Revise la carga útil por viaje y la densidad, y compare de nuevo las dos superficies."
+    }
   }
 }
