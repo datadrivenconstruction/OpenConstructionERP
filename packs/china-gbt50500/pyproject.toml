@@ -44,4 +44,5 @@ where = ["src"]
 openconstructionerp_china_gbt50500 = [
     "onboarding.yaml",
     "rule_packs/*.json",
+    "fee_schedules/*.json",
 ]

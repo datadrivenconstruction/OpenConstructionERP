@@ -135,6 +135,142 @@ export function computePrepayment(
   });
 }
 
+export interface FeeOption {
+  key: string;
+  values: string[];
+  default?: string;
+  labels_zh?: Record<string, string>;
+}
+
+export interface FeeLineMeta {
+  name_zh: string | null;
+  name_en: string | null;
+  kind: string | null;
+  band: { min?: string; mid?: string; max?: string } | null;
+  non_competitive: boolean;
+  user_input: boolean;
+  needs_confirmation: boolean;
+  reference_rates: Array<{ chapter_zh: string; chapter_en: string; rate: string }>;
+  doc: string | null;
+  url: string | null;
+  secondary: boolean;
+}
+
+export interface FeeScheduleSummary {
+  key: string;
+  name_zh: string;
+  name_en: string;
+  effective_from: string | null;
+  effective_to: string | null;
+  superseded_by: string | null;
+  labour_factor: string | null;
+  bases_verified: boolean;
+  doc: string | null;
+  url: string | null;
+  options: FeeOption[];
+  lines: Record<string, FeeLineMeta>;
+}
+
+export interface FeeLineResult {
+  code: string;
+  group: string;
+  base: string;
+  rate: string | null;
+  coefficient: string;
+  amount: string;
+  status: 'published' | 'user' | 'missing';
+  published: string | null;
+  floor: string | null;
+}
+
+export interface FeeSettings {
+  schedule_key: string | null;
+  rates: Record<string, string>;
+  options: Record<string, string>;
+  bases: Record<string, Record<string, string>>;
+  labour_includes_social_insurance: boolean;
+  apply_labour_factor: boolean | null;
+}
+
+export interface FeeBlock {
+  jurisdiction: string;
+  jurisdiction_name_zh: string;
+  jurisdiction_name_en: string;
+  date: string | null;
+  guifei_abolished_from: string | null;
+  price_station_url: string | null;
+  price_publication: string | null;
+  schedules: FeeScheduleSummary[];
+  resolved_key: string | null;
+  schedule: FeeScheduleSummary | null;
+  in_force: boolean | null;
+  successor: string | null;
+  settings: Partial<FeeSettings>;
+  result: {
+    schedule_key: string;
+    labour: string;
+    labour_factor_applied: boolean;
+    direct: string;
+    lines: FeeLineResult[];
+    pre_tax: string;
+    vat_rate: string;
+    vat: string;
+    total: string;
+    options: Record<string, string>;
+  } | null;
+}
+
+export interface ProjectFees {
+  fee: FeeBlock | null;
+  findings: Finding[];
+}
+
+export interface EditionMovePreview {
+  from: string | null;
+  to: string;
+  needed: boolean;
+  guifei_lines: string[];
+  guifei_markups: string[];
+  codes_to_review: Array<{ ref: string; code: string }>;
+  codes_to_review_count: number;
+  fee_schedule_from: string | null;
+  fee_schedule_to: string | null;
+  applied?: { standard_edition: string; markups_switched_off: string[] };
+}
+
+export function fetchProjectFees(projectId: string): Promise<ProjectFees> {
+  return apiGet<ProjectFees>(`${PACK}/projects/${projectId}/fees/`);
+}
+
+export function saveProjectFees(projectId: string, body: FeeSettings): Promise<ProjectFees> {
+  return apiPut<ProjectFees, FeeSettings>(`${PACK}/projects/${projectId}/fees/`, body);
+}
+
+export function fetchEditionMove(projectId: string): Promise<EditionMovePreview> {
+  return apiGet<EditionMovePreview>(`${PACK}/projects/${projectId}/edition-move/`);
+}
+
+export function applyEditionMove(projectId: string): Promise<EditionMovePreview> {
+  return apiPost<EditionMovePreview>(`${PACK}/projects/${projectId}/edition-move/`, {});
+}
+
+/** Settings a PUT sends: blank rates dropped, everything else as stated. */
+export function toFeeSettings(s: Partial<FeeSettings>): FeeSettings {
+  const rates = Object.fromEntries(
+    Object.entries(s.rates ?? {})
+      .map(([k, v]) => [k, String(v ?? '').trim()] as const)
+      .filter(([, v]) => v !== ''),
+  );
+  return {
+    schedule_key: s.schedule_key || null,
+    rates,
+    options: { ...(s.options ?? {}) },
+    bases: { ...(s.bases ?? {}) },
+    labour_includes_social_insurance: !!s.labour_includes_social_insurance,
+    apply_labour_factor: s.apply_labour_factor ?? null,
+  };
+}
+
 /** The fields a PUT sends, read off a profile; blank strings become null. */
 export function toProfileFields(p: ProfileFields): ProfileFields {
   const blank = (v: string | null | undefined) => (v == null || v.trim() === '' ? null : v.trim());

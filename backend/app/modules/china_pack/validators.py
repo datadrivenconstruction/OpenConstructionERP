@@ -24,6 +24,16 @@ cn.prepay_subcontract_invoice   warning subcontract deduction without site invoi
 cn.fapiao_site                  error   construction 数电票 lacks site or project
 cn.fapiao_number                error   number not 20 digits or wrong year prefix
 cn.unlimited_risk               warning open-ended contract risk clause
+cn.fee.noncompetitive_below_floor error safety fee rate below the provincial floor
+cn.fee.schedule_not_in_force    error   fee schedule not in force on the tender date
+cn.fee.guifei_after_abolition   error   规费 priced after the province dropped it
+cn.fee.rate_outside_band        warning rate outside the published band
+cn.fee.unsourced_rate           info    rate entered by the user, no official source
+cn.labour.double_social_insurance warning labour factor on labour incl. social insurance
+cn.tax.method_mixed             error   9% and 3% lines in one bill
+cn.sc.safety_base_includes_lumpsum error safety base keeps a term the source excludes
+cn.price.source_missing         warning material price without source or period
+cn.standard.edition_mismatch    warning 2013 label after the national 2024 date
 =============================== ======= ==========================================
 """
 
@@ -554,6 +564,319 @@ class UnlimitedRisk(_CnRule):
         return [self.ok()]
 
 
+# ── Provincial fee programme ─────────────────────────────────────────────────
+
+
+def _fee(record: dict[str, Any]) -> dict[str, Any]:
+    fee = record.get("fee")
+    return fee if isinstance(fee, dict) and fee.get("result") else {}
+
+
+def _fee_lines(fee: dict[str, Any]) -> list[tuple[dict[str, Any], dict[str, Any]]]:
+    meta = ((fee.get("schedule") or {}).get("lines")) or {}
+    return [(row, meta.get(row["code"]) or {}) for row in (fee.get("result") or {}).get("lines") or []]
+
+
+def _doc(fee: dict[str, Any], meta: dict[str, Any] | None = None) -> str:
+    return str((meta or {}).get("doc") or (fee.get("schedule") or {}).get("doc") or "")
+
+
+def _place(fee: dict[str, Any]) -> str:
+    return str(fee.get("jurisdiction_name_zh") or fee.get("jurisdiction") or "")
+
+
+def _line_name(meta: dict[str, Any], code: str) -> str:
+    return str(meta.get("name_zh") or meta.get("name_en") or code)
+
+
+class FeeBelowFloor(_CnRule):
+    rule_id = "cn.fee.noncompetitive_below_floor"
+    name = "Non-Competitive Fee Not Below Its Floor"
+    severity = Severity.ERROR
+    category = RuleCategory.COMPLIANCE
+    description = "A safety or civilised construction fee may not be discounted below the provincial minimum"
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        fee = _fee(_record(context))
+        if not fee:
+            return []
+        found = []
+        checked = 0
+        for row, meta in _fee_lines(fee):
+            if not meta.get("non_competitive") or row.get("floor") is None or row.get("rate") is None:
+                continue
+            checked += 1
+            rate, floor = to_decimal(row["rate"]), to_decimal(row["floor"])
+            if rate < floor:
+                name = _line_name(meta, row["code"])
+                found.append(
+                    self.fail(
+                        f"{name} {rate.normalize()}% is below the {_place(fee)} minimum {floor.normalize()}% "
+                        f"({_doc(fee, meta)}); the bid is non-responsive",
+                        {
+                            "line": name,
+                            "rate": str(rate.normalize()),
+                            "floor": str(floor.normalize()),
+                            "prov": _place(fee),
+                            "doc": _doc(fee, meta),
+                        },
+                        row["code"],
+                    )
+                )
+        return self.verdict(found, checked > 0)
+
+
+class FeeScheduleNotInForce(_CnRule):
+    rule_id = "cn.fee.schedule_not_in_force"
+    name = "Fee Schedule In Force On The Tender Date"
+    severity = Severity.ERROR
+    category = RuleCategory.COMPLIANCE
+    description = "The provincial fee schedule is picked by the tender date, not by the newest edition"
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        fee = _fee(_record(context))
+        if not fee or not fee.get("date"):
+            return []
+        if fee.get("in_force") is False:
+            successor = str(fee.get("successor") or "")
+            nxt = next((s for s in fee.get("schedules") or [] if s and s.get("key") == successor), None)
+            succ_name = str((nxt or {}).get("name_zh") or successor or "-")
+            return [
+                self.fail(
+                    f"Fee schedule {_doc(fee)} is not in force on the tender date {fee['date']}; use {succ_name}",
+                    {"doc": _doc(fee), "date": fee["date"], "successor": succ_name},
+                )
+            ]
+        return [self.ok()]
+
+
+class GuifeiAfterAbolition(_CnRule):
+    rule_id = "cn.fee.guifei_after_abolition"
+    name = "No 规费 Line After The Province Dropped It"
+    severity = Severity.ERROR
+    category = RuleCategory.COMPLIANCE
+    description = "Where 规费 was abolished as a line, social insurance sits in labour and management fee"
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        record = _record(context)
+        fee = record.get("fee") if isinstance(record.get("fee"), dict) else {}
+        abolished = parse_date(fee.get("guifei_abolished_from"))
+        on = parse_date(fee.get("date"))
+        if abolished is None or on is None or on < abolished:
+            return []
+        priced = [
+            row["code"]
+            for row, meta in _fee_lines(fee)
+            if (meta.get("kind") == "guifei" or row.get("group") == "guifei") and to_decimal(row.get("amount")) > 0
+        ]
+        marked = [n for n in fee.get("markup_names") or record.get("markup_names") or [] if "规费" in str(n)]
+        if priced or marked:
+            return [
+                self.fail(
+                    f"{_place(fee)} dropped 规费 as a separate line from {abolished.isoformat()}; "
+                    "move social insurance into labour/management",
+                    {"prov": _place(fee), "date": abolished.isoformat(), "lines": priced, "markups": marked},
+                    priced[0] if priced else None,
+                )
+            ]
+        return [self.ok()]
+
+
+class FeeRateOutsideBand(_CnRule):
+    rule_id = "cn.fee.rate_outside_band"
+    name = "Fee Rate Inside The Published Band"
+    severity = Severity.WARNING
+    category = RuleCategory.CONSISTENCY
+    description = "A rate the user picked lies outside the band the provincial document publishes"
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        fee = _fee(_record(context))
+        if not fee:
+            return []
+        found = []
+        banded = 0
+        for row, meta in _fee_lines(fee):
+            band = meta.get("band") or {}
+            if not band or row.get("rate") is None:
+                continue
+            banded += 1
+            rate = to_decimal(row["rate"])
+            low = to_decimal(band["min"]) if band.get("min") else None
+            high = to_decimal(band["max"]) if band.get("max") else None
+            if (low is not None and rate < low) or (high is not None and rate > high):
+                name = _line_name(meta, row["code"])
+                found.append(
+                    self.fail(
+                        f"{name} {rate.normalize()}% is outside the published band "
+                        f"{band.get('min')}-{band.get('max')}% ({_doc(fee, meta)})",
+                        {
+                            "line": name,
+                            "rate": str(rate.normalize()),
+                            "min": str(band.get("min")),
+                            "max": str(band.get("max")),
+                            "doc": _doc(fee, meta),
+                        },
+                        row["code"],
+                    )
+                )
+        return self.verdict(found, banded > 0)
+
+
+class FeeUnsourcedRate(_CnRule):
+    rule_id = "cn.fee.unsourced_rate"
+    name = "User-Entered Rate Without An Official Source"
+    severity = Severity.INFO
+    category = RuleCategory.COMPLETENESS
+    description = "Rates we hold no official text for are the user's own and are not checked"
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        fee = _fee(_record(context))
+        if not fee:
+            return []
+        return [
+            self.fail(
+                f"{_line_name(meta, row['code'])} has no official source; it was entered by the user and is not "
+                "checked",
+                {"line": _line_name(meta, row["code"]), "status": row.get("status")},
+                row["code"],
+            )
+            for row, meta in _fee_lines(fee)
+            if meta.get("user_input") and row.get("status") == "user"
+        ]
+
+
+class DoubleSocialInsurance(_CnRule):
+    rule_id = "cn.labour.double_social_insurance"
+    name = "Labour Factor Not On Labour With Social Insurance"
+    severity = Severity.WARNING
+    category = RuleCategory.CONSISTENCY
+    description = "A labour uplift for social insurance must not be applied to labour that already includes it"
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        fee = _fee(_record(context))
+        if not fee:
+            return []
+        result = fee.get("result") or {}
+        if result.get("labour_factor_applied") and fee.get("labour_includes_social_insurance"):
+            factor = str((fee.get("schedule") or {}).get("labour_factor") or "")
+            return [
+                self.fail(
+                    f"The x{factor} labour factor is applied to labour already marked as including social insurance",
+                    {"factor": factor},
+                )
+            ]
+        return [self.ok()]
+
+
+class TaxMethodMixed(_CnRule):
+    rule_id = "cn.tax.method_mixed"
+    name = "One Tax Method Per Bill"
+    severity = Severity.ERROR
+    category = RuleCategory.CONSISTENCY
+    description = "General-method (9%) and simplified (3%) lines cannot sit in one bill"
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        record = _record(context)
+        rates = {
+            to_decimal(line.get("rate_pct")).normalize()
+            for line in record.get("lines") or []
+            if line.get("rate_pct") not in (None, "") and line.get("kind") != service.PC_SUM_KIND
+        }
+        if not rates:
+            return []
+        if Decimal(3) in rates and Decimal(9) in rates:
+            return [self.fail("General (9%) and simplified (3%) tax methods are mixed in one bill", {})]
+        return [self.ok()]
+
+
+class SafetyBaseExcludes(_CnRule):
+    rule_id = "cn.sc.safety_base_includes_lumpsum"
+    name = "Safety Fee Base Leaves Out What The Source Excludes"
+    severity = Severity.ERROR
+    category = RuleCategory.COMPLIANCE
+    description = "Where the document takes the safety fee on cost excluding lump-sum measures, the base must too"
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        from app.modules.china_pack.fees import effective_bases  # noqa: PLC0415
+
+        fee = _fee(_record(context))
+        if not fee:
+            return []
+        bases = effective_bases(fee)
+        found = []
+        checked = 0
+        for row, meta in _fee_lines(fee):
+            if not meta.get("excludes"):
+                continue
+            checked += 1
+            base = bases.get(row["code"]) or {}
+            kept = [t for t in meta["excludes"] if to_decimal(base.get(t))]
+            if kept:
+                name = _line_name(meta, row["code"])
+                found.append(
+                    self.fail(
+                        f"{name} base must exclude lump-sum measure items",
+                        {"line": name, "terms": kept, "prov": _place(fee)},
+                        row["code"],
+                    )
+                )
+        return self.verdict(found, checked > 0)
+
+
+class PriceSourceMissing(_CnRule):
+    rule_id = "cn.price.source_missing"
+    name = "Material Prices Name Their Source"
+    severity = Severity.WARNING
+    category = RuleCategory.COMPLETENESS
+    description = "A material price needs a source and period: the CWICR version or the user's price-file month"
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        record = _record(context)
+        prices = record.get("prices") if isinstance(record.get("prices"), dict) else {}
+        if not prices.get("material_positions"):
+            return []
+        missing = list(prices.get("unsourced_material") or [])
+        if missing:
+            return [
+                self.fail(
+                    f"{len(missing)} material price(s) have no source/period (CWICR version or the user's "
+                    "price-file month)",
+                    {"count": len(missing)},
+                    missing[0],
+                )
+            ]
+        return [self.ok()]
+
+
+class StandardEditionMismatch(_CnRule):
+    rule_id = "cn.standard.edition_mismatch"
+    name = "National Edition Matches The Project Date"
+    severity = Severity.WARNING
+    category = RuleCategory.COMPLIANCE
+    description = "GB/T 50500-2024 applies nationally from its in-force date where no local switch date is known"
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        record = _record(context)
+        profile = _profile(record)
+        on = parse_date(profile.get("tender_date")) or parse_date(profile.get("contract_date"))
+        if not record or on is None or _edition(record) != service.EDITION_2013:
+            return []
+        if service.tender_switch_date(profile.get("site_subdivision"), profile.get("site_city")) is not None:
+            return []  # cn.edition_mismatch judges against the local date
+        national = service.national_switch_date()
+        if national is None:
+            return []
+        if on >= national:
+            return [
+                self.fail(
+                    f"Project dated {on.isoformat()} is labelled GB 50500-2013; GB/T 50500-2024 applies from "
+                    f"{national.isoformat()}",
+                    {"date": on.isoformat(), "from": national.isoformat()},
+                )
+            ]
+        return [self.ok()]
+
+
 _RULES: tuple[ValidationRule, ...] = (
     CodeFormat(),
     CodeUnique(),
@@ -569,6 +892,16 @@ _RULES: tuple[ValidationRule, ...] = (
     FapiaoSite(),
     FapiaoNumber(),
     UnlimitedRisk(),
+    FeeBelowFloor(),
+    FeeScheduleNotInForce(),
+    GuifeiAfterAbolition(),
+    FeeRateOutsideBand(),
+    FeeUnsourcedRate(),
+    DoubleSocialInsurance(),
+    TaxMethodMixed(),
+    SafetyBaseExcludes(),
+    PriceSourceMissing(),
+    StandardEditionMismatch(),
 )
 
 RULE_IDS: tuple[str, ...] = tuple(r.rule_id for r in _RULES)

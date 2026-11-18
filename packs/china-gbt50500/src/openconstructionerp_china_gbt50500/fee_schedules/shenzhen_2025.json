@@ -1,0 +1,84 @@
+{
+  "key": "shenzhen_2025",
+  "jurisdiction": "CN-GD-SZ",
+  "edition": "2025",
+  "name_zh": "深圳市建设工程计价费率标准（2025）",
+  "name_en": "Shenzhen rate standard 2025",
+  "effective_from": "2026-01-01",
+  "labour_factor": "1.15",
+  "labour_factor_source": "S2",
+  "vat_rates": {
+    "general": "9",
+    "simplified": "3"
+  },
+  "source": "S1",
+  "lines": [
+    {
+      "code": "mgmt",
+      "name_zh": "管理费",
+      "name_en": "Management fee",
+      "group": "fenbu",
+      "kind": "management",
+      "base": {
+        "labour": "1",
+        "plant": "0.1"
+      },
+      "rate": "20.44",
+      "source": "S1",
+      "band": {
+        "min": "14",
+        "mid": "20.44",
+        "max": "26"
+      }
+    },
+    {
+      "code": "profit",
+      "name_zh": "利润",
+      "name_en": "Profit",
+      "group": "fenbu",
+      "kind": "profit",
+      "base": {
+        "direct": "1",
+        "line:mgmt": "1"
+      },
+      "rate": "5",
+      "source": "S1",
+      "band": {
+        "min": "3",
+        "mid": "5",
+        "max": "7"
+      }
+    },
+    {
+      "code": "safety",
+      "name_zh": "安全文明施工费",
+      "name_en": "Safety and civilised construction fee",
+      "group": "cuoshi",
+      "kind": "safety",
+      "base": {
+        "fenbu": "1"
+      },
+      "rate": "3.42",
+      "source": "S1",
+      "band": {
+        "min": "1.90",
+        "mid": "3.42",
+        "max": "4.94"
+      },
+      "non_competitive": true,
+      "floor": "1.90"
+    },
+    {
+      "code": "training",
+      "name_zh": "工人培训基金",
+      "name_en": "Worker training fund",
+      "group": "cuoshi",
+      "kind": "safety",
+      "base": {
+        "fenbu": "1"
+      },
+      "rate": "0.4",
+      "source": "S1"
+    }
+  ]
+}

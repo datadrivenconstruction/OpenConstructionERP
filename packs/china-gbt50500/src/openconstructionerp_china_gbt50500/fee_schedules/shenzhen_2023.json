@@ -1,0 +1,70 @@
+{
+  "key": "shenzhen_2023",
+  "jurisdiction": "CN-GD-SZ",
+  "edition": "2023",
+  "name_zh": "深圳市建设工程计价费率标准（2023）",
+  "name_en": "Shenzhen rate standard 2023",
+  "effective_from": "2024-02-15",
+  "effective_to": "2025-12-31",
+  "superseded_by": "shenzhen_2025",
+  "vat_rates": {
+    "general": "9",
+    "simplified": "3"
+  },
+  "source": "S3",
+  "bases_verified": false,
+  "lines": [
+    {
+      "code": "mgmt",
+      "name_zh": "管理费",
+      "name_en": "Management fee",
+      "group": "fenbu",
+      "kind": "management",
+      "base": {
+        "labour": "1",
+        "plant": "0.1"
+      },
+      "rate": "16.2",
+      "source": "S3"
+    },
+    {
+      "code": "profit",
+      "name_zh": "利润",
+      "name_en": "Profit",
+      "group": "fenbu",
+      "kind": "profit",
+      "base": {
+        "direct": "1",
+        "line:mgmt": "1"
+      },
+      "rate": "5",
+      "source": "S3"
+    },
+    {
+      "code": "safety",
+      "name_zh": "安全文明施工费",
+      "name_en": "Safety and civilised construction fee",
+      "group": "cuoshi",
+      "kind": "safety",
+      "base": {
+        "fenbu": "1"
+      },
+      "rate": "3.68",
+      "source": "S3",
+      "non_competitive": true,
+      "floor": "rate"
+    },
+    {
+      "code": "guifei",
+      "name_zh": "规费",
+      "name_en": "Statutory charges",
+      "group": "guifei",
+      "kind": "guifei",
+      "base": {
+        "labour": "1"
+      },
+      "rate": "18",
+      "source": "S3"
+    }
+  ]
+}

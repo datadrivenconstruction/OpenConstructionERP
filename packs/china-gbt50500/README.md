@@ -138,6 +138,51 @@ The 9 percent figure is the rate since 2019-04-01. It was 11 percent from 2016
 and 10 percent from 2018-05-01, so an older bill carrying a different number is
 not wrong.
 
+## Provincial fee programmes (计费程序)
+
+The national code fixes the bill structure; the money is decided by each
+province's fee programme: which fee lines exist, the base each is taken on,
+the rate, and whether it may be discounted. `fee_schedules/` carries one JSON
+file per province and edition, every rate with its document number and URL
+(`jurisdictions.json` lists the sources). The project picks its schedule by
+the tender date, or the contract date when there is no tender, never by the
+newest edition. A site outside these jurisdictions sees no fee programme.
+
+| Jurisdiction | Schedule file | In force for tenders | What ships |
+|---|---|---|---|
+| Shenzhen | `shenzhen_2025` | from 2026-01-01 | mgmt (L + 0.1 J) 20.44% (14-26), profit 5% (3-7), safety 3.42% (1.90-4.94, floor 1.90), training fund 0.4%, labour x1.15, no 规费 |
+| Shenzhen | `shenzhen_2023` | 2024-02-15 to 2025-12-31 | mgmt 16.2%, profit 5%, safety 3.68%, 规费 18% of labour |
+| Guangdong ex-Shenzhen | `guangdong_2018_adj2025` | from 2025-09-01 | profit 20% of (L + J); green and safety fee 19% of (L + J) split 0.22 / 0.20 / 0.26 / 0.61, only safety non-competitive; mgmt entered by the user |
+| Zhejiang | `zhejiang_2018_rules2026` | from 2026-01-01 | mgmt 16.57% (12.43-20.71), profit 8.10% (6.08-10.12), safety 11.90 urban / 9.91 non-urban, 规费 25.78%, all on (L + J) |
+| Jiangsu | `jiangsu_2014_vat` | until 2026-05-31 | mgmt 32/29/26% by class I/II/III, profit 12%, safety 3.1% (+0.7% site-standard uplift), social insurance 3.2% + housing fund 0.53% |
+| Jiangsu | `jiangsu_2026` | from 2026-06-01 | structure only; mgmt, profit and safety rates entered by the user; no 规费 |
+| Beijing | `beijing_2021_377` | from 2025-09-01 | safety 23.53 / 25.36 / 28.22% of (L + J) by grade, waste haulage 1.4 / 1.1% inside / outside the 5th ring; mgmt, profit and injury insurance entered by the user; no 规费 |
+| Sichuan | `sichuan_2020_15` | from 2025-01-01 | safety 6.16% (basic 3.08 x 2, floor 3.08) on pre-tax cost excluding lump-sum measures; 综合费 and 规费 entered by the user |
+
+Shanghai is not shipped: no sourced provincial rates yet.
+
+### Needs confirmation
+
+These are shipped as empty fields (the user enters the rate from their own
+document) or carry a flag on the screen. Do not prefill them as law:
+
+- Guangdong management fee per chapter (concrete 28.75, formwork 26.35, floors
+  17.73, earthworks 15.50 on L + J). Secondary source; shown as reference
+  values only, the user enters the blended rate. Profit 20% is from the same
+  secondary source and is flagged.
+- Jiangsu 2026 reference rates (management fee, profit, safety floor) and the
+  bases they apply to. Text not obtained.
+- Beijing management fee and profit indicators (published in 北京工程造价信息,
+  copyright, not shipped) and the migrant workers' injury insurance rate.
+- Sichuan 综合费 and 规费 on the 2020 base, and their bases.
+- Zhejiang 2018 safety floor (the bid must not go below it; value not held).
+- Shenzhen 2023: the bases are assumed equal to the 2025 standard, and the
+  2023 net VAT reading (3.02% with 7/3/2 surcharges) is not applied.
+- Frequency of each city's 信息价 publication.
+
+Quota books, consumption tables, quota unit rates and 信息价 values are not
+shipped: the user imports their own copy. Prices come from CWICR.
+
 ## Verify against the standard
 
 These items rest on our own reading or a secondary source. Check them against
@@ -145,7 +190,8 @@ the official text before relying on them for a tender:
 
 - The appendix of national item codes and names under GB/T 50500-2024 and
   GB/T 50854-2024 (we ship patterns, not the appendix).
-- Where each province folds 规费 (Guangdong is shipped; others are not).
+- Where each province folds 规费 (Guangdong, Shenzhen, Beijing and Jiangsu are
+  shipped; others are not).
 - The 预缴 rates of 2% and 3% (secondary reading of MOF/STA 2026 No.14).
 - Shanghai risk bands of 3/5/8 percent and the Shanghai tender switch date
   (not shipped).
@@ -161,7 +207,7 @@ the official text before relying on them for a tender:
 | Methodology | `china`, derived from the regional markup table |
 | Cost data | `cwicr-zh-shanghai` (global-market catalogue, Shanghai prices) and `cwicr-zh-china` (national Dinge base); Beijing, Shenzhen, Guangzhou and Chengdu are listed as preferred metros and arrive in marketplace updates |
 | Demo project | `office-shanghai`, a 32-storey Grade A tower in Lujiazui, measured works approx. CNY 690 million |
-| Engine rules | `gbt50500`: item code present, format per edition, unique per sub-project; `cn_vat`: fourteen VAT, 预缴 and 数电票 rules |
+| Engine rules | `gbt50500`: item code present, format per edition, unique per sub-project; `cn_vat`: twenty-four VAT, 预缴, 数电票 and provincial fee rules |
 | Reference documents | seven, listed below |
 
 ## Reference documents

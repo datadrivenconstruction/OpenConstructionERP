@@ -1,0 +1,90 @@
+{
+  "_comment": "Provincial fee programmes (计费程序) for building works. Every rate carries its source id; the sources are listed below with the document number and URL. Rates marked user_input have no official text we hold and are entered by the user from their own document. No quota table, quota unit rate or 信息价 value is shipped here.",
+  "sources": {
+    "S1": {"doc": "深圳市建设工程计价费率标准（2025）附件3", "url": "https://www.sz.gov.cn/attachment/1/1645/1645750/12483320.docx"},
+    "S2": {"doc": "深圳市建设工程计价调整规则（2025）附件2", "url": "https://www.sz.gov.cn/attachment/1/1645/1645749/12483320.doc"},
+    "S3": {"doc": "深圳市建设工程计价费率标准（2023）", "url": "https://zjj.sz.gov.cn/attachment/1/1459/1459552/11030963.pdf"},
+    "S4": {"doc": "粤标定函〔2025〕22号", "url": "https://www.shanwei.gov.cn/swzfjs/zhuanti/gczj/content/post_1178774.html"},
+    "S5": {"doc": "广东省房屋建筑与装饰工程综合定额（2018） rate table, secondary summary", "url": "https://www.fwxgx.com/articles/6377", "secondary": true},
+    "S6": {"doc": "广东省房屋建筑与装饰工程综合定额（2018）", "url": "http://www.gd.gov.cn/attachment/0/513/513443/4095070.pdf"},
+    "S7": {"doc": "浙建建函〔2025〕320号", "url": "https://www.nbzj.net/kindeditor-4.1.7/attached/file/20251106/20251106140502_7922.pdf"},
+    "S8": {"doc": "浙江省建设工程计价规则（2018版）", "url": "https://www.zjzjxh.com/static/pdf/2018%E6%B5%99%E6%B1%9F%E7%9C%81%E5%BB%BA%E8%AE%BE%E5%B7%A5%E7%A8%8B%E8%AE%A1%E4%BB%B7%E8%A7%84%E5%88%99%E4%BA%A4%E5%BA%95%E5%9F%B9%E8%AE%ADPDF.pdf"},
+    "S9": {"doc": "江苏省建设工程费用组成规则及费用参考（2026）, interpretation", "url": "https://www.wuxi.gov.cn/doc/2026/05/27/4782086.shtml"},
+    "S10": {"doc": "江苏省建设工程费用定额（2014年）营改增后调整内容", "url": "http://www.wxgczj.com.cn/uploadfile/b30c5dd0-63df-4d98-880f-5486000ad801/%E9%99%84%E4%BB%B61%EF%BC%9A%E3%80%8A%E6%B1%9F%E8%8B%8F%E7%9C%81%E5%BB%BA%E8%AE%BE%E5%B7%A5%E7%A8%8B%E8%B4%B9%E7%94%A8%E5%AE%9A%E9%A2%9D%E3%80%8B%EF%BC%882014%E5%B9%B4%EF%BC%89%E8%90%A5%E6%94%B9%E5%A2%9E%E5%90%8E%E8%B0%83%E6%95%B4%E5%86%85%E5%AE%B9.doc"},
+    "S11": {"doc": "京建发〔2025〕377号, interpretation", "url": "https://zjw.beijing.gov.cn/bjjs/xxgk/zcjd2024/xxyx24/743738625/index.shtml"},
+    "S12": {"doc": "京建发〔2021〕404号 附件", "url": "https://zjw.beijing.gov.cn/bjjs/xxgk/zcwj2024/qtzcwj/xxyx13/436476953/"},
+    "S13": {"doc": "川建行规〔2024〕15号 附件2 四川省建设工程安全文明施工费计价管理办法", "url": "https://jst.sc.gov.cn/scjst/gfxwj/2024/10/16/c96719669a1f4a7a8adf47b274abdc4d/"},
+    "S14": {"doc": "穗建造价〔2024〕110号", "url": "https://zfcj.gz.gov.cn/attachment/7/7688/7688014/9916927.pdf"},
+    "S15": {"doc": "苏建价〔2025〕57号, secondary", "url": "https://bbs.co188.com/thread-10552230-1-1.html", "secondary": true}
+  },
+  "jurisdictions": {
+    "CN-GD-SZ": {
+      "subdivision": "CN-GD",
+      "cities": ["Shenzhen", "深圳"],
+      "name_zh": "深圳",
+      "name_en": "Shenzhen",
+      "schedules": ["shenzhen_2023", "shenzhen_2025"],
+      "guifei_abolished_from": "2026-01-01",
+      "guifei_source": "S2",
+      "labour_factor_source": "S2",
+      "price_station_url": "https://zjj.sz.gov.cn",
+      "cwicr_region": null
+    },
+    "CN-GD": {
+      "subdivision": "CN-GD",
+      "cities": [],
+      "name_zh": "广东（深圳以外）",
+      "name_en": "Guangdong outside Shenzhen",
+      "schedules": ["guangdong_2018_adj2025"],
+      "guifei_abolished_from": null,
+      "guifei_note": "规费 folded into labour and management fee by the 2018 quota (S6); no separate line.",
+      "price_station_url": "https://zfcj.gz.gov.cn",
+      "labour_index": {"doc": "穗建造价〔2024〕110号", "frequency": "quarterly", "source": "S14"},
+      "cwicr_region": null
+    },
+    "CN-ZJ": {
+      "subdivision": "CN-ZJ",
+      "cities": [],
+      "name_zh": "浙江",
+      "name_en": "Zhejiang",
+      "schedules": ["zhejiang_2018_rules2026"],
+      "guifei_abolished_from": null,
+      "price_station_url": null,
+      "cwicr_region": null
+    },
+    "CN-JS": {
+      "subdivision": "CN-JS",
+      "cities": [],
+      "name_zh": "江苏",
+      "name_en": "Jiangsu",
+      "schedules": ["jiangsu_2014_vat", "jiangsu_2026"],
+      "guifei_abolished_from": "2026-06-01",
+      "guifei_source": "S9",
+      "price_station_url": null,
+      "labour_index": {"doc": "苏建价〔2025〕57号", "frequency": null, "source": "S15", "from": "2025-09-01"},
+      "cwicr_region": null
+    },
+    "CN-BJ": {
+      "subdivision": "CN-BJ",
+      "cities": [],
+      "name_zh": "北京",
+      "name_en": "Beijing",
+      "schedules": ["beijing_2021_377"],
+      "guifei_abolished_from": "2025-09-01",
+      "guifei_source": "S11",
+      "price_station_url": null,
+      "price_publication": "北京工程造价信息",
+      "cwicr_region": null
+    },
+    "CN-SC": {
+      "subdivision": "CN-SC",
+      "cities": [],
+      "name_zh": "四川",
+      "name_en": "Sichuan",
+      "schedules": ["sichuan_2020_15"],
+      "guifei_abolished_from": null,
+      "price_station_url": null,
+      "cwicr_region": null
+    }
+  }
+}

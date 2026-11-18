@@ -1,0 +1,61 @@
+{
+  "key": "jiangsu_2026",
+  "jurisdiction": "CN-JS",
+  "edition": "2026",
+  "name_zh": "GB/T 50500-2024及江苏省费用组成规则、费用参考（2026）",
+  "name_en": "Jiangsu 2026 fee rules under GB/T 50500-2024",
+  "effective_from": "2026-06-01",
+  "vat_rates": {
+    "general": "9",
+    "simplified": "3"
+  },
+  "source": "S9",
+  "bases_verified": false,
+  "lines": [
+    {
+      "code": "mgmt",
+      "name_zh": "企业管理费",
+      "name_en": "Management fee",
+      "group": "fenbu",
+      "kind": "management",
+      "base": {
+        "labour": "1",
+        "plant": "1"
+      },
+      "rate": null,
+      "source": "S9",
+      "user_input": true,
+      "needs_confirmation": true
+    },
+    {
+      "code": "profit",
+      "name_zh": "利润",
+      "name_en": "Profit",
+      "group": "fenbu",
+      "kind": "profit",
+      "base": {
+        "labour": "1",
+        "plant": "1"
+      },
+      "rate": null,
+      "source": "S9",
+      "user_input": true,
+      "needs_confirmation": true
+    },
+    {
+      "code": "safety",
+      "name_zh": "安全文明施工费",
+      "name_en": "Safety and civilised construction fee",
+      "group": "cuoshi",
+      "kind": "safety",
+      "base": {
+        "fenbu": "1"
+      },
+      "rate": null,
+      "source": "S9",
+      "user_input": true,
+      "non_competitive": true,
+      "needs_confirmation": true
+    }
+  ]
+}

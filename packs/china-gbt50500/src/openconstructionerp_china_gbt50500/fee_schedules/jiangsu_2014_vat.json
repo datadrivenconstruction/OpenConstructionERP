@@ -1,0 +1,143 @@
+{
+  "key": "jiangsu_2014_vat",
+  "jurisdiction": "CN-JS",
+  "edition": "2014",
+  "name_zh": "江苏省建设工程费用定额（2014年）营改增后调整",
+  "name_en": "Jiangsu 2014 fee quota, VAT adjustment",
+  "effective_to": "2026-05-31",
+  "superseded_by": "jiangsu_2026",
+  "vat_rates": {
+    "general": "9",
+    "simplified": "3"
+  },
+  "source": "S10",
+  "options": [
+    {
+      "key": "project_class",
+      "values": [
+        "III",
+        "II",
+        "I"
+      ],
+      "default": "III",
+      "labels_zh": {
+        "I": "一类工程",
+        "II": "二类工程",
+        "III": "三类工程"
+      }
+    },
+    {
+      "key": "site_standard",
+      "values": [
+        "no",
+        "yes"
+      ],
+      "default": "no",
+      "labels_zh": {
+        "no": "否",
+        "yes": "省级标化工地增加费"
+      }
+    }
+  ],
+  "lines": [
+    {
+      "code": "mgmt",
+      "name_zh": "企业管理费",
+      "name_en": "Management fee",
+      "group": "fenbu",
+      "kind": "management",
+      "base": {
+        "labour": "1",
+        "plant": "1"
+      },
+      "rate": null,
+      "source": "S10",
+      "rate_options": {
+        "option": "project_class",
+        "rates": {
+          "I": "32",
+          "II": "29",
+          "III": "26"
+        }
+      }
+    },
+    {
+      "code": "profit",
+      "name_zh": "利润",
+      "name_en": "Profit",
+      "group": "fenbu",
+      "kind": "profit",
+      "base": {
+        "labour": "1",
+        "plant": "1"
+      },
+      "rate": "12",
+      "source": "S10"
+    },
+    {
+      "code": "safety",
+      "name_zh": "安全文明施工措施费",
+      "name_en": "Safety and civilised construction fee",
+      "group": "cuoshi",
+      "kind": "safety",
+      "base": {
+        "fenbu": "1"
+      },
+      "rate": "3.1",
+      "source": "S10",
+      "non_competitive": true,
+      "floor": "rate"
+    },
+    {
+      "code": "safety_uplift",
+      "name_zh": "标化工地增加费",
+      "name_en": "Site-standard uplift",
+      "group": "cuoshi",
+      "kind": "safety",
+      "base": {
+        "fenbu": "1"
+      },
+      "rate": null,
+      "source": "S10",
+      "rate_options": {
+        "option": "site_standard",
+        "rates": {
+          "no": "0",
+          "yes": "0.7"
+        }
+      }
+    },
+    {
+      "code": "social_insurance",
+      "name_zh": "社会保险费",
+      "name_en": "Social insurance",
+      "group": "guifei",
+      "kind": "guifei",
+      "base": {
+        "fenbu": "1",
+        "group:cuoshi": "1",
+        "lump_sum_measures": "1",
+        "provisional_sum": "1",
+        "other_items": "1"
+      },
+      "rate": "3.2",
+      "source": "S10"
+    },
+    {
+      "code": "housing_fund",
+      "name_zh": "住房公积金",
+      "name_en": "Housing fund",
+      "group": "guifei",
+      "kind": "guifei",
+      "base": {
+        "fenbu": "1",
+        "group:cuoshi": "1",
+        "lump_sum_measures": "1",
+        "provisional_sum": "1",
+        "other_items": "1"
+      },
+      "rate": "0.53",
+      "source": "S10"
+    }
+  ]
+}

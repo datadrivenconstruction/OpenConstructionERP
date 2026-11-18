@@ -10,6 +10,12 @@ Endpoints:
     GET  /projects/{project_id}/check/     - summary and cn_vat findings of a stored project
     GET  /invoices/{invoice_id}/fapiao/    - 数电票 data (JSON or XML) for import into a channel
     POST /prepayment/                      - 预缴 schedule at the pack's rates
+    GET  /fee-schedules/                   - provincial fee jurisdictions and schedules with sources
+    POST /fee-calc/                        - run a provincial fee programme over posted sums
+    GET  /projects/{project_id}/fees/      - the project's fee programme over its bills, with findings
+    PUT  /projects/{project_id}/fees/      - save rates, options and bases picked inside the programme
+    GET  /projects/{project_id}/edition-move/ - preview of moving the project to GB/T 50500-2024
+    POST /projects/{project_id}/edition-move/ - apply the confirmed move
 """
 
 import logging
@@ -19,11 +25,20 @@ from typing import Any, Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 from pydantic import BaseModel, Field
+from sqlalchemy import select
 
-from app.dependencies import CurrentUserId, SessionDep, get_current_user_id, verify_project_access
-from app.modules.china_pack import fapiao, service
+from app.dependencies import (
+    CurrentUserId,
+    RequirePermission,
+    SessionDep,
+    get_current_user_id,
+    verify_project_access,
+)
+from app.modules.china_pack import fapiao, fees, repository, service
 from app.modules.china_pack.config import CN_TAX, PACK_CONFIG
-from app.modules.china_pack.validators import evaluate
+from app.modules.china_pack.models import ChinaFeeProfile
+from app.modules.china_pack.schemas import FeeCalcRequest, FeeSettings
+from app.modules.china_pack.validators import RULE_IDS, evaluate
 
 router = APIRouter(dependencies=[Depends(get_current_user_id)], tags=["china_pack"])
 logger = logging.getLogger(__name__)
@@ -204,4 +219,130 @@ async def post_prepayment(body: PrepaymentRequest) -> dict:
             }
             for r in schedule
         ],
+    }
+
+
+# ── Provincial fee programmes ────────────────────────────────────────────────
+
+
+@router.get("/fee-schedules/")
+async def get_fee_schedules(subdivision: str | None = None, city: str | None = None) -> dict:
+    """The fee jurisdictions and schedules; filtered to one site when a province or city is given."""
+    cat = fees.catalogue()
+    keys = list(cat["jurisdictions"])
+    if subdivision or city:
+        found = fees.jurisdiction_for(subdivision, city)
+        keys = [found] if found else []
+    return {
+        "jurisdictions": {
+            k: {**cat["jurisdictions"][k], "schedules": [fees.schedule_summary(s.key) for s in fees.schedules_for(k)]}
+            for k in keys
+        },
+        "sources": cat["sources"],
+    }
+
+
+@router.post("/fee-calc/")
+async def post_fee_calc(body: FeeCalcRequest) -> dict:
+    """Run the site's fee programme over posted component sums and check it."""
+    profile = {
+        "site_subdivision": body.subdivision,
+        "site_city": body.city,
+        "tender_date": body.tender_date.isoformat() if body.tender_date else None,
+        "contract_date": body.contract_date.isoformat() if body.contract_date else None,
+        "tax_method": body.tax_method,
+    }
+    fee = fees.fee_block(
+        profile, body.settings.model_dump(), {"components": body.components}, markup_names=body.markup_names
+    )
+    if fee is None:
+        return {"fee": None, "findings": []}
+    record = service.build_record(profile=profile, fee=fee, markup_names=body.markup_names)
+    return {"fee": fee, "findings": _findings(await evaluate(record))}
+
+
+async def _fee_view(session: Any, project_id: uuid.UUID) -> dict:
+    try:
+        record = await service.project_record(session, project_id)
+    except LookupError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found") from exc
+    fee_rule_ids = {r for r in RULE_IDS if r.startswith(("cn.fee.", "cn.labour.", "cn.sc.", "cn.price."))}
+    findings = [f for f in _findings(await evaluate(record)) if f["rule_id"] in fee_rule_ids]
+    return {"fee": record.get("fee") or None, "prices": record.get("prices") or {}, "findings": findings}
+
+
+@router.get("/projects/{project_id}/fees/")
+async def get_project_fees(project_id: uuid.UUID, session: SessionDep, user_id: CurrentUserId) -> dict:
+    """The project's provincial fee programme computed over its bills, with the fee findings."""
+    await verify_project_access(project_id, user_id, session)
+    return await _fee_view(session, project_id)
+
+
+@router.put(
+    "/projects/{project_id}/fees/",
+    dependencies=[Depends(RequirePermission("project_tax.write"))],
+)
+async def put_project_fees(
+    project_id: uuid.UUID, payload: FeeSettings, session: SessionDep, user_id: CurrentUserId
+) -> dict:
+    """Save the rates, options and bases a person picked, then recompute."""
+    await verify_project_access(project_id, user_id, session)
+    row = await repository.get_fee_profile(session, project_id)
+    if row is None:
+        row = ChinaFeeProfile(project_id=project_id)
+    row.schedule_key = payload.schedule_key or None
+    row.rates = dict(payload.rates)
+    row.options = dict(payload.options)
+    row.bases = {k: dict(v) for k, v in payload.bases.items()}
+    row.labour_includes_social_insurance = payload.labour_includes_social_insurance
+    row.apply_labour_factor = payload.apply_labour_factor
+    row.updated_by = user_id
+    await repository.save_fee_profile(session, row)
+    await session.commit()
+    return await _fee_view(session, project_id)
+
+
+@router.get("/projects/{project_id}/edition-move/")
+async def get_edition_move(project_id: uuid.UUID, session: SessionDep, user_id: CurrentUserId) -> dict:
+    """Preview of moving the project to GB/T 50500-2024: what is applied and what to move by hand."""
+    await verify_project_access(project_id, user_id, session)
+    try:
+        record = await service.project_record(session, project_id)
+    except LookupError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found") from exc
+    return fees.edition_move_preview(record)
+
+
+@router.post(
+    "/projects/{project_id}/edition-move/",
+    dependencies=[Depends(RequirePermission("project_tax.write"))],
+)
+async def post_edition_move(project_id: uuid.UUID, session: SessionDep, user_id: CurrentUserId) -> dict:
+    """Apply the move a person confirmed: the profile edition, and 规费 markups switched off."""
+    from app.modules.boq.models import BOQ  # noqa: PLC0415
+    from app.modules.project_tax import repository as tax_repo  # noqa: PLC0415
+    from app.modules.project_tax import service as tax_service  # noqa: PLC0415
+    from app.modules.project_tax.schemas import ProfileUpdate  # noqa: PLC0415
+    from app.modules.projects.models import Project  # noqa: PLC0415
+
+    await verify_project_access(project_id, user_id, session)
+    project = await session.get(Project, project_id)
+    if project is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found")
+    current = tax_service.to_response(project, await tax_repo.get_for_project(session, project_id))
+    fields = current.model_dump(include=set(ProfileUpdate.model_fields))
+    fields["standard_edition"] = service.EDITION_2024
+    await tax_service.save_profile(session, project, ProfileUpdate(**fields), user_id=user_id)
+    switched: list[str] = []
+    bills = (await session.execute(select(BOQ).where(BOQ.project_id == project_id))).scalars().all()
+    for bill in bills:
+        for markup in bill.markups:
+            if markup.is_active and "规费" in str(markup.name):
+                markup.is_active = False
+                switched.append(str(markup.name))
+    await session.commit()
+    record = await service.project_record(session, project_id)
+    return {
+        "applied": {"standard_edition": service.EDITION_2024, "markups_switched_off": switched},
+        **fees.edition_move_preview(record),
     }

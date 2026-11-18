@@ -1,0 +1,68 @@
+{
+  "key": "sichuan_2020_15",
+  "jurisdiction": "CN-SC",
+  "edition": "2020",
+  "name_zh": "四川省2020清单计价定额及川建行规〔2024〕15号",
+  "name_en": "Sichuan 2020 quota with rule 15 (2024)",
+  "effective_from": "2025-01-01",
+  "vat_rates": {
+    "general": "9",
+    "simplified": "3"
+  },
+  "source": "S13",
+  "bases_verified": false,
+  "lines": [
+    {
+      "code": "zonghe",
+      "name_zh": "综合费",
+      "name_en": "Combined overhead and profit",
+      "group": "fenbu",
+      "kind": "management",
+      "base": {
+        "labour": "1",
+        "plant": "1"
+      },
+      "rate": null,
+      "user_input": true,
+      "needs_confirmation": true
+    },
+    {
+      "code": "guifei",
+      "name_zh": "规费",
+      "name_en": "Statutory charges",
+      "group": "guifei",
+      "kind": "guifei",
+      "base": {
+        "labour": "1"
+      },
+      "rate": null,
+      "user_input": true,
+      "needs_confirmation": true
+    },
+    {
+      "code": "safety",
+      "name_zh": "安全文明施工费",
+      "name_en": "Safety and civilised construction fee",
+      "group": "cuoshi",
+      "kind": "safety",
+      "base": {
+        "fenbu": "1",
+        "group:guifei": "1",
+        "provisional_sum": "1",
+        "other_items": "1"
+      },
+      "rate": "6.16",
+      "source": "S13",
+      "band": {
+        "min": "3.08",
+        "mid": "6.16",
+        "max": "6.16"
+      },
+      "non_competitive": true,
+      "floor": "3.08",
+      "excludes": [
+        "lump_sum_measures"
+      ]
+    }
+  ]
+}
