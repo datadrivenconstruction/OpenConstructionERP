@@ -2845,6 +2845,8 @@ _COUNTRY_ISO2: dict[str, str] = {
     "Nigeria": "NG",
     "Portugal": "PT",
     "Singapore": "SG",
+    "Hong Kong SAR": "HK",
+    "Hong Kong": "HK",
     "Romania": "RO",
     "Greece": "GR",
     "Ukraine": "UA",
@@ -2961,6 +2963,7 @@ _PACK_DEMO_TYPE: dict[str, str] = {
     "hospital-lyon": "Healthcare",
     "bhu-punjab": "Healthcare",
     "hk-gov-office-fitout": "Commercial",
+    "hk-residential-tuen-mun": "Residential",
     "school-karachi": "Education",
     "tower-abudhabi": "Mixed-use",
     "condo-toronto": "Residential",
@@ -3053,6 +3056,7 @@ _CURRENCY_SYMBOL: dict[str, str] = {
     "HUF": "Ft",
     "RUB": "₽",
     "SGD": "S$",
+    "HKD": "HK$",
     "CZK": "Kč",
     "IDR": "Rp",
     "NGN": "₦",
@@ -3131,6 +3135,9 @@ _DEMO_COST_LEVEL: dict[str, tuple[float, float]] = {
     # labour well below European levels. Ireland, Belgium and Portugal
     # price in EUR and need no row.
     "SGD": (1.50, 1.20),
+    # Hong Kong: about 8.5 dollars to the euro in 2026 (USD peg). Materials are imported at
+    # world prices; skilled site wages sit near the German level, so labour stays close.
+    "HKD": (9.00, 7.50),
     "CZK": (25.00, 10.00),
     "IDR": (17000.00, 3500.00),
     "NGN": (1700.00, 250.00),

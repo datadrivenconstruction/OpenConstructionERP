@@ -3920,6 +3920,8 @@ _COUNTRY_RULE_SETS: dict[str, list[str]] = {
     # Italy. Without this row an Italian project created with no pack active
     # validated its computo against no Italian rule at all.
     "IT": ["italy"],
+    # Hong Kong: Cap. 652 payment terms, the CIC and CWR levies, no tax line.
+    "HK": ["hongkong"],
 }
 
 

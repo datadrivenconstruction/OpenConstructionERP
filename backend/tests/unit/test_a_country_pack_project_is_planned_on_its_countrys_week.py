@@ -63,6 +63,10 @@ _UNRESOLVED_REGIONS: tuple[str | None, ...] = ("Somewhere City", "", None)
 COUNTRIES_WITHOUT_A_HOLIDAY_SOURCE: dict[str, str] = {
     "BE": "the ten Belgian legal holidays, three of them movable with Easter",
     "GR": "the Greek public holidays, four of them movable with Orthodox Easter",
+    "HK": (
+        "the 17 general holidays gazetted under the General Holidays Ordinance (Cap. 149), six of them "
+        "lunar, with the next-day substitution rule"
+    ),
     "HR": "the Croatian holidays under the 2019 Holidays Act",
     "ID": "the Indonesian national holidays and cuti bersama, set by joint ministerial decree each year",
     "IE": "the ten Irish public holidays, four of them first-Monday rules",

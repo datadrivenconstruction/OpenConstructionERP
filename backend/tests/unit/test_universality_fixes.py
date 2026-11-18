@@ -312,7 +312,7 @@ def test_classifier_hint_dict_includes_all_present_standards():
         ("KR", "kbim"),
         ("IN", "nrm"),  # India — RICS heritage
         ("HI", "nrm"),  # India Hindi region — same default
-        ("HK", "nrm"),  # ex-British, RICS heritage
+        ("HK", "hksmm4"),  # HKIS Standard Method of Measurement, 4th edition
         ("SG", "nrm"),  # ex-British, RICS heritage
         ("MY", "nrm"),  # ex-British, RICS heritage
         ("AU", "nrm"),  # Australia — AIQS RICS-aligned

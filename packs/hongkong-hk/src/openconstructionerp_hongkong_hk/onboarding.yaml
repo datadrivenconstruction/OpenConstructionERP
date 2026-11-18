@@ -1,29 +1,34 @@
 # Hong Kong SAR Construction Pack - first-login onboarding wizard.
+#
+# Labels are Traditional Chinese (Hong Kong) first, because the pack selects the
+# zh-HK interface; the English half is there because contracts, bills and
+# valuations in Hong Kong are mostly written in English.
 version: 2
-locale: en-GB
-title: "Welcome to OpenConstructionERP - Hong Kong SAR"
-subtitle: "Three steps to line the workspace up with Hong Kong practice: contract form, payment terms under Cap. 652, Hong Kong dollar."
+locale: zh-HK
+title: "歡迎使用 OpenConstructionERP - 香港特別行政區"
+title_en: "Welcome to OpenConstructionERP - Hong Kong SAR"
+subtitle: "三個步驟，按香港慣例設定工作區：合約格式、第 652 章下的付款條款、港元。Three steps to line the workspace up with Hong Kong practice: contract form, payment terms under Cap. 652, Hong Kong dollar."
 
 steps:
   - id: company_profile
-    title: "Company details"
-    body: "Used on bills, valuations, payment claims and invoices."
+    title: "公司資料 / Company details"
+    body: "用於工料清單、估值、付款申索及發票。Used on bills, valuations, payment claims and invoices."
     fields:
-      - { key: company_name, label: "Company name", type: text, required: true }
-      - { key: br_number, label: "Business Registration number", type: text, required: false, placeholder: "12345678" }
-      - { key: cic_registered, label: "We are registered with the Construction Industry Council", type: checkbox, default: true }
+      - { key: company_name, label: "公司名稱 / Company name", type: text, required: true }
+      - { key: br_number, label: "商業登記號碼 / Business Registration number", type: text, required: false, placeholder: "12345678" }
+      - { key: cic_registered, label: "本公司已在建造業議會登記 / We are registered with the Construction Industry Council", type: checkbox, default: true }
 
   - id: contract_type
-    title: "Contract and payment"
-    body: "Contracts made on or after 28 August 2025 may fall under the Security of Payment Ordinance (Cap. 652): payment response within 30 days and payment within 60 days of a payment claim. A pay-when-paid clause has no effect under it."
+    title: "合約及付款 / Contract and payment"
+    body: "於 2025 年 8 月 28 日或之後訂立的合約可能受《建造業付款保障條例》（第 652 章）規管：收到付款申索後 30 日內回應，60 日內付款。在該條例下，「收款後付款」條款無效。Contracts made on or after 28 August 2025 may fall under the Security of Payment Ordinance (Cap. 652): payment response within 30 days and payment within 60 days of a payment claim. A pay-when-paid clause has no effect under it."
     fields:
-      - { key: works_in_public_sector, label: "We build public works", type: checkbox, default: false, help: "Public works default to the General Conditions of Contract for Building Works; NEC4 is common too. Shown for review, never enforced." }
-      - { key: monthly_valuations, label: "Value the works monthly", type: checkbox, default: true }
-      - { key: retention_percent, label: "Retention held on each valuation (percent)", type: text, required: false, default: "10" }
-      - { key: retention_limit_percent, label: "Retention limit (percent of the contract sum)", type: text, required: false, default: "5" }
+      - { key: works_in_public_sector, label: "本公司承接公共工程 / We build public works", type: checkbox, default: false, help: "公共工程預設採用《建築工程一般合約條款》，NEC4 亦常用。僅供覆核，不會強制執行。Public works default to the General Conditions of Contract for Building Works; NEC4 is common too. Shown for review, never enforced." }
+      - { key: monthly_valuations, label: "每月估值 / Value the works monthly", type: checkbox, default: true }
+      - { key: retention_percent, label: "每期估值扣留的保留金（百分比）/ Retention held on each valuation (percent)", type: text, required: false, default: "10" }
+      - { key: retention_limit_percent, label: "保留金上限（合約總額百分比）/ Retention limit (percent of the contract sum)", type: text, required: false, default: "5" }
 
   - id: money
-    title: "Money"
-    body: "Hong Kong dollar at two decimals. Hong Kong has no VAT or GST. The CIC levy (0.5 percent) and the CWR levy (0.03 percent) are added on works over HK$3,000,000."
+    title: "貨幣 / Money"
+    body: "港元，兩位小數。香港不設增值稅或商品及服務稅。工程價值超過港幣 3,000,000 元時，加入建造業議會徵款（0.5%）及建造業工人註冊徵款（0.03%）。Hong Kong dollar at two decimals. Hong Kong has no VAT or GST. The CIC levy (0.5 percent) and the CWR levy (0.03 percent) are added on works over HK$3,000,000."
     fields:
-      - { key: currency, label: "Currency", type: select, required: true, default: "HKD (HK$)", options: ["HKD (HK$)", "USD ($) - for contracts priced in dollars"] }
+      - { key: currency, label: "貨幣 / Currency", type: select, required: true, default: "HKD (HK$)", options: ["HKD (HK$)", "USD ($) - for contracts priced in dollars"] }

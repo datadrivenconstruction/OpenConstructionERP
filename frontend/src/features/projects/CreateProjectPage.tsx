@@ -226,6 +226,7 @@ const STANDARD_GROUPS: OptionGroup[] = [
       { value: 'birimfiyat', label: 'Birim Fiyat (Turkey)' },
       { value: 'nlsfb', label: 'NL/SfB (Netherlands)' },
       { value: 'knr', label: 'KNR / KNNR (Poland)' },
+      { value: 'hksmm4', label: 'HKSMM4 (Hong Kong)' },
     ],
   },
   {

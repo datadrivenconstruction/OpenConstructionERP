@@ -1,5 +1,7 @@
 # openconstructionerp-hongkong-hk
 
+Preview. The zh-HK wording, the glossary and the demo rates are waiting for review by a Hong Kong quantity surveyor.
+
 Country pack for Hong Kong SAR. It sets up the workspace the way a Hong Kong quantity surveyor or main contractor works:
 
 - **Payment claims on the Cap. 652 clock.** The `hk_sopo` payment regime gives each valuation its statutory dates: payment response, payment, the day a dispute arises and the last day to serve the adjudication notice.
@@ -23,7 +25,8 @@ Country pack for Hong Kong SAR. It sets up the workspace the way a Hong Kong qua
 | Classification | HKSMM4 code skeleton, `data/hksmm4_skeleton.json` | codes and our own descriptions only |
 | Price indices | BWTPI (1970 Q1 = 100), BSTPI (1989 Q4 = 100), `data/archsd_tpi.json` | DATA.GOV.HK, ArchSD |
 | Validation | rule set `hongkong` (13 rules), compliance pack `hk_compliance` | |
-| Demo | `hk-gov-office-fitout`, HK$50M government office fit-out, contract made 01.02.2026 | |
+| Demos | `hk-gov-office-fitout`, HK$50M government office fit-out under the GCC, in English, contract made 01.02.2026; `hk-residential-tuen-mun`, HK$478.9M private residential tower in Tuen Mun, in Traditional Chinese, contract made 01.03.2026 | demo data, indicative rates |
+| Working calendar | weekends only | the gazetted general holidays (Cap. 149) are not modelled yet |
 
 ## Security of Payment Ordinance (Cap. 652)
 
