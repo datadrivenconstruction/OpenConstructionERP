@@ -35,6 +35,7 @@ is deliberately absent from the schema.
     PUT    /reverse-charge/{id}       - replace a determination
     DELETE /reverse-charge/{id}       - remove a determination
 
+    POST   /place-of-supply/prepayment/  - prepayment where the site is outside the home region
     POST   /statutory/preview                          - compute a document's taxes, store nothing
     GET    /statutory/categories                       - the categories a person can choose from
     GET    /statutory/{source_kind}/{source_id}        - the stored taxes of one document
@@ -69,6 +70,7 @@ from __future__ import annotations
 
 import uuid
 from datetime import date, timedelta
+from decimal import Decimal
 from typing import Annotated, get_args
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
@@ -92,6 +94,7 @@ from app.modules.tax_withholding.models import (
     WithholdingDeduction,
     WithholdingRegime,
 )
+from app.modules.tax_withholding.place_of_supply import PrepaymentPeriod, prepayment_schedule
 from app.modules.tax_withholding.schemas import (
     DeductionCreateRequest,
     DeductionPreviewRequest,
@@ -102,6 +105,9 @@ from app.modules.tax_withholding.schemas import (
     PartyStatusCreateRequest,
     PartyStatusResponse,
     PartyStatusUpdateRequest,
+    PrepaymentPeriodOut,
+    PrepaymentRequest,
+    PrepaymentResponse,
     RegimeCreateRequest,
     RegimeResponse,
     RegimeSeedResponse,
@@ -401,6 +407,48 @@ async def remove_party_status(status_id: uuid.UUID, session: SessionDep) -> None
     if row is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Party tax status not found")
     await repository.delete_party_status(session, row)
+
+
+# ── Place-of-supply prepayment ───────────────────────────────────────────────
+
+
+@router.post(
+    "/place-of-supply/prepayment/",
+    response_model=PrepaymentResponse,
+    dependencies=[Depends(RequirePermission("tax_withholding.read"))],
+)
+async def preview_prepayment(payload: PrepaymentRequest) -> PrepaymentResponse:
+    """Tax prepaid where the site is, period by period, a shortfall carried forward.
+
+    Stateless: the figures come from the receipts and subcontract payments
+    posted, and a recorded figure is compared, never stored or filed.
+    """
+    schedule = prepayment_schedule(
+        [PrepaymentPeriod(p.period, p.receipts, p.subcontract_paid, p.recorded_prepaid) for p in payload.periods],
+        tax_rate_pct=payload.tax_rate_pct,
+        prepay_rate_pct=payload.prepay_rate_pct,
+        carried_in=payload.carried_in,
+    )
+    return PrepaymentResponse(
+        periods=[
+            PrepaymentPeriodOut(
+                period=r.period,
+                receipts=r.receipts,
+                subcontract_paid=r.subcontract_paid,
+                carried_in=r.carried_in,
+                base_gross=r.base_gross,
+                base_net=r.base_net,
+                prepaid=r.prepaid,
+                carried_out=r.carried_out,
+                recorded_prepaid=r.recorded_prepaid,
+                difference=r.difference,
+                matches=r.matches,
+            )
+            for r in schedule
+        ],
+        total_prepaid=sum((r.prepaid for r in schedule), start=Decimal(0)),
+        carried_forward=schedule[-1].carried_out,
+    )
 
 
 # ── Deductions ───────────────────────────────────────────────────────────────

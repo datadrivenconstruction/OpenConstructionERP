@@ -4688,22 +4688,51 @@ class GBT50500CodeRequired(ValidationRule):
         return results
 
 
+def _gb50500_project_scope(context: ValidationContext) -> tuple[str | None, str | None]:
+    """The bill's standard edition and the project's subdivision, when known."""
+    data = context.data if isinstance(context.data, dict) else {}
+    record = data.get("project_record") if isinstance(data.get("project_record"), dict) else {}
+    edition = record.get("standard_edition") if isinstance(record, dict) else None
+    subdivision = record.get("subdivision_code") if isinstance(record, dict) else None
+    return (str(edition) if edition else None, str(subdivision) if subdivision else None)
+
+
+def _gb50500_sub_project(pos: dict[str, Any]) -> str:
+    """The sub-project (单项工程) a line belongs to; blank means the whole bill."""
+    meta = pos.get("metadata") if isinstance(pos.get("metadata"), dict) else {}
+    classification = pos.get("classification") if isinstance(pos.get("classification"), dict) else {}
+    return str(meta.get("sub_project") or classification.get("sub_project") or "")
+
+
 class GBT50500ValidCode(ValidationRule):
+    """The code matches a national, supplementary or provincial pattern.
+
+    Patterns come from ``country_data/item_code_patterns.json`` per edition, so
+    a supplementary code such as ``01B001`` passes, and a Shanghai prefix
+    ``沪`` passes only on a project located in Shanghai.
+    """
+
     rule_id = "gbt50500.valid_code"
     name = "Valid GB/T 50500 Code"
     standard = "gbt50500"
     severity = Severity.WARNING
     category = RuleCategory.COMPLIANCE
-    description = "GB/T 50500 codes should be 9-digit or 12-digit numeric codes"
+    description = (
+        "GB/T 50500 codes must match a national (9 or 12 digits), supplementary (0xB001) or provincial pattern"
+    )
 
     async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        from app.core.item_codes import code_patterns  # noqa: PLC0415
+
         locale = _get_locale(context)
+        edition, subdivision = _gb50500_project_scope(context)
+        patterns = [re.compile(p) for p in code_patterns("gb50500", edition, subdivision)]
         results: list[RuleResult] = []
         for pos in _get_positions(context):
-            code = _gb50500_code(pos)
+            code = _gb50500_code(pos).strip()
             if not code:
                 continue
-            passed = code.isdigit() and len(code) in (9, 12)
+            passed = any(p.fullmatch(code) for p in patterns)
             message = (
                 _ok(locale)
                 if passed
@@ -4722,7 +4751,59 @@ class GBT50500ValidCode(ValidationRule):
                     passed=passed,
                     message=message,
                     element_ref=pos.get("id"),
-                    details={"given_code": code},
+                    details={"given_code": code, "edition": edition or "", "subdivision": subdivision or ""},
+                )
+            )
+        return results
+
+
+class GBT50500CodeUnique(ValidationRule):
+    """A twelve-digit code is used once per sub-project (单项工程).
+
+    The last three digits are assigned by whoever compiles the bill precisely
+    so that each item is addressable; a code used twice makes a priced item
+    ambiguous in a tender comparison and at settlement.
+    """
+
+    rule_id = "gbt50500.code_unique"
+    name = "GB/T 50500 Code Unique"
+    standard = "gbt50500"
+    severity = Severity.ERROR
+    category = RuleCategory.CONSISTENCY
+    description = "A GB/T 50500 item code may appear only once within one sub-project"
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        from app.core.line_tax import check_item_codes  # noqa: PLC0415
+
+        locale = _get_locale(context)
+        entries = [
+            (str(pos.get("id") or pos.get("ordinal") or ""), _gb50500_code(pos), _gb50500_sub_project(pos))
+            for pos in _get_leaf_positions(context)
+        ]
+        duplicates = {f.ref: f for f in check_item_codes(entries, []) if f.kind == "duplicate"}
+        results: list[RuleResult] = []
+        for ref, code, scope in entries:
+            if not code.strip():
+                continue
+            finding = duplicates.get(ref)
+            results.append(
+                RuleResult(
+                    rule_id=self.rule_id,
+                    rule_name=self.name,
+                    severity=self.severity,
+                    category=self.category,
+                    passed=finding is None,
+                    message=(
+                        _ok(locale)
+                        if finding is None
+                        else translate("gbt50500.code_unique.fail", locale=locale, code=code.strip())
+                    ),
+                    element_ref=ref or None,
+                    details={
+                        "given_code": code.strip(),
+                        "sub_project": scope,
+                        "first_ref": finding.other_refs[0] if finding else "",
+                    },
                 )
             )
         return results
@@ -13030,6 +13111,7 @@ def register_builtin_rules() -> None:
         # GB/T 50500 (China)
         (GBT50500CodeRequired(), None),
         (GBT50500ValidCode(), None),
+        (GBT50500CodeUnique(), None),
         # CPWD (India)
         (CPWDCodeRequired(), None),
         (CPWDMeasurementUnits(), None),

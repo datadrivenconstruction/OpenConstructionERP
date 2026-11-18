@@ -412,7 +412,10 @@
       "suggestion": "Tetapkan kode GB/T 50500 sembilan digit (misalnya 010101001)"
     },
     "valid_code": {
-      "fail": "Kode GB/T 50500 '{code}' tidak valid; diharapkan 9 atau 12 digit"
+      "fail": "Kode GB/T 50500 '{code}' tidak valid; diharapkan 9 atau 12 digit atau kode tambahan seperti 01B001"
+    },
+    "code_unique": {
+      "fail": "Kode item '{code}' dipakai lebih dari sekali dalam subproyek yang sama"
     }
   },
   "cpwd": {

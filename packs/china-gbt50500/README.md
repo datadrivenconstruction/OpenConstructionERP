@@ -56,6 +56,11 @@ Two bills for the same work will legitimately carry different twelve-digit
 codes and identical nine-digit prefixes, which is the part that surprises
 readers used to a fixed national code.
 
+Supplementary codes (补充项目) take the form `01B001`: the two-digit category,
+`B`, and a three-digit serial. Shanghai adds its own codes prefixed `沪`, which
+are accepted only on a project whose site is in Shanghai (CN-SH). A code is
+used once per sub-project (单项工程); the same code in two sub-projects is fine.
+
 Every bill item also needs five elements, and the third is the one that
 matters: 项目编码, 项目名称, **项目特征**, 计量单位, 工程量. The rate is
 priced against the characteristics, and a settlement dispute turns on them. An
@@ -63,11 +68,23 @@ item written without them is not a priced item, it is an argument deferred.
 
 ## Which edition
 
-The pack states GB 50500-2013, because that is the edition the shipped item
-codes were authored against and the only text we have. GB/T 50500-2024
-superseded it from 2025-09-01, along with the GB/T 50854-2024 measurement
-family. Neither text could be obtained, so the pack does not claim conformance
-to them.
+Each project stores its edition on its tax profile (Projects, China tax).
+
+- **GB/T 50500-2024**, in force 2025-09-01, is the default for a project
+  created on or after that day. A tender total is four heads: 分部分项, 措施项目,
+  其他项目 and 增值税. 规费 is no longer a head; provinces fold it into labour and
+  the management fee. 专业工程暂估价 is priced VAT-inclusive and stays out of the
+  VAT base.
+- **GB 50500-2013** is what a project created before that day reads as. It
+  keeps its five heads, 规费 included, and its markup stack
+  (`CN_GB50500_2013`).
+
+Nothing re-prices a stored bill. Moving a 2013 project to 2024 is a person's
+choice on the tax profile; a new bill seeded afterwards takes the 2024 stack,
+and the 9-digit codes carry over unchanged. Shenzhen moved its tenders on
+2026-01-01, so a 2013 bill tendered there after that day is flagged
+(`cn.edition_mismatch`). No other switch date is shipped until a source states
+one.
 
 Note the prefix when reading the two. The 2013 edition is **GB**, a mandatory
 code. The 2024 edition is **GB/T**, a recommended standard.
@@ -90,17 +107,49 @@ validate: the rules read either spelling.
 
 ## Tax
 
-Priced tax-exclusive (除税价), with the tax added as bill five.
+Priced tax-exclusive (除税价), with the VAT added as its own head. From
+2026-01-01 the VAT Law and its implementing regulations apply.
 
 | method | 中文 | rate | when |
 |---|---|---|---|
-| general | 一般计税方法 | 9% | construction services in general, with input VAT credited |
-| simplified | 简易计税方法 | 3% | labour-only contracts, employer-supplied-material contracts, and old projects, at the contractor's election |
+| general | 一般计税方法 | 9% | construction works, input VAT credited |
+| general | 一般计税方法 | 13% | goods, including goods sold with installation (from 2026-01-01) |
+| general | 一般计税方法 | 6% | other services |
+| simplified | 简易计税方法 | 3% | labour-only (清包工) and old projects (老项目, permit start before 2016-04-30), until 2027-12-31 |
+| simplified | 简易计税方法 | 3% | employer-supplied works (甲供), only where elected before 2026-01-01 (grandfathered) |
+| small taxpayer | 小规模纳税人 | 1% | 2026-01-01 to 2027-12-31 |
+
+An election of the simplified method is kept for 36 months; the profile
+refuses a change inside the lock. 甲供 materials are a bill line flagged
+"supplied by employer, not invoiced": priced and taxed in the bill, deducted on
+the payment application.
+
+**预缴.** Where the site is outside the home region, tax is prepaid at the site:
+(receipts - subcontract payments) / (1 + rate) x 2% (general) or 3%
+(simplified). A negative base prepays nothing and carries forward. The
+platform computes and reconciles; filing happens in the tax e-bureau.
+
+**数电票.** The platform prepares the invoice data of a construction 数电票
+(special-business tag 建筑服务, site location, project name) as JSON or XML for
+import into the taxpayer's certified channel, and validates the 20-digit
+number recorded back. It does not issue or red-letter invoices itself.
 
 The 9 percent figure is the rate since 2019-04-01. It was 11 percent from 2016
 and 10 percent from 2018-05-01, so an older bill carrying a different number is
-not wrong. Which method applies is a property of the contract rather than of
-the work, and a contractor can be running both at once on different jobs.
+not wrong.
+
+## Verify against the standard
+
+These items rest on our own reading or a secondary source. Check them against
+the official text before relying on them for a tender:
+
+- The appendix of national item codes and names under GB/T 50500-2024 and
+  GB/T 50854-2024 (we ship patterns, not the appendix).
+- Where each province folds 规费 (Guangdong is shipped; others are not).
+- The 预缴 rates of 2% and 3% (secondary reading of MOF/STA 2026 No.14).
+- Shanghai risk bands of 3/5/8 percent and the Shanghai tender switch date
+  (not shipped).
+- The 数电票 cross-region flag and the land-VAT project number fields.
 
 ## What ships
 
@@ -112,7 +161,7 @@ the work, and a contractor can be running both at once on different jobs.
 | Methodology | `china`, derived from the regional markup table |
 | Cost data | `cwicr-zh-shanghai` (global-market catalogue, Shanghai prices) and `cwicr-zh-china` (national Dinge base); Beijing, Shenzhen, Guangzhou and Chengdu are listed as preferred metros and arrive in marketplace updates |
 | Demo project | `office-shanghai`, a 32-storey Grade A tower in Lujiazui, measured works approx. CNY 690 million |
-| Engine rules | `gbt50500`: item code present, and 9 or 12 numeric digits |
+| Engine rules | `gbt50500`: item code present, format per edition, unique per sub-project; `cn_vat`: fourteen VAT, 预缴 and 数电票 rules |
 | Reference documents | seven, listed below |
 
 ## Reference documents
@@ -128,7 +177,7 @@ tender against it.
 | `cn_zonghe_danjia` | what the comprehensive unit rate contains, and what it does not |
 | `cn_gb50854_gongchengliang` | net measurement, and where the waste goes instead |
 | `cn_guifei_anquanwenming` | the two fees that may not be discounted |
-| `cn_zengzhishui_jianzhu` | VAT: general method and simplified method |
+| `cn_zengzhishui_jianzhu` | VAT under the VAT Law: methods, elections, 预缴 |
 | `cn_zhaobiao_jiesuan` | the bid ceiling, and how the price moves after award |
 
 ## How far this has been reviewed

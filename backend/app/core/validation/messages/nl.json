@@ -412,7 +412,10 @@
       "suggestion": "Wijs een negencijferige GB/T 50500-code toe (bijvoorbeeld 010101001)"
     },
     "valid_code": {
-      "fail": "Ongeldige GB/T 50500-code '{code}'; verwacht worden 9 of 12 cijfers"
+      "fail": "Ongeldige GB/T 50500-code '{code}'; verwacht worden 9 of 12 cijfers of een aanvullende code zoals 01B001"
+    },
+    "code_unique": {
+      "fail": "Postcode '{code}' wordt meer dan eens gebruikt in hetzelfde deelproject"
     }
   },
   "cpwd": {

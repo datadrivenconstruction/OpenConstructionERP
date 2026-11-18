@@ -412,7 +412,10 @@
       "suggestion": "9-stelligen GB/T 50500-Code zuweisen (z.B. 010101001)"
     },
     "valid_code": {
-      "fail": "Ungültiger GB/T 50500-Code '{code}' - erwartet 9 oder 12 Stellen"
+      "fail": "Ungültiger GB/T 50500-Code '{code}' - erwartet 9 oder 12 Stellen oder einen Ergänzungscode wie 01B001"
+    },
+    "code_unique": {
+      "fail": "Positionscode '{code}' wird im selben Teilprojekt mehrfach verwendet"
     }
   },
   "cpwd": {

@@ -412,7 +412,10 @@
       "suggestion": "Przypisz 9-cyfrowy kod GB/T 50500 (np. 010101001)"
     },
     "valid_code": {
-      "fail": "Nieprawidłowy kod GB/T 50500 „{code}” — oczekiwano 9 lub 12 cyfr"
+      "fail": "Nieprawidłowy kod GB/T 50500 „{code}” — oczekiwano 9 lub 12 cyfr albo kodu uzupełniającego, np. 01B001"
+    },
+    "code_unique": {
+      "fail": "Kod pozycji „{code}” użyto więcej niż raz w tym samym podprojekcie"
     }
   },
   "cpwd": {

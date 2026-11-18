@@ -286,6 +286,7 @@ export const ROUTE_BACKEND_MODULE: Record<string, string | readonly string[]> = 
   '/framework-agreements': 'oe_framework_agreements',
   '/payment-clock': 'oe_payment_clock',
   '/tax-withholding': 'oe_tax_withholding',
+  '/china-tax': 'oe_china_pack',
   '/einvoice-clearance': 'oe_einvoice_clearance',
   '/cost-match': 'oe_cost_match',
   '/full-evm': 'oe_full_evm',

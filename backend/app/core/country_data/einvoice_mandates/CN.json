@@ -1,0 +1,33 @@
+{
+  "schema": "oe.einvoice_mandate/1",
+  "country": "CN",
+  "markets": [
+    "CN"
+  ],
+  "regime": {
+    "regime": "clearance",
+    "platform": "National unified e-invoice service platform (全国统一电子发票服务平台)",
+    "label": "China - fully digitalised e-invoices (数电票)",
+    "identifier_label": "20-digit invoice number assigned by the platform",
+    "document_format": "cn_shudianpiao_json",
+    "profile_fields": [
+      "tax_registration_id"
+    ],
+    "cancellation_window_days": null,
+    "cancellation_basis": "read_from_authority",
+    "correction_mechanism": "red-letter invoice (红字数电票) issued against a red-letter confirmation (红字发票信息确认单); a confirmation not accepted within 72 hours lapses",
+    "scope": "Every taxpayer, nationwide, since 2024-12-01. Construction services carry the special-business tag 建筑服务 with the site location and the project name.",
+    "commencement": [
+      {
+        "obligation": "issue",
+        "effective_date": "2024-12-01",
+        "scope": "All taxpayers nationwide, fully digitalised e-invoices through the national platform",
+        "legal_status": "in_force",
+        "source_url": "https://fgk.chinatax.gov.cn/",
+        "read_date": "2026-11-18",
+        "notes": "STA Announcement 2024 No.11: Art.3 face fields, Art.4 the 20-digit number (two-digit year, two-digit provincial bureau, one channel digit, 15-digit serial), Art.2 special-business tags, Art.8 red-letter confirmation."
+      }
+    ],
+    "notes": "The platform prepares the invoice data and does not transmit it: no adapter is registered for this country. Issuing a 数电票 needs the taxpayer's own access to the national platform or a certified channel, which is a per-company integration. The prepared data (JSON or XML) is imported there, and the issued 20-digit number, PDF and OFD are recorded back on the invoice and validated."
+  }
+}

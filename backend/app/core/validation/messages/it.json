@@ -412,7 +412,10 @@
       "suggestion": "Assegnare un codice GB/T 50500 a 9 cifre (es. 010101001)"
     },
     "valid_code": {
-      "fail": "Codice GB/T 50500 '{code}' non valido - attese 9 o 12 cifre"
+      "fail": "Codice GB/T 50500 '{code}' non valido - attese 9 o 12 cifre o un codice supplementare come 01B001"
+    },
+    "code_unique": {
+      "fail": "Il codice voce '{code}' è usato più volte nello stesso sottoprogetto"
     }
   },
   "cpwd": {

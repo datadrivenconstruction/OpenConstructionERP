@@ -185,6 +185,7 @@ const TODAYS_SIMPLE = [
   '/framework-agreements',
   '/payment-clock',
   '/tax-withholding',
+  '/china-tax',
   '/tax-rates',
   '/einvoice-clearance',
 ];

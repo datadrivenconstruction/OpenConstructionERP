@@ -412,7 +412,10 @@
       "suggestion": "Gán mã GB/T 50500 gồm 9 chữ số (ví dụ 010101001)"
     },
     "valid_code": {
-      "fail": "Mã GB/T 50500 '{code}' không hợp lệ; yêu cầu 9 hoặc 12 chữ số"
+      "fail": "Mã GB/T 50500 '{code}' không hợp lệ; yêu cầu 9 hoặc 12 chữ số hoặc mã bổ sung như 01B001"
+    },
+    "code_unique": {
+      "fail": "Mã hạng mục '{code}' được dùng nhiều lần trong cùng một hạng mục công trình"
     }
   },
   "cpwd": {

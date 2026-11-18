@@ -22,6 +22,8 @@ mandatory code, and the 2024 edition is GB/T, a recommended standard.
 from decimal import Decimal
 from typing import Any
 
+from app.core.item_codes import editions as item_code_editions
+
 PACK_CONFIG: dict[str, Any] = {
     # ── Identity ─────────────────────────────────────────────────────────────
     "region_code": "CN",
@@ -128,38 +130,63 @@ PACK_CONFIG: dict[str, Any] = {
         },
     ],
     # ── Tax rules (增值税 / VAT) ──────────────────────────────────────────────
+    #
+    # Each row carries its own window. The VAT Law (in force 2026-01-01) keeps
+    # 13 / 9 / 6 and the 3% collection rate; the 1% for small taxpayers is a
+    # temporary reduction that ends 2027-12-31 (MOF/STA Ann. 2026 No.10).
     "tax_rules": [
         {
             "code": "CN_VAT_13",
             "name": "增值税 - 13% (goods)",
             "type": "vat",
             "rate_pct": "13",
-            "description": "Standard rate on goods, which is what construction materials are bought at.",
+            "effective_from": "2019-04-01",
+            "effective_to": None,
+            "description": (
+                "Rate on goods, including goods sold together with their installation "
+                "(prefabricated parts, machinery, steel structure)."
+            ),
         },
         {
             "code": "CN_VAT_9",
             "name": "增值税 - 9% (construction services)",
             "type": "vat",
             "rate_pct": "9",
+            "effective_from": "2019-04-01",
+            "effective_to": None,
             "description": "Rate for construction and installation services under the general method.",
             "note": "This is the rate a works contract normally carries.",
         },
         {
             "code": "CN_VAT_6",
-            "name": "增值税 - 6% (modern services)",
+            "name": "增值税 - 6% (other services)",
             "type": "vat",
             "rate_pct": "6",
-            "description": "Design, supervision, cost consultancy and other modern services.",
+            "effective_from": "2016-05-01",
+            "effective_to": None,
+            "description": "Design, supervision, cost consultancy and other services.",
         },
         {
             "code": "CN_VAT_3_SIMPLIFIED",
             "name": "增值税 - 3% 简易计税 (simplified method)",
             "type": "vat",
             "rate_pct": "3",
+            "effective_from": "2016-05-01",
+            "effective_to": None,
             "description": (
-                "Simplified assessment available to qualifying projects, for example "
-                "contractor-supplied-labour-only works and certain older projects."
+                "Collection rate of the simplified method. Only an eligible project may elect it: "
+                "labour-only work (清包工) and old projects (老项目) until 2027-12-31, and employer-supplied "
+                "(甲供) projects only if they were already on it before 2026-01-01. See simplified_elections."
             ),
+        },
+        {
+            "code": "CN_VAT_1_SMALL",
+            "name": "增值税 - 1% (small taxpayers, reduced collection rate)",
+            "type": "vat",
+            "rate_pct": "1",
+            "effective_from": "2026-01-01",
+            "effective_to": "2027-12-31",
+            "description": "The 3% collection rate reduced to 1% for small-scale taxpayers, until 2027-12-31.",
         },
     ],
     # ── Payment milestones (typical) ─────────────────────────────────────────
@@ -213,12 +240,166 @@ PACK_CONFIG: dict[str, Any] = {
     #
     # "standard" is the 9% construction-services rate rather than the 13% goods
     # rate: this is the figure a works contract is priced with, and it is the
-    # one a bill total needs.
+    # one a bill total needs. China has two low rates, 9 and 6, so "reduced"
+    # here only means the services rate; the per-line answer is in
+    # ``tax_categories`` below, which is what the rules read.
     "vat_rates": {
         "CN": {
             "standard": Decimal("0.09"),
             "reduced": Decimal("0.06"),
             "zero": Decimal("0.00"),
         },
+    },
+}
+
+# ── VAT and GB/T 50500-2024 data the neutral engines are fed with ────────────
+#
+# Sources (read 2026-11-18): S1 VAT Law 2024-12-25; S2 Decree 826; S3 MOF/STA
+# Ann. 2026 No.10; S4 Ann. 2026 No.13; S5 Ann. 2026 No.14 (read through the
+# Jiangsu Tax Bureau explainer only); S6 STA Ann. 2024 No.11; S7 Shanghai
+# application rules 2025 for GB/T 50500-2024; S8 Guangdong 2025 No.24. The
+# standard text itself is not held: structure and codes only, our own wording.
+CN_TAX: dict[str, Any] = {
+    "sources": {
+        "S1": "VAT Law of the PRC (2024-12-25, in force 2026-01-01)",
+        "S2": "Decree 826, VAT Law Implementing Regulations (in force 2026-01-01)",
+        "S3": "MOF/STA Announcement 2026 No.10",
+        "S4": "MOF/STA Announcement 2026 No.13",
+        "S5": "MOF/STA Announcement 2026 No.14 (secondary reading, verify)",
+        "S6": "STA Announcement 2024 No.11 (fully digitalised e-invoices)",
+        "S7": "GB/T 50500-2024 via Shanghai application rules 2025 (沪建标定〔2025〕521号)",
+        "S8": "Guangdong 粤标定函〔2025〕24号 cl.4 (secondary reading)",
+    },
+    # Effective-dated categories a bill line or an invoice line is assigned to.
+    "tax_categories": [
+        {"code": "works", "kind": "works", "rate_pct": "9", "effective_from": "2019-04-01", "source": "S1 Art.10"},
+        {"code": "goods", "kind": "goods", "rate_pct": "13", "effective_from": "2019-04-01", "source": "S1 Art.10"},
+        {
+            "code": "goods_installed",
+            "kind": "goods",
+            "rate_pct": "13",
+            "effective_from": "2026-01-01",
+            "source": "S4 sec.3",
+        },
+        {
+            "code": "services",
+            "kind": "services",
+            "rate_pct": "6",
+            "effective_from": "2016-05-01",
+            "source": "S1 Art.10",
+        },
+        {
+            "code": "simplified",
+            "kind": "simplified",
+            "rate_pct": "3",
+            "effective_from": "2016-05-01",
+            "source": "S1 Art.11",
+        },
+        {
+            "code": "small_taxpayer",
+            "kind": "simplified",
+            "rate_pct": "1",
+            "effective_from": "2026-01-01",
+            "effective_to": "2027-12-31",
+            "source": "S3",
+        },
+        {"code": "exempt", "kind": "exempt", "rate_pct": "0", "effective_from": "2016-05-01", "source": "S1"},
+    ],
+    # Rates a line of a given kind may carry on a general-method bill.
+    "expected_rates_by_kind": {"works": ["9"], "goods": ["13"], "services": ["6"]},
+    # Who may elect the 3% simplified method, and until when.
+    "simplified_elections": [
+        {
+            "basis": "labour_only",
+            "label_zh": "清包工",
+            "valid_to": "2027-12-31",
+            "source": "S3 sec.3(1)",
+        },
+        {
+            "basis": "old_project",
+            "label_zh": "老项目",
+            "permit_start_before": "2016-04-30",
+            "valid_to": "2027-12-31",
+            "source": "S3 sec.3(1)",
+        },
+        {
+            "basis": "employer_supplied",
+            "label_zh": "甲供工程",
+            # No new election on a contract dated on or after this day;
+            # projects already on the simplified method before it continue.
+            "no_new_election_from": "2026-01-01",
+            "grandfathered": True,
+            "source": "S3 sec.5(6)",
+        },
+    ],
+    "simplified_lock_months": 36,
+    "small_taxpayer_threshold_cny": "5000000",
+    # 预缴: (gross received - subcontract paid) / (1 + rate) x prepay rate.
+    "prepayment": {
+        "general_pct": "2",
+        "simplified_pct": "3",
+        "general_tax_rate_pct": "9",
+        "simplified_tax_rate_pct": "3",
+        "source": "S5",
+        "verified": False,
+    },
+    # Editions of the bill standard, from core/country_data/item_code_patterns.json.
+    # A project stores its own; one that states none takes the newest edition in
+    # force on the day it was created.
+    "editions": item_code_editions("gb50500"),
+    "default_edition_key": "gb50500@2024",
+    # The heads a tender total is made of, in order. ``vat_base`` marks the
+    # heads the VAT is charged on.
+    "estimate_structures": {
+        "gb50500@2013": [
+            {"key": "fenbu", "label_zh": "分部分项工程费", "vat_base": True},
+            {"key": "cuoshi", "label_zh": "措施项目费", "vat_base": True},
+            {"key": "qita", "label_zh": "其他项目费", "vat_base": True},
+            {"key": "guifei", "label_zh": "规费", "vat_base": True},
+            {"key": "shuijin", "label_zh": "税金", "vat_base": False},
+        ],
+        "gb50500@2024": [
+            {"key": "fenbu", "label_zh": "分部分项工程项目清单", "vat_base": True},
+            {"key": "cuoshi", "label_zh": "措施项目清单", "vat_base": True},
+            {"key": "qita", "label_zh": "其他项目清单", "vat_base": True},
+            {"key": "zengzhishui", "label_zh": "增值税", "vat_base": False},
+        ],
+    },
+    # Kinds of line inside 其他项目. Only the specialist prime-cost sum is
+    # priced VAT-inclusive (S7 2.0.18); the rest are tax-exclusive (S7 3.1.9).
+    "other_item_kinds": [
+        {"key": "provisional_sum", "label_zh": "暂列金额", "tax_inclusive": False},
+        {"key": "daywork", "label_zh": "计日工", "tax_inclusive": False},
+        {"key": "main_contractor_service", "label_zh": "总承包服务费", "tax_inclusive": False},
+        {"key": "specialist_pc_sum", "label_zh": "专业工程暂估价", "tax_inclusive": True},
+    ],
+    # Item code patterns per edition live in core/country_data/item_code_patterns.json
+    # (one source for the bill rules and this pack); see app.core.item_codes.
+    "item_code_scope": "sub_project",
+    # Provincial overlays. Only what a source states; the rest stays null and
+    # is marked "verify" in the pack README.
+    "provinces": {
+        "CN-SH": {
+            "name_zh": "上海",
+            "risk_bands_pct": {"labour": "3", "main_materials": "5", "other": "8"},
+            "tender_switch_date": None,
+            "source": "S7 4.2.4, 3.3.5",
+        },
+        "CN-GD": {
+            "name_zh": "广东",
+            "guifei_folded": True,
+            "guifei_split": {"social_insurance": "labour", "other": "management_fee"},
+            "tender_switch_date": None,
+            "cities": {"Shenzhen": {"name_zh": "深圳", "tender_switch_date": "2026-01-01"}},
+            "source": "S8 cl.4; Shenzhen notice 2025-11-07",
+        },
+    },
+    # 数电票 profile (S6). Number = YY + 2-digit bureau + channel digit + 15-digit serial.
+    "fapiao": {
+        "number_pattern": r"^\d{20}$",
+        "special_business_tag": "建筑服务",
+        "required_construction_fields": ["site_location", "project_name"],
+        "red_letter": {"mechanism": "红字确认单", "confirmation_void_after_hours": 72},
+        "unverified_fields": ["cross_region_flag", "land_vat_project_no"],
     },
 }

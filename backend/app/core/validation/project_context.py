@@ -158,6 +158,32 @@ async def _tender_count(session: AsyncSession, project_id: uuid.UUID) -> int | N
     return int(count or 0)
 
 
+async def _standard_edition(session: AsyncSession, project_id: uuid.UUID) -> str | None:
+    """The bill standard edition the project stored, or ``None`` when it stated none.
+
+    Read from the project tax profile when that module is installed. A missing
+    row is ``None``, never today's edition: an edition is a fact the project
+    records, not one derived from the clock.
+    """
+    try:
+        from app.modules.project_tax.models import ProjectTaxProfile
+    except ImportError:
+        return None
+    try:
+        # A savepoint, so an install whose table is missing does not abort the
+        # caller's transaction on PostgreSQL along with this one read.
+        async with session.begin_nested():
+            value = (
+                await session.execute(
+                    select(ProjectTaxProfile.standard_edition).where(ProjectTaxProfile.project_id == project_id)
+                )
+            ).scalar_one_or_none()
+    except Exception:  # noqa: BLE001 - an unanswerable edition is "not stated"
+        logger.debug("Could not read the standard edition for project=%s", project_id, exc_info=True)
+        return None
+    return str(value) if value else None
+
+
 async def _project_record(session: AsyncSession, project_id: uuid.UUID) -> dict[str, Any] | None:
     """The project as the completeness rules read it, or ``None`` for an unknown id.
 
@@ -174,6 +200,7 @@ async def _project_record(session: AsyncSession, project_id: uuid.UUID) -> dict[
                 Project.id,
                 Project.name,
                 Project.country_code,
+                Project.subdivision_code,
                 Project.region,
                 Project.currency,
                 Project.classification_standard,
@@ -193,6 +220,7 @@ async def _project_record(session: AsyncSession, project_id: uuid.UUID) -> dict[
         "id": str(row.id),
         "name": row.name,
         "country_code": row.country_code,
+        "subdivision_code": row.subdivision_code,
         "region": row.region,
         "currency": row.currency,
         "classification_standard": row.classification_standard,
@@ -209,6 +237,7 @@ async def _project_record(session: AsyncSession, project_id: uuid.UUID) -> dict[
         "contract_count": contract_count,
         "client_party_count": client_party_count,
         "tender_count": await _tender_count(session, project_id),
+        "standard_edition": await _standard_edition(session, project_id),
     }
 
 

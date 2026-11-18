@@ -412,7 +412,10 @@
       "suggestion": "Rendeljen hozzá kilencjegyű GB/T 50500 kódot (pl. 010101001)"
     },
     "valid_code": {
-      "fail": "Érvénytelen GB/T 50500 kód („{code}”); 9 vagy 12 számjegy szükséges"
+      "fail": "Érvénytelen GB/T 50500 kód („{code}”); 9 vagy 12 számjegy vagy kiegészítő kód (pl. 01B001) szükséges"
+    },
+    "code_unique": {
+      "fail": "A(z) „{code}” tételkód ugyanabban az alprojektben többször szerepel"
     }
   },
   "cpwd": {
