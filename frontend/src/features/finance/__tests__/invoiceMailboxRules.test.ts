@@ -1,4 +1,3 @@
-// @vitest-environment node
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 import { describe, it, expect } from 'vitest';
