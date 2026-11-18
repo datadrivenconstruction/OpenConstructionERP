@@ -2258,5 +2258,15 @@
       "fail": "Die Menge ist festes Volumen (gewachsener Boden); der Auflockerungsfaktor ist nicht angewendet.",
       "suggestion": "Senden Sie stattdessen den gelockerten Abtrag, wenn die LV-Position lose gemessen wird."
     }
+  },
+  "stockpiles": {
+    "density_assumed": {
+      "fail": "Die Dichte ist angenommen, nicht gemessen: Die Tonnen sind nur so verlässlich wie diese Schätzung.",
+      "suggestion": "Eine Probe wiegen oder die Dichte den Lieferscheinen des Lieferanten entnehmen."
+    },
+    "variance_high": {
+      "fail": "Das Aufmaß weicht um {v} % vom Buchbestand ab, über der Toleranz von {t} %.",
+      "suggestion": "Dichte und Basisfläche prüfen, dann eine Korrektur vorschlagen und bei echter Differenz bestätigen."
+    }
   }
 }

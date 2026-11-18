@@ -2258,5 +2258,15 @@
       "fail": "Ang dami ay bank volume (nasa lupa); hindi inilapat ang swell factor.",
       "suggestion": "Ipadala na lang ang maluwag na hukay kung sinusukat ang linya ng BOQ bilang maluwag na materyal."
     }
+  },
+  "stockpiles": {
+    "density_assumed": {
+      "fail": "Ipinagpalagay ang density, hindi sinukat: ang tonelada ay kasing-lakas lang ng hulang iyon.",
+      "suggestion": "Magtimbang ng sample o kunin ang density sa delivery notes ng supplier."
+    },
+    "variance_high": {
+      "fail": "Ang survey ay {v} % ang pagitan sa book stock, higit sa tolerance na {t} %.",
+      "suggestion": "Suriin ang density at base surface, saka magmungkahi ng adjustment at kumpirmahin kung totoo ang pagkakaiba."
+    }
   }
 }

@@ -45,6 +45,7 @@ import { manifest as estimateChecks } from './estimate-checks/manifest';
 import { manifest as lessonsLearned } from './lessons-learned/manifest';
 import { manifest as survey } from './survey/manifest';
 import { manifest as surveyVolumes } from './survey-volumes/manifest';
+import { manifest as surveyStockpiles } from './survey-stockpiles/manifest';
 
 /* ── Registry ──────────────────────────────────────────────────────── */
 
@@ -70,6 +71,7 @@ export const MODULE_REGISTRY: ModuleManifest[] = [
   lessonsLearned,
   survey,
   surveyVolumes,
+  surveyStockpiles,
 ];
 
 /* ── Helper functions ──────────────────────────────────────────────── */

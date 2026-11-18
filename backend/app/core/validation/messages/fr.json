@@ -2258,5 +2258,15 @@
       "fail": "La quantité est un volume en place (dans le sol) ; le foisonnement n'est pas appliqué.",
       "suggestion": "Envoyez plutôt le déblai foisonné si la ligne du métré est mesurée en matériau foisonné."
     }
+  },
+  "stockpiles": {
+    "density_assumed": {
+      "fail": "La densité est supposée et non mesurée : les tonnes ne valent que ce que vaut cette estimation.",
+      "suggestion": "Pesez un échantillon ou prenez la densité sur les bons de livraison du fournisseur."
+    },
+    "variance_high": {
+      "fail": "Le relevé s'écarte du stock comptable de {v} %, au-delà de la tolérance de {t} %.",
+      "suggestion": "Vérifiez la densité et la surface de base, puis proposez un ajustement et confirmez-le si l'écart est réel."
+    }
   }
 }

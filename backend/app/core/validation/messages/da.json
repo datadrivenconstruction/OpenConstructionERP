@@ -2258,5 +2258,15 @@
       "fail": "Mængden er fast volumen (i jorden); opluckningsfaktoren er ikke anvendt.",
       "suggestion": "Send i stedet den løse afgravning, hvis tilbudslisteposten måles som løst materiale."
     }
+  },
+  "stockpiles": {
+    "density_assumed": {
+      "fail": "Massefylden er antaget, ikke målt: tonnene er kun så pålidelige som det skøn.",
+      "suggestion": "Vej en prøve eller tag massefylden fra leverandørens følgesedler."
+    },
+    "variance_high": {
+      "fail": "Opmålingen afviger {v} % fra bogført beholdning, over tolerancen på {t} %.",
+      "suggestion": "Kontrollér massefylden og basisfladen, foreslå derefter en regulering og bekræft den, hvis forskellen er reel."
+    }
   }
 }

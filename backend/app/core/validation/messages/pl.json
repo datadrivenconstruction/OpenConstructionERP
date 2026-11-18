@@ -2258,5 +2258,15 @@
       "fail": "Ilość to objętość w stanie rodzimym (w gruncie); współczynnik spulchnienia nie jest zastosowany.",
       "suggestion": "Wyślij urobek spulchniony, jeśli pozycja przedmiaru jest mierzona w stanie luźnym."
     }
+  },
+  "stockpiles": {
+    "density_assumed": {
+      "fail": "Gęstość jest założona, nie zmierzona: tony są tak wiarygodne jak to założenie.",
+      "suggestion": "Zważ próbkę lub weź gęstość z dokumentów dostawy."
+    },
+    "variance_high": {
+      "fail": "Pomiar różni się od stanu księgowego o {v} %, powyżej tolerancji {t} %.",
+      "suggestion": "Sprawdź gęstość i powierzchnię bazową, potem zaproponuj korektę i potwierdź ją, jeśli różnica jest realna."
+    }
   }
 }

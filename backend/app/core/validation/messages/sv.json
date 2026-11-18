@@ -2258,5 +2258,15 @@
       "fail": "Mängden är fast volym (i marken); svällningsfaktorn är inte tillämpad.",
       "suggestion": "Skicka i stället lös schaktmassa om mängdförteckningens post mäts som löst material."
     }
+  },
+  "stockpiles": {
+    "density_assumed": {
+      "fail": "Densiteten är antagen, inte uppmätt: tonen är bara så tillförlitlig som antagandet.",
+      "suggestion": "Väg ett prov eller ta densiteten från leverantörens följesedlar."
+    },
+    "variance_high": {
+      "fail": "Inmätningen avviker {v} % från bokfört lager, över toleransen på {t} %.",
+      "suggestion": "Kontrollera densiteten och basytan, föreslå sedan en justering och bekräfta den om skillnaden är verklig."
+    }
   }
 }

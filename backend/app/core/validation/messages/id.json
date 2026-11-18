@@ -2258,5 +2258,15 @@
       "fail": "Kuantitas adalah volume asli (di dalam tanah); faktor pengembangan tidak diterapkan.",
       "suggestion": "Kirim galian lepas jika item BOQ diukur sebagai material lepas."
     }
+  },
+  "stockpiles": {
+    "density_assumed": {
+      "fail": "Kerapatan diasumsikan, bukan diukur: ton hanya seandal perkiraan itu.",
+      "suggestion": "Timbang sampel atau ambil kerapatan dari surat jalan pemasok."
+    },
+    "variance_high": {
+      "fail": "Survei berbeda {v} % dari stok buku, melampaui toleransi {t} %.",
+      "suggestion": "Periksa kerapatan dan permukaan dasar, lalu usulkan penyesuaian dan konfirmasikan jika selisihnya nyata."
+    }
   }
 }

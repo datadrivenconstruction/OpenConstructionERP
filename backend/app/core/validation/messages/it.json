@@ -2258,5 +2258,15 @@
       "fail": "La quantità è volume in sito (nel terreno); il fattore di rigonfiamento non è applicato.",
       "suggestion": "Inviate invece lo scavo rigonfiato se la voce del computo è misurata come materiale sciolto."
     }
+  },
+  "stockpiles": {
+    "density_assumed": {
+      "fail": "La densità è ipotizzata, non misurata: le tonnellate sono affidabili quanto quella stima.",
+      "suggestion": "Pesate un campione o prendete la densità dai documenti di consegna del fornitore."
+    },
+    "variance_high": {
+      "fail": "Il rilievo si discosta dalla giacenza contabile del {v} %, oltre la tolleranza del {t} %.",
+      "suggestion": "Controllate la densità e la superficie di base, poi proponete una rettifica e confermatela se la differenza è reale."
+    }
   }
 }

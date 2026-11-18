@@ -82,7 +82,7 @@ _FIELD = ["fieldreports", "collaboration", "field_diary", "payroll"]
 _ESG = ["carbon"]
 _BI = ["bi_dashboards", "reporting", "project_controls"]
 _ENTERPRISE = ["enterprise_workflows", "full_evm", "rfq_bidding", "integrations"]
-_SURVEY = ["survey_core", "surfaces_volumes"]
+_SURVEY = ["survey_core", "surfaces_volumes", "stockpiles"]
 
 # Region-specific packs are chosen on the onboarding region step / via partner
 # packs, not by a company profile, so they are not part of any profile's set.
@@ -234,6 +234,7 @@ COMPANY_PRESETS: dict[str, CompanyPreset] = {
             "cad",  # takeoff depends on it
             "survey_core",  # setting-out and as-built points on every site
             "surfaces_volumes",
+            "stockpiles",
         ],
     ),
     "estimator": CompanyPreset(
@@ -514,6 +515,7 @@ COMPANY_PRESETS: dict[str, CompanyPreset] = {
             "meetings",  # same site meetings
             "survey_core",  # earthworks are paid from surveyed volumes
             "surfaces_volumes",
+            "stockpiles",
             "bi_dashboards",  # project_controls depends on it
             "bim_hub",  # reporting depends on it
         ],
@@ -943,6 +945,7 @@ COMPANY_PRESETS: dict[str, CompanyPreset] = {
         enabled_modules=[
             "survey_core",
             "surfaces_volumes",
+            "stockpiles",
             "boq",
             "validation",
             "equipment",

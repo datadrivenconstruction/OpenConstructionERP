@@ -2258,5 +2258,15 @@
       "fail": "De hoeveelheid is vast volume (in de grond); de opbulkingsfactor is niet toegepast.",
       "suggestion": "Stuur in plaats daarvan de losse ontgraving als de bestekpost in losse grond wordt gemeten."
     }
+  },
+  "stockpiles": {
+    "density_assumed": {
+      "fail": "De dichtheid is aangenomen, niet gemeten: de tonnen zijn zo betrouwbaar als die schatting.",
+      "suggestion": "Weeg een monster of neem de dichtheid uit de leveringsbonnen van de leverancier."
+    },
+    "variance_high": {
+      "fail": "De meting wijkt {v} % af van de boekvoorraad, boven de tolerantie van {t} %.",
+      "suggestion": "Controleer de dichtheid en het basisvlak, stel dan een correctie voor en bevestig die als het verschil echt is."
+    }
   }
 }

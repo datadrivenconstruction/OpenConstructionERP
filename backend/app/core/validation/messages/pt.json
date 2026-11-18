@@ -2258,5 +2258,15 @@
       "fail": "A quantidade é volume no corte (no terreno); o fator de empolamento não é aplicado.",
       "suggestion": "Envie o corte empolado se a linha do orçamento for medida como material solto."
     }
+  },
+  "stockpiles": {
+    "density_assumed": {
+      "fail": "A densidade é assumida, não medida: as toneladas são tão fiáveis quanto essa estimativa.",
+      "suggestion": "Pese uma amostra ou tire a densidade das guias de entrega do fornecedor."
+    },
+    "variance_high": {
+      "fail": "O levantamento difere do stock contabilístico em {v} %, acima da tolerância de {t} %.",
+      "suggestion": "Verifique a densidade e a superfície base, depois proponha um ajuste e confirme-o se a diferença for real."
+    }
   }
 }

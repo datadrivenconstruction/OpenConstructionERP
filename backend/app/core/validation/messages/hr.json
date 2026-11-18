@@ -2258,5 +2258,15 @@
       "fail": "Količina je volumen u sraslom stanju (u tlu); koeficijent rastresitosti nije primijenjen.",
       "suggestion": "Pošaljite rastresiti iskop ako se stavka troškovnika mjeri u rastresitom stanju."
     }
+  },
+  "stockpiles": {
+    "density_assumed": {
+      "fail": "Gustoća je pretpostavljena, a ne izmjerena: tone su pouzdane koliko i ta procjena.",
+      "suggestion": "Izvažite uzorak ili uzmite gustoću iz otpremnica dobavljača."
+    },
+    "variance_high": {
+      "fail": "Izmjera odstupa od knjigovodstvenog stanja za {v} %, iznad tolerancije od {t} %.",
+      "suggestion": "Provjerite gustoću i osnovnu plohu, zatim predložite korekciju i potvrdite je ako je razlika stvarna."
+    }
   }
 }
