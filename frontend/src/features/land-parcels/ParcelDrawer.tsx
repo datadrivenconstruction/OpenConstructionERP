@@ -29,6 +29,7 @@ import {
   type RightKind,
 } from './api';
 import { STATUS_VARIANT } from './parcelFormat';
+import { fmtFixed } from '@/shared/lib/formatters';
 
 interface Props {
   parcelId: string | null;
@@ -272,8 +273,8 @@ export function ParcelDrawer({ parcelId, projectId, idLabel, onClose }: Props) {
                 {p.points.map((pt) => (
                   <tr key={pt.seq}>
                     <td><bdi dir="ltr">{pt.label}</bdi></td>
-                    <td className="text-right font-mono"><bdi dir="ltr">{pt.e.toFixed(3)}</bdi></td>
-                    <td className="text-right font-mono"><bdi dir="ltr">{pt.n.toFixed(3)}</bdi></td>
+                    <td className="text-right font-mono"><bdi dir="ltr">{fmtFixed(pt.e, 3)}</bdi></td>
+                    <td className="text-right font-mono"><bdi dir="ltr">{fmtFixed(pt.n, 3)}</bdi></td>
                     <td>{pt.mark ? t(`survey.parcels.mark.${pt.mark}`, { defaultValue: pt.mark }) : ''}</td>
                     {isAdvanced && <td className="text-right">{pt.accuracy_m ?? ''}</td>}
                   </tr>

@@ -24,7 +24,8 @@ EXPECTED = json.loads((DEMO / "expected.json").read_text(encoding="utf-8"))["sto
 
 
 async def _demo(client: AsyncClient, header: dict) -> tuple[str, dict]:
-    installed = await client.post("/api/demo/install/survey-riverside-yard", headers=header)
+    # A fresh pile per test: a confirmed adjustment in one lesson would zero the next one's variance.
+    installed = await client.post("/api/demo/install/survey-riverside-yard", params={"force": True}, headers=header)
     assert installed.status_code in (200, 201), installed.text
     pid = installed.json()["project_id"]
     [pile] = (await client.get(f"{BASE}/projects/{pid}/stockpiles", headers=header)).json()["items"]
@@ -87,14 +88,17 @@ async def test_lessons_2_to_4_survey_variance_and_confirmed_adjustment(client: A
     adj = proposed.json()
     assert adj["status"] == "proposed"
     assert adj["delta_t"] == l4["signed_t"]
-    assert (await client.get(f"/api/v1/site-inventory/projects/{pid}/movements", headers=header)).json() == []
+    before = (await client.get(f"/api/v1/site-inventory/projects/{pid}/movements", headers=header)).json()
 
     confirmed = await client.post(f"{BASE}/adjustments/{adj['id']}/confirm", headers=header)
     assert confirmed.status_code == 200, confirmed.text
     assert confirmed.json()["status"] == "booked"
     assert confirmed.json()["adjustment"]["status"] == "confirmed"
     assert confirmed.json()["adjustment"]["confirmed_by_name"]
-    [move] = (await client.get(f"/api/v1/site-inventory/projects/{pid}/movements", headers=header)).json()
+    after = (await client.get(f"/api/v1/site-inventory/projects/{pid}/movements", headers=header)).json()
+    booked = confirmed.json()["adjustment"]["movement_id"]
+    assert booked not in {m["id"] for m in before}
+    [move] = [m for m in after if m["id"] == booked]
     assert move["movement_type"] == l4["movement"]
     assert float(move["quantity"]) == l4["quantity_t"]
 
@@ -119,6 +123,11 @@ async def test_lesson_5_report_is_a_pdf_and_the_summary_follows(client: AsyncCli
 
 async def test_a_viewer_reads_but_cannot_confirm(client: AsyncClient, header: dict, viewer: dict) -> None:
     pid, pile = await _demo(client, header)
+    me = await client.get("/api/v1/users/me", headers=viewer)
+    added = await client.post(
+        f"/api/v1/projects/{pid}/members", json={"user_id": me.json()["id"], "role": "member"}, headers=header
+    )
+    assert added.status_code in (200, 201), added.text
     assert (await client.get(f"{BASE}/projects/{pid}/stockpiles", headers=viewer)).status_code == 200
     r = await client.post(f"{BASE}/stockpiles/{pile['id']}/surveys", json={"density_t_m3": 1.6}, headers=viewer)
     assert r.status_code == 403

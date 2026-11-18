@@ -62,11 +62,15 @@ export function useIconOverridesVersion(): void {
 }
 
 const TONE_BY_ROUTE = new Map<string, number>();
-navGroups.forEach((group, index) => {
-  for (const item of group.items) {
-    if (!TONE_BY_ROUTE.has(item.to)) TONE_BY_ROUTE.set(item.to, index % SECTION_TONES.length);
-  }
-});
+// A group fed only by module manifests has no static rows and takes no tone,
+// so the sections after it keep the tones they had without it.
+navGroups
+  .filter((group) => group.items.length > 0)
+  .forEach((group, index) => {
+    for (const item of group.items) {
+      if (!TONE_BY_ROUTE.has(item.to)) TONE_BY_ROUTE.set(item.to, index % SECTION_TONES.length);
+    }
+  });
 
 /** Index into SECTION_TONES for a menu route: its section's place in the menu. */
 export function sectionTone(route: string): number | undefined {

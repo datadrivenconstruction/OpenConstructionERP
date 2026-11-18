@@ -13,6 +13,7 @@ import { Badge, Button, SideDrawer } from '@/shared/ui';
 import { getErrorMessage } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
 import { createTraverse, type Traverse, type TraverseInput } from './volumesApi';
+import { fmtFixed } from '@/shared/lib/formatters';
 
 const LEG_TEMPLATE = 'leg,from,to,length_m,d_e,d_n\n';
 
@@ -65,7 +66,7 @@ export function TraverseDrawer({ open, projectId, onClose, isAdvanced, shown }: 
     setResult(null);
     onClose();
   };
-  const m = (v: number | null | undefined, d = 3) => (v == null ? '-' : v.toFixed(d));
+  const m = (v: number | null | undefined, d = 3) => (v == null ? '-' : fmtFixed(v, d));
 
   return (
     <SideDrawer
@@ -173,9 +174,9 @@ export function TraverseDrawer({ open, projectId, onClose, isAdvanced, shown }: 
                     <tr key={leg.leg}>
                       <td>{leg.leg}</td>
                       <td><bdi dir="ltr">{leg.from} - {leg.to}</bdi></td>
-                      <td className="text-right"><bdi dir="ltr">{leg.length_m.toFixed(2)}</bdi></td>
-                      <td className="text-right"><bdi dir="ltr">{leg.c_e.toFixed(4)}</bdi></td>
-                      <td className="text-right"><bdi dir="ltr">{leg.c_n.toFixed(4)}</bdi></td>
+                      <td className="text-right"><bdi dir="ltr">{fmtFixed(leg.length_m, 2)}</bdi></td>
+                      <td className="text-right"><bdi dir="ltr">{fmtFixed(leg.c_e, 4)}</bdi></td>
+                      <td className="text-right"><bdi dir="ltr">{fmtFixed(leg.c_n, 4)}</bdi></td>
                     </tr>
                   ))}
                 </tbody>

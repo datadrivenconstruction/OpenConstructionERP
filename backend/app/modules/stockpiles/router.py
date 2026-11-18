@@ -174,13 +174,13 @@ async def _adjustment(adjustment_id: uuid.UUID, session: SessionDep, user_id: st
 )
 async def confirm_adjustment(
     adjustment_id: uuid.UUID,
-    body: AdjustmentConfirm,
     session: SessionDep,
     user_id: CurrentUserId,
+    body: AdjustmentConfirm | None = None,
     locale: str = _LOCALE,
 ) -> SurveyOut:
     service, a = await _adjustment(adjustment_id, session, user_id)
-    return await service.confirm_adjustment(a, body, user_id, locale)
+    return await service.confirm_adjustment(a, body or AdjustmentConfirm(), user_id, locale)
 
 
 @router.post("/adjustments/{adjustment_id}/cancel", response_model=SurveyOut, dependencies=_WRITE)

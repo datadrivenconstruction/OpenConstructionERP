@@ -68,6 +68,7 @@ import { Sidebar } from './Sidebar';
 import { meOnboardingQueryKey } from './meOnboardingQuery';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useModuleStore } from '@/stores/useModuleStore';
+import { MODULE_REGISTRY } from '@/modules/_registry';
 import { useViewModeStore } from '@/stores/useViewModeStore';
 
 /** Answer the two calls the menu depends on: the backend module list (none
@@ -193,8 +194,12 @@ beforeEach(() => {
   localStorage.clear();
   api.apiGet.mockReset();
   useAuthStore.setState({ isAuthenticated: true, userRole: 'editor', userId: USER_A, accessToken: null });
-  // Every module on, so the rows below depend on the mode and the profile only.
-  useModuleStore.setState({ enabledModules: {}, hiddenGroups: [] });
+  // Every module on except the survey family, which ships off (a survey profile or Settings
+  // turns it on), so the rows below depend on the mode and the profile only.
+  const surveyOff = Object.fromEntries(
+    MODULE_REGISTRY.filter((m) => m.navItems.some((i) => i.group === 'grp_survey')).map((m) => [m.id, false]),
+  );
+  useModuleStore.setState({ enabledModules: surveyOff, hiddenGroups: [] });
   // The store reads localStorage once at import, so the mode is set on it.
   useViewModeStore.getState().setMode('simple');
 });

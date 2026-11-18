@@ -62,10 +62,12 @@ describe('icon catalogue', () => {
 
 describe('section tones', () => {
   it('give each menu section a tone, neighbours differing', () => {
-    const tones = navGroups.map((g) => sectionTone(g.items[0]!.to));
+    // Groups fed only by module manifests have no static row to tone.
+    const groups = navGroups.filter((g) => g.items.length > 0);
+    const tones = groups.map((g) => sectionTone(g.items[0]!.to));
     for (const tone of tones) expect(tone).toBeLessThan(SECTION_TONES.length);
     for (let i = 1; i < tones.length; i += 1) {
-      if (navGroups[i]!.items[0]!.to !== navGroups[i - 1]!.items[0]!.to) expect(tones[i]).not.toBe(tones[i - 1]);
+      if (groups[i]!.items[0]!.to !== groups[i - 1]!.items[0]!.to) expect(tones[i]).not.toBe(tones[i - 1]);
     }
   });
 });

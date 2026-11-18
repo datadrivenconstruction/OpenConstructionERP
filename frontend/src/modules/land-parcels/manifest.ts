@@ -15,7 +15,7 @@ export const manifest: ModuleManifest = {
   category: 'tools',
   // Off until a survey or developer profile turns it on: land is the owner's work, so most menus never show it.
   defaultEnabled: false,
-  depends: [],
+  depends: ['survey_core'],
   routes: [{ path: '/survey/parcels', title: 'survey.parcels.title', component: Page }],
   navItems: [{ labelKey: 'survey.parcels.title', to: '/survey/parcels', icon: LandPlot, group: 'grp_survey' }],
 };

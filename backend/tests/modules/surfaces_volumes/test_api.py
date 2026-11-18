@@ -87,14 +87,15 @@ async def test_lessons_1_to_3_surfaces_and_the_volume(client: AsyncClient, heade
     assert v["confidence"] == 1.0
     assert {f["rule_id"] for f in v["findings"]} == {"VOL-004"}
 
-    tin = await client.patch(f"{BASE}/volumes/{v['id']}", json={"method": "tin"}, headers=header)
-    assert tin.status_code == 200, tin.text
-    assert (tin.json()["cut_m3"], tin.json()["fill_m3"]) == (lesson["cut_m3"], lesson["fill_m3"])
-
     plan = await client.get(f"{BASE}/projects/{project_id}/plan", params={"volume_id": v["id"]}, headers=header)
     layers = {f["properties"]["layer"] for f in plan.json()["features"]}
     assert layers == {"points", "surfaces", "heat"}
     assert plan.json()["properties"]["epsg"] == 32633
+
+    # The TIN method has no cell grid, so it carries no heat layer.
+    tin = await client.patch(f"{BASE}/volumes/{v['id']}", json={"method": "tin"}, headers=header)
+    assert tin.status_code == 200, tin.text
+    assert (tin.json()["cut_m3"], tin.json()["fill_m3"]) == (lesson["cut_m3"], lesson["fill_m3"])
 
     summary = await client.get(f"{BASE}/projects/{project_id}/summary", headers=header)
     assert summary.json()["calculations"] == 1

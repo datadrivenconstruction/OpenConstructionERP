@@ -26,7 +26,7 @@ function rowsInGroup(isEnabled: (key: string) => boolean): string[] {
 
 // setState, not setModuleEnabled: the action also schedules a save to the server.
 function turn(on: boolean): void {
-  useModuleStore.setState((s) => ({ enabledModules: { ...s.enabledModules, survey: on } }));
+  useModuleStore.setState((s) => ({ enabledModules: { ...s.enabledModules, survey_core: on } }));
 }
 
 afterEach(() => turn(false));
@@ -41,16 +41,16 @@ describe('Survey & Land menu group', () => {
 
   it('is hidden when no survey module is enabled (the shipped default)', () => {
     const defaults = getModuleDefaults();
-    expect(defaults.survey).toBe(false);
+    expect(defaults.survey_core).toBe(false);
     expect(rowsInGroup((key) => defaults[key] ?? true)).toEqual([]);
   });
 
   it('is hidden in the real store until the module is switched on, then shows the register', () => {
     turn(false);
-    expect(useModuleStore.getState().isModuleEnabled('survey')).toBe(false);
+    expect(useModuleStore.getState().isModuleEnabled('survey_core')).toBe(false);
     expect(rowsInGroup(useModuleStore.getState().isModuleEnabled)).toEqual([]);
     turn(true);
-    expect(useModuleStore.getState().isModuleEnabled('survey')).toBe(true);
+    expect(useModuleStore.getState().isModuleEnabled('survey_core')).toBe(true);
     expect(rowsInGroup(useModuleStore.getState().isModuleEnabled)).toEqual(['/survey']);
     turn(false);
     expect(rowsInGroup(useModuleStore.getState().isModuleEnabled)).toEqual([]);
@@ -58,12 +58,12 @@ describe('Survey & Land menu group', () => {
 
   it('is filled by the survey register and the modules that depend on it, never by another module', () => {
     const publishers = MODULE_REGISTRY.filter((m) => m.navItems.some((i) => i.group === GROUP));
-    expect(publishers.map((m) => m.id)).toContain('survey');
-    for (const m of publishers) expect(m.id === 'survey' || (m.depends ?? []).includes('survey'), m.id).toBe(true);
+    expect(publishers.map((m) => m.id)).toContain('survey_core');
+    for (const m of publishers) expect(m.id === 'survey_core' || (m.depends ?? []).includes('survey_core'), m.id).toBe(true);
   });
 
   it('is not part of the always-on core modules, so Settings > Modules can switch it off', () => {
-    expect(CORE_MODULES.has('survey')).toBe(false);
+    expect(CORE_MODULES.has('survey_core')).toBe(false);
   });
 
   it('keeps the register route out of the menu data of every other group', () => {
@@ -73,7 +73,7 @@ describe('Survey & Land menu group', () => {
 });
 
 describe('survey module manifest', () => {
-  const survey = MODULE_REGISTRY.find((m) => m.id === 'survey')!;
+  const survey = MODULE_REGISTRY.find((m) => m.id === 'survey_core')!;
 
   it('is off by default and names its page by translation key', () => {
     expect(survey.defaultEnabled).toBe(false);
