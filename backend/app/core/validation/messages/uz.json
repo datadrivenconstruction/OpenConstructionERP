@@ -2225,7 +2225,7 @@
   "schedule_pdf_import": {
     "no_text_layer": {
       "fail": "PDF faylida matn qatlami yo'q, shuning uchun jadvalni o'qib bo'lmaydi.",
-      "suggestion": "Jadvalni MS Project XML, Primavera XER yoki Excel sifatida eksport qiling va o'sha faylni import qiling."
+      "suggestion": "Jadvalni MS Project XML, XER yoki Excel sifatida eksport qiling va o'sha faylni import qiling."
     },
     "dates_parsed": {
       "fail": "{row}-qator: boshlanish yoki tugash sana emas.",

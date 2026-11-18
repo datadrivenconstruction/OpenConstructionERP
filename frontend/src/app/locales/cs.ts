@@ -12792,7 +12792,7 @@ const resource = {
     "schedule.tabular_import.issue.too_many_rows": "Soubor má více než {{limit}} řádků činností; rozdělte jej na menší soubory",
     "schedule.tabular_import.issue.unsupported_file_type": "Soubor není tabulka ani CSV",
     "schedule.tabular_import.issue.value_too_long": "Pole „{{field}}” má {{length}} znaků, více než {{limit}}",
-    "schedule.tabular_import.issue.pdf_no_text_layer": "PDF nemá textovou vrstvu (sken nebo obrázek). Exportujte harmonogram jako MS Project XML, Primavera XER nebo Excel a importujte tento soubor.",
+    "schedule.tabular_import.issue.pdf_no_text_layer": "PDF nemá textovou vrstvu (sken nebo obrázek). Exportujte harmonogram jako MS Project XML, XER nebo Excel a importujte tento soubor.",
     "schedule.tabular_import.issue.pdf_table_not_found": "Žádná stránka PDF nemá záhlaví tabulky harmonogramu (ID, název, začátek, konec, doba trvání).",
     "schedule.tabular_import.issues_none": "V souboru nebyly nalezeny žádné problémy.",
     "schedule.tabular_import.issues_title": "Problémy v souboru",

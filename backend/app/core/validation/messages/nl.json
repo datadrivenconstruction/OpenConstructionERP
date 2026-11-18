@@ -2225,7 +2225,7 @@
   "schedule_pdf_import": {
     "no_text_layer": {
       "fail": "De PDF heeft geen tekstlaag, de tabel kan niet worden gelezen.",
-      "suggestion": "Exporteer de planning als MS Project-XML, Primavera-XER of Excel en importeer dat bestand."
+      "suggestion": "Exporteer de planning als MS Project-XML, XER of Excel en importeer dat bestand."
     },
     "dates_parsed": {
       "fail": "Rij {row}: een begin of einde is geen datum.",

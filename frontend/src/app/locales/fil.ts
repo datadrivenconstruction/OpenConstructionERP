@@ -16217,7 +16217,7 @@ const resource = {
     "schedule.tabular_import.issue.too_many_rows": "Ang file ay may higit sa {{limit}} na row ng aktibidad; hatiin ito sa mas maliliit na file",
     "schedule.tabular_import.issue.unsupported_file_type": "Ang file ay hindi spreadsheet o CSV",
     "schedule.tabular_import.issue.value_too_long": "Ang field na \"{{field}}\" ay may {{length}} na karakter, higit sa {{limit}}",
-    "schedule.tabular_import.issue.pdf_no_text_layer": "Walang text layer ang PDF (scan o larawan). I-export ang iskedyul bilang MS Project XML, Primavera XER o Excel at i-import ang file na iyon.",
+    "schedule.tabular_import.issue.pdf_no_text_layer": "Walang text layer ang PDF (scan o larawan). I-export ang iskedyul bilang MS Project XML, XER o Excel at i-import ang file na iyon.",
     "schedule.tabular_import.issue.pdf_table_not_found": "Walang pahina ng PDF na may header ng talahanayan ng iskedyul (ID, pangalan, simula, pagtatapos, tagal).",
     "schedule.tabular_import.issues_none": "Walang nakitang problema sa file.",
     "schedule.tabular_import.issues_title": "Mga Problema sa File",

@@ -13047,7 +13047,7 @@ const resource = {
     "schedule.tabular_import.issue.too_many_rows": "Tệp có nhiều hơn {{limit}} dòng công việc; hãy chia thành các tệp nhỏ hơn",
     "schedule.tabular_import.issue.unsupported_file_type": "Tệp không phải bảng tính hay CSV",
     "schedule.tabular_import.issue.value_too_long": "Trường \"{{field}}\" có {{length}} ký tự, nhiều hơn {{limit}}",
-    "schedule.tabular_import.issue.pdf_no_text_layer": "PDF không có lớp văn bản (bản quét hoặc hình ảnh). Hãy xuất tiến độ dưới dạng MS Project XML, Primavera XER hoặc Excel và nhập tệp đó.",
+    "schedule.tabular_import.issue.pdf_no_text_layer": "PDF không có lớp văn bản (bản quét hoặc hình ảnh). Hãy xuất tiến độ dưới dạng MS Project XML, XER hoặc Excel và nhập tệp đó.",
     "schedule.tabular_import.issue.pdf_table_not_found": "Không trang nào trong PDF có tiêu đề bảng tiến độ (mã, tên, bắt đầu, kết thúc, thời lượng).",
     "schedule.tabular_import.issues_none": "Không tìm thấy vấn đề nào trong tệp.",
     "schedule.tabular_import.issues_title": "Vấn đề trong tệp",

@@ -16681,7 +16681,7 @@ const resource = {
     "schedule.tabular_import.issue.too_many_rows": "לקובץ יש יותר מ-{{limit}} שורות פעילות; יש לפצל אותו לקבצים קטנים יותר",
     "schedule.tabular_import.issue.unsupported_file_type": "הקובץ אינו גיליון אלקטרוני ואינו CSV",
     "schedule.tabular_import.issue.value_too_long": "לשדה \"{{field}}\" יש {{length}} תווים, יותר מ-{{limit}}",
-    "schedule.tabular_import.issue.pdf_no_text_layer": "ל-PDF אין שכבת טקסט (סריקה או תמונה). ייצאו את לוח הזמנים כ-MS Project XML, Primavera XER או Excel וייבאו את הקובץ הזה.",
+    "schedule.tabular_import.issue.pdf_no_text_layer": "ל-PDF אין שכבת טקסט (סריקה או תמונה). ייצאו את לוח הזמנים כ-MS Project XML, XER או Excel וייבאו את הקובץ הזה.",
     "schedule.tabular_import.issue.pdf_table_not_found": "באף עמוד של ה-PDF אין כותרת של טבלת לוח זמנים (מזהה, שם, התחלה, סיום, משך).",
     "schedule.tabular_import.issues_none": "לא נמצאו בעיות בקובץ.",
     "schedule.tabular_import.issues_title": "בעיות בקובץ",

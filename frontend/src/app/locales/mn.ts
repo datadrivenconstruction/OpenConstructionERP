@@ -17148,7 +17148,7 @@ const resource = {
     "schedule.tabular_import.issue.too_many_rows": "Файлд {{limit}}-ээс илүү ажлын мөр байна; жижиг файлуудад хуваана уу",
     "schedule.tabular_import.issue.unsupported_file_type": "Файл хүснэгт ч биш, CSV ч биш байна",
     "schedule.tabular_import.issue.value_too_long": "«{{field}}» талбарт {{length}} тэмдэгт байна, энэ {{limit}}-ээс илүү",
-    "schedule.tabular_import.issue.pdf_no_text_layer": "PDF-д текстийн давхарга алга (скан эсвэл зураг). Хуваарийг MS Project XML, Primavera XER эсвэл Excel хэлбэрээр экспортлоод тэр файлыг импортлоно уу.",
+    "schedule.tabular_import.issue.pdf_no_text_layer": "PDF-д текстийн давхарга алга (скан эсвэл зураг). Хуваарийг MS Project XML, XER эсвэл Excel хэлбэрээр экспортлоод тэр файлыг импортлоно уу.",
     "schedule.tabular_import.issue.pdf_table_not_found": "PDF-ийн аль ч хуудсанд хуваарийн хүснэгтийн толгой байхгүй (ID, нэр, эхлэх, дуусах, хугацаа).",
     "schedule.tabular_import.issues_none": "Файлд асуудал олдсонгүй.",
     "schedule.tabular_import.issues_title": "Файл дотор асуудлууд",

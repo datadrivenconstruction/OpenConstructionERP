@@ -2225,7 +2225,7 @@
   "schedule_pdf_import": {
     "no_text_layer": {
       "fail": "PDF nie ma warstwy tekstowej, tabeli nie można odczytać.",
-      "suggestion": "Wyeksportuj harmonogram jako XML MS Project, XER Primavera lub Excel i zaimportuj ten plik."
+      "suggestion": "Wyeksportuj harmonogram jako XML MS Project, XER lub Excel i zaimportuj ten plik."
     },
     "dates_parsed": {
       "fail": "Wiersz {row}: początek lub koniec nie jest datą.",

@@ -10823,7 +10823,7 @@ const resource = {
     "schedule.tabular_import.issue.too_many_rows": "Файлда {{limit}}-ден көп иш сабы бар; аны кичирээк файлдарга бөлүңүз",
     "schedule.tabular_import.issue.unsupported_file_type": "Файл эсептөө таблицасы да, CSV да эмес",
     "schedule.tabular_import.issue.value_too_long": "«{{field}}» талаасында {{length}} белги бар, бул {{limit}}-ден көп",
-    "schedule.tabular_import.issue.pdf_no_text_layer": "PDFте текст катмары жок (скан же сүрөт). Графикти MS Project XML, Primavera XER же Excel катары экспорттоп, ошол файлды импорттоңуз.",
+    "schedule.tabular_import.issue.pdf_no_text_layer": "PDFте текст катмары жок (скан же сүрөт). Графикти MS Project XML, XER же Excel катары экспорттоп, ошол файлды импорттоңуз.",
     "schedule.tabular_import.issue.pdf_table_not_found": "PDFтин бир дагы бетинде графиктин таблица башы жок (ID, аталышы, башталышы, бүтүшү, узактыгы).",
     "schedule.tabular_import.issues_none": "Файлда маселе табылган жок.",
     "schedule.tabular_import.issues_title": "Файлдагы маселелер",

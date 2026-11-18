@@ -2225,7 +2225,7 @@
   "schedule_pdf_import": {
     "no_text_layer": {
       "fail": "PDF-en har ikke noe tekstlag, så tabellen kan ikke leses.",
-      "suggestion": "Eksporter fremdriftsplanen som MS Project XML, Primavera XER eller Excel, og importer den filen."
+      "suggestion": "Eksporter fremdriftsplanen som MS Project XML, XER eller Excel, og importer den filen."
     },
     "dates_parsed": {
       "fail": "Rad {row}: en start eller slutt er ikke en dato.",

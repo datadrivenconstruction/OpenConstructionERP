@@ -16541,7 +16541,7 @@ const resource = {
     "schedule.tabular_import.issue.too_many_rows": "فایل بیش از {{limit}} سطر فعالیت دارد؛ آن را به فایل‌های کوچک‌تر تقسیم کنید",
     "schedule.tabular_import.issue.unsupported_file_type": "فایل نه صفحه‌گسترده است و نه CSV",
     "schedule.tabular_import.issue.value_too_long": "فیلد «{{field}}» {{length}} نویسه دارد، بیشتر از {{limit}}",
-    "schedule.tabular_import.issue.pdf_no_text_layer": "فایل PDF لایه متنی ندارد (اسکن یا تصویر). برنامه را به‌صورت MS Project XML، Primavera XER یا Excel صادر کنید و آن فایل را وارد کنید.",
+    "schedule.tabular_import.issue.pdf_no_text_layer": "فایل PDF لایه متنی ندارد (اسکن یا تصویر). برنامه را به‌صورت MS Project XML، XER یا Excel صادر کنید و آن فایل را وارد کنید.",
     "schedule.tabular_import.issue.pdf_table_not_found": "هیچ صفحه‌ای از PDF سرستون جدول برنامه زمان‌بندی ندارد (شناسه، نام، شروع، پایان، مدت).",
     "schedule.tabular_import.issues_none": "در فایل مشکلی یافت نشد.",
     "schedule.tabular_import.issues_title": "مشکلات فایل",

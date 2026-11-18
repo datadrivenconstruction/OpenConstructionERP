@@ -2225,7 +2225,7 @@
   "schedule_pdf_import": {
     "no_text_layer": {
       "fail": "Il PDF non ha un livello di testo, la tabella non può essere letta.",
-      "suggestion": "Esporta il cronoprogramma come XML di MS Project, XER di Primavera o Excel e importa quel file."
+      "suggestion": "Esporta il cronoprogramma come XML di MS Project, XER o Excel e importa quel file."
     },
     "dates_parsed": {
       "fail": "Riga {row}: un inizio o una fine non è una data.",

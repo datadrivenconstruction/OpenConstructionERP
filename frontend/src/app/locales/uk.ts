@@ -12466,7 +12466,7 @@ const resource = {
     "schedule.tabular_import.issue.too_many_rows": "У файлі більше ніж {{limit}} рядків робіт; розділіть його на менші файли",
     "schedule.tabular_import.issue.unsupported_file_type": "Файл не є ні таблицею, ні CSV",
     "schedule.tabular_import.issue.value_too_long": "Поле «{{field}}»: {{length}} символів, більше ніж {{limit}}",
-    "schedule.tabular_import.issue.pdf_no_text_layer": "У PDF немає текстового шару (скан або зображення). Експортуйте графік у MS Project XML, Primavera XER або Excel та імпортуйте цей файл.",
+    "schedule.tabular_import.issue.pdf_no_text_layer": "У PDF немає текстового шару (скан або зображення). Експортуйте графік у MS Project XML, XER або Excel та імпортуйте цей файл.",
     "schedule.tabular_import.issue.pdf_table_not_found": "На жодній сторінці PDF немає заголовка таблиці графіка (ID, назва, початок, завершення, тривалість).",
     "schedule.tabular_import.issues_none": "У файлі не знайдено проблем.",
     "schedule.tabular_import.issues_title": "Проблеми у файлі",

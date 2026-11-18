@@ -12543,7 +12543,7 @@ const resource = {
     "schedule.tabular_import.issue.too_many_rows": "파일에 {{limit}}개보다 많은 활동 행이 있습니다; 더 작은 파일로 나누세요",
     "schedule.tabular_import.issue.unsupported_file_type": "파일이 스프레드시트도 CSV도 아닙니다",
     "schedule.tabular_import.issue.value_too_long": "필드 \"{{field}}\"가 {{length}}자로, {{limit}}자를 초과합니다",
-    "schedule.tabular_import.issue.pdf_no_text_layer": "PDF에 텍스트 레이어가 없습니다(스캔 또는 이미지). 공정표를 MS Project XML, Primavera XER 또는 Excel로 내보낸 뒤 그 파일을 가져오세요.",
+    "schedule.tabular_import.issue.pdf_no_text_layer": "PDF에 텍스트 레이어가 없습니다(스캔 또는 이미지). 공정표를 MS Project XML, XER 또는 Excel로 내보낸 뒤 그 파일을 가져오세요.",
     "schedule.tabular_import.issue.pdf_table_not_found": "PDF의 어느 페이지에도 공정표 머리글(ID, 이름, 시작, 종료, 기간)이 없습니다.",
     "schedule.tabular_import.issues_none": "파일에서 문제가 발견되지 않았습니다.",
     "schedule.tabular_import.issues_title": "파일의 문제",

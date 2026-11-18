@@ -13087,7 +13087,7 @@ const resource = {
     "schedule.tabular_import.issue.too_many_rows": "Datoteka ima više od {{limit}} redaka aktivnosti; podijelite je na manje datoteke",
     "schedule.tabular_import.issue.unsupported_file_type": "Datoteka nije ni proračunska tablica ni CSV",
     "schedule.tabular_import.issue.value_too_long": "Polje \"{{field}}\" sadrži {{length}} znakova, više od {{limit}}",
-    "schedule.tabular_import.issue.pdf_no_text_layer": "PDF nema tekstualni sloj (sken ili slika). Izvezite plan kao MS Project XML, Primavera XER ili Excel i uvezite tu datoteku.",
+    "schedule.tabular_import.issue.pdf_no_text_layer": "PDF nema tekstualni sloj (sken ili slika). Izvezite plan kao MS Project XML, XER ili Excel i uvezite tu datoteku.",
     "schedule.tabular_import.issue.pdf_table_not_found": "Nijedna stranica PDF-a nema zaglavlje tablice terminskog plana (ID, naziv, početak, završetak, trajanje).",
     "schedule.tabular_import.issues_none": "U datoteci nisu pronađeni problemi.",
     "schedule.tabular_import.issues_title": "Problemi u datoteci",

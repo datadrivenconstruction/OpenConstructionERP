@@ -12525,7 +12525,7 @@ const resource = {
     "schedule.tabular_import.issue.too_many_rows": "ファイルに{{limit}}を超えるアクティビティ行があります。より小さいファイルに分割してください",
     "schedule.tabular_import.issue.unsupported_file_type": "ファイルは表計算ファイルでもCSVでもありません",
     "schedule.tabular_import.issue.value_too_long": "項目「{{field}}」は{{length}}文字で、{{limit}}文字を超えています",
-    "schedule.tabular_import.issue.pdf_no_text_layer": "PDFにテキストレイヤーがありません（スキャンまたは画像）。工程表を MS Project XML、Primavera XER または Excel で書き出し、そのファイルをインポートしてください。",
+    "schedule.tabular_import.issue.pdf_no_text_layer": "PDFにテキストレイヤーがありません（スキャンまたは画像）。工程表を MS Project XML、XER または Excel で書き出し、そのファイルをインポートしてください。",
     "schedule.tabular_import.issue.pdf_table_not_found": "PDFのどのページにも工程表の見出し行（ID、名前、開始、終了、期間）がありません。",
     "schedule.tabular_import.issues_none": "ファイルに問題は見つかりませんでした。",
     "schedule.tabular_import.issues_title": "ファイル内の問題",

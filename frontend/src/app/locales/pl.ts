@@ -13160,7 +13160,7 @@ const resource = {
     "schedule.tabular_import.issue.too_many_rows": "Plik ma więcej niż {{limit}} wierszy działań; podziel go na mniejsze pliki",
     "schedule.tabular_import.issue.unsupported_file_type": "Plik nie jest arkuszem ani CSV",
     "schedule.tabular_import.issue.value_too_long": "Pole „{{field}}” ma {{length}} znaków, więcej niż {{limit}}",
-    "schedule.tabular_import.issue.pdf_no_text_layer": "PDF nie ma warstwy tekstowej (skan lub obraz). Wyeksportuj harmonogram jako XML MS Project, XER Primavera lub Excel i zaimportuj ten plik.",
+    "schedule.tabular_import.issue.pdf_no_text_layer": "PDF nie ma warstwy tekstowej (skan lub obraz). Wyeksportuj harmonogram jako XML MS Project, XER lub Excel i zaimportuj ten plik.",
     "schedule.tabular_import.issue.pdf_table_not_found": "Żadna strona PDF nie ma nagłówka tabeli harmonogramu (ID, nazwa, początek, koniec, czas trwania).",
     "schedule.tabular_import.issues_none": "Nie znaleziono problemów w pliku.",
     "schedule.tabular_import.issues_title": "Problemy w pliku",

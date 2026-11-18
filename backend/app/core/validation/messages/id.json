@@ -2225,7 +2225,7 @@
   "schedule_pdf_import": {
     "no_text_layer": {
       "fail": "PDF tidak memiliki lapisan teks, sehingga tabelnya tidak dapat dibaca.",
-      "suggestion": "Ekspor jadwal sebagai MS Project XML, Primavera XER, atau Excel lalu impor file tersebut."
+      "suggestion": "Ekspor jadwal sebagai MS Project XML, XER, atau Excel lalu impor file tersebut."
     },
     "dates_parsed": {
       "fail": "Baris {row}: tanggal mulai atau selesai bukan tanggal.",

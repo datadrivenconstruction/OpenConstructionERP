@@ -2225,7 +2225,7 @@
   "schedule_pdf_import": {
     "no_text_layer": {
       "fail": "Walang text layer ang PDF, kaya hindi mabasa ang talahanayan nito.",
-      "suggestion": "I-export ang iskedyul bilang MS Project XML, Primavera XER o Excel at i-import ang file na iyon."
+      "suggestion": "I-export ang iskedyul bilang MS Project XML, XER o Excel at i-import ang file na iyon."
     },
     "dates_parsed": {
       "fail": "Hilera {row}: ang simula o pagtatapos ay hindi petsa.",

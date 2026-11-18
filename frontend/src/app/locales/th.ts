@@ -13141,7 +13141,7 @@ const resource = {
     "schedule.tabular_import.issue.too_many_rows": "ไฟล์มีแถวกิจกรรมมากกว่า {{limit}} แถว โปรดแบ่งเป็นไฟล์ที่เล็กลง",
     "schedule.tabular_import.issue.unsupported_file_type": "ไฟล์ไม่ใช่สเปรดชีตหรือ CSV",
     "schedule.tabular_import.issue.value_too_long": "ช่อง \"{{field}}\" มี {{length}} อักขระ มากกว่า {{limit}}",
-    "schedule.tabular_import.issue.pdf_no_text_layer": "PDF ไม่มีชั้นข้อความ (เป็นภาพสแกนหรือรูปภาพ) ส่งออกแผนงานเป็น MS Project XML, Primavera XER หรือ Excel แล้วนำเข้าไฟล์นั้นแทน",
+    "schedule.tabular_import.issue.pdf_no_text_layer": "PDF ไม่มีชั้นข้อความ (เป็นภาพสแกนหรือรูปภาพ) ส่งออกแผนงานเป็น MS Project XML, XER หรือ Excel แล้วนำเข้าไฟล์นั้นแทน",
     "schedule.tabular_import.issue.pdf_table_not_found": "ไม่มีหน้าใดใน PDF ที่มีหัวตารางแผนงาน (รหัส, ชื่อ, เริ่ม, สิ้นสุด, ระยะเวลา)",
     "schedule.tabular_import.issues_none": "ไม่พบปัญหาในไฟล์",
     "schedule.tabular_import.issues_title": "ปัญหาในไฟล์",

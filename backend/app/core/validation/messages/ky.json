@@ -2225,7 +2225,7 @@
   "schedule_pdf_import": {
     "no_text_layer": {
       "fail": "PDF файлында текст катмары жок, ошондуктан таблицаны окуу мүмкүн эмес.",
-      "suggestion": "Графикти MS Project XML, Primavera XER же Excel катары экспорттоп, ошол файлды импорттоңуз."
+      "suggestion": "Графикти MS Project XML, XER же Excel катары экспорттоп, ошол файлды импорттоңуз."
     },
     "dates_parsed": {
       "fail": "{row}-сап: башталышы же бүтүшү дата эмес.",

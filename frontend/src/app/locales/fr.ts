@@ -11489,7 +11489,7 @@ const resource = {
     "schedule.tabular_import.issue.too_many_rows": "Le fichier a plus de {{limit}} lignes d'activité ; divisez-le en fichiers plus petits",
     "schedule.tabular_import.issue.unsupported_file_type": "Le fichier n'est ni un tableau ni un CSV",
     "schedule.tabular_import.issue.value_too_long": "Champ « {{field}} » : {{length}} caractères, plus que {{limit}}",
-    "schedule.tabular_import.issue.pdf_no_text_layer": "Le PDF n'a pas de couche texte (scan ou image). Exportez le planning en XML MS Project, XER Primavera ou Excel et importez ce fichier.",
+    "schedule.tabular_import.issue.pdf_no_text_layer": "Le PDF n'a pas de couche texte (scan ou image). Exportez le planning en XML MS Project, XER ou Excel et importez ce fichier.",
     "schedule.tabular_import.issue.pdf_table_not_found": "Aucune page du PDF n'a d'en-tête de tableau de planning (ID, nom, début, fin, durée).",
     "schedule.tabular_import.issues_none": "Aucun problème trouvé dans le fichier.",
     "schedule.tabular_import.issues_title": "Problèmes dans le fichier",

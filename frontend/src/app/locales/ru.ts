@@ -12938,7 +12938,7 @@ const resource = {
     "schedule.tabular_import.issue.too_many_rows": "В файле больше {{limit}} строк задач; разделите его на меньшие файлы",
     "schedule.tabular_import.issue.unsupported_file_type": "Файл не является ни таблицей, ни CSV",
     "schedule.tabular_import.issue.value_too_long": "Поле «{{field}}»: {{length}} символов, больше чем {{limit}}",
-    "schedule.tabular_import.issue.pdf_no_text_layer": "В PDF нет текстового слоя (скан или изображение). Экспортируйте график в MS Project XML, Primavera XER или Excel и импортируйте этот файл.",
+    "schedule.tabular_import.issue.pdf_no_text_layer": "В PDF нет текстового слоя (скан или изображение). Экспортируйте график в MS Project XML, XER или Excel и импортируйте этот файл.",
     "schedule.tabular_import.issue.pdf_table_not_found": "Ни на одной странице PDF нет заголовка таблицы графика (ID, название, начало, окончание, длительность).",
     "schedule.tabular_import.issues_none": "В файле не найдено проблем.",
     "schedule.tabular_import.issues_title": "Проблемы в файле",

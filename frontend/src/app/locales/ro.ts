@@ -13242,7 +13242,7 @@ const resource = {
     "schedule.tabular_import.issue.too_many_rows": "Fișierul are mai mult de {{limit}} de rânduri de activități; împărțiți-l în fișiere mai mici",
     "schedule.tabular_import.issue.unsupported_file_type": "Fișierul nu este nici fișier de calcul tabelar, nici CSV",
     "schedule.tabular_import.issue.value_too_long": "Câmpul \"{{field}}\" are {{length}} de caractere, mai multe decât {{limit}}",
-    "schedule.tabular_import.issue.pdf_no_text_layer": "PDF-ul nu are strat de text (scanare sau imagine). Exportați graficul ca XML MS Project, XER Primavera sau Excel și importați acel fișier.",
+    "schedule.tabular_import.issue.pdf_no_text_layer": "PDF-ul nu are strat de text (scanare sau imagine). Exportați graficul ca XML MS Project, XER sau Excel și importați acel fișier.",
     "schedule.tabular_import.issue.pdf_table_not_found": "Nicio pagină a PDF-ului nu are antet de tabel de grafic (ID, nume, început, sfârșit, durată).",
     "schedule.tabular_import.issues_none": "Nu au fost găsite probleme în fișier.",
     "schedule.tabular_import.issues_title": "Probleme în fișier",

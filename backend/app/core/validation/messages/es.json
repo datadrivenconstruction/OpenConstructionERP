@@ -2225,7 +2225,7 @@
   "schedule_pdf_import": {
     "no_text_layer": {
       "fail": "El PDF no tiene capa de texto, no se puede leer su tabla.",
-      "suggestion": "Exporte el cronograma como XML de MS Project, XER de Primavera o Excel e importe ese archivo."
+      "suggestion": "Exporte el cronograma como XML de MS Project, XER o Excel e importe ese archivo."
     },
     "dates_parsed": {
       "fail": "Fila {row}: un inicio o un fin no es una fecha.",

@@ -9911,7 +9911,7 @@ const resource = {
     "schedule.tabular_import.issue.too_many_rows": "The file has more than {{limit}} activity rows; split it into smaller files",
     "schedule.tabular_import.issue.unsupported_file_type": "The file is not a spreadsheet or a CSV",
     "schedule.tabular_import.issue.value_too_long": "The {{field}} has {{length}} characters, more than {{limit}}",
-    "schedule.tabular_import.issue.pdf_no_text_layer": "The PDF has no text layer (a scan or an image). Export the schedule as MS Project XML, Primavera XER or Excel and import that file instead.",
+    "schedule.tabular_import.issue.pdf_no_text_layer": "The PDF has no text layer (a scan or an image). Export the schedule as MS Project XML, XER or Excel and import that file instead.",
     "schedule.tabular_import.issue.pdf_table_not_found": "No page of the PDF has a schedule table header (ID, name, start, finish, duration).",
     "schedule.tabular_import.issues_none": "No problems found in the file.",
     "schedule.tabular_import.issues_title": "Problems in the file",

@@ -14901,7 +14901,7 @@ const resource = {
     "schedule.tabular_import.issue.too_many_rows": "Filen har flere enn {{limit}} aktivitetsrader; del den i mindre filer",
     "schedule.tabular_import.issue.unsupported_file_type": "Filen er ikke et regneark eller en CSV",
     "schedule.tabular_import.issue.value_too_long": "Feltet «{{field}}» har {{length}} tegn, mer enn {{limit}}",
-    "schedule.tabular_import.issue.pdf_no_text_layer": "PDF-en har ikke noe tekstlag (skanning eller bilde). Eksporter planen som MS Project XML, Primavera XER eller Excel, og importer den filen.",
+    "schedule.tabular_import.issue.pdf_no_text_layer": "PDF-en har ikke noe tekstlag (skanning eller bilde). Eksporter planen som MS Project XML, XER eller Excel, og importer den filen.",
     "schedule.tabular_import.issue.pdf_table_not_found": "Ingen side i PDF-en har en tabelloverskrift for en fremdriftsplan (ID, navn, start, slutt, varighet).",
     "schedule.tabular_import.issues_none": "Ingen problemer funnet i filen.",
     "schedule.tabular_import.issues_title": "Problemer i filen",

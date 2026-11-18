@@ -2225,7 +2225,7 @@
   "schedule_pdf_import": {
     "no_text_layer": {
       "fail": "PDFにテキストレイヤーがないため、表を読み取れません。",
-      "suggestion": "工程表を MS Project XML、Primavera XER または Excel で書き出し、そのファイルをインポートしてください。"
+      "suggestion": "工程表を MS Project XML、XER または Excel で書き出し、そのファイルをインポートしてください。"
     },
     "dates_parsed": {
       "fail": "{row} 行目: 開始日または終了日が日付ではありません。",

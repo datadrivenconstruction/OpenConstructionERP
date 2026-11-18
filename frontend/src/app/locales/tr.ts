@@ -13405,7 +13405,7 @@ const resource = {
     "schedule.tabular_import.issue.too_many_rows": "Dosyada {{limit}}'den fazla faaliyet satırı var; daha küçük dosyalara bölün",
     "schedule.tabular_import.issue.unsupported_file_type": "Dosya ne elektronik tablo ne de CSV",
     "schedule.tabular_import.issue.value_too_long": "\"{{field}}\" alanı {{length}} karakter içeriyor, {{limit}}'den fazla",
-    "schedule.tabular_import.issue.pdf_no_text_layer": "PDF'de metin katmanı yok (tarama veya görüntü). Programı MS Project XML, Primavera XER veya Excel olarak dışa aktarın ve o dosyayı içe aktarın.",
+    "schedule.tabular_import.issue.pdf_no_text_layer": "PDF'de metin katmanı yok (tarama veya görüntü). Programı MS Project XML, XER veya Excel olarak dışa aktarın ve o dosyayı içe aktarın.",
     "schedule.tabular_import.issue.pdf_table_not_found": "PDF'in hiçbir sayfasında program tablosu başlığı yok (kimlik, ad, başlangıç, bitiş, süre).",
     "schedule.tabular_import.issues_none": "Dosyada sorun bulunamadı.",
     "schedule.tabular_import.issues_title": "Dosyadaki sorunlar",

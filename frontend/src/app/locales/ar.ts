@@ -18123,7 +18123,7 @@ const resource = {
     "schedule.tabular_import.issue.too_many_rows": "يحتوي الملف على أكثر من {{limit}} سطر نشاط؛ قسّمه إلى ملفات أصغر",
     "schedule.tabular_import.issue.unsupported_file_type": "الملف ليس جدول بيانات ولا CSV",
     "schedule.tabular_import.issue.value_too_long": "يحتوي الحقل \"{{field}}\" على {{length}} حرفاً، أكثر من {{limit}}",
-    "schedule.tabular_import.issue.pdf_no_text_layer": "لا يحتوي ملف PDF على طبقة نصية (مسح ضوئي أو صورة). صدّر الجدول الزمني بصيغة MS Project XML أو Primavera XER أو Excel واستورد ذلك الملف.",
+    "schedule.tabular_import.issue.pdf_no_text_layer": "لا يحتوي ملف PDF على طبقة نصية (مسح ضوئي أو صورة). صدّر الجدول الزمني بصيغة MS Project XML أو XER أو Excel واستورد ذلك الملف.",
     "schedule.tabular_import.issue.pdf_table_not_found": "لا تحتوي أي صفحة من ملف PDF على رأس جدول زمني (المعرّف، الاسم، البداية، النهاية، المدة).",
     "schedule.tabular_import.issues_none": "لم يُعثر على مشكلات في الملف.",
     "schedule.tabular_import.issues_title": "المشكلات في الملف",

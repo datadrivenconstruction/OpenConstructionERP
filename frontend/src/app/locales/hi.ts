@@ -12668,7 +12668,7 @@ const resource = {
     "schedule.tabular_import.issue.too_many_rows": "फ़ाइल में {{limit}} से ज़्यादा गतिविधि पंक्तियाँ हैं; इसे छोटी फ़ाइलों में विभाजित करें",
     "schedule.tabular_import.issue.unsupported_file_type": "फ़ाइल न तो स्प्रेडशीट है न ही CSV",
     "schedule.tabular_import.issue.value_too_long": "फ़ील्ड \"{{field}}\" में {{length}} वर्ण हैं, जो {{limit}} से ज़्यादा है",
-    "schedule.tabular_import.issue.pdf_no_text_layer": "PDF में टेक्स्ट लेयर नहीं है (स्कैन या छवि)। शेड्यूल को MS Project XML, Primavera XER या Excel के रूप में निर्यात करें और वह फ़ाइल आयात करें।",
+    "schedule.tabular_import.issue.pdf_no_text_layer": "PDF में टेक्स्ट लेयर नहीं है (स्कैन या छवि)। शेड्यूल को MS Project XML, XER या Excel के रूप में निर्यात करें और वह फ़ाइल आयात करें।",
     "schedule.tabular_import.issue.pdf_table_not_found": "PDF के किसी भी पृष्ठ पर शेड्यूल तालिका का शीर्षक नहीं है (ID, नाम, प्रारंभ, समाप्ति, अवधि)।",
     "schedule.tabular_import.issues_none": "फ़ाइल में कोई समस्या नहीं मिली।",
     "schedule.tabular_import.issues_title": "फ़ाइल में समस्याएँ",

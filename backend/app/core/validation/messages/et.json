@@ -2225,7 +2225,7 @@
   "schedule_pdf_import": {
     "no_text_layer": {
       "fail": "PDF-il puudub tekstikiht, seega tabelit ei saa lugeda.",
-      "suggestion": "Eksportige ajakava MS Project XML-, Primavera XER- või Excel-vormingusse ja importige see fail."
+      "suggestion": "Eksportige ajakava MS Project XML-, XER- või Excel-vormingusse ja importige see fail."
     },
     "dates_parsed": {
       "fail": "Rida {row}: algus või lõpp ei ole kuupäev.",

@@ -2225,7 +2225,7 @@
   "schedule_pdf_import": {
     "no_text_layer": {
       "fail": "PDF файлът няма текстов слой, таблицата не може да бъде прочетена.",
-      "suggestion": "Експортирайте графика като MS Project XML, Primavera XER или Excel и импортирайте този файл."
+      "suggestion": "Експортирайте графика като MS Project XML, XER или Excel и импортирайте този файл."
     },
     "dates_parsed": {
       "fail": "Ред {row}: начало или край не е дата.",

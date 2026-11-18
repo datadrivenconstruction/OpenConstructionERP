@@ -197,7 +197,7 @@ const resource = {
     "schedule.tabular_import.rows_desc": "Check the dates and durations of every row. Nothing is written until you import.",
     "schedule.tabular_import.rows_confidence": "Confidence",
     "schedule.tabular_import.rows_more": "More rows not shown: {{n}}",
-    "schedule.tabular_import.issue.pdf_no_text_layer": "The PDF has no text layer (a scan or an image). Export the schedule as MS Project XML, Primavera XER or Excel and import that file instead.",
+    "schedule.tabular_import.issue.pdf_no_text_layer": "The PDF has no text layer (a scan or an image). Export the schedule as MS Project XML, XER or Excel and import that file instead.",
     "schedule.tabular_import.issue.pdf_table_not_found": "No page of the PDF has a schedule table header (ID, name, start, finish, duration).",
     "about.dev_model_title": "Development and Contribution Model",
     "about.dev_model_p1": "OpenConstructionERP has been under continuous development for more than six years and has benefited from contributions, feedback, testing, and domain expertise from many different people.",

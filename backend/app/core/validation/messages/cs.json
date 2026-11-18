@@ -2225,7 +2225,7 @@
   "schedule_pdf_import": {
     "no_text_layer": {
       "fail": "PDF nemá textovou vrstvu, tabulku nelze přečíst.",
-      "suggestion": "Exportujte harmonogram jako MS Project XML, Primavera XER nebo Excel a importujte tento soubor."
+      "suggestion": "Exportujte harmonogram jako MS Project XML, XER nebo Excel a importujte tento soubor."
     },
     "dates_parsed": {
       "fail": "Řádek {row}: začátek nebo konec není datum.",

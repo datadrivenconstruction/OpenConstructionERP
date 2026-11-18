@@ -16259,7 +16259,7 @@ const resource = {
     "schedule.tabular_import.issue.too_many_rows": "ফাইলে {{limit}}টির বেশি কার্যক্রমের সারি আছে; এটি ছোট ফাইলে ভাগ করুন",
     "schedule.tabular_import.issue.unsupported_file_type": "ফাইলটি স্প্রেডশিট বা CSV নয়",
     "schedule.tabular_import.issue.value_too_long": "ক্ষেত্র \"{{field}}\"-এ {{length}}টি অক্ষর আছে, {{limit}}টির বেশি",
-    "schedule.tabular_import.issue.pdf_no_text_layer": "PDF-এ টেক্সট লেয়ার নেই (স্ক্যান বা ছবি)। সময়সূচিটি MS Project XML, Primavera XER বা Excel হিসেবে এক্সপোর্ট করে সেই ফাইলটি ইমপোর্ট করুন।",
+    "schedule.tabular_import.issue.pdf_no_text_layer": "PDF-এ টেক্সট লেয়ার নেই (স্ক্যান বা ছবি)। সময়সূচিটি MS Project XML, XER বা Excel হিসেবে এক্সপোর্ট করে সেই ফাইলটি ইমপোর্ট করুন।",
     "schedule.tabular_import.issue.pdf_table_not_found": "PDF-এর কোনো পৃষ্ঠায় সময়সূচি টেবিলের শিরোনাম নেই (ID, নাম, শুরু, শেষ, সময়কাল)।",
     "schedule.tabular_import.issues_none": "ফাইলে কোনো সমস্যা পাওয়া যায়নি।",
     "schedule.tabular_import.issues_title": "ফাইলের সমস্যা",

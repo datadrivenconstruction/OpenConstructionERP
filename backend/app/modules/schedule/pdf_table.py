@@ -179,7 +179,7 @@ def read_pdf_table(data: bytes) -> PdfTable:
         raise PdfTableError(
             "pdf_no_text_layer",
             "The PDF has no text layer (it is a scan or an image); import the schedule as MS Project XML, "
-            "Primavera XER or Excel instead",
+            "XER or Excel instead",
         )
 
     columns: list[_Cell] | None = None

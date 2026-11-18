@@ -12752,7 +12752,7 @@ const resource = {
     "schedule.tabular_import.issue.too_many_rows": "Die Datei hat mehr als {{limit}} Aktivitätszeilen; teilen Sie sie in kleinere Dateien auf",
     "schedule.tabular_import.issue.unsupported_file_type": "Die Datei ist keine Tabelle und keine CSV",
     "schedule.tabular_import.issue.value_too_long": "Feld „{{field}}“: {{length}} Zeichen, mehr als {{limit}}",
-    "schedule.tabular_import.issue.pdf_no_text_layer": "Das PDF hat keine Textebene (Scan oder Bild). Exportieren Sie den Terminplan als MS-Project-XML, Primavera-XER oder Excel und importieren Sie diese Datei.",
+    "schedule.tabular_import.issue.pdf_no_text_layer": "Das PDF hat keine Textebene (Scan oder Bild). Exportieren Sie den Terminplan als MS-Project-XML, XER oder Excel und importieren Sie diese Datei.",
     "schedule.tabular_import.issue.pdf_table_not_found": "Keine Seite des PDFs hat einen Tabellenkopf eines Terminplans (ID, Name, Anfang, Ende, Dauer).",
     "schedule.tabular_import.issues_none": "Keine Probleme in der Datei gefunden.",
     "schedule.tabular_import.issues_title": "Probleme in der Datei",

@@ -11423,7 +11423,7 @@ const resource = {
     "schedule.tabular_import.issue.too_many_rows": "Het bestand heeft meer dan {{limit}} activiteitrijen; splits het in kleinere bestanden",
     "schedule.tabular_import.issue.unsupported_file_type": "Het bestand is geen spreadsheet of CSV",
     "schedule.tabular_import.issue.value_too_long": "Veld \"{{field}}\": {{length}} tekens, meer dan {{limit}}",
-    "schedule.tabular_import.issue.pdf_no_text_layer": "De PDF heeft geen tekstlaag (scan of afbeelding). Exporteer de planning als MS Project-XML, Primavera-XER of Excel en importeer dat bestand.",
+    "schedule.tabular_import.issue.pdf_no_text_layer": "De PDF heeft geen tekstlaag (scan of afbeelding). Exporteer de planning als MS Project-XML, XER of Excel en importeer dat bestand.",
     "schedule.tabular_import.issue.pdf_table_not_found": "Geen pagina van de PDF heeft een tabelkop van een planning (ID, naam, begin, einde, duur).",
     "schedule.tabular_import.issues_none": "Geen problemen gevonden in het bestand.",
     "schedule.tabular_import.issues_title": "Problemen in het bestand",

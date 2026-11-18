@@ -11609,7 +11609,7 @@ const resource = {
     "schedule.tabular_import.issue.too_many_rows": "Il file ha più di {{limit}} righe di attività; dividerlo in file più piccoli",
     "schedule.tabular_import.issue.unsupported_file_type": "Il file non è un foglio di calcolo né un CSV",
     "schedule.tabular_import.issue.value_too_long": "Il campo «{{field}}» ha {{length}} caratteri, più di {{limit}}",
-    "schedule.tabular_import.issue.pdf_no_text_layer": "Il PDF non ha un livello di testo (scansione o immagine). Esporta il cronoprogramma come XML di MS Project, XER di Primavera o Excel e importa quel file.",
+    "schedule.tabular_import.issue.pdf_no_text_layer": "Il PDF non ha un livello di testo (scansione o immagine). Esporta il cronoprogramma come XML di MS Project, XER o Excel e importa quel file.",
     "schedule.tabular_import.issue.pdf_table_not_found": "Nessuna pagina del PDF ha un'intestazione di tabella del cronoprogramma (ID, nome, inizio, fine, durata).",
     "schedule.tabular_import.issues_none": "Nessun problema trovato nel file.",
     "schedule.tabular_import.issues_title": "Problemi nel file",

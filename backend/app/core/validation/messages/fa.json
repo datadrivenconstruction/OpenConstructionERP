@@ -2225,7 +2225,7 @@
   "schedule_pdf_import": {
     "no_text_layer": {
       "fail": "فایل PDF لایه متنی ندارد، بنابراین جدول آن خوانده نمی‌شود.",
-      "suggestion": "برنامه زمان‌بندی را به‌صورت MS Project XML، Primavera XER یا Excel صادر کنید و آن فایل را وارد کنید."
+      "suggestion": "برنامه زمان‌بندی را به‌صورت MS Project XML، XER یا Excel صادر کنید و آن فایل را وارد کنید."
     },
     "dates_parsed": {
       "fail": "ردیف {row}: تاریخ شروع یا پایان، تاریخ معتبر نیست.",

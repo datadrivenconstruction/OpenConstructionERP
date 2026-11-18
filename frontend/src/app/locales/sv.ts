@@ -15035,7 +15035,7 @@ const resource = {
     "schedule.tabular_import.issue.too_many_rows": "Filen har fler än {{limit}} aktivitetsrader; dela den i mindre filer",
     "schedule.tabular_import.issue.unsupported_file_type": "Filen är inte ett kalkylblad eller en CSV",
     "schedule.tabular_import.issue.value_too_long": "Fältet \"{{field}}\" har {{length}} tecken, mer än {{limit}}",
-    "schedule.tabular_import.issue.pdf_no_text_layer": "PDF:en saknar textlager (skanning eller bild). Exportera tidplanen som MS Project XML, Primavera XER eller Excel och importera den filen.",
+    "schedule.tabular_import.issue.pdf_no_text_layer": "PDF:en saknar textlager (skanning eller bild). Exportera tidplanen som MS Project XML, XER eller Excel och importera den filen.",
     "schedule.tabular_import.issue.pdf_table_not_found": "Ingen sida i PDF:en har en tabellrubrik för en tidplan (ID, namn, start, slut, varaktighet).",
     "schedule.tabular_import.issues_none": "Inga problem hittades i filen.",
     "schedule.tabular_import.issues_title": "Problem i filen",

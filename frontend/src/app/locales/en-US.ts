@@ -1708,7 +1708,7 @@ const resource = {
     "schedule.tabular_import.rows_desc": "Check the dates and durations of every row. Nothing is written until you import.",
     "schedule.tabular_import.rows_confidence": "Confidence",
     "schedule.tabular_import.rows_more": "More rows not shown: {{n}}",
-    "schedule.tabular_import.issue.pdf_no_text_layer": "The PDF has no text layer (a scan or an image). Export the schedule as MS Project XML, Primavera XER or Excel and import that file instead.",
+    "schedule.tabular_import.issue.pdf_no_text_layer": "The PDF has no text layer (a scan or an image). Export the schedule as MS Project XML, XER or Excel and import that file instead.",
     "schedule.tabular_import.issue.pdf_table_not_found": "No page of the PDF has a schedule table header (ID, name, start, finish, duration).",
     "supplier_catalogs.err_unknown_unit": "unit not recognized",
     "measurement_book.explainer": "Record what was actually built, one dated line per location: number x length x width x height, or a direct quantity. A second person checks each line. Checked quantities make the running bill, which progress claims then pick up.",

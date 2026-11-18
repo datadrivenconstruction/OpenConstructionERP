@@ -16575,7 +16575,7 @@ const resource = {
     "schedule.tabular_import.issue.too_many_rows": "Файлда {{limit}}-ден көп әрекет жолы бар; оны кішірек файлдарға бөліңіз",
     "schedule.tabular_import.issue.unsupported_file_type": "Файл кестелік файл да, CSV да емес",
     "schedule.tabular_import.issue.value_too_long": "«{{field}}» өрісінде {{length}} таңба бар, бұл {{limit}}-ден көп",
-    "schedule.tabular_import.issue.pdf_no_text_layer": "PDF-те мәтін қабаты жоқ (скан немесе сурет). Кестені MS Project XML, Primavera XER немесе Excel ретінде экспорттап, сол файлды импорттаңыз.",
+    "schedule.tabular_import.issue.pdf_no_text_layer": "PDF-те мәтін қабаты жоқ (скан немесе сурет). Кестені MS Project XML, XER немесе Excel ретінде экспорттап, сол файлды импорттаңыз.",
     "schedule.tabular_import.issue.pdf_table_not_found": "PDF-тің ешбір бетінде кесте тақырыбы жоқ (ID, атауы, басталуы, аяқталуы, ұзақтығы).",
     "schedule.tabular_import.issues_none": "Файлда мәселе табылмады.",
     "schedule.tabular_import.issues_title": "Файлдағы мәселелер",

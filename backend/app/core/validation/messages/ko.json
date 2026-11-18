@@ -2225,7 +2225,7 @@
   "schedule_pdf_import": {
     "no_text_layer": {
       "fail": "PDF에 텍스트 레이어가 없어 표를 읽을 수 없습니다.",
-      "suggestion": "일정을 MS Project XML, Primavera XER 또는 Excel로 내보낸 뒤 그 파일을 가져오세요."
+      "suggestion": "일정을 MS Project XML, XER 또는 Excel로 내보낸 뒤 그 파일을 가져오세요."
     },
     "dates_parsed": {
       "fail": "{row}행: 시작일 또는 종료일이 날짜가 아닙니다.",

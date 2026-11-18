@@ -17284,7 +17284,7 @@ const resource = {
     "schedule.tabular_import.issue.too_many_rows": "Failil on rohkem kui {{limit}} tegevuse rida; jagage see väiksemateks failideks",
     "schedule.tabular_import.issue.unsupported_file_type": "Fail ei ole tabel ega CSV",
     "schedule.tabular_import.issue.value_too_long": "Väljal \"{{field}}\" on {{length}} tähemärki, rohkem kui {{limit}}",
-    "schedule.tabular_import.issue.pdf_no_text_layer": "PDF-il puudub tekstikiht (skaneering või pilt). Eksportige ajakava MS Project XML-, Primavera XER- või Excel-vormingusse ja importige see fail.",
+    "schedule.tabular_import.issue.pdf_no_text_layer": "PDF-il puudub tekstikiht (skaneering või pilt). Eksportige ajakava MS Project XML-, XER- või Excel-vormingusse ja importige see fail.",
     "schedule.tabular_import.issue.pdf_table_not_found": "Ühelgi PDF-i lehel pole ajakava tabeli päist (ID, nimi, algus, lõpp, kestus).",
     "schedule.tabular_import.issues_none": "Failist probleeme ei leitud.",
     "schedule.tabular_import.issues_title": "Probleemid failis",

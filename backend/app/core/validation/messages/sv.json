@@ -2225,7 +2225,7 @@
   "schedule_pdf_import": {
     "no_text_layer": {
       "fail": "PDF:en saknar textlager, så tabellen kan inte läsas.",
-      "suggestion": "Exportera tidplanen som MS Project XML, Primavera XER eller Excel och importera den filen."
+      "suggestion": "Exportera tidplanen som MS Project XML, XER eller Excel och importera den filen."
     },
     "dates_parsed": {
       "fail": "Rad {row}: en start eller ett slut är inte ett datum.",

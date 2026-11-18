@@ -11209,7 +11209,7 @@ const resource = {
     "schedule.tabular_import.issue.too_many_rows": "El archivo tiene más de {{limit}} filas de actividad; divídalo en archivos más pequeños",
     "schedule.tabular_import.issue.unsupported_file_type": "El archivo no es una hoja de cálculo ni un CSV",
     "schedule.tabular_import.issue.value_too_long": "El campo «{{field}}» tiene {{length}} caracteres, más que {{limit}}",
-    "schedule.tabular_import.issue.pdf_no_text_layer": "El PDF no tiene capa de texto (escaneo o imagen). Exporte el cronograma como XML de MS Project, XER de Primavera o Excel e importe ese archivo.",
+    "schedule.tabular_import.issue.pdf_no_text_layer": "El PDF no tiene capa de texto (escaneo o imagen). Exporte el cronograma como XML de MS Project, XER o Excel e importe ese archivo.",
     "schedule.tabular_import.issue.pdf_table_not_found": "Ninguna página del PDF tiene un encabezado de tabla de cronograma (ID, nombre, inicio, fin, duración).",
     "schedule.tabular_import.issues_none": "No se encontraron problemas en el archivo.",
     "schedule.tabular_import.issues_title": "Problemas en el archivo",

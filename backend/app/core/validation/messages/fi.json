@@ -2225,7 +2225,7 @@
   "schedule_pdf_import": {
     "no_text_layer": {
       "fail": "PDF:ssä ei ole tekstikerrosta, joten taulukkoa ei voi lukea.",
-      "suggestion": "Vie aikataulu MS Project XML-, Primavera XER- tai Excel-muotoon ja tuo se tiedosto."
+      "suggestion": "Vie aikataulu MS Project XML-, XER- tai Excel-muotoon ja tuo se tiedosto."
     },
     "dates_parsed": {
       "fail": "Rivi {row}: alku tai loppu ei ole päivämäärä.",

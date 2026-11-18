@@ -2225,7 +2225,7 @@
   "schedule_pdf_import": {
     "no_text_layer": {
       "fail": "The PDF has no text layer, so its table cannot be read.",
-      "suggestion": "Export the schedule as MS Project XML, Primavera XER or Excel and import that file instead."
+      "suggestion": "Export the schedule as MS Project XML, XER or Excel and import that file instead."
     },
     "dates_parsed": {
       "fail": "Row {row}: a start or finish is not a date.",

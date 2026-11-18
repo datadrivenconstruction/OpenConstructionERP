@@ -12699,7 +12699,7 @@ const resource = {
     "schedule.tabular_import.issue.too_many_rows": "Файлът има повече от {{limit}} реда с дейности; разделете го на по-малки файлове",
     "schedule.tabular_import.issue.unsupported_file_type": "Файлът не е нито електронна таблица, нито CSV",
     "schedule.tabular_import.issue.value_too_long": "Полето „{{field}}“ има {{length}} знака, повече от {{limit}}",
-    "schedule.tabular_import.issue.pdf_no_text_layer": "PDF файлът няма текстов слой (сканиране или изображение). Експортирайте графика като MS Project XML, Primavera XER или Excel и импортирайте този файл.",
+    "schedule.tabular_import.issue.pdf_no_text_layer": "PDF файлът няма текстов слой (сканиране или изображение). Експортирайте графика като MS Project XML, XER или Excel и импортирайте този файл.",
     "schedule.tabular_import.issue.pdf_table_not_found": "Нито една страница на PDF файла няма заглавие на таблица на график (ID, име, начало, край, продължителност).",
     "schedule.tabular_import.issues_none": "Във файла не бяха открити проблеми.",
     "schedule.tabular_import.issues_title": "Проблеми във файла",

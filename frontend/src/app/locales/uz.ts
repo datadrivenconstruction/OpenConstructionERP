@@ -13053,7 +13053,7 @@ const resource = {
     "schedule.tabular_import.issue.too_many_rows": "Faylda {{limit}} dan koʻp faoliyat qatori bor; uni kichikroq fayllarga boʻling",
     "schedule.tabular_import.issue.unsupported_file_type": "Fayl elektron jadval ham, CSV ham emas",
     "schedule.tabular_import.issue.value_too_long": "\"{{field}}\" maydonida {{length}} belgi bor, bu {{limit}} dan koʻp",
-    "schedule.tabular_import.issue.pdf_no_text_layer": "PDFʼda matn qatlami yoʻq (skan yoki rasm). Jadvalni MS Project XML, Primavera XER yoki Excel sifatida eksport qiling va oʻsha faylni import qiling.",
+    "schedule.tabular_import.issue.pdf_no_text_layer": "PDFʼda matn qatlami yoʻq (skan yoki rasm). Jadvalni MS Project XML, XER yoki Excel sifatida eksport qiling va oʻsha faylni import qiling.",
     "schedule.tabular_import.issue.pdf_table_not_found": "PDFʼning hech bir sahifasida jadval sarlavhasi yoʻq (ID, nomi, boshlanishi, tugashi, davomiyligi).",
     "schedule.tabular_import.issues_none": "Faylda muammo topilmadi.",
     "schedule.tabular_import.issues_title": "Fayldagi muammolar",

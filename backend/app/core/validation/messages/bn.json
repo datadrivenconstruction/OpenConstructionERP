@@ -2225,7 +2225,7 @@
   "schedule_pdf_import": {
     "no_text_layer": {
       "fail": "PDF-এ কোনো টেক্সট লেয়ার নেই, তাই এর টেবিল পড়া যায় না।",
-      "suggestion": "সময়সূচিটি MS Project XML, Primavera XER বা Excel হিসেবে এক্সপোর্ট করে সেই ফাইলটি ইমপোর্ট করুন।"
+      "suggestion": "সময়সূচিটি MS Project XML, XER বা Excel হিসেবে এক্সপোর্ট করে সেই ফাইলটি ইমপোর্ট করুন।"
     },
     "dates_parsed": {
       "fail": "সারি {row}: শুরু বা শেষ কোনো তারিখ নয়।",

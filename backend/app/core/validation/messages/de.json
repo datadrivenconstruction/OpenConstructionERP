@@ -2225,7 +2225,7 @@
   "schedule_pdf_import": {
     "no_text_layer": {
       "fail": "Das PDF hat keine Textebene, die Tabelle kann nicht gelesen werden.",
-      "suggestion": "Exportieren Sie den Terminplan als MS-Project-XML, Primavera-XER oder Excel und importieren Sie diese Datei."
+      "suggestion": "Exportieren Sie den Terminplan als MS-Project-XML, XER oder Excel und importieren Sie diese Datei."
     },
     "dates_parsed": {
       "fail": "Zeile {row}: Anfang oder Ende ist kein Datum.",

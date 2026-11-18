@@ -2225,7 +2225,7 @@
   "schedule_pdf_import": {
     "no_text_layer": {
       "fail": "Le PDF n'a pas de couche texte, son tableau ne peut pas être lu.",
-      "suggestion": "Exportez le planning en XML MS Project, XER Primavera ou Excel et importez ce fichier."
+      "suggestion": "Exportez le planning en XML MS Project, XER ou Excel et importez ce fichier."
     },
     "dates_parsed": {
       "fail": "Ligne {row} : un début ou une fin n'est pas une date.",

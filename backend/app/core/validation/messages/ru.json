@@ -2225,7 +2225,7 @@
   "schedule_pdf_import": {
     "no_text_layer": {
       "fail": "В PDF нет текстового слоя, таблицу прочитать нельзя.",
-      "suggestion": "Экспортируйте график в MS Project XML, Primavera XER или Excel и импортируйте этот файл."
+      "suggestion": "Экспортируйте график в MS Project XML, XER или Excel и импортируйте этот файл."
     },
     "dates_parsed": {
       "fail": "Строка {row}: начало или окончание не является датой.",

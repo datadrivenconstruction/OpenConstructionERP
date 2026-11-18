@@ -2225,7 +2225,7 @@
   "schedule_pdf_import": {
     "no_text_layer": {
       "fail": "ל-PDF אין שכבת טקסט, ולכן לא ניתן לקרוא את הטבלה.",
-      "suggestion": "ייצאו את לוח הזמנים כ-MS Project XML, Primavera XER או Excel וייבאו את הקובץ הזה."
+      "suggestion": "ייצאו את לוח הזמנים כ-MS Project XML, XER או Excel וייבאו את הקובץ הזה."
     },
     "dates_parsed": {
       "fail": "שורה {row}: התחלה או סיום אינם תאריך.",

@@ -2225,7 +2225,7 @@
   "schedule_pdf_import": {
     "no_text_layer": {
       "fail": "PDF میں ٹیکسٹ لیئر نہیں ہے، اس لیے اس کا جدول پڑھا نہیں جا سکتا۔",
-      "suggestion": "شیڈول کو MS Project XML، Primavera XER یا Excel کے طور پر ایکسپورٹ کریں اور وہ فائل امپورٹ کریں۔"
+      "suggestion": "شیڈول کو MS Project XML، XER یا Excel کے طور پر ایکسپورٹ کریں اور وہ فائل امپورٹ کریں۔"
     },
     "dates_parsed": {
       "fail": "قطار {row}: شروع یا اختتام تاریخ نہیں ہے۔",

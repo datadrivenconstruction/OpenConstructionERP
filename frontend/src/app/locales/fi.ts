@@ -12431,7 +12431,7 @@ const resource = {
     "schedule.tabular_import.issue.too_many_rows": "Tiedostossa on enemmän kuin {{limit}} tehtäväriviä; jaa se pienempiin tiedostoihin",
     "schedule.tabular_import.issue.unsupported_file_type": "Tiedosto ei ole taulukko eikä CSV",
     "schedule.tabular_import.issue.value_too_long": "Kentässä \"{{field}}\" on {{length}} merkkiä, enemmän kuin {{limit}}",
-    "schedule.tabular_import.issue.pdf_no_text_layer": "PDF:ssä ei ole tekstikerrosta (skannaus tai kuva). Vie aikataulu MS Project XML-, Primavera XER- tai Excel-muotoon ja tuo se tiedosto.",
+    "schedule.tabular_import.issue.pdf_no_text_layer": "PDF:ssä ei ole tekstikerrosta (skannaus tai kuva). Vie aikataulu MS Project XML-, XER- tai Excel-muotoon ja tuo se tiedosto.",
     "schedule.tabular_import.issue.pdf_table_not_found": "Millään PDF:n sivulla ei ole aikataulutaulukon otsikkoriviä (tunnus, nimi, alku, loppu, kesto).",
     "schedule.tabular_import.issues_none": "Tiedostosta ei löytynyt ongelmia.",
     "schedule.tabular_import.issues_title": "Ongelmat tiedostossa",

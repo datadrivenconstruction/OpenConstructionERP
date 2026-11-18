@@ -2225,7 +2225,7 @@
   "schedule_pdf_import": {
     "no_text_layer": {
       "fail": "PDF файлында мәтін қабаты жоқ, сондықтан кестені оқу мүмкін емес.",
-      "suggestion": "Кестені MS Project XML, Primavera XER немесе Excel ретінде экспорттап, сол файлды импорттаңыз."
+      "suggestion": "Кестені MS Project XML, XER немесе Excel ретінде экспорттап, сол файлды импорттаңыз."
     },
     "dates_parsed": {
       "fail": "{row}-жол: басталу немесе аяқталу күн емес.",

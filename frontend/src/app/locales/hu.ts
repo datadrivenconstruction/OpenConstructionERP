@@ -11319,7 +11319,7 @@ const resource = {
     "schedule.tabular_import.issue.too_many_rows": "A fájlban {{limit}}-nél több tevékenység sor van; ossza kisebb fájlokra",
     "schedule.tabular_import.issue.unsupported_file_type": "A fájl nem táblázat és nem CSV",
     "schedule.tabular_import.issue.value_too_long": "A „{{field}}” mező {{length}} karakteres, ez több, mint {{limit}}",
-    "schedule.tabular_import.issue.pdf_no_text_layer": "A PDF-nek nincs szövegrétege (szkennelt vagy kép). Exportálja az ütemtervet MS Project XML, Primavera XER vagy Excel formátumba, és azt importálja.",
+    "schedule.tabular_import.issue.pdf_no_text_layer": "A PDF-nek nincs szövegrétege (szkennelt vagy kép). Exportálja az ütemtervet MS Project XML, XER vagy Excel formátumba, és azt importálja.",
     "schedule.tabular_import.issue.pdf_table_not_found": "A PDF egyik oldalán sincs ütemterv-táblázat fejléc (azonosító, név, kezdés, befejezés, időtartam).",
     "schedule.tabular_import.issues_none": "Nem találtunk problémát a fájlban.",
     "schedule.tabular_import.issues_title": "Problémák a fájlban",

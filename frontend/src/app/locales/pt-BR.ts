@@ -11217,7 +11217,7 @@ const resource = {
     "schedule.tabular_import.issue.too_many_rows": "O arquivo tem mais de {{limit}} linhas de atividade; divida-o em arquivos menores",
     "schedule.tabular_import.issue.unsupported_file_type": "O arquivo não é uma planilha nem um CSV",
     "schedule.tabular_import.issue.value_too_long": "O campo «{{field}}» tem {{length}} caracteres, mais do que {{limit}}",
-    "schedule.tabular_import.issue.pdf_no_text_layer": "O PDF não tem camada de texto (digitalização ou imagem). Exporte o cronograma como XML do MS Project, XER do Primavera ou Excel e importe esse arquivo.",
+    "schedule.tabular_import.issue.pdf_no_text_layer": "O PDF não tem camada de texto (digitalização ou imagem). Exporte o cronograma como XML do MS Project, XER ou Excel e importe esse arquivo.",
     "schedule.tabular_import.issue.pdf_table_not_found": "Nenhuma página do PDF tem cabeçalho de tabela de cronograma (ID, nome, início, término, duração).",
     "schedule.tabular_import.issues_none": "Nenhum problema encontrado no arquivo.",
     "schedule.tabular_import.issues_title": "Problemas no arquivo",

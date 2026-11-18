@@ -12562,7 +12562,7 @@ const resource = {
     "schedule.tabular_import.issue.too_many_rows": "文件超过 {{limit}} 个活动行；请拆分为更小的文件",
     "schedule.tabular_import.issue.unsupported_file_type": "文件既不是电子表格也不是 CSV",
     "schedule.tabular_import.issue.value_too_long": "字段「{{field}}」有 {{length}} 个字符，超过 {{limit}}",
-    "schedule.tabular_import.issue.pdf_no_text_layer": "该 PDF 没有文本层（扫描件或图片）。请将进度计划导出为 MS Project XML、Primavera XER 或 Excel，然后导入该文件。",
+    "schedule.tabular_import.issue.pdf_no_text_layer": "该 PDF 没有文本层（扫描件或图片）。请将进度计划导出为 MS Project XML、XER 或 Excel，然后导入该文件。",
     "schedule.tabular_import.issue.pdf_table_not_found": "PDF 中没有任何页面包含进度表表头（编号、名称、开始、完成、工期）。",
     "schedule.tabular_import.issues_none": "文件中未发现问题。",
     "schedule.tabular_import.issues_title": "文件中的问题",

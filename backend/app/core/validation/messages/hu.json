@@ -2225,7 +2225,7 @@
   "schedule_pdf_import": {
     "no_text_layer": {
       "fail": "A PDF-nek nincs szövegrétege, a táblázat nem olvasható.",
-      "suggestion": "Exportálja az ütemtervet MS Project XML, Primavera XER vagy Excel formátumba, és azt importálja."
+      "suggestion": "Exportálja az ütemtervet MS Project XML, XER vagy Excel formátumba, és azt importálja."
     },
     "dates_parsed": {
       "fail": "{row}. sor: a kezdés vagy a befejezés nem dátum.",

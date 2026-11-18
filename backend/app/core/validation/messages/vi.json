@@ -2225,7 +2225,7 @@
   "schedule_pdf_import": {
     "no_text_layer": {
       "fail": "PDF không có lớp văn bản nên không thể đọc bảng.",
-      "suggestion": "Hãy xuất tiến độ dưới dạng MS Project XML, Primavera XER hoặc Excel và nhập tệp đó."
+      "suggestion": "Hãy xuất tiến độ dưới dạng MS Project XML, XER hoặc Excel và nhập tệp đó."
     },
     "dates_parsed": {
       "fail": "Dòng {row}: ngày bắt đầu hoặc kết thúc không phải là ngày.",

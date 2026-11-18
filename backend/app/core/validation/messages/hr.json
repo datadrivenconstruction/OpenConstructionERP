@@ -2225,7 +2225,7 @@
   "schedule_pdf_import": {
     "no_text_layer": {
       "fail": "PDF nema tekstualni sloj, tablica se ne može pročitati.",
-      "suggestion": "Izvezite terminski plan kao MS Project XML, Primavera XER ili Excel i uvezite tu datoteku."
+      "suggestion": "Izvezite terminski plan kao MS Project XML, XER ili Excel i uvezite tu datoteku."
     },
     "dates_parsed": {
       "fail": "Redak {row}: početak ili završetak nije datum.",

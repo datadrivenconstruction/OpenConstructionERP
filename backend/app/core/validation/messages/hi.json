@@ -2225,7 +2225,7 @@
   "schedule_pdf_import": {
     "no_text_layer": {
       "fail": "PDF में टेक्स्ट लेयर नहीं है, इसलिए इसकी तालिका पढ़ी नहीं जा सकती।",
-      "suggestion": "शेड्यूल को MS Project XML, Primavera XER या Excel के रूप में निर्यात करें और वह फ़ाइल आयात करें।"
+      "suggestion": "शेड्यूल को MS Project XML, XER या Excel के रूप में निर्यात करें और वह फ़ाइल आयात करें।"
     },
     "dates_parsed": {
       "fail": "पंक्ति {row}: प्रारंभ या समाप्ति तिथि नहीं है।",

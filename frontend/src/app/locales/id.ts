@@ -13047,7 +13047,7 @@ const resource = {
     "schedule.tabular_import.issue.too_many_rows": "File memiliki lebih dari {{limit}} baris aktivitas; bagi menjadi file yang lebih kecil",
     "schedule.tabular_import.issue.unsupported_file_type": "File bukan spreadsheet atau CSV",
     "schedule.tabular_import.issue.value_too_long": "Kolom \"{{field}}\" memiliki {{length}} karakter, lebih dari {{limit}}",
-    "schedule.tabular_import.issue.pdf_no_text_layer": "PDF tidak memiliki lapisan teks (pindaian atau gambar). Ekspor jadwal sebagai MS Project XML, Primavera XER, atau Excel lalu impor file tersebut.",
+    "schedule.tabular_import.issue.pdf_no_text_layer": "PDF tidak memiliki lapisan teks (pindaian atau gambar). Ekspor jadwal sebagai MS Project XML, XER, atau Excel lalu impor file tersebut.",
     "schedule.tabular_import.issue.pdf_table_not_found": "Tidak ada halaman PDF yang memiliki judul tabel jadwal (ID, nama, mulai, selesai, durasi).",
     "schedule.tabular_import.issues_none": "Tidak ditemukan masalah dalam file.",
     "schedule.tabular_import.issues_title": "Masalah dalam file",

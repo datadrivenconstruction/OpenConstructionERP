@@ -16624,7 +16624,7 @@ const resource = {
     "schedule.tabular_import.issue.too_many_rows": "Το αρχείο έχει περισσότερες από {{limit}} γραμμές δραστηριοτήτων· χωρίστε το σε μικρότερα αρχεία",
     "schedule.tabular_import.issue.unsupported_file_type": "Το αρχείο δεν είναι υπολογιστικό φύλλο ούτε CSV",
     "schedule.tabular_import.issue.value_too_long": "Το πεδίο «{{field}}» έχει {{length}} χαρακτήρες, περισσότερους από {{limit}}",
-    "schedule.tabular_import.issue.pdf_no_text_layer": "Το PDF δεν έχει επίπεδο κειμένου (σάρωση ή εικόνα). Εξαγάγετε το χρονοδιάγραμμα ως MS Project XML, Primavera XER ή Excel και εισαγάγετε αυτό το αρχείο.",
+    "schedule.tabular_import.issue.pdf_no_text_layer": "Το PDF δεν έχει επίπεδο κειμένου (σάρωση ή εικόνα). Εξαγάγετε το χρονοδιάγραμμα ως MS Project XML, XER ή Excel και εισαγάγετε αυτό το αρχείο.",
     "schedule.tabular_import.issue.pdf_table_not_found": "Καμία σελίδα του PDF δεν έχει κεφαλίδα πίνακα χρονοδιαγράμματος (ID, όνομα, έναρξη, λήξη, διάρκεια).",
     "schedule.tabular_import.issues_none": "Δεν βρέθηκαν προβλήματα στο αρχείο.",
     "schedule.tabular_import.issues_title": "Προβλήματα στο αρχείο",

@@ -2225,7 +2225,7 @@
   "schedule_pdf_import": {
     "no_text_layer": {
       "fail": "PDF ไม่มีชั้นข้อความ จึงอ่านตารางไม่ได้",
-      "suggestion": "ส่งออกแผนงานเป็น MS Project XML, Primavera XER หรือ Excel แล้วนำเข้าไฟล์นั้นแทน"
+      "suggestion": "ส่งออกแผนงานเป็น MS Project XML, XER หรือ Excel แล้วนำเข้าไฟล์นั้นแทน"
     },
     "dates_parsed": {
       "fail": "แถว {row}: วันเริ่มหรือวันสิ้นสุดไม่ใช่วันที่",

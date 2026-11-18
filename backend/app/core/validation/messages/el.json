@@ -2225,7 +2225,7 @@
   "schedule_pdf_import": {
     "no_text_layer": {
       "fail": "Το PDF δεν έχει επίπεδο κειμένου, ο πίνακας δεν μπορεί να διαβαστεί.",
-      "suggestion": "Εξαγάγετε το χρονοδιάγραμμα ως MS Project XML, Primavera XER ή Excel και εισαγάγετε αυτό το αρχείο."
+      "suggestion": "Εξαγάγετε το χρονοδιάγραμμα ως MS Project XML, XER ή Excel και εισαγάγετε αυτό το αρχείο."
     },
     "dates_parsed": {
       "fail": "Γραμμή {row}: μια έναρξη ή λήξη δεν είναι ημερομηνία.",

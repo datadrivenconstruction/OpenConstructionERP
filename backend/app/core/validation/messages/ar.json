@@ -2225,7 +2225,7 @@
   "schedule_pdf_import": {
     "no_text_layer": {
       "fail": "لا يحتوي ملف PDF على طبقة نصية، لذا لا يمكن قراءة جدوله.",
-      "suggestion": "صدّر الجدول الزمني بصيغة MS Project XML أو Primavera XER أو Excel واستورد ذلك الملف."
+      "suggestion": "صدّر الجدول الزمني بصيغة MS Project XML أو XER أو Excel واستورد ذلك الملف."
     },
     "dates_parsed": {
       "fail": "الصف {row}: تاريخ البداية أو النهاية ليس تاريخًا صالحًا.",

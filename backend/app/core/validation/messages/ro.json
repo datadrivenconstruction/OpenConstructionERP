@@ -2225,7 +2225,7 @@
   "schedule_pdf_import": {
     "no_text_layer": {
       "fail": "PDF-ul nu are strat de text, tabelul nu poate fi citit.",
-      "suggestion": "Exportați graficul ca XML MS Project, XER Primavera sau Excel și importați acel fișier."
+      "suggestion": "Exportați graficul ca XML MS Project, XER sau Excel și importați acel fișier."
     },
     "dates_parsed": {
       "fail": "Rândul {row}: un început sau un sfârșit nu este o dată.",

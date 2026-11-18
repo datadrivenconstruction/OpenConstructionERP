@@ -16583,7 +16583,7 @@ const resource = {
     "schedule.tabular_import.issue.too_many_rows": "فائل میں {{limit}} سے زیادہ سرگرمی قطاریں ہیں؛ اسے چھوٹی فائلوں میں تقسیم کریں",
     "schedule.tabular_import.issue.unsupported_file_type": "فائل نہ تو اسپریڈشیٹ ہے اور نہ ہی CSV",
     "schedule.tabular_import.issue.value_too_long": "فیلڈ \"{{field}}\" میں {{length}} حروف ہیں، جو {{limit}} سے زیادہ ہیں",
-    "schedule.tabular_import.issue.pdf_no_text_layer": "PDF میں ٹیکسٹ لیئر نہیں ہے (اسکین یا تصویر)۔ شیڈول کو MS Project XML، Primavera XER یا Excel کے طور پر ایکسپورٹ کریں اور وہ فائل امپورٹ کریں۔",
+    "schedule.tabular_import.issue.pdf_no_text_layer": "PDF میں ٹیکسٹ لیئر نہیں ہے (اسکین یا تصویر)۔ شیڈول کو MS Project XML، XER یا Excel کے طور پر ایکسپورٹ کریں اور وہ فائل امپورٹ کریں۔",
     "schedule.tabular_import.issue.pdf_table_not_found": "PDF کے کسی صفحے پر شیڈول جدول کا ہیڈر نہیں ہے (ID، نام، شروع، اختتام، مدت)۔",
     "schedule.tabular_import.issues_none": "فائل میں کوئی مسئلہ نہیں ملا۔",
     "schedule.tabular_import.issues_title": "فائل میں مسائل",

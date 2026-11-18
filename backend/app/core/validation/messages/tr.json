@@ -2225,7 +2225,7 @@
   "schedule_pdf_import": {
     "no_text_layer": {
       "fail": "PDF'de metin katmanı yok, tablo okunamıyor.",
-      "suggestion": "Programı MS Project XML, Primavera XER veya Excel olarak dışa aktarın ve o dosyayı içe aktarın."
+      "suggestion": "Programı MS Project XML, XER veya Excel olarak dışa aktarın ve o dosyayı içe aktarın."
     },
     "dates_parsed": {
       "fail": "Satır {row}: bir başlangıç veya bitiş tarih değil.",
