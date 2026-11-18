@@ -73,6 +73,7 @@ import { RecordDeliveryModal } from './RecordDeliveryModal';
 import { LineRequirements, changedRequirements } from './LineRequirements';
 import { ConfirmReceiptDialog, type ConfirmableReceipt } from './ConfirmReceiptDialog';
 import { fmtFixed } from '@/shared/lib/formatters';
+import { canUpdatePurchaseOrders } from './poPermissions';
 import { CASH_TERMS, NET_DAY_OPTIONS, isStandardPaymentTerms, paymentTermsToWire, paymentTermsToForm } from './paymentTerms';
 import { orderSource, rfqDeepLink } from '@/shared/lib/awardChainLinks';
 import { RelatedRecordLink } from '@/shared/ui/RelatedRecordLink';
@@ -719,6 +720,8 @@ function PurchaseOrdersTab({
   const addToast = useToastStore((s) => s.addToast);
   const userRole = useAuthStore((s) => s.userRole);
   const isManager = userRole === 'admin' || userRole === 'manager';
+  // Same bar as the server's `procurement.update`, so Edit is not hidden from editors.
+  const canEditPO = canUpdatePurchaseOrders(userRole);
 
   // 3-way match: rows hovered or focused fetch their match status on demand
   // (we never bulk-fetch on list load to avoid N×fetch on big projects).
@@ -1834,7 +1837,7 @@ function PurchaseOrdersTab({
                   }),
                 })}
               </span>
-              {isManager && (
+              {canEditPO && (
                 <Button
                   variant="ghost"
                   size="sm"
@@ -2023,22 +2026,35 @@ function PurchaseOrdersTab({
                       testId={`po-pdf-${po.id}`}
                       onCustomize={poLayout.open({ recordId: po.id, projectId: projectId || null })}
                     />
+                  {canEditPO && (
+                    <>
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => openEditMut.mutate(po.id)}
+                        disabled={openEditMut.isPending || editPOMut.isPending}
+                        data-testid={`po-edit-${po.id}`}
+                      >
+                        {t('common.edit', { defaultValue: 'Edit' })}
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => openEditMut.mutate(po.id)}
+                        disabled={openEditMut.isPending || editPOMut.isPending}
+                        title={t('procurement.edit_po', { defaultValue: 'Edit purchase order' })}
+                        className="!p-1.5 text-content-tertiary hover:text-oe-blue"
+                      >
+                        {openEditMut.isPending && openEditMut.variables === po.id ? (
+                          <Loader2 size={14} className="animate-spin" />
+                        ) : (
+                          <Pencil size={14} />
+                        )}
+                      </Button>
+                    </>
+                  )}
                   {isManager && (
                   <>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => openEditMut.mutate(po.id)}
-                      disabled={openEditMut.isPending || editPOMut.isPending}
-                      title={t('procurement.edit_po', { defaultValue: 'Edit purchase order' })}
-                      className="!p-1.5 text-content-tertiary hover:text-oe-blue"
-                    >
-                      {openEditMut.isPending && openEditMut.variables === po.id ? (
-                        <Loader2 size={14} className="animate-spin" />
-                      ) : (
-                        <Pencil size={14} />
-                      )}
-                    </Button>
                     {/* Commitment gate (TOP-30 #10): a draft PO must be
                         approved before it can be issued. Approval is what
                         commits budget in finance, so draft rows show Approve
