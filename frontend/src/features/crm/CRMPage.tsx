@@ -1489,9 +1489,9 @@ function DealDrawer({
 
   if (!opp) return null;
 
-  const todayIso = new Date().toISOString().slice(0, 10);
+  const todayStr = new Date().toISOString().slice(0, 10);
   const isOverdue = (a: Activity) =>
-    !a.completed_at && !!a.due_at && a.due_at.slice(0, 10) < todayIso;
+    !a.completed_at && !!a.due_at && a.due_at.slice(0, 10) < todayStr;
 
   const currentIdx = stages.findIndex((s) => s.id === opp.stage_id);
 
