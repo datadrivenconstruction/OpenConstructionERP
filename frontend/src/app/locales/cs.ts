@@ -57996,6 +57996,7 @@ const resource = {
     "modules.catalog.land_parcels": "Pozemky a parcely",
     "modules.catalog.stockpiles": "Skládky",
     "modules.catalog.mine_survey": "Důlní měření",
+    "modules.catalog.monitoring": "Monitoring deformací",
     "modules.pp_desc_eleven_areas_framework": "Řízení projektu ze strany investora v jedenácti oblastech řízení ve dvou fázích, vývoj projektu a realizace stavby, s jednou branou mezi nimi a jedním schváleným rámcovým dokumentem pro každou oblast.",
     "modules.pp_name_pakistan_pk": "Stavební balíček Pákistánu",
     "modules.pp_name_peru_pe": "Stavební balíček Peru",
