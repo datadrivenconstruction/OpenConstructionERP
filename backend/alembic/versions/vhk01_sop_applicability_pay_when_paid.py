@@ -18,7 +18,7 @@ Inspector-guarded, so a re-run, or an install whose boot already added the
 columns from the models, changes nothing.
 
 Revision ID: vhk01_sop_applicability
-Revises: vsub01_agreement_documents
+Revises: vmin01_mine_survey
 Create Date: 2026-11-18
 """
 
@@ -31,7 +31,7 @@ import sqlalchemy as sa
 from alembic import op
 
 revision: str = "vhk01_sop_applicability"
-down_revision: Union[str, Sequence[str], None] = "vsub01_agreement_documents"
+down_revision: Union[str, Sequence[str], None] = "vmin01_mine_survey"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

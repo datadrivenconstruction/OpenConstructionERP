@@ -12,7 +12,7 @@ on a running install from the model; the migration is inspector-guarded, so a
 re-run or a downgrade without the table changes nothing.
 
 Revision ID: vptx01_project_tax_profile
-Revises: vsub01_agreement_documents
+Revises: vcc440_commercial_control
 Create Date: 2026-11-18
 """
 
@@ -25,7 +25,7 @@ import sqlalchemy as sa
 from alembic import op
 
 revision: str = "vptx01_project_tax_profile"
-down_revision: Union[str, Sequence[str], None] = "vsub01_agreement_documents"
+down_revision: Union[str, Sequence[str], None] = "vcc440_commercial_control"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

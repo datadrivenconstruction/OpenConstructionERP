@@ -6,7 +6,7 @@ Additive new tables only, so a deploy that heals its schema at boot picks them
 up without ``alembic upgrade``.
 
 Revision ID: vsrv01_survey_core
-Revises: vsub01_agreement_documents
+Revises: vdt04_po_delivery_address
 Create Date: 2026-11-17
 """
 
@@ -18,7 +18,7 @@ import sqlalchemy as sa
 from alembic import op
 
 revision: str = "vsrv01_survey_core"
-down_revision: str | Sequence[str] | None = "vsub01_agreement_documents"
+down_revision: str | Sequence[str] | None = "vdt04_po_delivery_address"
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 

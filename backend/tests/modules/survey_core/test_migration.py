@@ -28,6 +28,7 @@ _PATH = BACKEND / "alembic" / "versions" / "vsrv01_survey_core.py"
 CRS, SETS, POINTS = "oe_survey_project_crs", "oe_survey_point_set", "oe_survey_point"
 _TABLES = (CRS, SETS, POINTS)
 RELEASE_HEAD = "vsub01_agreement_documents"  # head of the 19.8.0 release
+PREVIOUS = "vdt04_po_delivery_address"  # the revision the survey chain follows in 19.9.0
 
 
 def _load():
@@ -75,12 +76,12 @@ def _matches_the_models(connection) -> None:
 # -- the revision chain (no database) ----------------------------------------------------------------------------
 
 
-def test_there_is_one_head_and_the_survey_revision_hangs_off_the_release_head() -> None:
+def test_there_is_one_head_and_the_survey_revision_follows_the_previous_revision() -> None:
     script = ScriptDirectory.from_config(Config(str(BACKEND / "alembic.ini")))
     assert len(script.get_heads()) == 1
     revision = script.get_revision("vsrv01_survey_core")
     assert revision is not None
-    assert revision.down_revision == RELEASE_HEAD
+    assert revision.down_revision == PREVIOUS
     assert script.get_revision(RELEASE_HEAD) is not None
 
 
@@ -93,7 +94,7 @@ def test_the_revision_is_reachable_from_the_head() -> None:
 def test_the_revision_declares_its_names() -> None:
     migration = _load()
     assert migration.revision == "vsrv01_survey_core"
-    assert migration.down_revision == RELEASE_HEAD
+    assert migration.down_revision == PREVIOUS
     assert len(migration.revision) <= 32  # alembic_version.version_num is VARCHAR(32)
 
 

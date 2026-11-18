@@ -13,7 +13,7 @@ models. Inspector-guarded, so a re-run or a downgrade on a database without
 the tables changes nothing.
 
 Revision ID: vdt03_doc_layouts
-Revises: vsub01_agreement_documents
+Revises: vcnf01_china_fee_profile
 Create Date: 2026-11-18
 """
 
@@ -26,7 +26,7 @@ import sqlalchemy as sa
 from alembic import op
 
 revision: str = "vdt03_doc_layouts"
-down_revision: Union[str, Sequence[str], None] = "vsub01_agreement_documents"
+down_revision: Union[str, Sequence[str], None] = "vcnf01_china_fee_profile"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

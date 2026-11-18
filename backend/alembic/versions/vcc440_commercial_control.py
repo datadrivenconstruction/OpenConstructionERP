@@ -15,7 +15,7 @@ Every add is inspector-guarded, so a running install whose boot heal already
 added a column, or a re-run, changes nothing.
 
 Revision ID: vcc440_commercial_control
-Revises: vsub01_agreement_documents
+Revises: vsch01_activity_assignee_text
 Create Date: 2026-11-18
 """
 
@@ -28,7 +28,7 @@ import sqlalchemy as sa
 from alembic import op
 
 revision: str = "vcc440_commercial_control"
-down_revision: Union[str, Sequence[str], None] = "vsub01_agreement_documents"
+down_revision: Union[str, Sequence[str], None] = "vsch01_activity_assignee_text"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

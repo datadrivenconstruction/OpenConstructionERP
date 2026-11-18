@@ -8187,6 +8187,18 @@
               "annotation": "Mapped[int | None]",
               "sql_type": "Integer",
               "nullable": true
+            },
+            {
+              "name": "amount_min",
+              "annotation": "Mapped[Decimal | None]",
+              "sql_type": "Numeric",
+              "nullable": true
+            },
+            {
+              "name": "amount_max",
+              "annotation": "Mapped[Decimal | None]",
+              "sql_type": "Numeric",
+              "nullable": true
             }
           ],
           "relationships": []
@@ -8255,6 +8267,18 @@
               "nullable": true,
               "is_fk": true,
               "fk_target": "oe_users_user.id"
+            },
+            {
+              "name": "amount",
+              "annotation": "Mapped[Decimal | None]",
+              "sql_type": "Numeric",
+              "nullable": true
+            },
+            {
+              "name": "amount_currency",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
             }
           ],
           "relationships": []
@@ -8544,6 +8568,14 @@
             {
               "name": "sla_hours",
               "type": "int | None"
+            },
+            {
+              "name": "amount_min",
+              "type": "FiniteDecimal | None"
+            },
+            {
+              "name": "amount_max",
+              "type": "FiniteDecimal | None"
             }
           ]
         },
@@ -8585,6 +8617,16 @@
             {
               "name": "sla_hours",
               "type": "int | None"
+            },
+            {
+              "name": "amount_min",
+              "type": "FiniteDecimal | None",
+              "default": "None"
+            },
+            {
+              "name": "amount_max",
+              "type": "FiniteDecimal | None",
+              "default": "None"
             }
           ]
         },
@@ -8705,6 +8747,10 @@
             {
               "name": "steps",
               "type": "list[StepResponse]"
+            },
+            {
+              "name": "band_findings",
+              "type": "list[dict[str, Any]]"
             }
           ]
         },
@@ -8767,6 +8813,14 @@
             {
               "name": "target_id",
               "type": "UUID"
+            },
+            {
+              "name": "amount",
+              "type": "FiniteDecimal | None"
+            },
+            {
+              "name": "amount_currency",
+              "type": "str | None"
             }
           ]
         },
@@ -8817,6 +8871,20 @@
               "name": "current_assignee_user_id",
               "type": "UUID | None",
               "default": "None"
+            },
+            {
+              "name": "amount",
+              "type": "FiniteDecimal | None",
+              "default": "None"
+            },
+            {
+              "name": "amount_currency",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "skipped_step_ordinals",
+              "type": "list[int]"
             },
             {
               "name": "created_at",
@@ -9395,6 +9463,7 @@
       ],
       "import_dependencies": [
         "notifications",
+        "procurement",
         "projects",
         "teams",
         "users"
@@ -28585,6 +28654,7 @@
         "branch_router.py",
         "branch_schemas.py",
         "branch_service.py",
+        "budget_basis.py",
         "cad_import.py",
         "change_review.py",
         "change_review_models.py",
@@ -35171,6 +35241,7 @@
         "measurement",
         "price_breakdown",
         "price_index",
+        "project_tax",
         "projects",
         "risk",
         "schedule",
@@ -47179,6 +47250,7 @@
         "events.py",
         "export_routes.py",
         "intl.py",
+        "layouts.py",
         "manifest.py",
         "models.py",
         "pdf_export.py",
@@ -48754,6 +48826,7 @@
         "ai",
         "boq",
         "costmodel",
+        "doc_templates",
         "finance",
         "ncr",
         "projects",
@@ -48769,8 +48842,15 @@
       "files": [
         "__init__.py",
         "config.py",
+        "fapiao.py",
+        "fees.py",
         "manifest.py",
-        "router.py"
+        "models.py",
+        "repository.py",
+        "router.py",
+        "schemas.py",
+        "service.py",
+        "validators.py"
       ],
       "manifest": {
         "name": "oe_china_pack",
@@ -48783,16 +48863,231 @@
         "auto_install": false,
         "enabled": true
       },
-      "models": [],
+      "models": [
+        {
+          "class_name": "ChinaFeeProfile",
+          "tablename": "oe_china_pack_fee_profile",
+          "docstring": "Rates, options and the schedule override of one project's fee programme.",
+          "columns": [
+            {
+              "name": "project_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_projects_project.id"
+            },
+            {
+              "name": "schedule_key",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "rates",
+              "annotation": "Mapped[dict]",
+              "sql_type": "JSON",
+              "nullable": false
+            },
+            {
+              "name": "options",
+              "annotation": "Mapped[dict]",
+              "sql_type": "JSON",
+              "nullable": false
+            },
+            {
+              "name": "bases",
+              "annotation": "Mapped[dict]",
+              "sql_type": "JSON",
+              "nullable": false
+            },
+            {
+              "name": "labour_includes_social_insurance",
+              "annotation": "Mapped[bool]",
+              "sql_type": "Boolean",
+              "nullable": false
+            },
+            {
+              "name": "apply_labour_factor",
+              "annotation": "Mapped[bool | None]",
+              "sql_type": "Boolean",
+              "nullable": true
+            },
+            {
+              "name": "updated_by",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            }
+          ],
+          "relationships": []
+        }
+      ],
       "routes": [
         {
           "method": "GET",
           "path": "/config/",
           "handler": "get_config"
+        },
+        {
+          "method": "GET",
+          "path": "/tax/",
+          "handler": "get_tax"
+        },
+        {
+          "method": "POST",
+          "path": "/tender-summary/",
+          "handler": "post_tender_summary",
+          "request_schema": "SummaryRequest"
+        },
+        {
+          "method": "POST",
+          "path": "/check/",
+          "handler": "post_check",
+          "request_schema": "CheckRequest"
+        },
+        {
+          "method": "GET",
+          "path": "/projects/{project_id}/check/",
+          "handler": "get_project_check"
+        },
+        {
+          "method": "GET",
+          "path": "/invoices/{invoice_id}/fapiao/",
+          "handler": "get_fapiao",
+          "request_schema": "Literal['json', 'xml']"
+        },
+        {
+          "method": "POST",
+          "path": "/prepayment/",
+          "handler": "post_prepayment",
+          "request_schema": "PrepaymentRequest"
+        },
+        {
+          "method": "GET",
+          "path": "/fee-schedules/",
+          "handler": "get_fee_schedules"
+        },
+        {
+          "method": "POST",
+          "path": "/fee-calc/",
+          "handler": "post_fee_calc",
+          "request_schema": "FeeCalcRequest"
+        },
+        {
+          "method": "GET",
+          "path": "/projects/{project_id}/fees/",
+          "handler": "get_project_fees"
+        },
+        {
+          "method": "PUT",
+          "path": "/projects/{project_id}/fees/",
+          "handler": "put_project_fees",
+          "request_schema": "FeeSettings"
+        },
+        {
+          "method": "GET",
+          "path": "/projects/{project_id}/edition-move/",
+          "handler": "get_edition_move"
+        },
+        {
+          "method": "POST",
+          "path": "/projects/{project_id}/edition-move/",
+          "handler": "post_edition_move"
         }
       ],
-      "schemas": [],
-      "import_dependencies": []
+      "schemas": [
+        {
+          "class_name": "FeeSettings",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "What a person states inside a provincial fee programme.",
+          "fields": [
+            {
+              "name": "schedule_key",
+              "type": "str | None"
+            },
+            {
+              "name": "rates",
+              "type": "dict[str, str]",
+              "description": "Rate in percent per line code"
+            },
+            {
+              "name": "options",
+              "type": "dict[str, str]",
+              "description": "Zone, grade or class per option key"
+            },
+            {
+              "name": "bases",
+              "type": "dict[str, dict[str, str]]",
+              "description": "Own base per line code"
+            },
+            {
+              "name": "labour_includes_social_insurance",
+              "type": "bool",
+              "default": "False"
+            },
+            {
+              "name": "apply_labour_factor",
+              "type": "bool | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "FeeCalcRequest",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "A fee programme run without the database.",
+          "fields": [
+            {
+              "name": "subdivision",
+              "type": "str | None"
+            },
+            {
+              "name": "city",
+              "type": "str | None"
+            },
+            {
+              "name": "tender_date",
+              "type": "date | None",
+              "default": "None"
+            },
+            {
+              "name": "contract_date",
+              "type": "date | None",
+              "default": "None"
+            },
+            {
+              "name": "tax_method",
+              "type": "Literal['general', 'simplified', 'exempt']",
+              "default": "'general'"
+            },
+            {
+              "name": "components",
+              "type": "dict[str, str]"
+            },
+            {
+              "name": "settings",
+              "type": "FeeSettings"
+            },
+            {
+              "name": "markup_names",
+              "type": "list[str]"
+            }
+          ]
+        }
+      ],
+      "import_dependencies": [
+        "boq",
+        "einvoice_clearance",
+        "finance",
+        "project_tax",
+        "projects",
+        "tax_withholding"
+      ]
     },
     {
       "module_id": "claims_evidence",
@@ -66054,6 +66349,12 @@
               "nullable": false
             },
             {
+              "name": "pay_when_paid",
+              "annotation": "Mapped[bool]",
+              "sql_type": "Boolean",
+              "nullable": false
+            },
+            {
               "name": "status",
               "annotation": "Mapped[str]",
               "sql_type": "String",
@@ -68100,6 +68401,13 @@
           "request_schema": "None"
         },
         {
+          "method": "PATCH",
+          "path": "/progress-claim-lines/{line_id}/quantities",
+          "handler": "update_claim_line_quantities",
+          "response_model": "ProgressClaimLineResponse",
+          "request_schema": "ProgressClaimLineQuantities"
+        },
+        {
           "method": "POST",
           "path": "/progress-claim-lines/",
           "handler": "create_claim_line",
@@ -68758,6 +69066,11 @@
               "type": "ReleaseEvent | None"
             },
             {
+              "name": "pay_when_paid",
+              "type": "bool",
+              "default": "False"
+            },
+            {
               "name": "status",
               "type": "str"
             },
@@ -68836,6 +69149,11 @@
             {
               "name": "retention_release_event",
               "type": "ReleaseEvent | None"
+            },
+            {
+              "name": "pay_when_paid",
+              "type": "bool | None",
+              "default": "None"
             },
             {
               "name": "status",
@@ -68929,6 +69247,11 @@
             {
               "name": "retention_release_event",
               "type": "ReleaseEvent"
+            },
+            {
+              "name": "pay_when_paid",
+              "type": "bool",
+              "default": "False"
             },
             {
               "name": "status",
@@ -70616,6 +70939,23 @@
           ]
         },
         {
+          "class_name": "ProgressClaimLineQuantities",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "The payer's side of a valuation line: the assessed and certified quantity.\n\nThe submitted quantity is ``period_completed_qty`` and is edited with the\nline while the claim is a draft. These two are recorded after it is sent.",
+          "fields": [
+            {
+              "name": "assessed_qty",
+              "type": "Decimal18_4 | None"
+            },
+            {
+              "name": "certified_qty",
+              "type": "Decimal18_4 | None"
+            }
+          ]
+        },
+        {
           "class_name": "ProgressClaimLineResponse",
           "bases": [
             "BaseModel"
@@ -70689,6 +71029,10 @@
             {
               "name": "updated_at",
               "type": "datetime"
+            },
+            {
+              "name": "findings",
+              "type": "list[dict[str, Any]]"
             }
           ]
         },
@@ -78310,6 +78654,7 @@
         "cashflow_forecast_service.py",
         "chain_rules.py",
         "chain_service.py",
+        "commitment_grid.py",
         "contract_exposure.py",
         "cost_control.py",
         "cost_control_data.py",
@@ -79496,6 +79841,12 @@
           "handler": "get_spine_rollup",
           "response_model": "SpineRollupResponse",
           "request_schema": "CostSpineService"
+        },
+        {
+          "method": "GET",
+          "path": "/projects/{project_id}/spine/commitment-grid/",
+          "handler": "get_commitment_grid",
+          "response_model": "CommitmentGridResponse"
         },
         {
           "method": "GET",
@@ -81548,6 +81899,146 @@
               "name": "positions_off_spine",
               "type": "int",
               "default": "0"
+            }
+          ]
+        },
+        {
+          "class_name": "CommitmentGridRow",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "One priced bill position against what has been bought for it.\n\n``budget_*`` is the cost budget, quantity x target rate when the position has\none (``budget_basis = \"target\"``), else quantity x unit rate. Committed is\nissued purchase orders plus live subcontracts; remaining is budget minus\ncommitted and goes negative when the line is over-committed.",
+          "fields": [
+            {
+              "name": "boq_position_id",
+              "type": "UUID"
+            },
+            {
+              "name": "boq_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "ordinal",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "description",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "unit",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "wbs_id",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "cost_line_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "budget_basis",
+              "type": "str"
+            },
+            {
+              "name": "budget_rate",
+              "type": "FiniteDecimal"
+            },
+            {
+              "name": "budget_qty",
+              "type": "FiniteDecimal"
+            },
+            {
+              "name": "budget_value",
+              "type": "FiniteDecimal"
+            },
+            {
+              "name": "po_committed_qty",
+              "type": "FiniteDecimal"
+            },
+            {
+              "name": "po_committed_value",
+              "type": "FiniteDecimal"
+            },
+            {
+              "name": "subcontract_committed_qty",
+              "type": "FiniteDecimal"
+            },
+            {
+              "name": "subcontract_committed_value",
+              "type": "FiniteDecimal"
+            },
+            {
+              "name": "committed_qty",
+              "type": "FiniteDecimal"
+            },
+            {
+              "name": "committed_value",
+              "type": "FiniteDecimal"
+            },
+            {
+              "name": "remaining_qty",
+              "type": "FiniteDecimal"
+            },
+            {
+              "name": "remaining_value",
+              "type": "FiniteDecimal"
+            },
+            {
+              "name": "received_qty",
+              "type": "FiniteDecimal"
+            },
+            {
+              "name": "received_value",
+              "type": "FiniteDecimal"
+            },
+            {
+              "name": "on_cost_spine",
+              "type": "bool",
+              "default": "False"
+            },
+            {
+              "name": "over_committed_qty",
+              "type": "bool",
+              "default": "False"
+            },
+            {
+              "name": "over_committed_value",
+              "type": "bool",
+              "default": "False"
+            }
+          ]
+        },
+        {
+          "class_name": "CommitmentGridResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "The commitment grid of a project, its totals and the rule findings.",
+          "fields": [
+            {
+              "name": "currency",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "rows",
+              "type": "list[CommitmentGridRow]"
+            },
+            {
+              "name": "totals",
+              "type": "dict[str, FiniteDecimal]"
+            },
+            {
+              "name": "findings",
+              "type": "list[dict[str, Any]]"
             }
           ]
         }
@@ -89049,6 +89540,7 @@
         "schemas.py",
         "seed.py",
         "service.py",
+        "spine_rollup.py",
         "tests/__init__.py",
         "tests/test_cvr_math.py",
         "validators.py"
@@ -89190,6 +89682,18 @@
             },
             {
               "name": "forecast_value",
+              "annotation": "Mapped[Decimal]",
+              "sql_type": "Numeric",
+              "nullable": false
+            },
+            {
+              "name": "budget_cost",
+              "annotation": "Mapped[Decimal]",
+              "sql_type": "Numeric",
+              "nullable": false
+            },
+            {
+              "name": "committed_cost",
               "annotation": "Mapped[Decimal]",
               "sql_type": "Numeric",
               "nullable": false
@@ -89419,6 +89923,13 @@
           "path": "/reports/{report_id}/lines/from-field-time/",
           "handler": "import_field_labour",
           "response_model": "CvrLineResponse",
+          "request_schema": "CvrService"
+        },
+        {
+          "method": "POST",
+          "path": "/reports/{report_id}/lines/from-cost-spine/",
+          "handler": "populate_from_spine",
+          "response_model": "CvrSpineRefreshResponse",
           "request_schema": "CvrService"
         },
         {
@@ -89713,6 +90224,14 @@
               "type": "DecimalMoney"
             },
             {
+              "name": "budget_cost",
+              "type": "DecimalMoney"
+            },
+            {
+              "name": "committed_cost",
+              "type": "DecimalMoney"
+            },
+            {
               "name": "sort_order",
               "type": "int"
             },
@@ -89764,6 +90283,14 @@
             },
             {
               "name": "forecast_value",
+              "type": "DecimalMoney | None"
+            },
+            {
+              "name": "budget_cost",
+              "type": "DecimalMoney | None"
+            },
+            {
+              "name": "committed_cost",
               "type": "DecimalMoney | None"
             },
             {
@@ -89829,6 +90356,14 @@
             },
             {
               "name": "forecast_value",
+              "type": "DecimalMoney"
+            },
+            {
+              "name": "budget_cost",
+              "type": "DecimalMoney"
+            },
+            {
+              "name": "committed_cost",
               "type": "DecimalMoney"
             },
             {
@@ -89914,6 +90449,14 @@
             },
             {
               "name": "total_forecast_value",
+              "type": "DecimalMoney"
+            },
+            {
+              "name": "total_budget_cost",
+              "type": "DecimalMoney"
+            },
+            {
+              "name": "total_committed_cost",
               "type": "DecimalMoney"
             },
             {
@@ -90386,12 +90929,61 @@
               "type": "int"
             }
           ]
+        },
+        {
+          "class_name": "CvrSpineRefreshResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Result of filling a report from the cost spine.",
+          "fields": [
+            {
+              "name": "report_id",
+              "type": "UUID"
+            },
+            {
+              "name": "currency",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "created",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "updated",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "kept_overrides",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "lines",
+              "type": "list[CvrLineResponse]"
+            },
+            {
+              "name": "totals",
+              "type": "dict[str, DecimalMoney]"
+            },
+            {
+              "name": "findings",
+              "type": "list[dict[str, Any]]"
+            }
+          ]
         }
       ],
       "import_dependencies": [
+        "boq",
         "contracts",
+        "costmodel",
         "field_time",
-        "projects"
+        "finance",
+        "projects",
+        "subcontractors"
       ]
     },
     {
@@ -105625,6 +106217,8 @@
         "__init__.py",
         "documents.py",
         "kinds.py",
+        "layout_router.py",
+        "layout_service.py",
         "manifest.py",
         "models.py",
         "permissions.py",
@@ -105825,6 +106419,158 @@
             },
             {
               "name": "issued_by",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            }
+          ],
+          "relationships": []
+        },
+        {
+          "class_name": "DocLayout",
+          "tablename": "oe_doc_templates_layout",
+          "docstring": "A firm's layout of one record document in one scope, under one variant name.\n\n``scope`` is ``workspace`` (the company default) or ``project:<uuid>`` (that\nproject's override). ``variant`` names one of several layouts of the same\ndocument (\"short\", \"full terms\"); one per scope is the default.",
+          "columns": [
+            {
+              "name": "kind",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "scope",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "variant",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "name",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "is_default",
+              "annotation": "Mapped[bool]",
+              "sql_type": "Boolean",
+              "nullable": false
+            },
+            {
+              "name": "draft",
+              "annotation": "Mapped[dict | None]",
+              "sql_type": "JSON",
+              "nullable": true
+            },
+            {
+              "name": "draft_updated_by",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "draft_updated_at",
+              "annotation": "Mapped[datetime | None]",
+              "sql_type": "DateTime",
+              "nullable": true
+            },
+            {
+              "name": "published_version_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            }
+          ],
+          "relationships": []
+        },
+        {
+          "class_name": "DocLayoutVersion",
+          "tablename": "oe_doc_templates_layout_version",
+          "docstring": "An immutable published layout. ``action`` is ``publish``, ``restore``, ``reset`` or ``import``.",
+          "columns": [
+            {
+              "name": "layout_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_doc_templates_layout.id"
+            },
+            {
+              "name": "number",
+              "annotation": "Mapped[int]",
+              "sql_type": "Integer",
+              "nullable": false
+            },
+            {
+              "name": "document",
+              "annotation": "Mapped[dict]",
+              "sql_type": "JSON",
+              "nullable": false
+            },
+            {
+              "name": "action",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "note",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "author_id",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "author_name",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            }
+          ],
+          "relationships": []
+        },
+        {
+          "class_name": "DocClause",
+          "tablename": "oe_doc_templates_clause",
+          "docstring": "A reusable clause (payment terms, warranty, retention) a layout's clause block prints, per language.",
+          "columns": [
+            {
+              "name": "key",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "category",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "title",
+              "annotation": "Mapped[dict]",
+              "sql_type": "JSON",
+              "nullable": false
+            },
+            {
+              "name": "text",
+              "annotation": "Mapped[dict]",
+              "sql_type": "JSON",
+              "nullable": false
+            },
+            {
+              "name": "updated_by",
               "annotation": "Mapped[str | None]",
               "sql_type": "String",
               "nullable": true
@@ -106397,6 +107143,160 @@
             {
               "name": "is_manager",
               "type": "bool"
+            }
+          ]
+        },
+        {
+          "class_name": "LayoutSummary",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "One document whose structure a firm can lay out.",
+          "fields": [
+            {
+              "name": "key",
+              "type": "str"
+            },
+            {
+              "name": "module",
+              "type": "str"
+            },
+            {
+              "name": "label",
+              "type": "str"
+            },
+            {
+              "name": "published",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "drafts",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "projects",
+              "type": "int",
+              "default": "0"
+            }
+          ]
+        },
+        {
+          "class_name": "LayoutListResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Every visible layout.",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[LayoutSummary]"
+            },
+            {
+              "name": "total",
+              "type": "int"
+            },
+            {
+              "name": "can_edit",
+              "type": "bool"
+            }
+          ]
+        },
+        {
+          "class_name": "LayoutDraftIn",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "The working template; normalised on save, checked on publish.",
+          "fields": [
+            {
+              "name": "template",
+              "type": "dict"
+            },
+            {
+              "name": "name",
+              "type": "str"
+            }
+          ]
+        },
+        {
+          "class_name": "LayoutPublishIn",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Publish note.",
+          "fields": [
+            {
+              "name": "note",
+              "type": "str"
+            }
+          ]
+        },
+        {
+          "class_name": "LayoutPreviewIn",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "An unsaved template and, optionally, the record to preview it on.",
+          "fields": [
+            {
+              "name": "template",
+              "type": "dict"
+            },
+            {
+              "name": "record_id",
+              "type": "str | None"
+            }
+          ]
+        },
+        {
+          "class_name": "LayoutImportIn",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "An exported layout file.",
+          "fields": [
+            {
+              "name": "format",
+              "type": "str"
+            },
+            {
+              "name": "schema_version",
+              "type": "int"
+            },
+            {
+              "name": "kind",
+              "type": "str"
+            },
+            {
+              "name": "name",
+              "type": "str"
+            },
+            {
+              "name": "template",
+              "type": "dict"
+            }
+          ]
+        },
+        {
+          "class_name": "ClauseIn",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "One clause of the library, per language.",
+          "fields": [
+            {
+              "name": "category",
+              "type": "str"
+            },
+            {
+              "name": "title",
+              "type": "dict[str, str]"
+            },
+            {
+              "name": "text",
+              "type": "dict[str, str]"
             }
           ]
         }
@@ -137889,6 +138789,7 @@
         "invoice_mailbox_models.py",
         "invoice_mailbox_schemas.py",
         "invoice_mailbox_service.py",
+        "layouts.py",
         "manifest.py",
         "models.py",
         "open_items.py",
@@ -141559,6 +142460,7 @@
         "contacts",
         "contracts",
         "costmodel",
+        "doc_templates",
         "einvoice",
         "file_search",
         "i18n_foundation",
@@ -181329,6 +182231,11 @@
             {
               "name": "base",
               "type": "list[str]"
+            },
+            {
+              "name": "threshold",
+              "type": "FiniteDecimal | None",
+              "default": "None"
             }
           ]
         },
@@ -187452,6 +188359,611 @@
       ]
     },
     {
+      "module_id": "norm_pricing",
+      "module_label": "Norm Pricing",
+      "module_category": "core",
+      "files": [
+        "__init__.py",
+        "export.py",
+        "manifest.py",
+        "permissions.py",
+        "repository.py",
+        "router.py",
+        "schemas.py",
+        "service.py",
+        "validators.py"
+      ],
+      "manifest": {
+        "name": "oe_norm_pricing",
+        "version": "0.1.0",
+        "display_name": "Norm Pricing",
+        "description": "Norm-based estimating settings per project: estimate wage, monthly hours, funding class and labour location, the graded hourly labour rates derived from them with the derivation shown, the norm-code and funding-cap checks of the norm_base and public_funding rule sets, labour rates written back to bill resources after a preview, and the bill in the market's estimate sheet columns. Shown only where a country pack supplies a norm base or pricing rules.",
+        "author": "OpenConstructionERP Core Team",
+        "category": "core",
+        "depends": [
+          "oe_projects",
+          "oe_boq"
+        ],
+        "auto_install": true,
+        "enabled": true
+      },
+      "models": [],
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/profile",
+          "handler": "get_profile",
+          "response_model": "PricingProfile",
+          "request_schema": "None"
+        },
+        {
+          "method": "PUT",
+          "path": "/settings",
+          "handler": "put_settings",
+          "response_model": "PricingProfile",
+          "request_schema": "EstimatePricingSettings"
+        },
+        {
+          "method": "GET",
+          "path": "/labour-rates",
+          "handler": "get_labour_rates",
+          "response_model": "LabourRatesOut",
+          "request_schema": "None"
+        },
+        {
+          "method": "POST",
+          "path": "/check-code",
+          "handler": "post_check_code",
+          "response_model": "CodeCheckOut",
+          "request_schema": "CodeCheckIn"
+        },
+        {
+          "method": "GET",
+          "path": "/labour-writeback",
+          "handler": "get_labour_writeback",
+          "response_model": "WritebackPreview",
+          "request_schema": "None"
+        },
+        {
+          "method": "POST",
+          "path": "/labour-writeback",
+          "handler": "post_labour_writeback",
+          "response_model": "WritebackResult",
+          "request_schema": "WritebackApply"
+        },
+        {
+          "method": "GET",
+          "path": "/export/xlsx",
+          "handler": "get_export_xlsx",
+          "request_schema": "None"
+        }
+      ],
+      "schemas": [
+        {
+          "class_name": "EstimatePricingSettings",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "What a project records for norm-based pricing. Every field is optional.",
+          "fields": [
+            {
+              "name": "estimate_wage",
+              "type": "Decimal | None"
+            },
+            {
+              "name": "monthly_hours",
+              "type": "Decimal | None"
+            },
+            {
+              "name": "funding_class",
+              "type": "str | None"
+            },
+            {
+              "name": "estimate_role",
+              "type": "Literal['investor', 'contractor'] | None",
+              "default": "None"
+            },
+            {
+              "name": "labour_location",
+              "type": "str | None"
+            }
+          ]
+        },
+        {
+          "class_name": "LabeledOption",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "key",
+              "type": "str"
+            },
+            {
+              "name": "label",
+              "type": "str"
+            },
+            {
+              "name": "source",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "factor",
+              "type": "str | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "MarkupCapOut",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "key",
+              "type": "str"
+            },
+            {
+              "name": "label",
+              "type": "str"
+            },
+            {
+              "name": "cap_percent",
+              "type": "str"
+            }
+          ]
+        },
+        {
+          "class_name": "FundingClassOut",
+          "bases": [
+            "LabeledOption"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "markup_caps",
+              "type": "list[MarkupCapOut]"
+            },
+            {
+              "name": "investor_estimate_at_cap",
+              "type": "bool",
+              "default": "False"
+            },
+            {
+              "name": "min_quotes",
+              "type": "int | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "NormTypeOut",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "prefix",
+              "type": "str"
+            },
+            {
+              "name": "title",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "collections",
+              "type": "int | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "NormBaseOut",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "key",
+              "type": "str"
+            },
+            {
+              "name": "name",
+              "type": "str"
+            },
+            {
+              "name": "classification_key",
+              "type": "str"
+            },
+            {
+              "name": "code_example",
+              "type": "str"
+            },
+            {
+              "name": "types",
+              "type": "list[NormTypeOut]"
+            },
+            {
+              "name": "legacy_prefixes",
+              "type": "dict[str, str]"
+            },
+            {
+              "name": "grade_field",
+              "type": "str",
+              "default": "'grade'"
+            }
+          ]
+        },
+        {
+          "class_name": "PricingProfile",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "What the project's country pack offers, and what the project chose.\n\n``available`` is false when no pack covering the project's country carries\nnorm data; the client then shows nothing.",
+          "fields": [
+            {
+              "name": "available",
+              "type": "bool"
+            },
+            {
+              "name": "pack_slug",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "currency",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "norm_bases",
+              "type": "list[NormBaseOut]"
+            },
+            {
+              "name": "funding_classes",
+              "type": "list[FundingClassOut]"
+            },
+            {
+              "name": "location_factors",
+              "type": "list[LabeledOption]"
+            },
+            {
+              "name": "grades",
+              "type": "list[str]"
+            },
+            {
+              "name": "base_grade",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "grading_status",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "grading_source",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "has_export_layout",
+              "type": "bool",
+              "default": "False"
+            },
+            {
+              "name": "default_monthly_hours",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "settings",
+              "type": "EstimatePricingSettings"
+            }
+          ]
+        },
+        {
+          "class_name": "RateOut",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "grade",
+              "type": "str"
+            },
+            {
+              "name": "base_grade",
+              "type": "str"
+            },
+            {
+              "name": "base_rate",
+              "type": "str"
+            },
+            {
+              "name": "grade_one_rate",
+              "type": "str"
+            },
+            {
+              "name": "base_coefficient",
+              "type": "str"
+            },
+            {
+              "name": "coefficient",
+              "type": "str"
+            },
+            {
+              "name": "rate",
+              "type": "str"
+            },
+            {
+              "name": "location_factor",
+              "type": "str"
+            },
+            {
+              "name": "rate_with_location",
+              "type": "str"
+            }
+          ]
+        },
+        {
+          "class_name": "LabourRatesOut",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Hourly rates per grade with the figures each was derived from.",
+          "fields": [
+            {
+              "name": "estimate_wage",
+              "type": "str"
+            },
+            {
+              "name": "monthly_hours",
+              "type": "str"
+            },
+            {
+              "name": "rates",
+              "type": "list[RateOut]"
+            },
+            {
+              "name": "missing_grades",
+              "type": "list[str]"
+            }
+          ]
+        },
+        {
+          "class_name": "CodeCheckIn",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "code",
+              "type": "str"
+            }
+          ]
+        },
+        {
+          "class_name": "CodeCheckOut",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "status",
+              "type": "Literal['ok', 'legacy', 'shape', 'no_base']"
+            },
+            {
+              "name": "code",
+              "type": "str"
+            },
+            {
+              "name": "suggested",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "old_prefix",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "new_prefix",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "title",
+              "type": "str | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "WritebackRow",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "One labour resource whose rate would change, with the figures behind the new rate.",
+          "fields": [
+            {
+              "name": "position_id",
+              "type": "str"
+            },
+            {
+              "name": "ordinal",
+              "type": "str"
+            },
+            {
+              "name": "description",
+              "type": "str"
+            },
+            {
+              "name": "resource_index",
+              "type": "int"
+            },
+            {
+              "name": "resource_name",
+              "type": "str"
+            },
+            {
+              "name": "grade",
+              "type": "str"
+            },
+            {
+              "name": "current_rate",
+              "type": "str | None"
+            },
+            {
+              "name": "proposed_rate",
+              "type": "str"
+            },
+            {
+              "name": "derivation",
+              "type": "RateOut"
+            }
+          ]
+        },
+        {
+          "class_name": "WritebackSkip",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "position_id",
+              "type": "str"
+            },
+            {
+              "name": "ordinal",
+              "type": "str"
+            },
+            {
+              "name": "resource_index",
+              "type": "int"
+            },
+            {
+              "name": "resource_name",
+              "type": "str"
+            },
+            {
+              "name": "reason",
+              "type": "Literal['no_grade', 'grade_off_scale']"
+            },
+            {
+              "name": "grade",
+              "type": "str | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "WritebackPreview",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "What applying the project's labour rates to a bill would change. Nothing is written.",
+          "fields": [
+            {
+              "name": "boq_id",
+              "type": "str"
+            },
+            {
+              "name": "estimate_wage",
+              "type": "str"
+            },
+            {
+              "name": "monthly_hours",
+              "type": "str"
+            },
+            {
+              "name": "location_factor",
+              "type": "str"
+            },
+            {
+              "name": "changes",
+              "type": "list[WritebackRow]"
+            },
+            {
+              "name": "unchanged",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "skipped",
+              "type": "list[WritebackSkip]"
+            }
+          ]
+        },
+        {
+          "class_name": "WritebackItem",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "position_id",
+              "type": "str"
+            },
+            {
+              "name": "resource_index",
+              "type": "int"
+            },
+            {
+              "name": "rate",
+              "type": "str"
+            }
+          ]
+        },
+        {
+          "class_name": "WritebackApply",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[WritebackItem]"
+            }
+          ]
+        },
+        {
+          "class_name": "WritebackResult",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "updated_positions",
+              "type": "int"
+            },
+            {
+              "name": "updated_resources",
+              "type": "int"
+            }
+          ]
+        }
+      ],
+      "import_dependencies": [
+        "boq",
+        "projects"
+      ]
+    },
+    {
       "module_id": "notifications",
       "module_label": "Notifications",
       "module_category": "core",
@@ -191212,6 +192724,7 @@
       "module_category": "regional",
       "files": [
         "__init__.py",
+        "applicability.py",
         "clock.py",
         "data.py",
         "demo.py",
@@ -191379,6 +192892,48 @@
               "name": "notes",
               "annotation": "Mapped[str]",
               "sql_type": "Text",
+              "nullable": false
+            },
+            {
+              "name": "applies_from",
+              "annotation": "Mapped[date | None]",
+              "sql_type": "Date",
+              "nullable": true
+            },
+            {
+              "name": "min_contract_value",
+              "annotation": "Mapped[Decimal | None]",
+              "sql_type": "Numeric",
+              "nullable": true
+            },
+            {
+              "name": "min_contract_value_supply",
+              "annotation": "Mapped[Decimal | None]",
+              "sql_type": "Numeric",
+              "nullable": true
+            },
+            {
+              "name": "private_scope_rule",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "early_claim_counts_from_billing_date",
+              "annotation": "Mapped[bool]",
+              "sql_type": "Boolean",
+              "nullable": false
+            },
+            {
+              "name": "adjudication_window_days",
+              "annotation": "Mapped[int | None]",
+              "sql_type": "Integer",
+              "nullable": true
+            },
+            {
+              "name": "conditional_payment_void",
+              "annotation": "Mapped[bool]",
+              "sql_type": "Boolean",
               "nullable": false
             }
           ],
@@ -191852,6 +193407,41 @@
               "type": "str"
             },
             {
+              "name": "applies_from",
+              "type": "date | None",
+              "default": "None"
+            },
+            {
+              "name": "min_contract_value",
+              "type": "Decimal | None",
+              "default": "None"
+            },
+            {
+              "name": "min_contract_value_supply",
+              "type": "Decimal | None",
+              "default": "None"
+            },
+            {
+              "name": "private_scope_rule",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "early_claim_counts_from_billing_date",
+              "type": "bool",
+              "default": "False"
+            },
+            {
+              "name": "adjudication_window_days",
+              "type": "int | None",
+              "default": "None"
+            },
+            {
+              "name": "conditional_payment_void",
+              "type": "bool",
+              "default": "False"
+            },
+            {
               "name": "interest_description",
               "type": "str",
               "default": "''"
@@ -191965,6 +193555,41 @@
               "name": "notes",
               "type": "str",
               "default": "''"
+            },
+            {
+              "name": "applies_from",
+              "type": "date | None",
+              "default": "None"
+            },
+            {
+              "name": "min_contract_value",
+              "type": "Decimal18_2 | None",
+              "default": "None"
+            },
+            {
+              "name": "min_contract_value_supply",
+              "type": "Decimal18_2 | None",
+              "default": "None"
+            },
+            {
+              "name": "private_scope_rule",
+              "type": "PrivateScopeRuleLiteral",
+              "default": "''"
+            },
+            {
+              "name": "early_claim_counts_from_billing_date",
+              "type": "bool",
+              "default": "False"
+            },
+            {
+              "name": "adjudication_window_days",
+              "type": "int | None",
+              "default": "None"
+            },
+            {
+              "name": "conditional_payment_void",
+              "type": "bool",
+              "default": "False"
             }
           ]
         },
@@ -207862,6 +209487,7 @@
         "manifest.py",
         "models.py",
         "permissions.py",
+        "quarterly_import.py",
         "resource_index_math.py",
         "resource_index_router.py",
         "resource_index_schemas.py",
@@ -207901,6 +209527,18 @@
               "name": "description",
               "annotation": "Mapped[str]",
               "sql_type": "Text",
+              "nullable": false
+            },
+            {
+              "name": "source_attribution",
+              "annotation": "Mapped[str]",
+              "sql_type": "Text",
+              "nullable": false
+            },
+            {
+              "name": "source_url",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
               "nullable": false
             }
           ],
@@ -208094,6 +209732,12 @@
         },
         {
           "method": "POST",
+          "path": "/import/quarterly/",
+          "handler": "import_quarterly",
+          "request_schema": "UploadFile"
+        },
+        {
+          "method": "POST",
           "path": "/import/statssa-p0151/",
           "handler": "import_statssa_p0151",
           "request_schema": "UploadFile"
@@ -208188,6 +209832,14 @@
             {
               "name": "description",
               "type": "str"
+            },
+            {
+              "name": "source_attribution",
+              "type": "str"
+            },
+            {
+              "name": "source_url",
+              "type": "str"
             }
           ]
         },
@@ -208204,6 +209856,14 @@
             },
             {
               "name": "description",
+              "type": "str | None"
+            },
+            {
+              "name": "source_attribution",
+              "type": "str | None"
+            },
+            {
+              "name": "source_url",
               "type": "str | None"
             }
           ]
@@ -208226,6 +209886,16 @@
             {
               "name": "description",
               "type": "str"
+            },
+            {
+              "name": "source_attribution",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "source_url",
+              "type": "str",
+              "default": "''"
             },
             {
               "name": "point_count",
@@ -208710,6 +210380,7 @@
         "events.py",
         "export_routes.py",
         "intl.py",
+        "layouts.py",
         "manifest.py",
         "models.py",
         "order_owner.py",
@@ -208880,6 +210551,12 @@
             },
             {
               "name": "payment_terms",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "delivery_address",
               "annotation": "Mapped[str | None]",
               "sql_type": "String",
               "nullable": true
@@ -210191,6 +211868,10 @@
               "type": "str | None"
             },
             {
+              "name": "delivery_address",
+              "type": "str | None"
+            },
+            {
               "name": "notes",
               "type": "str | None"
             },
@@ -210304,6 +211985,10 @@
             },
             {
               "name": "payment_terms",
+              "type": "str | None"
+            },
+            {
+              "name": "delivery_address",
               "type": "str | None"
             },
             {
@@ -210574,6 +212259,11 @@
             },
             {
               "name": "payment_terms",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "delivery_address",
               "type": "str | None",
               "default": "None"
             },
@@ -213235,6 +214925,7 @@
         "boq",
         "contacts",
         "costmodel",
+        "doc_templates",
         "documents",
         "finance",
         "inspections",
@@ -221469,6 +223160,376 @@
         }
       ],
       "import_dependencies": []
+    },
+    {
+      "module_id": "project_tax",
+      "module_label": "Project Tax Profile",
+      "module_category": "core",
+      "files": [
+        "__init__.py",
+        "manifest.py",
+        "models.py",
+        "permissions.py",
+        "repository.py",
+        "router.py",
+        "schemas.py",
+        "service.py",
+        "validators.py"
+      ],
+      "manifest": {
+        "name": "oe_project_tax",
+        "version": "1.0.0",
+        "display_name": "Project Tax Profile",
+        "description": "How one project accounts for output tax: the method (general, simplified or exempt) with its election date and lock period, whether it is grandfathered, the edition of the bill standard it is priced to, and where the site is for tax prepaid at the place of supply.",
+        "author": "OpenConstructionERP Core Team",
+        "category": "core",
+        "depends": [
+          "oe_projects",
+          "oe_users"
+        ],
+        "auto_install": true,
+        "enabled": true
+      },
+      "models": [
+        {
+          "class_name": "ProjectTaxProfile",
+          "tablename": "oe_project_tax_profile",
+          "docstring": "How one project accounts for output tax, and which bill edition it uses.\n\n``method_history`` is the list of methods the project left, each\n``{\"method\", \"election_date\", \"changed_on\"}``; the lock check reads the\ncurrent election, the history is the evidence behind it.",
+          "columns": [
+            {
+              "name": "project_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_projects_project.id"
+            },
+            {
+              "name": "tax_method",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "election_date",
+              "annotation": "Mapped[date | None]",
+              "sql_type": "Date",
+              "nullable": true
+            },
+            {
+              "name": "lock_months",
+              "annotation": "Mapped[int | None]",
+              "sql_type": "Integer",
+              "nullable": true
+            },
+            {
+              "name": "grandfathered",
+              "annotation": "Mapped[bool]",
+              "sql_type": "Boolean",
+              "nullable": false
+            },
+            {
+              "name": "simplified_basis",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "employer_supplied",
+              "annotation": "Mapped[bool]",
+              "sql_type": "Boolean",
+              "nullable": false
+            },
+            {
+              "name": "taxpayer_size",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "permit_start_date",
+              "annotation": "Mapped[date | None]",
+              "sql_type": "Date",
+              "nullable": true
+            },
+            {
+              "name": "contract_date",
+              "annotation": "Mapped[date | None]",
+              "sql_type": "Date",
+              "nullable": true
+            },
+            {
+              "name": "tender_date",
+              "annotation": "Mapped[date | None]",
+              "sql_type": "Date",
+              "nullable": true
+            },
+            {
+              "name": "standard_edition",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "site_subdivision",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "site_city",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "home_subdivision",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "home_city",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "method_history",
+              "annotation": "Mapped[list]",
+              "sql_type": "JSON",
+              "nullable": false
+            },
+            {
+              "name": "notes",
+              "annotation": "Mapped[str]",
+              "sql_type": "Text",
+              "nullable": false
+            },
+            {
+              "name": "updated_by",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            }
+          ],
+          "relationships": []
+        }
+      ],
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/projects/{project_id}/profile/",
+          "handler": "get_profile",
+          "response_model": "ProfileResponse"
+        },
+        {
+          "method": "PUT",
+          "path": "/projects/{project_id}/profile/",
+          "handler": "put_profile",
+          "response_model": "ProfileSaveResponse",
+          "request_schema": "ProfileUpdate"
+        }
+      ],
+      "schemas": [
+        {
+          "class_name": "ProfileFields",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "The fields a person states about a project's tax position.",
+          "fields": [
+            {
+              "name": "tax_method",
+              "type": "TaxMethodLiteral",
+              "default": "'general'"
+            },
+            {
+              "name": "election_date",
+              "type": "date | None",
+              "default": "None"
+            },
+            {
+              "name": "lock_months",
+              "type": "int | None"
+            },
+            {
+              "name": "grandfathered",
+              "type": "bool",
+              "default": "False"
+            },
+            {
+              "name": "simplified_basis",
+              "type": "str | None"
+            },
+            {
+              "name": "employer_supplied",
+              "type": "bool",
+              "default": "False"
+            },
+            {
+              "name": "taxpayer_size",
+              "type": "TaxpayerSizeLiteral",
+              "default": "'general'"
+            },
+            {
+              "name": "permit_start_date",
+              "type": "date | None",
+              "default": "None"
+            },
+            {
+              "name": "contract_date",
+              "type": "date | None",
+              "default": "None"
+            },
+            {
+              "name": "tender_date",
+              "type": "date | None",
+              "default": "None"
+            },
+            {
+              "name": "standard_edition",
+              "type": "str | None"
+            },
+            {
+              "name": "site_subdivision",
+              "type": "str | None"
+            },
+            {
+              "name": "site_city",
+              "type": "str | None"
+            },
+            {
+              "name": "home_subdivision",
+              "type": "str | None"
+            },
+            {
+              "name": "home_city",
+              "type": "str | None"
+            },
+            {
+              "name": "notes",
+              "type": "str"
+            }
+          ]
+        },
+        {
+          "class_name": "ProfileUpdate",
+          "bases": [
+            "ProfileFields"
+          ],
+          "docstring": "Body of the PUT. Every field is stated; a missing one takes its default.",
+          "fields": []
+        },
+        {
+          "class_name": "EditionOption",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "One edition of the project's bill standard a person can pick.",
+          "fields": [
+            {
+              "name": "key",
+              "type": "str"
+            },
+            {
+              "name": "label",
+              "type": "str"
+            },
+            {
+              "name": "in_force_from",
+              "type": "str | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "ProfileResponse",
+          "bases": [
+            "ProfileFields"
+          ],
+          "docstring": "The stored profile, or a derived proposal when ``stored`` is false.",
+          "fields": [
+            {
+              "name": "project_id",
+              "type": "uuid.UUID"
+            },
+            {
+              "name": "stored",
+              "type": "bool",
+              "default": "True"
+            },
+            {
+              "name": "edition_source",
+              "type": "Literal['stored', 'derived', 'none']",
+              "default": "'stored'"
+            },
+            {
+              "name": "cross_region",
+              "type": "bool | None",
+              "default": "None"
+            },
+            {
+              "name": "lock_ends_on",
+              "type": "date | None",
+              "default": "None"
+            },
+            {
+              "name": "method_history",
+              "type": "list[dict[str, Any]]"
+            },
+            {
+              "name": "editions",
+              "type": "list[EditionOption]"
+            }
+          ]
+        },
+        {
+          "class_name": "ProfileFinding",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "One validation finding on a saved profile.",
+          "fields": [
+            {
+              "name": "rule_id",
+              "type": "str"
+            },
+            {
+              "name": "severity",
+              "type": "str"
+            },
+            {
+              "name": "message",
+              "type": "str"
+            },
+            {
+              "name": "details",
+              "type": "dict[str, Any]"
+            }
+          ]
+        },
+        {
+          "class_name": "ProfileSaveResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "What a save returns: the profile as stored and what the rules said.",
+          "fields": [
+            {
+              "name": "profile",
+              "type": "ProfileResponse"
+            },
+            {
+              "name": "findings",
+              "type": "list[ProfileFinding]"
+            }
+          ]
+        }
+      ],
+      "import_dependencies": [
+        "projects"
+      ]
     },
     {
       "module_id": "projects",
@@ -263686,6 +265747,7 @@
         "mspdi_import.py",
         "mspdi_import_service.py",
         "ordering.py",
+        "pdf_table.py",
         "permissions.py",
         "plan_confidence.py",
         "profile_models.py",
@@ -264071,6 +266133,12 @@
               "name": "assignee_id",
               "annotation": "Mapped[uuid.UUID | None]",
               "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "assignee_text",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
               "nullable": true
             }
           ],
@@ -265256,6 +267324,10 @@
               "default": "None"
             },
             {
+              "name": "assignee_text",
+              "type": "str | None"
+            },
+            {
               "name": "metadata",
               "type": "dict[str, Any]"
             }
@@ -265406,6 +267478,10 @@
               "name": "assignee_id",
               "type": "UUID | None",
               "default": "None"
+            },
+            {
+              "name": "assignee_text",
+              "type": "str | None"
             },
             {
               "name": "metadata",
@@ -265569,6 +267645,11 @@
             {
               "name": "assignee_id",
               "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "assignee_text",
+              "type": "str | None",
               "default": "None"
             },
             {
@@ -266017,6 +268098,11 @@
             },
             {
               "name": "assignee_name",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "assignee_text",
               "type": "str | None",
               "default": "None"
             },
@@ -293383,7 +295469,7 @@
           "path": "/adjustments/{adjustment_id}/confirm",
           "handler": "confirm_adjustment",
           "response_model": "SurveyOut",
-          "request_schema": "AdjustmentConfirm"
+          "request_schema": "AdjustmentConfirm | None"
         },
         {
           "method": "POST",
@@ -295519,6 +297605,13 @@
           "request_schema": "PaymentApplicationLineUpdate"
         },
         {
+          "method": "PATCH",
+          "path": "/payment-application-lines/{line_id}/quantities",
+          "handler": "update_payment_application_line_quantities",
+          "response_model": "PaymentApplicationLineResponse",
+          "request_schema": "PaymentApplicationLineQuantities"
+        },
+        {
           "method": "GET",
           "path": "/progress-claims/{claim_id}/rollup",
           "handler": "get_claim_rollup",
@@ -297200,6 +299293,27 @@
           ]
         },
         {
+          "class_name": "PaymentApplicationLineQuantities",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "The three quantities of one valuation line: claimed, assessed, certified.\n\nThe subcontractor claims, the quantity surveyor assesses (measures) and the\ncertifier certifies. Each is optional; a field left out keeps its value.",
+          "fields": [
+            {
+              "name": "claimed_qty",
+              "type": "Decimal18_4 | None"
+            },
+            {
+              "name": "assessed_qty",
+              "type": "Decimal18_4 | None"
+            },
+            {
+              "name": "certified_qty",
+              "type": "Decimal18_4 | None"
+            }
+          ]
+        },
+        {
           "class_name": "ApprovedLineAmount",
           "bases": [
             "BaseModel"
@@ -297276,6 +299390,10 @@
               "name": "contract_line_id",
               "type": "UUID | None",
               "default": "None"
+            },
+            {
+              "name": "findings",
+              "type": "list[dict[str, Any]]"
             }
           ]
         },
@@ -312597,6 +314715,7 @@
         "manifest.py",
         "models.py",
         "permissions.py",
+        "place_of_supply.py",
         "repository.py",
         "router.py",
         "schemas.py",
@@ -313449,6 +315568,13 @@
           "method": "DELETE",
           "path": "/party-status/{status_id}",
           "handler": "remove_party_status"
+        },
+        {
+          "method": "POST",
+          "path": "/place-of-supply/prepayment/",
+          "handler": "preview_prepayment",
+          "response_model": "PrepaymentResponse",
+          "request_schema": "PrepaymentRequest"
         },
         {
           "method": "POST",
@@ -315100,6 +317226,133 @@
               "name": "limit",
               "type": "int",
               "default": "200"
+            }
+          ]
+        },
+        {
+          "class_name": "PrepaymentPeriodIn",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "One period's gross receipts and gross subcontract payments.",
+          "fields": [
+            {
+              "name": "period",
+              "type": "str"
+            },
+            {
+              "name": "receipts",
+              "type": "FiniteDecimal"
+            },
+            {
+              "name": "subcontract_paid",
+              "type": "FiniteDecimal"
+            },
+            {
+              "name": "recorded_prepaid",
+              "type": "FiniteDecimal | None"
+            }
+          ]
+        },
+        {
+          "class_name": "PrepaymentRequest",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Periods in filing order and the two rates the prepayment is computed at.",
+          "fields": [
+            {
+              "name": "periods",
+              "type": "list[PrepaymentPeriodIn]"
+            },
+            {
+              "name": "tax_rate_pct",
+              "type": "FiniteDecimal"
+            },
+            {
+              "name": "prepay_rate_pct",
+              "type": "FiniteDecimal"
+            },
+            {
+              "name": "carried_in",
+              "type": "FiniteDecimal"
+            }
+          ]
+        },
+        {
+          "class_name": "PrepaymentPeriodOut",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "The computed prepayment of one period.",
+          "fields": [
+            {
+              "name": "period",
+              "type": "str"
+            },
+            {
+              "name": "receipts",
+              "type": "Decimal"
+            },
+            {
+              "name": "subcontract_paid",
+              "type": "Decimal"
+            },
+            {
+              "name": "carried_in",
+              "type": "Decimal"
+            },
+            {
+              "name": "base_gross",
+              "type": "Decimal"
+            },
+            {
+              "name": "base_net",
+              "type": "Decimal"
+            },
+            {
+              "name": "prepaid",
+              "type": "Decimal"
+            },
+            {
+              "name": "carried_out",
+              "type": "Decimal"
+            },
+            {
+              "name": "recorded_prepaid",
+              "type": "Decimal | None",
+              "default": "None"
+            },
+            {
+              "name": "difference",
+              "type": "Decimal | None",
+              "default": "None"
+            },
+            {
+              "name": "matches",
+              "type": "bool | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "PrepaymentResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "The schedule and its totals.",
+          "fields": [
+            {
+              "name": "periods",
+              "type": "list[PrepaymentPeriodOut]"
+            },
+            {
+              "name": "total_prepaid",
+              "type": "Decimal"
+            },
+            {
+              "name": "carried_forward",
+              "type": "Decimal"
             }
           ]
         }
@@ -332076,10 +334329,10 @@
     },
     {
       "name": "boq",
-      "ts_files": 284,
+      "ts_files": 286,
       "css_files": 0,
-      "test_files": 139,
-      "total_files": 284
+      "test_files": 140,
+      "total_files": 286
     },
     {
       "name": "buyer-portal",
@@ -332150,6 +334403,13 @@
       "css_files": 0,
       "test_files": 7,
       "total_files": 15
+    },
+    {
+      "name": "china-tax",
+      "ts_files": 5,
+      "css_files": 0,
+      "test_files": 1,
+      "total_files": 5
     },
     {
       "name": "claims-evidence",
@@ -332335,10 +334595,10 @@
     },
     {
       "name": "cvr",
-      "ts_files": 6,
+      "ts_files": 9,
       "css_files": 0,
-      "test_files": 1,
-      "total_files": 6
+      "test_files": 2,
+      "total_files": 9
     },
     {
       "name": "daily-diary",
@@ -332426,10 +334686,10 @@
     },
     {
       "name": "doc-templates",
-      "ts_files": 9,
+      "ts_files": 19,
       "css_files": 0,
-      "test_files": 1,
-      "total_files": 9
+      "test_files": 3,
+      "total_files": 19
     },
     {
       "name": "documents",
@@ -332957,6 +335217,13 @@
       "total_files": 5
     },
     {
+      "name": "norm-pricing",
+      "ts_files": 6,
+      "css_files": 0,
+      "test_files": 1,
+      "total_files": 6
+    },
+    {
       "name": "notifications",
       "ts_files": 5,
       "css_files": 0,
@@ -333322,10 +335589,10 @@
     },
     {
       "name": "schedule",
-      "ts_files": 100,
+      "ts_files": 101,
       "css_files": 0,
       "test_files": 44,
-      "total_files": 100
+      "total_files": 101
     },
     {
       "name": "schedule-advanced",
@@ -333504,10 +335771,10 @@
     },
     {
       "name": "tasks",
-      "ts_files": 8,
+      "ts_files": 10,
       "css_files": 0,
-      "test_files": 1,
-      "total_files": 8
+      "test_files": 2,
+      "total_files": 10
     },
     {
       "name": "tax-rates",
@@ -333694,6 +335961,7 @@
     ],
     "approval_routes": [
       "notifications",
+      "procurement",
       "projects",
       "teams",
       "users"
@@ -333828,6 +336096,7 @@
       "measurement",
       "price_breakdown",
       "price_index",
+      "project_tax",
       "projects",
       "risk",
       "schedule",
@@ -333899,6 +336168,7 @@
       "ai",
       "boq",
       "costmodel",
+      "doc_templates",
       "finance",
       "ncr",
       "projects",
@@ -333906,7 +336176,14 @@
       "teams",
       "variations"
     ],
-    "china_pack": [],
+    "china_pack": [
+      "boq",
+      "einvoice_clearance",
+      "finance",
+      "project_tax",
+      "projects",
+      "tax_withholding"
+    ],
     "claims_evidence": [
       "change_intelligence",
       "changeorders",
@@ -334171,9 +336448,13 @@
       "users"
     ],
     "cvr": [
+      "boq",
       "contracts",
+      "costmodel",
       "field_time",
+      "finance",
       "projects",
+      "subcontractors",
       "users"
     ],
     "dach_pack": [
@@ -334541,6 +336822,7 @@
       "contacts",
       "contracts",
       "costmodel",
+      "doc_templates",
       "einvoice",
       "file_search",
       "i18n_foundation",
@@ -334808,6 +337090,10 @@
       "price_breakdown",
       "waste_factors"
     ],
+    "norm_pricing": [
+      "boq",
+      "projects"
+    ],
     "notifications": [
       "bid_management",
       "carbon",
@@ -335001,6 +337287,7 @@
       "boq",
       "contacts",
       "costmodel",
+      "doc_templates",
       "documents",
       "finance",
       "inspections",
@@ -335076,6 +337363,10 @@
       "validation"
     ],
     "project_route": [
+      "projects",
+      "users"
+    ],
+    "project_tax": [
       "projects",
       "users"
     ],
@@ -335603,17 +337894,17 @@
     ]
   },
   "statistics": {
-    "backend_modules": 256,
-    "modules_with_manifests": 256,
-    "total_models": 955,
-    "total_columns": 11204,
+    "backend_modules": 258,
+    "modules_with_manifests": 258,
+    "total_models": 960,
+    "total_columns": 11270,
     "total_relationships": 261,
-    "total_routes": 5454,
-    "total_schemas": 5020,
-    "total_python_files": 3555,
-    "frontend_features": 247,
-    "frontend_ts_files": 4347,
-    "frontend_backend_mapped": 222
+    "total_routes": 5481,
+    "total_schemas": 5061,
+    "total_python_files": 3592,
+    "frontend_features": 249,
+    "frontend_ts_files": 4376,
+    "frontend_backend_mapped": 223
   },
   "frontend_backend_mapping": {
     "about": null,
@@ -335652,6 +337943,7 @@
     "certified-payroll": "certified_payroll",
     "change-intelligence": "change_intelligence",
     "changeorders": "changeorders",
+    "china-tax": null,
     "claims-evidence": "claims_evidence",
     "clash": "clash",
     "closeout": "closeout",
@@ -335767,6 +338059,7 @@
     "monitoring": "monitoring",
     "ncr": "ncr",
     "norm-expansion": "norm_expansion",
+    "norm-pricing": "norm_pricing",
     "notifications": "notifications",
     "offers": "offers",
     "onboarding": "onboarding",
