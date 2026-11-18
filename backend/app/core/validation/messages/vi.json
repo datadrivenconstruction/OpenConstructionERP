@@ -2218,5 +2218,37 @@
       "calendar_no_work_days": "Lịch {calendar} không có ngày làm việc nào.",
       "suggestion": "Đánh dấu các ngày làm việc của lịch này trong tiến độ nguồn."
     }
+  },
+  "norm_base": {
+    "code_present": {
+      "fail": "Dòng {ordinal} không ghi mã định mức {base}. Dự toán theo định mức ghi định mức ở mọi dòng.",
+      "suggestion": "Nhập mã định mức vào phân loại {classification} của dòng."
+    },
+    "code_shape": {
+      "fail": "\"{code}\" ở dòng {ordinal} không phải mã {base}. Mã cần có dạng như {example}."
+    },
+    "legacy_prefix": {
+      "fail": "\"{code}\" ở dòng {ordinal} dùng tiền tố đã bãi bỏ {old}. Mã hiện hành là {new}."
+    },
+    "resource_breakdown": {
+      "fail": "Dòng định mức {code} không có giờ công hoặc bậc thợ bình quân.",
+      "suggestion": "Thêm nguồn lực nhân công với giờ công trên một đơn vị và bậc thợ bình quân của định mức."
+    },
+    "grade_range": {
+      "fail": "Bậc {grade} ở dòng {ordinal} nằm ngoài {min} đến {max} hoặc không theo bước {step}."
+    }
+  },
+  "public_funding": {
+    "markup_cap": {
+      "fail": "{funding}: {markup} là {percent} %, mức trần là {cap} % chi phí trực tiếp ({source}).",
+      "suggestion": "Giảm tỷ lệ về mức trần, hoặc đặt nguồn vốn là tư nhân nếu công việc không dùng vốn công."
+    },
+    "investor_exact": {
+      "fail": "Dự toán chủ đầu tư bằng {funding}: {markup} phải đúng {cap} % ({source})."
+    },
+    "material_price_evidence": {
+      "fail": "{funding}: vật liệu {material} ở dòng {ordinal} có {count} trên {required} báo giá và không có phân tích giá.",
+      "suggestion": "Ghi nhận báo giá của nhà cung cấp cho vật liệu hoặc đính kèm báo cáo phân tích giá."
+    }
   }
 }

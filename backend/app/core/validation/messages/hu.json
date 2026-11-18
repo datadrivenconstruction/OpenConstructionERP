@@ -2218,5 +2218,37 @@
       "calendar_no_work_days": "A(z) {calendar} naptárban nincs munkanap.",
       "suggestion": "Jelölje meg a naptár munkanapjait a forrásütemtervben."
     }
+  },
+  "norm_base": {
+    "code_present": {
+      "fail": "A(z) {ordinal}. tétel nem hivatkozik {base} normakódra. Normaalapú költségvetésben minden tétel normát idéz.",
+      "suggestion": "Adja meg a normakódot a tétel {classification} besorolásában."
+    },
+    "code_shape": {
+      "fail": "A(z) {ordinal}. tétel „{code}” kódja nem {base} kód. Várt formátum például: {example}."
+    },
+    "legacy_prefix": {
+      "fail": "A(z) {ordinal}. tétel „{code}” kódja a megszűnt {old} előtagot használja. Az érvényes kód: {new}."
+    },
+    "resource_breakdown": {
+      "fail": "A(z) {code} normatételnek nincs munkaórája vagy átlagos bérkategóriája.",
+      "suggestion": "Vegye fel a munkaerő-erőforrást az egységre jutó órákkal és a norma átlagos bérkategóriájával."
+    },
+    "grade_range": {
+      "fail": "A(z) {ordinal}. tétel {grade} bérkategóriája kívül esik a {min}–{max} tartományon, vagy nem {step} lépésközű."
+    }
+  },
+  "public_funding": {
+    "markup_cap": {
+      "fail": "{funding}: {markup} értéke {percent} %, a felső határ a közvetlen költségek {cap} %-a ({source}).",
+      "suggestion": "Csökkentse a pótlékot a felső határig, vagy állítsa magánfinanszírozásra, ha nem közpénz fizeti a munkát."
+    },
+    "investor_exact": {
+      "fail": "Megrendelői költségvetés, {funding}: {markup} pontosan {cap} % legyen ({source})."
+    },
+    "material_price_evidence": {
+      "fail": "{funding}: a(z) {ordinal}. tétel {material} anyagához {count}/{required} árajánlat tartozik, árelemzés nincs.",
+      "suggestion": "Rögzítse az anyag szállítói ajánlatait, vagy csatolja az árelemzési jelentést."
+    }
   }
 }

@@ -2218,5 +2218,37 @@
       "calendar_no_work_days": "Kalender {calendar} heeft geen werkdag.",
       "suggestion": "Markeer de werkdagen van deze kalender in de bronplanning."
     }
+  },
+  "norm_base": {
+    "code_present": {
+      "fail": "Regel {ordinal} noemt geen normcode van {base}. Een normgebaseerde begroting noemt op elke regel een norm.",
+      "suggestion": "Vul de normcode in onder de classificatie {classification} van de regel."
+    },
+    "code_shape": {
+      "fail": "„{code}” op regel {ordinal} is geen code van {base}. Verwacht wordt een code zoals {example}."
+    },
+    "legacy_prefix": {
+      "fail": "„{code}” op regel {ordinal} gebruikt het vervallen voorvoegsel {old}. De geldende code is {new}."
+    },
+    "resource_breakdown": {
+      "fail": "Normregel {code} heeft geen arbeidsuren of geen gemiddelde loongroep.",
+      "suggestion": "Voeg de arbeidsresource toe met de uren per eenheid en de gemiddelde loongroep van de norm."
+    },
+    "grade_range": {
+      "fail": "Loongroep {grade} op regel {ordinal} ligt buiten {min} tot {max} of niet in stappen van {step}."
+    }
+  },
+  "public_funding": {
+    "markup_cap": {
+      "fail": "{funding}: {markup} is {percent} %, het plafond is {cap} % van de directe kosten ({source}).",
+      "suggestion": "Verlaag de opslag tot het plafond, of zet de financiering op privaat als geen publiek geld het werk betaalt."
+    },
+    "investor_exact": {
+      "fail": "Begroting van de opdrachtgever met {funding}: {markup} hoort precies {cap} % te zijn ({source})."
+    },
+    "material_price_evidence": {
+      "fail": "{funding}: materiaal {material} op regel {ordinal} heeft {count} van {required} prijsoffertes en geen prijsanalyse.",
+      "suggestion": "Leg de offertes van leveranciers voor het materiaal vast of voeg het prijsanalyserapport toe."
+    }
   }
 }

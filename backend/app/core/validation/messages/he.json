@@ -2218,5 +2218,37 @@
       "calendar_no_work_days": "בלוח השנה {calendar} אין יום עבודה.",
       "suggestion": "סמנו את ימי העבודה של לוח שנה זה בלוח הזמנים המקורי."
     }
+  },
+  "norm_base": {
+    "code_present": {
+      "fail": "בשורה {ordinal} אין קוד תקן של {base}. אומדן מבוסס תקנים מפנה לתקן בכל שורה.",
+      "suggestion": "הזינו את קוד התקן בסיווג {classification} של השורה."
+    },
+    "code_shape": {
+      "fail": "\"{code}\" בשורה {ordinal} אינו קוד של {base}. צפוי קוד כמו {example}."
+    },
+    "legacy_prefix": {
+      "fail": "\"{code}\" בשורה {ordinal} משתמש בקידומת שבוטלה {old}. הקוד התקף הוא {new}."
+    },
+    "resource_breakdown": {
+      "fail": "בשורת התקן {code} אין שעות עבודה או דרגה ממוצעת.",
+      "suggestion": "הוסיפו את משאב העבודה עם השעות ליחידה והדרגה הממוצעת של התקן."
+    },
+    "grade_range": {
+      "fail": "דרגה {grade} בשורה {ordinal} מחוץ לטווח {min} עד {max} או לא בצעדים של {step}."
+    }
+  },
+  "public_funding": {
+    "markup_cap": {
+      "fail": "{funding}: {markup} הוא {percent} %, התקרה היא {cap} % מהעלויות הישירות ({source}).",
+      "suggestion": "הורידו את התוספת עד התקרה, או הגדירו מימון פרטי אם כסף ציבורי אינו משלם על העבודה."
+    },
+    "investor_exact": {
+      "fail": "אומדן המזמין ב{funding}: {markup} צריך להיות בדיוק {cap} % ({source})."
+    },
+    "material_price_evidence": {
+      "fail": "{funding}: לחומר {material} בשורה {ordinal} יש {count} מתוך {required} הצעות מחיר ואין ניתוח מחירים.",
+      "suggestion": "תעדו את הצעות הספקים לחומר או צרפו את דוח ניתוח המחירים."
+    }
   }
 }

@@ -2218,5 +2218,37 @@
       "calendar_no_work_days": "Kalendarz {calendar} nie ma żadnego dnia roboczego.",
       "suggestion": "Zaznacz dni robocze tego kalendarza w harmonogramie źródłowym."
     }
+  },
+  "norm_base": {
+    "code_present": {
+      "fail": "Pozycja {ordinal} nie podaje kodu normy {base}. Kosztorys oparty na normach podaje normę w każdej pozycji.",
+      "suggestion": "Wpisz kod normy w klasyfikacji {classification} tej pozycji."
+    },
+    "code_shape": {
+      "fail": "„{code}” w pozycji {ordinal} nie jest kodem {base}. Oczekiwany kod w rodzaju {example}."
+    },
+    "legacy_prefix": {
+      "fail": "„{code}” w pozycji {ordinal} ma wycofany prefiks {old}. Obowiązujący kod to {new}."
+    },
+    "resource_breakdown": {
+      "fail": "Pozycja normy {code} nie ma roboczogodzin lub średniej kategorii robót.",
+      "suggestion": "Dodaj zasób robocizny z roboczogodzinami na jednostkę i średnią kategorią robót z normy."
+    },
+    "grade_range": {
+      "fail": "Kategoria {grade} w pozycji {ordinal} jest poza zakresem {min}–{max} lub nie jest wielokrotnością {step}."
+    }
+  },
+  "public_funding": {
+    "markup_cap": {
+      "fail": "{funding}: {markup} wynosi {percent} %, limit to {cap} % kosztów bezpośrednich ({source}).",
+      "suggestion": "Obniż narzut do limitu albo ustaw finansowanie prywatne, jeśli roboty nie są opłacane ze środków publicznych."
+    },
+    "investor_exact": {
+      "fail": "Kosztorys inwestorski ze środków {funding}: {markup} powinien wynosić dokładnie {cap} % ({source})."
+    },
+    "material_price_evidence": {
+      "fail": "{funding}: materiał {material} w pozycji {ordinal} ma {count} z {required} ofert cenowych i brak analizy cen.",
+      "suggestion": "Zapisz oferty dostawców dla materiału albo dołącz raport z analizy cen."
+    }
   }
 }

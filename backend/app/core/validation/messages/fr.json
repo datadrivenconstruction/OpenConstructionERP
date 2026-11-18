@@ -2218,5 +2218,37 @@
       "calendar_no_work_days": "Le calendrier {calendar} n'a aucun jour ouvré.",
       "suggestion": "Indiquez les jours ouvrés de ce calendrier dans le planning source."
     }
+  },
+  "norm_base": {
+    "code_present": {
+      "fail": "La ligne {ordinal} ne cite aucun code de norme {base}. Une estimation fondée sur des normes cite une norme à chaque ligne.",
+      "suggestion": "Saisissez le code de norme dans la classification {classification} de la ligne."
+    },
+    "code_shape": {
+      "fail": "« {code} » à la ligne {ordinal} n'est pas un code {base}. Code attendu du type {example}."
+    },
+    "legacy_prefix": {
+      "fail": "« {code} » à la ligne {ordinal} utilise l'ancien préfixe {old}. Le code en vigueur est {new}."
+    },
+    "resource_breakdown": {
+      "fail": "La ligne de norme {code} n'a pas d'heures de main-d'œuvre ou pas de qualification moyenne.",
+      "suggestion": "Ajoutez la ressource main-d'œuvre avec ses heures par unité et la qualification moyenne de la norme."
+    },
+    "grade_range": {
+      "fail": "La qualification {grade} à la ligne {ordinal} est hors de {min} à {max} ou pas par pas de {step}."
+    }
+  },
+  "public_funding": {
+    "markup_cap": {
+      "fail": "{funding} : {markup} est de {percent} %, le plafond est de {cap} % des coûts directs ({source}).",
+      "suggestion": "Ramenez le taux au plafond, ou indiquez un financement privé si aucun fonds public ne paie les travaux."
+    },
+    "investor_exact": {
+      "fail": "Estimation du maître d'ouvrage sur {funding} : {markup} doit être exactement de {cap} % ({source})."
+    },
+    "material_price_evidence": {
+      "fail": "{funding} : le matériau {material} à la ligne {ordinal} a {count} offres de prix sur {required} et aucune analyse de prix.",
+      "suggestion": "Enregistrez les offres des fournisseurs pour le matériau ou joignez le rapport d'analyse des prix."
+    }
   }
 }

@@ -2218,5 +2218,37 @@
       "calendar_no_work_days": "Kalender {calendar} har ingen arbejdsdag.",
       "suggestion": "Markér kalenderens arbejdsdage i kildeplanen."
     }
+  },
+  "norm_base": {
+    "code_present": {
+      "fail": "Linje {ordinal} angiver ingen normkode fra {base}. Et normbaseret overslag angiver en norm på hver linje.",
+      "suggestion": "Angiv normkoden under linjens klassifikation {classification}."
+    },
+    "code_shape": {
+      "fail": "\"{code}\" på linje {ordinal} er ikke en kode fra {base}. Der forventes en kode som {example}."
+    },
+    "legacy_prefix": {
+      "fail": "\"{code}\" på linje {ordinal} bruger det udgåede præfiks {old}. Den gældende kode er {new}."
+    },
+    "resource_breakdown": {
+      "fail": "Normlinjen {code} har ingen arbejdstimer eller ingen gennemsnitlig lønklasse.",
+      "suggestion": "Tilføj arbejdsressourcen med timer pr. enhed og normens gennemsnitlige lønklasse."
+    },
+    "grade_range": {
+      "fail": "Lønklasse {grade} på linje {ordinal} ligger uden for {min} til {max} eller ikke i trin på {step}."
+    }
+  },
+  "public_funding": {
+    "markup_cap": {
+      "fail": "{funding}: {markup} er {percent} %, loftet er {cap} % af de direkte omkostninger ({source}).",
+      "suggestion": "Sænk tillægget til loftet, eller sæt finansieringen til privat, hvis ingen offentlige midler betaler arbejdet."
+    },
+    "investor_exact": {
+      "fail": "Bygherrens overslag med {funding}: {markup} bør være præcis {cap} % ({source})."
+    },
+    "material_price_evidence": {
+      "fail": "{funding}: materialet {material} på linje {ordinal} har {count} af {required} pristilbud og ingen prisanalyse.",
+      "suggestion": "Registrer leverandørernes tilbud på materialet, eller vedhæft prisanalyserapporten."
+    }
   }
 }

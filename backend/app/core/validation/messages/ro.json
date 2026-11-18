@@ -2218,5 +2218,37 @@
       "calendar_no_work_days": "Calendarul {calendar} nu are nicio zi lucrătoare.",
       "suggestion": "Marcați zilele lucrătoare ale acestui calendar în graficul sursă."
     }
+  },
+  "norm_base": {
+    "code_present": {
+      "fail": "Linia {ordinal} nu citează niciun cod de normă {base}. Un deviz pe norme citează o normă pe fiecare linie.",
+      "suggestion": "Introduceți codul normei în clasificarea {classification} a liniei."
+    },
+    "code_shape": {
+      "fail": "„{code}” pe linia {ordinal} nu este un cod {base}. Se așteaptă un cod precum {example}."
+    },
+    "legacy_prefix": {
+      "fail": "„{code}” pe linia {ordinal} folosește prefixul retras {old}. Codul în vigoare este {new}."
+    },
+    "resource_breakdown": {
+      "fail": "Linia de normă {code} nu are ore de manoperă sau nu are categoria medie.",
+      "suggestion": "Adăugați resursa de manoperă cu orele pe unitate și categoria medie a normei."
+    },
+    "grade_range": {
+      "fail": "Categoria {grade} pe linia {ordinal} este în afara intervalului {min}–{max} sau nu în pași de {step}."
+    }
+  },
+  "public_funding": {
+    "markup_cap": {
+      "fail": "{funding}: {markup} este {percent} %, plafonul este {cap} % din costurile directe ({source}).",
+      "suggestion": "Reduceți cota la plafon sau setați finanțarea privată dacă lucrările nu sunt plătite din fonduri publice."
+    },
+    "investor_exact": {
+      "fail": "Devizul beneficiarului din {funding}: {markup} trebuie să fie exact {cap} % ({source})."
+    },
+    "material_price_evidence": {
+      "fail": "{funding}: materialul {material} pe linia {ordinal} are {count} din {required} oferte de preț și nicio analiză de preț.",
+      "suggestion": "Înregistrați ofertele furnizorilor pentru material sau atașați raportul de analiză a prețurilor."
+    }
   }
 }

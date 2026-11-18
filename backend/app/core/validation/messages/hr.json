@@ -2218,5 +2218,37 @@
       "calendar_no_work_days": "Kalendar {calendar} nema nijedan radni dan.",
       "suggestion": "Označite radne dane ovog kalendara u izvornom planu."
     }
+  },
+  "norm_base": {
+    "code_present": {
+      "fail": "Stavka {ordinal} ne navodi šifru norme {base}. Troškovnik prema normama navodi normu u svakoj stavci.",
+      "suggestion": "Upišite šifru norme u klasifikaciju {classification} stavke."
+    },
+    "code_shape": {
+      "fail": "„{code}” u stavci {ordinal} nije šifra {base}. Očekuje se šifra poput {example}."
+    },
+    "legacy_prefix": {
+      "fail": "„{code}” u stavci {ordinal} koristi ukinuti prefiks {old}. Važeća šifra je {new}."
+    },
+    "resource_breakdown": {
+      "fail": "Stavka norme {code} nema radne sate ili prosječni razred.",
+      "suggestion": "Dodajte resurs rada sa satima po jedinici i prosječnim razredom norme."
+    },
+    "grade_range": {
+      "fail": "Razred {grade} u stavci {ordinal} je izvan raspona {min}–{max} ili nije u koracima od {step}."
+    }
+  },
+  "public_funding": {
+    "markup_cap": {
+      "fail": "{funding}: {markup} iznosi {percent} %, gornja granica je {cap} % izravnih troškova ({source}).",
+      "suggestion": "Smanjite dodatak na gornju granicu ili postavite privatno financiranje ako radove ne plaćaju javna sredstva."
+    },
+    "investor_exact": {
+      "fail": "Troškovnik naručitelja iz {funding}: {markup} treba iznositi točno {cap} % ({source})."
+    },
+    "material_price_evidence": {
+      "fail": "{funding}: materijal {material} u stavci {ordinal} ima {count} od {required} ponuda cijena i nema analize cijena.",
+      "suggestion": "Zabilježite ponude dobavljača za materijal ili priložite izvješće o analizi cijena."
+    }
   }
 }

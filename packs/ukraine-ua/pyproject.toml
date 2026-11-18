@@ -54,4 +54,6 @@ where = ["src"]
 openconstructionerp_ukraine_ua = [
     "onboarding.yaml",
     "rule_packs/*.json",
+    "norm_bases/*.json",
+    "estimate_pricing.json",
 ]

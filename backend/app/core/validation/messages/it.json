@@ -2218,5 +2218,37 @@
       "calendar_no_work_days": "Il calendario {calendar} non ha giorni lavorativi.",
       "suggestion": "Indica i giorni lavorativi di questo calendario nel cronoprogramma di origine."
     }
+  },
+  "norm_base": {
+    "code_present": {
+      "fail": "La riga {ordinal} non cita alcun codice di norma {base}. Un computo basato su norme cita una norma in ogni riga.",
+      "suggestion": "Inserisca il codice di norma nella classificazione {classification} della riga."
+    },
+    "code_shape": {
+      "fail": "«{code}» alla riga {ordinal} non è un codice {base}. Atteso un codice come {example}."
+    },
+    "legacy_prefix": {
+      "fail": "«{code}» alla riga {ordinal} usa il prefisso dismesso {old}. Il codice vigente è {new}."
+    },
+    "resource_breakdown": {
+      "fail": "La riga di norma {code} non ha ore di manodopera o non ha la qualifica media.",
+      "suggestion": "Aggiunga la risorsa manodopera con le ore per unità e la qualifica media della norma."
+    },
+    "grade_range": {
+      "fail": "La qualifica {grade} alla riga {ordinal} è fuori da {min} a {max} o non a passi di {step}."
+    }
+  },
+  "public_funding": {
+    "markup_cap": {
+      "fail": "{funding}: {markup} è {percent} %, il limite è {cap} % dei costi diretti ({source}).",
+      "suggestion": "Riduca la maggiorazione al limite, oppure imposti il finanziamento privato se nessun fondo pubblico paga i lavori."
+    },
+    "investor_exact": {
+      "fail": "Stima del committente con {funding}: {markup} dovrebbe essere esattamente {cap} % ({source})."
+    },
+    "material_price_evidence": {
+      "fail": "{funding}: il materiale {material} alla riga {ordinal} ha {count} offerte di prezzo su {required} e nessuna analisi dei prezzi.",
+      "suggestion": "Registri le offerte dei fornitori per il materiale o alleghi la relazione di analisi dei prezzi."
+    }
   }
 }

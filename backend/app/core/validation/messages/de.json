@@ -2218,5 +2218,37 @@
       "calendar_no_work_days": "Kalender {calendar} hat keinen Arbeitstag.",
       "suggestion": "Markieren Sie die Arbeitstage dieses Kalenders im Quellterminplan."
     }
+  },
+  "norm_base": {
+    "code_present": {
+      "fail": "Zeile {ordinal} nennt keine Normnummer der {base}. Eine normbasierte Kalkulation nennt in jeder Zeile eine Norm.",
+      "suggestion": "Tragen Sie die Normnummer unter der Klassifikation {classification} der Zeile ein."
+    },
+    "code_shape": {
+      "fail": "„{code}“ in Zeile {ordinal} ist keine Nummer der {base}. Erwartet wird eine Nummer wie {example}."
+    },
+    "legacy_prefix": {
+      "fail": "„{code}“ in Zeile {ordinal} verwendet das veraltete Präfix {old}. Die gültige Nummer lautet {new}."
+    },
+    "resource_breakdown": {
+      "fail": "Die Normzeile {code} hat keine Arbeitsstunden oder keine mittlere Lohngruppe.",
+      "suggestion": "Ergänzen Sie die Lohnressource mit Stunden je Einheit und der mittleren Lohngruppe der Norm."
+    },
+    "grade_range": {
+      "fail": "Lohngruppe {grade} in Zeile {ordinal} liegt außerhalb von {min} bis {max} oder nicht im Raster {step}."
+    }
+  },
+  "public_funding": {
+    "markup_cap": {
+      "fail": "{funding}: {markup} beträgt {percent} %, die Obergrenze ist {cap} % der direkten Kosten ({source}).",
+      "suggestion": "Senken Sie den Zuschlag auf die Obergrenze oder stellen Sie die Finanzierung auf privat, wenn keine öffentlichen Mittel die Arbeiten bezahlen."
+    },
+    "investor_exact": {
+      "fail": "Kalkulation des Auftraggebers mit {funding}: {markup} sollte genau {cap} % betragen ({source})."
+    },
+    "material_price_evidence": {
+      "fail": "{funding}: Material {material} in Zeile {ordinal} hat {count} von {required} Preisangeboten und keine Preisanalyse.",
+      "suggestion": "Erfassen Sie die Lieferantenangebote zum Material oder hängen Sie den Preisanalysebericht an."
+    }
   }
 }

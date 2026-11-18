@@ -2218,5 +2218,37 @@
       "calendar_no_work_days": "カレンダー {calendar} に稼働日がありません。",
       "suggestion": "元の工程表でこのカレンダーの稼働日を指定してください。"
     }
+  },
+  "norm_base": {
+    "code_present": {
+      "fail": "{ordinal} 行目に {base} の基準コードがありません。基準に基づく積算では各行に基準を記載します。",
+      "suggestion": "行の分類 {classification} に基準コードを入力してください。"
+    },
+    "code_shape": {
+      "fail": "{ordinal} 行目の「{code}」は {base} のコードではありません。{example} のようなコードが必要です。"
+    },
+    "legacy_prefix": {
+      "fail": "{ordinal} 行目の「{code}」は廃止された接頭辞 {old} を使っています。現行のコードは {new} です。"
+    },
+    "resource_breakdown": {
+      "fail": "基準行 {code} に労務時間または平均等級がありません。",
+      "suggestion": "単位当たりの時間と基準の平均等級を付けて労務資源を追加してください。"
+    },
+    "grade_range": {
+      "fail": "{ordinal} 行目の等級 {grade} は {min}〜{max} の範囲外か、{step} 刻みではありません。"
+    }
+  },
+  "public_funding": {
+    "markup_cap": {
+      "fail": "{funding}: {markup} は {percent} %、上限は直接費の {cap} % です ({source})。",
+      "suggestion": "上限まで率を下げるか、公的資金で支払われない工事なら資金区分を民間にしてください。"
+    },
+    "investor_exact": {
+      "fail": "{funding} による発注者積算: {markup} はちょうど {cap} % にすべきです ({source})。"
+    },
+    "material_price_evidence": {
+      "fail": "{funding}: {ordinal} 行目の材料 {material} の見積は {required} 件中 {count} 件で、価格分析がありません。",
+      "suggestion": "材料の供給者見積を記録するか、価格分析報告書を添付してください。"
+    }
   }
 }

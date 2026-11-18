@@ -3912,7 +3912,7 @@ _COUNTRY_RULE_SETS: dict[str, list[str]] = {
     # neither.
     "RO": ["romania", "din276"],
     "GR": ["greece", "din276"],
-    "UA": ["ukraine", "din276"],
+    "UA": ["ukraine", "din276", "norm_base", "public_funding"],
     "HR": ["din276"],
     "CZ": ["din276"],
     "BE": ["din276"],

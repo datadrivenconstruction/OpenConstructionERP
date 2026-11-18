@@ -2218,5 +2218,37 @@
       "calendar_no_work_days": "Kalendris {calendar} pole ühtegi tööpäeva.",
       "suggestion": "Märkige lähtegraafikus selle kalendri tööpäevad."
     }
+  },
+  "norm_base": {
+    "code_present": {
+      "fail": "Real {ordinal} ei ole normi koodi ({base}). Normipõhises eelarves viitab iga rida normile.",
+      "suggestion": "Sisestage normi kood rea klassifikaatorisse {classification}."
+    },
+    "code_shape": {
+      "fail": "Rea {ordinal} kood „{code}” ei ole {base} kood. Oodatakse koodi nagu {example}."
+    },
+    "legacy_prefix": {
+      "fail": "Rea {ordinal} kood „{code}” kasutab kehtetut eesliidet {old}. Kehtiv kood on {new}."
+    },
+    "resource_breakdown": {
+      "fail": "Normireal {code} pole töötunde või keskmist palgajärku.",
+      "suggestion": "Lisage tööjõuressurss tundidega ühiku kohta ja normi keskmine palgajärk."
+    },
+    "grade_range": {
+      "fail": "Rea {ordinal} palgajärk {grade} on väljaspool vahemikku {min}–{max} või mitte sammuga {step}."
+    }
+  },
+  "public_funding": {
+    "markup_cap": {
+      "fail": "{funding}: {markup} on {percent} %, ülempiir on {cap} % otsestest kuludest ({source}).",
+      "suggestion": "Vähendage juurdehindlust ülempiirini või märkige rahastus erarahaks, kui tööd ei maksta avalikest vahenditest."
+    },
+    "investor_exact": {
+      "fail": "Tellija eelarve, {funding}: {markup} peab olema täpselt {cap} % ({source})."
+    },
+    "material_price_evidence": {
+      "fail": "{funding}: rea {ordinal} materjalil {material} on {count}/{required} hinnapakkumist ja hinnaanalüüs puudub.",
+      "suggestion": "Salvestage materjali tarnijapakkumised või lisage hinnaanalüüsi aruanne."
+    }
   }
 }

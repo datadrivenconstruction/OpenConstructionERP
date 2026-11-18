@@ -158,6 +158,12 @@ async def _tender_count(session: AsyncSession, project_id: uuid.UUID) -> int | N
     return int(count or 0)
 
 
+def _estimate_pricing(metadata: Any) -> dict[str, Any] | None:
+    """The project's estimate-pricing settings, or ``None`` when it has none."""
+    block = metadata.get("estimate_pricing") if isinstance(metadata, dict) else None
+    return dict(block) if isinstance(block, dict) else None
+
+
 async def _project_record(session: AsyncSession, project_id: uuid.UUID) -> dict[str, Any] | None:
     """The project as the completeness rules read it, or ``None`` for an unknown id.
 
@@ -183,6 +189,7 @@ async def _project_record(session: AsyncSession, project_id: uuid.UUID) -> dict[
                 Project.planned_end_date,
                 Project.client_id,
                 Project.fx_rates,
+                Project.metadata_,
             ).where(Project.id == project_id)
         )
     ).first()
@@ -209,6 +216,9 @@ async def _project_record(session: AsyncSession, project_id: uuid.UUID) -> dict[
         "contract_count": contract_count,
         "client_party_count": client_party_count,
         "tender_count": await _tender_count(session, project_id),
+        # Estimate wage, monthly hours, funding class and labour location the
+        # norm_base and public_funding rule sets read; see app.core.norm_bases.
+        "estimate_pricing": _estimate_pricing(row.metadata_),
     }
 
 

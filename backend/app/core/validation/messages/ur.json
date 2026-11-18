@@ -2218,5 +2218,37 @@
       "calendar_no_work_days": "کیلنڈر {calendar} میں کوئی کام کا دن نہیں ہے۔",
       "suggestion": "ماخذ پروگرام میں اس کیلنڈر کے کام کے دن نشان زد کریں۔"
     }
+  },
+  "norm_base": {
+    "code_present": {
+      "fail": "سطر {ordinal} میں {base} معیار کا کوڈ نہیں ہے۔ معیار پر مبنی تخمینے میں ہر سطر کسی معیار کا حوالہ دیتی ہے۔",
+      "suggestion": "سطر کی {classification} درجہ بندی میں معیار کا کوڈ درج کریں۔"
+    },
+    "code_shape": {
+      "fail": "سطر {ordinal} پر \"{code}\" {base} کا کوڈ نہیں ہے۔ {example} جیسا کوڈ متوقع ہے۔"
+    },
+    "legacy_prefix": {
+      "fail": "سطر {ordinal} پر \"{code}\" منسوخ شدہ سابقہ {old} استعمال کرتا ہے۔ موجودہ کوڈ {new} ہے۔"
+    },
+    "resource_breakdown": {
+      "fail": "معیار کی سطر {code} میں مزدوری کے گھنٹے یا اوسط درجہ نہیں ہے۔",
+      "suggestion": "فی اکائی گھنٹوں اور معیار کے اوسط درجے کے ساتھ مزدوری کا وسیلہ شامل کریں۔"
+    },
+    "grade_range": {
+      "fail": "سطر {ordinal} پر درجہ {grade} حد {min} تا {max} سے باہر ہے یا {step} کے وقفوں میں نہیں ہے۔"
+    }
+  },
+  "public_funding": {
+    "markup_cap": {
+      "fail": "{funding}: {markup} {percent} % ہے، حد براہ راست لاگت کا {cap} % ہے ({source})۔",
+      "suggestion": "اضافہ حد تک کم کریں، یا اگر کام سرکاری رقم سے ادا نہیں ہوتا تو مالی معاونت نجی رکھیں۔"
+    },
+    "investor_exact": {
+      "fail": "{funding} پر مالک کا تخمینہ: {markup} بالکل {cap} % ہونا چاہیے ({source})۔"
+    },
+    "material_price_evidence": {
+      "fail": "{funding}: سطر {ordinal} پر مواد {material} کی {required} میں سے {count} قیمت کی پیشکشیں ہیں اور قیمت کا تجزیہ نہیں ہے۔",
+      "suggestion": "مواد کے لیے فراہم کنندگان کی پیشکشیں درج کریں یا قیمت کے تجزیے کی رپورٹ منسلک کریں۔"
+    }
   }
 }

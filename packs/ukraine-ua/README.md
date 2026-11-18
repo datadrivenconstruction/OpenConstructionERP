@@ -88,8 +88,35 @@ the electronic procurement system, under the martial law procedure of поста
   school with a civil protection shelter in Kyiv, priced at 2026 levels in UAH
   excluding ПДВ
 - **A three-step onboarding wizard** in Ukrainian and English
+- **KNU norm codes** (`norm_bases/knu.json`, the neutral `norm_base` rule set):
+  a line cites a norm under the `knu` key, such as КБ1-13-1 (type, collection,
+  group, norm). The prefixes КБ, КР, КМ, КВ, КП and КБМ are accepted; a code with
+  a pre-2023 prefix (Е, ЕН, ЕД, РН, М, В, П, СН) is flagged with its current
+  form, and a code of another shape is a warning, not an error, because the
+  shape comes from secondary literature citing a ministry letter we have not
+  read. The collection index carries numbers and type titles only
+- **Graded labour rates** (`estimate_pricing.json`): the hourly rate of a grade
+  from the estimate wage, the monthly hours and the coefficient table of
+  Додаток 15, with base grade 3.8. Whole-grade coefficients 1 to 7 and linear
+  steps between them reproduce every value the source quotes; grades above 7.0
+  are not shipped until the annex row for grade 8 is read. 174 hours a month is
+  a 2026 default, never enforced
+- **Funding caps** (the neutral `public_funding` rule set): on budget or state
+  money, general production costs 10, administrative costs 3 and profit 15
+  percent of direct costs (постанова КМУ №1512, п. 1 пп. 4) are caps for a
+  contractor and exact values for the client's estimate; each material needs
+  three supplier offers or a price analysis. Private funding has no caps
+- **Combat-zone labour factors**: ×2 for territories of active hostilities and
+  ×1.5 for possible hostilities, on labour only. The project carries the flag;
+  the territory list changes by order and is not looked up
 
-No CWICR cost database covers Ukraine yet, so the pack preloads none.
+The wage, hours, funding type, who prices the estimate and the combat-zone flag
+are set per project under Settings, in a card that only appears for a project
+whose country pack supplies norm pricing.
+
+No CWICR cost database covers Ukraine yet, so the pack preloads none, and no
+material carries a price from a cost base: price evidence stays empty until a
+user records supplier offers.
 
 ## Demo price levels
 

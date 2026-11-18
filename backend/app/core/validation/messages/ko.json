@@ -2218,5 +2218,37 @@
       "calendar_no_work_days": "달력 {calendar}에 근무일이 없습니다.",
       "suggestion": "원본 공정표에서 이 달력의 근무일을 지정하세요."
     }
+  },
+  "norm_base": {
+    "code_present": {
+      "fail": "{ordinal}행에 {base} 기준 코드가 없습니다. 기준에 따른 적산은 모든 행에 기준을 기재합니다.",
+      "suggestion": "행의 {classification} 분류에 기준 코드를 입력하세요."
+    },
+    "code_shape": {
+      "fail": "{ordinal}행의 \"{code}\"는 {base} 코드가 아닙니다. {example} 같은 코드가 필요합니다."
+    },
+    "legacy_prefix": {
+      "fail": "{ordinal}행의 \"{code}\"는 폐지된 접두어 {old}를 사용합니다. 현행 코드는 {new}입니다."
+    },
+    "resource_breakdown": {
+      "fail": "기준 행 {code}에 노무 시간 또는 평균 등급이 없습니다.",
+      "suggestion": "단위당 시간과 기준의 평균 등급을 포함한 노무 자원을 추가하세요."
+    },
+    "grade_range": {
+      "fail": "{ordinal}행의 등급 {grade}는 {min}~{max} 범위를 벗어나거나 {step} 단위가 아닙니다."
+    }
+  },
+  "public_funding": {
+    "markup_cap": {
+      "fail": "{funding}: {markup}는 {percent} %이며, 상한은 직접비의 {cap} %입니다 ({source}).",
+      "suggestion": "요율을 상한까지 낮추거나, 공공 자금으로 지급되지 않는 공사라면 자금 구분을 민간으로 설정하세요."
+    },
+    "investor_exact": {
+      "fail": "{funding} 발주자 적산: {markup}는 정확히 {cap} %여야 합니다 ({source})."
+    },
+    "material_price_evidence": {
+      "fail": "{funding}: {ordinal}행의 자재 {material}는 견적 {required}건 중 {count}건이며 가격 분석이 없습니다.",
+      "suggestion": "자재의 공급업체 견적을 기록하거나 가격 분석 보고서를 첨부하세요."
+    }
   }
 }

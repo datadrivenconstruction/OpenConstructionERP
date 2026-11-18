@@ -2218,5 +2218,37 @@
       "calendar_no_work_days": "Kalenterissa {calendar} ei ole työpäiviä.",
       "suggestion": "Merkitse tämän kalenterin työpäivät lähdeaikatauluun."
     }
+  },
+  "norm_base": {
+    "code_present": {
+      "fail": "Rivillä {ordinal} ei ole normikoodia ({base}). Normeihin perustuvassa laskelmassa jokainen rivi viittaa normiin.",
+      "suggestion": "Syötä normikoodi rivin luokitukseen {classification}."
+    },
+    "code_shape": {
+      "fail": "Rivin {ordinal} koodi \"{code}\" ei ole {base}-koodi. Odotettu muoto on esimerkiksi {example}."
+    },
+    "legacy_prefix": {
+      "fail": "Rivin {ordinal} koodi \"{code}\" käyttää poistunutta etuliitettä {old}. Voimassa oleva koodi on {new}."
+    },
+    "resource_breakdown": {
+      "fail": "Normirivillä {code} ei ole työtunteja tai keskimääräistä palkkaluokkaa.",
+      "suggestion": "Lisää työresurssi tunteineen yksikköä kohti ja normin keskimääräinen palkkaluokka."
+    },
+    "grade_range": {
+      "fail": "Rivin {ordinal} palkkaluokka {grade} on välin {min}–{max} ulkopuolella tai ei porrastu {step} välein."
+    }
+  },
+  "public_funding": {
+    "markup_cap": {
+      "fail": "{funding}: {markup} on {percent} %, katto on {cap} % välittömistä kustannuksista ({source}).",
+      "suggestion": "Laske lisä kattoon tai merkitse rahoitus yksityiseksi, jos julkiset varat eivät maksa työtä."
+    },
+    "investor_exact": {
+      "fail": "Tilaajan laskelma, {funding}: {markup} tulee olla tasan {cap} % ({source})."
+    },
+    "material_price_evidence": {
+      "fail": "{funding}: rivin {ordinal} materiaalilla {material} on {count}/{required} hintatarjousta eikä hinta-analyysiä.",
+      "suggestion": "Kirjaa toimittajien tarjoukset materiaalille tai liitä hinta-analyysiraportti."
+    }
   }
 }

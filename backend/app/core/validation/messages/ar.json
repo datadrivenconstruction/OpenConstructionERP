@@ -2218,5 +2218,37 @@
       "calendar_no_work_days": "التقويم {calendar} لا يحتوي على أي يوم عمل.",
       "suggestion": "حدد أيام العمل لهذا التقويم في البرنامج الزمني المصدر."
     }
+  },
+  "norm_base": {
+    "code_present": {
+      "fail": "البند {ordinal} لا يذكر رمز معيار من {base}. التقدير القائم على المعايير يذكر معيارًا في كل بند.",
+      "suggestion": "أدخل رمز المعيار في تصنيف {classification} للبند."
+    },
+    "code_shape": {
+      "fail": "\"{code}\" في البند {ordinal} ليس رمزًا من {base}. المتوقع رمز مثل {example}."
+    },
+    "legacy_prefix": {
+      "fail": "\"{code}\" في البند {ordinal} يستخدم البادئة الملغاة {old}. الرمز الساري هو {new}."
+    },
+    "resource_breakdown": {
+      "fail": "بند المعيار {code} بلا ساعات عمل أو بلا درجة متوسطة للعمالة.",
+      "suggestion": "أضف مورد العمالة مع الساعات لكل وحدة والدرجة المتوسطة الواردة في المعيار."
+    },
+    "grade_range": {
+      "fail": "الدرجة {grade} في البند {ordinal} خارج النطاق {min} إلى {max} أو ليست بخطوات {step}."
+    }
+  },
+  "public_funding": {
+    "markup_cap": {
+      "fail": "{funding}: {markup} يساوي {percent} %، والحد الأعلى {cap} % من التكاليف المباشرة ({source}).",
+      "suggestion": "اخفض النسبة إلى الحد الأعلى، أو اجعل التمويل خاصًا إذا لم تُدفع الأعمال من أموال عامة."
+    },
+    "investor_exact": {
+      "fail": "تقدير المالك بتمويل {funding}: يجب أن يكون {markup} بالضبط {cap} % ({source})."
+    },
+    "material_price_evidence": {
+      "fail": "{funding}: المادة {material} في البند {ordinal} لها {count} من {required} عروض أسعار ولا يوجد تحليل للأسعار.",
+      "suggestion": "سجّل عروض الموردين للمادة أو أرفق تقرير تحليل الأسعار."
+    }
   }
 }

@@ -2218,5 +2218,37 @@
       "calendar_no_work_days": "ক্যালেন্ডার {calendar}-এ কোনো কর্মদিবস নেই।",
       "suggestion": "উৎস সময়সূচিতে এই ক্যালেন্ডারের কর্মদিবসগুলো চিহ্নিত করুন।"
     }
+  },
+  "norm_base": {
+    "code_present": {
+      "fail": "সারি {ordinal} এ কোনো {base} মানদণ্ড কোড নেই। মানদণ্ড-ভিত্তিক প্রাক্কলনে প্রতিটি সারিতে একটি মানদণ্ড উল্লেখ থাকে।",
+      "suggestion": "সারির {classification} শ্রেণিবিন্যাসে মানদণ্ড কোড লিখুন।"
+    },
+    "code_shape": {
+      "fail": "সারি {ordinal} এ \"{code}\" কোনো {base} কোড নয়। {example} এর মতো কোড প্রত্যাশিত।"
+    },
+    "legacy_prefix": {
+      "fail": "সারি {ordinal} এ \"{code}\" বাতিল উপসর্গ {old} ব্যবহার করে। বর্তমান কোড {new}।"
+    },
+    "resource_breakdown": {
+      "fail": "মানদণ্ড সারি {code} এ শ্রমঘণ্টা বা গড় গ্রেড নেই।",
+      "suggestion": "প্রতি একক ঘণ্টা এবং মানদণ্ডের গড় গ্রেডসহ শ্রম সম্পদ যোগ করুন।"
+    },
+    "grade_range": {
+      "fail": "সারি {ordinal} এ গ্রেড {grade} {min} থেকে {max} সীমার বাইরে বা {step} ধাপে নয়।"
+    }
+  },
+  "public_funding": {
+    "markup_cap": {
+      "fail": "{funding}: {markup} হলো {percent} %, সীমা প্রত্যক্ষ ব্যয়ের {cap} % ({source})।",
+      "suggestion": "মার্কআপ সীমা পর্যন্ত কমান, অথবা কাজ সরকারি অর্থে পরিশোধ না হলে অর্থায়ন বেসরকারি করুন।"
+    },
+    "investor_exact": {
+      "fail": "{funding} এ মালিকের প্রাক্কলন: {markup} ঠিক {cap} % হওয়া উচিত ({source})।"
+    },
+    "material_price_evidence": {
+      "fail": "{funding}: সারি {ordinal} এ উপকরণ {material} এর {required} টির মধ্যে {count} টি মূল্য প্রস্তাব আছে এবং কোনো মূল্য বিশ্লেষণ নেই।",
+      "suggestion": "উপকরণের জন্য সরবরাহকারীদের প্রস্তাব নথিভুক্ত করুন বা মূল্য বিশ্লেষণ প্রতিবেদন সংযুক্ত করুন।"
+    }
   }
 }

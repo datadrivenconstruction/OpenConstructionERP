@@ -2218,5 +2218,37 @@
       "calendar_no_work_days": "تقویم {calendar} هیچ روز کاری ندارد.",
       "suggestion": "روزهای کاری این تقویم را در برنامه مبدأ مشخص کنید."
     }
+  },
+  "norm_base": {
+    "code_present": {
+      "fail": "ردیف {ordinal} هیچ کد استاندارد {base} ندارد. برآورد مبتنی بر استاندارد در هر ردیف به یک استاندارد ارجاع می‌دهد.",
+      "suggestion": "کد استاندارد را در طبقه‌بندی {classification} ردیف وارد کنید."
+    },
+    "code_shape": {
+      "fail": "«{code}» در ردیف {ordinal} کد {base} نیست. کدی مانند {example} انتظار می‌رود."
+    },
+    "legacy_prefix": {
+      "fail": "«{code}» در ردیف {ordinal} از پیشوند منسوخ {old} استفاده می‌کند. کد معتبر {new} است."
+    },
+    "resource_breakdown": {
+      "fail": "ردیف استاندارد {code} ساعت کار یا رتبه میانگین ندارد.",
+      "suggestion": "منبع نیروی کار را با ساعت در هر واحد و رتبه میانگین استاندارد اضافه کنید."
+    },
+    "grade_range": {
+      "fail": "رتبه {grade} در ردیف {ordinal} خارج از بازه {min} تا {max} است یا با گام {step} نیست."
+    }
+  },
+  "public_funding": {
+    "markup_cap": {
+      "fail": "{funding}: {markup} برابر {percent} % است و سقف آن {cap} % هزینه‌های مستقیم است ({source}).",
+      "suggestion": "ضریب را تا سقف کاهش دهید، یا اگر کار با بودجه عمومی پرداخت نمی‌شود تأمین مالی را خصوصی کنید."
+    },
+    "investor_exact": {
+      "fail": "برآورد کارفرما با {funding}: {markup} باید دقیقاً {cap} % باشد ({source})."
+    },
+    "material_price_evidence": {
+      "fail": "{funding}: مصالح {material} در ردیف {ordinal} دارای {count} از {required} پیشنهاد قیمت است و تحلیل قیمت ندارد.",
+      "suggestion": "پیشنهادهای تأمین‌کنندگان را برای مصالح ثبت کنید یا گزارش تحلیل قیمت را پیوست کنید."
+    }
   }
 }

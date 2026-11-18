@@ -1,0 +1,173 @@
+{
+  "key": "ua_knu_pricing",
+  "name": "Ціноутворення за Настановою (наказ №281)",
+  "currency": "UAH",
+  "labour_grading": {
+    "base_grade": "3.8",
+    "grade_min": "1.0",
+    "grade_max": "8.0",
+    "grade_step": "0.1",
+    "coefficients": {
+      "1.0": "1.000",
+      "1.1": "1.009",
+      "1.2": "1.017",
+      "1.3": "1.026",
+      "1.4": "1.034",
+      "1.5": "1.043",
+      "1.6": "1.051",
+      "1.7": "1.060",
+      "1.8": "1.068",
+      "1.9": "1.077",
+      "2.0": "1.085",
+      "2.1": "1.095",
+      "2.2": "1.105",
+      "2.3": "1.115",
+      "2.4": "1.125",
+      "2.5": "1.136",
+      "2.6": "1.146",
+      "2.7": "1.156",
+      "2.8": "1.166",
+      "2.9": "1.176",
+      "3.0": "1.186",
+      "3.1": "1.201",
+      "3.2": "1.217",
+      "3.3": "1.232",
+      "3.4": "1.247",
+      "3.5": "1.263",
+      "3.6": "1.278",
+      "3.7": "1.293",
+      "3.8": "1.308",
+      "3.9": "1.324",
+      "4.0": "1.339",
+      "4.1": "1.359",
+      "4.2": "1.380",
+      "4.3": "1.400",
+      "4.4": "1.420",
+      "4.5": "1.441",
+      "4.6": "1.461",
+      "4.7": "1.481",
+      "4.8": "1.501",
+      "4.9": "1.522",
+      "5.0": "1.542",
+      "5.1": "1.567",
+      "5.2": "1.593",
+      "5.3": "1.618",
+      "5.4": "1.644",
+      "5.5": "1.669",
+      "5.6": "1.694",
+      "5.7": "1.720",
+      "5.8": "1.745",
+      "5.9": "1.771",
+      "6.0": "1.796",
+      "6.1": "1.824",
+      "6.2": "1.852",
+      "6.3": "1.880",
+      "6.4": "1.908",
+      "6.5": "1.936",
+      "6.6": "1.963",
+      "6.7": "1.991",
+      "6.8": "2.019",
+      "6.9": "2.047",
+      "7.0": "2.075"
+    },
+    "source": "Настанова з визначення вартості будівництва, Додаток 15; base grade 3.8 per Іськов (ЖДТУ 2026) 3.3.2",
+    "status": "derived",
+    "note": "Whole-grade coefficients 1 to 7 with linear steps of 0.1 between them, rounded half up to three places. They reproduce every value quoted in the source (1.263, 1.308, 1.593, 2.075). Grades 7.1 to 8.0 are not shipped until the annex row for grade 8 is read; check the table against Додаток 15 before a public tender."
+  },
+  "defaults": {
+    "monthly_hours": "174",
+    "monthly_hours_note": "2026: 261 working days x 8 h / 12 = 174. Public holidays are not observed under martial law. A default, never enforced."
+  },
+  "funding_classes": [
+    {
+      "key": "public",
+      "label": {
+        "en": "Public funds (budget or state)",
+        "uk": "Бюджетні або державні кошти",
+        "ru": "Бюджетные или государственные средства",
+        "de": "Öffentliche Mittel (Haushalt oder Staat)"
+      },
+      "source": "Постанова КМУ №1512 від 19.11.2025, п. 1 пп. 4",
+      "markup_caps": [
+        {
+          "key": "general_production",
+          "label": {
+            "en": "General production costs",
+            "uk": "Загальновиробничі витрати"
+          },
+          "names": [
+            "Загальновиробничі витрати",
+            "ЗВВ"
+          ],
+          "cap_percent": "10"
+        },
+        {
+          "key": "administrative",
+          "label": {
+            "en": "Administrative costs",
+            "uk": "Адміністративні витрати"
+          },
+          "names": [
+            "Адміністративні витрати"
+          ],
+          "cap_percent": "3"
+        },
+        {
+          "key": "profit",
+          "label": {
+            "en": "Profit",
+            "uk": "Кошторисний прибуток"
+          },
+          "names": [
+            "Кошторисний прибуток",
+            "Прибуток"
+          ],
+          "category": "profit",
+          "cap_percent": "15"
+        }
+      ],
+      "investor_estimate_at_cap": true,
+      "price_evidence": {
+        "min_quotes": 3,
+        "source": "Мінрозвитку, explanation of постанова №1512: a price analysis report per resource, three offers"
+      }
+    },
+    {
+      "key": "private",
+      "label": {
+        "en": "Private funds",
+        "uk": "Приватні кошти",
+        "ru": "Частные средства",
+        "de": "Private Mittel"
+      },
+      "markup_caps": [],
+      "investor_estimate_at_cap": false,
+      "price_evidence": null
+    }
+  ],
+  "labour_location_factors": [
+    {
+      "key": "active_hostilities",
+      "label": {
+        "en": "Territory of active hostilities",
+        "uk": "Території активних бойових дій",
+        "ru": "Территории активных боевых действий",
+        "de": "Gebiet aktiver Kampfhandlungen"
+      },
+      "factor": "2.0",
+      "source": "Мінрозвитку, explanation of постанова КМУ №1512"
+    },
+    {
+      "key": "possible_hostilities",
+      "label": {
+        "en": "Territory of possible hostilities",
+        "uk": "Території можливих бойових дій",
+        "ru": "Территории возможных боевых действий",
+        "de": "Gebiet möglicher Kampfhandlungen"
+      },
+      "factor": "1.5",
+      "source": "Мінрозвитку, explanation of постанова КМУ №1512"
+    }
+  ],
+  "location_note": "The list of territories changes by ministry order, so the project carries a flag a person sets; nothing looks the territory up."
+}

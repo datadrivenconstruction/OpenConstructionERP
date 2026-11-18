@@ -2218,5 +2218,37 @@
       "calendar_no_work_days": "Calendar {calendar} has no working weekday.",
       "suggestion": "Mark the working weekdays of this calendar in the source programme."
     }
+  },
+  "norm_base": {
+    "code_present": {
+      "fail": "Line {ordinal} cites no {base} norm code. A norm-based estimate cites a norm on every line.",
+      "suggestion": "Enter the norm code under the {classification} classification of the line."
+    },
+    "code_shape": {
+      "fail": "\"{code}\" on line {ordinal} is not a {base} code. Expected a code like {example}."
+    },
+    "legacy_prefix": {
+      "fail": "\"{code}\" on line {ordinal} uses the retired prefix {old}. The current code is {new}."
+    },
+    "resource_breakdown": {
+      "fail": "Norm line {code} has no labour hours or no average grade.",
+      "suggestion": "Add the labour resource with its hours per unit and the average grade of the norm."
+    },
+    "grade_range": {
+      "fail": "Grade {grade} on line {ordinal} is outside {min} to {max} or not in steps of {step}."
+    }
+  },
+  "public_funding": {
+    "markup_cap": {
+      "fail": "{funding}: {markup} is {percent} %, the cap is {cap} % of direct costs ({source}).",
+      "suggestion": "Lower the markup to the cap, or set the project's funding type to private if no public money pays for the work."
+    },
+    "investor_exact": {
+      "fail": "Client estimate on {funding}: {markup} should be exactly {cap} % ({source})."
+    },
+    "material_price_evidence": {
+      "fail": "{funding}: material {material} on line {ordinal} has {count} of {required} price offers and no price analysis.",
+      "suggestion": "Record the supplier offers on the material or attach the price analysis report."
+    }
   }
 }
