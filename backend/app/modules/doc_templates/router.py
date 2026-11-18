@@ -261,13 +261,17 @@ async def issue_pdf(
     kind = service.require_kind(kind_key)
     ids = await accessible_project_ids(session, user_id)
     countries = await service.workspace_countries(session, payload, user_id)
-    pdf, filename = await service.issue(session, kind, record_id, locale, countries, user_id, ids)
+    pdf, filename, lang = await service.issue(session, kind, record_id, locale, countries, user_id, ids)
     await session.commit()
     safe = "".join(ch if ch.isalnum() or ch in "-_." else "-" for ch in filename)[:120] or "document"
     return Response(
         content=pdf,
         media_type="application/pdf",
-        headers={"Content-Disposition": f'attachment; filename="{safe}.pdf"', "Cache-Control": "no-store"},
+        headers={
+            "Content-Disposition": f'attachment; filename="{safe}.pdf"',
+            "Cache-Control": "no-store",
+            "Content-Language": lang,
+        },
     )
 
 
@@ -304,7 +308,11 @@ async def preview(
         raise
     if media.startswith("text/html"):
         return PreviewEmailOut(subject="", html=data.decode("utf-8", "replace"), issues=issues)
-    return Response(content=data, media_type=media, headers={"Cache-Control": "no-store"})
+    return Response(
+        content=data,
+        media_type=media,
+        headers={"Cache-Control": "no-store", "Content-Language": service.normalise_locale(locale)},
+    )
 
 
 @router.post("/{kind_key}/test-send", response_model=TestSendOut, dependencies=_READ)

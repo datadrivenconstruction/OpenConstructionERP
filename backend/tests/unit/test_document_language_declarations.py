@@ -44,6 +44,7 @@ APP_ROOT = pathlib.Path(app_pkg.__file__).resolve().parent
 #: Routes that render a document in the request and must declare its language.
 #: Each entry is ``module path relative to app/`` -> function name.
 RENDERING_ROUTES: dict[str, set[str]] = {
+    "modules/doc_templates/router.py": {"issue_pdf", "preview"},
     "core/branding_router.py": {"get_document_appearance_sample", "get_document_type_sample"},
     # The Excel export is not a PDF, but it builds a document in the request, and
     # the search below finds it through a comment that mentions the PDF export.

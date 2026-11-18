@@ -618,8 +618,11 @@ async def issue(
     countries: list[str],
     user_id: str,
     project_ids: set[Any] | None,
-) -> tuple[bytes, str]:
-    """Issue a record's document with the published wording and log the version it printed."""
+) -> tuple[bytes, str, str]:
+    """Issue a record's document with the published wording and log the version it printed.
+
+    Returns the PDF, its file name and the language of the wording it printed.
+    """
     from app.modules.doc_templates.models import DocTemplateIssue
 
     if kind.record_document is None:
@@ -649,7 +652,7 @@ async def issue(
         )
     )
     await session.flush()
-    return pdf, doc.filename
+    return pdf, doc.filename, resolved.text_locale or lang
 
 
 async def log_letter_issue(
