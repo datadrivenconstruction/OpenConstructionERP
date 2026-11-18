@@ -73,6 +73,7 @@ import { RecordDeliveryModal } from './RecordDeliveryModal';
 import { LineRequirements, changedRequirements } from './LineRequirements';
 import { ConfirmReceiptDialog, type ConfirmableReceipt } from './ConfirmReceiptDialog';
 import { fmtFixed } from '@/shared/lib/formatters';
+import { CASH_TERMS, NET_DAY_OPTIONS, isStandardPaymentTerms, paymentTermsToWire, paymentTermsToForm } from './paymentTerms';
 import { orderSource, rfqDeepLink } from '@/shared/lib/awardChainLinks';
 import { RelatedRecordLink } from '@/shared/ui/RelatedRecordLink';
 
@@ -173,6 +174,9 @@ interface POItemResponse {
   // The requisition line this order line was raised from by a conversion,
   // null for a line typed into the order by hand.
   requisition_item_id?: string | null;
+  // Where the cost lands in the books: a cost centre or cost code, and the WBS node.
+  cost_category?: string | null;
+  wbs_id?: string | null;
   sort_order: number;
   required_certificate_type?: string | null;
   requires_inspection?: boolean;
@@ -244,6 +248,10 @@ interface POLineItemForm {
    * sent back without it loses its link to the requisition and the BOQ.
    */
   requisition_item_id?: string | null;
+  /** Cost centre / cost code the line is booked to; free text from the buyer's chart. */
+  cost_category?: string;
+  /** WBS node, carried through an edit untouched so replacing lines does not drop it. */
+  wbs_id?: string | null;
   /** The saved line, when editing; requirement changes on a locked order go to it. */
   id?: string;
   /** What a delivery of the line must arrive with: a certificate type code, or ''. */
@@ -253,7 +261,7 @@ interface POLineItemForm {
 
 /** The figures of a line, without its delivery requirements. */
 function lineFigures(items: POLineItemForm[]) {
-  return items.map((li) => [li.description, li.quantity, li.unit, li.unit_rate, li.amount, li.boq_position_id]);
+  return items.map((li) => [li.description, li.quantity, li.unit, li.unit_rate, li.amount, li.boq_position_id, li.cost_category ?? '']);
 }
 
 
@@ -289,14 +297,13 @@ interface POFormState {
  * untouched field look edited.
  */
 function poFormFromResponse(po: POResponse, projectCurrency: string): POFormState {
-  const payTermMatch = (po.payment_terms ?? '').match(/(\d+)/);
   return {
     vendor_contact_id: po.vendor_contact_id ?? '',
     vendor_display: po.vendor_name ?? '',
     po_type: po.po_type === 'blanket' || po.po_type === 'service' ? po.po_type : 'standard',
     delivery_date: po.delivery_date ?? '',
     currency: po.currency_code || projectCurrency || '',
-    payment_terms: payTermMatch?.[1] ?? '30',
+    payment_terms: paymentTermsToForm(po.payment_terms),
     delivery_address: po.delivery_address ?? '',
     notes: po.notes ?? '',
     invoice_tolerance_pct: po.invoice_tolerance_pct ?? '',
@@ -314,6 +321,8 @@ function poFormFromResponse(po: POResponse, projectCurrency: string): POFormStat
             // id to a readable position even when it sorts past the first page.
             boq_position_id: it.boq_position_id ?? null,
             requisition_item_id: it.requisition_item_id ?? null,
+            cost_category: it.cost_category ?? '',
+            wbs_id: it.wbs_id ?? null,
             id: it.id,
             required_certificate_type: it.required_certificate_type ?? '',
             requires_inspection: Boolean(it.requires_inspection),
@@ -968,7 +977,7 @@ function PurchaseOrdersTab({
         // is the tax, as before the rate existed.
         ...(poRate !== null ? { tax_rate_pct: poRateText } : { tax_amount: poTaxInput || '0' }),
         amount_total: String(poTotal.toFixed(2)),
-        payment_terms: `Net ${data.payment_terms}`,
+        payment_terms: paymentTermsToWire(data.payment_terms),
         delivery_address: data.delivery_address.trim() || undefined,
         notes: data.notes || undefined,
         invoice_tolerance_pct: data.invoice_tolerance_pct.trim() || undefined,
@@ -985,6 +994,7 @@ function PurchaseOrdersTab({
             // Omitted rather than sent as null when the line is unattributed:
             // the field is optional on POItemCreate and an absent one reads the
             // same as an unlinked line without asking the server to resolve it.
+            cost_category: li.cost_category?.trim() || undefined,
             boq_position_id: li.boq_position_id || undefined,
             required_certificate_type: li.required_certificate_type || undefined,
             requires_inspection: Boolean(li.requires_inspection),
@@ -1036,7 +1046,7 @@ function PurchaseOrdersTab({
       }
       if (data.currency !== base.currency) body.currency_code = data.currency;
       if (data.payment_terms !== base.payment_terms) {
-        body.payment_terms = `Net ${data.payment_terms}`;
+        body.payment_terms = paymentTermsToWire(data.payment_terms);
       }
       if (data.delivery_address !== base.delivery_address) body.delivery_address = data.delivery_address.trim();
       if (data.notes !== base.notes) body.notes = data.notes || undefined;
@@ -1058,6 +1068,8 @@ function PurchaseOrdersTab({
             unit_rate: li.unit_rate || '0',
             boq_position_id: li.boq_position_id || undefined,
             requisition_item_id: li.requisition_item_id || undefined,
+            cost_category: li.cost_category?.trim() || undefined,
+            wbs_id: li.wbs_id || undefined,
             required_certificate_type: li.required_certificate_type || undefined,
             requires_inspection: Boolean(li.requires_inspection),
             sort_order: idx,
@@ -1455,6 +1467,18 @@ function PurchaseOrdersTab({
                         line={idx + 1}
                         disabled={figuresLocked}
                       />
+                      <input
+                        value={li.cost_category ?? ''}
+                        disabled={figuresLocked}
+                        maxLength={100}
+                        onChange={(e) => updateLineItem(idx, 'cost_category', e.target.value)}
+                        placeholder={t('procurement.cost_code_placeholder', { defaultValue: 'Cost centre / cost code' })}
+                        aria-label={t('procurement.cost_code_for', {
+                          defaultValue: 'Cost centre or cost code for line {{line}}',
+                          line: idx + 1,
+                        })}
+                        className={clsx('oe-input', 'oe-input-sm')}
+                      />
                       <LineRequirements
                         line={idx + 1}
                         certificateType={li.required_certificate_type ?? ''}
@@ -1642,10 +1666,17 @@ function PurchaseOrdersTab({
                       onChange={(e) => setPoForm((f) => ({ ...f, payment_terms: e.target.value }))}
                       className="oe-select oe-input-lg"
                     >
-                      <option value="30">{t('procurement.net_days', { defaultValue: 'Net {{days}} days', days: 30 })}</option>
-                      <option value="45">{t('procurement.net_days', { defaultValue: 'Net {{days}} days', days: 45 })}</option>
-                      <option value="60">{t('procurement.net_days', { defaultValue: 'Net {{days}} days', days: 60 })}</option>
-                      <option value="90">{t('procurement.net_days', { defaultValue: 'Net {{days}} days', days: 90 })}</option>
+                      <option value={CASH_TERMS}>
+                        {t('procurement.payment_cash', { defaultValue: 'Cash on delivery (immediate payment)' })}
+                      </option>
+                      {NET_DAY_OPTIONS.map((d) => (
+                        <option key={d} value={d}>
+                          {t('procurement.net_days', { defaultValue: 'Net {{days}} days', days: Number(d) })}
+                        </option>
+                      ))}
+                      {!isStandardPaymentTerms(poForm.payment_terms) && (
+                        <option value={poForm.payment_terms}>{poForm.payment_terms}</option>
+                      )}
                     </select>
                   </div>
                   {/* Invoice allowance: how far a supplier invoice may run past
