@@ -2258,5 +2258,15 @@
       "fail": "The quantity is bank volume (in the ground); the swell factor is not applied.",
       "suggestion": "Send the loose cut instead if the BOQ line is measured as loose material."
     }
+  },
+  "mine_survey": {
+    "compliance_outside": {
+      "fail": "Period compliance {c} % is outside the {lo}-{hi} % band.",
+      "suggestion": "Check the plan and the survey, then explain the gap in the period note before the claim."
+    },
+    "truck_differs": {
+      "fail": "Truck-count tonnes differ from survey tonnes by {v} %, beyond the {t} % check.",
+      "suggestion": "Check the payload per load and the density, then compare the two surfaces again."
+    }
   }
 }

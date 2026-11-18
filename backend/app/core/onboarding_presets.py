@@ -943,6 +943,7 @@ COMPANY_PRESETS: dict[str, CompanyPreset] = {
         enabled_modules=[
             "survey_core",
             "surfaces_volumes",
+            "mine_survey",
             "boq",
             "validation",
             "equipment",

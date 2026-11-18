@@ -96,5 +96,45 @@
     "traverse_min_ratio": 10000,
     "coverage_min_pct": 90,
     "label": "Demo values, not a standard"
+  },
+  "mine_survey": {
+    "period": "Oct 2026",
+    "period_label": "2026-10",
+    "unit": "Pit N Bench 2",
+    "unit_type": "bench",
+    "plan_file": "pit_plan_2026-10.csv",
+    "start_file": "pit_2026-10-01.csv",
+    "end_file": "pit_2026-10-31.csv",
+    "truck_file": "truck_loads_2026-10.csv",
+    "lesson_1": {
+      "plan_m3": 12500.0,
+      "plan_t": 25000.0,
+      "density_t_m3": 2.0
+    },
+    "lesson_2": {
+      "cell_size_m": 10.0,
+      "actual_m3": 11870.0,
+      "coverage_pct": 100.0
+    },
+    "lesson_3": {
+      "compliance_pct": 94.96,
+      "band_pct": [
+        95,
+        105
+      ],
+      "finding": "MIN-001"
+    },
+    "lesson_4": {
+      "loads": 620,
+      "payload_t": 40.0,
+      "truck_t": 24800.0,
+      "survey_t": 23740.0,
+      "truck_factor_pct": 4.47,
+      "truck_check_pct": 3,
+      "finding": "MIN-002"
+    },
+    "lesson_5": {
+      "claim_quantity_m3": 11870.0
+    }
   }
 }

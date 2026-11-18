@@ -2258,5 +2258,15 @@
       "fail": "A mennyiség tömör térfogat (a talajban); a lazulási tényező nincs alkalmazva.",
       "suggestion": "Küldje inkább a laza kitermelést, ha a költségvetési tétel laza anyagban mért."
     }
+  },
+  "mine_survey": {
+    "compliance_outside": {
+      "fail": "Az időszak teljesítése, {c} %, a {lo}-{hi} % sávon kívül esik.",
+      "suggestion": "Ellenőrizze a tervet és a felmérést, és a kimutatás előtt magyarázza meg az eltérést az időszak megjegyzésében."
+    },
+    "truck_differs": {
+      "fail": "A fuvarszámlálás szerinti tonna {v} %-kal tér el a felmért tonnától, ami meghaladja a {t} % ellenőrzési határt.",
+      "suggestion": "Ellenőrizze a fuvaronkénti terhelést és a sűrűséget, majd hasonlítsa össze újra a két felületet."
+    }
   }
 }

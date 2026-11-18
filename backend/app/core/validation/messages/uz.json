@@ -2258,5 +2258,15 @@
       "fail": "Miqdor zich holatdagi hajm (gruntda); yumshash koeffitsiyenti qo'llanilmagan.",
       "suggestion": "Smeta bandi yumshoq material sifatida o'lchansa, yumshatilgan qazishni yuboring."
     }
+  },
+  "mine_survey": {
+    "compliance_outside": {
+      "fail": "Davr bajarilishi {c} % {lo}-{hi} % oraligʻidan tashqarida.",
+      "suggestion": "Reja va oʻlchovni tekshiring, daʼvodan oldin farqni davr izohida tushuntiring."
+    },
+    "truck_differs": {
+      "fail": "Yuk mashinalarini sanash boʻyicha tonna oʻlchangan tonnadan {v} % farq qiladi, bu {t} % tekshiruv chegarasidan yuqori.",
+      "suggestion": "Har bir reysdagi yuk va zichlikni tekshiring, soʻng ikki sirtni yana solishtiring."
+    }
   }
 }

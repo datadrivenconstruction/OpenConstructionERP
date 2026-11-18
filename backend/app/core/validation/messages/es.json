@@ -2258,5 +2258,15 @@
       "fail": "La cantidad es volumen en banco (en el terreno); no se aplica el factor de esponjamiento.",
       "suggestion": "Envíe el desmonte esponjado si la partida se mide como material suelto."
     }
+  },
+  "mine_survey": {
+    "compliance_outside": {
+      "fail": "El cumplimiento del periodo, {c} %, queda fuera de la banda {lo}-{hi} %.",
+      "suggestion": "Revise el plan y el levantamiento y explique la diferencia en la nota del periodo antes de la certificación."
+    },
+    "truck_differs": {
+      "fail": "Las toneladas por conteo de camiones difieren {v} % de las toneladas levantadas, por encima del control del {t} %.",
+      "suggestion": "Revise la carga útil por viaje y la densidad, y compare de nuevo las dos superficies."
+    }
   }
 }

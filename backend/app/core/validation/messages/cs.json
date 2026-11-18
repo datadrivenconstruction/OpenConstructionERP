@@ -2258,5 +2258,15 @@
       "fail": "Množství je objem v rostlém stavu (v zemi); součinitel nakypření není použit.",
       "suggestion": "Pokud se položka rozpočtu měří v nakypřeném stavu, odešlete raději nakypřený výkop."
     }
+  },
+  "mine_survey": {
+    "compliance_outside": {
+      "fail": "Plnění za období {c} % je mimo pásmo {lo}-{hi} %.",
+      "suggestion": "Zkontrolujte plán a zaměření a před nárokem vysvětlete rozdíl v poznámce k období."
+    },
+    "truck_differs": {
+      "fail": "Tuny podle počtu jízd se liší od zaměřených tun o {v} %, tedy nad kontrolou {t} %.",
+      "suggestion": "Zkontrolujte užitečné zatížení jedné jízdy a hustotu a poté znovu porovnejte oba povrchy."
+    }
   }
 }

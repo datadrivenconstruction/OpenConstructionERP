@@ -2258,5 +2258,15 @@
       "fail": "Määrä on kiintotilavuutta (maassa); löyhtymiskerrointa ei ole käytetty.",
       "suggestion": "Lähetä sen sijaan löyhä kaivumassa, jos määräluettelon nimike mitataan löyhänä."
     }
+  },
+  "mine_survey": {
+    "compliance_outside": {
+      "fail": "Jakson toteuma {c} % on vaihteluvälin {lo}-{hi} % ulkopuolella.",
+      "suggestion": "Tarkista suunnitelma ja mittaus ja selitä ero jakson huomautuksessa ennen laskutusta."
+    },
+    "truck_differs": {
+      "fail": "Ajokertojen laskennan tonnit poikkeavat mitatuista tonneista {v} %, yli {t} % tarkistusrajan.",
+      "suggestion": "Tarkista kuorma ajoa kohti ja tiheys ja vertaa sitten kahta pintaa uudelleen."
+    }
   }
 }

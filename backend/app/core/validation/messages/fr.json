@@ -2258,5 +2258,15 @@
       "fail": "La quantité est un volume en place (dans le sol) ; le foisonnement n'est pas appliqué.",
       "suggestion": "Envoyez plutôt le déblai foisonné si la ligne du métré est mesurée en matériau foisonné."
     }
+  },
+  "mine_survey": {
+    "compliance_outside": {
+      "fail": "La conformité de la période, {c} %, est hors de la plage {lo}-{hi} %.",
+      "suggestion": "Vérifiez le plan et le levé, puis expliquez l'écart dans la note de période avant la situation."
+    },
+    "truck_differs": {
+      "fail": "Les tonnes comptées par camions diffèrent de {v} % des tonnes levées, au-delà du contrôle de {t} %.",
+      "suggestion": "Vérifiez la charge utile par voyage et la densité, puis comparez de nouveau les deux surfaces."
+    }
   }
 }

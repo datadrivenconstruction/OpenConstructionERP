@@ -2258,5 +2258,15 @@
       "fail": "Khối lượng là thể tích nguyên thổ (trong đất); hệ số nở rời chưa được áp dụng.",
       "suggestion": "Gửi khối lượng đào nở rời nếu hạng mục dự toán được đo theo vật liệu rời."
     }
+  },
+  "mine_survey": {
+    "compliance_outside": {
+      "fail": "Mức thực hiện của kỳ {c} % nằm ngoài dải {lo}-{hi} %.",
+      "suggestion": "Kiểm tra kế hoạch và số liệu đo, rồi giải thích chênh lệch trong ghi chú kỳ trước khi thanh toán."
+    },
+    "truck_differs": {
+      "fail": "Số tấn theo đếm xe chênh {v} % so với số tấn đo, vượt ngưỡng kiểm tra {t} %.",
+      "suggestion": "Kiểm tra tải trọng mỗi chuyến và khối lượng riêng, rồi so sánh lại hai bề mặt."
+    }
   }
 }

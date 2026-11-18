@@ -2258,5 +2258,15 @@
       "fail": "Mængden er fast volumen (i jorden); opluckningsfaktoren er ikke anvendt.",
       "suggestion": "Send i stedet den løse afgravning, hvis tilbudslisteposten måles som løst materiale."
     }
+  },
+  "mine_survey": {
+    "compliance_outside": {
+      "fail": "Periodens opfyldelse {c} % ligger uden for båndet {lo}-{hi} %.",
+      "suggestion": "Kontroller planen og opmålingen, og forklar afvigelsen i periodens note før kravet."
+    },
+    "truck_differs": {
+      "fail": "Tons efter lastbiltælling afviger {v} % fra opmålte tons, over kontrollen på {t} %.",
+      "suggestion": "Kontroller nyttelasten pr. læs og densiteten, og sammenlign derefter de to overflader igen."
+    }
   }
 }

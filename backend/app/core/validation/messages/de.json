@@ -2258,5 +2258,15 @@
       "fail": "Die Menge ist festes Volumen (gewachsener Boden); der Auflockerungsfaktor ist nicht angewendet.",
       "suggestion": "Senden Sie stattdessen den gelockerten Abtrag, wenn die LV-Position lose gemessen wird."
     }
+  },
+  "mine_survey": {
+    "compliance_outside": {
+      "fail": "Die Periodenerfüllung von {c} % liegt außerhalb des Bandes {lo}-{hi} %.",
+      "suggestion": "Plan und Vermessung prüfen und die Abweichung vor der Abrechnung in der Periodennotiz erklären."
+    },
+    "truck_differs": {
+      "fail": "Die Tonnen nach Fahrtenzählung weichen um {v} % von den vermessenen Tonnen ab, über der Prüfgrenze von {t} %.",
+      "suggestion": "Nutzlast je Fahrt und Dichte prüfen, danach die beiden Oberflächen erneut vergleichen."
+    }
   }
 }

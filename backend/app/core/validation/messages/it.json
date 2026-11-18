@@ -2258,5 +2258,15 @@
       "fail": "La quantità è volume in sito (nel terreno); il fattore di rigonfiamento non è applicato.",
       "suggestion": "Inviate invece lo scavo rigonfiato se la voce del computo è misurata come materiale sciolto."
     }
+  },
+  "mine_survey": {
+    "compliance_outside": {
+      "fail": "La conformità del periodo, {c} %, è fuori dalla fascia {lo}-{hi} %.",
+      "suggestion": "Controlli il piano e il rilievo e spieghi lo scarto nella nota del periodo prima dello stato avanzamento."
+    },
+    "truck_differs": {
+      "fail": "Le tonnellate dal conteggio dei camion differiscono del {v} % da quelle rilevate, oltre il controllo del {t} %.",
+      "suggestion": "Controlli il carico utile per viaggio e la densità, poi confronti di nuovo le due superfici."
+    }
   }
 }

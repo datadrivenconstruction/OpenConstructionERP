@@ -2258,5 +2258,15 @@
       "fail": "Mängden är fast volym (i marken); svällningsfaktorn är inte tillämpad.",
       "suggestion": "Skicka i stället lös schaktmassa om mängdförteckningens post mäts som löst material."
     }
+  },
+  "mine_survey": {
+    "compliance_outside": {
+      "fail": "Periodens måluppfyllelse {c} % ligger utanför bandet {lo}-{hi} %.",
+      "suggestion": "Kontrollera planen och inmätningen och förklara avvikelsen i periodens anteckning före kravet."
+    },
+    "truck_differs": {
+      "fail": "Ton enligt lastbilsräkning avviker {v} % från inmätta ton, över kontrollen på {t} %.",
+      "suggestion": "Kontrollera nyttolasten per tur och densiteten och jämför sedan de två ytorna igen."
+    }
   }
 }

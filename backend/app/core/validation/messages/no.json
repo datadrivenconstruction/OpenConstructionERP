@@ -2258,5 +2258,15 @@
       "fail": "Mengden er faste masser (i grunnen); svellfaktoren er ikke brukt.",
       "suggestion": "Send heller løse masser fra utgraving hvis posten måles som løst materiale."
     }
+  },
+  "mine_survey": {
+    "compliance_outside": {
+      "fail": "Periodens oppfyllelse {c} % ligger utenfor båndet {lo}-{hi} %.",
+      "suggestion": "Kontroller planen og oppmålingen, og forklar avviket i periodenotatet før kravet."
+    },
+    "truck_differs": {
+      "fail": "Tonn etter lastebiltelling avviker {v} % fra oppmålte tonn, over kontrollen på {t} %.",
+      "suggestion": "Kontroller nyttelasten per tur og tettheten, og sammenlign deretter de to flatene på nytt."
+    }
   }
 }

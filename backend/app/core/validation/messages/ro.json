@@ -2258,5 +2258,15 @@
       "fail": "Cantitatea este volum în stare naturală (în teren); coeficientul de afânare nu este aplicat.",
       "suggestion": "Trimiteți săpătura afânată dacă articolul din antemăsurătoare se măsoară afânat."
     }
+  },
+  "mine_survey": {
+    "compliance_outside": {
+      "fail": "Conformitatea perioadei, {c} %, este în afara intervalului {lo}-{hi} %.",
+      "suggestion": "Verificați planul și măsurătoarea și explicați diferența în nota perioadei înainte de situația de lucrări."
+    },
+    "truck_differs": {
+      "fail": "Tonele din numărarea camioanelor diferă cu {v} % de tonele măsurate, peste verificarea de {t} %.",
+      "suggestion": "Verificați încărcătura pe cursă și densitatea, apoi comparați din nou cele două suprafețe."
+    }
   }
 }

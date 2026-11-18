@@ -2258,5 +2258,15 @@
       "fail": "De hoeveelheid is vast volume (in de grond); de opbulkingsfactor is niet toegepast.",
       "suggestion": "Stuur in plaats daarvan de losse ontgraving als de bestekpost in losse grond wordt gemeten."
     }
+  },
+  "mine_survey": {
+    "compliance_outside": {
+      "fail": "De uitvoering van de periode, {c} %, ligt buiten de bandbreedte {lo}-{hi} %.",
+      "suggestion": "Controleer het plan en de meting en leg het verschil uit in de periodenotitie vóór de claim."
+    },
+    "truck_differs": {
+      "fail": "De tonnen volgens vrachtentelling wijken {v} % af van de gemeten tonnen, boven de controle van {t} %.",
+      "suggestion": "Controleer de lading per rit en de dichtheid en vergelijk daarna de twee oppervlakken opnieuw."
+    }
   }
 }
