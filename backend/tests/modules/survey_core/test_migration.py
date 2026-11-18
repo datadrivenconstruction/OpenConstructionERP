@@ -50,7 +50,9 @@ def _previous_release(migration, connection, monkeypatch) -> None:
     """Leave the database as the 19.8.0 release does: none of the survey tables."""
     _bind(migration, connection, monkeypatch)
     if set(_TABLES) <= _tables(connection):
-        migration.downgrade()
+        # Later survey modules (surfaces, stockpiles, ...) hold FKs to these tables in the test schema.
+        for table in _TABLES:
+            connection.execute(sa.text(f"DROP TABLE {table} CASCADE"))
     assert not set(_TABLES) & _tables(connection)
 
 
