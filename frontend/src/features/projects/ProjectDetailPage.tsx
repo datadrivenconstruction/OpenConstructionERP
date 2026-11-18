@@ -401,6 +401,7 @@ const standardLabels: Record<string, string> = {
   birimfiyat: 'Birim Fiyat',
   nlsfb: 'NL/SfB',
   knr: 'KNR',
+  hksmm4: 'HKSMM4',
 };
 
 // ---------------------------------------------------------------------------

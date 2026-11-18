@@ -1341,6 +1341,7 @@ export function ProjectCard({
     birimfiyat: 'Birim Fiyat',
     nlsfb: 'NL/SfB',
     knr: 'KNR',
+    hksmm4: 'HKSMM4',
   };
 
   // Currency symbol icon — falls back to neutral DollarSign for unknown codes
