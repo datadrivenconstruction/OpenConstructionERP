@@ -222,11 +222,14 @@ class ContactRepository:
         search: str | None,
         team_contact_ids: list[uuid.UUID],
         limit: int,
+        owner_id: str | None,
+        roster_project_ids: set[uuid.UUID] | None,
     ) -> tuple[list[Contact], list[Contact]]:
-        """Contacts a picker offers: project team first, then every other active contact.
+        """Contacts a picker offers: project team first, then the rest the caller may see.
 
-        Read-only and deliberately not owner-scoped: a company's address book is
-        shared for picking. Writes keep going through the owner-or-admin gate.
+        Visible to a non-admin: the caller's own contacts plus contacts on the
+        roster of the projects in ``roster_project_ids``. ``owner_id=None`` means
+        no scope (admin). Read-only; writes keep the owner-or-admin gate.
         """
         base = self._filtered(
             contact_type=None,
@@ -236,15 +239,30 @@ class ContactRepository:
             owner_id=None,
             tags=None,
         )
+        if owner_id is not None:
+            visible = [_tenant_scope(owner_id)]
+            if roster_project_ids:
+                from app.modules.teams.models import RosterMember
+
+                visible.append(
+                    Contact.id.in_(
+                        select(RosterMember.contact_id).where(
+                            RosterMember.project_id.in_(roster_project_ids),
+                            RosterMember.contact_id.is_not(None),
+                        )
+                    )
+                )
+            visible_base = base.where(or_(*visible))
+        else:
+            visible_base = base
         order = (func.lower(func.coalesce(Contact.last_name, Contact.company_name, "")), Contact.id)
         team: list[Contact] = []
         if team_contact_ids:
+            # The caller was cleared for the project, so its roster is theirs to pick from.
             res = await self.session.execute(base.where(Contact.id.in_(team_contact_ids)).order_by(*order).limit(limit))
             team = list(res.scalars().all())
-        rest = base.order_by(*order).limit(limit)
-        if team_contact_ids:
-            rest = base.where(Contact.id.notin_(team_contact_ids)).order_by(*order).limit(limit)
-        company = list((await self.session.execute(rest)).scalars().all())
+            visible_base = visible_base.where(Contact.id.notin_(team_contact_ids))
+        company = list((await self.session.execute(visible_base.order_by(*order).limit(limit))).scalars().all())
         return team, company
 
     async def create(self, contact: Contact) -> Contact:

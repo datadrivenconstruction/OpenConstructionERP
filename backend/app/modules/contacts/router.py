@@ -291,9 +291,9 @@ async def search_contacts(
     "/pickable/",
     response_model=PickableContactsResponse,
     summary="Contacts for a picker",
-    description="Every active contact of the company, for choosing an assignee. With project_id the "
-    "members of that project's team come first in a separate group. Read-only: editing and "
-    "deleting stay with the author or an admin.",
+    description="Contacts for choosing an assignee: the caller's own plus those on the roster of any "
+    "project the caller can access (admins: all). With project_id that project's team comes first "
+    "in a separate group. Read-only: editing and deleting stay with the author or an admin.",
 )
 async def pickable_contacts(
     session: SessionDep,
@@ -321,8 +321,15 @@ async def pickable_contacts(
                 )
             )
             team_ids = list({r[0] for r in rows.all()})
+    from app.dependencies import accessible_project_ids
+
+    admin = await _is_admin(session, user_id)
     team, company = await service.repo.list_pickable(
-        search=q.strip() if q and q.strip() else None, team_contact_ids=team_ids, limit=limit
+        search=q.strip() if q and q.strip() else None,
+        team_contact_ids=team_ids,
+        limit=limit,
+        owner_id=None if admin else user_id,
+        roster_project_ids=None if admin else await accessible_project_ids(session, user_id, live_only=True),
     )
     return PickableContactsResponse(
         team=[PickableContact.model_validate(c) for c in team],

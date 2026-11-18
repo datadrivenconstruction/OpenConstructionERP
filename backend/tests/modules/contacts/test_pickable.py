@@ -38,25 +38,45 @@ async def _contact(owner: str, name: str) -> uuid.UUID:
         return c.id
 
 
-async def test_non_admin_picks_colleagues_contacts_but_cannot_edit_them(client: AsyncClient) -> None:
+async def _project(client: AsyncClient, headers: dict[str, str], tag: str) -> uuid.UUID:
+    r = await client.post("/api/v1/projects/", json={"name": f"P {tag}", "currency": "EUR"}, headers=headers)
+    assert r.status_code in (200, 201), r.text
+    return uuid.UUID(r.json()["id"])
+
+
+async def test_private_contact_of_another_user_is_not_offered(client: AsyncClient) -> None:
     _, author = await _login(client)
     tag = uuid.uuid4().hex[:8]
-    theirs = await _contact(author, f"Theirs {tag}")
+    await _contact(author, f"Private {tag}")
     viewer_headers, _ = await _login(client)
-
-    own_list = await client.get(URL, params={"limit": 500}, headers=viewer_headers)
-    assert f"Theirs {tag}" not in {c["company_name"] for c in own_list.json()["items"]}
 
     r = await client.get(f"{URL}pickable/", params={"q": tag}, headers=viewer_headers)
     assert r.status_code == 200, r.text
+    assert r.json() == {"team": [], "company": []}
+
+    admin_headers, _ = await _login(client, admin=True)
+    seen = await client.get(f"{URL}pickable/", params={"q": tag}, headers=admin_headers)
+    assert [c["company_name"] for c in seen.json()["company"]] == [f"Private {tag}"]
+
+
+async def test_colleague_on_my_project_roster_is_pickable_but_not_editable(client: AsyncClient) -> None:
+    _, author = await _login(client)
+    tag = uuid.uuid4().hex[:8]
+    theirs = await _contact(author, f"Theirs {tag}")
+    headers, _ = await _login(client)
+    pid = await _project(client, headers, tag)
+    async with async_session_factory() as session:
+        session.add(RosterMember(project_id=pid, contact_id=theirs, display_name=f"Theirs {tag}"))
+        await session.commit()
+
+    # No project given: still offered, through the roster of a project the caller reaches.
+    r = await client.get(f"{URL}pickable/", params={"q": tag}, headers=headers)
+    assert r.status_code == 200, r.text
     assert [c["company_name"] for c in r.json()["company"]] == [f"Theirs {tag}"]
-    assert r.json()["team"] == []
     assert "primary_phone" not in r.json()["company"][0]
 
-    edit = await client.patch(f"{URL}{theirs}", json={"company_name": "Hijacked"}, headers=viewer_headers)
-    assert edit.status_code == 403
-    gone = await client.delete(f"{URL}{theirs}", headers=viewer_headers)
-    assert gone.status_code == 403
+    assert (await client.patch(f"{URL}{theirs}", json={"company_name": "Hijacked"}, headers=headers)).status_code == 403
+    assert (await client.delete(f"{URL}{theirs}", headers=headers)).status_code == 403
 
 
 async def test_project_team_comes_first_and_search_spans_both(client: AsyncClient) -> None:
@@ -64,10 +84,8 @@ async def test_project_team_comes_first_and_search_spans_both(client: AsyncClien
     _, other = await _login(client)
     tag = uuid.uuid4().hex[:8]
     member = await _contact(other, f"Zed team {tag}")
-    outsider = await _contact(other, f"Abe outsider {tag}")
-    project = await client.post("/api/v1/projects/", json={"name": f"P {tag}", "currency": "EUR"}, headers=headers)
-    assert project.status_code in (200, 201), project.text
-    pid = uuid.UUID(project.json()["id"])
+    outsider = await _contact(me, f"Abe outsider {tag}")
+    pid = await _project(client, headers, tag)
     async with async_session_factory() as session:
         session.add(RosterMember(project_id=pid, contact_id=member, display_name=f"Zed team {tag}"))
         await session.commit()
@@ -80,4 +98,3 @@ async def test_project_team_comes_first_and_search_spans_both(client: AsyncClien
 
     foreign = await client.get(f"{URL}pickable/", params={"project_id": str(uuid.uuid4())}, headers=headers)
     assert foreign.status_code in (403, 404)
-    assert me
