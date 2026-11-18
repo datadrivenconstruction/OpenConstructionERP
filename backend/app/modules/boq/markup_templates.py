@@ -2956,12 +2956,14 @@ REGION_BY_COUNTRY: dict[str, str] = {
 # reachability test accepts it only when the region it names is itself reached
 # by some country.
 #
-# Italy is the one case: ``IT`` (per price analysis) is the alternative to
+# Italy: ``IT`` (per price analysis) is the alternative to
 # ``IT_PREZZARIO`` (per price list), and the two differ by exactly the spese
 # generali and utile d'impresa that a price-list rate already contains.
+# ``CN_GB50500_2013`` (with a 规费 head) is the alternative to ``CN`` for
+# projects billed under the 2013 edition; ``EDITION_REGIONS`` picks it.
 REGION_VARIANTS: dict[str, str] = {
     "IT": "IT_PREZZARIO",
-    "CN": "CN_GB50500_2013",
+    "CN_GB50500_2013": "CN",
 }
 
 # A region whose bill standard changed edition, and the stack each edition is

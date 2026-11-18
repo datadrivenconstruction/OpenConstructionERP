@@ -4780,7 +4780,10 @@ class GBT50500CodeUnique(ValidationRule):
             (str(pos.get("id") or pos.get("ordinal") or ""), _gb50500_code(pos), _gb50500_sub_project(pos))
             for pos in _get_leaf_positions(context)
         ]
-        duplicates = {f.ref: f for f in check_item_codes(entries, []) if f.kind == "duplicate"}
+        from app.core.item_codes import shared_code_patterns  # noqa: PLC0415
+
+        shared = shared_code_patterns("gb50500")
+        duplicates = {f.ref: f for f in check_item_codes(entries, [], shared) if f.kind == "duplicate"}
         results: list[RuleResult] = []
         for ref, code, scope in entries:
             if not code.strip():

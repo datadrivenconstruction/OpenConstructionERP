@@ -157,7 +157,7 @@ def test_china_has_a_stack_per_edition() -> None:
     assert any("规费" in n or "规费" in n for n in old)
     assert len(old) == len(new) + 1
     assert EDITION_REGIONS["CN"] == {"gb50500@2013": "CN_GB50500_2013", "gb50500@2024": "CN"}
-    assert REGION_VARIANTS["CN"] == "CN_GB50500_2013"
+    assert REGION_VARIANTS["CN_GB50500_2013"] == "CN"
 
 
 # ── EN 16931: project reference and site ─────────────────────────────────────

@@ -141,10 +141,11 @@ RULE_PACKS: dict[str, dict[str, Any]] = {
         "id": "cn_compliance",
         "name": "China Compliance",
         "description": "GB/T 50500 bill-of-quantities item codes, present and in the "
-        "9- or 12-digit national format, plus the universal quality baseline.",
+        "9- or 12-digit national format, VAT base, tax method and fapiao checks, "
+        "plus the universal quality baseline.",
         "jurisdiction": "CN",
         "enforced_workflows": [WORKFLOW_CONTRACT_SIGNATURE],
-        "rule_sets": ["boq_quality", "gbt50500"],
+        "rule_sets": ["boq_quality", "gbt50500", "cn_vat"],
     },
     "es_compliance": {
         "id": "es_compliance",

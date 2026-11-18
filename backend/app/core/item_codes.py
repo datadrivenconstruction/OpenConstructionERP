@@ -85,6 +85,11 @@ def code_patterns(standard: str, edition: str | None = None, subdivision: str | 
     return patterns
 
 
+def shared_code_patterns(standard: str) -> list[str]:
+    """Patterns of codes that name an item rather than a line, so they may repeat."""
+    return list(standard_entry(standard).get("shared_code_patterns") or [])
+
+
 def uniqueness_scope(standard: str) -> str:
     """Where a code of this standard may not repeat: bill, section or sub_project."""
     return str(standard_entry(standard).get("uniqueness_scope") or "bill")

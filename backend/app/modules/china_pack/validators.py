@@ -35,7 +35,7 @@ from datetime import date
 from decimal import Decimal
 from typing import Any
 
-from app.core.item_codes import code_patterns
+from app.core.item_codes import code_patterns, shared_code_patterns
 from app.core.line_tax import check_item_codes, method_change_locked, parse_date, to_decimal
 from app.core.validation.engine import (
     RuleCategory,
@@ -125,7 +125,7 @@ def _code_findings(record: dict[str, Any]) -> list[Any]:
         for line in record.get("lines") or []
     ]
     patterns = code_patterns("gb50500", _edition(record), profile.get("site_subdivision"))
-    return check_item_codes(entries, patterns)
+    return check_item_codes(entries, patterns, shared_code_patterns("gb50500"))
 
 
 class CodeFormat(_CnRule):
