@@ -299,6 +299,10 @@
     "unit_exportable": {
       "fail": "항목 {ordinal}: 단위 '{unit}'이(가) 4자 GAEB QU 필드에 맞지 않아 내보낼 때 잘립니다",
       "suggestion": "4자 이하의 GAEB 단위 코드를 사용하세요 (m, m2, m3, St, h, psch, kg, t)"
+    },
+    "short_text_length": {
+      "fail": "항목 {ordinal}: 짧은 텍스트가 {length}자입니다. GAEB 내보내기에서 70자로 잘립니다",
+      "suggestion": "짧은 텍스트를 70자 이내로 줄이고 세부 내용은 긴 텍스트에 두십시오"
     }
   },
   "nrm": {

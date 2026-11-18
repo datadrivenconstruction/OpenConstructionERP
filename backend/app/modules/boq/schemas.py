@@ -700,6 +700,11 @@ class PositionUpdate(BaseModel):
         pattern=r"^(pending|passed|warnings|errors)$",
     )
     metadata: dict[str, Any] | None = None
+    long_text: str | None = Field(
+        default=None,
+        max_length=20000,
+        description="Langtext of a position or section; an empty string removes it.",
+    )
     sort_order: int | None = None
     wbs_id: str | None = None
     cost_code_id: str | None = None

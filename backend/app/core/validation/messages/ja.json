@@ -299,6 +299,10 @@
     "unit_exportable": {
       "fail": "項目 {ordinal}：単位「{unit}」は 4 文字の GAEB QU 欄に収まらず、エクスポート時に切り詰められます",
       "suggestion": "4 文字以内の GAEB 単位コードを使用してください（m、m2、m3、St、h、psch、kg、t）"
+    },
+    "short_text_length": {
+      "fail": "項目 {ordinal}: 短文が {length} 文字あります。GAEB エクスポートでは 70 文字に切り詰められます",
+      "suggestion": "短文を 70 文字以内に短くし、詳細は長文に記載してください"
     }
   },
   "nrm": {

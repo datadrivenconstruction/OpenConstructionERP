@@ -299,6 +299,10 @@
     "unit_exportable": {
       "fail": "Pozycja {ordinal}: jednostka '{unit}' nie mieści się w 4-znakowym polu GAEB QU i zostanie obcięta przy eksporcie",
       "suggestion": "Użyj kodu jednostki GAEB o długości najwyżej 4 znaków (m, m2, m3, St, h, psch, kg, t)"
+    },
+    "short_text_length": {
+      "fail": "Pozycja {ordinal}: tekst krótki ma {length} znaków; eksport GAEB obcina go do 70",
+      "suggestion": "Skróć tekst krótki do 70 znaków, a szczegóły pozostaw w tekście długim"
     }
   },
   "nrm": {

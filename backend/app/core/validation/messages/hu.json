@@ -299,6 +299,10 @@
     "unit_exportable": {
       "fail": "{ordinal} tétel: a(z) '{unit}' egység nem fér el a 4 karakteres GAEB QU mezőben, exportkor levágódik",
       "suggestion": "Legfeljebb 4 karakteres GAEB egységkódot használjon (m, m2, m3, St, h, psch, kg, t)"
+    },
+    "short_text_length": {
+      "fail": "{ordinal}. tétel: a rövid szöveg {length} karakter; a GAEB-export 70-re vágja",
+      "suggestion": "Rövidítse a rövid szöveget 70 karakterre, a részleteket hagyja a hosszú szövegben"
     }
   },
   "nrm": {

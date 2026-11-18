@@ -754,7 +754,14 @@ export function BOQEditorPage() {
           ...cur,
           positions: cur.positions.map((p) => {
             if (p.id !== id) return p;
-            const next = { ...p, ...data } as Position;
+            const { long_text: longText, ...rest } = data;
+            const next = { ...p, ...rest } as Position;
+            if (longText !== undefined) {
+              const meta = { ...(next.metadata ?? {}) } as Record<string, unknown>;
+              if (longText.trim()) meta.gaeb_long_text = longText.trim();
+              else delete meta.gaeb_long_text;
+              next.metadata = meta;
+            }
             if (data.quantity !== undefined || data.unit_rate !== undefined) {
               // Mirror backend semantics (boq/service.py::_compute_total):
               // total = quantity × unit_rate, no VAT, no markups. Markups
@@ -2196,6 +2203,12 @@ export function BOQEditorPage() {
           e.preventDefault();
           e.stopPropagation();
           toggleAICopilotRef.current?.();
+          return;
+        case 'edit_texts':
+          if (boqGridRef.current?.openTextEditorForFocused()) {
+            e.preventDefault();
+            e.stopPropagation();
+          }
           return;
         case 'delete_selected':
           // Same tracked-delete pipeline as the context menu / batch bar, so
@@ -6789,6 +6802,9 @@ export function BOQEditorPage() {
 
               <kbd className="inline-flex items-center rounded border border-border-light bg-surface-secondary px-1.5 py-0.5 text-xs font-mono">{t('boq.shortcut_ctrl_l', { defaultValue: 'Ctrl+L' })}</kbd>
               <span className="text-content-secondary">{t('boq.shortcut_lock', { defaultValue: 'Lock / Unlock Estimate' })}</span>
+
+              <kbd className="inline-flex items-center rounded border border-border-light bg-surface-secondary px-1.5 py-0.5 text-xs font-mono">Alt+L</kbd>
+              <span className="text-content-secondary">{t('boq.edit_texts', { defaultValue: 'Edit Kurztext and Langtext' })}</span>
 
               <kbd className="inline-flex items-center rounded border border-border-light bg-surface-secondary px-1.5 py-0.5 text-xs font-mono">{t('boq.shortcut_ctrl_z', { defaultValue: 'Ctrl+Z' })}</kbd>
               <span className="text-content-secondary">{t('boq.shortcut_undo', { defaultValue: 'Undo' })}</span>

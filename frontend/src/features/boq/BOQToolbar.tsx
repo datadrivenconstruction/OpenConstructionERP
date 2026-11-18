@@ -323,11 +323,11 @@ export function BOQToolbar({
 
   /* ── Description density (single line ↔ multi-line Langtext) ───────── */
   const descDensity = useBoqDescDensityStore((s) => s.density);
-  const cycleDescDensity = useBoqDescDensityStore((s) => s.cycleDensity);
+  const setDescDensity = useBoqDescDensityStore((s) => s.setDensity);
   const descDensityLabel: Record<BoqDescDensity, string> = {
-    compact: t('boq.desc_density_compact', { defaultValue: 'Compact' }),
-    comfortable: t('boq.desc_density_comfortable', { defaultValue: 'Comfortable' }),
-    tall: t('boq.desc_density_tall', { defaultValue: 'Langtext' }),
+    compact: t('boq.langtext_mode_off', { defaultValue: 'Off' }),
+    comfortable: t('boq.langtext_mode_preview', { defaultValue: '2 lines' }),
+    tall: t('boq.langtext_mode_full', { defaultValue: 'Full' }),
   };
 
   const scoreColor = (s: number) =>
@@ -648,13 +648,33 @@ export function BOQToolbar({
 
           <span className="mx-0.5 h-5 w-px shrink-0 bg-border-light" />
 
-          <IconBtn
-            icon={<WrapText size={16} />}
-            title={`${t('boq.desc_density_tooltip', { defaultValue: 'Description height: switch between a single line and a multi-line Langtext view. Double-click a description to edit the full text.' })} (${descDensityLabel[descDensity]})`}
-            onClick={cycleDescDensity}
-            active={descDensity !== 'compact'}
-            testId="boq-desc-density-toggle"
-          />
+          {/* Langtext anzeigen: off / first two lines / full, remembered per browser. */}
+          <div
+            role="radiogroup"
+            aria-label={t('boq.langtext_mode', { defaultValue: 'Show Langtext' })}
+            title={t('boq.langtext_mode_tip', { defaultValue: 'How much of each Langtext the list shows under the Kurztext. Edit texts with the pencil, a double-click on the Langtext, or Alt+L.' })}
+            className="flex shrink-0 items-center gap-0.5 rounded-lg border border-border-light bg-surface-secondary p-0.5"
+            data-testid="boq-desc-density-toggle"
+          >
+            <WrapText size={14} className="mx-1 text-content-tertiary" aria-hidden />
+            {(['compact', 'comfortable', 'tall'] as BoqDescDensity[]).map((mode) => (
+              <button
+                key={mode}
+                type="button"
+                role="radio"
+                aria-checked={descDensity === mode}
+                onClick={() => setDescDensity(mode)}
+                data-testid={`boq-langtext-mode-${mode}`}
+                className={`h-6 rounded-md px-2 text-xs font-medium whitespace-nowrap transition-colors ${
+                  descDensity === mode
+                    ? 'bg-surface-elevated text-content-primary shadow-sm'
+                    : 'text-content-tertiary hover:text-content-primary'
+                }`}
+              >
+                {descDensityLabel[mode]}
+              </button>
+            ))}
+          </div>
           {onCarbonFootprint && (
             <IconBtn
               icon={<Leaf size={16} className="text-semantic-success" />}

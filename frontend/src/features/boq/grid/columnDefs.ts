@@ -179,14 +179,15 @@ export interface BOQColumnContext {
  *
  * The cell renders the OZ in ``font-mono text-xs`` (12px, ~7.5px advance per
  * character, upper bound across the mono stacks we ship) plus fixed chrome:
- * 8px cell padding each side and the 10px validation dot with its 4px gap.
+ * the quartz theme's 16px cell padding each side and the 10px validation dot
+ * with its 4px gap.
  * Clamped to [88, 180] so short ordinals keep the historic compact column
  * and a pathological ordinal cannot eat the viewport - the column stays
  * user-resizable either way.
  */
 export function ordinalColumnWidth(maxOrdinalChars: number): number {
   const CHAR_PX = 7.5;
-  const CHROME_PX = 30; // 2 x 8px padding + 10px status dot + 4px gap
+  const CHROME_PX = 50; // 2 x 16px padding + 10px status dot + 4px gap + 4px slack
   const fitted = Math.ceil(maxOrdinalChars * CHAR_PX) + CHROME_PX;
   return Math.max(88, Math.min(180, fitted));
 }
@@ -397,7 +398,7 @@ export function resourceSplitMoneyTotals(
 /** True for a real cost line (not a section header, footer, or resource sub-row). */
 function isCostLine(d: Record<string, unknown> | undefined): boolean {
   return (
-    !!d && !d._isSection && !d._isFooter && !d._isResource && !d._isAddResource && !d._isVariantHeader && !d._isLangtext
+    !!d && !d._isSection && !d._isFooter && !d._isResource && !d._isAddResource && !d._isVariantHeader
   );
 }
 
@@ -678,18 +679,14 @@ export function getColumnDefs(context: BOQColumnContext): ColDef[] {
       minWidth: 180,
       flex: 3,
       editable: true,
-      // Multi-line Langtext editor: a popup textarea so a position description
-      // can hold a full LV-style specification with newlines, not just one
-      // line. The value is the same `description` field (stored as TEXT,
-      // newlines preserved); the grid's density toggle controls how much of it
-      // shows at rest.
-      cellEditor: 'agLargeTextCellEditor',
-      cellEditorPopup: true,
-      cellEditorParams: {
-        maxLength: 5000,
-        rows: 14,
-        cols: 64,
-      },
+      // A click edits the Kurztext in place, on one line. The Langtext has its
+      // own editor (pencil, double-click on it, Alt+L). A description that
+      // already holds line breaks keeps the popup textarea, because a one-line
+      // input would drop them.
+      cellEditorSelector: (params) =>
+        String(params.data?.description ?? '').includes('\n')
+          ? { component: 'agLargeTextCellEditor', popup: true, params: { maxLength: 5000, rows: 14, cols: 64 } }
+          : { component: 'agTextCellEditor', params: { maxLength: 5000 } },
       cellRenderer: 'descriptionCellRenderer',
       // !pl-1 overrides AG Grid's default ~17px cell-horizontal-padding
       // so the position description sits flush-left within the column
@@ -708,7 +705,7 @@ export function getColumnDefs(context: BOQColumnContext): ColDef[] {
         const d = params.data as Record<string, unknown> | undefined;
         if (
           !d || d._isSection || d._isFooter || d._isResource ||
-          d._isAddResource || d._isVariantHeader || d._isLangtext
+          d._isAddResource || d._isVariantHeader
         ) {
           return null;
         }

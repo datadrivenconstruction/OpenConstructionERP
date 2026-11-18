@@ -299,6 +299,10 @@
     "unit_exportable": {
       "fail": "Position {ordinal}: Einheit '{unit}' passt nicht in das 4-stellige GAEB-Feld QU und würde beim Export gekürzt",
       "suggestion": "GAEB-Einheit mit höchstens 4 Zeichen verwenden (m, m2, m3, St, h, psch, kg, t)"
+    },
+    "short_text_length": {
+      "fail": "Position {ordinal}: Kurztext hat {length} Zeichen; der GAEB-Export kürzt ihn auf 70",
+      "suggestion": "Kurztext auf 70 Zeichen kürzen und Details im Langtext belassen"
     }
   },
   "nrm": {

@@ -247,9 +247,20 @@ export function SectionFullWidthRenderer(params: ICellRendererParams) {
   const t = ctx.t ?? ((key: string, opts?: Record<string, string | number>) =>
     (opts?.defaultValue as string) ?? key);
 
+  // Section Langtext (Vorbemerkung / Hinweistext): under the header, by the
+  // same mode as the positions; the chip unfolds or folds it for this section.
+  const longText = getGaebLongText(data.metadata);
+  const textMode = ctx.descDensity ?? 'comfortable';
+  const textUnfolded = ctx.expandedSectionTexts?.has(data.id) ?? false;
+  const textShown = !!longText && (textMode !== 'compact' || textUnfolded);
+  const textFull = textMode === 'tall' || textUnfolded;
+  const openTexts = ctx.onOpenTextEditor ? () => ctx.onOpenTextEditor!(data.id, 'long') : undefined;
+  const textIndent = (depth > 0 ? 8 + depth * 22 : 8) + (readOnly ? 52 : 90);
+
   return (
+    <div className="flex flex-col w-full h-full">
     <div
-      className={`flex items-center w-full h-full px-2 gap-2 select-none group/section transition-colors ${
+      className={`flex items-center w-full h-[38px] shrink-0 px-2 gap-2 select-none group/section transition-colors ${
         depth > 0 ? 'border-l-[3px] border-oe-blue' : ''
       } ${
         dragOver ? 'bg-oe-blue-subtle border-t-2 border-oe-blue' : ''
@@ -375,6 +386,31 @@ export function SectionFullWidthRenderer(params: ICellRendererParams) {
         </button>
       )}
 
+      {longText && textMode !== 'tall' && (
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            ctx.onToggleSectionText?.(data.id);
+          }}
+          aria-expanded={textFull}
+          data-testid="section-langtext-toggle"
+          className={`shrink-0 inline-flex items-center gap-0.5 h-5 px-1.5 rounded text-[10px] font-semibold
+                     normal-case tracking-normal transition-colors ${
+                       textShown
+                         ? 'bg-oe-blue-subtle text-oe-blue-text hover:bg-oe-blue hover:text-white'
+                         : 'bg-surface-tertiary text-content-secondary hover:bg-oe-blue-subtle hover:text-oe-blue-text'
+                     }`}
+          title={textFull
+            ? t('boq.langtext_hide', { defaultValue: 'Hide full Langtext' })
+            : t('boq.langtext_show', { defaultValue: 'Show full Langtext' })}
+        >
+          <FileText size={11} />
+          {t('boq.text_editor_long', { defaultValue: 'Langtext' })}
+          {textFull ? <ChevronDown size={11} /> : <ChevronRight size={11} />}
+        </button>
+      )}
+
       <span className="shrink-0 inline-flex items-center h-4 px-1.5 rounded-full
                        bg-surface-tertiary text-[10px] font-medium text-content-tertiary
                        tabular-nums">
@@ -386,6 +422,27 @@ export function SectionFullWidthRenderer(params: ICellRendererParams) {
       </span>
 
       <div className="flex-1" />
+
+      {!renaming && openTexts && (
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            openTexts();
+          }}
+          className="shrink-0 h-5 flex items-center gap-0.5 px-1.5 rounded
+                     text-[10px] font-medium
+                     text-content-tertiary hover:text-oe-blue
+                     bg-transparent hover:bg-oe-blue-subtle
+                     opacity-0 group-hover/section:opacity-100 focus-visible:opacity-100
+                     transition-all"
+          title={t('boq.edit_section_texts', { defaultValue: 'Edit title and Langtext' })}
+          aria-label={t('boq.edit_section_texts', { defaultValue: 'Edit title and Langtext' })}
+          data-testid="section-edit-texts"
+        >
+          <FileText size={10} />
+        </button>
+      )}
 
       {!renaming && !readOnly && (
         <button
@@ -591,6 +648,18 @@ export function SectionFullWidthRenderer(params: ICellRendererParams) {
         {formattedSubtotal}
       </span>
     </div>
+    {textShown && longText && (
+      <div className="pr-6 pb-2" style={{ paddingLeft: textIndent }}>
+        <LangtextBlock
+          text={longText}
+          clamp={!textFull}
+          onOpen={openTexts}
+          title={openTexts ? t('boq.langtext_dblclick_hint', { defaultValue: 'Double-click to edit the Langtext' }) : undefined}
+          testId="section-long-text-body"
+        />
+      </div>
+    )}
+    </div>
   );
 }
 
@@ -716,10 +785,14 @@ export type FullGridContext = ActionsContext & ResourceGridContext & SectionGrou
    */
   variationTraces?: Record<string, VariationLineTraceBadge>;
   variationUntracedBadge?: VariationLineTraceBadge;
-  /** Description-density preference: how tall a position description renders
-   *  at rest (compact = one truncated line, comfortable/tall = multi-line
-   *  Langtext with newlines honoured). Driven by the BOQ toolbar toggle. */
+  /** Langtext mode from the toolbar: compact = off (Kurztext only),
+   *  comfortable = first two lines of the Langtext, tall = full Langtext. */
   descDensity?: 'compact' | 'comfortable' | 'tall';
+  /** Open the Kurztext / Langtext editor panel on a position or section. */
+  onOpenTextEditor?: (rowId: string, focus?: 'short' | 'long') => void;
+  /** Sections whose Langtext is unfolded in full regardless of the mode. */
+  expandedSectionTexts?: Set<string>;
+  onToggleSectionText?: (sectionId: string) => void;
   /** When the dedicated Material/Labor/Equipment % columns are shown, the
    *  description cell hides its inline cost-driver split pill to avoid
    *  showing the same figures twice. */
@@ -874,7 +947,9 @@ export function ExpandCellRenderer(params: ICellRendererParams) {
     : 0;
   const isExpanded = ctx?.expandedPositions?.has(data.id) ?? false;
   const expandTitle = !hasResources
-    ? t('boq.gaeb_long_text', { defaultValue: 'Langtext' })
+    ? isExpanded
+      ? t('boq.langtext_hide', { defaultValue: 'Hide full Langtext' })
+      : t('boq.langtext_show', { defaultValue: 'Show full Langtext' })
     : isExpanded
     ? t('boq.collapse_resources', { defaultValue: 'Collapse {{count}} resources', count: resCount })
     : t('boq.expand_resources', { defaultValue: 'Show {{count}} resources', count: resCount });
@@ -1043,6 +1118,102 @@ function ScopeOfWorkHint({
   );
 }
 
+/* ── Langtext block + text-edit pencil ──────────────────────────────
+ *  Both sit inside AG Grid cells of a singleClickEdit grid, so they listen
+ *  natively: a click on the Langtext must not open the Kurztext editor, and a
+ *  double-click (or the pencil) opens the text panel instead. */
+export function LangtextBlock({
+  text,
+  clamp,
+  onOpen,
+  title,
+  className = '',
+  testId = 'boq-long-text-body',
+}: {
+  text: string;
+  clamp: boolean;
+  onOpen?: () => void;
+  title?: string;
+  className?: string;
+  testId?: string;
+}) {
+  const ref = useRef<HTMLDivElement | null>(null);
+  const openRef = useRef(onOpen);
+  openRef.current = onOpen;
+  useEffect(() => {
+    const node = ref.current;
+    if (!node) return undefined;
+    const stop = (e: Event) => e.stopPropagation();
+    const open = (e: Event) => {
+      e.stopPropagation();
+      e.preventDefault();
+      openRef.current?.();
+    };
+    node.addEventListener('click', stop);
+    node.addEventListener('dblclick', open);
+    return () => {
+      node.removeEventListener('click', stop);
+      node.removeEventListener('dblclick', open);
+    };
+  }, []);
+  return (
+    <div
+      ref={ref}
+      data-testid={testId}
+      title={title}
+      className={`border-l-2 border-border pl-2 text-xs font-normal normal-case tracking-normal leading-[18px] text-content-secondary whitespace-pre-wrap break-words ${
+        clamp ? 'line-clamp-2' : ''
+      } ${onOpen ? 'cursor-text' : ''} ${className}`}
+    >
+      {text}
+    </div>
+  );
+}
+
+function TextEditButton({ onOpen, label }: { onOpen: () => void; label: string }) {
+  const ref = useRef<HTMLButtonElement | null>(null);
+  const openRef = useRef(onOpen);
+  openRef.current = onOpen;
+  useEffect(() => {
+    const node = ref.current;
+    if (!node) return undefined;
+    const open = (e: Event) => {
+      e.stopPropagation();
+      e.stopImmediatePropagation();
+      e.preventDefault();
+      openRef.current();
+    };
+    const stop = (e: Event) => {
+      e.stopPropagation();
+      e.stopImmediatePropagation();
+    };
+    node.addEventListener('pointerdown', open, true);
+    node.addEventListener('mousedown', stop, true);
+    node.addEventListener('click', stop, true);
+    return () => {
+      node.removeEventListener('pointerdown', open, true);
+      node.removeEventListener('mousedown', stop, true);
+      node.removeEventListener('click', stop, true);
+    };
+  }, []);
+  return (
+    <button
+      ref={ref}
+      type="button"
+      tabIndex={-1}
+      title={`${label} (Alt+L)`}
+      aria-label={label}
+      data-testid="boq-edit-texts"
+      style={{ position: 'relative', zIndex: 10 }}
+      className="shrink-0 inline-flex h-[18px] w-[18px] items-center justify-center rounded
+                 text-content-tertiary hover:text-oe-blue hover:bg-oe-blue-subtle
+                 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity"
+    >
+      <Pencil size={12} />
+    </button>
+  );
+}
+
 /* ── Description + CWICR Variant Badge ────────────────────────────── */
 
 /**
@@ -1127,16 +1298,19 @@ export function DescriptionCellRenderer(params: ICellRendererParams) {
   // duplicated text is just noise on legacy applies.
   const displayValue = stripVariantSuffix(value as string | null | undefined);
 
-  // Description density: compact keeps the historical single truncated line;
-  // comfortable / tall let the full multi-line Langtext show, honouring the
-  // newlines stored in the description and scrolling within the (taller) row
-  // when the text overflows.
-  const descMultiline = (ctx?.descDensity ?? 'compact') !== 'compact';
-  const descTextCls = descMultiline
-    ? 'whitespace-pre-wrap break-words leading-snug min-w-0 w-full overflow-y-auto max-h-full'
-    : // flex-1 + min-w-24: the position text keeps the room, the chips beside it shrink first.
-      'truncate min-w-24 flex-1';
-  const descAlignCls = descMultiline ? 'items-start py-0.5' : 'items-center';
+  // Langtext mode: off keeps the single truncated Kurztext line; "first
+  // lines" clamps Kurztext and Langtext to two lines each; full (or a row
+  // unfolded by its chevron) shows both whole. getRowHeight sizes the row to
+  // match, so nothing scrolls inside a cell.
+  const textMode = ctx?.descDensity ?? 'comfortable';
+  const rowUnfolded = ctx?.expandedPositions?.has(positionId) ?? false;
+  const descMultiline = textMode !== 'compact' || rowUnfolded;
+  const textFull = textMode === 'tall' || rowUnfolded;
+  const descTextCls = !descMultiline
+    ? // flex-1 + min-w-24: the position text keeps the room, the chips beside it shrink first.
+      'truncate min-w-24 flex-1'
+    : `whitespace-pre-wrap break-words min-w-0 flex-1 ${textFull ? '' : 'line-clamp-2'}`;
+  const descAlignCls = descMultiline ? 'items-start leading-[18px]' : 'items-center';
 
   const meta = (data.metadata ?? {}) as Record<string, unknown>;
   const variant = (meta as { variant?: { label?: string; price?: number; index?: number } }).variant;
@@ -1154,27 +1328,42 @@ export function DescriptionCellRenderer(params: ICellRendererParams) {
     ? scopeRaw.filter((s): s is string => typeof s === 'string' && s.trim().length > 0)
     : [];
   const gaebLongText = getGaebLongText(meta);
-  const scopeHint = scopeSteps.length > 0 || gaebLongText ? (
+  // With the Langtext hidden, the (i) popover still lets it be read in place.
+  const longTextHidden = !!gaebLongText && !descMultiline;
+  const scopeHint = scopeSteps.length > 0 || longTextHidden ? (
     <>
-      {gaebLongText ? <ScopeOfWorkHint steps={[]} longText={gaebLongText} t={t} /> : null}
+      {longTextHidden ? <ScopeOfWorkHint steps={[]} longText={gaebLongText!} t={t} /> : null}
       {scopeSteps.length > 0 ? <ScopeOfWorkHint steps={scopeSteps} t={t} /> : null}
     </>
   ) : null;
-  // Langtext toggle on: the long text renders muted below the short text.
-  // Only built when the toggle is on and a long text exists (cheap otherwise).
-  const descBody = descMultiline && gaebLongText ? (
-    <span className={descTextCls}>
-      <span>{displayValue}</span>
-      <span
-        className="block mt-0.5 text-xs text-content-tertiary whitespace-pre-wrap break-words"
-        data-testid="boq-long-text-body"
-      >
-        {gaebLongText}
-      </span>
-    </span>
-  ) : (
-    <span className={descTextCls}>{displayValue}</span>
-  );
+  const descBody = <span className={descTextCls}>{displayValue}</span>;
+  const openTexts = ctx?.onOpenTextEditor && positionId
+    ? () => ctx.onOpenTextEditor!(positionId, 'long')
+    : undefined;
+  const editLabel = t('boq.edit_texts', { defaultValue: 'Edit Kurztext and Langtext' });
+  const longBlock = gaebLongText && descMultiline ? (
+    <LangtextBlock
+      text={gaebLongText}
+      clamp={!textFull}
+      onOpen={openTexts}
+      title={openTexts ? t('boq.langtext_dblclick_hint', { defaultValue: 'Double-click to edit the Langtext' }) : undefined}
+      className="mt-1"
+    />
+  ) : null;
+  const editBtn = openTexts ? <TextEditButton onOpen={openTexts} label={editLabel} /> : null;
+  // Kurztext line(s) on top, Langtext under it, the edit pencil at the right.
+  const withTexts = (head: JSX.Element): JSX.Element => {
+    if (!longBlock && !editBtn) return head;
+    return (
+      <div className={`flex w-full min-w-0 gap-1 ${descMultiline ? 'items-start py-[5px]' : 'items-center h-full'}`}>
+        <div className="flex min-w-0 flex-1 flex-col">
+          {head}
+          {longBlock}
+        </div>
+        {editBtn}
+      </div>
+    );
+  };
 
   /* ── "V" icon — surfaces when EITHER:
    *     (a) at least one resource on this position carries cached
@@ -1381,15 +1570,17 @@ export function DescriptionCellRenderer(params: ICellRendererParams) {
 
   if (!hasVariant && !hasDefault) {
     if (!variantIconButton && !scopeHint && !breakdownPill && !provenanceChip && !provisChip) {
-      return descMultiline ? (
-        <span className="block w-full whitespace-pre-wrap break-words leading-snug overflow-y-auto max-h-full">
-          {displayValue}
-        </span>
-      ) : (
-        <span className="truncate">{displayValue}</span>
+      return withTexts(
+        descMultiline ? (
+          <span className={`block w-full leading-[18px] whitespace-pre-wrap break-words ${textFull ? '' : 'line-clamp-2'}`}>
+            {displayValue}
+          </span>
+        ) : (
+          <span className="truncate">{displayValue}</span>
+        ),
       );
     }
-    return (
+    return withTexts(
       <span className={`inline-flex ${descAlignCls} gap-1.5 min-w-0 max-w-full`}>
         {variantIconButton}
         {descBody}
@@ -1397,7 +1588,7 @@ export function DescriptionCellRenderer(params: ICellRendererParams) {
         {breakdownPill}
         {provisChip}
         {provenanceChip}
-      </span>
+      </span>,
     );
   }
 
@@ -1417,7 +1608,7 @@ export function DescriptionCellRenderer(params: ICellRendererParams) {
     // Variant choice is surfaced through the V button + the synthetic
     // VARIANT row inside the expanded resource panel \u2014 the blue
     // "Variant: <label>" pill that used to render here was redundant.
-    return (
+    return withTexts(
       <span className={`inline-flex ${descAlignCls} gap-1.5 min-w-0 max-w-full`}>
         {variantIconButton}
         {descBody}
@@ -1425,7 +1616,7 @@ export function DescriptionCellRenderer(params: ICellRendererParams) {
         {breakdownPill}
         {provisChip}
         {provenanceChip}
-      </span>
+      </span>,
     );
   }
 
@@ -1448,7 +1639,7 @@ export function DescriptionCellRenderer(params: ICellRendererParams) {
         : t('costs.variant_median_word', { defaultValue: 'median' }),
   });
 
-  return (
+  return withTexts(
     <span className="inline-flex items-center gap-1.5 min-w-0 max-w-full">
       {variantIconButton}
       <span className="truncate min-w-0">{displayValue}</span>
@@ -1477,7 +1668,7 @@ export function DescriptionCellRenderer(params: ICellRendererParams) {
           </span>
         )}
       </span>
-    </span>
+    </span>,
   );
 }
 
@@ -5234,20 +5425,6 @@ export function ResourceFullWidthRenderer(params: ICellRendererParams) {
   if (data?._isResource) {
     const row = <EditableResourceRow data={data} ctx={ctx} slots={slots} leftPad={leftPad} />;
     return ctx.readOnly ? <div className="h-full w-full" {...INERT}>{row}</div> : row;
-  }
-
-  // GAEB Langtext block above the resources of an expanded position.
-  if (data?._isLangtext) {
-    return (
-      <div
-        className="h-full w-full overflow-y-auto py-1.5 pr-4 text-xs text-content-secondary"
-        style={{ paddingLeft: leftPad }}
-        data-testid="boq-long-text-block"
-      >
-        <div className="oe-overline mb-0.5">{ctx.t('boq.gaeb_long_text', { defaultValue: 'Langtext' })}</div>
-        <div className="whitespace-pre-wrap break-words leading-snug">{data._langtext as string}</div>
-      </div>
-    );
   }
 
   // Synthetic "abstract variant" header — surfaces the position-level

@@ -1,41 +1,48 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 /**
- * BOQ description-density store.
+ * BOQ Langtext display store ("Langtext anzeigen").
  *
- * Controls how tall a position's description cell renders in the BOQ grid, so
- * an estimator can turn a one-line Kurztext into a full multi-line Langtext
- * view (like a German LV) without leaving the grid:
+ * How much of the Langtext (long text) the BOQ grid shows under each Kurztext,
+ * for positions and section headers alike:
  *
- *   - compact     : single line, truncated with an ellipsis (the classic view).
- *   - comfortable : a few wrapped lines, newlines honoured, scroll for the rest.
- *   - tall        : a generous block for long specification text.
+ *   - compact     : off. Kurztext only, one line; the row's chevron or the
+ *                   section's Langtext chip opens a single text.
+ *   - comfortable : the first two lines of the Langtext under the Kurztext.
+ *   - tall        : the full Langtext; the row grows to fit it.
  *
- * The full text always lives in the single `description` field (stored as TEXT
- * on the backend, newlines preserved), and the large-text popup editor handles
- * writing arbitrarily long Langtext. This store only drives how much of it the
- * grid shows at rest. Persisted to localStorage so the choice survives reloads.
+ * The Langtext lives in `metadata.gaeb_long_text`; the text editor writes it.
+ * Remembered per signed-in user (in this browser) so the choice survives
+ * reloads and does not leak to a colleague on a shared PC. The storage key
+ * moved with the change of meaning, so everyone starts at "first two lines".
  */
 
 import { create } from 'zustand';
+import { useAuthStore } from './useAuthStore';
 
 export type BoqDescDensity = 'compact' | 'comfortable' | 'tall';
 
-const STORAGE_KEY = 'oe_boq_desc_density';
+const STORAGE_KEY = 'oe_boq_langtext_mode';
 const ORDER: BoqDescDensity[] = ['compact', 'comfortable', 'tall'];
+const DEFAULT: BoqDescDensity = 'comfortable';
+
+function storageKey(): string {
+  const userId = useAuthStore.getState().userId;
+  return userId ? `${STORAGE_KEY}:${userId}` : STORAGE_KEY;
+}
 
 function read(): BoqDescDensity {
   try {
-    const v = localStorage.getItem(STORAGE_KEY);
-    return v === 'comfortable' || v === 'tall' ? v : 'compact';
+    const v = localStorage.getItem(storageKey());
+    return v === 'compact' || v === 'comfortable' || v === 'tall' ? v : DEFAULT;
   } catch {
-    return 'compact';
+    return DEFAULT;
   }
 }
 
 function persist(value: BoqDescDensity): void {
   try {
-    localStorage.setItem(STORAGE_KEY, value);
+    localStorage.setItem(storageKey(), value);
   } catch {
     /* ignore — a private-mode browser just loses the preference */
   }
@@ -44,7 +51,7 @@ function persist(value: BoqDescDensity): void {
 interface BoqDescDensityState {
   density: BoqDescDensity;
   setDensity: (value: BoqDescDensity) => void;
-  /** Advance compact -> comfortable -> tall -> compact (toolbar button). */
+  /** Advance off -> first lines -> full -> off. */
   cycleDensity: () => void;
 }
 
@@ -61,11 +68,7 @@ export const useBoqDescDensityStore = create<BoqDescDensityState>((set, get) => 
   },
 }));
 
-/** Pixel height a position row uses for each density (compact matches the
- *  grid's historical 32px position row). Exported so the grid's getRowHeight
- *  and any layout math stay in sync with the store. */
-export const BOQ_DESC_ROW_HEIGHT: Record<BoqDescDensity, number> = {
-  compact: 32,
-  comfortable: 64,
-  tall: 132,
-};
+// Another user signing in on this browser gets their own choice back.
+useAuthStore.subscribe((state, prev) => {
+  if (state.userId !== prev.userId) useBoqDescDensityStore.setState({ density: read() });
+});

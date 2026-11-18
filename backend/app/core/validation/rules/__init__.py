@@ -1619,6 +1619,57 @@ class GAEBUnitExportable(ValidationRule):
         return results
 
 
+class GAEBShortTextLength(ValidationRule):
+    """Flags a Kurztext that GAEB export would cut to 70 characters.
+
+    A position with a Langtext travels as Kurztext (``OutlTxt``) plus Langtext;
+    the Kurztext is cut at 70 characters on export, so the issuer reads a
+    different label than the estimator typed.
+    """
+
+    rule_id = "gaeb.short_text_length"
+    name = "GAEB Kurztext length"
+    standard = "gaeb"
+    severity = Severity.WARNING
+    category = RuleCategory.COMPLIANCE
+    description = "The Kurztext of a position with a Langtext should fit the 70 GAEB characters."
+
+    MAX_SHORT_TEXT_CHARS = 70
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        locale = _get_locale(context)
+        results: list[RuleResult] = []
+        for pos in _get_positions(context):
+            meta = _position_metadata(pos)
+            if meta.get("gaeb_is_section") or str(pos.get("type") or "").lower() == "section":
+                continue
+            if not str(meta.get("gaeb_long_text") or "").strip():
+                continue
+            short = " ".join(str(pos.get("description") or "").split())
+            passed = len(short) <= self.MAX_SHORT_TEXT_CHARS
+            results.append(
+                RuleResult(
+                    rule_id=self.rule_id,
+                    rule_name=self.name,
+                    severity=self.severity,
+                    category=self.category,
+                    passed=passed,
+                    message=_ok(locale)
+                    if passed
+                    else translate(
+                        "gaeb.short_text_length.fail",
+                        locale=locale,
+                        ordinal=pos.get("ordinal", "?"),
+                        length=len(short),
+                    ),
+                    element_ref=pos.get("id"),
+                    details={"length": len(short), "limit": self.MAX_SHORT_TEXT_CHARS},
+                    suggestion=None if passed else translate("gaeb.short_text_length.suggestion", locale=locale),
+                )
+            )
+        return results
+
+
 def _count_decimal_places(value: Any) -> int | None:
     """Count trailing decimal places in ``value``.
 
@@ -12989,6 +13040,7 @@ def register_builtin_rules() -> None:
         (GAEBProvisWithoutTotal(), None),
         (GAEBOrdinalChanged(), None),
         (GAEBUnitExportable(), None),
+        (GAEBShortTextLength(), None),
         # NRM (UK)
         (NRMClassificationRequired(), None),
         (NRMValidElement(), None),

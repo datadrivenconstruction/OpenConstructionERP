@@ -35,6 +35,7 @@ export type BoqShortcutAction =
   | 'toggle_lock'
   | 'toggle_ai_chat'
   | 'toggle_ai_copilot'
+  | 'edit_texts'
   | 'delete_selected'
   | 'duplicate';
 
@@ -133,6 +134,8 @@ export function resolveBoqShortcut(e: BoqShortcutKey, state: BoqShortcutState): 
   const plainAlt = e.altKey === true && e.ctrlKey !== true && e.metaKey !== true
     && !(typeof e.getModifierState === 'function' && e.getModifierState('AltGraph') === true);
   if (plainAlt && !shift && isLetter('i')) return 'toggle_ai_copilot';
+  // Alt+L opens the Kurztext / Langtext editor on the focused row.
+  if (plainAlt && !shift && isLetter('l')) return 'edit_texts';
 
   if ((key === 'Delete' || key === 'Backspace') && state.hasSelection && state.canDelete !== false) {
     return 'delete_selected';

@@ -361,6 +361,23 @@ def _label_text(node: ET.Element | None) -> str:
     return _paragraph_text(node)
 
 
+def _category_label_lines(ctgy: ET.Element) -> list[str]:
+    """Non-empty lines of a ``BoQCtgy`` ``LblTx``, one per paragraph or ``<br/>``.
+
+    The first line is the section's Kurztext; any further lines are its Langtext.
+    """
+    lbl = _find_child(ctgy, "LblTx")
+    if lbl is None:
+        return []
+    if lbl.text and lbl.text.strip() and not len(lbl):
+        return [line.strip() for line in lbl.text.splitlines() if line.strip()]
+    paragraphs = [c for c in lbl if _local(c.tag) == "p"]
+    lines: list[str] = []
+    for p in paragraphs or [lbl]:
+        lines.extend(line for line in _paragraph_lines(p) if line)
+    return lines
+
+
 def _extract_short_text(item: ET.Element) -> str:
     """Pull the Kurztext (short label) from ``OutlineText / OutlTxt`` or
     a category's ``LblTx``. ``OutlineText`` may sit under ``Description``,
@@ -933,7 +950,27 @@ class GAEBXMLImporter:
                 }
             )
 
-        def _walk(body: ET.Element, rno_chain: list[str], section_oz: str) -> None:
+        def _add_section_text(section_row: ImportedPosition | None, text: str) -> None:
+            """Append a Langtext block (LblTx tail or Hinweistext) to a section row."""
+            if section_row is None or not text:
+                return
+            current = str(section_row.metadata.get("gaeb_long_text") or "")
+            joined = f"{current}\n\n{text}" if current else text
+            section_row.metadata["gaeb_long_text"] = joined[:_MAX_LONG_TEXT_CHARS]
+
+        def _note_remark(remark: ET.Element, section_oz: str, section_row: ImportedPosition | None) -> None:
+            # Vorbemerkung / Hinweistext: kept with the section it sits in.
+            text = _extract_long_text(remark)
+            if text:
+                remarks.append({"section": section_oz, "id": (remark.get("ID") or "").strip(), "text": text})
+                _add_section_text(section_row, text)
+
+        def _walk(
+            body: ET.Element,
+            rno_chain: list[str],
+            section_oz: str,
+            section_row: ImportedPosition | None = None,
+        ) -> None:
             for child in body:
                 tag = _local(child.tag)
                 if tag == "BoQCtgy":
@@ -943,36 +980,40 @@ class GAEBXMLImporter:
                     part = (child.get("RNoPart") or child.get("ID") or "").strip()
                     child_chain = rno_chain + ([part] if part else [])
                     child_oz = _build_oz(child_chain, "", mask_lengths)
-                    label = _extract_short_text(child)
+                    label_lines = _category_label_lines(child)
+                    label = label_lines[0] if label_lines else _extract_short_text(child)
                     sections_seen.append({"ordinal": child_oz, "label": label or child_oz})
                     # Emit a section header row mirroring the LV tree.
-                    result.positions.append(
-                        ImportedPosition(
-                            description=label or child_oz or "Section",
-                            ordinal=child_oz,
-                            unit="section",
-                            quantity=0.0,
-                            unit_rate=0.0,
-                            classification={"gaeb_section": child_oz} if child_oz else {},
-                            source="gaeb_import",
-                            is_section=True,
-                            metadata={
-                                "gaeb_ordinal": child_oz,
-                                "gaeb_da_kind": da_kind,
-                                "gaeb_is_section": True,
-                                **({"gaeb_id": child.get("ID").strip()} if (child.get("ID") or "").strip() else {}),
-                                **({"gaeb_rno_parts": child_chain} if child.get("RNoPart") else {}),
-                                **(
-                                    {"gaeb_ctlg_assign": ctgy_assign}
-                                    if (ctgy_assign := _catalogue_assignments(child, catalogues))
-                                    else {}
-                                ),
-                            },
-                        )
+                    section_row = ImportedPosition(
+                        description=label or child_oz or "Section",
+                        ordinal=child_oz,
+                        unit="section",
+                        quantity=0.0,
+                        unit_rate=0.0,
+                        classification={"gaeb_section": child_oz} if child_oz else {},
+                        source="gaeb_import",
+                        is_section=True,
+                        metadata={
+                            "gaeb_ordinal": child_oz,
+                            "gaeb_da_kind": da_kind,
+                            "gaeb_is_section": True,
+                            **({"gaeb_id": child.get("ID").strip()} if (child.get("ID") or "").strip() else {}),
+                            **({"gaeb_rno_parts": child_chain} if child.get("RNoPart") else {}),
+                            **(
+                                {"gaeb_ctlg_assign": ctgy_assign}
+                                if (ctgy_assign := _catalogue_assignments(child, catalogues))
+                                else {}
+                            ),
+                        },
                     )
+                    result.positions.append(section_row)
+                    # A multi-line LblTx: everything after the first line is the
+                    # section's Langtext, ahead of any Hinweistext in its body.
+                    if len(label_lines) > 1:
+                        _add_section_text(section_row, "\n".join(label_lines[1:]))
                     inner = _find_child(child, "BoQBody")
                     if inner is not None:
-                        _walk(inner, child_chain, child_oz)
+                        _walk(inner, child_chain, child_oz, section_row)
                 elif tag == "Itemlist":
                     for entry in child:
                         etag = _local(entry.tag)
@@ -980,6 +1021,8 @@ class GAEBXMLImporter:
                             _emit_item(entry, rno_chain, section_oz)
                         elif etag == "MarkupItem":
                             _emit_markup(entry, rno_chain)
+                        elif etag == "Remark":
+                            _note_remark(entry, section_oz, section_row)
                         else:
                             _note_unread("unsupported_element", etag, section_oz)
                 elif tag in ("Item",):
@@ -987,12 +1030,9 @@ class GAEBXMLImporter:
                 elif tag == "MarkupItem":
                     _emit_markup(child, rno_chain)
                 elif tag == "BoQBody":
-                    _walk(child, rno_chain, section_oz)
+                    _walk(child, rno_chain, section_oz, section_row)
                 elif tag == "Remark":
-                    # Vorbemerkung: kept with the section it opens.
-                    text = _extract_long_text(child)
-                    if text:
-                        remarks.append({"section": section_oz, "id": (child.get("ID") or "").strip(), "text": text})
+                    _note_remark(child, section_oz, section_row)
 
         _walk(top_body, [], "")
         if remarks:

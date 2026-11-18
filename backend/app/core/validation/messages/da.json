@@ -299,6 +299,10 @@
     "unit_exportable": {
       "fail": "Post {ordinal}: enheden '{unit}' passer ikke i GAEB-feltet QU på 4 tegn og afkortes ved eksport",
       "suggestion": "Brug en GAEB-enhedskode på højst 4 tegn (m, m2, m3, St, h, psch, kg, t)"
+    },
+    "short_text_length": {
+      "fail": "Position {ordinal}: korttekst har {length} tegn; GAEB-eksport afkorter den til 70",
+      "suggestion": "Forkort korttekst til 70 tegn og behold detaljerne i langteksten"
     }
   },
   "nrm": {
