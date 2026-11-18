@@ -2287,5 +2287,13 @@
     ],
     "key_count_at_seed": 3,
     "note": "Delta sign with base, Extra and base are correct words in Spanish, Italian and Portuguese (boq.compare_col_delta, framework.order.extra_chip, safety.baseline_short)"
+  },
+  {
+    "locale_set": [
+      "de",
+      "sv"
+    ],
+    "key_count_at_seed": 3,
+    "note": "GAEB XML 3.3 Import / Export, Block and Material are the same word in German and Swedish."
   }
 ]

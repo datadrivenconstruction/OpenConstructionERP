@@ -13,7 +13,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AlertTriangle, ChevronDown, ChevronRight, FileText, Users } from 'lucide-react';
 import { Badge, Button, Card, EmptyState, SkeletonTable } from '@/shared/ui';
 import { formatCurrency } from '@/shared/lib/money';
-import { fmtNumber } from '@/shared/lib/formatters';
+import { fmtList, fmtNumber } from '@/shared/lib/formatters';
 import { useToastStore } from '@/stores/useToastStore';
 import {
   SCOPE_KINDS,
@@ -374,7 +374,7 @@ export function PackageContentsPanel({
                             <span className="block text-xs text-content-tertiary">
                               {t('tendering.contents.supplied_by_others', {
                                 defaultValue: 'Supplied by others: {{items}}',
-                                items: line.supplied_by_others.join(', '),
+                                items: fmtList(line.supplied_by_others),
                               })}
                             </span>
                           )}

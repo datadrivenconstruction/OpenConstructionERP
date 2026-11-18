@@ -48,6 +48,7 @@ RENDERING_ROUTES: dict[str, set[str]] = {
     "modules/changeorders/export_routes.py": {"export_change_order_pdf", "export_change_order_register"},
     "modules/claims_evidence/export_routes.py": {"export_evidence_pack", "export_reconstructed_pack_document"},
     "modules/correspondence/export_routes.py": {"export_correspondence_pdf", "export_correspondence_register"},
+    "modules/contracts/export_routes.py": {"export_contract_pdf"},
     "modules/cutting/router.py": {"export_plan"},
     "modules/doc_templates/layout_router.py": {"preview"},
     "modules/procurement/export_routes.py": {"export_goods_receipt_pdf", "export_purchase_order_pdf"},

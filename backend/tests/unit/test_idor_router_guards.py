@@ -788,6 +788,11 @@ ROUTER_HANDLERS: dict[str, list[str]] = {
         "list_bid_invitations",
         "create_bid_link",
         "revoke_bid_invitation",
+        "get_package_preview",
+        "delete_package",
+        "cancel_package",
+        "put_buyer_prices",
+        "create_link_for_bid",
         "list_package_addenda",
         "create_package_addendum",
         "publish_package_addendum",
@@ -1587,6 +1592,10 @@ _NOT_ROUTER_GATED: dict[str, str] = {
     "tendering.bid_portal_view": (
         "Public by design, the bidder link token is the capability. Returns only the unpriced bill, "
         "the package facts and the bidder's own draft; unknown tokens 404, revoked or expired 410."
+    ),
+    "tendering.bid_portal_logo": (
+        "Public by design, the bidder link token is the capability. Returns only the issuing company's document logo; "
+        "unknown tokens 404, revoked or expired 410."
     ),
     "tendering.bid_portal_save_draft": (
         "Public by design, writes only the draft of the one invitation the token resolves to, "

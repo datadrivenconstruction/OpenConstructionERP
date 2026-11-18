@@ -515,8 +515,8 @@ class PackagePreviewComponent(BaseModel):
     code: str | None = None
     kind: str
     unit: str = ""
-    quantity: Decimal = Decimal("0")
-    unit_cost: Decimal = Decimal("0")
+    quantity: FiniteDecimal = Decimal("0")
+    unit_cost: FiniteDecimal = Decimal("0")
     included: bool = True
 
     @field_serializer("quantity", "unit_cost", when_used="json")
@@ -536,8 +536,8 @@ class PackagePreviewLine(BaseModel):
     quantity: str = ""
     depth: int = 0
     supplied_by_others: list[str] = Field(default_factory=list)
-    budget_rate: Decimal | None = None
-    budget_total: Decimal | None = None
+    budget_rate: FiniteDecimal | None = None
+    budget_total: FiniteDecimal | None = None
     # The scope left part of this line's components with the owner.
     split: bool = False
     # The scope names cost kinds but this line has no priced components.

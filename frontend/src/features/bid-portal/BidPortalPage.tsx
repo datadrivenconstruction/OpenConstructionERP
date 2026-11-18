@@ -23,7 +23,7 @@ import { sortLanguagesByName } from '@/shared/lib/languageOrder';
 import { Button, ConfirmDialog } from '@/shared/ui';
 import { useConfirm } from '@/shared/hooks/useConfirm';
 import { formatCurrency } from '@/shared/lib/money';
-import { formatDateValue } from '@/shared/lib/formatters';
+import { fmtList, formatDateValue } from '@/shared/lib/formatters';
 import { localizedUnitCode } from '@/shared/lib/unitLabels';
 import { parseMoneyInput, toDecimalPayloadString } from '@/shared/lib/parseDecimal';
 import { copyToClipboard } from '@/shared/lib/browser';
@@ -388,7 +388,7 @@ export function BidPortalPage() {
                       <p className="mt-0.5 text-xs text-content-tertiary" data-testid={`bid-portal-supplied-${line.id}`}>
                         {t('bid_portal.supplied_by_others', {
                           defaultValue: 'Supplied by others, not to be priced: {{items}}',
-                          items: (line.supplied_by_others ?? []).join(', '),
+                          items: fmtList(line.supplied_by_others ?? []),
                         })}
                       </p>
                     )}
