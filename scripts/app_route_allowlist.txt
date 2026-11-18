@@ -14,8 +14,8 @@
 # Caddyfile first and here second. Editing this file to make CI green ships a
 # route that still 404s for every visitor.
 #
-# Extracted from: Caddyfile.new (sha256 2e422907f9c7d1f4d816a86dee629a65f0f23d22f484aa3dd052906c10a2e9d3)
-# Segments: 239
+# Extracted from: Caddyfile.live (sha256 082873b0b72471a48dd750afd2043713e794c924d240cc2192ceb30f7be6e4fc)
+# Segments: 241
 5d
 about
 academy-courses
@@ -59,6 +59,7 @@ change-intelligence
 change-orders
 changeorders
 chat
+china-tax
 claims-evidence
 clash
 closeout
@@ -230,6 +231,7 @@ styles-lab
 subcontractors
 submittals
 supplier-catalogs
+survey
 sustainability
 takeoff
 takeoff-viewer
