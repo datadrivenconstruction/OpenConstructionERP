@@ -1461,6 +1461,7 @@ const resource = {
     "tendering.how_subtitle": "From a priced bid schedule to an awarded contract, in five steps",
     "tendering.how_intro": "Take a priced bid schedule to market: package the work, invite subcontractors, compare their offers and award the winner, which writes the agreed rates back to the bid schedule.",
     "tendering.how_mod_boq": "Bid Schedule",
+    "tendering.contents.kind_labor": "Labor",
     "validation.select_boq_first": "Select a Bid Schedule first",
     "validation.rule_position_has_quantity": "Checks that every bid schedule position has a quantity greater than zero.",
     "validation.rule_no_duplicate_ordinals": "Ensures all ordinal numbers within the bid schedule are unique.",
