@@ -104,6 +104,14 @@ class CvrLine(Base):
     accruals: Mapped[Decimal] = mapped_column(Numeric(18, 4), nullable=False, default=Decimal("0"))
     forecast_cost: Mapped[Decimal] = mapped_column(Numeric(18, 4), nullable=False, default=Decimal("0"))
     forecast_value: Mapped[Decimal] = mapped_column(Numeric(18, 4), nullable=False, default=Decimal("0"))
+    # Cost budget (bill at target cost) and open commitment, both filled from the
+    # cost spine by ``populate_from_spine``; a hand-built report leaves them 0.
+    budget_cost: Mapped[Decimal] = mapped_column(
+        Numeric(18, 4), nullable=False, default=Decimal("0"), server_default="0"
+    )
+    committed_cost: Mapped[Decimal] = mapped_column(
+        Numeric(18, 4), nullable=False, default=Decimal("0"), server_default="0"
+    )
     sort_order: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         "metadata",

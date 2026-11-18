@@ -69,6 +69,7 @@ vi.mock('./api', () => ({
   populateClaimPreview: vi.fn(),
   commitClaimLines: vi.fn(),
   updateClaimLine: vi.fn(),
+  updateClaimLineQuantities: vi.fn(),
   // Billing a line by hand, and the schedule of values it is picked from.
   createClaimLine: vi.fn(),
   listContractLines: vi.fn(),
@@ -627,6 +628,26 @@ describe('ProgressClaimLineTable', () => {
       'cl-1',
       expect.objectContaining({ period_completed_pct: 55 }),
     );
+  });
+
+  it('records the assessed and certified quantity once the claim is submitted', async () => {
+    api.updateClaimLineQuantities.mockResolvedValue({ ...line, assessed_qty: '90', certified_qty: '85' });
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    render(
+      <QueryClientProvider client={client}>
+        <ProgressClaimLineTable claimId={CLAIM_ID} lines={[line]} currency="USD" editable={false} claimStatus="submitted" />
+      </QueryClientProvider>,
+    );
+    expect(screen.queryByText(/^Edit$/i)).toBeNull();
+    fireEvent.click(screen.getByText(/Record valuation/i));
+    const row = within(screen.getByTestId('claim-line-table'));
+    expect(row.queryByLabelText(/% complete/i)).toBeNull();
+    fireEvent.change(row.getByLabelText(/Assessed qty/i), { target: { value: '90' } });
+    fireEvent.change(row.getByLabelText(/Certified qty/i), { target: { value: '85' } });
+    fireEvent.click(screen.getByText(/^Save$/i));
+    await waitFor(() => expect(api.updateClaimLineQuantities).toHaveBeenCalledTimes(1));
+    expect(api.updateClaimLineQuantities).toHaveBeenCalledWith('cl-1', { assessed_qty: '90', certified_qty: '85' });
+    expect(api.updateClaimLine).not.toHaveBeenCalled();
   });
 
   it('re-reads the claim, its lines, the G702 and the register after a save', async () => {

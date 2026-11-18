@@ -2244,5 +2244,50 @@
       "fail": "Rij {row}: een voorganger is geen activiteit uit de tabel.",
       "suggestion": "Controleer de kolom voorgangers; onopgeloste koppelingen worden overgeslagen."
     }
+  },
+  "commercial_control": {
+    "ok": "Gecontroleerd, geen bevindingen",
+    "cvr": {
+      "target_rate_basis": {
+        "fail": "{missing} van {total} geprijsde posten hebben geen doelprijs en zijn begroot tegen de verkoopprijs (bijvoorbeeld {sample})",
+        "suggestion": "Vul de doelkostprijs in op deze posten zodat het budget de kosten zijn waaraan de bouwplaats wordt gehouden"
+      },
+      "unmapped_cost": {
+        "fail": "{kind} {label} heeft geen WBS of kostencode: verplicht {committed}, werkelijk {actual}",
+        "suggestion": "Boek de orderregel, onderaanneming of factuur op een WBS-element zodat de CVR hem kan plaatsen"
+      }
+    },
+    "procurement": {
+      "line_over_committed": {
+        "fail": "Post {ordinal} is overgecontracteerd: {committed_qty} van {budget_qty} besteld, {committed_value} tegenover een budget van {budget_value}",
+        "suggestion": "Controleer op een dubbele bestelling of leg een meerwerk of budgetoverheveling vast voordat u meer vastlegt"
+      }
+    },
+    "approval_routes": {
+      "bands_contiguous": {
+        "gap": {
+          "fail": "Bedragen van {low} tot {high} bereiken geen goedkeurder (stap {step})",
+          "suggestion": "Verbreed een aangrenzende band of voeg een stap toe zodat elk bedrag een goedkeurder heeft"
+        },
+        "overlap": {
+          "fail": "Stap {step} overlapt een lagere band van {low} tot {high}; beide goedkeurders tekenen die bedragen",
+          "suggestion": "Laat elke band beginnen waar de vorige eindigt, tenzij beide moeten tekenen"
+        },
+        "empty": {
+          "fail": "Stap {step} heeft een band van {low} tot {high} die geen bedrag bevat",
+          "suggestion": "Zet het minimum onder het maximum of laat het maximum leeg voor geen plafond"
+        }
+      }
+    },
+    "valuation": {
+      "assessed_within_submitted": {
+        "fail": "Regel {line}: beoordeelde hoeveelheid {assessed} ligt boven de ingediende {submitted}",
+        "suggestion": "Beoordeel hooguit wat is ingediend en leg extra werk vast als meerwerk"
+      },
+      "certified_within_assessed": {
+        "fail": "Regel {line}: gecertificeerde hoeveelheid {certified} ligt boven de beoordeelde {assessed}",
+        "suggestion": "Certificeer hooguit wat is beoordeeld, of beoordeel de regel eerst opnieuw"
+      }
+    }
   }
 }

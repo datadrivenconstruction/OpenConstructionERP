@@ -49,6 +49,9 @@ export interface CvrLine {
   accruals: string;
   forecast_cost: string;
   forecast_value: string;
+  /** Cost budget and open commitment, filled from the cost spine (0 on a hand-built line). */
+  budget_cost?: string;
+  committed_cost?: string;
   sort_order: number;
   margin_to_date: string;
   forecast_margin: string;
@@ -71,6 +74,8 @@ export interface CvrSummary {
   total_accruals: string;
   total_forecast_cost: string;
   total_forecast_value: string;
+  total_budget_cost?: string;
+  total_committed_cost?: string;
   margin_to_date: string;
   forecast_margin: string;
   margin_to_date_pct: string;
@@ -234,6 +239,71 @@ export async function createCvrLine(
 }
 
 /** Add or refresh the labour cost head from the month's approved field timesheets. */
+/** A failed commercial control rule, already translated by the server. */
+export interface CommercialFinding {
+  rule_id: string;
+  severity: 'error' | 'warning' | 'info' | string;
+  element_ref: string | null;
+  message: string;
+  suggestion: string | null;
+  details: Record<string, unknown>;
+}
+
+export interface CvrSpineRefresh {
+  report_id: string;
+  currency: string;
+  created: number;
+  updated: number;
+  kept_overrides: number;
+  lines: CvrLine[];
+  totals: Record<string, string>;
+  findings: CommercialFinding[];
+}
+
+/** Fill or refresh the report by WBS from the bill, commitments and actual cost. */
+export async function populateCvrFromSpine(reportId: string): Promise<CvrSpineRefresh> {
+  return apiPost<CvrSpineRefresh>(`/v1/cvr/reports/${reportId}/lines/from-cost-spine/`, {});
+}
+
+/** One priced bill line: budget, committed, remaining, received. Money and quantities are strings. */
+export interface CommitmentGridRow {
+  boq_position_id: string;
+  boq_id: string | null;
+  ordinal: string;
+  description: string;
+  unit: string;
+  wbs_id: string | null;
+  cost_line_id: string | null;
+  budget_basis: 'target' | 'unit_rate';
+  budget_rate: string;
+  budget_qty: string;
+  budget_value: string;
+  po_committed_qty: string;
+  po_committed_value: string;
+  subcontract_committed_qty: string;
+  subcontract_committed_value: string;
+  committed_qty: string;
+  committed_value: string;
+  remaining_qty: string;
+  remaining_value: string;
+  received_qty: string;
+  received_value: string;
+  on_cost_spine: boolean;
+  over_committed_qty: boolean;
+  over_committed_value: boolean;
+}
+
+export interface CommitmentGridResponse {
+  currency: string;
+  rows: CommitmentGridRow[];
+  totals: Record<string, string>;
+  findings: CommercialFinding[];
+}
+
+export async function fetchCommitmentGrid(projectId: string): Promise<CommitmentGridResponse> {
+  return apiGet<CommitmentGridResponse>(`/v1/costmodel/projects/${projectId}/spine/commitment-grid/`);
+}
+
 export async function importFieldLabourLine(reportId: string): Promise<CvrLine> {
   return apiPost<CvrLine>(`/v1/cvr/reports/${reportId}/lines/from-field-time/`, {});
 }

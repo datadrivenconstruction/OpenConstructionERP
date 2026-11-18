@@ -2244,5 +2244,50 @@
       "fail": "Wiersz {row}: poprzednik nie jest czynnością z tabeli.",
       "suggestion": "Sprawdź kolumnę poprzedników; nierozpoznane powiązania są pomijane."
     }
+  },
+  "commercial_control": {
+    "ok": "Sprawdzono, brak uwag",
+    "cvr": {
+      "target_rate_basis": {
+        "fail": "{missing} z {total} wycenionych pozycji nie ma stawki docelowej i jest budżetowanych po cenie sprzedaży (np. {sample})",
+        "suggestion": "Wpisz docelową stawkę kosztową w tych pozycjach, aby budżet był kosztem, z którego rozliczana jest budowa"
+      },
+      "unmapped_cost": {
+        "fail": "{kind} {label} nie ma WBS ani kodu kosztu: zaangażowane {committed}, rzeczywiste {actual}",
+        "suggestion": "Przypisz pozycję zamówienia, podwykonawstwo lub fakturę do elementu WBS, aby CVR mógł ją ująć"
+      }
+    },
+    "procurement": {
+      "line_over_committed": {
+        "fail": "Pozycja {ordinal} jest nadmiernie zaangażowana: zamówiono {committed_qty} z {budget_qty}, {committed_value} przy budżecie {budget_value}",
+        "suggestion": "Sprawdź podwójne zamówienie albo wprowadź zmianę lub przesunięcie budżetu, zanim zaangażujesz więcej"
+      }
+    },
+    "approval_routes": {
+      "bands_contiguous": {
+        "gap": {
+          "fail": "Kwoty od {low} do {high} nie trafiają do żadnego zatwierdzającego (krok {step})",
+          "suggestion": "Poszerz sąsiedni przedział lub dodaj krok, aby każda kwota miała zatwierdzającego"
+        },
+        "overlap": {
+          "fail": "Krok {step} nakłada się na niższy przedział od {low} do {high}; te kwoty podpisują obaj zatwierdzający",
+          "suggestion": "Niech każdy przedział zaczyna się tam, gdzie kończy poprzedni, chyba że podpisać mają obaj"
+        },
+        "empty": {
+          "fail": "Krok {step} ma przedział od {low} do {high}, który nie obejmuje żadnej kwoty",
+          "suggestion": "Ustaw minimum poniżej maksimum albo zostaw maksimum puste, jeśli nie ma limitu"
+        }
+      }
+    },
+    "valuation": {
+      "assessed_within_submitted": {
+        "fail": "Pozycja {line}: ilość oceniona {assessed} przekracza zgłoszoną {submitted}",
+        "suggestion": "Oceniaj najwyżej to, co zgłoszono, a dodatkowe roboty ujmuj jako zmianę"
+      },
+      "certified_within_assessed": {
+        "fail": "Pozycja {line}: ilość poświadczona {certified} przekracza ocenioną {assessed}",
+        "suggestion": "Poświadczaj najwyżej to, co oceniono, albo najpierw oceń pozycję ponownie"
+      }
+    }
   }
 }

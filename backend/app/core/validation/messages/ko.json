@@ -2244,5 +2244,50 @@
       "fail": "{row}행: 선행 작업이 표에 있는 작업이 아닙니다.",
       "suggestion": "선행 작업 열을 확인하세요. 확인되지 않는 연결은 건너뜁니다."
     }
+  },
+  "commercial_control": {
+    "ok": "확인 완료, 문제 없음",
+    "cvr": {
+      "target_rate_basis": {
+        "fail": "단가가 있는 {total}개 항목 중 {missing}개에 목표 단가가 없어 판매 단가로 예산이 잡혔습니다 (예: {sample})",
+        "suggestion": "예산이 현장이 지켜야 할 원가가 되도록 이 항목들에 목표 원가 단가를 입력하세요"
+      },
+      "unmapped_cost": {
+        "fail": "{kind} {label}에 WBS나 원가 코드가 없습니다: 약정 {committed}, 실적 {actual}",
+        "suggestion": "CVR이 배치할 수 있도록 발주 행, 하도급 또는 송장을 WBS 요소에 연결하세요"
+      }
+    },
+    "procurement": {
+      "line_over_committed": {
+        "fail": "항목 {ordinal}이(가) 초과 약정되었습니다: {budget_qty} 중 {committed_qty} 발주, 예산 {budget_value} 대비 {committed_value}",
+        "suggestion": "추가 약정 전에 중복 발주를 확인하거나 변경 또는 예산 전용을 등록하세요"
+      }
+    },
+    "approval_routes": {
+      "bands_contiguous": {
+        "gap": {
+          "fail": "{low} 이상 {high} 미만 금액은 어떤 승인자에게도 가지 않습니다 (단계 {step})",
+          "suggestion": "인접 구간을 넓히거나 단계를 추가하여 모든 금액에 승인자가 있게 하세요"
+        },
+        "overlap": {
+          "fail": "단계 {step}이(가) 하위 구간 {low} 이상 {high} 미만과 겹쳐 두 승인자가 모두 해당 금액에 서명합니다",
+          "suggestion": "둘 다 서명해야 하는 경우가 아니라면 각 구간은 이전 구간이 끝나는 곳에서 시작하세요"
+        },
+        "empty": {
+          "fail": "단계 {step}의 구간 {low}~{high}에는 어떤 금액도 포함되지 않습니다",
+          "suggestion": "최소값을 최대값보다 작게 하거나 상한이 없으면 최대값을 비워 두세요"
+        }
+      }
+    },
+    "valuation": {
+      "assessed_within_submitted": {
+        "fail": "행 {line}: 사정 수량 {assessed}이(가) 청구 수량 {submitted}보다 큽니다",
+        "suggestion": "청구한 수량까지만 사정하고 추가 작업은 변경으로 등록하세요"
+      },
+      "certified_within_assessed": {
+        "fail": "행 {line}: 확인 수량 {certified}이(가) 사정 수량 {assessed}보다 큽니다",
+        "suggestion": "사정한 수량까지만 확인하거나 먼저 행을 다시 사정하세요"
+      }
+    }
   }
 }

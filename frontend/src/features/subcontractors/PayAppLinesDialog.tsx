@@ -19,8 +19,8 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useQuery } from '@tanstack/react-query';
-import { CheckCheck, Loader2 } from 'lucide-react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { AlertTriangle, CheckCheck, Loader2, Save } from 'lucide-react';
 
 import { Button } from '@/shared/ui';
 import { WideModal, WideModalSection } from '@/shared/ui/WideModal';
@@ -28,6 +28,7 @@ import { MoneyDisplay } from '@/shared/ui/MoneyDisplay';
 import {
   listPaymentApplicationLines,
   listWorkPackages,
+  updatePaymentApplicationLineQuantities,
   type ApprovedLineAmount,
   type PaymentApplication,
   type PaymentApplicationLine,
@@ -50,6 +51,14 @@ function amountProblem(raw: string, claimed: number): 'invalid' | 'above' | null
 }
 
 const cents = (v: number) => Math.round(v * 100);
+
+/** Quantities stay open until finance approves; after that they are what the money was decided on. */
+const QTY_OPEN = new Set(['submitted', 'foreman_approved']);
+const QTY_FIELDS = ['claimed_qty', 'assessed_qty', 'certified_qty'] as const;
+type QtyField = (typeof QTY_FIELDS)[number];
+type QtyDraft = Record<string, Record<QtyField, string>>;
+
+const qtyStr = (v: number | string | null | undefined) => String(toNum(v));
 
 /** The retention rate the claimed header was worked out at, for when the agreement's is not to hand. */
 function headerRate(payment: PaymentApplication): number {
@@ -90,6 +99,70 @@ export function PayAppLinesDialog({
     [packagesQ.data],
   );
   const lines: PaymentApplicationLine[] = linesQ.data ?? [];
+  const qc = useQueryClient();
+
+  // Claimed / assessed / certified quantity per line, saved together.
+  const qtyEditable = QTY_OPEN.has(payment.status) && !busy;
+  const [qtyTyped, setQtyTyped] = useState<QtyDraft>({});
+  const [qtyFindings, setQtyFindings] = useState<Record<string, string[]>>({});
+  useEffect(() => {
+    if (!linesQ.data) return;
+    setQtyTyped(
+      Object.fromEntries(
+        linesQ.data.map((ln) => [
+          ln.id,
+          { claimed_qty: qtyStr(ln.claimed_qty), assessed_qty: qtyStr(ln.assessed_qty), certified_qty: qtyStr(ln.certified_qty) },
+        ]),
+      ),
+    );
+  }, [linesQ.data]);
+  const changedQty = lines.filter((ln) =>
+    QTY_FIELDS.some((f) => (qtyTyped[ln.id]?.[f] ?? qtyStr(ln[f])) !== qtyStr(ln[f])),
+  );
+  const qtyInvalid = changedQty.some((ln) =>
+    QTY_FIELDS.some((f) => {
+      const n = Number(qtyTyped[ln.id]?.[f] ?? '');
+      return !Number.isFinite(n) || n < 0;
+    }),
+  );
+  const saveQtyMut = useMutation({
+    mutationFn: async () => {
+      const out: Record<string, string[]> = {};
+      for (const ln of changedQty) {
+        const draft = qtyTyped[ln.id] ?? { claimed_qty: '0', assessed_qty: '0', certified_qty: '0' };
+        const saved = await updatePaymentApplicationLineQuantities(ln.id, {
+          claimed_qty: draft.claimed_qty.trim() || '0',
+          assessed_qty: draft.assessed_qty.trim() || '0',
+          certified_qty: draft.certified_qty.trim() || '0',
+        });
+        out[ln.id] = (saved.findings ?? []).map((f) => f.message);
+      }
+      return out;
+    },
+    onSuccess: (out) => {
+      setQtyFindings((prev) => ({ ...prev, ...out }));
+      qc.invalidateQueries({ queryKey: ['subcontractors', 'pay-app-lines', payment.id] });
+    },
+  });
+  const qtyCell = (ln: PaymentApplicationLine, field: QtyField, label: string) =>
+    qtyEditable ? (
+      <input
+        type="text"
+        inputMode="decimal"
+        value={qtyTyped[ln.id]?.[field] ?? ''}
+        onChange={(e) =>
+          setQtyTyped((prev) => ({
+            ...prev,
+            [ln.id]: { ...(prev[ln.id] ?? { claimed_qty: '0', assessed_qty: '0', certified_qty: '0' }), [field]: e.target.value },
+          }))
+        }
+        className="oe-input w-24 text-right tabular-nums"
+        aria-label={label}
+        data-testid={`pay-app-${field}`}
+      />
+    ) : (
+      toNum(ln[field]).toLocaleString()
+    );
 
   // Approve mode starts each line at what it already has approved, or at the
   // claim when nothing is set yet, which is how the portal submits a line.
@@ -211,6 +284,15 @@ export function PayAppLinesDialog({
                     {t('subcontractors.pay_app_col_package', { defaultValue: 'Work package' })}
                   </th>
                   <th className="text-right">
+                    {t('commercial_control.qty_claimed', { defaultValue: 'Claimed qty' })}
+                  </th>
+                  <th className="text-right">
+                    {t('commercial_control.qty_assessed', { defaultValue: 'Assessed qty' })}
+                  </th>
+                  <th className="text-right">
+                    {t('commercial_control.qty_certified', { defaultValue: 'Certified qty' })}
+                  </th>
+                  <th className="text-right">
                     {t('subcontractors.pay_app_col_claimed', { defaultValue: 'Claimed' })}
                   </th>
                   <th className="text-right">
@@ -229,7 +311,24 @@ export function PayAppLinesDialog({
                   const problem = problems[i];
                   return (
                     <tr key={ln.id} className="align-top">
-                      <td>{name}</td>
+                      <td>
+                        {name}
+                        {(qtyFindings[ln.id] ?? []).length > 0 && (
+                          <p className="mt-0.5 flex items-start gap-1 text-xs text-semantic-warning" role="status">
+                            <AlertTriangle size={12} className="mt-0.5 shrink-0" />
+                            <span>{(qtyFindings[ln.id] ?? []).join(' ')}</span>
+                          </p>
+                        )}
+                      </td>
+                      <td className="text-right">
+                        {qtyCell(ln, 'claimed_qty', t('commercial_control.qty_claimed', { defaultValue: 'Claimed qty' }))}
+                      </td>
+                      <td className="text-right">
+                        {qtyCell(ln, 'assessed_qty', t('commercial_control.qty_assessed', { defaultValue: 'Assessed qty' }))}
+                      </td>
+                      <td className="text-right">
+                        {qtyCell(ln, 'certified_qty', t('commercial_control.qty_certified', { defaultValue: 'Certified qty' }))}
+                      </td>
                       <td className="text-right">{money(claimed)}</td>
                       <td className="text-right">
                         {mode === 'approve' ? (
@@ -280,7 +379,7 @@ export function PayAppLinesDialog({
               </tbody>
               <tfoot>
                 <tr className="font-medium">
-                  <td>{t('subcontractors.pay_app_total', { defaultValue: 'Total' })}</td>
+                  <td colSpan={4}>{t('subcontractors.pay_app_total', { defaultValue: 'Total' })}</td>
                   <td className="text-right">{money(claimedTotal)}</td>
                   <td className="text-right" data-testid="pay-app-approved-total">
                     {approvedKnown ? money(approvedTotal) : '—'}
@@ -291,6 +390,26 @@ export function PayAppLinesDialog({
                 </tr>
               </tfoot>
             </table>
+          </div>
+        )}
+        {!loading && qtyEditable && lines.length > 0 && (
+          <div className="mt-2 flex items-center justify-end gap-2">
+            {saveQtyMut.isError && (
+              <span className="text-xs text-semantic-error" role="alert">
+                {t('commercial_control.save_quantities_failed', { defaultValue: 'Could not save the quantities' })}
+              </span>
+            )}
+            <Button
+              size="sm"
+              variant="secondary"
+              icon={<Save size={12} />}
+              onClick={() => saveQtyMut.mutate()}
+              loading={saveQtyMut.isPending}
+              disabled={changedQty.length === 0 || qtyInvalid}
+              data-testid="pay-app-save-quantities"
+            >
+              {t('commercial_control.save_quantities', { defaultValue: 'Save quantities' })}
+            </Button>
           </div>
         )}
         {!loading && (

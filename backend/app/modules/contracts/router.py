@@ -138,6 +138,7 @@ from app.modules.contracts.schemas import (
     ProgressClaimCommitRequest,
     ProgressClaimCreate,
     ProgressClaimLineCreate,
+    ProgressClaimLineQuantities,
     ProgressClaimLineResponse,
     ProgressClaimLineUpdate,
     ProgressClaimListResponse,
@@ -1467,7 +1468,93 @@ async def list_claim_lines(
     await _verify_claim_access(session, claim_id, user_id)
     repo = ProgressClaimLineRepository(session)
     items = await repo.list_for_claim(claim_id)
-    return [ProgressClaimLineResponse.model_validate(it) for it in items]
+    return await _with_valuation_findings(items, target_id=str(claim_id))
+
+
+async def _with_valuation_findings(items: list[Any], *, target_id: str) -> list[ProgressClaimLineResponse]:
+    """Claim lines with their submitted / assessed / certified findings attached."""
+    from app.core.validation.rules.commercial_control import evaluate
+
+    out = [ProgressClaimLineResponse.model_validate(it) for it in items]
+    findings = await evaluate(
+        {
+            "valuation_lines": [
+                {
+                    "id": str(r.id),
+                    "label": str(r.contract_line_id),
+                    "submitted": str(r.period_completed_qty),
+                    "assessed": str(r.assessed_qty),
+                    "certified": str(r.certified_qty),
+                }
+                for r in out
+            ]
+        },
+        target_type="progress_claim",
+        target_id=target_id,
+    )
+    by_line: dict[str, list[dict[str, Any]]] = {}
+    for finding in findings:
+        by_line.setdefault(str(finding.get("element_ref") or ""), []).append(finding)
+    for row in out:
+        row.findings = by_line.get(str(row.id), [])
+    return out
+
+
+#: Claim statuses in which the payer's assessed / certified quantity may still be recorded.
+_QTY_ASSESS_STATUSES = frozenset({"draft", "submitted"})
+_QTY_CERTIFY_STATUSES = frozenset({"draft", "submitted", "approved"})
+
+
+@router.patch(
+    "/progress-claim-lines/{line_id}/quantities",
+    response_model=ProgressClaimLineResponse,
+)
+async def update_claim_line_quantities(
+    line_id: uuid.UUID,
+    data: ProgressClaimLineQuantities,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    _perm: None = Depends(RequirePermission("contracts.update")),
+) -> ProgressClaimLineResponse:
+    """Record the assessed and certified quantity of one claim line.
+
+    The assessment is open until the claim is approved and the certificate
+    until it is certified; after that the quantities are what was paid on.
+    The change is audited.
+    """
+    from app.core.audit_log import log_activity
+
+    repo = ProgressClaimLineRepository(session)
+    obj = await repo.get_by_id(line_id)
+    if obj is None:
+        raise HTTPException(status_code=404, detail="Claim line not found")
+    claim = await _verify_claim_access(session, obj.progress_claim_id, user_id)
+    fields = {k: v for k, v in data.model_dump(exclude_unset=True).items() if v is not None}
+    allowed = {"assessed_qty": _QTY_ASSESS_STATUSES, "certified_qty": _QTY_CERTIFY_STATUSES}
+    for name in fields:
+        if claim.status not in allowed[name]:
+            raise HTTPException(
+                status_code=409,
+                detail={
+                    "error": "quantities_locked",
+                    "message": f"The claim is {claim.status!r}; its {name.replace('_', ' ')} can no longer change.",
+                    "claim_status": claim.status,
+                },
+            )
+    if fields:
+        before = {k: str(getattr(obj, k)) for k in fields}
+        await repo.update_fields(line_id, **fields)
+        await session.refresh(obj)
+        await log_activity(
+            session,
+            actor_id=user_id,
+            entity_type="progress_claim_line",
+            entity_id=str(line_id),
+            action="quantities_updated",
+            module="contracts",
+            metadata={k: {"from": before[k], "to": str(v)} for k, v in fields.items()},
+        )
+    return (await _with_valuation_findings([obj], target_id=str(obj.progress_claim_id)))[0]
 
 
 @router.post(

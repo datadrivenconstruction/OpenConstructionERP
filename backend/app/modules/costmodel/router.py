@@ -20,6 +20,7 @@ Endpoints:
     GET    /projects/{project_id}/5d/evm                 - full EVM calculation
     POST   /projects/{project_id}/5d/what-if             - create what-if scenario
     GET    /projects/{project_id}/spine/position-actuals/ - per bill position, money and site record
+    GET    /projects/{project_id}/spine/commitment-grid/ - per bill line: budget, committed, remaining, received
     GET    /projects/{project_id}/cost-control/          - forecast per cost line or contract
     GET    /projects/{project_id}/cost-control/snapshots/ - saved forecasts
     POST   /projects/{project_id}/cost-control/snapshots/ - save today's forecast
@@ -106,6 +107,8 @@ from app.modules.costmodel.schemas import (
     BudgetSummary,
     CashFlowData,
     CashFlowResponse,
+    CommitmentGridResponse,
+    CommitmentGridRow,
     ContractExposureResponse,
     ControlAccountCreate,
     ControlAccountResponse,
@@ -1083,6 +1086,51 @@ async def get_spine_rollup(
     """Return the project-wide Cost Spine rollup (accounts + lines + totals)."""
     await verify_project_access(project_id, user_id, session)
     return await service.rollup_for_project(project_id)
+
+
+@router.get(
+    "/projects/{project_id}/spine/commitment-grid/",
+    response_model=CommitmentGridResponse,
+    dependencies=[Depends(RequirePermission("costmodel.read"))],
+)
+async def get_commitment_grid(
+    project_id: uuid.UUID,
+    user_id: CurrentUserId,
+    session: SessionDep,
+    boq_id: uuid.UUID | None = Query(default=None, description="Narrow to one bill of quantities"),
+) -> CommitmentGridResponse:
+    """Per bill line: budget, committed (orders + subcontracts), remaining and received.
+
+    Findings carry ``procurement.line_over_committed`` per line and
+    ``cvr.target_rate_basis`` once when some lines have no target rate.
+    """
+    from app.core.validation.rules.commercial_control import evaluate
+    from app.modules.costmodel.commitment_grid import build_commitment_grid
+
+    await verify_project_access(project_id, user_id, session)
+    grid = await build_commitment_grid(session, project_id, boq_id=boq_id)
+    rows = [CommitmentGridRow.model_validate(row) for row in grid.rows]
+    findings = await evaluate(
+        {
+            "grid_rows": [
+                {
+                    "id": str(r.boq_position_id),
+                    "ordinal": r.ordinal,
+                    "budget_qty": str(r.budget_qty),
+                    "committed_qty": str(r.committed_qty),
+                    "budget_value": str(r.budget_value),
+                    "committed_value": str(r.committed_value),
+                }
+                for r in grid.rows
+            ],
+            "budget_positions": [
+                {"id": str(r.boq_position_id), "ordinal": r.ordinal, "basis": r.budget_basis} for r in grid.rows
+            ],
+        },
+        target_type="commitment_grid",
+        target_id=str(project_id),
+    )
+    return CommitmentGridResponse(currency=grid.currency, rows=rows, totals=grid.totals, findings=findings)
 
 
 @router.get(

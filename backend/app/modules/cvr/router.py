@@ -68,6 +68,7 @@ from app.modules.cvr.schemas import (
     CvrReportListResponse,
     CvrReportResponse,
     CvrReportUpdate,
+    CvrSpineRefreshResponse,
     CvrSummaryResponse,
     PaymentApplicationCreate,
     PaymentApplicationListResponse,
@@ -296,6 +297,28 @@ async def import_field_labour(
     await verify_project_access(report.project_id, user_id, session)
     line = await service.import_field_labour(report_id)
     resp = CvrLineResponse.model_validate(line)
+    await session.commit()
+    return resp
+
+
+@router.post(
+    "/reports/{report_id}/lines/from-cost-spine/",
+    response_model=CvrSpineRefreshResponse,
+    dependencies=[Depends(RequirePermission("cvr.write"))],
+)
+async def populate_from_spine(
+    report_id: uuid.UUID,
+    user_id: CurrentUserId,
+    session: SessionDep,
+    service: CvrService = Depends(_get_service),
+) -> CvrSpineRefreshResponse:
+    """Fill or refresh the report by WBS from the bill, commitments and actual cost."""
+    report = await service.get_report(report_id)
+    await verify_project_access(report.project_id, user_id, session)
+    result = await service.populate_from_spine(report_id)
+    resp = CvrSpineRefreshResponse(
+        **{**result, "lines": [CvrLineResponse.model_validate(line) for line in result["lines"]]}
+    )
     await session.commit()
     return resp
 

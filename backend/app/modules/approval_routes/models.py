@@ -29,6 +29,7 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime
+from decimal import Decimal
 
 from sqlalchemy import (
     Boolean,
@@ -36,6 +37,7 @@ from sqlalchemy import (
     ForeignKey,
     Index,
     Integer,
+    Numeric,
     String,
     Text,
     UniqueConstraint,
@@ -191,6 +193,11 @@ class Step(Base):
     # author did not declare a quorum.
     required_approver_count: Mapped[int | None] = mapped_column(Integer, nullable=True)
     sla_hours: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    # Amount band in the project currency: the step takes part in routing an
+    # amount when ``amount_min <= amount < amount_max``. Both NULL = every amount.
+    # ``amount_max`` NULL alone = no ceiling ("also signs above 50 000").
+    amount_min: Mapped[Decimal | None] = mapped_column(Numeric(18, 2), nullable=True)
+    amount_max: Mapped[Decimal | None] = mapped_column(Numeric(18, 2), nullable=True)
 
     def __repr__(self) -> str:  # pragma: no cover
         target = self.approver_role or str(self.approver_user_id)
@@ -246,6 +253,12 @@ class Instance(Base):
         ForeignKey("oe_users_user.id", ondelete="SET NULL"),
         nullable=True,
     )
+
+    # The amount the workflow was started for, and its currency, kept for the
+    # audit trail: it decides which banded steps apply. NULL = no amount, every
+    # step applies.
+    amount: Mapped[Decimal | None] = mapped_column(Numeric(18, 2), nullable=True)
+    amount_currency: Mapped[str | None] = mapped_column(String(3), nullable=True)
 
     def __repr__(self) -> str:  # pragma: no cover
         return f"<Instance {self.target_kind}:{self.target_id} step={self.current_step_ordinal} status={self.status}>"

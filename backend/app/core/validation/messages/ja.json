@@ -2244,5 +2244,50 @@
       "fail": "{row} 行目: 先行作業が表の作業ではありません。",
       "suggestion": "先行作業列を確認してください。解決できないリンクはスキップされます。"
     }
+  },
+  "commercial_control": {
+    "ok": "確認済み、問題なし",
+    "cvr": {
+      "target_rate_basis": {
+        "fail": "単価設定済みの {total} 項目のうち {missing} 項目に目標単価がなく、販売単価で予算化されています（例: {sample}）",
+        "suggestion": "予算が現場の目標原価になるよう、これらの項目に目標原価単価を入力してください"
+      },
+      "unmapped_cost": {
+        "fail": "{kind} {label} に WBS もコストコードもありません: 発注済 {committed}、実績 {actual}",
+        "suggestion": "CVR に計上できるよう、発注明細・下請契約・請求書を WBS 要素に紐づけてください"
+      }
+    },
+    "procurement": {
+      "line_over_committed": {
+        "fail": "項目 {ordinal} は予算超過の発注です: {budget_qty} のうち {committed_qty} 発注済、予算 {budget_value} に対し {committed_value}",
+        "suggestion": "さらに発注する前に二重発注を確認するか、変更または予算振替を登録してください"
+      }
+    },
+    "approval_routes": {
+      "bands_contiguous": {
+        "gap": {
+          "fail": "{low} 以上 {high} 未満の金額はどの承認者にも届きません（ステップ {step}）",
+          "suggestion": "隣の範囲を広げるかステップを追加し、すべての金額に承認者がいるようにしてください"
+        },
+        "overlap": {
+          "fail": "ステップ {step} は下位の範囲（{low} 以上 {high} 未満）と重なっており、その金額は両方の承認者が署名します",
+          "suggestion": "両者の署名が必要な場合を除き、各範囲は前の範囲の終わりから始めてください"
+        },
+        "empty": {
+          "fail": "ステップ {step} の範囲 {low}〜{high} にはどの金額も含まれません",
+          "suggestion": "最小値を最大値より小さくするか、上限がない場合は最大値を空欄にしてください"
+        }
+      }
+    },
+    "valuation": {
+      "assessed_within_submitted": {
+        "fail": "明細 {line}: 査定数量 {assessed} が申請数量 {submitted} を超えています",
+        "suggestion": "査定は申請数量までとし、追加工事は変更として登録してください"
+      },
+      "certified_within_assessed": {
+        "fail": "明細 {line}: 認定数量 {certified} が査定数量 {assessed} を超えています",
+        "suggestion": "認定は査定数量までとするか、先に明細を再査定してください"
+      }
+    }
   }
 }

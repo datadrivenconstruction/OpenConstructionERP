@@ -2244,5 +2244,50 @@
       "fail": "Redak {row}: prethodnik nije aktivnost iz tablice.",
       "suggestion": "Provjerite stupac prethodnika; neriješene veze se preskaču."
     }
+  },
+  "commercial_control": {
+    "ok": "Provjereno, bez primjedbi",
+    "cvr": {
+      "target_rate_basis": {
+        "fail": "{missing} od {total} cijenjenih stavki nema ciljanu cijenu i budžetirane su po prodajnoj cijeni (npr. {sample})",
+        "suggestion": "Unesite ciljani trošak na tim stavkama kako bi budžet bio trošak kojem se gradilište drži"
+      },
+      "unmapped_cost": {
+        "fail": "{kind} {label} nema WBS ni šifru troška: ugovoreno {committed}, stvarno {actual}",
+        "suggestion": "Knjižite stavku narudžbe, podugovor ili račun na element WBS-a kako bi ga CVR mogao smjestiti"
+      }
+    },
+    "procurement": {
+      "line_over_committed": {
+        "fail": "Stavka {ordinal} je preugovorena: naručeno {committed_qty} od {budget_qty}, {committed_value} prema budžetu od {budget_value}",
+        "suggestion": "Provjerite dvostruku narudžbu ili evidentirajte izmjenu ili prijenos budžeta prije novih obveza"
+      }
+    },
+    "approval_routes": {
+      "bands_contiguous": {
+        "gap": {
+          "fail": "Iznosi od {low} do {high} ne dolaze ni do jednog odobravatelja (korak {step})",
+          "suggestion": "Proširite susjedni raspon ili dodajte korak kako bi svaki iznos imao odobravatelja"
+        },
+        "overlap": {
+          "fail": "Korak {step} preklapa se s nižim rasponom od {low} do {high}; te iznose potpisuju oba odobravatelja",
+          "suggestion": "Neka svaki raspon počinje gdje prethodni završava, osim ako trebaju potpisati oba"
+        },
+        "empty": {
+          "fail": "Korak {step} ima raspon od {low} do {high} koji ne sadrži nijedan iznos",
+          "suggestion": "Postavite minimum ispod maksimuma ili ostavite maksimum prazan za bez gornje granice"
+        }
+      }
+    },
+    "valuation": {
+      "assessed_within_submitted": {
+        "fail": "Redak {line}: procijenjena količina {assessed} veća je od podnesene {submitted}",
+        "suggestion": "Procjenjujte najviše podneseno, a dodatne radove evidentirajte kao izmjenu"
+      },
+      "certified_within_assessed": {
+        "fail": "Redak {line}: ovjerena količina {certified} veća je od procijenjene {assessed}",
+        "suggestion": "Ovjerite najviše procijenjeno ili najprije ponovno procijenite redak"
+      }
+    }
   }
 }

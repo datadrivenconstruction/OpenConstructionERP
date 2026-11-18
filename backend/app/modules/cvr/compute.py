@@ -58,6 +58,8 @@ def summarise_lines(lines: list[Any]) -> dict[str, Any]:
     total_accruals = Decimal("0")
     total_fcost = Decimal("0")
     total_fvalue = Decimal("0")
+    total_budget = Decimal("0")
+    total_committed = Decimal("0")
     warnings: list[str] = []
 
     for line in lines:
@@ -72,6 +74,8 @@ def summarise_lines(lines: list[Any]) -> dict[str, Any]:
         total_accruals += accruals
         total_fcost += fcost
         total_fvalue += fvalue
+        total_budget += to_decimal(getattr(line, "budget_cost", 0) or 0)
+        total_committed += to_decimal(getattr(line, "committed_cost", 0) or 0)
 
         code = str(getattr(line, "cost_code", "") or "")
         for flag in forecast_flags(
@@ -88,6 +92,8 @@ def summarise_lines(lines: list[Any]) -> dict[str, Any]:
     return {
         "total_cost_to_date": q2(total_cost),
         "total_value_to_date": q2(total_value),
+        "total_budget_cost": q2(total_budget),
+        "total_committed_cost": q2(total_committed),
         "total_accruals": q2(total_accruals),
         "total_forecast_cost": q2(total_fcost),
         "total_forecast_value": q2(total_fvalue),

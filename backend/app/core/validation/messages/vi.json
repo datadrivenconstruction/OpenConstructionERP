@@ -2244,5 +2244,50 @@
       "fail": "Dòng {row}: một công việc trước không thuộc bảng.",
       "suggestion": "Kiểm tra cột công việc trước; các liên kết không xác định sẽ bị bỏ qua."
     }
+  },
+  "commercial_control": {
+    "ok": "Đã kiểm tra, không có vấn đề",
+    "cvr": {
+      "target_rate_basis": {
+        "fail": "{missing} trong {total} hạng mục đã định giá chưa có đơn giá mục tiêu và đang lập ngân sách theo giá bán (ví dụ {sample})",
+        "suggestion": "Nhập đơn giá chi phí mục tiêu cho các hạng mục này để ngân sách là chi phí công trường phải tuân theo"
+      },
+      "unmapped_cost": {
+        "fail": "{kind} {label} không có WBS hay mã chi phí: cam kết {committed}, thực tế {actual}",
+        "suggestion": "Gán dòng đơn hàng, hợp đồng thầu phụ hoặc hóa đơn vào một phần tử WBS để CVR có thể xếp nó"
+      }
+    },
+    "procurement": {
+      "line_over_committed": {
+        "fail": "Hạng mục {ordinal} cam kết vượt: đã đặt {committed_qty} trên {budget_qty}, {committed_value} so với ngân sách {budget_value}",
+        "suggestion": "Kiểm tra đặt hàng trùng, hoặc ghi nhận thay đổi hay điều chuyển ngân sách trước khi cam kết thêm"
+      }
+    },
+    "approval_routes": {
+      "bands_contiguous": {
+        "gap": {
+          "fail": "Các khoản từ {low} đến dưới {high} không đến người phê duyệt nào (bước {step})",
+          "suggestion": "Mở rộng khoảng liền kề hoặc thêm một bước để mỗi khoản đều có người phê duyệt"
+        },
+        "overlap": {
+          "fail": "Bước {step} chồng lấn khoảng thấp hơn từ {low} đến dưới {high}; cả hai người phê duyệt đều ký các khoản đó",
+          "suggestion": "Để mỗi khoản bắt đầu nơi khoản trước kết thúc, trừ khi cả hai cần ký"
+        },
+        "empty": {
+          "fail": "Bước {step} có khoảng từ {low} đến {high} không chứa khoản tiền nào",
+          "suggestion": "Đặt mức tối thiểu dưới mức tối đa, hoặc để trống mức tối đa nếu không có trần"
+        }
+      }
+    },
+    "valuation": {
+      "assessed_within_submitted": {
+        "fail": "Dòng {line}: khối lượng thẩm định {assessed} vượt khối lượng đề nghị {submitted}",
+        "suggestion": "Thẩm định tối đa phần đã đề nghị và ghi công việc thêm thành thay đổi"
+      },
+      "certified_within_assessed": {
+        "fail": "Dòng {line}: khối lượng xác nhận {certified} vượt khối lượng thẩm định {assessed}",
+        "suggestion": "Xác nhận tối đa phần đã thẩm định, hoặc thẩm định lại dòng trước"
+      }
+    }
   }
 }

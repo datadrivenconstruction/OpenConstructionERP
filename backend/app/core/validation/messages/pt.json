@@ -2244,5 +2244,50 @@
       "fail": "Linha {row}: um predecessor não é uma atividade da tabela.",
       "suggestion": "Verifique a coluna de predecessoras; vínculos não resolvidos são ignorados."
     }
+  },
+  "commercial_control": {
+    "ok": "Verificado, sem problemas",
+    "cvr": {
+      "target_rate_basis": {
+        "fail": "{missing} de {total} itens orçados não têm preço-alvo e estão orçados pelo preço de venda (por exemplo {sample})",
+        "suggestion": "Indique o custo-alvo nestes itens para que o orçamento seja o custo exigido à obra"
+      },
+      "unmapped_cost": {
+        "fail": "{kind} {label} não tem EAP nem código de custo: comprometido {committed}, real {actual}",
+        "suggestion": "Atribua a linha de pedido, a subempreitada ou a fatura a um elemento da EAP para que o CVR a possa situar"
+      }
+    },
+    "procurement": {
+      "line_over_committed": {
+        "fail": "O item {ordinal} está sobrecomprometido: {committed_qty} de {budget_qty} encomendados, {committed_value} para um orçamento de {budget_value}",
+        "suggestion": "Verifique se há encomenda duplicada ou registe uma alteração ou transferência de orçamento antes de comprometer mais"
+      }
+    },
+    "approval_routes": {
+      "bands_contiguous": {
+        "gap": {
+          "fail": "Valores de {low} até {high} não chegam a nenhum aprovador (passo {step})",
+          "suggestion": "Alargue uma faixa vizinha ou acrescente um passo para que cada valor tenha aprovador"
+        },
+        "overlap": {
+          "fail": "O passo {step} sobrepõe-se a uma faixa inferior de {low} até {high}; ambos os aprovadores assinam esses valores",
+          "suggestion": "Faça cada faixa começar onde termina a anterior, a menos que ambos devam assinar"
+        },
+        "empty": {
+          "fail": "O passo {step} tem uma faixa de {low} a {high} que não contém nenhum valor",
+          "suggestion": "Ponha o mínimo abaixo do máximo, ou deixe o máximo vazio para não haver teto"
+        }
+      }
+    },
+    "valuation": {
+      "assessed_within_submitted": {
+        "fail": "Linha {line}: a quantidade avaliada {assessed} excede a apresentada {submitted}",
+        "suggestion": "Avalie no máximo o apresentado e registe o trabalho extra como alteração"
+      },
+      "certified_within_assessed": {
+        "fail": "Linha {line}: a quantidade certificada {certified} excede a avaliada {assessed}",
+        "suggestion": "Certifique no máximo o avaliado, ou reavalie primeiro a linha"
+      }
+    }
   }
 }

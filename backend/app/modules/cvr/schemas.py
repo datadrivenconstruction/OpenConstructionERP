@@ -110,6 +110,8 @@ class CvrLineCreate(BaseModel):
     accruals: DecimalMoney = Field(default=Decimal("0"), ge=0)
     forecast_cost: DecimalMoney = Field(default=Decimal("0"), ge=0)
     forecast_value: DecimalMoney = Field(default=Decimal("0"), ge=0)
+    budget_cost: DecimalMoney = Field(default=Decimal("0"), ge=0)
+    committed_cost: DecimalMoney = Field(default=Decimal("0"), ge=0)
     sort_order: int = Field(default=0, ge=0)
     currency: str | None = Field(default=None, max_length=3)
     metadata: dict[str, Any] = Field(default_factory=dict)
@@ -128,6 +130,8 @@ class CvrLineUpdate(BaseModel):
     accruals: DecimalMoney | None = Field(default=None, ge=0)
     forecast_cost: DecimalMoney | None = Field(default=None, ge=0)
     forecast_value: DecimalMoney | None = Field(default=None, ge=0)
+    budget_cost: DecimalMoney | None = Field(default=None, ge=0)
+    committed_cost: DecimalMoney | None = Field(default=None, ge=0)
     sort_order: int | None = Field(default=None, ge=0)
     currency: str | None = Field(default=None, max_length=3)
     metadata: dict[str, Any] | None = None
@@ -148,6 +152,8 @@ class CvrLineResponse(BaseModel):
     accruals: DecimalMoney = Decimal("0")
     forecast_cost: DecimalMoney = Decimal("0")
     forecast_value: DecimalMoney = Decimal("0")
+    budget_cost: DecimalMoney = Decimal("0")
+    committed_cost: DecimalMoney = Decimal("0")
     sort_order: int = 0
     # Derived (computed in model_post_init from the money fields above):
     margin_to_date: DecimalMoney = Decimal("0")
@@ -195,6 +201,8 @@ class CvrSummaryResponse(BaseModel):
     total_accruals: DecimalMoney = Decimal("0")
     total_forecast_cost: DecimalMoney = Decimal("0")
     total_forecast_value: DecimalMoney = Decimal("0")
+    total_budget_cost: DecimalMoney = Decimal("0")
+    total_committed_cost: DecimalMoney = Decimal("0")
     margin_to_date: DecimalMoney = Decimal("0")
     forecast_margin: DecimalMoney = Decimal("0")
     margin_to_date_pct: DecimalMoney = Decimal("0")
@@ -383,3 +391,16 @@ class ProgressClaimOptionListResponse(BaseModel):
 
     items: list[ProgressClaimOption]
     total: int
+
+
+class CvrSpineRefreshResponse(BaseModel):
+    """Result of filling a report from the cost spine."""
+
+    report_id: UUID
+    currency: str = ""
+    created: int = 0
+    updated: int = 0
+    kept_overrides: int = 0
+    lines: list[CvrLineResponse] = Field(default_factory=list)
+    totals: dict[str, DecimalMoney] = Field(default_factory=dict)
+    findings: list[dict[str, Any]] = Field(default_factory=list)

@@ -2244,5 +2244,50 @@
       "fail": "Zeile {row}: Ein Vorgänger ist kein Vorgang der Tabelle.",
       "suggestion": "Prüfen Sie die Vorgängerspalte; nicht auflösbare Verknüpfungen werden übersprungen."
     }
+  },
+  "commercial_control": {
+    "ok": "Geprüft, keine Auffälligkeiten",
+    "cvr": {
+      "target_rate_basis": {
+        "fail": "{missing} von {total} bepreisten Positionen haben keinen Zielpreis und werden zum Verkaufspreis budgetiert (z. B. {sample})",
+        "suggestion": "Tragen Sie für diese Positionen den Zielkostenpreis ein, damit das Budget den Kosten entspricht, an denen die Baustelle gemessen wird"
+      },
+      "unmapped_cost": {
+        "fail": "{kind} {label} hat kein PSP-Element und keine Kostenart: beauftragt {committed}, Ist {actual}",
+        "suggestion": "Ordnen Sie Bestellposition, Nachunternehmervertrag oder Rechnung einem PSP-Element zu, damit die CVR sie zuordnen kann"
+      }
+    },
+    "procurement": {
+      "line_over_committed": {
+        "fail": "Position {ordinal} ist überbeauftragt: {committed_qty} von {budget_qty} bestellt, {committed_value} bei einem Budget von {budget_value}",
+        "suggestion": "Prüfen Sie auf Doppelbestellung oder erfassen Sie einen Nachtrag oder eine Budgetumbuchung, bevor Sie mehr beauftragen"
+      }
+    },
+    "approval_routes": {
+      "bands_contiguous": {
+        "gap": {
+          "fail": "Beträge von {low} bis unter {high} erreichen keinen Genehmiger (Schritt {step})",
+          "suggestion": "Erweitern Sie ein benachbartes Band oder fügen Sie einen Schritt hinzu, damit jeder Betrag einen Genehmiger hat"
+        },
+        "overlap": {
+          "fail": "Schritt {step} überschneidet ein niedrigeres Band von {low} bis unter {high}, diese Beträge zeichnen beide Genehmiger",
+          "suggestion": "Lassen Sie jedes Band dort beginnen, wo das vorige endet, es sei denn, beide sollen zeichnen"
+        },
+        "empty": {
+          "fail": "Schritt {step} hat ein Band von {low} bis {high}, das keinen Betrag enthält",
+          "suggestion": "Setzen Sie das Minimum unter das Maximum oder lassen Sie das Maximum für keine Obergrenze leer"
+        }
+      }
+    },
+    "valuation": {
+      "assessed_within_submitted": {
+        "fail": "Position {line}: geprüfte Menge {assessed} liegt über der eingereichten {submitted}",
+        "suggestion": "Prüfen Sie höchstens die eingereichte Menge und erfassen Sie Mehrleistungen als Nachtrag"
+      },
+      "certified_within_assessed": {
+        "fail": "Position {line}: bescheinigte Menge {certified} liegt über der geprüften {assessed}",
+        "suggestion": "Bescheinigen Sie höchstens die geprüfte Menge oder prüfen Sie die Position erneut"
+      }
+    }
   }
 }

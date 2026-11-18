@@ -2244,5 +2244,50 @@
       "fail": "Række {row}: en forgænger er ikke en aktivitet i tabellen.",
       "suggestion": "Kontrollér forgængerkolonnen; uløste forbindelser springes over."
     }
+  },
+  "commercial_control": {
+    "ok": "Kontrolleret, ingen bemærkninger",
+    "cvr": {
+      "target_rate_basis": {
+        "fail": "{missing} af {total} prissatte poster har ingen målpris og budgetteres til salgspris (for eksempel {sample})",
+        "suggestion": "Angiv målkostprisen på disse poster, så budgettet er den omkostning, byggepladsen holdes op på"
+      },
+      "unmapped_cost": {
+        "fail": "{kind} {label} har ingen WBS eller omkostningskode: forpligtet {committed}, faktisk {actual}",
+        "suggestion": "Kontér ordrelinjen, underentreprisen eller fakturaen på et WBS-element, så CVR kan placere den"
+      }
+    },
+    "procurement": {
+      "line_over_committed": {
+        "fail": "Post {ordinal} er overforpligtet: {committed_qty} af {budget_qty} bestilt, {committed_value} mod et budget på {budget_value}",
+        "suggestion": "Kontrollér for dobbeltbestilling, eller registrér en ændring eller budgetoverførsel, før der forpligtes mere"
+      }
+    },
+    "approval_routes": {
+      "bands_contiguous": {
+        "gap": {
+          "fail": "Beløb fra {low} op til {high} når ingen godkender (trin {step})",
+          "suggestion": "Udvid et nabointerval eller tilføj et trin, så hvert beløb har en godkender"
+        },
+        "overlap": {
+          "fail": "Trin {step} overlapper et lavere interval fra {low} op til {high}; begge godkendere underskriver de beløb",
+          "suggestion": "Lad hvert interval begynde, hvor det forrige slutter, medmindre begge skal underskrive"
+        },
+        "empty": {
+          "fail": "Trin {step} har et interval fra {low} til {high}, som ikke indeholder noget beløb",
+          "suggestion": "Sæt minimum under maksimum, eller lad maksimum stå tomt for intet loft"
+        }
+      }
+    },
+    "valuation": {
+      "assessed_within_submitted": {
+        "fail": "Linje {line}: vurderet mængde {assessed} er over den indsendte {submitted}",
+        "suggestion": "Vurdér højst det indsendte, og registrér ekstraarbejde som en ændring"
+      },
+      "certified_within_assessed": {
+        "fail": "Linje {line}: certificeret mængde {certified} er over den vurderede {assessed}",
+        "suggestion": "Certificér højst det vurderede, eller vurdér linjen igen først"
+      }
+    }
   }
 }

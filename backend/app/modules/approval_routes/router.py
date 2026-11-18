@@ -63,7 +63,7 @@ from app.modules.approval_routes.schemas import (
     StepResponse,
     StepStateResponse,
 )
-from app.modules.approval_routes.service import ApprovalRouteService
+from app.modules.approval_routes.service import ApprovalRouteService, applicable_ordinals
 from app.modules.approval_routes.simulate import simulate_route
 
 router = APIRouter(tags=["approval_routes"])
@@ -102,6 +102,18 @@ async def _route_to_response(
     steps = await service.list_steps(route.id)  # type: ignore[attr-defined]
     payload = RouteResponse.model_validate(route)
     payload.steps = [StepResponse.model_validate(s) for s in steps]
+    if any(s.amount_min is not None or s.amount_max is not None for s in steps):
+        from app.core.validation.rules.commercial_control import evaluate
+
+        payload.band_findings = await evaluate(
+            {
+                "route_steps": [
+                    {"ordinal": s.ordinal, "amount_min": s.amount_min, "amount_max": s.amount_max} for s in steps
+                ]
+            },
+            target_type="approval_route",
+            target_id=str(route.id),  # type: ignore[attr-defined]
+        )
     return payload
 
 
@@ -112,6 +124,9 @@ async def _instance_to_response(
     states = await service.list_step_states(instance.id)  # type: ignore[attr-defined]
     payload = InstanceResponse.model_validate(instance)
     payload.step_states = [StepStateResponse.model_validate(s) for s in states]
+    steps = await service.list_steps(instance.route_id)  # type: ignore[attr-defined]
+    applicable = set(applicable_ordinals(steps, instance.amount))  # type: ignore[attr-defined]
+    payload.skipped_step_ordinals = sorted(s.ordinal for s in steps if s.ordinal not in applicable)
     return payload
 
 

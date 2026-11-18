@@ -12945,6 +12945,7 @@ def register_builtin_rules() -> None:
     # locale, position and currency helpers from this package, so a top-level
     # import would run before those names exist.
     from app.core.validation.rules.broker_licence import BROKER_LICENCE_RULES
+    from app.core.validation.rules.commercial_control import COMMERCIAL_CONTROL_RULES
     from app.core.validation.rules.field_clock import FIELD_CLOCK_RULES
     from app.core.validation.rules.field_productivity import PRODUCTIVITY_RULES
     from app.core.validation.rules.italy_prezzario import ITALY_PREZZARIO_RULES
@@ -13129,6 +13130,9 @@ def register_builtin_rules() -> None:
         (OfflineSyncMergeComplete(), ["offline_sync"]),
         (FieldCaptureOpFresh(), ["field_diary_capture"]),
         *((rule, None) for rule in FIELD_CLOCK_RULES),
+        # Commercial control: budget at target cost, commitments per bill line,
+        # CVR by WBS, approval amount bands, valuation quantity stages.
+        *((rule, ["commercial_control"]) for rule in COMMERCIAL_CONTROL_RULES),
         *((rule, None) for rule in PRODUCTIVITY_RULES),
         # Estimate Audit (curated cross-checks: wrong unit, near-duplicate,
         # missing companion, catalogue-benchmarked rate outlier)

@@ -2244,5 +2244,50 @@
       "fail": "Řádek {row}: předchůdce není činností tabulky.",
       "suggestion": "Zkontrolujte sloupec předchůdců; nevyřešené vazby se přeskočí."
     }
+  },
+  "commercial_control": {
+    "ok": "Zkontrolováno, bez nálezů",
+    "cvr": {
+      "target_rate_basis": {
+        "fail": "{missing} z {total} oceněných položek nemá cílovou cenu a je rozpočtováno prodejní cenou (např. {sample})",
+        "suggestion": "Zadejte u těchto položek cílovou nákladovou cenu, aby rozpočet odpovídal nákladům, ze kterých se stavba hodnotí"
+      },
+      "unmapped_cost": {
+        "fail": "{kind} {label} nemá WBS ani nákladový kód: zavázáno {committed}, skutečnost {actual}",
+        "suggestion": "Přiřaďte řádek objednávky, subdodávku nebo fakturu k prvku WBS, aby ji CVR mohl zařadit"
+      }
+    },
+    "procurement": {
+      "line_over_committed": {
+        "fail": "Položka {ordinal} je přezávazkovaná: objednáno {committed_qty} z {budget_qty}, {committed_value} při rozpočtu {budget_value}",
+        "suggestion": "Zkontrolujte dvojí objednávku nebo zadejte změnu či přesun rozpočtu, než zavážete víc"
+      }
+    },
+    "approval_routes": {
+      "bands_contiguous": {
+        "gap": {
+          "fail": "Částky od {low} do {high} nedojdou k žádnému schvalovateli (krok {step})",
+          "suggestion": "Rozšiřte sousední pásmo nebo přidejte krok, aby každá částka měla schvalovatele"
+        },
+        "overlap": {
+          "fail": "Krok {step} se překrývá s nižším pásmem od {low} do {high}; tyto částky podepisují oba schvalovatelé",
+          "suggestion": "Ať každé pásmo začíná tam, kde předchozí končí, pokud nemají podepsat oba"
+        },
+        "empty": {
+          "fail": "Krok {step} má pásmo od {low} do {high}, které neobsahuje žádnou částku",
+          "suggestion": "Nastavte minimum pod maximum, nebo nechte maximum prázdné bez stropu"
+        }
+      }
+    },
+    "valuation": {
+      "assessed_within_submitted": {
+        "fail": "Řádek {line}: posouzené množství {assessed} je vyšší než předložené {submitted}",
+        "suggestion": "Posuzujte nejvýše předložené množství, vícepráce evidujte jako změnu"
+      },
+      "certified_within_assessed": {
+        "fail": "Řádek {line}: certifikované množství {certified} je vyšší než posouzené {assessed}",
+        "suggestion": "Certifikujte nejvýše posouzené množství, nebo řádek nejprve znovu posuďte"
+      }
+    }
   }
 }

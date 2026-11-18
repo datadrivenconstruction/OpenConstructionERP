@@ -2244,5 +2244,50 @@
       "fail": "{row}. sor: egy előd nem a táblázat tevékenysége.",
       "suggestion": "Ellenőrizze az elődök oszlopát; a fel nem oldható kapcsolatok kimaradnak."
     }
+  },
+  "commercial_control": {
+    "ok": "Ellenőrizve, nincs észrevétel",
+    "cvr": {
+      "target_rate_basis": {
+        "fail": "{total} beárazott tételből {missing} nem rendelkezik célárral, ezért eladási áron kerül a költségvetésbe (pl. {sample})",
+        "suggestion": "Adja meg ezeknél a tételeknél a célköltséget, hogy a költségvetés az építkezésen elvárt költség legyen"
+      },
+      "unmapped_cost": {
+        "fail": "{kind} {label}: nincs WBS-elem és költségkód, lekötött {committed}, tényleges {actual}",
+        "suggestion": "Rendelje a megrendelési sort, alvállalkozást vagy számlát egy WBS-elemhez, hogy a CVR el tudja helyezni"
+      }
+    },
+    "procurement": {
+      "line_over_committed": {
+        "fail": "A(z) {ordinal} tétel túl van kötve: {budget_qty}-ból {committed_qty} megrendelve, {committed_value} a(z) {budget_value} költségvetéssel szemben",
+        "suggestion": "Ellenőrizze a dupla rendelést, vagy rögzítsen módosítást vagy költségvetés-átcsoportosítást, mielőtt többet köt le"
+      }
+    },
+    "approval_routes": {
+      "bands_contiguous": {
+        "gap": {
+          "fail": "A(z) {low} és {high} közötti összegek egyetlen jóváhagyóhoz sem jutnak el ({step}. lépés)",
+          "suggestion": "Bővítsen egy szomszédos sávot, vagy adjon hozzá lépést, hogy minden összegnek legyen jóváhagyója"
+        },
+        "overlap": {
+          "fail": "A(z) {step}. lépés átfed egy alacsonyabb sávval {low} és {high} között; ezeket az összegeket mindkét jóváhagyó aláírja",
+          "suggestion": "Minden sáv ott kezdődjön, ahol az előző véget ér, hacsak nem kell mindkettőnek aláírnia"
+        },
+        "empty": {
+          "fail": "A(z) {step}. lépés sávja {low} és {high} között egyetlen összeget sem tartalmaz",
+          "suggestion": "A minimum legyen a maximum alatt, vagy hagyja üresen a maximumot, ha nincs felső határ"
+        }
+      }
+    },
+    "valuation": {
+      "assessed_within_submitted": {
+        "fail": "{line} sor: az értékelt mennyiség ({assessed}) meghaladja a benyújtottat ({submitted})",
+        "suggestion": "Legfeljebb a benyújtott mennyiséget értékelje, a többletmunkát módosításként rögzítse"
+      },
+      "certified_within_assessed": {
+        "fail": "{line} sor: az igazolt mennyiség ({certified}) meghaladja az értékeltet ({assessed})",
+        "suggestion": "Legfeljebb az értékelt mennyiséget igazolja, vagy előbb értékelje újra a sort"
+      }
+    }
   }
 }

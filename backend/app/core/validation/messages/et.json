@@ -2244,5 +2244,50 @@
       "fail": "Rida {row}: eelnev tegevus ei ole tabeli tegevus.",
       "suggestion": "Kontrollige eelnevate veergu; lahendamata seosed jäetakse vahele."
     }
+  },
+  "commercial_control": {
+    "ok": "Kontrollitud, märkusi pole",
+    "cvr": {
+      "target_rate_basis": {
+        "fail": "{missing} {total}-st hinnatud positsioonist ei ole sihthinda ja need on eelarvestatud müügihinnaga (nt {sample})",
+        "suggestion": "Sisestage nendele positsioonidele sihtkulu, et eelarve oleks kulu, mille järgi objekti hinnatakse"
+      },
+      "unmapped_cost": {
+        "fail": "{kind} {label}: puudub WBS ja kulukood, kohustus {committed}, tegelik {actual}",
+        "suggestion": "Siduge tellimuse rida, alltöövõtt või arve WBS-elemendiga, et CVR saaks selle paigutada"
+      }
+    },
+    "procurement": {
+      "line_over_committed": {
+        "fail": "Positsioon {ordinal} on ülekohustatud: tellitud {committed_qty} / {budget_qty}, {committed_value} eelarve {budget_value} vastu",
+        "suggestion": "Kontrollige topelttellimust või registreerige muudatus või eelarve ümberpaigutus enne uute kohustuste võtmist"
+      }
+    },
+    "approval_routes": {
+      "bands_contiguous": {
+        "gap": {
+          "fail": "Summad {low} kuni {high} ei jõua ühegi kinnitajani (samm {step})",
+          "suggestion": "Laiendage naabervahemikku või lisage samm, et igal summal oleks kinnitaja"
+        },
+        "overlap": {
+          "fail": "Samm {step} kattub madalama vahemikuga {low} kuni {high}; neid summasid allkirjastavad mõlemad kinnitajad",
+          "suggestion": "Alustage iga vahemikku sealt, kus eelmine lõpeb, kui just mõlemad ei pea allkirjastama"
+        },
+        "empty": {
+          "fail": "Sammul {step} on vahemik {low} kuni {high}, kuhu ei mahu ühtki summat",
+          "suggestion": "Seadke miinimum alla maksimumi või jätke maksimum tühjaks, kui ülempiiri pole"
+        }
+      }
+    },
+    "valuation": {
+      "assessed_within_submitted": {
+        "fail": "Rida {line}: hinnatud kogus {assessed} ületab esitatud {submitted}",
+        "suggestion": "Hinnake kõige rohkem esitatut ja registreerige lisatööd muudatusena"
+      },
+      "certified_within_assessed": {
+        "fail": "Rida {line}: sertifitseeritud kogus {certified} ületab hinnatud {assessed}",
+        "suggestion": "Sertifitseerige kõige rohkem hinnatut või hinnake rida esmalt uuesti"
+      }
+    }
   }
 }
