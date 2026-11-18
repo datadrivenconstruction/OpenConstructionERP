@@ -250,6 +250,8 @@ const resource = {
     "procurement.requisitions.over_allocation_reason": "Reason if this goes over the BOQ quantity (optional)",
     "procurement.po_document": "Purchase order",
     "procurement.gr_document": "Goods receipt",
+    "procurement.delivery_address": "Delivery address",
+    "procurement.delivery_address_placeholder": "Site address, gate, contact on site",
     "resourceSummary.buyList.col.covered": "On requisitions",
     "resourceSummary.buyList.col.remaining": "Remaining",
     "resourceSummary.requisition.use_remaining": "Request only what is not yet on a submitted requisition. Untick to request the whole BOQ quantity.",
@@ -1370,6 +1372,12 @@ const resource = {
     "doc_layout.tab_layout": "Layout",
     "doc_layout.tab_branding": "Branding",
     "doc_layout.tab_history": "History",
+    "doc_layout.legal_notes": "Legal notes",
+    "doc_layout.legal_note_title": "Legal note ({{country}})",
+    "doc_layout.legal_note_when": "printed when it applies",
+    "doc_layout.variant_create": "Create",
+    "doc_layout.delete_variant_confirm": "Delete this variant and its versions? Documents already issued keep their record.",
+    "doc_layout.record_missing": "{{field}} is missing on this record ({{source}})",
   }
 } as { translation: Record<string, string> };
 

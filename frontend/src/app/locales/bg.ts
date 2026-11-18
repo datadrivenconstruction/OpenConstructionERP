@@ -60126,6 +60126,8 @@ const resource = {
     "procurement.item_requires_inspection": "Входящ контрол",
     "procurement.po_document": "Поръчка за покупка",
     "procurement.gr_document": "Приемане на стока",
+    "procurement.delivery_address": "Адрес за доставка",
+    "procurement.delivery_address_placeholder": "Адрес на обекта, вход, лице за контакт на обекта",
     "portal.deliveries.submitted": "Доставката е изпратена на обекта за потвърждение",
     "portal.deliveries.no_orders": "Няма поръчки, споделени с вас",
     "portal.deliveries.no_orders_desc": "Когато купувач сподели поръчка с вас, можете да обявявате доставките по нея тук.",
@@ -65409,6 +65411,12 @@ const resource = {
     "doc_layout.tab_layout": "Шаблон",
     "doc_layout.tab_branding": "Визуална идентичност",
     "doc_layout.tab_history": "История",
+    "doc_layout.legal_notes": "Правни бележки",
+    "doc_layout.legal_note_title": "Правна бележка ({{country}})",
+    "doc_layout.legal_note_when": "отпечатва се, когато е приложимо",
+    "doc_layout.variant_create": "Създаване",
+    "doc_layout.delete_variant_confirm": "Да се изтрие ли този вариант и версиите му? Вече издадените документи запазват записа си.",
+    "doc_layout.record_missing": "{{field}} липсва в този запис ({{source}})",
   }
 } as { translation: Record<string, string> };
 

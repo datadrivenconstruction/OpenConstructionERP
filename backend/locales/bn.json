@@ -1592,7 +1592,8 @@
         "no_rejections": "কিছুই প্রত্যাখ্যাত হয়নি।",
         "sig_delivered_by": "সরবরাহকারী",
         "counterparty_tax_id": "করদাতা শনাক্তকরণ নম্বর",
-        "counterparty_address": "ঠিকানা"
+        "counterparty_address": "ঠিকানা",
+        "delivery_address": "ডেলিভারির ঠিকানা"
       },
       "labels": {
         "po_status": {

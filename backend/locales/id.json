@@ -1644,7 +1644,8 @@
         "no_rejections": "Tidak ada barang yang ditolak.",
         "sig_delivered_by": "Dikirim oleh",
         "counterparty_tax_id": "NPWP",
-        "counterparty_address": "Alamat"
+        "counterparty_address": "Alamat",
+        "delivery_address": "Alamat pengiriman"
       },
       "labels": {
         "po_status": {

@@ -60122,6 +60122,8 @@ const resource = {
     "procurement.item_requires_inspection": "Innkommende kontroll",
     "procurement.po_document": "Innkjøpsordre",
     "procurement.gr_document": "Varemottak",
+    "procurement.delivery_address": "Leveringsadresse",
+    "procurement.delivery_address_placeholder": "Byggeplassens adresse, port, kontaktperson på stedet",
     "portal.deliveries.submitted": "Leveransen er sendt til byggeplassen for bekreftelse",
     "portal.deliveries.no_orders": "Ingen innkjøpsordrer er delt med deg",
     "portal.deliveries.no_orders_desc": "Når en innkjøper deler en innkjøpsordre med deg, kan du melde leveransene fra den her.",
@@ -65405,6 +65407,12 @@ const resource = {
     "doc_layout.tab_layout": "Oppsett",
     "doc_layout.tab_branding": "Visuell identitet",
     "doc_layout.tab_history": "Historikk",
+    "doc_layout.legal_notes": "Juridiske merknader",
+    "doc_layout.legal_note_title": "Juridisk merknad ({{country}})",
+    "doc_layout.legal_note_when": "skrives ut når den gjelder",
+    "doc_layout.variant_create": "Opprett",
+    "doc_layout.delete_variant_confirm": "Slette denne varianten og versjonene? Dokumenter som allerede er utstedt, beholder registreringen sin.",
+    "doc_layout.record_missing": "{{field}} mangler på denne posten ({{source}})",
   }
 } as { translation: Record<string, string> };
 

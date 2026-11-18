@@ -59877,6 +59877,8 @@ const resource = {
     "procurement.item_requires_inspection": "Inspeksi barang masuk",
     "procurement.po_document": "Pesanan pembelian",
     "procurement.gr_document": "Tanda terima barang",
+    "procurement.delivery_address": "Alamat pengiriman",
+    "procurement.delivery_address_placeholder": "Alamat proyek, gerbang, kontak di lokasi",
     "portal.deliveries.submitted": "Pengiriman dikirim ke lapangan untuk konfirmasi",
     "portal.deliveries.no_orders": "Belum ada pesanan pembelian yang dibagikan kepada Anda",
     "portal.deliveries.no_orders_desc": "Saat pembeli membagikan pesanan pembelian kepada Anda, Anda dapat mengumumkan pengirimannya di sini.",
@@ -65139,6 +65141,12 @@ const resource = {
     "doc_layout.tab_layout": "Tata letak",
     "doc_layout.tab_branding": "Identitas visual",
     "doc_layout.tab_history": "Riwayat",
+    "doc_layout.legal_notes": "Catatan hukum",
+    "doc_layout.legal_note_title": "Catatan hukum ({{country}})",
+    "doc_layout.legal_note_when": "dicetak bila berlaku",
+    "doc_layout.variant_create": "Buat",
+    "doc_layout.delete_variant_confirm": "Hapus varian ini beserta versinya? Dokumen yang sudah diterbitkan tetap menyimpan catatannya.",
+    "doc_layout.record_missing": "{{field}} belum ada pada catatan ini ({{source}})",
   }
 } as { translation: Record<string, string> };
 

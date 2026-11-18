@@ -1644,7 +1644,8 @@
         "no_rejections": "不合格はありません。",
         "sig_delivered_by": "納入者",
         "counterparty_tax_id": "税務番号",
-        "counterparty_address": "住所"
+        "counterparty_address": "住所",
+        "delivery_address": "納入先住所"
       },
       "labels": {
         "po_status": {

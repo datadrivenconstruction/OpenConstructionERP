@@ -63032,6 +63032,8 @@ const resource = {
     "procurement.item_requires_inspection": "Contrôle à réception",
     "procurement.po_document": "Bon de commande",
     "procurement.gr_document": "Bon de réception",
+    "procurement.delivery_address": "Adresse de livraison",
+    "procurement.delivery_address_placeholder": "Adresse du chantier, accès, contact sur place",
     "portal.deliveries.submitted": "Livraison envoyée au chantier pour confirmation",
     "portal.deliveries.no_orders": "Aucune commande partagée avec vous",
     "portal.deliveries.no_orders_desc": "Lorsqu'un acheteur partage une commande avec vous, vous pouvez annoncer ici ses livraisons.",
@@ -68348,6 +68350,12 @@ const resource = {
     "doc_layout.tab_layout": "Mise en page",
     "doc_layout.tab_branding": "Identité visuelle",
     "doc_layout.tab_history": "Historique",
+    "doc_layout.legal_notes": "Mentions légales",
+    "doc_layout.legal_note_title": "Mention légale ({{country}})",
+    "doc_layout.legal_note_when": "imprimée lorsqu’elle s’applique",
+    "doc_layout.variant_create": "Créer",
+    "doc_layout.delete_variant_confirm": "Supprimer cette variante et ses versions ? Les documents déjà émis conservent leur trace.",
+    "doc_layout.record_missing": "{{field}} manque sur cet enregistrement ({{source}})",
   }
 } as { translation: Record<string, string> };
 

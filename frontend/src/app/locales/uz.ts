@@ -61054,6 +61054,8 @@ const resource = {
     "procurement.item_requires_inspection": "Kirish nazorati",
     "procurement.po_document": "Xarid buyurtmasi",
     "procurement.gr_document": "Mahsulot qabul qilish hujjati",
+    "procurement.delivery_address": "Yetkazib berish manzili",
+    "procurement.delivery_address_placeholder": "Obyekt manzili, darvoza, obyektdagi aloqa shaxsi",
     "portal.deliveries.submitted": "Yetkazib berish tasdiqlash uchun obyektga yuborildi",
     "portal.deliveries.no_orders": "Siz bilan ulashilgan xarid buyurtmalari yo‘q",
     "portal.deliveries.no_orders_desc": "Xaridor siz bilan xarid buyurtmasini ulashganda, bu yerda uning yetkazib berishlarini e’lon qilishingiz mumkin.",
@@ -66337,6 +66339,11 @@ const resource = {
     "doc_layout.tab_layout": "Maket",
     "doc_layout.tab_branding": "Vizual identifikatsiya",
     "doc_layout.tab_history": "Tarix",
+    "doc_layout.legal_notes": "Huquqiy izohlar",
+    "doc_layout.legal_note_title": "Huquqiy izoh ({{country}})",
+    "doc_layout.legal_note_when": "tegishli boʻlganda chop etiladi",
+    "doc_layout.variant_create": "Yaratish",
+    "doc_layout.delete_variant_confirm": "Ushbu variant va uning versiyalari oʻchirilsinmi? Avval chiqarilgan hujjatlarning yozuvi saqlanib qoladi.",
   }
 } as { translation: Record<string, string> };
 

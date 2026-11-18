@@ -1644,7 +1644,8 @@
         "no_rejections": "Midagi ei lükatud tagasi.",
         "sig_delivered_by": "Tarnija esindaja",
         "counterparty_tax_id": "KMKR",
-        "counterparty_address": "Aadress"
+        "counterparty_address": "Aadress",
+        "delivery_address": "Tarneaadress"
       },
       "labels": {
         "po_status": {

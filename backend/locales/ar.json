@@ -788,7 +788,8 @@
         "no_rejections": "لم يُرفض أي شيء.",
         "sig_delivered_by": "سلّمه",
         "counterparty_tax_id": "الرقم الضريبي",
-        "counterparty_address": "العنوان"
+        "counterparty_address": "العنوان",
+        "delivery_address": "عنوان التسليم"
       },
       "labels": {
         "po_status": {

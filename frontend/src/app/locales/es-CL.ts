@@ -42920,6 +42920,8 @@ const resource = {
     "procurement.po_invoiced_over": "Facturado por encima del valor de la orden",
     "procurement.po_document": "Orden de compra",
     "procurement.gr_document": "Recepción de mercancía",
+    "procurement.delivery_address": "Dirección de entrega",
+    "procurement.delivery_address_placeholder": "Dirección de la obra, acceso, contacto en obra",
     "contracts.insights.title": "Información de contratos",
     "contracts.insights.ds_contracts": "Registro de contratos",
     "contracts.insights.f_title": "Contrato",
@@ -60188,6 +60190,12 @@ const resource = {
     "doc_layout.tab_layout": "Diseño",
     "doc_layout.tab_branding": "Identidad visual",
     "doc_layout.tab_history": "Historial",
+    "doc_layout.legal_notes": "Notas legales",
+    "doc_layout.legal_note_title": "Nota legal ({{country}})",
+    "doc_layout.legal_note_when": "se imprime cuando corresponde",
+    "doc_layout.variant_create": "Crear",
+    "doc_layout.delete_variant_confirm": "¿Eliminar esta variante y sus versiones? Los documentos ya emitidos conservan su registro.",
+    "doc_layout.record_missing": "Falta {{field}} en este registro ({{source}})",
     // --- /Draft lender preparation ---
   }
 } as { translation: Record<string, string> };

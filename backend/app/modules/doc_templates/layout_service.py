@@ -51,6 +51,7 @@ EXPORT_FORMAT = "openconstructionerp.doc-layout"
 __all__ = [
     "EXPORT_FORMAT",
     "Resolved",
+    "data_issues",
     "diff_templates",
     "issue_document",
     "layout_visible",
@@ -170,8 +171,19 @@ def describe(spec: LayoutSpec, locale: str, countries: Sequence[str]) -> dict[st
             for s in spec.sections
         ],
         "locks": locks_for(spec, countries).as_dict(),
+        "legal": _legal_for_editor(spec, countries, locale),
         "standard": normalise(spec.standard(_legacy_sections(spec))),
     }
+
+
+def _legal_for_editor(spec: LayoutSpec, countries: Sequence[str], locale: str) -> list[dict[str, str]]:
+    from app.core.doc_templates.legal import legal_blocks_for_editor
+
+    try:
+        return legal_blocks_for_editor(spec.key, countries, locale)
+    except Exception:  # noqa: BLE001 - an unreadable pack file never hides the editor
+        logger.debug("doc_templates: legal blocks unreadable", exc_info=True)
+        return []
 
 
 def _legacy_sections(spec: LayoutSpec) -> Mapping[str, bool] | None:
@@ -643,9 +655,49 @@ def render(
     *,
     standard: Mapping[str, Any] | None = None,
     clauses: Mapping[str, Mapping[str, Any]] | None = None,
+    legal: Sequence[Any] = (),
 ) -> Any:
-    """The record form *template* (or the standard one) prints for *ctx*."""
-    return compile_layout(template or standard or standard_template(spec), spec, ctx, clauses=clauses)
+    """The record form *template* (or the standard one) prints for *ctx*, pack notes in the legal zone."""
+    return compile_layout(template or standard or standard_template(spec), spec, ctx, clauses=clauses, legal=legal)
+
+
+def _facts(ctx: LayoutContext) -> dict[str, Any]:
+    """Display values with the empty ones blank, so a printed dash never counts as data."""
+    facts: dict[str, Any] = dict(ctx.values)
+    for path, value in ctx.raw.items():
+        if value is None or value is False:
+            facts[path] = ""
+        elif path not in facts or value is True:
+            facts[path] = value
+    return facts
+
+
+def data_issues(spec: LayoutSpec, ctx: LayoutContext, countries: Sequence[str]) -> tuple[list[Any], list[Issue]]:
+    """Legal notes the packs print on this record, and the data it lacks.
+
+    Data a pack requires and the record lacks (``doctpl.legal_data_missing``, error)
+    blocks issuing. Data the platform standard asks for is a warning, so a record
+    saved before the field existed still prints.
+    """
+    from app.core.doc_templates.legal import legal_notes
+    from app.core.doc_templates.rules import check_mandatory
+
+    facts = _facts(ctx)
+    standard = [Issue(i.rule_id, "warning", i.block, i.params) for i in check_mandatory(spec, facts)]  # type: ignore[arg-type]
+    try:
+        notes, legal = legal_notes(spec.key, countries, facts, ctx.locale)
+    except Exception:  # noqa: BLE001 - an unreadable pack file costs its notes, not the document
+        logger.warning("doc_templates: legal notes unreadable for %s", spec.key, exc_info=True)
+        notes, legal = [], []
+    return notes, [*legal, *standard]
+
+
+def _refuse_issue(issues: list[Issue]) -> None:
+    if has_errors(issues):
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail={"message": "Mandatory document data is missing", "issues": [i.as_dict() for i in issues]},
+        )
 
 
 async def issue_document(
@@ -659,12 +711,19 @@ async def issue_document(
     user_id: str | None,
     variant: str | None = None,
     version_id: uuid.UUID | None = None,
+    countries: Sequence[str] = (),
 ) -> Any:
-    """The record form to print, from the published layout in force, with an issue log row."""
+    """The record form to print, from the published layout in force, with an issue log row.
+
+    The country packs' legal notes print in the legal zone of every layout, standard
+    or custom; data a pack requires and the record lacks refuses the document (422).
+    """
+    notes, problems = data_issues(spec, ctx, countries)
+    _refuse_issue(problems)
     resolved = await published_layout(session, spec.key, project_id=project_id, variant=variant, version_id=version_id)
     template = resolved.template if resolved is not None else None
     clauses = await clause_map(session) if template is not None else {}
-    document = render(spec, template, ctx, standard=standard, clauses=clauses)
+    document = render(spec, template, ctx, standard=standard, clauses=clauses, legal=notes)
     try:
         session.add(
             DocTemplateIssue(
@@ -682,6 +741,7 @@ async def issue_document(
     except Exception:  # noqa: BLE001 - a document never fails on its issue log
         logger.debug("doc_templates: layout issue log failed", exc_info=True)
     return document
+
 
 
 async def preview_context(
@@ -707,14 +767,16 @@ async def preview_pdf(
     locale: str,
     record_id: str | None,
     project_ids: set[Any] | None,
+    countries: Sequence[str] = (),
 ) -> bytes:
-    """PDF of an unsaved template on a real record or the sample."""
+    """PDF of an unsaved template on a real record or the sample, with the packs' legal notes."""
     import asyncio
 
     from app.core.register_export import build_record_pdf
 
     ctx = await preview_context(session, spec, locale, record_id, project_ids)
-    document = render(spec, normalise(template), ctx, clauses=await clause_map(session))
+    notes, _problems = data_issues(spec, ctx, countries)
+    document = render(spec, normalise(template), ctx, clauses=await clause_map(session), legal=notes)
     return await asyncio.to_thread(build_record_pdf, document)
 
 

@@ -764,7 +764,8 @@
         "no_rejections": "Nichts beanstandet.",
         "sig_delivered_by": "Übergeben von",
         "counterparty_tax_id": "Steuer-Nr. / USt-IdNr.",
-        "counterparty_address": "Anschrift"
+        "counterparty_address": "Anschrift",
+        "delivery_address": "Lieferadresse"
       },
       "labels": {
         "po_status": {

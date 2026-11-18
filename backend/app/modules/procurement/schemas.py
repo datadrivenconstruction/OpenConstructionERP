@@ -156,6 +156,7 @@ class POCreate(BaseModel):
     tax_rate_pct: str | None = Field(default=None, max_length=20)
     status: str = Field(default="draft", max_length=50)
     payment_terms: str | None = Field(default=None, max_length=100)
+    delivery_address: str | None = Field(default=None, max_length=500)
     notes: str | None = Field(default=None, max_length=5000)
     items: list[POItemCreate] = Field(default_factory=list)
     metadata: dict[str, Any] = Field(default_factory=dict)
@@ -224,6 +225,7 @@ class POUpdate(BaseModel):
     tax_rate_pct: str | None = Field(default=None, max_length=20)
     status: str | None = Field(default=None, max_length=50)
     payment_terms: str | None = Field(default=None, max_length=100)
+    delivery_address: str | None = Field(default=None, max_length=500)
     notes: str | None = Field(default=None, max_length=5000)
     items: list[POItemCreate] | None = None
     metadata: dict[str, Any] | None = None
@@ -382,6 +384,7 @@ class POResponse(BaseModel):
     invoice_tolerance_pct: str | None = None
     invoice_tolerance_abs: str | None = None
     payment_terms: str | None = None
+    delivery_address: str | None = None
     notes: str | None = None
     created_by: UUID | None = None
     metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="metadata_")

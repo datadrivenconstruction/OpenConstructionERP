@@ -1660,7 +1660,8 @@
         "no_rejections": "Эч нерсе четке кагылган жок.",
         "sig_delivered_by": "Жеткирген",
         "counterparty_tax_id": "Салык ID",
-        "counterparty_address": "Дареги"
+        "counterparty_address": "Дареги",
+        "delivery_address": "Жеткирүү дареги"
       },
       "labels": {
         "po_status": {

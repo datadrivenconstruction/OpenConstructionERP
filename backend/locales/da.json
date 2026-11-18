@@ -1644,7 +1644,8 @@
         "no_rejections": "Intet blev afvist.",
         "sig_delivered_by": "Leveret af",
         "counterparty_tax_id": "CVR-/momsnr.",
-        "counterparty_address": "Adresse"
+        "counterparty_address": "Adresse",
+        "delivery_address": "Leveringsadresse"
       },
       "labels": {
         "po_status": {

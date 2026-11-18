@@ -62687,6 +62687,8 @@ const resource = {
     "procurement.item_requires_inspection": "Beérkezési ellenőrzés",
     "procurement.po_document": "Beszerzési megrendelés",
     "procurement.gr_document": "Áruátvételi bizonylat",
+    "procurement.delivery_address": "Szállítási cím",
+    "procurement.delivery_address_placeholder": "Építési terület címe, kapu, helyszíni kapcsolattartó",
     "portal.deliveries.submitted": "A szállítás a helyszínre került megerősítésre",
     "portal.deliveries.no_orders": "Nincs Önnel megosztott beszerzési megrendelés",
     "portal.deliveries.no_orders_desc": "Amikor a vevő megoszt Önnel egy beszerzési megrendelést, itt jelentheti be annak szállításait.",
@@ -67970,6 +67972,12 @@ const resource = {
     "doc_layout.tab_layout": "Sablon",
     "doc_layout.tab_branding": "Vizuális arculat",
     "doc_layout.tab_history": "Előzmények",
+    "doc_layout.legal_notes": "Jogi megjegyzések",
+    "doc_layout.legal_note_title": "Jogi megjegyzés ({{country}})",
+    "doc_layout.legal_note_when": "akkor nyomtatódik, ha vonatkozik",
+    "doc_layout.variant_create": "Létrehozás",
+    "doc_layout.delete_variant_confirm": "Törli ezt a változatot és a verzióit? A már kiadott dokumentumok nyilvántartása megmarad.",
+    "doc_layout.record_missing": "Ebből a rekordból hiányzik: {{field}} ({{source}})",
   }
 } as { translation: Record<string, string> };
 

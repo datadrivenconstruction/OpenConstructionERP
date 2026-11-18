@@ -96,9 +96,10 @@ def purchase_order_standard(sections: Mapping[str, bool] | None = None) -> dict[
                     "doc.po_type",
                     "doc.issue_date",
                     "doc.delivery_date",
+                    "doc.delivery_address",
                     "doc.total",
                     "doc.created_by",
-                    omit=("supplier.tax_id", "supplier.address"),
+                    omit=("supplier.tax_id", "supplier.address", "doc.delivery_address"),
                 ),
             },
             {
@@ -149,6 +150,7 @@ _PO_FIELDS = (
     MergeField("doc.po_type", "text", "Standard", "document"),
     MergeField("doc.issue_date", "date", "01.09.2026", "document"),
     MergeField("doc.delivery_date", "date", "15.09.2026", "document"),
+    MergeField("doc.delivery_address", "text", "Riverside Block B, gate 2, 10115 Berlin", "document"),
     MergeField("doc.currency", "text", "EUR", "document"),
     MergeField("doc.subtotal", "money", "40.588,24 €", "document"),
     MergeField("doc.tax", "money", "7.711,76 €", "document"),
@@ -202,6 +204,7 @@ def _sample_po() -> SimpleNamespace:
         invoice_tolerance_pct="2",
         invoice_tolerance_abs=None,
         payment_terms="30 days net",
+        delivery_address="Riverside Block B, gate 2, 10115 Berlin",
         notes="Deliver to gate B between 7 and 9 am.",
         created_by="Maria Keller",
         items=[
@@ -309,6 +312,7 @@ PURCHASE_ORDER = LayoutSpec(
         MandatoryField(("doc.issue_date",), "PO date", _STANDARD, "purchase order"),
         MandatoryField(("supplier.name",), "Supplier", _STANDARD, "purchase order"),
         MandatoryField(("doc.currency",), "Currency", _STANDARD, "purchase order"),
+        MandatoryField(("doc.delivery_address",), "Delivery address", _STANDARD, "purchase order"),
     ),
     locked_fields={"supplier.name": _STANDARD, "doc.issue_date": _STANDARD},
 )

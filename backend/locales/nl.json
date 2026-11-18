@@ -1644,7 +1644,8 @@
         "no_rejections": "Er is niets afgekeurd.",
         "sig_delivered_by": "Geleverd door",
         "counterparty_tax_id": "btw-nummer",
-        "counterparty_address": "Adres"
+        "counterparty_address": "Adres",
+        "delivery_address": "Afleveradres"
       },
       "labels": {
         "po_status": {

@@ -21,6 +21,8 @@ import clsx from 'clsx';
 import { Download, Loader2, Redo2, RotateCcw, Undo2, Upload } from 'lucide-react';
 
 import { SideDrawer } from '@/shared/ui/SideDrawer';
+import { ConfirmDialog } from '@/shared/ui/ConfirmDialog';
+import { useConfirm } from '@/shared/hooks/useConfirm';
 import { useToastStore } from '@/stores/useToastStore';
 import {
   deleteLayoutVariant,
@@ -42,7 +44,7 @@ import {
   type LayoutTarget,
   type LayoutTemplate,
 } from './layoutApi';
-import { historyOf, historyPush, historyRedo, historyUndo, type History } from './layoutModel';
+import { historyOf, historyPush, historyRedo, historyUndo, variantKey, type History } from './layoutModel';
 import { BrandingPanel, ContentPanel, HistoryPanel, LayoutPanel } from './LayoutPanels';
 import { INPUT } from './BlockEditor';
 
@@ -103,6 +105,8 @@ export function LayoutEditorDrawer({ open, onClose, layoutKey, recordId, project
   const [previewError, setPreviewError] = useState(false);
   const [previewing, setPreviewing] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const [newVariant, setNewVariant] = useState<string | null>(null);
+  const { confirm, ...confirmProps } = useConfirm();
 
   const target: LayoutTarget = useMemo(
     () => ({ key: layoutKey, projectId: scope === 'project' ? projectId : null, variant, locale }),
@@ -303,8 +307,7 @@ export function LayoutEditorDrawer({ open, onClose, layoutKey, recordId, project
                   aria-label={t('doc_layout.variant', { defaultValue: 'Variant' })}
                   onChange={(e) => {
                     if (e.target.value === '__new__') {
-                      const name = window.prompt(t('doc_layout.variant_name', { defaultValue: 'Name of the new variant' }));
-                      if (name) setVariant(name.trim().toLowerCase().replace(/[^a-z0-9_]+/g, '_').slice(0, 40) || 'standard');
+                      setNewVariant('');
                       return;
                     }
                     setVariant(e.target.value);
@@ -337,6 +340,35 @@ export function LayoutEditorDrawer({ open, onClose, layoutKey, recordId, project
                   </button>
                 </div>
               </div>
+              {newVariant !== null && (
+                <form
+                  className="flex items-center gap-1.5"
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    const key = variantKey(newVariant);
+                    if (key) setVariant(key);
+                    setNewVariant(null);
+                  }}
+                  data-testid="layout-new-variant"
+                >
+                  <input
+                    autoFocus
+                    className={clsx(INPUT, 'h-7 flex-1 text-xs')}
+                    value={newVariant}
+                    maxLength={40}
+                    placeholder={t('doc_layout.variant_name', { defaultValue: 'Name of the new variant' })}
+                    aria-label={t('doc_layout.variant_name', { defaultValue: 'Name of the new variant' })}
+                    onChange={(e) => setNewVariant(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Escape' && setNewVariant(null)}
+                  />
+                  <button type="submit" disabled={!variantKey(newVariant)} className="rounded-md bg-oe-blue px-2 py-1 text-xs font-medium text-white disabled:opacity-40">
+                    {t('doc_layout.variant_create', { defaultValue: 'Create' })}
+                  </button>
+                  <button type="button" onClick={() => setNewVariant(null)} className="rounded-md px-2 py-1 text-xs text-content-secondary hover:bg-surface-secondary">
+                    {t('common.cancel', { defaultValue: 'Cancel' })}
+                  </button>
+                </form>
+              )}
               {!data.can_edit && (
                 <p className="rounded-md bg-surface-secondary px-3 py-2 text-xs text-content-secondary">
                   {t('doc_layout.read_only', { defaultValue: 'You can look at the layout. Changing it needs the Document manager role.' })}
@@ -408,7 +440,15 @@ export function LayoutEditorDrawer({ open, onClose, layoutKey, recordId, project
                       </button>
                     )}
                     <span className="ml-auto flex items-center gap-0.5">
-                      <button type="button" disabled={busy} onClick={() => window.confirm(t('doc_layout.reset_confirm', { defaultValue: 'Print this document in the standard layout again? Your versions stay in the history.' })) && run(() => resetLayout(target), t('doc_layout.reset_done', { defaultValue: 'Standard layout in force' }))} className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-surface-secondary" aria-label={t('doc_layout.reset', { defaultValue: 'Reset to standard' })} title={t('doc_layout.reset', { defaultValue: 'Reset to standard' })} data-testid="layout-reset">
+                      <button type="button" disabled={busy} onClick={async () => {
+                          const ok = await confirm({
+                            title: t('doc_layout.reset', { defaultValue: 'Reset to standard' }),
+                            message: t('doc_layout.reset_confirm', { defaultValue: 'Print this document in the standard layout again? Your versions stay in the history.' }),
+                            confirmLabel: t('doc_layout.reset', { defaultValue: 'Reset to standard' }),
+                            variant: 'warning',
+                          });
+                          if (ok) await run(() => resetLayout(target), t('doc_layout.reset_done', { defaultValue: 'Standard layout in force' }));
+                        }} className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-surface-secondary" aria-label={t('doc_layout.reset', { defaultValue: 'Reset to standard' })} title={t('doc_layout.reset', { defaultValue: 'Reset to standard' })} data-testid="layout-reset">
                         <RotateCcw size={14} />
                       </button>
                       <button type="button" disabled={busy} onClick={onExport} className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-surface-secondary" aria-label={t('doc_layout.export', { defaultValue: 'Export as file' })} title={t('doc_layout.export', { defaultValue: 'Export as file' })}>
@@ -427,7 +467,13 @@ export function LayoutEditorDrawer({ open, onClose, layoutKey, recordId, project
                       </button>
                     )}
                     {variant !== 'standard' && state.variants.some((v) => v.variant === variant && v.scope === state.scope) && (
-                      <button type="button" disabled={busy} onClick={() => run(async () => { const next = await deleteLayoutVariant(target); setVariant('standard'); return next; })} className="rounded-md border border-border-light px-2 py-0.5 text-semantic-error hover:bg-surface-secondary">
+                      <button type="button" disabled={busy} onClick={async () => {
+                        const ok = await confirm({
+                          title: t('doc_layout.delete_variant', { defaultValue: 'Delete this variant' }),
+                          message: t('doc_layout.delete_variant_confirm', { defaultValue: 'Delete this variant and its versions? Documents already issued keep their record.' }),
+                        });
+                        if (ok) await run(async () => { const next = await deleteLayoutVariant(target); setVariant('standard'); return next; });
+                      }} className="rounded-md border border-border-light px-2 py-0.5 text-semantic-error hover:bg-surface-secondary">
                         {t('doc_layout.delete_variant', { defaultValue: 'Delete this variant' })}
                       </button>
                     )}
@@ -447,6 +493,15 @@ export function LayoutEditorDrawer({ open, onClose, layoutKey, recordId, project
                 <Loader2 size={11} className="animate-spin" /> {t('doc_layout.rendering', { defaultValue: 'Updating preview' })}
               </span>
             )}
+            {(valuesQuery.data?.issues ?? []).length > 0 && (
+              <ul className="absolute inset-x-2 bottom-2 z-10 space-y-0.5 rounded-md border border-semantic-warning/40 bg-surface-primary/95 px-3 py-2 text-xs" aria-live="polite" data-testid="layout-record-issues">
+                {(valuesQuery.data?.issues ?? []).slice(0, 4).map((issue, i) => (
+                  <li key={`${issue.rule_id}-${i}`} className={issue.severity === 'error' ? 'text-semantic-error' : 'text-content-secondary'}>
+                    {t('doc_layout.record_missing', { defaultValue: '{{field}} is missing on this record ({{source}})', field: issue.params.field ?? '', source: issue.params.source ?? '' })}
+                  </li>
+                ))}
+              </ul>
+            )}
             {previewError && !previewUrl ? (
               <p className="p-4 text-sm text-content-tertiary">{t('doc_layout.preview_failed', { defaultValue: 'The preview could not be drawn. Check the issues on the left.' })}</p>
             ) : previewUrl ? (
@@ -455,6 +510,7 @@ export function LayoutEditorDrawer({ open, onClose, layoutKey, recordId, project
           </div>
         </div>
       )}
+      <ConfirmDialog {...confirmProps} />
     </SideDrawer>
   );
 }

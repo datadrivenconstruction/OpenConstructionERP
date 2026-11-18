@@ -425,15 +425,22 @@ async def list_records(session: SessionDep, user_id: CurrentUserId, key: str = _
 async def record_values(
     session: SessionDep,
     user_id: CurrentUserId,
+    payload: CurrentUserPayload,
     key: str = _KEY,
     record_id: str | None = Query(None, max_length=64),
     locale: str = _LOCALE,
 ) -> dict[str, Any]:
-    """Merge field values of a record (or the sample), shown next to each field in the picker."""
+    """Merge field values of a record (or the sample) for the picker, and the data it lacks to be issued."""
     spec = ls.require_layout(key)
     ids = await accessible_project_ids(session, user_id)
     ctx = await ls.preview_context(session, spec, locale, record_id, ids)
-    return {"values": ctx.values, "status": ctx.status, "rows": {k: len(v) for k, v in ctx.collections.items()}}
+    _notes, problems = ls.data_issues(spec, ctx, await workspace_countries(session, payload, user_id))
+    return {
+        "values": ctx.values,
+        "status": ctx.status,
+        "rows": {k: len(v) for k, v in ctx.collections.items()},
+        "issues": [i.as_dict() for i in problems] if record_id else [],
+    }
 
 
 @layout_router.post("/{key}/preview", response_model=None, dependencies=_READ)
@@ -441,13 +448,22 @@ async def preview(
     body: LayoutPreviewIn,
     session: SessionDep,
     user_id: CurrentUserId,
+    payload: CurrentUserPayload,
     key: str = _KEY,
     locale: str = _LOCALE,
 ) -> Response:
     """PDF of an unsaved template on a real record the caller can open, or on sample data."""
     spec = ls.require_layout(key)
     ids = await accessible_project_ids(session, user_id)
-    pdf = await ls.preview_pdf(session, spec, body.template, locale=locale, record_id=body.record_id, project_ids=ids)
+    pdf = await ls.preview_pdf(
+        session,
+        spec,
+        body.template,
+        locale=locale,
+        record_id=body.record_id,
+        project_ids=ids,
+        countries=await workspace_countries(session, payload, user_id),
+    )
     return Response(
         content=pdf,
         media_type="application/pdf",

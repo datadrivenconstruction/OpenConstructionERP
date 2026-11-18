@@ -59878,6 +59878,8 @@ const resource = {
     "procurement.item_requires_inspection": "การตรวจรับสินค้า",
     "procurement.po_document": "ใบสั่งซื้อ",
     "procurement.gr_document": "ใบรับสินค้า",
+    "procurement.delivery_address": "ที่อยู่สำหรับจัดส่ง",
+    "procurement.delivery_address_placeholder": "ที่อยู่หน้างาน ประตู ผู้ติดต่อหน้างาน",
     "portal.deliveries.submitted": "ส่งการส่งมอบไปยังไซต์งานเพื่อยืนยันแล้ว",
     "portal.deliveries.no_orders": "ยังไม่มีใบสั่งซื้อที่แชร์ให้คุณ",
     "portal.deliveries.no_orders_desc": "เมื่อผู้ซื้อแชร์ใบสั่งซื้อให้ คุณสามารถแจ้งการส่งมอบของใบสั่งซื้อนั้นได้ที่นี่",
@@ -65140,6 +65142,11 @@ const resource = {
     "doc_layout.tab_layout": "รูปแบบ",
     "doc_layout.tab_branding": "อัตลักษณ์องค์กร",
     "doc_layout.tab_history": "ประวัติ",
+    "doc_layout.legal_notes": "ข้อความตามกฎหมาย",
+    "doc_layout.legal_note_title": "ข้อความตามกฎหมาย ({{country}})",
+    "doc_layout.legal_note_when": "พิมพ์เมื่อเข้าเงื่อนไข",
+    "doc_layout.variant_create": "สร้าง",
+    "doc_layout.delete_variant_confirm": "ลบรูปแบบนี้และเวอร์ชันทั้งหมดหรือไม่ เอกสารที่ออกไปแล้วยังคงมีบันทึกอยู่",
   }
 } as { translation: Record<string, string> };
 

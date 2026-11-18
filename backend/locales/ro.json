@@ -1644,7 +1644,8 @@
         "no_rejections": "Nu s-a respins nimic.",
         "sig_delivered_by": "Livrat de",
         "counterparty_tax_id": "CUI/CIF",
-        "counterparty_address": "Adresă"
+        "counterparty_address": "Adresă",
+        "delivery_address": "Adresa de livrare"
       },
       "labels": {
         "po_status": {

@@ -63321,6 +63321,8 @@ const resource = {
     "procurement.item_requires_inspection": "Входной контроль",
     "procurement.po_document": "Заказ на закупку",
     "procurement.gr_document": "Приёмка товара",
+    "procurement.delivery_address": "Адрес доставки",
+    "procurement.delivery_address_placeholder": "Адрес объекта, въезд, контактное лицо на объекте",
     "portal.deliveries.submitted": "Поставка отправлена на объект для подтверждения",
     "portal.deliveries.no_orders": "С вами не поделились ни одним заказом на поставку",
     "portal.deliveries.no_orders_desc": "Когда заказчик поделится с вами заказом на поставку, вы сможете заявить о его поставках здесь.",
@@ -68673,6 +68675,12 @@ const resource = {
     "doc_layout.tab_layout": "Страница",
     "doc_layout.tab_branding": "Оформление",
     "doc_layout.tab_history": "История",
+    "doc_layout.legal_notes": "Юридические примечания",
+    "doc_layout.legal_note_title": "Юридическое примечание ({{country}})",
+    "doc_layout.legal_note_when": "печатается, когда применимо",
+    "doc_layout.variant_create": "Создать",
+    "doc_layout.delete_variant_confirm": "Удалить этот вариант и его версии? Уже выпущенные документы сохраняют свою запись.",
+    "doc_layout.record_missing": "В этой записи нет: {{field}} ({{source}})",
   }
 } as { translation: Record<string, string> };
 

@@ -60392,6 +60392,8 @@ const resource = {
     "procurement.item_requires_inspection": "আগত পরিদর্শন",
     "procurement.po_document": "ক্রয় আদেশ",
     "procurement.gr_document": "পণ্য গ্রহণের রসিদ",
+    "procurement.delivery_address": "ডেলিভারির ঠিকানা",
+    "procurement.delivery_address_placeholder": "সাইটের ঠিকানা, গেট, সাইটে যোগাযোগের ব্যক্তি",
     "portal.deliveries.submitted": "নিশ্চিতকরণের জন্য ডেলিভারি সাইটে পাঠানো হয়েছে",
     "portal.deliveries.no_orders": "আপনার সঙ্গে কোনো ক্রয় অর্ডার শেয়ার করা হয়নি",
     "portal.deliveries.no_orders_desc": "ক্রেতা আপনার সঙ্গে ক্রয় অর্ডার শেয়ার করলে এখানে তার ডেলিভারি ঘোষণা করতে পারবেন।",
@@ -65675,6 +65677,12 @@ const resource = {
     "doc_layout.tab_layout": "বিন্যাস",
     "doc_layout.tab_branding": "ভিজ্যুয়াল পরিচয়",
     "doc_layout.tab_history": "ইতিহাস",
+    "doc_layout.legal_notes": "আইনি নোট",
+    "doc_layout.legal_note_title": "আইনি নোট ({{country}})",
+    "doc_layout.legal_note_when": "প্রযোজ্য হলে মুদ্রিত হয়",
+    "doc_layout.variant_create": "তৈরি করুন",
+    "doc_layout.delete_variant_confirm": "এই ভ্যারিয়েন্ট ও এর সংস্করণগুলো মুছবেন? আগে জারি করা নথির রেকর্ড থেকে যাবে।",
+    "doc_layout.record_missing": "এই রেকর্ডে {{field}} নেই ({{source}})",
   }
 } as { translation: Record<string, string> };
 

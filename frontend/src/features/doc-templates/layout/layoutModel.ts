@@ -222,3 +222,13 @@ export function historyRedo<T>(h: History<T>): History<T> {
   if (next === undefined) return h;
   return { past: [...h.past, h.present], present: next, future: rest };
 }
+
+/** A variant key from the name typed for it: lower case letters, digits and underscores. */
+export function variantKey(name: string): string {
+  return name
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9_]+/g, '_')
+    .replace(/^_+|_+$/g, '')
+    .slice(0, 40);
+}

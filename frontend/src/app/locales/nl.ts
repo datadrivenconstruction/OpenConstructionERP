@@ -61003,6 +61003,8 @@ const resource = {
     "procurement.item_requires_inspection": "Inkomende controle",
     "procurement.po_document": "Inkooporder",
     "procurement.gr_document": "Goederenontvangst",
+    "procurement.delivery_address": "Afleveradres",
+    "procurement.delivery_address_placeholder": "Adres bouwplaats, poort, contactpersoon op de bouw",
     "portal.deliveries.submitted": "Levering naar de bouwplaats gestuurd voor bevestiging",
     "portal.deliveries.no_orders": "Er zijn geen inkooporders met u gedeeld",
     "portal.deliveries.no_orders_desc": "Wanneer een koper een inkooporder met u deelt, kunt u hier de leveringen aankondigen.",
@@ -66286,6 +66288,12 @@ const resource = {
     "doc_layout.tab_layout": "Indeling",
     "doc_layout.tab_branding": "Huisstijl",
     "doc_layout.tab_history": "Geschiedenis",
+    "doc_layout.legal_notes": "Wettelijke vermeldingen",
+    "doc_layout.legal_note_title": "Wettelijke vermelding ({{country}})",
+    "doc_layout.legal_note_when": "afgedrukt wanneer van toepassing",
+    "doc_layout.variant_create": "Aanmaken",
+    "doc_layout.delete_variant_confirm": "Deze variant en de versies ervan verwijderen? Al uitgegeven documenten behouden hun registratie.",
+    "doc_layout.record_missing": "{{field}} ontbreekt in deze record ({{source}})",
   }
 } as { translation: Record<string, string> };
 

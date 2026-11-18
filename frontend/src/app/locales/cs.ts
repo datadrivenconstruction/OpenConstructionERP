@@ -61392,6 +61392,8 @@ const resource = {
     "procurement.item_requires_inspection": "Vstupní kontrola",
     "procurement.po_document": "Nákupní objednávka",
     "procurement.gr_document": "Příjemka",
+    "procurement.delivery_address": "Dodací adresa",
+    "procurement.delivery_address_placeholder": "Adresa stavby, brána, kontakt na stavbě",
     "portal.deliveries.submitted": "Dodávka odeslána na stavbu k potvrzení",
     "portal.deliveries.no_orders": "Nejsou s vámi sdíleny žádné objednávky",
     "portal.deliveries.no_orders_desc": "Jakmile vám kupující sdílí objednávku, můžete zde ohlásit její dodávky.",
@@ -66744,6 +66746,12 @@ const resource = {
     "doc_layout.tab_layout": "Rozvržení",
     "doc_layout.tab_branding": "Vizuální identita",
     "doc_layout.tab_history": "Historie",
+    "doc_layout.legal_notes": "Právní poznámky",
+    "doc_layout.legal_note_title": "Právní poznámka ({{country}})",
+    "doc_layout.legal_note_when": "tiskne se, když platí",
+    "doc_layout.variant_create": "Vytvořit",
+    "doc_layout.delete_variant_confirm": "Smazat tuto variantu a její verze? Již vydané dokumenty si svůj záznam ponechají.",
+    "doc_layout.record_missing": "{{field}} v tomto záznamu chybí ({{source}})",
   }
 } as { translation: Record<string, string> };
 

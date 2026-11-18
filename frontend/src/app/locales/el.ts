@@ -60082,6 +60082,8 @@ const resource = {
     "procurement.item_requires_inspection": "Εισερχόμενος έλεγχος",
     "procurement.po_document": "Εντολή αγοράς",
     "procurement.gr_document": "Παραλαβή εμπορευμάτων",
+    "procurement.delivery_address": "Διεύθυνση παράδοσης",
+    "procurement.delivery_address_placeholder": "Διεύθυνση εργοταξίου, πύλη, υπεύθυνος επικοινωνίας στο εργοτάξιο",
     "portal.deliveries.submitted": "Η παράδοση εστάλη στο εργοτάξιο για επιβεβαίωση",
     "portal.deliveries.no_orders": "Δεν έχουν κοινοποιηθεί παραγγελίες αγοράς σε εσάς",
     "portal.deliveries.no_orders_desc": "Όταν ένας αγοραστής κοινοποιεί μια παραγγελία αγοράς σε εσάς, μπορείτε να δηλώνετε εδώ τις παραδόσεις της.",
@@ -65365,6 +65367,12 @@ const resource = {
     "doc_layout.tab_layout": "Διάταξη",
     "doc_layout.tab_branding": "Εταιρική ταυτότητα",
     "doc_layout.tab_history": "Ιστορικό",
+    "doc_layout.legal_notes": "Νομικές σημειώσεις",
+    "doc_layout.legal_note_title": "Νομική σημείωση ({{country}})",
+    "doc_layout.legal_note_when": "εκτυπώνεται όταν ισχύει",
+    "doc_layout.variant_create": "Δημιουργία",
+    "doc_layout.delete_variant_confirm": "Διαγραφή αυτής της παραλλαγής και των εκδόσεών της; Τα έγγραφα που έχουν ήδη εκδοθεί διατηρούν την εγγραφή τους.",
+    "doc_layout.record_missing": "Λείπει το {{field}} σε αυτή την εγγραφή ({{source}})",
   }
 } as { translation: Record<string, string> };
 

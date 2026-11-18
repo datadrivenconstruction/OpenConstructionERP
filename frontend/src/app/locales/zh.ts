@@ -62347,6 +62347,8 @@ const resource = {
     "procurement.item_requires_inspection": "来料检验",
     "procurement.po_document": "采购订单",
     "procurement.gr_document": "收货单",
+    "procurement.delivery_address": "交货地址",
+    "procurement.delivery_address_placeholder": "工地地址、大门、现场联系人",
     "portal.deliveries.submitted": "交付已发送至现场确认",
     "portal.deliveries.no_orders": "没有与您共享的采购订单",
     "portal.deliveries.no_orders_desc": "采购方与您共享采购订单后，您可以在此申报该订单的交付。",
@@ -67609,6 +67611,11 @@ const resource = {
     "doc_layout.tab_layout": "版式",
     "doc_layout.tab_branding": "视觉标识",
     "doc_layout.tab_history": "历史",
+    "doc_layout.legal_notes": "法定说明",
+    "doc_layout.legal_note_title": "法定说明（{{country}}）",
+    "doc_layout.legal_note_when": "适用时打印",
+    "doc_layout.variant_create": "创建",
+    "doc_layout.delete_variant_confirm": "删除此变体及其所有版本？已签发的文件保留其记录。",
   }
 } as { translation: Record<string, string> };
 

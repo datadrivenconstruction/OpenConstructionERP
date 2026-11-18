@@ -1644,7 +1644,8 @@
         "no_rejections": "Nic nie zostało odrzucone.",
         "sig_delivered_by": "Dostarczył",
         "counterparty_tax_id": "NIP",
-        "counterparty_address": "Adres"
+        "counterparty_address": "Adres",
+        "delivery_address": "Adres dostawy"
       },
       "labels": {
         "po_status": {

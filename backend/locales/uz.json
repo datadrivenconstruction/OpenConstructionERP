@@ -1660,7 +1660,8 @@
         "no_rejections": "Hech narsa rad etilmagan.",
         "sig_delivered_by": "Yetkazib bergan",
         "counterparty_tax_id": "STIR",
-        "counterparty_address": "Manzil"
+        "counterparty_address": "Manzil",
+        "delivery_address": "Yetkazib berish manzili"
       },
       "labels": {
         "po_status": {

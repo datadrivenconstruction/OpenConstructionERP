@@ -60126,6 +60126,8 @@ const resource = {
     "procurement.item_requires_inspection": "Saapumistarkastus",
     "procurement.po_document": "Ostotilaus",
     "procurement.gr_document": "Tavaran vastaanotto",
+    "procurement.delivery_address": "Toimitusosoite",
+    "procurement.delivery_address_placeholder": "Työmaan osoite, portti, yhteyshenkilö työmaalla",
     "portal.deliveries.submitted": "Toimitus lähetetty työmaalle vahvistettavaksi",
     "portal.deliveries.no_orders": "Sinulle ei ole jaettu ostotilauksia",
     "portal.deliveries.no_orders_desc": "Kun ostaja jakaa sinulle ostotilauksen, voit ilmoittaa sen toimitukset täällä.",
@@ -65409,6 +65411,12 @@ const resource = {
     "doc_layout.tab_layout": "Pohja",
     "doc_layout.tab_branding": "Visuaalinen ilme",
     "doc_layout.tab_history": "Historia",
+    "doc_layout.legal_notes": "Oikeudelliset huomautukset",
+    "doc_layout.legal_note_title": "Oikeudellinen huomautus ({{country}})",
+    "doc_layout.legal_note_when": "tulostetaan, kun se koskee asiakirjaa",
+    "doc_layout.variant_create": "Luo",
+    "doc_layout.delete_variant_confirm": "Poistetaanko tämä muunnelma ja sen versiot? Jo annetut asiakirjat säilyttävät tietonsa.",
+    "doc_layout.record_missing": "Tästä tietueesta puuttuu {{field}} ({{source}})",
   }
 } as { translation: Record<string, string> };
 

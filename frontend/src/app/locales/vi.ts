@@ -59886,6 +59886,8 @@ const resource = {
     "procurement.item_requires_inspection": "Kiểm tra nhập kho",
     "procurement.po_document": "Đơn đặt hàng",
     "procurement.gr_document": "Phiếu nhập kho",
+    "procurement.delivery_address": "Địa chỉ giao hàng",
+    "procurement.delivery_address_placeholder": "Địa chỉ công trường, cổng, người liên hệ tại công trường",
     "portal.deliveries.submitted": "Đã gửi giao hàng đến công trường để xác nhận",
     "portal.deliveries.no_orders": "Chưa có đơn mua hàng nào được chia sẻ với bạn",
     "portal.deliveries.no_orders_desc": "Khi bên mua chia sẻ đơn mua hàng với bạn, bạn có thể thông báo các đợt giao hàng tại đây.",
@@ -65148,6 +65150,11 @@ const resource = {
     "doc_layout.tab_layout": "Bố cục",
     "doc_layout.tab_branding": "Nhận diện thương hiệu",
     "doc_layout.tab_history": "Lịch sử",
+    "doc_layout.legal_notes": "Ghi chú pháp lý",
+    "doc_layout.legal_note_title": "Ghi chú pháp lý ({{country}})",
+    "doc_layout.legal_note_when": "được in khi áp dụng",
+    "doc_layout.variant_create": "Tạo",
+    "doc_layout.delete_variant_confirm": "Xóa biến thể này và các phiên bản của nó? Các tài liệu đã phát hành vẫn giữ bản ghi.",
   }
 } as { translation: Record<string, string> };
 

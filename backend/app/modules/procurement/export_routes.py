@@ -37,7 +37,13 @@ from app.core.register_context import (
     record_download,
 )
 from app.core.register_export import RecordDocument
-from app.dependencies import CurrentUserId, RequirePermission, SessionDep, verify_project_access
+from app.dependencies import (
+    CurrentUserId,
+    CurrentUserPayload,
+    RequirePermission,
+    SessionDep,
+    verify_project_access,
+)
 from app.modules.procurement.layouts import (
     GOODS_RECEIPT,
     PURCHASE_ORDER,
@@ -68,10 +74,12 @@ async def _issue(
     record_id: str,
     project_id: uuid.UUID | None,
     user_id: str,
+    payload: dict[str, Any],
     variant: str | None,
     version: uuid.UUID | None,
 ) -> RecordDocument:
     from app.modules.doc_templates.layout_service import clean_variant, issue_document
+    from app.modules.doc_templates.service import workspace_countries
 
     return await issue_document(
         session,
@@ -83,6 +91,7 @@ async def _issue(
         user_id=user_id,
         variant=clean_variant(variant) if variant else None,
         version_id=version,
+        countries=await workspace_countries(session, payload, user_id),
     )
 
 
@@ -90,6 +99,7 @@ async def _issue(
 async def export_purchase_order_pdf(
     po_id: uuid.UUID,
     user_id: CurrentUserId,
+    payload: CurrentUserPayload,
     session: SessionDep,
     locale: LocaleQuery = None,
     accept_language: AcceptLanguageHeader = None,
@@ -117,6 +127,7 @@ async def export_purchase_order_pdf(
         record_id=str(po.id),
         project_id=po.project_id,
         user_id=str(user_id),
+        payload=dict(payload),
         variant=variant,
         version=layout_version,
     )
@@ -128,6 +139,7 @@ async def export_purchase_order_pdf(
 async def export_goods_receipt_pdf(
     gr_id: uuid.UUID,
     user_id: CurrentUserId,
+    payload: CurrentUserPayload,
     session: SessionDep,
     locale: LocaleQuery = None,
     accept_language: AcceptLanguageHeader = None,
@@ -158,6 +170,7 @@ async def export_goods_receipt_pdf(
         record_id=str(receipt.id),
         project_id=po.project_id,
         user_id=str(user_id),
+        payload=dict(payload),
         variant=variant,
         version=layout_version,
     )

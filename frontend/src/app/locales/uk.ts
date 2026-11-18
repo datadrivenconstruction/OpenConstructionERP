@@ -62200,6 +62200,8 @@ const resource = {
     "procurement.item_requires_inspection": "Вхідний контроль",
     "procurement.po_document": "Замовлення на закупівлю",
     "procurement.gr_document": "Прибуткова накладна",
+    "procurement.delivery_address": "Адреса доставки",
+    "procurement.delivery_address_placeholder": "Адреса об’єкта, в’їзд, контактна особа на об’єкті",
     "portal.deliveries.submitted": "Поставку надіслано на об'єкт для підтвердження",
     "portal.deliveries.no_orders": "Жодного замовлення на постачання не передано вам",
     "portal.deliveries.no_orders_desc": "Коли замовник передасть вам замовлення на постачання, ви зможете оголошувати його поставки тут.",
@@ -67552,6 +67554,11 @@ const resource = {
     "doc_layout.tab_layout": "Макет",
     "doc_layout.tab_branding": "Фірмовий стиль",
     "doc_layout.tab_history": "Історія",
+    "doc_layout.legal_notes": "Юридичні примітки",
+    "doc_layout.legal_note_title": "Юридична примітка ({{country}})",
+    "doc_layout.legal_note_when": "друкується, коли застосовно",
+    "doc_layout.variant_create": "Створити",
+    "doc_layout.delete_variant_confirm": "Видалити цей варіант і його версії? Уже видані документи зберігають свій запис.",
   }
 } as { translation: Record<string, string> };
 

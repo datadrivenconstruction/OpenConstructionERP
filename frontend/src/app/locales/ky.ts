@@ -60239,6 +60239,8 @@ const resource = {
     "procurement.item_requires_inspection": "Кирүүчү текшерүү",
     "procurement.po_document": "Сатып алуу буйрутмасы",
     "procurement.gr_document": "Товарды кабыл алуу кабарлама",
+    "procurement.delivery_address": "Жеткирүү дареги",
+    "procurement.delivery_address_placeholder": "Объекттин дареги, дарбаза, объекттеги байланыш адамы",
     "portal.deliveries.submitted": "Жеткирүү ырастоо үчүн объектке жөнөтүлдү",
     "portal.deliveries.no_orders": "Сиз менен бөлүшүлгөн сатып алуу буйрутмалары жок",
     "portal.deliveries.no_orders_desc": "Сатып алуучу сиз менен буйрутманы бөлүшкөндө, анын жеткирүүлөрүн бул жерден жарыялай аласыз.",
@@ -65522,6 +65524,12 @@ const resource = {
     "doc_layout.tab_layout": "Макет",
     "doc_layout.tab_branding": "Визуалдык бейпилдик",
     "doc_layout.tab_history": "Тарых",
+    "doc_layout.legal_notes": "Укуктук эскертүүлөр",
+    "doc_layout.legal_note_title": "Укуктук эскертүү ({{country}})",
+    "doc_layout.legal_note_when": "колдонулганда басылат",
+    "doc_layout.variant_create": "Түзүү",
+    "doc_layout.delete_variant_confirm": "Бул вариантты жана анын версияларын өчүрөсүзбү? Мурда берилген документтердин жазуусу сакталат.",
+    "doc_layout.record_missing": "Бул жазууда {{field}} жок ({{source}})",
   }
 } as { translation: Record<string, string> };
 

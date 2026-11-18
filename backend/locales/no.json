@@ -1644,7 +1644,8 @@
         "no_rejections": "Ingenting ble avvist.",
         "sig_delivered_by": "Levert av",
         "counterparty_tax_id": "Org.nr.",
-        "counterparty_address": "Adresse"
+        "counterparty_address": "Adresse",
+        "delivery_address": "Leveringsadresse"
       },
       "labels": {
         "po_status": {
