@@ -4,6 +4,8 @@
     "gb50500": {
       "country": "CN",
       "uniqueness_scope": "sub_project",
+      "shared_code_patterns": ["^\\d{9}$", "^沪\\d{9}$"],
+      "shared_code_note": "A 9-digit national code names the item, not the line; only the 12-digit code with the compiler's suffix must be unique",
       "default_edition": "gb50500@2024",
       "editions": {
         "gb50500@2013": {

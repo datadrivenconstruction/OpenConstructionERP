@@ -227,15 +227,18 @@ class CodeFinding:
 def check_item_codes(
     entries: Sequence[tuple[str, str, str]],
     patterns: Sequence[str],
+    shared: Sequence[str] = (),
 ) -> list[CodeFinding]:
     """Check ``(ref, code, scope)`` entries against patterns and for duplicates.
 
     A code passes the format check when any pattern matches it in full. Blank
     codes are skipped: whether a code is required is a different rule. A code
     used twice inside one ``scope`` yields one ``duplicate`` finding per extra
-    occurrence, naming the first occurrence.
+    occurrence, naming the first occurrence. Codes matching a ``shared``
+    pattern name an item rather than a line and are never duplicates.
     """
     compiled = [re.compile(p) for p in patterns]
+    repeatable = [re.compile(p) for p in shared]
     findings: list[CodeFinding] = []
     seen: dict[tuple[str, str], str] = {}
     for ref, code, scope in entries:
@@ -245,6 +248,8 @@ def check_item_codes(
         if compiled and not any(p.fullmatch(text) for p in compiled):
             findings.append(CodeFinding("format", ref, text, scope))
         key = (scope, text)
+        if any(p.fullmatch(text) for p in repeatable):
+            continue
         if key in seen:
             findings.append(CodeFinding("duplicate", ref, text, scope, (seen[key],)))
         else:
