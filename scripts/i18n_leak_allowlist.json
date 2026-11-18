@@ -2288,5 +2288,120 @@
     "en_value": "EIN",
     "note": "US Employer Identification Number, the legal name of the identifier; written the same way in every locale including ru, en-US inherits it",
     "reason_category": "standard_code"
+  },
+  "survey.field.e": {
+    "en_value": "E (m)",
+    "note": "survey easting axis letter with the metre unit, written E (m) in survey practice across locales",
+    "reason_category": "abbreviation"
+  },
+  "survey.field.n": {
+    "en_value": "N (m)",
+    "note": "survey northing axis letter with the metre unit, written N (m) in survey practice across locales",
+    "reason_category": "abbreviation"
+  },
+  "survey.field.z": {
+    "en_value": "Z (m)",
+    "note": "height axis letter with the metre unit, written Z (m) in survey practice across locales",
+    "reason_category": "abbreviation"
+  },
+  "survey.field.point_id": {
+    "en_value": "ID",
+    "note": "ID column header, the same abbreviation the platform uses in other register tables",
+    "reason_category": "acronym"
+  },
+  "volumes.field.id": {
+    "en_value": "ID",
+    "note": "ID column header, the same abbreviation the platform uses in other register tables",
+    "reason_category": "acronym"
+  },
+  "survey.monitoring.level.ok": {
+    "en_value": "OK",
+    "note": "OK alert level badge, the universal status abbreviation",
+    "reason_category": "abbreviation"
+  },
+  "survey.monitoring.unit.mm": {
+    "en_value": "mm",
+    "note": "millimetre unit symbol",
+    "reason_category": "abbreviation"
+  },
+  "survey.parcels.format.dxf": {
+    "en_value": "DXF",
+    "note": "DXF file format name",
+    "reason_category": "standard_code"
+  },
+  "survey.parcels.format.geojson": {
+    "en_value": "GeoJSON",
+    "note": "GeoJSON file format name (RFC 7946)",
+    "reason_category": "standard_code"
+  },
+  "survey.parcels.format.shapefile": {
+    "en_value": "Shapefile (.zip)",
+    "note": "Shapefile format name with its .zip container extension",
+    "reason_category": "product_name"
+  },
+  "survey.setting_out.col.d": {
+    "en_value": "d (mm)",
+    "note": "stakeout deviation symbol d with the millimetre unit",
+    "reason_category": "abbreviation"
+  },
+  "survey.setting_out.col.dz": {
+    "en_value": "dZ",
+    "note": "height deviation symbol dZ",
+    "reason_category": "abbreviation"
+  },
+  "volumes.surface.source_landxml": {
+    "en_value": "LandXML",
+    "note": "LandXML open interchange format name",
+    "reason_category": "standard_code"
+  },
+  "stockpiles.field.tonnes": {
+    "en_value": "Tonnes",
+    "note": "Tonnes is the French word too; other locales translate it",
+    "reason_category": "cognate_loanword"
+  },
+  "survey.monitoring.col.point": {
+    "en_value": "Point",
+    "note": "Point is the French word too; other locales translate it",
+    "reason_category": "cognate_loanword"
+  },
+  "survey.monitoring.kpi.points": {
+    "en_value": "Points",
+    "note": "Points is the French plural too; other locales translate it",
+    "reason_category": "cognate_loanword"
+  },
+  "survey.monitoring.kpi.action": {
+    "en_value": "Action",
+    "note": "Action is the French word too; other locales translate it",
+    "reason_category": "cognate_loanword"
+  },
+  "survey.monitoring.level.action": {
+    "en_value": "Action",
+    "note": "Action is the French word too; other locales translate it",
+    "reason_category": "cognate_loanword"
+  },
+  "mine.col.plan_m3": {
+    "en_value": "Plan m³",
+    "note": "Plan is the same word in the locales that keep it, as capital_plan.plan; unit m3",
+    "reason_category": "cognate_loanword"
+  },
+  "mine.col.plan_t": {
+    "en_value": "Plan t",
+    "note": "Plan is the same word in the locales that keep it, as capital_plan.plan; unit t",
+    "reason_category": "cognate_loanword"
+  },
+  "mine.kpi.plan": {
+    "en_value": "Plan",
+    "note": "Plan is the same word in the locales that keep it, as capital_plan.plan",
+    "reason_category": "cognate_loanword"
+  },
+  "survey.import.instrument": {
+    "en_value": "Instrument",
+    "note": "Instrument is the same word in the locales that keep it, as construction_control.field.instrument",
+    "reason_category": "cognate_loanword"
+  },
+  "survey.setting_out.field.instrument": {
+    "en_value": "Instrument",
+    "note": "Instrument is the same word in the locales that keep it, as construction_control.field.instrument",
+    "reason_category": "cognate_loanword"
   }
 }

@@ -33,6 +33,7 @@ import {
   Crown,
   ShieldCheck,
   Edit3,
+  ClipboardCheck,
   Eye,
   Building2,
   BadgeCheck,
@@ -56,14 +57,15 @@ const AGPL_URL = 'https://www.gnu.org/licenses/agpl-3.0.html';
 // ── Role display config (icon + badge variant). The human labels are read
 // from the SAME i18n keys the User Management page uses (users.roles.*), so
 // no new role strings are introduced and DE/RU/etc. stay translated. ──────
-const ROLE_META: Record<UserRole, { icon: typeof Crown; variant: 'error' | 'warning' | 'blue' | 'neutral' }> = {
+const ROLE_META: Record<UserRole, { icon: typeof Crown; variant: 'error' | 'warning' | 'blue' | 'success' | 'neutral' }> = {
   admin: { icon: Crown, variant: 'error' },
   manager: { icon: ShieldCheck, variant: 'warning' },
   editor: { icon: Edit3, variant: 'blue' },
+  surveyor: { icon: ClipboardCheck, variant: 'success' },
   viewer: { icon: Eye, variant: 'neutral' },
 };
 
-const ROLE_ORDER: UserRole[] = ['admin', 'manager', 'editor', 'viewer'];
+const ROLE_ORDER: UserRole[] = ['admin', 'manager', 'editor', 'surveyor', 'viewer'];
 
 function RoleChip({ role }: { role: UserRole }) {
   const { t } = useTranslation();
@@ -137,7 +139,7 @@ export function SettingsTeamPanel() {
     membersQuery.isError && membersQuery.error instanceof ApiError && membersQuery.error.status === 403;
 
   const stats = useMemo(() => {
-    const counts: Record<UserRole, number> = { admin: 0, manager: 0, editor: 0, viewer: 0 };
+    const counts: Record<UserRole, number> = { admin: 0, manager: 0, editor: 0, surveyor: 0, viewer: 0 };
     let active = 0;
     for (const m of members) {
       if (m.role in counts) counts[m.role] += 1;
