@@ -8,8 +8,6 @@ Run:
     python -m pytest -q -x --no-header tests/modules/contacts/test_project_scope.py
 """
 
-import uuid
-
 import pytest
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
@@ -49,7 +47,12 @@ async def _seed(tenant: str, project_a: str, project_b: str) -> None:
 
 async def test_list_and_stats_follow_the_project(client: AsyncClient) -> None:
     headers, me = await _login(client)
-    project_a, project_b = str(uuid.uuid4()), str(uuid.uuid4())
+    project_a, project_b = [
+        (
+            await client.post("/api/v1/projects/", json={"name": f"Scope {n}", "currency": "EUR"}, headers=headers)
+        ).json()["id"]
+        for n in ("A", "B")
+    ]
     await _seed(me, project_a, project_b)
 
     everything = await client.get(URL, params={"limit": 500}, headers=headers)
