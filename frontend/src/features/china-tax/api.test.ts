@@ -2,7 +2,7 @@
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 import { describe, expect, it } from 'vitest';
 
-import { findingKey, toProfileFields } from './api';
+import { findingKey, toFeeSettings, toProfileFields } from './api';
 import type { ProfileFields } from './api';
 
 const base: ProfileFields = {
@@ -43,5 +43,16 @@ describe('toProfileFields', () => {
 describe('findingKey', () => {
   it('makes a rule id a flat i18n key', () => {
     expect(findingKey('cn.vat_base_pc_sum')).toBe('china_tax.rule.cn_vat_base_pc_sum');
+  });
+});
+
+describe('toFeeSettings', () => {
+  it('drops blank rates and keeps the rest as stated', () => {
+    const out = toFeeSettings({ rates: { mgmt: ' 25.71 ', profit: '' }, options: { zone: 'urban' } });
+    expect(out.rates).toEqual({ mgmt: '25.71' });
+    expect(out.options).toEqual({ zone: 'urban' });
+    expect(out.schedule_key).toBeNull();
+    expect(out.apply_labour_factor).toBeNull();
+    expect(out.labour_includes_social_insurance).toBe(false);
   });
 });

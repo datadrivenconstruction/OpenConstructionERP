@@ -330,9 +330,10 @@ async def test_open_ended_risk_clause_warns() -> None:
     assert "cn.unlimited_risk" not in await _ids(profile={}, contract={"risk_clause": "bands"})
 
 
-def test_all_fourteen_rules_are_registered() -> None:
-    assert len(RULE_IDS) == 14
-    assert len(set(RULE_IDS)) == 14
+def test_all_rules_are_registered_once() -> None:
+    # 14 national rules plus 10 for the provincial fee programmes.
+    assert len(RULE_IDS) == 24
+    assert len(set(RULE_IDS)) == 24
 
 
 # ── 数电票 data ──────────────────────────────────────────────────────────────

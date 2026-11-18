@@ -1,0 +1,124 @@
+{
+  "key": "guangdong_2018_adj2025",
+  "jurisdiction": "CN-GD",
+  "edition": "2018",
+  "name_zh": "广东省综合定额（2018）及粤标定函〔2025〕22号",
+  "name_en": "Guangdong 2018 quota with the 2025 adjustment",
+  "effective_from": "2025-09-01",
+  "vat_rates": {
+    "general": "9",
+    "simplified": "3"
+  },
+  "source": "S4",
+  "lines": [
+    {
+      "code": "mgmt",
+      "name_zh": "管理费",
+      "name_en": "Management fee",
+      "group": "fenbu",
+      "kind": "management",
+      "base": {
+        "labour": "1",
+        "plant": "1"
+      },
+      "rate": null,
+      "source": "S5",
+      "user_input": true,
+      "needs_confirmation": true,
+      "reference_rates": [
+        {
+          "chapter_zh": "混凝土",
+          "chapter_en": "Concrete",
+          "rate": "28.75"
+        },
+        {
+          "chapter_zh": "模板",
+          "chapter_en": "Formwork",
+          "rate": "26.35"
+        },
+        {
+          "chapter_zh": "楼地面",
+          "chapter_en": "Floors",
+          "rate": "17.73"
+        },
+        {
+          "chapter_zh": "土石方",
+          "chapter_en": "Earthworks",
+          "rate": "15.50"
+        }
+      ]
+    },
+    {
+      "code": "profit",
+      "name_zh": "利润",
+      "name_en": "Profit",
+      "group": "fenbu",
+      "kind": "profit",
+      "base": {
+        "labour": "1",
+        "plant": "1"
+      },
+      "rate": "20",
+      "source": "S5",
+      "needs_confirmation": true
+    },
+    {
+      "code": "civilised",
+      "name_zh": "文明施工费",
+      "name_en": "Civilised construction",
+      "group": "cuoshi",
+      "kind": "safety",
+      "base": {
+        "labour": "1",
+        "plant": "1"
+      },
+      "rate": "19",
+      "source": "S4",
+      "coefficient": "0.22"
+    },
+    {
+      "code": "environment",
+      "name_zh": "环境保护费",
+      "name_en": "Environmental protection",
+      "group": "cuoshi",
+      "kind": "safety",
+      "base": {
+        "labour": "1",
+        "plant": "1"
+      },
+      "rate": "19",
+      "source": "S4",
+      "coefficient": "0.20"
+    },
+    {
+      "code": "temporary",
+      "name_zh": "临时设施费",
+      "name_en": "Temporary works",
+      "group": "cuoshi",
+      "kind": "safety",
+      "base": {
+        "labour": "1",
+        "plant": "1"
+      },
+      "rate": "19",
+      "source": "S4",
+      "coefficient": "0.26"
+    },
+    {
+      "code": "safety",
+      "name_zh": "安全施工费",
+      "name_en": "Safety",
+      "group": "cuoshi",
+      "kind": "safety",
+      "base": {
+        "labour": "1",
+        "plant": "1"
+      },
+      "rate": "19",
+      "source": "S4",
+      "coefficient": "0.61",
+      "non_competitive": true,
+      "floor": "rate"
+    }
+  ]
+}

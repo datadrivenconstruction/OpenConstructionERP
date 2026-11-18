@@ -246,9 +246,11 @@ async def project_record(session: Any, project_id: uuid.UUID) -> dict[str, Any]:
     )
     lines: list[dict[str, Any]] = []
     markup_names: list[str] = []
+    all_positions: list[Any] = []
     for bill in bills:
         positions = (await session.execute(select(Position).where(Position.boq_id == bill.id))).scalars().all()
         lines.extend(lines_from_positions(list(positions)))
+        all_positions.extend(positions)
         markup_names.extend(m.name for m in bill.markups if m.is_active)
     invoices = (
         (
@@ -265,13 +267,26 @@ async def project_record(session: Any, project_id: uuid.UUID) -> dict[str, Any]:
             (await session.execute(select(InvoiceLineItem).where(InvoiceLineItem.invoice_id == inv.id))).scalars().all()
         )
         invoice_rows.append(invoice_record(inv, list(inv_lines)))
+    from app.modules.china_pack import fees  # noqa: PLC0415
+    from app.modules.china_pack.repository import get_fee_profile  # noqa: PLC0415
+
+    profile_dict = profile.model_dump(mode="json")
+    profile_dict["site_subdivision"] = profile_dict.get("site_subdivision") or getattr(
+        project, "subdivision_code", None
+    )
+    split = fees.components_from_positions(all_positions)
+    fee = fees.fee_block(
+        profile_dict, fees.settings_dict(await get_fee_profile(session, project_id)), split, markup_names=markup_names
+    )
     return build_record(
-        profile=profile.model_dump(mode="json"),
+        profile=profile_dict,
         lines=lines,
         invoices=invoice_rows,
         markup_names=markup_names,
         currency_code=str(getattr(project, "currency", "") or "CNY"),
         project_subdivision=getattr(project, "subdivision_code", None),
+        fee=fee,
+        prices={k: split[k] for k in ("material_positions", "unsourced_material")},
     )
 
 
@@ -285,6 +300,8 @@ def build_record(
     markup_names: list[str] | None = None,
     currency_code: str = "CNY",
     project_subdivision: str | None = None,
+    fee: dict[str, Any] | None = None,
+    prices: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """The plain dict the ``cn_vat`` rules read."""
     return {
@@ -296,6 +313,8 @@ def build_record(
         "prepayment": prepayment or {},
         "contract": contract or {},
         "markup_names": list(markup_names or []),
+        "fee": fee or {},
+        "prices": prices or {},
     }
 
 
@@ -314,3 +333,11 @@ def tender_switch_date(subdivision: str | None, city: str | None) -> date | None
                 if city.strip() in (name, row.get("name_zh")):
                     return parse_date(row.get("tender_switch_date"))
     return parse_date(province.get("tender_switch_date"))
+
+
+def national_switch_date() -> date | None:
+    """The day GB/T 50500-2024 came into force nationally, from the editions data."""
+    for row in CN_TAX["editions"]:
+        if row.get("key") == EDITION_2024:
+            return parse_date(row.get("in_force_from"))
+    return None

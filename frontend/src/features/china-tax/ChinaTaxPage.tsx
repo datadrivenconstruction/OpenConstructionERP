@@ -30,6 +30,7 @@ import {
   saveProfile,
   toProfileFields,
 } from './api';
+import { ProvincialFeePanel } from './ProvincialFeePanel';
 import type { Finding, PrepaymentPeriodInput, PrepaymentResult, ProfileFields, TaxProfile } from './api';
 
 const INPUT = 'w-full rounded-md border border-border bg-surface-primary px-2 py-1.5 text-sm text-content-primary';
@@ -314,6 +315,8 @@ export function ChinaTaxPage() {
           </tbody>
         </table>
       </Card>
+
+      <ProvincialFeePanel projectId={projectId} edition={profile?.standard_edition ?? null} />
 
       <Card>
         <h2 className="mb-2 text-sm font-semibold text-content-primary">

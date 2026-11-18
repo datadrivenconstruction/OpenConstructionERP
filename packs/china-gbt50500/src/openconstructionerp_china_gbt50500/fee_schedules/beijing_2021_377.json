@@ -1,0 +1,130 @@
+{
+  "key": "beijing_2021_377",
+  "jurisdiction": "CN-BJ",
+  "edition": "2021",
+  "name_zh": "北京市2021年预算消耗量标准及京建发〔2025〕377号",
+  "name_en": "Beijing 2021 consumption standard with notice 377 (2025)",
+  "effective_from": "2025-09-01",
+  "vat_rates": {
+    "general": "9",
+    "simplified": "3"
+  },
+  "source": "S11",
+  "options": [
+    {
+      "key": "safety_grade",
+      "values": [
+        "dabiao",
+        "lvse",
+        "yangban"
+      ],
+      "default": "dabiao",
+      "labels_zh": {
+        "dabiao": "达标",
+        "lvse": "绿色",
+        "yangban": "样板"
+      }
+    },
+    {
+      "key": "ring",
+      "values": [
+        "inside",
+        "outside"
+      ],
+      "default": "inside",
+      "labels_zh": {
+        "inside": "五环内",
+        "outside": "五环外"
+      }
+    }
+  ],
+  "lines": [
+    {
+      "code": "safety",
+      "name_zh": "安全文明施工费",
+      "name_en": "Safety and civilised construction fee",
+      "group": "cuoshi",
+      "kind": "safety",
+      "base": {
+        "labour": "1",
+        "plant": "1"
+      },
+      "rate": null,
+      "source": "S12",
+      "rate_options": {
+        "option": "safety_grade",
+        "rates": {
+          "dabiao": "23.53",
+          "lvse": "25.36",
+          "yangban": "28.22"
+        }
+      },
+      "non_competitive": true,
+      "floor": "option"
+    },
+    {
+      "code": "waste",
+      "name_zh": "建筑垃圾运输处置费",
+      "name_en": "Construction waste haulage",
+      "group": "cuoshi",
+      "kind": "other",
+      "base": {
+        "labour": "1",
+        "plant": "1"
+      },
+      "rate": null,
+      "source": "S12",
+      "rate_options": {
+        "option": "ring",
+        "rates": {
+          "inside": "1.4",
+          "outside": "1.1"
+        }
+      }
+    },
+    {
+      "code": "mgmt",
+      "name_zh": "企业管理费",
+      "name_en": "Management fee",
+      "group": "fenbu",
+      "kind": "management",
+      "base": {
+        "direct": "1",
+        "line:safety": "1",
+        "line:waste": "1"
+      },
+      "rate": null,
+      "source": "S11",
+      "user_input": true
+    },
+    {
+      "code": "profit",
+      "name_zh": "利润",
+      "name_en": "Profit",
+      "group": "fenbu",
+      "kind": "profit",
+      "base": {
+        "direct": "1",
+        "line:safety": "1",
+        "line:waste": "1"
+      },
+      "rate": null,
+      "source": "S11",
+      "user_input": true
+    },
+    {
+      "code": "injury_insurance",
+      "name_zh": "农民工工伤保险",
+      "name_en": "Migrant workers' injury insurance",
+      "group": "other",
+      "kind": "insurance",
+      "base": {
+        "direct": "1"
+      },
+      "rate": null,
+      "source": "S11",
+      "user_input": true,
+      "needs_confirmation": true
+    }
+  ]
+}

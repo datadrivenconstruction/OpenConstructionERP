@@ -1,0 +1,101 @@
+{
+  "key": "zhejiang_2018_rules2026",
+  "jurisdiction": "CN-ZJ",
+  "edition": "2018",
+  "name_zh": "浙江省建设工程计价规则（2018版）及浙建建函〔2025〕320号",
+  "name_en": "Zhejiang 2018 pricing rules with the 2026 safety rates",
+  "effective_from": "2026-01-01",
+  "vat_rates": {
+    "general": "9",
+    "simplified": "3"
+  },
+  "source": "S7",
+  "options": [
+    {
+      "key": "zone",
+      "values": [
+        "urban",
+        "non_urban"
+      ],
+      "default": "urban",
+      "labels_zh": {
+        "urban": "市区",
+        "non_urban": "非市区"
+      }
+    }
+  ],
+  "lines": [
+    {
+      "code": "mgmt",
+      "name_zh": "企业管理费",
+      "name_en": "Management fee",
+      "group": "fenbu",
+      "kind": "management",
+      "base": {
+        "labour": "1",
+        "plant": "1"
+      },
+      "rate": "16.57",
+      "source": "S8",
+      "band": {
+        "min": "12.43",
+        "mid": "16.57",
+        "max": "20.71"
+      }
+    },
+    {
+      "code": "profit",
+      "name_zh": "利润",
+      "name_en": "Profit",
+      "group": "fenbu",
+      "kind": "profit",
+      "base": {
+        "labour": "1",
+        "plant": "1"
+      },
+      "rate": "8.10",
+      "source": "S8",
+      "band": {
+        "min": "6.08",
+        "mid": "8.10",
+        "max": "10.12"
+      }
+    },
+    {
+      "code": "safety",
+      "name_zh": "安全文明施工基本费",
+      "name_en": "Safety and civilised construction fee (basic)",
+      "group": "cuoshi",
+      "kind": "safety",
+      "base": {
+        "labour": "1",
+        "plant": "1"
+      },
+      "rate": null,
+      "source": "S7",
+      "rate_options": {
+        "option": "zone",
+        "rates": {
+          "urban": "11.90",
+          "non_urban": "9.91"
+        }
+      },
+      "non_competitive": true,
+      "floor": null,
+      "needs_confirmation": true
+    },
+    {
+      "code": "guifei",
+      "name_zh": "规费",
+      "name_en": "Statutory charges",
+      "group": "guifei",
+      "kind": "guifei",
+      "base": {
+        "labour": "1",
+        "plant": "1"
+      },
+      "rate": "25.78",
+      "source": "S8"
+    }
+  ]
+}
