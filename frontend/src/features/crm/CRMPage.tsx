@@ -77,6 +77,7 @@ import { PageHeader } from '@/shared/ui/PageHeader';
 import { ConfirmDialog } from '@/shared/ui/ConfirmDialog';
 import { SideDrawer } from '@/shared/ui/SideDrawer';
 import { useAuthStore } from '@/stores/useAuthStore';
+import { fetchUsers } from '@/features/users/api';
 import { crmGuide } from './crmGuide';
 import {
   WideModal,
@@ -105,6 +106,8 @@ import {
   qualifyLead,
   disqualifyLead,
   deleteLead,
+  deleteOpportunity,
+  updateActivity,
   parseRemovalRefusal,
   convertLead,
   moveOpportunityStage,
@@ -185,7 +188,7 @@ const LEAD_SOURCES: LeadSource[] = [
   'inbound',
 ];
 
-const ACTIVITY_KINDS: ActivityKind[] = ['call', 'meeting', 'email', 'task', 'note'];
+const ACTIVITY_KINDS: ActivityKind[] = ['call', 'meeting', 'email', 'site_visit', 'task', 'note'];
 
 // ISO-4217 codes offered in the deal currency picker. Keeps multi-currency
 // rollups (MultiCurrencyTotal / MoneyDisplay) consistent by preventing
@@ -1300,6 +1303,24 @@ function DealDrawer({
   const [winReason, setWinReason] = useState('');
   const [noteText, setNoteText] = useState('');
   const [linkOpen, setLinkOpen] = useState(false);
+  const [actKind, setActKind] = useState<ActivityKind>('call');
+  const [actSubject, setActSubject] = useState('');
+  const [actDue, setActDue] = useState('');
+  const [actAssignee, setActAssignee] = useState('');
+  const [confirmDeleteDeal, setConfirmDeleteDeal] = useState(false);
+  // Deleting a deal is gated on MANAGER server-side (`crm.delete`).
+  const userRole = useAuthStore((s) => s.userRole);
+  const canDeleteDeal = userRole === 'admin' || userRole === 'manager';
+
+  const usersQ = useQuery({
+    queryKey: ['crm', 'assignable-users'],
+    queryFn: () => fetchUsers({ is_active: true, limit: 200 }),
+    staleTime: 5 * 60 * 1000,
+  });
+  const usersById = useMemo(
+    () => Object.fromEntries((usersQ.data ?? []).map((u) => [u.id, u.full_name || u.email])),
+    [usersQ.data],
+  );
 
   const activitiesQ = useQuery({
     queryKey: ['crm', 'activities', 'opp', opportunityId],
@@ -1426,7 +1447,51 @@ function DealDrawer({
     onError: (err) => addToast({ type: 'error', title: getErrorMessage(err) }),
   });
 
+  const taskMut = useMutation({
+    mutationFn: () =>
+      createActivity({
+        opportunity_id: opportunityId,
+        account_id: opp?.account_id ?? null,
+        kind: actKind,
+        subject: actSubject.trim(),
+        due_at: actDue || null,
+        assigned_user_id: actAssignee || null,
+      }),
+    onSuccess: () => {
+      setActSubject('');
+      setActDue('');
+      qc.invalidateQueries({ queryKey: ['crm', 'activities'] });
+    },
+    onError: (err) => addToast({ type: 'error', title: getErrorMessage(err) }),
+  });
+
+  const doneMut = useMutation({
+    mutationFn: (a: Activity) =>
+      updateActivity(a.id, { completed_at: a.completed_at ? null : new Date().toISOString() }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['crm', 'activities'] }),
+    onError: (err) => addToast({ type: 'error', title: getErrorMessage(err) }),
+  });
+
+  const deleteDealMut = useMutation({
+    mutationFn: () => deleteOpportunity(opportunityId),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['crm', 'opportunities'] });
+      qc.invalidateQueries({ queryKey: ['crm', 'activities'] });
+      addToast({ type: 'success', title: t('crm.deal_deleted', { defaultValue: 'Deal deleted' }) });
+      setConfirmDeleteDeal(false);
+      onClose();
+    },
+    onError: (err) => {
+      setConfirmDeleteDeal(false);
+      addToast({ type: 'error', title: getErrorMessage(err) });
+    },
+  });
+
   if (!opp) return null;
+
+  const todayIso = new Date().toISOString().slice(0, 10);
+  const isOverdue = (a: Activity) =>
+    !a.completed_at && !!a.due_at && a.due_at.slice(0, 10) < todayIso;
 
   const currentIdx = stages.findIndex((s) => s.id === opp.stage_id);
 
@@ -1806,6 +1871,55 @@ function DealDrawer({
                 {t('crm.log', { defaultValue: 'Log' })}
               </Button>
             </div>
+            <div className="mb-3 grid grid-cols-2 gap-1.5 sm:grid-cols-[110px_1fr_130px_150px_auto]">
+              <select
+                value={actKind}
+                onChange={(e) => setActKind(e.target.value as ActivityKind)}
+                className={`oe-select ${inputCls}`}
+                aria-label={t('crm.kind', { defaultValue: 'Kind' })}
+              >
+                {ACTIVITY_KINDS.filter((k) => k !== 'note').map((k) => (
+                  <option key={k} value={k}>
+                    {t(`crm.kind_${k}`, { defaultValue: k })}
+                  </option>
+                ))}
+              </select>
+              <input
+                value={actSubject}
+                onChange={(e) => setActSubject(e.target.value)}
+                placeholder={t('crm.activity_subject_ph', { defaultValue: 'What needs to happen?' })}
+                className={`oe-input ${inputCls}`}
+              />
+              <input
+                type="date"
+                value={actDue}
+                onChange={(e) => setActDue(e.target.value)}
+                className={`oe-input ${inputCls}`}
+                aria-label={t('crm.due', { defaultValue: 'Due' })}
+              />
+              <select
+                value={actAssignee}
+                onChange={(e) => setActAssignee(e.target.value)}
+                className={`oe-select ${inputCls}`}
+                aria-label={t('crm.assignee', { defaultValue: 'Assigned to' })}
+              >
+                <option value="">{t('crm.unassigned', { defaultValue: 'Unassigned' })}</option>
+                {(usersQ.data ?? []).map((u) => (
+                  <option key={u.id} value={u.id}>
+                    {u.full_name || u.email}
+                  </option>
+                ))}
+              </select>
+              <Button
+                variant="secondary"
+                icon={<Plus size={14} />}
+                onClick={() => taskMut.mutate()}
+                loading={taskMut.isPending}
+                disabled={!actSubject.trim()}
+              >
+                {t('crm.schedule_activity', { defaultValue: 'Add activity' })}
+              </Button>
+            </div>
             {activitiesQ.isLoading ? (
               <SkeletonTable rows={3} columns={2} />
             ) : (activitiesQ.data ?? []).length === 0 ? (
@@ -1821,13 +1935,38 @@ function DealDrawer({
                     key={a.id}
                     className="flex gap-3 border-b border-border-light pb-2 last:border-0"
                   >
-                    <span className="mt-0.5 w-16 shrink-0 text-2xs font-semibold uppercase text-content-tertiary">
-                      {a.kind}
+                    <input
+                      type="checkbox"
+                      className="mt-1 shrink-0"
+                      checked={!!a.completed_at}
+                      disabled={doneMut.isPending}
+                      onChange={() => doneMut.mutate(a)}
+                      aria-label={
+                        a.completed_at
+                          ? t('crm.mark_open', { defaultValue: 'Reopen' })
+                          : t('crm.mark_done', { defaultValue: 'Mark done' })
+                      }
+                    />
+                    <span className="mt-0.5 w-20 shrink-0 text-2xs font-semibold uppercase text-content-tertiary">
+                      {t(`crm.kind_${a.kind}`, { defaultValue: a.kind })}
                     </span>
                     <div className="flex-1">
-                      <p className="text-sm font-medium">
+                      <p
+                        className={`text-sm font-medium ${a.completed_at ? 'text-content-tertiary line-through' : ''}`}
+                      >
                         {a.subject || '—'}
                       </p>
+                      {(a.due_at || a.assigned_user_id) && (
+                        <p
+                          className={`mt-0.5 text-2xs ${isOverdue(a) ? 'font-semibold text-semantic-error' : 'text-content-tertiary'}`}
+                        >
+                          {a.due_at && <DateDisplay value={a.due_at} />}
+                          {isOverdue(a) &&
+                            ` · ${t('crm.activity_overdue', { defaultValue: 'Overdue' })}`}
+                          {a.assigned_user_id &&
+                            ` · ${usersById[a.assigned_user_id] ?? ''}`}
+                        </p>
+                      )}
                       {a.body && a.body !== a.subject && (
                         <p className="mt-0.5 whitespace-pre-wrap text-xs text-content-secondary">
                           {a.body}
@@ -1914,7 +2053,50 @@ function DealDrawer({
               </ul>
             )}
           </Card>
+
+          {canDeleteDeal && (
+            <Card padding="sm">
+              {opp.status === 'won' ? (
+                <p className="text-xs text-content-tertiary">
+                  {t('crm.delete_deal_won_hint', {
+                    defaultValue: 'A won deal stays on record and cannot be deleted.',
+                  })}
+                </p>
+              ) : (
+                <>
+                  <p className="mb-2 text-xs text-content-tertiary">
+                    {t('crm.delete_deal_hint', {
+                      defaultValue:
+                        'For a duplicate or a mistyped deal. Its logged activities and stage history are removed with it. To close a deal you worked, mark it lost instead.',
+                    })}
+                  </p>
+                  <Button
+                    variant="ghost"
+                    icon={<Trash2 size={14} />}
+                    onClick={() => setConfirmDeleteDeal(true)}
+                    disabled={deleteDealMut.isPending}
+                    className="text-semantic-error hover:bg-semantic-error/10"
+                  >
+                    {t('crm.delete_deal', { defaultValue: 'Delete deal' })}
+                  </Button>
+                </>
+              )}
+            </Card>
+          )}
         </div>
+      <ConfirmDialog
+        open={confirmDeleteDeal}
+        onCancel={() => setConfirmDeleteDeal(false)}
+        onConfirm={() => deleteDealMut.mutate()}
+        loading={deleteDealMut.isPending}
+        title={t('crm.delete_deal_title', { defaultValue: 'Delete this deal?' })}
+        message={t('crm.delete_deal_message', {
+          defaultValue:
+            'The deal {{name}}, its activities and stage history are removed for good. This cannot be undone.',
+          name: opp.title,
+        })}
+        confirmLabel={t('crm.delete_deal', { defaultValue: 'Delete deal' })}
+      />
     </SideDrawer>
   );
 }

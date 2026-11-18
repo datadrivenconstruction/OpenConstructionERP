@@ -340,9 +340,10 @@ class ActivityCreate(BaseModel):
     account_id: UUID | None = None
     opportunity_id: UUID | None = None
     lead_id: UUID | None = None
+    assigned_user_id: UUID | None = None
     kind: str = Field(
         default="note",
-        pattern=r"^(call|meeting|email|task|note)$",
+        pattern=r"^(call|meeting|email|site_visit|task|note)$",
     )
     subject: str = Field(default="", max_length=500)
     body: str = Field(default="", max_length=20000)
@@ -358,7 +359,8 @@ class ActivityCreate(BaseModel):
 class ActivityUpdate(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 
-    kind: str | None = Field(default=None, pattern=r"^(call|meeting|email|task|note)$")
+    assigned_user_id: UUID | None = None
+    kind: str | None = Field(default=None, pattern=r"^(call|meeting|email|site_visit|task|note)$")
     subject: str | None = Field(default=None, max_length=500)
     body: str | None = Field(default=None, max_length=20000)
     due_at: str | None = Field(default=None, max_length=40)
@@ -378,6 +380,7 @@ class ActivityResponse(BaseModel):
     account_id: UUID | None
     opportunity_id: UUID | None
     lead_id: UUID | None
+    assigned_user_id: UUID | None = None
     kind: str
     subject: str
     body: str

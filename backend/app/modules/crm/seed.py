@@ -42,10 +42,11 @@ logger = logging.getLogger(__name__)
 _STAGES = (
     ("lead", "Lead", 0, 10, False, False, False, "#94a3b8"),
     ("qualified", "Qualified", 1, 25, False, False, False, "#38bdf8"),
-    ("proposal", "Proposal", 2, 50, False, False, False, "#a78bfa"),
-    ("negotiation", "Negotiation", 3, 75, False, False, False, "#f59e0b"),
-    ("won", "Won", 4, 100, True, True, False, "#22c55e"),
-    ("lost", "Lost", 5, 0, True, False, True, "#ef4444"),
+    ("bidding", "Bidding", 2, 35, False, False, False, "#06b6d4"),
+    ("proposal", "Proposal", 3, 50, False, False, False, "#a78bfa"),
+    ("negotiation", "Negotiation", 4, 75, False, False, False, "#f59e0b"),
+    ("won", "Won", 5, 100, True, True, False, "#22c55e"),
+    ("lost", "Lost", 6, 0, True, False, True, "#ef4444"),
 )
 
 

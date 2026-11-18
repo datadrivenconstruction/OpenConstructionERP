@@ -84,7 +84,7 @@ export type LeadStatus =
 
 export type OpportunityStatus = 'open' | 'won' | 'lost' | 'abandoned';
 
-export type ActivityKind = 'call' | 'meeting' | 'email' | 'task' | 'note';
+export type ActivityKind = 'call' | 'meeting' | 'email' | 'site_visit' | 'task' | 'note';
 
 export type ActivityOutcome =
   | 'no_answer'
@@ -176,6 +176,7 @@ export interface Activity {
   account_id: string | null;
   opportunity_id: string | null;
   lead_id: string | null;
+  assigned_user_id?: string | null;
   kind: ActivityKind;
   subject: string;
   body: string;
@@ -330,6 +331,7 @@ export interface ActivityCreatePayload {
   account_id?: string | null;
   opportunity_id?: string | null;
   lead_id?: string | null;
+  assigned_user_id?: string | null;
   kind?: ActivityKind;
   subject?: string;
   body?: string;

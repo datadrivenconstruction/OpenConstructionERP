@@ -27,6 +27,7 @@ from app.modules.crm.models import (
     Lead,
     Opportunity,
     OpportunityStageHistory,
+    PipelineStage,
 )
 from app.modules.crm.repository import (
     AccountRepository,
@@ -1136,7 +1137,14 @@ class CrmService:
         return opp
 
     async def delete_opportunity(self, opportunity_id: uuid.UUID) -> None:
-        await self.get_opportunity(opportunity_id)
+        opp = await self.get_opportunity(opportunity_id)
+        if opp.status == "won":
+            # A won deal spawned a project and fed win-rate and commission
+            # figures; deleting it would silently rewrite that history.
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail={"code": "opportunity_won", "message": "A won deal stays on record and cannot be deleted."},
+            )
         await self.opportunity_repo.delete(opportunity_id)
 
     async def transition_opportunity_stage(
@@ -1383,6 +1391,27 @@ class CrmService:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Reason not found")
         await self.reason_repo.delete(reason_id)
 
+    async def list_stages(self) -> list[PipelineStage]:
+        """List pipeline stages, adding the standard ``bidding`` stage to older installs."""
+        stages = await self.stage_repo.list_all()
+        codes = {s.code: s for s in stages}
+        if "bidding" in codes or "qualified" not in codes or "proposal" not in codes:
+            return stages
+        at = codes["qualified"].display_order + 1
+        for s in stages:
+            if s.display_order >= at:
+                await self.stage_repo.update_fields(s.id, display_order=s.display_order + 1)
+        await self.stage_repo.create(
+            PipelineStage(
+                code="bidding",
+                name="Bidding",
+                display_order=at,
+                default_probability_percent=35,
+                color="#06b6d4",
+            )
+        )
+        return await self.stage_repo.list_all()
+
     # ── Activities ───────────────────────────────────────────────────────
 
     async def create_activity(
@@ -1408,6 +1437,7 @@ class CrmService:
             account_id=data.account_id,
             opportunity_id=data.opportunity_id,
             lead_id=data.lead_id,
+            assigned_user_id=data.assigned_user_id,
             kind=data.kind,
             subject=data.subject,
             body=data.body,
