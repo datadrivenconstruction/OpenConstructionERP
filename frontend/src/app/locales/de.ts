@@ -59153,6 +59153,12 @@ const resource = {
     "modules.catalog.doc_templates": "Dokumente & Vorlagen",
     "modules.catalog.estimate_archive": "Versiegelte Kalkulationen",
     "modules.catalog.framework_agreements": "Rahmenverträge",
+    "modules.catalog.survey_core": "Vermessungsregister",
+    "modules.catalog.surfaces_volumes": "Volumen",
+    "modules.catalog.setting_out": "Absteckung",
+    "modules.catalog.land_parcels": "Grundstücke und Flurstücke",
+    "modules.catalog.stockpiles": "Haufwerke",
+    "modules.catalog.mine_survey": "Grubenvermessung",
     "modules.pp_name_pakistan_pk": "Pakistan-Baupaket",
     "modules.pp_name_peru_pe": "Peru-Baupaket",
     // stakeholders (module 8) frontend keys: start

@@ -37,6 +37,7 @@ export const ROLES_WITH_OWNER_SCOPED_DELETE: readonly string[] = [
   'estimator',
   'quantity_surveyor',
   'qs',
+  'surveyor',
   'user',
 ];
 
@@ -56,5 +57,6 @@ export const ROLES_WITH_LEAD_DELETE: readonly string[] = [
   'estimator',
   'quantity_surveyor',
   'qs',
+  'surveyor',
   'user',
 ];
