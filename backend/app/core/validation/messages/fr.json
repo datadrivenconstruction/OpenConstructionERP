@@ -412,7 +412,10 @@
       "suggestion": "Attribuez un code GB/T 50500 à 9 chiffres (par exemple 010101001)"
     },
     "valid_code": {
-      "fail": "Le code GB/T 50500 « {code} » est invalide : 9 ou 12 chiffres attendus"
+      "fail": "Le code GB/T 50500 « {code} » est invalide : 9 ou 12 chiffres ou un code complémentaire tel que 01B001 attendus"
+    },
+    "code_unique": {
+      "fail": "Le code d'article « {code} » est utilisé plusieurs fois dans le même sous-projet"
     }
   },
   "cpwd": {

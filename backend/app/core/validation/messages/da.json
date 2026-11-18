@@ -412,7 +412,10 @@
       "suggestion": "Tildel en nicifret GB/T 50500-kode (f.eks. 010101001)"
     },
     "valid_code": {
-      "fail": "Ugyldig GB/T 50500-kode '{code}' – forventer 9 eller 12 cifre"
+      "fail": "Ugyldig GB/T 50500-kode '{code}' – forventer 9 eller 12 cifre eller en supplerende kode som 01B001"
+    },
+    "code_unique": {
+      "fail": "Positionskoden '{code}' er brugt mere end én gang i samme delprojekt"
     }
   },
   "cpwd": {

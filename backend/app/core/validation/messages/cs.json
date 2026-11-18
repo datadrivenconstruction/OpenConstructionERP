@@ -412,7 +412,10 @@
       "suggestion": "Přiřaďte devítimístný kód GB/T 50500 (např. 010101001)"
     },
     "valid_code": {
-      "fail": "Neplatný kód GB/T 50500 '{code}' – očekáváno 9 nebo 12 číslic"
+      "fail": "Neplatný kód GB/T 50500 '{code}' – očekáváno 9 nebo 12 číslic nebo doplňkový kód jako 01B001"
+    },
+    "code_unique": {
+      "fail": "Kód položky '{code}' je v jednom dílčím objektu použit vícekrát"
     }
   },
   "cpwd": {

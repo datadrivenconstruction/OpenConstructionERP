@@ -239,10 +239,12 @@ def test_the_unit_rate_analysis_reads_the_rate_and_not_the_bill_heads() -> None:
     field, and asserts them as equalities. The management fee is what a Chinese
     unit rate carries as overhead; 措施项目费 and 规费 are not part of it.
     """
-    lines = list(DEFAULT_MARKUP_TEMPLATES["CN"])
+    for region, expected_heads in (("CN", 1), ("CN_GB50500_2013", 2)):
+        lines = list(DEFAULT_MARKUP_TEMPLATES[region])
 
-    assert _markup_pct(lines, "overhead") == 8
-    assert _markup_pct(lines, "profit") == 5
+        assert _markup_pct(lines, "overhead") == 8, region
+        assert _markup_pct(lines, "profit") == 5, region
 
-    heads = sum(1 for line in lines if str(line["category"]) == "other")
-    assert heads == 2, "措施项目费 and 规费 are the two heads; a third would change what the analysis omits"
+        # 措施项目费 is a head in both editions; 规费 is a head only in 2013.
+        heads = sum(1 for line in lines if str(line["category"]) == "other")
+        assert heads == expected_heads, f"{region}: a further head would change what the analysis omits"

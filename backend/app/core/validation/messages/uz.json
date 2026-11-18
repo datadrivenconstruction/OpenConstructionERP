@@ -412,7 +412,10 @@
       "suggestion": "Toʻqqiz xonali GB/T 50500 kodini tayinlang (masalan, 010101001)"
     },
     "valid_code": {
-      "fail": "GB/T 50500 '{code}' kodi yaroqsiz; 9 yoki 12 raqam kutiladi"
+      "fail": "GB/T 50500 '{code}' kodi yaroqsiz; 9 yoki 12 raqam yoki 01B001 kabi qo‘shimcha kod kutiladi"
+    },
+    "code_unique": {
+      "fail": "'{code}' pozitsiya kodi bitta kichik loyihada bir necha marta ishlatilgan"
     }
   },
   "cpwd": {

@@ -21,6 +21,7 @@ from app.modules.einvoice.cii import (
     EInvoice,
     EInvoiceError,
     Party,
+    _delivery_address,
     _money,
     _pct,
     _price,
@@ -186,9 +187,25 @@ def build_ubl_xml(inv: EInvoice, *, strict: bool = True) -> bytes:
     if inv.order_reference:
         oref = _sub(root, "cac", "OrderReference")
         _sub(oref, "cbc", "ID", inv.order_reference)
+    # BT-11. A UBL CreditNote has no ProjectReference element; it is left off there.
+    if inv.project_reference and not credit:
+        pref = _sub(root, "cac", "ProjectReference")
+        _sub(pref, "cbc", "ID", inv.project_reference)
 
     _party(root, "AccountingSupplierParty", inv.seller)
     _party(root, "AccountingCustomerParty", inv.buyer)
+
+    site = _delivery_address(inv)
+    if site:
+        loc = _sub(_sub(root, "cac", "Delivery"), "cac", "DeliveryLocation")
+        addr = _sub(loc, "cac", "Address")
+        for key, tag in (("line1", "StreetName"), ("city", "CityName"), ("postcode", "PostalZone")):
+            if site.get(key):
+                _sub(addr, "cbc", tag, site[key])
+        if site.get("subdivision"):
+            _sub(addr, "cbc", "CountrySubentity", site["subdivision"])
+        country = _sub(addr, "cac", "Country")
+        _sub(country, "cbc", "IdentificationCode", site["country_code"])
 
     if inv.payment_means_code:
         pm = _sub(root, "cac", "PaymentMeans")

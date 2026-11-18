@@ -412,7 +412,10 @@
       "suggestion": "Määrake üheksakohaline GB/T 50500 kood (nt 010101001)"
     },
     "valid_code": {
-      "fail": "Vigane GB/T 50500 kood '{code}'; oodatud on 9 või 12 numbrit"
+      "fail": "Vigane GB/T 50500 kood '{code}'; oodatud on 9 või 12 numbrit või lisakood nagu 01B001"
+    },
+    "code_unique": {
+      "fail": "Kirje koodi '{code}' on samas alamprojektis kasutatud mitu korda"
     }
   },
   "cpwd": {

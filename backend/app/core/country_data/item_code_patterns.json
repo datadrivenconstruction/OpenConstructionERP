@@ -1,0 +1,30 @@
+{
+  "_comment": "Item-code patterns per classification standard and edition, plus subdivision overlays and the scope a code must be unique in. Read by app.core.item_codes. A code passes when any pattern of its edition (or of the project's subdivision overlay) matches it in full.",
+  "standards": {
+    "gb50500": {
+      "country": "CN",
+      "uniqueness_scope": "sub_project",
+      "default_edition": "gb50500@2024",
+      "editions": {
+        "gb50500@2013": {
+          "label": "GB 50500-2013",
+          "in_force_from": "2013-07-01",
+          "patterns": ["^\\d{9}$", "^\\d{12}$", "^0\\dB\\d{3}$"],
+          "source": "GB 50500-2013 / GB 50854-2013: 9-digit national code, 3-digit bill suffix, supplementary codes 0xB001"
+        },
+        "gb50500@2024": {
+          "label": "GB/T 50500-2024",
+          "in_force_from": "2025-09-01",
+          "patterns": ["^\\d{9}$", "^\\d{12}$", "^0\\dB\\d{3}$"],
+          "source": "GB/T 50500-2024 via Shanghai application rules 2025, 4.2.5 and 4.2.6; appendix numbering not verified"
+        }
+      },
+      "subdivisions": {
+        "CN-SH": {
+          "patterns": ["^沪\\d{9}$", "^沪\\d{12}$"],
+          "source": "Shanghai application rules 2025, 4.2.4"
+        }
+      }
+    }
+  }
+}

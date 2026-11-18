@@ -4,10 +4,15 @@ Kept in its own module so unit tests can import the manifest without
 triggering the package ``__init__`` side-effects.
 
 Validation this pack switches on:
-  * ``gbt50500`` - two rules in the core engine, both over the bill of
-    quantities item code. One requires the code to be present on every
-    position, the other requires it to be a 9-digit or 12-digit numeric
-    national code. That is the whole of what the engine checks.
+  * ``gbt50500`` - three rules in the core engine over the bill of
+    quantities item code: present on every position; a 9-digit or 12-digit
+    national code or a supplementary code such as ``01B001`` (plus the 沪
+    codes on a Shanghai project); and used once per sub-project. The
+    patterns live in ``backend/app/core/country_data/item_code_patterns.json``.
+  * ``cn_vat`` - fourteen rules in ``oe_china_pack`` over a project's
+    bill, tax profile, 预缴 periods and 数电票 data: edition and 规费 head,
+    VAT base and line rates, the simplified-method elections and their
+    lock, the prepayment formula and the invoice face.
 
 Two spellings, and they are not interchangeable. ``gbt50500`` is the
 engine rule set: it is the rule ids, the ``standard`` attribute on the
@@ -48,20 +53,24 @@ for the reader; no engine rules exist behind them today:
   * GB/T 50378-2019 - 绿色建筑评价标准 (assessment standard for green
     building).
 
-Edition. The pack states GB 50500-2013 because that is the edition the
-shipped item codes were authored against and the only one whose text we
-have. GB/T 50500-2024 superseded it from 2025-09-01, along with the
-GB/T 50854-2024 measurement family; neither text could be obtained, so
-the pack does not claim conformance to them. Note the prefix while
-reading the two: the 2013 edition is GB, a mandatory code, and the 2024
-edition is GB/T, a recommended standard.
+Edition. Each project stores its edition on its tax profile. GB/T
+50500-2024 (in force 2025-09-01) is the default for a project created on
+or after that day: four heads, no 规费 head, VAT base without the
+specialist prime-cost sum. A project created before it reads as GB
+50500-2013 and keeps its five heads; nothing re-prices a stored bill. The
+pack ships the structure, the codes and its own wording, never the text
+of either edition, and claims no conformance until a cost engineer has
+read the text. Note the prefix: the 2013 edition is GB, a mandatory code,
+and the 2024 edition is GB/T, a recommended standard.
 
-Tax model:
-  * cn_vat_9 - VAT general tax method (一般计税) at 9% output VAT on
-    construction services, shown as a separate cumulative line on top of
-    the tax-exclusive direct cost. Enterprise management fee, statutory
-    charges (规费), profit and the safe/civilised-construction fee are
-    taken on the direct cost per the Shanghai cost build-up.
+Tax model (VAT Law, in force 2026-01-01):
+  * General method 9% on works, 13% on goods including goods supplied
+    with installation, 6% on other services; shown as its own head on top
+    of the tax-exclusive bill.
+  * Simplified method 3% for 清包工 and 老项目 until 2027-12-31; 甲供
+    only where elected before 2026-01-01. A 36-month lock on any election.
+  * 预缴 where the site is in another region: 2% general, 3% simplified,
+    on receipts less subcontract payments, net of VAT.
 
 CWICR regions:
   * Only ``cwicr-zh-shanghai`` is wired in for the demo. Additional
@@ -84,8 +93,10 @@ MANIFEST = PartnerPackManifest(
         "Chinese and English UI, CNY as the default currency, the VAT "
         "general tax method (9%) as the default tax template, Shanghai cost "
         "data and a Shanghai office-tower demo project. Validation covers "
-        "the GB 50500 bill of quantities item code: it has to be present, "
-        "and it has to be a 9-digit or 12-digit national code."
+        "the GB 50500 item code (national, supplementary and Shanghai codes, "
+        "unique per sub-project) and, under GB/T 50500-2024 and the VAT Law, "
+        "the VAT base, line rates, simplified-method elections, 预缴 and "
+        "数电票 data."
     ),
     default_locale="zh",
     # No pack-shipped vocabulary overlay. A zh overlay is wanted for this pack
@@ -113,7 +124,7 @@ MANIFEST = PartnerPackManifest(
     default_methodology="china",
     # Reference documents. These are read by a person, not by the engine: each
     # states what a Chinese bill does and why, and each carries a review_status
-    # saying how far it has been checked. Only the first is backed by engine
+    # saying how far it has been checked. The item-code and VAT documents are backed by engine
     # rules today, and it names them in enables_rule_ids.
     validation_rule_packs=[
         "cn_gb50500_qingdan_bianma",  # the twelve-digit item code and the five required elements
@@ -121,11 +132,12 @@ MANIFEST = PartnerPackManifest(
         "cn_zonghe_danjia",  # what the comprehensive unit rate contains, and what it does not
         "cn_gb50854_gongchengliang",  # net measurement, and where the waste goes instead
         "cn_guifei_anquanwenming",  # the two fees that may not be discounted
-        "cn_zengzhishui_jianzhu",  # VAT: general method 9%, simplified method 3%
+        "cn_zengzhishui_jianzhu",  # VAT under the VAT Law: methods, elections, 预缴
         "cn_zhaobiao_jiesuan",  # the bid ceiling, and how the price moves afterwards
     ],
     validation_rule_sets=[
-        "gbt50500",  # GB 50500-2013 item code: presence and 9/12-digit format
+        "gbt50500",  # GB 50500 item code: presence, format per edition, uniqueness
+        "cn_vat",  # VAT base, rates, elections, 预缴 and 数电票 (oe_china_pack)
         #
         # Planned, not built, and deliberately not listed above. Each of
         # these would need rules written in the core engine; none exists
@@ -134,7 +146,7 @@ MANIFEST = PartnerPackManifest(
         # gb50010_concrete (GB 50010-2010), gb50011_seismic (GB 50011-2010),
         # gb50009_loads (GB 50009-2012), gb50016_fire (GB 50016-2014),
         # gbt50378_green (GB/T 50378-2019) and china_tax_construction
-        # (VAT 9% plus statutory charges). Add a slug back on the day its
+        # (superseded by cn_vat). Add a slug back on the day its
         # rules land, not before.
     ],
     default_modules=[],  # empty = show all (Shape A - no module hiding)

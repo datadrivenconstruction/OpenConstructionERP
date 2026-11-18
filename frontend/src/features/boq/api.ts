@@ -732,6 +732,24 @@ export function billDirectCost(
   );
 }
 
+/** The part of the direct cost priced with its tax already in it.
+ *
+ * A line whose ``metadata.tax_inclusive`` is true (a specialist prime-cost
+ * sum, for one) stays in the direct cost and out of the base of every
+ * ``tax`` markup, which is what the server's markup cascade does too.
+ */
+export function billTaxInclusiveCost(
+  positions: ReadonlyArray<Pick<Position, 'unit' | 'total' | 'quantity' | 'unit_rate' | 'metadata'>>,
+  baseCurrency: string | undefined | null,
+  fxRates: Array<{ currency: string; rate: number }> | undefined | null,
+): number {
+  return billDirectCost(
+    positions.filter((p) => (p.metadata as Record<string, unknown> | null | undefined)?.tax_inclusive === true),
+    baseCurrency,
+    fxRates,
+  );
+}
+
 /** A position nobody has typed into yet: no description and no quantity.
  *
  * "Add Position" creates the row on the server straight away and opens its

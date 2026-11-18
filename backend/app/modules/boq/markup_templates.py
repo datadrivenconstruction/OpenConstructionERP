@@ -34,6 +34,7 @@ __all__ = [
     "DEFAULT_MARKUP_TEMPLATES",
     "REGION_BY_COUNTRY",
     "REGION_VARIANTS",
+    "EDITION_REGIONS",
     "NON_SINGLE_TAX_REGIONS",
     "PL_KOSZTORYS_NARZUTY",
     "PL_KOSZTORYS_REVIEW_STATUS",
@@ -686,14 +687,54 @@ DEFAULT_MARKUP_TEMPLATES: dict[str, list[dict[str, object]]] = {
     # and the analysis sheet reported sixteen percent of overhead on a Chinese
     # bill whose management fee is eight.
     #
-    # 规费 is a placeholder and is meant to be read as one. The charge is real
-    # and mandatory, but it is set provincially and itemised (社会保险费,
-    # 住房公积金, and where it still applies 工程排污费), so no single national
-    # percentage is right anywhere; five is an order of magnitude to start
-    # editing from. The line is kept rather than dropped: the text of
-    # GB/T 50500-2024 could not be obtained, and not having read a repeal is
-    # not the same as having read a retention.
+    # GB/T 50500-2024 (in force 2025-09-01) prices a bill in four heads:
+    # 分部分项, 措施项目, 其他项目 and 增值税. 规费 is no longer a head of its
+    # own; provinces fold it into labour and the management fee (Shanghai
+    # application rules 2025, Guangdong 粤标定函〔2025〕24号). This stack is
+    # what a new Chinese bill is seeded with. A project on GB 50500-2013 is
+    # seeded with ``CN_GB50500_2013`` below, chosen from the project's stored
+    # edition, and a bill already priced is never re-seeded by an edition.
+    #
+    # 专业工程暂估价 is priced VAT-inclusive. A position flagged
+    # ``tax_inclusive`` stays out of the base of every ``tax`` line, which
+    # is what keeps the VAT line here from taxing it a second time.
     "CN": [
+        {
+            "name": "\u4f01\u4e1a\u7ba1\u7406\u8d39 (Enterprise management fee)",
+            "category": "overhead",
+            "percentage": "8.0",
+            "apply_to": "direct_cost",
+            "sort_order": 0,
+        },
+        {
+            "name": "\u5229\u6da6 (Profit)",
+            "category": "profit",
+            "percentage": "5.0",
+            "apply_to": "direct_cost",
+            "sort_order": 1,
+        },
+        {
+            "name": "\u63aa\u65bd\u9879\u76ee\u8d39 (Preliminaries)",
+            "category": "other",
+            "percentage": "8.0",
+            "apply_to": "direct_cost",
+            "sort_order": 2,
+        },
+        {
+            "name": "\u589e\u503c\u7a0e (VAT)",
+            "category": "tax",
+            "percentage": "9.0",
+            "apply_to": "cumulative",
+            "sort_order": 3,
+        },
+    ],
+    # GB 50500-2013: five heads, 规费 among them. 规费 is a placeholder and is
+    # meant to be read as one. The charge is real and mandatory, but it is set
+    # provincially and itemised (社会保险费, 住房公积金, and where it still
+    # applies 工程排污费), so no single national percentage is right anywhere;
+    # five is an order of magnitude to start editing from. Offered as the CN
+    # variant, and seeded for a project whose edition is 2013.
+    "CN_GB50500_2013": [
         {
             "name": "\u4f01\u4e1a\u7ba1\u7406\u8d39 (Enterprise management fee)",
             "category": "overhead",
@@ -2920,6 +2961,15 @@ REGION_BY_COUNTRY: dict[str, str] = {
 # generali and utile d'impresa that a price-list rate already contains.
 REGION_VARIANTS: dict[str, str] = {
     "IT": "IT_PREZZARIO",
+    "CN": "CN_GB50500_2013",
+}
+
+# A region whose bill standard changed edition, and the stack each edition is
+# seeded with. Keyed by the edition keys of
+# ``app/core/country_data/item_code_patterns.json``; an edition not named here
+# takes the region's own stack.
+EDITION_REGIONS: dict[str, dict[str, str]] = {
+    "CN": {"gb50500@2013": "CN_GB50500_2013", "gb50500@2024": "CN"},
 }
 
 # Regions whose tax lines a single country VAT rate cannot stand in for, and

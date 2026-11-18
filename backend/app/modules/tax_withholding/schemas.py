@@ -820,3 +820,68 @@ __all__ = [
     "StatutoryUpsertRequest",
     "WithholdingFinding",
 ]
+
+
+# ── Place-of-supply prepayment ───────────────────────────────────────────────
+
+
+class PrepaymentPeriodIn(BaseModel):
+    """One period's gross receipts and gross subcontract payments."""
+
+    period: str = Field(..., min_length=1, max_length=40)
+    receipts: FiniteDecimal = Field(..., ge=0)
+    subcontract_paid: FiniteDecimal = Field(default=Decimal(0), ge=0)
+    recorded_prepaid: FiniteDecimal | None = Field(default=None, ge=0)
+
+
+class PrepaymentRequest(BaseModel):
+    """Periods in filing order and the two rates the prepayment is computed at."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    periods: list[PrepaymentPeriodIn] = Field(..., min_length=1, max_length=240)
+    tax_rate_pct: FiniteDecimal = Field(..., ge=0, le=100)
+    prepay_rate_pct: FiniteDecimal = Field(..., ge=0, le=100)
+    carried_in: FiniteDecimal = Field(default=Decimal(0), ge=0)
+
+
+class PrepaymentPeriodOut(BaseModel):
+    """The computed prepayment of one period."""
+
+    period: str
+    receipts: Decimal
+    subcontract_paid: Decimal
+    carried_in: Decimal
+    base_gross: Decimal
+    base_net: Decimal
+    prepaid: Decimal
+    carried_out: Decimal
+    recorded_prepaid: Decimal | None = None
+    difference: Decimal | None = None
+    matches: bool | None = None
+
+    @field_serializer(
+        "receipts",
+        "subcontract_paid",
+        "carried_in",
+        "base_gross",
+        "base_net",
+        "prepaid",
+        "carried_out",
+        "recorded_prepaid",
+        "difference",
+    )
+    def _money(self, value: Decimal | None) -> str | None:
+        return None if value is None else str(value)
+
+
+class PrepaymentResponse(BaseModel):
+    """The schedule and its totals."""
+
+    periods: list[PrepaymentPeriodOut]
+    total_prepaid: Decimal
+    carried_forward: Decimal
+
+    @field_serializer("total_prepaid", "carried_forward")
+    def _money(self, value: Decimal) -> str:
+        return str(value)

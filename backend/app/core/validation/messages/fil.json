@@ -412,7 +412,10 @@
       "suggestion": "Magtalaga ng 9-digit GB/T 50500 code (halimbawa, 010101001)"
     },
     "valid_code": {
-      "fail": "Hindi wasto ang GB/T 50500 code na '{code}'; inaasahan ang 9 o 12 digit"
+      "fail": "Hindi wasto ang GB/T 50500 code na '{code}'; inaasahan ang 9 o 12 digit o karagdagang code gaya ng 01B001"
+    },
+    "code_unique": {
+      "fail": "Ang item code na '{code}' ay ginamit nang higit sa isang beses sa iisang sub-project"
     }
   },
   "cpwd": {

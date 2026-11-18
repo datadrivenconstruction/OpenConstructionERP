@@ -1,7 +1,7 @@
 {
   "rule_pack_id": "cn_zengzhishui_jianzhu",
-  "name": "VAT on construction services: two methods, two rates",
-  "name_zh": "建筑服务增值税：一般计税与简易计税",
+  "name": "VAT on construction services under the VAT Law",
+  "name_zh": "建筑服务增值税：增值税法下的一般计税与简易计税",
   "standard": "gb50500",
   "jurisdiction": "CN",
   "applies_to": [
@@ -9,34 +9,67 @@
     "invoicing",
     "reporting"
   ],
-  "review_status": "Drawn from the published national codes and from public statutory sources. Pending review by a Chinese cost engineer (造价工程师) before it is relied on for a tender.",
+  "review_status": "Drawn from the published statutes and announcements named below. Pending review by a Chinese cost engineer (造价工程师) and a tax adviser before it is relied on for a tender. The 预缴 rates rest on a secondary reading and are marked unverified.",
   "references": [
-    "财税〔2016〕36号 营业税改征增值税试点实施办法",
-    "财税〔2018〕32号",
-    "财政部 税务总局 海关总署公告2019年第39号",
-    "住建部办公厅〔2016〕4号 建筑业营改增计价依据调整"
+    "中华人民共和国增值税法 (2024-12-25, in force 2026-01-01) Art.10, Art.11",
+    "增值税法实施条例 (国务院令第826号, in force 2026-01-01) Art.16, Art.36-38, Art.45",
+    "财政部 税务总局公告2026年第10号",
+    "财政部 税务总局公告2026年第13号",
+    "财政部 税务总局公告2026年第14号 (secondary reading, verify)",
+    "国家税务总局公告2024年第11号 (数电票)"
   ],
-  "description": "Construction moved from business tax to VAT in 2016, and the whole of the pricing base moved with it: a Chinese bill is priced tax-exclusive (除税价) and the tax is added as bill five. Which rate applies is not a property of the work but of the contract, and a contractor can be running both methods on different jobs at the same time.",
+  "historical_references": [
+    "财税〔2016〕36号 营业税改征增值税试点实施办法 (replaced by the VAT Law from 2026-01-01)",
+    "财税〔2018〕32号 (rate history)",
+    "财政部 税务总局 海关总署公告2019年第39号 (rate history)",
+    "住建部办公厅〔2016〕4号 建筑业营改增计价依据调整 (tax-exclusive pricing)"
+  ],
+  "description": "A Chinese bill is priced tax-exclusive and the VAT is added as its own head. Under GB/T 50500-2024 that head is the fourth (增值税); under GB 50500-2013 it is the fifth (税金), after 规费. The rate follows the contract and the method the project elected, so a contractor can run both methods on different jobs at the same time.",
   "methods": [
     {
       "name_zh": "一般计税方法",
       "name": "general method",
       "rate": 9,
       "basis": "output VAT on the tax-exclusive works cost, with input VAT credited",
-      "applies_to": "construction services in general"
+      "applies_to": "construction services in general; goods sold with installation are 13 from 2026-01-01, other services 6"
     },
     {
       "name_zh": "简易计税方法",
       "name": "simplified method",
       "rate": 3,
-      "basis": "a collection rate on the tax-exclusive works cost, with no input credit",
-      "applies_to": "labour-only contracts (清包工), works where the employer supplies the materials (甲供工程), and old projects (老项目) whose permit or contract predates 2016-04-30, at the contractor's election"
+      "basis": "a collection rate on gross receipts divided by 1.03, with no input credit",
+      "applies_to": "labour-only contracts (清包工) and old projects (老项目, permit start before 2016-04-30) until 2027-12-31; employer-supplied works (甲供工程) only where the project elected before 2026-01-01"
     }
   ],
+  "elections": [
+    {"basis": "labour_only", "name_zh": "清包工", "valid_to": "2027-12-31"},
+    {"basis": "old_project", "name_zh": "老项目", "permit_start_before": "2016-04-30", "valid_to": "2027-12-31"},
+    {"basis": "employer_supplied", "name_zh": "甲供工程", "no_new_election_from": "2026-01-01", "grandfathered": true}
+  ],
+  "prepayment": {
+    "name_zh": "跨地区预缴",
+    "formula": "(gross receipts - subcontract payments) / (1 + rate) x prepayment rate",
+    "general_pct": 2,
+    "simplified_pct": 3,
+    "carry_forward": "a negative base prepays nothing and the shortfall is deducted next period",
+    "verified": false
+  },
   "practice_notes": [
     "The 9 percent figure is the rate since 2019-04-01. It was 11 percent from 2016 and 10 percent from 2018-05-01, so an older bill is not wrong for carrying a different number",
-    "Tax-exclusive pricing means every rate in bills one to four already excludes VAT; applying the rate to a tax-inclusive base overstates the total",
-    "The election between methods is made per project and is not freely reversible"
+    "Every rate in the other heads already excludes VAT; applying the rate to a tax-inclusive base overstates the total",
+    "专业工程暂估价 is priced VAT-inclusive and stays out of the VAT base",
+    "A simplified-method election is kept for 36 months",
+    "A 甲供 material line is priced in the bill and in the VAT base, and is deducted on the payment application rather than invoiced"
   ],
-  "enables_rule_ids": []
+  "enables_rule_ids": [
+    "cn.vat_base_pc_sum",
+    "cn.vat_rate_line",
+    "cn.simplified_jiagong",
+    "cn.simplified_sunset",
+    "cn.simplified_lock",
+    "cn.prepay_calc",
+    "cn.prepay_subcontract_invoice",
+    "cn.fapiao_site",
+    "cn.fapiao_number"
+  ]
 }

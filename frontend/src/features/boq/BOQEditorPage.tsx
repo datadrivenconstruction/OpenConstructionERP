@@ -30,6 +30,7 @@ import { useDisplayQuantity } from '@/shared/hooks/useDisplayQuantity';
 import {
   boqApi,
   billDirectCost,
+  billTaxInclusiveCost,
   exportablePositions,
   groupPositionsIntoSections,
   isEmptyPosition,
@@ -2571,6 +2572,11 @@ export function BOQEditorPage() {
     return billDirectCost(boq.positions, currencyCode, fxRates);
   }, [boq, currencyCode, fxRates]);
 
+  const taxInclusiveCost = useMemo(
+    () => (boq ? billTaxInclusiveCost(boq.positions, currencyCode, fxRates) : 0),
+    [boq, currencyCode, fxRates],
+  );
+
   const markupTotals = useMemo(() => {
     let running = directCost;
     return markups
@@ -2612,7 +2618,7 @@ export function BOQEditorPage() {
    * ``cost-breakdown.grand_total`` (see the ``costBreakdown`` query above),
    * which is what the toolbar card, the Markup panel and the Cost Breakdown
    * panel print. Audit #156. */
-  const vatAmount = netTotal * vatRate;
+  const vatAmount = (netTotal - taxInclusiveCost) * vatRate;
   const grossTotal = netTotal + vatAmount;
 
   /* ── Display currency (Issue #88) ─────────────────────────────────────
@@ -5965,6 +5971,7 @@ export function BOQEditorPage() {
             fmt={fmt}
             openSignal={markupOpenSignal}
             pricedFromPublishedRates={boq?.metadata?.priced_from_published_rates === true}
+            taxInclusiveCost={taxInclusiveCost}
             readOnly={Boolean(boq?.is_locked)}
           />
         </div>

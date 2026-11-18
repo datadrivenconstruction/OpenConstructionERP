@@ -412,7 +412,10 @@
       "suggestion": "Määritä yhdeksännumeroinen GB/T 50500 -koodi (esim. 010101001)"
     },
     "valid_code": {
-      "fail": "Virheellinen GB/T 50500 -koodi '{code}'; odotetaan 9 tai 12 numeroa"
+      "fail": "Virheellinen GB/T 50500 -koodi '{code}'; odotetaan 9 tai 12 numeroa tai lisäkoodia kuten 01B001"
+    },
+    "code_unique": {
+      "fail": "Nimikekoodia '{code}' käytetään samassa osahankkeessa useammin kuin kerran"
     }
   },
   "cpwd": {

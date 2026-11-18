@@ -188,6 +188,11 @@ class EInvoice:
     type_code: str = "380"  # BT-3 (380 invoice, 381 credit note)
     buyer_reference: str | None = None  # BT-10 (Leitweg-ID for XRechnung)
     order_reference: str | None = None  # BT-13 (buyer PO)
+    project_reference: str | None = None  # BT-11
+    project_name: str | None = None  # CII SpecifiedProcuringProject/Name; required beside BT-11 there
+    # BG-15 deliver-to address: the site of a construction invoice. Keys
+    # ``line1``, ``city``, ``postcode``, ``subdivision``, ``country_code``.
+    delivery_address: dict[str, str] | None = None
     due_date: str | None = None  # BT-9 (ISO)
     payment_terms: str | None = None  # BT-20
     prepaid_amount: Decimal = Decimal("0")  # BT-113
@@ -211,6 +216,14 @@ class EInvoice:
 
 
 # --- formatting helpers ---------------------------------------------------
+
+
+def _delivery_address(inv: EInvoice) -> dict[str, str]:
+    """The BG-15 address, or empty when it cannot carry the country BT-80 requires."""
+    raw = inv.delivery_address or {}
+    site = {k: str(v).strip() for k, v in raw.items() if v is not None and str(v).strip()}
+    return site if site.get("country_code") else {}
+
 
 _2P = Decimal("0.01")
 _4P = Decimal("0.0001")
@@ -424,9 +437,25 @@ def build_cii_xml(inv: EInvoice, *, strict: bool = True) -> bytes:
     if inv.order_reference:
         ref = _sub(agr, "ram", "BuyerOrderReferencedDocument")
         _sub(ref, "ram", "IssuerAssignedID", inv.order_reference)
+    if inv.project_reference:
+        proj = _sub(agr, "ram", "SpecifiedProcuringProject")
+        _sub(proj, "ram", "ID", inv.project_reference)
+        _sub(proj, "ram", "Name", inv.project_name or inv.project_reference)
 
     # 3c. Header delivery (mandatory container, may be empty)
-    _sub(tx, "ram", "ApplicableHeaderTradeDelivery")
+    dlv = _sub(tx, "ram", "ApplicableHeaderTradeDelivery")
+    site = _delivery_address(inv)
+    if site:
+        addr = _sub(_sub(dlv, "ram", "ShipToTradeParty"), "ram", "PostalTradeAddress")
+        for key, tag in (
+            ("postcode", "PostcodeCode"),
+            ("line1", "LineOne"),
+            ("city", "CityName"),
+            ("country_code", "CountryID"),
+            ("subdivision", "CountrySubDivisionName"),
+        ):
+            if site.get(key):
+                _sub(addr, "ram", tag, site[key])
 
     # 3d. Header settlement (currency, tax breakdown, payment, totals)
     stl = _sub(tx, "ram", "ApplicableHeaderTradeSettlement")

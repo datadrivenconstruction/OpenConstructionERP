@@ -412,7 +412,10 @@
       "suggestion": "Dodijelite deveteroznamenkastu šifru GB/T 50500 (npr. 010101001)"
     },
     "valid_code": {
-      "fail": "Nevaljana šifra GB/T 50500 '{code}'; očekuje se 9 ili 12 znamenki"
+      "fail": "Nevaljana šifra GB/T 50500 '{code}'; očekuje se 9 ili 12 znamenki ili dopunska šifra poput 01B001"
+    },
+    "code_unique": {
+      "fail": "Šifra stavke '{code}' koristi se više puta u istom potprojektu"
     }
   },
   "cpwd": {

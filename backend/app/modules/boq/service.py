@@ -300,6 +300,7 @@ from app.modules.boq.gaeb_common import is_excluded_from_total
 from app.modules.boq.markup_templates import (
     CONSTRUCTION_TIER_COUNTRIES,
     CONSTRUCTION_TIER_TAX_CODE,
+    EDITION_REGIONS,
     region_key_for_country,
     resolve_region_lines,
 )
@@ -1713,6 +1714,7 @@ def _calculate_markup_amounts(
     direct_cost: Decimal,
     markups: list[BOQMarkup],
     escalation_factors: Mapping[uuid.UUID, Decimal] | None = None,
+    tax_inclusive_cost: Decimal = Decimal("0"),
 ) -> list[tuple[BOQMarkup, Decimal]]:
     """Compute the dollar amount for each active markup line.
 
@@ -1775,6 +1777,11 @@ def _calculate_markup_amounts(
             a total that quietly absorbs an unknown is a number nobody can
             check. If this ever produces a zero for a live line, the caller
             skipped the resolution step.
+        tax_inclusive_cost: The part of ``direct_cost`` priced with its tax
+            already in it (a position flagged ``tax_inclusive``, such as a
+            specialist prime-cost sum). It stays in every base except the base
+            of a ``tax`` line, so tax is not charged on it a second time. Zero,
+            the default, is the bill exactly as before the flag.
 
     Returns:
         List of (markup, computed_amount) tuples preserving input order.
@@ -1798,6 +1805,8 @@ def _calculate_markup_amounts(
             base = direct_cost + running_sum
         else:
             base = direct_cost
+        if tax_inclusive_cost and (markup.category or "").lower() == "tax":
+            base -= tax_inclusive_cost
 
         # Calculate amount based on type
         markup_type = (markup.markup_type or "percentage").lower()
@@ -1822,6 +1831,12 @@ def _calculate_markup_amounts(
         results.append((markup, amount))
 
     return results
+
+
+def _is_tax_inclusive(position: Position) -> bool:
+    """Whether a position is priced with its tax already in it (``metadata.tax_inclusive``)."""
+    meta = getattr(position, "metadata_", None)
+    return isinstance(meta, dict) and meta.get("tax_inclusive") is True
 
 
 def _scope_chain(
@@ -1966,8 +1981,10 @@ def _calculate_markup_amounts_scoped(
     scope_ids: set[uuid.UUID] = {
         m.scope_position_id for m in markups if m.scope_position_id is not None and m.is_active
     }
+    amount_of = leaf_amount or (lambda p: Decimal(str(_str_to_float(p.total))))
     if not scope_ids:
-        return _calculate_markup_amounts(direct_cost, markups, escalation_factors)
+        inclusive = sum((amount_of(p) for p in positions if not _is_section(p) and _is_tax_inclusive(p)), Decimal("0"))
+        return _calculate_markup_amounts(direct_cost, markups, escalation_factors, inclusive)
 
     bill_wide = [m for m in markups if m.scope_position_id is None]
     overrides_by_scope: dict[uuid.UUID, list[BOQMarkup]] = {}
@@ -1976,9 +1993,9 @@ def _calculate_markup_amounts_scoped(
             overrides_by_scope.setdefault(markup.scope_position_id, []).append(markup)
 
     parent_of: dict[uuid.UUID, uuid.UUID | None] = {p.id: p.parent_id for p in positions}
-    amount_of = leaf_amount or (lambda p: Decimal(str(_str_to_float(p.total))))
 
     buckets: dict[tuple[uuid.UUID, ...], Decimal] = {}
+    inclusive_by_bucket: dict[tuple[uuid.UUID, ...], Decimal] = {}
     walked = Decimal("0")
     for position in positions:
         if _is_section(position):
@@ -1986,6 +2003,8 @@ def _calculate_markup_amounts_scoped(
         amount = amount_of(position)
         key = _scope_chain(position.id, parent_of, scope_ids)  # type: ignore[arg-type]
         buckets[key] = buckets.get(key, Decimal("0")) + amount
+        if _is_tax_inclusive(position):
+            inclusive_by_bucket[key] = inclusive_by_bucket.get(key, Decimal("0")) + amount
         walked += amount
 
     # The caller's direct cost wins over the tree walk. They can legitimately
@@ -2002,7 +2021,8 @@ def _calculate_markup_amounts_scoped(
     earned: dict[int, Decimal] = {id(m): Decimal("0") for m in markups}
     for key, bucket_cost in buckets.items():
         stack = _effective_stack(bill_wide, overrides_by_scope, key)
-        for markup, amount in _calculate_markup_amounts(bucket_cost, stack, escalation_factors):
+        inclusive = inclusive_by_bucket.get(key, Decimal("0"))
+        for markup, amount in _calculate_markup_amounts(bucket_cost, stack, escalation_factors, inclusive):
             earned[id(markup)] = earned.get(id(markup), Decimal("0")) + amount
 
     return [(m, earned.get(id(m), Decimal("0"))) for m in markups]
@@ -7014,6 +7034,30 @@ class BOQService:
         # a truthiness test here would send both back to the Gulf region's 5.
         return _SeededVat(resolution.combined_rate_pct)
 
+    async def _edition_region(self, project: Any, region_key: str) -> str:
+        """The stack of the project's bill standard edition, when its region has one per edition.
+
+        A region whose older edition prices differently names that edition's
+        stack in :data:`EDITION_REGIONS`. The edition is the one stored on the
+        project's tax profile, or, when none is stored, the edition in force on
+        the day the project was created, so a project begun under the old
+        edition is never seeded with the new one's heads.
+        """
+        by_edition = EDITION_REGIONS.get(region_key)
+        if not by_edition:
+            return region_key
+        try:
+            from app.modules.project_tax import repository as tax_repo
+            from app.modules.project_tax import service as tax_service
+
+            async with self.session.begin_nested():
+                row = await tax_repo.get_for_project(self.session, project.id)
+            edition = tax_service.to_response(project, row).standard_edition
+        except Exception:  # noqa: BLE001 - no tax profile module or table: the region's own stack
+            logger.debug("edition lookup failed for project %s", getattr(project, "id", None), exc_info=True)
+            return region_key
+        return by_edition.get(edition or "", region_key)
+
     async def apply_default_markups(self, boq_id: uuid.UUID, region: str | None = None) -> list[BOQMarkup]:
         """Replace all markups on a BOQ with the default template for a region.
 
@@ -7082,6 +7126,7 @@ class BOQService:
             country_code = getattr(project, "country_code", None)
             if region is None:
                 region_key = region_key_for_country(country_code)
+                region_key = await self._edition_region(project, region_key)
 
         # Where the VAT number comes from, in precedence order, and the answer
         # is recorded on the line rather than only used. A region serves many

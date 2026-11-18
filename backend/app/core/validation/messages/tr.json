@@ -412,7 +412,10 @@
       "suggestion": "Dokuz haneli GB/T 50500 kodu atayın (ör. 010101001)"
     },
     "valid_code": {
-      "fail": "Geçersiz GB/T 50500 kodu '{code}'; 9 veya 12 hane bekleniyor"
+      "fail": "Geçersiz GB/T 50500 kodu '{code}'; 9 veya 12 hane ya da 01B001 gibi bir ek kod bekleniyor"
+    },
+    "code_unique": {
+      "fail": "'{code}' kalem kodu aynı alt projede birden fazla kez kullanılmış"
     }
   },
   "cpwd": {

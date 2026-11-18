@@ -412,7 +412,10 @@
       "suggestion": "Atribuiți un cod GB/T 50500 din 9 cifre (de exemplu, 010101001)"
     },
     "valid_code": {
-      "fail": "Cod GB/T 50500 nevalid '{code}' – sunt necesare 9 sau 12 cifre"
+      "fail": "Cod GB/T 50500 nevalid '{code}' – sunt necesare 9 sau 12 cifre sau un cod suplimentar precum 01B001"
+    },
+    "code_unique": {
+      "fail": "Codul articolului '{code}' este folosit de mai multe ori în același subproiect"
     }
   },
   "cpwd": {

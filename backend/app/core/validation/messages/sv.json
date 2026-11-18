@@ -412,7 +412,10 @@
       "suggestion": "Tilldela en niosiffrig GB/T 50500-kod (t.ex. 010101001)"
     },
     "valid_code": {
-      "fail": "Ogiltig GB/T 50500-kod '{code}' – 9 eller 12 siffror förväntas"
+      "fail": "Ogiltig GB/T 50500-kod '{code}' – 9 eller 12 siffror eller en tilläggskod som 01B001 förväntas"
+    },
+    "code_unique": {
+      "fail": "Postkoden '{code}' används mer än en gång i samma delprojekt"
     }
   },
   "cpwd": {

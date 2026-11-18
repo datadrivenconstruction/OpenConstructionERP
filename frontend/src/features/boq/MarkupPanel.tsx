@@ -194,6 +194,8 @@ interface MarkupPanelProps {
   sections?: SectionEntry[];
   /** The bill's `metadata.priced_from_published_rates`: its rates already contain overhead and profit. */
   pricedFromPublishedRates?: boolean;
+  /** Direct cost already carrying its tax (``metadata.tax_inclusive`` lines); kept out of every tax line's base. */
+  taxInclusiveCost?: number;
   readOnly?: boolean;
 }
 
@@ -203,7 +205,7 @@ interface EditState {
   value: string;
 }
 
-export function MarkupPanel({ boqId, markups, directCost, currencySymbol, currencyCode, locale, fmt, openSignal, sections, pricedFromPublishedRates = false, readOnly = false }: MarkupPanelProps) {
+export function MarkupPanel({ boqId, markups, directCost, currencySymbol, currencyCode, locale, fmt, openSignal, sections, pricedFromPublishedRates = false, taxInclusiveCost = 0, readOnly = false }: MarkupPanelProps) {
   const { t, i18n } = useTranslation();
   const queryClient = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
@@ -322,7 +324,8 @@ export function MarkupPanel({ boqId, markups, directCost, currencySymbol, curren
       .map((m) => {
         let amount = 0;
         const pct = typeof m.percentage === 'number' && Number.isFinite(m.percentage) ? m.percentage : 0;
-        const base = m.apply_to === 'cumulative' || m.apply_to === 'subtotal' ? running : directCost;
+        const exempt = m.category === 'tax' ? taxInclusiveCost : 0;
+        const base = (m.apply_to === 'cumulative' || m.apply_to === 'subtotal' ? running : directCost) - exempt;
         if (m.markup_type === 'fixed') {
           // fixed_amount arrives as a Decimal-as-string ("500.00"), so a
           // ``typeof === 'number'`` guard rejected it and rendered every fixed
@@ -346,15 +349,15 @@ export function MarkupPanel({ boqId, markups, directCost, currencySymbol, curren
           // direct cost + the markups before it); GAEB import persists tax
           // markups as 'subtotal', so basing it on directCost here would
           // under-state the Amount column and the grand total against the server.
-          amount = running * (pct / 100);
+          amount = (running - exempt) * (pct / 100);
         } else {
-          amount = directCost * (pct / 100);
+          amount = (directCost - exempt) * (pct / 100);
         }
         running += amount;
         return { id: m.id, amount };
       });
     return { calcMap: new Map(calculated.map((c) => [c.id, c.amount])), grandTotal: running, calculated };
-  }, [markups, directCost]);
+  }, [markups, directCost, taxInclusiveCost]);
 
   const handleAddMarkup = useCallback(() => {
     addMutation.mutate({

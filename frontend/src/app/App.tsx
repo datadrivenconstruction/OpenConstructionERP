@@ -563,6 +563,9 @@ const PaymentClockPage = lazy(() =>
 const TaxWithholdingPage = lazy(() =>
   import('@/features/tax-withholding').then((m) => ({ default: m.TaxWithholdingPage }))
 );
+const ChinaTaxPage = lazy(() =>
+  import('@/features/china-tax').then((m) => ({ default: m.ChinaTaxPage }))
+);
 const LegalEntitiesPage = lazy(() =>
   import('@/features/legal-entities').then((m) => ({ default: m.LegalEntitiesPage }))
 );
@@ -1859,6 +1862,7 @@ export default function App() {
         <Route path="/framework-agreements/:id" element={<P title="Framework Agreements"><FrameworkAgreementPage /></P>} />
         <Route path="/payment-clock" element={<P title="Payment Clock"><PaymentClockPage /></P>} />
         <Route path="/tax-withholding" element={<P title="Withholding Tax"><TaxWithholdingPage /></P>} />
+        <Route path="/china-tax" element={<P title="China VAT"><ChinaTaxPage /></P>} />
         <Route path="/tax-rates" element={<P title="Tax Rates"><TaxRatesPage /></P>} />
         <Route path="/admin/legal-entities" element={<P title="Legal Entities"><LegalEntitiesPage /></P>} />
         <Route path="/einvoice-clearance" element={<P title="E-invoice Clearance"><EInvoiceClearancePage /></P>} />
