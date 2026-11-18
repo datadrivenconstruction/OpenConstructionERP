@@ -65649,6 +65649,13 @@
         },
         {
           "method": "GET",
+          "path": "/pickable/",
+          "handler": "pickable_contacts",
+          "response_model": "PickableContactsResponse",
+          "request_schema": "None"
+        },
+        {
+          "method": "GET",
           "path": "/stats/",
           "handler": "contact_stats",
           "response_model": "ContactStatsResponse",
@@ -66190,12 +66197,67 @@
               "default": "0"
             }
           ]
+        },
+        {
+          "class_name": "PickableContact",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "The few fields a picker shows; nothing private leaves the address book.",
+          "fields": [
+            {
+              "name": "id",
+              "type": "UUID"
+            },
+            {
+              "name": "contact_type",
+              "type": "str"
+            },
+            {
+              "name": "first_name",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "last_name",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "company_name",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "primary_email",
+              "type": "str | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "PickableContactsResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Picker groups: members of the project team, then the rest of the company.",
+          "fields": [
+            {
+              "name": "team",
+              "type": "list[PickableContact]"
+            },
+            {
+              "name": "company",
+              "type": "list[PickableContact]"
+            }
+          ]
         }
       ],
       "import_dependencies": [
         "portal",
         "projects",
         "property_dev",
+        "teams",
         "tendering",
         "users"
       ]
@@ -336437,6 +336499,7 @@
       "portal",
       "projects",
       "property_dev",
+      "teams",
       "tendering",
       "users"
     ],
@@ -338007,8 +338070,8 @@
     "total_models": 960,
     "total_columns": 11271,
     "total_relationships": 261,
-    "total_routes": 5482,
-    "total_schemas": 5063,
+    "total_routes": 5483,
+    "total_schemas": 5065,
     "total_python_files": 3593,
     "frontend_features": 249,
     "frontend_ts_files": 4380,
