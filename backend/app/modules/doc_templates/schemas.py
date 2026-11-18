@@ -196,3 +196,72 @@ class ManagerIn(BaseModel):
     """Grant or revoke the Document manager role."""
 
     is_manager: bool
+
+
+# ── Document layouts ─────────────────────────────────────────────────────
+
+
+class LayoutSummary(BaseModel):
+    """One document whose structure a firm can lay out."""
+
+    key: str
+    module: str
+    label: str
+    published: int = 0
+    drafts: int = 0
+    projects: int = 0
+
+
+class LayoutListResponse(BaseModel):
+    """Every visible layout."""
+
+    items: list[LayoutSummary]
+    total: int
+    can_edit: bool
+
+
+class LayoutDraftIn(BaseModel):
+    """The working template; normalised on save, checked on publish."""
+
+    template: dict = Field(default_factory=dict)
+    name: str = Field("", max_length=120)
+
+
+class LayoutPublishIn(BaseModel):
+    """Publish note."""
+
+    note: str = Field("", max_length=500)
+
+
+class LayoutPreviewIn(BaseModel):
+    """An unsaved template and, optionally, the record to preview it on."""
+
+    template: dict = Field(default_factory=dict)
+    record_id: str | None = Field(None, max_length=64)
+
+
+class LayoutImportIn(BaseModel):
+    """An exported layout file."""
+
+    format: str = Field("", max_length=80)
+    schema_version: int = Field(1, alias="schema")
+    kind: str = Field("", max_length=120)
+    name: str = Field("", max_length=120)
+    template: dict = Field(default_factory=dict)
+
+    model_config = {"populate_by_name": True}
+
+
+class ClauseIn(BaseModel):
+    """One clause of the library, per language."""
+
+    category: str = Field("", max_length=40)
+    title: dict[str, str] = Field(default_factory=dict)
+    text: dict[str, str] = Field(default_factory=dict)
+
+    @field_validator("title", "text")
+    @classmethod
+    def _bounded(cls, value: dict[str, str]) -> dict[str, str]:
+        if len(value) > 40:
+            raise ValueError("too many languages")
+        return value

@@ -40,7 +40,7 @@ import {
   Upload,
 } from 'lucide-react';
 import { Button, Card, Input, SkeletonText, TabBar } from '@/shared/ui';
-import { DocTemplatesList } from '@/features/doc-templates';
+import { DocTemplatesList, DocumentLayoutsCard } from '@/features/doc-templates';
 import { ApiError, getErrorMessage, triggerDownload } from '@/shared/lib/api';
 import { fmtFixed, fmtList } from '@/shared/lib/formatters';
 import { useAuthStore } from '@/stores/useAuthStore';
@@ -230,7 +230,12 @@ export function CompanyDocumentsSettings() {
         ariaLabel={t('settings.tab_company', { defaultValue: 'Documents & templates' })}
       />
       {sub === 'letterhead' && <LetterheadSettings />}
-      {sub === 'documents' && <DocTemplatesList channel="pdf" initialKind={params.get('kind')} />}
+      {sub === 'documents' && (
+        <>
+          <DocumentLayoutsCard />
+          <DocTemplatesList channel="pdf" initialKind={params.get('kind')} />
+        </>
+      )}
       {sub === 'emails' && <DocTemplatesList channel="email" initialKind={params.get('kind')} />}
     </div>
   );

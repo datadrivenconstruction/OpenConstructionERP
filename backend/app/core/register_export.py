@@ -107,6 +107,7 @@ from app.core.regional_format import (
 __all__ = [
     "EMPTY",
     "FORM_FURNITURE",
+    "PageSetup",
     "FURNITURE",
     "DocumentCatalogue",
     "ProjectHeader",
@@ -937,6 +938,7 @@ def _footer_callback(
     letterhead_on_first_page: bool,
     running_title: str = "",
     page_height: float = 0.0,
+    decor: PageDecor | None = None,
 ) -> Callable[[Any, Any], None]:
     """``onPage`` callback: translated footer, workspace logo top right, running title.
 
@@ -961,6 +963,8 @@ def _footer_callback(
     running_style = ParagraphStyle("RegisterRunningTitle", fontName=BOLD_FONT, fontSize=8, leading=10, textColor=_MUTED)
     custom_footer = str(look.get("footer_text") or "").strip()
     show_page_numbers = look.get("show_page_numbers", True) is not False
+    if decor is not None and decor.page_numbers is not None:
+        show_page_numbers = decor.page_numbers
     usable = page_width - 2 * margin_side
     # Only a type that lists the two second-line settings among its fields
     # honours them (the record forms and the RFI log); a register without a type
@@ -973,26 +977,36 @@ def _footer_callback(
     def _draw(canvas: Any, doc: Any) -> None:
         canvas.saveState()
         draw_watermark(canvas, look, page_w=doc.pagesize[0], page_h=doc.pagesize[1])
+        if decor is not None:
+            from app.core.record_layout import draw_page_decor
+
+            draw_page_decor(canvas, doc, decor, total_pages=max(total_pages, doc.page), margin_side=margin_side)
         canvas.setStrokeColor(_RULE)
         canvas.setLineWidth(0.5)
         canvas.line(margin_side, 13 * mm, page_width - margin_side, 13 * mm)
         page_text = page_label.format(page=doc.page, total=max(total_pages, doc.page)) if show_page_numbers else ""
         # One line, fitted into the room beside the page number: the paragraph
         # is anchored by its top, so a wrapped line would fall off the sheet.
-        left_text, _face, left_size = pdf_fit_line(
-            custom_footer or branded_cover_brand(),
-            pdf_room_beside(usable, page_text),
-            suffix="" if custom_footer or not default_stamp else f"  |  {generated_label.format(timestamp=generated)}",
-            base=BODY_FONT,
-        )
-        left = Paragraph(pdf_markup(left_text, style), pdf_fitted_style(style, left_text, left_size))
-        _, left_h = left.wrapOn(canvas, usable, 20)
-        left.drawOn(canvas, margin_side, 9 * mm - left_h + 2)
+        if decor is not None and decor.footer_lines:
+            left_text, left_size = "", 7.0
+        else:
+            left_text, _face, left_size = pdf_fit_line(
+                custom_footer or branded_cover_brand(),
+                pdf_room_beside(usable, page_text),
+                suffix=""
+                if custom_footer or not default_stamp
+                else f"  |  {generated_label.format(timestamp=generated)}",
+                base=BODY_FONT,
+            )
+        if not (decor is not None and decor.footer_lines):
+            left = Paragraph(pdf_markup(left_text, style), pdf_fitted_style(style, left_text, left_size))
+            _, left_h = left.wrapOn(canvas, usable, 20)
+            left.drawOn(canvas, margin_side, 9 * mm - left_h + 2)
         if page_text:
             right = Paragraph(pdf_markup(page_text, right_style), pdf_style_for_text(right_style, page_text))
             _, right_h = right.wrapOn(canvas, usable, 20)
             right.drawOn(canvas, margin_side, 9 * mm - right_h + 2)
-        if running_title and doc.page > 1 and page_height:
+        if running_title and doc.page > 1 and page_height and not (decor is not None and decor.header_lines):
             # One line, beside the logo's corner: fitted, never wrapped.
             head_text, _head_face, head_size = pdf_fit_line(
                 running_title, usable - _RUNNING_TITLE_LOGO_ROOM, size=8.0, bold=True, base=BOLD_FONT
@@ -1033,6 +1047,9 @@ def _build_twice(
     generated: str,
     doc_type: str | None,
     running_title: str = "",
+    margin_top: float = _MARGIN_TOP,
+    margin_bottom: float = _MARGIN_BOTTOM,
+    decor: PageDecor | None = None,
 ) -> bytes:
     """Build the document, then build it again knowing how many pages it has.
 
@@ -1054,8 +1071,8 @@ def _build_twice(
             pagesize=pagesize,
             leftMargin=margin_side,
             rightMargin=margin_side,
-            topMargin=_MARGIN_TOP,
-            bottomMargin=_MARGIN_BOTTOM,
+            topMargin=margin_top,
+            bottomMargin=margin_bottom,
             title=title,
             author=meta["author"],
             subject=subject,
@@ -1065,9 +1082,9 @@ def _build_twice(
         )
         frame = Frame(
             margin_side,
-            _MARGIN_BOTTOM,
+            margin_bottom,
             page_width - 2 * margin_side,
-            page_height - _MARGIN_TOP - _MARGIN_BOTTOM,
+            page_height - margin_top - margin_bottom,
             leftPadding=0,
             rightPadding=0,
             topPadding=0,
@@ -1085,6 +1102,7 @@ def _build_twice(
             letterhead_on_first_page=has_letterhead,
             running_title=running_title,
             page_height=page_height,
+            decor=decor,
         )
         doc.addPageTemplates([PageTemplate(id="body", frames=[frame], onPage=on_page)])
         doc.build(story)
@@ -1093,7 +1111,16 @@ def _build_twice(
     return output
 
 
-def _styles() -> dict[str, ParagraphStyle]:
+def _styles(*, ink: Any = None, serif: bool = False) -> dict[str, ParagraphStyle]:
+    styles = _base_styles()
+    if ink is None and not serif:
+        return styles
+    from app.core.record_layout import restyle
+
+    return restyle(styles, ink=ink, default_ink=_INK, serif=serif)
+
+
+def _base_styles() -> dict[str, ParagraphStyle]:
     base = getSampleStyleSheet()["Normal"]
     return {
         "title": ParagraphStyle("RegTitle", parent=base, fontName=BOLD_FONT, fontSize=16, leading=20, textColor=_INK),
@@ -1805,6 +1832,37 @@ class RecordBlock:
     right_aligned: Sequence[bool] = ()
     keep_together: Sequence[bool] = ()
     total_rows: int = 0
+    # Block kinds of document layouts (see app.core.record_layout); the hand-written forms leave them empty.
+    markup: Sequence[str] = ()
+    children: Sequence[Sequence[RecordBlock]] = ()
+    ratios: Sequence[float] = ()
+    image: bytes | None = None
+    width: float = 0.0
+    height: float = 0.0
+    style: Mapping[str, Any] | None = None
+    level: int = 1
+
+
+@dataclass(frozen=True)
+class PageSetup:
+    """Sheet size and margins of a record form, in points. ``None`` on a form means A4 portrait."""
+
+    width: float
+    height: float
+    margin_side: float = 20 * mm
+    margin_top: float = 18 * mm
+    margin_bottom: float = 18 * mm
+
+
+@dataclass(frozen=True)
+class PageDecor:
+    """What a document layout draws on every sheet besides the form's own footer."""
+
+    watermark_text: str = ""
+    header_lines: tuple[tuple[str, str], ...] = ()
+    footer_lines: tuple[tuple[str, str], ...] = ()
+    header_on_first_page: bool = True
+    page_numbers: bool | None = None
 
 
 @dataclass(frozen=True)
@@ -1836,6 +1894,17 @@ class RecordDocument:
     generated_label: str = "Generated {timestamp}"
     generated: str = ""
     doc_type: str | None = None
+    # Set by document layouts only; the defaults print the form exactly as before.
+    page: PageSetup | None = None
+    watermark_text: str = ""
+    header_lines: Sequence[tuple[str, str]] = ()
+    footer_lines: Sequence[tuple[str, str]] = ()
+    header_on_first_page: bool = True
+    page_numbers: bool | None = None
+    accent: str = ""
+    serif: bool = False
+    letterhead: bool = True
+    show_subject: bool = True
 
 
 def grid_rows(pairs: Sequence[tuple[str, str] | None]) -> list[list[str]]:
@@ -1932,6 +2001,10 @@ _SIGNATURE_SHARES: dict[int, tuple[float, ...]] = {
 def _block_flowables(
     block: RecordBlock, usable: float, styles: dict[str, ParagraphStyle], frame_height: float = 0.0
 ) -> list[Any]:
+    if block.kind in _LAYOUT_KINDS or block.style:
+        from app.core.record_layout import layout_flowables
+
+        return layout_flowables(block, usable, styles, frame_height, _layout_helpers())
     heading = Paragraph(pdf_markup(block.title, styles["section"]), pdf_style_for_text(styles["section"], block.title))
     if block.kind == "grid":
         columns = max((len(row) for row in block.rows), default=2)
@@ -1991,8 +2064,22 @@ def _block_flowables(
     return [CondPageBreak(_LONG_SECTION_MIN_ROOM), heading, box]
 
 
+#: Block kinds drawn by :mod:`app.core.record_layout`.
+_LAYOUT_KINDS = frozenset({"bare_grid", "rich", "heading", "spacer", "page_break", "image", "qr", "columns"})
+
+
+def _layout_helpers() -> dict[str, Any]:
+    """The pieces of this renderer the layout block kinds reuse."""
+    return {
+        "label_value_table": _label_value_table,
+        "block_flowables": _block_flowables,
+        "boxed": _boxed,
+        "para": _para,
+    }
+
+
 def build_record_pdf(document: RecordDocument) -> bytes:
-    """Render one record as a portrait A4 form.
+    """Render one record as a form, portrait A4 unless a document layout sets the sheet.
 
     Args:
         document: The translated record.
@@ -2000,13 +2087,19 @@ def build_record_pdf(document: RecordDocument) -> bytes:
     Returns:
         The PDF as bytes, starting with ``b"%PDF"``.
     """
-    usable = A4[0] - 2 * _FORM_MARGIN_SIDE
-    frame_height = A4[1] - _MARGIN_TOP - _MARGIN_BOTTOM
+    page = document.page
+    pagesize = (page.width, page.height) if page is not None else A4
+    margin_side = page.margin_side if page is not None else _FORM_MARGIN_SIDE
+    margin_top = page.margin_top if page is not None else _MARGIN_TOP
+    margin_bottom = page.margin_bottom if page is not None else _MARGIN_BOTTOM
+    usable = pagesize[0] - 2 * margin_side
+    frame_height = pagesize[1] - margin_top - margin_bottom
+    ink = _ink_colour(document.accent)
 
     def _story() -> tuple[list[Any], bool]:
-        styles = _styles()
+        styles = _styles() if ink is None and not document.serif else _styles(ink=ink, serif=document.serif)
         flow: list[Any] = []
-        letterhead = branded_letterhead(usable, doc_type=document.doc_type)
+        letterhead = branded_letterhead(usable, doc_type=document.doc_type) if document.letterhead else None
         if letterhead is not None:
             flow.append(letterhead)
         header = Table(
@@ -2026,16 +2119,17 @@ def build_record_pdf(document: RecordDocument) -> bytes:
                 [
                     ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
                     ("LEFTPADDING", (0, 0), (0, 0), 0),
-                    ("BOX", (1, 0), (1, 0), 0.8, _INK),
+                    ("BOX", (1, 0), (1, 0), 0.8, ink or _INK),
                     ("TOPPADDING", (1, 0), (1, 0), 2 * mm),
                     ("BOTTOMPADDING", (1, 0), (1, 0), 2 * mm),
-                    ("LINEBELOW", (0, 0), (-1, 0), 1.5, _INK),
+                    ("LINEBELOW", (0, 0), (-1, 0), 1.5, ink or _INK),
                     ("BOTTOMPADDING", (0, 0), (0, 0), 3 * mm),
                 ]
             )
         )
         flow.append(header)
-        flow.append(_para(document.subject, styles["subject"]))
+        if document.show_subject:
+            flow.append(_para(document.subject, styles["subject"]))
         if document.grid:
             half = usable / 2
             flow.append(_label_value_table(document.grid, styles, [32 * mm, half - 32 * mm, 32 * mm, half - 32 * mm]))
@@ -2043,10 +2137,21 @@ def build_record_pdf(document: RecordDocument) -> bytes:
             flow.extend(_block_flowables(block, usable, styles, frame_height))
         return flow, letterhead is not None
 
+    decor = None
+    if document.watermark_text or document.header_lines or document.footer_lines or document.page_numbers is not None:
+        decor = PageDecor(
+            watermark_text=document.watermark_text,
+            header_lines=tuple(document.header_lines),
+            footer_lines=tuple(document.footer_lines),
+            header_on_first_page=document.header_on_first_page,
+            page_numbers=document.page_numbers,
+        )
     return _build_twice(
         _story,
-        pagesize=A4,
-        margin_side=_FORM_MARGIN_SIDE,
+        pagesize=pagesize,
+        margin_side=margin_side,
+        margin_top=margin_top,
+        margin_bottom=margin_bottom,
         title=f"{document.title} {document.number}".strip(),
         subject=document.subject,
         page_label=document.page_label,
@@ -2057,4 +2162,13 @@ def build_record_pdf(document: RecordDocument) -> bytes:
         running_title=" · ".join(
             part for part in (f"{document.title} {document.number}".strip(), document.project_label) if part
         ),
+        decor=decor,
     )
+
+
+def _ink_colour(value: str) -> Any:
+    """A ``#rrggbb`` accent as a reportlab colour, ``None`` when unset or malformed."""
+    text = (value or "").strip()
+    if not re.fullmatch(r"#[0-9a-fA-F]{6}", text):
+        return None
+    return colors.HexColor(text)

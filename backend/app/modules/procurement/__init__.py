@@ -8,3 +8,8 @@ async def on_startup() -> None:
     from app.modules.procurement.permissions import register_procurement_permissions
 
     register_procurement_permissions()
+
+    from app.core.doc_templates.layout.spec import register_layout_provider
+    from app.modules.procurement.layouts import register_procurement_layouts
+
+    register_layout_provider(register_procurement_layouts)

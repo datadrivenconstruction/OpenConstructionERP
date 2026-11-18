@@ -19,7 +19,7 @@ import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState, type 
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import clsx from 'clsx';
-import { ChevronDown, Download, FileDown, FileSpreadsheet, FileText, Loader2 } from 'lucide-react';
+import { ChevronDown, Download, FileDown, FileSpreadsheet, FileText, Loader2, SlidersHorizontal } from 'lucide-react';
 
 import { REGISTER_DOCUMENT_LOCALES, defaultDocumentLocale, documentLocaleName } from '@/shared/lib/documentExport';
 import { DocumentLanguageSelect } from '@/shared/ui/DocumentLanguageSelect';
@@ -64,6 +64,12 @@ export interface DocumentExportMenuProps {
   testId?: string;
   /** `data-guide` anchor of the main half, for a module guide spotlight. */
   guide?: string;
+  /**
+   * Opens the layout editor of the document, in the language picked in the
+   * menu. Shown as "Customize document" under the entries; omit it where the
+   * document has no editable layout.
+   */
+  onCustomize?: (locale: string) => void;
 }
 
 /**
@@ -101,6 +107,7 @@ export function DocumentExportMenu({
   className,
   testId = 'document-export',
   guide,
+  onCustomize,
 }: DocumentExportMenuProps) {
   const { t, i18n } = useTranslation();
   const addToast = useToastStore((s) => s.addToast);
@@ -318,6 +325,23 @@ export function DocumentExportMenu({
                 </div>
               );
             })}
+            {onCustomize && (
+              <div className="mt-1 border-t border-border-light pt-1">
+                <button
+                  type="button"
+                  role="menuitem"
+                  onClick={() => {
+                    setOpen(false);
+                    onCustomize(locale);
+                  }}
+                  className="flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm text-content-primary transition-colors hover:bg-surface-secondary"
+                  data-testid={`${testId}-customize`}
+                >
+                  <SlidersHorizontal size={15} className="shrink-0 text-content-tertiary" />
+                  {t('doc_layout.customize', { defaultValue: 'Customize document' })}
+                </button>
+              </div>
+            )}
             {note && (
               <p className="border-t border-border-light px-3 pb-1.5 pt-2 text-2xs leading-snug text-content-tertiary">
                 {note}

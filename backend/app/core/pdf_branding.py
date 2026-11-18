@@ -268,6 +268,20 @@ def _logo_image_bytes(data_url: Any) -> bytes | None:
     return raw
 
 
+def branded_logo_bytes() -> bytes | None:
+    """The workspace logo as raster bytes for an image block, ``None`` when none decodes. Never raises."""
+    try:
+        branding = _read_branding()
+        profile = _read_company_profile()
+        for candidate in _logo_candidates(branding, profile):
+            raw = _logo_image_bytes(candidate)
+            if raw:
+                return _logo_raster_for_pdf(raw)
+    except Exception:  # noqa: BLE001 - a missing logo is an empty block, never a lost document
+        logger.debug("No workspace logo for an image block", exc_info=True)
+    return None
+
+
 def _app_company_name(branding: dict[str, Any]) -> str:
     """The app branding's own company name, trimmed, or ``""``."""
     name = branding.get("company_name")
@@ -1483,6 +1497,7 @@ __all__ = [
     "DEFAULT_BRAND",
     "branded_appearance",
     "branded_cover_brand",
+    "branded_logo_bytes",
     "branded_doc_metadata",
     "branded_footer",
     "branded_header_footer",
