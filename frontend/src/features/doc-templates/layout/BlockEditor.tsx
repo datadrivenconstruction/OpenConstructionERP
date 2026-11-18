@@ -10,6 +10,7 @@ import { useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ArrowDown, ArrowUp, Eye, EyeOff, Lock, Plus, Trash2 } from 'lucide-react';
 import clsx from 'clsx';
+import { fmtList } from '@/shared/lib/formatters';
 
 import type {
   BlockCondition,
@@ -169,7 +170,7 @@ export function I18nTextInput({
         <p className="mt-1 text-2xs text-semantic-error" role="alert">
           {t('doc_layout.unknown_field', {
             defaultValue: 'Not a field of this document: {{fields}}',
-            fields: unknown.join(', '),
+            fields: fmtList(unknown),
           })}
         </p>
       )}
@@ -447,7 +448,7 @@ function ColumnsEditor({ block, spec, locale, primary, locks, readOnly, onChange
                 <p className="mt-1 text-2xs text-content-tertiary">
                   {t('doc_layout.formula_hint', {
                     defaultValue: 'Use column names ({{names}}), numbers, + - * / and round, min, max, if.',
-                    names: (collection?.columns ?? []).filter((c) => c.format !== 'text' && c.format !== 'index').map((c) => c.id).join(', '),
+                    names: fmtList((collection?.columns ?? []).filter((c) => c.format !== 'text' && c.format !== 'index').map((c) => c.id)),
                   })}
                 </p>
               )}

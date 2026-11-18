@@ -2,6 +2,7 @@
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 //
 // Dependency-free so the BOQ grid can read it without the API client.
+import { fmtFixed } from '@/shared/lib/formatters';
 
 /**
  * The average labour grade of a line: grades of its labour resources weighted
@@ -29,5 +30,5 @@ export function averageLabourGrade(metadata: unknown, gradeField = 'grade'): str
     }
   }
   const value = hours > 0 ? weighted / hours : plain;
-  return value === null ? null : (Math.round(value * 10) / 10).toFixed(1);
+  return value === null ? null : fmtFixed(Math.round(value * 10) / 10, 1);
 }

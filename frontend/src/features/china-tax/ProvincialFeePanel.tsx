@@ -12,6 +12,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AlertTriangle, ExternalLink } from 'lucide-react';
 
 import { getErrorMessage } from '@/shared/lib/api';
+import { fmtList } from '@/shared/lib/formatters';
 import { Button } from '@/shared/ui/Button';
 import { Card } from '@/shared/ui/Card';
 import { MoneyDisplay } from '@/shared/ui/MoneyDisplay';
@@ -84,7 +85,7 @@ export function ProvincialFeePanel({ projectId, edition }: { projectId: string; 
               {t('china_tax.move_guifei_lines', { count: preview.guifei_lines.length, defaultValue: 'Bill lines under the 规费 head to move: {{count}}' })}
             </li>
             <li>
-              {t('china_tax.move_guifei_markups', { names: preview.guifei_markups.join(', ') || '-', defaultValue: '规费 markups to switch off: {{names}}' })}
+              {t('china_tax.move_guifei_markups', { names: fmtList(preview.guifei_markups) || '-', defaultValue: '规费 markups to switch off: {{names}}' })}
             </li>
             <li>
               {t('china_tax.move_codes', { count: preview.codes_to_review_count, defaultValue: 'Item codes to review against the 2024 patterns: {{count}}' })}
@@ -217,7 +218,7 @@ export function ProvincialFeePanel({ projectId, edition }: { projectId: string; 
                         {(meta?.reference_rates ?? []).length > 0 && (
                           <div className="text-2xs text-content-tertiary">
                             {t('china_tax.fees_reference', { defaultValue: 'Reference per chapter:' })}{' '}
-                            {meta?.reference_rates.map((r) => `${r.chapter_zh} ${r.rate}%`).join(', ')}
+                            {fmtList((meta?.reference_rates ?? []).map((r) => `${r.chapter_zh} ${r.rate}%`))}
                           </div>
                         )}
                       </td>

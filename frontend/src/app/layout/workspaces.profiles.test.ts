@@ -291,6 +291,7 @@ describe('a workspace row and the modules behind it', () => {
       'oe_architecture_map',
       'oe_carbon',
       'oe_certified_payroll',
+      'oe_china_pack',
       'oe_formwork',
       'oe_funding',
       'oe_payment_clock',
