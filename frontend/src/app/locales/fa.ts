@@ -36532,6 +36532,7 @@ const resource = {
     "property_dev.doc_templates.variables_empty": "مستندات متغیری در دسترس نیست - این صفحه را از یک مستأجر با فعال‌بودن توسعه املاک بارگذاری کنید.",
     "property_dev.doc_templates.variables_intro": "از این جانگه‌دارها درون الگوهای .docx / .html خود استفاده کنید. رویدادهای تولید سند آن‌ها را در زمان رندر از توسعه، قطعه، خریدار، قرارداد، رزرو، قسط و تحویل فعال درون‌یابی می‌کنند.",
     "property_dev.doc_templates.variables_title": "متغیرهای الگو",
+    "property_dev.doc_templates.company_layouts_link": "چیدمان‌ها و بندهای سایر اسناد شرکت",
     "property_dev.house_type.add_new": "افزودن جدید...",
     "property_dev.house_type.area_typical_col": "معمول {{unit}}",
     "property_dev.house_type.area_typical_label": "مساحت معمول (متر مربع)",
@@ -64750,6 +64751,7 @@ const resource = {
     "letter_templates.one_off_hint": "تغییرات فقط برای این نامه اعمال می‌شود.",
     "letter_templates.save_as_template": "همچنین به‌عنوان قالب این زبان ذخیره شود",
     "letter_templates.download": "دانلود PDF",
+    "letter_templates.company_template": "قالب و ظاهر شرکت",
     "demo_market.label": "زبان و بازار",
     "demo_market.hint": "زبان رابط را تغییر می‌دهد و دموی آن کشور را با داده‌ها و استانداردهای خودش باز می‌کند.",
     "boot.starting_title": "در حال راه‌اندازی OpenConstructionERP",
@@ -65465,6 +65467,13 @@ const resource = {
     "doc_layout.clause_library_hint": "متن‌های قابل استفاده مجدد که چیدمان سند در بلوک بند چاپ می‌کند، یک متن برای هر زبان. بندهای بسته کشور شما فقط‌خواندنی هستند.",
     "doc_layout.clause_new": "بند جدید",
     "doc_layout.clause_key": "کلید",
+    "doc_layout.clause_category": "دسته",
+    "doc_layout.clause_language": "زبان",
+    "doc_layout.clause_title": "عنوان",
+    "doc_layout.clause_text": "متن",
+    "doc_layout.clause_saved": "بند ذخیره شد",
+    "doc_layout.clause_delete": "حذف بند",
+    "doc_layout.clause_delete_confirm": "بند «{{name}}» حذف شود؟ چیدمان‌هایی که از آن استفاده می‌کنند در جای آن چیزی چاپ نمی‌کنند.",
   }
 } as { translation: Record<string, string> };
 

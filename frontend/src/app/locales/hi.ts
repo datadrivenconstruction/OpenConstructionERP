@@ -44325,6 +44325,7 @@ const resource = {
     "propdev.dashboards.cf.title": "रूपांतरण फ़नल",
     "property_dev.doc_templates.editor_cta_title": "अपने ब्राउज़र में टेम्प्लेट बनाएं या संपादित करें",
     "property_dev.doc_templates.locale_editor_title": "दस्तावेज़-टेम्प्लेट अनुवाद",
+    "property_dev.doc_templates.company_layouts_link": "कंपनी के अन्य दस्तावेज़ों के लेआउट और खंड",
     "propdev.phase.sequence": "#",
   "propdev.lead_status_converted": "बदला गया",
   "propdev.lead_status_disqualified": "अयोग्य",
@@ -64793,6 +64794,7 @@ const resource = {
     "letter_templates.one_off_hint": "बदलाव केवल इस पत्र पर लागू होंगे।",
     "letter_templates.save_as_template": "इस भाषा के टेम्पलेट के रूप में भी सहेजें",
     "letter_templates.download": "PDF डाउनलोड करें",
+    "letter_templates.company_template": "कंपनी टेम्पलेट और रूप",
     "demo_market.label": "भाषा और बाज़ार",
     "demo_market.hint": "इंटरफ़ेस की भाषा बदलता है और उस देश का डेमो उसके अपने डेटा और मानकों के साथ खोलता है।",
     "boot.starting_title": "OpenConstructionERP सेट अप हो रहा है",
@@ -65508,6 +65510,12 @@ const resource = {
     "doc_layout.clause_library_hint": "पुन: प्रयोज्य पाठ जिन्हें दस्तावेज़ लेआउट खंड ब्लॉक में छापता है, प्रति भाषा एक पाठ। आपके देश पैक के खंड केवल पढ़ने के लिए हैं।",
     "doc_layout.clause_new": "नया खंड",
     "doc_layout.clause_key": "कुंजी",
+    "doc_layout.clause_category": "श्रेणी",
+    "doc_layout.clause_language": "भाषा",
+    "doc_layout.clause_title": "शीर्षक",
+    "doc_layout.clause_text": "पाठ",
+    "doc_layout.clause_saved": "खंड सहेजा गया",
+    "doc_layout.clause_delete": "खंड हटाएँ",
   }
 } as { translation: Record<string, string> };
 

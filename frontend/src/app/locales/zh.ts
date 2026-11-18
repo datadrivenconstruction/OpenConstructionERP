@@ -44108,6 +44108,7 @@ const resource = {
     "project_route.showing_count": "{{count}} 项评估",
     "property_dev.doc_templates.editor_cta_title": "在浏览器中创建或编辑模板",
     "property_dev.doc_templates.locale_editor_title": "文档模板翻译",
+    "property_dev.doc_templates.company_layouts_link": "其他公司文档的版式和条款",
     "propdev.phase.sequence": "#",
   "propdev.lead_status_converted": "已成交",
   "propdev.lead_status_disqualified": "已排除",
@@ -66995,6 +66996,7 @@ const resource = {
     "letter_templates.one_off_hint": "修改仅适用于本函件。",
     "letter_templates.save_as_template": "同时保存为该语言的模板",
     "letter_templates.download": "下载 PDF",
+    "letter_templates.company_template": "公司模板和外观",
     "demo_market.label": "语言与市场",
     "demo_market.hint": "切换界面语言，并打开该国家的演示，使用其自己的数据和标准。",
     "boot.starting_title": "正在设置 OpenConstructionERP",
@@ -67813,6 +67815,17 @@ const resource = {
     "doc_layout.legal_note_when": "适用时打印",
     "doc_layout.variant_create": "创建",
     "doc_layout.delete_variant_confirm": "删除此变体及其所有版本？已签发的文件保留其记录。",
+    "doc_layout.clause_saved": "条款已保存",
+    "doc_layout.clause_delete": "删除条款",
+    "doc_layout.clause_library": "条款库",
+    "doc_layout.clause_library_hint": "文档版式在条款块中打印的可复用文本，每种语言一段文本。国家包中的条款为只读。",
+    "doc_layout.clause_new": "新建条款",
+    "doc_layout.clause_key": "键",
+    "doc_layout.clause_category": "类别",
+    "doc_layout.clause_language": "语言",
+    "doc_layout.clause_title": "标题",
+    "doc_layout.clause_text": "文本",
+    "doc_layout.clause_delete_confirm": "删除条款“{{name}}”？使用该条款的版式将不会在其位置打印任何内容。",
   }
 } as { translation: Record<string, string> };
 

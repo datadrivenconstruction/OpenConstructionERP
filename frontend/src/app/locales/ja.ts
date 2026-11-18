@@ -37407,6 +37407,7 @@ const resource = {
     "property_dev.doc_templates.variables_empty": "変数ドキュメントは利用できません-property-devが有効なテナントからこのページをロードします。",
     "property_dev.doc_templates.variables_intro": "これらのプレースホルダーを.docx/.htmlテンプレート内で使用します。ドキュメント生成イベントは、レンダリング時にアクティブな開発、プロット、買い手、契約、予約、割賦金と引き渡しからそれらを挿入します。",
     "property_dev.doc_templates.variables_title": "テンプレート変数",
+    "property_dev.doc_templates.company_layouts_link": "その他の会社文書のレイアウトと条項",
     "property_dev.house_type.add_new": "新規追加...",
     "property_dev.house_type.area_typical_col": "一般的な{{unit}}",
     "property_dev.house_type.area_typical_label": "一般的なエリア（m²）",
@@ -66057,6 +66058,7 @@ const resource = {
     "letter_templates.one_off_hint": "変更はこのレターにのみ適用されます。",
     "letter_templates.save_as_template": "この言語のテンプレートとしても保存",
     "letter_templates.download": "PDF をダウンロード",
+    "letter_templates.company_template": "会社テンプレートと外観",
     "demo_market.label": "言語と市場",
     "demo_market.hint": "画面の言語を切り替え、その国のデータと規格を持つデモを開きます。",
     "boot.starting_title": "OpenConstructionERP を設定しています",
@@ -66772,6 +66774,12 @@ const resource = {
     "doc_layout.clause_library_hint": "文書レイアウトが条項ブロックに印刷する再利用可能なテキスト。言語ごとに1つ。国別パックの条項は読み取り専用です。",
     "doc_layout.clause_new": "新しい条項",
     "doc_layout.clause_key": "キー",
+    "doc_layout.clause_category": "カテゴリ",
+    "doc_layout.clause_language": "言語",
+    "doc_layout.clause_title": "タイトル",
+    "doc_layout.clause_text": "本文",
+    "doc_layout.clause_saved": "条項を保存しました",
+    "doc_layout.clause_delete": "条項を削除",
   }
 } as { translation: Record<string, string> };
 

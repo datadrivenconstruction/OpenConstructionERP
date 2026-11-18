@@ -44651,6 +44651,7 @@ const resource = {
     "project_route.showing_count": "{{count}} değerlendirme",
     "property_dev.doc_templates.editor_cta_title": "Tarayıcınızda şablonlar oluşturun veya düzenleyin",
     "property_dev.doc_templates.locale_editor_title": "Belge şablonu çevirileri",
+    "property_dev.doc_templates.company_layouts_link": "Diğer şirket belgelerinin düzenleri ve maddeleri",
     "propdev.phase.sequence": "#",
   "propdev.lead_status_converted": "Dönüştürüldü",
   "propdev.lead_status_disqualified": "Diskalifiye edildi",
@@ -65671,6 +65672,7 @@ const resource = {
     "letter_templates.one_off_hint": "Değişiklikler yalnızca bu mektup için geçerli.",
     "letter_templates.save_as_template": "Bu dil için şablon olarak da kaydet",
     "letter_templates.download": "PDF indir",
+    "letter_templates.company_template": "Şirket şablonu ve görünümü",
     "demo_market.label": "Dil ve pazar",
     "demo_market.hint": "Arayüz dilini değiştirir ve o ülkenin kendi verileri ve standartlarıyla demosunu açar.",
     "boot.starting_title": "OpenConstructionERP kuruluyor",
@@ -66381,6 +66383,17 @@ const resource = {
     "doc_layout.legal_note_when": "geçerli olduğunda basılır",
     "doc_layout.variant_create": "Oluştur",
     "doc_layout.delete_variant_confirm": "Bu varyant ve sürümleri silinsin mi? Daha önce düzenlenen belgelerin kaydı korunur.",
+    "doc_layout.clause_saved": "Madde kaydedildi",
+    "doc_layout.clause_delete": "Maddeyi sil",
+    "doc_layout.clause_library": "Madde kitaplığı",
+    "doc_layout.clause_library_hint": "Bir belge düzeninin madde bloğunda yazdırdığı, her dil için bir metin olan yeniden kullanılabilir metinler. Ülke paketindeki maddeler salt okunurdur.",
+    "doc_layout.clause_new": "Yeni madde",
+    "doc_layout.clause_key": "Anahtar",
+    "doc_layout.clause_category": "Kategori",
+    "doc_layout.clause_language": "Dil",
+    "doc_layout.clause_title": "Başlık",
+    "doc_layout.clause_text": "Metin",
+    "doc_layout.clause_delete_confirm": "\"{{name}}\" maddesi silinsin mi? Bu maddeyi kullanan düzenler yerine hiçbir şey yazdırmaz.",
   }
 } as { translation: Record<string, string> };
 

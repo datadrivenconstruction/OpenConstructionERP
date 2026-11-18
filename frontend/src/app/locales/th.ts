@@ -37458,6 +37458,7 @@ const resource = {
     "property_dev.doc_templates.variables_empty": "ไม่มีเอกสารตัวแปร - โหลดหน้านี้จากผู้เช่าที่มี property-dev เปิดใช้งาน",
     "property_dev.doc_templates.variables_intro": "ใช้ตัวยึดตำแหน่งเหล่านี้ในแม่แบบ .docx / .html ของคุณ เหตุการณ์การสร้างเอกสารสอดแทรกพวกมันในเวลาแสดงผลจากการพัฒนา แปลงที่ดิน ผู้ซื้อ สัญญา การจอง เงินงวด และการส่งมอบที่ใช้งาน",
     "property_dev.doc_templates.variables_title": "ตัวแปรแม่แบบ",
+    "property_dev.doc_templates.company_layouts_link": "เลย์เอาต์และข้อกำหนดของเอกสารบริษัทอื่น ๆ",
     "property_dev.house_type.add_new": "เพิ่มใหม่...",
     "property_dev.house_type.area_typical_col": "ทั่วไป {{unit}}",
     "property_dev.house_type.area_typical_label": "พื้นที่ทั่วไป (m²)",
@@ -64525,6 +64526,7 @@ const resource = {
     "letter_templates.one_off_hint": "การเปลี่ยนแปลงมีผลกับจดหมายฉบับนี้เท่านั้น",
     "letter_templates.save_as_template": "บันทึกเป็นแม่แบบของภาษานี้ด้วย",
     "letter_templates.download": "ดาวน์โหลด PDF",
+    "letter_templates.company_template": "เทมเพลตและรูปลักษณ์ของบริษัท",
     "demo_market.label": "ภาษาและตลาด",
     "demo_market.hint": "เปลี่ยนภาษาของหน้าจอและเปิดเดโมของประเทศนั้นพร้อมข้อมูลและมาตรฐานของตนเอง",
     "boot.starting_title": "กำลังตั้งค่า OpenConstructionERP",
@@ -65235,6 +65237,17 @@ const resource = {
     "doc_layout.legal_note_when": "พิมพ์เมื่อเข้าเงื่อนไข",
     "doc_layout.variant_create": "สร้าง",
     "doc_layout.delete_variant_confirm": "ลบรูปแบบนี้และเวอร์ชันทั้งหมดหรือไม่ เอกสารที่ออกไปแล้วยังคงมีบันทึกอยู่",
+    "doc_layout.clause_saved": "บันทึกข้อกำหนดแล้ว",
+    "doc_layout.clause_delete": "ลบข้อกำหนด",
+    "doc_layout.clause_library": "คลังข้อกำหนด",
+    "doc_layout.clause_library_hint": "ข้อความที่ใช้ซ้ำได้ซึ่งเลย์เอาต์เอกสารพิมพ์ในบล็อกข้อกำหนด หนึ่งข้อความต่อหนึ่งภาษา ข้อกำหนดจากชุดข้อมูลประเทศเป็นแบบอ่านอย่างเดียว",
+    "doc_layout.clause_new": "ข้อกำหนดใหม่",
+    "doc_layout.clause_key": "คีย์",
+    "doc_layout.clause_category": "หมวดหมู่",
+    "doc_layout.clause_language": "ภาษา",
+    "doc_layout.clause_title": "ชื่อเรื่อง",
+    "doc_layout.clause_text": "ข้อความ",
+    "doc_layout.clause_delete_confirm": "ลบข้อกำหนด \"{{name}}\" หรือไม่ เลย์เอาต์ที่ใช้ข้อกำหนดนี้จะไม่พิมพ์อะไรแทนที่",
   }
 } as { translation: Record<string, string> };
 

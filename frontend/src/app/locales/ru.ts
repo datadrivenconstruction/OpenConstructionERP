@@ -44430,6 +44430,7 @@ const resource = {
     "project.folder_link": "Папка проекта",
     "property_dev.doc_templates.editor_cta_title": "Создавайте или редактируйте шаблоны в вашем браузере",
     "property_dev.doc_templates.locale_editor_title": "Переводы шаблонов документов",
+    "property_dev.doc_templates.company_layouts_link": "Макеты и условия остальных документов компании",
     "propdev.phase.sequence": "#",
     "propdev.cancel_buyer_title": "Отменить покупателя?",
   "propdev.lead_status_converted": "Преобразован",
@@ -68059,6 +68060,7 @@ const resource = {
     "letter_templates.one_off_hint": "Изменения касаются только этого письма.",
     "letter_templates.save_as_template": "Также сохранить как шаблон для этого языка",
     "letter_templates.download": "Скачать PDF",
+    "letter_templates.company_template": "Шаблон и оформление компании",
     "demo_market.label": "Язык и рынок",
     "demo_market.hint": "Переключает язык интерфейса и открывает демо этой страны с её данными и стандартами.",
     "boot.starting_title": "Настройка OpenConstructionERP",
@@ -68878,6 +68880,17 @@ const resource = {
     "doc_layout.variant_create": "Создать",
     "doc_layout.delete_variant_confirm": "Удалить этот вариант и его версии? Уже выпущенные документы сохраняют свою запись.",
     "doc_layout.record_missing": "В этой записи нет: {{field}} ({{source}})",
+    "doc_layout.clause_saved": "Условие сохранено",
+    "doc_layout.clause_delete": "Удалить условие",
+    "doc_layout.clause_library": "Библиотека пунктов",
+    "doc_layout.clause_library_hint": "Повторно используемые тексты, которые макет документа печатает в блоке пункта, по одному тексту на язык. Пункты из странового пакета доступны только для чтения.",
+    "doc_layout.clause_new": "Новый пункт",
+    "doc_layout.clause_key": "Ключ",
+    "doc_layout.clause_category": "Категория",
+    "doc_layout.clause_language": "Язык",
+    "doc_layout.clause_title": "Название",
+    "doc_layout.clause_text": "Текст",
+    "doc_layout.clause_delete_confirm": "Удалить пункт «{{name}}»? Макеты, которые его используют, ничего не напечатают на его месте.",
   }
 } as { translation: Record<string, string> };
 

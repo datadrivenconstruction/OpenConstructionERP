@@ -37948,6 +37948,7 @@ const resource = {
     "property_dev.doc_templates.variables_empty": "Nessuna documentazione di variabili disponibile - carica questa pagina da un tenant con property-dev abilitato.",
     "property_dev.doc_templates.variables_intro": "Usa questi segnaposti all'interno dei tuoi modelli .docx / .html. Gli eventi di generazione del documento li interpolano al momento del rendering dallo sviluppo attivo, dal lotto, dall'acquirente, dal contratto, dalla prenotazione, dalla rata e dalla consegna.",
     "property_dev.doc_templates.variables_title": "Variabili del modello",
+    "property_dev.doc_templates.company_layouts_link": "Layout e clausole degli altri documenti aziendali",
     "property_dev.house_type.add_new": "Aggiungi nuovo...",
     "property_dev.house_type.area_typical_col": "Tipico {{unit}}",
     "property_dev.house_type.area_typical_label": "Area tipica (m²)",
@@ -66034,6 +66035,7 @@ const resource = {
     "letter_templates.one_off_hint": "Le modifiche valgono solo per questa lettera.",
     "letter_templates.save_as_template": "Salva anche come modello per questa lingua",
     "letter_templates.download": "Scarica PDF",
+    "letter_templates.company_template": "Modello e aspetto aziendale",
     "demo_market.label": "Lingua e mercato",
     "demo_market.hint": "Imposta la lingua dell'interfaccia e apre la demo di quel paese, con dati e norme propri.",
     "boot.starting_title": "Configurazione di OpenConstructionERP",
@@ -66749,6 +66751,12 @@ const resource = {
     "doc_layout.clause_library_hint": "Testi riutilizzabili che un layout di documento stampa in un blocco clausola, un testo per lingua. Le clausole del pacchetto del tuo paese sono di sola lettura.",
     "doc_layout.clause_new": "Nuova clausola",
     "doc_layout.clause_key": "Chiave",
+    "doc_layout.clause_category": "Categoria",
+    "doc_layout.clause_language": "Lingua",
+    "doc_layout.clause_title": "Titolo",
+    "doc_layout.clause_text": "Testo",
+    "doc_layout.clause_saved": "Clausola salvata",
+    "doc_layout.clause_delete": "Elimina clausola",
   }
 } as { translation: Record<string, string> };
 

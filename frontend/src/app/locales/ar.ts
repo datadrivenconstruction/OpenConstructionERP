@@ -38449,6 +38449,7 @@ const resource = {
     "property_dev.doc_templates.variables_empty": "لا توثيق متغير متاح - حمل هذه الصفحة من مستأجر مع تفعيل خاصية التطوير.",
     "property_dev.doc_templates.variables_intro": "استخدم هذه البدائل داخل قوالب .docx / .html. تقوم أحداث إنشاء المستندات بالاستيفاء الداخلي من المشروع التطويري النشط والقطعة والمشتري والعقد والحجز والقسط والتسليم.",
     "property_dev.doc_templates.variables_title": "متغيرات القالب",
+    "property_dev.doc_templates.company_layouts_link": "تخطيطات وبنود مستندات الشركة الأخرى",
     "property_dev.house_type.add_new": "إضافة جديد...",
     "property_dev.house_type.area_typical_col": "النموذجي {{unit}}",
     "property_dev.house_type.area_typical_label": "المساحة النموذجية (م²)",
@@ -67996,6 +67997,7 @@ const resource = {
     "letter_templates.one_off_hint": "تنطبق التغييرات على هذه الرسالة فقط.",
     "letter_templates.save_as_template": "حفظ أيضاً كقالب لهذه اللغة",
     "letter_templates.download": "تنزيل PDF",
+    "letter_templates.company_template": "قالب الشركة ومظهرها",
     "demo_market.label": "اللغة والسوق",
     "demo_market.hint": "يغيّر لغة الواجهة ويفتح العرض التوضيحي لذلك البلد ببياناته ومعاييره الخاصة.",
     "boot.starting_title": "جارٍ إعداد OpenConstructionERP",
@@ -68711,6 +68713,13 @@ const resource = {
     "doc_layout.clause_library_hint": "نصوص قابلة لإعادة الاستخدام يطبعها تخطيط المستند في كتلة بند، نص واحد لكل لغة. البنود الواردة من حزمة بلدك للقراءة فقط.",
     "doc_layout.clause_new": "بند جديد",
     "doc_layout.clause_key": "المفتاح",
+    "doc_layout.clause_category": "الفئة",
+    "doc_layout.clause_language": "اللغة",
+    "doc_layout.clause_title": "العنوان",
+    "doc_layout.clause_text": "النص",
+    "doc_layout.clause_saved": "تم حفظ البند",
+    "doc_layout.clause_delete": "حذف البند",
+    "doc_layout.clause_delete_confirm": "هل تريد حذف البند \"{{name}}\"؟ التخطيطات التي تستخدمه لن تطبع شيئًا مكانه.",
   }
 } as { translation: Record<string, string> };
 

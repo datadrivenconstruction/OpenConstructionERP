@@ -36485,6 +36485,7 @@ const resource = {
     "property_dev.doc_templates.variables_empty": "Walang available na dokumentasyon ng variable - i-load ang pahinang ito mula sa tenant na naka-enable ang property-dev.",
     "property_dev.doc_templates.variables_intro": "Gamitin ang mga placeholder na ito sa loob ng .docx / .html na template mo. Nagpapalit ang mga kaganapan ng pagbuo ng dokumento ng mga ito sa oras ng pag-render mula sa aktibong development, plot, mamimili, kontrata, reserbasyon, hulog at paghahatid.",
     "property_dev.doc_templates.variables_title": "Mga variable ng template",
+    "property_dev.doc_templates.company_layouts_link": "Mga layout at sugnay ng iba pang dokumento ng kumpanya",
     "property_dev.house_type.add_new": "Magdagdag ng bago...",
     "property_dev.house_type.area_typical_col": "Karaniwang {{unit}}",
     "property_dev.house_type.area_typical_label": "Karaniwang lawak (m²)",
@@ -64748,6 +64749,7 @@ const resource = {
     "letter_templates.one_off_hint": "Sa liham na ito lang ilalapat ang mga pagbabago.",
     "letter_templates.save_as_template": "I-save din bilang template para sa wikang ito",
     "letter_templates.download": "I-download ang PDF",
+    "letter_templates.company_template": "Template at itsura ng kumpanya",
     "demo_market.label": "Wika at merkado",
     "demo_market.hint": "Pinapalitan ang wika ng interface at binubuksan ang demo ng bansang iyon, kasama ang sarili nitong data at pamantayan.",
     "boot.starting_title": "Inihahanda ang OpenConstructionERP",
@@ -65463,6 +65465,13 @@ const resource = {
     "doc_layout.clause_library_hint": "Mga muling magagamit na teksto na ipinapi-print ng layout ng dokumento sa isang bloke ng sugnay, isang teksto bawat wika. Read-only ang mga sugnay mula sa country pack mo.",
     "doc_layout.clause_new": "Bagong sugnay",
     "doc_layout.clause_key": "Key",
+    "doc_layout.clause_category": "Kategorya",
+    "doc_layout.clause_language": "Wika",
+    "doc_layout.clause_title": "Pamagat",
+    "doc_layout.clause_text": "Teksto",
+    "doc_layout.clause_saved": "Nai-save ang sugnay",
+    "doc_layout.clause_delete": "Burahin ang sugnay",
+    "doc_layout.clause_delete_confirm": "Burahin ang sugnay na \"{{name}}\"? Walang ipi-print ang mga layout na gumagamit nito sa lugar nito.",
   }
 } as { translation: Record<string, string> };
 

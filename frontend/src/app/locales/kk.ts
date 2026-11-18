@@ -36442,6 +36442,7 @@ const resource = {
     "property_dev.doc_templates.variables_empty": "Айнымалы құжаттама қолжетімсіз - бұл бетті жылжымайтын мүлікті әзірлеу қосылған жалдаушыдан жүктеңіз.",
     "property_dev.doc_templates.variables_intro": ".docx / .html үлгілеріңіздің ішінде осы орынбасарларды пайдаланыңыз. Құжат жасау оқиғалары оларды көрсету кезінде белсенді әзірлеме, учаске, сатып алушы, келісім-шарт, брондау, жарна және тапсырудан интерполяциялайды.",
     "property_dev.doc_templates.variables_title": "Үлгі айнымалылары",
+    "property_dev.doc_templates.company_layouts_link": "Компанияның басқа құжаттарының макеттері мен шарттары",
     "property_dev.house_type.add_new": "Жаңасын қосу...",
     "property_dev.house_type.area_typical_col": "Әдеттегі {{unit}}",
     "property_dev.house_type.area_typical_label": "Әдеттегі аудан (м²)",
@@ -64751,6 +64752,7 @@ const resource = {
     "letter_templates.one_off_hint": "Өзгерістер тек осы хатқа қолданылады.",
     "letter_templates.save_as_template": "Осы тілдің үлгісі ретінде де сақтау",
     "letter_templates.download": "PDF жүктеу",
+    "letter_templates.company_template": "Компания үлгісі мен көрінісі",
     "demo_market.label": "Тіл және нарық",
     "demo_market.hint": "Интерфейс тілін ауыстырады және сол елдің өз деректері мен стандарттары бар демосын ашады.",
     "boot.starting_title": "OpenConstructionERP орнатылуда",
@@ -65466,6 +65468,12 @@ const resource = {
     "doc_layout.clause_library_hint": "Құжат макеті шарт блогында басып шығаратын қайта қолданылатын мәтіндер, әр тілге бір мәтін. Еліңіздің пакетіндегі шарттар тек оқуға арналған.",
     "doc_layout.clause_new": "Жаңа шарт",
     "doc_layout.clause_key": "Кілт",
+    "doc_layout.clause_category": "Санат",
+    "doc_layout.clause_language": "Тіл",
+    "doc_layout.clause_title": "Тақырып",
+    "doc_layout.clause_text": "Мәтін",
+    "doc_layout.clause_saved": "Шарт сақталды",
+    "doc_layout.clause_delete": "Шартты жою",
   }
 } as { translation: Record<string, string> };
 

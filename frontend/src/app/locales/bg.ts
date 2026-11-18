@@ -44252,6 +44252,7 @@ const resource = {
     "project.settings.folder.invalid": "Започнете с http://, https://, file://, smb:// или мрежов път като \\\\server\\share.",
     "project.folder_link": "Папка на проекта",
     "property_dev.doc_templates.locale_editor_title": "Преводи на шаблони на документи",
+    "property_dev.doc_templates.company_layouts_link": "Оформления и клаузи на останалите фирмени документи",
     "propdev.phase.sequence": "#",
   "propdev.lead_status_converted": "Преобразуван",
   "propdev.lead_status_disqualified": "Дисквалифициран",
@@ -64794,6 +64795,7 @@ const resource = {
     "letter_templates.one_off_hint": "Промените важат само за това писмо.",
     "letter_templates.save_as_template": "Запази и като шаблон за този език",
     "letter_templates.download": "Изтегли PDF",
+    "letter_templates.company_template": "Шаблон и облик на фирмата",
     "demo_market.label": "Език и пазар",
     "demo_market.hint": "Сменя езика на интерфейса и отваря демото за тази държава с нейните данни и стандарти.",
     "boot.starting_title": "Настройване на OpenConstructionERP",
@@ -65509,6 +65511,13 @@ const resource = {
     "doc_layout.clause_library_hint": "Текстове за многократна употреба, които оформлението на документа отпечатва в блок клауза, по един текст на език. Клаузите от пакета на вашата държава са само за четене.",
     "doc_layout.clause_new": "Нова клауза",
     "doc_layout.clause_key": "Ключ",
+    "doc_layout.clause_category": "Категория",
+    "doc_layout.clause_language": "Език",
+    "doc_layout.clause_title": "Заглавие",
+    "doc_layout.clause_text": "Текст",
+    "doc_layout.clause_saved": "Клаузата е запазена",
+    "doc_layout.clause_delete": "Изтриване на клауза",
+    "doc_layout.clause_delete_confirm": "Да се изтрие ли клаузата „{{name}}“? Оформленията, които я използват, няма да отпечатат нищо на нейно място.",
   }
 } as { translation: Record<string, string> };
 

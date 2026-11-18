@@ -34322,6 +34322,7 @@ const resource = {
     "property_dev.doc_templates.locale_json_label": "Translation JSON",
     "property_dev.doc_templates.locale_hint": "Tip: load English as a starter, translate the leaf values, keep the keys, then save. Empty keys silently fall back to English at render time.",
     "property_dev.doc_templates.locale_revert": "Remove override",
+    "property_dev.doc_templates.company_layouts_link": "Layouts and clauses of the other company documents",
     "propdev.edit.error_full_name_required": "Full name is required",
     "propdev.edit.error_email_invalid": "Enter a valid email address",
     "propdev.edit.error_currency_iso": "Currency must be a 3-letter ISO code (e.g. EUR)",
@@ -59041,6 +59042,7 @@ const resource = {
     "letter_templates.one_off_hint": "Changes apply to this letter only.",
     "letter_templates.save_as_template": "Also save as the template for this language",
     "letter_templates.download": "Download PDF",
+    "letter_templates.company_template": "Company template and look",
     "demo_market.label": "Language and market",
     "demo_market.hint": "Sets the interface language and opens the demo for that country, with its own data and standards.",
     "boot.starting_title": "Setting up OpenConstructionERP",
@@ -59864,6 +59866,13 @@ const resource = {
     "doc_layout.clause_library_hint": "Reusable texts a document layout prints in a clause block, one text per language. Clauses from your country pack are read-only.",
     "doc_layout.clause_new": "New clause",
     "doc_layout.clause_key": "Key",
+    "doc_layout.clause_category": "Category",
+    "doc_layout.clause_language": "Language",
+    "doc_layout.clause_title": "Title",
+    "doc_layout.clause_text": "Text",
+    "doc_layout.clause_saved": "Clause saved",
+    "doc_layout.clause_delete": "Delete clause",
+    "doc_layout.clause_delete_confirm": "Delete the clause \"{{name}}\"? Layouts that use it print nothing in its place.",
   }
 } as { translation: Record<string, string> };
 

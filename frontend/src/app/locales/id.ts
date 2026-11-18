@@ -43945,6 +43945,7 @@ const resource = {
     "project.folder_link": "Folder proyek",
     "property_dev.doc_templates.editor_cta_title": "Buat atau edit templat di peramban Anda",
     "property_dev.doc_templates.locale_editor_title": "Terjemahan templat dokumen",
+    "property_dev.doc_templates.company_layouts_link": "Tata letak dan klausul dokumen perusahaan lainnya",
     "propdev.phase.sequence": "#",
     "propdev.cancel_buyer_title": "Batalkan pembeli?",
   "propdev.lead_status_converted": "Transaksi selesai",
@@ -64524,6 +64525,7 @@ const resource = {
     "letter_templates.one_off_hint": "Perubahan hanya berlaku untuk surat ini.",
     "letter_templates.save_as_template": "Simpan juga sebagai templat untuk bahasa ini",
     "letter_templates.download": "Unduh PDF",
+    "letter_templates.company_template": "Templat dan tampilan perusahaan",
     "demo_market.label": "Bahasa dan pasar",
     "demo_market.hint": "Mengganti bahasa antarmuka dan membuka demo negara tersebut dengan data dan standarnya sendiri.",
     "boot.starting_title": "Menyiapkan OpenConstructionERP",
@@ -65239,6 +65241,12 @@ const resource = {
     "doc_layout.clause_library_hint": "Teks yang dapat digunakan ulang yang dicetak tata letak dokumen dalam blok klausul, satu teks per bahasa. Klausul dari paket negara Anda hanya-baca.",
     "doc_layout.clause_new": "Klausul baru",
     "doc_layout.clause_key": "Kunci",
+    "doc_layout.clause_category": "Kategori",
+    "doc_layout.clause_language": "Bahasa",
+    "doc_layout.clause_title": "Judul",
+    "doc_layout.clause_text": "Teks",
+    "doc_layout.clause_saved": "Klausul disimpan",
+    "doc_layout.clause_delete": "Hapus klausul",
   }
 } as { translation: Record<string, string> };
 

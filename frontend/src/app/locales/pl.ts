@@ -45122,6 +45122,7 @@ const resource = {
     "project.folder_link": "Folder projektu",
     "property_dev.doc_templates.editor_cta_title": "Twórz lub edytuj szablony w przeglądarce",
     "property_dev.doc_templates.locale_editor_title": "Tłumaczenia szablonów dokumentów",
+    "property_dev.doc_templates.company_layouts_link": "Układy i klauzule pozostałych dokumentów firmy",
     "propdev.phase.sequence": "#",
     "propdev.development.launch_date": "Uruchomienie sprzedaży",
   "propdev.lead_status_converted": "Przekształcony",
@@ -66390,6 +66391,7 @@ const resource = {
     "letter_templates.one_off_hint": "Zmiany dotyczą tylko tego pisma.",
     "letter_templates.save_as_template": "Zapisz też jako szablon dla tego języka",
     "letter_templates.download": "Pobierz PDF",
+    "letter_templates.company_template": "Szablon i wygląd firmy",
     "demo_market.label": "Język i rynek",
     "demo_market.hint": "Zmienia język interfejsu i otwiera demo tego kraju z jego własnymi danymi i normami.",
     "boot.starting_title": "Konfigurowanie OpenConstructionERP",
@@ -67105,6 +67107,12 @@ const resource = {
     "doc_layout.clause_library_hint": "Teksty wielokrotnego użytku, które układ dokumentu drukuje w bloku klauzuli, jeden tekst na język. Klauzule z pakietu Twojego kraju są tylko do odczytu.",
     "doc_layout.clause_new": "Nowa klauzula",
     "doc_layout.clause_key": "Klucz",
+    "doc_layout.clause_category": "Kategoria",
+    "doc_layout.clause_language": "Język",
+    "doc_layout.clause_title": "Tytuł",
+    "doc_layout.clause_text": "Tekst",
+    "doc_layout.clause_saved": "Klauzula zapisana",
+    "doc_layout.clause_delete": "Usuń klauzulę",
   }
 } as { translation: Record<string, string> };
 

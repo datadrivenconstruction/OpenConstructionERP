@@ -44470,6 +44470,7 @@ const resource = {
     "project.folder_link": "Mapa projekta",
     "property_dev.doc_templates.editor_cta_title": "Stvorite ili uredite predloške u svom pregledniku",
     "property_dev.doc_templates.locale_editor_title": "Prijevodi predložaka dokumenata",
+    "property_dev.doc_templates.company_layouts_link": "Izgledi i klauzule ostalih dokumenata tvrtke",
     "propdev.phase.sequence": "#",
     "propdev.cancel_buyer_title": "Otkazati kupca?",
   "propdev.lead_status_converted": "Pretvoren",
@@ -65162,6 +65163,7 @@ const resource = {
     "letter_templates.one_off_hint": "Promjene vrijede samo za ovaj dopis.",
     "letter_templates.save_as_template": "Spremi i kao predložak za ovaj jezik",
     "letter_templates.download": "Preuzmi PDF",
+    "letter_templates.company_template": "Predložak i izgled tvrtke",
     "demo_market.label": "Jezik i tržište",
     "demo_market.hint": "Mijenja jezik sučelja i otvara demo te zemlje s njezinim podacima i normama.",
     "boot.starting_title": "Postavljanje OpenConstructionERP-a",
@@ -65877,6 +65879,12 @@ const resource = {
     "doc_layout.clause_library_hint": "Tekstovi za višekratnu upotrebu koje izgled dokumenta ispisuje u bloku klauzule, jedan tekst po jeziku. Klauzule iz paketa vaše zemlje samo su za čitanje.",
     "doc_layout.clause_new": "Nova klauzula",
     "doc_layout.clause_key": "Ključ",
+    "doc_layout.clause_category": "Kategorija",
+    "doc_layout.clause_language": "Jezik",
+    "doc_layout.clause_title": "Naslov",
+    "doc_layout.clause_text": "Tekst",
+    "doc_layout.clause_saved": "Klauzula spremljena",
+    "doc_layout.clause_delete": "Izbriši klauzulu",
   }
 } as { translation: Record<string, string> };
 

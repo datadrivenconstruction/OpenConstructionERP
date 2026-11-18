@@ -37392,6 +37392,7 @@ const resource = {
     "property_dev.doc_templates.variables_empty": "사용 가능한 변수 문서가 없습니다 - property-dev가 활성화된 테넌트에서 이 페이지를 로드하세요.",
     "property_dev.doc_templates.variables_intro": ".docx / .html 템플릿 내에 이 플레이스홀더를 사용하세요. 문서 생성 이벤트는 렌더 시간에 활성 개발, 플롯, 구매자, 계약, 예약, 할부금 및 인계에서 이들을 보간합니다.",
     "property_dev.doc_templates.variables_title": "템플릿 변수",
+    "property_dev.doc_templates.company_layouts_link": "다른 회사 문서의 레이아웃과 조항",
     "property_dev.house_type.add_new": "새로 추가...",
     "property_dev.house_type.area_typical_col": "일반적인 {{unit}}",
     "property_dev.house_type.area_typical_label": "일반적인 면적(m²)",
@@ -65141,6 +65142,7 @@ const resource = {
     "letter_templates.one_off_hint": "변경 사항은 이 서신에만 적용됩니다.",
     "letter_templates.save_as_template": "이 언어의 템플릿으로도 저장",
     "letter_templates.download": "PDF 다운로드",
+    "letter_templates.company_template": "회사 템플릿 및 모양",
     "demo_market.label": "언어와 시장",
     "demo_market.hint": "화면 언어를 바꾸고 해당 국가의 데이터와 기준이 담긴 데모를 엽니다.",
     "boot.starting_title": "OpenConstructionERP 설정 중",
@@ -65856,6 +65858,12 @@ const resource = {
     "doc_layout.clause_library_hint": "문서 레이아웃이 조항 블록에 인쇄하는 재사용 텍스트로, 언어마다 하나씩입니다. 국가 팩의 조항은 읽기 전용입니다.",
     "doc_layout.clause_new": "새 조항",
     "doc_layout.clause_key": "키",
+    "doc_layout.clause_category": "범주",
+    "doc_layout.clause_language": "언어",
+    "doc_layout.clause_title": "제목",
+    "doc_layout.clause_text": "본문",
+    "doc_layout.clause_saved": "조항이 저장되었습니다",
+    "doc_layout.clause_delete": "조항 삭제",
   }
 } as { translation: Record<string, string> };
 

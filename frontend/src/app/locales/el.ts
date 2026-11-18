@@ -36473,6 +36473,7 @@ const resource = {
     "property_dev.doc_templates.variables_empty": "Δεν υπάρχει διαθέσιμη τεκμηρίωση μεταβλητών - φορτώστε αυτή τη σελίδα από έναν μισθωτή με ενεργοποιημένη την ανάπτυξη ακινήτων.",
     "property_dev.doc_templates.variables_intro": "Χρησιμοποιήστε αυτά τα placeholder μέσα στα πρότυπα .docx / .html σας. Τα συμβάντα δημιουργίας εγγράφων τα παρεμβάλλουν κατά την απόδοση από την ενεργή ανάπτυξη, μονάδα, αγοραστή, σύμβαση, προκράτηση, δόση και παραλαβή.",
     "property_dev.doc_templates.variables_title": "Μεταβλητές προτύπου",
+    "property_dev.doc_templates.company_layouts_link": "Διατάξεις και όροι των άλλων εγγράφων της εταιρείας",
     "property_dev.house_type.add_new": "Προσθήκη νέου...",
     "property_dev.house_type.area_typical_col": "Τυπικό {{unit}}",
     "property_dev.house_type.area_typical_label": "Τυπική επιφάνεια (m²)",
@@ -64750,6 +64751,7 @@ const resource = {
     "letter_templates.one_off_hint": "Οι αλλαγές ισχύουν μόνο για αυτή την επιστολή.",
     "letter_templates.save_as_template": "Αποθήκευση και ως πρότυπο για αυτή τη γλώσσα",
     "letter_templates.download": "Λήψη PDF",
+    "letter_templates.company_template": "Πρότυπο και εμφάνιση εταιρείας",
     "demo_market.label": "Γλώσσα και αγορά",
     "demo_market.hint": "Αλλάζει τη γλώσσα της διεπαφής και ανοίγει το demo αυτής της χώρας, με τα δικά της δεδομένα και πρότυπα.",
     "boot.starting_title": "Ρύθμιση του OpenConstructionERP",
@@ -65465,6 +65467,13 @@ const resource = {
     "doc_layout.clause_library_hint": "Επαναχρησιμοποιήσιμα κείμενα που μια διάταξη εγγράφου τυπώνει σε μπλοκ όρου, ένα κείμενο ανά γλώσσα. Οι όροι από το πακέτο της χώρας σας είναι μόνο για ανάγνωση.",
     "doc_layout.clause_new": "Νέος όρος",
     "doc_layout.clause_key": "Κλειδί",
+    "doc_layout.clause_category": "Κατηγορία",
+    "doc_layout.clause_language": "Γλώσσα",
+    "doc_layout.clause_title": "Τίτλος",
+    "doc_layout.clause_text": "Κείμενο",
+    "doc_layout.clause_saved": "Ο όρος αποθηκεύτηκε",
+    "doc_layout.clause_delete": "Διαγραφή όρου",
+    "doc_layout.clause_delete_confirm": "Διαγραφή του όρου «{{name}}»; Οι διατάξεις που τον χρησιμοποιούν δεν θα τυπώσουν τίποτα στη θέση του.",
   }
 } as { translation: Record<string, string> };
 

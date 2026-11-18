@@ -44639,6 +44639,7 @@ const resource = {
     "project.folder_link": "Složka projektu",
     "property_dev.doc_templates.editor_cta_title": "Vytvářejte nebo upravujte šablony ve svém prohlížeči",
     "property_dev.doc_templates.locale_editor_title": "Překlady šablon dokumentů",
+    "property_dev.doc_templates.company_layouts_link": "Rozvržení a doložky ostatních firemních dokumentů",
     "propdev.phase.sequence": "#",
     "propdev.cancel_buyer_title": "Zrušit kupujícího?",
   "propdev.lead_status_converted": "Převeden",
@@ -66129,6 +66130,7 @@ const resource = {
     "letter_templates.one_off_hint": "Změny platí jen pro tento dopis.",
     "letter_templates.save_as_template": "Uložit také jako šablonu pro tento jazyk",
     "letter_templates.download": "Stáhnout PDF",
+    "letter_templates.company_template": "Firemní šablona a vzhled",
     "demo_market.label": "Jazyk a trh",
     "demo_market.hint": "Přepne jazyk rozhraní a otevře demo dané země s jejími vlastními daty a normami.",
     "boot.starting_title": "Nastavování OpenConstructionERP",
@@ -66844,6 +66846,13 @@ const resource = {
     "doc_layout.clause_library_hint": "Opakovaně použitelné texty, které rozvržení dokumentu tiskne v bloku doložky, jeden text na jazyk. Doložky z balíčku vaší země jsou jen pro čtení.",
     "doc_layout.clause_new": "Nová doložka",
     "doc_layout.clause_key": "Klíč",
+    "doc_layout.clause_category": "Kategorie",
+    "doc_layout.clause_language": "Jazyk",
+    "doc_layout.clause_title": "Název",
+    "doc_layout.clause_text": "Text",
+    "doc_layout.clause_saved": "Doložka uložena",
+    "doc_layout.clause_delete": "Smazat doložku",
+    "doc_layout.clause_delete_confirm": "Smazat doložku „{{name}}“? Rozvržení, která ji používají, na jejím místě nic nevytisknou.",
   }
 } as { translation: Record<string, string> };
 

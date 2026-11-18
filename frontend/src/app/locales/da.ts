@@ -44248,6 +44248,7 @@ const resource = {
     "project.settings.folder.invalid": "Start med http://, https://, file://, smb:// eller en netværkssti som \\\\server\\share.",
     "project.folder_link": "Projektmappe",
     "property_dev.doc_templates.editor_cta_title": "Opret eller rediger skabeloner i din browser",
+    "property_dev.doc_templates.company_layouts_link": "Layouts og klausuler for virksomhedens øvrige dokumenter",
     "propdev.phase.sequence": "#",
   "propdev.lead_status_converted": "Konverteret",
   "propdev.lead_status_disqualified": "Diskvalificeret",
@@ -64790,6 +64791,7 @@ const resource = {
     "letter_templates.one_off_hint": "Ændringer gælder kun dette brev.",
     "letter_templates.save_as_template": "Gem også som skabelon for dette sprog",
     "letter_templates.download": "Hent PDF",
+    "letter_templates.company_template": "Virksomhedsskabelon og udseende",
     "demo_market.label": "Sprog og marked",
     "demo_market.hint": "Skifter brugerfladens sprog og åbner demoen for det land med dets egne data og standarder.",
     "boot.starting_title": "Opsætter OpenConstructionERP",
@@ -65505,6 +65507,13 @@ const resource = {
     "doc_layout.clause_library_hint": "Genanvendelige tekster, som et dokumentlayout udskriver i en klausulblok, én tekst pr. sprog. Klausuler fra din landepakke er skrivebeskyttede.",
     "doc_layout.clause_new": "Ny klausul",
     "doc_layout.clause_key": "Nøgle",
+    "doc_layout.clause_category": "Kategori",
+    "doc_layout.clause_language": "Sprog",
+    "doc_layout.clause_title": "Titel",
+    "doc_layout.clause_text": "Tekst",
+    "doc_layout.clause_saved": "Klausul gemt",
+    "doc_layout.clause_delete": "Slet klausul",
+    "doc_layout.clause_delete_confirm": "Slet klausulen \"{{name}}\"? Layouts, der bruger den, udskriver intet i dens sted.",
   }
 } as { translation: Record<string, string> };
 

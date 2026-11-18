@@ -44552,6 +44552,7 @@ const resource = {
     "project.settings.folder.invalid": "Comece com http://, https://, file://, smb:// ou um caminho de rede como \\\\server\\share.",
     "project.folder_link": "Pasta do projeto",
     "property_dev.doc_templates.editor_cta_title": "Criar ou editar modelos no seu navegador",
+    "property_dev.doc_templates.company_layouts_link": "Layouts e cláusulas dos outros documentos da empresa",
     "propdev.phase.sequence": "#",
     "propdev.matrix.rules_title": "Regras",
     "propdev.cancel_buyer_title": "Cancelar comprador?",
@@ -67726,6 +67727,7 @@ const resource = {
     "letter_templates.one_off_hint": "As alterações aplicam-se apenas a esta carta.",
     "letter_templates.save_as_template": "Guardar também como modelo para este idioma",
     "letter_templates.download": "Descarregar PDF",
+    "letter_templates.company_template": "Modelo e aparência da empresa",
     "demo_market.label": "Idioma e mercado",
     "demo_market.hint": "Muda o idioma da interface e abre a demo desse país, com os seus próprios dados e normas.",
     "boot.starting_title": "Configurando o OpenConstructionERP",
@@ -68441,6 +68443,12 @@ const resource = {
     "doc_layout.clause_library_hint": "Textos reutilizáveis que um layout de documento imprime num bloco de cláusula, um texto por idioma. As cláusulas do pacote do seu país são só de leitura.",
     "doc_layout.clause_new": "Nova cláusula",
     "doc_layout.clause_key": "Chave",
+    "doc_layout.clause_category": "Categoria",
+    "doc_layout.clause_language": "Idioma",
+    "doc_layout.clause_title": "Título",
+    "doc_layout.clause_text": "Texto",
+    "doc_layout.clause_saved": "Cláusula guardada",
+    "doc_layout.clause_delete": "Excluir cláusula",
   }
 } as { translation: Record<string, string> };
 

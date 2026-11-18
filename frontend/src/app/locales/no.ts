@@ -44210,6 +44210,7 @@ const resource = {
     "project_route.no_entries_hint": "Klassifiser din første arbeidstype for å få en foreslått rute.",
     "project_route.showing_count": "{{count}} vurderinger",
     "property_dev.doc_templates.editor_cta_title": "Opprett eller rediger maler i nettleseren din",
+    "property_dev.doc_templates.company_layouts_link": "Oppsett og klausuler for firmaets øvrige dokumenter",
     "propdev.phase.sequence": "#",
     "propdev.matrix.rules_title": "Regler",
     "propdev.cancel_buyer_title": "Avbryt kjøper?",
@@ -64790,6 +64791,7 @@ const resource = {
     "letter_templates.one_off_hint": "Endringene gjelder bare dette brevet.",
     "letter_templates.save_as_template": "Lagre også som mal for dette språket",
     "letter_templates.download": "Last ned PDF",
+    "letter_templates.company_template": "Firmamal og utseende",
     "demo_market.label": "Språk og marked",
     "demo_market.hint": "Bytter språket i grensesnittet og åpner demoen for det landet, med egne data og standarder.",
     "boot.starting_title": "Setter opp OpenConstructionERP",
@@ -65505,6 +65507,12 @@ const resource = {
     "doc_layout.clause_library_hint": "Gjenbrukbare tekster som et dokumentoppsett skriver ut i en klausulblokk, én tekst per språk. Klausuler fra landspakken din er skrivebeskyttet.",
     "doc_layout.clause_new": "Ny klausul",
     "doc_layout.clause_key": "Nøkkel",
+    "doc_layout.clause_category": "Kategori",
+    "doc_layout.clause_language": "Språk",
+    "doc_layout.clause_title": "Tittel",
+    "doc_layout.clause_text": "Tekst",
+    "doc_layout.clause_saved": "Klausul lagret",
+    "doc_layout.clause_delete": "Slett klausul",
   }
 } as { translation: Record<string, string> };
 
