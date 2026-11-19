@@ -11,7 +11,7 @@ install also gets them from the auto-migrator. Each step is guarded, so a
 re-run changes nothing.
 
 Revision ID: awe01_award_entities
-Revises: vcrm01_deal_activities
+Revises: svc01_survey_calcs
 Create Date: 2026-11-19
 """
 
@@ -24,7 +24,7 @@ import sqlalchemy as sa
 from alembic import op
 
 revision: str = "awe01_award_entities"
-down_revision: Union[str, Sequence[str], None] = "vcrm01_deal_activities"
+down_revision: Union[str, Sequence[str], None] = "svc01_survey_calcs"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
