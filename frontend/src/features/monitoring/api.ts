@@ -54,6 +54,10 @@ export interface MonitoringPoint {
   rate_mm_day: number | null;
   level: Level;
   ack_state: AckState;
+  /** Next threshold the linear trend of the last epochs reaches, and in how many days. */
+  forecast_level?: string;
+  forecast_days?: number | null;
+  forecast_rate_mm_day?: number | null;
 }
 
 export interface SeriesEntry {
