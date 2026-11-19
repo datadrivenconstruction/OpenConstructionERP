@@ -928,3 +928,172 @@ jobs:
         # answered with a 2xx and the body it did answer with.
         shell: bash
         run: python ../scripts/ci/cli_cold_start_probe.py --port 8765 --timeout 900
+
+  cli-browser-cold-start:
+    name: Browser cold start (${{ matrix.os }})
+    # The lane above proves a cold install answers HTTP. This one proves a
+    # person can use it, and it exists because of a report no other lane could
+    # have produced: a fresh Windows install, one load of the sign-in page, and
+    # DevTools showing 585 requests, 6.4 MB, 27 console errors and a toast
+    # reading "could not load data" on a page that had not been given a chance
+    # to load anything. Every one of those numbers is a property of the running
+    # product - the retries, the health poll, the probes, the service worker and
+    # the page all at once - and a unit test that mocked any of them would have
+    # measured the mock.
+    #
+    # So this starts the same CLI on the same empty data directory, waits for
+    # /api/health, and then hands the port to headless Chromium, which opens
+    # /login and counts every request for 45 seconds, registers the first
+    # account through the form, signs out and back in, opens Settings and opens
+    # /register. The ceilings are in the spec, and the counts are published as
+    # annotations and a step summary by scripts/ci/browser_cold_start_lane.py,
+    # so the numbers are on the run and not only in a log nobody downloads.
+    #
+    # The interface is the one the frontend job built, downloaded as an artifact
+    # rather than built a second time here: this lane is about what a shipped
+    # bundle does against a cold server, and rebuilding it per OS would spend
+    # ten minutes answering a question the build already answered. That is also
+    # why the lane refuses to run against a server that does not serve an
+    # application root - a browser pointed at a 404 produces tiny request counts
+    # and a clean console, which is a green lane measuring nothing.
+    #
+    # macOS is not in the matrix. The lane's subject is the two platforms
+    # installers report from, and the macOS hosted runners in this repository
+    # have a recorded history of being cancelled for capacity, which would put a
+    # third leg here whose red means nothing about the product.
+    needs: [frontend]
+    # Skipped rather than failed when the build it downloads did not happen.
+    # `frontend` is a matrix, so a capacity cancellation on its macOS leg reads
+    # as a failure of the whole job and would otherwise turn this lane red for
+    # an event that touched neither the interface nor the server.
+    if: ${{ !cancelled() && needs.frontend.result == 'success' }}
+    runs-on: ${{ matrix.os }}
+    # The CLI's own wait for health is 900s, and Playwright's per-test ceiling
+    # is 240s with a 45s recording window inside it. The margin above both is
+    # npm ci, the browser download and the install of the product.
+    timeout-minutes: 50
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js 24
+        uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: backend/pyproject.toml
+
+      - name: Download the built interface
+        id: dist
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-dist
+          path: frontend/dist
+
+      - name: Refuse to run against an interface that was not built
+        # A download that produced an empty directory is the one failure this
+        # lane could not otherwise see: the server would come up, serve its own
+        # 404 for every route, and the browser would report a clean, quiet,
+        # almost-empty first boot. Naming it here keeps that from being read as
+        # a pass further down.
+        if: ${{ !cancelled() && steps.dist.outcome == 'success' }}
+        shell: bash
+        run: |
+          test -f frontend/dist/index.html || {
+            echo "::error::frontend/dist/index.html is missing; the downloaded bundle is empty"
+            exit 1
+          }
+          echo "built interface: $(ls frontend/dist | wc -l) entries"
+
+      - name: Install dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Install Chromium (Linux dependencies)
+        if: ${{ !cancelled() && matrix.os == 'ubuntu-latest' }}
+        working-directory: frontend
+        run: npx playwright install --with-deps chromium
+
+      - name: Install Chromium
+        if: ${{ !cancelled() && matrix.os != 'ubuntu-latest' }}
+        working-directory: frontend
+        run: npx playwright install chromium
+
+      - name: Install the product
+        # After the interface is on disk, so the force-include in
+        # backend/pyproject.toml has something to carry and the server resolves
+        # the same bundle the lane is about to open.
+        id: install
+        working-directory: backend
+        run: pip install -e .
+
+      - name: Start it through the CLI and drive a browser through the first session
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        # No service container, no DATABASE_URL, no fixture, no dev server. The
+        # CLI's own STAGE lines are inherited into this log; the driver adds the
+        # time to first healthy response, the request census and the traces.
+        working-directory: backend
+        shell: bash
+        run: python ../scripts/ci/browser_cold_start_lane.py --port 8765 --timeout 900
+
+      - name: Upload the traces and the request log
+        # On failure only, and `ignore` rather than `error` when there is
+        # nothing: a lane that failed before Playwright ran has no trace, and
+        # failing the job a second time for that hides the first cause. An
+        # artifact-service outage has failed a job in this workflow before and
+        # silently skipped the step after it, which is why this is last.
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: browser-cold-start-${{ matrix.os }}
+          path: frontend/test-results
+          retention-days: 7
+          if-no-files-found: ignore
+
+  cold-start-gate:
+    name: CLI cold start
+    # One stable check that is green only when both cold-start lanes passed, so
+    # a reader of the run sees one verdict for "a fresh install works" instead of
+    # counting matrix legs. Same shape as backend-gate above, and the same reason
+    # for `!cancelled()` rather than `always()`: a cancelled run earned no
+    # verdict either way, and reporting one would be reporting nothing ran as
+    # though something had.
+    needs: [cli-cold-start, cli-browser-cold-start]
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require both cold-start lanes to pass
+        shell: bash
+        run: |
+          probe="${{ needs.cli-cold-start.result }}"
+          browser="${{ needs.cli-browser-cold-start.result }}"
+          echo "cli-cold-start: $probe"
+          echo "cli-browser-cold-start: $browser"
+          if [ "$probe" != "success" ]; then
+            echo "::error::the CLI cold start lane did not pass: $probe"
+            exit 1
+          fi
+          # A skip is accepted for the browser lane alone, and said out loud when
+          # it happens. It skips only when the frontend build it downloads did
+          # not happen, which is a failure of a different lane and already red
+          # on the run. Treating that as a failure here would report the same
+          # event twice and would name this gate as the thing that broke.
+          if [ "$browser" = "skipped" ]; then
+            echo "::warning::the browser cold start lane was skipped, so this gate is green on the HTTP probe alone"
+          elif [ "$browser" != "success" ]; then
+            echo "::error::the browser cold start lane did not pass: $browser"
+            exit 1
+          fi
+          echo "Both cold-start lanes passed."
