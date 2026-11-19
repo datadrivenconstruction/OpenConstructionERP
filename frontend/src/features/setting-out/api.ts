@@ -9,8 +9,8 @@ import { API_BASE, activeLanguageTag, apiDelete, apiGet, apiPatch, apiPost, down
 
 const BASE = '/v1/setting-out';
 
-export type ItemType = 'column' | 'wall' | 'pile' | 'anchor_bolt' | 'kerb' | 'centreline' | 'grid_line' | 'other';
-export const ITEM_TYPES: ItemType[] = ['column', 'wall', 'pile', 'anchor_bolt', 'kerb', 'centreline', 'grid_line', 'other'];
+export type ItemType = 'column' | 'wall' | 'pile' | 'anchor_bolt' | 'kerb' | 'centreline' | 'grid_line' | 'boundary_corner' | 'other';
+export const ITEM_TYPES: ItemType[] = ['column', 'wall', 'pile', 'anchor_bolt', 'kerb', 'centreline', 'grid_line', 'boundary_corner', 'other'];
 export type RefType = '' | 'boq' | 'bim' | 'cad';
 export type Verdict = 'pass' | 'fail' | 'no_tolerance';
 export type StakeState = Verdict | 'open';

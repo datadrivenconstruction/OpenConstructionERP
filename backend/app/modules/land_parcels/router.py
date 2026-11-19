@@ -126,9 +126,10 @@ async def list_parcels(
     locale: Locale = "en",
     offset: int = Query(0, ge=0),
     limit: int = Query(1000, ge=1, le=5000),
+    include_superseded: bool = False,
 ) -> ParcelListResponse:
     await verify_project_access(project_id, user_id, session)
-    rows = await ParcelService(session).list_parcels(project_id, markets, locale)
+    rows = await ParcelService(session).list_parcels(project_id, markets, locale, include_superseded)
     return ParcelListResponse(items=rows[offset : offset + limit], total=len(rows), offset=offset, limit=limit)
 
 
@@ -363,3 +364,8 @@ async def delete_zone(zone_id: uuid.UUID, session: SessionDep, user_id: CurrentU
     await verify_project_access(zone.project_id, user_id, session)
     await service.delete_zone(zone, user_id)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+from app.modules.land_parcels.calc_router import router as _calc_router  # noqa: E402
+
+router.include_router(_calc_router)

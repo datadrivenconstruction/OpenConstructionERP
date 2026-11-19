@@ -264,3 +264,8 @@ async def create_ncr(
     rec = await service.get_record(record_id)
     await verify_project_access(rec.project_id, user_id, session)
     return await service.create_ncr_draft(rec, user_id, locale)
+
+
+from app.modules.setting_out.road_router import router as _road_router  # noqa: E402
+
+router.include_router(_road_router)

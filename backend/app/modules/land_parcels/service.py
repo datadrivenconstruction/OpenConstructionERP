@@ -23,7 +23,10 @@ from fastapi import HTTPException, status
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.modules.land_parcels import parcel_io
+from app.modules.land_parcels import (
+    calc_validators,  # noqa: F401 - registers SRV-101 with the parcel rules
+    parcel_io,
+)
 from app.modules.land_parcels.geometry import open_ring, round_area, shoelace_area
 from app.modules.land_parcels.models import (
     LandParcel,
@@ -159,15 +162,24 @@ class ParcelService:
             return tol, f"{tol} m2{src}"
         return (legal * pct / 100).quantize(Decimal("0.01")), f"{_plain(pct)}% config"
 
-    async def _rows(self, project_id: uuid.UUID) -> tuple[list[LandParcel], dict[uuid.UUID, list[LandParcelPoint]]]:
-        parcels = await self.repo.list_parcels(project_id)
+    async def _rows(
+        self, project_id: uuid.UUID, include_superseded: bool = False
+    ) -> tuple[list[LandParcel], dict[uuid.UUID, list[LandParcelPoint]]]:
+        # A split or merged parent stays as history; checks and lists see only the live parcels.
+        parcels = [p for p in await self.repo.list_parcels(project_id) if include_superseded or not p.superseded]
         return parcels, await self.repo.points_by_parcel([p.id for p in parcels])
 
-    async def _context(self, project_id: uuid.UUID, profile: ParcelProfile) -> dict[str, Any]:
+    async def _context(
+        self, project_id: uuid.UUID, profile: ParcelProfile, markets: list[str] | None = None
+    ) -> dict[str, Any]:
+        from app.modules.land_parcels.calc_service import corner_rows  # noqa: PLC0415
+
         parcels, points = await self._rows(project_id)
         cfg = await self.settings(project_id)
         out = []
+        corners: list[dict[str, Any]] = []
         for p in parcels:
+            corners += corner_rows(p, points.get(p.id, []), markets or [])
             tol, text = self._tolerance(p.legal_area, profile, cfg.area_tolerance_pct)
             computed = round_area(p.computed_area, profile.area_decimals) if p.computed_area is not None else None
             out.append(
@@ -187,14 +199,19 @@ class ParcelService:
                 }
             )
         zones = [{"id": str(z.id), "name": z.name, "ring": z.ring} for z in await self.repo.list_zones(project_id)]
-        return {"parcels": out, "work_zones": zones, "settings": {"gap_tolerance_m": str(cfg.gap_tolerance_m)}}
+        return {
+            "parcels": out,
+            "work_zones": zones,
+            "corners": corners,
+            "settings": {"gap_tolerance_m": str(cfg.gap_tolerance_m)},
+        }
 
     async def validate(self, project_id: uuid.UUID, markets: list[str], locale: str = "en") -> ValidationReportOut:
         from app.core.validation.engine import validation_engine  # noqa: PLC0415
 
         profile = await self.profile(project_id, markets)
         report = await validation_engine.validate(
-            data=await self._context(project_id, profile),
+            data=await self._context(project_id, profile, markets),
             rule_sets=[PARCEL_RULE_SET],
             target_type="land_parcels",
             target_id=str(project_id),
@@ -252,6 +269,8 @@ class ParcelService:
             rights_kinds=sorted({r.kind for r in rights}),
             boq_position_id=p.boq_position_id,
             sent_at=p.sent_at,
+            parent_ids=[str(x) for x in (p.parent_ids or [])],
+            superseded=bool(p.superseded),
             findings=findings,
         )
 
@@ -260,9 +279,11 @@ class ParcelService:
         pid = str(parcel_id)
         return [f for f in report.findings if pid in (f.element_ref or "").split(",")]
 
-    async def list_parcels(self, project_id: uuid.UUID, markets: list[str], locale: str) -> list[ParcelOut]:
+    async def list_parcels(
+        self, project_id: uuid.UUID, markets: list[str], locale: str, include_superseded: bool = False
+    ) -> list[ParcelOut]:
         profile = await self.profile(project_id, markets)
-        parcels, points = await self._rows(project_id)
+        parcels, points = await self._rows(project_id, include_superseded)
         rights = await self.repo.list_rights(project_id)
         report = await self.validate(project_id, markets, locale)
         by_parcel: dict[uuid.UUID, list[LandRight]] = {}
@@ -295,6 +316,8 @@ class ParcelService:
                     n=float(pt.n),
                     mark=pt.mark,  # type: ignore[arg-type]
                     accuracy_m=float(pt.accuracy_m) if pt.accuracy_m is not None else None,
+                    corner_status=pt.corner_status or "",
+                    accuracy_class=pt.accuracy_class or "",
                 )
                 for pt in points
             ],

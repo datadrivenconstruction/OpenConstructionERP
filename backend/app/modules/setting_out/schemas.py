@@ -14,7 +14,9 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
-ItemType = Literal["column", "wall", "pile", "anchor_bolt", "kerb", "centreline", "grid_line", "other"]
+ItemType = Literal[
+    "column", "wall", "pile", "anchor_bolt", "kerb", "centreline", "grid_line", "boundary_corner", "other"
+]
 RefType = Literal["", "boq", "bim", "cad"]
 VerdictOut = Literal["pass", "fail", "no_tolerance", "open"]
 

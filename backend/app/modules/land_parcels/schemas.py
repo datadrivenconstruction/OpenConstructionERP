@@ -35,6 +35,9 @@ class BoundaryPointIn(BaseModel):
 
 class BoundaryPointOut(BoundaryPointIn):
     seq: int
+    #: found | set | calculated | ""
+    corner_status: str = ""
+    accuracy_class: str = ""
 
 
 class ParcelCreate(BaseModel):
@@ -120,6 +123,9 @@ class ParcelOut(BaseModel):
     rights_kinds: list[str] = Field(default_factory=list)
     boq_position_id: uuid.UUID | None = None
     sent_at: datetime | None = None
+    #: Parcels this one was split from or merged out of.
+    parent_ids: list[str] = Field(default_factory=list)
+    superseded: bool = False
     findings: list[FindingOut] = Field(default_factory=list)
 
 

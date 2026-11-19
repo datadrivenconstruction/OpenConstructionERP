@@ -184,3 +184,38 @@ def test_hand_reduced_book_with_a_slip_fails_the_arithmetic_check() -> None:
 def test_level_book_needs_an_opening_backsight() -> None:
     with pytest.raises(ValueError, match="backsight"):
         reduce([BookRow("BM1", fs=1.0), BookRow("BM2", fs=1.0)], 10.0)
+
+
+async def _calc_failed(rule, data: dict) -> list:
+    from app.core.validation.engine import ValidationContext
+
+    return [r for r in await rule.validate(ValidationContext(data=data, metadata={"locale": "en"})) if not r.passed]
+
+
+async def test_srv040_041_on_cogo_rows() -> None:
+    from app.modules.survey_core.calc_validators import ParallelLinesRule, TwoSolutionsRule
+
+    data = {"cogo": [{"ref": "x", "method": "line_line", "status": "parallel"},
+                     {"ref": "y", "method": "distance_distance", "status": "two_solutions"}]}  # fmt: skip
+    assert [r.rule_id for r in await _calc_failed(ParallelLinesRule(), data)] == ["SRV-040"]
+    assert [r.rule_id for r in await _calc_failed(TwoSolutionsRule(), data)] == ["SRV-041"]
+
+
+async def test_srv050_pentagon_25_seconds_against_k10_and_k12() -> None:
+    from app.modules.survey_core.calc_validators import AngularMisclosureRule
+
+    row = {"id": "t", "kind": "traverse", "ang_misclosure_sec": 25.0, "angle_count": 5}
+    [hit] = await _calc_failed(AngularMisclosureRule(), {"traverses": [{**row, "ang_k_sec": 10}]})
+    assert hit.rule_id == "SRV-050" and "25.0" in hit.message
+    assert await _calc_failed(AngularMisclosureRule(), {"traverses": [{**row, "ang_k_sec": 12}]}) == []
+    assert await _calc_failed(AngularMisclosureRule(), {"traverses": [row]}) == []
+
+
+async def test_srv060_level_arithmetic() -> None:
+    from app.modules.survey_core.calc_validators import LevelArithmeticRule
+
+    row = {"id": "l", "kind": "level", "name": "Run 1", "arithmetic_ok": False,
+           "sum_bs": 5.0, "sum_fs": 4.2, "first_rl": 45.2, "last_rl": 46.0}  # fmt: skip
+    [hit] = await _calc_failed(LevelArithmeticRule(), {"traverses": [row]})
+    assert hit.rule_id == "SRV-060" and "Run 1" in hit.message
+    assert await _calc_failed(LevelArithmeticRule(), {"traverses": [{**row, "arithmetic_ok": True}]}) == []
