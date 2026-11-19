@@ -1,8 +1,8 @@
 """Levies, payment discount and the bidder radius search through the API.
 
 Worked example 1 of the subcontractor award domain, end to end: contract sum
-400,008.60, levies 0.3 + 0.5 + 0.4 %, retention 10 % capped at 5 %, invoice
-120,000.00 paid within 14 days at 2 % -> 104,569.92.
+400,008.60, levies 0.3 + 0.5 + 0.4 % and retention 10 % (capped at 5 %) all on
+the gross invoice of 120,000.00, paid within 14 days at 2 % -> 104,428.80.
 """
 
 from __future__ import annotations
@@ -27,7 +27,6 @@ from tests._pg import transactional_session
 pytestmark = pytest.mark.asyncio
 
 TERMS = {
-    "deduction_order": "levies_then_retention",
     "retention_cap_percent": "5",
     "payment_discount_percent": "2",
     "payment_discount_days": 14,
@@ -102,6 +101,7 @@ async def test_worked_example_statement_through_the_api(db_session) -> None:
         put = await client.put(f"/v1/subcontractors/agreements/{agreement.id}/terms", json=TERMS)
         assert put.status_code == 200, put.text
         assert [lv["code"] for lv in put.json()["levies"]] == ["insurance", "cleaning", "power"]
+        assert {lv["levy_base"] for lv in put.json()["levies"]} == {"gross"}
 
         r = await client.get(
             f"/v1/subcontractors/agreements/{agreement.id}/deductions",
@@ -110,11 +110,11 @@ async def test_worked_example_statement_through_the_api(db_session) -> None:
     assert r.status_code == 200, r.text
     body = r.json()
     assert Decimal(body["levies_total"]) == Decimal("1440.00")
-    assert Decimal(body["retention_amount"]) == Decimal("11856.00")
+    assert Decimal(body["retention_amount"]) == Decimal("12000.00")
     assert Decimal(body["retention_cap_amount"]) == Decimal("20000.43")
-    assert Decimal(body["payable"]) == Decimal("106704.00")
-    assert Decimal(body["payment_discount_amount"]) == Decimal("2134.08")
-    assert Decimal(body["amount_to_pay"]) == Decimal("104569.92")
+    assert Decimal(body["payable"]) == Decimal("106560.00")
+    assert Decimal(body["payment_discount_amount"]) == Decimal("2131.20")
+    assert Decimal(body["amount_to_pay"]) == Decimal("104428.80")
     assert body["discount_due_date"] == "2026-03-16"
     results = {row["rule_id"]: row for row in body["validation"]}
     assert results["subcontract.levies_reconcile"]["passed"] is True

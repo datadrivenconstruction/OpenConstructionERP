@@ -177,7 +177,6 @@ async def _workspace_countries(session: AsyncSession, payload: dict[str, Any], u
 
 
 def _apply_terms(entity: SubcontractTerms, data: SubcontractTermsIn) -> None:
-    entity.deduction_order = data.deduction_order
     entity.retention_cap_percent = data.retention_cap_percent
     entity.payment_discount_percent = data.payment_discount_percent
     entity.payment_discount_days = data.payment_discount_days
@@ -191,6 +190,7 @@ def _apply_terms(entity: SubcontractTerms, data: SubcontractTermsIn) -> None:
             rate_percent=levy.rate_percent if levy.basis == "percent" else None,
             fixed_amount=levy.fixed_amount if levy.basis == "fixed" else None,
             applies_at=levy.applies_at,
+            levy_base=levy.levy_base,
             sort_order=index,
         )
         for index, levy in enumerate(data.levies)
@@ -272,7 +272,6 @@ def terms_to_calc(
     return PaymentTerms(
         retention_percent=retention_percent,
         retention_cap_amount=retention_cap_amount(contract_sum, entity.retention_cap_percent),
-        deduction_order=entity.deduction_order,
         payment_discount_percent=entity.payment_discount_percent,
         payment_discount_days=entity.payment_discount_days,
         payment_discount_agreed=bool(entity.payment_discount_agreed),
@@ -284,6 +283,7 @@ def terms_to_calc(
                 rate_percent=levy.rate_percent,
                 fixed_amount=levy.fixed_amount,
                 applies_at=levy.applies_at,
+                levy_base=levy.levy_base,
             )
             for levy in entity.levies
         ),

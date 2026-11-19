@@ -13,7 +13,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 Basis = Literal["percent", "fixed"]
 AppliesAt = Literal["each_invoice", "final_account"]
-DeductionOrder = Literal["levies_then_retention", "retention_then_levies"]
+LevyBase = Literal["gross", "net_after_retention"]
 
 _PCT = {"ge": Decimal("0"), "le": Decimal("100"), "max_digits": 7, "decimal_places": 3}
 _AMT = {"ge": Decimal("0"), "le": Decimal("1e15"), "max_digits": 18, "decimal_places": 2}
@@ -72,6 +72,7 @@ class SubcontractLevyIn(BaseModel):
     rate_percent: Decimal | None = Field(default=None, **_PCT)
     fixed_amount: Decimal | None = Field(default=None, **_AMT)
     applies_at: AppliesAt = "each_invoice"
+    levy_base: LevyBase = "gross"
 
 
 class SubcontractLevyResponse(SubcontractLevyIn):
@@ -86,7 +87,6 @@ class SubcontractLevyResponse(SubcontractLevyIn):
 class SubcontractTermsIn(BaseModel):
     """Deduction terms of a subcontract (replaces the levy list as a whole)."""
 
-    deduction_order: DeductionOrder = "levies_then_retention"
     retention_cap_percent: Decimal | None = Field(default=None, **_PCT)
     payment_discount_percent: Decimal | None = Field(default=None, **_PCT)
     payment_discount_days: int | None = Field(default=None, ge=0, le=365)
@@ -102,7 +102,6 @@ class SubcontractTermsResponse(BaseModel):
     id: UUID | None = None
     agreement_id: UUID | None = None
     contract_id: UUID | None = None
-    deduction_order: DeductionOrder = "levies_then_retention"
     retention_cap_percent: Decimal | None = None
     payment_discount_percent: Decimal | None = None
     payment_discount_days: int | None = None
@@ -132,7 +131,6 @@ class DeductionStatementResponse(BaseModel):
     currency: str = ""
     contract_sum: Decimal
     work_value: Decimal
-    deduction_order: DeductionOrder
     final_account: bool = False
     levies: list[dict[str, Any]]
     levies_total: Decimal

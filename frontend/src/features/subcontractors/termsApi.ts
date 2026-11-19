@@ -11,7 +11,7 @@ import { apiDelete, apiGet, apiPost, apiPut } from '@/shared/lib/api';
 
 export type LevyBasis = 'percent' | 'fixed';
 export type LevyAppliesAt = 'each_invoice' | 'final_account';
-export type DeductionOrder = 'levies_then_retention' | 'retention_then_levies';
+export type LevyBase = 'gross' | 'net_after_retention';
 
 export interface LevyCatalogueItem {
   id: string;
@@ -52,13 +52,13 @@ export interface SubcontractLevy {
   rate_percent: string | null;
   fixed_amount: string | null;
   applies_at: LevyAppliesAt;
+  levy_base?: LevyBase;
 }
 
 export interface SubcontractTerms {
   id?: string | null;
   agreement_id?: string | null;
   contract_id?: string | null;
-  deduction_order: DeductionOrder;
   retention_cap_percent: string | null;
   payment_discount_percent: string | null;
   payment_discount_days: number | null;
@@ -69,7 +69,7 @@ export interface SubcontractTerms {
 }
 
 export interface StatementLine {
-  kind: 'work_value' | 'levy' | 'after_levies' | 'retention' | 'payable' | 'payment_discount';
+  kind: 'work_value' | 'levy' | 'retention' | 'payable' | 'payment_discount';
   code?: string;
   name?: string;
   amount: string;
@@ -92,7 +92,6 @@ export interface DeductionStatement {
   currency: string;
   contract_sum: string;
   work_value: string;
-  deduction_order: DeductionOrder;
   levies_total: string;
   retention_percent: string;
   retention_amount: string;
