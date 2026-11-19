@@ -142,7 +142,9 @@ function watch(page: Page): { census: () => Census; stop: () => void } {
       for (const [url, count] of urls) {
         // Grouped without the query string, because a poll that varies a cache
         // buster is still one endpoint asked too many times.
-        const endpoint = url.split('?')[0];
+        // `?? url` because the project type checks with noUncheckedIndexedAccess,
+        // and because a key with no query string is the whole key anyway.
+        const endpoint = url.split('?')[0] ?? url;
         byEndpoint[endpoint] = (byEndpoint[endpoint] ?? 0) + count;
         if (count > worstRepeat.count) worstRepeat = { url, count };
       }
