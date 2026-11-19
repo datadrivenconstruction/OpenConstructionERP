@@ -338,6 +338,7 @@ export async function downloadSurveyExport(url: string, fallbackFilename: string
   const name = response.headers.get('Content-Disposition')?.match(/filename="?([^";]+)"?/)?.[1];
   triggerDownload(blob, name || fallbackFilename);
   return (response.headers.get('X-Survey-Warnings') ?? '').split(',').filter(Boolean);
+}
 
 // ── Register v2: point detail, bulk actions, export, control checks ─────────
 

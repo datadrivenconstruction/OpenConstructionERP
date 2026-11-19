@@ -2295,5 +2295,27 @@
     ],
     "key_count_at_seed": 3,
     "note": "GAEB XML 3.3 Import / Export, Block and Material are the same word in German and Swedish."
+  },
+  {
+    "locale_set": [
+      "cs",
+      "da",
+      "fil"
+    ],
+    "key_count_at_seed": 3,
+    "note": "Tolerance is the same word in Czech, Danish and Filipino (drawing_compare.tolerance, survey.control.tolerance, submittals.field_model_reference)."
+  },
+  {
+    "locale_set": [
+      "es",
+      "es-CL",
+      "es-CO",
+      "es-MX",
+      "id",
+      "pt",
+      "pt-BR"
+    ],
+    "key_count_at_seed": 3,
+    "note": "Visual, Final and Horizontal are the same word in Spanish, Indonesian and Portuguese."
   }
 ]

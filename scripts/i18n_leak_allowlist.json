@@ -2438,5 +2438,30 @@
     "en_value": "COGO",
     "note": "coordinate geometry abbreviation used as a tab name in every locale",
     "reason_category": "abbreviation"
+  },
+  "survey.export.format.csv": {
+    "en_value": "CSV",
+    "note": "format or coordinate-component label written the same in every locale",
+    "reason_category": "standard_code"
+  },
+  "survey.export.format.dxf": {
+    "en_value": "DXF",
+    "note": "format or coordinate-component label written the same in every locale",
+    "reason_category": "standard_code"
+  },
+  "survey.export.format.geojson": {
+    "en_value": "GeoJSON",
+    "note": "format or coordinate-component label written the same in every locale",
+    "reason_category": "standard_code"
+  },
+  "survey.export.format.gsi": {
+    "en_value": "GSI-16",
+    "note": "format or coordinate-component label written the same in every locale",
+    "reason_category": "standard_code"
+  },
+  "survey.export.format.landxml": {
+    "en_value": "LandXML 1.2",
+    "note": "format or coordinate-component label written the same in every locale",
+    "reason_category": "standard_code"
   }
 }
