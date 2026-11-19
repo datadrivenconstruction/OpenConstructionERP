@@ -113,6 +113,15 @@ async def _inherit_award_cost_lines(session: Any, contract: Any, lines: list[Any
         return
 
 
+async def _hand_terms_to_subcontract(session: Any, contract: Any) -> None:
+    """Pass the agreed terms to the subcontract terms service when the platform carries one."""
+    try:
+        from app.modules.subcontractors.terms_service import set_subcontract_terms  # noqa: PLC0415
+    except ImportError:
+        return
+    await set_subcontract_terms(session, contract_id=contract.id, terms=dict(contract.terms or {}), source="award")
+
+
 async def _award_terms_of(session: Any, package_id: uuid.UUID, bid_id: uuid.UUID) -> tuple[Any, Any]:
     """The award terms of the package when they name this bid, and the round the award rests on."""
     from app.modules.tendering.award_terms import AwardTermsService  # noqa: PLC0415
@@ -340,6 +349,7 @@ async def _draft(package_id: uuid.UUID, bid_id: uuid.UUID, *, awarded_by: object
 
         await session.flush()
         await _inherit_award_cost_lines(session, contract, drafted_lines)
+        await _hand_terms_to_subcontract(session, contract)
         await session.commit()
 
         event_bus.publish_detached(
