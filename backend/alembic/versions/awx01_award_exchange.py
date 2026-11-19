@@ -16,7 +16,7 @@ running install and the auto-migrator adds the nullable columns; the
 migration is inspector-guarded, so a re-run changes nothing.
 
 Revision ID: awx01_award_exchange
-Revises: vcrm01_deal_activities
+Revises: awt01_tender_award_terms
 Create Date: 2026-11-19
 """
 
@@ -29,7 +29,7 @@ import sqlalchemy as sa
 from alembic import op
 
 revision: str = "awx01_award_exchange"
-down_revision: Union[str, Sequence[str], None] = "vcrm01_deal_activities"
+down_revision: Union[str, Sequence[str], None] = "awt01_tender_award_terms"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

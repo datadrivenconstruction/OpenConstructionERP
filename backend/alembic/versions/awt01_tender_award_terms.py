@@ -12,7 +12,7 @@ running install from the models; the migration is inspector-guarded, so a
 re-run or a downgrade without the tables changes nothing.
 
 Revision ID: awt01_tender_award_terms
-Revises: vcrm01_deal_activities
+Revises: svu01_survey_v2_ux
 Create Date: 2026-11-19
 """
 
@@ -25,7 +25,7 @@ import sqlalchemy as sa
 from alembic import op
 
 revision: str = "awt01_tender_award_terms"
-down_revision: Union[str, Sequence[str], None] = "vcrm01_deal_activities"
+down_revision: Union[str, Sequence[str], None] = "svu01_survey_v2_ux"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
