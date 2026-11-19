@@ -328,6 +328,7 @@
     "backend/app/modules/costs/router.py::_category_tree_cache",
     "backend/app/modules/costs/router.py::_region_cache",
     "backend/app/modules/dashboards/rows_io.py::_STAGING",
+    "backend/app/modules/dataflow/registry.py::REGISTRY",
     "backend/app/modules/dwg_takeoff/service.py::_BACKGROUND_CONVERSION_TASKS",
     "backend/app/modules/eac/engine/api.py::_CANCEL_TOKENS",
     "backend/app/modules/einvoice_clearance/service.py::_payload_builders",
