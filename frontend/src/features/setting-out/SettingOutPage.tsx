@@ -32,6 +32,8 @@ import { useToastStore } from '@/stores/useToastStore';
 import { getProjectCrs } from '@/features/survey/api';
 import { crsChipText } from '@/features/survey/crsPicker';
 import { CrsDialog } from '@/features/survey/CrsDialog';
+import { GridGroundChip } from '@/features/survey/GeodesyPanel';
+import { SurveyExportMenu } from '@/features/survey/SurveyExportMenu';
 import {
   createNcrDraft,
   downloadSheet,
@@ -136,6 +138,9 @@ export default function SettingOutPage() {
         data-testid="so-print-sheet">
         {t('survey.setting_out.action.print_sheet', { defaultValue: 'Print sheet' })}
       </Button>
+      {req && projectId && (
+        <SurveyExportMenu target={{ kind: 'stakes', projectId, requestId: req.id, code: req.code }} disabled={!req.stakes.length} />
+      )}
       <ModuleGuideButton content={settingOutGuide} />
     </div>
   );
@@ -159,11 +164,14 @@ export default function SettingOutPage() {
       <PageHeader
         srTitle={title}
         subtitle={
-          <button type="button" onClick={() => setCrsOpen(true)}
-            className="inline-flex items-center rounded-full border border-border-light px-2.5 py-0.5 text-xs hover:bg-surface-secondary"
-            title={t('survey.crs.chip_tip', { defaultValue: 'Project coordinate system. Click to change.' })}>
-            <bdi dir="ltr">{chip || t('survey.action.set_crs', { defaultValue: 'Set project CRS' })}</bdi>
-          </button>
+          <span className="inline-flex flex-wrap items-center gap-2">
+            <button type="button" onClick={() => setCrsOpen(true)}
+              className="inline-flex items-center rounded-full border border-border-light px-2.5 py-0.5 text-xs hover:bg-surface-secondary"
+              title={t('survey.crs.chip_tip', { defaultValue: 'Project coordinate system. Click to change.' })}>
+              <bdi dir="ltr">{chip || t('survey.action.set_crs', { defaultValue: 'Set project CRS' })}</bdi>
+            </button>
+            {projectId && <GridGroundChip projectId={projectId} />}
+          </span>
         }
         actions={actions}
       />

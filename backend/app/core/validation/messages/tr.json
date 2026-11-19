@@ -2380,6 +2380,46 @@
     "level_arithmetic": {
       "fail": "{name} nivelman defteri: aritmetik kontrol tutmadı, ΣGeri − ΣİLeri = {d} ancak son kot − ilk kot = {r}.",
       "suggestion": "Okumaları ve her satırın hesabını yeniden kontrol edin."
+    },
+    "geoid_missing": {
+      "fail": "{v} düşey datumu {g} jeoit gridine ihtiyaç duyuyor ve bu grid kurulu değil; yükseklikler ölçüldüğü gibi korunuyor.",
+      "suggestion": "Yöneticiden grid dosyasını PROJ veri klasörüne kurmasını isteyin veya ölçülen yükseklikleri koruyun."
+    },
+    "legacy_grid": {
+      "fail": "{epsg} gridi {country} için eski bir sistem; ana sistem {p}.",
+      "suggestion": "Çizimler kullanıyorsa koruyun; yeni işler genellikle ana sistemde yapılır."
+    },
+    "local_grid_points": {
+      "fail": "Yerel grid için en az 2 ortak nokta gerekir.",
+      "suggestion": "Hem şantiye gridinde hem ulusal gridde bilinen noktalar ekleyin."
+    },
+    "local_grid_residual": {
+      "fail": "{id} noktasında {r} mm artık, {t} mm sınırının üzerinde.",
+      "suggestion": "Noktayı iki listede de kontrol edin veya yalnızca kontrol noktası olarak kullanın."
+    },
+    "local_grid_scale": {
+      "fail": "{s} ppm ölçek 1'den {t} ppm'den fazla sapıyor; birimleri kontrol edin (fit veya metre).",
+      "suggestion": "Her iki koordinat listesinin aynı birimi kullandığından emin olun."
+    },
+    "ground_grid": {
+      "fail": "Aplikasyon föyündeki mesafeler grid mesafesidir; {d} m üzerinde arazi/grid farkı {mm} mm.",
+      "suggestion": "Sahada ölçülen mesafeler arazi mesafesidir: grid mesafelerini birleşik ölçek faktörüne bölün."
+    },
+    "gsi_unit": {
+      "fail": "GSI kelimesi {wi} bilinmeyen birim kodu {u} içeriyor.",
+      "suggestion": "Dosyayı metre veya fit birimiyle yeniden dışa aktarın."
+    },
+    "foot_definition": {
+      "fail": "Dosya fit cinsinden, proje metre kullanıyor; fit tanımını seçin.",
+      "suggestion": "Uluslararası fit (0,3048 m) veya ABD ölçme fiti (1200/3937 m) seçin."
+    },
+    "raw_skipped": {
+      "fail": "İndirgenmiş koordinatı olmayan {n} ham gözlem atlandı.",
+      "suggestion": "Gözlemleri kontrolörde indirgeyin ve koordinatları dışa aktarın."
+    },
+    "export_crs": {
+      "fail": "Dışa aktarma KRS'si {a}, proje KRS'si {b} ile farklı; koordinatlar dönüştürüldü.",
+      "suggestion": "Alıcı yazılımın dışa aktarma sistemini beklediğinden emin olun."
     }
   },
   "volumes": {
@@ -2433,7 +2473,9 @@
       "findings": "Bulgular",
       "no_profile": "Profil yok, bir tane belirleyin",
       "d": "d (mm)",
-      "dz": "dZ (mm)"
+      "dz": "dZ (mm)",
+      "scale": "Grid / arazi",
+      "scale_line": "BÖF {csf} (k {k}, h {h} m): {grid} m grid = {ground} m arazi"
     },
     "profile_uncovered": {
       "fail": "Boy kesit {c} kilometresini kapsamıyor.",

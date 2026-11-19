@@ -12,6 +12,7 @@ from sqlalchemy import Select, delete, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.survey_core.models import (
+    SurveyGeodesy,
     SurveyPoint,
     SurveyPointSet,
     SurveyProfile,
@@ -145,6 +146,43 @@ class SurveyRepository:
             )
         ).scalar_one()
         return int(total), int(control)
+
+    async def centroid(self, project_id: uuid.UUID) -> tuple[float, float, float | None, int] | None:
+        """Mean E, N and Z of the project's points and how many there are; ``None`` without points."""
+        row = (
+            await self.session.execute(
+                select(
+                    func.avg(SurveyPoint.e),
+                    func.avg(SurveyPoint.n),
+                    func.avg(SurveyPoint.z),
+                    func.count(SurveyPoint.id),
+                ).where(SurveyPoint.project_id == project_id)
+            )
+        ).first()
+        if row is None or not row[3]:
+            return None
+        return float(row[0]), float(row[1]), float(row[2]) if row[2] is not None else None, int(row[3])
+
+    async def get_geodesy(self, project_id: uuid.UUID) -> SurveyGeodesy | None:
+        rows = await self.session.execute(select(SurveyGeodesy).where(SurveyGeodesy.project_id == project_id))
+        return rows.scalar_one_or_none()
+
+    async def export_points(
+        self, project_id: uuid.UUID, *, kind: str = "", set_id: uuid.UUID | None = None, limit: int = 100_000
+    ) -> list[tuple[str, float, float, float | None, str, str]]:
+        """``(point_id, e, n, z, code, description)`` for an export, in point id order (rows, not objects)."""
+        q = select(
+            SurveyPoint.point_id, SurveyPoint.e, SurveyPoint.n, SurveyPoint.z, SurveyPoint.code, SurveyPoint.description
+        ).where(SurveyPoint.project_id == project_id)
+        if kind:
+            q = q.where(SurveyPoint.kind == kind)
+        if set_id is not None:
+            q = q.where(SurveyPoint.point_set_id == set_id)
+        rows = await self.session.execute(q.order_by(SurveyPoint.point_id, SurveyPoint.id).limit(limit))
+        return [
+            (pid, float(e), float(n), float(z) if z is not None else None, code or "", desc or "")
+            for pid, e, n, z, code, desc in rows.all()
+        ]
 
     async def add_points(self, points: list[SurveyPoint]) -> None:
         self.session.add_all(points)

@@ -12,6 +12,8 @@ Tables:
     oe_survey_point - one point of a set, stored in the project CRS.
     oe_survey_traverse - a closed traverse or a level run with its misclosure
         and the profile verdict it got when it was computed.
+    oe_survey_geodesy - linear unit, the local site grid tie (Helmert) and the
+        grid/ground inputs of one project.
     oe_survey_profile - survey thresholds: one row per project, or the
         workspace default (project_id NULL). No core default value exists;
         demo and pack rows carry a label saying where the numbers come from.
@@ -171,3 +173,34 @@ class SurveyProfile(Base):
     level_k_mm: Mapped[Decimal | None] = mapped_column(Numeric(8, 2), nullable=True)
     coverage_min_pct: Mapped[Decimal | None] = mapped_column(Numeric(5, 2), nullable=True)
     angular_k_sec: Mapped[Decimal | None] = mapped_column(Numeric(8, 2), nullable=True)
+
+
+class SurveyGeodesy(Base):
+    """One project's geodesy settings: linear unit, the local site grid tie, and grid/ground inputs.
+
+    The local grid is a 2D similarity transform from the site grid to
+    ``local_grid_epsg`` (the project CRS when NULL), solved from
+    ``local_points`` ``[{point_id, x, y, e, n, use}]``. Tolerances are config:
+    there is no core default, so SRV-023 and SRV-024 stay silent until set.
+    """
+
+    __tablename__ = "oe_survey_geodesy"
+
+    project_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(), ForeignKey("oe_projects_project.id", ondelete="CASCADE"), nullable=False, unique=True
+    )
+    # "" = from the CRS axis unit | m | ft | ftUS
+    linear_unit: Mapped[str] = mapped_column(String(8), nullable=False, default="", server_default="")
+    local_grid_epsg: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    local_points: Mapped[list] = mapped_column(JSON, nullable=False, default=list)  # type: ignore[assignment]
+    helmert_a: Mapped[float | None] = mapped_column(Float, nullable=True)
+    helmert_b: Mapped[float | None] = mapped_column(Float, nullable=True)
+    helmert_te: Mapped[float | None] = mapped_column(Float, nullable=True)
+    helmert_tn: Mapped[float | None] = mapped_column(Float, nullable=True)
+    rms_mm: Mapped[float | None] = mapped_column(Float, nullable=True)
+    apply_local_grid: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default="false")
+    residual_tol_mm: Mapped[Decimal | None] = mapped_column(Numeric(8, 1), nullable=True)
+    scale_tol_ppm: Mapped[Decimal | None] = mapped_column(Numeric(10, 1), nullable=True)
+    csf_height_m: Mapped[Decimal | None] = mapped_column(Numeric(10, 3), nullable=True)
+    reference_distance_m: Mapped[Decimal | None] = mapped_column(Numeric(10, 3), nullable=True)
+    updated_by: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)

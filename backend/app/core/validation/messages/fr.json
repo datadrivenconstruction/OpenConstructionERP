@@ -2380,6 +2380,46 @@
     "level_arithmetic": {
       "fail": "Carnet de nivellement {name} : contrôle arithmétique en échec, ΣAR − ΣAV = {d} mais dernière altitude − première = {r}.",
       "suggestion": "Revérifiez les lectures et le calcul de chaque ligne."
+    },
+    "geoid_missing": {
+      "fail": "Le système altimétrique {v} nécessite la grille de géoïde {g}, non installée ; les altitudes restent telles que mesurées.",
+      "suggestion": "Demander à l'administrateur d'installer la grille dans le dossier de données PROJ, ou garder les altitudes mesurées."
+    },
+    "legacy_grid": {
+      "fail": "La projection {epsg} est un ancien système en {country} ; le système principal est {p}.",
+      "suggestion": "La conserver si les plans l'utilisent ; les nouveaux travaux se font en général dans le système principal."
+    },
+    "local_grid_points": {
+      "fail": "Une grille locale nécessite au moins 2 points communs.",
+      "suggestion": "Ajouter des points connus dans la grille du chantier et dans la grille nationale."
+    },
+    "local_grid_residual": {
+      "fail": "Résidu de {r} mm sur {id}, au-delà de {t} mm.",
+      "suggestion": "Vérifier ce point dans les deux listes, ou l'utiliser seulement comme point de contrôle."
+    },
+    "local_grid_scale": {
+      "fail": "L'échelle de {s} ppm s'écarte de 1 de plus de {t} ppm ; vérifier les unités (pieds ou mètres).",
+      "suggestion": "Vérifier que les deux listes de coordonnées utilisent la même unité."
+    },
+    "ground_grid": {
+      "fail": "Les distances de la fiche d'implantation sont en projection ; l'écart terrain/projection sur {d} m est de {mm} mm.",
+      "suggestion": "Les distances mesurées sur le terrain sont réelles : diviser les distances en projection par le facteur d'échelle combiné."
+    },
+    "gsi_unit": {
+      "fail": "Le mot GSI {wi} a un code d'unité inconnu {u}.",
+      "suggestion": "Exporter à nouveau le fichier en mètres ou en pieds."
+    },
+    "foot_definition": {
+      "fail": "Le fichier est en pieds mais le projet en mètres ; choisir la définition du pied.",
+      "suggestion": "Choisir le pied international (0,3048 m) ou le pied d'arpentage US (1200/3937 m)."
+    },
+    "raw_skipped": {
+      "fail": "{n} observations brutes sans coordonnées réduites ont été ignorées.",
+      "suggestion": "Réduire les observations sur le carnet de terrain et exporter les coordonnées."
+    },
+    "export_crs": {
+      "fail": "Le SCR d'export {a} diffère du SCR du projet {b} ; coordonnées transformées.",
+      "suggestion": "Vérifier que le logiciel destinataire attend le système d'export."
     }
   },
   "volumes": {
@@ -2433,7 +2473,9 @@
       "findings": "Constats",
       "no_profile": "Aucun profil, définissez-en un",
       "d": "d (mm)",
-      "dz": "dZ (mm)"
+      "dz": "dZ (mm)",
+      "scale": "Projection / terrain",
+      "scale_line": "FEC {csf} (k {k}, h {h} m) : {grid} m en projection = {ground} m au terrain"
     },
     "profile_uncovered": {
       "fail": "Le profil en long ne couvre pas l'abscisse {c}.",

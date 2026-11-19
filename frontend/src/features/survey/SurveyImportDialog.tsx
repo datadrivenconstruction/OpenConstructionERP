@@ -17,6 +17,7 @@ import {
   importPoints,
   previewImport,
   type DuplicatePolicy,
+  type FootDefinition,
   type ImportBody,
   type ImportPreview,
   type PointKind,
@@ -30,6 +31,7 @@ import {
   delimiterLabelKey,
   detectDelimiter,
   fileFormatFor,
+  selfDescribing,
   guessPreset,
   looksLikeHeader,
   mappingProblems,
@@ -71,12 +73,15 @@ export function SurveyImportDialog({ open, projectId, projectEpsg, onClose }: Pr
   const [sourceEpsg, setSourceEpsg] = useState('');
   const [meta, setMeta] = useState({ name: '', instrument: '', surveyed_by: '', survey_date: '' });
   const [policy, setPolicy] = useState<DuplicatePolicy>('keep_first');
+  const [foot, setFoot] = useState<FootDefinition>('');
+  const [coords, setCoords] = useState<'grid' | 'local'>('grid');
   const [preview, setPreview] = useState<ImportPreview | null>(null);
 
-  const format = fileFormatFor(filename);
+  const format = fileFormatFor(filename, text);
+  const direct = selfDescribing(format);
   const rows = useMemo(() => (text ? sampleRows(text, delimiter.value) : []), [text, delimiter.value]);
   const colCount = Math.max(0, ...rows.map((r) => r.length));
-  const problems = format === 'geojson' ? [] : mappingProblems(columns);
+  const problems = direct ? [] : mappingProblems(columns);
 
   const reset = () => {
     setStep(1);
@@ -125,6 +130,8 @@ export function SurveyImportDialog({ open, projectId, projectEpsg, onClose }: Pr
     surveyed_by: meta.surveyed_by,
     survey_date: meta.survey_date || null,
     duplicate_policy: dup,
+    foot_definition: foot,
+    coords,
   });
 
   const runPreview = useMutation({
@@ -160,12 +167,12 @@ export function SurveyImportDialog({ open, projectId, projectEpsg, onClose }: Pr
       </span>
       <div className="flex gap-2">
         {step > 1 && (
-          <Button variant="secondary" onClick={() => setStep((s) => (s === 3 && format === 'geojson' ? 1 : ((s - 1) as Step)))}>
+          <Button variant="secondary" onClick={() => setStep((s) => (s === 3 && direct ? 1 : ((s - 1) as Step)))}>
             {t('common.back', { defaultValue: 'Back' })}
           </Button>
         )}
         {step === 1 && (
-          <Button variant="primary" disabled={!text} onClick={() => (format === 'geojson' ? runPreview.mutate(undefined) : setStep(2))}>
+          <Button variant="primary" disabled={!text} onClick={() => (direct ? runPreview.mutate(undefined) : setStep(2))}>
             {t('common.next', { defaultValue: 'Next' })}
           </Button>
         )}
@@ -203,10 +210,10 @@ export function SurveyImportDialog({ open, projectId, projectEpsg, onClose }: Pr
         <div className="space-y-4">
           <label className="flex flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-border-light p-8 text-sm cursor-pointer hover:bg-surface-secondary">
             <Upload size={20} aria-hidden />
-            <span>{filename || t('survey.import.drop', { defaultValue: 'Choose a CSV, TXT or GeoJSON file from your instrument' })}</span>
+            <span>{filename || t('survey.import.drop_formats', { defaultValue: 'Choose a CSV, TXT, GeoJSON, GSI-8/16, JobXML or LandXML file' })}</span>
             <input
               type="file"
-              accept=".csv,.txt,.pts,.xyz,.geojson,.json"
+              accept=".csv,.txt,.pts,.xyz,.geojson,.json,.gsi,.xml,.jxl"
               className="sr-only"
               onChange={(e) => {
                 const f = e.target.files?.[0];
@@ -231,6 +238,25 @@ export function SurveyImportDialog({ open, projectId, projectEpsg, onClose }: Pr
                 onChange={(e) => setSourceEpsg(e.target.value)}
               />
             </div>
+            {format !== 'geojson' && (
+              <div>
+                <label className={LABEL} htmlFor="survey-imp-foot">{t('survey.import.foot', { defaultValue: 'Foot, when the file is in feet' })}</label>
+                <select id="survey-imp-foot" className={INPUT} value={foot} onChange={(e) => setFoot(e.target.value as FootDefinition)}>
+                  <option value="">{t('survey.import.foot_auto', { defaultValue: 'As the project, ask if unclear' })}</option>
+                  <option value="ft">{t('survey.import.foot_intl', { defaultValue: 'International foot (0.3048 m)' })}</option>
+                  <option value="ftUS">{t('survey.import.foot_us', { defaultValue: 'US survey foot (1200/3937 m)' })}</option>
+                </select>
+              </div>
+            )}
+            {format !== 'geojson' && (
+              <div>
+                <label className={LABEL} htmlFor="survey-imp-coords">{t('survey.import.coords', { defaultValue: 'Coordinates in the file' })}</label>
+                <select id="survey-imp-coords" className={INPUT} value={coords} onChange={(e) => setCoords(e.target.value as 'grid' | 'local')}>
+                  <option value="grid">{t('survey.import.coords_grid', { defaultValue: 'National or project grid' })}</option>
+                  <option value="local">{t('survey.import.coords_local', { defaultValue: 'Site grid (through the local grid tie)' })}</option>
+                </select>
+              </div>
+            )}
             <div>
               <label className={LABEL} htmlFor="survey-imp-kind">{t('survey.import.kind', { defaultValue: 'Point kind' })}</label>
               <select id="survey-imp-kind" className={INPUT} value={kind} onChange={(e) => setKind(e.target.value as PointKind)}>
@@ -359,6 +385,26 @@ export function SurveyImportDialog({ open, projectId, projectEpsg, onClose }: Pr
               })}
             </p>
           )}
+          {preview.unit_converted && (
+            <p className="text-sm" data-testid="survey-import-unit">
+              {t('survey.import.unit_converted', {
+                defaultValue: 'The file is in {{from}}; values are converted to the project unit {{to}}.',
+                from: preview.file_unit,
+                to: preview.project_unit,
+              })}
+            </p>
+          )}
+          {preview.local_grid_applied && (
+            <p className="text-sm">{t('survey.import.local_applied', { defaultValue: 'Site grid coordinates go through the local grid tie.' })}</p>
+          )}
+          {!!preview.missing_grids?.length && (
+            <p className="text-sm text-semantic-warning">
+              {t('survey.import.geoid_missing', {
+                defaultValue: 'Geoid grid {{grids}} is not installed: heights are kept as measured.',
+                grids: preview.missing_grids.join(', '),
+              })}
+            </p>
+          )}
           {preview.detected_crs && (
             <p className="flex items-center gap-2 text-sm">
               {t('survey.import.detected', { defaultValue: 'The coordinates look like EPSG {{code}}. Set it as the project system if that is right.', code: preview.detected_crs.epsg })}
@@ -372,7 +418,7 @@ export function SurveyImportDialog({ open, projectId, projectEpsg, onClose }: Pr
                   <span className="font-mono text-xs text-semantic-error">{p.rule_id}</span>
                   <span>{t('survey.import.problem_line', { defaultValue: 'Line {{line}}', line: p.line })}</span>
                   {p.point_id && <bdi dir="ltr" className="font-mono">{p.point_id}</bdi>}
-                  <span className="text-content-secondary">{p.detail}</span>
+                  <span className="text-content-secondary">{p.message || p.detail}</span>
                 </li>
               ))}
             </ul>

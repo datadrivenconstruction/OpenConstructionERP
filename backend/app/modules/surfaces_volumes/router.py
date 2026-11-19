@@ -7,6 +7,7 @@ Endpoints:
     POST   /projects/{project_id}/surfaces/from-points - triangulate imported point sets
     POST   /projects/{project_id}/surfaces/landxml     - import LandXML surfaces
     DELETE /surfaces/{surface_id}                      - remove an unused surface
+    GET    /surfaces/{surface_id}/export               - one surface as LandXML or DXF
     GET    /projects/{project_id}/volumes             - calculations with their findings
     POST   /projects/{project_id}/volumes             - compute a new draft
     GET    /projects/{project_id}/summary             - KPI band
@@ -118,6 +119,28 @@ async def delete_surface(surface_id: uuid.UUID, session: SessionDep, user_id: Cu
     await verify_project_access(s.project_id, user_id, session)
     await service.delete_surface(s)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@router.get("/surfaces/{surface_id}/export", response_class=Response, dependencies=_READ)
+async def export_surface(
+    surface_id: uuid.UUID,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    fmt: str = Query("landxml", alias="format", pattern="^(landxml|dxf)$"),
+    locale: str = _LOCALE,
+) -> Response:
+    """One TIN surface as LandXML or DXF 3D faces."""
+    from app.modules.survey_core.point_export import ExportSurface  # noqa: PLC0415
+    from app.modules.survey_core.router import download  # noqa: PLC0415
+    from app.modules.survey_core.service import SurveyService  # noqa: PLC0415
+
+    s = await VolumesService(session).get_surface(surface_id)
+    await verify_project_access(s.project_id, user_id, session)
+    surface = ExportSurface(s.name, [tuple(v) for v in s.vertices or []], [tuple(f) for f in s.faces or []])
+    text, findings = await SurveyService(session).write_points(
+        s.project_id, [], fmt, surfaces=[surface], locale=locale, project_name=s.name
+    )
+    return download(text, fmt, f"surface-{s.name}", findings)
 
 
 # ── Project views ──────────────────────────────────────────────────────────

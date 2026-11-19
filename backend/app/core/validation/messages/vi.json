@@ -2380,6 +2380,46 @@
     "level_arithmetic": {
       "fail": "Sổ thủy chuẩn {name}: kiểm tra số học không khớp, ΣSau − ΣTrước = {d} nhưng cao độ cuối − đầu = {r}.",
       "suggestion": "Kiểm tra lại số đọc và phép tính của từng dòng."
+    },
+    "geoid_missing": {
+      "fail": "Hệ độ cao {v} cần lưới geoid {g}, chưa được cài đặt; độ cao được giữ như đã đo.",
+      "suggestion": "Nhờ quản trị viên cài tệp lưới vào thư mục dữ liệu PROJ, hoặc giữ độ cao đã đo."
+    },
+    "legacy_grid": {
+      "fail": "Lưới {epsg} là hệ cũ ở {country}; hệ chính là {p}.",
+      "suggestion": "Giữ lại nếu bản vẽ dùng nó; công việc mới thường dùng hệ chính."
+    },
+    "local_grid_points": {
+      "fail": "Lưới cục bộ cần ít nhất 2 điểm chung.",
+      "suggestion": "Thêm các điểm đã biết trong cả lưới công trường và lưới quốc gia."
+    },
+    "local_grid_residual": {
+      "fail": "Số dư {r} mm tại {id} vượt {t} mm.",
+      "suggestion": "Kiểm tra điểm trong cả hai danh sách, hoặc chỉ dùng làm điểm kiểm tra."
+    },
+    "local_grid_scale": {
+      "fail": "Tỷ lệ {s} ppm lệch khỏi 1 hơn {t} ppm; kiểm tra đơn vị (feet hay mét).",
+      "suggestion": "Bảo đảm hai danh sách tọa độ dùng cùng đơn vị."
+    },
+    "ground_grid": {
+      "fail": "Khoảng cách trên phiếu bố trí là khoảng cách lưới; chênh lệch mặt đất/lưới trên {d} m là {mm} mm.",
+      "suggestion": "Khoảng cách đo tại công trường là mặt đất: chia khoảng cách lưới cho hệ số tỷ lệ tổng hợp."
+    },
+    "gsi_unit": {
+      "fail": "Từ GSI {wi} có mã đơn vị không xác định {u}.",
+      "suggestion": "Xuất lại tệp theo mét hoặc feet."
+    },
+    "foot_definition": {
+      "fail": "Tệp dùng feet nhưng dự án dùng mét; hãy chọn định nghĩa foot.",
+      "suggestion": "Chọn foot quốc tế (0,3048 m) hoặc foot trắc địa Hoa Kỳ (1200/3937 m)."
+    },
+    "raw_skipped": {
+      "fail": "Đã bỏ qua {n} quan trắc thô không có tọa độ đã tính.",
+      "suggestion": "Xử lý quan trắc trên sổ đo điện tử và xuất tọa độ."
+    },
+    "export_crs": {
+      "fail": "Hệ tọa độ xuất {a} khác hệ của dự án {b}; tọa độ đã được chuyển đổi.",
+      "suggestion": "Bảo đảm phần mềm nhận mong đợi hệ tọa độ xuất."
     }
   },
   "volumes": {
@@ -2433,7 +2473,9 @@
       "findings": "Phát hiện",
       "no_profile": "Chưa có hồ sơ dung sai, hãy đặt một",
       "d": "d (mm)",
-      "dz": "dZ (mm)"
+      "dz": "dZ (mm)",
+      "scale": "Lưới / mặt đất",
+      "scale_line": "Hệ số tỷ lệ tổng hợp {csf} (k {k}, h {h} m): {grid} m lưới = {ground} m mặt đất"
     },
     "profile_uncovered": {
       "fail": "Trắc dọc không bao gồm lý trình {c}.",

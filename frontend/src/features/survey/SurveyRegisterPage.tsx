@@ -8,7 +8,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Crosshair, Database, FileUp, ListChecks, MapPin, Route } from 'lucide-react';
+import { Crosshair, Database, FileUp, Grid3x3, ListChecks, MapPin, Route } from 'lucide-react';
 import {
   Breadcrumb,
   Button,
@@ -39,6 +39,8 @@ import {
 } from './api';
 import { crsChipText } from './crsPicker';
 import { CrsDialog } from './CrsDialog';
+import { GridGroundChip, LocalGridDialog } from './GeodesyPanel';
+import { SurveyExportMenu } from './SurveyExportMenu';
 import { SurveyImportDialog } from './SurveyImportDialog';
 import { surveyGuide } from './surveyGuide';
 import { SurveyPlan } from './SurveyPlan';
@@ -60,6 +62,7 @@ export default function SurveyRegisterPage() {
   const [tab, setTab] = useState<Tab>('points');
   const [crsOpen, setCrsOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
+  const [localOpen, setLocalOpen] = useState(false);
   const [kind, setKind] = useState('');
   const [setFilter, setSetFilter] = useState('');
   const [q, setQ] = useState('');
@@ -154,8 +157,15 @@ export default function SurveyRegisterPage() {
       >
         {t('survey.action.new_traverse', { defaultValue: 'New traverse' })}
       </Button>
+      <Button variant="secondary" icon={<Grid3x3 size={16} />} onClick={() => setLocalOpen(true)} data-testid="survey-local-grid-open">
+        {t('survey.action.local_grid', { defaultValue: 'Local grid' })}
+      </Button>
       </>
       )}
+      <SurveyExportMenu
+        target={{ kind: 'register', projectId: projectId!, pointKind: kind || undefined, setId: setFilter || undefined }}
+        disabled={!summary.data?.points}
+      />
       <ModuleGuideButton content={surveyGuide} />
     </div>
   );
@@ -185,15 +195,18 @@ export default function SurveyRegisterPage() {
       <PageHeader
         srTitle={title}
         subtitle={
-          <button
-            type="button"
-            data-testid="survey-crs-chip"
-            onClick={() => setCrsOpen(true)}
-            className="inline-flex items-center rounded-full border border-border-light px-2.5 py-0.5 text-xs hover:bg-surface-secondary"
-            title={t('survey.crs.chip_tip', { defaultValue: 'Project coordinate system. Click to change.' })}
-          >
-            <bdi dir="ltr">{chip || t('survey.action.set_crs', { defaultValue: 'Set project CRS' })}</bdi>
-          </button>
+          <span className="inline-flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              data-testid="survey-crs-chip"
+              onClick={() => setCrsOpen(true)}
+              className="inline-flex items-center rounded-full border border-border-light px-2.5 py-0.5 text-xs hover:bg-surface-secondary"
+              title={t('survey.crs.chip_tip', { defaultValue: 'Project coordinate system. Click to change.' })}
+            >
+              <bdi dir="ltr">{chip || t('survey.action.set_crs', { defaultValue: 'Set project CRS' })}</bdi>
+            </button>
+            {projectId && <GridGroundChip projectId={projectId} />}
+          </span>
         }
         actions={actions}
       />
@@ -471,6 +484,7 @@ export default function SurveyRegisterPage() {
           setShownTraverse(null);
         }}
       />
+      {projectId && <LocalGridDialog open={localOpen} projectId={projectId} onClose={() => setLocalOpen(false)} />}
       <CrsDialog open={crsOpen} projectId={projectId} state={crs.data} onClose={() => setCrsOpen(false)} />
       <SurveyImportDialog
         open={importOpen}

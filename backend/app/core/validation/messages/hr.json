@@ -2380,6 +2380,46 @@
     "level_arithmetic": {
       "fail": "Nivelmanski zapisnik {name}: računska kontrola ne slaže se, ΣN − ΣP = {d}, a zadnja visina − prva = {r}.",
       "suggestion": "Ponovno provjerite očitanja i izračun svakog retka."
+    },
+    "geoid_missing": {
+      "fail": "Visinski sustav {v} treba mrežu geoida {g}, koja nije instalirana; visine ostaju kako su izmjerene.",
+      "suggestion": "Zamolite administratora da instalira mrežu u mapu podataka PROJ ili zadržite izmjerene visine."
+    },
+    "legacy_grid": {
+      "fail": "Sustav {epsg} je stari sustav u zemlji {country}; glavni sustav je {p}.",
+      "suggestion": "Zadržite ga ako ga nacrti koriste; novi radovi obično su u glavnom sustavu."
+    },
+    "local_grid_points": {
+      "fail": "Lokalna mreža treba najmanje 2 zajedničke točke.",
+      "suggestion": "Dodajte točke poznate u mreži gradilišta i u državnoj mreži."
+    },
+    "local_grid_residual": {
+      "fail": "Odstupanje {r} mm na {id} iznad {t} mm.",
+      "suggestion": "Provjerite točku u oba popisa ili je koristite samo kao kontrolnu."
+    },
+    "local_grid_scale": {
+      "fail": "Mjerilo {s} ppm razlikuje se od 1 za više od {t} ppm; provjerite jedinice (stope ili metri).",
+      "suggestion": "Provjerite koriste li oba popisa koordinata istu jedinicu."
+    },
+    "ground_grid": {
+      "fail": "Udaljenosti na iskolčnom listu su u projekciji; razlika teren/projekcija na {d} m iznosi {mm} mm.",
+      "suggestion": "Udaljenosti izmjerene na terenu su terenske: podijelite udaljenosti u projekciji kombiniranim faktorom mjerila."
+    },
+    "gsi_unit": {
+      "fail": "GSI riječ {wi} ima nepoznatu oznaku jedinice {u}.",
+      "suggestion": "Ponovno izvezite datoteku u metrima ili stopama."
+    },
+    "foot_definition": {
+      "fail": "Datoteka je u stopama, a projekt u metrima; odaberite definiciju stope.",
+      "suggestion": "Odaberite međunarodnu stopu (0,3048 m) ili američku geodetsku stopu (1200/3937 m)."
+    },
+    "raw_skipped": {
+      "fail": "Preskočeno je {n} sirovih opažanja bez reduciranih koordinata.",
+      "suggestion": "Reducirajte opažanja na kontroleru i izvezite koordinate."
+    },
+    "export_crs": {
+      "fail": "Koordinatni sustav izvoza {a} razlikuje se od sustava projekta {b}; koordinate su transformirane.",
+      "suggestion": "Provjerite očekuje li odredišni softver sustav izvoza."
     }
   },
   "volumes": {
@@ -2433,7 +2473,9 @@
       "findings": "Nalazi",
       "no_profile": "Nema profila, postavite ga",
       "d": "d (mm)",
-      "dz": "dZ (mm)"
+      "dz": "dZ (mm)",
+      "scale": "Projekcija / teren",
+      "scale_line": "KFM {csf} (k {k}, h {h} m): {grid} m u projekciji = {ground} m na terenu"
     },
     "profile_uncovered": {
       "fail": "Uzdužni profil ne pokriva stacionažu {c}.",

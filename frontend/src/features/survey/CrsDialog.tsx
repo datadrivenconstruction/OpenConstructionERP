@@ -157,6 +157,16 @@ export function CrsDialog({ open, projectId, state, onClose }: Props) {
                 <bdi dir="ltr" className="font-mono w-24 shrink-0">EPSG {o.epsg}</bdi>
                 <span className="flex-1 min-w-0 truncate">{o.name}</span>
                 {o.reason && <span className="text-xs text-content-tertiary">{reasonText(o.reason, o.pack_country)}</span>}
+                {o.role === 'legacy' && (
+                  <span className="rounded border border-border-light px-1 text-xs text-content-tertiary">
+                    {t('survey.crs.role_legacy', { defaultValue: 'legacy' })}
+                  </span>
+                )}
+                {o.vertical_name && (
+                  <span className="text-xs text-content-tertiary" title={o.geoid_grid ?? undefined}>
+                    {t('survey.crs.heights', { defaultValue: 'heights {{name}}', name: o.vertical_name })}
+                  </span>
+                )}
                 {o.confidence != null && <ConfidenceBadge score={o.confidence} showScore size="sm" />}
               </label>
             ))}

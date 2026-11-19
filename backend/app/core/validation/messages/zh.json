@@ -2380,6 +2380,46 @@
     "level_arithmetic": {
       "fail": "水准手簿 {name}：计算校核未通过，ΣBS − ΣFS = {d}，而末点高程 − 起点高程 = {r}。",
       "suggestion": "重新检查读数和每一行的计算。"
+    },
+    "geoid_missing": {
+      "fail": "高程基准 {v} 需要大地水准面格网 {g}，但未安装；高程按实测保留。",
+      "suggestion": "请管理员把格网文件安装到 PROJ 数据目录，或保留实测高程。"
+    },
+    "legacy_grid": {
+      "fail": "坐标系 {epsg} 在 {country} 属于旧系统；主要系统是 {p}。",
+      "suggestion": "图纸使用时可保留；新工作通常采用主要系统。"
+    },
+    "local_grid_points": {
+      "fail": "局部坐标系至少需要 2 个公共点。",
+      "suggestion": "添加在施工坐标系和国家坐标系中都已知的点。"
+    },
+    "local_grid_residual": {
+      "fail": "{id} 的残差 {r} mm 超过 {t} mm。",
+      "suggestion": "在两份坐标表中核对该点，或仅作检核点使用。"
+    },
+    "local_grid_scale": {
+      "fail": "比例 {s} ppm 与 1 的偏差超过 {t} ppm；请检查单位（英尺或米）。",
+      "suggestion": "确认两份坐标表使用相同单位。"
+    },
+    "ground_grid": {
+      "fail": "放样单上的距离为投影距离；{d} m 上的地面/投影差为 {mm} mm。",
+      "suggestion": "现场丈量的距离为地面距离：投影距离除以综合比例因子。"
+    },
+    "gsi_unit": {
+      "fail": "GSI 字 {wi} 的单位代码 {u} 无法识别。",
+      "suggestion": "以米或英尺为单位重新导出文件。"
+    },
+    "foot_definition": {
+      "fail": "文件使用英尺而项目使用米；请选择英尺定义。",
+      "suggestion": "选择国际英尺（0.3048 m）或美国测量英尺（1200/3937 m）。"
+    },
+    "raw_skipped": {
+      "fail": "跳过了 {n} 条没有归算坐标的原始观测。",
+      "suggestion": "在控制器上归算观测并导出坐标。"
+    },
+    "export_crs": {
+      "fail": "导出坐标系 {a} 与项目坐标系 {b} 不同；坐标已转换。",
+      "suggestion": "确认接收软件需要该导出坐标系。"
     }
   },
   "volumes": {
@@ -2433,7 +2473,9 @@
       "findings": "问题",
       "no_profile": "无偏差配置，请设置",
       "d": "d (mm)",
-      "dz": "dZ (mm)"
+      "dz": "dZ (mm)",
+      "scale": "投影 / 地面",
+      "scale_line": "综合比例因子 {csf}（k {k}，h {h} m）：投影 {grid} m = 地面 {ground} m"
     },
     "profile_uncovered": {
       "fail": "纵断面未覆盖里程 {c}。",

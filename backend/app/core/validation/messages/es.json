@@ -2380,6 +2380,46 @@
     "level_arithmetic": {
       "fail": "Libreta de nivelación {name}: falla la comprobación aritmética, ΣEsp − ΣFre = {d} pero última cota − primera = {r}.",
       "suggestion": "Revise las lecturas y el cálculo de cada fila."
+    },
+    "geoid_missing": {
+      "fail": "El sistema vertical {v} necesita la malla de geoide {g}, que no está instalada; las alturas se mantienen como se midieron.",
+      "suggestion": "Pida al administrador que instale la malla en la carpeta de datos de PROJ, o mantenga las alturas medidas."
+    },
+    "legacy_grid": {
+      "fail": "La cuadrícula {epsg} es un sistema antiguo en {country}; el sistema principal es {p}.",
+      "suggestion": "Manténgala si los planos la usan; el trabajo nuevo suele ir en el sistema principal."
+    },
+    "local_grid_points": {
+      "fail": "Una cuadrícula local necesita al menos 2 puntos comunes.",
+      "suggestion": "Añada puntos conocidos en la cuadrícula de obra y en la nacional."
+    },
+    "local_grid_residual": {
+      "fail": "Residuo de {r} mm en {id}, por encima de {t} mm.",
+      "suggestion": "Revise este punto en ambas listas, o úselo solo como punto de control."
+    },
+    "local_grid_scale": {
+      "fail": "La escala de {s} ppm difiere de 1 en más de {t} ppm; revise las unidades (pies o metros).",
+      "suggestion": "Compruebe que ambas listas de coordenadas usen la misma unidad."
+    },
+    "ground_grid": {
+      "fail": "Las distancias de la hoja de replanteo son de cuadrícula; la diferencia terreno/cuadrícula en {d} m es de {mm} mm.",
+      "suggestion": "Las distancias medidas en obra son de terreno: divida las de cuadrícula por el factor de escala combinado."
+    },
+    "gsi_unit": {
+      "fail": "La palabra GSI {wi} tiene el código de unidad desconocido {u}.",
+      "suggestion": "Exporte el archivo de nuevo en metros o pies."
+    },
+    "foot_definition": {
+      "fail": "El archivo está en pies pero el proyecto usa metros; elija la definición del pie.",
+      "suggestion": "Elija el pie internacional (0,3048 m) o el pie topográfico de EE. UU. (1200/3937 m)."
+    },
+    "raw_skipped": {
+      "fail": "Se omitieron {n} observaciones brutas sin coordenadas reducidas.",
+      "suggestion": "Reduzca las observaciones en la libreta electrónica y exporte coordenadas."
+    },
+    "export_crs": {
+      "fail": "El SRC de exportación {a} difiere del SRC del proyecto {b}; coordenadas transformadas.",
+      "suggestion": "Compruebe que el programa de destino espera el sistema de exportación."
     }
   },
   "volumes": {
@@ -2433,7 +2473,9 @@
       "findings": "Hallazgos",
       "no_profile": "Sin perfil, defina uno",
       "d": "d (mm)",
-      "dz": "dZ (mm)"
+      "dz": "dZ (mm)",
+      "scale": "Cuadrícula / terreno",
+      "scale_line": "FEC {csf} (k {k}, h {h} m): {grid} m de cuadrícula = {ground} m de terreno"
     },
     "profile_uncovered": {
       "fail": "El perfil longitudinal no cubre la progresiva {c}.",

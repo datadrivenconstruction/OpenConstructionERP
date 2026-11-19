@@ -2380,6 +2380,46 @@
     "level_arithmetic": {
       "fail": "Nivellementsprotokol {name}: regnekontrollen passer ikke, ΣT − ΣF = {d}, men sidste kote − første = {r}.",
       "suggestion": "Gennemgå aflæsningerne og beregningen i hver linje."
+    },
+    "geoid_missing": {
+      "fail": "Højdesystem {v} kræver geoidegitteret {g}, som ikke er installeret; højder bevares som målt.",
+      "suggestion": "Bed administratoren installere gitterfilen i PROJ-datamappen, eller behold de målte højder."
+    },
+    "legacy_grid": {
+      "fail": "Gitter {epsg} er et ældre system i {country}; hovedsystemet er {p}.",
+      "suggestion": "Behold det, hvis tegningerne bruger det; nyt arbejde sker normalt i hovedsystemet."
+    },
+    "local_grid_points": {
+      "fail": "Et lokalt gitter kræver mindst 2 fælles punkter.",
+      "suggestion": "Tilføj punkter, der er kendt i både byggepladsens og det nationale gitter."
+    },
+    "local_grid_residual": {
+      "fail": "Restafvigelse {r} mm på {id} over {t} mm.",
+      "suggestion": "Kontrollér punktet i begge lister, eller brug det kun som kontrolpunkt."
+    },
+    "local_grid_scale": {
+      "fail": "Skala {s} ppm afviger fra 1 med mere end {t} ppm; kontrollér enhederne (fod eller meter).",
+      "suggestion": "Sørg for, at begge koordinatlister bruger samme enhed."
+    },
+    "ground_grid": {
+      "fail": "Afstande på afsætningsarket er gitterafstande; forskellen terræn/gitter over {d} m er {mm} mm.",
+      "suggestion": "Afstande målt på pladsen er terrænafstande: divider gitterafstande med den kombinerede skalafaktor."
+    },
+    "gsi_unit": {
+      "fail": "GSI-ord {wi} har ukendt enhedskode {u}.",
+      "suggestion": "Eksportér filen igen i meter eller fod."
+    },
+    "foot_definition": {
+      "fail": "Filen er i fod, men projektet bruger meter; vælg fod-definitionen.",
+      "suggestion": "Vælg international fod (0,3048 m) eller US survey foot (1200/3937 m)."
+    },
+    "raw_skipped": {
+      "fail": "{n} rå observationer uden reducerede koordinater blev sprunget over.",
+      "suggestion": "Reducer observationerne på controlleren, og eksportér koordinater."
+    },
+    "export_crs": {
+      "fail": "Eksport-CRS {a} afviger fra projekt-CRS {b}; koordinater transformeret.",
+      "suggestion": "Kontrollér, at det modtagende program forventer eksportsystemet."
     }
   },
   "volumes": {
@@ -2433,7 +2473,9 @@
       "findings": "Fund",
       "no_profile": "Ingen profil, angiv en",
       "d": "d (mm)",
-      "dz": "dZ (mm)"
+      "dz": "dZ (mm)",
+      "scale": "Gitter / terræn",
+      "scale_line": "KSF {csf} (k {k}, h {h} m): {grid} m gitter = {ground} m terræn"
     },
     "profile_uncovered": {
       "fail": "Længdeprofilen dækker ikke station {c}.",

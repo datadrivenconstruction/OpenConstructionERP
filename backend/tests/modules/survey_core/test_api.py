@@ -97,10 +97,11 @@ async def test_srv003_against_points_already_in_the_register(
     await _import(client, header, project_id, "existing_ground.csv", duplicate_policy="keep_first")
     await _import(client, header, project_id, "existing_ground.csv", duplicate_policy="keep_last")
     report = (await client.post(f"{BASE}/projects/{project_id}/validate", headers=header)).json()
-    assert [f["rule_id"] for f in report["findings"]] == ["SRV-003"]
+    # SRV-025 also speaks here: the fixture sits far from the zone meridian, so grid and ground differ.
+    assert [f["rule_id"] for f in report["findings"] if f["rule_id"] != "SRV-025"] == ["SRV-003"]
     assert report["findings"][0]["element_ref"] == "EG-045"
     summary = (await client.get(f"{BASE}/projects/{project_id}/summary", headers=header)).json()
-    assert summary == {**summary, "points": 154, "point_sets": 2, "findings": 1}
+    assert summary == {**summary, "points": 154, "point_sets": 2, "findings": 2}  # SRV-003 and SRV-025
 
 
 async def test_srv001_import_without_crs_then_declare(client: AsyncClient, header: dict, project_id: str) -> None:

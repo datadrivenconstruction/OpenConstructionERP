@@ -17,6 +17,11 @@ Endpoints:
     POST   /point-sets/{set_id}/declare-crs       - say which EPSG a set without one is in
     DELETE /point-sets/{set_id}                   - remove a point set and its points
     GET    /projects/{project_id}/plan            - survey points as GeoJSON (WGS 84) for the map
+    GET    /projects/{project_id}/geodesy         - linear unit, local grid tie, grid/ground inputs
+    PUT    /projects/{project_id}/geodesy         - set them (audited)
+    POST   /local-grid/solve                      - Helmert from common points with residuals (nothing saved)
+    GET    /projects/{project_id}/scale-factor    - combined scale factor, grid vs ground
+    GET    /projects/{project_id}/export          - points as CSV, GeoJSON, GSI-16, LandXML or DXF
     GET    /projects/{project_id}/traverses       - closed traverses and level runs
     POST   /projects/{project_id}/traverses       - compute a traverse from its legs, or a level run
     DELETE /traverses/{traverse_id}               - remove a traverse
@@ -44,12 +49,18 @@ from app.dependencies import (
 )
 from app.modules.survey_core.crs import search
 from app.modules.survey_core.permissions import can_confirm, require_survey_confirm
+from app.modules.survey_core.point_export import MEDIA_TYPES, export_filename
 from app.modules.survey_core.schemas import (
     CrsInfoListResponse,
     CrsInfoOut,
+    Finding,
+    GeodesyIn,
+    GeodesyOut,
     ImportPreview,
     ImportRequest,
     ImportResult,
+    LocalGridSolution,
+    LocalGridSolveRequest,
     PointListResponse,
     PointSetListResponse,
     PointSetOut,
@@ -57,6 +68,7 @@ from app.modules.survey_core.schemas import (
     ProjectCrsSet,
     ProjectCrsState,
     RegisterSummary,
+    ScaleFactorOut,
     SurveyProfileIn,
     SurveyProfileOut,
     TransformRequest,
@@ -122,11 +134,15 @@ async def confirm_crs(project_id: uuid.UUID, session: SessionDep, user_id: Curre
 
 @router.post("/projects/{project_id}/import/preview", response_model=ImportPreview, dependencies=_WRITE)
 async def import_preview(
-    project_id: uuid.UUID, body: ImportRequest, session: SessionDep, user_id: CurrentUserId
+    project_id: uuid.UUID,
+    body: ImportRequest,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    locale: str = Query("en", max_length=10),
 ) -> ImportPreview:
     """What an import would read; nothing is saved."""
     await verify_project_access(project_id, user_id, session)
-    return await SurveyService(session).preview(project_id, body)
+    return await SurveyService(session).preview(project_id, body, locale)
 
 
 @router.post(
@@ -136,10 +152,14 @@ async def import_preview(
     dependencies=_WRITE,
 )
 async def import_points(
-    project_id: uuid.UUID, body: ImportRequest, session: SessionDep, user_id: CurrentUserId
+    project_id: uuid.UUID,
+    body: ImportRequest,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    locale: str = Query("en", max_length=10),
 ) -> ImportResult:
     await verify_project_access(project_id, user_id, session)
-    return await SurveyService(session).import_points(project_id, body, user_id)
+    return await SurveyService(session).import_points(project_id, body, user_id, locale)
 
 
 @router.get("/projects/{project_id}/points", response_model=PointListResponse, dependencies=_READ)
@@ -281,3 +301,88 @@ async def plan(project_id: uuid.UUID, session: SessionDep, user_id: CurrentUserI
 from app.modules.survey_core.calc_router import router as _calc_router  # noqa: E402
 
 router.include_router(_calc_router)
+
+
+# ── Geodesy: unit, local grid, grid/ground, export ─────────────────────────────────────────────────────────────────
+
+
+@router.get("/projects/{project_id}/geodesy", response_model=GeodesyOut, dependencies=_READ)
+async def get_geodesy(project_id: uuid.UUID, session: SessionDep, user_id: CurrentUserId) -> GeodesyOut:
+    await verify_project_access(project_id, user_id, session)
+    return await SurveyService(session).geodesy(project_id)
+
+
+@router.put("/projects/{project_id}/geodesy", response_model=GeodesyOut, dependencies=_WRITE)
+async def put_geodesy(
+    project_id: uuid.UUID, body: GeodesyIn, session: SessionDep, user_id: CurrentUserId
+) -> GeodesyOut:
+    """Linear unit, local grid tie and grid/ground inputs (audited); the tie is solved before it is saved."""
+    await verify_project_access(project_id, user_id, session)
+    return await SurveyService(session).set_geodesy(project_id, body, user_id)
+
+
+@router.post("/local-grid/solve", response_model=LocalGridSolution, dependencies=_READ)
+async def solve_local_grid(body: LocalGridSolveRequest) -> LocalGridSolution:
+    """Scale, rotation, shift and residuals of a site grid from its common points; nothing is saved."""
+    return SurveyService.solve_local_grid(body.points)
+
+
+@router.get("/projects/{project_id}/scale-factor", response_model=ScaleFactorOut | None, dependencies=_READ)
+async def scale_factor(
+    project_id: uuid.UUID,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    e: float | None = None,
+    n: float | None = None,
+    h: float | None = Query(None, ge=-500, le=9000),
+    d: float | None = Query(None, gt=0, le=100000),
+) -> ScaleFactorOut | None:
+    """Combined scale factor and the grid/ground pair for a distance; empty for a local or geographic CRS."""
+    await verify_project_access(project_id, user_id, session)
+    return await SurveyService(session).scale_factor(project_id, e=e, n=n, height_m=h, distance_m=d)
+
+
+_FORMAT = "^(csv|geojson|gsi|landxml|dxf)$"
+_PRESET = "^(PNEZD|PENZD|ENZ|NEZ)$"
+_DELIMITER = r"^(,|;|\t|\||\s)$"
+
+
+def download(text: str, fmt: str, base: str, findings: list[Finding]) -> Response:
+    """The export as an attachment; warnings travel as rule ids, the screen words them."""
+    headers = {
+        "Content-Disposition": f'attachment; filename="{export_filename(base, fmt)}"',
+        "Access-Control-Expose-Headers": "Content-Disposition, X-Survey-Warnings",
+    }
+    if findings:
+        headers["X-Survey-Warnings"] = ",".join(f.rule_id for f in findings)
+    return Response(content=text.encode("utf-8"), media_type=MEDIA_TYPES[fmt], headers=headers)
+
+
+@router.get("/projects/{project_id}/export", dependencies=_READ)
+async def export_points(
+    project_id: uuid.UUID,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    fmt: str = Query("csv", alias="format", pattern=_FORMAT),
+    preset: str = Query("PNEZD", pattern=_PRESET),
+    delimiter: str = Query(",", pattern=_DELIMITER),
+    kind: str = Query("", pattern=_KIND),
+    set_id: uuid.UUID | None = None,
+    target_epsg: int | None = Query(None, ge=1000, le=999999),
+    local: bool = False,
+    locale: str = Query("en", max_length=10),
+) -> Response:
+    """Register points as CSV, GeoJSON, GSI-16, LandXML or DXF, in the project CRS unless asked otherwise."""
+    await verify_project_access(project_id, user_id, session)
+    text, findings = await SurveyService(session).export(
+        project_id,
+        fmt,
+        preset=preset,
+        delimiter=delimiter,
+        kind=kind,
+        set_id=set_id,
+        target_epsg=target_epsg,
+        local=local,
+        locale=locale,
+    )
+    return download(text, fmt, f"survey_points_{kind or 'all'}", findings)

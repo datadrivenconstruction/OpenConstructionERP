@@ -2380,6 +2380,46 @@
     "level_arithmetic": {
       "fail": "Carnetul de nivelment {name}: verificarea aritmetică a eșuat, ΣÎnapoi − ΣÎnainte = {d}, dar ultima cotă − prima = {r}.",
       "suggestion": "Reverificați citirile și calculul fiecărui rând."
+    },
+    "geoid_missing": {
+      "fail": "Sistemul de altitudini {v} are nevoie de grila geoidului {g}, care nu este instalată; altitudinile rămân cum au fost măsurate.",
+      "suggestion": "Cereți administratorului să instaleze grila în folderul de date PROJ sau păstrați altitudinile măsurate."
+    },
+    "legacy_grid": {
+      "fail": "Sistemul {epsg} este un sistem vechi în {country}; sistemul principal este {p}.",
+      "suggestion": "Păstrați-l dacă planșele îl folosesc; lucrările noi se fac de obicei în sistemul principal."
+    },
+    "local_grid_points": {
+      "fail": "O rețea locală are nevoie de cel puțin 2 puncte comune.",
+      "suggestion": "Adăugați puncte cunoscute în rețeaua șantierului și în cea națională."
+    },
+    "local_grid_residual": {
+      "fail": "Rezidual de {r} mm la {id}, peste {t} mm.",
+      "suggestion": "Verificați punctul în ambele liste sau folosiți-l doar ca punct de control."
+    },
+    "local_grid_scale": {
+      "fail": "Scara de {s} ppm diferă de 1 cu mai mult de {t} ppm; verificați unitățile (picioare sau metri).",
+      "suggestion": "Asigurați-vă că ambele liste de coordonate au aceeași unitate."
+    },
+    "ground_grid": {
+      "fail": "Distanțele din fișa de trasare sunt în proiecție; diferența teren/proiecție pe {d} m este de {mm} mm.",
+      "suggestion": "Distanțele măsurate pe șantier sunt de teren: împărțiți distanțele în proiecție la factorul de scară combinat."
+    },
+    "gsi_unit": {
+      "fail": "Cuvântul GSI {wi} are codul de unitate necunoscut {u}.",
+      "suggestion": "Exportați din nou fișierul în metri sau picioare."
+    },
+    "foot_definition": {
+      "fail": "Fișierul este în picioare, dar proiectul în metri; alegeți definiția piciorului.",
+      "suggestion": "Alegeți piciorul internațional (0,3048 m) sau piciorul topografic SUA (1200/3937 m)."
+    },
+    "raw_skipped": {
+      "fail": "Au fost omise {n} observații brute fără coordonate reduse.",
+      "suggestion": "Reduceți observațiile pe controler și exportați coordonate."
+    },
+    "export_crs": {
+      "fail": "Sistemul de coordonate al exportului {a} diferă de cel al proiectului {b}; coordonatele au fost transformate.",
+      "suggestion": "Verificați că programul destinatar așteaptă sistemul de export."
     }
   },
   "volumes": {
@@ -2433,7 +2473,9 @@
       "findings": "Constatări",
       "no_profile": "Fără profil, setați unul",
       "d": "d (mm)",
-      "dz": "dZ (mm)"
+      "dz": "dZ (mm)",
+      "scale": "Proiecție / teren",
+      "scale_line": "FSC {csf} (k {k}, h {h} m): {grid} m în proiecție = {ground} m pe teren"
     },
     "profile_uncovered": {
       "fail": "Profilul longitudinal nu acoperă poziția kilometrică {c}.",

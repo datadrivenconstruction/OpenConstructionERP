@@ -4,16 +4,21 @@
 
 The network is switched off: PROJ never fetches grid files at run time, so a
 transform either uses what ships with pyproj or fails loudly. Country packs
-list the grids they need. Packs also contribute CRS suggestions through
-:func:`register_pack_crs`; core holds no national system.
+list the grids they need. National grids, heights and geoid names come from
+``core/country_data/survey_reference.json`` (registered at startup, so they
+work without a pack); packs may add systems through :func:`register_pack_crs`.
 """
 
 from __future__ import annotations
 
+import json
 import os
+import warnings
 from collections.abc import Callable, Iterable, Sequence
 from dataclasses import dataclass
 from functools import lru_cache
+from pathlib import Path
+from typing import Any
 
 os.environ.setdefault("PROJ_NETWORK", "OFF")
 
@@ -21,13 +26,27 @@ from pyproj import CRS, Transformer  # noqa: E402
 from pyproj.database import query_crs_info  # noqa: E402
 from pyproj.enums import PJType  # noqa: E402
 from pyproj.exceptions import CRSError  # noqa: E402
+from pyproj.transformer import TransformerGroup  # noqa: E402
 
 Point3 = tuple[float, float, float | None]
 
 _SEARCH_TYPES = (PJType.PROJECTED_CRS, PJType.GEOGRAPHIC_2D_CRS, PJType.VERTICAL_CRS, PJType.COMPOUND_CRS)
 
-#: Country code -> [(epsg, note)] registered by active country packs.
-_PACK_CRS: dict[str, list[tuple[int, str]]] = {}
+
+@dataclass(frozen=True)
+class NationalCrs:
+    """One national grid as a country offers it: role, its height system and geoid model."""
+
+    epsg: int
+    note: str = ""
+    role: str = "primary"  # primary | zone | legacy
+    vertical_epsg: int | None = None
+    geoid_grid: str | None = None
+    proj_grid: str | None = None
+
+
+#: Country code -> national systems: core reference data first, then whatever packs add.
+_PACK_CRS: dict[str, list[NationalCrs]] = {}
 
 
 @dataclass(frozen=True)
@@ -150,24 +169,221 @@ def transform_points(points: Sequence[Point3], source_epsg: int, target_epsg: in
     return out
 
 
-def register_pack_crs(country: str, systems: Iterable[tuple[int, str]]) -> None:
-    """Called by a country pack to offer its national systems in the CRS picker."""
-    _PACK_CRS[country.strip().upper()] = [(int(e), str(note)) for e, note in systems]
+SystemSpec = NationalCrs | tuple | dict
+
+
+def _as_national(spec: SystemSpec) -> NationalCrs:
+    if isinstance(spec, NationalCrs):
+        return spec
+    if isinstance(spec, dict):
+        v = spec.get("vertical_epsg")
+        return NationalCrs(
+            epsg=int(spec["epsg"]),
+            note=str(spec.get("note") or ""),
+            role=str(spec.get("role") or "primary"),
+            vertical_epsg=int(v) if v else None,
+            geoid_grid=spec.get("geoid_grid") or None,
+            proj_grid=spec.get("proj_grid") or None,
+        )
+    epsg, note, *rest = spec
+    role = str(rest[0]) if rest else "primary"
+    vertical = int(rest[1]) if len(rest) > 1 and rest[1] else None
+    geoid = str(rest[2]) if len(rest) > 2 and rest[2] else None
+    return NationalCrs(int(epsg), str(note), role, vertical, geoid)
+
+
+def register_pack_crs(country: str, systems: Iterable[SystemSpec]) -> None:
+    """Offer national systems in the CRS picker; a second call only adds codes not yet listed."""
+    listed = _PACK_CRS.setdefault(country.strip().upper(), [])
+    known = {s.epsg for s in listed}
+    for spec in systems:
+        item = _as_national(spec)
+        if item.epsg not in known:
+            listed.append(item)
+            known.add(item.epsg)
+
+
+def national_crs_for(markets: Iterable[str]) -> list[tuple[NationalCrs, str]]:
+    """``(system, country)`` for the caller's markets only; no market chosen lists nothing."""
+    wanted = {m.strip().upper() for m in markets}
+    if "*" in wanted:
+        return []
+    return [(s, c) for c, systems in sorted(_PACK_CRS.items()) if c in wanted for s in systems]
 
 
 def pack_crs_for(markets: Iterable[str]) -> list[tuple[int, str, str]]:
     """``(epsg, note, country)`` from the packs of the caller's markets only."""
-    wanted = {m.strip().upper() for m in markets}
-    if "*" in wanted:
-        return []
-    return [(e, note, c) for c, systems in sorted(_PACK_CRS.items()) if c in wanted for e, note in systems]
+    return [(s.epsg, s.note, c) for s, c in national_crs_for(markets)]
+
+
+# ── National reference data (core, works without a pack) ──────────────────────────────────────────────────────────
+
+REFERENCE_PATH = Path(__file__).resolve().parents[2] / "core" / "country_data" / "survey_reference.json"
+
+
+@lru_cache(maxsize=1)
+def survey_reference() -> dict[str, dict[str, Any]]:
+    """``country -> entry`` from ``country_data/survey_reference.json``."""
+    data = json.loads(REFERENCE_PATH.read_text(encoding="utf-8"))
+    return {str(k).upper(): v for k, v in (data.get("countries") or {}).items()}
+
+
+def load_survey_reference() -> int:
+    """Register every country's national systems from the core reference; returns how many systems."""
+    count = 0
+    for country, entry in survey_reference().items():
+        vertical = [int(v["epsg"]) for v in entry.get("vertical") or []]
+        geoid = entry.get("geoid") or {}
+        systems = [
+            NationalCrs(
+                epsg=int(h["epsg"]),
+                note=str(h.get("note") or ""),
+                role=str(h.get("role") or "primary"),
+                vertical_epsg=vertical[0] if vertical else None,
+                geoid_grid=geoid.get("name") or None,
+                proj_grid=geoid.get("proj_grid") or None,
+            )
+            for h in entry.get("horizontal") or []
+        ]
+        register_pack_crs(country, systems)
+        count += len(systems)
+    return count
+
+
+def legacy_note(epsg: int | None, markets: Iterable[str] | None = None) -> tuple[str, int] | None:
+    """``(country, primary epsg)`` when ``epsg`` is a legacy grid there (SRV-021); markets narrow the search."""
+    if epsg is None:
+        return None
+    wanted = None if markets is None else {m.strip().upper() for m in markets} - {"*"}
+    for country, systems in sorted(_PACK_CRS.items()):
+        if wanted and country not in wanted:
+            continue
+        if not any(s.epsg == int(epsg) and s.role == "legacy" for s in systems):
+            continue
+        primary = next((s.epsg for s in systems if s.role == "primary"), None)
+        if primary is not None:
+            return country, primary
+    return None
+
+
+def geoid_name_for(vertical_epsg: int | None) -> str | None:
+    """The geoid model a country pairs with this height system, from the reference."""
+    if not vertical_epsg:
+        return None
+    for entry in survey_reference().values():
+        if any(int(v["epsg"]) == int(vertical_epsg) for v in entry.get("vertical") or []):
+            geoid = entry.get("geoid") or {}
+            if geoid.get("name"):
+                return str(geoid["name"])
+    return None
+
+
+# ── Heights ───────────────────────────────────────────────────────────────────────────────────────────────────────
+
+
+@dataclass(frozen=True)
+class VerticalStatus:
+    """Whether heights between two systems can be converted with what is installed."""
+
+    needed: bool
+    available: bool
+    missing_grids: tuple[str, ...] = ()
+
+
+def _compound(h: int, v: int | None) -> CRS:
+    base = CRS.from_epsg(int(h))
+    if v is None:
+        return base.to_3d() if base.is_geographic else base
+    return CRS.from_user_input(f"EPSG:{int(h)}+{int(v)}")
+
+
+@lru_cache(maxsize=256)
+def vertical_status(source_h: int, source_v: int | None, target_h: int, target_v: int | None) -> VerticalStatus:
+    """Can heights go from ``source_h+source_v`` to ``target_h+target_v`` offline?
+
+    ``None`` as a vertical code means ellipsoidal heights when the horizontal
+    system is geographic, and "carry as measured" for a projected one.
+    """
+    if source_v == target_v:
+        return VerticalStatus(needed=False, available=True)
+    try:
+        src, dst = _compound(source_h, source_v), _compound(target_h, target_v)
+        if len(src.axis_info) < 3 or len(dst.axis_info) < 3:
+            return VerticalStatus(needed=False, available=True)
+        with warnings.catch_warnings():
+            # The missing grid is reported to the person as SRV-020, not to the log.
+            warnings.simplefilter("ignore", UserWarning)
+            group = TransformerGroup(src, dst, always_xy=True)
+    except (CRSError, ValueError) as exc:
+        raise ValueError(f"no height transform from {source_h}+{source_v} to {target_h}+{target_v}") from exc
+    missing = sorted(
+        {
+            grid.short_name or grid.full_name or grid.name
+            for op in group.unavailable_operations
+            for grid in getattr(op, "grids", [])
+            if not grid.available
+        }
+    )
+    usable = bool(group.transformers) and (group.best_available or not missing)
+    return VerticalStatus(needed=True, available=usable, missing_grids=tuple(missing))
+
+
+@dataclass
+class Transform3dResult:
+    """Moved points, whether heights were converted, and which grids were missing."""
+
+    points: list[Point3]
+    heights_converted: bool
+    missing_grids: tuple[str, ...] = ()
+
+
+def transform_points_3d(
+    points: Sequence[Point3],
+    source_epsg: int,
+    target_epsg: int,
+    source_vertical: int | None = None,
+    target_vertical: int | None = None,
+) -> Transform3dResult:
+    """E/N/H through a compound CRS when both heights are named and the geoid grid is installed.
+
+    Without the grid the plan position is still transformed and heights are
+    kept as measured; the caller reports SRV-020.
+    """
+    status = vertical_status(int(source_epsg), source_vertical, int(target_epsg), target_vertical)
+    if not status.needed or not status.available:
+        moved = transform_points(points, source_epsg, target_epsg)
+        return Transform3dResult(moved, False, status.missing_grids)
+    tr = Transformer.from_crs(
+        _compound(source_epsg, source_vertical), _compound(target_epsg, target_vertical), always_xy=True
+    )
+    out: list[Point3] = []
+    for x, y, z in points:
+        if z is None:
+            tx, ty = transform_points([(x, y, None)], source_epsg, target_epsg)[0][:2]
+            out.append((tx, ty, None))
+            continue
+        tx, ty, tz = tr.transform(x, y, z)
+        if float("inf") in (tx, ty, tz):
+            raise ValueError(f"point ({x}, {y}) is outside EPSG {target_epsg}")
+        out.append((float(tx), float(ty), float(tz)))
+    return Transform3dResult(out, True, ())
 
 
 __all__ = [
     "CrsInfo",
+    "NationalCrs",
+    "Transform3dResult",
+    "VerticalStatus",
     "describe",
+    "geoid_name_for",
+    "legacy_note",
+    "load_survey_reference",
+    "national_crs_for",
     "pack_crs_for",
     "register_pack_crs",
+    "survey_reference",
+    "transform_points_3d",
+    "vertical_status",
     "search",
     "transform_points",
     "utm_epsg_for",

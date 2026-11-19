@@ -6,6 +6,7 @@ import {
   columnsForPreset,
   detectDelimiter,
   fileFormatFor,
+  selfDescribing,
   guessPreset,
   mappingProblems,
   parseNumber,
@@ -69,5 +70,11 @@ describe('survey import mapping', () => {
     expect(fileFormatFor('parcels.geojson')).toBe('geojson');
     expect(fileFormatFor('field.TXT')).toBe('txt');
     expect(fileFormatFor('control.csv')).toBe('csv');
+    expect(fileFormatFor('job.GSI')).toBe('gsi');
+    expect(fileFormatFor('job.jxl')).toBe('jobxml');
+    expect(fileFormatFor('job.xml', '<?xml version="1.0"?><JOBFile jobName="x">')).toBe('jobxml');
+    expect(fileFormatFor('surface.xml', '<LandXML>')).toBe('landxml');
+    expect(selfDescribing('gsi')).toBe(true);
+    expect(selfDescribing('csv')).toBe(false);
   });
 });

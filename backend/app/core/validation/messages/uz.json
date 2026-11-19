@@ -2380,6 +2380,46 @@
     "level_arithmetic": {
       "fail": "{name} nivelirlash jurnali: arifmetik nazorat mos kelmadi, ΣOrqa − ΣOld = {d}, lekin oxirgi belgi − birinchi = {r}.",
       "suggestion": "Sanoqlarni va har bir qator hisobini qayta tekshiring."
+    },
+    "geoid_missing": {
+      "fail": "{v} balandlik tizimiga {g} geoid to'ri kerak, u o'rnatilmagan; balandliklar o'lchanganicha qoldirildi.",
+      "suggestion": "Administratordan to'r faylini PROJ ma'lumotlar papkasiga o'rnatishni so'rang yoki o'lchangan balandliklarni qoldiring."
+    },
+    "legacy_grid": {
+      "fail": "{epsg} tizimi {country} uchun eski tizim; asosiy tizim — {p}.",
+      "suggestion": "Chizmalar undan foydalansa, qoldiring; yangi ish odatda asosiy tizimda bajariladi."
+    },
+    "local_grid_points": {
+      "fail": "Mahalliy tizimga kamida 2 ta umumiy nuqta kerak.",
+      "suggestion": "Ham qurilish maydoni, ham davlat tizimida ma'lum nuqtalarni qo'shing."
+    },
+    "local_grid_residual": {
+      "fail": "{id} nuqtasidagi {r} mm qoldiq {t} mm dan oshadi.",
+      "suggestion": "Nuqtani ikkala ro'yxatda tekshiring yoki faqat nazorat nuqtasi sifatida ishlating."
+    },
+    "local_grid_scale": {
+      "fail": "{s} ppm masshtab 1 dan {t} ppm dan ko'proq farq qiladi; birliklarni tekshiring (fut yoki metr).",
+      "suggestion": "Ikkala koordinatalar ro'yxati bir xil birlikda ekanini tekshiring."
+    },
+    "ground_grid": {
+      "fail": "Rejalash varag'idagi masofalar proyeksiya masofalari; {d} m da yer/proyeksiya farqi {mm} mm.",
+      "suggestion": "Maydonda o'lchangan masofalar yer masofalari: proyeksiya masofasini umumiy masshtab koeffitsientiga bo'ling."
+    },
+    "gsi_unit": {
+      "fail": "GSI {wi} so'zida noma'lum birlik kodi {u} bor.",
+      "suggestion": "Faylni metr yoki futda qayta eksport qiling."
+    },
+    "foot_definition": {
+      "fail": "Fayl futda, loyiha esa metrda; fut ta'rifini tanlang.",
+      "suggestion": "Xalqaro futni (0,3048 m) yoki AQSh geodezik futini (1200/3937 m) tanlang."
+    },
+    "raw_skipped": {
+      "fail": "Hisoblangan koordinatasiz {n} ta xom o'lchov o'tkazib yuborildi.",
+      "suggestion": "O'lchovlarni kontrollerda qayta ishlang va koordinatalarni eksport qiling."
+    },
+    "export_crs": {
+      "fail": "Eksport tizimi {a} loyiha tizimi {b} dan farq qiladi; koordinatalar qayta hisoblandi.",
+      "suggestion": "Qabul qiluvchi dastur eksport tizimini kutishini tekshiring."
     }
   },
   "volumes": {
@@ -2433,7 +2473,9 @@
       "findings": "Kamchiliklar",
       "no_profile": "Profil yo'q, uni belgilang",
       "d": "d (mm)",
-      "dz": "dZ (mm)"
+      "dz": "dZ (mm)",
+      "scale": "Proyeksiya / yer",
+      "scale_line": "Umumiy masshtab {csf} (k {k}, h {h} m): proyeksiyada {grid} m = yerda {ground} m"
     },
     "profile_uncovered": {
       "fail": "Bo'ylama profil {c} piketini qamramaydi.",

@@ -2380,6 +2380,46 @@
     "level_arithmetic": {
       "fail": "Caderneta de nivelamento {name}: verificação aritmética falhou, ΣRé − ΣVante = {d} mas última cota − primeira = {r}.",
       "suggestion": "Confira as leituras e o cálculo de cada linha."
+    },
+    "geoid_missing": {
+      "fail": "O sistema vertical {v} precisa da grade do geoide {g}, que não está instalada; as altitudes ficam como medidas.",
+      "suggestion": "Peça ao administrador para instalar a grade na pasta de dados do PROJ, ou mantenha as altitudes medidas."
+    },
+    "legacy_grid": {
+      "fail": "A grade {epsg} é um sistema antigo em {country}; o sistema principal é {p}.",
+      "suggestion": "Mantenha-a se os desenhos a usam; trabalho novo costuma ir no sistema principal."
+    },
+    "local_grid_points": {
+      "fail": "Uma grade local precisa de pelo menos 2 pontos comuns.",
+      "suggestion": "Adicione pontos conhecidos na grade da obra e na grade nacional."
+    },
+    "local_grid_residual": {
+      "fail": "Resíduo de {r} mm em {id}, acima de {t} mm.",
+      "suggestion": "Verifique o ponto nas duas listas, ou use-o só como ponto de verificação."
+    },
+    "local_grid_scale": {
+      "fail": "A escala de {s} ppm difere de 1 em mais de {t} ppm; verifique as unidades (pés ou metros).",
+      "suggestion": "Garanta que as duas listas de coordenadas usam a mesma unidade."
+    },
+    "ground_grid": {
+      "fail": "As distâncias da folha de locação são de grade; a diferença terreno/grade em {d} m é de {mm} mm.",
+      "suggestion": "Distâncias medidas na obra são de terreno: divida as de grade pelo fator de escala combinado."
+    },
+    "gsi_unit": {
+      "fail": "A palavra GSI {wi} tem o código de unidade desconhecido {u}.",
+      "suggestion": "Exporte o arquivo novamente em metros ou pés."
+    },
+    "foot_definition": {
+      "fail": "O arquivo está em pés, mas o projeto usa metros; escolha a definição do pé.",
+      "suggestion": "Escolha o pé internacional (0,3048 m) ou o pé de levantamento dos EUA (1200/3937 m)."
+    },
+    "raw_skipped": {
+      "fail": "{n} observações brutas sem coordenadas reduzidas foram ignoradas.",
+      "suggestion": "Reduza as observações na coletora e exporte coordenadas."
+    },
+    "export_crs": {
+      "fail": "O SRC de exportação {a} difere do SRC do projeto {b}; coordenadas transformadas.",
+      "suggestion": "Confirme que o software de destino espera o sistema de exportação."
     }
   },
   "volumes": {
@@ -2433,7 +2473,9 @@
       "findings": "Constatações",
       "no_profile": "Sem perfil, defina um",
       "d": "d (mm)",
-      "dz": "dZ (mm)"
+      "dz": "dZ (mm)",
+      "scale": "Grade / terreno",
+      "scale_line": "FEC {csf} (k {k}, h {h} m): {grid} m de grade = {ground} m de terreno"
     },
     "profile_uncovered": {
       "fail": "O perfil longitudinal não cobre a estaca {c}.",
