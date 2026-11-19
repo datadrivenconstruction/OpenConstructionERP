@@ -28,6 +28,7 @@ from app.core.onboarding_presets import (
     _CORE_MODULES,
     _REGIONAL,
     COMPANY_PRESETS,
+    MODULE_PREF_ALIASES,
     SIZE_PRESETS,
     get_core_modules,
     get_preset,
@@ -377,7 +378,8 @@ def test_every_preset_switches_on_what_its_modules_depend_on(key: str) -> None:
     unmet = sorted(
         f"{module} needs {dep}"
         for module, on in prefs.items()
-        if on
+        # Hyphenated aliases are frontend ids of the same modules; they have no backend tree.
+        if on and module not in MODULE_PREF_ALIASES.values()
         for dep in _manifest_depends(module)
         if prefs.get(dep, True) is False
     )
