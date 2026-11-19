@@ -104,7 +104,8 @@ export function StakeCard({ stake, tolH, tolV, instrument, controlRef, canWrite 
       <span className="oe-label">{label}</span>
       <input
         id={id}
-        className="oe-input w-full h-12 text-lg font-mono"
+        className="oe-input w-full text-lg font-mono"
+        style={{ height: 48 }}
         inputMode="decimal"
         autoComplete="off"
         dir="ltr"
