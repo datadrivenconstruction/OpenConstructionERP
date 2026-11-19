@@ -24,6 +24,8 @@ from typing import Any
 
 from fastapi import FastAPI
 
+from app.core.data_paths import DataPaths
+
 logger = logging.getLogger(__name__)
 
 MODULES_DIR = Path(__file__).parent.parent / "modules"
@@ -238,6 +240,9 @@ class ModuleManifest:
     # `when` keeps both true statements instead of averaging them into a false
     # one.
     inference: InferenceDeclaration | tuple[InferenceDeclaration, ...] | None = None
+    # Where this module's data comes from and goes to; None = nobody has declared it
+    # yet (only auto-derived links show), see app.core.data_paths.
+    data_paths: DataPaths | None = None
 
     def inference_declarations(self) -> tuple[InferenceDeclaration, ...]:
         """Every declaration this manifest carries, in one shape.

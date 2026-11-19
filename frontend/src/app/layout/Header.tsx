@@ -202,6 +202,7 @@ export const TITLE_I18N_MAP: Record<string, string> = {
   'Reporting Dashboards': 'nav.reporting_dashboards',
   'Analytics': 'nav.analytics',
   'Architecture Map': 'nav.architecture_map',
+  'Data paths': 'data_paths.button',
   'Sustainability': 'nav.sustainability',
   // Admin
   'User Management': 'sidebar.admin_grid.users',

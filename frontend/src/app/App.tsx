@@ -443,6 +443,9 @@ const GovernancePage = lazy(() =>
 const ArchitectureMapPage = lazy(() =>
   import('@/features/architecture/ArchitectureMapPage').then((m) => ({ default: m.ArchitectureMapPage }))
 );
+const DataPathsPage = lazy(() =>
+  import('@/features/data-paths/DataPathsPage').then((m) => ({ default: m.DataPathsPage }))
+);
 const ProjectIntelligencePage = lazy(() =>
   import('@/features/project-intelligence/ProjectIntelligencePage').then((m) => ({ default: m.ProjectIntelligencePage }))
 );
@@ -1787,6 +1790,9 @@ export default function App() {
             remembered in localStorage; never gates the AGPL code itself. */}
         <Route path="/inside" element={<P title="Inside track"><InsidePage /></P>} />
         <Route path="/project-intelligence" element={<P title="Project Intelligence"><ProjectIntelligencePage /></P>} />
+        {/* Data paths: the user-facing data map; /architecture stays the developer view. */}
+        <Route path="/data-paths" element={<P title="Data paths"><DataPathsPage /></P>} />
+        <Route path="/data-paths/:module" element={<P title="Data paths"><DataPathsPage /></P>} />
         {/* Architecture Map — internal tool, admin-only. Surfaces module
             dependency graph + DDC integrity audit; not for day-to-day use. */}
         <Route

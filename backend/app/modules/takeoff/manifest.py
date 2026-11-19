@@ -3,6 +3,7 @@
 """Takeoff module manifest."""
 
 from app.core.module_loader import InferenceDeclaration, InferenceRole, ModuleManifest
+from app.modules.takeoff.data_paths import DATA_PATHS
 
 manifest = ModuleManifest(
     name="oe_takeoff",
@@ -29,4 +30,5 @@ manifest = ModuleManifest(
             "confirms, and plan_read.py owns every number the model is not trusted to produce"
         ),
     ),
+    data_paths=DATA_PATHS,
 )

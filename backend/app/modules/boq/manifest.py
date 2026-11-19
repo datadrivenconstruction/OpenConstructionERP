@@ -3,6 +3,7 @@
 """Bill of Quantities module manifest."""
 
 from app.core.module_loader import ModuleManifest
+from app.modules.boq.data_paths import DATA_PATHS
 
 manifest = ModuleManifest(
     name="oe_boq",
@@ -14,4 +15,5 @@ manifest = ModuleManifest(
     depends=["oe_projects", "oe_measurement", "oe_price_breakdown"],
     auto_install=True,
     enabled=True,
+    data_paths=DATA_PATHS,
 )

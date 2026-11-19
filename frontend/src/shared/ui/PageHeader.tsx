@@ -7,6 +7,9 @@ import clsx from 'clsx';
 
 import { Button, ButtonSizeOverrideContext } from './Button';
 import { usePageHeaderSlot } from './pageHeaderSlot';
+import { ModuleGuideButton } from './ModuleGuideButton';
+import { DataPathsButton } from './DataPaths/DataPathsButton';
+import { DataPathsSlotContext } from './DataPaths/slot';
 
 /**
  * Canonical module page top block (MODULE_STYLE_GUIDE.md section 2).
@@ -149,6 +152,7 @@ export function PageHeader({ subtitle, actions, srTitle, className }: PageHeader
     // midline above the content (uniformity sweep, shared issue).
     return srTitle ? <h1 className="sr-only">{srTitle}</h1> : null;
   }
+  const guideInActions = flattenActions(actions).some((el) => el.type === ModuleGuideButton);
   return (
     // items-center: the (usually single-line) subtitle sits on the same
     // vertical midline as the h-8/h-9 action buttons. Top-aligning them
@@ -173,7 +177,15 @@ export function PageHeader({ subtitle, actions, srTitle, className }: PageHeader
           scrolled the whole page sideways. The cap is inert whenever the row
           fits, so wide layouts are unchanged. */}
       <div className="flex max-w-full shrink-0 flex-wrap items-center gap-2 empty:hidden">
-        {actions && <HeaderActions actions={actions} />}
+        <DataPathsSlotContext.Provider value={guideInActions ? 'guide' : 'header'}>
+          {actions && <HeaderActions actions={actions} />}
+          {/* No guide button among the actions: the header carries Data paths itself. */}
+          {!guideInActions && (
+            <ButtonSizeOverrideContext.Provider value="md">
+              <DataPathsButton />
+            </ButtonSizeOverrideContext.Provider>
+          )}
+        </DataPathsSlotContext.Provider>
         <HeaderSlot />
       </div>
     </div>

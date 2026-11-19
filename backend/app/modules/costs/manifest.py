@@ -3,6 +3,7 @@
 """Cost Database module manifest."""
 
 from app.core.module_loader import InferenceDeclaration, InferenceRole, ModuleManifest
+from app.modules.costs.data_paths import DATA_PATHS
 
 manifest = ModuleManifest(
     name="oe_costs",
@@ -52,4 +53,5 @@ manifest = ModuleManifest(
             ),
         ),
     ),
+    data_paths=DATA_PATHS,
 )

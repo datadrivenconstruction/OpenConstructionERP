@@ -1,0 +1,116 @@
+# DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
+# Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
+"""Data paths of the boq module (see app.core.data_paths)."""
+
+from app.core.data_paths import DataPath, DataPaths, Entity, Param, Stale, Sum
+
+DATA_PATHS = DataPaths(
+    why="data_paths.why.boq",
+    roles=(
+        "estimator",
+        "quantity_surveyor",
+    ),
+    entities=(
+        Entity("BOQ", label="data_paths.entity.boq", route="/boq"),
+        Entity("Position", label="data_paths.entity.position", route="/boq", measure=Sum("total")),
+        Entity("BOQMarkup", label="data_paths.entity.markup", route="/boq"),
+    ),
+    inputs=(
+        DataPath(
+            "oe_takeoff",
+            "TakeoffMeasurement",
+            via="TakeoffMeasurement.linked_boq_position_id",
+            label="data_paths.entity.measurement",
+            route="/takeoff",
+            importance="high",
+            breaks="data_paths.breaks.no_quantities",
+        ),
+        DataPath(
+            "oe_costs",
+            "CostItemUsage",
+            via="CostItemUsage.cost_item_id",
+            label="data_paths.entity.cost_item_usage",
+            route="/costs",
+            importance="high",
+            breaks="data_paths.breaks.no_prices",
+        ),
+        DataPath(
+            "oe_bim_hub",
+            "QuantityLink",
+            via="QuantityLink.model_id",
+            label="data_paths.entity.quantity_link",
+            route="/bim",
+        ),
+    ),
+    outputs=(
+        DataPath(
+            "oe_tendering",
+            "TenderPackage",
+            via="TenderPackage.boq_id",
+            label="data_paths.entity.tender_package",
+            route="/tendering",
+            importance="critical",
+            breaks="data_paths.breaks.no_tender_scope",
+        ),
+        DataPath(
+            "oe_schedule",
+            "Activity",
+            via="Activity.boq_position_ids",
+            label="data_paths.entity.activity",
+            route="/schedule",
+            importance="high",
+            breaks="data_paths.breaks.no_cost_loading",
+        ),
+        DataPath(
+            "oe_costmodel",
+            "CostLine",
+            via="CostLine.boq_position_id",
+            label="data_paths.entity.cost_line",
+            route="/cost-model",
+            importance="high",
+            breaks="data_paths.breaks.no_budget",
+        ),
+        DataPath(
+            "oe_validation",
+            "ValidationReport",
+            via="ValidationReport.target_id",
+            label="data_paths.entity.validation_report",
+            route="/validation",
+        ),
+    ),
+    parameters=(
+        Param(
+            "Position.quantity",
+            drives=(
+                "Position.total",
+                "oe_tendering:package_value",
+                "oe_schedule.Activity.cost_planned",
+            ),
+            label="data_paths.param.quantity",
+        ),
+        Param(
+            "Position.unit_rate",
+            drives=(
+                "Position.total",
+                "oe_tendering:package_value",
+                "oe_costmodel.CostLine.estimate_amount",
+            ),
+            label="data_paths.param.unit_rate",
+        ),
+        Param(
+            "BOQMarkup.percentage",
+            drives=(
+                "oe_tendering:package_value",
+                "oe_contracts:contract_value",
+            ),
+            label="data_paths.param.markup",
+        ),
+    ),
+    stale=(
+        Stale(
+            source="Position.updated_at",
+            copy="oe_tendering.TenderPackage.metadata_.last_distributed_at",
+            label="data_paths.stale.changed_after_export",
+        ),
+    ),
+)

@@ -12,12 +12,14 @@
 // shows, matching ModuleHelpButton; the button stays accessible via
 // aria-label.
 
-import { lazy, Suspense, useState } from 'react';
+import { lazy, Suspense, useContext, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { GraduationCap } from 'lucide-react';
 
 import { Button } from './Button';
 import { ModuleGuide, type ModuleGuideContent } from './ModuleGuide';
+import { DataPathsButton } from './DataPaths/DataPathsButton';
+import { DataPathsSlotContext } from './DataPaths/slot';
 
 // Lazy: the pill indexes every playbook, which must not ride in the entry chunk.
 const ModuleCasesButton = lazy(() =>
@@ -44,6 +46,7 @@ export function ModuleGuideButton({
 }: ModuleGuideButtonProps) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
+  const dataPathsSlot = useContext(DataPathsSlotContext);
 
   const resolvedLabel = label ?? t('guide.button', { defaultValue: 'How it works' });
   const aria = t('guide.button_aria', {
@@ -59,6 +62,8 @@ export function ModuleGuideButton({
       <Suspense fallback={null}>
         <ModuleCasesButton />
       </Suspense>
+      {/* Data paths sits in the same learning group, directly before How it works. */}
+      {dataPathsSlot !== 'header' && <DataPathsButton />}
       {/* The re-open control for a collapsed info block used to sit here, and
           now lives in the top bar beside the module name (founder 2026-08-07).
           It is not rendered in both places: two controls for one action drift
