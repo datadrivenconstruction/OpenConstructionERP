@@ -115,3 +115,20 @@ def test_landxml_reads_spiral_and_profile_and_reports_srv071() -> None:
     assert spiral.azimuth_deg == pytest.approx(0.0)
     again = alignment_from_json(alignment_to_json(out.alignment))
     assert again.point_at(1150.0) == pytest.approx(out.alignment.point_at(1150.0))
+
+
+async def test_stake_list_route_reports_srv070_and_srv071() -> None:
+    from app.modules.setting_out.road_router import MeasuredLevel, StakeListIn, road_stake_list
+
+    out = await road_stake_list(
+        StakeListIn(landxml=LANDXML, interval=20.0, measured=[MeasuredLevel(chainage=1180.0, z=51.640)]),
+        locale="en",
+    )
+    rules = sorted(f.rule_id for f in out.findings)
+    assert "SRV-071" in rules
+    row = next(r for r in out.rows if r.chainage == 1180.0)
+    assert row.design_z == pytest.approx(51.606, abs=5e-4)
+    assert row.dz_mm == pytest.approx(34.0, abs=0.6)
+    assert row.cut_fill == "cut"
+    if out.alignment_length + out.start_chainage > 1400.0:
+        assert "SRV-070" in rules

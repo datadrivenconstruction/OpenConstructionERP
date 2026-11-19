@@ -17,7 +17,17 @@ from __future__ import annotations
 from collections.abc import Iterable, Mapping
 from dataclasses import dataclass, field
 
-ITEM_TYPES: tuple[str, ...] = ("column", "wall", "pile", "anchor_bolt", "kerb", "centreline", "grid_line", "other")
+ITEM_TYPES: tuple[str, ...] = (
+    "column",
+    "wall",
+    "pile",
+    "anchor_bolt",
+    "kerb",
+    "centreline",
+    "grid_line",
+    "boundary_corner",
+    "other",
+)
 
 DEMO_KEY = "demo"
 

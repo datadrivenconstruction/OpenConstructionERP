@@ -114,6 +114,10 @@ class PointOut(BaseModel):
     rate_mm_day: float | None = None
     level: Level = "none"
     ack_state: AckState = "none"
+    #: Linear fit over the last epochs: the next threshold it reaches and in how many days.
+    forecast_level: str = ""
+    forecast_days: float | None = None
+    forecast_rate_mm_day: float | None = None
 
 
 class SeriesEntry(BaseModel):

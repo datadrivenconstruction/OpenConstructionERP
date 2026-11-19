@@ -39,6 +39,7 @@ from app.modules.monitoring.monitoring_math import (
     Reading,
     Thresholds,
     evaluate,
+    forecast,
     ordered,
 )
 from app.modules.monitoring.readings_io import ParsedReading, ParseResult, parse_readings
@@ -337,6 +338,7 @@ class MonitoringService:
             level = "none"
         else:
             level = last[2].level
+        fc = forecast([ev for _, _, ev in series], profile.thresholds) if profile is not None else None
         pending = any(a.acknowledged_at is None for a in alerts)
         return PointOut(
             id=point.id,
@@ -355,6 +357,9 @@ class MonitoringService:
             rate_mm_day=_f(last[2].rate_mm_day) if last else None,
             level=level,  # type: ignore[arg-type]
             ack_state="pending" if pending else ("done" if alerts else "none"),
+            forecast_level=(fc.level or "") if fc else "",
+            forecast_days=fc.days if fc else None,
+            forecast_rate_mm_day=fc.slope_mm_day if fc else None,
         )
 
     async def _outs(self, project_id: uuid.UUID, markets: list[str], only: uuid.UUID | None = None) -> list[PointOut]:
@@ -702,6 +707,8 @@ class MonitoringService:
                     "displacement_mm": p.displacement_mm,
                     "rate_mm_day": p.rate_mm_day,
                     "acknowledged": p.ack_state == "done",
+                    "forecast_level": p.forecast_level,
+                    "forecast_days": p.forecast_days,
                 }
                 for p in points
             ]
