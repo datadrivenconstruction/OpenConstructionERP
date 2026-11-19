@@ -8,7 +8,7 @@ Creates ``oe_subcontractors_levy_catalogue``, ``oe_subcontractors_subcontract_te
 so a database whose tables ``create_all`` already built is a no-op.
 
 Revision ID: awl_subcontract_levies
-Revises: vcrm01_deal_activities
+Revises: awe01_award_entities
 Create Date: 2026-11-19
 """
 
@@ -20,7 +20,7 @@ import sqlalchemy as sa
 from alembic import op
 
 revision: str = "awl_subcontract_levies"
-down_revision: str | Sequence[str] | None = "vcrm01_deal_activities"
+down_revision: str | Sequence[str] | None = "awe01_award_entities"
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 
