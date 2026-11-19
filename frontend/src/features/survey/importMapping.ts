@@ -167,9 +167,12 @@ export function mappingProblems(columns: ColumnField[]): MappingProblem[] {
   return out;
 }
 
-export function fileFormatFor(filename: string): FileFormat {
+export function fileFormatFor(filename: string, text = ''): FileFormat {
   const ext = filename.toLowerCase().split('.').pop() ?? '';
   if (ext === 'geojson' || ext === 'json') return 'geojson';
+  if (ext === 'gsi') return 'gsi';
+  if (ext === 'jxl') return 'jobxml';
+  if (ext === 'xml') return text.slice(0, 4000).includes('<JOBFile') ? 'jobxml' : 'landxml';
   if (ext === 'txt' || ext === 'pts' || ext === 'xyz') return 'txt';
   return 'csv';
 }
@@ -184,4 +187,9 @@ export function sampleRows(text: string, delimiter: string, count = 5): string[]
 /** A delimiter as a person reads it. */
 export function delimiterLabelKey(d: string): string {
   return { ',': 'comma', ';': 'semicolon', '\t': 'tab', '|': 'pipe', ' ': 'space' }[d] ?? 'comma';
+}
+
+/** Formats that carry their own columns and units: no mapping step. */
+export function selfDescribing(format: FileFormat): boolean {
+  return format === 'geojson' || format === 'gsi' || format === 'jobxml' || format === 'landxml';
 }

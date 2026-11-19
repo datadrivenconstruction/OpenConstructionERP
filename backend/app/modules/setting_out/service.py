@@ -710,12 +710,67 @@ class SettingOutService:
 
         detail = await self.detail(req)
         report = await self.validate(req.project_id, locale, req.id)
+        scale_note, scale_findings = await self._scale_note(detail, locale)
         return build_setting_out_sheet(
             detail,
             project_name=await self.repo.project_name(req.project_id),
             crs_label=await self.repo.project_crs_label(req.project_id),
-            findings=report.findings,
+            findings=[*report.findings, *scale_findings],
             locale=locale,
+            scale_note=scale_note,
+        )
+
+    async def _scale_note(self, detail: RequestDetail, locale: str) -> tuple[str, list[Finding]]:
+        """CSF line for the sheet at the stakes' centre, and SRV-025 when grid and ground differ by 0.5 mm or more."""
+        from app.core.validation.messages import translate  # noqa: PLC0415
+        from app.modules.survey_core.service import SurveyService  # noqa: PLC0415
+
+        if not detail.stakes:
+            return "", []
+        e = sum(s.design_e for s in detail.stakes) / len(detail.stakes)
+        n = sum(s.design_n for s in detail.stakes) / len(detail.stakes)
+        zs = [s.design_z for s in detail.stakes if s.design_z is not None]
+        sf = await SurveyService(self.session).scale_factor(
+            detail.project_id, e=e, n=n, height_m=sum(zs) / len(zs) if zs else None
+        )
+        if sf is None:
+            return "", []
+        note = translate(
+            "setting_out.sheet.scale_line",
+            locale=locale,
+            csf=f"{sf.csf:.8f}",
+            k=f"{sf.k:.8f}",
+            h=f"{sf.height_m:.1f}",
+            grid=f"{sf.distance_m:.3f}",
+            ground=f"{sf.ground_m:.3f}",
+        )
+        if abs(sf.diff_mm) < 0.5:
+            return note, []
+        params = {"d": f"{sf.distance_m:g}", "mm": f"{sf.diff_mm:.0f}"}
+        return note, [
+            Finding(
+                rule_id="SRV-025",
+                severity="warning",
+                message=translate("survey.ground_grid.fail", locale=locale, **params),
+                suggestion=translate("survey.ground_grid.suggestion", locale=locale, **params),
+            )
+        ]
+
+    async def export_stakes(self, req: SettingOutRequest, fmt: str, locale: str = "en") -> tuple[str, list]:
+        """Design stakes of a request in a survey exchange format, in the project CRS."""
+        from app.modules.survey_core.point_export import ExportPoint  # noqa: PLC0415
+        from app.modules.survey_core.service import SurveyService  # noqa: PLC0415
+
+        detail = await self.detail(req)
+        points = [
+            ExportPoint(s.point_id, s.design_e, s.design_n, s.design_z, s.code, detail.name) for s in detail.stakes
+        ]
+        return await SurveyService(self.session).write_points(
+            req.project_id,
+            points,
+            fmt,
+            locale=locale,
+            project_name=await self.repo.project_name(req.project_id),
         )
 
     # ── Riverside Yard demo ────────────────────────────────────────────────

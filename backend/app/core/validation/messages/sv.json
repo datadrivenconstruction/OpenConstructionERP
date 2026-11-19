@@ -2355,6 +2355,46 @@
     "level_misclosure": {
       "fail": "Avvägningens slutfel {f} mm överstiger k·√km med k = {k} mm.",
       "suggestion": "Gör om avvägningen eller kontrollera höjderna på de använda fixpunkterna."
+    },
+    "geoid_missing": {
+      "fail": "Höjdsystem {v} behöver geoidgittret {g}, som inte är installerat; höjder behålls som uppmätta.",
+      "suggestion": "Be administratören installera gitterfilen i PROJ-datamappen, eller behåll de uppmätta höjderna."
+    },
+    "legacy_grid": {
+      "fail": "System {epsg} är ett äldre system i {country}; huvudsystemet är {p}.",
+      "suggestion": "Behåll det om ritningarna använder det; nytt arbete görs oftast i huvudsystemet."
+    },
+    "local_grid_points": {
+      "fail": "Ett lokalt system behöver minst 2 gemensamma punkter.",
+      "suggestion": "Lägg till punkter som är kända i både arbetsplatsens och det nationella systemet."
+    },
+    "local_grid_residual": {
+      "fail": "Restfel {r} mm på {id} över {t} mm.",
+      "suggestion": "Kontrollera punkten i båda listorna, eller använd den bara som kontrollpunkt."
+    },
+    "local_grid_scale": {
+      "fail": "Skala {s} ppm avviker från 1 med mer än {t} ppm; kontrollera enheterna (fot eller meter).",
+      "suggestion": "Se till att båda koordinatlistorna har samma enhet."
+    },
+    "ground_grid": {
+      "fail": "Avstånd på utsättningsbladet är plana avstånd; skillnaden mark/plan över {d} m är {mm} mm.",
+      "suggestion": "Avstånd uppmätta på plats är markavstånd: dela plana avstånd med den kombinerade skalfaktorn."
+    },
+    "gsi_unit": {
+      "fail": "GSI-ord {wi} har okänd enhetskod {u}.",
+      "suggestion": "Exportera filen igen i meter eller fot."
+    },
+    "foot_definition": {
+      "fail": "Filen är i fot men projektet använder meter; välj fotdefinition.",
+      "suggestion": "Välj internationell fot (0,3048 m) eller US survey foot (1200/3937 m)."
+    },
+    "raw_skipped": {
+      "fail": "{n} råa observationer utan reducerade koordinater hoppades över.",
+      "suggestion": "Reducera observationerna i handenheten och exportera koordinater."
+    },
+    "export_crs": {
+      "fail": "Export-CRS {a} skiljer sig från projektets CRS {b}; koordinater transformerade.",
+      "suggestion": "Kontrollera att den mottagande programvaran förväntar sig exportsystemet."
     }
   },
   "volumes": {
@@ -2408,7 +2448,9 @@
       "findings": "Avvikelser",
       "no_profile": "Ingen profil, ange en",
       "d": "d (mm)",
-      "dz": "dZ (mm)"
+      "dz": "dZ (mm)",
+      "scale": "Plan / mark",
+      "scale_line": "KSF {csf} (k {k}, h {h} m): {grid} m plan = {ground} m mark"
     }
   },
   "land_parcels": {

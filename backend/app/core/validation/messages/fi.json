@@ -2355,6 +2355,46 @@
     "level_misclosure": {
       "fail": "Vaaituksen sulkuvirhe {f} mm ylittää k·√km, kun k = {k} mm.",
       "suggestion": "Toista vaaitus tai tarkista käytettyjen korkeuskiintopisteiden korkeudet."
+    },
+    "geoid_missing": {
+      "fail": "Korkeusjärjestelmä {v} tarvitsee geoidihilan {g}, jota ei ole asennettu; korkeudet pidetään mitattuina.",
+      "suggestion": "Pyydä ylläpitäjää asentamaan hilatiedosto PROJ-datakansioon tai pidä mitatut korkeudet."
+    },
+    "legacy_grid": {
+      "fail": "Järjestelmä {epsg} on vanha järjestelmä maassa {country}; pääjärjestelmä on {p}.",
+      "suggestion": "Pidä se, jos piirustukset käyttävät sitä; uusi työ tehdään yleensä pääjärjestelmässä."
+    },
+    "local_grid_points": {
+      "fail": "Paikallinen koordinaatisto tarvitsee vähintään 2 yhteistä pistettä.",
+      "suggestion": "Lisää pisteitä, jotka tunnetaan sekä työmaan että valtakunnallisessa koordinaatistossa."
+    },
+    "local_grid_residual": {
+      "fail": "Jäännösvirhe {r} mm pisteessä {id} yli {t} mm.",
+      "suggestion": "Tarkista piste kummastakin luettelosta tai käytä sitä vain tarkistuspisteenä."
+    },
+    "local_grid_scale": {
+      "fail": "Mittakaava {s} ppm poikkeaa 1:stä yli {t} ppm; tarkista yksiköt (jalat vai metrit).",
+      "suggestion": "Varmista, että molemmat koordinaattiluettelot ovat samassa yksikössä."
+    },
+    "ground_grid": {
+      "fail": "Merkintälomakkeen etäisyydet ovat tasoetäisyyksiä; maasto/taso-ero {d} m:llä on {mm} mm.",
+      "suggestion": "Työmaalla mitatut etäisyydet ovat maastoetäisyyksiä: jaa tasoetäisyydet yhdistetyllä mittakaavakertoimella."
+    },
+    "gsi_unit": {
+      "fail": "GSI-sanalla {wi} on tuntematon yksikkökoodi {u}.",
+      "suggestion": "Vie tiedosto uudelleen metreinä tai jalkoina."
+    },
+    "foot_definition": {
+      "fail": "Tiedosto on jalkoina, mutta projekti käyttää metrejä; valitse jalan määritelmä.",
+      "suggestion": "Valitse kansainvälinen jalka (0,3048 m) tai Yhdysvaltain maanmittausjalka (1200/3937 m)."
+    },
+    "raw_skipped": {
+      "fail": "{n} raakahavaintoa ilman redusoituja koordinaatteja ohitettiin.",
+      "suggestion": "Redusoi havainnot maastotallentimessa ja vie koordinaatit."
+    },
+    "export_crs": {
+      "fail": "Viennin koordinaattijärjestelmä {a} eroaa projektin järjestelmästä {b}; koordinaatit muunnettiin.",
+      "suggestion": "Varmista, että vastaanottava ohjelma odottaa viennin järjestelmää."
     }
   },
   "volumes": {
@@ -2408,7 +2448,9 @@
       "findings": "Havainnot",
       "no_profile": "Ei profiilia, aseta se",
       "d": "d (mm)",
-      "dz": "dZ (mm)"
+      "dz": "dZ (mm)",
+      "scale": "Taso / maasto",
+      "scale_line": "YMK {csf} (k {k}, h {h} m): {grid} m tasossa = {ground} m maastossa"
     }
   },
   "land_parcels": {

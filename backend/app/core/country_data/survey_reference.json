@@ -1,0 +1,3363 @@
+{
+ "_comment": "National survey reference per ISO country code: horizontal grids (role primary, zone or legacy), height systems and the geoid model. Every EPSG code is resolved through pyproj by tests/modules/survey_core/test_survey_reference.py and must carry the token its datum name starts with. Geoid grids are never shipped; proj_grid names the PROJ-data file an administrator installs. angle_unit and linear_unit are preselects (practice), not law. Packs may add entries, never replace these.",
+ "source": "EPSG Geodetic Parameter Dataset (epsg.org)",
+ "countries": {
+  "DE": {
+   "name": "Germany",
+   "horizontal": [
+    {
+     "epsg": 25832,
+     "role": "primary",
+     "token": "ETRS89",
+     "note": "ETRS89 / UTM 32N"
+    },
+    {
+     "epsg": 25833,
+     "role": "primary",
+     "token": "ETRS89",
+     "note": "ETRS89 / UTM 33N"
+    },
+    {
+     "epsg": 31466,
+     "role": "legacy",
+     "token": "DHDN",
+     "note": "DHDN / Gauss-Krueger"
+    },
+    {
+     "epsg": 31467,
+     "role": "legacy",
+     "token": "DHDN",
+     "note": "DHDN / Gauss-Krueger"
+    },
+    {
+     "epsg": 31468,
+     "role": "legacy",
+     "token": "DHDN",
+     "note": "DHDN / Gauss-Krueger"
+    },
+    {
+     "epsg": 31469,
+     "role": "legacy",
+     "token": "DHDN",
+     "note": "DHDN / Gauss-Krueger"
+    }
+   ],
+   "vertical": [
+    {
+     "epsg": 7837,
+     "token": "DHHN2016"
+    }
+   ],
+   "geoid": {
+    "name": "GCG2016",
+    "proj_grid": "de_bkg_gcg2016.tif",
+    "licence": "national mapping agency; install separately"
+   },
+   "angle_unit": "gon",
+   "linear_unit": "m",
+   "source": "EPSG Geodetic Parameter Dataset (epsg.org)"
+  },
+  "AT": {
+   "name": "Austria",
+   "horizontal": [
+    {
+     "epsg": 31254,
+     "role": "primary",
+     "token": "MGI",
+     "note": "MGI / Austria GK"
+    },
+    {
+     "epsg": 31255,
+     "role": "primary",
+     "token": "MGI",
+     "note": "MGI / Austria GK"
+    },
+    {
+     "epsg": 31256,
+     "role": "primary",
+     "token": "MGI",
+     "note": "MGI / Austria GK"
+    },
+    {
+     "epsg": 3416,
+     "role": "primary",
+     "token": "ETRS89",
+     "note": "ETRS89 / Austria Lambert"
+    },
+    {
+     "epsg": 31287,
+     "role": "legacy",
+     "token": "MGI",
+     "note": "MGI / Austria Lambert"
+    }
+   ],
+   "vertical": [
+    {
+     "epsg": 5778,
+     "token": "GHA"
+    }
+   ],
+   "geoid": null,
+   "angle_unit": "gon",
+   "linear_unit": "m",
+   "source": "EPSG Geodetic Parameter Dataset (epsg.org)"
+  },
+  "CH": {
+   "name": "Switzerland",
+   "horizontal": [
+    {
+     "epsg": 2056,
+     "role": "primary",
+     "token": "CH1903+",
+     "note": "CH1903+ / LV95"
+    },
+    {
+     "epsg": 21781,
+     "role": "legacy",
+     "token": "CH1903",
+     "note": "CH1903 / LV03"
+    }
+   ],
+   "vertical": [
+    {
+     "epsg": 5728,
+     "token": "LN02"
+    },
+    {
+     "epsg": 5729,
+     "token": "LHN95"
+    }
+   ],
+   "geoid": {
+    "name": "CHGeo2004",
+    "proj_grid": "ch_swisstopo_chgeo2004_ETRS89_LN02.tif",
+    "licence": "national mapping agency; install separately"
+   },
+   "angle_unit": "gon",
+   "linear_unit": "m",
+   "source": "EPSG Geodetic Parameter Dataset (epsg.org)"
+  },
+  "FR": {
+   "name": "France",
+   "horizontal": [
+    {
+     "epsg": 2154,
+     "role": "primary",
+     "token": "RGF93 v1",
+     "note": "RGF93 / Lambert-93"
+    },
+    {
+     "epsg": 3942,
+     "role": "zone",
+     "token": "RGF93 v1",
+     "note": "RGF93 / CC conic zones"
+    },
+    {
+     "epsg": 3943,
+     "role": "zone",
+     "token": "RGF93 v1",
+     "note": "RGF93 / CC conic zones"
+    },
+    {
+     "epsg": 3944,
+     "role": "zone",
+     "token": "RGF93 v1",
+     "note": "RGF93 / CC conic zones"
+    },
+    {
+     "epsg": 3945,
+     "role": "zone",
+     "token": "RGF93 v1",
+     "note": "RGF93 / CC conic zones"
+    },
+    {
+     "epsg": 3946,
+     "role": "zone",
+     "token": "RGF93 v1",
+     "note": "RGF93 / CC conic zones"
+    },
+    {
+     "epsg": 3947,
+     "role": "zone",
+     "token": "RGF93 v1",
+     "note": "RGF93 / CC conic zones"
+    },
+    {
+     "epsg": 3948,
+     "role": "zone",
+     "token": "RGF93 v1",
+     "note": "RGF93 / CC conic zones"
+    },
+    {
+     "epsg": 3949,
+     "role": "zone",
+     "token": "RGF93 v1",
+     "note": "RGF93 / CC conic zones"
+    },
+    {
+     "epsg": 3950,
+     "role": "zone",
+     "token": "RGF93 v1",
+     "note": "RGF93 / CC conic zones"
+    }
+   ],
+   "vertical": [
+    {
+     "epsg": 5720,
+     "token": "NGF-IGN69"
+    }
+   ],
+   "geoid": {
+    "name": "RAF20",
+    "proj_grid": "fr_ign_RAF20.tif",
+    "licence": "national mapping agency; install separately"
+   },
+   "angle_unit": "dms",
+   "linear_unit": "m",
+   "source": "EPSG Geodetic Parameter Dataset (epsg.org)"
+  },
+  "BE": {
+   "name": "Belgium",
+   "horizontal": [
+    {
+     "epsg": 3812,
+     "role": "primary",
+     "token": "ETRS89",
+     "note": "ETRS89 / Belgian Lambert 2008"
+    },
+    {
+     "epsg": 31370,
+     "role": "legacy",
+     "token": "BD72",
+     "note": "BD72 / Belgian Lambert 72"
+    }
+   ],
+   "vertical": [
+    {
+     "epsg": 5710,
+     "token": "Ostend"
+    }
+   ],
+   "geoid": {
+    "name": "hBG18",
+    "proj_grid": null,
+    "licence": "national mapping agency; install separately"
+   },
+   "angle_unit": "dms",
+   "linear_unit": "m",
+   "source": "EPSG Geodetic Parameter Dataset (epsg.org)"
+  },
+  "NL": {
+   "name": "Netherlands",
+   "horizontal": [
+    {
+     "epsg": 28992,
+     "role": "primary",
+     "token": "Amersfoort",
+     "note": "Amersfoort / RD New"
+    }
+   ],
+   "vertical": [
+    {
+     "epsg": 5709,
+     "token": "NAP"
+    }
+   ],
+   "geoid": {
+    "name": "RDNAPTRANS",
+    "proj_grid": "nl_nsgi_nlgeo2018.tif",
+    "licence": "national mapping agency; install separately"
+   },
+   "angle_unit": "dms",
+   "linear_unit": "m",
+   "source": "EPSG Geodetic Parameter Dataset (epsg.org)"
+  },
+  "DK": {
+   "name": "Denmark",
+   "horizontal": [
+    {
+     "epsg": 25832,
+     "role": "primary",
+     "token": "ETRS89",
+     "note": "ETRS89 / UTM 32N"
+    },
+    {
+     "epsg": 25833,
+     "role": "primary",
+     "token": "ETRS89",
+     "note": "ETRS89 / UTM 33N"
+    }
+   ],
+   "vertical": [
+    {
+     "epsg": 5799,
+     "token": "DVR90"
+    }
+   ],
+   "geoid": {
+    "name": "DKgeoid",
+    "proj_grid": null,
+    "licence": "national mapping agency; install separately"
+   },
+   "angle_unit": "dms",
+   "linear_unit": "m",
+   "source": "EPSG Geodetic Parameter Dataset (epsg.org)"
+  },
+  "NO": {
+   "name": "Norway",
+   "horizontal": [
+    {
+     "epsg": 25832,
+     "role": "primary",
+     "token": "ETRS89",
+     "note": "ETRS89 / UTM 32N"
+    },
+    {
+     "epsg": 25833,
+     "role": "primary",
+     "token": "ETRS89",
+     "note": "ETRS89 / UTM 33N"
+    },
+    {
+     "epsg": 25835,
+     "role": "primary",
+     "token": "ETRS89",
+     "note": "ETRS89 / UTM 35N"
+    },
+    {
+     "epsg": 5105,
+     "role": "zone",
+     "token": "ETRS89-NOR [EUREF89]",
+     "note": "ETRS89 / NTM zones"
+    },
+    {
+     "epsg": 5106,
+     "role": "zone",
+     "token": "ETRS89-NOR [EUREF89]",
+     "note": "ETRS89 / NTM zones"
+    },
+    {
+     "epsg": 5107,
+     "role": "zone",
+     "token": "ETRS89-NOR [EUREF89]",
+     "note": "ETRS89 / NTM zones"
+    },
+    {
+     "epsg": 5108,
+     "role": "zone",
+     "token": "ETRS89-NOR [EUREF89]",
+     "note": "ETRS89 / NTM zones"
+    },
+    {
+     "epsg": 5109,
+     "role": "zone",
+     "token": "ETRS89-NOR [EUREF89]",
+     "note": "ETRS89 / NTM zones"
+    },
+    {
+     "epsg": 5110,
+     "role": "zone",
+     "token": "ETRS89-NOR [EUREF89]",
+     "note": "ETRS89 / NTM zones"
+    },
+    {
+     "epsg": 5111,
+     "role": "zone",
+     "token": "ETRS89-NOR [EUREF89]",
+     "note": "ETRS89 / NTM zones"
+    },
+    {
+     "epsg": 5112,
+     "role": "zone",
+     "token": "ETRS89-NOR [EUREF89]",
+     "note": "ETRS89 / NTM zones"
+    },
+    {
+     "epsg": 5113,
+     "role": "zone",
+     "token": "ETRS89-NOR [EUREF89]",
+     "note": "ETRS89 / NTM zones"
+    },
+    {
+     "epsg": 5114,
+     "role": "zone",
+     "token": "ETRS89-NOR [EUREF89]",
+     "note": "ETRS89 / NTM zones"
+    },
+    {
+     "epsg": 5115,
+     "role": "zone",
+     "token": "ETRS89-NOR [EUREF89]",
+     "note": "ETRS89 / NTM zones"
+    },
+    {
+     "epsg": 5116,
+     "role": "zone",
+     "token": "ETRS89-NOR [EUREF89]",
+     "note": "ETRS89 / NTM zones"
+    },
+    {
+     "epsg": 5117,
+     "role": "zone",
+     "token": "ETRS89-NOR [EUREF89]",
+     "note": "ETRS89 / NTM zones"
+    },
+    {
+     "epsg": 5118,
+     "role": "zone",
+     "token": "ETRS89-NOR [EUREF89]",
+     "note": "ETRS89 / NTM zones"
+    },
+    {
+     "epsg": 5119,
+     "role": "zone",
+     "token": "ETRS89-NOR [EUREF89]",
+     "note": "ETRS89 / NTM zones"
+    },
+    {
+     "epsg": 5120,
+     "role": "zone",
+     "token": "ETRS89-NOR [EUREF89]",
+     "note": "ETRS89 / NTM zones"
+    },
+    {
+     "epsg": 5121,
+     "role": "zone",
+     "token": "ETRS89-NOR [EUREF89]",
+     "note": "ETRS89 / NTM zones"
+    },
+    {
+     "epsg": 5122,
+     "role": "zone",
+     "token": "ETRS89-NOR [EUREF89]",
+     "note": "ETRS89 / NTM zones"
+    },
+    {
+     "epsg": 5123,
+     "role": "zone",
+     "token": "ETRS89-NOR [EUREF89]",
+     "note": "ETRS89 / NTM zones"
+    },
+    {
+     "epsg": 5124,
+     "role": "zone",
+     "token": "ETRS89-NOR [EUREF89]",
+     "note": "ETRS89 / NTM zones"
+    },
+    {
+     "epsg": 5125,
+     "role": "zone",
+     "token": "ETRS89-NOR [EUREF89]",
+     "note": "ETRS89 / NTM zones"
+    },
+    {
+     "epsg": 5126,
+     "role": "zone",
+     "token": "ETRS89-NOR [EUREF89]",
+     "note": "ETRS89 / NTM zones"
+    },
+    {
+     "epsg": 5127,
+     "role": "zone",
+     "token": "ETRS89-NOR [EUREF89]",
+     "note": "ETRS89 / NTM zones"
+    },
+    {
+     "epsg": 5128,
+     "role": "zone",
+     "token": "ETRS89-NOR [EUREF89]",
+     "note": "ETRS89 / NTM zones"
+    },
+    {
+     "epsg": 5129,
+     "role": "zone",
+     "token": "ETRS89-NOR [EUREF89]",
+     "note": "ETRS89 / NTM zones"
+    },
+    {
+     "epsg": 5130,
+     "role": "zone",
+     "token": "ETRS89-NOR [EUREF89]",
+     "note": "ETRS89 / NTM zones"
+    }
+   ],
+   "vertical": [
+    {
+     "epsg": 5941,
+     "token": "NN2000"
+    }
+   ],
+   "geoid": {
+    "name": "HREF",
+    "proj_grid": null,
+    "licence": "national mapping agency; install separately"
+   },
+   "angle_unit": "dms",
+   "linear_unit": "m",
+   "source": "EPSG Geodetic Parameter Dataset (epsg.org)"
+  },
+  "SE": {
+   "name": "Sweden",
+   "horizontal": [
+    {
+     "epsg": 3006,
+     "role": "primary",
+     "token": "SWEREF99 TM",
+     "note": "SWEREF99 TM"
+    },
+    {
+     "epsg": 3007,
+     "role": "zone",
+     "token": "SWEREF99 12 00",
+     "note": "SWEREF99 local zones"
+    },
+    {
+     "epsg": 3008,
+     "role": "zone",
+     "token": "SWEREF99 13 30",
+     "note": "SWEREF99 local zones"
+    },
+    {
+     "epsg": 3009,
+     "role": "zone",
+     "token": "SWEREF99 15 00",
+     "note": "SWEREF99 local zones"
+    },
+    {
+     "epsg": 3010,
+     "role": "zone",
+     "token": "SWEREF99 16 30",
+     "note": "SWEREF99 local zones"
+    },
+    {
+     "epsg": 3011,
+     "role": "zone",
+     "token": "SWEREF99 18 00",
+     "note": "SWEREF99 local zones"
+    },
+    {
+     "epsg": 3012,
+     "role": "zone",
+     "token": "SWEREF99 14 15",
+     "note": "SWEREF99 local zones"
+    },
+    {
+     "epsg": 3013,
+     "role": "zone",
+     "token": "SWEREF99 15 45",
+     "note": "SWEREF99 local zones"
+    },
+    {
+     "epsg": 3014,
+     "role": "zone",
+     "token": "SWEREF99 17 15",
+     "note": "SWEREF99 local zones"
+    },
+    {
+     "epsg": 3015,
+     "role": "zone",
+     "token": "SWEREF99 18 45",
+     "note": "SWEREF99 local zones"
+    },
+    {
+     "epsg": 3016,
+     "role": "zone",
+     "token": "SWEREF99 20 15",
+     "note": "SWEREF99 local zones"
+    },
+    {
+     "epsg": 3017,
+     "role": "zone",
+     "token": "SWEREF99 21 45",
+     "note": "SWEREF99 local zones"
+    },
+    {
+     "epsg": 3018,
+     "role": "zone",
+     "token": "SWEREF99 23 15",
+     "note": "SWEREF99 local zones"
+    },
+    {
+     "epsg": 3021,
+     "role": "legacy",
+     "token": "RT90 2.5 gon V",
+     "note": "RT90 2.5 gon V"
+    }
+   ],
+   "vertical": [
+    {
+     "epsg": 5613,
+     "token": "RH2000"
+    }
+   ],
+   "geoid": {
+    "name": "SWEN17",
+    "proj_grid": null,
+    "licence": "national mapping agency; install separately"
+   },
+   "angle_unit": "dms",
+   "linear_unit": "m",
+   "source": "EPSG Geodetic Parameter Dataset (epsg.org)"
+  },
+  "PL": {
+   "name": "Poland",
+   "horizontal": [
+    {
+     "epsg": 2180,
+     "role": "primary",
+     "token": "ETRF2000-PL",
+     "note": "PL-1992 (CS92)"
+    },
+    {
+     "epsg": 2176,
+     "role": "zone",
+     "token": "ETRF2000-PL",
+     "note": "PL-2000 zones"
+    },
+    {
+     "epsg": 2177,
+     "role": "zone",
+     "token": "ETRF2000-PL",
+     "note": "PL-2000 zones"
+    },
+    {
+     "epsg": 2178,
+     "role": "zone",
+     "token": "ETRF2000-PL",
+     "note": "PL-2000 zones"
+    },
+    {
+     "epsg": 2179,
+     "role": "zone",
+     "token": "ETRF2000-PL",
+     "note": "PL-2000 zones"
+    }
+   ],
+   "vertical": [
+    {
+     "epsg": 9651,
+     "token": "EVRF2007-PL"
+    }
+   ],
+   "geoid": {
+    "name": "PL-geoid2021",
+    "proj_grid": null,
+    "licence": "national mapping agency; install separately"
+   },
+   "angle_unit": "gon",
+   "linear_unit": "m",
+   "source": "EPSG Geodetic Parameter Dataset (epsg.org)"
+  },
+  "CZ": {
+   "name": "Czechia",
+   "horizontal": [
+    {
+     "epsg": 5514,
+     "role": "primary",
+     "token": "S-JTSK",
+     "note": "S-JTSK / Krovak East North"
+    }
+   ],
+   "vertical": [
+    {
+     "epsg": 8357,
+     "token": "Baltic 1957"
+    }
+   ],
+   "geoid": null,
+   "angle_unit": "gon",
+   "linear_unit": "m",
+   "source": "EPSG Geodetic Parameter Dataset (epsg.org)"
+  },
+  "HU": {
+   "name": "Hungary",
+   "horizontal": [
+    {
+     "epsg": 23700,
+     "role": "primary",
+     "token": "HD72",
+     "note": "HD72 / EOV"
+    }
+   ],
+   "vertical": [
+    {
+     "epsg": 5787,
+     "token": "EOMA 1980"
+    }
+   ],
+   "geoid": null,
+   "angle_unit": "dms",
+   "linear_unit": "m",
+   "source": "EPSG Geodetic Parameter Dataset (epsg.org)"
+  },
+  "HR": {
+   "name": "Croatia",
+   "horizontal": [
+    {
+     "epsg": 3765,
+     "role": "primary",
+     "token": "HTRS96",
+     "note": "HTRS96 / Croatia TM"
+    }
+   ],
+   "vertical": [
+    {
+     "epsg": 5610,
+     "token": "HVRS71"
+    }
+   ],
+   "geoid": {
+    "name": "HRG2009",
+    "proj_grid": null,
+    "licence": "national mapping agency; install separately"
+   },
+   "angle_unit": "dms",
+   "linear_unit": "m",
+   "source": "EPSG Geodetic Parameter Dataset (epsg.org)"
+  },
+  "RO": {
+   "name": "Romania",
+   "horizontal": [
+    {
+     "epsg": 3844,
+     "role": "primary",
+     "token": "Pulkovo 1942(58)",
+     "note": "Stereo70"
+    }
+   ],
+   "vertical": [
+    {
+     "epsg": 5781,
+     "token": "Constanta"
+    }
+   ],
+   "geoid": null,
+   "angle_unit": "dms",
+   "linear_unit": "m",
+   "source": "EPSG Geodetic Parameter Dataset (epsg.org)"
+  },
+  "GR": {
+   "name": "Greece",
+   "horizontal": [
+    {
+     "epsg": 2100,
+     "role": "primary",
+     "token": "GGRS87",
+     "note": "GGRS87 / Greek Grid"
+    }
+   ],
+   "vertical": [],
+   "geoid": null,
+   "angle_unit": "dms",
+   "linear_unit": "m",
+   "source": "EPSG Geodetic Parameter Dataset (epsg.org)"
+  },
+  "IT": {
+   "name": "Italy",
+   "horizontal": [
+    {
+     "epsg": 7791,
+     "role": "primary",
+     "token": "RDN2008",
+     "note": "RDN2008 / UTM 32-34N"
+    },
+    {
+     "epsg": 7792,
+     "role": "primary",
+     "token": "RDN2008",
+     "note": "RDN2008 / UTM 32-34N"
+    },
+    {
+     "epsg": 7793,
+     "role": "primary",
+     "token": "RDN2008",
+     "note": "RDN2008 / UTM 32-34N"
+    },
+    {
+     "epsg": 6875,
+     "role": "primary",
+     "token": "RDN2008",
+     "note": "RDN2008 / Italy zone"
+    },
+    {
+     "epsg": 3003,
+     "role": "legacy",
+     "token": "Monte Mario",
+     "note": "Monte Mario / Gauss-Boaga zone 1"
+    },
+    {
+     "epsg": 3004,
+     "role": "legacy",
+     "token": "Monte Mario",
+     "note": "Monte Mario / Gauss-Boaga zone 2"
+    }
+   ],
+   "vertical": [
+    {
+     "epsg": 5214,
+     "token": "Genoa 1942"
+    }
+   ],
+   "geoid": {
+    "name": "ITALGEO",
+    "proj_grid": null,
+    "licence": "national mapping agency; install separately"
+   },
+   "angle_unit": "dms",
+   "linear_unit": "m",
+   "source": "EPSG Geodetic Parameter Dataset (epsg.org)"
+  },
+  "ES": {
+   "name": "Spain",
+   "horizontal": [
+    {
+     "epsg": 25829,
+     "role": "primary",
+     "token": "ETRS89",
+     "note": "ETRS89 / UTM 29-31N"
+    },
+    {
+     "epsg": 25830,
+     "role": "primary",
+     "token": "ETRS89",
+     "note": "ETRS89 / UTM 29-31N"
+    },
+    {
+     "epsg": 25831,
+     "role": "primary",
+     "token": "ETRS89",
+     "note": "ETRS89 / UTM 29-31N"
+    },
+    {
+     "epsg": 4082,
+     "role": "zone",
+     "token": "REGCAN95",
+     "note": "REGCAN95 / UTM 27N (Canary Islands)"
+    },
+    {
+     "epsg": 4083,
+     "role": "zone",
+     "token": "REGCAN95",
+     "note": "REGCAN95 / UTM 28N (Canary Islands)"
+    },
+    {
+     "epsg": 23029,
+     "role": "legacy",
+     "token": "ED50",
+     "note": "ED50 / UTM"
+    },
+    {
+     "epsg": 23030,
+     "role": "legacy",
+     "token": "ED50",
+     "note": "ED50 / UTM"
+    },
+    {
+     "epsg": 23031,
+     "role": "legacy",
+     "token": "ED50",
+     "note": "ED50 / UTM"
+    }
+   ],
+   "vertical": [
+    {
+     "epsg": 5782,
+     "token": "Alicante"
+    }
+   ],
+   "geoid": {
+    "name": "EGM08-REDNAP",
+    "proj_grid": null,
+    "licence": "national mapping agency; install separately"
+   },
+   "angle_unit": "dms",
+   "linear_unit": "m",
+   "source": "EPSG Geodetic Parameter Dataset (epsg.org)"
+  },
+  "PT": {
+   "name": "Portugal",
+   "horizontal": [
+    {
+     "epsg": 3763,
+     "role": "primary",
+     "token": "ETRS89",
+     "note": "ETRS89 / PT-TM06"
+    }
+   ],
+   "vertical": [
+    {
+     "epsg": 5780,
+     "token": "Cascais"
+    }
+   ],
+   "geoid": null,
+   "angle_unit": "dms",
+   "linear_unit": "m",
+   "source": "EPSG Geodetic Parameter Dataset (epsg.org)"
+  },
+  "IE": {
+   "name": "Ireland",
+   "horizontal": [
+    {
+     "epsg": 2157,
+     "role": "primary",
+     "token": "IRENET95",
+     "note": "Irish Transverse Mercator"
+    },
+    {
+     "epsg": 29903,
+     "role": "legacy",
+     "token": "TM75",
+     "note": "Irish Grid"
+    }
+   ],
+   "vertical": [
+    {
+     "epsg": 5731,
+     "token": "Malin Head"
+    }
+   ],
+   "geoid": {
+    "name": "OSGM15",
+    "proj_grid": "uk_os_OSGM15_Malin.tif",
+    "licence": "national mapping agency; install separately"
+   },
+   "angle_unit": "dms",
+   "linear_unit": "m",
+   "source": "EPSG Geodetic Parameter Dataset (epsg.org)"
+  },
+  "GB": {
+   "name": "United Kingdom",
+   "horizontal": [
+    {
+     "epsg": 27700,
+     "role": "primary",
+     "token": "OSGB36",
+     "note": "OSGB36 / British National Grid (via OSTN15)"
+    }
+   ],
+   "vertical": [
+    {
+     "epsg": 5701,
+     "token": "ODN"
+    }
+   ],
+   "geoid": {
+    "name": "OSGM15",
+    "proj_grid": "uk_os_OSGM15_GB.tif",
+    "licence": "national mapping agency; install separately"
+   },
+   "angle_unit": "dms",
+   "linear_unit": "m",
+   "source": "EPSG Geodetic Parameter Dataset (epsg.org)"
+  },
+  "RU": {
+   "name": "Russia",
+   "horizontal": [
+    {
+     "epsg": 28404,
+     "role": "primary",
+     "token": "Pulkovo 1942",
+     "note": "Pulkovo 1942 / Gauss-Krueger zones; MSK local systems as a user-entered local grid"
+    },
+    {
+     "epsg": 28405,
+     "role": "primary",
+     "token": "Pulkovo 1942",
+     "note": "Pulkovo 1942 / Gauss-Krueger zones; MSK local systems as a user-entered local grid"
+    },
+    {
+     "epsg": 28406,
+     "role": "primary",
+     "token": "Pulkovo 1942",
+     "note": "Pulkovo 1942 / Gauss-Krueger zones; MSK local systems as a user-entered local grid"
+    },
+    {
+     "epsg": 28407,
+     "role": "primary",
+     "token": "Pulkovo 1942",
+     "note": "Pulkovo 1942 / Gauss-Krueger zones; MSK local systems as a user-entered local grid"
+    },
+    {
+     "epsg": 28408,
+     "role": "primary",
+     "token": "Pulkovo 1942",
+     "note": "Pulkovo 1942 / Gauss-Krueger zones; MSK local systems as a user-entered local grid"
+    },
+    {
+     "epsg": 28409,
+     "role": "primary",
+     "token": "Pulkovo 1942",
+     "note": "Pulkovo 1942 / Gauss-Krueger zones; MSK local systems as a user-entered local grid"
+    },
+    {
+     "epsg": 28410,
+     "role": "primary",
+     "token": "Pulkovo 1942",
+     "note": "Pulkovo 1942 / Gauss-Krueger zones; MSK local systems as a user-entered local grid"
+    },
+    {
+     "epsg": 28411,
+     "role": "primary",
+     "token": "Pulkovo 1942",
+     "note": "Pulkovo 1942 / Gauss-Krueger zones; MSK local systems as a user-entered local grid"
+    },
+    {
+     "epsg": 28412,
+     "role": "primary",
+     "token": "Pulkovo 1942",
+     "note": "Pulkovo 1942 / Gauss-Krueger zones; MSK local systems as a user-entered local grid"
+    },
+    {
+     "epsg": 28413,
+     "role": "primary",
+     "token": "Pulkovo 1942",
+     "note": "Pulkovo 1942 / Gauss-Krueger zones; MSK local systems as a user-entered local grid"
+    },
+    {
+     "epsg": 28414,
+     "role": "primary",
+     "token": "Pulkovo 1942",
+     "note": "Pulkovo 1942 / Gauss-Krueger zones; MSK local systems as a user-entered local grid"
+    },
+    {
+     "epsg": 28415,
+     "role": "primary",
+     "token": "Pulkovo 1942",
+     "note": "Pulkovo 1942 / Gauss-Krueger zones; MSK local systems as a user-entered local grid"
+    },
+    {
+     "epsg": 28416,
+     "role": "primary",
+     "token": "Pulkovo 1942",
+     "note": "Pulkovo 1942 / Gauss-Krueger zones; MSK local systems as a user-entered local grid"
+    },
+    {
+     "epsg": 28417,
+     "role": "primary",
+     "token": "Pulkovo 1942",
+     "note": "Pulkovo 1942 / Gauss-Krueger zones; MSK local systems as a user-entered local grid"
+    },
+    {
+     "epsg": 28418,
+     "role": "primary",
+     "token": "Pulkovo 1942",
+     "note": "Pulkovo 1942 / Gauss-Krueger zones; MSK local systems as a user-entered local grid"
+    },
+    {
+     "epsg": 28419,
+     "role": "primary",
+     "token": "Pulkovo 1942",
+     "note": "Pulkovo 1942 / Gauss-Krueger zones; MSK local systems as a user-entered local grid"
+    },
+    {
+     "epsg": 28420,
+     "role": "primary",
+     "token": "Pulkovo 1942",
+     "note": "Pulkovo 1942 / Gauss-Krueger zones; MSK local systems as a user-entered local grid"
+    },
+    {
+     "epsg": 28421,
+     "role": "primary",
+     "token": "Pulkovo 1942",
+     "note": "Pulkovo 1942 / Gauss-Krueger zones; MSK local systems as a user-entered local grid"
+    },
+    {
+     "epsg": 28422,
+     "role": "primary",
+     "token": "Pulkovo 1942",
+     "note": "Pulkovo 1942 / Gauss-Krueger zones; MSK local systems as a user-entered local grid"
+    },
+    {
+     "epsg": 28423,
+     "role": "primary",
+     "token": "Pulkovo 1942",
+     "note": "Pulkovo 1942 / Gauss-Krueger zones; MSK local systems as a user-entered local grid"
+    },
+    {
+     "epsg": 28424,
+     "role": "primary",
+     "token": "Pulkovo 1942",
+     "note": "Pulkovo 1942 / Gauss-Krueger zones; MSK local systems as a user-entered local grid"
+    },
+    {
+     "epsg": 28425,
+     "role": "primary",
+     "token": "Pulkovo 1942",
+     "note": "Pulkovo 1942 / Gauss-Krueger zones; MSK local systems as a user-entered local grid"
+    },
+    {
+     "epsg": 28426,
+     "role": "primary",
+     "token": "Pulkovo 1942",
+     "note": "Pulkovo 1942 / Gauss-Krueger zones; MSK local systems as a user-entered local grid"
+    },
+    {
+     "epsg": 28427,
+     "role": "primary",
+     "token": "Pulkovo 1942",
+     "note": "Pulkovo 1942 / Gauss-Krueger zones; MSK local systems as a user-entered local grid"
+    },
+    {
+     "epsg": 28428,
+     "role": "primary",
+     "token": "Pulkovo 1942",
+     "note": "Pulkovo 1942 / Gauss-Krueger zones; MSK local systems as a user-entered local grid"
+    },
+    {
+     "epsg": 28429,
+     "role": "primary",
+     "token": "Pulkovo 1942",
+     "note": "Pulkovo 1942 / Gauss-Krueger zones; MSK local systems as a user-entered local grid"
+    },
+    {
+     "epsg": 28430,
+     "role": "primary",
+     "token": "Pulkovo 1942",
+     "note": "Pulkovo 1942 / Gauss-Krueger zones; MSK local systems as a user-entered local grid"
+    },
+    {
+     "epsg": 28431,
+     "role": "primary",
+     "token": "Pulkovo 1942",
+     "note": "Pulkovo 1942 / Gauss-Krueger zones; MSK local systems as a user-entered local grid"
+    },
+    {
+     "epsg": 28432,
+     "role": "primary",
+     "token": "Pulkovo 1942",
+     "note": "Pulkovo 1942 / Gauss-Krueger zones; MSK local systems as a user-entered local grid"
+    }
+   ],
+   "vertical": [
+    {
+     "epsg": 5705,
+     "token": "Baltic 1977"
+    }
+   ],
+   "geoid": null,
+   "angle_unit": "gon",
+   "linear_unit": "m",
+   "source": "EPSG Geodetic Parameter Dataset (epsg.org)"
+  },
+  "UA": {
+   "name": "Ukraine",
+   "horizontal": [
+    {
+     "epsg": 5562,
+     "role": "primary",
+     "token": "UCS-2000",
+     "note": "UCS-2000 / Gauss-Krueger zones; SK-63 as a local grid"
+    },
+    {
+     "epsg": 5563,
+     "role": "primary",
+     "token": "UCS-2000",
+     "note": "UCS-2000 / Gauss-Krueger zones; SK-63 as a local grid"
+    },
+    {
+     "epsg": 5564,
+     "role": "primary",
+     "token": "UCS-2000",
+     "note": "UCS-2000 / Gauss-Krueger zones; SK-63 as a local grid"
+    },
+    {
+     "epsg": 5565,
+     "role": "primary",
+     "token": "UCS-2000",
+     "note": "UCS-2000 / Gauss-Krueger zones; SK-63 as a local grid"
+    }
+   ],
+   "vertical": [
+    {
+     "epsg": 5705,
+     "token": "Baltic 1977"
+    }
+   ],
+   "geoid": null,
+   "angle_unit": "gon",
+   "linear_unit": "m",
+   "source": "EPSG Geodetic Parameter Dataset (epsg.org)"
+  },
+  "TR": {
+   "name": "Turkey",
+   "horizontal": [
+    {
+     "epsg": 5253,
+     "role": "primary",
+     "token": "TUREF",
+     "note": "TUREF / TM 3-degree zones"
+    },
+    {
+     "epsg": 5254,
+     "role": "primary",
+     "token": "TUREF",
+     "note": "TUREF / TM 3-degree zones"
+    },
+    {
+     "epsg": 5255,
+     "role": "primary",
+     "token": "TUREF",
+     "note": "TUREF / TM 3-degree zones"
+    },
+    {
+     "epsg": 5256,
+     "role": "primary",
+     "token": "TUREF",
+     "note": "TUREF / TM 3-degree zones"
+    },
+    {
+     "epsg": 5257,
+     "role": "primary",
+     "token": "TUREF",
+     "note": "TUREF / TM 3-degree zones"
+    },
+    {
+     "epsg": 5258,
+     "role": "primary",
+     "token": "TUREF",
+     "note": "TUREF / TM 3-degree zones"
+    },
+    {
+     "epsg": 5259,
+     "role": "primary",
+     "token": "TUREF",
+     "note": "TUREF / TM 3-degree zones"
+    },
+    {
+     "epsg": 2319,
+     "role": "legacy",
+     "token": "ED50",
+     "note": "ED50 / TM 3-degree zones"
+    },
+    {
+     "epsg": 2320,
+     "role": "legacy",
+     "token": "ED50",
+     "note": "ED50 / TM 3-degree zones"
+    },
+    {
+     "epsg": 2321,
+     "role": "legacy",
+     "token": "ED50",
+     "note": "ED50 / TM 3-degree zones"
+    },
+    {
+     "epsg": 2322,
+     "role": "legacy",
+     "token": "ED50",
+     "note": "ED50 / TM 3-degree zones"
+    },
+    {
+     "epsg": 2323,
+     "role": "legacy",
+     "token": "ED50",
+     "note": "ED50 / TM 3-degree zones"
+    },
+    {
+     "epsg": 2324,
+     "role": "legacy",
+     "token": "ED50",
+     "note": "ED50 / TM 3-degree zones"
+    },
+    {
+     "epsg": 2325,
+     "role": "legacy",
+     "token": "ED50",
+     "note": "ED50 / TM 3-degree zones"
+    }
+   ],
+   "vertical": [],
+   "geoid": null,
+   "angle_unit": "dms",
+   "linear_unit": "m",
+   "source": "EPSG Geodetic Parameter Dataset (epsg.org)"
+  },
+  "US": {
+   "name": "United States",
+   "horizontal": [
+    {
+     "epsg": 26910,
+     "role": "primary",
+     "token": "NAD83",
+     "note": "NAD83 / UTM 10-19N; State Plane by search"
+    },
+    {
+     "epsg": 26911,
+     "role": "primary",
+     "token": "NAD83",
+     "note": "NAD83 / UTM 10-19N; State Plane by search"
+    },
+    {
+     "epsg": 26912,
+     "role": "primary",
+     "token": "NAD83",
+     "note": "NAD83 / UTM 10-19N; State Plane by search"
+    },
+    {
+     "epsg": 26913,
+     "role": "primary",
+     "token": "NAD83",
+     "note": "NAD83 / UTM 10-19N; State Plane by search"
+    },
+    {
+     "epsg": 26914,
+     "role": "primary",
+     "token": "NAD83",
+     "note": "NAD83 / UTM 10-19N; State Plane by search"
+    },
+    {
+     "epsg": 26915,
+     "role": "primary",
+     "token": "NAD83",
+     "note": "NAD83 / UTM 10-19N; State Plane by search"
+    },
+    {
+     "epsg": 26916,
+     "role": "primary",
+     "token": "NAD83",
+     "note": "NAD83 / UTM 10-19N; State Plane by search"
+    },
+    {
+     "epsg": 26917,
+     "role": "primary",
+     "token": "NAD83",
+     "note": "NAD83 / UTM 10-19N; State Plane by search"
+    },
+    {
+     "epsg": 26918,
+     "role": "primary",
+     "token": "NAD83",
+     "note": "NAD83 / UTM 10-19N; State Plane by search"
+    },
+    {
+     "epsg": 26919,
+     "role": "primary",
+     "token": "NAD83",
+     "note": "NAD83 / UTM 10-19N; State Plane by search"
+    },
+    {
+     "epsg": 26941,
+     "role": "zone",
+     "token": "NAD83",
+     "note": "NAD83 / California zones (m)"
+    },
+    {
+     "epsg": 26942,
+     "role": "zone",
+     "token": "NAD83",
+     "note": "NAD83 / California zones (m)"
+    },
+    {
+     "epsg": 26943,
+     "role": "zone",
+     "token": "NAD83",
+     "note": "NAD83 / California zones (m)"
+    },
+    {
+     "epsg": 26944,
+     "role": "zone",
+     "token": "NAD83",
+     "note": "NAD83 / California zones (m)"
+    },
+    {
+     "epsg": 26945,
+     "role": "zone",
+     "token": "NAD83",
+     "note": "NAD83 / California zones (m)"
+    },
+    {
+     "epsg": 26946,
+     "role": "zone",
+     "token": "NAD83",
+     "note": "NAD83 / California zones (m)"
+    },
+    {
+     "epsg": 2225,
+     "role": "zone",
+     "token": "NAD83",
+     "note": "NAD83 / California zones (ftUS)"
+    },
+    {
+     "epsg": 2226,
+     "role": "zone",
+     "token": "NAD83",
+     "note": "NAD83 / California zones (ftUS)"
+    },
+    {
+     "epsg": 2227,
+     "role": "zone",
+     "token": "NAD83",
+     "note": "NAD83 / California zones (ftUS)"
+    },
+    {
+     "epsg": 2228,
+     "role": "zone",
+     "token": "NAD83",
+     "note": "NAD83 / California zones (ftUS)"
+    },
+    {
+     "epsg": 2229,
+     "role": "zone",
+     "token": "NAD83",
+     "note": "NAD83 / California zones (ftUS)"
+    },
+    {
+     "epsg": 2230,
+     "role": "zone",
+     "token": "NAD83",
+     "note": "NAD83 / California zones (ftUS)"
+    },
+    {
+     "epsg": 32137,
+     "role": "zone",
+     "token": "NAD83",
+     "note": "NAD83 / Texas zones (m)"
+    },
+    {
+     "epsg": 32138,
+     "role": "zone",
+     "token": "NAD83",
+     "note": "NAD83 / Texas zones (m)"
+    },
+    {
+     "epsg": 32139,
+     "role": "zone",
+     "token": "NAD83",
+     "note": "NAD83 / Texas zones (m)"
+    },
+    {
+     "epsg": 32140,
+     "role": "zone",
+     "token": "NAD83",
+     "note": "NAD83 / Texas zones (m)"
+    },
+    {
+     "epsg": 32141,
+     "role": "zone",
+     "token": "NAD83",
+     "note": "NAD83 / Texas zones (m)"
+    },
+    {
+     "epsg": 2275,
+     "role": "zone",
+     "token": "NAD83",
+     "note": "NAD83 / Texas zones (ftUS)"
+    },
+    {
+     "epsg": 2276,
+     "role": "zone",
+     "token": "NAD83",
+     "note": "NAD83 / Texas zones (ftUS)"
+    },
+    {
+     "epsg": 2277,
+     "role": "zone",
+     "token": "NAD83",
+     "note": "NAD83 / Texas zones (ftUS)"
+    },
+    {
+     "epsg": 2278,
+     "role": "zone",
+     "token": "NAD83",
+     "note": "NAD83 / Texas zones (ftUS)"
+    },
+    {
+     "epsg": 2279,
+     "role": "zone",
+     "token": "NAD83",
+     "note": "NAD83 / Texas zones (ftUS)"
+    }
+   ],
+   "vertical": [
+    {
+     "epsg": 5703,
+     "token": "NAVD88"
+    },
+    {
+     "epsg": 6360,
+     "token": "NAVD88"
+    }
+   ],
+   "geoid": {
+    "name": "GEOID18",
+    "proj_grid": "us_noaa_g2018u0.tif",
+    "licence": "national mapping agency; install separately"
+   },
+   "angle_unit": "dms",
+   "linear_unit": "ftUS",
+   "source": "EPSG Geodetic Parameter Dataset (epsg.org)"
+  },
+  "CA": {
+   "name": "Canada",
+   "horizontal": [
+    {
+     "epsg": 2955,
+     "role": "primary",
+     "token": "NAD83(CSRS)",
+     "note": "NAD83(CSRS) / UTM"
+    },
+    {
+     "epsg": 2956,
+     "role": "primary",
+     "token": "NAD83(CSRS)",
+     "note": "NAD83(CSRS) / UTM"
+    },
+    {
+     "epsg": 2957,
+     "role": "primary",
+     "token": "NAD83(CSRS)",
+     "note": "NAD83(CSRS) / UTM"
+    },
+    {
+     "epsg": 2958,
+     "role": "primary",
+     "token": "NAD83(CSRS)",
+     "note": "NAD83(CSRS) / UTM"
+    },
+    {
+     "epsg": 2959,
+     "role": "primary",
+     "token": "NAD83(CSRS)",
+     "note": "NAD83(CSRS) / UTM"
+    },
+    {
+     "epsg": 2960,
+     "role": "primary",
+     "token": "NAD83(CSRS)",
+     "note": "NAD83(CSRS) / UTM"
+    },
+    {
+     "epsg": 2961,
+     "role": "primary",
+     "token": "NAD83(CSRS)",
+     "note": "NAD83(CSRS) / UTM"
+    },
+    {
+     "epsg": 2962,
+     "role": "primary",
+     "token": "NAD83(CSRS)",
+     "note": "NAD83(CSRS) / UTM"
+    },
+    {
+     "epsg": 3154,
+     "role": "primary",
+     "token": "NAD83(CSRS)",
+     "note": "NAD83(CSRS) / UTM"
+    },
+    {
+     "epsg": 3155,
+     "role": "primary",
+     "token": "NAD83(CSRS)",
+     "note": "NAD83(CSRS) / UTM"
+    },
+    {
+     "epsg": 3156,
+     "role": "primary",
+     "token": "NAD83(CSRS)",
+     "note": "NAD83(CSRS) / UTM"
+    },
+    {
+     "epsg": 3157,
+     "role": "primary",
+     "token": "NAD83(CSRS)",
+     "note": "NAD83(CSRS) / UTM"
+    },
+    {
+     "epsg": 3158,
+     "role": "primary",
+     "token": "NAD83(CSRS)",
+     "note": "NAD83(CSRS) / UTM"
+    },
+    {
+     "epsg": 3159,
+     "role": "primary",
+     "token": "NAD83(CSRS)",
+     "note": "NAD83(CSRS) / UTM"
+    },
+    {
+     "epsg": 3160,
+     "role": "primary",
+     "token": "NAD83(CSRS)",
+     "note": "NAD83(CSRS) / UTM"
+    },
+    {
+     "epsg": 32181,
+     "role": "zone",
+     "token": "NAD83",
+     "note": "NAD83 / MTM zones (Quebec)"
+    },
+    {
+     "epsg": 32182,
+     "role": "zone",
+     "token": "NAD83",
+     "note": "NAD83 / MTM zones (Quebec)"
+    },
+    {
+     "epsg": 32183,
+     "role": "zone",
+     "token": "NAD83",
+     "note": "NAD83 / MTM zones (Quebec)"
+    },
+    {
+     "epsg": 32184,
+     "role": "zone",
+     "token": "NAD83",
+     "note": "NAD83 / MTM zones (Quebec)"
+    },
+    {
+     "epsg": 32185,
+     "role": "zone",
+     "token": "NAD83",
+     "note": "NAD83 / MTM zones (Quebec)"
+    },
+    {
+     "epsg": 32186,
+     "role": "zone",
+     "token": "NAD83",
+     "note": "NAD83 / MTM zones (Quebec)"
+    },
+    {
+     "epsg": 32187,
+     "role": "zone",
+     "token": "NAD83",
+     "note": "NAD83 / MTM zones (Quebec)"
+    },
+    {
+     "epsg": 32188,
+     "role": "zone",
+     "token": "NAD83",
+     "note": "NAD83 / MTM zones (Quebec)"
+    },
+    {
+     "epsg": 32189,
+     "role": "zone",
+     "token": "NAD83",
+     "note": "NAD83 / MTM zones (Quebec)"
+    },
+    {
+     "epsg": 32190,
+     "role": "zone",
+     "token": "NAD83",
+     "note": "NAD83 / MTM zones (Quebec)"
+    }
+   ],
+   "vertical": [
+    {
+     "epsg": 6647,
+     "token": "CGVD2013(CGG2013)"
+    }
+   ],
+   "geoid": {
+    "name": "CGG2013a",
+    "proj_grid": "ca_nrc_CGG2013an83.tif",
+    "licence": "national mapping agency; install separately"
+   },
+   "angle_unit": "dms",
+   "linear_unit": "m",
+   "source": "EPSG Geodetic Parameter Dataset (epsg.org)"
+  },
+  "MX": {
+   "name": "Mexico",
+   "horizontal": [
+    {
+     "epsg": 6372,
+     "role": "primary",
+     "token": "Mexico ITRF2008",
+     "note": "Mexico ITRF2008 / LCC"
+    },
+    {
+     "epsg": 6366,
+     "role": "zone",
+     "token": "Mexico ITRF2008",
+     "note": "Mexico ITRF2008 / UTM 11-16N"
+    },
+    {
+     "epsg": 6367,
+     "role": "zone",
+     "token": "Mexico ITRF2008",
+     "note": "Mexico ITRF2008 / UTM 11-16N"
+    },
+    {
+     "epsg": 6368,
+     "role": "zone",
+     "token": "Mexico ITRF2008",
+     "note": "Mexico ITRF2008 / UTM 11-16N"
+    },
+    {
+     "epsg": 6369,
+     "role": "zone",
+     "token": "Mexico ITRF2008",
+     "note": "Mexico ITRF2008 / UTM 11-16N"
+    },
+    {
+     "epsg": 6370,
+     "role": "zone",
+     "token": "Mexico ITRF2008",
+     "note": "Mexico ITRF2008 / UTM 11-16N"
+    },
+    {
+     "epsg": 6371,
+     "role": "zone",
+     "token": "Mexico ITRF2008",
+     "note": "Mexico ITRF2008 / UTM 11-16N"
+    }
+   ],
+   "vertical": [],
+   "geoid": {
+    "name": "GGM10",
+    "proj_grid": null,
+    "licence": "national mapping agency; install separately"
+   },
+   "angle_unit": "dms",
+   "linear_unit": "m",
+   "source": "EPSG Geodetic Parameter Dataset (epsg.org)"
+  },
+  "BR": {
+   "name": "Brazil",
+   "horizontal": [
+    {
+     "epsg": 31978,
+     "role": "primary",
+     "token": "SIRGAS 2000",
+     "note": "SIRGAS 2000 / UTM 18-25S"
+    },
+    {
+     "epsg": 31979,
+     "role": "primary",
+     "token": "SIRGAS 2000",
+     "note": "SIRGAS 2000 / UTM 18-25S"
+    },
+    {
+     "epsg": 31980,
+     "role": "primary",
+     "token": "SIRGAS 2000",
+     "note": "SIRGAS 2000 / UTM 18-25S"
+    },
+    {
+     "epsg": 31981,
+     "role": "primary",
+     "token": "SIRGAS 2000",
+     "note": "SIRGAS 2000 / UTM 18-25S"
+    },
+    {
+     "epsg": 31982,
+     "role": "primary",
+     "token": "SIRGAS 2000",
+     "note": "SIRGAS 2000 / UTM 18-25S"
+    },
+    {
+     "epsg": 31983,
+     "role": "primary",
+     "token": "SIRGAS 2000",
+     "note": "SIRGAS 2000 / UTM 18-25S"
+    },
+    {
+     "epsg": 31984,
+     "role": "primary",
+     "token": "SIRGAS 2000",
+     "note": "SIRGAS 2000 / UTM 18-25S"
+    },
+    {
+     "epsg": 31985,
+     "role": "primary",
+     "token": "SIRGAS 2000",
+     "note": "SIRGAS 2000 / UTM 18-25S"
+    },
+    {
+     "epsg": 29190,
+     "role": "legacy",
+     "token": "SAD69",
+     "note": "SAD69 / UTM"
+    },
+    {
+     "epsg": 29191,
+     "role": "legacy",
+     "token": "SAD69",
+     "note": "SAD69 / UTM"
+    },
+    {
+     "epsg": 29192,
+     "role": "legacy",
+     "token": "SAD69",
+     "note": "SAD69 / UTM"
+    },
+    {
+     "epsg": 29193,
+     "role": "legacy",
+     "token": "SAD69",
+     "note": "SAD69 / UTM"
+    },
+    {
+     "epsg": 29194,
+     "role": "legacy",
+     "token": "SAD69",
+     "note": "SAD69 / UTM"
+    },
+    {
+     "epsg": 29195,
+     "role": "legacy",
+     "token": "SAD69",
+     "note": "SAD69 / UTM"
+    }
+   ],
+   "vertical": [],
+   "geoid": {
+    "name": "hgeoHNOR2020",
+    "proj_grid": null,
+    "licence": "national mapping agency; install separately"
+   },
+   "angle_unit": "dms",
+   "linear_unit": "m",
+   "source": "EPSG Geodetic Parameter Dataset (epsg.org)"
+  },
+  "PE": {
+   "name": "Peru",
+   "horizontal": [
+    {
+     "epsg": 32717,
+     "role": "primary",
+     "token": "WGS 84",
+     "note": "WGS 84 / UTM 17-19S"
+    },
+    {
+     "epsg": 32718,
+     "role": "primary",
+     "token": "WGS 84",
+     "note": "WGS 84 / UTM 17-19S"
+    },
+    {
+     "epsg": 32719,
+     "role": "primary",
+     "token": "WGS 84",
+     "note": "WGS 84 / UTM 17-19S"
+    },
+    {
+     "epsg": 24877,
+     "role": "legacy",
+     "token": "PSAD56",
+     "note": "PSAD56 / UTM"
+    },
+    {
+     "epsg": 24878,
+     "role": "legacy",
+     "token": "PSAD56",
+     "note": "PSAD56 / UTM"
+    },
+    {
+     "epsg": 24879,
+     "role": "legacy",
+     "token": "PSAD56",
+     "note": "PSAD56 / UTM"
+    }
+   ],
+   "vertical": [],
+   "geoid": null,
+   "angle_unit": "dms",
+   "linear_unit": "m",
+   "source": "EPSG Geodetic Parameter Dataset (epsg.org)"
+  },
+  "CL": {
+   "name": "Chile",
+   "horizontal": [
+    {
+     "epsg": 9154,
+     "role": "primary",
+     "token": "SIRGAS-Chile 2016",
+     "note": "SIRGAS-Chile 2016 / UTM 18S"
+    },
+    {
+     "epsg": 9155,
+     "role": "primary",
+     "token": "SIRGAS-Chile 2016",
+     "note": "SIRGAS-Chile 2016 / UTM 19S"
+    },
+    {
+     "epsg": 32718,
+     "role": "zone",
+     "token": "WGS 84",
+     "note": "WGS 84 / UTM 18S"
+    },
+    {
+     "epsg": 32719,
+     "role": "zone",
+     "token": "WGS 84",
+     "note": "WGS 84 / UTM 19S"
+    },
+    {
+     "epsg": 24878,
+     "role": "legacy",
+     "token": "PSAD56",
+     "note": "PSAD56 / UTM 18S"
+    },
+    {
+     "epsg": 24879,
+     "role": "legacy",
+     "token": "PSAD56",
+     "note": "PSAD56 / UTM 19S"
+    }
+   ],
+   "vertical": [],
+   "geoid": null,
+   "angle_unit": "dms",
+   "linear_unit": "m",
+   "source": "EPSG Geodetic Parameter Dataset (epsg.org)"
+  },
+  "CN": {
+   "name": "China",
+   "horizontal": [
+    {
+     "epsg": 4490,
+     "role": "primary",
+     "token": "China Geodetic Coordinate System 2000",
+     "note": "CGCS2000 geographic"
+    },
+    {
+     "epsg": 4513,
+     "role": "zone",
+     "token": "CGCS2000",
+     "note": "CGCS2000 / 3-degree Gauss-Krueger"
+    },
+    {
+     "epsg": 4514,
+     "role": "zone",
+     "token": "CGCS2000",
+     "note": "CGCS2000 / 3-degree Gauss-Krueger"
+    },
+    {
+     "epsg": 4515,
+     "role": "zone",
+     "token": "CGCS2000",
+     "note": "CGCS2000 / 3-degree Gauss-Krueger"
+    },
+    {
+     "epsg": 4516,
+     "role": "zone",
+     "token": "CGCS2000",
+     "note": "CGCS2000 / 3-degree Gauss-Krueger"
+    },
+    {
+     "epsg": 4517,
+     "role": "zone",
+     "token": "CGCS2000",
+     "note": "CGCS2000 / 3-degree Gauss-Krueger"
+    },
+    {
+     "epsg": 4518,
+     "role": "zone",
+     "token": "CGCS2000",
+     "note": "CGCS2000 / 3-degree Gauss-Krueger"
+    },
+    {
+     "epsg": 4519,
+     "role": "zone",
+     "token": "CGCS2000",
+     "note": "CGCS2000 / 3-degree Gauss-Krueger"
+    },
+    {
+     "epsg": 4520,
+     "role": "zone",
+     "token": "CGCS2000",
+     "note": "CGCS2000 / 3-degree Gauss-Krueger"
+    },
+    {
+     "epsg": 4521,
+     "role": "zone",
+     "token": "CGCS2000",
+     "note": "CGCS2000 / 3-degree Gauss-Krueger"
+    },
+    {
+     "epsg": 4522,
+     "role": "zone",
+     "token": "CGCS2000",
+     "note": "CGCS2000 / 3-degree Gauss-Krueger"
+    },
+    {
+     "epsg": 4523,
+     "role": "zone",
+     "token": "CGCS2000",
+     "note": "CGCS2000 / 3-degree Gauss-Krueger"
+    },
+    {
+     "epsg": 4524,
+     "role": "zone",
+     "token": "CGCS2000",
+     "note": "CGCS2000 / 3-degree Gauss-Krueger"
+    },
+    {
+     "epsg": 4525,
+     "role": "zone",
+     "token": "CGCS2000",
+     "note": "CGCS2000 / 3-degree Gauss-Krueger"
+    },
+    {
+     "epsg": 4526,
+     "role": "zone",
+     "token": "CGCS2000",
+     "note": "CGCS2000 / 3-degree Gauss-Krueger"
+    },
+    {
+     "epsg": 4527,
+     "role": "zone",
+     "token": "CGCS2000",
+     "note": "CGCS2000 / 3-degree Gauss-Krueger"
+    },
+    {
+     "epsg": 4528,
+     "role": "zone",
+     "token": "CGCS2000",
+     "note": "CGCS2000 / 3-degree Gauss-Krueger"
+    },
+    {
+     "epsg": 4529,
+     "role": "zone",
+     "token": "CGCS2000",
+     "note": "CGCS2000 / 3-degree Gauss-Krueger"
+    },
+    {
+     "epsg": 4530,
+     "role": "zone",
+     "token": "CGCS2000",
+     "note": "CGCS2000 / 3-degree Gauss-Krueger"
+    },
+    {
+     "epsg": 4531,
+     "role": "zone",
+     "token": "CGCS2000",
+     "note": "CGCS2000 / 3-degree Gauss-Krueger"
+    },
+    {
+     "epsg": 4532,
+     "role": "zone",
+     "token": "CGCS2000",
+     "note": "CGCS2000 / 3-degree Gauss-Krueger"
+    },
+    {
+     "epsg": 4533,
+     "role": "zone",
+     "token": "CGCS2000",
+     "note": "CGCS2000 / 3-degree Gauss-Krueger"
+    },
+    {
+     "epsg": 4534,
+     "role": "zone",
+     "token": "CGCS2000",
+     "note": "CGCS2000 / 3-degree Gauss-Krueger"
+    },
+    {
+     "epsg": 4535,
+     "role": "zone",
+     "token": "CGCS2000",
+     "note": "CGCS2000 / 3-degree Gauss-Krueger"
+    },
+    {
+     "epsg": 4536,
+     "role": "zone",
+     "token": "CGCS2000",
+     "note": "CGCS2000 / 3-degree Gauss-Krueger"
+    },
+    {
+     "epsg": 4537,
+     "role": "zone",
+     "token": "CGCS2000",
+     "note": "CGCS2000 / 3-degree Gauss-Krueger"
+    },
+    {
+     "epsg": 4538,
+     "role": "zone",
+     "token": "CGCS2000",
+     "note": "CGCS2000 / 3-degree Gauss-Krueger"
+    },
+    {
+     "epsg": 4539,
+     "role": "zone",
+     "token": "CGCS2000",
+     "note": "CGCS2000 / 3-degree Gauss-Krueger"
+    },
+    {
+     "epsg": 4540,
+     "role": "zone",
+     "token": "CGCS2000",
+     "note": "CGCS2000 / 3-degree Gauss-Krueger"
+    },
+    {
+     "epsg": 4541,
+     "role": "zone",
+     "token": "CGCS2000",
+     "note": "CGCS2000 / 3-degree Gauss-Krueger"
+    },
+    {
+     "epsg": 4542,
+     "role": "zone",
+     "token": "CGCS2000",
+     "note": "CGCS2000 / 3-degree Gauss-Krueger"
+    },
+    {
+     "epsg": 4543,
+     "role": "zone",
+     "token": "CGCS2000",
+     "note": "CGCS2000 / 3-degree Gauss-Krueger"
+    },
+    {
+     "epsg": 4544,
+     "role": "zone",
+     "token": "CGCS2000",
+     "note": "CGCS2000 / 3-degree Gauss-Krueger"
+    },
+    {
+     "epsg": 4545,
+     "role": "zone",
+     "token": "CGCS2000",
+     "note": "CGCS2000 / 3-degree Gauss-Krueger"
+    },
+    {
+     "epsg": 4546,
+     "role": "zone",
+     "token": "CGCS2000",
+     "note": "CGCS2000 / 3-degree Gauss-Krueger"
+    },
+    {
+     "epsg": 4547,
+     "role": "zone",
+     "token": "CGCS2000",
+     "note": "CGCS2000 / 3-degree Gauss-Krueger"
+    },
+    {
+     "epsg": 4548,
+     "role": "zone",
+     "token": "CGCS2000",
+     "note": "CGCS2000 / 3-degree Gauss-Krueger"
+    },
+    {
+     "epsg": 4549,
+     "role": "zone",
+     "token": "CGCS2000",
+     "note": "CGCS2000 / 3-degree Gauss-Krueger"
+    },
+    {
+     "epsg": 4550,
+     "role": "zone",
+     "token": "CGCS2000",
+     "note": "CGCS2000 / 3-degree Gauss-Krueger"
+    },
+    {
+     "epsg": 4551,
+     "role": "zone",
+     "token": "CGCS2000",
+     "note": "CGCS2000 / 3-degree Gauss-Krueger"
+    },
+    {
+     "epsg": 4552,
+     "role": "zone",
+     "token": "CGCS2000",
+     "note": "CGCS2000 / 3-degree Gauss-Krueger"
+    },
+    {
+     "epsg": 4553,
+     "role": "zone",
+     "token": "CGCS2000",
+     "note": "CGCS2000 / 3-degree Gauss-Krueger"
+    },
+    {
+     "epsg": 4554,
+     "role": "zone",
+     "token": "CGCS2000",
+     "note": "CGCS2000 / 3-degree Gauss-Krueger"
+    }
+   ],
+   "vertical": [
+    {
+     "epsg": 5737,
+     "token": "Yellow Sea 1985"
+    }
+   ],
+   "geoid": null,
+   "angle_unit": "dms",
+   "linear_unit": "m",
+   "source": "EPSG Geodetic Parameter Dataset (epsg.org)"
+  },
+  "HK": {
+   "name": "Hong Kong",
+   "horizontal": [
+    {
+     "epsg": 2326,
+     "role": "primary",
+     "token": "Hong Kong 1980 Grid System",
+     "note": "Hong Kong 1980 Grid"
+    }
+   ],
+   "vertical": [
+    {
+     "epsg": 5738,
+     "token": "HKPD"
+    }
+   ],
+   "geoid": null,
+   "angle_unit": "dms",
+   "linear_unit": "m",
+   "source": "EPSG Geodetic Parameter Dataset (epsg.org)"
+  },
+  "JP": {
+   "name": "Japan",
+   "horizontal": [
+    {
+     "epsg": 6669,
+     "role": "primary",
+     "token": "JGD2011",
+     "note": "JGD2011 / Japan Plane Rectangular CS I-XIX"
+    },
+    {
+     "epsg": 6670,
+     "role": "primary",
+     "token": "JGD2011",
+     "note": "JGD2011 / Japan Plane Rectangular CS I-XIX"
+    },
+    {
+     "epsg": 6671,
+     "role": "primary",
+     "token": "JGD2011",
+     "note": "JGD2011 / Japan Plane Rectangular CS I-XIX"
+    },
+    {
+     "epsg": 6672,
+     "role": "primary",
+     "token": "JGD2011",
+     "note": "JGD2011 / Japan Plane Rectangular CS I-XIX"
+    },
+    {
+     "epsg": 6673,
+     "role": "primary",
+     "token": "JGD2011",
+     "note": "JGD2011 / Japan Plane Rectangular CS I-XIX"
+    },
+    {
+     "epsg": 6674,
+     "role": "primary",
+     "token": "JGD2011",
+     "note": "JGD2011 / Japan Plane Rectangular CS I-XIX"
+    },
+    {
+     "epsg": 6675,
+     "role": "primary",
+     "token": "JGD2011",
+     "note": "JGD2011 / Japan Plane Rectangular CS I-XIX"
+    },
+    {
+     "epsg": 6676,
+     "role": "primary",
+     "token": "JGD2011",
+     "note": "JGD2011 / Japan Plane Rectangular CS I-XIX"
+    },
+    {
+     "epsg": 6677,
+     "role": "primary",
+     "token": "JGD2011",
+     "note": "JGD2011 / Japan Plane Rectangular CS I-XIX"
+    },
+    {
+     "epsg": 6678,
+     "role": "primary",
+     "token": "JGD2011",
+     "note": "JGD2011 / Japan Plane Rectangular CS I-XIX"
+    },
+    {
+     "epsg": 6679,
+     "role": "primary",
+     "token": "JGD2011",
+     "note": "JGD2011 / Japan Plane Rectangular CS I-XIX"
+    },
+    {
+     "epsg": 6680,
+     "role": "primary",
+     "token": "JGD2011",
+     "note": "JGD2011 / Japan Plane Rectangular CS I-XIX"
+    },
+    {
+     "epsg": 6681,
+     "role": "primary",
+     "token": "JGD2011",
+     "note": "JGD2011 / Japan Plane Rectangular CS I-XIX"
+    },
+    {
+     "epsg": 6682,
+     "role": "primary",
+     "token": "JGD2011",
+     "note": "JGD2011 / Japan Plane Rectangular CS I-XIX"
+    },
+    {
+     "epsg": 6683,
+     "role": "primary",
+     "token": "JGD2011",
+     "note": "JGD2011 / Japan Plane Rectangular CS I-XIX"
+    },
+    {
+     "epsg": 6684,
+     "role": "primary",
+     "token": "JGD2011",
+     "note": "JGD2011 / Japan Plane Rectangular CS I-XIX"
+    },
+    {
+     "epsg": 6685,
+     "role": "primary",
+     "token": "JGD2011",
+     "note": "JGD2011 / Japan Plane Rectangular CS I-XIX"
+    },
+    {
+     "epsg": 6686,
+     "role": "primary",
+     "token": "JGD2011",
+     "note": "JGD2011 / Japan Plane Rectangular CS I-XIX"
+    },
+    {
+     "epsg": 6687,
+     "role": "primary",
+     "token": "JGD2011",
+     "note": "JGD2011 / Japan Plane Rectangular CS I-XIX"
+    }
+   ],
+   "vertical": [
+    {
+     "epsg": 6695,
+     "token": "JGD2011 (vertical)"
+    }
+   ],
+   "geoid": {
+    "name": "GSIGEO2011",
+    "proj_grid": null,
+    "licence": "national mapping agency; install separately"
+   },
+   "angle_unit": "dms",
+   "linear_unit": "m",
+   "source": "EPSG Geodetic Parameter Dataset (epsg.org)"
+  },
+  "KR": {
+   "name": "South Korea",
+   "horizontal": [
+    {
+     "epsg": 5179,
+     "role": "primary",
+     "token": "KGD2002",
+     "note": "Korea 2000 / Unified CS"
+    },
+    {
+     "epsg": 5185,
+     "role": "zone",
+     "token": "KGD2002",
+     "note": "Korea 2000 belts"
+    },
+    {
+     "epsg": 5186,
+     "role": "zone",
+     "token": "KGD2002",
+     "note": "Korea 2000 belts"
+    },
+    {
+     "epsg": 5187,
+     "role": "zone",
+     "token": "KGD2002",
+     "note": "Korea 2000 belts"
+    },
+    {
+     "epsg": 5188,
+     "role": "zone",
+     "token": "KGD2002",
+     "note": "Korea 2000 belts"
+    }
+   ],
+   "vertical": [],
+   "geoid": null,
+   "angle_unit": "dms",
+   "linear_unit": "m",
+   "source": "EPSG Geodetic Parameter Dataset (epsg.org)"
+  },
+  "SG": {
+   "name": "Singapore",
+   "horizontal": [
+    {
+     "epsg": 3414,
+     "role": "primary",
+     "token": "SVY21",
+     "note": "SVY21 / Singapore TM"
+    }
+   ],
+   "vertical": [
+    {
+     "epsg": 6916,
+     "token": "SHD"
+    }
+   ],
+   "geoid": null,
+   "angle_unit": "dms",
+   "linear_unit": "m",
+   "source": "EPSG Geodetic Parameter Dataset (epsg.org)"
+  },
+  "ID": {
+   "name": "Indonesia",
+   "horizontal": [
+    {
+     "epsg": 9476,
+     "role": "primary",
+     "token": "SRGI2013",
+     "note": "SRGI2013 / UTM 46-52N"
+    },
+    {
+     "epsg": 9477,
+     "role": "primary",
+     "token": "SRGI2013",
+     "note": "SRGI2013 / UTM 46-52N"
+    },
+    {
+     "epsg": 9478,
+     "role": "primary",
+     "token": "SRGI2013",
+     "note": "SRGI2013 / UTM 46-52N"
+    },
+    {
+     "epsg": 9479,
+     "role": "primary",
+     "token": "SRGI2013",
+     "note": "SRGI2013 / UTM 46-52N"
+    },
+    {
+     "epsg": 9480,
+     "role": "primary",
+     "token": "SRGI2013",
+     "note": "SRGI2013 / UTM 46-52N"
+    },
+    {
+     "epsg": 9481,
+     "role": "primary",
+     "token": "SRGI2013",
+     "note": "SRGI2013 / UTM 46-52N"
+    },
+    {
+     "epsg": 9482,
+     "role": "primary",
+     "token": "SRGI2013",
+     "note": "SRGI2013 / UTM 46-52N"
+    },
+    {
+     "epsg": 9487,
+     "role": "primary",
+     "token": "SRGI2013",
+     "note": "SRGI2013 / UTM 47-50S"
+    },
+    {
+     "epsg": 9488,
+     "role": "primary",
+     "token": "SRGI2013",
+     "note": "SRGI2013 / UTM 47-50S"
+    },
+    {
+     "epsg": 9489,
+     "role": "primary",
+     "token": "SRGI2013",
+     "note": "SRGI2013 / UTM 47-50S"
+    },
+    {
+     "epsg": 9490,
+     "role": "primary",
+     "token": "SRGI2013",
+     "note": "SRGI2013 / UTM 47-50S"
+    },
+    {
+     "epsg": 23830,
+     "role": "legacy",
+     "token": "DGN95",
+     "note": "DGN95 / Indonesia TM-3"
+    },
+    {
+     "epsg": 23831,
+     "role": "legacy",
+     "token": "DGN95",
+     "note": "DGN95 / Indonesia TM-3"
+    },
+    {
+     "epsg": 23832,
+     "role": "legacy",
+     "token": "DGN95",
+     "note": "DGN95 / Indonesia TM-3"
+    },
+    {
+     "epsg": 23833,
+     "role": "legacy",
+     "token": "DGN95",
+     "note": "DGN95 / Indonesia TM-3"
+    },
+    {
+     "epsg": 23834,
+     "role": "legacy",
+     "token": "DGN95",
+     "note": "DGN95 / Indonesia TM-3"
+    },
+    {
+     "epsg": 23835,
+     "role": "legacy",
+     "token": "DGN95",
+     "note": "DGN95 / Indonesia TM-3"
+    },
+    {
+     "epsg": 23836,
+     "role": "legacy",
+     "token": "DGN95",
+     "note": "DGN95 / Indonesia TM-3"
+    },
+    {
+     "epsg": 23837,
+     "role": "legacy",
+     "token": "DGN95",
+     "note": "DGN95 / Indonesia TM-3"
+    },
+    {
+     "epsg": 23838,
+     "role": "legacy",
+     "token": "DGN95",
+     "note": "DGN95 / Indonesia TM-3"
+    },
+    {
+     "epsg": 23839,
+     "role": "legacy",
+     "token": "DGN95",
+     "note": "DGN95 / Indonesia TM-3"
+    },
+    {
+     "epsg": 23840,
+     "role": "legacy",
+     "token": "DGN95",
+     "note": "DGN95 / Indonesia TM-3"
+    },
+    {
+     "epsg": 23841,
+     "role": "legacy",
+     "token": "DGN95",
+     "note": "DGN95 / Indonesia TM-3"
+    },
+    {
+     "epsg": 23842,
+     "role": "legacy",
+     "token": "DGN95",
+     "note": "DGN95 / Indonesia TM-3"
+    },
+    {
+     "epsg": 23843,
+     "role": "legacy",
+     "token": "DGN95",
+     "note": "DGN95 / Indonesia TM-3"
+    },
+    {
+     "epsg": 23844,
+     "role": "legacy",
+     "token": "DGN95",
+     "note": "DGN95 / Indonesia TM-3"
+    },
+    {
+     "epsg": 23845,
+     "role": "legacy",
+     "token": "DGN95",
+     "note": "DGN95 / Indonesia TM-3"
+    }
+   ],
+   "vertical": [],
+   "geoid": {
+    "name": "InaGeoid",
+    "proj_grid": null,
+    "licence": "national mapping agency; install separately"
+   },
+   "angle_unit": "dms",
+   "linear_unit": "m",
+   "source": "EPSG Geodetic Parameter Dataset (epsg.org)"
+  },
+  "IN": {
+   "name": "India",
+   "horizontal": [
+    {
+     "epsg": 32643,
+     "role": "primary",
+     "token": "WGS 84",
+     "note": "WGS 84 / UTM 43-46N"
+    },
+    {
+     "epsg": 32644,
+     "role": "primary",
+     "token": "WGS 84",
+     "note": "WGS 84 / UTM 43-46N"
+    },
+    {
+     "epsg": 32645,
+     "role": "primary",
+     "token": "WGS 84",
+     "note": "WGS 84 / UTM 43-46N"
+    },
+    {
+     "epsg": 32646,
+     "role": "primary",
+     "token": "WGS 84",
+     "note": "WGS 84 / UTM 43-46N"
+    },
+    {
+     "epsg": 24378,
+     "role": "legacy",
+     "token": "Kalianpur 1975",
+     "note": "Kalianpur 1975 / India zone I"
+    },
+    {
+     "epsg": 24379,
+     "role": "legacy",
+     "token": "Kalianpur 1975",
+     "note": "Kalianpur 1975 / India zone IIa"
+    },
+    {
+     "epsg": 24380,
+     "role": "legacy",
+     "token": "Kalianpur 1975",
+     "note": "Kalianpur 1975 / India zone IIb"
+    },
+    {
+     "epsg": 24381,
+     "role": "legacy",
+     "token": "Kalianpur 1975",
+     "note": "Kalianpur 1975 / India zone IIIa"
+    },
+    {
+     "epsg": 24383,
+     "role": "legacy",
+     "token": "Kalianpur 1975",
+     "note": "Kalianpur 1975 / India zone IVa"
+    }
+   ],
+   "vertical": [],
+   "geoid": null,
+   "angle_unit": "dms",
+   "linear_unit": "m",
+   "source": "EPSG Geodetic Parameter Dataset (epsg.org)"
+  },
+  "PK": {
+   "name": "Pakistan",
+   "horizontal": [
+    {
+     "epsg": 32641,
+     "role": "primary",
+     "token": "WGS 84",
+     "note": "WGS 84 / UTM 41-43N"
+    },
+    {
+     "epsg": 32642,
+     "role": "primary",
+     "token": "WGS 84",
+     "note": "WGS 84 / UTM 41-43N"
+    },
+    {
+     "epsg": 32643,
+     "role": "primary",
+     "token": "WGS 84",
+     "note": "WGS 84 / UTM 41-43N"
+    }
+   ],
+   "vertical": [],
+   "geoid": null,
+   "angle_unit": "dms",
+   "linear_unit": "m",
+   "source": "EPSG Geodetic Parameter Dataset (epsg.org)"
+  },
+  "AE": {
+   "name": "United Arab Emirates",
+   "horizontal": [
+    {
+     "epsg": 32639,
+     "role": "primary",
+     "token": "WGS 84",
+     "note": "WGS 84 / UTM 39N"
+    },
+    {
+     "epsg": 32640,
+     "role": "primary",
+     "token": "WGS 84",
+     "note": "WGS 84 / UTM 40N"
+    },
+    {
+     "epsg": 3997,
+     "role": "zone",
+     "token": "WGS 84",
+     "note": "WGS 84 / Dubai Local TM"
+    }
+   ],
+   "vertical": [],
+   "geoid": null,
+   "angle_unit": "dms",
+   "linear_unit": "m",
+   "source": "EPSG Geodetic Parameter Dataset (epsg.org)"
+  },
+  "SA": {
+   "name": "Saudi Arabia",
+   "horizontal": [
+    {
+     "epsg": 9356,
+     "role": "primary",
+     "token": "KSA-GRF17",
+     "note": "KSA-GRF17 / UTM 36-40N"
+    },
+    {
+     "epsg": 9357,
+     "role": "primary",
+     "token": "KSA-GRF17",
+     "note": "KSA-GRF17 / UTM 36-40N"
+    },
+    {
+     "epsg": 9358,
+     "role": "primary",
+     "token": "KSA-GRF17",
+     "note": "KSA-GRF17 / UTM 36-40N"
+    },
+    {
+     "epsg": 9359,
+     "role": "primary",
+     "token": "KSA-GRF17",
+     "note": "KSA-GRF17 / UTM 36-40N"
+    },
+    {
+     "epsg": 9360,
+     "role": "primary",
+     "token": "KSA-GRF17",
+     "note": "KSA-GRF17 / UTM 36-40N"
+    },
+    {
+     "epsg": 20437,
+     "role": "legacy",
+     "token": "Ain el Abd",
+     "note": "Ain el Abd / UTM"
+    },
+    {
+     "epsg": 20438,
+     "role": "legacy",
+     "token": "Ain el Abd",
+     "note": "Ain el Abd / UTM"
+    },
+    {
+     "epsg": 20439,
+     "role": "legacy",
+     "token": "Ain el Abd",
+     "note": "Ain el Abd / UTM"
+    }
+   ],
+   "vertical": [],
+   "geoid": null,
+   "angle_unit": "dms",
+   "linear_unit": "m",
+   "source": "EPSG Geodetic Parameter Dataset (epsg.org)"
+  },
+  "EG": {
+   "name": "Egypt",
+   "horizontal": [
+    {
+     "epsg": 22992,
+     "role": "primary",
+     "token": "Egypt 1907",
+     "note": "Egypt 1907 belts"
+    },
+    {
+     "epsg": 22993,
+     "role": "primary",
+     "token": "Egypt 1907",
+     "note": "Egypt 1907 belts"
+    },
+    {
+     "epsg": 22994,
+     "role": "primary",
+     "token": "Egypt 1907",
+     "note": "Egypt 1907 belts"
+    }
+   ],
+   "vertical": [],
+   "geoid": null,
+   "angle_unit": "dms",
+   "linear_unit": "m",
+   "source": "EPSG Geodetic Parameter Dataset (epsg.org)"
+  },
+  "NG": {
+   "name": "Nigeria",
+   "horizontal": [
+    {
+     "epsg": 26391,
+     "role": "primary",
+     "token": "Minna",
+     "note": "Minna / Nigeria belts"
+    },
+    {
+     "epsg": 26392,
+     "role": "primary",
+     "token": "Minna",
+     "note": "Minna / Nigeria belts"
+    },
+    {
+     "epsg": 26393,
+     "role": "primary",
+     "token": "Minna",
+     "note": "Minna / Nigeria belts"
+    },
+    {
+     "epsg": 26331,
+     "role": "zone",
+     "token": "Minna",
+     "note": "Minna / UTM 31N"
+    },
+    {
+     "epsg": 26332,
+     "role": "zone",
+     "token": "Minna",
+     "note": "Minna / UTM 32N"
+    }
+   ],
+   "vertical": [],
+   "geoid": null,
+   "angle_unit": "dms",
+   "linear_unit": "m",
+   "source": "EPSG Geodetic Parameter Dataset (epsg.org)"
+  },
+  "ZA": {
+   "name": "South Africa",
+   "horizontal": [
+    {
+     "epsg": 2046,
+     "role": "primary",
+     "token": "Hartebeesthoek94",
+     "note": "Hartebeesthoek94 / Lo15-Lo33"
+    },
+    {
+     "epsg": 2047,
+     "role": "primary",
+     "token": "Hartebeesthoek94",
+     "note": "Hartebeesthoek94 / Lo15-Lo33"
+    },
+    {
+     "epsg": 2048,
+     "role": "primary",
+     "token": "Hartebeesthoek94",
+     "note": "Hartebeesthoek94 / Lo15-Lo33"
+    },
+    {
+     "epsg": 2049,
+     "role": "primary",
+     "token": "Hartebeesthoek94",
+     "note": "Hartebeesthoek94 / Lo15-Lo33"
+    },
+    {
+     "epsg": 2050,
+     "role": "primary",
+     "token": "Hartebeesthoek94",
+     "note": "Hartebeesthoek94 / Lo15-Lo33"
+    },
+    {
+     "epsg": 2051,
+     "role": "primary",
+     "token": "Hartebeesthoek94",
+     "note": "Hartebeesthoek94 / Lo15-Lo33"
+    },
+    {
+     "epsg": 2052,
+     "role": "primary",
+     "token": "Hartebeesthoek94",
+     "note": "Hartebeesthoek94 / Lo15-Lo33"
+    },
+    {
+     "epsg": 2053,
+     "role": "primary",
+     "token": "Hartebeesthoek94",
+     "note": "Hartebeesthoek94 / Lo15-Lo33"
+    },
+    {
+     "epsg": 2054,
+     "role": "primary",
+     "token": "Hartebeesthoek94",
+     "note": "Hartebeesthoek94 / Lo15-Lo33"
+    },
+    {
+     "epsg": 2055,
+     "role": "primary",
+     "token": "Hartebeesthoek94",
+     "note": "Hartebeesthoek94 / Lo15-Lo33"
+    },
+    {
+     "epsg": 22275,
+     "role": "legacy",
+     "token": "Cape",
+     "note": "Cape / Lo"
+    },
+    {
+     "epsg": 22277,
+     "role": "legacy",
+     "token": "Cape",
+     "note": "Cape / Lo"
+    },
+    {
+     "epsg": 22279,
+     "role": "legacy",
+     "token": "Cape",
+     "note": "Cape / Lo"
+    },
+    {
+     "epsg": 22281,
+     "role": "legacy",
+     "token": "Cape",
+     "note": "Cape / Lo"
+    },
+    {
+     "epsg": 22283,
+     "role": "legacy",
+     "token": "Cape",
+     "note": "Cape / Lo"
+    },
+    {
+     "epsg": 22285,
+     "role": "legacy",
+     "token": "Cape",
+     "note": "Cape / Lo"
+    },
+    {
+     "epsg": 22287,
+     "role": "legacy",
+     "token": "Cape",
+     "note": "Cape / Lo"
+    },
+    {
+     "epsg": 22289,
+     "role": "legacy",
+     "token": "Cape",
+     "note": "Cape / Lo"
+    },
+    {
+     "epsg": 22291,
+     "role": "legacy",
+     "token": "Cape",
+     "note": "Cape / Lo"
+    },
+    {
+     "epsg": 22293,
+     "role": "legacy",
+     "token": "Cape",
+     "note": "Cape / Lo"
+    }
+   ],
+   "vertical": [
+    {
+     "epsg": 9279,
+     "token": "SA LLD"
+    }
+   ],
+   "geoid": {
+    "name": "SAGEOID2010",
+    "proj_grid": null,
+    "licence": "national mapping agency; install separately"
+   },
+   "angle_unit": "dms",
+   "linear_unit": "m",
+   "source": "EPSG Geodetic Parameter Dataset (epsg.org)"
+  },
+  "AU": {
+   "name": "Australia",
+   "horizontal": [
+    {
+     "epsg": 7849,
+     "role": "primary",
+     "token": "GDA2020",
+     "note": "GDA2020 / MGA 49-56"
+    },
+    {
+     "epsg": 7850,
+     "role": "primary",
+     "token": "GDA2020",
+     "note": "GDA2020 / MGA 49-56"
+    },
+    {
+     "epsg": 7851,
+     "role": "primary",
+     "token": "GDA2020",
+     "note": "GDA2020 / MGA 49-56"
+    },
+    {
+     "epsg": 7852,
+     "role": "primary",
+     "token": "GDA2020",
+     "note": "GDA2020 / MGA 49-56"
+    },
+    {
+     "epsg": 7853,
+     "role": "primary",
+     "token": "GDA2020",
+     "note": "GDA2020 / MGA 49-56"
+    },
+    {
+     "epsg": 7854,
+     "role": "primary",
+     "token": "GDA2020",
+     "note": "GDA2020 / MGA 49-56"
+    },
+    {
+     "epsg": 7855,
+     "role": "primary",
+     "token": "GDA2020",
+     "note": "GDA2020 / MGA 49-56"
+    },
+    {
+     "epsg": 7856,
+     "role": "primary",
+     "token": "GDA2020",
+     "note": "GDA2020 / MGA 49-56"
+    },
+    {
+     "epsg": 28349,
+     "role": "legacy",
+     "token": "GDA94",
+     "note": "GDA94 / MGA 49-56"
+    },
+    {
+     "epsg": 28350,
+     "role": "legacy",
+     "token": "GDA94",
+     "note": "GDA94 / MGA 49-56"
+    },
+    {
+     "epsg": 28351,
+     "role": "legacy",
+     "token": "GDA94",
+     "note": "GDA94 / MGA 49-56"
+    },
+    {
+     "epsg": 28352,
+     "role": "legacy",
+     "token": "GDA94",
+     "note": "GDA94 / MGA 49-56"
+    },
+    {
+     "epsg": 28353,
+     "role": "legacy",
+     "token": "GDA94",
+     "note": "GDA94 / MGA 49-56"
+    },
+    {
+     "epsg": 28354,
+     "role": "legacy",
+     "token": "GDA94",
+     "note": "GDA94 / MGA 49-56"
+    },
+    {
+     "epsg": 28355,
+     "role": "legacy",
+     "token": "GDA94",
+     "note": "GDA94 / MGA 49-56"
+    },
+    {
+     "epsg": 28356,
+     "role": "legacy",
+     "token": "GDA94",
+     "note": "GDA94 / MGA 49-56"
+    }
+   ],
+   "vertical": [
+    {
+     "epsg": 5711,
+     "token": "AHD"
+    }
+   ],
+   "geoid": {
+    "name": "AUSGeoid2020",
+    "proj_grid": "au_ga_AUSGeoid2020_20180201.tif",
+    "licence": "national mapping agency; install separately"
+   },
+   "angle_unit": "dms",
+   "linear_unit": "m",
+   "source": "EPSG Geodetic Parameter Dataset (epsg.org)"
+  },
+  "NZ": {
+   "name": "New Zealand",
+   "horizontal": [
+    {
+     "epsg": 2193,
+     "role": "primary",
+     "token": "NZGD2000",
+     "note": "NZGD2000 / NZTM 2000"
+    },
+    {
+     "epsg": 2105,
+     "role": "zone",
+     "token": "NZGD2000",
+     "note": "NZGD2000 / meridional circuits"
+    },
+    {
+     "epsg": 2106,
+     "role": "zone",
+     "token": "NZGD2000",
+     "note": "NZGD2000 / meridional circuits"
+    },
+    {
+     "epsg": 2107,
+     "role": "zone",
+     "token": "NZGD2000",
+     "note": "NZGD2000 / meridional circuits"
+    },
+    {
+     "epsg": 2108,
+     "role": "zone",
+     "token": "NZGD2000",
+     "note": "NZGD2000 / meridional circuits"
+    },
+    {
+     "epsg": 2109,
+     "role": "zone",
+     "token": "NZGD2000",
+     "note": "NZGD2000 / meridional circuits"
+    },
+    {
+     "epsg": 2110,
+     "role": "zone",
+     "token": "NZGD2000",
+     "note": "NZGD2000 / meridional circuits"
+    },
+    {
+     "epsg": 2111,
+     "role": "zone",
+     "token": "NZGD2000",
+     "note": "NZGD2000 / meridional circuits"
+    },
+    {
+     "epsg": 2112,
+     "role": "zone",
+     "token": "NZGD2000",
+     "note": "NZGD2000 / meridional circuits"
+    },
+    {
+     "epsg": 2113,
+     "role": "zone",
+     "token": "NZGD2000",
+     "note": "NZGD2000 / meridional circuits"
+    },
+    {
+     "epsg": 2114,
+     "role": "zone",
+     "token": "NZGD2000",
+     "note": "NZGD2000 / meridional circuits"
+    },
+    {
+     "epsg": 2115,
+     "role": "zone",
+     "token": "NZGD2000",
+     "note": "NZGD2000 / meridional circuits"
+    },
+    {
+     "epsg": 2116,
+     "role": "zone",
+     "token": "NZGD2000",
+     "note": "NZGD2000 / meridional circuits"
+    },
+    {
+     "epsg": 2117,
+     "role": "zone",
+     "token": "NZGD2000",
+     "note": "NZGD2000 / meridional circuits"
+    },
+    {
+     "epsg": 2118,
+     "role": "zone",
+     "token": "NZGD2000",
+     "note": "NZGD2000 / meridional circuits"
+    },
+    {
+     "epsg": 2119,
+     "role": "zone",
+     "token": "NZGD2000",
+     "note": "NZGD2000 / meridional circuits"
+    },
+    {
+     "epsg": 2120,
+     "role": "zone",
+     "token": "NZGD2000",
+     "note": "NZGD2000 / meridional circuits"
+    },
+    {
+     "epsg": 2121,
+     "role": "zone",
+     "token": "NZGD2000",
+     "note": "NZGD2000 / meridional circuits"
+    },
+    {
+     "epsg": 2122,
+     "role": "zone",
+     "token": "NZGD2000",
+     "note": "NZGD2000 / meridional circuits"
+    },
+    {
+     "epsg": 2123,
+     "role": "zone",
+     "token": "NZGD2000",
+     "note": "NZGD2000 / meridional circuits"
+    },
+    {
+     "epsg": 2124,
+     "role": "zone",
+     "token": "NZGD2000",
+     "note": "NZGD2000 / meridional circuits"
+    },
+    {
+     "epsg": 2125,
+     "role": "zone",
+     "token": "NZGD2000",
+     "note": "NZGD2000 / meridional circuits"
+    },
+    {
+     "epsg": 2126,
+     "role": "zone",
+     "token": "NZGD2000",
+     "note": "NZGD2000 / meridional circuits"
+    },
+    {
+     "epsg": 2127,
+     "role": "zone",
+     "token": "NZGD2000",
+     "note": "NZGD2000 / meridional circuits"
+    },
+    {
+     "epsg": 2128,
+     "role": "zone",
+     "token": "NZGD2000",
+     "note": "NZGD2000 / meridional circuits"
+    },
+    {
+     "epsg": 2129,
+     "role": "zone",
+     "token": "NZGD2000",
+     "note": "NZGD2000 / meridional circuits"
+    },
+    {
+     "epsg": 2130,
+     "role": "zone",
+     "token": "NZGD2000",
+     "note": "NZGD2000 / meridional circuits"
+    },
+    {
+     "epsg": 2131,
+     "role": "zone",
+     "token": "NZGD2000",
+     "note": "NZGD2000 / meridional circuits"
+    },
+    {
+     "epsg": 2132,
+     "role": "zone",
+     "token": "NZGD2000",
+     "note": "NZGD2000 / meridional circuits"
+    }
+   ],
+   "vertical": [
+    {
+     "epsg": 7839,
+     "token": "NZVD2016"
+    }
+   ],
+   "geoid": {
+    "name": "NZGeoid2016",
+    "proj_grid": "nz_linz_nzgeoid2016.tif",
+    "licence": "national mapping agency; install separately"
+   },
+   "angle_unit": "dms",
+   "linear_unit": "m",
+   "source": "EPSG Geodetic Parameter Dataset (epsg.org)"
+  },
+  "KZ": {
+   "name": "Kazakhstan",
+   "horizontal": [
+    {
+     "epsg": 32639,
+     "role": "primary",
+     "token": "WGS 84",
+     "note": "WGS 84 / UTM 39-45N"
+    },
+    {
+     "epsg": 32640,
+     "role": "primary",
+     "token": "WGS 84",
+     "note": "WGS 84 / UTM 39-45N"
+    },
+    {
+     "epsg": 32641,
+     "role": "primary",
+     "token": "WGS 84",
+     "note": "WGS 84 / UTM 39-45N"
+    },
+    {
+     "epsg": 32642,
+     "role": "primary",
+     "token": "WGS 84",
+     "note": "WGS 84 / UTM 39-45N"
+    },
+    {
+     "epsg": 32643,
+     "role": "primary",
+     "token": "WGS 84",
+     "note": "WGS 84 / UTM 39-45N"
+    },
+    {
+     "epsg": 32644,
+     "role": "primary",
+     "token": "WGS 84",
+     "note": "WGS 84 / UTM 39-45N"
+    },
+    {
+     "epsg": 32645,
+     "role": "primary",
+     "token": "WGS 84",
+     "note": "WGS 84 / UTM 39-45N"
+    },
+    {
+     "epsg": 28409,
+     "role": "legacy",
+     "token": "Pulkovo 1942",
+     "note": "Pulkovo 1942 / Gauss-Krueger zones 9-15; MSK local systems as a local grid"
+    },
+    {
+     "epsg": 28410,
+     "role": "legacy",
+     "token": "Pulkovo 1942",
+     "note": "Pulkovo 1942 / Gauss-Krueger zones 9-15; MSK local systems as a local grid"
+    },
+    {
+     "epsg": 28411,
+     "role": "legacy",
+     "token": "Pulkovo 1942",
+     "note": "Pulkovo 1942 / Gauss-Krueger zones 9-15; MSK local systems as a local grid"
+    },
+    {
+     "epsg": 28412,
+     "role": "legacy",
+     "token": "Pulkovo 1942",
+     "note": "Pulkovo 1942 / Gauss-Krueger zones 9-15; MSK local systems as a local grid"
+    },
+    {
+     "epsg": 28413,
+     "role": "legacy",
+     "token": "Pulkovo 1942",
+     "note": "Pulkovo 1942 / Gauss-Krueger zones 9-15; MSK local systems as a local grid"
+    },
+    {
+     "epsg": 28414,
+     "role": "legacy",
+     "token": "Pulkovo 1942",
+     "note": "Pulkovo 1942 / Gauss-Krueger zones 9-15; MSK local systems as a local grid"
+    },
+    {
+     "epsg": 28415,
+     "role": "legacy",
+     "token": "Pulkovo 1942",
+     "note": "Pulkovo 1942 / Gauss-Krueger zones 9-15; MSK local systems as a local grid"
+    }
+   ],
+   "vertical": [
+    {
+     "epsg": 5705,
+     "token": "Baltic 1977"
+    }
+   ],
+   "geoid": null,
+   "angle_unit": "gon",
+   "linear_unit": "m",
+   "source": "EPSG Geodetic Parameter Dataset (epsg.org)"
+  }
+ }
+}

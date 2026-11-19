@@ -2355,6 +2355,46 @@
     "level_misclosure": {
       "fail": "Nivellement-Widerspruch {f} mm überschreitet k·√km mit k = {k} mm.",
       "suggestion": "Nivellement wiederholen oder die verwendeten Höhenfestpunkte prüfen."
+    },
+    "geoid_missing": {
+      "fail": "Höhensystem {v} braucht das Geoidgitter {g}, das nicht installiert ist; Höhen bleiben wie gemessen.",
+      "suggestion": "Den Administrator bitten, die Gitterdatei im PROJ-Datenordner zu installieren, oder Höhen wie gemessen lassen."
+    },
+    "legacy_grid": {
+      "fail": "Gitter {epsg} ist ein Altsystem in {country}; das Hauptsystem ist {p}.",
+      "suggestion": "Beibehalten, wenn die Pläne es nutzen; neue Arbeiten meist im Hauptsystem."
+    },
+    "local_grid_points": {
+      "fail": "Ein lokales Netz braucht mindestens 2 identische Punkte.",
+      "suggestion": "Punkte ergänzen, die im Baustellennetz und im Landesnetz bekannt sind."
+    },
+    "local_grid_residual": {
+      "fail": "Restklaffe {r} mm bei {id} über {t} mm.",
+      "suggestion": "Den Punkt in beiden Listen prüfen oder nur als Kontrollpunkt verwenden."
+    },
+    "local_grid_scale": {
+      "fail": "Maßstab {s} ppm weicht um mehr als {t} ppm von 1 ab; Einheiten prüfen (Fuß oder Meter).",
+      "suggestion": "Sicherstellen, dass beide Koordinatenlisten dieselbe Einheit haben."
+    },
+    "ground_grid": {
+      "fail": "Strecken im Absteckprotokoll sind Gitterstrecken; der Unterschied Natur/Gitter auf {d} m beträgt {mm} mm.",
+      "suggestion": "Vor Ort gemessene Strecken sind Naturstrecken: Gitterstrecken durch den kombinierten Maßstabsfaktor teilen."
+    },
+    "gsi_unit": {
+      "fail": "GSI-Wort {wi} hat den unbekannten Einheitencode {u}.",
+      "suggestion": "Die Datei erneut mit Meter oder Fuß als Einheit exportieren."
+    },
+    "foot_definition": {
+      "fail": "Die Datei ist in Fuß, das Projekt in Metern; Fußdefinition wählen.",
+      "suggestion": "Internationalen Fuß (0,3048 m) oder US-Survey-Fuß (1200/3937 m) wählen."
+    },
+    "raw_skipped": {
+      "fail": "{n} Rohbeobachtungen ohne reduzierte Koordinaten wurden übersprungen.",
+      "suggestion": "Die Beobachtungen im Feldrechner reduzieren und Koordinaten exportieren."
+    },
+    "export_crs": {
+      "fail": "Export-KBS {a} weicht vom Projekt-KBS {b} ab; Koordinaten wurden transformiert.",
+      "suggestion": "Prüfen, dass die Zielsoftware das Exportsystem erwartet."
     }
   },
   "volumes": {
@@ -2408,7 +2448,9 @@
       "findings": "Befunde",
       "no_profile": "Kein Profil, bitte festlegen",
       "d": "d (mm)",
-      "dz": "dZ (mm)"
+      "dz": "dZ (mm)",
+      "scale": "Gitter / Natur",
+      "scale_line": "KMF {csf} (k {k}, h {h} m): {grid} m Gitter = {ground} m Natur"
     }
   },
   "land_parcels": {

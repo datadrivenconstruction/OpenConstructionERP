@@ -5,13 +5,24 @@
  * first, nothing saved until Import), points, point sets and SRV findings.
  */
 
-import { apiDelete, apiGet, apiPost, apiPut } from '@/shared/lib/api';
+import {
+  apiDelete,
+  apiGet,
+  apiPost,
+  apiPut,
+  digitSystemHeader,
+  extractErrorMessageFromBody,
+  getAuthToken,
+  triggerDownload,
+} from '@/shared/lib/api';
 
 const BASE = '/v1/survey-core';
 
 export type PointKind = 'control' | 'benchmark' | 'topo' | 'stake' | 'asbuilt';
 export const POINT_KINDS: PointKind[] = ['control', 'benchmark', 'topo', 'stake', 'asbuilt'];
-export type FileFormat = 'csv' | 'txt' | 'geojson';
+export type FileFormat = 'csv' | 'txt' | 'geojson' | 'gsi' | 'jobxml' | 'landxml';
+export type LinearUnit = 'm' | 'ft' | 'ftUS';
+export type FootDefinition = '' | 'ft' | 'ftUS';
 export type DuplicatePolicy = 'keep_first' | 'keep_last' | 'skip';
 
 export interface CrsInfo {
@@ -27,6 +38,12 @@ export interface CrsSuggestion extends CrsInfo {
   reason: 'project_location' | 'pack' | 'detected' | 'geographic';
   confidence: number | null;
   pack_country: string;
+  /** National systems: primary, a zone of it, or a legacy grid still found on drawings. */
+  role?: 'primary' | 'zone' | 'legacy' | '';
+  note?: string;
+  vertical_epsg?: number | null;
+  vertical_name?: string | null;
+  geoid_grid?: string | null;
 }
 
 export interface ProjectCrs {
@@ -110,6 +127,10 @@ export interface ImportBody {
   surveyed_by: string;
   survey_date: string | null;
   duplicate_policy: DuplicatePolicy;
+  /** A feet file for a metre project names its foot (SRV-031). */
+  foot_definition?: FootDefinition;
+  /** `local`: the file is in the site grid and goes through the project's local grid tie. */
+  coords?: 'grid' | 'local';
 }
 
 export interface ImportProblem {
@@ -117,6 +138,7 @@ export interface ImportProblem {
   line: number;
   point_id: string;
   detail: string;
+  message?: string;
 }
 
 export interface ImportPreview {
@@ -130,6 +152,12 @@ export interface ImportPreview {
   will_transform: boolean;
   detected_crs: CrsSuggestion | null;
   existing_conflicts: number;
+  file_unit?: string;
+  project_unit?: string;
+  unit_converted?: boolean;
+  heights_converted?: boolean;
+  missing_grids?: string[];
+  local_grid_applied?: boolean;
 }
 
 export interface Finding {
@@ -183,3 +211,128 @@ export const declareSetCrs = (setId: string, epsg: number) =>
 export const getSummary = (projectId: string) => apiGet<RegisterSummary>(`${BASE}/projects/${projectId}/summary`);
 export const validateRegister = (projectId: string, locale: string) =>
   apiPost<ValidationReport>(`${BASE}/projects/${projectId}/validate?locale=${encodeURIComponent(locale)}`, {});
+
+// ── Geodesy: unit, local grid, grid/ground, export ────────────────────────────
+
+export interface LocalGridPoint {
+  point_id: string;
+  x: number;
+  y: number;
+  e: number;
+  n: number;
+  use: boolean;
+}
+
+export interface LocalGridResidual {
+  point_id: string;
+  de_mm: number;
+  dn_mm: number;
+  r_mm: number;
+  used: boolean;
+}
+
+export interface LocalGridSolution {
+  scale: number;
+  scale_ppm: number;
+  rotation_deg: number;
+  te: number;
+  tn: number;
+  rms_mm: number;
+  fitted: number;
+  residuals: LocalGridResidual[];
+}
+
+export interface ScaleFactor {
+  epsg: number;
+  e: number;
+  n: number;
+  height_m: number;
+  k: number;
+  elevation_factor: number;
+  csf: number;
+  distance_m: number;
+  grid_m: number;
+  ground_m: number;
+  diff_mm: number;
+  height_source: 'setting' | 'points' | 'none';
+}
+
+export interface GeodesyInput {
+  linear_unit: '' | LinearUnit;
+  local_grid_epsg: number | null;
+  local_points: LocalGridPoint[];
+  apply_local_grid: boolean;
+  residual_tol_mm: number | null;
+  scale_tol_ppm: number | null;
+  csf_height_m: number | null;
+  reference_distance_m: number | null;
+}
+
+export interface Geodesy extends GeodesyInput {
+  project_id: string;
+  effective_unit: LinearUnit;
+  solution: LocalGridSolution | null;
+  scale: ScaleFactor | null;
+}
+
+export type ExportFormat = 'csv' | 'geojson' | 'gsi' | 'landxml' | 'dxf';
+export const EXPORT_FORMATS: ExportFormat[] = ['csv', 'geojson', 'gsi', 'landxml', 'dxf'];
+export const CSV_PRESETS = ['PNEZD', 'PENZD', 'ENZ', 'NEZ'] as const;
+
+export const getGeodesy = (projectId: string) => apiGet<Geodesy>(`${BASE}/projects/${projectId}/geodesy`);
+export const setGeodesy = (projectId: string, body: GeodesyInput) => apiPut<Geodesy>(`${BASE}/projects/${projectId}/geodesy`, body);
+export const solveLocalGrid = (points: LocalGridPoint[]) => apiPost<LocalGridSolution>(`${BASE}/local-grid/solve`, { points });
+export const getScaleFactor = (projectId: string, distance?: number) =>
+  apiGet<ScaleFactor | null>(`${BASE}/projects/${projectId}/scale-factor${distance ? `?d=${distance}` : ''}`);
+
+export interface ExportOptions {
+  format: ExportFormat;
+  preset?: string;
+  delimiter?: string;
+  kind?: string;
+  set_id?: string;
+  target_epsg?: number | null;
+  local?: boolean;
+  locale?: string;
+}
+
+export function exportQuery(o: ExportOptions): string {
+  const qs = new URLSearchParams({ format: o.format });
+  if (o.format === 'csv') {
+    if (o.preset) qs.set('preset', o.preset);
+    if (o.delimiter) qs.set('delimiter', o.delimiter);
+  }
+  if (o.kind) qs.set('kind', o.kind);
+  if (o.set_id) qs.set('set_id', o.set_id);
+  if (o.local) qs.set('local', 'true');
+  else if (o.target_epsg) qs.set('target_epsg', String(o.target_epsg));
+  if (o.locale) qs.set('locale', o.locale);
+  return qs.toString();
+}
+
+export const registerExportUrl = (projectId: string, o: ExportOptions) => `/api${BASE}/projects/${projectId}/export?${exportQuery(o)}`;
+export const stakeExportUrl = (requestId: string, o: ExportOptions) =>
+  `/api/v1/setting-out/requests/${requestId}/export?${exportQuery({ format: o.format, locale: o.locale })}`;
+
+/** Download an export and return the rule ids the server flagged (e.g. SRV-110 for another CRS). */
+export async function downloadSurveyExport(url: string, fallbackFilename: string): Promise<string[]> {
+  const headers: Record<string, string> = { Accept: 'application/octet-stream' };
+  const token = getAuthToken();
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+  const digits = digitSystemHeader();
+  if (digits) headers['X-Digit-System'] = digits;
+  const response = await fetch(url, { method: 'GET', headers });
+  if (!response.ok) {
+    let detail = `Download failed (HTTP ${response.status})`;
+    try {
+      detail = extractErrorMessageFromBody(await response.json()) ?? detail;
+    } catch {
+      // Not JSON; keep the status message.
+    }
+    throw new Error(detail);
+  }
+  const blob = await response.blob();
+  const name = response.headers.get('Content-Disposition')?.match(/filename="?([^";]+)"?/)?.[1];
+  triggerDownload(blob, name || fallbackFilename);
+  return (response.headers.get('X-Survey-Warnings') ?? '').split(',').filter(Boolean);
+}

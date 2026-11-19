@@ -2355,6 +2355,46 @@
     "level_misclosure": {
       "fail": "L'errore di chiusura della livellazione {f} mm supera k·√km con k = {k} mm.",
       "suggestion": "Ripetete la livellazione o controllate le quote dei capisaldi usati."
+    },
+    "geoid_missing": {
+      "fail": "Il sistema altimetrico {v} richiede la griglia del geoide {g}, non installata; le quote restano come misurate.",
+      "suggestion": "Chiedere all'amministratore di installare la griglia nella cartella dati di PROJ, o mantenere le quote misurate."
+    },
+    "legacy_grid": {
+      "fail": "La griglia {epsg} è un sistema storico in {country}; il sistema principale è {p}.",
+      "suggestion": "Mantenerla se i disegni la usano; i nuovi lavori di solito vanno nel sistema principale."
+    },
+    "local_grid_points": {
+      "fail": "Una griglia locale richiede almeno 2 punti comuni.",
+      "suggestion": "Aggiungere punti noti sia nella griglia di cantiere sia in quella nazionale."
+    },
+    "local_grid_residual": {
+      "fail": "Residuo di {r} mm su {id}, oltre {t} mm.",
+      "suggestion": "Controllare il punto in entrambe le liste, o usarlo solo come punto di verifica."
+    },
+    "local_grid_scale": {
+      "fail": "La scala di {s} ppm si discosta da 1 di oltre {t} ppm; controllare le unità (piedi o metri).",
+      "suggestion": "Verificare che entrambe le liste di coordinate usino la stessa unità."
+    },
+    "ground_grid": {
+      "fail": "Le distanze del foglio di tracciamento sono di griglia; la differenza terreno/griglia su {d} m è di {mm} mm.",
+      "suggestion": "Le distanze misurate in cantiere sono a terra: dividere quelle di griglia per il fattore di scala combinato."
+    },
+    "gsi_unit": {
+      "fail": "La parola GSI {wi} ha il codice unità sconosciuto {u}.",
+      "suggestion": "Esportare di nuovo il file in metri o piedi."
+    },
+    "foot_definition": {
+      "fail": "Il file è in piedi ma il progetto usa i metri; scegliere la definizione del piede.",
+      "suggestion": "Scegliere il piede internazionale (0,3048 m) o il piede topografico USA (1200/3937 m)."
+    },
+    "raw_skipped": {
+      "fail": "{n} osservazioni grezze senza coordinate ridotte sono state saltate.",
+      "suggestion": "Ridurre le osservazioni sul controller ed esportare le coordinate."
+    },
+    "export_crs": {
+      "fail": "Il SR di esportazione {a} differisce dal SR del progetto {b}; coordinate trasformate.",
+      "suggestion": "Verificare che il software di destinazione si aspetti il sistema di esportazione."
     }
   },
   "volumes": {
@@ -2408,7 +2448,9 @@
       "findings": "Rilievi",
       "no_profile": "Nessun profilo, impostane uno",
       "d": "d (mm)",
-      "dz": "dZ (mm)"
+      "dz": "dZ (mm)",
+      "scale": "Griglia / terreno",
+      "scale_line": "FSC {csf} (k {k}, h {h} m): {grid} m di griglia = {ground} m a terra"
     }
   },
   "land_parcels": {

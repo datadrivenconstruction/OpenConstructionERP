@@ -15,7 +15,9 @@ from typing import Literal
 from pydantic import BaseModel, ConfigDict, Field
 
 PointKind = Literal["control", "benchmark", "topo", "stake", "asbuilt"]
-FileFormat = Literal["csv", "txt", "geojson"]
+FileFormat = Literal["csv", "txt", "geojson", "gsi", "jobxml", "landxml"]
+LinearUnit = Literal["m", "ft", "ftUS"]
+FootDefinition = Literal["", "ft", "ftUS"]
 DuplicatePolicy = Literal["keep_first", "keep_last", "skip"]
 ColumnField = Literal["", "point_id", "e", "n", "z", "code", "description", "kind", "sigma"]
 
@@ -35,6 +37,12 @@ class CrsSuggestion(CrsInfoOut):
     reason: Literal["project_location", "pack", "detected", "geographic"]
     confidence: float | None = None
     pack_country: str = ""
+    #: National systems only: primary | zone | legacy, the country's height system and geoid model.
+    role: str = ""
+    note: str = ""
+    vertical_epsg: int | None = None
+    vertical_name: str = ""
+    geoid_grid: str = ""
 
 
 class ProjectCrsOut(BaseModel):
@@ -140,6 +148,12 @@ class ImportRequest(BaseModel):
     survey_date: date | None = None
     duplicate_policy: DuplicatePolicy = "keep_first"
     note: str = Field(default="", max_length=2000)
+    #: A file in feet for a metre project needs the foot named (SRV-031); never guessed.
+    foot_definition: FootDefinition = ""
+    #: Height system the file's Z is in; with the project's vertical EPSG, heights go through the geoid.
+    source_vertical_epsg: int | None = Field(default=None, ge=1000, le=999999)
+    #: ``local``: the file is in the site grid and goes through the project's local grid tie first.
+    coords: Literal["grid", "local"] = "grid"
 
 
 class ImportProblem(BaseModel):
@@ -147,6 +161,7 @@ class ImportProblem(BaseModel):
     line: int
     point_id: str = ""
     detail: str = ""
+    message: str = ""
 
 
 class PreviewRow(BaseModel):
@@ -179,6 +194,12 @@ class ImportPreview(BaseModel):
     will_transform: bool = False
     detected_crs: CrsSuggestion | None = None
     existing_conflicts: int = 0
+    file_unit: str = "m"
+    project_unit: str = "m"
+    unit_converted: bool = False
+    heights_converted: bool = False
+    missing_grids: list[str] = Field(default_factory=list)
+    local_grid_applied: bool = False
 
 
 class ImportResult(BaseModel):
@@ -302,3 +323,79 @@ class CrsInfoListResponse(BaseModel):
     total: int
     offset: int = 0
     limit: int = 50
+
+
+# ── Geodesy: linear unit, local grid, grid/ground ─────────────────────────────────────────────────────────────────
+
+
+class LocalGridPointIn(BaseModel):
+    """A point known in the site grid (x, y) and the national grid (e, n)."""
+
+    point_id: str = Field(min_length=1, max_length=64)
+    x: float
+    y: float
+    e: float
+    n: float
+    use: bool = True
+
+
+class LocalGridResidualOut(BaseModel):
+    point_id: str
+    de_mm: float
+    dn_mm: float
+    r_mm: float
+    used: bool
+
+
+class LocalGridSolveRequest(BaseModel):
+    points: list[LocalGridPointIn] = Field(max_length=200)
+
+
+class LocalGridSolution(BaseModel):
+    """Scale, rotation and shift of the site grid in the national grid, with each point's residual."""
+
+    scale: float
+    scale_ppm: float
+    rotation_deg: float
+    te: float
+    tn: float
+    rms_mm: float
+    fitted: int
+    residuals: list[LocalGridResidualOut]
+
+
+class GeodesyIn(BaseModel):
+    """Per-project geodesy settings; tolerances are config with no core default."""
+
+    linear_unit: Literal["", "m", "ft", "ftUS"] = ""
+    local_grid_epsg: int | None = Field(default=None, ge=1000, le=999999)
+    local_points: list[LocalGridPointIn] = Field(default_factory=list, max_length=200)
+    apply_local_grid: bool = False
+    residual_tol_mm: float | None = Field(default=None, gt=0, le=100000)
+    scale_tol_ppm: float | None = Field(default=None, gt=0, le=1_000_000)
+    csf_height_m: float | None = Field(default=None, ge=-500, le=9000)
+    reference_distance_m: float | None = Field(default=None, gt=0, le=100000)
+
+
+class ScaleFactorOut(BaseModel):
+    """Grid and ground at the project: CSF = k * R / (R + h)."""
+
+    epsg: int
+    e: float
+    n: float
+    height_m: float
+    k: float
+    elevation_factor: float
+    csf: float
+    distance_m: float
+    grid_m: float
+    ground_m: float
+    diff_mm: float
+    height_source: Literal["setting", "points", "none"]
+
+
+class GeodesyOut(GeodesyIn):
+    project_id: uuid.UUID
+    effective_unit: LinearUnit = "m"
+    solution: LocalGridSolution | None = None
+    scale: ScaleFactorOut | None = None

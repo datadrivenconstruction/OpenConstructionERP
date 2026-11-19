@@ -2355,6 +2355,46 @@
     "level_misclosure": {
       "fail": "Uzávěr nivelace {f} mm překračuje k·√km při k = {k} mm.",
       "suggestion": "Opakujte nivelaci nebo zkontrolujte výšky použitých nivelačních bodů."
+    },
+    "geoid_missing": {
+      "fail": "Výškový systém {v} vyžaduje mřížku geoidu {g}, která není nainstalována; výšky zůstávají podle měření.",
+      "suggestion": "Požádejte správce o instalaci mřížky do datové složky PROJ, nebo ponechte naměřené výšky."
+    },
+    "legacy_grid": {
+      "fail": "Souřadnicový systém {epsg} je v zemi {country} starší systém; hlavní systém je {p}.",
+      "suggestion": "Ponechte jej, pokud ho výkresy používají; nové práce obvykle v hlavním systému."
+    },
+    "local_grid_points": {
+      "fail": "Místní síť vyžaduje alespoň 2 identické body.",
+      "suggestion": "Přidejte body známé v síti stavby i ve státní síti."
+    },
+    "local_grid_residual": {
+      "fail": "Odchylka {r} mm na bodě {id} přesahuje {t} mm.",
+      "suggestion": "Zkontrolujte bod v obou seznamech, nebo jej použijte jen jako kontrolní."
+    },
+    "local_grid_scale": {
+      "fail": "Měřítko {s} ppm se liší od 1 o více než {t} ppm; zkontrolujte jednotky (stopy nebo metry).",
+      "suggestion": "Ověřte, že oba seznamy souřadnic mají stejnou jednotku."
+    },
+    "ground_grid": {
+      "fail": "Vzdálenosti ve vytyčovacím protokolu jsou v síti; rozdíl terén/síť na {d} m je {mm} mm.",
+      "suggestion": "Vzdálenosti měřené na stavbě jsou terénní: vydělte vzdálenosti v síti kombinovaným měřítkovým faktorem."
+    },
+    "gsi_unit": {
+      "fail": "Slovo GSI {wi} má neznámý kód jednotky {u}.",
+      "suggestion": "Exportujte soubor znovu v metrech nebo stopách."
+    },
+    "foot_definition": {
+      "fail": "Soubor je ve stopách, ale projekt v metrech; zvolte definici stopy.",
+      "suggestion": "Zvolte mezinárodní stopu (0,3048 m) nebo americkou zeměměřickou stopu (1200/3937 m)."
+    },
+    "raw_skipped": {
+      "fail": "Přeskočeno {n} surových měření bez redukovaných souřadnic.",
+      "suggestion": "Zredukujte měření v kontroléru a exportujte souřadnice."
+    },
+    "export_crs": {
+      "fail": "Souřadnicový systém exportu {a} se liší od systému projektu {b}; souřadnice transformovány.",
+      "suggestion": "Ověřte, že cílový software očekává systém exportu."
     }
   },
   "volumes": {
@@ -2408,7 +2448,9 @@
       "findings": "Zjištění",
       "no_profile": "Bez profilu, nastavte jej",
       "d": "d (mm)",
-      "dz": "dZ (mm)"
+      "dz": "dZ (mm)",
+      "scale": "Síť / terén",
+      "scale_line": "KMF {csf} (k {k}, h {h} m): {grid} m v síti = {ground} m v terénu"
     }
   },
   "land_parcels": {

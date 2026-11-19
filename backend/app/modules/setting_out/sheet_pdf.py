@@ -46,6 +46,7 @@ def build_setting_out_sheet(
     crs_label: str,
     findings: Sequence[Finding],
     locale: str = "en",
+    scale_note: str = "",
 ) -> bytes:
     """Render the setting-out sheet of one request as PDF bytes."""
     fonts = register_pdf_fonts()
@@ -89,6 +90,9 @@ def build_setting_out_sheet(
             p(datetime.now(UTC).strftime("%Y-%m-%d %H:%M UTC")),
         ],
     ]
+    if scale_note:
+        # Grid distances on the sheet versus what a tape reads on the ground.
+        meta.append([p(tr("scale")), p(scale_note), p(""), p("")])
     mt = Table(meta, colWidths=[30 * mm, WIDTH / 2 - 30 * mm, 30 * mm, WIDTH / 2 - 30 * mm])
     mt.setStyle(TableStyle([("VALIGN", (0, 0), (-1, -1), "TOP"), ("LINEBELOW", (0, -1), (-1, -1), 0.5, colors.grey)]))
     flow += [Spacer(1, 3 * mm), mt, Spacer(1, 4 * mm)]

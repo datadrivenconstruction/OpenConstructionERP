@@ -2355,6 +2355,46 @@
     "level_misclosure": {
       "fail": "Sluitfout van de waterpassing {f} mm overschrijdt k·√km met k = {k} mm.",
       "suggestion": "Waterpas opnieuw of controleer de hoogten van de gebruikte peilmerken."
+    },
+    "geoid_missing": {
+      "fail": "Hoogtesysteem {v} heeft het geoïdegrid {g} nodig, dat niet is geïnstalleerd; hoogten blijven zoals gemeten.",
+      "suggestion": "Vraag de beheerder het grid in de PROJ-datamap te installeren, of houd de gemeten hoogten aan."
+    },
+    "legacy_grid": {
+      "fail": "Grid {epsg} is een oud systeem in {country}; het hoofdsysteem is {p}.",
+      "suggestion": "Behoud het als de tekeningen het gebruiken; nieuw werk meestal in het hoofdsysteem."
+    },
+    "local_grid_points": {
+      "fail": "Een lokaal grid heeft minstens 2 gemeenschappelijke punten nodig.",
+      "suggestion": "Voeg punten toe die in het bouwgrid en het landelijke grid bekend zijn."
+    },
+    "local_grid_residual": {
+      "fail": "Restafwijking {r} mm op {id} boven {t} mm.",
+      "suggestion": "Controleer dit punt in beide lijsten, of gebruik het alleen als controlepunt."
+    },
+    "local_grid_scale": {
+      "fail": "Schaal {s} ppm wijkt meer dan {t} ppm af van 1; controleer de eenheden (voet of meter).",
+      "suggestion": "Zorg dat beide coördinatenlijsten dezelfde eenheid gebruiken."
+    },
+    "ground_grid": {
+      "fail": "Afstanden op het uitzetblad zijn gridafstanden; het verschil terrein/grid over {d} m is {mm} mm.",
+      "suggestion": "Op het terrein gemeten afstanden zijn terreinafstanden: deel gridafstanden door de gecombineerde schaalfactor."
+    },
+    "gsi_unit": {
+      "fail": "GSI-woord {wi} heeft onbekende eenheidscode {u}.",
+      "suggestion": "Exporteer het bestand opnieuw in meter of voet."
+    },
+    "foot_definition": {
+      "fail": "Het bestand is in voet maar het project in meter; kies de voetdefinitie.",
+      "suggestion": "Kies de internationale voet (0,3048 m) of de US survey foot (1200/3937 m)."
+    },
+    "raw_skipped": {
+      "fail": "{n} ruwe waarnemingen zonder gereduceerde coördinaten zijn overgeslagen.",
+      "suggestion": "Reduceer de waarnemingen op de controller en exporteer coördinaten."
+    },
+    "export_crs": {
+      "fail": "Export-CRS {a} wijkt af van project-CRS {b}; coördinaten getransformeerd.",
+      "suggestion": "Controleer dat de ontvangende software het exportsysteem verwacht."
     }
   },
   "volumes": {
@@ -2408,7 +2448,9 @@
       "findings": "Bevindingen",
       "no_profile": "Geen profiel, stel er een in",
       "d": "d (mm)",
-      "dz": "dZ (mm)"
+      "dz": "dZ (mm)",
+      "scale": "Grid / terrein",
+      "scale_line": "GSF {csf} (k {k}, h {h} m): {grid} m grid = {ground} m terrein"
     }
   },
   "land_parcels": {

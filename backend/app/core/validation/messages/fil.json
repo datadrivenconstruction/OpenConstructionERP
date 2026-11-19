@@ -2355,6 +2355,46 @@
     "level_misclosure": {
       "fail": "Ang misclosure ng leveling na {f} mm ay lampas sa k·√km na may k = {k} mm.",
       "suggestion": "Ulitin ang leveling o suriin ang taas ng mga benchmark na ginamit."
+    },
+    "geoid_missing": {
+      "fail": "Kailangan ng vertical datum {v} ang geoid grid {g}, na hindi naka-install; pinanatili ang mga taas gaya ng pagkasukat.",
+      "suggestion": "Hilingin sa administrator na i-install ang grid file sa PROJ data folder, o panatilihin ang nasukat na taas."
+    },
+    "legacy_grid": {
+      "fail": "Ang grid {epsg} ay lumang sistema sa {country}; ang pangunahing sistema ay {p}.",
+      "suggestion": "Panatilihin kung ginagamit ito ng mga drawing; karaniwang nasa pangunahing sistema ang bagong trabaho."
+    },
+    "local_grid_points": {
+      "fail": "Kailangan ng local grid ang hindi bababa sa 2 magkaparehong punto.",
+      "suggestion": "Magdagdag ng mga puntong kilala sa site grid at sa national grid."
+    },
+    "local_grid_residual": {
+      "fail": "Residual na {r} mm sa {id}, lampas sa {t} mm.",
+      "suggestion": "Suriin ang punto sa parehong listahan, o gamitin lang bilang check point."
+    },
+    "local_grid_scale": {
+      "fail": "Ang scale na {s} ppm ay iba sa 1 nang higit sa {t} ppm; suriin ang mga unit (feet o metro).",
+      "suggestion": "Tiyaking iisang unit ang gamit ng dalawang listahan ng coordinate."
+    },
+    "ground_grid": {
+      "fail": "Grid ang mga distansya sa stake sheet; ang pagkakaiba ng ground/grid sa {d} m ay {mm} mm.",
+      "suggestion": "Ground ang mga distansyang sinukat sa site: hatiin ang grid na distansya sa combined scale factor."
+    },
+    "gsi_unit": {
+      "fail": "May hindi kilalang unit code {u} ang GSI word {wi}.",
+      "suggestion": "I-export muli ang file sa metro o feet."
+    },
+    "foot_definition": {
+      "fail": "Naka-feet ang file pero metro ang gamit ng proyekto; piliin ang depinisyon ng foot.",
+      "suggestion": "Piliin ang international foot (0.3048 m) o ang US survey foot (1200/3937 m)."
+    },
+    "raw_skipped": {
+      "fail": "Nilaktawan ang {n} raw observation na walang reduced coordinates.",
+      "suggestion": "I-reduce ang mga observation sa controller at i-export ang coordinates."
+    },
+    "export_crs": {
+      "fail": "Ang export CRS {a} ay iba sa project CRS {b}; na-transform ang mga coordinate.",
+      "suggestion": "Tiyaking inaasahan ng tatanggap na software ang export system."
     }
   },
   "volumes": {
@@ -2408,7 +2448,9 @@
       "findings": "Mga natuklasan",
       "no_profile": "Walang profile, magtakda ng isa",
       "d": "d (mm)",
-      "dz": "dZ (mm)"
+      "dz": "dZ (mm)",
+      "scale": "Grid / ground",
+      "scale_line": "CSF {csf} (k {k}, h {h} m): {grid} m grid = {ground} m ground"
     }
   },
   "land_parcels": {

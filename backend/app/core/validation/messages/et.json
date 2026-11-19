@@ -2355,6 +2355,46 @@
     "level_misclosure": {
       "fail": "Nivelleerimise sulgemisviga {f} mm ületab k·√km, kui k = {k} mm.",
       "suggestion": "Korrake nivelleerimist või kontrollige kasutatud reeperite kõrgusi."
+    },
+    "geoid_missing": {
+      "fail": "Kõrgussüsteem {v} vajab geoidivõrku {g}, mis pole paigaldatud; kõrgused jäävad mõõdetuks.",
+      "suggestion": "Paluge administraatoril paigaldada võrgufail PROJ-i andmekausta või jätke mõõdetud kõrgused."
+    },
+    "legacy_grid": {
+      "fail": "Süsteem {epsg} on riigis {country} vana süsteem; põhisüsteem on {p}.",
+      "suggestion": "Jätke see, kui joonised seda kasutavad; uus töö tehakse tavaliselt põhisüsteemis."
+    },
+    "local_grid_points": {
+      "fail": "Kohalik võrk vajab vähemalt 2 ühist punkti.",
+      "suggestion": "Lisage punkte, mis on teada nii objekti kui ka riiklikus võrgus."
+    },
+    "local_grid_residual": {
+      "fail": "Jääkviga {r} mm punktis {id} üle {t} mm.",
+      "suggestion": "Kontrollige punkti mõlemas loendis või kasutage seda ainult kontrollpunktina."
+    },
+    "local_grid_scale": {
+      "fail": "Mõõtkava {s} ppm erineb 1-st rohkem kui {t} ppm; kontrollige ühikuid (jalad või meetrid).",
+      "suggestion": "Veenduge, et mõlemad koordinaadiloendid kasutavad sama ühikut."
+    },
+    "ground_grid": {
+      "fail": "Mahamärkimislehe kaugused on tasandil; maastiku ja tasandi erinevus {d} m kohta on {mm} mm.",
+      "suggestion": "Objektil mõõdetud kaugused on maastikul: jagage tasandikaugused kombineeritud mõõtkavateguriga."
+    },
+    "gsi_unit": {
+      "fail": "GSI-sõnal {wi} on tundmatu ühikukood {u}.",
+      "suggestion": "Eksportige fail uuesti meetrites või jalgades."
+    },
+    "foot_definition": {
+      "fail": "Fail on jalgades, projekt meetrites; valige jala määratlus.",
+      "suggestion": "Valige rahvusvaheline jalg (0,3048 m) või USA maamõõdujalg (1200/3937 m)."
+    },
+    "raw_skipped": {
+      "fail": "Jäeti vahele {n} töötlemata vaatlust ilma redutseeritud koordinaatideta.",
+      "suggestion": "Redutseerige vaatlused kontrolleris ja eksportige koordinaadid."
+    },
+    "export_crs": {
+      "fail": "Ekspordi koordinaatsüsteem {a} erineb projekti süsteemist {b}; koordinaadid teisendati.",
+      "suggestion": "Veenduge, et vastuvõttev tarkvara ootab ekspordi süsteemi."
     }
   },
   "volumes": {
@@ -2408,7 +2448,9 @@
       "findings": "Leiud",
       "no_profile": "Profiil puudub, määra see",
       "d": "d (mm)",
-      "dz": "dZ (mm)"
+      "dz": "dZ (mm)",
+      "scale": "Tasand / maastik",
+      "scale_line": "KMT {csf} (k {k}, h {h} m): {grid} m tasandil = {ground} m maastikul"
     }
   },
   "land_parcels": {

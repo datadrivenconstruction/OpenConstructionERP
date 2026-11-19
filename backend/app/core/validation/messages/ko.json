@@ -2355,6 +2355,46 @@
     "level_misclosure": {
       "fail": "수준측량 폐합차 {f} mm가 k·√km(k = {k} mm)를 초과합니다.",
       "suggestion": "수준측량을 다시 하거나 사용한 수준점 표고를 확인하세요."
+    },
+    "geoid_missing": {
+      "fail": "수직 기준 {v}에는 지오이드 격자 {g}가 필요하지만 설치되어 있지 않아 높이를 측정값 그대로 유지합니다.",
+      "suggestion": "관리자에게 격자 파일을 PROJ 데이터 폴더에 설치해 달라고 하거나 측정 높이를 유지하세요."
+    },
+    "legacy_grid": {
+      "fail": "좌표계 {epsg}는 {country}의 구 좌표계입니다. 주 좌표계는 {p}입니다.",
+      "suggestion": "도면이 사용하면 유지하세요. 새 작업은 보통 주 좌표계에서 합니다."
+    },
+    "local_grid_points": {
+      "fail": "현장 좌표계에는 공통점이 2개 이상 필요합니다.",
+      "suggestion": "현장 좌표계와 국가 좌표계 모두에서 알려진 점을 추가하세요."
+    },
+    "local_grid_residual": {
+      "fail": "{id}의 잔차 {r} mm가 {t} mm를 넘습니다.",
+      "suggestion": "두 목록에서 이 점을 확인하거나 검사점으로만 사용하세요."
+    },
+    "local_grid_scale": {
+      "fail": "축척 {s} ppm이 1과 {t} ppm 이상 다릅니다. 단위(피트 또는 미터)를 확인하세요.",
+      "suggestion": "두 좌표 목록이 같은 단위인지 확인하세요."
+    },
+    "ground_grid": {
+      "fail": "측설 시트의 거리는 평면 거리입니다. {d} m에서 지상/평면 차이는 {mm} mm입니다.",
+      "suggestion": "현장에서 잰 거리는 지상 거리입니다. 평면 거리를 결합 축척 계수로 나누세요."
+    },
+    "gsi_unit": {
+      "fail": "GSI 워드 {wi}의 단위 코드 {u}를 알 수 없습니다.",
+      "suggestion": "미터 또는 피트 단위로 파일을 다시 내보내세요."
+    },
+    "foot_definition": {
+      "fail": "파일은 피트인데 프로젝트는 미터를 씁니다. 피트 정의를 선택하세요.",
+      "suggestion": "국제 피트(0.3048 m) 또는 미국 측량 피트(1200/3937 m)를 선택하세요."
+    },
+    "raw_skipped": {
+      "fail": "계산 좌표가 없는 원시 관측 {n}건을 건너뛰었습니다.",
+      "suggestion": "컨트롤러에서 관측을 계산하고 좌표를 내보내세요."
+    },
+    "export_crs": {
+      "fail": "내보내기 좌표계 {a}가 프로젝트 좌표계 {b}와 다릅니다. 좌표를 변환했습니다.",
+      "suggestion": "받는 소프트웨어가 내보내기 좌표계를 기대하는지 확인하세요."
     }
   },
   "volumes": {
@@ -2408,7 +2448,9 @@
       "findings": "지적 사항",
       "no_profile": "프로필이 없습니다. 설정하세요",
       "d": "d (mm)",
-      "dz": "dZ (mm)"
+      "dz": "dZ (mm)",
+      "scale": "평면 / 지상",
+      "scale_line": "결합 축척 계수 {csf} (k {k}, h {h} m): 평면 {grid} m = 지상 {ground} m"
     }
   },
   "land_parcels": {

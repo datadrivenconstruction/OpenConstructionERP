@@ -2355,6 +2355,46 @@
     "level_misclosure": {
       "fail": "Salah penutup sipat datar {f} mm melebihi k·√km dengan k = {k} mm.",
       "suggestion": "Ulangi sipat datar atau periksa elevasi titik tetap yang digunakan."
+    },
+    "geoid_missing": {
+      "fail": "Datum vertikal {v} memerlukan grid geoid {g}, yang belum terpasang; tinggi disimpan sesuai ukuran.",
+      "suggestion": "Minta administrator memasang berkas grid di folder data PROJ, atau pertahankan tinggi hasil ukur."
+    },
+    "legacy_grid": {
+      "fail": "Grid {epsg} adalah sistem lama di {country}; sistem utama adalah {p}.",
+      "suggestion": "Pertahankan jika gambar memakainya; pekerjaan baru biasanya di sistem utama."
+    },
+    "local_grid_points": {
+      "fail": "Grid lokal memerlukan minimal 2 titik sekutu.",
+      "suggestion": "Tambahkan titik yang diketahui di grid proyek dan grid nasional."
+    },
+    "local_grid_residual": {
+      "fail": "Residu {r} mm pada {id} di atas {t} mm.",
+      "suggestion": "Periksa titik ini di kedua daftar, atau gunakan hanya sebagai titik kontrol."
+    },
+    "local_grid_scale": {
+      "fail": "Skala {s} ppm berbeda dari 1 lebih dari {t} ppm; periksa satuan (kaki atau meter).",
+      "suggestion": "Pastikan kedua daftar koordinat memakai satuan yang sama."
+    },
+    "ground_grid": {
+      "fail": "Jarak di lembar stake out adalah jarak grid; selisih lapangan/grid pada {d} m adalah {mm} mm.",
+      "suggestion": "Jarak yang diukur di lapangan adalah jarak lapangan: bagi jarak grid dengan faktor skala gabungan."
+    },
+    "gsi_unit": {
+      "fail": "Kata GSI {wi} memiliki kode satuan tak dikenal {u}.",
+      "suggestion": "Ekspor ulang berkas dalam meter atau kaki."
+    },
+    "foot_definition": {
+      "fail": "Berkas dalam kaki tetapi proyek memakai meter; pilih definisi kaki.",
+      "suggestion": "Pilih kaki internasional (0,3048 m) atau kaki survei AS (1200/3937 m)."
+    },
+    "raw_skipped": {
+      "fail": "{n} pengamatan mentah tanpa koordinat tereduksi dilewati.",
+      "suggestion": "Reduksi pengamatan di controller lalu ekspor koordinat."
+    },
+    "export_crs": {
+      "fail": "CRS ekspor {a} berbeda dari CRS proyek {b}; koordinat ditransformasi.",
+      "suggestion": "Pastikan perangkat lunak penerima mengharapkan sistem ekspor."
     }
   },
   "volumes": {
@@ -2408,7 +2448,9 @@
       "findings": "Temuan",
       "no_profile": "Tanpa profil, tetapkan satu",
       "d": "d (mm)",
-      "dz": "dZ (mm)"
+      "dz": "dZ (mm)",
+      "scale": "Grid / lapangan",
+      "scale_line": "FSG {csf} (k {k}, h {h} m): {grid} m grid = {ground} m lapangan"
     }
   },
   "land_parcels": {

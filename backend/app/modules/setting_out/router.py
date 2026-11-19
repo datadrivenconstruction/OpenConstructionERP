@@ -19,6 +19,7 @@ Endpoints:
     POST   /requests/{request_id}/chainage           - chainage/offset calculator on the alignment
     POST   /requests/{request_id}/measured           - import measured stakes from CSV
     GET    /requests/{request_id}/sheet.pdf          - setting-out sheet
+    GET    /requests/{request_id}/export             - design stakes as CSV, GeoJSON, GSI-16, LandXML or DXF
     POST   /stakes/{stake_id}/records                - record one measurement, instant verdict
     GET    /stakes/{stake_id}/records                - measurement history of a stake
     POST   /records/{record_id}/ncr                  - NCR draft in Quality for a failed stake
@@ -224,6 +225,21 @@ async def sheet_pdf(
             "Content-Language": normalize_document_locale(locale, SUPPORTED_LOCALES, "en"),
         },
     )
+
+
+@router.get("/requests/{request_id}/export", response_class=Response, dependencies=_READ)
+async def export_stakes(
+    request_id: uuid.UUID,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    fmt: str = Query("csv", alias="format", pattern="^(csv|geojson|gsi|landxml|dxf)$"),
+    locale: str = _LOCALE,
+) -> Response:
+    from app.modules.survey_core.router import download  # noqa: PLC0415
+
+    service, req = await _request(request_id, session, user_id)
+    text, findings = await service.export_stakes(req, fmt, locale)
+    return download(text, fmt, f"setting-out-{req.code}", findings)
 
 
 async def _stake(stake_id: uuid.UUID, session: SessionDep, user_id: CurrentUserId):  # noqa: ANN202

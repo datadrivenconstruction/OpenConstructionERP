@@ -2355,6 +2355,46 @@
     "level_misclosure": {
       "fail": "A szintezés záróhibája {f} mm meghaladja a k·√km értéket (k = {k} mm).",
       "suggestion": "Ismételje meg a szintezést, vagy ellenőrizze a használt magassági alappontokat."
+    },
+    "geoid_missing": {
+      "fail": "A(z) {v} magassági rendszerhez a(z) {g} geoidrács kell, ami nincs telepítve; a magasságok mértként maradnak.",
+      "suggestion": "Kérje meg a rendszergazdát, hogy telepítse a rácsot a PROJ adatmappába, vagy tartsa meg a mért magasságokat."
+    },
+    "legacy_grid": {
+      "fail": "A(z) {epsg} rendszer régi rendszer itt: {country}; a fő rendszer {p}.",
+      "suggestion": "Tartsa meg, ha a tervek ezt használják; az új munka általában a fő rendszerben készül."
+    },
+    "local_grid_points": {
+      "fail": "A helyi hálózathoz legalább 2 közös pont kell.",
+      "suggestion": "Adjon meg olyan pontokat, amelyek a helyszíni és az országos hálózatban is ismertek."
+    },
+    "local_grid_residual": {
+      "fail": "{r} mm maradék eltérés a(z) {id} ponton, több mint {t} mm.",
+      "suggestion": "Ellenőrizze a pontot mindkét listában, vagy használja csak ellenőrző pontként."
+    },
+    "local_grid_scale": {
+      "fail": "A {s} ppm méretarány több mint {t} ppm-mel tér el 1-től; ellenőrizze a mértékegységet (láb vagy méter).",
+      "suggestion": "Győződjön meg róla, hogy mindkét koordinátalista azonos mértékegységű."
+    },
+    "ground_grid": {
+      "fail": "A kitűzési lap távolságai vetületi távolságok; a terep/vetület eltérés {d} m-en {mm} mm.",
+      "suggestion": "A helyszínen mért távolságok terepiek: a vetületi távolságot ossza el a kombinált méretarány-tényezővel."
+    },
+    "gsi_unit": {
+      "fail": "A(z) {wi} GSI-szó egységkódja ismeretlen: {u}.",
+      "suggestion": "Exportálja újra a fájlt méterben vagy lábban."
+    },
+    "foot_definition": {
+      "fail": "A fájl lábban van, a projekt méterben; válassza ki a láb definícióját.",
+      "suggestion": "Válassza a nemzetközi lábat (0,3048 m) vagy az amerikai földmérő lábat (1200/3937 m)."
+    },
+    "raw_skipped": {
+      "fail": "{n} redukált koordináta nélküli nyers mérés kimaradt.",
+      "suggestion": "Redukálja a méréseket a kontrolleren, és exportáljon koordinátákat."
+    },
+    "export_crs": {
+      "fail": "Az export koordináta-rendszere ({a}) eltér a projektétől ({b}); a koordináták át lettek számítva.",
+      "suggestion": "Ellenőrizze, hogy a fogadó szoftver az export rendszerét várja."
     }
   },
   "volumes": {
@@ -2408,7 +2448,9 @@
       "findings": "Megállapítások",
       "no_profile": "Nincs profil, adjon meg egyet",
       "d": "d (mm)",
-      "dz": "dZ (mm)"
+      "dz": "dZ (mm)",
+      "scale": "Vetület / terep",
+      "scale_line": "KMT {csf} (k {k}, h {h} m): {grid} m vetületi = {ground} m terepi"
     }
   },
   "land_parcels": {

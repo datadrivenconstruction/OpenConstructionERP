@@ -2355,6 +2355,46 @@
     "level_misclosure": {
       "fail": "Level run misclosure {f} mm exceeds k·√km with k = {k} mm.",
       "suggestion": "Re-run the levels or check the benchmark heights used."
+    },
+    "geoid_missing": {
+      "fail": "Vertical datum {v} needs geoid grid {g}, which is not installed; heights are kept as measured.",
+      "suggestion": "Ask the administrator to install the grid file in the PROJ data folder, or keep heights as measured."
+    },
+    "legacy_grid": {
+      "fail": "Grid {epsg} is a legacy system in {country}; the primary system is {p}.",
+      "suggestion": "Keep it when the drawings use it; new work usually goes in the primary system."
+    },
+    "local_grid_points": {
+      "fail": "A local grid needs at least 2 common points.",
+      "suggestion": "Add points known in both the site grid and the national grid."
+    },
+    "local_grid_residual": {
+      "fail": "Residual {r} mm on {id} above {t} mm.",
+      "suggestion": "Check this point in both lists, or use it as a check point only."
+    },
+    "local_grid_scale": {
+      "fail": "Scale {s} ppm differs from 1 by more than {t} ppm; check the units (feet or metres).",
+      "suggestion": "Make sure both coordinate lists use the same unit."
+    },
+    "ground_grid": {
+      "fail": "Stake sheet distances are grid; the ground/grid difference over {d} m is {mm} mm.",
+      "suggestion": "Distances taped on site are ground: divide grid distances by the combined scale factor."
+    },
+    "gsi_unit": {
+      "fail": "GSI word {wi} has unknown unit code {u}.",
+      "suggestion": "Export the file again with metres or feet as the unit."
+    },
+    "foot_definition": {
+      "fail": "File declares feet but the project uses metres; choose the foot definition.",
+      "suggestion": "Choose the international foot (0.3048 m) or the US survey foot (1200/3937 m)."
+    },
+    "raw_skipped": {
+      "fail": "{n} raw observations without reduced coordinates were skipped.",
+      "suggestion": "Reduce the observations on the controller and export coordinates."
+    },
+    "export_crs": {
+      "fail": "Export CRS {a} differs from project CRS {b}; coordinates transformed.",
+      "suggestion": "Make sure the receiving software expects the export system."
     }
   },
   "volumes": {
@@ -2408,7 +2448,9 @@
       "findings": "Findings",
       "no_profile": "No profile, set one",
       "d": "Offset d (mm)",
-      "dz": "Offset dZ (mm)"
+      "dz": "Offset dZ (mm)",
+      "scale": "Grid / ground",
+      "scale_line": "CSF {csf} (k {k}, h {h} m): {grid} m grid = {ground} m ground"
     }
   },
   "land_parcels": {

@@ -2355,6 +2355,46 @@
     "level_misclosure": {
       "fail": "Odchyłka niwelacji {f} mm przekracza k·√km przy k = {k} mm.",
       "suggestion": "Powtórz niwelację lub sprawdź wysokości użytych reperów."
+    },
+    "geoid_missing": {
+      "fail": "Układ wysokości {v} wymaga siatki geoidy {g}, która nie jest zainstalowana; wysokości pozostają jak pomierzone.",
+      "suggestion": "Poproś administratora o instalację siatki w folderze danych PROJ lub zachowaj wysokości pomierzone."
+    },
+    "legacy_grid": {
+      "fail": "Układ {epsg} jest układem dawnym w kraju {country}; układ podstawowy to {p}.",
+      "suggestion": "Zachowaj go, jeśli rysunki go używają; nowe prace zwykle w układzie podstawowym."
+    },
+    "local_grid_points": {
+      "fail": "Układ lokalny wymaga co najmniej 2 punktów dostosowania.",
+      "suggestion": "Dodaj punkty znane w układzie budowy i w układzie państwowym."
+    },
+    "local_grid_residual": {
+      "fail": "Odchyłka {r} mm na {id} przekracza {t} mm.",
+      "suggestion": "Sprawdź punkt w obu wykazach lub użyj go tylko jako punktu kontrolnego."
+    },
+    "local_grid_scale": {
+      "fail": "Skala {s} ppm różni się od 1 o więcej niż {t} ppm; sprawdź jednostki (stopy czy metry).",
+      "suggestion": "Upewnij się, że oba wykazy współrzędnych mają tę samą jednostkę."
+    },
+    "ground_grid": {
+      "fail": "Odległości w szkicu tyczenia są w układzie; różnica teren/układ na {d} m wynosi {mm} mm.",
+      "suggestion": "Odległości mierzone w terenie są terenowe: podziel odległości w układzie przez łączny współczynnik skali."
+    },
+    "gsi_unit": {
+      "fail": "Słowo GSI {wi} ma nieznany kod jednostki {u}.",
+      "suggestion": "Wyeksportuj plik ponownie w metrach lub stopach."
+    },
+    "foot_definition": {
+      "fail": "Plik jest w stopach, a projekt w metrach; wybierz definicję stopy.",
+      "suggestion": "Wybierz stopę międzynarodową (0,3048 m) lub stopę geodezyjną USA (1200/3937 m)."
+    },
+    "raw_skipped": {
+      "fail": "Pominięto {n} surowych obserwacji bez zredukowanych współrzędnych.",
+      "suggestion": "Zredukuj obserwacje w rejestratorze i wyeksportuj współrzędne."
+    },
+    "export_crs": {
+      "fail": "Układ eksportu {a} różni się od układu projektu {b}; współrzędne przeliczono.",
+      "suggestion": "Upewnij się, że program docelowy oczekuje układu eksportu."
     }
   },
   "volumes": {
@@ -2408,7 +2448,9 @@
       "findings": "Ustalenia",
       "no_profile": "Brak profilu, ustaw go",
       "d": "d (mm)",
-      "dz": "dZ (mm)"
+      "dz": "dZ (mm)",
+      "scale": "Układ / teren",
+      "scale_line": "ŁWS {csf} (k {k}, h {h} m): {grid} m w układzie = {ground} m w terenie"
     }
   },
   "land_parcels": {

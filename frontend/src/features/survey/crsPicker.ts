@@ -9,7 +9,7 @@
 
 import type { CrsInfo, CrsSuggestion, ProjectCrs } from './api';
 
-export type CrsOption = CrsInfo & Partial<Pick<CrsSuggestion, 'reason' | 'confidence' | 'pack_country'>>;
+export type CrsOption = CrsInfo & Partial<Pick<CrsSuggestion, 'reason' | 'confidence' | 'pack_country' | 'role' | 'vertical_name' | 'geoid_grid'>>;
 
 /** "EPSG 32633 · WGS 84 / UTM zone 33N", or the local-grid label key's fallback. */
 export function crsChipText(crs: Pick<ProjectCrs, 'horizontal_epsg' | 'horizontal_name' | 'is_local_grid'> | null, localLabel: string): string {
