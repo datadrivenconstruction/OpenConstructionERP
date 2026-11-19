@@ -674,6 +674,8 @@ class RecipientImportResult(BaseModel):
     skipped: list[RecipientImportRow]
     contacts_created: int = 0
     contacts_linked: int = 0
+    # Firms the subcontractor directory blocks; left off the list (award.bidder_blocked).
+    blocked: list[str] = Field(default_factory=list)
 
 
 class DistributeRequest(BaseModel):
@@ -1169,6 +1171,9 @@ class BidPortalDraft(BaseModel):
     unit_prices: dict[str, str] = Field(default_factory=dict)
     notes: str = ""
     saved_at: datetime | None = None
+    # unit_price: the bid is the priced lines; lump_sum: one figure for the package.
+    pricing_mode: str = "unit_price"
+    lump_sum: str | None = None
 
 
 class BidPortalView(BaseModel):
@@ -1214,6 +1219,10 @@ class BidPortalPricesRequest(BaseModel):
     unit_prices: dict[str, Any] = Field(default_factory=dict, max_length=50_000)
     notes: str = Field(default="", max_length=2000)
     currency: str | None = Field(default=None, max_length=10)
+    # ``lump_sum`` offers one figure for the whole package; unit prices, when
+    # given as well, are its breakdown and the contract keeps them on the lines.
+    pricing_mode: Literal["unit_price", "lump_sum"] = "unit_price"
+    lump_sum: Any = None
 
 
 # -- GAEB X84 bid return --------------------------------------------------------

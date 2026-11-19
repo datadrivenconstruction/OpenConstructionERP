@@ -36,6 +36,7 @@ import {
   saveBidDraft,
   submitBid,
   type BidPortalErrorCode,
+  type BidPricingMode,
   type BidPortalLine,
   type BidPortalView,
 } from './api';
@@ -75,6 +76,8 @@ export function BidPortalPage() {
   const [state, setState] = useState<PageState>({ kind: 'loading' });
   const [inputs, setInputs] = useState<Record<string, string>>({});
   const [notes, setNotes] = useState('');
+  const [pricingMode, setPricingMode] = useState<BidPricingMode>('unit_price');
+  const [lumpSum, setLumpSum] = useState('');
   const [dirty, setDirty] = useState(false);
   const [busy, setBusy] = useState<'save' | 'submit' | null>(null);
   const [actionError, setActionError] = useState<BidPortalErrorCode | null>(null);
@@ -85,6 +88,8 @@ export function BidPortalPage() {
     setState({ kind: 'ready', view });
     setInputs({ ...view.draft.unit_prices });
     setNotes(view.draft.notes || '');
+    setPricingMode(view.draft.pricing_mode === 'lump_sum' ? 'lump_sum' : 'unit_price');
+    setLumpSum(view.draft.lump_sum ?? '');
     setDirty(false);
     setServerLineErrors({});
   }, []);
@@ -133,7 +138,11 @@ export function BidPortalPage() {
   const pricedCount = items.filter((l) => parsed[l.id]?.value !== null && parsed[l.id]?.value !== undefined).length;
   const invalidCount = items.filter((l) => parsed[l.id]?.invalid).length;
   const unpricedCount = items.length - pricedCount - invalidCount;
-  const sum = items.reduce((acc, l) => acc + (parsed[l.id]?.value ?? 0) * quantityOf(l), 0);
+  const linesSum = items.reduce((acc, l) => acc + (parsed[l.id]?.value ?? 0) * quantityOf(l), 0);
+  const parsedLump = parsePrice(lumpSum);
+  const isLump = pricingMode === 'lump_sum';
+  const lumpReady = isLump && parsedLump.value !== null && !parsedLump.invalid;
+  const sum = isLump ? (parsedLump.value ?? 0) : linesSum;
 
   // A field the bidder edits keeps the canonical form they typed or the
   // server stored; once the bid is in and the field is only read, the price
@@ -154,7 +163,14 @@ export function BidPortalPage() {
       const raw = (inputs[line.id] ?? '').trim();
       if (raw) unit_prices[line.id] = toDecimalPayloadString(raw, '');
     }
-    return { unit_prices, notes, currency };
+    const lump = lumpSum.trim();
+    return {
+      unit_prices,
+      notes,
+      currency,
+      pricing_mode: pricingMode,
+      lump_sum: isLump && lump ? toDecimalPayloadString(lump, '') : null,
+    };
   };
 
   const handleFailure = (err: unknown) => {
@@ -460,6 +476,58 @@ export function BidPortalPage() {
         </table>
       </div>
 
+      <fieldset className="mt-4 rounded-lg border border-border-light p-3" data-testid="bid-portal-pricing-mode">
+        <legend className="px-1 text-sm font-medium text-content-primary">
+          {t('bid_portal.pricing_mode', { defaultValue: 'How do you price this offer?' })}
+        </legend>
+        <div className="flex flex-wrap gap-4">
+          {(['unit_price', 'lump_sum'] as const).map((mode) => (
+            <label key={mode} className="flex items-center gap-2 text-sm">
+              <input
+                type="radio"
+                name="bid-portal-pricing-mode"
+                value={mode}
+                checked={pricingMode === mode}
+                disabled={readOnly}
+                onChange={() => {
+                  setPricingMode(mode);
+                  setDirty(true);
+                }}
+              />
+              {mode === 'unit_price'
+                ? t('bid_portal.mode_unit_price', { defaultValue: 'Unit prices: the bid is the sum of the priced lines' })
+                : t('bid_portal.mode_lump_sum', { defaultValue: 'Lump sum: one price for the whole package' })}
+            </label>
+          ))}
+        </div>
+        {isLump && (
+          <div className="mt-3">
+            <label htmlFor="bid-portal-lump-sum" className="oe-label">
+              {t('bid_portal.lump_sum', { defaultValue: 'Lump sum ({{currency}})', currency })}
+            </label>
+            <input
+              id="bid-portal-lump-sum"
+              inputMode="decimal"
+              value={lumpSum}
+              disabled={readOnly}
+              onChange={(e) => {
+                setLumpSum(e.target.value);
+                setDirty(true);
+              }}
+              aria-invalid={parsedLump.invalid || undefined}
+              className="oe-input mt-1 w-48 text-right tabular-nums"
+              data-testid="bid-portal-lump-sum"
+            />
+            <p className="mt-1 text-xs text-content-tertiary">
+              {t('bid_portal.lump_sum_hint', {
+                defaultValue: 'Unit prices you enter above stay as the breakdown of the lump sum. Lines sum: {{amount}}',
+                amount: money(linesSum),
+              })}
+            </p>
+          </div>
+        )}
+      </fieldset>
+
       <div className="mt-4">
         <label htmlFor="bid-portal-notes" className="oe-label">
           {t('bid_portal.notes', { defaultValue: 'Notes for the buyer (optional)' })}
@@ -513,7 +581,7 @@ export function BidPortalPage() {
                 variant="primary"
                 onClick={onSubmit}
                 loading={busy === 'submit'}
-                disabled={busy !== null || pricedCount === 0 || invalidCount > 0}
+                disabled={busy !== null || (isLump ? !lumpReady : pricedCount === 0) || invalidCount > 0}
                 data-testid="bid-portal-submit"
               >
                 {t('bid_portal.submit', { defaultValue: 'Submit bid' })}
@@ -543,6 +611,9 @@ function ActionErrorText({ code }: { code: BidPortalErrorCode }) {
       return <>{t('bid_portal.error.invalid_prices', { defaultValue: 'Some prices could not be accepted. Check the marked lines.' })}</>;
     case 'nothing_priced':
       return <>{t('bid_portal.error.nothing_priced', { defaultValue: 'Enter at least one price before submitting.' })}</>;
+    case 'lump_sum_required':
+    case 'lump_sum_invalid':
+      return <>{t('bid_portal.error.lump_sum', { defaultValue: 'Enter the lump sum as a number of 0 or more.' })}</>;
     case 'already_submitted':
       return <>{t('bid_portal.error.already_submitted', { defaultValue: 'This bid was already submitted.' })}</>;
     case 'closed':

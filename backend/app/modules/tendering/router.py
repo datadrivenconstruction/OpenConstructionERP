@@ -1871,3 +1871,8 @@ async def check_bid_integrity(
 from app.modules.tendering.addenda_router import router as _addenda_router  # noqa: E402
 
 router.include_router(_addenda_router)
+
+# Award terms, negotiation rounds and the bidder gate.
+from app.modules.tendering.award_router import router as _award_router  # noqa: E402
+
+router.include_router(_award_router)

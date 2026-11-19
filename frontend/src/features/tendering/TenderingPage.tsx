@@ -63,6 +63,7 @@ import { AddendumList } from './AddendumList';
 import { ClarificationsPanel } from './ClarificationsPanel';
 import { bidComplianceChips } from './bidCompliance';
 import { AwardRecordPanel } from './AwardRecordPanel';
+import { AwardTermsPanel } from './AwardTermsPanel';
 import { BidLinkCell, InvitationSummary, bidInvitationsQueryKey } from './BidLinkCell';
 import { BidPortalMarks } from './BidPortalMarks';
 import { RecipientImportDialog } from './RecipientImportDialog';
@@ -1548,7 +1549,7 @@ function PackageDetail({
   // only loads when its tab is opened, so a package nobody keeps a record for
   // costs no request and stores nothing.
   const [activeTab, setActiveTab] = useState<
-    'contents' | 'bids' | 'distribution' | 'addenda' | 'clarifications' | 'leveling' | 'award-record'
+    'contents' | 'bids' | 'distribution' | 'addenda' | 'clarifications' | 'leveling' | 'award' | 'award-record'
   >('bids');
   // A bid entered by hand, being priced line by line by the buyer.
   const [pricingBid, setPricingBid] = useState<BidData | null>(null);
@@ -1627,6 +1628,7 @@ function PackageDetail({
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ['tendering-package', packageId] });
       queryClient.invalidateQueries({ queryKey: ['tendering-comparison', packageId] });
+      queryClient.invalidateQueries({ queryKey: ['tendering-award-terms', packageId] });
       queryClient.invalidateQueries({ queryKey: ['tendering-packages'] });
       // The award writes the winning line rates into the BOQ where it can,
       // and the procurement module auto-creates a draft PO from the winning
@@ -2289,6 +2291,7 @@ function PackageDetail({
           { id: 'addenda' as const, label: t('tendering.tab_addenda', 'Addenda') },
           { id: 'clarifications' as const, label: t('tendering.tab_clarifications', { defaultValue: 'Questions' }) },
           { id: 'leveling' as const, label: t('tendering.tab_leveling', 'Leveling') },
+          { id: 'award' as const, label: t('tendering.tab_award', { defaultValue: 'Award' }) },
           {
             id: 'award-record' as const,
             label: t('tendering.tab_award_record', { defaultValue: 'Award record' }),
@@ -2579,6 +2582,15 @@ function PackageDetail({
       {/* Award record sub-tab — the written record of how this award was
           reached, assembled from the procedure. Mounted (and therefore
           fetched) only when the tab is opened. */}
+      {activeTab === 'award' && (
+        <AwardTermsPanel
+          packageId={packageId}
+          packageStatus={pkg.status}
+          bids={pkg.bids}
+          onAward={(bidId) => awardMutation.mutate(bidId)}
+          awarding={awardMutation.isPending}
+        />
+      )}
       {activeTab === 'award-record' && <AwardRecordPanel packageId={packageId} />}
 
       {/* Award recommendation — see analysis.ts for the confidence rules */}

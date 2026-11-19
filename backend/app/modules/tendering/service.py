@@ -1374,6 +1374,13 @@ class TenderingService:
         # subscribers draft inherit this check and are not checked again.
         # ``ok`` when no commitment matrix is installed or the package is not
         # linked to a commitment item; ``block`` raises 409.
+        # The award terms decide the figure: a blocked firm, a lapsed certificate
+        # or a negotiated bid without its approved final offer refuses the award
+        # (409), and the contract sum after discount or lump sum is what binds.
+        from app.modules.tendering.award_terms import AwardTermsService
+
+        award_preview = await AwardTermsService(self.session).assert_awardable(package, bid, project)
+
         from app.core import commitment_guard
 
         guard_verdict = await commitment_guard.enforce(
@@ -1381,7 +1388,7 @@ class TenderingService:
             project_id=package.project_id,
             kind="tender_package",
             document_id=package_id,
-            new_amount=_to_decimal(bid.total_amount),
+            new_amount=award_preview.contract_sum,
             currency=(bid.currency or project_currency or "").strip().upper(),
             actor_id=awarded_by,
         )
@@ -1602,6 +1609,12 @@ class TenderingService:
         else:
             resolved = await bridge.find_contact_by_email(self.session, data.email, tenant_id=tenant_id)
             contact_id = str(resolved.id) if resolved is not None else None
+        # A firm the subcontractor directory blocks is not invited (409 award.bidder_blocked).
+        from app.modules.tendering.award_terms import AwardTermsService  # noqa: PLC0415
+
+        await AwardTermsService(self.session).invite_gate(
+            package, subcontractor_id=data.subcontractor_id, contact_id=contact_id
+        )
         entry = {
             "id": str(uuid.uuid4()),
             "company_name": data.company_name,
@@ -1673,7 +1686,11 @@ class TenderingService:
         rows = await self._checked_import_rows(package, filename, content)
         recipients = self._read_recipients(package)
         added: list[dict] = []
+        blocked: list[str] = []
         created = linked = 0
+        from app.modules.tendering.award_terms import AwardTermsService  # noqa: PLC0415
+
+        gate = AwardTermsService(self.session).invitation_checker(package)
         for row in rows:
             if not row.valid:
                 continue
@@ -1687,6 +1704,9 @@ class TenderingService:
                 module_tag=bridge.SUBCONTRACTOR_TAG,
                 tenant_id=tenant_id,
             )
+            if await gate.blocks_invitation(contact_id=contact.id):
+                blocked.append(row.company)
+                continue
             if existing is None:
                 contact.company_name = row.company
                 contact.vat_number = row.vat_id or None
@@ -1718,6 +1738,7 @@ class TenderingService:
             skipped=[self._import_row_response(r) for r in rows if not r.valid],
             contacts_created=created,
             contacts_linked=linked,
+            blocked=blocked,
         )
 
     async def remove_recipient(self, package_id: uuid.UUID, recipient_id: str) -> None:

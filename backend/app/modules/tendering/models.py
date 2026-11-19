@@ -254,3 +254,18 @@ class TenderClarification(Base):
 
     def __repr__(self) -> str:
         return f"<TenderClarification #{self.number} package={self.package_id} {self.status}>"
+
+
+# Award terms and negotiation rounds live in their own file; imported here so the module registers them.
+from app.modules.tendering.award_models import TenderAwardTerms, TenderNegotiationRound  # noqa: E402
+
+__all__ = [
+    "TenderAwardTerms",
+    "TenderBid",
+    "TenderBidInvitation",
+    "TenderBidReceipt",
+    "TenderClarification",
+    "TenderNegotiationRound",
+    "TenderPackage",
+    "TenderSealing",
+]
