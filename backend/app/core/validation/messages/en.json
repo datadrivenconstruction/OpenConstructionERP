@@ -2657,5 +2657,43 @@
       "fail": "The file does not name the bidder",
       "suggestion": "Enter the firm name in the bidder data of the file"
     }
+  },
+  "bundle": {
+    "project_share_missing": {
+      "fail": "Line {code} has no share for project {project}; cost cannot be split.",
+      "suggestion": "Enter the project's quantity, or 0 if it takes none of this line."
+    },
+    "share_sum_mismatch": {
+      "fail": "Shares of line {code} add up to {sum}, the line quantity is {qty}.",
+      "suggestion": "Correct the shares or the line quantity so both match exactly."
+    },
+    "share_cost_line_missing": {
+      "fail": "Share of {project} on line {code} has no cost line; it will not show in the cost report.",
+      "suggestion": "Pick the project's cost line for this share."
+    },
+    "entity_missing": {
+      "fail": "Project {project} has no legal entity; its contract cannot name the buyer.",
+      "suggestion": "Assign the project to a company of the group in the project settings."
+    },
+    "project_over_budget": {
+      "fail": "{project}: award {net} exceeds the budget {budget} by {delta}.",
+      "suggestion": "Check the project budget or agree the overrun before the award."
+    },
+    "award_split_unreconciled": {
+      "fail": "Project shares add up to {sum}, the award is {total}.",
+      "suggestion": "Recalculate the split; the rounding cent goes to the largest project."
+    },
+    "calloff_project_not_in_bundle": {
+      "fail": "Project {project} is not part of this bundle.",
+      "suggestion": "Call off only for projects that take part in the bundle."
+    },
+    "calloff_over_share": {
+      "fail": "{project} has called off {used} of {share} {unit} on line {code}.",
+      "suggestion": "Raise the project's share or agree the extra quantity first."
+    },
+    "bidder_blocked": {
+      "fail": "{vendor} is blocked in the subcontractor directory and cannot be awarded.",
+      "suggestion": "Clear the block in the directory or award to another firm."
+    }
   }
 }

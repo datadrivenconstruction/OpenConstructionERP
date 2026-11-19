@@ -2611,5 +2611,43 @@
     "index_attribution": {
       "fail": "ArchSD-prisindekset mangler kildeangivelse: angiv Architectural Services Department"
     }
+  },
+  "bundle": {
+    "project_share_missing": {
+      "fail": "Linje {code} har ingen andel for projekt {project}; omkostningen kan ikke fordeles.",
+      "suggestion": "Angiv projektets mængde, eller 0 hvis det ikke tager noget af linjen."
+    },
+    "share_sum_mismatch": {
+      "fail": "Andelene på linje {code} giver {sum}, linjens mængde er {qty}.",
+      "suggestion": "Ret andelene eller mængden, så de stemmer præcist."
+    },
+    "share_cost_line_missing": {
+      "fail": "Andelen for {project} på linje {code} har ingen omkostningslinje; den vises ikke i omkostningsrapporten.",
+      "suggestion": "Vælg projektets omkostningslinje for andelen."
+    },
+    "entity_missing": {
+      "fail": "Projekt {project} har ingen juridisk enhed; kontrakten kan ikke angive køberen.",
+      "suggestion": "Knyt projektet til et selskab i koncernen i projektindstillingerne."
+    },
+    "project_over_budget": {
+      "fail": "{project}: tildelingen {net} overstiger budgettet {budget} med {delta}.",
+      "suggestion": "Kontrollér projektbudgettet eller afstem overskridelsen før tildeling."
+    },
+    "award_split_unreconciled": {
+      "fail": "Projektandelene giver {sum}, tildelingen er {total}.",
+      "suggestion": "Genberegn fordelingen; afrundingsøren går til det største projekt."
+    },
+    "calloff_project_not_in_bundle": {
+      "fail": "Projekt {project} er ikke en del af dette samlede indkøb.",
+      "suggestion": "Afkald kun for projekter i det samlede indkøb."
+    },
+    "calloff_over_share": {
+      "fail": "{project} har afkaldt {used} af {share} {unit} på linje {code}.",
+      "suggestion": "Hæv projektets andel eller afstem den ekstra mængde først."
+    },
+    "bidder_blocked": {
+      "fail": "{vendor} er spærret i underentreprenørregistret og kan ikke tildeles.",
+      "suggestion": "Ophæv spærringen i registret eller tildel et andet firma."
+    }
   }
 }

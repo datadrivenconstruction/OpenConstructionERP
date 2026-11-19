@@ -2611,5 +2611,43 @@
     "index_attribution": {
       "fail": "ArchSD 投标价格指数未注明来源：请注明建筑署"
     }
+  },
+  "bundle": {
+    "project_share_missing": {
+      "fail": "条目 {code} 没有项目 {project} 的份额，成本无法分摊。",
+      "suggestion": "输入该项目的数量；若不使用此条目则填 0。"
+    },
+    "share_sum_mismatch": {
+      "fail": "条目 {code} 的份额合计为 {sum}，条目数量为 {qty}。",
+      "suggestion": "修改份额或数量，使两者完全一致。"
+    },
+    "share_cost_line_missing": {
+      "fail": "{project} 在条目 {code} 上的份额没有成本科目，不会出现在成本报告中。",
+      "suggestion": "为该份额选择项目的成本科目。"
+    },
+    "entity_missing": {
+      "fail": "项目 {project} 没有法人主体，合同无法写明买方。",
+      "suggestion": "在项目设置中将项目归属到集团内的公司。"
+    },
+    "project_over_budget": {
+      "fail": "{project}：中标金额 {net} 超出预算 {budget}，超出 {delta}。",
+      "suggestion": "核对项目预算，或在定标前确认超支。"
+    },
+    "award_split_unreconciled": {
+      "fail": "各项目份额合计 {sum}，中标金额为 {total}。",
+      "suggestion": "重新计算分摊；舍入差额计入最大的项目。"
+    },
+    "calloff_project_not_in_bundle": {
+      "fail": "项目 {project} 不属于本次集中采购。",
+      "suggestion": "只能为参与集中采购的项目下达订单。"
+    },
+    "calloff_over_share": {
+      "fail": "{project} 已在条目 {code} 上订购 {used}，份额为 {share} {unit}。",
+      "suggestion": "提高该项目的份额，或先确认追加数量。"
+    },
+    "bidder_blocked": {
+      "fail": "{vendor} 在分包商名录中被禁用，无法授标。",
+      "suggestion": "在名录中解除禁用，或授标给其他公司。"
+    }
   }
 }

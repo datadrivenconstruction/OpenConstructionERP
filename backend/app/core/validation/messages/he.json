@@ -2611,5 +2611,43 @@
     "index_attribution": {
       "fail": "מדד המחירים של ArchSD ללא ציון מקור: ציינו את Architectural Services Department"
     }
+  },
+  "bundle": {
+    "project_share_missing": {
+      "fail": "לשורה {code} אין חלק לפרויקט {project}; לא ניתן לפצל את העלות.",
+      "suggestion": "הזינו את כמות הפרויקט, או 0 אם אינו לוקח מהשורה."
+    },
+    "share_sum_mismatch": {
+      "fail": "חלקי השורה {code} מסתכמים ב-{sum}, כמות השורה היא {qty}.",
+      "suggestion": "תקנו את החלקים או את הכמות עד להתאמה מדויקת."
+    },
+    "share_cost_line_missing": {
+      "fail": "לחלק של {project} בשורה {code} אין שורת עלות; הוא לא יופיע בדוח העלויות.",
+      "suggestion": "בחרו את שורת העלות של הפרויקט לחלק זה."
+    },
+    "entity_missing": {
+      "fail": "לפרויקט {project} אין ישות משפטית; החוזה לא יכול לציין את הקונה.",
+      "suggestion": "שייכו את הפרויקט לחברה בקבוצה בהגדרות הפרויקט."
+    },
+    "project_over_budget": {
+      "fail": "{project}: הזכייה {net} חורגת מהתקציב {budget} ב-{delta}.",
+      "suggestion": "בדקו את תקציב הפרויקט או אשרו את החריגה לפני הזכייה."
+    },
+    "award_split_unreconciled": {
+      "fail": "חלקי הפרויקטים מסתכמים ב-{sum}, הזכייה היא {total}.",
+      "suggestion": "חשבו מחדש את הפיצול; אגורת העיגול עוברת לפרויקט הגדול ביותר."
+    },
+    "calloff_project_not_in_bundle": {
+      "fail": "הפרויקט {project} אינו חלק מרכש מאוחד זה.",
+      "suggestion": "הזמינו רק עבור פרויקטים של הרכש המאוחד."
+    },
+    "calloff_over_share": {
+      "fail": "{project} הזמין {used} מתוך {share} {unit} בשורה {code}.",
+      "suggestion": "הגדילו את חלק הפרויקט או אשרו קודם את הכמות הנוספת."
+    },
+    "bidder_blocked": {
+      "fail": "{vendor} חסום במאגר קבלני המשנה ולא ניתן להעניק לו זכייה.",
+      "suggestion": "הסירו את החסימה במאגר או העניקו לחברה אחרת."
+    }
   }
 }

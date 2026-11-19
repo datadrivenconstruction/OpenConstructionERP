@@ -2611,5 +2611,43 @@
     "index_attribution": {
       "fail": "مؤشر أسعار ArchSD بلا إسناد للمصدر: اذكر Architectural Services Department"
     }
+  },
+  "bundle": {
+    "project_share_missing": {
+      "fail": "البند {code} ليس له حصة للمشروع {project}؛ لا يمكن تقسيم التكلفة.",
+      "suggestion": "أدخل كمية المشروع، أو 0 إذا لم يأخذ شيئًا من هذا البند."
+    },
+    "share_sum_mismatch": {
+      "fail": "مجموع حصص البند {code} هو {sum}، وكمية البند {qty}.",
+      "suggestion": "صحّح الحصص أو الكمية حتى تتطابقا تمامًا."
+    },
+    "share_cost_line_missing": {
+      "fail": "حصة {project} في البند {code} بلا بند تكلفة؛ لن تظهر في تقرير التكاليف.",
+      "suggestion": "اختر بند التكلفة الخاص بالمشروع لهذه الحصة."
+    },
+    "entity_missing": {
+      "fail": "المشروع {project} بلا كيان قانوني؛ لا يمكن للعقد تسمية المشتري.",
+      "suggestion": "اربط المشروع بشركة من المجموعة في إعدادات المشروع."
+    },
+    "project_over_budget": {
+      "fail": "{project}: الترسية {net} تتجاوز الميزانية {budget} بمقدار {delta}.",
+      "suggestion": "راجع ميزانية المشروع أو اعتمد التجاوز قبل الترسية."
+    },
+    "award_split_unreconciled": {
+      "fail": "مجموع حصص المشاريع {sum}، والترسية {total}.",
+      "suggestion": "أعد حساب التقسيم؛ فرق التقريب يذهب إلى أكبر مشروع."
+    },
+    "calloff_project_not_in_bundle": {
+      "fail": "المشروع {project} ليس جزءًا من هذا الشراء المجمّع.",
+      "suggestion": "اطلب فقط للمشاريع المشاركة في الشراء المجمّع."
+    },
+    "calloff_over_share": {
+      "fail": "طلب {project} كمية {used} من {share} {unit} في البند {code}.",
+      "suggestion": "ارفع حصة المشروع أو اعتمد الكمية الإضافية أولًا."
+    },
+    "bidder_blocked": {
+      "fail": "{vendor} محظور في دليل المقاولين من الباطن ولا يمكن الترسية عليه.",
+      "suggestion": "ارفع الحظر في الدليل أو رسِّ على شركة أخرى."
+    }
   }
 }

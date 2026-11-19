@@ -186,6 +186,7 @@ const TODAYS_SIMPLE = [
   '/survey',
   '/contracts',
   '/framework-agreements',
+  '/central-purchasing',
   '/payment-clock',
   '/tax-withholding',
   '/china-tax',

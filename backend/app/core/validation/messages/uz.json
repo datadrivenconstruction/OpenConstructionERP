@@ -2611,5 +2611,43 @@
     "index_attribution": {
       "fail": "ArchSD narx indeksida manba ko'rsatilmagan: Architectural Services Department ni ko'rsating"
     }
+  },
+  "bundle": {
+    "project_share_missing": {
+      "fail": "{code} qatorida {project} loyihasi ulushi yo'q; xarajatni bo'lib bo'lmaydi.",
+      "suggestion": "Loyiha miqdorini kiriting yoki bu qatordan olmasa 0."
+    },
+    "share_sum_mismatch": {
+      "fail": "{code} qatori ulushlari yig'indisi {sum}, qator miqdori {qty}.",
+      "suggestion": "Ulushlar yoki miqdorni aniq mos kelguncha tuzating."
+    },
+    "share_cost_line_missing": {
+      "fail": "{project} ulushining {code} qatorida xarajat moddasi yo'q; u xarajat hisobotida ko'rinmaydi.",
+      "suggestion": "Bu ulush uchun loyihaning xarajat moddasini tanlang."
+    },
+    "entity_missing": {
+      "fail": "{project} loyihasining yuridik shaxsi yo'q; shartnomada xaridorni ko'rsatib bo'lmaydi.",
+      "suggestion": "Loyiha sozlamalarida loyihani guruh kompaniyasiga bog'lang."
+    },
+    "project_over_budget": {
+      "fail": "{project}: buyurtma {net} byudjet {budget} dan {delta} ga oshadi.",
+      "suggestion": "Loyiha byudjetini tekshiring yoki oshishni buyurtmadan oldin kelishing."
+    },
+    "award_split_unreconciled": {
+      "fail": "Loyiha ulushlari yig'indisi {sum}, buyurtma {total}.",
+      "suggestion": "Taqsimotni qayta hisoblang; yaxlitlash farqi eng katta loyihaga o'tadi."
+    },
+    "calloff_project_not_in_bundle": {
+      "fail": "{project} loyihasi bu birlashgan xaridga kirmaydi.",
+      "suggestion": "Faqat birlashgan xarid loyihalari uchun buyurtma bering."
+    },
+    "calloff_over_share": {
+      "fail": "{project} {code} qatorida {share} {unit} dan {used} buyurtma qildi.",
+      "suggestion": "Loyiha ulushini oshiring yoki qo'shimcha miqdorni avval kelishing."
+    },
+    "bidder_blocked": {
+      "fail": "{vendor} subpudratchilar reyestrida bloklangan, unga buyurtma berib bo'lmaydi.",
+      "suggestion": "Reyestrda blokni olib tashlang yoki boshqa firmaga bering."
+    }
   }
 }

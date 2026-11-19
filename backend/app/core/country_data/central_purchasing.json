@@ -1,0 +1,72 @@
+{
+  "_comment": "Cost code catalogues per market for central purchasing bundles, read by app.modules.central_purchasing.catalog. Labels only: a bundle line names a code so each project's own cost line can be found by it. No procurement law here; a private buyer's bundle has no statutory limit.",
+  "as_of": "2026-11-19",
+  "markets": {
+    "DE": {
+      "standard": "din276",
+      "label": "DIN 276:2018-12",
+      "codes": [
+        {"code": "322", "label": "Flachgründungen und Bodenplatten"},
+        {"code": "331", "label": "Tragende Außenwände"},
+        {"code": "335", "label": "Außenwandbekleidungen, außen"},
+        {"code": "341", "label": "Tragende Innenwände"},
+        {"code": "342", "label": "Nichttragende Innenwände"},
+        {"code": "344", "label": "Innenwandöffnungen"},
+        {"code": "345", "label": "Innenwandbekleidungen"},
+        {"code": "351", "label": "Deckenkonstruktionen"},
+        {"code": "352", "label": "Deckenbeläge"},
+        {"code": "353", "label": "Deckenbekleidungen"},
+        {"code": "363", "label": "Dachbeläge"},
+        {"code": "412", "label": "Wasseranlagen"},
+        {"code": "422", "label": "Wärmeverteilnetze"},
+        {"code": "431", "label": "Lüftungsanlagen"},
+        {"code": "444", "label": "Niederspannungsinstallationsanlagen"},
+        {"code": "445", "label": "Beleuchtungsanlagen"}
+      ]
+    },
+    "US": {
+      "standard": "masterformat",
+      "label": "CSI MasterFormat 2020",
+      "codes": [
+        {"code": "03 30 00", "label": "Cast-in-Place Concrete"},
+        {"code": "03 31 00", "label": "Structural Concrete"},
+        {"code": "04 22 00", "label": "Concrete Unit Masonry"},
+        {"code": "05 12 00", "label": "Structural Steel Framing"},
+        {"code": "07 21 00", "label": "Thermal Insulation"},
+        {"code": "08 11 13", "label": "Hollow Metal Doors and Frames"},
+        {"code": "09 21 16", "label": "Gypsum Board Assemblies"},
+        {"code": "09 51 00", "label": "Acoustical Ceilings"},
+        {"code": "09 91 00", "label": "Painting"},
+        {"code": "22 11 16", "label": "Domestic Water Piping"},
+        {"code": "23 31 00", "label": "HVAC Ducts and Casings"},
+        {"code": "26 05 33", "label": "Raceway and Boxes for Electrical Systems"},
+        {"code": "26 05 36", "label": "Cable Trays for Electrical Systems"},
+        {"code": "26 51 00", "label": "Interior Lighting"}
+      ]
+    },
+    "CA": {
+      "standard": "masterformat",
+      "label": "CSI MasterFormat 2020",
+      "inherit": "US"
+    },
+    "GB": {
+      "standard": "nrm1",
+      "label": "RICS NRM 1",
+      "codes": [
+        {"code": "1.1", "label": "Substructure"},
+        {"code": "2.1", "label": "Frame"},
+        {"code": "2.2", "label": "Upper floors"},
+        {"code": "2.3", "label": "Roof"},
+        {"code": "2.5", "label": "External walls"},
+        {"code": "2.7", "label": "Internal walls and partitions"},
+        {"code": "2.8", "label": "Internal doors"},
+        {"code": "3.1", "label": "Wall finishes"},
+        {"code": "3.2", "label": "Floor finishes"},
+        {"code": "3.3", "label": "Ceiling finishes"},
+        {"code": "5.4", "label": "Water installations"},
+        {"code": "5.6", "label": "Space heating and air conditioning"},
+        {"code": "5.8", "label": "Electrical installations"}
+      ]
+    }
+  }
+}

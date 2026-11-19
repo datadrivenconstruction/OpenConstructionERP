@@ -2611,5 +2611,43 @@
     "index_attribution": {
       "fail": "ArchSD fiyat endeksinde kaynak belirtilmemiş: Architectural Services Department'ı belirtin"
     }
+  },
+  "bundle": {
+    "project_share_missing": {
+      "fail": "{code} kaleminde {project} projesi için pay yok; maliyet bölünemez.",
+      "suggestion": "Projenin miktarını girin, bu kalemden almıyorsa 0 yazın."
+    },
+    "share_sum_mismatch": {
+      "fail": "{code} kaleminin paylarının toplamı {sum}, kalem miktarı {qty}.",
+      "suggestion": "Payları veya miktarı tam eşleşecek şekilde düzeltin."
+    },
+    "share_cost_line_missing": {
+      "fail": "{project} projesinin {code} kalemindeki payının maliyet satırı yok; maliyet raporunda görünmeyecek.",
+      "suggestion": "Bu pay için projenin maliyet satırını seçin."
+    },
+    "entity_missing": {
+      "fail": "{project} projesinin tüzel kişiliği yok; sözleşme alıcıyı belirtemez.",
+      "suggestion": "Proje ayarlarında projeyi grubun bir şirketine bağlayın."
+    },
+    "project_over_budget": {
+      "fail": "{project}: {net} ihale bedeli {budget} bütçesini {delta} aşıyor.",
+      "suggestion": "Proje bütçesini kontrol edin veya aşımı ihaleden önce onaylayın."
+    },
+    "award_split_unreconciled": {
+      "fail": "Proje paylarının toplamı {sum}, ihale bedeli {total}.",
+      "suggestion": "Dağılımı yeniden hesaplayın; yuvarlama kuruşu en büyük projeye gider."
+    },
+    "calloff_project_not_in_bundle": {
+      "fail": "{project} projesi bu toplu alımın parçası değil.",
+      "suggestion": "Yalnızca toplu alımdaki projeler için çağrı yapın."
+    },
+    "calloff_over_share": {
+      "fail": "{project}, {code} kaleminde {share} {unit} payın {used} kadarını çağırdı.",
+      "suggestion": "Projenin payını artırın veya ek miktarı önce onaylayın."
+    },
+    "bidder_blocked": {
+      "fail": "{vendor} taşeron rehberinde engelli ve ihale alamaz.",
+      "suggestion": "Rehberdeki engeli kaldırın veya başka bir firmaya verin."
+    }
   }
 }

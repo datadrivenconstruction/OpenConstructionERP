@@ -213,6 +213,7 @@ const EXTRA_ROUTE_ICONS: Record<string, LucideIcon> = {
   '/win-loss': Scale,
   '/contracts': FileSignature,
   '/framework-agreements': Layers3,
+  '/central-purchasing': Boxes,
   '/payment-clock': Scale,
   '/tax-withholding': Percent,
   '/china-tax': Receipt,

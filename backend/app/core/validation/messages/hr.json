@@ -2611,5 +2611,43 @@
     "index_attribution": {
       "fail": "Indeks cijena ArchSD nema naveden izvor: navedite Architectural Services Department"
     }
+  },
+  "bundle": {
+    "project_share_missing": {
+      "fail": "Stavka {code} nema udio za projekt {project}; trošak se ne može raspodijeliti.",
+      "suggestion": "Unesite količinu projekta ili 0 ako ne uzima ništa od ove stavke."
+    },
+    "share_sum_mismatch": {
+      "fail": "Udjeli stavke {code} zbrajaju se u {sum}, količina stavke je {qty}.",
+      "suggestion": "Ispravite udjele ili količinu da se točno podudaraju."
+    },
+    "share_cost_line_missing": {
+      "fail": "Udio {project} na stavci {code} nema troškovnu stavku; neće se vidjeti u izvješću o troškovima.",
+      "suggestion": "Odaberite troškovnu stavku projekta za ovaj udio."
+    },
+    "entity_missing": {
+      "fail": "Projekt {project} nema pravnu osobu; ugovor ne može navesti kupca.",
+      "suggestion": "Povežite projekt s društvom grupe u postavkama projekta."
+    },
+    "project_over_budget": {
+      "fail": "{project}: dodjela {net} premašuje proračun {budget} za {delta}.",
+      "suggestion": "Provjerite proračun projekta ili dogovorite prekoračenje prije dodjele."
+    },
+    "award_split_unreconciled": {
+      "fail": "Udjeli projekata zbrajaju se u {sum}, dodjela je {total}.",
+      "suggestion": "Ponovno izračunajte raspodjelu; cent od zaokruživanja ide najvećem projektu."
+    },
+    "calloff_project_not_in_bundle": {
+      "fail": "Projekt {project} nije dio ove zajedničke nabave.",
+      "suggestion": "Naručujte samo za projekte zajedničke nabave."
+    },
+    "calloff_over_share": {
+      "fail": "{project} je naručio {used} od {share} {unit} na stavci {code}.",
+      "suggestion": "Povećajte udio projekta ili najprije dogovorite dodatnu količinu."
+    },
+    "bidder_blocked": {
+      "fail": "{vendor} je blokiran u registru podizvođača i ne može dobiti ugovor.",
+      "suggestion": "Uklonite blokadu u registru ili dodijelite drugoj tvrtki."
+    }
   }
 }

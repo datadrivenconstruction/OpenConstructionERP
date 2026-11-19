@@ -2611,5 +2611,43 @@
     "index_attribution": {
       "fail": "ArchSD 入札価格指数に出典表示がありません：Architectural Services Department を明記してください"
     }
+  },
+  "bundle": {
+    "project_share_missing": {
+      "fail": "明細 {code} にプロジェクト {project} の配分がありません。費用を分割できません。",
+      "suggestion": "プロジェクトの数量を入力してください。この明細を使わない場合は 0 です。"
+    },
+    "share_sum_mismatch": {
+      "fail": "明細 {code} の配分合計は {sum}、明細数量は {qty} です。",
+      "suggestion": "配分または数量を修正して完全に一致させてください。"
+    },
+    "share_cost_line_missing": {
+      "fail": "明細 {code} の {project} の配分に原価科目がありません。原価レポートに表示されません。",
+      "suggestion": "この配分にプロジェクトの原価科目を選んでください。"
+    },
+    "entity_missing": {
+      "fail": "プロジェクト {project} に法人がありません。契約書に発注者を記載できません。",
+      "suggestion": "プロジェクト設定でグループ会社に割り当ててください。"
+    },
+    "project_over_budget": {
+      "fail": "{project}: 発注額 {net} は予算 {budget} を {delta} 超えています。",
+      "suggestion": "プロジェクト予算を確認するか、発注前に超過を承認してください。"
+    },
+    "award_split_unreconciled": {
+      "fail": "プロジェクト配分の合計は {sum}、発注額は {total} です。",
+      "suggestion": "配分を再計算してください。端数は最大のプロジェクトに入ります。"
+    },
+    "calloff_project_not_in_bundle": {
+      "fail": "プロジェクト {project} はこの集中購買に含まれていません。",
+      "suggestion": "集中購買のプロジェクトに対してのみ発注してください。"
+    },
+    "calloff_over_share": {
+      "fail": "{project} は明細 {code} で {share} {unit} のうち {used} を発注済みです。",
+      "suggestion": "プロジェクトの配分を増やすか、追加数量を先に承認してください。"
+    },
+    "bidder_blocked": {
+      "fail": "{vendor} は協力会社名簿で取引停止中のため、発注できません。",
+      "suggestion": "名簿で停止を解除するか、別の会社に発注してください。"
+    }
   }
 }
