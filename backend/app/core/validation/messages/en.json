@@ -1004,6 +1004,14 @@
       "insurance": "Insurance",
       "method_statement": "Method statement",
       "other": "Other document"
+    },
+    "levies_reconcile": {
+      "fail": "Work value less levies and retention comes to {expected}, but the payable amount is {payable}",
+      "suggestion": "Recalculate the statement from the subcontract terms instead of editing amounts by hand."
+    },
+    "payment_discount_reconciles": {
+      "fail": "The payment discount is {discount}, but the agreed rate of the payable amount gives {expected}",
+      "suggestion": "Recalculate the discount from the agreed rate and the payable amount."
     }
   },
   "submittal": {
@@ -1133,7 +1141,8 @@
     "baseline_not_found": "Baseline not found",
     "fx_rate_set_locked": "The ECB rates for {date} are locked, so this refresh did not overwrite them. Unlock that rate set first if it should take the new publication.",
     "boq_locked": "BOQ is locked and cannot be modified. Create a revision to make changes.",
-    "boq_link_owner_locked": "Code '{code}' is defined by a line in the locked bill '{bill}', and linking to it would change that bill. Unlock that bill first, or enter the line under a new code."
+    "boq_link_owner_locked": "Code '{code}' is defined by a line in the locked bill '{bill}', and linking to it would change that bill. Unlock that bill first, or enter the line under a new code.",
+    "levy_code_taken": "A levy with this code is already in the catalogue."
   },
   "variations": {
     "boq_lines_are_traced": {
@@ -2656,6 +2665,22 @@
     "bidder_info_present_x84": {
       "fail": "The file does not name the bidder",
       "suggestion": "Enter the firm name in the bidder data of the file"
+    }
+  },
+  "tender": {
+    "recipient_outside_radius": {
+      "fail": "Firm is {distance} km from site, outside the search radius of {radius} km",
+      "suggestion": "Keep the firm if it serves this area, or widen the radius."
+    }
+  },
+  "de": {
+    "payment_discount_unagreed": {
+      "fail": "Payment discount of {discount} used but not agreed in the contract (VOB/B 16 (5) 2)",
+      "suggestion": "Record the discount rate and days in the subcontract, or pay without discount."
+    },
+    "retention_over_vob_cap": {
+      "fail": "Retention of {rate}% per payment is above {maximum}% (VOB/B 17 (6) 1)",
+      "suggestion": "Lower the retention per payment to the VOB/B maximum."
     }
   }
 }

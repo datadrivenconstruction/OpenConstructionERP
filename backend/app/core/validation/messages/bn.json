@@ -968,6 +968,14 @@
       "insurance": "বিমা",
       "method_statement": "কাজের পদ্ধতির বিবরণ",
       "other": "অন্যান্য নথি"
+    },
+    "levies_reconcile": {
+      "fail": "কাজের মূল্য থেকে চার্জ ও ধারণ বাদ দিলে {expected} হয়, কিন্তু প্রদেয় পরিমাণ {payable}",
+      "suggestion": "হাতে পরিমাণ বদলানোর বদলে উপ-চুক্তির শর্ত থেকে বিবরণী আবার হিসাব করুন।"
+    },
+    "payment_discount_reconciles": {
+      "fail": "পরিশোধ ছাড় {discount}, কিন্তু প্রদেয় পরিমাণে সম্মত হার দিলে {expected} হয়",
+      "suggestion": "সম্মত হার ও প্রদেয় পরিমাণ থেকে ছাড় আবার হিসাব করুন।"
     }
   },
   "submittal": {
@@ -1097,7 +1105,8 @@
     "boq_bulk_items_required": "'items' তালিকা প্রয়োজন এবং খালি হতে পারবে না",
     "boq_classification_unavailable": "শ্রেণিবিন্যাস সেবা উপলব্ধ নেই",
     "boq_budget_no_positions": "পরিমাণ তালিকায় কোনো আইটেম নেই: বাজেট করার কিছু নেই।",
-    "boq_fix_unit_rate_required": "একটি অ-ঋণাত্মক 'unit_rate' প্যারামিটার প্রয়োজন"
+    "boq_fix_unit_rate_required": "একটি অ-ঋণাত্মক 'unit_rate' প্যারামিটার প্রয়োজন",
+    "levy_code_taken": "এই কোডের একটি চার্জ ক্যাটালগে আগেই আছে।"
   },
   "variations": {
     "boq_lines_are_traced": {
@@ -2610,6 +2619,22 @@
     },
     "index_attribution": {
       "fail": "ArchSD মূল্য সূচকে উৎস নেই: Architectural Services Department উল্লেখ করুন"
+    }
+  },
+  "tender": {
+    "recipient_outside_radius": {
+      "fail": "প্রতিষ্ঠানটি সাইট থেকে {distance} কিমি দূরে, {radius} কিমি অনুসন্ধান ব্যাসার্ধের বাইরে",
+      "suggestion": "প্রতিষ্ঠানটি এই এলাকায় কাজ করলে রাখুন, নয়তো ব্যাসার্ধ বাড়ান।"
+    }
+  },
+  "de": {
+    "payment_discount_unagreed": {
+      "fail": "{discount} পরিশোধ ছাড় নেওয়া হয়েছে কিন্তু চুক্তিতে সম্মত নয় (VOB/B 16 (5) 2)",
+      "suggestion": "ছাড়ের হার ও দিন উপ-চুক্তিতে লিখুন, অথবা ছাড় ছাড়া পরিশোধ করুন।"
+    },
+    "retention_over_vob_cap": {
+      "fail": "প্রতি পরিশোধে {rate}% ধারণ {maximum}% এর বেশি (VOB/B 17 (6) 1)",
+      "suggestion": "প্রতি পরিশোধে ধারণ VOB/B সর্বোচ্চে নামিয়ে আনুন।"
     }
   }
 }

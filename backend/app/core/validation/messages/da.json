@@ -968,6 +968,14 @@
       "insurance": "Forsikring",
       "method_statement": "Metodebeskrivelse",
       "other": "Andet dokument"
+    },
+    "levies_reconcile": {
+      "fail": "Arbejdsværdien minus afgifter og tilbageholdelse giver {expected}, men beløbet til betaling er {payable}",
+      "suggestion": "Genberegn opgørelsen ud fra underentreprisevilkårene i stedet for at rette beløb i hånden."
+    },
+    "payment_discount_reconciles": {
+      "fail": "Kontantrabatten er {discount}, men den aftalte sats af beløbet til betaling giver {expected}",
+      "suggestion": "Genberegn rabatten ud fra den aftalte sats og beløbet til betaling."
     }
   },
   "submittal": {
@@ -1097,7 +1105,8 @@
     "boq_bulk_items_required": "Listen 'items' er påkrævet og må ikke være tom",
     "boq_classification_unavailable": "Klassifikationstjenesten er ikke tilgængelig",
     "boq_budget_no_positions": "Mængdefortegnelsen har ingen poster: intet at budgettere.",
-    "boq_fix_unit_rate_required": "En ikke-negativ parameter 'unit_rate' er påkrævet"
+    "boq_fix_unit_rate_required": "En ikke-negativ parameter 'unit_rate' er påkrævet",
+    "levy_code_taken": "Der findes allerede en afgift med denne kode i kataloget."
   },
   "variations": {
     "boq_lines_are_traced": {
@@ -2610,6 +2619,22 @@
     },
     "index_attribution": {
       "fail": "ArchSD-prisindekset mangler kildeangivelse: angiv Architectural Services Department"
+    }
+  },
+  "tender": {
+    "recipient_outside_radius": {
+      "fail": "Firmaet ligger {distance} km fra byggepladsen, uden for søgeradius på {radius} km",
+      "suggestion": "Behold firmaet, hvis det dækker området, eller udvid radius."
+    }
+  },
+  "de": {
+    "payment_discount_unagreed": {
+      "fail": "Kontantrabat på {discount} brugt, men ikke aftalt i kontrakten (VOB/B 16 (5) 2)",
+      "suggestion": "Angiv rabatsats og dage i underentreprisekontrakten, eller betal uden rabat."
+    },
+    "retention_over_vob_cap": {
+      "fail": "Tilbageholdelse på {rate}% pr. betaling er over {maximum}% (VOB/B 17 (6) 1)",
+      "suggestion": "Sænk tilbageholdelsen pr. betaling til VOB/B-maksimum."
     }
   }
 }

@@ -986,6 +986,14 @@
       "insurance": "Versicherung",
       "method_statement": "Ausführungsbeschreibung",
       "other": "Sonstiges Dokument"
+    },
+    "levies_reconcile": {
+      "fail": "Leistungswert abzüglich Umlagen und Einbehalt ergibt {expected}, der Auszahlungsbetrag ist aber {payable}",
+      "suggestion": "Berechnen Sie die Aufstellung aus den Vertragsbedingungen neu, statt Beträge von Hand zu ändern."
+    },
+    "payment_discount_reconciles": {
+      "fail": "Das Skonto beträgt {discount}, der vereinbarte Satz auf den Auszahlungsbetrag ergibt aber {expected}",
+      "suggestion": "Berechnen Sie das Skonto aus dem vereinbarten Satz und dem Auszahlungsbetrag neu."
     }
   },
   "submittal": {
@@ -1115,7 +1123,8 @@
     "baseline_not_found": "Baseline nicht gefunden",
     "fx_rate_set_locked": "Die EZB-Kurse vom {date} sind gesperrt, deshalb hat diese Aktualisierung sie nicht überschrieben. Entsperren Sie den Kurssatz zuerst, wenn er die neue Veröffentlichung übernehmen soll.",
     "boq_locked": "Das Leistungsverzeichnis ist gesperrt und kann nicht geändert werden. Legen Sie eine Revision an, um Änderungen vorzunehmen.",
-    "boq_link_owner_locked": "Der Code '{code}' ist durch eine Position im gesperrten Leistungsverzeichnis '{bill}' definiert, und eine Verknüpfung würde dieses Leistungsverzeichnis ändern. Entsperren Sie es zuerst oder erfassen Sie die Position unter einem neuen Code."
+    "boq_link_owner_locked": "Der Code '{code}' ist durch eine Position im gesperrten Leistungsverzeichnis '{bill}' definiert, und eine Verknüpfung würde dieses Leistungsverzeichnis ändern. Entsperren Sie es zuerst oder erfassen Sie die Position unter einem neuen Code.",
+    "levy_code_taken": "Eine Umlage mit diesem Kürzel steht bereits im Katalog."
   },
   "variations": {
     "boq_lines_are_traced": {
@@ -2656,6 +2665,22 @@
     "bidder_info_present_x84": {
       "fail": "Die Datei nennt keinen Bieter",
       "suggestion": "Tragen Sie den Firmennamen in den Bieterdaten der Datei ein"
+    }
+  },
+  "tender": {
+    "recipient_outside_radius": {
+      "fail": "Die Firma ist {distance} km von der Baustelle entfernt, außerhalb des Suchradius von {radius} km",
+      "suggestion": "Behalten Sie die Firma, wenn sie diese Region bedient, oder vergrößern Sie den Radius."
+    }
+  },
+  "de": {
+    "payment_discount_unagreed": {
+      "fail": "Skonto von {discount} abgezogen, aber im Vertrag nicht vereinbart (VOB/B § 16 Abs. 5 Nr. 2)",
+      "suggestion": "Tragen Sie Skontosatz und Frist im Nachunternehmervertrag ein oder zahlen Sie ohne Skonto."
+    },
+    "retention_over_vob_cap": {
+      "fail": "Einbehalt von {rate} % je Zahlung liegt über {maximum} % (VOB/B § 17 Abs. 6 Nr. 1)",
+      "suggestion": "Senken Sie den Einbehalt je Zahlung auf das VOB/B-Maximum."
     }
   }
 }

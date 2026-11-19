@@ -968,6 +968,14 @@
       "insurance": "Seguro",
       "method_statement": "Paraan ng paggawa",
       "other": "Ibang dokumento"
+    },
+    "levies_reconcile": {
+      "fail": "Ang halaga ng gawa bawas ang mga singil at retensyon ay {expected}, pero ang babayaran ay {payable}",
+      "suggestion": "Kalkulahin muli ang pahayag mula sa mga kondisyon ng subkontrata sa halip na baguhin ang halaga nang mano-mano."
+    },
+    "payment_discount_reconciles": {
+      "fail": "Ang diskwento sa bayad ay {discount}, pero ang napagkasunduang rate sa babayaran ay nagbibigay ng {expected}",
+      "suggestion": "Kalkulahin muli ang diskwento mula sa napagkasunduang rate at babayaran."
     }
   },
   "submittal": {
@@ -1097,7 +1105,8 @@
     "boq_bulk_items_required": "Kailangan ang listahang 'items' at hindi dapat walang laman",
     "boq_classification_unavailable": "Hindi available ang serbisyo ng klasipikasyon",
     "boq_budget_no_positions": "Walang item ang bill of quantities: walang ibu-budget.",
-    "boq_fix_unit_rate_required": "Kailangan ang parameter na 'unit_rate' na hindi negatibo"
+    "boq_fix_unit_rate_required": "Kailangan ang parameter na 'unit_rate' na hindi negatibo",
+    "levy_code_taken": "May singil na may ganitong code na sa katalogo."
   },
   "variations": {
     "boq_lines_are_traced": {
@@ -2610,6 +2619,22 @@
     },
     "index_attribution": {
       "fail": "Walang source attribution ang ArchSD price index: banggitin ang Architectural Services Department"
+    }
+  },
+  "tender": {
+    "recipient_outside_radius": {
+      "fail": "Ang kumpanya ay {distance} km mula sa site, labas sa radius ng paghahanap na {radius} km",
+      "suggestion": "Panatilihin ang kumpanya kung naglilingkod ito sa lugar na ito, o palakihin ang radius."
+    }
+  },
+  "de": {
+    "payment_discount_unagreed": {
+      "fail": "Ginamit ang diskwento sa bayad na {discount} pero hindi napagkasunduan sa kontrata (VOB/B 16 (5) 2)",
+      "suggestion": "Itala ang rate at araw ng diskwento sa subkontrata, o magbayad nang walang diskwento."
+    },
+    "retention_over_vob_cap": {
+      "fail": "Ang retensyon na {rate}% bawat bayad ay lampas sa {maximum}% (VOB/B 17 (6) 1)",
+      "suggestion": "Ibaba ang retensyon bawat bayad sa maximum ng VOB/B."
     }
   }
 }

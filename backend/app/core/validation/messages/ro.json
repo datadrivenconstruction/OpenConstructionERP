@@ -968,6 +968,14 @@
       "insurance": "Asigurare",
       "method_statement": "Metodă de execuție",
       "other": "Alt document"
+    },
+    "levies_reconcile": {
+      "fail": "Valoarea lucrărilor minus taxele și reținerea dă {expected}, dar suma de plată este {payable}",
+      "suggestion": "Recalculați situația din condițiile subcontractului în loc să modificați sumele manual."
+    },
+    "payment_discount_reconciles": {
+      "fail": "Discountul pentru plată rapidă este {discount}, dar cota convenită din suma de plată dă {expected}",
+      "suggestion": "Recalculați discountul din cota convenită și suma de plată."
     }
   },
   "submittal": {
@@ -1097,7 +1105,8 @@
     "boq_bulk_items_required": "Lista 'items' este obligatorie și nu trebuie să fie goală",
     "boq_classification_unavailable": "Serviciul de clasificare este indisponibil",
     "boq_budget_no_positions": "Lista de cantități nu are poziții: nimic de bugetat.",
-    "boq_fix_unit_rate_required": "Este necesar un parametru 'unit_rate' nenegativ"
+    "boq_fix_unit_rate_required": "Este necesar un parametru 'unit_rate' nenegativ",
+    "levy_code_taken": "Există deja în catalog o taxă cu acest cod."
   },
   "variations": {
     "boq_lines_are_traced": {
@@ -2610,6 +2619,22 @@
     },
     "index_attribution": {
       "fail": "Indicele de prețuri ArchSD nu are sursa: menționați Architectural Services Department"
+    }
+  },
+  "tender": {
+    "recipient_outside_radius": {
+      "fail": "Firma se află la {distance} km de șantier, în afara razei de căutare de {radius} km",
+      "suggestion": "Păstrați firma dacă lucrează în această zonă sau măriți raza."
+    }
+  },
+  "de": {
+    "payment_discount_unagreed": {
+      "fail": "Discount pentru plată rapidă de {discount} aplicat, dar neconvenit în contract (VOB/B 16 (5) 2)",
+      "suggestion": "Înregistrați cota și zilele discountului în subcontract sau plătiți fără discount."
+    },
+    "retention_over_vob_cap": {
+      "fail": "Reținerea de {rate}% pe plată depășește {maximum}% (VOB/B 17 (6) 1)",
+      "suggestion": "Reduceți reținerea pe plată la maximul VOB/B."
     }
   }
 }

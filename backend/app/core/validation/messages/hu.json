@@ -968,6 +968,14 @@
       "insurance": "Biztosítás",
       "method_statement": "Módszerleírás",
       "other": "Egyéb dokumentum"
+    },
+    "levies_reconcile": {
+      "fail": "A munka értéke a díjak és a visszatartás levonása után {expected}, de a fizetendő összeg {payable}",
+      "suggestion": "Számolja újra az elszámolást az alvállalkozói feltételekből ahelyett, hogy kézzel írná át az összegeket."
+    },
+    "payment_discount_reconciles": {
+      "fail": "A fizetési engedmény {discount}, de a megállapodott kulcs a fizetendő összegre {expected}",
+      "suggestion": "Számolja újra az engedményt a megállapodott kulcsból és a fizetendő összegből."
     }
   },
   "submittal": {
@@ -1097,7 +1105,8 @@
     "boq_bulk_items_required": "Az 'items' lista kötelező, és nem lehet üres",
     "boq_classification_unavailable": "Az osztályozási szolgáltatás nem érhető el",
     "boq_budget_no_positions": "A költségvetési kiírásnak nincs tétele: nincs mit költségvetésbe venni.",
-    "boq_fix_unit_rate_required": "Nem negatív 'unit_rate' paraméter szükséges"
+    "boq_fix_unit_rate_required": "Nem negatív 'unit_rate' paraméter szükséges",
+    "levy_code_taken": "Ezzel a kóddal már van díj a katalógusban."
   },
   "variations": {
     "boq_lines_are_traced": {
@@ -2610,6 +2619,22 @@
     },
     "index_attribution": {
       "fail": "Az ArchSD árindexnél hiányzik a forrás: tüntesse fel az Architectural Services Department-et"
+    }
+  },
+  "tender": {
+    "recipient_outside_radius": {
+      "fail": "A cég {distance} km-re van az építkezéstől, a {radius} km-es keresési körön kívül",
+      "suggestion": "Tartsa meg a céget, ha ezen a területen dolgozik, vagy növelje a sugarat."
+    }
+  },
+  "de": {
+    "payment_discount_unagreed": {
+      "fail": "{discount} fizetési engedmény alkalmazva, de a szerződésben nincs kikötve (VOB/B 16 (5) 2)",
+      "suggestion": "Rögzítse az engedmény kulcsát és napjait az alvállalkozói szerződésben, vagy fizessen engedmény nélkül."
+    },
+    "retention_over_vob_cap": {
+      "fail": "A fizetésenkénti {rate}% visszatartás meghaladja a {maximum}%-ot (VOB/B 17 (6) 1)",
+      "suggestion": "Csökkentse a fizetésenkénti visszatartást a VOB/B maximumára."
     }
   }
 }

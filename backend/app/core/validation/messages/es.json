@@ -986,6 +986,14 @@
       "insurance": "Seguro",
       "method_statement": "Método de trabajo",
       "other": "Otro documento"
+    },
+    "levies_reconcile": {
+      "fail": "El valor de la obra menos cargos y retención da {expected}, pero el importe a pagar es {payable}",
+      "suggestion": "Recalcule la liquidación con las condiciones del subcontrato en lugar de editar importes a mano."
+    },
+    "payment_discount_reconciles": {
+      "fail": "El descuento por pronto pago es {discount}, pero la tasa pactada sobre el importe a pagar da {expected}",
+      "suggestion": "Recalcule el descuento con la tasa pactada y el importe a pagar."
     }
   },
   "submittal": {
@@ -1115,7 +1123,8 @@
     "boq_bulk_items_required": "La lista 'items' es obligatoria y no debe estar vacía",
     "boq_classification_unavailable": "Servicio de clasificación no disponible",
     "boq_budget_no_positions": "El presupuesto no tiene partidas: nada que presupuestar.",
-    "boq_fix_unit_rate_required": "Se requiere un parámetro 'unit_rate' no negativo"
+    "boq_fix_unit_rate_required": "Se requiere un parámetro 'unit_rate' no negativo",
+    "levy_code_taken": "Ya existe en el catálogo un cargo con este código."
   },
   "variations": {
     "boq_lines_are_traced": {
@@ -2656,6 +2665,22 @@
     "bidder_info_present_x84": {
       "fail": "El archivo no indica el licitador",
       "suggestion": "Introduzca el nombre de la empresa en los datos del licitador del archivo"
+    }
+  },
+  "tender": {
+    "recipient_outside_radius": {
+      "fail": "La empresa está a {distance} km de la obra, fuera del radio de búsqueda de {radius} km",
+      "suggestion": "Mantenga la empresa si trabaja en esta zona, o amplíe el radio."
+    }
+  },
+  "de": {
+    "payment_discount_unagreed": {
+      "fail": "Descuento por pronto pago de {discount} aplicado pero no pactado en el contrato (VOB/B 16 (5) 2)",
+      "suggestion": "Registre la tasa y los días del descuento en el subcontrato, o pague sin descuento."
+    },
+    "retention_over_vob_cap": {
+      "fail": "Retención del {rate}% por pago superior al {maximum}% (VOB/B 17 (6) 1)",
+      "suggestion": "Reduzca la retención por pago al máximo de VOB/B."
     }
   }
 }

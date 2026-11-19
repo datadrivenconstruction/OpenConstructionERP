@@ -968,6 +968,14 @@
       "insurance": "Kindlustus",
       "method_statement": "Töömeetod",
       "other": "Muu dokument"
+    },
+    "levies_reconcile": {
+      "fail": "Töö väärtus miinus tasud ja kinnipidamine annab {expected}, kuid makstav summa on {payable}",
+      "suggestion": "Arvutage väljavõte alltöövõtu tingimustest uuesti, selle asemel et summasid käsitsi muuta."
+    },
+    "payment_discount_reconciles": {
+      "fail": "Kassasoodustus on {discount}, kuid kokkulepitud määr makstavast summast annab {expected}",
+      "suggestion": "Arvutage soodustus kokkulepitud määrast ja makstavast summast uuesti."
     }
   },
   "submittal": {
@@ -1097,7 +1105,8 @@
     "boq_bulk_items_required": "Loend 'items' on kohustuslik ega tohi olla tühi",
     "boq_classification_unavailable": "Klassifitseerimisteenus ei ole saadaval",
     "boq_budget_no_positions": "Mahuloendis pole positsioone: pole mida eelarvestada.",
-    "boq_fix_unit_rate_required": "Vajalik on mittenegatiivne parameeter 'unit_rate'"
+    "boq_fix_unit_rate_required": "Vajalik on mittenegatiivne parameeter 'unit_rate'",
+    "levy_code_taken": "Selle koodiga tasu on kataloogis juba olemas."
   },
   "variations": {
     "boq_lines_are_traced": {
@@ -2610,6 +2619,22 @@
     },
     "index_attribution": {
       "fail": "ArchSD hinnaindeksil puudub allikaviide: märkige Architectural Services Department"
+    }
+  },
+  "tender": {
+    "recipient_outside_radius": {
+      "fail": "Ettevõte asub objektist {distance} km kaugusel, väljaspool otsinguraadiust {radius} km",
+      "suggestion": "Jätke ettevõte alles, kui see teenindab seda piirkonda, või suurendage raadiust."
+    }
+  },
+  "de": {
+    "payment_discount_unagreed": {
+      "fail": "Kassasoodustust {discount} kasutati, kuid lepingus pole seda kokku lepitud (VOB/B 16 (5) 2)",
+      "suggestion": "Märkige soodustuse määr ja päevad alltöövõtulepingusse või makske ilma soodustuseta."
+    },
+    "retention_over_vob_cap": {
+      "fail": "Kinnipidamine {rate}% makse kohta ületab {maximum}% (VOB/B 17 (6) 1)",
+      "suggestion": "Vähendage makse kohta kinnipidamist VOB/B maksimumini."
     }
   }
 }

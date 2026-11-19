@@ -968,6 +968,14 @@
       "insurance": "Assicurazione",
       "method_statement": "Metodologia di esecuzione",
       "other": "Altro documento"
+    },
+    "levies_reconcile": {
+      "fail": "Il valore dei lavori meno addebiti e ritenuta dà {expected}, ma l'importo da pagare è {payable}",
+      "suggestion": "Ricalcola il prospetto dalle condizioni del subappalto invece di modificare gli importi a mano."
+    },
+    "payment_discount_reconciles": {
+      "fail": "Lo sconto per pagamento anticipato è {discount}, ma l'aliquota concordata sull'importo da pagare dà {expected}",
+      "suggestion": "Ricalcola lo sconto dall'aliquota concordata e dall'importo da pagare."
     }
   },
   "submittal": {
@@ -1097,7 +1105,8 @@
     "boq_bulk_items_required": "L'elenco 'items' è obbligatorio e non deve essere vuoto",
     "boq_classification_unavailable": "Servizio di classificazione non disponibile",
     "boq_budget_no_positions": "Il computo non ha voci: niente da preventivare.",
-    "boq_fix_unit_rate_required": "È richiesto un parametro 'unit_rate' non negativo"
+    "boq_fix_unit_rate_required": "È richiesto un parametro 'unit_rate' non negativo",
+    "levy_code_taken": "Nel catalogo esiste già un addebito con questo codice."
   },
   "variations": {
     "boq_lines_are_traced": {
@@ -2610,6 +2619,22 @@
     },
     "index_attribution": {
       "fail": "L'indice dei prezzi ArchSD non indica la fonte: citare l'Architectural Services Department"
+    }
+  },
+  "tender": {
+    "recipient_outside_radius": {
+      "fail": "L'impresa è a {distance} km dal cantiere, fuori dal raggio di ricerca di {radius} km",
+      "suggestion": "Tieni l'impresa se opera in questa zona, oppure allarga il raggio."
+    }
+  },
+  "de": {
+    "payment_discount_unagreed": {
+      "fail": "Sconto per pagamento anticipato di {discount} applicato ma non concordato nel contratto (VOB/B 16 (5) 2)",
+      "suggestion": "Registra aliquota e giorni dello sconto nel subappalto, oppure paga senza sconto."
+    },
+    "retention_over_vob_cap": {
+      "fail": "Ritenuta del {rate}% per pagamento superiore al {maximum}% (VOB/B 17 (6) 1)",
+      "suggestion": "Riduci la ritenuta per pagamento al massimo VOB/B."
     }
   }
 }

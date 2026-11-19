@@ -968,6 +968,14 @@
       "insurance": "Sigorta",
       "method_statement": "Yöntem bildirimi",
       "other": "Diğer belge"
+    },
+    "levies_reconcile": {
+      "fail": "İş bedeli eksi kesintiler ve teminat kesintisi {expected} ediyor, ancak ödenecek tutar {payable}",
+      "suggestion": "Tutarları elle değiştirmek yerine hesap dökümünü taşeron sözleşmesi koşullarından yeniden hesaplayın."
+    },
+    "payment_discount_reconciles": {
+      "fail": "Erken ödeme iskontosu {discount}, ancak ödenecek tutar üzerinden anlaşılan oran {expected} veriyor",
+      "suggestion": "İskontoyu anlaşılan oran ve ödenecek tutardan yeniden hesaplayın."
     }
   },
   "submittal": {
@@ -1097,7 +1105,8 @@
     "boq_bulk_items_required": "'items' listesi zorunludur ve boş olmamalıdır",
     "boq_classification_unavailable": "Sınıflandırma hizmeti kullanılamıyor",
     "boq_budget_no_positions": "Metraj cetvelinde poz yok: bütçelenecek bir şey yok.",
-    "boq_fix_unit_rate_required": "Negatif olmayan bir 'unit_rate' parametresi gereklidir"
+    "boq_fix_unit_rate_required": "Negatif olmayan bir 'unit_rate' parametresi gereklidir",
+    "levy_code_taken": "Bu koda sahip bir kesinti katalogda zaten var."
   },
   "variations": {
     "boq_lines_are_traced": {
@@ -2610,6 +2619,22 @@
     },
     "index_attribution": {
       "fail": "ArchSD fiyat endeksinde kaynak belirtilmemiş: Architectural Services Department'ı belirtin"
+    }
+  },
+  "tender": {
+    "recipient_outside_radius": {
+      "fail": "Firma şantiyeye {distance} km uzaklıkta, {radius} km arama yarıçapının dışında",
+      "suggestion": "Firma bu bölgede çalışıyorsa tutun ya da yarıçapı büyütün."
+    }
+  },
+  "de": {
+    "payment_discount_unagreed": {
+      "fail": "{discount} erken ödeme iskontosu uygulandı ancak sözleşmede kararlaştırılmadı (VOB/B 16 (5) 2)",
+      "suggestion": "İskonto oranını ve gününü taşeron sözleşmesine yazın ya da iskontosuz ödeyin."
+    },
+    "retention_over_vob_cap": {
+      "fail": "Ödeme başına %{rate} teminat kesintisi %{maximum} üzerinde (VOB/B 17 (6) 1)",
+      "suggestion": "Ödeme başına teminat kesintisini VOB/B üst sınırına indirin."
     }
   }
 }

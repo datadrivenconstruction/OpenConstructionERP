@@ -968,6 +968,14 @@
       "insurance": "Försäkring",
       "method_statement": "Metodbeskrivning",
       "other": "Annat dokument"
+    },
+    "levies_reconcile": {
+      "fail": "Arbetsvärdet minus avgifter och innehållande blir {expected}, men beloppet att betala är {payable}",
+      "suggestion": "Räkna om sammanställningen från underentreprenadvillkoren i stället för att ändra belopp för hand."
+    },
+    "payment_discount_reconciles": {
+      "fail": "Kassarabatten är {discount}, men den avtalade satsen på beloppet att betala ger {expected}",
+      "suggestion": "Räkna om rabatten från den avtalade satsen och beloppet att betala."
     }
   },
   "submittal": {
@@ -1097,7 +1105,8 @@
     "boq_bulk_items_required": "Listan 'items' krävs och får inte vara tom",
     "boq_classification_unavailable": "Klassificeringstjänsten är inte tillgänglig",
     "boq_budget_no_positions": "Mängdförteckningen har inga poster: inget att budgetera.",
-    "boq_fix_unit_rate_required": "En icke-negativ parameter 'unit_rate' krävs"
+    "boq_fix_unit_rate_required": "En icke-negativ parameter 'unit_rate' krävs",
+    "levy_code_taken": "En avgift med den här koden finns redan i katalogen."
   },
   "variations": {
     "boq_lines_are_traced": {
@@ -2610,6 +2619,22 @@
     },
     "index_attribution": {
       "fail": "ArchSD-prisindexet saknar källangivelse: ange Architectural Services Department"
+    }
+  },
+  "tender": {
+    "recipient_outside_radius": {
+      "fail": "Företaget ligger {distance} km från arbetsplatsen, utanför sökradien {radius} km",
+      "suggestion": "Behåll företaget om det verkar i området, eller öka radien."
+    }
+  },
+  "de": {
+    "payment_discount_unagreed": {
+      "fail": "Kassarabatt på {discount} använd men inte avtalad i kontraktet (VOB/B 16 (5) 2)",
+      "suggestion": "Ange rabattsats och dagar i underentreprenadkontraktet, eller betala utan rabatt."
+    },
+    "retention_over_vob_cap": {
+      "fail": "Innehållande på {rate}% per betalning överstiger {maximum}% (VOB/B 17 (6) 1)",
+      "suggestion": "Sänk innehållandet per betalning till VOB/B-maximum."
     }
   }
 }

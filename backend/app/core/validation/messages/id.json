@@ -968,6 +968,14 @@
       "insurance": "Asuransi",
       "method_statement": "Metode kerja",
       "other": "Dokumen lain"
+    },
+    "levies_reconcile": {
+      "fail": "Nilai pekerjaan dikurangi pungutan dan retensi menjadi {expected}, tetapi jumlah yang dibayar {payable}",
+      "suggestion": "Hitung ulang rincian dari ketentuan subkontrak alih-alih mengubah jumlah secara manual."
+    },
+    "payment_discount_reconciles": {
+      "fail": "Diskon pembayaran {discount}, tetapi tarif yang disepakati atas jumlah yang dibayar menghasilkan {expected}",
+      "suggestion": "Hitung ulang diskon dari tarif yang disepakati dan jumlah yang dibayar."
     }
   },
   "submittal": {
@@ -1097,7 +1105,8 @@
     "boq_bulk_items_required": "Daftar 'items' wajib ada dan tidak boleh kosong",
     "boq_classification_unavailable": "Layanan klasifikasi tidak tersedia",
     "boq_budget_no_positions": "Daftar kuantitas tidak memiliki item: tidak ada yang dianggarkan.",
-    "boq_fix_unit_rate_required": "Parameter 'unit_rate' yang tidak negatif diperlukan"
+    "boq_fix_unit_rate_required": "Parameter 'unit_rate' yang tidak negatif diperlukan",
+    "levy_code_taken": "Pungutan dengan kode ini sudah ada di katalog."
   },
   "variations": {
     "boq_lines_are_traced": {
@@ -2610,6 +2619,22 @@
     },
     "index_attribution": {
       "fail": "Indeks harga ArchSD tidak mencantumkan sumber: sebutkan Architectural Services Department"
+    }
+  },
+  "tender": {
+    "recipient_outside_radius": {
+      "fail": "Perusahaan berjarak {distance} km dari lokasi, di luar radius pencarian {radius} km",
+      "suggestion": "Pertahankan perusahaan jika melayani area ini, atau perbesar radius."
+    }
+  },
+  "de": {
+    "payment_discount_unagreed": {
+      "fail": "Diskon pembayaran {discount} dipakai tetapi tidak disepakati dalam kontrak (VOB/B 16 (5) 2)",
+      "suggestion": "Catat tarif dan hari diskon di subkontrak, atau bayar tanpa diskon."
+    },
+    "retention_over_vob_cap": {
+      "fail": "Retensi {rate}% per pembayaran melebihi {maximum}% (VOB/B 17 (6) 1)",
+      "suggestion": "Turunkan retensi per pembayaran ke batas VOB/B."
     }
   }
 }

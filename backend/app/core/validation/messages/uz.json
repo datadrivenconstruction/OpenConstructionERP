@@ -968,6 +968,14 @@
       "insurance": "Sug'urta",
       "method_statement": "Ish usuli bayoni",
       "other": "Boshqa hujjat"
+    },
+    "levies_reconcile": {
+      "fail": "Ish qiymatidan yigʻimlar va ushlab qolingan summa ayirilganda {expected} boʻladi, lekin toʻlanadigan summa {payable}",
+      "suggestion": "Summalarni qoʻlda oʻzgartirish oʻrniga hisobotni subpudrat shartnomasi shartlaridan qayta hisoblang."
+    },
+    "payment_discount_reconciles": {
+      "fail": "Toʻlov chegirmasi {discount}, lekin toʻlanadigan summadan kelishilgan stavka {expected} beradi",
+      "suggestion": "Chegirmani kelishilgan stavka va toʻlanadigan summadan qayta hisoblang."
     }
   },
   "submittal": {
@@ -1097,7 +1105,8 @@
     "boq_bulk_items_required": "'items' ro'yxati majburiy va bo'sh bo'lmasligi kerak",
     "boq_classification_unavailable": "Tasniflash xizmati mavjud emas",
     "boq_budget_no_positions": "Hajmlar qaydnomasida pozitsiyalar yo'q: byudjetlaydigan narsa yo'q.",
-    "boq_fix_unit_rate_required": "Manfiy bo'lmagan 'unit_rate' parametri kerak"
+    "boq_fix_unit_rate_required": "Manfiy bo'lmagan 'unit_rate' parametri kerak",
+    "levy_code_taken": "Bu kodli yigʻim katalogda allaqachon bor."
   },
   "variations": {
     "boq_lines_are_traced": {
@@ -2610,6 +2619,22 @@
     },
     "index_attribution": {
       "fail": "ArchSD narx indeksida manba ko'rsatilmagan: Architectural Services Department ni ko'rsating"
+    }
+  },
+  "tender": {
+    "recipient_outside_radius": {
+      "fail": "Firma obyektdan {distance} km uzoqda, {radius} km qidiruv radiusidan tashqarida",
+      "suggestion": "Firma bu hududda ishlasa qoldiring yoki radiusni kattalashtiring."
+    }
+  },
+  "de": {
+    "payment_discount_unagreed": {
+      "fail": "{discount} toʻlov chegirmasi qoʻllandi, lekin shartnomada kelishilmagan (VOB/B 16 (5) 2)",
+      "suggestion": "Chegirma stavkasi va muddatini subpudrat shartnomasiga yozing yoki chegirmasiz toʻlang."
+    },
+    "retention_over_vob_cap": {
+      "fail": "Har bir toʻlovdan {rate}% ushlab qolish {maximum}% dan yuqori (VOB/B 17 (6) 1)",
+      "suggestion": "Har bir toʻlovdan ushlab qolishni VOB/B chegarasigacha kamaytiring."
     }
   }
 }

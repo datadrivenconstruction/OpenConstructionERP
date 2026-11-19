@@ -968,6 +968,14 @@
       "insurance": "بیمه",
       "method_statement": "شرح روش اجرا",
       "other": "سند دیگر"
+    },
+    "levies_reconcile": {
+      "fail": "ارزش کار پس از کسر هزینه‌ها و سپرده {expected} می‌شود، اما مبلغ قابل پرداخت {payable} است",
+      "suggestion": "به جای ویرایش دستی مبالغ، صورت‌حساب را از شرایط قرارداد پیمانکار جزء دوباره محاسبه کنید."
+    },
+    "payment_discount_reconciles": {
+      "fail": "تخفیف پرداخت {discount} است، اما نرخ توافق‌شده از مبلغ قابل پرداخت {expected} می‌دهد",
+      "suggestion": "تخفیف را از نرخ توافق‌شده و مبلغ قابل پرداخت دوباره محاسبه کنید."
     }
   },
   "submittal": {
@@ -1097,7 +1105,8 @@
     "boq_bulk_items_required": "فهرست 'items' الزامی است و نباید خالی باشد",
     "boq_classification_unavailable": "سرویس طبقه‌بندی در دسترس نیست",
     "boq_budget_no_positions": "صورت‌ریز مقادیر ردیفی ندارد: چیزی برای بودجه‌بندی نیست.",
-    "boq_fix_unit_rate_required": "پارامتر 'unit_rate' غیرمنفی لازم است"
+    "boq_fix_unit_rate_required": "پارامتر 'unit_rate' غیرمنفی لازم است",
+    "levy_code_taken": "هزینه‌ای با این کد از قبل در فهرست وجود دارد."
   },
   "variations": {
     "boq_lines_are_traced": {
@@ -2610,6 +2619,22 @@
     },
     "index_attribution": {
       "fail": "شاخص قیمت ArchSD منبع ندارد: Architectural Services Department را ذکر کنید"
+    }
+  },
+  "tender": {
+    "recipient_outside_radius": {
+      "fail": "شرکت {distance} کیلومتر از کارگاه فاصله دارد، خارج از شعاع جستجوی {radius} کیلومتر",
+      "suggestion": "اگر شرکت در این منطقه کار می‌کند نگهش دارید، یا شعاع را بزرگ‌تر کنید."
+    }
+  },
+  "de": {
+    "payment_discount_unagreed": {
+      "fail": "تخفیف پرداخت {discount} اعمال شده اما در قرارداد توافق نشده است (VOB/B 16 (5) 2)",
+      "suggestion": "نرخ و مهلت تخفیف را در قرارداد پیمانکار جزء ثبت کنید یا بدون تخفیف بپردازید."
+    },
+    "retention_over_vob_cap": {
+      "fail": "سپرده {rate}% از هر پرداخت بیش از {maximum}% است (VOB/B 17 (6) 1)",
+      "suggestion": "سپرده هر پرداخت را تا سقف VOB/B کاهش دهید."
     }
   }
 }

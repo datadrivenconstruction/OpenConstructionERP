@@ -13090,6 +13090,7 @@ def register_builtin_rules() -> None:
     from app.core.validation.rules.pakistan_boq import PAKISTAN_RULES
     from app.core.validation.rules.peru_presupuesto import PERU_RULES
     from app.core.validation.rules.project_completeness import PROJECT_COMPLETENESS_RULES
+    from app.core.validation.rules.subcontract_terms import SUBCONTRACT_TERMS_RULES
     from app.core.validation.rules.vat_rate import VAT_RATE_RULES
 
     rules: list[tuple[ValidationRule, list[str] | None]] = [
@@ -13416,6 +13417,8 @@ def register_builtin_rules() -> None:
         *((rule_class(), None) for rule_class in VAT_RATE_RULES),
         # GAEB DA XML 3.3 exchange phases X81/X83/X84/X86 (bill and file rules)
         *((rule, [GAEB_EXCHANGE_RULE_SET]) for rule in GAEB_EXCHANGE_RULES),
+        # Subcontract deduction statement and bidder radius search (neutral)
+        *SUBCONTRACT_TERMS_RULES,
     ]
 
     for rule, sets in rules:

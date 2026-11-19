@@ -968,6 +968,14 @@
       "insurance": "ביטוח",
       "method_statement": "הצהרת שיטת עבודה",
       "other": "מסמך אחר"
+    },
+    "levies_reconcile": {
+      "fail": "שווי העבודה בניכוי היטלים ועיכבון יוצא {expected}, אך הסכום לתשלום הוא {payable}",
+      "suggestion": "חשבו מחדש את הדוח מתנאי חוזה קבלן המשנה במקום לערוך סכומים ידנית."
+    },
+    "payment_discount_reconciles": {
+      "fail": "הנחת התשלום היא {discount}, אך השיעור המוסכם מהסכום לתשלום נותן {expected}",
+      "suggestion": "חשבו מחדש את ההנחה מהשיעור המוסכם ומהסכום לתשלום."
     }
   },
   "submittal": {
@@ -1097,7 +1105,8 @@
     "boq_bulk_items_required": "הרשימה 'items' נדרשת ואסור שתהיה ריקה",
     "boq_classification_unavailable": "שירות הסיווג אינו זמין",
     "boq_budget_no_positions": "לכתב הכמויות אין סעיפים: אין מה לתקצב.",
-    "boq_fix_unit_rate_required": "נדרש פרמטר 'unit_rate' לא שלילי"
+    "boq_fix_unit_rate_required": "נדרש פרמטר 'unit_rate' לא שלילי",
+    "levy_code_taken": "היטל עם קוד זה כבר קיים בקטלוג."
   },
   "variations": {
     "boq_lines_are_traced": {
@@ -2610,6 +2619,22 @@
     },
     "index_attribution": {
       "fail": "מדד המחירים של ArchSD ללא ציון מקור: ציינו את Architectural Services Department"
+    }
+  },
+  "tender": {
+    "recipient_outside_radius": {
+      "fail": "החברה נמצאת {distance} ק\"מ מהאתר, מחוץ לרדיוס החיפוש של {radius} ק\"מ",
+      "suggestion": "השאירו את החברה אם היא עובדת באזור, או הגדילו את הרדיוס."
+    }
+  },
+  "de": {
+    "payment_discount_unagreed": {
+      "fail": "הנחת תשלום של {discount} נוצלה אך לא הוסכמה בחוזה (VOB/B 16 (5) 2)",
+      "suggestion": "רשמו את שיעור ההנחה והימים בחוזה קבלן המשנה, או שלמו ללא הנחה."
+    },
+    "retention_over_vob_cap": {
+      "fail": "עיכבון של {rate}% לתשלום גבוה מ-{maximum}% (VOB/B 17 (6) 1)",
+      "suggestion": "הורידו את העיכבון לתשלום למקסימום של VOB/B."
     }
   }
 }

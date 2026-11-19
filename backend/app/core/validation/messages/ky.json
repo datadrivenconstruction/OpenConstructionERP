@@ -968,6 +968,14 @@
       "insurance": "Камсыздандыруу",
       "method_statement": "Иштөө ыкмасынын сүрөттөмөсү",
       "other": "Башка документ"
+    },
+    "levies_reconcile": {
+      "fail": "Иштин наркы алымдарды жана кармалып калган сумманы кемиткенде {expected} болот, бирок төлөнүүчү сумма {payable}",
+      "suggestion": "Сумманы кол менен өзгөртпөй, эсепти суб-подряд келишиминин шарттарынан кайра эсептеңиз."
+    },
+    "payment_discount_reconciles": {
+      "fail": "Төлөм арзандатуусу {discount}, бирок төлөнүүчү суммадан макулдашылган чен {expected} берет",
+      "suggestion": "Арзандатууну макулдашылган чен жана төлөнүүчү суммадан кайра эсептеңиз."
     }
   },
   "submittal": {
@@ -1097,7 +1105,8 @@
     "boq_bulk_items_required": "'items' тизмеси милдеттүү жана бош болбошу керек",
     "boq_classification_unavailable": "Классификация кызматы жеткиликсиз",
     "boq_budget_no_positions": "Көлөм ведомостунда позиция жок: бюджеттей турган эч нерсе жок.",
-    "boq_fix_unit_rate_required": "Терс эмес 'unit_rate' параметри керек"
+    "boq_fix_unit_rate_required": "Терс эмес 'unit_rate' параметри керек",
+    "levy_code_taken": "Бул коддогу алым каталогдо мурунтан эле бар."
   },
   "variations": {
     "boq_lines_are_traced": {
@@ -2610,6 +2619,22 @@
     },
     "index_attribution": {
       "fail": "ArchSD баа индексинде булак көрсөтүлгөн эмес: Architectural Services Department көрсөтүңүз"
+    }
+  },
+  "tender": {
+    "recipient_outside_radius": {
+      "fail": "Фирма объекттен {distance} км алыс, {radius} км издөө радиусунан тышкары",
+      "suggestion": "Фирма бул аймакта иштесе калтырыңыз же радиусту чоңойтуңуз."
+    }
+  },
+  "de": {
+    "payment_discount_unagreed": {
+      "fail": "{discount} төлөм арзандатуусу колдонулду, бирок келишимде макулдашылган эмес (VOB/B 16 (5) 2)",
+      "suggestion": "Арзандатуу ченин жана мөөнөтүн суб-подряд келишимине жазыңыз же арзандатуусуз төлөңүз."
+    },
+    "retention_over_vob_cap": {
+      "fail": "Ар бир төлөмдөн {rate}% кармоо {maximum}% чегинен жогору (VOB/B 17 (6) 1)",
+      "suggestion": "Ар бир төлөмдөн кармоону VOB/B чегине чейин азайтыңыз."
     }
   }
 }

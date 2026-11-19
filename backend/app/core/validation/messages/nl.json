@@ -968,6 +968,14 @@
       "insurance": "Verzekering",
       "method_statement": "Werkmethode",
       "other": "Overig document"
+    },
+    "levies_reconcile": {
+      "fail": "Werkwaarde min heffingen en inhouding komt op {expected}, maar het te betalen bedrag is {payable}",
+      "suggestion": "Herbereken de staat uit de voorwaarden van het onderaannemingscontract in plaats van bedragen met de hand te wijzigen."
+    },
+    "payment_discount_reconciles": {
+      "fail": "De betalingskorting is {discount}, maar het afgesproken percentage van het te betalen bedrag geeft {expected}",
+      "suggestion": "Herbereken de korting uit het afgesproken percentage en het te betalen bedrag."
     }
   },
   "submittal": {
@@ -1097,7 +1105,8 @@
     "boq_bulk_items_required": "De lijst 'items' is vereist en mag niet leeg zijn",
     "boq_classification_unavailable": "Classificatieservice niet beschikbaar",
     "boq_budget_no_positions": "De bestekstaat heeft geen posten: niets om te begroten.",
-    "boq_fix_unit_rate_required": "Een niet-negatieve parameter 'unit_rate' is vereist"
+    "boq_fix_unit_rate_required": "Een niet-negatieve parameter 'unit_rate' is vereist",
+    "levy_code_taken": "Er staat al een heffing met deze code in de catalogus."
   },
   "variations": {
     "boq_lines_are_traced": {
@@ -2610,6 +2619,22 @@
     },
     "index_attribution": {
       "fail": "De ArchSD-prijsindex vermeldt geen bron: vermeld het Architectural Services Department"
+    }
+  },
+  "tender": {
+    "recipient_outside_radius": {
+      "fail": "Het bedrijf ligt {distance} km van de bouwplaats, buiten de zoekstraal van {radius} km",
+      "suggestion": "Houd het bedrijf als het in deze regio werkt, of vergroot de straal."
+    }
+  },
+  "de": {
+    "payment_discount_unagreed": {
+      "fail": "Betalingskorting van {discount} toegepast maar niet in het contract afgesproken (VOB/B 16 (5) 2)",
+      "suggestion": "Leg percentage en termijn van de korting vast in het contract, of betaal zonder korting."
+    },
+    "retention_over_vob_cap": {
+      "fail": "Inhouding van {rate}% per betaling ligt boven {maximum}% (VOB/B 17 (6) 1)",
+      "suggestion": "Verlaag de inhouding per betaling tot het VOB/B-maximum."
     }
   }
 }

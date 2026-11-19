@@ -968,6 +968,14 @@
       "insurance": "保险",
       "method_statement": "施工方案",
       "other": "其他文件"
+    },
+    "levies_reconcile": {
+      "fail": "工程价值扣除分摊费和保留金后为 {expected}，但应付金额为 {payable}",
+      "suggestion": "请按分包合同条款重新计算明细，不要手动修改金额。"
+    },
+    "payment_discount_reconciles": {
+      "fail": "付款折扣为 {discount}，但按约定比例计算应付金额得 {expected}",
+      "suggestion": "请按约定比例和应付金额重新计算折扣。"
     }
   },
   "submittal": {
@@ -1097,7 +1105,8 @@
     "boq_bulk_items_required": "“items”列表为必填项，且不能为空",
     "boq_classification_unavailable": "分类服务不可用",
     "boq_budget_no_positions": "工程量清单没有项目：没有可编制预算的内容。",
-    "boq_fix_unit_rate_required": "需要非负的“unit_rate”参数"
+    "boq_fix_unit_rate_required": "需要非负的“unit_rate”参数",
+    "levy_code_taken": "目录中已有使用此代码的分摊费。"
   },
   "variations": {
     "boq_lines_are_traced": {
@@ -2610,6 +2619,22 @@
     },
     "index_attribution": {
       "fail": "ArchSD 投标价格指数未注明来源：请注明建筑署"
+    }
+  },
+  "tender": {
+    "recipient_outside_radius": {
+      "fail": "该公司距工地 {distance} 公里，超出 {radius} 公里搜索半径",
+      "suggestion": "如该公司服务此地区可保留，或扩大半径。"
+    }
+  },
+  "de": {
+    "payment_discount_unagreed": {
+      "fail": "使用了 {discount} 的付款折扣，但合同未约定 (VOB/B 16 (5) 2)",
+      "suggestion": "请在分包合同中记录折扣比例和天数，或不打折付款。"
+    },
+    "retention_over_vob_cap": {
+      "fail": "每次付款保留金 {rate}% 超过 {maximum}% (VOB/B 17 (6) 1)",
+      "suggestion": "请将每次付款的保留金降至 VOB/B 上限。"
     }
   }
 }

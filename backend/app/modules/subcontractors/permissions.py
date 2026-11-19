@@ -33,5 +33,7 @@ def register_subcontractors_permissions() -> None:
             "subcontractors.approve_change": Role.MANAGER,
             # Which documents every subcontract needs on file, and whether a gap blocks.
             "subcontractors.configure_documents": Role.MANAGER,
+            # The company levy catalogue (names, bases, default rates).
+            "subcontractors.configure_levies": Role.MANAGER,
         },
     )

@@ -968,6 +968,14 @@
       "insurance": "보험",
       "method_statement": "시공 방법서",
       "other": "기타 문서"
+    },
+    "levies_reconcile": {
+      "fail": "기성액에서 공제금과 유보금을 빼면 {expected}인데 지급액은 {payable}입니다",
+      "suggestion": "금액을 직접 고치지 말고 하도급 계약 조건으로 명세를 다시 계산하세요."
+    },
+    "payment_discount_reconciles": {
+      "fail": "지급 할인은 {discount}인데 지급액에 합의한 율을 적용하면 {expected}입니다",
+      "suggestion": "합의한 율과 지급액으로 할인을 다시 계산하세요."
     }
   },
   "submittal": {
@@ -1097,7 +1105,8 @@
     "boq_bulk_items_required": "'items' 목록은 필수이며 비어 있으면 안 됩니다",
     "boq_classification_unavailable": "분류 서비스를 사용할 수 없습니다",
     "boq_budget_no_positions": "내역서에 항목이 없습니다: 예산화할 것이 없습니다.",
-    "boq_fix_unit_rate_required": "음수가 아닌 'unit_rate' 매개변수가 필요합니다"
+    "boq_fix_unit_rate_required": "음수가 아닌 'unit_rate' 매개변수가 필요합니다",
+    "levy_code_taken": "이 코드의 공제 항목이 이미 카탈로그에 있습니다."
   },
   "variations": {
     "boq_lines_are_traced": {
@@ -2610,6 +2619,22 @@
     },
     "index_attribution": {
       "fail": "ArchSD 입찰가격지수에 출처 표시가 없습니다: Architectural Services Department를 명시하세요"
+    }
+  },
+  "tender": {
+    "recipient_outside_radius": {
+      "fail": "업체가 현장에서 {distance} km 떨어져 있어 검색 반경 {radius} km 밖입니다",
+      "suggestion": "이 지역에서 일하는 업체라면 유지하거나 반경을 넓히세요."
+    }
+  },
+  "de": {
+    "payment_discount_unagreed": {
+      "fail": "계약에 합의되지 않은 지급 할인 {discount}이 적용되었습니다 (VOB/B 16 (5) 2)",
+      "suggestion": "할인율과 기간을 하도급 계약에 기록하거나 할인 없이 지급하세요."
+    },
+    "retention_over_vob_cap": {
+      "fail": "지급당 유보금 {rate}%가 {maximum}%를 초과합니다 (VOB/B 17 (6) 1)",
+      "suggestion": "지급당 유보금을 VOB/B 상한으로 낮추세요."
     }
   }
 }

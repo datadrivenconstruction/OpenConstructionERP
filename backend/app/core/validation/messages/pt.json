@@ -968,6 +968,14 @@
       "insurance": "Seguro",
       "method_statement": "Método construtivo",
       "other": "Outro documento"
+    },
+    "levies_reconcile": {
+      "fail": "O valor da obra menos encargos e retenção dá {expected}, mas o valor a pagar é {payable}",
+      "suggestion": "Recalcule o extrato a partir das condições da subempreitada em vez de editar valores à mão."
+    },
+    "payment_discount_reconciles": {
+      "fail": "O desconto por pronto pagamento é {discount}, mas a taxa acordada sobre o valor a pagar dá {expected}",
+      "suggestion": "Recalcule o desconto a partir da taxa acordada e do valor a pagar."
     }
   },
   "submittal": {
@@ -1097,7 +1105,8 @@
     "boq_bulk_items_required": "A lista 'items' é obrigatória e não pode estar vazia",
     "boq_classification_unavailable": "Serviço de classificação indisponível",
     "boq_budget_no_positions": "O mapa de quantidades não tem posições: nada a orçamentar.",
-    "boq_fix_unit_rate_required": "É necessário um parâmetro 'unit_rate' não negativo"
+    "boq_fix_unit_rate_required": "É necessário um parâmetro 'unit_rate' não negativo",
+    "levy_code_taken": "Já existe no catálogo um encargo com este código."
   },
   "variations": {
     "boq_lines_are_traced": {
@@ -2610,6 +2619,22 @@
     },
     "index_attribution": {
       "fail": "O índice de preços ArchSD não indica a fonte: cite o Architectural Services Department"
+    }
+  },
+  "tender": {
+    "recipient_outside_radius": {
+      "fail": "A empresa está a {distance} km da obra, fora do raio de pesquisa de {radius} km",
+      "suggestion": "Mantenha a empresa se ela atende esta zona, ou aumente o raio."
+    }
+  },
+  "de": {
+    "payment_discount_unagreed": {
+      "fail": "Desconto por pronto pagamento de {discount} aplicado mas não acordado no contrato (VOB/B 16 (5) 2)",
+      "suggestion": "Registe a taxa e os dias do desconto na subempreitada, ou pague sem desconto."
+    },
+    "retention_over_vob_cap": {
+      "fail": "Retenção de {rate}% por pagamento acima de {maximum}% (VOB/B 17 (6) 1)",
+      "suggestion": "Reduza a retenção por pagamento ao máximo VOB/B."
     }
   }
 }

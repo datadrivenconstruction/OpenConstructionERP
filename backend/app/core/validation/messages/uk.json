@@ -968,6 +968,14 @@
       "insurance": "Страхування",
       "method_statement": "Опис методів робіт",
       "other": "Інший документ"
+    },
+    "levies_reconcile": {
+      "fail": "Вартість робіт за вирахуванням зборів і утримання становить {expected}, а сума до сплати {payable}",
+      "suggestion": "Перерахуйте розрахунок за умовами договору субпідряду, а не змінюйте суми вручну."
+    },
+    "payment_discount_reconciles": {
+      "fail": "Знижка за дострокову оплату {discount}, а погоджена ставка від суми до сплати дає {expected}",
+      "suggestion": "Перерахуйте знижку за погодженою ставкою та сумою до сплати."
     }
   },
   "submittal": {
@@ -1097,7 +1105,8 @@
     "boq_bulk_items_required": "Список 'items' обов'язковий і не має бути порожнім",
     "boq_classification_unavailable": "Сервіс класифікації недоступний",
     "boq_budget_no_positions": "У кошторисі обсягів немає позицій: нічого бюджетувати.",
-    "boq_fix_unit_rate_required": "Потрібен невід'ємний параметр 'unit_rate'"
+    "boq_fix_unit_rate_required": "Потрібен невід'ємний параметр 'unit_rate'",
+    "levy_code_taken": "Збір із таким кодом уже є в каталозі."
   },
   "variations": {
     "boq_lines_are_traced": {
@@ -2610,6 +2619,22 @@
     },
     "index_attribution": {
       "fail": "Індекс цін ArchSD без зазначення джерела: зазначте Architectural Services Department"
+    }
+  },
+  "tender": {
+    "recipient_outside_radius": {
+      "fail": "Фірма розташована за {distance} км від об'єкта, поза радіусом пошуку {radius} км",
+      "suggestion": "Залиште фірму, якщо вона працює в цьому районі, або збільште радіус."
+    }
+  },
+  "de": {
+    "payment_discount_unagreed": {
+      "fail": "Знижку за дострокову оплату {discount} застосовано, але не погоджено в договорі (VOB/B 16 (5) 2)",
+      "suggestion": "Внесіть ставку та строк знижки в договір субпідряду або платіть без знижки."
+    },
+    "retention_over_vob_cap": {
+      "fail": "Утримання {rate}% з платежу перевищує {maximum}% (VOB/B 17 (6) 1)",
+      "suggestion": "Знизьте утримання з платежу до максимуму VOB/B."
     }
   }
 }

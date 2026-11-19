@@ -968,6 +968,14 @@
       "insurance": "Сақтандыру",
       "method_statement": "Жұмыс әдісінің сипаттамасы",
       "other": "Басқа құжат"
+    },
+    "levies_reconcile": {
+      "fail": "Жұмыс құны алымдар мен ұстап қалуды шегергенде {expected} болады, бірақ төленетін сома {payable}",
+      "suggestion": "Сомаларды қолмен өзгертудің орнына есепті қосалқы мердігерлік шарт талаптарынан қайта есептеңіз."
+    },
+    "payment_discount_reconciles": {
+      "fail": "Төлем жеңілдігі {discount}, бірақ төленетін сомадан келісілген мөлшерлеме {expected} береді",
+      "suggestion": "Жеңілдікті келісілген мөлшерлеме мен төленетін сомадан қайта есептеңіз."
     }
   },
   "submittal": {
@@ -1097,7 +1105,8 @@
     "boq_bulk_items_required": "'items' тізімі міндетті және бос болмауы керек",
     "boq_classification_unavailable": "Жіктеу қызметі қолжетімсіз",
     "boq_budget_no_positions": "Көлем ведомосында позициялар жоқ: бюджеттейтін ештеңе жоқ.",
-    "boq_fix_unit_rate_required": "Теріс емес 'unit_rate' параметрі қажет"
+    "boq_fix_unit_rate_required": "Теріс емес 'unit_rate' параметрі қажет",
+    "levy_code_taken": "Бұл кодпен алым каталогта бұрыннан бар."
   },
   "variations": {
     "boq_lines_are_traced": {
@@ -2610,6 +2619,22 @@
     },
     "index_attribution": {
       "fail": "ArchSD баға индексінде дереккөз көрсетілмеген: Architectural Services Department көрсетіңіз"
+    }
+  },
+  "tender": {
+    "recipient_outside_radius": {
+      "fail": "Фирма нысаннан {distance} км қашықта, {radius} км іздеу радиусынан тыс",
+      "suggestion": "Фирма осы аймақта жұмыс істесе қалдырыңыз немесе радиусты үлкейтіңіз."
+    }
+  },
+  "de": {
+    "payment_discount_unagreed": {
+      "fail": "{discount} төлем жеңілдігі қолданылды, бірақ шартта келісілмеген (VOB/B 16 (5) 2)",
+      "suggestion": "Жеңілдік мөлшерлемесі мен мерзімін қосалқы мердігерлік шартқа енгізіңіз немесе жеңілдіксіз төлеңіз."
+    },
+    "retention_over_vob_cap": {
+      "fail": "Әр төлемнен {rate}% ұстап қалу {maximum}% шегінен жоғары (VOB/B 17 (6) 1)",
+      "suggestion": "Әр төлемнен ұстап қалуды VOB/B шегіне дейін азайтыңыз."
     }
   }
 }

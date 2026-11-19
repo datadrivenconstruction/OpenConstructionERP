@@ -968,6 +968,14 @@
       "insurance": "ประกันภัย",
       "method_statement": "วิธีการทำงาน",
       "other": "เอกสารอื่น"
+    },
+    "levies_reconcile": {
+      "fail": "มูลค่างานหักค่าธรรมเนียมและเงินประกันผลงานได้ {expected} แต่ยอดที่ต้องจ่ายคือ {payable}",
+      "suggestion": "คำนวณรายการใหม่จากเงื่อนไขสัญญาช่วงแทนการแก้ไขจำนวนเงินด้วยมือ"
+    },
+    "payment_discount_reconciles": {
+      "fail": "ส่วนลดการชำระเงินคือ {discount} แต่อัตราที่ตกลงจากยอดที่ต้องจ่ายได้ {expected}",
+      "suggestion": "คำนวณส่วนลดใหม่จากอัตราที่ตกลงและยอดที่ต้องจ่าย"
     }
   },
   "submittal": {
@@ -1097,7 +1105,8 @@
     "boq_bulk_items_required": "ต้องมีรายการ 'items' และต้องไม่ว่าง",
     "boq_classification_unavailable": "บริการจัดหมวดหมู่ไม่พร้อมใช้งาน",
     "boq_budget_no_positions": "ใบถอดปริมาณงานไม่มีรายการ: ไม่มีสิ่งที่จะตั้งงบ",
-    "boq_fix_unit_rate_required": "ต้องมีพารามิเตอร์ 'unit_rate' ที่ไม่เป็นลบ"
+    "boq_fix_unit_rate_required": "ต้องมีพารามิเตอร์ 'unit_rate' ที่ไม่เป็นลบ",
+    "levy_code_taken": "มีค่าธรรมเนียมที่ใช้รหัสนี้ในแคตตาล็อกแล้ว"
   },
   "variations": {
     "boq_lines_are_traced": {
@@ -2610,6 +2619,22 @@
     },
     "index_attribution": {
       "fail": "ดัชนีราคา ArchSD ไม่ระบุแหล่งที่มา: ระบุ Architectural Services Department"
+    }
+  },
+  "tender": {
+    "recipient_outside_radius": {
+      "fail": "บริษัทอยู่ห่างจากไซต์ {distance} กม. นอกรัศมีค้นหา {radius} กม.",
+      "suggestion": "เก็บบริษัทไว้หากให้บริการในพื้นที่นี้ หรือขยายรัศมี"
+    }
+  },
+  "de": {
+    "payment_discount_unagreed": {
+      "fail": "ใช้ส่วนลดการชำระเงิน {discount} แต่ไม่ได้ตกลงไว้ในสัญญา (VOB/B 16 (5) 2)",
+      "suggestion": "บันทึกอัตราและจำนวนวันของส่วนลดในสัญญาช่วง หรือจ่ายโดยไม่มีส่วนลด"
+    },
+    "retention_over_vob_cap": {
+      "fail": "เงินประกันผลงาน {rate}% ต่อการจ่ายเกิน {maximum}% (VOB/B 17 (6) 1)",
+      "suggestion": "ลดเงินประกันผลงานต่อการจ่ายลงถึงเพดานของ VOB/B"
     }
   }
 }
