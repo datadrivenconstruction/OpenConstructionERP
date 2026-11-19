@@ -29,6 +29,7 @@ const STATUS_VARIANT: Record<BidInvitationStatus, BadgeVariant> = {
   not_opened: 'neutral',
   opened: 'blue',
   submitted: 'success',
+  declined: 'warning',
   expired: 'warning',
   revoked: 'neutral',
 };
@@ -63,6 +64,8 @@ export function BidLinkCell({ packageId, recipientId }: { packageId: string; rec
         return t('tendering.bid_link.status_opened', { defaultValue: 'Link opened' });
       case 'submitted':
         return t('tendering.bid_link.status_submitted', { defaultValue: 'Prices submitted' });
+      case 'declined':
+        return t('tendering.bid_link.status_declined', { defaultValue: 'Declined to bid' });
       case 'expired':
         return t('tendering.bid_link.status_expired', { defaultValue: 'Link expired' });
       case 'revoked':
@@ -138,6 +141,11 @@ export function BidLinkCell({ packageId, recipientId }: { packageId: string; rec
             {statusLabel(latest.status)}
           </Badge>
         )}
+        {latest && (latest.file_count ?? 0) > 0 && (
+          <span className="text-2xs text-content-tertiary" data-testid="bid-link-file-count">
+            {t('tendering.bid_link.file_count', { defaultValue: 'Files: {{count}}', count: latest.file_count })}
+          </span>
+        )}
         <button
           type="button"
           onClick={onCopy}
@@ -153,6 +161,11 @@ export function BidLinkCell({ packageId, recipientId }: { packageId: string; rec
         </button>
       </div>
       {latest && !latest.revoked_at && <PartyChip invitation={latest} />}
+      {latest?.status === 'declined' && latest.decline_reason && (
+        <p className="max-w-xs text-right text-2xs text-content-secondary" data-testid="bid-link-decline-reason">
+          {t('tendering.bid_link.decline_reason', { defaultValue: 'Reason: {{reason}}', reason: latest.decline_reason })}
+        </p>
+      )}
       {shownUrl && (
         <input
           readOnly
@@ -171,7 +184,7 @@ export type InvitationTally = Record<BidInvitationStatus | 'no_link', number>;
 
 /** Count each recipient once, by the state of its newest link. */
 export function tallyInvitations(items: BidInvitation[], recipientIds: string[]): InvitationTally {
-  const tally: InvitationTally = { no_link: 0, not_opened: 0, opened: 0, submitted: 0, expired: 0, revoked: 0 };
+  const tally: InvitationTally = { no_link: 0, not_opened: 0, opened: 0, submitted: 0, declined: 0, expired: 0, revoked: 0 };
   for (const id of recipientIds) {
     const latest = latestInvitation(items, id);
     tally[latest ? latest.status : 'no_link'] += 1;
@@ -194,6 +207,7 @@ export function InvitationSummary({ packageId, recipientIds }: { packageId: stri
     { key: 'not_opened', label: t('tendering.bid_link.status_not_opened', { defaultValue: 'Link not opened' }), variant: 'neutral' },
     { key: 'opened', label: t('tendering.bid_link.status_opened', { defaultValue: 'Link opened' }), variant: 'blue' },
     { key: 'submitted', label: t('tendering.bid_link.status_submitted', { defaultValue: 'Prices submitted' }), variant: 'success' },
+    { key: 'declined', label: t('tendering.bid_link.status_declined', { defaultValue: 'Declined to bid' }), variant: 'warning' },
     { key: 'expired', label: t('tendering.bid_link.status_expired', { defaultValue: 'Link expired' }), variant: 'warning' },
     { key: 'revoked', label: t('tendering.bid_link.status_revoked', { defaultValue: 'Link revoked' }), variant: 'neutral' },
   ];

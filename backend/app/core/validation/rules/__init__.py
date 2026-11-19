@@ -13083,6 +13083,7 @@ def register_builtin_rules() -> None:
     from app.core.validation.rules.commercial_control import COMMERCIAL_CONTROL_RULES
     from app.core.validation.rules.field_clock import FIELD_CLOCK_RULES
     from app.core.validation.rules.field_productivity import PRODUCTIVITY_RULES
+    from app.core.validation.rules.gaeb_phases import GAEB_EXCHANGE_RULE_SET, GAEB_EXCHANGE_RULES
     from app.core.validation.rules.hongkong import HONGKONG_RULES
     from app.core.validation.rules.italy_prezzario import ITALY_PREZZARIO_RULES
     from app.core.validation.rules.norm_base import NORM_BASE_RULES
@@ -13413,6 +13414,8 @@ def register_builtin_rules() -> None:
         *((rule_class(), None) for rule_class in NORM_BASE_RULES),
         # Tax line at the standard VAT rate of the dated tax seed (neutral)
         *((rule_class(), None) for rule_class in VAT_RATE_RULES),
+        # GAEB DA XML 3.3 exchange phases X81/X83/X84/X86 (bill and file rules)
+        *((rule, [GAEB_EXCHANGE_RULE_SET]) for rule in GAEB_EXCHANGE_RULES),
     ]
 
     for rule, sets in rules:

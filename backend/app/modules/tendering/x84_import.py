@@ -14,6 +14,7 @@ comparison never reads a bid for a different bill.
 from __future__ import annotations
 
 import hashlib
+import logging
 import re
 import uuid
 from decimal import Decimal, InvalidOperation
@@ -24,6 +25,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.boq.units import to_gaeb_unit_code
 from app.modules.tendering.schemas import BidCreate, BidLineItem, X84ImportPreview, X84LineCheck
+
+logger = logging.getLogger(__name__)
 
 #: Upper bound for one uploaded X84 file.
 MAX_X84_BYTES = 20 * 1024 * 1024
@@ -207,6 +210,15 @@ class X84BidImportService:
             total_amount=format(total.quantize(Decimal("0.01")), "f"),
             blocking=blocking,
         )
+        # The GAEB phase rules read the file as sent; they inform, the line
+        # checks above decide.
+        from app.core.validation.rules.gaeb_phases import run_gaeb_exchange_rules
+
+        try:
+            text = content.decode("utf-8", errors="replace")
+            preview.rule_results = await run_gaeb_exchange_rules({"gaeb_document": {"phase": "x84", "content": text}})
+        except Exception:  # noqa: BLE001 - a rule fault never blocks the import
+            logger.warning("GAEB phase rules failed on %s", filename, exc_info=True)
         return preview, package, {"prices": prices, "priceable": priceable, "currency": tender_currency}
 
     async def import_bid(

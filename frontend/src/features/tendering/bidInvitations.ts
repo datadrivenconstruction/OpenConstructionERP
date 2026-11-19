@@ -10,7 +10,7 @@
 
 import { apiDelete, apiGet, apiPost, apiPut } from '@/shared/lib/api';
 
-export type BidInvitationStatus = 'not_opened' | 'opened' | 'submitted' | 'expired' | 'revoked';
+export type BidInvitationStatus = 'not_opened' | 'opened' | 'submitted' | 'declined' | 'expired' | 'revoked';
 
 export interface BidInvitation {
   id: string;
@@ -24,6 +24,11 @@ export interface BidInvitation {
   draft_saved_at: string | null;
   submitted_at: string | null;
   revoked_at: string | null;
+  /** The firm said it will not bid, and why. */
+  declined_at?: string | null;
+  decline_reason?: string | null;
+  /** Offer files the firm uploaded through its link. */
+  file_count?: number;
   bid_id: string | null;
   created_at: string;
   contact_id?: string | null;

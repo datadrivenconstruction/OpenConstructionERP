@@ -2571,5 +2571,51 @@
     "index_attribution": {
       "fail": "Der ArchSD-Baupreisindex hat keine Quellenangabe: das Architectural Services Department als Quelle nennen"
     }
+  },
+  "gaeb_exchange": {
+    "item_description_not_empty": {
+      "fail": "Position {ordinal} hat keinen Text",
+      "suggestion": "Geben Sie der Position einen Kurztext; der Empfänger liest das LV danach"
+    },
+    "unit_specified_per_item": {
+      "fail": "Position {ordinal} hat keine Einheit",
+      "suggestion": "Tragen Sie die Einheit der Position ein (m, m2, m3, St, ...)"
+    },
+    "quantity_present_x83": {
+      "fail": "Position {ordinal} hat keine Menge",
+      "suggestion": "Tragen Sie die Menge ein, die die Bieter bepreisen sollen"
+    },
+    "unit_price_present_x84": {
+      "fail": "Position {ordinal} hat keinen Einheitspreis",
+      "suggestion": "Bepreisen Sie jede Position, bevor die Datei hinausgeht"
+    },
+    "total_price_calculated_correctly": {
+      "fail": "Position {ordinal}: Gesamtbetrag {total} ist nicht Menge x Einheitspreis ({expected})",
+      "suggestion": "Berechnen Sie den Gesamtbetrag der Position neu"
+    },
+    "lv_numbering_consistent": {
+      "fail": "Die Ordnungszahl {ordinal} kommt mehrfach vor",
+      "suggestion": "Geben Sie jeder Position eine eigene Ordnungszahl"
+    },
+    "oz_format_valid": {
+      "fail": "Die Ordnungszahl '{ordinal}' passt nicht in eine GAEB-OZ",
+      "suggestion": "Höchstens fünf Stufen mit je bis zu 14 Buchstaben oder Ziffern, z. B. 01.02.0030"
+    },
+    "currency_element_present": {
+      "fail": "Der Austausch nennt keine Währung",
+      "suggestion": "Legen Sie die Projektwährung fest, damit die Datei sie angibt"
+    },
+    "xml_schema_valid": {
+      "fail": "Die Datei ist kein gültiges GAEB DA XML 3.3 ({reason})",
+      "suggestion": "Exportieren Sie die Datei im sendenden Programm erneut als GAEB DA XML 3.3"
+    },
+    "phase_structure_valid": {
+      "fail": "Die {phase}-Datei hat nicht den Aufbau ihrer Phase: {problems}",
+      "suggestion": "Prüfen Sie, ob die Datei die richtige Phase hat und vollständig ist"
+    },
+    "bidder_info_present_x84": {
+      "fail": "Die Datei nennt keinen Bieter",
+      "suggestion": "Tragen Sie den Firmennamen in den Bieterdaten der Datei ein"
+    }
   }
 }

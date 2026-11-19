@@ -2571,5 +2571,51 @@
     "index_attribution": {
       "fail": "Индекс цен ArchSD без указания источника: укажите Architectural Services Department"
     }
+  },
+  "gaeb_exchange": {
+    "item_description_not_empty": {
+      "fail": "У позиции {ordinal} нет текста",
+      "suggestion": "Дайте позиции краткий текст: получатель читает смету по нему"
+    },
+    "unit_specified_per_item": {
+      "fail": "У позиции {ordinal} нет единицы измерения",
+      "suggestion": "Укажите единицу позиции (м, м2, м3, шт, ...)"
+    },
+    "quantity_present_x83": {
+      "fail": "У позиции {ordinal} нет количества",
+      "suggestion": "Укажите количество, которое участники должны оценить"
+    },
+    "unit_price_present_x84": {
+      "fail": "У позиции {ordinal} нет единичной цены",
+      "suggestion": "Оцените каждую позицию до отправки файла"
+    },
+    "total_price_calculated_correctly": {
+      "fail": "Позиция {ordinal}: сумма {total} не равна количеству x цене ({expected})",
+      "suggestion": "Пересчитайте сумму позиции"
+    },
+    "lv_numbering_consistent": {
+      "fail": "Номер позиции {ordinal} встречается несколько раз",
+      "suggestion": "Дайте каждой позиции свой номер"
+    },
+    "oz_format_valid": {
+      "fail": "Номер '{ordinal}' не подходит для номера позиции GAEB",
+      "suggestion": "Не более пяти уровней, до 14 букв или цифр в каждом, например 01.02.0030"
+    },
+    "currency_element_present": {
+      "fail": "В обмене не указана валюта",
+      "suggestion": "Задайте валюту проекта, чтобы файл её указал"
+    },
+    "xml_schema_valid": {
+      "fail": "Файл не является корректным GAEB DA XML 3.3 ({reason})",
+      "suggestion": "Экспортируйте файл заново из исходной программы как GAEB DA XML 3.3"
+    },
+    "phase_structure_valid": {
+      "fail": "Файл {phase} не имеет структуры своей фазы: {problems}",
+      "suggestion": "Проверьте, что файл нужной фазы и полный"
+    },
+    "bidder_info_present_x84": {
+      "fail": "В файле не указан участник",
+      "suggestion": "Укажите название фирмы в данных участника в файле"
+    }
   }
 }

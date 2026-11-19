@@ -2571,5 +2571,51 @@
     "index_attribution": {
       "fail": "The ArchSD tender price index has no source attribution: credit the Architectural Services Department"
     }
+  },
+  "gaeb_exchange": {
+    "item_description_not_empty": {
+      "fail": "Item {ordinal} has no text",
+      "suggestion": "Give the item a short text; the receiver reads the bill by it"
+    },
+    "unit_specified_per_item": {
+      "fail": "Item {ordinal} has no unit",
+      "suggestion": "Set the unit (m, m2, m3, pcs, ...) of the item"
+    },
+    "quantity_present_x83": {
+      "fail": "Item {ordinal} has no quantity",
+      "suggestion": "Enter the quantity the bidders are asked to price"
+    },
+    "unit_price_present_x84": {
+      "fail": "Item {ordinal} has no unit price",
+      "suggestion": "Price every item before the file goes out"
+    },
+    "total_price_calculated_correctly": {
+      "fail": "Item {ordinal}: total {total} is not quantity x unit price ({expected})",
+      "suggestion": "Recalculate the item total"
+    },
+    "lv_numbering_consistent": {
+      "fail": "Item number {ordinal} is used more than once",
+      "suggestion": "Give every item its own item number"
+    },
+    "oz_format_valid": {
+      "fail": "Item number '{ordinal}' does not fit a GAEB item number",
+      "suggestion": "Use at most five levels of up to 14 letters or digits, e.g. 01.02.0030"
+    },
+    "currency_element_present": {
+      "fail": "The exchange names no currency",
+      "suggestion": "Set the project currency so the file states it"
+    },
+    "xml_schema_valid": {
+      "fail": "The file is not valid GAEB DA XML 3.3 ({reason})",
+      "suggestion": "Export the file again from the sending program as GAEB DA XML 3.3"
+    },
+    "phase_structure_valid": {
+      "fail": "The {phase} file does not have the structure of its phase: {problems}",
+      "suggestion": "Check that the file is the right phase and complete"
+    },
+    "bidder_info_present_x84": {
+      "fail": "The file does not name the bidder",
+      "suggestion": "Enter the firm name in the bidder data of the file"
+    }
   }
 }

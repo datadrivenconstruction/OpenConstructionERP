@@ -9,12 +9,14 @@ Tables:
     oe_tendering_sealing - the sealed submission mode of a package and its opening
     oe_tendering_bid_receipt - time stamp and SHA-256 of each sealed submission
     oe_tendering_clarification - bidder questions and the answers published to all bidders
+    oe_tendering_bid_file - offer files a bidder uploaded through its link (X84, PDF, attachments)
+    oe_tendering_package_document - project documents the buyer sends out with a package
 """
 
 import uuid
 from datetime import datetime
 
-from sqlalchemy import JSON, Boolean, DateTime, Float, ForeignKey, Integer, String, Text
+from sqlalchemy import JSON, Boolean, DateTime, Float, ForeignKey, Integer, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import GUID, Base
@@ -166,6 +168,10 @@ class TenderBidInvitation(Base):
     )
     contact_match_method: Mapped[str | None] = mapped_column(String(20), nullable=True)
     contact_match_confidence: Mapped[float | None] = mapped_column(Float, nullable=True)
+    # The firm said it will not bid, and why. Kept on the link so the buyer
+    # sees it per firm; a new link carries it over unless the buyer reopens.
+    declined_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    decline_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     def __repr__(self) -> str:
         return f"<TenderBidInvitation {self.company_name} package={self.package_id}>"
@@ -256,16 +262,75 @@ class TenderClarification(Base):
         return f"<TenderClarification #{self.number} package={self.package_id} {self.status}>"
 
 
+class TenderBidFile(Base):
+    """A file a bidder uploaded through its link: a priced X84, its offer PDF or an attachment.
+
+    The bytes are kept under the tendering uploads directory and the file is
+    filed as a project document (``document_id``), so offers are found with
+    the project's other files. ``sha256`` is what the bidder is shown back.
+    """
+
+    __tablename__ = "oe_tendering_bid_file"
+
+    package_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(),
+        ForeignKey("oe_tendering_package.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    invitation_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, index=True)
+    recipient_id: Mapped[str] = mapped_column(String(64), nullable=False, default="", server_default="")
+    company_name: Mapped[str] = mapped_column(String(255), nullable=False, default="", server_default="")
+    bid_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+    # x84 | offer_pdf | attachment
+    kind: Mapped[str] = mapped_column(String(20), nullable=False, default="attachment", server_default="attachment")
+    file_name: Mapped[str] = mapped_column(String(255), nullable=False)
+    mime_type: Mapped[str] = mapped_column(String(100), nullable=False, default="", server_default="")
+    file_size: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
+    sha256: Mapped[str] = mapped_column(String(64), nullable=False)
+    file_path: Mapped[str] = mapped_column(String(500), nullable=False, default="", server_default="")
+    document_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+    uploaded_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+    def __repr__(self) -> str:
+        return f"<TenderBidFile {self.kind} {self.file_name} package={self.package_id}>"
+
+
+class TenderPackageDocument(Base):
+    """A project document the buyer sends out with a package (drawings, specifications).
+
+    Bidders read the list and download each file through their own link; the
+    document itself stays in Documents and is never copied.
+    """
+
+    __tablename__ = "oe_tendering_package_document"
+    __table_args__ = (UniqueConstraint("package_id", "document_id", name="uq_oe_tendering_package_document_doc"),)
+
+    package_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(),
+        ForeignKey("oe_tendering_package.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    document_id: Mapped[uuid.UUID] = mapped_column(GUID(), nullable=False, index=True)
+    added_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
+
+    def __repr__(self) -> str:
+        return f"<TenderPackageDocument package={self.package_id} document={self.document_id}>"
+
+
 # Award terms and negotiation rounds live in their own file; imported here so the module registers them.
 from app.modules.tendering.award_models import TenderAwardTerms, TenderNegotiationRound  # noqa: E402
 
 __all__ = [
     "TenderAwardTerms",
     "TenderBid",
+    "TenderBidFile",
     "TenderBidInvitation",
     "TenderBidReceipt",
     "TenderClarification",
     "TenderNegotiationRound",
     "TenderPackage",
+    "TenderPackageDocument",
     "TenderSealing",
 ]

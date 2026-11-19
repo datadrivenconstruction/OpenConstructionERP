@@ -2571,5 +2571,51 @@
     "index_attribution": {
       "fail": "El índice de precios ArchSD no indica su fuente: cite al Architectural Services Department"
     }
+  },
+  "gaeb_exchange": {
+    "item_description_not_empty": {
+      "fail": "La partida {ordinal} no tiene texto",
+      "suggestion": "Dé a la partida un texto breve; el destinatario lee el presupuesto por él"
+    },
+    "unit_specified_per_item": {
+      "fail": "La partida {ordinal} no tiene unidad",
+      "suggestion": "Indique la unidad de la partida (m, m2, m3, ud, ...)"
+    },
+    "quantity_present_x83": {
+      "fail": "La partida {ordinal} no tiene cantidad",
+      "suggestion": "Indique la cantidad que los licitadores deben valorar"
+    },
+    "unit_price_present_x84": {
+      "fail": "La partida {ordinal} no tiene precio unitario",
+      "suggestion": "Valore todas las partidas antes de enviar el archivo"
+    },
+    "total_price_calculated_correctly": {
+      "fail": "Partida {ordinal}: el importe {total} no es cantidad x precio unitario ({expected})",
+      "suggestion": "Vuelva a calcular el importe de la partida"
+    },
+    "lv_numbering_consistent": {
+      "fail": "El número de partida {ordinal} se usa más de una vez",
+      "suggestion": "Dé a cada partida su propio número"
+    },
+    "oz_format_valid": {
+      "fail": "El número '{ordinal}' no encaja en un número de partida GAEB",
+      "suggestion": "Use como máximo cinco niveles de hasta 14 letras o cifras, p. ej. 01.02.0030"
+    },
+    "currency_element_present": {
+      "fail": "El intercambio no indica moneda",
+      "suggestion": "Defina la moneda del proyecto para que el archivo la indique"
+    },
+    "xml_schema_valid": {
+      "fail": "El archivo no es GAEB DA XML 3.3 válido ({reason})",
+      "suggestion": "Vuelva a exportar el archivo desde el programa de origen como GAEB DA XML 3.3"
+    },
+    "phase_structure_valid": {
+      "fail": "El archivo {phase} no tiene la estructura de su fase: {problems}",
+      "suggestion": "Compruebe que el archivo es de la fase correcta y está completo"
+    },
+    "bidder_info_present_x84": {
+      "fail": "El archivo no indica el licitador",
+      "suggestion": "Introduzca el nombre de la empresa en los datos del licitador del archivo"
+    }
   }
 }

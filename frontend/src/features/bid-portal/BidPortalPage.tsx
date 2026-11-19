@@ -41,6 +41,7 @@ import {
   type BidPortalView,
 } from './api';
 import { TenderInfoSection } from './TenderInfoSection';
+import { BidExchangeSection } from './BidExchangeSection';
 
 type PageState =
   | { kind: 'loading' }
@@ -282,6 +283,8 @@ export function BidPortalPage() {
       </section>
 
       <TenderInfoSection token={token} />
+
+      <BidExchangeSection token={token} view={v} onView={adopt} />
 
       {v.state === 'submitted' && (
         <div

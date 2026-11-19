@@ -1116,13 +1116,17 @@ class BidInvitationResponse(BaseModel):
     recipient_id: str
     company_name: str
     email: str
-    # not_opened | opened | submitted | expired | revoked
+    # not_opened | opened | submitted | declined | expired | revoked
     status: str
     expires_at: datetime
     opened_at: datetime | None = None
     draft_saved_at: datetime | None = None
     submitted_at: datetime | None = None
     revoked_at: datetime | None = None
+    declined_at: datetime | None = None
+    decline_reason: str | None = None
+    # Files the firm uploaded through its link (X84, offer PDF, attachments).
+    file_count: int = 0
     bid_id: UUID | None = None
     created_at: datetime
     # Directory party of this bidder; ``contact_name`` is its display name.
@@ -1176,10 +1180,32 @@ class BidPortalDraft(BaseModel):
     lump_sum: str | None = None
 
 
+class BidPortalFile(BaseModel):
+    """A file the bidder uploaded, as shown back to the bidder and to the buyer."""
+
+    id: UUID
+    # x84 | offer_pdf | attachment
+    kind: str
+    file_name: str
+    file_size: int = 0
+    sha256: str = ""
+    uploaded_at: datetime
+
+
+class BidPortalDocument(BaseModel):
+    """A document the buyer sent out with the package; downloaded through the link."""
+
+    id: UUID
+    name: str
+    file_size: int = 0
+    mime_type: str = ""
+    revision_code: str | None = None
+
+
 class BidPortalView(BaseModel):
     """Everything the public bid page needs, and nothing else."""
 
-    # open | submitted | closed
+    # open | submitted | declined | closed
     state: str
     package_name: str
     package_description: str = ""
@@ -1202,6 +1228,69 @@ class BidPortalView(BaseModel):
     received_at: datetime | None = None
     item_count: int = 0
     unpriced_count: int = 0
+    declined_at: datetime | None = None
+    decline_reason: str | None = None
+    files: list[BidPortalFile] = Field(default_factory=list)
+    documents: list[BidPortalDocument] = Field(default_factory=list)
+
+
+class BidPortalDeclineRequest(BaseModel):
+    """A firm that will not bid says so, with a reason the buyer reads."""
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    reason: str = Field(..., min_length=1, max_length=2000)
+
+
+class BidFileResponse(BidPortalFile):
+    """A bidder file as staff see it, with the firm and the Documents row it is filed as."""
+
+    invitation_id: UUID | None = None
+    recipient_id: str = ""
+    company_name: str = ""
+    bid_id: UUID | None = None
+    mime_type: str = ""
+    document_id: UUID | None = None
+
+
+class PackageDocumentsAttach(BaseModel):
+    """Project documents to send out with a package."""
+
+    document_ids: list[UUID] = Field(..., min_length=1, max_length=200)
+
+
+class PackageDocumentResponse(BaseModel):
+    """A project document attached to a package."""
+
+    id: UUID
+    document_id: UUID
+    name: str
+    file_size: int = 0
+    mime_type: str = ""
+    category: str = ""
+    revision_code: str | None = None
+    added_at: datetime
+
+
+class BillDifference(BaseModel):
+    """One way the bill moved away from the file it was imported from."""
+
+    ordinal: str = ""
+    # ordinal | unit | quantity | text | removed | added
+    field: str
+    was: str = ""
+    now: str = ""
+
+
+class BillSourceState(BaseModel):
+    """The imported file behind a package's bill and whether the bill still matches it."""
+
+    source: dict[str, Any] | None = None
+    changed: bool = False
+    differences: list[BillDifference] = Field(default_factory=list)
+    # The awarded bid an award export (X86) is written from by default.
+    awarded_bid_id: UUID | None = None
+    rule_results: list[dict[str, Any]] = Field(default_factory=list)
 
 
 class BidPortalPricesRequest(BaseModel):
@@ -1264,6 +1353,8 @@ class X84ImportPreview(BaseModel):
     missing_ordinals: list[str] = Field(default_factory=list)
     total_amount: str = "0.00"
     blocking: bool = False
+    # GAEB phase rules run on the file itself (gaeb.phase_x84_structure_valid ...).
+    rule_results: list[dict[str, Any]] = Field(default_factory=list)
 
 
 class ClarificationListResponse(BaseModel):

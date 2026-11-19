@@ -89,6 +89,7 @@ import {
   type DistributeResponse,
 } from './api';
 import { PackageContentsPanel } from './PackageContentsPanel';
+import { ExchangePanel } from './ExchangePanel';
 import { BuyerPricesDialog } from './BuyerPricesDialog';
 import { createBidLinkForBid } from './bidInvitations';
 import { fmtList, fmtPercent, formatDateValue } from '@/shared/lib/formatters';
@@ -2322,6 +2323,9 @@ function PackageDetail({
 
       {/* Bids list */}
       {activeTab === 'bids' && <SealedTenderPanel packageId={packageId} pkg={pkg} />}
+
+      {/* Bill file, award file, documents out and files back */}
+      {activeTab === 'bids' && <ExchangePanel pkg={pkg} />}
 
       {activeTab === 'bids' && pkg.bids.length > 0 && (
         <div className="space-y-2">
