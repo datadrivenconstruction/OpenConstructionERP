@@ -20672,6 +20672,7 @@ const resource = {
     "dwg_takeoff.undo_aria": "Αναίρεση",
     "errors.timeout_title": "Το αίτημα έληξε",
     "errors.query_failed_title": "Δεν ήταν δυνατή η φόρτωση δεδομένων",
+    "errors.query_server_starting_title": "Ακόμα εκκινεί",
     "offline.synced_changes_one": "Συγχρονίστηκε {{count}} αλλαγή εκτός σύνδεσης",
     "offline.synced_changes_other": "Συγχρονίστηκαν {{count}} αλλαγές εκτός σύνδεσης",
     "offline.failed_changes_one": "{{count}} αλλαγή απέτυχε να συγχρονιστεί",

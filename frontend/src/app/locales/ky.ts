@@ -17658,6 +17658,7 @@ const resource = {
   "dwg_takeoff.intro_link_bim": "BIM көрүүчү",
     "errors.timeout_title": "Суроо мөөнөтү бүттү",
     "errors.query_failed_title": "Маалыматтарды жүктөө мүмкүн болгон жок",
+    "errors.query_server_starting_title": "Дагы эле ишке кирүүдө",
     "offline.synced_changes_one": "{{count}} офлайн өзгөртүү шайкештирилди",
     "offline.synced_changes_other": "{{count}} офлайн өзгөртүү шайкештирилди",
     "offline.failed_changes_one": "{{count}} өзгөртүүнү шайкештирүү ишке ашкан жок",

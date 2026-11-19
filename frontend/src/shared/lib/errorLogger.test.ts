@@ -216,6 +216,13 @@ describe('expected missing claim invoice reporting', () => {
 
   beforeEach(() => {
     reporter.clearErrorLog();
+    // These cases log the same claim-invoice failure with a different body each
+    // time, and one reporter instance now serves the whole block. The reporter
+    // sends one report per distinct error per minute, so without this the second
+    // case onward would be deduplicated - correctly, but not what is being asked
+    // here: each case is a fresh session asking whether that body stays
+    // observable. Every assertion below is unchanged.
+    reporter.resetBackendReportLimiter();
     vi.stubEnv('VITE_ENABLE_ERROR_REPORTING', 'true');
     fetchSpy.mockReset().mockResolvedValue(new Response('{}', { status: 202 }));
     vi.stubGlobal('fetch', fetchSpy);

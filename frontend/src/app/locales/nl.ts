@@ -20411,6 +20411,7 @@ const resource = {
     "dwg_takeoff.undo_aria": "Ongedaan maken",
     "errors.timeout_title": "Time-out van verzoek",
     "errors.query_failed_title": "Gegevens konden niet worden geladen",
+    "errors.query_server_starting_title": "Nog aan het opstarten",
     "offline.synced_changes_one": "{{count}} offline wijziging gesynchroniseerd",
     "offline.synced_changes_other": "{{count}} offline wijzigingen gesynchroniseerd",
     "offline.failed_changes_one": "{{count}} wijziging kon niet worden gesynchroniseerd",

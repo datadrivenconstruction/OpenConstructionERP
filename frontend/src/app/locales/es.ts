@@ -20622,6 +20622,7 @@ const resource = {
     "dwg_takeoff.undo_aria": "Deshacer",
     "errors.timeout_title": "Se agotó el tiempo de espera de la solicitud",
     "errors.query_failed_title": "No se pudieron cargar los datos",
+    "errors.query_server_starting_title": "Aún se está iniciando",
     "offline.synced_changes_one": "Se sincronizó {{count}} cambio sin conexión",
     "offline.synced_changes_many": "Se sincronizaron {{count}} de cambios sin conexión",
     "offline.synced_changes_other": "Se sincronizaron {{count}} cambios sin conexión",

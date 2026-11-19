@@ -20316,6 +20316,7 @@ const resource = {
     "dwg_takeoff.undo_aria": "I-undo",
     "errors.timeout_title": "Nag-timeout ang hiling",
     "errors.query_failed_title": "Hindi ma-load ang datos",
+    "errors.query_server_starting_title": "Nagsisimula pa rin",
     "offline.synced_changes_one": "Na-sync ang {{count}} offline na pagbabago",
     "offline.synced_changes_other": "Na-sync ang {{count}} offline na pagbabago",
     "offline.failed_changes_one": "Hindi na-sync ang {{count}} pagbabago",

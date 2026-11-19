@@ -20795,6 +20795,7 @@ const resource = {
     "dwg_takeoff.undo_aria": "ביטול",
     "errors.timeout_title": "הבקשה פגה",
     "errors.query_failed_title": "לא ניתן היה לטעון נתונים",
+    "errors.query_server_starting_title": "עדיין בהפעלה",
     "offline.synced_changes_one": "שינוי אחד שבוצע במצב לא מקוון סונכרן",
     "offline.synced_changes_two": "{{count}} שינויים שבוצעו במצב לא מקוון סונכרנו",
     "offline.synced_changes_other": "{{count}} שינויים שבוצעו במצב לא מקוון סונכרנו",

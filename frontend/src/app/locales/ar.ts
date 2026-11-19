@@ -22152,6 +22152,7 @@ const resource = {
     "dwg_takeoff.undo_aria": "تراجع",
     "errors.timeout_title": "انتهت مهلة الطلب",
     "errors.query_failed_title": "تعذّر تحميل البيانات",
+    "errors.query_server_starting_title": "لا يزال يبدأ",
     "offline.synced_changes_zero": "لم تتم مزامنة أي تغيير من وضع عدم الاتصال",
     "offline.synced_changes_one": "تمت مزامنة تغيير واحد من وضع عدم الاتصال",
     "offline.synced_changes_two": "تمت مزامنة تغييرين من وضع عدم الاتصال",

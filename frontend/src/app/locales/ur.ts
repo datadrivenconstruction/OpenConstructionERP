@@ -20673,6 +20673,7 @@ const resource = {
     "dwg_takeoff.undo_aria": "واپس کریں",
     "errors.timeout_title": "درخواست کا وقت ختم ہو گیا",
     "errors.query_failed_title": "ڈیٹا لوڈ نہیں ہو سکا",
+    "errors.query_server_starting_title": "ابھی شروع ہو رہا ہے",
     "offline.synced_changes_one": "{{count}} آف لائن تبدیلی ہم آہنگ ہو گئی",
     "offline.synced_changes_other": "{{count}} آف لائن تبدیلیاں ہم آہنگ ہو گئیں",
     "offline.failed_changes_one": "{{count}} تبدیلی ہم آہنگ نہیں ہو سکی",

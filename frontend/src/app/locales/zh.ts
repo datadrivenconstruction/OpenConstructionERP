@@ -21055,6 +21055,7 @@ const resource = {
     "dwg_takeoff.undo_aria": "撤销",
     "errors.timeout_title": "请求超时",
     "errors.query_failed_title": "无法加载数据",
+    "errors.query_server_starting_title": "仍在启动中",
     "offline.synced_changes_other": "已同步 {{count}} 项离线更改",
     "offline.failed_changes_other": "{{count}} 项更改同步失败",
     "files.detail.size_converted_artifact": "（转换产物）",

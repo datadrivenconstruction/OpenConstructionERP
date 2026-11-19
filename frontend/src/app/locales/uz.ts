@@ -20816,6 +20816,7 @@ const resource = {
     "dwg_takeoff.undo_aria": "Ortga Qaytarish",
     "errors.timeout_title": "Soʻrov vaqti tugadi",
     "errors.query_failed_title": "Maʼlumotni yuklab boʻlmadi",
+    "errors.query_server_starting_title": "Hali ishga tushmoqda",
     "offline.synced_changes_one": "{{count}} ta oflayn oʻzgarish sinxronlandi",
     "offline.synced_changes_other": "{{count}} ta oflayn oʻzgarish sinxronlandi",
     "offline.failed_changes_one": "{{count}} ta oʻzgarishni sinxronlab boʻlmadi",

@@ -20881,6 +20881,7 @@ const resource = {
     "dwg_takeoff.undo_aria": "Hoàn tác",
     "errors.timeout_title": "Yêu cầu đã hết thời gian chờ",
     "errors.query_failed_title": "Không thể tải dữ liệu",
+    "errors.query_server_starting_title": "Vẫn đang khởi động",
     "offline.synced_changes_other": "Đã đồng bộ {{count}} thay đổi ngoại tuyến",
     "offline.failed_changes_other": "Không thể đồng bộ {{count}} thay đổi",
     "files.detail.size_converted_artifact": "(sản phẩm đã chuyển đổi)",

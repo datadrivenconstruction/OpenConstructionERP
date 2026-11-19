@@ -20257,6 +20257,7 @@ const resource = {
     "dwg_takeoff.undo_aria": "Annuler",
     "errors.timeout_title": "Délai de la requête dépassé",
     "errors.query_failed_title": "Impossible de charger les données",
+    "errors.query_server_starting_title": "Démarrage en cours",
     "offline.synced_changes_one": "{{count}} modification hors ligne synchronisée",
     "offline.synced_changes_many": "{{count}} de modifications hors ligne synchronisées",
     "offline.synced_changes_other": "{{count}} modifications hors ligne synchronisées",

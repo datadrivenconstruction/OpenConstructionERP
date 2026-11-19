@@ -19572,6 +19572,7 @@ const resource = {
     "dwg_takeoff.undo_aria": "Anular",
     "errors.timeout_title": "O pedido excedeu o tempo limite",
     "errors.query_failed_title": "Não foi possível carregar os dados",
+    "errors.query_server_starting_title": "Ainda está iniciando",
     "files.detail.size_converted_artifact": "(artefacto convertido)",
     "files.detail.size_converted_artifact_hint": "O carregamento original de origem não está disponível; este é o tamanho do artefacto de geometria convertido.",
     "finance.mixed_currency_converted": "Os registros abrangem várias moedas; os totais são convertidos para {{currency}} utilizando as taxas de câmbio do projeto.",

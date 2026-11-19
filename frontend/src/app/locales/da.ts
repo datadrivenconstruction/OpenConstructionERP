@@ -21197,6 +21197,7 @@ const resource = {
     "dwg_takeoff.undo_aria": "Fortryd",
     "errors.timeout_title": "Forespørgslen fik timeout",
     "errors.query_failed_title": "Data kunne ikke indlæses",
+    "errors.query_server_starting_title": "Starter stadig",
     "offline.synced_changes_one": "{{count}} offlineændring er synkroniseret",
     "offline.synced_changes_other": "{{count}} offlineændringer er synkroniseret",
     "offline.failed_changes_one": "{{count}} ændring kunne ikke synkroniseres",

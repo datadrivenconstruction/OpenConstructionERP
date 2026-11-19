@@ -21200,6 +21200,7 @@ const resource = {
     "dwg_takeoff.undo_aria": "पूर्ववत करें",
     "errors.timeout_title": "अनुरोध का समय समाप्त हुआ",
     "errors.query_failed_title": "डेटा लोड नहीं हो सका",
+    "errors.query_server_starting_title": "अभी शुरू हो रहा है",
     "offline.synced_changes_one": "{{count}} ऑफ़लाइन बदलाव सिंक हुआ",
     "offline.synced_changes_other": "{{count}} ऑफ़लाइन बदलाव सिंक हुए",
     "offline.failed_changes_one": "{{count}} बदलाव सिंक नहीं हो सका",

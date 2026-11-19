@@ -21715,6 +21715,7 @@ const resource = {
     "dwg_takeoff.undo_aria": "Geri al",
     "errors.timeout_title": "İstek zaman aşımına uğradı",
     "errors.query_failed_title": "Veriler yüklenemedi",
+    "errors.query_server_starting_title": "Hâlâ başlıyor",
     "offline.synced_changes_one": "{{count}} çevrimdışı değişiklik eşitlendi",
     "offline.synced_changes_other": "{{count}} çevrimdışı değişiklik eşitlendi",
     "offline.failed_changes_one": "{{count}} değişiklik eşitlenemedi",

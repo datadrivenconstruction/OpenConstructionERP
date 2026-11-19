@@ -21541,6 +21541,7 @@ const resource = {
     "dwg_takeoff.undo_aria": "Cofnij",
     "errors.timeout_title": "Przekroczono limit czasu żądania",
     "errors.query_failed_title": "Nie udało się wczytać danych",
+    "errors.query_server_starting_title": "Wciąż się uruchamia",
     "offline.synced_changes_one": "Zsynchronizowano {{count}} zmianę offline",
     "offline.synced_changes_few": "Zsynchronizowano {{count}} zmiany offline",
     "offline.synced_changes_many": "Zsynchronizowano {{count}} zmian offline",

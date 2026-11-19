@@ -21017,6 +21017,7 @@ const resource = {
     "dwg_takeoff.undo_aria": "Angre",
     "errors.timeout_title": "Forespørselen tidsavbrutt",
     "errors.query_failed_title": "Kunne ikke laste inn data",
+    "errors.query_server_starting_title": "Starter fortsatt",
     "offline.synced_changes_one": "Synkroniserte {{count}} frakoblet endring",
     "offline.synced_changes_other": "Synkroniserte {{count}} frakoblede endringer",
     "offline.failed_changes_one": "{{count}} endring kunne ikke synkroniseres",

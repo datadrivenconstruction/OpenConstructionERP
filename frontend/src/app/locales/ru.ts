@@ -21718,6 +21718,7 @@ const resource = {
     "dwg_takeoff.undo_aria": "Отменить",
     "errors.timeout_title": "Истекло время ожидания запроса",
     "errors.query_failed_title": "Не удалось загрузить данные",
+    "errors.query_server_starting_title": "Ещё запускается",
     "offline.synced_changes_one": "Синхронизировано {{count}} офлайн-изменение",
     "offline.synced_changes_few": "Синхронизировано {{count}} офлайн-изменения",
     "offline.synced_changes_many": "Синхронизировано {{count}} офлайн-изменений",

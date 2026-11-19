@@ -20695,6 +20695,7 @@ const resource = {
     "dwg_takeoff.undo_aria": "Rückgängig",
     "errors.timeout_title": "Zeitüberschreitung der Anfrage",
     "errors.query_failed_title": "Daten konnten nicht geladen werden",
+    "errors.query_server_starting_title": "Startet noch",
     "offline.synced_changes_one": "{{count}} Offline-Änderung synchronisiert",
     "offline.synced_changes_other": "{{count}} Offline-Änderungen synchronisiert",
     "offline.failed_changes_one": "{{count}} Änderung konnte nicht synchronisiert werden",

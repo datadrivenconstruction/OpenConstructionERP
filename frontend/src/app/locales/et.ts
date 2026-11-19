@@ -21216,6 +21216,7 @@ const resource = {
     "dwg_takeoff.undo_aria": "Võta tagasi",
     "errors.timeout_title": "Päring aegus",
     "errors.query_failed_title": "Andmete laadimine ebaõnnestus",
+    "errors.query_server_starting_title": "Käivitub endiselt",
     "offline.synced_changes_one": "Sünkroonitud {{count}} võrguühenduseta muudatus",
     "offline.synced_changes_other": "Sünkroonitud {{count}} võrguühenduseta muudatust",
     "offline.failed_changes_one": "{{count}} muudatuse sünkroonimine ebaõnnestus",

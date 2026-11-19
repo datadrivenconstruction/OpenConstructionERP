@@ -21164,6 +21164,7 @@ const resource = {
     "dwg_takeoff.undo_aria": "Zpět",
     "errors.timeout_title": "Vypršel časový limit požadavku",
     "errors.query_failed_title": "Data se nepodařilo načíst",
+    "errors.query_server_starting_title": "Stále se spouští",
     "offline.synced_changes_one": "Synchronizována {{count}} offline změna",
     "offline.synced_changes_few": "Synchronizovány {{count}} offline změny",
     "offline.synced_changes_many": "Synchronizováno {{count}} offline změny",

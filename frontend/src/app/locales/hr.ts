@@ -21024,6 +21024,7 @@ const resource = {
     "dwg_takeoff.undo_aria": "Poništi",
     "errors.timeout_title": "Isteklo vrijeme zahtjeva",
     "errors.query_failed_title": "Podatke nije bilo moguće učitati",
+    "errors.query_server_starting_title": "Još se pokreće",
     "offline.synced_changes_one": "Sinkronizirana {{count}} izvanmrežna promjena",
     "offline.synced_changes_few": "Sinkronizirane {{count}} izvanmrežne promjene",
     "offline.synced_changes_other": "Sinkronizirano {{count}} izvanmrežnih promjena",

@@ -21018,6 +21018,7 @@ const resource = {
     "dwg_takeoff.undo_aria": "元に戻す",
     "errors.timeout_title": "リクエストがタイムアウトしました",
     "errors.query_failed_title": "データを読み込めませんでした",
+    "errors.query_server_starting_title": "まだ起動中です",
     "offline.synced_changes_other": "オフラインの変更を{{count}}件同期しました",
     "offline.failed_changes_other": "{{count}}件の変更を同期できませんでした",
     "files.detail.size_converted_artifact": "（変換後の成果物）",

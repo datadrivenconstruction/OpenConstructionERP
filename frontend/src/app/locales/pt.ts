@@ -20630,6 +20630,7 @@ const resource = {
     "dwg_takeoff.undo_aria": "Anular",
     "errors.timeout_title": "O pedido excedeu o tempo limite",
     "errors.query_failed_title": "Não foi possível carregar os dados",
+    "errors.query_server_starting_title": "Ainda está a iniciar",
     "offline.synced_changes_one": "{{count}} alteração offline sincronizada",
     "offline.synced_changes_many": "{{count}} de alterações offline sincronizadas",
     "offline.synced_changes_other": "{{count}} alterações offline sincronizadas",

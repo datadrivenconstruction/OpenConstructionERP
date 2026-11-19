@@ -20310,6 +20310,7 @@ const resource = {
     "dwg_takeoff.undo_aria": "পূর্বাবস্থায় ফিরুন",
     "errors.timeout_title": "অনুরোধের সময় শেষ হয়ে গেছে",
     "errors.query_failed_title": "ডেটা লোড করা যায়নি",
+    "errors.query_server_starting_title": "এখনো শুরু হচ্ছে",
     "offline.synced_changes_one": "অফলাইনের {{count}}টি পরিবর্তন সিঙ্ক হয়েছে",
     "offline.synced_changes_other": "অফলাইনের {{count}}টি পরিবর্তন সিঙ্ক হয়েছে",
     "offline.failed_changes_one": "{{count}}টি পরিবর্তন সিঙ্ক করা যায়নি",

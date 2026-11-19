@@ -20828,6 +20828,7 @@ const resource = {
     "dwg_takeoff.undo_aria": "Urungkan",
     "errors.timeout_title": "Permintaan kehabisan waktu",
     "errors.query_failed_title": "Data tidak dapat dimuat",
+    "errors.query_server_starting_title": "Masih memulai",
     "offline.synced_changes_other": "{{count}} perubahan offline telah disinkronkan",
     "offline.failed_changes_other": "{{count}} perubahan gagal disinkronkan",
     "files.detail.size_converted_artifact": "(artefak terkonversi)",

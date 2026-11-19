@@ -21209,6 +21209,7 @@ const resource = {
     "dwg_takeoff.undo_aria": "Ångra",
     "errors.timeout_title": "Begäran tog för lång tid",
     "errors.query_failed_title": "Det gick inte att läsa in data",
+    "errors.query_server_starting_title": "Startar fortfarande",
     "offline.synced_changes_one": "Synkroniserade {{count}} offlineändring",
     "offline.synced_changes_other": "Synkroniserade {{count}} offlineändringar",
     "offline.failed_changes_one": "{{count}} ändring kunde inte synkroniseras",

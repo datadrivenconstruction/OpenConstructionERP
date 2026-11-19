@@ -20686,6 +20686,7 @@ const resource = {
     "dwg_takeoff.undo_aria": "Annulla",
     "errors.timeout_title": "Richiesta scaduta",
     "errors.query_failed_title": "Impossibile caricare i dati",
+    "errors.query_server_starting_title": "Avvio ancora in corso",
     "offline.synced_changes_one": "Sincronizzata {{count}} modifica offline",
     "offline.synced_changes_many": "Sincronizzate {{count}} di modifiche offline",
     "offline.synced_changes_other": "Sincronizzate {{count}} modifiche offline",

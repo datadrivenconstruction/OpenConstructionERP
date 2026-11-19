@@ -59,7 +59,18 @@ const queryClient = new QueryClient({
   // render the same table for "no rows" and "no answer". The handler decides
   // what is worth saying; see `queryErrorToast.ts` for what it stays quiet on.
   queryCache: new QueryCache({
-    onError: (error, query) => notifyQueryError(error, query),
+    onError: (error, query) =>
+      notifyQueryError(error, query, {
+        // The action on the toast re-asks the queries that failed rather than
+        // reloading the document. A reload throws away the screen the reader was
+        // on and, on a cold start, restarts the forty requests that caused the
+        // message in the first place. Active queries only: pressing Retry means
+        // "fill in the page I am looking at", not "move every cached query in the
+        // app", and a background query nobody is watching answers on its own
+        // schedule. `queryClient` is in scope by the time this runs, which is
+        // after construction, so the reference is not a use-before-initialise.
+        onRetry: () => void queryClient.refetchQueries({ type: 'active' }),
+      }),
   }),
   mutationCache: new MutationCache({
     onSuccess: (_data, _variables, _context, mutation) => {

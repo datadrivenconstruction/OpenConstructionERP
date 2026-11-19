@@ -21083,6 +21083,7 @@ const resource = {
     "dwg_takeoff.undo_aria": "Скасувати",
     "errors.timeout_title": "Час запиту вичерпано",
     "errors.query_failed_title": "Не вдалося завантажити дані",
+    "errors.query_server_starting_title": "Ще запускається",
     "offline.synced_changes_one": "Синхронізовано {{count}} офлайн-зміну",
     "offline.synced_changes_few": "Синхронізовано {{count}} офлайн-зміни",
     "offline.synced_changes_many": "Синхронізовано {{count}} офлайн-змін",

@@ -21242,6 +21242,7 @@ const resource = {
     "dwg_takeoff.undo_aria": "Anulează",
     "errors.timeout_title": "Cererea a expirat",
     "errors.query_failed_title": "Datele nu au putut fi încărcate",
+    "errors.query_server_starting_title": "Încă pornește",
     "offline.synced_changes_one": "S-a sincronizat {{count}} modificare offline",
     "offline.synced_changes_few": "S-au sincronizat {{count}} modificări offline",
     "offline.synced_changes_other": "S-au sincronizat {{count}} de modificări offline",

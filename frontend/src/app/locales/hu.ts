@@ -20348,6 +20348,7 @@ const resource = {
     "dwg_takeoff.undo_aria": "Visszavonás",
     "errors.timeout_title": "A kérés túllépte az időkorlátot",
     "errors.query_failed_title": "Nem sikerült betölteni az adatokat",
+    "errors.query_server_starting_title": "Még indul",
     "offline.synced_changes_one": "{{count}} offline módosítás szinkronizálva",
     "offline.synced_changes_other": "{{count}} offline módosítás szinkronizálva",
     "offline.failed_changes_one": "{{count}} módosítás szinkronizálása nem sikerült",

@@ -21048,6 +21048,7 @@ const resource = {
     "dwg_takeoff.undo_aria": "เลิกทำ",
     "errors.timeout_title": "คำขอหมดเวลา",
     "errors.query_failed_title": "ไม่สามารถโหลดข้อมูลได้",
+    "errors.query_server_starting_title": "กำลังเริ่มทำงาน",
     "offline.synced_changes_other": "ซิงค์การเปลี่ยนแปลงแบบออฟไลน์แล้ว {{count}} รายการ",
     "offline.failed_changes_other": "ซิงค์การเปลี่ยนแปลงไม่สำเร็จ {{count}} รายการ",
     "files.detail.size_converted_artifact": "(ไฟล์ที่แปลงแล้ว)",

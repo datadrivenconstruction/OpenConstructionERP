@@ -20589,6 +20589,7 @@ const resource = {
     "dwg_takeoff.undo_aria": "واگرد",
     "errors.timeout_title": "درخواست منقضی شد",
     "errors.query_failed_title": "بارگذاری داده ممکن نشد",
+    "errors.query_server_starting_title": "هنوز در حال شروع است",
     "offline.synced_changes_one": "{{count}} تغییر آفلاین همگام‌سازی شد",
     "offline.synced_changes_other": "{{count}} تغییر آفلاین همگام‌سازی شد",
     "offline.failed_changes_one": "همگام‌سازی {{count}} تغییر ناموفق بود",

@@ -20554,6 +20554,7 @@ const resource = {
     "dwg_takeoff.undo_aria": "Отмени",
     "errors.timeout_title": "Заявката изтече",
     "errors.query_failed_title": "Данните не можаха да бъдат заредени",
+    "errors.query_server_starting_title": "Все още стартира",
     "offline.synced_changes_one": "Синхронизирана е {{count}} офлайн промяна",
     "offline.synced_changes_other": "Синхронизирани са {{count}} офлайн промени",
     "offline.failed_changes_one": "{{count}} промяна не беше синхронизирана",

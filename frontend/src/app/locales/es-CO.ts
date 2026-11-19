@@ -19600,6 +19600,7 @@ const resource = {
     "dwg_takeoff.undo_aria": "Deshacer",
     "errors.timeout_title": "Se agotó el tiempo de espera de la solicitud",
     "errors.query_failed_title": "No se pudieron cargar los datos",
+    "errors.query_server_starting_title": "Aún está iniciando",
     "files.detail.size_converted_artifact": "(artefacto convertido)",
     "files.detail.size_converted_artifact_hint": "El archivo de origen original no está disponible; este es el tamaño del artefacto de geometría convertido.",
     "finance.mixed_currency_converted": "Los registros abarcan varias monedas; los totales se convierten a {{currency}} usando los tipos de cambio del proyecto.",

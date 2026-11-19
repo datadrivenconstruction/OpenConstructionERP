@@ -20623,6 +20623,7 @@ const resource = {
     "dwg_takeoff.undo_aria": "Болдырмау",
     "errors.timeout_title": "Сұраныс уақыты бітті",
     "errors.query_failed_title": "Деректерді жүктеу мүмкін болмады",
+    "errors.query_server_starting_title": "Әлі іске қосылуда",
     "offline.synced_changes_one": "{{count}} офлайн өзгеріс синхрондалды",
     "offline.synced_changes_other": "{{count}} офлайн өзгеріс синхрондалды",
     "offline.failed_changes_one": "{{count}} өзгерісті синхрондау сәтсіз аяқталды",

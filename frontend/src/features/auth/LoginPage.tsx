@@ -69,6 +69,31 @@ function ThemeSwitch() {
   );
 }
 
+/**
+ * The health probe's whole schedule, in milliseconds between attempts.
+ *
+ * Exported, and the schedule named here rather than computed in the effect, so a
+ * test can read what the page will do instead of inferring it from timers: the
+ * claim is about how often a sign-in page asks a server that has not finished
+ * starting, and that is a property of these numbers.
+ *
+ * Eight waits after the first attempt, doubling to a cap of thirty seconds and
+ * then holding it: 3, 6, 12, 24, 30, 30, 30, 30. Nine attempts over 165 seconds,
+ * which covers the documented worst case - main.py measures a cold boot reaching
+ * an open port in about 143 seconds, and a health check issued during an inline
+ * OpenAPI build coming back after 71.5 - while asking about a fifth as often as
+ * the fixed three-second poll it replaces did after the first twenty seconds. An
+ * owner watching a fresh install counted 585 requests and 6.4 MB for one load of
+ * this page; the poll was a large share of both.
+ *
+ * The cap is a ceiling and not a loop. When the schedule is spent the page says
+ * so and offers a button, because a page that quietly keeps polling forever and a
+ * page that has given up look exactly the same to the person watching it.
+ */
+export const HEALTH_PROBE_DELAYS_MS: readonly number[] = [
+  3_000, 6_000, 12_000, 24_000, 30_000, 30_000, 30_000, 30_000,
+];
+
 export function LoginPage() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
@@ -217,6 +242,13 @@ export function LoginPage() {
   // connection failure and says so.
   const [serverReady, setServerReady] = useState(false);
   const [starting, setStarting] = useState(false);
+  // Whether the schedule above has been spent without an answer, and which run of
+  // it this is. The epoch is what a retry advances: it re-runs this effect, which
+  // is the only thing that can start a fresh schedule, and the cleanup of the run
+  // it replaces is what stops a late answer from that run setting state behind the
+  // new one's back.
+  const [probeExhausted, setProbeExhausted] = useState(false);
+  const [probeEpoch, setProbeEpoch] = useState(0);
   useEffect(() => {
     let cancelled = false;
     let attempts = 0;
@@ -227,16 +259,31 @@ export function LoginPage() {
         if (!res.ok) throw new Error(`health probe HTTP ${res.status}`);
         if (!cancelled) setServerReady(true);
       } catch {
-        // Still booting. Two minutes of tries at three seconds covers the
-        // documented worst case without holding a socket open forever.
-        if (!cancelled && attempts < 40) window.setTimeout(() => void probe(), 3000);
+        if (cancelled) return;
+        // Still booting. The next wait comes from the schedule rather than from a
+        // constant, and a schedule with nothing left in it is a state the reader
+        // is told about instead of a poll that never ends.
+        const delay = HEALTH_PROBE_DELAYS_MS[attempts - 1];
+        if (delay === undefined) {
+          setProbeExhausted(true);
+          return;
+        }
+        window.setTimeout(() => void probe(), delay);
       }
     };
     void probe();
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [probeEpoch]);
+
+  // Start the schedule again from the top. The reader pressing this is the same
+  // event the automatic probe would have been, so an answer that arrives now
+  // navigates exactly as one that arrived on its own would have.
+  const retryHealthProbe = () => {
+    setProbeExhausted(false);
+    setProbeEpoch((epoch) => epoch + 1);
+  };
 
   // OIDC configuration (fetched once on mount)
   const [oidcConfig, setOidcConfig] = useState<{
@@ -636,7 +683,7 @@ export function LoginPage() {
               {/* Not an error, and not styled as one: a boot in progress is a
                   wait, so it reads as a status with a spinner rather than a
                   red banner telling the person something is broken. */}
-              {starting && !error && (
+              {starting && !error && !probeExhausted && (
                 <div
                   data-testid="login-starting"
                   role="status"
@@ -649,6 +696,31 @@ export function LoginPage() {
                   <span>
                     {t('auth.preparing_workspace', { defaultValue: 'Preparing your workspace...' })}
                   </span>
+                </div>
+              )}
+
+              {/* The schedule is spent and the server still has not answered. This
+                  is the state the fixed poll never reached: it stopped asking
+                  silently, which reads as a page that has hung, and it left no
+                  control on the page. The wording is the one the page already uses
+                  while it waits, so the reader is told the wait is continuing
+                  rather than that something broke, and the button restarts the
+                  same schedule from the top. */}
+              {probeExhausted && !serverReady && !error && (
+                <div
+                  data-testid="login-still-starting"
+                  role="status"
+                  className="flex items-start justify-between gap-2 rounded-lg bg-surface-secondary px-3 py-2 text-xs text-content-secondary animate-stagger-in"
+                >
+                  <span>{t('auth.preparing_workspace', { defaultValue: 'Preparing your workspace...' })}</span>
+                  <button
+                    type="button"
+                    data-testid="login-retry-health"
+                    onClick={retryHealthProbe}
+                    className="shrink-0 font-medium text-oe-blue underline-offset-2 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue rounded"
+                  >
+                    {t('common.retry', { defaultValue: 'Retry' })}
+                  </button>
                 </div>
               )}
 

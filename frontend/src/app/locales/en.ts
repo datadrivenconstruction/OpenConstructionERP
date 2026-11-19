@@ -17192,6 +17192,7 @@ const resource = {
   "dwg_takeoff.intro_link_bim": "BIM viewer",
     "errors.timeout_title": "Request timed out",
     "errors.query_failed_title": "Could not load data",
+    "errors.query_server_starting_title": "Still starting up",
     "offline.synced_changes_one": "Synced {{count}} offline change",
     "offline.synced_changes_other": "Synced {{count}} offline changes",
     "offline.failed_changes_one": "{{count}} change failed to sync",

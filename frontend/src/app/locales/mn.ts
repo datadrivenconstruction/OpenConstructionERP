@@ -21314,6 +21314,7 @@ const resource = {
     "dwg_takeoff.undo_aria": "Буцаах",
     "errors.timeout_title": "Хүсэлтийн хугацаа дууссан",
     "errors.query_failed_title": "Өгөгдлийг ачаалж чадсангүй",
+    "errors.query_server_starting_title": "Эхлүүлж байна",
     "offline.synced_changes_one": "Офлайн {{count}} өөрчлөлтийг синк хийлээ",
     "offline.synced_changes_other": "Офлайн {{count}} өөрчлөлтийг синк хийлээ",
     "offline.failed_changes_one": "{{count}} өөрчлөлтийг синк хийж чадсангүй",

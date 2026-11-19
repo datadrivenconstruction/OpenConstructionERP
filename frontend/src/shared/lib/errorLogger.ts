@@ -375,6 +375,63 @@ let _consecutiveFailures = 0;
 let _circuitOpenAt = 0; // 0 = closed
 
 // ---------------------------------------------------------------------------
+// Rate limit, dedupe, and the two pages where not reaching the server is normal
+// ---------------------------------------------------------------------------
+
+/**
+ * The circuit above bounds a session whose reports are FAILING. Nothing bounded a
+ * session whose reports were succeeding: a page that throws in a loop against a
+ * healthy backend sent one POST per error, forever, because each 200 reset the
+ * failure counter. An owner counting the requests one load of the sign-in page
+ * made found `client-errors/` among the endpoints asked over and over, which is
+ * what this is for.
+ *
+ * Five a minute is above what an honest session produces - a defect worth
+ * reporting is a rare event - and below what a loop produces, so the limit
+ * removes the loop and not the signal. The window slides rather than resets, so a
+ * burst cannot spend a fresh allowance every time the clock crosses a minute.
+ */
+const MAX_REPORTS_PER_MINUTE = 5;
+const REPORT_WINDOW_MS = 60_000;
+
+/**
+ * One report per distinct error, for the length of the window above.
+ *
+ * The same failure thrown twenty times is one fact about the product, and twenty
+ * copies of it in a report channel make the one that matters harder to find.
+ * Keyed on what identifies the failure - category, message, endpoint, status -
+ * rather than on the stack, because a stack carries addresses that differ between
+ * builds and would make every build's first occurrence look new.
+ */
+const _reportedSignatures = new Map<string, number>();
+
+/** A bound on the signature map, for the same reason the buffer above has one. */
+const MAX_SIGNATURES = 128;
+
+let _reportTimes: number[] = [];
+
+/** Empty the limiter. Tests only: both halves of it are module state. */
+export function resetBackendReportLimiter(): void {
+  _reportTimes = [];
+  _reportedSignatures.clear();
+}
+
+/**
+ * Whether the reader is on a page where the server not answering is expected.
+ *
+ * The sign-in and sign-up pages are the two a person reaches during a first boot,
+ * which is exactly when the backend is busiest and least able to answer. A
+ * rejected `fetch` there is the boot, not a defect, and reporting it as one sends
+ * a request to the server that is already the thing being waited for.
+ * `isNetworkBlip` is the same judgement this channel already makes about a
+ * payload; this is where it decides whether to send at all.
+ */
+function onAnAuthPage(): boolean {
+  if (typeof window === 'undefined' || !window.location) return false;
+  return /(?:^|\/)(?:login|register)\/?$/.test(window.location.pathname);
+}
+
+// ---------------------------------------------------------------------------
 // Internal state
 // ---------------------------------------------------------------------------
 
@@ -562,6 +619,36 @@ function postToBackend(entry: ErrorLogEntry): void {
       // Reset window expired — allow one probe; circuit stays open until
       // the probe succeeds.
     }
+
+    // A network blip on the sign-in or sign-up page is a boot in progress. Dropped
+    // before the counters below, so it spends neither the rate allowance nor a
+    // signature: the same failure on any other page is still reported.
+    if (onAnAuthPage() && isNetworkBlip(entry)) return;
+
+    const signature = [
+      entry.category,
+      entry.message,
+      entry.context?.endpoint ?? '',
+      entry.context?.status ?? '',
+    ].join('|');
+    const previous = _reportedSignatures.get(signature);
+    if (previous !== undefined && now - previous < REPORT_WINDOW_MS) return;
+    if (_reportedSignatures.size >= MAX_SIGNATURES) {
+      for (const [key, at] of _reportedSignatures) {
+        if (now - at >= REPORT_WINDOW_MS) _reportedSignatures.delete(key);
+      }
+      // Still full of recent signatures: drop the oldest rather than grow without
+      // bound in a tab nobody closes.
+      if (_reportedSignatures.size >= MAX_SIGNATURES) {
+        const oldest = _reportedSignatures.keys().next().value;
+        if (oldest !== undefined) _reportedSignatures.delete(oldest);
+      }
+    }
+    _reportedSignatures.set(signature, now);
+
+    _reportTimes = _reportTimes.filter((at) => now - at < REPORT_WINDOW_MS);
+    if (_reportTimes.length >= MAX_REPORTS_PER_MINUTE) return;
+    _reportTimes.push(now);
 
     const stackLines = (entry.stack ?? '')
       .split('\n')

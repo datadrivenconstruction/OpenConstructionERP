@@ -20942,6 +20942,7 @@ const resource = {
     "dwg_takeoff.undo_aria": "Kumoa",
     "errors.timeout_title": "Pyyntö aikakatkaistiin",
     "errors.query_failed_title": "Tietoja ei voitu ladata",
+    "errors.query_server_starting_title": "Käynnistyy yhä",
     "offline.synced_changes_one": "{{count}} offline-muutos synkronoitu",
     "offline.synced_changes_other": "{{count}} offline-muutosta synkronoitu",
     "offline.failed_changes_one": "{{count}} muutoksen synkronointi epäonnistui",

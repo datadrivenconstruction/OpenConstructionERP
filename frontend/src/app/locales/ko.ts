@@ -21005,6 +21005,7 @@ const resource = {
     "dwg_takeoff.undo_aria": "실행 취소",
     "errors.timeout_title": "요청 시간이 초과되었습니다",
     "errors.query_failed_title": "데이터를 불러오지 못했습니다",
+    "errors.query_server_starting_title": "아직 시작하는 중입니다",
     "offline.synced_changes_other": "오프라인 변경 사항 {{count}}개를 동기화했습니다",
     "offline.failed_changes_other": "변경 사항 {{count}}개를 동기화하지 못했습니다",
     "files.detail.size_converted_artifact": "(변환된 산출물)",
