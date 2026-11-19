@@ -88,6 +88,8 @@ import {
   type DistributeResponse,
 } from './api';
 import { PackageContentsPanel } from './PackageContentsPanel';
+import { PackageHeaderCard } from './PackageHeaderCard';
+import { AwardFollowUpPanel } from './AwardFollowUpPanel';
 import { BuyerPricesDialog } from './BuyerPricesDialog';
 import { createBidLinkForBid } from './bidInvitations';
 import { fmtList, fmtPercent, formatDateValue } from '@/shared/lib/formatters';
@@ -2311,14 +2313,26 @@ function PackageDetail({
 
       {/* Package contents: what goes out, before it does */}
       {activeTab === 'contents' && (
-        <PackageContentsPanel
-          packageId={packageId}
-          editable={pkg.status !== 'awarded' && pkg.status !== 'closed'}
-        />
+        <>
+          <PackageHeaderCard
+            packageId={packageId}
+            projectId={pkg.project_id}
+            deadline={pkg.deadline}
+            locked={pkg.status === 'awarded' || pkg.status === 'closed'}
+          />
+          <PackageContentsPanel
+            packageId={packageId}
+            editable={pkg.status !== 'awarded' && pkg.status !== 'closed'}
+          />
+        </>
       )}
 
       {/* Bids list */}
       {activeTab === 'bids' && <SealedTenderPanel packageId={packageId} pkg={pkg} />}
+
+      {activeTab === 'bids' && (pkg.status === 'awarded' || pkg.status === 'closed') && (
+        <AwardFollowUpPanel packageId={packageId} />
+      )}
 
       {activeTab === 'bids' && pkg.bids.length > 0 && (
         <div className="space-y-2">

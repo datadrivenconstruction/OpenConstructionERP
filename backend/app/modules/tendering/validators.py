@@ -171,6 +171,7 @@ def register_tendering_validation_rules() -> None:
     register_tendering_addenda_rules()
     register_tendering_parties_rules()
     register_tendering_contents_rules()
+    register_tendering_award_rules()
 
 
 # ── Addenda, revisions, questions and bid bonds ─────────────────────────────
@@ -452,3 +453,63 @@ def register_tendering_contents_rules() -> None:
     """Register the package-contents rules with the platform rule registry."""
     for rule in (PackageHasLines(), BudgetOverrideNearComputed(), ScopeLeavesCostOnLine(), ScopeCanSplitLine()):
         rule_registry.register(rule, [CONTENTS_RULE_SET])
+
+
+# ── Award: issuing company and rejection letters ────────────────────────────
+# Reads the payload built by ``award_flow.award_validation_payload``:
+# ``{"package_id", "active_entity_count", "issuing_entity_id", "awarded",
+#    "losers_not_notified": [company names]}``.
+
+AWARD_RULE_SET = "tendering_award"
+
+
+class AwardMandantMissing(_SealedRule):
+    rule_id = "award.mandant_missing"
+    name = "Package names its company"
+    description = (
+        "In a group with more than one company, the package or its project names the company "
+        "the contract and letters are issued in."
+    )
+    severity = Severity.WARNING
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        data = _data(context)
+        ref = str(data.get("package_id") or "")
+        if int(data.get("active_entity_count") or 0) < 2:
+            return [self._result(True, ref, "", "")]
+        return [
+            self._result(
+                bool(data.get("issuing_entity_id")),
+                ref,
+                "The package has no client entity; the contract cannot name its buyer.",
+                "Pick the company in the package header, or assign one to the project",
+            )
+        ]
+
+
+class AwardLosersNotNotified(_SealedRule):
+    rule_id = "award.losers_not_notified"
+    name = "Unsuccessful bidders are told"
+    description = "After the award every rejected bidder is sent a rejection letter."
+    severity = Severity.WARNING
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        data = _data(context)
+        ref = str(data.get("package_id") or "")
+        pending = [str(n) for n in (data.get("losers_not_notified") or [])]
+        if not data.get("awarded"):
+            return [self._result(True, ref, "", "")]
+        return [
+            self._result(
+                not pending,
+                ref,
+                f"Rejection letters not sent to {len(pending)} bidders.",
+                "Send the rejection letters from the award step",
+            )
+        ]
+
+
+def register_tendering_award_rules() -> None:
+    """Register the award rules with the platform rule registry."""
+    for rule in (AwardMandantMissing(), AwardLosersNotNotified()):
+        rule_registry.register(rule, [AWARD_RULE_SET])

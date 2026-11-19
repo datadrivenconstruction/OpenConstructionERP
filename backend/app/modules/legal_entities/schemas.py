@@ -32,6 +32,15 @@ class EntityAddress(BaseModel):
     city: str = Field(default="", max_length=100)
 
 
+class EntityBank(BaseModel):
+    """The bank account a company prints on its documents."""
+
+    holder: str = Field(default="", max_length=200)
+    iban: str = Field(default="", max_length=64)
+    bic: str = Field(default="", max_length=20)
+    bank_name: str = Field(default="", max_length=200)
+
+
 class TaxIdValue(BaseModel):
     """One tax identifier, e.g. ``{"scheme": "vat", "value": "DE123456789"}``."""
 
@@ -58,6 +67,8 @@ class LegalEntityCreate(_CodesMixin):
     address: EntityAddress | None = None
     tax_ids: list[TaxIdValue] = Field(default_factory=list, max_length=10)
     invoice_prefix: str | None = Field(default=None, max_length=32)
+    default_signatory: str | None = Field(default=None, max_length=255)
+    bank: EntityBank | None = None
     is_default: bool = False
     is_active: bool = True
     metadata: dict[str, Any] = Field(default_factory=dict)
@@ -85,6 +96,8 @@ class LegalEntityUpdate(_CodesMixin):
     address: EntityAddress | None = None
     tax_ids: list[TaxIdValue] | None = Field(default=None, max_length=10)
     invoice_prefix: str | None = Field(default=None, max_length=32)
+    default_signatory: str | None = Field(default=None, max_length=255)
+    bank: EntityBank | None = None
     is_default: bool | None = None
     is_active: bool | None = None
     metadata: dict[str, Any] | None = None
@@ -153,6 +166,8 @@ class LegalEntityResponse(BaseModel):
     address: dict[str, Any] | None = None
     tax_ids: list[dict[str, Any]] = Field(default_factory=list)
     invoice_prefix: str | None = None
+    default_signatory: str | None = None
+    bank: dict[str, Any] | None = None
     is_default: bool
     is_active: bool
     metadata: dict[str, Any] = Field(default_factory=dict, alias="metadata_")

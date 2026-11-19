@@ -12,9 +12,9 @@ Tables:
 """
 
 import uuid
-from datetime import datetime
+from datetime import date, datetime
 
-from sqlalchemy import JSON, Boolean, DateTime, Float, ForeignKey, Integer, String, Text
+from sqlalchemy import JSON, Boolean, Date, DateTime, Float, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import GUID, Base
@@ -39,6 +39,21 @@ class TenderPackage(Base):
     description: Mapped[str] = mapped_column(Text, nullable=False, default="")
     status: Mapped[str] = mapped_column(String(50), nullable=False, default="draft", index=True)
     deadline: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    # ── Package header ───────────────────────────────────────────────────
+    # The company of the group the package is bought for (oe_legal_entities_entity).
+    # NULL means the project's company; letters and the contract are issued in its name.
+    legal_entity_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, index=True)
+    trade: Mapped[str | None] = mapped_column(String(120), nullable=True)
+    # The project cost line (oe_costmodel_cost_line) the award is committed against.
+    cost_line_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, index=True)
+    issue_date: Mapped[date | None] = mapped_column(Date, nullable=True)
+    questions_until: Mapped[date | None] = mapped_column(Date, nullable=True)
+    bids_due: Mapped[date | None] = mapped_column(Date, nullable=True)
+    award_planned: Mapped[date | None] = mapped_column(Date, nullable=True)
+    buyer_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
+    estimator_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
+    site_manager_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
+    approver_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         "metadata",
         JSON,

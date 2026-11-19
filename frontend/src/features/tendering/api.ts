@@ -768,3 +768,112 @@ export function putBuyerPrices(
 ): Promise<unknown> {
   return apiPut(`/v1/tendering/bids/${bidId}/prices/`, body);
 }
+
+/* ── Package header, rejections in bulk, filing the award ─────────────── */
+
+export interface IssuingEntity {
+  id: string;
+  code: string;
+  name: string;
+  /** `package` when the package names it, `project` when it comes from the project. */
+  source: 'package' | 'project';
+}
+
+export interface PackageHeader {
+  package_id: string;
+  legal_entity_id: string | null;
+  trade: string | null;
+  cost_line_id: string | null;
+  issue_date: string | null;
+  questions_until: string | null;
+  bids_due: string | null;
+  award_planned: string | null;
+  buyer_id: string | null;
+  estimator_id: string | null;
+  site_manager_id: string | null;
+  approver_id: string | null;
+  issuing_entity: IssuingEntity | null;
+  cost_line: { id: string; code: string; description: string; budget: string } | null;
+  /** Decimal string in the project currency. */
+  budget: string;
+  currency: string;
+  active_entity_count: number;
+  warnings: string[];
+}
+
+export type PackageHeaderInput = Partial<
+  Pick<
+    PackageHeader,
+    | 'legal_entity_id'
+    | 'trade'
+    | 'cost_line_id'
+    | 'issue_date'
+    | 'questions_until'
+    | 'bids_due'
+    | 'award_planned'
+    | 'buyer_id'
+    | 'estimator_id'
+    | 'site_manager_id'
+    | 'approver_id'
+  >
+>;
+
+export type RejectionState = 'pending' | 'sent' | 'failed' | 'no_email';
+
+export interface RejectionRow {
+  bid_id: string;
+  company_name: string;
+  email: string;
+  notified_at: string | null;
+  state: RejectionState;
+  last_error: string | null;
+}
+
+export interface RejectionsPreview {
+  package_id: string;
+  awarded: boolean;
+  issuing_entity: IssuingEntity | null;
+  rows: RejectionRow[];
+  pending: number;
+}
+
+export interface RejectionsSendResult extends RejectionsPreview {
+  sent: number;
+  failed: number;
+  filed: number;
+  backend: string;
+  smtp_configured: boolean;
+}
+
+export interface FiledDocument {
+  kind: 'contract' | 'award_record' | 'award_letter' | 'rejection_letter';
+  document_id: string | null;
+  name: string;
+  state: 'filed' | 'already_filed' | 'skipped';
+  reason: string | null;
+}
+
+export function getPackageHeader(packageId: string): Promise<PackageHeader> {
+  return apiGet<PackageHeader>(`/v1/tendering/packages/${packageId}/header/`);
+}
+
+export function savePackageHeader(packageId: string, body: PackageHeaderInput): Promise<PackageHeader> {
+  return apiPut<PackageHeader>(`/v1/tendering/packages/${packageId}/header/`, body);
+}
+
+export function getRejections(packageId: string): Promise<RejectionsPreview> {
+  return apiGet<RejectionsPreview>(`/v1/tendering/packages/${packageId}/rejections/`);
+}
+
+export function sendRejections(packageId: string, bidIds: string[] = []): Promise<RejectionsSendResult> {
+  return apiPost<RejectionsSendResult>(`/v1/tendering/packages/${packageId}/rejections/send/`, {
+    bid_ids: bidIds,
+  });
+}
+
+export function fileAwardDocuments(packageId: string): Promise<{ package_id: string; documents: FiledDocument[] }> {
+  return apiPost<{ package_id: string; documents: FiledDocument[] }>(
+    `/v1/tendering/packages/${packageId}/award-documents/file/`,
+    {},
+  );
+}

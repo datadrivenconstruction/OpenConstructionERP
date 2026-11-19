@@ -36,6 +36,13 @@ export interface EntityAddress {
   city?: string;
 }
 
+export interface EntityBank {
+  holder?: string;
+  iban?: string;
+  bic?: string;
+  bank_name?: string;
+}
+
 export interface TaxIdValue {
   scheme: string;
   value: string;
@@ -54,6 +61,8 @@ export interface LegalEntity {
   address: EntityAddress | null;
   tax_ids: TaxIdValue[];
   invoice_prefix: string | null;
+  default_signatory?: string | null;
+  bank?: EntityBank | null;
   is_default: boolean;
   is_active: boolean;
   metadata: Record<string, unknown>;
@@ -79,6 +88,8 @@ export interface LegalEntityInput {
   address?: EntityAddress | null;
   tax_ids?: TaxIdValue[];
   invoice_prefix?: string | null;
+  default_signatory?: string | null;
+  bank?: EntityBank | null;
   is_default?: boolean;
   is_active?: boolean;
 }

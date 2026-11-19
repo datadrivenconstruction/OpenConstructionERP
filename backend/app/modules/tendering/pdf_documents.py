@@ -437,6 +437,19 @@ def _sign_off(
     flow.append(_safe_para(signer, styles["value"]))
 
 
+def _issuer_block(styles: dict[str, ParagraphStyle], issuer: dict[str, Any] | None) -> list[Any]:
+    """The company of the group the letter is issued in: name, address, ids and bank, no labels."""
+    if not issuer or not issuer.get("name"):
+        return []
+    ids = " · ".join(str(issuer[k]) for k in ("tax_id", "registration", "bank") if issuer.get(k))
+    flow: list[Any] = [_safe_para(issuer["name"], styles["value"])]
+    for line in (issuer.get("address"), ids):
+        if line:
+            flow.append(_safe_para(line, styles["meta"]))
+    flow.append(Spacer(1, 4 * mm))
+    return flow
+
+
 def _company_name() -> str:
     from app.core.company_profile import read_company_profile
 
@@ -460,6 +473,7 @@ def generate_award_letter_pdf(
     notes: str | None = None,
     text: LetterText | None = None,
     locale: str = "en",
+    issuer: dict[str, Any] | None = None,
 ) -> bytes:
     """Render a letter of award for the winning bid.
 
@@ -473,7 +487,7 @@ def generate_award_letter_pdf(
     lang = template_language(template, locale)
     text = text or default_text(template, lang)
     amount = _fmt_money_for(_to_decimal(awarded_amount), currency, lang)
-    signer = awarded_by_name or project_name or ""
+    signer = awarded_by_name or (issuer or {}).get("signatory") or project_name or ""
     values: dict[str, str | None] = {
         "bidder": company_name,
         "project": project_name,
@@ -481,7 +495,7 @@ def generate_award_letter_pdf(
         "amount": amount,
         "award_date": _fmt_date(awarded_at),
         "sender": signer,
-        "company": _company_name(),
+        "company": (issuer or {}).get("name") or _company_name(),
     }
 
     buffer = io.BytesIO()
@@ -503,6 +517,7 @@ def generate_award_letter_pdf(
             date_label=label(lang, "date"),
         )
     )
+    flow.extend(_issuer_block(styles, issuer))
     heading = render(text.heading, values)
     if heading:
         flow.append(_safe_para(heading, styles["doc_title"]))
@@ -577,6 +592,7 @@ def generate_rejection_letter_pdf(
     reason: str | None = None,
     text: LetterText | None = None,
     locale: str = "en",
+    issuer: dict[str, Any] | None = None,
 ) -> bytes:
     """Render a rejection notice for an unsuccessful bidder.
 
@@ -589,14 +605,14 @@ def generate_rejection_letter_pdf(
     template = tendering_template(REJECTION_KEY)
     lang = template_language(template, locale)
     text = text or default_text(template, lang)
-    signer = signed_by_name or project_name or ""
+    signer = signed_by_name or (issuer or {}).get("signatory") or project_name or ""
     values: dict[str, str | None] = {
         "bidder": company_name,
         "project": project_name,
         "package": package_name,
         "date": _fmt_date(rejected_at),
         "sender": signer,
-        "company": _company_name(),
+        "company": (issuer or {}).get("name") or _company_name(),
     }
 
     buffer = io.BytesIO()
@@ -618,6 +634,7 @@ def generate_rejection_letter_pdf(
             date_label=label(lang, "date"),
         )
     )
+    flow.extend(_issuer_block(styles, issuer))
     heading = render(text.heading, values)
     if heading:
         flow.append(_safe_para(heading, styles["doc_title"]))
@@ -753,7 +770,9 @@ def _record_fact_value(fact: dict[str, Any]) -> str:
     return ", ".join(parts)
 
 
-def generate_award_record_pdf(*, record: dict[str, Any], package_ref: str) -> bytes:
+def generate_award_record_pdf(
+    *, record: dict[str, Any], package_ref: str, issuer: dict[str, Any] | None = None
+) -> bytes:
     """Render the award record for filing, at whatever stage it stands.
 
     Every stage is exportable, gaps included: a record filed halfway through a
@@ -772,6 +791,7 @@ def generate_award_record_pdf(*, record: dict[str, Any], package_ref: str) -> by
     if letterhead is not None:
         flow.append(letterhead)
     flow.extend(_header_block(styles, "VERGABEVERMERK", package_ref, letterhead=letterhead))
+    flow.extend(_issuer_block(styles, issuer))
     flow.append(Paragraph("Award record of the procurement procedure", styles["doc_title"]))
 
     gaps = [g for g in (record.get("gaps") or []) if isinstance(g, dict)]

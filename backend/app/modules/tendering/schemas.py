@@ -7,7 +7,7 @@ v3 §10 - money fields are Decimal-as-string in JSON.
 """
 
 import re
-from datetime import datetime
+from datetime import date, datetime
 from decimal import Decimal, InvalidOperation
 from typing import Any, Literal
 from uuid import UUID
@@ -155,6 +155,9 @@ class PackageResponse(BaseModel):
     # "informal" | "sealed"; ``sealed`` carries the opening state of a sealed package.
     submission_mode: str = "informal"
     sealed: "SealedInfo | None" = None
+    #: The company the package is bought for; ``None`` means the project's company.
+    legal_entity_id: UUID | None = None
+    trade: str | None = None
 
 
 class PackageWithBidsResponse(PackageResponse):
@@ -1264,3 +1267,115 @@ class ClarificationListResponse(BaseModel):
     total: int
     offset: int = 0
     limit: int = 50
+
+
+# ── Package header, issuing company, rejections and filing ──────────────────
+
+
+class PackageHeaderUpdate(BaseModel):
+    """What a buyer sets on the package header. Only the fields sent are changed."""
+
+    legal_entity_id: UUID | None = None
+    trade: str | None = Field(default=None, max_length=120)
+    cost_line_id: UUID | None = None
+    issue_date: date | None = None
+    questions_until: date | None = None
+    bids_due: date | None = None
+    award_planned: date | None = None
+    buyer_id: str | None = Field(default=None, max_length=36)
+    estimator_id: str | None = Field(default=None, max_length=36)
+    site_manager_id: str | None = Field(default=None, max_length=36)
+    approver_id: str | None = Field(default=None, max_length=36)
+
+    @field_validator("trade", mode="after")
+    @classmethod
+    def _strip_trade(cls, v: str | None) -> str | None:
+        return (v or "").strip() or None
+
+
+class IssuingEntity(BaseModel):
+    """The company letters and the contract are issued in, and why it is that one."""
+
+    id: UUID
+    code: str
+    name: str
+    #: ``package`` when the package names it, ``project`` when it comes from the project.
+    source: Literal["package", "project"]
+
+
+class HeaderCostLine(BaseModel):
+    id: UUID
+    code: str
+    description: str = ""
+    #: Budget on the cost line, Decimal as string in the project currency.
+    budget: str = "0"
+
+
+class PackageHeaderResponse(BaseModel):
+    package_id: UUID
+    legal_entity_id: UUID | None = None
+    trade: str | None = None
+    cost_line_id: UUID | None = None
+    issue_date: date | None = None
+    questions_until: date | None = None
+    bids_due: date | None = None
+    award_planned: date | None = None
+    buyer_id: str | None = None
+    estimator_id: str | None = None
+    site_manager_id: str | None = None
+    approver_id: str | None = None
+    issuing_entity: IssuingEntity | None = None
+    cost_line: HeaderCostLine | None = None
+    #: Package budget (bill sum or the hand-entered override), Decimal as string.
+    budget: str = "0"
+    currency: str = ""
+    #: How many active companies the group has; the company picker shows from two.
+    active_entity_count: int = 0
+    #: Date order problems, e.g. ``questions_after_bids_due``.
+    warnings: list[str] = Field(default_factory=list)
+
+
+class RejectionRow(BaseModel):
+    bid_id: UUID
+    company_name: str
+    email: str = ""
+    notified_at: str | None = None
+    #: ``pending``, ``sent``, ``failed`` or ``no_email``.
+    state: str = "pending"
+    last_error: str | None = None
+
+
+class RejectionsPreview(BaseModel):
+    package_id: UUID
+    awarded: bool
+    issuing_entity: IssuingEntity | None = None
+    rows: list[RejectionRow] = Field(default_factory=list)
+    #: Rejected bidders not told yet who can be sent a letter.
+    pending: int = 0
+
+
+class RejectionsSendRequest(BaseModel):
+    #: Bids to send to; empty means every pending rejected bid.
+    bid_ids: list[UUID] = Field(default_factory=list, max_length=500)
+
+
+class RejectionsSendResponse(RejectionsPreview):
+    sent: int = 0
+    failed: int = 0
+    filed: int = 0
+    backend: str = ""
+    smtp_configured: bool = False
+
+
+class FiledDocument(BaseModel):
+    kind: Literal["contract", "award_record", "award_letter", "rejection_letter"]
+    document_id: UUID | None = None
+    name: str
+    #: ``filed``, ``already_filed`` or ``skipped``.
+    state: str
+    reason: str | None = None
+
+
+class AwardFilingResponse(BaseModel):
+    package_id: UUID
+    documents: list[FiledDocument] = Field(default_factory=list)

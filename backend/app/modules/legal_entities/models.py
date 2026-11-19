@@ -60,6 +60,10 @@ class LegalEntity(Base):
     tax_ids: Mapped[list] = mapped_column(JSON, nullable=False, default=list, server_default="[]")  # type: ignore[assignment]
     #: Prefix of this entity's own invoice number series, e.g. ``R-HB-``. NULL keeps the install's series.
     invoice_prefix: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    #: Who signs contracts and award or rejection letters for the company unless a person is named.
+    default_signatory: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    #: Bank account printed on the company's documents: ``{"holder", "iban", "bic", "bank_name"}``.
+    bank: Mapped[dict | None] = mapped_column(JSON, nullable=True)  # type: ignore[assignment]
     #: The entity a document falls back to when nothing names one. At most one.
     is_default: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default="false")
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True, server_default="true")
