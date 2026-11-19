@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate, Link } from 'react-router-dom';
 import {
   Eye, EyeOff, Mail, Lock, User, Globe, ChevronDown,
-  HardDrive, Zap, Globe2, Brain, Building2, Briefcase, Search,
+  HardDrive, Zap, Globe2, Brain, Building2, Briefcase,
 } from 'lucide-react';
 import { Button, Input, LogoWithText, CountryFlag } from '@/shared/ui';
 import { SUPPORTED_LANGUAGES, getLanguageByCode } from '@/app/i18n';
@@ -25,7 +25,6 @@ export function RegisterPage() {
   const [email, setEmail] = useState('');
   const [company, setCompany] = useState('');
   const [jobTitle, setJobTitle] = useState('');
-  const [howFoundUs, setHowFoundUs] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -81,7 +80,6 @@ export function RegisterPage() {
           full_name: fullName,
           company,
           job_title: jobTitle,
-          how_found_us: howFoundUs,
         }),
       });
 
@@ -138,7 +136,7 @@ export function RegisterPage() {
   };
 
   const benefits = [
-    { icon: HardDrive, color: 'text-emerald-500 bg-emerald-500/10', title: t('login.benefit.local', 'Your data stays on your computer'), desc: t('login.benefit.local_desc', 'Self-hosted: your machines, your network, your rules.') },
+    { icon: HardDrive, color: 'text-emerald-500 bg-emerald-500/10', title: t('login.benefit.local', 'Self-hosted: your data stays where you run this.'), desc: t('login.benefit.local_desc', 'Self-hosted: your machines, your network, your rules.') },
     { icon: Globe2, color: 'text-violet-500 bg-violet-500/10', title: t('login.benefit.standards', 'Global cost databases'), desc: t('login.benefit.standards_desc', '55,000+ cost items, 48 databases.') },
     { icon: Brain, color: 'text-amber-500 bg-amber-500/10', title: t('login.benefit.ai', 'AI-assisted estimation'), desc: t('login.benefit.ai_desc', 'Smart suggestions. You decide, AI assists.') },
     { icon: Zap, color: 'text-rose-500 bg-rose-500/10', title: t('login.benefit.allinone', 'BOQ + 4D + 5D + Tendering'), desc: t('login.benefit.allinone_desc', 'Full workflow in one tool.') },
@@ -320,32 +318,6 @@ export function RegisterPage() {
                   autoComplete="organization-title"
                   icon={<Briefcase size={15} />}
                 />
-                <div>
-                  <label htmlFor="register-how-found" className="text-sm font-medium text-content-primary block mb-1">
-                    {t('auth.how_found_us', 'How did you find us?')}
-                  </label>
-                  <div className="relative">
-                    <div className="pointer-events-none absolute inset-y-0 start-0 flex items-center ps-3 text-content-tertiary">
-                      <Search size={15} />
-                    </div>
-                    <select
-                      id="register-how-found"
-                      name="how_found_us"
-                      value={howFoundUs}
-                      onChange={(e) => setHowFoundUs(e.target.value)}
-                      className="h-9 w-full rounded-lg border border-border bg-surface-primary ps-9 pe-3 text-sm text-content-primary transition-all duration-fast ease-oe focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent hover:border-content-tertiary appearance-none cursor-pointer"
-                    >
-                      <option value="">{t('auth.how_found_select', '- Select -')}</option>
-                      <option value="google">{t('auth.how_found_google', 'Google Search')}</option>
-                      <option value="linkedin">{t('auth.how_found_linkedin', 'LinkedIn')}</option>
-                      <option value="reddit">{t('auth.how_found_reddit', 'Reddit')}</option>
-                      <option value="youtube">{t('auth.how_found_youtube', 'YouTube')}</option>
-                      <option value="recommendation">{t('auth.how_found_recommendation', 'Recommendation')}</option>
-                      <option value="conference">{t('auth.how_found_conference', 'Conference / Event')}</option>
-                      <option value="other">{t('auth.how_found_other', 'Other')}</option>
-                    </select>
-                  </div>
-                </div>
               </div>
 
               <div className="flex flex-col gap-1 animate-stagger-in" style={{ animationDelay: '340ms' }}>

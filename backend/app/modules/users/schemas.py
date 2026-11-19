@@ -272,11 +272,6 @@ class UserCreate(BaseModel):
         max_length=255,
         description="Job title / role in the company (optional)",
     )
-    how_found_us: str = Field(
-        default="",
-        max_length=100,
-        description="How the user discovered the platform (optional)",
-    )
 
     @field_validator("password")
     @classmethod

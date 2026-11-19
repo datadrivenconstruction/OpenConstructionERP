@@ -812,8 +812,6 @@ class UserService:
             reg_meta["company"] = data.company
         if data.job_title:
             reg_meta["job_title"] = data.job_title
-        if data.how_found_us:
-            reg_meta["how_found_us"] = data.how_found_us
         if client_ip:
             reg_meta["registration_ip"] = client_ip
         if user_agent:

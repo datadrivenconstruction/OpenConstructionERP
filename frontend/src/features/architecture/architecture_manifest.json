@@ -268317,11 +268317,6 @@
               "name": "job_title",
               "type": "str",
               "description": "Job title / role in the company (optional)"
-            },
-            {
-              "name": "how_found_us",
-              "type": "str",
-              "description": "How the user discovered the platform (optional)"
             }
           ]
         },

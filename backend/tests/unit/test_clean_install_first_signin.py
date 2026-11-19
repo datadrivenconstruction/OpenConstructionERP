@@ -143,7 +143,6 @@ async def _register(client: AsyncClient, **overrides: Any) -> dict[str, Any]:
         "full_name": "Abdoo",
         "company": "Nile Estimating",
         "job_title": "Owner",
-        "how_found_us": "colleague",
     }
     payload.update(overrides)
     response = await client.post(REGISTER, json=payload)
@@ -210,14 +209,22 @@ async def test_the_first_account_on_a_clean_install_signs_in(clean_install):
 
 
 async def test_the_sign_up_form_s_free_text_fields_do_not_change_the_outcome(clean_install):
-    """A job title, a company and a referral source are not credentials.
+    """A job title and a company are not credentials, and a referral answer is nothing.
 
     The report named two of them as suspects: the role field, which the sign-up
-    page only accepts as a word, and "How did you find us?". Neither is sent as
-    ``role`` - the form's field is ``job_title``, free text stored in the
-    registration metadata - and ``UserCreate.role`` is constrained to the four
+    page only accepts as a word, and the question "How did you find us?". Neither
+    is sent as ``role`` - the form's field is ``job_title``, free text stored in
+    the registration metadata - and ``UserCreate.role`` is constrained to the four
     real roles and defaults, so a word in that box cannot decide the account's
-    privileges. Registering with all three filled in has to reach the same place.
+    privileges.
+
+    The referral question is gone: the form stopped asking it and ``UserCreate``
+    stopped accepting it, because nothing in the product ever read the answer back.
+    What this case now asserts about it is the part an operator can be caught by -
+    a browser still holding yesterday's bundle posts the field, and that request
+    has to create the first administrator rather than be refused for a property the
+    schema no longer declares. The answer is ignored and is not stored beside the
+    account.
     """
     client, factory = clean_install
 
@@ -237,8 +244,9 @@ async def test_the_sign_up_form_s_free_text_fields_do_not_change_the_outcome(cle
 
     user = await _stored_user(factory, "owner@example.com")
     registration = (user.metadata_ or {}).get("registration") or {}
+    assert registration["company"] == "Asher Ramadan Contracting"
     assert registration["job_title"] == "Owner"
-    assert registration["how_found_us"] == "a colleague recommended it"
+    assert "how_found_us" not in registration, "a field the form no longer asks must not be stored"
 
 
 async def test_an_address_typed_in_mixed_case_with_spaces_signs_in(clean_install):

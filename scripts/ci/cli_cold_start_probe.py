@@ -196,6 +196,13 @@ def _register_and_sign_in(port: int) -> str | None:
             "full_name": "Cold Start Owner",
             "company": "Cold Start Probe",
             "job_title": "Owner",
+            # Not a field of this product any more: the sign-up form stopped asking
+            # how a person found it and the schema stopped accepting it. The probe
+            # sends it anyway, because the client it stands in for is a browser
+            # holding yesterday's bundle, and an installation whose first account
+            # cannot be created by that browser is a cold start that failed. What
+            # the server does with an unknown property is the thing being proved:
+            # it is ignored, not rejected, and not stored.
             "how_found_us": "cli-cold-start-probe",
         },
     )
