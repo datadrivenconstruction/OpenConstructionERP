@@ -25,6 +25,6 @@ describe('tallyInvitations', () => {
     // The API lists newest first; an older revoked link must not count again.
     const items = [link('a', 'submitted'), link('a', 'revoked'), link('b', 'opened')];
     const tally = tallyInvitations(items, ['a', 'b', 'c']);
-    expect(tally).toEqual({ no_link: 1, not_opened: 0, opened: 1, submitted: 1, expired: 0, revoked: 0 });
+    expect(tally).toEqual({ no_link: 1, not_opened: 0, opened: 1, submitted: 1, declined: 0, expired: 0, revoked: 0 });
   });
 });

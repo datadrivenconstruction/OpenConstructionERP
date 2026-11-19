@@ -171,6 +171,7 @@ def register_tendering_validation_rules() -> None:
     register_tendering_addenda_rules()
     register_tendering_parties_rules()
     register_tendering_contents_rules()
+    register_tendering_exchange_rules()
 
 
 # ── Addenda, revisions, questions and bid bonds ─────────────────────────────
@@ -452,3 +453,64 @@ def register_tendering_contents_rules() -> None:
     """Register the package-contents rules with the platform rule registry."""
     for rule in (PackageHasLines(), BudgetOverrideNearComputed(), ScopeLeavesCostOnLine(), ScopeCanSplitLine()):
         rule_registry.register(rule, [CONTENTS_RULE_SET])
+
+
+# ── Exchange: the bill against its imported file, bidder responses ──────────
+# Reads the payload built by ``award_exchange.validation_payload``:
+# ``{"source": {...} | None, "changed", "differences": [...],
+#    "invitations": [{"id", "company_name", "status", "decline_reason"}]}``.
+
+EXCHANGE_RULE_SET = "tendering_exchange"
+
+
+class BillChangedSinceImport(_SealedRule):
+    rule_id = "tender.bill_changed_since_import"
+    name = "Bill unchanged since the GAEB import"
+    description = (
+        "A bill imported from another party's file keeps its item numbers, units, quantities and texts; "
+        "the award file (X86) is refused once they differ."
+    )
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        data = _data(context)
+        source = data.get("source")
+        if not isinstance(source, dict):
+            return []
+        diffs = [d for d in data.get("differences") or [] if isinstance(d, dict)]
+        first = ", ".join(f"{d.get('ordinal') or '?'} ({d.get('field')})" for d in diffs[:5])
+        return [
+            self._result(
+                not diffs,
+                f"source:{source.get('id', '')}",
+                f"The bill differs from the imported file {source.get('file_name') or ''} in {len(diffs)} place(s): "
+                f"{first}; the award file (X86) is refused",
+                "Undo the changes to item numbers, units, quantities or texts, or agree a new bill with the issuer "
+                "and import it again",
+            )
+        ]
+
+
+class DeclinedBidderHasReason(_SealedRule):
+    rule_id = "tender.decline_has_reason"
+    name = "A declined invitation says why"
+    description = "A firm that declined to bid gave a reason the buyer can act on."
+    severity = Severity.INFO
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        raw = _data(context).get("invitations") or []
+        return [
+            self._result(
+                bool(str(row.get("decline_reason") or "").strip()),
+                f"invitation:{row.get('id', '')}",
+                f"{row.get('company_name') or 'A firm'} declined without a reason",
+                "Ask the firm why it declined, so the next package goes to firms that will bid",
+            )
+            for row in raw
+            if isinstance(row, dict) and row.get("status") == "declined"
+        ]
+
+
+def register_tendering_exchange_rules() -> None:
+    """Register the exchange rules with the platform rule registry."""
+    for rule in (BillChangedSinceImport(), DeclinedBidderHasReason()):
+        rule_registry.register(rule, [EXCHANGE_RULE_SET])

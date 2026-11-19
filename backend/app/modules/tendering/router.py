@@ -33,7 +33,9 @@ from app.dependencies import (
 )
 from app.modules.letter_templates.schemas import LetterTextIn
 from app.modules.tendering import parties as tender_parties
+from app.modules.tendering.award_exchange import AwardExchangeService
 from app.modules.tendering.bid_portal import BidPortalService, enforce_rate_limit
+from app.modules.tendering.bidder_exchange import MAX_BIDDER_FILE_BYTES, BidderExchangeService
 from app.modules.tendering.models import TenderBidInvitation
 from app.modules.tendering.recipient_import import MAX_IMPORT_BYTES
 from app.modules.tendering.schemas import (
@@ -45,14 +47,17 @@ from app.modules.tendering.schemas import (
     BidAnalysisResponse,
     BidComparisonResponse,
     BidCreate,
+    BidFileResponse,
     BidIntegrityResponse,
     BidInvitationCreated,
     BidInvitationListResponse,
     BidInvitationResponse,
+    BidPortalDeclineRequest,
     BidPortalPricesRequest,
     BidPortalView,
     BidResponse,
     BidUpdate,
+    BillSourceState,
     BuyerPricesRequest,
     CreatePackageFromBOQData,
     DistributeRequest,
@@ -61,6 +66,8 @@ from app.modules.tendering.schemas import (
     LevelingMatrixResponse,
     PackageCancel,
     PackageCreate,
+    PackageDocumentResponse,
+    PackageDocumentsAttach,
     PackagePreviewResponse,
     PackageResponse,
     PackageScopeResponse,
@@ -1254,6 +1261,210 @@ async def bid_portal_submit(
     enforce_rate_limit(request, write=True)
     _public_headers(response)
     return await _get_bid_portal(session).submit(token, body)
+
+
+# ── Exchange: bill unchanged, award file, offer files, request documents ────
+
+
+def _award_exchange(session: SessionDep) -> AwardExchangeService:
+    return AwardExchangeService(session)
+
+
+@router.get("/packages/{package_id}/bill-source/", response_model=BillSourceState)
+async def get_package_bill_source(
+    package_id: uuid.UUID,
+    user_id: CurrentUserId,
+    session: SessionDep,
+    service: TenderingService = Depends(_get_service),
+    _perm: None = Depends(RequirePermission("tendering.read")),
+) -> BillSourceState:
+    """The file the package's bill was imported from, and whether the bill still matches it."""
+    package = await _verify_package_owner(service, session, package_id, user_id)
+    return await _award_exchange(session).bill_source_state(package)  # type: ignore[arg-type]
+
+
+@router.get("/packages/{package_id}/export/gaeb-x86/")
+async def export_package_gaeb_x86(
+    package_id: uuid.UUID,
+    user_id: CurrentUserId,
+    session: SessionDep,
+    bid_id: uuid.UUID | None = Query(default=None),
+    service: TenderingService = Depends(_get_service),
+    _perm: None = Depends(RequirePermission("tendering.read")),
+) -> StreamingResponse:
+    """Download the award file (GAEB X86): the bill as imported with the awarded unit prices.
+
+    409 ``bill_changed_since_import`` lists what differs from the imported file;
+    422 ``x86_unpriced_lines`` lists lines the bid left unpriced. The file is
+    also filed with the project's documents.
+    """
+    package = await _verify_package_owner(service, session, package_id, user_id)
+    xml, filename, _ = await _award_exchange(session).build_x86(package, bid_id, actor_id=user_id)  # type: ignore[arg-type]
+    return StreamingResponse(
+        iter([xml]),
+        media_type="application/xml; charset=utf-8",
+        headers={"Content-Disposition": attachment_disposition(filename)},
+    )
+
+
+@router.get("/packages/{package_id}/bid-files/", response_model=list[BidFileResponse])
+async def list_package_bid_files(
+    package_id: uuid.UUID,
+    user_id: CurrentUserId,
+    session: SessionDep,
+    service: TenderingService = Depends(_get_service),
+    _perm: None = Depends(RequirePermission("tendering.read")),
+) -> list[BidFileResponse]:
+    """Files the bidders uploaded through their links, newest first."""
+    await _verify_package_owner(service, session, package_id, user_id)
+    return await _award_exchange(session).list_files(package_id)
+
+
+@router.get("/packages/{package_id}/bid-files/{file_id}/download/")
+async def download_package_bid_file(
+    package_id: uuid.UUID,
+    file_id: uuid.UUID,
+    user_id: CurrentUserId,
+    session: SessionDep,
+    service: TenderingService = Depends(_get_service),
+    _perm: None = Depends(RequirePermission("tendering.read")),
+) -> Response:
+    """One file a bidder uploaded, as an attachment."""
+    import asyncio
+    from pathlib import Path
+
+    from app.core.storage import is_within_safe_root, module_uploads_dir
+
+    await _verify_package_owner(service, session, package_id, user_id)
+    row = await _award_exchange(session).bid_file(package_id, file_id)
+    root = module_uploads_dir("tendering").resolve()
+    path = Path(row.file_path).resolve()
+    if not is_within_safe_root(path, extra_roots=[root]) or not path.is_file():
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Bid file not found")
+    content = await asyncio.to_thread(path.read_bytes)
+    response = Response(content=content, media_type=row.mime_type or "application/octet-stream")
+    response.headers["Content-Disposition"] = attachment_disposition(row.file_name)
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    return response
+
+
+@router.get("/packages/{package_id}/documents/", response_model=list[PackageDocumentResponse])
+async def list_package_documents(
+    package_id: uuid.UUID,
+    user_id: CurrentUserId,
+    session: SessionDep,
+    service: TenderingService = Depends(_get_service),
+    _perm: None = Depends(RequirePermission("tendering.read")),
+) -> list[PackageDocumentResponse]:
+    """Project documents sent out with the package (drawings, specifications, conditions)."""
+    package = await _verify_package_owner(service, session, package_id, user_id)
+    return await _award_exchange(session).list_package_documents(package)  # type: ignore[arg-type]
+
+
+@router.post("/packages/{package_id}/documents/", response_model=list[PackageDocumentResponse])
+async def attach_package_documents(
+    package_id: uuid.UUID,
+    body: PackageDocumentsAttach,
+    user_id: CurrentUserId,
+    session: SessionDep,
+    service: TenderingService = Depends(_get_service),
+    _perm: None = Depends(RequirePermission("tendering.update")),
+) -> list[PackageDocumentResponse]:
+    """Attach documents of the package's project; bidders download them through their links."""
+    package = await _verify_package_owner(service, session, package_id, user_id)
+    return await _award_exchange(session).attach_documents(package, body.document_ids, user_id)  # type: ignore[arg-type]
+
+
+@router.delete("/packages/{package_id}/documents/{link_id}/", status_code=status.HTTP_204_NO_CONTENT)
+async def detach_package_document(
+    package_id: uuid.UUID,
+    link_id: uuid.UUID,
+    user_id: CurrentUserId,
+    session: SessionDep,
+    service: TenderingService = Depends(_get_service),
+    _perm: None = Depends(RequirePermission("tendering.update")),
+) -> Response:
+    """Stop sending a document with the package; the document itself stays."""
+    package = await _verify_package_owner(service, session, package_id, user_id)
+    await _award_exchange(session).detach_document(package, link_id)  # type: ignore[arg-type]
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@router.post("/bid-portal/{token}/x84/check/", response_model=X84ImportPreview)
+async def bid_portal_x84_check(
+    token: str,
+    request: Request,
+    response: Response,
+    session: SessionDep,
+    file: UploadFile = File(...),
+) -> X84ImportPreview:
+    """Public: match a priced GAEB X84 against the bill of this link; nothing is stored."""
+    enforce_rate_limit(request, write=True)
+    _public_headers(response)
+    content = await file.read(MAX_X84_BYTES + 1)
+    return await BidderExchangeService(session).check_x84(token, file.filename or "", content)
+
+
+@router.post("/bid-portal/{token}/x84/", response_model=BidPortalView)
+async def bid_portal_x84_submit(
+    token: str,
+    request: Request,
+    response: Response,
+    session: SessionDep,
+    file: UploadFile = File(...),
+    notes: str = Form(default=""),
+) -> BidPortalView:
+    """Public: submit the bid from a priced X84; 422 with every mismatch when a line does not fit the bill."""
+    enforce_rate_limit(request, write=True)
+    _public_headers(response)
+    content = await file.read(MAX_X84_BYTES + 1)
+    return await BidderExchangeService(session).submit_x84(token, file.filename or "", content, notes)
+
+
+@router.post("/bid-portal/{token}/files/", response_model=BidPortalView)
+async def bid_portal_upload_file(
+    token: str,
+    request: Request,
+    response: Response,
+    session: SessionDep,
+    file: UploadFile = File(...),
+    kind: str = Form(default="attachment"),
+) -> BidPortalView:
+    """Public: upload the offer PDF or an attachment; it is filed with the buyer's project documents."""
+    enforce_rate_limit(request, write=True)
+    _public_headers(response)
+    content = await file.read(MAX_BIDDER_FILE_BYTES + 1)
+    return await BidderExchangeService(session).upload(token, kind, file.filename or "", content)
+
+
+@router.post("/bid-portal/{token}/decline/", response_model=BidPortalView)
+async def bid_portal_decline(
+    token: str,
+    body: BidPortalDeclineRequest,
+    request: Request,
+    response: Response,
+    session: SessionDep,
+) -> BidPortalView:
+    """Public: the firm will not bid, with its reason."""
+    enforce_rate_limit(request, write=True)
+    _public_headers(response)
+    return await BidderExchangeService(session).decline(token, body.reason)
+
+
+@router.get("/bid-portal/{token}/documents/{link_id}/")
+async def bid_portal_document(token: str, link_id: uuid.UUID, request: Request, session: SessionDep) -> Response:
+    """Public: one request document of this link's package, as an attachment; 404 for any other."""
+    import asyncio
+
+    enforce_rate_limit(request, write=False)
+    path, name, media_type = await BidderExchangeService(session).document_file(token, link_id)
+    content = await asyncio.to_thread(path.read_bytes)
+    response = Response(content=content, media_type=media_type)
+    _public_headers(response)
+    response.headers["Content-Disposition"] = attachment_disposition(name)
+    response.headers["Content-Security-Policy"] = "default-src 'none'; sandbox"
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    return response
 
 
 # ── Addenda Endpoints ────────────────────────────────────────────────────────

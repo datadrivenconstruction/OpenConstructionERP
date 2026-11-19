@@ -12,6 +12,7 @@ Tables:
     oe_boq_quantity_link - live model→position quantity binding
     oe_boq_template - user-owned editable estimate templates
     oe_boq_exchange_report - what an import or export did not carry across
+    oe_boq_exchange_source - the original file a bill was imported from (exchange_source_models)
 """
 
 import uuid
@@ -795,6 +796,7 @@ class BOQExchangeReport(Base):
 # (``oe_boq_change_flag``) is registered the same way.
 from app.modules.boq.change_review_models import BOQChangeFlag  # noqa: E402,F401
 from app.modules.boq.copilot_models import PositionCopilotMessage  # noqa: E402,F401
+from app.modules.boq.exchange_source_models import BOQExchangeSource  # noqa: E402,F401
 
 
 class BOQTemplate(Base):

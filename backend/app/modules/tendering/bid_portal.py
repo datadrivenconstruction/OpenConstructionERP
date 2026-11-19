@@ -187,15 +187,18 @@ def usable_recipient_id(value: object) -> str | None:
 
 
 def invitation_status(invitation: TenderBidInvitation, deadline: str | None, now: datetime) -> str:
-    """``revoked``, ``submitted``, ``expired``, ``opened`` or ``not_opened``.
+    """``revoked``, ``submitted``, ``declined``, ``expired``, ``opened`` or ``not_opened``.
 
     Revoked wins over everything, and a submitted link stays ``submitted`` after
     it expires, because what the buyer needs to know then is that a bid came in.
+    A firm that said it will not bid stays ``declined`` for the same reason.
     """
     if invitation.revoked_at is not None:
         return "revoked"
     if invitation.submitted_at is not None:
         return "submitted"
+    if getattr(invitation, "declined_at", None) is not None:
+        return "declined"
     if now > effective_expiry(invitation, deadline):
         return "expired"
     if invitation.opened_at is not None:
@@ -488,6 +491,8 @@ class BidPortalService:
             draft_saved_at=_aware(invitation.draft_saved_at),
             submitted_at=_aware(invitation.submitted_at),
             revoked_at=_aware(invitation.revoked_at),
+            declined_at=_aware(invitation.declined_at),
+            decline_reason=invitation.decline_reason,
             bid_id=invitation.bid_id,
             created_at=_aware(invitation.created_at) or now,
             contact_id=invitation.contact_id,
@@ -510,6 +515,11 @@ class BidPortalService:
         rows = await self._invitations_for(package_id)
         items = [self.to_response(row, package.deadline) for row in rows]
         await self._add_party_names(items)
+        from app.modules.tendering.award_exchange import AwardExchangeService
+
+        counts = await AwardExchangeService(self.session).file_counts(package_id)
+        for item in items:
+            item.file_count = counts.get(item.recipient_id, 0)
         return items
 
     async def _add_party_names(self, items: list[BidInvitationResponse]) -> None:
@@ -593,6 +603,8 @@ class BidPortalService:
             draft=dict(carried.draft or {}) if carried is not None else {},
             draft_saved_at=carried.draft_saved_at if carried is not None else None,
             submitted_at=carried.submitted_at if carried is not None and not reopen else None,
+            declined_at=carried.declined_at if carried is not None and not reopen else None,
+            decline_reason=carried.decline_reason if carried is not None and not reopen else None,
             bid_id=carried.bid_id if carried is not None else None,
             created_by=str(actor_id) if actor_id else None,
             **recipient_party(recipient),
@@ -727,6 +739,8 @@ class BidPortalService:
             state = "submitted"
         elif package.status in _CLOSED_PACKAGE_STATES:
             state = "closed"
+        elif invitation.declined_at is not None:
+            state = "declined"
         else:
             state = "open"
         try:
@@ -760,7 +774,55 @@ class BidPortalService:
             received_at=_aware(receipt.received_at) if receipt is not None else None,
             item_count=len(priceable),
             unpriced_count=sum(1 for pid in priceable if pid not in prices),
+            declined_at=_aware(invitation.declined_at),
+            decline_reason=invitation.decline_reason,
         )
+
+    async def enrich(
+        self, view: BidPortalView, invitation: TenderBidInvitation, package: TenderPackage
+    ) -> BidPortalView:
+        """Add the firm's own uploaded files and the documents sent out with the package."""
+        from app.modules.tendering.award_exchange import AwardExchangeService
+        from app.modules.tendering.models import TenderBidFile
+        from app.modules.tendering.schemas import BidPortalDocument, BidPortalFile
+
+        rows = (
+            (
+                await self.session.execute(
+                    select(TenderBidFile)
+                    .where(
+                        TenderBidFile.package_id == package.id,
+                        TenderBidFile.recipient_id == invitation.recipient_id,
+                    )
+                    .order_by(TenderBidFile.uploaded_at)
+                )
+            )
+            .scalars()
+            .all()
+        )
+        view.files = [
+            BidPortalFile(
+                id=row.id,
+                kind=row.kind,
+                file_name=row.file_name,
+                file_size=row.file_size,
+                sha256=row.sha256,
+                uploaded_at=_aware(row.uploaded_at) or datetime.now(UTC),
+            )
+            for row in rows
+        ]
+        pairs = await AwardExchangeService(self.session).package_documents(package)
+        view.documents = [
+            BidPortalDocument(
+                id=link.id,
+                name=doc.name,
+                file_size=doc.file_size or 0,
+                mime_type=doc.mime_type or "",
+                revision_code=getattr(doc, "revision_code", None),
+            )
+            for link, doc in pairs
+        ]
+        return view
 
     @staticmethod
     def _submitted_amount(invitation: TenderBidInvitation) -> str | None:
@@ -788,7 +850,7 @@ class BidPortalService:
         receipt = None
         if sealing is not None and invitation.submitted_at is not None and invitation.bid_id is not None:
             receipt = await sealed.latest_receipt(invitation.bid_id)
-        return self._view(
+        view = self._view(
             invitation,
             package,
             project_name,
@@ -799,6 +861,7 @@ class BidPortalService:
             sealed=sealing is not None,
             receipt=receipt,
         )
+        return await self.enrich(view, invitation, package)
 
     async def _check_writable(
         self, invitation: TenderBidInvitation, package: TenderPackage, currency: str, body: BidPortalPricesRequest
@@ -808,6 +871,8 @@ class BidPortalService:
             raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="bid_already_submitted")
         if package.status in _CLOSED_PACKAGE_STATES:
             raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="tender_closed")
+        if invitation.declined_at is not None:
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="bid_declined")
         # Sealed: the server clock decides, a late invitation does not exist.
         sealed = SealedTenderService(self.session)
         sealing = await sealed.get(package.id)
@@ -843,7 +908,8 @@ class BidPortalService:
         if invitation.opened_at is None:
             invitation.opened_at = invitation.draft_saved_at
         await self.session.flush()
-        return self._view(invitation, package, project_name, currency, lines, priceable)
+        view = self._view(invitation, package, project_name, currency, lines, priceable)
+        return await self.enrich(view, invitation, package)
 
     async def _existing_bid(self, invitation: TenderBidInvitation, package_id: uuid.UUID) -> Any:
         """The bid this firm already has on the package, if any.
@@ -1055,6 +1121,7 @@ class BidPortalService:
             len(priced),
             len(unpriced),
         )
-        return self._view(
+        view = self._view(
             invitation, package, project_name, currency, lines, priceable, amount, sealed=is_sealed, receipt=receipt
         )
+        return await self.enrich(view, invitation, package)

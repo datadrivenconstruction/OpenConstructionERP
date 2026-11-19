@@ -762,6 +762,13 @@ ROUTER_HANDLERS: dict[str, list[str]] = {
     # excluded in _NOT_ROUTER_GATED below.
     "tendering": [
         "get_package",
+        "get_package_bill_source",
+        "export_package_gaeb_x86",
+        "list_package_bid_files",
+        "download_package_bid_file",
+        "list_package_documents",
+        "attach_package_documents",
+        "detach_package_document",
         "set_submission_mode",
         "get_sealed_status",
         "open_sealed_bids",
@@ -1604,6 +1611,25 @@ _NOT_ROUTER_GATED: dict[str, str] = {
     "tendering.bid_portal_submit": (
         "Public by design, writes the bid of the one invitation the token resolves to through "
         "TenderingService.create_bid/update_bid; a second submit on the same link is refused."
+    ),
+    "tendering.bid_portal_x84_check": (
+        "Public by design, the bidder link token is the capability. Matches an uploaded X84 against the bill "
+        "of the token's own package and stores nothing."
+    ),
+    "tendering.bid_portal_x84_submit": (
+        "Public by design, submits the bid of the one invitation the token resolves to through the link's "
+        "regular submit path, only when every X84 line fits that package's bill."
+    ),
+    "tendering.bid_portal_upload_file": (
+        "Public by design, stores an offer file for the one invitation the token resolves to; extension, "
+        "signature, size and per-firm count are checked."
+    ),
+    "tendering.bid_portal_decline": (
+        "Public by design, records a decline on the one invitation the token resolves to; refused once submitted."
+    ),
+    "tendering.bid_portal_document": (
+        "Public by design, the bidder link token is the capability. Serves a document only when it is attached to "
+        "the token's own package and belongs to that package's project; any other id 404."
     ),
     # Tenant phase-model catalogues belong to a tenant, not a project. Every
     # route resolves the row through CatalogueStore.get(tenant, id), which

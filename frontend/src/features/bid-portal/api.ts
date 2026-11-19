@@ -32,7 +32,28 @@ export interface BidPortalDraft {
   saved_at: string | null;
 }
 
-export type BidPortalState = 'open' | 'submitted' | 'closed';
+export type BidPortalState = 'open' | 'submitted' | 'closed' | 'declined';
+
+export type BidFileKind = 'x84' | 'offer_pdf' | 'attachment';
+
+/** A file this firm uploaded through its link. */
+export interface BidPortalFile {
+  id: string;
+  kind: BidFileKind;
+  file_name: string;
+  file_size: number;
+  sha256: string;
+  uploaded_at: string;
+}
+
+/** A document the buyer sends out with the package. */
+export interface BidPortalDocument {
+  id: string;
+  name: string;
+  file_size: number;
+  mime_type: string;
+  revision_code?: string | null;
+}
 
 export interface BidPortalView {
   state: BidPortalState;
@@ -56,6 +77,43 @@ export interface BidPortalView {
   bid_amount: string | null;
   item_count: number;
   unpriced_count: number;
+  declined_at?: string | null;
+  decline_reason?: string | null;
+  files?: BidPortalFile[];
+  documents?: BidPortalDocument[];
+}
+
+/** One line of an uploaded X84 matched against the bill. */
+export interface X84LineCheck {
+  ordinal: string;
+  position_id: string | null;
+  description: string;
+  unit: string;
+  quantity: string;
+  unit_rate: string | null;
+  /** unknown_position, unit_mismatch, quantity_changed, unpriced, duplicate_position. */
+  issues: string[];
+}
+
+export interface X84RuleResult {
+  rule_id: string;
+  severity: string;
+  passed: boolean;
+  message: string;
+  suggestion?: string | null;
+}
+
+export interface X84Preview {
+  filename: string;
+  sha256: string;
+  file_issues: string[];
+  lines: X84LineCheck[];
+  matched: number;
+  priced: number;
+  missing_ordinals: string[];
+  total_amount: string;
+  blocking: boolean;
+  rule_results?: X84RuleResult[];
 }
 
 export interface BidPortalPricesBody {
@@ -75,6 +133,11 @@ export type BidPortalErrorCode =
   | 'currency_mismatch'
   | 'nothing_priced'
   | 'rate_limited'
+  | 'declined'
+  | 'x84_mismatch'
+  | 'file_rejected'
+  | 'file_too_large'
+  | 'too_many_files'
   | 'unknown';
 
 export class BidPortalError extends Error {
@@ -82,6 +145,7 @@ export class BidPortalError extends Error {
     public code: BidPortalErrorCode,
     public status: number,
     public lineErrors: Array<{ line_id: string; reason: string }> = [],
+    public preview: X84Preview | null = null,
   ) {
     super(code);
     this.name = 'BidPortalError';
@@ -99,6 +163,14 @@ const DETAIL_CODES: Record<string, BidPortalErrorCode> = {
   rate_limited: 'rate_limited',
   invalid_unit_prices: 'invalid_prices',
   currency_mismatch: 'currency_mismatch',
+  bid_declined: 'declined',
+  x84_has_blocking_issues: 'x84_mismatch',
+  invalid_file_kind: 'file_rejected',
+  empty_file: 'file_rejected',
+  file_type_not_allowed: 'file_rejected',
+  not_a_pdf: 'file_rejected',
+  file_too_large: 'file_too_large',
+  too_many_files: 'too_many_files',
 };
 
 async function toError(res: Response): Promise<BidPortalError> {
@@ -112,18 +184,23 @@ async function toError(res: Response): Promise<BidPortalError> {
     return new BidPortalError(DETAIL_CODES[detail] ?? 'unknown', res.status);
   }
   if (detail && typeof detail === 'object' && 'code' in detail) {
-    const d = detail as { code: string; errors?: Array<{ line_id: string; reason: string }> };
-    return new BidPortalError(DETAIL_CODES[d.code] ?? 'unknown', res.status, d.errors ?? []);
+    const d = detail as { code: string; errors?: Array<{ line_id: string; reason: string }>; preview?: X84Preview };
+    return new BidPortalError(DETAIL_CODES[d.code] ?? 'unknown', res.status, d.errors ?? [], d.preview ?? null);
   }
   if (res.status === 404) return new BidPortalError('not_found', 404);
   if (res.status === 429) return new BidPortalError('rate_limited', 429);
+  if (res.status === 413) return new BidPortalError('file_too_large', 413);
   return new BidPortalError('unknown', res.status);
 }
 
 async function callJson<T>(token: string, path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`/api/v1/tendering/bid-portal/${encodeURIComponent(token)}/${path}`, {
     ...init,
-    headers: { Accept: 'application/json', ...(init?.body ? { 'Content-Type': 'application/json' } : {}) },
+    // A FormData body sets its own multipart boundary.
+    headers: {
+      Accept: 'application/json',
+      ...(init?.body && !(init.body instanceof FormData) ? { 'Content-Type': 'application/json' } : {}),
+    },
     credentials: 'omit',
     referrerPolicy: 'no-referrer',
   });
@@ -150,6 +227,36 @@ export function saveBidDraft(token: string, body: BidPortalPricesBody): Promise<
 
 export function submitBid(token: string, body: BidPortalPricesBody): Promise<BidPortalView> {
   return call(token, 'submit/', { method: 'POST', body: JSON.stringify(body) });
+}
+
+function fileForm(file: File, extra: Record<string, string> = {}): FormData {
+  const form = new FormData();
+  form.append('file', file);
+  for (const [key, value] of Object.entries(extra)) form.append(key, value);
+  return form;
+}
+
+/** Match a priced X84 against the bill; nothing is stored. */
+export function checkBidX84(token: string, file: File): Promise<X84Preview> {
+  return callJson<X84Preview>(token, 'x84/check/', { method: 'POST', body: fileForm(file) });
+}
+
+/** Submit the bid from a priced X84; refused with the preview when a line does not fit. */
+export function submitBidX84(token: string, file: File, notes = ''): Promise<BidPortalView> {
+  return call(token, 'x84/', { method: 'POST', body: fileForm(file, { notes }) });
+}
+
+export function uploadBidFile(token: string, file: File, kind: 'offer_pdf' | 'attachment'): Promise<BidPortalView> {
+  return call(token, 'files/', { method: 'POST', body: fileForm(file, { kind }) });
+}
+
+export function declineBid(token: string, reason: string): Promise<BidPortalView> {
+  return call(token, 'decline/', { method: 'POST', body: JSON.stringify({ reason }) });
+}
+
+/** Download address of a request document for this link. */
+export function bidPortalDocumentUrl(token: string, documentId: string): string {
+  return `/api/v1/tendering/bid-portal/${encodeURIComponent(token)}/documents/${encodeURIComponent(documentId)}/`;
 }
 
 export interface TenderInfoAddendum {

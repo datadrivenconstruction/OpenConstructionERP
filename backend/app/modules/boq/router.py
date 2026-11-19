@@ -6005,7 +6005,7 @@ async def export_boq_pdf(
 )
 @router.get(
     "/boqs/{boq_id}/export/gaeb/",
-    summary="Export BOQ as GAEB XML 3.3 (X83 Angebotsaufforderung default, ?format=x84 for Angebotsabgabe)",
+    summary="Export BOQ as GAEB XML 3.3 (X83 call for bids default, ?format=x84 bid, ?format=x86 award)",
     dependencies=[Depends(RequirePermission("boq.export"))],
 )
 async def export_boq_gaeb(
@@ -6017,14 +6017,17 @@ async def export_boq_gaeb(
     # NB: query-string alias is still ``?format=x84`` for backward-compat with
     # the documented URL; the Python parameter is ``gaeb_format`` to avoid
     # shadowing the stdlib ``format`` builtin used by the XML builder.
-    gaeb_format: Literal["x83", "x84"] = Query(
+    gaeb_format: Literal["x83", "x84", "x86"] = Query(
         "x83",
         alias="format",
         description=(
             "GAEB DA phase to emit. ``x83`` = Angebotsaufforderung (call for "
             "bids, DP 83, unpriced). ``x84`` = Angebotsabgabe (bid "
             "submission, DP 84, priced). An X84 is a plain Hauptangebot "
-            "unless ``bid_type=alternate`` is also passed."
+            "unless ``bid_type=alternate`` is also passed. ``x86`` = "
+            "Auftragserteilung (award, DP 86): the bill with its texts and "
+            "prices, refused with 409 ``bill_changed_since_import`` when the "
+            "bill no longer matches the file it was imported from."
         ),
     ),
     bid_type: Literal["main", "alternate"] = Query(
@@ -6089,6 +6092,8 @@ async def _build_gaeb_export(
     """The GAEB DA XML export of a bill, built in memory with the writer's trace."""
     from app.modules.projects.repository import ProjectRepository
 
+    if gaeb_format == "x86":
+        await _refuse_changed_bill(session, boq_id)
     boq_data = await service.get_boq_structured_for_export(boq_id, embed_markups)
     await _stamp_drawing_refs(session, boq_data)
 
@@ -6112,7 +6117,7 @@ async def _build_gaeb_export(
         trace=trace,
     )
 
-    ext = "X84" if gaeb_format == "x84" else "X83"
+    ext = gaeb_format.upper()
     return _BuiltExport(
         content=xml_content.encode("utf-8"),
         filename=f"{boq_data.name}.{ext}",
@@ -6124,6 +6129,20 @@ async def _build_gaeb_export(
         project_id=boq_data.project_id,
         trace=trace,
     )
+
+
+async def _refuse_changed_bill(session: Any, boq_id: uuid.UUID) -> None:
+    """409 when the bill moved away from the file it was imported from (an X86 must answer that file)."""
+    from app.modules.boq.exchange_source import BILL_CHANGED, bill_state
+    from app.modules.boq.repository import PositionRepository
+
+    positions = await PositionRepository(session).list_all_for_boq(boq_id)
+    state = await bill_state(session, boq_id, positions)
+    if state["changed"]:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail={"code": BILL_CHANGED, "differences": state["differences"][:50]},
+        )
 
 
 @router.get(
@@ -6217,6 +6236,7 @@ def build_gaeb_xml(
     gaeb_format: str,
     bid_type: str = "main",
     trace: list[dict[str, Any]] | None = None,
+    contractor_name: str = "",
 ) -> str:
     """Build a schema-valid GAEB DA XML 3.3 document string.
 
@@ -6224,7 +6244,9 @@ def build_gaeb_xml(
     XSD without booting the app. ``boq_data`` is a ``BOQWithSections`` (or any
     object exposing ``name``, ``sections``, ``positions``, ``markups``,
     ``direct_cost`` and ``net_total``). ``gaeb_format`` is ``"x83"``
-    (Angebotsaufforderung, unpriced) or ``"x84"`` (Angebotsabgabe, priced).
+    (Angebotsaufforderung, unpriced), ``"x84"`` (Angebotsabgabe, priced) or
+    ``"x86"`` (Auftragserteilung, the award: the X83 bill with its full texts and
+    the agreed prices, ``contractor_name`` as the awarded firm in ``CTR``).
 
     ``bid_type`` applies to X84 only: ``"main"`` (default) emits a plain
     Hauptangebot; ``"alternate"`` marks the bid as a Nebenangebot - positions
@@ -6250,7 +6272,7 @@ def build_gaeb_xml(
     # the 3.0 namespace (.../GAEB_DA_XML/200407) while GAEBInfo/Version said
     # "3.3", which fails XSD validation against the 3.3 schema. DP 83 and 84
     # share the DA83/DA84 envelope; we emit the matching DA<nn>/3.3 URI.
-    dp_code = "84" if gaeb_format == "x84" else "83"
+    dp_code = {"x84": "84", "x86": "86"}.get(gaeb_format, "83")
     ns = f"http://www.gaeb.de/GAEB_DA_XML/DA{dp_code}/3.3"
     ET.register_namespace("", ns)
 
@@ -6277,7 +6299,10 @@ def build_gaeb_xml(
     # forbids UP/IT on items and Totals on the LV. X84 (Angebotsabgabe) is the
     # priced bid: it carries UP/IT, Totals, and priced MarkupItems. We emit the
     # phase-correct element set for each so both validate against the 3.3 XSD.
-    is_priced = dp_code == "84"
+    is_priced = dp_code in ("84", "86")
+    # The award restates the bill as the call for bids did (texts, labels);
+    # only the bid return is the restricted, text-less priced set.
+    full_text = dp_code != "84"
 
     # ── PrjInfo. The X84 schema restricts PrjInfo to NamePrj + LblPrj only;
     # the X83 schema uses the full base type (which also allows Cur). Emit the
@@ -6292,7 +6317,7 @@ def build_gaeb_xml(
     prj_label = str(gaeb_header.get("project_label") or "").strip()
     prj_info = ET.SubElement(gaeb, "PrjInfo")
     ET.SubElement(prj_info, "NamePrj").text = prj_number[:60]
-    if is_priced:
+    if not full_text:
         ET.SubElement(prj_info, "LblPrj").text = (prj_label or project_name or "")[:60]
     else:
         if prj_label:
@@ -6326,7 +6351,7 @@ def build_gaeb_xml(
     if is_priced:
         ctr = ET.SubElement(award, "CTR")
         addr = ET.SubElement(ctr, "Address")
-        ET.SubElement(addr, "Name1").text = "OpenConstructionERP"
+        ET.SubElement(addr, "Name1").text = (contractor_name.strip() or "OpenConstructionERP")[:40]
         ET.SubElement(addr, "Street").text = "-"
         ET.SubElement(addr, "PCode").text = "-"
         ET.SubElement(addr, "City").text = "-"
@@ -6349,7 +6374,7 @@ def build_gaeb_xml(
                 "priced": is_priced,
             }
         )
-    if not is_priced:
+    if full_text:
         ET.SubElement(boq_info, "LblBoQ").text = (project_name or boq_data.name or "")[:60]
         ET.SubElement(boq_info, "Date").text = today
         # OutlCompl is a closed enum (AllTxt / OutTxt / DetailTxt).
@@ -6525,7 +6550,7 @@ def build_gaeb_xml(
         desc = ET.SubElement(item, "Description")
         complete = ET.SubElement(desc, "CompleteText")
         detail = ET.SubElement(complete, "DetailTxt")
-        if not is_priced:
+        if full_text:
             text_el = ET.SubElement(detail, "Text")
             for line in (text or "").split("\n"):
                 p = ET.SubElement(text_el, "p")
@@ -6690,7 +6715,7 @@ def build_gaeb_xml(
                     "up": up_s if is_priced else None,
                     "it": it_s if is_priced else None,
                     "qu": qu_written,
-                    "text_written": not is_priced,
+                    "text_written": full_text,
                 }
             )
         # AI Act art. 50(2): a row a model produced carries a parsable
@@ -6703,16 +6728,16 @@ def build_gaeb_xml(
         short_text = str(getattr(pos, "description", "") or "")
         long_text = str(meta.get("gaeb_long_text") or "").strip()
         description = long_text or short_text
-        if ai_line and not is_priced:
+        if ai_line and full_text:
             description = f"{description}\n{ai_line}"
-        if drawing_line and not is_priced:
+        if drawing_line and full_text:
             description = f"{description}\n{drawing_line}"
-        _set_description(item, description, short_text if (long_text or is_priced) else "")
+        _set_description(item, description, short_text if (long_text or not full_text) else "")
         # Schema order: BidComm follows Description in the X84 Item.
         comm_lines = _alt_rationale_lines(pos) if is_alternate_bid else []
-        if ai_line and is_priced:
+        if ai_line and not full_text:
             comm_lines = [*comm_lines, ai_line]
-        if drawing_line and is_priced:
+        if drawing_line and not full_text:
             comm_lines = [*comm_lines, drawing_line]
         if comm_lines:
             _set_ml_text(item, "BidComm", "\n".join(comm_lines))
@@ -6827,7 +6852,7 @@ def build_gaeb_xml(
             sec = sections_by_oz.get(".".join(path))
             if sec is not None:
                 ctgy.set("ID", _source_id(_pos_meta(sec), "oeCtgy"))
-            if not is_priced:
+            if full_text:
                 label = str(getattr(sec, "description", "") or "") if sec is not None else ""
                 _set_ml_text(ctgy, "LblTx", label or ".".join(path))
 
@@ -6875,7 +6900,7 @@ def build_gaeb_xml(
                 ID=_mint_id("oeCtgy"),
                 RNoPart=_rnopart(_leaf_segment(sec_ordinal, ""), 0),
             )
-            if not is_priced:
+            if full_text:
                 _set_ml_text(ctgy, "LblTx", section.description or sec_ordinal)
             ctgy_body = ET.SubElement(ctgy, "BoQBody")
             if section.positions:
@@ -6899,7 +6924,7 @@ def build_gaeb_xml(
         # category list). Kept distinct from sections; no label needed.
         if boq_data.positions:
             ung = ET.SubElement(boq_body, "BoQCtgy", ID=_mint_id("oeCtgy"), RNoPart=_rnopart("U", 0))
-            if not is_priced:
+            if full_text:
                 _set_ml_text(ung, "LblTx", "Ungrouped Positions")
             ung_body = ET.SubElement(ung, "BoQBody")
             ung_list = ET.SubElement(ung_body, "Itemlist")
@@ -9156,10 +9181,24 @@ async def _record_import_fidelity(
         )
         out = report.to_dict()
         out["id"] = str(row.id) if row is not None else None
-        return out
     except Exception:  # noqa: BLE001 - diagnostics, never fail an import
         logger.warning("Import fidelity report failed for BOQ %s", boq_id, exc_info=True)
         return None
+    # The file as received, so the bill can later be checked against it and
+    # answered in the same exchange format (an X83 is answered by an X86).
+    from app.modules.boq.exchange_source import record_source
+
+    await record_source(
+        service.session,
+        boq_id,
+        project_id=project_id,
+        format_id=format_id,
+        imported=imported_boq,
+        content=content,
+        file_name=file_name,
+        user_id=str(actor_id) if actor_id else None,
+    )
+    return out
 
 
 async def _record_legacy_sheet_fidelity(
