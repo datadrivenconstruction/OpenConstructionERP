@@ -19,6 +19,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { X, ListChecks, Loader2, Plus } from 'lucide-react';
 import { createTask, type TaskType, type TaskPriority } from '@/features/tasks/api';
 import { useToastStore } from '@/stores/useToastStore';
+import { useDismiss } from '@/shared/hooks/useDismiss';
 
 interface CreateTaskFromDwgModalProps {
   projectId: string;
@@ -126,8 +127,9 @@ export default function CreateTaskFromDwgModal({
 
   const canSubmit = title.trim().length > 0 && !createMut.isPending;
 
+  const dismiss = useDismiss({ onClose });
   return (
-    <div
+    <div {...dismiss}
       className="fixed inset-0 z-modal flex items-center justify-center bg-black/70 backdrop-blur-lg p-4"
       role="dialog"
       aria-modal="true"

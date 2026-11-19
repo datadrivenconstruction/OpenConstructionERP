@@ -24,6 +24,7 @@ import { Button, Input } from '@/shared/ui';
 import { useToastStore } from '@/stores/useToastStore';
 
 import { updateElementAssetInfo, type AssetInfoPayload, type AssetSummary } from './api';
+import { useDismiss } from '@/shared/hooks/useDismiss';
 
 /** Operational-status vocabulary shared with ``AssetsPage`` filter chips. */
 export const OPERATIONAL_STATUS_OPTIONS = [
@@ -164,8 +165,9 @@ export function AssetEditModal({ asset, onClose, onSaved }: AssetEditModalProps)
     mutation.mutate(payload);
   };
 
+  const dismiss = useDismiss({ onClose });
   return (
-    <div
+    <div {...dismiss}
       className="fixed inset-0 z-modal flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
       onClick={onClose}
     >

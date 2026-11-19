@@ -22,6 +22,7 @@ import { apiGet, type Page } from '@/shared/lib/api';
 import { TruncationNotice } from '@/shared/ui/TruncationNotice';
 import { useToastStore } from '@/stores/useToastStore';
 import { linkReportDocuments } from './api';
+import { useDismiss } from '@/shared/hooks/useDismiss';
 
 interface ProjectDocument {
   id: string;
@@ -105,8 +106,9 @@ export default function AttachExistingFileModal({
     },
   });
 
+  const dismiss = useDismiss({ onClose });
   return (
-    <div
+    <div {...dismiss}
       className="fixed inset-0 z-popover flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
       role="dialog"
       aria-modal="true"

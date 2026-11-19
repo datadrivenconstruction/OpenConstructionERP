@@ -52,6 +52,7 @@ import {
 } from '../contracts/api';
 import { getNumberLocale } from '@/stores/usePreferencesStore';
 import { parseDecimalInput, toDecimalPayloadString } from '@/shared/lib/parseDecimal';
+import { useDismiss } from '@/shared/hooks/useDismiss';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Helpers
@@ -132,6 +133,7 @@ function FxRateModal({
     }
   }, [open, initial]);
 
+  const dismiss = useDismiss({ onClose: onCancel, enabled: open });
   if (!open) return null;
 
   const effectiveCode = code === '__custom__' ? customCode.trim().toUpperCase() : code;
@@ -166,7 +168,7 @@ function FxRateModal({
   };
 
   return (
-    <div className="fixed inset-0 z-modal flex items-center justify-center">
+    <div {...dismiss} className="fixed inset-0 z-modal flex items-center justify-center">
       <div
         className="absolute inset-0 bg-black/70 backdrop-blur-lg animate-fade-in"
         onClick={onCancel}

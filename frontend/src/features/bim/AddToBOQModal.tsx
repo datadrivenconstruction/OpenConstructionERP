@@ -34,6 +34,7 @@ import {
 } from '@/features/boq/suggestQuantityFromBIM';
 import { fmtFixed, fmtList } from '@/shared/lib/formatters';
 import { getNumberLocale } from '@/stores/usePreferencesStore';
+import { useDismiss } from '@/shared/hooks/useDismiss';
 
 /** Backend response shape for POST /api/v1/costs/suggest-for-element/. */
 interface CostSuggestion {
@@ -466,8 +467,9 @@ export default function AddToBOQModal({
 
   const busy = linkExistingMut.isPending || createNewMut.isPending || createBoqMut.isPending;
 
+  const dismiss = useDismiss({ onClose });
   return (
-    <div
+    <div {...dismiss}
       className="fixed inset-0 z-modal flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
       role="dialog"
       aria-modal="true"

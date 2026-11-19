@@ -25,6 +25,7 @@ import { useToastStore } from '@/stores/useToastStore';
 import { updateElementAssetInfo } from '@/features/bim/api';
 
 import { discoverAssets, type DiscoveryCandidate } from './api';
+import { useDismiss } from '@/shared/hooks/useDismiss';
 
 interface DiscoverAssetsModalProps {
   projectId: string;
@@ -125,8 +126,9 @@ export function DiscoverAssetsModal({ projectId, onClose, onPromoted }: Discover
     },
   });
 
+  const dismiss = useDismiss({ onClose });
   return (
-    <div
+    <div {...dismiss}
       className="fixed inset-0 z-modal flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
       onClick={onClose}
     >

@@ -19,6 +19,7 @@ import { updateActivityBIMLinks } from './api';
 import type { BIMElementData } from '@/shared/ui/BIMViewer';
 import { TruncationNotice } from '@/shared/ui/TruncationNotice';
 import { useToastStore } from '@/stores/useToastStore';
+import { useDismiss } from '@/shared/hooks/useDismiss';
 
 interface ScheduleHeader {
   id: string;
@@ -165,8 +166,9 @@ export default function LinkActivityToBIMModal({
 
   const isLoading = schedulesQuery.isLoading || activitiesQuery.isLoading;
 
+  const dismiss = useDismiss({ onClose });
   return (
-    <div
+    <div {...dismiss}
       className="fixed inset-0 z-modal flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
       role="dialog"
       aria-modal="true"

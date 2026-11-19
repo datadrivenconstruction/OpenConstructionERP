@@ -17,6 +17,7 @@ import { useToastStore } from '@/stores/useToastStore';
 
 import { createSnapshot, type Snapshot, type SnapshotError } from './api';
 import { formatFileSize } from '@/shared/lib/formatters';
+import { useDismiss } from '@/shared/hooks/useDismiss';
 
 const SUPPORTED_EXTENSIONS = ['ifc', 'rvt', 'dwg'] as const;
 const MAX_BYTES = 200 * 1024 * 1024;
@@ -114,8 +115,9 @@ export function SnapshotCreateModal({
     if (canSubmit) mutation.mutate();
   };
 
+  const dismiss = useDismiss({ onClose });
   return (
-    <div
+    <div {...dismiss}
       className="fixed inset-0 z-modal flex items-center justify-center bg-black/40 px-4"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();

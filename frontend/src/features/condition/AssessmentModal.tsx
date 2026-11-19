@@ -16,6 +16,7 @@ import { todayLocalISO } from '@/shared/lib/dates';
 import { useToastStore } from '@/stores/useToastStore';
 import { createAssessment, fetchScales, suggestRating, type Assessment, type AssetKind } from './api';
 import { intensityLabel, levelLabel, severityLabel } from './conditionLabels';
+import { useDismiss } from '@/shared/hooks/useDismiss';
 
 const inputCls =
   'h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary focus:border-oe-blue focus:outline-none';
@@ -107,8 +108,9 @@ export function AssessmentModal({
   const suggestion = suggestionQ.data;
   const canSave = elementName.trim().length > 0 && rating !== null && !saveMut.isPending;
 
+  const dismiss = useDismiss({ onClose });
   return (
-    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" role="dialog" aria-modal="true">
+    <div {...dismiss} className="fixed inset-0 z-modal flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" role="dialog" aria-modal="true">
       <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-border-light bg-surface-elevated shadow-xl">
         <div className="flex items-center justify-between border-b border-border-light px-5 py-3">
           <h3 className="oe-section-title">

@@ -12,6 +12,7 @@ import { usePreferencesStore } from '@/stores/usePreferencesStore';
 import { getUnitsForLocale } from '@/features/boq/boqHelpers';
 import { unitLabel } from '@/shared/lib/unitLabels';
 import { assembliesApi, type CreateAssemblyData } from './api';
+import { useDismiss } from '@/shared/hooks/useDismiss';
 
 /* -- Constants ------------------------------------------------------------ */
 
@@ -132,10 +133,11 @@ export function CreateAssemblyModal({ open, onClose }: CreateAssemblyModalProps)
   const selectClass =
     'h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary transition-all duration-fast ease-oe focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent hover:border-content-tertiary cursor-pointer appearance-none';
 
+  const dismiss = useDismiss({ onClose, enabled: open });
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-modal flex items-center justify-center">
+    <div {...dismiss} className="fixed inset-0 z-modal flex items-center justify-center">
       <div
         className="absolute inset-0 bg-black/70 backdrop-blur-lg animate-fade-in"
         onClick={onClose}

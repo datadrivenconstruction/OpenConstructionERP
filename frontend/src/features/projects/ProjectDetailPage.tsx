@@ -98,6 +98,7 @@ import { usePartnerPack } from '@/shared/hooks/usePartnerPack';
 import { isFrameworkPackActive } from '@/app/layout/packMenu';
 import { fmtList, fmtPercent, fmtFixed, formatDateValue } from '@/shared/lib/formatters';
 import { formatCurrency as formatMoney, toNum } from '@/shared/lib/money';
+import { useDismiss } from '@/shared/hooks/useDismiss';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -1186,8 +1187,9 @@ function ImportDialog({
     }
   }, [selectedFile, mutation]);
 
+  const dismiss = useDismiss({ onClose });
   return (
-    <div className="fixed inset-0 z-modal flex items-center justify-center">
+    <div {...dismiss} className="fixed inset-0 z-modal flex items-center justify-center">
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/70 backdrop-blur-lg animate-fade-in"

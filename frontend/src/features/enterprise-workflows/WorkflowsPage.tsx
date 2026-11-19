@@ -44,6 +44,7 @@ import {
   type ApprovalStatus,
 } from './api';
 import { useSingleFlight } from '@/shared/hooks/useSingleFlight';
+import { useDismiss } from '@/shared/hooks/useDismiss';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -166,10 +167,11 @@ function CreateWorkflowDialog({
     setSteps([EMPTY_STEP]);
   }, [name, description, entityType, steps, onSubmit]);
 
+  const dismiss = useDismiss({ onClose, enabled: open });
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/40">
+    <div {...dismiss} className="fixed inset-0 z-modal flex items-center justify-center bg-black/40">
       <div className="mx-4 w-full max-w-md rounded-2xl border border-border-light bg-surface-elevated p-5 shadow-xl">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="oe-section-title">

@@ -11,6 +11,7 @@ import { useTranslation } from 'react-i18next';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Loader2, X, FileText } from 'lucide-react';
 import { matchElementsApi, type MatchSession } from './api';
+import { useDismiss } from '@/shared/hooks/useDismiss';
 
 interface Props {
   projectId: string;
@@ -45,8 +46,9 @@ export function NewSessionFromTextModal({ projectId, onClose, onCreated }: Props
 
   const canSubmit = lines.length > 0 && !mut.isPending;
 
+  const dismiss = useDismiss({ onClose });
   return (
-    <div
+    <div {...dismiss}
       role="dialog"
       aria-modal="true"
       className="fixed inset-0 z-modal flex items-center justify-center bg-black/50 p-4"

@@ -59,6 +59,7 @@ import {
 import { SectionToolbar, StatusBadge, ElementLinks, inputCls, labelCls, textareaCls } from './shared';
 import { fmtList } from '@/shared/lib/formatters';
 import { useSingleFlight } from '@/shared/hooks/useSingleFlight';
+import { useDismiss } from '@/shared/hooks/useDismiss';
 
 const HANDOVER_STATUS_VARIANTS: Record<string, 'neutral' | 'blue' | 'success' | 'warning' | 'error'> = {
   draft: 'neutral',
@@ -1026,8 +1027,9 @@ function ModalShell({
   children: React.ReactNode;
 }) {
   const { t } = useTranslation();
+  const dismiss = useDismiss({ onClose });
   return (
-    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+    <div {...dismiss} className="fixed inset-0 z-modal flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
       <div
         role="dialog"
         aria-modal="true"

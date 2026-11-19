@@ -23,6 +23,7 @@ import {
   type ResourceType,
 } from './api';
 import { fmtFixed } from '@/shared/lib/formatters';
+import { useDismiss } from '@/shared/hooks/useDismiss';
 
 /* -- Constants ------------------------------------------------------------ */
 
@@ -532,8 +533,9 @@ function TemplateDrawer({
   // stale cached bundle can outlive a deploy.
   const currencyBuckets = result?.totals_by_currency ?? [];
 
+  const dismiss = useDismiss({ onClose, backdrop: true });
   return (
-    <div className="fixed inset-0 z-modal flex justify-end bg-black/40">
+    <div {...dismiss} className="fixed inset-0 z-modal flex justify-end bg-black/40">
       <div
         className="flex h-full w-full max-w-xl flex-col overflow-y-auto bg-surface-primary shadow-xl"
         role="dialog"

@@ -46,6 +46,7 @@ import {
   type BIMRequirementImportResult,
   type BIMRequirementValidationResult,
 } from './api';
+import { useDismiss } from '@/shared/hooks/useDismiss';
 
 const ACCEPTED_EXTENSIONS = '.ids,.xml,.xlsx,.xls,.csv,.txt,.json';
 
@@ -490,8 +491,9 @@ function ValidateAgainstModelModal({
     },
   });
 
+  const dismiss = useDismiss({ onClose });
   return (
-    <div
+    <div {...dismiss}
       className="fixed inset-0 z-modal flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
       onClick={onClose}
     >

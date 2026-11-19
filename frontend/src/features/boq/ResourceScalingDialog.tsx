@@ -28,6 +28,7 @@ import {
   type ScaleScopeInput,
 } from './resourceScalingApi';
 import { scalingErrorText, scalingWarningText } from './resourceScalingText';
+import { useDismiss } from '@/shared/hooks/useDismiss';
 
 export interface ResourceScalingScope extends ScaleScopeInput {
   /** What the scope is called on screen: a section ordinal and title, or a resource name. */
@@ -191,12 +192,13 @@ export function ResourceScalingDialog({
     return fmtList(measure?.units ?? []);
   }, [metric, measure, t]);
 
+  const dismiss = useDismiss({ onClose, enabled: open && !!scope });
   if (!open || !scope) return null;
 
   const factorPct = plan ? (Number(plan.factor) - 1) * 100 : 0;
 
   return (
-    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/40 p-4" onClick={onClose}>
+    <div {...dismiss} className="fixed inset-0 z-modal flex items-center justify-center bg-black/40 p-4" onClick={onClose}>
       <div
         role="dialog"
         aria-modal="true"

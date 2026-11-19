@@ -68,6 +68,7 @@ import { ApplicationPanel } from './ApplicationPanel';
 import { buildFundingInsights } from './fundingInsights';
 import { fundingGuide } from './fundingGuide';
 import { obligationLabel } from './obligationLabel';
+import { useDismiss } from '@/shared/hooks/useDismiss';
 
 type TabId = 'applications' | 'deadlines' | 'programmes';
 
@@ -323,6 +324,8 @@ export function FundingPage() {
     ? openApplication
     : null;
 
+  const dismissB = useDismiss({ onClose: () => setShowCreate(false), enabled: showCreate });
+  const dismiss = useDismiss({ onClose: () => setShowProgrammeForm(false), enabled: showProgrammeForm });
   return (
     <div className="space-y-5 animate-fade-in">
       <Breadcrumb
@@ -716,7 +719,7 @@ export function FundingPage() {
       )}
 
       {showProgrammeForm && (
-        <div className="fixed inset-0 z-modal flex items-center justify-center overflow-y-auto bg-black/40 p-4">
+        <div {...dismiss} className="fixed inset-0 z-modal flex items-center justify-center overflow-y-auto bg-black/40 p-4">
           <Card className="my-auto w-full max-w-2xl p-4">
             <h2 className="mb-3 text-lg font-semibold">
               {t('funding.new_programme', { defaultValue: 'New programme' })}
@@ -928,7 +931,7 @@ export function FundingPage() {
       )}
 
       {showCreate && (
-        <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/40 p-4">
+        <div {...dismissB} className="fixed inset-0 z-modal flex items-center justify-center bg-black/40 p-4">
           <Card className="w-full max-w-lg p-4">
             <h2 className="mb-3 text-lg font-semibold">
               {t('funding.new_application', { defaultValue: 'New application' })}

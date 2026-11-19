@@ -33,6 +33,7 @@ import { SUPPORTED_LANGUAGES } from '@/app/i18n';
 import { sortLanguagesByName } from '@/shared/lib/languageOrder';
 import { useThemeStore } from '@/stores/useThemeStore';
 import { beginOidcLogin } from './oidcPkce';
+import { useDismiss } from '@/shared/hooks/useDismiss';
 
 /* Segmented theme switch (Light / Dark / System) for the login page. */
 function ThemeSwitch() {
@@ -373,6 +374,7 @@ export function LoginPage() {
 
   // Desktop first-run: clean centered pending state while we silently sign in
   // to the local workspace. Falls back to the form on any failure (see effect).
+  const dismiss = useDismiss({ onClose: () => setShowInfo(false), enabled: showInfo });
   if (bootstrapping) {
     return (
       <div className="relative flex h-screen flex-col items-center justify-center bg-surface-secondary overflow-hidden">
@@ -1117,7 +1119,7 @@ export function LoginPage() {
 
       {/* ── About modal ── */}
       {showInfo && (
-        <div className="fixed inset-0 z-modal flex items-center justify-center p-4">
+        <div {...dismiss} className="fixed inset-0 z-modal flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/70 backdrop-blur-lg" onClick={() => setShowInfo(false)} />
 
           <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl border border-border-light bg-surface-elevated shadow-2xl">

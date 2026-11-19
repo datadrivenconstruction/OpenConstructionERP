@@ -24,6 +24,7 @@ import {
   type SyncSeverity,
 } from './api';
 import { fmtList } from '@/shared/lib/formatters';
+import { useDismiss } from '@/shared/hooks/useDismiss';
 
 export interface SyncReportDrawerProps {
   presetId: string;
@@ -65,8 +66,9 @@ export function SyncReportDrawer({
       (i) => i.suggested_fix === 'auto_rename' || i.suggested_fix === 'drop_filter',
     );
 
+  const dismiss = useDismiss({ onClose });
   return (
-    <div
+    <div {...dismiss}
       className="fixed inset-0 z-modal flex justify-end bg-black/40"
       role="dialog"
       aria-modal="true"

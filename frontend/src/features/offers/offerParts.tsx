@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Send } from 'lucide-react';
 import { Button } from '@/shared/ui/Button';
 import { TEXT_PLACEHOLDERS, createCustomer, type Offer } from './api';
+import { useDismiss } from '@/shared/hooks/useDismiss';
 
 /** The primary action. While an error stands it is disabled and the first error is shown, not only hinted. */
 export function SendAction({
@@ -144,8 +145,9 @@ export function AcceptDialog({
   const [contract, setContract] = useState(canCreateContract);
   const toggle = (ordinal: string) => setTicked((cur) => (cur.includes(ordinal) ? cur.filter((o) => o !== ordinal) : [...cur, ordinal]));
 
+  const dismiss = useDismiss({ onClose: onCancel });
   return (
-    <div role="dialog" aria-modal="true" aria-label={t('offers.mark_accepted', { defaultValue: 'Mark accepted' })} className="fixed inset-0 z-modal flex items-center justify-center bg-black/40">
+    <div {...dismiss} role="dialog" aria-modal="true" aria-label={t('offers.mark_accepted', { defaultValue: 'Mark accepted' })} className="fixed inset-0 z-modal flex items-center justify-center bg-black/40">
       <div className="w-full max-w-md space-y-3 rounded-lg bg-surface-primary p-5 shadow-xl">
         <h2 className="text-base font-semibold">{t('offers.mark_accepted', { defaultValue: 'Mark accepted' })}</h2>
         <label className="block text-sm">

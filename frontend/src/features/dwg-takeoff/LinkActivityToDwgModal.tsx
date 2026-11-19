@@ -18,6 +18,7 @@ import { X, Search, Calendar, Link2, Loader2 } from 'lucide-react';
 import { apiGet, apiPatch, type Page } from '@/shared/lib/api';
 import { TruncationNotice } from '@/shared/ui/TruncationNotice';
 import { useToastStore } from '@/stores/useToastStore';
+import { useDismiss } from '@/shared/hooks/useDismiss';
 
 interface ScheduleHeader {
   id: string;
@@ -158,8 +159,9 @@ export default function LinkActivityToDwgModal({
 
   const isLoading = schedulesQuery.isLoading || activitiesQuery.isLoading;
 
+  const dismiss = useDismiss({ onClose });
   return (
-    <div
+    <div {...dismiss}
       className="fixed inset-0 z-modal flex items-center justify-center bg-black/70 backdrop-blur-lg p-4"
       role="dialog"
       aria-modal="true"

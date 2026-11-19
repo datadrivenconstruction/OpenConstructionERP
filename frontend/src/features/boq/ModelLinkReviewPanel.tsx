@@ -20,6 +20,7 @@ import clsx from 'clsx';
 import { Button, Badge } from '@/shared/ui';
 import { useToastStore } from '@/stores/useToastStore';
 import { boqApi, type QuantityLinkRefreshRow } from './api';
+import { useDismiss } from '@/shared/hooks/useDismiss';
 
 export interface ModelLinkReviewPanelProps {
   boqId: string;
@@ -131,10 +132,11 @@ export function ModelLinkReviewPanel({
     [rows],
   );
 
+  const dismiss = useDismiss({ onClose, enabled: isOpen });
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-y-0 right-0 z-50 flex">
+    <div {...dismiss} className="fixed inset-y-0 right-0 z-50 flex">
       <div className="fixed inset-0 bg-black/20" onClick={onClose} aria-hidden="true" />
       <div
         role="dialog"
