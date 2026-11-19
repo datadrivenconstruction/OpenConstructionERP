@@ -173,3 +173,51 @@ def evaluate(axis: str, readings: Sequence[Reading], thresholds: Thresholds) -> 
         if exact is not None:  # a reading without the needed numbers never becomes the reference
             previous_exact, previous_at, previous_level = exact, reading.at, level
     return out
+
+
+# ── Forecast ──────────────────────────────────────────────────────────────
+
+#: Epochs the trend is fitted over unless the caller says otherwise.
+FORECAST_EPOCHS = 5
+
+
+@dataclass(frozen=True)
+class Forecast:
+    """Linear trend over the last epochs and when it reaches the next level."""
+
+    slope_mm_day: float
+    fitted_mm: float
+    epochs: int
+    level: str | None = None
+    limit_mm: float | None = None
+    days: float | None = None
+
+
+def forecast(evaluations: Sequence[Evaluation], t: Thresholds, last_n: int = FORECAST_EPOCHS) -> Forecast | None:
+    """Least-squares line through the last ``last_n`` displacements and the days to the next threshold.
+
+    The next threshold is the lowest displacement limit the fitted value has not reached. A trend
+    running back towards zero, or flat, reaches nothing. None with fewer than two usable epochs.
+    """
+    pts = [(e.at, float(e.displacement_mm)) for e in evaluations if e.displacement_mm is not None][-max(last_n, 2) :]
+    if len(pts) < 2:
+        return None
+    t0 = pts[0][0]
+    xs = [(at - t0).total_seconds() / 86400.0 for at, _ in pts]
+    ys = [y for _, y in pts]
+    mx, my = sum(xs) / len(xs), sum(ys) / len(ys)
+    sxx = sum((x - mx) ** 2 for x in xs)
+    if sxx <= 0:
+        return None
+    slope = sum((x - mx) * (y - my) for x, y in zip(xs, ys, strict=True)) / sxx
+    fitted = my + slope * (xs[-1] - mx)
+    out = Forecast(round(slope, 4), round(fitted, 3), len(pts))
+    away = abs(slope) > 1e-9 and (fitted == 0 or (slope > 0) == (fitted > 0))
+    if not away:
+        return out
+    for level, limit in (("alert", t.alert_mm), ("action", t.action_mm), ("alarm", t.alarm_mm)):
+        if limit is None or abs(fitted) >= float(limit):
+            continue
+        days = (float(limit) - abs(fitted)) / abs(slope)
+        return Forecast(out.slope_mm_day, out.fitted_mm, out.epochs, level, float(limit), round(days, 1))
+    return out

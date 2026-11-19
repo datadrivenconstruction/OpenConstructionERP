@@ -2355,6 +2355,22 @@
     "level_misclosure": {
       "fail": "El error de cierre de nivelación {f} mm supera k·√km con k = {k} mm.",
       "suggestion": "Repita la nivelación o compruebe las cotas de los puntos de referencia usados."
+    },
+    "cogo_parallel": {
+      "fail": "Las líneas son paralelas: no hay intersección.",
+      "suggestion": "Revise los rumbos o elija dos líneas que se crucen."
+    },
+    "cogo_two_solutions": {
+      "fail": "La intersección por distancias tiene dos soluciones; elija una.",
+      "suggestion": "Conserve el punto en el lado correcto de la línea base."
+    },
+    "angular_misclosure": {
+      "fail": "El error de cierre angular {a}\" supera {k}\" × √{n}.",
+      "suggestion": "Revise los ángulos en busca de errores groseros, mídalos de nuevo o confirme la clase de precisión."
+    },
+    "level_arithmetic": {
+      "fail": "Libreta de nivelación {name}: falla la comprobación aritmética, ΣEsp − ΣFre = {d} pero última cota − primera = {r}.",
+      "suggestion": "Revise las lecturas y el cálculo de cada fila."
     }
   },
   "volumes": {
@@ -2409,6 +2425,14 @@
       "no_profile": "Sin perfil, defina uno",
       "d": "d (mm)",
       "dz": "dZ (mm)"
+    },
+    "profile_uncovered": {
+      "fail": "El perfil longitudinal no cubre la progresiva {c}.",
+      "suggestion": "Amplíe el perfil o limite la lista de replanteo a su rango."
+    },
+    "spiral_skipped": {
+      "fail": "Falta un parámetro de clotoide; elemento {n} omitido.",
+      "suggestion": "Exporte de nuevo el eje con la longitud de la clotoide y ambos radios."
     }
   },
   "land_parcels": {
@@ -2459,6 +2483,18 @@
       "status_negotiating": "En negociación",
       "status_acquired": "Adquirida",
       "status_expropriation": "Expropiación"
+    },
+    "subdivision_area": {
+      "fail": "Las áreas de los lotes {a} + {b} difieren de la parcela madre {p} (diferencia {d} m²).",
+      "suggestion": "Revise la línea de corte: los lotes deben sumar la parcela madre."
+    },
+    "corner_rpp": {
+      "fail": "La precisión del vértice {id}, {r} m, supera {limit} m.",
+      "suggestion": "Mida de nuevo el vértice o revise la clase de precisión asignada."
+    },
+    "setback": {
+      "fail": "La huella {f} está a {d} m del lindero {b}; retiro exigido {s} m.",
+      "suggestion": "Revise la posición de la huella frente al retiro exigido."
     }
   },
   "monitoring": {
@@ -2494,6 +2530,10 @@
       "no_profile": "Sin perfil, defina uno",
       "ack_yes": "Sí",
       "ack_no": "Sin confirmar"
+    },
+    "forecast": {
+      "fail": "Se prevé que el punto {id} alcance el nivel {level} en {d} días.",
+      "suggestion": "Programe una lectura adicional y revise la tendencia antes de alcanzar el umbral."
     }
   },
   "stockpiles": {

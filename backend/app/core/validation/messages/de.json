@@ -2355,6 +2355,22 @@
     "level_misclosure": {
       "fail": "Nivellement-Widerspruch {f} mm überschreitet k·√km mit k = {k} mm.",
       "suggestion": "Nivellement wiederholen oder die verwendeten Höhenfestpunkte prüfen."
+    },
+    "cogo_parallel": {
+      "fail": "Die Linien sind parallel: kein Schnittpunkt.",
+      "suggestion": "Prüfen Sie die Richtungswinkel oder wählen Sie zwei Linien, die sich schneiden."
+    },
+    "cogo_two_solutions": {
+      "fail": "Bogenschnitt mit zwei Lösungen; wählen Sie eine aus.",
+      "suggestion": "Behalten Sie den Punkt auf der richtigen Seite der Basislinie."
+    },
+    "angular_misclosure": {
+      "fail": "Winkelabschlussfehler {a}\" überschreitet {k}\" × √{n}.",
+      "suggestion": "Prüfen Sie die Winkel auf grobe Fehler, messen Sie neu oder bestätigen Sie die Genauigkeitsklasse."
+    },
+    "level_arithmetic": {
+      "fail": "Nivellementbuch {name}: Rechenprobe fehlgeschlagen, ΣR − ΣV = {d}, aber letzte Höhe − erste Höhe = {r}.",
+      "suggestion": "Prüfen Sie die Ablesungen und die Auswertung jeder Zeile."
     }
   },
   "volumes": {
@@ -2409,6 +2425,14 @@
       "no_profile": "Kein Profil, bitte festlegen",
       "d": "d (mm)",
       "dz": "dZ (mm)"
+    },
+    "profile_uncovered": {
+      "fail": "Das Höhenprofil deckt Station {c} nicht ab.",
+      "suggestion": "Verlängern Sie das Profil oder begrenzen Sie die Absteckliste auf seinen Bereich."
+    },
+    "spiral_skipped": {
+      "fail": "Klothoidenparameter fehlt; Element {n} übersprungen.",
+      "suggestion": "Exportieren Sie die Achse erneut mit Klothoidenlänge und beiden Radien."
     }
   },
   "land_parcels": {
@@ -2459,6 +2483,18 @@
       "status_negotiating": "In Verhandlung",
       "status_acquired": "Erworben",
       "status_expropriation": "Enteignung"
+    },
+    "subdivision_area": {
+      "fail": "Teilflächen {a} + {b} weichen von der Ausgangsfläche {p} ab (Differenz {d} m²).",
+      "suggestion": "Prüfen Sie die Teilungslinie: Die Teile müssen die Ausgangsfläche ergeben."
+    },
+    "corner_rpp": {
+      "fail": "Grenzpunkt {id}: Genauigkeit {r} m überschreitet {limit} m.",
+      "suggestion": "Messen Sie den Grenzpunkt neu oder prüfen Sie die zugewiesene Genauigkeitsklasse."
+    },
+    "setback": {
+      "fail": "Grundriss {f} liegt {d} m von Grenze {b} entfernt; Abstandsfläche {s} m.",
+      "suggestion": "Prüfen Sie die Lage des Grundrisses gegen den geforderten Grenzabstand."
     }
   },
   "monitoring": {
@@ -2494,6 +2530,10 @@
       "no_profile": "Kein Profil, bitte festlegen",
       "ack_yes": "Ja",
       "ack_no": "Nein"
+    },
+    "forecast": {
+      "fail": "Punkt {id} erreicht laut Prognose {level} in {d} Tagen.",
+      "suggestion": "Planen Sie eine zusätzliche Messung und prüfen Sie den Trend, bevor der Grenzwert erreicht wird."
     }
   },
   "stockpiles": {

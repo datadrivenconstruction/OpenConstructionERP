@@ -19,6 +19,7 @@ from typing import Any
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.modules.survey_core import calc_validators  # noqa: F401 - registers SRV-050/060 with the register rules
 from app.modules.survey_core import crs as crs_lib
 from app.modules.survey_core.models import (
     SurveyPoint,
@@ -135,6 +136,7 @@ def _point_out(p: SurveyPoint) -> PointOut:
         kind=p.kind,
         sigma=_f(p.sigma),
         description=p.description,
+        method=p.method or "",
     )
 
 
@@ -505,6 +507,14 @@ class SurveyService:
                     "misclosure_mm": _f(t.misclosure_mm),
                     "allowed_mm": _f(t.allowed_mm),
                     "k_mm": _f(t.k_mm),
+                    "angle_count": t.angle_count,
+                    "ang_misclosure_sec": _f(t.ang_misclosure_sec),
+                    "ang_k_sec": _f(t.ang_k_sec),
+                    **{
+                        k: v
+                        for k, v in ((t.observations or {}).get("check") or {}).items()
+                        if k in ("arithmetic_ok", "sum_bs", "sum_fs", "first_rl", "last_rl")
+                    },
                 }
                 for t in await self.repo.list_traverses(project_id)
             ],
@@ -610,6 +620,7 @@ class SurveyService:
             traverse_min_ratio=row.traverse_min_ratio,
             level_k_mm=_f(row.level_k_mm),
             coverage_min_pct=_f(row.coverage_min_pct),
+            angular_k_sec=_f(row.angular_k_sec),
         )
 
     async def set_profile(
@@ -627,12 +638,14 @@ class SurveyService:
                 "traverse_min_ratio": row.traverse_min_ratio,
                 "level_k_mm": _f(row.level_k_mm),
                 "coverage_min_pct": _f(row.coverage_min_pct),
+                "angular_k_sec": _f(row.angular_k_sec),
             }
         row.label = data.label
         row.source = source
         row.traverse_min_ratio = data.traverse_min_ratio
         row.level_k_mm = _d(data.level_k_mm, "0.01")
         row.coverage_min_pct = _d(data.coverage_min_pct, "0.01")
+        row.angular_k_sec = _d(data.angular_k_sec, "0.01")
         await self.session.flush()
         await self._audit(
             "update" if old else "create",
@@ -752,6 +765,11 @@ def _traverse_out(t: SurveyTraverse) -> TraverseOut:
         profile_label=t.profile_label,
         note=t.note,
         created_at=t.created_at,
+        angle_count=t.angle_count,
+        ang_misclosure_sec=_f(t.ang_misclosure_sec),
+        ang_k_sec=_f(t.ang_k_sec),
+        ang_allowed_sec=_f(t.ang_allowed_sec),
+        observations=t.observations,
     )
 
 

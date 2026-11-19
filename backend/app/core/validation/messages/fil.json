@@ -2355,6 +2355,22 @@
     "level_misclosure": {
       "fail": "Ang misclosure ng leveling na {f} mm ay lampas sa k·√km na may k = {k} mm.",
       "suggestion": "Ulitin ang leveling o suriin ang taas ng mga benchmark na ginamit."
+    },
+    "cogo_parallel": {
+      "fail": "Magkaagapay ang mga linya: walang interseksiyon.",
+      "suggestion": "Suriin ang mga bearing o pumili ng dalawang linyang nagsasalubong."
+    },
+    "cogo_two_solutions": {
+      "fail": "May dalawang solusyon ang distance-distance intersection; pumili ng isa.",
+      "suggestion": "Panatilihin ang punto sa tamang panig ng base line."
+    },
+    "angular_misclosure": {
+      "fail": "Ang angular misclosure na {a}\" ay lampas sa {k}\" × √{n}.",
+      "suggestion": "Hanapin ang malaking mali sa mga anggulo, sukatin muli, o kumpirmahin ang closure class."
+    },
+    "level_arithmetic": {
+      "fail": "Level book {name}: hindi tugma ang arithmetic check, ΣBS − ΣFS = {d} pero huling RL − unang RL = {r}.",
+      "suggestion": "Suriing muli ang mga reading at ang kalkulasyon ng bawat hilera."
     }
   },
   "volumes": {
@@ -2409,6 +2425,14 @@
       "no_profile": "Walang profile, magtakda ng isa",
       "d": "d (mm)",
       "dz": "dZ (mm)"
+    },
+    "profile_uncovered": {
+      "fail": "Hindi saklaw ng profile ang chainage {c}.",
+      "suggestion": "Pahabain ang profile o limitahan ang stake list sa saklaw nito."
+    },
+    "spiral_skipped": {
+      "fail": "Kulang ang parameter ng spiral; nilaktawan ang elemento {n}.",
+      "suggestion": "I-export muli ang alignment kasama ang haba ng spiral at parehong radius."
     }
   },
   "land_parcels": {
@@ -2459,6 +2483,18 @@
       "status_negotiating": "Nakikipag-usap",
       "status_acquired": "Nakuha na",
       "status_expropriation": "Ekspropriasyon"
+    },
+    "subdivision_area": {
+      "fail": "Ang mga sukat ng bahagi {a} + {b} ay iba sa orihinal na lote {p} (diperensiya {d} m²).",
+      "suggestion": "Suriin ang linyang panghati: dapat bumuo ang mga bahagi ng orihinal na lote."
+    },
+    "corner_rpp": {
+      "fail": "Ang precision ng mohon {id} na {r} m ay lampas sa {limit} m.",
+      "suggestion": "Sukatin muli ang mohon o suriin ang itinakdang precision class nito."
+    },
+    "setback": {
+      "fail": "Ang footprint {f} ay {d} m mula sa hangganan {b}; kailangang setback {s} m.",
+      "suggestion": "Suriin ang posisyon ng footprint laban sa kailangang setback."
     }
   },
   "monitoring": {
@@ -2494,6 +2530,10 @@
       "no_profile": "Walang profile, magtakda ng isa",
       "ack_yes": "Oo",
       "ack_no": "Hindi"
+    },
+    "forecast": {
+      "fail": "Inaasahang aabot ang punto {id} sa {level} sa loob ng {d} araw.",
+      "suggestion": "Magplano ng karagdagang reading at suriin ang trend bago maabot ang threshold."
     }
   },
   "stockpiles": {

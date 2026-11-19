@@ -1,0 +1,60 @@
+{
+  "_doc": "Survey closure and boundary-corner classes per country (ISO code). Offered only while that country is an active market. Every class names its source; status to_verify means the pack author has not yet checked the table against the source, so the class is offered for the surveyor to pick and is never applied on its own.",
+  "US": {
+    "closure_classes": [
+      {
+        "key": "us_fgcc1984_trav_3_1",
+        "label": "FGCC 1984 traverse, third order class I",
+        "angular_k_sec": 10,
+        "traverse_min_ratio": 10000,
+        "source": "FGCC 1984, Standards and Specifications for Geodetic Control Networks, traverse",
+        "status": "to_verify"
+      },
+      {
+        "key": "us_fgcc1984_trav_3_2",
+        "label": "FGCC 1984 traverse, third order class II",
+        "angular_k_sec": 12,
+        "traverse_min_ratio": 5000,
+        "source": "FGCC 1984, Standards and Specifications for Geodetic Control Networks, traverse",
+        "status": "to_verify"
+      },
+      {
+        "key": "us_fgcc1984_lev_2_1",
+        "label": "FGCC 1984 levelling, second order class I",
+        "level_k_mm": 6,
+        "source": "FGCC 1984, Standards and Specifications for Geodetic Control Networks, levelling",
+        "status": "to_verify"
+      },
+      {
+        "key": "us_fgcc1984_lev_3",
+        "label": "FGCC 1984 levelling, third order",
+        "level_k_mm": 12,
+        "source": "FGCC 1984, Standards and Specifications for Geodetic Control Networks, levelling",
+        "status": "to_verify"
+      }
+    ],
+    "corner_classes": [
+      {
+        "key": "us_alta_nsps_2021_rpp",
+        "label": "ALTA/NSPS 2021 relative positional precision",
+        "base_m": 0.021336,
+        "ppm": 50,
+        "source": "2021 ALTA/NSPS Minimum Standard Detail Requirements, section 3.E (0.07 ft + 50 ppm)",
+        "status": "to_verify"
+      }
+    ]
+  },
+  "RU": {
+    "closure_classes": [],
+    "corner_classes": [
+      {
+        "key": "ru_rosreestr_p0393_settlement",
+        "label": "Rosreestr P/0393, settlement land (Mt 0.10 m)",
+        "base_m": 0.10,
+        "ppm": 0,
+        "source": "Rosreestr order P/0393 of 23.10.2020",
+        "status": "to_verify"
+      }
+    ]
+  }
+}

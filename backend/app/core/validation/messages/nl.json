@@ -2355,6 +2355,22 @@
     "level_misclosure": {
       "fail": "Sluitfout van de waterpassing {f} mm overschrijdt k·√km met k = {k} mm.",
       "suggestion": "Waterpas opnieuw of controleer de hoogten van de gebruikte peilmerken."
+    },
+    "cogo_parallel": {
+      "fail": "De lijnen zijn evenwijdig: geen snijpunt.",
+      "suggestion": "Controleer de richtingshoeken of kies twee lijnen die elkaar snijden."
+    },
+    "cogo_two_solutions": {
+      "fail": "Boogsnijding met twee oplossingen; kies er één.",
+      "suggestion": "Houd het punt aan de juiste kant van de basislijn."
+    },
+    "angular_misclosure": {
+      "fail": "Hoeksluitfout {a}\" overschrijdt {k}\" × √{n}.",
+      "suggestion": "Controleer de hoeken op grove fouten, meet ze opnieuw of bevestig de nauwkeurigheidsklasse."
+    },
+    "level_arithmetic": {
+      "fail": "Waterpasboek {name}: rekenkundige controle mislukt, ΣA − ΣV = {d} maar laatste hoogte − eerste = {r}.",
+      "suggestion": "Controleer de aflezingen en de uitwerking van elke regel."
     }
   },
   "volumes": {
@@ -2409,6 +2425,14 @@
       "no_profile": "Geen profiel, stel er een in",
       "d": "d (mm)",
       "dz": "dZ (mm)"
+    },
+    "profile_uncovered": {
+      "fail": "Het lengteprofiel dekt kilometrering {c} niet.",
+      "suggestion": "Verleng het profiel of beperk de uitzetlijst tot het bereik ervan."
+    },
+    "spiral_skipped": {
+      "fail": "Clothoïdeparameter ontbreekt; element {n} overgeslagen.",
+      "suggestion": "Exporteer de as opnieuw met de clothoïdelengte en beide stralen."
     }
   },
   "land_parcels": {
@@ -2459,6 +2483,18 @@
       "status_negotiating": "In onderhandeling",
       "status_acquired": "Verworven",
       "status_expropriation": "Onteigening"
+    },
+    "subdivision_area": {
+      "fail": "Oppervlakten van de delen {a} + {b} wijken af van het moederperceel {p} (verschil {d} m²).",
+      "suggestion": "Controleer de deellijn: de delen moeten samen het moederperceel vormen."
+    },
+    "corner_rpp": {
+      "fail": "Nauwkeurigheid van grenspunt {id}, {r} m, overschrijdt {limit} m.",
+      "suggestion": "Meet het grenspunt opnieuw of controleer de toegewezen nauwkeurigheidsklasse."
+    },
+    "setback": {
+      "fail": "Footprint {f} ligt {d} m van grens {b}; vereiste afstand {s} m.",
+      "suggestion": "Controleer de ligging van de footprint ten opzichte van de vereiste afstand."
     }
   },
   "monitoring": {
@@ -2494,6 +2530,10 @@
       "no_profile": "Geen profiel, stel er een in",
       "ack_yes": "Ja",
       "ack_no": "Nee"
+    },
+    "forecast": {
+      "fail": "Punt {id} bereikt naar verwachting {level} over {d} dagen.",
+      "suggestion": "Plan een extra meting en bekijk de trend voordat de drempel wordt bereikt."
     }
   },
   "stockpiles": {

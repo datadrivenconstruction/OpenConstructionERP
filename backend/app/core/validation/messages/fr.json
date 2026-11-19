@@ -2355,6 +2355,22 @@
     "level_misclosure": {
       "fail": "L'écart de fermeture du nivellement {f} mm dépasse k·√km avec k = {k} mm.",
       "suggestion": "Refaites le nivellement ou vérifiez les altitudes des repères utilisés."
+    },
+    "cogo_parallel": {
+      "fail": "Les droites sont parallèles : pas d'intersection.",
+      "suggestion": "Vérifiez les gisements ou choisissez deux droites qui se coupent."
+    },
+    "cogo_two_solutions": {
+      "fail": "Intersection par distances avec deux solutions ; choisissez-en une.",
+      "suggestion": "Gardez le point du bon côté de la base."
+    },
+    "angular_misclosure": {
+      "fail": "Fermeture angulaire {a}\" supérieure à {k}\" × √{n}.",
+      "suggestion": "Recherchez une faute dans les angles, mesurez-les à nouveau ou confirmez la classe de précision."
+    },
+    "level_arithmetic": {
+      "fail": "Carnet de nivellement {name} : contrôle arithmétique en échec, ΣAR − ΣAV = {d} mais dernière altitude − première = {r}.",
+      "suggestion": "Revérifiez les lectures et le calcul de chaque ligne."
     }
   },
   "volumes": {
@@ -2409,6 +2425,14 @@
       "no_profile": "Aucun profil, définissez-en un",
       "d": "d (mm)",
       "dz": "dZ (mm)"
+    },
+    "profile_uncovered": {
+      "fail": "Le profil en long ne couvre pas l'abscisse {c}.",
+      "suggestion": "Prolongez le profil ou limitez la liste d'implantation à son étendue."
+    },
+    "spiral_skipped": {
+      "fail": "Paramètre de clothoïde manquant ; élément {n} ignoré.",
+      "suggestion": "Exportez à nouveau l'axe avec la longueur de clothoïde et les deux rayons."
     }
   },
   "land_parcels": {
@@ -2459,6 +2483,18 @@
       "status_negotiating": "En négociation",
       "status_acquired": "Acquise",
       "status_expropriation": "Procédure d'expropriation"
+    },
+    "subdivision_area": {
+      "fail": "Surfaces des lots {a} + {b} différentes de la parcelle mère {p} (écart {d} m²).",
+      "suggestion": "Vérifiez la ligne de division : les lots doivent reconstituer la parcelle mère."
+    },
+    "corner_rpp": {
+      "fail": "Précision de la borne {id} de {r} m supérieure à {limit} m.",
+      "suggestion": "Remesurez la borne ou vérifiez la classe de précision qui lui est attribuée."
+    },
+    "setback": {
+      "fail": "L'emprise {f} est à {d} m de la limite {b} ; recul exigé {s} m.",
+      "suggestion": "Vérifiez la position de l'emprise par rapport au recul exigé."
     }
   },
   "monitoring": {
@@ -2494,6 +2530,10 @@
       "no_profile": "Aucun profil, en définir un",
       "ack_yes": "Oui",
       "ack_no": "Non"
+    },
+    "forecast": {
+      "fail": "Le point {id} devrait atteindre le niveau {level} dans {d} jours.",
+      "suggestion": "Prévoyez une mesure supplémentaire et examinez la tendance avant le franchissement du seuil."
     }
   },
   "stockpiles": {

@@ -57,13 +57,20 @@ def _previous_release(migration, connection, monkeypatch) -> None:
     assert not set(_TABLES) & _tables(connection)
 
 
+# Columns a later revision (svc01_survey_calcs) adds to these tables.
+_LATER = {POINTS: {"method", "inputs"}}
+
+
 def _matches_the_models(connection) -> None:
     from app.modules.survey_core import models
 
     for table in (models.SurveyProjectCrs.__table__, models.SurveyPointSet.__table__, models.SurveyPoint.__table__):
         migrated = {c["name"]: c for c in inspect(connection).get_columns(table.name)}
-        assert set(migrated) == {c.name for c in table.columns}, table.name
+        later = _LATER.get(table.name, set())
+        assert set(migrated) == {c.name for c in table.columns} - later, table.name
         for column in table.columns:
+            if column.name in later:
+                continue
             assert migrated[column.name]["nullable"] == column.nullable, (table.name, column.name)
             if type(column.type) is sa.Numeric:
                 got = migrated[column.name]["type"]

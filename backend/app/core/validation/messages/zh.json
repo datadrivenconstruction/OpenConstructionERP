@@ -2355,6 +2355,22 @@
     "level_misclosure": {
       "fail": "水准路线闭合差 {f} mm 超过 k·√km（k = {k} mm）。",
       "suggestion": "重新进行水准测量，或检查所用水准点的高程。"
+    },
+    "cogo_parallel": {
+      "fail": "直线平行：没有交点。",
+      "suggestion": "检查方位角，或选择两条相交的直线。"
+    },
+    "cogo_two_solutions": {
+      "fail": "距离交会有两个解；请选择一个。",
+      "suggestion": "保留基线正确一侧的点。"
+    },
+    "angular_misclosure": {
+      "fail": "角度闭合差 {a}\" 超过 {k}\" × √{n}。",
+      "suggestion": "检查角度是否有粗差，重新观测或确认精度等级。"
+    },
+    "level_arithmetic": {
+      "fail": "水准手簿 {name}：计算校核未通过，ΣBS − ΣFS = {d}，而末点高程 − 起点高程 = {r}。",
+      "suggestion": "重新检查读数和每一行的计算。"
     }
   },
   "volumes": {
@@ -2409,6 +2425,14 @@
       "no_profile": "无偏差配置，请设置",
       "d": "d (mm)",
       "dz": "dZ (mm)"
+    },
+    "profile_uncovered": {
+      "fail": "纵断面未覆盖里程 {c}。",
+      "suggestion": "延长纵断面，或将放样列表限制在其范围内。"
+    },
+    "spiral_skipped": {
+      "fail": "缺少缓和曲线参数；已跳过要素 {n}。",
+      "suggestion": "重新导出线形，并包含缓和曲线长度和两个半径。"
     }
   },
   "land_parcels": {
@@ -2459,6 +2483,18 @@
       "status_negotiating": "协商中",
       "status_acquired": "已取得",
       "status_expropriation": "征收"
+    },
+    "subdivision_area": {
+      "fail": "分割后面积 {a} + {b} 与原宗地 {p} 不符（差 {d} m²）。",
+      "suggestion": "检查分割线：各部分之和必须等于原宗地。"
+    },
+    "corner_rpp": {
+      "fail": "界址点 {id} 精度 {r} m 超过 {limit} m。",
+      "suggestion": "重新测量界址点，或检查为其指定的精度等级。"
+    },
+    "setback": {
+      "fail": "建筑轮廓 {f} 距边界 {b} {d} m；要求退距 {s} m。",
+      "suggestion": "对照要求的退距检查建筑轮廓的位置。"
     }
   },
   "monitoring": {
@@ -2494,6 +2530,10 @@
       "no_profile": "无阈值方案，请设置",
       "ack_yes": "是",
       "ack_no": "否"
+    },
+    "forecast": {
+      "fail": "预计点 {id} 将在 {d} 天后达到 {level}。",
+      "suggestion": "在达到阈值之前安排一次补充观测并检查趋势。"
     }
   },
   "stockpiles": {

@@ -2355,6 +2355,22 @@
     "level_misclosure": {
       "fail": "Neînchiderea nivelmentului {f} mm depășește k·√km cu k = {k} mm.",
       "suggestion": "Refaceți nivelmentul sau verificați cotele reperelor folosite."
+    },
+    "cogo_parallel": {
+      "fail": "Dreptele sunt paralele: nu există intersecție.",
+      "suggestion": "Verificați orientările sau alegeți două drepte care se intersectează."
+    },
+    "cogo_two_solutions": {
+      "fail": "Intersecția liniară are două soluții; alegeți una.",
+      "suggestion": "Păstrați punctul pe partea corectă a bazei."
+    },
+    "angular_misclosure": {
+      "fail": "Neînchiderea unghiulară {a}\" depășește {k}\" × √{n}.",
+      "suggestion": "Verificați unghiurile pentru greșeli grosolane, măsurați-le din nou sau confirmați clasa de precizie."
+    },
+    "level_arithmetic": {
+      "fail": "Carnetul de nivelment {name}: verificarea aritmetică a eșuat, ΣÎnapoi − ΣÎnainte = {d}, dar ultima cotă − prima = {r}.",
+      "suggestion": "Reverificați citirile și calculul fiecărui rând."
     }
   },
   "volumes": {
@@ -2409,6 +2425,14 @@
       "no_profile": "Fără profil, setați unul",
       "d": "d (mm)",
       "dz": "dZ (mm)"
+    },
+    "profile_uncovered": {
+      "fail": "Profilul longitudinal nu acoperă poziția kilometrică {c}.",
+      "suggestion": "Prelungiți profilul sau limitați lista de trasare la intervalul lui."
+    },
+    "spiral_skipped": {
+      "fail": "Lipsește un parametru al clotoidei; elementul {n} a fost omis.",
+      "suggestion": "Exportați din nou axul cu lungimea clotoidei și ambele raze."
     }
   },
   "land_parcels": {
@@ -2459,6 +2483,18 @@
       "status_negotiating": "Negociere",
       "status_acquired": "Achiziționată",
       "status_expropriation": "Expropriere"
+    },
+    "subdivision_area": {
+      "fail": "Suprafețele loturilor {a} + {b} diferă de parcela inițială {p} (diferență {d} m²).",
+      "suggestion": "Verificați linia de dezmembrare: loturile trebuie să refacă parcela inițială."
+    },
+    "corner_rpp": {
+      "fail": "Precizia punctului de hotar {id}, {r} m, depășește {limit} m.",
+      "suggestion": "Măsurați din nou punctul sau verificați clasa de precizie atribuită."
+    },
+    "setback": {
+      "fail": "Amprenta {f} se află la {d} m de limita {b}; retragere impusă {s} m.",
+      "suggestion": "Verificați poziția amprentei față de retragerea impusă."
     }
   },
   "monitoring": {
@@ -2494,6 +2530,10 @@
       "no_profile": "Niciun profil, setați unul",
       "ack_yes": "Da",
       "ack_no": "Nu"
+    },
+    "forecast": {
+      "fail": "Se estimează că punctul {id} va atinge nivelul {level} în {d} zile.",
+      "suggestion": "Planificați o citire suplimentară și analizați tendința înainte de atingerea pragului."
     }
   },
   "stockpiles": {

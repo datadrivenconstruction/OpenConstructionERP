@@ -2355,6 +2355,22 @@
     "level_misclosure": {
       "fail": "Level run misclosure {f} mm exceeds k·√km with k = {k} mm.",
       "suggestion": "Re-run the levels or check the benchmark heights used."
+    },
+    "cogo_parallel": {
+      "fail": "Lines are parallel: no intersection.",
+      "suggestion": "Check the bearings or choose two lines that cross."
+    },
+    "cogo_two_solutions": {
+      "fail": "Two solutions for a distance-distance intersection; pick one.",
+      "suggestion": "Keep the point on the correct side of the base line."
+    },
+    "angular_misclosure": {
+      "fail": "Angular misclosure {a}\" exceeds {k}\" × √{n}.",
+      "suggestion": "Check the angles for a blunder, observe them again, or confirm the closure class."
+    },
+    "level_arithmetic": {
+      "fail": "Level book {name}: arithmetic check failed, ΣBS − ΣFS = {d} but last RL − first RL = {r}.",
+      "suggestion": "Recheck the readings and the reduction of each row."
     }
   },
   "volumes": {
@@ -2409,6 +2425,14 @@
       "no_profile": "No profile, set one",
       "d": "Offset d (mm)",
       "dz": "Offset dZ (mm)"
+    },
+    "profile_uncovered": {
+      "fail": "Profile does not cover chainage {c}.",
+      "suggestion": "Extend the profile or limit the stake list to its range."
+    },
+    "spiral_skipped": {
+      "fail": "Spiral parameter missing; element {n} skipped.",
+      "suggestion": "Export the alignment again with the spiral length and both radii."
     }
   },
   "land_parcels": {
@@ -2459,6 +2483,18 @@
       "status_negotiating": "Negotiating",
       "status_acquired": "Acquired",
       "status_expropriation": "Expropriation"
+    },
+    "subdivision_area": {
+      "fail": "Children areas {a} + {b} differ from parent {p} (difference {d} m²).",
+      "suggestion": "Check the cut line: the parts must add up to the parent parcel."
+    },
+    "corner_rpp": {
+      "fail": "Corner {id} precision {r} m exceeds {limit} m.",
+      "suggestion": "Measure the corner again or check the precision class assigned to it."
+    },
+    "setback": {
+      "fail": "Footprint {f} is {d} m from boundary {b}; setback {s} m.",
+      "suggestion": "Check the footprint position against the required setback."
     }
   },
   "monitoring": {
@@ -2494,6 +2530,10 @@
       "no_profile": "No profile, set one",
       "ack_yes": "Yes",
       "ack_no": "No"
+    },
+    "forecast": {
+      "fail": "Point {id} forecast to reach {level} in {d} days.",
+      "suggestion": "Plan an extra reading and review the trend before the threshold is reached."
     }
   },
   "stockpiles": {

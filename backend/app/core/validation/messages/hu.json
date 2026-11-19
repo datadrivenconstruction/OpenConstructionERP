@@ -2355,6 +2355,22 @@
     "level_misclosure": {
       "fail": "A szintezés záróhibája {f} mm meghaladja a k·√km értéket (k = {k} mm).",
       "suggestion": "Ismételje meg a szintezést, vagy ellenőrizze a használt magassági alappontokat."
+    },
+    "cogo_parallel": {
+      "fail": "Az egyenesek párhuzamosak: nincs metszéspont.",
+      "suggestion": "Ellenőrizze az irányszögeket, vagy válasszon két metsződő egyenest."
+    },
+    "cogo_two_solutions": {
+      "fail": "Az ívmetszésnek két megoldása van; válasszon egyet.",
+      "suggestion": "Tartsa meg a pontot az alapvonal megfelelő oldalán."
+    },
+    "angular_misclosure": {
+      "fail": "A szögzáróhiba {a}\" meghaladja a {k}\" × √{n} értéket.",
+      "suggestion": "Ellenőrizze a szögeket durva hibákra, mérje újra őket, vagy erősítse meg a pontossági osztályt."
+    },
+    "level_arithmetic": {
+      "fail": "{name} szintezési jegyzőkönyv: a számítási ellenőrzés nem egyezik, ΣH − ΣE = {d}, de utolsó magasság − első = {r}.",
+      "suggestion": "Ellenőrizze a leolvasásokat és minden sor számítását."
     }
   },
   "volumes": {
@@ -2409,6 +2425,14 @@
       "no_profile": "Nincs profil, adjon meg egyet",
       "d": "d (mm)",
       "dz": "dZ (mm)"
+    },
+    "profile_uncovered": {
+      "fail": "A hossz-szelvény nem fedi le a(z) {c} szelvényszámot.",
+      "suggestion": "Hosszabbítsa meg a szelvényt, vagy korlátozza a kitűzési listát a tartományára."
+    },
+    "spiral_skipped": {
+      "fail": "Hiányzik a klotoid paramétere; a(z) {n}. elem kimaradt.",
+      "suggestion": "Exportálja újra a nyomvonalat a klotoid hosszával és mindkét sugárral."
     }
   },
   "land_parcels": {
@@ -2459,6 +2483,18 @@
       "status_negotiating": "Tárgyalás",
       "status_acquired": "Megszerzett",
       "status_expropriation": "Kisajátítás"
+    },
+    "subdivision_area": {
+      "fail": "A részek területe {a} + {b} eltér az eredeti földrészlettől {p} (eltérés {d} m²).",
+      "suggestion": "Ellenőrizze a megosztási vonalat: a részek összege az eredeti földrészlet."
+    },
+    "corner_rpp": {
+      "fail": "A(z) {id} töréspont pontossága {r} m, ami meghaladja a {limit} m értéket.",
+      "suggestion": "Mérje újra a pontot, vagy ellenőrizze a hozzárendelt pontossági osztályt."
+    },
+    "setback": {
+      "fail": "A(z) {f} alaprajz {d} m-re van a(z) {b} határtól; előírt távolság {s} m.",
+      "suggestion": "Ellenőrizze az alaprajz helyzetét az előírt határtávolsághoz képest."
     }
   },
   "monitoring": {
@@ -2494,6 +2530,10 @@
       "no_profile": "Nincs profil, állítson be egyet",
       "ack_yes": "Igen",
       "ack_no": "Nem"
+    },
+    "forecast": {
+      "fail": "A(z) {id} pont az előrejelzés szerint {d} nap múlva éri el a(z) {level} szintet.",
+      "suggestion": "Tervezzen további mérést, és vizsgálja meg a trendet a határérték elérése előtt."
     }
   },
   "stockpiles": {

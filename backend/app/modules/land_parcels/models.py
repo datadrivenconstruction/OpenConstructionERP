@@ -54,6 +54,10 @@ class LandParcel(Base):
     sent_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     sent_by: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
     created_by: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+    # Parcels this one was split from or merged out of (ids as strings).
+    parent_ids: Mapped[list | None] = mapped_column(JSON, nullable=True)
+    # Replaced by its children after a split or merge; kept for the record, left out of the checks.
+    superseded: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default="false")
 
 
 class LandParcelPoint(Base):
@@ -72,6 +76,10 @@ class LandParcelPoint(Base):
     # How the corner is marked on the ground: monument | pin | pipe | stone | nail | unmarked | ""
     mark: Mapped[str] = mapped_column(String(30), nullable=False, default="", server_default="")
     accuracy_m: Mapped[Decimal | None] = mapped_column(Numeric(8, 4), nullable=True)
+    # found | set | calculated | ""
+    corner_status: Mapped[str] = mapped_column(String(20), nullable=False, default="", server_default="")
+    # Key of a corner precision class from country data, "" = none.
+    accuracy_class: Mapped[str] = mapped_column(String(60), nullable=False, default="", server_default="")
 
 
 class LandParty(Base):
