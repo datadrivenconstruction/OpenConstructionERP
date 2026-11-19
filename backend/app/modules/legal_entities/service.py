@@ -67,6 +67,14 @@ def _address(value: Any) -> dict[str, str] | None:
     return cleaned or None
 
 
+def _bank(value: Any) -> dict[str, str] | None:
+    """A bank account with blanks dropped; the IBAN without spaces, upper-cased."""
+    cleaned = _address(value)
+    if cleaned and cleaned.get("iban"):
+        cleaned["iban"] = cleaned["iban"].replace(" ", "").upper()
+    return cleaned
+
+
 #: Invoice statuses that mean the document has left the building.
 _ISSUED_STATUSES = ("issued", "sent", "approved", "paid", "partially_paid", "overdue")
 
@@ -119,6 +127,8 @@ class LegalEntityService:
             address=_address(data.get("address")),
             tax_ids=clean(data.get("tax_ids")),
             invoice_prefix=(data.get("invoice_prefix") or "").strip() or None,
+            default_signatory=(data.get("default_signatory") or "").strip() or None,
+            bank=_bank(data.get("bank")),
             is_default=bool(data.get("is_default")) or first,
             is_active=data.get("is_active", True),
             metadata_=dict(data.get("metadata") or {}),
@@ -156,9 +166,11 @@ class LegalEntityService:
         for field in ("subdivision_code", "registration_number", "tax_id"):
             if field in data:
                 setattr(entity, field, data[field])
-        for field in ("legal_name", "invoice_prefix"):
+        for field in ("legal_name", "invoice_prefix", "default_signatory"):
             if field in data:
                 setattr(entity, field, (data[field] or "").strip() or None)
+        if "bank" in data:
+            entity.bank = _bank(data["bank"])
         if "address" in data:
             entity.address = _address(data["address"])
         if data.get("tax_ids") is not None:

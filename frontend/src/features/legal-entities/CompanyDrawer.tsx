@@ -27,6 +27,7 @@ import {
   LEGAL_ENTITIES_KEY,
   legalEntitiesApi,
   type EntityAddress,
+  type EntityBank,
   type LegalEntity,
   type LegalEntityInput,
   type MemberRole,
@@ -50,6 +51,8 @@ interface Form {
   address: EntityAddress;
   tax_ids: Record<string, string>;
   invoice_prefix: string;
+  default_signatory: string;
+  bank: EntityBank;
   is_active: boolean;
   is_default: boolean;
 }
@@ -66,6 +69,8 @@ function formOf(c: LegalEntity | null): Form {
     address: { ...(c?.address ?? {}) },
     tax_ids: Object.fromEntries((c?.tax_ids ?? []).map((r) => [r.scheme, r.value])),
     invoice_prefix: c?.invoice_prefix ?? '',
+    default_signatory: c?.default_signatory ?? '',
+    bank: { ...(c?.bank ?? {}) },
     is_active: c?.is_active ?? true,
     is_default: c?.is_default ?? false,
   };
@@ -143,6 +148,8 @@ export function CompanyDrawer({ company, isFirst, canEdit, onClose }: Props) {
       address: form.address,
       tax_ids,
       invoice_prefix: form.invoice_prefix.trim() || null,
+      default_signatory: form.default_signatory.trim() || null,
+      bank: Object.values(form.bank).some((v) => (v ?? '').trim()) ? form.bank : null,
       is_active: form.is_active,
       ...(form.is_default ? { is_default: true } : {}),
     };
@@ -468,6 +475,32 @@ export function CompanyDrawer({ company, isFirst, canEdit, onClose }: Props) {
                 value={form.invoice_prefix}
                 readOnly={ro}
                 onChange={(e) => set('invoice_prefix', e.target.value)}
+                className="font-mono"
+              />
+              <Input
+                label={t('legal_entities.default_signatory', { defaultValue: 'Signs contracts and letters' })}
+                value={form.default_signatory}
+                readOnly={ro}
+                onChange={(e) => set('default_signatory', e.target.value)}
+              />
+              <Input
+                label={t('legal_entities.bank_name', { defaultValue: 'Bank' })}
+                value={form.bank.bank_name ?? ''}
+                readOnly={ro}
+                onChange={(e) => set('bank', { ...form.bank, bank_name: e.target.value })}
+              />
+              <Input
+                label={t('legal_entities.iban', { defaultValue: 'IBAN or account number' })}
+                value={form.bank.iban ?? ''}
+                readOnly={ro}
+                onChange={(e) => set('bank', { ...form.bank, iban: e.target.value })}
+                className="font-mono"
+              />
+              <Input
+                label={t('legal_entities.bic', { defaultValue: 'BIC / SWIFT' })}
+                value={form.bank.bic ?? ''}
+                readOnly={ro}
+                onChange={(e) => set('bank', { ...form.bank, bic: e.target.value })}
                 className="font-mono"
               />
               <label className="flex items-center gap-2">

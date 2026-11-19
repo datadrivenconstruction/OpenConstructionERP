@@ -32,6 +32,7 @@ from app.dependencies import (
     verify_project_access,
 )
 from app.modules.letter_templates.schemas import LetterTextIn
+from app.modules.tendering import award_flow
 from app.modules.tendering import parties as tender_parties
 from app.modules.tendering.award_exchange import AwardExchangeService
 from app.modules.tendering.bid_portal import BidPortalService, enforce_rate_limit
@@ -42,6 +43,7 @@ from app.modules.tendering.schemas import (
     AddendumAcknowledgeRequest,
     AddendumCreate,
     AddendumResponse,
+    AwardFilingResponse,
     AwardRecordNoteCreate,
     AwardRecordResponse,
     BidAnalysisResponse,
@@ -68,6 +70,8 @@ from app.modules.tendering.schemas import (
     PackageCreate,
     PackageDocumentResponse,
     PackageDocumentsAttach,
+    PackageHeaderResponse,
+    PackageHeaderUpdate,
     PackagePreviewResponse,
     PackageResponse,
     PackageScopeResponse,
@@ -79,6 +83,9 @@ from app.modules.tendering.schemas import (
     RecipientImportPreview,
     RecipientImportResult,
     RecipientResponse,
+    RejectionsPreview,
+    RejectionsSendRequest,
+    RejectionsSendResponse,
     SealedInfo,
     SealedStatusResponse,
     SubmissionModeUpdate,
@@ -228,6 +235,8 @@ def _package_to_response(package: object, sealing: object | None = None) -> Pack
         created_at=package.created_at,  # type: ignore[attr-defined]
         updated_at=package.updated_at,  # type: ignore[attr-defined]
         bid_count=len(bids),
+        legal_entity_id=getattr(package, "legal_entity_id", None),
+        trade=getattr(package, "trade", None),
         **_sealed_info(package, sealing),
     )
 
@@ -2076,6 +2085,113 @@ async def check_bid_integrity(
     """Recompute the SHA-256 of a bid's stored content and compare it with its receipt."""
     bid = await _verify_bid_access(service, session, bid_id, user_id, payload)
     return BidIntegrityResponse(**await SealedTenderService(session).verify(bid, user_id))  # type: ignore[arg-type]
+
+
+# ── Package header, rejections in bulk, filing the award ────────────────────
+
+
+@router.get("/packages/{package_id}/header/", response_model=PackageHeaderResponse)
+async def get_package_header(
+    package_id: uuid.UUID,
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    service: TenderingService = Depends(_get_service),
+    _perm: None = Depends(RequirePermission("tendering.read")),
+) -> PackageHeaderResponse:
+    """Company, trade, cost line, dates and roles of the package, with the company letters are issued in."""
+    package = await _verify_package_owner(service, session, package_id, user_id, payload)
+    return await award_flow.read_header(session, package)  # type: ignore[arg-type]
+
+
+@router.put("/packages/{package_id}/header/", response_model=PackageHeaderResponse)
+async def put_package_header(
+    package_id: uuid.UUID,
+    body: PackageHeaderUpdate,
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    service: TenderingService = Depends(_get_service),
+    _perm: None = Depends(RequirePermission("tendering.update")),
+) -> PackageHeaderResponse:
+    """Set the header fields sent; company and cost line are fixed once the package is awarded."""
+    package = await _verify_package_owner(service, session, package_id, user_id, payload)
+    await award_flow.write_header(session, package, body)  # type: ignore[arg-type]
+    return await award_flow.read_header(session, package)  # type: ignore[arg-type]
+
+
+@router.get("/packages/{package_id}/rejections/", response_model=RejectionsPreview)
+async def preview_rejections(
+    package_id: uuid.UUID,
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    service: TenderingService = Depends(_get_service),
+    _perm: None = Depends(RequirePermission("tendering.read")),
+) -> RejectionsPreview:
+    """Who gets a rejection letter, and who was already told."""
+    package = await _verify_package_owner(service, session, package_id, user_id, payload)
+    return await award_flow.rejection_preview(session, package)  # type: ignore[arg-type]
+
+
+@router.post("/packages/{package_id}/rejections/send/", response_model=RejectionsSendResponse)
+async def send_rejections(
+    package_id: uuid.UUID,
+    body: RejectionsSendRequest,
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    service: TenderingService = Depends(_get_service),
+    _perm: None = Depends(RequirePermission("tendering.distribute")),
+) -> RejectionsSendResponse:
+    """Email every pending rejected bidder its letter and file each letter in project documents."""
+    package = await _verify_package_owner(service, session, package_id, user_id, payload)
+    return await award_flow.send_rejections(service, package, body.bid_ids, actor_id=user_id)  # type: ignore[arg-type]
+
+
+@router.post("/packages/{package_id}/award-documents/file/", response_model=AwardFilingResponse)
+async def file_award_documents(
+    package_id: uuid.UUID,
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    service: TenderingService = Depends(_get_service),
+    _perm: None = Depends(RequirePermission("tendering.distribute")),
+) -> AwardFilingResponse:
+    """File the contract draft, award record and award letter as project documents, each once."""
+    package = await _verify_package_owner(service, session, package_id, user_id, payload)
+    return await award_flow.file_award_documents(service, package, actor_id=user_id)  # type: ignore[arg-type]
+
+
+@router.get("/packages/{package_id}/award/validation/")
+async def validate_package_award(
+    package_id: uuid.UUID,
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    service: TenderingService = Depends(_get_service),
+    _perm: None = Depends(RequirePermission("tendering.read")),
+) -> dict:
+    """Run the ``tendering_award`` rule set: issuing company named, losers told."""
+    from app.core.validation.engine import ValidationContext, rule_registry  # noqa: PLC0415
+    from app.modules.tendering.validators import AWARD_RULE_SET  # noqa: PLC0415
+
+    package = await _verify_package_owner(service, session, package_id, user_id, payload)
+    data = await award_flow.award_validation_payload(session, package)  # type: ignore[arg-type]
+    context = ValidationContext(data=data, project_id=str(package.project_id))  # type: ignore[attr-defined]
+    results = [
+        {
+            "rule_id": r.rule_id,
+            "severity": str(r.severity),
+            "passed": r.passed,
+            "message": r.message,
+            "element_ref": r.element_ref,
+            "suggestion": r.suggestion,
+        }
+        for rule in rule_registry.get_rules_for_sets([AWARD_RULE_SET])
+        for r in await rule.validate(context)
+    ]
+    return {"package_id": str(package_id), "passed": all(r["passed"] for r in results), "results": results}
 
 
 # Clarifications, timeline, addenda validation and the bidder-side addenda routes.

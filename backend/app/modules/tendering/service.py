@@ -1502,6 +1502,9 @@ class TenderingService:
             elif other.status not in ("rejected",):
                 await self.repo.update_bid_fields(other.id, status="rejected")
 
+        from app.modules.tendering.award_flow import controlling_fields
+
+        controlling = await controlling_fields(self.session, package, bid)
         # After commit, not now: the subscribers (the purchase order and the
         # contract draft) open their own sessions, and an award that rolls
         # back must not leave either behind.
@@ -1509,6 +1512,7 @@ class TenderingService:
             self.session,
             "tendering.package.awarded",
             {
+                **controlling,
                 "package_id": str(package_id),
                 "bid_id": str(bid_id),
                 "company_name": bid.company_name,
@@ -2133,6 +2137,7 @@ class TenderingService:
             notes=bid.notes or None,
             text=letter,
             locale=self.last_letter_language,
+            issuer=await self._letter_issuer(package),
         )
         filename = f"award_letter_{self._slug(package.name)}_{self._slug(bid.company_name)}.pdf"
         return pdf, filename
@@ -2201,9 +2206,16 @@ class TenderingService:
             reason=(bid.notes or None),
             text=letter,
             locale=self.last_letter_language,
+            issuer=await self._letter_issuer(package),
         )
         filename = f"rejection_notice_{self._slug(package.name)}_{self._slug(bid.company_name)}.pdf"
         return pdf, filename
+
+    async def _letter_issuer(self, package: Any) -> dict | None:
+        """The company of the group a letter of *package* is issued in (see ``award_flow``)."""
+        from app.modules.tendering.award_flow import issuer_for
+
+        return await issuer_for(getattr(self, "session", None), package)
 
     async def _project_name_and_currency(self, package: TenderPackage) -> tuple[str, str]:
         """Resolve (project_name, project_currency) for a package's project."""
@@ -2626,10 +2638,11 @@ class TenderingService:
         from app.modules.tendering.pdf_documents import generate_award_record_pdf
 
         record = await self.award_record(package_id)
+        issuer = await self._letter_issuer(await self.get_package(package_id))
         # The arguments are plain values from the record DTO. Laying out the PDF is pure CPU,
         # so it runs in a worker thread and the event loop keeps serving requests.
         pdf = await asyncio.to_thread(
-            generate_award_record_pdf, record=record.model_dump(), package_ref=str(package_id)[:8]
+            generate_award_record_pdf, record=record.model_dump(), package_ref=str(package_id)[:8], issuer=issuer
         )
         return pdf, f"award_record_{self._slug(record.package_name)}.pdf"
 

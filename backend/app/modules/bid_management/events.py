@@ -304,6 +304,8 @@ async def _draft(package_id: uuid.UUID, bid_id: uuid.UUID, *, awarded_by: object
             status="draft",
             terms=_contract_terms(terms, figures, offer_round),
             created_by=str(awarded_by)[:36] if awarded_by else None,
+            # The package header names the account the award is committed against.
+            cost_line_id=getattr(package, "cost_line_id", None),
         )
         if terms is not None and terms.retention_percent is not None:
             contract.retention_percent = terms.retention_percent
@@ -315,6 +317,8 @@ async def _draft(package_id: uuid.UUID, bid_id: uuid.UUID, *, awarded_by: object
             "awarded_bidder_name": bid.company_name,
             "boq_id": str(package.boq_id) if package.boq_id else None,
         }
+        if getattr(package, "legal_entity_id", None) is not None:
+            contract.metadata_["legal_entity_id"] = str(package.legal_entity_id)
         if counterparty.contact_id is not None:
             contract.metadata_["counterparty_contact_id"] = str(counterparty.contact_id)
         session.add(contract)
