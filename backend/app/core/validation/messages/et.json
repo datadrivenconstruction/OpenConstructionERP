@@ -2694,5 +2694,43 @@
       "fail": "Kinnipidamine {rate}% makse kohta ületab {maximum}% (VOB/B 17 (6) 1)",
       "suggestion": "Vähendage makse kohta kinnipidamist VOB/B maksimumini."
     }
+  },
+  "bundle": {
+    "project_share_missing": {
+      "fail": "Real {code} pole projekti {project} osa; kulu ei saa jagada.",
+      "suggestion": "Sisesta projekti kogus või 0, kui see reast midagi ei võta."
+    },
+    "share_sum_mismatch": {
+      "fail": "Rea {code} osade summa on {sum}, rea kogus on {qty}.",
+      "suggestion": "Paranda osad või kogus, et need täpselt klapiks."
+    },
+    "share_cost_line_missing": {
+      "fail": "Projekti {project} osal real {code} pole kulurida; see ei ilmu kuluaruandesse.",
+      "suggestion": "Vali projekti kulurida sellele osale."
+    },
+    "entity_missing": {
+      "fail": "Projektil {project} pole juriidilist isikut; leping ei saa ostjat nimetada.",
+      "suggestion": "Seo projekt projekti seadetes kontserni ettevõttega."
+    },
+    "project_over_budget": {
+      "fail": "{project}: tellimus {net} ületab eelarvet {budget} summa {delta} võrra.",
+      "suggestion": "Kontrolli projekti eelarvet või lepi ületus kokku enne tellimist."
+    },
+    "award_split_unreconciled": {
+      "fail": "Projektide osade summa on {sum}, tellimus on {total}.",
+      "suggestion": "Arvuta jaotus uuesti; ümardussent läheb suurimale projektile."
+    },
+    "calloff_project_not_in_bundle": {
+      "fail": "Projekt {project} ei kuulu sellesse koondhankesse.",
+      "suggestion": "Esita tellimusi ainult koondhanke projektidele."
+    },
+    "calloff_over_share": {
+      "fail": "{project} on tellinud {used} / {share} {unit} real {code}.",
+      "suggestion": "Suurenda projekti osa või lepi lisakogus enne kokku."
+    },
+    "bidder_blocked": {
+      "fail": "{vendor} on alltöövõtjate registris blokeeritud ja talle ei saa tellimust anda.",
+      "suggestion": "Eemalda blokeering registris või vali teine ettevõte."
+    }
   }
 }

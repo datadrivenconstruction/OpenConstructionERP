@@ -89,7 +89,7 @@ describe('menu groups', () => {
         '/methodologies',
         '/sheets',
         '/geo', '/pointcloud',
-        '/contracts', '/framework-agreements', '/payment-clock', '/tax-withholding', '/china-tax', '/tax-rates', '/einvoice-clearance',
+        '/contracts', '/framework-agreements', '/central-purchasing', '/payment-clock', '/tax-withholding', '/china-tax', '/tax-rates', '/einvoice-clearance',
       ].sort(),
     );
   });

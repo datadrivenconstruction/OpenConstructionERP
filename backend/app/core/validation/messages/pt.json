@@ -2694,5 +2694,43 @@
       "fail": "Retenção de {rate}% por pagamento acima de {maximum}% (VOB/B 17 (6) 1)",
       "suggestion": "Reduza a retenção por pagamento ao máximo VOB/B."
     }
+  },
+  "bundle": {
+    "project_share_missing": {
+      "fail": "A linha {code} não tem quota para o projeto {project}; o custo não pode ser repartido.",
+      "suggestion": "Indique a quantidade do projeto, ou 0 se não levar nada desta linha."
+    },
+    "share_sum_mismatch": {
+      "fail": "As quotas da linha {code} somam {sum}, a quantidade da linha é {qty}.",
+      "suggestion": "Corrija as quotas ou a quantidade até coincidirem exatamente."
+    },
+    "share_cost_line_missing": {
+      "fail": "A quota de {project} na linha {code} não tem linha de custo; não aparecerá no relatório de custos.",
+      "suggestion": "Escolha a linha de custo do projeto para esta quota."
+    },
+    "entity_missing": {
+      "fail": "O projeto {project} não tem entidade jurídica; o contrato não pode indicar o comprador.",
+      "suggestion": "Associe o projeto a uma empresa do grupo nas definições do projeto."
+    },
+    "project_over_budget": {
+      "fail": "{project}: a adjudicação {net} excede o orçamento {budget} em {delta}.",
+      "suggestion": "Verifique o orçamento do projeto ou acorde o excesso antes de adjudicar."
+    },
+    "award_split_unreconciled": {
+      "fail": "As quotas dos projetos somam {sum}, a adjudicação é {total}.",
+      "suggestion": "Recalcule a repartição; o cêntimo de arredondamento vai para o maior projeto."
+    },
+    "calloff_project_not_in_bundle": {
+      "fail": "O projeto {project} não faz parte desta compra agrupada.",
+      "suggestion": "Faça pedidos apenas para projetos da compra agrupada."
+    },
+    "calloff_over_share": {
+      "fail": "{project} pediu {used} de {share} {unit} na linha {code}.",
+      "suggestion": "Aumente a quota do projeto ou acorde primeiro a quantidade extra."
+    },
+    "bidder_blocked": {
+      "fail": "{vendor} está bloqueado no diretório de subempreiteiros e não pode ser adjudicado.",
+      "suggestion": "Retire o bloqueio no diretório ou adjudique a outra empresa."
+    }
   }
 }

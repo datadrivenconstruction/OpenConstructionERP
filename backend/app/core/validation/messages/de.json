@@ -2740,5 +2740,43 @@
       "fail": "Einbehalt von {rate} % je Zahlung liegt über {maximum} % (VOB/B § 17 Abs. 6 Nr. 1)",
       "suggestion": "Senken Sie den Einbehalt je Zahlung auf das VOB/B-Maximum."
     }
+  },
+  "bundle": {
+    "project_share_missing": {
+      "fail": "Position {code} hat keinen Anteil für Projekt {project}; die Kosten lassen sich nicht aufteilen.",
+      "suggestion": "Menge des Projekts eintragen, oder 0, wenn es diese Position nicht abnimmt."
+    },
+    "share_sum_mismatch": {
+      "fail": "Die Anteile der Position {code} ergeben {sum}, die Positionsmenge ist {qty}.",
+      "suggestion": "Anteile oder Positionsmenge korrigieren, bis beide genau übereinstimmen."
+    },
+    "share_cost_line_missing": {
+      "fail": "Der Anteil von {project} an Position {code} hat keine Kostenposition; er erscheint nicht im Kostenbericht.",
+      "suggestion": "Die Kostenposition des Projekts für diesen Anteil wählen."
+    },
+    "entity_missing": {
+      "fail": "Projekt {project} hat keine Gesellschaft; sein Vertrag kann den Auftraggeber nicht benennen.",
+      "suggestion": "Das Projekt in den Projekteinstellungen einer Gesellschaft der Gruppe zuordnen."
+    },
+    "project_over_budget": {
+      "fail": "{project}: Vergabe {net} überschreitet das Budget {budget} um {delta}.",
+      "suggestion": "Projektbudget prüfen oder die Überschreitung vor der Vergabe abstimmen."
+    },
+    "award_split_unreconciled": {
+      "fail": "Die Projektanteile ergeben {sum}, die Vergabe beträgt {total}.",
+      "suggestion": "Aufteilung neu berechnen; der Rundungscent geht an das größte Projekt."
+    },
+    "calloff_project_not_in_bundle": {
+      "fail": "Projekt {project} gehört nicht zu dieser Bündelausschreibung.",
+      "suggestion": "Abrufe nur für Projekte der Bündelausschreibung erstellen."
+    },
+    "calloff_over_share": {
+      "fail": "{project} hat {used} von {share} {unit} der Position {code} abgerufen.",
+      "suggestion": "Anteil des Projekts erhöhen oder die Mehrmenge vorher abstimmen."
+    },
+    "bidder_blocked": {
+      "fail": "{vendor} ist im Nachunternehmerverzeichnis gesperrt und kann nicht beauftragt werden.",
+      "suggestion": "Sperre im Verzeichnis aufheben oder an eine andere Firma vergeben."
+    }
   }
 }

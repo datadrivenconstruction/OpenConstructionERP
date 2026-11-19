@@ -557,6 +557,12 @@ const FrameworkRegisterPage = lazy(() =>
 const FrameworkAgreementPage = lazy(() =>
   import('@/features/framework-agreements').then((m) => ({ default: m.FrameworkAgreementPage }))
 );
+const CentralPurchasingPage = lazy(() =>
+  import('@/features/central-purchasing').then((m) => ({ default: m.CentralPurchasingPage }))
+);
+const CentralPurchasingBundlePage = lazy(() =>
+  import('@/features/central-purchasing').then((m) => ({ default: m.BundlePage }))
+);
 const PaymentClockPage = lazy(() =>
   import('@/features/payment-clock').then((m) => ({ default: m.PaymentClockPage }))
 );
@@ -1860,6 +1866,8 @@ export default function App() {
         <Route path="/contracts" element={<P title="Contracts"><ContractsPage /></P>} />
         <Route path="/framework-agreements" element={<P title="Framework Agreements"><FrameworkRegisterPage /></P>} />
         <Route path="/framework-agreements/:id" element={<P title="Framework Agreements"><FrameworkAgreementPage /></P>} />
+        <Route path="/central-purchasing" element={<P title="Central Purchasing"><CentralPurchasingPage /></P>} />
+        <Route path="/central-purchasing/:id" element={<P title="Central Purchasing"><CentralPurchasingBundlePage /></P>} />
         <Route path="/payment-clock" element={<P title="Payment Clock"><PaymentClockPage /></P>} />
         <Route path="/tax-withholding" element={<P title="Withholding Tax"><TaxWithholdingPage /></P>} />
         <Route path="/china-tax" element={<P title="China VAT"><ChinaTaxPage /></P>} />

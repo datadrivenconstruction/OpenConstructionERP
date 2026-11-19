@@ -2694,5 +2694,43 @@
       "fail": "A fizetésenkénti {rate}% visszatartás meghaladja a {maximum}%-ot (VOB/B 17 (6) 1)",
       "suggestion": "Csökkentse a fizetésenkénti visszatartást a VOB/B maximumára."
     }
+  },
+  "bundle": {
+    "project_share_missing": {
+      "fail": "A(z) {code} tételnek nincs részesedése a(z) {project} projektre; a költség nem osztható fel.",
+      "suggestion": "Adja meg a projekt mennyiségét, vagy 0-t, ha nem kér ebből a tételből."
+    },
+    "share_sum_mismatch": {
+      "fail": "A(z) {code} tétel részesedéseinek összege {sum}, a tétel mennyisége {qty}.",
+      "suggestion": "Javítsa a részesedéseket vagy a mennyiséget, hogy pontosan egyezzenek."
+    },
+    "share_cost_line_missing": {
+      "fail": "A(z) {project} részesedésének a(z) {code} tételen nincs költségsora; nem jelenik meg a költségjelentésben.",
+      "suggestion": "Válassza ki a projekt költségsorát ehhez a részesedéshez."
+    },
+    "entity_missing": {
+      "fail": "A(z) {project} projektnek nincs jogi személye; a szerződés nem nevezheti meg a vevőt.",
+      "suggestion": "Rendelje a projektet a csoport egyik cégéhez a projekt beállításaiban."
+    },
+    "project_over_budget": {
+      "fail": "{project}: a(z) {net} odaítélés {delta} összeggel meghaladja a(z) {budget} költségvetést.",
+      "suggestion": "Ellenőrizze a projekt költségvetését, vagy egyeztesse a túllépést az odaítélés előtt."
+    },
+    "award_split_unreconciled": {
+      "fail": "A projektrészesedések összege {sum}, az odaítélés {total}.",
+      "suggestion": "Számolja újra a felosztást; a kerekítési fillér a legnagyobb projekthez kerül."
+    },
+    "calloff_project_not_in_bundle": {
+      "fail": "A(z) {project} projekt nem része ennek az összevont beszerzésnek.",
+      "suggestion": "Csak az összevont beszerzés projektjeire adjon le lehívást."
+    },
+    "calloff_over_share": {
+      "fail": "A(z) {project} {used} / {share} {unit} mennyiséget hívott le a(z) {code} tételen.",
+      "suggestion": "Növelje a projekt részesedését, vagy előbb egyeztesse a többletmennyiséget."
+    },
+    "bidder_blocked": {
+      "fail": "A(z) {vendor} tiltott az alvállalkozói nyilvántartásban, nem kaphat megbízást.",
+      "suggestion": "Oldja fel a tiltást a nyilvántartásban, vagy válasszon másik céget."
+    }
   }
 }

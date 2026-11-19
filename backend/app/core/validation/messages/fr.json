@@ -2694,5 +2694,43 @@
       "fail": "Retenue de {rate} % par paiement supérieure à {maximum} % (VOB/B 17 (6) 1)",
       "suggestion": "Ramenez la retenue par paiement au maximum VOB/B."
     }
+  },
+  "bundle": {
+    "project_share_missing": {
+      "fail": "La ligne {code} n'a pas de part pour le projet {project} ; le coût ne peut pas être réparti.",
+      "suggestion": "Saisissez la quantité du projet, ou 0 s'il ne prend rien de cette ligne."
+    },
+    "share_sum_mismatch": {
+      "fail": "Les parts de la ligne {code} totalisent {sum}, la quantité de la ligne est {qty}.",
+      "suggestion": "Corrigez les parts ou la quantité pour qu'elles concordent exactement."
+    },
+    "share_cost_line_missing": {
+      "fail": "La part de {project} sur la ligne {code} n'a pas de ligne de coût ; elle n'apparaîtra pas dans le rapport de coûts.",
+      "suggestion": "Choisissez la ligne de coût du projet pour cette part."
+    },
+    "entity_missing": {
+      "fail": "Le projet {project} n'a pas d'entité juridique ; son contrat ne peut pas nommer l'acheteur.",
+      "suggestion": "Rattachez le projet à une société du groupe dans les paramètres du projet."
+    },
+    "project_over_budget": {
+      "fail": "{project} : l'attribution {net} dépasse le budget {budget} de {delta}.",
+      "suggestion": "Vérifiez le budget du projet ou validez le dépassement avant l'attribution."
+    },
+    "award_split_unreconciled": {
+      "fail": "Les parts des projets totalisent {sum}, l'attribution est de {total}.",
+      "suggestion": "Recalculez la répartition ; le centime d'arrondi va au plus grand projet."
+    },
+    "calloff_project_not_in_bundle": {
+      "fail": "Le projet {project} ne fait pas partie de cet achat groupé.",
+      "suggestion": "Ne passez des commandes que pour les projets de l'achat groupé."
+    },
+    "calloff_over_share": {
+      "fail": "{project} a commandé {used} sur {share} {unit} de la ligne {code}.",
+      "suggestion": "Augmentez la part du projet ou validez d'abord la quantité supplémentaire."
+    },
+    "bidder_blocked": {
+      "fail": "{vendor} est bloqué dans l'annuaire des sous-traitants et ne peut pas être retenu.",
+      "suggestion": "Levez le blocage dans l'annuaire ou attribuez à une autre entreprise."
+    }
   }
 }

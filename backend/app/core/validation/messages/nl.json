@@ -2694,5 +2694,43 @@
       "fail": "Inhouding van {rate}% per betaling ligt boven {maximum}% (VOB/B 17 (6) 1)",
       "suggestion": "Verlaag de inhouding per betaling tot het VOB/B-maximum."
     }
+  },
+  "bundle": {
+    "project_share_missing": {
+      "fail": "Regel {code} heeft geen aandeel voor project {project}; de kosten kunnen niet worden verdeeld.",
+      "suggestion": "Vul de hoeveelheid van het project in, of 0 als het niets van deze regel afneemt."
+    },
+    "share_sum_mismatch": {
+      "fail": "De aandelen van regel {code} tellen op tot {sum}, de regelhoeveelheid is {qty}.",
+      "suggestion": "Corrigeer aandelen of hoeveelheid tot ze precies overeenkomen."
+    },
+    "share_cost_line_missing": {
+      "fail": "Het aandeel van {project} in regel {code} heeft geen kostenregel; het verschijnt niet in het kostenrapport.",
+      "suggestion": "Kies de kostenregel van het project voor dit aandeel."
+    },
+    "entity_missing": {
+      "fail": "Project {project} heeft geen rechtspersoon; het contract kan de koper niet noemen.",
+      "suggestion": "Koppel het project in de projectinstellingen aan een bedrijf van de groep."
+    },
+    "project_over_budget": {
+      "fail": "{project}: gunning {net} overschrijdt het budget {budget} met {delta}.",
+      "suggestion": "Controleer het projectbudget of stem de overschrijding af vóór de gunning."
+    },
+    "award_split_unreconciled": {
+      "fail": "De projectaandelen tellen op tot {sum}, de gunning is {total}.",
+      "suggestion": "Bereken de verdeling opnieuw; de afrondingscent gaat naar het grootste project."
+    },
+    "calloff_project_not_in_bundle": {
+      "fail": "Project {project} hoort niet bij deze gebundelde inkoop.",
+      "suggestion": "Plaats afroepen alleen voor projecten van de gebundelde inkoop."
+    },
+    "calloff_over_share": {
+      "fail": "{project} heeft {used} van {share} {unit} afgeroepen op regel {code}.",
+      "suggestion": "Verhoog het aandeel van het project of stem de extra hoeveelheid eerst af."
+    },
+    "bidder_blocked": {
+      "fail": "{vendor} is geblokkeerd in het onderaannemersregister en kan niet worden gegund.",
+      "suggestion": "Hef de blokkade in het register op of gun aan een ander bedrijf."
+    }
   }
 }

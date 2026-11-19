@@ -2694,5 +2694,43 @@
       "fail": "Retensi {rate}% per pembayaran melebihi {maximum}% (VOB/B 17 (6) 1)",
       "suggestion": "Turunkan retensi per pembayaran ke batas VOB/B."
     }
+  },
+  "bundle": {
+    "project_share_missing": {
+      "fail": "Baris {code} tidak punya bagian untuk proyek {project}; biaya tidak dapat dibagi.",
+      "suggestion": "Isi kuantitas proyek, atau 0 jika proyek tidak mengambil baris ini."
+    },
+    "share_sum_mismatch": {
+      "fail": "Bagian baris {code} berjumlah {sum}, kuantitas baris {qty}.",
+      "suggestion": "Perbaiki bagian atau kuantitas hingga sama persis."
+    },
+    "share_cost_line_missing": {
+      "fail": "Bagian {project} pada baris {code} tidak punya baris biaya; tidak akan tampil di laporan biaya.",
+      "suggestion": "Pilih baris biaya proyek untuk bagian ini."
+    },
+    "entity_missing": {
+      "fail": "Proyek {project} tidak punya badan hukum; kontrak tidak dapat menyebut pembeli.",
+      "suggestion": "Kaitkan proyek ke perusahaan grup di pengaturan proyek."
+    },
+    "project_over_budget": {
+      "fail": "{project}: penghargaan {net} melebihi anggaran {budget} sebesar {delta}.",
+      "suggestion": "Periksa anggaran proyek atau setujui kelebihannya sebelum penghargaan."
+    },
+    "award_split_unreconciled": {
+      "fail": "Bagian proyek berjumlah {sum}, penghargaan {total}.",
+      "suggestion": "Hitung ulang pembagian; sen pembulatan masuk ke proyek terbesar."
+    },
+    "calloff_project_not_in_bundle": {
+      "fail": "Proyek {project} bukan bagian dari pembelian gabungan ini.",
+      "suggestion": "Pesan hanya untuk proyek dalam pembelian gabungan."
+    },
+    "calloff_over_share": {
+      "fail": "{project} telah memesan {used} dari {share} {unit} pada baris {code}.",
+      "suggestion": "Naikkan bagian proyek atau setujui dahulu kuantitas tambahan."
+    },
+    "bidder_blocked": {
+      "fail": "{vendor} diblokir di direktori subkontraktor dan tidak dapat diberi penghargaan.",
+      "suggestion": "Buka blokir di direktori atau berikan ke perusahaan lain."
+    }
   }
 }

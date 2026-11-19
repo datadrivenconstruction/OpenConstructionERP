@@ -2694,5 +2694,43 @@
       "fail": "Zádržné {rate} % z platby je nad {maximum} % (VOB/B 17 (6) 1)",
       "suggestion": "Snižte zádržné z platby na maximum VOB/B."
     }
+  },
+  "bundle": {
+    "project_share_missing": {
+      "fail": "Položka {code} nemá podíl projektu {project}; náklady nelze rozdělit.",
+      "suggestion": "Zadejte množství projektu, nebo 0, pokud tuto položku nebere."
+    },
+    "share_sum_mismatch": {
+      "fail": "Podíly položky {code} dávají součet {sum}, množství položky je {qty}.",
+      "suggestion": "Opravte podíly nebo množství, aby se přesně shodovaly."
+    },
+    "share_cost_line_missing": {
+      "fail": "Podíl {project} na položce {code} nemá nákladovou položku; nezobrazí se v nákladové zprávě.",
+      "suggestion": "Vyberte nákladovou položku projektu pro tento podíl."
+    },
+    "entity_missing": {
+      "fail": "Projekt {project} nemá právnickou osobu; smlouva nemůže uvést kupujícího.",
+      "suggestion": "Přiřaďte projekt v nastavení projektu ke společnosti skupiny."
+    },
+    "project_over_budget": {
+      "fail": "{project}: zadání {net} překračuje rozpočet {budget} o {delta}.",
+      "suggestion": "Zkontrolujte rozpočet projektu nebo odsouhlaste překročení před zadáním."
+    },
+    "award_split_unreconciled": {
+      "fail": "Podíly projektů dávají součet {sum}, zadání je {total}.",
+      "suggestion": "Přepočítejte rozdělení; haléř ze zaokrouhlení jde největšímu projektu."
+    },
+    "calloff_project_not_in_bundle": {
+      "fail": "Projekt {project} není součástí tohoto sdruženého nákupu.",
+      "suggestion": "Objednávejte jen pro projekty sdruženého nákupu."
+    },
+    "calloff_over_share": {
+      "fail": "{project} odvolal {used} z {share} {unit} na položce {code}.",
+      "suggestion": "Zvyšte podíl projektu nebo nejdřív odsouhlaste dodatečné množství."
+    },
+    "bidder_blocked": {
+      "fail": "{vendor} je v registru subdodavatelů blokován a nelze mu zakázku zadat.",
+      "suggestion": "Zrušte blokaci v registru nebo zadejte jiné firmě."
+    }
   }
 }

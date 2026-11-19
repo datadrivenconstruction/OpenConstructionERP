@@ -2694,5 +2694,43 @@
       "fail": "지급당 유보금 {rate}%가 {maximum}%를 초과합니다 (VOB/B 17 (6) 1)",
       "suggestion": "지급당 유보금을 VOB/B 상한으로 낮추세요."
     }
+  },
+  "bundle": {
+    "project_share_missing": {
+      "fail": "항목 {code}에 프로젝트 {project}의 배분이 없어 비용을 나눌 수 없습니다.",
+      "suggestion": "프로젝트 수량을 입력하세요. 이 항목을 쓰지 않으면 0입니다."
+    },
+    "share_sum_mismatch": {
+      "fail": "항목 {code}의 배분 합계는 {sum}, 항목 수량은 {qty}입니다.",
+      "suggestion": "배분 또는 수량을 고쳐 정확히 일치시키세요."
+    },
+    "share_cost_line_missing": {
+      "fail": "항목 {code}의 {project} 배분에 원가 항목이 없어 원가 보고서에 나타나지 않습니다.",
+      "suggestion": "이 배분에 프로젝트의 원가 항목을 선택하세요."
+    },
+    "entity_missing": {
+      "fail": "프로젝트 {project}에 법인이 없어 계약서에 구매자를 적을 수 없습니다.",
+      "suggestion": "프로젝트 설정에서 그룹 회사에 연결하세요."
+    },
+    "project_over_budget": {
+      "fail": "{project}: 낙찰 금액 {net}이 예산 {budget}을 {delta} 초과합니다.",
+      "suggestion": "프로젝트 예산을 확인하거나 낙찰 전에 초과분을 승인하세요."
+    },
+    "award_split_unreconciled": {
+      "fail": "프로젝트 배분 합계는 {sum}, 낙찰 금액은 {total}입니다.",
+      "suggestion": "배분을 다시 계산하세요. 반올림 차액은 가장 큰 프로젝트로 갑니다."
+    },
+    "calloff_project_not_in_bundle": {
+      "fail": "프로젝트 {project}는 이 통합 구매에 포함되지 않습니다.",
+      "suggestion": "통합 구매에 포함된 프로젝트에만 발주하세요."
+    },
+    "calloff_over_share": {
+      "fail": "{project}는 항목 {code}에서 {share} {unit} 중 {used}를 발주했습니다.",
+      "suggestion": "프로젝트 배분을 늘리거나 추가 수량을 먼저 승인하세요."
+    },
+    "bidder_blocked": {
+      "fail": "{vendor}는 협력업체 명부에서 차단되어 낙찰할 수 없습니다.",
+      "suggestion": "명부에서 차단을 해제하거나 다른 업체에 낙찰하세요."
+    }
   }
 }

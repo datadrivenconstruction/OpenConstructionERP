@@ -2694,5 +2694,43 @@
       "fail": "Tilbakeholdelse på {rate}% per betaling er over {maximum}% (VOB/B 17 (6) 1)",
       "suggestion": "Senk tilbakeholdelsen per betaling til VOB/B-maksimum."
     }
+  },
+  "bundle": {
+    "project_share_missing": {
+      "fail": "Linje {code} har ingen andel for prosjekt {project}; kostnaden kan ikke fordeles.",
+      "suggestion": "Angi prosjektets mengde, eller 0 hvis det ikke tar noe av linjen."
+    },
+    "share_sum_mismatch": {
+      "fail": "Andelene på linje {code} blir {sum}, linjens mengde er {qty}.",
+      "suggestion": "Rett andelene eller mengden slik at de stemmer nøyaktig."
+    },
+    "share_cost_line_missing": {
+      "fail": "Andelen til {project} på linje {code} mangler kostnadslinje; den vises ikke i kostnadsrapporten.",
+      "suggestion": "Velg prosjektets kostnadslinje for andelen."
+    },
+    "entity_missing": {
+      "fail": "Prosjekt {project} har ingen juridisk enhet; kontrakten kan ikke angi kjøperen.",
+      "suggestion": "Knytt prosjektet til et selskap i konsernet i prosjektinnstillingene."
+    },
+    "project_over_budget": {
+      "fail": "{project}: tildelingen {net} overstiger budsjettet {budget} med {delta}.",
+      "suggestion": "Kontroller prosjektbudsjettet eller avklar overskridelsen før tildeling."
+    },
+    "award_split_unreconciled": {
+      "fail": "Prosjektandelene blir {sum}, tildelingen er {total}.",
+      "suggestion": "Beregn fordelingen på nytt; avrundingsøret går til det største prosjektet."
+    },
+    "calloff_project_not_in_bundle": {
+      "fail": "Prosjekt {project} er ikke med i dette samordnede innkjøpet.",
+      "suggestion": "Gjør avrop bare for prosjekter i det samordnede innkjøpet."
+    },
+    "calloff_over_share": {
+      "fail": "{project} har avropt {used} av {share} {unit} på linje {code}.",
+      "suggestion": "Øk prosjektets andel eller avklar den ekstra mengden først."
+    },
+    "bidder_blocked": {
+      "fail": "{vendor} er sperret i underentreprenørregisteret og kan ikke tildeles.",
+      "suggestion": "Opphev sperren i registeret eller tildel et annet firma."
+    }
   }
 }

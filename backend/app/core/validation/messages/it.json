@@ -2694,5 +2694,43 @@
       "fail": "Ritenuta del {rate}% per pagamento superiore al {maximum}% (VOB/B 17 (6) 1)",
       "suggestion": "Riduci la ritenuta per pagamento al massimo VOB/B."
     }
+  },
+  "bundle": {
+    "project_share_missing": {
+      "fail": "La voce {code} non ha quota per il progetto {project}; il costo non si può ripartire.",
+      "suggestion": "Inserire la quantità del progetto, o 0 se non prende nulla di questa voce."
+    },
+    "share_sum_mismatch": {
+      "fail": "Le quote della voce {code} sommano {sum}, la quantità della voce è {qty}.",
+      "suggestion": "Correggere quote o quantità finché coincidono esattamente."
+    },
+    "share_cost_line_missing": {
+      "fail": "La quota di {project} sulla voce {code} non ha voce di costo; non comparirà nel report costi.",
+      "suggestion": "Scegliere la voce di costo del progetto per questa quota."
+    },
+    "entity_missing": {
+      "fail": "Il progetto {project} non ha entità giuridica; il suo contratto non può indicare l'acquirente.",
+      "suggestion": "Assegnare il progetto a una società del gruppo nelle impostazioni del progetto."
+    },
+    "project_over_budget": {
+      "fail": "{project}: l'aggiudicazione {net} supera il budget {budget} di {delta}.",
+      "suggestion": "Verificare il budget del progetto o concordare lo sforamento prima dell'aggiudicazione."
+    },
+    "award_split_unreconciled": {
+      "fail": "Le quote dei progetti sommano {sum}, l'aggiudicazione è {total}.",
+      "suggestion": "Ricalcolare la ripartizione; il centesimo di arrotondamento va al progetto più grande."
+    },
+    "calloff_project_not_in_bundle": {
+      "fail": "Il progetto {project} non fa parte di questo acquisto aggregato.",
+      "suggestion": "Emettere ordini solo per i progetti dell'acquisto aggregato."
+    },
+    "calloff_over_share": {
+      "fail": "{project} ha ordinato {used} di {share} {unit} sulla voce {code}.",
+      "suggestion": "Aumentare la quota del progetto o concordare prima la quantità aggiuntiva."
+    },
+    "bidder_blocked": {
+      "fail": "{vendor} è bloccato nell'elenco subappaltatori e non può essere aggiudicatario.",
+      "suggestion": "Rimuovere il blocco nell'elenco o aggiudicare a un'altra impresa."
+    }
   }
 }

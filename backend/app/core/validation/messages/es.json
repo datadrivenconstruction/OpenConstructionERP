@@ -2740,5 +2740,43 @@
       "fail": "Retención del {rate}% por pago superior al {maximum}% (VOB/B 17 (6) 1)",
       "suggestion": "Reduzca la retención por pago al máximo de VOB/B."
     }
+  },
+  "bundle": {
+    "project_share_missing": {
+      "fail": "La partida {code} no tiene cuota para el proyecto {project}; el coste no se puede repartir.",
+      "suggestion": "Indique la cantidad del proyecto, o 0 si no toma nada de esta partida."
+    },
+    "share_sum_mismatch": {
+      "fail": "Las cuotas de la partida {code} suman {sum}; la cantidad de la partida es {qty}.",
+      "suggestion": "Corrija las cuotas o la cantidad hasta que coincidan exactamente."
+    },
+    "share_cost_line_missing": {
+      "fail": "La cuota de {project} en la partida {code} no tiene línea de coste; no aparecerá en el informe de costes.",
+      "suggestion": "Elija la línea de coste del proyecto para esta cuota."
+    },
+    "entity_missing": {
+      "fail": "El proyecto {project} no tiene entidad jurídica; su contrato no puede nombrar al comprador.",
+      "suggestion": "Asigne el proyecto a una empresa del grupo en la configuración del proyecto."
+    },
+    "project_over_budget": {
+      "fail": "{project}: la adjudicación {net} supera el presupuesto {budget} en {delta}.",
+      "suggestion": "Revise el presupuesto del proyecto o acuerde el exceso antes de adjudicar."
+    },
+    "award_split_unreconciled": {
+      "fail": "Las cuotas de los proyectos suman {sum}; la adjudicación es {total}.",
+      "suggestion": "Recalcule el reparto; el céntimo de redondeo va al proyecto mayor."
+    },
+    "calloff_project_not_in_bundle": {
+      "fail": "El proyecto {project} no forma parte de esta compra agrupada.",
+      "suggestion": "Haga pedidos solo para proyectos de la compra agrupada."
+    },
+    "calloff_over_share": {
+      "fail": "{project} ha pedido {used} de {share} {unit} en la partida {code}.",
+      "suggestion": "Aumente la cuota del proyecto o acuerde antes la cantidad adicional."
+    },
+    "bidder_blocked": {
+      "fail": "{vendor} está bloqueado en el directorio de subcontratistas y no se le puede adjudicar.",
+      "suggestion": "Levante el bloqueo en el directorio o adjudique a otra empresa."
+    }
   }
 }

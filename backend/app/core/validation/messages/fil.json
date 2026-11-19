@@ -2694,5 +2694,43 @@
       "fail": "Ang retensyon na {rate}% bawat bayad ay lampas sa {maximum}% (VOB/B 17 (6) 1)",
       "suggestion": "Ibaba ang retensyon bawat bayad sa maximum ng VOB/B."
     }
+  },
+  "bundle": {
+    "project_share_missing": {
+      "fail": "Walang bahagi ang proyektong {project} sa linyang {code}; hindi mahahati ang gastos.",
+      "suggestion": "Ilagay ang dami ng proyekto, o 0 kung wala itong kukunin sa linyang ito."
+    },
+    "share_sum_mismatch": {
+      "fail": "Ang mga bahagi ng linyang {code} ay umaabot sa {sum}, ang dami ng linya ay {qty}.",
+      "suggestion": "Itama ang mga bahagi o dami hanggang eksaktong magtugma."
+    },
+    "share_cost_line_missing": {
+      "fail": "Walang cost line ang bahagi ng {project} sa linyang {code}; hindi ito lalabas sa ulat ng gastos.",
+      "suggestion": "Piliin ang cost line ng proyekto para sa bahaging ito."
+    },
+    "entity_missing": {
+      "fail": "Walang legal entity ang proyektong {project}; hindi mapapangalanan ng kontrata ang mamimili.",
+      "suggestion": "Iugnay ang proyekto sa isang kumpanya ng grupo sa settings ng proyekto."
+    },
+    "project_over_budget": {
+      "fail": "{project}: ang award na {net} ay lampas sa budget na {budget} nang {delta}.",
+      "suggestion": "Suriin ang budget ng proyekto o aprubahan ang sobra bago ang award."
+    },
+    "award_split_unreconciled": {
+      "fail": "Ang mga bahagi ng proyekto ay umaabot sa {sum}, ang award ay {total}.",
+      "suggestion": "Kalkulahin muli ang hati; ang sentimo ng rounding ay napupunta sa pinakamalaking proyekto."
+    },
+    "calloff_project_not_in_bundle": {
+      "fail": "Ang proyektong {project} ay hindi bahagi ng pinagsamang pagbiling ito.",
+      "suggestion": "Mag-order lamang para sa mga proyekto ng pinagsamang pagbili."
+    },
+    "calloff_over_share": {
+      "fail": "Ang {project} ay nag-order ng {used} sa {share} {unit} sa linyang {code}.",
+      "suggestion": "Taasan ang bahagi ng proyekto o aprubahan muna ang dagdag na dami."
+    },
+    "bidder_blocked": {
+      "fail": "Naka-block ang {vendor} sa direktoryo ng subcontractor at hindi mabibigyan ng award.",
+      "suggestion": "Alisin ang block sa direktoryo o i-award sa ibang kumpanya."
+    }
   }
 }

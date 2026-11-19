@@ -2694,5 +2694,43 @@
       "fail": "Zatrzymanie {rate}% z płatności przekracza {maximum}% (VOB/B 17 (6) 1)",
       "suggestion": "Obniż zatrzymanie z płatności do maksimum VOB/B."
     }
+  },
+  "bundle": {
+    "project_share_missing": {
+      "fail": "Pozycja {code} nie ma udziału projektu {project}; kosztu nie można podzielić.",
+      "suggestion": "Wpisz ilość projektu albo 0, jeśli nie bierze tej pozycji."
+    },
+    "share_sum_mismatch": {
+      "fail": "Udziały pozycji {code} sumują się do {sum}, ilość pozycji to {qty}.",
+      "suggestion": "Popraw udziały lub ilość, aż będą dokładnie zgodne."
+    },
+    "share_cost_line_missing": {
+      "fail": "Udział {project} w pozycji {code} nie ma pozycji kosztowej; nie pojawi się w raporcie kosztów.",
+      "suggestion": "Wybierz pozycję kosztową projektu dla tego udziału."
+    },
+    "entity_missing": {
+      "fail": "Projekt {project} nie ma podmiotu prawnego; umowa nie może wskazać kupującego.",
+      "suggestion": "Przypisz projekt do spółki grupy w ustawieniach projektu."
+    },
+    "project_over_budget": {
+      "fail": "{project}: udzielenie {net} przekracza budżet {budget} o {delta}.",
+      "suggestion": "Sprawdź budżet projektu lub uzgodnij przekroczenie przed udzieleniem."
+    },
+    "award_split_unreconciled": {
+      "fail": "Udziały projektów sumują się do {sum}, zamówienie wynosi {total}.",
+      "suggestion": "Przelicz podział; grosz z zaokrąglenia trafia do największego projektu."
+    },
+    "calloff_project_not_in_bundle": {
+      "fail": "Projekt {project} nie należy do tego zakupu zbiorczego.",
+      "suggestion": "Składaj zamówienia tylko dla projektów zakupu zbiorczego."
+    },
+    "calloff_over_share": {
+      "fail": "{project} zamówił {used} z {share} {unit} w pozycji {code}.",
+      "suggestion": "Zwiększ udział projektu lub najpierw uzgodnij dodatkową ilość."
+    },
+    "bidder_blocked": {
+      "fail": "{vendor} jest zablokowany w rejestrze podwykonawców i nie może otrzymać zamówienia.",
+      "suggestion": "Zdejmij blokadę w rejestrze lub udziel zamówienia innej firmie."
+    }
   }
 }

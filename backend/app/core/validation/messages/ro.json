@@ -2694,5 +2694,43 @@
       "fail": "Reținerea de {rate}% pe plată depășește {maximum}% (VOB/B 17 (6) 1)",
       "suggestion": "Reduceți reținerea pe plată la maximul VOB/B."
     }
+  },
+  "bundle": {
+    "project_share_missing": {
+      "fail": "Linia {code} nu are cotă pentru proiectul {project}; costul nu poate fi repartizat.",
+      "suggestion": "Introduceți cantitatea proiectului sau 0 dacă nu ia nimic din această linie."
+    },
+    "share_sum_mismatch": {
+      "fail": "Cotele liniei {code} însumează {sum}, cantitatea liniei este {qty}.",
+      "suggestion": "Corectați cotele sau cantitatea până se potrivesc exact."
+    },
+    "share_cost_line_missing": {
+      "fail": "Cota lui {project} pe linia {code} nu are linie de cost; nu va apărea în raportul de costuri.",
+      "suggestion": "Alegeți linia de cost a proiectului pentru această cotă."
+    },
+    "entity_missing": {
+      "fail": "Proiectul {project} nu are entitate juridică; contractul nu poate numi cumpărătorul.",
+      "suggestion": "Atribuiți proiectul unei societăți din grup în setările proiectului."
+    },
+    "project_over_budget": {
+      "fail": "{project}: atribuirea {net} depășește bugetul {budget} cu {delta}.",
+      "suggestion": "Verificați bugetul proiectului sau aprobați depășirea înainte de atribuire."
+    },
+    "award_split_unreconciled": {
+      "fail": "Cotele proiectelor însumează {sum}, atribuirea este {total}.",
+      "suggestion": "Recalculați repartizarea; banul din rotunjire merge la cel mai mare proiect."
+    },
+    "calloff_project_not_in_bundle": {
+      "fail": "Proiectul {project} nu face parte din această achiziție grupată.",
+      "suggestion": "Emiteți comenzi doar pentru proiectele achiziției grupate."
+    },
+    "calloff_over_share": {
+      "fail": "{project} a comandat {used} din {share} {unit} pe linia {code}.",
+      "suggestion": "Măriți cota proiectului sau aprobați mai întâi cantitatea suplimentară."
+    },
+    "bidder_blocked": {
+      "fail": "{vendor} este blocat în registrul subcontractanților și nu poate primi atribuirea.",
+      "suggestion": "Ridicați blocarea în registru sau atribuiți altei firme."
+    }
   }
 }

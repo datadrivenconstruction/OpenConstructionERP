@@ -2694,5 +2694,43 @@
       "fail": "Pidätys {rate} % maksua kohden ylittää {maximum} % (VOB/B 17 (6) 1)",
       "suggestion": "Laske maksukohtainen pidätys VOB/B-enimmäismäärään."
     }
+  },
+  "bundle": {
+    "project_share_missing": {
+      "fail": "Rivillä {code} ei ole osuutta hankkeelle {project}; kustannusta ei voi jakaa.",
+      "suggestion": "Anna hankkeen määrä, tai 0 jos se ei ota tästä rivistä mitään."
+    },
+    "share_sum_mismatch": {
+      "fail": "Rivin {code} osuuksien summa on {sum}, rivin määrä on {qty}.",
+      "suggestion": "Korjaa osuudet tai määrä niin, että ne täsmäävät tarkasti."
+    },
+    "share_cost_line_missing": {
+      "fail": "Hankkeen {project} osuudella rivillä {code} ei ole kustannusriviä; se ei näy kustannusraportissa.",
+      "suggestion": "Valitse hankkeen kustannusrivi tälle osuudelle."
+    },
+    "entity_missing": {
+      "fail": "Hankkeella {project} ei ole oikeushenkilöä; sopimus ei voi nimetä ostajaa.",
+      "suggestion": "Liitä hanke konsernin yhtiöön hankkeen asetuksissa."
+    },
+    "project_over_budget": {
+      "fail": "{project}: hankinta {net} ylittää budjetin {budget} määrällä {delta}.",
+      "suggestion": "Tarkista hankkeen budjetti tai sovi ylityksestä ennen hankintapäätöstä."
+    },
+    "award_split_unreconciled": {
+      "fail": "Hankkeiden osuuksien summa on {sum}, hankinta on {total}.",
+      "suggestion": "Laske jako uudelleen; pyöristyssentti menee suurimmalle hankkeelle."
+    },
+    "calloff_project_not_in_bundle": {
+      "fail": "Hanke {project} ei kuulu tähän yhteishankintaan.",
+      "suggestion": "Tee tilauksia vain yhteishankinnan hankkeille."
+    },
+    "calloff_over_share": {
+      "fail": "{project} on tilannut {used} / {share} {unit} rivillä {code}.",
+      "suggestion": "Kasvata hankkeen osuutta tai sovi lisämäärästä ensin."
+    },
+    "bidder_blocked": {
+      "fail": "{vendor} on estetty aliurakoitsijarekisterissä, eikä sille voi tehdä hankintaa.",
+      "suggestion": "Poista esto rekisterissä tai valitse toinen yritys."
+    }
   }
 }

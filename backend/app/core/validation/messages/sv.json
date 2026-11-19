@@ -2694,5 +2694,43 @@
       "fail": "Innehållande på {rate}% per betalning överstiger {maximum}% (VOB/B 17 (6) 1)",
       "suggestion": "Sänk innehållandet per betalning till VOB/B-maximum."
     }
+  },
+  "bundle": {
+    "project_share_missing": {
+      "fail": "Rad {code} saknar andel för projekt {project}; kostnaden kan inte fördelas.",
+      "suggestion": "Ange projektets mängd, eller 0 om det inte tar något av raden."
+    },
+    "share_sum_mismatch": {
+      "fail": "Andelarna på rad {code} blir {sum}, radens mängd är {qty}.",
+      "suggestion": "Rätta andelarna eller mängden så att de stämmer exakt."
+    },
+    "share_cost_line_missing": {
+      "fail": "Andelen för {project} på rad {code} saknar kostnadsrad; den syns inte i kostnadsrapporten.",
+      "suggestion": "Välj projektets kostnadsrad för andelen."
+    },
+    "entity_missing": {
+      "fail": "Projekt {project} saknar juridisk person; avtalet kan inte ange köparen.",
+      "suggestion": "Koppla projektet till ett bolag i koncernen i projektinställningarna."
+    },
+    "project_over_budget": {
+      "fail": "{project}: tilldelningen {net} överskrider budgeten {budget} med {delta}.",
+      "suggestion": "Kontrollera projektbudgeten eller stäm av överskridandet före tilldelning."
+    },
+    "award_split_unreconciled": {
+      "fail": "Projektandelarna blir {sum}, tilldelningen är {total}.",
+      "suggestion": "Räkna om fördelningen; avrundningsöret går till det största projektet."
+    },
+    "calloff_project_not_in_bundle": {
+      "fail": "Projekt {project} ingår inte i detta samordnade köp.",
+      "suggestion": "Gör avrop bara för projekt i det samordnade köpet."
+    },
+    "calloff_over_share": {
+      "fail": "{project} har avropat {used} av {share} {unit} på rad {code}.",
+      "suggestion": "Höj projektets andel eller stäm av den extra mängden först."
+    },
+    "bidder_blocked": {
+      "fail": "{vendor} är spärrad i underentreprenörsregistret och kan inte tilldelas.",
+      "suggestion": "Häv spärren i registret eller tilldela ett annat företag."
+    }
   }
 }

@@ -536,6 +536,13 @@ export const navGroups: NavGroup[] = [
         helpKey: 'sidebar.help.framework_agreements',
         defaultHelp: 'Agreed rates ordered job by job, with the cap in view.',
       },
+      {
+        labelKey: 'nav.central_purchasing',
+        to: '/central-purchasing',
+        icon: Boxes,
+        helpKey: 'sidebar.help.central_purchasing',
+        defaultHelp: 'One tender for several projects; each project gets its own contract and budget check.',
+      },
       { labelKey: 'nav.payment_clock', to: '/payment-clock', icon: Scale },
       { labelKey: 'nav.tax_withholding', to: '/tax-withholding', icon: Percent },
       { labelKey: 'nav.china_tax', to: '/china-tax', icon: Receipt },

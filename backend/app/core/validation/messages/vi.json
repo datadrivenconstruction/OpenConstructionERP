@@ -2694,5 +2694,43 @@
       "fail": "Tiền giữ lại {rate}% mỗi lần thanh toán vượt {maximum}% (VOB/B 17 (6) 1)",
       "suggestion": "Giảm tiền giữ lại mỗi lần thanh toán xuống mức tối đa của VOB/B."
     }
+  },
+  "bundle": {
+    "project_share_missing": {
+      "fail": "Dòng {code} không có phần cho dự án {project}; không thể chia chi phí.",
+      "suggestion": "Nhập khối lượng của dự án, hoặc 0 nếu dự án không lấy dòng này."
+    },
+    "share_sum_mismatch": {
+      "fail": "Tổng phần của dòng {code} là {sum}, khối lượng dòng là {qty}.",
+      "suggestion": "Sửa các phần hoặc khối lượng cho khớp chính xác."
+    },
+    "share_cost_line_missing": {
+      "fail": "Phần của {project} ở dòng {code} chưa có dòng chi phí; sẽ không hiện trong báo cáo chi phí.",
+      "suggestion": "Chọn dòng chi phí của dự án cho phần này."
+    },
+    "entity_missing": {
+      "fail": "Dự án {project} chưa có pháp nhân; hợp đồng không thể ghi bên mua.",
+      "suggestion": "Gán dự án cho một công ty trong tập đoàn ở phần cài đặt dự án."
+    },
+    "project_over_budget": {
+      "fail": "{project}: giá trúng thầu {net} vượt ngân sách {budget} {delta}.",
+      "suggestion": "Kiểm tra ngân sách dự án hoặc duyệt phần vượt trước khi trao thầu."
+    },
+    "award_split_unreconciled": {
+      "fail": "Tổng phần các dự án là {sum}, giá trúng thầu là {total}.",
+      "suggestion": "Tính lại phân bổ; phần làm tròn dồn cho dự án lớn nhất."
+    },
+    "calloff_project_not_in_bundle": {
+      "fail": "Dự án {project} không thuộc gói mua chung này.",
+      "suggestion": "Chỉ đặt hàng cho các dự án thuộc gói mua chung."
+    },
+    "calloff_over_share": {
+      "fail": "{project} đã đặt {used} trên {share} {unit} ở dòng {code}.",
+      "suggestion": "Tăng phần của dự án hoặc duyệt trước khối lượng bổ sung."
+    },
+    "bidder_blocked": {
+      "fail": "{vendor} bị chặn trong danh bạ nhà thầu phụ, không thể trao thầu.",
+      "suggestion": "Gỡ chặn trong danh bạ hoặc trao cho công ty khác."
+    }
   }
 }
