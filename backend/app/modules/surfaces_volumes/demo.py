@@ -33,11 +33,11 @@ async def seed_survey_demo(session: AsyncSession, project_id: uuid.UUID, user_id
     await core.set_crs(project_id, ProjectCrsSet(horizontal_epsg=32633), user_id, True)
     await core.set_profile(
         project_id,
-        SurveyProfileIn(label=DEMO_PROFILE_LABEL, traverse_min_ratio=10000, coverage_min_pct=90),
+        SurveyProfileIn(label=DEMO_PROFILE_LABEL, traverse_min_ratio=10000, coverage_min_pct=90, control_tol_mm=20),
         user_id,
         source="demo",
     )
-    await core.import_points(
+    control = await core.import_points(
         project_id,
         ImportRequest(
             text=(DATA / "control.csv").read_text(encoding="utf-8"),
@@ -48,6 +48,7 @@ async def seed_survey_demo(session: AsyncSession, project_id: uuid.UUID, user_id
         ),
         user_id,
     )
+    await _seed_control_checks(session, project_id, control.point_set.id, user_id)
     ground = await core.import_points(
         project_id,
         ImportRequest(
@@ -104,6 +105,36 @@ async def seed_survey_demo(session: AsyncSession, project_id: uuid.UUID, user_id
     }
 
 
+#: Morning check shots on the control: CP1 within the demo 20 mm, CP3 off by 29.5 mm (SRV-012).
+DEMO_CHECKS = {"CP1": (0.006, -0.004, 0.003), "CP3": (0.027, 0.012, -0.008)}
+
+
+async def _seed_control_checks(session: AsyncSession, project_id: uuid.UUID, set_id: uuid.UUID, user_id: str) -> None:
+    from sqlalchemy import select
+
+    from app.modules.survey_core.models import SurveyPoint
+    from app.modules.survey_core.register_schemas import ControlCheckIn
+    from app.modules.survey_core.register_service import RegisterService
+
+    rows = (await session.execute(select(SurveyPoint).where(SurveyPoint.point_set_id == set_id))).scalars().all()
+    register = RegisterService(session)
+    for p in rows:
+        if p.point_id not in DEMO_CHECKS:
+            continue
+        de, dn, dz = DEMO_CHECKS[p.point_id]
+        await register.add_check(
+            project_id,
+            ControlCheckIn(
+                control_point_id=p.id,
+                e=float(p.e) + de,
+                n=float(p.n) + dn,
+                z=float(p.z) + dz if p.z is not None else None,
+                note="Morning check shot",
+            ),
+            user_id,
+        )
+
+
 async def _seed_site_pages(session: AsyncSession, project_id: uuid.UUID, user_id: str) -> dict[str, Any]:
     """Setting-out, monitoring (three epochs) and parcels, so every survey page of the demo has data."""
     from app.modules.land_parcels.schemas import ImportRequest as ParcelImport
@@ -113,7 +144,9 @@ async def _seed_site_pages(session: AsyncSession, project_id: uuid.UUID, user_id
 
     parcels_dir = Path(__file__).resolve().parents[1] / "land_parcels" / "demo" / "riverside"
     request = await SettingOutService(session).load_riverside_demo(project_id, user_id)
-    points = await MonitoringService(session).load_riverside_demo(project_id, user_id, [], "en", epochs=3)
+    monitoring = MonitoringService(session)
+    points = await monitoring.load_riverside_demo(project_id, user_id, [], "en", epochs=3)
+    points = await _seed_alarm_point(monitoring, project_id, user_id) or points
     parcels = ParcelService(session)
     imported = await parcels.import_file(
         project_id,
@@ -137,8 +170,43 @@ async def _seed_site_pages(session: AsyncSession, project_id: uuid.UUID, user_id
         user_id,
         [],
     )
+    # P-004's register area is 950 m2 against 900 m2 by coordinates, so PAR-001 shows on the demo.
+    mismatch = await parcels.import_file(
+        project_id,
+        ParcelImport(
+            format="geojson",
+            target="parcels",
+            filename="parcel_p004.geojson",
+            text=(parcels_dir / "parcel_p004.geojson").read_text(encoding="utf-8"),
+        ),
+        user_id,
+        [],
+    )
     return {
         "setting_out_requests": 1 if request else 0,
         "monitoring_points": len(points),
-        "parcels": imported.created,
+        "parcels": imported.created + mismatch.created,
     }
+
+
+async def _seed_alarm_point(monitoring: Any, project_id: uuid.UUID, user_id: str) -> list[Any]:
+    """MP-03 settles 34 mm in two weeks: past the demo alarm level, so MON-001 shows red on the demo."""
+    from app.modules.monitoring.schemas import PointCreate, ReadingsImport
+
+    demo_dir = Path(__file__).resolve().parents[1] / "monitoring" / "demo" / "riverside"
+    if "MP-03" not in {p.code for p in await monitoring.repo.list_points(project_id)}:
+        await monitoring.create_point(
+            project_id,
+            PointCreate(code="MP-03", name="Pit wall pin 3", point_type="settlement_pin", location="Pit-edge wall"),
+            user_id,
+        )
+    await monitoring.import_readings(
+        project_id,
+        ReadingsImport(
+            text=(demo_dir / "monitoring_mp03.csv").read_text(encoding="utf-8"), filename="monitoring_mp03.csv"
+        ),
+        user_id,
+        [],
+        "en",
+    )
+    return await monitoring.list_points(project_id, [])

@@ -52,6 +52,8 @@ class SurveySurface(Base):
     faces: Mapped[list] = mapped_column(JSON, nullable=False, default=list)  # type: ignore[assignment]
     note: Mapped[str] = mapped_column(Text, nullable=False, default="", server_default="")
     created_by: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+    # [[[e, n, z], ...], ...]: breaklines kept as triangle edges, for the plan and a rebuild.
+    breaklines: Mapped[list | None] = mapped_column(JSON, nullable=True)  # type: ignore[assignment]
 
 
 class SurveyVolume(Base):

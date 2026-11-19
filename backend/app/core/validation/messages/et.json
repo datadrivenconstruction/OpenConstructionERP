@@ -2420,6 +2420,10 @@
     "export_crs": {
       "fail": "Ekspordi koordinaatsüsteem {a} erineb projekti süsteemist {b}; koordinaadid teisendati.",
       "suggestion": "Veenduge, et vastuvõttev tarkvara ootab ekspordi süsteemi."
+    },
+    "control_check": {
+      "fail": "Alusvõrgu punkt {id}: kontrollmõõtmine erineb {r} mm, rohkem kui {t} mm tolerants.",
+      "suggestion": "Mõõda punkt uuesti; kui see on liikunud, ära maha märgi sellest enne, kui see on taastatud."
     }
   },
   "volumes": {
@@ -2438,6 +2442,18 @@
     "bank_volume": {
       "fail": "Kogus on tihe maht (pinnases); kobestusteguri ei rakendata.",
       "suggestion": "Saatke kobestatud kaevis, kui kuluarvestuse rida mõõdetakse kobedana."
+    },
+    "no_ground_class": {
+      "fail": "Punktipilves pole maapinnapunkte (klass 2); pinna {code} jaoks kasutati kõiki punkte.",
+      "suggestion": "Klassifitseeri punktipilv skaneerimistarkvaras või kontrolli, et taimestik ja masinad pole pinnas."
+    },
+    "breakline_missed": {
+      "fail": "Pinna {code} {n} murdejoone lõiku ei õnnestunud säilitada kolmnurkade servadena.",
+      "suggestion": "Kontrolli, et murdejooned ei lõikuks ja jääksid pinna sisse."
+    },
+    "no_factors": {
+      "fail": "Materjalil {material} pole kobestus- ja tihendustegureid: näidatakse ainult looduslikus olekus mahte.",
+      "suggestion": "Sisesta materjali tegurid geotehnilisest aruandest."
     }
   },
   "setting_out": {

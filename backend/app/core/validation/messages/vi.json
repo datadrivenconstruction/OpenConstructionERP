@@ -2420,6 +2420,10 @@
     "export_crs": {
       "fail": "Hệ tọa độ xuất {a} khác hệ của dự án {b}; tọa độ đã được chuyển đổi.",
       "suggestion": "Bảo đảm phần mềm nhận mong đợi hệ tọa độ xuất."
+    },
+    "control_check": {
+      "fail": "Điểm khống chế {id}: lần đo kiểm tra lệch {r} mm, vượt dung sai {t} mm.",
+      "suggestion": "Đo lại điểm; nếu điểm đã dịch chuyển, không bố trí từ điểm đó cho đến khi được khôi phục."
     }
   },
   "volumes": {
@@ -2438,6 +2442,18 @@
     "bank_volume": {
       "fail": "Khối lượng là thể tích nguyên thổ (trong đất); hệ số nở rời chưa được áp dụng.",
       "suggestion": "Gửi khối lượng đào nở rời nếu hạng mục dự toán được đo theo vật liệu rời."
+    },
+    "no_ground_class": {
+      "fail": "Đám mây điểm không có điểm mặt đất (lớp 2); đã dùng tất cả các điểm cho bề mặt {code}.",
+      "suggestion": "Hãy phân loại đám mây điểm trong phần mềm quét, hoặc kiểm tra cây cối và máy móc không nằm trong bề mặt."
+    },
+    "breakline_missed": {
+      "fail": "{n} đoạn đường gãy của bề mặt {code} không giữ được làm cạnh tam giác.",
+      "suggestion": "Kiểm tra các đường gãy không cắt nhau và nằm trong bề mặt."
+    },
+    "no_factors": {
+      "fail": "Chưa có hệ số nở rời và đầm chặt cho {material}: chỉ hiển thị khối lượng nguyên thổ.",
+      "suggestion": "Nhập hệ số của vật liệu này từ báo cáo địa chất."
     }
   },
   "setting_out": {

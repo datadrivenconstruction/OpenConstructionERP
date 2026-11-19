@@ -29,14 +29,19 @@ import { useViewModeStore } from '@/stores/useViewModeStore';
 import { useToastStore } from '@/stores/useToastStore';
 import {
   POINT_KINDS,
+  bulkPoints,
   deletePointSet,
   getProjectCrs,
   getSummary,
   listPointSets,
   listPoints,
   validateRegister,
+  type BulkAction,
   type PointSet,
 } from './api';
+import { ControlTab } from './ControlTab';
+import { PointDrawer } from './PointDrawer';
+import { PointExportControl } from './PointExportControl';
 import { crsChipText } from './crsPicker';
 import { CrsDialog } from './CrsDialog';
 import { GridGroundChip, LocalGridDialog } from './GeodesyPanel';
@@ -50,7 +55,7 @@ import { ViewOnlyNote, useSurveyAccess } from './useSurveyAccess';
 import { deleteTraverse, getRegisterPlan, listTraverses, type Traverse } from './volumesApi';
 import { fmtFixed } from '@/shared/lib/formatters';
 
-type Tab = 'points' | 'sets' | 'traverses' | 'plan';
+type Tab = 'points' | 'control' | 'sets' | 'traverses' | 'plan';
 const coord = (v: number | null | undefined) => (v == null ? '' : fmtFixed(v, 3));
 
 export default function SurveyRegisterPage() {
@@ -68,6 +73,10 @@ export default function SurveyRegisterPage() {
   const [q, setQ] = useState('');
   const [traverseOpen, setTraverseOpen] = useState(false);
   const [shownTraverse, setShownTraverse] = useState<Traverse | null>(null);
+  const [openPoint, setOpenPoint] = useState<string | null>(null);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [bulkAction, setBulkAction] = useState<BulkAction>('set_code');
+  const [bulkValue, setBulkValue] = useState('');
   const demo = useOpenSurveyDemo('/survey/points');
   const { canWrite } = useSurveyAccess();
 
@@ -122,6 +131,47 @@ export default function SurveyRegisterPage() {
     onError: (e) => addToast({ type: 'error', title: getErrorMessage(e) }),
   });
 
+  const bulk = useMutation({
+    mutationFn: () =>
+      bulkPoints(projectId!, {
+        ids: [...selected],
+        action: bulkAction,
+        value: bulkAction === 'set_code' || bulkAction === 'set_kind' ? bulkValue : undefined,
+        target_set_id: bulkAction === 'move_to_set' ? bulkValue : undefined,
+      }),
+    onSuccess: (r) => {
+      setSelected(new Set());
+      void qc.invalidateQueries({ queryKey: ['survey'] });
+      addToast({
+        type: r.skipped_locked ? 'warning' : 'success',
+        title: t('survey.bulk.done', { defaultValue: '{{count}} points changed', count: r.affected }),
+        message: r.skipped_locked
+          ? t('survey.bulk.skipped_locked', { defaultValue: '{{count}} locked points were left as they are.', count: r.skipped_locked })
+          : undefined,
+      });
+    },
+    onError: (e) => addToast({ type: 'error', title: getErrorMessage(e) }),
+  });
+  const runBulk = () => {
+    if (bulkAction === 'delete') {
+      const ok = window.confirm(
+        t('survey.bulk.delete_confirm', { defaultValue: 'Delete {{count}} points? This cannot be undone.', count: selected.size }),
+      );
+      if (!ok) return;
+    }
+    bulk.mutate();
+  };
+  const visibleIds = (points.data?.items ?? []).map((p) => p.id);
+  const allSelected = visibleIds.length > 0 && visibleIds.every((id) => selected.has(id));
+  const toggle = (id: string) =>
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  const bulkReady = bulkAction === 'delete' || bulkValue.trim() !== '';
+
   const setNames = useMemo(() => new Map((sets.data ?? []).map((s) => [s.id, s.name])), [sets.data]);
   const chip = crsChipText(crs.data?.crs ?? null, t('survey.crs.local', { defaultValue: 'Local grid' }));
   const title = t('survey.page.register', { defaultValue: 'Survey register' });
@@ -166,6 +216,7 @@ export default function SurveyRegisterPage() {
         target={{ kind: 'register', projectId: projectId!, pointKind: kind || undefined, setId: setFilter || undefined }}
         disabled={!summary.data?.points}
       />
+      <PointExportControl projectId={projectId} ids={[...selected]} />
       <ModuleGuideButton content={surveyGuide} />
     </div>
   );
@@ -258,6 +309,7 @@ export default function SurveyRegisterPage() {
         onChange={setTab}
         tabs={[
           { id: 'points', label: t('survey.tab.points', { defaultValue: 'Points' }) },
+          { id: 'control', label: t('survey.tab.control', { defaultValue: 'Control' }) },
           { id: 'sets', label: t('survey.tab.point_sets', { defaultValue: 'Point sets' }) },
           { id: 'traverses', label: t('survey.tab.traverses', { defaultValue: 'Traverses' }) },
           { id: 'plan', label: t('survey.tab.plan', { defaultValue: 'Plan' }) },
@@ -287,6 +339,50 @@ export default function SurveyRegisterPage() {
               aria-label={t('survey.filter.search', { defaultValue: 'Search ID or code' })}
             />
           </div>
+          {canWrite && selected.size > 0 && (
+            <div className="flex flex-wrap items-center gap-2 border-b border-border-light bg-surface-secondary p-3 text-sm" data-testid="survey-bulk-bar">
+              <span className="font-medium">{t('survey.bulk.selected', { defaultValue: '{{count}} selected', count: selected.size })}</span>
+              <select
+                className="oe-input w-44"
+                value={bulkAction}
+                onChange={(e) => {
+                  setBulkAction(e.target.value as BulkAction);
+                  setBulkValue('');
+                }}
+                aria-label={t('survey.bulk.action', { defaultValue: 'Action' })}
+              >
+                <option value="set_code">{t('survey.bulk.set_code', { defaultValue: 'Set code' })}</option>
+                <option value="set_kind">{t('survey.bulk.set_kind', { defaultValue: 'Set kind' })}</option>
+                <option value="move_to_set">{t('survey.bulk.move_to_set', { defaultValue: 'Move to point set (layer)' })}</option>
+                <option value="delete">{t('survey.bulk.delete', { defaultValue: 'Delete' })}</option>
+              </select>
+              {bulkAction === 'set_code' && (
+                <input className="oe-input w-32" value={bulkValue} onChange={(e) => setBulkValue(e.target.value)} placeholder={t('survey.field.code', { defaultValue: 'Code' })} />
+              )}
+              {bulkAction === 'set_kind' && (
+                <select className="oe-input w-36" value={bulkValue} onChange={(e) => setBulkValue(e.target.value)}>
+                  <option value="">-</option>
+                  {POINT_KINDS.map((k) => (
+                    <option key={k} value={k}>{t(`survey.kind.${k}`, { defaultValue: k })}</option>
+                  ))}
+                </select>
+              )}
+              {bulkAction === 'move_to_set' && (
+                <select className="oe-input w-44" value={bulkValue} onChange={(e) => setBulkValue(e.target.value)}>
+                  <option value="">-</option>
+                  {(sets.data ?? []).map((st) => (
+                    <option key={st.id} value={st.id}>{st.name}</option>
+                  ))}
+                </select>
+              )}
+              <Button size="sm" variant={bulkAction === 'delete' ? 'danger' : 'primary'} disabled={!bulkReady} loading={bulk.isPending} onClick={runBulk}>
+                {t('survey.bulk.apply', { defaultValue: 'Apply' })}
+              </Button>
+              <Button size="sm" variant="ghost" onClick={() => setSelected(new Set())}>
+                {t('survey.bulk.clear', { defaultValue: 'Clear selection' })}
+              </Button>
+            </div>
+          )}
           {points.isLoading ? (
             <Skeleton className="h-48 m-3" />
           ) : points.isError ? (
@@ -313,6 +409,14 @@ export default function SurveyRegisterPage() {
               <table className="oe-table w-full text-sm">
                 <thead>
                   <tr>
+                    <th className="w-8">
+                      <input
+                        type="checkbox"
+                        checked={allSelected}
+                        onChange={() => setSelected(allSelected ? new Set() : new Set(visibleIds))}
+                        aria-label={t('survey.bulk.select_all', { defaultValue: 'Select all shown points' })}
+                      />
+                    </th>
                     <th>{t('survey.field.point_id', { defaultValue: 'ID' })}</th>
                     <th>{t('survey.field.code', { defaultValue: 'Code' })}</th>
                     <th>{t('survey.field.kind', { defaultValue: 'Kind' })}</th>
@@ -329,8 +433,15 @@ export default function SurveyRegisterPage() {
                 </thead>
                 <tbody>
                   {(points.data?.items ?? []).map((p) => (
-                    <tr key={p.id}>
-                      <td><bdi dir="ltr" className="font-mono">{p.point_id}</bdi></td>
+                    <tr key={p.id} className={selected.has(p.id) ? 'bg-surface-secondary' : undefined}>
+                      <td>
+                        <input type="checkbox" checked={selected.has(p.id)} onChange={() => toggle(p.id)} aria-label={p.point_id} />
+                      </td>
+                      <td>
+                        <button type="button" className="hover:underline" onClick={() => setOpenPoint(p.id)} data-testid="survey-point-open">
+                          <bdi dir="ltr" className="font-mono">{p.point_id}</bdi>
+                        </button>
+                      </td>
                       <td>{p.code}</td>
                       <td>{t(`survey.kind.${p.kind}`, { defaultValue: p.kind })}</td>
                       <td className="text-right"><bdi dir="ltr" className="font-mono">{coord(p.e)}</bdi></td>
@@ -345,6 +456,16 @@ export default function SurveyRegisterPage() {
             </div>
           )}
         </Card>
+      )}
+
+      {tab === 'control' && (
+        <ControlTab
+          projectId={projectId}
+          canWrite={canWrite}
+          measuredOptions={(points.data?.items ?? [])
+            .filter((p) => p.kind !== 'control')
+            .map((p) => ({ id: p.id, label: p.code ? `${p.point_id} (${p.code})` : p.point_id }))}
+        />
       )}
 
       {tab === 'sets' && (
@@ -471,9 +592,16 @@ export default function SurveyRegisterPage() {
       )}
 
       {tab === 'plan' && (
-        <SurveyPlan plan={plan.data} isLoading={plan.isLoading} error={plan.error} onRetry={() => plan.refetch()} />
+        <SurveyPlan
+          plan={plan.data}
+          isLoading={plan.isLoading}
+          error={plan.error}
+          onRetry={() => plan.refetch()}
+          exportSlot={<PointExportControl projectId={projectId} />}
+        />
       )}
 
+      <PointDrawer pointId={openPoint} canWrite={canWrite} onClose={() => setOpenPoint(null)} />
       <TraverseDrawer
         open={traverseOpen}
         projectId={projectId}

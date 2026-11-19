@@ -22,6 +22,8 @@ Endpoints:
     POST   /volumes/{volume_id}/record-progress       - record measured progress
     GET    /volumes/{volume_id}/history               - who did what with the result
     GET    /volumes/{volume_id}/report.pdf            - volume report
+    POST   /projects/{project_id}/surfaces/point-cloud - LAS/LAZ to a surface (tools_router)
+    POST   /projects/{project_id}/staged-volumes       - cut/fill per stage (tools_router)
 """
 
 from __future__ import annotations
@@ -314,3 +316,9 @@ async def report_pdf(
             "Content-Language": normalize_document_locale(locale, SUPPORTED_LOCALES, "en"),
         },
     )
+
+
+# Point cloud import and staged volumes live in their own file; same prefix and permissions.
+from app.modules.surfaces_volumes.tools_router import router as _tools_router  # noqa: E402
+
+router.include_router(_tools_router)

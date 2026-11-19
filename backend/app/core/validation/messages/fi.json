@@ -2420,6 +2420,10 @@
     "export_crs": {
       "fail": "Viennin koordinaattijärjestelmä {a} eroaa projektin järjestelmästä {b}; koordinaatit muunnettiin.",
       "suggestion": "Varmista, että vastaanottava ohjelma odottaa viennin järjestelmää."
+    },
+    "control_check": {
+      "fail": "Kiintopiste {id}: tarkistusmittaus poikkeaa {r} mm, enemmän kuin {t} mm:n toleranssi.",
+      "suggestion": "Mittaa piste uudelleen; jos se on liikkunut, älä merkitse siitä ennen kuin se on palautettu."
     }
   },
   "volumes": {
@@ -2438,6 +2442,18 @@
     "bank_volume": {
       "fail": "Määrä on kiintotilavuutta (maassa); löyhtymiskerrointa ei ole käytetty.",
       "suggestion": "Lähetä sen sijaan löyhä kaivumassa, jos määräluettelon nimike mitataan löyhänä."
+    },
+    "no_ground_class": {
+      "fail": "Pistepilvessä ei ole maanpintapisteitä (luokka 2); pinnalle {code} käytettiin kaikkia pisteitä.",
+      "suggestion": "Luokittele pistepilvi skannausohjelmassa tai tarkista, ettei kasvillisuus tai koneet ole pinnassa."
+    },
+    "breakline_missed": {
+      "fail": "Pinnan {code} {n} taiteviivan osaa ei voitu säilyttää kolmioiden reunoina.",
+      "suggestion": "Tarkista, etteivät taiteviivat leikkaa toisiaan ja pysyvät pinnan sisällä."
+    },
+    "no_factors": {
+      "fail": "Materiaalille {material} ei ole kiinto-, irto- ja tiivistyskertoimia: vain kiintotilavuudet näytetään.",
+      "suggestion": "Syötä materiaalin kertoimet pohjatutkimusraportista."
     }
   },
   "setting_out": {

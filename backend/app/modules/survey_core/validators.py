@@ -9,6 +9,7 @@ Rules run over a plain dict context built by the service::
         "point_sets": [{"id", "name", "stored_epsg"}],
         "points": [{"point_id", "e", "n", "z", "set_id"}],
         "traverses": [{"id", "name", "kind", "ratio", "profile_ratio", "misclosure_mm", "allowed_mm", "k_mm"}],
+        "control_checks": [{"point_id", "d2d_mm", "tol_mm"}],
     }
 
 SRV-001 error: a point set with no coordinate system.
@@ -16,6 +17,7 @@ SRV-002 warning: a detected project CRS nobody confirmed.
 SRV-003 error: one point id with two different positions.
 SRV-010 error: a traverse closes worse than the profile's 1:x.
 SRV-011 warning: a level run misses by more than k * sqrt(km).
+SRV-012 warning: a control check shot is off by more than the profile tolerance.
 Both thresholds come from a survey profile (pack, demo or the user's own);
 there is no core default, so without a profile neither rule fires.
 
@@ -355,6 +357,34 @@ class ExportCrsRule(_SurveyRule):
         return [self.fail(context, "export_crs", a=a, b=b)]
 
 
+class ControlCheckRule(_SurveyRule):
+    """SRV-012: the latest check shot on a control point is within the profile tolerance."""
+
+    rule_id = "SRV-012"
+    name = "Control check within tolerance"
+    severity = Severity.WARNING
+    category = RuleCategory.COMPLIANCE
+    description = "A control point that moved, or was set out wrong, shifts everything staked from it"
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        out = []
+        for c in rows(context, "control_checks"):
+            r, tol = _f(c.get("d2d_mm")), _f(c.get("tol_mm"))
+            if r is None or not tol or r <= tol:
+                continue
+            out.append(
+                self.fail(
+                    context,
+                    "control_check",
+                    ref=str(c.get("point_id") or ""),
+                    id=str(c.get("point_id") or ""),
+                    r=f"{r:.1f}",
+                    t=f"{tol:g}",
+                )
+            )
+        return out or [self.ok()]
+
+
 SURVEY_RULES = (
     PointSetHasCrsRule,
     CrsConfirmedRule,
@@ -371,6 +401,7 @@ SURVEY_RULES = (
     FootDefinitionRule,
     RawObservationsRule,
     ExportCrsRule,
+    ControlCheckRule,
 )
 
 #: Import-time rule id -> message key, for the import preview's problem texts.

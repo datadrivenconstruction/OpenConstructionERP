@@ -6,12 +6,15 @@
  */
 
 import {
+  API_BASE,
   apiDelete,
   apiGet,
+  apiPatch,
   apiPost,
   apiPut,
   digitSystemHeader,
   extractErrorMessageFromBody,
+  fetchWithAuth,
   getAuthToken,
   triggerDownload,
 } from '@/shared/lib/api';
@@ -335,4 +338,108 @@ export async function downloadSurveyExport(url: string, fallbackFilename: string
   const name = response.headers.get('Content-Disposition')?.match(/filename="?([^";]+)"?/)?.[1];
   triggerDownload(blob, name || fallbackFilename);
   return (response.headers.get('X-Survey-Warnings') ?? '').split(',').filter(Boolean);
+
+// ── Register v2: point detail, bulk actions, export, control checks ─────────
+
+export interface UsedBy {
+  kind: string;
+  code: string;
+  name: string;
+  locked: boolean;
+}
+
+export interface PointDetail extends SurveyPoint {
+  set_name: string;
+  source_filename: string;
+  source_line: number | null;
+  survey_date: string | null;
+  stored_epsg: number | null;
+  used_by: UsedBy[];
+  locked: boolean;
+}
+
+export type PointUpdate = Partial<Pick<SurveyPoint, 'point_id' | 'e' | 'n' | 'z' | 'code' | 'kind' | 'description'>> & {
+  clear_z?: boolean;
+};
+export type BulkAction = 'set_code' | 'set_kind' | 'move_to_set' | 'delete';
+export interface BulkResult {
+  action: BulkAction;
+  affected: number;
+  skipped_locked: number;
+}
+export type ExportFormat = 'csv' | 'dxf' | 'landxml';
+
+export interface ControlCheck {
+  id: string;
+  control_point_id: string;
+  measured_point_id: string | null;
+  e: number;
+  n: number;
+  z: number | null;
+  de_mm: number;
+  dn_mm: number;
+  dz_mm: number | null;
+  d2d_mm: number;
+  verdict: 'pass' | 'fail' | 'no_tolerance';
+  note: string;
+  created_at: string | null;
+}
+
+export interface ControlRow {
+  point: SurveyPoint;
+  checks: ControlCheck[];
+  latest: ControlCheck | null;
+}
+
+export interface ControlList {
+  items: ControlRow[];
+  total: number;
+  tolerance_mm: number | null;
+  profile_label: string;
+  failing: number;
+}
+
+export interface ControlCheckInput {
+  control_point_id: string;
+  measured_point_id?: string | null;
+  e?: number | null;
+  n?: number | null;
+  z?: number | null;
+  note?: string;
+}
+
+export const getPoint = (id: string) => apiGet<PointDetail>(`${BASE}/points/${id}`);
+export const updatePoint = (id: string, body: PointUpdate) => apiPatch<PointDetail>(`${BASE}/points/${id}`, body);
+export const deletePoint = (id: string) => apiDelete(`${BASE}/points/${id}`);
+export const bulkPoints = (
+  projectId: string,
+  body: { ids: string[]; action: BulkAction; value?: string; target_set_id?: string },
+) => apiPost<BulkResult>(`${BASE}/projects/${projectId}/points/bulk`, body);
+export const getControl = (projectId: string) => apiGet<ControlList>(`${BASE}/projects/${projectId}/control`);
+export const addControlCheck = (projectId: string, body: ControlCheckInput) =>
+  apiPost<ControlCheck>(`${BASE}/projects/${projectId}/control/checks`, body);
+export const deleteControlCheck = (projectId: string, checkId: string) =>
+  apiDelete(`${BASE}/projects/${projectId}/control/checks/${checkId}`);
+
+/** POST the selection (or every point when `ids` is empty) and save the file the server returns. */
+export async function exportPoints(
+  projectId: string,
+  body: { ids?: string[]; format: ExportFormat; preset?: 'PNEZD' | 'PENZD'; delimiter?: string; header?: boolean },
+): Promise<void> {
+  const response = await fetchWithAuth(`${API_BASE}${BASE}/projects/${projectId}/points/export`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  if (!response.ok) {
+    let detail = `HTTP ${response.status}`;
+    try {
+      detail = extractErrorMessageFromBody(await response.json()) ?? detail;
+    } catch {
+      // Not JSON; keep the status.
+    }
+    throw new Error(detail);
+  }
+  const ext = body.format === 'landxml' ? 'xml' : body.format;
+  triggerDownload(await response.blob(), `survey_points.${ext}`);
 }

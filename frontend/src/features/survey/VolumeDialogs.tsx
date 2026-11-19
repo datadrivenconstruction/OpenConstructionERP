@@ -1,8 +1,8 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 /**
- * Dialogs of the Volumes page: New surface (from a point set or a LandXML
- * file), New volume (three fields, the rest under Advanced options) and
+ * Dialogs of the Volumes page: New surface (from a point set with optional
+ * breaklines, a LandXML file or a LAS/LAZ point cloud), New volume (three fields, the rest under Advanced options) and
  * Send to BOQ (pick the line, replace or add, cut, fill, net or loose cut).
  */
 
@@ -14,13 +14,16 @@ import { getErrorMessage } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
 import { listPointSets } from './api';
 import {
+  CLOUD_MAX_BYTES,
   VOLUME_METHODS,
   createVolume,
   formatM3,
   importLandXml,
+  importPointCloud,
   searchBoqPositions,
   sendToBoq,
   surfaceFromPoints,
+  type CloudStat,
   type QuantityKind,
   type SendResult,
   type Surface,
@@ -42,6 +45,16 @@ export function parseBoundary(text: string): [number, number][] | null {
   return ring as [number, number][];
 }
 
+/** "TOE, CREST kerb" -> ["TOE", "CREST", "kerb"], duplicates dropped, order kept. */
+export function parseCodes(text: string): string[] {
+  const out: string[] = [];
+  for (const c of text.split(/[\s,;]+/)) {
+    const code = c.trim();
+    if (code && !out.includes(code)) out.push(code);
+  }
+  return out;
+}
+
 function Field({ label, tip, children }: { label: string; tip?: string; children: React.ReactNode }) {
   return (
     <label className="block">
@@ -61,16 +74,51 @@ export function NewSurfaceDialog({ open, projectId, onClose }: NewSurfaceProps) 
   const { t, i18n } = useTranslation();
   const qc = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
-  const [source, setSource] = useState<'points' | 'landxml'>('points');
+  const [source, setSource] = useState<'points' | 'landxml' | 'cloud'>('points');
   const [name, setName] = useState('');
   const [setId, setSetId] = useState('');
   const [file, setFile] = useState<File | null>(null);
+  const [codes, setCodes] = useState('');
+  const [boundary, setBoundary] = useState('');
+  const [cell, setCell] = useState('0.5');
+  const [stat, setStat] = useState<CloudStat>('min');
+  const [groundOnly, setGroundOnly] = useState(true);
+  const ring = boundary.trim() ? parseBoundary(boundary) : null;
+  const cellNum = Number(cell.replace(',', '.'));
   const sets = useQuery({ queryKey: ['survey', 'sets', projectId], queryFn: () => listPointSets(projectId), enabled: open });
 
   const save = useMutation({
     mutationFn: async () => {
-      if (source === 'points') return [await surfaceFromPoints(projectId, { name: name.trim(), point_set_ids: [setId] })];
+      if (source === 'points') {
+        const made = await surfaceFromPoints(projectId, {
+          name: name.trim(),
+          point_set_ids: [setId],
+          breakline_codes: parseCodes(codes),
+          boundary: ring,
+        });
+        return [made];
+      }
       if (!file) return [];
+      if (source === 'cloud') {
+        if (file.size > CLOUD_MAX_BYTES) throw new Error(t('volumes.cloud.too_big', { defaultValue: 'The file is larger than 2 GB.' }));
+        const res = await importPointCloud(projectId, file, {
+          name: name.trim(),
+          cell_size_m: cellNum,
+          stat,
+          ground_only: groundOnly,
+          locale: i18n.language,
+        });
+        addToast({
+          type: 'info',
+          title: t('volumes.cloud.read', {
+            defaultValue: '{{points}} points read, {{cells}} cells of {{cell}} m',
+            points: res.points_read.toLocaleString(i18n.language),
+            cells: res.cells.toLocaleString(i18n.language),
+            cell: res.cell_size_m,
+          }),
+        });
+        return [res.surface];
+      }
       if (file.size > LANDXML_MAX_BYTES) throw new Error(t('volumes.surface.too_big', { defaultValue: 'The file is larger than 30 MB.' }));
       const res = await importLandXml(projectId, { text: await file.text(), filename: file.name, name: name.trim() });
       return res.surfaces;
@@ -78,6 +126,7 @@ export function NewSurfaceDialog({ open, projectId, onClose }: NewSurfaceProps) 
     onSuccess: (made: Surface[]) => {
       qc.invalidateQueries({ queryKey: ['volumes'] });
       for (const s of made) {
+        for (const f of s.findings ?? []) addToast({ type: 'warning', title: f.rule_id, message: [f.message, f.suggestion].filter(Boolean).join(' ') });
         addToast({
           type: 'success',
           title: t('volumes.surface.created', {
@@ -94,7 +143,12 @@ export function NewSurfaceDialog({ open, projectId, onClose }: NewSurfaceProps) 
     },
     onError: (e) => addToast({ type: 'error', title: getErrorMessage(e) }),
   });
-  const ready = source === 'points' ? !!setId && !!name.trim() : !!file;
+  const ready =
+    source === 'points'
+      ? !!setId && !!name.trim() && (!boundary.trim() || !!ring)
+      : source === 'cloud'
+        ? !!file && Number.isFinite(cellNum) && cellNum > 0
+        : !!file;
 
   return (
     <WideModal
@@ -119,17 +173,22 @@ export function NewSurfaceDialog({ open, projectId, onClose }: NewSurfaceProps) 
             <input type="radio" checked={source === 'landxml'} onChange={() => setSource('landxml')} />
             {t('volumes.surface.from_landxml', { defaultValue: 'From a LandXML file' })}
           </label>
+          <label className="inline-flex items-center gap-2">
+            <input type="radio" checked={source === 'cloud'} onChange={() => setSource('cloud')} data-testid="surface-source-cloud" />
+            {t('volumes.surface.from_cloud', { defaultValue: 'From a point cloud (LAS, LAZ)' })}
+          </label>
         </div>
         <Field label={t('common.name', { defaultValue: 'Name' })}>
           <input
             className="oe-input w-full"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder={source === 'landxml' ? t('volumes.surface.name_from_file', { defaultValue: 'Taken from the file when empty' }) : ''}
+            placeholder={source !== 'points' ? t('volumes.surface.name_from_file', { defaultValue: 'Taken from the file when empty' }) : ''}
             data-testid="surface-name"
           />
         </Field>
         {source === 'points' ? (
+          <>
           <Field label={t('volumes.surface.point_set', { defaultValue: 'Point set' })}>
             <select className="oe-input w-full" value={setId} onChange={(e) => setSetId(e.target.value)} data-testid="surface-set">
               <option value="">{t('volumes.surface.pick_set', { defaultValue: 'Choose a point set' })}</option>
@@ -140,6 +199,51 @@ export function NewSurfaceDialog({ open, projectId, onClose }: NewSurfaceProps) 
               ))}
             </select>
           </Field>
+          <Field
+            label={t('volumes.surface.breakline_codes', { defaultValue: 'Breakline codes (optional)' })}
+            tip={t('volumes.surface.breakline_tip', {
+              defaultValue: 'Points with these codes are joined in file order into lines the triangles may not cross: toe, crest, kerb, ditch.',
+            })}
+          >
+            <input className="oe-input w-full" value={codes} onChange={(e) => setCodes(e.target.value)} placeholder="TOE, CREST" data-testid="surface-breaklines" />
+          </Field>
+          <Field label={t('volumes.surface.boundary', { defaultValue: 'Outer boundary (optional): E N; E N; ...' })}>
+            <textarea className="oe-input w-full font-mono text-xs" rows={2} dir="ltr" value={boundary} onChange={(e) => setBoundary(e.target.value)} />
+            {boundary.trim() && !ring && (
+              <span className="text-xs text-semantic-error">{t('volumes.surface.boundary_bad', { defaultValue: 'Three or more E N pairs, separated by semicolons.' })}</span>
+            )}
+          </Field>
+          </>
+        ) : source === 'cloud' ? (
+          <>
+            <Field label={t('volumes.cloud.file', { defaultValue: 'LAS or LAZ file, up to 2 GB' })}>
+              <input type="file" accept=".las,.laz" onChange={(e) => setFile(e.target.files?.[0] ?? null)} data-testid="surface-cloud-file" />
+            </Field>
+            <div className="grid grid-cols-2 gap-3">
+              <Field
+                label={t('volumes.cloud.cell', { defaultValue: 'Cell size (m)' })}
+                tip={t('volumes.cloud.cell_tip', { defaultValue: 'One height per cell. 0.5 m suits drone surveys; a larger cell is faster.' })}
+              >
+                <input className="oe-input w-full" inputMode="decimal" dir="ltr" value={cell} onChange={(e) => setCell(e.target.value)} />
+              </Field>
+              <Field label={t('volumes.cloud.stat', { defaultValue: 'Height per cell' })}>
+                <select className="oe-input w-full" value={stat} onChange={(e) => setStat(e.target.value as CloudStat)}>
+                  <option value="min">{t('volumes.cloud.stat_min', { defaultValue: 'Lowest point (bare ground)' })}</option>
+                  <option value="mean">{t('volumes.cloud.stat_mean', { defaultValue: 'Average' })}</option>
+                  <option value="max">{t('volumes.cloud.stat_max', { defaultValue: 'Highest point' })}</option>
+                </select>
+              </Field>
+            </div>
+            <label className="inline-flex items-center gap-2">
+              <input type="checkbox" checked={groundOnly} onChange={(e) => setGroundOnly(e.target.checked)} />
+              {t('volumes.cloud.ground_only', { defaultValue: 'Ground points only (class 2)' })}
+            </label>
+            <p className="text-xs text-content-tertiary">
+              {t('volumes.cloud.hint', {
+                defaultValue: 'The cloud is read in chunks and reduced to a grid on the server, so a large file does not need a large machine. Coordinates must be in the project system.',
+              })}
+            </p>
+          </>
         ) : (
           <Field label={t('volumes.surface.file', { defaultValue: 'LandXML file (metres)' })}>
             <input type="file" accept=".xml,.landxml" onChange={(e) => setFile(e.target.files?.[0] ?? null)} />

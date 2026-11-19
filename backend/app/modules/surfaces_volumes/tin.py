@@ -9,6 +9,10 @@ shifted to a local origin first; UTM eastings in float32 would lose half a metre
 
 Heights are interpolated linearly inside each triangle; outside the triangles a
 surface has no data (NaN), which is what coverage counts.
+
+Breaklines (toe, crest, kerb) are kept as triangle edges: their vertices are
+inserted, then every segment the Delaunay triangulation crossed is recovered by
+edge flips (Sloan 1993), so no triangle bridges a slope change.
 """
 
 from __future__ import annotations
@@ -72,6 +76,114 @@ def dedupe_xy(e: np.ndarray, n: np.ndarray, z: np.ndarray) -> tuple[np.ndarray, 
     return e[first], n[first], z[first]
 
 
+Polyline = list[tuple[float, float, float]]
+
+
+def _orient(ax: float, ay: float, bx: float, by: float, cx: float, cy: float) -> float:
+    return (bx - ax) * (cy - ay) - (by - ay) * (cx - ax)
+
+
+def _crosses(p: np.ndarray, a: int, b: int, u: int, v: int) -> bool:
+    """True when segment u-v crosses segment a-b in both interiors."""
+    if len({a, b, u, v}) < 4:
+        return False
+    ax, ay = p[a]
+    bx, by = p[b]
+    ux, uy = p[u]
+    vx, vy = p[v]
+    d1 = _orient(ax, ay, bx, by, ux, uy)
+    d2 = _orient(ax, ay, bx, by, vx, vy)
+    d3 = _orient(ux, uy, vx, vy, ax, ay)
+    d4 = _orient(ux, uy, vx, vy, bx, by)
+    return d1 * d2 < 0 and d3 * d4 < 0
+
+
+def _split_on_vertices(p: np.ndarray, a: int, b: int, eps: float = 1e-6) -> list[tuple[int, int]]:
+    """Segment a-b as sub-segments between the vertices lying on it (a constraint cannot jump a vertex)."""
+    d = p[b] - p[a]
+    length2 = float(d @ d)
+    if length2 == 0:
+        return []
+    rel = p - p[a]
+    t = (rel @ d) / length2
+    off = np.abs(rel[:, 0] * d[1] - rel[:, 1] * d[0]) / np.sqrt(length2)
+    on = np.nonzero((off < eps) & (t > 1e-9) & (t < 1 - 1e-9))[0]
+    chain = [a, *[int(i) for i in on[np.argsort(t[on])]], b]
+    return list(zip(chain[:-1], chain[1:], strict=True))
+
+
+def _key(i: int, j: int) -> tuple[int, int]:
+    return (i, j) if i < j else (j, i)
+
+
+def enforce_edges(local_xy: np.ndarray, tri: np.ndarray, segments: list[tuple[int, int]]) -> tuple[np.ndarray, int]:
+    """Flip edges until every constraint segment is an edge of the triangulation.
+
+    Returns the triangles (CCW) and how many segments could not be recovered
+    (a segment that leaves the hull, or a chain of quads that never turns convex).
+    """
+    tris: list[list[int]] = [[int(x) for x in t] for t in tri]
+    edges: dict[tuple[int, int], set[int]] = {}
+    for k, (a, b, c) in enumerate(tris):
+        for i, j in ((a, b), (b, c), (c, a)):
+            edges.setdefault(_key(i, j), set()).add(k)
+
+    def third(k: int, i: int, j: int) -> int:
+        return next(x for x in tris[k] if x not in (i, j))
+
+    # The original edges are tested in one vectorised pass per segment; edges made by flips are few.
+    static = np.array(sorted(edges), dtype=np.int64).reshape(-1, 2)
+    added: set[tuple[int, int]] = set()
+
+    def crossing_edges(a: int, b: int) -> list[tuple[int, int]]:
+        (ax, ay), (bx, by) = local_xy[a], local_xy[b]
+        u, v = local_xy[static[:, 0]], local_xy[static[:, 1]]
+        d1 = (bx - ax) * (u[:, 1] - ay) - (by - ay) * (u[:, 0] - ax)
+        d2 = (bx - ax) * (v[:, 1] - ay) - (by - ay) * (v[:, 0] - ax)
+        d3 = (v[:, 0] - u[:, 0]) * (ay - u[:, 1]) - (v[:, 1] - u[:, 1]) * (ax - u[:, 0])
+        d4 = (v[:, 0] - u[:, 0]) * (by - u[:, 1]) - (v[:, 1] - u[:, 1]) * (bx - u[:, 0])
+        hit = static[(d1 * d2 < 0) & (d3 * d4 < 0)]
+        out = [(int(i), int(j)) for i, j in hit if (int(i), int(j)) in edges]
+        out.extend(k for k in added if k in edges and _crosses(local_xy, a, b, k[0], k[1]))
+        return out
+
+    missed = 0
+    for seg_a, seg_b in segments:
+        for a, b in _split_on_vertices(local_xy, seg_a, seg_b):
+            if _key(a, b) in edges:
+                continue
+            crossing = crossing_edges(a, b)
+            budget = 50 * len(crossing) + 100
+            while crossing and budget > 0:
+                budget -= 1
+                u, v = crossing.pop(0)
+                owners = edges.get((u, v))
+                if not owners or len(owners) != 2:
+                    break  # an edge on the hull: the segment leaves the surface
+                t1, t2 = owners
+                p, q = third(t1, u, v), third(t2, u, v)
+                if not _crosses(local_xy, p, q, u, v):
+                    crossing.append((u, v))  # quad not convex yet; revisit after its neighbours flip
+                    continue
+                # Orient so that t1 = (u, v, p) and t2 = (v, u, q) run counter-clockwise.
+                if _orient(*local_xy[u], *local_xy[v], *local_xy[p]) < 0:
+                    p, q, t1, t2 = q, p, t2, t1
+                tris[t1] = [u, q, p]
+                tris[t2] = [q, v, p]
+                del edges[(u, v)]
+                edges[_key(v, p)].discard(t1)
+                edges[_key(v, p)].add(t2)
+                edges[_key(u, q)].discard(t2)
+                edges[_key(u, q)].add(t1)
+                edges[_key(p, q)] = {t1, t2}
+                added.add(_key(p, q))
+                if _crosses(local_xy, a, b, p, q):
+                    crossing.append(_key(p, q))
+            if _key(a, b) not in edges:
+                missed += 1
+    return np.asarray(tris, dtype=np.int64).reshape(-1, 3), missed
+
+
 @dataclass
 class Tin:
     """A triangulated surface: absolute E/N/Z vertices and CCW triangles."""
@@ -81,6 +193,8 @@ class Tin:
     z: np.ndarray
     tri: np.ndarray
     origin: tuple[float, float] = field(default=(0.0, 0.0))
+    #: Breakline segments that could not be kept as edges (SRV-081).
+    missed_segments: int = 0
 
     @classmethod
     def from_points(cls, e: list[float] | np.ndarray, n: list[float] | np.ndarray, z: list[float] | np.ndarray) -> Tin:
@@ -91,6 +205,49 @@ class Tin:
         origin = (float(ea.min()), float(na.min())) if len(ea) else (0.0, 0.0)
         local = np.column_stack([ea - origin[0], na - origin[1]])
         return cls(ea, na, za, _triangulate(local), origin)
+
+    @classmethod
+    def from_points_with_breaklines(
+        cls,
+        e: list[float] | np.ndarray,
+        n: list[float] | np.ndarray,
+        z: list[float] | np.ndarray,
+        breaklines: list[Polyline],
+        boundary: list[tuple[float, float]] | None = None,
+    ) -> Tin:
+        """Delaunay TIN whose breakline segments are triangle edges; triangles outside ``boundary`` dropped.
+
+        A breakline vertex wins over a scattered point at the same plan position,
+        because its height is the one the surveyor strung on purpose.
+        """
+        lines = [[(float(x), float(y), float(h)) for x, y, h in line] for line in breaklines if len(line) >= 2]
+        flat = [v for line in lines for v in line]
+        ea, na, za = (np.asarray(v, dtype=np.float64) for v in (e, n, z))
+        ok = np.isfinite(ea) & np.isfinite(na) & np.isfinite(za)
+        ea = np.concatenate([np.array([v[0] for v in flat]), ea[ok]])
+        na = np.concatenate([np.array([v[1] for v in flat]), na[ok]])
+        za = np.concatenate([np.array([v[2] for v in flat]), za[ok]])
+        ea, na, za = dedupe_xy(ea, na, za)
+        origin = (float(ea.min()), float(na.min())) if len(ea) else (0.0, 0.0)
+        local = np.column_stack([ea - origin[0], na - origin[1]])
+        tri = _triangulate(local)
+        grid = np.round(np.column_stack([ea, na]) / SAME_XY_M).astype(np.int64)
+        index = {(int(a), int(b)): i for i, (a, b) in enumerate(grid)}
+        segments: list[tuple[int, int]] = []
+        for line in lines:
+            ids = [index.get((round(x / SAME_XY_M), round(y / SAME_XY_M))) for x, y, _ in line]
+            segments.extend(
+                (i, j) for i, j in zip(ids[:-1], ids[1:], strict=True) if i is not None and j is not None and i != j
+            )
+        missed = 0
+        if segments and len(tri):
+            tri, missed = enforce_edges(local, tri, segments)
+        if boundary and len(tri):
+            from app.modules.surfaces_volumes.volumes import in_polygon  # noqa: PLC0415 - volumes imports tin
+
+            keep = in_polygon(ea[tri].mean(axis=1), na[tri].mean(axis=1), boundary)
+            tri = tri[keep]
+        return cls(ea, na, za, tri, origin, missed)
 
     @classmethod
     def from_faces(
@@ -221,4 +378,4 @@ class Tin:
         return inside, l1 * self.z[a] + l2 * self.z[b] + l3 * self.z[c]
 
 
-__all__ = ["SAME_XY_M", "Tin", "dedupe_xy"]
+__all__ = ["SAME_XY_M", "Polyline", "Tin", "dedupe_xy", "enforce_edges"]

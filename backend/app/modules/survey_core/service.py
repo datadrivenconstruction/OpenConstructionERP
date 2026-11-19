@@ -735,6 +735,7 @@ class SurveyService:
                 }
                 for t in await self.repo.list_traverses(project_id)
             ],
+            "control_checks": await self._control_check_rows(project_id),
         }
 
     @staticmethod
@@ -776,6 +777,11 @@ class SurveyService:
             out["scale"] = fit.transform.scale
             out["residuals"] = [vars(r) for r in fit.residuals]
         return out
+
+    async def _control_check_rows(self, project_id: uuid.UUID) -> list[dict[str, Any]]:
+        from app.modules.survey_core.register_service import RegisterService  # noqa: PLC0415
+
+        return await RegisterService(self.session).check_rows(project_id)
 
     async def validate(self, project_id: uuid.UUID, locale: str = "en") -> ValidationReportOut:
         from app.core.validation.engine import validation_engine  # noqa: PLC0415
@@ -1118,6 +1124,7 @@ class SurveyService:
             label=row.label,
             traverse_min_ratio=row.traverse_min_ratio,
             level_k_mm=_f(row.level_k_mm),
+            control_tol_mm=_f(row.control_tol_mm),
             coverage_min_pct=_f(row.coverage_min_pct),
             angular_k_sec=_f(row.angular_k_sec),
         )
@@ -1136,6 +1143,7 @@ class SurveyService:
                 "label": row.label,
                 "traverse_min_ratio": row.traverse_min_ratio,
                 "level_k_mm": _f(row.level_k_mm),
+                "control_tol_mm": _f(row.control_tol_mm),
                 "coverage_min_pct": _f(row.coverage_min_pct),
                 "angular_k_sec": _f(row.angular_k_sec),
             }
@@ -1143,6 +1151,7 @@ class SurveyService:
         row.source = source
         row.traverse_min_ratio = data.traverse_min_ratio
         row.level_k_mm = _d(data.level_k_mm, "0.01")
+        row.control_tol_mm = _d(data.control_tol_mm, "0.01")
         row.coverage_min_pct = _d(data.coverage_min_pct, "0.01")
         row.angular_k_sec = _d(data.angular_k_sec, "0.01")
         await self.session.flush()

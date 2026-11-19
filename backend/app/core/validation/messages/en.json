@@ -2420,6 +2420,10 @@
     "export_crs": {
       "fail": "Export CRS {a} differs from project CRS {b}; coordinates transformed.",
       "suggestion": "Make sure the receiving software expects the export system."
+    },
+    "control_check": {
+      "fail": "Control point {id}: the check shot is {r} mm off, beyond the {t} mm tolerance.",
+      "suggestion": "Re-observe the point; if it has moved, stop setting out from it until it is re-established."
     }
   },
   "volumes": {
@@ -2438,6 +2442,18 @@
     "bank_volume": {
       "fail": "The quantity is bank volume (in the ground); the swell factor is not applied.",
       "suggestion": "Send the loose cut instead if the BOQ line is measured as loose material."
+    },
+    "no_ground_class": {
+      "fail": "The point cloud has no ground points (class 2); all points were used for surface {code}.",
+      "suggestion": "Classify the cloud in the scanning software, or check that vegetation and machines are not in the surface."
+    },
+    "breakline_missed": {
+      "fail": "{n} breakline segments of surface {code} could not be kept as triangle edges.",
+      "suggestion": "Check that breaklines do not cross each other and stay inside the surface."
+    },
+    "no_factors": {
+      "fail": "No bank, loose and compacted factors for {material}: only bank volumes are shown.",
+      "suggestion": "Enter the factors for this material from the soil report."
     }
   },
   "setting_out": {

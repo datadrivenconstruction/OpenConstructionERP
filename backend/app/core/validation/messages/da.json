@@ -2420,6 +2420,10 @@
     "export_crs": {
       "fail": "Eksport-CRS {a} afviger fra projekt-CRS {b}; koordinater transformeret.",
       "suggestion": "Kontrollér, at det modtagende program forventer eksportsystemet."
+    },
+    "control_check": {
+      "fail": "Fikspunkt {id}: kontrolmålingen afviger {r} mm, mere end tolerancen på {t} mm.",
+      "suggestion": "Mål punktet igen; hvis det har flyttet sig, så afsæt ikke fra det, før det er genetableret."
     }
   },
   "volumes": {
@@ -2438,6 +2442,18 @@
     "bank_volume": {
       "fail": "Mængden er fast volumen (i jorden); opluckningsfaktoren er ikke anvendt.",
       "suggestion": "Send i stedet den løse afgravning, hvis tilbudslisteposten måles som løst materiale."
+    },
+    "no_ground_class": {
+      "fail": "Punktskyen har ingen terrænpunkter (klasse 2); alle punkter blev brugt til fladen {code}.",
+      "suggestion": "Klassificér punktskyen i scanningsprogrammet, eller kontrollér at bevoksning og maskiner ikke er i fladen."
+    },
+    "breakline_missed": {
+      "fail": "{n} brudlinjesegmenter i fladen {code} kunne ikke bevares som trekantsider.",
+      "suggestion": "Kontrollér at brudlinjer ikke krydser hinanden og ligger inden for fladen."
+    },
+    "no_factors": {
+      "fail": "Ingen faktorer for fast, løs og komprimeret volumen for {material}: kun faste volumener vises.",
+      "suggestion": "Indtast faktorerne for materialet fra den geotekniske rapport."
     }
   },
   "setting_out": {

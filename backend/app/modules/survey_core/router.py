@@ -386,3 +386,9 @@ async def export_points(
         locale=locale,
     )
     return download(text, fmt, f"survey_points_{kind or 'all'}", findings)
+
+
+# Point detail, bulk actions, export and control checks live in their own file; same prefix and permissions.
+from app.modules.survey_core.register_router import router as _register_router  # noqa: E402
+
+router.include_router(_register_router)

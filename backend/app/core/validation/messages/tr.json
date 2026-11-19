@@ -2420,6 +2420,10 @@
     "export_crs": {
       "fail": "Dışa aktarma KRS'si {a}, proje KRS'si {b} ile farklı; koordinatlar dönüştürüldü.",
       "suggestion": "Alıcı yazılımın dışa aktarma sistemini beklediğinden emin olun."
+    },
+    "control_check": {
+      "fail": "Poligon noktası {id}: kontrol ölçümü {r} mm sapıyor, {t} mm toleransın üzerinde.",
+      "suggestion": "Noktayı yeniden ölçün; yeri değiştiyse yeniden tesis edilene kadar ondan aplikasyon yapmayın."
     }
   },
   "volumes": {
@@ -2438,6 +2442,18 @@
     "bank_volume": {
       "fail": "Miktar yerinde (zemindeki) hacimdir; kabarma katsayısı uygulanmadı.",
       "suggestion": "Keşif kalemi gevşek malzeme olarak ölçülüyorsa gevşek kazıyı gönderin."
+    },
+    "no_ground_class": {
+      "fail": "Nokta bulutunda zemin noktası (sınıf 2) yok; {code} yüzeyi için tüm noktalar kullanıldı.",
+      "suggestion": "Bulutu tarama yazılımında sınıflandırın veya bitki örtüsü ve makinelerin yüzeyde olmadığını kontrol edin."
+    },
+    "breakline_missed": {
+      "fail": "{code} yüzeyinin {n} kırık çizgi parçası üçgen kenarı olarak korunamadı.",
+      "suggestion": "Kırık çizgilerin birbirini kesmediğini ve yüzeyin içinde kaldığını kontrol edin."
+    },
+    "no_factors": {
+      "fail": "{material} için kabarma ve sıkışma katsayısı yok: yalnızca yerinde hacimler gösteriliyor.",
+      "suggestion": "Bu malzemenin katsayılarını zemin etüdü raporundan girin."
     }
   },
   "setting_out": {

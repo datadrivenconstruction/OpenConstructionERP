@@ -2420,6 +2420,10 @@
     "export_crs": {
       "fail": "Souřadnicový systém exportu {a} se liší od systému projektu {b}; souřadnice transformovány.",
       "suggestion": "Ověřte, že cílový software očekává systém exportu."
+    },
+    "control_check": {
+      "fail": "Bod bodového pole {id}: kontrolní měření se liší o {r} mm, více než tolerance {t} mm.",
+      "suggestion": "Bod znovu zaměřte; pokud se posunul, nevytyčujte z něj, dokud nebude obnoven."
     }
   },
   "volumes": {
@@ -2438,6 +2442,18 @@
     "bank_volume": {
       "fail": "Množství je objem v rostlém stavu (v zemi); součinitel nakypření není použit.",
       "suggestion": "Pokud se položka rozpočtu měří v nakypřeném stavu, odešlete raději nakypřený výkop."
+    },
+    "no_ground_class": {
+      "fail": "Mračno bodů nemá body terénu (třída 2); pro povrch {code} byly použity všechny body.",
+      "suggestion": "Klasifikujte mračno ve skenovacím softwaru, nebo ověřte, že vegetace a stroje nejsou v povrchu."
+    },
+    "breakline_missed": {
+      "fail": "{n} úseků povinných hran povrchu {code} se nepodařilo zachovat jako hrany trojúhelníků.",
+      "suggestion": "Ověřte, že se povinné hrany nekříží a leží uvnitř povrchu."
+    },
+    "no_factors": {
+      "fail": "Pro {material} chybí součinitele nakypření a zhutnění: zobrazují se jen objemy v rostlém stavu.",
+      "suggestion": "Zadejte součinitele pro tento materiál z geotechnického průzkumu."
     }
   },
   "setting_out": {

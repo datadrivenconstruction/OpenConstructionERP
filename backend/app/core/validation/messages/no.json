@@ -2420,6 +2420,10 @@
     "export_crs": {
       "fail": "Eksport-CRS {a} avviker fra prosjekt-CRS {b}; koordinater transformert.",
       "suggestion": "Kontroller at mottakende program forventer eksportsystemet."
+    },
+    "control_check": {
+      "fail": "Fastmerke {id}: kontrollmålingen avviker {r} mm, mer enn toleransen på {t} mm.",
+      "suggestion": "Mål punktet på nytt; hvis det har flyttet seg, ikke sett ut fra det før det er reetablert."
     }
   },
   "volumes": {
@@ -2438,6 +2442,18 @@
     "bank_volume": {
       "fail": "Mengden er faste masser (i grunnen); svellfaktoren er ikke brukt.",
       "suggestion": "Send heller løse masser fra utgraving hvis posten måles som løst materiale."
+    },
+    "no_ground_class": {
+      "fail": "Punktskyen har ingen terrengpunkter (klasse 2); alle punkter ble brukt for flaten {code}.",
+      "suggestion": "Klassifiser punktskyen i skanneprogrammet, eller kontroller at vegetasjon og maskiner ikke er i flaten."
+    },
+    "breakline_missed": {
+      "fail": "{n} bruddlinjesegmenter i flaten {code} kunne ikke beholdes som trekantkanter.",
+      "suggestion": "Kontroller at bruddlinjer ikke krysser hverandre og ligger innenfor flaten."
+    },
+    "no_factors": {
+      "fail": "Ingen faktorer for fast, løs og komprimert masse for {material}: bare faste volumer vises.",
+      "suggestion": "Legg inn faktorene for materialet fra den geotekniske rapporten."
     }
   },
   "setting_out": {

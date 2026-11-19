@@ -6,7 +6,16 @@
  */
 
 import type { FeatureCollection } from 'geojson';
-import { apiDelete, apiGet, apiPatch, apiPost, apiPut } from '@/shared/lib/api';
+import {
+  API_BASE,
+  apiDelete,
+  apiGet,
+  apiPatch,
+  apiPost,
+  apiPut,
+  extractErrorMessageFromBody,
+  fetchWithAuth,
+} from '@/shared/lib/api';
 
 const BASE = '/v1/surfaces-volumes';
 const CORE = '/v1/survey-core';
@@ -21,7 +30,7 @@ export interface Surface {
   project_id: string;
   code: string;
   name: string;
-  source: 'points' | 'landxml' | 'dtm';
+  source: 'points' | 'landxml' | 'dtm' | 'pointcloud';
   source_filename: string;
   epsg: number | null;
   accuracy_tier: string | null;
@@ -31,6 +40,8 @@ export interface Surface {
   z_min: number | null;
   z_max: number | null;
   in_use: number;
+  breakline_count?: number;
+  findings?: Finding[];
   created_at: string | null;
 }
 
@@ -185,7 +196,13 @@ export type SurveyPlan = FeatureCollection & { properties?: { epsg: number | nul
 
 
 export const listSurfaces = (projectId: string) => apiGet<{ items: Surface[] }>(`${BASE}/projects/${projectId}/surfaces`).then((r) => r.items);
-export const surfaceFromPoints = (projectId: string, body: { name: string; point_set_ids: string[] }) =>
+export interface SurfaceFromPointsBody {
+  name: string;
+  point_set_ids: string[];
+  breakline_codes?: string[];
+  boundary?: [number, number][] | null;
+}
+export const surfaceFromPoints = (projectId: string, body: SurfaceFromPointsBody) =>
   apiPost<Surface>(`${BASE}/projects/${projectId}/surfaces/from-points`, body);
 export const importLandXml = (projectId: string, body: { text: string; filename: string; name?: string }) =>
   apiPost<{ surfaces: Surface[]; problems: string[] }>(`${BASE}/projects/${projectId}/surfaces/landxml`, body);
@@ -238,3 +255,86 @@ export function netSide(net: number): 'cut' | 'fill' | 'balanced' {
   if (net < -0.05) return 'fill';
   return 'balanced';
 }
+
+// ── Point clouds and staged volumes ─────────────────────────────────────────
+
+export type CloudStat = 'min' | 'mean' | 'max';
+
+export interface CloudImportResult {
+  surface: Surface;
+  points_read: number;
+  points_used: number;
+  ground_points: number;
+  used_all_classes: boolean;
+  cells: number;
+  cell_size_m: number;
+  stat: CloudStat;
+  las_version: string;
+  compressed: boolean;
+}
+
+export interface StageInput {
+  label: string;
+  surface_id?: string | null;
+  strip_depth_m?: number | null;
+  surveyed_on?: string;
+  material?: string;
+}
+
+export interface MaterialFactors {
+  loose?: number | null;
+  compacted?: number | null;
+}
+
+export interface StageStep {
+  index: number;
+  from_label: string;
+  to_label: string;
+  surveyed_on: string;
+  material: string;
+  cut_m3: number;
+  fill_m3: number;
+  net_m3: number;
+  coverage_pct: number;
+  cut_loose_m3: number | null;
+  fill_bank_needed_m3: number | null;
+  cumulative_cut_m3: number;
+  cumulative_fill_m3: number;
+}
+
+export interface StagedResult {
+  steps: StageStep[];
+  total_cut_m3: number;
+  total_fill_m3: number;
+  method: string;
+  findings: Finding[];
+}
+
+export const CLOUD_MAX_BYTES = 2 * 1024 ** 3;
+
+/** Upload a LAS or LAZ file; the server grids it and stores the cells as a surface. */
+export async function importPointCloud(
+  projectId: string,
+  file: File,
+  opts: { name?: string; cell_size_m: number; stat: CloudStat; ground_only: boolean; locale: string },
+): Promise<CloudImportResult> {
+  const form = new FormData();
+  form.append('file', file);
+  form.append('name', opts.name ?? '');
+  form.append('cell_size_m', String(opts.cell_size_m));
+  form.append('stat', opts.stat);
+  form.append('ground_only', String(opts.ground_only));
+  const response = await fetchWithAuth(`${API_BASE}${BASE}/projects/${projectId}/surfaces/point-cloud?locale=${encodeURIComponent(opts.locale)}`, {
+    method: 'POST',
+    body: form,
+  });
+  const body = await response.json().catch(() => null);
+  if (!response.ok) throw new Error(extractErrorMessageFromBody(body) ?? `HTTP ${response.status}`);
+  return body as CloudImportResult;
+}
+
+export const computeStaged = (
+  projectId: string,
+  body: { stages: StageInput[]; method?: VolumeMethod; cell_size_m?: number | null; factors?: Record<string, MaterialFactors> },
+  locale: string,
+) => apiPost<StagedResult>(`${BASE}/projects/${projectId}/staged-volumes?locale=${encodeURIComponent(locale)}`, body);

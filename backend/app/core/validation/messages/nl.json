@@ -2420,6 +2420,10 @@
     "export_crs": {
       "fail": "Export-CRS {a} wijkt af van project-CRS {b}; coördinaten getransformeerd.",
       "suggestion": "Controleer dat de ontvangende software het exportsysteem verwacht."
+    },
+    "control_check": {
+      "fail": "Vastpunt {id}: de controlemeting wijkt {r} mm af, meer dan de tolerantie van {t} mm.",
+      "suggestion": "Meet het punt opnieuw in; als het verschoven is, zet er niet meer vanaf uit tot het opnieuw is bepaald."
     }
   },
   "volumes": {
@@ -2438,6 +2442,18 @@
     "bank_volume": {
       "fail": "De hoeveelheid is vast volume (in de grond); de opbulkingsfactor is niet toegepast.",
       "suggestion": "Stuur in plaats daarvan de losse ontgraving als de bestekpost in losse grond wordt gemeten."
+    },
+    "no_ground_class": {
+      "fail": "De puntenwolk heeft geen maaiveldpunten (klasse 2); voor oppervlak {code} zijn alle punten gebruikt.",
+      "suggestion": "Classificeer de puntenwolk in de scansoftware, of controleer dat begroeiing en machines niet in het oppervlak zitten."
+    },
+    "breakline_missed": {
+      "fail": "{n} breuklijnsegmenten van oppervlak {code} konden niet als driehoekszijden behouden blijven.",
+      "suggestion": "Controleer dat breuklijnen elkaar niet kruisen en binnen het oppervlak blijven."
+    },
+    "no_factors": {
+      "fail": "Geen factoren voor vast, los en verdicht volume voor {material}: alleen vaste volumes worden getoond.",
+      "suggestion": "Voer de factoren voor dit materiaal in uit het grondonderzoek."
     }
   },
   "setting_out": {

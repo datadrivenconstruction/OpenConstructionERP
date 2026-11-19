@@ -19,6 +19,14 @@ QuantityKind = Literal["cut", "fill", "net", "loose_cut"]
 Ring = list[tuple[float, float]]
 
 
+class Finding(BaseModel):
+    rule_id: str
+    severity: str
+    message: str
+    suggestion: str | None = None
+    element_ref: str | None = None
+
+
 class SurfaceOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -39,6 +47,8 @@ class SurfaceOut(BaseModel):
     note: str = ""
     in_use: int = 0
     created_at: datetime | None = None
+    breakline_count: int = 0
+    findings: list[Finding] = Field(default_factory=list)
 
 
 class SurfaceFromPoints(BaseModel):
@@ -47,6 +57,19 @@ class SurfaceFromPoints(BaseModel):
     name: str = Field(min_length=1, max_length=255)
     point_set_ids: list[uuid.UUID] = Field(min_length=1, max_length=20)
     note: str = Field(default="", max_length=2000)
+    #: Polylines of [e, n, z] kept as triangle edges (toe, crest, kerb).
+    breaklines: list[list[tuple[float, float, float]]] = Field(default_factory=list, max_length=2000)
+    #: Point codes whose points, in file order, are strung into one breakline per code.
+    breakline_codes: list[str] = Field(default_factory=list, max_length=50)
+    #: Outer boundary: triangles outside it are dropped.
+    boundary: Ring | None = None
+
+    @field_validator("boundary")
+    @classmethod
+    def _ring(cls, v: Ring | None) -> Ring | None:
+        if v is not None and len(v) < 3:
+            raise ValueError("A boundary needs at least three corners")
+        return v
 
 
 class LandXmlImport(BaseModel):
@@ -106,14 +129,6 @@ class VolumeDuplicate(BaseModel):
     swell_factor: float | None = Field(default=None, gt=0, le=5)
     shrink_factor: float | None = Field(default=None, gt=0, le=5)
     material: str | None = Field(default=None, max_length=120)
-
-
-class Finding(BaseModel):
-    rule_id: str
-    severity: str
-    message: str
-    suggestion: str | None = None
-    element_ref: str | None = None
 
 
 class VolumeOut(BaseModel):
@@ -263,3 +278,71 @@ class VolumeListResponse(BaseModel):
     total: int
     offset: int = 0
     limit: int = 50
+
+
+# ── Point cloud and staged volumes ─────────────────────────────────────────
+
+
+class CloudImportResult(BaseModel):
+    """A surface gridded from a LAS/LAZ cloud, with what was read."""
+
+    surface: SurfaceOut
+    points_read: int
+    points_used: int
+    ground_points: int
+    used_all_classes: bool
+    cells: int
+    cell_size_m: float
+    stat: str
+    las_version: str = ""
+    compressed: bool = False
+
+
+class MaterialFactors(BaseModel):
+    """Bank to loose and bank to compacted, entered by the user; no default exists."""
+
+    loose: float | None = Field(default=None, gt=0, le=5)
+    compacted: float | None = Field(default=None, gt=0, le=5)
+
+
+class StageIn(BaseModel):
+    """A surveyed surface, or a strip of the stage before by ``strip_depth_m``."""
+
+    label: str = Field(default="", max_length=120)
+    surface_id: uuid.UUID | None = None
+    strip_depth_m: float | None = Field(default=None, gt=0, le=50)
+    surveyed_on: str = Field(default="", max_length=10)
+    #: What moves between the stage before and this one (topsoil, bulk cut, rock).
+    material: str = Field(default="", max_length=120)
+
+
+class StagedRequest(BaseModel):
+    stages: list[StageIn] = Field(min_length=2, max_length=24)
+    method: Method = "grid"
+    cell_size_m: float | None = Field(default=None, gt=0, le=1000)
+    boundary: Ring | None = None
+    factors: dict[str, MaterialFactors] = Field(default_factory=dict)
+
+
+class StageStep(BaseModel):
+    index: int
+    from_label: str
+    to_label: str
+    surveyed_on: str = ""
+    material: str = ""
+    cut_m3: float
+    fill_m3: float
+    net_m3: float
+    coverage_pct: float
+    cut_loose_m3: float | None = None
+    fill_bank_needed_m3: float | None = None
+    cumulative_cut_m3: float
+    cumulative_fill_m3: float
+
+
+class StagedResult(BaseModel):
+    steps: list[StageStep]
+    total_cut_m3: float
+    total_fill_m3: float
+    method: str
+    findings: list[Finding] = Field(default_factory=list)

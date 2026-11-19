@@ -2420,6 +2420,10 @@
     "export_crs": {
       "fail": "CRS ekspor {a} berbeda dari CRS proyek {b}; koordinat ditransformasi.",
       "suggestion": "Pastikan perangkat lunak penerima mengharapkan sistem ekspor."
+    },
+    "control_check": {
+      "fail": "Titik kontrol {id}: pengukuran cek menyimpang {r} mm, melebihi toleransi {t} mm.",
+      "suggestion": "Ukur ulang titik; jika bergeser, jangan melakukan stake out darinya sampai titik itu dipasang kembali."
     }
   },
   "volumes": {
@@ -2438,6 +2442,18 @@
     "bank_volume": {
       "fail": "Kuantitas adalah volume asli (di dalam tanah); faktor pengembangan tidak diterapkan.",
       "suggestion": "Kirim galian lepas jika item BOQ diukur sebagai material lepas."
+    },
+    "no_ground_class": {
+      "fail": "Awan titik tidak memiliki titik tanah (kelas 2); semua titik dipakai untuk permukaan {code}.",
+      "suggestion": "Klasifikasikan awan titik di perangkat lunak pemindaian, atau pastikan vegetasi dan alat berat tidak masuk ke permukaan."
+    },
+    "breakline_missed": {
+      "fail": "{n} segmen garis patah permukaan {code} tidak dapat dipertahankan sebagai sisi segitiga.",
+      "suggestion": "Pastikan garis patah tidak saling berpotongan dan tetap di dalam permukaan."
+    },
+    "no_factors": {
+      "fail": "Tidak ada faktor pengembangan dan pemadatan untuk {material}: hanya volume asli yang ditampilkan.",
+      "suggestion": "Masukkan faktor material ini dari laporan tanah."
     }
   },
   "setting_out": {

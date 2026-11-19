@@ -302,6 +302,7 @@ class SurveyProfileIn(BaseModel):
     label: str = Field(default="", max_length=255)
     traverse_min_ratio: int | None = Field(default=None, ge=100, le=10_000_000)
     level_k_mm: float | None = Field(default=None, gt=0, le=1_000)
+    control_tol_mm: float | None = Field(default=None, gt=0, le=10_000)
     coverage_min_pct: float | None = Field(default=None, ge=0, le=100)
     angular_k_sec: float | None = Field(default=None, gt=0, le=3600)
 

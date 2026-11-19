@@ -2420,6 +2420,10 @@
     "export_crs": {
       "fail": "Układ eksportu {a} różni się od układu projektu {b}; współrzędne przeliczono.",
       "suggestion": "Upewnij się, że program docelowy oczekuje układu eksportu."
+    },
+    "control_check": {
+      "fail": "Punkt osnowy {id}: pomiar kontrolny odbiega o {r} mm, więcej niż tolerancja {t} mm.",
+      "suggestion": "Pomierz punkt ponownie; jeśli się przesunął, nie tyczy od niego, dopóki nie zostanie odtworzony."
     }
   },
   "volumes": {
@@ -2438,6 +2442,18 @@
     "bank_volume": {
       "fail": "Ilość to objętość w stanie rodzimym (w gruncie); współczynnik spulchnienia nie jest zastosowany.",
       "suggestion": "Wyślij urobek spulchniony, jeśli pozycja przedmiaru jest mierzona w stanie luźnym."
+    },
+    "no_ground_class": {
+      "fail": "Chmura punktów nie ma punktów terenu (klasa 2); dla powierzchni {code} użyto wszystkich punktów.",
+      "suggestion": "Sklasyfikuj chmurę w programie do skanowania lub sprawdź, czy roślinność i maszyny nie weszły do powierzchni."
+    },
+    "breakline_missed": {
+      "fail": "{n} odcinków linii nieciągłości powierzchni {code} nie udało się zachować jako krawędzi trójkątów.",
+      "suggestion": "Sprawdź, czy linie nieciągłości nie przecinają się i leżą wewnątrz powierzchni."
+    },
+    "no_factors": {
+      "fail": "Brak współczynników spulchnienia i zagęszczenia dla {material}: pokazano tylko objętości w stanie rodzimym.",
+      "suggestion": "Wpisz współczynniki dla tego materiału z opinii geotechnicznej."
     }
   },
   "setting_out": {

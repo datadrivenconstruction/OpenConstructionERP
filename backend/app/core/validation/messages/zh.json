@@ -2420,6 +2420,10 @@
     "export_crs": {
       "fail": "导出坐标系 {a} 与项目坐标系 {b} 不同；坐标已转换。",
       "suggestion": "确认接收软件需要该导出坐标系。"
+    },
+    "control_check": {
+      "fail": "控制点 {id}:检核测量偏差 {r} mm,超出 {t} mm 限差。",
+      "suggestion": "请重新观测该点;如已移动,在重新埋设前不要从该点放样。"
     }
   },
   "volumes": {
@@ -2438,6 +2442,18 @@
     "bank_volume": {
       "fail": "数量为自然方（原状土）；未应用松散系数。",
       "suggestion": "如果清单项按松方计量，请改为发送松方挖方。"
+    },
+    "no_ground_class": {
+      "fail": "点云中没有地面点(第 2 类),曲面 {code} 使用了全部点。",
+      "suggestion": "请在扫描软件中对点云分类,或检查植被和机械是否混入曲面。"
+    },
+    "breakline_missed": {
+      "fail": "曲面 {code} 的 {n} 段特征线未能保留为三角形边。",
+      "suggestion": "请检查特征线互不相交且位于曲面范围内。"
+    },
+    "no_factors": {
+      "fail": "{material} 没有松散系数和压实系数:仅显示自然方量。",
+      "suggestion": "请根据岩土报告输入该材料的系数。"
     }
   },
   "setting_out": {
