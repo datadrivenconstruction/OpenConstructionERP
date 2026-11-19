@@ -21,25 +21,54 @@ Endpoints:
     POST   /entries/{entry_id}/truck-loads          - truck-count tonnes from a CSV
     POST   /entries/{entry_id}/add-to-claim         - progress entry for the confirmed actual (survey.confirm)
     GET    /periods/{period_id}/report.pdf          - mine period report
+    GET    /units/{unit_id}/materials               - ore/waste/low-grade polygons of a unit
+    POST   /units/{unit_id}/materials[/import]      - add one, or import GeoJSON / drawing layers
+    DELETE /materials/{material_id}                 - remove a polygon
+    POST   /entries/{entry_id}/material-split       - clip the actual by the polygons, tonnes per material
+    GET    /units/{unit_id}/drive                   - face pickups, profiles, advance and overbreak
+    POST   /units/{unit_id}/faces                   - a face pickup (sets the period advance)
+    POST   /units/{unit_id}/profiles[/import]       - measured profiles (area or outline, or a CSV)
+    GET    /projects/{project_id}/blast-patterns    - blast patterns
+    POST   /projects/{project_id}/blast-patterns    - new pattern with its design collars
+    GET    /blast-patterns/{pattern_id}             - holes, as-drilled check, SRV-093 findings
+    PATCH  /blast-patterns/{pattern_id}             - name, tolerances, note
+    POST   /blast-patterns/{pattern_id}/as-drilled  - import the as-drilled holes
+    GET    /blast-patterns/{pattern_id}/stake-list.csv - design collars for the instrument
+    DELETE /blast-patterns/{pattern_id}             - remove a pattern
 """
 
 from __future__ import annotations
 
 import uuid
+from typing import Any
 
 from fastapi import APIRouter, Depends, Query, Response, status
 
 from app.core.document_locale import normalize_document_locale
 from app.core.i18n import SUPPORTED_LOCALES
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep, verify_project_access
+from app.modules.mine_survey.depth import MineDepthService
+from app.modules.mine_survey.models import MineUnit
 from app.modules.mine_survey.schemas import (
     AddToClaim,
     ClaimResult,
     ComputeActual,
     ConfirmActual,
+    DrilledImport,
+    DriveDetail,
     EntryCreate,
     EntryOut,
     EntryUpdate,
+    FaceIn,
+    FaceOut,
+    MaterialImport,
+    MaterialImportResult,
+    MaterialIn,
+    MaterialOut,
+    PatternCreate,
+    PatternDetail,
+    PatternListResponse,
+    PatternUpdate,
     PeriodCreate,
     PeriodDetail,
     PeriodListResponse,
@@ -47,6 +76,9 @@ from app.modules.mine_survey.schemas import (
     PeriodUpdate,
     PlanImport,
     PlanImportResult,
+    ProfileImport,
+    ProfileIn,
+    ProfileOut,
     TruckLoadsImport,
     UnitCreate,
     UnitListResponse,
@@ -258,3 +290,157 @@ async def report_pdf(
             "Content-Language": normalize_document_locale(locale, SUPPORTED_LOCALES, "en"),
         },
     )
+
+
+# ── v2: material split, drives, blast patterns ─────────────────────────────
+
+
+async def _unit_of(unit_id: uuid.UUID, session: SessionDep, user_id: str) -> tuple[MineDepthService, MineUnit]:
+    depth = MineDepthService(session)
+    u = await depth._unit(unit_id)  # noqa: SLF001
+    await verify_project_access(u.project_id, user_id, session)
+    return depth, u
+
+
+@router.get("/units/{unit_id}/materials", response_model=list[MaterialOut], dependencies=_READ)
+async def list_materials(unit_id: uuid.UUID, session: SessionDep, user_id: CurrentUserId) -> list[MaterialOut]:
+    depth, u = await _unit_of(unit_id, session, user_id)
+    return await depth.list_materials(u.id)
+
+
+@router.post("/units/{unit_id}/materials", response_model=MaterialOut, status_code=201, dependencies=_WRITE)
+async def add_material(
+    unit_id: uuid.UUID, body: MaterialIn, session: SessionDep, user_id: CurrentUserId
+) -> MaterialOut:
+    depth, u = await _unit_of(unit_id, session, user_id)
+    return await depth.add_material(u, body, user_id)
+
+
+@router.post("/units/{unit_id}/materials/import", response_model=MaterialImportResult, dependencies=_WRITE)
+async def import_materials(
+    unit_id: uuid.UUID, body: MaterialImport, session: SessionDep, user_id: CurrentUserId
+) -> MaterialImportResult:
+    depth, u = await _unit_of(unit_id, session, user_id)
+    return await depth.import_materials(u, body, user_id)
+
+
+@router.delete("/materials/{material_id}", status_code=status.HTTP_204_NO_CONTENT, dependencies=_WRITE)
+async def delete_material(material_id: uuid.UUID, session: SessionDep, user_id: CurrentUserId) -> Response:
+    depth = MineDepthService(session)
+    m = await depth.get_material(material_id)
+    await verify_project_access(m.project_id, user_id, session)
+    await depth.repo.delete(m)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@router.post("/entries/{entry_id}/material-split", response_model=EntryOut, dependencies=_WRITE)
+async def material_split(
+    entry_id: uuid.UUID, session: SessionDep, user_id: CurrentUserId, locale: str = _LOCALE
+) -> EntryOut:
+    service, e = await _entry(entry_id, session, user_id)
+    service._open(e)  # noqa: SLF001
+    await MineDepthService(session).split_entry(e)
+    return await service._entry_response(e, locale)  # noqa: SLF001
+
+
+@router.get("/units/{unit_id}/drive", response_model=DriveDetail, dependencies=_READ)
+async def drive_detail(
+    unit_id: uuid.UUID,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    period_id: uuid.UUID | None = None,
+    locale: str = _LOCALE,
+) -> DriveDetail:
+    depth, u = await _unit_of(unit_id, session, user_id)
+    period = await MineService(session).get_period(period_id) if period_id else None
+    return await depth.drive_detail(u, period, locale)
+
+
+@router.post("/units/{unit_id}/faces", response_model=FaceOut, status_code=201, dependencies=_WRITE)
+async def add_face(unit_id: uuid.UUID, body: FaceIn, session: SessionDep, user_id: CurrentUserId) -> FaceOut:
+    depth, u = await _unit_of(unit_id, session, user_id)
+    return await depth.add_face(u, body)
+
+
+@router.post("/units/{unit_id}/profiles", response_model=ProfileOut, status_code=201, dependencies=_WRITE)
+async def add_profile(unit_id: uuid.UUID, body: ProfileIn, session: SessionDep, user_id: CurrentUserId) -> ProfileOut:
+    depth, u = await _unit_of(unit_id, session, user_id)
+    return await depth.add_profile(u, body)
+
+
+@router.post("/units/{unit_id}/profiles/import", response_model=list[ProfileOut], dependencies=_WRITE)
+async def import_profiles(
+    unit_id: uuid.UUID, body: ProfileImport, session: SessionDep, user_id: CurrentUserId
+) -> list[ProfileOut]:
+    depth, u = await _unit_of(unit_id, session, user_id)
+    rows, _ = await depth.import_profiles(u, body)
+    return rows
+
+
+@router.get("/projects/{project_id}/blast-patterns", response_model=PatternListResponse, dependencies=_READ)
+async def list_patterns(project_id: uuid.UUID, session: SessionDep, user_id: CurrentUserId) -> PatternListResponse:
+    await verify_project_access(project_id, user_id, session)
+    rows = await MineDepthService(session).list_patterns(project_id)
+    return PatternListResponse(items=rows, total=len(rows))
+
+
+@router.post(
+    "/projects/{project_id}/blast-patterns", response_model=PatternDetail, status_code=201, dependencies=_WRITE
+)
+async def create_pattern(
+    project_id: uuid.UUID, body: PatternCreate, session: SessionDep, user_id: CurrentUserId, locale: str = _LOCALE
+) -> PatternDetail:
+    await verify_project_access(project_id, user_id, session)
+    depth = MineDepthService(session)
+    p, problems = await depth.create_pattern(project_id, body, user_id)
+    return await depth.pattern_detail(p, locale, problems)
+
+
+async def _pattern(pattern_id: uuid.UUID, session: SessionDep, user_id: str) -> tuple[MineDepthService, Any]:
+    depth = MineDepthService(session)
+    p = await depth.get_pattern(pattern_id)
+    await verify_project_access(p.project_id, user_id, session)
+    return depth, p
+
+
+@router.get("/blast-patterns/{pattern_id}", response_model=PatternDetail, dependencies=_READ)
+async def pattern_detail(
+    pattern_id: uuid.UUID, session: SessionDep, user_id: CurrentUserId, locale: str = _LOCALE
+) -> PatternDetail:
+    depth, p = await _pattern(pattern_id, session, user_id)
+    return await depth.pattern_detail(p, locale)
+
+
+@router.patch("/blast-patterns/{pattern_id}", response_model=PatternDetail, dependencies=_WRITE)
+async def update_pattern(
+    pattern_id: uuid.UUID, body: PatternUpdate, session: SessionDep, user_id: CurrentUserId, locale: str = _LOCALE
+) -> PatternDetail:
+    depth, p = await _pattern(pattern_id, session, user_id)
+    await depth.update_pattern(p, body)
+    return await depth.pattern_detail(p, locale)
+
+
+@router.post("/blast-patterns/{pattern_id}/as-drilled", response_model=PatternDetail, dependencies=_WRITE)
+async def import_drilled(
+    pattern_id: uuid.UUID, body: DrilledImport, session: SessionDep, user_id: CurrentUserId, locale: str = _LOCALE
+) -> PatternDetail:
+    depth, p = await _pattern(pattern_id, session, user_id)
+    problems = await depth.import_drilled(p, body)
+    return await depth.pattern_detail(p, locale, problems)
+
+
+@router.get("/blast-patterns/{pattern_id}/stake-list.csv", dependencies=_READ)
+async def stake_list(pattern_id: uuid.UUID, session: SessionDep, user_id: CurrentUserId) -> Response:
+    depth, p = await _pattern(pattern_id, session, user_id)
+    return Response(
+        content=await depth.stake_list(p),
+        media_type="text/csv",
+        headers={"Content-Disposition": f'attachment; filename="{p.code}-collars.csv"'},
+    )
+
+
+@router.delete("/blast-patterns/{pattern_id}", status_code=status.HTTP_204_NO_CONTENT, dependencies=_WRITE)
+async def delete_pattern(pattern_id: uuid.UUID, session: SessionDep, user_id: CurrentUserId) -> Response:
+    depth, p = await _pattern(pattern_id, session, user_id)
+    await depth.repo.delete(p)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)

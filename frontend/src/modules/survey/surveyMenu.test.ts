@@ -51,7 +51,7 @@ describe('Survey & Land menu group', () => {
     expect(rowsInGroup(useModuleStore.getState().isModuleEnabled)).toEqual([]);
     turn(true);
     expect(useModuleStore.getState().isModuleEnabled('survey_core')).toBe(true);
-    expect(rowsInGroup(useModuleStore.getState().isModuleEnabled)).toEqual(['/survey']);
+    expect(rowsInGroup(useModuleStore.getState().isModuleEnabled)).toEqual(['/survey', '/survey/points']);
     turn(false);
     expect(rowsInGroup(useModuleStore.getState().isModuleEnabled)).toEqual([]);
   });
@@ -81,8 +81,21 @@ describe('survey module manifest', () => {
     expect(survey.description).toBe('survey.module_description');
   });
 
-  it('serves one route, /survey, and offers it in the survey group', () => {
-    expect(survey.routes.map((r) => r.path)).toEqual(['/survey']);
-    expect(survey.navItems.map((i) => [i.to, i.group])).toEqual([['/survey', GROUP]]);
+  it('serves the overview at /survey and the register at /survey/points', () => {
+    expect(survey.routes.map((r) => r.path)).toEqual(['/survey', '/survey/points']);
+    expect(survey.navItems.map((i) => [i.to, i.group])).toEqual([
+      ['/survey', GROUP],
+      ['/survey/points', GROUP],
+    ]);
+  });
+
+  it('keeps /survey answering while the module is off, with the setup page', () => {
+    expect(survey.offRoutes?.map((r) => r.path)).toEqual(['/survey']);
+  });
+
+  it('offers one collapsed setup row while the survey group is empty', () => {
+    const group = navGroups.find((g) => g.id === GROUP)!;
+    expect(group.emptyItem?.to).toBe('/survey');
+    expect(group.emptyItem?.labelKey).toBe('survey.setup.nav');
   });
 });

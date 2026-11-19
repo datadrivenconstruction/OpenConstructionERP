@@ -92,11 +92,53 @@ async def seed_survey_demo(session: AsyncSession, project_id: uuid.UUID, user_id
 
     piles = await seed_stockpile_demo(session, project_id, user_id)
     mine = await seed_mine_demo(session, project_id, user_id)
+    pages = await _seed_site_pages(session, project_id, user_id)
     return {
         **piles,
         **mine,
+        **pages,
         "survey_points": ground.imported + 4,
         "survey_surfaces": 2,
         "survey_volumes": 1,
         "survey_cut_m3": calc.cut_m3,
+    }
+
+
+async def _seed_site_pages(session: AsyncSession, project_id: uuid.UUID, user_id: str) -> dict[str, Any]:
+    """Setting-out, monitoring (three epochs) and parcels, so every survey page of the demo has data."""
+    from app.modules.land_parcels.schemas import ImportRequest as ParcelImport
+    from app.modules.land_parcels.service import ParcelService
+    from app.modules.monitoring.service import MonitoringService
+    from app.modules.setting_out.service import SettingOutService
+
+    parcels_dir = Path(__file__).resolve().parents[1] / "land_parcels" / "demo" / "riverside"
+    request = await SettingOutService(session).load_riverside_demo(project_id, user_id)
+    points = await MonitoringService(session).load_riverside_demo(project_id, user_id, [], "en", epochs=3)
+    parcels = ParcelService(session)
+    imported = await parcels.import_file(
+        project_id,
+        ParcelImport(
+            format="geojson",
+            target="parcels",
+            filename="parcels.geojson",
+            text=(parcels_dir / "parcels.geojson").read_text(encoding="utf-8"),
+        ),
+        user_id,
+        [],
+    )
+    await parcels.import_file(
+        project_id,
+        ParcelImport(
+            format="geojson",
+            target="work_zone",
+            filename="work_zone.geojson",
+            text=(parcels_dir / "work_zone.geojson").read_text(encoding="utf-8"),
+        ),
+        user_id,
+        [],
+    )
+    return {
+        "setting_out_requests": 1 if request else 0,
+        "monitoring_points": len(points),
+        "parcels": imported.created,
     }

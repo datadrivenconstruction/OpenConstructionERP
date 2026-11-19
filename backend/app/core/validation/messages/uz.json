@@ -2514,6 +2514,21 @@
     "truck_differs": {
       "fail": "Yuk mashinalarini sanash boʻyicha tonna oʻlchangan tonnadan {v} % farq qiladi, bu {t} % tekshiruv chegarasidan yuqori.",
       "suggestion": "Har bir reysdagi yuk va zichlikni tekshiring, soʻng ikki sirtni yana solishtiring."
+    },
+    "material_unassigned": {
+      "fail": "Material poligonlari blokning faqat {p} % ini qoplaydi; qolganining zichligi va tonnasi yoʻq."
+    },
+    "overbreak": {
+      "fail": "Lahimning ortiqcha qazilishi {o} % ({n} profil loyihadan kichik) {t} % chegarasidan oshadi."
+    },
+    "profile_outside": {
+      "fail": "{c} m piketdagi profil lahimning loyiha piketajidan tashqarida."
+    },
+    "hole_collar": {
+      "fail": "{id} quduq: ogʻzi loyihadan {v} m siljigan, {t} m chegarasidan oshadi."
+    },
+    "hole_depth": {
+      "fail": "{id} quduq: chuqurligi loyihadan {v} m farq qiladi, {t} m chegarasidan oshadi."
     }
   },
   "hongkong": {

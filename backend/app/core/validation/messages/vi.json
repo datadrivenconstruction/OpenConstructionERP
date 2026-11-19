@@ -2514,6 +2514,21 @@
     "truck_differs": {
       "fail": "Số tấn theo đếm xe chênh {v} % so với số tấn đo, vượt ngưỡng kiểm tra {t} %.",
       "suggestion": "Kiểm tra tải trọng mỗi chuyến và khối lượng riêng, rồi so sánh lại hai bề mặt."
+    },
+    "material_unassigned": {
+      "fail": "Đa giác vật liệu chỉ phủ {p} % khối; phần còn lại không có tỷ trọng và không có tấn."
+    },
+    "overbreak": {
+      "fail": "Đào lẹm đường lò {o} % ({n} mặt cắt nhỏ hơn thiết kế) vượt ngưỡng kiểm tra {t} %."
+    },
+    "profile_outside": {
+      "fail": "Mặt cắt tại lý trình {c} m nằm ngoài lý trình thiết kế của đường lò."
+    },
+    "hole_collar": {
+      "fail": "Lỗ khoan {id}: miệng lỗ lệch {v} m so với thiết kế, vượt dung sai {t} m."
+    },
+    "hole_depth": {
+      "fail": "Lỗ khoan {id}: chiều sâu chênh {v} m so với thiết kế, vượt dung sai {t} m."
     }
   },
   "hongkong": {

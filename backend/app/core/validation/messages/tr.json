@@ -2514,6 +2514,21 @@
     "truck_differs": {
       "fail": "Kamyon sayımına göre tonaj, ölçülen tonajdan {v} % farklı ve {t} % kontrol sınırını aşıyor.",
       "suggestion": "Sefer başına yükü ve yoğunluğu kontrol edin, ardından iki yüzeyi yeniden karşılaştırın."
+    },
+    "material_unassigned": {
+      "fail": "Malzeme poligonları birimin yalnızca % {p} kadarını kapsıyor; kalanın yoğunluğu ve tonajı yok."
+    },
+    "overbreak": {
+      "fail": "Galerinin aşırı kazısı % {o} ({n} kesit projenin altında) % {t} kontrolünü aşıyor."
+    },
+    "profile_outside": {
+      "fail": "{c} m kilometredeki kesit galerinin proje kilometrajı dışında."
+    },
+    "hole_collar": {
+      "fail": "Delik {id}: ağız projeden {v} m uzakta, {t} m toleransın üzerinde."
+    },
+    "hole_depth": {
+      "fail": "Delik {id}: derinlik projeden {v} m farklı, {t} m toleransın üzerinde."
     }
   },
   "hongkong": {

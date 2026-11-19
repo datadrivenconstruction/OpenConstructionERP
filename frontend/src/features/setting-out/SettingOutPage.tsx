@@ -8,7 +8,6 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { CheckCircle2, CircleDashed, FileUp, FileWarning, Plus, Printer, Target, XCircle } from 'lucide-react';
 import {
@@ -40,7 +39,6 @@ import {
   getSummary,
   listProfiles,
   listRequests,
-  loadDemo,
   validateSettingOut,
 } from './api';
 import { DesignImportDialog } from './DesignImportDialog';
@@ -49,6 +47,8 @@ import { StakeCard, VerdictBadge } from './StakeCard';
 import { settingOutGuide } from './settingOutGuide';
 import { fmtCoord, fmtMm } from './verdict';
 import { fmtFixed } from '@/shared/lib/formatters';
+import { useOpenSurveyDemo } from '@/features/survey/useOpenSurveyDemo';
+import { ViewOnlyNote, useSurveyAccess } from '@/features/survey/useSurveyAccess';
 
 type View = 'table' | 'field';
 
@@ -67,7 +67,8 @@ function usePhone(): boolean {
 
 export default function SettingOutPage() {
   const { t, i18n } = useTranslation();
-  const navigate = useNavigate();
+  const { canWrite } = useSurveyAccess();
+  const openDemo = useOpenSurveyDemo('/survey/setting-out');
   const qc = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
   const projectId = useProjectContextStore((s) => s.activeProjectId);
@@ -96,14 +97,6 @@ export default function SettingOutPage() {
     enabled: !!activeId,
   });
 
-  const demo = useMutation({
-    mutationFn: () => loadDemo(projectId!),
-    onSuccess: (r) => {
-      setSelected(r.id);
-      qc.invalidateQueries({ queryKey: ['setting-out'] });
-    },
-    onError: (e) => addToast({ type: 'error', title: getErrorMessage(e) }),
-  });
   const ncr = useMutation({
     mutationFn: (recordId: string) => createNcrDraft(recordId, i18n.language),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['setting-out'] }),
@@ -125,7 +118,7 @@ export default function SettingOutPage() {
         <EmptyState
           icon={<Target size={24} />}
           title={t('survey.setting_out.no_project', { defaultValue: 'Open a project to see its setting-out requests.' })}
-          action={{ label: t('survey.action.open_demo', { defaultValue: 'Open demo project' }), onClick: () => navigate('/onboarding/demo') }}
+          action={{ label: t('survey.action.open_demo', { defaultValue: 'Open demo project' }), onClick: () => void openDemo.open() }}
         />
       </div>
     );
@@ -134,7 +127,7 @@ export default function SettingOutPage() {
   const req = detail.data;
   const actions = (
     <div className="flex flex-wrap gap-2">
-      <Button variant="primary" icon={<Plus size={16} />} onClick={() => setNewOpen(true)} data-testid="so-new-request">
+      <Button variant="primary" icon={<Plus size={16} />} onClick={() => setNewOpen(true)} data-testid="so-new-request" disabled={!canWrite}>
         {t('survey.setting_out.action.new_request', { defaultValue: 'New request' })}
       </Button>
       <Button variant="secondary" icon={<Printer size={16} />} disabled={!req}
@@ -173,6 +166,7 @@ export default function SettingOutPage() {
         }
         actions={actions}
       />
+      <ViewOnlyNote />
       <DismissibleInfo storageKey="survey.setting_out.info" title={t('survey.register.info_title', { defaultValue: 'What is this' })}>
         {t('survey.setting_out.what_is', {
           defaultValue:
@@ -236,11 +230,8 @@ export default function SettingOutPage() {
               <Button variant="primary" onClick={() => setNewOpen(true)}>
                 {t('survey.setting_out.action.new_request', { defaultValue: 'New request' })}
               </Button>
-              <Button variant="secondary" onClick={() => navigate('/onboarding/demo')}>
+              <Button variant="secondary" onClick={() => void openDemo.open()}>
                 {t('survey.action.open_demo', { defaultValue: 'Open demo project' })}
-              </Button>
-              <Button variant="ghost" disabled={demo.isPending} onClick={() => demo.mutate()} data-testid="so-load-demo">
-                {t('survey.setting_out.action.load_example', { defaultValue: 'Load the course example' })}
               </Button>
             </div>
           }
@@ -317,7 +308,7 @@ export default function SettingOutPage() {
               ) : showCards ? (
                 <div className="grid gap-3 p-3 sm:grid-cols-2 lg:grid-cols-3">
                   {req.stakes.map((s) => (
-                    <StakeCard key={s.id} stake={s} tolH={req.tol_h_mm} tolV={req.tol_v_mm} instrument={req.instrument} controlRef={req.control_ref} />
+                    <StakeCard key={s.id} stake={s} tolH={req.tol_h_mm} tolV={req.tol_v_mm} instrument={req.instrument} controlRef={req.control_ref} canWrite={canWrite} />
                   ))}
                 </div>
               ) : (

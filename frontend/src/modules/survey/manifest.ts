@@ -1,10 +1,12 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 import { lazy } from 'react';
-import { Crosshair } from 'lucide-react';
+import { Compass, Crosshair } from 'lucide-react';
 import type { ModuleManifest } from '../_types';
 
 const Page = lazy(() => import('@/features/survey/SurveyRegisterPage'));
+const Hub = lazy(() => import('@/features/survey/SurveyHubPage'));
+const Setup = lazy(() => import('@/features/survey/SurveyHubPage').then((m) => ({ default: m.SurveySetupPage })));
 
 export const manifest: ModuleManifest = {
   id: 'survey_core',
@@ -17,6 +19,14 @@ export const manifest: ModuleManifest = {
   // Survey & Land group stays out of menus that have no use for it.
   defaultEnabled: false,
   depends: [],
-  routes: [{ path: '/survey', title: 'survey.page.register', component: Page }],
-  navItems: [{ labelKey: 'survey.page.register', to: '/survey', icon: Crosshair, group: 'grp_survey' }],
+  routes: [
+    { path: '/survey', title: 'survey.page.overview', component: Hub },
+    { path: '/survey/points', title: 'survey.page.register', component: Page },
+  ],
+  // An old /survey link still lands on a page that says how to switch survey on.
+  offRoutes: [{ path: '/survey', title: 'survey.page.overview', component: Setup }],
+  navItems: [
+    { labelKey: 'survey.page.overview', to: '/survey', icon: Compass, group: 'grp_survey' },
+    { labelKey: 'survey.page.register', to: '/survey/points', icon: Crosshair, group: 'grp_survey' },
+  ],
 };

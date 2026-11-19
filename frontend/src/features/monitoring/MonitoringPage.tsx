@@ -7,7 +7,6 @@
 
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Activity, AlertOctagon, AlertTriangle, BellRing, CalendarClock, Printer, Upload } from 'lucide-react';
 import {
@@ -32,7 +31,6 @@ import {
   getSummary,
   listPoints,
   listProfiles,
-  loadDemo,
   setProfile,
   validateMonitoring,
 } from './api';
@@ -40,10 +38,13 @@ import { ImportReadingsDialog } from './ImportReadingsDialog';
 import { LevelBadge, PointDrawer } from './PointDrawer';
 import { fmtMm, fmtRate } from './levels';
 import { monitoringGuide } from './monitoringGuide';
+import { useOpenSurveyDemo } from '@/features/survey/useOpenSurveyDemo';
+import { ViewOnlyNote, useSurveyAccess } from '@/features/survey/useSurveyAccess';
 
 export default function MonitoringPage() {
   const { t, i18n } = useTranslation();
-  const navigate = useNavigate();
+  const { canWrite } = useSurveyAccess();
+  const openDemo = useOpenSurveyDemo('/survey/monitoring');
   const qc = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
   const projectId = useProjectContextStore((s) => s.activeProjectId);
@@ -61,11 +62,6 @@ export default function MonitoringPage() {
     enabled,
   });
 
-  const demo = useMutation({
-    mutationFn: () => loadDemo(projectId!),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['monitoring'] }),
-    onError: (e) => addToast({ type: 'error', title: getErrorMessage(e) }),
-  });
   const pick = useMutation({
     mutationFn: (key: string) => setProfile(projectId!, key),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['monitoring'] }),
@@ -82,7 +78,7 @@ export default function MonitoringPage() {
         <EmptyState
           icon={<Activity size={24} />}
           title={t('survey.monitoring.no_project', { defaultValue: 'Open a project to see its monitoring points.' })}
-          action={{ label: t('survey.action.open_demo', { defaultValue: 'Open demo project' }), onClick: () => navigate('/onboarding/demo') }}
+          action={{ label: t('survey.action.open_demo', { defaultValue: 'Open demo project' }), onClick: () => void openDemo.open() }}
         />
       </div>
     );
@@ -104,7 +100,7 @@ export default function MonitoringPage() {
 
   const actions = (
     <div className="flex flex-wrap gap-2">
-      <Button variant="primary" icon={<Upload size={16} />} onClick={() => setImportOpen(true)} data-testid="mon-import">
+      <Button variant="primary" icon={<Upload size={16} />} onClick={() => setImportOpen(true)} data-testid="mon-import" disabled={!canWrite}>
         {t('survey.monitoring.action.import_readings', { defaultValue: 'Import readings' })}
       </Button>
       <Button
@@ -124,6 +120,7 @@ export default function MonitoringPage() {
     <div className="space-y-4">
       <Breadcrumb items={[{ label: t('sidebar.group.survey', { defaultValue: 'Survey & Land' }), to: '/survey' }, { label: title }]} />
       <PageHeader srTitle={title} actions={actions} />
+      <ViewOnlyNote />
       <DismissibleInfo storageKey="survey.monitoring.info" title={t('survey.register.info_title', { defaultValue: 'What is this' })}>
         {t('survey.monitoring.what_is', {
           defaultValue:
@@ -204,8 +201,8 @@ export default function MonitoringPage() {
               <Button variant="primary" onClick={() => setImportOpen(true)}>
                 {t('survey.monitoring.action.import_readings', { defaultValue: 'Import readings' })}
               </Button>
-              <Button variant="ghost" disabled={demo.isPending} onClick={() => demo.mutate()} data-testid="mon-load-demo">
-                {t('survey.monitoring.action.load_example', { defaultValue: 'Load the course example' })}
+              <Button variant="secondary" loading={openDemo.busy} onClick={() => void openDemo.open()}>
+                {t('survey.action.open_demo', { defaultValue: 'Open demo project' })}
               </Button>
             </div>
           }

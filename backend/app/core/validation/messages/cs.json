@@ -2514,6 +2514,21 @@
     "truck_differs": {
       "fail": "Tuny podle počtu jízd se liší od zaměřených tun o {v} %, tedy nad kontrolou {t} %.",
       "suggestion": "Zkontrolujte užitečné zatížení jedné jízdy a hustotu a poté znovu porovnejte oba povrchy."
+    },
+    "material_unassigned": {
+      "fail": "Polygony materiálu pokrývají jen {p} % jednotky; zbytek nemá hustotu ani tuny."
+    },
+    "overbreak": {
+      "fail": "Nadvýlom díla {o} % ({n} profilů pod projektem) překračuje kontrolu {t} %."
+    },
+    "profile_outside": {
+      "fail": "Profil ve staničení {c} m leží mimo projektové staničení díla."
+    },
+    "hole_collar": {
+      "fail": "Vrt {id}: ústí je {v} m od projektu, nad tolerancí {t} m."
+    },
+    "hole_depth": {
+      "fail": "Vrt {id}: hloubka se liší o {v} m od projektu, nad tolerancí {t} m."
     }
   },
   "hongkong": {

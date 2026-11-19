@@ -2514,6 +2514,21 @@
     "truck_differs": {
       "fail": "Die Tonnen nach Fahrtenzählung weichen um {v} % von den vermessenen Tonnen ab, über der Prüfgrenze von {t} %.",
       "suggestion": "Nutzlast je Fahrt und Dichte prüfen, danach die beiden Oberflächen erneut vergleichen."
+    },
+    "material_unassigned": {
+      "fail": "Die Materialpolygone decken nur {p} % der Einheit ab; der Rest hat keine Dichte und keine Tonnen."
+    },
+    "overbreak": {
+      "fail": "Mehrausbruch der Strecke {o} % ({n} Profile unter Soll) liegt über der Prüfgrenze von {t} %."
+    },
+    "profile_outside": {
+      "fail": "Das Profil bei Station {c} m liegt außerhalb der Soll-Stationierung der Strecke."
+    },
+    "hole_collar": {
+      "fail": "Bohrloch {id}: Ansatzpunkt liegt {v} m neben dem Soll, über der Toleranz von {t} m."
+    },
+    "hole_depth": {
+      "fail": "Bohrloch {id}: Tiefe weicht um {v} m vom Soll ab, über der Toleranz von {t} m."
     }
   },
   "hongkong": {

@@ -2514,6 +2514,21 @@
     "truck_differs": {
       "fail": "按车次统计的吨数与测量吨数相差 {v} %，超过 {t} % 的核对限值。",
       "suggestion": "请核对每车载重和密度，然后重新比较两个曲面。"
+    },
+    "material_unassigned": {
+      "fail": "材料多边形仅覆盖单元的 {p} %，其余部分没有密度也没有吨数。"
+    },
+    "overbreak": {
+      "fail": "巷道超挖 {o} %（{n} 个断面小于设计）超过 {t} % 的核对限值。"
+    },
+    "profile_outside": {
+      "fail": "里程 {c} m 处的断面位于巷道设计里程之外。"
+    },
+    "hole_collar": {
+      "fail": "炮孔 {id}：孔口偏离设计 {v} m，超过 {t} m 的允许偏差。"
+    },
+    "hole_depth": {
+      "fail": "炮孔 {id}：孔深与设计相差 {v} m，超过 {t} m 的允许偏差。"
     }
   },
   "hongkong": {

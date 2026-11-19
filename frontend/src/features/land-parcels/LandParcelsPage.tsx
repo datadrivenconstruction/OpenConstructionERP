@@ -8,7 +8,6 @@
 
 import { Suspense, lazy, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AlertTriangle, CheckCircle2, Coins, FileDown, FileUp, LandPlot, Printer, Ruler } from 'lucide-react';
 import {
@@ -51,6 +50,8 @@ import { ParcelImportDialog } from './ParcelImportDialog';
 import { STATUS_VARIANT, ruleIds } from './parcelFormat';
 import { parcelsGuide } from './parcelsGuide';
 import { fmtList } from '@/shared/lib/formatters';
+import { useOpenSurveyDemo } from '@/features/survey/useOpenSurveyDemo';
+import { ViewOnlyNote, useSurveyAccess } from '@/features/survey/useSurveyAccess';
 
 const ParcelPlan = lazy(() => import('./ParcelPlan'));
 
@@ -58,7 +59,8 @@ type Tab = 'schedule' | 'plan' | 'rights';
 
 export default function LandParcelsPage() {
   const { t, i18n } = useTranslation();
-  const navigate = useNavigate();
+  const { canWrite } = useSurveyAccess();
+  const openDemo = useOpenSurveyDemo('/survey/parcels');
   const qc = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
   const projectId = useProjectContextStore((s) => s.activeProjectId);
@@ -106,7 +108,7 @@ export default function LandParcelsPage() {
         <EmptyState
           icon={<LandPlot size={24} />}
           title={t('survey.parcels.no_project', { defaultValue: 'Open a project to see the land it needs.' })}
-          action={{ label: t('survey.action.open_demo', { defaultValue: 'Open demo project' }), onClick: () => navigate('/onboarding/demo') }}
+          action={{ label: t('survey.action.open_demo', { defaultValue: 'Open demo project' }), onClick: () => void openDemo.open() }}
         />
       </div>
     );
@@ -120,7 +122,7 @@ export default function LandParcelsPage() {
 
   const actions = (
     <div className="flex flex-wrap gap-2">
-      <Button variant="primary" icon={<FileUp size={16} />} onClick={() => setImportTarget('parcels')} data-testid="parcels-import">
+      <Button variant="primary" icon={<FileUp size={16} />} onClick={() => setImportTarget('parcels')} data-testid="parcels-import" disabled={!canWrite}>
         {t('survey.parcels.btn.import', { defaultValue: 'Import parcels' })}
       </Button>
       <div className="relative">
@@ -263,6 +265,7 @@ export default function LandParcelsPage() {
     <div className="space-y-4">
       <Breadcrumb items={[{ label: t('sidebar.group.survey', { defaultValue: 'Survey & Land' }), to: '/survey' }, { label: title }]} />
       <PageHeader srTitle={title} actions={actions} />
+      <ViewOnlyNote />
       <DismissibleInfo storageKey="survey.parcels.info" title={t('survey.register.info_title', { defaultValue: 'What is this' })}>
         {t('survey.parcels.info', {
           defaultValue:

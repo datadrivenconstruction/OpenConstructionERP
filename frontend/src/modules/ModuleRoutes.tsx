@@ -38,8 +38,7 @@ export function useModuleRouteElements({ Wrapper }: ModuleRoutesProps) {
   const { isModuleEnabled } = useModuleStore();
 
   return MODULE_REGISTRY
-    .filter((m) => isModuleEnabled(m.id))
-    .flatMap((m) => m.routes)
+    .flatMap((m) => (isModuleEnabled(m.id) ? m.routes : (m.offRoutes ?? [])))
     .map((route) => (
       <Route
         key={route.path}

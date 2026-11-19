@@ -2514,6 +2514,21 @@
     "truck_differs": {
       "fail": "A fuvarszámlálás szerinti tonna {v} %-kal tér el a felmért tonnától, ami meghaladja a {t} % ellenőrzési határt.",
       "suggestion": "Ellenőrizze a fuvaronkénti terhelést és a sűrűséget, majd hasonlítsa össze újra a két felületet."
+    },
+    "material_unassigned": {
+      "fail": "Az anyagpoligonok az egység csak {p} %-át fedik le; a maradéknak nincs sűrűsége és tonnája."
+    },
+    "overbreak": {
+      "fail": "A vágat túlfejtése {o} % ({n} szelvény a terv alatt) meghaladja a {t} %-os ellenőrzést."
+    },
+    "profile_outside": {
+      "fail": "A {c} m szelvényszámú profil a vágat tervezett szelvényezésén kívül esik."
+    },
+    "hole_collar": {
+      "fail": "{id} furat: a fúráspont {v} m-re van a tervtől, a {t} m-es tűrés felett."
+    },
+    "hole_depth": {
+      "fail": "{id} furat: a mélység {v} m-rel tér el a tervtől, a {t} m-es tűrés felett."
     }
   },
   "hongkong": {

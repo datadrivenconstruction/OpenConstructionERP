@@ -2514,6 +2514,21 @@
     "truck_differs": {
       "fail": "Truck-count tonnes differ from survey tonnes by {v} %, beyond the {t} % check.",
       "suggestion": "Check the payload per load and the density, then compare the two surfaces again."
+    },
+    "material_unassigned": {
+      "fail": "Material polygons cover only {p} % of the unit; the rest has no density and no tonnes."
+    },
+    "overbreak": {
+      "fail": "Drive overbreak {o} % ({n} profiles under design) is beyond the {t} % check."
+    },
+    "profile_outside": {
+      "fail": "Profile at chainage {c} m lies outside the design chainage of the drive."
+    },
+    "hole_collar": {
+      "fail": "Hole {id}: collar is {v} m off the design, beyond the {t} m tolerance."
+    },
+    "hole_depth": {
+      "fail": "Hole {id}: depth differs by {v} m from the design, beyond the {t} m tolerance."
     }
   },
   "hongkong": {

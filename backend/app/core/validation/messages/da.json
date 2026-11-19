@@ -2514,6 +2514,21 @@
     "truck_differs": {
       "fail": "Tons efter lastbiltælling afviger {v} % fra opmålte tons, over kontrollen på {t} %.",
       "suggestion": "Kontroller nyttelasten pr. læs og densiteten, og sammenlign derefter de to overflader igen."
+    },
+    "material_unassigned": {
+      "fail": "Materialepolygonerne dækker kun {p} % af enheden; resten har ingen densitet og ingen tons."
+    },
+    "overbreak": {
+      "fail": "Overudbrydning af stollen på {o} % ({n} profiler under projekt) overstiger kontrollen på {t} %."
+    },
+    "profile_outside": {
+      "fail": "Profilet ved station {c} m ligger uden for stollens projektstationering."
+    },
+    "hole_collar": {
+      "fail": "Borehul {id}: ansatspunktet ligger {v} m fra projektet, over tolerancen på {t} m."
+    },
+    "hole_depth": {
+      "fail": "Borehul {id}: dybden afviger {v} m fra projektet, over tolerancen på {t} m."
     }
   },
   "hongkong": {

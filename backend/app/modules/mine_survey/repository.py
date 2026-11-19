@@ -10,7 +10,16 @@ from typing import Any
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.modules.mine_survey.models import MinePeriod, MinePeriodEntry, MineUnit
+from app.modules.mine_survey.models import (
+    MineBlastHole,
+    MineBlastPattern,
+    MineDriveFace,
+    MineDriveProfile,
+    MineMaterial,
+    MinePeriod,
+    MinePeriodEntry,
+    MineUnit,
+)
 
 
 class MineRepository:
@@ -111,3 +120,33 @@ class MineRepository:
         if row is None:
             return ""
         return str(row[0] or row[1] or "")
+
+    # ── v2: materials, drives, blast patterns ──────────────────────────────
+
+    async def materials_of(self, unit_id: uuid.UUID) -> list[MineMaterial]:
+        stmt = select(MineMaterial).where(MineMaterial.unit_id == unit_id).order_by(MineMaterial.created_at)
+        return list((await self.session.execute(stmt)).scalars().all())
+
+    async def faces_of(self, unit_id: uuid.UUID, period_id: uuid.UUID | None = None) -> list[MineDriveFace]:
+        stmt = select(MineDriveFace).where(MineDriveFace.unit_id == unit_id)
+        if period_id is not None:
+            stmt = stmt.where(MineDriveFace.period_id == period_id)
+        return list((await self.session.execute(stmt.order_by(MineDriveFace.chainage_m))).scalars().all())
+
+    async def profiles_of(self, unit_id: uuid.UUID, period_id: uuid.UUID | None = None) -> list[MineDriveProfile]:
+        stmt = select(MineDriveProfile).where(MineDriveProfile.unit_id == unit_id)
+        if period_id is not None:
+            stmt = stmt.where(MineDriveProfile.period_id == period_id)
+        return list((await self.session.execute(stmt.order_by(MineDriveProfile.chainage_m))).scalars().all())
+
+    async def list_patterns(self, project_id: uuid.UUID) -> list[MineBlastPattern]:
+        stmt = select(MineBlastPattern).where(MineBlastPattern.project_id == project_id).order_by(MineBlastPattern.code)
+        return list((await self.session.execute(stmt)).scalars().all())
+
+    async def pattern_codes(self, project_id: uuid.UUID) -> list[str]:
+        stmt = select(MineBlastPattern.code).where(MineBlastPattern.project_id == project_id)
+        return [str(c) for c in (await self.session.execute(stmt)).scalars().all()]
+
+    async def holes_of(self, pattern_id: uuid.UUID) -> list[MineBlastHole]:
+        stmt = select(MineBlastHole).where(MineBlastHole.pattern_id == pattern_id).order_by(MineBlastHole.hole_id)
+        return list((await self.session.execute(stmt)).scalars().all())

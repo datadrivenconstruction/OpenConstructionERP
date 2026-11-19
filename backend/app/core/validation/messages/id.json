@@ -2514,6 +2514,21 @@
     "truck_differs": {
       "fail": "Tonase hitungan truk berbeda {v} % dari tonase survei, melebihi pemeriksaan {t} %.",
       "suggestion": "Periksa muatan per rit dan densitas, lalu bandingkan kembali kedua permukaan."
+    },
+    "material_unassigned": {
+      "fail": "Poligon material hanya mencakup {p} % unit; sisanya tanpa densitas dan tanpa ton."
+    },
+    "overbreak": {
+      "fail": "Overbreak terowongan {o} % ({n} profil di bawah desain) melebihi batas periksa {t} %."
+    },
+    "profile_outside": {
+      "fail": "Profil pada stasiun {c} m berada di luar stasiun desain terowongan."
+    },
+    "hole_collar": {
+      "fail": "Lubang {id}: kolar berjarak {v} m dari desain, melebihi toleransi {t} m."
+    },
+    "hole_depth": {
+      "fail": "Lubang {id}: kedalaman berbeda {v} m dari desain, melebihi toleransi {t} m."
     }
   },
   "hongkong": {

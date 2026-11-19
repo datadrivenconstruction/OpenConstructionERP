@@ -2514,6 +2514,21 @@
     "truck_differs": {
       "fail": "Tony według liczenia kursów różnią się o {v} % od zmierzonych, powyżej kontroli {t} %.",
       "suggestion": "Sprawdź ładunek na kurs i gęstość, a następnie ponownie porównaj obie powierzchnie."
+    },
+    "material_unassigned": {
+      "fail": "Poligony materiału pokrywają tylko {p} % jednostki; reszta nie ma gęstości ani ton."
+    },
+    "overbreak": {
+      "fail": "Nadwyłom wyrobiska {o} % ({n} profili poniżej projektu) przekracza kontrolę {t} %."
+    },
+    "profile_outside": {
+      "fail": "Profil w kilometrażu {c} m leży poza projektowym kilometrażem wyrobiska."
+    },
+    "hole_collar": {
+      "fail": "Otwór {id}: wylot jest {v} m od projektu, ponad tolerancję {t} m."
+    },
+    "hole_depth": {
+      "fail": "Otwór {id}: głębokość różni się o {v} m od projektu, ponad tolerancję {t} m."
     }
   },
   "hongkong": {

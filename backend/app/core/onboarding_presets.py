@@ -82,7 +82,19 @@ _FIELD = ["fieldreports", "collaboration", "field_diary", "payroll"]
 _ESG = ["carbon"]
 _BI = ["bi_dashboards", "reporting", "project_controls"]
 _ENTERPRISE = ["enterprise_workflows", "full_evm", "rfq_bidding", "integrations"]
-_SURVEY = ["survey_core", "surfaces_volumes", "stockpiles", "mine_survey"]
+_SURVEY = [
+    "survey_core",
+    "surfaces_volumes",
+    "stockpiles",
+    "mine_survey",
+    "setting_out",
+    "land_parcels",
+    "monitoring",
+]
+
+#: Frontend module ids that differ from the backend package key. Preferences are
+#: written under the package key; the module store reads both spellings.
+MODULE_PREF_ALIASES: dict[str, str] = {"setting_out": "setting-out", "land_parcels": "land-parcels"}
 
 # Region-specific packs are chosen on the onboarding region step / via partner
 # packs, not by a company profile, so they are not part of any profile's set.
@@ -920,6 +932,10 @@ COMPANY_PRESETS: dict[str, CompanyPreset] = {
         enabled_modules=[
             "survey_core",
             "surfaces_volumes",
+            "stockpiles",
+            "setting_out",  # setting-out and as-built checks are daily work
+            "monitoring",
+            "land_parcels",
             "boq",  # volumes are sent to BOQ lines
             "validation",
             "cad",
@@ -947,6 +963,7 @@ COMPANY_PRESETS: dict[str, CompanyPreset] = {
             "surfaces_volumes",
             "stockpiles",
             "mine_survey",
+            "monitoring",  # highwall and slope prisms
             "boq",
             "validation",
             "equipment",
@@ -1134,4 +1151,7 @@ def modules_for(enabled_modules: list[str]) -> dict[str, bool]:
         if key in regional:
             continue
         prefs[key] = True if key in _CORE_MODULES else key in chosen
+    for key, alias in MODULE_PREF_ALIASES.items():
+        if key in prefs:
+            prefs[alias] = prefs[key]
     return prefs
