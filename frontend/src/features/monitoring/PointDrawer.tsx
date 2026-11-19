@@ -91,6 +91,16 @@ export function PointDrawer({ pointId, onClose }: Props) {
               <bdi dir="ltr">{fmtRate(d.rate_mm_day)}</bdi> {t('survey.monitoring.unit.mm_day', { defaultValue: 'mm/day' })}
             </span>
           </div>
+          {d.forecast_level && d.forecast_days != null && (
+            <p className="text-sm text-content-secondary" data-testid="mon-forecast"
+              title={t('survey.monitoring.forecast_tip', { defaultValue: 'Straight line through the last five epochs. A trend, not a promise.' })}>
+              {t('survey.monitoring.forecast', {
+                defaultValue: 'Trend reaches {{level}} in {{days}} days',
+                level: t(`survey.monitoring.level.${d.forecast_level}`, { defaultValue: d.forecast_level }),
+                days: d.forecast_days.toFixed(1),
+              })}
+            </p>
+          )}
 
           {geo && (
             <svg

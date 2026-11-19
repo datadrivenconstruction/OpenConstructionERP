@@ -46,6 +46,7 @@ import {
 import { DesignImportDialog } from './DesignImportDialog';
 import { NewRequestDialog } from './NewRequestDialog';
 import { StakeCard, VerdictBadge } from './StakeCard';
+import { RoadStakePanel } from '@/features/survey-calc/RoadStakePanel';
 import { settingOutGuide } from './settingOutGuide';
 import { fmtCoord, fmtMm } from './verdict';
 import { fmtFixed } from '@/shared/lib/formatters';
@@ -361,6 +362,12 @@ export default function SettingOutPage() {
             </Card>
           ) : null}
         </>
+      )}
+
+      {projectId && (
+        <CollapsibleSection storageKey="survey.setting_out.road" title={t('survey.road.title', { defaultValue: 'Road and rail stake list' })} defaultCollapsed>
+          <RoadStakePanel />
+        </CollapsibleSection>
       )}
 
       <NewRequestDialog open={newOpen} projectId={projectId} profiles={profiles.data ?? []} onClose={() => setNewOpen(false)} onCreated={(r) => setSelected(r.id)} />

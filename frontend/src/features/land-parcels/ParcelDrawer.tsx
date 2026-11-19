@@ -30,6 +30,7 @@ import {
 } from './api';
 import { STATUS_VARIANT } from './parcelFormat';
 import { fmtFixed } from '@/shared/lib/formatters';
+import { ParcelTools } from '@/features/survey-calc/ParcelTools';
 
 interface Props {
   parcelId: string | null;
@@ -208,6 +209,8 @@ export function ParcelDrawer({ parcelId, projectId, idLabel, onClose }: Props) {
               </p>
             )}
           </section>
+
+          <ParcelTools parcelId={p.id} onSplit={onClose} />
 
           <section className="space-y-2">
             <h3 className="font-medium">{t('survey.parcels.tab.rights', { defaultValue: 'Parties & rights' })}</h3>
