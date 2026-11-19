@@ -124,13 +124,18 @@ export function DataPathsPage() {
   return (
     <div className="space-y-4" data-testid="data-paths-page">
       <PageHeader
-        title={focusLabel ? t('data_paths.drawer_title', { defaultValue: 'Data paths: {{module}}', module: focusLabel }) : t('data_paths.map_title', { defaultValue: 'Platform data map' })}
+        srTitle={t('data_paths.button', { defaultValue: 'Data paths' })}
         subtitle={
-          projectId
-            ? t('data_paths.subtitle_project', { defaultValue: 'Live numbers for the current project' })
-            : t('data_paths.subtitle_no_project', { defaultValue: 'Pick a project to see live numbers' })
+          focusLabel
+            ? t('data_paths.drawer_title', { defaultValue: 'Data paths: {{module}}', module: focusLabel })
+            : t('data_paths.map_title', { defaultValue: 'Platform data map' })
         }
       />
+      {!projectId && (
+        <p className="text-sm text-content-tertiary">
+          {t('data_paths.subtitle_no_project', { defaultValue: 'Pick a project to see live numbers' })}
+        </p>
+      )}
 
       <div className="flex flex-wrap items-center gap-3">
         <TabBar<Level>
