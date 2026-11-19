@@ -2355,6 +2355,10 @@
     "level_misclosure": {
       "fail": "Neînchiderea nivelmentului {f} mm depășește k·√km cu k = {k} mm.",
       "suggestion": "Refaceți nivelmentul sau verificați cotele reperelor folosite."
+    },
+    "control_check": {
+      "fail": "Punctul de sprijin {id}: măsurarea de control diferă cu {r} mm, peste toleranța de {t} mm.",
+      "suggestion": "Remăsurați punctul; dacă s-a deplasat, nu mai trasați din el până nu este restabilit."
     }
   },
   "volumes": {
@@ -2373,6 +2377,18 @@
     "bank_volume": {
       "fail": "Cantitatea este volum în stare naturală (în teren); coeficientul de afânare nu este aplicat.",
       "suggestion": "Trimiteți săpătura afânată dacă articolul din antemăsurătoare se măsoară afânat."
+    },
+    "no_ground_class": {
+      "fail": "Norul de puncte nu are puncte de teren (clasa 2); pentru suprafața {code} s-au folosit toate punctele.",
+      "suggestion": "Clasificați norul în programul de scanare sau verificați că vegetația și utilajele nu sunt în suprafață."
+    },
+    "breakline_missed": {
+      "fail": "{n} segmente de linii de frângere ale suprafeței {code} nu au putut fi păstrate ca laturi de triunghiuri.",
+      "suggestion": "Verificați că liniile de frângere nu se intersectează și rămân în interiorul suprafeței."
+    },
+    "no_factors": {
+      "fail": "Nu există coeficienți de afânare și compactare pentru {material}: se afișează doar volumele în stare naturală.",
+      "suggestion": "Introduceți coeficienții acestui material din studiul geotehnic."
     }
   },
   "setting_out": {

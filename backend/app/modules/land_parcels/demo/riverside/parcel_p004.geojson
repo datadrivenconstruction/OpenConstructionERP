@@ -1,0 +1,49 @@
+{
+ "type": "FeatureCollection",
+ "name": "Riverside Yard parcel P-004 (register area differs on purpose)",
+ "crs": {
+  "type": "name",
+  "properties": {
+   "name": "urn:ogc:def:crs:EPSG::32633"
+  }
+ },
+ "features": [
+  {
+   "type": "Feature",
+   "properties": {
+    "parcel_id": "P-004",
+    "name": "Riverside East",
+    "status": "negotiating",
+    "legal_area": 950,
+    "acquisition_cost": 30000
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       389170.0,
+       5819000.0
+      ],
+      [
+       389200.0,
+       5819000.0
+      ],
+      [
+       389200.0,
+       5819030.0
+      ],
+      [
+       389170.0,
+       5819030.0
+      ],
+      [
+       389170.0,
+       5819000.0
+      ]
+     ]
+    ]
+   }
+  }
+ ]
+}

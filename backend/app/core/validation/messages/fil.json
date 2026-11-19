@@ -2355,6 +2355,10 @@
     "level_misclosure": {
       "fail": "Ang misclosure ng leveling na {f} mm ay lampas sa k·√km na may k = {k} mm.",
       "suggestion": "Ulitin ang leveling o suriin ang taas ng mga benchmark na ginamit."
+    },
+    "control_check": {
+      "fail": "Control point {id}: lumihis ang check shot nang {r} mm, lampas sa {t} mm na tolerance.",
+      "suggestion": "Sukatin muli ang point; kung gumalaw ito, huwag mag-set out mula rito hangga't hindi ito naibabalik."
     }
   },
   "volumes": {
@@ -2373,6 +2377,18 @@
     "bank_volume": {
       "fail": "Ang dami ay bank volume (nasa lupa); hindi inilapat ang swell factor.",
       "suggestion": "Ipadala na lang ang maluwag na hukay kung sinusukat ang linya ng BOQ bilang maluwag na materyal."
+    },
+    "no_ground_class": {
+      "fail": "Walang ground point (class 2) ang point cloud; ginamit ang lahat ng point para sa surface {code}.",
+      "suggestion": "I-classify ang cloud sa scanning software, o tiyaking walang halaman at makina sa surface."
+    },
+    "breakline_missed": {
+      "fail": "Hindi napanatili bilang gilid ng tatsulok ang {n} segment ng breakline ng surface {code}.",
+      "suggestion": "Tiyaking hindi nagkakrus ang mga breakline at nasa loob ng surface."
+    },
+    "no_factors": {
+      "fail": "Walang swell at compaction factor para sa {material}: bank volume lang ang ipinapakita.",
+      "suggestion": "Ilagay ang mga factor ng materyal na ito mula sa soil report."
     }
   },
   "setting_out": {

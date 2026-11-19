@@ -2355,6 +2355,10 @@
     "level_misclosure": {
       "fail": "L'errore di chiusura della livellazione {f} mm supera k·√km con k = {k} mm.",
       "suggestion": "Ripetete la livellazione o controllate le quote dei capisaldi usati."
+    },
+    "control_check": {
+      "fail": "Punto di appoggio {id}: la misura di controllo si scosta di {r} mm, oltre la tolleranza di {t} mm.",
+      "suggestion": "Rimisurate il punto; se si è spostato, non tracciate da esso finché non è ripristinato."
     }
   },
   "volumes": {
@@ -2373,6 +2377,18 @@
     "bank_volume": {
       "fail": "La quantità è volume in sito (nel terreno); il fattore di rigonfiamento non è applicato.",
       "suggestion": "Inviate invece lo scavo rigonfiato se la voce del computo è misurata come materiale sciolto."
+    },
+    "no_ground_class": {
+      "fail": "La nuvola di punti non contiene punti terreno (classe 2); per la superficie {code} sono stati usati tutti i punti.",
+      "suggestion": "Classificate la nuvola nel software di scansione, o verificate che vegetazione e mezzi non siano nella superficie."
+    },
+    "breakline_missed": {
+      "fail": "{n} segmenti di linee di discontinuità della superficie {code} non sono stati mantenuti come lati dei triangoli.",
+      "suggestion": "Verificate che le linee di discontinuità non si incrocino e restino dentro la superficie."
+    },
+    "no_factors": {
+      "fail": "Nessun coefficiente di rigonfiamento e costipamento per {material}: sono mostrati solo i volumi in banco.",
+      "suggestion": "Inserite i coefficienti di questo materiale dalla relazione geotecnica."
     }
   },
   "setting_out": {

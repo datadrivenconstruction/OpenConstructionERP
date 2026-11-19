@@ -105,7 +105,34 @@ def _surface_out(s: SurveySurface, in_use: int = 0) -> SurfaceOut:
     out.area_m2 = float(s.area_m2 or 0)
     out.z_min, out.z_max = _f(s.z_min), _f(s.z_max)
     out.in_use = in_use
+    out.breakline_count = len(s.breaklines or [])
     return out
+
+
+async def surface_findings(data: dict[str, Any], project_id: str, locale: str = "en") -> list[Finding]:
+    """SRV-080..082 over a surface build or a staged run."""
+    from app.core.validation.engine import validation_engine  # noqa: PLC0415
+    from app.modules.surfaces_volumes.surface_validators import SURFACE_RULE_SET  # noqa: PLC0415
+
+    report = await validation_engine.validate(
+        data=data,
+        rule_sets=[SURFACE_RULE_SET],
+        target_type="survey_surface",
+        target_id=str((data.get("surface") or {}).get("code") or ""),
+        project_id=project_id,
+        metadata={"locale": locale},
+    )
+    return [
+        Finding(
+            rule_id=r.rule_id,
+            severity=str(getattr(r.severity, "value", r.severity)),
+            message=r.message,
+            suggestion=r.suggestion,
+            element_ref=r.element_ref,
+        )
+        for r in report.results
+        if not r.passed
+    ]
 
 
 def quantity_of(v: SurveyVolume, kind: str) -> float:
@@ -207,6 +234,7 @@ class VolumesService:
         filename: str = "",
         note: str = "",
         tier: str | None = None,
+        breaklines: list | None = None,
     ) -> SurveySurface:
         if tin.point_count > MAX_SURFACE_POINTS:
             raise _bad(f"{tin.point_count} points is more than {MAX_SURFACE_POINTS}: decimate the surface first")
@@ -234,6 +262,7 @@ class VolumesService:
             faces=[[int(i), int(j), int(k)] for i, j, k in tin.tri],
             note=note,
             created_by=_uuid(user_id),
+            breaklines=breaklines or None,
         )
         await self.repo.add(surface)
         return surface
@@ -250,7 +279,18 @@ class VolumesService:
         pts = [(e, n, z) for e, n, z in await self.repo.point_rows(list(data.point_set_ids)) if z is not None]
         if len(pts) < 3:
             raise _bad("A surface needs at least three points with a height")
-        tin = Tin.from_points([p[0] for p in pts], [p[1] for p in pts], [p[2] for p in pts])
+        lines = [[(float(a), float(b), float(c)) for a, b, c in line] for line in data.breaklines]
+        if data.breakline_codes:
+            strung: dict[str, list[tuple[float, float, float]]] = {}
+            for code, e, n, z in await self.repo.coded_rows(list(data.point_set_ids), list(data.breakline_codes)):
+                strung.setdefault(code, []).append((e, n, z))
+            lines.extend(line for line in strung.values() if len(line) >= 2)
+        if lines or data.boundary:
+            tin = Tin.from_points_with_breaklines(
+                [p[0] for p in pts], [p[1] for p in pts], [p[2] for p in pts], lines, data.boundary
+            )
+        else:
+            tin = Tin.from_points([p[0] for p in pts], [p[1] for p in pts], [p[2] for p in pts])
         surface = await self._store_surface(
             project_id,
             tin,
@@ -261,8 +301,13 @@ class VolumesService:
             point_set_id=data.point_set_ids[0],
             filename=sets[0].source_filename if sets[0] else "",
             note=data.note,
+            breaklines=[[[round(a, 4), round(b, 4), round(c, 4)] for a, b, c in line] for line in lines],
         )
-        return _surface_out(surface)
+        out = _surface_out(surface)
+        out.findings = await surface_findings(
+            {"surface": {"code": surface.code, "missed_segments": tin.missed_segments}}, str(project_id)
+        )
+        return out
 
     async def import_landxml(self, project_id: uuid.UUID, data: LandXmlImport, user_id: str) -> LandXmlResult:
         try:
@@ -771,6 +816,15 @@ class VolumesService:
                     "properties": {"layer": "surfaces", "id": s.code, "name": s.name},
                 }
             )
+            for line in s.breaklines or []:
+                coords = to_ll([float(v[0]) for v in line], [float(v[1]) for v in line])
+                features.append(
+                    {
+                        "type": "Feature",
+                        "geometry": {"type": "LineString", "coordinates": [list(c) for c in coords]},
+                        "properties": {"layer": "breaklines", "id": s.code, "name": s.name},
+                    }
+                )
         if volume_id is not None:
             v = await self.get_volume(volume_id)
             if v.project_id != project_id:
@@ -809,4 +863,4 @@ def _heat_features(heat: dict | None, to_ll) -> list[dict[str, Any]]:
     return out
 
 
-__all__ = ["FORMULA", "MAX_SURFACE_POINTS", "VolumesService", "quantity_of", "tin_of"]
+__all__ = ["FORMULA", "MAX_SURFACE_POINTS", "VolumesService", "quantity_of", "surface_findings", "tin_of"]

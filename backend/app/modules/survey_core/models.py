@@ -54,6 +54,29 @@ class SurveyProjectCrs(Base):
     confirmed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
 
+class SurveyControlCheck(Base):
+    """A check shot on a control point: the measured position and its residual against the known one."""
+
+    __tablename__ = "oe_survey_control_check"
+    __table_args__ = (Index("ix_oe_survey_control_check_point", "control_point_id"),)
+
+    project_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(), ForeignKey("oe_projects_project.id", ondelete="CASCADE"), nullable=False
+    )
+    control_point_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(), ForeignKey("oe_survey_point.id", ondelete="CASCADE"), nullable=False
+    )
+    # The register point that was compared, when the check came from a measured point.
+    measured_point_id: Mapped[uuid.UUID | None] = mapped_column(
+        GUID(), ForeignKey("oe_survey_point.id", ondelete="SET NULL"), nullable=True
+    )
+    e: Mapped[Decimal] = mapped_column(Numeric(14, 4), nullable=False)
+    n: Mapped[Decimal] = mapped_column(Numeric(14, 4), nullable=False)
+    z: Mapped[Decimal | None] = mapped_column(Numeric(10, 4), nullable=True)
+    note: Mapped[str] = mapped_column(String(255), nullable=False, default="", server_default="")
+    created_by: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+
+
 class SurveyPointSet(Base):
     """One imported point file."""
 
@@ -158,4 +181,6 @@ class SurveyProfile(Base):
     source: Mapped[str] = mapped_column(String(20), nullable=False, default="user", server_default="user")
     traverse_min_ratio: Mapped[int | None] = mapped_column(Integer, nullable=True)
     level_k_mm: Mapped[Decimal | None] = mapped_column(Numeric(8, 2), nullable=True)
+    # Largest plan residual of a control check shot, mm; no core default.
+    control_tol_mm: Mapped[Decimal | None] = mapped_column(Numeric(8, 2), nullable=True)
     coverage_min_pct: Mapped[Decimal | None] = mapped_column(Numeric(5, 2), nullable=True)

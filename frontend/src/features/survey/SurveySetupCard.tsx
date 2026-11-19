@@ -2,13 +2,15 @@
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 /**
  * One-click switch for the Survey & Land family: the seven survey modules with
- * a checkbox each, on by default except mine survey, which only mining work
- * needs. Shown on /survey while the family is off and in Settings > Market.
+ * a checkbox each. The first ticks follow the company profile (a survey firm, a
+ * mine, a contractor); any other profile gets all but mine survey. Shown on
+ * /survey while the family is off and in Settings > Market.
  */
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Compass } from 'lucide-react';
 import { Button, Card, CardContent, CardHeader } from '@/shared/ui';
+import { useCompanyPresetKey } from '@/app/layout/useCompanyWorkspace';
 import { useModuleStore } from '@/stores/useModuleStore';
 import { useToastStore } from '@/stores/useToastStore';
 
@@ -31,6 +33,32 @@ export const SURVEY_MODULES: SurveyModuleOption[] = [
   { id: 'mine_survey', labelKey: 'mine.page.title', fallback: 'Mine survey', descKey: 'survey.setup.mine_desc', descFallback: 'Monthly mined volumes, ore and waste tonnes, drives and blast patterns.', defaultOn: false },
 ];
 
+const CONTRACTOR_SET = ['survey_core', 'surfaces_volumes', 'stockpiles', 'setting-out'];
+const CONTRACTORS = new Set([
+  'general_contractor',
+  'subcontractor',
+  'design_build',
+  'homebuilder',
+  'construction_manager',
+  'site_supervisor',
+  'mep_contractor',
+]);
+
+/** Which modules start ticked for a company profile key (from onboarding). */
+export function surveyDefaultsFor(presetKey: string | null | undefined): Record<string, boolean> {
+  const all = (except: string) => Object.fromEntries(SURVEY_MODULES.map((m) => [m.id, m.id !== except]));
+  if (presetKey === 'survey_company') return all('mine_survey');
+  if (presetKey === 'mining_operator') return all('land-parcels');
+  if (presetKey && CONTRACTORS.has(presetKey)) {
+    return Object.fromEntries(SURVEY_MODULES.map((m) => [m.id, CONTRACTOR_SET.includes(m.id)]));
+  }
+  if (presetKey === 'civil_infrastructure') {
+    // Earthworks contractor plus settlement monitoring along the works.
+    return Object.fromEntries(SURVEY_MODULES.map((m) => [m.id, CONTRACTOR_SET.includes(m.id) || m.id === 'monitoring']));
+  }
+  return Object.fromEntries(SURVEY_MODULES.map((m) => [m.id, m.defaultOn]));
+}
+
 /** True while no survey module is on: the family still needs switching on. */
 export function useSurveyFamilyOff(): boolean {
   const isModuleEnabled = useModuleStore((s) => s.isModuleEnabled);
@@ -42,12 +70,19 @@ export function SurveySetupCard({ onEnabled }: { onEnabled?: () => void }) {
   const setModuleEnabled = useModuleStore((s) => s.setModuleEnabled);
   const isModuleEnabled = useModuleStore((s) => s.isModuleEnabled);
   const addToast = useToastStore((s) => s.addToast);
+  const presetKey = useCompanyPresetKey();
   const anyOn = SURVEY_MODULES.some((m) => isModuleEnabled(m.id));
+  const [touched, setTouched] = useState(false);
   const [picked, setPicked] = useState<Record<string, boolean>>(() =>
-    Object.fromEntries(SURVEY_MODULES.map((m) => [m.id, anyOn ? isModuleEnabled(m.id) : m.defaultOn])),
+    anyOn ? Object.fromEntries(SURVEY_MODULES.map((m) => [m.id, isModuleEnabled(m.id)])) : surveyDefaultsFor(presetKey),
   );
+  // The profile arrives after the first render; follow it until the user ticks something.
+  useEffect(() => {
+    if (!anyOn && !touched) setPicked(surveyDefaultsFor(presetKey));
+  }, [presetKey, anyOn, touched]);
 
-  const toggle = (id: string, on: boolean) =>
+  const toggle = (id: string, on: boolean) => {
+    setTouched(true);
     setPicked((p) => {
       const next = { ...p, [id]: on };
       // Every survey page reads its points from the register.
@@ -55,6 +90,7 @@ export function SurveySetupCard({ onEnabled }: { onEnabled?: () => void }) {
       if (on && id === 'mine_survey') next.surfaces_volumes = true;
       return next;
     });
+  };
 
   const apply = () => {
     for (const m of SURVEY_MODULES) setModuleEnabled(m.id, !!picked[m.id]);
@@ -71,6 +107,11 @@ export function SurveySetupCard({ onEnabled }: { onEnabled?: () => void }) {
         })}
       />
       <CardContent>
+        {!anyOn && presetKey && (
+          <p className="mb-3 text-xs text-content-secondary" data-testid="survey-setup-profile-note">
+            {t('survey.setup.profile_note', { defaultValue: 'Ticked for your company profile. Change anything before you switch on.' })}
+          </p>
+        )}
         <ul className="grid gap-2 sm:grid-cols-2">
           {SURVEY_MODULES.map((m) => (
             <li key={m.id}>

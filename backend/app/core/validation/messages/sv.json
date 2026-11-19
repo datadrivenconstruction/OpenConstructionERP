@@ -2355,6 +2355,10 @@
     "level_misclosure": {
       "fail": "Avvägningens slutfel {f} mm överstiger k·√km med k = {k} mm.",
       "suggestion": "Gör om avvägningen eller kontrollera höjderna på de använda fixpunkterna."
+    },
+    "control_check": {
+      "fail": "Stompunkt {id}: kontrollmätningen avviker {r} mm, mer än toleransen {t} mm.",
+      "suggestion": "Mät in punkten igen; om den har flyttat sig, sätt inte ut från den förrän den är återetablerad."
     }
   },
   "volumes": {
@@ -2373,6 +2377,18 @@
     "bank_volume": {
       "fail": "Mängden är fast volym (i marken); svällningsfaktorn är inte tillämpad.",
       "suggestion": "Skicka i stället lös schaktmassa om mängdförteckningens post mäts som löst material."
+    },
+    "no_ground_class": {
+      "fail": "Punktmolnet saknar markpunkter (klass 2); alla punkter användes för ytan {code}.",
+      "suggestion": "Klassa punktmolnet i skanningsprogrammet, eller kontrollera att vegetation och maskiner inte finns i ytan."
+    },
+    "breakline_missed": {
+      "fail": "{n} brytlinjesegment i ytan {code} kunde inte behållas som triangelkanter.",
+      "suggestion": "Kontrollera att brytlinjer inte korsar varandra och ligger inom ytan."
+    },
+    "no_factors": {
+      "fail": "Inga faktorer för fast, löst och packat för {material}: bara fasta volymer visas.",
+      "suggestion": "Ange faktorerna för materialet från den geotekniska rapporten."
     }
   },
   "setting_out": {

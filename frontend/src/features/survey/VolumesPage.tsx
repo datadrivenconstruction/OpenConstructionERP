@@ -34,6 +34,7 @@ import { useViewModeStore } from '@/stores/useViewModeStore';
 import { useToastStore } from '@/stores/useToastStore';
 import { getProjectCrs } from './api';
 import { crsChipText } from './crsPicker';
+import { StagedPanel } from './StagedPanel';
 import { SurveyPlan } from './SurveyPlan';
 import { NewSurfaceDialog, NewVolumeDialog, SendToBoqDialog } from './VolumeDialogs';
 import { useOpenSurveyDemo } from './useOpenSurveyDemo';
@@ -57,7 +58,7 @@ import {
 import { fmtFixed } from '@/shared/lib/formatters';
 import { ViewOnlyNote, useSurveyAccess } from './useSurveyAccess';
 
-type Tab = 'calculations' | 'surfaces' | 'plan';
+type Tab = 'calculations' | 'surfaces' | 'staged' | 'plan';
 
 function StatusBadge({ status }: { status: Volume['status'] }) {
   const { t } = useTranslation();
@@ -223,6 +224,7 @@ export default function VolumesPage() {
         tabs={[
           { id: 'calculations', label: t('volumes.tab.calculations', { defaultValue: 'Calculations' }) },
           { id: 'surfaces', label: t('volumes.tab.surfaces', { defaultValue: 'Surfaces' }) },
+          { id: 'staged', label: t('volumes.tab.staged', { defaultValue: 'Stages' }) },
           { id: 'plan', label: t('survey.tab.plan', { defaultValue: 'Plan' }) },
         ]}
       />
@@ -342,6 +344,8 @@ export default function VolumesPage() {
           )}
         </Card>
       )}
+
+      {tab === 'staged' && <StagedPanel projectId={projectId} surfaces={surfaces.data ?? []} />}
 
       {tab === 'plan' && <SurveyPlan plan={plan.data} isLoading={plan.isLoading} error={plan.error} onRetry={() => plan.refetch()} showLegend />}
 

@@ -2355,6 +2355,10 @@
     "level_misclosure": {
       "fail": "El error de cierre de nivelación {f} mm supera k·√km con k = {k} mm.",
       "suggestion": "Repita la nivelación o compruebe las cotas de los puntos de referencia usados."
+    },
+    "control_check": {
+      "fail": "Punto de control {id}: la medición de comprobación se desvía {r} mm, más que la tolerancia de {t} mm.",
+      "suggestion": "Vuelva a medir el punto; si se ha movido, no replantee desde él hasta que se restablezca."
     }
   },
   "volumes": {
@@ -2373,6 +2377,18 @@
     "bank_volume": {
       "fail": "La cantidad es volumen en banco (en el terreno); no se aplica el factor de esponjamiento.",
       "suggestion": "Envíe el desmonte esponjado si la partida se mide como material suelto."
+    },
+    "no_ground_class": {
+      "fail": "La nube de puntos no tiene puntos de terreno (clase 2); se usaron todos los puntos para la superficie {code}.",
+      "suggestion": "Clasifique la nube en el software de escaneo, o compruebe que la vegetación y la maquinaria no están en la superficie."
+    },
+    "breakline_missed": {
+      "fail": "{n} segmentos de líneas de quiebre de la superficie {code} no se pudieron conservar como aristas de triángulos.",
+      "suggestion": "Compruebe que las líneas de quiebre no se cruzan entre sí y quedan dentro de la superficie."
+    },
+    "no_factors": {
+      "fail": "No hay factores de esponjamiento ni de compactación para {material}: solo se muestran volúmenes en banco.",
+      "suggestion": "Introduzca los factores de este material según el informe geotécnico."
     }
   },
   "setting_out": {

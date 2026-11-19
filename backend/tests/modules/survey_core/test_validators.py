@@ -101,7 +101,14 @@ async def test_messages_answer_in_the_callers_language() -> None:
     assert "Koordinatensystem" in result.message
 
 
-_SURVEY_KEYS = ("no_crs", "crs_unconfirmed", "duplicate_point", "traverse_misclosure", "level_misclosure")
+_SURVEY_KEYS = (
+    "no_crs",
+    "crs_unconfirmed",
+    "duplicate_point",
+    "traverse_misclosure",
+    "level_misclosure",
+    "control_check",
+)
 
 
 def test_every_locale_carries_every_survey_message() -> None:

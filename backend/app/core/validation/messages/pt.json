@@ -2355,6 +2355,10 @@
     "level_misclosure": {
       "fail": "O erro de fecho do nivelamento {f} mm excede k·√km com k = {k} mm.",
       "suggestion": "Repita o nivelamento ou verifique as cotas das referências de nível usadas."
+    },
+    "control_check": {
+      "fail": "Ponto de apoio {id}: a medição de verificação desvia {r} mm, acima da tolerância de {t} mm.",
+      "suggestion": "Volte a medir o ponto; se se moveu, não implante a partir dele até ser restabelecido."
     }
   },
   "volumes": {
@@ -2373,6 +2377,18 @@
     "bank_volume": {
       "fail": "A quantidade é volume no corte (no terreno); o fator de empolamento não é aplicado.",
       "suggestion": "Envie o corte empolado se a linha do orçamento for medida como material solto."
+    },
+    "no_ground_class": {
+      "fail": "A nuvem de pontos não tem pontos de terreno (classe 2); foram usados todos os pontos para a superfície {code}.",
+      "suggestion": "Classifique a nuvem no software de varrimento, ou verifique que a vegetação e as máquinas não estão na superfície."
+    },
+    "breakline_missed": {
+      "fail": "{n} segmentos de linhas de quebra da superfície {code} não puderam ser mantidos como arestas de triângulos.",
+      "suggestion": "Verifique que as linhas de quebra não se cruzam e ficam dentro da superfície."
+    },
+    "no_factors": {
+      "fail": "Sem fatores de empolamento e compactação para {material}: só são mostrados volumes in situ.",
+      "suggestion": "Introduza os fatores deste material a partir do relatório geotécnico."
     }
   },
   "setting_out": {

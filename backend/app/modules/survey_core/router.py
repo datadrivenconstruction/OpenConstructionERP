@@ -275,3 +275,9 @@ async def put_default_profile(body: SurveyProfileIn, session: SessionDep, user_i
 async def plan(project_id: uuid.UUID, session: SessionDep, user_id: CurrentUserId) -> dict[str, Any]:
     await verify_project_access(project_id, user_id, session)
     return await SurveyService(session).plan(project_id)
+
+
+# Point detail, bulk actions, export and control checks live in their own file; same prefix and permissions.
+from app.modules.survey_core.register_router import router as _register_router  # noqa: E402
+
+router.include_router(_register_router)

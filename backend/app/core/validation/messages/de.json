@@ -2355,6 +2355,10 @@
     "level_misclosure": {
       "fail": "Nivellement-Widerspruch {f} mm überschreitet k·√km mit k = {k} mm.",
       "suggestion": "Nivellement wiederholen oder die verwendeten Höhenfestpunkte prüfen."
+    },
+    "control_check": {
+      "fail": "Festpunkt {id}: die Kontrollmessung weicht um {r} mm ab, mehr als die Toleranz von {t} mm.",
+      "suggestion": "Messen Sie den Punkt erneut; hat er sich bewegt, stecken Sie nicht mehr von ihm ab, bis er neu bestimmt ist."
     }
   },
   "volumes": {
@@ -2373,6 +2377,18 @@
     "bank_volume": {
       "fail": "Die Menge ist festes Volumen (gewachsener Boden); der Auflockerungsfaktor ist nicht angewendet.",
       "suggestion": "Senden Sie stattdessen den gelockerten Abtrag, wenn die LV-Position lose gemessen wird."
+    },
+    "no_ground_class": {
+      "fail": "Die Punktwolke enthält keine Bodenpunkte (Klasse 2); für die Oberfläche {code} wurden alle Punkte verwendet.",
+      "suggestion": "Klassifizieren Sie die Punktwolke in der Scan-Software oder prüfen Sie, dass Bewuchs und Maschinen nicht in der Oberfläche liegen."
+    },
+    "breakline_missed": {
+      "fail": "{n} Bruchkantensegmente der Oberfläche {code} konnten nicht als Dreieckskanten erhalten werden.",
+      "suggestion": "Prüfen Sie, dass sich Bruchkanten nicht kreuzen und innerhalb der Oberfläche liegen."
+    },
+    "no_factors": {
+      "fail": "Keine Faktoren für gewachsen, gelöst und verdichtet für {material}: nur Volumen im gewachsenen Zustand werden angezeigt.",
+      "suggestion": "Tragen Sie die Faktoren für dieses Material aus dem Bodengutachten ein."
     }
   },
   "setting_out": {

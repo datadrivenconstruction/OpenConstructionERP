@@ -2355,6 +2355,10 @@
     "level_misclosure": {
       "fail": "Nivelirlash yopilish xatosi {f} mm k·√km qiymatidan oshadi (k = {k} mm).",
       "suggestion": "Nivelirlashni takrorlang yoki ishlatilgan reperlar balandliklarini tekshiring."
+    },
+    "control_check": {
+      "fail": "Tayanch punkt {id}: nazorat o'lchovi {r} mm ga og'adi, {t} mm ruxsatdan ko'p.",
+      "suggestion": "Punktni qayta o'lchang; agar u siljigan bo'lsa, tiklanmaguncha undan joyga ko'chirish ishlarini bajarmang."
     }
   },
   "volumes": {
@@ -2373,6 +2377,18 @@
     "bank_volume": {
       "fail": "Miqdor zich holatdagi hajm (gruntda); yumshash koeffitsiyenti qo'llanilmagan.",
       "suggestion": "Smeta bandi yumshoq material sifatida o'lchansa, yumshatilgan qazishni yuboring."
+    },
+    "no_ground_class": {
+      "fail": "Nuqtalar bulutida yer nuqtalari (2-sinf) yo'q; {code} sirti uchun barcha nuqtalar ishlatildi.",
+      "suggestion": "Bulutni skanerlash dasturida tasniflang yoki o'simlik va texnika sirtga tushmaganini tekshiring."
+    },
+    "breakline_missed": {
+      "fail": "{code} sirtining {n} ta sinish chizig'i bo'lagini uchburchak qirralari sifatida saqlab bo'lmadi.",
+      "suggestion": "Sinish chiziqlari bir-birini kesmasligini va sirt ichida yotishini tekshiring."
+    },
+    "no_factors": {
+      "fail": "{material} uchun yumshash va zichlanish koeffitsientlari yo'q: faqat tabiiy holatdagi hajmlar ko'rsatildi.",
+      "suggestion": "Ushbu material koeffitsientlarini tuproq hisobotidan kiriting."
     }
   },
   "setting_out": {

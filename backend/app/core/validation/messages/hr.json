@@ -2355,6 +2355,10 @@
     "level_misclosure": {
       "fail": "Odstupanje nivelmana {f} mm premašuje k·√km uz k = {k} mm.",
       "suggestion": "Ponovite nivelman ili provjerite visine korištenih repera."
+    },
+    "control_check": {
+      "fail": "Točka osnove {id}: kontrolno mjerenje odstupa {r} mm, više od tolerancije {t} mm.",
+      "suggestion": "Ponovno izmjerite točku; ako se pomaknula, ne iskolčujte s nje dok se ne obnovi."
     }
   },
   "volumes": {
@@ -2373,6 +2377,18 @@
     "bank_volume": {
       "fail": "Količina je volumen u sraslom stanju (u tlu); koeficijent rastresitosti nije primijenjen.",
       "suggestion": "Pošaljite rastresiti iskop ako se stavka troškovnika mjeri u rastresitom stanju."
+    },
+    "no_ground_class": {
+      "fail": "Oblak točaka nema točaka terena (klasa 2); za plohu {code} korištene su sve točke.",
+      "suggestion": "Klasificirajte oblak u softveru za skeniranje ili provjerite da vegetacija i strojevi nisu u plohi."
+    },
+    "breakline_missed": {
+      "fail": "{n} segmenata prijelomnica plohe {code} nije se moglo zadržati kao bridove trokuta.",
+      "suggestion": "Provjerite da se prijelomnice ne sijeku i da ostaju unutar plohe."
+    },
+    "no_factors": {
+      "fail": "Nema koeficijenata rastresitosti i zbijenosti za {material}: prikazani su samo volumeni u sraslom stanju.",
+      "suggestion": "Unesite koeficijente za ovaj materijal iz geotehničkog izvješća."
     }
   },
   "setting_out": {

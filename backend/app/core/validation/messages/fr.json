@@ -2355,6 +2355,10 @@
     "level_misclosure": {
       "fail": "L'écart de fermeture du nivellement {f} mm dépasse k·√km avec k = {k} mm.",
       "suggestion": "Refaites le nivellement ou vérifiez les altitudes des repères utilisés."
+    },
+    "control_check": {
+      "fail": "Point de calage {id} : le contrôle s'écarte de {r} mm, au-delà de la tolérance de {t} mm.",
+      "suggestion": "Mesurez à nouveau le point ; s'il a bougé, n'implantez plus depuis ce point avant qu'il soit rétabli."
     }
   },
   "volumes": {
@@ -2373,6 +2377,18 @@
     "bank_volume": {
       "fail": "La quantité est un volume en place (dans le sol) ; le foisonnement n'est pas appliqué.",
       "suggestion": "Envoyez plutôt le déblai foisonné si la ligne du métré est mesurée en matériau foisonné."
+    },
+    "no_ground_class": {
+      "fail": "Le nuage de points ne contient aucun point sol (classe 2) ; tous les points ont servi à la surface {code}.",
+      "suggestion": "Classez le nuage dans le logiciel de scan, ou vérifiez que la végétation et les engins ne sont pas dans la surface."
+    },
+    "breakline_missed": {
+      "fail": "{n} segments de lignes de rupture de la surface {code} n'ont pas pu être conservés comme arêtes de triangles.",
+      "suggestion": "Vérifiez que les lignes de rupture ne se croisent pas et restent à l'intérieur de la surface."
+    },
+    "no_factors": {
+      "fail": "Aucun coefficient de foisonnement ni de compactage pour {material} : seuls les volumes en place sont affichés.",
+      "suggestion": "Saisissez les coefficients de ce matériau d'après le rapport géotechnique."
     }
   },
   "setting_out": {

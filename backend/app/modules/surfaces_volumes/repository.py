@@ -99,6 +99,17 @@ class VolumesRepository:
         )
         return [(float(e), float(n), float(z) if z is not None else None) for e, n, z in rows.all()]
 
+    async def coded_rows(self, set_ids: list[uuid.UUID], codes: list[str]) -> list[tuple[str, float, float, float]]:
+        """``(code, e, n, z)`` of points with a height whose code is in ``codes``, in file order."""
+        from app.modules.survey_core.models import SurveyPoint  # noqa: PLC0415
+
+        rows = await self.session.execute(
+            select(SurveyPoint.code, SurveyPoint.e, SurveyPoint.n, SurveyPoint.z)
+            .where(SurveyPoint.point_set_id.in_(set_ids), SurveyPoint.code.in_(codes), SurveyPoint.z.is_not(None))
+            .order_by(SurveyPoint.point_set_id, SurveyPoint.source_line, SurveyPoint.id)
+        )
+        return [(str(c), float(e), float(n), float(z)) for c, e, n, z in rows.all()]
+
     async def user_name(self, user_id: uuid.UUID | None) -> str:
         if user_id is None:
             return ""

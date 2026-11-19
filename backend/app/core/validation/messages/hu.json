@@ -2355,6 +2355,10 @@
     "level_misclosure": {
       "fail": "A szintezés záróhibája {f} mm meghaladja a k·√km értéket (k = {k} mm).",
       "suggestion": "Ismételje meg a szintezést, vagy ellenőrizze a használt magassági alappontokat."
+    },
+    "control_check": {
+      "fail": "{id} alappont: az ellenőrző mérés {r} mm-rel tér el, többel, mint a {t} mm-es tűrés.",
+      "suggestion": "Mérje be újra a pontot; ha elmozdult, ne tűzzön ki róla, amíg újra nem határozták meg."
     }
   },
   "volumes": {
@@ -2373,6 +2377,18 @@
     "bank_volume": {
       "fail": "A mennyiség tömör térfogat (a talajban); a lazulási tényező nincs alkalmazva.",
       "suggestion": "Küldje inkább a laza kitermelést, ha a költségvetési tétel laza anyagban mért."
+    },
+    "no_ground_class": {
+      "fail": "A pontfelhőben nincsenek terepi pontok (2. osztály); a(z) {code} felülethez minden pontot felhasználtunk.",
+      "suggestion": "Osztályozza a pontfelhőt a szkennelő szoftverben, vagy ellenőrizze, hogy növényzet és gépek nincsenek a felületben."
+    },
+    "breakline_missed": {
+      "fail": "A(z) {code} felület {n} törésvonal-szakaszát nem sikerült háromszögélként megtartani.",
+      "suggestion": "Ellenőrizze, hogy a törésvonalak nem metszik egymást és a felületen belül maradnak."
+    },
+    "no_factors": {
+      "fail": "Nincs lazulási és tömörödési tényező ehhez: {material}; csak a termett állapotú térfogatok látszanak.",
+      "suggestion": "Adja meg az anyag tényezőit a talajmechanikai jelentésből."
     }
   },
   "setting_out": {
