@@ -110,6 +110,10 @@ class SurveyPoint(Base):
     sigma: Mapped[Decimal | None] = mapped_column(Numeric(8, 4), nullable=True)
     description: Mapped[str] = mapped_column(String(255), nullable=False, default="", server_default="")
     source_line: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    # How a computed point was made (inverse, polar, bearing_bearing, traverse, ...); "" = measured.
+    method: Mapped[str] = mapped_column(String(32), nullable=False, default="", server_default="")
+    # The inputs of that computation, kept for the audit trail.
+    inputs: Mapped[dict | None] = mapped_column(JSON, nullable=True)
 
 
 class SurveyTraverse(Base):
@@ -142,6 +146,13 @@ class SurveyTraverse(Base):
     profile_label: Mapped[str] = mapped_column(String(255), nullable=False, default="", server_default="")
     note: Mapped[str] = mapped_column(Text, nullable=False, default="", server_default="")
     created_by: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+    # Field traverse: angular misclosure (seconds), the k of k*sqrt(n) and its allowance.
+    angle_count: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    ang_misclosure_sec: Mapped[Decimal | None] = mapped_column(Numeric(10, 2), nullable=True)
+    ang_k_sec: Mapped[Decimal | None] = mapped_column(Numeric(8, 2), nullable=True)
+    ang_allowed_sec: Mapped[Decimal | None] = mapped_column(Numeric(10, 2), nullable=True)
+    # Field observations and the reduction (stations or level book rows, arithmetic check).
+    observations: Mapped[dict | None] = mapped_column(JSON, nullable=True)
 
 
 class SurveyProfile(Base):
@@ -159,3 +170,4 @@ class SurveyProfile(Base):
     traverse_min_ratio: Mapped[int | None] = mapped_column(Integer, nullable=True)
     level_k_mm: Mapped[Decimal | None] = mapped_column(Numeric(8, 2), nullable=True)
     coverage_min_pct: Mapped[Decimal | None] = mapped_column(Numeric(5, 2), nullable=True)
+    angular_k_sec: Mapped[Decimal | None] = mapped_column(Numeric(8, 2), nullable=True)

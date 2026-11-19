@@ -110,7 +110,79 @@ class ArcElement:
         return self.radius * self.sweep
 
 
-Element = LineElement | ArcElement
+@dataclass(frozen=True)
+class SpiralElement:
+    """A clothoid: curvature changes linearly from ``1/radius_start`` to ``1/radius_end`` over ``length``.
+
+    ``azimuth_deg`` is the tangent direction at ``start`` (from grid north, clockwise). A radius of
+    ``None`` is a straight (infinite radius). ``ccw`` turns left. Positions are integrated with
+    Simpson's rule, which is exact to well under a millimetre for road spirals.
+    """
+
+    start: tuple[float, float]
+    azimuth_deg: float
+    length: float
+    radius_start: float | None
+    radius_end: float | None
+    ccw: bool
+
+    def _k(self, radius: float | None) -> float:
+        if not radius:
+            return 0.0
+        return (-1.0 if self.ccw else 1.0) / radius
+
+    def azimuth_at(self, s: float) -> float:
+        """Tangent azimuth in radians at arc length ``s`` (clockwise from north)."""
+        k0, k1 = self._k(self.radius_start), self._k(self.radius_end)
+        return math.radians(self.azimuth_deg) + k0 * s + (k1 - k0) * s * s / (2.0 * self.length)
+
+    def centre_at(self, s: float) -> tuple[float, float]:
+        """(E, N) on the spiral at arc length ``s``."""
+        steps = max(16, 2 * math.ceil(s / 2.0))
+        h = s / steps
+        se = ce = 0.0
+        for i in range(steps + 1):
+            w = 1 if i in (0, steps) else (4 if i % 2 else 2)
+            a = self.azimuth_at(i * h)
+            se += w * math.sin(a)
+            ce += w * math.cos(a)
+        return self.start[0] + se * h / 3.0, self.start[1] + ce * h / 3.0
+
+    @property
+    def end(self) -> tuple[float, float]:
+        return self.centre_at(self.length)
+
+    def point(self, s: float, offset: float) -> tuple[float, float]:
+        e, n = self.centre_at(s)
+        a = self.azimuth_at(s)
+        return e + offset * math.cos(a), n - offset * math.sin(a)
+
+    def project(self, e: float, n: float) -> tuple[float, float] | None:
+        """(s, right-positive offset) of the foot of (E, N) on the spiral, or None beyond its ends."""
+        samples = max(20, math.ceil(self.length))
+        best_s, best_d = 0.0, math.inf
+        for i in range(samples + 1):
+            s = self.length * i / samples
+            pe, pn = self.centre_at(s)
+            d = math.hypot(e - pe, n - pn)
+            if d < best_d:
+                best_s, best_d = s, d
+        lo, hi = max(best_s - self.length / samples, 0.0), min(best_s + self.length / samples, self.length)
+        for _ in range(40):
+            m1, m2 = lo + (hi - lo) / 3, hi - (hi - lo) / 3
+            d1 = math.hypot(e - self.centre_at(m1)[0], n - self.centre_at(m1)[1])
+            d2 = math.hypot(e - self.centre_at(m2)[0], n - self.centre_at(m2)[1])
+            lo, hi = (lo, m2) if d1 < d2 else (m1, hi)
+        s = (lo + hi) / 2
+        pe, pn = self.centre_at(s)
+        a = self.azimuth_at(s)
+        along = (e - pe) * math.sin(a) + (n - pn) * math.cos(a)
+        if abs(along) > 1e-3:
+            return None  # the nearest spiral point is an end and the foot lies beyond it
+        return s, (e - pe) * math.cos(a) - (n - pn) * math.sin(a)
+
+
+Element = LineElement | ArcElement | SpiralElement
 
 
 class AlignmentError(ValueError):
@@ -161,6 +233,8 @@ class Alignment:
 
 
 def _point_on(el: Element, s: float, offset: float) -> tuple[float, float]:
+    if isinstance(el, SpiralElement):
+        return el.point(s, offset)
     if isinstance(el, LineElement):
         length = el.length or 1.0
         ux, uy = (el.end[0] - el.start[0]) / length, (el.end[1] - el.start[1]) / length
@@ -176,6 +250,8 @@ def _point_on(el: Element, s: float, offset: float) -> tuple[float, float]:
 
 def _project(el: Element, e: float, n: float) -> tuple[float, float] | None:
     tol = 1e-6
+    if isinstance(el, SpiralElement):
+        return el.project(e, n)
     if isinstance(el, LineElement):
         length = el.length
         if length == 0:
@@ -202,6 +278,7 @@ __all__ = [
     "ArcElement",
     "Delta",
     "LineElement",
+    "SpiralElement",
     "Verdict",
     "stake_delta",
 ]

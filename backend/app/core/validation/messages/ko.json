@@ -2355,6 +2355,22 @@
     "level_misclosure": {
       "fail": "수준측량 폐합차 {f} mm가 k·√km(k = {k} mm)를 초과합니다.",
       "suggestion": "수준측량을 다시 하거나 사용한 수준점 표고를 확인하세요."
+    },
+    "cogo_parallel": {
+      "fail": "두 직선이 평행합니다: 교점이 없습니다.",
+      "suggestion": "방위각을 확인하거나 서로 교차하는 두 직선을 선택하십시오."
+    },
+    "cogo_two_solutions": {
+      "fail": "거리-거리 교회에 해가 두 개 있습니다. 하나를 선택하십시오.",
+      "suggestion": "기선의 올바른 쪽에 있는 점을 유지하십시오."
+    },
+    "angular_misclosure": {
+      "fail": "각 폐합오차 {a}\"가 {k}\" × √{n}을 초과합니다.",
+      "suggestion": "각도의 과대오차를 확인하고 재관측하거나 정확도 등급을 확인하십시오."
+    },
+    "level_arithmetic": {
+      "fail": "수준 야장 {name}: 산술 검사가 맞지 않습니다. ΣBS − ΣFS = {d}, 마지막 표고 − 처음 표고 = {r}.",
+      "suggestion": "읽음값과 각 행의 계산을 다시 확인하십시오."
     }
   },
   "volumes": {
@@ -2409,6 +2425,14 @@
       "no_profile": "프로필이 없습니다. 설정하세요",
       "d": "d (mm)",
       "dz": "dZ (mm)"
+    },
+    "profile_uncovered": {
+      "fail": "종단면이 측점 {c}을(를) 포함하지 않습니다.",
+      "suggestion": "종단면을 연장하거나 측설 목록을 그 범위로 제한하십시오."
+    },
+    "spiral_skipped": {
+      "fail": "클로소이드 매개변수가 없어 요소 {n}을(를) 건너뛰었습니다.",
+      "suggestion": "클로소이드 길이와 두 반경을 포함하여 선형을 다시 내보내십시오."
     }
   },
   "land_parcels": {
@@ -2459,6 +2483,18 @@
       "status_negotiating": "협의 중",
       "status_acquired": "취득",
       "status_expropriation": "수용"
+    },
+    "subdivision_area": {
+      "fail": "분할 면적 {a} + {b}이(가) 원 필지 {p}과(와) 다릅니다(차이 {d} m²).",
+      "suggestion": "분할선을 확인하십시오. 각 부분의 합은 원 필지와 같아야 합니다."
+    },
+    "corner_rpp": {
+      "fail": "경계점 {id}의 정확도 {r} m가 {limit} m를 초과합니다.",
+      "suggestion": "경계점을 재측량하거나 지정된 정확도 등급을 확인하십시오."
+    },
+    "setback": {
+      "fail": "건축 범위 {f}이(가) 경계 {b}에서 {d} m 떨어져 있습니다. 필요한 이격거리 {s} m.",
+      "suggestion": "필요한 이격거리에 대해 건축 범위의 위치를 확인하십시오."
     }
   },
   "monitoring": {
@@ -2494,6 +2530,10 @@
       "no_profile": "프로파일이 없습니다. 설정하십시오",
       "ack_yes": "예",
       "ack_no": "아니오"
+    },
+    "forecast": {
+      "fail": "점 {id}이(가) {d}일 후 {level}에 도달할 것으로 예측됩니다.",
+      "suggestion": "임계값에 도달하기 전에 추가 측정을 계획하고 추세를 검토하십시오."
     }
   },
   "stockpiles": {

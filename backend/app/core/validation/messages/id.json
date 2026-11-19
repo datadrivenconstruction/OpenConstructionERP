@@ -2355,6 +2355,22 @@
     "level_misclosure": {
       "fail": "Salah penutup sipat datar {f} mm melebihi k·√km dengan k = {k} mm.",
       "suggestion": "Ulangi sipat datar atau periksa elevasi titik tetap yang digunakan."
+    },
+    "cogo_parallel": {
+      "fail": "Garis-garisnya sejajar: tidak ada perpotongan.",
+      "suggestion": "Periksa azimut atau pilih dua garis yang berpotongan."
+    },
+    "cogo_two_solutions": {
+      "fail": "Perpotongan jarak-jarak memiliki dua solusi; pilih salah satu.",
+      "suggestion": "Pertahankan titik di sisi garis dasar yang benar."
+    },
+    "angular_misclosure": {
+      "fail": "Salah penutup sudut {a}\" melebihi {k}\" × √{n}.",
+      "suggestion": "Periksa kesalahan besar pada sudut, ukur ulang, atau konfirmasi kelas ketelitian."
+    },
+    "level_arithmetic": {
+      "fail": "Buku sipat datar {name}: pemeriksaan aritmetika gagal, ΣBS − ΣFS = {d} tetapi RL akhir − RL awal = {r}.",
+      "suggestion": "Periksa ulang bacaan dan perhitungan setiap baris."
     }
   },
   "volumes": {
@@ -2409,6 +2425,14 @@
       "no_profile": "Tanpa profil, tetapkan satu",
       "d": "d (mm)",
       "dz": "dZ (mm)"
+    },
+    "profile_uncovered": {
+      "fail": "Profil memanjang tidak mencakup stasiun {c}.",
+      "suggestion": "Perpanjang profil atau batasi daftar pematokan pada rentangnya."
+    },
+    "spiral_skipped": {
+      "fail": "Parameter spiral tidak ada; elemen {n} dilewati.",
+      "suggestion": "Ekspor ulang alinyemen dengan panjang spiral dan kedua jari-jari."
     }
   },
   "land_parcels": {
@@ -2459,6 +2483,18 @@
       "status_negotiating": "Negosiasi",
       "status_acquired": "Diperoleh",
       "status_expropriation": "Pencabutan hak"
+    },
+    "subdivision_area": {
+      "fail": "Luas bagian {a} + {b} berbeda dari bidang induk {p} (selisih {d} m²).",
+      "suggestion": "Periksa garis pemecahan: jumlah bagian harus sama dengan bidang induk."
+    },
+    "corner_rpp": {
+      "fail": "Ketelitian titik batas {id} sebesar {r} m melebihi {limit} m.",
+      "suggestion": "Ukur ulang titik atau periksa kelas ketelitian yang ditetapkan."
+    },
+    "setback": {
+      "fail": "Tapak {f} berjarak {d} m dari batas {b}; sempadan wajib {s} m.",
+      "suggestion": "Periksa posisi tapak terhadap sempadan yang diwajibkan."
     }
   },
   "monitoring": {
@@ -2494,6 +2530,10 @@
       "no_profile": "Tidak ada profil, atur satu",
       "ack_yes": "Ya",
       "ack_no": "Tidak"
+    },
+    "forecast": {
+      "fail": "Titik {id} diperkirakan mencapai {level} dalam {d} hari.",
+      "suggestion": "Rencanakan pembacaan tambahan dan tinjau tren sebelum ambang tercapai."
     }
   },
   "stockpiles": {

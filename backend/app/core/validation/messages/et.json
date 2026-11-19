@@ -2355,6 +2355,22 @@
     "level_misclosure": {
       "fail": "Nivelleerimise sulgemisviga {f} mm ületab k·√km, kui k = {k} mm.",
       "suggestion": "Korrake nivelleerimist või kontrollige kasutatud reeperite kõrgusi."
+    },
+    "cogo_parallel": {
+      "fail": "Sirged on paralleelsed: lõikepunkti pole.",
+      "suggestion": "Kontrollige direktsiooninurki või valige kaks lõikuvat sirget."
+    },
+    "cogo_two_solutions": {
+      "fail": "Kauguste järgi lõikamisel on kaks lahendit; valige üks.",
+      "suggestion": "Jätke punkt baasjoone õigele poolele."
+    },
+    "angular_misclosure": {
+      "fail": "Nurga sulgemisviga {a}\" ületab {k}\" × √{n}.",
+      "suggestion": "Kontrollige nurki jämevigade suhtes, mõõtke need uuesti või kinnitage täpsusklass."
+    },
+    "level_arithmetic": {
+      "fail": "Nivelleerimisraamat {name}: aritmeetiline kontroll ebaõnnestus, ΣT − ΣE = {d}, kuid viimane kõrgus − esimene = {r}.",
+      "suggestion": "Kontrollige lugemeid ja iga rea arvutust."
     }
   },
   "volumes": {
@@ -2409,6 +2425,14 @@
       "no_profile": "Profiil puudub, määra see",
       "d": "d (mm)",
       "dz": "dZ (mm)"
+    },
+    "profile_uncovered": {
+      "fail": "Pikiprofiil ei kata piketti {c}.",
+      "suggestion": "Pikendage profiili või piirake mahamärkimise loend selle ulatusega."
+    },
+    "spiral_skipped": {
+      "fail": "Klotoidi parameeter puudub; element {n} jäeti vahele.",
+      "suggestion": "Eksportige telg uuesti klotoidi pikkuse ja mõlema raadiusega."
     }
   },
   "land_parcels": {
@@ -2459,6 +2483,18 @@
       "status_negotiating": "Läbirääkimised",
       "status_acquired": "Omandatud",
       "status_expropriation": "Võõrandamine"
+    },
+    "subdivision_area": {
+      "fail": "Osade pindalad {a} + {b} erinevad algkinnistust {p} (vahe {d} m²).",
+      "suggestion": "Kontrollige jagamisjoont: osad peavad kokku andma algkinnistu."
+    },
+    "corner_rpp": {
+      "fail": "Piiripunkti {id} täpsus {r} m ületab {limit} m.",
+      "suggestion": "Mõõtke punkt uuesti või kontrollige sellele määratud täpsusklassi."
+    },
+    "setback": {
+      "fail": "Ehitisealune pind {f} on {d} m kaugusel piirist {b}; nõutav kaugus {s} m.",
+      "suggestion": "Kontrollige ehitisealuse pinna asukohta nõutava kauguse suhtes."
     }
   },
   "monitoring": {
@@ -2494,6 +2530,10 @@
       "no_profile": "Profiil puudub, määrake see",
       "ack_yes": "Jah",
       "ack_no": "Ei"
+    },
+    "forecast": {
+      "fail": "Prognoosi järgi jõuab punkt {id} tasemele {level} {d} päeva pärast.",
+      "suggestion": "Planeerige lisamõõtmine ja vaadake trend üle enne läve saavutamist."
     }
   },
   "stockpiles": {

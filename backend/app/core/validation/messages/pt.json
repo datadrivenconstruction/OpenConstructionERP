@@ -2355,6 +2355,22 @@
     "level_misclosure": {
       "fail": "O erro de fecho do nivelamento {f} mm excede k·√km com k = {k} mm.",
       "suggestion": "Repita o nivelamento ou verifique as cotas das referências de nível usadas."
+    },
+    "cogo_parallel": {
+      "fail": "As linhas são paralelas: não há interseção.",
+      "suggestion": "Verifique os azimutes ou escolha duas linhas que se cruzem."
+    },
+    "cogo_two_solutions": {
+      "fail": "A interseção por distâncias tem duas soluções; escolha uma.",
+      "suggestion": "Mantenha o ponto do lado correto da linha de base."
+    },
+    "angular_misclosure": {
+      "fail": "Erro de fechamento angular {a}\" acima de {k}\" × √{n}.",
+      "suggestion": "Procure erros grosseiros nos ângulos, meça-os novamente ou confirme a classe de precisão."
+    },
+    "level_arithmetic": {
+      "fail": "Caderneta de nivelamento {name}: verificação aritmética falhou, ΣRé − ΣVante = {d} mas última cota − primeira = {r}.",
+      "suggestion": "Confira as leituras e o cálculo de cada linha."
     }
   },
   "volumes": {
@@ -2409,6 +2425,14 @@
       "no_profile": "Sem perfil, defina um",
       "d": "d (mm)",
       "dz": "dZ (mm)"
+    },
+    "profile_uncovered": {
+      "fail": "O perfil longitudinal não cobre a estaca {c}.",
+      "suggestion": "Estenda o perfil ou limite a lista de locação ao seu intervalo."
+    },
+    "spiral_skipped": {
+      "fail": "Parâmetro da clotoide ausente; elemento {n} ignorado.",
+      "suggestion": "Exporte o eixo novamente com o comprimento da clotoide e os dois raios."
     }
   },
   "land_parcels": {
@@ -2459,6 +2483,18 @@
       "status_negotiating": "Em negociação",
       "status_acquired": "Adquirida",
       "status_expropriation": "Expropriação"
+    },
+    "subdivision_area": {
+      "fail": "As áreas dos lotes {a} + {b} diferem da parcela original {p} (diferença {d} m²).",
+      "suggestion": "Verifique a linha de divisão: os lotes devem somar a parcela original."
+    },
+    "corner_rpp": {
+      "fail": "A precisão do vértice {id}, {r} m, excede {limit} m.",
+      "suggestion": "Meça o vértice novamente ou verifique a classe de precisão atribuída."
+    },
+    "setback": {
+      "fail": "A projeção {f} está a {d} m da divisa {b}; recuo exigido {s} m.",
+      "suggestion": "Verifique a posição da projeção em relação ao recuo exigido."
     }
   },
   "monitoring": {
@@ -2494,6 +2530,10 @@
       "no_profile": "Sem perfil, defina um",
       "ack_yes": "Sim",
       "ack_no": "Não"
+    },
+    "forecast": {
+      "fail": "Prevê-se que o ponto {id} atinja o nível {level} em {d} dias.",
+      "suggestion": "Programe uma leitura extra e analise a tendência antes de o limite ser atingido."
     }
   },
   "stockpiles": {

@@ -2355,6 +2355,22 @@
     "level_misclosure": {
       "fail": "Sai số khép thủy chuẩn {f} mm vượt k·√km với k = {k} mm.",
       "suggestion": "Đo lại thủy chuẩn hoặc kiểm tra cao độ các mốc đã dùng."
+    },
+    "cogo_parallel": {
+      "fail": "Hai đường thẳng song song: không có giao điểm.",
+      "suggestion": "Kiểm tra các góc phương vị hoặc chọn hai đường cắt nhau."
+    },
+    "cogo_two_solutions": {
+      "fail": "Giao hội cạnh có hai nghiệm; hãy chọn một.",
+      "suggestion": "Giữ điểm ở đúng phía của đường đáy."
+    },
+    "angular_misclosure": {
+      "fail": "Sai số khép góc {a}\" vượt quá {k}\" × √{n}.",
+      "suggestion": "Kiểm tra sai số thô của các góc, đo lại hoặc xác nhận cấp chính xác."
+    },
+    "level_arithmetic": {
+      "fail": "Sổ thủy chuẩn {name}: kiểm tra số học không khớp, ΣSau − ΣTrước = {d} nhưng cao độ cuối − đầu = {r}.",
+      "suggestion": "Kiểm tra lại số đọc và phép tính của từng dòng."
     }
   },
   "volumes": {
@@ -2409,6 +2425,14 @@
       "no_profile": "Chưa có hồ sơ dung sai, hãy đặt một",
       "d": "d (mm)",
       "dz": "dZ (mm)"
+    },
+    "profile_uncovered": {
+      "fail": "Trắc dọc không bao gồm lý trình {c}.",
+      "suggestion": "Kéo dài trắc dọc hoặc giới hạn danh sách cắm mốc trong phạm vi của nó."
+    },
+    "spiral_skipped": {
+      "fail": "Thiếu tham số đường cong clothoid; bỏ qua phần tử {n}.",
+      "suggestion": "Xuất lại tuyến với chiều dài clothoid và cả hai bán kính."
     }
   },
   "land_parcels": {
@@ -2459,6 +2483,18 @@
       "status_negotiating": "Đang thương lượng",
       "status_acquired": "Đã thu hồi",
       "status_expropriation": "Trưng thu"
+    },
+    "subdivision_area": {
+      "fail": "Diện tích các phần {a} + {b} khác thửa gốc {p} (chênh {d} m²).",
+      "suggestion": "Kiểm tra đường chia: tổng các phần phải bằng thửa gốc."
+    },
+    "corner_rpp": {
+      "fail": "Độ chính xác của mốc {id} là {r} m, vượt quá {limit} m.",
+      "suggestion": "Đo lại mốc hoặc kiểm tra cấp chính xác đã gán."
+    },
+    "setback": {
+      "fail": "Mặt bằng {f} cách ranh {b} {d} m; khoảng lùi yêu cầu {s} m.",
+      "suggestion": "Kiểm tra vị trí mặt bằng so với khoảng lùi yêu cầu."
     }
   },
   "monitoring": {
@@ -2494,6 +2530,10 @@
       "no_profile": "Chưa có hồ sơ, hãy thiết lập",
       "ack_yes": "Có",
       "ack_no": "Không"
+    },
+    "forecast": {
+      "fail": "Dự báo điểm {id} sẽ đạt mức {level} sau {d} ngày.",
+      "suggestion": "Lên kế hoạch đo bổ sung và xem xét xu hướng trước khi đạt ngưỡng."
     }
   },
   "stockpiles": {

@@ -2355,6 +2355,22 @@
     "level_misclosure": {
       "fail": "水準測量の閉合差 {f} mm が k·√km（k = {k} mm）を超えています。",
       "suggestion": "水準測量をやり直すか、使用した水準点の標高を確認してください。"
+    },
+    "cogo_parallel": {
+      "fail": "直線が平行です。交点はありません。",
+      "suggestion": "方向角を確認するか、交わる2本の直線を選んでください。"
+    },
+    "cogo_two_solutions": {
+      "fail": "距離による交会に解が2つあります。1つを選んでください。",
+      "suggestion": "基線の正しい側にある点を残してください。"
+    },
+    "angular_misclosure": {
+      "fail": "角閉合差 {a}\" が {k}\" × √{n} を超えています。",
+      "suggestion": "角度の過誤を確認し、再観測するか精度区分を確認してください。"
+    },
+    "level_arithmetic": {
+      "fail": "水準手簿 {name}: 計算点検が一致しません。ΣBS − ΣFS = {d}、最終標高 − 初期標高 = {r}。",
+      "suggestion": "読み値と各行の計算を再確認してください。"
     }
   },
   "volumes": {
@@ -2409,6 +2425,14 @@
       "no_profile": "プロファイルがありません。設定してください",
       "d": "d (mm)",
       "dz": "dZ (mm)"
+    },
+    "profile_uncovered": {
+      "fail": "縦断面が測点 {c} をカバーしていません。",
+      "suggestion": "縦断面を延長するか、杭打ちリストをその範囲に限定してください。"
+    },
+    "spiral_skipped": {
+      "fail": "クロソイドのパラメータがありません。要素 {n} をスキップしました。",
+      "suggestion": "クロソイド長と両方の半径を含めて線形を再出力してください。"
     }
   },
   "land_parcels": {
@@ -2459,6 +2483,18 @@
       "status_negotiating": "交渉中",
       "status_acquired": "取得済み",
       "status_expropriation": "収用"
+    },
+    "subdivision_area": {
+      "fail": "分割後の面積 {a} + {b} が元の筆 {p} と一致しません(差 {d} m²)。",
+      "suggestion": "分割線を確認してください。各部分の合計は元の筆と等しい必要があります。"
+    },
+    "corner_rpp": {
+      "fail": "境界点 {id} の精度 {r} m が {limit} m を超えています。",
+      "suggestion": "境界点を再測量するか、割り当てた精度区分を確認してください。"
+    },
+    "setback": {
+      "fail": "建築範囲 {f} は境界 {b} から {d} m です。必要な後退距離は {s} m です。",
+      "suggestion": "建築範囲の位置を必要な後退距離と照合してください。"
     }
   },
   "monitoring": {
@@ -2494,6 +2530,10 @@
       "no_profile": "プロファイル未設定、設定してください",
       "ack_yes": "はい",
       "ack_no": "いいえ"
+    },
+    "forecast": {
+      "fail": "点 {id} は {d} 日後に {level} に達すると予測されます。",
+      "suggestion": "閾値に達する前に追加観測を計画し、傾向を確認してください。"
     }
   },
   "stockpiles": {

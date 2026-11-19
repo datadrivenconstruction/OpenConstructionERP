@@ -92,6 +92,8 @@ class PointOut(BaseModel):
     kind: str = "topo"
     sigma: float | None = None
     description: str = ""
+    #: How a computed point was made; "" for a measured point.
+    method: str = ""
 
 
 class PointListResponse(BaseModel):
@@ -267,6 +269,12 @@ class TraverseOut(BaseModel):
     profile_label: str = ""
     note: str = ""
     created_at: datetime | None = None
+    angle_count: int | None = None
+    ang_misclosure_sec: float | None = None
+    ang_k_sec: float | None = None
+    ang_allowed_sec: float | None = None
+    #: Field observations and their reduction (field traverse stations or level book rows).
+    observations: dict | None = None
 
 
 class SurveyProfileIn(BaseModel):
@@ -274,6 +282,7 @@ class SurveyProfileIn(BaseModel):
     traverse_min_ratio: int | None = Field(default=None, ge=100, le=10_000_000)
     level_k_mm: float | None = Field(default=None, gt=0, le=1_000)
     coverage_min_pct: float | None = Field(default=None, ge=0, le=100)
+    angular_k_sec: float | None = Field(default=None, gt=0, le=3600)
 
 
 class SurveyProfileOut(SurveyProfileIn):

@@ -2355,6 +2355,22 @@
     "level_misclosure": {
       "fail": "Odstupanje nivelmana {f} mm premašuje k·√km uz k = {k} mm.",
       "suggestion": "Ponovite nivelman ili provjerite visine korištenih repera."
+    },
+    "cogo_parallel": {
+      "fail": "Pravci su paralelni: nema sjecišta.",
+      "suggestion": "Provjerite smjerne kutove ili odaberite dva pravca koji se sijeku."
+    },
+    "cogo_two_solutions": {
+      "fail": "Lučni presjek ima dva rješenja; odaberite jedno.",
+      "suggestion": "Zadržite točku s ispravne strane osnovice."
+    },
+    "angular_misclosure": {
+      "fail": "Kutno odstupanje {a}\" premašuje {k}\" × √{n}.",
+      "suggestion": "Provjerite kutove zbog grubih pogrešaka, ponovno ih izmjerite ili potvrdite razred točnosti."
+    },
+    "level_arithmetic": {
+      "fail": "Nivelmanski zapisnik {name}: računska kontrola ne slaže se, ΣN − ΣP = {d}, a zadnja visina − prva = {r}.",
+      "suggestion": "Ponovno provjerite očitanja i izračun svakog retka."
     }
   },
   "volumes": {
@@ -2409,6 +2425,14 @@
       "no_profile": "Nema profila, postavite ga",
       "d": "d (mm)",
       "dz": "dZ (mm)"
+    },
+    "profile_uncovered": {
+      "fail": "Uzdužni profil ne pokriva stacionažu {c}.",
+      "suggestion": "Produljite profil ili ograničite popis iskolčenja na njegov raspon."
+    },
+    "spiral_skipped": {
+      "fail": "Nedostaje parametar klotoide; element {n} preskočen.",
+      "suggestion": "Ponovno izvezite os s duljinom klotoide i oba polumjera."
     }
   },
   "land_parcels": {
@@ -2459,6 +2483,18 @@
       "status_negotiating": "Pregovori",
       "status_acquired": "Stečeno",
       "status_expropriation": "Izvlaštenje"
+    },
+    "subdivision_area": {
+      "fail": "Površine dijelova {a} + {b} razlikuju se od izvorne čestice {p} (razlika {d} m²).",
+      "suggestion": "Provjerite liniju diobe: dijelovi moraju dati izvornu česticu."
+    },
+    "corner_rpp": {
+      "fail": "Točnost međne točke {id}, {r} m, premašuje {limit} m.",
+      "suggestion": "Ponovno izmjerite točku ili provjerite dodijeljeni razred točnosti."
+    },
+    "setback": {
+      "fail": "Tlocrt {f} udaljen je {d} m od međe {b}; propisana udaljenost {s} m.",
+      "suggestion": "Provjerite položaj tlocrta u odnosu na propisanu udaljenost."
     }
   },
   "monitoring": {
@@ -2494,6 +2530,10 @@
       "no_profile": "Nema profila, postavite ga",
       "ack_yes": "Da",
       "ack_no": "Ne"
+    },
+    "forecast": {
+      "fail": "Prema prognozi točka {id} dosegnut će razinu {level} za {d} dana.",
+      "suggestion": "Planirajte dodatno mjerenje i pregledajte trend prije dosezanja praga."
     }
   },
   "stockpiles": {

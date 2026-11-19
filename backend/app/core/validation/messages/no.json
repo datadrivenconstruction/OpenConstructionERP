@@ -2355,6 +2355,22 @@
     "level_misclosure": {
       "fail": "Nivellementets sluttfeil {f} mm overstiger k·√km med k = {k} mm.",
       "suggestion": "Gjenta nivellementet eller kontroller høydene på fastmerkene som ble brukt."
+    },
+    "cogo_parallel": {
+      "fail": "Linjene er parallelle: ingen skjæring.",
+      "suggestion": "Kontroller retningsvinklene, eller velg to linjer som krysser hverandre."
+    },
+    "cogo_two_solutions": {
+      "fail": "Avstandsskjæring med to løsninger; velg én.",
+      "suggestion": "Behold punktet på riktig side av basislinjen."
+    },
+    "angular_misclosure": {
+      "fail": "Vinkelavvik {a}\" overstiger {k}\" × √{n}.",
+      "suggestion": "Kontroller vinklene for grove feil, mål dem på nytt, eller bekreft nøyaktighetsklassen."
+    },
+    "level_arithmetic": {
+      "fail": "Nivellementsprotokoll {name}: regnekontrollen stemmer ikke, ΣB − ΣF = {d}, men siste høyde − første = {r}.",
+      "suggestion": "Kontroller avlesningene og beregningen på hver linje."
     }
   },
   "volumes": {
@@ -2409,6 +2425,14 @@
       "no_profile": "Ingen profil, angi en",
       "d": "d (mm)",
       "dz": "dZ (mm)"
+    },
+    "profile_uncovered": {
+      "fail": "Lengdeprofilen dekker ikke profilnummer {c}.",
+      "suggestion": "Forleng profilen, eller begrens utsettingslisten til dens område."
+    },
+    "spiral_skipped": {
+      "fail": "Klotoideparameter mangler; element {n} hoppet over.",
+      "suggestion": "Eksporter linjen på nytt med klotoidelengde og begge radier."
     }
   },
   "land_parcels": {
@@ -2459,6 +2483,18 @@
       "status_negotiating": "Forhandling",
       "status_acquired": "Ervervet",
       "status_expropriation": "Ekspropriasjon"
+    },
+    "subdivision_area": {
+      "fail": "Delenes arealer {a} + {b} avviker fra hovedeiendommen {p} (differanse {d} m²).",
+      "suggestion": "Kontroller delingslinjen: delene må til sammen gi hovedeiendommen."
+    },
+    "corner_rpp": {
+      "fail": "Grensepunkt {id} har nøyaktighet {r} m, over {limit} m.",
+      "suggestion": "Mål punktet på nytt, eller kontroller tildelt nøyaktighetsklasse."
+    },
+    "setback": {
+      "fail": "Fotavtrykket {f} ligger {d} m fra grense {b}; krav til avstand {s} m.",
+      "suggestion": "Kontroller fotavtrykkets plassering mot den påkrevde avstanden."
     }
   },
   "monitoring": {
@@ -2494,6 +2530,10 @@
       "no_profile": "Ingen profil, velg en",
       "ack_yes": "Ja",
       "ack_no": "Nei"
+    },
+    "forecast": {
+      "fail": "Punkt {id} ventes å nå {level} om {d} dager.",
+      "suggestion": "Planlegg en ekstra måling og vurder trenden før grenseverdien nås."
     }
   },
   "stockpiles": {

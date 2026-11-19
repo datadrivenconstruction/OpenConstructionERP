@@ -2355,6 +2355,22 @@
     "level_misclosure": {
       "fail": "Uzávěr nivelace {f} mm překračuje k·√km při k = {k} mm.",
       "suggestion": "Opakujte nivelaci nebo zkontrolujte výšky použitých nivelačních bodů."
+    },
+    "cogo_parallel": {
+      "fail": "Přímky jsou rovnoběžné: žádný průsečík.",
+      "suggestion": "Zkontrolujte směrníky nebo zvolte dvě přímky, které se protínají."
+    },
+    "cogo_two_solutions": {
+      "fail": "Protínání z délek má dvě řešení; vyberte jedno.",
+      "suggestion": "Ponechte bod na správné straně základny."
+    },
+    "angular_misclosure": {
+      "fail": "Úhlová odchylka {a}\" překračuje {k}\" × √{n}.",
+      "suggestion": "Zkontrolujte úhly kvůli hrubým chybám, změřte je znovu nebo potvrďte třídu přesnosti."
+    },
+    "level_arithmetic": {
+      "fail": "Nivelační zápisník {name}: početní kontrola nesouhlasí, ΣZ − ΣP = {d}, ale poslední výška − první = {r}.",
+      "suggestion": "Znovu zkontrolujte čtení a výpočet každého řádku."
     }
   },
   "volumes": {
@@ -2409,6 +2425,14 @@
       "no_profile": "Bez profilu, nastavte jej",
       "d": "d (mm)",
       "dz": "dZ (mm)"
+    },
+    "profile_uncovered": {
+      "fail": "Podélný profil nepokrývá staničení {c}.",
+      "suggestion": "Prodlužte profil nebo omezte vytyčovací seznam na jeho rozsah."
+    },
+    "spiral_skipped": {
+      "fail": "Chybí parametr klotoidy; prvek {n} vynechán.",
+      "suggestion": "Exportujte osu znovu s délkou klotoidy a oběma poloměry."
     }
   },
   "land_parcels": {
@@ -2459,6 +2483,18 @@
       "status_negotiating": "Jednání",
       "status_acquired": "Nabyto",
       "status_expropriation": "Vyvlastnění"
+    },
+    "subdivision_area": {
+      "fail": "Výměry dílů {a} + {b} se liší od původní parcely {p} (rozdíl {d} m²).",
+      "suggestion": "Zkontrolujte dělicí čáru: díly musí dát dohromady původní parcelu."
+    },
+    "corner_rpp": {
+      "fail": "Přesnost lomového bodu {id} {r} m překračuje {limit} m.",
+      "suggestion": "Změřte bod znovu nebo zkontrolujte přiřazenou třídu přesnosti."
+    },
+    "setback": {
+      "fail": "Půdorys {f} je {d} m od hranice {b}; požadovaný odstup {s} m.",
+      "suggestion": "Zkontrolujte polohu půdorysu vůči požadovanému odstupu."
     }
   },
   "monitoring": {
@@ -2494,6 +2530,10 @@
       "no_profile": "Chybí profil, nastavte jej",
       "ack_yes": "Ano",
       "ack_no": "Ne"
+    },
+    "forecast": {
+      "fail": "Podle prognózy bod {id} dosáhne úrovně {level} za {d} dní.",
+      "suggestion": "Naplánujte další měření a posuďte trend dříve, než bude dosažen limit."
     }
   },
   "stockpiles": {

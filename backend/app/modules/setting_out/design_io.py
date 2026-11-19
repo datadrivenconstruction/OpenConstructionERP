@@ -9,20 +9,24 @@ CSV: a header row names the columns (``point``/``id``, ``e``/``easting``,
 chainage and no E/N is placed on the request's alignment.
 
 LandXML: ``CgPoints/CgPoint`` become design points and ``Alignments/Alignment``
-(``CoordGeom`` with ``Line`` and ``Curve``) becomes the alignment. LandXML writes
-northing before easting. Spirals are reported and skipped. Parsing goes through
-defusedxml, so entity expansion and external entities are refused.
+(``CoordGeom`` with ``Line``, ``Curve`` and clothoid ``Spiral``) becomes the
+alignment, and its ``Profile/ProfAlign`` (``PVI`` and ``ParaCurve``) the vertical
+profile. LandXML writes northing before easting. A spiral without its length,
+radii or tangent direction is reported (SRV-071) and skipped. Parsing goes
+through defusedxml, so entity expansion and external entities are refused.
 """
 
 from __future__ import annotations
 
 import csv
 import io
+import math
 from dataclasses import dataclass, field
 
 from defusedxml import ElementTree as SafeET
 
-from app.modules.setting_out.stakeout_math import Alignment, AlignmentError, ArcElement, LineElement
+from app.modules.setting_out.road_geometry import ProfileError, Pvi, VerticalProfile
+from app.modules.setting_out.stakeout_math import Alignment, AlignmentError, ArcElement, LineElement, SpiralElement
 
 MAX_ROWS = 5000
 
@@ -101,8 +105,11 @@ class MeasuredRow:
 class DesignFile:
     points: list[DesignPoint] = field(default_factory=list)
     alignment: Alignment | None = None
+    profile: VerticalProfile | None = None
     problems: list[Problem] = field(default_factory=list)
     rows_read: int = 0
+    #: Spiral elements skipped for a missing parameter (SRV-071), by element number.
+    spirals_skipped: list[int] = field(default_factory=list)
 
 
 def _num(cell: str) -> float | None:
@@ -277,23 +284,76 @@ def parse_landxml(text: str | bytes, alignment_name: str = "") -> DesignFile:
             if alignment_name and name != alignment_name:
                 continue
             if out.alignment is None:
-                out.alignment = _alignment(al, name, out.problems)
+                out.alignment = _alignment(al, name, out.problems, out.spirals_skipped)
+                out.profile = _profile(al, out.problems)
     return out
 
 
-def _alignment(node, name: str, problems: list[Problem]) -> Alignment | None:
-    elements: list[LineElement | ArcElement] = []
+def _float_attr(el, name: str) -> float | None:
+    raw = (el.get(name) or "").strip()
+    if not raw:
+        return None
+    if raw.upper() in ("INF", "INFINITY"):
+        return math.inf
+    try:
+        return float(raw)
+    except ValueError:
+        return None
+
+
+def _tangent_out(el: LineElement | ArcElement | SpiralElement) -> float:
+    """Azimuth in degrees of the tangent at the end of ``el``."""
+    if isinstance(el, LineElement):
+        return math.degrees(math.atan2(el.end[0] - el.start[0], el.end[1] - el.start[1]))
+    if isinstance(el, SpiralElement):
+        return math.degrees(el.azimuth_at(el.length))
+    radial = math.atan2(el.end[0] - el.center[0], el.end[1] - el.center[1])
+    return math.degrees(radial + (-math.pi / 2 if el.ccw else math.pi / 2))
+
+
+def _spiral(el, start: tuple[float, float] | None, previous: float | None) -> SpiralElement | None:
+    length = _float_attr(el, "length")
+    r0, r1 = _float_attr(el, "radiusStart"), _float_attr(el, "radiusEnd")
+    if start is None or not length or length <= 0 or r0 is None or r1 is None:
+        return None
+    if (el.get("spiType") or "clothoid").lower() != "clothoid":
+        return None
+    pi = _pt(el, "PI")
+    if pi is not None and pi != start:
+        azimuth = math.degrees(math.atan2(pi[0] - start[0], pi[1] - start[1]))
+    elif previous is not None:
+        azimuth = previous
+    else:
+        return None
+    ccw = (el.get("rot") or "ccw").lower() != "cw"
+    return SpiralElement(start, azimuth, length, None if math.isinf(r0) else r0, None if math.isinf(r1) else r1, ccw)
+
+
+def _alignment(node, name: str, problems: list[Problem], skipped: list[int] | None = None) -> Alignment | None:
+    elements: list[LineElement | ArcElement | SpiralElement] = []
+    number = 0
     for geom in _children(node, "CoordGeom"):
         for el in list(geom):
             kind = _local(el.tag)
+            number += 1
             start, end = _pt(el, "Start"), _pt(el, "End")
             if kind == "Line" and start and end:
                 elements.append(LineElement(start, end))
             elif kind == "Curve" and start and end and _pt(el, "Center"):
                 ccw = (el.get("rot") or "ccw").lower() != "cw"
                 elements.append(ArcElement(start, _pt(el, "Center"), end, ccw))  # type: ignore[arg-type]
+            elif kind == "Spiral":
+                spiral = _spiral(el, start, _tangent_out(elements[-1]) if elements else None)
+                if spiral is None:
+                    problems.append(
+                        Problem(0, f"SRV-071: {name} element {number}: Spiral parameter missing; element skipped")
+                    )
+                    if skipped is not None:
+                        skipped.append(number)
+                else:
+                    elements.append(spiral)
             else:
-                problems.append(Problem(0, f"alignment {name}: {kind} element skipped (lines and arcs only)"))
+                problems.append(Problem(0, f"alignment {name}: {kind} element skipped (lines, arcs and spirals only)"))
     if not elements:
         problems.append(Problem(0, f"alignment {name} has no line or arc"))
         return None
@@ -302,6 +362,34 @@ def _alignment(node, name: str, problems: list[Problem]) -> Alignment | None:
     except ValueError:
         start_ch = 0.0
     return Alignment(tuple(elements), start_ch, name)
+
+
+def _profile(node, problems: list[Problem]) -> VerticalProfile | None:
+    """The first ``ProfAlign`` under the alignment's ``Profile``: PVIs and parabolic curves."""
+    for prof in _children(node, "Profile"):
+        for pa in _children(prof, "ProfAlign"):
+            pvis: list[Pvi] = []
+            label = pa.get("name") or ""
+            for el in list(pa):
+                kind = _local(el.tag)
+                parts = (el.text or "").split()
+                try:
+                    ch, level = float(parts[0]), float(parts[1])
+                except (IndexError, ValueError):
+                    problems.append(Problem(0, f"profile {label}: {kind} without station and level"))
+                    continue
+                if kind == "ParaCurve":
+                    pvis.append(Pvi(ch, level, _float_attr(el, "length") or 0.0))
+                else:
+                    if kind != "PVI":
+                        problems.append(Problem(0, f"profile {label}: {kind} read as a PVI without a curve"))
+                    pvis.append(Pvi(ch, level))
+            try:
+                return VerticalProfile(tuple(pvis), label)
+            except ProfileError as exc:
+                problems.append(Problem(0, str(exc)))
+                return None
+    return None
 
 
 def place_on_alignment(points: list[DesignPoint], alignment: Alignment | None, problems: list[Problem]) -> None:
@@ -328,6 +416,18 @@ def alignment_to_json(al: Alignment) -> dict:
     for el in al.elements:
         if isinstance(el, LineElement):
             els.append({"type": "line", "start": list(el.start), "end": list(el.end)})
+        elif isinstance(el, SpiralElement):
+            els.append(
+                {
+                    "type": "spiral",
+                    "start": list(el.start),
+                    "azimuth_deg": el.azimuth_deg,
+                    "length": el.length,
+                    "radius_start": el.radius_start,
+                    "radius_end": el.radius_end,
+                    "ccw": el.ccw,
+                }
+            )
         else:
             els.append(
                 {"type": "arc", "start": list(el.start), "center": list(el.center), "end": list(el.end), "ccw": el.ccw}
@@ -338,12 +438,23 @@ def alignment_to_json(al: Alignment) -> dict:
 def alignment_from_json(data: dict | None) -> Alignment | None:
     if not data or not data.get("elements"):
         return None
-    els: list[LineElement | ArcElement] = []
+    els: list[LineElement | ArcElement | SpiralElement] = []
     for el in data["elements"]:
         if el.get("type") == "line":
             els.append(LineElement(tuple(el["start"]), tuple(el["end"])))  # type: ignore[arg-type]
         elif el.get("type") == "arc":
             els.append(ArcElement(tuple(el["start"]), tuple(el["center"]), tuple(el["end"]), bool(el["ccw"])))  # type: ignore[arg-type]
+        elif el.get("type") == "spiral":
+            els.append(
+                SpiralElement(
+                    tuple(el["start"]),  # type: ignore[arg-type]
+                    float(el["azimuth_deg"]),
+                    float(el["length"]),
+                    el.get("radius_start"),
+                    el.get("radius_end"),
+                    bool(el["ccw"]),
+                )
+            )
     return Alignment(tuple(els), float(data.get("start_chainage") or 0.0), str(data.get("name") or ""))
 
 

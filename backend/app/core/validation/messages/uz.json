@@ -2355,6 +2355,22 @@
     "level_misclosure": {
       "fail": "Nivelirlash yopilish xatosi {f} mm k·√km qiymatidan oshadi (k = {k} mm).",
       "suggestion": "Nivelirlashni takrorlang yoki ishlatilgan reperlar balandliklarini tekshiring."
+    },
+    "cogo_parallel": {
+      "fail": "Chiziqlar parallel: kesishish nuqtasi yo'q.",
+      "suggestion": "Direksion burchaklarni tekshiring yoki kesishadigan ikki chiziqni tanlang."
+    },
+    "cogo_two_solutions": {
+      "fail": "Masofa bo'yicha kesishtirishning ikki yechimi bor; bittasini tanlang.",
+      "suggestion": "Nuqtani bazis chiziqning to'g'ri tomonida qoldiring."
+    },
+    "angular_misclosure": {
+      "fail": "Burchak bog'lanmasligi {a}\" {k}\" × √{n} dan oshadi.",
+      "suggestion": "Burchaklarni qo'pol xatoga tekshiring, qayta o'lchang yoki aniqlik sinfini tasdiqlang."
+    },
+    "level_arithmetic": {
+      "fail": "{name} nivelirlash jurnali: arifmetik nazorat mos kelmadi, ΣOrqa − ΣOld = {d}, lekin oxirgi belgi − birinchi = {r}.",
+      "suggestion": "Sanoqlarni va har bir qator hisobini qayta tekshiring."
     }
   },
   "volumes": {
@@ -2409,6 +2425,14 @@
       "no_profile": "Profil yo'q, uni belgilang",
       "d": "d (mm)",
       "dz": "dZ (mm)"
+    },
+    "profile_uncovered": {
+      "fail": "Bo'ylama profil {c} piketini qamramaydi.",
+      "suggestion": "Profilni uzaytiring yoki joyga ko'chirish ro'yxatini uning oralig'i bilan cheklang."
+    },
+    "spiral_skipped": {
+      "fail": "Klotoida parametri yo'q; {n} element o'tkazib yuborildi.",
+      "suggestion": "Trassani klotoida uzunligi va ikkala radius bilan qayta eksport qiling."
     }
   },
   "land_parcels": {
@@ -2459,6 +2483,18 @@
       "status_negotiating": "Muzokara",
       "status_acquired": "Sotib olingan",
       "status_expropriation": "Olib qo'yish"
+    },
+    "subdivision_area": {
+      "fail": "Qismlar maydoni {a} + {b} dastlabki uchastkadan {p} farq qiladi (farq {d} m²).",
+      "suggestion": "Bo'lish chizig'ini tekshiring: qismlar yig'indisi dastlabki uchastkaga teng bo'lishi kerak."
+    },
+    "corner_rpp": {
+      "fail": "{id} chegara nuqtasining aniqligi {r} m, bu {limit} m dan oshadi.",
+      "suggestion": "Nuqtani qayta o'lchang yoki unga berilgan aniqlik sinfini tekshiring."
+    },
+    "setback": {
+      "fail": "{f} konturi {b} chegarasidan {d} m uzoqlikda; talab qilingan chekinish {s} m.",
+      "suggestion": "Kontur joylashuvini talab qilingan chekinish bilan solishtiring."
     }
   },
   "monitoring": {
@@ -2494,6 +2530,10 @@
       "no_profile": "Profil yo'q, bittasini belgilang",
       "ack_yes": "Ha",
       "ack_no": "Yo'q"
+    },
+    "forecast": {
+      "fail": "Prognozga ko'ra {id} nuqtasi {d} kunda «{level}» darajasiga yetadi.",
+      "suggestion": "Chegaraga yetishidan oldin qo'shimcha o'lchovni rejalashtiring va trendni ko'rib chiqing."
     }
   },
   "stockpiles": {

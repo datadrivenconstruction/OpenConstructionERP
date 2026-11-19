@@ -2355,6 +2355,22 @@
     "level_misclosure": {
       "fail": "Nivelman kapanma hatası {f} mm, k = {k} mm ile k·√km değerini aşıyor.",
       "suggestion": "Nivelmanı tekrarlayın veya kullanılan röper kotlarını kontrol edin."
+    },
+    "cogo_parallel": {
+      "fail": "Doğrular paralel: kesişim yok.",
+      "suggestion": "Semt açılarını kontrol edin veya kesişen iki doğru seçin."
+    },
+    "cogo_two_solutions": {
+      "fail": "Kenar kestirmesinin iki çözümü var; birini seçin.",
+      "suggestion": "Noktayı taban çizgisinin doğru tarafında tutun."
+    },
+    "angular_misclosure": {
+      "fail": "Açı kapanma hatası {a}\", {k}\" × √{n} değerini aşıyor.",
+      "suggestion": "Açılarda kaba hata arayın, yeniden ölçün veya doğruluk sınıfını onaylayın."
+    },
+    "level_arithmetic": {
+      "fail": "{name} nivelman defteri: aritmetik kontrol tutmadı, ΣGeri − ΣİLeri = {d} ancak son kot − ilk kot = {r}.",
+      "suggestion": "Okumaları ve her satırın hesabını yeniden kontrol edin."
     }
   },
   "volumes": {
@@ -2409,6 +2425,14 @@
       "no_profile": "Profil yok, bir tane belirleyin",
       "d": "d (mm)",
       "dz": "dZ (mm)"
+    },
+    "profile_uncovered": {
+      "fail": "Boy kesit {c} kilometresini kapsamıyor.",
+      "suggestion": "Boy kesiti uzatın veya aplikasyon listesini onun aralığıyla sınırlayın."
+    },
+    "spiral_skipped": {
+      "fail": "Klotoid parametresi eksik; {n} numaralı eleman atlandı.",
+      "suggestion": "Güzergâhı klotoid uzunluğu ve iki yarıçapla yeniden dışa aktarın."
     }
   },
   "land_parcels": {
@@ -2459,6 +2483,18 @@
       "status_negotiating": "Müzakere",
       "status_acquired": "Edinildi",
       "status_expropriation": "Kamulaştırma"
+    },
+    "subdivision_area": {
+      "fail": "Parça alanları {a} + {b} ana parselden {p} farklı (fark {d} m²).",
+      "suggestion": "Ayırma çizgisini kontrol edin: parçaların toplamı ana parsel olmalı."
+    },
+    "corner_rpp": {
+      "fail": "{id} sınır noktasının doğruluğu {r} m, {limit} m sınırını aşıyor.",
+      "suggestion": "Noktayı yeniden ölçün veya atanan doğruluk sınıfını kontrol edin."
+    },
+    "setback": {
+      "fail": "{f} oturumu {b} sınırından {d} m uzakta; gerekli çekme mesafesi {s} m.",
+      "suggestion": "Oturumun konumunu gerekli çekme mesafesine göre kontrol edin."
     }
   },
   "monitoring": {
@@ -2494,6 +2530,10 @@
       "no_profile": "Profil yok, bir profil belirleyin",
       "ack_yes": "Evet",
       "ack_no": "Hayır"
+    },
+    "forecast": {
+      "fail": "{id} noktasının {d} gün içinde {level} seviyesine ulaşması bekleniyor.",
+      "suggestion": "Ek bir ölçüm planlayın ve eşiğe ulaşılmadan önce eğilimi inceleyin."
     }
   },
   "stockpiles": {

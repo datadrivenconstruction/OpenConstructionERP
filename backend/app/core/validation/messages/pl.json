@@ -2355,6 +2355,22 @@
     "level_misclosure": {
       "fail": "Odchyłka niwelacji {f} mm przekracza k·√km przy k = {k} mm.",
       "suggestion": "Powtórz niwelację lub sprawdź wysokości użytych reperów."
+    },
+    "cogo_parallel": {
+      "fail": "Linie są równoległe: brak przecięcia.",
+      "suggestion": "Sprawdź azymuty lub wybierz dwie przecinające się linie."
+    },
+    "cogo_two_solutions": {
+      "fail": "Wcięcie liniowe ma dwa rozwiązania; wybierz jedno.",
+      "suggestion": "Zachowaj punkt po właściwej stronie bazy."
+    },
+    "angular_misclosure": {
+      "fail": "Odchyłka kątowa {a}\" przekracza {k}\" × √{n}.",
+      "suggestion": "Sprawdź kąty pod kątem błędów grubych, pomierz je ponownie lub potwierdź klasę dokładności."
+    },
+    "level_arithmetic": {
+      "fail": "Dziennik niwelacji {name}: kontrola rachunkowa nie zgadza się, ΣW − ΣP = {d}, a ostatnia wysokość − pierwsza = {r}.",
+      "suggestion": "Sprawdź odczyty i obliczenia w każdym wierszu."
     }
   },
   "volumes": {
@@ -2409,6 +2425,14 @@
       "no_profile": "Brak profilu, ustaw go",
       "d": "d (mm)",
       "dz": "dZ (mm)"
+    },
+    "profile_uncovered": {
+      "fail": "Profil podłużny nie obejmuje kilometrażu {c}.",
+      "suggestion": "Wydłuż profil lub ogranicz listę tyczenia do jego zakresu."
+    },
+    "spiral_skipped": {
+      "fail": "Brak parametru klotoidy; element {n} pominięty.",
+      "suggestion": "Wyeksportuj oś ponownie z długością klotoidy i oboma promieniami."
     }
   },
   "land_parcels": {
@@ -2459,6 +2483,18 @@
       "status_negotiating": "Negocjacje",
       "status_acquired": "Nabyta",
       "status_expropriation": "Wywłaszczenie"
+    },
+    "subdivision_area": {
+      "fail": "Powierzchnie działek {a} + {b} różnią się od działki pierwotnej {p} (różnica {d} m²).",
+      "suggestion": "Sprawdź linię podziału: części muszą dawać działkę pierwotną."
+    },
+    "corner_rpp": {
+      "fail": "Dokładność punktu granicznego {id} {r} m przekracza {limit} m.",
+      "suggestion": "Pomierz punkt ponownie lub sprawdź przypisaną mu klasę dokładności."
+    },
+    "setback": {
+      "fail": "Obrys {f} jest {d} m od granicy {b}; wymagana odległość {s} m.",
+      "suggestion": "Sprawdź położenie obrysu względem wymaganej odległości od granicy."
     }
   },
   "monitoring": {
@@ -2494,6 +2530,10 @@
       "no_profile": "Brak profilu, ustaw go",
       "ack_yes": "Tak",
       "ack_no": "Nie"
+    },
+    "forecast": {
+      "fail": "Prognoza: punkt {id} osiągnie poziom {level} za {d} dni.",
+      "suggestion": "Zaplanuj dodatkowy pomiar i przeanalizuj trend przed osiągnięciem progu."
     }
   },
   "stockpiles": {

@@ -2355,6 +2355,22 @@
     "level_misclosure": {
       "fail": "Vaaituksen sulkuvirhe {f} mm ylittää k·√km, kun k = {k} mm.",
       "suggestion": "Toista vaaitus tai tarkista käytettyjen korkeuskiintopisteiden korkeudet."
+    },
+    "cogo_parallel": {
+      "fail": "Suorat ovat yhdensuuntaiset: ei leikkauspistettä.",
+      "suggestion": "Tarkista suuntakulmat tai valitse kaksi toisiaan leikkaavaa suoraa."
+    },
+    "cogo_two_solutions": {
+      "fail": "Etäisyysleikkauksella on kaksi ratkaisua; valitse toinen.",
+      "suggestion": "Säilytä piste perusviivan oikealla puolella."
+    },
+    "angular_misclosure": {
+      "fail": "Kulmasulkuvirhe {a}\" ylittää {k}\" × √{n}.",
+      "suggestion": "Tarkista kulmat karkeiden virheiden varalta, mittaa ne uudelleen tai vahvista tarkkuusluokka."
+    },
+    "level_arithmetic": {
+      "fail": "Vaaituskirja {name}: laskentatarkistus ei täsmää, ΣT − ΣE = {d}, mutta viimeinen korkeus − ensimmäinen = {r}.",
+      "suggestion": "Tarkista lukemat ja kunkin rivin laskenta."
     }
   },
   "volumes": {
@@ -2409,6 +2425,14 @@
       "no_profile": "Ei profiilia, aseta se",
       "d": "d (mm)",
       "dz": "dZ (mm)"
+    },
+    "profile_uncovered": {
+      "fail": "Pituusleikkaus ei kata paalua {c}.",
+      "suggestion": "Jatka pituusleikkausta tai rajaa merkintälista sen alueelle."
+    },
+    "spiral_skipped": {
+      "fail": "Klotoidin parametri puuttuu; elementti {n} ohitettu.",
+      "suggestion": "Vie linjaus uudelleen klotoidin pituuden ja molempien säteiden kanssa."
     }
   },
   "land_parcels": {
@@ -2459,6 +2483,18 @@
       "status_negotiating": "Neuvottelu",
       "status_acquired": "Hankittu",
       "status_expropriation": "Lunastus"
+    },
+    "subdivision_area": {
+      "fail": "Osien pinta-alat {a} + {b} poikkeavat emokiinteistöstä {p} (ero {d} m²).",
+      "suggestion": "Tarkista jakoviiva: osien on muodostettava emokiinteistö yhdessä."
+    },
+    "corner_rpp": {
+      "fail": "Rajapisteen {id} tarkkuus {r} m ylittää {limit} m.",
+      "suggestion": "Mittaa piste uudelleen tai tarkista sille annettu tarkkuusluokka."
+    },
+    "setback": {
+      "fail": "Rakennusala {f} on {d} m:n päässä rajasta {b}; vaadittu etäisyys {s} m.",
+      "suggestion": "Tarkista rakennusalan sijainti vaadittuun etäisyyteen nähden."
     }
   },
   "monitoring": {
@@ -2494,6 +2530,10 @@
       "no_profile": "Ei profiilia, määritä profiili",
       "ack_yes": "Kyllä",
       "ack_no": "Ei"
+    },
+    "forecast": {
+      "fail": "Pisteen {id} ennustetaan saavuttavan tason {level} {d} päivässä.",
+      "suggestion": "Suunnittele lisämittaus ja tarkastele trendiä ennen raja-arvon saavuttamista."
     }
   },
   "stockpiles": {

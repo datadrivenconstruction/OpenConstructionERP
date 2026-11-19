@@ -2355,6 +2355,22 @@
     "level_misclosure": {
       "fail": "Nivellementets slutfejl {f} mm overstiger k·√km med k = {k} mm.",
       "suggestion": "Gentag nivellementet eller kontrollér koterne på de anvendte fikspunkter."
+    },
+    "cogo_parallel": {
+      "fail": "Linjerne er parallelle: intet skæringspunkt.",
+      "suggestion": "Kontrollér retningsvinklerne, eller vælg to linjer, der skærer hinanden."
+    },
+    "cogo_two_solutions": {
+      "fail": "Afstandsskæring med to løsninger; vælg én.",
+      "suggestion": "Behold punktet på den rigtige side af basislinjen."
+    },
+    "angular_misclosure": {
+      "fail": "Vinkelafvigelse {a}\" overstiger {k}\" × √{n}.",
+      "suggestion": "Kontrollér vinklerne for grove fejl, mål dem igen, eller bekræft nøjagtighedsklassen."
+    },
+    "level_arithmetic": {
+      "fail": "Nivellementsprotokol {name}: regnekontrollen passer ikke, ΣT − ΣF = {d}, men sidste kote − første = {r}.",
+      "suggestion": "Gennemgå aflæsningerne og beregningen i hver linje."
     }
   },
   "volumes": {
@@ -2409,6 +2425,14 @@
       "no_profile": "Ingen profil, angiv en",
       "d": "d (mm)",
       "dz": "dZ (mm)"
+    },
+    "profile_uncovered": {
+      "fail": "Længdeprofilen dækker ikke station {c}.",
+      "suggestion": "Forlæng profilen, eller begræns afsætningslisten til dens område."
+    },
+    "spiral_skipped": {
+      "fail": "Klotoideparameter mangler; element {n} sprunget over.",
+      "suggestion": "Eksportér linjeføringen igen med klotoidelængde og begge radier."
     }
   },
   "land_parcels": {
@@ -2459,6 +2483,18 @@
       "status_negotiating": "Forhandling",
       "status_acquired": "Erhvervet",
       "status_expropriation": "Ekspropriation"
+    },
+    "subdivision_area": {
+      "fail": "Delenes arealer {a} + {b} afviger fra moderparcellen {p} (forskel {d} m²).",
+      "suggestion": "Kontrollér delingslinjen: delene skal tilsammen give moderparcellen."
+    },
+    "corner_rpp": {
+      "fail": "Skelpunkt {id} har nøjagtigheden {r} m, over {limit} m.",
+      "suggestion": "Mål punktet igen, eller kontrollér den tildelte nøjagtighedsklasse."
+    },
+    "setback": {
+      "fail": "Fodaftrykket {f} ligger {d} m fra skel {b}; krævet afstand {s} m.",
+      "suggestion": "Kontrollér fodaftrykkets placering i forhold til den krævede afstand."
     }
   },
   "monitoring": {
@@ -2494,6 +2530,10 @@
       "no_profile": "Ingen profil, angiv en",
       "ack_yes": "Ja",
       "ack_no": "Nej"
+    },
+    "forecast": {
+      "fail": "Punkt {id} forventes at nå {level} om {d} dage.",
+      "suggestion": "Planlæg en ekstra måling, og gennemgå tendensen, før grænsen nås."
     }
   },
   "stockpiles": {

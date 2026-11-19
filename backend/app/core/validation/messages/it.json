@@ -2355,6 +2355,22 @@
     "level_misclosure": {
       "fail": "L'errore di chiusura della livellazione {f} mm supera k·√km con k = {k} mm.",
       "suggestion": "Ripetete la livellazione o controllate le quote dei capisaldi usati."
+    },
+    "cogo_parallel": {
+      "fail": "Le rette sono parallele: nessuna intersezione.",
+      "suggestion": "Controllare gli azimut o scegliere due rette che si intersecano."
+    },
+    "cogo_two_solutions": {
+      "fail": "L'intersezione per distanze ha due soluzioni; sceglierne una.",
+      "suggestion": "Mantenere il punto dal lato corretto della base."
+    },
+    "angular_misclosure": {
+      "fail": "Errore di chiusura angolare {a}\" oltre {k}\" × √{n}.",
+      "suggestion": "Cercare errori grossolani negli angoli, rimisurarli o confermare la classe di precisione."
+    },
+    "level_arithmetic": {
+      "fail": "Libretto di livellazione {name}: verifica aritmetica non riuscita, ΣInd − ΣAv = {d} ma ultima quota − prima = {r}.",
+      "suggestion": "Ricontrollare le letture e il calcolo di ogni riga."
     }
   },
   "volumes": {
@@ -2409,6 +2425,14 @@
       "no_profile": "Nessun profilo, impostane uno",
       "d": "d (mm)",
       "dz": "dZ (mm)"
+    },
+    "profile_uncovered": {
+      "fail": "Il profilo longitudinale non copre la progressiva {c}.",
+      "suggestion": "Estendere il profilo o limitare l'elenco di tracciamento al suo intervallo."
+    },
+    "spiral_skipped": {
+      "fail": "Parametro della clotoide mancante; elemento {n} saltato.",
+      "suggestion": "Esportare di nuovo l'asse con la lunghezza della clotoide ed entrambi i raggi."
     }
   },
   "land_parcels": {
@@ -2459,6 +2483,18 @@
       "status_negotiating": "In trattativa",
       "status_acquired": "Acquisita",
       "status_expropriation": "Esproprio"
+    },
+    "subdivision_area": {
+      "fail": "Le superfici dei lotti {a} + {b} differiscono dalla particella madre {p} (differenza {d} m²).",
+      "suggestion": "Controllare la linea di frazionamento: i lotti devono ricomporre la particella madre."
+    },
+    "corner_rpp": {
+      "fail": "Precisione del vertice {id} pari a {r} m oltre {limit} m.",
+      "suggestion": "Rimisurare il vertice o controllare la classe di precisione assegnata."
+    },
+    "setback": {
+      "fail": "L'impronta {f} dista {d} m dal confine {b}; distanza minima {s} m.",
+      "suggestion": "Verificare la posizione dell'impronta rispetto alla distanza minima richiesta."
     }
   },
   "monitoring": {
@@ -2494,6 +2530,10 @@
       "no_profile": "Nessun profilo, impostarne uno",
       "ack_yes": "Sì",
       "ack_no": "Non confermato"
+    },
+    "forecast": {
+      "fail": "Si prevede che il punto {id} raggiunga il livello {level} tra {d} giorni.",
+      "suggestion": "Programmare una lettura aggiuntiva e rivedere l'andamento prima che la soglia venga raggiunta."
     }
   },
   "stockpiles": {
