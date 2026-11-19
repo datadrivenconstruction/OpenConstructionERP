@@ -28,6 +28,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/shared/ui';
 import type { QualityBreakdown, Tip } from './boqHelpers';
+import { useDismiss } from '@/shared/hooks/useDismiss';
 
 /* ── QualityRow (used by QualityScoreRing tooltip) ───────────────────── */
 
@@ -530,8 +531,9 @@ export function ExportWarningDialog({
   onConfirm: (format: string) => void;
   t: (key: string, options?: Record<string, string | number>) => string;
 }) {
+  const dismiss = useDismiss({ onClose: onCancel, backdrop: true });
   return (
-    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/30">
+    <div {...dismiss} className="fixed inset-0 z-modal flex items-center justify-center bg-black/30">
       <div className="w-96 rounded-xl border border-border bg-surface-elevated p-5 shadow-2xl animate-fade-in">
         <div className="flex items-center gap-3 mb-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-semantic-warning-bg">

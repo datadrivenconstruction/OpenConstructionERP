@@ -23,6 +23,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus, X, Trash2, UserPlus } from 'lucide-react';
 import { apiGet, apiPost, apiDelete } from '@/shared/lib/api';
 import { UserSearchInput } from '@/shared/ui/UserSearchInput';
+import { useDismiss } from '@/shared/hooks/useDismiss';
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -123,8 +124,9 @@ function MemberListModal({
   canRemove,
 }: MemberListModalProps) {
   const { t } = useTranslation();
+  const dismiss = useDismiss({ onClose });
   return (
-    <div
+    <div {...dismiss}
       role="dialog"
       aria-modal="true"
       aria-label={t('projects.team.modal_members_title', {
@@ -222,8 +224,9 @@ function AddMemberModal({
     [userId, role, onSubmit],
   );
 
+  const dismissB = useDismiss({ onClose });
   return (
-    <div
+    <div {...dismissB}
       role="dialog"
       aria-modal="true"
       aria-label={t('projects.team.modal_add_title', {

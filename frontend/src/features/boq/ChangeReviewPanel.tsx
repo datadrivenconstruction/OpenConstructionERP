@@ -43,6 +43,7 @@ import {
   type BIMQuantityProposal,
   type ChangeFlag,
 } from './changeReviewApi';
+import { useDismiss } from '@/shared/hooks/useDismiss';
 
 export type ChangeReviewTab = 'flags' | 'quantities';
 type Tab = ChangeReviewTab;
@@ -316,6 +317,7 @@ export function ChangeReviewPanel({
     },
   });
 
+  const dismiss = useDismiss({ onClose, enabled: isOpen });
   if (!isOpen) return null;
 
   const flags = flagsQuery.data?.flags ?? [];
@@ -324,7 +326,7 @@ export function ChangeReviewPanel({
   const selectedAppliable = proposals.filter((r) => r.appliable && selected.has(r.position_id));
 
   return (
-    <div className="fixed inset-y-0 right-0 z-50 flex">
+    <div {...dismiss} className="fixed inset-y-0 right-0 z-50 flex">
       <div className="fixed inset-0 bg-black/20" onClick={onClose} aria-hidden="true" />
       <div
         role="dialog"

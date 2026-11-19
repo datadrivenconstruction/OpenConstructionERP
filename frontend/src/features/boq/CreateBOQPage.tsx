@@ -13,6 +13,7 @@ import { fetchProjectList } from '@/shared/lib/projectList';
 import { boqApi } from './api';
 import { importFailureFromBody } from './importFailureText';
 import { ImportJobFailedError, isImportJob, waitForImportJob } from './importJob';
+import { useDismiss } from '@/shared/hooks/useDismiss';
 
 interface Project {
   id: string;
@@ -284,6 +285,7 @@ export function CreateBOQModal({ open, onClose, defaultProjectId }: CreateBOQMod
     }
   };
 
+  const dismiss = useDismiss({ onClose, busy, enabled: open });
   if (!open) return null;
 
   const submitLabel =
@@ -292,7 +294,7 @@ export function CreateBOQModal({ open, onClose, defaultProjectId }: CreateBOQMod
       : t('boq.create_boq', { defaultValue: 'Create BOQ' });
 
   return (
-    <div className="fixed inset-0 z-modal flex items-center justify-center">
+    <div {...dismiss} className="fixed inset-0 z-modal flex items-center justify-center">
       {/* Backdrop */}
       <div className="absolute inset-0 bg-black/70 backdrop-blur-lg animate-fade-in" onClick={busy ? undefined : onClose} />
 

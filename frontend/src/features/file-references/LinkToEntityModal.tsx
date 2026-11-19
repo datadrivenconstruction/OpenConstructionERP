@@ -18,6 +18,7 @@ import { Button } from '@/shared/ui/Button';
 import { useToastStore } from '@/stores/useToastStore';
 import { useCreateReference } from './hooks';
 import type { FileKind, TargetType } from './types';
+import { useDismiss } from '@/shared/hooks/useDismiss';
 
 const TARGET_TYPES: ReadonlyArray<{ value: TargetType; label: string }> = [
   { value: 'rfi', label: 'RFI' },
@@ -131,10 +132,11 @@ export function LinkToEntityModal({
     handleClose,
   ]);
 
+  const dismiss = useDismiss({ onClose: handleClose, enabled: open });
   if (!open) return null;
 
   return (
-    <div
+    <div {...dismiss}
       role="dialog"
       aria-modal="true"
       aria-labelledby="link-modal-title"

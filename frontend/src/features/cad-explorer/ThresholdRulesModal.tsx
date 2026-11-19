@@ -22,6 +22,7 @@ import {
   DEFAULT_MID_COLOR,
   DEFAULT_HIGH_COLOR,
 } from './thresholds';
+import { useDismiss } from '@/shared/hooks/useDismiss';
 
 interface ThresholdRulesModalProps {
   open: boolean;
@@ -84,10 +85,11 @@ export function ThresholdRulesModal({
     commit([]);
   };
 
+  const dismiss = useDismiss({ onClose, enabled: open });
   if (!open) return null;
 
   return (
-    <div
+    <div {...dismiss}
       className="fixed inset-0 z-modal flex items-center justify-center"
       data-testid="threshold-rules-modal"
     >

@@ -31,6 +31,7 @@ import {
 } from './clockApi';
 import { enqueueClockEvent } from './clockOffline';
 import { useClockStore } from './clockStore';
+import { useDismiss } from '@/shared/hooks/useDismiss';
 
 interface Fix {
   latitude: number;
@@ -79,8 +80,9 @@ function ConsentDialog({
   onCancel: () => void;
 }) {
   const { t } = useTranslation();
+  const dismiss = useDismiss({ onClose: onCancel, backdrop: true });
   return (
-    <div
+    <div {...dismiss}
       role="dialog"
       aria-modal="true"
       aria-label={t('field_clock.consent_title', { defaultValue: 'Location consent' })}

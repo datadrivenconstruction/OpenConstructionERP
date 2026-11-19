@@ -13,6 +13,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Loader2, X, FileSpreadsheet, Upload } from 'lucide-react';
 import { matchElementsApi, type MatchSession } from './api';
 import { fmtFixed } from '@/shared/lib/formatters';
+import { useDismiss } from '@/shared/hooks/useDismiss';
 
 interface Props {
   projectId: string;
@@ -58,8 +59,9 @@ export function NewSessionFromExcelModal({
 
   const canSubmit = !!file && !mut.isPending;
 
+  const dismiss = useDismiss({ onClose });
   return (
-    <div
+    <div {...dismiss}
       role="dialog"
       aria-modal="true"
       className="fixed inset-0 z-modal flex items-center justify-center bg-black/50 p-4"

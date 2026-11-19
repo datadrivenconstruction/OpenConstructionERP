@@ -4,6 +4,7 @@ import { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Copy, Check, X, Link2 } from 'lucide-react';
 import { copyToClipboard } from '@/shared/lib/browser';
+import { useDismiss } from '@/shared/hooks/useDismiss';
 
 interface ShareDialogProps {
   roomName: string;
@@ -35,10 +36,11 @@ export function ShareDialog({ roomName, isOpen, onClose }: ShareDialogProps) {
     }
   }, [shareUrl]);
 
+  const dismiss = useDismiss({ onClose, enabled: isOpen, backdrop: true });
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/40">
+    <div {...dismiss} className="fixed inset-0 z-modal flex items-center justify-center bg-black/40">
       <div className="w-96 rounded-xl border border-border bg-surface-elevated p-5 shadow-lg">
         <div className="flex items-center justify-between mb-4">
           <h3 className="oe-card-title flex items-center gap-2">

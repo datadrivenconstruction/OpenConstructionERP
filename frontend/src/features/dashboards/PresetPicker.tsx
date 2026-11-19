@@ -27,6 +27,7 @@ import {
   type DashboardPreset,
 } from './api';
 import { PresetSyncBadge } from './PresetSyncBadge';
+import { useDismiss } from '@/shared/hooks/useDismiss';
 
 export interface PresetPickerProps {
   projectId?: string | null;
@@ -292,8 +293,9 @@ export function PresetSaveModal({
     [canSubmit, name, description, kind, shared, projectId, snapshot, mutation],
   );
 
+  const dismiss = useDismiss({ onClose });
   return (
-    <div
+    <div {...dismiss}
       className="fixed inset-0 z-modal flex items-center justify-center bg-black/50"
       role="dialog"
       aria-modal="true"

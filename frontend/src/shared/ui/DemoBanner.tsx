@@ -22,6 +22,7 @@ import { useTranslation } from 'react-i18next';
 import { AlertTriangle, Gauge, X, Download, ExternalLink, UploadCloud } from 'lucide-react';
 import { apiGet } from '@/shared/lib/api';
 import { markDemoReadOnly } from '@/stores/useDemoReadOnlyStore';
+import { useDismiss } from '@/shared/hooks/useDismiss';
 
 const SESSION_KEY = 'oe_demo_modal_dismissed';
 
@@ -58,6 +59,7 @@ export function DemoBanner() {
     setModalOpen(false);
   };
 
+  const dismiss = useDismiss({ onClose: closeModal, enabled: modalOpen });
   if (!demoMode) return null;
 
   return (
@@ -132,7 +134,7 @@ export function DemoBanner() {
 
       {/* One-time modal */}
       {modalOpen && (
-        <div
+        <div {...dismiss}
           className="fixed inset-0 z-[200] flex items-center justify-center bg-black/70 backdrop-blur-lg p-4 animate-fade-in"
           onClick={closeModal}
         >

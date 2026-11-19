@@ -50,6 +50,7 @@ import {
 } from '../api';
 import { SectionToolbar, StatusBadge, ElementLinks, inputCls, labelCls, textareaCls } from './shared';
 import { useSingleFlight } from '@/shared/hooks/useSingleFlight';
+import { useDismiss } from '@/shared/hooks/useDismiss';
 
 // EN 10204 inspection-document grades plus the EU CPR / UKCA markings and a
 // generic certificate of conformity. Mirrors CERT_TYPE_PATTERN in the schema.
@@ -1543,8 +1544,9 @@ function ModalShell({
   children: React.ReactNode;
 }) {
   const { t } = useTranslation();
+  const dismiss = useDismiss({ onClose });
   return (
-    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+    <div {...dismiss} className="fixed inset-0 z-modal flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
       <div
         role="dialog"
         aria-modal="true"

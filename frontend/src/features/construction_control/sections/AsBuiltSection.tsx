@@ -49,6 +49,7 @@ import {
 } from '../api';
 import { ElementLinks, SectionToolbar, StatusBadge, inputCls, labelCls, textareaCls } from './shared';
 import { useSingleFlight } from '@/shared/hooks/useSingleFlight';
+import { useDismiss } from '@/shared/hooks/useDismiss';
 
 // English fallbacks for the computed `construction_control.accuracy_class.*` keys. The default used to be
 // the raw value, so until the key lands in a locale the screen shows the bare
@@ -1457,8 +1458,9 @@ function ModalShell({
   children: React.ReactNode;
 }) {
   const { t } = useTranslation();
+  const dismiss = useDismiss({ onClose });
   return (
-    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+    <div {...dismiss} className="fixed inset-0 z-modal flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
       <div
         role="dialog"
         aria-modal="true"

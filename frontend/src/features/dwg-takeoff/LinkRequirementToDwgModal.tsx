@@ -31,6 +31,7 @@ import {
   type RequirementSet,
 } from '@/features/requirements/api';
 import { useToastStore } from '@/stores/useToastStore';
+import { useDismiss } from '@/shared/hooks/useDismiss';
 
 interface LinkRequirementToDwgModalProps {
   projectId: string;
@@ -164,8 +165,9 @@ export default function LinkRequirementToDwgModal({
 
   const isLoading = setsQuery.isLoading || reqsQuery.isLoading;
 
+  const dismiss = useDismiss({ onClose });
   return (
-    <div
+    <div {...dismiss}
       className="fixed inset-0 z-modal flex items-center justify-center bg-black/70 backdrop-blur-lg p-4"
       role="dialog"
       aria-modal="true"

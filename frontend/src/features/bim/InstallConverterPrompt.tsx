@@ -28,6 +28,7 @@ import {
 import { ConverterInstallProgressBar } from './ConverterInstallProgressBar';
 import { useToastStore } from '@/stores/useToastStore';
 import { fmtFixed } from '@/shared/lib/formatters';
+import { useDismiss } from '@/shared/hooks/useDismiss';
 
 interface InstallConverterPromptProps {
   open: boolean;
@@ -117,6 +118,7 @@ export function InstallConverterPrompt({
     },
   });
 
+  const dismiss = useDismiss({ onClose, busy: installMutation.isPending, enabled: open });
   if (!open) return null;
 
   // #153 guard — defensive: caller can mount the prompt before converterId
@@ -133,7 +135,7 @@ export function InstallConverterPrompt({
   const installing = installMutation.isPending;
 
   return (
-    <div
+    <div {...dismiss}
       className="fixed inset-0 z-modal flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
       role="dialog"
       aria-modal="true"

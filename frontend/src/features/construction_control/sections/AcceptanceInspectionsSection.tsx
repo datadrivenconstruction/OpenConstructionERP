@@ -47,6 +47,7 @@ import {
   textareaCls,
 } from './shared';
 import { useSingleFlight } from '@/shared/hooks/useSingleFlight';
+import { useDismiss } from '@/shared/hooks/useDismiss';
 
 const INSPECTION_TYPES: InspectionType[] = ['mir', 'wir', 'ir', 'hidden_works', 'acceptance'];
 const PARTY_ROLES: PartyRole[] = ['qc', 'qa', 'tpi', 'ahj'];
@@ -779,8 +780,9 @@ export function ModalShell({
   children: React.ReactNode;
 }) {
   const { t } = useTranslation();
+  const dismiss = useDismiss({ onClose });
   return (
-    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+    <div {...dismiss} className="fixed inset-0 z-modal flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
       <div
         role="dialog"
         aria-modal="true"

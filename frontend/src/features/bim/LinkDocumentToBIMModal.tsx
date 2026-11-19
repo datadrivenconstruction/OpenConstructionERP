@@ -19,6 +19,7 @@ import { TruncationNotice } from '@/shared/ui/TruncationNotice';
 import { createDocumentBIMLink } from './api';
 import type { BIMElementData } from '@/shared/ui/BIMViewer';
 import { useToastStore } from '@/stores/useToastStore';
+import { useDismiss } from '@/shared/hooks/useDismiss';
 
 interface DocumentItem {
   id: string;
@@ -127,8 +128,9 @@ export default function LinkDocumentToBIMModal({
     },
   });
 
+  const dismiss = useDismiss({ onClose });
   return (
-    <div
+    <div {...dismiss}
       className="fixed inset-0 z-modal flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
       role="dialog"
       aria-modal="true"

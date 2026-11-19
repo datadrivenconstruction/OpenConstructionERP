@@ -19,6 +19,7 @@ import {
   recordExternalAttendee,
   type AttendanceRow,
 } from './api';
+import { useDismiss } from '@/shared/hooks/useDismiss';
 
 interface AttendanceSectionProps {
   meetingId: string;
@@ -109,6 +110,7 @@ export function AttendanceSection({ meetingId }: AttendanceSectionProps) {
     rows.find((r) => r.user_id === currentUserId && !!r.checked_in_at)
   );
 
+  const dismiss = useDismiss({ onClose: () => setShowExternalModal(false), enabled: showExternalModal });
   return (
     <div
       className="rounded-lg bg-surface-secondary p-3"
@@ -218,7 +220,7 @@ export function AttendanceSection({ meetingId }: AttendanceSectionProps) {
 
       {/* Add-external modal — small inline portal-free dialog */}
       {showExternalModal && (
-        <div
+        <div {...dismiss}
           className="fixed inset-0 z-modal flex items-center justify-center bg-black/40 p-4"
           onClick={(e) => {
             e.stopPropagation();

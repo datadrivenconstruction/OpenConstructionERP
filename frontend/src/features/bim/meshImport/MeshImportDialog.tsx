@@ -56,6 +56,7 @@ import {
 } from './geometry';
 import { MeshPreview } from './MeshPreview';
 import { getNumberLocale } from '@/stores/usePreferencesStore';
+import { useDismiss } from '@/shared/hooks/useDismiss';
 
 interface MeshImportDialogProps {
   projectId: string;
@@ -395,8 +396,9 @@ export default function MeshImportDialog({
     t,
   ]);
 
+  const dismiss = useDismiss({ onClose, busy: uploading });
   return (
-    <div
+    <div {...dismiss}
       className="fixed inset-0 z-modal flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
       role="dialog"
       aria-modal="true"

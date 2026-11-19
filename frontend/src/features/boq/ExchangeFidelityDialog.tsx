@@ -23,6 +23,7 @@ import {
 } from './exchangeFidelityApi';
 import { formatLabel, severityLabel } from './exchangeFidelityText';
 import { FidelityReportView } from './FidelityReportView';
+import { useDismiss } from '@/shared/hooks/useDismiss';
 
 export interface ExchangeFidelityDialogProps {
   open: boolean;
@@ -68,6 +69,7 @@ export function ExchangeFidelityDialog({ open, boqId, reportId, onClose }: Excha
     enabled: open && !!selectedId && checked?.id !== selectedId,
   });
 
+  const dismiss = useDismiss({ onClose, enabled: open });
   if (!open) return null;
 
   const report: FidelityReport | null = checked && checked.id === selectedId ? checked : (detail.data ?? null);
@@ -89,7 +91,7 @@ export function ExchangeFidelityDialog({ open, boqId, reportId, onClose }: Excha
   };
 
   return (
-    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/40 p-4" onClick={onClose}>
+    <div {...dismiss} className="fixed inset-0 z-modal flex items-center justify-center bg-black/40 p-4" onClick={onClose}>
       <div
         role="dialog"
         aria-modal="true"

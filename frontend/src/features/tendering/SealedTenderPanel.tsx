@@ -32,6 +32,7 @@ import {
   type SealedState,
   type SubmissionMode,
 } from './api';
+import { useDismiss } from '@/shared/hooks/useDismiss';
 
 /** Local date and time of an ISO instant, in the viewer's time zone. */
 export function localDateTime(iso: string | null | undefined): string {
@@ -289,6 +290,7 @@ export function SealedTenderPanel({ packageId, pkg }: { packageId: string; pkg: 
   const canOpen = isSealed && state !== 'opened';
   const deadlinePassed = status?.deadline_passed === true;
 
+  const dismiss = useDismiss({ onClose: () => setShowOpen(false), enabled: showOpen });
   return (
     <Card data-testid="sealed-tender-panel">
       <div className="space-y-3">
@@ -435,7 +437,7 @@ export function SealedTenderPanel({ packageId, pkg }: { packageId: string; pkg: 
       </div>
 
       {showOpen && (
-        <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/40 p-4" role="dialog" aria-modal="true">
+        <div {...dismiss} className="fixed inset-0 z-modal flex items-center justify-center bg-black/40 p-4" role="dialog" aria-modal="true">
           <div className="w-full max-w-md space-y-3 rounded-xl bg-surface-primary p-5 shadow-xl" data-testid="sealed-open-dialog">
             <h3 className="oe-card-title">
               {t('tendering.sealed.open_title', { defaultValue: 'Open sealed bids' })}

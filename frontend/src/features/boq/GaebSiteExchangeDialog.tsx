@@ -25,6 +25,7 @@ import {
   type X31Preview,
   type X89CheckReport,
 } from './gaebSiteExchangeApi';
+import { useDismiss } from '@/shared/hooks/useDismiss';
 
 export type GaebSiteTab = 'x31_import' | 'x31_export' | 'x89_check';
 
@@ -310,6 +311,7 @@ export function GaebSiteExchangeDialog({
     }
   }, [boqId, basis, boqName, addToast, t]);
 
+  const dismiss = useDismiss({ onClose, enabled: open });
   if (!open) return null;
 
   const tabs: { id: GaebSiteTab; label: string }[] = [
@@ -319,7 +321,7 @@ export function GaebSiteExchangeDialog({
   ];
 
   return (
-    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/40 p-4" onClick={onClose}>
+    <div {...dismiss} className="fixed inset-0 z-modal flex items-center justify-center bg-black/40 p-4" onClick={onClose}>
       <div
         role="dialog"
         aria-modal="true"

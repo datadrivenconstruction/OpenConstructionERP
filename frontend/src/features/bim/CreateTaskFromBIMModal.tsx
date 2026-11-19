@@ -20,6 +20,7 @@ import { X, CheckSquare, Loader2, Plus } from 'lucide-react';
 import { createTask, type TaskType, type TaskPriority } from '@/features/tasks/api';
 import type { BIMElementData } from '@/shared/ui/BIMViewer';
 import { useToastStore } from '@/stores/useToastStore';
+import { useDismiss } from '@/shared/hooks/useDismiss';
 
 interface CreateTaskFromBIMModalProps {
   projectId: string;
@@ -115,8 +116,9 @@ export default function CreateTaskFromBIMModal({
 
   const canSubmit = title.trim().length > 0 && !createMut.isPending;
 
+  const dismiss = useDismiss({ onClose });
   return (
-    <div
+    <div {...dismiss}
       className="fixed inset-0 z-modal flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
       role="dialog"
       aria-modal="true"

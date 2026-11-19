@@ -24,6 +24,7 @@ import {
   type ReviewState,
   type ReviewTab,
 } from './excelReviewText';
+import { useDismiss } from '@/shared/hooks/useDismiss';
 
 export interface ExcelReviewDialogProps {
   open: boolean;
@@ -77,6 +78,7 @@ export function ExcelReviewDialog({ open, preview, applying = false, onApply, on
 
   const total = useMemo(() => applyCount(preview, state), [preview, state]);
 
+  const dismiss = useDismiss({ onClose: onCancel, enabled: open, busy: applying });
   if (!open) return null;
 
   const tabs: { id: ReviewTab; count: number }[] = [
@@ -98,7 +100,7 @@ export function ExcelReviewDialog({ open, preview, applying = false, onApply, on
   );
 
   return (
-    <div
+    <div {...dismiss}
       className="fixed inset-0 z-modal flex items-center justify-center bg-black/70 backdrop-blur-lg"
       role="dialog"
       aria-modal="true"

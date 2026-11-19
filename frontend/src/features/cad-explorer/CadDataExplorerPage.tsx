@@ -84,6 +84,7 @@ import { cadExplorerGuide } from './cadExplorerGuide';
 import { useConverterRanges } from '@/features/bim/useConverterRanges';
 import { fmtList, fmtPercent, getIntlLocale } from '@/shared/lib/formatters';
 import { getNumberLocale } from '@/stores/usePreferencesStore';
+import { useDismiss } from '@/shared/hooks/useDismiss';
 
 /* ── Recharts - lazy-loaded so the initial Data Explorer bundle stays lean.
       Charts live in a ~38 kB gzipped chunk that only loads once the user
@@ -2491,6 +2492,7 @@ function DrillDownModal({
     enabled: open && !!slice,
   });
 
+  const dismiss = useDismiss({ onClose, enabled: open && !!slice });
   if (!open || !slice) return null;
 
   const rows = data?.rows ?? [];
@@ -2503,7 +2505,7 @@ function DrillDownModal({
     : [];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center" data-testid="chart-drill-modal">
+    <div {...dismiss} className="fixed inset-0 z-50 flex items-center justify-center" data-testid="chart-drill-modal">
       <div className="absolute inset-0 bg-black/70 backdrop-blur-lg animate-fade-in" onClick={onClose} />
       <div className="relative w-full max-w-3xl mx-4 rounded-2xl bg-surface-elevated border border-border-light shadow-2xl animate-fade-in">
         <div className="flex items-center justify-between px-6 pt-5 pb-3 border-b border-border-light">
@@ -2589,9 +2591,10 @@ function ViewsDrawer({ open, onClose }: ViewsDrawerProps) {
   const deleteView = useAnalysisStateStore((s) => s.deleteView);
   const addToast = useToastStore((s) => s.addToast);
 
+  const dismissB = useDismiss({ onClose, enabled: open });
   if (!open) return null;
   return (
-    <div className="fixed inset-0 z-40" data-testid="views-drawer">
+    <div {...dismissB} className="fixed inset-0 z-40" data-testid="views-drawer">
       <div className="absolute inset-0 bg-black/30" onClick={onClose} />
       <aside className="absolute right-0 top-0 bottom-0 w-80 bg-surface-elevated border-l border-border-light shadow-xl overflow-y-auto">
         <div className="flex items-center justify-between px-4 py-3 border-b border-border-light sticky top-0 bg-surface-elevated">
@@ -2966,10 +2969,11 @@ function CreateBOQFromPivotModal({ open, onClose, groups, groupByColumns, aggCol
     }
   }, [boqId, groups, groupByColumns, quantityCol, unitGuess, addToast, onClose, navigate, t]);
 
+  const dismissC = useDismiss({ onClose, enabled: open });
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div {...dismissC} className="fixed inset-0 z-50 flex items-center justify-center">
       <div className="absolute inset-0 bg-black/70 backdrop-blur-lg animate-fade-in" onClick={onClose} />
       <div className="relative w-full max-w-lg mx-4 rounded-2xl bg-surface-elevated border border-border-light shadow-2xl animate-fade-in">
         {/* Header */}
@@ -3394,8 +3398,9 @@ function SaveDialog({
     }
   }, [sessionId, projectId, name, addToast, t, onSaved, onClose]);
 
+  const dismissD = useDismiss({ onClose });
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={onClose}>
+    <div {...dismissD} className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={onClose}>
       <div className="w-full max-w-md mx-4 rounded-xl bg-surface-elevated shadow-xl border border-border-light p-5" onClick={(e) => e.stopPropagation()}>
         <h3 className="text-sm font-semibold text-content-primary mb-4">
           {t('explorer.save_analysis', { defaultValue: 'Save Analysis' })}
@@ -3495,8 +3500,9 @@ function SaveToProjectDialog({
     }
   }, [sessionId, projectId, modelName, addToast, t, onSaved, onClose]);
 
+  const dismissE = useDismiss({ onClose });
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={onClose}>
+    <div {...dismissE} className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={onClose}>
       <div className="w-full max-w-md mx-4 rounded-xl bg-surface-elevated shadow-xl border border-border-light p-5" onClick={(e) => e.stopPropagation()}>
         <h3 className="text-sm font-semibold text-content-primary mb-1">
           {t('explorer.save_to_project', { defaultValue: 'Save to Project (BIM Hub)' })}
