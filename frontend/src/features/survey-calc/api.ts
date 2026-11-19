@@ -9,9 +9,6 @@
 import { activeLanguageTag, apiGet, apiPatch, apiPost } from '@/shared/lib/api';
 import type { AngleUnit } from './angles';
 
-const SURVEY = '/v1/survey-core';
-const PARCELS = '/v1/land-parcels';
-const SETTING_OUT = '/v1/setting-out';
 
 const loc = () => `locale=${encodeURIComponent(activeLanguageTag() ?? 'en')}`;
 
@@ -185,17 +182,17 @@ export interface LevelBookOut {
   points_updated: number;
 }
 
-export const getClasses = () => apiGet<CalcClasses>(`${SURVEY}/calc/classes`);
-export const runCogo = (body: CogoRequest) => apiPost<CogoResult, CogoRequest>(`${SURVEY}/calc/cogo?${loc()}`, body);
+export const getClasses = () => apiGet<CalcClasses>(`/v1/survey-core/calc/classes`);
+export const runCogo = (body: CogoRequest) => apiPost<CogoResult, CogoRequest>(`/v1/survey-core/calc/cogo?${loc()}`, body);
 export const saveComputedPoints = (projectId: string, name: string, points: ComputedPoint[]) =>
-  apiPost<{ point_set_id: string; saved: number }>(`${SURVEY}/projects/${projectId}/computed-points`, { name, points });
+  apiPost<{ point_set_id: string; saved: number }>(`/v1/survey-core/projects/${projectId}/computed-points`, { name, points });
 export const runTraverse = (body: FieldTraverseIn) =>
-  apiPost<FieldTraverseOut, FieldTraverseIn>(`${SURVEY}/calc/field-traverse?${loc()}`, body);
+  apiPost<FieldTraverseOut, FieldTraverseIn>(`/v1/survey-core/calc/field-traverse?${loc()}`, body);
 export const saveTraverse = (projectId: string, body: FieldTraverseIn) =>
-  apiPost<FieldTraverseOut, FieldTraverseIn>(`${SURVEY}/projects/${projectId}/field-traverses?${loc()}`, body);
-export const runLevelBook = (body: LevelBookIn) => apiPost<LevelBookOut, LevelBookIn>(`${SURVEY}/calc/level-book?${loc()}`, body);
+  apiPost<FieldTraverseOut, FieldTraverseIn>(`/v1/survey-core/projects/${projectId}/field-traverses?${loc()}`, body);
+export const runLevelBook = (body: LevelBookIn) => apiPost<LevelBookOut, LevelBookIn>(`/v1/survey-core/calc/level-book?${loc()}`, body);
 export const saveLevelBook = (projectId: string, body: LevelBookIn) =>
-  apiPost<LevelBookOut, LevelBookIn>(`${SURVEY}/projects/${projectId}/level-books?${loc()}`, body);
+  apiPost<LevelBookOut, LevelBookIn>(`/v1/survey-core/projects/${projectId}/level-books?${loc()}`, body);
 
 export interface StakeListIn {
   landxml: string;
@@ -215,7 +212,7 @@ export interface StakeListOut {
   findings: Finding[];
 }
 
-export const runStakeList = (body: StakeListIn) => apiPost<StakeListOut, StakeListIn>(`${SETTING_OUT}/road/stake-list?${loc()}`, body);
+export const runStakeList = (body: StakeListIn) => apiPost<StakeListOut, StakeListIn>(`/v1/setting-out/road/stake-list?${loc()}`, body);
 
 export interface SplitIn {
   mode: 'line' | 'parallel' | 'rotate';
@@ -273,13 +270,13 @@ export interface SetbackOut {
   findings: Finding[];
 }
 
-export const splitParcel = (parcelId: string, body: SplitIn) => apiPost<SplitOut, SplitIn>(`${PARCELS}/parcels/${parcelId}/split?${loc()}`, body);
+export const splitParcel = (parcelId: string, body: SplitIn) => apiPost<SplitOut, SplitIn>(`/v1/land-parcels/parcels/${parcelId}/split?${loc()}`, body);
 export const mergeParcels = (projectId: string, parcelIds: string[], ref: string, preview: boolean) =>
-  apiPost<SplitOut>(`${PARCELS}/projects/${projectId}/parcels/merge?${loc()}`, { parcel_ids: parcelIds, ref, preview });
-export const getCorners = (parcelId: string) => apiGet<CornerRegister>(`${PARCELS}/parcels/${parcelId}/corners?${loc()}`);
+  apiPost<SplitOut>(`/v1/land-parcels/projects/${projectId}/parcels/merge?${loc()}`, { parcel_ids: parcelIds, ref, preview });
+export const getCorners = (parcelId: string) => apiGet<CornerRegister>(`/v1/land-parcels/parcels/${parcelId}/corners?${loc()}`);
 export const patchCorner = (parcelId: string, seq: number, body: CornerPatch) =>
-  apiPatch<CornerRegister, CornerPatch>(`${PARCELS}/parcels/${parcelId}/corners/${seq}?${loc()}`, body);
+  apiPatch<CornerRegister, CornerPatch>(`/v1/land-parcels/parcels/${parcelId}/corners/${seq}?${loc()}`, body);
 export const stakeCorners = (parcelId: string) =>
-  apiPost<{ request_id: string; code: string; stakes: number }>(`${PARCELS}/parcels/${parcelId}/corners/stake`, {});
+  apiPost<{ request_id: string; code: string; stakes: number }>(`/v1/land-parcels/parcels/${parcelId}/corners/stake`, {});
 export const checkSetback = (parcelId: string, footprint: number[][], name: string, setbackM: number) =>
-  apiPost<SetbackOut>(`${PARCELS}/parcels/${parcelId}/setback?${loc()}`, { footprint, name, setback_m: setbackM });
+  apiPost<SetbackOut>(`/v1/land-parcels/parcels/${parcelId}/setback?${loc()}`, { footprint, name, setback_m: setbackM });

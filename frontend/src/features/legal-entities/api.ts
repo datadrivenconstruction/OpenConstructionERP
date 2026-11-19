@@ -8,7 +8,6 @@
 
 import { apiDelete, apiGet, apiPatch, apiPost, apiPut } from '@/shared/lib/api';
 
-const BASE = '/v1/legal-entities';
 
 export interface LegalEntityIssue {
   rule_id: string;
@@ -169,42 +168,42 @@ export function effectiveEntityId(
 export const legalEntitiesApi = {
   list: (includeInactive = true) =>
     apiGet<{ items: LegalEntity[]; total: number }>(
-      `${BASE}/entities/?include_inactive=${includeInactive ? 'true' : 'false'}`,
+      `/v1/legal-entities/entities/?include_inactive=${includeInactive ? 'true' : 'false'}`,
     ),
-  create: (body: LegalEntityInput) => apiPost<LegalEntity, LegalEntityInput>(`${BASE}/entities/`, body),
+  create: (body: LegalEntityInput) => apiPost<LegalEntity, LegalEntityInput>(`/v1/legal-entities/entities/`, body),
   update: (id: string, body: Partial<LegalEntityInput>) =>
-    apiPatch<LegalEntity, Partial<LegalEntityInput>>(`${BASE}/entities/${id}`, body),
-  remove: (id: string) => apiDelete(`${BASE}/entities/${id}`),
+    apiPatch<LegalEntity, Partial<LegalEntityInput>>(`/v1/legal-entities/entities/${id}`, body),
+  remove: (id: string) => apiDelete(`/v1/legal-entities/entities/${id}`),
   addBranch: (entityId: string, body: BranchInput) =>
-    apiPost<Branch, BranchInput>(`${BASE}/entities/${entityId}/branches/`, body),
+    apiPost<Branch, BranchInput>(`/v1/legal-entities/entities/${entityId}/branches/`, body),
   removeBranch: (entityId: string, branchId: string) =>
-    apiDelete(`${BASE}/entities/${entityId}/branches/${branchId}`),
-  projectEntity: (projectId: string) => apiGet<ProjectEntity>(`${BASE}/projects/${projectId}/entity`),
+    apiDelete(`/v1/legal-entities/entities/${entityId}/branches/${branchId}`),
+  projectEntity: (projectId: string) => apiGet<ProjectEntity>(`/v1/legal-entities/projects/${projectId}/entity`),
   assignProject: (projectId: string, legalEntityId: string | null, branchId: string | null = null) =>
     apiPut<ProjectEntity, { legal_entity_id: string | null; legal_entity_branch_id: string | null }>(
-      `${BASE}/projects/${projectId}/entity`,
+      `/v1/legal-entities/projects/${projectId}/entity`,
       { legal_entity_id: legalEntityId, legal_entity_branch_id: branchId },
     ),
   updateBranch: (entityId: string, branchId: string, body: Partial<BranchInput> & { is_active?: boolean }) =>
     apiPatch<Branch, Partial<BranchInput> & { is_active?: boolean }>(
-      `${BASE}/entities/${entityId}/branches/${branchId}`,
+      `/v1/legal-entities/entities/${entityId}/branches/${branchId}`,
       body,
     ),
-  uiState: () => apiGet<EntitiesUiState>(`${BASE}/ui-state`),
+  uiState: () => apiGet<EntitiesUiState>(`/v1/legal-entities/ui-state`),
   taxSchemes: (countryCode: string) =>
     apiGet<{ country_code: string; schemes: TaxScheme[] }>(
-      `${BASE}/tax-schemes/${encodeURIComponent(countryCode || 'ZZ')}`,
+      `/v1/legal-entities/tax-schemes/${encodeURIComponent(countryCode || 'ZZ')}`,
     ),
   members: (entityId: string) =>
-    apiGet<{ items: EntityMember[]; any_members: boolean }>(`${BASE}/entities/${entityId}/members/`),
+    apiGet<{ items: EntityMember[]; any_members: boolean }>(`/v1/legal-entities/entities/${entityId}/members/`),
   addMember: (entityId: string, userId: string, role: MemberRole = 'member') =>
-    apiPost<EntityMember, { user_id: string; role: MemberRole }>(`${BASE}/entities/${entityId}/members/`, {
+    apiPost<EntityMember, { user_id: string; role: MemberRole }>(`/v1/legal-entities/entities/${entityId}/members/`, {
       user_id: userId,
       role,
     }),
   updateMember: (entityId: string, memberId: string, role: MemberRole) =>
-    apiPatch<EntityMember, { role: MemberRole }>(`${BASE}/entities/${entityId}/members/${memberId}`, { role }),
+    apiPatch<EntityMember, { role: MemberRole }>(`/v1/legal-entities/entities/${entityId}/members/${memberId}`, { role }),
   removeMember: (entityId: string, memberId: string) =>
-    apiDelete(`${BASE}/entities/${entityId}/members/${memberId}`),
-  projectSeller: (projectId: string) => apiGet<ProjectSeller>(`${BASE}/projects/${projectId}/seller`),
+    apiDelete(`/v1/legal-entities/entities/${entityId}/members/${memberId}`),
+  projectSeller: (projectId: string) => apiGet<ProjectSeller>(`/v1/legal-entities/projects/${projectId}/seller`),
 };

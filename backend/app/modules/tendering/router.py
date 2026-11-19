@@ -50,7 +50,6 @@ from app.modules.tendering.schemas import (
     BidComparisonResponse,
     BidCreate,
     BidFileListResponse,
-    BidFileResponse,
     BidIntegrityResponse,
     BidInvitationCreated,
     BidInvitationListResponse,

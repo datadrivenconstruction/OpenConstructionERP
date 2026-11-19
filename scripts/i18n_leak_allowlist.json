@@ -2349,6 +2349,11 @@
     "note": "height deviation symbol dZ",
     "reason_category": "abbreviation"
   },
+  "volumes.surface.breakline_placeholder": {
+    "en_value": "TOE, CREST",
+    "note": "example breakline codes, literal survey data",
+    "reason_category": "standard_code"
+  },
   "volumes.surface.source_landxml": {
     "en_value": "LandXML",
     "note": "LandXML open interchange format name",

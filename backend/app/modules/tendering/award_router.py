@@ -16,7 +16,15 @@ from typing import Any
 from fastapi import APIRouter, Depends, Query, Response, status
 
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep, verify_project_access
-from app.modules.tendering.award_schemas import AwardPreview, AwardTermsIn, AwardTermsOut, BidderGate, RoundIn, RoundListResponse, RoundOut
+from app.modules.tendering.award_schemas import (
+    AwardPreview,
+    AwardTermsIn,
+    AwardTermsOut,
+    BidderGate,
+    RoundIn,
+    RoundListResponse,
+    RoundOut,
+)
 from app.modules.tendering.award_terms import AwardTermsService, bid_party, bidder_gate
 from app.modules.tendering.sealed import SealedTenderService
 from app.modules.tendering.service import TenderingService

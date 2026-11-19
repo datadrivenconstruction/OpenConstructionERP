@@ -19,7 +19,6 @@ import {
   triggerDownload,
 } from '@/shared/lib/api';
 
-const BASE = '/v1/survey-core';
 
 export type PointKind = 'control' | 'benchmark' | 'topo' | 'stake' | 'asbuilt';
 export const POINT_KINDS: PointKind[] = ['control', 'benchmark', 'topo', 'stake', 'asbuilt'];
@@ -187,17 +186,17 @@ export interface RegisterSummary {
   last_import: string | null;
 }
 
-export const searchCrs = (q: string) => apiGet<{ items: CrsInfo[] }>(`${BASE}/crs/search?q=${encodeURIComponent(q)}`).then((r) => r.items);
-export const getProjectCrs = (projectId: string) => apiGet<ProjectCrsState>(`${BASE}/projects/${projectId}/crs`);
+export const searchCrs = (q: string) => apiGet<{ items: CrsInfo[] }>(`/v1/survey-core/crs/search?q=${encodeURIComponent(q)}`).then((r) => r.items);
+export const getProjectCrs = (projectId: string) => apiGet<ProjectCrsState>(`/v1/survey-core/projects/${projectId}/crs`);
 export const setProjectCrs = (projectId: string, body: ProjectCrsInput) =>
-  apiPut<ProjectCrs>(`${BASE}/projects/${projectId}/crs`, body);
+  apiPut<ProjectCrs>(`/v1/survey-core/projects/${projectId}/crs`, body);
 export const confirmProjectCrs = (projectId: string) =>
-  apiPost<ProjectCrs>(`${BASE}/projects/${projectId}/crs/confirm`, {});
+  apiPost<ProjectCrs>(`/v1/survey-core/projects/${projectId}/crs/confirm`, {});
 export const previewImport = (projectId: string, body: ImportBody) =>
-  apiPost<ImportPreview>(`${BASE}/projects/${projectId}/import/preview`, body);
+  apiPost<ImportPreview>(`/v1/survey-core/projects/${projectId}/import/preview`, body);
 export const importPoints = (projectId: string, body: ImportBody) =>
   apiPost<{ point_set: PointSet; imported: number; problems: ImportProblem[] }>(
-    `${BASE}/projects/${projectId}/import`,
+    `/v1/survey-core/projects/${projectId}/import`,
     body,
   );
 export const listPoints = (projectId: string, params: { kind?: string; set_id?: string; q?: string } = {}) => {
@@ -205,15 +204,15 @@ export const listPoints = (projectId: string, params: { kind?: string; set_id?: 
   if (params.kind) qs.set('kind', params.kind);
   if (params.set_id) qs.set('set_id', params.set_id);
   if (params.q) qs.set('q', params.q);
-  return apiGet<{ items: SurveyPoint[]; total: number }>(`${BASE}/projects/${projectId}/points?${qs.toString()}`);
+  return apiGet<{ items: SurveyPoint[]; total: number }>(`/v1/survey-core/projects/${projectId}/points?${qs.toString()}`);
 };
-export const listPointSets = (projectId: string) => apiGet<{ items: PointSet[] }>(`${BASE}/projects/${projectId}/point-sets`).then((r) => r.items);
-export const deletePointSet = (setId: string) => apiDelete(`${BASE}/point-sets/${setId}`);
+export const listPointSets = (projectId: string) => apiGet<{ items: PointSet[] }>(`/v1/survey-core/projects/${projectId}/point-sets`).then((r) => r.items);
+export const deletePointSet = (setId: string) => apiDelete(`/v1/survey-core/point-sets/${setId}`);
 export const declareSetCrs = (setId: string, epsg: number) =>
-  apiPost<PointSet>(`${BASE}/point-sets/${setId}/declare-crs`, { epsg });
-export const getSummary = (projectId: string) => apiGet<RegisterSummary>(`${BASE}/projects/${projectId}/summary`);
+  apiPost<PointSet>(`/v1/survey-core/point-sets/${setId}/declare-crs`, { epsg });
+export const getSummary = (projectId: string) => apiGet<RegisterSummary>(`/v1/survey-core/projects/${projectId}/summary`);
 export const validateRegister = (projectId: string, locale: string) =>
-  apiPost<ValidationReport>(`${BASE}/projects/${projectId}/validate?locale=${encodeURIComponent(locale)}`, {});
+  apiPost<ValidationReport>(`/v1/survey-core/projects/${projectId}/validate?locale=${encodeURIComponent(locale)}`, {});
 
 // ── Geodesy: unit, local grid, grid/ground, export ────────────────────────────
 
@@ -282,11 +281,11 @@ export type ExportFormat = 'csv' | 'geojson' | 'gsi' | 'landxml' | 'dxf';
 export const EXPORT_FORMATS: ExportFormat[] = ['csv', 'geojson', 'gsi', 'landxml', 'dxf'];
 export const CSV_PRESETS = ['PNEZD', 'PENZD', 'ENZ', 'NEZ'] as const;
 
-export const getGeodesy = (projectId: string) => apiGet<Geodesy>(`${BASE}/projects/${projectId}/geodesy`);
-export const setGeodesy = (projectId: string, body: GeodesyInput) => apiPut<Geodesy>(`${BASE}/projects/${projectId}/geodesy`, body);
-export const solveLocalGrid = (points: LocalGridPoint[]) => apiPost<LocalGridSolution>(`${BASE}/local-grid/solve`, { points });
+export const getGeodesy = (projectId: string) => apiGet<Geodesy>(`/v1/survey-core/projects/${projectId}/geodesy`);
+export const setGeodesy = (projectId: string, body: GeodesyInput) => apiPut<Geodesy>(`/v1/survey-core/projects/${projectId}/geodesy`, body);
+export const solveLocalGrid = (points: LocalGridPoint[]) => apiPost<LocalGridSolution>(`/v1/survey-core/local-grid/solve`, { points });
 export const getScaleFactor = (projectId: string, distance?: number) =>
-  apiGet<ScaleFactor | null>(`${BASE}/projects/${projectId}/scale-factor${distance ? `?d=${distance}` : ''}`);
+  apiGet<ScaleFactor | null>(`/v1/survey-core/projects/${projectId}/scale-factor${distance ? `?d=${distance}` : ''}`);
 
 export interface ExportOptions {
   format: ExportFormat;
@@ -313,7 +312,7 @@ export function exportQuery(o: ExportOptions): string {
   return qs.toString();
 }
 
-export const registerExportUrl = (projectId: string, o: ExportOptions) => `/api${BASE}/projects/${projectId}/export?${exportQuery(o)}`;
+export const registerExportUrl = (projectId: string, o: ExportOptions) => `/api/v1/survey-core/projects/${projectId}/export?${exportQuery(o)}`;
 export const stakeExportUrl = (requestId: string, o: ExportOptions) =>
   `/api/v1/setting-out/requests/${requestId}/export?${exportQuery({ format: o.format, locale: o.locale })}`;
 
@@ -409,25 +408,25 @@ export interface ControlCheckInput {
   note?: string;
 }
 
-export const getPoint = (id: string) => apiGet<PointDetail>(`${BASE}/points/${id}`);
-export const updatePoint = (id: string, body: PointUpdate) => apiPatch<PointDetail>(`${BASE}/points/${id}`, body);
-export const deletePoint = (id: string) => apiDelete(`${BASE}/points/${id}`);
+export const getPoint = (id: string) => apiGet<PointDetail>(`/v1/survey-core/points/${id}`);
+export const updatePoint = (id: string, body: PointUpdate) => apiPatch<PointDetail>(`/v1/survey-core/points/${id}`, body);
+export const deletePoint = (id: string) => apiDelete(`/v1/survey-core/points/${id}`);
 export const bulkPoints = (
   projectId: string,
   body: { ids: string[]; action: BulkAction; value?: string; target_set_id?: string },
-) => apiPost<BulkResult>(`${BASE}/projects/${projectId}/points/bulk`, body);
-export const getControl = (projectId: string) => apiGet<ControlList>(`${BASE}/projects/${projectId}/control`);
+) => apiPost<BulkResult>(`/v1/survey-core/projects/${projectId}/points/bulk`, body);
+export const getControl = (projectId: string) => apiGet<ControlList>(`/v1/survey-core/projects/${projectId}/control`);
 export const addControlCheck = (projectId: string, body: ControlCheckInput) =>
-  apiPost<ControlCheck>(`${BASE}/projects/${projectId}/control/checks`, body);
+  apiPost<ControlCheck>(`/v1/survey-core/projects/${projectId}/control/checks`, body);
 export const deleteControlCheck = (projectId: string, checkId: string) =>
-  apiDelete(`${BASE}/projects/${projectId}/control/checks/${checkId}`);
+  apiDelete(`/v1/survey-core/projects/${projectId}/control/checks/${checkId}`);
 
 /** POST the selection (or every point when `ids` is empty) and save the file the server returns. */
 export async function exportPoints(
   projectId: string,
   body: { ids?: string[]; format: ExportFormat; preset?: 'PNEZD' | 'PENZD'; delimiter?: string; header?: boolean },
 ): Promise<void> {
-  const response = await fetchWithAuth(`${API_BASE}${BASE}/projects/${projectId}/points/export`, {
+  const response = await fetchWithAuth(`${API_BASE}/v1/survey-core/projects/${projectId}/points/export`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),

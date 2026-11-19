@@ -1574,6 +1574,7 @@ const resource = {
     "stockpiles.guide.create_body": "Name the pile, load the ground file under it and enter the book stock.",
     "stockpiles.guide.survey_body": "Add the pile file with the density and its source. Check volume, tonnes and variance.",
     "stockpiles.guide.adjust_body": "If the variance is real, propose an adjustment and confirm it. The inventory moves only then.",
+    "volumes.surface.breakline_placeholder": "TOE, CREST",
   }
 } as { translation: Record<string, string> };
 

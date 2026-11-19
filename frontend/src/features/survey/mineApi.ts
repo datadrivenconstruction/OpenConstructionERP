@@ -9,7 +9,6 @@
 import { apiDelete, apiGet, apiPatch, apiPost } from '@/shared/lib/api';
 import type { Finding } from './volumesApi';
 
-const BASE = '/v1/mine-survey';
 
 export type UnitType = 'pit' | 'bench' | 'block' | 'stope' | 'drive';
 export const UNIT_TYPES: UnitType[] = ['pit', 'bench', 'block', 'stope', 'drive'];
@@ -183,24 +182,24 @@ export interface ClaimResult {
 
 const loc = (locale: string) => `locale=${encodeURIComponent(locale)}`;
 
-export const listPeriods = (projectId: string) => apiGet<{ items: MinePeriod[] }>(`${BASE}/projects/${projectId}/periods`).then((r) => r.items);
-export const createPeriod = (projectId: string, body: PeriodInput) => apiPost<MinePeriod>(`${BASE}/projects/${projectId}/periods`, body);
-export const getPeriod = (id: string, locale: string) => apiGet<MinePeriodDetail>(`${BASE}/periods/${id}?${loc(locale)}`);
-export const deletePeriod = (id: string) => apiDelete(`${BASE}/periods/${id}`);
+export const listPeriods = (projectId: string) => apiGet<{ items: MinePeriod[] }>(`/v1/mine-survey/projects/${projectId}/periods`).then((r) => r.items);
+export const createPeriod = (projectId: string, body: PeriodInput) => apiPost<MinePeriod>(`/v1/mine-survey/projects/${projectId}/periods`, body);
+export const getPeriod = (id: string, locale: string) => apiGet<MinePeriodDetail>(`/v1/mine-survey/periods/${id}?${loc(locale)}`);
+export const deletePeriod = (id: string) => apiDelete(`/v1/mine-survey/periods/${id}`);
 export const addEntry = (periodId: string, body: EntryInput, locale: string) =>
-  apiPost<MineEntry>(`${BASE}/periods/${periodId}/entries?${loc(locale)}`, body);
+  apiPost<MineEntry>(`/v1/mine-survey/periods/${periodId}/entries?${loc(locale)}`, body);
 export const updateEntry = (id: string, body: { actual_advance_m?: number | null; plan_advance_m?: number | null }, locale: string) =>
-  apiPatch<MineEntry>(`${BASE}/entries/${id}?${loc(locale)}`, body);
-export const deleteEntry = (id: string) => apiDelete(`${BASE}/entries/${id}`);
+  apiPatch<MineEntry>(`/v1/mine-survey/entries/${id}?${loc(locale)}`, body);
+export const deleteEntry = (id: string) => apiDelete(`/v1/mine-survey/entries/${id}`);
 export const computeActual = (id: string, body: ComputeActualInput, locale: string) =>
-  apiPost<MineEntry>(`${BASE}/entries/${id}/compute-actual?${loc(locale)}`, body);
+  apiPost<MineEntry>(`/v1/mine-survey/entries/${id}/compute-actual?${loc(locale)}`, body);
 export const confirmActual = (id: string, acknowledge: string[], locale: string) =>
-  apiPost<MineEntry>(`${BASE}/entries/${id}/confirm-actual?${loc(locale)}`, { acknowledge });
+  apiPost<MineEntry>(`/v1/mine-survey/entries/${id}/confirm-actual?${loc(locale)}`, { acknowledge });
 export const importTruckLoads = (id: string, text: string, filename: string, locale: string) =>
-  apiPost<MineEntry>(`${BASE}/entries/${id}/truck-loads?${loc(locale)}`, { text, filename });
+  apiPost<MineEntry>(`/v1/mine-survey/entries/${id}/truck-loads?${loc(locale)}`, { text, filename });
 export const addToClaim = (id: string, positionId: string) =>
-  apiPost<ClaimResult>(`${BASE}/entries/${id}/add-to-claim`, { position_id: positionId });
-export const periodReportUrl = (id: string, locale: string) => `/api${BASE}/periods/${id}/report.pdf?${loc(locale)}`;
+  apiPost<ClaimResult>(`/v1/mine-survey/entries/${id}/add-to-claim`, { position_id: positionId });
+export const periodReportUrl = (id: string, locale: string) => `/api/v1/mine-survey/periods/${id}/report.pdf?${loc(locale)}`;
 
 /** Percent with two decimals, "94.96 %". */
 export function formatPct(value: number | null | undefined, locale: string): string {
@@ -246,18 +245,18 @@ export function periodTitle(label: string, locale: string): string {
 }
 
 export const splitByMaterial = (entryId: string, locale: string) =>
-  apiPost<MineEntry>(`${BASE}/entries/${entryId}/material-split?${loc(locale)}`, {});
+  apiPost<MineEntry>(`/v1/mine-survey/entries/${entryId}/material-split?${loc(locale)}`, {});
 export const importMaterials = (unitId: string, text: string, filename: string) =>
-  apiPost<{ items: unknown[]; problems: string[] }>(`${BASE}/units/${unitId}/materials/import`, { text, filename, replace: true });
+  apiPost<{ items: unknown[]; problems: string[] }>(`/v1/mine-survey/units/${unitId}/materials/import`, { text, filename, replace: true });
 export const listPatterns = (projectId: string) =>
-  apiGet<{ items: BlastPattern[] }>(`${BASE}/projects/${projectId}/blast-patterns`).then((r) => r.items);
+  apiGet<{ items: BlastPattern[] }>(`/v1/mine-survey/projects/${projectId}/blast-patterns`).then((r) => r.items);
 export const createPattern = (
   projectId: string,
   body: { name: string; collar_tol_m: number | null; depth_tol_m: number | null; design_text: string },
   locale: string,
-) => apiPost<BlastPatternDetail>(`${BASE}/projects/${projectId}/blast-patterns?${loc(locale)}`, body);
-export const getPattern = (id: string, locale: string) => apiGet<BlastPatternDetail>(`${BASE}/blast-patterns/${id}?${loc(locale)}`);
+) => apiPost<BlastPatternDetail>(`/v1/mine-survey/projects/${projectId}/blast-patterns?${loc(locale)}`, body);
+export const getPattern = (id: string, locale: string) => apiGet<BlastPatternDetail>(`/v1/mine-survey/blast-patterns/${id}?${loc(locale)}`);
 export const importAsDrilled = (id: string, text: string, locale: string) =>
-  apiPost<BlastPatternDetail>(`${BASE}/blast-patterns/${id}/as-drilled?${loc(locale)}`, { text });
-export const deletePattern = (id: string) => apiDelete(`${BASE}/blast-patterns/${id}`);
-export const stakeListUrl = (id: string) => `/api${BASE}/blast-patterns/${id}/stake-list.csv`;
+  apiPost<BlastPatternDetail>(`/v1/mine-survey/blast-patterns/${id}/as-drilled?${loc(locale)}`, { text });
+export const deletePattern = (id: string) => apiDelete(`/v1/mine-survey/blast-patterns/${id}`);
+export const stakeListUrl = (id: string) => `/api/v1/mine-survey/blast-patterns/${id}/stake-list.csv`;

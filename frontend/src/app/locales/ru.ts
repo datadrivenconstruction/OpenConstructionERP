@@ -69537,6 +69537,7 @@ const resource = {
     "volumes.surface.breakline_tip": "Точки с этими кодами соединяются в порядке файла в линии, которые треугольники не пересекают: подошва, бровка, бордюр, кювет.",
     "volumes.surface.boundary": "Внешняя граница (необязательно): E N; E N; ...",
     "volumes.surface.boundary_bad": "Три или больше пар E N через точку с запятой.",
+    "volumes.surface.breakline_placeholder": "TOE, CREST",
     "volumes.tab.calculations": "Расчёты",
     "volumes.tab.surfaces": "Поверхности",
     "volumes.tab.staged": "Этапы",

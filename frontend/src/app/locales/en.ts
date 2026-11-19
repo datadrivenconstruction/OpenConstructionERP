@@ -60531,6 +60531,7 @@ const resource = {
     "volumes.surface.breakline_tip": "Points with these codes are joined in file order into lines the triangles may not cross: toe, crest, kerb, ditch.",
     "volumes.surface.boundary": "Outer boundary (optional): E N; E N; ...",
     "volumes.surface.boundary_bad": "Three or more E N pairs, separated by semicolons.",
+    "volumes.surface.breakline_placeholder": "TOE, CREST",
     "volumes.tab.calculations": "Calculations",
     "volumes.tab.surfaces": "Surfaces",
     "volumes.tab.staged": "Stages",

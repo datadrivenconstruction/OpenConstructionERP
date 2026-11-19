@@ -8,7 +8,6 @@
 import { apiDelete, apiGet, apiPatch, apiPost } from '@/shared/lib/api';
 import type { Finding } from './volumesApi';
 
-const BASE = '/v1/stockpiles';
 
 export type DensitySource = 'measured' | 'supplier' | 'assumed';
 export const DENSITY_SOURCES: DensitySource[] = ['measured', 'supplier', 'assumed'];
@@ -95,29 +94,29 @@ export interface SurveyInput {
 }
 
 
-export const getStockpileSummary = (projectId: string) => apiGet<StockpileSummary>(`${BASE}/projects/${projectId}/summary`);
+export const getStockpileSummary = (projectId: string) => apiGet<StockpileSummary>(`/v1/stockpiles/projects/${projectId}/summary`);
 export const listStockpiles = (projectId: string, locale: string) =>
-  apiGet<{ items: Stockpile[] }>(`${BASE}/projects/${projectId}/stockpiles?locale=${encodeURIComponent(locale)}`).then((r) => r.items);
+  apiGet<{ items: Stockpile[] }>(`/v1/stockpiles/projects/${projectId}/stockpiles?locale=${encodeURIComponent(locale)}`).then((r) => r.items);
 export const getStockpile = (id: string, locale: string) =>
-  apiGet<StockpileDetail>(`${BASE}/stockpiles/${id}?locale=${encodeURIComponent(locale)}`);
+  apiGet<StockpileDetail>(`/v1/stockpiles/stockpiles/${id}?locale=${encodeURIComponent(locale)}`);
 export const createStockpile = (projectId: string, body: StockpileInput) =>
-  apiPost<StockpileDetail>(`${BASE}/projects/${projectId}/stockpiles`, body);
+  apiPost<StockpileDetail>(`/v1/stockpiles/projects/${projectId}/stockpiles`, body);
 export const updateStockpile = (id: string, body: Partial<StockpileInput>) =>
-  apiPatch<StockpileDetail>(`${BASE}/stockpiles/${id}`, body);
-export const deleteStockpile = (id: string) => apiDelete(`${BASE}/stockpiles/${id}`);
+  apiPatch<StockpileDetail>(`/v1/stockpiles/stockpiles/${id}`, body);
+export const deleteStockpile = (id: string) => apiDelete(`/v1/stockpiles/stockpiles/${id}`);
 export const addSurvey = (id: string, body: SurveyInput, locale: string) =>
-  apiPost<PileSurvey>(`${BASE}/stockpiles/${id}/surveys?locale=${encodeURIComponent(locale)}`, body);
+  apiPost<PileSurvey>(`/v1/stockpiles/stockpiles/${id}/surveys?locale=${encodeURIComponent(locale)}`, body);
 export const updateSurvey = (id: string, body: Partial<SurveyInput>, locale: string) =>
-  apiPatch<PileSurvey>(`${BASE}/surveys/${id}?locale=${encodeURIComponent(locale)}`, body);
-export const deleteSurvey = (id: string) => apiDelete(`${BASE}/surveys/${id}`);
+  apiPatch<PileSurvey>(`/v1/stockpiles/surveys/${id}?locale=${encodeURIComponent(locale)}`, body);
+export const deleteSurvey = (id: string) => apiDelete(`/v1/stockpiles/surveys/${id}`);
 export const proposeAdjustment = (surveyId: string) =>
-  apiPost<Adjustment>(`${BASE}/surveys/${surveyId}/propose-adjustment`, {});
+  apiPost<Adjustment>(`/v1/stockpiles/surveys/${surveyId}/propose-adjustment`, {});
 export const confirmAdjustment = (adjustmentId: string, locale: string) =>
-  apiPost<PileSurvey>(`${BASE}/adjustments/${adjustmentId}/confirm?locale=${encodeURIComponent(locale)}`, {});
+  apiPost<PileSurvey>(`/v1/stockpiles/adjustments/${adjustmentId}/confirm?locale=${encodeURIComponent(locale)}`, {});
 export const cancelAdjustment = (adjustmentId: string, locale: string) =>
-  apiPost<PileSurvey>(`${BASE}/adjustments/${adjustmentId}/cancel?locale=${encodeURIComponent(locale)}`, {});
+  apiPost<PileSurvey>(`/v1/stockpiles/adjustments/${adjustmentId}/cancel?locale=${encodeURIComponent(locale)}`, {});
 export const stockpileReportUrl = (surveyId: string, locale: string) =>
-  `/api${BASE}/surveys/${surveyId}/report.pdf?locale=${encodeURIComponent(locale)}`;
+  `/api/v1/stockpiles/surveys/${surveyId}/report.pdf?locale=${encodeURIComponent(locale)}`;
 
 /** Tonnes with two decimals, "8,087.04". */
 export function formatTonnes(value: number | null | undefined, locale: string): string {

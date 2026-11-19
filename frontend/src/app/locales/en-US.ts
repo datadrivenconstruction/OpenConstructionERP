@@ -1706,6 +1706,7 @@ const resource = {
     "normPricing.preview_empty": "Every graded labor rate in this bill already matches.",
     "normPricing.skipped": "Labor rows left out (no grade, or a grade off the scale): {{count}}",
     "survey.monitoring.glossary.displacement_def": "How far a point has moved from its first reading, in millimeters.",
+    "volumes.surface.breakline_placeholder": "TOE, CREST",
   }
 } as { translation: Record<string, string> };
 

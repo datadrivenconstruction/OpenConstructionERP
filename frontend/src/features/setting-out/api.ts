@@ -7,7 +7,6 @@
 
 import { API_BASE, activeLanguageTag, apiDelete, apiGet, apiPatch, apiPost, downloadWithAuth } from '@/shared/lib/api';
 
-const BASE = '/v1/setting-out';
 
 export type ItemType = 'column' | 'wall' | 'pile' | 'anchor_bolt' | 'kerb' | 'centreline' | 'grid_line' | 'boundary_corner' | 'other';
 export const ITEM_TYPES: ItemType[] = ['column', 'wall', 'pile', 'anchor_bolt', 'kerb', 'centreline', 'grid_line', 'boundary_corner', 'other'];
@@ -157,33 +156,33 @@ export interface Summary {
   ncr_drafts: number;
 }
 
-export const listProfiles = (projectId: string) => apiGet<{ items: ToleranceProfile[] }>(`${BASE}/projects/${projectId}/profiles`).then((r) => r.items);
-export const listRequests = (projectId: string) => apiGet<{ items: StakeoutRequest[] }>(`${BASE}/projects/${projectId}/requests`).then((r) => r.items);
+export const listProfiles = (projectId: string) => apiGet<{ items: ToleranceProfile[] }>(`/v1/setting-out/projects/${projectId}/profiles`).then((r) => r.items);
+export const listRequests = (projectId: string) => apiGet<{ items: StakeoutRequest[] }>(`/v1/setting-out/projects/${projectId}/requests`).then((r) => r.items);
 export const createRequest = (projectId: string, body: RequestInput) =>
-  apiPost<StakeoutRequest, RequestInput>(`${BASE}/projects/${projectId}/requests`, body);
-export const getSummary = (projectId: string) => apiGet<Summary>(`${BASE}/projects/${projectId}/summary`);
+  apiPost<StakeoutRequest, RequestInput>(`/v1/setting-out/projects/${projectId}/requests`, body);
+export const getSummary = (projectId: string) => apiGet<Summary>(`/v1/setting-out/projects/${projectId}/summary`);
 export const validateSettingOut = (projectId: string, locale: string) =>
-  apiPost<ValidationReport>(`${BASE}/projects/${projectId}/validate?locale=${encodeURIComponent(locale)}`);
+  apiPost<ValidationReport>(`/v1/setting-out/projects/${projectId}/validate?locale=${encodeURIComponent(locale)}`);
 export const loadDemo = (projectId: string) =>
-  apiPost<StakeoutRequestDetail>(`${BASE}/projects/${projectId}/demo/riverside`);
-export const getRequest = (id: string) => apiGet<StakeoutRequestDetail>(`${BASE}/requests/${id}`);
+  apiPost<StakeoutRequestDetail>(`/v1/setting-out/projects/${projectId}/demo/riverside`);
+export const getRequest = (id: string) => apiGet<StakeoutRequestDetail>(`/v1/setting-out/requests/${id}`);
 export const updateRequest = (id: string, body: Partial<RequestInput>) =>
-  apiPatch<StakeoutRequest, Partial<RequestInput>>(`${BASE}/requests/${id}`, body);
-export const deleteRequest = (id: string) => apiDelete(`${BASE}/requests/${id}`);
+  apiPatch<StakeoutRequest, Partial<RequestInput>>(`/v1/setting-out/requests/${id}`, body);
+export const deleteRequest = (id: string) => apiDelete(`/v1/setting-out/requests/${id}`);
 export const previewDesign = (id: string, body: DesignImportInput) =>
-  apiPost<DesignPreview, DesignImportInput>(`${BASE}/requests/${id}/design/preview`, body);
+  apiPost<DesignPreview, DesignImportInput>(`/v1/setting-out/requests/${id}/design/preview`, body);
 export const importDesign = (id: string, body: DesignImportInput) =>
-  apiPost<StakeoutRequestDetail, DesignImportInput>(`${BASE}/requests/${id}/design`, body);
+  apiPost<StakeoutRequestDetail, DesignImportInput>(`/v1/setting-out/requests/${id}/design`, body);
 export const recordStake = (stakeId: string, body: RecordInput) =>
-  apiPost<StakeRecord, RecordInput>(`${BASE}/stakes/${stakeId}/records`, body);
-export const stakeHistory = (stakeId: string) => apiGet<{ items: StakeRecord[] }>(`${BASE}/stakes/${stakeId}/records`).then((r) => r.items);
+  apiPost<StakeRecord, RecordInput>(`/v1/setting-out/stakes/${stakeId}/records`, body);
+export const stakeHistory = (stakeId: string) => apiGet<{ items: StakeRecord[] }>(`/v1/setting-out/stakes/${stakeId}/records`).then((r) => r.items);
 export const createNcrDraft = (recordId: string, locale: string) =>
   apiPost<{ ncr_id: string; ncr_number: string; record_id: string }>(
-    `${BASE}/records/${recordId}/ncr?locale=${encodeURIComponent(locale)}`,
+    `/v1/setting-out/records/${recordId}/ncr?locale=${encodeURIComponent(locale)}`,
   );
 
 export async function downloadSheet(id: string, code: string): Promise<void> {
   const lang = activeLanguageTag();
   const query = lang ? `?locale=${encodeURIComponent(lang)}` : '';
-  await downloadWithAuth(`${API_BASE}${BASE}/requests/${encodeURIComponent(id)}/sheet.pdf${query}`, `setting-out-${code}.pdf`);
+  await downloadWithAuth(`${API_BASE}/v1/setting-out/requests/${encodeURIComponent(id)}/sheet.pdf${query}`, `setting-out-${code}.pdf`);
 }

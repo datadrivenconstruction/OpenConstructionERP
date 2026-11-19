@@ -205,7 +205,7 @@ export function NewSurfaceDialog({ open, projectId, onClose }: NewSurfaceProps) 
               defaultValue: 'Points with these codes are joined in file order into lines the triangles may not cross: toe, crest, kerb, ditch.',
             })}
           >
-            <input className="oe-input w-full" value={codes} onChange={(e) => setCodes(e.target.value)} placeholder="TOE, CREST" data-testid="surface-breaklines" />
+            <input className="oe-input w-full" value={codes} onChange={(e) => setCodes(e.target.value)} placeholder={t('volumes.surface.breakline_placeholder', { defaultValue: 'TOE, CREST' })} data-testid="surface-breaklines" />
           </Field>
           <Field label={t('volumes.surface.boundary', { defaultValue: 'Outer boundary (optional): E N; E N; ...' })}>
             <textarea className="oe-input w-full font-mono text-xs" rows={2} dir="ltr" value={boundary} onChange={(e) => setBoundary(e.target.value)} />

@@ -68904,6 +68904,7 @@ const resource = {
     "volumes.surface.breakline_tip": "Punkte mit diesen Codes werden in Dateireihenfolge zu Linien verbunden, die kein Dreieck kreuzen darf: Böschungsfuß, Böschungskante, Bordstein, Graben.",
     "volumes.surface.boundary": "Äußere Begrenzung (optional): E N; E N; ...",
     "volumes.surface.boundary_bad": "Drei oder mehr E-N-Paare, durch Semikolon getrennt.",
+    "volumes.surface.breakline_placeholder": "TOE, CREST",
     "volumes.tab.calculations": "Berechnungen",
     "volumes.tab.surfaces": "Flächen",
     "volumes.tab.staged": "Phasen",

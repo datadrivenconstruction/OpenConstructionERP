@@ -17,8 +17,6 @@ import {
   fetchWithAuth,
 } from '@/shared/lib/api';
 
-const BASE = '/v1/surfaces-volumes';
-const CORE = '/v1/survey-core';
 
 export type VolumeMethod = 'grid' | 'tin' | 'end_area';
 export const VOLUME_METHODS: VolumeMethod[] = ['grid', 'tin', 'end_area'];
@@ -195,7 +193,7 @@ export interface SurveyProfile {
 export type SurveyPlan = FeatureCollection & { properties?: { epsg: number | null; local_grid: boolean } };
 
 
-export const listSurfaces = (projectId: string) => apiGet<{ items: Surface[] }>(`${BASE}/projects/${projectId}/surfaces`).then((r) => r.items);
+export const listSurfaces = (projectId: string) => apiGet<{ items: Surface[] }>(`/v1/surfaces-volumes/projects/${projectId}/surfaces`).then((r) => r.items);
 export interface SurfaceFromPointsBody {
   name: string;
   point_set_ids: string[];
@@ -203,45 +201,45 @@ export interface SurfaceFromPointsBody {
   boundary?: [number, number][] | null;
 }
 export const surfaceFromPoints = (projectId: string, body: SurfaceFromPointsBody) =>
-  apiPost<Surface>(`${BASE}/projects/${projectId}/surfaces/from-points`, body);
+  apiPost<Surface>(`/v1/surfaces-volumes/projects/${projectId}/surfaces/from-points`, body);
 export const importLandXml = (projectId: string, body: { text: string; filename: string; name?: string }) =>
-  apiPost<{ surfaces: Surface[]; problems: string[] }>(`${BASE}/projects/${projectId}/surfaces/landxml`, body);
-export const deleteSurface = (id: string) => apiDelete(`${BASE}/surfaces/${id}`);
+  apiPost<{ surfaces: Surface[]; problems: string[] }>(`/v1/surfaces-volumes/projects/${projectId}/surfaces/landxml`, body);
+export const deleteSurface = (id: string) => apiDelete(`/v1/surfaces-volumes/surfaces/${id}`);
 
 export const listVolumes = (projectId: string, locale: string) =>
-  apiGet<{ items: Volume[] }>(`${BASE}/projects/${projectId}/volumes?locale=${encodeURIComponent(locale)}`).then((r) => r.items);
-export const getVolumeSummary = (projectId: string) => apiGet<VolumeSummary>(`${BASE}/projects/${projectId}/summary`);
-export const createVolume = (projectId: string, body: VolumeInput) => apiPost<Volume>(`${BASE}/projects/${projectId}/volumes`, body);
+  apiGet<{ items: Volume[] }>(`/v1/surfaces-volumes/projects/${projectId}/volumes?locale=${encodeURIComponent(locale)}`).then((r) => r.items);
+export const getVolumeSummary = (projectId: string) => apiGet<VolumeSummary>(`/v1/surfaces-volumes/projects/${projectId}/summary`);
+export const createVolume = (projectId: string, body: VolumeInput) => apiPost<Volume>(`/v1/surfaces-volumes/projects/${projectId}/volumes`, body);
 export const updateVolume = (id: string, body: Partial<VolumeInput> & { cell_auto?: boolean }) =>
-  apiPatch<Volume>(`${BASE}/volumes/${id}`, body);
-export const deleteVolume = (id: string) => apiDelete(`${BASE}/volumes/${id}`);
+  apiPatch<Volume>(`/v1/surfaces-volumes/volumes/${id}`, body);
+export const deleteVolume = (id: string) => apiDelete(`/v1/surfaces-volumes/volumes/${id}`);
 export const confirmVolume = (id: string, acknowledge: string[], locale: string) =>
-  apiPost<Volume>(`${BASE}/volumes/${id}/confirm?locale=${encodeURIComponent(locale)}`, { acknowledge });
+  apiPost<Volume>(`/v1/surfaces-volumes/volumes/${id}/confirm?locale=${encodeURIComponent(locale)}`, { acknowledge });
 export const duplicateVolume = (id: string, body: Partial<VolumeInput>) =>
-  apiPost<Volume>(`${BASE}/volumes/${id}/duplicate`, body);
+  apiPost<Volume>(`/v1/surfaces-volumes/volumes/${id}/duplicate`, body);
 export const sendToBoq = (id: string, body: { position_id: string; mode: 'replace' | 'add'; quantity: QuantityKind }, locale: string) =>
-  apiPost<SendResult>(`${BASE}/volumes/${id}/send-to-boq?locale=${encodeURIComponent(locale)}`, body);
+  apiPost<SendResult>(`/v1/surfaces-volumes/volumes/${id}/send-to-boq?locale=${encodeURIComponent(locale)}`, body);
 export const recordProgress = (id: string, body: { position_id?: string; quantity: QuantityKind; period_label?: string }) =>
   apiPost<{ entry_id: string; percent_complete: number; quantity_m3: number; period_label: string }>(
-    `${BASE}/volumes/${id}/record-progress`,
+    `/v1/surfaces-volumes/volumes/${id}/record-progress`,
     body,
   );
-export const volumeHistory = (id: string) => apiGet<{ items: VolumeEvent[] }>(`${BASE}/volumes/${id}/history`).then((r) => r.items);
+export const volumeHistory = (id: string) => apiGet<{ items: VolumeEvent[] }>(`/v1/surfaces-volumes/volumes/${id}/history`).then((r) => r.items);
 export const searchBoqPositions = (projectId: string, q: string) =>
-  apiGet<{ items: BoqPositionHit[] }>(`${BASE}/projects/${projectId}/boq-positions?q=${encodeURIComponent(q)}&unit=m3`).then((r) => r.items);
+  apiGet<{ items: BoqPositionHit[] }>(`/v1/surfaces-volumes/projects/${projectId}/boq-positions?q=${encodeURIComponent(q)}&unit=m3`).then((r) => r.items);
 export const volumeReportUrl = (id: string, locale: string) =>
-  `/api${BASE}/volumes/${id}/report.pdf?locale=${encodeURIComponent(locale)}`;
+  `/api/v1/surfaces-volumes/volumes/${id}/report.pdf?locale=${encodeURIComponent(locale)}`;
 export const getVolumesPlan = (projectId: string, volumeId?: string | null) =>
-  apiGet<SurveyPlan>(`${BASE}/projects/${projectId}/plan${volumeId ? `?volume_id=${volumeId}` : ''}`);
+  apiGet<SurveyPlan>(`/v1/surfaces-volumes/projects/${projectId}/plan${volumeId ? `?volume_id=${volumeId}` : ''}`);
 
-export const getRegisterPlan = (projectId: string) => apiGet<SurveyPlan>(`${CORE}/projects/${projectId}/plan`);
-export const listTraverses = (projectId: string) => apiGet<{ items: Traverse[] }>(`${CORE}/projects/${projectId}/traverses`).then((r) => r.items);
+export const getRegisterPlan = (projectId: string) => apiGet<SurveyPlan>(`/v1/survey-core/projects/${projectId}/plan`);
+export const listTraverses = (projectId: string) => apiGet<{ items: Traverse[] }>(`/v1/survey-core/projects/${projectId}/traverses`).then((r) => r.items);
 export const createTraverse = (projectId: string, body: TraverseInput) =>
-  apiPost<Traverse>(`${CORE}/projects/${projectId}/traverses`, body);
-export const deleteTraverse = (id: string) => apiDelete(`${CORE}/traverses/${id}`);
-export const getDefaultProfile = () => apiGet<SurveyProfile>(`${CORE}/profile`);
+  apiPost<Traverse>(`/v1/survey-core/projects/${projectId}/traverses`, body);
+export const deleteTraverse = (id: string) => apiDelete(`/v1/survey-core/traverses/${id}`);
+export const getDefaultProfile = () => apiGet<SurveyProfile>(`/v1/survey-core/profile`);
 export const putDefaultProfile = (body: Omit<SurveyProfile, 'scope' | 'source'>) =>
-  apiPut<SurveyProfile>(`${CORE}/profile`, body);
+  apiPut<SurveyProfile>(`/v1/survey-core/profile`, body);
 
 /** Bank m3 for display: one decimal, grouped per the reader's locale. */
 export function formatM3(value: number | null | undefined, locale: string): string {
@@ -324,7 +322,7 @@ export async function importPointCloud(
   form.append('cell_size_m', String(opts.cell_size_m));
   form.append('stat', opts.stat);
   form.append('ground_only', String(opts.ground_only));
-  const response = await fetchWithAuth(`${API_BASE}${BASE}/projects/${projectId}/surfaces/point-cloud?locale=${encodeURIComponent(opts.locale)}`, {
+  const response = await fetchWithAuth(`${API_BASE}/v1/surfaces-volumes/projects/${projectId}/surfaces/point-cloud?locale=${encodeURIComponent(opts.locale)}`, {
     method: 'POST',
     body: form,
   });
@@ -337,4 +335,4 @@ export const computeStaged = (
   projectId: string,
   body: { stages: StageInput[]; method?: VolumeMethod; cell_size_m?: number | null; factors?: Record<string, MaterialFactors> },
   locale: string,
-) => apiPost<StagedResult>(`${BASE}/projects/${projectId}/staged-volumes?locale=${encodeURIComponent(locale)}`, body);
+) => apiPost<StagedResult>(`/v1/surfaces-volumes/projects/${projectId}/staged-volumes?locale=${encodeURIComponent(locale)}`, body);
