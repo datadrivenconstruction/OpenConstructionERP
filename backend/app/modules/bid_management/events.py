@@ -14,6 +14,11 @@ line and keeping the bill position it was priced against under
 ``ContractLine.metadata_["boq_position_id"]``, the key the contracts progress
 bridge reads.
 
+The award terms of the package (``tendering.award_terms``) decide the figures:
+the contract type follows the final offer (unit price or lump sum), a lump sum
+is spread over the lines pro rata to the cent, the agreed discount comes off,
+and retention, its cap and the payment discount land on the contract.
+
 Each contract line inherits the cost line of the bill position it was priced
 against, and the position's split when it has one
 (:func:`app.modules.costmodel.inheritance_service.inherit_contract_lines`), so
@@ -108,6 +113,47 @@ async def _inherit_award_cost_lines(session: Any, contract: Any, lines: list[Any
         return
 
 
+async def _award_terms_of(session: Any, package_id: uuid.UUID, bid_id: uuid.UUID) -> tuple[Any, Any]:
+    """The award terms of the package when they name this bid, and the round the award rests on."""
+    from app.modules.tendering.award_terms import AwardTermsService  # noqa: PLC0415
+
+    service = AwardTermsService(session)
+    row = await service.terms_row(package_id)
+    terms = service.terms_in(row) if row is not None and row.bid_id == bid_id else None
+    rounds = await service.rounds(package_id, bid_id)
+    return terms, service.offer_round(rounds, terms.round_id if terms is not None else None)
+
+
+def _contract_terms(terms: Any, figures: Any, offer_round: Any) -> dict[str, Any]:
+    """``Contract.terms`` of an award: the payment terms that have no column, and the award as agreed."""
+    out: dict[str, Any] = {
+        "award_terms": {
+            "contract_type": figures.contract_type,
+            "lines_total": str(figures.lines_total),
+            "offer_total": str(figures.offer_total),
+            "discount_percent": str(terms.discount_percent) if terms is not None else "0",
+            "discount_amount": str(figures.discount_amount),
+            "contract_sum": str(figures.contract_sum),
+            "lump_sum_source": figures.lump_sum_source,
+            "round_no": offer_round.round_no if offer_round is not None else None,
+        }
+    }
+    if terms is None:
+        return out
+    payment: dict[str, Any] = {}
+    if terms.retention_cap_percent is not None:
+        payment["retention_cap_percent"] = str(terms.retention_cap_percent)
+    if terms.payment_discount_percent is not None:
+        payment["payment_discount_percent"] = str(terms.payment_discount_percent)
+    if terms.payment_discount_days is not None:
+        payment["payment_discount_days"] = terms.payment_discount_days
+    if payment:
+        out["payment_terms"] = payment
+    if figures.retention_cap_amount is not None:
+        out["award_terms"]["retention_cap_amount"] = str(figures.retention_cap_amount)
+    return out
+
+
 async def _on_tender_awarded(event: Event) -> None:
     """Schedule the contract draft for a tender award as a detached task.
 
@@ -143,6 +189,7 @@ async def _draft(package_id: uuid.UUID, bid_id: uuid.UUID, *, awarded_by: object
     from app.modules.bid_management.models import BidPackage  # noqa: PLC0415
     from app.modules.boq.models import Position  # noqa: PLC0415
     from app.modules.contracts.models import Contract, ContractLine  # noqa: PLC0415
+    from app.modules.tendering.award_terms import award_figures  # noqa: PLC0415
     from app.modules.tendering.models import TenderBid, TenderPackage  # noqa: PLC0415
 
     async with async_session_factory() as session:
@@ -208,13 +255,16 @@ async def _draft(package_id: uuid.UUID, bid_id: uuid.UUID, *, awarded_by: object
             )
             positions = {p.id: p for p in rows}
 
-        running_total = Decimal("0")
+        # The award terms decide the contract: type (unit price or lump sum, as
+        # the final offer is priced), the sum after discount, a lump sum spread
+        # over the lines pro rata, retention and the payment discount.
+        terms, offer_round = await _award_terms_of(session, package_id, bid_id)
+        figures = award_figures(bid, terms, offer_round)
+
         line_specs: list[dict[str, Any]] = []
         for idx, line in enumerate(raw_lines):
             qty = _to_decimal(line.get("quantity"))
             rate = _to_decimal(line.get("unit_rate"))
-            total = qty * rate
-            running_total += total
             position = positions.get(_parse_uuid(line.get("position_id")) or uuid.UUID(int=0))
             line_specs.append(
                 {
@@ -222,32 +272,32 @@ async def _draft(package_id: uuid.UUID, bid_id: uuid.UUID, *, awarded_by: object
                     "description": str(line.get("description") or (position.description if position else "")),
                     "unit": (str(line.get("unit") or "")[:20]) or None,
                     "quantity": qty,
-                    "unit_rate": rate,
-                    "total_value": total,
+                    "unit_rate": figures.line_rates[idx],
+                    "total_value": figures.line_totals[idx],
+                    "offer_unit_rate": rate,
+                    "offer_total": qty * rate,
                     "order_index": idx,
                     "position_id": position.id if position is not None else None,
                 }
             )
-
-        # The same figure the purchase order for this award takes: the lines
-        # when they are priced, else the bid total (a lump sum above the lines).
-        bid_total = _to_decimal(bid.total_amount)
-        total_value = running_total if running_total > 0 else bid_total
+        total_value = figures.contract_sum
 
         code = await free_contract_code(session, f"CONTRACT-TND-{package_id.hex[:8].upper()}")
         contract = Contract(
             code=code,
             title=(package.name or code)[:500],
-            contract_type="lump_sum",
+            contract_type=figures.contract_type,
             counterparty_type="subcontractor",
             counterparty_id=counterparty.counterparty_id,
             project_id=package.project_id,
             total_value=total_value,
             currency=(bid.currency or "")[:3],
             status="draft",
-            terms={},
+            terms=_contract_terms(terms, figures, offer_round),
             created_by=str(awarded_by)[:36] if awarded_by else None,
         )
+        if terms is not None and terms.retention_percent is not None:
+            contract.retention_percent = terms.retention_percent
         contract.metadata_ = {
             "source": "tendering.package.awarded",
             "tender_package_id": str(package_id),
@@ -277,7 +327,11 @@ async def _draft(package_id: uuid.UUID, bid_id: uuid.UUID, *, awarded_by: object
                 total_value=spec["total_value"],
                 order_index=spec["order_index"],
             )
-            cl.metadata_ = {"tender_bid_line_index": spec["order_index"]}
+            cl.metadata_ = {
+                "tender_bid_line_index": spec["order_index"],
+                "offer_unit_rate": str(spec["offer_unit_rate"]),
+                "offer_total": str(spec["offer_total"]),
+            }
             if spec["position_id"] is not None:
                 # contracts.service.BOQ_POSITION_META_KEY
                 cl.metadata_["boq_position_id"] = str(spec["position_id"])

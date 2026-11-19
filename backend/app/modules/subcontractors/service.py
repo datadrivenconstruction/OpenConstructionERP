@@ -466,6 +466,7 @@ def subcontractor_award_block(
     *,
     certificates: Sequence[Certificate],
     as_at: date,
+    required_types: tuple[str, ...] = REQUIRED_CERT_TYPES_FOR_PAYMENT,
 ) -> PaymentBlockResult:
     """Why, if at all, a subcontractor may not be awarded live work.
 
@@ -518,6 +519,9 @@ def subcontractor_award_block(
             that date. Required and explicit rather than an internal call to the
             clock, because a gate that reads the wall clock cannot be tested at
             its boundary and cannot be replayed.
+        required_types: The certificate types the award needs. A caller that
+            knows the project's national pack passes the pack's list; the
+            default is the module's built-in one.
 
     Returns:
         The verdict. ``reasons`` carries only what actually blocks, so
@@ -537,8 +541,9 @@ def subcontractor_award_block(
     # Award requires exactly what payment requires. One constant, deliberately:
     # a second one holding the same tuple would be a divergence waiting to
     # happen. If the two sets ever genuinely differ, split the constant then.
-    findings = evaluate_required_certificates(certificates, as_at=as_at)
-    findings = _apply_insurance_backstop(findings, subcontractor, certificates, as_at=as_at)
+    findings = evaluate_required_certificates(certificates, as_at=as_at, required_types=required_types)
+    if "insurance" in required_types:
+        findings = _apply_insurance_backstop(findings, subcontractor, certificates, as_at=as_at)
 
     for finding in findings:
         if finding.state == "revoked":

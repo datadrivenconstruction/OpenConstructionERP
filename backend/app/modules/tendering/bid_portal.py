@@ -343,6 +343,26 @@ def parse_unit_price(raw: object) -> Decimal | None:
     return value.copy_abs() if value.is_zero() else value
 
 
+def checked_lump_sum(body: Any, *, required: bool) -> Decimal | None:
+    """The lump sum of a ``lump_sum`` offer, parsed like a unit price; None for a unit-price offer.
+
+    Raises:
+        HTTPException 422: ``lump_sum_required`` when a submitted lump-sum offer names none,
+            ``lump_sum_invalid`` when it is not a non-negative number.
+    """
+    if getattr(body, "pricing_mode", "unit_price") != "lump_sum":
+        return None
+    try:
+        value = parse_unit_price(getattr(body, "lump_sum", None))
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail={"code": "lump_sum_invalid", "reason": str(exc)}
+        ) from exc
+    if value is None and required:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="lump_sum_required")
+    return value
+
+
 def validate_unit_prices(raw_prices: Mapping[str, object], priceable: Mapping[str, Any]) -> dict[str, Decimal]:
     """Check every entered price against the package's lines.
 
@@ -752,6 +772,8 @@ class BidPortalService:
                 unit_prices=prices,
                 notes=str(draft.get("notes") or ""),
                 saved_at=_aware(invitation.draft_saved_at),
+                pricing_mode="lump_sum" if draft.get("pricing_mode") == "lump_sum" else "unit_price",
+                lump_sum=str(draft["lump_sum"]) if draft.get("lump_sum") not in (None, "") else None,
             ),
             submitted_at=_aware(invitation.submitted_at),
             bid_amount=bid_amount,
@@ -835,9 +857,12 @@ class BidPortalService:
         package, project_name, currency, lines, priceable = await self._context(invitation)
         await self._check_writable(invitation, package, currency, body)
         priced = validate_unit_prices(body.unit_prices, priceable)
+        lump_sum = checked_lump_sum(body, required=False)
         invitation.draft = {
             "unit_prices": {pid: format(value, "f") for pid, value in priced.items()},
             "notes": body.notes,
+            "pricing_mode": body.pricing_mode,
+            "lump_sum": format(lump_sum, "f") if lump_sum is not None else None,
         }
         invitation.draft_saved_at = datetime.now(UTC)
         if invitation.opened_at is None:
@@ -963,11 +988,15 @@ class BidPortalService:
         package, project_name, currency, lines, priceable = await self._context(invitation)
         is_sealed = await self._check_writable(invitation, package, currency, body)
         priced = validate_unit_prices(body.unit_prices, priceable)
-        if not priced:
+        lump_sum = checked_lump_sum(body, required=True)
+        if not priced and lump_sum is None:
             raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="nothing_priced")
 
         now = datetime.now(UTC)
         line_items, amount, unpriced = price_lines(priceable, priced)
+        lines_amount = amount
+        if lump_sum is not None:
+            amount = format(lump_sum.quantize(Decimal("0.01")), "f")
         # The bid is in the tender's currency, never in one the bidder names:
         # with none known on the GC side it stays "" (unknown), which every
         # currency check here reads as "cannot prove a mismatch".
@@ -984,6 +1013,8 @@ class BidPortalService:
             "bidder_note": body.notes,
             "late": due is not None and now > due,
             "boq_revision_no": current_boq_revision(package.metadata_),
+            "pricing_mode": body.pricing_mode,
+            "lines_amount": lines_amount,
         }
 
         existing = await self._existing_bid(invitation, package.id)
@@ -998,6 +1029,7 @@ class BidPortalService:
                     "currency": existing.currency,
                     "submitted_at": existing.submitted_at,
                     "line_items": existing.line_items or [],
+                    "pricing_mode": old_meta.get("pricing_mode"),
                     "replaced_at": _utc_stamp(now),
                 }
             )
@@ -1034,6 +1066,8 @@ class BidPortalService:
             "unit_prices": {pid: format(value, "f") for pid, value in priced.items()},
             "notes": body.notes,
             "submitted_amount": amount,
+            "pricing_mode": body.pricing_mode,
+            "lump_sum": amount if lump_sum is not None else None,
         }
         invitation.draft_saved_at = now
         invitation.submitted_at = now

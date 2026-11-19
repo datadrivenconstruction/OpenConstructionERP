@@ -30,7 +30,12 @@ export interface BidPortalDraft {
   unit_prices: Record<string, string>;
   notes: string;
   saved_at: string | null;
+  /** unit_price: the bid is the priced lines; lump_sum: one figure for the package. */
+  pricing_mode?: BidPricingMode;
+  lump_sum?: string | null;
 }
+
+export type BidPricingMode = 'unit_price' | 'lump_sum';
 
 export type BidPortalState = 'open' | 'submitted' | 'closed';
 
@@ -62,6 +67,8 @@ export interface BidPortalPricesBody {
   unit_prices: Record<string, string>;
   notes: string;
   currency: string;
+  pricing_mode: BidPricingMode;
+  lump_sum: string | null;
 }
 
 /** What went wrong, as a code the page turns into a sentence. */
@@ -74,6 +81,8 @@ export type BidPortalErrorCode =
   | 'invalid_prices'
   | 'currency_mismatch'
   | 'nothing_priced'
+  | 'lump_sum_required'
+  | 'lump_sum_invalid'
   | 'rate_limited'
   | 'unknown';
 
@@ -96,6 +105,8 @@ const DETAIL_CODES: Record<string, BidPortalErrorCode> = {
   tender_closed: 'closed',
   sealed_deadline_passed: 'closed',
   nothing_priced: 'nothing_priced',
+  lump_sum_required: 'lump_sum_required',
+  lump_sum_invalid: 'lump_sum_invalid',
   rate_limited: 'rate_limited',
   invalid_unit_prices: 'invalid_prices',
   currency_mismatch: 'currency_mismatch',

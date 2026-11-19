@@ -14,6 +14,7 @@ can be checked as a whole, after a deadline move or a direct database change.
 
 from __future__ import annotations
 
+from decimal import Decimal, InvalidOperation
 from typing import Any
 
 from app.core.validation.engine import (
@@ -171,6 +172,7 @@ def register_tendering_validation_rules() -> None:
     register_tendering_addenda_rules()
     register_tendering_parties_rules()
     register_tendering_contents_rules()
+    register_award_rules()
 
 
 # ── Addenda, revisions, questions and bid bonds ─────────────────────────────
@@ -452,3 +454,189 @@ def register_tendering_contents_rules() -> None:
     """Register the package-contents rules with the platform rule registry."""
     for rule in (PackageHasLines(), BudgetOverrideNearComputed(), ScopeLeavesCostOnLine(), ScopeCanSplitLine()):
         rule_registry.register(rule, [CONTENTS_RULE_SET])
+
+
+# ── Award: terms, final offer, contract draft, bidder gate ──────────────────
+# Reads the payload built by ``award_terms.AwardTermsService._payload``:
+# ``{"rounds_count", "final_round_no", "final_round_approved", "used_round_no",
+#    "revisions_count", "offer_total", "discount_percent", "expected_contract_sum",
+#    "contract_sum", "contract_type", "line_totals", "gate": {"findings"},
+#    "contract": {"total_value", "contract_type", "line_count", "lines_total"} | None}``.
+
+AWARD_RULE_SET = "award"
+
+
+def _dec(value: Any) -> Decimal:
+    try:
+        return Decimal(str(value))
+    except (InvalidOperation, ValueError, TypeError):
+        return Decimal("0")
+
+
+def _findings(context: ValidationContext, rule_id: str) -> list[dict[str, Any]]:
+    gate = _data(context).get("gate") or {}
+    raw = gate.get("findings") if isinstance(gate, dict) else None
+    return [f for f in raw or [] if isinstance(f, dict) and f.get("rule_id") == rule_id]
+
+
+class _GateRule(_SealedRule):
+    category = RuleCategory.COMPLIANCE
+    fail_message = ""
+    suggestion_text = "Open the firm in the subcontractor directory and clear the block or file the certificate"
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        gate = _data(context).get("gate") or {}
+        ref = f"subcontractor:{gate.get('subcontractor_id') or ''}"
+        return [
+            self._result(
+                False,
+                ref,
+                self.fail_message.format(document=f.get("document_type") or f.get("code") or ""),
+                self.suggestion_text,
+            )
+            for f in _findings(context, self.rule_id)
+        ]
+
+
+class AwardBidderBlocked(_GateRule):
+    rule_id = "award.bidder_blocked"
+    name = "Bidder is not blocked"
+    description = "A firm the subcontractor directory blocks, or whose prequalification is rejected or suspended."
+    fail_message = "This firm is blocked and cannot be invited or awarded"
+
+
+class AwardEvidenceExpired(_GateRule):
+    rule_id = "award.evidence_expired"
+    name = "Required certificate is valid"
+    description = "A certificate the project's pack requires has expired or was revoked."
+    fail_message = "A required certificate has expired: {document}"
+
+
+class AwardEvidenceMissing(_GateRule):
+    rule_id = "award.evidence_missing"
+    name = "Required certificate is on file"
+    description = "A certificate the project's pack requires is not on file; payment will be held."
+    severity = Severity.WARNING
+    fail_message = "A required certificate is not on file, payment will be held: {document}"
+
+
+class AwardContractSumMismatch(_SealedRule):
+    rule_id = "award.contract_sum_mismatch"
+    name = "Contract sum is the final offer minus discount"
+    description = "The contract sum equals the final offer (lines sum, or lump sum) less the agreed discount."
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        data = _data(context)
+        expected = _dec(data.get("expected_contract_sum"))
+        contract = data.get("contract")
+        actual = _dec(contract.get("total_value")) if isinstance(contract, dict) else _dec(data.get("contract_sum"))
+        return [
+            self._result(
+                actual == expected,
+                f"contract:{contract.get('id')}" if isinstance(contract, dict) else "award",
+                f"Contract sum {actual} differs from final offer minus discount {expected}",
+                "Correct the contract value or the award terms so both name the same figure",
+            )
+        ]
+
+
+class AwardLumpSumLinesReconcile(_SealedRule):
+    rule_id = "award.lump_sum_lines_reconcile"
+    name = "Lump-sum contract lines add up"
+    description = "The lines of a lump-sum contract add up to the agreed lump sum."
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        data = _data(context)
+        contract = data.get("contract")
+        if isinstance(contract, dict):
+            if contract.get("contract_type") != "lump_sum" or not contract.get("line_count"):
+                return []
+            total, lines = _dec(contract.get("total_value")), _dec(contract.get("lines_total"))
+            ref = f"contract:{contract.get('id')}"
+        else:
+            raw = data.get("line_totals") or []
+            if data.get("contract_type") != "lump_sum" or not raw:
+                return []
+            total, lines = _dec(data.get("contract_sum")), sum((_dec(v) for v in raw), Decimal("0"))
+            ref = "award"
+        return [
+            self._result(
+                lines == total,
+                ref,
+                f"Contract lines add up to {lines}, not to the agreed lump sum {total}",
+                "Spread the lump sum over the lines again",
+            )
+        ]
+
+
+class AwardNoFinalRevision(_SealedRule):
+    rule_id = "award.no_final_revision"
+    name = "A bid revision is marked final"
+    description = "The bid was revised but no revision is marked final; the latest one is used."
+    severity = Severity.WARNING
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        data = _data(context)
+        if int(data.get("rounds_count") or 0) > 0 or int(data.get("revisions_count") or 0) == 0:
+            return []
+        return [
+            self._result(
+                False,
+                f"bid:{data.get('bid_id', '')}",
+                "No bid revision is marked final; the latest one is used",
+                "Record the agreed offer as a negotiation round and mark it final",
+            )
+        ]
+
+
+class AwardFinalOfferRequired(_SealedRule):
+    rule_id = "award.final_offer_required"
+    name = "Negotiated bid has a final offer"
+    description = "A bid with negotiation rounds is awarded on the round marked final."
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        data = _data(context)
+        if int(data.get("rounds_count") or 0) == 0:
+            return []
+        return [
+            self._result(
+                data.get("final_round_no") is not None,
+                f"bid:{data.get('bid_id', '')}",
+                "The bid has negotiation rounds but none is marked as the final offer",
+                "Mark the round the firm agreed to as final",
+            )
+        ]
+
+
+class AwardFinalOfferApproved(_SealedRule):
+    rule_id = "award.final_offer_not_approved"
+    name = "Final offer is approved"
+    description = "The final offer of a negotiated bid is approved before the award."
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        data = _data(context)
+        if data.get("final_round_no") is None:
+            return []
+        return [
+            self._result(
+                bool(data.get("final_round_approved")),
+                f"bid:{data.get('bid_id', '')}",
+                "The final offer is not approved yet",
+                "Approve the final offer; the approval asks the commitment release matrix",
+            )
+        ]
+
+
+def register_award_rules() -> None:
+    """Register the award rules with the platform rule registry."""
+    for rule in (
+        AwardBidderBlocked(),
+        AwardEvidenceExpired(),
+        AwardEvidenceMissing(),
+        AwardContractSumMismatch(),
+        AwardLumpSumLinesReconcile(),
+        AwardNoFinalRevision(),
+        AwardFinalOfferRequired(),
+        AwardFinalOfferApproved(),
+    ):
+        rule_registry.register(rule, [AWARD_RULE_SET])
