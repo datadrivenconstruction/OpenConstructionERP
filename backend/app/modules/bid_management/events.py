@@ -119,7 +119,12 @@ async def _hand_terms_to_subcontract(session: Any, contract: Any) -> None:
         from app.modules.subcontractors.terms_service import set_subcontract_terms  # noqa: PLC0415
     except ImportError:
         return
-    await set_subcontract_terms(session, contract_id=contract.id, terms=dict(contract.terms or {}), source="award")
+    payment = dict((contract.terms or {}).get("payment_terms") or {})
+    if not payment:
+        return
+    # The award fixed these figures, so a discount named here is agreed.
+    payment["payment_discount_agreed"] = payment.get("payment_discount_percent") is not None
+    await set_subcontract_terms(session, contract_id=contract.id, terms=payment, source="award")
 
 
 async def _award_terms_of(session: Any, package_id: uuid.UUID, bid_id: uuid.UUID) -> tuple[Any, Any]:
