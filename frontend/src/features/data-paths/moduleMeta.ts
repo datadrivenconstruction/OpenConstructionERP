@@ -11,6 +11,18 @@ import { ROUTE_BACKEND_MODULE } from '@/app/layout/Sidebar';
 import { navGroups } from '@/app/layout/navCatalog';
 import { sectionTone } from '@/app/layout/menuIcons';
 
+// Core modules are always installed, so the sidebar's optional-module map leaves
+// them out; their pages still own data paths.
+const CORE_ROUTE_MODULE: Record<string, string> = {
+  '/boq': 'oe_boq',
+  '/costs': 'oe_costs',
+  '/assemblies': 'oe_assemblies',
+};
+
+function routeOwners(): [string, string | readonly string[]][] {
+  return [...Object.entries(CORE_ROUTE_MODULE), ...Object.entries(ROUTE_BACKEND_MODULE)];
+}
+
 export interface ModuleMeta {
   module: string;
   route: string | null;
@@ -106,7 +118,7 @@ function routeIndex(): Map<string, RouteFacts> {
     }
   }
   const out = new Map<string, RouteFacts>();
-  for (const [route, owner] of Object.entries(ROUTE_BACKEND_MODULE)) {
+  for (const [route, owner] of routeOwners()) {
     const modules = typeof owner === 'string' ? [owner] : owner;
     const facts = navByRoute.get(route);
     for (const module of modules) {
@@ -118,7 +130,7 @@ function routeIndex(): Map<string, RouteFacts> {
     }
   }
   // Prefer a route that has a menu row over one that does not.
-  for (const [route, owner] of Object.entries(ROUTE_BACKEND_MODULE)) {
+  for (const [route, owner] of routeOwners()) {
     const facts = navByRoute.get(route);
     if (!facts) continue;
     for (const module of typeof owner === 'string' ? [owner] : owner) {
@@ -156,7 +168,7 @@ export function moduleMeta(module: string): ModuleMeta {
 /** Module owning a front-end path: the longest route prefix in the sidebar map, segment-aligned. */
 export function moduleForPath(pathname: string): string | null {
   let best: { route: string; module: string } | null = null;
-  for (const [route, owner] of Object.entries(ROUTE_BACKEND_MODULE)) {
+  for (const [route, owner] of routeOwners()) {
     if (route === '/') continue;
     if (pathname === route || pathname.startsWith(`${route}/`)) {
       if (!best || route.length > best.route.length) {
