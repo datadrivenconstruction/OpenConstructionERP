@@ -483,11 +483,15 @@ def _blank(match: re.Match[str]) -> str:
 def html_strings(text: str) -> list[tuple[int, str, str]]:
     """The values an HTML document puts in front of a reader or a crawler.
 
-    Comments are dropped before anything is read, and dropped rather than scanned.
-    A comment is not rendered, and the one in frontend/index.html is the attribution
-    notice AGPL-3.0 section 5 asks a modified version to keep: reading it as copy
-    would either flag a notice the licence requires, or need an allowlist entry wide
-    enough to hide a real claim smuggled into a comment later.
+    Comments are read, then dropped. They used to be dropped unread, on the reasoning
+    that a comment is not rendered - which was true of the reader and false of the
+    guard, and left the whole class unpoliced: the note in frontend/index.html naming
+    a deployment script that injects analytics into the shipped page was never judged
+    by anything, and neither would the next one be. A comment is copy somebody wrote
+    into a page this product serves, so it is scanned under the key ``comment``, and
+    the attribution notice that used to live in one now lives in the two ``meta``
+    elements ``scripts/check_built_html_comments.py`` requires, allowlisted by their
+    own keys rather than by a substring wide enough to hide a claim beside them.
 
     Keys are the document's own - ``title``, ``meta:og:title``, ``uPrivacy`` - not
     line numbers, for the reason the locale scan prefers an i18n key: an entry keyed
@@ -496,6 +500,15 @@ def html_strings(text: str) -> list[tuple[int, str, str]]:
     single keyed entry covers and 29 line entries would not.
     """
     out: list[tuple[int, str, str]] = []
+
+    # Read before blanking, so the text a page carries is judged whatever element of
+    # it carries it. The delimiters are cut rather than matched around: a comment is
+    # its body, and a body that is only whitespace has nothing to say.
+    for m in HTML_COMMENT.finditer(text):
+        body = " ".join(m.group(0)[4:-3].split())
+        if body:
+            out.append((_line_of(text, m.start()), "comment", body))
+
     work = HTML_COMMENT.sub(_blank, text)
 
     for m in HTML_TITLE.finditer(work):

@@ -54,6 +54,14 @@ const FORBIDDEN = [
   'free',
 ];
 
+/**
+ * The two meta elements that carry the licence and the attribution.
+ *
+ * Named here rather than in the two cases that treat them differently, so the
+ * exemption in one and the assertion in the other cannot drift apart.
+ */
+const LEGAL_FLOOR_META = new Set(['license', 'source']);
+
 /** "#1" as a rank claim. A hex colour continues with a hex digit; the claim does not. */
 const HEX_TAIL = /#1[0-9a-fA-F]/g;
 
@@ -119,9 +127,10 @@ describe('the browser chrome in frontend/index.html', () => {
   it('carries no claim about origins, licence or price in any meta value', () => {
     const metas = metaValues(HTML);
     // The head carries the viewport, the description, the keywords, the robots
-    // directive, five og:* values, three twitter:* values, the application name and
-    // the theme colour. Fewer than ten means the extractor stopped matching, and an
-    // empty set would pass every assertion below without judging anything.
+    // directive, five og:* values, three twitter:* values, the application name, the
+    // theme colour and the two licence elements the case below judges on its own
+    // terms. Fewer than ten means the extractor stopped matching, and an empty set
+    // would pass every assertion below without judging anything.
     expect(metas.length).toBeGreaterThanOrEqual(10);
 
     const named = metas.map((m) => `${m.key}=${m.value.slice(0, 60)}`);
@@ -130,6 +139,11 @@ describe('the browser chrome in frontend/index.html', () => {
     expect(named.some((n) => n.startsWith('description='))).toBe(true);
 
     for (const meta of metas) {
+      // name="license" and name="source" carry the licence identifier and the upstream
+      // attribution, which is the one thing on this page allowed to name an origin.
+      // They are asserted in the case below rather than skipped: exempting them here
+      // and saying nothing there would leave the notice unjudged entirely.
+      if (LEGAL_FLOOR_META.has(meta.key)) continue;
       expect(offenders(meta.value), `meta ${meta.key}: ${meta.value}`).toEqual([]);
     }
   });
@@ -155,17 +169,54 @@ describe('the browser chrome in frontend/index.html', () => {
     expect(ld.softwareVersion).toMatch(/^\d+\.\d+\.\d+$/);
   });
 
-  it('keeps the attribution the licence requires, out of sight of the reader', () => {
+  it('carries no comment, and nothing that names a deployment', () => {
+    // What an owner read in View Source on the sign-in page of a fresh install: a note
+    // to a developer, naming a script outside this repository that injects analytics
+    // into the page after it ships. scripts/check_built_html_comments.py refuses any
+    // comment in the pages a build produces, and runs against frontend/dist in CI;
+    // this is the half that reads the source, and it can also say what the note was
+    // about rather than only that a comment existed.
+    expect(HTML).not.toContain('<!--');
+    // The same defect with the rest of the page swallowed into it.
+    expect(HTML).not.toContain('-->');
+
+    const lower = HTML.toLowerCase();
+    for (const needle of [
+      'analytics',
+      'gtag',
+      'googletagmanager',
+      'gtm-',
+      'matomo',
+      'plausible',
+      'deployment script',
+    ]) {
+      expect(lower.includes(needle), `${needle} is named in the page`).toBe(false);
+    }
+  });
+
+  it('keeps the attribution the licence requires, as data a reader is not shown', () => {
     // AGPL-3.0 section 5 asks a modified version to keep the attribution notices
-    // intact. In this file that notice is an HTML comment: preserved, and not rendered.
-    // Asserting both halves is the point - a cleanup that deleted the notice to make
-    // the page cleaner would break the licence, and one that moved it into a meta tag
-    // would put it back in front of the reader this suite exists to protect.
-    expect(HTML).toMatch(/<!--[^>]*OpenConstructionERP[\s\S]*?-->/);
-    expect(offenders(HTML.replace(/<!--[\s\S]*?-->/g, ' ')).filter((w) => w !== 'free')).toEqual(
-      // Nothing outside a comment carries an upstream name or an origin claim.
-      [],
+    // intact. This file carried that notice as an HTML comment, and the served pages
+    // are now gated on carrying no comment at all, so the notice is stated as document
+    // data instead: a link to the licence text served with the product, the licence
+    // identifier, and the upstream project it is based on. A <meta> element is not
+    // rendered, so the reader this suite exists to protect still sees none of it - and
+    // a cleanup that deletes the comments cannot take the notice with it, which is the
+    // failure mode a check that only counted comments would have walked into.
+    const metas = new Map(metaValues(HTML).map((m) => [m.key, m.value]));
+    expect(metas.get('license')).toBe('AGPL-3.0-or-later');
+    expect(metas.get('source') ?? '').toMatch(/OpenConstructionERP/);
+    expect(metas.get('source') ?? '').toMatch(/DataDrivenConstruction/);
+    expect(HTML).toMatch(/<link[^>]*rel="license"[^>]*href="\/legal\/LICENSE\.txt"/);
+
+    // And that is the only place on the page an upstream name appears. Take the three
+    // elements out and nothing left carries one, which is what the case this replaced
+    // asked of everything outside a comment.
+    const without = HTML.replace(/<meta\b[^>]*name="(?:license|source)"[^>]*>/gi, ' ').replace(
+      /<link\b[^>]*rel="license"[^>]*>/gi,
+      ' ',
     );
+    expect(offenders(without).filter((w) => w !== 'free')).toEqual([]);
   });
 });
 

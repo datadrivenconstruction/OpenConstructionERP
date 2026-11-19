@@ -147,3 +147,26 @@ End-to-end browser tests run on Playwright. Install the browsers once with `npm 
 - There is no automatic formatter. Match the style of the file you are editing.
 - Lint with ESLint: `npm run lint`.
 - Components are functional and use named exports. Global client state goes in a Zustand store under `src/stores`; server state goes through React Query.
+
+## index.html: what the shipped page carries
+
+The page has no comment in it. `scripts/check_built_html_comments.py` refuses a
+built page that carries one, in CI against `frontend/dist`, so anything a developer
+needs to know about this file lives here instead of in the file:
+
+- **Licence and attribution.** Three head elements state it as document data rather
+  than as copy: `<link rel="license" href="/legal/LICENSE.txt">`,
+  `<meta name="license" content="AGPL-3.0-or-later">` and `<meta name="source">`,
+  which names the upstream project and points at the LICENSE and NOTICE files served
+  with this product. Both metas are allowlisted in
+  `scripts/promotional_allowlist.json` by their own key, because they are the legal
+  floor and not marketing.
+- **Fonts.** Served from our own origin, with no preconnect and no third party.
+  Provenance, licences and the reason the cyrillic-ext face is declared over one
+  codepoint are in `public/assets/vendor/fonts/README.txt`.
+- **The appearance boot script.** `#oe-appearance-boot` puts the saved style (accent,
+  font, density, radius), the menu look and the dark class on `<html>` before first
+  paint, so a reload never flashes the default look. It mirrors
+  `src/shared/lib/appearance.ts`, and `src/shared/lib/__tests__/appearanceBoot.test.ts`
+  runs the real script out of this file and checks the two agree - which is why the
+  script keeps its `id` and stays above `/src/main.tsx`.

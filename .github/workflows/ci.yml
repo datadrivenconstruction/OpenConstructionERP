@@ -541,6 +541,41 @@ jobs:
           NODE_OPTIONS: --max-old-space-size=12288
         run: npm run build
 
+      - name: Set up Python 3.12
+        # For the two steps below and nothing else in this job. The check reads the
+        # pages the build just produced, so it runs here rather than in a lane that
+        # has no build to read; a runner's preinstalled Python would work too, and
+        # naming a version is the difference between that being true and being
+        # assumed.
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: Prove the built-HTML comment gate can fail
+        if: ${{ !cancelled() }}
+        # A gate only ever seen passing is indistinguishable from one that cannot
+        # fail. This plants a comment, an unterminated comment and a hollowed-out
+        # licence notice in throwaway copies of the real shell and requires a refusal
+        # for each, plus one for a population with no page in it, which is the way a
+        # check like this most often goes quiet.
+        run: python ../scripts/check_built_html_comments.py --selftest
+
+      - name: Check the built HTML carries no comment and still carries the licence notice
+        if: ${{ !cancelled() && matrix.os != 'macos-latest' }}
+        # --dist-only: judge the artifact a browser actually receives, and refuse to
+        # fall back to the source documents when there is no build. Reading the source
+        # here would pass on a checkout that never built anything. macOS is skipped
+        # for the reason the two steps above it are: this job builds nothing there.
+        #
+        # What it refuses, and why a source-only check could not: an owner installing
+        # this product read View Source on the sign-in page and found a note to a
+        # developer naming a deployment script that injects analytics into the page
+        # after it ships. The second half of the name is the other direction - the
+        # comment that carried the attribution AGPL-3.0 section 5 requires was removed
+        # with the rest, so the notice moved into the head as data and this step fails
+        # if a build ever loses it.
+        run: python ../scripts/check_built_html_comments.py --dist-only
+
       - name: Upload the built bundle
         # The bundle this job has just built, kept for a week so a smoke run or
         # a wheel size check can take it instead of building again on a machine

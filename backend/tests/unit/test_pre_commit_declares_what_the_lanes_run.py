@@ -64,6 +64,13 @@ CI_ONLY_BY_DESIGN = {
         "Self-test rather than a gate on the tree. Step: 'Check the accessibility "
         "ratchet can still see its own defects'."
     ),
+    "check_built_html_comments.py": (
+        "Reads the pages the frontend build produces, and in CI is pointed at frontend/dist "
+        "with --dist-only so it cannot fall back to the sources. Step: 'Check the built HTML "
+        "carries no comment and still carries the licence notice', with 'Prove the built-HTML "
+        "comment gate can fail' beside it. At pre-commit time no bundle has been built, and a "
+        "check that quietly judged the sources instead would pass on the artifact nobody ships."
+    ),
     "check_docker_force_include_context.py": ("Self-test. Step: 'Prove the Docker force-include gate can fail'."),
     "check_prompt_provenance.py": ("Self-test. Step: 'Prove the prompt provenance guard can fail'."),
     "check_wheel_ships_every_pack.py": (

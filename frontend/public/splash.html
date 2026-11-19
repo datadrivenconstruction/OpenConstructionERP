@@ -305,15 +305,8 @@
     <p class="logpath" id="logpath"></p>
     <button class="copybtn" id="copybtn" type="button" data-i18n="copy">Copy details</button>
 
-    <!-- The way out of a configured server that cannot be reached. Hidden
-         unless the launcher calls offerLocalFallback(), because on every other
-         failure there is nothing here to fall back FROM: the local server is
-         already what was being started. Without this button the only way back
-         from a wrong server address is to find and edit a file, which is not
-         something we can ask of the people this fails for. -->
     <button class="copybtn" id="uselocalbtn" type="button" style="display:none" data-i18n="useLocal">Use a server on this computer</button>
 
-    <!-- One-time launch choice: app window (default) or normal web browser. -->
     <section class="choice" id="choice" aria-live="polite">
       <h2 data-i18n="cTitle">How would you like to open Construction AI OS?</h2>
       <p data-i18n="cBody">You can use it as its own app window, or open it in the web browser you already use. You can switch any time later.</p>

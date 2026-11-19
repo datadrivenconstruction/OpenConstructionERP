@@ -120,6 +120,22 @@ OCE_BG_CONFIG.barInterval = 800;   // ms between bar jitters
 - CSS `mask-image` for gradient fade (WebKit prefix included)
 - CSS `perspective` + `rotateX` for 3D tilt
 
+## Splash screen
+
+`splash.html` is the page the desktop launcher shows while the backend starts. It
+carries no comment, because the built HTML this product serves is gated on having
+none (`scripts/check_built_html_comments.py`), and the two notes it used to carry
+are the reason this section exists:
+
+- **The local-fallback button.** `#uselocalbtn` is the way out of a configured
+  server that cannot be reached. It stays hidden unless the launcher calls
+  `offerLocalFallback()`, because on every other failure there is nothing here to
+  fall back FROM: the local server is already what was being started. Without this
+  button the only way back from a wrong server address is to find and edit a file,
+  which is not something we can ask of the people this fails for.
+- **The one-time launch choice.** `#choice` asks once whether to open the product in
+  its own app window (the default) or in the web browser the reader already uses.
+
 ## License
 
 MIT — Use freely in any project.
