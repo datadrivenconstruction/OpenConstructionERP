@@ -38,6 +38,9 @@ import {
   updateEntry,
   type MineEntry,
 } from './mineApi';
+import { ViewOnlyNote, useSurveyAccess } from './useSurveyAccess';
+import { MineBlastCard } from './MineBlastCard';
+import { MineEntryDepth } from './MineEntryDepth';
 
 function AdvanceCell({ entry, lang, onSave }: { entry: MineEntry; lang: string; onSave: (v: number | null) => void }) {
   const { t } = useTranslation();
@@ -69,6 +72,7 @@ function AdvanceCell({ entry, lang, onSave }: { entry: MineEntry; lang: string; 
 
 export default function MinePage() {
   const { t, i18n } = useTranslation();
+  const { canWrite } = useSurveyAccess();
   const lang = i18n.language;
   const qc = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
@@ -158,7 +162,7 @@ export default function MinePage() {
           ))}
         </select>
       )}
-      <Button variant="primary" icon={<Plus size={16} />} onClick={() => setNewOpen(true)} data-testid="mine-new-period">
+      <Button variant="primary" icon={<Plus size={16} />} onClick={() => setNewOpen(true)} data-testid="mine-new-period" disabled={!canWrite}>
         {t('mine.action.new_period', { defaultValue: 'New period' })}
       </Button>
       <Button variant="secondary" icon={<Layers size={16} />} disabled={!d} onClick={() => setUnitOpen(true)} data-testid="mine-add-unit">
@@ -181,6 +185,7 @@ export default function MinePage() {
     <div className="space-y-4">
       <Breadcrumb items={[{ label: t('sidebar.group.survey', { defaultValue: 'Survey & Land' }) }, { label: title }]} />
       <PageHeader srTitle={title} subtitle={chip ? <bdi dir="ltr" className="text-xs">{chip}</bdi> : undefined} actions={actions} />
+      <ViewOnlyNote />
       <DismissibleInfo storageKey="mine.info" title={t('survey.register.info_title', { defaultValue: 'What is this' })}>
         {t('mine.info', {
           defaultValue:
@@ -328,6 +333,7 @@ export default function MinePage() {
                               ))}
                             </ul>
                           )}
+                          <MineEntryDepth entry={e} canWrite={canWrite} />
                           {isAdvanced && e.underground && <AdvanceCell entry={e} lang={lang} onSave={(v) => advance.mutate({ e, v })} />}
                         </td>
                       </tr>
@@ -339,6 +345,8 @@ export default function MinePage() {
           </table>
         </Card>
       )}
+
+      <MineBlastCard projectId={projectId} canWrite={canWrite} />
 
       <NewPeriodDialog open={newOpen} projectId={projectId} onClose={() => setNewOpen(false)} onCreated={(p) => setPeriodId(p.id)} />
       <AddUnitDialog open={unitOpen} period={d ?? null} onClose={() => setUnitOpen(false)} />

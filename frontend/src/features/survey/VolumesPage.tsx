@@ -55,6 +55,7 @@ import {
   type Volume,
 } from './volumesApi';
 import { fmtFixed } from '@/shared/lib/formatters';
+import { ViewOnlyNote, useSurveyAccess } from './useSurveyAccess';
 
 type Tab = 'calculations' | 'surfaces' | 'plan';
 
@@ -67,6 +68,7 @@ function StatusBadge({ status }: { status: Volume['status'] }) {
 
 export default function VolumesPage() {
   const { t, i18n } = useTranslation();
+  const { canWrite } = useSurveyAccess();
   const lang = i18n.language;
   const qc = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
@@ -176,12 +178,12 @@ export default function VolumesPage() {
         variant="primary"
         icon={<Plus size={16} />}
         onClick={() => setVolumeOpen(true)}
-        disabled={(surfaces.data ?? []).length < 2}
+        disabled={!canWrite || (surfaces.data ?? []).length < 2}
         data-testid="volumes-new"
       >
         {t('volumes.action.new_volume', { defaultValue: 'New volume' })}
       </Button>
-      <Button variant="secondary" icon={<Layers size={16} />} onClick={() => setSurfaceOpen(true)} data-testid="volumes-new-surface">
+      <Button variant="secondary" icon={<Layers size={16} />} onClick={() => setSurfaceOpen(true)} data-testid="volumes-new-surface" disabled={!canWrite}>
         {t('volumes.action.new_surface', { defaultValue: 'New surface' })}
       </Button>
       <ModuleGuideButton content={volumesGuide} />
@@ -197,6 +199,7 @@ export default function VolumesPage() {
     <div className="space-y-4">
       <Breadcrumb items={[{ label: t('sidebar.group.survey', { defaultValue: 'Survey & Land' }) }, { label: title }]} />
       <PageHeader srTitle={title} subtitle={chip ? <bdi dir="ltr" className="text-xs">{chip}</bdi> : undefined} actions={actions} />
+      <ViewOnlyNote />
       <DismissibleInfo storageKey="volumes.info" title={t('survey.register.info_title', { defaultValue: 'What is this' })}>
         {t('volumes.info', {
           defaultValue:

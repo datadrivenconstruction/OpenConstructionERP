@@ -2514,6 +2514,21 @@
     "truck_differs": {
       "fail": "Veokite loenduse tonnid erinevad mõõdistuse tonnidest {v} %, mis ületab kontrollpiiri {t} %.",
       "suggestion": "Kontrollige koormat ühe sõidu kohta ja tihedust ning võrrelge kaht pinda uuesti."
+    },
+    "material_unassigned": {
+      "fail": "Materjali polügoonid katavad ainult {p} % üksusest; ülejäänul pole tihedust ega tonne."
+    },
+    "overbreak": {
+      "fail": "Käigu üleväljamine {o} % ({n} profiili alla projekti) ületab {t} % kontrollpiiri."
+    },
+    "profile_outside": {
+      "fail": "Profiil piketil {c} m asub käigu projekteeritud piketaažist väljas."
+    },
+    "hole_collar": {
+      "fail": "Puurauk {id}: suue on projektist {v} m kaugusel, üle {t} m tolerantsi."
+    },
+    "hole_depth": {
+      "fail": "Puurauk {id}: sügavus erineb projektist {v} m, üle {t} m tolerantsi."
     }
   },
   "hongkong": {

@@ -2514,6 +2514,21 @@
     "truck_differs": {
       "fail": "Tonele din numărarea camioanelor diferă cu {v} % de tonele măsurate, peste verificarea de {t} %.",
       "suggestion": "Verificați încărcătura pe cursă și densitatea, apoi comparați din nou cele două suprafețe."
+    },
+    "material_unassigned": {
+      "fail": "Poligoanele de material acoperă doar {p} % din unitate; restul nu are densitate și nici tone."
+    },
+    "overbreak": {
+      "fail": "Supraexcavarea galeriei de {o} % ({n} profile sub proiect) depășește verificarea de {t} %."
+    },
+    "profile_outside": {
+      "fail": "Profilul la poziția kilometrică {c} m este în afara kilometrajului de proiect al galeriei."
+    },
+    "hole_collar": {
+      "fail": "Gaura {id}: gura este la {v} m de proiect, peste toleranța de {t} m."
+    },
+    "hole_depth": {
+      "fail": "Gaura {id}: adâncimea diferă cu {v} m de proiect, peste toleranța de {t} m."
     }
   },
   "hongkong": {

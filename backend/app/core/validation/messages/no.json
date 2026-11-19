@@ -2514,6 +2514,21 @@
     "truck_differs": {
       "fail": "Tonn etter lastebiltelling avviker {v} % fra oppmålte tonn, over kontrollen på {t} %.",
       "suggestion": "Kontroller nyttelasten per tur og tettheten, og sammenlign deretter de to flatene på nytt."
+    },
+    "material_unassigned": {
+      "fail": "Materialpolygonene dekker bare {p} % av enheten; resten har ingen tetthet og ingen tonn."
+    },
+    "overbreak": {
+      "fail": "Overberg i driften på {o} % ({n} profiler under prosjekt) er over kontrollen på {t} %."
+    },
+    "profile_outside": {
+      "fail": "Profilet ved profilnummer {c} m ligger utenfor driftens prosjekterte profilering."
+    },
+    "hole_collar": {
+      "fail": "Borhull {id}: ansettet ligger {v} m fra prosjektet, over toleransen på {t} m."
+    },
+    "hole_depth": {
+      "fail": "Borhull {id}: dybden avviker {v} m fra prosjektet, over toleransen på {t} m."
     }
   },
   "hongkong": {

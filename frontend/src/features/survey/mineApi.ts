@@ -52,6 +52,70 @@ export interface MineEntry {
   claimed_m3: number | null;
   claimed_by_name: string;
   findings: Finding[];
+  truck_ratio_pct?: number | null;
+  material_split?: MaterialSplit | null;
+  drive?: DriveSummary | null;
+}
+
+export interface MaterialSplitPart {
+  material: string;
+  name: string;
+  volume_m3: number;
+  density_t_m3: number | null;
+  tonnes: number | null;
+}
+
+export interface MaterialSplit {
+  parts: MaterialSplitPart[];
+  total_m3: number;
+  assigned_m3: number;
+  unassigned_m3: number;
+  coverage_pct: number | null;
+  tonnes: number | null;
+}
+
+export interface DriveSummary {
+  faces: number;
+  advance_m: number | null;
+  profiles: number;
+  design_area_m2: number | null;
+  mean_actual_m2: number | null;
+  overbreak_pct: number | null;
+  excess_m3: number | null;
+  excess_t: number | null;
+  under_count: number;
+}
+
+export interface BlastHole {
+  id: string;
+  hole_id: string;
+  design_e: number;
+  design_n: number;
+  design_depth_m: number | null;
+  drilled_e: number | null;
+  drilled_n: number | null;
+  drilled_depth_m: number | null;
+  collar_offset_m: number | null;
+  depth_diff_m: number | null;
+  collar_ok: boolean | null;
+  depth_ok: boolean | null;
+}
+
+export interface BlastPattern {
+  id: string;
+  code: string;
+  name: string;
+  collar_tol_m: number | null;
+  depth_tol_m: number | null;
+  holes: number;
+  drilled: number;
+  failed: number;
+}
+
+export interface BlastPatternDetail extends BlastPattern {
+  items: BlastHole[];
+  findings: Finding[];
+  problems: string[];
 }
 
 export interface MineTotals {
@@ -180,3 +244,20 @@ export function periodTitle(label: string, locale: string): string {
   if (!m) return label;
   return new Intl.DateTimeFormat(locale, { month: 'short', year: 'numeric', timeZone: 'UTC' }).format(new Date(Date.UTC(+m[1]!, +m[2]! - 1, 1)));
 }
+
+export const splitByMaterial = (entryId: string, locale: string) =>
+  apiPost<MineEntry>(`${BASE}/entries/${entryId}/material-split?${loc(locale)}`, {});
+export const importMaterials = (unitId: string, text: string, filename: string) =>
+  apiPost<{ items: unknown[]; problems: string[] }>(`${BASE}/units/${unitId}/materials/import`, { text, filename, replace: true });
+export const listPatterns = (projectId: string) =>
+  apiGet<{ items: BlastPattern[] }>(`${BASE}/projects/${projectId}/blast-patterns`).then((r) => r.items);
+export const createPattern = (
+  projectId: string,
+  body: { name: string; collar_tol_m: number | null; depth_tol_m: number | null; design_text: string },
+  locale: string,
+) => apiPost<BlastPatternDetail>(`${BASE}/projects/${projectId}/blast-patterns?${loc(locale)}`, body);
+export const getPattern = (id: string, locale: string) => apiGet<BlastPatternDetail>(`${BASE}/blast-patterns/${id}?${loc(locale)}`);
+export const importAsDrilled = (id: string, text: string, locale: string) =>
+  apiPost<BlastPatternDetail>(`${BASE}/blast-patterns/${id}/as-drilled?${loc(locale)}`, { text });
+export const deletePattern = (id: string) => apiDelete(`${BASE}/blast-patterns/${id}`);
+export const stakeListUrl = (id: string) => `/api${BASE}/blast-patterns/${id}/stake-list.csv`;

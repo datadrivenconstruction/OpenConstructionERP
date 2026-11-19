@@ -1200,7 +1200,8 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
         to: runtimeModuleRoute(e.module),
         icon: RUNTIME_MODULE_ICONS[e.icon] ?? RUNTIME_MODULE_ICONS.package!,
       }));
-    return [...group.items, ...dynamicItems, ...runtimeItems];
+    const rows = [...group.items, ...dynamicItems, ...runtimeItems];
+    return rows.length === 0 && group.emptyItem ? [group.emptyItem] : rows;
   };
 
   // The gates every row passes whatever the mode: module-enabled, admin and

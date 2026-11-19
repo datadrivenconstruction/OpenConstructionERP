@@ -41,6 +41,30 @@ const CORE_MODULES = new Set([
   'modules',
 ]);
 
+/**
+ * Backend package keys whose frontend module id is spelled differently. The
+ * onboarding presets write the package key; the registry uses the hyphenated
+ * id, so both spellings resolve to the same flag.
+ */
+export const MODULE_ID_ALIASES: Readonly<Record<string, string>> = {
+  setting_out: 'setting-out',
+  land_parcels: 'land-parcels',
+};
+
+/** The registry id for a module key, following MODULE_ID_ALIASES. */
+export function canonicalModuleId(key: string): string {
+  return MODULE_ID_ALIASES[key] ?? key;
+}
+
+/** Copy every aliased key onto its registry id; the registry spelling wins when both are present. */
+function withCanonicalIds(prefs: Record<string, boolean>): Record<string, boolean> {
+  const out = { ...prefs };
+  for (const [alias, id] of Object.entries(MODULE_ID_ALIASES)) {
+    if (alias in prefs && !(id in prefs)) out[id] = prefs[alias]!;
+  }
+  return out;
+}
+
 /** Optional modules with their default enabled state. */
 const OPTIONAL_DEFAULTS: Record<string, boolean> = {
   templates: true,
@@ -158,10 +182,11 @@ export const useModuleStore = create<ModuleStore>((set, get) => ({
 
   isModuleEnabled: (key: string) => {
     if (CORE_MODULES.has(key)) return true;
-    return get().enabledModules[key] ?? true;
+    return get().enabledModules[canonicalModuleId(key)] ?? get().enabledModules[key] ?? true;
   },
 
-  setModuleEnabled: (key: string, enabled: boolean) => {
+  setModuleEnabled: (rawKey: string, enabled: boolean) => {
+    const key = canonicalModuleId(rawKey);
     if (CORE_MODULES.has(key)) return; // Can't disable core
     set((state) => {
       const next = { ...state.enabledModules, [key]: enabled };
@@ -249,7 +274,7 @@ export const useModuleStore = create<ModuleStore>((set, get) => ({
       );
       const serverPrefs = resp.modules ?? resp;
       set((state) => {
-        const merged = { ...state.enabledModules, ...serverPrefs };
+        const merged = { ...state.enabledModules, ...withCanonicalIds(serverPrefs) };
         try {
           localStorage.setItem(STORE_KEY, JSON.stringify(merged));
         } catch {

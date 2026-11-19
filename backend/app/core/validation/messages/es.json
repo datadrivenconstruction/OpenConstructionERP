@@ -2514,6 +2514,21 @@
     "truck_differs": {
       "fail": "Las toneladas por conteo de camiones difieren {v} % de las toneladas levantadas, por encima del control del {t} %.",
       "suggestion": "Revise la carga útil por viaje y la densidad, y compare de nuevo las dos superficies."
+    },
+    "material_unassigned": {
+      "fail": "Los polígonos de material cubren solo el {p} % de la unidad; el resto no tiene densidad ni toneladas."
+    },
+    "overbreak": {
+      "fail": "La sobreexcavación de la galería del {o} % ({n} perfiles bajo diseño) supera el control del {t} %."
+    },
+    "profile_outside": {
+      "fail": "El perfil en el PK {c} m está fuera del abscisado de diseño de la galería."
+    },
+    "hole_collar": {
+      "fail": "Barreno {id}: el emboquille está a {v} m del diseño, por encima de la tolerancia de {t} m."
+    },
+    "hole_depth": {
+      "fail": "Barreno {id}: la profundidad difiere {v} m del diseño, por encima de la tolerancia de {t} m."
     }
   },
   "hongkong": {

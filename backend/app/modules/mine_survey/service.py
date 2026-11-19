@@ -125,6 +125,9 @@ class MineService:
             underground=u.unit_type in calc.UNDERGROUND,
             density_t_m3=_f(u.density_t_m3),
             entry_count=count,
+            design_ch_from_m=_f(u.design_ch_from_m),
+            design_ch_to_m=_f(u.design_ch_to_m),
+            design_area_m2=_f(u.design_area_m2),
         )
 
     async def list_units(self, project_id: uuid.UUID) -> list[UnitOut]:
@@ -148,6 +151,9 @@ class MineService:
             density_t_m3=_q(data.density_t_m3, "0.0001"),
             note=data.note,
             created_by=_uuid(user_id),
+            design_ch_from_m=_q(data.design_ch_from_m, "0.001"),
+            design_ch_to_m=_q(data.design_ch_to_m, "0.001"),
+            design_area_m2=_q(data.design_area_m2, "0.001"),
         )
         await self.repo.add(u)
         return self._unit_out(u)
@@ -163,6 +169,9 @@ class MineService:
             u.density_t_m3 = _q(data.density_t_m3, "0.0001")  # type: ignore[assignment]
         if data.note is not None:
             u.note = data.note
+        for name in ("design_ch_from_m", "design_ch_to_m", "design_area_m2"):
+            if name in data.model_fields_set:
+                setattr(u, name, _q(getattr(data, name), "0.001"))
         await self.session.flush()
         return self._unit_out(u, (await self.repo.entry_counts_by_unit(u.project_id)).get(u.id, 0))
 
@@ -186,6 +195,7 @@ class MineService:
             profile_label=p.profile_label,
             note=p.note,
             entry_count=count,
+            overbreak_tol_pct=_f(p.overbreak_tol_pct),
         )
 
     async def list_periods(self, project_id: uuid.UUID) -> list[PeriodOut]:
@@ -210,6 +220,7 @@ class MineService:
             band_lo_pct=_q(data.band_lo_pct, "0.01"),
             band_hi_pct=_q(data.band_hi_pct, "0.01"),
             truck_tolerance_pct=_q(data.truck_tolerance_pct, "0.01"),
+            overbreak_tol_pct=_q(data.overbreak_tol_pct, "0.01"),
             profile_label=data.profile_label.strip(),
             note=data.note,
             created_by=_uuid(user_id),
@@ -227,6 +238,8 @@ class MineService:
             p.band_lo_pct, p.band_hi_pct = _q(lo, "0.01"), _q(hi, "0.01")  # type: ignore[assignment]
         if "truck_tolerance_pct" in sent:
             p.truck_tolerance_pct = _q(data.truck_tolerance_pct, "0.01")  # type: ignore[assignment]
+        if "overbreak_tol_pct" in sent:
+            p.overbreak_tol_pct = _q(data.overbreak_tol_pct, "0.01")  # type: ignore[assignment]
         if data.profile_label is not None:
             p.profile_label = data.profile_label.strip()
         if data.note is not None:
@@ -249,7 +262,11 @@ class MineService:
 
     def _numbers(self, e: MinePeriodEntry, v: SurveyVolume | None) -> dict[str, Decimal | None]:
         actual = v.cut_m3 if v is not None else None
-        survey_t = calc.survey_tonnes(actual, e.density_t_m3)
+        split = (e.details or {}).get("material_split") if v is not None else None
+        if split and split.get("tonnes") is not None:
+            survey_t: Decimal | None = calc.dec(split["tonnes"])
+        else:
+            survey_t = calc.survey_tonnes(actual, e.density_t_m3)
         return {
             "actual": actual,
             "compliance": calc.compliance_pct(actual, e.plan_m3),
@@ -259,8 +276,10 @@ class MineService:
 
     async def findings(self, e: MinePeriodEntry, p: MinePeriod, unit: MineUnit, locale: str = "en") -> list[Finding]:
         from app.core.validation.engine import validation_engine  # noqa: PLC0415
+        from app.modules.mine_survey.depth import MineDepthService  # noqa: PLC0415
 
         n = self._numbers(e, await self._volume_of(e))
+        split = (e.details or {}).get("material_split") or {}
         report = await validation_engine.validate(
             data={
                 "entry": {
@@ -270,7 +289,9 @@ class MineService:
                     "band_hi": _f(p.band_hi_pct),
                     "truck_factor_pct": _f(n["truck_factor"]),
                     "truck_tolerance_pct": _f(p.truck_tolerance_pct),
-                }
+                    "material_coverage_pct": split.get("coverage_pct") if split.get("parts") else None,
+                },
+                "drive": await MineDepthService(self.session).drive_context(unit, p),
             },
             rule_sets=[MINE_RULE_SET],
             target_type="mine_period_entry",
@@ -333,7 +354,17 @@ class MineService:
             claimed_at=e.claimed_at,
             note=e.note,
             findings=await self.findings(e, p, unit, locale),
+            truck_ratio_pct=_f(calc.truck_ratio_pct(e.truck_t, n["survey_t"])),
+            material_split=(e.details or {}).get("material_split") if v is not None else None,
+            drive=await self._drive_summary(unit, p),
         )
+
+    async def _drive_summary(self, unit: MineUnit, p: MinePeriod):  # noqa: ANN202 - DriveSummary | None
+        if unit.unit_type not in calc.UNDERGROUND:
+            return None
+        from app.modules.mine_survey.depth import MineDepthService  # noqa: PLC0415
+
+        return await MineDepthService(self.session).drive_summary(unit, p.id)
 
     @staticmethod
     def _totals(entries: list[EntryOut]) -> Totals:
@@ -527,6 +558,8 @@ class MineService:
             user_id,
         )
         e.actual_volume_id = v.id
+        # A split of the old actual no longer describes this one.
+        e.details = {k: val for k, val in (e.details or {}).items() if k != "material_split"}
         await self.session.flush()
         if old is not None:
             await self.volumes.delete_volume(old)

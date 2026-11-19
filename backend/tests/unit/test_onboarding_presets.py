@@ -430,3 +430,37 @@ def test_a_profile_leaves_out_what_its_company_never_opens(key: str) -> None:
     assert extra == [], f"preset {key} switches on {extra}"
     prefs = modules_for(COMPANY_PRESETS[key].enabled_modules)
     assert all(prefs[m] is False for m in _PROFILE_MUST_NOT_INCLUDE[key])
+
+
+# ── Survey & Land ─────────────────────────────────────────────────────────────
+
+
+def test_the_survey_family_is_offered_whole() -> None:
+    from app.core.onboarding_presets import _SURVEY
+
+    assert set(_SURVEY) == {
+        "survey_core",
+        "surfaces_volumes",
+        "stockpiles",
+        "mine_survey",
+        "setting_out",
+        "land_parcels",
+        "monitoring",
+    }
+
+
+def test_a_geomatics_firm_gets_setting_out_monitoring_and_parcels_but_no_mine() -> None:
+    mods = set(COMPANY_PRESETS["survey_company"].enabled_modules)
+    assert {"survey_core", "surfaces_volumes", "stockpiles", "setting_out", "monitoring", "land_parcels"} <= mods
+    assert "mine_survey" not in mods
+
+
+def test_a_mining_operator_watches_its_walls() -> None:
+    assert "monitoring" in COMPANY_PRESETS["mining_operator"].enabled_modules
+
+
+def test_hyphenated_frontend_ids_get_the_same_flag_as_the_package_key() -> None:
+    prefs = modules_for(["survey_core", "setting_out"])
+    assert prefs["setting_out"] is True
+    assert prefs["setting-out"] is True
+    assert prefs["land-parcels"] is False

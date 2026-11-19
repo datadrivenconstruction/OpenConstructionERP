@@ -2514,6 +2514,21 @@
     "truck_differs": {
       "fail": "Ajokertojen laskennan tonnit poikkeavat mitatuista tonneista {v} %, yli {t} % tarkistusrajan.",
       "suggestion": "Tarkista kuorma ajoa kohti ja tiheys ja vertaa sitten kahta pintaa uudelleen."
+    },
+    "material_unassigned": {
+      "fail": "Materiaalipolygonit kattavat vain {p} % yksiköstä; lopulla ei ole tiheyttä eikä tonneja."
+    },
+    "overbreak": {
+      "fail": "Perän ylilouhinta {o} % ({n} profiilia alle suunnitelman) ylittää {t} %:n tarkistusrajan."
+    },
+    "profile_outside": {
+      "fail": "Paalulla {c} m oleva profiili on perän suunnitellun paaluvälin ulkopuolella."
+    },
+    "hole_collar": {
+      "fail": "Reikä {id}: aloituskohta on {v} m suunnitelmasta, yli {t} m:n toleranssin."
+    },
+    "hole_depth": {
+      "fail": "Reikä {id}: syvyys poikkeaa {v} m suunnitelmasta, yli {t} m:n toleranssin."
     }
   },
   "hongkong": {

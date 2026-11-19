@@ -182,6 +182,8 @@ const TODAYS_SIMPLE = [
   '/sheets',
   '/geo',
   '/pointcloud',
+  // Survey & Land keeps one setup row while every survey module is off.
+  '/survey',
   '/contracts',
   '/framework-agreements',
   '/payment-clock',

@@ -30,6 +30,9 @@ class UnitCreate(BaseModel):
     unit_type: UnitType = "bench"
     density_t_m3: float | None = Field(default=None, gt=0, le=30)
     note: str = Field(default="", max_length=2000)
+    design_ch_from_m: float | None = Field(default=None, ge=0, le=1e7)
+    design_ch_to_m: float | None = Field(default=None, ge=0, le=1e7)
+    design_area_m2: float | None = Field(default=None, gt=0, le=10000)
 
 
 class UnitUpdate(BaseModel):
@@ -37,6 +40,9 @@ class UnitUpdate(BaseModel):
     unit_type: UnitType | None = None
     density_t_m3: float | None = Field(default=None, gt=0, le=30)
     note: str | None = Field(default=None, max_length=2000)
+    design_ch_from_m: float | None = Field(default=None, ge=0, le=1e7)
+    design_ch_to_m: float | None = Field(default=None, ge=0, le=1e7)
+    design_area_m2: float | None = Field(default=None, gt=0, le=10000)
 
 
 class UnitOut(BaseModel):
@@ -48,6 +54,9 @@ class UnitOut(BaseModel):
     underground: bool
     density_t_m3: float | None
     entry_count: int = 0
+    design_ch_from_m: float | None = None
+    design_ch_to_m: float | None = None
+    design_area_m2: float | None = None
 
 
 class PeriodCreate(BaseModel):
@@ -57,6 +66,7 @@ class PeriodCreate(BaseModel):
     band_lo_pct: float | None = Field(default=None, ge=0, le=1000)
     band_hi_pct: float | None = Field(default=None, ge=0, le=1000)
     truck_tolerance_pct: float | None = Field(default=None, ge=0, le=100)
+    overbreak_tol_pct: float | None = Field(default=None, ge=0, le=100)
     profile_label: str = Field(default="", max_length=120)
     note: str = Field(default="", max_length=2000)
 
@@ -73,6 +83,7 @@ class PeriodUpdate(BaseModel):
     band_lo_pct: float | None = Field(default=None, ge=0, le=1000)
     band_hi_pct: float | None = Field(default=None, ge=0, le=1000)
     truck_tolerance_pct: float | None = Field(default=None, ge=0, le=100)
+    overbreak_tol_pct: float | None = Field(default=None, ge=0, le=100)
     profile_label: str | None = Field(default=None, max_length=120)
     note: str | None = Field(default=None, max_length=2000)
 
@@ -195,6 +206,10 @@ class EntryOut(BaseModel):
     claimed_at: datetime | None
     note: str
     findings: list[Finding]
+    #: Truck-count tonnes as a percentage of survey tonnes (100 % = they agree).
+    truck_ratio_pct: float | None = None
+    material_split: MaterialSplitOut | None = None
+    drive: DriveSummary | None = None
 
 
 class Totals(BaseModel):
@@ -219,6 +234,7 @@ class PeriodOut(BaseModel):
     profile_label: str
     note: str
     entry_count: int = 0
+    overbreak_tol_pct: float | None = None
 
 
 class PeriodDetail(PeriodOut):
@@ -238,3 +254,210 @@ class UnitListResponse(BaseModel):
     total: int
     offset: int = 0
     limit: int = 50
+
+
+# ── v2: material split, drive profiles, blast patterns ─────────────────────
+
+Material = Literal["ore", "waste", "low_grade", "other"]
+Ring2 = list[tuple[float, float]]
+
+
+class MaterialIn(BaseModel):
+    material: Material = "ore"
+    name: str = Field(default="", max_length=255)
+    density_t_m3: float | None = Field(default=None, gt=0, le=30)
+    ring: Ring2 = Field(min_length=3, max_length=5000)
+
+
+class MaterialImport(BaseModel):
+    """GeoJSON polygons (``material``, ``name``, ``density_t_m3`` properties), or polylines of a drawing."""
+
+    text: str = Field(default="", max_length=20_000_000)
+    filename: str = Field(default="", max_length=255)
+    #: A drawing already converted by the drawings module (DDC cad2data), and its layers per material.
+    drawing_id: uuid.UUID | None = None
+    layers: dict[str, Material] = Field(default_factory=dict, max_length=50)
+    densities: dict[str, float] = Field(default_factory=dict, max_length=10)
+    replace: bool = False
+
+
+class MaterialOut(BaseModel):
+    id: uuid.UUID
+    unit_id: uuid.UUID
+    material: str
+    name: str
+    density_t_m3: float | None
+    ring: Ring2
+    area_m2: float
+    source: str
+    source_filename: str
+
+
+class MaterialImportResult(BaseModel):
+    items: list[MaterialOut]
+    problems: list[str]
+
+
+class MaterialPartOut(BaseModel):
+    material: str
+    name: str
+    volume_m3: float
+    density_t_m3: float | None
+    tonnes: float | None
+
+
+class MaterialSplitOut(BaseModel):
+    parts: list[MaterialPartOut]
+    total_m3: float
+    assigned_m3: float
+    unassigned_m3: float
+    coverage_pct: float | None
+    tonnes: float | None
+
+
+class FaceIn(BaseModel):
+    chainage_m: float = Field(ge=0, le=1e7)
+    picked_on: date | None = None
+    period_id: uuid.UUID | None = None
+    note: str = Field(default="", max_length=1000)
+
+
+class FaceOut(BaseModel):
+    id: uuid.UUID
+    unit_id: uuid.UUID
+    period_id: uuid.UUID | None
+    chainage_m: float
+    picked_on: date | None
+    note: str
+
+
+class ProfileIn(BaseModel):
+    """A measured profile: its area, or the (offset, height) ring it was measured as."""
+
+    chainage_m: float = Field(ge=0, le=1e7)
+    actual_area_m2: float | None = Field(default=None, gt=0, le=10000)
+    ring: Ring2 = Field(default_factory=list, max_length=5000)
+    design_area_m2: float | None = Field(default=None, gt=0, le=10000)
+    period_id: uuid.UUID | None = None
+
+    @model_validator(mode="after")
+    def _area(self) -> ProfileIn:
+        if self.actual_area_m2 is None and len(self.ring) < 3:
+            raise ValueError("Give the profile area or at least three points of its outline")
+        return self
+
+
+class ProfileImport(BaseModel):
+    """CSV ``chainage,area`` (optional ``design_area``)."""
+
+    text: str = Field(min_length=1, max_length=2_000_000)
+    period_id: uuid.UUID | None = None
+
+
+class ProfileOut(BaseModel):
+    id: uuid.UUID
+    unit_id: uuid.UUID
+    period_id: uuid.UUID | None
+    chainage_m: float
+    actual_area_m2: float
+    design_area_m2: float | None
+    overbreak_pct: float | None
+    inside_design: bool | None
+
+
+class DriveSummary(BaseModel):
+    faces: int
+    advance_m: float | None
+    profiles: int
+    design_area_m2: float | None
+    mean_actual_m2: float | None
+    overbreak_pct: float | None
+    excess_m3: float | None
+    excess_t: float | None
+    under_count: int = 0
+
+
+class DriveDetail(BaseModel):
+    unit: UnitOut
+    faces: list[FaceOut]
+    profiles: list[ProfileOut]
+    summary: DriveSummary
+    findings: list[Finding]
+
+
+class HoleIn(BaseModel):
+    hole_id: str = Field(min_length=1, max_length=64)
+    e: float
+    n: float
+    z: float | None = None
+    depth_m: float | None = Field(default=None, ge=0, le=1000)
+
+
+class PatternCreate(BaseModel):
+    name: str = Field(min_length=1, max_length=255)
+    unit_id: uuid.UUID | None = None
+    collar_tol_m: float | None = Field(default=None, gt=0, le=100)
+    depth_tol_m: float | None = Field(default=None, gt=0, le=100)
+    note: str = Field(default="", max_length=2000)
+    #: Design collars as CSV ``hole,e,n,z,depth``.
+    design_text: str = Field(default="", max_length=5_000_000)
+
+
+class PatternUpdate(BaseModel):
+    name: str | None = Field(default=None, min_length=1, max_length=255)
+    collar_tol_m: float | None = Field(default=None, gt=0, le=100)
+    depth_tol_m: float | None = Field(default=None, gt=0, le=100)
+    note: str | None = Field(default=None, max_length=2000)
+
+
+class DrilledImport(BaseModel):
+    """As-drilled CSV ``hole,e,n,z,depth``; holes are matched by id."""
+
+    text: str = Field(min_length=1, max_length=5_000_000)
+    drilled_on: date | None = None
+
+
+class HoleOut(BaseModel):
+    id: uuid.UUID
+    hole_id: str
+    design_e: float
+    design_n: float
+    design_z: float | None
+    design_depth_m: float | None
+    drilled_e: float | None
+    drilled_n: float | None
+    drilled_z: float | None
+    drilled_depth_m: float | None
+    collar_offset_m: float | None
+    depth_diff_m: float | None
+    collar_ok: bool | None
+    depth_ok: bool | None
+
+
+class PatternOut(BaseModel):
+    id: uuid.UUID
+    project_id: uuid.UUID
+    unit_id: uuid.UUID | None
+    code: str
+    name: str
+    collar_tol_m: float | None
+    depth_tol_m: float | None
+    note: str
+    holes: int
+    drilled: int
+    failed: int
+
+
+class PatternDetail(PatternOut):
+    items: list[HoleOut]
+    findings: list[Finding]
+    problems: list[str] = Field(default_factory=list)
+
+
+class PatternListResponse(BaseModel):
+    items: list[PatternOut]
+    total: int
+
+
+EntryOut.model_rebuild()
+PeriodDetail.model_rebuild()

@@ -2514,6 +2514,21 @@
     "truck_differs": {
       "fail": "Ton enligt lastbilsräkning avviker {v} % från inmätta ton, över kontrollen på {t} %.",
       "suggestion": "Kontrollera nyttolasten per tur och densiteten och jämför sedan de två ytorna igen."
+    },
+    "material_unassigned": {
+      "fail": "Materialpolygonerna täcker bara {p} % av enheten; resten saknar densitet och ton."
+    },
+    "overbreak": {
+      "fail": "Överberg i orten på {o} % ({n} profiler under projekt) överstiger kontrollen på {t} %."
+    },
+    "profile_outside": {
+      "fail": "Profilen vid sektion {c} m ligger utanför ortens projekterade sektionering."
+    },
+    "hole_collar": {
+      "fail": "Borrhål {id}: påhugget ligger {v} m från projektet, över toleransen på {t} m."
+    },
+    "hole_depth": {
+      "fail": "Borrhål {id}: djupet avviker {v} m från projektet, över toleransen på {t} m."
     }
   },
   "hongkong": {

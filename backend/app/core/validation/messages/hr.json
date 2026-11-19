@@ -2514,6 +2514,21 @@
     "truck_differs": {
       "fail": "Tone prema brojanju vožnji razlikuju se od izmjerenih tona za {v} %, iznad provjere od {t} %.",
       "suggestion": "Provjerite nosivost po vožnji i gustoću, a zatim ponovno usporedite dvije plohe."
+    },
+    "material_unassigned": {
+      "fail": "Poligoni materijala pokrivaju samo {p} % jedinice; ostatak nema gustoću ni tone."
+    },
+    "overbreak": {
+      "fail": "Prekoprofilni iskop hodnika {o} % ({n} profila ispod projekta) premašuje provjeru od {t} %."
+    },
+    "profile_outside": {
+      "fail": "Profil na stacionaži {c} m leži izvan projektne stacionaže hodnika."
+    },
+    "hole_collar": {
+      "fail": "Bušotina {id}: ušće je {v} m od projekta, iznad tolerancije od {t} m."
+    },
+    "hole_depth": {
+      "fail": "Bušotina {id}: dubina se razlikuje za {v} m od projekta, iznad tolerancije od {t} m."
     }
   },
   "hongkong": {

@@ -1,7 +1,7 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 /**
- * Survey register (/survey): the project CRS, control and topo points, the
+ * Survey register (/survey/points): the project CRS, control and topo points, the
  * files they came from, and the SRV findings on them.
  */
 
@@ -44,6 +44,7 @@ import { surveyGuide } from './surveyGuide';
 import { SurveyPlan } from './SurveyPlan';
 import { TraverseDrawer, VerdictBadge, ratioText } from './TraverseDrawer';
 import { useOpenSurveyDemo } from './useOpenSurveyDemo';
+import { ViewOnlyNote, useSurveyAccess } from './useSurveyAccess';
 import { deleteTraverse, getRegisterPlan, listTraverses, type Traverse } from './volumesApi';
 import { fmtFixed } from '@/shared/lib/formatters';
 
@@ -64,7 +65,8 @@ export default function SurveyRegisterPage() {
   const [q, setQ] = useState('');
   const [traverseOpen, setTraverseOpen] = useState(false);
   const [shownTraverse, setShownTraverse] = useState<Traverse | null>(null);
-  const demo = useOpenSurveyDemo('/survey');
+  const demo = useOpenSurveyDemo('/survey/points');
+  const { canWrite } = useSurveyAccess();
 
   const enabled = !!projectId;
   const crs = useQuery({ queryKey: ['survey', 'crs', projectId], queryFn: () => getProjectCrs(projectId!), enabled });
@@ -136,6 +138,8 @@ export default function SurveyRegisterPage() {
 
   const actions = (
     <div className="flex flex-wrap gap-2">
+      {canWrite && (
+      <>
       <Button variant="primary" icon={<FileUp size={16} />} onClick={() => setImportOpen(true)} data-testid="survey-import">
         {t('survey.action.import_points', { defaultValue: 'Import points' })}
       </Button>
@@ -150,6 +154,8 @@ export default function SurveyRegisterPage() {
       >
         {t('survey.action.new_traverse', { defaultValue: 'New traverse' })}
       </Button>
+      </>
+      )}
       <ModuleGuideButton content={surveyGuide} />
     </div>
   );
@@ -174,8 +180,8 @@ export default function SurveyRegisterPage() {
   const empty = points.isSuccess && points.data.total === 0 && !kind && !setFilter && !q;
 
   return (
-    <div className="space-y-4">
-      <Breadcrumb items={[{ label: t('sidebar.group.survey', { defaultValue: 'Survey & Land' }) }, { label: title }]} />
+    <div className="space-y-5">
+      <Breadcrumb items={[{ label: t('sidebar.group.survey', { defaultValue: 'Survey & Land' }), to: '/survey' }, { label: title }]} />
       <PageHeader
         srTitle={title}
         subtitle={
@@ -191,6 +197,7 @@ export default function SurveyRegisterPage() {
         }
         actions={actions}
       />
+      <ViewOnlyNote />
       <DismissibleInfo storageKey="survey.register.info" title={t('survey.register.info_title', { defaultValue: 'What is this' })}>
         {t('survey.register.info', {
           defaultValue:
@@ -277,9 +284,11 @@ export default function SurveyRegisterPage() {
               title={t('survey.empty', { defaultValue: 'No survey points yet. Import a CSV from your instrument.' })}
               action={
                 <div className="flex gap-2 justify-center">
-                  <Button variant="primary" onClick={() => setImportOpen(true)}>
-                    {t('survey.action.import_points', { defaultValue: 'Import points' })}
-                  </Button>
+                  {canWrite && (
+                    <Button variant="primary" onClick={() => setImportOpen(true)}>
+                      {t('survey.action.import_points', { defaultValue: 'Import points' })}
+                    </Button>
+                  )}
                   <Button variant="secondary" loading={demo.busy} onClick={() => void demo.open()} data-testid="survey-open-demo">
                     {t('survey.action.open_demo', { defaultValue: 'Open demo project' })}
                   </Button>
@@ -368,6 +377,7 @@ export default function SurveyRegisterPage() {
                       <Button
                         size="sm"
                         variant="ghost"
+                        disabled={!canWrite}
                         onClick={() => {
                           if (window.confirm(t('survey.set.delete_confirm', { defaultValue: 'Delete this point set and its {{count}} points?', count: s.point_count }))) {
                             remove.mutate(s);
@@ -393,7 +403,7 @@ export default function SurveyRegisterPage() {
             <EmptyState
               icon={<Route size={24} />}
               title={t('survey.traverse.empty', { defaultValue: 'No traverses yet. Paste the legs of a closed loop to check its misclosure.' })}
-              action={{ label: t('survey.action.new_traverse', { defaultValue: 'New traverse' }), onClick: () => setTraverseOpen(true) }}
+              action={canWrite ? { label: t('survey.action.new_traverse', { defaultValue: 'New traverse' }), onClick: () => setTraverseOpen(true) } : undefined}
             />
           ) : (
             <table className="oe-table w-full text-sm">
@@ -435,7 +445,7 @@ export default function SurveyRegisterPage() {
                     </td>
                     <td><VerdictBadge verdict={tr.verdict} /></td>
                     <td className="text-right">
-                      <Button size="sm" variant="ghost" onClick={() => removeTraverse.mutate(tr)}>
+                      <Button size="sm" variant="ghost" disabled={!canWrite} onClick={() => removeTraverse.mutate(tr)}>
                         {t('common.delete', { defaultValue: 'Delete' })}
                       </Button>
                     </td>

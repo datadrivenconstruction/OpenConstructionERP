@@ -64,6 +64,9 @@ export interface ModuleManifest {
   category: 'estimation' | 'planning' | 'procurement' | 'tools' | 'regional' | 'converter';
   /** Routes this module registers */
   routes: ModuleRoute[];
+  /** Routes served while the module is OFF (a setup page), so an old link
+   *  lands somewhere that explains how to switch the module on. */
+  offRoutes?: ModuleRoute[];
   /** Sidebar nav items */
   navItems: ModuleNavItem[];
   /** Whether the module is enabled by default for new users */

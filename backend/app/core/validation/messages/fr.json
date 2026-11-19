@@ -2514,6 +2514,21 @@
     "truck_differs": {
       "fail": "Les tonnes comptées par camions diffèrent de {v} % des tonnes levées, au-delà du contrôle de {t} %.",
       "suggestion": "Vérifiez la charge utile par voyage et la densité, puis comparez de nouveau les deux surfaces."
+    },
+    "material_unassigned": {
+      "fail": "Les polygones de matériau ne couvrent que {p} % de l'unité ; le reste n'a ni densité ni tonnes."
+    },
+    "overbreak": {
+      "fail": "Le hors-profil de la galerie de {o} % ({n} profils sous le projet) dépasse le contrôle de {t} %."
+    },
+    "profile_outside": {
+      "fail": "Le profil au PK {c} m est hors du chaînage de projet de la galerie."
+    },
+    "hole_collar": {
+      "fail": "Trou {id} : la tête est à {v} m du projet, au-delà de la tolérance de {t} m."
+    },
+    "hole_depth": {
+      "fail": "Trou {id} : la profondeur diffère de {v} m du projet, au-delà de la tolérance de {t} m."
     }
   },
   "hongkong": {

@@ -2514,6 +2514,21 @@
     "truck_differs": {
       "fail": "Ang tonelada mula sa bilang ng trak ay may {v} % na pagkakaiba sa tonelada ng survey, lampas sa {t} % na tseke.",
       "suggestion": "Suriin ang karga bawat biyahe at ang density, saka ihambing muli ang dalawang surface."
+    },
+    "material_unassigned": {
+      "fail": "Sakop lamang ng mga polygon ng materyal ang {p} % ng unit; walang density at tonelada ang natitira."
+    },
+    "overbreak": {
+      "fail": "Ang overbreak ng drive na {o} % ({n} profile na mas maliit sa disenyo) ay lampas sa {t} % na check."
+    },
+    "profile_outside": {
+      "fail": "Ang profile sa chainage {c} m ay nasa labas ng design chainage ng drive."
+    },
+    "hole_collar": {
+      "fail": "Butas {id}: ang collar ay {v} m mula sa disenyo, lampas sa {t} m na tolerance."
+    },
+    "hole_depth": {
+      "fail": "Butas {id}: ang lalim ay iba nang {v} m sa disenyo, lampas sa {t} m na tolerance."
     }
   },
   "hongkong": {

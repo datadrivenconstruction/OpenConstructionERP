@@ -2514,6 +2514,21 @@
     "truck_differs": {
       "fail": "Le tonnellate dal conteggio dei camion differiscono del {v} % da quelle rilevate, oltre il controllo del {t} %.",
       "suggestion": "Controlli il carico utile per viaggio e la densità, poi confronti di nuovo le due superfici."
+    },
+    "material_unassigned": {
+      "fail": "I poligoni di materiale coprono solo il {p} % dell'unità; il resto non ha densità né tonnellate."
+    },
+    "overbreak": {
+      "fail": "Il sovrascavo della galleria del {o} % ({n} profili sotto progetto) supera il controllo del {t} %."
+    },
+    "profile_outside": {
+      "fail": "Il profilo alla progressiva {c} m è fuori dalla progressiva di progetto della galleria."
+    },
+    "hole_collar": {
+      "fail": "Foro {id}: l'imbocco è a {v} m dal progetto, oltre la tolleranza di {t} m."
+    },
+    "hole_depth": {
+      "fail": "Foro {id}: la profondità differisce di {v} m dal progetto, oltre la tolleranza di {t} m."
     }
   },
   "hongkong": {

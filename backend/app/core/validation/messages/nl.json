@@ -2514,6 +2514,21 @@
     "truck_differs": {
       "fail": "De tonnen volgens vrachtentelling wijken {v} % af van de gemeten tonnen, boven de controle van {t} %.",
       "suggestion": "Controleer de lading per rit en de dichtheid en vergelijk daarna de twee oppervlakken opnieuw."
+    },
+    "material_unassigned": {
+      "fail": "De materiaalpolygonen dekken slechts {p} % van de eenheid; de rest heeft geen dichtheid en geen tonnen."
+    },
+    "overbreak": {
+      "fail": "Overmatige uitbraak van de gang van {o} % ({n} profielen onder ontwerp) ligt boven de controle van {t} %."
+    },
+    "profile_outside": {
+      "fail": "Het profiel bij kilometrering {c} m ligt buiten de ontwerpkilometrering van de gang."
+    },
+    "hole_collar": {
+      "fail": "Boorgat {id}: het aanzetpunt ligt {v} m naast het ontwerp, boven de tolerantie van {t} m."
+    },
+    "hole_depth": {
+      "fail": "Boorgat {id}: de diepte wijkt {v} m af van het ontwerp, boven de tolerantie van {t} m."
     }
   },
   "hongkong": {

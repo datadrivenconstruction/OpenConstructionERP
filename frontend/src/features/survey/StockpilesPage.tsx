@@ -51,6 +51,7 @@ import {
   type PileSurvey,
   type Stockpile,
 } from './stockpilesApi';
+import { ViewOnlyNote, useSurveyAccess } from './useSurveyAccess';
 
 function VarianceBadge({ survey, tolerance }: { survey: PileSurvey | null; tolerance: number | null }) {
   const { i18n } = useTranslation();
@@ -64,6 +65,7 @@ function VarianceBadge({ survey, tolerance }: { survey: PileSurvey | null; toler
 
 export default function StockpilesPage() {
   const { t, i18n } = useTranslation();
+  const { canWrite } = useSurveyAccess();
   const lang = i18n.language;
   const qc = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
@@ -124,7 +126,7 @@ export default function StockpilesPage() {
 
   const actions = (
     <div className="flex flex-wrap gap-2">
-      <Button variant="primary" icon={<Plus size={16} />} onClick={() => setNewOpen(true)} data-testid="stockpiles-new">
+      <Button variant="primary" icon={<Plus size={16} />} onClick={() => setNewOpen(true)} data-testid="stockpiles-new" disabled={!canWrite}>
         {t('stockpiles.action.new_stockpile', { defaultValue: 'New stockpile' })}
       </Button>
       <Button
@@ -147,6 +149,7 @@ export default function StockpilesPage() {
     <div className="space-y-4">
       <Breadcrumb items={[{ label: t('sidebar.group.survey', { defaultValue: 'Survey & Land' }) }, { label: title }]} />
       <PageHeader srTitle={title} subtitle={chip ? <bdi dir="ltr" className="text-xs">{chip}</bdi> : undefined} actions={actions} />
+      <ViewOnlyNote />
       <DismissibleInfo storageKey="stockpiles.info" title={t('survey.register.info_title', { defaultValue: 'What is this' })}>
         {t('stockpiles.info', {
           defaultValue:

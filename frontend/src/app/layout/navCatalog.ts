@@ -177,6 +177,9 @@ export interface NavGroup {
    *  "so `oe_pointcloud`'s manifest can add its own row", and no such
    *  frontend manifest exists — `oe_pointcloud` is backend-only. */
   dynamicGroupKey?: string;
+  /** One collapsed row shown only while the group has no other rows, so a
+   *  family of modules that is off can still be found and switched on. */
+  emptyItem?: NavItem;
 }
 
 /** The Learn group's id: the sidebar draws it apart from the loop and stores
@@ -435,6 +438,7 @@ export const navGroups: NavGroup[] = [
     dynamicGroupKey: 'grp_survey',
     defaultOpen: true,
     items: [],
+    emptyItem: { labelKey: 'survey.setup.nav', defaultLabel: 'Set up survey', to: '/survey', icon: Compass },
   },
   // ── 6. MODEL COORDINATION ──────────────────────────────────────────
   // Multi-model BIM/CAD coordination: clash, federations, rule packs,
