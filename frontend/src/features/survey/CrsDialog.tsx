@@ -23,8 +23,6 @@ interface Props {
   open: boolean;
   projectId: string;
   state: ProjectCrsState | undefined;
-  /** First visit: the dialog stays until a system is chosen. */
-  required?: boolean;
   onClose: () => void;
 }
 
@@ -33,7 +31,7 @@ function numOrNull(v: string): number | null {
   return v.trim() !== '' && Number.isFinite(n) ? n : null;
 }
 
-export function CrsDialog({ open, projectId, state, required = false, onClose }: Props) {
+export function CrsDialog({ open, projectId, state, onClose }: Props) {
   const { t } = useTranslation();
   const qc = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
@@ -112,18 +110,15 @@ export function CrsDialog({ open, projectId, state, required = false, onClose }:
   return (
     <WideModal
       open={open}
-      onClose={required && !current ? () => undefined : onClose}
-      hideCloseButton={required && !current}
+      onClose={onClose}
       busy={save.isPending}
       title={t('survey.crs.title', { defaultValue: 'Project coordinate system' })}
       size="md"
       footer={
         <div className="flex justify-end gap-2">
-          {!(required && !current) && (
-            <Button variant="secondary" onClick={onClose}>
-              {t('common.cancel', { defaultValue: 'Cancel' })}
-            </Button>
-          )}
+          <Button variant="secondary" onClick={onClose}>
+            {t('common.cancel', { defaultValue: 'Cancel' })}
+          </Button>
           <Button variant="primary" disabled={!canSave} loading={save.isPending} onClick={() => save.mutate()} data-testid="survey-crs-save">
             {useLabel}
           </Button>

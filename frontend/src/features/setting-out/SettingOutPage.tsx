@@ -365,7 +365,7 @@ export default function SettingOutPage() {
 
       <NewRequestDialog open={newOpen} projectId={projectId} profiles={profiles.data ?? []} onClose={() => setNewOpen(false)} onCreated={(r) => setSelected(r.id)} />
       {activeId && <DesignImportDialog open={importOpen} requestId={activeId} onClose={() => setImportOpen(false)} />}
-      <CrsDialog open={crsOpen} required={false} projectId={projectId} state={crs.data} onClose={() => setCrsOpen(false)} />
+      <CrsDialog open={crsOpen} projectId={projectId} state={crs.data} onClose={() => setCrsOpen(false)} />
     </div>
   );
 }
