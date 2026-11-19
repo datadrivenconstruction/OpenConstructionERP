@@ -19,7 +19,7 @@ import type { FlowCard, FlowModel } from './flowModel';
 import { stateText } from './flowModel';
 import { useNarrow, useReducedMotion } from './motion';
 
-const CARD_H = 76;
+const CARD_H = 88;
 const GAP = 12;
 const ROW_H = 30;
 
@@ -63,8 +63,8 @@ function PathCard({
       )}
       style={{ borderInlineStartWidth: 3, borderInlineStartColor: card.tone }}
     >
-      <div className="flex items-center justify-between gap-2">
-        <span className="truncate text-xs font-medium text-content-secondary" title={card.moduleLabel}>
+      <div className="flex items-start justify-between gap-2">
+        <span className="line-clamp-2 break-words text-xs font-medium leading-4 text-content-secondary" title={card.moduleLabel}>
           {card.moduleLabel}
         </span>
         {card.importance !== 'supporting' && (

@@ -26,6 +26,7 @@ DATA_PATHS = DataPaths(
             route="/boq",
             importance="critical",
             breaks="data_paths.breaks.no_budget",
+            missing="data_paths.missing.no_budget_from_boq",
         ),
         DataPath(
             "oe_contracts",

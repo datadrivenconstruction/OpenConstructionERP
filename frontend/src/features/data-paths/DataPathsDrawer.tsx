@@ -41,6 +41,10 @@ export function DataPathsDrawer({ module, open, onClose }: DataPathsDrawerProps)
   const model = useMemo(() => (query.data ? buildFlowModel(t, query.data) : null), [query.data, t]);
   const descId = useId();
   const title = model?.moduleLabel ?? moduleLabel(t, module);
+  const pathModules = useMemo(
+    () => new Set([module, ...(model ? [...model.inputs, ...model.outputs].map((c) => c.module) : [])]),
+    [module, model],
+  );
 
   return (
     <SideDrawer
@@ -98,6 +102,7 @@ export function DataPathsDrawer({ module, open, onClose }: DataPathsDrawerProps)
               <PartiesHoneycomb
                 parties={parties.data.parties}
                 litModules={parties.data.parties.some((p) => !p.placeholder && p.modules.includes(module)) ? new Set([module]) : null}
+                pathModules={pathModules}
                 compact
                 wideList
               />

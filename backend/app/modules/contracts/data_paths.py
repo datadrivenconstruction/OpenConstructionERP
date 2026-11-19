@@ -30,6 +30,7 @@ DATA_PATHS = DataPaths(
             route="/tendering",
             importance="critical",
             breaks="data_paths.breaks.no_contract_value",
+            missing="data_paths.missing.no_contract_for_tender",
         ),
         DataPath(
             "oe_contacts",
@@ -49,6 +50,7 @@ DATA_PATHS = DataPaths(
             measure=Sum("amount_total"),
             importance="critical",
             breaks="data_paths.breaks.no_invoices",
+            missing="data_paths.missing.no_invoice_for_contract",
         ),
         DataPath(
             "oe_payment_clock",

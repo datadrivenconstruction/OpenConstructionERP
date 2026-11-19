@@ -8,6 +8,7 @@
 // execution -> finance).
 
 import { ROUTE_BACKEND_MODULE } from '@/app/layout/Sidebar';
+import type { LucideIcon } from 'lucide-react';
 import { navGroups } from '@/app/layout/navCatalog';
 import { sectionTone } from '@/app/layout/menuIcons';
 
@@ -34,6 +35,8 @@ export interface ModuleMeta {
   /** `var(--oe-tone-N)` of the sidebar section; neutral when the module has no menu row. */
   tone: string;
   stage: number;
+  /** The module's menu icon; null when it has no menu row. */
+  icon: LucideIcon | null;
 }
 
 /** Workflow stages, left to right. Platform modules sit in their own band. */
@@ -96,6 +99,7 @@ interface RouteFacts {
   groupId: string;
   groupLabelKey: string;
   groupDefaultLabel: string | null;
+  icon: LucideIcon | null;
 }
 
 let routeByModule: Map<string, RouteFacts> | null = null;
@@ -113,6 +117,7 @@ function routeIndex(): Map<string, RouteFacts> {
           groupId: group.id,
           groupLabelKey: group.labelKey,
           groupDefaultLabel: group.defaultLabel ?? null,
+          icon: item.icon ?? null,
         });
       }
     }
@@ -125,7 +130,7 @@ function routeIndex(): Map<string, RouteFacts> {
       if (out.has(module)) continue;
       out.set(
         module,
-        facts ?? { route, labelKey: '', defaultLabel: null, groupId: '', groupLabelKey: '', groupDefaultLabel: null },
+        facts ?? { route, labelKey: '', defaultLabel: null, groupId: '', groupLabelKey: '', groupDefaultLabel: null, icon: null },
       );
     }
   }
@@ -160,6 +165,7 @@ export function moduleMeta(module: string): ModuleMeta {
     familyDefaultLabel: facts?.groupDefaultLabel ?? null,
     tone: toneIndex === undefined ? 'var(--oe-text-tertiary)' : `var(--oe-tone-${toneIndex})`,
     stage: STAGES.indexOf(stage),
+    icon: facts?.icon ?? null,
   };
   metaCache.set(module, meta);
   return meta;

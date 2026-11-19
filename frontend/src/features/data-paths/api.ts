@@ -115,6 +115,11 @@ export interface HealthItem {
   label: string;
   importance: Importance;
   breaks: string;
+  /** i18n key of the plain sentence for this gap. */
+  missing?: string;
+  upstream?: string;
+  /** Module that has to act; the Fix link opens it. */
+  downstream?: string;
 }
 
 export interface PlatformMap {
@@ -137,6 +142,12 @@ export interface Party {
   roles: string[];
   modules: string[];
   placeholder: boolean;
+  /** client | contractor | subcontractor | supplier | bidder | consultant | person; empty for placeholders. */
+  primary_role?: string;
+  /** Records per module that name this party. */
+  touches?: Record<string, number>;
+  /** Party id of the company a person works for. */
+  org?: string | null;
 }
 
 export interface ProjectParties {

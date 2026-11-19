@@ -25,6 +25,7 @@ DATA_PATHS = DataPaths(
             route="/schedule",
             importance="critical",
             breaks="data_paths.breaks.no_evm",
+            missing="data_paths.missing.no_activities_for_evm",
         ),
         DataPath(
             "oe_costmodel",
@@ -34,6 +35,7 @@ DATA_PATHS = DataPaths(
             route="/cost-model",
             importance="critical",
             breaks="data_paths.breaks.no_evm",
+            missing="data_paths.missing.no_budget_for_evm",
         ),
     ),
     parameters=(

@@ -25,6 +25,7 @@ DATA_PATHS = DataPaths(
             route="/boq",
             importance="critical",
             breaks="data_paths.breaks.no_tender_scope",
+            missing="data_paths.missing.no_boq_for_tender",
         ),
         DataPath(
             "oe_contacts",
@@ -44,6 +45,7 @@ DATA_PATHS = DataPaths(
             measure=Sum("total_value"),
             importance="critical",
             breaks="data_paths.breaks.no_contract_value",
+            missing="data_paths.missing.no_contract_for_tender",
         ),
     ),
     parameters=(

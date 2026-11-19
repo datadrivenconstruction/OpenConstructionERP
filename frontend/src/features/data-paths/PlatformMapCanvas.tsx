@@ -1,8 +1,10 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 //
-// The platform map canvas: modules in workflow-stage columns (layout.ts),
-// coloured by their sidebar family, edges carrying the project's live counts.
+// The platform map canvas: modules in workflow-stage columns (layout.ts) under
+// stage headers, coloured by their sidebar family, edges as smooth curves whose
+// width grows with the project's live counts. It opens fitted to its content and
+// never below the zoom at which node labels stay 12 px or larger.
 // Data moves along active edges as small particles; with reduced motion the
 // particles are replaced by a static arrowhead. Hovering a module lights its
 // whole upstream and downstream chain; clicking it zooms to its path.
@@ -13,11 +15,9 @@ import {
   Background,
   BaseEdge,
   Controls,
-  EdgeLabelRenderer,
   Handle,
   Position,
   ReactFlowProvider,
-  getBezierPath,
   useReactFlow,
   type Edge,
   type EdgeProps,
@@ -28,14 +28,25 @@ import { useThemeStore } from '@/stores/useThemeStore';
 import '@xyflow/react/dist/style.css';
 import { useTranslation } from 'react-i18next';
 import clsx from 'clsx';
+import type { LucideIcon } from 'lucide-react';
 
 import { formatNumber } from '@/shared/lib/formatters';
 
 import type { EdgeOut, Importance, MapModule } from './api';
 import { chainOf, layeredLayout } from './layout';
-import { moduleMeta } from './moduleMeta';
+import { STAGES, moduleMeta } from './moduleMeta';
 import { moduleLabel } from './flowModel';
 import { useReducedMotion } from './motion';
+
+const STAGE_DEFAULTS: Record<string, string> = {
+  capture: 'Takeoff',
+  estimate: 'Estimating',
+  tender: 'Procurement',
+  contract: 'Commercial',
+  execution: 'Site',
+  finance: 'Finance',
+  platform: 'Platform',
+};
 
 export type ModuleStatus = 'with_data' | 'empty' | 'not_installed';
 
@@ -48,6 +59,7 @@ export interface CanvasModule {
 type ModuleNodeData = {
   label: string;
   family: string;
+  icon: LucideIcon | null;
   tone: string;
   count: number | null;
   status: ModuleStatus;
@@ -59,6 +71,10 @@ type ModuleNodeData = {
 };
 
 type FlowEdgeData = {
+  title: string;
+  /** Touches the platform band (contacts, documents, RFIs): supporting links drawn quietly. */
+  band: boolean;
+  tone: string;
   count: number | null;
   active: boolean;
   importance: Importance;
@@ -68,35 +84,65 @@ type FlowEdgeData = {
   stale: boolean;
 };
 
+const NODE_W = 160;
+const NODE_H = 64;
+const COL_GAP = 36;
+const ROW_GAP = 14;
+const HEADER_H = 40;
+// Node names are 14 px; below this zoom they would drop under 12 px on screen.
+const MIN_READABLE_ZOOM = 0.86;
+
+type StageNodeData = { label: string; n: number; width: number };
+
+const StageNode = memo(function StageNode({ data }: NodeProps<Node<StageNodeData>>) {
+  return (
+    <div
+      className="flex items-baseline justify-between border-b border-border-light pb-1.5 text-xs font-semibold uppercase tracking-wide text-content-tertiary"
+      style={{ width: data.width }}
+    >
+      <span className="truncate">{data.label}</span>
+      <span className="tabular-nums font-medium">{data.n}</span>
+    </div>
+  );
+});
+
 const ModuleNode = memo(function ModuleNode({ data }: NodeProps<Node<ModuleNodeData>>) {
   const { t } = useTranslation();
+  const Icon = data.icon;
   return (
     <div
       className={clsx(
-        'w-52 rounded-xl border bg-surface-primary px-3 py-2 transition-[opacity,box-shadow] duration-200',
+        'flex flex-col justify-between rounded-xl border bg-surface-primary px-2.5 py-2 transition-[opacity,box-shadow] duration-200',
         data.focus ? 'border-oe-blue shadow-md ring-2 ring-oe-blue/30' : data.lit ? 'border-oe-blue/60 shadow-sm' : 'border-border-light shadow-xs',
         data.dim && 'opacity-30',
         data.status === 'not_installed' && 'border-dashed',
       )}
-      style={{ borderInlineStartWidth: 4, borderInlineStartColor: data.tone }}
+      style={{ width: NODE_W, height: NODE_H }}
+      title={`${data.label} · ${data.family}`}
       data-testid="dp-map-node"
     >
       <Handle type="target" position={Position.Left} className="!h-1.5 !w-1.5 !border-0 !bg-transparent" />
-      <div className="flex items-center justify-between gap-2">
-        <span className="truncate text-sm font-medium text-content-primary">{data.label}</span>
+      <div className="flex min-w-0 items-start gap-2">
+        <span
+          className="mt-px flex h-6 w-6 shrink-0 items-center justify-center rounded-md"
+          style={{ background: `color-mix(in srgb, ${data.tone} 16%, transparent)`, color: data.tone }}
+          aria-hidden
+        >
+          {Icon ? <Icon size={14} strokeWidth={2} /> : <span className="h-2 w-2 rounded-full" style={{ background: data.tone }} />}
+        </span>
+        <span className="line-clamp-2 min-w-0 flex-1 break-words text-sm font-medium leading-tight text-content-primary">{data.label}</span>
         {data.critical && (
           <span
-            className="h-2 w-2 shrink-0 rounded-full bg-semantic-error"
+            className="mt-1 h-2 w-2 shrink-0 rounded-full bg-semantic-error"
             title={t('data_paths.health_missing_short', { defaultValue: 'A critical input is missing' })}
           />
         )}
       </div>
-      <div className="mt-0.5 flex items-center justify-between gap-2 text-2xs text-content-tertiary">
-        <span className="truncate">{data.family}</span>
+      <div className="flex items-baseline justify-end gap-1">
         {data.status === 'not_installed' ? (
-          <span>{t('data_paths.state_not_installed', { defaultValue: 'Not installed' })}</span>
+          <span className="text-xs text-content-tertiary">{t('data_paths.state_not_installed', { defaultValue: 'Not installed' })}</span>
         ) : data.count !== null ? (
-          <span className={clsx('tabular-nums', data.count ? 'font-medium text-content-secondary' : 'text-content-quaternary')}>
+          <span className={clsx('text-base font-semibold leading-none tabular-nums', data.count ? 'text-content-primary' : 'text-content-quaternary')}>
             {formatNumber(data.count)}
           </span>
         ) : null}
@@ -106,11 +152,28 @@ const ModuleNode = memo(function ModuleNode({ data }: NodeProps<Node<ModuleNodeD
   );
 });
 
-function FlowEdge({ id, sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition, data }: EdgeProps<Edge<FlowEdgeData>>) {
-  const [path, lx, ly] = getBezierPath({ sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition });
+/** Smooth curve; a link that runs backwards loops under its nodes instead of through them. */
+function curve(sx: number, sy: number, tx: number, ty: number): [string, number, number] {
+  if (tx > sx + 8) {
+    const c = Math.max(36, (tx - sx) * 0.5);
+    return [`M ${sx} ${sy} C ${sx + c} ${sy}, ${tx - c} ${ty}, ${tx} ${ty}`, (sx + tx) / 2, (sy + ty) / 2];
+  }
+  const drop = Math.max(sy, ty) + NODE_H * 0.75;
+  return [`M ${sx} ${sy} C ${sx + 28} ${sy}, ${sx + 28} ${drop}, ${(sx + tx) / 2} ${drop} S ${tx - 28} ${ty}, ${tx} ${ty}`, (sx + tx) / 2, drop];
+}
+
+export function edgeWidth(count: number | null, importance: Importance): number {
+  const base = importance === 'critical' ? 1.75 : importance === 'high' ? 1.4 : 1.1;
+  return base + Math.min(4.5, Math.log2(1 + Math.max(0, count ?? 0)) * 0.7);
+}
+
+function FlowEdge({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps<Edge<FlowEdgeData>>) {
+  const [path] = curve(sourceX, sourceY, targetX, targetY);
   const d = data as FlowEdgeData;
-  const width = d.importance === 'critical' ? 2.5 : d.importance === 'high' ? 1.75 : 1.1;
-  const stroke = d.stale ? 'var(--oe-warning)' : d.lit ? 'var(--oe-blue)' : 'var(--oe-border)';
+  // Links that run against the workflow stay quiet until their chain is lit.
+  const quiet = (targetX <= sourceX + 8 || d.band) && !d.lit;
+  const width = quiet ? 1 : edgeWidth(d.count, d.importance);
+  const stroke = d.stale ? 'var(--oe-warning)' : d.lit ? 'var(--oe-blue)' : d.tone;
   return (
     <>
       <BaseEdge
@@ -119,32 +182,26 @@ function FlowEdge({ id, sourceX, sourceY, targetX, targetY, sourcePosition, targ
         style={{
           stroke,
           strokeWidth: width + (d.lit ? 0.75 : 0),
-          opacity: d.dim ? 0.15 : 1,
-          strokeDasharray: d.stale ? '6 4' : undefined,
+          strokeLinecap: 'round',
+          opacity: d.dim ? 0.12 : d.lit ? 0.95 : quiet ? 0.28 : 0.5,
+          strokeDasharray: d.stale ? '6 4' : quiet ? '3 4' : undefined,
           transition: 'opacity 200ms, stroke 200ms',
         }}
         markerEnd={d.reduce || !d.active ? 'url(#dp-arrow)' : undefined}
       />
+      <path d={path} fill="none" stroke="transparent" strokeWidth={12}>
+        <title>{d.title}</title>
+      </path>
       {d.active && !d.reduce && !d.dim && (
         <circle r={d.lit ? 3 : 2.2} fill="var(--oe-blue)" opacity={0.75}>
           <animateMotion dur={`${d.importance === 'critical' ? 2.2 : 3.2}s`} repeatCount="indefinite" path={path} />
         </circle>
       )}
-      {d.count !== null && d.count > 0 && !d.dim && (
-        <EdgeLabelRenderer>
-          <div
-            className="nodrag nopan pointer-events-none absolute rounded-full border border-border-light bg-surface-primary px-1.5 text-2xs tabular-nums text-content-secondary shadow-xs"
-            style={{ transform: `translate(-50%, -50%) translate(${lx}px, ${ly}px)` }}
-          >
-            {formatNumber(d.count)}
-          </div>
-        </EdgeLabelRenderer>
-      )}
     </>
   );
 }
 
-const nodeTypes = { module: ModuleNode };
+const nodeTypes = { module: ModuleNode, stage: StageNode };
 const edgeTypes = { flow: FlowEdge };
 
 export interface PlatformMapCanvasProps {
@@ -162,7 +219,7 @@ export interface PlatformMapCanvasProps {
   height?: number;
 }
 
-function Canvas({ modules, edges, focus, visible, lit, hovered, onHover, onSelect, showTechnical, height = 620 }: PlatformMapCanvasProps) {
+function Canvas({ modules, edges, focus, visible, lit, hovered, onHover, onSelect, showTechnical, height }: PlatformMapCanvasProps) {
   const { t } = useTranslation();
   const reduce = useReducedMotion();
   const { fitView } = useReactFlow();
@@ -202,9 +259,52 @@ function Canvas({ modules, edges, focus, visible, lit, hovered, onHover, onSelec
           return { id: m.module.name, stage: meta.stage, sortKey: `${meta.familyId}:${m.module.name}` };
         }),
         inView,
+        { nodeWidth: NODE_W, nodeHeight: NODE_H, columnGap: COL_GAP, rowGap: ROW_GAP, bandColumns: 6 },
       ),
     [shown, inView],
   );
+
+  // Stage headers over every column that has modules, and one over the platform band.
+  const stageNodes: Node<StageNodeData>[] = useMemo(() => {
+    const byStage = new Map<number, { x: number; top: number; n: number }>();
+    for (const m of shown) {
+      const pos = positions.get(m.module.name);
+      if (!pos) continue;
+      const stage = moduleMeta(m.module.name).stage;
+      const bandStage = STAGES.indexOf('platform');
+      const key = stage === bandStage ? -1 : stage;
+      const hit = byStage.get(key);
+      if (!hit) byStage.set(key, { x: key === -1 ? 0 : pos.x, top: pos.y, n: 1 });
+      else {
+        hit.top = Math.min(hit.top, pos.y);
+        hit.n += 1;
+      }
+    }
+    const mainTop = Math.min(...[...byStage.entries()].filter(([k]) => k !== -1).map(([, v]) => v.top), 0);
+    return [...byStage.entries()].map(([key, v]) => {
+      const stage = key === -1 ? 'platform' : (STAGES[key] ?? 'platform');
+      return {
+        id: `stage:${stage}`,
+        type: 'stage',
+        position: { x: v.x, y: (key === -1 ? v.top : mainTop) - HEADER_H },
+        data: { label: String(t(`data_paths.stage_${stage}`, { defaultValue: STAGE_DEFAULTS[stage] })), n: v.n, width: NODE_W },
+        draggable: false,
+        selectable: false,
+        connectable: false,
+        focusable: false,
+      };
+    });
+  }, [shown, positions, t]);
+
+  const contentHeight = useMemo(() => {
+    let top = 0;
+    let bottom = 0;
+    for (const pos of positions.values()) {
+      top = Math.min(top, pos.y);
+      bottom = Math.max(bottom, pos.y + NODE_H);
+    }
+    return bottom - top + HEADER_H;
+  }, [positions]);
 
   const chain = useMemo(() => {
     const anchor = hovered ?? null;
@@ -229,6 +329,7 @@ function Canvas({ modules, edges, focus, visible, lit, hovered, onHover, onSelec
           data: {
             label: moduleLabel(t, m.module.name, m.module.display_name),
             family,
+            icon: meta.icon,
             tone: meta.tone,
             count: m.module.count,
             status: m.status,
@@ -257,6 +358,9 @@ function Canvas({ modules, edges, focus, visible, lit, hovered, onHover, onSelec
           type: 'flow',
           focusable: false,
           data: {
+            title: `${moduleLabel(t, e.source)} → ${moduleLabel(t, e.target)}${e.count !== null ? `: ${formatNumber(e.count)}` : ''}`,
+            tone: moduleMeta(e.source).tone,
+            band: [e.source, e.target].some((m) => STAGES[moduleMeta(m).stage] === 'platform'),
             count: e.count,
             active: e.active,
             importance: e.importance,
@@ -267,7 +371,7 @@ function Canvas({ modules, edges, focus, visible, lit, hovered, onHover, onSelec
           },
         };
       }),
-    [inView, chain, reduce],
+    [inView, chain, reduce, t],
   );
 
   // Zoom smoothly to the focused module's neighbourhood (or the whole map).
@@ -279,9 +383,15 @@ function Canvas({ modules, edges, focus, visible, lit, hovered, onHover, onSelec
           if (e.source === focus) near.add(e.target);
           if (e.target === focus) near.add(e.source);
         }
-        void fitView({ nodes: [...near].map((id) => ({ id })), padding: 0.25, duration: reduce ? 0 : 600, maxZoom: 1.2 });
+        void fitView({
+          nodes: [...near].map((id) => ({ id })),
+          padding: 0.2,
+          duration: reduce ? 0 : 600,
+          minZoom: MIN_READABLE_ZOOM,
+          maxZoom: 1.2,
+        });
       } else {
-        void fitView({ padding: 0.12, duration: reduce ? 0 : 500 });
+        void fitView({ padding: 0.04, duration: reduce ? 0 : 500, minZoom: MIN_READABLE_ZOOM, maxZoom: 1.1 });
       }
     }, 30);
     return () => window.clearTimeout(handle);
@@ -292,7 +402,7 @@ function Canvas({ modules, edges, focus, visible, lit, hovered, onHover, onSelec
   return (
     <div
       className="relative overflow-hidden rounded-xl border border-border-light bg-surface-secondary"
-      style={{ height }}
+      style={{ height: height ?? Math.min(760, Math.max(380, contentHeight + 72)) }}
       role="application"
       aria-label={t('data_paths.map_aria', { defaultValue: 'Platform data map. A list with the same content follows.' })}
     >
@@ -304,18 +414,19 @@ function Canvas({ modules, edges, focus, visible, lit, hovered, onHover, onSelec
         </defs>
       </svg>
       <ReactFlow
-        nodes={nodes}
+        nodes={[...stageNodes, ...nodes] as Node[]}
         edges={flowEdges}
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
-        onNodeClick={onNodeClick}
-        onNodeMouseEnter={(_, n) => onHover(n.id)}
+        onNodeClick={(e, n) => n.type === 'module' && onNodeClick(e, n)}
+        onNodeMouseEnter={(_, n) => n.type === 'module' && onHover(n.id)}
         onNodeMouseLeave={() => onHover(null)}
         nodesDraggable={false}
         nodesConnectable={false}
         minZoom={0.3}
         maxZoom={2}
         fitView
+        fitViewOptions={{ padding: 0.04, minZoom: MIN_READABLE_ZOOM, maxZoom: 1.1 }}
         colorMode={colorMode}
         style={{ background: 'transparent', '--xy-background-color': 'transparent' } as CSSProperties}
         proOptions={{ hideAttribution: true }}

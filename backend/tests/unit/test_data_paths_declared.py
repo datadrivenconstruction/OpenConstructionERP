@@ -67,7 +67,7 @@ def _labels(decl: DataPaths) -> list[str]:
     keys = [decl.why]
     keys += [e.label for e in decl.entities]
     for _d, p in decl.paths():
-        keys += [p.label, p.breaks]
+        keys += [p.label, p.breaks] + ([p.missing] if p.missing else [])
     keys += [p.label for p in decl.parameters]
     keys += [s.label for s in decl.stale]
     return [k for k in keys if k]

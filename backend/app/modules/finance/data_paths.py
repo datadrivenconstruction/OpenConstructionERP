@@ -26,6 +26,7 @@ DATA_PATHS = DataPaths(
             measure=Sum("amount_total"),
             importance="critical",
             breaks="data_paths.breaks.no_invoices",
+            missing="data_paths.missing.no_claim_in_finance",
         ),
         DataPath(
             "oe_procurement",

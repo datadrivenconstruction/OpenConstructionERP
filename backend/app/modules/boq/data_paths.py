@@ -51,6 +51,7 @@ DATA_PATHS = DataPaths(
             route="/tendering",
             importance="critical",
             breaks="data_paths.breaks.no_tender_scope",
+            missing="data_paths.missing.no_tender_from_boq",
         ),
         DataPath(
             "oe_schedule",

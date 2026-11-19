@@ -133,6 +133,9 @@ class HealthItem(BaseModel):
     label: str
     importance: str
     breaks: str
+    missing: str = Field(default="", description="i18n key of the plain sentence for this gap")
+    upstream: str = Field(default="", description="Module the data comes from")
+    downstream: str = Field(default="", description="Module that has to act; the Fix link opens it")
 
 
 class PlatformMap(BaseModel):
@@ -155,6 +158,9 @@ class PartyOut(BaseModel):
     roles: list[str]
     modules: list[str]
     placeholder: bool = False
+    primary_role: str = ""
+    touches: dict[str, int] = Field(default_factory=dict, description="Records per module that name this party")
+    org: str | None = Field(default=None, description="Party id of the organisation a person works for")
 
 
 class ProjectParties(BaseModel):

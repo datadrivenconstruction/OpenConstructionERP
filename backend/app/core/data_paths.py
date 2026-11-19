@@ -97,6 +97,8 @@ class DataPath:
         route: Front-end register the card opens; ``{project}`` is substituted.
         importance: :class:`Importance`; anything above supporting needs ``breaks``.
         breaks: i18n key of what stops downstream when this path is empty.
+        missing: i18n key of the plain sentence the health panel shows when a
+            critical path is empty (``No contract yet for the awarded tender``).
         where: Extra filters on ``entity``.
         scope: ``project`` (default) or ``global`` for shared reference data
             (cost catalogues, statutory regimes) that has no project.
@@ -110,6 +112,7 @@ class DataPath:
     route: str = ""
     importance: Importance | str = Importance.SUPPORTING
     breaks: str = ""
+    missing: str = ""
     where: tuple[Where, ...] = ()
     scope: str = "project"
 

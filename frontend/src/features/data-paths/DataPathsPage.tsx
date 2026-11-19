@@ -19,13 +19,14 @@ import { TabBar } from '@/shared/ui/TabBar';
 import { formatNumber } from '@/shared/lib/formatters';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 
-import { useModulePaths, usePlatformMap, useProjectParties, type Party } from './api';
+import { useModulePaths, usePlatformMap, useProjectParties, type HealthItem, type Party } from './api';
 import { buildFlowModel, moduleLabel } from './flowModel';
 import { DataPathsFlow } from './DataPathsFlow';
 import { DataPathsList } from './DataPathsDrawer';
 import { PartiesHoneycomb } from './PartiesHoneycomb';
 import { PlatformMapCanvas, type CanvasModule, type ModuleStatus } from './PlatformMapCanvas';
 import { neighbourhood } from './layout';
+import { moduleMeta } from './moduleMeta';
 
 type Level = 'module' | 'neighbourhood' | 'platform';
 type Filter = 'all' | ModuleStatus;
@@ -194,7 +195,8 @@ export function DataPathsPage() {
         <p className="text-sm text-semantic-error">{t('data_paths.load_failed', { defaultValue: 'The data paths could not be loaded.' })}</p>
       )}
 
-      <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_20rem]">
+      {/* The map takes the full width so it reads without zooming; health and people sit below. */}
+      <div className="space-y-4">
         <div className="min-w-0 space-y-4">
           {level === 'module' && focus ? (
             <div className="rounded-xl border border-border-light bg-surface-primary p-4">
@@ -225,10 +227,9 @@ export function DataPathsPage() {
               showTechnical={showTechnical}
             />
           )}
-          <MapList modules={modules} edges={edges} visible={visible} />
         </div>
 
-        <aside className="space-y-4">
+        <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
           <HealthPanel health={map.data?.health ?? []} hasProject={!!projectId} />
           <section className="rounded-xl border border-border-light bg-surface-primary p-3">
             <h3 className="mb-2 text-sm font-semibold text-content-primary">{t('data_paths.people_title', { defaultValue: 'People on this project' })}</h3>
@@ -240,7 +241,6 @@ export function DataPathsPage() {
                 onSelectParty={(p: Party) => {
                   if (p.modules[0]) select(p.modules[0]);
                 }}
-                compact
               />
             ) : (
               <p className="text-xs text-content-tertiary">
@@ -248,13 +248,14 @@ export function DataPathsPage() {
               </p>
             )}
           </section>
-        </aside>
+        </div>
+        <MapList modules={modules} edges={edges} visible={visible} />
       </div>
     </div>
   );
 }
 
-function HealthPanel({ health, hasProject }: { health: { module: string; path_id: string; source: string; label: string; breaks: string }[]; hasProject: boolean }) {
+function HealthPanel({ health, hasProject }: { health: HealthItem[]; hasProject: boolean }) {
   const { t } = useTranslation();
   if (!hasProject) return null;
   return (
@@ -266,23 +267,39 @@ function HealthPanel({ health, hasProject }: { health: { module: string; path_id
           {t('data_paths.health_ok', { defaultValue: 'Every critical input has data.' })}
         </p>
       ) : (
-        <ul className="space-y-2">
-          {health.map((h) => (
-            <li key={h.path_id} className="flex gap-2 text-xs">
-              <CircleAlert size={14} className="mt-0.5 shrink-0 text-semantic-error" aria-hidden />
-              <span>
-                <Link to={`/data-paths/${encodeURIComponent(h.module)}`} className="font-medium text-content-primary hover:text-oe-blue">
-                  {t('data_paths.health_missing', {
-                    defaultValue: '{{module}} has no {{input}} from {{source}}',
-                    module: moduleLabel(t, h.module),
-                    input: h.label ? t(h.label, { defaultValue: h.label }) : '',
-                    source: moduleLabel(t, h.source),
-                  })}
-                </Link>
-                {h.breaks && <span className="block text-content-tertiary">{t(h.breaks, { defaultValue: '' })}</span>}
-              </span>
-            </li>
-          ))}
+        <ul className="space-y-2.5">
+          {health.map((h) => {
+            const upstream = h.upstream || h.source;
+            const downstream = h.downstream || h.module;
+            const sentence = h.missing
+              ? t(h.missing, { defaultValue: '' })
+              : t('data_paths.health_missing_plain', {
+                  defaultValue: 'Nothing has reached {{module}} from {{source}} yet',
+                  module: moduleLabel(t, downstream),
+                  source: moduleLabel(t, upstream),
+                });
+            const fixRoute = moduleMeta(downstream).route;
+            return (
+              <li key={h.path_id} className="flex gap-2 text-xs" data-testid="dp-health-item">
+                <CircleAlert size={14} className="mt-0.5 shrink-0 text-semantic-error" aria-hidden />
+                <span className="min-w-0 flex-1">
+                  <Link to={`/data-paths/${encodeURIComponent(downstream)}`} className="font-medium text-content-primary hover:text-oe-blue">
+                    {sentence}
+                  </Link>
+                  {h.breaks && <span className="block text-content-tertiary">{t(h.breaks, { defaultValue: '' })}</span>}
+                </span>
+                {fixRoute && (
+                  <Link
+                    to={fixRoute}
+                    className="shrink-0 self-start rounded-md border border-border-light px-2 py-0.5 font-medium text-oe-blue hover:bg-surface-secondary"
+                    aria-label={t('data_paths.health_fix_aria', { defaultValue: 'Fix in {{module}}', module: moduleLabel(t, downstream) })}
+                  >
+                    {t('data_paths.health_fix', { defaultValue: 'Fix' })}
+                  </Link>
+                )}
+              </li>
+            );
+          })}
         </ul>
       )}
     </section>

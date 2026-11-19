@@ -308,6 +308,7 @@ async def platform_map(
     modules: list[MapModule] = []
     edge_counts: dict[tuple[str, str], tuple[int | None, bool, str]] = {}
     health: list[HealthItem] = []
+    health_pairs: set[tuple[str, str]] = set()
     for name, manifest in sorted(graph.manifests.items()):
         if not visible(name):
             continue
@@ -351,7 +352,10 @@ async def platform_map(
                     and total > 0
                     and visible(path.module)
                     and path.module in graph.loaded
+                    and pair not in health_pairs
                 ):
+                    # Both ends may declare the same link; one gap is one line.
+                    health_pairs.add(pair)
                     health.append(
                         HealthItem(
                             module=name,
@@ -360,6 +364,9 @@ async def platform_map(
                             label=path.label,
                             importance=str(path.importance),
                             breaks=path.breaks,
+                            missing=path.missing,
+                            upstream=pair[0],
+                            downstream=pair[1],
                         )
                     )
         modules.append(item)
