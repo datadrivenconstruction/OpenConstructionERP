@@ -53,6 +53,7 @@ interface Form {
   invoice_prefix: string;
   default_signatory: string;
   bank: EntityBank;
+  logo_data_url: string;
   is_active: boolean;
   is_default: boolean;
 }
@@ -71,6 +72,7 @@ function formOf(c: LegalEntity | null): Form {
     invoice_prefix: c?.invoice_prefix ?? '',
     default_signatory: c?.default_signatory ?? '',
     bank: { ...(c?.bank ?? {}) },
+    logo_data_url: c?.logo_data_url ?? '',
     is_active: c?.is_active ?? true,
     is_default: c?.is_default ?? false,
   };
@@ -150,6 +152,7 @@ export function CompanyDrawer({ company, isFirst, canEdit, onClose }: Props) {
       invoice_prefix: form.invoice_prefix.trim() || null,
       default_signatory: form.default_signatory.trim() || null,
       bank: Object.values(form.bank).some((v) => (v ?? '').trim()) ? form.bank : null,
+      logo_data_url: form.logo_data_url || null,
       is_active: form.is_active,
       ...(form.is_default ? { is_default: true } : {}),
     };
@@ -503,6 +506,39 @@ export function CompanyDrawer({ company, isFirst, canEdit, onClose }: Props) {
                 onChange={(e) => set('bank', { ...form.bank, bic: e.target.value })}
                 className="font-mono"
               />
+              <div className="text-sm">
+                <span className="mb-1 block font-medium text-content-primary">
+                  {t('legal_entities.logo', { defaultValue: 'Logo on documents' })}
+                </span>
+                <div className="flex items-center gap-2">
+                  {form.logo_data_url && (
+                    <img src={form.logo_data_url} alt="" className="h-8 max-w-[8rem] object-contain" />
+                  )}
+                  {!ro && (
+                    <input
+                      type="file"
+                      accept="image/png,image/jpeg,image/webp"
+                      className="text-xs"
+                      aria-label={t('legal_entities.logo', { defaultValue: 'Logo on documents' })}
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        const reader = new FileReader();
+                        reader.onload = () => set('logo_data_url', String(reader.result ?? ''));
+                        reader.readAsDataURL(file);
+                      }}
+                    />
+                  )}
+                  {!ro && form.logo_data_url && (
+                    <Button size="sm" variant="ghost" onClick={() => set('logo_data_url', '')}>
+                      {t('legal_entities.logo_remove', { defaultValue: 'Remove logo' })}
+                    </Button>
+                  )}
+                </div>
+                <p className="mt-1 text-xs text-content-tertiary">
+                  {t('legal_entities.logo_hint', { defaultValue: 'Empty: documents carry the workspace logo.' })}
+                </p>
+              </div>
               <label className="flex items-center gap-2">
                 <input
                   type="checkbox"

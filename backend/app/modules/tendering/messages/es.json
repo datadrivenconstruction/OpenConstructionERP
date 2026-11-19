@@ -1,0 +1,12 @@
+{
+  "award": {
+    "mandant_missing": {
+      "fail": "El paquete no tiene entidad contratante; el contrato no puede nombrar al comprador.",
+      "suggestion": "Elija la empresa en la cabecera del paquete o asigne una al proyecto."
+    },
+    "losers_not_notified": {
+      "fail": "Cartas de rechazo no enviadas a {n} licitadores.",
+      "suggestion": "Envíe las cartas de rechazo desde el paso de adjudicación."
+    }
+  }
+}

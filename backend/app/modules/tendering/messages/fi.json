@@ -1,0 +1,12 @@
+{
+  "award": {
+    "mandant_missing": {
+      "fail": "Paketilla ei ole tilaajayksikköä; sopimus ei voi nimetä ostajaa.",
+      "suggestion": "Valitse yhtiö paketin otsikkotiedoissa tai liitä projektiin yhtiö."
+    },
+    "losers_not_notified": {
+      "fail": "Hylkäyskirjeitä ei lähetetty {n} tarjoajalle.",
+      "suggestion": "Lähetä hylkäyskirjeet valintavaiheesta."
+    }
+  }
+}

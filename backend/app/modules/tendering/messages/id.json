@@ -1,0 +1,12 @@
+{
+  "award": {
+    "mandant_missing": {
+      "fail": "Paket tidak memiliki entitas pemberi kerja; kontrak tidak dapat menyebut pembeli.",
+      "suggestion": "Pilih perusahaan di kepala paket, atau tetapkan satu untuk proyek."
+    },
+    "losers_not_notified": {
+      "fail": "Surat penolakan belum dikirim ke {n} peserta.",
+      "suggestion": "Kirim surat penolakan dari langkah penunjukan."
+    }
+  }
+}

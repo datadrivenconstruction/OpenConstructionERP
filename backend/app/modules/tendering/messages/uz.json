@@ -1,0 +1,12 @@
+{
+  "award": {
+    "mandant_missing": {
+      "fail": "Paketda buyurtmachi yuridik shaxs yo'q; shartnoma xaridorni ko'rsata olmaydi.",
+      "suggestion": "Paket sarlavhasida kompaniyani tanlang yoki loyihaga kompaniya biriktiring."
+    },
+    "losers_not_notified": {
+      "fail": "Rad xatlari {n} ishtirokchiga yuborilmagan.",
+      "suggestion": "Rad xatlarini tanlov bosqichidan yuboring."
+    }
+  }
+}

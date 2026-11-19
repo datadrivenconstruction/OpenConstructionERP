@@ -1,0 +1,12 @@
+{
+  "award": {
+    "mandant_missing": {
+      "fail": "Pakiet nie ma podmiotu zamawiającego; umowa nie może wskazać kupującego.",
+      "suggestion": "Wybierz spółkę w nagłówku pakietu lub przypisz ją do projektu."
+    },
+    "losers_not_notified": {
+      "fail": "Nie wysłano pism z odmową do oferentów: {n}.",
+      "suggestion": "Wyślij pisma z odmową w kroku wyboru wykonawcy."
+    }
+  }
+}

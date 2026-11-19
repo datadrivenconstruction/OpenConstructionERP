@@ -1,0 +1,12 @@
+{
+  "award": {
+    "mandant_missing": {
+      "fail": "Gói thầu chưa có pháp nhân giao thầu; hợp đồng không thể ghi tên bên mua.",
+      "suggestion": "Chọn công ty trong tiêu đề gói thầu hoặc gán một công ty cho dự án."
+    },
+    "losers_not_notified": {
+      "fail": "Chưa gửi thư từ chối cho {n} nhà thầu.",
+      "suggestion": "Gửi thư từ chối từ bước chọn thầu."
+    }
+  }
+}

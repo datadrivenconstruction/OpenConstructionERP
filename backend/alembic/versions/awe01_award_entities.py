@@ -5,7 +5,7 @@
 Adds to ``oe_tendering_package`` the company the package is bought for
 (``legal_entity_id``), trade, cost line, four dates (issue, questions until,
 bids due, award planned) and four roles (buyer, estimator, site manager,
-approver). Adds ``default_signatory`` and ``bank`` to
+approver). Adds ``default_signatory``, ``bank`` and ``logo_data_url`` to
 ``oe_legal_entities_entity``. Every column is nullable and additive; a running
 install also gets them from the auto-migrator. Each step is guarded, so a
 re-run changes nothing.
@@ -49,6 +49,7 @@ _PKG_INDEXED = ("legal_entity_id", "cost_line_id")
 _ENT_COLUMNS: tuple[tuple[str, sa.types.TypeEngine], ...] = (
     ("default_signatory", sa.String(255)),
     ("bank", sa.JSON()),
+    ("logo_data_url", sa.Text()),
 )
 
 

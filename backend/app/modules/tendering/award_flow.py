@@ -110,7 +110,15 @@ def issuer_identity(entity: LegalEntity) -> dict[str, Any]:
         "registration": entity.registration_number or "",
         "bank": " / ".join(p for p in (bank.get("bank_name"), bank.get("iban"), bank.get("bic")) if p),
         "signatory": entity.default_signatory or "",
+        "profile": issuer_profile(entity),
     }
+
+
+def issuer_profile(entity: LegalEntity) -> dict[str, str]:
+    """The entity in the company-profile shape the letterhead, logo and contract seller read."""
+    from app.modules.legal_entities.seller import entity_profile
+
+    return entity_profile(entity)
 
 
 async def issuer_for(session: Any, package: Any) -> dict[str, Any] | None:
@@ -457,6 +465,7 @@ async def _contract_pdf(session: AsyncSession, package: TenderPackage) -> tuple[
     contract = await find_award_contract(session, package.project_id, keys={"tender_package_id": str(package.id)})
     if contract is None:
         return None
+    from app.core.company_profile import issuing_company
     from app.core.register_context import load_project_header
     from app.modules.contracts.pdf_export import build_contract_pdf
     from app.modules.contracts.repository import ContractLineRepository
@@ -465,7 +474,10 @@ async def _contract_pdf(session: AsyncSession, package: TenderPackage) -> tuple[
     project = await load_project_header(session, contract.project_id)
     lines = list(await ContractLineRepository(session).list_for_contract(contract.id))
     counterparty = await ContractsService(session).resolve_counterparty_name(contract)
-    pdf = await asyncio.to_thread(build_contract_pdf, contract, lines, project=project, counterparty=counterparty)
+    entity, _source = await issuing_entity(session, package)
+    # The package's company (else the project's) is the buyer the contract names.
+    with issuing_company(issuer_profile(entity) if entity is not None else None):
+        pdf = await asyncio.to_thread(build_contract_pdf, contract, lines, project=project, counterparty=counterparty)
     return pdf, f"contract_{contract.code}.pdf"
 
 

@@ -1,0 +1,12 @@
+{
+  "award": {
+    "mandant_missing": {
+      "fail": "Walang entidad ng employer ang package; hindi mapangalanan ng kontrata ang buyer.",
+      "suggestion": "Piliin ang kumpanya sa header ng package, o magtalaga ng isa sa proyekto."
+    },
+    "losers_not_notified": {
+      "fail": "Hindi naipadala ang sulat ng pagtanggi sa {n} bidder.",
+      "suggestion": "Ipadala ang mga sulat ng pagtanggi mula sa hakbang ng award."
+    }
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "award": {
+    "mandant_missing": {
+      "fail": "Le lot n'a pas d'entité cliente ; le contrat ne peut pas nommer l'acheteur.",
+      "suggestion": "Choisissez la société dans l'en-tête du lot ou affectez-en une au projet."
+    },
+    "losers_not_notified": {
+      "fail": "Lettres de refus non envoyées à {n} soumissionnaires.",
+      "suggestion": "Envoyez les lettres de refus depuis l'étape d'attribution."
+    }
+  }
+}

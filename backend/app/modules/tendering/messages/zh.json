@@ -1,0 +1,12 @@
+{
+  "award": {
+    "mandant_missing": {
+      "fail": "分包包未指定发包主体，合同无法写明买方。",
+      "suggestion": "请在分包包表头中选择公司，或为项目指定公司。"
+    },
+    "losers_not_notified": {
+      "fail": "尚有 {n} 家投标单位未收到未中标通知。",
+      "suggestion": "请在定标步骤中发送未中标通知。"
+    }
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "award": {
+    "mandant_missing": {
+      "fail": "Paket nema naručitelja; ugovor ne može navesti kupca.",
+      "suggestion": "Odaberite društvo u zaglavlju paketa ili ga dodijelite projektu."
+    },
+    "losers_not_notified": {
+      "fail": "Odbijenice nisu poslane ponuditeljima: {n}.",
+      "suggestion": "Pošaljite odbijenice iz koraka odabira."
+    }
+  }
+}

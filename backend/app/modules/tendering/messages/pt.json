@@ -1,0 +1,12 @@
+{
+  "award": {
+    "mandant_missing": {
+      "fail": "O pacote não tem entidade contratante; o contrato não pode indicar o comprador.",
+      "suggestion": "Escolha a empresa no cabeçalho do pacote ou atribua uma ao projeto."
+    },
+    "losers_not_notified": {
+      "fail": "Cartas de recusa não enviadas a {n} proponentes.",
+      "suggestion": "Envie as cartas de recusa a partir do passo de adjudicação."
+    }
+  }
+}
