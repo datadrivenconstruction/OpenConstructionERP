@@ -2393,3 +2393,8 @@ async def put_document_policy(
     policy = await svc.set_document_policy(data, user_id)
     await session.commit()
     return policy
+
+
+from app.modules.subcontractors.terms_router import terms_router  # noqa: E402
+
+router.include_router(terms_router)

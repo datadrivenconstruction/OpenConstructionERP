@@ -968,6 +968,14 @@
       "insurance": "Pojištění",
       "method_statement": "Technologický postup",
       "other": "Jiný dokument"
+    },
+    "levies_reconcile": {
+      "fail": "Hodnota prací po odečtení poplatků a zádržného je {expected}, ale částka k úhradě je {payable}",
+      "suggestion": "Přepočítejte vyúčtování z podmínek subdodavatelské smlouvy místo ruční úpravy částek."
+    },
+    "payment_discount_reconciles": {
+      "fail": "Skonto činí {discount}, ale sjednaná sazba z částky k úhradě dává {expected}",
+      "suggestion": "Přepočítejte skonto ze sjednané sazby a částky k úhradě."
     }
   },
   "submittal": {
@@ -1097,7 +1105,8 @@
     "boq_bulk_items_required": "Seznam 'items' je povinný a nesmí být prázdný",
     "boq_classification_unavailable": "Služba klasifikace není dostupná",
     "boq_budget_no_positions": "Výkaz výměr nemá žádné položky: není co rozpočtovat.",
-    "boq_fix_unit_rate_required": "Je vyžadován nezáporný parametr 'unit_rate'"
+    "boq_fix_unit_rate_required": "Je vyžadován nezáporný parametr 'unit_rate'",
+    "levy_code_taken": "Poplatek s tímto kódem už v katalogu je."
   },
   "variations": {
     "boq_lines_are_traced": {
@@ -2555,6 +2564,22 @@
     },
     "index_attribution": {
       "fail": "Cenový index ArchSD neuvádí zdroj: uveďte Architectural Services Department"
+    }
+  },
+  "tender": {
+    "recipient_outside_radius": {
+      "fail": "Firma je {distance} km od stavby, mimo okruh hledání {radius} km",
+      "suggestion": "Ponechte firmu, pokud v této oblasti působí, nebo zvětšete okruh."
+    }
+  },
+  "de": {
+    "payment_discount_unagreed": {
+      "fail": "Skonto {discount} použito, ale ve smlouvě nesjednáno (VOB/B 16 (5) 2)",
+      "suggestion": "Zapište sazbu a lhůtu skonta do subdodavatelské smlouvy, nebo plaťte bez skonta."
+    },
+    "retention_over_vob_cap": {
+      "fail": "Zádržné {rate} % z platby je nad {maximum} % (VOB/B 17 (6) 1)",
+      "suggestion": "Snižte zádržné z platby na maximum VOB/B."
     }
   }
 }

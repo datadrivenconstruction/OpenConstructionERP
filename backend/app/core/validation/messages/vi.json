@@ -968,6 +968,14 @@
       "insurance": "Bảo hiểm",
       "method_statement": "Biện pháp thi công",
       "other": "Tài liệu khác"
+    },
+    "levies_reconcile": {
+      "fail": "Giá trị công việc trừ phí và tiền giữ lại là {expected}, nhưng số tiền phải trả là {payable}",
+      "suggestion": "Tính lại bảng kê theo điều khoản hợp đồng thầu phụ thay vì sửa số tiền bằng tay."
+    },
+    "payment_discount_reconciles": {
+      "fail": "Chiết khấu thanh toán là {discount}, nhưng tỷ lệ đã thỏa thuận trên số tiền phải trả cho ra {expected}",
+      "suggestion": "Tính lại chiết khấu theo tỷ lệ đã thỏa thuận và số tiền phải trả."
     }
   },
   "submittal": {
@@ -1097,7 +1105,8 @@
     "boq_bulk_items_required": "Danh sách 'items' là bắt buộc và không được để trống",
     "boq_classification_unavailable": "Dịch vụ phân loại không khả dụng",
     "boq_budget_no_positions": "Bảng khối lượng không có hạng mục: không có gì để lập ngân sách.",
-    "boq_fix_unit_rate_required": "Cần tham số 'unit_rate' không âm"
+    "boq_fix_unit_rate_required": "Cần tham số 'unit_rate' không âm",
+    "levy_code_taken": "Danh mục đã có khoản phí với mã này."
   },
   "variations": {
     "boq_lines_are_traced": {
@@ -2555,6 +2564,22 @@
     },
     "index_attribution": {
       "fail": "Chỉ số giá ArchSD thiếu ghi nguồn: ghi Architectural Services Department"
+    }
+  },
+  "tender": {
+    "recipient_outside_radius": {
+      "fail": "Công ty cách công trường {distance} km, ngoài bán kính tìm kiếm {radius} km",
+      "suggestion": "Giữ công ty nếu họ phục vụ khu vực này, hoặc mở rộng bán kính."
+    }
+  },
+  "de": {
+    "payment_discount_unagreed": {
+      "fail": "Đã áp dụng chiết khấu thanh toán {discount} nhưng hợp đồng không thỏa thuận (VOB/B 16 (5) 2)",
+      "suggestion": "Ghi tỷ lệ và số ngày chiết khấu vào hợp đồng thầu phụ, hoặc thanh toán không chiết khấu."
+    },
+    "retention_over_vob_cap": {
+      "fail": "Tiền giữ lại {rate}% mỗi lần thanh toán vượt {maximum}% (VOB/B 17 (6) 1)",
+      "suggestion": "Giảm tiền giữ lại mỗi lần thanh toán xuống mức tối đa của VOB/B."
     }
   }
 }

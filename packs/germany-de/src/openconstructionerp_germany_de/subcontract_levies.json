@@ -1,0 +1,20 @@
+{
+  "country": "DE",
+  "source": "Contract practice (Bauumlagen in Nachunternehmerverträgen). No statute sets these rates; each company enters the percentages it agrees.",
+  "levies": [
+    {"code": "bauwesenversicherung", "basis": "percent", "applies_at": "each_invoice",
+     "name": {"de": "Bauwesenversicherung", "en": "Construction all-risks insurance"}},
+    {"code": "baureinigung", "basis": "percent", "applies_at": "each_invoice",
+     "name": {"de": "Baureinigung und Bauschuttbeseitigung", "en": "Site cleaning and debris removal"}},
+    {"code": "baustrom_bauwasser", "basis": "percent", "applies_at": "each_invoice",
+     "name": {"de": "Baustrom und Bauwasser", "en": "Site power and water"}},
+    {"code": "baustelleneinrichtung", "basis": "percent", "applies_at": "each_invoice",
+     "name": {"de": "Mitbenutzung der Baustelleneinrichtung", "en": "Shared site facilities"}},
+    {"code": "entsorgung", "basis": "percent", "applies_at": "each_invoice",
+     "name": {"de": "Abfallentsorgung", "en": "Waste disposal"}},
+    {"code": "sanitaer", "basis": "percent", "applies_at": "each_invoice",
+     "name": {"de": "Sanitär- und Aufenthaltscontainer", "en": "Welfare and rest containers"}},
+    {"code": "bewachung", "basis": "percent", "applies_at": "final_account",
+     "name": {"de": "Baustellenbewachung", "en": "Site security"}}
+  ]
+}

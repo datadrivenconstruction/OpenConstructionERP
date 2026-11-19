@@ -968,6 +968,14 @@
       "insurance": "Osiguranje",
       "method_statement": "Opis metode rada",
       "other": "Ostali dokument"
+    },
+    "levies_reconcile": {
+      "fail": "Vrijednost radova umanjena za naknade i zadržavanje iznosi {expected}, ali iznos za plaćanje je {payable}",
+      "suggestion": "Ponovno izračunajte obračun iz uvjeta podugovora umjesto ručnog mijenjanja iznosa."
+    },
+    "payment_discount_reconciles": {
+      "fail": "Popust za plaćanje iznosi {discount}, ali dogovorena stopa od iznosa za plaćanje daje {expected}",
+      "suggestion": "Ponovno izračunajte popust iz dogovorene stope i iznosa za plaćanje."
     }
   },
   "submittal": {
@@ -1097,7 +1105,8 @@
     "boq_bulk_items_required": "Popis 'items' je obavezan i ne smije biti prazan",
     "boq_classification_unavailable": "Usluga klasifikacije nije dostupna",
     "boq_budget_no_positions": "Troškovnik nema stavki: nema što budžetirati.",
-    "boq_fix_unit_rate_required": "Obavezan je nenegativan parametar 'unit_rate'"
+    "boq_fix_unit_rate_required": "Obavezan je nenegativan parametar 'unit_rate'",
+    "levy_code_taken": "Naknada s ovom šifrom već je u katalogu."
   },
   "variations": {
     "boq_lines_are_traced": {
@@ -2555,6 +2564,22 @@
     },
     "index_attribution": {
       "fail": "Indeks cijena ArchSD nema naveden izvor: navedite Architectural Services Department"
+    }
+  },
+  "tender": {
+    "recipient_outside_radius": {
+      "fail": "Tvrtka je {distance} km od gradilišta, izvan radijusa pretraživanja od {radius} km",
+      "suggestion": "Zadržite tvrtku ako radi na ovom području ili povećajte radijus."
+    }
+  },
+  "de": {
+    "payment_discount_unagreed": {
+      "fail": "Popust za plaćanje od {discount} primijenjen, ali nije ugovoren (VOB/B 16 (5) 2)",
+      "suggestion": "Upišite stopu i rok popusta u podugovor ili platite bez popusta."
+    },
+    "retention_over_vob_cap": {
+      "fail": "Zadržavanje od {rate}% po plaćanju je iznad {maximum}% (VOB/B 17 (6) 1)",
+      "suggestion": "Smanjite zadržavanje po plaćanju na VOB/B maksimum."
     }
   }
 }

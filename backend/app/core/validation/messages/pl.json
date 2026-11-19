@@ -968,6 +968,14 @@
       "insurance": "Ubezpieczenie",
       "method_statement": "Opis metody wykonania",
       "other": "Inny dokument"
+    },
+    "levies_reconcile": {
+      "fail": "Wartość robót minus opłaty i zatrzymanie daje {expected}, ale kwota do zapłaty wynosi {payable}",
+      "suggestion": "Przelicz zestawienie z warunków umowy podwykonawczej zamiast zmieniać kwoty ręcznie."
+    },
+    "payment_discount_reconciles": {
+      "fail": "Skonto wynosi {discount}, ale uzgodniona stawka od kwoty do zapłaty daje {expected}",
+      "suggestion": "Przelicz skonto z uzgodnionej stawki i kwoty do zapłaty."
     }
   },
   "submittal": {
@@ -1097,7 +1105,8 @@
     "boq_bulk_items_required": "Lista 'items' jest wymagana i nie może być pusta",
     "boq_classification_unavailable": "Usługa klasyfikacji niedostępna",
     "boq_budget_no_positions": "Przedmiar nie ma pozycji: nie ma czego budżetować.",
-    "boq_fix_unit_rate_required": "Wymagany jest nieujemny parametr 'unit_rate'"
+    "boq_fix_unit_rate_required": "Wymagany jest nieujemny parametr 'unit_rate'",
+    "levy_code_taken": "Opłata z tym kodem jest już w katalogu."
   },
   "variations": {
     "boq_lines_are_traced": {
@@ -2555,6 +2564,22 @@
     },
     "index_attribution": {
       "fail": "Indeks cen ArchSD nie podaje źródła: wskaż Architectural Services Department"
+    }
+  },
+  "tender": {
+    "recipient_outside_radius": {
+      "fail": "Firma jest {distance} km od budowy, poza promieniem wyszukiwania {radius} km",
+      "suggestion": "Zostaw firmę, jeśli obsługuje ten rejon, lub zwiększ promień."
+    }
+  },
+  "de": {
+    "payment_discount_unagreed": {
+      "fail": "Skonto {discount} zastosowane, ale nieuzgodnione w umowie (VOB/B 16 (5) 2)",
+      "suggestion": "Wpisz stawkę i termin skonta do umowy podwykonawczej albo zapłać bez skonta."
+    },
+    "retention_over_vob_cap": {
+      "fail": "Zatrzymanie {rate}% z płatności przekracza {maximum}% (VOB/B 17 (6) 1)",
+      "suggestion": "Obniż zatrzymanie z płatności do maksimum VOB/B."
     }
   }
 }

@@ -57,6 +57,7 @@ import { fetchProjectList } from '@/shared/lib/projectList';
 import { useToastStore } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { BidComparisonChart } from './BidComparisonChart';
+import { BidderRadiusBar, BidderRowMeta, applyBidderSearch, useBidderFilter } from './BidderRadiusBar';
 import { getBidCarbon } from '@/features/carbon/lifecycleApi';
 import { kgToTonnes } from '@/features/carbon/lifecycle';
 import { AddendumList } from './AddendumList';
@@ -376,12 +377,16 @@ async function resolveSubcontractorEmail(subId: string): Promise<string> {
 function SubcontractorPickerModal({
   onPick,
   onClose,
+  projectId,
 }: {
   onPick: (sub: Subcontractor, email: string) => void;
   onClose: () => void;
+  /** Enables the trade, radius and favourites filter around this project's site. */
+  projectId?: string;
 }) {
   const { t } = useTranslation();
   const [search, setSearch] = useState('');
+  const bidder = useBidderFilter(projectId);
   const [resolvingId, setResolvingId] = useState<string | null>(null);
 
   const subsQ = useQuery({
@@ -393,14 +398,20 @@ function SubcontractorPickerModal({
   const rows = useMemo(() => {
     const items = subsQ.data?.items ?? [];
     const s = search.trim().toLowerCase();
-    if (!s) return items;
-    return items.filter(
+    const narrowed = applyBidderSearch(items, bidder.state, bidder.search);
+    if (!s) return narrowed;
+    return narrowed.filter(
       (it) =>
         it.legal_name.toLowerCase().includes(s) ||
         (it.trade_name || '').toLowerCase().includes(s) ||
         it.trade_categories.some((c) => c.toLowerCase().includes(s)),
     );
-  }, [subsQ.data, search]);
+  }, [subsQ.data, search, bidder.state, bidder.search]);
+
+  const trades = useMemo(
+    () => [...new Set((subsQ.data?.items ?? []).flatMap((it) => it.trade_categories))].sort(),
+    [subsQ.data],
+  );
 
   const pick = async (sub: Subcontractor) => {
     setResolvingId(sub.id);
@@ -448,6 +459,9 @@ function SubcontractorPickerModal({
             autoFocus
           />
         </div>
+        {projectId && (
+          <BidderRadiusBar state={bidder.state} setState={bidder.setState} search={bidder.search} trades={trades} />
+        )}
         {subsQ.isLoading ? (
           <SkeletonTable rows={5} columns={3} />
         ) : rows.length === 0 ? (
@@ -485,6 +499,7 @@ function SubcontractorPickerModal({
                     defaultValue: TENDERING_PREQUAL_LABELS[sub.prequalification_status] ?? sub.prequalification_status,
                   })}
                 </Badge>
+                {projectId && <BidderRowMeta row={bidder.byId.get(sub.id)} trade={bidder.state.trade} />}
                 {resolvingId === sub.id ? (
                   <Loader2 size={14} className="shrink-0 animate-spin text-content-tertiary" />
                 ) : (
@@ -663,9 +678,11 @@ function AddBidDialog({
   currency,
   onClose,
   onCreated,
+  projectId,
 }: {
   packageId: string;
   currency: string;
+  projectId?: string;
   onClose: () => void;
   onCreated: () => void;
 }) {
@@ -795,6 +812,7 @@ function AddBidDialog({
       </WideModalSection>
       {pickerOpen && (
         <SubcontractorPickerModal
+          projectId={projectId}
           onPick={(sub, resolvedEmail) => {
             setCompanyName(sub.legal_name);
             if (resolvedEmail) setContactEmail(resolvedEmail);
@@ -1182,7 +1200,7 @@ function RecipientStatusBadge({ status }: { status: string }) {
   );
 }
 
-function DistributionPanel({ packageId }: { packageId: string }) {
+function DistributionPanel({ packageId, projectId }: { packageId: string; projectId?: string }) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
@@ -1496,6 +1514,7 @@ function DistributionPanel({ packageId }: { packageId: string }) {
 
       {pickerOpen && (
         <SubcontractorPickerModal
+          projectId={projectId}
           onPick={(sub, resolvedEmail) => {
             if (!resolvedEmail) {
               addToast({
@@ -2563,7 +2582,7 @@ function PackageDetail({
       )}
 
       {/* Distribution sub-tab */}
-      {activeTab === 'distribution' && <DistributionPanel packageId={packageId} />}
+      {activeTab === 'distribution' && <DistributionPanel packageId={packageId} projectId={pkg?.project_id} />}
 
       {/* Addenda sub-tab */}
       {activeTab === 'addenda' && <AddendumList packageId={packageId} />}
@@ -2654,6 +2673,7 @@ function PackageDetail({
       {showAddBid && (
         <AddBidDialog
           packageId={packageId}
+          projectId={pkg?.project_id}
           currency={currency}
           onClose={() => setShowAddBid(false)}
           onCreated={handleBidCreated}

@@ -968,6 +968,14 @@
       "insurance": "保険",
       "method_statement": "施工方法書",
       "other": "その他の書類"
+    },
+    "levies_reconcile": {
+      "fail": "出来高から賦課金と保留金を差し引くと {expected} ですが、支払額は {payable} です",
+      "suggestion": "金額を手で直さず、下請契約の条件から明細を再計算してください。"
+    },
+    "payment_discount_reconciles": {
+      "fail": "支払割引は {discount} ですが、支払額に合意した率を掛けると {expected} です",
+      "suggestion": "合意した率と支払額から割引を再計算してください。"
     }
   },
   "submittal": {
@@ -1097,7 +1105,8 @@
     "boq_bulk_items_required": "'items' リストは必須で、空にできません",
     "boq_classification_unavailable": "分類サービスは利用できません",
     "boq_budget_no_positions": "数量表に項目がありません。予算化するものがありません。",
-    "boq_fix_unit_rate_required": "負でない 'unit_rate' パラメータが必要です"
+    "boq_fix_unit_rate_required": "負でない 'unit_rate' パラメータが必要です",
+    "levy_code_taken": "このコードの賦課金はすでにカタログにあります。"
   },
   "variations": {
     "boq_lines_are_traced": {
@@ -2555,6 +2564,22 @@
     },
     "index_attribution": {
       "fail": "ArchSD 入札価格指数に出典表示がありません：Architectural Services Department を明記してください"
+    }
+  },
+  "tender": {
+    "recipient_outside_radius": {
+      "fail": "会社は現場から {distance} km、検索半径 {radius} km の外にあります",
+      "suggestion": "この地域に対応する会社なら残すか、半径を広げてください。"
+    }
+  },
+  "de": {
+    "payment_discount_unagreed": {
+      "fail": "{discount} の支払割引が契約で合意されないまま適用されています (VOB/B 16 (5) 2)",
+      "suggestion": "割引率と日数を下請契約に記録するか、割引なしで支払ってください。"
+    },
+    "retention_over_vob_cap": {
+      "fail": "1回の支払あたりの保留金 {rate}% が {maximum}% を超えています (VOB/B 17 (6) 1)",
+      "suggestion": "支払ごとの保留金を VOB/B の上限まで下げてください。"
     }
   }
 }

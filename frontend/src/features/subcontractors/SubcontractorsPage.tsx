@@ -14,6 +14,7 @@ import {
   FileText,
   Award,
   DollarSign,
+  Percent,
   ClipboardList,
   Pencil,
   Trash2,
@@ -49,6 +50,7 @@ import {
 } from '@/shared/ui';
 import { Toggle } from '@/shared/ui/Toggle';
 import { MoneyDisplay } from '@/shared/ui/MoneyDisplay';
+import { SubcontractTermsPanel } from './SubcontractTermsPanel';
 import { DateDisplay } from '@/shared/ui/DateDisplay';
 import { PageHeader } from '@/shared/ui/PageHeader';
 import { TruncationNotice } from '@/shared/ui/TruncationNotice';
@@ -108,9 +110,9 @@ import {
 } from '@/features/contracts/hakedis';
 import { fmtPercent, fmtFixed } from '@/shared/lib/formatters';
 
-type DrawerTab = 'scope' | 'payments' | 'ratings' | 'retention';
+type DrawerTab = 'scope' | 'payments' | 'deductions' | 'ratings' | 'retention';
 
-const DRAWER_TABS: readonly DrawerTab[] = ['scope', 'payments', 'ratings', 'retention'];
+const DRAWER_TABS: readonly DrawerTab[] = ['scope', 'payments', 'deductions', 'ratings', 'retention'];
 
 function isDrawerTab(value: string | null): value is DrawerTab {
   return value !== null && (DRAWER_TABS as readonly string[]).includes(value);
@@ -1113,6 +1115,13 @@ function DetailDrawer({ id, onClose }: { id: string; onClose: () => void }) {
                       icon: DollarSign,
                     },
                     {
+                      id: 'deductions',
+                      label: t('subcontractors.tab_deductions', {
+                        defaultValue: 'Deductions',
+                      }),
+                      icon: Percent,
+                    },
+                    {
                       id: 'ratings',
                       label: t('subcontractors.tab_ratings', {
                         defaultValue: 'Ratings',
@@ -1163,6 +1172,7 @@ function DetailDrawer({ id, onClose }: { id: string; onClose: () => void }) {
                   agreements={agreements}
                 />
               )}
+              {tab === 'deductions' && <SubcontractTermsPanel agreements={agreements} />}
               {tab === 'ratings' && (
                 <RatingsTab
                   subcontractorId={sub.id}

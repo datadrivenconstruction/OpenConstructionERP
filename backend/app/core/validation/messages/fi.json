@@ -968,6 +968,14 @@
       "insurance": "Vakuutus",
       "method_statement": "Työselostus",
       "other": "Muu asiakirja"
+    },
+    "levies_reconcile": {
+      "fail": "Työn arvo vähennettynä maksuilla ja pidätyksellä on {expected}, mutta maksettava summa on {payable}",
+      "suggestion": "Laske erittely uudelleen aliurakan ehdoista sen sijaan, että muokkaat summia käsin."
+    },
+    "payment_discount_reconciles": {
+      "fail": "Kassa-alennus on {discount}, mutta sovittu prosentti maksettavasta summasta antaa {expected}",
+      "suggestion": "Laske alennus uudelleen sovitusta prosentista ja maksettavasta summasta."
     }
   },
   "submittal": {
@@ -1097,7 +1105,8 @@
     "boq_bulk_items_required": "Luettelo 'items' vaaditaan eikä se saa olla tyhjä",
     "boq_classification_unavailable": "Luokituspalvelu ei ole käytettävissä",
     "boq_budget_no_positions": "Määräluettelossa ei ole nimikkeitä: ei mitään budjetoitavaa.",
-    "boq_fix_unit_rate_required": "Ei-negatiivinen parametri 'unit_rate' vaaditaan"
+    "boq_fix_unit_rate_required": "Ei-negatiivinen parametri 'unit_rate' vaaditaan",
+    "levy_code_taken": "Luettelossa on jo maksu tällä koodilla."
   },
   "variations": {
     "boq_lines_are_traced": {
@@ -2555,6 +2564,22 @@
     },
     "index_attribution": {
       "fail": "ArchSD-hintaindeksistä puuttuu lähde: mainitse Architectural Services Department"
+    }
+  },
+  "tender": {
+    "recipient_outside_radius": {
+      "fail": "Yritys on {distance} km työmaalta, hakusäteen {radius} km ulkopuolella",
+      "suggestion": "Pidä yritys, jos se toimii alueella, tai kasvata sädettä."
+    }
+  },
+  "de": {
+    "payment_discount_unagreed": {
+      "fail": "Kassa-alennusta {discount} käytetty, vaikka sitä ei ole sovittu sopimuksessa (VOB/B 16 (5) 2)",
+      "suggestion": "Kirjaa alennusprosentti ja päivät aliurakkasopimukseen tai maksa ilman alennusta."
+    },
+    "retention_over_vob_cap": {
+      "fail": "Pidätys {rate} % maksua kohden ylittää {maximum} % (VOB/B 17 (6) 1)",
+      "suggestion": "Laske maksukohtainen pidätys VOB/B-enimmäismäärään."
     }
   }
 }

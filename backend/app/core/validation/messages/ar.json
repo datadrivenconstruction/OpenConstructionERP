@@ -968,6 +968,14 @@
       "insurance": "التأمين",
       "method_statement": "بيان طريقة التنفيذ",
       "other": "مستند آخر"
+    },
+    "levies_reconcile": {
+      "fail": "قيمة الأعمال بعد خصم الرسوم والمحتجزات تساوي {expected}، لكن المبلغ المستحق هو {payable}",
+      "suggestion": "أعد حساب الكشف من شروط عقد الباطن بدلًا من تعديل المبالغ يدويًا."
+    },
+    "payment_discount_reconciles": {
+      "fail": "خصم السداد المبكر هو {discount}، لكن النسبة المتفق عليها من المبلغ المستحق تعطي {expected}",
+      "suggestion": "أعد حساب الخصم من النسبة المتفق عليها والمبلغ المستحق."
     }
   },
   "submittal": {
@@ -1097,7 +1105,8 @@
     "boq_bulk_items_required": "القائمة 'items' مطلوبة ويجب ألا تكون فارغة",
     "boq_classification_unavailable": "خدمة التصنيف غير متاحة",
     "boq_budget_no_positions": "لا توجد بنود في جدول الكميات: لا شيء للميزنة.",
-    "boq_fix_unit_rate_required": "المعامل 'unit_rate' مطلوب ويجب ألا يكون سالبًا"
+    "boq_fix_unit_rate_required": "المعامل 'unit_rate' مطلوب ويجب ألا يكون سالبًا",
+    "levy_code_taken": "يوجد في الكتالوج رسم بهذا الرمز بالفعل."
   },
   "variations": {
     "boq_lines_are_traced": {
@@ -2555,6 +2564,22 @@
     },
     "index_attribution": {
       "fail": "مؤشر أسعار ArchSD بلا إسناد للمصدر: اذكر Architectural Services Department"
+    }
+  },
+  "tender": {
+    "recipient_outside_radius": {
+      "fail": "تبعد الشركة {distance} كم عن الموقع، خارج نطاق البحث البالغ {radius} كم",
+      "suggestion": "أبقِ الشركة إن كانت تخدم هذه المنطقة، أو وسّع نطاق البحث."
+    }
+  },
+  "de": {
+    "payment_discount_unagreed": {
+      "fail": "طُبّق خصم سداد مبكر بقيمة {discount} دون الاتفاق عليه في العقد (VOB/B 16 (5) 2)",
+      "suggestion": "سجّل نسبة الخصم ومدته في عقد الباطن، أو ادفع دون خصم."
+    },
+    "retention_over_vob_cap": {
+      "fail": "نسبة المحتجزات {rate}% لكل دفعة تتجاوز {maximum}% (VOB/B 17 (6) 1)",
+      "suggestion": "خفّض المحتجزات لكل دفعة إلى الحد الأقصى في VOB/B."
     }
   }
 }

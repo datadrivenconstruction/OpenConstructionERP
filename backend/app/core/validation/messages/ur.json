@@ -968,6 +968,14 @@
       "insurance": "انشورنس",
       "method_statement": "طریقۂ کار کا بیان",
       "other": "دیگر دستاویز"
+    },
+    "levies_reconcile": {
+      "fail": "کام کی قیمت سے چارجز اور روکی گئی رقم نکال کر {expected} بنتا ہے، مگر قابل ادائیگی رقم {payable} ہے",
+      "suggestion": "رقمیں ہاتھ سے بدلنے کے بجائے ذیلی معاہدے کی شرائط سے گوشوارہ دوبارہ حساب کریں۔"
+    },
+    "payment_discount_reconciles": {
+      "fail": "ادائیگی رعایت {discount} ہے، مگر قابل ادائیگی رقم پر طے شدہ شرح سے {expected} بنتا ہے",
+      "suggestion": "طے شدہ شرح اور قابل ادائیگی رقم سے رعایت دوبارہ حساب کریں۔"
     }
   },
   "submittal": {
@@ -1097,7 +1105,8 @@
     "boq_bulk_items_required": "فہرست 'items' درکار ہے اور خالی نہیں ہونی چاہیے",
     "boq_classification_unavailable": "درجہ بندی کی سروس دستیاب نہیں",
     "boq_budget_no_positions": "مقداروں کی فہرست میں کوئی آئٹم نہیں: بجٹ کرنے کو کچھ نہیں۔",
-    "boq_fix_unit_rate_required": "غیر منفی 'unit_rate' پیرامیٹر درکار ہے"
+    "boq_fix_unit_rate_required": "غیر منفی 'unit_rate' پیرامیٹر درکار ہے",
+    "levy_code_taken": "اس کوڈ کا چارج کیٹلاگ میں پہلے سے موجود ہے۔"
   },
   "variations": {
     "boq_lines_are_traced": {
@@ -2555,6 +2564,22 @@
     },
     "index_attribution": {
       "fail": "ArchSD قیمت اشاریے میں ماخذ درج نہیں: Architectural Services Department کا حوالہ دیں"
+    }
+  },
+  "tender": {
+    "recipient_outside_radius": {
+      "fail": "فرم سائٹ سے {distance} کلومیٹر دور ہے، {radius} کلومیٹر کے تلاش کے دائرے سے باہر",
+      "suggestion": "اگر فرم اس علاقے میں کام کرتی ہے تو رکھیں، یا دائرہ بڑھائیں۔"
+    }
+  },
+  "de": {
+    "payment_discount_unagreed": {
+      "fail": "{discount} کی ادائیگی رعایت لی گئی مگر معاہدے میں طے نہیں (VOB/B 16 (5) 2)",
+      "suggestion": "رعایت کی شرح اور دن ذیلی معاہدے میں درج کریں، یا بغیر رعایت ادائیگی کریں۔"
+    },
+    "retention_over_vob_cap": {
+      "fail": "فی ادائیگی {rate}% روکی گئی رقم {maximum}% سے زیادہ ہے (VOB/B 17 (6) 1)",
+      "suggestion": "فی ادائیگی روکی گئی رقم کو VOB/B کی حد تک کم کریں۔"
     }
   }
 }

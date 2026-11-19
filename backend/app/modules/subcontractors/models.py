@@ -854,3 +854,12 @@ class PaymentComplianceOverride(Base):
 
     def __repr__(self) -> str:
         return f"<PaymentComplianceOverride pay_app={self.payment_application_id}>"
+
+
+from app.modules.subcontractors.terms_models import (  # noqa: E402,F401
+    FirmLocation,
+    LevyCatalogueItem,
+    SubcontractLevy,
+    SubcontractorFavourite,
+    SubcontractTerms,
+)

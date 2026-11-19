@@ -968,6 +968,14 @@
       "insurance": "Застраховка",
       "method_statement": "Описание на метода",
       "other": "Друг документ"
+    },
+    "levies_reconcile": {
+      "fail": "Стойността на работите минус таксите и задържането е {expected}, но сумата за плащане е {payable}",
+      "suggestion": "Преизчислете справката от условията на подизпълнителския договор, вместо да променяте сумите ръчно."
+    },
+    "payment_discount_reconciles": {
+      "fail": "Отстъпката за плащане е {discount}, но договорената ставка от сумата за плащане дава {expected}",
+      "suggestion": "Преизчислете отстъпката от договорената ставка и сумата за плащане."
     }
   },
   "submittal": {
@@ -1097,7 +1105,8 @@
     "boq_bulk_items_required": "Списъкът 'items' е задължителен и не трябва да е празен",
     "boq_classification_unavailable": "Услугата за класификация не е налична",
     "boq_budget_no_positions": "Количествената сметка няма позиции: няма какво да се бюджетира.",
-    "boq_fix_unit_rate_required": "Изисква се неотрицателен параметър 'unit_rate'"
+    "boq_fix_unit_rate_required": "Изисква се неотрицателен параметър 'unit_rate'",
+    "levy_code_taken": "В каталога вече има такса с този код."
   },
   "variations": {
     "boq_lines_are_traced": {
@@ -2555,6 +2564,22 @@
     },
     "index_attribution": {
       "fail": "Ценовият индекс ArchSD няма посочен източник: посочете Architectural Services Department"
+    }
+  },
+  "tender": {
+    "recipient_outside_radius": {
+      "fail": "Фирмата е на {distance} км от обекта, извън радиуса на търсене от {radius} км",
+      "suggestion": "Запазете фирмата, ако работи в този район, или увеличете радиуса."
+    }
+  },
+  "de": {
+    "payment_discount_unagreed": {
+      "fail": "Приложена е отстъпка за плащане {discount}, която не е договорена (VOB/B 16 (5) 2)",
+      "suggestion": "Впишете ставката и срока на отстъпката в подизпълнителския договор или платете без отстъпка."
+    },
+    "retention_over_vob_cap": {
+      "fail": "Задържане от {rate}% на плащане е над {maximum}% (VOB/B 17 (6) 1)",
+      "suggestion": "Намалете задържането на плащане до максимума по VOB/B."
     }
   }
 }

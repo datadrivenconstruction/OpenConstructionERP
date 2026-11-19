@@ -968,6 +968,14 @@
       "insurance": "बीमा",
       "method_statement": "कार्यविधि विवरण",
       "other": "अन्य दस्तावेज़"
+    },
+    "levies_reconcile": {
+      "fail": "कार्य मूल्य में से शुल्क और प्रतिधारण घटाकर {expected} आता है, पर देय राशि {payable} है",
+      "suggestion": "राशियाँ हाथ से बदलने के बजाय उप-अनुबंध की शर्तों से विवरण फिर से गणना करें।"
+    },
+    "payment_discount_reconciles": {
+      "fail": "भुगतान छूट {discount} है, पर देय राशि पर तय दर से {expected} आता है",
+      "suggestion": "तय दर और देय राशि से छूट फिर से गणना करें।"
     }
   },
   "submittal": {
@@ -1097,7 +1105,8 @@
     "boq_bulk_items_required": "'items' सूची आवश्यक है और खाली नहीं होनी चाहिए",
     "boq_classification_unavailable": "वर्गीकरण सेवा उपलब्ध नहीं है",
     "boq_budget_no_positions": "मात्रा सूची में कोई मद नहीं है: बजट करने को कुछ नहीं।",
-    "boq_fix_unit_rate_required": "एक गैर-ऋणात्मक 'unit_rate' पैरामीटर आवश्यक है"
+    "boq_fix_unit_rate_required": "एक गैर-ऋणात्मक 'unit_rate' पैरामीटर आवश्यक है",
+    "levy_code_taken": "इस कोड वाला शुल्क कैटलॉग में पहले से है।"
   },
   "variations": {
     "boq_lines_are_traced": {
@@ -2555,6 +2564,22 @@
     },
     "index_attribution": {
       "fail": "ArchSD मूल्य सूचकांक में स्रोत नहीं: Architectural Services Department का उल्लेख करें"
+    }
+  },
+  "tender": {
+    "recipient_outside_radius": {
+      "fail": "फर्म साइट से {distance} किमी दूर है, {radius} किमी की खोज त्रिज्या से बाहर",
+      "suggestion": "यदि फर्म इस क्षेत्र में काम करती है तो रखें, या त्रिज्या बढ़ाएँ।"
+    }
+  },
+  "de": {
+    "payment_discount_unagreed": {
+      "fail": "{discount} की भुगतान छूट ली गई पर अनुबंध में तय नहीं है (VOB/B 16 (5) 2)",
+      "suggestion": "छूट की दर और दिन उप-अनुबंध में दर्ज करें, या बिना छूट भुगतान करें।"
+    },
+    "retention_over_vob_cap": {
+      "fail": "प्रति भुगतान {rate}% प्रतिधारण {maximum}% से अधिक है (VOB/B 17 (6) 1)",
+      "suggestion": "प्रति भुगतान प्रतिधारण को VOB/B अधिकतम तक घटाएँ।"
     }
   }
 }

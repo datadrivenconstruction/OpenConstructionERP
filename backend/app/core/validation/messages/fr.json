@@ -968,6 +968,14 @@
       "insurance": "Assurance",
       "method_statement": "Mémoire technique",
       "other": "Autre document"
+    },
+    "levies_reconcile": {
+      "fail": "La valeur des travaux moins les prélèvements et la retenue donne {expected}, mais le montant à payer est {payable}",
+      "suggestion": "Recalculez le décompte à partir des conditions du sous-traité au lieu de modifier les montants à la main."
+    },
+    "payment_discount_reconciles": {
+      "fail": "L'escompte est de {discount}, mais le taux convenu sur le montant à payer donne {expected}",
+      "suggestion": "Recalculez l'escompte à partir du taux convenu et du montant à payer."
     }
   },
   "submittal": {
@@ -1097,7 +1105,8 @@
     "boq_bulk_items_required": "La liste « items » est requise et ne doit pas être vide",
     "boq_classification_unavailable": "Service de classification indisponible",
     "boq_budget_no_positions": "Le métré ne contient aucun poste : rien à budgétiser.",
-    "boq_fix_unit_rate_required": "Un paramètre « unit_rate » non négatif est requis"
+    "boq_fix_unit_rate_required": "Un paramètre « unit_rate » non négatif est requis",
+    "levy_code_taken": "Un prélèvement avec ce code existe déjà dans le catalogue."
   },
   "variations": {
     "boq_lines_are_traced": {
@@ -2555,6 +2564,22 @@
     },
     "index_attribution": {
       "fail": "L'indice des prix ArchSD n'indique pas sa source : citez l'Architectural Services Department"
+    }
+  },
+  "tender": {
+    "recipient_outside_radius": {
+      "fail": "L'entreprise est à {distance} km du chantier, hors du rayon de recherche de {radius} km",
+      "suggestion": "Gardez l'entreprise si elle intervient dans cette zone, ou élargissez le rayon."
+    }
+  },
+  "de": {
+    "payment_discount_unagreed": {
+      "fail": "Escompte de {discount} appliqué mais non convenu au contrat (VOB/B 16 (5) 2)",
+      "suggestion": "Indiquez le taux et le délai d'escompte dans le sous-traité, ou payez sans escompte."
+    },
+    "retention_over_vob_cap": {
+      "fail": "Retenue de {rate} % par paiement supérieure à {maximum} % (VOB/B 17 (6) 1)",
+      "suggestion": "Ramenez la retenue par paiement au maximum VOB/B."
     }
   }
 }
