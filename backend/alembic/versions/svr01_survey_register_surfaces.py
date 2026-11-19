@@ -7,7 +7,7 @@ guard, so a deploy that heals its schema at boot and a stamped database both
 end up with the same shape.
 
 Revision ID: svr01_survey_register_surfaces
-Revises: svu01_survey_v2_ux
+Revises: svg01_survey_geodesy
 Create Date: 2026-11-19
 """
 
@@ -19,7 +19,7 @@ import sqlalchemy as sa
 from alembic import op
 
 revision: str = "svr01_survey_register_surfaces"
-down_revision: str | Sequence[str] | None = "svu01_survey_v2_ux"
+down_revision: str | Sequence[str] | None = "svg01_survey_geodesy"
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 
