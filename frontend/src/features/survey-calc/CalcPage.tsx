@@ -135,7 +135,7 @@ function CogoTab({ projectId }: { projectId: string | null }) {
   const save = useMutation({
     mutationFn: () =>
       saveComputedPoints(projectId as string, '', [
-        { point_id: pointId.trim(), e: chosen![0], n: chosen![1], method: r!.method, inputs: r!.inputs },
+        { point_id: pointId.trim(), e: chosen![0]!, n: chosen![1]!, method: r!.method, inputs: r!.inputs },
       ]),
     onSuccess: () => addToast({ type: 'success', title: t('survey.cogo.saved', { defaultValue: 'Point saved to the survey register' }) }),
     onError: (e) => addToast({ type: 'error', title: getErrorMessage(e) }),
@@ -220,9 +220,9 @@ export function parseStations(text: string, unit: AngleUnit): StationIn[] | null
     const [id, ...rest] = line.split(/\s+/);
     const width = unit === 'dms' && rest.length >= 3 ? 3 : 1;
     if (rest.length < width || rest.length > width + 1) return null;
-    const dist = rest.length > width ? Number(rest[width].replace(',', '.')) : null;
+    const dist = rest.length > width ? Number(rest[width]!.replace(',', '.')) : null;
     if (dist != null && !(Number.isFinite(dist) && dist > 0)) return null;
-    out.push({ station_id: id, angle: rest.slice(0, width).join(' '), distance_m: dist });
+    out.push({ station_id: id ?? '', angle: rest.slice(0, width).join(' '), distance_m: dist });
   }
   return out.length >= 2 ? out : null;
 }
@@ -255,10 +255,10 @@ function TraverseTab({ projectId }: { projectId: string | null }) {
       shape,
       angle_unit: unit,
       angle_sense: sense,
-      start: { station_id: startId.trim(), e: s[0], n: s[1] },
+      start: { station_id: startId.trim(), e: s[0]!, n: s[1]! },
       azimuth: az.trim(),
       stations: rows,
-      end: e ? { station_id: '', e: e[0], n: e[1] } : null,
+      end: e ? { station_id: '', e: e[0]!, n: e[1]! } : null,
       closing_azimuth: shape === 'link' ? closeAz.trim() : null,
       class_key: cls,
     };
@@ -382,7 +382,7 @@ export function parseBook(text: string): BookRow[] | null {
   const rows: BookRow[] = [];
   for (const line of text.split(/\r?\n/).map((l) => l.trim()).filter(Boolean)) {
     const [station, bs, is, fs, dist] = line.split(/\s+/);
-    const row = { station, bs: num(bs), is: num(is), fs: num(fs), distance_m: num(dist) };
+    const row = { station: station ?? '', bs: num(bs), is: num(is), fs: num(fs), distance_m: num(dist) };
     if ([row.bs, row.is, row.fs, row.distance_m].some((x) => x != null && !Number.isFinite(x))) return null;
     rows.push(row);
   }

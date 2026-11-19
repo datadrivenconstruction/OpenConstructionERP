@@ -19,7 +19,7 @@ export function parseAngle(text: string, unit: AngleUnit): number | null {
     if (parts.length === 0 || parts.length > 3 || parts.some((p) => !Number.isFinite(p))) return null;
     const [d, m = 0, sec = 0] = parts;
     if (parts.length > 1 && (m >= 60 || sec >= 60)) return null;
-    const value = d + m / 60 + sec / 3600;
+    const value = (d ?? 0) + m / 60 + sec / 3600;
     return negative ? -value : value;
   }
   if (!/^\d*\.?\d+$|^\d+\.$/.test(body)) return null;

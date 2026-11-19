@@ -188,7 +188,7 @@ function CornersTool({ parcelId }: { parcelId: string }) {
                 </td>
                 <td className="text-right">
                   <bdi dir="ltr" className="font-mono">{fmtM(c.limit_m)}</bdi>
-                  {c.findings.length > 0 && <Badge variant="warning" size="sm" className="ms-1">{c.findings[0].rule_id}</Badge>}
+                  {c.findings.length > 0 && <Badge variant="warning" size="sm" className="ms-1">{c.findings[0]?.rule_id}</Badge>}
                 </td>
               </tr>
             ))}

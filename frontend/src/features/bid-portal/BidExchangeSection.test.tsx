@@ -84,7 +84,7 @@ describe('BidExchangeSection', () => {
   });
 
   it('submits a clean X84 and hands the new view back', async () => {
-    const clean = preview({ blocking: false, lines: [preview().lines[0]] });
+    const clean = preview({ blocking: false, lines: [preview().lines[0]!] });
     vi.mocked(checkBidX84).mockResolvedValue(clean);
     const submitted = makeView({ state: 'submitted' });
     vi.mocked(submitBidX84).mockResolvedValue(submitted);

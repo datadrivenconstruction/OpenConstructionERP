@@ -23,7 +23,7 @@ export function parseMeasured(text: string): StakeListIn['measured'] | null {
   for (const line of text.split(/\r?\n/).map((l) => l.trim()).filter(Boolean)) {
     const nums = line.split(/[\s;,]+/).map(Number);
     if (nums.some((x) => !Number.isFinite(x)) || nums.length < 2 || nums.length > 3) return null;
-    out.push(nums.length === 2 ? { chainage: nums[0], offset: 0, z: nums[1] } : { chainage: nums[0], offset: nums[1], z: nums[2] });
+    out.push(nums.length === 2 ? { chainage: nums[0]!, offset: 0, z: nums[1]! } : { chainage: nums[0]!, offset: nums[1]!, z: nums[2]! });
   }
   return out;
 }
