@@ -223,6 +223,37 @@ Der Befehl macht dieses Konto zum Administrator und aktiviert es; eine Adresse, 
 **Das heißt:** Das Passwort ist länger, als der Hash fassen kann, in dem es gespeichert wird. Buchstaben außerhalb von ASCII (mit Akzent, kyrillisch, arabisch, chinesisch) belegen zwei oder drei Bytes, deshalb liegt ein Passwort aus 30 solchen Zeichen über der Grenze, obwohl es kurz aussieht.
 **Was tun:** Kürzen Sie es. Es wurde nichts gespeichert, Konto und Passwort sind also unverändert. Leerzeichen innerhalb des Passworts sind in Ordnung; Leerzeichen an den beiden Enden gehören hier nicht zum Passwort und werden entfernt, bevor es geprüft und bevor es gespeichert wird. Ein Passwort, das mit einem Leerzeichen am Ende eingefügt wurde, meldet sich deshalb trotzdem an.
 
+## Den Server selbst starten: der erste Start
+
+**Sie sehen:** Der Browser meldet, die Seite sei nicht erreichbar - eine bis zwei Minuten, nachdem Sie den Server gestartet haben.
+**Das bedeutet:** Der Port öffnet sich erst, wenn der erste Start seine Arbeit beendet hat: Datenbankschema anlegen, Module laden, Routentabelle aufbauen. Bis dahin hört niemand auf dem Port. Der Browser ist also nicht langsam und der Server lehnt Sie nicht ab - er ist noch nicht an dem Punkt, an dem er überhaupt antworten kann. Ein Start, der alles durchführt, erreicht einen offenen Port nach etwa 143 Sekunden auf einem ruhigen Rechner, und die längste einzelne Phase darin ist die Routentabelle mit 32 Sekunden auf einem ruhigen und 59 Sekunden auf einem ausgelasteten Rechner. In der Testsuite, die bei jedem Commit läuft, dauerte die ganze Folge - starten, auf die Gesundheitsprüfung warten, registrieren, anmelden - 58 Sekunden unter Linux, 59 unter macOS und 106 unter Windows. Ein erster Start mit einem leeren Datenverzeichnis ist der langsamste Start, den Sie je sehen werden; jeder weitere nutzt diese Arbeit wieder und öffnet in Sekunden.
+**Tun Sie Folgendes:** Lassen Sie das Terminalfenster offen und lesen Sie es, statt den Browser neu zu laden. Ein gesunder Start gibt pro Phase eine Zeile aus, sobald er sie erreicht, und solange eine Phase dauert, gibt er alle fünfzehn Sekunden `Still working: <Phase> (<Sekunden>s)` aus - ein Fenster, das schreibt, ist also ein Start, der vorankommt. Wenn er bereit ist, gibt er die Adresse aus. Zwei Dinge bedeuten, dass wirklich etwas falsch ist: vier Minuten lang keine neue Zeile - das ist das Intervall, das der Desktop-Starter selbst benutzt, um einen gestoppten Start zu erkennen - und eine Zeile mit `Traceback`. Wenn Sie eines von beiden sehen, legen Sie die letzten zwanzig Zeilen dieses Fensters zusammen mit den Protokolldateien vom Anfang dieser Seite in einen Bericht.
+
+**Sie sehen:** Die Seite öffnet sich und meldet sofort, Daten konnten nicht geladen werden, oder die Anmeldeseite sagt, der Arbeitsbereich werde noch vorbereitet.
+**Das bedeutet:** Die Seite hat den Server erreicht, während der Server noch gestartet ist - bei einem ersten Start ist das die normale Reihenfolge und kein Fehler. Die Oberfläche fragt, ob der Server bereit ist, wartet und fragt erneut, in einem Plan, der zurückweicht: drei Sekunden, dann sechs, dann zwölf, dann vierundzwanzig, danach jeweils eine halbe Minute. Nach etwa zweieinhalb Minuten hört sie auf zu fragen, sagt, dass der Server noch startet, und legt einen Button **Erneut versuchen** auf die Seite, denn eine Seite, die still für immer weiterfragt, sieht genauso aus wie eine, die aufgegeben hat. Eine Meldung "Startet noch" ist dasselbe Urteil über eine einzelne Anfrage: Der Server hat 503 geantwortet, und das antwortet er, solange er hochfährt.
+**Tun Sie Folgendes:** Drücken Sie **Erneut versuchen**, wenn Sie ihn sehen, oder warten Sie, bis das Terminalfenster die Adresse ausgibt, und laden Sie dann einmal neu. Kommt die Meldung auf jeder Seite zurück, lange nachdem der Start fertig war, ist nicht der Server das, worauf gewartet wird: Führen Sie `openconstructionerp doctor` aus und lesen Sie, was es über den Port und die Datenbank sagt.
+
+**Sie sehen:** Sie haben mit `git pull` eine neuere Version geholt, neu gestartet, und jede Seite sieht genau so aus wie vorher.
+**Das bedeutet:** Der Server liefert die Oberfläche nicht aus den Dateien, die Sie geholt haben. Er liefert eine Kopie, die früher gebaut wurde - aus `backend/app/_frontend_dist`, wenn dieser Ordner existiert, sonst aus `frontend/dist` neben dem Paket - und `git pull` holt Quelltext, ohne etwas zu bauen. Ihr Browser legt eine zweite Schicht darüber: Ein Service Worker liefert weiter die Kopie aus seinem Cache, sodass selbst ein neu gebauter Ordner unverändert aussehen kann, bis dieser Cache geleert ist.
+**Tun Sie Folgendes:** Bauen Sie die Oberfläche neu und löschen Sie danach die Kopie im Browser. In der Windows PowerShell, vom Repository-Ordner aus:
+
+```
+cd frontend
+$env:NODE_OPTIONS="--max-old-space-size=8192"
+npm ci
+npm run build
+```
+
+Unter Linux oder macOS dieselben vier Zeilen, mit `export NODE_OPTIONS=--max-old-space-size=8192` anstelle der zweiten. Die Variable hebt den Speicher an, den der Build benutzen darf; ohne sie kann ein Build auf einem Rechner mit 8 GB oder weniger mit `JavaScript heap out of memory` abbrechen. Bricht er trotz gesetzter Variable so ab, führen Sie `npx vite build` statt `npm run build` aus: Das erzeugt dasselbe Bündel und überspringt den separaten Typ-Check, also den Teil, der am meisten Speicher braucht. Öffnen Sie danach im Browser die Entwicklertools (F12), gehen Sie zu **Application**, drücken Sie **Unregister** beim Service Worker, drücken Sie **Clear site data** und laden Sie mit Strg+F5 neu. Um zu sehen, welchen Ordner Ihr Server tatsächlich liest, führen Sie dies vom Ordner `backend` aus:
+
+```
+python -c "from app.cli_static import get_frontend_dir; print(get_frontend_dir())"
+```
+
+**Sie sehen:** Sie haben sich registriert, und die Anmeldung antwortet mit "Invalid email or password" oder sagt, das Konto sei angelegt und ein Administrator müsse es aktivieren.
+**Das bedeutet:** Das Konto existiert und ist noch nicht aktiv. Bei einer Installation, die nicht ganz neu ist, ist das der Standard und kein Fehler; das erste Konto auf einer wirklich leeren Datenbank ist die Ausnahme und wird aktiviert und zum Administrator gemacht, denn eine neue Installation ohne Zugang ist keine Installation.
+**Tun Sie Folgendes:** Lesen Sie [Anmelden bei einer Installation, die Sie selbst betreiben](#anmelden-bei-einer-installation-die-sie-selbst-betreiben) oben - dorthin gibt dieser Abschnitt den Fall weiter. Der Abschnitt nennt die drei Wege: die Registrierung mit `OE_REGISTRATION_MODE` öffnen, das Konto als Administrator aktivieren, und ein neues Passwort von einem Terminal aus setzen - mit dem, was jeder der drei kostet, und der Passwortregel, die das Formular vor dem Absenden nennt.
+
 ## Deinstallieren und Ihre Daten
 
 Die Deinstallation entfernt das Programm und behält Ihre Projekte. Sie liegen im Ordner `.openestimate` in Ihrem Benutzerordner (dazu der oben genannte `ProgramData`-Ordner, wenn Ihr Benutzername nicht-lateinische Buchstaben enthält). Eine Neuinstallation fängt deshalb nicht von vorn an. Für einen echten Neuanfang deinstallieren Sie und löschen `.openestimate` selbst, nachdem Sie es an einen sicheren Ort kopiert haben.

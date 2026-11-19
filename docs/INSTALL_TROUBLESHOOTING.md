@@ -221,6 +221,37 @@ It makes that account an administrator and activates it, and it refuses an addre
 **It means:** the password is longer than the hash it is stored in can hold. Letters outside ASCII - accented, Cyrillic, Arabic, Chinese - take two or three bytes each, so a password of 30 such characters is over the limit even though it looks short.
 **Do:** shorten it. Nothing was stored, so the account or the password is unchanged. Internal spaces are fine; spaces at the two ends are not part of a password here, and are removed before it is checked and before it is stored, so a password pasted with a space at the end still signs in.
 
+## Running the server yourself: the first start
+
+**You see:** the browser says it cannot reach the page, for a minute or two after you started the server.
+**It means:** the port does not open until the first start has finished its work - creating the database schema, loading the modules, building the route table. Until then nothing is listening, so the browser is not being slow and the server is not refusing you: it has not reached the point where it can answer at all. A start that does all of it reaches an open port in about 143 seconds on a quiet machine, and the longest single phase measured inside that is the route table, at 32 seconds on a quiet machine and 59 seconds on a busy one. In the test suite that runs on every commit, the whole sequence - start, wait for health, register, sign in - took 58 seconds on Linux, 59 on macOS and 106 on Windows. A first start on an empty data folder is the slowest start you will ever see; every start after it reuses that work and opens in seconds.
+**Do:** leave the terminal window open and read it instead of reloading the browser. A healthy start prints a line per phase as it reaches it, and while a phase takes a while it prints `Still working: <phase> (<seconds>s)` every fifteen seconds, so a window that is printing is a start that is progressing. When it is ready it prints the address to open. Two things mean something is genuinely wrong: no new line for four minutes, which is the interval the desktop launcher itself uses to decide a start has stopped, and a line containing `Traceback`. If you see either, put the last twenty lines of that window into a report along with the log files from the top of this page.
+
+**You see:** the page opens and at once shows a message that data could not be loaded, or the sign-in page says it is still preparing your workspace.
+**It means:** the page reached the server while the server was still starting, which on a first start is the normal order of events and not a fault. The interface asks whether the server is ready, waits, and asks again on a schedule that backs off - three seconds, then six, then twelve, then twenty-four, then half a minute at a time. After about two and a half minutes it stops asking, says the server is still starting, and puts a **Retry** button on the page, because a page that quietly polls forever looks exactly like a page that has given up. A message reading "Still starting up" is the same judgement about one request: the server answered 503, which is what it answers while it comes up.
+**Do:** press **Retry** when you see it, or wait for the terminal window to print the address and then reload once. If the message comes back on every page long after the start finished, the server is not what is being waited for: run `openconstructionerp doctor` and read what it says about the port and the database.
+
+**You see:** you pulled a newer version with `git pull`, restarted, and every page looks exactly as it did before.
+**It means:** the server does not serve the interface from the files you pulled. It serves a copy that was built earlier - from `backend/app/_frontend_dist` when that folder exists, and from `frontend/dist` beside the package otherwise - and `git pull` fetches source without building anything. Your browser adds a second layer: a service worker keeps serving the copy it cached, so even a rebuilt folder can look unchanged until that cache is cleared.
+**Do:** rebuild the interface, then clear the browser's copy of it. In Windows PowerShell, from the repository folder:
+
+```
+cd frontend
+$env:NODE_OPTIONS="--max-old-space-size=8192"
+npm ci
+npm run build
+```
+
+On Linux or macOS the same four lines, with `export NODE_OPTIONS=--max-old-space-size=8192` in place of the second. The variable raises the memory the build is allowed to use; without it a build on a machine with 8 GB or less can stop with `JavaScript heap out of memory`. If it stops that way even with the variable set, run `npx vite build` instead of `npm run build`: that produces the same bundle and skips the separate type check, which is the part that needs the most memory. Then in the browser open the developer tools (F12), go to **Application**, press **Unregister** on the service worker, press **Clear site data**, and reload with Ctrl+F5. To see which folder your server is actually reading, run this from the `backend` folder:
+
+```
+python -c "from app.cli_static import get_frontend_dir; print(get_frontend_dir())"
+```
+
+**You see:** you registered, and signing in answers "Invalid email or password", or says the account was created and an administrator has to activate it.
+**It means:** the account exists and is not active yet. On an installation that is not brand new that is the default rather than a fault; the first account on a genuinely empty database is the exception, and is activated and made the administrator, because a new installation with no way in is not an installation.
+**Do:** read [Signing in to an installation you run yourself](#signing-in-to-an-installation-you-run-yourself) above, which is where this section hands that case. It names the three ways out - opening registration with `OE_REGISTRATION_MODE`, activating the account as an administrator, and setting a new password from a terminal - what each of them costs, and the password rule the sign-up form states before you submit.
+
 ## Uninstalling and your data
 
 Uninstalling removes the program and keeps your projects. They live in the `.openestimate` folder in your home folder (plus the `ProgramData` folder above, if your user name has non-Latin letters). Reinstalling therefore does not start you over. To start from scratch, uninstall and then delete `.openestimate` yourself, after you have copied it somewhere safe.
