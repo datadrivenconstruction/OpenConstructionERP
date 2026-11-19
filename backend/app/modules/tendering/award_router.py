@@ -16,7 +16,7 @@ from typing import Any
 from fastapi import APIRouter, Depends, Query, Response, status
 
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep, verify_project_access
-from app.modules.tendering.award_schemas import AwardPreview, AwardTermsIn, AwardTermsOut, BidderGate, RoundIn, RoundOut
+from app.modules.tendering.award_schemas import AwardPreview, AwardTermsIn, AwardTermsOut, BidderGate, RoundIn, RoundListResponse, RoundOut
 from app.modules.tendering.award_terms import AwardTermsService, bid_party, bidder_gate
 from app.modules.tendering.sealed import SealedTenderService
 from app.modules.tendering.service import TenderingService
@@ -82,16 +82,17 @@ async def preview_bid_award(
     return await AwardTermsService(session).preview(package_id, None, bid_id=bid_id)
 
 
-@router.get("/packages/{package_id}/rounds/", response_model=list[RoundOut])
+@router.get("/packages/{package_id}/rounds/", response_model=RoundListResponse)
 async def list_rounds(
     package_id: uuid.UUID,
     user_id: CurrentUserId,
     session: SessionDep,
     _perm: None = Depends(RequirePermission("tendering.read")),
-) -> list[RoundOut]:
+) -> RoundListResponse:
     """Every negotiation round of the package, per bid in round order."""
     await _package(session, package_id, user_id, "negotiation_rounds")
-    return await AwardTermsService(session).list_rounds(package_id)
+    rows = await AwardTermsService(session).list_rounds(package_id)
+    return RoundListResponse(items=rows, total=len(rows), limit=max(len(rows), 1))
 
 
 @router.post("/packages/{package_id}/bids/{bid_id}/rounds/", response_model=RoundOut, status_code=201)

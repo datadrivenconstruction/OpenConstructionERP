@@ -2423,5 +2423,20 @@
     "en_value": "Text",
     "note": "\"Text\" is the native word in cs/de/ro/sv (and en-GB spells it the same); fil/id/nl hold distinct translations (Teksto/Teks/Tekst), so the shared set is a true cognate, not a copied fallback",
     "reason_category": "cognate_loanword"
+  },
+  "bid_portal.files.kind_x84": {
+    "en_value": "GAEB X84",
+    "note": "named exchange standard phase code (CLAUDE.md: not translated)",
+    "reason_category": "standard_code"
+  },
+  "legal_entities.bic": {
+    "en_value": "BIC / SWIFT",
+    "note": "bank identifier code names, the same in every locale",
+    "reason_category": "standard_code"
+  },
+  "survey.cogo.tab.cogo": {
+    "en_value": "COGO",
+    "note": "coordinate geometry abbreviation used as a tab name in every locale",
+    "reason_category": "abbreviation"
   }
 }

@@ -24,6 +24,8 @@ from app.modules.subcontractors.terms_schemas import (
     BidderSearchResponse,
     DeductionStatementResponse,
     FavouriteIn,
+    FavouriteListResponse,
+    FavouriteResponse,
     FirmLocationIn,
     FirmLocationResponse,
     LevyCatalogueItemIn,
@@ -257,16 +259,17 @@ async def geocode_firm(
     return out
 
 
-@terms_router.get("/favourites")
+@terms_router.get("/favourites", response_model=FavouriteListResponse)
 async def list_favourites(
     session: SessionDep,
     _user: CurrentUserId,
     trade: str | None = Query(default=None, max_length=120),
     _perm: None = Depends(RequirePermission("subcontractors.read")),
-) -> list[dict[str, str]]:
+) -> FavouriteListResponse:
     """Favourite firms, per trade."""
     rows = await SubcontractTermsService(session).list_favourites(trade)
-    return [{"subcontractor_id": str(r.subcontractor_id), "trade": r.trade} for r in rows]
+    items = [FavouriteResponse(subcontractor_id=str(r.subcontractor_id), trade=r.trade) for r in rows]
+    return FavouriteListResponse(items=items, total=len(items), limit=max(len(items), 1))
 
 
 @terms_router.post("/favourites", status_code=204)

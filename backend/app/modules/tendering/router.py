@@ -49,6 +49,7 @@ from app.modules.tendering.schemas import (
     BidAnalysisResponse,
     BidComparisonResponse,
     BidCreate,
+    BidFileListResponse,
     BidFileResponse,
     BidIntegrityResponse,
     BidInvitationCreated,
@@ -68,6 +69,7 @@ from app.modules.tendering.schemas import (
     LevelingMatrixResponse,
     PackageCancel,
     PackageCreate,
+    PackageDocumentListResponse,
     PackageDocumentResponse,
     PackageDocumentsAttach,
     PackageHeaderResponse,
@@ -1316,17 +1318,18 @@ async def export_package_gaeb_x86(
     )
 
 
-@router.get("/packages/{package_id}/bid-files/", response_model=list[BidFileResponse])
+@router.get("/packages/{package_id}/bid-files/", response_model=BidFileListResponse)
 async def list_package_bid_files(
     package_id: uuid.UUID,
     user_id: CurrentUserId,
     session: SessionDep,
     service: TenderingService = Depends(_get_service),
     _perm: None = Depends(RequirePermission("tendering.read")),
-) -> list[BidFileResponse]:
+) -> BidFileListResponse:
     """Files the bidders uploaded through their links, newest first."""
     await _verify_package_owner(service, session, package_id, user_id)
-    return await _award_exchange(session).list_files(package_id)
+    rows = await _award_exchange(session).list_files(package_id)
+    return BidFileListResponse(items=rows, total=len(rows), limit=max(len(rows), 1))
 
 
 @router.get("/packages/{package_id}/bid-files/{file_id}/download/")
@@ -1357,17 +1360,18 @@ async def download_package_bid_file(
     return response
 
 
-@router.get("/packages/{package_id}/documents/", response_model=list[PackageDocumentResponse])
+@router.get("/packages/{package_id}/documents/", response_model=PackageDocumentListResponse)
 async def list_package_documents(
     package_id: uuid.UUID,
     user_id: CurrentUserId,
     session: SessionDep,
     service: TenderingService = Depends(_get_service),
     _perm: None = Depends(RequirePermission("tendering.read")),
-) -> list[PackageDocumentResponse]:
+) -> PackageDocumentListResponse:
     """Project documents sent out with the package (drawings, specifications, conditions)."""
     package = await _verify_package_owner(service, session, package_id, user_id)
-    return await _award_exchange(session).list_package_documents(package)  # type: ignore[arg-type]
+    rows = await _award_exchange(session).list_package_documents(package)  # type: ignore[arg-type]
+    return PackageDocumentListResponse(items=rows, total=len(rows), limit=max(len(rows), 1))
 
 
 @router.post("/packages/{package_id}/documents/", response_model=list[PackageDocumentResponse])

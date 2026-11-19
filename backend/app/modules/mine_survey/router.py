@@ -71,6 +71,7 @@ from app.modules.mine_survey.schemas import (
     PatternUpdate,
     PeriodCreate,
     PeriodDetail,
+    MaterialListResponse,
     PeriodListResponse,
     PeriodOut,
     PeriodUpdate,
@@ -302,10 +303,11 @@ async def _unit_of(unit_id: uuid.UUID, session: SessionDep, user_id: str) -> tup
     return depth, u
 
 
-@router.get("/units/{unit_id}/materials", response_model=list[MaterialOut], dependencies=_READ)
-async def list_materials(unit_id: uuid.UUID, session: SessionDep, user_id: CurrentUserId) -> list[MaterialOut]:
+@router.get("/units/{unit_id}/materials", response_model=MaterialListResponse, dependencies=_READ)
+async def list_materials(unit_id: uuid.UUID, session: SessionDep, user_id: CurrentUserId) -> MaterialListResponse:
     depth, u = await _unit_of(unit_id, session, user_id)
-    return await depth.list_materials(u.id)
+    rows = await depth.list_materials(u.id)
+    return MaterialListResponse(items=rows, total=len(rows), limit=max(len(rows), 1))
 
 
 @router.post("/units/{unit_id}/materials", response_model=MaterialOut, status_code=201, dependencies=_WRITE)

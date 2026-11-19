@@ -8,7 +8,7 @@
  * figure the panel shows is the figure the contract is drafted with.
  */
 
-import { ApiError, apiDelete, apiGet, apiPost, apiPut } from '@/shared/lib/api';
+import { ApiError, apiDelete, apiGet, apiPost, apiPut, type Page } from '@/shared/lib/api';
 
 export type PricingMode = 'unit_price' | 'lump_sum';
 
@@ -125,38 +125,36 @@ export interface RoundInput {
   note: string;
 }
 
-const base = (packageId: string) => `/v1/tendering/packages/${packageId}`;
-
 export function getAwardTerms(packageId: string): Promise<AwardTermsState> {
-  return apiGet<AwardTermsState>(`${base(packageId)}/award-terms/`);
+  return apiGet<AwardTermsState>(`/v1/tendering/packages/${packageId}/award-terms/`);
 }
 
 export function saveAwardTerms(packageId: string, terms: AwardTerms): Promise<AwardTermsState> {
-  return apiPut<AwardTermsState, AwardTerms>(`${base(packageId)}/award-terms/`, terms);
+  return apiPut<AwardTermsState, AwardTerms>(`/v1/tendering/packages/${packageId}/award-terms/`, terms);
 }
 
 export function previewAwardTerms(packageId: string, terms: AwardTerms): Promise<AwardPreview> {
-  return apiPost<AwardPreview, AwardTerms>(`${base(packageId)}/award-terms/preview/`, terms);
+  return apiPost<AwardPreview, AwardTerms>(`/v1/tendering/packages/${packageId}/award-terms/preview/`, terms);
 }
 
 export function listRounds(packageId: string): Promise<NegotiationRound[]> {
-  return apiGet<NegotiationRound[]>(`${base(packageId)}/rounds/`);
+  return apiGet<Page<NegotiationRound>>(`/v1/tendering/packages/${packageId}/rounds/`).then((page) => page.items);
 }
 
 export function addRound(packageId: string, bidId: string, round: RoundInput): Promise<NegotiationRound> {
-  return apiPost<NegotiationRound, RoundInput>(`${base(packageId)}/bids/${bidId}/rounds/`, round);
+  return apiPost<NegotiationRound, RoundInput>(`/v1/tendering/packages/${packageId}/bids/${bidId}/rounds/`, round);
 }
 
 export function markRoundFinal(packageId: string, roundId: string, final = true): Promise<NegotiationRound> {
-  return apiPost<NegotiationRound>(`${base(packageId)}/rounds/${roundId}/final/?final=${final}`, {});
+  return apiPost<NegotiationRound>(`/v1/tendering/packages/${packageId}/rounds/${roundId}/final/?final=${final}`, {});
 }
 
 export function approveRound(packageId: string, roundId: string): Promise<NegotiationRound> {
-  return apiPost<NegotiationRound>(`${base(packageId)}/rounds/${roundId}/approve/`, {});
+  return apiPost<NegotiationRound>(`/v1/tendering/packages/${packageId}/rounds/${roundId}/approve/`, {});
 }
 
 export function deleteRound(packageId: string, roundId: string): Promise<void> {
-  return apiDelete(`${base(packageId)}/rounds/${roundId}/`);
+  return apiDelete(`/v1/tendering/packages/${packageId}/rounds/${roundId}/`);
 }
 
 /** Empty terms for a bid: no discount, no lump sum, nothing agreed yet. */

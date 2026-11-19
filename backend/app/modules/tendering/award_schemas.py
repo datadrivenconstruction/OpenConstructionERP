@@ -155,3 +155,12 @@ class AwardTermsOut(BaseModel):
     preview: AwardPreview | None = None
     contract_id: UUID | None = None
     contract_code: str | None = None
+
+
+class RoundListResponse(BaseModel):
+    """Negotiation rounds of a package."""
+
+    items: list[RoundOut]
+    total: int
+    offset: int = 0
+    limit: int = 50

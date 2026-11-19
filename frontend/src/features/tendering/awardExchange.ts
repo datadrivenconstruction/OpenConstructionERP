@@ -6,7 +6,7 @@
  * out with the package, and the files bidders uploaded.
  */
 
-import { apiDelete, apiGet, apiPost, getAuthToken, triggerDownload } from '@/shared/lib/api';
+import { apiDelete, apiGet, apiPost, getAuthToken, triggerDownload, type Page } from '@/shared/lib/api';
 
 export interface BillSource {
   id: string;
@@ -79,7 +79,7 @@ export function fetchBillSource(packageId: string): Promise<BillSourceState> {
 }
 
 export function listPackageDocuments(packageId: string): Promise<PackageDocument[]> {
-  return apiGet(`/v1/tendering/packages/${packageId}/documents/`);
+  return apiGet<Page<PackageDocument>>(`/v1/tendering/packages/${packageId}/documents/`).then((page) => page.items);
 }
 
 export function attachPackageDocuments(packageId: string, documentIds: string[]): Promise<PackageDocument[]> {
@@ -91,13 +91,13 @@ export function detachPackageDocument(packageId: string, linkId: string): Promis
 }
 
 export function listBidFiles(packageId: string): Promise<BidFile[]> {
-  return apiGet(`/v1/tendering/packages/${packageId}/bid-files/`);
+  return apiGet<Page<BidFile>>(`/v1/tendering/packages/${packageId}/bid-files/`).then((page) => page.items);
 }
 
 export async function searchProjectDocuments(projectId: string, search: string): Promise<ProjectDocumentOption[]> {
   const params = new URLSearchParams({ project_id: projectId, limit: '50' });
   if (search.trim()) params.set('search', search.trim());
-  const page = await apiGet<{ items: ProjectDocumentOption[] }>(`/v1/documents/?${params.toString()}`);
+  const page = await apiGet<Page<ProjectDocumentOption>>(`/v1/documents/?${params.toString()}`);
   return page.items ?? [];
 }
 

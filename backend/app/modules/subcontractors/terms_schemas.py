@@ -206,3 +206,19 @@ class FavouriteIn(BaseModel):
 
     subcontractor_id: UUID
     trade: str = Field(min_length=1, max_length=120)
+
+
+class FavouriteResponse(BaseModel):
+    """A favourite firm for one trade."""
+
+    subcontractor_id: str
+    trade: str
+
+
+class FavouriteListResponse(BaseModel):
+    """Favourite firms, per trade."""
+
+    items: list[FavouriteResponse]
+    total: int
+    offset: int = 0
+    limit: int = 50

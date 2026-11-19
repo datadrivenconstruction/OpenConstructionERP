@@ -132,25 +132,24 @@ export interface BidderSearch {
   validation: ValidationRow[];
 }
 
-const BASE = '/v1/subcontractors';
 
-export const getLevyCatalogue = () => apiGet<LevyCatalogue>(`${BASE}/levy-catalogue`);
+export const getLevyCatalogue = () => apiGet<LevyCatalogue>(`/v1/subcontractors/levy-catalogue`);
 
 export const createLevy = (body: Omit<LevyCatalogueItem, 'id' | 'source'>) =>
-  apiPost<LevyCatalogueItem>(`${BASE}/levy-catalogue`, body);
+  apiPost<LevyCatalogueItem>(`/v1/subcontractors/levy-catalogue`, body);
 
 export const updateLevy = (id: string, body: Omit<LevyCatalogueItem, 'id' | 'source'>) =>
-  apiPut<LevyCatalogueItem>(`${BASE}/levy-catalogue/${id}`, body);
+  apiPut<LevyCatalogueItem>(`/v1/subcontractors/levy-catalogue/${id}`, body);
 
-export const deleteLevy = (id: string) => apiDelete(`${BASE}/levy-catalogue/${id}`);
+export const deleteLevy = (id: string) => apiDelete(`/v1/subcontractors/levy-catalogue/${id}`);
 
-export const importPackLevies = () => apiPost<{ added: number }>(`${BASE}/levy-catalogue/import-pack`, {});
+export const importPackLevies = () => apiPost<{ added: number }>(`/v1/subcontractors/levy-catalogue/import-pack`, {});
 
 export const getAgreementTerms = (agreementId: string) =>
-  apiGet<SubcontractTerms>(`${BASE}/agreements/${agreementId}/terms`);
+  apiGet<SubcontractTerms>(`/v1/subcontractors/agreements/${agreementId}/terms`);
 
 export const putAgreementTerms = (agreementId: string, body: SubcontractTerms) =>
-  apiPut<SubcontractTerms>(`${BASE}/agreements/${agreementId}/terms`, body);
+  apiPut<SubcontractTerms>(`/v1/subcontractors/agreements/${agreementId}/terms`, body);
 
 export function getDeductions(
   agreementId: string,
@@ -160,12 +159,12 @@ export function getDeductions(
   if (params.payment_application_id) q.set('payment_application_id', params.payment_application_id);
   if (params.work_value) q.set('work_value', params.work_value);
   if (params.final_account) q.set('final_account', 'true');
-  return apiGet<DeductionStatement>(`${BASE}/agreements/${agreementId}/deductions?${q.toString()}`);
+  return apiGet<DeductionStatement>(`/v1/subcontractors/agreements/${agreementId}/deductions?${q.toString()}`);
 }
 
 export const recordDeductions = (agreementId: string, paymentApplicationId: string) =>
   apiPost<DeductionStatement>(
-    `${BASE}/agreements/${agreementId}/payment-applications/${paymentApplicationId}/deductions`,
+    `/v1/subcontractors/agreements/${agreementId}/payment-applications/${paymentApplicationId}/deductions`,
     {},
   );
 
@@ -181,16 +180,16 @@ export function searchBidders(params: {
   if (params.radius_km) q.set('radius_km', String(params.radius_km));
   if (params.favourites_only) q.set('favourites_only', 'true');
   if (params.include_outside) q.set('include_outside', 'true');
-  return apiGet<BidderSearch>(`${BASE}/bidder-search?${q.toString()}`);
+  return apiGet<BidderSearch>(`/v1/subcontractors/bidder-search?${q.toString()}`);
 }
 
 export const addFavourite = (subcontractorId: string, trade: string) =>
-  apiPost<void>(`${BASE}/favourites`, { subcontractor_id: subcontractorId, trade });
+  apiPost<void>(`/v1/subcontractors/favourites`, { subcontractor_id: subcontractorId, trade });
 
 export const removeFavourite = (subcontractorId: string, trade: string) =>
   apiDelete(
-    `${BASE}/favourites?subcontractor_id=${encodeURIComponent(subcontractorId)}&trade=${encodeURIComponent(trade)}`,
+    `/v1/subcontractors/favourites?subcontractor_id=${encodeURIComponent(subcontractorId)}&trade=${encodeURIComponent(trade)}`,
   );
 
 export const geocodeFirm = (subcontractorId: string) =>
-  apiPost<{ has_coordinates: boolean; reason: string | null }>(`${BASE}/subcontractors/${subcontractorId}/geocode`, {});
+  apiPost<{ has_coordinates: boolean; reason: string | null }>(`/v1/subcontractors/subcontractors/${subcontractorId}/geocode`, {});

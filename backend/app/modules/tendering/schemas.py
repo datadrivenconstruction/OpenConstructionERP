@@ -1479,3 +1479,21 @@ class FiledDocument(BaseModel):
 class AwardFilingResponse(BaseModel):
     package_id: UUID
     documents: list[FiledDocument] = Field(default_factory=list)
+
+
+class BidFileListResponse(BaseModel):
+    """Files bidders uploaded through their links."""
+
+    items: list[BidFileResponse]
+    total: int
+    offset: int = 0
+    limit: int = 50
+
+
+class PackageDocumentListResponse(BaseModel):
+    """Project documents sent out with a package."""
+
+    items: list[PackageDocumentResponse]
+    total: int
+    offset: int = 0
+    limit: int = 50

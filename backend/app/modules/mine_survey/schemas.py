@@ -461,3 +461,12 @@ class PatternListResponse(BaseModel):
 
 EntryOut.model_rebuild()
 PeriodDetail.model_rebuild()
+
+
+class MaterialListResponse(BaseModel):
+    """Materials of one unit."""
+
+    items: list[MaterialOut]
+    total: int
+    offset: int = 0
+    limit: int = 50
