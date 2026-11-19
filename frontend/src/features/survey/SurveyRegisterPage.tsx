@@ -98,9 +98,18 @@ export default function SurveyRegisterPage() {
   });
 
   const noCrs = crs.isSuccess && !crs.data.crs;
+  // Offer the CRS once per project and session; the chip and the SRV finding reopen it.
   useEffect(() => {
-    if (noCrs) setCrsOpen(true);
-  }, [noCrs]);
+    if (!noCrs || !projectId) return;
+    const key = `survey.crs.offered.${projectId}`;
+    try {
+      if (sessionStorage.getItem(key)) return;
+      sessionStorage.setItem(key, '1');
+    } catch {
+      // storage blocked: still offer it, closing works either way
+    }
+    setCrsOpen(true);
+  }, [noCrs, projectId]);
 
   const remove = useMutation({
     mutationFn: (s: PointSet) => deletePointSet(s.id),
@@ -452,7 +461,7 @@ export default function SurveyRegisterPage() {
           setShownTraverse(null);
         }}
       />
-      <CrsDialog open={crsOpen} required={noCrs} projectId={projectId} state={crs.data} onClose={() => setCrsOpen(false)} />
+      <CrsDialog open={crsOpen} projectId={projectId} state={crs.data} onClose={() => setCrsOpen(false)} />
       <SurveyImportDialog
         open={importOpen}
         projectId={projectId}
