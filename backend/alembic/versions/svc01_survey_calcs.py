@@ -13,7 +13,7 @@ at boot picks them up without ``alembic upgrade``:
 * ``oe_land_parcel_point.corner_status`` / ``accuracy_class``: corner register.
 
 Revision ID: svc01_survey_calcs
-Revises: vcrm01_deal_activities
+Revises: awx01_award_exchange
 Create Date: 2026-11-19
 """
 
@@ -25,7 +25,7 @@ import sqlalchemy as sa
 from alembic import op
 
 revision: str = "svc01_survey_calcs"
-down_revision: str | Sequence[str] | None = "vcrm01_deal_activities"
+down_revision: str | Sequence[str] | None = "awx01_award_exchange"
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 
