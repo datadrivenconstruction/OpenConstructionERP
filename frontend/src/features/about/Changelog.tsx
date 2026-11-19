@@ -67,6 +67,13 @@ const UNRELEASED: ChangelogEntry | null = null;
 // carry the long form and are left alone as the record of what shipped.
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '19.9.0',
+    date: '2026-11-19',
+    tag: 'NEW',
+    summary:
+      'Tender packages show their contents before they go out, bids entered by hand can be priced line by line, and drafts can be deleted. Contracts print to PDF and keep client and subcontract values apart, purchase orders can be edited by every role allowed to change them, the CRM tracks deal activities, and a family of survey modules arrives.',
+  },
+  {
     version: '19.8.0',
     date: '2026-11-17',
     tag: 'NEW',
