@@ -80,7 +80,7 @@ jobs:
     # project governance modules added some seventy files to tests/pg; the
     # first run with all of them was cut off at thirty minutes inside the
     # dialect suite, which reads as a cancelled job and gives no verdict.
-    timeout-minutes: 90
+    timeout-minutes: 120
     defaults:
       run:
         working-directory: backend

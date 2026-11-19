@@ -321526,11 +321526,11 @@
             },
             {
               "name": "quantity",
-              "type": "Decimal"
+              "type": "FiniteDecimal"
             },
             {
               "name": "unit_cost",
-              "type": "Decimal"
+              "type": "FiniteDecimal"
             },
             {
               "name": "included",
@@ -321590,12 +321590,12 @@
             },
             {
               "name": "budget_rate",
-              "type": "Decimal | None",
+              "type": "FiniteDecimal | None",
               "default": "None"
             },
             {
               "name": "budget_total",
-              "type": "Decimal | None",
+              "type": "FiniteDecimal | None",
               "default": "None"
             },
             {
