@@ -72,9 +72,6 @@ class SubcontractTerms(Base):
         nullable=True,
     )
     contract_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
-    deduction_order: Mapped[str] = mapped_column(
-        String(30), nullable=False, default="levies_then_retention", server_default="levies_then_retention"
-    )
     # Retention stops when it reaches this percent of the contract sum. NULL = no cap.
     retention_cap_percent: Mapped[Decimal | None] = mapped_column(Numeric(7, 3), nullable=True)
     payment_discount_percent: Mapped[Decimal | None] = mapped_column(Numeric(7, 3), nullable=True)
@@ -116,6 +113,8 @@ class SubcontractLevy(Base):
     applies_at: Mapped[str] = mapped_column(
         String(20), nullable=False, default="each_invoice", server_default="each_invoice"
     )
+    # ``gross`` (default) or ``net_after_retention``: what a percentage levy is taken on.
+    levy_base: Mapped[str] = mapped_column(String(30), nullable=False, default="gross", server_default="gross")
     sort_order: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
 
     terms: Mapped[SubcontractTerms] = relationship(back_populates="levies", lazy="raise_on_sql")

@@ -8,16 +8,16 @@ the work they bill, holds back retention, and takes a payment discount when it
 pays within the agreed days. This module turns one invoice's work value and the
 subcontract's terms into the deduction lines a person can check by hand.
 
-Order of deductions
--------------------
-``levies_then_retention`` (the default) reads::
+How the deductions combine
+--------------------------
+Retention and every percentage levy are computed independently on the same
+gross (certified) work value, so their order never changes the result::
 
-    work value -> minus levies -> retention % of what is left -> payable
-    -> payment discount % of payable when paid by the due date
+    payable = gross - retention % of gross - each levy % of gross
+    payment discount = discount % of payable, when paid by the due date
 
-``retention_then_levies`` takes retention on the work value first and the
-levies on what is left; some markets agree it that way. The payment discount
-always comes last and always acts on the payable amount.
+A levy whose ``levy_base`` is ``net_after_retention`` is taken on gross less
+retention instead, for markets that agree it that way.
 
 Every amount rounds half up to 0.01 at the step that produces it, so each line
 is the figure printed and the lines add up to the payable exactly.
@@ -36,9 +36,10 @@ CENT = Decimal("0.01")
 ZERO = Decimal("0")
 HUNDRED = Decimal("100")
 
-LEVIES_THEN_RETENTION = "levies_then_retention"
-RETENTION_THEN_LEVIES = "retention_then_levies"
-DEDUCTION_ORDERS: tuple[str, ...] = (LEVIES_THEN_RETENTION, RETENTION_THEN_LEVIES)
+GROSS = "gross"
+NET_AFTER_RETENTION = "net_after_retention"
+#: What a percentage levy is computed on.
+LEVY_BASES_OF: tuple[str, ...] = (GROSS, NET_AFTER_RETENTION)
 
 #: A levy is a percentage of the work value or a fixed amount.
 LEVY_BASES: tuple[str, ...] = ("percent", "fixed")
@@ -86,6 +87,7 @@ class LevyTerm:
     rate_percent: Decimal | None = None
     fixed_amount: Decimal | None = None
     applies_at: str = "each_invoice"
+    levy_base: str = GROSS
 
 
 @dataclass(frozen=True)
@@ -94,7 +96,6 @@ class PaymentTerms:
 
     retention_percent: Decimal = ZERO
     retention_cap_amount: Decimal | None = None
-    deduction_order: str = LEVIES_THEN_RETENTION
     payment_discount_percent: Decimal | None = None
     payment_discount_days: int | None = None
     payment_discount_agreed: bool = False
@@ -114,11 +115,15 @@ def _levy_amount(levy: LevyTerm, base: Decimal) -> Decimal:
     return percent_of(base, levy.rate_percent or ZERO)
 
 
-def _levy_lines(levies: tuple[LevyTerm, ...], base: Decimal, *, final_account: bool) -> list[dict[str, Any]]:
+def _levy_lines(
+    levies: tuple[LevyTerm, ...], gross: Decimal, net: Decimal, *, final_account: bool
+) -> list[dict[str, Any]]:
     lines: list[dict[str, Any]] = []
     for levy in levies:
         if levy.applies_at == "final_account" and not final_account:
             continue
+        on_net = levy.levy_base == NET_AFTER_RETENTION
+        base = net if on_net else gross
         lines.append(
             {
                 "code": levy.code,
@@ -127,6 +132,7 @@ def _levy_lines(levies: tuple[LevyTerm, ...], base: Decimal, *, final_account: b
                 "rate_percent": levy.rate_percent,
                 "fixed_amount": levy.fixed_amount,
                 "applies_at": levy.applies_at,
+                "levy_base": NET_AFTER_RETENTION if on_net else GROSS,
                 "base": base,
                 "amount": _levy_amount(levy, base),
             }
@@ -168,37 +174,22 @@ def build_deductions(
     Returns:
         A dict with the levy lines, the retention, the payable amount, the
         payment discount with its due date, and ``lines``: every step in the
-        order it was applied with the running amount after it.
+        order shown with the running amount after it.
     """
     work = round_cent(money(work_value))
     held = money(retained_to_date)
-    order = terms.deduction_order if terms.deduction_order in DEDUCTION_ORDERS else LEVIES_THEN_RETENTION
+    retention, capped = _retention(work, terms, held)
+    levy_lines = _levy_lines(terms.levies, work, work - retention, final_account=final_account)
+    levies_total = sum((line["amount"] for line in levy_lines), ZERO)
+
     lines: list[dict[str, Any]] = [{"kind": "work_value", "amount": work, "running": work}]
-
-    running = work
-    if order == LEVIES_THEN_RETENTION:
-        levy_lines = _levy_lines(terms.levies, work, final_account=final_account)
-        levies_total = sum((line["amount"] for line in levy_lines), ZERO)
-        running -= levies_total
-        for line in levy_lines:
-            lines.append({"kind": "levy", "code": line["code"], "name": line["name"], "amount": line["amount"]})
-        lines.append({"kind": "after_levies", "amount": running, "running": running})
-        retention_base = running
-        retention, capped = _retention(retention_base, terms, held)
-        running -= retention
-        lines.append({"kind": "retention", "amount": retention, "running": running})
-    else:
-        retention_base = work
-        retention, capped = _retention(retention_base, terms, held)
-        running -= retention
-        lines.append({"kind": "retention", "amount": retention, "running": running})
-        levy_lines = _levy_lines(terms.levies, running, final_account=final_account)
-        levies_total = sum((line["amount"] for line in levy_lines), ZERO)
-        for line in levy_lines:
-            lines.append({"kind": "levy", "code": line["code"], "name": line["name"], "amount": line["amount"]})
-        running -= levies_total
-        lines.append({"kind": "after_levies", "amount": running, "running": running})
-
+    running = work - retention
+    lines.append({"kind": "retention", "amount": retention, "running": running})
+    for line in levy_lines:
+        running -= line["amount"]
+        lines.append(
+            {"kind": "levy", "code": line["code"], "name": line["name"], "amount": line["amount"], "running": running}
+        )
     payable = running
     lines.append({"kind": "payable", "amount": payable, "running": payable})
 
@@ -220,11 +211,10 @@ def build_deductions(
 
     return {
         "work_value": work,
-        "deduction_order": order,
         "final_account": final_account,
         "levies": levy_lines,
         "levies_total": levies_total,
-        "retention_base": retention_base,
+        "retention_base": work,
         "retention_percent": terms.retention_percent,
         "retention_amount": retention,
         "retention_capped": capped,
@@ -244,11 +234,11 @@ def build_deductions(
 
 
 __all__ = [
-    "DEDUCTION_ORDERS",
-    "LEVIES_THEN_RETENTION",
+    "GROSS",
     "LEVY_APPLIES_AT",
     "LEVY_BASES",
-    "RETENTION_THEN_LEVIES",
+    "LEVY_BASES_OF",
+    "NET_AFTER_RETENTION",
     "LevyTerm",
     "PaymentTerms",
     "build_deductions",

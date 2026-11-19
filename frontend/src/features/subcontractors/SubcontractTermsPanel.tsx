@@ -49,6 +49,7 @@ function levyFromCatalogue(item: LevyCatalogueItem): SubcontractLevy {
     rate_percent: item.default_percent,
     fixed_amount: item.default_fixed_amount,
     applies_at: item.applies_at,
+    levy_base: 'gross',
   };
 }
 
@@ -61,8 +62,6 @@ export function StatementTable({ statement }: { statement: DeductionStatement })
         return t('subcontractors.terms_line_work', { defaultValue: 'Work value' });
       case 'levy':
         return name ?? '';
-      case 'after_levies':
-        return t('subcontractors.terms_line_after_levies', { defaultValue: 'After levies' });
       case 'retention':
         return t('subcontractors.terms_line_retention', {
           defaultValue: 'Retention {{rate}}%',
@@ -302,34 +301,12 @@ function TermsForm({ agreement }: { agreement: Agreement }) {
   return (
     <div className="space-y-3">
       <p className="text-xs text-content-secondary">
-        {draft.deduction_order === 'levies_then_retention'
-          ? t('subcontractors.terms_order_levies_first', {
-              defaultValue:
-                'Order: work value, minus levies, minus retention on what is left, gives the payable amount. The payment discount is taken last, on the payable amount.',
-            })
-          : t('subcontractors.terms_order_retention_first', {
-              defaultValue:
-                'Order: work value, minus retention, minus levies on what is left, gives the payable amount. The payment discount is taken last, on the payable amount.',
-            })}
+        {t('subcontractors.terms_basis_note', {
+          defaultValue:
+            'Retention and each levy are taken on the gross work value, so their order does not change the result. The payment discount comes last, on what remains payable.',
+        })}
       </p>
       <div className="grid grid-cols-2 gap-2 text-sm">
-        <label className="space-y-1">
-          <span className="text-xs text-content-secondary">
-            {t('subcontractors.terms_order', { defaultValue: 'Deduction order' })}
-          </span>
-          <select
-            value={draft.deduction_order}
-            onChange={(e) => set({ deduction_order: e.target.value as SubcontractTerms['deduction_order'] })}
-            className={fieldCls}
-          >
-            <option value="levies_then_retention">
-              {t('subcontractors.terms_order_a', { defaultValue: 'Levies, then retention' })}
-            </option>
-            <option value="retention_then_levies">
-              {t('subcontractors.terms_order_b', { defaultValue: 'Retention, then levies' })}
-            </option>
-          </select>
-        </label>
         <label className="space-y-1">
           <span className="text-xs text-content-secondary">
             {t('subcontractors.terms_cap', { defaultValue: 'Retention cap, % of contract sum' })}
@@ -385,7 +362,7 @@ function TermsForm({ agreement }: { agreement: Agreement }) {
           </p>
         )}
         {draft.levies.map((levy, i) => (
-          <div key={levy.code} className="grid grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,1.4fr)_auto] items-center gap-2 text-sm">
+          <div key={levy.code} className="grid grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,1.4fr)_minmax(0,1.2fr)_auto] items-center gap-2 text-sm">
             <span className="truncate">{levy.name}</span>
             <input
               aria-label={t('subcontractors.terms_rate', { defaultValue: 'Rate %' })}
@@ -412,6 +389,18 @@ function TermsForm({ agreement }: { agreement: Agreement }) {
               </option>
               <option value="final_account">
                 {t('subcontractors.terms_final_account', { defaultValue: 'Once, at final account' })}
+              </option>
+            </select>
+            <select
+              aria-label={t('subcontractors.terms_levy_base', { defaultValue: 'Taken on' })}
+              value={levy.levy_base ?? 'gross'}
+              onChange={(e) => setLevy(i, { levy_base: e.target.value as SubcontractLevy['levy_base'] })}
+              className={fieldCls}
+              disabled={levy.basis === 'fixed'}
+            >
+              <option value="gross">{t('subcontractors.terms_levy_on_gross', { defaultValue: 'Gross' })}</option>
+              <option value="net_after_retention">
+                {t('subcontractors.terms_levy_on_net', { defaultValue: 'Net after retention' })}
               </option>
             </select>
             <button

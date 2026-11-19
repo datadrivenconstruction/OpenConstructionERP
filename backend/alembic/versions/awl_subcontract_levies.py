@@ -69,7 +69,6 @@ def upgrade() -> None:
             *_base(),
             sa.Column("agreement_id", sa.String(36), sa.ForeignKey(f"{_AGR}.id", ondelete="CASCADE"), nullable=True),
             sa.Column("contract_id", sa.String(36), nullable=True),
-            sa.Column("deduction_order", sa.String(30), nullable=False, server_default="levies_then_retention"),
             sa.Column("retention_cap_percent", sa.Numeric(7, 3), nullable=True),
             sa.Column("payment_discount_percent", sa.Numeric(7, 3), nullable=True),
             sa.Column("payment_discount_days", sa.Integer(), nullable=True),
@@ -91,6 +90,7 @@ def upgrade() -> None:
             sa.Column("rate_percent", sa.Numeric(7, 3), nullable=True),
             sa.Column("fixed_amount", sa.Numeric(18, 2), nullable=True),
             sa.Column("applies_at", sa.String(20), nullable=False, server_default="each_invoice"),
+            sa.Column("levy_base", sa.String(30), nullable=False, server_default="gross"),
             sa.Column("sort_order", sa.Integer(), nullable=False, server_default="0"),
         )
         op.create_index("ix_oe_subcontractors_subcontract_levy_terms_id", _LEVY, ["terms_id"])

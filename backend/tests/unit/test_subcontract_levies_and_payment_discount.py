@@ -3,6 +3,9 @@
 Example 1 of the subcontractor award domain: contract sum 400,008.60, levies
 0.3 + 0.5 + 0.4 = 1.2 %, retention 10 % per payment capped at 5 % of the
 contract sum (20,000.43), first invoice 120,000.00, payment discount 2 % in 14 days.
+Retention and every levy are taken on the same gross amount, so their order does
+not matter: 120,000.00 - 12,000.00 - 1,440.00 = 106,560.00 payable; the discount
+is 2 % of that, 2,131.20, leaving 104,428.80.
 """
 
 from __future__ import annotations
@@ -11,7 +14,7 @@ from datetime import date
 from decimal import Decimal
 
 from app.modules.subcontractors.terms import (
-    RETENTION_THEN_LEVIES,
+    NET_AFTER_RETENTION,
     LevyTerm,
     PaymentTerms,
     build_deductions,
@@ -53,21 +56,20 @@ def test_first_invoice_matches_the_worked_example() -> None:
     s = build_deductions(D("120000.00"), _terms(), invoice_date=date(2026, 3, 2), paid_on=date(2026, 3, 16))
     assert [line["amount"] for line in s["levies"]] == [D("360.00"), D("600.00"), D("480.00")]
     assert s["levies_total"] == D("1440.00")
-    assert s["retention_base"] == D("118560.00")
-    assert s["retention_amount"] == D("11856.00")
-    assert s["payable"] == D("106704.00")
-    assert s["payment_discount_amount"] == D("2134.08")
-    assert s["payable_with_discount"] == D("104569.92")
+    assert s["retention_base"] == D("120000.00")
+    assert s["retention_amount"] == D("12000.00")
+    assert s["payable"] == D("106560.00")
+    assert s["payment_discount_amount"] == D("2131.20")
+    assert s["payable_with_discount"] == D("104428.80")
     assert s["discount_due_date"] == date(2026, 3, 16)
     assert s["discount_applies"] is True
-    assert s["amount_to_pay"] == D("104569.92")
+    assert s["amount_to_pay"] == D("104428.80")
     assert [line["kind"] for line in s["lines"]] == [
         "work_value",
-        "levy",
-        "levy",
-        "levy",
-        "after_levies",
         "retention",
+        "levy",
+        "levy",
+        "levy",
         "payable",
         "payment_discount",
     ]
@@ -78,25 +80,29 @@ def test_first_invoice_matches_the_worked_example() -> None:
 def test_late_payment_loses_the_discount() -> None:
     s = build_deductions(D("120000.00"), _terms(), invoice_date=date(2026, 3, 2), paid_on=date(2026, 3, 17))
     assert s["discount_applies"] is False
-    assert s["amount_to_pay"] == D("106704.00")
+    assert s["amount_to_pay"] == D("106560.00")
 
 
 def test_unpaid_invoice_offers_the_discount_but_does_not_take_it() -> None:
     s = build_deductions(D("120000.00"), _terms(), invoice_date=date(2026, 3, 2))
     assert s["discount_applies"] is None
-    assert s["amount_to_pay"] == D("106704.00")
-    assert s["payable_with_discount"] == D("104569.92")
+    assert s["amount_to_pay"] == D("106560.00")
+    assert s["payable_with_discount"] == D("104428.80")
 
 
 def test_retention_stops_at_the_cap() -> None:
-    s = build_deductions(D("120000.00"), _terms(), retained_to_date=D("11856.00"))
-    assert s["retention_amount"] == D("8144.43")
+    s = build_deductions(D("120000.00"), _terms(), retained_to_date=D("12000.00"))
+    assert s["retention_amount"] == D("8000.43")
     assert s["retention_capped"] is True
-    assert s["payable"] == D("120000.00") - D("1440.00") - D("8144.43")
+    assert s["payable"] == D("120000.00") - D("1440.00") - D("8000.43")
 
 
-def test_retention_first_order_takes_levies_on_what_is_left() -> None:
-    s = build_deductions(D("120000.00"), _terms(deduction_order=RETENTION_THEN_LEVIES))
+def test_a_levy_agreed_on_net_after_retention_takes_its_rate_of_gross_less_retention() -> None:
+    on_net = tuple(
+        LevyTerm(code=lv.code, name=lv.name, rate_percent=lv.rate_percent, levy_base=NET_AFTER_RETENTION)
+        for lv in LEVIES
+    )
+    s = build_deductions(D("120000.00"), _terms(levies=on_net))
     assert s["retention_amount"] == D("12000.00")
     # 1.2 % of 108,000.00 = 324 + 540 + 432
     assert s["levies_total"] == D("1296.00")
@@ -118,9 +124,9 @@ def test_final_account_levy_is_charged_once_at_final_account() -> None:
 def test_a_statement_that_does_not_add_up_is_found() -> None:
     s = build_deductions(D("120000.00"), _terms())
     tampered = {**s, "payable": D("107000.00")}
-    assert check_levies_reconcile(tampered)[0].params == {"expected": "106704.00", "payable": "107000.00"}
+    assert check_levies_reconcile(tampered)[0].params == {"expected": "106560.00", "payable": "107000.00"}
     wrong_discount = {**s, "payment_discount_amount": D("2000.00")}
-    assert check_discount_reconciles(wrong_discount)[0].params["expected"] == "2134.08"
+    assert check_discount_reconciles(wrong_discount)[0].params["expected"] == "2131.20"
 
 
 def test_recipient_outside_radius_is_flagged_with_its_distance() -> None:
@@ -175,7 +181,7 @@ def test_german_payment_discount_without_agreement_warns() -> None:
     s = build_deductions(D("120000.00"), _terms(payment_discount_agreed=False))
     results = _validate(DePaymentDiscountUnagreed(), {**s, "country_code": "DE"})
     assert [r.passed for r in results] == [False]
-    assert "2134.08" in results[0].message
+    assert "2131.20" in results[0].message
     agreed = build_deductions(D("120000.00"), _terms())
     assert [r.passed for r in _validate(DePaymentDiscountUnagreed(), {**agreed, "country_code": "DE"})] == [True]
 
