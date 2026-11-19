@@ -64,7 +64,9 @@ function PathCard({
       style={{ borderInlineStartWidth: 3, borderInlineStartColor: card.tone }}
     >
       <div className="flex items-center justify-between gap-2">
-        <span className="truncate text-xs font-medium text-content-secondary">{card.moduleLabel}</span>
+        <span className="truncate text-xs font-medium text-content-secondary" title={card.moduleLabel}>
+          {card.moduleLabel}
+        </span>
         {card.importance !== 'supporting' && (
           <span
             className={clsx(
@@ -87,8 +89,11 @@ function PathCard({
         <div className="flex min-w-0 items-baseline gap-2">
           {hasProject && card.count !== null ? (
             card.count === 0 ? (
-              <span className="text-xs text-content-quaternary">
-                {t('data_paths.no_records', { defaultValue: 'No records yet' })}
+              <span
+                className="text-lg font-semibold tabular-nums text-content-quaternary"
+                title={t('data_paths.no_records', { defaultValue: 'No records yet' })}
+              >
+                0
               </span>
             ) : (
               <span className="text-lg font-semibold tabular-nums text-content-primary">{formatNumber(card.count)}</span>

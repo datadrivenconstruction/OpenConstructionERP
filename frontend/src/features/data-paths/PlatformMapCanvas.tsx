@@ -7,7 +7,7 @@
 // particles are replaced by a static arrowhead. Hovering a module lights its
 // whole upstream and downstream chain; clicking it zooms to its path.
 
-import { memo, useCallback, useEffect, useMemo } from 'react';
+import { memo, useCallback, useEffect, useMemo, type CSSProperties } from 'react';
 import {
   ReactFlow,
   Background,
@@ -15,7 +15,6 @@ import {
   Controls,
   EdgeLabelRenderer,
   Handle,
-  MiniMap,
   Position,
   ReactFlowProvider,
   getBezierPath,
@@ -25,6 +24,7 @@ import {
   type Node,
   type NodeProps,
 } from '@xyflow/react';
+import { useThemeStore } from '@/stores/useThemeStore';
 import '@xyflow/react/dist/style.css';
 import { useTranslation } from 'react-i18next';
 import clsx from 'clsx';
@@ -171,7 +171,26 @@ function Canvas({ modules, edges, focus, visible, lit, hovered, onHover, onSelec
     () => edges.filter((e) => (showTechnical || e.kind === 'declared') && e.source !== e.target),
     [edges, showTechnical],
   );
-  const shown = useMemo(() => modules.filter((m) => !visible || visible.has(m.module.name)), [modules, visible]);
+  // The default map is the declared data network; modules with no declared link
+  // join only through a filter, a search or "Show all links".
+  const connected = useMemo(() => {
+    const s = new Set<string>();
+    for (const e of shownEdges) {
+      s.add(e.source);
+      s.add(e.target);
+    }
+    return s;
+  }, [shownEdges]);
+  const colorMode = useThemeStore((s) => s.resolved);
+  const shown = useMemo(
+    () =>
+      modules.filter((m) => {
+        const name = m.module.name;
+        if (visible) return visible.has(name);
+        return showTechnical || connected.has(name) || name === focus;
+      }),
+    [modules, visible, showTechnical, connected, focus],
+  );
   const ids = useMemo(() => new Set(shown.map((m) => m.module.name)), [shown]);
   const inView = useMemo(() => shownEdges.filter((e) => ids.has(e.source) && ids.has(e.target)), [shownEdges, ids]);
 
@@ -294,22 +313,15 @@ function Canvas({ modules, edges, focus, visible, lit, hovered, onHover, onSelec
         onNodeMouseLeave={() => onHover(null)}
         nodesDraggable={false}
         nodesConnectable={false}
-        minZoom={0.1}
+        minZoom={0.3}
         maxZoom={2}
         fitView
+        colorMode={colorMode}
+        style={{ background: 'transparent', '--xy-background-color': 'transparent' } as CSSProperties}
         proOptions={{ hideAttribution: true }}
       >
         <Background gap={28} size={1} color="var(--oe-border-light)" />
         <Controls showInteractive={false} position="bottom-right" />
-        <MiniMap
-          pannable
-          zoomable
-          position="top-right"
-          nodeColor={(n) => (n.data as ModuleNodeData).tone}
-          nodeStrokeWidth={0}
-          maskColor="rgb(0 0 0 / 0.08)"
-          className="!rounded-lg !border !border-border-light !bg-surface-primary"
-        />
       </ReactFlow>
     </div>
   );

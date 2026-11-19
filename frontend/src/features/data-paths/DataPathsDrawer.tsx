@@ -55,7 +55,7 @@ export function DataPathsDrawer({ module, open, onClose }: DataPathsDrawerProps)
       widthClass="sm:max-w-3xl"
       headerActions={model ? <ExportMenu model={model} /> : null}
     >
-      <div className="space-y-4" data-testid="data-paths-drawer">
+      <div className="space-y-4 p-4" data-testid="data-paths-drawer">
         {model?.why && (
           <p id={descId} className="rounded-lg bg-surface-secondary px-3 py-2 text-sm text-content-secondary">
             {model.why}
@@ -94,9 +94,12 @@ export function DataPathsDrawer({ module, open, onClose }: DataPathsDrawerProps)
         {tab === 'people' && (
           projectId ? (
             parties.data ? (
+              // Everyone on the project, with the people who work in this module lit.
               <PartiesHoneycomb
-                parties={parties.data.parties.filter((p) => p.placeholder || p.modules.includes(module) || p.modules.length === 0)}
+                parties={parties.data.parties}
+                litModules={parties.data.parties.some((p) => !p.placeholder && p.modules.includes(module)) ? new Set([module]) : null}
                 compact
+                wideList
               />
             ) : (
               <div className="h-32 animate-pulse rounded-xl bg-surface-secondary" aria-busy="true" />

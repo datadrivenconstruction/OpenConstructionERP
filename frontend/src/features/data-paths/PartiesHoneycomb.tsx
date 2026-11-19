@@ -53,13 +53,15 @@ export interface PartiesHoneycombProps {
   onHoverParty?: (modules: string[] | null) => void;
   onSelectParty?: (party: Party) => void;
   compact?: boolean;
+  /** Room for the name list in two columns (the drawer); the map sidebar keeps one. */
+  wideList?: boolean;
 }
 
 export function partyRoleText(t: (k: string, o?: Record<string, unknown>) => unknown, roles: string[]): string {
   return roles.map((r) => String(t(`data_paths.role_${r}`, { defaultValue: humanize(r) }))).join(', ');
 }
 
-export function PartiesHoneycomb({ parties, litModules, onHoverParty, onSelectParty, compact }: PartiesHoneycombProps) {
+export function PartiesHoneycomb({ parties, litModules, onHoverParty, onSelectParty, compact, wideList }: PartiesHoneycombProps) {
   const { t } = useTranslation();
   const byZone = useMemo(() => {
     const out: Record<PartyZone, Party[]> = { client: [], delivery: [], specialist: [] };
@@ -145,6 +147,28 @@ export function PartiesHoneycomb({ parties, litModules, onHoverParty, onSelectPa
                     );
                   })}
                 </svg>
+              )}
+              {compact && list.some((p) => !p.placeholder) && (
+                // In the drawer the initials alone do not say who someone is.
+                <ul className={clsx('mt-2 grid grid-cols-1 gap-x-4 gap-y-1', wideList && 'sm:grid-cols-2')} aria-hidden>
+                  {list
+                    .filter((p) => !p.placeholder)
+                    .map((p) => {
+                      const lit = !!litModules && p.modules.some((m) => litModules.has(m));
+                      return (
+                        <li
+                          key={p.id}
+                          className={clsx('flex min-w-0 items-baseline gap-2 text-xs', litModules && !lit && 'opacity-50')}
+                        >
+                          <span className="w-6 shrink-0 font-semibold text-content-tertiary">{p.initials}</span>
+                          <span className="min-w-0 flex-1 truncate text-content-primary" title={p.name}>
+                            {p.name}
+                          </span>
+                          <span className="max-w-[45%] shrink-0 truncate text-content-tertiary">{partyRoleText(t, p.roles)}</span>
+                        </li>
+                      );
+                    })}
+                </ul>
               )}
             </section>
           );
