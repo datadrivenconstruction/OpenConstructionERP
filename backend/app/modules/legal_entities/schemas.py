@@ -69,6 +69,8 @@ class LegalEntityCreate(_CodesMixin):
     invoice_prefix: str | None = Field(default=None, max_length=32)
     default_signatory: str | None = Field(default=None, max_length=255)
     bank: EntityBank | None = None
+    #: PNG, JPEG or WebP data URL; an empty string removes the logo.
+    logo_data_url: str | None = None
     is_default: bool = False
     is_active: bool = True
     metadata: dict[str, Any] = Field(default_factory=dict)
@@ -98,6 +100,8 @@ class LegalEntityUpdate(_CodesMixin):
     invoice_prefix: str | None = Field(default=None, max_length=32)
     default_signatory: str | None = Field(default=None, max_length=255)
     bank: EntityBank | None = None
+    #: PNG, JPEG or WebP data URL; an empty string removes the logo.
+    logo_data_url: str | None = None
     is_default: bool | None = None
     is_active: bool | None = None
     metadata: dict[str, Any] | None = None
@@ -168,6 +172,7 @@ class LegalEntityResponse(BaseModel):
     invoice_prefix: str | None = None
     default_signatory: str | None = None
     bank: dict[str, Any] | None = None
+    logo_data_url: str | None = None
     is_default: bool
     is_active: bool
     metadata: dict[str, Any] = Field(default_factory=dict, alias="metadata_")

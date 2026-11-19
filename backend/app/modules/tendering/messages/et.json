@@ -1,0 +1,12 @@
+{
+  "award": {
+    "mandant_missing": {
+      "fail": "Paketil puudub tellijaüksus; leping ei saa ostjat nimetada.",
+      "suggestion": "Valige ettevõte paketi päises või määrake see projektile."
+    },
+    "losers_not_notified": {
+      "fail": "Loobumiskirju pole saadetud {n} pakkujale.",
+      "suggestion": "Saatke loobumiskirjad valikusammust."
+    }
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "award": {
+    "mandant_missing": {
+      "fail": "Het pakket heeft geen opdrachtgevende entiteit; het contract kan de koper niet noemen.",
+      "suggestion": "Kies de vennootschap in de pakketkop of wijs er een toe aan het project."
+    },
+    "losers_not_notified": {
+      "fail": "Afwijzingsbrieven niet verstuurd aan {n} inschrijvers.",
+      "suggestion": "Verstuur de afwijzingsbrieven vanuit de gunningsstap."
+    }
+  }
+}

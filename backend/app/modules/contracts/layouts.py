@@ -172,23 +172,29 @@ async def _records(session: Any, project_ids: set[Any] | None) -> list[tuple[str
 
 async def contract_layout_context(session: Any, contract: Any, locale: str) -> LayoutContext:
     """One stored contract's layout context, counterparty name resolved."""
+    from app.core.company_profile import issuing_company
     from app.core.register_context import generated_now, load_project_header
     from app.modules.contracts.pdf_export import contract_context
     from app.modules.contracts.pdf_translations import normalize_pdf_locale, tr
     from app.modules.contracts.repository import ContractLineRepository
     from app.modules.contracts.service import ContractsService
+    from app.modules.legal_entities.seller import entity_for_contract, entity_profile
 
     project = await load_project_header(session, contract.project_id)
     lang = normalize_pdf_locale(locale)
     lines = await ContractLineRepository(session).list_for_contract(contract.id)
-    return contract_context(
-        contract,
-        list(lines),
-        project=project,
-        counterparty=await ContractsService(session).resolve_counterparty_name(contract),
-        locale=lang,
-        generated=generated_now(tr(lang, "datetime_format"), project),
-    )
+    counterparty = await ContractsService(session).resolve_counterparty_name(contract)
+    entity = await entity_for_contract(session, contract)
+    # The contract names the group company that concludes it, not the install's profile.
+    with issuing_company(entity_profile(entity) if entity is not None else None):
+        return contract_context(
+            contract,
+            list(lines),
+            project=project,
+            counterparty=counterparty,
+            locale=lang,
+            generated=generated_now(tr(lang, "datetime_format"), project),
+        )
 
 
 async def _context(session: Any, record_id: str, locale: str) -> LayoutContext:

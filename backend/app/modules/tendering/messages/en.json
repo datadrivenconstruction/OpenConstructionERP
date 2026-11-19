@@ -1,0 +1,12 @@
+{
+  "award": {
+    "mandant_missing": {
+      "fail": "The package has no client entity; the contract cannot name its buyer.",
+      "suggestion": "Pick the company in the package header, or assign one to the project."
+    },
+    "losers_not_notified": {
+      "fail": "Rejection letters not sent to {n} bidders.",
+      "suggestion": "Send the rejection letters from the award step."
+    }
+  }
+}

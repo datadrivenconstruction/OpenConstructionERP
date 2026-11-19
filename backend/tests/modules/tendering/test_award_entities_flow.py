@@ -39,12 +39,23 @@ from tests._pg import isolated_engine
 pytestmark = pytest.mark.asyncio
 
 
+@pytest_asyncio.fixture(scope="module")
+async def engine():
+    # One database for the module: cloning the schema template per test costs minutes on Windows.
+    async with isolated_engine() as eng:
+        yield eng
+
+
 @pytest_asyncio.fixture
-async def session():
-    async with isolated_engine() as engine:
-        factory = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+async def session(engine):
+    async with engine.connect() as conn:
+        outer = await conn.begin()
+        factory = async_sessionmaker(
+            bind=conn, class_=AsyncSession, expire_on_commit=False, join_transaction_mode="create_savepoint"
+        )
         async with factory() as s:
             yield s
+        await outer.rollback()
 
 
 async def _entity(s: AsyncSession, code: str, name: str, **kw) -> LegalEntity:
@@ -295,3 +306,71 @@ async def test_rejections_wait_for_the_award(session, group, outbox) -> None:
     with pytest.raises(HTTPException) as exc:
         await award_flow.send_rejections(TenderingService(session), group["package"], [], actor_id=None)
     assert exc.value.status_code == 409
+
+
+_PNG = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=="
+
+
+def _sued_without_ids() -> LegalEntity:
+    return LegalEntity(
+        code="SUED",
+        name="Bau GmbH Sued",
+        country_code="DE",
+        functional_currency="EUR",
+        tax_ids=[],
+        address={"line1": "Isarweg 2", "postcode": "80331", "city": "Muenchen"},
+        logo_data_url=_PNG,
+    )
+
+
+async def test_documents_print_the_issuing_company_and_its_logo() -> None:
+    from app.core.company_profile import issuing_company, read_company_profile
+    from app.core.doc_templates.seller import resolve_seller
+    from app.modules.legal_entities.seller import entity_profile
+
+    workspace = read_company_profile()
+    with issuing_company(entity_profile(_sued_without_ids())):
+        profile = read_company_profile()
+        seller = resolve_seller()
+    assert profile["legal_name"] == "Bau GmbH Sued"
+    assert profile["address"] == "Isarweg 2\n80331 Muenchen"
+    assert profile["document_logo_data_url"] == _PNG
+    # A blank tax id stays blank: the workspace's VAT number never lands on another company.
+    assert profile["vat_id"] == ""
+    assert seller.legal_name == "Bau GmbH Sued"
+    assert read_company_profile() == workspace
+
+
+async def test_award_rule_messages_follow_the_language() -> None:
+    from app.modules.tendering.validators import AwardLosersNotNotified, AwardMandantMissing
+
+    data = {"package_id": "p", "active_entity_count": 2, "awarded": True, "losers_not_notified": ["A", "B"]}
+    ctx = ValidationContext(data=data, metadata={"locale": "de"})
+    (mandant,) = await AwardMandantMissing().validate(ctx)
+    (losers,) = await AwardLosersNotNotified().validate(ctx)
+    assert mandant.message.startswith("Das Paket hat keinen Mandanten")
+    assert losers.message == "Absagen an 2 Bieter nicht versandt."
+    (en,) = await AwardLosersNotNotified().validate(ValidationContext(data=data))
+    assert en.message == "Rejection letters not sent to 2 bidders."
+
+
+async def test_contract_names_the_package_company_not_the_project_one(session, group) -> None:
+    from app.core.company_profile import issuing_company, read_company_profile
+    from app.modules.legal_entities.seller import entity_for_contract, entity_profile
+
+    package = group["package"]
+    group["project"].legal_entity_id = group["nord"].id
+    package.legal_entity_id = group["sued"].id
+    await session.flush()
+    entity, source = await award_flow.issuing_entity(session, package)
+    assert (entity.code, source) == ("SUED", "package")
+
+    class _Contract:
+        project_id = group["project"].id
+        metadata_ = {"legal_entity_id": str(group["sued"].id)}
+
+    assert (await entity_for_contract(session, _Contract())).code == "SUED"
+    _Contract.metadata_ = {}
+    assert (await entity_for_contract(session, _Contract())).code == "NORD"
+    with issuing_company(entity_profile(group["sued"])):
+        assert read_company_profile()["legal_name"] == "Bau GmbH Sued"

@@ -25,12 +25,17 @@ from app.core.validation.engine import (
     ValidationRule,
     rule_registry,
 )
+from app.modules.tendering.messages import translate
 
 SEALED_RULE_SET = "tendering_sealed"
 
 
 def _data(context: ValidationContext) -> dict[str, Any]:
     return context.data if isinstance(context.data, dict) else {}
+
+
+def _locale(context: ValidationContext) -> str:
+    return str((context.metadata or {}).get("locale") or "en")
 
 
 def _bids(context: ValidationContext) -> list[dict[str, Any]]:
@@ -701,12 +706,13 @@ class AwardMandantMissing(_SealedRule):
         ref = str(data.get("package_id") or "")
         if int(data.get("active_entity_count") or 0) < 2:
             return [self._result(True, ref, "", "")]
+        locale = _locale(context)
         return [
             self._result(
                 bool(data.get("issuing_entity_id")),
                 ref,
-                "The package has no client entity; the contract cannot name its buyer.",
-                "Pick the company in the package header, or assign one to the project",
+                translate("award.mandant_missing.fail", locale),
+                translate("award.mandant_missing.suggestion", locale),
             )
         ]
 
@@ -753,8 +759,8 @@ class AwardLosersNotNotified(_SealedRule):
             self._result(
                 not pending,
                 ref,
-                f"Rejection letters not sent to {len(pending)} bidders.",
-                "Send the rejection letters from the award step",
+                translate("award.losers_not_notified.fail", _locale(context), n=len(pending)),
+                translate("award.losers_not_notified.suggestion", _locale(context)),
             )
         ]
 

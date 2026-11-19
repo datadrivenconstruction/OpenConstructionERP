@@ -1,0 +1,12 @@
+{
+  "award": {
+    "mandant_missing": {
+      "fail": "A csomagnak nincs megrendelő társasága; a szerződés nem tudja megnevezni a vevőt.",
+      "suggestion": "Válassza ki a társaságot a csomag fejlécében, vagy rendeljen egyet a projekthez."
+    },
+    "losers_not_notified": {
+      "fail": "{n} ajánlattevő nem kapott elutasító levelet.",
+      "suggestion": "Küldje el az elutasító leveleket az odaítélési lépésből."
+    }
+  }
+}

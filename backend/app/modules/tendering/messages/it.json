@@ -1,0 +1,12 @@
+{
+  "award": {
+    "mandant_missing": {
+      "fail": "Il pacchetto non ha un committente; il contratto non può indicare l'acquirente.",
+      "suggestion": "Scegli la società nell'intestazione del pacchetto o assegnane una al progetto."
+    },
+    "losers_not_notified": {
+      "fail": "Lettere di esclusione non inviate a {n} offerenti.",
+      "suggestion": "Invia le lettere di esclusione dalla fase di aggiudicazione."
+    }
+  }
+}

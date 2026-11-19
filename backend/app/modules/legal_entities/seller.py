@@ -99,6 +99,35 @@ def entity_identity(entity: LegalEntity) -> dict[str, str]:
     return {k: str(v).strip() for k, v in fields.items() if v and str(v).strip()}
 
 
+def entity_profile(entity: LegalEntity) -> dict[str, str]:
+    """The entity in the company-profile shape, for ``app.core.company_profile.issuing_company``."""
+    ident = entity_identity(entity)
+    town = " ".join(p for p in (ident.get("postcode"), ident.get("city")) if p)
+    return {
+        "legal_name": ident.get("name", ""),
+        "address": "\n".join(p for p in (ident.get("line1"), town) if p),
+        "registration_line": ident.get("legal_id", ""),
+        "vat_id": ident.get("vat_id", ""),
+        "tax_number": ident.get("tax_number", ""),
+        "document_logo_data_url": entity.logo_data_url or "",
+    }
+
+
+async def entity_for_contract(session: AsyncSession, contract: Any) -> LegalEntity | None:
+    """The company a contract is concluded by: its own ``legal_entity_id``, else its project's."""
+    from app.modules.projects.models import Project
+
+    entity_id = (getattr(contract, "metadata_", None) or {}).get("legal_entity_id")
+    if not entity_id:
+        entity_id = await session.scalar(select(Project.legal_entity_id).where(Project.id == contract.project_id))
+    if not entity_id:
+        return None
+    try:
+        return await session.get(LegalEntity, uuid.UUID(str(entity_id)))
+    except ValueError:
+        return None
+
+
 async def _settings_defaults(session: AsyncSession, scope: str) -> dict[str, Any] | None:
     from app.modules.finance.einvoice_settings_models import EInvoiceSettings
 

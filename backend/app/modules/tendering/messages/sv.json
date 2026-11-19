@@ -1,0 +1,12 @@
+{
+  "award": {
+    "mandant_missing": {
+      "fail": "Paketet saknar beställande enhet; kontraktet kan inte namnge köparen.",
+      "suggestion": "Välj bolag i pakethuvudet eller koppla ett bolag till projektet."
+    },
+    "losers_not_notified": {
+      "fail": "Avslagsbrev inte skickade till {n} anbudsgivare.",
+      "suggestion": "Skicka avslagsbreven från tilldelningssteget."
+    }
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "award": {
+    "mandant_missing": {
+      "fail": "Das Paket hat keinen Mandanten; der Vertrag kann seinen Auftraggeber nicht nennen.",
+      "suggestion": "Gesellschaft im Paketkopf wählen oder dem Projekt zuordnen."
+    },
+    "losers_not_notified": {
+      "fail": "Absagen an {n} Bieter nicht versandt.",
+      "suggestion": "Absagen im Vergabeschritt versenden."
+    }
+  }
+}

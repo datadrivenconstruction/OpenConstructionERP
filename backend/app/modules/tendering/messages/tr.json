@@ -1,0 +1,12 @@
+{
+  "award": {
+    "mandant_missing": {
+      "fail": "Paketin işveren tüzel kişisi yok; sözleşme alıcıyı belirtemiyor.",
+      "suggestion": "Şirketi paket başlığında seçin veya projeye bir şirket atayın."
+    },
+    "losers_not_notified": {
+      "fail": "Red yazısı gönderilmeyen teklif veren sayısı: {n}.",
+      "suggestion": "Red yazılarını ihale adımından gönderin."
+    }
+  }
+}

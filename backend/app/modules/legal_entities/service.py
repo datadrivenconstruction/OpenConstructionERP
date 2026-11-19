@@ -75,6 +75,21 @@ def _bank(value: Any) -> dict[str, str] | None:
     return cleaned
 
 
+def _entity_logo(value: Any) -> str | None:
+    """A raster logo data URL, ``None`` to clear; anything else is refused."""
+    if not value:
+        return None
+    from app.core.company_profile import accepted_logo
+
+    logo = accepted_logo(value)
+    if not logo or logo.startswith("data:image/svg"):
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="The logo must be a PNG, JPEG or WebP image within the size limit",
+        )
+    return logo
+
+
 #: Invoice statuses that mean the document has left the building.
 _ISSUED_STATUSES = ("issued", "sent", "approved", "paid", "partially_paid", "overdue")
 
@@ -129,6 +144,7 @@ class LegalEntityService:
             invoice_prefix=(data.get("invoice_prefix") or "").strip() or None,
             default_signatory=(data.get("default_signatory") or "").strip() or None,
             bank=_bank(data.get("bank")),
+            logo_data_url=_entity_logo(data.get("logo_data_url")),
             is_default=bool(data.get("is_default")) or first,
             is_active=data.get("is_active", True),
             metadata_=dict(data.get("metadata") or {}),
@@ -171,6 +187,8 @@ class LegalEntityService:
                 setattr(entity, field, (data[field] or "").strip() or None)
         if "bank" in data:
             entity.bank = _bank(data["bank"])
+        if "logo_data_url" in data:
+            entity.logo_data_url = _entity_logo(data["logo_data_url"])
         if "address" in data:
             entity.address = _address(data["address"])
         if data.get("tax_ids") is not None:

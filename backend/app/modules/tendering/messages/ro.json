@@ -1,0 +1,12 @@
+{
+  "award": {
+    "mandant_missing": {
+      "fail": "Pachetul nu are entitate beneficiară; contractul nu poate numi cumpărătorul.",
+      "suggestion": "Alegeți societatea în antetul pachetului sau atribuiți una proiectului."
+    },
+    "losers_not_notified": {
+      "fail": "Scrisori de respingere netrimise către {n} ofertanți.",
+      "suggestion": "Trimiteți scrisorile de respingere din pasul de atribuire."
+    }
+  }
+}

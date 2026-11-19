@@ -31,6 +31,7 @@ settled in Kuwaiti dinar keeps the fils the bid was actually made in.
 
 from __future__ import annotations
 
+import functools
 import html
 import io
 from datetime import UTC, datetime
@@ -437,10 +438,17 @@ def _sign_off(
     flow.append(_safe_para(signer, styles["value"]))
 
 
-def _issuer_block(styles: dict[str, ParagraphStyle], issuer: dict[str, Any] | None) -> list[Any]:
-    """The company of the group the letter is issued in: name, address, ids and bank, no labels."""
+def _issuer_block(
+    styles: dict[str, ParagraphStyle], issuer: dict[str, Any] | None, letterhead: Any | None = None
+) -> list[Any]:
+    """The company of the group the letter is issued in: name, address, ids and bank, no labels.
+
+    Under a letterhead, which already names the company, only the bank line is added.
+    """
     if not issuer or not issuer.get("name"):
         return []
+    if letterhead is not None:
+        return [_safe_para(issuer["bank"], styles["meta"]), Spacer(1, 4 * mm)] if issuer.get("bank") else []
     ids = " · ".join(str(issuer[k]) for k in ("tax_id", "registration", "bank") if issuer.get(k))
     flow: list[Any] = [_safe_para(issuer["name"], styles["value"])]
     for line in (issuer.get("address"), ids):
@@ -448,6 +456,19 @@ def _issuer_block(styles: dict[str, ParagraphStyle], issuer: dict[str, Any] | No
             flow.append(_safe_para(line, styles["meta"]))
     flow.append(Spacer(1, 4 * mm))
     return flow
+
+
+def _as_issuer(fn: Any) -> Any:
+    """Render *fn* in the issuing company's name: letterhead, logo and footer follow it."""
+
+    @functools.wraps(fn)
+    def wrapper(*args: Any, **kwargs: Any) -> bytes:
+        from app.core.company_profile import issuing_company
+
+        with issuing_company((kwargs.get("issuer") or {}).get("profile")):
+            return fn(*args, **kwargs)
+
+    return wrapper
 
 
 def _company_name() -> str:
@@ -459,6 +480,7 @@ def _company_name() -> str:
         return ""
 
 
+@_as_issuer
 def generate_award_letter_pdf(
     *,
     package_name: str,
@@ -517,7 +539,7 @@ def generate_award_letter_pdf(
             date_label=label(lang, "date"),
         )
     )
-    flow.extend(_issuer_block(styles, issuer))
+    flow.extend(_issuer_block(styles, issuer, letterhead))
     heading = render(text.heading, values)
     if heading:
         flow.append(_safe_para(heading, styles["doc_title"]))
@@ -577,6 +599,7 @@ def generate_award_letter_pdf(
     return pdf_bytes
 
 
+@_as_issuer
 def generate_rejection_letter_pdf(
     *,
     package_name: str,
@@ -634,7 +657,7 @@ def generate_rejection_letter_pdf(
             date_label=label(lang, "date"),
         )
     )
-    flow.extend(_issuer_block(styles, issuer))
+    flow.extend(_issuer_block(styles, issuer, letterhead))
     heading = render(text.heading, values)
     if heading:
         flow.append(_safe_para(heading, styles["doc_title"]))
@@ -770,6 +793,7 @@ def _record_fact_value(fact: dict[str, Any]) -> str:
     return ", ".join(parts)
 
 
+@_as_issuer
 def generate_award_record_pdf(
     *, record: dict[str, Any], package_ref: str, issuer: dict[str, Any] | None = None
 ) -> bytes:
@@ -791,7 +815,7 @@ def generate_award_record_pdf(
     if letterhead is not None:
         flow.append(letterhead)
     flow.extend(_header_block(styles, "VERGABEVERMERK", package_ref, letterhead=letterhead))
-    flow.extend(_issuer_block(styles, issuer))
+    flow.extend(_issuer_block(styles, issuer, letterhead))
     flow.append(Paragraph("Award record of the procurement procedure", styles["doc_title"]))
 
     gaps = [g for g in (record.get("gaps") or []) if isinstance(g, dict)]

@@ -41,10 +41,13 @@ data-dir resolution, so it stays cheap to import and needs no migration.
 
 from __future__ import annotations
 
+import contextlib
+import contextvars
 import json
 import logging
 import re
 import unicodedata
+from collections.abc import Iterator
 from pathlib import Path
 from typing import Any
 
@@ -256,7 +259,48 @@ def _forget_profile(data_dir: Path | None) -> None:
     _profile_cache.pop(str(company_profile_path(data_dir)), None)
 
 
+#: Fields that name the issuing company: a blank one is printed blank, never the workspace's value.
+_ISSUER_IDENTITY = frozenset({"legal_name", "address", "registration_line", "vat_id", "tax_number"})
+
+#: The company a document is being issued in, laid over the stored profile while it renders.
+_issuer_override: contextvars.ContextVar[dict[str, str] | None] = contextvars.ContextVar(
+    "company_profile_issuer", default=None
+)
+
+
+@contextlib.contextmanager
+def issuing_company(fields: dict[str, str] | None) -> Iterator[None]:
+    """Render documents in another company's name inside the block.
+
+    ``fields`` uses the profile's keys (``legal_name``, ``address``, ``vat_id``,
+    ``document_logo_data_url`` ...); blank values keep the stored ones, so a
+    group company without its own logo still prints the workspace logo.
+    """
+    kept = {k: v for k, v in (fields or {}).items() if v or k in _ISSUER_IDENTITY}
+    token = _issuer_override.set(kept or None)
+    try:
+        yield
+    finally:
+        _issuer_override.reset(token)
+
+
+def accepted_logo(value: Any) -> str:
+    """An image data URL the document layer accepts, or ``""``."""
+    return _logo(value)
+
+
 def read_company_profile(data_dir: Path | None = None) -> dict[str, str]:
+    """Return the company profile documents print, the issuing company laid over it."""
+    profile = _read_stored_profile(data_dir)
+    override = _issuer_override.get()
+    if override and data_dir is None:
+        profile.update(override)
+        if "document_logo_data_url" in override:
+            profile["document_logo_png_data_url"] = ""
+    return profile
+
+
+def _read_stored_profile(data_dir: Path | None = None) -> dict[str, str]:
     """Return the stored company profile, or defaults when none/corrupt.
 
     A fresh ``dict`` is returned each call so callers can never mutate the

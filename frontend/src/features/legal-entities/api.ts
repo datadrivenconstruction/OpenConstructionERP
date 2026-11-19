@@ -63,6 +63,8 @@ export interface LegalEntity {
   invoice_prefix: string | null;
   default_signatory?: string | null;
   bank?: EntityBank | null;
+  /** PNG, JPEG or WebP data URL printed on this company's documents. */
+  logo_data_url?: string | null;
   is_default: boolean;
   is_active: boolean;
   metadata: Record<string, unknown>;
@@ -90,6 +92,8 @@ export interface LegalEntityInput {
   invoice_prefix?: string | null;
   default_signatory?: string | null;
   bank?: EntityBank | null;
+  /** PNG, JPEG or WebP data URL printed on this company's documents. */
+  logo_data_url?: string | null;
   is_default?: boolean;
   is_active?: boolean;
 }

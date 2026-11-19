@@ -1,0 +1,12 @@
+{
+  "award": {
+    "mandant_missing": {
+      "fail": "Pakken har ingen bygherreenhed; kontrakten kan ikke navngive køberen.",
+      "suggestion": "Vælg selskabet i pakkehovedet, eller tildel projektet et selskab."
+    },
+    "losers_not_notified": {
+      "fail": "Afslagsbreve ikke sendt til {n} tilbudsgivere.",
+      "suggestion": "Send afslagsbrevene fra tildelingstrinnet."
+    }
+  }
+}

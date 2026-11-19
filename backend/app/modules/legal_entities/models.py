@@ -25,7 +25,7 @@ from __future__ import annotations
 
 import uuid
 
-from sqlalchemy import JSON, Boolean, ForeignKey, Index, String, UniqueConstraint
+from sqlalchemy import JSON, Boolean, ForeignKey, Index, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import GUID, Base
@@ -64,6 +64,8 @@ class LegalEntity(Base):
     default_signatory: Mapped[str | None] = mapped_column(String(255), nullable=True)
     #: Bank account printed on the company's documents: ``{"holder", "iban", "bic", "bank_name"}``.
     bank: Mapped[dict | None] = mapped_column(JSON, nullable=True)  # type: ignore[assignment]
+    #: The company's own logo as a raster image data URL; NULL prints the workspace logo.
+    logo_data_url: Mapped[str | None] = mapped_column(Text, nullable=True)
     #: The entity a document falls back to when nothing names one. At most one.
     is_default: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default="false")
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True, server_default="true")

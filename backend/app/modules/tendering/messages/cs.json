@@ -1,0 +1,12 @@
+{
+  "award": {
+    "mandant_missing": {
+      "fail": "Balíček nemá objednatele; smlouva nemůže uvést kupujícího.",
+      "suggestion": "Vyberte společnost v hlavičce balíčku nebo ji přiřaďte projektu."
+    },
+    "losers_not_notified": {
+      "fail": "Dopisy o odmítnutí neodeslány uchazečům: {n}.",
+      "suggestion": "Odešlete dopisy o odmítnutí v kroku zadání."
+    }
+  }
+}
