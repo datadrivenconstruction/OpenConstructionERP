@@ -2424,6 +2424,14 @@
     "control_check": {
       "fail": "Bod bodového pole {id}: kontrolní měření se liší o {r} mm, více než tolerance {t} mm.",
       "suggestion": "Bod znovu zaměřte; pokud se posunul, nevytyčujte z něj, dokud nebude obnoven."
+    },
+    "lsq_global_test": {
+      "fail": "Globální test vyrovnání nevyhověl: sigma0 {s}, vážený součet čtverců oprav {v} je mimo [{lo}, {hi}].",
+      "suggestion": "Porovnejte apriorní směrodatné odchylky s použitým přístrojem a pak hledejte hrubou chybu v označeném měření."
+    },
+    "lsq_outlier": {
+      "fail": "Měření na {obs} má normovanou opravu {w}, nad kritickou hodnotou 3,29.",
+      "suggestion": "Zkontrolujte zápis měření nebo jej opakujte, než vyrovnání přijmete."
     }
   },
   "volumes": {

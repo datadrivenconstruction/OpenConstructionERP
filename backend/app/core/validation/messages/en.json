@@ -2424,6 +2424,14 @@
     "control_check": {
       "fail": "Control point {id}: the check shot is {r} mm off, beyond the {t} mm tolerance.",
       "suggestion": "Re-observe the point; if it has moved, stop setting out from it until it is re-established."
+    },
+    "lsq_global_test": {
+      "fail": "Least-squares global test fails: sigma0 {s}, weighted sum of squared residuals {v} is outside [{lo}, {hi}].",
+      "suggestion": "Check the a priori standard deviations against the instrument used, then look for a blunder in the flagged observation."
+    },
+    "lsq_outlier": {
+      "fail": "The observation at {obs} has a standardized residual of {w}, above the critical value 3.29.",
+      "suggestion": "Check how the observation was booked or observe it again before accepting the adjustment."
     }
   },
   "volumes": {

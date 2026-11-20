@@ -122,6 +122,8 @@ _SURVEY_KEYS = (
     "local_grid_residual",
     "local_grid_scale",
     "raw_skipped",
+    "lsq_global_test",
+    "lsq_outlier",
 )
 
 

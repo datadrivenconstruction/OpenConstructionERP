@@ -8,6 +8,7 @@
 
 import { activeLanguageTag, apiGet, apiPatch, apiPost } from '@/shared/lib/api';
 import type { AngleUnit } from './angles';
+import type { AdjustMethod, InstrumentClass, LsqOut } from './adjustment';
 
 
 const loc = () => `locale=${encodeURIComponent(activeLanguageTag() ?? 'en')}`;
@@ -43,6 +44,7 @@ export interface CornerClass {
 export interface CalcClasses {
   closure: ClosureClass[];
   corner: CornerClass[];
+  instruments?: InstrumentClass[];
 }
 
 export type CogoMethod = 'inverse' | 'polar' | 'bearing_bearing' | 'line_line' | 'distance_distance' | 'offset' | 'area';
@@ -107,6 +109,14 @@ export interface FieldTraverseIn {
   end?: { station_id: string; e: number; n: number } | null;
   closing_azimuth?: string | null;
   class_key: string;
+  angular_k_sec?: number | null;
+  min_ratio?: number | null;
+  method?: AdjustMethod;
+  instrument_key?: string;
+  angle_sd_sec?: number | null;
+  dist_sd_mm?: number | null;
+  dist_ppm?: number | null;
+  centering_sd_mm?: number | null;
   save_points?: boolean;
 }
 
@@ -129,8 +139,11 @@ export interface FieldTraverseOut {
   linear_verdict: string;
   class_label: string;
   stations: { station_id: string; e: number; n: number; angle_corrected_deg: number; c_e: number; c_n: number }[];
+  method?: AdjustMethod;
+  lsq?: LsqOut | null;
   findings: Finding[];
   points_saved: number;
+  traverse?: SavedRecord | null;
 }
 
 export interface BookRow {
@@ -148,6 +161,7 @@ export interface LevelBookIn {
   close_rl: number | null;
   rows: BookRow[];
   class_key: string;
+  k_mm?: number | null;
   write_rls?: boolean;
 }
 
@@ -180,6 +194,7 @@ export interface LevelBookOut {
   class_label: string;
   findings: Finding[];
   points_updated: number;
+  traverse?: SavedRecord | null;
 }
 
 export const getClasses = () => apiGet<CalcClasses>(`/v1/survey-core/calc/classes`);
@@ -280,3 +295,11 @@ export const stakeCorners = (parcelId: string) =>
   apiPost<{ request_id: string; code: string; stakes: number }>(`/v1/land-parcels/parcels/${parcelId}/corners/stake`, {});
 export const checkSetback = (parcelId: string, footprint: number[][], name: string, setbackM: number) =>
   apiPost<SetbackOut>(`/v1/land-parcels/parcels/${parcelId}/setback?${loc()}`, { footprint, name, setback_m: setbackM });
+
+/** The stored traverse or level run a save returns. */
+export interface SavedRecord {
+  id: string;
+  name: string;
+  kind: string;
+  method: string;
+}

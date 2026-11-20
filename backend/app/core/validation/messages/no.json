@@ -2424,6 +2424,14 @@
     "control_check": {
       "fail": "Fastmerke {id}: kontrollmålingen avviker {r} mm, mer enn toleransen på {t} mm.",
       "suggestion": "Mål punktet på nytt; hvis det har flyttet seg, ikke sett ut fra det før det er reetablert."
+    },
+    "lsq_global_test": {
+      "fail": "Utjevningens globale test er ikke bestått: sigma0 {s}, vektet kvadratsum av residualene {v} ligger utenfor [{lo}, {hi}].",
+      "suggestion": "Sammenlign a priori-standardavvikene med instrumentet som ble brukt, og let deretter etter en grov feil i den merkede observasjonen."
+    },
+    "lsq_outlier": {
+      "fail": "Observasjonen ved {obs} har en standardisert residual på {w}, over den kritiske verdien 3,29.",
+      "suggestion": "Kontroller hvordan observasjonen ble ført, eller mål den på nytt før utjevningen godtas."
     }
   },
   "volumes": {

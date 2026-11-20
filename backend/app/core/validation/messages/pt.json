@@ -2424,6 +2424,14 @@
     "control_check": {
       "fail": "Ponto de apoio {id}: a medição de verificação desvia {r} mm, acima da tolerância de {t} mm.",
       "suggestion": "Volte a medir o ponto; se se moveu, não implante a partir dele até ser restabelecido."
+    },
+    "lsq_global_test": {
+      "fail": "O teste global dos mínimos quadrados falha: sigma0 {s}, soma ponderada dos quadrados dos resíduos {v} fora de [{lo}, {hi}].",
+      "suggestion": "Compare os desvios-padrão a priori com o instrumento usado e procure um erro grosseiro na observação assinalada."
+    },
+    "lsq_outlier": {
+      "fail": "A observação em {obs} tem um resíduo padronizado de {w}, acima do valor crítico 3,29.",
+      "suggestion": "Verifique o registo da observação ou meça-a de novo antes de aceitar o ajustamento."
     }
   },
   "volumes": {

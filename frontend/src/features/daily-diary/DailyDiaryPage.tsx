@@ -4,7 +4,7 @@ import { PhotoStrip } from '@/features/photos/components/PhotoStrip';
 import { useState, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import clsx from 'clsx';
 import {
   Calendar,
@@ -254,13 +254,15 @@ function formatSha(sha: string): string {
 export function DailyDiaryPage() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
-  const [tab, setTab] = useState<Tab>('diaries');
+  const [searchParams] = useSearchParams();
+  const [tab, setTab] = useState<Tab>(() => (searchParams.get('diary') ? 'today' : 'diaries'));
   const activeProjectId = useActiveProjectId();
   const [projectId, setProjectId] = useState<string>('');
   const today = new Date();
   const [year, setYear] = useState(today.getFullYear());
   const [month, setMonth] = useState(today.getMonth());
-  const [activeDiaryId, setActiveDiaryId] = useState<string>('');
+  // ?diary=<id> opens one diary, e.g. from a survey record's links.
+  const [activeDiaryId, setActiveDiaryId] = useState<string>(() => searchParams.get('diary') ?? '');
   const [createOpen, setCreateOpen] = useState(false);
   // Date the create flow should be prefilled with. Set when a user clicks an
   // empty calendar day so the new diary defaults to THAT day rather than
@@ -284,8 +286,9 @@ export function DailyDiaryPage() {
   useEffect(() => {
     if (activeProjectId) {
       if (activeProjectId !== projectId) {
+        // The first project pick keeps a diary opened by a deep link.
+        if (projectId) setActiveDiaryId('');
         setProjectId(activeProjectId);
-        setActiveDiaryId('');
       }
       return;
     }
@@ -1959,8 +1962,10 @@ function EntriesTimeline({
   // Open the upstream record a source-linked entry was raised from.
   // Inspections already consume ?highlight (scroll + flash); Safety lands on
   // the incidents tab today and will consume ?highlight once its batch ships.
-  const openSource = (mod: string, ref: string) => {
-    if (mod === 'inspections') {
+  const openSource = (mod: string, ref: string, meta?: Record<string, unknown>) => {
+    if (mod === 'survey_core') {
+      navigate(`/survey/points?${meta?.kind === 'point_set' ? 'set' : 'traverse'}=${ref}`);
+    } else if (mod === 'inspections') {
       navigate(`/inspections?highlight=${ref}`);
     } else if (mod === 'safety' || mod === 'hse') {
       navigate(`/safety?highlight=${ref}`);
@@ -2202,7 +2207,7 @@ function EntriesTimeline({
                   {e.source_module && e.source_ref && (
                     <button
                       type="button"
-                      onClick={() => openSource(e.source_module as string, e.source_ref as string)}
+                      onClick={() => openSource(e.source_module as string, e.source_ref as string, e.metadata)}
                       className="mt-1.5 inline-flex items-center gap-1 rounded-md border border-border-light bg-surface-primary px-2 py-1 text-2xs font-medium text-oe-blue hover:bg-oe-blue-subtle/10"
                       data-testid="daily-diary-entry-view-source"
                     >
@@ -2211,7 +2216,9 @@ function EntriesTimeline({
                         ? t('daily_diary.view_inspection', { defaultValue: 'View inspection' })
                         : e.source_module === 'safety' || e.source_module === 'hse'
                           ? t('daily_diary.view_incident', { defaultValue: 'View incident' })
-                          : t('daily_diary.view_source', { defaultValue: 'View source' })}
+                          : e.source_module === 'survey_core'
+                            ? t('daily_diary.view_survey', { defaultValue: 'View survey' })
+                            : t('daily_diary.view_source', { defaultValue: 'View source' })}
                     </button>
                   )}
                   <p className="mt-1 text-2xs text-content-tertiary">

@@ -43,6 +43,8 @@ const TARGET_PLURAL: Record<TargetType, string> = {
   boq_position: 'BOQ positions',
   project: 'projects',
   clash_run: 'clash runs',
+  survey_traverse: 'survey traverses',
+  survey_point_set: 'survey point sets',
 };
 
 function pluralizeSummary(byType: Map<TargetType, FileReferenceResponse[]>): string {

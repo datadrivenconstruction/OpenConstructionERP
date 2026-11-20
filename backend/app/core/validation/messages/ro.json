@@ -2424,6 +2424,14 @@
     "control_check": {
       "fail": "Punctul de sprijin {id}: măsurarea de control diferă cu {r} mm, peste toleranța de {t} mm.",
       "suggestion": "Remăsurați punctul; dacă s-a deplasat, nu mai trasați din el până nu este restabilit."
+    },
+    "lsq_global_test": {
+      "fail": "Testul global al compensării nu trece: sigma0 {s}, suma ponderată a pătratelor corecțiilor {v} este în afara [{lo}, {hi}].",
+      "suggestion": "Comparați abaterile standard a priori cu instrumentul folosit, apoi căutați o greșeală grosolană în observația marcată."
+    },
+    "lsq_outlier": {
+      "fail": "Observația în {obs} are o corecție standardizată de {w}, peste valoarea critică 3,29.",
+      "suggestion": "Verificați înregistrarea observației sau repetați-o înainte de a accepta compensarea."
     }
   },
   "volumes": {

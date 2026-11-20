@@ -37,9 +37,19 @@ class CornerClassOut(BaseModel):
     ppm: float = 0.0
 
 
+class InstrumentClassOut(BaseModel):
+    key: str
+    angle_sd_sec: float
+    dist_sd_mm: float
+    dist_ppm: float
+    centering_sd_mm: float
+
+
 class CalcClassesOut(BaseModel):
     closure: list[ClosureClassOut] = Field(default_factory=list)
     corner: list[CornerClassOut] = Field(default_factory=list)
+    #: Instrument accuracy grades for the least-squares weights (the same in every market).
+    instruments: list[InstrumentClassOut] = Field(default_factory=list)
 
 
 class CogoRequest(BaseModel):
@@ -129,8 +139,69 @@ class FieldTraverseIn(BaseModel):
     class_key: str = Field(default="", max_length=60)
     angular_k_sec: float | None = Field(default=None, gt=0, le=3600)
     min_ratio: int | None = Field(default=None, ge=100, le=10_000_000)
+    #: ``bowditch`` (compass rule) or ``lsq`` (least squares; Bowditch is returned alongside).
+    method: Literal["bowditch", "lsq"] = "bowditch"
+    instrument_key: str = Field(default="", max_length=32)
+    angle_sd_sec: float | None = Field(default=None, gt=0, le=600)
+    dist_sd_mm: float | None = Field(default=None, ge=0, le=1000)
+    dist_ppm: float | None = Field(default=None, ge=0, le=1000)
+    centering_sd_mm: float | None = Field(default=None, ge=0, le=100)
     save_points: bool = False
     note: str = Field(default="", max_length=2000)
+
+
+class LsqResidualOut(BaseModel):
+    kind: Literal["angle", "distance"]
+    ref: str
+    observed: float
+    #: Arc seconds for an angle, millimetres for a distance.
+    residual: float
+    sd: float
+    redundancy: float
+    standardized: float | None = None
+    flagged: bool = False
+    suspect: bool = False
+
+
+class EllipseOut(BaseModel):
+    ref: str
+    a_m: float
+    b_m: float
+    azimuth_deg: float
+    sd_e_m: float = 0.0
+    sd_n_m: float = 0.0
+
+
+class LsqStationOut(BaseModel):
+    station_id: str
+    e: float
+    n: float
+    fixed: bool = False
+    #: LSQ minus Bowditch, millimetres.
+    d_e_mm: float = 0.0
+    d_n_mm: float = 0.0
+
+
+class LsqOut(BaseModel):
+    iterations: int
+    observations: int
+    unknowns: int
+    redundancy: int
+    vtpv: float
+    sigma0: float
+    chi2_lower: float
+    chi2_upper: float
+    chi2_pass: bool
+    alpha: float
+    confidence_95: float
+    angle_sd_sec: float
+    dist_sd_mm: float
+    dist_ppm: float
+    centering_sd_mm: float
+    stations: list[LsqStationOut] = Field(default_factory=list)
+    residuals: list[LsqResidualOut] = Field(default_factory=list)
+    ellipses: list[EllipseOut] = Field(default_factory=list)
+    relative_ellipses: list[EllipseOut] = Field(default_factory=list)
 
 
 class AdjustedStationOut(BaseModel):
@@ -161,7 +232,10 @@ class FieldTraverseOut(BaseModel):
     min_ratio: int | None = None
     linear_verdict: str = "no_profile"
     class_label: str = ""
+    #: Bowditch-adjusted stations (always computed, the comparison column for LSQ).
     stations: list[AdjustedStationOut] = Field(default_factory=list)
+    method: str = "bowditch"
+    lsq: LsqOut | None = None
     findings: list[Finding] = Field(default_factory=list)
     traverse: TraverseOut | None = None
     points_saved: int = 0
@@ -225,3 +299,56 @@ class LevelBookOut(BaseModel):
     findings: list[Finding] = Field(default_factory=list)
     traverse: TraverseOut | None = None
     points_updated: int = 0
+
+
+class CalcDemoOut(BaseModel):
+    """Field observations of the riverside survey demo, ready to load into the calculation forms."""
+
+    traverse: FieldTraverseIn
+    level_book: LevelBookIn
+
+
+class TraverseReportIn(BaseModel):
+    """A traverse to print: the same input as the calculation plus labels in the reader's language."""
+
+    traverse: FieldTraverseIn
+    title: str = Field(default="", max_length=255)
+    labels: dict[str, str] = Field(default_factory=dict, max_length=200)
+
+
+SurveyLinkKind = Literal["traverse", "point_set"]
+
+
+class DiaryLinkIn(BaseModel):
+    """Record a traverse, level run or import in the site diary of its day."""
+
+    diary_date: str = Field(pattern=r"^\d{4}-\d{2}-\d{2}$")
+    title: str = Field(min_length=1, max_length=500)
+    crew: str = Field(default="", max_length=500)
+    instrument: str = Field(default="", max_length=255)
+    weather: str = Field(default="", max_length=255)
+    note: str = Field(default="", max_length=2000)
+
+
+class DiaryLinkOut(BaseModel):
+    entry_id: str
+    diary_id: str
+    diary_date: str
+    title: str
+    crew: str = ""
+    instrument: str = ""
+    weather: str = ""
+
+
+class DocumentLinkOut(BaseModel):
+    reference_id: str
+    file_kind: str
+    file_id: str
+    label: str = ""
+
+
+class SurveyLinksOut(BaseModel):
+    kind: SurveyLinkKind
+    target_id: str
+    diary: list[DiaryLinkOut] = Field(default_factory=list)
+    documents: list[DocumentLinkOut] = Field(default_factory=list)

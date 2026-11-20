@@ -2424,6 +2424,14 @@
     "control_check": {
       "fail": "Vastpunt {id}: de controlemeting wijkt {r} mm af, meer dan de tolerantie van {t} mm.",
       "suggestion": "Meet het punt opnieuw in; als het verschoven is, zet er niet meer vanaf uit tot het opnieuw is bepaald."
+    },
+    "lsq_global_test": {
+      "fail": "De globale toets van de vereffening faalt: sigma0 {s}, gewogen kwadratensom van de correcties {v} ligt buiten [{lo}, {hi}].",
+      "suggestion": "Vergelijk de a-priori standaardafwijkingen met het gebruikte instrument en zoek daarna een grove fout in de gemarkeerde waarneming."
+    },
+    "lsq_outlier": {
+      "fail": "De waarneming bij {obs} heeft een gestandaardiseerde correctie van {w}, boven de kritieke waarde 3,29.",
+      "suggestion": "Controleer hoe de waarneming is genoteerd of meet opnieuw voordat u de vereffening aanvaardt."
     }
   },
   "volumes": {

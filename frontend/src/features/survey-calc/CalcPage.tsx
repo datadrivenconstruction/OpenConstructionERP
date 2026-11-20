@@ -9,7 +9,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { Calculator, Save } from 'lucide-react';
+import { Calculator, FileDown, FlaskConical, Save } from 'lucide-react';
 import { Badge, Breadcrumb, Button, Card, TabBar } from '@/shared/ui';
 import { PageHeader } from '@/shared/ui/PageHeader';
 import { getErrorMessage } from '@/shared/lib/api';
@@ -34,6 +34,9 @@ import {
   type LevelBookIn,
   type StationIn,
 } from './api';
+import { downloadTraverseReport, getCalcDemo, type AdjustMethod, type CalcDemo } from './adjustment';
+import { LsqPanel, TraverseSketch } from './LsqPanel';
+import { SurveyLinksPanel } from './SurveyLinksPanel';
 
 type Tab = 'cogo' | 'traverse' | 'level';
 
@@ -214,6 +217,24 @@ function CogoTab({ projectId }: { projectId: string | null }) {
   );
 }
 
+/** "1.5" -> 1.5; empty or not a number -> null. */
+const numOrNull = (v: string): number | null => {
+  const n = Number(v.replace(',', '.'));
+  return v.trim() && Number.isFinite(n) ? n : null;
+};
+const numText = (v: number | null | undefined) => (v == null ? '' : String(v));
+
+function DemoButton({ onLoad }: { onLoad: (demo: CalcDemo) => void }) {
+  const { t } = useTranslation();
+  const addToast = useToastStore((s) => s.addToast);
+  const load = useMutation({ mutationFn: getCalcDemo, onSuccess: onLoad, onError: (e) => addToast({ type: 'error', title: getErrorMessage(e) }) });
+  return (
+    <Button size="sm" variant="ghost" icon={<FlaskConical size={14} />} loading={load.isPending} onClick={() => load.mutate()} data-testid="calc-load-demo">
+      {t('survey.calc.load_demo', { defaultValue: 'Load demo field book' })}
+    </Button>
+  );
+}
+
 /** "ID angle [distance]" per line. A DMS angle may be one token (108-12-30) or three (108 12 30). */
 export function parseStations(text: string, unit: AngleUnit): StationIn[] | null {
   const out: StationIn[] = [];
@@ -243,7 +264,40 @@ function TraverseTab({ projectId }: { projectId: string | null }) {
   const [end, setEnd] = useState('');
   const [closeAz, setCloseAz] = useState('');
   const [cls, setCls] = useState('');
+  const [kSec, setKSec] = useState('');
+  const [minRatio, setMinRatio] = useState('');
+  const [method, setMethod] = useState<AdjustMethod>('bowditch');
+  const [instrument, setInstrument] = useState('ts_2');
+  const [sd, setSd] = useState({ angle: '', dist: '', ppm: '', centering: '' });
+  const [reporting, setReporting] = useState(false);
   const options = (classes.data?.closure ?? []).filter((c) => c.angular_k_sec != null || c.traverse_min_ratio != null);
+  const instruments = classes.data?.instruments ?? [];
+  const pickInstrument = (key: string) => {
+    setInstrument(key);
+    const i = instruments.find((x) => x.key === key);
+    if (i) setSd({ angle: String(i.angle_sd_sec), dist: String(i.dist_sd_mm), ppm: String(i.dist_ppm), centering: String(i.centering_sd_mm) });
+  };
+  const loadDemo = (demo: CalcDemo) => {
+    const d = demo.traverse;
+    setName(d.name);
+    setShape(d.shape);
+    setUnit(d.angle_unit);
+    setSense(d.angle_sense);
+    setStartId(d.start.station_id);
+    setStart(`${d.start.e} ${d.start.n}`);
+    setAz(d.azimuth);
+    setStations(d.stations.map((s) => `${s.station_id} ${s.angle}${s.distance_m != null ? ` ${s.distance_m.toFixed(3)}` : ''}`).join('\n'));
+    setEnd(d.end ? `${d.end.e} ${d.end.n}` : '');
+    setCloseAz(d.closing_azimuth ?? '');
+    setCls(d.class_key);
+    setKSec(numText(d.angular_k_sec));
+    setMinRatio(numText(d.min_ratio));
+    setMethod(d.method ?? 'bowditch');
+    setInstrument(d.instrument_key ?? '');
+    setSd({ angle: numText(d.angle_sd_sec), dist: numText(d.dist_sd_mm), ppm: numText(d.dist_ppm), centering: numText(d.centering_sd_mm) });
+    compute.reset();
+    save.reset();
+  };
 
   const build = (): FieldTraverseIn | null => {
     const s = parseCoord(start);
@@ -262,10 +316,52 @@ function TraverseTab({ projectId }: { projectId: string | null }) {
       end: e ? { station_id: '', e: e[0]!, n: e[1]! } : null,
       closing_azimuth: shape === 'link' ? closeAz.trim() : null,
       class_key: cls,
+      angular_k_sec: numOrNull(kSec),
+      min_ratio: numOrNull(minRatio),
+      method,
+      instrument_key: method === 'lsq' ? instrument : '',
+      angle_sd_sec: method === 'lsq' ? numOrNull(sd.angle) : null,
+      dist_sd_mm: method === 'lsq' ? numOrNull(sd.dist) : null,
+      dist_ppm: method === 'lsq' ? numOrNull(sd.ppm) : null,
+      centering_sd_mm: method === 'lsq' ? numOrNull(sd.centering) : null,
     };
   };
   const body = build();
   const compute = useMutation({ mutationFn: runTraverse, onError: (e) => addToast({ type: 'error', title: getErrorMessage(e) }) });
+  const report = async (b: FieldTraverseIn) => {
+    setReporting(true);
+    try {
+      const labels: Record<string, string> = {
+        title: t('survey.report.title', { defaultValue: 'Traverse adjustment report' }),
+        method: t('survey.lsq.method', { defaultValue: 'Adjustment' }),
+        bowditch: t('survey.lsq.bowditch', { defaultValue: 'Bowditch (compass rule)' }),
+        lsq: t('survey.lsq.lsq', { defaultValue: 'Least squares' }),
+        angular: t('survey.report.angular', { defaultValue: 'Angular misclosure' }),
+        allowed: t('survey.report.allowed', { defaultValue: 'allowed' }),
+        linear: t('survey.report.linear', { defaultValue: 'Linear misclosure' }),
+        ratio: t('survey.report.ratio', { defaultValue: 'Relative precision' }),
+        length: t('survey.traverse.length', { defaultValue: 'Length (m)' }),
+        sigma0: t('survey.report.sigma0', { defaultValue: 'A posteriori sigma0' }),
+        chi2: t('survey.report.chi2', { defaultValue: 'Chi-square global test' }),
+        pass: t('survey.lsq.chi2_pass', { defaultValue: 'Global test passes' }),
+        fail: t('survey.lsq.chi2_fail', { defaultValue: 'Global test fails' }),
+        weights: t('survey.lsq.weights', { defaultValue: 'A priori standard deviations' }),
+        coordinates: t('survey.lsq.compare', { defaultValue: 'Bowditch and least squares side by side' }),
+        station: t('survey.cogo.col.station', { defaultValue: 'Station' }),
+        residuals: t('survey.lsq.residuals', { defaultValue: 'Residuals' }),
+        observation: t('survey.lsq.observation', { defaultValue: 'Observation' }),
+        ellipses: t('survey.lsq.ellipses', { defaultValue: 'Error ellipses, one sigma' }),
+        orientation: t('survey.lsq.azimuth', { defaultValue: 'Azimuth of a' }),
+        sketch: t('survey.lsq.sketch', { defaultValue: 'Sketch with error ellipses' }),
+        fixed: t('survey.lsq.fixed', { defaultValue: 'fixed' }),
+      };
+      await downloadTraverseReport(b, `${labels.title}: ${b.name}`, labels);
+    } catch (e) {
+      addToast({ type: 'error', title: getErrorMessage(e) });
+    } finally {
+      setReporting(false);
+    }
+  };
   const save = useMutation({
     mutationFn: (b: FieldTraverseIn) => saveTraverse(projectId as string, { ...b, save_points: true }),
     onSuccess: () => addToast({ type: 'success', title: t('survey.cogo.traverse_saved', { defaultValue: 'Traverse saved with its stations as control' }) }),
@@ -276,6 +372,7 @@ function TraverseTab({ projectId }: { projectId: string | null }) {
   return (
     <div className="grid gap-4 lg:grid-cols-2">
       <Card className="p-4 space-y-3">
+        <div className="flex justify-end"><DemoButton onLoad={loadDemo} /></div>
         <div className="grid grid-cols-2 gap-2">
           <Field label={t('survey.cogo.name', { defaultValue: 'Name' })}>
             <input className="oe-input w-full" value={name} onChange={(e) => setName(e.target.value)} />
@@ -324,13 +421,56 @@ function TraverseTab({ projectId }: { projectId: string | null }) {
             ))}
           </select>
         </Field>
-        <div className="flex gap-2">
-          <Button icon={<Calculator size={14} />} disabled={!body} loading={compute.isPending} onClick={() => body && compute.mutate(body)}>
+        <div className="grid grid-cols-2 gap-2">
+          <Field label={t('survey.calc.k_sec', { defaultValue: 'Angular k (seconds), overrides the class' })}>
+            <input className="oe-input w-full font-mono" dir="ltr" inputMode="decimal" value={kSec} onChange={(e) => setKSec(e.target.value)} />
+          </Field>
+          <Field label={t('survey.calc.min_ratio', { defaultValue: 'Minimum ratio 1:x, overrides the class' })}>
+            <input className="oe-input w-full font-mono" dir="ltr" inputMode="numeric" value={minRatio} onChange={(e) => setMinRatio(e.target.value)} />
+          </Field>
+        </div>
+        <Field label={t('survey.lsq.method', { defaultValue: 'Adjustment' })}>
+          <select className="oe-input w-full" value={method} onChange={(e) => { const m = e.target.value as AdjustMethod; setMethod(m); if (m === 'lsq' && !sd.angle) pickInstrument(instrument || 'ts_2'); }} data-testid="traverse-method">
+            <option value="bowditch">{t('survey.lsq.bowditch', { defaultValue: 'Bowditch (compass rule)' })}</option>
+            <option value="lsq">{t('survey.lsq.lsq', { defaultValue: 'Least squares' })}</option>
+          </select>
+        </Field>
+        {method === 'lsq' && (
+          <div className="grid grid-cols-2 gap-2 rounded-md border border-border-light p-2">
+            <Field label={t('survey.lsq.instrument', { defaultValue: 'Instrument class' })}>
+              <select className="oe-input w-full" value={instrument} onChange={(e) => pickInstrument(e.target.value)}>
+                <option value="">{t('survey.lsq.custom', { defaultValue: 'Own values' })}</option>
+                {instruments.map((i) => (
+                  <option key={i.key} value={i.key}>{t('survey.lsq.instrument_option', { defaultValue: '{{a}}" total station, {{d}} mm + {{p}} ppm', a: i.angle_sd_sec, d: i.dist_sd_mm, p: i.dist_ppm })}</option>
+                ))}
+              </select>
+            </Field>
+            <Field label={t('survey.lsq.sd_angle', { defaultValue: 'Angle sd (seconds)' })}>
+              <input className="oe-input w-full font-mono" dir="ltr" inputMode="decimal" value={sd.angle} onChange={(e) => { setInstrument(''); setSd({ ...sd, angle: e.target.value }); }} />
+            </Field>
+            <Field label={t('survey.lsq.sd_dist', { defaultValue: 'Distance sd (mm) + ppm' })}>
+              <div className="flex gap-1">
+                <input className="oe-input w-full font-mono" dir="ltr" inputMode="decimal" value={sd.dist} onChange={(e) => { setInstrument(''); setSd({ ...sd, dist: e.target.value }); }} />
+                <input className="oe-input w-full font-mono" dir="ltr" inputMode="decimal" value={sd.ppm} onChange={(e) => { setInstrument(''); setSd({ ...sd, ppm: e.target.value }); }} />
+              </div>
+            </Field>
+            <Field label={t('survey.lsq.sd_centering', { defaultValue: 'Centering sd (mm)' })}>
+              <input className="oe-input w-full font-mono" dir="ltr" inputMode="decimal" value={sd.centering} onChange={(e) => { setInstrument(''); setSd({ ...sd, centering: e.target.value }); }} />
+            </Field>
+          </div>
+        )}
+        <div className="flex flex-wrap gap-2">
+          <Button icon={<Calculator size={14} />} disabled={!body} loading={compute.isPending} onClick={() => body && compute.mutate(body)} data-testid="traverse-calc-compute">
             {t('survey.cogo.compute', { defaultValue: 'Compute' })}
           </Button>
           {projectId && r && body && (
             <Button variant="secondary" icon={<Save size={14} />} loading={save.isPending} onClick={() => save.mutate(body)}>
               {t('survey.cogo.save_traverse', { defaultValue: 'Save traverse' })}
+            </Button>
+          )}
+          {r && body && (
+            <Button variant="secondary" icon={<FileDown size={14} />} loading={reporting} onClick={() => void report(body)} data-testid="traverse-report">
+              {t('survey.report.download', { defaultValue: 'Report PDF' })}
             </Button>
           )}
         </div>
@@ -370,7 +510,11 @@ function TraverseTab({ projectId }: { projectId: string | null }) {
               ))}
             </tbody>
           </table>
+          {r.lsq ? <LsqPanel result={r} /> : <TraverseSketch result={r} lsq={null} />}
           <Findings items={r.findings} />
+          {projectId && save.data?.traverse && (
+            <SurveyLinksPanel projectId={projectId} kind="traverse" targetId={save.data.traverse.id} label={save.data.traverse.name} />
+          )}
         </Card>
       )}
     </div>
@@ -400,14 +544,28 @@ function LevelTab({ projectId }: { projectId: string | null }) {
   const [closeRl, setCloseRl] = useState('');
   const [book, setBook] = useState('');
   const [cls, setCls] = useState('');
+  const [kMm, setKMm] = useState('');
   const [writeRls, setWriteRls] = useState(false);
   const options = (classes.data?.closure ?? []).filter((c) => c.level_k_mm != null);
   const rows = parseBook(book);
   const s0 = Number(startRl.replace(',', '.'));
   const body: LevelBookIn | null =
     rows && startRl.trim() && Number.isFinite(s0)
-      ? { name: name.trim() || 'Level run', method, start_rl: s0, close_rl: closeRl.trim() ? Number(closeRl.replace(',', '.')) : null, rows, class_key: cls }
+      ? { name: name.trim() || 'Level run', method, start_rl: s0, close_rl: closeRl.trim() ? Number(closeRl.replace(',', '.')) : null, rows, class_key: cls, k_mm: numOrNull(kMm) }
       : null;
+  const loadDemo = (demo: CalcDemo) => {
+    const d = demo.level_book;
+    const cell = (v: number | null | undefined) => (v == null ? '-' : v.toFixed(3));
+    setName(d.name);
+    setMethod(d.method);
+    setStartRl(d.start_rl.toFixed(3));
+    setCloseRl(d.close_rl == null ? '' : d.close_rl.toFixed(3));
+    setBook(d.rows.map((r) => [r.station, cell(r.bs), cell(r.is), cell(r.fs), r.distance_m == null ? '' : String(r.distance_m)].join(' ').trim()).join('\n'));
+    setCls(d.class_key);
+    setKMm(numText(d.k_mm));
+    compute.reset();
+    save.reset();
+  };
   const compute = useMutation({ mutationFn: runLevelBook, onError: (e) => addToast({ type: 'error', title: getErrorMessage(e) }) });
   const save = useMutation({
     mutationFn: (b: LevelBookIn) => saveLevelBook(projectId as string, { ...b, write_rls: writeRls }),
@@ -419,6 +577,7 @@ function LevelTab({ projectId }: { projectId: string | null }) {
   return (
     <div className="grid gap-4 lg:grid-cols-2">
       <Card className="p-4 space-y-3">
+        <div className="flex justify-end"><DemoButton onLoad={loadDemo} /></div>
         <div className="grid grid-cols-2 gap-2">
           <Field label={t('survey.cogo.name', { defaultValue: 'Name' })}>
             <input className="oe-input w-full" value={name} onChange={(e) => setName(e.target.value)} />
@@ -446,6 +605,9 @@ function LevelTab({ projectId }: { projectId: string | null }) {
               <option key={c.key} value={c.key}>{c.label}</option>
             ))}
           </select>
+        </Field>
+        <Field label={t('survey.calc.k_mm', { defaultValue: 'Level k (mm per root km), overrides the class' })}>
+          <input className="oe-input w-full font-mono" dir="ltr" inputMode="decimal" value={kMm} onChange={(e) => setKMm(e.target.value)} />
         </Field>
         <div className="flex flex-wrap items-center gap-2">
           <Button icon={<Calculator size={14} />} disabled={!body} loading={compute.isPending} onClick={() => body && compute.mutate(body)}>
@@ -505,6 +667,9 @@ function LevelTab({ projectId }: { projectId: string | null }) {
             </table>
           </div>
           <Findings items={r.findings} />
+          {projectId && save.data?.traverse && (
+            <SurveyLinksPanel projectId={projectId} kind="traverse" targetId={save.data.traverse.id} label={save.data.traverse.name} />
+          )}
         </Card>
       )}
     </div>

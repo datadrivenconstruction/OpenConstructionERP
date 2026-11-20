@@ -655,6 +655,12 @@ export function FilePreviewPane({ row, onClose, onEmail, onShare, onManageAccess
               inspection: '/inspections',
               ncr: '/ncr',
             };
+            const surveyParam: Record<string, string> = { survey_traverse: 'traverse', survey_point_set: 'set' };
+            const param = surveyParam[ref.target_type];
+            if (param) {
+              navigate(`/survey/points?${param}=${ref.target_id}`);
+              return;
+            }
             const base = targetRoute[ref.target_type] ?? `/${ref.target_type}`;
             navigate(`${base}/${ref.target_id}`);
           }}

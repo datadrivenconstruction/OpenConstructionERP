@@ -17,6 +17,15 @@ SRV-050 error: angular misclosure above ``k * sqrt(n)`` seconds
 (``ang_misclosure_sec``, ``ang_k_sec``, ``angle_count``); no ``k``, no finding.
 SRV-060 error: a level book whose arithmetic check fails
 (``arithmetic_ok`` False, with ``sum_bs``, ``sum_fs``, ``first_rl``, ``last_rl``).
+
+A least-squares traverse adds two rows to the ``survey_calc`` context::
+
+    {"lsq": [{"ref", "vtpv", "lower", "upper", "redundancy", "sigma0"}],
+     "lsq_residuals": [{"ref", "kind", "w"}]}
+
+SRV-051 warning: the chi-square global test rejects the a priori weights.
+SRV-052 warning: a standardized residual above Baarda's 3.29 (suspected blunder).
+SRV-011 (level run within ``k * sqrt(km)``) also runs on a level book as it is computed.
 """
 
 from __future__ import annotations
@@ -133,7 +142,59 @@ class LevelArithmeticRule(_CalcRule):
         return out or [self.ok()]
 
 
-CALC_RULES = (ParallelLinesRule, TwoSolutionsRule)
+class LsqGlobalTestRule(_CalcRule):
+    """SRV-051: the a posteriori variance factor passes the two-sided chi-square test."""
+
+    rule_id = "SRV-051"
+    name = "Least-squares global test"
+    severity = Severity.WARNING
+    category = RuleCategory.QUALITY
+    description = "Sum of weighted squared residuals inside the chi-square bounds for the redundancy"
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        out = []
+        for t in rows(context, "lsq"):
+            vtpv, lo, hi = _f(t.get("vtpv")), _f(t.get("lower")), _f(t.get("upper"))
+            if vtpv is None or lo is None or hi is None or lo <= vtpv <= hi:
+                continue
+            out.append(
+                self.fail(
+                    context,
+                    "lsq_global_test",
+                    ref=str(t.get("ref") or ""),
+                    s=f"{_f(t.get('sigma0')) or 0.0:.2f}",
+                    v=f"{vtpv:.2f}",
+                    lo=f"{lo:.2f}",
+                    hi=f"{hi:.2f}",
+                )
+            )
+        return out or [self.ok()]
+
+
+class LsqOutlierRule(_CalcRule):
+    """SRV-052: no standardized residual above Baarda's critical value."""
+
+    rule_id = "SRV-052"
+    name = "Least-squares residual outlier"
+    severity = Severity.WARNING
+    category = RuleCategory.QUALITY
+    description = "Standardized residual above 3.29 marks an observation to check"
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        out = [
+            self.fail(
+                context,
+                "lsq_outlier",
+                ref=str(r.get("ref") or ""),
+                obs=str(r.get("ref") or ""),
+                w=f"{_f(r.get('w')) or 0.0:.2f}",
+            )
+            for r in rows(context, "lsq_residuals")
+        ]
+        return out or [self.ok()]
+
+
+CALC_RULES = (ParallelLinesRule, TwoSolutionsRule, LsqGlobalTestRule, LsqOutlierRule)
 TRAVERSE_RULES = (AngularMisclosureRule, LevelArithmeticRule)
 
 
@@ -143,6 +204,9 @@ def register_calc_validation_rules() -> None:
         rule_registry.register(rule_class(), [SURVEY_CALC_RULE_SET])
     for rule_class in TRAVERSE_RULES:
         rule_registry.register(rule_class(), [SURVEY_RULE_SET, SURVEY_CALC_RULE_SET])
+    from app.modules.survey_core.validators import LevelRunRule  # noqa: PLC0415
+
+    rule_registry.register(LevelRunRule(), [SURVEY_RULE_SET, SURVEY_CALC_RULE_SET])
 
 
 __all__ = ["CALC_RULES", "SURVEY_CALC_RULE_SET", "TRAVERSE_RULES", "register_calc_validation_rules"]

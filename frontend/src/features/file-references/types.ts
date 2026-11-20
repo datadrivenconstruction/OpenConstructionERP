@@ -34,7 +34,9 @@ export type TargetType =
   | 'bcf_topic'
   | 'boq_position'
   | 'project'
-  | 'clash_run';
+  | 'clash_run'
+  | 'survey_traverse'
+  | 'survey_point_set';
 
 export type ViolationCode =
   | 'not-iso19650'

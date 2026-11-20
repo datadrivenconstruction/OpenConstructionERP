@@ -313679,6 +313679,7 @@
         "geodesy.py",
         "instrument_io.py",
         "level_book.py",
+        "lsq_traverse.py",
         "manifest.py",
         "models.py",
         "permissions.py",
@@ -313691,8 +313692,10 @@
         "router.py",
         "schemas.py",
         "service.py",
+        "survey_links.py",
         "survey_math.py",
         "traverse.py",
+        "traverse_report.py",
         "validators.py"
       ],
       "manifest": {
@@ -315972,6 +315975,9 @@
       ],
       "import_dependencies": [
         "cad",
+        "daily_diary",
+        "documents",
+        "file_references",
         "geo_hub",
         "surfaces_volumes"
       ]
@@ -341915,10 +341921,10 @@
     },
     {
       "name": "survey-calc",
-      "ts_files": 7,
+      "ts_files": 11,
       "css_files": 0,
-      "test_files": 2,
-      "total_files": 7
+      "test_files": 3,
+      "total_files": 11
     },
     {
       "name": "sustainability",
@@ -343973,6 +343979,9 @@
     ],
     "survey_core": [
       "cad",
+      "daily_diary",
+      "documents",
+      "file_references",
       "geo_hub",
       "projects",
       "surfaces_volumes"
@@ -344108,9 +344117,9 @@
     "total_relationships": 264,
     "total_routes": 5553,
     "total_schemas": 5173,
-    "total_python_files": 3684,
+    "total_python_files": 3687,
     "frontend_features": 252,
-    "frontend_ts_files": 4450,
+    "frontend_ts_files": 4454,
     "frontend_backend_mapped": 224
   },
   "frontend_backend_mapping": {

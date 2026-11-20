@@ -14,6 +14,7 @@ import { getErrorMessage } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
 import { createTraverse, type Traverse, type TraverseInput } from './volumesApi';
 import { fmtFixed } from '@/shared/lib/formatters';
+import { SurveyLinksPanel } from '@/features/survey-calc/SurveyLinksPanel';
 
 const LEG_TEMPLATE = 'leg,from,to,length_m,d_e,d_n\n';
 
@@ -183,6 +184,7 @@ export function TraverseDrawer({ open, projectId, onClose, isAdvanced, shown }: 
               </table>
             </div>
           )}
+          {view.id && <SurveyLinksPanel projectId={projectId} kind="traverse" targetId={view.id} label={view.name} />}
           <div className="flex justify-end">
             <Button variant="secondary" onClick={close}>{t('common.close', { defaultValue: 'Close' })}</Button>
           </div>
