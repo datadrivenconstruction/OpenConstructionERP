@@ -156,9 +156,10 @@ def build_command(
             return [*prefix, "native-graph", src, "--out", str(out_dir), "--ifc"]
         return [*prefix, src, "-o", str(out_dir), "--ifc"]
     if fmt == "ifc":
-        if name == "ifc2excel":
-            return [*prefix, src, "--output", str(out_dir), "--raw-tables"]
         cmd = [*prefix, src, "--output", str(out_dir)]
+        if name == "ifc2excel":
+            # Without --glb the Linux/macOS build writes no geometry and the viewer falls back to boxes.
+            cmd.append("--raw-tables")
         return [*cmd, "--glb"] if glb else cmd
     if fmt == "dwg":
         cmd = [*prefix, src, "-o", str(out_dir), "--json", "--no-svg"]
