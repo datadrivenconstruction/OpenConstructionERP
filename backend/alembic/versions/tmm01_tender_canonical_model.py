@@ -21,7 +21,7 @@ the same copy from the boot repair below.
 # data-rewrite-ack: oe_bid_management_package - inserts mirror rows only, one per source package, batched per package
 
 Revision ID: tmm01_tender_canonical_model
-Revises: svr01_survey_register_surfaces
+Revises: cpb01_central_purchasing_bundles
 Create Date: 2026-11-20
 """
 
