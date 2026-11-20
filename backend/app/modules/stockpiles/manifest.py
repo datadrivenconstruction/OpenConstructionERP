@@ -3,6 +3,7 @@
 """Stockpiles module manifest."""
 
 from app.core.module_loader import ModuleManifest
+from app.modules.stockpiles.data_paths import DATA_PATHS
 
 manifest = ModuleManifest(
     name="oe_stockpiles",
@@ -19,4 +20,5 @@ manifest = ModuleManifest(
     optional_depends=["oe_site_inventory", "oe_documents"],
     auto_install=True,
     enabled=True,
+    data_paths=DATA_PATHS,
 )

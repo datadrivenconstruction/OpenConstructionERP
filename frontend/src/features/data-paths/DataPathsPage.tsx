@@ -21,7 +21,7 @@ import { useProjectContextStore } from '@/stores/useProjectContextStore';
 
 import { useModulePaths, usePlatformMap, useProjectParties, type HealthItem, type Party } from './api';
 import { buildFlowModel, moduleLabel } from './flowModel';
-import { DataPathsFlow } from './DataPathsFlow';
+import { FocusView } from './FocusView';
 import { DataPathsList } from './DataPathsDrawer';
 import { PartiesHoneycomb } from './PartiesHoneycomb';
 import { PlatformMapCanvas, type CanvasModule, type ModuleStatus } from './PlatformMapCanvas';
@@ -199,10 +199,8 @@ export function DataPathsPage() {
       <div className="space-y-4">
         <div className="min-w-0 space-y-4">
           {level === 'module' && focus ? (
-            <div className="rounded-xl border border-border-light bg-surface-primary p-4">
-              {flow?.why && <p className="mb-3 text-sm text-content-secondary">{flow.why}</p>}
-              {paths.isLoading && <div className="h-64 animate-pulse rounded-xl bg-surface-secondary" />}
-              {flow && <DataPathsFlow model={flow} />}
+            <div className="space-y-4">
+              <FocusView module={focus} projectId={projectId} deepLink technical={showTechnical} canvasHeight="max(560px, calc(100vh - 280px))" />
               {flow && (
                 <details className="mt-4">
                   <summary className="cursor-pointer text-sm text-content-secondary">{t('data_paths.tab_list', { defaultValue: 'List' })}</summary>

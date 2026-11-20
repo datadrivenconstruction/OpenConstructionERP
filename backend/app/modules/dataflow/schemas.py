@@ -166,3 +166,86 @@ class PartyOut(BaseModel):
 class ProjectParties(BaseModel):
     project_id: uuid.UUID
     parties: list[PartyOut]
+
+
+class DutyOut(BaseModel):
+    role: str
+    label: str
+
+
+class ExternalOut(BaseModel):
+    kind: str
+    label: str
+    role: str = ""
+
+
+class RuleOut(BaseModel):
+    rule_id: str
+    name: str
+    severity: str = ""
+
+
+class TraceStepOut(BaseModel):
+    module: str
+    label: str
+    via: str = ""
+
+
+class TraceOut(BaseModel):
+    id: str
+    label: str
+    summary: str
+    steps: list[TraceStepOut]
+    at: list[int] = Field(default_factory=list, description="Step indexes that sit in the focused module")
+
+
+class ModuleFocus(BaseModel):
+    """The right panel of the data paths window for one module."""
+
+    module: str
+    declared: bool
+    why: str = ""
+    roles: list[str] = Field(default_factory=list)
+    duties: list[DutyOut] = Field(default_factory=list)
+    external: list[ExternalOut] = Field(default_factory=list)
+    rules: list[RuleOut] = Field(default_factory=list)
+    traces: list[TraceOut] = Field(default_factory=list)
+
+
+class ChipOut(BaseModel):
+    id: str
+    label: str
+    count: int = Field(ge=0)
+    tone: str = "neutral"
+
+
+class ModuleChips(BaseModel):
+    module: str
+    chips: list[ChipOut] = Field(default_factory=list)
+    generated_at: datetime
+
+
+class ChangeOut(BaseModel):
+    module: str
+    entity: str
+    entity_id: str | None = None
+    action: str
+    at: str | None = None
+    user: str = ""
+
+
+class ModuleChanges(BaseModel):
+    module: str
+    days: int
+    changes: list[ChangeOut] = Field(default_factory=list)
+
+
+class TraceList(BaseModel):
+    traces: list[TraceOut]
+
+
+class CoverageOut(BaseModel):
+    declared: int = Field(ge=0)
+    derived: int = Field(ge=0)
+    none: int = Field(ge=0)
+    modules: dict[str, str]
