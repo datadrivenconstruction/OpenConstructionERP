@@ -19,6 +19,8 @@ vi.mock('@/features/documents/api', () => ({ fetchDocuments: vi.fn(async () => (
 
 import BriefPage from './BriefPage';
 
+vi.mock('react-i18next', async () => (await import('./testStrings')).i18nMock());
+
 const stored: BriefDoc = {
   schema: 'ddc-brief/1', brief_id: '11111111-1111-4111-8111-111111111111', project_id: '22222222-2222-4222-8222-222222222222',
   version: 1, country: 'DE', locale: 'de', depth_level: 'D2', use: { category: 'residential_multi' },

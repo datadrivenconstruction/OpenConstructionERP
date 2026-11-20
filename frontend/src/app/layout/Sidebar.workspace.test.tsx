@@ -203,7 +203,8 @@ beforeEach(() => {
   const surveyOff = Object.fromEntries(
     MODULE_REGISTRY.filter((m) => m.navItems.some((i) => i.group === 'grp_survey')).map((m) => [m.id, false]),
   );
-  useModuleStore.setState({ enabledModules: surveyOff, hiddenGroups: [] });
+  // Design stays in view beside any workspace (keepInView); its rows are tested in the module.
+  useModuleStore.setState({ enabledModules: { ...surveyOff, design: false }, hiddenGroups: [] });
   // The store reads localStorage once at import, so the mode is set on it.
   useViewModeStore.getState().setMode('simple');
 });
@@ -222,6 +223,16 @@ describe('Simple mode with a general contractor profile', () => {
 
     const more = screen.getByTestId('sidebar-more-modules');
     expect(more.getAttribute('aria-expanded')).toBe('false');
+  });
+
+  it('keeps Design in view beside the workspace, outside More modules', async () => {
+    useModuleStore.setState({ enabledModules: { ...useModuleStore.getState().enabledModules, design: true } });
+    serverSays('general_contractor');
+    renderAt('/');
+
+    await screen.findByTestId('sidebar-workspace');
+    expect(screen.getByTestId('sidebar-more-modules').getAttribute('aria-expanded')).toBe('false');
+    expect(menuHrefs()).toContain('/design/editor');
   });
 
   it('reveals every other screen under More modules without listing a workspace row twice', async () => {

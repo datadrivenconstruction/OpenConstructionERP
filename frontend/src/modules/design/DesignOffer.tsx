@@ -14,6 +14,7 @@ import { DISMISS_KEY, MODULE_KEY, shouldOffer, type OfferVariant } from './data/
 import { tr } from './BriefFields';
 import { writeConsent } from './data/webEditor';
 import { startBackgroundLoad } from './editorPayload';
+import { installIfOffered } from './webEditorApi';
 import { LoadHint } from './BackgroundLoad';
 
 const readDismissed = (): boolean => {
@@ -52,6 +53,7 @@ export function DesignOffer({ variant }: { variant: OfferVariant }) {
     // yes = the editor may be fetched in idle time; changed later on the editor page
     writeConsent('yes');
     void startBackgroundLoad('yes');
+    void installIfOffered();
     setJustEnabled(true);
   };
   const no = () => {
