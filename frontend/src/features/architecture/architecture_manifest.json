@@ -43949,13 +43949,13 @@
           "method": "GET",
           "path": "/cost-lines",
           "handler": "cost_lines",
-          "response_model": "list[CostLineOption]"
+          "response_model": "CostLineListResponse"
         },
         {
           "method": "GET",
           "path": "/",
           "handler": "list_bundles",
-          "response_model": "list[BundleSummary]"
+          "response_model": "BundleListResponse"
         },
         {
           "method": "POST",
@@ -44084,7 +44084,7 @@
             },
             {
               "name": "budget_tolerance_pct",
-              "type": "Decimal"
+              "type": "Decimal7_4"
             }
           ]
         },
@@ -44121,7 +44121,7 @@
             },
             {
               "name": "budget_tolerance_pct",
-              "type": "Decimal | None"
+              "type": "Decimal7_4 | None"
             },
             {
               "name": "vendor_name",
@@ -44139,11 +44139,11 @@
             },
             {
               "name": "discount_pct",
-              "type": "Decimal | None"
+              "type": "Decimal7_4 | None"
             },
             {
               "name": "lump_sum",
-              "type": "Decimal | None"
+              "type": "Decimal18_2 | None"
             },
             {
               "name": "clear_discount",
@@ -44170,7 +44170,7 @@
             },
             {
               "name": "budget_amount",
-              "type": "Decimal | None"
+              "type": "Decimal18_2 | None"
             }
           ]
         },
@@ -44183,7 +44183,7 @@
           "fields": [
             {
               "name": "budget_amount",
-              "type": "Decimal | None"
+              "type": "Decimal18_2 | None"
             },
             {
               "name": "clear_budget",
@@ -44205,7 +44205,7 @@
             },
             {
               "name": "quantity",
-              "type": "Decimal | None"
+              "type": "Decimal18_4 | None"
             },
             {
               "name": "cost_line_id",
@@ -44235,11 +44235,11 @@
             },
             {
               "name": "quantity",
-              "type": "Decimal"
+              "type": "Decimal18_4"
             },
             {
               "name": "unit_rate",
-              "type": "Decimal | None"
+              "type": "Decimal18_4 | None"
             },
             {
               "name": "cost_code",
@@ -44273,11 +44273,11 @@
             },
             {
               "name": "quantity",
-              "type": "Decimal | None"
+              "type": "Decimal18_4 | None"
             },
             {
               "name": "unit_rate",
-              "type": "Decimal | None"
+              "type": "Decimal18_4 | None"
             },
             {
               "name": "clear_rate",
@@ -44304,15 +44304,15 @@
           "fields": [
             {
               "name": "discount_pct",
-              "type": "Decimal | None"
+              "type": "Decimal7_4 | None"
             },
             {
               "name": "lump_sum",
-              "type": "Decimal | None"
+              "type": "Decimal18_2 | None"
             },
             {
               "name": "rates",
-              "type": "dict[uuid.UUID, Decimal]"
+              "type": "dict[uuid.UUID, Decimal18_4]"
             }
           ]
         },
@@ -44339,11 +44339,11 @@
             },
             {
               "name": "discount_pct",
-              "type": "Decimal | None"
+              "type": "Decimal7_4 | None"
             },
             {
               "name": "lump_sum",
-              "type": "Decimal | None"
+              "type": "Decimal18_2 | None"
             }
           ]
         },
@@ -44360,7 +44360,7 @@
             },
             {
               "name": "quantity",
-              "type": "Decimal"
+              "type": "Decimal18_4"
             }
           ]
         },
@@ -45009,6 +45009,60 @@
             {
               "name": "codes",
               "type": "list[dict[str, str]]"
+            }
+          ]
+        },
+        {
+          "class_name": "BundleListResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[BundleSummary]"
+            },
+            {
+              "name": "total",
+              "type": "int"
+            },
+            {
+              "name": "offset",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "limit",
+              "type": "int",
+              "default": "50"
+            }
+          ]
+        },
+        {
+          "class_name": "CostLineListResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[CostLineOption]"
+            },
+            {
+              "name": "total",
+              "type": "int"
+            },
+            {
+              "name": "offset",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "limit",
+              "type": "int",
+              "default": "50"
             }
           ]
         }
@@ -343989,7 +344043,7 @@
     "total_columns": 11431,
     "total_relationships": 264,
     "total_routes": 5552,
-    "total_schemas": 5169,
+    "total_schemas": 5171,
     "total_python_files": 3684,
     "frontend_features": 252,
     "frontend_ts_files": 4448,

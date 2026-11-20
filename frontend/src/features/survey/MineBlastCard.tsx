@@ -104,7 +104,7 @@ export function MineBlastCard({ projectId, canWrite }: { projectId: string; canW
             </label>
             <label className="text-sm sm:col-span-3">
               {t('mine.blast.design_csv', { defaultValue: 'Design holes, one per line: hole, E, N, Z, depth' })}
-              <textarea className="oe-input mt-1 h-28 w-full font-mono text-xs" value={form.text} onChange={(e) => setForm({ ...form, text: e.target.value })} />
+              <textarea rows={6} className="oe-textarea mt-1 w-full font-mono text-xs" value={form.text} onChange={(e) => setForm({ ...form, text: e.target.value })} />
             </label>
             <div className="flex justify-end gap-2 sm:col-span-3">
               <Button size="sm" variant="ghost" onClick={() => setForm(null)}>
@@ -158,7 +158,7 @@ export function MineBlastCard({ projectId, canWrite }: { projectId: string; canW
               <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
                 <label className="flex-1 text-sm">
                   {t('mine.blast.drilled_csv', { defaultValue: 'As-drilled holes, same columns as the design' })}
-                  <textarea className="oe-input mt-1 h-20 w-full font-mono text-xs" value={drilled} onChange={(e) => setDrilled(e.target.value)} />
+                  <textarea rows={4} className="oe-textarea mt-1 w-full font-mono text-xs" value={drilled} onChange={(e) => setDrilled(e.target.value)} />
                 </label>
                 <Button size="sm" variant="primary" icon={<Upload size={14} />} disabled={!drilled.trim()} loading={asDrilled.isPending} onClick={() => asDrilled.mutate()}>
                   {t('mine.blast.import_drilled', { defaultValue: 'Import as-drilled' })}
