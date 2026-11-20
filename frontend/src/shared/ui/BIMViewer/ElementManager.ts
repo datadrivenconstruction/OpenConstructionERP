@@ -585,6 +585,29 @@ export function isGlassLikeElement(
   return false;
 }
 
+/** The three extras a design revision writes on every GLB node (contract `ddc-erp-link/1`). */
+const NODE_EXTRA_KEYS = ['element_key', 'type_key', 'ifc_class'] as const;
+
+/** `element_key` from the node's own extras (three.js copies glTF extras to `userData`), else its nearest ancestor's. */
+function nodeElementKey(node: THREE.Object3D): string | undefined {
+  for (let cur: THREE.Object3D | null = node; cur; cur = cur.parent) {
+    const key = (cur.userData as { element_key?: unknown }).element_key;
+    if (typeof key === 'string' && key) return key;
+  }
+  return undefined;
+}
+
+function pickNodeExtras(node: THREE.Object3D): Record<string, string> {
+  const out: Record<string, string> = {};
+  for (let cur: THREE.Object3D | null = node; cur; cur = cur.parent) {
+    for (const k of NODE_EXTRA_KEYS) {
+      const v = (cur.userData as Record<string, unknown>)[k];
+      if (!(k in out) && typeof v === 'string') out[k] = v;
+    }
+  }
+  return out;
+}
+
 /* ── Element Manager ───────────────────────────────────────────────────── */
 
 export class ElementManager {
@@ -861,7 +884,7 @@ export class ElementManager {
                   // Apply the same -90 deg X rotation processLoadedScene will,
                   // so the building the user watches assemble sits exactly where
                   // the finished, batched model ends up (no jump on completion).
-                  group.rotation.x = -Math.PI / 2;
+                  if (this.glbUpAxis !== 'y') group.rotation.x = -Math.PI / 2;
                   this.elementGroup.add(group);
                   previewGroup = group;
                 }
@@ -1203,6 +1226,20 @@ export class ElementManager {
     });
   }
 
+  /** Up axis of GLB sources. `z` (default): the converter pipeline, rotated here. `y`: a model whose
+   *  GLB is already upright (design revisions, contract profile), left as it is. */
+  private glbUpAxis: 'z' | 'y' = 'z';
+
+  setGlbUpAxis(axis: 'z' | 'y'): void {
+    this.glbUpAxis = axis;
+  }
+
+  /** Only design revisions load an upright GLB; every extra of the design contract (element_key
+   *  binding, node extras, batched visibility) applies to those models and to no other. */
+  private get designModel(): boolean {
+    return this.glbUpAxis === 'y';
+  }
+
   /**
    * Shared scene-processing logic for both GLTFLoader and ColladaLoader.
    *
@@ -1267,7 +1304,7 @@ export class ElementManager {
     // (Y extent > Z extent) and also skip rotation in that case — the
     // model is already upright in Three.js coordinates.
     if (_isGLB) {
-      scene.rotation.x = -Math.PI / 2;
+      if (this.glbUpAxis !== 'y') scene.rotation.x = -Math.PI / 2;
     } else {
       const bbox = new THREE.Box3().setFromObject(scene);
       const sizeY = Math.max(0, bbox.max.y - bbox.min.y);
@@ -1385,17 +1422,21 @@ export class ElementManager {
           }
         }
 
-        let element: BIMElementData | undefined;
+        // A node that names its element in its extras (`element_key`) wins over its name: three.js
+        // strips `. : / [ ]` and turns spaces into `_` from node names, so a key such as
+        // `b1/s05/u4A` can never be read back from the name.
+        const elementKey = this.designModel ? nodeElementKey(child) : undefined;
+        let element: BIMElementData | undefined = elementKey ? stableIdToElement.get(elementKey) : undefined;
         // Prefer the outermost ancestor that resolves in stableIdToElement,
         // falling back through increasingly inner nodes.
-        for (let i = namedChain.length - 1; i >= 0; i--) {
+        for (let i = namedChain.length - 1; !elementKey && i >= 0; i--) {
           const hit = stableIdToElement.get(namedChain[i]!);
           if (hit) {
             element = hit;
             break;
           }
         }
-        if (!element) {
+        if (!element && !elementKey) {
           for (let i = namedChain.length - 1; i >= 0; i--) {
             const hit = nameToElement.get(namedChain[i]!);
             if (hit) {
@@ -1442,9 +1483,11 @@ export class ElementManager {
         }
 
         const originalMaterial = child.material;
+        const nodeExtras = elementKey ? pickNodeExtras(child) : undefined;
 
         if (element) {
           child.userData = {
+            ...(nodeExtras ? { nodeExtras } : {}),
             elementId: element.id,
             elementData: element,
             originalMaterial,
@@ -1457,6 +1500,7 @@ export class ElementManager {
           matchedCount++;
         } else {
           child.userData = {
+            ...(nodeExtras ? { nodeExtras } : {}),
             elementId: null,
             originalMaterial,
             outerNodeId: outerNumericName || undefined,
@@ -2269,6 +2313,13 @@ export class ElementManager {
     this._edgeOverlays.clear();
   }
 
+  /** Show or hide one element's mesh; a batched mesh goes through its BatchedMesh instance. */
+  private setMeshVisible(mesh: THREE.Mesh, visible: boolean): void {
+    const handle = (mesh.userData as { batchHandle?: { batched: THREE.BatchedMesh; instanceId: number } }).batchHandle;
+    if (this.designModel && handle) handle.batched.setVisibleAt(handle.instanceId, visible);
+    else mesh.visible = visible;
+  }
+
   /** Set visibility of elements by discipline. */
   setDisciplineVisible(discipline: string, visible: boolean): void {
     // #153 guard — RVT elements without an IFC discipline arrive with
@@ -2279,7 +2330,7 @@ export class ElementManager {
       const data = mesh.userData as { elementData?: BIMElementData };
       const elDiscipline = (data.elementData?.discipline ?? '').toLowerCase();
       if (elDiscipline && elDiscipline === target) {
-        mesh.visible = visible;
+        this.setMeshVisible(mesh, visible);
       }
     }
   }
@@ -2289,7 +2340,7 @@ export class ElementManager {
     for (const [, mesh] of this.meshMap) {
       const data = mesh.userData as { elementData?: BIMElementData };
       if (data.elementData?.storey === storey) {
-        mesh.visible = visible;
+        this.setMeshVisible(mesh, visible);
       }
     }
   }
@@ -2483,6 +2534,8 @@ export class ElementManager {
     // Walk the full DAE scene graph and make everything visible again
     if (this.daeGroup) {
       this.daeGroup.traverse((obj) => {
+        // Design models only: a batched original stays parked, its BatchedMesh draws it.
+        if (this.designModel && (obj.userData as { batchHandle?: unknown }).batchHandle) return;
         obj.visible = true;
       });
       this.daeGroup.visible = true;
