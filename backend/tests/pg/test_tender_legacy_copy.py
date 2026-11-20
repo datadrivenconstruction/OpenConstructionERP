@@ -563,3 +563,19 @@ async def test_the_tender_card_reads_a_copy_with_every_tab(pg_session) -> None:
     assert card.read_only and card.source_id == str(package.id)
     assert (len(card.line_items), len(card.bidders), len(card.submissions)) == (2, 2, 2)
     assert [q.question for q in card.questions] == ["Fire rating?"]
+
+
+async def test_readers_count_the_copies_with_the_native_tenders(pg_session) -> None:
+    from app.core.validation.project_context import _tender_count
+    from app.modules.bi_dashboards.kpis import bid_win_rate_kpi
+
+    project = await _project(pg_session)
+    package, bids = await _tender(pg_session, project, status="awarded")
+    package.metadata_ = {"awarded_bid_id": str(bids[0].id)}
+    await pg_session.flush()
+    await _rfq(pg_session, project, number=f"RFQ-{uuid.uuid4().hex[:6]}")
+    await _copy(pg_session)
+
+    kpi = await bid_win_rate_kpi(pg_session, project_id=project.id)
+    assert kpi.breakdown == {"won": 2, "total": 3}  # one award per copy; 2 tender bids + 1 quote
+    assert await _tender_count(pg_session, project.id) == 1  # the RFQ is supply, not a trade tender
