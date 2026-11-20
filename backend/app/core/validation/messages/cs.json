@@ -2486,6 +2486,22 @@
     "no_factors": {
       "fail": "Pro {material} chybí součinitele nakypření a zhutnění: zobrazují se jen objemy v rostlém stavu.",
       "suggestion": "Zadejte součinitele pro tento materiál z geotechnického průzkumu."
+    },
+    "pad_ring_open": {
+      "fail": "Obrys plošiny {name} není uzavřený prstenec s plochou.",
+      "suggestion": "Nakreslete alespoň tři rohy a uzavřete prstenec."
+    },
+    "pad_self_intersects": {
+      "fail": "Obrys plošiny {name} sám sebe protíná ({n}).",
+      "suggestion": "Posuňte rohy tak, aby se strany nekřížily."
+    },
+    "pad_no_level": {
+      "fail": "Plošina {name} nemá výšku.",
+      "suggestion": "Zadejte projektovanou výšku plošiny v metrech."
+    },
+    "pad_batter_open": {
+      "fail": "{n} rohů svahu plošiny {name} nedosáhlo terénu.",
+      "suggestion": "Rozšiřte povrch terénu kolem plošiny nebo zmenšete svah."
     }
   },
   "setting_out": {

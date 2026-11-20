@@ -2486,6 +2486,22 @@
     "no_factors": {
       "fail": "Keine Faktoren für gewachsen, gelöst und verdichtet für {material}: nur Volumen im gewachsenen Zustand werden angezeigt.",
       "suggestion": "Tragen Sie die Faktoren für dieses Material aus dem Bodengutachten ein."
+    },
+    "pad_ring_open": {
+      "fail": "Der Umriss des Planums {name} ist kein geschlossener Ring mit Fläche.",
+      "suggestion": "Zeichnen Sie mindestens drei Ecken und schließen Sie den Ring."
+    },
+    "pad_self_intersects": {
+      "fail": "Der Umriss des Planums {name} kreuzt sich {n}-mal selbst.",
+      "suggestion": "Verschieben Sie die Ecken, sodass sich keine Seiten kreuzen."
+    },
+    "pad_no_level": {
+      "fail": "Für das Planum {name} ist keine Höhe gesetzt.",
+      "suggestion": "Geben Sie die Planungshöhe des Planums in Metern ein."
+    },
+    "pad_batter_open": {
+      "fail": "{n} Böschungsecken des Planums {name} erreichen das Gelände nicht.",
+      "suggestion": "Erweitern Sie das Geländemodell um das Planum oder verkleinern Sie die Böschung."
     }
   },
   "setting_out": {

@@ -11,7 +11,7 @@ from __future__ import annotations
 import uuid
 from datetime import date, datetime
 from decimal import Decimal
-from typing import Literal
+from typing import Annotated, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_serializer
 
@@ -22,7 +22,8 @@ RightKind = Literal["ownership", "lease", "easement", "servitude", "mortgage", "
 PartyKind = Literal["person", "organisation", "public"]
 ImportFormat = Literal["geojson", "shapefile"]
 ImportTarget = Literal["parcels", "work_zone"]
-Mark = Literal["", "monument", "pin", "pipe", "stone", "nail", "unmarked"]
+#: A boundary mark key; the offered list comes from the country profile (``ProfileOut.marks``).
+Mark = Annotated[str, Field(max_length=30, pattern=r"^[a-z0-9_]*$")]
 
 
 class BoundaryPointIn(BaseModel):
@@ -31,13 +32,13 @@ class BoundaryPointIn(BaseModel):
     n: float
     mark: Mark = ""
     accuracy_m: float | None = Field(None, ge=0, le=100)
+    #: found | set | calculated | ""
+    corner_status: str = Field("", max_length=20)
+    accuracy_class: str = Field("", max_length=60)
 
 
 class BoundaryPointOut(BoundaryPointIn):
     seq: int
-    #: found | set | calculated | ""
-    corner_status: str = ""
-    accuracy_class: str = ""
 
 
 class ParcelCreate(BaseModel):
@@ -144,6 +145,11 @@ class WorkZoneOut(BaseModel):
     vertex_count: int = 0
 
 
+class MarkTypeOut(BaseModel):
+    key: str
+    monumented: bool
+
+
 class ProfileOut(BaseModel):
     """What the active country pack adds; neutral values without one."""
 
@@ -154,6 +160,9 @@ class ProfileOut(BaseModel):
     area_decimals: int = 2
     area_tolerance_source: str = ""
     export_formats: list[str] = Field(default_factory=list)
+    #: The parcel number format (a full-match regex) for the live PAR-006 check; "" = any.
+    id_pattern: str = ""
+    marks: list[MarkTypeOut] = Field(default_factory=list)
 
 
 class SettingsOut(BaseModel):
@@ -278,3 +287,57 @@ class WorkZoneListResponse(BaseModel):
     total: int
     offset: int = 0
     limit: int = 50
+
+
+class WorkZoneIn(BaseModel):
+    """A work zone drawn on the plan: a ring in the project grid."""
+
+    name: str = Field(min_length=1, max_length=255)
+    ring: list[tuple[float, float]] = Field(min_length=3, max_length=5000)
+
+
+class TouchedParcel(BaseModel):
+    parcel_id: uuid.UUID
+    parcel_ref: str
+    status: str
+    overlap_m2: float
+    #: PAR-003: the zone enters land the project does not hold yet.
+    blocking: bool
+
+
+class WorkZoneDetail(WorkZoneOut):
+    ring: list[tuple[float, float]] = Field(default_factory=list)
+    touched: list[TouchedParcel] = Field(default_factory=list)
+    findings: list[FindingOut] = Field(default_factory=list)
+
+
+class BoundaryPointRow(BaseModel):
+    """One boundary point of the register, shared by every parcel that has it as a corner."""
+
+    point_no: str
+    e: float
+    n: float
+    mark: str = ""
+    #: From the country mark list; None when no mark is recorded.
+    monumented: bool | None = None
+    accuracy_m: float | None = None
+    corner_status: str = ""
+    parcels: list[str] = Field(default_factory=list)
+    #: The parcels record different marks for this point.
+    mark_conflict: bool = False
+    #: Largest distance between the copies of this point in different parcels, m.
+    position_spread_m: float = 0.0
+
+
+class BoundaryPointRegister(BaseModel):
+    items: list[BoundaryPointRow]
+    total: int
+    monumented: int = 0
+    unmarked: int = 0
+    conflicts: int = 0
+
+
+class DemoLoadResult(BaseModel):
+    parcels: int
+    work_zones: int
+    skipped: bool = False

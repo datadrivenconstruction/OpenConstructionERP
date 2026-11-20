@@ -1,0 +1,45 @@
+{
+ "type": "FeatureCollection",
+ "name": "Riverside Yard haul road",
+ "crs": {
+  "type": "name",
+  "properties": {
+   "name": "urn:ogc:def:crs:EPSG::32633"
+  }
+ },
+ "features": [
+  {
+   "type": "Feature",
+   "properties": {
+    "name": "Haul road"
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       389030.0,
+       5819080.0
+      ],
+      [
+       389100.0,
+       5819080.0
+      ],
+      [
+       389100.0,
+       5819095.0
+      ],
+      [
+       389030.0,
+       5819095.0
+      ],
+      [
+       389030.0,
+       5819080.0
+      ]
+     ]
+    ]
+   }
+  }
+ ]
+}

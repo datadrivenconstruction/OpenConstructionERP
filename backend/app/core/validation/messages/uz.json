@@ -2486,6 +2486,22 @@
     "no_factors": {
       "fail": "{material} uchun yumshash va zichlanish koeffitsientlari yo'q: faqat tabiiy holatdagi hajmlar ko'rsatildi.",
       "suggestion": "Ushbu material koeffitsientlarini tuproq hisobotidan kiriting."
+    },
+    "pad_ring_open": {
+      "fail": "{name} maydonchasining konturi maydonli yopiq halqa emas.",
+      "suggestion": "Kamida uchta burchak chizing va halqani yoping."
+    },
+    "pad_self_intersects": {
+      "fail": "{name} maydonchasining konturi o'zini {n} marta kesib o'tadi.",
+      "suggestion": "Tomonlar kesishmasligi uchun burchaklarni suring."
+    },
+    "pad_no_level": {
+      "fail": "{name} maydonchasining belgisi berilmagan.",
+      "suggestion": "Maydonchaning loyiha belgisini metrda kiriting."
+    },
+    "pad_batter_open": {
+      "fail": "{name} maydonchasi qiyaligining {n} burchagi yer yuzasiga yetmadi.",
+      "suggestion": "Maydoncha atrofidagi yer yuzasini kengaytiring yoki qiyalikni kamaytiring."
     }
   },
   "setting_out": {

@@ -369,3 +369,9 @@ async def delete_zone(zone_id: uuid.UUID, session: SessionDep, user_id: CurrentU
 from app.modules.land_parcels.calc_router import router as _calc_router  # noqa: E402
 
 router.include_router(_calc_router)
+
+
+# Work zones drawn on the plan, the boundary point register and the demo; same prefix and permissions.
+from app.modules.land_parcels.plan_router import router as _plan_router  # noqa: E402
+
+router.include_router(_plan_router)

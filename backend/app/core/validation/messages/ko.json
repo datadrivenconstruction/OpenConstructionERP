@@ -2486,6 +2486,22 @@
     "no_factors": {
       "fail": "{material}의 팽창 및 다짐 계수가 없어 자연 상태 체적만 표시합니다.",
       "suggestion": "토질 보고서에서 이 재료의 계수를 입력하세요."
+    },
+    "pad_ring_open": {
+      "fail": "패드 {name}의 외곽선이 면적을 가진 닫힌 링이 아닙니다.",
+      "suggestion": "꼭짓점을 3개 이상 그리고 링을 닫으세요."
+    },
+    "pad_self_intersects": {
+      "fail": "패드 {name}의 외곽선이 {n}번 자기 교차합니다.",
+      "suggestion": "변이 교차하지 않도록 꼭짓점을 옮기세요."
+    },
+    "pad_no_level": {
+      "fail": "패드 {name}에 계획고가 없습니다.",
+      "suggestion": "패드의 계획고를 미터 단위로 입력하세요."
+    },
+    "pad_batter_open": {
+      "fail": "패드 {name}의 비탈면 모서리 {n}개가 지표면에 닿지 않았습니다.",
+      "suggestion": "패드 주변의 지표면을 넓히거나 비탈면을 줄이세요."
     }
   },
   "setting_out": {

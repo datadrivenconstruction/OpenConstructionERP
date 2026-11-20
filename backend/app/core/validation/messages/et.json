@@ -2486,6 +2486,22 @@
     "no_factors": {
       "fail": "Materjalil {material} pole kobestus- ja tihendustegureid: näidatakse ainult looduslikus olekus mahte.",
       "suggestion": "Sisesta materjali tegurid geotehnilisest aruandest."
+    },
+    "pad_ring_open": {
+      "fail": "Platvormi {name} kontuur ei ole suletud pindalaga rõngas.",
+      "suggestion": "Joonistage vähemalt kolm nurka ja sulgege rõngas."
+    },
+    "pad_self_intersects": {
+      "fail": "Platvormi {name} kontuur lõikub iseendaga {n} korda.",
+      "suggestion": "Liigutage nurki nii, et küljed ei lõikuks."
+    },
+    "pad_no_level": {
+      "fail": "Platvormil {name} puudub kõrgus.",
+      "suggestion": "Sisestage platvormi projektkõrgus meetrites."
+    },
+    "pad_batter_open": {
+      "fail": "Platvormi {name} {n} nõlvanurka ei ulatunud maapinnani.",
+      "suggestion": "Laiendage maapinda platvormi ümber või vähendage nõlva."
     }
   },
   "setting_out": {

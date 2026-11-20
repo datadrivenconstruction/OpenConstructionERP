@@ -2486,6 +2486,22 @@
     "no_factors": {
       "fail": "Tidak ada faktor pengembangan dan pemadatan untuk {material}: hanya volume asli yang ditampilkan.",
       "suggestion": "Masukkan faktor material ini dari laporan tanah."
+    },
+    "pad_ring_open": {
+      "fail": "Batas pad {name} bukan cincin tertutup yang memiliki luas.",
+      "suggestion": "Gambar minimal tiga sudut dan tutup cincinnya."
+    },
+    "pad_self_intersects": {
+      "fail": "Batas pad {name} memotong dirinya sendiri {n} kali.",
+      "suggestion": "Pindahkan sudut agar tidak ada sisi yang bersilangan."
+    },
+    "pad_no_level": {
+      "fail": "Pad {name} belum memiliki elevasi.",
+      "suggestion": "Masukkan elevasi rencana pad dalam meter."
+    },
+    "pad_batter_open": {
+      "fail": "{n} sudut lereng pad {name} tidak mencapai permukaan tanah.",
+      "suggestion": "Perluas permukaan tanah di sekitar pad atau kurangi lerengnya."
     }
   },
   "setting_out": {

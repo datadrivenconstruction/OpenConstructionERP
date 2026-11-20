@@ -2486,6 +2486,22 @@
     "no_factors": {
       "fail": "Inga faktorer för fast, löst och packat för {material}: bara fasta volymer visas.",
       "suggestion": "Ange faktorerna för materialet från den geotekniska rapporten."
+    },
+    "pad_ring_open": {
+      "fail": "Konturen för plattan {name} är inte en sluten ring med en area.",
+      "suggestion": "Rita minst tre hörn och stäng ringen."
+    },
+    "pad_self_intersects": {
+      "fail": "Konturen för plattan {name} korsar sig själv {n} gånger.",
+      "suggestion": "Flytta hörnen så att inga sidor korsar varandra."
+    },
+    "pad_no_level": {
+      "fail": "Plattan {name} saknar nivå.",
+      "suggestion": "Ange plattans projekterade nivå i meter."
+    },
+    "pad_batter_open": {
+      "fail": "{n} släntens hörn för plattan {name} når inte markytan.",
+      "suggestion": "Utöka markytan runt plattan eller minska släntlutningen."
     }
   },
   "setting_out": {

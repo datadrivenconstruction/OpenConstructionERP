@@ -2486,6 +2486,22 @@
     "no_factors": {
       "fail": "{material} 没有松散系数和压实系数:仅显示自然方量。",
       "suggestion": "请根据岩土报告输入该材料的系数。"
+    },
+    "pad_ring_open": {
+      "fail": "场坪 {name} 的轮廓不是具有面积的闭合环。",
+      "suggestion": "至少绘制三个角点并闭合轮廓。"
+    },
+    "pad_self_intersects": {
+      "fail": "场坪 {name} 的轮廓自相交 {n} 处。",
+      "suggestion": "移动角点，使各边互不相交。"
+    },
+    "pad_no_level": {
+      "fail": "场坪 {name} 未设置标高。",
+      "suggestion": "输入场坪的设计标高（米）。"
+    },
+    "pad_batter_open": {
+      "fail": "场坪 {name} 有 {n} 个边坡角点未到达地面。",
+      "suggestion": "扩大场坪周围的地面模型，或减小边坡。"
     }
   },
   "setting_out": {

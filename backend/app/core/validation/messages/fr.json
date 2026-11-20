@@ -2486,6 +2486,22 @@
     "no_factors": {
       "fail": "Aucun coefficient de foisonnement ni de compactage pour {material} : seuls les volumes en place sont affichés.",
       "suggestion": "Saisissez les coefficients de ce matériau d'après le rapport géotechnique."
+    },
+    "pad_ring_open": {
+      "fail": "Le contour de la plateforme {name} n'est pas un anneau fermé avec une surface.",
+      "suggestion": "Dessinez au moins trois sommets et fermez l'anneau."
+    },
+    "pad_self_intersects": {
+      "fail": "Le contour de la plateforme {name} se recoupe {n} fois.",
+      "suggestion": "Déplacez les sommets pour qu'aucun côté ne se croise."
+    },
+    "pad_no_level": {
+      "fail": "La plateforme {name} n'a pas de cote.",
+      "suggestion": "Saisissez la cote de projet de la plateforme en mètres."
+    },
+    "pad_batter_open": {
+      "fail": "{n} angles du talus de la plateforme {name} n'atteignent pas le terrain.",
+      "suggestion": "Étendez la surface du terrain autour de la plateforme ou réduisez le talus."
     }
   },
   "setting_out": {

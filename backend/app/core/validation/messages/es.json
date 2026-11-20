@@ -2486,6 +2486,22 @@
     "no_factors": {
       "fail": "No hay factores de esponjamiento ni de compactación para {material}: solo se muestran volúmenes en banco.",
       "suggestion": "Introduzca los factores de este material según el informe geotécnico."
+    },
+    "pad_ring_open": {
+      "fail": "El contorno de la plataforma {name} no es un anillo cerrado con área.",
+      "suggestion": "Dibuje al menos tres vértices y cierre el anillo."
+    },
+    "pad_self_intersects": {
+      "fail": "El contorno de la plataforma {name} se cruza consigo mismo {n} veces.",
+      "suggestion": "Mueva los vértices para que ningún lado se cruce."
+    },
+    "pad_no_level": {
+      "fail": "La plataforma {name} no tiene cota.",
+      "suggestion": "Introduzca la cota de proyecto de la plataforma en metros."
+    },
+    "pad_batter_open": {
+      "fail": "{n} esquinas del talud de la plataforma {name} no alcanzaron el terreno.",
+      "suggestion": "Amplíe la superficie del terreno alrededor de la plataforma o reduzca el talud."
     }
   },
   "setting_out": {

@@ -2486,6 +2486,22 @@
     "no_factors": {
       "fail": "Nema koeficijenata rastresitosti i zbijenosti za {material}: prikazani su samo volumeni u sraslom stanju.",
       "suggestion": "Unesite koeficijente za ovaj materijal iz geotehničkog izvješća."
+    },
+    "pad_ring_open": {
+      "fail": "Obris platoa {name} nije zatvoreni prsten s površinom.",
+      "suggestion": "Nacrtajte najmanje tri kuta i zatvorite prsten."
+    },
+    "pad_self_intersects": {
+      "fail": "Obris platoa {name} siječe sam sebe {n} puta.",
+      "suggestion": "Pomaknite kutove tako da se stranice ne sijeku."
+    },
+    "pad_no_level": {
+      "fail": "Plato {name} nema visinu.",
+      "suggestion": "Unesite projektiranu visinu platoa u metrima."
+    },
+    "pad_batter_open": {
+      "fail": "{n} kutova pokosa platoa {name} nije doseglo teren.",
+      "suggestion": "Proširite površinu terena oko platoa ili smanjite pokos."
     }
   },
   "setting_out": {

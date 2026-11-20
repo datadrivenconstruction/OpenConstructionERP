@@ -2486,6 +2486,22 @@
     "no_factors": {
       "fail": "Chưa có hệ số nở rời và đầm chặt cho {material}: chỉ hiển thị khối lượng nguyên thổ.",
       "suggestion": "Nhập hệ số của vật liệu này từ báo cáo địa chất."
+    },
+    "pad_ring_open": {
+      "fail": "Đường bao của nền {name} không phải là vòng khép kín có diện tích.",
+      "suggestion": "Vẽ ít nhất ba góc và khép vòng."
+    },
+    "pad_self_intersects": {
+      "fail": "Đường bao của nền {name} tự cắt {n} lần.",
+      "suggestion": "Di chuyển các góc để không có cạnh nào cắt nhau."
+    },
+    "pad_no_level": {
+      "fail": "Nền {name} chưa có cao độ.",
+      "suggestion": "Nhập cao độ thiết kế của nền theo mét."
+    },
+    "pad_batter_open": {
+      "fail": "{n} góc mái dốc của nền {name} không chạm mặt đất.",
+      "suggestion": "Mở rộng bề mặt đất quanh nền hoặc giảm mái dốc."
     }
   },
   "setting_out": {

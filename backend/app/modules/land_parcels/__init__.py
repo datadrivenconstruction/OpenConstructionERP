@@ -11,6 +11,8 @@ rules. National cadastre rules arrive from country packs through
 
 async def on_startup() -> None:
     """Module startup hook - register validation rules (permissions come from survey_core)."""
+    from app.modules.land_parcels.cadastre import register_country_profiles
     from app.modules.land_parcels.validators import register_parcel_validation_rules
 
     register_parcel_validation_rules()
+    register_country_profiles()

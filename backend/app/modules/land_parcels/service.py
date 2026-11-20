@@ -46,6 +46,7 @@ from app.modules.land_parcels.schemas import (
     ImportPreview,
     ImportRequest,
     ImportResult,
+    MarkTypeOut,
     ParcelCreate,
     ParcelDetail,
     ParcelOut,
@@ -126,6 +127,8 @@ class ParcelService:
             area_decimals=profile.area_decimals,
             area_tolerance_source=profile.area_tolerance_source,
             export_formats=[*BASE_FORMATS, *profile.exporters],
+            id_pattern=profile.id_pattern,
+            marks=[MarkTypeOut(key=m.key, monumented=m.monumented) for m in profile.marks],
         )
 
     async def settings(self, project_id: uuid.UUID) -> SettingsOut:
@@ -345,6 +348,8 @@ class ParcelService:
                 n=_q4(p.n),
                 mark=p.mark,
                 accuracy_m=_q4(p.accuracy_m) if p.accuracy_m is not None else None,
+                corner_status=p.corner_status,
+                accuracy_class=p.accuracy_class,
             )
             for i, p in enumerate(kept)
         ]

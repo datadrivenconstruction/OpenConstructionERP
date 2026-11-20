@@ -2486,6 +2486,22 @@
     "no_factors": {
       "fail": "Nincs lazulási és tömörödési tényező ehhez: {material}; csak a termett állapotú térfogatok látszanak.",
       "suggestion": "Adja meg az anyag tényezőit a talajmechanikai jelentésből."
+    },
+    "pad_ring_open": {
+      "fail": "A(z) {name} plató körvonala nem zárt, területtel rendelkező gyűrű.",
+      "suggestion": "Rajzoljon legalább három sarkot, és zárja le a gyűrűt."
+    },
+    "pad_self_intersects": {
+      "fail": "A(z) {name} plató körvonala {n} helyen metszi önmagát.",
+      "suggestion": "Mozgassa a sarkokat úgy, hogy az oldalak ne metsszék egymást."
+    },
+    "pad_no_level": {
+      "fail": "A(z) {name} platónak nincs magassága.",
+      "suggestion": "Adja meg a plató tervezett magasságát méterben."
+    },
+    "pad_batter_open": {
+      "fail": "A(z) {name} plató {n} rézsűsarka nem érte el a terepet.",
+      "suggestion": "Bővítse a terepfelületet a plató körül, vagy csökkentse a rézsűt."
     }
   },
   "setting_out": {

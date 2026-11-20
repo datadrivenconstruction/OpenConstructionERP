@@ -2486,6 +2486,22 @@
     "no_factors": {
       "fail": "Walang swell at compaction factor para sa {material}: bank volume lang ang ipinapakita.",
       "suggestion": "Ilagay ang mga factor ng materyal na ito mula sa soil report."
+    },
+    "pad_ring_open": {
+      "fail": "Ang balangkas ng pad {name} ay hindi saradong singsing na may sukat.",
+      "suggestion": "Gumuhit ng hindi bababa sa tatlong sulok at isara ang singsing."
+    },
+    "pad_self_intersects": {
+      "fail": "Ang balangkas ng pad {name} ay tumatawid sa sarili nito nang {n} beses.",
+      "suggestion": "Ilipat ang mga sulok para walang gilid na magtawiran."
+    },
+    "pad_no_level": {
+      "fail": "Walang antas ang pad {name}.",
+      "suggestion": "Ilagay ang disenyong antas ng pad sa metro."
+    },
+    "pad_batter_open": {
+      "fail": "{n} sulok ng dalisdis ng pad {name} ang hindi umabot sa lupa.",
+      "suggestion": "Palawakin ang ibabaw ng lupa sa paligid ng pad o bawasan ang dalisdis."
     }
   },
   "setting_out": {
