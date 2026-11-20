@@ -2552,6 +2552,14 @@
     "stake_unresolved": {
       "fail": "Țărușul {id} este în afara toleranței și nu are nici NCR, nici abatere acceptată.",
       "suggestion": "Creați o ciornă NCR sau acceptați abaterea cu o justificare."
+    },
+    "radius_below_min": {
+      "fail": "Raza {r} m la {ip} este sub minimul de {rmin} m pentru {v} km/h.",
+      "suggestion": "Măriți raza sau reduceți viteza de proiectare și notați motivul."
+    },
+    "curves_overlap": {
+      "fail": "Curbele {a} și {b} se suprapun: au nevoie de {need} m dintr-o aliniere de {have} m.",
+      "suggestion": "Micșorați una dintre raze sau mutați un vârf."
     }
   },
   "land_parcels": {

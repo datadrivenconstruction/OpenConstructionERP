@@ -2552,6 +2552,14 @@
     "stake_unresolved": {
       "fail": "A estaca {id} está fora da tolerância e não tem NCR nem desvio aceite.",
       "suggestion": "Crie um rascunho de NCR ou aceite o desvio indicando o motivo."
+    },
+    "radius_below_min": {
+      "fail": "O raio {r} m em {ip} é inferior ao mínimo de {rmin} m para {v} km/h.",
+      "suggestion": "Aumente o raio ou reduza a velocidade de projeto e registe o motivo."
+    },
+    "curves_overlap": {
+      "fail": "As curvas {a} e {b} sobrepõem-se: precisam de {need} m de uma tangente de {have} m.",
+      "suggestion": "Reduza um dos raios ou mova um vértice."
     }
   },
   "land_parcels": {

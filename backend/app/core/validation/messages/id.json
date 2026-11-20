@@ -2552,6 +2552,14 @@
     "stake_unresolved": {
       "fail": "Patok {id} di luar toleransi dan tidak memiliki NCR maupun deviasi yang diterima.",
       "suggestion": "Buat draf NCR, atau terima deviasi dengan alasannya."
+    },
+    "radius_below_min": {
+      "fail": "Jari-jari {r} m di {ip} di bawah minimum {rmin} m untuk {v} km/jam.",
+      "suggestion": "Perbesar jari-jari atau turunkan kecepatan rencana, lalu catat alasannya."
+    },
+    "curves_overlap": {
+      "fail": "Lengkung {a} dan {b} bertumpang: butuh {need} m dari tangen sepanjang {have} m.",
+      "suggestion": "Perkecil salah satu jari-jari atau geser titik potong."
     }
   },
   "land_parcels": {

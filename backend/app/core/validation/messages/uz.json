@@ -2552,6 +2552,14 @@
     "stake_unresolved": {
       "fail": "{id} belgilash nuqtasi dopuskdan tashqarida va unda na NCR, na qabul qilingan og'ish bor.",
       "suggestion": "NCR qoralamasini yarating yoki og'ishni sababini ko'rsatib qabul qiling."
+    },
+    "radius_below_min": {
+      "fail": "{ip} dagi {r} m radius {v} km/soat uchun eng kam {rmin} m dan kichik.",
+      "suggestion": "Radiusni oshiring yoki loyiha tezligini pasaytiring va sababini yozing."
+    },
+    "curves_overlap": {
+      "fail": "{a} va {b} egri chiziqlari ustma-ust tushadi: {have} m to‘g‘ri chiziqdan {need} m kerak.",
+      "suggestion": "Radiuslardan birini kamaytiring yoki burilish nuqtasini suring."
     }
   },
   "land_parcels": {

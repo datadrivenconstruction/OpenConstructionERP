@@ -2552,6 +2552,14 @@
     "stake_unresolved": {
       "fail": "Punkt tyczenia {id} jest poza tolerancją i nie ma ani NCR, ani zaakceptowanej odchyłki.",
       "suggestion": "Utwórz szkic NCR albo zaakceptuj odchyłkę z podaniem przyczyny."
+    },
+    "radius_below_min": {
+      "fail": "Promień {r} m w {ip} jest mniejszy od minimum {rmin} m dla {v} km/h.",
+      "suggestion": "Zwiększ promień lub obniż prędkość projektową i zapisz powód."
+    },
+    "curves_overlap": {
+      "fail": "Łuki {a} i {b} nachodzą na siebie: potrzebują {need} m prostej o długości {have} m.",
+      "suggestion": "Zmniejsz jeden z promieni lub przesuń wierzchołek."
     }
   },
   "land_parcels": {

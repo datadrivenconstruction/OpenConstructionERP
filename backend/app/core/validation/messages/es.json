@@ -2552,6 +2552,14 @@
     "stake_unresolved": {
       "fail": "La estaca {id} no cumple la tolerancia y no tiene ni NCR ni desviación aceptada.",
       "suggestion": "Cree un borrador de NCR o acepte la desviación indicando el motivo."
+    },
+    "radius_below_min": {
+      "fail": "El radio {r} m en {ip} es menor que el mínimo de {rmin} m para {v} km/h.",
+      "suggestion": "Aumente el radio o reduzca la velocidad de proyecto y anote el motivo."
+    },
+    "curves_overlap": {
+      "fail": "Las curvas {a} y {b} se solapan: necesitan {need} m de una tangente de {have} m.",
+      "suggestion": "Reduzca uno de los radios o mueva un vértice."
     }
   },
   "land_parcels": {

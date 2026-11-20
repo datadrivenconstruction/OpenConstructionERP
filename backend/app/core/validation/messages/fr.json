@@ -2552,6 +2552,14 @@
     "stake_unresolved": {
       "fail": "Le piquet {id} est hors tolérance et n'a ni NCR ni écart accepté.",
       "suggestion": "Créez un brouillon de NCR ou acceptez l'écart en indiquant la raison."
+    },
+    "radius_below_min": {
+      "fail": "Le rayon {r} m en {ip} est inférieur au minimum de {rmin} m pour {v} km/h.",
+      "suggestion": "Augmentez le rayon ou réduisez la vitesse de référence, et notez la raison."
+    },
+    "curves_overlap": {
+      "fail": "Les courbes {a} et {b} se chevauchent : elles demandent {need} m d'un alignement droit de {have} m.",
+      "suggestion": "Réduisez l'un des rayons ou déplacez un sommet."
     }
   },
   "land_parcels": {

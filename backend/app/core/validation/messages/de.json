@@ -2552,6 +2552,14 @@
     "stake_unresolved": {
       "fail": "Absteckpunkt {id} ist außerhalb der Toleranz und hat weder eine NCR noch eine akzeptierte Abweichung.",
       "suggestion": "Einen NCR-Entwurf anlegen oder die Abweichung mit Begründung akzeptieren."
+    },
+    "radius_below_min": {
+      "fail": "Radius {r} m an {ip} liegt unter dem Mindestradius {rmin} m für {v} km/h.",
+      "suggestion": "Radius vergrößern oder Entwurfsgeschwindigkeit senken und den Grund festhalten."
+    },
+    "curves_overlap": {
+      "fail": "Bögen {a} und {b} überlappen: sie brauchen {need} m einer {have} m langen Geraden.",
+      "suggestion": "Einen der Radien verkleinern oder einen Tangentenschnittpunkt verschieben."
     }
   },
   "land_parcels": {

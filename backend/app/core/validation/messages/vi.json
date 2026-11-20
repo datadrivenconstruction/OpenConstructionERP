@@ -2552,6 +2552,14 @@
     "stake_unresolved": {
       "fail": "Cọc {id} vượt dung sai và không có NCR cũng như sai lệch được chấp nhận.",
       "suggestion": "Tạo bản nháp NCR hoặc chấp nhận sai lệch kèm lý do."
+    },
+    "radius_below_min": {
+      "fail": "Bán kính {r} m tại {ip} nhỏ hơn mức tối thiểu {rmin} m cho {v} km/h.",
+      "suggestion": "Tăng bán kính hoặc giảm tốc độ thiết kế và ghi lại lý do."
+    },
+    "curves_overlap": {
+      "fail": "Đường cong {a} và {b} chồng lên nhau: cần {need} m của đoạn thẳng dài {have} m.",
+      "suggestion": "Giảm một bán kính hoặc dời một đỉnh."
     }
   },
   "land_parcels": {

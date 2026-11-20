@@ -229,3 +229,8 @@ async def acknowledge(
 ) -> PointDetail:
     service, point = await _point(point_id, session, user_id)
     return await service.acknowledge(point, body, user_id, markets)
+
+
+from app.modules.monitoring.plan_router import router as _plan_router  # noqa: E402
+
+router.include_router(_plan_router)

@@ -2552,6 +2552,14 @@
     "stake_unresolved": {
       "fail": "Stake {id} failed and has neither an NCR nor an accepted deviation.",
       "suggestion": "Create an NCR draft, or accept the deviation with a reason."
+    },
+    "radius_below_min": {
+      "fail": "Radius {r} m at {ip} is below the {rmin} m minimum for {v} km/h.",
+      "suggestion": "Increase the radius or lower the design speed, and record the reason."
+    },
+    "curves_overlap": {
+      "fail": "Curves {a} and {b} overlap: they need {need} m of a {have} m tangent.",
+      "suggestion": "Reduce one of the radii or move an intersection point."
     }
   },
   "land_parcels": {

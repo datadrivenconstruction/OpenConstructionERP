@@ -2552,6 +2552,14 @@
     "stake_unresolved": {
       "fail": "Uitzetpunt {id} valt buiten de tolerantie en heeft geen NCR en geen geaccepteerde afwijking.",
       "suggestion": "Maak een NCR-concept aan of accepteer de afwijking met een reden."
+    },
+    "radius_below_min": {
+      "fail": "Straal {r} m bij {ip} is kleiner dan het minimum van {rmin} m voor {v} km/u.",
+      "suggestion": "Vergroot de straal of verlaag de ontwerpsnelheid en noteer de reden."
+    },
+    "curves_overlap": {
+      "fail": "Bogen {a} en {b} overlappen: ze hebben {need} m nodig van een rechtstand van {have} m.",
+      "suggestion": "Verklein een van de stralen of verplaats een snijpunt."
     }
   },
   "land_parcels": {

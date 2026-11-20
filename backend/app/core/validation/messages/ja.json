@@ -2552,6 +2552,14 @@
     "stake_unresolved": {
       "fail": "杭 {id} は許容差を超えており、NCR も承認済みの偏差もありません。",
       "suggestion": "NCR の下書きを作成するか、理由を添えて偏差を承認してください。"
+    },
+    "radius_below_min": {
+      "fail": "{ip} の半径 {r} m は {v} km/h の最小半径 {rmin} m 未満です。",
+      "suggestion": "半径を大きくするか設計速度を下げ、理由を記録してください。"
+    },
+    "curves_overlap": {
+      "fail": "曲線 {a} と {b} が重なっています: 長さ {have} m の直線のうち {need} m が必要です。",
+      "suggestion": "いずれかの半径を小さくするか、交点を移動してください。"
     }
   },
   "land_parcels": {

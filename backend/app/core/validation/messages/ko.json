@@ -2552,6 +2552,14 @@
     "stake_unresolved": {
       "fail": "말뚝 {id}이(가) 허용오차를 벗어났으며 NCR도 승인된 편차도 없습니다.",
       "suggestion": "NCR 초안을 작성하거나 사유와 함께 편차를 승인하세요."
+    },
+    "radius_below_min": {
+      "fail": "{ip}의 반경 {r} m가 {v} km/h 최소 반경 {rmin} m보다 작습니다.",
+      "suggestion": "반경을 늘리거나 설계 속도를 낮추고 사유를 기록하세요."
+    },
+    "curves_overlap": {
+      "fail": "곡선 {a}와 {b}가 겹칩니다: 길이 {have} m 직선 중 {need} m가 필요합니다.",
+      "suggestion": "반경 하나를 줄이거나 교점을 옮기세요."
     }
   },
   "land_parcels": {

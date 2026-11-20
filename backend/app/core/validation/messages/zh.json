@@ -2552,6 +2552,14 @@
     "stake_unresolved": {
       "fail": "放样点 {id} 超出允许偏差，既没有 NCR 也没有已接受的偏差。",
       "suggestion": "创建 NCR 草稿，或注明理由后接受该偏差。"
+    },
+    "radius_below_min": {
+      "fail": "{ip} 处半径 {r} m 小于设计速度 {v} km/h 的最小半径 {rmin} m。",
+      "suggestion": "增大半径或降低设计速度，并记录原因。"
+    },
+    "curves_overlap": {
+      "fail": "曲线 {a} 与 {b} 重叠：需要长 {have} m 直线中的 {need} m。",
+      "suggestion": "减小其中一个半径或移动交点。"
     }
   },
   "land_parcels": {

@@ -2552,6 +2552,14 @@
     "stake_unresolved": {
       "fail": "Merkintäpiste {id} on toleranssin ulkopuolella, eikä sillä ole NCR:ää eikä hyväksyttyä poikkeamaa.",
       "suggestion": "Luo NCR-luonnos tai hyväksy poikkeama perusteluineen."
+    },
+    "radius_below_min": {
+      "fail": "Säde {r} m kohdassa {ip} alittaa nopeuden {v} km/h vähimmäissäteen {rmin} m.",
+      "suggestion": "Suurenna sädettä tai laske mitoitusnopeutta ja kirjaa syy."
+    },
+    "curves_overlap": {
+      "fail": "Kaaret {a} ja {b} menevät päällekkäin: ne tarvitsevat {need} m {have} m:n suorasta.",
+      "suggestion": "Pienennä toista säteistä tai siirrä taitepistettä."
     }
   },
   "land_parcels": {

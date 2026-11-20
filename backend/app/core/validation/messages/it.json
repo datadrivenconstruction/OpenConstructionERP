@@ -2552,6 +2552,14 @@
     "stake_unresolved": {
       "fail": "Il picchetto {id} è fuori tolleranza e non ha né una NCR né una deviazione accettata.",
       "suggestion": "Crea una bozza di NCR oppure accetta la deviazione con una motivazione."
+    },
+    "radius_below_min": {
+      "fail": "Il raggio {r} m in {ip} è inferiore al minimo di {rmin} m per {v} km/h.",
+      "suggestion": "Aumentare il raggio o ridurre la velocità di progetto e annotare il motivo."
+    },
+    "curves_overlap": {
+      "fail": "Le curve {a} e {b} si sovrappongono: richiedono {need} m di un rettifilo di {have} m.",
+      "suggestion": "Ridurre uno dei raggi o spostare un vertice."
     }
   },
   "land_parcels": {

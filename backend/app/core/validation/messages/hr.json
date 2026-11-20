@@ -2552,6 +2552,14 @@
     "stake_unresolved": {
       "fail": "Iskolčena točka {id} je izvan tolerancije i nema ni NCR ni prihvaćeno odstupanje.",
       "suggestion": "Izradite nacrt NCR-a ili prihvatite odstupanje uz obrazloženje."
+    },
+    "radius_below_min": {
+      "fail": "Polumjer {r} m u {ip} manji je od najmanjeg {rmin} m za {v} km/h.",
+      "suggestion": "Povećajte polumjer ili smanjite projektnu brzinu i zabilježite razlog."
+    },
+    "curves_overlap": {
+      "fail": "Krivine {a} i {b} se preklapaju: trebaju {need} m pravca dugog {have} m.",
+      "suggestion": "Smanjite jedan od polumjera ili pomaknite tjeme."
     }
   },
   "land_parcels": {

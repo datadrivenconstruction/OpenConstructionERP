@@ -1,0 +1,14 @@
+#name,Riverside control loop
+#shape,loop
+#angle_unit,dms
+#angle_mode,right
+#start,T1,389004.120,5818982.350
+#backsight,CP1,298 26 53
+#closing_angle,326 25 20
+station,bs,fs,face_l,face_r,dist_mode,distance,zenith,hi,ht,note
+T1,CP1,T2,148 42 46,148 42 42,horizontal,154.374,,1.552,1.600,Nail in kerb
+T2,T1,T3,100 01 43,100 01 49,slope,103.420,89 12 00,1.548,1.600,
+T3,T2,T4,122 05 41,122 05 39,horizontal,93.632,,1.601,1.600,
+T4,T3,T5,134 03 16,134 03 16,slope,109.113,91 03 00,1.530,1.600,Peg by gate
+T5,T4,T6,116 36 54,116 36 58,horizontal,82.824,,1.575,1.600,
+T6,T5,T1,132 04 34,132 04 28,slope,89.481,90 36 00,1.560,1.600,
