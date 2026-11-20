@@ -432,9 +432,11 @@ interface PointCloudViewerProps {
   scanId: string;
   /** Display label for the header, e.g. the scan source / format. */
   scanLabel?: string;
+  /** Load the points from another OEPC endpoint (a deviation heatmap) and show its colours. */
+  pointsPath?: string;
 }
 
-export function PointCloudViewer({ scanId, scanLabel }: PointCloudViewerProps) {
+export function PointCloudViewer({ scanId, scanLabel, pointsPath }: PointCloudViewerProps) {
   const { t } = useTranslation();
   const resolvedTheme = useThemeStore((s) => s.resolved);
   // Quantity hand-off targets the active project's BOQ (mirrors the DWG
@@ -750,6 +752,7 @@ export function PointCloudViewer({ scanId, scanLabel }: PointCloudViewerProps) {
 
     fetchScanPoints(scanId, {
       maxPoints,
+      path: pointsPath,
       signal: controller.signal,
       onProgress: (loaded) => {
         if (!cancelled) setProgressBytes(loaded);
@@ -760,6 +763,7 @@ export function PointCloudViewer({ scanId, scanLabel }: PointCloudViewerProps) {
         const parsed = parseOepc(buffer);
         setCloud(parsed);
         setColorMode((prev) => {
+          if (pointsPath && parsed.rgb) return 'rgb';
           // Keep a still-valid user choice; otherwise pick the richest channel.
           if (prev === 'rgb' && parsed.rgb) return prev;
           if (prev === 'intensity' && parsed.intensity) return prev;
@@ -791,7 +795,7 @@ export function PointCloudViewer({ scanId, scanLabel }: PointCloudViewerProps) {
       cancelled = true;
       controller.abort();
     };
-  }, [scanId, maxPoints, reloadNonce]);
+  }, [scanId, maxPoints, reloadNonce, pointsPath]);
 
   // ── Rebuild the Points object when a new cloud lands ─────────────────────
   useEffect(() => {

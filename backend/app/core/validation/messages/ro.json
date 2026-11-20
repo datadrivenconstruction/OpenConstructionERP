@@ -2778,5 +2778,35 @@
       "fail": "Fișierul nu indică ofertantul",
       "suggestion": "Introduceți denumirea firmei în datele ofertantului din fișier"
     }
+  },
+  "pointcloud": {
+    "out_of_tolerance": {
+      "fail": "{share} % din punctele scanării peste {surface} sunt în afara toleranței de ±{tol} mm; limita este {limit} %.",
+      "suggestion": "Deschideți harta termică, verificați pe șantier zonele roșii și albastre și remediați-le sau ridicați-le din nou înainte de a folosi cantitatea."
+    },
+    "low_coverage": {
+      "fail": "Scanarea acoperă {share} % din suprafața de proiect {surface}; se așteaptă cel puțin {floor} %.",
+      "suggestion": "Scanați zonele lipsă sau citiți statisticile ca acoperind doar partea scanată."
+    },
+    "no_overlap": {
+      "fail": "Niciun punct al scanării nu se află peste suprafața de proiect {surface}.",
+      "suggestion": "Verificați că scanarea și proiectul sunt în același sistem de coordonate și că este aleasă suprafața corectă."
+    }
+  },
+  "pointcloud_report": {
+    "title": "Scanare față de proiect",
+    "scan": "Scanare",
+    "design": "Suprafață de proiect",
+    "tolerance": "Toleranță",
+    "points": "Puncte comparate / citite",
+    "mean": "Abatere medie",
+    "rms": "RMS",
+    "p95": "P95 al abaterii absolute",
+    "within": "În toleranță",
+    "high": "Peste proiect",
+    "low": "Sub proiect",
+    "coverage": "Suprafață de proiect acoperită",
+    "findings": "Constatări",
+    "map": "Harta abaterilor (cea mai rea celulă pe bloc)"
   }
 }

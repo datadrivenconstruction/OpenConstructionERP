@@ -2778,5 +2778,35 @@
       "fail": "文件中未注明投标人",
       "suggestion": "请在文件的投标人信息中填写公司名称"
     }
+  },
+  "pointcloud": {
+    "out_of_tolerance": {
+      "fail": "{surface} 上方 {share} % 的扫描点超出 ±{tol} mm 容差；限值为 {limit} %。",
+      "suggestion": "打开热力图，在现场核查红色和蓝色区域，在使用该工程量之前返工或重新测量。"
+    },
+    "low_coverage": {
+      "fail": "扫描覆盖设计面 {surface} 的 {share} %；应至少为 {floor} %。",
+      "suggestion": "补扫缺失区域，或将统计视为仅针对已扫描部分。"
+    },
+    "no_overlap": {
+      "fail": "没有任何扫描点位于设计面 {surface} 上方。",
+      "suggestion": "检查扫描与设计是否在同一坐标系，以及是否选择了正确的面。"
+    }
+  },
+  "pointcloud_report": {
+    "title": "扫描与设计对比",
+    "scan": "扫描",
+    "design": "设计面",
+    "tolerance": "容差",
+    "points": "已比较 / 已读取点数",
+    "mean": "平均偏差",
+    "rms": "RMS",
+    "p95": "绝对偏差 P95",
+    "within": "容差内",
+    "high": "高于设计",
+    "low": "低于设计",
+    "coverage": "设计面积覆盖率",
+    "findings": "检查结果",
+    "map": "偏差图（每块最差单元）"
   }
 }

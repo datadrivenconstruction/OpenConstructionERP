@@ -2778,5 +2778,35 @@
       "fail": "Filen oppgir ingen anbyder",
       "suggestion": "Oppgi firmanavnet i anbyderdataene i filen"
     }
+  },
+  "pointcloud": {
+    "out_of_tolerance": {
+      "fail": "{share} % av skannepunktene over {surface} ligger utenfor toleransen ±{tol} mm; grensen er {limit} %.",
+      "suggestion": "Åpne varmekartet, kontroller de røde og blå områdene på byggeplassen, og utbedre eller mål dem inn på nytt før mengden brukes."
+    },
+    "low_coverage": {
+      "fail": "Skanningen dekker {share} % av den prosjekterte flaten {surface}; minst {floor} % forventes.",
+      "suggestion": "Skann de manglende områdene, eller les statistikken som gjeldende bare for den skannede delen."
+    },
+    "no_overlap": {
+      "fail": "Ingen skannepunkter ligger over den prosjekterte flaten {surface}.",
+      "suggestion": "Kontroller at skanning og prosjekt er i samme koordinatsystem og at riktig flate er valgt."
+    }
+  },
+  "pointcloud_report": {
+    "title": "Skanning mot prosjekt",
+    "scan": "Skanning",
+    "design": "Prosjektert flate",
+    "tolerance": "Toleranse",
+    "points": "Punkter sammenlignet / lest",
+    "mean": "Gjennomsnittlig avvik",
+    "rms": "RMS",
+    "p95": "P95 av absolutt avvik",
+    "within": "Innenfor toleranse",
+    "high": "Over prosjekt",
+    "low": "Under prosjekt",
+    "coverage": "Dekket prosjektareal",
+    "findings": "Merknader",
+    "map": "Avvikskart (dårligste celle per blokk)"
   }
 }

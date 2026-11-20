@@ -2778,5 +2778,35 @@
       "fail": "File tidak mencantumkan nama penawar",
       "suggestion": "Isi nama perusahaan pada data penawar di dalam file"
     }
+  },
+  "pointcloud": {
+    "out_of_tolerance": {
+      "fail": "{share} % titik pindaian di atas {surface} berada di luar toleransi ±{tol} mm; batasnya {limit} %.",
+      "suggestion": "Buka peta panas, periksa area merah dan biru di lapangan, lalu perbaiki atau ukur ulang sebelum kuantitas digunakan."
+    },
+    "low_coverage": {
+      "fail": "Pindaian mencakup {share} % permukaan desain {surface}; diharapkan minimal {floor} %.",
+      "suggestion": "Pindai area yang belum tercakup, atau baca statistik hanya untuk bagian yang dipindai."
+    },
+    "no_overlap": {
+      "fail": "Tidak ada titik pindaian di atas permukaan desain {surface}.",
+      "suggestion": "Periksa bahwa pindaian dan desain berada dalam sistem koordinat yang sama dan permukaan yang benar dipilih."
+    }
+  },
+  "pointcloud_report": {
+    "title": "Pindaian terhadap desain",
+    "scan": "Pindaian",
+    "design": "Permukaan desain",
+    "tolerance": "Toleransi",
+    "points": "Titik dibandingkan / dibaca",
+    "mean": "Deviasi rata-rata",
+    "rms": "RMS",
+    "p95": "P95 deviasi absolut",
+    "within": "Dalam toleransi",
+    "high": "Di atas desain",
+    "low": "Di bawah desain",
+    "coverage": "Area desain tercakup",
+    "findings": "Temuan",
+    "map": "Peta deviasi (sel terburuk per blok)"
   }
 }

@@ -2778,5 +2778,35 @@
       "fail": "{vendor} ist im Nachunternehmerverzeichnis gesperrt und kann nicht beauftragt werden.",
       "suggestion": "Sperre im Verzeichnis aufheben oder an eine andere Firma vergeben."
     }
+  },
+  "pointcloud": {
+    "out_of_tolerance": {
+      "fail": "{share} % der Scanpunkte über {surface} liegen außerhalb der Toleranz von ±{tol} mm; die Grenze ist {limit} %.",
+      "suggestion": "Öffnen Sie die Heatmap, prüfen Sie die roten und blauen Bereiche vor Ort und bessern Sie nach oder messen Sie neu, bevor die Menge verwendet wird."
+    },
+    "low_coverage": {
+      "fail": "Der Scan deckt {share} % der Planfläche {surface} ab; erwartet werden mindestens {floor} %.",
+      "suggestion": "Scannen Sie die fehlenden Bereiche oder lesen Sie die Statistik nur für den gescannten Teil."
+    },
+    "no_overlap": {
+      "fail": "Kein Scanpunkt liegt über der Planfläche {surface}.",
+      "suggestion": "Prüfen Sie, ob Scan und Planung im selben Koordinatensystem liegen und die richtige Fläche gewählt ist."
+    }
+  },
+  "pointcloud_report": {
+    "title": "Scan gegen Planung",
+    "scan": "Scan",
+    "design": "Planfläche",
+    "tolerance": "Toleranz",
+    "points": "Punkte verglichen / gelesen",
+    "mean": "Mittlere Abweichung",
+    "rms": "RMS",
+    "p95": "P95 der absoluten Abweichung",
+    "within": "Innerhalb der Toleranz",
+    "high": "Über Planung",
+    "low": "Unter Planung",
+    "coverage": "Abgedeckte Planfläche",
+    "findings": "Befunde",
+    "map": "Abweichungskarte (ungünstigste Zelle je Block)"
   }
 }

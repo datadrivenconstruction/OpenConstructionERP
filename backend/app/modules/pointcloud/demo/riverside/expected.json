@@ -1,0 +1,48 @@
+{
+  "dataset": "riverside_yard",
+  "scan": {
+    "file": "riverside_pad_asbuilt.las",
+    "generated_at_seed": true,
+    "points": 24542,
+    "ground_points": 24321,
+    "machine_points": 221,
+    "design_surface": "Pad",
+    "design_z": 34.3,
+    "high_spot": {"e_min": 389060.0, "n_min": 5819020.0, "e_max": 389080.0, "n_max": 5819040.0, "dz_mm": 45}
+  },
+  "deviation": {
+    "tolerance_key": "demo",
+    "tolerance_mm": 10.0,
+    "threshold_pct": 5.0,
+    "ground_only": true,
+    "points_compared": 24321,
+    "mean_mm": 3.11,
+    "rms_mm": 11.91,
+    "p95_mm": 44.0,
+    "min_mm": -2.0,
+    "max_mm": 47.0,
+    "within_pct": 93.09,
+    "high_pct": 6.91,
+    "low_pct": 0.0,
+    "out_count": 1681,
+    "coverage_pct": 100.0,
+    "severity": "over",
+    "findings": ["PCD-001"]
+  },
+  "deviation_all_classes": {
+    "points_compared": 24542,
+    "out_count": 1902,
+    "max_mm": 2500.0
+  },
+  "cutfill": {
+    "method": "grid",
+    "cell_size_m": 0.5,
+    "stat": "min",
+    "cells": 24321,
+    "cut_m3": 21.135,
+    "fill_m3": 2.224,
+    "net_m3": 18.911,
+    "coverage_pct": 100.0,
+    "boq_quantity": "cut"
+  }
+}

@@ -2778,5 +2778,35 @@
       "fail": "{vendor} está bloqueado en el directorio de subcontratistas y no se le puede adjudicar.",
       "suggestion": "Levante el bloqueo en el directorio o adjudique a otra empresa."
     }
+  },
+  "pointcloud": {
+    "out_of_tolerance": {
+      "fail": "El {share} % de los puntos del escaneo sobre {surface} queda fuera de la tolerancia de ±{tol} mm; el límite es {limit} %.",
+      "suggestion": "Abra el mapa de calor, revise en obra las zonas rojas y azules y corríjalas o vuelva a levantarlas antes de usar la cantidad."
+    },
+    "low_coverage": {
+      "fail": "El escaneo cubre el {share} % de la superficie de proyecto {surface}; se espera al menos el {floor} %.",
+      "suggestion": "Escanee las zonas que faltan o lea las estadísticas solo para la parte escaneada."
+    },
+    "no_overlap": {
+      "fail": "Ningún punto del escaneo queda sobre la superficie de proyecto {surface}.",
+      "suggestion": "Compruebe que el escaneo y el proyecto están en el mismo sistema de coordenadas y que la superficie elegida es la correcta."
+    }
+  },
+  "pointcloud_report": {
+    "title": "Escaneo frente a proyecto",
+    "scan": "Escaneo",
+    "design": "Superficie de proyecto",
+    "tolerance": "Tolerancia",
+    "points": "Puntos comparados / leídos",
+    "mean": "Desviación media",
+    "rms": "RMS",
+    "p95": "P95 de la desviación absoluta",
+    "within": "Dentro de tolerancia",
+    "high": "Por encima del proyecto",
+    "low": "Por debajo del proyecto",
+    "coverage": "Área de proyecto cubierta",
+    "findings": "Hallazgos",
+    "map": "Mapa de desviaciones (peor celda por bloque)"
   }
 }

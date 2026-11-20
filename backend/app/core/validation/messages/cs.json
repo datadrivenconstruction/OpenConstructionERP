@@ -2778,5 +2778,35 @@
       "fail": "Soubor neuvádí uchazeče",
       "suggestion": "Doplňte název firmy do údajů o uchazeči v souboru"
     }
+  },
+  "pointcloud": {
+    "out_of_tolerance": {
+      "fail": "{share} % bodů skenu nad {surface} leží mimo toleranci ±{tol} mm; limit je {limit} %.",
+      "suggestion": "Otevřete teplotní mapu, zkontrolujte na stavbě červené a modré oblasti a opravte je nebo je znovu zaměřte, než se množství použije."
+    },
+    "low_coverage": {
+      "fail": "Sken pokrývá {share} % projektové plochy {surface}; očekává se alespoň {floor} %.",
+      "suggestion": "Naskenujte chybějící oblasti, nebo čtěte statistiku jen pro naskenovanou část."
+    },
+    "no_overlap": {
+      "fail": "Žádný bod skenu neleží nad projektovou plochou {surface}.",
+      "suggestion": "Zkontrolujte, že sken a projekt jsou ve stejném souřadnicovém systému a že je zvolena správná plocha."
+    }
+  },
+  "pointcloud_report": {
+    "title": "Sken proti projektu",
+    "scan": "Sken",
+    "design": "Projektová plocha",
+    "tolerance": "Tolerance",
+    "points": "Bodů porovnáno / načteno",
+    "mean": "Průměrná odchylka",
+    "rms": "RMS",
+    "p95": "P95 absolutní odchylky",
+    "within": "V toleranci",
+    "high": "Nad projektem",
+    "low": "Pod projektem",
+    "coverage": "Pokrytá plocha projektu",
+    "findings": "Zjištění",
+    "map": "Mapa odchylek (nejhorší buňka v bloku)"
   }
 }

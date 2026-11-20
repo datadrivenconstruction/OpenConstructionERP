@@ -2778,5 +2778,35 @@
       "fail": "Filen angiver ingen bydere",
       "suggestion": "Angiv firmanavnet i budgiverdata i filen"
     }
+  },
+  "pointcloud": {
+    "out_of_tolerance": {
+      "fail": "{share} % af scanningspunkterne over {surface} ligger uden for tolerancen ±{tol} mm; grænsen er {limit} %.",
+      "suggestion": "Åbn varmekortet, kontrollér de røde og blå områder på pladsen, og udbedr eller genopmål dem, før mængden bruges."
+    },
+    "low_coverage": {
+      "fail": "Scanningen dækker {share} % af den projekterede flade {surface}; mindst {floor} % forventes.",
+      "suggestion": "Scan de manglende områder, eller læs statistikken som gældende kun for den scannede del."
+    },
+    "no_overlap": {
+      "fail": "Intet scanningspunkt ligger over den projekterede flade {surface}.",
+      "suggestion": "Kontrollér, at scanning og projekt er i samme koordinatsystem, og at den rigtige flade er valgt."
+    }
+  },
+  "pointcloud_report": {
+    "title": "Scanning mod projekt",
+    "scan": "Scanning",
+    "design": "Projekteret flade",
+    "tolerance": "Tolerance",
+    "points": "Punkter sammenlignet / læst",
+    "mean": "Gennemsnitlig afvigelse",
+    "rms": "RMS",
+    "p95": "P95 af absolut afvigelse",
+    "within": "Inden for tolerance",
+    "high": "Over projekt",
+    "low": "Under projekt",
+    "coverage": "Dækket projektareal",
+    "findings": "Bemærkninger",
+    "map": "Afvigelseskort (dårligste celle pr. blok)"
   }
 }

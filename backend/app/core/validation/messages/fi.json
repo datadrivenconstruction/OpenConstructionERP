@@ -2778,5 +2778,35 @@
       "fail": "Tiedostossa ei ole nimetty tarjoajaa",
       "suggestion": "Syötä yrityksen nimi tiedoston tarjoajatietoihin"
     }
+  },
+  "pointcloud": {
+    "out_of_tolerance": {
+      "fail": "{share} % skannauspisteistä pinnan {surface} päällä on toleranssin ±{tol} mm ulkopuolella; raja on {limit} %.",
+      "suggestion": "Avaa lämpökartta, tarkista punaiset ja siniset alueet työmaalla ja korjaa tai mittaa ne uudelleen ennen kuin määrää käytetään."
+    },
+    "low_coverage": {
+      "fail": "Skannaus kattaa {share} % suunnittelupinnasta {surface}; vähintään {floor} % odotetaan.",
+      "suggestion": "Skannaa puuttuvat alueet tai lue tilastot vain skannattua osaa koskevina."
+    },
+    "no_overlap": {
+      "fail": "Yksikään skannauspiste ei ole suunnittelupinnan {surface} päällä.",
+      "suggestion": "Tarkista, että skannaus ja suunnitelma ovat samassa koordinaatistossa ja että oikea pinta on valittu."
+    }
+  },
+  "pointcloud_report": {
+    "title": "Skannaus vs. suunnitelma",
+    "scan": "Skannaus",
+    "design": "Suunnittelupinta",
+    "tolerance": "Toleranssi",
+    "points": "Pisteitä verrattu / luettu",
+    "mean": "Keskipoikkeama",
+    "rms": "RMS",
+    "p95": "Absoluuttisen poikkeaman P95",
+    "within": "Toleranssin sisällä",
+    "high": "Suunnitelman yläpuolella",
+    "low": "Suunnitelman alapuolella",
+    "coverage": "Katettu suunnittelupinta-ala",
+    "findings": "Havainnot",
+    "map": "Poikkeamakartta (huonoin solu lohkoa kohti)"
   }
 }

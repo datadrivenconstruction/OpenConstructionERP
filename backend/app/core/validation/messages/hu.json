@@ -2778,5 +2778,35 @@
       "fail": "A fájl nem nevezi meg az ajánlattevőt",
       "suggestion": "Adja meg a cég nevét a fájl ajánlattevői adataiban"
     }
+  },
+  "pointcloud": {
+    "out_of_tolerance": {
+      "fail": "A szkennelési pontok {share} %-a a(z) {surface} felett kívül esik a ±{tol} mm tűrésen; a határ {limit} %.",
+      "suggestion": "Nyissa meg a hőtérképet, ellenőrizze a helyszínen a piros és kék területeket, és javítsa vagy mérje újra őket, mielőtt a mennyiséget felhasználja."
+    },
+    "low_coverage": {
+      "fail": "A szkennelés a(z) {surface} tervezett felület {share} %-át fedi le; legalább {floor} % az elvárt.",
+      "suggestion": "Szkennelje be a hiányzó területeket, vagy a statisztikát csak a beszkennelt részre vonatkozóan olvassa."
+    },
+    "no_overlap": {
+      "fail": "Egyetlen szkennelési pont sincs a(z) {surface} tervezett felület felett.",
+      "suggestion": "Ellenőrizze, hogy a szkennelés és a terv ugyanabban a koordináta-rendszerben van, és a megfelelő felület van kiválasztva."
+    }
+  },
+  "pointcloud_report": {
+    "title": "Szkennelés a tervvel szemben",
+    "scan": "Szkennelés",
+    "design": "Tervezett felület",
+    "tolerance": "Tűrés",
+    "points": "Összevetett / beolvasott pontok",
+    "mean": "Átlagos eltérés",
+    "rms": "RMS",
+    "p95": "Az abszolút eltérés P95 értéke",
+    "within": "Tűrésen belül",
+    "high": "A terv felett",
+    "low": "A terv alatt",
+    "coverage": "Lefedett tervezett terület",
+    "findings": "Megállapítások",
+    "map": "Eltérési térkép (legrosszabb cella blokkonként)"
   }
 }

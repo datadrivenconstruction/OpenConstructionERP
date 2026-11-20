@@ -216,8 +216,8 @@ export function NewSurfaceDialog({ open, projectId, onClose }: NewSurfaceProps) 
           </>
         ) : source === 'cloud' ? (
           <>
-            <Field label={t('volumes.cloud.file', { defaultValue: 'LAS or LAZ file, up to 2 GB' })}>
-              <input type="file" accept=".las,.laz" onChange={(e) => setFile(e.target.files?.[0] ?? null)} data-testid="surface-cloud-file" />
+            <Field label={t('volumes.cloud.file_any', { defaultValue: 'LAS, LAZ or E57 file, up to 2 GB' })}>
+              <input type="file" accept=".las,.laz,.e57" onChange={(e) => setFile(e.target.files?.[0] ?? null)} data-testid="surface-cloud-file" />
             </Field>
             <div className="grid grid-cols-2 gap-3">
               <Field

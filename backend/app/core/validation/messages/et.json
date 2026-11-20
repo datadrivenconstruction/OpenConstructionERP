@@ -2778,5 +2778,35 @@
       "fail": "Failis ei ole nimetatud pakkujat",
       "suggestion": "Sisestage faili pakkuja andmetesse ettevõtte nimi"
     }
+  },
+  "pointcloud": {
+    "out_of_tolerance": {
+      "fail": "{share} % skaneerimispunktidest pinna {surface} kohal on väljaspool tolerantsi ±{tol} mm; piir on {limit} %.",
+      "suggestion": "Avage soojuskaart, kontrollige objektil punaseid ja siniseid alasid ning parandage või mõõtke need uuesti enne koguse kasutamist."
+    },
+    "low_coverage": {
+      "fail": "Skaneering katab {share} % projektpinnast {surface}; oodatakse vähemalt {floor} %.",
+      "suggestion": "Skaneerige puuduvad alad või lugege statistikat ainult skaneeritud osa kohta."
+    },
+    "no_overlap": {
+      "fail": "Ükski skaneerimispunkt ei asu projektpinna {surface} kohal.",
+      "suggestion": "Kontrollige, et skaneering ja projekt on samas koordinaatsüsteemis ning valitud on õige pind."
+    }
+  },
+  "pointcloud_report": {
+    "title": "Skaneering vs projekt",
+    "scan": "Skaneering",
+    "design": "Projektpind",
+    "tolerance": "Tolerants",
+    "points": "Punkte võrreldud / loetud",
+    "mean": "Keskmine hälve",
+    "rms": "RMS",
+    "p95": "Absoluutse hälbe P95",
+    "within": "Tolerantsi piires",
+    "high": "Projektist kõrgemal",
+    "low": "Projektist madalamal",
+    "coverage": "Kaetud projektpindala",
+    "findings": "Leiud",
+    "map": "Hälbekaart (halvim lahter ploki kohta)"
   }
 }

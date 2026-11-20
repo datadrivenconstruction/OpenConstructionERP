@@ -2778,5 +2778,35 @@
       "fail": "Plik nie podaje wykonawcy",
       "suggestion": "Wpisz nazwę firmy w danych wykonawcy w pliku"
     }
+  },
+  "pointcloud": {
+    "out_of_tolerance": {
+      "fail": "{share} % punktów skanu nad {surface} leży poza tolerancją ±{tol} mm; limit to {limit} %.",
+      "suggestion": "Otwórz mapę cieplną, sprawdź na budowie strefy czerwone i niebieskie i popraw je lub zmierz ponownie, zanim ilość zostanie użyta."
+    },
+    "low_coverage": {
+      "fail": "Skan pokrywa {share} % powierzchni projektowej {surface}; oczekiwane jest co najmniej {floor} %.",
+      "suggestion": "Zeskanuj brakujące strefy albo traktuj statystyki jako dotyczące tylko zeskanowanej części."
+    },
+    "no_overlap": {
+      "fail": "Żaden punkt skanu nie leży nad powierzchnią projektową {surface}.",
+      "suggestion": "Sprawdź, czy skan i projekt są w tym samym układzie współrzędnych i czy wybrano właściwą powierzchnię."
+    }
+  },
+  "pointcloud_report": {
+    "title": "Skan a projekt",
+    "scan": "Skan",
+    "design": "Powierzchnia projektowa",
+    "tolerance": "Tolerancja",
+    "points": "Punkty porównane / odczytane",
+    "mean": "Średnie odchylenie",
+    "rms": "RMS",
+    "p95": "P95 odchylenia bezwzględnego",
+    "within": "W tolerancji",
+    "high": "Powyżej projektu",
+    "low": "Poniżej projektu",
+    "coverage": "Pokryta powierzchnia projektu",
+    "findings": "Ustalenia",
+    "map": "Mapa odchyleń (najgorsza komórka w bloku)"
   }
 }

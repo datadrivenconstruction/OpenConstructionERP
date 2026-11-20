@@ -266,3 +266,10 @@ async def complete_ingest(
         status=result["status"],
         size_bytes=result["size_bytes"],
     )
+
+
+# ── Scan to surface, scan against design, cloud to quantities ──────────────
+
+from app.modules.pointcloud.scan_design_router import router as _scan_design_router  # noqa: E402
+
+router.include_router(_scan_design_router)

@@ -2778,5 +2778,35 @@
       "fail": "{vendor} is blocked in the subcontractor directory and cannot be awarded.",
       "suggestion": "Clear the block in the directory or award to another firm."
     }
+  },
+  "pointcloud": {
+    "out_of_tolerance": {
+      "fail": "{share} % of the scan points over {surface} lie outside the ±{tol} mm tolerance; the limit is {limit} %.",
+      "suggestion": "Open the heatmap, check the red and blue areas on site, and rework or re-survey them before the quantity is used."
+    },
+    "low_coverage": {
+      "fail": "The scan covers {share} % of design surface {surface}; at least {floor} % is expected.",
+      "suggestion": "Scan the missing areas, or read the statistics as covering the scanned part only."
+    },
+    "no_overlap": {
+      "fail": "No scan point lies over design surface {surface}.",
+      "suggestion": "Check that the scan and the design are in the same coordinate system and that the right surface is chosen."
+    }
+  },
+  "pointcloud_report": {
+    "title": "Scan against design",
+    "scan": "Scan",
+    "design": "Design surface",
+    "tolerance": "Tolerance",
+    "points": "Points compared / read",
+    "mean": "Mean deviation",
+    "rms": "RMS",
+    "p95": "P95 of absolute deviation",
+    "within": "Within tolerance",
+    "high": "Above design",
+    "low": "Below design",
+    "coverage": "Design area covered",
+    "findings": "Findings",
+    "map": "Deviation map (worst cell per block)"
   }
 }

@@ -2778,5 +2778,35 @@
       "fail": "Walang pangalan ng bidder sa file",
       "suggestion": "Ilagay ang pangalan ng kompanya sa datos ng bidder sa file"
     }
+  },
+  "pointcloud": {
+    "out_of_tolerance": {
+      "fail": "{share} % ng mga punto ng scan sa ibabaw ng {surface} ay labas sa tolerance na ±{tol} mm; ang limitasyon ay {limit} %.",
+      "suggestion": "Buksan ang heatmap, suriin sa site ang mga pulang at asul na bahagi, at ayusin o sukatin muli bago gamitin ang dami."
+    },
+    "low_coverage": {
+      "fail": "Sinasaklaw ng scan ang {share} % ng design surface na {surface}; inaasahan ang hindi bababa sa {floor} %.",
+      "suggestion": "I-scan ang mga kulang na bahagi, o basahin ang istatistika bilang para lamang sa na-scan na bahagi."
+    },
+    "no_overlap": {
+      "fail": "Walang punto ng scan sa ibabaw ng design surface na {surface}.",
+      "suggestion": "Tiyaking nasa iisang coordinate system ang scan at ang disenyo at tama ang napiling surface."
+    }
+  },
+  "pointcloud_report": {
+    "title": "Scan laban sa disenyo",
+    "scan": "Scan",
+    "design": "Design surface",
+    "tolerance": "Tolerance",
+    "points": "Mga puntong pinaghambing / binasa",
+    "mean": "Karaniwang paglihis",
+    "rms": "RMS",
+    "p95": "P95 ng absolute na paglihis",
+    "within": "Pasok sa tolerance",
+    "high": "Mas mataas sa disenyo",
+    "low": "Mas mababa sa disenyo",
+    "coverage": "Saklaw na lugar ng disenyo",
+    "findings": "Mga natuklasan",
+    "map": "Mapa ng paglihis (pinakamasamang cell bawat block)"
   }
 }

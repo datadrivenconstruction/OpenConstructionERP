@@ -322,7 +322,11 @@ export async function importPointCloud(
   form.append('cell_size_m', String(opts.cell_size_m));
   form.append('stat', opts.stat);
   form.append('ground_only', String(opts.ground_only));
-  const response = await fetchWithAuth(`${API_BASE}/v1/surfaces-volumes/projects/${projectId}/surfaces/point-cloud?locale=${encodeURIComponent(opts.locale)}`, {
+  // E57 is read by the point cloud module on the same gridding path as LAS.
+  const path = file.name.toLowerCase().endsWith('.e57')
+    ? `/v1/pointcloud/projects/${projectId}/surfaces/cloud`
+    : `/v1/surfaces-volumes/projects/${projectId}/surfaces/point-cloud`;
+  const response = await fetchWithAuth(`${API_BASE}${path}?locale=${encodeURIComponent(opts.locale)}`, {
     method: 'POST',
     body: form,
   });

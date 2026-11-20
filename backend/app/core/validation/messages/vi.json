@@ -2778,5 +2778,35 @@
       "fail": "File không ghi tên nhà thầu",
       "suggestion": "Nhập tên công ty trong thông tin nhà thầu của file"
     }
+  },
+  "pointcloud": {
+    "out_of_tolerance": {
+      "fail": "{share} % điểm quét trên {surface} nằm ngoài dung sai ±{tol} mm; giới hạn là {limit} %.",
+      "suggestion": "Mở bản đồ nhiệt, kiểm tra các vùng đỏ và xanh tại công trường, rồi sửa hoặc đo lại trước khi dùng khối lượng."
+    },
+    "low_coverage": {
+      "fail": "Bản quét phủ {share} % bề mặt thiết kế {surface}; cần ít nhất {floor} %.",
+      "suggestion": "Quét các vùng còn thiếu, hoặc đọc thống kê như chỉ áp dụng cho phần đã quét."
+    },
+    "no_overlap": {
+      "fail": "Không có điểm quét nào nằm trên bề mặt thiết kế {surface}.",
+      "suggestion": "Kiểm tra bản quét và thiết kế cùng hệ tọa độ và đã chọn đúng bề mặt."
+    }
+  },
+  "pointcloud_report": {
+    "title": "Bản quét so với thiết kế",
+    "scan": "Bản quét",
+    "design": "Bề mặt thiết kế",
+    "tolerance": "Dung sai",
+    "points": "Điểm đã so sánh / đã đọc",
+    "mean": "Độ lệch trung bình",
+    "rms": "RMS",
+    "p95": "P95 của độ lệch tuyệt đối",
+    "within": "Trong dung sai",
+    "high": "Cao hơn thiết kế",
+    "low": "Thấp hơn thiết kế",
+    "coverage": "Diện tích thiết kế được phủ",
+    "findings": "Phát hiện",
+    "map": "Bản đồ độ lệch (ô xấu nhất mỗi khối)"
   }
 }
