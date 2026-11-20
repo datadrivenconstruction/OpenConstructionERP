@@ -246,6 +246,40 @@
   /* How far fixed widgets step aside: the dock width while it is open in
      either mode, 0px when closed or full screen. Same writer. */
   --oe-ai-dock-widget-offset: 0px;
+  /* Plan canvas cartography (survey-plan/cartography.ts reads these at runtime;
+     the same table drives print). Colourblind-safe RdBu for cut/fill. */
+  --oe-map-bg: #f7f6f2;
+  --oe-map-grid: rgba(15, 23, 42, 0.06);
+  --oe-map-grid-major: rgba(15, 23, 42, 0.14);
+  --oe-map-ink: #1d1d1f;
+  --oe-map-ink-2: #515154;
+  --oe-map-halo: #ffffff;
+  --oe-map-accent: #0071e3;
+  --oe-map-control-fill: #ffffff;
+  --oe-map-topo: #3a3a3c;
+  --oe-map-line: #3a3a3c;
+  --oe-map-kerb: #6e4b9e;
+  --oe-map-fence: #8a5a2b;
+  --oe-map-tree: #2f7d32;
+  --oe-map-utility: #0b6e99;
+  --oe-map-building: #7a3b2e;
+  --oe-map-water: #1f78b4;
+  --oe-map-measure: #d97706;
+  --oe-map-misclosure: #c026d3;
+  --oe-map-error: #dc2626;
+  --oe-map-warning: #d97706;
+  --oe-map-success: #15803d;
+  --oe-map-surface: #0f766e;
+  --oe-map-breakline: #b45309;
+  --oe-map-parcel: #4338ca;
+  --oe-map-zone: #be185d;
+  --oe-map-cut-3: #b2182b;
+  --oe-map-cut-2: #d6604d;
+  --oe-map-cut-1: #f4a582;
+  --oe-map-neutral: #e0e0e0;
+  --oe-map-fill-1: #92c5de;
+  --oe-map-fill-2: #4393c3;
+  --oe-map-fill-3: #2166ac;
 }
 
 /* ── Dark Mode ─────────────────────────────────────────────────────────── */
@@ -360,6 +394,32 @@
   --oe-shadow-xl: 0 24px 80px rgba(0, 0, 0, 0.6), 0 8px 24px rgba(0, 0, 0, 0.4);
 
   color-scheme: dark;
+  --oe-map-bg: #141416;
+  --oe-map-grid: rgba(255, 255, 255, 0.05);
+  --oe-map-grid-major: rgba(255, 255, 255, 0.12);
+  --oe-map-ink: #f5f5f7;
+  --oe-map-ink-2: #b0b0b5;
+  --oe-map-halo: #141416;
+  --oe-map-accent: #4c9dff;
+  --oe-map-control-fill: #141416;
+  --oe-map-topo: #d1d1d6;
+  --oe-map-line: #c7c7cc;
+  --oe-map-kerb: #b79cff;
+  --oe-map-fence: #e0a96d;
+  --oe-map-tree: #6fcf73;
+  --oe-map-utility: #4fc3f7;
+  --oe-map-building: #ef9a8a;
+  --oe-map-water: #64b5f6;
+  --oe-map-measure: #fbbf24;
+  --oe-map-misclosure: #f472b6;
+  --oe-map-error: #f87171;
+  --oe-map-warning: #fbbf24;
+  --oe-map-success: #4ade80;
+  --oe-map-surface: #2dd4bf;
+  --oe-map-breakline: #f59e0b;
+  --oe-map-parcel: #a5b4fc;
+  --oe-map-zone: #f9a8d4;
+  --oe-map-neutral: #3a3a3c;
 }
 
 /* ── Base ────────────────────────────────────────────────────────────────── */
