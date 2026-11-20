@@ -120,6 +120,39 @@ class Bundle:
         self.order.insert(at, (pos, key))
         self.index = {k: n for n, k in reversed(self.order)}
 
+    def add_many(self, items: list[tuple[str, str]]) -> None:
+        """Insert many new keys in one pass; same placement as repeated :meth:`add`, linear in bundle size."""
+        last: dict[str, int] = {}
+        for i, existing in self.order:
+            parts = existing.split(".")
+            for n in range(1, len(parts)):
+                last[".".join(parts[:n]) + "."] = i
+        groups: dict[int, list[tuple[str, str]]] = {}
+        for key, value in items:
+            parts = key.split(".")
+            anchor = next(
+                (last[p] for n in range(len(parts) - 1, 0, -1) if (p := ".".join(parts[:n]) + ".") in last),
+                self.order[-1][0] if self.order else self.start,
+            )
+            groups.setdefault(anchor, []).append((key, value))
+        out: list[bytes] = []
+        for i, line in enumerate(self.lines):
+            group = groups.get(i)
+            if group is None:
+                out.append(line)
+                continue
+            indent = b"    "
+            match = _KEY_LINE.match(line)
+            if match:
+                indent = match.group(1).replace(b"\r", b"")
+                if not match.group(4):
+                    line = line.rstrip() + b"," + self.cr
+            out.append(line)
+            out.extend(self._line(indent, k, v) for k, v in group)
+        self.end += len(out) - len(self.lines)
+        self.lines = out
+        self._scan()
+
     def rename(self, old: str, new: str) -> None:
         i = self.index[old]
         match = _KEY_LINE.match(self.lines[i])
@@ -244,7 +277,8 @@ def cmd_import(args: argparse.Namespace) -> int:
     patch = json.loads(Path(args.file).read_text(encoding="utf-8"))
     en = Bundle("en")
     bundle = Bundle(args.lang)
-    added = updated = 0
+    updated = 0
+    fresh: dict[str, str] = {}
     for key, value in patch.items():
         source = en.get(key)
         # Importing into en itself is how a batch of new source keys lands.
@@ -257,9 +291,10 @@ def cmd_import(args: argparse.Namespace) -> int:
         if key in bundle.index:
             bundle.set(key, value)
             updated += 1
-        else:
-            bundle.add(key, value)
-            added += 1
+        elif key not in fresh:
+            fresh[key] = value
+    bundle.add_many(list(fresh.items()))
+    added = len(fresh)
     bundle.save()
     print(f"{args.lang}: {added} added, {updated} updated")
     return 0
