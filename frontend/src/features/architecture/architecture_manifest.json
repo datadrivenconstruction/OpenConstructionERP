@@ -28664,6 +28664,7 @@
         "copilot_schemas.py",
         "copilot_service.py",
         "cost_risk_engine.py",
+        "data_paths.py",
         "ddc_runner.py",
         "drawing_refs.py",
         "dxf_native.py",
@@ -28674,6 +28675,8 @@
         "exchange_fidelity_router.py",
         "exchange_fidelity_service.py",
         "exchange_formats.py",
+        "exchange_source.py",
+        "exchange_source_models.py",
         "exporters/__init__.py",
         "exporters/bc3.py",
         "gaeb_common.py",
@@ -43551,6 +43554,1478 @@
       ]
     },
     {
+      "module_id": "central_purchasing",
+      "module_label": "Central Purchasing",
+      "module_category": "business",
+      "files": [
+        "__init__.py",
+        "catalog.py",
+        "data_paths.py",
+        "manifest.py",
+        "models.py",
+        "permissions.py",
+        "repository.py",
+        "router.py",
+        "schemas.py",
+        "service.py",
+        "split.py",
+        "validators.py"
+      ],
+      "manifest": {
+        "name": "oe_central_purchasing",
+        "version": "0.1.0",
+        "display_name": "Central Purchasing",
+        "description": "One tender for several projects: shares per project, an exact award split, and one contract or purchase order per project and company, or a framework agreement per company with call-offs",
+        "author": "OpenConstructionERP Core Team",
+        "category": "business",
+        "depends": [
+          "oe_users",
+          "oe_projects",
+          "oe_contracts",
+          "oe_procurement",
+          "oe_costmodel",
+          "oe_legal_entities"
+        ],
+        "auto_install": true,
+        "enabled": true
+      },
+      "models": [
+        {
+          "class_name": "Bundle",
+          "tablename": "oe_central_purchasing_bundle",
+          "docstring": "A tender for one trade or material over several projects of the company.",
+          "columns": [
+            {
+              "name": "code",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "title",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "description",
+              "annotation": "Mapped[str]",
+              "sql_type": "Text",
+              "nullable": false
+            },
+            {
+              "name": "kind",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "mode",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "status",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "currency",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "cost_code_standard",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "budget_tolerance_pct",
+              "annotation": "Mapped[Decimal]",
+              "sql_type": "Numeric",
+              "nullable": false
+            },
+            {
+              "name": "bid_package_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "vendor_name",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "subcontractor_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "contact_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "discount_pct",
+              "annotation": "Mapped[Decimal | None]",
+              "sql_type": "Numeric",
+              "nullable": true
+            },
+            {
+              "name": "lump_sum",
+              "annotation": "Mapped[Decimal | None]",
+              "sql_type": "Numeric",
+              "nullable": true
+            },
+            {
+              "name": "awarded_gross",
+              "annotation": "Mapped[Decimal | None]",
+              "sql_type": "Numeric",
+              "nullable": true
+            },
+            {
+              "name": "awarded_net",
+              "annotation": "Mapped[Decimal | None]",
+              "sql_type": "Numeric",
+              "nullable": true
+            },
+            {
+              "name": "awarded_at",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "awarded_by",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "created_by",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "metadata_",
+              "annotation": "Mapped[dict]",
+              "sql_type": "JSON",
+              "nullable": false
+            }
+          ],
+          "relationships": [
+            {
+              "name": "projects",
+              "type": "one-to-many",
+              "annotation": "Mapped[list[BundleProject]]"
+            },
+            {
+              "name": "lines",
+              "type": "one-to-many",
+              "annotation": "Mapped[list[BundleLine]]"
+            }
+          ]
+        },
+        {
+          "class_name": "BundleProject",
+          "tablename": "oe_central_purchasing_project",
+          "docstring": "A project taking part in a bundle, with the entity that buys for it and its budget.",
+          "columns": [
+            {
+              "name": "bundle_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_central_purchasing_bundle.id"
+            },
+            {
+              "name": "project_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_projects_project.id"
+            },
+            {
+              "name": "legal_entity_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "budget_amount",
+              "annotation": "Mapped[Decimal | None]",
+              "sql_type": "Numeric",
+              "nullable": true
+            },
+            {
+              "name": "order_index",
+              "annotation": "Mapped[int]",
+              "sql_type": "Integer",
+              "nullable": false
+            }
+          ],
+          "relationships": []
+        },
+        {
+          "class_name": "BundleLine",
+          "tablename": "oe_central_purchasing_line",
+          "docstring": "One scope line: a trade item or material with the bundle quantity and the awarded rate.",
+          "columns": [
+            {
+              "name": "bundle_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_central_purchasing_bundle.id"
+            },
+            {
+              "name": "order_index",
+              "annotation": "Mapped[int]",
+              "sql_type": "Integer",
+              "nullable": false
+            },
+            {
+              "name": "code",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "description",
+              "annotation": "Mapped[str]",
+              "sql_type": "Text",
+              "nullable": false
+            },
+            {
+              "name": "unit",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "quantity",
+              "annotation": "Mapped[Decimal]",
+              "sql_type": "Numeric",
+              "nullable": false
+            },
+            {
+              "name": "unit_rate",
+              "annotation": "Mapped[Decimal | None]",
+              "sql_type": "Numeric",
+              "nullable": true
+            },
+            {
+              "name": "cost_code",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            }
+          ],
+          "relationships": [
+            {
+              "name": "shares",
+              "type": "one-to-many",
+              "annotation": "Mapped[list[LineShare]]"
+            }
+          ]
+        },
+        {
+          "class_name": "LineShare",
+          "tablename": "oe_central_purchasing_share",
+          "docstring": "A project's quantity of one bundle line, booked on that project's cost line.\n\n``quantity`` NULL means the buyer has not said yet (``bundle.project_share_missing``);\nzero means the project takes none of this line.",
+          "columns": [
+            {
+              "name": "line_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_central_purchasing_line.id"
+            },
+            {
+              "name": "bundle_project_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_central_purchasing_project.id"
+            },
+            {
+              "name": "quantity",
+              "annotation": "Mapped[Decimal | None]",
+              "sql_type": "Numeric",
+              "nullable": true
+            },
+            {
+              "name": "cost_line_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            }
+          ],
+          "relationships": []
+        },
+        {
+          "class_name": "AwardSplit",
+          "tablename": "oe_central_purchasing_split",
+          "docstring": "What one project carries of the award, and the document the award drafted for it.",
+          "columns": [
+            {
+              "name": "bundle_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_central_purchasing_bundle.id"
+            },
+            {
+              "name": "bundle_project_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_central_purchasing_project.id"
+            },
+            {
+              "name": "gross",
+              "annotation": "Mapped[Decimal]",
+              "sql_type": "Numeric",
+              "nullable": false
+            },
+            {
+              "name": "discount",
+              "annotation": "Mapped[Decimal]",
+              "sql_type": "Numeric",
+              "nullable": false
+            },
+            {
+              "name": "net",
+              "annotation": "Mapped[Decimal]",
+              "sql_type": "Numeric",
+              "nullable": false
+            },
+            {
+              "name": "document_type",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "document_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            }
+          ],
+          "relationships": []
+        }
+      ],
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/my-shares",
+          "handler": "my_shares",
+          "response_model": "list[MyShare]"
+        },
+        {
+          "method": "GET",
+          "path": "/catalogues",
+          "handler": "catalogues",
+          "response_model": "list[Catalogue]"
+        },
+        {
+          "method": "GET",
+          "path": "/cost-lines",
+          "handler": "cost_lines",
+          "response_model": "list[CostLineOption]"
+        },
+        {
+          "method": "GET",
+          "path": "/",
+          "handler": "list_bundles",
+          "response_model": "list[BundleSummary]"
+        },
+        {
+          "method": "POST",
+          "path": "/",
+          "handler": "create_bundle",
+          "response_model": "BundleDetail",
+          "request_schema": "BundleCreate"
+        },
+        {
+          "method": "GET",
+          "path": "/{bundle_id}",
+          "handler": "get_bundle",
+          "response_model": "BundleDetail"
+        },
+        {
+          "method": "PATCH",
+          "path": "/{bundle_id}",
+          "handler": "update_bundle",
+          "response_model": "BundleDetail",
+          "request_schema": "BundleUpdate"
+        },
+        {
+          "method": "DELETE",
+          "path": "/{bundle_id}",
+          "handler": "delete_bundle"
+        },
+        {
+          "method": "POST",
+          "path": "/{bundle_id}/preview",
+          "handler": "preview",
+          "response_model": "BundleDetail",
+          "request_schema": "PreviewRequest"
+        },
+        {
+          "method": "POST",
+          "path": "/{bundle_id}/projects",
+          "handler": "add_project",
+          "response_model": "BundleDetail",
+          "request_schema": "ProjectAdd"
+        },
+        {
+          "method": "PATCH",
+          "path": "/{bundle_id}/projects/{bp_id}",
+          "handler": "update_project",
+          "response_model": "BundleDetail",
+          "request_schema": "ProjectUpdate"
+        },
+        {
+          "method": "DELETE",
+          "path": "/{bundle_id}/projects/{bp_id}",
+          "handler": "remove_project",
+          "response_model": "BundleDetail"
+        },
+        {
+          "method": "POST",
+          "path": "/{bundle_id}/lines",
+          "handler": "add_line",
+          "response_model": "BundleDetail",
+          "request_schema": "LineIn"
+        },
+        {
+          "method": "PATCH",
+          "path": "/{bundle_id}/lines/{line_id}",
+          "handler": "update_line",
+          "response_model": "BundleDetail",
+          "request_schema": "LineUpdate"
+        },
+        {
+          "method": "DELETE",
+          "path": "/{bundle_id}/lines/{line_id}",
+          "handler": "delete_line",
+          "response_model": "BundleDetail"
+        },
+        {
+          "method": "POST",
+          "path": "/{bundle_id}/publish",
+          "handler": "publish",
+          "response_model": "BundleDetail"
+        },
+        {
+          "method": "POST",
+          "path": "/{bundle_id}/award",
+          "handler": "award",
+          "response_model": "BundleDetail",
+          "request_schema": "AwardRequest"
+        },
+        {
+          "method": "POST",
+          "path": "/{bundle_id}/call-offs",
+          "handler": "call_off",
+          "response_model": "CallOffResult",
+          "request_schema": "CallOffRequest"
+        }
+      ],
+      "schemas": [
+        {
+          "class_name": "BundleCreate",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "title",
+              "type": "str"
+            },
+            {
+              "name": "description",
+              "type": "str"
+            },
+            {
+              "name": "kind",
+              "type": "str"
+            },
+            {
+              "name": "mode",
+              "type": "str"
+            },
+            {
+              "name": "currency",
+              "type": "str"
+            },
+            {
+              "name": "cost_code_standard",
+              "type": "str | None"
+            },
+            {
+              "name": "budget_tolerance_pct",
+              "type": "Decimal"
+            }
+          ]
+        },
+        {
+          "class_name": "BundleUpdate",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "title",
+              "type": "str | None"
+            },
+            {
+              "name": "description",
+              "type": "str | None"
+            },
+            {
+              "name": "kind",
+              "type": "str | None"
+            },
+            {
+              "name": "mode",
+              "type": "str | None"
+            },
+            {
+              "name": "currency",
+              "type": "str | None"
+            },
+            {
+              "name": "cost_code_standard",
+              "type": "str | None"
+            },
+            {
+              "name": "budget_tolerance_pct",
+              "type": "Decimal | None"
+            },
+            {
+              "name": "vendor_name",
+              "type": "str | None"
+            },
+            {
+              "name": "subcontractor_id",
+              "type": "uuid.UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "contact_id",
+              "type": "uuid.UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "discount_pct",
+              "type": "Decimal | None"
+            },
+            {
+              "name": "lump_sum",
+              "type": "Decimal | None"
+            },
+            {
+              "name": "clear_discount",
+              "type": "bool",
+              "default": "False"
+            },
+            {
+              "name": "clear_lump_sum",
+              "type": "bool",
+              "default": "False"
+            }
+          ]
+        },
+        {
+          "class_name": "ProjectAdd",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "project_id",
+              "type": "uuid.UUID"
+            },
+            {
+              "name": "budget_amount",
+              "type": "Decimal | None"
+            }
+          ]
+        },
+        {
+          "class_name": "ProjectUpdate",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "budget_amount",
+              "type": "Decimal | None"
+            },
+            {
+              "name": "clear_budget",
+              "type": "bool",
+              "default": "False"
+            }
+          ]
+        },
+        {
+          "class_name": "ShareIn",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "bundle_project_id",
+              "type": "uuid.UUID"
+            },
+            {
+              "name": "quantity",
+              "type": "Decimal | None"
+            },
+            {
+              "name": "cost_line_id",
+              "type": "uuid.UUID | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "LineIn",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "code",
+              "type": "str"
+            },
+            {
+              "name": "description",
+              "type": "str"
+            },
+            {
+              "name": "unit",
+              "type": "str"
+            },
+            {
+              "name": "quantity",
+              "type": "Decimal"
+            },
+            {
+              "name": "unit_rate",
+              "type": "Decimal | None"
+            },
+            {
+              "name": "cost_code",
+              "type": "str | None"
+            },
+            {
+              "name": "shares",
+              "type": "list[ShareIn] | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "LineUpdate",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "code",
+              "type": "str | None"
+            },
+            {
+              "name": "description",
+              "type": "str | None"
+            },
+            {
+              "name": "unit",
+              "type": "str | None"
+            },
+            {
+              "name": "quantity",
+              "type": "Decimal | None"
+            },
+            {
+              "name": "unit_rate",
+              "type": "Decimal | None"
+            },
+            {
+              "name": "clear_rate",
+              "type": "bool",
+              "default": "False"
+            },
+            {
+              "name": "cost_code",
+              "type": "str | None"
+            },
+            {
+              "name": "shares",
+              "type": "list[ShareIn] | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "PreviewRequest",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Terms not saved yet: the split is recomputed as the buyer types.",
+          "fields": [
+            {
+              "name": "discount_pct",
+              "type": "Decimal | None"
+            },
+            {
+              "name": "lump_sum",
+              "type": "Decimal | None"
+            },
+            {
+              "name": "rates",
+              "type": "dict[uuid.UUID, Decimal]"
+            }
+          ]
+        },
+        {
+          "class_name": "AwardRequest",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "vendor_name",
+              "type": "str"
+            },
+            {
+              "name": "subcontractor_id",
+              "type": "uuid.UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "contact_id",
+              "type": "uuid.UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "discount_pct",
+              "type": "Decimal | None"
+            },
+            {
+              "name": "lump_sum",
+              "type": "Decimal | None"
+            }
+          ]
+        },
+        {
+          "class_name": "CallOffLineIn",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "line_id",
+              "type": "uuid.UUID"
+            },
+            {
+              "name": "quantity",
+              "type": "Decimal"
+            }
+          ]
+        },
+        {
+          "class_name": "CallOffRequest",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "project_id",
+              "type": "uuid.UUID"
+            },
+            {
+              "name": "lines",
+              "type": "list[CallOffLineIn]"
+            }
+          ]
+        },
+        {
+          "class_name": "Finding",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "rule_id",
+              "type": "str"
+            },
+            {
+              "name": "severity",
+              "type": "str"
+            },
+            {
+              "name": "message",
+              "type": "str"
+            },
+            {
+              "name": "suggestion",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "element_ref",
+              "type": "str | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "DocumentRef",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "type",
+              "type": "str"
+            },
+            {
+              "name": "id",
+              "type": "uuid.UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "code",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "status",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "project_id",
+              "type": "uuid.UUID | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "ShareOut",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "id",
+              "type": "uuid.UUID"
+            },
+            {
+              "name": "bundle_project_id",
+              "type": "uuid.UUID"
+            },
+            {
+              "name": "quantity",
+              "type": "Dec | None",
+              "default": "None"
+            },
+            {
+              "name": "cost_line_id",
+              "type": "uuid.UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "cost_line_code",
+              "type": "str | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "LineOut",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "id",
+              "type": "uuid.UUID"
+            },
+            {
+              "name": "order_index",
+              "type": "int"
+            },
+            {
+              "name": "code",
+              "type": "str"
+            },
+            {
+              "name": "description",
+              "type": "str"
+            },
+            {
+              "name": "unit",
+              "type": "str"
+            },
+            {
+              "name": "quantity",
+              "type": "Dec"
+            },
+            {
+              "name": "unit_rate",
+              "type": "Dec | None",
+              "default": "None"
+            },
+            {
+              "name": "cost_code",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "shares",
+              "type": "list[ShareOut]"
+            },
+            {
+              "name": "share_sum",
+              "type": "Dec"
+            }
+          ]
+        },
+        {
+          "class_name": "ProjectOut",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "id",
+              "type": "uuid.UUID"
+            },
+            {
+              "name": "project_id",
+              "type": "uuid.UUID"
+            },
+            {
+              "name": "name",
+              "type": "str"
+            },
+            {
+              "name": "project_code",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "legal_entity_id",
+              "type": "uuid.UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "legal_entity_name",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "budget_amount",
+              "type": "Dec | None",
+              "default": "None"
+            },
+            {
+              "name": "budget_from_lines",
+              "type": "Dec | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "SplitRow",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "bundle_project_id",
+              "type": "uuid.UUID"
+            },
+            {
+              "name": "project_name",
+              "type": "str"
+            },
+            {
+              "name": "legal_entity_name",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "gross",
+              "type": "Dec"
+            },
+            {
+              "name": "discount",
+              "type": "Dec"
+            },
+            {
+              "name": "net",
+              "type": "Dec"
+            },
+            {
+              "name": "budget",
+              "type": "Dec | None",
+              "default": "None"
+            },
+            {
+              "name": "over_budget",
+              "type": "bool",
+              "default": "False"
+            },
+            {
+              "name": "budget_delta",
+              "type": "Dec | None",
+              "default": "None"
+            },
+            {
+              "name": "document",
+              "type": "DocumentRef | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "SplitOut",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "method",
+              "type": "str"
+            },
+            {
+              "name": "gross",
+              "type": "Dec"
+            },
+            {
+              "name": "net",
+              "type": "Dec"
+            },
+            {
+              "name": "target",
+              "type": "Dec"
+            },
+            {
+              "name": "reconciles",
+              "type": "bool"
+            },
+            {
+              "name": "rows",
+              "type": "list[SplitRow]"
+            },
+            {
+              "name": "cells",
+              "type": "dict[str, dict[str, Dec]]"
+            }
+          ]
+        },
+        {
+          "class_name": "BundleSummary",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "id",
+              "type": "uuid.UUID"
+            },
+            {
+              "name": "code",
+              "type": "str"
+            },
+            {
+              "name": "title",
+              "type": "str"
+            },
+            {
+              "name": "kind",
+              "type": "str"
+            },
+            {
+              "name": "mode",
+              "type": "str"
+            },
+            {
+              "name": "status",
+              "type": "str"
+            },
+            {
+              "name": "currency",
+              "type": "str"
+            },
+            {
+              "name": "vendor_name",
+              "type": "str"
+            },
+            {
+              "name": "project_count",
+              "type": "int"
+            },
+            {
+              "name": "line_count",
+              "type": "int"
+            },
+            {
+              "name": "gross",
+              "type": "Dec"
+            },
+            {
+              "name": "net",
+              "type": "Dec"
+            },
+            {
+              "name": "errors",
+              "type": "int"
+            },
+            {
+              "name": "warnings",
+              "type": "int"
+            },
+            {
+              "name": "updated_at",
+              "type": "Any",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "BundleDetail",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "id",
+              "type": "uuid.UUID"
+            },
+            {
+              "name": "code",
+              "type": "str"
+            },
+            {
+              "name": "title",
+              "type": "str"
+            },
+            {
+              "name": "description",
+              "type": "str"
+            },
+            {
+              "name": "kind",
+              "type": "str"
+            },
+            {
+              "name": "mode",
+              "type": "str"
+            },
+            {
+              "name": "status",
+              "type": "str"
+            },
+            {
+              "name": "currency",
+              "type": "str"
+            },
+            {
+              "name": "cost_code_standard",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "budget_tolerance_pct",
+              "type": "Dec"
+            },
+            {
+              "name": "vendor_name",
+              "type": "str"
+            },
+            {
+              "name": "subcontractor_id",
+              "type": "uuid.UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "contact_id",
+              "type": "uuid.UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "discount_pct",
+              "type": "Dec | None",
+              "default": "None"
+            },
+            {
+              "name": "lump_sum",
+              "type": "Dec | None",
+              "default": "None"
+            },
+            {
+              "name": "awarded_at",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "projects",
+              "type": "list[ProjectOut]"
+            },
+            {
+              "name": "lines",
+              "type": "list[LineOut]"
+            },
+            {
+              "name": "split",
+              "type": "SplitOut"
+            },
+            {
+              "name": "findings",
+              "type": "list[Finding]"
+            },
+            {
+              "name": "agreements",
+              "type": "list[DocumentRef]"
+            }
+          ]
+        },
+        {
+          "class_name": "CallOffResult",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "document",
+              "type": "DocumentRef"
+            },
+            {
+              "name": "total",
+              "type": "Dec"
+            },
+            {
+              "name": "findings",
+              "type": "list[Finding]"
+            }
+          ]
+        },
+        {
+          "class_name": "MyShareLine",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "code",
+              "type": "str"
+            },
+            {
+              "name": "description",
+              "type": "str"
+            },
+            {
+              "name": "unit",
+              "type": "str"
+            },
+            {
+              "name": "quantity",
+              "type": "Dec | None",
+              "default": "None"
+            },
+            {
+              "name": "rate",
+              "type": "Dec | None",
+              "default": "None"
+            },
+            {
+              "name": "net",
+              "type": "Dec | None",
+              "default": "None"
+            },
+            {
+              "name": "called_off",
+              "type": "Dec | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "MyShare",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "bundle_id",
+              "type": "uuid.UUID"
+            },
+            {
+              "name": "code",
+              "type": "str"
+            },
+            {
+              "name": "title",
+              "type": "str"
+            },
+            {
+              "name": "status",
+              "type": "str"
+            },
+            {
+              "name": "kind",
+              "type": "str"
+            },
+            {
+              "name": "mode",
+              "type": "str"
+            },
+            {
+              "name": "currency",
+              "type": "str"
+            },
+            {
+              "name": "vendor_name",
+              "type": "str"
+            },
+            {
+              "name": "budget",
+              "type": "Dec | None",
+              "default": "None"
+            },
+            {
+              "name": "gross",
+              "type": "Dec"
+            },
+            {
+              "name": "net",
+              "type": "Dec"
+            },
+            {
+              "name": "over_budget",
+              "type": "bool",
+              "default": "False"
+            },
+            {
+              "name": "lines",
+              "type": "list[MyShareLine]"
+            },
+            {
+              "name": "document",
+              "type": "DocumentRef | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "CostLineOption",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "id",
+              "type": "uuid.UUID"
+            },
+            {
+              "name": "code",
+              "type": "str"
+            },
+            {
+              "name": "description",
+              "type": "str"
+            }
+          ]
+        },
+        {
+          "class_name": "Catalogue",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "standard",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "label",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "countries",
+              "type": "list[str]"
+            },
+            {
+              "name": "codes",
+              "type": "list[dict[str, str]]"
+            }
+          ]
+        }
+      ],
+      "import_dependencies": [
+        "bid_management",
+        "contracts",
+        "costmodel",
+        "framework_agreements",
+        "legal_entities",
+        "procurement",
+        "projects",
+        "subcontractors",
+        "users"
+      ]
+    },
+    {
       "module_id": "certified_payroll",
       "module_label": "Certified Payroll",
       "module_category": "compliance",
@@ -47252,6 +48727,7 @@
       "files": [
         "__init__.py",
         "budget_delta_repair.py",
+        "data_paths.py",
         "events.py",
         "export_routes.py",
         "intl.py",
@@ -61129,6 +62605,7 @@
       "files": [
         "__init__.py",
         "asbuilt_service.py",
+        "data_paths.py",
         "deletion.py",
         "gating_service.py",
         "handover_service.py",
@@ -66272,6 +67749,7 @@
         "claim_context.py",
         "compliance_packs.py",
         "country_defaults.py",
+        "data_paths.py",
         "events.py",
         "export_routes.py",
         "final_account.py",
@@ -73777,6 +75255,7 @@
         "finance",
         "guarantees",
         "i18n_foundation",
+        "legal_entities",
         "price_index",
         "progress",
         "projects",
@@ -78737,6 +80216,7 @@
         "cost_control_schemas.py",
         "cost_control_service.py",
         "cost_control_settings.py",
+        "data_paths.py",
         "elemental.py",
         "events.py",
         "forecast_docs.py",
@@ -82150,6 +83630,7 @@
         "base_state.py",
         "buildup.py",
         "cwicr_v3_catalogue.py",
+        "data_paths.py",
         "events.py",
         "hazards.py",
         "intelligence.py",
@@ -91092,6 +92573,7 @@
         "hooks.py",
         "manifest.py",
         "router.py",
+        "subcontract_rules.py",
         "validators.py"
       ],
       "manifest": {
@@ -91115,7 +92597,8 @@
       ],
       "schemas": [],
       "import_dependencies": [
-        "finance"
+        "finance",
+        "subcontractors"
       ]
     },
     {
@@ -97386,6 +98869,657 @@
       ],
       "import_dependencies": [
         "bim_hub"
+      ]
+    },
+    {
+      "module_id": "dataflow",
+      "module_label": "Data paths",
+      "module_category": "core",
+      "files": [
+        "__init__.py",
+        "graph.py",
+        "live.py",
+        "manifest.py",
+        "parties.py",
+        "permissions.py",
+        "registry.py",
+        "router.py",
+        "schemas.py",
+        "service.py",
+        "validators.py"
+      ],
+      "manifest": {
+        "name": "oe_dataflow",
+        "version": "0.1.0",
+        "display_name": "Data paths",
+        "description": "Where each module's data comes from and goes to: live counts per path, the platform map, project data map and the parties working on the data",
+        "author": "OpenConstructionERP Core Team",
+        "category": "core",
+        "depends": [
+          "oe_projects"
+        ],
+        "auto_install": true,
+        "enabled": true
+      },
+      "models": [],
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/projects/{project_id}/counts/",
+          "handler": "project_counts",
+          "response_model": "ProjectCounts",
+          "request_schema": "None"
+        },
+        {
+          "method": "GET",
+          "path": "/paths/{module}/",
+          "handler": "module_paths",
+          "response_model": "ModulePaths",
+          "request_schema": "ActiveMarkets"
+        },
+        {
+          "method": "GET",
+          "path": "/map/",
+          "handler": "platform_map",
+          "response_model": "PlatformMap",
+          "request_schema": "ActiveMarkets"
+        },
+        {
+          "method": "GET",
+          "path": "/projects/{project_id}/parties/",
+          "handler": "project_parties",
+          "response_model": "ProjectParties",
+          "request_schema": "None"
+        }
+      ],
+      "schemas": [
+        {
+          "class_name": "ObjectCount",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Row count of one object type inside a project.",
+          "fields": [
+            {
+              "name": "object",
+              "type": "str"
+            },
+            {
+              "name": "count",
+              "type": "int"
+            }
+          ]
+        },
+        {
+          "class_name": "ModuleCounts",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Counters contributed by one module.",
+          "fields": [
+            {
+              "name": "module",
+              "type": "str"
+            },
+            {
+              "name": "installed",
+              "type": "bool"
+            },
+            {
+              "name": "objects",
+              "type": "list[ObjectCount]"
+            },
+            {
+              "name": "reason",
+              "type": "str | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "ProjectCounts",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Counts per module for one project.",
+          "fields": [
+            {
+              "name": "project_id",
+              "type": "uuid.UUID"
+            },
+            {
+              "name": "generated_at",
+              "type": "datetime"
+            },
+            {
+              "name": "modules",
+              "type": "list[ModuleCounts]"
+            }
+          ]
+        },
+        {
+          "class_name": "Live",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Live numbers of one path or entity for the active project.",
+          "fields": [
+            {
+              "name": "count",
+              "type": "int | None",
+              "default": "None"
+            },
+            {
+              "name": "value",
+              "type": "str | None",
+              "description": "Sum or latest value, decimal string"
+            },
+            {
+              "name": "latest_at",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "state",
+              "type": "str",
+              "description": "ok|stale|broken|no_access|not_installed|unknown|hidden"
+            },
+            {
+              "name": "stale_count",
+              "type": "int | None",
+              "default": "None"
+            },
+            {
+              "name": "active",
+              "type": "bool",
+              "description": "Records changed in the last 7 days"
+            },
+            {
+              "name": "reason",
+              "type": "str | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "EntityOut",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "id",
+              "type": "str"
+            },
+            {
+              "name": "model",
+              "type": "str"
+            },
+            {
+              "name": "label",
+              "type": "str"
+            },
+            {
+              "name": "route",
+              "type": "str"
+            },
+            {
+              "name": "measure",
+              "type": "str"
+            },
+            {
+              "name": "live",
+              "type": "Live"
+            }
+          ]
+        },
+        {
+          "class_name": "PathOut",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "id",
+              "type": "str"
+            },
+            {
+              "name": "direction",
+              "type": "str"
+            },
+            {
+              "name": "module",
+              "type": "str"
+            },
+            {
+              "name": "entity",
+              "type": "str"
+            },
+            {
+              "name": "via",
+              "type": "str"
+            },
+            {
+              "name": "label",
+              "type": "str"
+            },
+            {
+              "name": "measure",
+              "type": "str"
+            },
+            {
+              "name": "measure_field",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "route",
+              "type": "str"
+            },
+            {
+              "name": "importance",
+              "type": "str"
+            },
+            {
+              "name": "breaks",
+              "type": "str"
+            },
+            {
+              "name": "live",
+              "type": "Live"
+            }
+          ]
+        },
+        {
+          "class_name": "ParamOut",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "field",
+              "type": "str"
+            },
+            {
+              "name": "label",
+              "type": "str"
+            },
+            {
+              "name": "drives",
+              "type": "list[str]"
+            },
+            {
+              "name": "drives_paths",
+              "type": "list[str]"
+            }
+          ]
+        },
+        {
+          "class_name": "StaleOut",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "source",
+              "type": "str"
+            },
+            {
+              "name": "copy_field",
+              "type": "str"
+            },
+            {
+              "name": "label",
+              "type": "str"
+            },
+            {
+              "name": "path_id",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "count",
+              "type": "int | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "EdgeOut",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "source",
+              "type": "str"
+            },
+            {
+              "name": "target",
+              "type": "str"
+            },
+            {
+              "name": "kind",
+              "type": "str"
+            },
+            {
+              "name": "details",
+              "type": "list[str]"
+            },
+            {
+              "name": "importance",
+              "type": "str",
+              "default": "'supporting'"
+            },
+            {
+              "name": "label",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "count",
+              "type": "int | None",
+              "default": "None"
+            },
+            {
+              "name": "active",
+              "type": "bool",
+              "default": "False"
+            },
+            {
+              "name": "state",
+              "type": "str",
+              "default": "'ok'"
+            }
+          ]
+        },
+        {
+          "class_name": "ModulePaths",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Everything the drawer draws for one module.",
+          "fields": [
+            {
+              "name": "module",
+              "type": "str"
+            },
+            {
+              "name": "declared",
+              "type": "bool"
+            },
+            {
+              "name": "installed",
+              "type": "bool"
+            },
+            {
+              "name": "why",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "roles",
+              "type": "list[str]"
+            },
+            {
+              "name": "project_id",
+              "type": "uuid.UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "currency",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "entities",
+              "type": "list[EntityOut]"
+            },
+            {
+              "name": "paths",
+              "type": "list[PathOut]"
+            },
+            {
+              "name": "parameters",
+              "type": "list[ParamOut]"
+            },
+            {
+              "name": "stale",
+              "type": "list[StaleOut]"
+            },
+            {
+              "name": "technical",
+              "type": "list[EdgeOut]"
+            },
+            {
+              "name": "neighbours",
+              "type": "list[str]"
+            },
+            {
+              "name": "generated_at",
+              "type": "datetime"
+            }
+          ]
+        },
+        {
+          "class_name": "MapModule",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "name",
+              "type": "str"
+            },
+            {
+              "name": "display_name",
+              "type": "str"
+            },
+            {
+              "name": "category",
+              "type": "str"
+            },
+            {
+              "name": "declared",
+              "type": "bool"
+            },
+            {
+              "name": "installed",
+              "type": "bool"
+            },
+            {
+              "name": "why",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "roles",
+              "type": "list[str]"
+            },
+            {
+              "name": "count",
+              "type": "int | None",
+              "description": "Records of the declared entities in the project"
+            },
+            {
+              "name": "counts",
+              "type": "dict[str, int]"
+            }
+          ]
+        },
+        {
+          "class_name": "HealthItem",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "module",
+              "type": "str"
+            },
+            {
+              "name": "path_id",
+              "type": "str"
+            },
+            {
+              "name": "source",
+              "type": "str"
+            },
+            {
+              "name": "label",
+              "type": "str"
+            },
+            {
+              "name": "importance",
+              "type": "str"
+            },
+            {
+              "name": "breaks",
+              "type": "str"
+            },
+            {
+              "name": "missing",
+              "type": "str",
+              "description": "i18n key of the plain sentence for this gap"
+            },
+            {
+              "name": "upstream",
+              "type": "str",
+              "description": "Module the data comes from"
+            },
+            {
+              "name": "downstream",
+              "type": "str",
+              "description": "Module that has to act; the Fix link opens it"
+            }
+          ]
+        },
+        {
+          "class_name": "PlatformMap",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "All visible modules and their data flows, with live counts on declared edges.",
+          "fields": [
+            {
+              "name": "project_id",
+              "type": "uuid.UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "currency",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "modules",
+              "type": "list[MapModule]"
+            },
+            {
+              "name": "edges",
+              "type": "list[EdgeOut]"
+            },
+            {
+              "name": "health",
+              "type": "list[HealthItem]"
+            },
+            {
+              "name": "generated_at",
+              "type": "datetime"
+            }
+          ]
+        },
+        {
+          "class_name": "PartyOut",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "id",
+              "type": "str"
+            },
+            {
+              "name": "kind",
+              "type": "str"
+            },
+            {
+              "name": "name",
+              "type": "str"
+            },
+            {
+              "name": "initials",
+              "type": "str"
+            },
+            {
+              "name": "zone",
+              "type": "str"
+            },
+            {
+              "name": "roles",
+              "type": "list[str]"
+            },
+            {
+              "name": "modules",
+              "type": "list[str]"
+            },
+            {
+              "name": "placeholder",
+              "type": "bool",
+              "default": "False"
+            },
+            {
+              "name": "primary_role",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "touches",
+              "type": "dict[str, int]",
+              "description": "Records per module that name this party"
+            },
+            {
+              "name": "org",
+              "type": "str | None",
+              "description": "Party id of the organisation a person works for"
+            }
+          ]
+        },
+        {
+          "class_name": "ProjectParties",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "project_id",
+              "type": "uuid.UUID"
+            },
+            {
+              "name": "parties",
+              "type": "list[PartyOut]"
+            }
+          ]
+        }
+      ],
+      "import_dependencies": [
+        "contacts",
+        "contracts",
+        "procurement",
+        "projects",
+        "subcontractors",
+        "teams",
+        "tendering",
+        "users"
       ]
     },
     {
@@ -138865,6 +140999,7 @@
         "connectors/file_connector.py",
         "connectors/registry.py",
         "cost_position.py",
+        "data_paths.py",
         "einvoice_parties.py",
         "einvoice_settings_models.py",
         "einvoice_settings_schemas.py",
@@ -146840,6 +148975,7 @@
       "module_category": "enterprise",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "job.py",
         "manifest.py",
         "metrics.py",
@@ -169940,6 +172076,10 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "calc_router.py",
+        "calc_schemas.py",
+        "calc_service.py",
+        "calc_validators.py",
         "geometry.py",
         "manifest.py",
         "models.py",
@@ -169950,6 +172090,7 @@
         "router.py",
         "schemas.py",
         "service.py",
+        "subdivision.py",
         "validators.py"
       ],
       "manifest": {
@@ -170079,6 +172220,18 @@
               "annotation": "Mapped[uuid.UUID | None]",
               "sql_type": "GUID",
               "nullable": true
+            },
+            {
+              "name": "parent_ids",
+              "annotation": "Mapped[list | None]",
+              "sql_type": "JSON",
+              "nullable": true
+            },
+            {
+              "name": "superseded",
+              "annotation": "Mapped[bool]",
+              "sql_type": "Boolean",
+              "nullable": false
             }
           ],
           "relationships": []
@@ -170131,6 +172284,18 @@
               "annotation": "Mapped[Decimal | None]",
               "sql_type": "Numeric",
               "nullable": true
+            },
+            {
+              "name": "corner_status",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "accuracy_class",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
             }
           ],
           "relationships": []
@@ -170517,6 +172682,16 @@
             {
               "name": "seq",
               "type": "int"
+            },
+            {
+              "name": "corner_status",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "accuracy_class",
+              "type": "str",
+              "default": "''"
             }
           ]
         },
@@ -170840,6 +173015,15 @@
               "name": "sent_at",
               "type": "datetime | None",
               "default": "None"
+            },
+            {
+              "name": "parent_ids",
+              "type": "list[str]"
+            },
+            {
+              "name": "superseded",
+              "type": "bool",
+              "default": "False"
             },
             {
               "name": "findings",
@@ -171399,6 +173583,7 @@
       "import_dependencies": [
         "boq",
         "projects",
+        "setting_out",
         "survey_core"
       ]
     },
@@ -172961,6 +175146,24 @@
               "nullable": true
             },
             {
+              "name": "default_signatory",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "bank",
+              "annotation": "Mapped[dict | None]",
+              "sql_type": "JSON",
+              "nullable": true
+            },
+            {
+              "name": "logo_data_url",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "Text",
+              "nullable": true
+            },
+            {
               "name": "is_default",
               "annotation": "Mapped[bool]",
               "sql_type": "Boolean",
@@ -173220,6 +175423,31 @@
           ]
         },
         {
+          "class_name": "EntityBank",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "The bank account a company prints on its documents.",
+          "fields": [
+            {
+              "name": "holder",
+              "type": "str"
+            },
+            {
+              "name": "iban",
+              "type": "str"
+            },
+            {
+              "name": "bic",
+              "type": "str"
+            },
+            {
+              "name": "bank_name",
+              "type": "str"
+            }
+          ]
+        },
+        {
           "class_name": "TaxIdValue",
           "bases": [
             "BaseModel"
@@ -173297,6 +175525,20 @@
               "type": "str | None"
             },
             {
+              "name": "default_signatory",
+              "type": "str | None"
+            },
+            {
+              "name": "bank",
+              "type": "EntityBank | None",
+              "default": "None"
+            },
+            {
+              "name": "logo_data_url",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
               "name": "is_default",
               "type": "bool",
               "default": "False"
@@ -173363,6 +175605,20 @@
             {
               "name": "invoice_prefix",
               "type": "str | None"
+            },
+            {
+              "name": "default_signatory",
+              "type": "str | None"
+            },
+            {
+              "name": "bank",
+              "type": "EntityBank | None",
+              "default": "None"
+            },
+            {
+              "name": "logo_data_url",
+              "type": "str | None",
+              "default": "None"
             },
             {
               "name": "is_default",
@@ -173585,6 +175841,21 @@
             },
             {
               "name": "invoice_prefix",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "default_signatory",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "bank",
+              "type": "dict[str, Any] | None",
+              "default": "None"
+            },
+            {
+              "name": "logo_data_url",
               "type": "str | None",
               "default": "None"
             },
@@ -183213,6 +185484,7 @@
         "__init__.py",
         "calc.py",
         "demo.py",
+        "depth.py",
         "manifest.py",
         "models.py",
         "report_pdf.py",
@@ -183285,6 +185557,24 @@
               "annotation": "Mapped[uuid.UUID | None]",
               "sql_type": "GUID",
               "nullable": true
+            },
+            {
+              "name": "design_ch_from_m",
+              "annotation": "Mapped[Decimal | None]",
+              "sql_type": "Numeric",
+              "nullable": true
+            },
+            {
+              "name": "design_ch_to_m",
+              "annotation": "Mapped[Decimal | None]",
+              "sql_type": "Numeric",
+              "nullable": true
+            },
+            {
+              "name": "design_area_m2",
+              "annotation": "Mapped[Decimal | None]",
+              "sql_type": "Numeric",
+              "nullable": true
             }
           ],
           "relationships": []
@@ -183334,6 +185624,12 @@
             },
             {
               "name": "truck_tolerance_pct",
+              "annotation": "Mapped[Decimal | None]",
+              "sql_type": "Numeric",
+              "nullable": true
+            },
+            {
+              "name": "overbreak_tol_pct",
               "annotation": "Mapped[Decimal | None]",
               "sql_type": "Numeric",
               "nullable": true
@@ -183488,6 +185784,322 @@
             }
           ],
           "relationships": []
+        },
+        {
+          "class_name": "MineMaterial",
+          "tablename": "oe_mine_material",
+          "docstring": "A material polygon (ore, waste, low grade) inside a unit; the unit's actual is clipped by it.",
+          "columns": [
+            {
+              "name": "project_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_projects_project.id"
+            },
+            {
+              "name": "unit_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_mine_unit.id"
+            },
+            {
+              "name": "material",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "name",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "density_t_m3",
+              "annotation": "Mapped[Decimal | None]",
+              "sql_type": "Numeric",
+              "nullable": true
+            },
+            {
+              "name": "ring",
+              "annotation": "Mapped[list]",
+              "sql_type": "JSON",
+              "nullable": false
+            },
+            {
+              "name": "source",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "source_filename",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "created_by",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            }
+          ],
+          "relationships": []
+        },
+        {
+          "class_name": "MineDriveFace",
+          "tablename": "oe_mine_drive_face",
+          "docstring": "A face pickup: where the drive face stood on a date.",
+          "columns": [
+            {
+              "name": "project_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_projects_project.id"
+            },
+            {
+              "name": "unit_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_mine_unit.id"
+            },
+            {
+              "name": "period_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true,
+              "is_fk": true,
+              "fk_target": "oe_mine_period.id"
+            },
+            {
+              "name": "chainage_m",
+              "annotation": "Mapped[Decimal]",
+              "sql_type": "Numeric",
+              "nullable": false
+            },
+            {
+              "name": "picked_on",
+              "annotation": "Mapped[date | None]",
+              "sql_type": "Date",
+              "nullable": true
+            },
+            {
+              "name": "note",
+              "annotation": "Mapped[str]",
+              "sql_type": "Text",
+              "nullable": false
+            }
+          ],
+          "relationships": []
+        },
+        {
+          "class_name": "MineDriveProfile",
+          "tablename": "oe_mine_drive_profile",
+          "docstring": "A scanned or measured drive profile at one chainage.",
+          "columns": [
+            {
+              "name": "project_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_projects_project.id"
+            },
+            {
+              "name": "unit_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_mine_unit.id"
+            },
+            {
+              "name": "period_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true,
+              "is_fk": true,
+              "fk_target": "oe_mine_period.id"
+            },
+            {
+              "name": "chainage_m",
+              "annotation": "Mapped[Decimal]",
+              "sql_type": "Numeric",
+              "nullable": false
+            },
+            {
+              "name": "actual_area_m2",
+              "annotation": "Mapped[Decimal]",
+              "sql_type": "Numeric",
+              "nullable": false
+            },
+            {
+              "name": "design_area_m2",
+              "annotation": "Mapped[Decimal | None]",
+              "sql_type": "Numeric",
+              "nullable": true
+            },
+            {
+              "name": "source",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            }
+          ],
+          "relationships": []
+        },
+        {
+          "class_name": "MineBlastPattern",
+          "tablename": "oe_mine_blast_pattern",
+          "docstring": "An open-pit blast pattern: design collars and depths with the pattern's tolerances.",
+          "columns": [
+            {
+              "name": "project_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_projects_project.id"
+            },
+            {
+              "name": "unit_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true,
+              "is_fk": true,
+              "fk_target": "oe_mine_unit.id"
+            },
+            {
+              "name": "code",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "name",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "collar_tol_m",
+              "annotation": "Mapped[Decimal | None]",
+              "sql_type": "Numeric",
+              "nullable": true
+            },
+            {
+              "name": "depth_tol_m",
+              "annotation": "Mapped[Decimal | None]",
+              "sql_type": "Numeric",
+              "nullable": true
+            },
+            {
+              "name": "note",
+              "annotation": "Mapped[str]",
+              "sql_type": "Text",
+              "nullable": false
+            },
+            {
+              "name": "created_by",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            }
+          ],
+          "relationships": []
+        },
+        {
+          "class_name": "MineBlastHole",
+          "tablename": "oe_mine_blast_hole",
+          "docstring": "One hole of a pattern: the design collar and depth, and the as-drilled values once imported.",
+          "columns": [
+            {
+              "name": "project_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_projects_project.id"
+            },
+            {
+              "name": "pattern_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_mine_blast_pattern.id"
+            },
+            {
+              "name": "hole_id",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "design_e",
+              "annotation": "Mapped[Decimal]",
+              "sql_type": "Numeric",
+              "nullable": false
+            },
+            {
+              "name": "design_n",
+              "annotation": "Mapped[Decimal]",
+              "sql_type": "Numeric",
+              "nullable": false
+            },
+            {
+              "name": "design_z",
+              "annotation": "Mapped[Decimal | None]",
+              "sql_type": "Numeric",
+              "nullable": true
+            },
+            {
+              "name": "design_depth_m",
+              "annotation": "Mapped[Decimal | None]",
+              "sql_type": "Numeric",
+              "nullable": true
+            },
+            {
+              "name": "drilled_e",
+              "annotation": "Mapped[Decimal | None]",
+              "sql_type": "Numeric",
+              "nullable": true
+            },
+            {
+              "name": "drilled_n",
+              "annotation": "Mapped[Decimal | None]",
+              "sql_type": "Numeric",
+              "nullable": true
+            },
+            {
+              "name": "drilled_z",
+              "annotation": "Mapped[Decimal | None]",
+              "sql_type": "Numeric",
+              "nullable": true
+            },
+            {
+              "name": "drilled_depth_m",
+              "annotation": "Mapped[Decimal | None]",
+              "sql_type": "Numeric",
+              "nullable": true
+            },
+            {
+              "name": "drilled_on",
+              "annotation": "Mapped[date | None]",
+              "sql_type": "Date",
+              "nullable": true
+            }
+          ],
+          "relationships": []
         }
       ],
       "routes": [
@@ -183605,6 +186217,107 @@
           "method": "GET",
           "path": "/periods/{period_id}/report.pdf",
           "handler": "report_pdf"
+        },
+        {
+          "method": "GET",
+          "path": "/units/{unit_id}/materials",
+          "handler": "list_materials",
+          "response_model": "MaterialListResponse"
+        },
+        {
+          "method": "POST",
+          "path": "/units/{unit_id}/materials",
+          "handler": "add_material",
+          "response_model": "MaterialOut",
+          "request_schema": "MaterialIn"
+        },
+        {
+          "method": "POST",
+          "path": "/units/{unit_id}/materials/import",
+          "handler": "import_materials",
+          "response_model": "MaterialImportResult",
+          "request_schema": "MaterialImport"
+        },
+        {
+          "method": "DELETE",
+          "path": "/materials/{material_id}",
+          "handler": "delete_material"
+        },
+        {
+          "method": "POST",
+          "path": "/entries/{entry_id}/material-split",
+          "handler": "material_split",
+          "response_model": "EntryOut"
+        },
+        {
+          "method": "GET",
+          "path": "/units/{unit_id}/drive",
+          "handler": "drive_detail",
+          "response_model": "DriveDetail"
+        },
+        {
+          "method": "POST",
+          "path": "/units/{unit_id}/faces",
+          "handler": "add_face",
+          "response_model": "FaceOut",
+          "request_schema": "FaceIn"
+        },
+        {
+          "method": "POST",
+          "path": "/units/{unit_id}/profiles",
+          "handler": "add_profile",
+          "response_model": "ProfileOut",
+          "request_schema": "ProfileIn"
+        },
+        {
+          "method": "POST",
+          "path": "/units/{unit_id}/profiles/import",
+          "handler": "import_profiles",
+          "response_model": "list[ProfileOut]",
+          "request_schema": "ProfileImport"
+        },
+        {
+          "method": "GET",
+          "path": "/projects/{project_id}/blast-patterns",
+          "handler": "list_patterns",
+          "response_model": "PatternListResponse"
+        },
+        {
+          "method": "POST",
+          "path": "/projects/{project_id}/blast-patterns",
+          "handler": "create_pattern",
+          "response_model": "PatternDetail",
+          "request_schema": "PatternCreate"
+        },
+        {
+          "method": "GET",
+          "path": "/blast-patterns/{pattern_id}",
+          "handler": "pattern_detail",
+          "response_model": "PatternDetail"
+        },
+        {
+          "method": "PATCH",
+          "path": "/blast-patterns/{pattern_id}",
+          "handler": "update_pattern",
+          "response_model": "PatternDetail",
+          "request_schema": "PatternUpdate"
+        },
+        {
+          "method": "POST",
+          "path": "/blast-patterns/{pattern_id}/as-drilled",
+          "handler": "import_drilled",
+          "response_model": "PatternDetail",
+          "request_schema": "DrilledImport"
+        },
+        {
+          "method": "GET",
+          "path": "/blast-patterns/{pattern_id}/stake-list.csv",
+          "handler": "stake_list"
+        },
+        {
+          "method": "DELETE",
+          "path": "/blast-patterns/{pattern_id}",
+          "handler": "delete_pattern"
         }
       ],
       "schemas": [
@@ -183662,6 +186375,18 @@
             {
               "name": "note",
               "type": "str"
+            },
+            {
+              "name": "design_ch_from_m",
+              "type": "float | None"
+            },
+            {
+              "name": "design_ch_to_m",
+              "type": "float | None"
+            },
+            {
+              "name": "design_area_m2",
+              "type": "float | None"
             }
           ]
         },
@@ -183688,6 +186413,18 @@
             {
               "name": "note",
               "type": "str | None"
+            },
+            {
+              "name": "design_ch_from_m",
+              "type": "float | None"
+            },
+            {
+              "name": "design_ch_to_m",
+              "type": "float | None"
+            },
+            {
+              "name": "design_area_m2",
+              "type": "float | None"
             }
           ]
         },
@@ -183730,6 +186467,21 @@
               "name": "entry_count",
               "type": "int",
               "default": "0"
+            },
+            {
+              "name": "design_ch_from_m",
+              "type": "float | None",
+              "default": "None"
+            },
+            {
+              "name": "design_ch_to_m",
+              "type": "float | None",
+              "default": "None"
+            },
+            {
+              "name": "design_area_m2",
+              "type": "float | None",
+              "default": "None"
             }
           ]
         },
@@ -183754,6 +186506,10 @@
             },
             {
               "name": "truck_tolerance_pct",
+              "type": "float | None"
+            },
+            {
+              "name": "overbreak_tol_pct",
               "type": "float | None"
             },
             {
@@ -183783,6 +186539,10 @@
             },
             {
               "name": "truck_tolerance_pct",
+              "type": "float | None"
+            },
+            {
+              "name": "overbreak_tol_pct",
               "type": "float | None"
             },
             {
@@ -184181,6 +186941,21 @@
             {
               "name": "findings",
               "type": "list[Finding]"
+            },
+            {
+              "name": "truck_ratio_pct",
+              "type": "float | None",
+              "default": "None"
+            },
+            {
+              "name": "material_split",
+              "type": "MaterialSplitOut | None",
+              "default": "None"
+            },
+            {
+              "name": "drive",
+              "type": "DriveSummary | None",
+              "default": "None"
             }
           ]
         },
@@ -184272,6 +187047,11 @@
               "name": "entry_count",
               "type": "int",
               "default": "0"
+            },
+            {
+              "name": "overbreak_tol_pct",
+              "type": "float | None",
+              "default": "None"
             }
           ]
         },
@@ -184329,6 +187109,705 @@
             {
               "name": "items",
               "type": "list[UnitOut]"
+            },
+            {
+              "name": "total",
+              "type": "int"
+            },
+            {
+              "name": "offset",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "limit",
+              "type": "int",
+              "default": "50"
+            }
+          ]
+        },
+        {
+          "class_name": "MaterialIn",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "material",
+              "type": "Material",
+              "default": "'ore'"
+            },
+            {
+              "name": "name",
+              "type": "str"
+            },
+            {
+              "name": "density_t_m3",
+              "type": "float | None"
+            },
+            {
+              "name": "ring",
+              "type": "Ring2"
+            }
+          ]
+        },
+        {
+          "class_name": "MaterialImport",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "GeoJSON polygons (``material``, ``name``, ``density_t_m3`` properties), or polylines of a drawing.",
+          "fields": [
+            {
+              "name": "text",
+              "type": "str"
+            },
+            {
+              "name": "filename",
+              "type": "str"
+            },
+            {
+              "name": "drawing_id",
+              "type": "uuid.UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "layers",
+              "type": "dict[str, Material]"
+            },
+            {
+              "name": "densities",
+              "type": "dict[str, float]"
+            },
+            {
+              "name": "replace",
+              "type": "bool",
+              "default": "False"
+            }
+          ]
+        },
+        {
+          "class_name": "MaterialOut",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "id",
+              "type": "uuid.UUID"
+            },
+            {
+              "name": "unit_id",
+              "type": "uuid.UUID"
+            },
+            {
+              "name": "material",
+              "type": "str"
+            },
+            {
+              "name": "name",
+              "type": "str"
+            },
+            {
+              "name": "density_t_m3",
+              "type": "float | None"
+            },
+            {
+              "name": "ring",
+              "type": "Ring2"
+            },
+            {
+              "name": "area_m2",
+              "type": "float"
+            },
+            {
+              "name": "source",
+              "type": "str"
+            },
+            {
+              "name": "source_filename",
+              "type": "str"
+            }
+          ]
+        },
+        {
+          "class_name": "MaterialImportResult",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[MaterialOut]"
+            },
+            {
+              "name": "problems",
+              "type": "list[str]"
+            }
+          ]
+        },
+        {
+          "class_name": "MaterialPartOut",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "material",
+              "type": "str"
+            },
+            {
+              "name": "name",
+              "type": "str"
+            },
+            {
+              "name": "volume_m3",
+              "type": "float"
+            },
+            {
+              "name": "density_t_m3",
+              "type": "float | None"
+            },
+            {
+              "name": "tonnes",
+              "type": "float | None"
+            }
+          ]
+        },
+        {
+          "class_name": "MaterialSplitOut",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "parts",
+              "type": "list[MaterialPartOut]"
+            },
+            {
+              "name": "total_m3",
+              "type": "float"
+            },
+            {
+              "name": "assigned_m3",
+              "type": "float"
+            },
+            {
+              "name": "unassigned_m3",
+              "type": "float"
+            },
+            {
+              "name": "coverage_pct",
+              "type": "float | None"
+            },
+            {
+              "name": "tonnes",
+              "type": "float | None"
+            }
+          ]
+        },
+        {
+          "class_name": "FaceIn",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "chainage_m",
+              "type": "float"
+            },
+            {
+              "name": "picked_on",
+              "type": "date | None",
+              "default": "None"
+            },
+            {
+              "name": "period_id",
+              "type": "uuid.UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "note",
+              "type": "str"
+            }
+          ]
+        },
+        {
+          "class_name": "FaceOut",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "id",
+              "type": "uuid.UUID"
+            },
+            {
+              "name": "unit_id",
+              "type": "uuid.UUID"
+            },
+            {
+              "name": "period_id",
+              "type": "uuid.UUID | None"
+            },
+            {
+              "name": "chainage_m",
+              "type": "float"
+            },
+            {
+              "name": "picked_on",
+              "type": "date | None"
+            },
+            {
+              "name": "note",
+              "type": "str"
+            }
+          ]
+        },
+        {
+          "class_name": "ProfileIn",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "A measured profile: its area, or the (offset, height) ring it was measured as.",
+          "fields": [
+            {
+              "name": "chainage_m",
+              "type": "float"
+            },
+            {
+              "name": "actual_area_m2",
+              "type": "float | None"
+            },
+            {
+              "name": "ring",
+              "type": "Ring2"
+            },
+            {
+              "name": "design_area_m2",
+              "type": "float | None"
+            },
+            {
+              "name": "period_id",
+              "type": "uuid.UUID | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "ProfileImport",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "CSV ``chainage,area`` (optional ``design_area``).",
+          "fields": [
+            {
+              "name": "text",
+              "type": "str"
+            },
+            {
+              "name": "period_id",
+              "type": "uuid.UUID | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "ProfileOut",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "id",
+              "type": "uuid.UUID"
+            },
+            {
+              "name": "unit_id",
+              "type": "uuid.UUID"
+            },
+            {
+              "name": "period_id",
+              "type": "uuid.UUID | None"
+            },
+            {
+              "name": "chainage_m",
+              "type": "float"
+            },
+            {
+              "name": "actual_area_m2",
+              "type": "float"
+            },
+            {
+              "name": "design_area_m2",
+              "type": "float | None"
+            },
+            {
+              "name": "overbreak_pct",
+              "type": "float | None"
+            },
+            {
+              "name": "inside_design",
+              "type": "bool | None"
+            }
+          ]
+        },
+        {
+          "class_name": "DriveSummary",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "faces",
+              "type": "int"
+            },
+            {
+              "name": "advance_m",
+              "type": "float | None"
+            },
+            {
+              "name": "profiles",
+              "type": "int"
+            },
+            {
+              "name": "design_area_m2",
+              "type": "float | None"
+            },
+            {
+              "name": "mean_actual_m2",
+              "type": "float | None"
+            },
+            {
+              "name": "overbreak_pct",
+              "type": "float | None"
+            },
+            {
+              "name": "excess_m3",
+              "type": "float | None"
+            },
+            {
+              "name": "excess_t",
+              "type": "float | None"
+            },
+            {
+              "name": "under_count",
+              "type": "int",
+              "default": "0"
+            }
+          ]
+        },
+        {
+          "class_name": "DriveDetail",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "unit",
+              "type": "UnitOut"
+            },
+            {
+              "name": "faces",
+              "type": "list[FaceOut]"
+            },
+            {
+              "name": "profiles",
+              "type": "list[ProfileOut]"
+            },
+            {
+              "name": "summary",
+              "type": "DriveSummary"
+            },
+            {
+              "name": "findings",
+              "type": "list[Finding]"
+            }
+          ]
+        },
+        {
+          "class_name": "HoleIn",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "hole_id",
+              "type": "str"
+            },
+            {
+              "name": "e",
+              "type": "float"
+            },
+            {
+              "name": "n",
+              "type": "float"
+            },
+            {
+              "name": "z",
+              "type": "float | None",
+              "default": "None"
+            },
+            {
+              "name": "depth_m",
+              "type": "float | None"
+            }
+          ]
+        },
+        {
+          "class_name": "PatternCreate",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "name",
+              "type": "str"
+            },
+            {
+              "name": "unit_id",
+              "type": "uuid.UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "collar_tol_m",
+              "type": "float | None"
+            },
+            {
+              "name": "depth_tol_m",
+              "type": "float | None"
+            },
+            {
+              "name": "note",
+              "type": "str"
+            },
+            {
+              "name": "design_text",
+              "type": "str"
+            }
+          ]
+        },
+        {
+          "class_name": "PatternUpdate",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "name",
+              "type": "str | None"
+            },
+            {
+              "name": "collar_tol_m",
+              "type": "float | None"
+            },
+            {
+              "name": "depth_tol_m",
+              "type": "float | None"
+            },
+            {
+              "name": "note",
+              "type": "str | None"
+            }
+          ]
+        },
+        {
+          "class_name": "DrilledImport",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "As-drilled CSV ``hole,e,n,z,depth``; holes are matched by id.",
+          "fields": [
+            {
+              "name": "text",
+              "type": "str"
+            },
+            {
+              "name": "drilled_on",
+              "type": "date | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "HoleOut",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "id",
+              "type": "uuid.UUID"
+            },
+            {
+              "name": "hole_id",
+              "type": "str"
+            },
+            {
+              "name": "design_e",
+              "type": "float"
+            },
+            {
+              "name": "design_n",
+              "type": "float"
+            },
+            {
+              "name": "design_z",
+              "type": "float | None"
+            },
+            {
+              "name": "design_depth_m",
+              "type": "float | None"
+            },
+            {
+              "name": "drilled_e",
+              "type": "float | None"
+            },
+            {
+              "name": "drilled_n",
+              "type": "float | None"
+            },
+            {
+              "name": "drilled_z",
+              "type": "float | None"
+            },
+            {
+              "name": "drilled_depth_m",
+              "type": "float | None"
+            },
+            {
+              "name": "collar_offset_m",
+              "type": "float | None"
+            },
+            {
+              "name": "depth_diff_m",
+              "type": "float | None"
+            },
+            {
+              "name": "collar_ok",
+              "type": "bool | None"
+            },
+            {
+              "name": "depth_ok",
+              "type": "bool | None"
+            }
+          ]
+        },
+        {
+          "class_name": "PatternOut",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "id",
+              "type": "uuid.UUID"
+            },
+            {
+              "name": "project_id",
+              "type": "uuid.UUID"
+            },
+            {
+              "name": "unit_id",
+              "type": "uuid.UUID | None"
+            },
+            {
+              "name": "code",
+              "type": "str"
+            },
+            {
+              "name": "name",
+              "type": "str"
+            },
+            {
+              "name": "collar_tol_m",
+              "type": "float | None"
+            },
+            {
+              "name": "depth_tol_m",
+              "type": "float | None"
+            },
+            {
+              "name": "note",
+              "type": "str"
+            },
+            {
+              "name": "holes",
+              "type": "int"
+            },
+            {
+              "name": "drilled",
+              "type": "int"
+            },
+            {
+              "name": "failed",
+              "type": "int"
+            }
+          ]
+        },
+        {
+          "class_name": "PatternDetail",
+          "bases": [
+            "PatternOut"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[HoleOut]"
+            },
+            {
+              "name": "findings",
+              "type": "list[Finding]"
+            },
+            {
+              "name": "problems",
+              "type": "list[str]"
+            }
+          ]
+        },
+        {
+          "class_name": "PatternListResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[PatternOut]"
+            },
+            {
+              "name": "total",
+              "type": "int"
+            }
+          ]
+        },
+        {
+          "class_name": "MaterialListResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Materials of one unit.",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[MaterialOut]"
             },
             {
               "name": "total",
@@ -186629,6 +190108,21 @@
               "name": "ack_state",
               "type": "AckState",
               "default": "'none'"
+            },
+            {
+              "name": "forecast_level",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "forecast_days",
+              "type": "float | None",
+              "default": "None"
+            },
+            {
+              "name": "forecast_rate_mm_day",
+              "type": "float | None",
+              "default": "None"
             }
           ]
         },
@@ -187071,6 +190565,7 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "events.py",
         "manifest.py",
         "models.py",
@@ -192822,6 +196317,7 @@
         "applicability.py",
         "clock.py",
         "data.py",
+        "data_paths.py",
         "demo.py",
         "manifest.py",
         "models.py",
@@ -210472,6 +213968,7 @@
         "__init__.py",
         "certificates.py",
         "cost_spine.py",
+        "data_paths.py",
         "events.py",
         "export_routes.py",
         "intl.py",
@@ -265896,6 +269393,7 @@
         "codes_service.py",
         "codes_valuecoerce.py",
         "constraints.py",
+        "data_paths.py",
         "diff_engine.py",
         "events.py",
         "evm_demo.py",
@@ -281206,6 +284704,9 @@
         "manifest.py",
         "models.py",
         "repository.py",
+        "road_geometry.py",
+        "road_router.py",
+        "road_validators.py",
         "router.py",
         "schemas.py",
         "service.py",
@@ -281696,6 +285197,11 @@
           "method": "GET",
           "path": "/requests/{request_id}/sheet.pdf",
           "handler": "sheet_pdf"
+        },
+        {
+          "method": "GET",
+          "path": "/requests/{request_id}/export",
+          "handler": "export_stakes"
         },
         {
           "method": "POST",
@@ -296229,6 +299735,12 @@
         "seed.py",
         "service.py",
         "tax_id.py",
+        "terms.py",
+        "terms_checks.py",
+        "terms_models.py",
+        "terms_router.py",
+        "terms_schemas.py",
+        "terms_service.py",
         "validators.py"
       ],
       "manifest": {
@@ -301981,7 +305493,9 @@
         "changeorders",
         "contacts",
         "contracts",
+        "doc_templates",
         "finance",
+        "geo_hub",
         "notifications",
         "projects",
         "tax_withholding",
@@ -308291,15 +311805,21 @@
       "files": [
         "__init__.py",
         "demo.py",
+        "drawing_lines.py",
         "landxml.py",
         "manifest.py",
         "models.py",
+        "pointcloud.py",
         "report_pdf.py",
         "repository.py",
         "router.py",
         "schemas.py",
         "service.py",
+        "staged.py",
+        "surface_validators.py",
         "tin.py",
+        "tools_router.py",
+        "tools_service.py",
         "validators.py",
         "volumes.py"
       ],
@@ -308426,6 +311946,12 @@
               "name": "created_by",
               "annotation": "Mapped[uuid.UUID | None]",
               "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "breaklines",
+              "annotation": "Mapped[list | None]",
+              "sql_type": "JSON",
               "nullable": true
             }
           ],
@@ -308749,6 +312275,11 @@
         },
         {
           "method": "GET",
+          "path": "/surfaces/{surface_id}/export",
+          "handler": "export_surface"
+        },
+        {
+          "method": "GET",
           "path": "/projects/{project_id}/volumes",
           "handler": "list_volumes",
           "response_model": "VolumeListResponse"
@@ -308837,6 +312368,37 @@
       ],
       "schemas": [
         {
+          "class_name": "Finding",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "rule_id",
+              "type": "str"
+            },
+            {
+              "name": "severity",
+              "type": "str"
+            },
+            {
+              "name": "message",
+              "type": "str"
+            },
+            {
+              "name": "suggestion",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "element_ref",
+              "type": "str | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
           "class_name": "SurfaceOut",
           "bases": [
             "BaseModel"
@@ -308922,6 +312484,15 @@
               "name": "created_at",
               "type": "datetime | None",
               "default": "None"
+            },
+            {
+              "name": "breakline_count",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "findings",
+              "type": "list[Finding]"
             }
           ]
         },
@@ -308943,6 +312514,19 @@
             {
               "name": "note",
               "type": "str"
+            },
+            {
+              "name": "breaklines",
+              "type": "list[list[tuple[float, float, float]]]"
+            },
+            {
+              "name": "breakline_codes",
+              "type": "list[str]"
+            },
+            {
+              "name": "boundary",
+              "type": "Ring | None",
+              "default": "None"
             }
           ]
         },
@@ -309129,37 +312713,6 @@
             {
               "name": "material",
               "type": "str | None"
-            }
-          ]
-        },
-        {
-          "class_name": "Finding",
-          "bases": [
-            "BaseModel"
-          ],
-          "docstring": "",
-          "fields": [
-            {
-              "name": "rule_id",
-              "type": "str"
-            },
-            {
-              "name": "severity",
-              "type": "str"
-            },
-            {
-              "name": "message",
-              "type": "str"
-            },
-            {
-              "name": "suggestion",
-              "type": "str | None",
-              "default": "None"
-            },
-            {
-              "name": "element_ref",
-              "type": "str | None",
-              "default": "None"
             }
           ]
         },
@@ -309751,13 +313304,240 @@
               "default": "50"
             }
           ]
+        },
+        {
+          "class_name": "CloudImportResult",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "A surface gridded from a LAS/LAZ cloud, with what was read.",
+          "fields": [
+            {
+              "name": "surface",
+              "type": "SurfaceOut"
+            },
+            {
+              "name": "points_read",
+              "type": "int"
+            },
+            {
+              "name": "points_used",
+              "type": "int"
+            },
+            {
+              "name": "ground_points",
+              "type": "int"
+            },
+            {
+              "name": "used_all_classes",
+              "type": "bool"
+            },
+            {
+              "name": "cells",
+              "type": "int"
+            },
+            {
+              "name": "cell_size_m",
+              "type": "float"
+            },
+            {
+              "name": "stat",
+              "type": "str"
+            },
+            {
+              "name": "las_version",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "compressed",
+              "type": "bool",
+              "default": "False"
+            }
+          ]
+        },
+        {
+          "class_name": "MaterialFactors",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Bank to loose and bank to compacted, entered by the user; no default exists.",
+          "fields": [
+            {
+              "name": "loose",
+              "type": "float | None"
+            },
+            {
+              "name": "compacted",
+              "type": "float | None"
+            }
+          ]
+        },
+        {
+          "class_name": "StageIn",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "A surveyed surface, or a strip of the stage before by ``strip_depth_m``.",
+          "fields": [
+            {
+              "name": "label",
+              "type": "str"
+            },
+            {
+              "name": "surface_id",
+              "type": "uuid.UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "strip_depth_m",
+              "type": "float | None"
+            },
+            {
+              "name": "surveyed_on",
+              "type": "str"
+            },
+            {
+              "name": "material",
+              "type": "str"
+            }
+          ]
+        },
+        {
+          "class_name": "StagedRequest",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "stages",
+              "type": "list[StageIn]"
+            },
+            {
+              "name": "method",
+              "type": "Method",
+              "default": "'grid'"
+            },
+            {
+              "name": "cell_size_m",
+              "type": "float | None"
+            },
+            {
+              "name": "boundary",
+              "type": "Ring | None",
+              "default": "None"
+            },
+            {
+              "name": "factors",
+              "type": "dict[str, MaterialFactors]"
+            }
+          ]
+        },
+        {
+          "class_name": "StageStep",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "index",
+              "type": "int"
+            },
+            {
+              "name": "from_label",
+              "type": "str"
+            },
+            {
+              "name": "to_label",
+              "type": "str"
+            },
+            {
+              "name": "surveyed_on",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "material",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "cut_m3",
+              "type": "float"
+            },
+            {
+              "name": "fill_m3",
+              "type": "float"
+            },
+            {
+              "name": "net_m3",
+              "type": "float"
+            },
+            {
+              "name": "coverage_pct",
+              "type": "float"
+            },
+            {
+              "name": "cut_loose_m3",
+              "type": "float | None",
+              "default": "None"
+            },
+            {
+              "name": "fill_bank_needed_m3",
+              "type": "float | None",
+              "default": "None"
+            },
+            {
+              "name": "cumulative_cut_m3",
+              "type": "float"
+            },
+            {
+              "name": "cumulative_fill_m3",
+              "type": "float"
+            }
+          ]
+        },
+        {
+          "class_name": "StagedResult",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "steps",
+              "type": "list[StageStep]"
+            },
+            {
+              "name": "total_cut_m3",
+              "type": "float"
+            },
+            {
+              "name": "total_fill_m3",
+              "type": "float"
+            },
+            {
+              "name": "method",
+              "type": "str"
+            },
+            {
+              "name": "findings",
+              "type": "list[Finding]"
+            }
+          ]
         }
       ],
       "import_dependencies": [
         "boq",
+        "dwg_takeoff",
+        "land_parcels",
         "mine_survey",
+        "monitoring",
         "progress",
         "projects",
+        "setting_out",
         "stockpiles",
         "survey_core",
         "users"
@@ -309769,11 +313549,26 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "calc_router.py",
+        "calc_schemas.py",
+        "calc_service.py",
+        "calc_validators.py",
+        "closure_classes.py",
+        "cogo.py",
         "crs.py",
+        "dependencies.py",
+        "field_traverse.py",
+        "geodesy.py",
+        "instrument_io.py",
+        "level_book.py",
         "manifest.py",
         "models.py",
         "permissions.py",
+        "point_export.py",
         "point_io.py",
+        "register_router.py",
+        "register_schemas.py",
+        "register_service.py",
         "repository.py",
         "router.py",
         "schemas.py",
@@ -309885,6 +313680,68 @@
               "name": "confirmed_at",
               "annotation": "Mapped[datetime | None]",
               "sql_type": "DateTime",
+              "nullable": true
+            }
+          ],
+          "relationships": []
+        },
+        {
+          "class_name": "SurveyControlCheck",
+          "tablename": "oe_survey_control_check",
+          "docstring": "A check shot on a control point: the measured position and its residual against the known one.",
+          "columns": [
+            {
+              "name": "project_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_projects_project.id"
+            },
+            {
+              "name": "control_point_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_survey_point.id"
+            },
+            {
+              "name": "measured_point_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true,
+              "is_fk": true,
+              "fk_target": "oe_survey_point.id"
+            },
+            {
+              "name": "e",
+              "annotation": "Mapped[Decimal]",
+              "sql_type": "Numeric",
+              "nullable": false
+            },
+            {
+              "name": "n",
+              "annotation": "Mapped[Decimal]",
+              "sql_type": "Numeric",
+              "nullable": false
+            },
+            {
+              "name": "z",
+              "annotation": "Mapped[Decimal | None]",
+              "sql_type": "Numeric",
+              "nullable": true
+            },
+            {
+              "name": "note",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "created_by",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
               "nullable": true
             }
           ],
@@ -310070,6 +313927,18 @@
               "annotation": "Mapped[int | None]",
               "sql_type": "Integer",
               "nullable": true
+            },
+            {
+              "name": "method",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "inputs",
+              "annotation": "Mapped[dict | None]",
+              "sql_type": "JSON",
+              "nullable": true
             }
           ],
           "relationships": []
@@ -310194,6 +314063,36 @@
               "annotation": "Mapped[uuid.UUID | None]",
               "sql_type": "GUID",
               "nullable": true
+            },
+            {
+              "name": "angle_count",
+              "annotation": "Mapped[int | None]",
+              "sql_type": "Integer",
+              "nullable": true
+            },
+            {
+              "name": "ang_misclosure_sec",
+              "annotation": "Mapped[Decimal | None]",
+              "sql_type": "Numeric",
+              "nullable": true
+            },
+            {
+              "name": "ang_k_sec",
+              "annotation": "Mapped[Decimal | None]",
+              "sql_type": "Numeric",
+              "nullable": true
+            },
+            {
+              "name": "ang_allowed_sec",
+              "annotation": "Mapped[Decimal | None]",
+              "sql_type": "Numeric",
+              "nullable": true
+            },
+            {
+              "name": "observations",
+              "annotation": "Mapped[dict | None]",
+              "sql_type": "JSON",
+              "nullable": true
             }
           ],
           "relationships": []
@@ -310236,9 +314135,121 @@
               "nullable": true
             },
             {
+              "name": "control_tol_mm",
+              "annotation": "Mapped[Decimal | None]",
+              "sql_type": "Numeric",
+              "nullable": true
+            },
+            {
               "name": "coverage_min_pct",
               "annotation": "Mapped[Decimal | None]",
               "sql_type": "Numeric",
+              "nullable": true
+            },
+            {
+              "name": "angular_k_sec",
+              "annotation": "Mapped[Decimal | None]",
+              "sql_type": "Numeric",
+              "nullable": true
+            }
+          ],
+          "relationships": []
+        },
+        {
+          "class_name": "SurveyGeodesy",
+          "tablename": "oe_survey_geodesy",
+          "docstring": "One project's geodesy settings: linear unit, the local site grid tie, and grid/ground inputs.\n\nThe local grid is a 2D similarity transform from the site grid to\n``local_grid_epsg`` (the project CRS when NULL), solved from\n``local_points`` ``[{point_id, x, y, e, n, use}]``. Tolerances are config:\nthere is no core default, so SRV-023 and SRV-024 stay silent until set.",
+          "columns": [
+            {
+              "name": "project_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_projects_project.id"
+            },
+            {
+              "name": "linear_unit",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "local_grid_epsg",
+              "annotation": "Mapped[int | None]",
+              "sql_type": "Integer",
+              "nullable": true
+            },
+            {
+              "name": "local_points",
+              "annotation": "Mapped[list]",
+              "sql_type": "JSON",
+              "nullable": false
+            },
+            {
+              "name": "helmert_a",
+              "annotation": "Mapped[float | None]",
+              "sql_type": "Float",
+              "nullable": true
+            },
+            {
+              "name": "helmert_b",
+              "annotation": "Mapped[float | None]",
+              "sql_type": "Float",
+              "nullable": true
+            },
+            {
+              "name": "helmert_te",
+              "annotation": "Mapped[float | None]",
+              "sql_type": "Float",
+              "nullable": true
+            },
+            {
+              "name": "helmert_tn",
+              "annotation": "Mapped[float | None]",
+              "sql_type": "Float",
+              "nullable": true
+            },
+            {
+              "name": "rms_mm",
+              "annotation": "Mapped[float | None]",
+              "sql_type": "Float",
+              "nullable": true
+            },
+            {
+              "name": "apply_local_grid",
+              "annotation": "Mapped[bool]",
+              "sql_type": "Boolean",
+              "nullable": false
+            },
+            {
+              "name": "residual_tol_mm",
+              "annotation": "Mapped[Decimal | None]",
+              "sql_type": "Numeric",
+              "nullable": true
+            },
+            {
+              "name": "scale_tol_ppm",
+              "annotation": "Mapped[Decimal | None]",
+              "sql_type": "Numeric",
+              "nullable": true
+            },
+            {
+              "name": "csf_height_m",
+              "annotation": "Mapped[Decimal | None]",
+              "sql_type": "Numeric",
+              "nullable": true
+            },
+            {
+              "name": "reference_distance_m",
+              "annotation": "Mapped[Decimal | None]",
+              "sql_type": "Numeric",
+              "nullable": true
+            },
+            {
+              "name": "updated_by",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
               "nullable": true
             }
           ],
@@ -310377,6 +314388,37 @@
           "method": "GET",
           "path": "/projects/{project_id}/plan",
           "handler": "plan"
+        },
+        {
+          "method": "GET",
+          "path": "/projects/{project_id}/geodesy",
+          "handler": "get_geodesy",
+          "response_model": "GeodesyOut"
+        },
+        {
+          "method": "PUT",
+          "path": "/projects/{project_id}/geodesy",
+          "handler": "put_geodesy",
+          "response_model": "GeodesyOut",
+          "request_schema": "GeodesyIn"
+        },
+        {
+          "method": "POST",
+          "path": "/local-grid/solve",
+          "handler": "solve_local_grid",
+          "response_model": "LocalGridSolution",
+          "request_schema": "LocalGridSolveRequest"
+        },
+        {
+          "method": "GET",
+          "path": "/projects/{project_id}/scale-factor",
+          "handler": "scale_factor",
+          "response_model": "ScaleFactorOut | None"
+        },
+        {
+          "method": "GET",
+          "path": "/projects/{project_id}/export",
+          "handler": "export_points"
         }
       ],
       "schemas": [
@@ -310432,6 +314474,31 @@
             },
             {
               "name": "pack_country",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "role",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "note",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "vertical_epsg",
+              "type": "int | None",
+              "default": "None"
+            },
+            {
+              "name": "vertical_name",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "geoid_grid",
               "type": "str",
               "default": "''"
             }
@@ -310647,6 +314714,11 @@
               "name": "description",
               "type": "str",
               "default": "''"
+            },
+            {
+              "name": "method",
+              "type": "str",
+              "default": "''"
             }
           ]
         },
@@ -310829,6 +314901,20 @@
             {
               "name": "note",
               "type": "str"
+            },
+            {
+              "name": "foot_definition",
+              "type": "FootDefinition",
+              "default": "''"
+            },
+            {
+              "name": "source_vertical_epsg",
+              "type": "int | None"
+            },
+            {
+              "name": "coords",
+              "type": "Literal['grid', 'local']",
+              "default": "'grid'"
             }
           ]
         },
@@ -310854,6 +314940,11 @@
             },
             {
               "name": "detail",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "message",
               "type": "str",
               "default": "''"
             }
@@ -310985,6 +315076,35 @@
               "name": "existing_conflicts",
               "type": "int",
               "default": "0"
+            },
+            {
+              "name": "file_unit",
+              "type": "str",
+              "default": "'m'"
+            },
+            {
+              "name": "project_unit",
+              "type": "str",
+              "default": "'m'"
+            },
+            {
+              "name": "unit_converted",
+              "type": "bool",
+              "default": "False"
+            },
+            {
+              "name": "heights_converted",
+              "type": "bool",
+              "default": "False"
+            },
+            {
+              "name": "missing_grids",
+              "type": "list[str]"
+            },
+            {
+              "name": "local_grid_applied",
+              "type": "bool",
+              "default": "False"
             }
           ]
         },
@@ -311325,6 +315445,31 @@
               "name": "created_at",
               "type": "datetime | None",
               "default": "None"
+            },
+            {
+              "name": "angle_count",
+              "type": "int | None",
+              "default": "None"
+            },
+            {
+              "name": "ang_misclosure_sec",
+              "type": "float | None",
+              "default": "None"
+            },
+            {
+              "name": "ang_k_sec",
+              "type": "float | None",
+              "default": "None"
+            },
+            {
+              "name": "ang_allowed_sec",
+              "type": "float | None",
+              "default": "None"
+            },
+            {
+              "name": "observations",
+              "type": "dict | None",
+              "default": "None"
             }
           ]
         },
@@ -311348,7 +315493,15 @@
               "type": "float | None"
             },
             {
+              "name": "control_tol_mm",
+              "type": "float | None"
+            },
+            {
               "name": "coverage_min_pct",
+              "type": "float | None"
+            },
+            {
+              "name": "angular_k_sec",
               "type": "float | None"
             }
           ]
@@ -311452,11 +315605,257 @@
               "default": "50"
             }
           ]
+        },
+        {
+          "class_name": "LocalGridPointIn",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "A point known in the site grid (x, y) and the national grid (e, n).",
+          "fields": [
+            {
+              "name": "point_id",
+              "type": "str"
+            },
+            {
+              "name": "x",
+              "type": "float"
+            },
+            {
+              "name": "y",
+              "type": "float"
+            },
+            {
+              "name": "e",
+              "type": "float"
+            },
+            {
+              "name": "n",
+              "type": "float"
+            },
+            {
+              "name": "use",
+              "type": "bool",
+              "default": "True"
+            }
+          ]
+        },
+        {
+          "class_name": "LocalGridResidualOut",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "point_id",
+              "type": "str"
+            },
+            {
+              "name": "de_mm",
+              "type": "float"
+            },
+            {
+              "name": "dn_mm",
+              "type": "float"
+            },
+            {
+              "name": "r_mm",
+              "type": "float"
+            },
+            {
+              "name": "used",
+              "type": "bool"
+            }
+          ]
+        },
+        {
+          "class_name": "LocalGridSolveRequest",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "points",
+              "type": "list[LocalGridPointIn]"
+            }
+          ]
+        },
+        {
+          "class_name": "LocalGridSolution",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Scale, rotation and shift of the site grid in the national grid, with each point's residual.",
+          "fields": [
+            {
+              "name": "scale",
+              "type": "float"
+            },
+            {
+              "name": "scale_ppm",
+              "type": "float"
+            },
+            {
+              "name": "rotation_deg",
+              "type": "float"
+            },
+            {
+              "name": "te",
+              "type": "float"
+            },
+            {
+              "name": "tn",
+              "type": "float"
+            },
+            {
+              "name": "rms_mm",
+              "type": "float"
+            },
+            {
+              "name": "fitted",
+              "type": "int"
+            },
+            {
+              "name": "residuals",
+              "type": "list[LocalGridResidualOut]"
+            }
+          ]
+        },
+        {
+          "class_name": "GeodesyIn",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Per-project geodesy settings; tolerances are config with no core default.",
+          "fields": [
+            {
+              "name": "linear_unit",
+              "type": "Literal['', 'm', 'ft', 'ftUS']",
+              "default": "''"
+            },
+            {
+              "name": "local_grid_epsg",
+              "type": "int | None"
+            },
+            {
+              "name": "local_points",
+              "type": "list[LocalGridPointIn]"
+            },
+            {
+              "name": "apply_local_grid",
+              "type": "bool",
+              "default": "False"
+            },
+            {
+              "name": "residual_tol_mm",
+              "type": "float | None"
+            },
+            {
+              "name": "scale_tol_ppm",
+              "type": "float | None"
+            },
+            {
+              "name": "csf_height_m",
+              "type": "float | None"
+            },
+            {
+              "name": "reference_distance_m",
+              "type": "float | None"
+            }
+          ]
+        },
+        {
+          "class_name": "ScaleFactorOut",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Grid and ground at the project: CSF = k * R / (R + h).",
+          "fields": [
+            {
+              "name": "epsg",
+              "type": "int"
+            },
+            {
+              "name": "e",
+              "type": "float"
+            },
+            {
+              "name": "n",
+              "type": "float"
+            },
+            {
+              "name": "height_m",
+              "type": "float"
+            },
+            {
+              "name": "k",
+              "type": "float"
+            },
+            {
+              "name": "elevation_factor",
+              "type": "float"
+            },
+            {
+              "name": "csf",
+              "type": "float"
+            },
+            {
+              "name": "distance_m",
+              "type": "float"
+            },
+            {
+              "name": "grid_m",
+              "type": "float"
+            },
+            {
+              "name": "ground_m",
+              "type": "float"
+            },
+            {
+              "name": "diff_mm",
+              "type": "float"
+            },
+            {
+              "name": "height_source",
+              "type": "Literal['setting', 'points', 'none']"
+            }
+          ]
+        },
+        {
+          "class_name": "GeodesyOut",
+          "bases": [
+            "GeodesyIn"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "project_id",
+              "type": "uuid.UUID"
+            },
+            {
+              "name": "effective_unit",
+              "type": "LinearUnit",
+              "default": "'m'"
+            },
+            {
+              "name": "solution",
+              "type": "LocalGridSolution | None",
+              "default": "None"
+            },
+            {
+              "name": "scale",
+              "type": "ScaleFactorOut | None",
+              "default": "None"
+            }
+          ]
         }
       ],
       "import_dependencies": [
         "cad",
-        "geo_hub"
+        "geo_hub",
+        "surfaces_volumes"
       ]
     },
     {
@@ -311466,6 +315865,7 @@
       "files": [
         "__init__.py",
         "carry_over.py",
+        "data_paths.py",
         "dedup.py",
         "manifest.py",
         "manifest_verifier.py",
@@ -319679,14 +324079,24 @@
         "addenda.py",
         "addenda_router.py",
         "addendum_email.py",
+        "award_exchange.py",
+        "award_flow.py",
+        "award_math.py",
+        "award_models.py",
         "award_record.py",
+        "award_router.py",
+        "award_schemas.py",
+        "award_terms.py",
         "bid_portal.py",
+        "bidder_exchange.py",
+        "data_paths.py",
         "demo_addenda.py",
         "gaeb_package.py",
         "intl.py",
         "invitation_email.py",
         "letter_texts.py",
         "manifest.py",
+        "messages/__init__.py",
         "models.py",
         "package_contents.py",
         "parties.py",
@@ -319755,6 +324165,72 @@
             },
             {
               "name": "deadline",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "legal_entity_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "trade",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "cost_line_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "issue_date",
+              "annotation": "Mapped[date | None]",
+              "sql_type": "Date",
+              "nullable": true
+            },
+            {
+              "name": "questions_until",
+              "annotation": "Mapped[date | None]",
+              "sql_type": "Date",
+              "nullable": true
+            },
+            {
+              "name": "bids_due",
+              "annotation": "Mapped[date | None]",
+              "sql_type": "Date",
+              "nullable": true
+            },
+            {
+              "name": "award_planned",
+              "annotation": "Mapped[date | None]",
+              "sql_type": "Date",
+              "nullable": true
+            },
+            {
+              "name": "buyer_id",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "estimator_id",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "site_manager_id",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "approver_id",
               "annotation": "Mapped[str | None]",
               "sql_type": "String",
               "nullable": true
@@ -319978,6 +324454,18 @@
               "annotation": "Mapped[float | None]",
               "sql_type": "Float",
               "nullable": true
+            },
+            {
+              "name": "declined_at",
+              "annotation": "Mapped[datetime | None]",
+              "sql_type": "DateTime",
+              "nullable": true
+            },
+            {
+              "name": "decline_reason",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "Text",
+              "nullable": true
             }
           ],
           "relationships": []
@@ -320151,6 +324639,122 @@
             },
             {
               "name": "addendum_id",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            }
+          ],
+          "relationships": []
+        },
+        {
+          "class_name": "TenderBidFile",
+          "tablename": "oe_tendering_bid_file",
+          "docstring": "A file a bidder uploaded through its link: a priced X84, its offer PDF or an attachment.\n\nThe bytes are kept under the tendering uploads directory and the file is\nfiled as a project document (``document_id``), so offers are found with\nthe project's other files. ``sha256`` is what the bidder is shown back.",
+          "columns": [
+            {
+              "name": "package_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_tendering_package.id"
+            },
+            {
+              "name": "invitation_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "recipient_id",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "company_name",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "bid_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "kind",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "file_name",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "mime_type",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "file_size",
+              "annotation": "Mapped[int]",
+              "sql_type": "Integer",
+              "nullable": false
+            },
+            {
+              "name": "sha256",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "file_path",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "document_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "uploaded_at",
+              "annotation": "Mapped[datetime]",
+              "sql_type": "DateTime",
+              "nullable": false
+            }
+          ],
+          "relationships": []
+        },
+        {
+          "class_name": "TenderPackageDocument",
+          "tablename": "oe_tendering_package_document",
+          "docstring": "A project document the buyer sends out with a package (drawings, specifications).\n\nBidders read the list and download each file through their own link; the\ndocument itself stays in Documents and is never copied.",
+          "columns": [
+            {
+              "name": "package_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_tendering_package.id"
+            },
+            {
+              "name": "document_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false
+            },
+            {
+              "name": "added_by",
               "annotation": "Mapped[str | None]",
               "sql_type": "String",
               "nullable": true
@@ -320434,6 +325038,86 @@
         },
         {
           "method": "GET",
+          "path": "/packages/{package_id}/bill-source/",
+          "handler": "get_package_bill_source",
+          "response_model": "BillSourceState",
+          "request_schema": "TenderingService"
+        },
+        {
+          "method": "GET",
+          "path": "/packages/{package_id}/export/gaeb-x86/",
+          "handler": "export_package_gaeb_x86",
+          "request_schema": "TenderingService"
+        },
+        {
+          "method": "GET",
+          "path": "/packages/{package_id}/bid-files/",
+          "handler": "list_package_bid_files",
+          "response_model": "BidFileListResponse",
+          "request_schema": "TenderingService"
+        },
+        {
+          "method": "GET",
+          "path": "/packages/{package_id}/bid-files/{file_id}/download/",
+          "handler": "download_package_bid_file",
+          "request_schema": "TenderingService"
+        },
+        {
+          "method": "GET",
+          "path": "/packages/{package_id}/documents/",
+          "handler": "list_package_documents",
+          "response_model": "PackageDocumentListResponse",
+          "request_schema": "TenderingService"
+        },
+        {
+          "method": "POST",
+          "path": "/packages/{package_id}/documents/",
+          "handler": "attach_package_documents",
+          "response_model": "list[PackageDocumentResponse]",
+          "request_schema": "PackageDocumentsAttach"
+        },
+        {
+          "method": "DELETE",
+          "path": "/packages/{package_id}/documents/{link_id}/",
+          "handler": "detach_package_document",
+          "request_schema": "TenderingService"
+        },
+        {
+          "method": "POST",
+          "path": "/bid-portal/{token}/x84/check/",
+          "handler": "bid_portal_x84_check",
+          "response_model": "X84ImportPreview",
+          "request_schema": "Request"
+        },
+        {
+          "method": "POST",
+          "path": "/bid-portal/{token}/x84/",
+          "handler": "bid_portal_x84_submit",
+          "response_model": "BidPortalView",
+          "request_schema": "Request"
+        },
+        {
+          "method": "POST",
+          "path": "/bid-portal/{token}/files/",
+          "handler": "bid_portal_upload_file",
+          "response_model": "BidPortalView",
+          "request_schema": "Request"
+        },
+        {
+          "method": "POST",
+          "path": "/bid-portal/{token}/decline/",
+          "handler": "bid_portal_decline",
+          "response_model": "BidPortalView",
+          "request_schema": "BidPortalDeclineRequest"
+        },
+        {
+          "method": "GET",
+          "path": "/bid-portal/{token}/documents/{link_id}/",
+          "handler": "bid_portal_document",
+          "request_schema": "Request"
+        },
+        {
+          "method": "GET",
           "path": "/packages/{package_id}/addenda/",
           "handler": "list_package_addenda",
           "response_model": "list[AddendumResponse]",
@@ -320563,6 +325247,47 @@
           "path": "/bids/{bid_id}/integrity/",
           "handler": "check_bid_integrity",
           "response_model": "BidIntegrityResponse",
+          "request_schema": "TenderingService"
+        },
+        {
+          "method": "GET",
+          "path": "/packages/{package_id}/header/",
+          "handler": "get_package_header",
+          "response_model": "PackageHeaderResponse",
+          "request_schema": "TenderingService"
+        },
+        {
+          "method": "PUT",
+          "path": "/packages/{package_id}/header/",
+          "handler": "put_package_header",
+          "response_model": "PackageHeaderResponse",
+          "request_schema": "PackageHeaderUpdate"
+        },
+        {
+          "method": "GET",
+          "path": "/packages/{package_id}/rejections/",
+          "handler": "preview_rejections",
+          "response_model": "RejectionsPreview",
+          "request_schema": "TenderingService"
+        },
+        {
+          "method": "POST",
+          "path": "/packages/{package_id}/rejections/send/",
+          "handler": "send_rejections",
+          "response_model": "RejectionsSendResponse",
+          "request_schema": "RejectionsSendRequest"
+        },
+        {
+          "method": "POST",
+          "path": "/packages/{package_id}/award-documents/file/",
+          "handler": "file_award_documents",
+          "response_model": "AwardFilingResponse",
+          "request_schema": "TenderingService"
+        },
+        {
+          "method": "GET",
+          "path": "/packages/{package_id}/award/validation/",
+          "handler": "validate_package_award",
           "request_schema": "TenderingService"
         }
       ],
@@ -320735,6 +325460,16 @@
             {
               "name": "sealed",
               "type": "'SealedInfo | None'",
+              "default": "None"
+            },
+            {
+              "name": "legal_entity_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "trade",
+              "type": "str | None",
               "default": "None"
             }
           ]
@@ -321935,6 +326670,10 @@
               "name": "contacts_linked",
               "type": "int",
               "default": "0"
+            },
+            {
+              "name": "blocked",
+              "type": "list[str]"
             }
           ]
         },
@@ -322997,6 +327736,21 @@
               "default": "None"
             },
             {
+              "name": "declined_at",
+              "type": "datetime | None",
+              "default": "None"
+            },
+            {
+              "name": "decline_reason",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "file_count",
+              "type": "int",
+              "default": "0"
+            },
+            {
               "name": "bid_id",
               "type": "UUID | None",
               "default": "None"
@@ -323139,6 +327893,83 @@
               "name": "saved_at",
               "type": "datetime | None",
               "default": "None"
+            },
+            {
+              "name": "pricing_mode",
+              "type": "str",
+              "default": "'unit_price'"
+            },
+            {
+              "name": "lump_sum",
+              "type": "str | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "BidPortalFile",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "A file the bidder uploaded, as shown back to the bidder and to the buyer.",
+          "fields": [
+            {
+              "name": "id",
+              "type": "UUID"
+            },
+            {
+              "name": "kind",
+              "type": "str"
+            },
+            {
+              "name": "file_name",
+              "type": "str"
+            },
+            {
+              "name": "file_size",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "sha256",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "uploaded_at",
+              "type": "datetime"
+            }
+          ]
+        },
+        {
+          "class_name": "BidPortalDocument",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "A document the buyer sent out with the package; downloaded through the link.",
+          "fields": [
+            {
+              "name": "id",
+              "type": "UUID"
+            },
+            {
+              "name": "name",
+              "type": "str"
+            },
+            {
+              "name": "file_size",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "mime_type",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "revision_code",
+              "type": "str | None",
+              "default": "None"
             }
           ]
         },
@@ -323238,6 +328069,194 @@
               "name": "unpriced_count",
               "type": "int",
               "default": "0"
+            },
+            {
+              "name": "declined_at",
+              "type": "datetime | None",
+              "default": "None"
+            },
+            {
+              "name": "decline_reason",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "files",
+              "type": "list[BidPortalFile]"
+            },
+            {
+              "name": "documents",
+              "type": "list[BidPortalDocument]"
+            }
+          ]
+        },
+        {
+          "class_name": "BidPortalDeclineRequest",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "A firm that will not bid says so, with a reason the buyer reads.",
+          "fields": [
+            {
+              "name": "reason",
+              "type": "str"
+            }
+          ]
+        },
+        {
+          "class_name": "BidFileResponse",
+          "bases": [
+            "BidPortalFile"
+          ],
+          "docstring": "A bidder file as staff see it, with the firm and the Documents row it is filed as.",
+          "fields": [
+            {
+              "name": "invitation_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "recipient_id",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "company_name",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "bid_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "mime_type",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "document_id",
+              "type": "UUID | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "PackageDocumentsAttach",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Project documents to send out with a package.",
+          "fields": [
+            {
+              "name": "document_ids",
+              "type": "list[UUID]"
+            }
+          ]
+        },
+        {
+          "class_name": "PackageDocumentResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "A project document attached to a package.",
+          "fields": [
+            {
+              "name": "id",
+              "type": "UUID"
+            },
+            {
+              "name": "document_id",
+              "type": "UUID"
+            },
+            {
+              "name": "name",
+              "type": "str"
+            },
+            {
+              "name": "file_size",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "mime_type",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "category",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "revision_code",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "added_at",
+              "type": "datetime"
+            }
+          ]
+        },
+        {
+          "class_name": "BillDifference",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "One way the bill moved away from the file it was imported from.",
+          "fields": [
+            {
+              "name": "ordinal",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "field",
+              "type": "str"
+            },
+            {
+              "name": "was",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "now",
+              "type": "str",
+              "default": "''"
+            }
+          ]
+        },
+        {
+          "class_name": "BillSourceState",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "The imported file behind a package's bill and whether the bill still matches it.",
+          "fields": [
+            {
+              "name": "source",
+              "type": "dict[str, Any] | None",
+              "default": "None"
+            },
+            {
+              "name": "changed",
+              "type": "bool",
+              "default": "False"
+            },
+            {
+              "name": "differences",
+              "type": "list[BillDifference]"
+            },
+            {
+              "name": "awarded_bid_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "rule_results",
+              "type": "list[dict[str, Any]]"
             }
           ]
         },
@@ -323259,6 +328278,16 @@
             {
               "name": "currency",
               "type": "str | None"
+            },
+            {
+              "name": "pricing_mode",
+              "type": "Literal['unit_price', 'lump_sum']",
+              "default": "'unit_price'"
+            },
+            {
+              "name": "lump_sum",
+              "type": "Any",
+              "default": "None"
             }
           ]
         },
@@ -323384,6 +328413,10 @@
               "name": "blocking",
               "type": "bool",
               "default": "False"
+            },
+            {
+              "name": "rule_results",
+              "type": "list[dict[str, Any]]"
             }
           ]
         },
@@ -323413,18 +328446,448 @@
               "default": "50"
             }
           ]
+        },
+        {
+          "class_name": "PackageHeaderUpdate",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "What a buyer sets on the package header. Only the fields sent are changed.",
+          "fields": [
+            {
+              "name": "legal_entity_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "trade",
+              "type": "str | None"
+            },
+            {
+              "name": "cost_line_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "issue_date",
+              "type": "date | None",
+              "default": "None"
+            },
+            {
+              "name": "questions_until",
+              "type": "date | None",
+              "default": "None"
+            },
+            {
+              "name": "bids_due",
+              "type": "date | None",
+              "default": "None"
+            },
+            {
+              "name": "award_planned",
+              "type": "date | None",
+              "default": "None"
+            },
+            {
+              "name": "buyer_id",
+              "type": "str | None"
+            },
+            {
+              "name": "estimator_id",
+              "type": "str | None"
+            },
+            {
+              "name": "site_manager_id",
+              "type": "str | None"
+            },
+            {
+              "name": "approver_id",
+              "type": "str | None"
+            }
+          ]
+        },
+        {
+          "class_name": "IssuingEntity",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "The company letters and the contract are issued in, and why it is that one.",
+          "fields": [
+            {
+              "name": "id",
+              "type": "UUID"
+            },
+            {
+              "name": "code",
+              "type": "str"
+            },
+            {
+              "name": "name",
+              "type": "str"
+            },
+            {
+              "name": "source",
+              "type": "Literal['package', 'project']"
+            }
+          ]
+        },
+        {
+          "class_name": "HeaderCostLine",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "id",
+              "type": "UUID"
+            },
+            {
+              "name": "code",
+              "type": "str"
+            },
+            {
+              "name": "description",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "budget",
+              "type": "str",
+              "default": "'0'"
+            }
+          ]
+        },
+        {
+          "class_name": "PackageHeaderResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "package_id",
+              "type": "UUID"
+            },
+            {
+              "name": "legal_entity_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "trade",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "cost_line_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "issue_date",
+              "type": "date | None",
+              "default": "None"
+            },
+            {
+              "name": "questions_until",
+              "type": "date | None",
+              "default": "None"
+            },
+            {
+              "name": "bids_due",
+              "type": "date | None",
+              "default": "None"
+            },
+            {
+              "name": "award_planned",
+              "type": "date | None",
+              "default": "None"
+            },
+            {
+              "name": "buyer_id",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "estimator_id",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "site_manager_id",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "approver_id",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "issuing_entity",
+              "type": "IssuingEntity | None",
+              "default": "None"
+            },
+            {
+              "name": "cost_line",
+              "type": "HeaderCostLine | None",
+              "default": "None"
+            },
+            {
+              "name": "budget",
+              "type": "str",
+              "default": "'0'"
+            },
+            {
+              "name": "currency",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "active_entity_count",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "warnings",
+              "type": "list[str]"
+            }
+          ]
+        },
+        {
+          "class_name": "RejectionRow",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "bid_id",
+              "type": "UUID"
+            },
+            {
+              "name": "company_name",
+              "type": "str"
+            },
+            {
+              "name": "email",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "notified_at",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "state",
+              "type": "str",
+              "default": "'pending'"
+            },
+            {
+              "name": "last_error",
+              "type": "str | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "RejectionsPreview",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "package_id",
+              "type": "UUID"
+            },
+            {
+              "name": "awarded",
+              "type": "bool"
+            },
+            {
+              "name": "issuing_entity",
+              "type": "IssuingEntity | None",
+              "default": "None"
+            },
+            {
+              "name": "rows",
+              "type": "list[RejectionRow]"
+            },
+            {
+              "name": "pending",
+              "type": "int",
+              "default": "0"
+            }
+          ]
+        },
+        {
+          "class_name": "RejectionsSendRequest",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "bid_ids",
+              "type": "list[UUID]"
+            }
+          ]
+        },
+        {
+          "class_name": "RejectionsSendResponse",
+          "bases": [
+            "RejectionsPreview"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "sent",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "failed",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "filed",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "backend",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "smtp_configured",
+              "type": "bool",
+              "default": "False"
+            }
+          ]
+        },
+        {
+          "class_name": "FiledDocument",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "kind",
+              "type": "Literal['contract', 'award_record', 'award_letter', 'rejection_letter']"
+            },
+            {
+              "name": "document_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "name",
+              "type": "str"
+            },
+            {
+              "name": "state",
+              "type": "str"
+            },
+            {
+              "name": "reason",
+              "type": "str | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "AwardFilingResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "package_id",
+              "type": "UUID"
+            },
+            {
+              "name": "documents",
+              "type": "list[FiledDocument]"
+            }
+          ]
+        },
+        {
+          "class_name": "BidFileListResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Files bidders uploaded through their links.",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[BidFileResponse]"
+            },
+            {
+              "name": "total",
+              "type": "int"
+            },
+            {
+              "name": "offset",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "limit",
+              "type": "int",
+              "default": "50"
+            }
+          ]
+        },
+        {
+          "class_name": "PackageDocumentListResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Project documents sent out with a package.",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[PackageDocumentResponse]"
+            },
+            {
+              "name": "total",
+              "type": "int"
+            },
+            {
+              "name": "offset",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "limit",
+              "type": "int",
+              "default": "50"
+            }
+          ]
         }
       ],
       "import_dependencies": [
         "bid_management",
         "boq",
         "contacts",
+        "contracts",
+        "costmodel",
         "doc_templates",
+        "documents",
         "guarantees",
+        "legal_entities",
         "letter_templates",
         "notifications",
         "price_breakdown",
         "projects",
+        "subcontractors",
         "teams",
         "users"
       ]
@@ -326066,6 +331529,7 @@
         "bim_scorecard.py",
         "bim_scorecard_service.py",
         "bim_validation_service.py",
+        "data_paths.py",
         "events.py",
         "ids_importer.py",
         "manifest.py",
@@ -334863,10 +340327,10 @@
     },
     {
       "name": "bid-portal",
-      "ts_files": 5,
+      "ts_files": 7,
       "css_files": 0,
-      "test_files": 1,
-      "total_files": 5
+      "test_files": 2,
+      "total_files": 7
     },
     {
       "name": "bim",
@@ -334940,6 +340404,13 @@
     },
     {
       "name": "cde",
+      "ts_files": 10,
+      "css_files": 0,
+      "test_files": 1,
+      "total_files": 10
+    },
+    {
+      "name": "central-purchasing",
       "ts_files": 10,
       "css_files": 0,
       "test_files": 1,
@@ -335182,6 +340653,13 @@
       "css_files": 0,
       "test_files": 15,
       "total_files": 34
+    },
+    {
+      "name": "data-paths",
+      "ts_files": 13,
+      "css_files": 0,
+      "test_files": 2,
+      "total_files": 13
     },
     {
       "name": "data-security",
@@ -336291,10 +341769,10 @@
     },
     {
       "name": "subcontractors",
-      "ts_files": 42,
+      "ts_files": 45,
       "css_files": 0,
-      "test_files": 13,
-      "total_files": 42
+      "test_files": 14,
+      "total_files": 45
     },
     {
       "name": "submittals",
@@ -336312,10 +341790,17 @@
     },
     {
       "name": "survey",
-      "ts_files": 29,
+      "ts_files": 44,
       "css_files": 0,
-      "test_files": 6,
-      "total_files": 29
+      "test_files": 9,
+      "total_files": 44
+    },
+    {
+      "name": "survey-calc",
+      "ts_files": 7,
+      "css_files": 0,
+      "test_files": 2,
+      "total_files": 7
     },
     {
       "name": "sustainability",
@@ -336368,10 +341853,10 @@
     },
     {
       "name": "tendering",
-      "ts_files": 37,
+      "ts_files": 48,
       "css_files": 0,
-      "test_files": 14,
-      "total_files": 37
+      "test_files": 17,
+      "total_files": 48
     },
     {
       "name": "timeline",
@@ -336704,6 +342189,17 @@
       "transmittals",
       "users"
     ],
+    "central_purchasing": [
+      "bid_management",
+      "contracts",
+      "costmodel",
+      "framework_agreements",
+      "legal_entities",
+      "procurement",
+      "projects",
+      "subcontractors",
+      "users"
+    ],
     "certified_payroll": [
       "payroll",
       "projects",
@@ -336906,6 +342402,7 @@
       "finance",
       "guarantees",
       "i18n_foundation",
+      "legal_entities",
       "price_index",
       "progress",
       "projects",
@@ -337022,7 +342519,8 @@
       "users"
     ],
     "dach_pack": [
-      "finance"
+      "finance",
+      "subcontractors"
     ],
     "daily_diary": [
       "documents",
@@ -337064,6 +342562,16 @@
     "dashboards": [
       "bim_hub",
       "projects",
+      "users"
+    ],
+    "dataflow": [
+      "contacts",
+      "contracts",
+      "procurement",
+      "projects",
+      "subcontractors",
+      "teams",
+      "tendering",
       "users"
     ],
     "deadlines": [
@@ -337521,6 +343029,7 @@
     "land_parcels": [
       "boq",
       "projects",
+      "setting_out",
       "survey_core"
     ],
     "latam_pack": [],
@@ -338308,7 +343817,9 @@
       "changeorders",
       "contacts",
       "contracts",
+      "doc_templates",
       "finance",
+      "geo_hub",
       "notifications",
       "projects",
       "tax_withholding",
@@ -338331,9 +343842,13 @@
     ],
     "surfaces_volumes": [
       "boq",
+      "dwg_takeoff",
+      "land_parcels",
       "mine_survey",
+      "monitoring",
       "progress",
       "projects",
+      "setting_out",
       "stockpiles",
       "survey_core",
       "users"
@@ -338341,7 +343856,8 @@
     "survey_core": [
       "cad",
       "geo_hub",
-      "projects"
+      "projects",
+      "surfaces_volumes"
     ],
     "takeoff": [
       "ai",
@@ -338377,12 +343893,17 @@
       "bid_management",
       "boq",
       "contacts",
+      "contracts",
+      "costmodel",
       "doc_templates",
+      "documents",
       "guarantees",
+      "legal_entities",
       "letter_templates",
       "notifications",
       "price_breakdown",
       "projects",
+      "subcontractors",
       "teams",
       "users"
     ],
@@ -338462,17 +343983,17 @@
     ]
   },
   "statistics": {
-    "backend_modules": 258,
-    "modules_with_manifests": 258,
-    "total_models": 960,
-    "total_columns": 11271,
-    "total_relationships": 261,
-    "total_routes": 5489,
-    "total_schemas": 5073,
-    "total_python_files": 3598,
-    "frontend_features": 249,
-    "frontend_ts_files": 4387,
-    "frontend_backend_mapped": 223
+    "backend_modules": 260,
+    "modules_with_manifests": 260,
+    "total_models": 974,
+    "total_columns": 11431,
+    "total_relationships": 264,
+    "total_routes": 5552,
+    "total_schemas": 5169,
+    "total_python_files": 3684,
+    "frontend_features": 252,
+    "frontend_ts_files": 4448,
+    "frontend_backend_mapped": 224
   },
   "frontend_backend_mapping": {
     "about": null,
@@ -338508,6 +344029,7 @@
     "cases": "cases",
     "catalog": "catalog",
     "cde": "cde",
+    "central-purchasing": "central_purchasing",
     "certified-payroll": "certified_payroll",
     "change-intelligence": "change_intelligence",
     "changeorders": "changeorders",
@@ -338542,6 +344064,7 @@
     "daily-diary": "daily_diary",
     "dashboard": "dashboard",
     "dashboards": "dashboards",
+    "data-paths": null,
     "data-security": null,
     "deadlines": "deadlines",
     "defects-liability": "defects_liability",
@@ -338704,6 +344227,7 @@
     "submittals": "submittals",
     "supplier-catalogs": "supplier_catalogs",
     "survey": "mine_survey",
+    "survey-calc": null,
     "sustainability": "ai",
     "takeoff": "takeoff",
     "tasks": "tasks",
