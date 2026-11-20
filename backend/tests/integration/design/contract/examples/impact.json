@@ -1,0 +1,53 @@
+{
+  "schema": "ddc-impact/1",
+  "revision_id": "95bb145e-f295-43dd-a059-d27876741295",
+  "estimate": true,
+  "model_delta_by_type": [
+    {
+      "type_key": "wall/party-240",
+      "ifc_class": "IfcWall",
+      "count_delta": -1,
+      "area_m2_delta": -14.2,
+      "volume_m3_delta": -3.41
+    },
+    {
+      "type_key": "space/living",
+      "ifc_class": "IfcSpace",
+      "count_delta": -1,
+      "area_m2_delta": 2.1
+    }
+  ],
+  "rows": [
+    {
+      "rule": "wall_ext",
+      "label": "Außenwände",
+      "cost_group": "330",
+      "unit": "m2",
+      "position_id": "7d1e9c3a-2b44-4f61-9a0d-1c2b3d4e5f60",
+      "ordinal": "330.001",
+      "new_position": false,
+      "current_quantity": "90.0000",
+      "model_quantity_now": "82.5000",
+      "model_quantity_new": "88.1000",
+      "new_quantity": "90.0000",
+      "quantity_delta": "0.0000",
+      "override": true,
+      "override_quantity": "90.0000",
+      "unit_rate": "10.0000",
+      "cost_delta": "0.0000",
+      "flags": [
+        "override"
+      ],
+      "elements": {
+        "added": [],
+        "removed": []
+      }
+    }
+  ],
+  "totals": {
+    "current": "900.0000",
+    "after": "900.0000",
+    "delta": "0.0000",
+    "unpriced_positions": 0
+  }
+}

@@ -1,0 +1,216 @@
+{
+  "schema": "ddc-context/1",
+  "link_versions": [
+    1
+  ],
+  "project": {
+    "id": "746402cb-14a8-430c-b3b9-9c6908fa75d7",
+    "name": "Wohnhaus Beispielstraße",
+    "country": "DE",
+    "currency": "EUR",
+    "locale": "de"
+  },
+  "permissions": {
+    "can_publish": true,
+    "can_accept": false,
+    "can_generate": true
+  },
+  "lock": {
+    "held_by": "Planer",
+    "mine": true,
+    "expires_at": "2026-11-12T13:00:00Z"
+  },
+  "latest_revision": {
+    "revision_id": "68143a44-27fb-47bb-aa7e-c1229f23a2dc",
+    "number": 1,
+    "status": "published"
+  },
+  "brief": {
+    "schema": "ddc-brief/1",
+    "brief_id": "d687671c-a6c3-4a73-8aa1-230664a927be",
+    "project_id": "746402cb-14a8-430c-b3b9-9c6908fa75d7",
+    "version": 3,
+    "name": "Wohnhaus Beispielstraße",
+    "country": "DE",
+    "locale": "de",
+    "norm_pack": "de",
+    "depth_level": "D2",
+    "use": {
+      "category": "residential_multi",
+      "detail": "Mehrfamilienhaus, ein Treppenhaus"
+    },
+    "site": {
+      "plot": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              12.37,
+              51.34
+            ],
+            [
+              12.370575,
+              51.34
+            ],
+            [
+              12.370575,
+              51.340162
+            ],
+            [
+              12.37,
+              51.340162
+            ],
+            [
+              12.37,
+              51.34
+            ]
+          ]
+        ]
+      },
+      "setbacks_m": {
+        "front": 3.0,
+        "side": 3.0,
+        "rear": 3.0
+      },
+      "max_floors": 5
+    },
+    "massing": {
+      "floors_above": 5,
+      "floors_below": 1,
+      "floor_height_m": 3.0,
+      "footprint": {
+        "width_m": 34.0,
+        "depth_m": 12.0
+      },
+      "lift": true
+    },
+    "programme": {
+      "units": [
+        {
+          "name": "2-Zimmer",
+          "count": 10,
+          "area_m2": 52,
+          "rooms": [
+            {
+              "kind": "living"
+            },
+            {
+              "kind": "bedroom"
+            },
+            {
+              "kind": "kitchen"
+            },
+            {
+              "kind": "bath"
+            },
+            {
+              "kind": "hall"
+            }
+          ]
+        },
+        {
+          "name": "3-Zimmer",
+          "count": 10,
+          "area_m2": 74,
+          "rooms": [
+            {
+              "kind": "living"
+            },
+            {
+              "kind": "bedroom",
+              "count": 2
+            },
+            {
+              "kind": "kitchen"
+            },
+            {
+              "kind": "bath"
+            },
+            {
+              "kind": "hall"
+            },
+            {
+              "kind": "storage"
+            }
+          ]
+        }
+      ],
+      "spaces": [
+        {
+          "kind": "technical",
+          "name": "Technik",
+          "floors": [
+            -1
+          ],
+          "area_m2": 40
+        }
+      ]
+    },
+    "structure": {
+      "system": "masonry",
+      "foundation": "raft"
+    },
+    "envelope": {
+      "roof": "flat"
+    },
+    "quality_level": "standard",
+    "budget": {
+      "amount": 4500000,
+      "currency": "EUR",
+      "includes_vat": true,
+      "cost_groups": "DIN 276 KG 300+400"
+    },
+    "generator": {
+      "template": "apartment_section"
+    },
+    "provenance": {
+      "/massing/floors_above": {
+        "status": "confirmed",
+        "confirmed_by": "beca49d0-f991-4f31-b0b2-e720d8b4292f",
+        "confirmed_at": "2026-11-12T10:15:00Z",
+        "sources": [
+          {
+            "kind": "document",
+            "document_id": "2344d010-88d8-4e0c-811d-219134150421",
+            "page": 2,
+            "quote": "fünf Vollgeschosse"
+          }
+        ]
+      },
+      "/site/plot": {
+        "status": "confirmed",
+        "sources": [
+          {
+            "kind": "map"
+          }
+        ]
+      },
+      "/structure/system": {
+        "status": "proposed",
+        "note": "Not stated in the documents."
+      }
+    },
+    "questions": [
+      {
+        "id": "q1",
+        "pointer": "/structure/system",
+        "text": "Tragwerk?",
+        "options": [
+          "masonry",
+          "concrete_walls",
+          "timber"
+        ],
+        "default": "masonry",
+        "reason": "missing"
+      }
+    ]
+  },
+  "ai": {
+    "protocol": "local",
+    "endpoint": "http://127.0.0.1:11434/v1",
+    "model": "local-default",
+    "api_key": null,
+    "local_only": true,
+    "expires_at": "2026-11-12T19:00:00Z"
+  }
+}

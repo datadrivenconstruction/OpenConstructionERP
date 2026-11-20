@@ -1,0 +1,31 @@
+{
+  "schema": "ddc-revision/1",
+  "revision_id": "95bb145e-f295-43dd-a059-d27876741295",
+  "project_ref": {
+    "erp_project_id": "746402cb-14a8-430c-b3b9-9c6908fa75d7",
+    "erp_url": "http://127.0.0.1:8000",
+    "name": "Wohnhaus Beispielstraße"
+  },
+  "parent_revision_id": "68143a44-27fb-47bb-aa7e-c1229f23a2dc",
+  "created_at": "2026-11-12T11:40:00Z",
+  "author": { "display_name": "Planer", "erp_user_id": "beca49d0-f991-4f31-b0b2-e720d8b4292f" },
+  "editor_version": "0.9.0",
+  "message": "Fifth floor: two 2-room units merged into one 4-room unit.",
+  "source": { "kind": "edited" },
+  "depth_level": "D2",
+  "units": { "length": "m", "area": "m2", "volume": "m3", "mass": "kg", "angle": "deg" },
+  "base_point": { "lat": 51.34, "lon": 12.37, "elevation_m": 112.0, "rotation_deg": 0.0, "crs": "EPSG:25833" },
+  "counts": { "elements": 4, "storeys": 6, "types": 3, "spaces": 0, "triangles": 48 },
+  "locale": "de",
+  "country": "DE",
+  "norm_pack": "de",
+  "checks": { "errors": 0, "warnings": 2, "issues_file": "issues.bcfzip" },
+  "files": [
+    { "path": "model.ddc", "role": "source", "sha256": "0000000000000000000000000000000000000000000000000000000000000001", "bytes": 81234 },
+    { "path": "geometry.glb", "role": "geometry", "sha256": "0000000000000000000000000000000000000000000000000000000000000002", "bytes": 4096 },
+    { "path": "elements.parquet", "role": "elements", "sha256": "0000000000000000000000000000000000000000000000000000000000000003", "bytes": 2048 },
+    { "path": "diff.json", "role": "diff", "sha256": "0000000000000000000000000000000000000000000000000000000000000004", "bytes": 900 },
+    { "path": "sheets/EG.pdf", "role": "sheet", "sha256": "0000000000000000000000000000000000000000000000000000000000000005", "bytes": 120000 },
+    { "path": "issues.bcfzip", "role": "issues", "sha256": "0000000000000000000000000000000000000000000000000000000000000006", "bytes": 3000 }
+  ]
+}

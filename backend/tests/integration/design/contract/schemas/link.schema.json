@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openconstructiondesign.org/schemas/ddc-link/1",
+  "title": "ddc-link/1 — the .ddclink file the ERP hands to the editor",
+  "description": "Opened by the editor through the OS file association. The code is single-use and expires 5 minutes after issue; the editor exchanges it at POST /api/v1/design/link/exchange for a project-scoped token kept in the OS key store.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "erp_url",
+    "project_id",
+    "code",
+    "expires_at",
+    "action"
+  ],
+  "properties": {
+    "schema": {
+      "const": "ddc-link/1"
+    },
+    "erp_url": {
+      "$ref": "#/$defs/erpUrl"
+    },
+    "project_id": {
+      "$ref": "#/$defs/uuid"
+    },
+    "project_name": {
+      "type": "string",
+      "maxLength": 200
+    },
+    "code": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]{32,128}$"
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "action": {
+      "enum": [
+        "open",
+        "new",
+        "generate"
+      ]
+    },
+    "revision_id": {
+      "$ref": "#/$defs/uuid",
+      "description": "Required when action = open."
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "action": {
+            "const": "open"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "revision_id"
+        ]
+      }
+    }
+  ],
+  "$defs": {
+    "uuid": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+    },
+    "erpUrl": {
+      "type": "string",
+      "pattern": "^(https://[A-Za-z0-9.-]+(:[0-9]{1,5})?|http://(localhost|127(\\.[0-9]{1,3}){3}|\\[::1\\])(:[0-9]{1,5})?)(/[^?#@\\s]*)?$",
+      "description": "https, or http only for a loopback host; no credentials, query or fragment."
+    }
+  }
+}

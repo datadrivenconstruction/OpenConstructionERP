@@ -2868,5 +2868,15 @@
     "coverage": "Qamralgan loyiha maydoni",
     "findings": "Topilmalar",
     "map": "Og'ish xaritasi (har blokdagi eng yomon katak)"
+  },
+  "design": {
+    "estimate_unpriced": {
+      "fail": "'{position}' pozitsiyasida birlik narxi yo'q, shuning uchun loyiha smetasi uni hisobga olmaydi.",
+      "suggestion": "Birlik narxini kiriting yoki xarajat pozitsiyasini tanlang."
+    },
+    "revision_awaiting_decision": {
+      "fail": "Model reviziyasi {number} {days} kundan beri qabul qilinishini kutmoqda.",
+      "suggestion": "Smeta joriy modelga mos bo'lishi uchun reviziyani qabul qiling yoki rad eting."
+    }
   }
 }

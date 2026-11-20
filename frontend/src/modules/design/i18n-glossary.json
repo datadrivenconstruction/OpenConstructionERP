@@ -1,0 +1,2318 @@
+{
+ "design brief": {
+  "de": "Planungsaufgabe",
+  "fr": "programme",
+  "es": "resumen de diseño",
+  "ar": "موجز التصميم",
+  "bg": "задание за проектиране",
+  "bn": "ডিজাইন ব্রিফ",
+  "cs": "zadání návrhu",
+  "da": "Designoplæg",
+  "el": "προδιαγραφή σχεδιασμού",
+  "es-CL": "resumen de diseño",
+  "es-CO": "resumen de diseño",
+  "es-MX": "resumen de diseño",
+  "et": "lähteülesanne",
+  "fa": "شرح کار طراحی",
+  "fi": "suunnittelun lähtötiedot",
+  "fil": "design brief",
+  "he": "תיאור עבודת תכנון",
+  "hr": "projektni zadatak",
+  "hu": "tervezési kiírás",
+  "id": "brief desain",
+  "ja": "設計条件書",
+  "kk": "жобалау техникалық тапсырмасы",
+  "ko": "설계 개요",
+  "ky": "долбоорлоо техникалык тапшырмасы",
+  "mn": "дизайны даалгавар",
+  "nl": "briefing",
+  "no": "Prosjekteringsoppdrag",
+  "pl": "brief projektowy",
+  "pt": "briefing de design",
+  "ro": "brief de proiectare",
+  "sv": "brief",
+  "th": "บรีฟงานออกแบบ",
+  "tr": "tasarım brifi",
+  "ur": "ڈیزائن بریف",
+  "uz": "loyihalash topshirig‘i",
+  "vi": "bản yêu cầu thiết kế"
+ },
+ "plot": {
+  "de": "Grundstück",
+  "fr": "parcelle",
+  "es": "parcela",
+  "pt-BR": "terreno",
+  "zh": "地块",
+  "hi": "प्लॉट",
+  "ar": "قطعة الأرض",
+  "bg": "парцел",
+  "bn": "প্লট",
+  "cs": "parcela",
+  "da": "Grund",
+  "el": "οικόπεδο",
+  "es-CL": "terreno",
+  "es-CO": "lote",
+  "es-MX": "predio",
+  "et": "krunt",
+  "fa": "قطعه زمین",
+  "fi": "tontti",
+  "fil": "lote",
+  "he": "חלקה",
+  "hr": "parcela",
+  "hu": "telek",
+  "id": "lahan",
+  "ja": "敷地",
+  "kk": "учаске",
+  "ko": "대지",
+  "ky": "участок",
+  "mn": "газрын хэсэг",
+  "nl": "perceel",
+  "no": "Tomt",
+  "pl": "działka",
+  "pt": "lote",
+  "ro": "teren",
+  "sv": "tomt",
+  "th": "ที่ดิน",
+  "tr": "arsa",
+  "ur": "پلاٹ",
+  "uz": "uchastka",
+  "vi": "thửa đất"
+ },
+ "site": {
+  "de": "Grundstück",
+  "es": "terreno",
+  "pt-BR": "terreno",
+  "zh": "场地",
+  "hi": "साइट",
+  "ar": "الموقع",
+  "cs": "pozemek",
+  "da": "Grund",
+  "et": "krunt",
+  "fa": "محل",
+  "fi": "tontti",
+  "fil": "site",
+  "he": "אתר",
+  "hr": "lokacija / građevinska čestica",
+  "mn": "барилгын талбай",
+  "no": "Tomt",
+  "pl": "teren / działka",
+  "pt": "terreno"
+ },
+ "setback": {
+  "de": "Grenzabstand",
+  "es": "retranqueo",
+  "pt-BR": "recuo",
+  "zh": "建筑退线",
+  "hi": "सेटबैक",
+  "ar": "الارتداد",
+  "bg": "отстояние",
+  "bn": "সেটব্যাক",
+  "cs": "odstup",
+  "da": "Tilbagetrækning",
+  "el": "απόσταση από το όριο",
+  "es-CL": "retiro",
+  "es-CO": "aislamiento",
+  "es-MX": "restricción",
+  "et": "kaugus krundi piirist",
+  "fa": "عقب‌نشینی",
+  "fi": "etäisyys tontin rajasta",
+  "fil": "setback",
+  "he": "קו בניין",
+  "hr": "odmak",
+  "hu": "előkert / oldalkert / hátsókert",
+  "id": "garis sempadan",
+  "ja": "セットバック",
+  "kk": "шегініс",
+  "ko": "이격거리",
+  "ky": "чегинүү",
+  "mn": "ухралт",
+  "no": "Avstand",
+  "pl": "odległość od granicy",
+  "pt": "afastamento",
+  "ro": "retragere",
+  "th": "ระยะร่น",
+  "tr": "çekme mesafesi",
+  "ur": "سیٹ بیک",
+  "uz": "chekinish",
+  "vi": "khoảng lùi"
+ },
+ "maximum floors": {
+  "de": "Maximale Geschosszahl"
+ },
+ "floor area ratio": {
+  "de": "Geschossflächenzahl",
+  "fr": "coefficient d’occupation des sols",
+  "es": "coeficiente de edificabilidad",
+  "pt-BR": "coeficiente de aproveitamento",
+  "zh": "容积率",
+  "hi": "फ़्लोर एरिया अनुपात (FAR)",
+  "ar": "معامل البناء",
+  "bg": "коефициент на интензивност",
+  "bn": "ফ্লোর এরিয়া রেশিও",
+  "cs": "koeficient podlažních ploch",
+  "da": "Bebyggelsesprocent",
+  "el": "συντελεστής δόμησης",
+  "es-CL": "coeficiente de constructibilidad",
+  "es-CO": "índice de construcción",
+  "es-MX": "coeficiente de utilización",
+  "et": "hoonestustihedus",
+  "fa": "تراکم ساختمانی",
+  "fi": "tehokkuusluku",
+  "fil": "floor area ratio",
+  "he": "אחוזי בנייה",
+  "hr": "koeficijent iskoristivosti",
+  "hu": "szintterületi mutató",
+  "id": "koefisien lantai bangunan",
+  "ja": "容積率",
+  "kk": "қабат ауданының коэффициенті",
+  "ko": "용적률",
+  "ky": "кабат аянтынын коэффициенти",
+  "mn": "давхрын талбайн харьцаа",
+  "nl": "FSI (bvo-verhouding)",
+  "no": "Utnyttelsesgrad",
+  "pl": "wskaźnik intensywności zabudowy",
+  "pt": "índice de utilização",
+  "ro": "coeficient de utilizare a terenului (CUT)",
+  "sv": "exploateringsgrad",
+  "th": "อัตราส่วนพื้นที่อาคารรวมต่อที่ดิน",
+  "tr": "emsal",
+  "ur": "فلور ایریا ریشو",
+  "uz": "qavat maydoni koeffitsienti",
+  "vi": "hệ số sử dụng đất"
+ },
+ "site coverage": {
+  "de": "Grundflächenzahl",
+  "fr": "emprise au sol",
+  "es": "ocupación de la parcela",
+  "pt-BR": "taxa de ocupação",
+  "zh": "建筑密度",
+  "hi": "ग्राउंड कवरेज",
+  "ar": "نسبة الإشغال",
+  "bg": "плътност на застрояване",
+  "cs": "zastavěnost pozemku",
+  "da": "Dækningsgrad",
+  "el": "συντελεστής κάλυψης",
+  "et": "ehitusaluse pinna osakaal",
+  "fa": "سطح اشغال",
+  "fi": "rakennuspeitto",
+  "fil": "site coverage",
+  "he": "תכסית",
+  "hr": "koeficijent izgrađenosti",
+  "hu": "beépítettség",
+  "id": "koefisien dasar bangunan",
+  "ja": "建ぺい率",
+  "kk": "учаскені жабу коэффициенті",
+  "ko": "건폐율",
+  "ky": "участокту каптоо коэффициенти",
+  "mn": "барилгажилтын коэффициент",
+  "no": "Bebyggelsesgrad",
+  "pl": "współczynnik zabudowy",
+  "pt": "taxa de ocupação",
+  "ro": "coeficient de ocupare a terenului (POT)",
+  "th": "อัตราส่วนพื้นที่อาคารปกคลุมดิน",
+  "tr": "taban oturumu",
+  "uz": "uchastkani qoplash koeffitsienti",
+  "vi": "mật độ xây dựng"
+ },
+ "ground elevation": {
+  "de": "Geländehöhe",
+  "es": "cota del terreno",
+  "zh": "场地标高",
+  "ar": "منسوب الأرض"
+ },
+ "massing": {
+  "de": "Baukörper",
+  "fr": "volumétrie",
+  "es": "volumetría",
+  "pt-BR": "volumetria",
+  "zh": "体量",
+  "hi": "आयतन (मासिंग)",
+  "ar": "الكتلة البنائية",
+  "nl": "bouwmassa",
+  "sv": "byggnadsvolym",
+  "uz": "hajmiy yechim",
+  "vi": "hình khối"
+ },
+ "programme": {
+  "de": "Raumprogramm",
+  "es": "programa",
+  "pt-BR": "programa",
+  "zh": "功能构成",
+  "hi": "स्पेस प्रोग्राम",
+  "ar": "البرنامج الوظيفي",
+  "en-GB": "programme",
+  "en-US": "program",
+  "et": "ruumiprogramm",
+  "fa": "برنامه‌ی فیزیکی",
+  "fi": "tilaohjelma",
+  "he": "תוכנית פונקציונלית"
+ },
+ "structure": {
+  "de": "Tragwerk",
+  "pt-BR": "estrutura",
+  "ar": "الهيكل",
+  "he": "קונסטרוקציה"
+ },
+ "structural system": {
+  "de": "Tragsystem",
+  "fr": "système porteur",
+  "pt-BR": "sistema estrutural",
+  "zh": "结构体系",
+  "hi": "संरचना प्रणाली",
+  "ar": "النظام الإنشائي"
+ },
+ "structural grid": {
+  "de": "Tragwerksraster",
+  "fr": "trame porteuse",
+  "es": "retícula estructural",
+  "pt-BR": "malha estrutural",
+  "zh": "结构柱网",
+  "hi": "संरचनात्मक ग्रिड",
+  "ar": "الشبكة الإنشائية",
+  "el": "στατικός κάναβος",
+  "hr": "konstrukcijska mreža",
+  "kk": "конструктивтік тор",
+  "th": "ผังแนวเสา"
+ },
+ "envelope": {
+  "de": "Gebäudehülle",
+  "fr": "enveloppe",
+  "es": "envolvente",
+  "pt-BR": "envoltória",
+  "zh": "围护结构",
+  "hi": "बाहरी आवरण",
+  "ar": "غلاف المبنى",
+  "et": "väliskest",
+  "nl": "gebouwschil",
+  "sv": "klimatskal",
+  "uz": "to‘siq konstruksiyalar"
+ },
+ "foundation": {
+  "de": "Gründung",
+  "fr": "fondations",
+  "es": "cimentación",
+  "pt-BR": "fundação",
+  "zh": "基础",
+  "hi": "नींव",
+  "ar": "الأساس",
+  "da": "Fundering",
+  "es-CL": "fundación",
+  "hr": "temeljenje",
+  "id": "pondasi",
+  "ky": "пайдубал",
+  "no": "Fundament",
+  "uz": "poydevor"
+ },
+ "raft foundation": {
+  "de": "Plattengründung",
+  "fr": "radier",
+  "zh": "筏板基础",
+  "ar": "أساس لبشة",
+  "en-GB": "raft",
+  "en-US": "mat foundation",
+  "es-CL": "radier",
+  "pt": "ensoleiramento geral",
+  "ro": "radier",
+  "th": "ฐานรากแผ่"
+ },
+ "strip footings": {
+  "de": "Streifenfundamente",
+  "fr": "semelles filantes",
+  "es": "zapatas corridas",
+  "pt-BR": "sapatas corridas",
+  "hi": "स्ट्रिप फ़ुटिंग",
+  "ar": "أساسات شريطية",
+  "bg": "ивични фундаменти",
+  "el": "πεδιλοδοκοί",
+  "et": "lintvundamendid",
+  "pt": "sapatas corridas",
+  "ro": "fundații continue",
+  "sv": "fundamentsulor",
+  "th": "ฐานรากแถบ"
+ },
+ "piles": {
+  "de": "Pfahlgründung",
+  "fr": "pieux",
+  "es": "pilotes",
+  "pt-BR": "estacas",
+  "hi": "पाइल",
+  "ar": "خوازيق"
+ },
+ "roof": {
+  "de": "Dach",
+  "fr": "toiture",
+  "es": "cubierta",
+  "pt-BR": "cobertura",
+  "hi": "छत",
+  "ar": "السقف",
+  "es-CL": "techumbre",
+  "es-CO": "cubierta",
+  "es-MX": "cubierta",
+  "kk": "шатыр",
+  "ky": "чатыр"
+ },
+ "flat roof": {
+  "de": "Flachdach",
+  "fr": "toit-terrasse",
+  "es": "cubierta plana",
+  "zh": "平屋顶",
+  "hi": "सपाट (फ़्लैट)",
+  "ar": "مسطح",
+  "th": "หลังคาแบน"
+ },
+ "gable roof": {
+  "de": "Satteldach",
+  "fr": "toit à deux pans",
+  "zh": "双坡屋顶",
+  "hi": "गेबल",
+  "ar": "جملوني"
+ },
+ "hip roof": {
+  "de": "Walmdach",
+  "fr": "toit à croupes",
+  "zh": "四坡屋顶",
+  "hi": "हिप",
+  "ar": "هرمي",
+  "et": "valmkatus",
+  "fi": "aumakatto",
+  "he": "גג ארבעה שיפועים",
+  "nl": "schilddak",
+  "sv": "valmtak"
+ },
+ "shed roof": {
+  "de": "Pultdach",
+  "ro": "acoperiș într-o apă"
+ },
+ "roof slope": {
+  "de": "Dachneigung",
+  "fr": "pente de toiture",
+  "es": "pendiente de cubierta",
+  "pt-BR": "inclinação da cobertura",
+  "zh": "屋顶坡度",
+  "hi": "छत का ढलान",
+  "ar": "ميل السقف"
+ },
+ "facade": {
+  "de": "Fassade",
+  "fr": "façade",
+  "es": "fachada",
+  "pt-BR": "fachada",
+  "zh": "外立面",
+  "hi": "फ़ेसेड",
+  "ar": "الواجهة"
+ },
+ "storey": {
+  "de": "Geschoss",
+  "fr": "niveau",
+  "es": "planta",
+  "pt-BR": "pavimento",
+  "zh": "楼层",
+  "hi": "मंज़िल",
+  "bg": "етаж",
+  "bn": "তলা",
+  "cs": "podlaží",
+  "da": "Etage",
+  "el": "όροφος",
+  "en-GB": "storey",
+  "en-US": "story",
+  "es-CL": "piso",
+  "es-CO": "piso",
+  "es-MX": "nivel",
+  "et": "korrus",
+  "fa": "طبقه",
+  "fi": "kerros",
+  "fil": "palapag",
+  "he": "קומה",
+  "hr": "etaža",
+  "hu": "szint",
+  "id": "lantai",
+  "ja": "階",
+  "kk": "қабат",
+  "ko": "층",
+  "ky": "кабат",
+  "mn": "давхар",
+  "nl": "bouwlaag",
+  "no": "Etasje",
+  "pl": "kondygnacja",
+  "pt": "piso",
+  "ro": "nivel",
+  "sv": "våning",
+  "th": "ชั้น",
+  "tr": "kat",
+  "ur": "منزل",
+  "uz": "qavat",
+  "vi": "tầng"
+ },
+ "floors above ground": {
+  "de": "oberirdische Geschosse",
+  "fr": "niveaux hors sol",
+  "es": "plantas sobre rasante",
+  "pt-BR": "pavimentos acima do solo",
+  "zh": "地上层数",
+  "ar": "الطوابق فوق الأرض"
+ },
+ "floors below ground": {
+  "de": "unterirdische Geschosse",
+  "fr": "niveaux en sous-sol",
+  "es": "plantas bajo rasante",
+  "pt-BR": "pavimentos abaixo do solo",
+  "zh": "地下层数",
+  "hi": "बेसमेंट मंज़िलें",
+  "ar": "الطوابق تحت الأرض"
+ },
+ "ground floor": {
+  "de": "Erdgeschoss",
+  "fr": "rez-de-chaussée",
+  "es": "planta baja",
+  "pt-BR": "térreo",
+  "zh": "首层",
+  "hi": "भूतल",
+  "ar": "الطابق الأرضي"
+ },
+ "floor height": {
+  "de": "Geschosshöhe",
+  "fr": "hauteur d’étage",
+  "pt-BR": "pé-direito",
+  "zh": "层高",
+  "hi": "मंज़िल की ऊँचाई"
+ },
+ "footprint": {
+  "de": "Gebäudegrundriss",
+  "fr": "emprise",
+  "es": "huella",
+  "pt-BR": "projeção",
+  "zh": "占地",
+  "hi": "प्लिंथ",
+  "ar": "بصمة المبنى",
+  "da": "Grundflade",
+  "fa": "ردپای ساختمان",
+  "hr": "tlocrt",
+  "mn": "дэвсгэр",
+  "nl": "grondvlak",
+  "sv": "byggnadens bredd/djup"
+ },
+ "gross floor area": {
+  "de": "Bruttogeschossfläche",
+  "fr": "surface de plancher brute",
+  "es": "superficie bruta construida",
+  "pt-BR": "área construída",
+  "zh": "总建筑面积",
+  "hi": "ग्रॉस फ़्लोर एरिया",
+  "ar": "إجمالي مساحة الطوابق",
+  "bg": "разгъната застроена площ",
+  "bn": "মোট ফ্লোর এরিয়া",
+  "cs": "hrubá podlahová plocha",
+  "da": "Bruttoetageareal",
+  "el": "μεικτή επιφάνεια ορόφων",
+  "et": "brutopind",
+  "fa": "مساحت ناخالص طبقات",
+  "fi": "bruttoala",
+  "fil": "gross floor area",
+  "he": "שטח ברוטו",
+  "hr": "bruto građevinska površina",
+  "hu": "bruttó alapterület",
+  "id": "luas lantai bruto",
+  "ja": "延べ床面積",
+  "kk": "жалпы аудан",
+  "ko": "연면적",
+  "ky": "жалпы аянт",
+  "mn": "барилгын нийт талбай",
+  "no": "Bruttoareal",
+  "pl": "powierzchnia brutto",
+  "pt": "área bruta de construção",
+  "ro": "suprafață construită desfășurată",
+  "th": "พื้นที่อาคารรวม",
+  "tr": "brüt inşaat alanı",
+  "ur": "مجموعی فلور ایریا",
+  "uz": "umumiy qavat maydoni",
+  "vi": "tổng diện tích sàn"
+ },
+ "living area": {
+  "de": "Wohnfläche",
+  "fr": "surface habitable",
+  "es": "superficie habitable",
+  "pt-BR": "área útil",
+  "hi": "कारपेट एरिया",
+  "cs": "obytná plocha",
+  "fil": "lawak ng tirahan",
+  "ja": "居住面積",
+  "ko": "주거 면적",
+  "nl": "woonoppervlak",
+  "pl": "powierzchnia mieszkalna",
+  "pt": "área habitável",
+  "ro": "suprafață locuibilă",
+  "vi": "diện tích ở"
+ },
+ "unit (dwelling)": {
+  "de": "Wohnung",
+  "hi": "यूनिट",
+  "hu": "lakás",
+  "tr": "daire"
+ },
+ "lift": {
+  "de": "Aufzug",
+  "fr": "ascenseur",
+  "es": "ascensor",
+  "pt-BR": "elevador",
+  "zh": "电梯",
+  "hi": "लिफ़्ट",
+  "ar": "المصعد",
+  "en-GB": "lift",
+  "en-US": "elevator",
+  "es-CL": "ascensor",
+  "es-CO": "ascensor",
+  "es-MX": "elevador",
+  "hu": "felvonó"
+ },
+ "parking spaces": {
+  "de": "Stellplätze",
+  "fr": "places de stationnement",
+  "pt-BR": "vagas de estacionamento",
+  "ar": "مواقف السيارات",
+  "es-CO": "parqueaderos",
+  "es-MX": "cajones de estacionamiento"
+ },
+ "masonry": {
+  "de": "Mauerwerk",
+  "fr": "maçonnerie",
+  "es": "mampostería",
+  "pt-BR": "alvenaria",
+  "zh": "砌体结构",
+  "hi": "चिनाई",
+  "ar": "بناء بالطوب أو الحجر",
+  "es-CL": "albañilería",
+  "et": "müüritis"
+ },
+ "concrete frame": {
+  "de": "Stahlbetonskelett",
+  "fr": "ossature béton",
+  "es": "pórticos de hormigón",
+  "pt-BR": "estrutura de concreto",
+  "zh": "混凝土框架结构",
+  "hi": "RCC फ़्रेम",
+  "ar": "هيكل خرساني"
+ },
+ "concrete walls": {
+  "de": "Stahlbetonwände",
+  "fr": "voiles béton",
+  "es": "muros de hormigón",
+  "pt-BR": "paredes de concreto",
+  "zh": "剪力墙结构",
+  "hi": "RCC दीवारें",
+  "ar": "جدران خرسانية"
+ },
+ "timber": {
+  "de": "Holz",
+  "fr": "bois",
+  "pt-BR": "madeira",
+  "zh": "木结构",
+  "hi": "लकड़ी",
+  "ar": "هيكل خشبي"
+ },
+ "steel": {
+  "de": "Stahl",
+  "fr": "acier",
+  "pt-BR": "aço",
+  "zh": "钢结构",
+  "hi": "स्टील",
+  "ar": "هيكل فولاذي"
+ },
+ "preliminary design": {
+  "de": "Vorentwurf",
+  "fr": "avant-projet sommaire",
+  "es": "anteproyecto",
+  "pt-BR": "anteprojeto"
+ },
+ "detailed design": {
+  "de": "Ausführungsplanung",
+  "fr": "études d’exécution",
+  "es": "proyecto de ejecución",
+  "pt-BR": "projeto executivo",
+  "zh": "施工图设计"
+ },
+ "construction": {
+  "de": "Bauausführung"
+ },
+ "revision": {
+  "de": "Revision",
+  "fr": "révision",
+  "es": "revisión",
+  "pt-BR": "revisão",
+  "zh": "修订",
+  "hi": "संशोधन",
+  "ar": "مراجعة",
+  "bg": "ревизия",
+  "bn": "সংশোধন",
+  "cs": "revize",
+  "da": "Revision",
+  "el": "αναθεώρηση",
+  "es-CL": "revisión",
+  "es-CO": "revisión",
+  "es-MX": "revisión",
+  "et": "revisjon",
+  "fa": "بازبینی",
+  "fi": "revisio",
+  "fil": "revision",
+  "he": "רוויזיה",
+  "hr": "revizija",
+  "hu": "változat",
+  "id": "revisi",
+  "ja": "リビジョン",
+  "kk": "нұсқа",
+  "ko": "개정본",
+  "ky": "версия",
+  "mn": "хувилбар",
+  "no": "Revisjon",
+  "pl": "rewizja",
+  "pt": "revisão",
+  "ro": "revizie",
+  "th": "การแก้ไขรุ่น (รุ่น N)",
+  "tr": "revizyon",
+  "ur": "نظرثانی",
+  "uz": "reviziya",
+  "vi": "bản sửa đổi"
+ },
+ "acceptance": {
+  "de": "Freigabe",
+  "fr": "acceptation",
+  "pt-BR": "aceitação",
+  "zh": "审批",
+  "hi": "स्वीकृति",
+  "bg": "приемане",
+  "bn": "অনুমোদন",
+  "cs": "přijetí",
+  "da": "Godkendelse",
+  "el": "αποδοχή",
+  "et": "aktsepteerimine",
+  "fa": "پذیرش",
+  "fi": "hyväksyntä",
+  "fil": "pagtanggap",
+  "he": "אישור",
+  "hr": "prihvaćanje",
+  "hu": "elfogadás",
+  "id": "persetujuan",
+  "ja": "承認",
+  "kk": "қабылдау",
+  "ko": "승인",
+  "ky": "кабыл алуу",
+  "mn": "зөвшөөрөл",
+  "nl": "acceptatie",
+  "no": "Godkjenning",
+  "pl": "akceptacja",
+  "pt": "aceitação",
+  "ro": "acceptare",
+  "sv": "godkännande",
+  "th": "การยอมรับ",
+  "tr": "kabul",
+  "ur": "منظوری",
+  "uz": "qabul qilish",
+  "vi": "chấp nhận"
+ },
+ "accept": {
+  "de": "Annehmen",
+  "pt-BR": "aceitar",
+  "hi": "स्वीकार करें",
+  "ar": "قبول"
+ },
+ "reject": {
+  "de": "Ablehnen",
+  "pt-BR": "recusar",
+  "hi": "अस्वीकार करें",
+  "ar": "رفض"
+ },
+ "estimate": {
+  "de": "Kostenschätzung",
+  "fr": "estimation",
+  "es": "estimación de costes",
+  "pt-BR": "estimativa",
+  "zh": "估算",
+  "hi": "एस्टिमेट",
+  "ar": "التقدير",
+  "bg": "оценка",
+  "bn": "প্রাক্কলন",
+  "cs": "odhad (nákladů)",
+  "da": "Overslag",
+  "el": "εκτίμηση",
+  "es-CL": "estimación de costos",
+  "es-CO": "estimación de costos",
+  "es-MX": "estimación de costos",
+  "et": "kalkulatsioon",
+  "fa": "برآورد",
+  "fi": "kustannusarvio",
+  "fil": "estimate",
+  "he": "אומדן",
+  "hr": "procjena",
+  "hu": "költségbecslés",
+  "id": "estimasi",
+  "ja": "見積",
+  "kk": "смета",
+  "ko": "견적",
+  "ky": "смета",
+  "mn": "тооцоо",
+  "nl": "kostenraming",
+  "no": "Kostnadsoverslag",
+  "pl": "kosztorys",
+  "pt": "estimativa",
+  "ro": "deviz",
+  "sv": "kalkyl",
+  "th": "ประมาณราคา",
+  "tr": "maliyet tahmini",
+  "ur": "تخمینہ",
+  "uz": "smeta",
+  "vi": "dự toán"
+ },
+ "cost group": {
+  "de": "Kostengruppe",
+  "fr": "groupe de coûts",
+  "es": "grupo de coste",
+  "pt-BR": "grupo de custo",
+  "zh": "成本组",
+  "hi": "लागत समूह",
+  "ar": "مجموعة التكلفة",
+  "bg": "разходна група",
+  "bn": "ব্যয় গ্রুপ",
+  "cs": "nákladová skupina (KG)",
+  "da": "Omkostningsgruppe",
+  "el": "ομάδα κόστους",
+  "es-CL": "grupo de costos",
+  "es-CO": "grupo de costos",
+  "es-MX": "grupo de costos",
+  "et": "kulugrupp",
+  "fa": "گروه هزینه",
+  "fi": "kustannusryhmä",
+  "fil": "cost group",
+  "he": "קבוצת עלות",
+  "hr": "troškovna skupina",
+  "hu": "költségcsoport",
+  "ja": "コストグループ",
+  "kk": "шығын тобы",
+  "ko": "비용 그룹",
+  "ky": "чыгым тобу",
+  "mn": "зардлын бүлэг",
+  "nl": "kostengroep",
+  "no": "Kostnadsgruppe",
+  "pl": "grupa kosztów (KG)",
+  "pt": "grupo de custos",
+  "ro": "grupă de cost",
+  "sv": "kostnadsgrupp",
+  "th": "หมวดค่าใช้จ่าย",
+  "tr": "maliyet grubu",
+  "ur": "لاگت گروپ",
+  "uz": "xarajat guruhi"
+ },
+ "unit rate": {
+  "de": "Einheitspreis",
+  "fr": "prix unitaire",
+  "es": "precio unitario",
+  "pt-BR": "preço unitário",
+  "zh": "单价",
+  "hi": "यूनिट रेट",
+  "ar": "سعر الوحدة",
+  "bg": "единична цена",
+  "bn": "একক দর",
+  "cs": "jednotková cena",
+  "da": "Enhedspris",
+  "el": "τιμή μονάδας",
+  "es-CL": "precio unitario",
+  "es-CO": "precio unitario",
+  "es-MX": "precio unitario",
+  "et": "ühikuhind",
+  "fa": "نرخ واحد",
+  "fi": "yksikköhinta",
+  "fil": "unit rate",
+  "he": "מחיר יחידה",
+  "hr": "jedinična cijena",
+  "hu": "egységár",
+  "id": "harga satuan",
+  "ja": "単価",
+  "kk": "бірлік бағасы",
+  "ko": "단가",
+  "ky": "бирдик баасы",
+  "mn": "нэгж үнэ",
+  "nl": "eenheidsprijs",
+  "no": "Enhetspris",
+  "pl": "cena jednostkowa",
+  "pt": "preço unitário",
+  "ro": "preț unitar",
+  "sv": "enhetspris",
+  "th": "ราคาต่อหน่วย",
+  "tr": "birim fiyat",
+  "ur": "یونٹ ریٹ",
+  "uz": "birlik narxi",
+  "vi": "đơn giá"
+ },
+ "position": {
+  "de": "Position",
+  "es": "partida",
+  "pt-BR": "item",
+  "zh": "清单项",
+  "bg": "позиция",
+  "bn": "আইটেম",
+  "cs": "položka",
+  "da": "Post",
+  "el": "θέση",
+  "es-CL": "partida",
+  "es-CO": "partida",
+  "es-MX": "partida",
+  "et": "positsioon",
+  "fa": "ردیف",
+  "fi": "nimike",
+  "fil": "posisyon",
+  "he": "סעיף",
+  "hr": "stavka",
+  "hu": "tétel",
+  "id": "item",
+  "ja": "項目",
+  "kk": "позиция",
+  "ko": "항목",
+  "ky": "позиция",
+  "mn": "мөр",
+  "nl": "post",
+  "no": "Post",
+  "pl": "pozycja",
+  "pt": "posição",
+  "ro": "poziție",
+  "sv": "post",
+  "th": "รายการ",
+  "tr": "kalem",
+  "ur": "مد (جمع: مدات)",
+  "uz": "pozitsiya",
+  "vi": "hạng mục"
+ },
+ "priced": {
+  "de": "bepreist",
+  "zh": "已计价",
+  "ar": "مسعّر",
+  "hr": "s cijenom",
+  "mn": "үнэ тогтоосон"
+ },
+ "unpriced": {
+  "de": "unbepreist",
+  "pt-BR": "sem preço",
+  "zh": "未计价",
+  "hi": "बिना दर",
+  "ar": "غير مسعّر",
+  "da": "Uden pris",
+  "et": "hinnastamata",
+  "fi": "hinnoittelematon",
+  "hr": "bez cijene",
+  "ja": "単価未設定",
+  "ko": "단가 미적용",
+  "mn": "үнэ тогтоогоогүй",
+  "no": "Uten pris"
+ },
+ "benchmark": {
+  "de": "Vergleichswert",
+  "fr": "référence",
+  "es": "referencia",
+  "pt-BR": "valor de referência",
+  "zh": "基准",
+  "hi": "बेंचमार्क",
+  "ar": "معيار مرجعي",
+  "fil": "benchmark",
+  "hu": "összehasonlító érték",
+  "pt": "valor de referência",
+  "ro": "etalon",
+  "tr": "referans"
+ },
+ "price level": {
+  "de": "Preisstand",
+  "es": "nivel de precios"
+ },
+ "VAT": {
+  "de": "Umsatzsteuer",
+  "fr": "TVA",
+  "es": "IVA",
+  "pt-BR": "IVA",
+  "zh": "增值税",
+  "hi": "VAT",
+  "it": "IVA",
+  "ar": "ضريبة القيمة المضافة",
+  "ky": "КНС",
+  "nl": "btw",
+  "sv": "moms"
+ },
+ "manual quantity": {
+  "de": "manuelle Menge",
+  "hi": "मैन्युअल मात्रा",
+  "ja": "手動数量",
+  "ko": "수동 수량"
+ },
+ "change order": {
+  "de": "Nachtrag",
+  "fr": "avenant",
+  "es": "modificado",
+  "pt-BR": "termo aditivo",
+  "zh": "变更单",
+  "hi": "चेंज ऑर्डर",
+  "ar": "أمر تغيير",
+  "bg": "промяна по договора",
+  "bn": "চেঞ্জ অর্ডার",
+  "cs": "změnový list",
+  "da": "Ændringsordre",
+  "el": "τροποποίηση σύμβασης",
+  "es-CL": "orden de cambio",
+  "es-CO": "orden de cambio",
+  "es-MX": "orden de cambio",
+  "et": "muudatustöö",
+  "fa": "دستور تغییر",
+  "fi": "muutostilaus",
+  "fil": "change order",
+  "he": "הוראת שינוי",
+  "hr": "izmjena ugovora",
+  "hu": "szerződésmódosítás",
+  "id": "perintah perubahan",
+  "ja": "変更注文",
+  "kk": "шарт өзгерісі",
+  "ko": "변경 주문",
+  "ky": "келишим өзгөртүүсү",
+  "mn": "гэрээний өөрчлөлт",
+  "nl": "wijzigingsorder",
+  "no": "Endringsordre",
+  "pl": "zmiana umowy",
+  "pt": "alteração contratual",
+  "ro": "comandă de modificare",
+  "sv": "ändringsorder",
+  "th": "ใบสั่งเปลี่ยนแปลง",
+  "tr": "değişiklik emri",
+  "ur": "چینج آرڈر",
+  "uz": "shartnoma o‘zgarishi",
+  "vi": "lệnh thay đổi"
+ },
+ "tender package": {
+  "de": "Ausschreibungspaket",
+  "fr": "lot d’appel d’offres",
+  "es": "paquete de licitación",
+  "pt-BR": "pacote de licitação",
+  "zh": "招标包",
+  "hi": "टेंडर पैकेज",
+  "ar": "حزمة مناقصة",
+  "bg": "пакет за търг",
+  "bn": "দরপত্র প্যাকেজ",
+  "cs": "balíček výběrového řízení",
+  "da": "Udbudspakke",
+  "el": "πακέτο διαγωνισμού",
+  "en-US": "bid package",
+  "et": "hankepakett",
+  "fa": "بسته‌ی مناقصه",
+  "fi": "tarjouspyyntöpaketti",
+  "fil": "tender package",
+  "he": "חבילת מכרז",
+  "hr": "paket natječaja",
+  "hu": "ajánlati csomag",
+  "id": "paket tender",
+  "ja": "入札パッケージ",
+  "kk": "тендер пакеті",
+  "ko": "입찰 패키지",
+  "ky": "тендер пакети",
+  "mn": "тендерийн багц",
+  "no": "Anbudspakke",
+  "pl": "pakiet przetargowy",
+  "pt": "pacote de concurso",
+  "ro": "pachet de licitație",
+  "th": "ชุดประกวดราคา",
+  "tr": "ihale paketi",
+  "ur": "ٹینڈر پیکیج",
+  "uz": "tender paketi",
+  "vi": "gói thầu"
+ },
+ "tender addendum": {
+  "de": "Ergänzung der Ausschreibungsunterlagen",
+  "fr": "modificatif au dossier de consultation",
+  "zh": "招标补遗",
+  "ar": "ملحق المناقصة",
+  "es": "adenda de licitación",
+  "pt-BR": "adendo de licitação",
+  "hi": "टेंडर कॉरिजेंडम",
+  "it": "integrazione al bando",
+  "ru": "дополнение к тендерной документации",
+  "uk": "доповнення до тендерної документації",
+  "bg": "допълнение към търга",
+  "da": "Udbudstillæg",
+  "el": "συμπλήρωμα διαγωνισμού",
+  "en-US": "bid addendum",
+  "es-CL": "adenda de licitación",
+  "es-CO": "adenda de licitación",
+  "es-MX": "adenda de licitación",
+  "et": "hankedokumentide täiendus",
+  "fa": "الحاقیه‌ی مناقصه",
+  "fi": "täydennys",
+  "fil": "tender addendum",
+  "he": "נספח מכרז",
+  "hr": "dopuna natječaja",
+  "hu": "kiegészítő tájékoztatás",
+  "id": "addendum tender",
+  "ja": "補遺",
+  "kk": "тендерлік құжаттамаға толықтыру",
+  "ko": "추가 공고",
+  "ky": "тендер документтерин толуктоо",
+  "mn": "тендерийн нэмэлт",
+  "nl": "addendum",
+  "no": "Tillegg til anbudsgrunnlaget",
+  "pt": "adenda de concurso",
+  "ro": "act adițional",
+  "sv": "tillägg",
+  "th": "เอกสารเพิ่มเติมการประกวดราคา",
+  "tr": "ihale zeyilnamesi",
+  "uz": "tender hujjatlariga qo‘shimcha",
+  "vi": "phụ lục đấu thầu"
+ },
+ "take-off": {
+  "de": "Mengenermittlung",
+  "es": "mediciones",
+  "bg": "количествена сметка",
+  "bn": "পরিমাণ তালিকা",
+  "cs": "výkaz výměr",
+  "da": "Mængdeliste",
+  "el": "προμέτρηση",
+  "es-CL": "cubicación",
+  "es-CO": "cómputo de cantidades",
+  "es-MX": "cuantificación",
+  "et": "mahutabel",
+  "fa": "متره",
+  "fi": "määräluettelo",
+  "fil": "take-off",
+  "he": "מדידת כמויות",
+  "hr": "predmjer",
+  "hu": "mennyiségi kimutatás",
+  "id": "rekapitulasi volume",
+  "ja": "拾い出し",
+  "kk": "көлем ведомосы",
+  "ko": "물량 산출",
+  "ky": "көлөм ведомосу",
+  "mn": "хэмжээний тооцоо",
+  "nl": "meetstaat",
+  "no": "Mengdeliste",
+  "pl": "przedmiar",
+  "pt": "mapa de quantidades",
+  "ro": "extras de cantități",
+  "sv": "mängdförteckning",
+  "th": "การถอดปริมาณ",
+  "tr": "metraj",
+  "ur": "مقداری فہرست",
+  "uz": "hajmlar ro‘yxati",
+  "vi": "bảng bóc tách"
+ },
+ "bill of quantities": {
+  "de": "Leistungsverzeichnis",
+  "fr": "bordereau de quantités",
+  "es": "presupuesto con mediciones",
+  "pt-BR": "planilha orçamentária",
+  "zh": "工程量清单",
+  "hi": "BOQ",
+  "ar": "جدول الكميات",
+  "bg": "BOQ (количествена сметка)",
+  "da": "Tilbudsliste",
+  "el": "BOQ (προμέτρηση/τιμολόγιο)",
+  "et": "koguste nimekiri (BOQ)",
+  "fa": "فهرست مقادیر",
+  "fi": "määräluettelo (BOQ)",
+  "fil": "BOQ",
+  "he": "כתב כמויות",
+  "hu": "BOQ (költségvetés)",
+  "ja": "BOQ",
+  "kk": "BOQ",
+  "ko": "BOQ",
+  "ky": "BOQ",
+  "no": "BOQ",
+  "pt": "mapa de quantidades",
+  "ro": "BOQ",
+  "th": "BOQ",
+  "tr": "BOQ (metraj cetveli)",
+  "uz": "BOQ"
+ },
+ "tendering": {
+  "de": "Ausschreibung",
+  "fr": "appels d’offres",
+  "es": "licitación",
+  "pt-BR": "licitações",
+  "ar": "المناقصات",
+  "en-US": "bidding",
+  "hu": "ajánlatkérés",
+  "sv": "anbud"
+ },
+ "bidder": {
+  "de": "Bieter",
+  "fr": "soumissionnaire",
+  "zh": "投标人",
+  "hi": "बिडर",
+  "ar": "مقدم العروض",
+  "bg": "участник",
+  "bn": "দরদাতা",
+  "cs": "uchazeč",
+  "da": "Tilbudsgiver",
+  "el": "προσφέρων",
+  "es-CL": "oferente",
+  "es-CO": "oferente",
+  "es-MX": "licitante",
+  "et": "pakkuja",
+  "fa": "پیشنهاددهنده",
+  "fi": "tarjoaja",
+  "fil": "bidder",
+  "he": "מציע",
+  "hr": "ponuditelj",
+  "hu": "ajánlattevő",
+  "id": "peserta tender",
+  "ja": "入札者",
+  "kk": "өтінім беруші",
+  "ko": "입찰자",
+  "ky": "өтүнмө берүүчү",
+  "mn": "оролцогч",
+  "nl": "inschrijver",
+  "no": "Tilbyder",
+  "pl": "oferent",
+  "pt": "concorrente",
+  "ro": "ofertant",
+  "sv": "anbudsgivare",
+  "th": "ผู้เสนอราคา",
+  "tr": "istekli",
+  "ur": "بولی دہندہ",
+  "uz": "taklif etuvchi",
+  "vi": "nhà thầu"
+ },
+ "schedule": {
+  "de": "Terminplan",
+  "fr": "planning",
+  "es": "planificación",
+  "pt-BR": "cronograma",
+  "zh": "进度计划",
+  "hi": "शेड्यूल",
+  "ar": "الجدول الزمني",
+  "bg": "график",
+  "bn": "সময়সূচি",
+  "cs": "harmonogram",
+  "da": "Tidsplan",
+  "el": "χρονοδιάγραμμα",
+  "es-CL": "cronograma",
+  "es-CO": "cronograma",
+  "es-MX": "cronograma",
+  "et": "ajakava",
+  "fa": "برنامه زمانی",
+  "fi": "aikataulu",
+  "fil": "iskedyul",
+  "he": "לוח זמנים",
+  "hr": "raspored",
+  "hu": "ütemterv",
+  "ja": "スケジュール",
+  "kk": "кесте",
+  "ko": "일정",
+  "ky": "график",
+  "mn": "хуваарь",
+  "nl": "planning",
+  "no": "Tidsplan",
+  "pl": "harmonogram",
+  "pt": "cronograma",
+  "ro": "grafic",
+  "sv": "tidplan",
+  "th": "กำหนดการ",
+  "tr": "iş programı",
+  "ur": "شیڈول",
+  "uz": "jadval"
+ },
+ "trade": {
+  "de": "Gewerk",
+  "fr": "corps d’état",
+  "es": "oficio",
+  "pt-BR": "especialidade",
+  "zh": "工种",
+  "hi": "ट्रेड",
+  "ar": "أعمال",
+  "bg": "вид работи",
+  "bn": "ট্রেড",
+  "cs": "profese",
+  "da": "Fag",
+  "el": "ειδικότητα",
+  "es-CL": "oficio",
+  "es-CO": "oficio",
+  "es-MX": "oficio",
+  "et": "tööliik",
+  "fa": "حرفه",
+  "fi": "työlaji",
+  "fil": "trade",
+  "he": "מקצוע",
+  "hr": "vrsta radova",
+  "hu": "munkanem",
+  "id": "pekerjaan",
+  "ja": "工種",
+  "kk": "мамандық",
+  "ko": "공종",
+  "ky": "адистик",
+  "mn": "ажлын төрөл",
+  "no": "Fag",
+  "pl": "branża",
+  "pt": "especialidade",
+  "ro": "specialitate",
+  "sv": "yrkesgrupp",
+  "th": "งานช่าง",
+  "tr": "iş kolu",
+  "ur": "ٹریڈ",
+  "uz": "kasb",
+  "vi": "công tác"
+ },
+ "productivity rate": {
+  "de": "Aufwandswert",
+  "fr": "rendement",
+  "es": "rendimiento",
+  "pt-BR": "índice de produtividade",
+  "zh": "生产效率",
+  "hi": "उत्पादकता दर",
+  "ar": "معدل الإنتاجية"
+ },
+ "crew": {
+  "de": "Kolonne",
+  "es": "cuadrilla",
+  "zh": "班组",
+  "bg": "бригада",
+  "bn": "দল",
+  "cs": "četa",
+  "da": "Hold",
+  "el": "συνεργείο",
+  "es-CL": "cuadrilla",
+  "es-CO": "cuadrilla",
+  "es-MX": "cuadrilla",
+  "et": "brigaad",
+  "fi": "työryhmä",
+  "fil": "crew",
+  "he": "צוות",
+  "hu": "brigád",
+  "id": "regu",
+  "ja": "班",
+  "kk": "бригада",
+  "ko": "작업반",
+  "ky": "бригада",
+  "no": "Mannskap",
+  "pl": "ekipa",
+  "pt": "equipa",
+  "ro": "echipă",
+  "th": "ทีมงาน",
+  "tr": "ekip",
+  "ur": "عملہ",
+  "uz": "brigada",
+  "vi": "tổ"
+ },
+ "working days": {
+  "de": "Arbeitstage",
+  "es": "días laborables",
+  "pt-BR": "dias úteis",
+  "ar": "أيام عمل"
+ },
+ "procurement": {
+  "de": "Beschaffung",
+  "fr": "achats",
+  "es": "contratación",
+  "pt-BR": "suprimentos",
+  "zh": "采购",
+  "hi": "प्रोक्योरमेंट",
+  "ar": "المشتريات",
+  "bg": "доставки",
+  "bn": "ক্রয়",
+  "cs": "zadávání zakázek",
+  "da": "Indkøb",
+  "el": "προμήθειες",
+  "es-CL": "adquisiciones",
+  "es-CO": "adquisiciones",
+  "es-MX": "adquisiciones",
+  "et": "hange",
+  "fa": "تدارکات",
+  "fi": "hankinta",
+  "fil": "procurement",
+  "he": "רכש",
+  "hr": "nabava",
+  "hu": "beszerzés",
+  "id": "pengadaan",
+  "ja": "調達",
+  "kk": "сатып алу",
+  "ko": "조달",
+  "ky": "сатып алуу",
+  "mn": "худалдан авалт",
+  "nl": "inkoop",
+  "no": "Innkjøp",
+  "pl": "zaopatrzenie",
+  "pt": "aprovisionamento",
+  "ro": "achiziții",
+  "sv": "inköp",
+  "th": "การจัดซื้อจัดจ้าง",
+  "tr": "satın alma",
+  "ur": "خریداری",
+  "uz": "xaridlar",
+  "vi": "mua sắm"
+ },
+ "discipline": {
+  "de": "Fachdisziplin",
+  "pt-BR": "disciplina",
+  "zh": "专业",
+  "hi": "डिसिप्लिन",
+  "ar": "التخصص"
+ },
+ "element": {
+  "de": "Element",
+  "pt-BR": "elemento",
+  "zh": "构件",
+  "hi": "तत्व",
+  "ar": "عنصر",
+  "bg": "елемент",
+  "bn": "উপাদান",
+  "cs": "prvek",
+  "da": "Element",
+  "el": "στοιχείο",
+  "et": "element",
+  "fa": "عنصر",
+  "fi": "elementti",
+  "fil": "elemento",
+  "he": "רכיב",
+  "hu": "elem",
+  "id": "elemen",
+  "ja": "要素",
+  "kk": "элемент",
+  "ko": "요소",
+  "ky": "элемент",
+  "no": "Element",
+  "pl": "element",
+  "pt": "elemento",
+  "ro": "element",
+  "th": "องค์ประกอบ",
+  "tr": "öğe",
+  "ur": "عنصر",
+  "uz": "element",
+  "vi": "phần tử"
+ },
+ "project manager": {
+  "de": "Projektleitung",
+  "fr": "chef de projet",
+  "es": "jefe de proyecto",
+  "pt-BR": "gerente de projeto",
+  "zh": "项目经理",
+  "hi": "प्रोजेक्ट मैनेजर",
+  "bg": "ръководител на проекта",
+  "el": "υπεύθυνος έργου",
+  "et": "projektijuht",
+  "fi": "projektipäällikkö"
+ },
+ "model": {
+  "de": "Modell",
+  "pt-BR": "modelo",
+  "zh": "模型",
+  "hi": "मॉडल",
+  "ar": "النموذج"
+ },
+ "drawing": {
+  "de": "Plan",
+  "kk": "сызба",
+  "ky": "чийме"
+ },
+ "setback (front)": {
+  "fr": "recul"
+ },
+ "setback (side/rear)": {
+  "fr": "retrait"
+ },
+ "dwelling / unit": {
+  "fr": "logement"
+ },
+ "room": {
+  "fr": "pièce",
+  "es": "estancia",
+  "pt-BR": "cômodo",
+  "zh": "房间",
+  "ar": "غرفة"
+ },
+ "mono-pitch roof": {
+  "fr": "toit monopente",
+  "zh": "单坡屋顶",
+  "hi": "एक ढलान (शेड)"
+ },
+ "energy standard": {
+  "fr": "norme énergétique",
+  "es": "estándar energético",
+  "pt-BR": "padrão energético",
+  "zh": "节能标准",
+  "hi": "ऊर्जा मानक",
+  "ar": "معيار الطاقة"
+ },
+ "kindergarten": {
+  "fr": "école maternelle",
+  "es": "escuela infantil",
+  "pt-BR": "creche"
+ },
+ "warehouse": {
+  "fr": "entrepôt",
+  "es": "almacén",
+  "pt-BR": "galpão"
+ },
+ "position (estimate item)": {
+  "fr": "poste"
+ },
+ "cost delta": {
+  "fr": "écart de coût",
+  "zh": "成本差额",
+  "hi": "लागत अंतर"
+ },
+ "change order register": {
+  "fr": "registre des avenants"
+ },
+ "quantity take-off": {
+  "fr": "métré",
+  "pt-BR": "levantamento de quantitativos",
+  "zh": "算量",
+  "hi": "क्वांटिटी टेक-ऑफ",
+  "ar": "حصر الكميات"
+ },
+ "concept": {
+  "fr": "esquisse",
+  "es": "concepto",
+  "pt-BR": "estudo preliminar"
+ },
+ "design editor": {
+  "fr": "éditeur de conception",
+  "pt-BR": "editor de design",
+  "zh": "设计编辑器",
+  "hi": "डिज़ाइन एडिटर",
+  "ar": "محرر التصميم",
+  "sv": "designeditor"
+ },
+ "floor": {
+  "es": "planta",
+  "pt-BR": "pavimento",
+  "zh": "层"
+ },
+ "dwelling": {
+  "es": "vivienda",
+  "pt-BR": "unidade habitacional",
+  "zh": "住宅套"
+ },
+ "unit": {
+  "es": "unidad",
+  "pt-BR": "unidade"
+ },
+ "parking": {
+  "es": "aparcamiento"
+ },
+ "single-family house": {
+  "es": "casa unifamiliar"
+ },
+ "multi-family residential": {
+  "es": "residencial multifamiliar"
+ },
+ "school": {
+  "es": "colegio"
+ },
+ "healthcare": {
+  "es": "sanitario"
+ },
+ "mixed use": {
+  "es": "uso mixto",
+  "pt-BR": "uso misto"
+ },
+ "raft": {
+  "es": "losa de cimentación",
+  "pt-BR": "radier",
+  "hi": "रैफ़्ट फ़ाउंडेशन",
+  "bg": "фундаментна плоча",
+  "el": "κοιτόστρωση"
+ },
+ "gable": {
+  "es": "a dos aguas",
+  "pt-BR": "duas águas"
+ },
+ "hip": {
+  "es": "a cuatro aguas",
+  "pt-BR": "quatro águas"
+ },
+ "shed": {
+  "es": "a un agua",
+  "pt-BR": "uma água"
+ },
+ "design": {
+  "es": "proyecto básico"
+ },
+ "bidders": {
+  "es": "licitadores",
+  "pt-BR": "licitantes"
+ },
+ "addendum": {
+  "es": "adenda",
+  "pt-BR": "adendo",
+  "hi": "कॉरिजेंडम",
+  "bn": "সংশোধনী",
+  "cs": "dodatek",
+  "pl": "aneks",
+  "ur": "ضمیمہ"
+ },
+ "budget": {
+  "es": "presupuesto",
+  "pt-BR": "orçamento",
+  "zh": "预算",
+  "hi": "बजट",
+  "ar": "الميزانية",
+  "cs": "rozpočet",
+  "es-CL": "presupuesto",
+  "es-CO": "presupuesto",
+  "es-MX": "presupuesto"
+ },
+ "assumption": {
+  "es": "supuesto",
+  "fil": "palagay",
+  "pt": "pressuposto"
+ },
+ "quantity": {
+  "es": "cantidad",
+  "hi": "मात्रा"
+ },
+ "norm pack": {
+  "es": "paquete normativo",
+  "pt-BR": "conjunto de normas",
+  "zh": "规范包"
+ },
+ "project": {
+  "pt-BR": "projeto",
+  "hi": "प्रोजेक्ट"
+ },
+ "brief": {
+  "pt-BR": "briefing",
+  "zh": "设计任务书",
+  "hi": "ब्रीफ़"
+ },
+ "setback, front": {
+  "pt-BR": "recuo frontal"
+ },
+ "setback, rear": {
+  "pt-BR": "recuo de fundos"
+ },
+ "setback, sides": {
+  "pt-BR": "recuos laterais"
+ },
+ "maximum height": {
+  "pt-BR": "altura máxima",
+  "ar": "أقصى ارتفاع"
+ },
+ "flat": {
+  "pt-BR": "plana"
+ },
+ "lead time": {
+  "pt-BR": "prazo de entrega",
+  "hi": "लीड टाइम"
+ },
+ "depth level": {
+  "pt-BR": "nível de detalhamento",
+  "ar": "مستوى التفصيل"
+ },
+ "perimeter": {
+  "pt-BR": "perímetro",
+  "zh": "周长"
+ },
+ "area": {
+  "pt-BR": "área"
+ },
+ "corner": {
+  "pt-BR": "canto",
+  "zh": "角点"
+ },
+ "outline": {
+  "pt-BR": "contorno",
+  "zh": "轮廓",
+  "fa": "مرز",
+  "mn": "контур"
+ },
+ "strip footing": {
+  "zh": "条形基础"
+ },
+ "pile foundation": {
+  "zh": "桩基础"
+ },
+ "activity": {
+  "zh": "工序",
+  "ja": "作業",
+  "ko": "작업"
+ },
+ "duration": {
+  "zh": "工期",
+  "ar": "المدة"
+ },
+ "labour hours": {
+  "zh": "工时"
+ },
+ "unit type": {
+  "zh": "户型",
+  "ar": "نوع الوحدة"
+ },
+ "quality level": {
+  "zh": "品质等级",
+  "hi": "गुणवत्ता स्तर",
+  "ar": "مستوى الجودة"
+ },
+ "use": {
+  "zh": "用途"
+ },
+ "concept design": {
+  "zh": "概念设计"
+ },
+ "cost snapshot": {
+  "zh": "成本快照"
+ },
+ "Design": {
+  "hi": "डिज़ाइन",
+  "ru": "Проектирование"
+ },
+ "position (BOQ item)": {
+  "hi": "आइटम"
+ },
+ "range": {
+  "hi": "रेंज"
+ },
+ "tender": {
+  "hi": "टेंडर",
+  "en-GB": "tender",
+  "en-US": "bid"
+ },
+ "generator": {
+  "hi": "जनरेटर",
+  "ar": "المولّد"
+ },
+ "administrator": {
+  "hi": "एडमिनिस्ट्रेटर",
+  "fi": "järjestelmänvalvoja"
+ },
+ "Design brief": {
+  "it": "Brief di progetto",
+  "ru": "Бриф проектирования",
+  "uk": "Бриф проєктування"
+ },
+ "Plot": {
+  "it": "Lotto",
+  "ru": "Участок",
+  "uk": "Ділянка"
+ },
+ "Plot outline": {
+  "it": "Contorno del lotto"
+ },
+ "Site": {
+  "it": "Area"
+ },
+ "Setback": {
+  "it": "Arretramento / distanza dai confini",
+  "ru": "Отступ",
+  "uk": "Відступ"
+ },
+ "Maximum height": {
+  "it": "Altezza massima",
+  "uk": "Максимальна висота"
+ },
+ "Floors above ground": {
+  "it": "Piani fuori terra",
+  "ru": "Надземные этажи",
+  "uk": "Надземні поверхи"
+ },
+ "Floors below ground": {
+  "it": "Piani interrati",
+  "ru": "Подземные этажи",
+  "uk": "Підземні поверхи"
+ },
+ "Storey": {
+  "it": "Piano",
+  "ru": "Этаж",
+  "uk": "Поверх"
+ },
+ "Ground floor": {
+  "it": "Piano terra",
+  "ru": "Первый этаж"
+ },
+ "Footprint": {
+  "it": "Impronta (superficie coperta)",
+  "ru": "Пятно застройки",
+  "uk": "Пляма забудови"
+ },
+ "Gross floor area": {
+  "it": "Superficie lorda di pavimento (SLP)",
+  "ru": "Общая площадь здания",
+  "uk": "Загальна площа будівлі"
+ },
+ "Floor area ratio": {
+  "it": "Indice di utilizzazione",
+  "ru": "Коэффициент плотности застройки",
+  "uk": "Коефіцієнт інтенсивності забудови"
+ },
+ "Site coverage": {
+  "it": "Rapporto di copertura",
+  "ru": "Коэффициент застройки",
+  "uk": "Коефіцієнт забудови"
+ },
+ "Living area": {
+  "it": "Superficie abitabile",
+  "ru": "Жилая площадь"
+ },
+ "Massing": {
+  "it": "Volumetria",
+  "ru": "Объёмное решение",
+  "uk": "Об’ємне рішення"
+ },
+ "Envelope": {
+  "it": "Involucro",
+  "ru": "Ограждающие конструкции",
+  "uk": "Огороджувальні конструкції"
+ },
+ "Facade": {
+  "it": "Facciata",
+  "ru": "Фасад",
+  "uk": "Фасад"
+ },
+ "Roof": {
+  "it": "Copertura",
+  "ru": "Кровля",
+  "uk": "Дах"
+ },
+ "Roof slope": {
+  "it": "Pendenza della copertura",
+  "ru": "Уклон кровли",
+  "uk": "Кут нахилу даху"
+ },
+ "Flat roof": {
+  "it": "Tetto piano",
+  "ru": "Плоская крыша"
+ },
+ "Gable roof": {
+  "it": "Tetto a due falde",
+  "ru": "Двускатная крыша"
+ },
+ "Hip roof": {
+  "it": "Tetto a padiglione (quattro falde)",
+  "ru": "Вальмовая крыша"
+ },
+ "Mono-pitch roof": {
+  "it": "Tetto a una falda",
+  "ru": "Односкатная крыша"
+ },
+ "Foundation": {
+  "it": "Fondazioni",
+  "ru": "Фундамент",
+  "uk": "Фундамент"
+ },
+ "Raft foundation": {
+  "it": "Platea di fondazione",
+  "ru": "Плитный фундамент"
+ },
+ "Strip footings": {
+  "it": "Fondazioni continue",
+  "ru": "Ленточные фундаменты",
+  "uk": "Стрічковий фундамент"
+ },
+ "Piles": {
+  "it": "Pali",
+  "ru": "Свайный фундамент",
+  "uk": "Палі"
+ },
+ "Structural grid": {
+  "it": "Maglia strutturale",
+  "ru": "Конструктивная сетка",
+  "uk": "Конструктивна сітка"
+ },
+ "Structural system": {
+  "it": "Sistema strutturale",
+  "ru": "Конструктивная система",
+  "uk": "Несуча система"
+ },
+ "Concrete frame": {
+  "it": "Telaio in cemento armato",
+  "ru": "Монолитный железобетонный каркас",
+  "uk": "Залізобетонний каркас"
+ },
+ "Masonry": {
+  "it": "Muratura",
+  "ru": "Каменная кладка",
+  "uk": "Мурована"
+ },
+ "Timber": {
+  "it": "Legno",
+  "ru": "Деревянные конструкции",
+  "uk": "Дерев’яна"
+ },
+ "Lift": {
+  "it": "Ascensore",
+  "ru": "Лифт",
+  "uk": "Ліфт"
+ },
+ "Parking spaces": {
+  "it": "Posti auto",
+  "ru": "Машиноместа",
+  "uk": "Машиномісця"
+ },
+ "Dwelling": {
+  "it": "Alloggio",
+  "ru": "Квартира",
+  "uk": "Квартира"
+ },
+ "Unit type": {
+  "it": "Tipologia",
+  "ru": "Тип квартир"
+ },
+ "Room": {
+  "it": "Locale",
+  "ru": "Помещение",
+  "uk": "Кімната"
+ },
+ "Single-family house": {
+  "it": "Casa unifamiliare"
+ },
+ "Multi-family residential": {
+  "it": "Residenziale plurifamiliare"
+ },
+ "Building use": {
+  "it": "Destinazione d’uso"
+ },
+ "Preliminary design": {
+  "it": "Progetto preliminare",
+  "uk": "Ескізний проєкт"
+ },
+ "Detailed design": {
+  "it": "Progetto esecutivo",
+  "uk": "Робоча документація"
+ },
+ "Revision": {
+  "it": "Revisione",
+  "ru": "Ревизия",
+  "uk": "Ревізія"
+ },
+ "Estimate": {
+  "it": "Stima",
+  "ru": "Смета",
+  "uk": "Кошторис"
+ },
+ "Quantity take-off": {
+  "it": "Computo metrico",
+  "ru": "Ведомость объёмов"
+ },
+ "Bill of quantities": {
+  "it": "Computo metrico estimativo",
+  "uk": "Відомість обсягів робіт"
+ },
+ "Position (BOQ line)": {
+  "it": "Voce"
+ },
+ "Unit rate": {
+  "it": "Prezzo unitario",
+  "ru": "Расценка",
+  "uk": "Одинична розцінка"
+ },
+ "Unpriced": {
+  "it": "Senza prezzo",
+  "ru": "Без цены",
+  "uk": "Без ціни"
+ },
+ "Cost group": {
+  "it": "Gruppo di costo",
+  "ru": "Группа затрат",
+  "uk": "Група витрат"
+ },
+ "Benchmark": {
+  "it": "Benchmark",
+  "ru": "Эталон",
+  "uk": "Орієнтир"
+ },
+ "Change order": {
+  "it": "Variante",
+  "ru": "Дополнительное соглашение",
+  "uk": "Зміна до договору"
+ },
+ "Cost delta": {
+  "it": "Scostamento di costo"
+ },
+ "Schedule": {
+  "it": "Cronoprogramma",
+  "ru": "График",
+  "uk": "Графік"
+ },
+ "Trade": {
+  "it": "Lavorazione",
+  "ru": "Вид работ",
+  "uk": "Вид робіт"
+ },
+ "Productivity rate": {
+  "it": "Produttività",
+  "ru": "Норма выработки",
+  "uk": "Норма виробітку"
+ },
+ "Procurement": {
+  "it": "Approvvigionamento",
+  "ru": "Закупки",
+  "uk": "Закупівлі"
+ },
+ "Tender package": {
+  "it": "Pacchetto di gara",
+  "ru": "Тендерный пакет",
+  "uk": "Тендерний пакет"
+ },
+ "Tendering": {
+  "it": "Gare",
+  "ru": "Тендеры"
+ },
+ "Tender addendum": {
+  "it": "Integrazione al bando",
+  "uk": "Доповнення до тендерної документації"
+ },
+ "Bidder": {
+  "it": "Concorrente"
+ },
+ "Project manager": {
+  "it": "Project manager",
+  "ru": "Руководитель проекта",
+  "uk": "Керівник проєкту"
+ },
+ "Budget": {
+  "it": "Budget",
+  "ru": "Бюджет",
+  "uk": "Бюджет"
+ },
+ "Acceptance": {
+  "it": "Accettazione",
+  "ru": "Приёмка",
+  "uk": "Прийняття"
+ },
+ "Design editor": {
+  "it": "Editor di progettazione"
+ },
+ "Quality level": {
+  "it": "Livello di qualità"
+ },
+ "Energy standard": {
+  "it": "Standard energetico",
+  "ru": "Энергетический стандарт",
+  "uk": "Стандарт енергоефективності"
+ },
+ "Country": {
+  "it": "Paese"
+ },
+ "Currency": {
+  "it": "Valuta"
+ },
+ "Maximum floors": {
+  "ru": "Максимальное число этажей"
+ },
+ "Ground elevation": {
+  "ru": "Отметка земли",
+  "uk": "Відмітка землі"
+ },
+ "Floor": {
+  "ru": "Этаж"
+ },
+ "Steel": {
+  "ru": "Стальные конструкции",
+  "uk": "Сталева"
+ },
+ "Includes VAT": {
+  "ru": "Включая НДС",
+  "uk": "Включно з ПДВ"
+ },
+ "Estimate position": {
+  "ru": "Позиция сметы"
+ },
+ "Manual quantity": {
+  "ru": "Ручное количество"
+ },
+ "Addendum": {
+  "ru": "Дополнение к тендерной документации"
+ },
+ "Labour hours": {
+  "ru": "Трудозатраты"
+ },
+ "Crew": {
+  "ru": "Бригада"
+ },
+ "Discipline": {
+  "ru": "Раздел",
+  "uk": "Розділ"
+ },
+ "Model": {
+  "ru": "Модель"
+ },
+ "Element": {
+  "ru": "Элемент"
+ },
+ "front setback": {
+  "ar": "الارتداد الأمامي"
+ },
+ "storey/floor": {
+  "ar": "طابق"
+ },
+ "dwelling/unit": {
+  "ar": "وحدة سكنية"
+ },
+ "mono-pitch/shed roof": {
+  "ar": "أحادي الميل"
+ },
+ "pitched": {
+  "ar": "مائل"
+ },
+ "position (BoQ item)": {
+  "ar": "بند"
+ },
+ "finishes": {
+  "ar": "أعمال التشطيب"
+ },
+ "building services": {
+  "ar": "الخدمات"
+ },
+ "Floor height": {
+  "uk": "Висота поверху"
+ },
+ "Ground floor height": {
+  "uk": "Висота першого поверху"
+ },
+ "Unit": {
+  "uk": "Квартира"
+ },
+ "Space": {
+  "uk": "Приміщення"
+ },
+ "Raft": {
+  "uk": "Плитний фундамент"
+ },
+ "Concrete walls": {
+  "uk": "Залізобетонні стіни"
+ },
+ "Flat": {
+  "uk": "Плоский"
+ },
+ "Gable": {
+  "uk": "Двосхилий"
+ },
+ "Hip": {
+  "uk": "Чотирисхилий"
+ },
+ "Mono-pitch": {
+  "uk": "Односхилий"
+ },
+ "Programme": {
+  "uk": "Програма приміщень"
+ },
+ "Take-off": {
+  "uk": "Відомість обсягів"
+ },
+ "Position": {
+  "uk": "Позиція"
+ },
+ "Priced": {
+  "uk": "З ціною"
+ },
+ "Accept": {
+  "uk": "Прийняти"
+ },
+ "Reject": {
+  "uk": "Відхилити"
+ },
+ "Bidders": {
+  "uk": "Учасники торгів"
+ },
+ "Duration": {
+  "uk": "Тривалість"
+ },
+ "Working days": {
+  "uk": "Робочі дні"
+ },
+ "Draft": {
+  "uk": "Чернетка"
+ },
+ "Concept": {
+  "uk": "Концепція"
+ },
+ "Norm pack": {
+  "uk": "Пакет норм"
+ },
+ "Depth level": {
+  "uk": "Рівень деталізації"
+ },
+ "field report": {
+  "de": "Baustellenbericht",
+  "fr": "compte rendu de chantier",
+  "es": "informe de campo",
+  "pt-BR": "relatório de campo",
+  "zh": "现场报告",
+  "hi": "फ़ील्ड रिपोर्ट",
+  "it": "rapporto di cantiere",
+  "ru": "полевой отчёт",
+  "ar": "التقرير الميداني",
+  "uk": "звіт з будмайданчика",
+  "bg": "отчет от обекта",
+  "bn": "ফিল্ড রিপোর্ট",
+  "cs": "terénní hlášení",
+  "da": "Feltrapport",
+  "el": "αναφορά εργοταξίου",
+  "et": "ehitusplatsi aruanne",
+  "fa": "گزارش میدانی",
+  "fi": "työmaaraportti",
+  "fil": "field report",
+  "he": "דוח שטח",
+  "hr": "terensko izvješće",
+  "hu": "terepjelentés",
+  "id": "laporan lapangan",
+  "ja": "フィールドレポート",
+  "kk": "далалық есеп",
+  "ko": "현장 보고서",
+  "ky": "талаа отчету",
+  "mn": "газар дээрх тайлан",
+  "nl": "veldrapport",
+  "no": "Feltrapport",
+  "pl": "raport z terenu",
+  "pt": "relatório de campo",
+  "ro": "raport de teren",
+  "sv": "fältrapport",
+  "th": "รายงานภาคสนาม",
+  "tr": "saha raporu",
+  "ur": "فیلڈ رپورٹ",
+  "uz": "dala hisoboti",
+  "vi": "báo cáo hiện trường"
+ },
+ "assembly": {
+  "de": "Baugruppe",
+  "fr": "ouvrage composé",
+  "es": "conjunto",
+  "pt-BR": "composição",
+  "zh": "组合项",
+  "hi": "असेंबली",
+  "it": "voce composta",
+  "ru": "укрупнённая расценка",
+  "ar": "التجميعة",
+  "uk": "збірка",
+  "bg": "комплексна позиция",
+  "bn": "অ্যাসেম্বলি",
+  "cs": "sestava",
+  "da": "Samling",
+  "el": "σύνθετο στοιχείο (κόστους)",
+  "et": "koost",
+  "fi": "kokoonpano",
+  "fil": "assembly",
+  "he": "מכלול",
+  "hr": "sklop",
+  "hu": "összetett tétel",
+  "ja": "アセンブリ",
+  "kk": "құрама",
+  "ko": "어셈블리",
+  "ky": "курама",
+  "mn": "багц",
+  "no": "Samling",
+  "pl": "zestaw",
+  "pt": "conjunto",
+  "ro": "ansamblu",
+  "th": "ชุดประกอบ",
+  "tr": "birleşik kalem",
+  "ur": "اسمبلی",
+  "uz": "yig‘ma"
+ },
+ "cost database": {
+  "de": "Kostendatenbank",
+  "fr": "base de données de coûts",
+  "es": "base de datos de costes",
+  "pt-BR": "banco de custos",
+  "zh": "成本数据库",
+  "hi": "लागत डेटाबेस",
+  "it": "database dei costi",
+  "ru": "база цен",
+  "ar": "قاعدة بيانات التكاليف",
+  "uk": "база вартості",
+  "bg": "база с разценки",
+  "bn": "ব্যয় ডেটাবেস",
+  "cs": "databáze nákladů",
+  "da": "Omkostningsdatabase",
+  "el": "βάση δεδομένων κόστους",
+  "et": "maksumusbaas",
+  "fi": "kustannustietokanta",
+  "fil": "cost database",
+  "he": "מסד נתוני עלויות",
+  "hr": "baza podataka troškova",
+  "hu": "költségadatbázis",
+  "ja": "コストデータベース",
+  "kk": "баға базасы",
+  "ko": "비용 데이터베이스",
+  "ky": "баа базасы",
+  "mn": "зардлын мэдээллийн сан",
+  "no": "Kostnadsdatabase",
+  "pl": "baza kosztów",
+  "pt": "base de dados de custos",
+  "ro": "bază de date de costuri",
+  "th": "ฐานข้อมูลต้นทุน",
+  "tr": "maliyet veritabanı",
+  "ur": "لاگت ڈیٹابیس",
+  "uz": "xarajatlar bazasi"
+ },
+ "sheet register": {
+  "de": "Planliste",
+  "fr": "registre des plans",
+  "es": "registro de planos",
+  "pt-BR": "lista de pranchas",
+  "zh": "图纸目录",
+  "hi": "शीट रजिस्टर",
+  "it": "registro delle tavole",
+  "ru": "реестр листов",
+  "ar": "سجل المخططات",
+  "uk": "реєстр аркушів",
+  "bg": "регистър на листовете",
+  "el": "μητρώο φύλλων"
+ },
+ "selection panel": {
+  "de": "Auswahl",
+  "fr": "panneau de sélection",
+  "es": "panel de selección",
+  "pt-BR": "painel de seleção",
+  "zh": "选择面板",
+  "hi": "चयन पैनल",
+  "it": "pannello di selezione",
+  "ru": "панель выделения",
+  "ar": "لوحة التحديد",
+  "uk": "панель «Вибране»",
+  "bg": "избор",
+  "el": "επιλογή"
+ },
+ "punch item": {
+  "bg": "дефект за отстраняване",
+  "cs": "položka seznamu vad",
+  "el": "εκκρεμότητα",
+  "fi": "puutelistan kohta",
+  "hr": "stavka nedostataka",
+  "mn": "засах зүйл",
+  "pl": "usterka (punch list)",
+  "pt": "pendência"
+ },
+ "project switcher": {
+  "bn": "প্রকল্প নির্বাচক",
+  "id": "pemilih proyek",
+  "ur": "پروجیکٹ سوئچر",
+  "vi": "bộ chọn dự án"
+ },
+ "sourced": {
+  "bn": "উৎসযুক্ত",
+  "ur": "ماخذ والا"
+ },
+ "draft": {
+  "cs": "koncept",
+  "kk": "нобай",
+  "ky": "ноорук",
+  "pl": "szkic",
+  "uz": "qoralama"
+ },
+ "confirm": {
+  "cs": "potvrdit",
+  "pl": "potwierdź"
+ },
+ "flat (dwelling)": {
+  "en-US": "apartment"
+ },
+ "set up": {
+  "et": "seadista",
+  "fi": "määritä"
+ },
+ "sheet": {
+  "fi": "piirustus"
+ },
+ "BOQ": {
+  "hr": "BOQ (troškovnik)",
+  "mn": "BOQ"
+ },
+ "link": {
+  "hr": "poveznica"
+ },
+ "template": {
+  "ky": "үлгү",
+  "mn": "үлгэр"
+ },
+ "space": {
+  "mn": "орон зай"
+ }
+}

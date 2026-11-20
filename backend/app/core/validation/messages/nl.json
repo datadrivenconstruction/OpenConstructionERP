@@ -2868,5 +2868,15 @@
     "coverage": "Gedekt ontwerpoppervlak",
     "findings": "Bevindingen",
     "map": "Afwijkingskaart (slechtste cel per blok)"
+  },
+  "design": {
+    "estimate_unpriced": {
+      "fail": "De post '{position}' heeft geen eenheidsprijs, daarom laat de ontwerpraming hem weg.",
+      "suggestion": "Voer een eenheidsprijs in of kies een kostenpost voor deze post."
+    },
+    "revision_awaiting_decision": {
+      "fail": "Modelrevisie {number} wacht al {days} dagen op acceptatie.",
+      "suggestion": "Accepteer of weiger de revisie, zodat de raming het huidige model volgt."
+    }
   }
 }

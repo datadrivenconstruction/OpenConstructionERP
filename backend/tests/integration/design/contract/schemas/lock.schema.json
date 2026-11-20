@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openconstructiondesign.org/schemas/ddc-lock/1",
+  "title": "ddc-lock/1 — lock response",
+  "description": "Body of POST/heartbeat lock and the 'lock' member of the context. 409 bodies carry held_by and expires_at inside detail.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "held_by",
+    "mine",
+    "expires_at"
+  ],
+  "properties": {
+    "held_by": {
+      "type": "string"
+    },
+    "mine": {
+      "type": "boolean"
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "$defs": {
+    "uuid": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+    }
+  }
+}

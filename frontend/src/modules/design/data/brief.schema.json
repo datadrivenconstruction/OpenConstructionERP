@@ -1,0 +1,187 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openconstructiondesign.org/schemas/ddc-brief/1",
+  "title": "ddc-brief/1 — design brief owned by the ERP, consumed by `ddc gen`",
+  "description": "Values are plain. Where a value came from and whether a person confirmed it lives in `provenance`, keyed by JSON Pointer into this document. `ddc gen` refuses a brief with any required value whose status is not 'confirmed'. Fields the generator cannot honour yet are reported in its log, never dropped silently.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "brief_id", "project_id", "version", "country", "locale", "use", "depth_level", "massing", "programme"],
+  "properties": {
+    "schema": { "const": "ddc-brief/1" },
+    "brief_id": { "$ref": "#/$defs/uuid" },
+    "project_id": { "$ref": "#/$defs/uuid" },
+    "version": { "type": "integer", "minimum": 1 },
+    "name": { "type": "string", "maxLength": 200 },
+    "country": { "type": "string", "pattern": "^[A-Z]{2}$" },
+    "locale": { "type": "string", "pattern": "^[a-z]{2,3}(-[A-Z]{2})?$" },
+    "norm_pack": { "type": "string", "description": "Editor norm pack id, e.g. 'de'. Defaults from country." },
+    "depth_level": { "enum": ["D1", "D2", "D3", "D4", "D5"] },
+    "use": {
+      "type": "object", "additionalProperties": false, "required": ["category"],
+      "properties": {
+        "category": { "enum": ["residential_single", "residential_multi", "office", "school", "kindergarten",
+                               "retail", "hotel", "healthcare", "industrial", "warehouse", "parking",
+                               "mixed_use", "infrastructure", "other"] },
+        "detail": { "type": "string", "maxLength": 500 }
+      }
+    },
+    "site": {
+      "type": "object", "additionalProperties": false,
+      "properties": {
+        "plot": { "$ref": "#/$defs/geojson_polygon" },
+        "address": { "type": "string", "maxLength": 300 },
+        "setbacks_m": {
+          "type": "object", "additionalProperties": false,
+          "properties": { "front": { "$ref": "#/$defs/len" }, "side": { "$ref": "#/$defs/len" },
+                          "rear": { "$ref": "#/$defs/len" } }
+        },
+        "max_height_m": { "$ref": "#/$defs/len" },
+        "max_floors": { "type": "integer", "minimum": 1 },
+        "floor_area_ratio_max": { "type": "number", "exclusiveMinimum": 0 },
+        "site_coverage_max": { "type": "number", "exclusiveMinimum": 0, "maximum": 1 },
+        "ground_elevation_m": { "type": "number" }
+      }
+    },
+    "massing": {
+      "type": "object", "additionalProperties": false, "required": ["floors_above"],
+      "properties": {
+        "floors_above": { "type": "integer", "minimum": 1, "maximum": 200 },
+        "floors_below": { "type": "integer", "minimum": 0, "maximum": 10 },
+        "floor_height_m": { "type": "number", "minimum": 2.2, "maximum": 12 },
+        "ground_floor_height_m": { "type": "number", "minimum": 2.2, "maximum": 12 },
+        "footprint": {
+          "type": "object", "additionalProperties": false, "required": ["width_m", "depth_m"],
+          "properties": { "width_m": { "$ref": "#/$defs/len" }, "depth_m": { "$ref": "#/$defs/len" } }
+        },
+        "gross_floor_area_m2": { "type": "number", "exclusiveMinimum": 0 },
+        "lift": { "type": "boolean" }
+      }
+    },
+    "programme": {
+      "type": "object", "additionalProperties": false,
+      "properties": {
+        "units": {
+          "type": "array", "description": "Repeated dwelling or office units.",
+          "items": {
+            "type": "object", "additionalProperties": false, "required": ["name", "count", "rooms"],
+            "properties": {
+              "name": { "type": "string", "minLength": 1 },
+              "count": { "type": "integer", "minimum": 1 },
+              "area_m2": { "type": "number", "exclusiveMinimum": 0 },
+              "rooms": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/space" } }
+            }
+          }
+        },
+        "spaces": { "type": "array", "description": "Spaces outside units (lobby, retail, technical).",
+                    "items": { "$ref": "#/$defs/space" } },
+        "parking_spaces": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "structure": {
+      "type": "object", "additionalProperties": false,
+      "properties": {
+        "system": { "enum": ["masonry", "concrete_frame", "concrete_walls", "timber", "steel", "hybrid", null] },
+        "foundation": { "enum": ["strip", "raft", "piles", null] },
+        "grid_m": { "type": "number", "minimum": 2, "maximum": 20 }
+      }
+    },
+    "envelope": {
+      "type": "object", "additionalProperties": false,
+      "properties": {
+        "roof": { "enum": ["flat", "gable", "hip", "shed", null] },
+        "roof_slope_deg": { "type": "number", "minimum": 0, "maximum": 75 },
+        "facade": { "type": "string", "maxLength": 100 },
+        "energy_standard": { "type": "string", "maxLength": 100 }
+      }
+    },
+    "quality_level": { "enum": ["basic", "standard", "high"] },
+    "budget": {
+      "type": "object", "additionalProperties": false, "required": ["amount", "currency"],
+      "properties": {
+        "amount": { "type": "number", "exclusiveMinimum": 0 },
+        "currency": { "type": "string", "pattern": "^[A-Z]{3}$" },
+        "includes_vat": { "type": "boolean" },
+        "cost_groups": { "type": "string", "description": "What the budget covers, e.g. 'DIN 276 KG 300+400'." }
+      }
+    },
+    "generator": {
+      "type": "object", "additionalProperties": false, "required": ["template"],
+      "description": "Optional pin to a generator template; spec_overrides go verbatim into the editor spec.",
+      "properties": {
+        "template": { "type": "string", "description": "house | apartment_section | office | school | universal" },
+        "spec_overrides": { "type": "object" },
+        "seed": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "propertyNames": { "pattern": "^(/[^/]+)+$" },
+      "additionalProperties": { "$ref": "#/$defs/provenance" }
+    },
+    "questions": {
+      "type": "array", "description": "Open questions the AI raised; answered ones move into values.",
+      "items": {
+        "type": "object", "additionalProperties": false, "required": ["id", "pointer", "text", "options"],
+        "properties": {
+          "id": { "type": "string" },
+          "pointer": { "type": "string", "pattern": "^(/[^/]+)+$" },
+          "text": { "type": "string" },
+          "options": { "type": "array", "items": { "type": ["string", "number", "boolean"] } },
+          "default": { "type": ["string", "number", "boolean", "null"] },
+          "reason": { "enum": ["missing", "contradiction", "out_of_range", "ambiguous"] }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "uuid": { "type": "string", "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$" },
+    "len": { "type": "number", "minimum": 0 },
+    "space": {
+      "type": "object", "additionalProperties": false, "required": ["kind"],
+      "properties": {
+        "kind": { "type": "string", "minLength": 1,
+                  "description": "Generator room kind (living, bedroom, kitchen, bath, wc, hall, storage, office, meeting, classroom, lab, staff, lobby, technical, parking, retail, dining, workshop, ward, gym) or a free name for the universal generator." },
+        "name": { "type": "string" },
+        "count": { "type": "integer", "minimum": 1 },
+        "area_m2": { "type": "number", "exclusiveMinimum": 0 },
+        "floors": { "type": "array", "items": { "type": "integer" } },
+        "adjacent_to": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "geojson_polygon": {
+      "type": "object", "additionalProperties": false, "required": ["type", "coordinates"],
+      "description": "RFC 7946 Polygon, WGS84 lon/lat; first ring = outline, counter-clockwise, closed.",
+      "properties": {
+        "type": { "const": "Polygon" },
+        "coordinates": {
+          "type": "array", "minItems": 1,
+          "items": { "type": "array", "minItems": 4,
+                     "items": { "type": "array", "minItems": 2, "maxItems": 3, "items": { "type": "number" } } }
+        }
+      }
+    },
+    "provenance": {
+      "type": "object", "additionalProperties": false, "required": ["status"],
+      "properties": {
+        "status": { "enum": ["proposed", "confirmed", "default"] },
+        "confirmed_by": { "$ref": "#/$defs/uuid" },
+        "confirmed_at": { "type": "string", "format": "date-time" },
+        "sources": {
+          "type": "array",
+          "items": {
+            "type": "object", "additionalProperties": false, "required": ["kind"],
+            "properties": {
+              "kind": { "enum": ["document", "drawing", "sketch", "text", "map", "user"] },
+              "document_id": { "$ref": "#/$defs/uuid" },
+              "page": { "type": "integer", "minimum": 1 },
+              "quote": { "type": "string", "maxLength": 1000 },
+              "region": { "type": "array", "items": { "type": "number" }, "minItems": 4, "maxItems": 4,
+                          "description": "x0,y0,x1,y1 in page fractions for drawings and sketches." }
+            }
+          }
+        },
+        "note": { "type": "string", "maxLength": 500 }
+      }
+    }
+  }
+}

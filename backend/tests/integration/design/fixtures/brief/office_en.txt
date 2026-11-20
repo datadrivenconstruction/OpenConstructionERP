@@ -1,0 +1,6 @@
+Project brief - office building
+The client requires an office building with 8 floors above ground and 2 basement levels.
+Gross floor area: 1,250 sqm
+Floor-to-floor height: 12 ft
+Maximum building height: 45 ft
+Budget: $2.5 million

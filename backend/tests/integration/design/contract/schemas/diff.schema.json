@@ -1,0 +1,154 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openconstructiondesign.org/schemas/ddc-diff/1",
+  "title": "ddc-diff/1 — diff.json: this revision against its parent",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "revision_id",
+    "parent_revision_id",
+    "added",
+    "removed",
+    "changed",
+    "by_type"
+  ],
+  "properties": {
+    "schema": {
+      "const": "ddc-diff/1"
+    },
+    "revision_id": {
+      "$ref": "#/$defs/uuid"
+    },
+    "parent_revision_id": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/uuid"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "null for the first revision: everything is 'added'."
+    },
+    "added": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/key"
+      },
+      "uniqueItems": true
+    },
+    "removed": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/key"
+      },
+      "uniqueItems": true
+    },
+    "changed": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "element_key",
+          "fields"
+        ],
+        "properties": {
+          "element_key": {
+            "$ref": "#/$defs/key"
+          },
+          "geometry": {
+            "type": "boolean",
+            "description": "geometry_hash differs."
+          },
+          "fields": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "field",
+                "old",
+                "new"
+              ],
+              "properties": {
+                "field": {
+                  "type": "string",
+                  "description": "Column name of elements.parquet or props.<name>."
+                },
+                "old": {
+                  "type": [
+                    "string",
+                    "number",
+                    "integer",
+                    "boolean",
+                    "null"
+                  ]
+                },
+                "new": {
+                  "type": [
+                    "string",
+                    "number",
+                    "integer",
+                    "boolean",
+                    "null"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "by_type": {
+      "type": "array",
+      "description": "Quantity deltas grouped by type_key; zero rows are omitted.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "type_key",
+          "ifc_class",
+          "count_delta"
+        ],
+        "properties": {
+          "type_key": {
+            "type": "string"
+          },
+          "ifc_class": {
+            "type": "string",
+            "pattern": "^Ifc[A-Za-z]+$"
+          },
+          "count_delta": {
+            "type": "integer"
+          },
+          "length_m_delta": {
+            "type": "number"
+          },
+          "area_m2_delta": {
+            "type": "number"
+          },
+          "volume_m3_delta": {
+            "type": "number"
+          },
+          "weight_kg_delta": {
+            "type": "number"
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "uuid": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+    },
+    "key": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 255,
+      "pattern": "^[A-Za-z0-9_$][A-Za-z0-9._#/:$-]*$"
+    }
+  }
+}

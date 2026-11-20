@@ -2868,5 +2868,15 @@
     "coverage": "Lefedett tervezett terület",
     "findings": "Megállapítások",
     "map": "Eltérési térkép (legrosszabb cella blokkonként)"
+  },
+  "design": {
+    "estimate_unpriced": {
+      "fail": "A(z) '{position}' tételnek nincs egységára, ezért a tervezési költségbecslés kihagyja.",
+      "suggestion": "Adjon meg egységárat, vagy válasszon költségtételt ehhez a tételhez."
+    },
+    "revision_awaiting_decision": {
+      "fail": "A(z) {number}. modellrevízió {days} napja vár elfogadásra.",
+      "suggestion": "Fogadja el vagy utasítsa el a revíziót, hogy a becslés az aktuális modellt kövesse."
+    }
   }
 }

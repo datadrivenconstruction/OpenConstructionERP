@@ -1,0 +1,695 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openconstructiondesign.org/schemas/ddc-web-bridge/1",
+  "title": "ddc-web-bridge/1 — messages between the ERP page and the browser editor",
+  "description": "One message per call or postMessage. Transport-agnostic: the same objects go through the JS module API (mount on a canvas element) or window.postMessage (iframe). Binary fields travel as ArrayBuffer or Uint8Array (structured clone); JSON transports send them as base64 strings. The ERP host checks every message against $defs/<type> before acting on it.",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/ready"
+    },
+    {
+      "$ref": "#/$defs/open"
+    },
+    {
+      "$ref": "#/$defs/refused"
+    },
+    {
+      "$ref": "#/$defs/dirty"
+    },
+    {
+      "$ref": "#/$defs/save"
+    },
+    {
+      "$ref": "#/$defs/save_result"
+    },
+    {
+      "$ref": "#/$defs/ai_request"
+    },
+    {
+      "$ref": "#/$defs/ai_result"
+    },
+    {
+      "$ref": "#/$defs/read_file"
+    },
+    {
+      "$ref": "#/$defs/file"
+    },
+    {
+      "$ref": "#/$defs/select"
+    },
+    {
+      "$ref": "#/$defs/settings"
+    }
+  ],
+  "$defs": {
+    "bridge": {
+      "type": "integer",
+      "const": 1
+    },
+    "request_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]{1,64}$"
+    },
+    "uuid": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+    },
+    "element_key": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_$][A-Za-z0-9._#/:$-]*$",
+      "maxLength": 512
+    },
+    "locale": {
+      "type": "string",
+      "pattern": "^[a-z]{2,3}(-[A-Za-z0-9]{2,8})*$"
+    },
+    "theme": {
+      "type": "string",
+      "enum": [
+        "light",
+        "dark"
+      ]
+    },
+    "binary": {
+      "description": "ArrayBuffer or Uint8Array in a structured-clone transport; base64 text in a JSON transport."
+    },
+    "error": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "code",
+        "message"
+      ],
+      "properties": {
+        "code": {
+          "type": "string",
+          "enum": [
+            "locked",
+            "no_permission",
+            "rejected",
+            "too_large",
+            "integrity",
+            "network",
+            "version",
+            "unavailable",
+            "declined",
+            "not_found",
+            "other"
+          ]
+        },
+        "status": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 599
+        },
+        "message": {
+          "type": "string",
+          "maxLength": 4000
+        }
+      }
+    },
+    "ready": {
+      "description": "editor -> host, once after mount: the bridge majors it speaks. The host answers with open, or refused when none is shared.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "bridge",
+        "type",
+        "versions",
+        "editor"
+      ],
+      "properties": {
+        "bridge": {
+          "$ref": "#/$defs/bridge"
+        },
+        "type": {
+          "const": "ready"
+        },
+        "versions": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 16,
+          "items": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "editor": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "name",
+            "version"
+          ],
+          "properties": {
+            "name": {
+              "type": "string",
+              "maxLength": 100
+            },
+            "version": {
+              "type": "string",
+              "maxLength": 64
+            }
+          }
+        }
+      }
+    },
+    "refused": {
+      "description": "host -> editor: no common bridge major; the host stops talking and offers the desktop editor.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "bridge",
+        "type",
+        "supported"
+      ],
+      "properties": {
+        "bridge": {
+          "$ref": "#/$defs/bridge"
+        },
+        "type": {
+          "const": "refused"
+        },
+        "supported": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "integer",
+            "minimum": 1
+          }
+        }
+      }
+    },
+    "open": {
+      "description": "host -> editor: the project to open. File URLs are relative to the ERP API and need the person's session; an editor without it (sandboxed iframe) reads them with read_file. The token never crosses the bridge. The host sends open again after a revision was made from the draft or another person's revision became the tip.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "bridge",
+        "type",
+        "project",
+        "brief",
+        "brief_version",
+        "revision",
+        "locale",
+        "theme",
+        "mode",
+        "draft",
+        "permissions",
+        "ai"
+      ],
+      "properties": {
+        "bridge": {
+          "$ref": "#/$defs/bridge"
+        },
+        "type": {
+          "const": "open"
+        },
+        "project": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "id",
+            "name"
+          ],
+          "properties": {
+            "id": {
+              "$ref": "#/$defs/uuid"
+            },
+            "name": {
+              "type": "string",
+              "maxLength": 500
+            }
+          }
+        },
+        "brief": {
+          "description": "ddc-brief/1 document (brief.schema.json) or null before the first save.",
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "brief_version": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1
+        },
+        "revision": {
+          "description": "The chain tip the editor builds on (README section 8), null for a new design.",
+          "type": [
+            "object",
+            "null"
+          ],
+          "additionalProperties": false,
+          "required": [
+            "revision_id",
+            "number",
+            "status",
+            "files"
+          ],
+          "properties": {
+            "revision_id": {
+              "$ref": "#/$defs/uuid"
+            },
+            "number": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "shared",
+                "published"
+              ]
+            },
+            "files": {
+              "type": "array",
+              "maxItems": 64,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "path",
+                  "role",
+                  "url",
+                  "bytes"
+                ],
+                "properties": {
+                  "path": {
+                    "type": "string",
+                    "maxLength": 200
+                  },
+                  "role": {
+                    "type": "string",
+                    "maxLength": 40
+                  },
+                  "url": {
+                    "type": "string",
+                    "pattern": "^/api/v1/design/revisions/[0-9a-f-]{36}/files/"
+                  },
+                  "bytes": {
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                }
+              }
+            }
+          }
+        },
+        "locale": {
+          "$ref": "#/$defs/locale"
+        },
+        "theme": {
+          "$ref": "#/$defs/theme"
+        },
+        "permissions": {
+          "description": "Per project (README section 11): can_edit = may autosave a draft and make a revision from it; can_accept = may accept revisions in the ERP.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "can_edit",
+            "can_accept"
+          ],
+          "properties": {
+            "can_edit": {
+              "type": "boolean"
+            },
+            "can_accept": {
+              "type": "boolean"
+            }
+          }
+        },
+        "ai": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "available"
+          ],
+          "properties": {
+            "available": {
+              "type": "boolean"
+            }
+          }
+        },
+        "mode": {
+          "description": "edit on a desktop browser with can_edit; view (look and select, no edits, no save) on a tablet or phone or without can_edit.",
+          "type": "string",
+          "enum": [
+            "edit",
+            "view"
+          ]
+        },
+        "draft": {
+          "description": "The person's autosaved draft, newer than revision; the editor reads its package with read_file path 'draft.ddcrev'. null = none.",
+          "type": [
+            "object",
+            "null"
+          ],
+          "additionalProperties": false,
+          "required": [
+            "revision_id",
+            "parent_revision_id",
+            "updated_at",
+            "element_count"
+          ],
+          "properties": {
+            "revision_id": {
+              "$ref": "#/$defs/uuid"
+            },
+            "parent_revision_id": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "updated_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "element_count": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        }
+      }
+    },
+    "settings": {
+      "description": "host -> editor: the person changed language or theme in the ERP.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "bridge",
+        "type",
+        "locale",
+        "theme"
+      ],
+      "properties": {
+        "bridge": {
+          "$ref": "#/$defs/bridge"
+        },
+        "type": {
+          "const": "settings"
+        },
+        "locale": {
+          "$ref": "#/$defs/locale"
+        },
+        "theme": {
+          "$ref": "#/$defs/theme"
+        }
+      }
+    },
+    "dirty": {
+      "description": "editor -> host: unsaved changes exist (true) or everything is saved (false). The host guards leaving the page while true.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "bridge",
+        "type",
+        "dirty"
+      ],
+      "properties": {
+        "bridge": {
+          "$ref": "#/$defs/bridge"
+        },
+        "type": {
+          "const": "dirty"
+        },
+        "dirty": {
+          "type": "boolean"
+        }
+      }
+    },
+    "save": {
+      "description": "editor -> host: autosave this .ddcrev package (README section 2) as the person's draft, after each edit (the editor debounces; one save at a time). The host checks size and SHA-256 and stores it with PUT /projects/{id}/draft; the ERP computes the draft's quantities and estimate lines at once. A revision for acceptance is made from the draft in the ERP (one button, the desktop editor's intake). Refused in view mode.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "bridge",
+        "type",
+        "request_id",
+        "package",
+        "package_bytes",
+        "package_sha256"
+      ],
+      "properties": {
+        "bridge": {
+          "$ref": "#/$defs/bridge"
+        },
+        "type": {
+          "const": "save"
+        },
+        "request_id": {
+          "$ref": "#/$defs/request_id"
+        },
+        "package": {
+          "$ref": "#/$defs/binary"
+        },
+        "package_bytes": {
+          "type": "integer",
+          "minimum": 22
+        },
+        "package_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      }
+    },
+    "save_result": {
+      "description": "host -> editor: answer to save. ok=true carries the stored draft; the ERP side panel and estimate preview update at once.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "bridge",
+        "type",
+        "request_id",
+        "ok"
+      ],
+      "properties": {
+        "bridge": {
+          "$ref": "#/$defs/bridge"
+        },
+        "type": {
+          "const": "save_result"
+        },
+        "request_id": {
+          "$ref": "#/$defs/request_id"
+        },
+        "ok": {
+          "type": "boolean"
+        },
+        "error": {
+          "$ref": "#/$defs/error"
+        },
+        "draft": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "revision_id",
+            "updated_at",
+            "element_count"
+          ],
+          "properties": {
+            "revision_id": {
+              "$ref": "#/$defs/uuid"
+            },
+            "updated_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "element_count": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        }
+      }
+    },
+    "ai_request": {
+      "description": "editor -> host: ask the ERP's AI. The ERP runs it with the person's own AI settings and shows every proposed value with its source; only values the person confirms reach the brief. The editor never talks to an AI service itself.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "bridge",
+        "type",
+        "request_id",
+        "action",
+        "text"
+      ],
+      "properties": {
+        "bridge": {
+          "$ref": "#/$defs/bridge"
+        },
+        "type": {
+          "const": "ai_request"
+        },
+        "request_id": {
+          "$ref": "#/$defs/request_id"
+        },
+        "action": {
+          "type": "string",
+          "enum": [
+            "brief_from_text"
+          ]
+        },
+        "text": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 20000
+        }
+      }
+    },
+    "ai_result": {
+      "description": "host -> editor: confirmed = the person confirmed values and the brief was saved as brief_version; declined = the person confirmed none; unavailable = no AI configured; failed = the request failed.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "bridge",
+        "type",
+        "request_id",
+        "status"
+      ],
+      "properties": {
+        "bridge": {
+          "$ref": "#/$defs/bridge"
+        },
+        "type": {
+          "const": "ai_result"
+        },
+        "request_id": {
+          "$ref": "#/$defs/request_id"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "confirmed",
+            "declined",
+            "unavailable",
+            "failed"
+          ]
+        },
+        "brief_version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "brief": {
+          "type": "object"
+        },
+        "confirmed": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "error": {
+          "$ref": "#/$defs/error"
+        }
+      }
+    },
+    "read_file": {
+      "description": "editor -> host: read one file of the open revision (a path listed in open.revision.files) or the draft package ('draft.ddcrev' when open.draft is set).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "bridge",
+        "type",
+        "request_id",
+        "path"
+      ],
+      "properties": {
+        "bridge": {
+          "$ref": "#/$defs/bridge"
+        },
+        "type": {
+          "const": "read_file"
+        },
+        "request_id": {
+          "$ref": "#/$defs/request_id"
+        },
+        "path": {
+          "type": "string",
+          "maxLength": 200
+        }
+      }
+    },
+    "file": {
+      "description": "host -> editor: answer to read_file.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "bridge",
+        "type",
+        "request_id",
+        "ok"
+      ],
+      "properties": {
+        "bridge": {
+          "$ref": "#/$defs/bridge"
+        },
+        "type": {
+          "const": "file"
+        },
+        "request_id": {
+          "$ref": "#/$defs/request_id"
+        },
+        "ok": {
+          "type": "boolean"
+        },
+        "bytes": {
+          "$ref": "#/$defs/binary"
+        },
+        "error": {
+          "$ref": "#/$defs/error"
+        }
+      }
+    },
+    "select": {
+      "description": "Either way: the selected elements (empty = nothing). editor -> host fills the ERP side panel; host -> editor highlights what the person picked in an ERP list.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "bridge",
+        "type",
+        "elements"
+      ],
+      "properties": {
+        "bridge": {
+          "$ref": "#/$defs/bridge"
+        },
+        "type": {
+          "const": "select"
+        },
+        "elements": {
+          "type": "array",
+          "maxItems": 5000,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "element_key"
+            ],
+            "properties": {
+              "element_key": {
+                "$ref": "#/$defs/element_key"
+              },
+              "ifc_class": {
+                "type": "string",
+                "pattern": "^Ifc[A-Za-z]+$"
+              },
+              "type_key": {
+                "type": "string",
+                "maxLength": 200
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openconstructiondesign.org/schemas/ddc-web-editor/1",
+  "title": "ddc-web-editor/1 — browser editor bundle",
+  "description": "Published next to the browser build of the editor. The ERP reads it to know what to download in the background (files, sizes, hashes) and how to start it: entry *.js = ES module exporting mount(element, host) (README section 11), entry *.html = page for a sandboxed iframe speaking postMessage.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "version", "bridge", "entry", "files"],
+  "properties": {
+    "schema": {"const": "ddc-web-editor/1"},
+    "version": {"type": "string", "minLength": 1, "maxLength": 64},
+    "bridge": {"type": "array", "minItems": 1, "maxItems": 16, "items": {"type": "integer", "minimum": 1}},
+    "entry": {"type": "string", "pattern": "^(?!(.*/)?[.][.]?(/|$))[A-Za-z0-9_.-]+(/[A-Za-z0-9_.-]+)*[.](js|mjs|html)$"},
+    "files": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 256,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["path", "bytes", "sha256"],
+        "properties": {
+          "path": {"type": "string", "pattern": "^(?!(.*/)?[.][.]?(/|$))[A-Za-z0-9_.-]+(/[A-Za-z0-9_.-]+)*$", "maxLength": 200},
+          "bytes": {"type": "integer", "minimum": 0},
+          "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+        }
+      }
+    }
+  }
+}

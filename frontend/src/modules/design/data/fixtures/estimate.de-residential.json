@@ -1,0 +1,627 @@
+{
+ "estimate": true,
+ "boq_id": "005a0000-0000-0000-0000-000000000384",
+ "revision_id": "005a0000-0000-0000-0000-000000000385",
+ "depth_level": "D2",
+ "country": "DE",
+ "use": "residential_multi",
+ "positions": [
+  {
+   "rule": "foundation",
+   "kind": "model",
+   "position_id": "005a0000-0000-0000-0000-000000000000",
+   "ordinal": "320.001",
+   "description": "Gründung",
+   "cost_group": "320",
+   "unit": "m3",
+   "quantity": "0",
+   "unit_rate": "0",
+   "total": "0",
+   "model_quantity": "0",
+   "override": false,
+   "override_quantity": null,
+   "override_reason": null,
+   "flags": [
+    "no_match",
+    "unpriced"
+   ],
+   "elements": 0,
+   "provenance": {
+    "select": {
+     "ifc_class": [
+      "IfcFooting",
+      "IfcPile"
+     ]
+    },
+    "quantity": {
+     "field": "volume_m3",
+     "aggregation": "sum"
+    },
+    "elements": 0
+   }
+  },
+  {
+   "rule": "wall_ext",
+   "kind": "model",
+   "position_id": "005a0000-0000-0000-0000-000000000001",
+   "ordinal": "330.001",
+   "description": "Außenwände",
+   "cost_group": "330",
+   "unit": "m2",
+   "quantity": "82.5",
+   "unit_rate": "0",
+   "total": "0",
+   "model_quantity": "82.5",
+   "override": false,
+   "override_quantity": null,
+   "override_reason": null,
+   "flags": [
+    "unpriced"
+   ],
+   "elements": 1,
+   "provenance": {
+    "select": {
+     "ifc_class": [
+      "IfcWall"
+     ],
+     "type_key_prefix": [
+      "wall/ext"
+     ]
+    },
+    "quantity": {
+     "field": "area_m2",
+     "aggregation": "sum"
+    },
+    "elements": 1
+   }
+  },
+  {
+   "rule": "window",
+   "kind": "model",
+   "position_id": "005a0000-0000-0000-0000-000000000002",
+   "ordinal": "334.001",
+   "description": "Fenster",
+   "cost_group": "334",
+   "unit": "m2",
+   "quantity": "0",
+   "unit_rate": "0",
+   "total": "0",
+   "model_quantity": "0",
+   "override": false,
+   "override_quantity": null,
+   "override_reason": null,
+   "flags": [
+    "no_match",
+    "unpriced"
+   ],
+   "elements": 0,
+   "provenance": {
+    "select": {
+     "ifc_class": [
+      "IfcWindow"
+     ]
+    },
+    "quantity": {
+     "field": "area_m2",
+     "aggregation": "sum"
+    },
+    "elements": 0
+   }
+  },
+  {
+   "rule": "wall_int",
+   "kind": "model",
+   "position_id": "005a0000-0000-0000-0000-000000000003",
+   "ordinal": "340.001",
+   "description": "Innenwände",
+   "cost_group": "340",
+   "unit": "m2",
+   "quantity": "0",
+   "unit_rate": "0",
+   "total": "0",
+   "model_quantity": "0",
+   "override": false,
+   "override_quantity": null,
+   "override_reason": null,
+   "flags": [
+    "no_match",
+    "unpriced"
+   ],
+   "elements": 0,
+   "provenance": {
+    "select": {
+     "ifc_class": [
+      "IfcWall"
+     ],
+     "type_key_not_prefix": [
+      "wall/ext"
+     ]
+    },
+    "quantity": {
+     "field": "area_m2",
+     "aggregation": "sum"
+    },
+    "elements": 0
+   }
+  },
+  {
+   "rule": "door",
+   "kind": "model",
+   "position_id": "005a0000-0000-0000-0000-000000000004",
+   "ordinal": "344.001",
+   "description": "Türen",
+   "cost_group": "344",
+   "unit": "pcs",
+   "quantity": "1",
+   "unit_rate": "0",
+   "total": "0",
+   "model_quantity": "1",
+   "override": false,
+   "override_quantity": null,
+   "override_reason": null,
+   "flags": [
+    "unpriced"
+   ],
+   "elements": 1,
+   "provenance": {
+    "select": {
+     "ifc_class": [
+      "IfcDoor"
+     ]
+    },
+    "quantity": {
+     "field": "count",
+     "aggregation": "sum"
+    },
+    "elements": 1
+   }
+  },
+  {
+   "rule": "slab",
+   "kind": "model",
+   "position_id": "005a0000-0000-0000-0000-000000000005",
+   "ordinal": "350.001",
+   "description": "Decken",
+   "cost_group": "350",
+   "unit": "m2",
+   "quantity": "401.2",
+   "unit_rate": "0",
+   "total": "0",
+   "model_quantity": "401.2",
+   "override": false,
+   "override_quantity": null,
+   "override_reason": null,
+   "flags": [
+    "unpriced"
+   ],
+   "elements": 1,
+   "provenance": {
+    "select": {
+     "ifc_class": [
+      "IfcSlab"
+     ],
+     "type_key_not_prefix": [
+      "slab/foundation",
+      "slab/roof"
+     ]
+    },
+    "quantity": {
+     "field": "area_m2",
+     "aggregation": "sum"
+    },
+    "elements": 1
+   }
+  },
+  {
+   "rule": "stair",
+   "kind": "model",
+   "position_id": "005a0000-0000-0000-0000-000000000006",
+   "ordinal": "350.002",
+   "description": "Treppen",
+   "cost_group": "350",
+   "unit": "pcs",
+   "quantity": "0",
+   "unit_rate": "0",
+   "total": "0",
+   "model_quantity": "0",
+   "override": false,
+   "override_quantity": null,
+   "override_reason": null,
+   "flags": [
+    "no_match",
+    "unpriced"
+   ],
+   "elements": 0,
+   "provenance": {
+    "select": {
+     "ifc_class": [
+      "IfcStair",
+      "IfcStairFlight"
+     ]
+    },
+    "quantity": {
+     "field": "count",
+     "aggregation": "sum"
+    },
+    "elements": 0
+   }
+  },
+  {
+   "rule": "roof",
+   "kind": "model",
+   "position_id": "005a0000-0000-0000-0000-000000000007",
+   "ordinal": "360.001",
+   "description": "Dächer",
+   "cost_group": "360",
+   "unit": "m2",
+   "quantity": "0",
+   "unit_rate": "0",
+   "total": "0",
+   "model_quantity": "0",
+   "override": false,
+   "override_quantity": null,
+   "override_reason": null,
+   "flags": [
+    "no_match",
+    "unpriced"
+   ],
+   "elements": 0,
+   "provenance": {
+    "select": {
+     "ifc_class": [
+      "IfcRoof"
+     ]
+    },
+    "quantity": {
+     "field": "area_m2",
+     "aggregation": "sum"
+    },
+    "elements": 0
+   }
+  },
+  {
+   "rule": "reinforcement",
+   "kind": "derived",
+   "position_id": "005a0000-0000-0000-0000-000000000008",
+   "ordinal": "350.003",
+   "description": "Bewehrung",
+   "cost_group": "350",
+   "unit": "kg",
+   "quantity": "0",
+   "unit_rate": "0",
+   "total": "0",
+   "model_quantity": "0",
+   "override": false,
+   "override_quantity": null,
+   "override_reason": null,
+   "flags": [
+    "input_missing",
+    "unpriced",
+    "no_match"
+   ],
+   "elements": 0,
+   "provenance": {
+    "formula": "concrete_volume_m3 * reinforcement_kg_per_m3",
+    "aggregates": {
+     "concrete_volume_m3": {
+      "value": "0",
+      "assumption": "Elements whose material name contains 'Stahlbeton'."
+     }
+    },
+    "missing": "An input of the formula has no published source.",
+    "missing_code": "input_missing"
+   }
+  },
+  {
+   "rule": "finishes",
+   "kind": "derived",
+   "position_id": "005a0000-0000-0000-0000-000000000009",
+   "ordinal": "340.002",
+   "description": "Oberflächen der Wände (beide Seiten)",
+   "cost_group": "340",
+   "unit": "m2",
+   "quantity": "0",
+   "unit_rate": "0",
+   "total": "0",
+   "model_quantity": "0",
+   "override": false,
+   "override_quantity": null,
+   "override_reason": null,
+   "flags": [
+    "rate_missing",
+    "unpriced",
+    "no_match"
+   ],
+   "elements": 0,
+   "provenance": {
+    "formula": "wall_area_m2 * 2",
+    "aggregates": {
+     "wall_area_m2": {
+      "value": "0",
+      "assumption": "Net wall area of all walls."
+     }
+    },
+    "missing": "No open published finish unit rate found.",
+    "missing_code": "rate_missing"
+   }
+  },
+  {
+   "rule": "services",
+   "kind": "derived",
+   "position_id": "005a0000-0000-0000-0000-00000000000a",
+   "ordinal": "400.001",
+   "description": "Technische Anlagen (je m² Wohnfläche)",
+   "cost_group": "400",
+   "unit": "m2",
+   "quantity": "28.4",
+   "unit_rate": "0",
+   "total": "0",
+   "model_quantity": "28.4",
+   "override": false,
+   "override_quantity": null,
+   "override_reason": null,
+   "flags": [
+    "rate_missing",
+    "unpriced"
+   ],
+   "elements": 0,
+   "provenance": {
+    "formula": "living_area_m2",
+    "aggregates": {
+     "living_area_m2": {
+      "value": "28.4",
+      "assumption": "Dwelling spaces = IfcSpace elements whose key has a unit segment (u<id>). Model floor area of those spaces, without the reductions of the living-area ordinance (WoFlV) for balconies and sloped ceilings."
+     }
+    },
+    "missing": "No open source splits KG 400 from KG 300 (only the combined KG 300+400 exists).",
+    "missing_code": "rate_missing"
+   }
+  },
+  {
+   "rule": "site_prep",
+   "kind": "derived",
+   "position_id": "005a0000-0000-0000-0000-00000000000b",
+   "ordinal": "200.001",
+   "description": "Herrichten und Erschließen (je m² Wohnfläche)",
+   "cost_group": "200",
+   "unit": "m2",
+   "quantity": "28.4",
+   "unit_rate": "107.1",
+   "total": "3041.64",
+   "model_quantity": "28.4",
+   "override": false,
+   "override_quantity": null,
+   "override_reason": null,
+   "flags": [],
+   "elements": 0,
+   "provenance": {
+    "formula": "living_area_m2",
+    "aggregates": {
+     "living_area_m2": {
+      "value": "28.4",
+      "assumption": "Dwelling spaces = IfcSpace elements whose key has a unit segment (u<id>). Model floor area of those spaces, without the reductions of the living-area ordinance (WoFlV) for balconies and sloped ceilings."
+     }
+    },
+    "benchmark": {
+     "low": "16.75",
+     "mid": "107.1",
+     "high": "822.58",
+     "unit": "EUR/m2",
+     "source_url": "https://www.bdb-bfh.de/downloads.html?file=files%2Fredaktion%2Fbdb%2FDownloads%2FWOB24%2FARGE_Studie_Kosten-Bedarf-Standards_Die-Krise-als-Einbahnstra%C3%9Fe.pdf",
+     "publisher": "ARGE Kiel (Arbeitsgemeinschaft für zeitgemäßes Bauen e.V.)",
+     "published": "2024-04-02",
+     "price_level_year": 2023,
+     "derived": false,
+     "published_basis": null,
+     "vat_included": null
+    }
+   }
+  },
+  {
+   "rule": "site_works",
+   "kind": "derived",
+   "position_id": "005a0000-0000-0000-0000-00000000000c",
+   "ordinal": "500.001",
+   "description": "Außenanlagen (je m² Wohnfläche)",
+   "cost_group": "500",
+   "unit": "m2",
+   "quantity": "28.4",
+   "unit_rate": "160.51",
+   "total": "4558.484",
+   "model_quantity": "28.4",
+   "override": false,
+   "override_quantity": null,
+   "override_reason": null,
+   "flags": [],
+   "elements": 0,
+   "provenance": {
+    "formula": "living_area_m2",
+    "aggregates": {
+     "living_area_m2": {
+      "value": "28.4",
+      "assumption": "Dwelling spaces = IfcSpace elements whose key has a unit segment (u<id>). Model floor area of those spaces, without the reductions of the living-area ordinance (WoFlV) for balconies and sloped ceilings."
+     }
+    },
+    "benchmark": {
+     "low": "41.77",
+     "mid": "160.51",
+     "high": "555.09",
+     "unit": "EUR/m2",
+     "source_url": "https://www.bdb-bfh.de/downloads.html?file=files%2Fredaktion%2Fbdb%2FDownloads%2FWOB24%2FARGE_Studie_Kosten-Bedarf-Standards_Die-Krise-als-Einbahnstra%C3%9Fe.pdf",
+     "publisher": "ARGE Kiel (Arbeitsgemeinschaft für zeitgemäßes Bauen e.V.)",
+     "published": "2024-04-02",
+     "price_level_year": 2023,
+     "derived": false,
+     "published_basis": null,
+     "vat_included": null
+    }
+   }
+  },
+  {
+   "rule": "ancillary",
+   "kind": "derived",
+   "position_id": "005a0000-0000-0000-0000-00000000000d",
+   "ordinal": "700.001",
+   "description": "Baunebenkosten (je m² Wohnfläche)",
+   "cost_group": "700",
+   "unit": "m2",
+   "quantity": "28.4",
+   "unit_rate": "503.43",
+   "total": "14297.412",
+   "model_quantity": "28.4",
+   "override": false,
+   "override_quantity": null,
+   "override_reason": null,
+   "flags": [],
+   "elements": 0,
+   "provenance": {
+    "formula": "living_area_m2",
+    "aggregates": {
+     "living_area_m2": {
+      "value": "28.4",
+      "assumption": "Dwelling spaces = IfcSpace elements whose key has a unit segment (u<id>). Model floor area of those spaces, without the reductions of the living-area ordinance (WoFlV) for balconies and sloped ceilings."
+     }
+    },
+    "benchmark": {
+     "low": "290.59",
+     "mid": "503.43",
+     "high": "1037.59",
+     "unit": "EUR/m2",
+     "source_url": "https://www.bdb-bfh.de/downloads.html?file=files%2Fredaktion%2Fbdb%2FDownloads%2FWOB24%2FARGE_Studie_Kosten-Bedarf-Standards_Die-Krise-als-Einbahnstra%C3%9Fe.pdf",
+     "publisher": "ARGE Kiel (Arbeitsgemeinschaft für zeitgemäßes Bauen e.V.)",
+     "published": "2024-04-02",
+     "price_level_year": 2023,
+     "derived": false,
+     "published_basis": null,
+     "vat_included": null
+    }
+   }
+  }
+ ],
+ "total": "21897.536",
+ "unpriced_positions": [
+  "foundation",
+  "wall_ext",
+  "window",
+  "wall_int",
+  "door",
+  "slab",
+  "stair",
+  "roof",
+  "reinforcement",
+  "finishes",
+  "services"
+ ],
+ "range": {
+  "currency": "EUR",
+  "basis_living_area_m2": "28.4",
+  "groups": {
+   "200": {
+    "source": "benchmark",
+    "low": "475.700",
+    "mid": "3041.64",
+    "high": "23361.272",
+    "basis": "WFL 28.4 m2",
+    "benchmark": {
+     "source_url": "https://www.bdb-bfh.de/downloads.html?file=files%2Fredaktion%2Fbdb%2FDownloads%2FWOB24%2FARGE_Studie_Kosten-Bedarf-Standards_Die-Krise-als-Einbahnstra%C3%9Fe.pdf",
+     "publisher": "ARGE Kiel (Arbeitsgemeinschaft für zeitgemäßes Bauen e.V.)",
+     "published": "2024-04-02",
+     "price_level_year": 2023,
+     "derived": false,
+     "published_basis": null,
+     "vat_included": null
+    }
+   },
+   "300+400": {
+    "source": "benchmark",
+    "low": "87330.0",
+    "mid": "110220.4",
+    "high": "206496.4",
+    "basis": "WFL 28.4 m2",
+    "benchmark": {
+     "source_url": "https://www.bdb-bfh.de/downloads.html?file=files%2Fredaktion%2Fbdb%2FDownloads%2FWOB24%2FARGE_Studie_Kosten-Bedarf-Standards_Die-Krise-als-Einbahnstra%C3%9Fe.pdf",
+     "publisher": "ARGE Kiel (Arbeitsgemeinschaft für zeitgemäßes Bauen e.V.)",
+     "published": "2024-04-02",
+     "price_level_year": 2026,
+     "derived": true,
+     "published_basis": null,
+     "vat_included": null
+    }
+   },
+   "500": {
+    "source": "benchmark",
+    "low": "1186.268",
+    "mid": "4558.484",
+    "high": "15764.556",
+    "basis": "WFL 28.4 m2",
+    "benchmark": {
+     "source_url": "https://www.bdb-bfh.de/downloads.html?file=files%2Fredaktion%2Fbdb%2FDownloads%2FWOB24%2FARGE_Studie_Kosten-Bedarf-Standards_Die-Krise-als-Einbahnstra%C3%9Fe.pdf",
+     "publisher": "ARGE Kiel (Arbeitsgemeinschaft für zeitgemäßes Bauen e.V.)",
+     "published": "2024-04-02",
+     "price_level_year": 2023,
+     "derived": false,
+     "published_basis": null,
+     "vat_included": null
+    }
+   },
+   "700": {
+    "source": "benchmark",
+    "low": "8252.756",
+    "mid": "14297.412",
+    "high": "29467.556",
+    "basis": "WFL 28.4 m2",
+    "benchmark": {
+     "source_url": "https://www.bdb-bfh.de/downloads.html?file=files%2Fredaktion%2Fbdb%2FDownloads%2FWOB24%2FARGE_Studie_Kosten-Bedarf-Standards_Die-Krise-als-Einbahnstra%C3%9Fe.pdf",
+     "publisher": "ARGE Kiel (Arbeitsgemeinschaft für zeitgemäßes Bauen e.V.)",
+     "published": "2024-04-02",
+     "price_level_year": 2023,
+     "derived": false,
+     "published_basis": null,
+     "vat_included": null
+    }
+   }
+  },
+  "sources_not_used": [
+   {
+    "source_url": "https://www.destatis.de/DE/Themen/Branchen-Unternehmen/Bauen/Publikationen/Downloads-Bautaetigkeit/baugenehmigungen-baukosten-pdf-5311103.pdf?__blob=publicationFile",
+    "publisher": "Statistisches Bundesamt (Destatis)",
+    "published": "2022-11-16",
+    "price_level_year": 2026,
+    "vat_included": true,
+    "reasons": [
+     "other_basis",
+     "no_range"
+    ]
+   },
+   {
+    "source_url": "https://statistik.thueringen.de/presse/2025/pr_094_25.pdf",
+    "publisher": "Thüringer Landesamt für Statistik",
+    "published": "2025-04-14",
+    "price_level_year": 2026,
+    "vat_included": null,
+    "reasons": [
+     "no_range"
+    ]
+   }
+  ],
+  "missing_groups": [],
+  "total": {
+   "low": "97244.724",
+   "mid": "132117.936",
+   "high": "275089.784",
+   "complete": true
+  },
+  "price_level_years": [
+   2023,
+   2026
+  ],
+  "not_in_range": [
+   "100",
+   "600"
+  ],
+  "note": "Cost groups 100 and 600 have no sourced benchmark and are not part of the range."
+ },
+ "inside_range": null,
+ "inside_range_note_code": "unpriced_or_unsourced",
+ "inside_range_note": "Not comparable: some positions are unpriced or a range group has no sourced benchmark."
+}

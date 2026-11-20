@@ -1,0 +1,31 @@
+{
+  "schema": "ddc-takeoff-basis/1",
+  "note": "Which quantity key a take-off line is measured in, by IFC class. A unit convention for ordering, not a sourced number: every line shows the other available bases and a person may switch it. Classes not listed use the default.",
+  "default": "count",
+  "by_ifc_class": {
+    "IfcWall": "area_m2",
+    "IfcWallStandardCase": "area_m2",
+    "IfcCurtainWall": "area_m2",
+    "IfcCovering": "area_m2",
+    "IfcRoof": "area_m2",
+    "IfcPlate": "area_m2",
+    "IfcSlab": "volume_m3",
+    "IfcFooting": "volume_m3",
+    "IfcPile": "volume_m3",
+    "IfcRamp": "volume_m3",
+    "IfcBeam": "length_m",
+    "IfcColumn": "length_m",
+    "IfcMember": "length_m",
+    "IfcRailing": "length_m",
+    "IfcPipeSegment": "length_m",
+    "IfcDuctSegment": "length_m",
+    "IfcCableCarrierSegment": "length_m",
+    "IfcReinforcingBar": "weight_kg",
+    "IfcReinforcingMesh": "weight_kg",
+    "IfcDoor": "count",
+    "IfcWindow": "count",
+    "IfcStair": "count",
+    "IfcStairFlight": "count"
+  },
+  "not_procured": ["IfcSpace", "IfcSite", "IfcBuilding", "IfcBuildingStorey", "IfcOpeningElement", "IfcZone"]
+}
