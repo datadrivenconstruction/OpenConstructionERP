@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 > **Tip:** This file is long. Use your browser's **Find** (Ctrl+F) to jump to a version number, or see the [Releases page](https://github.com/datadrivenconstruction/OpenConstructionERP/releases) for a per-release view with download links.
 
+## [20.0.1] - 2026-11-20
+
+### Fixed
+
+- In the Docker setup with the bundled nginx, the live presence connection opens as a WebSocket instead of failing with 404 and reconnecting.
+
 ## [20.0.0] - 2026-11-20
 
 Subcontract awards carry their terms into the contract, a company can buy once for several projects, survey work gains the geodesy a site surveyor needs, and every module shows where its data comes from and where it goes. An awarded tender hands its payment terms, retention, levies and cash discount to the subcontract, a central buyer splits one package across projects and legal entities, and a Data paths view draws the platform as one connected map with live counts and the firms behind them.

@@ -67,6 +67,12 @@ const UNRELEASED: ChangelogEntry | null = null;
 // carry the long form and are left alone as the record of what shipped.
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '20.0.1',
+    date: '2026-11-20',
+    tag: 'FIX',
+    summary: 'In the Docker setup with the bundled nginx, live presence connects as a WebSocket instead of retrying on 404.',
+  },
+  {
     version: '20.0.0',
     date: '2026-11-20',
     tag: 'NEW',
