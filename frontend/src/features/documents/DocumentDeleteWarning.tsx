@@ -41,7 +41,9 @@ import {
 
 /** Module key to the i18n key that module already uses for its own name. */
 const MODULE_LABEL_KEYS: Record<string, string> = {
+  boq: 'nav.boq',
   cde: 'cde.title',
+  central_purchasing: 'central_purchasing.title',
   closeout: 'closeout.title',
   construction_control: 'construction_control.title',
   contracts: 'contracts.title',
@@ -67,6 +69,7 @@ const MODULE_LABEL_KEYS: Record<string, string> = {
   takeoff: 'takeoff.title',
   tax_withholding: 'nav.tax_withholding',
   temporary_works: 'temporary_works.title',
+  tendering: 'nav.tendering',
   transmittals: 'transmittals.title',
   variations: 'nav.variations',
 };

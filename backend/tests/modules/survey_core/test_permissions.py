@@ -8,11 +8,11 @@ import pytest
 from fastapi import HTTPException
 
 from app.core.permissions import ROLE_ALIASES, Role, permission_registry
+from app.modules.survey_core.dependencies import require_survey_confirm
 from app.modules.survey_core.permissions import (
     CONFIRM,
     can_confirm,
     register_survey_permissions,
-    require_survey_confirm,
 )
 
 

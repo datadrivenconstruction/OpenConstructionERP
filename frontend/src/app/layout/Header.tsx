@@ -136,6 +136,7 @@ export const TITLE_I18N_MAP: Record<string, string> = {
   'Bid outcomes': 'winloss.title',
   'Contracts': 'nav.contracts',
   'Framework Agreements': 'framework.title',
+  'Central Purchasing': 'central_purchasing.title',
   'Subcontractors': 'nav.subcontractors',
   'Bid Management': 'nav.bid_management',
   'Tendering': 'nav.tendering',

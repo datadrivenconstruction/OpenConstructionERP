@@ -69089,6 +69089,7 @@ const resource = {
     "central_purchasing.col.projects": "Проєкти",
     "central_purchasing.col.quantity": "Кількість",
     "central_purchasing.col.rate": "Розцінка",
+    "central_purchasing.col.share_m2": "Частка, м²",
     "central_purchasing.col.status": "Статус",
     "central_purchasing.col.your_qty": "Ваша кількість",
     "central_purchasing.cost_code": "Код витрат {{code}}",

@@ -106,7 +106,7 @@ export function buildCsv(model: FlowModel, headers: { section: string; text: str
   const q = (s: string) => `"${s.replace(/"/g, '""')}"`;
   const lines = [[headers.section, headers.text, headers.link].map(q).join(',')];
   for (const r of listRows(model)) lines.push([sections[r.section], r.text, r.href].map(q).join(','));
-  return `﻿${lines.join('\r\n')}\r\n`;
+  return `\uFEFF${lines.join('\r\n')}\r\n`;
 }
 
 export function download(name: string, blob: Blob): void {

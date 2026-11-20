@@ -15,7 +15,8 @@ import { getErrorMessage } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
 import { fmtM } from './angles';
 import { runStakeList, type StakeListIn } from './api';
-import { Findings } from './CalcPage';
+import { Findings } from './CalcPage';
+import { fmtNumber } from '@/shared/lib/formatters';
 
 /** "chainage offset z" per line; offset may be left out (centreline). */
 export function parseMeasured(text: string): StakeListIn['measured'] | null {
@@ -119,7 +120,7 @@ export function RoadStakePanel() {
                     <td className="text-right"><bdi dir="ltr" className="font-mono">{fmtM(row.n)}</bdi></td>
                     <td className="text-right"><bdi dir="ltr" className="font-mono">{fmtM(row.design_z)}</bdi></td>
                     <td className="text-right"><bdi dir="ltr" className="font-mono">{fmtM(row.measured_z)}</bdi></td>
-                    <td className="text-right"><bdi dir="ltr" className="font-mono">{row.dz_mm == null ? '' : row.dz_mm.toFixed(0)}</bdi></td>
+                    <td className="text-right"><bdi dir="ltr" className="font-mono">{row.dz_mm == null ? '' : fmtNumber(row.dz_mm, 0)}</bdi></td>
                     <td>{row.cut_fill ? t(`survey.road.${row.cut_fill}`, { defaultValue: row.cut_fill === 'on_grade' ? 'On grade' : row.cut_fill === 'cut' ? 'Cut' : 'Fill' }) : ''}</td>
                   </tr>
                 ))}

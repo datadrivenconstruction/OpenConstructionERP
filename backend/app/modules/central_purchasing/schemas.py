@@ -10,6 +10,8 @@ from typing import Annotated, Any
 
 from pydantic import BaseModel, ConfigDict, Field, PlainSerializer
 
+from app.core.decimal_types import Decimal7_4, Decimal18_2, Decimal18_4
+
 Dec = Annotated[Decimal, PlainSerializer(lambda v: format(v, "f"), return_type=str, when_used="json")]
 
 _KIND = "^(subcontract|supply)$"
@@ -23,7 +25,7 @@ class BundleCreate(BaseModel):
     mode: str = Field(default="per_project_contracts", pattern=_MODE)
     currency: str = Field(default="", max_length=3)
     cost_code_standard: str | None = Field(default=None, max_length=40)
-    budget_tolerance_pct: Decimal = Field(default=Decimal("0"), ge=0, le=100)
+    budget_tolerance_pct: Decimal7_4 = Field(default=Decimal("0"), ge=0, le=100)
 
 
 class BundleUpdate(BaseModel):
@@ -33,30 +35,30 @@ class BundleUpdate(BaseModel):
     mode: str | None = Field(default=None, pattern=_MODE)
     currency: str | None = Field(default=None, max_length=3)
     cost_code_standard: str | None = Field(default=None, max_length=40)
-    budget_tolerance_pct: Decimal | None = Field(default=None, ge=0, le=100)
+    budget_tolerance_pct: Decimal7_4 | None = Field(default=None, ge=0, le=100)
     vendor_name: str | None = Field(default=None, max_length=255)
     subcontractor_id: uuid.UUID | None = None
     contact_id: uuid.UUID | None = None
-    discount_pct: Decimal | None = Field(default=None, ge=0, lt=100)
-    lump_sum: Decimal | None = Field(default=None, ge=0)
+    discount_pct: Decimal7_4 | None = Field(default=None, ge=0, lt=100)
+    lump_sum: Decimal18_2 | None = Field(default=None, ge=0)
     clear_discount: bool = False
     clear_lump_sum: bool = False
 
 
 class ProjectAdd(BaseModel):
     project_id: uuid.UUID
-    budget_amount: Decimal | None = Field(default=None, ge=0)
+    budget_amount: Decimal18_2 | None = Field(default=None, ge=0)
 
 
 class ProjectUpdate(BaseModel):
-    budget_amount: Decimal | None = Field(default=None, ge=0)
+    budget_amount: Decimal18_2 | None = Field(default=None, ge=0)
     clear_budget: bool = False
 
 
 class ShareIn(BaseModel):
     bundle_project_id: uuid.UUID
     #: ``None`` leaves the share blank (the rule flags it); ``0`` means none of this line.
-    quantity: Decimal | None = Field(default=None, ge=0)
+    quantity: Decimal18_4 | None = Field(default=None, ge=0)
     cost_line_id: uuid.UUID | None = None
 
 
@@ -64,8 +66,8 @@ class LineIn(BaseModel):
     code: str = Field(default="", max_length=80)
     description: str = Field(default="", max_length=5000)
     unit: str = Field(default="", max_length=20)
-    quantity: Decimal = Field(..., ge=0)
-    unit_rate: Decimal | None = Field(default=None, ge=0)
+    quantity: Decimal18_4 = Field(..., ge=0)
+    unit_rate: Decimal18_4 | None = Field(default=None, ge=0)
     cost_code: str | None = Field(default=None, max_length=40)
     shares: list[ShareIn] | None = None
 
@@ -74,8 +76,8 @@ class LineUpdate(BaseModel):
     code: str | None = Field(default=None, max_length=80)
     description: str | None = Field(default=None, max_length=5000)
     unit: str | None = Field(default=None, max_length=20)
-    quantity: Decimal | None = Field(default=None, ge=0)
-    unit_rate: Decimal | None = Field(default=None, ge=0)
+    quantity: Decimal18_4 | None = Field(default=None, ge=0)
+    unit_rate: Decimal18_4 | None = Field(default=None, ge=0)
     clear_rate: bool = False
     cost_code: str | None = Field(default=None, max_length=40)
     shares: list[ShareIn] | None = None
@@ -84,22 +86,22 @@ class LineUpdate(BaseModel):
 class PreviewRequest(BaseModel):
     """Terms not saved yet: the split is recomputed as the buyer types."""
 
-    discount_pct: Decimal | None = Field(default=None, ge=0, lt=100)
-    lump_sum: Decimal | None = Field(default=None, ge=0)
-    rates: dict[uuid.UUID, Decimal] = Field(default_factory=dict)
+    discount_pct: Decimal7_4 | None = Field(default=None, ge=0, lt=100)
+    lump_sum: Decimal18_2 | None = Field(default=None, ge=0)
+    rates: dict[uuid.UUID, Decimal18_4] = Field(default_factory=dict)
 
 
 class AwardRequest(BaseModel):
     vendor_name: str = Field(..., min_length=1, max_length=255)
     subcontractor_id: uuid.UUID | None = None
     contact_id: uuid.UUID | None = None
-    discount_pct: Decimal | None = Field(default=None, ge=0, lt=100)
-    lump_sum: Decimal | None = Field(default=None, ge=0)
+    discount_pct: Decimal7_4 | None = Field(default=None, ge=0, lt=100)
+    lump_sum: Decimal18_2 | None = Field(default=None, ge=0)
 
 
 class CallOffLineIn(BaseModel):
     line_id: uuid.UUID
-    quantity: Decimal = Field(..., gt=0)
+    quantity: Decimal18_4 = Field(..., gt=0)
 
 
 class CallOffRequest(BaseModel):
@@ -266,3 +268,17 @@ class Catalogue(BaseModel):
     label: str | None = None
     countries: list[str] = Field(default_factory=list)
     codes: list[dict[str, str]] = Field(default_factory=list)
+
+
+class BundleListResponse(BaseModel):
+    items: list[BundleSummary]
+    total: int
+    offset: int = 0
+    limit: int = 50
+
+
+class CostLineListResponse(BaseModel):
+    items: list[CostLineOption]
+    total: int
+    offset: int = 0
+    limit: int = 50

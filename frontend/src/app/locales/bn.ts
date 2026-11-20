@@ -67202,6 +67202,7 @@ const resource = {
     "central_purchasing.col.projects": "প্রকল্পসমূহ",
     "central_purchasing.col.quantity": "পরিমাণ",
     "central_purchasing.col.rate": "দর",
+    "central_purchasing.col.share_m2": "অংশ, মি²",
     "central_purchasing.col.status": "অবস্থা",
     "central_purchasing.col.your_qty": "আপনার পরিমাণ",
     "central_purchasing.cost_code": "খরচ কোড {{code}}",

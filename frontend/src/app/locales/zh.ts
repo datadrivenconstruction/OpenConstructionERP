@@ -69158,6 +69158,7 @@ const resource = {
     "central_purchasing.col.projects": "项目",
     "central_purchasing.col.quantity": "数量",
     "central_purchasing.col.rate": "单价",
+    "central_purchasing.col.share_m2": "份额, m²",
     "central_purchasing.col.status": "状态",
     "central_purchasing.col.your_qty": "您的数量",
     "central_purchasing.cost_code": "成本代码 {{code}}",

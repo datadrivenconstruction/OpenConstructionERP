@@ -70158,6 +70158,7 @@ const resource = {
     "central_purchasing.col.projects": "المشاريع",
     "central_purchasing.col.quantity": "الكمية",
     "central_purchasing.col.rate": "السعر",
+    "central_purchasing.col.share_m2": "الحصة، م²",
     "central_purchasing.col.status": "الحالة",
     "central_purchasing.col.your_qty": "كميتك",
     "central_purchasing.cost_code": "رمز التكلفة {{code}}",

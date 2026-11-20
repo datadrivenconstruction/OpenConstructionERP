@@ -66665,6 +66665,7 @@ const resource = {
     "central_purchasing.col.projects": "โครงการ",
     "central_purchasing.col.quantity": "ปริมาณ",
     "central_purchasing.col.rate": "ราคาต่อหน่วย",
+    "central_purchasing.col.share_m2": "ส่วนแบ่ง, ตร.ม.",
     "central_purchasing.col.status": "สถานะ",
     "central_purchasing.col.your_qty": "ปริมาณของคุณ",
     "central_purchasing.cost_code": "รหัสต้นทุน {{code}}",

@@ -13,7 +13,8 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Plus, Ruler, Trash2 } from 'lucide-react';
 import { Button, WideModal } from '@/shared/ui';
 import { getErrorMessage } from '@/shared/lib/api';
-import { useToastStore } from '@/stores/useToastStore';
+import { useToastStore } from '@/stores/useToastStore';
+import { fmtNumber } from '@/shared/lib/formatters';
 import {
   getGeodesy,
   getScaleFactor,
@@ -28,9 +29,9 @@ import {
 /** Grid/ground line in plain numbers; the format is fixed so a sheet and the screen read the same. */
 export function gridGroundText(sf: ScaleFactor): { csf: string; grid: string; ground: string; mm: string } {
   return {
-    csf: sf.csf.toFixed(8),
-    grid: sf.distance_m.toFixed(3),
-    ground: sf.ground_m.toFixed(3),
+    csf: fmtNumber(sf.csf, 8),
+    grid: fmtNumber(sf.distance_m, 3),
+    ground: fmtNumber(sf.ground_m, 3),
     mm: Math.round(sf.diff_mm).toString(),
   };
 }
@@ -51,8 +52,8 @@ export function GridGroundChip({ projectId, distance }: { projectId: string; dis
       title={t('survey.geodesy.csf_tip', {
         defaultValue: 'Combined scale factor {{csf}} (k {{k}}, h {{h}} m). Distances taped on site are ground; plans and stake sheets are grid.',
         csf: v.csf,
-        k: sf.data.k.toFixed(8),
-        h: sf.data.height_m.toFixed(1),
+        k: fmtNumber(sf.data.k, 8),
+        h: fmtNumber(sf.data.height_m, 1),
       })}
     >
       <Ruler size={12} aria-hidden />
@@ -213,7 +214,7 @@ export function LocalGridDialog({ open, projectId, onClose }: { open: boolean; p
                   <td className="text-center">
                     <input type="checkbox" checked={r.use} onChange={(e) => edit(i, { use: e.target.checked })} />
                   </td>
-                  <td className={`text-end font-mono text-xs ${over ? 'text-semantic-warning' : ''}`}>{res ? res.r_mm.toFixed(1) : '-'}</td>
+                  <td className={`text-end font-mono text-xs ${over ? 'text-semantic-warning' : ''}`}>{res ? fmtNumber(res.r_mm, 1) : '-'}</td>
                   <td className="text-end">
                     <Button
                       size="sm"
@@ -236,9 +237,9 @@ export function LocalGridDialog({ open, projectId, onClose }: { open: boolean; p
           <p className="text-sm" data-testid="survey-local-solution">
             {t('survey.geodesy.solution', {
               defaultValue: 'Scale {{ppm}} ppm, rotation {{rot}}°, RMS {{rms}} mm, fitted points: {{n}}.',
-              ppm: solution.scale_ppm.toFixed(1),
-              rot: solution.rotation_deg.toFixed(4),
-              rms: solution.rms_mm.toFixed(1),
+              ppm: fmtNumber(solution.scale_ppm, 1),
+              rot: fmtNumber(solution.rotation_deg, 4),
+              rms: fmtNumber(solution.rms_mm, 1),
               n: solution.fitted,
             })}
           </p>

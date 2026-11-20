@@ -21,6 +21,7 @@ import { DataPathsFlow } from './DataPathsFlow';
 import { PartiesHoneycomb } from './PartiesHoneycomb';
 import { buildCsv, buildFlowSvg, download, svgToPng, themeColors } from './exportDataPaths';
 import { useNarrow } from './motion';
+import { fmtList } from '@/shared/lib/formatters';
 
 type Tab = 'flow' | 'list' | 'people';
 
@@ -233,7 +234,7 @@ function TechnicalLinks({ edges, module }: { edges: EdgeOut[]; module: string })
                   {e.source === module ? '→' : '←'}
                 </span>
                 <span className="truncate text-content-primary">{moduleLabel(t, other, humanize(other))}</span>
-                {e.details.length > 0 && <span className="ms-auto truncate text-content-tertiary">{e.details.slice(0, 2).join(', ')}</span>}
+                {e.details.length > 0 && <span className="ms-auto truncate text-content-tertiary">{fmtList(e.details.slice(0, 2))}</span>}
               </li>
             );
           })}

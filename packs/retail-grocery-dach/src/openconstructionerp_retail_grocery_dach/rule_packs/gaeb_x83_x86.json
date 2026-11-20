@@ -15,10 +15,10 @@
     "gaeb.lv_structure",
     "gaeb.einheitspreis_sanity",
     "gaeb.trade_section_code",
-    "gaeb.quantity_decimals"
+    "gaeb.quantity_decimals",
+    "gaeb.xml_schema_valid"
   ],
   "planned_not_built_rule_ids": [
-    "gaeb.xml_schema_valid",
     "gaeb.x83_award_phase_present",
     "gaeb.x84_alternate_offer_structure",
     "gaeb.x86_award_phase_present",

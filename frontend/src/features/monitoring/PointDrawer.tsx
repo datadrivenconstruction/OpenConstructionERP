@@ -13,7 +13,8 @@ import { Badge, Button, Skeleton, WideModal } from '@/shared/ui';
 import { getErrorMessage } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
 import { acknowledge, getPoint, type Level } from './api';
-import { LEVEL_DEFAULT, bandLines, chartGeometry, fmtMm, fmtRate, levelVariant } from './levels';
+import { LEVEL_DEFAULT, bandLines, chartGeometry, fmtMm, fmtRate, levelVariant } from './levels';
+import { fmtNumber } from '@/shared/lib/formatters';
 
 const W = 560;
 const H = 220;
@@ -97,7 +98,7 @@ export function PointDrawer({ pointId, onClose }: Props) {
               {t('survey.monitoring.forecast', {
                 defaultValue: 'Trend reaches {{level}} in {{days}} days',
                 level: t(`survey.monitoring.level.${d.forecast_level}`, { defaultValue: d.forecast_level }),
-                days: d.forecast_days.toFixed(1),
+                days: fmtNumber(d.forecast_days, 1),
               })}
             </p>
           )}

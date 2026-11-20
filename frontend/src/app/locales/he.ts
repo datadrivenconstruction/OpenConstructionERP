@@ -67270,6 +67270,7 @@ const resource = {
     "central_purchasing.col.projects": "פרויקטים",
     "central_purchasing.col.quantity": "כמות",
     "central_purchasing.col.rate": "מחיר",
+    "central_purchasing.col.share_m2": "חלק, מ״ר",
     "central_purchasing.col.status": "סטטוס",
     "central_purchasing.col.your_qty": "הכמות שלך",
     "central_purchasing.cost_code": "קוד עלות {{code}}",

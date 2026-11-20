@@ -5,6 +5,8 @@
  * angles too; these only check input as it is typed and format results.
  */
 
+import { fmtNumberForInput } from '@/shared/lib/formatters';
+
 export type AngleUnit = 'deg' | 'dms' | 'gon';
 export const ANGLE_UNITS: AngleUnit[] = ['dms', 'deg', 'gon'];
 
@@ -30,8 +32,8 @@ export function parseAngle(text: string, unit: AngleUnit): number | null {
 /** ``deg`` in ``unit`` as text: DMS to 0.1", decimal degrees to 6 places, gon to 5. */
 export function formatAngle(deg: number | null | undefined, unit: AngleUnit): string {
   if (deg == null || !Number.isFinite(deg)) return '';
-  if (unit === 'gon') return (deg / 0.9).toFixed(5);
-  if (unit === 'deg') return deg.toFixed(6);
+  if (unit === 'gon') return fmtNumberForInput(deg / 0.9, 5);
+  if (unit === 'deg') return fmtNumberForInput(deg, 6);
   const sign = deg < 0 ? '-' : '';
   let tenths = Math.round(Math.abs(deg) * 36000);
   const d = Math.floor(tenths / 36000);
@@ -57,5 +59,5 @@ export function parseRing(text: string): number[][] | null {
 
 /** Fixed decimals for metres; empty for null. */
 export function fmtM(value: number | null | undefined, places = 3): string {
-  return value == null || !Number.isFinite(value) ? '' : value.toFixed(places);
+  return value == null || !Number.isFinite(value) ? '' : fmtNumberForInput(value, places);
 }

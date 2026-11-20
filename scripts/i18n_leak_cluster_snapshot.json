@@ -2317,5 +2317,23 @@
     ],
     "key_count_at_seed": 3,
     "note": "Visual, Final and Horizontal are the same word in Spanish, Indonesian and Portuguese."
+  },
+  {
+    "locale_set": [
+      "cs",
+      "de",
+      "ro"
+    ],
+    "key_count_at_seed": 3,
+    "note": "Export is the native word in these languages; the keys are independent coincidences."
+  },
+  {
+    "locale_set": [
+      "fil",
+      "fr",
+      "ro"
+    ],
+    "key_count_at_seed": 3,
+    "note": "Consultant is the native word in these languages; Pivot E N is a grid label."
   }
 ]

@@ -66898,6 +66898,7 @@ const resource = {
     "central_purchasing.col.projects": "پروجیکٹس",
     "central_purchasing.col.quantity": "مقدار",
     "central_purchasing.col.rate": "نرخ",
+    "central_purchasing.col.share_m2": "حصہ، m²",
     "central_purchasing.col.status": "حالت",
     "central_purchasing.col.your_qty": "آپ کی مقدار",
     "central_purchasing.cost_code": "لاگت کوڈ {{code}}",

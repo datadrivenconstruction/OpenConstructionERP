@@ -75,6 +75,12 @@ MIN_FILES_SCANNED = 500
 # towards zero rather than towards the size of this list.
 CANNOT_TRUNCATE: frozenset[str] = frozenset(
     {
+        # Cost code catalogues the bundle's markets contribute, read from the
+        # shipped country data; a code cut from the picker could not be chosen.
+        "central_purchasing/router.py::catalogues",
+        # Every award document a project team is owed from a bundle; a missing
+        # share would read as an award nobody made.
+        "central_purchasing/router.py::my_shares",
         # Pay application forms eligible for the project's country, computed in
         # memory from a static registry; the picker must offer each one.
         "contracts/router.py::list_payment_forms",

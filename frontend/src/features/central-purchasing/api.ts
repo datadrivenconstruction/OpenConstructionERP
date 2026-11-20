@@ -7,8 +7,6 @@
 
 import { apiDelete, apiGet, apiPatch, apiPost } from '@/shared/lib/api';
 
-const BASE = '/v1/central-purchasing';
-
 export type Dec = string;
 export type BundleKind = 'subcontract' | 'supply';
 export type BundleMode = 'per_project_contracts' | 'framework_call_off';
@@ -194,31 +192,32 @@ export const cpbKeys = {
 };
 
 export const cpbApi = {
-  list: () => apiGet<BundleSummary[]>(`${BASE}/`),
+  list: async () =>
+    (await apiGet<{ items: BundleSummary[]; total: number }>(`/v1/central-purchasing/?limit=500`)).items,
   create: (body: { title: string; kind: BundleKind; mode: BundleMode; currency?: string }) =>
-    apiPost<BundleDetail>(`${BASE}/`, body),
-  get: (id: string) => apiGet<BundleDetail>(`${BASE}/${id}`),
-  update: (id: string, body: Record<string, unknown>) => apiPatch<BundleDetail>(`${BASE}/${id}`, body),
-  remove: (id: string) => apiDelete<void>(`${BASE}/${id}`),
-  preview: (id: string, terms: Terms) => apiPost<BundleDetail>(`${BASE}/${id}/preview`, terms),
+    apiPost<BundleDetail>(`/v1/central-purchasing/`, body),
+  get: (id: string) => apiGet<BundleDetail>(`/v1/central-purchasing/${id}`),
+  update: (id: string, body: Record<string, unknown>) => apiPatch<BundleDetail>(`/v1/central-purchasing/${id}`, body),
+  remove: (id: string) => apiDelete<void>(`/v1/central-purchasing/${id}`),
+  preview: (id: string, terms: Terms) => apiPost<BundleDetail>(`/v1/central-purchasing/${id}/preview`, terms),
   addProject: (id: string, projectId: string) =>
-    apiPost<BundleDetail>(`${BASE}/${id}/projects`, { project_id: projectId }),
+    apiPost<BundleDetail>(`/v1/central-purchasing/${id}/projects`, { project_id: projectId }),
   updateProject: (id: string, bpId: string, budget: Dec | null) =>
     apiPatch<BundleDetail>(
-      `${BASE}/${id}/projects/${bpId}`,
+      `/v1/central-purchasing/${id}/projects/${bpId}`,
       budget == null ? { clear_budget: true } : { budget_amount: budget },
     ),
-  removeProject: (id: string, bpId: string) => apiDelete<BundleDetail>(`${BASE}/${id}/projects/${bpId}`),
-  addLine: (id: string, body: LineInput) => apiPost<BundleDetail>(`${BASE}/${id}/lines`, body),
+  removeProject: (id: string, bpId: string) => apiDelete<BundleDetail>(`/v1/central-purchasing/${id}/projects/${bpId}`),
+  addLine: (id: string, body: LineInput) => apiPost<BundleDetail>(`/v1/central-purchasing/${id}/lines`, body),
   updateLine: (id: string, lineId: string, body: Partial<LineInput> & { clear_rate?: boolean }) =>
-    apiPatch<BundleDetail>(`${BASE}/${id}/lines/${lineId}`, body),
-  removeLine: (id: string, lineId: string) => apiDelete<BundleDetail>(`${BASE}/${id}/lines/${lineId}`),
-  publish: (id: string) => apiPost<BundleDetail>(`${BASE}/${id}/publish`, {}),
-  award: (id: string, body: { vendor_name: string } & Terms) => apiPost<BundleDetail>(`${BASE}/${id}/award`, body),
+    apiPatch<BundleDetail>(`/v1/central-purchasing/${id}/lines/${lineId}`, body),
+  removeLine: (id: string, lineId: string) => apiDelete<BundleDetail>(`/v1/central-purchasing/${id}/lines/${lineId}`),
+  publish: (id: string) => apiPost<BundleDetail>(`/v1/central-purchasing/${id}/publish`, {}),
+  award: (id: string, body: { vendor_name: string } & Terms) => apiPost<BundleDetail>(`/v1/central-purchasing/${id}/award`, body),
   callOff: (id: string, body: { project_id: string; lines: { line_id: string; quantity: Dec }[] }) =>
-    apiPost<CallOffResult>(`${BASE}/${id}/call-offs`, body),
+    apiPost<CallOffResult>(`/v1/central-purchasing/${id}/call-offs`, body),
   myShares: (projectId: string) =>
-    apiGet<MyShare[]>(`${BASE}/my-shares?project_id=${encodeURIComponent(projectId)}`),
+    apiGet<MyShare[]>(`/v1/central-purchasing/my-shares?project_id=${encodeURIComponent(projectId)}`),
   catalogues: (id?: string) =>
-    apiGet<Catalogue[]>(`${BASE}/catalogues${id ? `?bundle_id=${encodeURIComponent(id)}` : ''}`),
+    apiGet<Catalogue[]>(`/v1/central-purchasing/catalogues${id ? `?bundle_id=${encodeURIComponent(id)}` : ''}`),
 };

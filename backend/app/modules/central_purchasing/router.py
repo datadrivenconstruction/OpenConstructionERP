@@ -17,12 +17,12 @@ from app.modules.central_purchasing.schemas import (
     AwardRequest,
     BundleCreate,
     BundleDetail,
-    BundleSummary,
+    BundleListResponse,
     BundleUpdate,
     CallOffRequest,
     CallOffResult,
     Catalogue,
-    CostLineOption,
+    CostLineListResponse,
     LineIn,
     LineUpdate,
     MyShare,
@@ -95,20 +95,30 @@ async def catalogues(
     return await svc.catalogues(row)
 
 
-@router.get("/cost-lines", response_model=list[CostLineOption], dependencies=[_MANAGE])
+@router.get("/cost-lines", response_model=CostLineListResponse, dependencies=[_MANAGE])
 async def cost_lines(
-    session: SessionDep, user_id: CurrentUserId, project_id: uuid.UUID = Query(...)
-) -> list[CostLineOption]:
+    session: SessionDep,
+    user_id: CurrentUserId,
+    project_id: uuid.UUID = Query(...),
+    limit: int = Query(default=50, ge=1, le=500),
+    offset: int = Query(default=0, ge=0),
+) -> CostLineListResponse:
     await verify_project_access(project_id, user_id, session)
-    return await _svc(session).cost_line_options(project_id)
+    rows = await _svc(session).cost_line_options(project_id)
+    return CostLineListResponse(items=rows[offset : offset + limit], total=len(rows), offset=offset, limit=limit)
 
 
-@router.get("/", response_model=list[BundleSummary], dependencies=[_MANAGE])
-async def list_bundles(session: SessionDep, user_id: CurrentUserId) -> list[BundleSummary]:
+@router.get("/", response_model=BundleListResponse, dependencies=[_MANAGE])
+async def list_bundles(
+    session: SessionDep,
+    user_id: CurrentUserId,
+    limit: int = Query(default=50, ge=1, le=500),
+    offset: int = Query(default=0, ge=0),
+) -> BundleListResponse:
     svc = _svc(session)
     rows = {r.id: r for r in await svc.repo.list()}
     visible = [s for s in await svc.summaries() if s.id in rows and await _may_open(session, rows[s.id], user_id)]
-    return visible
+    return BundleListResponse(items=visible[offset : offset + limit], total=len(visible), offset=offset, limit=limit)
 
 
 @router.post("/", response_model=BundleDetail, status_code=201, dependencies=[_MANAGE])

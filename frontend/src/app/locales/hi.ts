@@ -66935,6 +66935,7 @@ const resource = {
     "central_purchasing.col.projects": "परियोजनाएं",
     "central_purchasing.col.quantity": "मात्रा",
     "central_purchasing.col.rate": "दर",
+    "central_purchasing.col.share_m2": "हिस्सा, m²",
     "central_purchasing.col.status": "स्थिति",
     "central_purchasing.col.your_qty": "आपकी मात्रा",
     "central_purchasing.cost_code": "लागत कोड {{code}}",

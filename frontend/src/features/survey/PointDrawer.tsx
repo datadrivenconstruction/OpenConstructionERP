@@ -12,7 +12,8 @@ import { Lock } from 'lucide-react';
 import { Badge, Button, SideDrawer, Skeleton } from '@/shared/ui';
 import { getErrorMessage } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
-import { POINT_KINDS, deletePoint, getPoint, updatePoint, type PointKind, type PointUpdate } from './api';
+import { POINT_KINDS, deletePoint, getPoint, updatePoint, type PointKind, type PointUpdate } from './api';
+import { fmtNumber } from '@/shared/lib/formatters';
 
 interface Props {
   pointId: string | null;
@@ -65,9 +66,9 @@ export function PointDrawer({ pointId, canWrite, onClose }: Props) {
       point_id: d.point_id,
       code: d.code,
       kind: d.kind,
-      e: d.e.toFixed(3),
-      n: d.n.toFixed(3),
-      z: d.z == null ? '' : d.z.toFixed(3),
+      e: fmtNumber(d.e, 3),
+      n: fmtNumber(d.n, 3),
+      z: d.z == null ? '' : fmtNumber(d.z, 3),
       description: d.description,
     };
     setForm(f);

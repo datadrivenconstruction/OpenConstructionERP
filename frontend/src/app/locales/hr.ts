@@ -67309,6 +67309,7 @@ const resource = {
     "central_purchasing.col.projects": "Projekti",
     "central_purchasing.col.quantity": "Količina",
     "central_purchasing.col.rate": "Cijena",
+    "central_purchasing.col.share_m2": "Udio, m²",
     "central_purchasing.col.status": "Status",
     "central_purchasing.col.your_qty": "Vaša količina",
     "central_purchasing.cost_code": "Troškovni kod {{code}}",

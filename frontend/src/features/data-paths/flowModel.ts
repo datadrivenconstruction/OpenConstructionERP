@@ -7,7 +7,7 @@
 
 import type { TFunction } from 'i18next';
 
-import { formatNumber } from '@/shared/lib/formatters';
+import { fmtList, formatNumber } from '@/shared/lib/formatters';
 
 import type { Importance, ModulePaths, PathOut, PathState } from './api';
 import { moduleMeta } from './moduleMeta';
@@ -160,7 +160,7 @@ function card(t: TFunction, data: ModulePaths, p: PathOut): FlowCard {
     active: p.live.active,
     href: withProject(p.route || moduleMeta(p.module).route || '', data.project_id),
     tone: moduleMeta(p.module).tone,
-    sentence: `${lead}: ${parts.join(', ')}`,
+    sentence: `${lead}: ${fmtList(parts)}`,
   };
 }
 
@@ -205,7 +205,7 @@ export function listRows(model: FlowModel): { section: 'in' | 'centre' | 'out'; 
     ...model.inputs.map((c) => ({ section: 'in' as const, text: c.sentence, href: c.href })),
     ...model.entities.map((e) => ({
       section: 'centre' as const,
-      text: [e.label, e.count !== null ? formatNumber(e.count) : null, e.valueText].filter(Boolean).join(', '),
+      text: fmtList([e.label, e.count !== null ? formatNumber(e.count) : null, e.valueText].filter((x): x is string => Boolean(x))),
       href: e.href,
     })),
     ...model.outputs.map((c) => ({ section: 'out' as const, text: c.sentence, href: c.href })),

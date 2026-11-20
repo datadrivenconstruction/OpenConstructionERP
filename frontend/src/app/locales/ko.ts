@@ -67281,6 +67281,7 @@ const resource = {
     "central_purchasing.col.projects": "프로젝트",
     "central_purchasing.col.quantity": "수량",
     "central_purchasing.col.rate": "단가",
+    "central_purchasing.col.share_m2": "배분, m²",
     "central_purchasing.col.status": "상태",
     "central_purchasing.col.your_qty": "내 수량",
     "central_purchasing.cost_code": "원가 코드 {{code}}",

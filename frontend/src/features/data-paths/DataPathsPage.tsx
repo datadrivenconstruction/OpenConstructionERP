@@ -16,7 +16,7 @@ import { CircleAlert, CircleCheck, Search } from 'lucide-react';
 
 import { PageHeader } from '@/shared/ui/PageHeader';
 import { TabBar } from '@/shared/ui/TabBar';
-import { formatNumber } from '@/shared/lib/formatters';
+import { fmtList, formatNumber } from '@/shared/lib/formatters';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 
 import { useModulePaths, usePlatformMap, useProjectParties, type HealthItem, type Party } from './api';
@@ -327,7 +327,7 @@ function MapList({ modules, edges, visible }: { modules: CanvasModule[]; edges: 
               {m.module.count !== null && <span className="ms-2 tabular-nums text-content-tertiary">{formatNumber(m.module.count)}</span>}
               {out.length > 0 && (
                 <span className="block text-xs text-content-tertiary">
-                  {out.map((e) => moduleLabel(t, e.target)).join(', ')}
+                  {fmtList(out.map((e) => moduleLabel(t, e.target)))}
                 </span>
               )}
             </li>

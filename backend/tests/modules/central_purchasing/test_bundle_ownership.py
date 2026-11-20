@@ -41,8 +41,8 @@ async def test_another_companys_manager_cannot_open_touch_or_list_a_bundle(clien
         resp = await client.request(method, url, json=body, headers=rival)
         assert resp.status_code == 404, (method, url, resp.status_code, resp.text)
 
-    assert bid in {b["id"] for b in (await client.get(f"{API}/", headers=owner)).json()}
-    assert bid not in {b["id"] for b in (await client.get(f"{API}/", headers=rival)).json()}
+    assert bid in {b["id"] for b in (await client.get(f"{API}/", headers=owner)).json()["items"]}
+    assert bid not in {b["id"] for b in (await client.get(f"{API}/", headers=rival)).json()["items"]}
     assert (await client.get(f"{API}/{bid}", headers=owner)).json()["title"] == "Own bundle"
 
 
@@ -85,7 +85,7 @@ async def test_a_member_of_one_project_is_kept_out_of_the_bundle_and_sees_only_t
     assert pub.status_code == 200, pub.text
 
     assert (await client.get(f"{API}/{bid}", headers=member)).status_code == 404
-    assert bid not in {b["id"] for b in (await client.get(f"{API}/", headers=member)).json()}
+    assert bid not in {b["id"] for b in (await client.get(f"{API}/", headers=member)).json()["items"]}
     assert (await client.post(f"{API}/{bid}/award", json={"vendor_name": "X"}, headers=member)).status_code == 404
 
     mine = (await client.get(f"{API}/my-shares", params={"project_id": pa}, headers=member)).json()

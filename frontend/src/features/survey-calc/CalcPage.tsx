@@ -16,6 +16,7 @@ import { getErrorMessage } from '@/shared/lib/api';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { useToastStore } from '@/stores/useToastStore';
 import { ANGLE_UNITS, fmtM, formatAngle, parseCoord, parseRing, type AngleUnit } from './angles';
+import { fmtNumber } from '@/shared/lib/formatters';
 import {
   COGO_METHODS,
   getClasses,
@@ -338,14 +339,14 @@ function TraverseTab({ projectId }: { projectId: string | null }) {
         <Card className="p-4 space-y-3" data-testid="traverse-result">
           <div className="flex flex-wrap items-center gap-2 text-sm">
             <span>
-              {t('survey.cogo.angular', { defaultValue: 'Angular misclosure {{w}}" over {{n}} angles', w: r.angular_misclosure_sec.toFixed(1), n: r.angle_count })}
-              {r.angular_allowed_sec != null && <> · {t('survey.cogo.allowed', { defaultValue: 'allowed {{a}}"', a: r.angular_allowed_sec.toFixed(1) })}</>}
+              {t('survey.cogo.angular', { defaultValue: 'Angular misclosure {{w}}" over {{n}} angles', w: fmtNumber(r.angular_misclosure_sec, 1), n: r.angle_count })}
+              {r.angular_allowed_sec != null && <> · {t('survey.cogo.allowed', { defaultValue: 'allowed {{a}}"', a: fmtNumber(r.angular_allowed_sec, 1) })}</>}
             </span>
             <Verdict value={r.angular_verdict} />
           </div>
           <div className="flex flex-wrap items-center gap-2 text-sm">
             <span>
-              {t('survey.cogo.linear', { defaultValue: 'Linear misclosure {{f}} m, 1:{{ratio}}', f: r.misclosure_m.toFixed(3), ratio: r.ratio ?? '-' })}
+              {t('survey.cogo.linear', { defaultValue: 'Linear misclosure {{f}} m, 1:{{ratio}}', f: fmtNumber(r.misclosure_m, 3), ratio: r.ratio ?? '-' })}
             </span>
             <Verdict value={r.linear_verdict} />
           </div>
@@ -471,8 +472,8 @@ function LevelTab({ projectId }: { projectId: string | null }) {
             </Badge>
             {r.misclosure_mm != null && (
               <span>
-                {t('survey.cogo.level_misclosure', { defaultValue: 'Misclosure {{m}} mm over {{k}} km', m: r.misclosure_mm.toFixed(1), k: r.distance_km.toFixed(3) })}
-                {r.allowed_mm != null && <> · {t('survey.cogo.allowed_mm', { defaultValue: 'allowed {{a}} mm', a: r.allowed_mm.toFixed(1) })}</>}
+                {t('survey.cogo.level_misclosure', { defaultValue: 'Misclosure {{m}} mm over {{k}} km', m: fmtNumber(r.misclosure_mm, 1), k: fmtNumber(r.distance_km, 3) })}
+                {r.allowed_mm != null && <> · {t('survey.cogo.allowed_mm', { defaultValue: 'allowed {{a}} mm', a: fmtNumber(r.allowed_mm, 1) })}</>}
               </span>
             )}
             <Verdict value={r.verdict} />
@@ -496,7 +497,7 @@ function LevelTab({ projectId }: { projectId: string | null }) {
                       {method === 'hi' ? fmtM(row.hi) : row.rise != null ? `+${fmtM(row.rise)}` : row.fall != null ? `-${fmtM(row.fall)}` : ''}
                     </bdi></td>
                     <td className="text-right"><bdi dir="ltr" className="font-mono">{fmtM(row.rl)}</bdi></td>
-                    <td className="text-right"><bdi dir="ltr" className="font-mono">{row.correction_mm.toFixed(1)}</bdi></td>
+                    <td className="text-right"><bdi dir="ltr" className="font-mono">{fmtNumber(row.correction_mm, 1)}</bdi></td>
                     <td className="text-right"><bdi dir="ltr" className="font-mono">{fmtM(row.rl_adjusted)}</bdi></td>
                   </tr>
                 ))}

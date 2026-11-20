@@ -26,7 +26,7 @@
     },
     "US": {
       "standard": "masterformat",
-      "label": "CSI MasterFormat 2020",
+      "label": "Construction divisions",
       "codes": [
         {"code": "03 30 00", "label": "Cast-in-Place Concrete"},
         {"code": "03 31 00", "label": "Structural Concrete"},
@@ -46,7 +46,7 @@
     },
     "CA": {
       "standard": "masterformat",
-      "label": "CSI MasterFormat 2020",
+      "label": "Construction divisions",
       "inherit": "US"
     },
     "GB": {

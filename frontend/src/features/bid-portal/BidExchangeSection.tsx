@@ -14,7 +14,7 @@ import { useTranslation } from 'react-i18next';
 import { Ban, Download, FileText, FileUp, Paperclip } from 'lucide-react';
 
 import { Button } from '@/shared/ui';
-import { fmtList, formatDateValue } from '@/shared/lib/formatters';
+import { fmtList, fmtNumber, formatDateValue } from '@/shared/lib/formatters';
 
 import {
   BidPortalError,
@@ -29,7 +29,7 @@ import {
 } from './api';
 
 function sizeText(bytes: number): string {
-  if (bytes >= 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  if (bytes >= 1024 * 1024) return `${fmtNumber(bytes / (1024 * 1024), 1)} MB`;
   return `${Math.max(1, Math.round(bytes / 1024))} KB`;
 }
 

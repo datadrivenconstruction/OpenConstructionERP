@@ -16,6 +16,7 @@ import clsx from 'clsx';
 
 import type { Party, PartyZone } from './api';
 import { humanize, moduleLabel } from './flowModel';
+import { fmtList } from '@/shared/lib/formatters';
 
 const ZONES: PartyZone[] = ['client', 'delivery', 'specialist'];
 
@@ -128,7 +129,7 @@ export interface PartiesHoneycombProps {
 }
 
 export function partyRoleText(t: (k: string, o?: Record<string, unknown>) => unknown, roles: string[]): string {
-  return roles.map((r) => String(t(`data_paths.role_${r}`, { defaultValue: humanize(r) }))).join(', ');
+  return fmtList(roles.map((r) => String(t(`data_paths.role_${r}`, { defaultValue: humanize(r) }))));
 }
 
 function categoryLabel(t: (k: string, o?: Record<string, unknown>) => unknown, c: Category): string {
@@ -327,7 +328,7 @@ export function PartiesHoneycomb({
         {parties.map((p) => (
           <li key={p.id}>
             {p.placeholder ? partyRoleText(t, p.roles) : `${p.name}: ${partyRoleText(t, p.roles)}`}
-            {p.modules.length ? ` (${p.modules.map((m) => moduleLabel(t, m)).join(', ')})` : ''}
+            {p.modules.length ? ` (${fmtList(p.modules.map((m) => moduleLabel(t, m)))})` : ''}
           </li>
         ))}
       </ul>

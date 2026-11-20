@@ -67813,6 +67813,7 @@ const resource = {
     "central_purchasing.col.projects": "Projeler",
     "central_purchasing.col.quantity": "Miktar",
     "central_purchasing.col.rate": "Birim fiyat",
+    "central_purchasing.col.share_m2": "Pay, m²",
     "central_purchasing.col.status": "Durum",
     "central_purchasing.col.your_qty": "Sizin miktarınız",
     "central_purchasing.cost_code": "Maliyet kodu {{code}}",
