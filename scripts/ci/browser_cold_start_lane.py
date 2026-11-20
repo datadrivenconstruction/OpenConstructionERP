@@ -240,6 +240,20 @@ def _playwright_cli(frontend_dir: Path) -> Path | None:
     return candidate if candidate.is_file() else None
 
 
+def _node_executable() -> str | None:
+    """The interpreter that entry point needs, resolved rather than assumed.
+
+    ``cli.js`` is JavaScript and Node runs it. The first version of this lane passed
+    ``sys.executable``, which is the Python that is running this file, and Python
+    reading a JavaScript file dies on the first line: exit code 1, no report, no
+    metrics, and nothing on the console that names the cause. Both matrix legs failed
+    that way at ``a69ab2a4`` and the only evidence in the run was the *absence* of
+    ``test-results/cold-start-report.json``. Resolving Node here, before a server is
+    started and before a browser is launched, is what turns that into a named refusal.
+    """
+    return shutil.which("node")
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--port", type=int, default=8765, help="port the CLI should bind (default 8765)")
@@ -301,6 +315,10 @@ def main() -> int:
         return _fail(
             f"no @playwright/test under {frontend_dir / 'node_modules'}; the job has to run npm ci before this lane"
         )
+
+    node = _node_executable()
+    if node is None:
+        return _fail("no node on PATH; the job has to run actions/setup-node before this lane")
 
     created = False
     data_dir = args.data_dir
@@ -418,7 +436,7 @@ def main() -> int:
         run_env["CI"] = "1"
 
         playwright_command = [
-            sys.executable,
+            node,
             str(cli_js),
             "test",
             "--config",
@@ -436,7 +454,13 @@ def main() -> int:
             except json.JSONDecodeError as exc:
                 _annotate("warning", f"Playwright's JSON report did not parse: {exc}")
         else:
-            _annotate("warning", f"no Playwright JSON report at {report_path}")
+            # The exit code is in the annotation on purpose. A missing report has one
+            # cause that is a product defect and a dozen that are this lane failing to
+            # run Playwright at all, and only the code tells them apart from a run page.
+            _annotate(
+                "warning",
+                f"no Playwright JSON report at {report_path} (playwright exited {finished.returncode})",
+            )
 
         if isinstance(report, dict):
             metrics_list = _metrics_from(report)
