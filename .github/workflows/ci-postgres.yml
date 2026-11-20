@@ -1105,8 +1105,8 @@ jobs:
     # under contention from parallel work rather than anything about the tests.
     # Thirty is three times the observed run, so an actual hang names itself in
     # half an hour instead of inheriting the six hour default, and a runner
-    # having a slow day still finishes.
-    timeout-minutes: 30
+    # having a slow day still finishes. The set grew to about 25 minutes by 20.11.2026, so the cap is 45.
+    timeout-minutes: 45
     defaults:
       run:
         working-directory: backend
