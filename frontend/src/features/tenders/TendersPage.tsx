@@ -134,8 +134,8 @@ export function TendersPage() {
                     <th>{t('tenders.source_filter', { defaultValue: 'Created in' })}</th>
                     <th>{t('tenders.col_status', { defaultValue: 'Status' })}</th>
                     <th>{t('tenders.col_deadline', { defaultValue: 'Bids due' })}</th>
-                    <th className="text-right">{t('tenders.col_bids', { defaultValue: 'Bids' })}</th>
-                    <th className="text-right">{t('tenders.col_lowest', { defaultValue: 'Lowest bid' })}</th>
+                    <th className="num">{t('tenders.col_bids', { defaultValue: 'Bids' })}</th>
+                    <th className="num">{t('tenders.col_lowest', { defaultValue: 'Lowest bid' })}</th>
                     <th>{t('tenders.col_awarded', { defaultValue: 'Awarded to' })}</th>
                   </tr>
                 </thead>
@@ -153,8 +153,8 @@ export function TendersPage() {
                       </td>
                       <td>{t(`bid_management.status_${row.status}`, { defaultValue: row.status })}</td>
                       <td>{row.submission_deadline ? <DateDisplay value={row.submission_deadline} /> : null}</td>
-                      <td className="text-right tabular-nums">{row.bid_count}</td>
-                      <td className="text-right">
+                      <td className="num tabular-nums">{row.bid_count}</td>
+                      <td className="num tabular-nums">
                         {row.lowest_total != null ? (
                           <MoneyDisplay amount={row.lowest_total} currency={row.currency} />
                         ) : null}

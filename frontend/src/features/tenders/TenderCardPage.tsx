@@ -40,7 +40,15 @@ export function TenderCardPage() {
       />
       <PageHeader
         srTitle={t('tenders.title', { defaultValue: 'Tenders' })}
-        subtitle={tender ? title : t('tenders.card_loading', { defaultValue: 'Loading the tender.' })}
+        subtitle={
+          tender ? (
+            <span className="text-lg font-semibold text-content-primary">
+              <span className="text-content-tertiary tabular-nums">{tender.package.code}</span> {tender.package.title}
+            </span>
+          ) : (
+            t('tenders.card_loading', { defaultValue: 'Loading the tender.' })
+          )
+        }
         actions={
           tender ? (
             <Button
@@ -128,7 +136,7 @@ function TabBody({
             <th>{t('tenders.col_code', { defaultValue: 'Code' })}</th>
             <th>{t('tenders.col_description', { defaultValue: 'Description' })}</th>
             <th>{t('tenders.col_unit', { defaultValue: 'Unit' })}</th>
-            <th className="text-right">{t('tenders.col_quantity', { defaultValue: 'Quantity' })}</th>
+            <th className="num">{t('tenders.col_quantity', { defaultValue: 'Quantity' })}</th>
           </tr>
         </thead>
         <tbody>
@@ -137,7 +145,7 @@ function TabBody({
               <td>{l.code}</td>
               <td className="text-content-primary">{l.description}</td>
               <td>{l.unit}</td>
-              <td className="text-right tabular-nums">{l.quantity}</td>
+              <td className="num tabular-nums">{l.quantity}</td>
             </tr>
           ))}
         </tbody>
@@ -195,7 +203,7 @@ function TabBody({
           <tr>
             <th>{t('tenders.col_company', { defaultValue: 'Company' })}</th>
             <th>{t('tenders.col_submitted', { defaultValue: 'Submitted' })}</th>
-            <th className="text-right">{t('tenders.col_total', { defaultValue: 'Total' })}</th>
+            <th className="num">{t('tenders.col_total', { defaultValue: 'Total' })}</th>
           </tr>
         </thead>
         <tbody>
@@ -203,7 +211,7 @@ function TabBody({
             <tr key={s.id}>
               <td className="text-content-primary">{bidderName(s.bidder_id)}</td>
               <td>{s.submitted_at ? <DateDisplay value={s.submitted_at} /> : '-'}</td>
-              <td className="text-right">
+              <td className="num tabular-nums">
                 <MoneyDisplay amount={s.total_amount} currency={s.currency || cur} />
               </td>
             </tr>
