@@ -210,3 +210,9 @@ async def report_pdf(
             "Content-Language": normalize_document_locale(locale, SUPPORTED_LOCALES, "en"),
         },
     )
+
+
+# The pile on the plan (toe, crest, height map); same prefix and permissions.
+from app.modules.stockpiles.plan_router import router as _plan_router  # noqa: E402
+
+router.include_router(_plan_router)

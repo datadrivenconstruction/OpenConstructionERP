@@ -446,3 +446,9 @@ async def delete_pattern(pattern_id: uuid.UUID, session: SessionDep, user_id: Cu
     depth, p = await _pattern(pattern_id, session, user_id)
     await depth.repo.delete(p)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+# The mine on the plan (blast blocks, the period's volumes and surfaces); same prefix and permissions.
+from app.modules.mine_survey.plan_router import router as _plan_router  # noqa: E402
+
+router.include_router(_plan_router)

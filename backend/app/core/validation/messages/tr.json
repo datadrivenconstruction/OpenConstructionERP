@@ -2478,6 +2478,22 @@
     "no_factors": {
       "fail": "{material} için kabarma ve sıkışma katsayısı yok: yalnızca yerinde hacimler gösteriliyor.",
       "suggestion": "Bu malzemenin katsayılarını zemin etüdü raporundan girin."
+    },
+    "pad_ring_open": {
+      "fail": "{name} platformunun sınırı alanı olan kapalı bir halka değil.",
+      "suggestion": "En az üç köşe çizin ve halkayı kapatın."
+    },
+    "pad_self_intersects": {
+      "fail": "{name} platformunun sınırı kendisini {n} kez kesiyor.",
+      "suggestion": "Köşeleri, hiçbir kenar kesişmeyecek şekilde taşıyın."
+    },
+    "pad_no_level": {
+      "fail": "{name} platformunun kotu yok.",
+      "suggestion": "Platformun proje kotunu metre olarak girin."
+    },
+    "pad_batter_open": {
+      "fail": "{name} platformunun {n} şev köşesi zemine ulaşmadı.",
+      "suggestion": "Platform çevresindeki zemin yüzeyini genişletin veya şevi azaltın."
     }
   },
   "setting_out": {

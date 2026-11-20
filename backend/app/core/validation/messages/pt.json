@@ -2478,6 +2478,22 @@
     "no_factors": {
       "fail": "Sem fatores de empolamento e compactação para {material}: só são mostrados volumes in situ.",
       "suggestion": "Introduza os fatores deste material a partir do relatório geotécnico."
+    },
+    "pad_ring_open": {
+      "fail": "O contorno da plataforma {name} não é um anel fechado com área.",
+      "suggestion": "Desenhe pelo menos três vértices e feche o anel."
+    },
+    "pad_self_intersects": {
+      "fail": "O contorno da plataforma {name} cruza-se {n} vezes.",
+      "suggestion": "Mova os vértices para que nenhum lado se cruze."
+    },
+    "pad_no_level": {
+      "fail": "A plataforma {name} não tem cota.",
+      "suggestion": "Introduza a cota de projeto da plataforma em metros."
+    },
+    "pad_batter_open": {
+      "fail": "{n} cantos do talude da plataforma {name} não atingiram o terreno.",
+      "suggestion": "Amplie a superfície do terreno em volta da plataforma ou reduza o talude."
     }
   },
   "setting_out": {

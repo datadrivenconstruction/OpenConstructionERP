@@ -2478,6 +2478,22 @@
     "no_factors": {
       "fail": "Geen factoren voor vast, los en verdicht volume voor {material}: alleen vaste volumes worden getoond.",
       "suggestion": "Voer de factoren voor dit materiaal in uit het grondonderzoek."
+    },
+    "pad_ring_open": {
+      "fail": "De omtrek van platform {name} is geen gesloten ring met een oppervlakte.",
+      "suggestion": "Teken minstens drie hoeken en sluit de ring."
+    },
+    "pad_self_intersects": {
+      "fail": "De omtrek van platform {name} snijdt zichzelf {n} keer.",
+      "suggestion": "Verplaats de hoeken zodat geen zijden elkaar kruisen."
+    },
+    "pad_no_level": {
+      "fail": "Platform {name} heeft geen peil.",
+      "suggestion": "Voer het ontwerppeil van het platform in meters in."
+    },
+    "pad_batter_open": {
+      "fail": "{n} taludhoeken van platform {name} bereiken het maaiveld niet.",
+      "suggestion": "Breid het maaiveldmodel rond het platform uit of verklein het talud."
     }
   },
   "setting_out": {

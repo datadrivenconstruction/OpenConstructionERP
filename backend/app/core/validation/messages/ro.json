@@ -2478,6 +2478,22 @@
     "no_factors": {
       "fail": "Nu există coeficienți de afânare și compactare pentru {material}: se afișează doar volumele în stare naturală.",
       "suggestion": "Introduceți coeficienții acestui material din studiul geotehnic."
+    },
+    "pad_ring_open": {
+      "fail": "Conturul platformei {name} nu este un inel închis cu suprafață.",
+      "suggestion": "Desenați cel puțin trei colțuri și închideți inelul."
+    },
+    "pad_self_intersects": {
+      "fail": "Conturul platformei {name} se autointersectează de {n} ori.",
+      "suggestion": "Mutați colțurile astfel încât laturile să nu se intersecteze."
+    },
+    "pad_no_level": {
+      "fail": "Platforma {name} nu are cotă.",
+      "suggestion": "Introduceți cota de proiect a platformei în metri."
+    },
+    "pad_batter_open": {
+      "fail": "{n} colțuri ale taluzului platformei {name} nu au atins terenul.",
+      "suggestion": "Extindeți suprafața terenului în jurul platformei sau reduceți taluzul."
     }
   },
   "setting_out": {

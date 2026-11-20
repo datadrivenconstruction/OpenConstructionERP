@@ -1,0 +1,6 @@
+{
+  "_doc": "Drawing paper per ISO country code for printed survey plans: A-series (ISO 216) unless the market draws on ANSI sheets. A country without an entry uses _default.",
+  "_default": "A3",
+  "US": {"paper": "ANSI_B", "source": "ASME Y14.1 sheet sizes, common practice for site plans"},
+  "CA": {"paper": "ANSI_B", "source": "ASME Y14.1 sheet sizes in common use alongside ISO 216"}
+}

@@ -2478,6 +2478,22 @@
     "no_factors": {
       "fail": "Ingen faktorer for fast, løs og komprimert masse for {material}: bare faste volumer vises.",
       "suggestion": "Legg inn faktorene for materialet fra den geotekniske rapporten."
+    },
+    "pad_ring_open": {
+      "fail": "Omrisset av platået {name} er ikke en lukket ring med et areal.",
+      "suggestion": "Tegn minst tre hjørner og lukk ringen."
+    },
+    "pad_self_intersects": {
+      "fail": "Omrisset av platået {name} krysser seg selv {n} ganger.",
+      "suggestion": "Flytt hjørnene slik at ingen sider krysser hverandre."
+    },
+    "pad_no_level": {
+      "fail": "Platået {name} har ingen kote.",
+      "suggestion": "Angi platåets prosjekterte kote i meter."
+    },
+    "pad_batter_open": {
+      "fail": "{n} skråningshjørner av platået {name} når ikke terrenget.",
+      "suggestion": "Utvid terrengflaten rundt platået eller reduser skråningen."
     }
   },
   "setting_out": {

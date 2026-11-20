@@ -2478,6 +2478,22 @@
     "no_factors": {
       "fail": "Brak współczynników spulchnienia i zagęszczenia dla {material}: pokazano tylko objętości w stanie rodzimym.",
       "suggestion": "Wpisz współczynniki dla tego materiału z opinii geotechnicznej."
+    },
+    "pad_ring_open": {
+      "fail": "Obrys platformy {name} nie jest zamkniętym pierścieniem z powierzchnią.",
+      "suggestion": "Narysuj co najmniej trzy narożniki i zamknij pierścień."
+    },
+    "pad_self_intersects": {
+      "fail": "Obrys platformy {name} przecina sam siebie {n} razy.",
+      "suggestion": "Przesuń narożniki tak, aby boki się nie przecinały."
+    },
+    "pad_no_level": {
+      "fail": "Platforma {name} nie ma rzędnej.",
+      "suggestion": "Wpisz rzędną projektową platformy w metrach."
+    },
+    "pad_batter_open": {
+      "fail": "{n} narożników skarpy platformy {name} nie dosięgło terenu.",
+      "suggestion": "Rozszerz powierzchnię terenu wokół platformy lub zmniejsz skarpę."
     }
   },
   "setting_out": {

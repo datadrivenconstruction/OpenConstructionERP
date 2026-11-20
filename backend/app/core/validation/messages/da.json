@@ -2478,6 +2478,22 @@
     "no_factors": {
       "fail": "Ingen faktorer for fast, løs og komprimeret volumen for {material}: kun faste volumener vises.",
       "suggestion": "Indtast faktorerne for materialet fra den geotekniske rapport."
+    },
+    "pad_ring_open": {
+      "fail": "Omridset af planum {name} er ikke en lukket ring med et areal.",
+      "suggestion": "Tegn mindst tre hjørner og luk ringen."
+    },
+    "pad_self_intersects": {
+      "fail": "Omridset af planum {name} krydser sig selv {n} gange.",
+      "suggestion": "Flyt hjørnerne, så ingen sider krydser hinanden."
+    },
+    "pad_no_level": {
+      "fail": "Planum {name} har ingen kote.",
+      "suggestion": "Indtast planummets projekterede kote i meter."
+    },
+    "pad_batter_open": {
+      "fail": "{n} skråningshjørner af planum {name} når ikke terrænet.",
+      "suggestion": "Udvid terrænfladen omkring planummet eller reducer skråningen."
     }
   },
   "setting_out": {

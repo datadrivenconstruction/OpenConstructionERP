@@ -2478,6 +2478,22 @@
     "no_factors": {
       "fail": "No bank, loose and compacted factors for {material}: only bank volumes are shown.",
       "suggestion": "Enter the factors for this material from the soil report."
+    },
+    "pad_ring_open": {
+      "fail": "The outline of pad {name} is not a closed ring with an area.",
+      "suggestion": "Draw at least three corners and close the ring."
+    },
+    "pad_self_intersects": {
+      "fail": "The outline of pad {name} crosses itself {n} times.",
+      "suggestion": "Move the corners so that no two sides cross."
+    },
+    "pad_no_level": {
+      "fail": "Pad {name} has no level.",
+      "suggestion": "Enter the design level of the pad in metres."
+    },
+    "pad_batter_open": {
+      "fail": "{n} batter corners of pad {name} did not reach the ground surface.",
+      "suggestion": "Extend the ground surface around the pad, or reduce the batter."
     }
   },
   "setting_out": {

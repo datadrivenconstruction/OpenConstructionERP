@@ -24,6 +24,25 @@ Exporter = Callable[[list[dict[str, Any]], dict[str, Any]], tuple[bytes, str, st
 
 
 @dataclass(frozen=True)
+class MarkType:
+    """A boundary mark a surveyor can record at a corner; ``monumented`` = a physical mark in the ground."""
+
+    key: str
+    monumented: bool
+
+
+#: Offered when neither the country data nor a pack gives a list.
+NEUTRAL_MARKS: tuple[MarkType, ...] = (
+    MarkType("monument", True),
+    MarkType("stone", True),
+    MarkType("pipe", True),
+    MarkType("pin", True),
+    MarkType("nail", True),
+    MarkType("unmarked", False),
+)
+
+
+@dataclass(frozen=True)
 class ParcelProfile:
     """What one country's cadastre adds to the neutral parcel register."""
 
@@ -39,6 +58,8 @@ class ParcelProfile:
     #: Where the tolerance comes from (law, clause), shown next to every PAR-001 finding.
     area_tolerance_source: str = ""
     exporters: dict[str, Exporter] = field(default_factory=dict)
+    #: Boundary mark types of this cadastre, in the order the picker shows them.
+    marks: tuple[MarkType, ...] = NEUTRAL_MARKS
 
     def id_valid(self, parcel_ref: str) -> bool:
         """Whether a parcel id matches the country's format (always, without one)."""
@@ -84,7 +105,9 @@ def k_mt_sqrt_area(k: Decimal, mt: Decimal) -> Callable[[Decimal], Decimal]:
 
 __all__ = [
     "NEUTRAL",
+    "NEUTRAL_MARKS",
     "Exporter",
+    "MarkType",
     "ParcelProfile",
     "k_mt_sqrt_area",
     "profile_for",

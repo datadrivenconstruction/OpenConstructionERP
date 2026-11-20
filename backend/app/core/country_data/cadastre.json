@@ -1,0 +1,73 @@
+{
+  "_doc": "Cadastre conventions per ISO country code, applied only while that country is an active market. id_pattern is the parcel (cadastral) number format checked by PAR-006; area_tolerance is the allowed difference between the computed and the registered area for PAR-001 (formula k_mt_sqrt_area: k * Mt * sqrt(P), P in m2, result in m2); marks lists the boundary mark types the surveyor picks from, with whether each one is a physical monument. A country without an entry, or a field left out, keeps the neutral default: any parcel id, the project's percentage tolerance and the neutral mark list. status to_verify means the pack author has not yet checked the entry against the source.",
+  "_neutral_marks": [
+    {"key": "monument", "monumented": true},
+    {"key": "stone", "monumented": true},
+    {"key": "pipe", "monumented": true},
+    {"key": "pin", "monumented": true},
+    {"key": "nail", "monumented": true},
+    {"key": "unmarked", "monumented": false}
+  ],
+  "RU": {
+    "id_label_key": "survey.parcels.col.cadastral_number",
+    "id_label_default": "Cadastral number",
+    "id_pattern": "\\d{2}:\\d{2}:\\d{6,7}:\\d{1,}",
+    "id_example": "77:01:0001001:1234",
+    "area_tolerance": {"formula": "k_mt_sqrt_area", "k": "3.5", "mt": "0.10"},
+    "area_tolerance_source": "Rosreestr order P/0393 of 23.10.2020, Mt 0.10 m (settlements)",
+    "marks": [
+      {"key": "monument", "monumented": true},
+      {"key": "pipe", "monumented": true},
+      {"key": "pin", "monumented": true},
+      {"key": "unmarked", "monumented": false}
+    ],
+    "status": "to_verify"
+  },
+  "KZ": {
+    "id_label_key": "survey.parcels.col.cadastral_number",
+    "id_label_default": "Cadastral number",
+    "id_pattern": "\\d{2}:\\d{3}:\\d{3}:\\d{1,4}",
+    "id_example": "20:321:045:123",
+    "marks": [
+      {"key": "monument", "monumented": true},
+      {"key": "pipe", "monumented": true},
+      {"key": "pin", "monumented": true},
+      {"key": "unmarked", "monumented": false}
+    ],
+    "status": "to_verify"
+  },
+  "PL": {
+    "id_label_key": "survey.parcels.col.cadastral_number",
+    "id_label_default": "Parcel identifier",
+    "id_pattern": "\\d{6}_\\d\\.\\d{4}\\.\\d+(/\\d+)?",
+    "id_example": "146501_8.0101.123/4",
+    "marks": [
+      {"key": "stone", "monumented": true},
+      {"key": "pipe", "monumented": true},
+      {"key": "pin", "monumented": true},
+      {"key": "unmarked", "monumented": false}
+    ],
+    "status": "to_verify"
+  },
+  "DE": {
+    "marks": [
+      {"key": "stone", "monumented": true},
+      {"key": "pipe", "monumented": true},
+      {"key": "pin", "monumented": true},
+      {"key": "nail", "monumented": true},
+      {"key": "unmarked", "monumented": false}
+    ],
+    "status": "to_verify"
+  },
+  "US": {
+    "marks": [
+      {"key": "monument", "monumented": true},
+      {"key": "pin", "monumented": true},
+      {"key": "pipe", "monumented": true},
+      {"key": "nail", "monumented": true},
+      {"key": "stone", "monumented": true},
+      {"key": "unmarked", "monumented": false}
+    ],
+    "status": "to_verify"
+  }
+}

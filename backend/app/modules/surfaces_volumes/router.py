@@ -322,3 +322,8 @@ async def report_pdf(
 from app.modules.surfaces_volumes.tools_router import router as _tools_router  # noqa: E402
 
 router.include_router(_tools_router)
+
+# Design pads, contours, section samples and the mesh for the plan editor; same prefix and permissions.
+from app.modules.surfaces_volumes.geometry_router import router as _geometry_router  # noqa: E402
+
+router.include_router(_geometry_router)

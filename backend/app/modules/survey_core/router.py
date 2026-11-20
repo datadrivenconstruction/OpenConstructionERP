@@ -398,3 +398,8 @@ async def export_points(
 from app.modules.survey_core.register_router import router as _register_router  # noqa: E402
 
 router.include_router(_register_router)
+
+# The printed plan: DXF of the visible layers and the title block facts; same prefix and permissions.
+from app.modules.survey_core.plan_export_router import router as _plan_export_router  # noqa: E402
+
+router.include_router(_plan_export_router)

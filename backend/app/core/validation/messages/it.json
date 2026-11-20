@@ -2478,6 +2478,22 @@
     "no_factors": {
       "fail": "Nessun coefficiente di rigonfiamento e costipamento per {material}: sono mostrati solo i volumi in banco.",
       "suggestion": "Inserite i coefficienti di questo materiale dalla relazione geotecnica."
+    },
+    "pad_ring_open": {
+      "fail": "Il contorno della piattaforma {name} non è un anello chiuso con un'area.",
+      "suggestion": "Disegnare almeno tre vertici e chiudere l'anello."
+    },
+    "pad_self_intersects": {
+      "fail": "Il contorno della piattaforma {name} si interseca {n} volte.",
+      "suggestion": "Spostare i vertici in modo che nessun lato si incroci."
+    },
+    "pad_no_level": {
+      "fail": "La piattaforma {name} non ha una quota.",
+      "suggestion": "Inserire la quota di progetto della piattaforma in metri."
+    },
+    "pad_batter_open": {
+      "fail": "{n} spigoli della scarpata della piattaforma {name} non raggiungono il terreno.",
+      "suggestion": "Estendere la superficie del terreno intorno alla piattaforma o ridurre la scarpata."
     }
   },
   "setting_out": {

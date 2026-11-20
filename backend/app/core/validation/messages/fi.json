@@ -2478,6 +2478,22 @@
     "no_factors": {
       "fail": "Materiaalille {material} ei ole kiinto-, irto- ja tiivistyskertoimia: vain kiintotilavuudet näytetään.",
       "suggestion": "Syötä materiaalin kertoimet pohjatutkimusraportista."
+    },
+    "pad_ring_open": {
+      "fail": "Tasanteen {name} ääriviiva ei ole suljettu rengas, jolla on pinta-ala.",
+      "suggestion": "Piirrä vähintään kolme kulmaa ja sulje rengas."
+    },
+    "pad_self_intersects": {
+      "fail": "Tasanteen {name} ääriviiva leikkaa itsensä {n} kertaa.",
+      "suggestion": "Siirrä kulmia niin, etteivät sivut leikkaa."
+    },
+    "pad_no_level": {
+      "fail": "Tasanteella {name} ei ole korkoa.",
+      "suggestion": "Anna tasanteen suunnittelukorko metreinä."
+    },
+    "pad_batter_open": {
+      "fail": "Tasanteen {name} {n} luiskakulmaa ei ulottunut maanpintaan.",
+      "suggestion": "Laajenna maanpintamallia tasanteen ympärillä tai pienennä luiskaa."
     }
   },
   "setting_out": {

@@ -1,0 +1,343 @@
+{
+ "type": "FeatureCollection",
+ "name": "Riverside Yard parcels on the plan",
+ "crs": {
+  "type": "name",
+  "properties": {
+   "name": "urn:ogc:def:crs:EPSG::32633"
+  }
+ },
+ "_comment": "Six parcels with three deliberate errors: R-04 leaves a 0.30 m sliver gap to R-01 and R-02 (PAR-005), R-06 overlaps R-05 by 0.50 m2 (PAR-004), R-02 is registered 2 m2 larger than its boundary (PAR-001 with the demo's 0.1 % tolerance). The demo sets the gap tolerance to 0.5 m.",
+ "features": [
+  {
+   "type": "Feature",
+   "properties": {
+    "parcel_id": "R-01",
+    "name": "Riverside lot 1",
+    "status": "acquired",
+    "legal_area": 1600.0,
+    "acquisition_cost": 52000,
+    "corners": [
+     {
+      "label": "B01",
+      "mark": "monument"
+     },
+     {
+      "label": "B02",
+      "mark": "pin"
+     },
+     {
+      "label": "B06",
+      "mark": "pipe"
+     },
+     {
+      "label": "B05",
+      "mark": "pin"
+     }
+    ]
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       389000.0,
+       5819060.0
+      ],
+      [
+       389040.0,
+       5819060.0
+      ],
+      [
+       389040.0,
+       5819100.0
+      ],
+      [
+       389000.0,
+       5819100.0
+      ],
+      [
+       389000.0,
+       5819060.0
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "parcel_id": "R-02",
+    "name": "Riverside lot 2",
+    "status": "acquired",
+    "legal_area": 1602.0,
+    "acquisition_cost": 52000,
+    "corners": [
+     {
+      "label": "B02",
+      "mark": "pin"
+     },
+     {
+      "label": "B03",
+      "mark": "pin"
+     },
+     {
+      "label": "B07",
+      "mark": "pipe"
+     },
+     {
+      "label": "B06",
+      "mark": "pipe"
+     }
+    ]
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       389040.0,
+       5819060.0
+      ],
+      [
+       389080.0,
+       5819060.0
+      ],
+      [
+       389080.0,
+       5819100.0
+      ],
+      [
+       389040.0,
+       5819100.0
+      ],
+      [
+       389040.0,
+       5819060.0
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "parcel_id": "R-03",
+    "name": "Riverside lot 3",
+    "status": "negotiating",
+    "legal_area": 1600.0,
+    "acquisition_cost": 54000,
+    "corners": [
+     {
+      "label": "B03",
+      "mark": "pin"
+     },
+     {
+      "label": "B04",
+      "mark": "monument"
+     },
+     {
+      "label": "B08",
+      "mark": "pin"
+     },
+     {
+      "label": "B07",
+      "mark": "pipe"
+     }
+    ]
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       389080.0,
+       5819060.0
+      ],
+      [
+       389120.0,
+       5819060.0
+      ],
+      [
+       389120.0,
+       5819100.0
+      ],
+      [
+       389080.0,
+       5819100.0
+      ],
+      [
+       389080.0,
+       5819060.0
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "parcel_id": "R-04",
+    "name": "Riverbank north 1",
+    "status": "needed",
+    "legal_area": 1588.0,
+    "acquisition_cost": 38000,
+    "corners": [
+     {
+      "label": "B09",
+      "mark": "unmarked"
+     },
+     {
+      "label": "B10",
+      "mark": "unmarked"
+     },
+     {
+      "label": "B12",
+      "mark": "pin"
+     },
+     {
+      "label": "B11",
+      "mark": "monument"
+     }
+    ]
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       389000.0,
+       5819100.3
+      ],
+      [
+       389040.0,
+       5819100.3
+      ],
+      [
+       389040.0,
+       5819140.0
+      ],
+      [
+       389000.0,
+       5819140.0
+      ],
+      [
+       389000.0,
+       5819100.3
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "parcel_id": "R-05",
+    "name": "Riverbank north 2",
+    "status": "acquired",
+    "legal_area": 1600.0,
+    "acquisition_cost": 40000,
+    "corners": [
+     {
+      "label": "B06",
+      "mark": "pipe"
+     },
+     {
+      "label": "B07",
+      "mark": "pipe"
+     },
+     {
+      "label": "B13",
+      "mark": "pin"
+     },
+     {
+      "label": "B12",
+      "mark": "pin"
+     }
+    ]
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       389040.0,
+       5819100.0
+      ],
+      [
+       389080.0,
+       5819100.0
+      ],
+      [
+       389080.0,
+       5819140.0
+      ],
+      [
+       389040.0,
+       5819140.0
+      ],
+      [
+       389040.0,
+       5819100.0
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "parcel_id": "R-06",
+    "name": "Riverbank north 3",
+    "status": "negotiating",
+    "legal_area": 1600.5,
+    "acquisition_cost": 41000,
+    "corners": [
+     {
+      "label": "B15",
+      "mark": "unmarked"
+     },
+     {
+      "label": "B08",
+      "mark": "pin"
+     },
+     {
+      "label": "B14",
+      "mark": "monument"
+     },
+     {
+      "label": "B16",
+      "mark": "unmarked"
+     }
+    ]
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       389079.9875,
+       5819100.0
+      ],
+      [
+       389120.0,
+       5819100.0
+      ],
+      [
+       389120.0,
+       5819140.0
+      ],
+      [
+       389079.9875,
+       5819140.0
+      ],
+      [
+       389079.9875,
+       5819100.0
+      ]
+     ]
+    ]
+   }
+  }
+ ]
+}
