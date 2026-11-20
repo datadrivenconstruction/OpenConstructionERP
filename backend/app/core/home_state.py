@@ -134,6 +134,31 @@ def _same_path(left: Path, right: Path) -> bool:
         return left.absolute() == right.absolute()
 
 
+#: Free space a legacy copy must leave behind on the data dir's volume.
+COPY_FREE_RESERVE_BYTES = 2 * 1024**3
+
+
+def _missing_bytes(source: Path, target: Path) -> int:
+    """Total size of the files of ``source`` that ``target`` lacks."""
+    if source.is_file():
+        return 0 if target.exists() else source.stat().st_size
+    total = 0
+    for dirpath, _dirnames, filenames in os.walk(source):
+        rel = Path(dirpath).relative_to(source)
+        for filename in filenames:
+            if not (target / rel / filename).exists():
+                total += (Path(dirpath) / filename).stat().st_size
+    return total
+
+
+def _free_bytes(path: Path) -> int:
+    """Free bytes on the volume that holds ``path`` or its nearest existing parent."""
+    probe = path
+    while not probe.exists() and probe.parent != probe:
+        probe = probe.parent
+    return shutil.disk_usage(probe).free
+
+
 def _copy_missing(source: Path, target: Path) -> int:
     """Copy every file of ``source`` that ``target`` lacks; return how many."""
     if source.is_file():
@@ -191,6 +216,19 @@ def migrate_legacy_home_state(entries: tuple[LegacyEntry, ...] = LEGACY_ENTRIES)
         target = target_root.joinpath(*entry.parts)
         try:
             if not source.exists() or _same_path(source, target):
+                continue
+            # A fresh data dir has no marker, so without this every new one (each test
+            # run, each temp dir) received a full copy of a legacy upload store.
+            needed = _missing_bytes(source, target)
+            free = _free_bytes(target_root)
+            if needed > free - COPY_FREE_RESERVE_BYTES:
+                logger.warning(
+                    "Not copying legacy %s (%d MB) to %s: only %d MB free; move it by hand",
+                    source,
+                    needed // 2**20,
+                    target,
+                    free // 2**20,
+                )
                 continue
             copied = _copy_missing(source, target)
         except OSError:

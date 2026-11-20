@@ -1516,6 +1516,18 @@ def _boot_demo_ids(active: Any) -> list[str]:
 _HEILBRONN_DEMO_ID = "retail-market-heilbronn"
 
 
+def _boot_showcase_skip_reason() -> str | None:
+    """Why boot installs no showcase demos, pack mode and generic mode alike, or None.
+
+    Tests ask for a fast startup (``OE_TEST_FAST_STARTUP``) and operators opt out
+    with ``OE_SKIP_SHOWCASE``; a test that wants the demos unsets both.
+    """
+    for var in ("OE_TEST_FAST_STARTUP", "OE_SKIP_SHOWCASE"):
+        if os.environ.get(var, "").strip().lower() in ("1", "true", "yes"):
+            return var
+    return None
+
+
 async def _seed_demo_account(*, defer_projects: bool = False) -> Callable[[], Awaitable[None]] | None:
     """Create demo user + showcase projects if they don't exist yet.
 
@@ -1780,7 +1792,10 @@ async def _seed_demo_account(*, defer_projects: bool = False) -> Callable[[], Aw
                 #
                 # Both paths install each project in its own try/except so one failure
                 # never aborts the rest of the seed.
-                if install_showcase:
+                _showcase_skip = _boot_showcase_skip_reason()
+                if install_showcase and _showcase_skip:
+                    logger.debug("Showcase seed skipped (%s)", _showcase_skip)
+                elif install_showcase:
                     if active is not None:
                         # PACK MODE - seed only the active pack's project(s). Prefer the
                         # manifest's explicit demo_template_ids (filtered to ids that
@@ -1799,33 +1814,15 @@ async def _seed_demo_account(*, defer_projects: bool = False) -> Callable[[], Aw
                                 active.slug,
                             )
                     else:
-                        # GENERIC MODE - seed the rich showcase by default. Tests ask for
-                        # a fast startup (OE_TEST_FAST_STARTUP), and operators can opt out
-                        # with OE_SKIP_SHOWCASE=1; both skip the showcase loop. The
-                        # flagship below still installs alongside it.
-                        _fast_startup = os.environ.get("OE_TEST_FAST_STARTUP", "").lower() in (
-                            "1",
-                            "true",
-                            "yes",
-                        )
-                        _skip_showcase = os.environ.get("OE_SKIP_SHOWCASE", "").lower() in (
-                            "1",
-                            "true",
-                            "yes",
-                        )
-                        if _fast_startup or _skip_showcase:
-                            logger.debug(
-                                "Showcase seed skipped (%s)",
-                                "OE_TEST_FAST_STARTUP" if _fast_startup else "OE_SKIP_SHOWCASE",
-                            )
-                        else:
-                            from app.core.demo_projects import SHOWCASE_DEMO_IDS, install_demo_projects_at_boot
+                        # GENERIC MODE - seed the rich showcase. The flagship below
+                        # still installs alongside it.
+                        from app.core.demo_projects import SHOWCASE_DEMO_IDS, install_demo_projects_at_boot
 
-                            # This branch runs whenever the showcase owner has no
-                            # projects, which is also the state a purge of demo data
-                            # leaves behind. The helper skips every demo the user
-                            # removed, so a purge is not undone by the next restart.
-                            await install_demo_projects_at_boot(list(SHOWCASE_DEMO_IDS))
+                        # This branch runs whenever the showcase owner has no
+                        # projects, which is also the state a purge of demo data
+                        # leaves behind. The helper skips every demo the user
+                        # removed, so a purge is not undone by the next restart.
+                        await install_demo_projects_at_boot(list(SHOWCASE_DEMO_IDS))
 
                 # Flagship "Residential House" reference project - an ORM installer
                 # running on PostgreSQL so the full CAD-to-BOQ showcase (real
