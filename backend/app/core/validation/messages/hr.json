@@ -2500,6 +2500,14 @@
     "spiral_skipped": {
       "fail": "Nedostaje parametar klotoide; element {n} preskočen.",
       "suggestion": "Ponovno izvezite os s duljinom klotoide i oba polumjera."
+    },
+    "radius_below_min": {
+      "fail": "Polumjer {r} m u {ip} manji je od najmanjeg {rmin} m za {v} km/h.",
+      "suggestion": "Povećajte polumjer ili smanjite projektnu brzinu i zabilježite razlog."
+    },
+    "curves_overlap": {
+      "fail": "Krivine {a} i {b} se preklapaju: trebaju {need} m pravca dugog {have} m.",
+      "suggestion": "Smanjite jedan od polumjera ili pomaknite tjeme."
     }
   },
   "land_parcels": {

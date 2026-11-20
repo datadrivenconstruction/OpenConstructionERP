@@ -2500,6 +2500,14 @@
     "spiral_skipped": {
       "fail": "클로소이드 매개변수가 없어 요소 {n}을(를) 건너뛰었습니다.",
       "suggestion": "클로소이드 길이와 두 반경을 포함하여 선형을 다시 내보내십시오."
+    },
+    "radius_below_min": {
+      "fail": "{ip}의 반경 {r} m가 {v} km/h 최소 반경 {rmin} m보다 작습니다.",
+      "suggestion": "반경을 늘리거나 설계 속도를 낮추고 사유를 기록하세요."
+    },
+    "curves_overlap": {
+      "fail": "곡선 {a}와 {b}가 겹칩니다: 길이 {have} m 직선 중 {need} m가 필요합니다.",
+      "suggestion": "반경 하나를 줄이거나 교점을 옮기세요."
     }
   },
   "land_parcels": {

@@ -8,6 +8,12 @@ Rules run on one stake list as it is made::
 
 SRV-070 error: the vertical profile does not cover a stretch of the stake list.
 SRV-071 warning: a LandXML spiral without its length or radii was skipped.
+
+The alignment editor sends ``{"curves": [{"ref", "radius", "min_radius", "speed"}],
+"overlaps": [{"ref", "a", "b", "need", "have"}]}``:
+
+SRV-072 warning: a curve radius is below the minimum for the design speed (pack or demo table).
+SRV-073 error: two curves need more of a tangent than the tangent is long.
 """
 
 from __future__ import annotations
@@ -66,8 +72,66 @@ class SpiralReadRule(_RoadRule):
         return out or [self.ok()]
 
 
+def _num(value: object) -> float | None:
+    try:
+        return float(value)  # type: ignore[arg-type]
+    except (TypeError, ValueError):
+        return None
+
+
+def _m(value: float) -> str:
+    return f"{value:g}"
+
+
+class MinRadiusRule(_RoadRule):
+    """SRV-072: no curve is tighter than the minimum radius for the design speed."""
+
+    rule_id = "SRV-072"
+    name = "Minimum curve radius"
+    severity = Severity.WARNING
+    category = RuleCategory.COMPLIANCE
+    description = "A horizontal curve radius below the minimum for the design speed"
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        out = []
+        for c in rows(context, "curves"):
+            r, rmin, v = _num(c.get("radius")), _num(c.get("min_radius")), _num(c.get("speed"))
+            if r is None or rmin is None or r <= 0 or r >= rmin - 1e-9:
+                continue
+            ref = str(c.get("ref") or "")
+            out.append(self.fail(context, "radius_below_min", ref=ref, ip=ref, r=_m(r), rmin=_m(rmin), v=_m(v or 0)))
+        return out or [self.ok()]
+
+
+class CurvesFitRule(_RoadRule):
+    """SRV-073: curves on one tangent do not overlap."""
+
+    rule_id = "SRV-073"
+    name = "Curves fit between tangents"
+    severity = Severity.ERROR
+    category = RuleCategory.CONSISTENCY
+    description = "The tangent lengths of neighbouring curves exceed the leg between their IPs"
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        out = []
+        for o in rows(context, "overlaps"):
+            need, have = _num(o.get("need")) or 0.0, _num(o.get("have")) or 0.0
+            out.append(
+                self.fail(
+                    context,
+                    "curves_overlap",
+                    ref=str(o.get("ref") or ""),
+                    a=str(o.get("a") or ""),
+                    b=str(o.get("b") or ""),
+                    need=f"{need:.2f}",
+                    have=f"{have:.2f}",
+                )
+            )
+        return out or [self.ok()]
+
+
 def register_road_validation_rules() -> None:
-    for rule_class in (ProfileCoversRule, SpiralReadRule):
+    for rule_class in (ProfileCoversRule, SpiralReadRule, MinRadiusRule, CurvesFitRule):
         rule_registry.register(rule_class(), [ROAD_RULE_SET])
 
 

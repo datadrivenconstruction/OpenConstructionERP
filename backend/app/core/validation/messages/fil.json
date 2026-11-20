@@ -2500,6 +2500,14 @@
     "spiral_skipped": {
       "fail": "Kulang ang parameter ng spiral; nilaktawan ang elemento {n}.",
       "suggestion": "I-export muli ang alignment kasama ang haba ng spiral at parehong radius."
+    },
+    "radius_below_min": {
+      "fail": "Ang radius na {r} m sa {ip} ay mas mababa sa minimum na {rmin} m para sa {v} km/h.",
+      "suggestion": "Lakihan ang radius o babaan ang design speed, at itala ang dahilan."
+    },
+    "curves_overlap": {
+      "fail": "Nagsasapawan ang mga kurba {a} at {b}: kailangan nila ng {need} m ng {have} m na tangent.",
+      "suggestion": "Bawasan ang isa sa mga radius o ilipat ang isang intersection point."
     }
   },
   "land_parcels": {

@@ -2500,6 +2500,14 @@
     "spiral_skipped": {
       "fail": "Klotoideparameter mangler; element {n} hoppet over.",
       "suggestion": "Eksporter linjen på nytt med klotoidelengde og begge radier."
+    },
+    "radius_below_min": {
+      "fail": "Radius {r} m ved {ip} er under minimum {rmin} m for {v} km/t.",
+      "suggestion": "Øk radien eller senk dimensjonerende fart, og noter årsaken."
+    },
+    "curves_overlap": {
+      "fail": "Kurvene {a} og {b} overlapper: de trenger {need} m av en {have} m lang rettlinje.",
+      "suggestion": "Reduser en av radiene eller flytt et knekkpunkt."
     }
   },
   "land_parcels": {

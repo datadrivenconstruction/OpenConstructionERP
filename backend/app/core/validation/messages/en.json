@@ -2500,6 +2500,14 @@
     "spiral_skipped": {
       "fail": "Spiral parameter missing; element {n} skipped.",
       "suggestion": "Export the alignment again with the spiral length and both radii."
+    },
+    "radius_below_min": {
+      "fail": "Radius {r} m at {ip} is below the {rmin} m minimum for {v} km/h.",
+      "suggestion": "Increase the radius or lower the design speed, and record the reason."
+    },
+    "curves_overlap": {
+      "fail": "Curves {a} and {b} overlap: they need {need} m of a {have} m tangent.",
+      "suggestion": "Reduce one of the radii or move an intersection point."
     }
   },
   "land_parcels": {

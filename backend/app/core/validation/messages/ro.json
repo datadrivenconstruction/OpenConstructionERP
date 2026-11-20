@@ -2500,6 +2500,14 @@
     "spiral_skipped": {
       "fail": "Lipsește un parametru al clotoidei; elementul {n} a fost omis.",
       "suggestion": "Exportați din nou axul cu lungimea clotoidei și ambele raze."
+    },
+    "radius_below_min": {
+      "fail": "Raza {r} m la {ip} este sub minimul de {rmin} m pentru {v} km/h.",
+      "suggestion": "Măriți raza sau reduceți viteza de proiectare și notați motivul."
+    },
+    "curves_overlap": {
+      "fail": "Curbele {a} și {b} se suprapun: au nevoie de {need} m dintr-o aliniere de {have} m.",
+      "suggestion": "Micșorați una dintre raze sau mutați un vârf."
     }
   },
   "land_parcels": {

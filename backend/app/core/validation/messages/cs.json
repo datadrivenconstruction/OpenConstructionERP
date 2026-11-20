@@ -2500,6 +2500,14 @@
     "spiral_skipped": {
       "fail": "Chybí parametr klotoidy; prvek {n} vynechán.",
       "suggestion": "Exportujte osu znovu s délkou klotoidy a oběma poloměry."
+    },
+    "radius_below_min": {
+      "fail": "Poloměr {r} m v {ip} je menší než minimum {rmin} m pro {v} km/h.",
+      "suggestion": "Zvětšete poloměr nebo snižte návrhovou rychlost a zapište důvod."
+    },
+    "curves_overlap": {
+      "fail": "Oblouky {a} a {b} se překrývají: potřebují {need} m přímé dlouhé {have} m.",
+      "suggestion": "Zmenšete jeden z poloměrů nebo posuňte vrchol."
     }
   },
   "land_parcels": {

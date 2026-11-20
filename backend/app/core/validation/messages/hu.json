@@ -2500,6 +2500,14 @@
     "spiral_skipped": {
       "fail": "Hiányzik a klotoid paramétere; a(z) {n}. elem kimaradt.",
       "suggestion": "Exportálja újra a nyomvonalat a klotoid hosszával és mindkét sugárral."
+    },
+    "radius_below_min": {
+      "fail": "A(z) {ip} {r} m-es sugara kisebb a(z) {v} km/h-hoz tartozó {rmin} m-es minimumnál.",
+      "suggestion": "Növelje a sugarat vagy csökkentse a tervezési sebességet, és rögzítse az okát."
+    },
+    "curves_overlap": {
+      "fail": "A(z) {a} és {b} ív átfed: {need} m kell nekik egy {have} m-es egyenesből.",
+      "suggestion": "Csökkentse az egyik sugarat vagy mozgasson el egy töréspontot."
     }
   },
   "land_parcels": {

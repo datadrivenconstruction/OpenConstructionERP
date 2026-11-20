@@ -2500,6 +2500,14 @@
     "spiral_skipped": {
       "fail": "Klotoidparameter saknas; element {n} hoppades över.",
       "suggestion": "Exportera linjen igen med klotoidlängd och båda radierna."
+    },
+    "radius_below_min": {
+      "fail": "Radien {r} m vid {ip} är mindre än minimiradien {rmin} m för {v} km/h.",
+      "suggestion": "Öka radien eller sänk dimensionerande hastighet och notera skälet."
+    },
+    "curves_overlap": {
+      "fail": "Kurvorna {a} och {b} överlappar: de behöver {need} m av en {have} m lång rakläng.",
+      "suggestion": "Minska en av radierna eller flytta en brytpunkt."
     }
   },
   "land_parcels": {

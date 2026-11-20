@@ -2500,6 +2500,14 @@
     "spiral_skipped": {
       "fail": "Falta un parámetro de clotoide; elemento {n} omitido.",
       "suggestion": "Exporte de nuevo el eje con la longitud de la clotoide y ambos radios."
+    },
+    "radius_below_min": {
+      "fail": "El radio {r} m en {ip} es menor que el mínimo de {rmin} m para {v} km/h.",
+      "suggestion": "Aumente el radio o reduzca la velocidad de proyecto y anote el motivo."
+    },
+    "curves_overlap": {
+      "fail": "Las curvas {a} y {b} se solapan: necesitan {need} m de una tangente de {have} m.",
+      "suggestion": "Reduzca uno de los radios o mueva un vértice."
     }
   },
   "land_parcels": {

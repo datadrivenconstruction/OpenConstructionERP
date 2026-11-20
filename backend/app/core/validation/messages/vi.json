@@ -2500,6 +2500,14 @@
     "spiral_skipped": {
       "fail": "Thiếu tham số đường cong clothoid; bỏ qua phần tử {n}.",
       "suggestion": "Xuất lại tuyến với chiều dài clothoid và cả hai bán kính."
+    },
+    "radius_below_min": {
+      "fail": "Bán kính {r} m tại {ip} nhỏ hơn mức tối thiểu {rmin} m cho {v} km/h.",
+      "suggestion": "Tăng bán kính hoặc giảm tốc độ thiết kế và ghi lại lý do."
+    },
+    "curves_overlap": {
+      "fail": "Đường cong {a} và {b} chồng lên nhau: cần {need} m của đoạn thẳng dài {have} m.",
+      "suggestion": "Giảm một bán kính hoặc dời một đỉnh."
     }
   },
   "land_parcels": {

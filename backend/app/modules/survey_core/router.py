@@ -303,6 +303,10 @@ from app.modules.survey_core.calc_router import router as _calc_router  # noqa: 
 
 router.include_router(_calc_router)
 
+from app.modules.survey_core.field_book_router import router as _field_book_router  # noqa: E402
+
+router.include_router(_field_book_router)
+
 
 # ── Geodesy: unit, local grid, grid/ground, export ─────────────────────────────────────────────────────────────────
 

@@ -2500,6 +2500,14 @@
     "spiral_skipped": {
       "fail": "Klotoid parametresi eksik; {n} numaralı eleman atlandı.",
       "suggestion": "Güzergâhı klotoid uzunluğu ve iki yarıçapla yeniden dışa aktarın."
+    },
+    "radius_below_min": {
+      "fail": "{ip} noktasındaki {r} m yarıçap, {v} km/sa için en az {rmin} m değerinin altında.",
+      "suggestion": "Yarıçapı artırın veya proje hızını düşürün ve nedeni kaydedin."
+    },
+    "curves_overlap": {
+      "fail": "{a} ve {b} kurbaları çakışıyor: {have} m uzunluğundaki aliymandan {need} m gerekiyor.",
+      "suggestion": "Yarıçaplardan birini küçültün veya bir kırılma noktasını taşıyın."
     }
   },
   "land_parcels": {

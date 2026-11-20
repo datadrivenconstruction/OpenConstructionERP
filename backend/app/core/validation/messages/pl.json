@@ -2500,6 +2500,14 @@
     "spiral_skipped": {
       "fail": "Brak parametru klotoidy; element {n} pominięty.",
       "suggestion": "Wyeksportuj oś ponownie z długością klotoidy i oboma promieniami."
+    },
+    "radius_below_min": {
+      "fail": "Promień {r} m w {ip} jest mniejszy od minimum {rmin} m dla {v} km/h.",
+      "suggestion": "Zwiększ promień lub obniż prędkość projektową i zapisz powód."
+    },
+    "curves_overlap": {
+      "fail": "Łuki {a} i {b} nachodzą na siebie: potrzebują {need} m prostej o długości {have} m.",
+      "suggestion": "Zmniejsz jeden z promieni lub przesuń wierzchołek."
     }
   },
   "land_parcels": {

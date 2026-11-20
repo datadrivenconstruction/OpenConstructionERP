@@ -2500,6 +2500,14 @@
     "spiral_skipped": {
       "fail": "Klothoidenparameter fehlt; Element {n} übersprungen.",
       "suggestion": "Exportieren Sie die Achse erneut mit Klothoidenlänge und beiden Radien."
+    },
+    "radius_below_min": {
+      "fail": "Radius {r} m an {ip} liegt unter dem Mindestradius {rmin} m für {v} km/h.",
+      "suggestion": "Radius vergrößern oder Entwurfsgeschwindigkeit senken und den Grund festhalten."
+    },
+    "curves_overlap": {
+      "fail": "Bögen {a} und {b} überlappen: sie brauchen {need} m einer {have} m langen Geraden.",
+      "suggestion": "Einen der Radien verkleinern oder einen Tangentenschnittpunkt verschieben."
     }
   },
   "land_parcels": {

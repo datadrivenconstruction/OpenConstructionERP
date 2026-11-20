@@ -2500,6 +2500,14 @@
     "spiral_skipped": {
       "fail": "缺少缓和曲线参数；已跳过要素 {n}。",
       "suggestion": "重新导出线形，并包含缓和曲线长度和两个半径。"
+    },
+    "radius_below_min": {
+      "fail": "{ip} 处半径 {r} m 小于设计速度 {v} km/h 的最小半径 {rmin} m。",
+      "suggestion": "增大半径或降低设计速度，并记录原因。"
+    },
+    "curves_overlap": {
+      "fail": "曲线 {a} 与 {b} 重叠：需要长 {have} m 直线中的 {need} m。",
+      "suggestion": "减小其中一个半径或移动交点。"
     }
   },
   "land_parcels": {

@@ -2500,6 +2500,14 @@
     "spiral_skipped": {
       "fail": "Parametro della clotoide mancante; elemento {n} saltato.",
       "suggestion": "Esportare di nuovo l'asse con la lunghezza della clotoide ed entrambi i raggi."
+    },
+    "radius_below_min": {
+      "fail": "Il raggio {r} m in {ip} è inferiore al minimo di {rmin} m per {v} km/h.",
+      "suggestion": "Aumentare il raggio o ridurre la velocità di progetto e annotare il motivo."
+    },
+    "curves_overlap": {
+      "fail": "Le curve {a} e {b} si sovrappongono: richiedono {need} m di un rettifilo di {have} m.",
+      "suggestion": "Ridurre uno dei raggi o spostare un vertice."
     }
   },
   "land_parcels": {

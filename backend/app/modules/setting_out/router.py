@@ -285,3 +285,7 @@ async def create_ncr(
 from app.modules.setting_out.road_router import router as _road_router  # noqa: E402
 
 router.include_router(_road_router)
+
+from app.modules.setting_out.alignment_router import router as _alignment_router  # noqa: E402
+
+router.include_router(_alignment_router)

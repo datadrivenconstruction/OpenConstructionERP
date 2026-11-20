@@ -2500,6 +2500,14 @@
     "spiral_skipped": {
       "fail": "Clothoïdeparameter ontbreekt; element {n} overgeslagen.",
       "suggestion": "Exporteer de as opnieuw met de clothoïdelengte en beide stralen."
+    },
+    "radius_below_min": {
+      "fail": "Straal {r} m bij {ip} is kleiner dan het minimum van {rmin} m voor {v} km/u.",
+      "suggestion": "Vergroot de straal of verlaag de ontwerpsnelheid en noteer de reden."
+    },
+    "curves_overlap": {
+      "fail": "Bogen {a} en {b} overlappen: ze hebben {need} m nodig van een rechtstand van {have} m.",
+      "suggestion": "Verklein een van de stralen of verplaats een snijpunt."
     }
   },
   "land_parcels": {

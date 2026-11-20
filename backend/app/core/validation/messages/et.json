@@ -2500,6 +2500,14 @@
     "spiral_skipped": {
       "fail": "Klotoidi parameeter puudub; element {n} jäeti vahele.",
       "suggestion": "Eksportige telg uuesti klotoidi pikkuse ja mõlema raadiusega."
+    },
+    "radius_below_min": {
+      "fail": "Raadius {r} m punktis {ip} on väiksem kui kiiruse {v} km/h miinimum {rmin} m.",
+      "suggestion": "Suurendage raadiust või vähendage projektkiirust ja märkige põhjus."
+    },
+    "curves_overlap": {
+      "fail": "Kõverad {a} ja {b} kattuvad: neil on vaja {need} m {have} m pikkusest sirgest.",
+      "suggestion": "Vähendage üht raadiust või nihutage murdepunkti."
     }
   },
   "land_parcels": {
