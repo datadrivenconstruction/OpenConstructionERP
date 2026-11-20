@@ -11,6 +11,7 @@ imports zero point-cloud libraries.
 """
 
 from app.core.module_loader import ModuleManifest
+from app.modules.pointcloud.data_paths import DATA_PATHS
 
 manifest = ModuleManifest(
     name="oe_pointcloud",
@@ -34,4 +35,5 @@ manifest = ModuleManifest(
     ],
     auto_install=False,
     enabled=True,
+    data_paths=DATA_PATHS,
 )

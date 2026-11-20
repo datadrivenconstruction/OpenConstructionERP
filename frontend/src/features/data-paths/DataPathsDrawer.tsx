@@ -17,7 +17,7 @@ import { useProjectContextStore } from '@/stores/useProjectContextStore';
 
 import { useModulePaths, useProjectParties, type EdgeOut } from './api';
 import { buildFlowModel, humanize, listRows, moduleLabel, type FlowModel } from './flowModel';
-import { DataPathsFlow } from './DataPathsFlow';
+import { FocusView } from './FocusView';
 import { PartiesHoneycomb } from './PartiesHoneycomb';
 import { buildCsv, buildFlowSvg, download, svgToPng, themeColors } from './exportDataPaths';
 import { useNarrow } from './motion';
@@ -57,7 +57,7 @@ export function DataPathsDrawer({ module, open, onClose }: DataPathsDrawerProps)
           ? t('data_paths.subtitle_project', { defaultValue: 'Live numbers for the current project' })
           : t('data_paths.subtitle_no_project', { defaultValue: 'Pick a project to see live numbers' })
       }
-      widthClass="sm:max-w-3xl"
+      widthClass={tab === 'flow' ? 'sm:max-w-[min(1440px,96vw)]' : 'sm:max-w-3xl'}
       headerActions={model ? <ExportMenu model={model} /> : null}
     >
       <div className="space-y-4 p-4" data-testid="data-paths-drawer">
@@ -84,16 +84,18 @@ export function DataPathsDrawer({ module, open, onClose }: DataPathsDrawerProps)
             {t('data_paths.load_failed', { defaultValue: 'The data paths could not be loaded.' })}
           </p>
         )}
-        {model && tab === 'flow' && (
-          model.inputs.length + model.outputs.length === 0 ? (
-            <p className="text-sm text-content-tertiary">
-              {t('data_paths.no_declared', {
-                defaultValue: 'This module has not described its data paths yet. The links found in the code are below.',
-              })}
-            </p>
-          ) : (
-            <DataPathsFlow model={model} describedBy={model.why ? descId : undefined} />
-          )
+        {tab === 'flow' && (
+          <FocusView
+            module={module}
+            projectId={projectId}
+            enabled={open}
+            canvasHeight="max(480px, calc(100vh - 300px))"
+            onOpenModule={(route) => {
+              onClose();
+              navigate(route);
+            }}
+            onPeople={() => setTab('people')}
+          />
         )}
         {model && tab === 'list' && <DataPathsList model={model} />}
         {tab === 'people' && (

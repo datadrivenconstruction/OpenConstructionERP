@@ -174,6 +174,10 @@ def declaration_problems(
     for ent in decl.entities:
         check(f"{ent.model}.id", (name,))
         _check_measure(name, ent.model, ent.measure, ent.where, (name,), check)
+    for chip in decl.chips:
+        check(f"{chip.model}.project_id", (name,))
+        for cond in chip.where:
+            check(f"{chip.model}.{cond.field}", (name,))
     for _direction, path in decl.paths():
         if path.module not in known_modules:
             problems.append(f"{name}: path to unknown module {path.module}")

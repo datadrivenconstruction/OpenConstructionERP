@@ -11,6 +11,7 @@ import { ROUTE_BACKEND_MODULE } from '@/app/layout/Sidebar';
 import type { LucideIcon } from 'lucide-react';
 import { navGroups } from '@/app/layout/navCatalog';
 import { sectionTone } from '@/app/layout/menuIcons';
+import { MODULE_REGISTRY } from '@/modules/_registry';
 
 // Core modules are always installed, so the sidebar's optional-module map leaves
 // them out; their pages still own data paths.
@@ -20,8 +21,14 @@ const CORE_ROUTE_MODULE: Record<string, string> = {
   '/assemblies': 'oe_assemblies',
 };
 
+// Plugin modules (survey and the like) register their menu rows in their own
+// manifest; the manifest id is the backend package name (dashes read as underscores).
+function registryRoutes(): [string, string][] {
+  return MODULE_REGISTRY.flatMap((m) => m.navItems.map((item): [string, string] => [item.to, `oe_${m.id.replace(/-/g, '_')}`]));
+}
+
 function routeOwners(): [string, string | readonly string[]][] {
-  return [...Object.entries(CORE_ROUTE_MODULE), ...Object.entries(ROUTE_BACKEND_MODULE)];
+  return [...Object.entries(CORE_ROUTE_MODULE), ...Object.entries(ROUTE_BACKEND_MODULE), ...registryRoutes()];
 }
 
 export interface ModuleMeta {
@@ -108,12 +115,13 @@ function routeIndex(): Map<string, RouteFacts> {
   if (routeByModule) return routeByModule;
   const navByRoute = new Map<string, RouteFacts>();
   for (const group of navGroups) {
-    for (const item of group.items) {
+    const dynamic = MODULE_REGISTRY.flatMap((m) => m.navItems.filter((i) => i.group === (group.dynamicGroupKey ?? group.id)));
+    for (const item of [...group.items, ...dynamic]) {
       if (!navByRoute.has(item.to)) {
         navByRoute.set(item.to, {
           route: item.to,
           labelKey: item.labelKey,
-          defaultLabel: item.defaultLabel ?? null,
+          defaultLabel: ('defaultLabel' in item ? item.defaultLabel : undefined) ?? null,
           groupId: group.id,
           groupLabelKey: group.labelKey,
           groupDefaultLabel: group.defaultLabel ?? null,

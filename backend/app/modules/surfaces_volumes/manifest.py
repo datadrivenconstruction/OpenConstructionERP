@@ -3,6 +3,7 @@
 """Surfaces and volumes module manifest."""
 
 from app.core.module_loader import ModuleManifest
+from app.modules.surfaces_volumes.data_paths import DATA_PATHS
 
 manifest = ModuleManifest(
     name="oe_surfaces_volumes",
@@ -20,4 +21,5 @@ manifest = ModuleManifest(
     optional_depends=["oe_boq", "oe_progress", "oe_pointcloud"],
     auto_install=True,
     enabled=True,
+    data_paths=DATA_PATHS,
 )

@@ -3,6 +3,7 @@
 """Deformation monitoring module manifest."""
 
 from app.core.module_loader import ModuleManifest
+from app.modules.monitoring.data_paths import DATA_PATHS
 
 manifest = ModuleManifest(
     name="oe_monitoring",
@@ -20,4 +21,5 @@ manifest = ModuleManifest(
     optional_depends=["oe_notifications", "oe_risk"],
     auto_install=True,
     enabled=True,
+    data_paths=DATA_PATHS,
 )

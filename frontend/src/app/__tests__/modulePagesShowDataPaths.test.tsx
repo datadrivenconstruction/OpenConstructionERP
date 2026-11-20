@@ -56,6 +56,29 @@ describe('module pages show the Data paths button', () => {
     }
   }, 300_000);
 
+  // Plugin pages (the survey group) are owned through the module registry, not the sidebar map.
+  it('shows the button on every survey page', async () => {
+    const survey = [
+      '/survey',
+      '/survey/points',
+      '/survey/parcels',
+      '/survey/monitoring',
+      '/survey/setting-out',
+      '/survey/mine',
+      '/survey/stockpiles',
+      '/survey/volumes',
+    ];
+    for (const route of survey) {
+      mount(route);
+      await waitFor(() => expect(screen.getAllByTestId('data-paths-button')).toHaveLength(1), { timeout: 5000 }).catch(
+        () => {
+          throw new Error(`no Data paths button on ${route}`);
+        },
+      );
+      cleanup();
+    }
+  }, 120_000);
+
   it('keeps one button when the page also has How it works', async () => {
     for (const route of ['/boq', '/tendering', '/finance']) {
       mount(route, true);

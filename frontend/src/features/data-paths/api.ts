@@ -191,6 +191,105 @@ export function usePlatformMap(projectId: string | null | undefined, enabled = t
   });
 }
 
+export interface TraceStep {
+  module: string;
+  label: string;
+  via: string;
+}
+
+export interface Trace {
+  id: string;
+  label: string;
+  summary: string;
+  steps: TraceStep[];
+  /** Step indexes that sit in the focused module. */
+  at: number[];
+}
+
+export interface ModuleFocus {
+  module: string;
+  declared: boolean;
+  why: string;
+  roles: string[];
+  duties: { role: string; label: string }[];
+  external: { kind: 'party' | 'file' | 'device'; label: string; role: string }[];
+  rules: { rule_id: string; name: string; severity: string }[];
+  traces: Trace[];
+}
+
+export type ChipTone = 'neutral' | 'info' | 'warning' | 'error' | 'success';
+
+export interface Chip {
+  id: string;
+  label: string;
+  count: number;
+  tone: ChipTone;
+}
+
+export interface ModuleChips {
+  module: string;
+  chips: Chip[];
+  generated_at: string;
+}
+
+export interface Change {
+  module: string;
+  entity: string;
+  entity_id: string | null;
+  action: string;
+  at: string | null;
+  user: string;
+}
+
+export interface ModuleChanges {
+  module: string;
+  days: number;
+  changes: Change[];
+}
+
+/** Live numbers refresh every 30 s while the window is open. */
+export const LIVE_REFRESH_MS = 30_000;
+
+export function useModuleFocus(module: string | null, enabled = true) {
+  return useQuery({
+    queryKey: ['dataflow', 'focus', module],
+    queryFn: () => apiGet<ModuleFocus>(`/v1/dataflow/focus/${encodeURIComponent(module as string)}/`),
+    enabled: enabled && !!module,
+    staleTime: 5 * STALE_MS,
+  });
+}
+
+/** One request per card, so a failing source hides only its own chips. */
+export function useModuleChips(module: string, projectId: string | null | undefined, enabled = true) {
+  return useQuery({
+    queryKey: ['dataflow', 'chips', module, projectId ?? null],
+    queryFn: () => apiGet<ModuleChips>(withProject(`/v1/dataflow/chips/${encodeURIComponent(module)}/`, projectId)),
+    enabled: enabled && !!projectId,
+    staleTime: LIVE_REFRESH_MS,
+    refetchInterval: enabled ? LIVE_REFRESH_MS : false,
+    retry: false,
+  });
+}
+
+export function useModuleChanges(
+  module: string | null,
+  projectId: string | null | undefined,
+  downstream: string[],
+  enabled = true,
+) {
+  const tail = downstream.length ? `&downstream=${encodeURIComponent(downstream.slice(0, 12).join(','))}` : '';
+  return useQuery({
+    queryKey: ['dataflow', 'changes', module, projectId ?? null, downstream.slice(0, 12).join(',')],
+    queryFn: () =>
+      apiGet<ModuleChanges>(
+        `/v1/dataflow/changes/${encodeURIComponent(module as string)}/?project_id=${encodeURIComponent(projectId as string)}${tail}`,
+      ),
+    enabled: enabled && !!module && !!projectId,
+    staleTime: LIVE_REFRESH_MS,
+    refetchInterval: enabled ? LIVE_REFRESH_MS : false,
+  });
+}
+
 export function useProjectParties(projectId: string | null | undefined, enabled = true) {
   return useQuery({
     queryKey: ['dataflow', 'parties', projectId ?? null],

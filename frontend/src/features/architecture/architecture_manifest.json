@@ -92662,6 +92662,7 @@
       "files": [
         "__init__.py",
         "clock_headcount.py",
+        "data_paths.py",
         "events.py",
         "intl.py",
         "manifest.py",
@@ -98931,6 +98932,7 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "focus.py",
         "graph.py",
         "live.py",
         "manifest.py",
@@ -98940,6 +98942,7 @@
         "router.py",
         "schemas.py",
         "service.py",
+        "traces.py",
         "validators.py"
       ],
       "manifest": {
@@ -98984,6 +98987,41 @@
           "handler": "project_parties",
           "response_model": "ProjectParties",
           "request_schema": "None"
+        },
+        {
+          "method": "GET",
+          "path": "/focus/{module}/",
+          "handler": "module_focus",
+          "response_model": "ModuleFocus",
+          "request_schema": "ActiveMarkets"
+        },
+        {
+          "method": "GET",
+          "path": "/chips/{module}/",
+          "handler": "module_chips",
+          "response_model": "ModuleChips",
+          "request_schema": "ActiveMarkets"
+        },
+        {
+          "method": "GET",
+          "path": "/changes/{module}/",
+          "handler": "module_changes",
+          "response_model": "ModuleChanges",
+          "request_schema": "ActiveMarkets"
+        },
+        {
+          "method": "GET",
+          "path": "/traces/",
+          "handler": "list_traces",
+          "response_model": "TraceList",
+          "request_schema": "ActiveMarkets"
+        },
+        {
+          "method": "GET",
+          "path": "/coverage/",
+          "handler": "module_coverage",
+          "response_model": "CoverageOut",
+          "request_schema": "ActiveMarkets"
         }
       ],
       "schemas": [
@@ -99561,6 +99599,303 @@
             {
               "name": "parties",
               "type": "list[PartyOut]"
+            }
+          ]
+        },
+        {
+          "class_name": "DutyOut",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "role",
+              "type": "str"
+            },
+            {
+              "name": "label",
+              "type": "str"
+            }
+          ]
+        },
+        {
+          "class_name": "ExternalOut",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "kind",
+              "type": "str"
+            },
+            {
+              "name": "label",
+              "type": "str"
+            },
+            {
+              "name": "role",
+              "type": "str",
+              "default": "''"
+            }
+          ]
+        },
+        {
+          "class_name": "RuleOut",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "rule_id",
+              "type": "str"
+            },
+            {
+              "name": "name",
+              "type": "str"
+            },
+            {
+              "name": "severity",
+              "type": "str",
+              "default": "''"
+            }
+          ]
+        },
+        {
+          "class_name": "TraceStepOut",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "module",
+              "type": "str"
+            },
+            {
+              "name": "label",
+              "type": "str"
+            },
+            {
+              "name": "via",
+              "type": "str",
+              "default": "''"
+            }
+          ]
+        },
+        {
+          "class_name": "TraceOut",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "id",
+              "type": "str"
+            },
+            {
+              "name": "label",
+              "type": "str"
+            },
+            {
+              "name": "summary",
+              "type": "str"
+            },
+            {
+              "name": "steps",
+              "type": "list[TraceStepOut]"
+            },
+            {
+              "name": "at",
+              "type": "list[int]",
+              "description": "Step indexes that sit in the focused module"
+            }
+          ]
+        },
+        {
+          "class_name": "ModuleFocus",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "The right panel of the data paths window for one module.",
+          "fields": [
+            {
+              "name": "module",
+              "type": "str"
+            },
+            {
+              "name": "declared",
+              "type": "bool"
+            },
+            {
+              "name": "why",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "roles",
+              "type": "list[str]"
+            },
+            {
+              "name": "duties",
+              "type": "list[DutyOut]"
+            },
+            {
+              "name": "external",
+              "type": "list[ExternalOut]"
+            },
+            {
+              "name": "rules",
+              "type": "list[RuleOut]"
+            },
+            {
+              "name": "traces",
+              "type": "list[TraceOut]"
+            }
+          ]
+        },
+        {
+          "class_name": "ChipOut",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "id",
+              "type": "str"
+            },
+            {
+              "name": "label",
+              "type": "str"
+            },
+            {
+              "name": "count",
+              "type": "int"
+            },
+            {
+              "name": "tone",
+              "type": "str",
+              "default": "'neutral'"
+            }
+          ]
+        },
+        {
+          "class_name": "ModuleChips",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "module",
+              "type": "str"
+            },
+            {
+              "name": "chips",
+              "type": "list[ChipOut]"
+            },
+            {
+              "name": "generated_at",
+              "type": "datetime"
+            }
+          ]
+        },
+        {
+          "class_name": "ChangeOut",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "module",
+              "type": "str"
+            },
+            {
+              "name": "entity",
+              "type": "str"
+            },
+            {
+              "name": "entity_id",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "action",
+              "type": "str"
+            },
+            {
+              "name": "at",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "user",
+              "type": "str",
+              "default": "''"
+            }
+          ]
+        },
+        {
+          "class_name": "ModuleChanges",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "module",
+              "type": "str"
+            },
+            {
+              "name": "days",
+              "type": "int"
+            },
+            {
+              "name": "changes",
+              "type": "list[ChangeOut]"
+            }
+          ]
+        },
+        {
+          "class_name": "TraceList",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "traces",
+              "type": "list[TraceOut]"
+            }
+          ]
+        },
+        {
+          "class_name": "CoverageOut",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "declared",
+              "type": "int"
+            },
+            {
+              "name": "derived",
+              "type": "int"
+            },
+            {
+              "name": "none",
+              "type": "int"
+            },
+            {
+              "name": "modules",
+              "type": "dict[str, str]"
             }
           ]
         }
@@ -172134,6 +172469,7 @@
         "calc_schemas.py",
         "calc_service.py",
         "calc_validators.py",
+        "data_paths.py",
         "geometry.py",
         "manifest.py",
         "models.py",
@@ -185601,6 +185937,7 @@
       "files": [
         "__init__.py",
         "calc.py",
+        "data_paths.py",
         "demo.py",
         "depth.py",
         "manifest.py",
@@ -189473,6 +189810,7 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "manifest.py",
         "models.py",
         "monitoring_math.py",
@@ -208092,6 +208430,7 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "decode.py",
         "deviation.py",
         "manifest.py",
@@ -284818,6 +285157,7 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "design_io.py",
         "manifest.py",
         "models.py",
@@ -298868,6 +299208,7 @@
       "files": [
         "__init__.py",
         "calc.py",
+        "data_paths.py",
         "demo.py",
         "manifest.py",
         "models.py",
@@ -311922,6 +312263,7 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "demo.py",
         "drawing_lines.py",
         "landxml.py",
@@ -313674,6 +314016,7 @@
         "closure_classes.py",
         "cogo.py",
         "crs.py",
+        "data_paths.py",
         "dependencies.py",
         "field_traverse.py",
         "geodesy.py",
@@ -340774,10 +341117,10 @@
     },
     {
       "name": "data-paths",
-      "ts_files": 13,
+      "ts_files": 20,
       "css_files": 0,
-      "test_files": 2,
-      "total_files": 13
+      "test_files": 4,
+      "total_files": 20
     },
     {
       "name": "data-security",
@@ -344106,11 +344449,11 @@
     "total_models": 974,
     "total_columns": 11431,
     "total_relationships": 264,
-    "total_routes": 5553,
-    "total_schemas": 5173,
-    "total_python_files": 3684,
+    "total_routes": 5558,
+    "total_schemas": 5185,
+    "total_python_files": 3695,
     "frontend_features": 252,
-    "frontend_ts_files": 4450,
+    "frontend_ts_files": 4457,
     "frontend_backend_mapped": 224
   },
   "frontend_backend_mapping": {
