@@ -61,9 +61,12 @@ export function AlignmentEditor({ projectId, request, canWrite }: { projectId: s
 
   const ips = useMemo<IpInput[]>(
     () =>
-      rows
-        .map((r, i) => ({ name: r.name.trim() || `IP${i}`, e: parseDistance(r.e, conv), n: parseDistance(r.n, conv), radius: parseDistance(r.r, conv) ?? 0 }))
-        .filter((p): p is IpInput & { e: number; n: number } => p.e != null && p.n != null),
+      rows.flatMap((r, i): IpInput[] => {
+        const e = parseDistance(r.e, conv);
+        const n = parseDistance(r.n, conv);
+        if (e == null || n == null) return [];
+        return [{ name: r.name.trim() || `IP${i}`, e, n, radius: parseDistance(r.r, conv) ?? 0 }];
+      }),
     [rows, conv],
   );
   const ch0 = Number(startCh) || 0;
