@@ -160,6 +160,9 @@ export interface NavGroup {
   items: NavItem[];
   defaultOpen: boolean;
   hideInSimple?: boolean; // Entire group hidden in simple mode
+  /** A group of an opt-in module the person switched on themselves: next to a
+   *  company workspace or work mode it stays in view instead of under "More modules". */
+  keepInView?: boolean;
   /** Render a thin horizontal divider above this group. This used to name
    *  Regional, Modules and Settings as the users, peeling the setup
    *  surfaces off the project work above; none of the three is a nav group
@@ -271,6 +274,18 @@ export const navGroups: NavGroup[] = [
       { labelKey: 'nav.inbox', defaultLabel: 'Inbox', to: '/inbox', icon: Inbox },
       { labelKey: 'nav.timeline', defaultLabel: 'Timeline', to: '/timeline', icon: Activity },
     ],
+  },
+  // ── 1b. DESIGN ─────────────────────────────────────────────────────
+  // Rows come only from the optional Design module (start, editor, brief,
+  // revisions, acceptance, design estimate); without the module the group is
+  // empty and not drawn. Sits before Takeoff: a project is designed first.
+  {
+    id: 'grp_design',
+    labelKey: 'design.title',
+    defaultLabel: 'Design',
+    defaultOpen: true,
+    keepInView: true,
+    items: [],
   },
   // ── 2. TAKEOFF ─────────────────────────────────────────────────────
   // Quantity extraction across every source: 2D drawings (quantities, PDF

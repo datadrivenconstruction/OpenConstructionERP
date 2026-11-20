@@ -309,6 +309,13 @@ export const ROUTE_BACKEND_MODULE: Record<string, string | readonly string[]> = 
   '/leasing': 'oe_leasing',
   '/measurement-book': 'oe_measurement_book',
   '/service-charges': 'oe_service_charges',
+  // Design
+  '/design/overview': 'oe_design',
+  '/design/editor': 'oe_design',
+  '/design/brief': 'oe_design',
+  '/design/revisions': 'oe_design',
+  '/design/acceptance': 'oe_design',
+  '/design/estimate': 'oe_design',
   // Planning
   '/schedule': 'oe_schedule',
   '/schedule-advanced': 'oe_schedule_advanced',
@@ -1325,8 +1332,12 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
   // Edit mode opens "More modules" so a row hidden in there can be found and
   // switched back on.
   const moreExpanded = moreOpen || editMode;
+  // Switched on by the person (Design): stays in view next to a workspace or work mode.
+  const groupsOnScreen = !(workspaceActive || modeActive)
+    ? loopGroups
+    : loopGroups.filter((group) => group.keepInView || moreExpanded);
   const moreCount = workspaceActive || modeActive
-    ? loopGroups.reduce((sum, group) => sum + visibleGroupItems(group).length, 0)
+    ? loopGroups.filter((group) => !group.keepInView).reduce((sum, group) => sum + visibleGroupItems(group).length, 0)
     : 0;
 
   // Local usage counts feed the suggestion card; nothing changes until Accept.
@@ -1830,7 +1841,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
             reordering. Each row is only annotated: needed → sequence
             number; not needed → smaller + greyed; unconstrained → as
             default. Focus OFF / no profile → every row is default. */}
-        {(!(workspaceActive || modeActive) || moreExpanded) && loopGroups.map((group) => {
+        {groupsOnScreen.map((group) => {
           const visibleItems = visibleGroupItems(group);
 
           // Skip group if no visible items. In normal mode this means
