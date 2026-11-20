@@ -67607,6 +67607,8 @@ const resource = {
     "plan.tool.text": "Tekst",
     "plan.tool.text_default": "Note",
     "plan.tools": "Planværktøjer",
+    "plan.parcel.tab_editor": "Skel og kontroller",
+    "plan.tin.tab_pads": "Plateauer og terræn",
   }
 } as { translation: Record<string, string> };
 

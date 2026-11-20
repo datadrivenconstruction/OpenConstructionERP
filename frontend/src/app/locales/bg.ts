@@ -67605,6 +67605,8 @@ const resource = {
     "plan.tool.text": "Текст",
     "plan.tool.text_default": "Бележка",
     "plan.tools": "Инструменти на плана",
+    "plan.parcel.tab_editor": "Граници и проверки",
+    "plan.tin.tab_pads": "Площадки и терен",
   }
 } as { translation: Record<string, string> };
 

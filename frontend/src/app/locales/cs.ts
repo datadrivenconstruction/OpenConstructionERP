@@ -68950,6 +68950,8 @@ const resource = {
     "plan.tool.text": "Text",
     "plan.tool.text_default": "Poznámka",
     "plan.tools": "Nástroje plánu",
+    "plan.parcel.tab_editor": "Hranice a kontroly",
+    "plan.tin.tab_pads": "Plošiny a terén",
   }
 } as { translation: Record<string, string> };
 

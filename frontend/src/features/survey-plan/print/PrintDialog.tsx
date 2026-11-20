@@ -81,7 +81,7 @@ export function PrintDialog({ open, onClose, projectId, layers, conventions, def
       });
       triggerDownload(blob, `${fileStem(drawingNo || title)}.pdf`);
       if (dropped > 0) {
-        addToast({ type: 'info', title: t('plan.print.labels_dropped', { defaultValue: '{{count}} labels left out so none overlap; print at a larger scale to show them', count: dropped }) });
+        addToast({ type: 'info', title: t('plan.print.labels_dropped', { defaultValue: 'Labels left out so none overlap: {{n}}. Print at a larger scale to show them', n: dropped }) });
       }
     } catch (e) {
       addToast({ type: 'error', title: t('plan.print.failed', { defaultValue: 'Could not build the plan' }), message: getErrorMessage(e) });

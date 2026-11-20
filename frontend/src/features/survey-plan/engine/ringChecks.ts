@@ -300,7 +300,7 @@ export function padFindings(features: readonly PlanFeature[]): LiveFinding[] {
     }
     const crossings = selfIntersections(ring).filter(([i, j]) => i !== j).length;
     if (crossings) {
-      out.push({ ruleId: 'SRV-083', severity: 'error', featureId: f.id, at: centre(ring), messageKey: 'plan.tin.check.pad_self_intersects', defaultMessage: 'Pad {{name}}: the outline crosses itself {{n}} times', params: { name, n: crossings } });
+      out.push({ ruleId: 'SRV-083', severity: 'error', featureId: f.id, at: centre(ring), messageKey: 'plan.tin.check.pad_self_intersects', defaultMessage: 'Pad {{name}}: the outline crosses itself, crossings: {{n}}', params: { name, n: crossings } });
     }
     const level = f.properties.level;
     if (level == null || level === '' || !Number.isFinite(Number(level))) {

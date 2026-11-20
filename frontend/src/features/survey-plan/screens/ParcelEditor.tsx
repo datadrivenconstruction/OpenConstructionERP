@@ -81,7 +81,7 @@ export function ParcelEditor({ projectId, canWrite, canvas }: ParcelEditorProps)
     mutationFn: () => p2Api.loadDemo(projectId),
     onSuccess: (r) => {
       refresh();
-      addToast({ type: 'success', title: t('plan.parcel.demo_loaded', { defaultValue: '{{count}} demo parcels loaded', count: r.parcels }) });
+      addToast({ type: 'success', title: t('plan.parcel.demo_loaded', { defaultValue: 'Demo parcels loaded: {{n}}', n: r.parcels }) });
     },
     onError: (e) => addToast({ type: 'error', title: getErrorMessage(e) }),
   });

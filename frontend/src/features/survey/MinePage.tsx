@@ -6,7 +6,7 @@
  * actual can be added to the progress claim (survey.confirm).
  */
 
-import { Fragment, useEffect, useMemo, useState } from 'react';
+import { Fragment, Suspense, lazy, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { CheckCircle2, FileDown, Gauge, Layers, Mountain, Pickaxe, Plus, Scale, Send, Truck, Upload } from 'lucide-react';
@@ -42,6 +42,7 @@ import { ViewOnlyNote, useSurveyAccess } from './useSurveyAccess';
 import { MineBlastCard } from './MineBlastCard';
 import { MineEntryDepth } from './MineEntryDepth';
 
+const MinePlanView = lazy(() => import('@/features/survey-plan/screens/MinePlanView'));
 function AdvanceCell({ entry, lang, onSave }: { entry: MineEntry; lang: string; onSave: (v: number | null) => void }) {
   const { t } = useTranslation();
   const [value, setValue] = useState(entry.actual_advance_m == null ? '' : String(entry.actual_advance_m));
@@ -347,6 +348,10 @@ export default function MinePage() {
       )}
 
       <MineBlastCard projectId={projectId} canWrite={canWrite} />
+
+      <Suspense fallback={<Skeleton className="h-[480px]" />}>
+        <MinePlanView projectId={projectId} />
+      </Suspense>
 
       <NewPeriodDialog open={newOpen} projectId={projectId} onClose={() => setNewOpen(false)} onCreated={(p) => setPeriodId(p.id)} />
       <AddUnitDialog open={unitOpen} period={d ?? null} onClose={() => setUnitOpen(false)} />

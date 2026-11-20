@@ -67871,6 +67871,8 @@ const resource = {
     "plan.tool.text": "লেখা",
     "plan.tool.text_default": "নোট",
     "plan.tools": "প্ল্যান টুল",
+    "plan.parcel.tab_editor": "সীমানা ও যাচাই",
+    "plan.tin.tab_pads": "প্যাড ও ভূখণ্ড",
   }
 } as { translation: Record<string, string> };
 
