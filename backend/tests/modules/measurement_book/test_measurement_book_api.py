@@ -162,3 +162,34 @@ async def test_position_from_another_project_is_refused(db_session) -> None:
             json={"project_id": str(pid), "boq_position_id": str(foreign), "entry_date": "2026-10-01", "length": "1"},
         )
     assert r.status_code == 422
+
+
+async def test_lines_carry_their_sections_and_a_percentage_is_set_in_one_line(db_session) -> None:
+    """The positions list groups under BOQ sections; setting 60 % then 50 % writes +6 then -1 on a 10 m3 line."""
+    uid, pid, pos = await _setup(db_session)
+    position = await db_session.get(Position, pos)
+    section = Position(boq_id=position.boq_id, ordinal="02", description="Masonry", unit="")
+    db_session.add(section)
+    await db_session.flush()
+    position.parent_id = section.id
+    await db_session.flush()
+
+    async with _http(_app(db_session, uid)) as c:
+        [line] = (await c.get(f"{BASE}/positions/", params={"project_id": str(pid)})).json()
+        assert line["boq_name"] == "Main"
+        assert [s["description"] for s in line["sections"]] == ["Masonry"]
+
+        body = {"project_id": str(pid), "percent": "60", "entry_date": "2026-11-02"}
+        first = await c.post(f"{BASE}/positions/{pos}/percent", json=body)
+        assert first.status_code == 200, first.text
+        assert first.json()["quantity"] == "6.0000"
+        down = await c.post(f"{BASE}/positions/{pos}/percent", json={**body, "percent": "50"})
+        assert down.json()["quantity"] == "-1.0000"
+        same = await c.post(f"{BASE}/positions/{pos}/percent", json={**body, "percent": "50"})
+        assert same.status_code == 200
+        assert same.json() is None
+
+        [line] = (await c.get(f"{BASE}/positions/", params={"project_id": str(pid)})).json()
+        assert line["measured_quantity"] == "5.0000"
+        assert line["percent_measured"] == "50.00"
+        assert (await c.post(f"{BASE}/positions/{section.id}/percent", json=body)).status_code == 422

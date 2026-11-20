@@ -46,8 +46,18 @@ export interface EntryInput {
   notes?: string;
 }
 
+/** A BOQ section or subsection above a position, outermost first. */
+export interface SectionRef {
+  id: string;
+  ordinal: string;
+  description: string;
+}
+
 export interface PositionSummary {
   boq_position_id: string;
+  boq_id?: string | null;
+  boq_name?: string;
+  sections?: SectionRef[];
   ordinal: string;
   description: string;
   unit: string;
@@ -96,6 +106,12 @@ export const checkEntry = (
 
 export const fetchPositions = (projectId: string) =>
   apiGet<PositionSummary[]>(`/v1/measurement-book/positions/?project_id=${projectId}`);
+/** Writes the one line that brings the measured total to `percent` of the BOQ quantity; null when it already matches. */
+export const setPositionPercent = (projectId: string, positionId: string, percent: string) =>
+  apiPost<MeasurementEntry | null>(`/v1/measurement-book/positions/${positionId}/percent`, {
+    project_id: projectId,
+    percent,
+  });
 export const fetchRunningBill = (projectId: string) =>
   apiGet<RunningBill>(`/v1/measurement-book/running-bill/?project_id=${projectId}`);
 export const postToProgress = (projectId: string, periodLabel: string) =>

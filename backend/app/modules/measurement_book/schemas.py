@@ -74,8 +74,19 @@ class EntryResponse(BaseModel):
     notes: str | None
 
 
+class SectionRef(BaseModel):
+    """One BOQ section or subsection above a position, outermost first."""
+
+    id: uuid.UUID
+    ordinal: str
+    description: str
+
+
 class PositionSummary(BaseModel):
     boq_position_id: uuid.UUID
+    boq_id: uuid.UUID | None = None
+    boq_name: str = ""
+    sections: list[SectionRef] = Field(default_factory=list)
     ordinal: str
     description: str
     unit: str
@@ -96,6 +107,14 @@ class RunningBill(BaseModel):
     total_value: FiniteDecimal
     unchecked_count: int
     can_certify: bool
+
+
+class SetPercent(BaseModel):
+    """Bring a position's measured quantity to a share of its BOQ quantity in one line."""
+
+    project_id: uuid.UUID
+    percent: Decimal = Field(..., ge=0, le=1000)
+    entry_date: date | None = None
 
 
 class PostToProgress(BaseModel):
