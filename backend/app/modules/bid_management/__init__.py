@@ -10,7 +10,11 @@ reference (no FK across modules).
 
 
 async def on_startup() -> None:
-    """Module startup hook - register permissions."""
+    """Module startup hook - permissions, tender rules, and the tender mirror listeners."""
+    from app.modules.bid_management import legacy_mirror
     from app.modules.bid_management.permissions import register_bid_management_permissions
+    from app.modules.bid_management.tender_rules import register_tender_validation_rules
 
     register_bid_management_permissions()
+    register_tender_validation_rules()
+    legacy_mirror.install()

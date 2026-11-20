@@ -41,6 +41,7 @@ from app.dependencies import (
     SessionDep,
     verify_project_access,
 )
+from app.modules.bid_management.legacy_adapter import LegacyRFQRoute
 from app.modules.rfq_bidding.boq_resources import boq_project_id
 from app.modules.rfq_bidding.schemas import (
     BidAdjustmentCreate,
@@ -66,7 +67,7 @@ from app.modules.rfq_bidding.schemas import (
 )
 from app.modules.rfq_bidding.service import RFQService
 
-router = APIRouter(tags=["rfq_bidding"])
+router = APIRouter(tags=["rfq_bidding"], route_class=LegacyRFQRoute)
 
 
 def _get_service(session: SessionDep) -> RFQService:

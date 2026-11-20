@@ -1228,3 +1228,9 @@ async def notify_rejection(
     svc = BidManagementService(session)
     rej = await svc.notify_rejection(rejection_id)
     return BidRejectionResponse.model_validate(rej)
+
+
+# ── Tenders: one read API over native and copied packages ─────────────────
+from app.modules.bid_management.tenders import router as _tenders_router  # noqa: E402
+
+router.include_router(_tenders_router)

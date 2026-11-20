@@ -15,6 +15,8 @@ Tables:
     oe_bid_management_leveling          - per-bidder leveling row
     oe_bid_management_award             - award decision (one per package)
     oe_bid_management_rejection         - formal rejection record
+    oe_bid_management_submission_adjustment - priced adjustment on a submission
+    oe_tender_legacy_map                - old tendering / rfq id -> canonical id
 
 All cross-module references (tender_id, contact_id, subcontractor_id,
 contract_template_ref) are plain UUID / string columns - no SQLAlchemy
@@ -24,8 +26,9 @@ ForeignKey crossing module boundaries.
 from __future__ import annotations
 
 import uuid
+from decimal import Decimal
 
-from sqlalchemy import JSON, Boolean, ForeignKey, Integer, Numeric, String, Text, UniqueConstraint
+from sqlalchemy import JSON, Boolean, ForeignKey, Index, Integer, Numeric, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import GUID, Base
@@ -89,6 +92,17 @@ class BidPackage(Base):
         default=dict,
         server_default="{}",
     )
+    # Set on a package copied from ``tendering`` or ``rfq_bidding``: the old
+    # module still writes it, so the copy is read-only here (see legacy_mirror).
+    legacy_source: Mapped[str | None] = mapped_column(String(32), nullable=True, index=True)
+    # Plain UUIDs, no FK: the bill the package was raised from, the company
+    # that issues it (legal_entities).
+    boq_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, index=True)
+    legal_entity_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, index=True)
+    # Supply packages (from rfq_bidding): the cost lines sourced and the award basis.
+    cost_line_ids: Mapped[list | None] = mapped_column(JSON, nullable=True)  # type: ignore[assignment]
+    evaluation_method: Mapped[str | None] = mapped_column(String(30), nullable=True)
+    require_full_scope: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
 
     line_items: Mapped[list[BidPackageLineItem]] = relationship(
         back_populates="package",
@@ -186,6 +200,11 @@ class BidInvitation(Base):
         server_default="pending",
     )
     token_hash: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
+    # Link lifecycle of a bidder portal invitation (from tendering).
+    expires_at: Mapped[str | None] = mapped_column(String(40), nullable=True)
+    revoked_at: Mapped[str | None] = mapped_column(String(40), nullable=True)
+    draft_saved_at: Mapped[str | None] = mapped_column(String(40), nullable=True)
+    draft: Mapped[dict | None] = mapped_column(JSON, nullable=True)  # type: ignore[assignment]
 
     package: Mapped[BidPackage] = relationship(back_populates="invitations")
 
@@ -224,6 +243,8 @@ class Bidder(Base):
     )
     disqualification_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
     notes: Mapped[str] = mapped_column(Text, nullable=False, default="")
+    withdrawn_at: Mapped[str | None] = mapped_column(String(40), nullable=True)
+    withdrawn_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     package: Mapped[BidPackage] = relationship(back_populates="bidders")
 
@@ -284,6 +305,15 @@ class BidSubmission(Base):
         default=dict,
         server_default="{}",
     )
+    # Quote validity, currency conversion and late admission (from rfq_bidding).
+    validity_days: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    exchange_rate: Mapped[Decimal | None] = mapped_column(Numeric(18, 8), nullable=True)
+    exchange_rate_date: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    exchange_rate_source: Mapped[str | None] = mapped_column(String(60), nullable=True)
+    admitted_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
+    admitted_at: Mapped[str | None] = mapped_column(String(40), nullable=True)
+    admission_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
+    late_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     def __repr__(self) -> str:
         return f"<BidSubmission inv={self.invitation_id} total={self.total_amount}>"
@@ -300,12 +330,17 @@ class BidSubmissionLine(Base):
         nullable=False,
         index=True,
     )
-    line_item_id: Mapped[uuid.UUID] = mapped_column(
+    # Null for a free line a bidder added outside the package scope; such a
+    # line carries its own description and unit.
+    line_item_id: Mapped[uuid.UUID | None] = mapped_column(
         GUID(),
         ForeignKey("oe_bid_management_line_item.id", ondelete="CASCADE"),
-        nullable=False,
+        nullable=True,
         index=True,
     )
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    unit: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    unit_conversion_factor: Mapped[Decimal | None] = mapped_column(Numeric(18, 6), nullable=True)
     unit_price: Mapped[str] = mapped_column(
         Numeric(18, 4),  # type: ignore[arg-type]
         nullable=False,
@@ -575,6 +610,12 @@ class BidAward(Base):
     # Plain string - references a template id from documents/contracts module.
     contract_template_ref: Mapped[str] = mapped_column(String(255), nullable=False, default="")
     notified_others_at: Mapped[str | None] = mapped_column(String(40), nullable=True)
+    # How the winner was chosen (from rfq_bidding): ranking method, whether the
+    # award departs from the recommendation, and the basis snapshot.
+    method: Mapped[str | None] = mapped_column(String(30), nullable=True)
+    is_override: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
+    recommended_bidder_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+    basis: Mapped[dict | None] = mapped_column(JSON, nullable=True)  # type: ignore[assignment]
 
     def __repr__(self) -> str:
         return f"<BidAward package={self.package_id} amount={self.awarded_amount}>"
@@ -603,3 +644,51 @@ class BidRejection(Base):
 
     def __repr__(self) -> str:
         return f"<BidRejection package={self.package_id} bidder={self.bidder_id}>"
+
+
+class BidSubmissionAdjustment(Base):
+    """A priced adjustment on a submission: an exclusion, a plug, a discount."""
+
+    __tablename__ = "oe_bid_management_submission_adjustment"
+
+    submission_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(),
+        ForeignKey("oe_bid_management_submission.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    kind: Mapped[str] = mapped_column(String(40), nullable=False)
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    amount: Mapped[Decimal] = mapped_column(Numeric(18, 2), nullable=False, default=0, server_default="0")
+    currency: Mapped[str] = mapped_column(String(10), nullable=False, default="", server_default="")
+    included_in_bid: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default="0")
+    source: Mapped[str] = mapped_column(String(20), nullable=False, default="bidder", server_default="bidder")
+
+    def __repr__(self) -> str:
+        return f"<BidSubmissionAdjustment {self.kind} {self.amount}>"
+
+
+class TenderLegacyMap(Base):
+    """Where a row of the old tendering or rfq_bidding tables lives now.
+
+    One row per copied source row. It makes the copy re-runnable (a mapped row
+    is updated, never copied twice) and lets old ids reach the canonical record.
+    """
+
+    __tablename__ = "oe_tender_legacy_map"
+    __table_args__ = (
+        UniqueConstraint("source_table", "source_id", name="uq_oe_tender_legacy_map_source"),
+        Index("ix_oe_tender_legacy_map_target", "target_table", "target_id"),
+        Index("ix_oe_tender_legacy_map_package", "package_id"),
+    )
+
+    source_table: Mapped[str] = mapped_column(String(64), nullable=False)
+    source_id: Mapped[uuid.UUID] = mapped_column(GUID(), nullable=False)
+    target_table: Mapped[str] = mapped_column(String(64), nullable=False)
+    target_id: Mapped[uuid.UUID] = mapped_column(GUID(), nullable=False)
+    # The canonical package the row belongs to, so one package re-syncs in one query.
+    package_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+    copied_at: Mapped[str | None] = mapped_column(String(40), nullable=True)
+
+    def __repr__(self) -> str:
+        return f"<TenderLegacyMap {self.source_table}:{self.source_id} -> {self.target_table}:{self.target_id}>"

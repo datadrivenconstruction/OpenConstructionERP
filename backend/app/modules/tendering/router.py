@@ -31,6 +31,7 @@ from app.dependencies import (
     SessionDep,
     verify_project_access,
 )
+from app.modules.bid_management.legacy_adapter import LegacyTenderingRoute
 from app.modules.letter_templates.schemas import LetterTextIn
 from app.modules.tendering import award_flow
 from app.modules.tendering import parties as tender_parties
@@ -96,7 +97,7 @@ from app.modules.tendering.sealed import SealedTenderService, is_closed, redacte
 from app.modules.tendering.service import TenderingService
 from app.modules.tendering.x84_import import MAX_X84_BYTES, X84BidImportService
 
-router = APIRouter(tags=["tendering"])
+router = APIRouter(tags=["tendering"], route_class=LegacyTenderingRoute)
 logger = logging.getLogger(__name__)
 
 

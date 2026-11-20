@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from app.core.data_repairs import DataRepair, register_data_repair
+from app.core.data_repairs import DataRepair, NeverDelivered, register_data_repair
 
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
@@ -35,5 +35,32 @@ BID_AWARD_CONTRACT_COUNTERPARTY = register_data_repair(
         summary="Point award contracts that name the bidder row at the bidder's firm, or at no counterparty",
         run=_run_award_counterparty,
         nature="always_wrong",
+    )
+)
+
+
+async def _run_tender_legacy_copy(session: AsyncSession) -> int:
+    """Copy tender packages and RFQs that have no canonical mirror yet."""
+    from app.modules.bid_management.legacy_copy import copy_all
+
+    def _copy(sync_session) -> int:  # noqa: ANN001 - sync Session from run_sync
+        report = copy_all(sync_session.connection(), apply=True, only_unmapped=True)
+        return report.rows_changed
+
+    return await session.run_sync(_copy)
+
+
+#: Nature ``never_delivered``: the canonical mirror of a tendering package or
+#: RFQ is missing on every database that predates tmm01, because the boot heal
+#: builds the tables and copies nothing. Insert-only: a package already in
+#: ``oe_tender_legacy_map`` is skipped, and the map row is what records delivery.
+TENDER_LEGACY_COPY = register_data_repair(
+    DataRepair(
+        repair_id="tender_legacy_copy",
+        revision="tmm01_tender_canonical_model",
+        summary="Copy tendering packages and RFQs that have no canonical tender package yet",
+        run=_run_tender_legacy_copy,
+        nature="never_delivered",
+        never_delivered=NeverDelivered(table="oe_tender_legacy_map", identified_by=("source_table", "source_id")),
     )
 )

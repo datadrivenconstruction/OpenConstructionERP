@@ -211,7 +211,11 @@ PRESENCE_PROBES: tuple[Probe, ...] = (
         _company_probe("oe_subcontractors_subcontractor"),
         scope="company",
     ),
-    Probe("bid_management", _project_probe("oe_bid_management_package")),
+    # Copies of tendering / RFQ packages answer for their own modules, not for bid management.
+    Probe(
+        "bid_management",
+        "SELECT 1 FROM oe_bid_management_package WHERE project_id = :pid AND legacy_source IS NULL LIMIT 1",
+    ),
     # A project has variations activity if it has either a variation request or
     # an executed variation order (demo data seeds orders), so probe both.
     Probe(
