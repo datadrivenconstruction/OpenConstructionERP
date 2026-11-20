@@ -909,6 +909,25 @@ MARKETPLACE_MODULES += [
 _MODULES_BY_ID: dict[str, MarketplaceModule] = {m.id: m for m in MARKETPLACE_MODULES}
 
 
+#: The design editor link ships as the optional ``oe_design`` module; this card is how it is found and switched on.
+DESIGN_LINK_ID = "design-editor-link"
+MARKETPLACE_MODULES.append(
+    MarketplaceModule(
+        id=DESIGN_LINK_ID,
+        name="Design editor link",
+        description="Connect the design editor to your projects: a brief with the plot on a map, model revisions with element-level comparison, and an estimate that follows the accepted model.",
+        category="integration",
+        icon="PencilRuler",
+        version="0.1.0",
+        size_mb=0.0,
+        author=_DDC,
+        tags=["Design", "BIM", "Estimate"],
+        requires=[],
+        price="Free",
+    )
+)
+
+
 def get_marketplace_catalog(
     loaded_catalog_regions: set[str] | None = None,
 ) -> list[dict]:
@@ -962,6 +981,8 @@ def get_marketplace_catalog(
         elif mod.category == "analytics":
             # All analytics modules are built-in
             installed = True
+        elif mod.id == DESIGN_LINK_ID:
+            installed = "oe_design" in loaded_names
         elif mod.category == "integration":
             # Integrations are not yet implemented
             installed = False
