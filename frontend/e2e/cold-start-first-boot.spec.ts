@@ -210,6 +210,13 @@ test('the first account made through the UI owns the install and can sign in aga
   await page.locator('#register-email').fill(OWNER_EMAIL);
   await page.locator('#register-password').fill(OWNER_PASSWORD);
   await page.locator('#register-confirm-password').fill(OWNER_PASSWORD);
+  // The submit button is disabled until the privacy-consent box is ticked -
+  // RegisterPage requires the name, both password fields, a match, the policy and
+  // the consent before it will send. A lane that skipped this would wait out an
+  // action timeout on a button nobody can press and report it as a product that
+  // will not register its first account. There is exactly one checkbox on the form.
+  await page.locator('input[type="checkbox"]').check();
+  await expect(page.locator('button[type="submit"]')).toBeEnabled({ timeout: 10_000 });
   await page.locator('button[type="submit"]').click();
 
   // Registration either signs the first account straight in or says why it did
