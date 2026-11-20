@@ -183,6 +183,7 @@ import LinkRequirementToDwgModal from './LinkRequirementToDwgModal';
 import { fmtFixed, fmtList, fmtPrecision, formatFileSize } from '@/shared/lib/formatters';
 import { computeExtents, isImplausibleSpan } from './lib/viewport';
 import { compareNames } from '@/shared/lib/collator';
+import { DesignOffer } from '@/modules/design/DesignOffer';
 // boqApi / Position import removed - BOQ picker now handled via ElementInfoPopover callback
 
 /** The stores "Open from project files" reads in this module. The documents
@@ -5148,6 +5149,8 @@ export function DwgTakeoffPage() {
                 defaultValue: 'Open from project files',
               })}
             </button>
+
+            <DesignOffer variant="drawings" />
 
             {/* Auto-install of the local DWG converter (background, no click).
                 Shown when the user picks a .dwg and the converter is missing;

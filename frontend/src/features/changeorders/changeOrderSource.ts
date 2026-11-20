@@ -22,7 +22,7 @@
  * sees what was written and enters the amount.
  */
 
-export type ChangeOrderSourceKind = 'rfi' | 'ncr';
+export type ChangeOrderSourceKind = 'rfi' | 'ncr' | 'design_revision';
 
 export interface ChangeOrderSource {
   kind: ChangeOrderSourceKind;
@@ -72,6 +72,19 @@ export function changeOrderSource(
       to: `/ncr?highlight=${encode(id)}`,
       autoDrafted,
       amountUnread: needsReview ? str(metadata.ncr_cost_impact_raw) || null : null,
+    };
+  }
+  // A revision accepted in the optional Design module (`design_revision_id`): the pill opens its acceptance page.
+  if (source === 'design_revision') {
+    const id = str(metadata.design_revision_id);
+    if (!id) return null;
+    return {
+      kind: 'design_revision',
+      id,
+      number: '',
+      to: `/design/acceptance?revision=${encode(id)}`,
+      autoDrafted,
+      amountUnread: null,
     };
   }
   return null;
