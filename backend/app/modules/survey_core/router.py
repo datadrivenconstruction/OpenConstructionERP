@@ -303,6 +303,11 @@ from app.modules.survey_core.calc_router import router as _calc_router  # noqa: 
 
 router.include_router(_calc_router)
 
+# Plan editor: view transform, codes, conventions, edits with history.
+from app.modules.survey_core.plan_router import router as _plan_router  # noqa: E402
+
+router.include_router(_plan_router)
+
 
 # ── Geodesy: unit, local grid, grid/ground, export ─────────────────────────────────────────────────────────────────
 

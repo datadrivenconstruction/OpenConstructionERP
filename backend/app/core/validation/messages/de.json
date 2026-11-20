@@ -2432,6 +2432,30 @@
     "lsq_outlier": {
       "fail": "Die Beobachtung bei {obs} hat eine normierte Verbesserung von {w}, über dem kritischen Wert 3,29.",
       "suggestion": "Prüfen Sie die Buchung der Beobachtung oder messen Sie sie erneut, bevor Sie die Ausgleichung übernehmen."
+    },
+    "code_unknown": {
+      "fail": "Code {code} fehlt im Codekatalog ({count} Punkte).",
+      "suggestion": "Code in den Katalog aufnehmen oder die Punktcodes korrigieren."
+    },
+    "string_short": {
+      "fail": "Linie {name} hat nur einen Punkt, es wird keine Linie gezeichnet.",
+      "suggestion": "Einen zweiten Punkt der Linie codieren oder die Liniennummer korrigieren."
+    },
+    "string_short_closed": {
+      "fail": "Linie {name} ist geschlossen, hat aber nur {count} Punkte.",
+      "suggestion": "Eine geschlossene Linie braucht mindestens drei Punkte."
+    },
+    "ring_open": {
+      "fail": "Ein gezeichnetes Polygon hat weniger als drei verschiedene Eckpunkte.",
+      "suggestion": "Eckpunkte ergänzen oder das Polygon löschen."
+    },
+    "ring_crosses": {
+      "fail": "Ein gezeichnetes Polygon schneidet sich bei E {e}, N {n}.",
+      "suggestion": "Einen Eckpunkt verschieben oder löschen, damit sich die Kanten nicht mehr kreuzen."
+    },
+    "code_duplicate": {
+      "fail": "Der Codekatalog enthält Code {code} mehrfach.",
+      "suggestion": "Pro Code nur einen Eintrag behalten."
     }
   },
   "volumes": {

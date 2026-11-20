@@ -2432,6 +2432,30 @@
     "lsq_outlier": {
       "fail": "{obs} پر مشاہدے کا معیاری باقی {w} ہے، جو فیصلہ کن قدر 3.29 سے زیادہ ہے۔",
       "suggestion": "ایڈجسٹمنٹ قبول کرنے سے پہلے مشاہدے کا اندراج چیک کریں یا اسے دوبارہ ناپیں۔"
+    },
+    "code_unknown": {
+      "fail": "Code {code} is not in the code library ({count} points).",
+      "suggestion": "Add the code to the library or correct the points' codes."
+    },
+    "string_short": {
+      "fail": "String {name} has a single point, so no line is drawn.",
+      "suggestion": "Code a second point of the string or correct the string number."
+    },
+    "string_short_closed": {
+      "fail": "String {name} is closed but has only {count} points.",
+      "suggestion": "A closed string needs at least three points."
+    },
+    "ring_open": {
+      "fail": "A drawn polygon has fewer than three distinct vertices.",
+      "suggestion": "Add vertices or delete the polygon."
+    },
+    "ring_crosses": {
+      "fail": "A drawn polygon crosses itself near E {e}, N {n}.",
+      "suggestion": "Move or delete a vertex so the edges no longer cross."
+    },
+    "code_duplicate": {
+      "fail": "The code library lists code {code} more than once.",
+      "suggestion": "Keep one entry per code."
     }
   },
   "volumes": {

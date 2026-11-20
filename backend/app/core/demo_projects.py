@@ -15178,6 +15178,14 @@ async def install_demo_project(
                 module_data.update(await seed_riverside_scan(session, project.id, uuid.UUID(str(owner_id))))
     except Exception:
         logger.warning("Demo pad scan not seeded for %s", demo_id, exc_info=True)
+    try:
+        from app.modules.survey_core.plan_demo import PLAN_DEMOS, seed_plan_demo
+
+        if demo_id in PLAN_DEMOS:
+            async with session.begin_nested():
+                module_data.update(await seed_plan_demo(session, project.id, str(owner_id)))
+    except Exception:
+        logger.warning("Demo survey plan codes not seeded for %s", demo_id, exc_info=True)
 
     # ── 14. Real BIM geometry + downloadable PDF (baked assets, no convert) ─
     # Attach a real BIM model with real geometry and a real plan-set PDF from

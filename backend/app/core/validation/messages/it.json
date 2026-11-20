@@ -2432,6 +2432,30 @@
     "lsq_outlier": {
       "fail": "L'osservazione in {obs} ha uno scarto standardizzato di {w}, oltre il valore critico 3,29.",
       "suggestion": "Controlla come è stata registrata l'osservazione o ripetila prima di accettare la compensazione."
+    },
+    "code_unknown": {
+      "fail": "Il codice {code} non è nella libreria dei codici ({count} punti).",
+      "suggestion": "Aggiungi il codice alla libreria o correggi i codici dei punti."
+    },
+    "string_short": {
+      "fail": "La stringa {name} ha un solo punto, nessuna linea viene disegnata.",
+      "suggestion": "Codifica un secondo punto della stringa o correggine il numero."
+    },
+    "string_short_closed": {
+      "fail": "La stringa {name} è chiusa ma ha solo {count} punti.",
+      "suggestion": "Una stringa chiusa richiede almeno tre punti."
+    },
+    "ring_open": {
+      "fail": "Un poligono disegnato ha meno di tre vertici distinti.",
+      "suggestion": "Aggiungi vertici o elimina il poligono."
+    },
+    "ring_crosses": {
+      "fail": "Un poligono disegnato si interseca vicino a E {e}, N {n}.",
+      "suggestion": "Sposta o elimina un vertice in modo che i lati non si incrocino."
+    },
+    "code_duplicate": {
+      "fail": "La libreria dei codici ripete il codice {code}.",
+      "suggestion": "Tieni una sola voce per codice."
     }
   },
   "volumes": {

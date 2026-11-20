@@ -145,8 +145,19 @@ export function moveVertex(f: PlanFeature, index: number, to: GridXY): PlanFeatu
   const ps = paths(f.geometry);
   const at = locate(ps, index);
   if (!at) return f;
-  ps[at[0]]![at[1]] = to;
+  const ring = ps[at[0]]!;
+  const closed = f.geometry.type === 'Polygon' && ring.length > 1 && same(ring[0]!, ring[ring.length - 1]!);
+  ring[at[1]] = to;
+  // A closed ring keeps its closing repeat on the first vertex.
+  if (closed && (at[1] === 0 || at[1] === ring.length - 1)) {
+    ring[0] = to;
+    ring[ring.length - 1] = to;
+  }
   return { ...f, geometry: rebuild(f.geometry, ps) };
+}
+
+function same(a: GridXY, b: GridXY): boolean {
+  return a[0] === b[0] && a[1] === b[1];
 }
 
 /** Insert a vertex after `index`. */
@@ -165,9 +176,13 @@ export function removeVertex(f: PlanFeature, index: number): PlanFeature | null 
   const ps = paths(f.geometry);
   const loc = locate(ps, index);
   if (!loc) return null;
+  const ring = ps[loc[0]]!;
+  const closed = f.geometry.type === 'Polygon' && ring.length > 1 && same(ring[0]!, ring[ring.length - 1]!);
   const min = f.geometry.type === 'Polygon' ? 3 : 2;
-  if (ps[loc[0]]!.length <= min) return null;
-  ps[loc[0]]!.splice(loc[1], 1);
+  if (ring.length - (closed ? 1 : 0) <= min) return null;
+  const pos = closed && loc[1] === ring.length - 1 ? 0 : loc[1];
+  ring.splice(pos, 1);
+  if (closed && pos === 0) ring[ring.length - 1] = ring[0]!;
   return { ...f, geometry: rebuild(f.geometry, ps) };
 }
 

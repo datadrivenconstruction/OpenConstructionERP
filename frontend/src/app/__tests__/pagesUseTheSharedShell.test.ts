@@ -20,6 +20,7 @@ const ALLOWED: Record<string, string> = {
   'cad-explorer/CadDataExplorerPage.tsx': 'full-bleed CAD data grid and viewer',
   'dwg-takeoff/DwgTakeoffPage.tsx': 'full-bleed drawing canvas',
   'pipelines/PipelinesPage.tsx': 'full-bleed node canvas editor',
+  'survey-plan/PlanEditorPage.tsx': 'plan canvas',
   'auth/ForgotPasswordPage.tsx': 'rendered outside AppLayout (public auth screen)',
   'auth/ResetPasswordPage.tsx': 'rendered outside AppLayout (public auth screen)',
   'auth/VerifyEmailPage.tsx': 'rendered outside AppLayout (public auth screen)',

@@ -2432,6 +2432,30 @@
     "lsq_outlier": {
       "fail": "Obserwacja na {obs} ma poprawkę standaryzowaną {w}, powyżej wartości krytycznej 3,29.",
       "suggestion": "Sprawdź zapis obserwacji lub powtórz ją przed przyjęciem wyrównania."
+    },
+    "code_unknown": {
+      "fail": "Kodu {code} nie ma w bibliotece kodów ({count} punktów).",
+      "suggestion": "Dodaj kod do biblioteki lub popraw kody punktów."
+    },
+    "string_short": {
+      "fail": "Linia {name} ma tylko jeden punkt, linia nie powstaje.",
+      "suggestion": "Zakoduj drugi punkt linii lub popraw jej numer."
+    },
+    "string_short_closed": {
+      "fail": "Linia {name} jest zamknięta, ale ma tylko {count} punkty.",
+      "suggestion": "Linia zamknięta wymaga co najmniej trzech punktów."
+    },
+    "ring_open": {
+      "fail": "Narysowany wielokąt ma mniej niż trzy różne wierzchołki.",
+      "suggestion": "Dodaj wierzchołki lub usuń wielokąt."
+    },
+    "ring_crosses": {
+      "fail": "Narysowany wielokąt przecina sam siebie w pobliżu E {e}, N {n}.",
+      "suggestion": "Przesuń lub usuń wierzchołek, aby krawędzie się nie przecinały."
+    },
+    "code_duplicate": {
+      "fail": "Biblioteka kodów zawiera kod {code} więcej niż raz.",
+      "suggestion": "Zostaw jeden wpis na kod."
     }
   },
   "volumes": {

@@ -1,0 +1,59 @@
+{
+ "_doc": "Feature code library of the Riverside Yard demo: control, existing ground, two kerb strings EP1/EP2, the fence along the south edge, trees and manholes. Demo values, not a standard.",
+ "items": [
+  {
+   "code": "CP",
+   "label": "Control point",
+   "symbol": "control",
+   "line": "none",
+   "smooth": false,
+   "layer": "control",
+   "colour": "control-fill"
+  },
+  {
+   "code": "EG",
+   "label": "Existing ground",
+   "symbol": "spot",
+   "line": "none",
+   "smooth": false,
+   "layer": "points",
+   "colour": "topo"
+  },
+  {
+   "code": "EP",
+   "label": "Edge of pavement",
+   "symbol": "kerb",
+   "line": "open",
+   "smooth": false,
+   "layer": "linework",
+   "colour": "kerb"
+  },
+  {
+   "code": "FN",
+   "label": "Fence",
+   "symbol": "post",
+   "line": "open",
+   "smooth": false,
+   "layer": "linework",
+   "colour": "fence"
+  },
+  {
+   "code": "TR",
+   "label": "Tree",
+   "symbol": "tree",
+   "line": "none",
+   "smooth": false,
+   "layer": "points",
+   "colour": "tree"
+  },
+  {
+   "code": "MH",
+   "label": "Manhole",
+   "symbol": "manhole",
+   "line": "none",
+   "smooth": false,
+   "layer": "points",
+   "colour": "utility"
+  }
+ ]
+}

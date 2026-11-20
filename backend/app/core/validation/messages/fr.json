@@ -2432,6 +2432,30 @@
     "lsq_outlier": {
       "fail": "L'observation en {obs} a un résidu normé de {w}, au-dessus de la valeur critique 3,29.",
       "suggestion": "Vérifiez l'enregistrement de l'observation ou mesurez-la à nouveau avant d'accepter la compensation."
+    },
+    "code_unknown": {
+      "fail": "Le code {code} n'est pas dans la bibliothèque de codes ({count} points).",
+      "suggestion": "Ajoutez le code à la bibliothèque ou corrigez les codes des points."
+    },
+    "string_short": {
+      "fail": "La chaîne {name} n'a qu'un point, aucune ligne n'est tracée.",
+      "suggestion": "Codez un second point de la chaîne ou corrigez son numéro."
+    },
+    "string_short_closed": {
+      "fail": "La chaîne {name} est fermée mais n'a que {count} points.",
+      "suggestion": "Une chaîne fermée demande au moins trois points."
+    },
+    "ring_open": {
+      "fail": "Un polygone dessiné a moins de trois sommets distincts.",
+      "suggestion": "Ajoutez des sommets ou supprimez le polygone."
+    },
+    "ring_crosses": {
+      "fail": "Un polygone dessiné se recoupe près de E {e}, N {n}.",
+      "suggestion": "Déplacez ou supprimez un sommet pour que les côtés ne se croisent plus."
+    },
+    "code_duplicate": {
+      "fail": "La bibliothèque de codes contient le code {code} plusieurs fois.",
+      "suggestion": "Gardez une seule entrée par code."
     }
   },
   "volumes": {

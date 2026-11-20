@@ -1,12 +1,13 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 import { lazy } from 'react';
-import { Calculator, Compass, Crosshair } from 'lucide-react';
+import { Calculator, Compass, Crosshair, PenTool } from 'lucide-react';
 import type { ModuleManifest } from '../_types';
 
 const Page = lazy(() => import('@/features/survey/SurveyRegisterPage'));
 const Hub = lazy(() => import('@/features/survey/SurveyHubPage'));
 const Setup = lazy(() => import('@/features/survey/SurveyHubPage').then((m) => ({ default: m.SurveySetupPage })));
+const PlanPage = lazy(() => import('@/features/survey-plan/PlanEditorPage'));
 const CalcPage = lazy(() => import('@/features/survey-calc/CalcPage'));
 
 export const manifest: ModuleManifest = {
@@ -23,6 +24,7 @@ export const manifest: ModuleManifest = {
   routes: [
     { path: '/survey', title: 'survey.page.overview', component: Hub },
     { path: '/survey/points', title: 'survey.page.register', component: Page },
+    { path: '/survey/plan', title: 'plan.page.title', component: PlanPage },
     { path: '/survey/calc', title: 'survey.cogo.title', component: CalcPage },
   ],
   // An old /survey link still lands on a page that says how to switch survey on.
@@ -30,6 +32,7 @@ export const manifest: ModuleManifest = {
   navItems: [
     { labelKey: 'survey.page.overview', to: '/survey', icon: Compass, group: 'grp_survey' },
     { labelKey: 'survey.page.register', to: '/survey/points', icon: Crosshair, group: 'grp_survey' },
+    { labelKey: 'plan.page.title', to: '/survey/plan', icon: PenTool, group: 'grp_survey' },
     { labelKey: 'survey.cogo.title', to: '/survey/calc', icon: Calculator, group: 'grp_survey' },
   ],
 };
