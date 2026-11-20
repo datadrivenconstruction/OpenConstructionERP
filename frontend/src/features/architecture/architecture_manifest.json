@@ -102835,6 +102835,1293 @@
       ]
     },
     {
+      "module_id": "design",
+      "module_label": "Design",
+      "module_category": "integration",
+      "files": [
+        "__init__.py",
+        "ai_profile.py",
+        "auth.py",
+        "benchmarks.py",
+        "brief.py",
+        "brief_api.py",
+        "brief_doc.py",
+        "brief_draft.py",
+        "brief_extract.py",
+        "brief_fields.py",
+        "brief_model.py",
+        "brief_models.py",
+        "brief_parse.py",
+        "brief_sources.py",
+        "brief_texts.py",
+        "change_orders.py",
+        "contract_models.py",
+        "cost_suggest.py",
+        "data_paths.py",
+        "drafts_api.py",
+        "element_context.py",
+        "estimate.py",
+        "estimate_api.py",
+        "field_links.py",
+        "generate_api.py",
+        "imported.py",
+        "imported_api.py",
+        "intake.py",
+        "integration.py",
+        "jobs.py",
+        "links.py",
+        "links_api.py",
+        "manifest.py",
+        "mcp.py",
+        "mcp_actions.py",
+        "migrations/__init__.py",
+        "migrations/r16_imported_revisions.py",
+        "model_api.py",
+        "model_params.py",
+        "models.py",
+        "permissions.py",
+        "procurement.py",
+        "procurement_api.py",
+        "procurement_models.py",
+        "revisions.py",
+        "router.py",
+        "rules.py",
+        "schedule.py",
+        "schedule_api.py",
+        "schema_check.py",
+        "schemas.py",
+        "settings.py",
+        "start_api.py",
+        "validation_api.py",
+        "validators.py",
+        "web_release.py",
+        "web_release_api.py",
+        "worker_guard.py"
+      ],
+      "manifest": {
+        "name": "oe_design",
+        "version": "0.1.0",
+        "display_name": "Design",
+        "description": "Links the design editor to projects: brief, model revisions, acceptance, estimate recomputation from the model.",
+        "author": "DataDrivenConstruction",
+        "category": "integration",
+        "depends": [
+          "oe_projects",
+          "oe_bim_hub",
+          "oe_boq",
+          "oe_collaboration_locks"
+        ],
+        "auto_install": true,
+        "enabled": true
+      },
+      "models": [
+        {
+          "class_name": "DesignRevision",
+          "tablename": "oe_design_revision",
+          "docstring": "One accepted-or-pending package ``ddc-revision/1``. ``id`` = manifest ``revision_id``.",
+          "columns": [
+            {
+              "name": "project_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_projects_project.id"
+            },
+            {
+              "name": "number",
+              "annotation": "Mapped[int]",
+              "sql_type": "Integer",
+              "nullable": false
+            },
+            {
+              "name": "parent_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "status",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "source_kind",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "depth_level",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "message",
+              "annotation": "Mapped[str]",
+              "sql_type": "Text",
+              "nullable": false
+            },
+            {
+              "name": "manifest",
+              "annotation": "Mapped[dict]",
+              "sql_type": "JSON",
+              "nullable": false
+            },
+            {
+              "name": "storage_prefix",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "package_sha256",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "package_bytes",
+              "annotation": "Mapped[int]",
+              "sql_type": "BigInteger",
+              "nullable": false
+            },
+            {
+              "name": "bim_model_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "author_user_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false
+            },
+            {
+              "name": "decided_by",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "decided_at",
+              "annotation": "Mapped[datetime | None]",
+              "sql_type": "DateTime",
+              "nullable": true
+            },
+            {
+              "name": "decision_comment",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "Text",
+              "nullable": true
+            }
+          ],
+          "relationships": []
+        },
+        {
+          "class_name": "DesignLinkCode",
+          "tablename": "oe_design_link_code",
+          "docstring": "Single-use code inside a ``.ddclink`` file; lives 5 minutes.",
+          "columns": [
+            {
+              "name": "code_hash",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "project_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_projects_project.id"
+            },
+            {
+              "name": "user_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false
+            },
+            {
+              "name": "action",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "revision_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "expires_at",
+              "annotation": "Mapped[datetime]",
+              "sql_type": "DateTime",
+              "nullable": false
+            },
+            {
+              "name": "used_at",
+              "annotation": "Mapped[datetime | None]",
+              "sql_type": "DateTime",
+              "nullable": true
+            }
+          ],
+          "relationships": []
+        },
+        {
+          "class_name": "DesignLinkToken",
+          "tablename": "oe_design_link_token",
+          "docstring": "Project-scoped bearer token held by one editor installation.",
+          "columns": [
+            {
+              "name": "token_hash",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "project_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_projects_project.id"
+            },
+            {
+              "name": "user_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false
+            },
+            {
+              "name": "client_name",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "client_version",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "client_os",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "expires_at",
+              "annotation": "Mapped[datetime]",
+              "sql_type": "DateTime",
+              "nullable": false
+            },
+            {
+              "name": "revoked_at",
+              "annotation": "Mapped[datetime | None]",
+              "sql_type": "DateTime",
+              "nullable": true
+            },
+            {
+              "name": "last_used_at",
+              "annotation": "Mapped[datetime | None]",
+              "sql_type": "DateTime",
+              "nullable": true
+            }
+          ],
+          "relationships": []
+        },
+        {
+          "class_name": "DesignEstimate",
+          "tablename": "oe_design_estimate",
+          "docstring": "The cost estimate (one BOQ) that the rules of a project keep in step with its accepted revisions.",
+          "columns": [
+            {
+              "name": "project_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_projects_project.id"
+            },
+            {
+              "name": "boq_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false
+            },
+            {
+              "name": "country",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "use",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "aggregates",
+              "annotation": "Mapped[dict]",
+              "sql_type": "JSON",
+              "nullable": false
+            },
+            {
+              "name": "aggregate_values",
+              "annotation": "Mapped[dict]",
+              "sql_type": "JSON",
+              "nullable": false
+            },
+            {
+              "name": "revision_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            }
+          ],
+          "relationships": []
+        },
+        {
+          "class_name": "DesignEstimateRule",
+          "tablename": "oe_design_estimate_rule",
+          "docstring": "One ``ddc-rules/1`` rule of a project; the body is the rule object as validated.",
+          "columns": [
+            {
+              "name": "project_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_projects_project.id"
+            },
+            {
+              "name": "code",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "kind",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "enabled",
+              "annotation": "Mapped[bool]",
+              "nullable": false
+            },
+            {
+              "name": "body",
+              "annotation": "Mapped[dict]",
+              "sql_type": "JSON",
+              "nullable": false
+            },
+            {
+              "name": "sort_order",
+              "annotation": "Mapped[int]",
+              "sql_type": "Integer",
+              "nullable": false
+            }
+          ],
+          "relationships": []
+        },
+        {
+          "class_name": "DesignEstimateBinding",
+          "tablename": "oe_design_estimate_binding",
+          "docstring": "Position <-> rule, with what the model says beside what a person set.",
+          "columns": [
+            {
+              "name": "project_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_projects_project.id"
+            },
+            {
+              "name": "rule_code",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "kind",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "boq_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false
+            },
+            {
+              "name": "position_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false
+            },
+            {
+              "name": "link_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "revision_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "model_quantity",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "last_applied_quantity",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "override_reason",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "Text",
+              "nullable": true
+            },
+            {
+              "name": "element_keys",
+              "annotation": "Mapped[list]",
+              "sql_type": "JSON",
+              "nullable": false
+            },
+            {
+              "name": "flags",
+              "annotation": "Mapped[list]",
+              "sql_type": "JSON",
+              "nullable": false
+            },
+            {
+              "name": "provenance",
+              "annotation": "Mapped[dict]",
+              "sql_type": "JSON",
+              "nullable": false
+            }
+          ],
+          "relationships": []
+        },
+        {
+          "class_name": "DesignProjectOption",
+          "tablename": "oe_design_project_option",
+          "docstring": "Per-project choices of the module. ``change_orders``: off | ask | always (R9).",
+          "columns": [
+            {
+              "name": "project_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_projects_project.id"
+            },
+            {
+              "name": "change_orders",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "updated_by",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            }
+          ],
+          "relationships": []
+        },
+        {
+          "class_name": "DesignChangeOrder",
+          "tablename": "oe_design_change_order",
+          "docstring": "The cost snapshot of one accepted revision and the change order made from it (at most one per revision).",
+          "columns": [
+            {
+              "name": "project_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_projects_project.id"
+            },
+            {
+              "name": "revision_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false
+            },
+            {
+              "name": "change_order_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "snapshot",
+              "annotation": "Mapped[dict]",
+              "sql_type": "JSON",
+              "nullable": false
+            },
+            {
+              "name": "created_by",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            }
+          ],
+          "relationships": []
+        },
+        {
+          "class_name": "DesignSchedule",
+          "tablename": "oe_design_schedule",
+          "docstring": "The ERP schedule that sourced productivity rates keep in step with accepted revisions (R10).",
+          "columns": [
+            {
+              "name": "project_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_projects_project.id"
+            },
+            {
+              "name": "schedule_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false
+            },
+            {
+              "name": "country",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "use",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "crews",
+              "annotation": "Mapped[dict]",
+              "sql_type": "JSON",
+              "nullable": false
+            },
+            {
+              "name": "revision_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            }
+          ],
+          "relationships": []
+        },
+        {
+          "class_name": "DesignScheduleBinding",
+          "tablename": "oe_design_schedule_binding",
+          "docstring": "Activity <-> (rule, storey), with the duration the rates give beside what a person set.",
+          "columns": [
+            {
+              "name": "project_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_projects_project.id"
+            },
+            {
+              "name": "rule_code",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "storey",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "activity_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false
+            },
+            {
+              "name": "revision_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "model_duration",
+              "annotation": "Mapped[int | None]",
+              "sql_type": "Integer",
+              "nullable": true
+            },
+            {
+              "name": "last_applied_duration",
+              "annotation": "Mapped[int | None]",
+              "sql_type": "Integer",
+              "nullable": true
+            },
+            {
+              "name": "flags",
+              "annotation": "Mapped[list]",
+              "sql_type": "JSON",
+              "nullable": false
+            },
+            {
+              "name": "provenance",
+              "annotation": "Mapped[dict]",
+              "sql_type": "JSON",
+              "nullable": false
+            }
+          ],
+          "relationships": []
+        },
+        {
+          "class_name": "DesignJob",
+          "tablename": "oe_design_job",
+          "docstring": "One server-side generation run (ddc-job/1). The ERP job queue only carries it; this row is the truth.",
+          "columns": [
+            {
+              "name": "project_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_projects_project.id"
+            },
+            {
+              "name": "user_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false
+            },
+            {
+              "name": "brief_version",
+              "annotation": "Mapped[int]",
+              "sql_type": "Integer",
+              "nullable": false
+            },
+            {
+              "name": "status",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "slot",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "progress",
+              "annotation": "Mapped[float]",
+              "sql_type": "Float",
+              "nullable": false
+            },
+            {
+              "name": "log",
+              "annotation": "Mapped[list]",
+              "sql_type": "JSON",
+              "nullable": false
+            },
+            {
+              "name": "error",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "Text",
+              "nullable": true
+            },
+            {
+              "name": "revision_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "job_run_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "lock_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "cancel_requested",
+              "annotation": "Mapped[bool]",
+              "sql_type": "Boolean",
+              "nullable": false
+            },
+            {
+              "name": "heartbeat_at",
+              "annotation": "Mapped[datetime | None]",
+              "sql_type": "DateTime",
+              "nullable": true
+            },
+            {
+              "name": "started_at",
+              "annotation": "Mapped[datetime | None]",
+              "sql_type": "DateTime",
+              "nullable": true
+            },
+            {
+              "name": "finished_at",
+              "annotation": "Mapped[datetime | None]",
+              "sql_type": "DateTime",
+              "nullable": true
+            }
+          ],
+          "relationships": []
+        },
+        {
+          "class_name": "DesignDraft",
+          "tablename": "oe_design_draft",
+          "docstring": "The browser editor's autosaved work of one person on one project: a ``.ddcrev`` package not yet a revision.\n\nIts quantities and estimate are computed on every save (``draft_estimate``) so the ERP shows them at once;\n``POST /projects/{id}/draft/revision`` turns it into a revision through the normal intake.",
+          "columns": [
+            {
+              "name": "project_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_projects_project.id"
+            },
+            {
+              "name": "user_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false
+            },
+            {
+              "name": "package",
+              "annotation": "Mapped[bytes]",
+              "sql_type": "LargeBinary",
+              "nullable": false
+            },
+            {
+              "name": "package_sha256",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "package_bytes",
+              "annotation": "Mapped[int]",
+              "sql_type": "BigInteger",
+              "nullable": false
+            },
+            {
+              "name": "revision_id",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "parent_revision_id",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "element_count",
+              "annotation": "Mapped[int]",
+              "sql_type": "Integer",
+              "nullable": false
+            },
+            {
+              "name": "estimate",
+              "annotation": "Mapped[dict]",
+              "sql_type": "JSON",
+              "nullable": false
+            }
+          ],
+          "relationships": []
+        },
+        {
+          "class_name": "DesignEditRights",
+          "tablename": "oe_design_edit_rights",
+          "docstring": "Who may edit drafts and create revisions on a project: ``members`` (anyone who may publish, the default)\nor ``managers`` (those who may accept). Accepting stays with managers either way.",
+          "columns": [
+            {
+              "name": "project_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_projects_project.id"
+            },
+            {
+              "name": "edit",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "updated_by",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            }
+          ],
+          "relationships": []
+        },
+        {
+          "class_name": "DesignAiChoice",
+          "tablename": "oe_design_ai_choice",
+          "docstring": "The editor's own AI choice of one person; no row = the same as their ERP AI settings.",
+          "columns": [
+            {
+              "name": "user_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false
+            },
+            {
+              "name": "preferred_model",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "model",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            }
+          ],
+          "relationships": []
+        }
+      ],
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/",
+          "handler": "module_info",
+          "request_schema": "Response"
+        },
+        {
+          "method": "POST",
+          "path": "/link/code",
+          "handler": "create_link_code",
+          "response_model": "LinkFile",
+          "request_schema": "LinkCodeRequest"
+        },
+        {
+          "method": "POST",
+          "path": "/link/exchange",
+          "handler": "exchange_link_code",
+          "response_model": "ExchangeResponse",
+          "request_schema": "ExchangeRequest"
+        },
+        {
+          "method": "GET",
+          "path": "/projects/{project_id}/context",
+          "handler": "project_context",
+          "request_schema": "PrincipalDep"
+        },
+        {
+          "method": "GET",
+          "path": "/projects/{project_id}/access",
+          "handler": "project_access",
+          "request_schema": "PrincipalDep"
+        },
+        {
+          "method": "POST",
+          "path": "/projects/{project_id}/lock",
+          "handler": "take_lock",
+          "response_model": "LockView",
+          "request_schema": "PrincipalDep"
+        },
+        {
+          "method": "POST",
+          "path": "/projects/{project_id}/lock/heartbeat",
+          "handler": "renew_lock",
+          "response_model": "LockView",
+          "request_schema": "PrincipalDep"
+        },
+        {
+          "method": "DELETE",
+          "path": "/projects/{project_id}/lock",
+          "handler": "release_lock",
+          "request_schema": "PrincipalDep"
+        },
+        {
+          "method": "POST",
+          "path": "/projects/{project_id}/revisions",
+          "handler": "upload_revision",
+          "response_model": "RevisionView",
+          "request_schema": "PrincipalDep"
+        },
+        {
+          "method": "GET",
+          "path": "/projects/{project_id}/revisions",
+          "handler": "list_revisions",
+          "response_model": "list[RevisionView]",
+          "request_schema": "PrincipalDep"
+        },
+        {
+          "method": "GET",
+          "path": "/revisions/{revision_id}",
+          "handler": "get_revision",
+          "response_model": "RevisionView",
+          "request_schema": "PrincipalDep"
+        },
+        {
+          "method": "GET",
+          "path": "/revisions/{revision_id}/files/{path:path}",
+          "handler": "get_revision_file",
+          "request_schema": "PrincipalDep"
+        },
+        {
+          "method": "POST",
+          "path": "/revisions/{revision_id}/accept",
+          "handler": "accept_revision",
+          "response_model": "RevisionView",
+          "request_schema": "PrincipalDep"
+        },
+        {
+          "method": "POST",
+          "path": "/revisions/{revision_id}/reject",
+          "handler": "reject_revision",
+          "response_model": "RevisionView",
+          "request_schema": "RejectRequest"
+        },
+        {
+          "method": "GET",
+          "path": "/projects/{project_id}/change-orders/settings",
+          "handler": "change_order_settings",
+          "request_schema": "PrincipalDep"
+        },
+        {
+          "method": "PUT",
+          "path": "/projects/{project_id}/change-orders/settings",
+          "handler": "put_change_order_settings",
+          "request_schema": "ChangeOrderSettings"
+        },
+        {
+          "method": "GET",
+          "path": "/revisions/{revision_id}/change-order",
+          "handler": "revision_change_order",
+          "request_schema": "PrincipalDep"
+        },
+        {
+          "method": "POST",
+          "path": "/revisions/{revision_id}/change-order",
+          "handler": "create_revision_change_order",
+          "request_schema": "PrincipalDep"
+        }
+      ],
+      "schemas": [
+        {
+          "class_name": "LinkCodeRequest",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "project_id",
+              "type": "uuid.UUID"
+            },
+            {
+              "name": "action",
+              "type": "Literal['open', 'new', 'generate']"
+            },
+            {
+              "name": "revision_id",
+              "type": "uuid.UUID | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "LinkFile",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "``ddc-link/1``; the UI saves it as a .ddclink file.",
+          "fields": [
+            {
+              "name": "schema_",
+              "type": "Literal['ddc-link/1']"
+            },
+            {
+              "name": "erp_url",
+              "type": "str"
+            },
+            {
+              "name": "project_id",
+              "type": "uuid.UUID"
+            },
+            {
+              "name": "project_name",
+              "type": "str"
+            },
+            {
+              "name": "code",
+              "type": "str"
+            },
+            {
+              "name": "expires_at",
+              "type": "datetime"
+            },
+            {
+              "name": "action",
+              "type": "Literal['open', 'new', 'generate']"
+            },
+            {
+              "name": "revision_id",
+              "type": "uuid.UUID | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "ClientInfo",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "name",
+              "type": "str"
+            },
+            {
+              "name": "version",
+              "type": "str"
+            },
+            {
+              "name": "os",
+              "type": "str"
+            }
+          ]
+        },
+        {
+          "class_name": "ExchangeRequest",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "code",
+              "type": "str"
+            },
+            {
+              "name": "client",
+              "type": "ClientInfo"
+            }
+          ]
+        },
+        {
+          "class_name": "ExchangeResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "token",
+              "type": "str"
+            },
+            {
+              "name": "expires_at",
+              "type": "datetime"
+            },
+            {
+              "name": "project_id",
+              "type": "uuid.UUID"
+            }
+          ]
+        },
+        {
+          "class_name": "LockView",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "held_by",
+              "type": "str"
+            },
+            {
+              "name": "mine",
+              "type": "bool"
+            },
+            {
+              "name": "expires_at",
+              "type": "datetime"
+            }
+          ]
+        },
+        {
+          "class_name": "RevisionView",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "A stored revision: the manifest as uploaded plus what the ERP decided about it.",
+          "fields": [
+            {
+              "name": "revision_id",
+              "type": "uuid.UUID"
+            },
+            {
+              "name": "project_id",
+              "type": "uuid.UUID"
+            },
+            {
+              "name": "number",
+              "type": "int"
+            },
+            {
+              "name": "parent_revision_id",
+              "type": "uuid.UUID | None"
+            },
+            {
+              "name": "status",
+              "type": "Literal['shared', 'published', 'rejected', 'archived']"
+            },
+            {
+              "name": "source_kind",
+              "type": "str"
+            },
+            {
+              "name": "depth_level",
+              "type": "str | None"
+            },
+            {
+              "name": "brief_version",
+              "type": "int | None"
+            },
+            {
+              "name": "message",
+              "type": "str"
+            },
+            {
+              "name": "bim_model_id",
+              "type": "uuid.UUID | None"
+            },
+            {
+              "name": "author_user_id",
+              "type": "uuid.UUID"
+            },
+            {
+              "name": "decided_by",
+              "type": "uuid.UUID | None"
+            },
+            {
+              "name": "decided_at",
+              "type": "datetime | None"
+            },
+            {
+              "name": "decision_comment",
+              "type": "str | None"
+            },
+            {
+              "name": "package_sha256",
+              "type": "str"
+            },
+            {
+              "name": "package_bytes",
+              "type": "int"
+            },
+            {
+              "name": "created_at",
+              "type": "datetime"
+            },
+            {
+              "name": "manifest",
+              "type": "dict"
+            }
+          ]
+        },
+        {
+          "class_name": "AcceptRequest",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "comment",
+              "type": "str | None"
+            },
+            {
+              "name": "change_order",
+              "type": "bool | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "RejectRequest",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "comment",
+              "type": "str"
+            }
+          ]
+        }
+      ],
+      "import_dependencies": [
+        "ai",
+        "ai_agents",
+        "assemblies",
+        "bim_hub",
+        "boq",
+        "changeorders",
+        "collaboration_locks",
+        "cost_match",
+        "costs",
+        "documents",
+        "dwg_takeoff",
+        "erp_chat",
+        "fieldreports",
+        "file_search",
+        "mcp",
+        "notifications",
+        "projects",
+        "qms",
+        "schedule",
+        "tasks",
+        "tendering",
+        "users"
+      ]
+    },
+    {
       "module_id": "design_management",
       "module_label": "Design management",
       "module_category": "core",
@@ -340550,10 +341837,10 @@
     },
     {
       "name": "changeorders",
-      "ts_files": 15,
+      "ts_files": 16,
       "css_files": 0,
-      "test_files": 7,
-      "total_files": 15
+      "test_files": 8,
+      "total_files": 16
     },
     {
       "name": "china-tax",
@@ -341348,10 +342635,10 @@
     },
     {
       "name": "modules",
-      "ts_files": 38,
+      "ts_files": 40,
       "css_files": 0,
-      "test_files": 14,
-      "total_files": 39
+      "test_files": 15,
+      "total_files": 41
     },
     {
       "name": "monitoring",
@@ -342723,6 +344010,30 @@
       "projects",
       "requirements",
       "risk",
+      "users"
+    ],
+    "design": [
+      "ai",
+      "ai_agents",
+      "assemblies",
+      "bim_hub",
+      "boq",
+      "changeorders",
+      "collaboration_locks",
+      "cost_match",
+      "costs",
+      "documents",
+      "dwg_takeoff",
+      "erp_chat",
+      "fieldreports",
+      "file_search",
+      "mcp",
+      "notifications",
+      "projects",
+      "qms",
+      "schedule",
+      "tasks",
+      "tendering",
       "users"
     ],
     "design_management": [
@@ -344101,16 +345412,16 @@
     ]
   },
   "statistics": {
-    "backend_modules": 260,
-    "modules_with_manifests": 260,
-    "total_models": 974,
-    "total_columns": 11431,
+    "backend_modules": 261,
+    "modules_with_manifests": 261,
+    "total_models": 988,
+    "total_columns": 11542,
     "total_relationships": 264,
-    "total_routes": 5553,
-    "total_schemas": 5173,
-    "total_python_files": 3684,
+    "total_routes": 5571,
+    "total_schemas": 5182,
+    "total_python_files": 3742,
     "frontend_features": 252,
-    "frontend_ts_files": 4450,
+    "frontend_ts_files": 4453,
     "frontend_backend_mapped": 224
   },
   "frontend_backend_mapping": {
