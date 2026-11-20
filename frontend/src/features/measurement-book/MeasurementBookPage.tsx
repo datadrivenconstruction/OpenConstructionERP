@@ -4,12 +4,12 @@
  * Measurement book: dated quantity entries per BOQ position (number x length x breadth x height,
  * or a direct quantity), a second-person check, and the running bill that feeds progress claims.
  */
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { AlertTriangle, ArrowLeft, Check, Ruler, Trash2, X } from 'lucide-react';
-import { Badge, Button, Card, EmptyState, SkeletonTable } from '@/shared/ui';
+import { AlertTriangle, Check, Ruler, Trash2, X } from 'lucide-react';
+import { Badge, Button, Card, EmptyState, SkeletonTable, WideModal } from '@/shared/ui';
 import type { BadgeVariant } from '@/shared/ui';
 import { PageHeader } from '@/shared/ui/PageHeader';
 import { RequiresProject } from '@/shared/auth/RequiresProject';
@@ -25,9 +25,11 @@ import {
   fetchRunningBill,
   fetchValidation,
   postToProgress,
+  setPositionPercent,
   type CheckStatus,
   type EntryInput,
   type PositionSummary,
+  type SectionRef,
 } from './api';
 
 const inputCls =
@@ -98,7 +100,111 @@ function ValidationPanel({ projectId }: { projectId: string }) {
   );
 }
 
-function PositionsTable({ rows, onOpen }: { rows: PositionSummary[]; onOpen: (p: PositionSummary) => void }) {
+/** A table row: a section header or a measurable position. */
+export type BookRow =
+  | { kind: 'section'; key: string; depth: number; section: SectionRef; boqName: string }
+  | { kind: 'position'; key: string; depth: number; position: PositionSummary };
+
+/**
+ * Interleave section header rows with the positions, in bill order. A header is
+ * emitted whenever a position's section chain differs from the previous one at
+ * that level, so subsections nest under their section.
+ */
+export function buildBookRows(rows: PositionSummary[]): BookRow[] {
+  const out: BookRow[] = [];
+  let prev: string[] = [];
+  let prevBoq: string | null | undefined;
+  for (const p of rows) {
+    const path = p.sections ?? [];
+    const ids = path.map((s) => s.id);
+    if (p.boq_id !== prevBoq) prev = [];
+    let same = 0;
+    while (same < ids.length && same < prev.length && ids[same] === prev[same]) same += 1;
+    for (let d = same; d < path.length; d += 1) {
+      const section = path[d]!;
+      out.push({ kind: 'section', key: `s-${section.id}-${p.boq_position_id}`, depth: d, section, boqName: p.boq_name ?? '' });
+    }
+    out.push({ kind: 'position', key: p.boq_position_id, depth: path.length, position: p });
+    prev = ids;
+    prevBoq = p.boq_id;
+  }
+  return out;
+}
+
+/** Slider plus number box; commits on release, Enter or blur, never while dragging. */
+function PercentCell({
+  position,
+  disabled,
+  onCommit,
+}: {
+  position: PositionSummary;
+  disabled: boolean;
+  onCommit: (percent: string) => void;
+}) {
+  const { t } = useTranslation();
+  const stored = String(Math.round(pct(position.percent_measured) * 100) / 100);
+  const [value, setValue] = useState(stored);
+  useEffect(() => setValue(stored), [stored]);
+  const commit = () => {
+    const n = Number(value);
+    if (!Number.isFinite(n) || n < 0 || value.trim() === '' || n === Number(stored)) {
+      setValue(stored);
+      return;
+    }
+    onCommit(String(n));
+  };
+  const label = t('measurement_book.set_percent', { defaultValue: 'Set progress %' });
+  const noQty = pct(position.boq_quantity) <= 0;
+  return (
+    <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+      <input
+        type="range"
+        min={0}
+        max={100}
+        step={1}
+        value={Math.min(100, Math.max(0, Number(value) || 0))}
+        disabled={disabled || noQty}
+        aria-label={label}
+        title={label}
+        className="h-1.5 w-24 cursor-pointer accent-oe-blue disabled:cursor-not-allowed disabled:opacity-40"
+        onChange={(e) => setValue(e.target.value)}
+        onPointerUp={commit}
+        onKeyUp={(e) => {
+          if (e.key.startsWith('Arrow') || e.key === 'Home' || e.key === 'End' || e.key.startsWith('Page')) commit();
+        }}
+      />
+      <input
+        type="number"
+        min={0}
+        step="any"
+        dir="ltr"
+        value={value}
+        disabled={disabled || noQty}
+        aria-label={label}
+        className="oe-input h-7 w-16 px-1.5 text-end text-2xs tabular-nums"
+        onChange={(e) => setValue(e.target.value)}
+        onBlur={commit}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') commit();
+          if (e.key === 'Escape') setValue(stored);
+        }}
+      />
+      <span className="text-2xs text-content-tertiary">%</span>
+    </div>
+  );
+}
+
+function PositionsTable({
+  rows,
+  onOpen,
+  onSetPercent,
+  busyId,
+}: {
+  rows: PositionSummary[];
+  onOpen: (p: PositionSummary) => void;
+  onSetPercent: (p: PositionSummary, percent: string) => void;
+  busyId: string | null;
+}) {
   const { t } = useTranslation();
   return (
     <Card padding="none">
@@ -116,16 +222,32 @@ function PositionsTable({ rows, onOpen }: { rows: PositionSummary[]; onOpen: (p:
             </tr>
           </thead>
           <tbody>
-            {rows.map((p) => {
+            {buildBookRows(rows).map((row) => {
+              if (row.kind === 'section') {
+                return (
+                  <tr key={row.key} className="bg-surface-secondary/60" data-testid="measurement-book-section">
+                    <td
+                      colSpan={7}
+                      className={row.depth === 0 ? 'text-sm font-bold text-content-primary' : 'text-[13px] font-semibold text-content-primary'}
+                      style={{ paddingInlineStart: `${0.75 + row.depth * 1.25}rem` }}
+                    >
+                      <span className="tabular-nums" dir="ltr">{row.section.ordinal}</span> {row.section.description}
+                    </td>
+                  </tr>
+                );
+              }
+              const p = row.position;
               const over = pct(p.percent_measured) > 100;
               return (
                 <tr
-                  key={p.boq_position_id}
+                  key={row.key}
                   onClick={() => onOpen(p)}
                   className="cursor-pointer"
                   data-testid="measurement-book-position"
                 >
-                  <td className="tabular-nums" dir="ltr">{p.ordinal}</td>
+                  <td className="tabular-nums" dir="ltr" style={{ paddingInlineStart: `${0.75 + row.depth * 1.25}rem` }}>
+                    {p.ordinal}
+                  </td>
                   <td>{p.description}</td>
                   <td>{p.unit}</td>
                   <td className="text-end tabular-nums" dir="ltr">{p.boq_quantity}</td>
@@ -135,13 +257,16 @@ function PositionsTable({ rows, onOpen }: { rows: PositionSummary[]; onOpen: (p:
                   <td className="text-end tabular-nums" dir="ltr">{p.checked_quantity}</td>
                   <td>
                     <div className="flex items-center gap-2">
-                      <div className="h-1.5 w-24 overflow-hidden rounded-full bg-surface-tertiary">
-                        <div
-                          className={`h-full ${over ? 'bg-semantic-error' : 'bg-oe-blue'}`}
-                          style={{ width: `${Math.min(100, Math.max(0, pct(p.percent_measured)))}%` }}
-                        />
-                      </div>
-                      <span className="text-2xs tabular-nums text-content-secondary" dir="ltr">{p.percent_measured}%</span>
+                      <PercentCell
+                        position={p}
+                        disabled={busyId === p.boq_position_id}
+                        onCommit={(v) => onSetPercent(p, v)}
+                      />
+                      {over && (
+                        <span className="text-2xs font-semibold tabular-nums text-semantic-error" dir="ltr">
+                          {p.percent_measured}%
+                        </span>
+                      )}
                       {p.unchecked_count > 0 && (
                         <Badge variant="warning" size="sm">
                           {t('measurement_book.n_unchecked', { defaultValue: '{{n}} unchecked', n: p.unchecked_count })}
@@ -235,7 +360,7 @@ function EntryForm({ projectId, positionId, onDone }: { projectId: string; posit
   );
 }
 
-function PositionDetail({ projectId, position, onBack }: { projectId: string; position: PositionSummary; onBack: () => void }) {
+function PositionDialog({ projectId, position, onClose }: { projectId: string; position: PositionSummary; onClose: () => void }) {
   const { t } = useTranslation();
   const qc = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
@@ -273,18 +398,19 @@ function PositionDetail({ projectId, position, onBack }: { projectId: string; po
 
   const rows = q.data ?? [];
   return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-center gap-3">
-        <Button variant="ghost" size="sm" icon={<ArrowLeft size={14} className="rtl:rotate-180" />} onClick={onBack}>
-          {t('measurement_book.back', { defaultValue: 'All positions' })}
-        </Button>
-        <h2 className="oe-card-title">
-          <span dir="ltr">{position.ordinal}</span> {position.description}
-        </h2>
-        <span className="text-xs text-content-tertiary" dir="ltr">
+    <WideModal
+      open
+      onClose={onClose}
+      size="full"
+      title={`${position.ordinal} ${position.description}`}
+      subtitle={
+        <span dir="ltr">
           {position.measured_quantity} / {position.boq_quantity} {position.unit}
         </span>
-      </div>
+      }
+      testId="measurement-book-position-dialog"
+    >
+    <div className="space-y-4">
       <EntryForm projectId={projectId} positionId={position.boq_position_id} onDone={refresh} />
       {q.isLoading ? (
         <SkeletonTable rows={4} columns={6} />
@@ -357,6 +483,7 @@ function PositionDetail({ projectId, position, onBack }: { projectId: string; po
         </Card>
       )}
     </div>
+    </WideModal>
   );
 }
 
@@ -472,7 +599,45 @@ export function MeasurementBookPage() {
     queryFn: () => fetchPositions(projectId),
     enabled: !!projectId,
   });
-  const rows = posQ.data ?? [];
+  const qc = useQueryClient();
+  const addToast = useToastStore((s) => s.addToast);
+  const [boqFilter, setBoqFilter] = useState('');
+  const [sectionFilter, setSectionFilter] = useState('');
+  const allRows = useMemo(() => posQ.data ?? [], [posQ.data]);
+  const boqs = useMemo(() => {
+    const seen = new Map<string, string>();
+    for (const p of allRows) if (p.boq_id && !seen.has(p.boq_id)) seen.set(p.boq_id, p.boq_name ?? '');
+    return [...seen.entries()];
+  }, [allRows]);
+  const sectionOptions = useMemo(() => {
+    const seen = new Map<string, { section: SectionRef; depth: number }>();
+    for (const p of allRows) {
+      if (boqFilter && p.boq_id !== boqFilter) continue;
+      (p.sections ?? []).forEach((s, depth) => {
+        if (!seen.has(s.id)) seen.set(s.id, { section: s, depth });
+      });
+    }
+    return [...seen.values()];
+  }, [allRows, boqFilter]);
+  const rows = useMemo(
+    () =>
+      allRows.filter(
+        (p) =>
+          (!boqFilter || p.boq_id === boqFilter) &&
+          (!sectionFilter || (p.sections ?? []).some((s) => s.id === sectionFilter)),
+      ),
+    [allRows, boqFilter, sectionFilter],
+  );
+  const percent = useMutation({
+    mutationFn: (v: { id: string; percent: string }) => setPositionPercent(projectId, v.id, v.percent),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['measurement-book'] }),
+    onError: (e) =>
+      addToast({
+        type: 'error',
+        title: t('measurement_book.save_failed', { defaultValue: 'Could not save' }),
+        message: getErrorMessage(e),
+      }),
+  });
   const tabCls = (on: boolean) =>
     `border-b-2 px-3 py-2 text-sm font-medium ${on ? 'border-oe-blue text-oe-blue-text' : 'border-transparent text-content-tertiary hover:text-content-primary'}`;
 
@@ -498,10 +663,45 @@ export function MeasurementBookPage() {
               {t('measurement_book.tab_bill', { defaultValue: 'Running bill' })}
             </button>
           </div>
+          {tab === 'positions' && allRows.length > 0 && (boqs.length > 1 || sectionOptions.length > 0) && (
+            <div className="flex flex-wrap items-center gap-3" data-testid="measurement-book-filters">
+              {boqs.length > 1 && (
+                <select
+                  className="oe-select w-auto"
+                  value={boqFilter}
+                  aria-label={t('measurement_book.filter_boq', { defaultValue: 'Contract (BOQ)' })}
+                  onChange={(e) => {
+                    setBoqFilter(e.target.value);
+                    setSectionFilter('');
+                  }}
+                >
+                  <option value="">{t('measurement_book.all_boqs', { defaultValue: 'All contracts (BOQs)' })}</option>
+                  {boqs.map(([id, name]) => (
+                    <option key={id} value={id}>
+                      {name}
+                    </option>
+                  ))}
+                </select>
+              )}
+              {sectionOptions.length > 0 && (
+                <select
+                  className="oe-select w-auto"
+                  value={sectionFilter}
+                  aria-label={t('measurement_book.filter_section', { defaultValue: 'Section' })}
+                  onChange={(e) => setSectionFilter(e.target.value)}
+                >
+                  <option value="">{t('measurement_book.all_sections', { defaultValue: 'All sections' })}</option>
+                  {sectionOptions.map(({ section, depth }) => (
+                    <option key={section.id} value={section.id}>
+                      {`${'\u00a0\u00a0'.repeat(depth)}${section.ordinal} ${section.description}`.trimEnd()}
+                    </option>
+                  ))}
+                </select>
+              )}
+            </div>
+          )}
           {tab === 'bill' ? (
             <RunningBillTab projectId={projectId} />
-          ) : selected ? (
-            <PositionDetail projectId={projectId} position={selected} onBack={() => setSelected(null)} />
           ) : posQ.isLoading ? (
             <SkeletonTable rows={5} columns={6} />
           ) : rows.length === 0 ? (
@@ -511,7 +711,15 @@ export function MeasurementBookPage() {
               description={t('measurement_book.empty_desc', { defaultValue: 'Add positions to a bill of quantities first, then measure them here.' })}
             />
           ) : (
-            <PositionsTable rows={rows} onOpen={setSelected} />
+            <PositionsTable
+              rows={rows}
+              onOpen={setSelected}
+              onSetPercent={(p, v) => percent.mutate({ id: p.boq_position_id, percent: v })}
+              busyId={percent.isPending ? (percent.variables?.id ?? null) : null}
+            />
+          )}
+          {tab === 'positions' && selected && (
+            <PositionDialog projectId={projectId} position={selected} onClose={() => setSelected(null)} />
           )}
         </>
       )}

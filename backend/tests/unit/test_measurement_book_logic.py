@@ -11,7 +11,7 @@ from types import SimpleNamespace
 import pytest
 
 from app.core.validation.engine import ValidationContext
-from app.modules.measurement_book.service import compute_quantity, summarize
+from app.modules.measurement_book.service import compute_quantity, section_path, summarize
 from app.modules.measurement_book.validators import (
     CheckDeviationRule,
     CheckedBeforeCertificationRule,
@@ -85,3 +85,44 @@ async def test_rules_flag_overmeasure_unchecked_and_deviation() -> None:
     assert not dev[0].passed
     data["deviation_threshold_pct"] = D("10")
     assert (await CheckDeviationRule().validate(ValidationContext(data=data)))[0].passed
+
+
+def test_a_line_names_its_bill_and_the_sections_above_it() -> None:
+    """Earthworks > Excavation > 01.01.010: the chain comes back outermost first."""
+    boq_id = uuid.uuid4()
+    top = SimpleNamespace(id=uuid.uuid4(), parent_id=None, ordinal="01", description="Earthworks")
+    sub = SimpleNamespace(id=uuid.uuid4(), parent_id=top.id, ordinal="01.01", description="Excavation")
+    pos = SimpleNamespace(
+        id=uuid.uuid4(),
+        boq_id=boq_id,
+        parent_id=sub.id,
+        ordinal="01.01.010",
+        description="Trench",
+        unit="m3",
+        quantity="20",
+        unit_rate="12",
+    )
+    loose = SimpleNamespace(
+        id=uuid.uuid4(),
+        boq_id=boq_id,
+        parent_id=None,
+        ordinal="9",
+        description="Loose",
+        unit="m",
+        quantity="1",
+        unit_rate="1",
+    )
+    lines = summarize([pos, loose], [], {top.id: top, sub.id: sub}, {boq_id: "Lot 2 Structure"})
+
+    assert lines[0]["boq_name"] == "Lot 2 Structure"
+    assert [s["ordinal"] for s in lines[0]["sections"]] == ["01", "01.01"]
+    assert lines[1]["sections"] == []
+
+
+def test_a_cyclic_section_chain_stops_instead_of_looping() -> None:
+    a = SimpleNamespace(id=uuid.uuid4(), parent_id=None, ordinal="A", description="A")
+    b = SimpleNamespace(id=uuid.uuid4(), parent_id=a.id, ordinal="B", description="B")
+    a.parent_id = b.id
+    pos = SimpleNamespace(id=uuid.uuid4(), parent_id=b.id)
+
+    assert [s["ordinal"] for s in section_path(pos, {a.id: a, b.id: b})] == ["A", "B"]

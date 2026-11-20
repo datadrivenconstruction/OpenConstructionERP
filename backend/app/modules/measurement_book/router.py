@@ -8,6 +8,7 @@ PATCH  /entries/{id}                            - edit an unchecked measurement
 DELETE /entries/{id}                            - delete an unchecked measurement
 POST   /entries/{id}/check                      - check, dispute or reopen
 GET    /positions/?project_id=                  - cumulative quantities per BOQ position
+POST   /positions/{id}/percent                  - one line that brings a position to a percentage
 GET    /running-bill/?project_id=               - checked quantities valued at BOQ rates
 POST   /running-bill/post-to-progress?project_id= - record the bill as progress
 GET    /validation/?project_id=                 - measurement_book rule set
@@ -31,6 +32,7 @@ from app.modules.measurement_book.schemas import (
     PostToProgress,
     PostToProgressResult,
     RunningBill,
+    SetPercent,
     ValidationResponse,
 )
 from app.modules.measurement_book.service import DEFAULT_DEVIATION_PCT, MeasurementBookService
@@ -103,6 +105,18 @@ async def list_positions(
 ) -> list[PositionSummary]:
     await verify_project_access(project_id, user_id, session)
     return [PositionSummary(**p) for p in await MeasurementBookService(session).positions(project_id)]
+
+
+@router.post("/positions/{boq_position_id}/percent", response_model=EntryResponse | None, dependencies=[_WRITE])
+async def set_position_percent(
+    boq_position_id: uuid.UUID, body: SetPercent, session: SessionDep, user_id: CurrentUserId
+) -> EntryResponse | None:
+    await verify_project_access(body.project_id, user_id, session)
+    row = await MeasurementBookService(session).set_percent(boq_position_id, body, user_id)
+    if row is None:
+        return None
+    await session.commit()
+    return EntryResponse.model_validate(row)
 
 
 @router.get("/running-bill/", response_model=RunningBill, dependencies=[_READ])

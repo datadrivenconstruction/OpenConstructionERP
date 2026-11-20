@@ -14,7 +14,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.measurement_book.models import MeasurementBookEntry
 from app.modules.measurement_book.repository import MeasurementBookRepository
-from app.modules.measurement_book.schemas import EntryCheck, EntryCreate, EntryUpdate
+from app.modules.measurement_book.schemas import EntryCheck, EntryCreate, EntryUpdate, SetPercent
 
 ZERO = Decimal("0")
 HUNDRED = Decimal("100")
@@ -65,8 +65,33 @@ def accepted_quantity(entry: Any) -> Decimal:
     return entry.check_quantity if entry.check_quantity is not None else entry.quantity
 
 
-def summarize(positions: list[Any], entries: list[Any]) -> list[dict[str, Any]]:
-    """Cumulative measured and checked quantities per position, in bill order."""
+def section_path(position: Any, sections: dict[uuid.UUID, Any]) -> list[dict[str, Any]]:
+    """The sections above ``position``, outermost first; a broken or cyclic chain stops where it breaks."""
+    path: list[dict[str, Any]] = []
+    seen: set[uuid.UUID] = set()
+    parent_id = getattr(position, "parent_id", None)
+    while parent_id is not None and parent_id in sections and parent_id not in seen:
+        seen.add(parent_id)
+        sec = sections[parent_id]
+        path.append({"id": sec.id, "ordinal": sec.ordinal or "", "description": sec.description or ""})
+        parent_id = getattr(sec, "parent_id", None)
+    path.reverse()
+    return path
+
+
+def summarize(
+    positions: list[Any],
+    entries: list[Any],
+    sections: dict[uuid.UUID, Any] | None = None,
+    boq_names: dict[uuid.UUID, str] | None = None,
+) -> list[dict[str, Any]]:
+    """Cumulative measured and checked quantities per position, in bill order.
+
+    With ``sections`` and ``boq_names`` each line also names its bill and the
+    section chain above it, so the screen can group and filter the lines.
+    """
+    sections = sections or {}
+    boq_names = boq_names or {}
     by_pos: dict[uuid.UUID, list[Any]] = {}
     for e in entries:
         by_pos.setdefault(e.boq_position_id, []).append(e)
@@ -81,6 +106,9 @@ def summarize(positions: list[Any], entries: list[Any]) -> list[dict[str, Any]]:
         out.append(
             {
                 "boq_position_id": p.id,
+                "boq_id": getattr(p, "boq_id", None),
+                "boq_name": boq_names.get(getattr(p, "boq_id", None), ""),
+                "sections": section_path(p, sections),
                 "ordinal": p.ordinal or "",
                 "description": p.description or "",
                 "unit": p.unit or "",
@@ -169,7 +197,44 @@ class MeasurementBookService:
 
     async def positions(self, project_id: uuid.UUID) -> list[dict[str, Any]]:
         """Every measurable position of the project with its cumulative quantities."""
-        return summarize(await self.repo.project_positions(project_id), await self.repo.entries(project_id))
+        sections = {s.id: s for s in await self.repo.project_sections(project_id)}
+        return summarize(
+            await self.repo.project_positions(project_id),
+            await self.repo.entries(project_id),
+            sections,
+            await self.repo.project_boq_names(project_id),
+        )
+
+    async def set_percent(
+        self, position_id: uuid.UUID, data: SetPercent, actor: str | None
+    ) -> MeasurementBookEntry | None:
+        """Add the one direct-quantity line that brings the measured total to ``percent`` of the BOQ quantity.
+
+        The book stays a list of dated lines: setting 60 % on a position measured
+        at 40 % writes a line for the missing 20 %, and setting it lower writes a
+        negative correction. Nothing is written when the total already matches.
+        """
+        line = next((p for p in await self.positions(data.project_id) if p["boq_position_id"] == position_id), None)
+        if line is None:
+            raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, detail="BOQ position is not in this project")
+        if line["boq_quantity"] <= 0:
+            raise HTTPException(
+                status.HTTP_422_UNPROCESSABLE_CONTENT, detail="The position has no BOQ quantity to take a share of"
+            )
+        target = (line["boq_quantity"] * data.percent / HUNDRED).quantize(QTY)
+        delta = target - line["measured_quantity"]
+        if delta == 0:
+            return None
+        return await self.create(
+            EntryCreate(
+                project_id=data.project_id,
+                boq_position_id=position_id,
+                entry_date=data.entry_date or datetime.now(UTC).date(),
+                direct_quantity=delta,
+                description=f"Progress set to {data.percent.normalize():f} %",
+            ),
+            actor,
+        )
 
     async def running_bill(self, project_id: uuid.UUID) -> dict[str, Any]:
         """Positions with measurements, valued on checked quantities at the BOQ rate."""

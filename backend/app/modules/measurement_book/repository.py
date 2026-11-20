@@ -41,6 +41,19 @@ class MeasurementBookRepository:
         )
         return list((await self.session.execute(stmt)).scalars().all())
 
+    async def project_sections(self, project_id: uuid.UUID) -> list[Position]:
+        """The section rows (no unit) of the project's BOQs: the headers positions hang under."""
+        stmt = (
+            select(Position)
+            .join(BOQ, Position.boq_id == BOQ.id)
+            .where(BOQ.project_id == project_id, Position.unit == "")
+        )
+        return list((await self.session.execute(stmt)).scalars().all())
+
+    async def project_boq_names(self, project_id: uuid.UUID) -> dict[uuid.UUID, str]:
+        stmt = select(BOQ.id, BOQ.name).where(BOQ.project_id == project_id)
+        return {row[0]: row[1] or "" for row in (await self.session.execute(stmt)).all()}
+
     async def position_project(self, position_id: uuid.UUID) -> uuid.UUID | None:
         stmt = select(BOQ.project_id).join(Position, Position.boq_id == BOQ.id).where(Position.id == position_id)
         return (await self.session.execute(stmt)).scalar_one_or_none()
