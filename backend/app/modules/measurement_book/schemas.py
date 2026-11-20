@@ -11,7 +11,7 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from app.core.decimal_types import Decimal18_4, FiniteDecimal
+from app.core.decimal_types import Decimal7_3, Decimal18_4, FiniteDecimal
 
 CheckStatus = Literal["unchecked", "checked", "disputed"]
 
@@ -113,7 +113,7 @@ class SetPercent(BaseModel):
     """Bring a position's measured quantity to a share of its BOQ quantity in one line."""
 
     project_id: uuid.UUID
-    percent: Decimal = Field(..., ge=0, le=1000)
+    percent: Decimal7_3 = Field(..., ge=0, le=1000)
     entry_date: date | None = None
 
 

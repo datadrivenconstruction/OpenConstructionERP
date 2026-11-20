@@ -155,6 +155,7 @@ def test_the_linux_and_macos_command_lines(tmp_path: Path) -> None:
         "--output",
         str(out),
         "--raw-tables",
+        "--glb",
     ]
     assert ddc_runner.build_command("dwg", dwg, src, out, timeout=900) == [
         str(dwg),

@@ -14,8 +14,8 @@
 # Caddyfile first and here second. Editing this file to make CI green ships a
 # route that still 404s for every visitor.
 #
-# Extracted from: Caddyfile.live (sha256 082873b0b72471a48dd750afd2043713e794c924d240cc2192ceb30f7be6e4fc)
-# Segments: 241
+# Extracted from: Caddyfile.live (sha256 652c39578943d382fe9d7bf26f90d1f6d3cf25e0750c2b3f11caefe203f04b68)
+# Segments: 243
 5d
 about
 academy-courses
@@ -53,6 +53,7 @@ cases
 cases-art
 catalog
 cde
+central-purchasing
 certified-payroll
 cesium
 change-intelligence
@@ -90,6 +91,7 @@ daily-diary
 dashboard
 dashboards
 data-explorer
+data-paths
 de-din276-exchange
 deadlines
 defects-liability
