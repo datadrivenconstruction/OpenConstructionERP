@@ -9,6 +9,7 @@ Tables:
     oe_crm_pipeline_stage             - pipeline stage catalogue
     oe_crm_opportunity_stage_history  - stage transition log
     oe_crm_activity                   - call/meeting/email/task/note touches
+    oe_crm_account_contact            - links an account to contacts-module contacts
     oe_crm_forecast                   - period forecast snapshots
     oe_crm_win_loss_reason            - win/loss reason catalogue
     oe_crm_pipeline_stage_config      - singleton config row
@@ -37,6 +38,7 @@ from sqlalchemy import (
     Numeric,
     String,
     Text,
+    UniqueConstraint,
 )
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -153,6 +155,30 @@ class Account(Base):
 
     def __repr__(self) -> str:
         return f"<Account {self.name} ({self.status})>"
+
+
+class AccountContact(Base):
+    """Link between an account and a contact of the contacts module.
+
+    ``contact_id`` is a plain UUID (see module notes); the service checks that
+    the contact exists. One contact links to an account once.
+    """
+
+    __tablename__ = "oe_crm_account_contact"
+    __table_args__ = (UniqueConstraint("account_id", "contact_id", name="uq_crm_account_contact"),)
+
+    account_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(),
+        ForeignKey("oe_crm_account.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    contact_id: Mapped[uuid.UUID] = mapped_column(GUID(), nullable=False, index=True)
+    role: Mapped[str] = mapped_column(String(64), nullable=False, default="", server_default="")
+    is_primary: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default="false")
+
+    def __repr__(self) -> str:
+        return f"<AccountContact {self.account_id} {self.contact_id}>"
 
 
 class Lead(Base):

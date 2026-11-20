@@ -38,6 +38,7 @@ Security model (v3.0.x IDOR sweep):
 
 from __future__ import annotations
 
+import asyncio
 import logging
 import uuid
 from decimal import Decimal
@@ -1600,6 +1601,9 @@ async def kpi_history(
     return KPIHistoryResponse(kpi_code=code, history=points)
 
 
+_FRESHNESS_ACCESS_TIMEOUT_S = 3.0
+
+
 @router.get(
     "/kpi-freshness",
     dependencies=[Depends(RequirePermission("bi.kpi.read"))],
@@ -1617,10 +1621,20 @@ async def kpi_freshness(
     heavier live EVM/KPI payloads. This is the event-driven live-refresh signal,
     so the UI updates within seconds of an upstream change without a WebSocket.
     """
-    if project_id is not None:
-        await verify_project_access(project_id, user_id, session)
     from app.modules.bi_dashboards.events import get_kpi_freshness
 
+    if project_id is not None:
+        # The watermark read is O(1); the only thing that can stall here is the
+        # access check waiting on a saturated DB pool. Bound it and tell the
+        # client to retry instead of holding the dashboard's connection open.
+        try:
+            await asyncio.wait_for(verify_project_access(project_id, user_id, session), _FRESHNESS_ACCESS_TIMEOUT_S)
+        except TimeoutError:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="KPI freshness is temporarily unavailable",
+                headers={"Retry-After": "5"},
+            ) from None
     return get_kpi_freshness(str(project_id) if project_id else None)
 
 

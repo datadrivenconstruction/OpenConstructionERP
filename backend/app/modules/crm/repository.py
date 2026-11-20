@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import uuid
 from datetime import date as _date
+from datetime import datetime
 from decimal import Decimal
 from typing import Any
 
@@ -17,6 +18,7 @@ from sqlalchemy.sql.elements import ClauseElement
 
 from app.modules.crm.models import (
     Account,
+    AccountContact,
     CrmActivity,
     Forecast,
     Lead,
@@ -505,3 +507,55 @@ class WinLossReasonRepository:
         if reason is not None:
             await self.session.delete(reason)
             await self.session.flush()
+
+
+class AccountContactRepository:
+    def __init__(self, session: AsyncSession) -> None:
+        self.session = session
+
+    async def list_for_account(self, account_id: uuid.UUID) -> list[AccountContact]:
+        stmt = (
+            select(AccountContact)
+            .where(AccountContact.account_id == account_id)
+            .order_by(AccountContact.is_primary.desc(), AccountContact.created_at.asc())
+        )
+        return list((await self.session.execute(stmt)).scalars().all())
+
+    async def get(self, account_id: uuid.UUID, contact_id: uuid.UUID) -> AccountContact | None:
+        stmt = select(AccountContact).where(
+            AccountContact.account_id == account_id, AccountContact.contact_id == contact_id
+        )
+        return (await self.session.execute(stmt)).scalar_one_or_none()
+
+    async def create(self, link: AccountContact) -> AccountContact:
+        self.session.add(link)
+        await self.session.flush()
+        return link
+
+    async def delete(self, link: AccountContact) -> None:
+        await self.session.delete(link)
+        await self.session.flush()
+
+    async def clear_primary(self, account_id: uuid.UUID) -> None:
+        await self.session.execute(
+            update(AccountContact)
+            .where(AccountContact.account_id == account_id, AccountContact.is_primary.is_(True))
+            .values(is_primary=False)
+        )
+
+
+async def activity_counts_by_owner(
+    session: AsyncSession, *, start: datetime | None, end: datetime | None
+) -> list[tuple[uuid.UUID | None, str, int]]:
+    """Count activities per (owner, kind) logged in ``[start, end)``.
+
+    One grouped query: cost is independent of how many activities exist.
+    """
+    stmt = select(CrmActivity.owner_user_id, CrmActivity.kind, func.count()).group_by(
+        CrmActivity.owner_user_id, CrmActivity.kind
+    )
+    if start:
+        stmt = stmt.where(CrmActivity.created_at >= start)
+    if end:
+        stmt = stmt.where(CrmActivity.created_at < end)
+    return [(o, k, int(n)) for o, k, n in (await session.execute(stmt)).all()]

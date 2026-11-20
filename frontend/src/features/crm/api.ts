@@ -72,6 +72,7 @@ export type LeadSource =
   | 'web'
   | 'referral'
   | 'event'
+  | 'trade_show'
   | 'cold_outreach'
   | 'inbound';
 
@@ -316,12 +317,14 @@ export interface LeadQualifyPayload {
 }
 
 export interface LeadConvertPayload {
-  account_id: string;
+  /** Optional: falls back to the lead's own account. */
+  account_id?: string;
   title: string;
   estimated_value?: number;
   currency?: string;
   expected_close_date?: string | null;
-  stage_id: string;
+  /** Optional: falls back to the first open pipeline stage. */
+  stage_id?: string;
   probability_percent?: number;
   description?: string;
 }
@@ -582,4 +585,61 @@ export function getWinLossAnalytics(params?: {
   period_end?: string;
 }): Promise<WinLossAnalytics> {
   return apiGet<WinLossAnalytics>(withQs('/v1/crm/analytics/win-loss', params ?? {}));
+}
+
+/* ── Account contacts ─────────────────────────────────────────────────── */
+
+export interface AccountContact {
+  account_id: string;
+  contact_id: string;
+  role: string;
+  is_primary: boolean;
+  display_name: string;
+  email: string | null;
+  phone: string | null;
+}
+
+export function listAccountContacts(accountId: string): Promise<AccountContact[]> {
+  return apiGet<AccountContact[]>(`/v1/crm/accounts/${accountId}/contacts`);
+}
+
+export function linkAccountContact(
+  accountId: string,
+  data: { contact_id: string; role?: string; is_primary?: boolean },
+): Promise<AccountContact[]> {
+  return apiPost<AccountContact[]>(`/v1/crm/accounts/${accountId}/contacts`, data);
+}
+
+export function unlinkAccountContact(accountId: string, contactId: string): Promise<void> {
+  return apiDelete(`/v1/crm/accounts/${accountId}/contacts/${contactId}`);
+}
+
+/* ── Reports ──────────────────────────────────────────────────────────── */
+
+export interface OwnerActivityRow {
+  owner_user_id: string | null;
+  calls: number;
+  meetings: number;
+  emails: number;
+  site_visits: number;
+  total: number;
+}
+
+export function getOwnerActivitySummary(params: {
+  date_from?: string;
+  date_to?: string;
+}): Promise<{ date_from: string | null; date_to: string | null; rows: OwnerActivityRow[] }> {
+  return apiGet(withQs('/v1/crm/activities/summary', params));
+}
+
+export interface RevenueMonthRow {
+  /** YYYY-MM, or "" for deals without an expected close date. */
+  month: string;
+  currency: string;
+  expected: number | string;
+  deals: number;
+}
+
+export function getRevenueByMonth(): Promise<{ rows: RevenueMonthRow[]; mixed_currency: boolean }> {
+  return apiGet('/v1/crm/opportunities/revenue-by-month');
 }
