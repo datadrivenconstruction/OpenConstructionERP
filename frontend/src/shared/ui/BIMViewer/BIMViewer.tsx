@@ -314,6 +314,8 @@ export interface BIMViewerProps {
    * built by the viewer itself.
    */
   diffChangeByStableId?: Map<string, 'added' | 'deleted' | 'modified'> | null;
+  /** Up axis of the GLB. `y` for design revisions (already upright); the default `z` is the converter pipeline. */
+  glbUpAxis?: 'z' | 'y';
   /**
    * Clash-review deep-link support. When the user opens a clash result's
    * "3D" link the parent passes the two interfering element ids here so the
@@ -760,6 +762,7 @@ export function BIMViewer({
   modelName,
   modelMetadata = null,
   diffChangeByStableId = null,
+  glbUpAxis = 'z',
   clashHighlightIds = null,
   focusPoint = null,
   smartViewEvalResult = null,
@@ -1643,6 +1646,7 @@ export function BIMViewer({
   useEffect(() => {
     if (!elementMgrRef.current || !geometryUrl || !elements?.length) return;
     const mgr = elementMgrRef.current;
+    mgr.setGlbUpAxis(glbUpAxis);
     // Only load if not already loaded for this URL
     if (!mgr.hasLoadedGeometry()) {
       // Reset progress + error state at the start of every load.
