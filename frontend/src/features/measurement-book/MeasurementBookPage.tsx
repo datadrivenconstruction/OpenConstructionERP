@@ -228,7 +228,7 @@ function PositionsTable({
                   <tr key={row.key} className="bg-surface-secondary/60" data-testid="measurement-book-section">
                     <td
                       colSpan={7}
-                      className={row.depth === 0 ? 'text-sm font-bold text-content-primary' : 'text-[13px] font-semibold text-content-primary'}
+                      className={row.depth === 0 ? 'text-sm font-semibold text-content-primary' : 'text-[13px] font-semibold text-content-primary'}
                       style={{ paddingInlineStart: `${0.75 + row.depth * 1.25}rem` }}
                     >
                       <span className="tabular-nums" dir="ltr">{row.section.ordinal}</span> {row.section.description}

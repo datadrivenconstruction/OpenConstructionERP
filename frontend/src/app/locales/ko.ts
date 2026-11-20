@@ -63942,7 +63942,7 @@ const resource = {
     "measurement_book.empty_title": "아직 내역서 항목이 없습니다",
     "measurement_book.empty_desc": "먼저 내역서에 항목을 추가한 뒤 여기서 측정하십시오.",
     "measurement_book.set_percent": "진척률 % 설정",
-    "measurement_book.filter_boq": "계약 (물량내역서)",
+    "measurement_book.filter_boq": "계약 (내역서)",
     "measurement_book.all_boqs": "모든 계약",
     "measurement_book.filter_section": "섹션",
     "measurement_book.all_sections": "모든 섹션",

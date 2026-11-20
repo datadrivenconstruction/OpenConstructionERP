@@ -64858,7 +64858,7 @@ const resource = {
     "measurement_book.empty_title": "内訳書の項目がまだありません",
     "measurement_book.empty_desc": "先に内訳書に項目を追加し、ここで計測してください。",
     "measurement_book.set_percent": "進捗 % を設定",
-    "measurement_book.filter_boq": "契約（数量明細書）",
+    "measurement_book.filter_boq": "契約（内訳書）",
     "measurement_book.all_boqs": "すべての契約",
     "measurement_book.filter_section": "セクション",
     "measurement_book.all_sections": "すべてのセクション",
