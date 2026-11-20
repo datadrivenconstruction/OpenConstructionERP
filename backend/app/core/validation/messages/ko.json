@@ -2500,6 +2500,10 @@
     "spiral_skipped": {
       "fail": "클로소이드 매개변수가 없어 요소 {n}을(를) 건너뛰었습니다.",
       "suggestion": "클로소이드 길이와 두 반경을 포함하여 선형을 다시 내보내십시오."
+    },
+    "stake_unresolved": {
+      "fail": "말뚝 {id}이(가) 허용오차를 벗어났으며 NCR도 승인된 편차도 없습니다.",
+      "suggestion": "NCR 초안을 작성하거나 사유와 함께 편차를 승인하세요."
     }
   },
   "land_parcels": {

@@ -2500,6 +2500,10 @@
     "spiral_skipped": {
       "fail": "Klotoidi parameeter puudub; element {n} jäeti vahele.",
       "suggestion": "Eksportige telg uuesti klotoidi pikkuse ja mõlema raadiusega."
+    },
+    "stake_unresolved": {
+      "fail": "Mahamärkimise punkt {id} on tolerantsist väljas ja sellel pole ei NCR-i ega aktsepteeritud hälvet.",
+      "suggestion": "Looge NCR-i mustand või aktsepteerige hälve koos põhjendusega."
     }
   },
   "land_parcels": {

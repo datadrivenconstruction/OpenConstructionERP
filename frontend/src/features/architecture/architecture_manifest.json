@@ -190013,6 +190013,21 @@
               "default": "''"
             },
             {
+              "name": "edition",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "clause",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "status",
+              "type": "str",
+              "default": "''"
+            },
+            {
               "name": "thresholds",
               "type": "ThresholdsOut"
             }
@@ -190149,6 +190164,33 @@
           ]
         },
         {
+          "class_name": "ForecastLevelOut",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "level",
+              "type": "Literal['alert', 'action', 'alarm']"
+            },
+            {
+              "name": "limit_mm",
+              "type": "float"
+            },
+            {
+              "name": "reached",
+              "type": "bool",
+              "default": "False"
+            },
+            {
+              "name": "days",
+              "type": "float | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
           "class_name": "PointOut",
           "bases": [
             "BaseModel"
@@ -190241,6 +190283,20 @@
               "name": "forecast_rate_mm_day",
               "type": "float | None",
               "default": "None"
+            },
+            {
+              "name": "forecast_approaching",
+              "type": "bool",
+              "default": "False"
+            },
+            {
+              "name": "forecast_epochs",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "forecast_levels",
+              "type": "list[ForecastLevelOut]"
             }
           ]
         },
@@ -190289,6 +190345,11 @@
               "name": "level",
               "type": "Level",
               "default": "'none'"
+            },
+            {
+              "name": "risk_id",
+              "type": "str | None",
+              "default": "None"
             }
           ]
         },
@@ -284849,6 +284910,34 @@
       },
       "models": [
         {
+          "class_name": "SettingOutSettings",
+          "tablename": "oe_setting_out_settings",
+          "docstring": "One project's setting-out defaults.",
+          "columns": [
+            {
+              "name": "project_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_projects_project.id"
+            },
+            {
+              "name": "default_tolerance_key",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "auto_ncr",
+              "annotation": "Mapped[bool]",
+              "sql_type": "Boolean",
+              "nullable": false
+            }
+          ],
+          "relationships": []
+        },
+        {
           "class_name": "SettingOutToleranceProfile",
           "tablename": "oe_setting_out_tolerance_profile",
           "docstring": "A tolerance profile a project defined for itself.",
@@ -284933,6 +285022,12 @@
             },
             {
               "name": "tolerance_source",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "tolerance_reference",
               "annotation": "Mapped[str]",
               "sql_type": "String",
               "nullable": false
@@ -285208,6 +285303,24 @@
               "annotation": "Mapped[str | None]",
               "sql_type": "String",
               "nullable": true
+            },
+            {
+              "name": "deviation_accepted_at",
+              "annotation": "Mapped[datetime | None]",
+              "sql_type": "DateTime",
+              "nullable": true
+            },
+            {
+              "name": "deviation_accepted_by",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "deviation_note",
+              "annotation": "Mapped[str]",
+              "sql_type": "Text",
+              "nullable": false
             }
           ],
           "relationships": []
@@ -285227,6 +285340,25 @@
           "handler": "create_profile",
           "response_model": "ToleranceProfileOut",
           "request_schema": "ToleranceProfileCreate"
+        },
+        {
+          "method": "GET",
+          "path": "/projects/{project_id}/settings",
+          "handler": "get_settings",
+          "response_model": "SettingsOut"
+        },
+        {
+          "method": "PUT",
+          "path": "/projects/{project_id}/settings",
+          "handler": "set_settings",
+          "response_model": "SettingsOut",
+          "request_schema": "SettingsUpdate"
+        },
+        {
+          "method": "POST",
+          "path": "/projects/{project_id}/ncr-drafts",
+          "handler": "create_ncr_drafts",
+          "response_model": "BulkNcrOut"
         },
         {
           "method": "GET",
@@ -285339,6 +285471,13 @@
           "path": "/records/{record_id}/ncr",
           "handler": "create_ncr",
           "response_model": "NcrDraftOut"
+        },
+        {
+          "method": "POST",
+          "path": "/records/{record_id}/accept-deviation",
+          "handler": "accept_deviation",
+          "response_model": "RecordOut",
+          "request_schema": "AcceptDeviation"
         }
       ],
       "schemas": [
@@ -285356,6 +285495,34 @@
             {
               "name": "v_mm",
               "type": "float | None"
+            }
+          ]
+        },
+        {
+          "class_name": "ToleranceValueOut",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "h_mm",
+              "type": "float"
+            },
+            {
+              "name": "v_mm",
+              "type": "float | None",
+              "default": "None"
+            },
+            {
+              "name": "clause",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "status",
+              "type": "str",
+              "default": "''"
             }
           ]
         },
@@ -285389,8 +285556,50 @@
               "default": "''"
             },
             {
+              "name": "edition",
+              "type": "str",
+              "default": "''"
+            },
+            {
               "name": "items",
-              "type": "dict[str, ToleranceValue]"
+              "type": "dict[str, ToleranceValueOut]"
+            }
+          ]
+        },
+        {
+          "class_name": "SettingsOut",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "default_tolerance_key",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "auto_ncr",
+              "type": "bool",
+              "default": "False"
+            }
+          ]
+        },
+        {
+          "class_name": "SettingsUpdate",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "default_tolerance_key",
+              "type": "str | None"
+            },
+            {
+              "name": "auto_ncr",
+              "type": "bool | None",
+              "default": "None"
             }
           ]
         },
@@ -285603,6 +285812,34 @@
             {
               "name": "ncr_id",
               "type": "str | None"
+            },
+            {
+              "name": "deviation_accepted_at",
+              "type": "datetime | None",
+              "default": "None"
+            },
+            {
+              "name": "deviation_accepted_by",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "deviation_note",
+              "type": "str",
+              "default": "''"
+            }
+          ]
+        },
+        {
+          "class_name": "AcceptDeviation",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "note",
+              "type": "str"
             }
           ]
         },
@@ -285699,6 +285936,11 @@
             {
               "name": "tolerance_source",
               "type": "str"
+            },
+            {
+              "name": "tolerance_reference",
+              "type": "str",
+              "default": "''"
             },
             {
               "name": "tol_h_mm",
@@ -285997,6 +286239,24 @@
             {
               "name": "record_id",
               "type": "uuid.UUID"
+            }
+          ]
+        },
+        {
+          "class_name": "BulkNcrOut",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "created",
+              "type": "list[NcrDraftOut]"
+            },
+            {
+              "name": "skipped",
+              "type": "int",
+              "default": "0"
             }
           ]
         },
@@ -341782,10 +342042,10 @@
     },
     {
       "name": "setting-out",
-      "ts_files": 11,
+      "ts_files": 13,
       "css_files": 0,
-      "test_files": 3,
-      "total_files": 11
+      "test_files": 4,
+      "total_files": 13
     },
     {
       "name": "settings",
@@ -344103,14 +344363,14 @@
   "statistics": {
     "backend_modules": 260,
     "modules_with_manifests": 260,
-    "total_models": 974,
-    "total_columns": 11431,
+    "total_models": 975,
+    "total_columns": 11438,
     "total_relationships": 264,
-    "total_routes": 5553,
-    "total_schemas": 5173,
+    "total_routes": 5557,
+    "total_schemas": 5179,
     "total_python_files": 3684,
     "frontend_features": 252,
-    "frontend_ts_files": 4450,
+    "frontend_ts_files": 4452,
     "frontend_backend_mapped": 224
   },
   "frontend_backend_mapping": {

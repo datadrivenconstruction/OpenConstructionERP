@@ -200,6 +200,14 @@ export function StakeCard({ stake, tolH, tolV, instrument, controlRef, canWrite 
             <FileWarning size={16} aria-hidden />
             {t('survey.setting_out.ncr_linked', { defaultValue: 'NCR draft created' })}
           </div>
+        ) : saved.deviation_accepted_at ? (
+          <div className="text-sm text-content-secondary" data-testid="stake-deviation-accepted">
+            {t('survey.setting_out.deviation_accepted', {
+              defaultValue: 'Deviation accepted by {{name}}: {{note}}',
+              name: saved.deviation_accepted_by || '-',
+              note: saved.deviation_note || '',
+            })}
+          </div>
         ) : (
           canWrite && (
             <Button variant="danger" className="w-full h-12" icon={<FileWarning size={18} />} disabled={ncr.isPending}

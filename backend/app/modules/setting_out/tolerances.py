@@ -14,8 +14,11 @@ in millimetres, plus a ``default`` row for item types it does not name.
 
 from __future__ import annotations
 
+import json
 from collections.abc import Iterable, Mapping
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
+from pathlib import Path
+from typing import Any
 
 ITEM_TYPES: tuple[str, ...] = (
     "column",
@@ -38,6 +41,10 @@ class Tolerance:
 
     h_mm: float
     v_mm: float | None = None
+    #: Clause of the source standard this value comes from (pack values).
+    clause: str = ""
+    #: ``verified`` (clause cited) | ``to_verify`` (not yet checked against the source) | "".
+    status: str = ""
 
 
 @dataclass(frozen=True)
@@ -53,6 +60,8 @@ class ToleranceProfile:
     country: str = ""
     #: Where the values come from (standard and clause), shown next to the name.
     reference: str = ""
+    #: Edition year of the source standard.
+    edition: str = ""
 
     def for_item(self, item_type: str) -> Tolerance | None:
         """The tolerance for ``item_type``, else the profile's ``default`` row, else None."""
@@ -79,7 +88,47 @@ def register_pack_tolerance(country: str, profiles: Iterable[ToleranceProfile]) 
         if not p.key.startswith("pack:"):
             raise ValueError("pack tolerance keys start with 'pack:'")
         bucket[:] = [b for b in bucket if b.key != p.key]
-        bucket.append(ToleranceProfile(p.key, p.name, "pack", dict(p.items), code, p.reference))
+        bucket.append(replace(p, source="pack", items=dict(p.items), country=code))
+
+
+COUNTRY_DATA_PATH = Path(__file__).resolve().parents[2] / "core" / "country_data" / "site_tolerances.json"
+
+
+def _profile_from_json(row: Mapping[str, Any], shared: Mapping[str, Any]) -> ToleranceProfile:
+    base = {**shared.get(str(row.get("shared") or ""), {}), **row}
+    items = {
+        k: Tolerance(
+            h_mm=float(v["h_mm"]),
+            v_mm=None if v.get("v_mm") is None else float(v["v_mm"]),
+            clause=str(v.get("clause") or ""),
+            status=str(v.get("status") or "to_verify"),
+        )
+        for k, v in (base.get("items") or {}).items()
+    }
+    edition = str(base.get("edition") or "")
+    return ToleranceProfile(
+        key=str(row["key"]),
+        name=str(base.get("name") or row["key"]),
+        source="pack",
+        items=items,
+        reference=f"{base.get('standard') or ''}, {edition}".strip(", ")[:255],
+        edition=edition,
+    )
+
+
+def load_country_tolerances(path: Path = COUNTRY_DATA_PATH) -> int:
+    """Register every country's setting-out profiles from the country data; returns how many profiles."""
+    data = json.loads(path.read_text(encoding="utf-8"))
+    shared = data.get("_shared") or {}
+    count = 0
+    for country, entry in data.items():
+        if country.startswith("_"):
+            continue
+        profiles = [_profile_from_json(row, shared) for row in entry.get("setting_out") or []]
+        if profiles:
+            register_pack_tolerance(country, profiles)
+            count += len(profiles)
+    return count
 
 
 def clear_pack_tolerances() -> None:
@@ -120,6 +169,7 @@ __all__ = [
     "ToleranceProfile",
     "builtin_profile",
     "clear_pack_tolerances",
+    "load_country_tolerances",
     "pack_profiles_for",
     "profile_from_items",
     "register_pack_tolerance",

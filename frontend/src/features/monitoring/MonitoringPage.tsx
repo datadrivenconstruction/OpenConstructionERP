@@ -6,6 +6,7 @@
  */
 
 import { useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Activity, AlertOctagon, AlertTriangle, BellRing, CalendarClock, Printer, Upload } from 'lucide-react';
@@ -39,6 +40,7 @@ import { LevelBadge, PointDrawer } from './PointDrawer';
 import { fmtMm, fmtRate } from './levels';
 import { monitoringGuide } from './monitoringGuide';
 import { useOpenSurveyDemo } from '@/features/survey/useOpenSurveyDemo';
+import { SourceNote } from '@/features/setting-out/SourceNote';
 import { ViewOnlyNote, useSurveyAccess } from '@/features/survey/useSurveyAccess';
 
 export default function MonitoringPage() {
@@ -48,7 +50,17 @@ export default function MonitoringPage() {
   const qc = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
   const projectId = useProjectContextStore((s) => s.activeProjectId);
-  const [selected, setSelected] = useState<string | null>(null);
+  const [params, setParams] = useSearchParams();
+  // ?point=<id> opens that point, e.g. from the risk a trigger created.
+  const [selected, setSelectedState] = useState<string | null>(() => params.get('point'));
+  const setSelected = (id: string | null) => {
+    setSelectedState(id);
+    if (!id && params.has('point')) {
+      const next = new URLSearchParams(params);
+      next.delete('point');
+      setParams(next, { replace: true });
+    }
+  };
   const [importOpen, setImportOpen] = useState(false);
 
   const enabled = !!projectId;
@@ -168,6 +180,10 @@ export default function MonitoringPage() {
           <span className="text-xs text-content-tertiary">
             {t('survey.monitoring.profile.demo_note', { defaultValue: 'Demo values, not a standard' })}
           </span>
+        )}
+        {settings.data?.profile && settings.data.profile.source !== 'demo' && (
+          <SourceNote reference={settings.data.profile.reference} clause={settings.data.profile.clause}
+            status={settings.data.profile.status} testId="mon-profile-source" />
         )}
       </div>
 

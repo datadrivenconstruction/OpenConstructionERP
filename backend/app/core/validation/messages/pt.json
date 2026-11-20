@@ -2500,6 +2500,10 @@
     "spiral_skipped": {
       "fail": "Parâmetro da clotoide ausente; elemento {n} ignorado.",
       "suggestion": "Exporte o eixo novamente com o comprimento da clotoide e os dois raios."
+    },
+    "stake_unresolved": {
+      "fail": "A estaca {id} está fora da tolerância e não tem NCR nem desvio aceite.",
+      "suggestion": "Crie um rascunho de NCR ou aceite o desvio indicando o motivo."
     }
   },
   "land_parcels": {

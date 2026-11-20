@@ -2500,6 +2500,10 @@
     "spiral_skipped": {
       "fail": "Hiányzik a klotoid paramétere; a(z) {n}. elem kimaradt.",
       "suggestion": "Exportálja újra a nyomvonalat a klotoid hosszával és mindkét sugárral."
+    },
+    "stake_unresolved": {
+      "fail": "A(z) {id} kitűzési pont tűrésen kívül van, és nincs hozzá sem NCR, sem elfogadott eltérés.",
+      "suggestion": "Hozzon létre NCR-tervezetet, vagy fogadja el az eltérést indoklással."
     }
   },
   "land_parcels": {

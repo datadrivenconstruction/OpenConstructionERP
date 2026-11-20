@@ -2500,6 +2500,10 @@
     "spiral_skipped": {
       "fail": "Falta un parámetro de clotoide; elemento {n} omitido.",
       "suggestion": "Exporte de nuevo el eje con la longitud de la clotoide y ambos radios."
+    },
+    "stake_unresolved": {
+      "fail": "La estaca {id} no cumple la tolerancia y no tiene ni NCR ni desviación aceptada.",
+      "suggestion": "Cree un borrador de NCR o acepte la desviación indicando el motivo."
     }
   },
   "land_parcels": {

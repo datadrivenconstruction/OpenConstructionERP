@@ -491,6 +491,27 @@ function DetailView({ riskId, onBack }: { riskId: string; onBack: () => void }) 
         </Card>
       )}
 
+      {risk.metadata?.source === 'monitoring' && typeof risk.metadata.point_id === 'string' && (
+        <Card className="p-4 mb-6" data-testid="risk-monitoring-source">
+          <div className="flex flex-wrap items-center gap-2 text-sm">
+            <span className="text-content-secondary">
+              {t('risk.from_monitoring', {
+                defaultValue: 'Opened by monitoring point {{point}} at level {{level}}',
+                point: String(risk.metadata.point_code ?? ''),
+                level: t(`survey.monitoring.level.${String(risk.metadata.level ?? '')}`, { defaultValue: String(risk.metadata.level ?? '') }),
+              })}
+            </span>
+            <button
+              type="button"
+              onClick={() => navigate(`/survey/monitoring?point=${encodeURIComponent(String(risk.metadata?.point_id))}`)}
+              className="text-xs font-medium text-oe-blue hover:underline"
+            >
+              {t('risk.open_monitoring_point', { defaultValue: 'Open the point' })}
+            </button>
+          </div>
+        </Card>
+      )}
+
       {editing ? (
         <Card className="p-5 space-y-4">
           <div>

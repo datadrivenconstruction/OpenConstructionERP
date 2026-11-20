@@ -1,0 +1,130 @@
+{
+  "_doc": "Setting-out / as-built tolerance profiles and monitoring threshold profiles per country (ISO code). Registered at startup through register_pack_tolerance and register_pack_profile, offered only while that country is an active market. Every value names its standard, clause and edition year. status verified means the clause was cited from the published table; to_verify means the value has not yet been checked against the source text and must be confirmed by the user before it is relied on. Values in mm (h_mm radial in plan, v_mm height) and mm/day.",
+  "_shared": {
+    "eu_execution": {
+      "name": "EN 13670 / EN 1090-2 execution tolerances",
+      "standard": "EN 13670:2009 Execution of concrete structures; EN 1090-2:2018 Execution of steel structures",
+      "edition": "2009/2018",
+      "items": {
+        "column": {"h_mm": 25, "clause": "EN 13670:2009, 10.4 columns and walls, position in plan (tolerance class 1)", "status": "to_verify"},
+        "wall": {"h_mm": 25, "clause": "EN 13670:2009, 10.4 columns and walls, position in plan (tolerance class 1)", "status": "to_verify"},
+        "anchor_bolt": {"h_mm": 6, "clause": "EN 1090-2:2018, Annex B essential tolerances, foundation bolt group position", "status": "to_verify"},
+        "default": {"h_mm": 25, "clause": "EN 13670:2009, 10.3 foundations, position in plan (tolerance class 1)", "status": "to_verify"}
+      }
+    }
+  },
+  "DE": {
+    "setting_out": [
+      {
+        "key": "pack:de_din18202_2019",
+        "name": "DIN 18202 limit deviations",
+        "standard": "DIN 18202 Toleranzen im Hochbau",
+        "edition": "2019",
+        "items": {
+          "grid_line": {"h_mm": 16, "v_mm": 16, "clause": "Table 2 row 1 (plan, nominal 6 to 15 m) and row 2 (elevation, 3 to 6 m)", "status": "to_verify"},
+          "default": {"h_mm": 16, "v_mm": 16, "clause": "Table 2 row 1 (plan, nominal 6 to 15 m) and row 2 (elevation, 3 to 6 m)", "status": "to_verify"}
+        }
+      },
+      {"key": "pack:de_en_execution", "shared": "eu_execution", "name": "DIN EN 13670 / DIN EN 1090-2"}
+    ],
+    "monitoring": []
+  },
+  "AT": {
+    "setting_out": [
+      {"key": "pack:at_en_execution", "shared": "eu_execution", "name": "ÖNORM EN 13670 / ÖNORM EN 1090-2"}
+    ],
+    "monitoring": []
+  },
+  "FR": {
+    "setting_out": [
+      {"key": "pack:fr_en_execution", "shared": "eu_execution", "name": "NF EN 13670 / NF EN 1090-2"}
+    ],
+    "monitoring": []
+  },
+  "PL": {
+    "setting_out": [
+      {"key": "pack:pl_en_execution", "shared": "eu_execution", "name": "PN-EN 13670 / PN-EN 1090-2"}
+    ],
+    "monitoring": []
+  },
+  "GB": {
+    "setting_out": [
+      {
+        "key": "pack:gb_ice_sperw_2016",
+        "name": "ICE piling specification",
+        "standard": "ICE Specification for Piling and Embedded Retaining Walls (SPERW), 3rd edition",
+        "edition": "2016",
+        "items": {
+          "pile": {"h_mm": 75, "clause": "Section B, pile position at the commencing surface, any direction", "status": "to_verify"}
+        }
+      },
+      {"key": "pack:gb_en_execution", "shared": "eu_execution", "name": "BS EN 13670 / BS EN 1090-2"}
+    ],
+    "monitoring": []
+  },
+  "US": {
+    "setting_out": [
+      {
+        "key": "pack:us_aci117_2010",
+        "name": "ACI 117 concrete tolerances",
+        "standard": "ACI 117 Specification for Tolerances for Concrete Construction and Materials",
+        "edition": "2010",
+        "items": {
+          "column": {"h_mm": 25.4, "v_mm": 19.1, "clause": "Lateral alignment of members 1 in; level alignment 3/4 in", "status": "to_verify"},
+          "wall": {"h_mm": 25.4, "v_mm": 19.1, "clause": "Lateral alignment of members 1 in; level alignment 3/4 in", "status": "to_verify"},
+          "default": {"h_mm": 25.4, "v_mm": 19.1, "clause": "Lateral alignment of members 1 in; level alignment 3/4 in", "status": "to_verify"}
+        }
+      },
+      {
+        "key": "pack:us_aisc303_2016",
+        "name": "AISC 303 anchor rods",
+        "standard": "AISC 303 Code of Standard Practice for Steel Buildings and Bridges",
+        "edition": "2016",
+        "items": {
+          "anchor_bolt": {"h_mm": 6.4, "v_mm": 12.7, "clause": "Section 7.5.1, anchor-rod group centre to column line 1/4 in; top of rod elevation 1/2 in", "status": "to_verify"}
+        }
+      }
+    ],
+    "monitoring": []
+  },
+  "CN": {
+    "setting_out": [
+      {
+        "key": "pack:cn_gb50204_2015",
+        "name": "GB 50204 cast-in-place structures",
+        "standard": "GB 50204 Code for acceptance of constructional quality of concrete structures",
+        "edition": "2015",
+        "items": {
+          "column": {"h_mm": 8, "v_mm": 10, "clause": "Table 8.3.2, axis position of columns, walls, beams 8 mm; storey elevation 10 mm", "status": "verified"},
+          "wall": {"h_mm": 8, "v_mm": 10, "clause": "Table 8.3.2, axis position of columns, walls, beams 8 mm; storey elevation 10 mm", "status": "verified"},
+          "anchor_bolt": {"h_mm": 5, "clause": "Table 8.3.2, centre position of embedded bolts 5 mm", "status": "verified"}
+        }
+      }
+    ],
+    "monitoring": [
+      {
+        "key": "pack:cn_gb50497_2019",
+        "name": "GB 50497 excavation, grade 1, wall-top settlement",
+        "standard": "GB 50497 Technical standard for monitoring of building excavation engineering",
+        "edition": "2019",
+        "clause": "Alarm values table, retaining wall top vertical displacement, bored pile or diaphragm wall, grade 1 (lower bound of 10 to 20 mm and 2 to 3 mm/d)",
+        "status": "to_verify",
+        "thresholds": {"alarm_mm": 10, "rate_alarm": 2}
+      }
+    ]
+  },
+  "RU": {
+    "setting_out": [],
+    "monitoring": [
+      {
+        "key": "pack:ru_sp22_2016",
+        "name": "SP 22 limit settlement, RC frame building",
+        "standard": "SP 22.13330 Foundations of buildings and structures",
+        "edition": "2016",
+        "clause": "Appendix G, Table G.1, buildings with a full reinforced concrete frame, maximum settlement 10 cm (alarm at the limit)",
+        "status": "to_verify",
+        "thresholds": {"alarm_mm": 100}
+      }
+    ]
+  }
+}

@@ -2500,6 +2500,10 @@
     "spiral_skipped": {
       "fail": "Nedostaje parametar klotoide; element {n} preskočen.",
       "suggestion": "Ponovno izvezite os s duljinom klotoide i oba polumjera."
+    },
+    "stake_unresolved": {
+      "fail": "Iskolčena točka {id} je izvan tolerancije i nema ni NCR ni prihvaćeno odstupanje.",
+      "suggestion": "Izradite nacrt NCR-a ili prihvatite odstupanje uz obrazloženje."
     }
   },
   "land_parcels": {

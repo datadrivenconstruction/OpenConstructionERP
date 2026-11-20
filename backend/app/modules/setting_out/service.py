@@ -5,8 +5,9 @@
 A request snapshots its tolerance, so editing a profile later never rewrites a
 verdict already given. Records are append-only: the newest record is the stake's
 state and every earlier one stays as history. Every change writes an audit row.
-A failed stake opens an NCR in the Quality module only when a person presses
-Create NCR draft.
+A failed stake opens an NCR draft in the Quality module when a person presses
+Create NCR draft, for all failures at once, or on its own when the project
+setting ``auto_ncr`` is on. An engineer may instead accept the deviation.
 """
 
 from __future__ import annotations
@@ -36,10 +37,13 @@ from app.modules.setting_out.models import (
     SettingOutPoint,
     SettingOutRecord,
     SettingOutRequest,
+    SettingOutSettings,
     SettingOutToleranceProfile,
 )
 from app.modules.setting_out.repository import SettingOutRepository
 from app.modules.setting_out.schemas import (
+    AcceptDeviation,
+    BulkNcrOut,
     ChainageAnswer,
     ChainageQuery,
     DesignImport,
@@ -56,11 +60,13 @@ from app.modules.setting_out.schemas import (
     RequestOut,
     RequestUpdate,
     SettingOutSummary,
+    SettingsOut,
+    SettingsUpdate,
     StakeCreate,
     StakeOut,
     ToleranceProfileCreate,
     ToleranceProfileOut,
-    ToleranceValue,
+    ToleranceValueOut,
     ValidationReportOut,
 )
 from app.modules.setting_out.stakeout_math import AlignmentError, stake_delta
@@ -102,8 +108,21 @@ def _profile_out(p: tol_lib.ToleranceProfile) -> ToleranceProfileOut:
         source=p.source,  # type: ignore[arg-type]
         country=p.country,
         reference=p.reference,
-        items={k: ToleranceValue(h_mm=v.h_mm, v_mm=v.v_mm) for k, v in p.items.items()},
+        edition=p.edition,
+        items={
+            k: ToleranceValueOut(h_mm=v.h_mm, v_mm=v.v_mm, clause=v.clause, status=v.status) for k, v in p.items.items()
+        },
     )
+
+
+def tolerance_reference(profile: tol_lib.ToleranceProfile, value: tol_lib.Tolerance | None) -> str:
+    """Standard, edition, clause and status of one tolerance, as stored on a request and quoted in an NCR."""
+    parts = [profile.reference]
+    if value is not None and value.clause:
+        parts.append(value.clause)
+    if value is not None and value.status:
+        parts.append(value.status)
+    return "; ".join(p for p in parts if p)[:500]
 
 
 def _record_out(r: SettingOutRecord) -> RecordOut:
@@ -126,6 +145,9 @@ def _record_out(r: SettingOutRecord) -> RecordOut:
         measured_at=r.measured_at,
         note=r.note,
         ncr_id=r.ncr_id,
+        deviation_accepted_at=r.deviation_accepted_at,
+        deviation_accepted_by=r.deviation_accepted_by,
+        deviation_note=r.deviation_note,
     )
 
 
@@ -155,6 +177,32 @@ class SettingOutService:
             )
         except Exception:  # noqa: BLE001 - the audit trail must not undo the change it records
             logger.exception("setting_out: audit entry for %s failed", entity_id)
+
+    # ── Settings ───────────────────────────────────────────────────────────
+
+    async def get_settings(self, project_id: uuid.UUID) -> SettingsOut:
+        row = await self.repo.settings(project_id)
+        if row is None:
+            return SettingsOut()
+        return SettingsOut(default_tolerance_key=row.default_tolerance_key, auto_ncr=row.auto_ncr)
+
+    async def set_settings(
+        self, project_id: uuid.UUID, body: SettingsUpdate, user_id: str, markets: list[str]
+    ) -> SettingsOut:
+        if body.default_tolerance_key:
+            await self._resolve(project_id, body.default_tolerance_key, "other", markets)
+        row = await self.repo.settings(project_id)
+        if row is None:
+            row = SettingOutSettings(project_id=project_id, default_tolerance_key="", auto_ncr=False)
+            self.session.add(row)
+        old = {"default_tolerance_key": row.default_tolerance_key or "", "auto_ncr": bool(row.auto_ncr)}
+        if body.default_tolerance_key is not None:
+            row.default_tolerance_key = body.default_tolerance_key
+        if body.auto_ncr is not None:
+            row.auto_ncr = body.auto_ncr
+        await self.session.flush()
+        await self._audit("settings", project_id, user_id, {"old": old, "new": body.model_dump(exclude_none=True)})
+        return SettingsOut(default_tolerance_key=row.default_tolerance_key, auto_ncr=row.auto_ncr)
 
     # ── Tolerance profiles ─────────────────────────────────────────────────
 
@@ -187,10 +235,10 @@ class SettingOutService:
 
     async def _resolve(
         self, project_id: uuid.UUID, key: str, item_type: str, markets: list[str]
-    ) -> tuple[str, str, float | None, float | None]:
-        """``(label, source, h_mm, v_mm)`` of profile ``key`` for ``item_type``; empty key = no profile."""
+    ) -> tuple[str, str, float | None, float | None, str]:
+        """``(label, source, h_mm, v_mm, reference)`` of profile ``key`` for ``item_type``; empty key = no profile."""
         if not key:
-            return "", "", None, None
+            return "", "", None, None, ""
         profile: tol_lib.ToleranceProfile | None
         if key.startswith("project:"):
             row = await self.repo.get_profile(_uuid(key.split(":", 1)[1]) or uuid.uuid4())
@@ -200,16 +248,17 @@ class SettingOutService:
         if profile is None:
             raise _err(status.HTTP_422_UNPROCESSABLE_CONTENT, "Unknown tolerance profile")
         value = profile.for_item(item_type)
+        reference = tolerance_reference(profile, value)
         if value is None:
-            return profile.name, profile.source, None, None
-        return profile.name, profile.source, value.h_mm, value.v_mm
+            return profile.name, profile.source, None, None, reference
+        return profile.name, profile.source, value.h_mm, value.v_mm, reference
 
     # ── Requests ───────────────────────────────────────────────────────────
 
     async def create_request(
         self, project_id: uuid.UUID, body: RequestCreate, user_id: str, markets: list[str]
     ) -> RequestOut:
-        label, source, h, v = await self._resolve(project_id, body.tolerance_key, body.item_type, markets)
+        label, source, h, v, reference = await self._resolve(project_id, body.tolerance_key, body.item_type, markets)
         req = SettingOutRequest(
             project_id=project_id,
             code=await self.repo.next_code(project_id),
@@ -218,6 +267,7 @@ class SettingOutService:
             tolerance_key=body.tolerance_key,
             tolerance_label=label,
             tolerance_source=source,
+            tolerance_reference=reference,
             tol_h_mm=_d(body.tol_h_mm if body.tol_h_mm is not None else h, "0.1"),
             tol_v_mm=_d(body.tol_v_mm if body.tol_v_mm is not None else v, "0.1"),
             element_ref_type=body.element_ref_type,
@@ -243,8 +293,9 @@ class SettingOutService:
                 setattr(req, field, changes[field])
         if "tolerance_key" in changes or "item_type" in changes:
             key = changes.get("tolerance_key", req.tolerance_key) or ""
-            label, source, h, v = await self._resolve(req.project_id, key, req.item_type, markets)
+            label, source, h, v, reference = await self._resolve(req.project_id, key, req.item_type, markets)
             req.tolerance_key, req.tolerance_label, req.tolerance_source = key, label, source
+            req.tolerance_reference = reference
             req.tol_h_mm, req.tol_v_mm = _d(h, "0.1"), _d(v, "0.1")
         if "tol_h_mm" in changes:
             req.tol_h_mm = _d(changes["tol_h_mm"], "0.1")
@@ -306,6 +357,7 @@ class SettingOutService:
             tolerance_key=req.tolerance_key,
             tolerance_label=req.tolerance_label,
             tolerance_source=req.tolerance_source,
+            tolerance_reference=req.tolerance_reference or "",
             tol_h_mm=_f(req.tol_h_mm),
             tol_v_mm=_f(req.tol_v_mm),
             element_ref_type=req.element_ref_type,
@@ -519,7 +571,20 @@ class SettingOutService:
                 "verdict": delta.verdict,
             },
         )
+        if rec.verdict == "fail":
+            await self._auto_ncr(rec, user_id)
         return rec
+
+    async def _auto_ncr(self, rec: SettingOutRecord, user_id: str) -> None:
+        """Open the NCR draft on its own when the project asks for it; a failure never undoes the record."""
+        settings = await self.repo.settings(rec.project_id)
+        if settings is None or not settings.auto_ncr:
+            return
+        try:
+            async with self.session.begin_nested():
+                await self.create_ncr_draft(rec, user_id)
+        except Exception:  # noqa: BLE001 - the measurement stands even when Quality is unavailable
+            logger.exception("setting_out: automatic NCR draft for record %s failed", rec.id)
 
     async def add_record(self, stake: SettingOutPoint, body: RecordCreate, user_id: str) -> RecordOut:
         req = await self.get_request(stake.request_id)
@@ -577,6 +642,8 @@ class SettingOutService:
             raise _err(status.HTTP_409_CONFLICT, "Only a failed stake opens an NCR")
         if rec.ncr_id:
             raise _err(status.HTTP_409_CONFLICT, "This record already has an NCR")
+        if rec.deviation_accepted_at is not None:
+            raise _err(status.HTTP_409_CONFLICT, "The deviation of this record was accepted")
         try:
             from app.modules.ncr.schemas import NCRCreate  # noqa: PLC0415
             from app.modules.ncr.service import NCRService  # noqa: PLC0415
@@ -603,7 +670,10 @@ class SettingOutService:
                 + (f" Z {float(rec.measured_z):.3f}" if rec.measured_z is not None else ""),
                 f"dE {float(rec.de_mm):g} mm, dN {float(rec.dn_mm):g} mm, d {float(rec.d_mm):g} mm"
                 + (f", dZ {float(rec.dz_mm):g} mm" if rec.dz_mm is not None else ""),
-                f"tolerance {fmt(rec.tol_h_mm)} mm ({req.tolerance_label})",
+                f"tolerance {fmt(rec.tol_h_mm)} mm"
+                + (f", height {fmt(rec.tol_v_mm)} mm" if rec.tol_v_mm is not None else "")
+                + f" ({req.tolerance_label})",
+                f"source: {req.tolerance_reference or '-'}",
                 f"{rec.measured_by} · {rec.instrument} · {rec.control_ref}",
             ]
         )
@@ -622,7 +692,11 @@ class SettingOutService:
                     "record_id": str(rec.id),
                     "point_id": stake.point_id,
                     "d_mm": float(rec.d_mm),
+                    "dz_mm": _f(rec.dz_mm),
                     "tol_h_mm": _f(rec.tol_h_mm),
+                    "tol_v_mm": _f(rec.tol_v_mm),
+                    "tolerance_label": req.tolerance_label,
+                    "tolerance_reference": req.tolerance_reference or "",
                     "rule_id": "SET-001",
                 },
             ),
@@ -634,6 +708,36 @@ class SettingOutService:
             "create", req.id, user_id, {"ncr": str(ncr.id), "record": str(rec.id), "stake": stake.point_id}
         )
         return NcrDraftOut(ncr_id=str(ncr.id), ncr_number=str(ncr.ncr_number or ""), record_id=rec.id)
+
+    async def create_ncr_drafts(
+        self, project_id: uuid.UUID, user_id: str, locale: str = "en", request_id: uuid.UUID | None = None
+    ) -> BulkNcrOut:
+        """One NCR draft for every failed stake that has neither an NCR nor an accepted deviation."""
+        ids = [r.id for r in await self.repo.list_requests(project_id) if request_id is None or r.id == request_id]
+        latest, _ = self._latest(await self.repo.records(ids))
+        created: list[NcrDraftOut] = []
+        skipped = 0
+        for rec in latest.values():
+            if rec.verdict != "fail":
+                continue
+            if rec.ncr_id or rec.deviation_accepted_at is not None:
+                skipped += 1
+                continue
+            created.append(await self.create_ncr_draft(rec, user_id, locale))
+        return BulkNcrOut(created=created, skipped=skipped)
+
+    async def accept_deviation(self, rec: SettingOutRecord, body: AcceptDeviation, user_id: str) -> RecordOut:
+        """Record that the engineer accepts a failed stake as built, with the reason."""
+        if rec.verdict != "fail":
+            raise _err(status.HTTP_409_CONFLICT, "Only a failed stake has a deviation to accept")
+        if rec.deviation_accepted_at is not None:
+            raise _err(status.HTTP_409_CONFLICT, "The deviation of this record was already accepted")
+        rec.deviation_accepted_at = datetime.now(UTC)
+        rec.deviation_accepted_by = (await self.repo.user_name(_uuid(user_id)))[:255]
+        rec.deviation_note = body.note
+        await self.session.flush()
+        await self._audit("accept_deviation", rec.request_id, user_id, {"record": str(rec.id), "note": body.note})
+        return _record_out(rec)
 
     # ── Validation, summary, sheet ─────────────────────────────────────────
 
@@ -658,6 +762,8 @@ class SettingOutService:
                     "tol_v_mm": _f(rec.tol_v_mm) if rec else None,
                     "instrument": rec.instrument if rec else "",
                     "control_ref": rec.control_ref if rec else "",
+                    "ncr_id": rec.ncr_id if rec else None,
+                    "deviation_accepted": bool(rec and rec.deviation_accepted_at is not None),
                 }
             )
         return {"stakes": out}

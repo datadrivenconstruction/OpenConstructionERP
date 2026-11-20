@@ -2500,6 +2500,10 @@
     "spiral_skipped": {
       "fail": "缺少缓和曲线参数；已跳过要素 {n}。",
       "suggestion": "重新导出线形，并包含缓和曲线长度和两个半径。"
+    },
+    "stake_unresolved": {
+      "fail": "放样点 {id} 超出允许偏差，既没有 NCR 也没有已接受的偏差。",
+      "suggestion": "创建 NCR 草稿，或注明理由后接受该偏差。"
     }
   },
   "land_parcels": {

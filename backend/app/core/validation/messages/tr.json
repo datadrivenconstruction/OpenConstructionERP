@@ -2500,6 +2500,10 @@
     "spiral_skipped": {
       "fail": "Klotoid parametresi eksik; {n} numaralı eleman atlandı.",
       "suggestion": "Güzergâhı klotoid uzunluğu ve iki yarıçapla yeniden dışa aktarın."
+    },
+    "stake_unresolved": {
+      "fail": "Aplikasyon noktası {id} tolerans dışında ve ne NCR'si ne de kabul edilmiş sapması var.",
+      "suggestion": "Bir NCR taslağı oluşturun veya sapmayı gerekçesiyle kabul edin."
     }
   },
   "land_parcels": {

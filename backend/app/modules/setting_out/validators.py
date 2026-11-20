@@ -6,10 +6,12 @@ Rules run over a plain dict context built by the service from each stake's
 newest record::
 
     {"stakes": [{"request", "point_id", "verdict", "d_mm", "tol_h_mm",
-                 "dz_mm", "tol_v_mm", "instrument", "control_ref", "measured"}]}
+                 "dz_mm", "tol_v_mm", "instrument", "control_ref", "measured",
+                 "ncr_id", "deviation_accepted"}]}
 
 SET-001 error: a stake outside its tolerance (opens an NCR draft on request).
 SET-002 warning: a stakeout record with no instrument or no control reference.
+SET-003 warning: a failed stake with neither an NCR nor an accepted deviation.
 """
 
 from __future__ import annotations
@@ -89,7 +91,33 @@ class RecordTraceableRule(_SettingOutRule):
         return out or [self.ok()]
 
 
-SETTING_OUT_RULES = (StakeWithinToleranceRule, RecordTraceableRule)
+class FailureResolvedRule(_SettingOutRule):
+    """SET-003: a failed stake is either raised as an NCR or accepted as built."""
+
+    rule_id = "SET-003"
+    name = "Failed stakes are followed up"
+    severity = Severity.WARNING
+    category = RuleCategory.COMPLETENESS
+    description = "Every failed stake has an NCR draft or an accepted deviation"
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        out = [
+            self.fail(
+                context,
+                "stake_unresolved",
+                ref=f"{s.get('request') or ''}/{s.get('point_id') or ''}",
+                id=str(s.get("point_id") or ""),
+            )
+            for s in rows(context, "stakes")
+            if s.get("measured")
+            and s.get("verdict") == "fail"
+            and not s.get("ncr_id")
+            and not s.get("deviation_accepted")
+        ]
+        return out or [self.ok()]
+
+
+SETTING_OUT_RULES = (StakeWithinToleranceRule, RecordTraceableRule, FailureResolvedRule)
 
 
 def register_setting_out_validation_rules() -> None:

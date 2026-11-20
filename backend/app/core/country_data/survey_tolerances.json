@@ -1,5 +1,5 @@
 {
-  "_doc": "Survey closure and boundary-corner classes per country (ISO code). Offered only while that country is an active market. Every class names its source; status to_verify means the pack author has not yet checked the table against the source, so the class is offered for the surveyor to pick and is never applied on its own.",
+  "_doc": "Survey closure and boundary-corner classes per country (ISO code). Offered only while that country is an active market. Every class names its source; status to_verify means the pack author has not yet checked the table against the source, so the class is offered for the surveyor to pick and is never applied on its own. Each class also carries the edition year of its source and the clause where known.",
   "US": {
     "closure_classes": [
       {
@@ -8,7 +8,8 @@
         "angular_k_sec": 10,
         "traverse_min_ratio": 10000,
         "source": "FGCC 1984, Standards and Specifications for Geodetic Control Networks, traverse",
-        "status": "to_verify"
+        "status": "to_verify",
+        "edition": "1984"
       },
       {
         "key": "us_fgcc1984_trav_3_2",
@@ -16,21 +17,24 @@
         "angular_k_sec": 12,
         "traverse_min_ratio": 5000,
         "source": "FGCC 1984, Standards and Specifications for Geodetic Control Networks, traverse",
-        "status": "to_verify"
+        "status": "to_verify",
+        "edition": "1984"
       },
       {
         "key": "us_fgcc1984_lev_2_1",
         "label": "FGCC 1984 levelling, second order class I",
         "level_k_mm": 6,
         "source": "FGCC 1984, Standards and Specifications for Geodetic Control Networks, levelling",
-        "status": "to_verify"
+        "status": "to_verify",
+        "edition": "1984"
       },
       {
         "key": "us_fgcc1984_lev_3",
         "label": "FGCC 1984 levelling, third order",
         "level_k_mm": 12,
         "source": "FGCC 1984, Standards and Specifications for Geodetic Control Networks, levelling",
-        "status": "to_verify"
+        "status": "to_verify",
+        "edition": "1984"
       }
     ],
     "corner_classes": [
@@ -40,19 +44,148 @@
         "base_m": 0.021336,
         "ppm": 50,
         "source": "2021 ALTA/NSPS Minimum Standard Detail Requirements, section 3.E (0.07 ft + 50 ppm)",
-        "status": "to_verify"
+        "status": "to_verify",
+        "edition": "2021"
       }
     ]
   },
   "RU": {
-    "closure_classes": [],
+    "closure_classes": [
+      {
+        "key": "ru_poly_4cl",
+        "label": "Polygonometry, 4th class",
+        "angular_k_sec": 5,
+        "traverse_min_ratio": 25000,
+        "source": "GKINP-02-033-82 Instruction on topographic surveys at scales 1:5000 to 1:500, polygonometry",
+        "edition": "1982",
+        "clause": "Polygonometry 4th class: angular misclosure 5\"√n, relative misclosure 1:25000",
+        "status": "to_verify"
+      },
+      {
+        "key": "ru_poly_r1",
+        "label": "Polygonometry, 1st grade",
+        "angular_k_sec": 10,
+        "traverse_min_ratio": 10000,
+        "source": "GKINP-02-033-82 Instruction on topographic surveys at scales 1:5000 to 1:500, polygonometry",
+        "edition": "1982",
+        "clause": "Polygonometry 1st grade: angular misclosure 10\"√n, relative misclosure 1:10000",
+        "status": "to_verify"
+      },
+      {
+        "key": "ru_poly_r2",
+        "label": "Polygonometry, 2nd grade",
+        "angular_k_sec": 20,
+        "traverse_min_ratio": 5000,
+        "source": "GKINP-02-033-82 Instruction on topographic surveys at scales 1:5000 to 1:500, polygonometry",
+        "edition": "1982",
+        "clause": "Polygonometry 2nd grade: angular misclosure 20\"√n, relative misclosure 1:5000",
+        "status": "to_verify"
+      },
+      {
+        "key": "ru_lev_3",
+        "label": "Levelling, class III",
+        "level_k_mm": 10,
+        "source": "GKINP (GNTA)-03-010-02 Instruction on levelling of classes I, II, III and IV",
+        "edition": "2004",
+        "clause": "Class III: misclosure 10 mm√L",
+        "status": "to_verify"
+      },
+      {
+        "key": "ru_lev_4",
+        "label": "Levelling, class IV",
+        "level_k_mm": 20,
+        "source": "GKINP (GNTA)-03-010-02 Instruction on levelling of classes I, II, III and IV",
+        "edition": "2004",
+        "clause": "Class IV: misclosure 20 mm√L",
+        "status": "to_verify"
+      }
+    ],
     "corner_classes": [
       {
         "key": "ru_rosreestr_p0393_settlement",
         "label": "Rosreestr P/0393, settlement land (Mt 0.10 m)",
-        "base_m": 0.10,
+        "base_m": 0.1,
         "ppm": 0,
         "source": "Rosreestr order P/0393 of 23.10.2020",
+        "status": "to_verify",
+        "edition": "2020"
+      }
+    ]
+  },
+  "CN": {
+    "closure_classes": [
+      {
+        "key": "cn_gb50026_trav_4",
+        "label": "GB 50026 traverse, 4th order",
+        "angular_k_sec": 5,
+        "traverse_min_ratio": 35000,
+        "source": "GB 50026 Standard for engineering surveying",
+        "edition": "2020",
+        "clause": "Traverse main technical requirements, 4th order: 5\"√n, 1/35000",
+        "status": "to_verify"
+      },
+      {
+        "key": "cn_gb50026_trav_g1",
+        "label": "GB 50026 traverse, grade 1",
+        "angular_k_sec": 10,
+        "traverse_min_ratio": 15000,
+        "source": "GB 50026 Standard for engineering surveying",
+        "edition": "2020",
+        "clause": "Traverse main technical requirements, grade 1: 10\"√n, 1/15000",
+        "status": "to_verify"
+      },
+      {
+        "key": "cn_gb50026_trav_g2",
+        "label": "GB 50026 traverse, grade 2",
+        "angular_k_sec": 16,
+        "traverse_min_ratio": 10000,
+        "source": "GB 50026 Standard for engineering surveying",
+        "edition": "2020",
+        "clause": "Traverse main technical requirements, grade 2: 16\"√n, 1/10000",
+        "status": "to_verify"
+      },
+      {
+        "key": "cn_gb50026_trav_g3",
+        "label": "GB 50026 traverse, grade 3",
+        "angular_k_sec": 24,
+        "traverse_min_ratio": 5000,
+        "source": "GB 50026 Standard for engineering surveying",
+        "edition": "2020",
+        "clause": "Traverse main technical requirements, grade 3: 24\"√n, 1/5000",
+        "status": "to_verify"
+      },
+      {
+        "key": "cn_gb50026_lev_3",
+        "label": "GB 50026 levelling, 3rd order",
+        "level_k_mm": 12,
+        "source": "GB 50026 Standard for engineering surveying",
+        "edition": "2020",
+        "clause": "Levelling main technical requirements, 3rd order, flat ground: 12 mm√L",
+        "status": "to_verify"
+      },
+      {
+        "key": "cn_gb50026_lev_4",
+        "label": "GB 50026 levelling, 4th order",
+        "level_k_mm": 20,
+        "source": "GB 50026 Standard for engineering surveying",
+        "edition": "2020",
+        "clause": "Levelling main technical requirements, 4th order, flat ground: 20 mm√L",
+        "status": "to_verify"
+      }
+    ],
+    "corner_classes": []
+  },
+  "PL": {
+    "closure_classes": [],
+    "corner_classes": [
+      {
+        "key": "pl_std_tech_group1",
+        "label": "Survey standards, group I details (0.10 m)",
+        "base_m": 0.1,
+        "ppm": 0,
+        "source": "Regulation on technical standards for situational and height surveys",
+        "edition": "2020",
+        "clause": "Position error of group I details relative to the control network at most 0.10 m",
         "status": "to_verify"
       }
     ]

@@ -35,16 +35,22 @@ import { CrsDialog } from '@/features/survey/CrsDialog';
 import { GridGroundChip } from '@/features/survey/GeodesyPanel';
 import { SurveyExportMenu } from '@/features/survey/SurveyExportMenu';
 import {
+  acceptDeviation,
   createNcrDraft,
+  createNcrDrafts,
   downloadSheet,
   getRequest,
+  getSettings,
   getSummary,
   listProfiles,
   listRequests,
+  putSettings,
   validateSettingOut,
+  type SettingOutSettings,
 } from './api';
+import { SourceNote, splitReference } from './SourceNote';
 import { DesignImportDialog } from './DesignImportDialog';
-import { NewRequestDialog } from './NewRequestDialog';
+import { NewRequestDialog, profileLabel } from './NewRequestDialog';
 import { StakeCard, VerdictBadge } from './StakeCard';
 import { RoadStakePanel } from '@/features/survey-calc/RoadStakePanel';
 import { settingOutGuide } from './settingOutGuide';
@@ -82,12 +88,15 @@ export default function SettingOutPage() {
   const [newOpen, setNewOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
   const [crsOpen, setCrsOpen] = useState(false);
+  const [accepting, setAccepting] = useState<string | null>(null);
+  const [acceptNote, setAcceptNote] = useState('');
 
   const enabled = !!projectId;
   const crs = useQuery({ queryKey: ['survey', 'crs', projectId], queryFn: () => getProjectCrs(projectId!), enabled });
   const profiles = useQuery({ queryKey: ['setting-out', 'profiles', projectId], queryFn: () => listProfiles(projectId!), enabled });
   const requests = useQuery({ queryKey: ['setting-out', 'requests', projectId], queryFn: () => listRequests(projectId!), enabled });
   const summary = useQuery({ queryKey: ['setting-out', 'summary', projectId], queryFn: () => getSummary(projectId!), enabled });
+  const settings = useQuery({ queryKey: ['setting-out', 'settings', projectId], queryFn: () => getSettings(projectId!), enabled });
   const findings = useQuery({
     queryKey: ['setting-out', 'findings', projectId, i18n.language],
     queryFn: () => validateSettingOut(projectId!, i18n.language),
@@ -103,6 +112,31 @@ export default function SettingOutPage() {
   const ncr = useMutation({
     mutationFn: (recordId: string) => createNcrDraft(recordId, i18n.language),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['setting-out'] }),
+    onError: (e) => addToast({ type: 'error', title: getErrorMessage(e) }),
+  });
+  const saveSettings = useMutation({
+    mutationFn: (body: Partial<SettingOutSettings>) => putSettings(projectId!, body),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['setting-out', 'settings', projectId] }),
+    onError: (e) => addToast({ type: 'error', title: getErrorMessage(e) }),
+  });
+  const bulkNcr = useMutation({
+    mutationFn: () => createNcrDrafts(projectId!, i18n.language),
+    onSuccess: (r) => {
+      qc.invalidateQueries({ queryKey: ['setting-out'] });
+      addToast({
+        type: 'success',
+        title: t('survey.setting_out.bulk_ncr_done', { defaultValue: 'NCR drafts created: {{n}}', n: r.created.length }),
+      });
+    },
+    onError: (e) => addToast({ type: 'error', title: getErrorMessage(e) }),
+  });
+  const accept = useMutation({
+    mutationFn: ({ recordId, note }: { recordId: string; note: string }) => acceptDeviation(recordId, note),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['setting-out'] });
+      setAccepting(null);
+      setAcceptNote('');
+    },
     onError: (e) => addToast({ type: 'error', title: getErrorMessage(e) }),
   });
 
@@ -152,6 +186,9 @@ export default function SettingOutPage() {
     { key: 'ncr', label: t('survey.setting_out.kpi.ncr_drafts', { defaultValue: 'NCR drafts' }), value: summary.data?.ncr_drafts ?? 0, icon: FileWarning },
   ];
   const showCards = phone || view === 'field';
+  const defaultProfile = (profiles.data ?? []).find((p) => p.key === settings.data?.default_tolerance_key);
+  const reqSource = splitReference(req?.tolerance_reference);
+  const unresolved = (findings.data?.findings ?? []).filter((f) => f.rule_id === 'SET-003').length;
   const tolText = req
     ? req.tol_h_mm != null
       ? `${req.tolerance_label} ${fmtMm(req.tol_h_mm)} mm`.trim()
@@ -187,6 +224,7 @@ export default function SettingOutPage() {
           <li>{t('survey.setting_out.how_1', { defaultValue: 'Create a request and pick the tolerance profile, then import the design points or an alignment.' })}</li>
           <li>{t('survey.setting_out.how_2', { defaultValue: 'On site, type the measured E and N for each stake: Pass or Fail shows at once.' })}</li>
           <li>{t('survey.setting_out.how_3', { defaultValue: 'A failed stake opens an NCR draft in Quality with one button. Print the sheet for the file.' })}</li>
+          <li>{t('survey.setting_out.how_4', { defaultValue: 'Every failed stake needs an NCR draft or an accepted deviation (SET-003). Turn on automatic NCR drafts for the project if you always raise one.' })}</li>
         </ol>
         <dl className="mt-3 grid gap-1 text-sm">
           {(['setting_out', 'tolerance', 'chainage'] as const).map((k) => (
@@ -200,8 +238,36 @@ export default function SettingOutPage() {
 
       <KpiBand items={kpis} columns={4} size="sm" />
 
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm" data-testid="so-settings">
+        <label className="inline-flex flex-wrap items-center gap-2">
+          <span className="font-semibold">{t('survey.setting_out.settings.default_profile', { defaultValue: 'Project tolerance profile' })}</span>
+          <select className="oe-input" value={settings.data?.default_tolerance_key ?? ''} disabled={!canWrite || saveSettings.isPending}
+            onChange={(e) => saveSettings.mutate({ default_tolerance_key: e.target.value })} data-testid="so-default-profile"
+            title={t('survey.setting_out.settings.default_profile_tip', { defaultValue: 'Preselected for every new request. Country profiles show only for the markets of your company profile.' })}>
+            <option value="">{t('survey.setting_out.profile.none', { defaultValue: 'No profile, set one' })}</option>
+            {(profiles.data ?? []).map((p) => (
+              <option key={p.key} value={p.key}>{profileLabel(p, t)}</option>
+            ))}
+          </select>
+        </label>
+        {defaultProfile && <SourceNote reference={defaultProfile.reference} />}
+        <label className="inline-flex items-center gap-2">
+          <input type="checkbox" checked={!!settings.data?.auto_ncr} disabled={!canWrite || saveSettings.isPending}
+            onChange={(e) => saveSettings.mutate({ auto_ncr: e.target.checked })} data-testid="so-auto-ncr" />
+          <span>{t('survey.setting_out.settings.auto_ncr', { defaultValue: 'Create an NCR draft automatically when a stake fails tolerance' })}</span>
+        </label>
+      </div>
+
       {findings.data && findings.data.findings.length > 0 && (
         <Card className="p-3" data-testid="so-findings">
+          {unresolved > 0 && canWrite && (
+            <div className="mb-2 flex justify-end">
+              <Button size="sm" variant="secondary" icon={<FileWarning size={14} />} disabled={bulkNcr.isPending}
+                onClick={() => bulkNcr.mutate()} data-testid="so-bulk-ncr">
+                {t('survey.setting_out.action.bulk_ncr', { defaultValue: 'Create NCRs for all failures ({{n}})', n: unresolved })}
+              </Button>
+            </div>
+          )}
           <ul className="space-y-1 text-sm">
             {findings.data.findings.map((f, i) => {
               const recordId = f.element_ref ? stakesByRef.get(f.element_ref) : undefined;
@@ -214,10 +280,29 @@ export default function SettingOutPage() {
                     {f.message}
                     {f.suggestion && <span className="text-content-secondary"> {f.suggestion}</span>}
                   </span>
-                  {f.rule_id === 'SET-001' && recordId && !linked && (
-                    <Button size="sm" variant="secondary" disabled={ncr.isPending} onClick={() => ncr.mutate(recordId)}>
-                      {t('survey.setting_out.action.create_ncr', { defaultValue: 'Create NCR draft' })}
-                    </Button>
+                  {f.rule_id === 'SET-003' && recordId && !linked && canWrite && (
+                    <span className="flex flex-wrap gap-1">
+                      <Button size="sm" variant="secondary" disabled={ncr.isPending} onClick={() => ncr.mutate(recordId)}>
+                        {t('survey.setting_out.action.create_ncr', { defaultValue: 'Create NCR draft' })}
+                      </Button>
+                      <Button size="sm" variant="ghost" onClick={() => { setAccepting(recordId); setAcceptNote(''); }}>
+                        {t('survey.setting_out.action.accept_deviation', { defaultValue: 'Accept deviation' })}
+                      </Button>
+                    </span>
+                  )}
+                  {accepting && accepting === recordId && f.rule_id === 'SET-003' && (
+                    <form className="flex w-full flex-wrap items-center gap-2 ps-4"
+                      onSubmit={(e) => { e.preventDefault(); if (acceptNote.trim()) accept.mutate({ recordId: accepting, note: acceptNote.trim() }); }}>
+                      <input className="oe-input flex-1" value={acceptNote} onChange={(e) => setAcceptNote(e.target.value)} autoFocus
+                        aria-label={t('survey.setting_out.accept_reason', { defaultValue: 'Why is this deviation acceptable?' })}
+                        placeholder={t('survey.setting_out.accept_reason', { defaultValue: 'Why is this deviation acceptable?' })} />
+                      <Button size="sm" variant="primary" type="submit" disabled={!acceptNote.trim() || accept.isPending}>
+                        {t('survey.setting_out.action.accept_deviation', { defaultValue: 'Accept deviation' })}
+                      </Button>
+                      <Button size="sm" variant="ghost" type="button" onClick={() => setAccepting(null)}>
+                        {t('common.cancel', { defaultValue: 'Cancel' })}
+                      </Button>
+                    </form>
                   )}
                 </li>
               );
@@ -272,6 +357,7 @@ export default function SettingOutPage() {
                   <div className="text-sm text-content-secondary flex items-center gap-1" data-testid="so-request-tolerance">
                     {t('survey.setting_out.field.tolerance_short', { defaultValue: 'Tolerance' })}: {tolText}
                     <InfoHint inline text={t('survey.glossary.tolerance_def', { defaultValue: 'The allowed difference between the design and the staked position.' })} />
+                    {reqSource.text && <SourceNote reference={reqSource.text} status={reqSource.status} testId="so-request-source" />}
                     {req.alignment && (
                       <span>
                         {' · '}
@@ -369,7 +455,7 @@ export default function SettingOutPage() {
         </CollapsibleSection>
       )}
 
-      <NewRequestDialog open={newOpen} projectId={projectId} profiles={profiles.data ?? []} onClose={() => setNewOpen(false)} onCreated={(r) => setSelected(r.id)} />
+      <NewRequestDialog open={newOpen} projectId={projectId} profiles={profiles.data ?? []} defaultKey={settings.data?.default_tolerance_key ?? ''} onClose={() => setNewOpen(false)} onCreated={(r) => setSelected(r.id)} />
       {activeId && <DesignImportDialog open={importOpen} requestId={activeId} onClose={() => setImportOpen(false)} />}
       <CrsDialog open={crsOpen} projectId={projectId} state={crs.data} onClose={() => setCrsOpen(false)} />
     </div>

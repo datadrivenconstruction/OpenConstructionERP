@@ -2500,6 +2500,10 @@
     "spiral_skipped": {
       "fail": "Clothoïdeparameter ontbreekt; element {n} overgeslagen.",
       "suggestion": "Exporteer de as opnieuw met de clothoïdelengte en beide stralen."
+    },
+    "stake_unresolved": {
+      "fail": "Uitzetpunt {id} valt buiten de tolerantie en heeft geen NCR en geen geaccepteerde afwijking.",
+      "suggestion": "Maak een NCR-concept aan of accepteer de afwijking met een reden."
     }
   },
   "land_parcels": {

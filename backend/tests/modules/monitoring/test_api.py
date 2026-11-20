@@ -146,9 +146,11 @@ async def test_lessons_3_to_5_action_notification_risk_acknowledge_report(
     assert draft["title"] == "Monitoring point MP-01 at Action"
 
     report = (await client.post(f"{BASE}/projects/{project_id}/validate", headers=header)).json()
-    assert [f["rule_id"] for f in report["findings"]] == [l3["rule"]]
-    assert report["findings"][0]["message"] == l3["finding"]
-    assert report["findings"][0]["severity"] == "error"
+    # The trend also reaches Alarm in 6.6 days, inside the forecast horizon (SRV-120).
+    assert sorted(f["rule_id"] for f in report["findings"]) == sorted([l3["rule"], "SRV-120"])
+    crossed = next(f for f in report["findings"] if f["rule_id"] == l3["rule"])
+    assert crossed["message"] == l3["finding"]
+    assert crossed["severity"] == "error"
 
     kpi = (await client.get(f"{BASE}/projects/{project_id}/summary", headers=header)).json()
     expected_kpi = EXPECTED["kpi_after_epoch_4"]

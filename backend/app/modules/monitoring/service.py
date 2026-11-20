@@ -48,6 +48,7 @@ from app.modules.monitoring.schemas import (
     Acknowledge,
     AlertOut,
     Finding,
+    ForecastLevelOut,
     ImportProblem,
     MonitoringSummary,
     PointCreate,
@@ -120,6 +121,9 @@ def _profile_out(p: profile_lib.MonitoringProfile) -> ProfileOut:
         source=p.source,  # type: ignore[arg-type]
         country=p.country,
         reference=p.reference,
+        edition=p.edition,
+        clause=p.clause,
+        status=p.status,
         thresholds=_thresholds_out(p.thresholds),
     )
 
@@ -360,6 +364,12 @@ class MonitoringService:
             forecast_level=(fc.level or "") if fc else "",
             forecast_days=fc.days if fc else None,
             forecast_rate_mm_day=fc.slope_mm_day if fc else None,
+            forecast_approaching=fc.approaching if fc else False,
+            forecast_epochs=fc.epochs if fc else 0,
+            forecast_levels=[
+                ForecastLevelOut(level=lf.level, limit_mm=lf.limit_mm, reached=lf.reached, days=lf.days)  # type: ignore[arg-type]
+                for lf in (fc.levels if fc else ())
+            ],
         )
 
     async def _outs(self, project_id: uuid.UUID, markets: list[str], only: uuid.UUID | None = None) -> list[PointOut]:
@@ -381,6 +391,7 @@ class MonitoringService:
         ]
         alerts = await self.repo.alerts(point.project_id, point.id)
         base = self._point_out(point, series, alerts, profile)
+        risk_by_reading = {a.reading_id: a.risk_id for a in alerts if a.risk_id}
         return PointDetail(
             **base.model_dump(),
             profile_label=profile.name if profile else "",
@@ -395,6 +406,7 @@ class MonitoringService:
                     displacement_mm=_f(ev.displacement_mm),
                     rate_mm_day=_f(ev.rate_mm_day),
                     level=ev.level if profile else "none",  # type: ignore[arg-type]
+                    risk_id=risk_by_reading.get(r.id),
                 )
                 for r, at, ev in series
             ],
@@ -666,6 +678,8 @@ class MonitoringService:
                             "source": "monitoring",
                             "draft": True,
                             "point_id": str(point.id),
+                            "point_code": point.code,
+                            "reading_id": str(alert.reading_id),
                             "alert_id": str(alert.id),
                             "rule_id": "MON-001",
                             "level": alert.level,

@@ -2500,6 +2500,10 @@
     "spiral_skipped": {
       "fail": "Klotoidin parametri puuttuu; elementti {n} ohitettu.",
       "suggestion": "Vie linjaus uudelleen klotoidin pituuden ja molempien säteiden kanssa."
+    },
+    "stake_unresolved": {
+      "fail": "Merkintäpiste {id} on toleranssin ulkopuolella, eikä sillä ole NCR:ää eikä hyväksyttyä poikkeamaa.",
+      "suggestion": "Luo NCR-luonnos tai hyväksy poikkeama perusteluineen."
     }
   },
   "land_parcels": {

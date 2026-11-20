@@ -2500,6 +2500,10 @@
     "spiral_skipped": {
       "fail": "Klotoidparameter saknas; element {n} hoppades över.",
       "suggestion": "Exportera linjen igen med klotoidlängd och båda radierna."
+    },
+    "stake_unresolved": {
+      "fail": "Utsättningspunkt {id} ligger utanför toleransen och har varken en NCR eller en godkänd avvikelse.",
+      "suggestion": "Skapa ett NCR-utkast eller godkänn avvikelsen med en motivering."
     }
   },
   "land_parcels": {

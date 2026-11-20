@@ -177,5 +177,20 @@
     "lesson_5": {
       "claim_quantity_m3": 11870.0
     }
+  },
+  "geodesy": {
+    "note": "Course numbers for ground to grid on the Riverside Yard site (UTM 33N, near 52.51 N 13.37 E)",
+    "epsg": 32633,
+    "site": {
+      "e": 389080.0,
+      "n": 5819030.0,
+      "height_m": 34.3
+    },
+    "projection_scale_k": 0.999751,
+    "elevation_factor": 0.9999946,
+    "combined_scale_factor": 0.9997456,
+    "ground_m": 100.0,
+    "grid_m": 99.975,
+    "difference_mm": 25.4
   }
 }
