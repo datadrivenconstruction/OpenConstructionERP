@@ -198,6 +198,8 @@ def next_ordinal_after(steps: list[Step], amount: Decimal | None, ordinal: int) 
     """The next step after ``ordinal`` that ``amount`` routes through, or None when the chain is done."""
     later = [o for o in applicable_ordinals(steps, amount) if o > ordinal]
     return later[0] if later else None
+
+
 def _step_view(step: object) -> dict[str, object]:
     """A step (stored row or payload) as the route rules read it."""
     return {
