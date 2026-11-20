@@ -50,6 +50,7 @@ import { canonicalizeUnit } from './lib/units';
 import { aiApi } from '@/features/ai/api';
 import { hasLlmKey } from '@/features/ai-estimator/useAiReadiness';
 import { compareNames } from '@/shared/lib/collator';
+import { DesignOffer } from '@/modules/design/DesignOffer';
 
 const TakeoffViewerModule = lazy(() => import('@/modules/pdf-takeoff/TakeoffViewerModule'));
 
@@ -2380,6 +2381,7 @@ export function TakeoffPage() {
           {/* Upload Area */}
           <div className="mb-6" data-guide="takeoff-upload">
             <DropZone onFilesSelected={handleFilesSelected} disabled={false} />
+            <DesignOffer variant="drawings" />
             {selectedProjectId && (
               <div className="mt-3 flex justify-center">
                 <button

@@ -4723,7 +4723,7 @@ export function BIMViewer({
           still works. Verified against the v2.7.5 Match-tab regression
           where banner pills were intercepting clicks on the 5th tab. */}
       {elementCount > 0 && (
-        <div className="absolute top-3 end-3 z-20 flex items-center gap-1.5 flex-wrap justify-end max-w-[calc(100%-400px)] pointer-events-none">
+        <div className="absolute top-14 start-3 end-3 z-20 flex items-center gap-1.5 flex-wrap justify-start pointer-events-none md:top-3 md:start-auto md:justify-end md:max-w-[calc(100%-400px)]">
           {/* Total elements pill — not clickable, just informational */}
           <span
             className="pointer-events-auto inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-2xs font-medium bg-surface-primary text-content-secondary border border-border-light shadow-sm"
