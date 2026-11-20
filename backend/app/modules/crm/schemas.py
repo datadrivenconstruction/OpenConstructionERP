@@ -9,9 +9,10 @@ from decimal import Decimal
 from typing import Any
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from app.core.decimal_types import Decimal18_2, FiniteDecimal
+from app.modules.crm.validators import LEAD_SOURCE_PATTERN, normalize_currency
 
 # Upper bound for money fields - mirrors changeorders/full_evm/risk/punchlist.
 # Far above any realistic deal value yet within Decimal/Numeric(18,2) limits so
@@ -167,7 +168,7 @@ class LeadCreate(BaseModel):
     contact_phone: str | None = Field(default=None, max_length=64)
     source: str = Field(
         default="inbound",
-        pattern=r"^(web|referral|event|cold_outreach|inbound)$",
+        pattern=LEAD_SOURCE_PATTERN,
     )
     status: str = Field(
         default="new",
@@ -186,7 +187,7 @@ class LeadUpdate(BaseModel):
     contact_phone: str | None = Field(default=None, max_length=64)
     source: str | None = Field(
         default=None,
-        pattern=r"^(web|referral|event|cold_outreach|inbound)$",
+        pattern=LEAD_SOURCE_PATTERN,
     )
     status: str | None = Field(
         default=None,
@@ -222,16 +223,25 @@ class LeadQualifyRequest(BaseModel):
 
 
 class LeadConvertRequest(BaseModel):
+    """Convert a qualified lead. ``account_id`` falls back to the lead's own
+    account and ``stage_id`` to the first open pipeline stage, so a one-click
+    conversion from the pipeline needs only a title."""
+
     model_config = ConfigDict(str_strip_whitespace=True)
 
-    account_id: UUID
+    account_id: UUID | None = None
     title: str = Field(..., min_length=1, max_length=500)
     estimated_value: Decimal18_2 = Field(default=Decimal("0"), ge=0, le=_MONEY_MAX)
     currency: str = Field(default="", max_length=8)
     expected_close_date: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")
-    stage_id: UUID
+    stage_id: UUID | None = None
     probability_percent: int = Field(default=0, ge=0, le=100)
     description: str = Field(default="", max_length=10000)
+
+    @field_validator("currency")
+    @classmethod
+    def _currency(cls, v: str) -> str:
+        return normalize_currency(v)
 
 
 # ── Opportunity ───────────────────────────────────────────────────────────
@@ -250,7 +260,7 @@ class OpportunityCreate(BaseModel):
     stage_id: UUID
     source: str = Field(
         default="inbound",
-        pattern=r"^(web|referral|event|cold_outreach|inbound)$",
+        pattern=LEAD_SOURCE_PATTERN,
     )
     owner_user_id: UUID | None = None
     status: str = Field(
@@ -261,6 +271,11 @@ class OpportunityCreate(BaseModel):
     primary_contact_id: UUID | None = None
     project_id: UUID | None = None
     competitor_names: list[str] = Field(default_factory=list)
+
+    @field_validator("currency")
+    @classmethod
+    def _currency(cls, v: str) -> str:
+        return normalize_currency(v)
 
 
 class OpportunityUpdate(BaseModel):
@@ -275,7 +290,7 @@ class OpportunityUpdate(BaseModel):
     stage_id: UUID | None = None
     source: str | None = Field(
         default=None,
-        pattern=r"^(web|referral|event|cold_outreach|inbound)$",
+        pattern=LEAD_SOURCE_PATTERN,
     )
     owner_user_id: UUID | None = None
     status: str | None = Field(
@@ -286,6 +301,11 @@ class OpportunityUpdate(BaseModel):
     primary_contact_id: UUID | None = None
     project_id: UUID | None = None
     competitor_names: list[str] | None = None
+
+    @field_validator("currency")
+    @classmethod
+    def _currency(cls, v: str | None) -> str | None:
+        return None if v is None else normalize_currency(v)
 
 
 class OpportunityResponse(BaseModel):
@@ -514,3 +534,58 @@ class StageHistoryResponse(BaseModel):
     changed_by: UUID | None
     duration_in_previous_seconds: int | None
     created_at: datetime
+
+
+# ── Account contacts (link table to the contacts module) ──────────────────
+
+
+class AccountContactLinkCreate(BaseModel):
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    contact_id: UUID
+    role: str = Field(default="", max_length=64)
+    is_primary: bool = False
+
+
+class AccountContactResponse(BaseModel):
+    """A contact linked to an account, with the display fields the UI needs."""
+
+    account_id: UUID
+    contact_id: UUID
+    role: str
+    is_primary: bool
+    display_name: str
+    email: str | None = None
+    phone: str | None = None
+
+
+# ── Reports ───────────────────────────────────────────────────────────────
+
+
+class OwnerActivitySummaryRow(BaseModel):
+    owner_user_id: UUID | None
+    calls: int = 0
+    meetings: int = 0
+    emails: int = 0
+    site_visits: int = 0
+    total: int = 0
+
+
+class OwnerActivitySummaryResponse(BaseModel):
+    date_from: str | None
+    date_to: str | None
+    rows: list[OwnerActivitySummaryRow]
+
+
+class RevenueMonthRow(BaseModel):
+    """Expected revenue (value x probability) for one close month and currency."""
+
+    month: str  # YYYY-MM, or "" for deals with no expected close date
+    currency: str
+    expected: Decimal
+    deals: int
+
+
+class RevenueByMonthResponse(BaseModel):
+    rows: list[RevenueMonthRow]
+    mixed_currency: bool = False

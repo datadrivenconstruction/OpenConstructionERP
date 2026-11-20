@@ -79,6 +79,12 @@ import { SideDrawer } from '@/shared/ui/SideDrawer';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { fetchUsers } from '@/features/users/api';
 import { crmGuide } from './crmGuide';
+import { AccountsView } from './AccountsView';
+import { OwnerActivityCard, RevenueByMonthCard } from './CrmReports';
+import { PipelineLeadsStrip } from './PipelineLeadsStrip';
+import { sourceLabel } from './crmLabels';
+import { CurrencyPicker } from '@/shared/ui/CurrencyPicker';
+import { usePreferencesStore } from '@/stores/usePreferencesStore';
 import {
   WideModal,
   WideModalSection,
@@ -131,7 +137,7 @@ import {
   type RemovalRefusal,
 } from './api';
 
-type View = 'pipeline' | 'list' | 'leads' | 'activities' | 'insights';
+type View = 'pipeline' | 'list' | 'leads' | 'activities' | 'accounts' | 'insights';
 
 const LEAD_STATUS_VARIANT: Record<
   LeadStatus,
@@ -184,37 +190,12 @@ const LEAD_SOURCES: LeadSource[] = [
   'web',
   'referral',
   'event',
+  'trade_show',
   'cold_outreach',
   'inbound',
 ];
 
 const ACTIVITY_KINDS: ActivityKind[] = ['call', 'meeting', 'email', 'site_visit', 'task', 'note'];
-
-// ISO-4217 codes offered in the deal currency picker. Keeps multi-currency
-// rollups (MultiCurrencyTotal / MoneyDisplay) consistent by preventing
-// free-text codes that would key the per-currency split incorrectly.
-const CURRENCY_CODES = [
-  'EUR',
-  'USD',
-  'GBP',
-  'CHF',
-  'CAD',
-  'AUD',
-  'NZD',
-  'SEK',
-  'NOK',
-  'DKK',
-  'PLN',
-  'CZK',
-  'JPY',
-  'CNY',
-  'INR',
-  'BRL',
-  'AED',
-  'SAR',
-  'ZAR',
-  'TRY',
-];
 
 const inputCls =
   'w-full';
@@ -399,7 +380,7 @@ export function CRMPage() {
   const leadsQ = useQuery({
     queryKey: ['crm', 'leads'],
     queryFn: () => listLeads({ limit: 200 }),
-    enabled: view === 'leads',
+    enabled: view === 'leads' || view === 'pipeline',
   });
   const activitiesQ = useQuery({
     queryKey: ['crm', 'activities'],
@@ -494,6 +475,11 @@ export function CRMPage() {
       id: 'activities',
       label: t('crm.tab_activities', { defaultValue: 'Activities' }),
       icon: ActivityIcon,
+    },
+    {
+      id: 'accounts',
+      label: t('crm.tab_accounts', { defaultValue: 'Accounts' }),
+      icon: Network,
     },
     {
       id: 'insights',
@@ -631,6 +617,11 @@ export function CRMPage() {
           />
         </Card>
       ) : view === 'pipeline' ? (
+        <>
+        <PipelineLeadsStrip
+          leads={leadsQ.data ?? []}
+          onOpenLead={setSelectedLeadId}
+        />
         <PipelineBoard
           stages={stagesSorted}
           opportunities={filteredOpps}
@@ -638,6 +629,7 @@ export function CRMPage() {
           onSelect={setSelectedOpportunityId}
           onCreate={() => setCreateOpen(true)}
         />
+        </>
       ) : view === 'list' ? (
         <Card padding="none">
           <DealsTable
@@ -663,6 +655,10 @@ export function CRMPage() {
             rows={filteredActivities}
             onCreate={() => setCreateOpen(true)}
           />
+        </Card>
+      ) : view === 'accounts' ? (
+        <Card padding="none">
+          <AccountsView accounts={accountsQ.data ?? []} />
         </Card>
       ) : (
         <InsightsPanel stagesById={stagesById} />
@@ -1191,7 +1187,7 @@ function LeadsTable({
                 {r.account_id ? accountsById[r.account_id]?.name || '—' : '—'}
               </td>
               <td className="text-content-secondary capitalize">
-                {r.source.replace(/_/g, ' ')}
+                {sourceLabel(t, r.source)}
               </td>
               <td>
                 <Badge variant={LEAD_STATUS_VARIANT[r.status]} dot>
@@ -2242,12 +2238,13 @@ function LeadDrawer({
   // The server's structured 409, kept so the drawer can name what is holding
   // the lead instead of showing a bare error toast that disappears.
   const [deleteRefusal, setDeleteRefusal] = useState<RemovalRefusal | null>(null);
+  const prefCurrency = usePreferencesStore((st) => st.currency);
   const [convForm, setConvForm] = useState({
     title: '',
     account_id: '',
     stage_id: '',
     estimated_value: '0',
-    currency: 'EUR',
+    currency: prefCurrency,
     probability_percent: '20',
   });
 
@@ -2341,7 +2338,7 @@ function LeadDrawer({
         title: convForm.title.trim(),
         stage_id: convForm.stage_id,
         estimated_value: Number(convForm.estimated_value) || 0,
-        currency: convForm.currency || 'EUR',
+        currency: convForm.currency,
         probability_percent: Number(convForm.probability_percent) || 0,
       }),
     onSuccess: (opp) => {
@@ -2390,7 +2387,7 @@ function LeadDrawer({
               label={t('crm.source', { defaultValue: 'Source' })}
               value={
                 <span className="capitalize">
-                  {lead.source.replace(/_/g, ' ')}
+                  {sourceLabel(t, lead.source)}
                 </span>
               }
             />
@@ -2520,19 +2517,11 @@ function LeadDrawer({
                       <p className="mb-1 text-2xs uppercase tracking-wide text-content-tertiary">
                         {t('crm.currency', { defaultValue: 'Currency' })}
                       </p>
-                      <select
+                      <CurrencyPicker
                         value={convForm.currency}
-                        onChange={(e) =>
-                          setConvForm({ ...convForm, currency: e.target.value })
-                        }
-                        className={`oe-select ${inputCls}`}
-                      >
-                        {CURRENCY_CODES.map((c) => (
-                          <option key={c} value={c}>
-                            {c}
-                          </option>
-                        ))}
-                      </select>
+                        onChange={(code) => setConvForm({ ...convForm, currency: code })}
+                        selectClassName={`oe-select ${inputCls}`}
+                      />
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-2">
@@ -2928,6 +2917,11 @@ function InsightsPanel({
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
+        <RevenueByMonthCard />
+        <OwnerActivityCard />
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-2">
         <Card padding="md">
           <p className="oe-overline mb-3">
             {t('crm.by_stage', { defaultValue: 'Open value by stage' })}
@@ -3047,12 +3041,13 @@ function CreateModal({
     source: 'inbound' as LeadSource,
   });
 
+  const prefCurrency = usePreferencesStore((st) => st.currency);
   const [dealForm, setDealForm] = useState({
     account_id: accounts[0]?.id || '',
     new_account_name: '',
     title: '',
     estimated_value: '0',
-    currency: 'EUR',
+    currency: prefCurrency,
     probability_percent: '20',
     stage_id: stages[0]?.id || '',
     expected_close_date: '',
@@ -3089,7 +3084,7 @@ function CreateModal({
           account_id: accountId,
           title: dealForm.title.trim(),
           estimated_value: Number(dealForm.estimated_value) || 0,
-          currency: dealForm.currency || 'EUR',
+          currency: dealForm.currency,
           probability_percent: Number(dealForm.probability_percent) || 0,
           stage_id: dealForm.stage_id,
           expected_close_date: dealForm.expected_close_date || null,
@@ -3252,19 +3247,11 @@ function CreateModal({
             <WideModalField
               label={t('crm.currency', { defaultValue: 'Currency' })}
             >
-              <select
+              <CurrencyPicker
                 value={dealForm.currency}
-                onChange={(e) =>
-                  setDealForm({ ...dealForm, currency: e.target.value })
-                }
-                className={`oe-select ${inputCls}`}
-              >
-                {CURRENCY_CODES.map((c) => (
-                  <option key={c} value={c}>
-                    {c}
-                  </option>
-                ))}
-              </select>
+                onChange={(code) => setDealForm({ ...dealForm, currency: code })}
+                selectClassName={`oe-select ${inputCls}`}
+              />
             </WideModalField>
             <WideModalField label={t('crm.stage', { defaultValue: 'Stage' })}>
               <select
@@ -3440,7 +3427,7 @@ function CreateModal({
             >
               {LEAD_SOURCES.map((s) => (
                 <option key={s} value={s}>
-                  {s.replace(/_/g, ' ')}
+                  {sourceLabel(t, s)}
                 </option>
               ))}
             </select>
