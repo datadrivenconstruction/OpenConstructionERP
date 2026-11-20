@@ -131,6 +131,42 @@ class ParcelPlanService(ParcelService):
             base_rev=base_rev,
         )
 
+    async def plan_grid(self, project_id: uuid.UUID, markets: list[str]) -> dict[str, Any]:
+        """Parcels and work zones in project grid metres for the plan editor, with what its live checks read."""
+        profile = await self.profile(project_id, markets)
+        ctx = await self._context(project_id, profile, markets)
+        parcels, points = await self._rows(project_id)
+        corners = {
+            p.id: [
+                {"label": pt.label, "e": float(pt.e), "n": float(pt.n), "mark": pt.mark} for pt in points.get(p.id, [])
+            ]
+            for p in parcels
+        }
+        by_id = {str(p.id): p for p in parcels}
+        epsg, _local = await self._crs(project_id)
+        return {
+            "epsg": epsg,
+            "id_pattern": profile.id_pattern,
+            "gap_tolerance_m": ctx["settings"]["gap_tolerance_m"],
+            "parcels": [
+                {
+                    "id": row["id"],
+                    "ref": row["ref"],
+                    "name": by_id[row["id"]].name,
+                    "status": row["status"],
+                    "legal_area": row["legal_area"],
+                    "computed_area": row["computed_area"],
+                    "tolerance_m2": row["tolerance_m2"],
+                    "points": corners.get(by_id[row["id"]].id, []),
+                }
+                for row in ctx["parcels"]
+            ],
+            "zones": [
+                {"id": z["id"], "name": z["name"], "ring": [[float(e), float(n)] for e, n in z["ring"]]}
+                for z in ctx["work_zones"]
+            ],
+        }
+
     # ── Boundary point register ────────────────────────────────────────────
 
     async def boundary_points(self, project_id: uuid.UUID, markets: list[str]) -> BoundaryPointRegister:

@@ -39,3 +39,18 @@ def test_no_pile_gives_no_outline() -> None:
     _, base = _cone()
     out = pile_outline(base, base)
     assert out.toe == [] and out.crest == []
+
+
+def test_dh_grid_is_upper_minus_lower_on_the_overlap() -> None:
+    from app.modules.surfaces_volumes.dh_grid import dh_grid
+
+    xs = np.array([0.0, 50.0, 50.0, 0.0])
+    ys = np.array([0.0, 0.0, 30.0, 30.0])
+    upper = Tin.from_points(xs, ys, np.full(4, 12.0))
+    lower = Tin.from_points(xs + 10, ys, np.full(4, 10.0))
+    heat, dh = dh_grid(upper, lower)
+    assert heat is not None and dh is not None
+    assert heat["origin_e"] == pytest.approx(10.0)
+    assert heat["nx"] * heat["cell"] == pytest.approx(40.0, abs=heat["cell"])
+    assert all(v == pytest.approx(2.0) for v in heat["dh"] if v is not None)
+    assert len(heat["dh"]) <= 40_000

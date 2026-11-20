@@ -8,6 +8,7 @@ Endpoints:
     GET  /surfaces/{surface_id}/contours            - contour lines (automatic or given interval)
     POST /surfaces/{surface_id}/sample              - heights along a polyline at offsets
     GET  /surfaces/{surface_id}/mesh                - vertices and triangles for hillshade
+    GET  /volumes/{volume_id}/heat                  - base minus compare on a grid, for the cut/fill map
 """
 
 from __future__ import annotations
@@ -92,3 +93,22 @@ async def sample(surface_id: uuid.UUID, body: SampleIn, session: SessionDep, use
 async def mesh(surface_id: uuid.UUID, session: SessionDep, user_id: CurrentUserId) -> MeshOut:
     service, s = await _surface(surface_id, session, user_id)
     return service.mesh(s)
+
+
+@router.get("/volumes/{volume_id}/heat", dependencies=_READ)
+async def volume_heat(volume_id: uuid.UUID, session: SessionDep, user_id: CurrentUserId) -> dict:
+    """Cut (positive) and fill (negative) depth of a volume on a grid in project metres."""
+    import asyncio  # noqa: PLC0415
+
+    from app.modules.surfaces_volumes.dh_grid import dh_grid  # noqa: PLC0415
+    from app.modules.surfaces_volumes.service import VolumesService, tin_of  # noqa: PLC0415
+
+    volumes = VolumesService(session)
+    vol = await volumes.get_volume(volume_id)
+    await verify_project_access(vol.project_id, user_id, session)
+    if vol.base_surface_id is None or vol.compare_surface_id is None:
+        return {"volume_id": str(vol.id), "heat": None}
+    base = tin_of(await volumes.get_surface(vol.base_surface_id))
+    compare = tin_of(await volumes.get_surface(vol.compare_surface_id))
+    heat, _ = await asyncio.to_thread(dh_grid, base, compare)
+    return {"volume_id": str(vol.id), "heat": heat}

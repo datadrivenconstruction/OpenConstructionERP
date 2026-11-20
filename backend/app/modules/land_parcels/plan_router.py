@@ -7,6 +7,7 @@ Endpoints:
     GET  /work-zones/{zone_id}                    - ring, touched parcels and PAR-003 findings
     PUT  /work-zones/{zone_id}                    - edit the ring or the name
     GET  /projects/{project_id}/boundary-points   - the boundary point register (number, E/N, mark)
+    GET  /projects/{project_id}/plan-grid         - parcels and zones in grid metres for the editor
     POST /projects/{project_id}/demo/riverside    - six riverside parcels with deliberate errors
 """
 
@@ -76,6 +77,13 @@ async def put_zone(
     service = ParcelPlanService(session)
     zone = await service.update_zone(await _zone(service, zone_id, user_id), body, user_id, base_rev)
     return await service.zone_detail(zone, markets, locale)
+
+
+@router.get("/projects/{project_id}/plan-grid", response_model=None, dependencies=_READ)
+async def plan_grid(project_id: uuid.UUID, session: SessionDep, user_id: CurrentUserId, markets: ActiveMarkets) -> dict:
+    """Parcels and work zones in grid metres, for the plan editor."""
+    await verify_project_access(project_id, user_id, session)
+    return await ParcelPlanService(session).plan_grid(project_id, list(markets))
 
 
 @router.get("/projects/{project_id}/boundary-points", response_model=BoundaryPointRegister, dependencies=_READ)
