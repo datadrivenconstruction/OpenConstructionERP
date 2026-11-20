@@ -37,14 +37,14 @@ describe('module strings', () => {
         'min_length', 'max_length', 'pattern', 'min_items', 'max_items', 'not_allowed', 'date_time',
         'not_a_number', 'not_an_integer', 'server'].map((c) => `design.error.${c}`),
     ];
-    expect(keys.filter((k) => !EN[k])).toEqual([]);
+    expect(keys.filter((k) => !EN[k]!)).toEqual([]);
   });
 
   it('manifest names keys the locale bundles carry, and the section is on by default', () => {
     expect(manifest.defaultEnabled).toBe(true);
     for (const key of [manifest.name, manifest.description, ...manifest.routes.map((r) => r.title),
       ...manifest.navItems.map((n) => n.labelKey)]) {
-      expect(EN[key], key).toBeTruthy();
+      expect(EN[key]!, key).toBeTruthy();
     }
     expect(manifest.translations).toBeUndefined();
   });
@@ -71,7 +71,7 @@ describe('no worker refusal', () => {
   const err = new ApiError(503, 'Service Unavailable', { detail: { code: 'no_worker', message: 'x' } });
 
   it('is told with the module string', () => {
-    expect(noWorkerText(err, t)).toBe(EN['design.generate.no_worker']);
+    expect(noWorkerText(err, t)).toBe(EN['design.generate.no_worker']!);
   });
 
   it('leaves other errors alone', () => {

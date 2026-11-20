@@ -25,7 +25,6 @@ vi.mock('./api', () => ({
   cancelGeneration: api.cancel,
 }));
 vi.mock('@/shared/ui', async () => {
-  const React = await import('react');
   return {
     Badge: ({ children }: { children: React.ReactNode }) => <span>{children}</span>,
     Card: ({ children }: { children: React.ReactNode }) => <section>{children}</section>,

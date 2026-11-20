@@ -18,7 +18,7 @@ describe('Design menu section', () => {
     expect(design!.items).toEqual([]); // rows come from the module only: no module, no group
     expect(design!.labelKey).toBe('design.title');
     expect(ids.indexOf('grp_design')).toBeLessThan(ids.indexOf('grp_takeoff'));
-    expect(RU['design.title']).toBe('Проектирование');
+    expect(RU['design.title']!).toBe('Проектирование');
   });
 
   it('no longer files design pages under Takeoff', () => {

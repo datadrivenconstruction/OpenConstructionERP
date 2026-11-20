@@ -37,7 +37,7 @@ beforeEach(() => {
 describe('background load is decided at the design offer', () => {
   it('yes at set-up: module on, consent stored, load scheduled for idle time', async () => {
     const user = await mount('tour');
-    await user.click(screen.getByRole('button', { name: EN['design.offer.yes'] }));
+    await user.click(screen.getByRole('button', { name: EN['design.offer.yes']! }));
     expect(store.set).toHaveBeenCalledWith('design', true);
     expect(localStorage.getItem(CONSENT_KEY)).toBe('yes');
     expect(load).toHaveBeenCalledWith('yes');
@@ -45,21 +45,21 @@ describe('background load is decided at the design offer', () => {
 
   it('drawing uploads (DWG/PDF) get the offer with its own wording and yes works the same', async () => {
     const user = await mount('drawings');
-    expect(screen.getByTestId('design-offer-drawings').textContent).toContain(EN['design.offer.drawings']);
-    await user.click(screen.getByRole('button', { name: EN['design.offer.enable'] }));
+    expect(screen.getByTestId('design-offer-drawings').textContent).toContain(EN['design.offer.drawings']!);
+    await user.click(screen.getByRole('button', { name: EN['design.offer.enable']! }));
     expect(store.set).toHaveBeenCalledWith('design', true);
   });
 
   it('yes on the model page hero counts the same', async () => {
     const user = await mount('empty');
-    await user.click(screen.getByRole('button', { name: EN['design.offer.enable'] }));
+    await user.click(screen.getByRole('button', { name: EN['design.offer.enable']! }));
     expect(localStorage.getItem(CONSENT_KEY)).toBe('yes');
     expect(load).toHaveBeenCalledTimes(1);
   });
 
   it('not now: nothing is loaded and the answer is kept', async () => {
     const user = await mount('tour');
-    await user.click(screen.getByRole('button', { name: EN['design.offer.later'] }));
+    await user.click(screen.getByRole('button', { name: EN['design.offer.later']! }));
     expect(localStorage.getItem(CONSENT_KEY)).toBe('no');
     expect(load).not.toHaveBeenCalled();
   });
