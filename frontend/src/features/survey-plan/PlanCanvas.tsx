@@ -303,7 +303,7 @@ export default function PlanCanvas(props: PlanCanvasProps) {
       if (m) setAnnounce(m.text);
     },
     newId,
-    t: (key, options) => t(key, options as never) as string,
+    t: (key, options) => String(t(key, options as never)),
   };
 
   function finishShape(pts: GridXY[] = vertices) {
