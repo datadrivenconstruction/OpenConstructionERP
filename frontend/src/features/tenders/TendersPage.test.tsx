@@ -64,7 +64,8 @@ describe('TendersPage', () => {
     ]);
     renderPage();
     expect(await screen.findByText('TND-0001')).toBeInTheDocument();
-    expect(screen.getByText('RFQ-7').closest('a')).toHaveAttribute('href', `/projects/${PROJECT_ID}/rfq-bidding`);
+    const rfq = screen.getByText('RFQ-7').closest('a');
+    expect(rfq?.getAttribute('href')).toMatch(/^\/tenders\/[0-9a-f-]+$/);
     expect(screen.getByText('Nord')).toBeInTheDocument();
     expect(mockGet.mock.calls[0]![0]).toContain(`project_id=${PROJECT_ID}`);
   });
@@ -77,8 +78,15 @@ describe('TendersPage', () => {
     await waitFor(() => expect(mockGet.mock.calls.some(([url]) => String(url).includes('kind=supply'))).toBe(true));
   });
 
-  it('sends each source to the page that still edits it', () => {
-    expect(tenderEditPath({ source: 'tendering', project_id: 'p' })).toBe('/tendering');
-    expect(tenderEditPath({ source: 'native', project_id: 'p' })).toBe('/projects/p/bid-management');
+  it('sends each source to the editor that still owns it', () => {
+    expect(tenderEditPath({ source: 'tendering', project_id: 'p', source_id: 'o', id: 'n' })).toBe(
+      '/tenders/edit/tendering?package=o',
+    );
+    expect(tenderEditPath({ source: 'rfq_bidding', project_id: 'p', source_id: 'r', id: 'n' })).toBe(
+      '/projects/p/tenders/edit/rfq?rfq=r',
+    );
+    expect(tenderEditPath({ source: 'native', project_id: 'p', source_id: null, id: 'n' })).toBe(
+      '/projects/p/bid-management?highlight=n',
+    );
   });
 });

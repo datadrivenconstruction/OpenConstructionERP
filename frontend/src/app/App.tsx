@@ -946,6 +946,12 @@ const RFQBiddingPage = lazy(() =>
 const TendersPage = lazy(() =>
   import('@/features/tenders').then((m) => ({ default: m.TendersPage }))
 );
+const TenderCardPage = lazy(() =>
+  import('@/features/tenders').then((m) => ({ default: m.TenderCardPage }))
+);
+const LegacyTenderRedirect = lazy(() =>
+  import('@/features/tenders').then((m) => ({ default: m.LegacyTenderRedirect }))
+);
 const SavedViewsPage = lazy(() =>
   import('@/features/saved-views').then((m) => ({ default: m.SavedViewsPage }))
 );
@@ -1591,7 +1597,11 @@ export default function App() {
         <Route path="/funding" element={<P title="Public Funding"><FundingPage /></P>} />
         <Route path="/tenders" element={<P title="Tenders"><TendersPage /></P>} />
         <Route path="/projects/:projectId/tenders" element={<P title="Tenders"><TendersPage /></P>} />
-        <Route path="/tendering" element={<P title="Tendering"><TenderingPage /></P>} />
+        <Route path="/tenders/edit/tendering" element={<P title="Tendering"><TenderingPage /></P>} />
+        <Route path="/tenders/edit/rfq" element={<P title="RFQ Bidding"><RFQBiddingPage /></P>} />
+        <Route path="/projects/:projectId/tenders/edit/rfq" element={<P title="RFQ Bidding"><RFQBiddingPage /></P>} />
+        <Route path="/tenders/:tenderId" element={<P title="Tenders"><TenderCardPage /></P>} />
+        <Route path="/tendering" element={<P title="Tenders"><LegacyTenderRedirect source="tendering" /></P>} />
         <Route path="/tendering/:tenderId/bid-day" element={<P title="Bid day"><BidDayPage /></P>} />
         <Route path="/tendering/:tenderId/bid-no-bid" element={<P title="Bid / no-bid"><BidNoBidPage /></P>} />
 
@@ -1767,8 +1777,8 @@ export default function App() {
         <Route path="/projects/:projectId/workflows" element={<P title="Approval Workflows"><WorkflowsPage /></P>} />
         <Route path="/rebar-schedule" element={<P title="Rebar Schedule"><RebarSchedulePage /></P>} />
         <Route path="/projects/:projectId/rebar-schedule" element={<P title="Rebar Schedule"><RebarSchedulePage /></P>} />
-        <Route path="/rfq-bidding" element={<P title="RFQ Bidding"><RFQBiddingPage /></P>} />
-        <Route path="/projects/:projectId/rfq-bidding" element={<P title="RFQ Bidding"><RFQBiddingPage /></P>} />
+        <Route path="/rfq-bidding" element={<P title="Tenders"><LegacyTenderRedirect source="rfq_bidding" /></P>} />
+        <Route path="/projects/:projectId/rfq-bidding" element={<P title="Tenders"><LegacyTenderRedirect source="rfq_bidding" /></P>} />
         <Route path="/saved-views" element={<P title="Saved Views"><SavedViewsPage /></P>} />
         <Route path="/projects/:projectId/saved-views" element={<P title="Saved Views"><SavedViewsPage /></P>} />
         <Route path="/about" element={<P title="About"><AboutPage /></P>} />

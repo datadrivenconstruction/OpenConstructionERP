@@ -76,7 +76,7 @@ const SPLIT_BASELINE: Record<string, [string, string]> = {
   '/dwg-takeoff': ['nav.dwg_takeoff', 'dwg_takeoff.hero_title'],
   '/schedule': ['nav.schedule', 'schedule.title'],
   '/5d': ['nav.5d_cost_model', 'costmodel.title'],
-  '/tendering': ['nav.tendering', 'tendering.title'],
+  '/tenders/edit/tendering': ['nav.tendering', 'tendering.title'],
   '/photos': ['nav.photos', 'photos.title'],
   '/files/transmittals': ['transmittals.title', 'files.transmittals.title'],
   '/punchlist': ['nav.punchlist', 'punch.title'],

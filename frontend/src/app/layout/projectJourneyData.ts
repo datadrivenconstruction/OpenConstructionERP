@@ -210,7 +210,7 @@ export const JOURNEY_PHASES: readonly JourneyPhase[] = [
     descKey: 'journey.phase.tender.desc',
     desc: 'Package the work, invite builders and suppliers, compare bids and award.',
     modules: [
-      { to: '/tendering', labelKey: 'tendering.title', label: 'Tendering' },
+      { to: '/tenders', labelKey: 'tenders.title', label: 'Tenders' },
       { to: '/subcontractors', labelKey: 'nav.subcontractors', label: 'Subcontractors' },
       { to: '/bid-management', labelKey: 'nav.bid_management', label: 'Bid Management' },
       { to: '/procurement', labelKey: 'procurement.title', label: 'Procurement' },

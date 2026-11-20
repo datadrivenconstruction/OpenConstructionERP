@@ -37,7 +37,7 @@ export const PACK_FOCUS_CORE_ROUTES: readonly string[] = [
   '/bim',
   '/schedule',
   '/validation',
-  '/tendering',
+  '/tenders',
   '/reports',
 ];
 

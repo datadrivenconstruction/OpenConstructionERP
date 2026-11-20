@@ -294,6 +294,7 @@ export const ROUTE_BACKEND_MODULE: Record<string, string | readonly string[]> = 
   '/fx': 'oe_fx',
   '/subcontractors': 'oe_subcontractors',
   '/bid-management': 'oe_bid_management',
+  '/tenders': 'oe_bid_management',
   '/win-loss': 'oe_win_loss',
   '/estimate-archive': 'oe_estimate_archive',
   '/tendering': 'oe_tendering',

@@ -29,6 +29,7 @@ from app.dependencies import CurrentUserId, RequirePermission, SessionDep, verif
 from app.modules.bid_management.legacy_mirror import INCLUDE_MIRRORS
 from app.modules.bid_management.models import (
     BidAward,
+    BidComparison,
     Bidder,
     BidInvitation,
     BidPackage,
@@ -40,10 +41,12 @@ from app.modules.bid_management.models import (
 )
 from app.modules.bid_management.schemas import (
     BidAwardResponse,
+    BidComparisonResponse,
     BidderResponse,
     BidInvitationResponse,
     BidPackageLineItemResponse,
     BidPackageResponse,
+    BidQAResponse,
     BidSubmissionLineResponse,
     BidSubmissionResponse,
 )
@@ -90,6 +93,8 @@ class TenderDetail(BaseModel):
     submission_lines: list[BidSubmissionLineResponse] = Field(default_factory=list)
     award: BidAwardResponse | None = None
     question_count: int = 0
+    questions: list[BidQAResponse] = Field(default_factory=list)
+    comparison: BidComparisonResponse | None = None
 
 
 class TenderResolve(BaseModel):
@@ -353,9 +358,12 @@ async def get_tender(
         await _all(select(BidSubmissionLine).where(BidSubmissionLine.submission_id.in_(sub_ids))) if sub_ids else []
     )
     award = (await _all(select(BidAward).where(BidAward.package_id == pkg.id)))[:1]
-    questions = (
-        await session.execute(select(func.count(BidQA.id)).where(BidQA.package_id == pkg.id).execution_options(**_ALL))
-    ).scalar_one()
+    questions = await _all(select(BidQA).where(BidQA.package_id == pkg.id).order_by(BidQA.asked_at, BidQA.id))
+    comparison = (
+        await _all(
+            select(BidComparison).where(BidComparison.package_id == pkg.id).order_by(BidComparison.created_at.desc())
+        )
+    )[:1]
     src, src_id = _source_of(pkg)
     return TenderDetail(
         package=BidPackageResponse.model_validate(pkg),
@@ -368,7 +376,9 @@ async def get_tender(
         submissions=[BidSubmissionResponse.model_validate(r) for r in submissions],
         submission_lines=[BidSubmissionLineResponse.model_validate(r) for r in sub_lines],
         award=BidAwardResponse.model_validate(award[0]) if award else None,
-        question_count=int(questions or 0),
+        question_count=len(questions),
+        questions=[BidQAResponse.model_validate(r) for r in questions],
+        comparison=BidComparisonResponse.model_validate(comparison[0]) if comparison else None,
     )
 
 

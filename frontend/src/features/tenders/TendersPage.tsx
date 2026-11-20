@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { Gavel, Inbox, Trophy, Scale } from 'lucide-react';
 import { Badge, Breadcrumb, Card, EmptyState, ErrorState, KpiBand, SkeletonTable, TabBar } from '@/shared/ui';
 import { PageHeader } from '@/shared/ui/PageHeader';
@@ -13,7 +13,7 @@ import { RequiresProject } from '@/shared/auth/RequiresProject';
 import { useActiveProjectId } from '@/shared/hooks/useActiveProjectId';
 import {
   fetchTenders,
-  tenderEditPath,
+  tenderCardPath,
   tendersQueryKey,
   type TenderKind,
   type TenderSource,
@@ -32,7 +32,11 @@ export function TendersPage() {
   const { t } = useTranslation();
   const projectId = useActiveProjectId();
   const [kind, setKind] = useState<KindTab>('all');
-  const [source, setSource] = useState<TenderSource | ''>('');
+  const [searchParams] = useSearchParams();
+  const [source, setSource] = useState<TenderSource | ''>(() => {
+    const fromUrl = searchParams.get('source');
+    return SOURCE_LABELS.some(([value]) => value === fromUrl) ? (fromUrl as TenderSource) : '';
+  });
   const filters = { kind: kind === 'all' ? ('' as const) : kind, source };
 
   const query = useQuery({
@@ -139,7 +143,7 @@ export function TendersPage() {
                   {rows.map((row) => (
                     <tr key={row.id}>
                       <td>
-                        <Link className="text-oe-blue" to={tenderEditPath(row)}>
+                        <Link className="text-oe-blue" to={tenderCardPath(row.id)}>
                           {row.code}
                         </Link>
                       </td>
