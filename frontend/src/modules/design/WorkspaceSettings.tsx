@@ -12,6 +12,7 @@ import { fetchAiChoice, putAiChoice, putRights, type DesignRights } from './draf
 import { aiServices } from './data/workspace';
 import { BackgroundLoadToggle, LoadHint } from './BackgroundLoad';
 import { tr } from './BriefFields';
+import { WebEditorPanel } from './WebEditorPanel';
 
 function AiChoiceForm() {
   const { t } = useTranslation();
@@ -105,6 +106,7 @@ export function WorkspaceSettings({ projectId, rights }: { projectId: string; ri
         <div role="dialog" aria-label={tr(t, 'design.workspace.settings')}
           className="absolute end-0 top-10 z-30 flex w-[min(340px,calc(100vw-2rem))] flex-col gap-4 rounded-lg border border-border-light bg-surface-primary p-4 text-sm shadow-lg">
           <div className="flex flex-col gap-1"><BackgroundLoadToggle /><LoadHint /></div>
+          <WebEditorPanel />
           <AiChoiceForm />
           {rights?.can_accept && <RightsForm projectId={projectId} rights={rights} />}
         </div>

@@ -53,9 +53,17 @@ export function enginePayload(engineUrl: string, origin: string): Payload {
  */
 export async function findPayload(opts: {
   env: Record<string, string | undefined>; origin: string; engineUrl: string; fetchFn?: typeof fetch;
+  /** The bundle this server fetched from the release feed (see webEditorApi), used when no build-time URL is set. */
+  installedUrl?: () => Promise<string | null>;
 }): Promise<Payload & { fallback?: string }> {
   const engine = enginePayload(opts.engineUrl, opts.origin);
-  const at = bundleUrl(opts.env, opts.origin);
+  let at = bundleUrl(opts.env, opts.origin);
+  if (!at && opts.installedUrl) {
+    try {
+      const url = await opts.installedUrl();
+      at = url ? bundleUrl({ VITE_DESIGN_WEB_EDITOR_URL: url }, opts.origin) : null;
+    } catch { /* status unavailable: engine mode */ }
+  }
   if (!at) return engine;
   try {
     const r = await (opts.fetchFn ?? fetch)(at, { credentials: 'omit' });

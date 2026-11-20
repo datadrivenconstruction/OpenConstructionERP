@@ -124,6 +124,21 @@ describe('payload', () => {
     expect(p.assets.map((a) => a.url)).toEqual([`${ORIGIN}/design-editor/ddc-editor.js`, `${ORIGIN}/design-editor/pkg/ed.wasm`]);
   });
 
+  it('without a build-time URL: the bundle this server installed from the release feed', async () => {
+    const installedUrl = async () => '/api/v1/design/web-editor/files/0.10.0/manifest.json';
+    const p = await findPayload({ env: {}, origin: ORIGIN, engineUrl: '/w.wasm', fetchFn: json(manifest()), installedUrl });
+    expect(p.kind).toBe('editor');
+    if (p.kind !== 'editor') return;
+    expect(p.entryUrl).toBe(`${ORIGIN}/api/v1/design/web-editor/files/0.10.0/ddc-editor.js`);
+  });
+
+  it('stays on the engine when nothing is installed or the status call fails', async () => {
+    for (const installedUrl of [async () => null, async () => { throw new Error('offline'); }]) {
+      const p = await findPayload({ env: {}, origin: ORIGIN, engineUrl: '/w.wasm', installedUrl });
+      expect(p.kind).toBe('engine');
+    }
+  });
+
   it('falls back to the generator on another bridge major, a bad manifest or an HTML page', async () => {
     for (const fetchFn of [
       json(manifest({ bridge: [2] })),
