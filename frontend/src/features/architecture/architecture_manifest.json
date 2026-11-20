@@ -313682,6 +313682,14 @@
         "manifest.py",
         "models.py",
         "permissions.py",
+        "plan_demo.py",
+        "plan_models.py",
+        "plan_reference.py",
+        "plan_router.py",
+        "plan_schemas.py",
+        "plan_service.py",
+        "plan_validators.py",
+        "plan_view.py",
         "point_export.py",
         "point_io.py",
         "register_router.py",
@@ -315973,7 +315981,9 @@
       "import_dependencies": [
         "cad",
         "geo_hub",
-        "surfaces_volumes"
+        "projects",
+        "surfaces_volumes",
+        "users"
       ]
     },
     {
@@ -341921,6 +341931,13 @@
       "total_files": 7
     },
     {
+      "name": "survey-plan",
+      "ts_files": 37,
+      "css_files": 0,
+      "test_files": 7,
+      "total_files": 38
+    },
+    {
       "name": "sustainability",
       "ts_files": 5,
       "css_files": 0,
@@ -343975,7 +343992,8 @@
       "cad",
       "geo_hub",
       "projects",
-      "surfaces_volumes"
+      "surfaces_volumes",
+      "users"
     ],
     "takeoff": [
       "ai",
@@ -344108,9 +344126,9 @@
     "total_relationships": 264,
     "total_routes": 5553,
     "total_schemas": 5173,
-    "total_python_files": 3684,
-    "frontend_features": 252,
-    "frontend_ts_files": 4450,
+    "total_python_files": 3692,
+    "frontend_features": 253,
+    "frontend_ts_files": 4487,
     "frontend_backend_mapped": 224
   },
   "frontend_backend_mapping": {
@@ -344346,6 +344364,7 @@
     "supplier-catalogs": "supplier_catalogs",
     "survey": "mine_survey",
     "survey-calc": null,
+    "survey-plan": null,
     "sustainability": "ai",
     "takeoff": "takeoff",
     "tasks": "tasks",
