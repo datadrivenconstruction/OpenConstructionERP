@@ -189476,6 +189476,7 @@
         "manifest.py",
         "models.py",
         "monitoring_math.py",
+        "plan_router.py",
         "profiles.py",
         "readings_io.py",
         "report_pdf.py",
@@ -284818,6 +284819,8 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "alignment_design.py",
+        "alignment_router.py",
         "design_io.py",
         "manifest.py",
         "models.py",
@@ -313675,6 +313678,8 @@
         "cogo.py",
         "crs.py",
         "dependencies.py",
+        "field_book.py",
+        "field_book_router.py",
         "field_traverse.py",
         "geodesy.py",
         "instrument_io.py",
@@ -341921,6 +341926,13 @@
       "total_files": 7
     },
     {
+      "name": "survey-plan",
+      "ts_files": 43,
+      "css_files": 0,
+      "test_files": 10,
+      "total_files": 44
+    },
+    {
       "name": "sustainability",
       "ts_files": 5,
       "css_files": 0,
@@ -344108,9 +344120,9 @@
     "total_relationships": 264,
     "total_routes": 5553,
     "total_schemas": 5173,
-    "total_python_files": 3684,
-    "frontend_features": 252,
-    "frontend_ts_files": 4450,
+    "total_python_files": 3689,
+    "frontend_features": 253,
+    "frontend_ts_files": 4493,
     "frontend_backend_mapped": 224
   },
   "frontend_backend_mapping": {
@@ -344346,6 +344358,7 @@
     "supplier-catalogs": "supplier_catalogs",
     "survey": "mine_survey",
     "survey-calc": null,
+    "survey-plan": null,
     "sustainability": "ai",
     "takeoff": "takeoff",
     "tasks": "tasks",

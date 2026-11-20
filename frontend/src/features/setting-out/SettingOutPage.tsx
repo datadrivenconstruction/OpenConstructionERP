@@ -48,12 +48,14 @@ import { NewRequestDialog } from './NewRequestDialog';
 import { StakeCard, VerdictBadge } from './StakeCard';
 import { RoadStakePanel } from '@/features/survey-calc/RoadStakePanel';
 import { settingOutGuide } from './settingOutGuide';
+import { AlignmentEditor } from '@/features/survey-plan/screens/AlignmentEditor';
+import { StakePlan } from '@/features/survey-plan/screens/StakePlan';
 import { fmtCoord, fmtMm } from './verdict';
 import { fmtFixed } from '@/shared/lib/formatters';
 import { useOpenSurveyDemo } from '@/features/survey/useOpenSurveyDemo';
 import { ViewOnlyNote, useSurveyAccess } from '@/features/survey/useSurveyAccess';
 
-type View = 'table' | 'field';
+type View = 'table' | 'field' | 'plan' | 'alignment';
 
 function usePhone(): boolean {
   const query = '(max-width: 767px)';
@@ -304,11 +306,17 @@ export default function SettingOutPage() {
                     tabs={[
                       { id: 'table', label: t('survey.setting_out.view.table', { defaultValue: 'Table' }) },
                       { id: 'field', label: t('survey.setting_out.view.field', { defaultValue: 'Field cards' }) },
+                      { id: 'plan', label: t('plan.stake.tab', { defaultValue: 'Plan' }) },
+                      { id: 'alignment', label: t('plan.align.tab', { defaultValue: 'Alignment' }) },
                     ]}
                   />
                 </div>
               )}
-              {req.stakes.length === 0 ? (
+              {!phone && view === 'alignment' ? (
+                <AlignmentEditor projectId={projectId} request={req} canWrite={canWrite} />
+              ) : !phone && view === 'plan' && req.stakes.length > 0 ? (
+                <StakePlan projectId={projectId} request={req} />
+              ) : req.stakes.length === 0 ? (
                 <EmptyState
                   icon={<Target size={24} />}
                   title={t('survey.setting_out.no_stakes', { defaultValue: 'No design points yet. Import a CSV or LandXML file.' })}
