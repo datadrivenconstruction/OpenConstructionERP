@@ -21,7 +21,7 @@ the same copy from the boot repair below.
 # data-rewrite-ack: oe_bid_management_package - inserts mirror rows only, one per source package, batched per package
 
 Revision ID: tmm01_tender_canonical_model
-Revises: cpb01_central_purchasing_bundles
+Revises: vsto02_setting_out_followup
 Create Date: 2026-11-20
 """
 
@@ -33,7 +33,7 @@ import sqlalchemy as sa
 from alembic import op
 
 revision: str = "tmm01_tender_canonical_model"
-down_revision: str | Sequence[str] | None = "cpb01_central_purchasing_bundles"
+down_revision: str | Sequence[str] | None = "vsto02_setting_out_followup"
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 
