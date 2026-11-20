@@ -2424,6 +2424,30 @@
     "control_check": {
       "fail": "Point de calage {id} : le contrôle s'écarte de {r} mm, au-delà de la tolérance de {t} mm.",
       "suggestion": "Mesurez à nouveau le point ; s'il a bougé, n'implantez plus depuis ce point avant qu'il soit rétabli."
+    },
+    "code_unknown": {
+      "fail": "Le code {code} n'est pas dans la bibliothèque de codes ({count} points).",
+      "suggestion": "Ajoutez le code à la bibliothèque ou corrigez les codes des points."
+    },
+    "string_short": {
+      "fail": "La chaîne {name} n'a qu'un point, aucune ligne n'est tracée.",
+      "suggestion": "Codez un second point de la chaîne ou corrigez son numéro."
+    },
+    "string_short_closed": {
+      "fail": "La chaîne {name} est fermée mais n'a que {count} points.",
+      "suggestion": "Une chaîne fermée demande au moins trois points."
+    },
+    "ring_open": {
+      "fail": "Un polygone dessiné a moins de trois sommets distincts.",
+      "suggestion": "Ajoutez des sommets ou supprimez le polygone."
+    },
+    "ring_crosses": {
+      "fail": "Un polygone dessiné se recoupe près de E {e}, N {n}.",
+      "suggestion": "Déplacez ou supprimez un sommet pour que les côtés ne se croisent plus."
+    },
+    "code_duplicate": {
+      "fail": "La bibliothèque de codes contient le code {code} plusieurs fois.",
+      "suggestion": "Gardez une seule entrée par code."
     }
   },
   "volumes": {

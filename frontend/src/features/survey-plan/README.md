@@ -21,6 +21,15 @@ MapLibre only draws. The public contract is `types.ts`, `units/`, `planLayers.ts
 | `engine/liveChecks.ts` | Client checks mirroring server rules; `registerLiveCheck()` |
 | `usePlanEditStore.ts` | Selection, undo/redo (200), unsaved edits in sessionStorage |
 | `api.ts` | survey_core endpoints: view transform, codes, plan settings, points, sketch, edits |
+| `PlanCanvas.tsx` | The canvas: MapLibre host, paper grid, tool rail, options bar, snap glyph, inspector, status bar, keyboard, Ctrl+K entries |
+| `PlanEditorPage.tsx` | `/survey/plan`: points and control (editable for `survey.write`), code linework, sketch; `?focus=<id>` |
+| `chrome/` | Tool rail, options-bar precision input, layer popover, inspector with history, status bar, scale bar, north arrow, shortcut sheet |
+| `tools/builtins.ts` | Select, pan, point, line, polygon, arc, text, measure distance/area/angle |
+| `render.ts` | Grid features to MapLibre GeoJSON through the view transform; paper grid lines |
+
+`features/survey/SurveyPlan.tsx` is the read-only canvas for the hub, register and volumes tabs:
+points by grid E/N, served layers as `viewFeatures`, and on a local grid the served layers become
+grid features so the plan draws on paper instead of being refused.
 
 ## Units and conventions
 
@@ -99,6 +108,13 @@ export const ipTool: PlanTool = {
   Use `createFeature`, `updateFeature`, `deleteFeatures` or `batch` from `engine/commands.ts`.
 - Tool shortcuts appear in the `?` overlay and in Ctrl+K automatically.
 - Drawing tools (`edits: true`) are hidden for viewers and on phones.
+
+## Keys
+
+V select, H pan, P point, L line, O polygon, C arc, T text, M/A/N measure distance/area/angle,
+F3 snap, Alt place without snap, Space pan, Enter finish, Esc cancel, Backspace last vertex,
+Delete, Ctrl+Z / Ctrl+Shift+Z / Ctrl+Y, Ctrl+S, Ctrl+A, Ctrl+C copies the measurement, Z extents,
+? sheet, a digit starts precision input, Alt+M switches its mode. Letters are read by physical key.
 
 ## Saving
 

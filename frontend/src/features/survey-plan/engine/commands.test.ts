@@ -31,6 +31,14 @@ describe('vertex edits', () => {
     expect(removeVertex(inserted, 1)?.geometry).toEqual(moved.geometry);
   });
 
+  it('a closed ring keeps its closing vertex on move and remove', () => {
+    const closed: PlanFeature = { ...ring, geometry: { type: 'Polygon', coordinates: [[[0, 0], [10, 0], [10, 10], [0, 10], [0, 0]]] } };
+    expect(moveVertex(closed, 0, [-1, -1]).geometry).toEqual({ type: 'Polygon', coordinates: [[[-1, -1], [10, 0], [10, 10], [0, 10], [-1, -1]]] });
+    expect(removeVertex(closed, 0)?.geometry).toEqual({ type: 'Polygon', coordinates: [[[10, 0], [10, 10], [0, 10], [10, 0]]] });
+    const tri: PlanFeature = { ...ring, geometry: { type: 'Polygon', coordinates: [[[0, 0], [10, 0], [10, 10], [0, 0]]] } };
+    expect(removeVertex(tri, 1)).toBeNull();
+  });
+
   it('moving a point keeps its Z', () => {
     expect(moveVertex(pt('a', 1, 2), 0, [5, 6]).geometry).toEqual({ type: 'Point', coordinates: [5, 6, 10] });
   });

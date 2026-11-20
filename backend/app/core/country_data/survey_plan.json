@@ -1,0 +1,604 @@
+{
+ "_doc": "Plan editor conventions and feature code libraries per ISO country. The angle unit and linear unit come from survey_reference.json (angle_unit, linear_unit); this file adds the rest. A key a country does not set falls back to 'neutral'. Values are practice, not law: the project may override them in Settings and a user may override the display. Offered only while the country is an active market.",
+ "neutral": {
+  "conventions": {
+   "directionFormat": "azimuth",
+   "azimuthZero": "north",
+   "axis": "EN",
+   "areaUnit": "m2",
+   "precision": "mm",
+   "chainage": "metric",
+   "distanceInput": "grid",
+   "angleDecimals": 1
+  },
+  "paper": "A3",
+  "codes": [
+   {
+    "code": "CP",
+    "label": "Control point",
+    "symbol": "control",
+    "line": "none",
+    "smooth": false,
+    "layer": "control",
+    "colour": "control-fill"
+   },
+   {
+    "code": "EP",
+    "label": "Edge of pavement",
+    "symbol": "kerb",
+    "line": "open",
+    "smooth": false,
+    "layer": "linework",
+    "colour": "kerb"
+   },
+   {
+    "code": "KB",
+    "label": "Kerb",
+    "symbol": "kerb",
+    "line": "open",
+    "smooth": false,
+    "layer": "linework",
+    "colour": "kerb"
+   },
+   {
+    "code": "CL",
+    "label": "Centreline",
+    "symbol": "spot",
+    "line": "open",
+    "smooth": false,
+    "layer": "linework",
+    "colour": "line"
+   },
+   {
+    "code": "FN",
+    "label": "Fence",
+    "symbol": "post",
+    "line": "open",
+    "smooth": false,
+    "layer": "linework",
+    "colour": "fence"
+   },
+   {
+    "code": "WL",
+    "label": "Wall",
+    "symbol": "spot",
+    "line": "open",
+    "smooth": false,
+    "layer": "linework",
+    "colour": "building"
+   },
+   {
+    "code": "BLD",
+    "label": "Building",
+    "symbol": "spot",
+    "line": "closed",
+    "smooth": false,
+    "layer": "linework",
+    "colour": "building"
+   },
+   {
+    "code": "HDG",
+    "label": "Hedge",
+    "symbol": "tree",
+    "line": "open",
+    "smooth": true,
+    "layer": "linework",
+    "colour": "tree"
+   },
+   {
+    "code": "TB",
+    "label": "Top of bank",
+    "symbol": "spot",
+    "line": "open",
+    "smooth": true,
+    "layer": "linework",
+    "colour": "line"
+   },
+   {
+    "code": "BB",
+    "label": "Bottom of bank",
+    "symbol": "spot",
+    "line": "open",
+    "smooth": true,
+    "layer": "linework",
+    "colour": "line"
+   },
+   {
+    "code": "DT",
+    "label": "Ditch",
+    "symbol": "spot",
+    "line": "open",
+    "smooth": true,
+    "layer": "linework",
+    "colour": "water"
+   },
+   {
+    "code": "TR",
+    "label": "Tree",
+    "symbol": "tree",
+    "line": "none",
+    "smooth": false,
+    "layer": "points",
+    "colour": "tree"
+   },
+   {
+    "code": "MH",
+    "label": "Manhole",
+    "symbol": "manhole",
+    "line": "none",
+    "smooth": false,
+    "layer": "points",
+    "colour": "utility"
+   },
+   {
+    "code": "PO",
+    "label": "Pole or post",
+    "symbol": "post",
+    "line": "none",
+    "smooth": false,
+    "layer": "points",
+    "colour": "utility"
+   },
+   {
+    "code": "SP",
+    "label": "Spot height",
+    "symbol": "spot",
+    "line": "none",
+    "smooth": false,
+    "layer": "points",
+    "colour": "topo"
+   },
+   {
+    "code": "EG",
+    "label": "Existing ground",
+    "symbol": "spot",
+    "line": "none",
+    "smooth": false,
+    "layer": "points",
+    "colour": "topo"
+   }
+  ]
+ },
+ "countries": {
+  "US": {
+   "conventions": {
+    "directionFormat": "quadrant",
+    "areaUnit": "acre",
+    "precision": "0.01ft",
+    "chainage": "imperial"
+   },
+   "paper": "ANSI_B",
+   "codes": [
+    {
+     "code": "CP",
+     "label": "Control point",
+     "symbol": "control",
+     "line": "none",
+     "smooth": false,
+     "layer": "control",
+     "colour": "control-fill"
+    },
+    {
+     "code": "EOP",
+     "label": "Edge of pavement",
+     "symbol": "kerb",
+     "line": "open",
+     "smooth": false,
+     "layer": "linework",
+     "colour": "kerb"
+    },
+    {
+     "code": "BC",
+     "label": "Back of curb",
+     "symbol": "kerb",
+     "line": "open",
+     "smooth": false,
+     "layer": "linework",
+     "colour": "kerb"
+    },
+    {
+     "code": "FL",
+     "label": "Flow line",
+     "symbol": "spot",
+     "line": "open",
+     "smooth": true,
+     "layer": "linework",
+     "colour": "water"
+    },
+    {
+     "code": "CL",
+     "label": "Centerline",
+     "symbol": "spot",
+     "line": "open",
+     "smooth": false,
+     "layer": "linework",
+     "colour": "line"
+    },
+    {
+     "code": "FNC",
+     "label": "Fence",
+     "symbol": "post",
+     "line": "open",
+     "smooth": false,
+     "layer": "linework",
+     "colour": "fence"
+    },
+    {
+     "code": "BLDG",
+     "label": "Building",
+     "symbol": "spot",
+     "line": "closed",
+     "smooth": false,
+     "layer": "linework",
+     "colour": "building"
+    },
+    {
+     "code": "TOE",
+     "label": "Toe of slope",
+     "symbol": "spot",
+     "line": "open",
+     "smooth": true,
+     "layer": "linework",
+     "colour": "line"
+    },
+    {
+     "code": "TOP",
+     "label": "Top of slope",
+     "symbol": "spot",
+     "line": "open",
+     "smooth": true,
+     "layer": "linework",
+     "colour": "line"
+    },
+    {
+     "code": "TREE",
+     "label": "Tree",
+     "symbol": "tree",
+     "line": "none",
+     "smooth": false,
+     "layer": "points",
+     "colour": "tree"
+    },
+    {
+     "code": "MH",
+     "label": "Manhole",
+     "symbol": "manhole",
+     "line": "none",
+     "smooth": false,
+     "layer": "points",
+     "colour": "utility"
+    },
+    {
+     "code": "PP",
+     "label": "Power pole",
+     "symbol": "post",
+     "line": "none",
+     "smooth": false,
+     "layer": "points",
+     "colour": "utility"
+    },
+    {
+     "code": "SPOT",
+     "label": "Spot elevation",
+     "symbol": "spot",
+     "line": "none",
+     "smooth": false,
+     "layer": "points",
+     "colour": "topo"
+    },
+    {
+     "code": "EG",
+     "label": "Existing ground",
+     "symbol": "spot",
+     "line": "none",
+     "smooth": false,
+     "layer": "points",
+     "colour": "topo"
+    }
+   ]
+  },
+  "GB": {
+   "conventions": {
+    "directionFormat": "quadrant",
+    "areaUnit": "ha"
+   }
+  },
+  "AU": {
+   "conventions": {
+    "directionFormat": "quadrant",
+    "areaUnit": "ha"
+   }
+  },
+  "NZ": {
+   "conventions": {
+    "directionFormat": "quadrant",
+    "areaUnit": "ha"
+   }
+  },
+  "CA": {
+   "paper": "ANSI_B"
+  },
+  "DE": {
+   "conventions": {
+    "chainage": "km"
+   },
+   "codes": [
+    {
+     "code": "CP",
+     "label": "Festpunkt",
+     "symbol": "control",
+     "line": "none",
+     "smooth": false,
+     "layer": "control",
+     "colour": "control-fill"
+    },
+    {
+     "code": "BO",
+     "label": "Bordstein",
+     "symbol": "kerb",
+     "line": "open",
+     "smooth": false,
+     "layer": "linework",
+     "colour": "kerb"
+    },
+    {
+     "code": "FBR",
+     "label": "Fahrbahnrand",
+     "symbol": "kerb",
+     "line": "open",
+     "smooth": false,
+     "layer": "linework",
+     "colour": "kerb"
+    },
+    {
+     "code": "ZA",
+     "label": "Zaun",
+     "symbol": "post",
+     "line": "open",
+     "smooth": false,
+     "layer": "linework",
+     "colour": "fence"
+    },
+    {
+     "code": "MA",
+     "label": "Mauer",
+     "symbol": "spot",
+     "line": "open",
+     "smooth": false,
+     "layer": "linework",
+     "colour": "building"
+    },
+    {
+     "code": "GEB",
+     "label": "Gebäude",
+     "symbol": "spot",
+     "line": "closed",
+     "smooth": false,
+     "layer": "linework",
+     "colour": "building"
+    },
+    {
+     "code": "BOK",
+     "label": "Böschungsoberkante",
+     "symbol": "spot",
+     "line": "open",
+     "smooth": true,
+     "layer": "linework",
+     "colour": "line"
+    },
+    {
+     "code": "BUK",
+     "label": "Böschungsunterkante",
+     "symbol": "spot",
+     "line": "open",
+     "smooth": true,
+     "layer": "linework",
+     "colour": "line"
+    },
+    {
+     "code": "GR",
+     "label": "Graben",
+     "symbol": "spot",
+     "line": "open",
+     "smooth": true,
+     "layer": "linework",
+     "colour": "water"
+    },
+    {
+     "code": "BA",
+     "label": "Baum",
+     "symbol": "tree",
+     "line": "none",
+     "smooth": false,
+     "layer": "points",
+     "colour": "tree"
+    },
+    {
+     "code": "SD",
+     "label": "Schachtdeckel",
+     "symbol": "manhole",
+     "line": "none",
+     "smooth": false,
+     "layer": "points",
+     "colour": "utility"
+    },
+    {
+     "code": "MS",
+     "label": "Mast",
+     "symbol": "post",
+     "line": "none",
+     "smooth": false,
+     "layer": "points",
+     "colour": "utility"
+    },
+    {
+     "code": "HP",
+     "label": "Höhenpunkt",
+     "symbol": "spot",
+     "line": "none",
+     "smooth": false,
+     "layer": "points",
+     "colour": "topo"
+    },
+    {
+     "code": "EG",
+     "label": "Gelände",
+     "symbol": "spot",
+     "line": "none",
+     "smooth": false,
+     "layer": "points",
+     "colour": "topo"
+    }
+   ]
+  },
+  "RU": {
+   "conventions": {
+    "axis": "XY"
+   },
+   "codes": [
+    {
+     "code": "CP",
+     "label": "Пункт обоснования",
+     "symbol": "control",
+     "line": "none",
+     "smooth": false,
+     "layer": "control",
+     "colour": "control-fill"
+    },
+    {
+     "code": "BK",
+     "label": "Бортовой камень",
+     "symbol": "kerb",
+     "line": "open",
+     "smooth": false,
+     "layer": "linework",
+     "colour": "kerb"
+    },
+    {
+     "code": "KP",
+     "label": "Край проезжей части",
+     "symbol": "kerb",
+     "line": "open",
+     "smooth": false,
+     "layer": "linework",
+     "colour": "kerb"
+    },
+    {
+     "code": "OG",
+     "label": "Ограждение",
+     "symbol": "post",
+     "line": "open",
+     "smooth": false,
+     "layer": "linework",
+     "colour": "fence"
+    },
+    {
+     "code": "ZD",
+     "label": "Здание",
+     "symbol": "spot",
+     "line": "closed",
+     "smooth": false,
+     "layer": "linework",
+     "colour": "building"
+    },
+    {
+     "code": "BR",
+     "label": "Бровка откоса",
+     "symbol": "spot",
+     "line": "open",
+     "smooth": true,
+     "layer": "linework",
+     "colour": "line"
+    },
+    {
+     "code": "PD",
+     "label": "Подошва откоса",
+     "symbol": "spot",
+     "line": "open",
+     "smooth": true,
+     "layer": "linework",
+     "colour": "line"
+    },
+    {
+     "code": "KV",
+     "label": "Канава",
+     "symbol": "spot",
+     "line": "open",
+     "smooth": true,
+     "layer": "linework",
+     "colour": "water"
+    },
+    {
+     "code": "DR",
+     "label": "Дерево",
+     "symbol": "tree",
+     "line": "none",
+     "smooth": false,
+     "layer": "points",
+     "colour": "tree"
+    },
+    {
+     "code": "KL",
+     "label": "Колодец",
+     "symbol": "manhole",
+     "line": "none",
+     "smooth": false,
+     "layer": "points",
+     "colour": "utility"
+    },
+    {
+     "code": "OP",
+     "label": "Опора",
+     "symbol": "post",
+     "line": "none",
+     "smooth": false,
+     "layer": "points",
+     "colour": "utility"
+    },
+    {
+     "code": "PT",
+     "label": "Пикет",
+     "symbol": "spot",
+     "line": "none",
+     "smooth": false,
+     "layer": "points",
+     "colour": "topo"
+    },
+    {
+     "code": "EG",
+     "label": "Рельеф",
+     "symbol": "spot",
+     "line": "none",
+     "smooth": false,
+     "layer": "points",
+     "colour": "topo"
+    }
+   ]
+  },
+  "UA": {
+   "conventions": {
+    "axis": "XY"
+   }
+  },
+  "KZ": {
+   "conventions": {
+    "axis": "XY"
+   }
+  },
+  "PL": {
+   "conventions": {
+    "axis": "XY"
+   }
+  },
+  "CN": {
+   "conventions": {
+    "axis": "XY"
+   }
+  },
+  "HU": {
+   "conventions": {
+    "axis": "YX"
+   }
+  }
+ }
+}

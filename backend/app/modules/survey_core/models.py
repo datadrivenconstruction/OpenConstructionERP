@@ -229,3 +229,7 @@ class SurveyGeodesy(Base):
     csf_height_m: Mapped[Decimal | None] = mapped_column(Numeric(10, 3), nullable=True)
     reference_distance_m: Mapped[Decimal | None] = mapped_column(Numeric(10, 3), nullable=True)
     updated_by: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+
+
+# Plan editor tables live in their own file; imported here so the loader and Alembic see them.
+from app.modules.survey_core.plan_models import SurveyCodeLibrary, SurveyEdit, SurveyPlanSettings  # noqa: E402,F401

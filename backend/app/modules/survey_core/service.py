@@ -20,7 +20,10 @@ from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.validation.messages import translate
-from app.modules.survey_core import calc_validators  # noqa: F401 - registers SRV-050/060 with the register rules
+from app.modules.survey_core import (
+    calc_validators,  # noqa: F401 - registers SRV-050/060 with the register rules
+    plan_validators,  # noqa: F401 - registers SRV-140..144 with the register rules
+)
 from app.modules.survey_core import crs as crs_lib
 from app.modules.survey_core import geodesy as geo_lib
 from app.modules.survey_core.instrument_io import (
@@ -39,6 +42,7 @@ from app.modules.survey_core.models import (
     SurveyProjectCrs,
     SurveyTraverse,
 )
+from app.modules.survey_core.plan_service import plan_context
 from app.modules.survey_core.point_export import (
     EXPORT_FORMATS,
     ExportPoint,
@@ -736,6 +740,7 @@ class SurveyService:
                 for t in await self.repo.list_traverses(project_id)
             ],
             "control_checks": await self._control_check_rows(project_id),
+            **await plan_context(self.session, project_id),
         }
 
     @staticmethod

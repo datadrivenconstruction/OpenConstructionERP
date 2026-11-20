@@ -2424,6 +2424,30 @@
     "control_check": {
       "fail": "Ponto de apoio {id}: a medição de verificação desvia {r} mm, acima da tolerância de {t} mm.",
       "suggestion": "Volte a medir o ponto; se se moveu, não implante a partir dele até ser restabelecido."
+    },
+    "code_unknown": {
+      "fail": "O código {code} não está na biblioteca de códigos ({count} pontos).",
+      "suggestion": "Adicione o código à biblioteca ou corrija os códigos dos pontos."
+    },
+    "string_short": {
+      "fail": "A cadeia {name} tem um só ponto, nenhuma linha é desenhada.",
+      "suggestion": "Codifique um segundo ponto da cadeia ou corrija o número."
+    },
+    "string_short_closed": {
+      "fail": "A cadeia {name} está fechada mas tem só {count} pontos.",
+      "suggestion": "Uma cadeia fechada precisa de pelo menos três pontos."
+    },
+    "ring_open": {
+      "fail": "Um polígono desenhado tem menos de três vértices distintos.",
+      "suggestion": "Adicione vértices ou apague o polígono."
+    },
+    "ring_crosses": {
+      "fail": "Um polígono desenhado cruza-se perto de E {e}, N {n}.",
+      "suggestion": "Mova ou apague um vértice para que os lados não se cruzem."
+    },
+    "code_duplicate": {
+      "fail": "A biblioteca de códigos repete o código {code}.",
+      "suggestion": "Mantenha uma entrada por código."
     }
   },
   "volumes": {

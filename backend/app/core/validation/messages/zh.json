@@ -2424,6 +2424,30 @@
     "control_check": {
       "fail": "控制点 {id}:检核测量偏差 {r} mm,超出 {t} mm 限差。",
       "suggestion": "请重新观测该点;如已移动,在重新埋设前不要从该点放样。"
+    },
+    "code_unknown": {
+      "fail": "代码 {code} 不在代码库中（{count} 个点）。",
+      "suggestion": "将该代码加入代码库，或更正这些点的代码。"
+    },
+    "string_short": {
+      "fail": "线串 {name} 只有一个点，无法绘制线。",
+      "suggestion": "为该线串再编码一个点，或更正线串编号。"
+    },
+    "string_short_closed": {
+      "fail": "线串 {name} 是闭合的，但只有 {count} 个点。",
+      "suggestion": "闭合线串至少需要三个点。"
+    },
+    "ring_open": {
+      "fail": "绘制的多边形少于三个不同顶点。",
+      "suggestion": "添加顶点或删除该多边形。"
+    },
+    "ring_crosses": {
+      "fail": "绘制的多边形在 E {e}、N {n} 附近自相交。",
+      "suggestion": "移动或删除一个顶点，使各边不再相交。"
+    },
+    "code_duplicate": {
+      "fail": "代码库中代码 {code} 出现多次。",
+      "suggestion": "每个代码只保留一条。"
     }
   },
   "volumes": {
