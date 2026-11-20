@@ -3010,7 +3010,10 @@ async def reorder_positions(
     raw_ids = data.get("position_ids", [])
     if len(raw_ids) > 50_000:
         raise HTTPException(status_code=400, detail="Cannot reorder more than 50,000 positions at once")
-    position_ids = [uuid.UUID(pid) if isinstance(pid, str) else pid for pid in raw_ids]
+    try:
+        position_ids = [pid if isinstance(pid, uuid.UUID) else uuid.UUID(str(pid)) for pid in raw_ids]
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail="position_ids must contain position UUIDs only") from exc
     await service.reorder_positions(boq_id, position_ids)
     await _log_activity(
         service,

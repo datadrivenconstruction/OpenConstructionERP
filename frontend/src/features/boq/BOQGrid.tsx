@@ -2575,6 +2575,8 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
 
       // Skip footer rows entirely
       if (movedData._isFooter || overData._isFooter) return;
+      // Resource and helper rows are not positions; they move with their parent.
+      if (movedData._isResource || movedData._isAddResource || movedData._isVariantHeader || movedData._isCopilot) return;
 
       // Section-to-section reorder
       if (movedData._isSection && overData._isSection && onReorderSections) {
@@ -2601,10 +2603,22 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
           onUpdatePosition(movedData.id, { parent_id: newParentId }, { parent_id: movedData.parent_id });
         }
 
-        // Collect the current row order from the grid (excluding footer and section rows)
+        // Collect the current row order from the grid: real positions only, never the
+        // synthetic resource, add-resource, variant or copilot rows rendered under them.
         const reorderedIds: string[] = [];
         api.forEachNode((node) => {
-          if (node.data && !node.data._isFooter && !node.data._isSection && node.data.id) {
+          const d = node.data;
+          if (
+            d &&
+            d.id &&
+            !d._isFooter &&
+            !d._isSection &&
+            !d._isResource &&
+            !d._isAddResource &&
+            !d._isVariantHeader &&
+            !d._isCopilot &&
+            !d._isLangtext
+          ) {
             reorderedIds.push(node.data.id);
           }
         });
