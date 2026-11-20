@@ -478,6 +478,33 @@ def test_each_format_gets_its_own_command_line(tmp_path: Path) -> None:
         ddc_runner.build_command("dgn", py, src, out)
 
 
+def test_the_linux_and_macos_ifc_converter_is_asked_for_geometry(tmp_path: Path) -> None:
+    """``ifc2excel`` writes ``<stem>.glb`` only with ``--glb``; without it the viewer shows boxes."""
+    src = tmp_path / "in" / "Model.ifc"
+    out = tmp_path / "out"
+    for folder in ("ifc_linux-x64", "ifc_macos-arm64"):
+        exe = tmp_path / folder / "ifc2excel"
+        cmd = ddc_runner.build_command("ifc", exe, src, out)
+        assert cmd[-5:] == [str(src.resolve()), "--output", str(out), "--raw-tables", "--glb"]
+        # The retry for a build without the option drops only --glb.
+        plain = ddc_runner.build_command("ifc", exe, src, out, glb=False)
+        assert plain[-4:] == [str(src.resolve()), "--output", str(out), "--raw-tables"]
+        assert "--glb" not in plain
+
+
+def test_the_glb_an_ifc2excel_run_writes_is_collected(tmp_path: Path) -> None:
+    out_dir = tmp_path / "ifc_out"
+    folder = out_dir / "Model-abc123"
+    xlsx = folder / "Model.xlsx"
+    _write_ifc_workbook(xlsx)
+    (folder / "data.jsonl").write_text("{}\n", encoding="utf-8")
+    (folder / "Model.glb").write_bytes(b"glTF" + b"\x00" * 16)
+    run = ddc_runner.ConverterRun(fmt="ifc", command=[], returncode=0, stdout=json.dumps({"folder": str(folder)}))
+    ddc_runner._collect_outputs(run, out_dir, "Model")
+
+    assert run.outputs["glb"] == folder / "Model.glb"
+
+
 def test_outputs_are_found_through_the_json_line_the_converter_prints(tmp_path: Path) -> None:
     out_dir = tmp_path / "ifc_out"
     folder = out_dir / "Model-abc123"
