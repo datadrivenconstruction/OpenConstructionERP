@@ -10,12 +10,12 @@ The volume shown is the survey's own stored volume, never recomputed here.
 
 from __future__ import annotations
 
-import math
 from dataclasses import dataclass, field
 
 import numpy as np
 
 from app.modules.surfaces_volumes.contours import contour_at
+from app.modules.surfaces_volumes.dh_grid import dh_grid
 from app.modules.surfaces_volumes.tin import Tin
 
 TOE_HEIGHT_M = 0.1
@@ -43,22 +43,18 @@ def _ring_area(ring: list[tuple[float, float]]) -> float:
 
 def pile_outline(pile: Tin, base: Tin) -> PileOutline:
     """Toe, crest and the height map of ``pile`` above ``base``."""
-    if not len(pile.tri) or not len(base.tri):
+    heat, dh = dh_grid(pile, base, MAX_CELLS)
+    if heat is None or dh is None:
         return PileOutline()
-    x0, y0, x1, y1 = pile.bbox()
-    span = max(x1 - x0, y1 - y0, 1e-6)
-    cell = max(span / 200.0, math.sqrt((x1 - x0) * (y1 - y0) / MAX_CELLS) if (x1 - x0) * (y1 - y0) > 0 else 0.0, 0.05)
-    nx, ny = max(int(math.ceil((x1 - x0) / cell)), 1), max(int(math.ceil((y1 - y0) / cell)), 1)
-    zp = pile.sample_grid(x0, y0, cell, nx, ny)
-    zb = base.sample_grid(x0, y0, cell, nx, ny)
-    dh = zp - zb
     ok = np.isfinite(dh)
     if not ok.any():
         return PileOutline()
+    x0, y0, cell, nx, ny = heat["origin_e"], heat["origin_n"], heat["cell"], heat["nx"], heat["ny"]
+    x1, y1 = x0 + nx * cell, y0 + ny * cell
     dh_clip = np.where(ok, np.maximum(dh, 0.0), np.nan)
     top = float(np.nanmax(dh_clip))
     gx, gy = np.meshgrid(x0 + (np.arange(nx) + 0.5) * cell, y0 + (np.arange(ny) + 0.5) * cell)
-    # Pad the field with a zero rim so the toe closes even where the pile meets the survey edge.
+    # A zero rim round the field closes the toe even where the pile meets the survey edge.
     field_tin = Tin.from_points(
         np.concatenate([gx[ok], [x0 - cell, x1 + cell, x1 + cell, x0 - cell]]),
         np.concatenate([gy[ok], [y0 - cell, y0 - cell, y1 + cell, y1 + cell]]),
@@ -66,15 +62,14 @@ def pile_outline(pile: Tin, base: Tin) -> PileOutline:
     )
     toe_lines = contour_at(field_tin, TOE_HEIGHT_M) if top > TOE_HEIGHT_M else []
     crest_lines = contour_at(field_tin, top * CREST_SHARE) if top > TOE_HEIGHT_M else []
-    toe = toe_lines[0].coords if toe_lines else []
-    crest = crest_lines[0].coords if crest_lines else []
-    values = [None if not math.isfinite(v) else round(float(v), 3) for v in np.where(ok, dh, np.nan).ravel()]
+    toe = list(toe_lines[0].coords) if toe_lines else []
+    crest = list(crest_lines[0].coords) if crest_lines else []
     return PileOutline(
-        toe=list(toe),
-        crest=list(crest),
+        toe=toe,
+        crest=crest,
         max_height_m=round(top, 3),
-        footprint_m2=round(_ring_area(list(toe)), 2) if len(toe) >= 3 else 0.0,
-        heat={"origin_e": x0, "origin_n": y0, "cell": cell, "nx": nx, "ny": ny, "dh": values},
+        footprint_m2=round(_ring_area(toe), 2) if len(toe) >= 3 else 0.0,
+        heat=heat,
     )
 
 
