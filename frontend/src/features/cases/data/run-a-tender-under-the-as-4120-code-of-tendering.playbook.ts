@@ -74,9 +74,9 @@ const playbook: Playbook = {
       whyKey: "cases.run_a_tender_under_the_as_4120_code_of_tendering.step.documents.why",
       whyDefault:
         "Everything the code protects flows from every tenderer pricing the same document. A revision that reached three of five is not a documentation slip, it is an unequal tender, and the only honest remedy once it is discovered is to extend the period for everyone and pay for the time.",
-      moduleLabel: "Tendering",
-      moduleLabelKey: "tendering.title",
-      to: "/tendering",
+      moduleLabel: "Tenders",
+      moduleLabelKey: "tenders.title",
+      to: "/tenders",
     },
     {
       id: "addenda",

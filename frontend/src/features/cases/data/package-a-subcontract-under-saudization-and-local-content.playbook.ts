@@ -100,9 +100,9 @@ const playbook: Playbook = {
       whyKey: "cases.package_a_subcontract_under_saudization_and_local_content.step.enquire.why",
       whyDefault:
         "Priced against a common bill, the cheapest number is a fact. Priced against three different assumptions about who supplies the labour, it is a guess. Asking for the local content composition at enquiry also does something the award cannot: it lets you see which bidder has thought about it, because the one who has will answer with named suppliers and the one who has not will answer with a percentage.",
-      moduleLabel: "Tendering",
-      moduleLabelKey: "tendering.title",
-      to: "/tendering",
+      moduleLabel: "Tenders",
+      moduleLabelKey: "tenders.title",
+      to: "/tenders",
     },
     {
       id: "flowdown",

@@ -52,9 +52,9 @@ const playbook: Playbook = {
       whyKey: "cases.score_a_tender_on_price_and_preference_under_the_pppfa.step.goals.why",
       whyDefault:
         "Under the Preferential Procurement Policy Framework Act 5 of 2000 the goals are the organ of state's to choose, but only in the tender document and only in advance. Goals that commonly appear include the bidder's B-BBEE contributor status level, but nothing is scored by default: an evaluation committee that awards points for a goal the advertisement never mentioned has given every unsuccessful bidder a review, and one that ignores a goal it did publish has done the same.",
-      moduleLabel: "Tendering",
-      moduleLabelKey: "tendering.title",
-      to: "/tendering",
+      moduleLabel: "Tenders",
+      moduleLabelKey: "tenders.title",
+      to: "/tenders",
     },
     {
       id: "receive",

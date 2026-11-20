@@ -249,7 +249,7 @@ export function SealedTenderPanel({ packageId, pkg }: { packageId: string; pkg: 
       const iso = deadline ? new Date(deadline).toISOString() : null;
       const currentIso = serverDeadline ? new Date(serverDeadline).toISOString() : null;
       if (draftMode === 'sealed' && iso !== currentIso) {
-        await apiPatch(`/v1/tendering/packages/${packageId}`, { deadline: iso });
+        await apiPatch(`/v1/bid-management/tenders/main-contract/packages/${packageId}`, { deadline: iso });
       }
       return setSubmissionMode(packageId, { mode: draftMode, dual_opening: draftMode === 'sealed' && dual });
     },

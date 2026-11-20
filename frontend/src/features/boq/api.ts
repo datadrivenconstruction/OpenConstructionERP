@@ -2517,7 +2517,7 @@ export const boqApi = {
    *  the tendering module, returns the new draft package reference. */
   createTenderFromBoq: (data: CreateTenderFromBoqData) =>
     apiPost<TenderPackageRef, CreateTenderFromBoqData>(
-      '/v1/tendering/packages/from-boq/',
+      '/v1/bid-management/tenders/main-contract/packages/from-boq/',
       data,
     ),
 

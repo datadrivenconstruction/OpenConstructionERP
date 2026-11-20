@@ -273,15 +273,15 @@ export async function fetchRFQs(
   if (projectId) params.set('project_id', projectId);
   if (status) params.set('status', status);
   const qs = params.toString();
-  return apiGet<Page<RFQ>>(`/v1/rfq-bidding/${qs ? `?${qs}` : ''}`);
+  return apiGet<Page<RFQ>>(`/v1/bid-management/tenders/rfq/${qs ? `?${qs}` : ''}`);
 }
 
 export async function fetchRFQ(id: string): Promise<RFQ> {
-  return apiGet<RFQ>(`/v1/rfq-bidding/${id}`);
+  return apiGet<RFQ>(`/v1/bid-management/tenders/rfq/${id}`);
 }
 
 export async function createRFQ(payload: RFQCreatePayload): Promise<RFQ> {
-  return apiPost<RFQ, RFQCreatePayload>('/v1/rfq-bidding/', payload);
+  return apiPost<RFQ, RFQCreatePayload>('/v1/bid-management/tenders/rfq/', payload);
 }
 
 export async function fetchProjectBoqs(projectId: string): Promise<RfqBoqOption[]> {
@@ -293,30 +293,30 @@ export async function fetchProjectBoqs(projectId: string): Promise<RfqBoqOption[
 
 export async function fetchBoqResources(boqId: string): Promise<BoqResourceOption[]> {
   const page = await apiGet<{ items: BoqResourceOption[] }>(
-    `/v1/rfq-bidding/boq-resources/?boq_id=${encodeURIComponent(boqId)}`,
+    `/v1/bid-management/tenders/rfq/boq-resources/?boq_id=${encodeURIComponent(boqId)}`,
   );
   return normalizeListResponse(page);
 }
 
 export async function updateRFQ(id: string, payload: RFQUpdatePayload): Promise<RFQ> {
-  return apiPatch<RFQ, RFQUpdatePayload>(`/v1/rfq-bidding/${id}`, payload);
+  return apiPatch<RFQ, RFQUpdatePayload>(`/v1/bid-management/tenders/rfq/${id}`, payload);
 }
 
 export async function deleteRFQ(id: string): Promise<void> {
-  return apiDelete(`/v1/rfq-bidding/${id}`);
+  return apiDelete(`/v1/bid-management/tenders/rfq/${id}`);
 }
 
 export async function issueRFQ(id: string): Promise<RFQ> {
-  return apiPost<RFQ>(`/v1/rfq-bidding/${id}/issue/`);
+  return apiPost<RFQ>(`/v1/bid-management/tenders/rfq/${id}/issue/`);
 }
 
 export async function validateRFQ(id: string): Promise<ValidationReport> {
-  return apiGet<ValidationReport>(`/v1/rfq-bidding/${id}/validate/`);
+  return apiGet<ValidationReport>(`/v1/bid-management/tenders/rfq/${id}/validate/`);
 }
 
 export async function fetchScopeLines(rfqId: string): Promise<ScopeLine[]> {
   // The server answers with {items, total}.
-  const page = await apiGet<ScopeLine[] | { items: ScopeLine[] }>(`/v1/rfq-bidding/${rfqId}/lines/`);
+  const page = await apiGet<ScopeLine[] | { items: ScopeLine[] }>(`/v1/bid-management/tenders/rfq/${rfqId}/lines/`);
   return normalizeListResponse(page);
 }
 
@@ -324,36 +324,36 @@ export async function addScopeLine(
   rfqId: string,
   payload: ScopeLineCreatePayload,
 ): Promise<ScopeLine> {
-  return apiPost<ScopeLine, ScopeLineCreatePayload>(`/v1/rfq-bidding/${rfqId}/lines/`, payload);
+  return apiPost<ScopeLine, ScopeLineCreatePayload>(`/v1/bid-management/tenders/rfq/${rfqId}/lines/`, payload);
 }
 
 export async function fetchComparison(rfqId: string): Promise<ComparisonResponse> {
-  return apiGet<ComparisonResponse>(`/v1/rfq-bidding/${rfqId}/comparison/`);
+  return apiGet<ComparisonResponse>(`/v1/bid-management/tenders/rfq/${rfqId}/comparison/`);
 }
 
 export async function fetchAward(rfqId: string): Promise<AwardDecision> {
-  return apiGet<AwardDecision>(`/v1/rfq-bidding/${rfqId}/award/`);
+  return apiGet<AwardDecision>(`/v1/bid-management/tenders/rfq/${rfqId}/award/`);
 }
 
 export async function fetchBids(rfqId?: string): Promise<Page<Bid>> {
   const params = new URLSearchParams();
   if (rfqId) params.set('rfq_id', rfqId);
   const qs = params.toString();
-  return apiGet<Page<Bid>>(`/v1/rfq-bidding/bids/${qs ? `?${qs}` : ''}`);
+  return apiGet<Page<Bid>>(`/v1/bid-management/tenders/rfq/bids/${qs ? `?${qs}` : ''}`);
 }
 
 export async function submitBid(payload: BidCreatePayload): Promise<Bid> {
-  return apiPost<Bid, BidCreatePayload>('/v1/rfq-bidding/bids/', payload);
+  return apiPost<Bid, BidCreatePayload>('/v1/bid-management/tenders/rfq/bids/', payload);
 }
 
 export async function evaluateBid(bidId: string): Promise<Bid> {
-  return apiPost<Bid>(`/v1/rfq-bidding/bids/${bidId}/evaluate/`);
+  return apiPost<Bid>(`/v1/bid-management/tenders/rfq/bids/${bidId}/evaluate/`);
 }
 
 export async function confirmBidScope(bidId: string, confirmed: boolean): Promise<Bid> {
-  return apiPost<Bid, { confirmed: boolean }>(`/v1/rfq-bidding/bids/${bidId}/scope-confirmed/`, { confirmed });
+  return apiPost<Bid, { confirmed: boolean }>(`/v1/bid-management/tenders/rfq/bids/${bidId}/scope-confirmed/`, { confirmed });
 }
 
 export async function awardBid(bidId: string): Promise<Bid> {
-  return apiPost<Bid>(`/v1/rfq-bidding/bids/${bidId}/award/`);
+  return apiPost<Bid>(`/v1/bid-management/tenders/rfq/bids/${bidId}/award/`);
 }

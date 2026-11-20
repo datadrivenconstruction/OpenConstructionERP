@@ -317,9 +317,9 @@ const playbook: Playbook = {
       whyKey: "cases.price_a_lopsrm_tender_and_integrate_the_precios_unitarios.step.assemble.why",
       whyDefault:
         "What you submitted becomes the contract, and the version on somebody's laptop is not evidence of it. A year later, when an estimacion is queried or an extraordinario is priced, the argument is settled by the analisis that went in with the bid, and the firm that can produce it in a minute is negotiating from a different position from the one still looking for it.",
-      moduleLabel: "Tendering",
-      moduleLabelKey: "tendering.title",
-      to: "/tendering",
+      moduleLabel: "Tenders",
+      moduleLabelKey: "tenders.title",
+      to: "/tenders",
     },
   ],
 };

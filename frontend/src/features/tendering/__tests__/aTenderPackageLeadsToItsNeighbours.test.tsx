@@ -114,9 +114,9 @@ interface World {
 function setWorld(world: World): void {
   apiGetMock.mockImplementation((url: string) => {
     if (url.startsWith('/v1/boq/boqs/')) return Promise.resolve([]);
-    if (url.startsWith('/v1/tendering/packages/?')) return Promise.resolve([tenderPackage(world.status)]);
-    if (url === '/v1/tendering/packages/tp-1') return Promise.resolve({ ...tenderPackage(world.status), bids: [] });
-    if (url.startsWith('/v1/tendering/packages/tp-1/scope')) {
+    if (url.startsWith('/v1/bid-management/tenders/main-contract/packages/?')) return Promise.resolve([tenderPackage(world.status)]);
+    if (url === '/v1/bid-management/tenders/main-contract/packages/tp-1') return Promise.resolve({ ...tenderPackage(world.status), bids: [] });
+    if (url.startsWith('/v1/bid-management/tenders/main-contract/packages/tp-1/scope')) {
       return Promise.resolve({
         package_id: 'tp-1',
         boq_id: 'boq-7',
@@ -128,7 +128,7 @@ function setWorld(world: World): void {
         sections: [],
       });
     }
-    if (url.startsWith('/v1/tendering/packages/tp-1/comparison')) {
+    if (url.startsWith('/v1/bid-management/tenders/main-contract/packages/tp-1/comparison')) {
       return Promise.resolve({
         package_id: 'tp-1',
         package_name: 'Concrete works',

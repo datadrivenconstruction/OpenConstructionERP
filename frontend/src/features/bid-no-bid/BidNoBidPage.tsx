@@ -118,7 +118,7 @@ export function BidNoBidPage() {
     <div className="space-y-5 animate-fade-in pb-16" data-testid="bid-no-bid-page">
       <Breadcrumb
         items={[
-          { label: t('tendering.title', { defaultValue: 'Tendering' }), to: '/tendering' },
+          { label: t('tendering.title', { defaultValue: 'Tendering' }), to: '/tenders' },
           { label: card.tender_name },
           { label: t('bid_no_bid.title', { defaultValue: 'Bid / no-bid' }) },
         ]}

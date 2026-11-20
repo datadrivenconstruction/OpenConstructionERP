@@ -187,7 +187,7 @@ function RFQBiddingExplainer() {
         <span className="font-medium text-content-secondary">
           {t('rfq_bidding.flow_related', { defaultValue: 'Related:' })}
         </span>{' '}
-        <Link to="/tendering" className="font-medium text-oe-blue-text hover:underline">
+        <Link to="/tenders" className="font-medium text-oe-blue-text hover:underline">
           {t('rfq_bidding.mod_tendering', { defaultValue: 'Tendering' })}
         </Link>
         {' · '}

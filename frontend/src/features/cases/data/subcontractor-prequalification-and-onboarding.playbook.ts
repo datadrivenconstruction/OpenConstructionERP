@@ -156,9 +156,9 @@ const playbook: Playbook = {
         "cases.subcontractor_prequalification_and_onboarding.step.approved.why",
       whyDefault:
         "Prequalifying once and staying visible on the list is what turns a one-off approval into a standing pipeline of invitations.",
-      moduleLabel: "Tendering",
-      moduleLabelKey: "nav.tendering",
-      to: "/tendering",
+      moduleLabel: "Tenders",
+      moduleLabelKey: "tenders.title",
+      to: "/tenders",
     },
   ],
 };

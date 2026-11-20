@@ -483,7 +483,7 @@ export function EstimateBasisPanel({ projectId, boqId, currency, baseDate }: Est
           </Button>
           <Button
             variant="secondary"
-            onClick={() => navigate('/tendering')}
+            onClick={() => navigate('/tenders')}
             icon={<Send className="h-4 w-4" aria-hidden />}
           >
             {t('estimateBasis.openTendering', { defaultValue: 'Open Tendering' })}

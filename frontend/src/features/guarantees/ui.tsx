@@ -103,7 +103,7 @@ export function GuaranteesExplainer() {
         </span>{' '}
         <ModLink to="/contracts">{t('guarantees.mod_contracts', { defaultValue: 'Contracts' })}</ModLink>
         {' · '}
-        <ModLink to="/tendering">{t('guarantees.mod_tendering', { defaultValue: 'Tendering' })}</ModLink>
+        <ModLink to="/tenders">{t('guarantees.mod_tendering', { defaultValue: 'Tendering' })}</ModLink>
         {' · '}
         <ModLink to="/subcontractors">{t('guarantees.mod_subcontractors', { defaultValue: 'Subcontractors' })}</ModLink>
         {' · '}

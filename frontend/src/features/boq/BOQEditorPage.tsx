@@ -3379,7 +3379,7 @@ export function BOQEditorPage() {
       // tendering page's package list (keyed on the active project) includes
       // the new package before we deep-link to it.
       if (boq?.project_id) setActiveProject(boq.project_id, project?.name ?? '');
-      navigate(`/tendering?package=${pkg.id}`);
+      navigate(`/tenders?package=${pkg.id}`);
     },
     [navigate, setActiveProject, boq?.project_id, project?.name],
   );

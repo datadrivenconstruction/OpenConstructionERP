@@ -144,9 +144,9 @@ const playbook: Playbook = {
       whyKey: "cases.issue_a_procurement_and_buying_schedule.step.tender.why",
       whyDefault:
         "Pricing in order of urgency means the long-lead packages are settled while there is still time to negotiate, instead of being rushed at any price the week they are needed.",
-      moduleLabel: "Tendering",
-      moduleLabelKey: "tendering.title",
-      to: "/tendering",
+      moduleLabel: "Tenders",
+      moduleLabelKey: "tenders.title",
+      to: "/tenders",
     },
     {
       id: "order",

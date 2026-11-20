@@ -10,6 +10,11 @@ releases or 90 days, whichever is longer. Every response from them carries
   also waits for the second minor release after deprecation);
 * ``Link`` with ``rel="successor-version"``: the canonical tenders API.
 
+The same handlers are also mounted under the canonical tenders API
+(``/api/v1/bid-management/tenders/main-contract/`` and ``.../tenders/rfq/``, see
+``tender_routes``). There they are current and send no deprecation headers; the
+``Link`` header of an old route names the exact canonical path that replaces it.
+
 A path id may be the old id or the canonical id of the same record: the route
 class looks a canonical id up in ``oe_tender_legacy_map`` and hands the old
 handler the id it knows.
@@ -35,6 +40,13 @@ SUNSET_DAYS = 90
 #: The release that may first drop the routes: two minor releases after 19.9.
 REMOVAL_NOT_BEFORE_VERSION = "20.1.0"
 SUCCESSOR = "/api/v1/bid-management/tenders/"
+#: Old mount -> canonical mount of the same handlers.
+CANONICAL_MOUNTS: dict[str, str] = {
+    "/api/v1/tendering": "/api/v1/bid-management/tenders/main-contract",
+    "/api/v1/rfq-bidding": "/api/v1/bid-management/tenders/rfq",
+    "/api/v1/rfq_bidding": "/api/v1/bid-management/tenders/rfq",
+}
+_CANONICAL_MARKERS = ("/bid-management/tenders/", "/bid_management/tenders/")
 
 
 def sunset_at() -> datetime:
@@ -42,12 +54,25 @@ def sunset_at() -> datetime:
     return DEPRECATED_ON + timedelta(days=SUNSET_DAYS)
 
 
-def deprecation_headers() -> dict[str, str]:
+def successor_path(path: str) -> str:
+    """The canonical path that replaces an old tendering or RFQ path."""
+    for old, new in CANONICAL_MOUNTS.items():
+        if path == old or path.startswith(old + "/"):
+            return new + path[len(old) :]
+    return SUCCESSOR
+
+
+def is_canonical_path(path: str) -> bool:
+    """Whether a route path sits under the canonical tenders API."""
+    return any(marker in path for marker in _CANONICAL_MARKERS)
+
+
+def deprecation_headers(path: str | None = None) -> dict[str, str]:
     """The three headers every deprecated tender route sends."""
     return {
         "Deprecation": f"@{int(DEPRECATED_ON.timestamp())}",
         "Sunset": format_datetime(sunset_at(), usegmt=True),
-        "Link": f'<{SUCCESSOR}>; rel="successor-version"',
+        "Link": f'<{successor_path(path) if path else SUCCESSOR}>; rel="successor-version"',
     }
 
 
@@ -85,11 +110,19 @@ class _LegacyTenderRoute(APIRoute):
 
     families: tuple[str, ...] = ()
 
+    def __init__(self, path: str, *args: Any, **kwargs: Any) -> None:
+        super().__init__(path, *args, **kwargs)
+        # Decided by the final path: an include copies the flag from the staging route.
+        self.deprecated = self._is_deprecated()
+
+    def _is_deprecated(self) -> bool:
+        # The bidder portal stays: its links are already in bidders' mailboxes.
+        return "/bid-portal/" not in self.path and not is_canonical_path(self.path)
+
     def get_route_handler(self) -> Callable[[Request], Coroutine[Any, Any, Response]]:
         original = super().get_route_handler()
         families = self.families
-        # The bidder portal stays: its links are already in bidders' mailboxes.
-        deprecated = "/bid-portal/" not in self.path
+        deprecated = self._is_deprecated()
 
         async def handler(request: Request) -> Response:
             params = request.scope.get("path_params") or {}
@@ -100,7 +133,7 @@ class _LegacyTenderRoute(APIRoute):
                     request.scope["path_params"] = {k: found.get(str(v), v) for k, v in params.items()}
             response = await original(request)
             if deprecated:
-                for name, value in deprecation_headers().items():
+                for name, value in deprecation_headers(request.url.path).items():
                     response.headers.setdefault(name, value)
             return response
 

@@ -173,7 +173,7 @@ export interface PackageOption {
 
 
 export const listPackages = (projectId: string) =>
-  apiGet<PackageOption[]>(`/v1/tendering/packages/?project_id=${projectId}`);
+  apiGet<PackageOption[]>(`/v1/bid-management/tenders/main-contract/packages/?project_id=${projectId}`);
 export const listQuotes = async (projectId: string, packageId?: string) => {
   const { items } = await fetchAllPages<QuoteSummary>((offset, limit) =>
     apiGet<{ items: QuoteSummary[] }>(

@@ -99,7 +99,7 @@ export const SOURCES: Record<ListedKind, Source> = {
   },
   // A tender package has a name only, and no amount of its own.
   tender_package: {
-    read: (id) => apiGet<unknown>(`/v1/tendering/packages/?project_id=${id}&limit=${PAGE_SIZE}`),
+    read: (id) => apiGet<unknown>(`/v1/bid-management/tenders/main-contract/packages/?project_id=${id}&limit=${PAGE_SIZE}`),
     number: null,
     name: ['name'],
     currency: null,
@@ -111,7 +111,7 @@ export const SOURCES: Record<ListedKind, Source> = {
     currency: 'currency',
   },
   rfq: {
-    read: (id) => apiGet<unknown>(`/v1/rfq-bidding/?project_id=${id}&limit=${PAGE_SIZE}`),
+    read: (id) => apiGet<unknown>(`/v1/bid-management/tenders/rfq/?project_id=${id}&limit=${PAGE_SIZE}`),
     number: 'rfq_number',
     name: ['title'],
     currency: 'currency_code',

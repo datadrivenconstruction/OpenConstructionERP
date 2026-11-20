@@ -91,7 +91,6 @@ const KEY_SPLIT_BASELINE: Record<string, string[]> = {
   '/reports': ['nav.reporting', 'nav.reports'],
   '/schedule': ['nav.schedule', 'schedule.title'],
   '/schedule-advanced': ['nav.schedule_advanced', 'onboarding.mod_schedule_advanced'],
-  '/tendering': ['nav.tendering', 'tendering.title'],
   '/validation': ['nav.validation', 'validation.title'],
 };
 

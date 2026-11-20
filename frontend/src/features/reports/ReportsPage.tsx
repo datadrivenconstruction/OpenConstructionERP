@@ -598,7 +598,7 @@ async function downloadTenderComparisonReport(
   try {
     packages = await apiGet<Array<{
       id: string; name: string; status: string; bid_count: number; deadline: string | null;
-    }>>(`/v1/tendering/packages/?project_id=${projectId}`);
+    }>>(`/v1/bid-management/tenders/main-contract/packages/?project_id=${projectId}`);
   } catch {
     throw new Error(
       t('reports.err_no_tender', {
@@ -627,7 +627,7 @@ async function downloadTenderComparisonReport(
         budget_total: number;
         bid_totals: BidTotal[];
         rows: Array<{ description: string; unit: string; budget_rate: number; bids: Array<{ company_name: string; unit_rate: number; total: number }> }>;
-      }>(`/v1/tendering/packages/${pkg.id}/comparison/`);
+      }>(`/v1/bid-management/tenders/main-contract/packages/${pkg.id}/comparison/`);
 
       if (comparison.bid_totals.length > 0) {
         csvLines.push('');

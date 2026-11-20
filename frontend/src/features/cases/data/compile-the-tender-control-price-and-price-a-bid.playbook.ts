@@ -147,9 +147,9 @@ const playbook: Playbook = {
       whyKey: "cases.compile_the_tender_control_price_and_price_a_bid.step.evaluate.why",
       whyDefault:
         "Two checks are not judgment, and the product does not make them for you: under the 2024 standard a bid above the published maximum bid price is rejected, and so is a bid below cost, so read every total against the ceiling before you read anything else. Below the ceiling the comparison is yours to make and yours to justify. On public work the reasoning is read months later by somebody who was not in the room, and a written comparison against a stated base is the difference between an award that survives a challenge and one that is defended from memory.",
-      moduleLabel: "Tendering",
-      moduleLabelKey: "tendering.title",
-      to: "/tendering",
+      moduleLabel: "Tenders",
+      moduleLabelKey: "tenders.title",
+      to: "/tenders",
     },
   ],
 };

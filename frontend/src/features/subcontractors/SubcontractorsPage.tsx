@@ -322,7 +322,7 @@ function HowSubcontractorsWork() {
             {t('nav.procurement', { defaultValue: 'Procurement' })}
           </ModLink>{' '}
           ·{' '}
-          <ModLink to="/tendering">
+          <ModLink to="/tenders">
             {t('nav.tendering', { defaultValue: 'Tendering' })}
           </ModLink>{' '}
           ·{' '}

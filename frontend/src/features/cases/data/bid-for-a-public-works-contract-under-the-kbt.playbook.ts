@@ -49,9 +49,9 @@ const playbook: Playbook = {
       whyKey: "cases.bid_for_a_public_works_contract_under_the_kbt.step.value.why",
       whyDefault:
         "The national thresholds are set in the central budget act for the year and republished by the Kozbeszerzesi Hatosag each January, so last year's figure is the wrong figure and nobody is going to warn you. Kbt. 19. governs how the estimated value is worked out, and choosing a method that keeps a work under a threshold is the finding that undoes a whole procedure, so the number you record here is the number the file has to defend.",
-      moduleLabel: "Tendering",
-      moduleLabelKey: "tendering.title",
-      to: "/tendering",
+      moduleLabel: "Tenders",
+      moduleLabelKey: "tenders.title",
+      to: "/tenders",
     },
     {
       id: "docs",

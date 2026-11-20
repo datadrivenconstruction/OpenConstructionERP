@@ -163,7 +163,7 @@ export function ProjectAnalyticsGrid({ projectId }: ProjectAnalyticsGridProps) {
   const bidAnalysisQ = useQuery({
     queryKey: ['pi', 'bid-analysis', projectId],
     queryFn: () =>
-      apiGet<BidAnalysis>(`/v1/tendering/bid-analysis/?project_id=${projectId}`),
+      apiGet<BidAnalysis>(`/v1/bid-management/tenders/main-contract/bid-analysis/?project_id=${projectId}`),
     staleTime: PI_QUERY_STALE_MS,
     enabled: !!projectId,
   });

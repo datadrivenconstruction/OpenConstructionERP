@@ -103,9 +103,9 @@ const playbook: Playbook = {
       whyKey: "cases.evaluate_a_government_tender_against_the_estimated_cost.step.invite.why",
       whyDefault:
         "The comparison at the end is only valid if the offers answer the same question. A clarification sent to one bidder, or a bill quietly corrected after issue, breaks that and is the most common ground on which an award is challenged.",
-      moduleLabel: "Tendering",
-      moduleLabelKey: "tendering.title",
-      to: "/tendering",
+      moduleLabel: "Tenders",
+      moduleLabelKey: "tenders.title",
+      to: "/tenders",
     },
     {
       id: "receive",

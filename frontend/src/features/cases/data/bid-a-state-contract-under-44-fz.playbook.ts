@@ -48,9 +48,9 @@ const playbook: Playbook = {
       whyKey: "cases.bid_a_state_contract_under_44_fz.step.regime.why",
       whyDefault:
         "Under 44-FZ the procedure, the forms and the grounds for rejecting an application come from the statute and are identical for every customer in the country. Under 223-FZ they come from a regulation the customer writes itself, so two purchases run by two state companies can demand entirely different documents. Reading the wrong rulebook ends in rejection on formal grounds with your price never opened.",
-      moduleLabel: "Tendering",
-      moduleLabelKey: "tendering.title",
-      to: "/tendering",
+      moduleLabel: "Tenders",
+      moduleLabelKey: "tenders.title",
+      to: "/tenders",
     },
     {
       id: "nmck",

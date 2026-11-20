@@ -3,7 +3,7 @@
 /**
  * Staff API for bidder price-entry links (authenticated).
  *
- * Backed by /api/v1/tendering/packages/{id}/bid-invitations/ and
+ * Backed by /api/v1/bid-management/tenders/main-contract/packages/{id}/bid-invitations/ and
  * /recipients/{rid}/bid-link/. The token itself is returned once, inside
  * `url`, by `createBidLink`; listings never carry it.
  */
@@ -60,7 +60,7 @@ export interface BidInvitationCreated extends BidInvitation {
 }
 
 export function listBidInvitations(packageId: string): Promise<{ items: BidInvitation[]; total: number }> {
-  return apiGet(`/v1/tendering/packages/${packageId}/bid-invitations/`);
+  return apiGet(`/v1/bid-management/tenders/main-contract/packages/${packageId}/bid-invitations/`);
 }
 
 /**
@@ -74,19 +74,19 @@ export function createBidLink(
 ): Promise<BidInvitationCreated> {
   const query = options.reopen ? '?reopen=true' : '';
   return apiPost<BidInvitationCreated>(
-    `/v1/tendering/packages/${packageId}/recipients/${encodeURIComponent(recipientId)}/bid-link/${query}`,
+    `/v1/bid-management/tenders/main-contract/packages/${packageId}/recipients/${encodeURIComponent(recipientId)}/bid-link/${query}`,
     {},
   );
 }
 
 /** Link an invited firm to a directory contact (a person's decision, confidence 1). */
 export function linkInvitationParty(packageId: string, invitationId: string, contactId: string): Promise<PartyLinkResult> {
-  return apiPut<PartyLinkResult>(`/v1/tendering/packages/${packageId}/bid-invitations/${invitationId}/party/`, { contact_id: contactId });
+  return apiPut<PartyLinkResult>(`/v1/bid-management/tenders/main-contract/packages/${packageId}/bid-invitations/${invitationId}/party/`, { contact_id: contactId });
 }
 
 /** Remove the link. The contact itself is untouched. */
 export function unlinkInvitationParty(packageId: string, invitationId: string): Promise<PartyLinkResult> {
-  return apiDelete<PartyLinkResult>(`/v1/tendering/packages/${packageId}/bid-invitations/${invitationId}/party/`);
+  return apiDelete<PartyLinkResult>(`/v1/bid-management/tenders/main-contract/packages/${packageId}/bid-invitations/${invitationId}/party/`);
 }
 
 /** Confirm (true) or reject (false) the matcher's suggestion. */
@@ -99,5 +99,5 @@ export function decidePartySuggestion(reviewId: string, confirm: boolean): Promi
 /** A link for a bid the buyer entered by hand; the firm's submission updates that bid. */
 export function createBidLinkForBid(bidId: string, options: { reopen?: boolean } = {}): Promise<BidInvitationCreated> {
   const query = options.reopen ? '?reopen=true' : '';
-  return apiPost<BidInvitationCreated>(`/v1/tendering/bids/${bidId}/bid-link/${query}`, {});
+  return apiPost<BidInvitationCreated>(`/v1/bid-management/tenders/main-contract/bids/${bidId}/bid-link/${query}`, {});
 }

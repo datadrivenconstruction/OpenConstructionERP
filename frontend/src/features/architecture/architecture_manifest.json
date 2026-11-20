@@ -17817,7 +17817,6 @@
         "schedule",
         "subcontractors",
         "tasks",
-        "tendering",
         "users",
         "variations"
       ]
@@ -19281,6 +19280,9 @@
         "award_route.py",
         "award_selection.py",
         "events.py",
+        "legacy_adapter.py",
+        "legacy_copy.py",
+        "legacy_mirror.py",
         "manifest.py",
         "models.py",
         "permissions.py",
@@ -19291,6 +19293,9 @@
         "schemas.py",
         "seed.py",
         "service.py",
+        "tender_routes.py",
+        "tender_rules.py",
+        "tenders.py",
         "validators.py"
       ],
       "manifest": {
@@ -19422,6 +19427,42 @@
               "annotation": "Mapped[dict]",
               "sql_type": "JSON",
               "nullable": false
+            },
+            {
+              "name": "legacy_source",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "boq_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "legal_entity_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "cost_line_ids",
+              "annotation": "Mapped[list | None]",
+              "sql_type": "JSON",
+              "nullable": true
+            },
+            {
+              "name": "evaluation_method",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "require_full_scope",
+              "annotation": "Mapped[bool | None]",
+              "sql_type": "Boolean",
+              "nullable": true
             }
           ],
           "relationships": [
@@ -19609,6 +19650,30 @@
               "annotation": "Mapped[str | None]",
               "sql_type": "String",
               "nullable": true
+            },
+            {
+              "name": "expires_at",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "revoked_at",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "draft_saved_at",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "draft",
+              "annotation": "Mapped[dict | None]",
+              "sql_type": "JSON",
+              "nullable": true
             }
           ],
           "relationships": [
@@ -19693,6 +19758,18 @@
               "annotation": "Mapped[str]",
               "sql_type": "Text",
               "nullable": false
+            },
+            {
+              "name": "withdrawn_at",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "withdrawn_reason",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "Text",
+              "nullable": true
             }
           ],
           "relationships": [
@@ -19785,6 +19862,54 @@
               "annotation": "Mapped[dict]",
               "sql_type": "JSON",
               "nullable": false
+            },
+            {
+              "name": "validity_days",
+              "annotation": "Mapped[int | None]",
+              "sql_type": "Integer",
+              "nullable": true
+            },
+            {
+              "name": "exchange_rate",
+              "annotation": "Mapped[Decimal | None]",
+              "sql_type": "Numeric",
+              "nullable": true
+            },
+            {
+              "name": "exchange_rate_date",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "exchange_rate_source",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "admitted_by",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "admitted_at",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "admission_reason",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "Text",
+              "nullable": true
+            },
+            {
+              "name": "late_reason",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "Text",
+              "nullable": true
             }
           ],
           "relationships": []
@@ -19804,11 +19929,29 @@
             },
             {
               "name": "line_item_id",
-              "annotation": "Mapped[uuid.UUID]",
+              "annotation": "Mapped[uuid.UUID | None]",
               "sql_type": "GUID",
-              "nullable": false,
+              "nullable": true,
               "is_fk": true,
               "fk_target": "oe_bid_management_line_item.id"
+            },
+            {
+              "name": "description",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "Text",
+              "nullable": true
+            },
+            {
+              "name": "unit",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "unit_conversion_factor",
+              "annotation": "Mapped[Decimal | None]",
+              "sql_type": "Numeric",
+              "nullable": true
             },
             {
               "name": "unit_price",
@@ -20213,6 +20356,30 @@
               "annotation": "Mapped[str | None]",
               "sql_type": "String",
               "nullable": true
+            },
+            {
+              "name": "method",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "is_override",
+              "annotation": "Mapped[bool | None]",
+              "sql_type": "Boolean",
+              "nullable": true
+            },
+            {
+              "name": "recommended_bidder_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "basis",
+              "annotation": "Mapped[dict | None]",
+              "sql_type": "JSON",
+              "nullable": true
             }
           ],
           "relationships": []
@@ -20252,6 +20419,102 @@
             },
             {
               "name": "notified_at",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            }
+          ],
+          "relationships": []
+        },
+        {
+          "class_name": "BidSubmissionAdjustment",
+          "tablename": "oe_bid_management_submission_adjustment",
+          "docstring": "A priced adjustment on a submission: an exclusion, a plug, a discount.",
+          "columns": [
+            {
+              "name": "submission_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_bid_management_submission.id"
+            },
+            {
+              "name": "kind",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "description",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "Text",
+              "nullable": true
+            },
+            {
+              "name": "amount",
+              "annotation": "Mapped[Decimal]",
+              "sql_type": "Numeric",
+              "nullable": false
+            },
+            {
+              "name": "currency",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "included_in_bid",
+              "annotation": "Mapped[bool]",
+              "sql_type": "Boolean",
+              "nullable": false
+            },
+            {
+              "name": "source",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            }
+          ],
+          "relationships": []
+        },
+        {
+          "class_name": "TenderLegacyMap",
+          "tablename": "oe_tender_legacy_map",
+          "docstring": "Where a row of the old tendering or rfq_bidding tables lives now.\n\nOne row per copied source row. It makes the copy re-runnable (a mapped row\nis updated, never copied twice) and lets old ids reach the canonical record.",
+          "columns": [
+            {
+              "name": "source_table",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "source_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false
+            },
+            {
+              "name": "target_table",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "target_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false
+            },
+            {
+              "name": "package_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "copied_at",
               "annotation": "Mapped[str | None]",
               "sql_type": "String",
               "nullable": true
@@ -20779,6 +21042,29 @@
             {
               "name": "metadata",
               "type": "dict[str, Any]"
+            },
+            {
+              "name": "boq_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "legal_entity_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "cost_line_ids",
+              "type": "list[str] | None"
+            },
+            {
+              "name": "evaluation_method",
+              "type": "str | None"
+            },
+            {
+              "name": "require_full_scope",
+              "type": "bool | None",
+              "default": "None"
             }
           ]
         },
@@ -20840,6 +21126,29 @@
             {
               "name": "metadata",
               "type": "dict[str, Any] | None",
+              "default": "None"
+            },
+            {
+              "name": "boq_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "legal_entity_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "cost_line_ids",
+              "type": "list[str] | None"
+            },
+            {
+              "name": "evaluation_method",
+              "type": "str | None"
+            },
+            {
+              "name": "require_full_scope",
+              "type": "bool | None",
               "default": "None"
             }
           ]
@@ -20940,6 +21249,36 @@
             {
               "name": "metadata",
               "type": "dict[str, Any]"
+            },
+            {
+              "name": "legacy_source",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "boq_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "legal_entity_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "cost_line_ids",
+              "type": "list[Any] | None",
+              "default": "None"
+            },
+            {
+              "name": "evaluation_method",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "require_full_scope",
+              "type": "bool | None",
+              "default": "None"
             },
             {
               "name": "created_at",
@@ -21288,6 +21627,21 @@
               "default": "'pending'"
             },
             {
+              "name": "expires_at",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "revoked_at",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "draft_saved_at",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
               "name": "created_at",
               "type": "datetime"
             },
@@ -21467,6 +21821,16 @@
               "default": "None"
             },
             {
+              "name": "withdrawn_at",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "withdrawn_reason",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
               "name": "created_at",
               "type": "datetime"
             },
@@ -21642,6 +22006,46 @@
               "type": "dict[str, Any]"
             },
             {
+              "name": "validity_days",
+              "type": "int | None",
+              "default": "None"
+            },
+            {
+              "name": "exchange_rate",
+              "type": "Decimal | None",
+              "default": "None"
+            },
+            {
+              "name": "exchange_rate_date",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "exchange_rate_source",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "admitted_by",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "admitted_at",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "admission_reason",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "late_reason",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
               "name": "created_at",
               "type": "datetime"
             },
@@ -21760,7 +22164,23 @@
             },
             {
               "name": "line_item_id",
-              "type": "UUID"
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "description",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "unit",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "unit_conversion_factor",
+              "type": "Decimal | None",
+              "default": "None"
             },
             {
               "name": "unit_price",
@@ -22450,6 +22870,26 @@
             {
               "name": "notified_others_at",
               "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "method",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "is_override",
+              "type": "bool | None",
+              "default": "None"
+            },
+            {
+              "name": "recommended_bidder_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "basis",
+              "type": "dict[str, Any] | None",
               "default": "None"
             },
             {
@@ -23435,6 +23875,7 @@
         "contracts",
         "costmodel",
         "procurement",
+        "rfq_bidding",
         "subcontractors",
         "tendering"
       ]
@@ -341977,6 +342418,13 @@
       "total_files": 48
     },
     {
+      "name": "tenders",
+      "ts_files": 7,
+      "css_files": 0,
+      "test_files": 2,
+      "total_files": 7
+    },
+    {
       "name": "timeline",
       "ts_files": 5,
       "css_files": 0,
@@ -342187,7 +342635,6 @@
       "schedule",
       "subcontractors",
       "tasks",
-      "tendering",
       "users",
       "variations"
     ],
@@ -342210,6 +342657,7 @@
       "costmodel",
       "procurement",
       "projects",
+      "rfq_bidding",
       "subcontractors",
       "tendering",
       "users"
@@ -344103,14 +344551,14 @@
   "statistics": {
     "backend_modules": 260,
     "modules_with_manifests": 260,
-    "total_models": 974,
-    "total_columns": 11431,
+    "total_models": 976,
+    "total_columns": 11471,
     "total_relationships": 264,
     "total_routes": 5553,
     "total_schemas": 5173,
-    "total_python_files": 3684,
-    "frontend_features": 252,
-    "frontend_ts_files": 4450,
+    "total_python_files": 3690,
+    "frontend_features": 253,
+    "frontend_ts_files": 4457,
     "frontend_backend_mapped": 224
   },
   "frontend_backend_mapping": {
@@ -344354,6 +344802,7 @@
     "teams": "teams",
     "temporary-works": "temporary_works",
     "tendering": "tendering",
+    "tenders": null,
     "timeline": "timeline",
     "translation": null,
     "transmittals": "transmittals",

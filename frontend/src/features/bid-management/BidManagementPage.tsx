@@ -526,7 +526,7 @@ function HowBidManagementWorks() {
           <span className="font-medium text-content-secondary">
             {t('bid_management.flow_alt', { defaultValue: 'Alternative:' })}
           </span>{' '}
-          <ModLink to="/tendering">
+          <ModLink to="/tenders">
             {t('bid_management.mod_tendering', { defaultValue: 'Tendering' })}
           </ModLink>{' '}
           ·{' '}
@@ -735,7 +735,7 @@ export function BidManagementPage() {
           },
           {
             label: t('nav.tendering', { defaultValue: 'Tendering' }),
-            onClick: () => navigate('/tendering'),
+            onClick: () => navigate('/tenders'),
           },
           {
             label: t('nav.rfq_bidding', { defaultValue: 'RFQ Bidding' }),

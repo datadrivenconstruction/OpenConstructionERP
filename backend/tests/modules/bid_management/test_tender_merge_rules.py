@@ -163,3 +163,39 @@ def test_old_routers_use_the_adapter_route_class() -> None:
     rfq_classes = {type(r).__name__ for r in rfq_router.routes}
     assert tender_classes == {"LegacyTenderingRoute"}
     assert rfq_classes == {"LegacyRFQRoute"}
+
+
+def test_an_old_path_names_its_canonical_successor() -> None:
+    assert legacy_adapter.successor_path("/api/v1/tendering/packages/x/bids/") == (
+        "/api/v1/bid-management/tenders/main-contract/packages/x/bids/"
+    )
+    assert legacy_adapter.successor_path("/api/v1/rfq-bidding/x") == "/api/v1/bid-management/tenders/rfq/x"
+    assert legacy_adapter.successor_path("/api/v1/other/") == legacy_adapter.SUCCESSOR
+    assert "/tenders/rfq/x>" in legacy_adapter.deprecation_headers("/api/v1/rfq_bidding/x")["Link"]
+
+
+def test_every_old_route_but_the_portal_moves_under_the_tenders_api() -> None:
+    from fastapi import FastAPI
+
+    from app.modules.bid_management.router import router as bm_router
+    from app.modules.rfq_bidding.router import router as rfq_router
+    from app.modules.tendering.router import router as tender_router
+
+    app = FastAPI()
+    app.include_router(bm_router, prefix="/api/v1/bid-management")
+    app.include_router(tender_router, prefix="/api/v1/tendering")
+    app.include_router(rfq_router, prefix="/api/v1/rfq-bidding")
+    routes = [r for r in app.routes if hasattr(r, "methods")]
+    old = [r for r in routes if r.path.startswith(("/api/v1/tendering/", "/api/v1/rfq-bidding/"))]
+    moved = {
+        (legacy_adapter.successor_path(r.path), frozenset(r.methods)) for r in old if "/bid-portal/" not in r.path
+    }
+    canonical = {
+        (r.path, frozenset(r.methods))
+        for r in routes
+        if r.path.startswith(("/api/v1/bid-management/tenders/main-contract", "/api/v1/bid-management/tenders/rfq"))
+    }
+    assert moved and moved == canonical
+    assert all(r.deprecated for r in old if "/bid-portal/" not in r.path)
+    assert not any(r.deprecated for r in routes if legacy_adapter.is_canonical_path(r.path))
+    assert not any("/bid-portal/" in p for p, _ in canonical)

@@ -50,9 +50,9 @@ const playbook: Playbook = {
       whyKey: "cases.level_subcontract_bids_and_flow_the_terms_down.step.level.why",
       whyDefault:
         "Five bids that are each a single number look comparable and are not. The one that excluded the hoisting and the one that carried the permit have answered different questions, and the difference does not surface until it arrives as a change order in the autumn with no competitive tension left in it.",
-      moduleLabel: "Tendering",
-      moduleLabelKey: "tendering.title",
-      to: "/tendering",
+      moduleLabel: "Tenders",
+      moduleLabelKey: "tenders.title",
+      to: "/tenders",
     },
     {
       id: "register",
@@ -96,9 +96,9 @@ const playbook: Playbook = {
       whyKey: "cases.level_subcontract_bids_and_flow_the_terms_down.step.gate.why",
       whyDefault:
         "The honest statement is that a document was valid on the award date, and not that compliance is established for the contract or for the duration of the work, which is a different claim nobody has checked. A gate that can be waved through is worse than no gate at all, because everybody downstream believes it.",
-      moduleLabel: "Tendering",
-      moduleLabelKey: "tendering.title",
-      to: "/tendering",
+      moduleLabel: "Tenders",
+      moduleLabelKey: "tenders.title",
+      to: "/tenders",
     },
     {
       id: "renew",
