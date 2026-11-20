@@ -31,6 +31,7 @@ import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { useViewModeStore } from '@/stores/useViewModeStore';
 import { useToastStore } from '@/stores/useToastStore';
 import { getProjectCrs } from './api';
+import { HauledVsExcavatedPanel } from './HauledVsExcavatedPanel';
 import { crsChipText } from './crsPicker';
 import { useOpenSurveyDemo } from './useOpenSurveyDemo';
 import { formatM3 } from './volumesApi';
@@ -251,6 +252,8 @@ export default function StockpilesPage() {
                 {t('stockpiles.action.add_survey', { defaultValue: 'Add survey' })}
               </Button>
             </div>
+
+            {projectId && <HauledVsExcavatedPanel projectId={projectId} stockpileId={selected.id} />}
 
             <h3 className="oe-card-title">{t('stockpiles.surveys', { defaultValue: 'Surveys' })}</h3>
             {surveys.length === 0 ? (

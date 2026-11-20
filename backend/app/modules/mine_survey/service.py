@@ -33,6 +33,7 @@ from app.modules.mine_survey.schemas import (
     EntryOut,
     EntryUpdate,
     Finding,
+    MineCertify,
     PeriodCreate,
     PeriodDetail,
     PeriodOut,
@@ -47,7 +48,7 @@ from app.modules.mine_survey.schemas import (
 )
 from app.modules.mine_survey.validators import MINE_RULE_SET
 from app.modules.surfaces_volumes.models import SurveyVolume
-from app.modules.surfaces_volumes.service import VolumesService
+from app.modules.surfaces_volumes.service import VolumesService, quantity_of
 
 logger = logging.getLogger(__name__)
 
@@ -600,26 +601,20 @@ class MineService:
         from app.modules.surfaces_volumes.schemas import RecordProgress  # noqa: PLC0415
 
         self._open(e)
-        v = await self._volume_of(e)
-        if v is None or v.status not in ("confirmed", "sent"):
-            raise _err(status.HTTP_409_CONFLICT, "Confirm the actual before adding it to a claim")
+        v = await self._claimable(e)
         p, unit = await self.get_period(e.period_id), await self.get_unit(e.unit_id)
+        m3 = quantity_of(v, data.quantity)
         res = await self.volumes.record_progress(
             v,
             RecordProgress(
                 position_id=data.position_id,
                 period_label=p.label,
-                quantity="cut",
-                notes=data.notes.strip() or f"Mine survey {unit.name} {p.label}: {float(v.cut_m3):,.1f} m3 ({v.code})",
+                quantity=data.quantity,
+                notes=data.notes.strip() or f"Mine survey {unit.name} {p.label}: {m3:,.1f} m3 ({v.code})",
             ),
             user_id,
         )
-        uid = _uuid(user_id)
-        e.claim_entry_id = res.entry_id
-        e.claimed_m3 = _q(res.quantity_m3, "0.001")  # type: ignore[assignment]
-        e.claimed_at = datetime.now(UTC)
-        e.claimed_by_name = await self.repo.user_name(uid)
-        await self.session.flush()
+        await self._mark_claimed(e, res.entry_id, res.quantity_m3, user_id)
         await self._audit(
             "update",
             "mine_period_entry",
@@ -640,6 +635,48 @@ class MineService:
             period_label=res.period_label,
             percent_complete=res.percent_complete,
         )
+
+    async def _claimable(self, e: MinePeriodEntry) -> SurveyVolume:
+        v = await self._volume_of(e)
+        if v is None or v.status not in ("confirmed", "sent"):
+            raise _err(status.HTTP_409_CONFLICT, "Confirm the actual before adding it to a claim")
+        return v
+
+    async def _mark_claimed(self, e: MinePeriodEntry, entry_id: uuid.UUID, m3: float, user_id: str) -> None:
+        e.claim_entry_id = entry_id
+        e.claimed_m3 = _q(m3, "0.001")  # type: ignore[assignment]
+        e.claimed_at = datetime.now(UTC)
+        e.claimed_by_name = await self.repo.user_name(_uuid(user_id))
+        await self.session.flush()
+
+    def _certify_request(self, data: MineCertify, period_label: str) -> Any:
+        from app.modules.surfaces_volumes.schemas import CertifyQuantity  # noqa: PLC0415
+
+        return CertifyQuantity(
+            position_id=data.position_id, quantity=data.quantity, claim_id=data.claim_id, period_label=period_label
+        )
+
+    async def certify_preview(self, e: MinePeriodEntry, data: MineCertify) -> dict[str, Any]:
+        """What the open payment certificate would carry for the period's chosen quantity."""
+        v = await self._claimable(e)
+        p = await self.get_period(e.period_id)
+        return await self.volumes.certify_preview(v, self._certify_request(data, p.label))
+
+    async def certify(self, e: MinePeriodEntry, data: MineCertify, user_id: str) -> dict[str, Any]:
+        """Progress entry plus the certificate line, after the person confirmed the preview."""
+        self._open(e)
+        v = await self._claimable(e)
+        p = await self.get_period(e.period_id)
+        out = await self.volumes.certify(v, self._certify_request(data, p.label), user_id)
+        await self._mark_claimed(e, out["progress_entry_id"], float(out["quantity"]), user_id)
+        await self._audit(
+            "update",
+            "mine_period_entry",
+            e.id,
+            user_id,
+            {"sent_to": "progress_claim", "claim_id": str(out["claim"]["id"]), "m3": str(out["quantity"])},
+        )
+        return out
 
     # ── Report ─────────────────────────────────────────────────────────────
 

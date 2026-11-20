@@ -19,7 +19,15 @@ manifest = ModuleManifest(
     author="OpenConstructionERP Core Team",
     category="field",
     depends=["oe_projects"],
-    optional_depends=["oe_site_logistics", "oe_equipment", "oe_procurement", "oe_boq", "oe_costmodel"],
+    optional_depends=[
+        "oe_site_logistics",
+        "oe_equipment",
+        "oe_procurement",
+        "oe_boq",
+        "oe_costmodel",
+        "oe_surfaces_volumes",
+        "oe_stockpiles",
+    ],
     auto_install=True,
     enabled=True,
 )

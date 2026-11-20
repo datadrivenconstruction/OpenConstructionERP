@@ -45,6 +45,8 @@ export interface Ticket {
   reject_reason: string;
   receiver_name: string;
   has_signature: boolean;
+  survey_volume_id?: string | null;
+  stockpile_id?: string | null;
   findings: Finding[];
 }
 
@@ -72,6 +74,8 @@ export interface TicketCreate {
   plate?: string;
   rate?: string | null;
   rate_basis: RateBasis;
+  survey_volume_id?: string | null;
+  stockpile_id?: string | null;
 }
 
 export interface SummaryRow {
@@ -124,6 +128,22 @@ function qs(params: Record<string, string | undefined>): string {
 
 export const fetchTickets = (projectId: string, f: TicketFilter) =>
   apiGet<TicketList>(`/v1/haul_tickets/projects/${projectId}/tickets${qs({ ...f, limit: '500' })}`);
+
+export interface LinkTarget {
+  id: string;
+  code: string;
+  name: string;
+}
+
+/** Volumes and stockpiles a load can come from; an absent survey module yields an empty list. */
+export async function fetchLinkTargets(projectId: string): Promise<{ volumes: LinkTarget[]; stockpiles: LinkTarget[] }> {
+  const safe = (p: Promise<{ items: LinkTarget[] }>) => p.then((r) => r.items).catch(() => [] as LinkTarget[]);
+  const [volumes, stockpiles] = await Promise.all([
+    safe(apiGet<{ items: LinkTarget[] }>(`/v1/surfaces-volumes/projects/${projectId}/volumes`)),
+    safe(apiGet<{ items: LinkTarget[] }>(`/v1/stockpiles/projects/${projectId}/stockpiles`)),
+  ]);
+  return { volumes, stockpiles };
+}
 
 export const createTicket = (body: TicketCreate) => apiPost<Ticket>(`/v1/haul_tickets/tickets/`, body);
 

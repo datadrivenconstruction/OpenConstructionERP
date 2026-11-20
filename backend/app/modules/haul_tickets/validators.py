@@ -12,6 +12,10 @@
 * ``haul_tickets.mandatory_fields`` - ERROR. A field the project made mandatory is empty.
 * ``haul_tickets.waste_destination`` - ERROR. A disposal ticket without waste code or facility.
 * ``haul_invoice.line_has_ticket`` - ERROR. An invoice line names no ticket.
+* ``haul_variance.hauled_vs_excavated`` - WARNING. Hauled m3 differ from the excavated loose m3 by more
+  than the project threshold (10 % by default).
+* ``haul_variance.unresolved_tickets`` - WARNING. A linked ticket has no volume, no weight with a density
+  and no truck capacity, so its m3 are not counted.
 
 Errors block verification; warnings are shown and the verifier decides.
 """
@@ -37,6 +41,7 @@ logger = logging.getLogger(__name__)
 
 RULE_SET = "haul_tickets"
 INVOICE_RULE_SET = "haul_invoice"
+VARIANCE_RULE_SET = "haul_variance"
 DELIVERED_OR_LATER = ("delivered", "verified", "invoiced")
 
 
@@ -228,6 +233,46 @@ class InvoiceLineHasTicket(ValidationRule):
         return out
 
 
+def _variance(context: ValidationContext) -> dict[str, Any]:
+    v = _data(context).get("variance")
+    return v if isinstance(v, dict) else {}
+
+
+class HauledVsExcavated(ValidationRule):
+    rule_id = "haul_variance.hauled_vs_excavated"
+    name = "Hauled Matches Excavated"
+    standard = "custom"
+    severity = Severity.WARNING
+    category = RuleCategory.CONSISTENCY
+    description = "The m3 the tickets hauled agree with the excavated loose m3 within the project threshold."
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        v = _variance(context)
+        pct = dec(v.get("difference_pct"))
+        if pct is None:
+            return []
+        limit = Decimal(int(v.get("threshold_pct") or 0))
+        msg = (
+            f"Hauled {v.get('hauled_m3')} m3 against {v.get('excavated_m3')} m3 excavated: {pct} %, "
+            f"beyond the {limit} % the project allows."
+        )
+        return [_result(self, abs(pct) <= limit, "OK" if abs(pct) <= limit else msg, str(v.get("code") or ""))]
+
+
+class UnresolvedTickets(ValidationRule):
+    rule_id = "haul_variance.unresolved_tickets"
+    name = "Every Linked Ticket Has Cubic Metres"
+    standard = "custom"
+    severity = Severity.WARNING
+    category = RuleCategory.COMPLETENESS
+    description = "A linked ticket carries a volume, a weight with a material density, or a truck capacity."
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        n = int(_variance(context).get("unresolved") or 0)
+        msg = f"{n} linked tickets have no volume, weight with density or truck capacity: not counted."
+        return [_result(self, n == 0, "OK" if n == 0 else msg)]
+
+
 _TICKET_RULES: tuple[ValidationRule, ...] = (
     NetWeightConsistent(),
     Overweight(),
@@ -240,7 +285,8 @@ _TICKET_RULES: tuple[ValidationRule, ...] = (
     WasteDestination(),
 )
 _INVOICE_RULES: tuple[ValidationRule, ...] = (InvoiceLineHasTicket(),)
-RULE_IDS: tuple[str, ...] = tuple(r.rule_id for r in _TICKET_RULES + _INVOICE_RULES)
+_VARIANCE_RULES: tuple[ValidationRule, ...] = (HauledVsExcavated(), UnresolvedTickets())
+RULE_IDS: tuple[str, ...] = tuple(r.rule_id for r in _TICKET_RULES + _INVOICE_RULES + _VARIANCE_RULES)
 
 
 def register_haul_tickets_rules() -> None:
@@ -248,6 +294,8 @@ def register_haul_tickets_rules() -> None:
         rule_registry.register(rule, [RULE_SET])
     for rule in _INVOICE_RULES:
         rule_registry.register(rule, [INVOICE_RULE_SET])
+    for rule in _VARIANCE_RULES:
+        rule_registry.register(rule, [VARIANCE_RULE_SET])
 
 
 async def evaluate(snapshot: dict[str, Any], *, rule_set: str = RULE_SET, target_id: str = "") -> list[RuleResult]:

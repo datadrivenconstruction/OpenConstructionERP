@@ -22,6 +22,7 @@ import {
   downloadDisposalRegister,
   downloadTicketPdf,
   fetchInvoices,
+  fetchLinkTargets,
   fetchSummary,
   fetchTickets,
   previewImport,
@@ -314,7 +315,10 @@ function NewTicketForm({ projectId, onDone }: { projectId: string; onDone: () =>
     loads: '1',
     rate: '',
     rate_basis: 't' as RateBasis,
+    source: '',
   });
+  const targets = useQuery({ queryKey: ['haul', 'link-targets', projectId], queryFn: () => fetchLinkTargets(projectId) });
+  const hasTargets = (targets.data?.volumes.length ?? 0) + (targets.data?.stockpiles.length ?? 0) > 0;
   const set = (k: keyof typeof f) => (e: { target: { value: string } }) => setF((p) => ({ ...p, [k]: e.target.value }));
   const net = netTonnes(f.gross, f.tare);
   const tareTooHigh = f.gross !== '' && f.tare !== '' && net === null;
@@ -336,6 +340,8 @@ function NewTicketForm({ projectId, onDone }: { projectId: string; onDone: () =>
         loads: Number(f.loads) || 1,
         rate: f.rate || null,
         rate_basis: f.rate_basis,
+        survey_volume_id: f.source.startsWith('v:') ? f.source.slice(2) : null,
+        stockpile_id: f.source.startsWith('s:') ? f.source.slice(2) : null,
       }),
     onSuccess: onDone,
     onError,
@@ -388,6 +394,24 @@ function NewTicketForm({ projectId, onDone }: { projectId: string; onDone: () =>
             <option value="load">{t('haul.basis_load', { defaultValue: 'load' })}</option>
           </select>
         </label>
+        {hasTargets && (
+          <label className="flex flex-col gap-1 text-xs text-content-secondary">
+            {t('haul.f_source', { defaultValue: 'Excavated from' })}
+            <select value={f.source} onChange={set('source')} className={`${INPUT} oe-select`} data-testid="haul-source">
+              <option value="">{t('haul.source_none', { defaultValue: 'Not linked' })}</option>
+              {(targets.data?.volumes ?? []).map((v) => (
+                <option key={v.id} value={`v:${v.id}`}>
+                  {v.code} {v.name}
+                </option>
+              ))}
+              {(targets.data?.stockpiles ?? []).map((p) => (
+                <option key={p.id} value={`s:${p.id}`}>
+                  {p.code} {p.name}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
       </div>
       <div className="flex items-center gap-3 text-sm">
         <span>{t('haul.net_preview', { defaultValue: 'Net: {{net}} t', net: net ?? '-' })}</span>

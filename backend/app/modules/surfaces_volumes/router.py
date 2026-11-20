@@ -20,6 +20,8 @@ Endpoints:
     POST   /volumes/{volume_id}/duplicate             - copy into a new draft
     POST   /volumes/{volume_id}/send-to-boq           - write the quantity to a BOQ line
     POST   /volumes/{volume_id}/record-progress       - record measured progress
+    POST   /volumes/{volume_id}/certify/preview       - what the open payment certificate would carry
+    POST   /volumes/{volume_id}/certify               - write it (survey.write + contracts.update)
     GET    /volumes/{volume_id}/history               - who did what with the result
     GET    /volumes/{volume_id}/report.pdf            - volume report
     POST   /projects/{project_id}/surfaces/point-cloud - LAS/LAZ to a surface (tools_router)
@@ -35,8 +37,10 @@ from fastapi import APIRouter, Depends, Query, Response, status
 from app.core.document_locale import normalize_document_locale
 from app.core.i18n import SUPPORTED_LOCALES
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep, verify_project_access
+from app.modules.contracts.measured_quantity_schemas import MeasuredPreview
 from app.modules.surfaces_volumes.schemas import (
     BoqPositionHitListResponse,
+    CertifyQuantity,
     ConfirmRequest,
     LandXmlImport,
     LandXmlResult,
@@ -280,6 +284,30 @@ async def record_progress(
 ) -> RecordProgressResult:
     service, v = await _volume(volume_id, session, user_id)
     return await service.record_progress(v, body, user_id)
+
+
+@router.post(
+    "/volumes/{volume_id}/certify/preview",
+    response_model=MeasuredPreview,
+    dependencies=[*_READ, Depends(RequirePermission("contracts.read"))],
+)
+async def certify_preview(
+    volume_id: uuid.UUID, body: CertifyQuantity, session: SessionDep, user_id: CurrentUserId
+) -> MeasuredPreview:
+    service, v = await _volume(volume_id, session, user_id)
+    return MeasuredPreview.model_validate(await service.certify_preview(v, body))
+
+
+@router.post(
+    "/volumes/{volume_id}/certify",
+    response_model=MeasuredPreview,
+    dependencies=[*_WRITE, Depends(RequirePermission("contracts.update"))],
+)
+async def certify(
+    volume_id: uuid.UUID, body: CertifyQuantity, session: SessionDep, user_id: CurrentUserId
+) -> MeasuredPreview:
+    service, v = await _volume(volume_id, session, user_id)
+    return MeasuredPreview.model_validate(await service.certify(v, body, user_id))
 
 
 @router.get("/volumes/{volume_id}/history", response_model=VolumeEventListResponse, dependencies=_READ)

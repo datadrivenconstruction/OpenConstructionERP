@@ -207,6 +207,15 @@ class RecordProgress(BaseModel):
     notes: str = Field(default="", max_length=1000)
 
 
+class CertifyQuantity(BaseModel):
+    """Offer a measured quantity to the open payment certificate; ``confirm`` is a separate call."""
+
+    position_id: uuid.UUID | None = None
+    quantity: QuantityKind = "cut"
+    claim_id: uuid.UUID | None = None
+    period_label: str = Field(default="", max_length=20)
+
+
 class RecordProgressResult(BaseModel):
     entry_id: uuid.UUID
     position_id: uuid.UUID

@@ -12,7 +12,7 @@ Tables:
     oe_haul_tickets_settings - per-project limits and mandatory fields.
 
 Links into other modules (equipment, purchase order, BOQ position, transport,
-delivery booking, party) are soft (no foreign key), so each module can be
+delivery booking, party, survey volume, stockpile) are soft (no foreign key), so each module can be
 disabled or its rows deleted without cascading into the ticket register.
 """
 
@@ -75,6 +75,9 @@ class HaulTicket(Base):
     currency: Mapped[str] = mapped_column(String(10), nullable=False, default="")
     amount: Mapped[Decimal] = mapped_column(Numeric(18, 2), nullable=False, default=Decimal("0"))
     boq_position_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+    # The excavation (survey volume) or stockpile the load came from, for hauled vs excavated.
+    survey_volume_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+    stockpile_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
     cost_code: Mapped[str] = mapped_column(String(100), nullable=False, default="")
     status: Mapped[str] = mapped_column(String(20), nullable=False, default="issued", index=True)
     reject_reason: Mapped[str] = mapped_column(Text, nullable=False, default="")
@@ -159,5 +162,7 @@ class HaulSettings(Base):
     max_gross_t: Mapped[Decimal | None] = mapped_column(Numeric(10, 2), nullable=True)
     capacity_tolerance_pct: Mapped[int] = mapped_column(Integer, nullable=False, default=10)
     price_tolerance_pct: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
+    # Hauled vs excavated: a difference above this share is flagged; empty means the default 10 %.
+    haul_variance_pct: Mapped[int | None] = mapped_column(Integer, nullable=True)
     waste_catalogue: Mapped[str] = mapped_column(String(40), nullable=False, default="")
     currency: Mapped[str] = mapped_column(String(10), nullable=False, default="")

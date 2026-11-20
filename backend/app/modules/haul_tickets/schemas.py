@@ -69,6 +69,8 @@ class TicketFields(BaseModel):
     hours: Decimal8_2 | None = Field(default=None, ge=0)
     currency: str = Field(default="", max_length=10)
     boq_position_id: uuid.UUID | None = None
+    survey_volume_id: uuid.UUID | None = None
+    stockpile_id: uuid.UUID | None = None
     cost_code: str = Field(default="", max_length=100)
     receiver_name: str = Field(default="", max_length=255)
     signature: str | None = Field(default=None, max_length=400_000)
@@ -125,6 +127,8 @@ class TicketUpdate(BaseModel):
     hours: Decimal8_2 | None = Field(default=None, ge=0)
     currency: str | None = Field(default=None, max_length=10)
     boq_position_id: uuid.UUID | None = None
+    survey_volume_id: uuid.UUID | None = None
+    stockpile_id: uuid.UUID | None = None
     cost_code: str | None = Field(default=None, max_length=100)
     receiver_name: str | None = Field(default=None, max_length=255)
     signature: str | None = Field(default=None, max_length=400_000)
@@ -190,6 +194,8 @@ class TicketOut(_DecimalOut):
     currency: str
     amount: Decimal
     boq_position_id: uuid.UUID | None
+    survey_volume_id: uuid.UUID | None = None
+    stockpile_id: uuid.UUID | None = None
     cost_code: str
     status: str
     reject_reason: str
@@ -224,6 +230,7 @@ class SettingsIn(BaseModel):
     max_gross_t: Decimal10_2 | None = Field(default=None, ge=0)
     capacity_tolerance_pct: int = Field(default=10, ge=0, le=100)
     price_tolerance_pct: int = Field(default=1, ge=0, le=50)
+    haul_variance_pct: int = Field(default=10, ge=0, le=100)
     waste_catalogue: str = Field(default="", max_length=40)
     currency: str = Field(default="", max_length=10)
 
@@ -366,3 +373,33 @@ class ExpectedDeliveryListResponse(BaseModel):
     total: int
     offset: int = 0
     limit: int = 200
+
+
+class HaulBasisRow(_DecimalOut):
+    """Hauled m3 by how it was worked out: ticket volume, weighbridge tonnes / density, or loads x capacity."""
+
+    basis: Literal["volume", "weighbridge", "capacity", "unresolved"]
+    tickets: int
+    loads: int
+    hauled_m3: Decimal
+
+
+class HauledVsExcavatedOut(_DecimalOut):
+    """Excavated loose m3 of a volume (cut x swell) or the last stockpile survey, against the tickets linked to it."""
+
+    target: Literal["volume", "stockpile"]
+    target_id: uuid.UUID
+    code: str
+    name: str
+    excavated_m3: Decimal | None
+    excavated_basis: Literal["loose_cut", "bank_cut", "stockpile_survey", "none"]
+    swell_factor: Decimal | None = None
+    hauled_m3: Decimal
+    tickets: int
+    loads: int
+    by_basis: list[HaulBasisRow] = []
+    difference_m3: Decimal | None = None
+    difference_pct: Decimal | None = None
+    threshold_pct: int
+    within_threshold: bool | None = None
+    findings: list[FindingOut] = []

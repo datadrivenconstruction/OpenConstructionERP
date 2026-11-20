@@ -7,7 +7,7 @@
  */
 
 import { apiDelete, apiGet, apiPatch, apiPost } from '@/shared/lib/api';
-import type { Finding } from './volumesApi';
+import type { CertifyInput, Finding, MeasuredPreview } from './volumesApi';
 
 
 export type UnitType = 'pit' | 'bench' | 'block' | 'stope' | 'drive';
@@ -197,8 +197,12 @@ export const confirmActual = (id: string, acknowledge: string[], locale: string)
   apiPost<MineEntry>(`/v1/mine-survey/entries/${id}/confirm-actual?${loc(locale)}`, { acknowledge });
 export const importTruckLoads = (id: string, text: string, filename: string, locale: string) =>
   apiPost<MineEntry>(`/v1/mine-survey/entries/${id}/truck-loads?${loc(locale)}`, { text, filename });
-export const addToClaim = (id: string, positionId: string) =>
-  apiPost<ClaimResult>(`/v1/mine-survey/entries/${id}/add-to-claim`, { position_id: positionId });
+export const addToClaim = (id: string, body: CertifyInput) =>
+  apiPost<ClaimResult>(`/v1/mine-survey/entries/${id}/add-to-claim`, body);
+export const certifyEntryPreview = (id: string, body: CertifyInput) =>
+  apiPost<MeasuredPreview>(`/v1/mine-survey/entries/${id}/certify/preview`, body);
+export const certifyEntry = (id: string, body: CertifyInput) =>
+  apiPost<MeasuredPreview>(`/v1/mine-survey/entries/${id}/certify`, body);
 export const periodReportUrl = (id: string, locale: string) => `/api/v1/mine-survey/periods/${id}/report.pdf?${loc(locale)}`;
 
 /** Percent with two decimals, "94.96 %". */
