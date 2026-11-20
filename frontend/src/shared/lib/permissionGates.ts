@@ -81,6 +81,7 @@ export const PERMISSION_MIN_ROLE = {
   'central_purchasing.award': 'manager',
   'survey.write': 'editor',
   'survey.confirm': 'manager',
+  'rfq.update': 'editor',
 } as const satisfies Record<string, RankedRole>;
 
 export type GatedPermission = keyof typeof PERMISSION_MIN_ROLE;

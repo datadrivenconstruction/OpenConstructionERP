@@ -106,8 +106,9 @@ export interface BoqResourceOption {
 /** RFQUpdate. */
 export interface RFQUpdatePayload {
   title?: string;
-  description?: string;
-  submission_deadline?: string;
+  description?: string | null;
+  /** `null` clears the deadline. */
+  submission_deadline?: string | null;
   status?: RFQStatus;
 }
 

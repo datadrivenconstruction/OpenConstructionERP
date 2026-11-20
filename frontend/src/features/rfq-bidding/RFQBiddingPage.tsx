@@ -16,6 +16,7 @@ import {
   BarChart3,
   Clock,
   CheckCircle2,
+  Pencil,
 } from 'lucide-react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { PROCUREMENT_LINK, purchaseOrderDeepLink } from '@/shared/lib/awardChainLinks';
@@ -23,6 +24,7 @@ import { RelatedRecordLink } from '@/shared/ui/RelatedRecordLink';
 import { fmtDate } from '@/shared/lib/formatters';
 import { Badge, Breadcrumb, CollapsibleSection, ConfirmDialog, DismissibleInfo, EmptyState, StatCard, Button, WideModal } from '@/shared/ui';
 import { useConfirm } from '@/shared/hooks/useConfirm';
+import { useHasPermission } from '@/shared/lib/permissionGates';
 import type { BadgeVariant } from '@/shared/ui';
 import { PageHeader } from '@/shared/ui/PageHeader';
 import { TabBar, tabIds } from '@/shared/ui/TabBar';
@@ -38,6 +40,7 @@ import {
   createRFQ,
   issueRFQ,
   deleteRFQ,
+  updateRFQ,
   fetchComparison,
   awardBid,
   type RFQ,
@@ -46,6 +49,7 @@ import {
   RFQ_AWARDED_STATUSES,
   RFQ_FILTER_STATUSES,
   type RFQCreatePayload,
+  type RFQUpdatePayload,
   type ComparisonResponse,
   type QuoteComparison,
 } from './api';
@@ -106,6 +110,15 @@ type RFQTab = 'list' | 'comparison' | 'awards';
 const TAB_IDS = tabIds('rfq-bidding');
 
 /* ── Explainer ────────────────────────────────────────────────────────── */
+
+/** Statuses whose header (title, description, due date) the RFQ screen offers to edit. */
+const RFQ_EDITABLE_STATUSES: ReadonlySet<RFQStatus> = new Set<RFQStatus>([
+  'draft',
+  'published',
+  'issued',
+  'bids_received',
+  'evaluating',
+]);
 
 function RFQBiddingExplainer() {
   const { t } = useTranslation();
@@ -215,6 +228,8 @@ export function RFQBiddingPage() {
 
   // Dialog state
   const [showCreate, setShowCreate] = useState(false);
+  const [editingRfq, setEditingRfq] = useState<RFQ | null>(null);
+  const canEdit = useHasPermission('rfq.update');
 
   // Comparison selection
   const [comparisonRfqId, setComparisonRfqId] = useState<string | null>(null);
@@ -333,6 +348,22 @@ export function RFQBiddingPage() {
     },
     onError: () => {
       addToast({ type: 'error', title: t('rfq_bidding.issued_error', { defaultValue: 'Failed to issue RFQ' }) });
+    },
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: ({ id, payload }: { id: string; payload: RFQUpdatePayload }) => updateRFQ(id, payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['rfq-bidding'] });
+      setEditingRfq(null);
+      addToast({ type: 'success', title: t('rfq_bidding.updated_success', { defaultValue: 'RFQ updated' }) });
+    },
+    onError: (err: unknown) => {
+      addToast({
+        type: 'error',
+        title: t('rfq_bidding.updated_error', { defaultValue: 'Failed to update RFQ' }),
+        message: getErrorMessage(err),
+      });
     },
   });
 
@@ -537,6 +568,7 @@ export function RFQBiddingPage() {
             onStatusFilterChange={setStatusFilter}
             onIssue={handleIssue}
             onDelete={(id) => deleteMutation.mutate(id)}
+            onEdit={canEdit ? setEditingRfq : undefined}
             onSelectForComparison={(id) => {
               setComparisonRfqId(id);
               setActiveTab('comparison');
@@ -596,6 +628,18 @@ export function RFQBiddingPage() {
         />
       )}
 
+      {editingRfq && (
+        <CreateRFQDialog
+          projectId={projectId}
+          editing={editingRfq}
+          onSubmit={() => undefined}
+          onUpdate={(payload) => updateMutation.mutate({ id: editingRfq.id, payload })}
+          onClose={() => setEditingRfq(null)}
+          loading={updateMutation.isPending}
+          t={t}
+        />
+      )}
+
       <ConfirmDialog {...confirmProps} />
     </div>
   );
@@ -613,6 +657,7 @@ function RFQListPanel({
   onStatusFilterChange,
   onIssue,
   onDelete,
+  onEdit,
   onSelectForComparison,
   focusRfqId,
   t,
@@ -626,6 +671,8 @@ function RFQListPanel({
   onStatusFilterChange: (v: RFQStatus | '') => void;
   onIssue: (rfq: RFQ) => void;
   onDelete: (id: string) => void;
+  /** Absent when the signed-in role may not edit an RFQ. */
+  onEdit?: (rfq: RFQ) => void;
   onSelectForComparison: (id: string) => void;
   focusRfqId: string | null;
   t: (k: string, o?: Record<string, unknown>) => string;
@@ -767,6 +814,17 @@ function RFQListPanel({
                   >
                     <BarChart3 className="h-3 w-3" aria-hidden />
                     {t('rfq_bidding.compare', { defaultValue: 'Compare' })}
+                  </button>
+                )}
+                {onEdit && RFQ_EDITABLE_STATUSES.has(rfq.status) && (
+                  <button
+                    onClick={() => onEdit(rfq)}
+                    className="rounded-lg border border-border-light px-2 py-1.5 text-xs text-content-tertiary
+                      hover:bg-surface-secondary hover:text-content-primary transition-colors"
+                    title={t('rfq_bidding.edit_action', { defaultValue: 'Edit RFQ' })}
+                    aria-label={t('rfq_bidding.edit_action', { defaultValue: 'Edit RFQ' })}
+                  >
+                    <Pencil className="h-3.5 w-3.5" aria-hidden />
                   </button>
                 )}
                 {rfq.status === 'draft' && (
@@ -1382,20 +1440,25 @@ function AwardOrderLink({
 
 function CreateRFQDialog({
   projectId,
+  editing,
   onSubmit,
+  onUpdate,
   onClose,
   loading,
   t,
 }: {
   projectId: string;
+  /** Set to edit this RFQ's header instead of creating one; scope lines are not touched. */
+  editing?: RFQ;
   onSubmit: (payload: RFQCreatePayload) => void;
+  onUpdate?: (payload: RFQUpdatePayload) => void;
   onClose: () => void;
   loading: boolean;
   t: (k: string, o?: Record<string, unknown>) => string;
 }) {
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [dueDate, setDueDate] = useState('');
+  const [title, setTitle] = useState(editing?.title ?? '');
+  const [description, setDescription] = useState(editing?.description ?? '');
+  const [dueDate, setDueDate] = useState((editing?.submission_deadline ?? '').slice(0, 10));
   const [scopeSource, setScopeSource] = useState<'empty' | 'boq'>('empty');
   const [boqId, setBoqId] = useState('');
   const [selectedResources, setSelectedResources] = useState<Set<string>>(new Set());
@@ -1406,6 +1469,14 @@ function CreateRFQDialog({
     (e: React.FormEvent) => {
       e.preventDefault();
       if (!canSubmit) return;
+      if (editing) {
+        onUpdate?.({
+          title: title.trim(),
+          description: description.trim() || null,
+          submission_deadline: dueDate || null,
+        });
+        return;
+      }
       onSubmit({
         project_id: projectId,
         title: title.trim(),
@@ -1414,7 +1485,7 @@ function CreateRFQDialog({
         ...(fromBoq ? { boq_id: boqId, boq_resource_keys: [...selectedResources] } : {}),
       });
     },
-    [projectId, title, description, dueDate, onSubmit, canSubmit, fromBoq, boqId, selectedResources],
+    [projectId, editing, title, description, dueDate, onSubmit, onUpdate, canSubmit, fromBoq, boqId, selectedResources],
   );
 
   return (
@@ -1423,14 +1494,20 @@ function CreateRFQDialog({
       onClose={onClose}
       size={fromBoq ? 'lg' : 'sm'}
       busy={loading}
-      title={t('rfq_bidding.create_dialog_title', { defaultValue: 'Create RFQ' })}
+      title={
+        editing
+          ? t('rfq_bidding.edit_dialog_title', { defaultValue: 'Edit RFQ' })
+          : t('rfq_bidding.create_dialog_title', { defaultValue: 'Create RFQ' })
+      }
       footer={
         <>
           <Button variant="ghost" onClick={onClose} type="button">
             {t('common.cancel', { defaultValue: 'Cancel' })}
           </Button>
           <Button variant="primary" type="submit" form="rfq-create-form" disabled={!canSubmit || loading} loading={loading}>
-            {t('rfq_bidding.create_submit', { defaultValue: 'Create RFQ' })}
+            {editing
+              ? t('common.save', { defaultValue: 'Save' })
+              : t('rfq_bidding.create_submit', { defaultValue: 'Create RFQ' })}
           </Button>
         </>
       }
@@ -1479,6 +1556,7 @@ function CreateRFQDialog({
             />
           </div>
 
+          {!editing && (
           <fieldset>
             <legend className="oe-label">
               {t('rfq_bidding.scope_source_label', { defaultValue: 'Scope' })}
@@ -1504,6 +1582,7 @@ function CreateRFQDialog({
               </label>
             </div>
           </fieldset>
+          )}
 
           {fromBoq && (
             <BoqResourcePicker
