@@ -2868,5 +2868,15 @@
     "coverage": "덮인 설계 면적",
     "findings": "지적 사항",
     "map": "편차 지도 (블록별 최악 셀)"
+  },
+  "design": {
+    "estimate_unpriced": {
+      "fail": "항목 '{position}'에 단가가 없어 설계 견적에서 제외됩니다.",
+      "suggestion": "이 항목의 단가를 입력하거나 원가 항목을 선택하세요."
+    },
+    "revision_awaiting_decision": {
+      "fail": "모델 개정 {number}이(가) {days}일째 승인을 기다리고 있습니다.",
+      "suggestion": "견적이 현재 모델을 따르도록 개정을 승인하거나 반려하세요."
+    }
   }
 }

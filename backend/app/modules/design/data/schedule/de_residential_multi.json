@@ -1,0 +1,144 @@
+{
+  "schema": "ddc-schedule-rates/1",
+  "country": "DE",
+  "use": "residential_multi",
+  "notes": "Labour hours per unit of the estimate rules (data/rules/de_residential_din276.json). Every value was read on the page named by source.url on the retrieved date and is quoted verbatim (elisions marked ...). A rule without an open published value has labour_h_per_unit null and a missing reason: it gets no activity and is flagged rate_missing, never a guessed duration. Where the source gives a range, low and high are kept and 'use' says which end the plan uses. The logic block (order of trades, storey by storey) is a planning assumption, not sourced data.",
+  "rates": {
+    "site_prep": {
+      "labour_h_per_unit": null,
+      "missing": "No open published labour value per m2 living area for site preparation and utility connections."
+    },
+    "foundation": {
+      "labour_h_per_unit": {
+        "low": 4,
+        "high": 6,
+        "use": "high",
+        "unit": "h/m3",
+        "quantity_field": "volume_m3",
+        "crew": null,
+        "scope": "All-in labour for reinforced concrete work (formwork, reinforcement and concrete together) per m3 of concrete, rough calculation.",
+        "source": {
+          "title": "Kalkulation von Stahlbetonarbeiten: Schalarbeiten, Bewehrungsarbeiten, Betonarbeiten (lecture slides, Bauwirtschaftslehre VU)",
+          "publisher": "Institut für Baubetrieb, Bauwirtschaft, Projektentwicklung und Projektmanagement, TU Graz (C. Hofstadler)",
+          "country": "AT",
+          "url": "https://christianhofstadler.at/wp-content/uploads/2011/06/Kalkulation-Stahlbetonarbeiten-Hofstadler-2011.pdf",
+          "page": "slide 53, Gesamt-Aufwandswert",
+          "published": "2011",
+          "retrieved": "2026-11-13",
+          "quote": "Angaben zum Gesamt-Aufwandswert: 4 Std/m³ bis 6 Std/m³"
+        }
+      }
+    },
+    "wall_ext": {
+      "labour_h_per_unit": {
+        "value": 0.78,
+        "unit": "h/m2",
+        "quantity_field": "area_m2",
+        "crew": 4,
+        "crew_note": "The source states the crew of 4 workers as its own assumption (Kapazität aus Annahme).",
+        "scope": "External masonry wall 36.5 cm, lightweight clay block.",
+        "source": {
+          "title": "Aufwandswerte von Mauerwerksarbeiten (teaching wiki, construction scheduling)",
+          "publisher": "DaviD project wiki (university teaching material), wiki.bubiza.de",
+          "country": "DE",
+          "url": "https://wiki.bubiza.de/doku.php?id=aufwandswerte-von-mauerwerksarbeiten",
+          "page": "Position 5.1.10",
+          "published": "2024-05-29",
+          "retrieved": "2026-11-13",
+          "quote": "Mauerwerk der Außenwand 36,5 cm ... 0,78 h/qm; ... 4 Arbeiter * 8 h/Tag = 32 h/Tag"
+        }
+      }
+    },
+    "window": {
+      "labour_h_per_unit": null,
+      "missing": "No open published labour value for window installation found (only commercial calculators)."
+    },
+    "wall_int": {
+      "labour_h_per_unit": {
+        "low": 0.45,
+        "high": 0.64,
+        "use": "high",
+        "unit": "h/m2",
+        "quantity_field": "area_m2",
+        "crew": 4,
+        "crew_note": "The source states the crew of 4 workers as its own assumption (Kapazität aus Annahme).",
+        "scope": "Internal masonry wall, perforated clay brick: 17.5 cm = 0.45 h/m2, 24.0 cm = 0.64 h/m2. The model does not tell the thickness per wall, so the thicker (slower) wall is used.",
+        "source": {
+          "title": "Aufwandswerte von Mauerwerksarbeiten (teaching wiki, construction scheduling)",
+          "publisher": "DaviD project wiki (university teaching material), wiki.bubiza.de",
+          "country": "DE",
+          "url": "https://wiki.bubiza.de/doku.php?id=aufwandswerte-von-mauerwerksarbeiten",
+          "page": "Positions 5.2.10, 5.2.20",
+          "published": "2024-05-29",
+          "retrieved": "2026-11-13",
+          "quote": "Mauerwerk der Innenwand 24,0 cm ... 0,64 h/qm; Mauerwerk der Innenwand 17,5 cm ... 0,45 h/qm"
+        }
+      }
+    },
+    "door": {
+      "labour_h_per_unit": null,
+      "missing": "No open published labour value per interior door found."
+    },
+    "slab": {
+      "labour_h_per_unit": {
+        "low": 4,
+        "high": 6,
+        "use": "high",
+        "unit": "h/m3",
+        "quantity_field": "volume_m3",
+        "crew": null,
+        "scope": "All-in labour for reinforced concrete work (formwork, reinforcement and concrete together) per m3 of concrete, rough calculation. Applied to the concrete volume of the slabs, not to the slab area of the estimate position.",
+        "source": {
+          "title": "Kalkulation von Stahlbetonarbeiten: Schalarbeiten, Bewehrungsarbeiten, Betonarbeiten (lecture slides, Bauwirtschaftslehre VU)",
+          "publisher": "Institut für Baubetrieb, Bauwirtschaft, Projektentwicklung und Projektmanagement, TU Graz (C. Hofstadler)",
+          "country": "AT",
+          "url": "https://christianhofstadler.at/wp-content/uploads/2011/06/Kalkulation-Stahlbetonarbeiten-Hofstadler-2011.pdf",
+          "page": "slide 53, Gesamt-Aufwandswert",
+          "published": "2011",
+          "retrieved": "2026-11-13",
+          "quote": "Angaben zum Gesamt-Aufwandswert: 4 Std/m³ bis 6 Std/m³"
+        }
+      }
+    },
+    "stair": {
+      "labour_h_per_unit": null,
+      "missing": "No open published labour value for cast-in-place stair flights found."
+    },
+    "roof": {
+      "labour_h_per_unit": null,
+      "missing": "No open published labour value per m2 roof found."
+    },
+    "reinforcement": {
+      "not_scheduled": "Included in the all-in reinforced concrete rate of foundation and slab (formwork, reinforcement and concrete): a separate activity would count it twice."
+    },
+    "finishes": {
+      "labour_h_per_unit": null,
+      "missing": "No open published labour value for interior plaster found (only forum ranges and paywalled handbooks)."
+    },
+    "services": {
+      "labour_h_per_unit": null,
+      "missing": "No open published labour value for building services per m2 floor area found."
+    },
+    "site_works": {
+      "labour_h_per_unit": null,
+      "missing": "No open published labour value for external works per m2 living area found."
+    },
+    "ancillary": {
+      "not_scheduled": "Fees and other ancillary costs (cost group 700): no site work."
+    }
+  },
+  "logic": {
+    "site_prep": {"per_storey": false, "after": []},
+    "foundation": {"per_storey": false, "after": ["site_prep"]},
+    "wall_ext": {"per_storey": true, "after": ["foundation"], "after_below": ["slab"]},
+    "wall_int": {"per_storey": true, "after": ["wall_ext"]},
+    "slab": {"per_storey": true, "after": ["wall_ext", "wall_int"]},
+    "stair": {"per_storey": true, "after": ["slab"]},
+    "window": {"per_storey": true, "after": ["wall_ext"]},
+    "door": {"per_storey": true, "after": ["wall_int"]},
+    "roof": {"per_storey": false, "after": ["slab"]},
+    "finishes": {"per_storey": false, "after": ["roof", "window"]},
+    "services": {"per_storey": false, "after": ["roof"]},
+    "site_works": {"per_storey": false, "after": ["roof"]}
+  }
+}

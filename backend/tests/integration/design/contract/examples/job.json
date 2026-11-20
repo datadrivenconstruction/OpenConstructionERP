@@ -1,0 +1,12 @@
+{
+  "job_id": "0b7c2f1e-9d4a-4c55-8f0e-5a1d2e3f4a5b",
+  "status": "done",
+  "progress": 1.0,
+  "log_tail": [
+    "spec ok",
+    "geometry 48 triangles",
+    "checks 0 errors"
+  ],
+  "revision_id": "95bb145e-f295-43dd-a059-d27876741295",
+  "error": null
+}

@@ -1,0 +1,2 @@
+Building: Mehrfamilienhaus.
+Anzahl der Geschosse: 5

@@ -2868,5 +2868,15 @@
     "coverage": "Pokrytá plocha projektu",
     "findings": "Zjištění",
     "map": "Mapa odchylek (nejhorší buňka v bloku)"
+  },
+  "design": {
+    "estimate_unpriced": {
+      "fail": "Položka '{position}' nemá jednotkovou cenu, proto ji odhad nákladů návrhu vynechává.",
+      "suggestion": "Zadejte jednotkovou cenu nebo vyberte nákladovou položku."
+    },
+    "revision_awaiting_decision": {
+      "fail": "Revize modelu {number} čeká na převzetí již {days} dní.",
+      "suggestion": "Revizi přijměte nebo zamítněte, aby odhad nákladů odpovídal aktuálnímu modelu."
+    }
   }
 }

@@ -1,0 +1,644 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openconstructiondesign.org/schemas/ddc-revision/1",
+  "title": "ddc-revision/1 — package manifest (manifest.json inside a .ddcrev zip)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "revision_id",
+    "project_ref",
+    "parent_revision_id",
+    "created_at",
+    "author",
+    "editor_version",
+    "source",
+    "depth_level",
+    "units",
+    "base_point",
+    "counts",
+    "files"
+  ],
+  "properties": {
+    "schema": {
+      "const": "ddc-revision/1"
+    },
+    "revision_id": {
+      "$ref": "#/$defs/uuid",
+      "description": "Assigned by the editor; the ERP keeps it."
+    },
+    "project_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "erp_project_id"
+      ],
+      "properties": {
+        "erp_project_id": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/uuid"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "null when published without a link (file hand-over)."
+        },
+        "erp_url": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/erpUrl"
+            }
+          ]
+        },
+        "name": {
+          "type": "string",
+          "maxLength": 200
+        }
+      }
+    },
+    "parent_revision_id": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/uuid"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "author": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "display_name"
+      ],
+      "properties": {
+        "display_name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "erp_user_id": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/uuid"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "editor_version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+([-+][0-9A-Za-z.-]+)?$"
+    },
+    "message": {
+      "type": "string",
+      "maxLength": 2000,
+      "description": "What changed, written by the author."
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind"
+      ],
+      "properties": {
+        "kind": {
+          "enum": [
+            "generated",
+            "edited",
+            "imported"
+          ]
+        },
+        "brief_sha256": {
+          "$ref": "#/$defs/sha256",
+          "description": "Required when kind = generated."
+        },
+        "generator": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "template",
+            "version"
+          ],
+          "properties": {
+            "template": {
+              "type": "string",
+              "description": "Typology template or 'universal'."
+            },
+            "version": {
+              "type": "string"
+            },
+            "seed": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        },
+        "imported_from": {
+          "type": "string",
+          "description": "Original file name when kind = imported."
+        },
+        "brief_version": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Version of the ERP brief the package was generated from. Required when kind = generated."
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "generated"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "brief_sha256",
+              "brief_version",
+              "generator"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "imported"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "imported_from"
+            ]
+          }
+        }
+      ]
+    },
+    "depth_level": {
+      "enum": [
+        "D1",
+        "D2",
+        "D3",
+        "D4",
+        "D5"
+      ]
+    },
+    "units": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "length",
+        "area",
+        "volume",
+        "mass",
+        "angle"
+      ],
+      "properties": {
+        "length": {
+          "const": "m"
+        },
+        "area": {
+          "const": "m2"
+        },
+        "volume": {
+          "const": "m3"
+        },
+        "mass": {
+          "const": "kg"
+        },
+        "angle": {
+          "const": "deg"
+        }
+      }
+    },
+    "base_point": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "lat",
+        "lon",
+        "elevation_m",
+        "rotation_deg"
+      ],
+      "description": "Model origin (0,0,0) in WGS84; rotation = angle from true north to model +Y, clockwise.",
+      "properties": {
+        "lat": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": -90,
+          "maximum": 90
+        },
+        "lon": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": -180,
+          "maximum": 180
+        },
+        "elevation_m": {
+          "type": "number"
+        },
+        "rotation_deg": {
+          "type": "number",
+          "minimum": -360,
+          "maximum": 360
+        },
+        "crs": {
+          "type": "string",
+          "description": "Optional projected CRS of the plot, e.g. EPSG:25832."
+        }
+      }
+    },
+    "counts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "elements",
+        "storeys",
+        "types"
+      ],
+      "properties": {
+        "elements": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "storeys": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "types": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "spaces": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "triangles": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "locale": {
+      "type": "string",
+      "pattern": "^[a-z]{2,3}(-[A-Z]{2})?$"
+    },
+    "country": {
+      "type": "string",
+      "pattern": "^[A-Z]{2}$"
+    },
+    "norm_pack": {
+      "type": "string"
+    },
+    "checks": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "errors",
+        "warnings"
+      ],
+      "properties": {
+        "errors": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "warnings": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "issues_file": {
+          "type": "string"
+        }
+      }
+    },
+    "files": {
+      "type": "array",
+      "minItems": 3,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "path",
+          "role",
+          "sha256",
+          "bytes"
+        ],
+        "properties": {
+          "path": {
+            "type": "string",
+            "pattern": "^(?!.*\\.\\.)[A-Za-z0-9_-][A-Za-z0-9._-]*(/[A-Za-z0-9_-][A-Za-z0-9._-]*)*$"
+          },
+          "role": {
+            "enum": [
+              "source",
+              "geometry",
+              "elements",
+              "diff",
+              "sheet",
+              "issues",
+              "ifc",
+              "brief",
+              "thumbnail"
+            ]
+          },
+          "sha256": {
+            "$ref": "#/$defs/sha256"
+          },
+          "bytes": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "role": {
+                  "const": "source"
+                }
+              },
+              "required": [
+                "role"
+              ]
+            },
+            "then": {
+              "properties": {
+                "path": {
+                  "const": "model.ddc"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "role": {
+                  "const": "geometry"
+                }
+              },
+              "required": [
+                "role"
+              ]
+            },
+            "then": {
+              "properties": {
+                "path": {
+                  "const": "geometry.glb"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "role": {
+                  "const": "elements"
+                }
+              },
+              "required": [
+                "role"
+              ]
+            },
+            "then": {
+              "properties": {
+                "path": {
+                  "const": "elements.parquet"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "role": {
+                  "const": "diff"
+                }
+              },
+              "required": [
+                "role"
+              ]
+            },
+            "then": {
+              "properties": {
+                "path": {
+                  "const": "diff.json"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "role": {
+                  "const": "brief"
+                }
+              },
+              "required": [
+                "role"
+              ]
+            },
+            "then": {
+              "properties": {
+                "path": {
+                  "const": "brief.json"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "role": {
+                  "const": "issues"
+                }
+              },
+              "required": [
+                "role"
+              ]
+            },
+            "then": {
+              "properties": {
+                "path": {
+                  "const": "issues.bcfzip"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "role": {
+                  "const": "ifc"
+                }
+              },
+              "required": [
+                "role"
+              ]
+            },
+            "then": {
+              "properties": {
+                "path": {
+                  "const": "model.ifc"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "role": {
+                  "const": "sheet"
+                }
+              },
+              "required": [
+                "role"
+              ]
+            },
+            "then": {
+              "properties": {
+                "path": {
+                  "pattern": "^sheets/[A-Za-z0-9._-]+\\.pdf$"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "allOf": [
+        {
+          "contains": {
+            "properties": {
+              "role": {
+                "const": "geometry"
+              }
+            }
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "properties": {
+              "role": {
+                "const": "elements"
+              }
+            }
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "properties": {
+              "role": {
+                "const": "source"
+              }
+            }
+          },
+          "minContains": 1,
+          "maxContains": 1
+        }
+      ]
+    }
+  },
+  "$defs": {
+    "uuid": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "erpUrl": {
+      "type": "string",
+      "pattern": "^(https://[A-Za-z0-9.-]+(:[0-9]{1,5})?|http://(localhost|127(\\.[0-9]{1,3}){3}|\\[::1\\])(:[0-9]{1,5})?)(/[^?#@\\s]*)?$",
+      "description": "https, or http only for a loopback host; no credentials, query or fragment."
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "source": {
+            "properties": {
+              "kind": {
+                "const": "generated"
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          }
+        },
+        "required": [
+          "source"
+        ]
+      },
+      "then": {
+        "properties": {
+          "files": {
+            "contains": {
+              "properties": {
+                "role": {
+                  "const": "brief"
+                }
+              },
+              "required": [
+                "role"
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "parent_revision_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "parent_revision_id"
+        ]
+      },
+      "then": {
+        "properties": {
+          "files": {
+            "contains": {
+              "properties": {
+                "role": {
+                  "const": "diff"
+                }
+              },
+              "required": [
+                "role"
+              ]
+            }
+          }
+        }
+      }
+    }
+  ]
+}

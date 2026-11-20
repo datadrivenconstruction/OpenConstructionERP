@@ -2868,5 +2868,15 @@
     "coverage": "Dekket prosjektareal",
     "findings": "Merknader",
     "map": "Avvikskart (dårligste celle per blokk)"
+  },
+  "design": {
+    "estimate_unpriced": {
+      "fail": "Posten '{position}' har ingen enhetspris, så prosjektkalkylen utelater den.",
+      "suggestion": "Angi en enhetspris eller velg en kostnadspost for posten."
+    },
+    "revision_awaiting_decision": {
+      "fail": "Modellrevisjon {number} har ventet {days} dager på godkjenning.",
+      "suggestion": "Godkjenn eller avvis revisjonen slik at kalkylen følger den gjeldende modellen."
+    }
   }
 }

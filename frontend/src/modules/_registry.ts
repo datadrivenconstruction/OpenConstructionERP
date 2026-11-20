@@ -50,6 +50,7 @@ import { manifest as landParcels } from './land-parcels/manifest';
 import { manifest as monitoring } from './monitoring/manifest';
 import { manifest as surveyStockpiles } from './survey-stockpiles/manifest';
 import { manifest as surveyMine } from './survey-mine/manifest';
+import { manifest as design } from './design/manifest';
 
 /* ── Registry ──────────────────────────────────────────────────────── */
 
@@ -80,6 +81,7 @@ export const MODULE_REGISTRY: ModuleManifest[] = [
   monitoring,
   surveyStockpiles,
   surveyMine,
+  design,
 ];
 
 /* ── Helper functions ──────────────────────────────────────────────── */

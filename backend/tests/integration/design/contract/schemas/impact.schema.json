@@ -1,0 +1,222 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openconstructiondesign.org/schemas/ddc-impact/1",
+  "title": "ddc-impact/1 — estimate impact of a revision",
+  "description": "Body of GET /revisions/{id}/impact: a dry run, nothing is written. `estimate` is false when the project has no estimate yet; then `rows` is empty and `totals` absent. Overridden positions come first.",
+  "type": "object",
+  "required": [
+    "schema",
+    "revision_id",
+    "estimate",
+    "rows",
+    "model_delta_by_type"
+  ],
+  "properties": {
+    "schema": {
+      "const": "ddc-impact/1"
+    },
+    "revision_id": {
+      "$ref": "#/$defs/uuid"
+    },
+    "estimate": {
+      "type": "boolean"
+    },
+    "model_delta_by_type": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "by_type of the package diff.json (display only)."
+    },
+    "rows": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "rule",
+          "label",
+          "cost_group",
+          "unit",
+          "position_id",
+          "new_position",
+          "current_quantity",
+          "model_quantity_new",
+          "new_quantity",
+          "quantity_delta",
+          "override",
+          "unit_rate",
+          "cost_delta",
+          "flags",
+          "elements"
+        ],
+        "properties": {
+          "rule": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "cost_group": {
+            "type": "string",
+            "pattern": "^[0-9]{3}$"
+          },
+          "unit": {
+            "type": "string"
+          },
+          "position_id": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/uuid"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "ordinal": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "new_position": {
+            "type": "boolean"
+          },
+          "current_quantity": {
+            "type": "string",
+            "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+            "description": "Decimal as a string."
+          },
+          "model_quantity_now": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "model_quantity_new": {
+            "type": "string",
+            "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+            "description": "Decimal as a string."
+          },
+          "new_quantity": {
+            "type": "string",
+            "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+            "description": "Decimal as a string."
+          },
+          "quantity_delta": {
+            "type": "string",
+            "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+            "description": "Decimal as a string."
+          },
+          "override": {
+            "type": "boolean"
+          },
+          "override_quantity": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "unit_rate": {
+            "type": "string",
+            "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+            "description": "Decimal as a string."
+          },
+          "cost_delta": {
+            "type": "string",
+            "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+            "description": "Decimal as a string."
+          },
+          "flags": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "no_match",
+                "override",
+                "unpriced",
+                "rate_missing",
+                "input_missing"
+              ]
+            }
+          },
+          "elements": {
+            "type": "object",
+            "required": [
+              "added",
+              "removed"
+            ],
+            "properties": {
+              "added": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "removed": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "totals": {
+      "type": "object",
+      "required": [
+        "current",
+        "after",
+        "delta",
+        "unpriced_positions"
+      ],
+      "properties": {
+        "current": {
+          "type": "string",
+          "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+          "description": "Decimal as a string."
+        },
+        "after": {
+          "type": "string",
+          "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+          "description": "Decimal as a string."
+        },
+        "delta": {
+          "type": "string",
+          "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+          "description": "Decimal as a string."
+        },
+        "unpriced_positions": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "estimate": {
+            "const": true
+          }
+        },
+        "required": [
+          "estimate"
+        ]
+      },
+      "then": {
+        "required": [
+          "totals"
+        ]
+      }
+    }
+  ],
+  "$defs": {
+    "uuid": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+    }
+  }
+}

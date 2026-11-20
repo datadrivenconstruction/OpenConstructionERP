@@ -1,0 +1,335 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openconstructiondesign.org/schemas/ddc-revision-view/1",
+  "title": "ddc-revision-view/1 — revision view as the ERP returns it",
+  "description": "Body of GET /revisions/{id}, items of GET /projects/{id}/revisions, result of upload, accept and reject. `manifest` is the manifest as uploaded (revision.schema.json). For a model imported by an ERP converter and wrapped as a revision (R16), `manifest` is a `ddc-import/1` record, `depth_level` may be null (nobody stated it) and `package_sha256`/`package_bytes` describe the model's geometry file as the BIM hub stores it.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "revision_id",
+    "project_id",
+    "number",
+    "parent_revision_id",
+    "status",
+    "source_kind",
+    "depth_level",
+    "brief_version",
+    "message",
+    "bim_model_id",
+    "author_user_id",
+    "decided_by",
+    "decided_at",
+    "decision_comment",
+    "package_sha256",
+    "package_bytes",
+    "created_at",
+    "manifest"
+  ],
+  "properties": {
+    "revision_id": {
+      "$ref": "#/$defs/uuid"
+    },
+    "project_id": {
+      "$ref": "#/$defs/uuid"
+    },
+    "number": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "parent_revision_id": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/uuid"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "status": {
+      "enum": [
+        "shared",
+        "published",
+        "rejected",
+        "archived"
+      ]
+    },
+    "source_kind": {
+      "enum": [
+        "generated",
+        "edited",
+        "imported"
+      ]
+    },
+    "brief_version": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 1
+    },
+    "depth_level": {
+      "anyOf": [
+        {
+          "enum": [
+            "D1",
+            "D2",
+            "D3",
+            "D4",
+            "D5"
+          ]
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "null only for a wrapped import whose level of detail nobody stated."
+    },
+    "message": {
+      "type": "string"
+    },
+    "bim_model_id": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/uuid"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "author_user_id": {
+      "$ref": "#/$defs/uuid"
+    },
+    "decided_by": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/uuid"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "decided_at": {
+      "anyOf": [
+        {
+          "type": "string",
+          "format": "date-time"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "decision_comment": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "package_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "package_bytes": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "manifest": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": [
+            "schema"
+          ],
+          "properties": {
+            "schema": {
+              "const": "ddc-revision/1"
+            }
+          }
+        },
+        {
+          "$ref": "#/$defs/importRecord"
+        }
+      ]
+    }
+  },
+  "$defs": {
+    "uuid": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+    },
+    "importRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "A BIM hub model imported by an ERP converter, wrapped as a revision without a package (no .ddc source, no files).",
+      "required": [
+        "schema",
+        "revision_id",
+        "bim_model_id",
+        "source",
+        "counts",
+        "keys",
+        "restore",
+        "files"
+      ],
+      "properties": {
+        "schema": {
+          "const": "ddc-import/1"
+        },
+        "revision_id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "bim_model_id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "source": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "imported_from",
+            "model_format"
+          ],
+          "properties": {
+            "kind": {
+              "const": "imported"
+            },
+            "imported_from": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 255,
+              "description": "BIM hub model name."
+            },
+            "model_format": {
+              "type": "string",
+              "maxLength": 20,
+              "description": "BIM hub model_format, e.g. ifc, rvt; empty when unknown."
+            }
+          }
+        },
+        "counts": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "elements",
+            "storeys"
+          ],
+          "properties": {
+            "elements": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "storeys": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        },
+        "keys": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "verbatim",
+            "mapped"
+          ],
+          "description": "element_key = stable_id verbatim when it fits the key grammar; `mapped` counts the others (README s1).",
+          "properties": {
+            "verbatim": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "mapped": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        },
+        "restore": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "parent_model_id",
+            "metadata"
+          ],
+          "description": "BIM model fields as they were before wrapping; unwrapping puts them back.",
+          "properties": {
+            "parent_model_id": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "metadata": {
+              "type": "object",
+              "description": "Prior values of the metadata keys the wrap sets; a key absent here was absent."
+            }
+          }
+        },
+        "files": {
+          "type": "array",
+          "maxItems": 0
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "depth_level": {
+            "type": "null"
+          }
+        },
+        "required": [
+          "depth_level"
+        ]
+      },
+      "then": {
+        "properties": {
+          "manifest": {
+            "$ref": "#/$defs/importRecord"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "manifest": {
+            "properties": {
+              "schema": {
+                "const": "ddc-import/1"
+              }
+            },
+            "required": [
+              "schema"
+            ]
+          }
+        },
+        "required": [
+          "manifest"
+        ]
+      },
+      "then": {
+        "properties": {
+          "source_kind": {
+            "const": "imported"
+          },
+          "brief_version": {
+            "type": "null"
+          }
+        }
+      }
+    }
+  ]
+}

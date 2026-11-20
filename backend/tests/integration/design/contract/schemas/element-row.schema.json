@@ -1,0 +1,182 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openconstructiondesign.org/schemas/ddc-elements/1",
+  "title": "ddc-elements/1 — one row of elements.parquet",
+  "description": "Column set of elements.parquet. Physical types: strings for keys and text, float64 for quantities and bbox, int64 for count. The ERP stores every column as string (dataframe_store); the parquet written by the editor keeps native types. Columns not listed here are forbidden; extra data goes into props (JSON text).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "stable_id",
+    "element_key",
+    "element_type",
+    "ifc_class",
+    "type_key",
+    "name",
+    "storey",
+    "discipline",
+    "geometry_hash",
+    "bbox_min_x",
+    "bbox_min_y",
+    "bbox_min_z",
+    "bbox_max_x",
+    "bbox_max_y",
+    "bbox_max_z"
+  ],
+  "properties": {
+    "id": {
+      "$ref": "#/$defs/key",
+      "description": "== element_key. ERP join column (tiler, property panel)."
+    },
+    "stable_id": {
+      "$ref": "#/$defs/key",
+      "description": "== element_key. ERP element identity across versions."
+    },
+    "element_key": {
+      "$ref": "#/$defs/key"
+    },
+    "element_type": {
+      "type": "string",
+      "minLength": 1,
+      "description": "ERP category, e.g. Wall, Slab, Door."
+    },
+    "ifc_class": {
+      "type": "string",
+      "pattern": "^Ifc[A-Za-z]+$"
+    },
+    "type_key": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Stable key of the element type (family/type)."
+    },
+    "name": {
+      "type": "string"
+    },
+    "storey": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "space": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "element_key of the containing space, if any."
+    },
+    "discipline": {
+      "enum": [
+        "architecture",
+        "structure",
+        "mep",
+        "site",
+        "other"
+      ]
+    },
+    "material": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Primary material name."
+    },
+    "phase": {
+      "enum": [
+        "new",
+        "existing",
+        "demolished",
+        "temporary",
+        null
+      ]
+    },
+    "geometry_hash": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{16,64}$",
+      "description": "SHA-256 (lower-case hex, 64 chars) of the canonical world-space triangle list, README s4. 16 to 64 chars are accepted so older hashes survive; the ERP only compares equality."
+    },
+    "length_m": {
+      "$ref": "#/$defs/q"
+    },
+    "area_m2": {
+      "$ref": "#/$defs/q",
+      "description": "Net area, one definition per class (README s4): IfcWall = one face, length x height less openings; IfcSlab/IfcRoof/IfcCovering = plan (horizontal projection) area; IfcSpace = net floor area; IfcWindow/IfcDoor = rough opening width x height; other classes = null unless the class README lists it."
+    },
+    "area_gross_m2": {
+      "$ref": "#/$defs/q"
+    },
+    "volume_m3": {
+      "$ref": "#/$defs/q",
+      "description": "Net volume."
+    },
+    "volume_gross_m3": {
+      "$ref": "#/$defs/q"
+    },
+    "weight_kg": {
+      "$ref": "#/$defs/q"
+    },
+    "count": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "bbox_min_x": {
+      "type": "number"
+    },
+    "bbox_min_y": {
+      "type": "number"
+    },
+    "bbox_min_z": {
+      "type": "number"
+    },
+    "bbox_max_x": {
+      "type": "number"
+    },
+    "bbox_max_y": {
+      "type": "number"
+    },
+    "bbox_max_z": {
+      "type": "number"
+    },
+    "props": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "contentMediaType": "application/json",
+      "description": "JSON object text of remaining parameters (flat, string or number values)."
+    },
+    "space_usage": {
+      "enum": [
+        "living",
+        "office",
+        "production",
+        "storage",
+        "education",
+        "care",
+        "other_use",
+        "circulation",
+        "technical",
+        null
+      ],
+      "description": "IfcSpace rows only: DIN 277-style use of the space. 'living' + dwelling membership defines the living-area basis (WFL); null on every other class and when the editor does not know."
+    }
+  },
+  "$defs": {
+    "key": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 255,
+      "pattern": "^[A-Za-z0-9_$][A-Za-z0-9._#/:$-]*$"
+    },
+    "q": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0
+    }
+  }
+}

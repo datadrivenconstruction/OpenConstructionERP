@@ -2868,5 +2868,15 @@
     "coverage": "Design area covered",
     "findings": "Findings",
     "map": "Deviation map (worst cell per block)"
+  },
+  "design": {
+    "estimate_unpriced": {
+      "fail": "The position '{position}' has no unit rate, so the design estimate leaves it out.",
+      "suggestion": "Enter a unit rate or pick a cost item for this position."
+    },
+    "revision_awaiting_decision": {
+      "fail": "Model revision {number} has waited {days} days for acceptance.",
+      "suggestion": "Accept or reject the revision so the estimate follows the current model."
+    }
   }
 }

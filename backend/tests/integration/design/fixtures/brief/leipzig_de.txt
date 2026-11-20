@@ -1,0 +1,17 @@
+Projektbeschreibung Wohnanlage Leipzig
+Das Vorhaben ist ein Mehrfamilienhaus mit Tiefgarage.
+Adresse: Musterstraße 12, 04109 Leipzig, Deutschland
+Grundriss: ca. 34 m x 12 m
+
+Kennzahlen
+Anzahl der Geschosse: 5
+Untergeschosse: 1
+Geschosshöhe: 3,0 m
+BGF: ca. 4.250 m²
+Stellplätze: 40
+Fahrradstellplätze: 80
+Konstruktion: Mauerwerk mit Bodenplatte, Flachdach.
+Das Gebäude erhält einen Aufzug.
+Budget: 4,5 Mio. € inkl. MwSt
+Maximale Gebäudehöhe: 16,5 m
+GRZ 0,4 und GFZ 1,2

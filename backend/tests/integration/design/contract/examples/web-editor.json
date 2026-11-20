@@ -1,0 +1,20 @@
+{
+  "schema": "ddc-web-editor/1",
+  "version": "0.4.0",
+  "bridge": [
+    1
+  ],
+  "entry": "ddc-editor.js",
+  "files": [
+    {
+      "path": "ddc-editor.js",
+      "bytes": 41870,
+      "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    {
+      "path": "ddc_editor_bg.wasm",
+      "bytes": 5242880,
+      "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+    }
+  ]
+}

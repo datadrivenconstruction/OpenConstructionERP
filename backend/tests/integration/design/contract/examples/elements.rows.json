@@ -1,0 +1,42 @@
+[
+  {
+    "id": "b1/s00/wall-ext-N/0", "stable_id": "b1/s00/wall-ext-N/0", "element_key": "b1/s00/wall-ext-N/0",
+    "element_type": "Wall", "ifc_class": "IfcWall", "type_key": "wall/ext-masonry-365", "name": "Außenwand 36,5",
+    "storey": "EG", "space": null, "discipline": "architecture", "material": "Mauerwerk", "phase": "new",
+    "geometry_hash": "9f2c4a1e0b7d3c55",
+    "length_m": 34.0, "area_m2": 82.5, "area_gross_m2": 102.0, "volume_m3": 30.11, "volume_gross_m3": 37.23,
+    "weight_kg": null, "count": 1,
+    "bbox_min_x": 0.0, "bbox_min_y": 11.635, "bbox_min_z": 0.0, "bbox_max_x": 34.0, "bbox_max_y": 12.0, "bbox_max_z": 3.0,
+    "props": "{\"fire_rating\":\"REI 90\",\"u_value\":0.21}"
+  },
+  {
+    "id": "b1/s00/slab/0", "stable_id": "b1/s00/slab/0", "element_key": "b1/s00/slab/0",
+    "element_type": "Slab", "ifc_class": "IfcSlab", "type_key": "slab/concrete-200", "name": "Decke 20",
+    "storey": "EG", "space": null, "discipline": "structure", "material": "Stahlbeton C25/30", "phase": "new",
+    "geometry_hash": "17aa03be55c0e912",
+    "length_m": null, "area_m2": 401.2, "area_gross_m2": 408.0, "volume_m3": 80.24, "volume_gross_m3": 81.6,
+    "weight_kg": null, "count": 1,
+    "bbox_min_x": 0.0, "bbox_min_y": 0.0, "bbox_min_z": 2.8, "bbox_max_x": 34.0, "bbox_max_y": 12.0, "bbox_max_z": 3.0,
+    "props": null
+  },
+  {
+    "id": "b1/s01/u2A/door-entry/0", "stable_id": "b1/s01/u2A/door-entry/0", "element_key": "b1/s01/u2A/door-entry/0",
+    "element_type": "Door", "ifc_class": "IfcDoor", "type_key": "door/entry-1010x2135", "name": "Wohnungseingangstür",
+    "storey": "1.OG", "space": "b1/s01/u2A/hall", "discipline": "architecture", "material": null, "phase": "new",
+    "geometry_hash": "c3d4e5f60718293a",
+    "length_m": null, "area_m2": 2.16, "area_gross_m2": null, "volume_m3": null, "volume_gross_m3": null,
+    "weight_kg": null, "count": 1,
+    "bbox_min_x": 8.2, "bbox_min_y": 5.9, "bbox_min_z": 3.0, "bbox_max_x": 9.21, "bbox_max_y": 6.1, "bbox_max_z": 5.135,
+    "props": "{\"fire_rating\":\"EI2 30-C\"}"
+  },
+  {
+    "id": "b1/s05/u4A/room-living", "stable_id": "b1/s05/u4A/room-living", "element_key": "b1/s05/u4A/room-living",
+    "element_type": "Room", "ifc_class": "IfcSpace", "type_key": "space/living", "name": "Wohnen",
+    "storey": "5.OG", "space": null, "discipline": "architecture", "material": null, "phase": "new",
+    "geometry_hash": "00ffee1122334455",
+    "length_m": null, "area_m2": 28.4, "area_gross_m2": null, "volume_m3": 71.0, "volume_gross_m3": null,
+    "weight_kg": null, "count": 1,
+    "bbox_min_x": 0.365, "bbox_min_y": 6.2, "bbox_min_z": 15.0, "bbox_max_x": 6.0, "bbox_max_y": 11.635, "bbox_max_z": 17.5,
+    "props": null
+  }
+]

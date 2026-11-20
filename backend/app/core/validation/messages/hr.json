@@ -2868,5 +2868,15 @@
     "coverage": "Pokrivena projektna površina",
     "findings": "Nalazi",
     "map": "Karta odstupanja (najlošija ćelija po bloku)"
+  },
+  "design": {
+    "estimate_unpriced": {
+      "fail": "Stavka '{position}' nema jediničnu cijenu, pa je procjena troškova projekta izostavlja.",
+      "suggestion": "Unesite jediničnu cijenu ili odaberite troškovnu stavku."
+    },
+    "revision_awaiting_decision": {
+      "fail": "Revizija modela {number} čeka prihvaćanje već {days} dana.",
+      "suggestion": "Prihvatite ili odbijte reviziju kako bi procjena pratila trenutačni model."
+    }
   }
 }

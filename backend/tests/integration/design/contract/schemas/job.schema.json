@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openconstructiondesign.org/schemas/ddc-job/1",
+  "title": "ddc-job/1 — generation job status",
+  "description": "Body of GET /jobs/{id} (stage 2, server worker). `revision_id` appears once status = done.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "job_id",
+    "status",
+    "progress",
+    "log_tail"
+  ],
+  "properties": {
+    "job_id": {
+      "$ref": "#/$defs/uuid"
+    },
+    "status": {
+      "enum": [
+        "queued",
+        "running",
+        "done",
+        "failed",
+        "cancelled"
+      ]
+    },
+    "progress": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "log_tail": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 200
+    },
+    "revision_id": {
+      "$ref": "#/$defs/uuid"
+    },
+    "error": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "done"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "then": {
+        "required": [
+          "revision_id"
+        ]
+      }
+    }
+  ],
+  "$defs": {
+    "uuid": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+    }
+  }
+}

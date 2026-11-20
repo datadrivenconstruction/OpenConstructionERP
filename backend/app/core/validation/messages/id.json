@@ -2868,5 +2868,15 @@
     "coverage": "Area desain tercakup",
     "findings": "Temuan",
     "map": "Peta deviasi (sel terburuk per blok)"
+  },
+  "design": {
+    "estimate_unpriced": {
+      "fail": "Item '{position}' tidak memiliki harga satuan, sehingga estimasi desain tidak menyertakannya.",
+      "suggestion": "Masukkan harga satuan atau pilih item biaya untuk item ini."
+    },
+    "revision_awaiting_decision": {
+      "fail": "Revisi model {number} sudah {days} hari menunggu penerimaan.",
+      "suggestion": "Terima atau tolak revisi agar estimasi mengikuti model terkini."
+    }
   }
 }

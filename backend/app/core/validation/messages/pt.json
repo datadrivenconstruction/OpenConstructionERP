@@ -2868,5 +2868,15 @@
     "coverage": "Área de projeto coberta",
     "findings": "Constatações",
     "map": "Mapa de desvios (pior célula por bloco)"
+  },
+  "design": {
+    "estimate_unpriced": {
+      "fail": "A posição '{position}' não tem preço unitário, por isso a estimativa de projeto a exclui.",
+      "suggestion": "Introduza um preço unitário ou escolha um item de custo para esta posição."
+    },
+    "revision_awaiting_decision": {
+      "fail": "A revisão do modelo {number} aguarda aceitação há {days} dias.",
+      "suggestion": "Aceite ou rejeite a revisão para que a estimativa acompanhe o modelo atual."
+    }
   }
 }

@@ -2868,5 +2868,15 @@
     "coverage": "Abgedeckte Planfläche",
     "findings": "Befunde",
     "map": "Abweichungskarte (ungünstigste Zelle je Block)"
+  },
+  "design": {
+    "estimate_unpriced": {
+      "fail": "Die Position '{position}' hat keinen Einheitspreis und fehlt daher in der Entwurfskostenschätzung.",
+      "suggestion": "Geben Sie einen Einheitspreis ein oder wählen Sie eine Kostenposition für diese Position."
+    },
+    "revision_awaiting_decision": {
+      "fail": "Die Modellrevision {number} wartet seit {days} Tagen auf die Abnahme.",
+      "suggestion": "Nehmen Sie die Revision an oder lehnen Sie sie ab, damit die Kostenschätzung dem aktuellen Modell folgt."
+    }
   }
 }

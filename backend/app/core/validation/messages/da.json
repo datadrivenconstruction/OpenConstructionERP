@@ -2868,5 +2868,15 @@
     "coverage": "Dækket projektareal",
     "findings": "Bemærkninger",
     "map": "Afvigelseskort (dårligste celle pr. blok)"
+  },
+  "design": {
+    "estimate_unpriced": {
+      "fail": "Positionen '{position}' har ingen enhedspris, så projektoverslaget udelader den.",
+      "suggestion": "Indtast en enhedspris, eller vælg en omkostningspost til positionen."
+    },
+    "revision_awaiting_decision": {
+      "fail": "Modelrevision {number} har ventet {days} dage på godkendelse.",
+      "suggestion": "Godkend eller afvis revisionen, så overslaget følger den aktuelle model."
+    }
   }
 }

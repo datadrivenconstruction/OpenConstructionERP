@@ -2868,5 +2868,15 @@
     "coverage": "Kapsanan proje alanı",
     "findings": "Bulgular",
     "map": "Sapma haritası (blok başına en kötü hücre)"
+  },
+  "design": {
+    "estimate_unpriced": {
+      "fail": "'{position}' pozisyonunun birim fiyatı yok, bu yüzden tasarım maliyet tahmini onu dışarıda bırakıyor.",
+      "suggestion": "Bu pozisyon için birim fiyat girin veya bir maliyet kalemi seçin."
+    },
+    "revision_awaiting_decision": {
+      "fail": "{number} numaralı model revizyonu {days} gündür onay bekliyor.",
+      "suggestion": "Tahminin güncel modeli izlemesi için revizyonu kabul edin veya reddedin."
+    }
   }
 }

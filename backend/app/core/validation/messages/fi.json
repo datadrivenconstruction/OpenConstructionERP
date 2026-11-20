@@ -2868,5 +2868,15 @@
     "coverage": "Katettu suunnittelupinta-ala",
     "findings": "Havainnot",
     "map": "Poikkeamakartta (huonoin solu lohkoa kohti)"
+  },
+  "design": {
+    "estimate_unpriced": {
+      "fail": "Nimikkeellä '{position}' ei ole yksikköhintaa, joten suunnitelman kustannusarvio jättää sen pois.",
+      "suggestion": "Anna yksikköhinta tai valitse nimikkeelle kustannuserä."
+    },
+    "revision_awaiting_decision": {
+      "fail": "Mallin revisio {number} on odottanut hyväksyntää {days} päivää.",
+      "suggestion": "Hyväksy tai hylkää revisio, jotta kustannusarvio seuraa nykyistä mallia."
+    }
   }
 }

@@ -1,0 +1,18 @@
+{
+  "schema": "ddc-diff/1",
+  "revision_id": "95bb145e-f295-43dd-a059-d27876741295",
+  "parent_revision_id": "68143a44-27fb-47bb-aa7e-c1229f23a2dc",
+  "added": ["b1/s05/u4A/room-living"],
+  "removed": ["b1/s05/u2A/room-living", "b1/s05/u2B/room-living", "b1/s05/u2A-u2B/wall-party/0"],
+  "changed": [
+    {
+      "element_key": "b1/s00/wall-ext-N/0",
+      "geometry": false,
+      "fields": [{ "field": "props.u_value", "old": 0.24, "new": 0.21 }]
+    }
+  ],
+  "by_type": [
+    { "type_key": "wall/party-240", "ifc_class": "IfcWall", "count_delta": -1, "area_m2_delta": -14.2, "volume_m3_delta": -3.41 },
+    { "type_key": "space/living", "ifc_class": "IfcSpace", "count_delta": -1, "area_m2_delta": 2.1 }
+  ]
+}
