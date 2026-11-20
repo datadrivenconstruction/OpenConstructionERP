@@ -3,6 +3,8 @@
 """Setting-out ORM models.
 
 Tables:
+    oe_setting_out_settings - per project: the default tolerance profile and
+        whether a failed stake opens an NCR draft on its own.
     oe_setting_out_tolerance_profile - a project's own tolerance profile
         (item type -> horizontal/vertical mm). Demo and pack profiles live in code.
     oe_setting_out_request - one stakeout request: what to set out (linked BOQ
@@ -18,10 +20,24 @@ import uuid
 from datetime import datetime
 from decimal import Decimal
 
-from sqlalchemy import JSON, DateTime, ForeignKey, Index, Integer, Numeric, String, Text
+from sqlalchemy import JSON, Boolean, DateTime, ForeignKey, Index, Integer, Numeric, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database import GUID, Base
+
+
+class SettingOutSettings(Base):
+    """One project's setting-out defaults."""
+
+    __tablename__ = "oe_setting_out_settings"
+    __table_args__ = (UniqueConstraint("project_id", name="uq_oe_setting_out_settings_project_id"),)
+
+    project_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(), ForeignKey("oe_projects_project.id", ondelete="CASCADE"), nullable=False
+    )
+    # "demo" | "pack:<..>" | "project:<uuid>" | "" - preselected for new requests
+    default_tolerance_key: Mapped[str] = mapped_column(String(80), nullable=False, default="", server_default="")
+    auto_ncr: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default="false")
 
 
 class SettingOutToleranceProfile(Base):
@@ -56,6 +72,8 @@ class SettingOutRequest(Base):
     tolerance_key: Mapped[str] = mapped_column(String(80), nullable=False, default="", server_default="")
     tolerance_label: Mapped[str] = mapped_column(String(255), nullable=False, default="", server_default="")
     tolerance_source: Mapped[str] = mapped_column(String(20), nullable=False, default="", server_default="")
+    # Standard, clause, edition and status of the tolerance at the time it was picked.
+    tolerance_reference: Mapped[str] = mapped_column(String(500), nullable=False, default="", server_default="")
     tol_h_mm: Mapped[Decimal | None] = mapped_column(Numeric(8, 1), nullable=True)
     tol_v_mm: Mapped[Decimal | None] = mapped_column(Numeric(8, 1), nullable=True)
     # boq | bim | cad | "" - the element this request sets out
@@ -128,3 +146,7 @@ class SettingOutRecord(Base):
     measured_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     note: Mapped[str] = mapped_column(Text, nullable=False, default="", server_default="")
     ncr_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
+    # A failed stake the engineer accepted as built (concession) instead of raising an NCR.
+    deviation_accepted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    deviation_accepted_by: Mapped[str] = mapped_column(String(255), nullable=False, default="", server_default="")
+    deviation_note: Mapped[str] = mapped_column(Text, nullable=False, default="", server_default="")

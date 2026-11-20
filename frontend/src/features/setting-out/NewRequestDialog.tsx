@@ -14,6 +14,7 @@ import { getErrorMessage } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
 import { ITEM_TYPES, createRequest, type ItemType, type RefType, type StakeoutRequest, type ToleranceProfile } from './api';
 import { parseDecimal } from './verdict';
+import { SourceNote } from './SourceNote';
 
 export function profileLabel(p: ToleranceProfile, t: (k: string, o?: Record<string, unknown>) => string): string {
   if (p.source === 'demo') return `${p.name} · ${t('survey.setting_out.profile.demo', { defaultValue: 'Demo values, not a standard' })}`;
@@ -25,12 +26,15 @@ export function NewRequestDialog({
   open,
   projectId,
   profiles,
+  defaultKey = '',
   onClose,
   onCreated,
 }: {
   open: boolean;
   projectId: string;
   profiles: ToleranceProfile[];
+  /** The project's default profile, preselected when it is still offered. */
+  defaultKey?: string;
   onClose: () => void;
   onCreated: (r: StakeoutRequest) => void;
 }) {
@@ -48,8 +52,12 @@ export function NewRequestDialog({
   const [control, setControl] = useState('');
 
   useEffect(() => {
-    if (open && !profile && profiles.length) setProfile(profiles[0]!.key);
-  }, [open, profile, profiles]);
+    if (open && !profile && profiles.length) {
+      setProfile(profiles.some((p) => p.key === defaultKey) ? defaultKey : profiles[0]!.key);
+    }
+  }, [open, profile, profiles, defaultKey]);
+  const picked = profiles.find((p) => p.key === profile);
+  const pickedValue = picked ? picked.items[itemType] ?? picked.items.default : undefined;
 
   const create = useMutation({
     mutationFn: () =>
@@ -112,6 +120,20 @@ export function NewRequestDialog({
             ))}
             <option value="">{t('survey.setting_out.profile.none', { defaultValue: 'No profile, set one' })}</option>
           </select>
+          {picked && (
+            <span className="mt-1 block" data-testid="so-new-tolerance">
+              <span className="text-sm">
+                {pickedValue
+                  ? t('survey.setting_out.tolerance_value', {
+                      defaultValue: '{{h}} mm in plan, {{v}} mm in height',
+                      h: pickedValue.h_mm,
+                      v: pickedValue.v_mm ?? '-',
+                    })
+                  : t('survey.setting_out.tolerance_not_covered', { defaultValue: 'This profile has no value for this item type.' })}
+              </span>{' '}
+              <SourceNote reference={picked.reference} clause={pickedValue?.clause} status={pickedValue?.status} />
+            </span>
+          )}
         </label>
         <button type="button" className="text-sm text-content-secondary underline" onClick={() => setAdvanced((v) => !v)} aria-expanded={advanced}>
           {t('survey.action.advanced', { defaultValue: 'Advanced options' })}

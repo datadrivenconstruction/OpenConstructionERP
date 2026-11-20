@@ -2508,6 +2508,10 @@
     "spiral_skipped": {
       "fail": "Klothoidenparameter fehlt; Element {n} übersprungen.",
       "suggestion": "Exportieren Sie die Achse erneut mit Klothoidenlänge und beiden Radien."
+    },
+    "stake_unresolved": {
+      "fail": "Absteckpunkt {id} ist außerhalb der Toleranz und hat weder eine NCR noch eine akzeptierte Abweichung.",
+      "suggestion": "Einen NCR-Entwurf anlegen oder die Abweichung mit Begründung akzeptieren."
     }
   },
   "land_parcels": {

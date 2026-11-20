@@ -14,6 +14,7 @@ from app.modules.setting_out.models import (
     SettingOutPoint,
     SettingOutRecord,
     SettingOutRequest,
+    SettingOutSettings,
     SettingOutToleranceProfile,
 )
 
@@ -27,6 +28,12 @@ class SettingOutRepository:
     async def add(self, obj: Any) -> None:
         self.session.add(obj)
         await self.session.flush()
+
+    # ── Settings ───────────────────────────────────────────────────────────
+
+    async def settings(self, project_id: uuid.UUID) -> SettingOutSettings | None:
+        rows = await self.session.execute(select(SettingOutSettings).where(SettingOutSettings.project_id == project_id))
+        return rows.scalars().first()
 
     # ── Profiles ───────────────────────────────────────────────────────────
 

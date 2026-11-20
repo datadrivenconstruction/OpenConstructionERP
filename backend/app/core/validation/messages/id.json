@@ -2508,6 +2508,10 @@
     "spiral_skipped": {
       "fail": "Parameter spiral tidak ada; elemen {n} dilewati.",
       "suggestion": "Ekspor ulang alinyemen dengan panjang spiral dan kedua jari-jari."
+    },
+    "stake_unresolved": {
+      "fail": "Patok {id} di luar toleransi dan tidak memiliki NCR maupun deviasi yang diterima.",
+      "suggestion": "Buat draf NCR, atau terima deviasi dengan alasannya."
     }
   },
   "land_parcels": {

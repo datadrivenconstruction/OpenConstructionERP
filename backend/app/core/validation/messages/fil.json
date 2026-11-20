@@ -2508,6 +2508,10 @@
     "spiral_skipped": {
       "fail": "Kulang ang parameter ng spiral; nilaktawan ang elemento {n}.",
       "suggestion": "I-export muli ang alignment kasama ang haba ng spiral at parehong radius."
+    },
+    "stake_unresolved": {
+      "fail": "Ang stake {id} ay lampas sa tolerance at walang NCR o tinanggap na paglihis.",
+      "suggestion": "Gumawa ng draft ng NCR, o tanggapin ang paglihis nang may dahilan."
     }
   },
   "land_parcels": {

@@ -11,9 +11,12 @@ offered only while that pack's market is active. Projects add their own
 
 from __future__ import annotations
 
-from collections.abc import Iterable
-from dataclasses import dataclass
+import json
+from collections.abc import Iterable, Mapping
+from dataclasses import dataclass, replace
 from decimal import Decimal
+from pathlib import Path
+from typing import Any
 
 from app.modules.monitoring.monitoring_math import Thresholds
 
@@ -32,6 +35,12 @@ class MonitoringProfile:
     country: str = ""
     #: Standard and clause, or the designer's document, shown next to the name.
     reference: str = ""
+    #: Edition year of the source standard.
+    edition: str = ""
+    #: Clause the thresholds come from (pack profiles).
+    clause: str = ""
+    #: ``verified`` (clause cited) | ``to_verify`` (not yet checked against the source) | "".
+    status: str = ""
 
 
 DEMO_PROFILE = MonitoringProfile(
@@ -58,7 +67,41 @@ def register_pack_profile(country: str, profiles: Iterable[MonitoringProfile]) -
         if not p.key.startswith("pack:"):
             raise ValueError("pack monitoring profile keys start with 'pack:'")
         bucket[:] = [b for b in bucket if b.key != p.key]
-        bucket.append(MonitoringProfile(p.key, p.name, "pack", p.thresholds, code, p.reference))
+        bucket.append(replace(p, source="pack", country=code))
+
+
+COUNTRY_DATA_PATH = Path(__file__).resolve().parents[2] / "core" / "country_data" / "site_tolerances.json"
+_THRESHOLD_FIELDS = ("alert_mm", "action_mm", "alarm_mm", "rate_alert", "rate_action", "rate_alarm")
+
+
+def _profile_from_json(row: Mapping[str, Any]) -> MonitoringProfile:
+    raw = row.get("thresholds") or {}
+    values = {f: None if raw.get(f) is None else Decimal(str(raw[f])) for f in _THRESHOLD_FIELDS}
+    edition = str(row.get("edition") or "")
+    return MonitoringProfile(
+        key=str(row["key"]),
+        name=str(row.get("name") or row["key"]),
+        source="pack",
+        thresholds=Thresholds(**values),
+        reference=f"{row.get('standard') or ''}, {edition}".strip(", ")[:255],
+        edition=edition,
+        clause=str(row.get("clause") or ""),
+        status=str(row.get("status") or "to_verify"),
+    )
+
+
+def load_country_profiles(path: Path = COUNTRY_DATA_PATH) -> int:
+    """Register every country's monitoring profiles from the country data; returns how many profiles."""
+    data = json.loads(path.read_text(encoding="utf-8"))
+    count = 0
+    for country, entry in data.items():
+        if country.startswith("_"):
+            continue
+        profiles = [_profile_from_json(row) for row in entry.get("monitoring") or []]
+        if profiles:
+            register_pack_profile(country, profiles)
+            count += len(profiles)
+    return count
 
 
 def clear_pack_profiles() -> None:

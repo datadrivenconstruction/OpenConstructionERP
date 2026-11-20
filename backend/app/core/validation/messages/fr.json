@@ -2508,6 +2508,10 @@
     "spiral_skipped": {
       "fail": "Paramètre de clothoïde manquant ; élément {n} ignoré.",
       "suggestion": "Exportez à nouveau l'axe avec la longueur de clothoïde et les deux rayons."
+    },
+    "stake_unresolved": {
+      "fail": "Le piquet {id} est hors tolérance et n'a ni NCR ni écart accepté.",
+      "suggestion": "Créez un brouillon de NCR ou acceptez l'écart en indiquant la raison."
     }
   },
   "land_parcels": {

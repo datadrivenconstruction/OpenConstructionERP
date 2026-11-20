@@ -2508,6 +2508,10 @@
     "spiral_skipped": {
       "fail": "Spiral parameter missing; element {n} skipped.",
       "suggestion": "Export the alignment again with the spiral length and both radii."
+    },
+    "stake_unresolved": {
+      "fail": "Stake {id} failed and has neither an NCR nor an accepted deviation.",
+      "suggestion": "Create an NCR draft, or accept the deviation with a reason."
     }
   },
   "land_parcels": {

@@ -5,7 +5,7 @@
  * records with their verdict, NCR drafts and the setting-out sheet.
  */
 
-import { API_BASE, activeLanguageTag, apiDelete, apiGet, apiPatch, apiPost, downloadWithAuth } from '@/shared/lib/api';
+import { API_BASE, activeLanguageTag, apiDelete, apiGet, apiPatch, apiPost, apiPut, downloadWithAuth } from '@/shared/lib/api';
 
 
 export type ItemType = 'column' | 'wall' | 'pile' | 'anchor_bolt' | 'kerb' | 'centreline' | 'grid_line' | 'boundary_corner' | 'other';
@@ -14,13 +14,29 @@ export type RefType = '' | 'boq' | 'bim' | 'cad';
 export type Verdict = 'pass' | 'fail' | 'no_tolerance';
 export type StakeState = Verdict | 'open';
 
+/** ``verified``: the clause was cited; ``to_verify``: not yet checked against the source. */
+export type SourceStatus = 'verified' | 'to_verify' | '';
+
+export interface ToleranceValue {
+  h_mm: number;
+  v_mm: number | null;
+  clause?: string;
+  status?: SourceStatus;
+}
+
 export interface ToleranceProfile {
   key: string;
   name: string;
   source: 'demo' | 'pack' | 'project';
   country: string;
   reference: string;
-  items: Record<string, { h_mm: number; v_mm: number | null }>;
+  edition?: string;
+  items: Record<string, ToleranceValue>;
+}
+
+export interface SettingOutSettings {
+  default_tolerance_key: string;
+  auto_ncr: boolean;
 }
 
 export interface StakeRecord {
@@ -42,6 +58,9 @@ export interface StakeRecord {
   measured_at: string;
   note: string;
   ncr_id: string | null;
+  deviation_accepted_at?: string | null;
+  deviation_accepted_by?: string;
+  deviation_note?: string;
 }
 
 export interface Stake {
@@ -67,6 +86,8 @@ export interface StakeoutRequest {
   tolerance_key: string;
   tolerance_label: string;
   tolerance_source: string;
+  /** Standard, edition, clause and status of the tolerance when it was picked. */
+  tolerance_reference?: string;
   tol_h_mm: number | null;
   tol_v_mm: number | null;
   element_ref_type: RefType;
@@ -176,6 +197,15 @@ export const importDesign = (id: string, body: DesignImportInput) =>
 export const recordStake = (stakeId: string, body: RecordInput) =>
   apiPost<StakeRecord, RecordInput>(`/v1/setting-out/stakes/${stakeId}/records`, body);
 export const stakeHistory = (stakeId: string) => apiGet<{ items: StakeRecord[] }>(`/v1/setting-out/stakes/${stakeId}/records`).then((r) => r.items);
+export const getSettings = (projectId: string) => apiGet<SettingOutSettings>(`/v1/setting-out/projects/${projectId}/settings`);
+export const putSettings = (projectId: string, body: Partial<SettingOutSettings>) =>
+  apiPut<SettingOutSettings, Partial<SettingOutSettings>>(`/v1/setting-out/projects/${projectId}/settings`, body);
+export const createNcrDrafts = (projectId: string, locale: string) =>
+  apiPost<{ created: { ncr_id: string; ncr_number: string; record_id: string }[]; skipped: number }>(
+    `/v1/setting-out/projects/${projectId}/ncr-drafts?locale=${encodeURIComponent(locale)}`,
+  );
+export const acceptDeviation = (recordId: string, note: string) =>
+  apiPost<StakeRecord, { note: string }>(`/v1/setting-out/records/${recordId}/accept-deviation`, { note });
 export const createNcrDraft = (recordId: string, locale: string) =>
   apiPost<{ ncr_id: string; ncr_number: string; record_id: string }>(
     `/v1/setting-out/records/${recordId}/ncr?locale=${encodeURIComponent(locale)}`,

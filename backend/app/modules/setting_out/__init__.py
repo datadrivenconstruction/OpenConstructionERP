@@ -9,7 +9,9 @@ for failed stakes, and the printable setting-out sheet.
 
 
 async def on_startup() -> None:
-    """Module startup hook - register validation rules (permissions come from survey_core)."""
+    """Module startup hook - register validation rules and the country tolerance data."""
+    from app.modules.setting_out.tolerances import load_country_tolerances
     from app.modules.setting_out.validators import register_setting_out_validation_rules
 
     register_setting_out_validation_rules()
+    load_country_tolerances()

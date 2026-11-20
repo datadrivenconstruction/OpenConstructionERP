@@ -2508,6 +2508,10 @@
     "spiral_skipped": {
       "fail": "Thiếu tham số đường cong clothoid; bỏ qua phần tử {n}.",
       "suggestion": "Xuất lại tuyến với chiều dài clothoid và cả hai bán kính."
+    },
+    "stake_unresolved": {
+      "fail": "Cọc {id} vượt dung sai và không có NCR cũng như sai lệch được chấp nhận.",
+      "suggestion": "Tạo bản nháp NCR hoặc chấp nhận sai lệch kèm lý do."
     }
   },
   "land_parcels": {

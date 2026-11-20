@@ -182,8 +182,22 @@ FORECAST_EPOCHS = 5
 
 
 @dataclass(frozen=True)
+class LevelForecast:
+    """One threshold seen from the trend: already reached, days until reached, or not approaching."""
+
+    level: str
+    limit_mm: float
+    reached: bool
+    days: float | None = None
+
+
+@dataclass(frozen=True)
 class Forecast:
-    """Linear trend over the last epochs and when it reaches the next level."""
+    """Linear trend over the last epochs and when it reaches each level.
+
+    ``level``/``limit_mm``/``days`` name the next level only; ``levels`` lists every level with a
+    displacement limit. ``approaching`` is False when the trend is flat or runs back towards zero.
+    """
 
     slope_mm_day: float
     fitted_mm: float
@@ -191,13 +205,15 @@ class Forecast:
     level: str | None = None
     limit_mm: float | None = None
     days: float | None = None
+    approaching: bool = False
+    levels: tuple[LevelForecast, ...] = ()
 
 
 def forecast(evaluations: Sequence[Evaluation], t: Thresholds, last_n: int = FORECAST_EPOCHS) -> Forecast | None:
-    """Least-squares line through the last ``last_n`` displacements and the days to the next threshold.
+    """Least-squares line through the last ``last_n`` displacements and the days to every threshold.
 
-    The next threshold is the lowest displacement limit the fitted value has not reached. A trend
-    running back towards zero, or flat, reaches nothing. None with fewer than two usable epochs.
+    A threshold the fitted value has reached is marked reached. A trend running back towards zero,
+    or flat, reaches nothing more. None with fewer than two usable epochs.
     """
     pts = [(e.at, float(e.displacement_mm)) for e in evaluations if e.displacement_mm is not None][-max(last_n, 2) :]
     if len(pts) < 2:
@@ -211,13 +227,27 @@ def forecast(evaluations: Sequence[Evaluation], t: Thresholds, last_n: int = FOR
         return None
     slope = sum((x - mx) * (y - my) for x, y in zip(xs, ys, strict=True)) / sxx
     fitted = my + slope * (xs[-1] - mx)
-    out = Forecast(round(slope, 4), round(fitted, 3), len(pts))
     away = abs(slope) > 1e-9 and (fitted == 0 or (slope > 0) == (fitted > 0))
-    if not away:
-        return out
+    levels: list[LevelForecast] = []
     for level, limit in (("alert", t.alert_mm), ("action", t.action_mm), ("alarm", t.alarm_mm)):
-        if limit is None or abs(fitted) >= float(limit):
+        if limit is None:
             continue
-        days = (float(limit) - abs(fitted)) / abs(slope)
-        return Forecast(out.slope_mm_day, out.fitted_mm, out.epochs, level, float(limit), round(days, 1))
-    return out
+        if abs(fitted) >= float(limit):
+            levels.append(LevelForecast(level, float(limit), True))
+        elif away:
+            levels.append(
+                LevelForecast(level, float(limit), False, round((float(limit) - abs(fitted)) / abs(slope), 1))
+            )
+        else:
+            levels.append(LevelForecast(level, float(limit), False))
+    nxt = next((lf for lf in levels if not lf.reached and lf.days is not None), None)
+    return Forecast(
+        round(slope, 4),
+        round(fitted, 3),
+        len(pts),
+        nxt.level if nxt else None,
+        nxt.limit_mm if nxt else None,
+        nxt.days if nxt else None,
+        away,
+        tuple(levels),
+    )

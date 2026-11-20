@@ -2508,6 +2508,10 @@
     "spiral_skipped": {
       "fail": "Lipsește un parametru al clotoidei; elementul {n} a fost omis.",
       "suggestion": "Exportați din nou axul cu lungimea clotoidei și ambele raze."
+    },
+    "stake_unresolved": {
+      "fail": "Țărușul {id} este în afara toleranței și nu are nici NCR, nici abatere acceptată.",
+      "suggestion": "Creați o ciornă NCR sau acceptați abaterea cu o justificare."
     }
   },
   "land_parcels": {

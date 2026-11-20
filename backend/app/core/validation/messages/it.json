@@ -2508,6 +2508,10 @@
     "spiral_skipped": {
       "fail": "Parametro della clotoide mancante; elemento {n} saltato.",
       "suggestion": "Esportare di nuovo l'asse con la lunghezza della clotoide ed entrambi i raggi."
+    },
+    "stake_unresolved": {
+      "fail": "Il picchetto {id} è fuori tolleranza e non ha né una NCR né una deviazione accettata.",
+      "suggestion": "Crea una bozza di NCR oppure accetta la deviazione con una motivazione."
     }
   },
   "land_parcels": {

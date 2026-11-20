@@ -1,7 +1,10 @@
 {
   "dataset": "riverside_yard",
   "project_name": "Riverside Yard (survey demo)",
-  "crs": {"epsg": 32633, "chip": "EPSG 32633"},
+  "crs": {
+    "epsg": 32633,
+    "chip": "EPSG 32633"
+  },
   "demo_profiles_label": "Demo values, not a standard",
   "setting_out": {
     "lesson_1": {
@@ -10,20 +13,39 @@
       "tolerance_label": "Demo 10 mm",
       "tolerance_mm": 10,
       "alignment": "Axis C",
-      "chainage": {"C-03": 60.0, "C-04": 80.0}
+      "chainage": {
+        "C-03": 60.0,
+        "C-04": 80.0
+      }
     },
     "lesson_2": {
       "point": "C-04",
-      "design": {"e": 389080.000, "n": 5819030.000, "z": 34.300},
-      "measured": {"e": 389080.004, "n": 5819029.997, "z": 34.298},
+      "design": {
+        "e": 389080.0,
+        "n": 5819030.0,
+        "z": 34.3
+      },
+      "measured": {
+        "e": 389080.004,
+        "n": 5819029.997,
+        "z": 34.298
+      },
       "d_mm": 5,
       "dz_mm": -2,
       "verdict": "pass"
     },
     "lesson_3": {
       "point": "C-03",
-      "design": {"e": 389060.000, "n": 5819030.000, "z": 34.300},
-      "measured": {"e": 389060.012, "n": 5819029.991, "z": 34.302},
+      "design": {
+        "e": 389060.0,
+        "n": 5819030.0,
+        "z": 34.3
+      },
+      "measured": {
+        "e": 389060.012,
+        "n": 5819029.991,
+        "z": 34.302
+      },
       "d_mm": 15,
       "dz_mm": 2,
       "verdict": "fail",
@@ -31,7 +53,55 @@
       "finding": "Stake C-03 off by 15 mm, tolerance 10 mm",
       "ncr_type": "workmanship"
     },
-    "lesson_4": {"passed": 1, "failed": 1, "measured_by_listed": true},
-    "kpi_after_lessons": {"open": 0, "passed": 1, "failed": 1, "ncr_drafts": 1}
+    "lesson_4": {
+      "passed": 1,
+      "failed": 1,
+      "measured_by_listed": true
+    },
+    "kpi_after_lessons": {
+      "open": 0,
+      "passed": 1,
+      "failed": 1,
+      "ncr_drafts": 1
+    },
+    "lesson_5": {
+      "note": "Follow-up of the failed stake C-03 before the NCR of lesson 3 exists",
+      "rule": "SET-003",
+      "finding": "Stake C-03 failed and has neither an NCR nor an accepted deviation.",
+      "auto_ncr_default": false,
+      "bulk_ncr_created": 1,
+      "ncr_quotes": [
+        "d 15 mm",
+        "tolerance 10 mm",
+        "source: Demo values, not a standard"
+      ],
+      "accepted_deviation_clears_rule": true
+    },
+    "country_profiles": {
+      "note": "Offered only while the country is an active market; status to_verify values must be confirmed before use",
+      "CN": {
+        "key": "pack:cn_gb50204_2015",
+        "item": "column",
+        "h_mm": 8,
+        "v_mm": 10,
+        "edition": "2015",
+        "status": "verified"
+      },
+      "US": {
+        "key": "pack:us_aci117_2010",
+        "item": "column",
+        "h_mm": 25.4,
+        "v_mm": 19.1,
+        "edition": "2010",
+        "status": "to_verify"
+      },
+      "GB": {
+        "key": "pack:gb_ice_sperw_2016",
+        "item": "pile",
+        "h_mm": 75,
+        "edition": "2016",
+        "status": "to_verify"
+      }
+    }
   }
 }

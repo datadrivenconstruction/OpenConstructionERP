@@ -29,6 +29,9 @@ export interface Profile {
   source: 'demo' | 'pack' | 'project';
   country: string;
   reference: string;
+  edition?: string;
+  clause?: string;
+  status?: 'verified' | 'to_verify' | '';
   thresholds: Thresholds;
 }
 
@@ -58,6 +61,18 @@ export interface MonitoringPoint {
   forecast_level?: string;
   forecast_days?: number | null;
   forecast_rate_mm_day?: number | null;
+  /** False when the trend is flat or runs back towards zero. */
+  forecast_approaching?: boolean;
+  forecast_epochs?: number;
+  /** Every level with a displacement limit: reached already, or days until the trend reaches it. */
+  forecast_levels?: ForecastLevel[];
+}
+
+export interface ForecastLevel {
+  level: 'alert' | 'action' | 'alarm';
+  limit_mm: number;
+  reached: boolean;
+  days: number | null;
 }
 
 export interface SeriesEntry {
@@ -69,6 +84,8 @@ export interface SeriesEntry {
   displacement_mm: number | null;
   rate_mm_day: number | null;
   level: Level;
+  /** The risk register entry this reading's alert opened. */
+  risk_id?: string | null;
 }
 
 export interface Alert {

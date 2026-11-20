@@ -35,6 +35,10 @@ class ProfileOut(BaseModel):
     source: Literal["demo", "pack", "project"]
     country: str = ""
     reference: str = ""
+    edition: str = ""
+    clause: str = ""
+    #: ``verified`` | ``to_verify`` | "" (demo and project profiles).
+    status: str = ""
     thresholds: ThresholdsOut
 
 
@@ -96,6 +100,15 @@ class PointUpdate(BaseModel):
     location: str | None = Field(default=None, max_length=255)
 
 
+class ForecastLevelOut(BaseModel):
+    level: Literal["alert", "action", "alarm"]
+    limit_mm: float
+    #: The fitted trend value has already reached this level.
+    reached: bool = False
+    #: Days until the trend reaches it; null when reached or not approaching.
+    days: float | None = None
+
+
 class PointOut(BaseModel):
     id: uuid.UUID
     project_id: uuid.UUID
@@ -118,6 +131,10 @@ class PointOut(BaseModel):
     forecast_level: str = ""
     forecast_days: float | None = None
     forecast_rate_mm_day: float | None = None
+    #: False when the trend is flat or runs back towards zero.
+    forecast_approaching: bool = False
+    forecast_epochs: int = 0
+    forecast_levels: list[ForecastLevelOut] = []
 
 
 class SeriesEntry(BaseModel):
@@ -129,6 +146,8 @@ class SeriesEntry(BaseModel):
     displacement_mm: float | None = None
     rate_mm_day: float | None = None
     level: Level = "none"
+    #: The risk register entry this reading's alert opened, if any.
+    risk_id: str | None = None
 
 
 class AlertOut(BaseModel):

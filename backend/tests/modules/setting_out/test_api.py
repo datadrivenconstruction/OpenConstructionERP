@@ -66,8 +66,9 @@ async def test_lessons_2_to_4_pass_fail_ncr_sheet(client: AsyncClient, header: d
     assert (rec["d_mm"], rec["dz_mm"], rec["verdict"]) == (l3["d_mm"], l3["dz_mm"], l3["verdict"])
 
     report = (await client.post(f"{BASE}/projects/{project_id}/validate", headers=header)).json()
-    assert [f["rule_id"] for f in report["findings"]] == [l3["rule"]]
+    assert [f["rule_id"] for f in report["findings"]] == [l3["rule"], EXPECTED["lesson_5"]["rule"]]
     assert report["findings"][0]["message"] == l3["finding"]
+    assert report["findings"][1]["message"] == EXPECTED["lesson_5"]["finding"]
 
     ncr = await client.post(f"{BASE}/records/{rec['id']}/ncr", headers=header)
     assert ncr.status_code == 201, ncr.text

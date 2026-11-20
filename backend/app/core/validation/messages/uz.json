@@ -2508,6 +2508,10 @@
     "spiral_skipped": {
       "fail": "Klotoida parametri yo'q; {n} element o'tkazib yuborildi.",
       "suggestion": "Trassani klotoida uzunligi va ikkala radius bilan qayta eksport qiling."
+    },
+    "stake_unresolved": {
+      "fail": "{id} belgilash nuqtasi dopuskdan tashqarida va unda na NCR, na qabul qilingan og'ish bor.",
+      "suggestion": "NCR qoralamasini yarating yoki og'ishni sababini ko'rsatib qabul qiling."
     }
   },
   "land_parcels": {

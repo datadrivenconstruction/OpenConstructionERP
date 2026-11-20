@@ -10,7 +10,9 @@ Readings are imported from CSV; this module never controls an instrument.
 
 
 async def on_startup() -> None:
-    """Module startup hook - register validation rules (permissions come from survey_core)."""
+    """Module startup hook - register validation rules and the country tolerance data."""
+    from app.modules.monitoring.profiles import load_country_profiles
     from app.modules.monitoring.validators import register_monitoring_validation_rules
 
     register_monitoring_validation_rules()
+    load_country_profiles()

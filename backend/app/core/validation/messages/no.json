@@ -2508,6 +2508,10 @@
     "spiral_skipped": {
       "fail": "Klotoideparameter mangler; element {n} hoppet over.",
       "suggestion": "Eksporter linjen på nytt med klotoidelengde og begge radier."
+    },
+    "stake_unresolved": {
+      "fail": "Utsettingspunkt {id} er utenfor toleransen og har verken en NCR eller et godkjent avvik.",
+      "suggestion": "Opprett et NCR-utkast, eller godkjenn avviket med en begrunnelse."
     }
   },
   "land_parcels": {

@@ -17,13 +17,37 @@
       "displacement_mm": -15.0,
       "rate_mm_day": -1.29,
       "level": "alert",
-      "other_point": {"point": "MP-02", "displacement_mm": -2.0, "level": "ok"}
+      "other_point": {
+        "point": "MP-02",
+        "displacement_mm": -2.0,
+        "level": "ok"
+      },
+      "forecast": {
+        "method": "least-squares line over the last 5 epochs",
+        "epochs": 3,
+        "rate_used_mm_day": -1.0714,
+        "fitted_mm": -14.5,
+        "approaching": true,
+        "levels": {
+          "alert": "reached",
+          "action": 5.1,
+          "alarm": 14.5
+        }
+      }
     },
     "lesson_2": {
       "point": "MP-01",
       "epochs": 3,
-      "bands_mm": [10, 20, 30],
-      "displacements_mm": [0.0, -6.0, -15.0]
+      "bands_mm": [
+        10,
+        20,
+        30
+      ],
+      "displacements_mm": [
+        0.0,
+        -6.0,
+        -15.0
+      ]
     },
     "lesson_3": {
       "file": "monitoring_epoch_4.csv",
@@ -34,13 +58,49 @@
       "notification": true,
       "risk_draft": true,
       "rule": "MON-001",
-      "finding": "Point MP-01 displacement -23.0 mm or rate -1.14 mm/day crossed Action"
+      "finding": "Point MP-01 displacement -23.0 mm or rate -1.14 mm/day crossed Action",
+      "forecast": {
+        "epochs": 4,
+        "rate_used_mm_day": -1.1143,
+        "fitted_mm": -22.7,
+        "approaching": true,
+        "levels": {
+          "alert": "reached",
+          "action": "reached",
+          "alarm": 6.6
+        }
+      },
+      "risk_link": {
+        "reading_date": "2026-10-30",
+        "risk_metadata": {
+          "source": "monitoring",
+          "point_code": "MP-01",
+          "level": "action"
+        }
+      }
     },
-    "lesson_4": {"note": "Cracks surveyed, wall stable", "acknowledged": true},
+    "lesson_4": {
+      "note": "Cracks surveyed, wall stable",
+      "acknowledged": true
+    },
     "lesson_5": {
-      "report": {"action": 1, "alarm": 0, "alert": 0, "ok": 1},
-      "points": {"MP-01": "action", "MP-02": "ok"}
+      "report": {
+        "action": 1,
+        "alarm": 0,
+        "alert": 0,
+        "ok": 1
+      },
+      "points": {
+        "MP-01": "action",
+        "MP-02": "ok"
+      }
     },
-    "kpi_after_epoch_4": {"points": 2, "alarm": 0, "action": 1, "alert": 0, "last_epoch": "2026-10-30"}
+    "kpi_after_epoch_4": {
+      "points": 2,
+      "alarm": 0,
+      "action": 1,
+      "alert": 0,
+      "last_epoch": "2026-10-30"
+    }
   }
 }

@@ -2508,6 +2508,10 @@
     "spiral_skipped": {
       "fail": "Brak parametru klotoidy; element {n} pominięty.",
       "suggestion": "Wyeksportuj oś ponownie z długością klotoidy i oboma promieniami."
+    },
+    "stake_unresolved": {
+      "fail": "Punkt tyczenia {id} jest poza tolerancją i nie ma ani NCR, ani zaakceptowanej odchyłki.",
+      "suggestion": "Utwórz szkic NCR albo zaakceptuj odchyłkę z podaniem przyczyny."
     }
   },
   "land_parcels": {

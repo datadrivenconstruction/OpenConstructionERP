@@ -2508,6 +2508,10 @@
     "spiral_skipped": {
       "fail": "Chybí parametr klotoidy; prvek {n} vynechán.",
       "suggestion": "Exportujte osu znovu s délkou klotoidy a oběma poloměry."
+    },
+    "stake_unresolved": {
+      "fail": "Vytyčovací bod {id} je mimo toleranci a nemá NCR ani přijatou odchylku.",
+      "suggestion": "Vytvořte koncept NCR nebo přijměte odchylku s uvedením důvodu."
     }
   },
   "land_parcels": {

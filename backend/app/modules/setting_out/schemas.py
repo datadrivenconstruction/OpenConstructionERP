@@ -26,13 +26,33 @@ class ToleranceValue(BaseModel):
     v_mm: float | None = Field(default=None, gt=0, le=10000)
 
 
+class ToleranceValueOut(BaseModel):
+    h_mm: float
+    v_mm: float | None = None
+    #: Clause of the source standard (pack values).
+    clause: str = ""
+    #: ``verified`` | ``to_verify`` | "" (demo and project values).
+    status: str = ""
+
+
 class ToleranceProfileOut(BaseModel):
     key: str
     name: str
     source: Literal["demo", "pack", "project"]
     country: str = ""
     reference: str = ""
-    items: dict[str, ToleranceValue]
+    edition: str = ""
+    items: dict[str, ToleranceValueOut]
+
+
+class SettingsOut(BaseModel):
+    default_tolerance_key: str = ""
+    auto_ncr: bool = False
+
+
+class SettingsUpdate(BaseModel):
+    default_tolerance_key: str | None = Field(default=None, max_length=80)
+    auto_ncr: bool | None = None
 
 
 class ToleranceProfileCreate(BaseModel):
@@ -93,6 +113,15 @@ class RecordOut(BaseModel):
     measured_at: datetime
     note: str
     ncr_id: str | None
+    deviation_accepted_at: datetime | None = None
+    deviation_accepted_by: str = ""
+    deviation_note: str = ""
+
+
+class AcceptDeviation(BaseModel):
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    note: str = Field(min_length=1, max_length=2000)
 
 
 class StakeOut(BaseModel):
@@ -118,6 +147,7 @@ class RequestOut(BaseModel):
     tolerance_key: str
     tolerance_label: str
     tolerance_source: str
+    tolerance_reference: str = ""
     tol_h_mm: float | None
     tol_v_mm: float | None
     element_ref_type: str
@@ -205,6 +235,12 @@ class NcrDraftOut(BaseModel):
     ncr_id: str
     ncr_number: str
     record_id: uuid.UUID
+
+
+class BulkNcrOut(BaseModel):
+    created: list[NcrDraftOut]
+    #: Failed stakes skipped because they already have an NCR or an accepted deviation.
+    skipped: int = 0
 
 
 class Finding(BaseModel):

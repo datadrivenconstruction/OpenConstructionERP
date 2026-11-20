@@ -8,12 +8,14 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Link } from 'react-router-dom';
 import { Check } from 'lucide-react';
 import { Badge, Button, Skeleton, WideModal } from '@/shared/ui';
 import { getErrorMessage } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
 import { acknowledge, getPoint, type Level } from './api';
-import { LEVEL_DEFAULT, bandLines, chartGeometry, fmtMm, fmtRate, levelVariant } from './levels';
+import { LEVEL_DEFAULT, bandLines, chartGeometry, fmtMm, fmtRate, levelVariant } from './levels';
+
 import { fmtNumber } from '@/shared/lib/formatters';
 
 const W = 560;
@@ -92,15 +94,38 @@ export function PointDrawer({ pointId, onClose }: Props) {
               <bdi dir="ltr">{fmtRate(d.rate_mm_day)}</bdi> {t('survey.monitoring.unit.mm_day', { defaultValue: 'mm/day' })}
             </span>
           </div>
-          {d.forecast_level && d.forecast_days != null && (
-            <p className="text-sm text-content-secondary" data-testid="mon-forecast"
+          {(d.forecast_levels?.length ?? 0) > 0 && (
+            <div className="space-y-1 text-sm" data-testid="mon-forecast"
               title={t('survey.monitoring.forecast_tip', { defaultValue: 'Straight line through the last five epochs. A trend, not a promise.' })}>
-              {t('survey.monitoring.forecast', {
-                defaultValue: 'Trend reaches {{level}} in {{days}} days',
-                level: t(`survey.monitoring.level.${d.forecast_level}`, { defaultValue: d.forecast_level }),
-                days: fmtNumber(d.forecast_days, 1),
-              })}
-            </p>
+              <p className="text-content-secondary">
+                {d.forecast_approaching
+                  ? t('survey.monitoring.forecast_rate', {
+                      defaultValue: 'Trend over {{epochs}} epochs: {{rate}} mm/day',
+                      epochs: d.forecast_epochs ?? 0,
+                      rate: fmtRate(d.forecast_rate_mm_day ?? null),
+                    })
+                  : t('survey.monitoring.forecast_not_approaching', {
+                      defaultValue: 'Not approaching: the trend is flat or moving back ({{rate}} mm/day).',
+                      rate: fmtRate(d.forecast_rate_mm_day ?? null),
+                    })}
+              </p>
+              {d.forecast_approaching && (
+                <ul className="flex flex-wrap gap-x-4 gap-y-1" data-testid="mon-forecast-levels">
+                  {d.forecast_levels!.map((f) => (
+                    <li key={f.level} className="flex items-center gap-1">
+                      <LevelBadge level={f.level} />
+                      <span>
+                        {f.reached
+                          ? t('survey.monitoring.forecast_reached', { defaultValue: 'reached' })
+                          : f.days != null
+                            ? t('survey.monitoring.forecast_days', { defaultValue: 'in {{days}} days', days: fmtNumber(f.days, 1) })
+                            : t('survey.monitoring.forecast_not_approaching_short', { defaultValue: 'not approaching' })}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
           )}
 
           {geo && (
@@ -141,6 +166,7 @@ export function PointDrawer({ pointId, onClose }: Props) {
                 <th className="text-right">{t('survey.monitoring.col.displacement', { defaultValue: 'Displacement (mm)' })}</th>
                 <th className="text-right">{t('survey.monitoring.col.rate', { defaultValue: 'Rate (mm/day)' })}</th>
                 <th>{t('survey.monitoring.col.level', { defaultValue: 'Level' })}</th>
+                <th>{t('survey.monitoring.col.risk', { defaultValue: 'Risk' })}</th>
               </tr>
             </thead>
             <tbody>
@@ -150,6 +176,13 @@ export function PointDrawer({ pointId, onClose }: Props) {
                   <td className="text-right"><bdi dir="ltr" className="font-mono">{fmtMm(s.displacement_mm)}</bdi></td>
                   <td className="text-right"><bdi dir="ltr" className="font-mono">{fmtRate(s.rate_mm_day)}</bdi></td>
                   <td><LevelBadge level={s.level} /></td>
+                  <td>
+                    {s.risk_id && (
+                      <Link to={`/risks?id=${encodeURIComponent(s.risk_id)}`} className="text-oe-blue hover:underline" data-testid="mon-series-risk">
+                        {t('survey.monitoring.open_risk', { defaultValue: 'Open risk' })}
+                      </Link>
+                    )}
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -170,6 +203,11 @@ export function PointDrawer({ pointId, onClose }: Props) {
                         })
                       : t('survey.monitoring.ack.open', { defaultValue: 'Not acknowledged yet' })}
                   </span>
+                  {a.risk_id && (
+                    <Link to={`/risks?id=${encodeURIComponent(a.risk_id)}`} className="text-oe-blue hover:underline" data-testid="mon-alert-risk">
+                      {t('survey.monitoring.open_risk', { defaultValue: 'Open risk' })}
+                    </Link>
+                  )}
                 </li>
               ))}
             </ul>

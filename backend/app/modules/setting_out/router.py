@@ -5,6 +5,9 @@
 Endpoints:
     GET    /projects/{project_id}/profiles           - demo, active-pack and project tolerance profiles
     POST   /projects/{project_id}/profiles           - add a project tolerance profile
+    GET    /projects/{project_id}/settings           - default tolerance profile, automatic NCR drafts
+    PUT    /projects/{project_id}/settings           - change them (audited)
+    POST   /projects/{project_id}/ncr-drafts         - NCR drafts for every failed stake without one
     GET    /projects/{project_id}/requests           - stakeout requests with pass/fail counts
     POST   /projects/{project_id}/requests           - new request
     GET    /projects/{project_id}/summary            - KPIs: open, passed, failed, NCR drafts
@@ -23,6 +26,7 @@ Endpoints:
     POST   /stakes/{stake_id}/records                - record one measurement, instant verdict
     GET    /stakes/{stake_id}/records                - measurement history of a stake
     POST   /records/{record_id}/ncr                  - NCR draft in Quality for a failed stake
+    POST   /records/{record_id}/accept-deviation     - accept a failed stake as built, with the reason (survey.confirm)
 """
 
 from __future__ import annotations
@@ -36,6 +40,8 @@ from app.core.document_locale import normalize_document_locale
 from app.core.i18n import SUPPORTED_LOCALES
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep, verify_project_access
 from app.modules.setting_out.schemas import (
+    AcceptDeviation,
+    BulkNcrOut,
     ChainageAnswer,
     ChainageQuery,
     DesignImport,
@@ -52,6 +58,8 @@ from app.modules.setting_out.schemas import (
     RequestOut,
     RequestUpdate,
     SettingOutSummary,
+    SettingsOut,
+    SettingsUpdate,
     StakeCreate,
     StakeOut,
     ToleranceProfileCreate,
@@ -60,11 +68,13 @@ from app.modules.setting_out.schemas import (
     ValidationReportOut,
 )
 from app.modules.setting_out.service import SettingOutService
+from app.modules.survey_core.dependencies import require_survey_confirm
 
 router = APIRouter(tags=["setting_out"])
 
 _READ = [Depends(RequirePermission("survey.read"))]
 _WRITE = [Depends(RequirePermission("survey.write"))]
+_CONFIRM = [*_READ, Depends(require_survey_confirm)]
 _LOCALE = Query("en", max_length=10)
 
 
@@ -102,6 +112,32 @@ async def create_profile(
 ) -> ToleranceProfileOut:
     await verify_project_access(project_id, user_id, session)
     return await SettingOutService(session).create_profile(project_id, body, user_id)
+
+
+@router.get("/projects/{project_id}/settings", response_model=SettingsOut, dependencies=_READ)
+async def get_settings(project_id: uuid.UUID, session: SessionDep, user_id: CurrentUserId) -> SettingsOut:
+    await verify_project_access(project_id, user_id, session)
+    return await SettingOutService(session).get_settings(project_id)
+
+
+@router.put("/projects/{project_id}/settings", response_model=SettingsOut, dependencies=_WRITE)
+async def set_settings(
+    project_id: uuid.UUID, body: SettingsUpdate, session: SessionDep, user_id: CurrentUserId, markets: ActiveMarkets
+) -> SettingsOut:
+    await verify_project_access(project_id, user_id, session)
+    return await SettingOutService(session).set_settings(project_id, body, user_id, markets)
+
+
+@router.post("/projects/{project_id}/ncr-drafts", response_model=BulkNcrOut, dependencies=_WRITE)
+async def create_ncr_drafts(
+    project_id: uuid.UUID,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    request_id: uuid.UUID | None = None,
+    locale: str = _LOCALE,
+) -> BulkNcrOut:
+    await verify_project_access(project_id, user_id, session)
+    return await SettingOutService(session).create_ncr_drafts(project_id, user_id, locale, request_id)
 
 
 @router.get("/projects/{project_id}/requests", response_model=RequestListResponse, dependencies=_READ)
@@ -280,6 +316,16 @@ async def create_ncr(
     rec = await service.get_record(record_id)
     await verify_project_access(rec.project_id, user_id, session)
     return await service.create_ncr_draft(rec, user_id, locale)
+
+
+@router.post("/records/{record_id}/accept-deviation", response_model=RecordOut, dependencies=_CONFIRM)
+async def accept_deviation(
+    record_id: uuid.UUID, body: AcceptDeviation, session: SessionDep, user_id: CurrentUserId
+) -> RecordOut:
+    service = SettingOutService(session)
+    rec = await service.get_record(record_id)
+    await verify_project_access(rec.project_id, user_id, session)
+    return await service.accept_deviation(rec, body, user_id)
 
 
 from app.modules.setting_out.road_router import router as _road_router  # noqa: E402
