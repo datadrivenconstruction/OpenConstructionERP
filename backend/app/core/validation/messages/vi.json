@@ -2424,6 +2424,14 @@
     "control_check": {
       "fail": "Điểm khống chế {id}: lần đo kiểm tra lệch {r} mm, vượt dung sai {t} mm.",
       "suggestion": "Đo lại điểm; nếu điểm đã dịch chuyển, không bố trí từ điểm đó cho đến khi được khôi phục."
+    },
+    "lsq_global_test": {
+      "fail": "Kiểm định tổng thể của bình sai không đạt: sigma0 {s}, tổng bình phương có trọng số của số hiệu chỉnh {v} nằm ngoài [{lo}, {hi}].",
+      "suggestion": "Đối chiếu độ lệch chuẩn tiên nghiệm với máy đã dùng, sau đó tìm sai số thô trong trị đo được đánh dấu."
+    },
+    "lsq_outlier": {
+      "fail": "Trị đo tại {obs} có số hiệu chỉnh chuẩn hóa {w}, vượt giá trị tới hạn 3,29.",
+      "suggestion": "Kiểm tra việc ghi sổ trị đo hoặc đo lại trước khi chấp nhận bình sai."
     }
   },
   "volumes": {

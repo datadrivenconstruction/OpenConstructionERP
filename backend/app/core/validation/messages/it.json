@@ -2424,6 +2424,14 @@
     "control_check": {
       "fail": "Punto di appoggio {id}: la misura di controllo si scosta di {r} mm, oltre la tolleranza di {t} mm.",
       "suggestion": "Rimisurate il punto; se si è spostato, non tracciate da esso finché non è ripristinato."
+    },
+    "lsq_global_test": {
+      "fail": "Il test globale dei minimi quadrati non è superato: sigma0 {s}, somma pesata dei quadrati degli scarti {v} fuori da [{lo}, {hi}].",
+      "suggestion": "Confronta gli scarti quadratici a priori con lo strumento usato, poi cerca un errore grossolano nell'osservazione segnalata."
+    },
+    "lsq_outlier": {
+      "fail": "L'osservazione in {obs} ha uno scarto standardizzato di {w}, oltre il valore critico 3,29.",
+      "suggestion": "Controlla come è stata registrata l'osservazione o ripetila prima di accettare la compensazione."
     }
   },
   "volumes": {

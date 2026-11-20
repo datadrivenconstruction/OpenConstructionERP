@@ -2424,6 +2424,14 @@
     "control_check": {
       "fail": "Stompunkt {id}: kontrollmätningen avviker {r} mm, mer än toleransen {t} mm.",
       "suggestion": "Mät in punkten igen; om den har flyttat sig, sätt inte ut från den förrän den är återetablerad."
+    },
+    "lsq_global_test": {
+      "fail": "Utjämningens globala test underkänt: sigma0 {s}, viktad kvadratsumma av residualerna {v} ligger utanför [{lo}, {hi}].",
+      "suggestion": "Jämför a priori-standardavvikelserna med det använda instrumentet och leta sedan efter ett grovt fel i den markerade observationen."
+    },
+    "lsq_outlier": {
+      "fail": "Observationen vid {obs} har en standardiserad residual på {w}, över det kritiska värdet 3,29.",
+      "suggestion": "Kontrollera hur observationen bokfördes eller mät om den innan utjämningen godtas."
     }
   },
   "volumes": {

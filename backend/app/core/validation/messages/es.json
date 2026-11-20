@@ -2424,6 +2424,14 @@
     "control_check": {
       "fail": "Punto de control {id}: la medición de comprobación se desvía {r} mm, más que la tolerancia de {t} mm.",
       "suggestion": "Vuelva a medir el punto; si se ha movido, no replantee desde él hasta que se restablezca."
+    },
+    "lsq_global_test": {
+      "fail": "La prueba global de mínimos cuadrados no se cumple: sigma0 {s}, suma ponderada de residuos al cuadrado {v} fuera de [{lo}, {hi}].",
+      "suggestion": "Compare las desviaciones típicas a priori con el instrumento usado y busque un error grosero en la observación marcada."
+    },
+    "lsq_outlier": {
+      "fail": "La observación en {obs} tiene un residuo normalizado de {w}, por encima del valor crítico 3,29.",
+      "suggestion": "Revise cómo se anotó la observación o vuelva a medirla antes de aceptar el ajuste."
     }
   },
   "volumes": {

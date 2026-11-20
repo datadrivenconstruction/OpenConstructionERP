@@ -1,0 +1,42 @@
+{
+  "traverse": {
+    "name": "Site control loop",
+    "shape": "loop",
+    "angle_unit": "dms",
+    "angle_sense": "right",
+    "start": {"station_id": "T1", "e": 388950.0, "n": 5818950.0},
+    "azimuth": "90-00-00",
+    "stations": [
+      {"station_id": "T1", "angle": "95-01-47", "distance_m": 158.300},
+      {"station_id": "T2", "angle": "85-54-49", "distance_m": 151.701},
+      {"station_id": "T3", "angle": "90-37-16", "distance_m": 160.199},
+      {"station_id": "T4", "angle": "88-26-33", "distance_m": 142.200}
+    ],
+    "class_key": "",
+    "angular_k_sec": 15,
+    "min_ratio": 10000,
+    "method": "lsq",
+    "instrument_key": "",
+    "angle_sd_sec": 10,
+    "dist_sd_mm": 15,
+    "dist_ppm": 0,
+    "centering_sd_mm": 1,
+    "note": "Demo values, not a standard"
+  },
+  "level_book": {
+    "name": "CP1 to BM-R2",
+    "method": "rise_fall",
+    "start_rl": 33.900,
+    "close_rl": 34.690,
+    "rows": [
+      {"station": "CP1", "bs": 1.523},
+      {"station": "TP1", "fs": 0.874, "bs": 2.011, "distance_m": 300},
+      {"station": "PEG-1", "is": 1.250},
+      {"station": "TP2", "fs": 1.208, "bs": 0.987, "distance_m": 250},
+      {"station": "BM-R2", "fs": 1.644, "distance_m": 250}
+    ],
+    "class_key": "",
+    "k_mm": 12,
+    "note": "Demo values, not a standard"
+  }
+}

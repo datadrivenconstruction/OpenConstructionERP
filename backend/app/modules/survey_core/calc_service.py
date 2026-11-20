@@ -11,10 +11,12 @@ onto register points with the same id.
 
 from __future__ import annotations
 
+import json
 import math
 import uuid
 from datetime import UTC, datetime
 from decimal import Decimal
+from pathlib import Path
 from typing import Any
 
 from fastapi import HTTPException, status
@@ -26,21 +28,28 @@ from app.modules.survey_core import cogo
 from app.modules.survey_core.calc_schemas import (
     AdjustedStationOut,
     CalcClassesOut,
+    CalcDemoOut,
     ClosureClassOut,
     CogoRequest,
     CogoResult,
     ComputedPointsSave,
     CornerClassOut,
+    EllipseOut,
     FieldTraverseIn,
     FieldTraverseOut,
+    InstrumentClassOut,
     LevelBookIn,
     LevelBookOut,
+    LsqOut,
+    LsqResidualOut,
+    LsqStationOut,
     ReducedRowOut,
     SavedPoints,
 )
 from app.modules.survey_core.calc_validators import SURVEY_CALC_RULE_SET
 from app.modules.survey_core.field_traverse import Station, adjust, angular_verdict
 from app.modules.survey_core.level_book import BookRow, reduce
+from app.modules.survey_core.lsq_traverse import CONFIDENCE_95, INSTRUMENT_CLASSES, Weights, adjust_lsq
 from app.modules.survey_core.models import SurveyPoint, SurveyPointSet, SurveyTraverse
 from app.modules.survey_core.schemas import Finding
 from app.modules.survey_core.service import SurveyService, _traverse_out
@@ -86,6 +95,94 @@ def classes(markets: list[str]) -> CalcClassesOut:
     return CalcClassesOut(
         closure=[ClosureClassOut(**vars(c)) for c in classes_lib.closure_classes(markets)],
         corner=[CornerClassOut(**vars(c)) for c in classes_lib.corner_classes(markets)],
+        instruments=[InstrumentClassOut(**vars(i)) for i in INSTRUMENT_CLASSES],
+    )
+
+
+DEMO_PATH = Path(__file__).resolve().parent / "demo" / "riverside" / "calc_demo.json"
+
+
+def demo_inputs() -> CalcDemoOut:
+    """The riverside demo field book: a closed traverse and a level run, as the forms take them."""
+    return CalcDemoOut.model_validate(json.loads(DEMO_PATH.read_text(encoding="utf-8")))
+
+
+def _weights(body: FieldTraverseIn) -> Weights:
+    """A priori standard deviations: the instrument class, each value overridable."""
+    base = next((i for i in INSTRUMENT_CLASSES if i.key == body.instrument_key), None)
+    if body.instrument_key and base is None:
+        raise _bad("Unknown instrument class")
+    angle = body.angle_sd_sec or (base.angle_sd_sec if base else None)
+    dist = body.dist_sd_mm if body.dist_sd_mm is not None else (base.dist_sd_mm if base else None)
+    if angle is None or dist is None:
+        raise _bad("Least squares needs an instrument class or the angle and distance standard deviations")
+    ppm = body.dist_ppm if body.dist_ppm is not None else (base.dist_ppm if base else 0.0)
+    centering = body.centering_sd_mm if body.centering_sd_mm is not None else (base.centering_sd_mm if base else 0.0)
+    return Weights(angle, dist, ppm, centering)
+
+
+def _lsq_out(body: FieldTraverseIn, stations: list[Station], bowditch: list[AdjustedStationOut], unit: str) -> LsqOut:
+    w = _weights(body)
+    try:
+        res = adjust_lsq(
+            body.shape,
+            (body.start.e, body.start.n),
+            _angle(body.azimuth, unit),
+            stations,
+            w,
+            body.angle_sense,
+            (body.end.e, body.end.n) if body.end else None,
+            _angle(body.closing_azimuth, unit) if body.closing_azimuth is not None else None,
+        )
+    except ValueError as exc:
+        raise _bad(str(exc)) from exc
+    by_id = {s.station_id: s for s in bowditch}
+    out_stations = []
+    for s in res.stations:
+        b = by_id.get(s.station_id)
+        out_stations.append(
+            LsqStationOut(
+                station_id=s.station_id,
+                e=s.e,
+                n=s.n,
+                fixed=s.fixed,
+                d_e_mm=round((s.e - b.e) * 1000.0, 2) if b else 0.0,
+                d_n_mm=round((s.n - b.n) * 1000.0, 2) if b else 0.0,
+            )
+        )
+    return LsqOut(
+        iterations=res.iterations,
+        observations=res.observations,
+        unknowns=res.unknowns,
+        redundancy=res.redundancy,
+        vtpv=round(res.vtpv, 4),
+        sigma0=round(res.sigma0, 4),
+        chi2_lower=round(res.chi2_lower, 4),
+        chi2_upper=round(res.chi2_upper, 4),
+        chi2_pass=res.chi2_pass,
+        alpha=res.alpha,
+        confidence_95=round(CONFIDENCE_95, 4),
+        angle_sd_sec=w.angle_sd_sec,
+        dist_sd_mm=w.dist_sd_mm,
+        dist_ppm=w.dist_ppm,
+        centering_sd_mm=w.centering_sd_mm,
+        stations=out_stations,
+        residuals=[
+            LsqResidualOut(
+                kind=r.kind,  # type: ignore[arg-type]
+                ref=r.ref,
+                observed=r.observed,
+                residual=round(r.residual, 2),
+                sd=round(r.sd, 2),
+                redundancy=round(r.redundancy, 3),
+                standardized=None if r.standardized is None else round(r.standardized, 2),
+                flagged=r.flagged,
+                suspect=r.suspect,
+            )
+            for r in res.residuals
+        ],
+        ellipses=[EllipseOut(**vars(e)) for e in res.ellipses],
+        relative_ellipses=[EllipseOut(**vars(e)) for e in res.relative_ellipses],
     )
 
 
@@ -258,21 +355,35 @@ class CalcService:
             linear_verdict=traverse_verdict(result.ratio, min_ratio),
             class_label=cls.label if cls else "",
             stations=[AdjustedStationOut(**vars(s)) for s in result.stations],
+            method=body.method,
         )
-        out.findings = await run_rules(
-            {
-                "traverses": [
-                    {
-                        "id": body.name,
-                        "kind": "traverse",
-                        "angle_count": result.angle_count,
-                        "ang_misclosure_sec": result.angular_misclosure_sec,
-                        "ang_k_sec": k,
-                    }
-                ]
-            },
-            locale,
-        )
+        context: dict[str, Any] = {
+            "traverses": [
+                {
+                    "id": body.name,
+                    "kind": "traverse",
+                    "angle_count": result.angle_count,
+                    "ang_misclosure_sec": result.angular_misclosure_sec,
+                    "ang_k_sec": k,
+                }
+            ]
+        }
+        if body.method == "lsq":
+            out.lsq = _lsq_out(body, stations, out.stations, unit)
+            context["lsq"] = [
+                {
+                    "ref": body.name,
+                    "vtpv": out.lsq.vtpv,
+                    "lower": out.lsq.chi2_lower,
+                    "upper": out.lsq.chi2_upper,
+                    "redundancy": out.lsq.redundancy,
+                    "sigma0": out.lsq.sigma0,
+                }
+            ]
+            context["lsq_residuals"] = [
+                {"ref": r.ref, "kind": r.kind, "w": r.standardized} for r in out.lsq.residuals if r.suspect
+            ]
+        out.findings = await run_rules(context, locale)
         return out
 
     async def create_traverse(
@@ -285,7 +396,7 @@ class CalcService:
             project_id=project_id,
             name=body.name.strip(),
             kind="traverse",
-            method="field_bowditch",
+            method="field_lsq" if out.lsq else "field_bowditch",
             note=body.note,
             legs=[
                 {"leg": str(i + 1), "from": s.station_id, "to": "", "length_m": s.distance_m or 0.0, "d_e": 0, "d_n": 0}
@@ -308,6 +419,7 @@ class CalcService:
             observations={
                 "input": body.model_dump(mode="json", exclude={"save_points", "note"}),
                 "stations": [s.model_dump() for s in out.stations],
+                **({"lsq": out.lsq.model_dump()} if out.lsq else {}),
             },
         )
         # Legs as run with the corrected azimuths, so the traverse view shows the same closure.
@@ -320,16 +432,17 @@ class CalcService:
         await self.session.flush()
         if body.save_points:
             point_set = await self._new_set(project_id, f"Traverse {row.name}", "traverse", len(out.stations), user_id)
+            lsq_xy = {s.station_id: (s.e, s.n) for s in out.lsq.stations} if out.lsq else {}
             await self.survey.repo.add_points(
                 [
                     SurveyPoint(
                         project_id=project_id,
                         point_set_id=point_set.id,
                         point_id=s.station_id,
-                        e=_d(s.e),
-                        n=_d(s.n),
+                        e=_d(lsq_xy.get(s.station_id, (s.e, s.n))[0]),
+                        n=_d(lsq_xy.get(s.station_id, (s.e, s.n))[1]),
                         kind="control",
-                        method="traverse",
+                        method="traverse_lsq" if out.lsq else "traverse",
                         inputs={"traverse_id": str(row.id), "c_e": s.c_e, "c_n": s.c_n},
                     )
                     for s in out.stations
@@ -463,7 +576,10 @@ def _level_check(name: str, out: LevelBookOut) -> dict[str, Any]:
         "sum_fs": out.sum_fs,
         "first_rl": out.first_rl,
         "last_rl": out.last_rl,
+        "misclosure_mm": out.misclosure_mm,
+        "allowed_mm": out.allowed_mm,
+        "k_mm": out.k_mm,
     }
 
 
-__all__ = ["CalcService", "classes", "compute_cogo", "run_rules"]
+__all__ = ["CalcService", "classes", "compute_cogo", "demo_inputs", "run_rules"]

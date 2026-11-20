@@ -2424,6 +2424,14 @@
     "control_check": {
       "fail": "Titik kontrol {id}: pengukuran cek menyimpang {r} mm, melebihi toleransi {t} mm.",
       "suggestion": "Ukur ulang titik; jika bergeser, jangan melakukan stake out darinya sampai titik itu dipasang kembali."
+    },
+    "lsq_global_test": {
+      "fail": "Uji global perataan gagal: sigma0 {s}, jumlah kuadrat residu berbobot {v} berada di luar [{lo}, {hi}].",
+      "suggestion": "Bandingkan simpangan baku apriori dengan alat yang dipakai, lalu cari kesalahan kasar pada pengamatan yang ditandai."
+    },
+    "lsq_outlier": {
+      "fail": "Pengamatan di {obs} memiliki residu terstandar {w}, di atas nilai kritis 3,29.",
+      "suggestion": "Periksa pencatatan pengamatan atau ukur ulang sebelum menerima perataan."
     }
   },
   "volumes": {

@@ -2424,6 +2424,14 @@
     "control_check": {
       "fail": "Tayanch punkt {id}: nazorat o'lchovi {r} mm ga og'adi, {t} mm ruxsatdan ko'p.",
       "suggestion": "Punktni qayta o'lchang; agar u siljigan bo'lsa, tiklanmaguncha undan joyga ko'chirish ishlarini bajarmang."
+    },
+    "lsq_global_test": {
+      "fail": "Tenglashtirishning umumiy testi oʻtmadi: sigma0 {s}, tuzatmalar kvadratlarining vaznli yigʻindisi {v} [{lo}, {hi}] oraligʻidan tashqarida.",
+      "suggestion": "Aprior OKX ni ishlatilgan asbob bilan solishtiring, soʻngra belgilangan oʻlchashda qoʻpol xatoni qidiring."
+    },
+    "lsq_outlier": {
+      "fail": "{obs} nuqtasidagi oʻlchashning normallashgan tuzatmasi {w}, 3,29 kritik qiymatidan yuqori.",
+      "suggestion": "Tenglashtirishni qabul qilishdan oldin oʻlchash yozuvini tekshiring yoki qayta oʻlchang."
     }
   },
   "volumes": {

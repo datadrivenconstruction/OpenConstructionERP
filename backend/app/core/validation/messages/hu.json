@@ -2424,6 +2424,14 @@
     "control_check": {
       "fail": "{id} alappont: az ellenőrző mérés {r} mm-rel tér el, többel, mint a {t} mm-es tűrés.",
       "suggestion": "Mérje be újra a pontot; ha elmozdult, ne tűzzön ki róla, amíg újra nem határozták meg."
+    },
+    "lsq_global_test": {
+      "fail": "A kiegyenlítés globális próbája nem teljesül: sigma0 {s}, a javítások súlyozott négyzetösszege {v} kívül esik a [{lo}, {hi}] tartományon.",
+      "suggestion": "Vesse össze az a priori középhibákat a használt műszerrel, majd keressen durva hibát a megjelölt mérésben."
+    },
+    "lsq_outlier": {
+      "fail": "A(z) {obs} mérés standardizált javítása {w}, a 3,29 kritikus érték fölött.",
+      "suggestion": "Ellenőrizze a mérés rögzítését, vagy mérje újra, mielőtt elfogadja a kiegyenlítést."
     }
   },
   "volumes": {

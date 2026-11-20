@@ -2424,6 +2424,14 @@
     "control_check": {
       "fail": "Poligon noktası {id}: kontrol ölçümü {r} mm sapıyor, {t} mm toleransın üzerinde.",
       "suggestion": "Noktayı yeniden ölçün; yeri değiştiyse yeniden tesis edilene kadar ondan aplikasyon yapmayın."
+    },
+    "lsq_global_test": {
+      "fail": "Dengelemenin global testi geçmedi: sigma0 {s}, düzeltmelerin ağırlıklı kareler toplamı {v}, [{lo}, {hi}] aralığının dışında.",
+      "suggestion": "Önsel standart sapmaları kullanılan aletle karşılaştırın, ardından işaretli ölçüde kaba hata arayın."
+    },
+    "lsq_outlier": {
+      "fail": "{obs} noktasındaki ölçünün standartlaştırılmış düzeltmesi {w}, 3,29 kritik değerinin üzerinde.",
+      "suggestion": "Dengelemeyi kabul etmeden önce ölçünün kaydını kontrol edin veya ölçüyü yineleyin."
     }
   },
   "volumes": {

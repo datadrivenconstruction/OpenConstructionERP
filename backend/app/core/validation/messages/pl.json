@@ -2424,6 +2424,14 @@
     "control_check": {
       "fail": "Punkt osnowy {id}: pomiar kontrolny odbiega o {r} mm, więcej niż tolerancja {t} mm.",
       "suggestion": "Pomierz punkt ponownie; jeśli się przesunął, nie tyczy od niego, dopóki nie zostanie odtworzony."
+    },
+    "lsq_global_test": {
+      "fail": "Test globalny wyrównania niezaliczony: sigma0 {s}, ważona suma kwadratów poprawek {v} poza [{lo}, {hi}].",
+      "suggestion": "Porównaj odchylenia standardowe a priori z użytym instrumentem, a potem szukaj błędu grubego w oznaczonej obserwacji."
+    },
+    "lsq_outlier": {
+      "fail": "Obserwacja na {obs} ma poprawkę standaryzowaną {w}, powyżej wartości krytycznej 3,29.",
+      "suggestion": "Sprawdź zapis obserwacji lub powtórz ją przed przyjęciem wyrównania."
     }
   },
   "volumes": {

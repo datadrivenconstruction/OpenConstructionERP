@@ -51,6 +51,55 @@
       "n": 5818990.0
     }
   },
+  "survey_calc": {
+    "file": "calc_demo.json",
+    "traverse": {
+      "angular_misclosure_sec": 25.0,
+      "angular_correction_sec": -6.25,
+      "angular_k_sec": 15,
+      "angular_allowed_sec": 30.0,
+      "length_m": 612.4,
+      "f_e_m": 0.042,
+      "f_n_m": -0.031,
+      "misclosure_m": 0.052,
+      "ratio": 11731,
+      "min_ratio": 10000,
+      "bowditch_leg_m": 158.3,
+      "c_e_m": -0.011,
+      "c_n_m": 0.008,
+      "lsq": {
+        "redundancy": 3,
+        "sigma0": 1.489,
+        "vtpv": 6.656,
+        "chi2_lower": 0.216,
+        "chi2_upper": 9.348,
+        "chi2_pass": true,
+        "largest_residual": "T1",
+        "largest_standardized": -2.03,
+        "ellipse_a_mm": {
+          "T2": 11.2,
+          "T3": 12.3,
+          "T4": 11.3
+        }
+      }
+    },
+    "level_book": {
+      "misclosure_mm": 5.0,
+      "distance_km": 0.8,
+      "k_mm": 12,
+      "allowed_mm": 10.73,
+      "verdict": "pass",
+      "arithmetic_ok": true,
+      "intermediate": "PEG-1",
+      "intermediate_rl_adjusted": 35.3081,
+      "steps_mm": [
+        -1.9,
+        -1.6,
+        -1.5
+      ],
+      "close_rl_adjusted": 34.69
+    }
+  },
   "volumes": {
     "lesson_1": {
       "surface": "Existing ground",

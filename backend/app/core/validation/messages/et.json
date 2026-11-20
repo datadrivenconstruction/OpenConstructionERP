@@ -2424,6 +2424,14 @@
     "control_check": {
       "fail": "Alusvõrgu punkt {id}: kontrollmõõtmine erineb {r} mm, rohkem kui {t} mm tolerants.",
       "suggestion": "Mõõda punkt uuesti; kui see on liikunud, ära maha märgi sellest enne, kui see on taastatud."
+    },
+    "lsq_global_test": {
+      "fail": "Tasanduse globaaltest on läbimata: sigma0 {s}, parandite kaalutud ruutude summa {v} jääb vahemikust [{lo}, {hi}] välja.",
+      "suggestion": "Võrrelge a priori standardhälbeid kasutatud instrumendiga ja otsige seejärel jämedat viga märgitud mõõtmisest."
+    },
+    "lsq_outlier": {
+      "fail": "Mõõtmise {obs} standardiseeritud parand on {w}, üle kriitilise väärtuse 3,29.",
+      "suggestion": "Kontrollige mõõtmise kirjet või mõõtke uuesti enne tasanduse aktsepteerimist."
     }
   },
   "volumes": {

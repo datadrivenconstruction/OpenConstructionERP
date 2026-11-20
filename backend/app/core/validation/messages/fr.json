@@ -2424,6 +2424,14 @@
     "control_check": {
       "fail": "Point de calage {id} : le contrôle s'écarte de {r} mm, au-delà de la tolérance de {t} mm.",
       "suggestion": "Mesurez à nouveau le point ; s'il a bougé, n'implantez plus depuis ce point avant qu'il soit rétabli."
+    },
+    "lsq_global_test": {
+      "fail": "Le test global des moindres carrés échoue : sigma0 {s}, somme pondérée des carrés des résidus {v} hors de [{lo}, {hi}].",
+      "suggestion": "Vérifiez les écarts-types a priori par rapport à l'instrument utilisé, puis cherchez une faute dans l'observation signalée."
+    },
+    "lsq_outlier": {
+      "fail": "L'observation en {obs} a un résidu normé de {w}, au-dessus de la valeur critique 3,29.",
+      "suggestion": "Vérifiez l'enregistrement de l'observation ou mesurez-la à nouveau avant d'accepter la compensation."
     }
   },
   "volumes": {

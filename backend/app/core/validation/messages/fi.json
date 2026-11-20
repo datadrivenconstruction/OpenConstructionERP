@@ -2424,6 +2424,14 @@
     "control_check": {
       "fail": "Kiintopiste {id}: tarkistusmittaus poikkeaa {r} mm, enemmän kuin {t} mm:n toleranssi.",
       "suggestion": "Mittaa piste uudelleen; jos se on liikkunut, älä merkitse siitä ennen kuin se on palautettu."
+    },
+    "lsq_global_test": {
+      "fail": "Tasoituksen globaalitesti hylätty: sigma0 {s}, jäännösvirheiden painotettu neliösumma {v} on välin [{lo}, {hi}] ulkopuolella.",
+      "suggestion": "Vertaa a priori keskivirheitä käytettyyn kojeeseen ja etsi sitten karkea virhe merkitystä havainnosta."
+    },
+    "lsq_outlier": {
+      "fail": "Havainnon {obs} standardoitu jäännösvirhe on {w}, yli kriittisen arvon 3,29.",
+      "suggestion": "Tarkista havainnon kirjaus tai mittaa se uudelleen ennen tasoituksen hyväksymistä."
     }
   },
   "volumes": {

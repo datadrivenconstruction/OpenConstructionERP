@@ -2424,6 +2424,14 @@
     "control_check": {
       "fail": "Festpunkt {id}: die Kontrollmessung weicht um {r} mm ab, mehr als die Toleranz von {t} mm.",
       "suggestion": "Messen Sie den Punkt erneut; hat er sich bewegt, stecken Sie nicht mehr von ihm ab, bis er neu bestimmt ist."
+    },
+    "lsq_global_test": {
+      "fail": "Globaltest der Ausgleichung nicht bestanden: Sigma0 {s}, gewichtete Quadratsumme der Verbesserungen {v} liegt außerhalb von [{lo}, {hi}].",
+      "suggestion": "Prüfen Sie die A-priori-Standardabweichungen gegen das verwendete Instrument und suchen Sie dann einen groben Fehler in der markierten Beobachtung."
+    },
+    "lsq_outlier": {
+      "fail": "Die Beobachtung bei {obs} hat eine normierte Verbesserung von {w}, über dem kritischen Wert 3,29.",
+      "suggestion": "Prüfen Sie die Buchung der Beobachtung oder messen Sie sie erneut, bevor Sie die Ausgleichung übernehmen."
     }
   },
   "volumes": {

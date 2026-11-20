@@ -2424,6 +2424,14 @@
     "control_check": {
       "fail": "Točka osnove {id}: kontrolno mjerenje odstupa {r} mm, više od tolerancije {t} mm.",
       "suggestion": "Ponovno izmjerite točku; ako se pomaknula, ne iskolčujte s nje dok se ne obnovi."
+    },
+    "lsq_global_test": {
+      "fail": "Globalni test izjednačenja ne prolazi: sigma0 {s}, ponderirani zbroj kvadrata popravaka {v} izvan je [{lo}, {hi}].",
+      "suggestion": "Usporedite apriorna standardna odstupanja s korištenim instrumentom, zatim potražite grubu pogrešku u označenom opažanju."
+    },
+    "lsq_outlier": {
+      "fail": "Opažanje na {obs} ima standardizirani popravak {w}, iznad kritične vrijednosti 3,29.",
+      "suggestion": "Provjerite zapis opažanja ili ga ponovite prije prihvaćanja izjednačenja."
     }
   },
   "volumes": {

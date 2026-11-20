@@ -5,10 +5,12 @@
  * files they came from, and the SRV findings on them.
  */
 
-import { useEffect, useMemo, useState } from 'react';
+import { Fragment, useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Crosshair, Database, FileUp, Grid3x3, ListChecks, MapPin, Route } from 'lucide-react';
+import { Crosshair, Database, FileUp, Grid3x3, Link2, ListChecks, MapPin, Route } from 'lucide-react';
+import { SurveyLinksPanel } from '@/features/survey-calc/SurveyLinksPanel';
 import {
   Breadcrumb,
   Button,
@@ -64,7 +66,12 @@ export default function SurveyRegisterPage() {
   const addToast = useToastStore((s) => s.addToast);
   const projectId = useProjectContextStore((s) => s.activeProjectId);
   const isAdvanced = useViewModeStore((s) => s.isAdvanced);
-  const [tab, setTab] = useState<Tab>('points');
+  const [params, setParams] = useSearchParams();
+  // Deep links from the site diary and the file preview: ?traverse=<id> or ?set=<id>.
+  const linkTraverse = params.get('traverse');
+  const linkSet = params.get('set');
+  const [tab, setTab] = useState<Tab>(linkTraverse ? 'traverses' : linkSet ? 'sets' : 'points');
+  const [linkedSet, setLinkedSet] = useState<string | null>(linkSet);
   const [crsOpen, setCrsOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
   const [localOpen, setLocalOpen] = useState(false);
@@ -105,6 +112,16 @@ export default function SurveyRegisterPage() {
     queryFn: () => getRegisterPlan(projectId!),
     enabled: enabled && tab === 'plan',
   });
+  useEffect(() => {
+    if (!linkTraverse || !traverses.data) return;
+    const hit = traverses.data.find((tr) => tr.id === linkTraverse);
+    if (hit) {
+      setShownTraverse(hit);
+      setTraverseOpen(true);
+    }
+    params.delete('traverse');
+    setParams(params, { replace: true });
+  }, [linkTraverse, traverses.data, params, setParams]);
   const removeTraverse = useMutation({
     mutationFn: (tr: Traverse) => deleteTraverse(tr.id),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['survey'] }),
@@ -492,7 +509,8 @@ export default function SurveyRegisterPage() {
               </thead>
               <tbody>
                 {(sets.data ?? []).map((s) => (
-                  <tr key={s.id}>
+                  <Fragment key={s.id}>
+                  <tr>
                     <td>{s.name}</td>
                     <td className="text-content-secondary">{s.source_filename}</td>
                     <td>{s.instrument}</td>
@@ -507,7 +525,16 @@ export default function SurveyRegisterPage() {
                       )}
                     </td>
                     <td className="text-right">{s.point_count}</td>
-                    <td className="text-right">
+                    <td className="text-right whitespace-nowrap">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        icon={<Link2 size={14} />}
+                        aria-expanded={linkedSet === s.id}
+                        onClick={() => setLinkedSet(linkedSet === s.id ? null : s.id)}
+                      >
+                        {t('survey.links.title', { defaultValue: 'Diary and documents' })}
+                      </Button>
                       <Button
                         size="sm"
                         variant="ghost"
@@ -522,6 +549,14 @@ export default function SurveyRegisterPage() {
                       </Button>
                     </td>
                   </tr>
+                  {linkedSet === s.id && projectId && (
+                    <tr>
+                      <td colSpan={7} className="bg-surface-secondary">
+                        <SurveyLinksPanel projectId={projectId} kind="point_set" targetId={s.id} label={s.name} canWrite={canWrite} />
+                      </td>
+                    </tr>
+                  )}
+                  </Fragment>
                 ))}
               </tbody>
             </table>

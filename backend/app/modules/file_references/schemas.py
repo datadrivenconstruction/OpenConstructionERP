@@ -46,11 +46,13 @@ ALLOWED_TARGET_TYPES: tuple[str, ...] = (
     "boq_position",
     "project",
     "clash_run",
+    "survey_traverse",
+    "survey_point_set",
 )
 _TARGET_TYPE_PATTERN = (
     r"^(rfi|issue|task|submittal|punch_item|change_order|meeting|"
     r"field_report|tender_package|bid|contract|transmittal|inspection|ncr|"
-    r"bcf_topic|boq_position|project|clash_run)$"
+    r"bcf_topic|boq_position|project|clash_run|survey_traverse|survey_point_set)$"
 )
 
 # Violation codes - the union is closed because the scanner has finite

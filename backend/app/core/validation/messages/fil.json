@@ -2424,6 +2424,14 @@
     "control_check": {
       "fail": "Control point {id}: lumihis ang check shot nang {r} mm, lampas sa {t} mm na tolerance.",
       "suggestion": "Sukatin muli ang point; kung gumalaw ito, huwag mag-set out mula rito hangga't hindi ito naibabalik."
+    },
+    "lsq_global_test": {
+      "fail": "Hindi pumasa ang global test ng adjustment: sigma0 {s}, ang weighted na kabuuan ng mga squared residual {v} ay labas sa [{lo}, {hi}].",
+      "suggestion": "Ihambing ang mga a priori na standard deviation sa instrumentong ginamit, saka hanapin ang malaking mali sa minarkahang obserbasyon."
+    },
+    "lsq_outlier": {
+      "fail": "Ang obserbasyon sa {obs} ay may standardized residual na {w}, lampas sa critical value na 3.29.",
+      "suggestion": "Suriin kung paano naitala ang obserbasyon o sukatin muli bago tanggapin ang adjustment."
     }
   },
   "volumes": {

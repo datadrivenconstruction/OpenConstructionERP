@@ -2424,6 +2424,14 @@
     "control_check": {
       "fail": "Fikspunkt {id}: kontrolmålingen afviger {r} mm, mere end tolerancen på {t} mm.",
       "suggestion": "Mål punktet igen; hvis det har flyttet sig, så afsæt ikke fra det, før det er genetableret."
+    },
+    "lsq_global_test": {
+      "fail": "Udjævningens globale test er ikke bestået: sigma0 {s}, vægtet kvadratsum af residualer {v} ligger uden for [{lo}, {hi}].",
+      "suggestion": "Sammenlign a priori-spredningerne med det anvendte instrument, og søg derefter efter en grov fejl i den markerede observation."
+    },
+    "lsq_outlier": {
+      "fail": "Observationen ved {obs} har en standardiseret residual på {w}, over den kritiske værdi 3,29.",
+      "suggestion": "Kontrollér hvordan observationen blev noteret, eller mål den igen, før udjævningen godkendes."
     }
   },
   "volumes": {
