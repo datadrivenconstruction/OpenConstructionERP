@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 > **Tip:** This file is long. Use your browser's **Find** (Ctrl+F) to jump to a version number, or see the [Releases page](https://github.com/datadrivenconstruction/OpenConstructionERP/releases) for a per-release view with download links.
 
+## [20.0.0] - 2026-11-20
+
+Subcontract awards carry their terms into the contract, a company can buy once for several projects, survey work gains the geodesy a site surveyor needs, and every module shows where its data comes from and where it goes. An awarded tender hands its payment terms, retention, levies and cash discount to the subcontract, a central buyer splits one package across projects and legal entities, and a Data paths view draws the platform as one connected map with live counts and the firms behind them.
+
+### Added
+
+- Data paths. Every module page has a Data paths button next to the learning buttons. It shows what feeds the module, what reads from it and which parameters drive it, with live counts for the current project, a list view and the people and firms involved, grouped by role. A platform map at /data-paths shows all modules by workflow stage, with project health hints that link to the module that needs a record. Exports to SVG, PNG and CSV.
+- Central purchasing. A buyer bundles the same work from several projects into one package, sets each project's share per line, previews the award split and awards one contract or purchase order per project and legal entity, or one framework agreement per legal entity with call-offs. Project teams see only their own share. Eight validation rules check shares, budgets and entities.
+- Award terms. An award records payment terms, retention, levies and a cash discount and hands them to the subcontract. Retention and levies are taken on the same gross amount; the discount applies to what remains.
+- Legal entities on tenders and contracts: the contract is issued by the package's own company with its logo and header, and unsuccessful bidders get a rejection letter.
+- Tender exchange: GAEB X86 bid import, bidder file uploads through the portal and package documents for bidders.
+- Bidder search by radius around the site.
+- Measurement book: lines are grouped under their BOQ sections and subsections, the list filters by bill and by section, progress can be set as a percentage straight from the table, and a line's measurements open in a dialog over the list.
+- RFQs can be edited from the list while they are a draft, issued or receiving bids.
+- Survey: a reference of coordinate systems for 45 countries with legacy and height system hints, local grid fit with residuals, combined scale factor shown as grid and ground values, instrument import (GSI-8/16, JobXML, LandXML), export of points, stakes and surfaces (CSV, GeoJSON, GSI, LandXML, DXF), survey calculations (COGO), LAS/LAZ point clouds, breaklines, staged volumes with bulking and compaction factors, a point drawer with lock and bulk actions, a control tab with misclosures and a survey overview page.
+
+### Fixed
+
+- The coordinate system dialog can always be closed with Cancel or Escape, also for users who may not save a system. 54 other dialogs and overlays were checked and now close the same way.
+- Dragging a position in the BOQ no longer fails with a server error when resource rows are shown.
+- IFC models converted on Linux and macOS show their real 3D geometry instead of placeholder boxes.
+- An award of a subcontract tender passed its payment terms one level too deep and they were lost; they now reach the subcontract.
+- Several new routes check that the record belongs to the caller before answering.
+
 ## [19.9.0] - 2026-11-19
 
 Tendering, contracts and purchase orders answer the questions users raised this week, the CRM tracks deal activities, and a survey family of modules arrives. A tender package shows its contents before it goes out, a bid entered by hand can be priced line by line, contracts print to PDF and keep client and subcontract values apart, and purchase orders can be edited by everyone allowed to change them.

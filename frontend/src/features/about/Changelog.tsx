@@ -67,6 +67,13 @@ const UNRELEASED: ChangelogEntry | null = null;
 // carry the long form and are left alone as the record of what shipped.
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '20.0.0',
+    date: '2026-11-20',
+    tag: 'NEW',
+    summary:
+      'Awards hand their terms to the subcontract, one buyer can purchase for several projects, survey work gains geodesy and calculations, and every module shows where its data comes from and goes.',
+  },
+  {
     version: '19.9.0',
     date: '2026-11-19',
     tag: 'NEW',
