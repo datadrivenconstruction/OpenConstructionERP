@@ -322,7 +322,12 @@ test('settings shows support and legal without naming where this software comes 
   await page.locator('button[type="submit"]').click();
   await expect(page).not.toHaveURL(/\/login/, { timeout: 60_000 });
 
-  await page.goto('/settings');
+  // The card lives on the Company & documents tab. SettingsPage reads ?tab= and
+  // defaults to 'general', so a plain /settings renders a page that does not
+  // contain this card at all and the case would fail on a navigation nobody took
+  // rather than on anything the card says. This is the route a person clicks
+  // through to, spelled as the URL the page itself publishes.
+  await page.goto('/settings?tab=company');
   const cardHeading = page.getByText(/support and legal/i).first();
   await expect(cardHeading, 'the Support and legal card did not render').toBeVisible({ timeout: 60_000 });
 
