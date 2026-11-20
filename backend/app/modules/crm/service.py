@@ -12,7 +12,7 @@ from __future__ import annotations
 import logging
 import re
 import uuid
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime, time, timedelta
 from decimal import ROUND_HALF_UP, Decimal
 from typing import TYPE_CHECKING, Any, Iterable
 
@@ -22,6 +22,7 @@ from sqlalchemy.exc import IntegrityError
 from app.core.events import event_bus, publish_after_commit
 from app.modules.crm.models import (
     Account,
+    AccountContact,
     CrmActivity,
     Forecast,
     Lead,
@@ -30,6 +31,7 @@ from app.modules.crm.models import (
     PipelineStage,
 )
 from app.modules.crm.repository import (
+    AccountContactRepository,
     AccountRepository,
     ActivityRepository,
     ForecastRepository,
@@ -38,7 +40,9 @@ from app.modules.crm.repository import (
     PipelineStageRepository,
     StageHistoryRepository,
     WinLossReasonRepository,
+    activity_counts_by_owner,
 )
+from app.modules.crm.validators import check_period
 
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
@@ -604,12 +608,57 @@ def convert_opportunity_to_project_payload(opportunity: Any) -> dict[str, Any]:
 # ── Service class ─────────────────────────────────────────────────────────
 
 
+_ACTIVITY_SUMMARY_KEYS = {"call": "calls", "meeting": "meetings", "email": "emails", "site_visit": "site_visits"}
+
+
+def summarize_owner_activities(counts: Iterable[tuple[Any, str, int]]) -> list[dict[str, Any]]:
+    """Fold ``(owner, kind, n)`` rows into one row per owner.
+
+    ``total`` counts every kind (tasks and notes too); the named columns are the
+    touches a sales manager reviews. Rows sort by total, busiest first.
+    """
+    rows: dict[Any, dict[str, Any]] = {}
+    for owner, kind, n in counts:
+        row = rows.setdefault(
+            owner,
+            {"owner_user_id": owner, "calls": 0, "meetings": 0, "emails": 0, "site_visits": 0, "total": 0},
+        )
+        key = _ACTIVITY_SUMMARY_KEYS.get(kind)
+        if key:
+            row[key] += n
+        row["total"] += n
+    return sorted(rows.values(), key=lambda r: (-r["total"], str(r["owner_user_id"])))
+
+
+def compute_revenue_by_month(opps: Iterable[Any]) -> dict[str, Any]:
+    """Group open deals' ``value x probability`` by close month and currency.
+
+    Deals with no valid expected close date group under month ``""``. Currencies
+    are never blended (no FX here); ``mixed_currency`` flags more than one known code.
+    """
+    buckets: dict[tuple[str, str], list[Any]] = {}
+    for o in opps:
+        if getattr(o, "status", "open") != "open":
+            continue
+        raw = (getattr(o, "expected_close_date", None) or "")[:7]
+        month = raw if re.fullmatch(r"\d{4}-(0[1-9]|1[0-2])", raw) else ""
+        cell = buckets.setdefault((month, _opp_currency(o)), [Decimal(0), 0])
+        cell[0] += _opp_weighted(o)
+        cell[1] += 1
+    rows = [
+        {"month": m, "currency": c, "expected": _q2(v), "deals": n}
+        for (m, c), (v, n) in sorted(buckets.items(), key=lambda kv: (kv[0][0] == "", kv[0]))
+    ]
+    return {"rows": rows, "mixed_currency": len({r["currency"] for r in rows if r["currency"]}) > 1}
+
+
 class CrmService:
     """Business logic for the CRM module."""
 
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
         self.account_repo = AccountRepository(session)
+        self.account_contact_repo = AccountContactRepository(session)
         self.lead_repo = LeadRepository(session)
         self.opportunity_repo = OpportunityRepository(session)
         self.stage_repo = PipelineStageRepository(session)
@@ -953,29 +1002,38 @@ class CrmService:
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Only qualified leads can be converted",
             )
-        # Validate stage exists
-        stage = await self.stage_repo.get_by_id(payload.stage_id)
+        account_id = payload.account_id or lead.account_id
+        if account_id is None:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="crm.convert_needs_account: pick an account to convert this lead into a deal",
+            )
+        if payload.stage_id is not None:
+            stage = await self.stage_repo.get_by_id(payload.stage_id)
+        else:
+            stage = next((st for st in await self.stage_repo.list_all() if not st.is_final), None)
         if stage is None:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Invalid stage_id for new opportunity",
             )
-        if await self.account_repo.get_by_id(payload.account_id) is None:
+        if await self.account_repo.get_by_id(account_id) is None:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Invalid account_id for new opportunity",
             )
 
         opp = Opportunity(
-            account_id=payload.account_id,
+            account_id=account_id,
             title=payload.title,
             description=payload.description,
             estimated_value=payload.estimated_value,
             currency=payload.currency,
             expected_close_date=payload.expected_close_date,
             probability_percent=payload.probability_percent,
-            stage_id=payload.stage_id,
+            stage_id=stage.id,
             weighted_value=compute_weighted_value(payload.estimated_value, payload.probability_percent),
+            source=lead.source,
             owner_user_id=lead.assigned_to,
             status="open",
         )
@@ -1016,7 +1074,7 @@ class CrmService:
             data={
                 "lead_id": str(lead_id),
                 "opportunity_id": str(opp.id),
-                "account_id": str(payload.account_id),
+                "account_id": str(account_id),
                 "converted_by": user_id,
             },
             source_module="crm",
@@ -1028,6 +1086,91 @@ class CrmService:
             opp.id,
         )
         return lead, opp
+
+    # ── Account contacts ─────────────────────────────────────────────────
+
+    async def list_account_contacts(self, account_id: uuid.UUID) -> list[dict[str, Any]]:
+        """Contacts linked to an account, primary first, with display fields."""
+        from app.modules.contacts.models import Contact
+
+        await self.get_account(account_id)
+        out: list[dict[str, Any]] = []
+        for link in await self.account_contact_repo.list_for_account(account_id):
+            contact = await self.session.get(Contact, link.contact_id)
+            if contact is None:
+                continue
+            name = " ".join(p for p in (contact.first_name, contact.last_name) if p).strip()
+            out.append(
+                {
+                    "account_id": account_id,
+                    "contact_id": link.contact_id,
+                    "role": link.role,
+                    "is_primary": link.is_primary,
+                    "display_name": name or contact.company_name or contact.primary_email or "",
+                    "email": contact.primary_email,
+                    "phone": contact.primary_phone,
+                }
+            )
+        return out
+
+    async def link_account_contact(
+        self, account_id: uuid.UUID, contact_id: uuid.UUID, *, role: str = "", is_primary: bool = False
+    ) -> list[dict[str, Any]]:
+        """Link an existing contact to an account (rule ``crm.account_contact_unique``)."""
+        from app.modules.contacts.models import Contact
+
+        await self.get_account(account_id)
+        if await self.session.get(Contact, contact_id) is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Contact not found")
+        existing_link = await self.account_contact_repo.get(account_id, contact_id)
+        if existing_link is not None and is_primary and not existing_link.is_primary:
+            await self.account_contact_repo.clear_primary(account_id)
+            existing_link.is_primary = True
+            await self.session.flush()
+            await self.account_repo.update_fields(account_id, primary_contact_id=contact_id)
+            return await self.list_account_contacts(account_id)
+        if existing_link is not None:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="crm.account_contact_unique: this contact is already linked to the account",
+            )
+        existing = await self.account_contact_repo.list_for_account(account_id)
+        make_primary = is_primary or not existing
+        if make_primary:
+            await self.account_contact_repo.clear_primary(account_id)
+        await self.account_contact_repo.create(
+            AccountContact(account_id=account_id, contact_id=contact_id, role=role, is_primary=make_primary)
+        )
+        if make_primary:
+            await self.account_repo.update_fields(account_id, primary_contact_id=contact_id)
+        return await self.list_account_contacts(account_id)
+
+    async def unlink_account_contact(self, account_id: uuid.UUID, contact_id: uuid.UUID) -> None:
+        link = await self.account_contact_repo.get(account_id, contact_id)
+        if link is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Contact is not linked")
+        was_primary = link.is_primary
+        await self.account_contact_repo.delete(link)
+        if was_primary:
+            await self.account_repo.update_fields(account_id, primary_contact_id=None)
+
+    # ── Reports ──────────────────────────────────────────────────────────
+
+    async def owner_activity_summary(self, date_from: date | None, date_to: date | None) -> list[dict[str, Any]]:
+        """Calls, meetings and emails logged per owner in ``[date_from, date_to]``."""
+        try:
+            check_period(date_from, date_to)
+        except ValueError as exc:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
+        start = datetime.combine(date_from, time.min, tzinfo=UTC) if date_from else None
+        end = datetime.combine(date_to + timedelta(days=1), time.min, tzinfo=UTC) if date_to else None
+        counts = await activity_counts_by_owner(self.session, start=start, end=end)
+        return summarize_owner_activities(counts)
+
+    async def revenue_by_month(self, owner_user_id: uuid.UUID | None = None) -> dict[str, Any]:
+        """Expected revenue (value x probability) of open deals per close month."""
+        opps, _ = await self.opportunity_repo.list_all(limit=10000, status="open", owner_user_id=owner_user_id)
+        return compute_revenue_by_month(opps)
 
     # ── Opportunities ────────────────────────────────────────────────────
 

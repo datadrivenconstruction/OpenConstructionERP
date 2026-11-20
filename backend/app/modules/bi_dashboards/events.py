@@ -39,6 +39,9 @@ logger = logging.getLogger(__name__)
 _SERVER_STARTED_AT = datetime.now(UTC).isoformat()
 _GLOBAL_KEY = "*"
 _KPI_WATERMARKS: dict[str, dict[str, str | None]] = {}
+# Hard cap on tracked projects so the map (and any pass over it) stays bounded
+# on a long-lived process; the oldest entries are dropped first.
+_MAX_WATERMARKS = 5000
 
 
 def _bump_watermark(project_id: str | None, reason: str, source_event: str) -> None:
@@ -47,7 +50,14 @@ def _bump_watermark(project_id: str | None, reason: str, source_event: str) -> N
     entry = {"invalidated_at": now, "reason": reason, "source_event": source_event}
     _KPI_WATERMARKS[_GLOBAL_KEY] = entry
     if project_id:
-        _KPI_WATERMARKS[str(project_id)] = entry
+        key = str(project_id)
+        _KPI_WATERMARKS.pop(key, None)  # re-insert so dict order tracks recency
+        _KPI_WATERMARKS[key] = entry
+        while len(_KPI_WATERMARKS) > _MAX_WATERMARKS:
+            oldest = next((k for k in _KPI_WATERMARKS if k != _GLOBAL_KEY), None)
+            if oldest is None:
+                break
+            del _KPI_WATERMARKS[oldest]
 
 
 def get_kpi_freshness(project_id: str | None = None) -> dict[str, str | None]:

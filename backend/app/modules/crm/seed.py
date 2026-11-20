@@ -109,7 +109,7 @@ _COUNTRIES = (
 )
 
 
-_LEAD_SOURCES = ("web", "referral", "event", "cold_outreach", "inbound")
+_LEAD_SOURCES = ("web", "referral", "event", "trade_show", "cold_outreach", "inbound")
 _LEAD_STATUSES = ("new", "qualifying", "qualified", "disqualified", "converted")
 _OPP_SOURCES = _LEAD_SOURCES
 _ACTIVITY_KINDS = ("call", "meeting", "email", "task", "note")

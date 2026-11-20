@@ -2164,8 +2164,14 @@ function FiveDDashboard({ project }: { project: Project }) {
     queryFn: () =>
       apiGet<{ invalidated_at: string | null; server_started_at: string }>(
         `/v1/bi-dashboards/kpi-freshness?project_id=${project.id}`,
+        // Optional live-refresh probe: a slow answer must never hold the page.
+        // Give up after 5 s and keep the figures already on screen.
+        { timeoutMs: 5000, suppressTimeoutToast: true },
       ),
-    refetchInterval: 20000,
+    // Back off after a failure so a struggling server is not hit every 20 s,
+    // and pause while the tab is hidden.
+    refetchInterval: (query) => (query.state.status === 'error' ? 120000 : 20000),
+    refetchIntervalInBackground: false,
     retry: false,
   });
   const lastFreshnessRef = useRef<string | null>(null);

@@ -10,6 +10,7 @@ gate.
 from __future__ import annotations
 
 import uuid
+from datetime import date
 from decimal import Decimal
 from typing import Any
 
@@ -22,6 +23,8 @@ from app.dependencies import (
     SessionDep,
 )
 from app.modules.crm.schemas import (
+    AccountContactLinkCreate,
+    AccountContactResponse,
     AccountCreate,
     AccountResponse,
     AccountUpdate,
@@ -43,10 +46,12 @@ from app.modules.crm.schemas import (
     OpportunityResponse,
     OpportunityUpdate,
     OpportunityWinRequest,
+    OwnerActivitySummaryResponse,
     PipelineMetricsResponse,
     PipelineStageCreate,
     PipelineStageResponse,
     PipelineStageUpdate,
+    RevenueByMonthResponse,
     StageHistoryResponse,
     WinLossAnalyticsResponse,
     WinLossReasonCreate,
@@ -155,6 +160,39 @@ async def get_account(
 ) -> AccountResponse:
     account = await service.get_account(account_id)
     return AccountResponse.model_validate(account)
+
+
+@router.get("/accounts/{account_id}/contacts", response_model=list[AccountContactResponse])
+async def list_account_contacts(
+    account_id: uuid.UUID,
+    _perm: None = Depends(RequirePermission("crm.read")),
+    service: CrmService = Depends(_get_service),
+) -> list[AccountContactResponse]:
+    """Contacts linked to the account, primary contact first."""
+    rows = await service.list_account_contacts(account_id)
+    return [AccountContactResponse(**r) for r in rows]
+
+
+@router.post("/accounts/{account_id}/contacts", response_model=list[AccountContactResponse], status_code=201)
+async def link_account_contact(
+    account_id: uuid.UUID,
+    data: AccountContactLinkCreate,
+    _perm: None = Depends(RequirePermission("crm.update")),
+    service: CrmService = Depends(_get_service),
+) -> list[AccountContactResponse]:
+    """Link an existing contact (picked from the contacts module) to the account."""
+    rows = await service.link_account_contact(account_id, data.contact_id, role=data.role, is_primary=data.is_primary)
+    return [AccountContactResponse(**r) for r in rows]
+
+
+@router.delete("/accounts/{account_id}/contacts/{contact_id}", status_code=204)
+async def unlink_account_contact(
+    account_id: uuid.UUID,
+    contact_id: uuid.UUID,
+    _perm: None = Depends(RequirePermission("crm.update")),
+    service: CrmService = Depends(_get_service),
+) -> None:
+    await service.unlink_account_contact(account_id, contact_id)
 
 
 @router.patch("/accounts/{account_id}", response_model=AccountResponse)
@@ -352,6 +390,16 @@ async def create_opportunity(
     return OpportunityResponse.model_validate(opp)
 
 
+@router.get("/opportunities/revenue-by-month", response_model=RevenueByMonthResponse)
+async def revenue_by_month(
+    owner_user_id: uuid.UUID | None = Query(default=None),
+    _perm: None = Depends(RequirePermission("crm.read")),
+    service: CrmService = Depends(_get_service),
+) -> RevenueByMonthResponse:
+    """Expected revenue per expected-close month: deal value x probability, per currency."""
+    return RevenueByMonthResponse(**await service.revenue_by_month(owner_user_id))
+
+
 @router.get("/opportunities/{opportunity_id}", response_model=OpportunityResponse)
 async def get_opportunity(
     opportunity_id: uuid.UUID,
@@ -547,6 +595,22 @@ async def activity_timeline(
         opportunity_id=opportunity_id,
         lead_id=lead_id,
         limit=limit,
+    )
+
+
+@router.get("/activities/summary", response_model=OwnerActivitySummaryResponse)
+async def activity_summary(
+    date_from: date | None = Query(default=None),
+    date_to: date | None = Query(default=None),
+    _perm: None = Depends(RequirePermission("crm.read")),
+    service: CrmService = Depends(_get_service),
+) -> OwnerActivitySummaryResponse:
+    """Calls, meetings and emails logged per owner in a period (both dates inclusive)."""
+    rows = await service.owner_activity_summary(date_from, date_to)
+    return OwnerActivitySummaryResponse(
+        date_from=date_from.isoformat() if date_from else None,
+        date_to=date_to.isoformat() if date_to else None,
+        rows=rows,
     )
 
 
