@@ -2778,5 +2778,15 @@
       "fail": "Failis ei ole nimetatud pakkujat",
       "suggestion": "Sisestage faili pakkuja andmetesse ettevõtte nimi"
     }
+  },
+  "design": {
+    "estimate_unpriced": {
+      "fail": "Positsioonil '{position}' puudub ühikuhind, seega projekti kalkulatsioon jätab selle välja.",
+      "suggestion": "Sisestage ühikuhind või valige positsioonile kuluartikkel."
+    },
+    "revision_awaiting_decision": {
+      "fail": "Mudeli redaktsioon {number} on {days} päeva vastuvõttu oodanud.",
+      "suggestion": "Võtke redaktsioon vastu või lükake see tagasi, et kalkulatsioon järgiks praegust mudelit."
+    }
   }
 }

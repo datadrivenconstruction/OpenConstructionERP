@@ -2778,5 +2778,15 @@
       "fail": "文件中未注明投标人",
       "suggestion": "请在文件的投标人信息中填写公司名称"
     }
+  },
+  "design": {
+    "estimate_unpriced": {
+      "fail": "条目 '{position}' 没有单价，因此设计估算未计入该项。",
+      "suggestion": "请输入单价，或为该条目选择一个成本项。"
+    },
+    "revision_awaiting_decision": {
+      "fail": "模型修订 {number} 已等待验收 {days} 天。",
+      "suggestion": "请接受或拒绝该修订，使估算与当前模型一致。"
+    }
   }
 }

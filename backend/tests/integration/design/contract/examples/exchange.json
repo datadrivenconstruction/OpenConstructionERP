@@ -1,0 +1,15 @@
+{
+  "request": {
+    "code": "1nFlnKIs1m7gyR_tiXqflOszmc8d6c4CwYzlKK_GhO8",
+    "client": {
+      "name": "ddc-editor",
+      "version": "0.9.0",
+      "os": "windows"
+    }
+  },
+  "response": {
+    "token": "ddcl_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+    "expires_at": "2026-12-12T11:00:00Z",
+    "project_id": "746402cb-14a8-430c-b3b9-9c6908fa75d7"
+  }
+}

@@ -2778,5 +2778,15 @@
       "fail": "File không ghi tên nhà thầu",
       "suggestion": "Nhập tên công ty trong thông tin nhà thầu của file"
     }
+  },
+  "design": {
+    "estimate_unpriced": {
+      "fail": "Hạng mục '{position}' chưa có đơn giá nên dự toán thiết kế không tính đến.",
+      "suggestion": "Nhập đơn giá hoặc chọn một mục chi phí cho hạng mục này."
+    },
+    "revision_awaiting_decision": {
+      "fail": "Phiên bản mô hình {number} đã chờ nghiệm thu {days} ngày.",
+      "suggestion": "Chấp nhận hoặc từ chối phiên bản để dự toán theo mô hình hiện tại."
+    }
   }
 }

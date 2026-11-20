@@ -2778,5 +2778,15 @@
       "fail": "Il file non indica l'offerente",
       "suggestion": "Inserire la ragione sociale nei dati dell'offerente del file"
     }
+  },
+  "design": {
+    "estimate_unpriced": {
+      "fail": "La voce '{position}' non ha un prezzo unitario, quindi la stima di progetto la esclude.",
+      "suggestion": "Inserisci un prezzo unitario o scegli una voce di costo per questa posizione."
+    },
+    "revision_awaiting_decision": {
+      "fail": "La revisione del modello {number} attende l'accettazione da {days} giorni.",
+      "suggestion": "Accetta o rifiuta la revisione perché la stima segua il modello attuale."
+    }
   }
 }

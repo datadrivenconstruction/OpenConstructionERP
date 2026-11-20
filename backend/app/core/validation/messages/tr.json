@@ -2778,5 +2778,15 @@
       "fail": "Dosyada teklif veren belirtilmemiş",
       "suggestion": "Dosyadaki teklif veren bilgilerine firma adını girin"
     }
+  },
+  "design": {
+    "estimate_unpriced": {
+      "fail": "'{position}' pozisyonunun birim fiyatı yok, bu yüzden tasarım maliyet tahmini onu dışarıda bırakıyor.",
+      "suggestion": "Bu pozisyon için birim fiyat girin veya bir maliyet kalemi seçin."
+    },
+    "revision_awaiting_decision": {
+      "fail": "{number} numaralı model revizyonu {days} gündür onay bekliyor.",
+      "suggestion": "Tahminin güncel modeli izlemesi için revizyonu kabul edin veya reddedin."
+    }
   }
 }

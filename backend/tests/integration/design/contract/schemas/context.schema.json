@@ -1,0 +1,236 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openconstructiondesign.org/schemas/ddc-context/1",
+  "title": "ddc-context/1 — GET /api/v1/design/projects/{id}/context",
+  "description": "Everything the linked editor needs for one session. The ai block is held in memory only; the editor never writes it to disk in linked mode.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "project",
+    "permissions",
+    "lock",
+    "latest_revision",
+    "brief",
+    "link_versions"
+  ],
+  "properties": {
+    "schema": {
+      "const": "ddc-context/1"
+    },
+    "link_versions": {
+      "type": "array",
+      "items": {
+        "type": "integer",
+        "minimum": 1
+      },
+      "minItems": 1
+    },
+    "project": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name",
+        "country",
+        "currency",
+        "locale"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "name": {
+          "type": "string"
+        },
+        "country": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^[A-Z]{2}$"
+        },
+        "currency": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^[A-Z]{3}$"
+        },
+        "locale": {
+          "type": "string"
+        }
+      }
+    },
+    "permissions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "can_publish",
+        "can_accept",
+        "can_generate"
+      ],
+      "properties": {
+        "can_publish": {
+          "type": "boolean"
+        },
+        "can_accept": {
+          "type": "boolean"
+        },
+        "can_generate": {
+          "type": "boolean"
+        }
+      }
+    },
+    "lock": {
+      "anyOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "held_by",
+            "mine",
+            "expires_at"
+          ],
+          "properties": {
+            "held_by": {
+              "type": "string"
+            },
+            "mine": {
+              "type": "boolean"
+            },
+            "expires_at": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        }
+      ]
+    },
+    "latest_revision": {
+      "anyOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "revision_id",
+            "number",
+            "status"
+          ],
+          "properties": {
+            "revision_id": {
+              "$ref": "#/$defs/uuid"
+            },
+            "number": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "status": {
+              "$ref": "#/$defs/status"
+            }
+          }
+        }
+      ]
+    },
+    "brief": {
+      "anyOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "required": [
+            "schema",
+            "brief_id",
+            "project_id",
+            "version",
+            "country",
+            "locale",
+            "use",
+            "depth_level",
+            "massing",
+            "programme"
+          ],
+          "properties": {
+            "schema": {
+              "const": "ddc-brief/1"
+            },
+            "version": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          "description": "The latest saved brief, whole (same required fields as brief.schema.json)."
+        }
+      ]
+    },
+    "ai": {
+      "anyOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "protocol",
+            "endpoint",
+            "model",
+            "expires_at"
+          ],
+          "properties": {
+            "protocol": {
+              "enum": [
+                "chat-completions",
+                "messages",
+                "local"
+              ],
+              "description": "Wire protocol, not a vendor name."
+            },
+            "endpoint": {
+              "type": "string",
+              "format": "uri"
+            },
+            "model": {
+              "type": "string"
+            },
+            "api_key": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "local_only": {
+              "type": "boolean"
+            },
+            "expires_at": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        }
+      ]
+    }
+  },
+  "$defs": {
+    "uuid": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+    },
+    "status": {
+      "enum": [
+        "shared",
+        "published",
+        "rejected",
+        "archived"
+      ],
+      "description": "ERP CDE states: shared = uploaded, awaiting acceptance; published = accepted; archived = superseded."
+    }
+  }
+}

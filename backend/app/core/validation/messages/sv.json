@@ -2778,5 +2778,15 @@
       "fail": "Filen anger ingen anbudsgivare",
       "suggestion": "Ange företagsnamnet i anbudsgivarens uppgifter i filen"
     }
+  },
+  "design": {
+    "estimate_unpriced": {
+      "fail": "Posten '{position}' saknar à-pris, så projektkalkylen utelämnar den.",
+      "suggestion": "Ange ett à-pris eller välj en kostnadspost för posten."
+    },
+    "revision_awaiting_decision": {
+      "fail": "Modellrevision {number} har väntat {days} dagar på godkännande.",
+      "suggestion": "Godkänn eller avvisa revisionen så att kalkylen följer den aktuella modellen."
+    }
   }
 }

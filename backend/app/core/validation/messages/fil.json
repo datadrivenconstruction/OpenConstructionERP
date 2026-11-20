@@ -2778,5 +2778,15 @@
       "fail": "Walang pangalan ng bidder sa file",
       "suggestion": "Ilagay ang pangalan ng kompanya sa datos ng bidder sa file"
     }
+  },
+  "design": {
+    "estimate_unpriced": {
+      "fail": "Walang unit rate ang item na '{position}', kaya hindi ito isinasama ng design estimate.",
+      "suggestion": "Maglagay ng unit rate o pumili ng cost item para sa item na ito."
+    },
+    "revision_awaiting_decision": {
+      "fail": "{days} araw nang naghihintay ng pagtanggap ang model revision {number}.",
+      "suggestion": "Tanggapin o tanggihan ang revision para sundan ng estimate ang kasalukuyang model."
+    }
   }
 }

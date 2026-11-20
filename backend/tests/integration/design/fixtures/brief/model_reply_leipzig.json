@@ -1,0 +1,15 @@
+{"fields": [
+ {"pointer": "/massing/floors_above", "value": 5, "document_id": "2344d010-88d8-4e0c-811d-219134150421", "page": 2, "quote": "Anzahl der Geschosse: 5"},
+ {"pointer": "/structure/system", "value": "masonry", "document_id": "2344d010-88d8-4e0c-811d-219134150421", "page": 1, "quote": "Konstruktion: Mauerwerk mit Bodenplatte"},
+ {"pointer": "/structure/foundation", "value": "raft", "document_id": "2344d010-88d8-4e0c-811d-219134150421", "page": 2, "quote": "Mauerwerk mit Bodenplatte, Flachdach."},
+ {"pointer": "/programme/units", "value": [{"name": "Wohnung", "count": 20, "rooms": [{"kind": "living"}]}], "document_id": "2344d010-88d8-4e0c-811d-219134150421", "page": 1, "quote": "Das Vorhaben ist ein Mehrfamilienhaus mit Tiefgarage."},
+ {"pointer": "/massing/floors_below", "value": 3, "document_id": "2344d010-88d8-4e0c-811d-219134150421", "page": 2, "quote": "Untergeschosse: 1"},
+ {"pointer": "/massing/lift", "value": true, "document_id": "2344d010-88d8-4e0c-811d-219134150421", "page": 2, "quote": "Das Gebäude erhält einen Fahrstuhl mit zwei Kabinen."},
+ {"pointer": "/quality_level", "value": "high", "document_id": "2344d010-88d8-4e0c-811d-219134150421", "page": 1, "quote": "Das Vorhaben ist ein Mehrfamilienhaus"},
+ {"pointer": "/country", "value": "XX1", "document_id": "2344d010-88d8-4e0c-811d-219134150421", "page": 1, "quote": "Deutschland"},
+ {"pointer": "/massing/floor_height_m", "value": 30, "document_id": "2344d010-88d8-4e0c-811d-219134150421", "page": 2, "quote": "Geschosshöhe: 3,0 m"},
+ {"pointer": "/envelope/roof", "value": "flat", "document_id": "ffffffff-0000-0000-0000-000000000000", "page": 1, "quote": "Flachdach"}
+],
+"ambiguities": [
+ {"pointer": "/use/category", "text": "Residential block with an underground garage; use may also count as mixed.", "options": ["residential_multi", "mixed_use", "bogus"]}
+]}

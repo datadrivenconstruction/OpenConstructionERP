@@ -1,0 +1,10 @@
+{
+  "schema": "ddc-link/1",
+  "erp_url": "http://127.0.0.1:8000",
+  "project_id": "746402cb-14a8-430c-b3b9-9c6908fa75d7",
+  "project_name": "Wohnhaus Beispielstraße",
+  "code": "1nFlnKIs1m7gyR_tiXqflOszmc8d6c4CwYzlKK_GhO8",
+  "expires_at": "2026-11-12T11:05:00Z",
+  "action": "open",
+  "revision_id": "68143a44-27fb-47bb-aa7e-c1229f23a2dc"
+}

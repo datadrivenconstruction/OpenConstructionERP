@@ -1,0 +1,165 @@
+"""Validation rules of the Design module.
+
+Rule set ``design``, run over one project (``GET /api/v1/design/projects/{id}/validation``):
+
+* ``design.estimate_unpriced`` - WARNING. A position the model drives has no unit rate, so the design
+  estimate total leaves it out. Nothing is guessed: the person prices it or picks a cost item.
+* ``design.revision_awaiting_decision`` - INFO. A shared revision has waited longer than
+  ``REVIEW_AFTER_DAYS`` for acceptance; the estimate, schedule and procurement still follow the older one.
+"""
+
+from __future__ import annotations
+
+import uuid
+from datetime import UTC, datetime
+from decimal import Decimal, InvalidOperation
+from typing import Any
+
+from app.core.validation.engine import (
+    RuleCategory,
+    RuleResult,
+    Severity,
+    ValidationContext,
+    ValidationRule,
+    rule_registry,
+)
+from app.core.validation.messages import translate
+
+DESIGN_RULE_SET = "design"
+REVIEW_AFTER_DAYS = 14
+
+
+def _locale(context: ValidationContext) -> str:
+    return str((context.metadata or {}).get("locale") or "en")
+
+
+def _as_dt(value: Any) -> datetime | None:
+    if isinstance(value, datetime):
+        return value if value.tzinfo else value.replace(tzinfo=UTC)
+    try:
+        parsed = datetime.fromisoformat(str(value))
+    except (TypeError, ValueError):
+        return None
+    return parsed if parsed.tzinfo else parsed.replace(tzinfo=UTC)
+
+
+def _zero(value: Any) -> bool:
+    try:
+        return Decimal(str(value)) == 0
+    except (InvalidOperation, ValueError):
+        return True
+
+
+class EstimateUnpriced(ValidationRule):
+    """Every model-driven estimate position carries a unit rate."""
+
+    rule_id = "design.estimate_unpriced"
+    name = "Design estimate positions are priced"
+    standard = DESIGN_RULE_SET
+    severity = Severity.WARNING
+    category = RuleCategory.COMPLETENESS
+    description = "A position the model drives has no unit rate, so the estimate total leaves it out."
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        data = context.data if isinstance(context.data, dict) else {}
+        locale = _locale(context)
+        results: list[RuleResult] = []
+        for pos in data.get("positions") or []:
+            missing = _zero(pos.get("unit_rate"))
+            text = str(pos.get("description") or pos.get("rule") or "")
+            results.append(
+                RuleResult(
+                    rule_id=self.rule_id,
+                    rule_name=self.name,
+                    severity=self.severity,
+                    category=self.category,
+                    passed=not missing,
+                    message=translate("design.estimate_unpriced.fail", locale, position=text) if missing else "OK",
+                    element_ref=str(pos.get("position_id") or "") or None,
+                    suggestion=translate("design.estimate_unpriced.suggestion", locale) if missing else None,
+                    details={"rule": pos.get("rule"), "unit": pos.get("unit")},
+                )
+            )
+        return results
+
+
+class RevisionAwaitingDecision(ValidationRule):
+    """A shared revision is accepted or rejected within the review window."""
+
+    rule_id = "design.revision_awaiting_decision"
+    name = "Design revisions are decided in time"
+    standard = DESIGN_RULE_SET
+    severity = Severity.INFO
+    category = RuleCategory.CONSISTENCY
+    description = "A shared model revision has waited too long for acceptance."
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        data = context.data if isinstance(context.data, dict) else {}
+        now = _as_dt(data.get("as_of")) or datetime.now(UTC)
+        locale = _locale(context)
+        results: list[RuleResult] = []
+        for rev in data.get("revisions") or []:
+            if rev.get("status") != "shared":
+                continue
+            created = _as_dt(rev.get("created_at"))
+            if created is None:
+                continue
+            age = (now - created).days
+            late = age > REVIEW_AFTER_DAYS
+            results.append(
+                RuleResult(
+                    rule_id=self.rule_id,
+                    rule_name=self.name,
+                    severity=self.severity,
+                    category=self.category,
+                    passed=not late,
+                    message=translate(
+                        "design.revision_awaiting_decision.fail", locale, number=rev.get("number"), days=age
+                    )
+                    if late
+                    else "OK",
+                    element_ref=str(rev.get("revision_id") or "") or None,
+                    suggestion=translate("design.revision_awaiting_decision.suggestion", locale) if late else None,
+                    details={"age_days": age, "review_after_days": REVIEW_AFTER_DAYS},
+                )
+            )
+        return results
+
+
+_RULES: list[ValidationRule] = [EstimateUnpriced(), RevisionAwaitingDecision()]
+
+
+def register_design_rules() -> None:
+    """Register the rule set; idempotent."""
+    for rule in _RULES:
+        rule_registry.register(rule, [DESIGN_RULE_SET])
+
+
+async def validation_data(session: Any, project_id: uuid.UUID) -> dict[str, Any]:
+    """What the rule set reads: the design estimate positions and the revisions awaiting a decision."""
+    from sqlalchemy import select
+
+    from .estimate import summary
+    from .models import DesignRevision
+
+    est = await summary(session, project_id)
+    rows = (
+        await session.execute(
+            select(DesignRevision).where(DesignRevision.project_id == project_id, DesignRevision.status == "shared")
+        )
+    ).scalars()
+    return {
+        "positions": est.get("positions", []) if est.get("estimate") else [],
+        "revisions": [
+            {
+                "revision_id": str(r.id),
+                "number": r.number,
+                "status": r.status,
+                "created_at": r.created_at.isoformat() if r.created_at else None,
+            }
+            for r in rows
+        ],
+    }
+
+
+register_design_rules()

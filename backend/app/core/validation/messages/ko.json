@@ -2778,5 +2778,15 @@
       "fail": "파일에 입찰자 이름이 없습니다",
       "suggestion": "파일의 입찰자 정보에 회사명을 입력하세요"
     }
+  },
+  "design": {
+    "estimate_unpriced": {
+      "fail": "항목 '{position}'에 단가가 없어 설계 견적에서 제외됩니다.",
+      "suggestion": "이 항목의 단가를 입력하거나 원가 항목을 선택하세요."
+    },
+    "revision_awaiting_decision": {
+      "fail": "모델 개정 {number}이(가) {days}일째 승인을 기다리고 있습니다.",
+      "suggestion": "견적이 현재 모델을 따르도록 개정을 승인하거나 반려하세요."
+    }
   }
 }

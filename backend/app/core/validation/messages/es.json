@@ -2778,5 +2778,15 @@
       "fail": "{vendor} está bloqueado en el directorio de subcontratistas y no se le puede adjudicar.",
       "suggestion": "Levante el bloqueo en el directorio o adjudique a otra empresa."
     }
+  },
+  "design": {
+    "estimate_unpriced": {
+      "fail": "La partida '{position}' no tiene precio unitario, por lo que el presupuesto de diseño la deja fuera.",
+      "suggestion": "Introduzca un precio unitario o elija una partida de costes para esta posición."
+    },
+    "revision_awaiting_decision": {
+      "fail": "La revisión del modelo {number} lleva {days} días esperando aceptación.",
+      "suggestion": "Acepte o rechace la revisión para que el presupuesto siga el modelo actual."
+    }
   }
 }

@@ -2778,5 +2778,15 @@
       "fail": "{vendor} is blocked in the subcontractor directory and cannot be awarded.",
       "suggestion": "Clear the block in the directory or award to another firm."
     }
+  },
+  "design": {
+    "estimate_unpriced": {
+      "fail": "The position '{position}' has no unit rate, so the design estimate leaves it out.",
+      "suggestion": "Enter a unit rate or pick a cost item for this position."
+    },
+    "revision_awaiting_decision": {
+      "fail": "Model revision {number} has waited {days} days for acceptance.",
+      "suggestion": "Accept or reject the revision so the estimate follows the current model."
+    }
   }
 }

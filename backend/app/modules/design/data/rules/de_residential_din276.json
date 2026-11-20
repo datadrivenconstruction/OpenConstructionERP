@@ -1,0 +1,64 @@
+{
+  "schema": "ddc-rules/1",
+  "country": "DE",
+  "use": "residential_multi",
+  "classification": "din276",
+  "notes": "Selectors read the contract columns of a revision (ifc_class, type_key, element_key, material, storey, quantities). The type_key prefixes follow the editor type library (example: wall/ext-masonry-365); they are data, edit them per project. Model rules ship without unit rates: a position stays unpriced (flag unpriced) until a cost item or a sourced rate is assigned. A derived rule carries a rate only where a published source exists under benchmarks/; otherwise its rate or input is null and the position is flagged (rate_missing, input_missing), never filled with a guess. cost_query is the search text used against the ERP cost database (Cost Match) of the project region to find a unit rate; no match leaves the position unpriced and flagged cost_no_match.",
+  "aggregates": {
+    "living_area_m2": {
+      "label": "Living area (basis WFL)",
+      "select": {"ifc_class": ["IfcSpace"], "key_matches": "/u[^/]+/"},
+      "field": "area_m2",
+      "aggregation": "sum",
+      "assumption": "Dwelling spaces = IfcSpace elements whose key has a unit segment (u<id>). Model floor area of those spaces, without the reductions of the living-area ordinance (WoFlV) for balconies and sloped ceilings."
+    },
+    "concrete_volume_m3": {
+      "label": "Reinforced concrete volume",
+      "select": {"ifc_class": ["IfcSlab", "IfcWall", "IfcFooting", "IfcColumn", "IfcBeam"], "material_contains": ["Stahlbeton"]},
+      "field": "volume_m3",
+      "aggregation": "sum",
+      "assumption": "Elements whose material name contains 'Stahlbeton'."
+    },
+    "wall_area_m2": {
+      "label": "Wall area (net)",
+      "select": {"ifc_class": ["IfcWall"]},
+      "field": "area_m2",
+      "aggregation": "sum",
+      "assumption": "Net wall area of all walls."
+    }
+  },
+  "rules": [
+    {"id": "foundation", "kind": "model", "cost_group": "320", "label": "Gründung", "cost_query": {"de": "Fundament Stahlbeton"}, "unit": "m3",
+     "select": {"any_of": [{"ifc_class": ["IfcFooting", "IfcPile"]}, {"ifc_class": ["IfcSlab"], "type_key_prefix": ["slab/foundation"]}]}, "quantity": {"field": "volume_m3", "aggregation": "sum"}},
+    {"id": "wall_ext", "kind": "model", "cost_group": "330", "label": "Außenwände", "cost_query": {"de": "Außenwand Mauerwerk"}, "unit": "m2",
+     "select": {"ifc_class": ["IfcWall"], "type_key_prefix": ["wall/ext", "wall/gen-exterior"]}, "quantity": {"field": "area_m2", "aggregation": "sum"}},
+    {"id": "window", "kind": "model", "cost_group": "334", "label": "Fenster", "cost_query": {"de": "Fenster"}, "unit": "m2",
+     "select": {"ifc_class": ["IfcWindow"]}, "quantity": {"field": "area_m2", "aggregation": "sum"}},
+    {"id": "wall_int", "kind": "model", "cost_group": "340", "label": "Innenwände", "cost_query": {"de": "Innenwand"}, "unit": "m2",
+     "select": {"ifc_class": ["IfcWall"], "type_key_not_prefix": ["wall/ext", "wall/gen-exterior"]}, "quantity": {"field": "area_m2", "aggregation": "sum"}},
+    {"id": "door", "kind": "model", "cost_group": "344", "label": "Türen", "cost_query": {"de": "Innentür"}, "unit": "pcs",
+     "select": {"ifc_class": ["IfcDoor"]}, "quantity": {"field": "count", "aggregation": "sum"}},
+    {"id": "slab", "kind": "model", "cost_group": "350", "label": "Decken", "cost_query": {"de": "Geschossdecke Stahlbeton"}, "unit": "m2",
+     "select": {"ifc_class": ["IfcSlab"], "type_key_not_prefix": ["slab/foundation", "slab/roof"]}, "quantity": {"field": "area_m2", "aggregation": "sum"}},
+    {"id": "stair", "kind": "model", "cost_group": "350", "label": "Treppen", "cost_query": {"de": "Treppe"}, "unit": "pcs",
+     "select": {"ifc_class": ["IfcStair", "IfcStairFlight"]}, "quantity": {"field": "count", "aggregation": "sum"}},
+    {"id": "roof", "kind": "model", "cost_group": "360", "label": "Dächer", "cost_query": {"de": "Dach Dachdeckung"}, "unit": "m2",
+     "select": {"ifc_class": ["IfcRoof"]}, "quantity": {"field": "area_m2", "aggregation": "sum"}},
+
+    {"id": "reinforcement", "kind": "derived", "cost_group": "350", "label": "Bewehrung", "cost_query": {"de": "Betonstahl Bewehrung"}, "unit": "kg",
+     "formula": "concrete_volume_m3 * reinforcement_kg_per_m3",
+     "inputs": {"reinforcement_kg_per_m3": {"value": null, "unit": "kg/m3", "source": null}},
+     "rate": null, "missing": "No open published reinforcement ratio found."},
+    {"id": "finishes", "kind": "derived", "cost_group": "340", "label": "Oberflächen der Wände (beide Seiten)", "cost_query": {"de": "Putz Innenwand"}, "unit": "m2",
+     "formula": "wall_area_m2 * 2", "rate": null, "missing": "No open published finish unit rate found."},
+    {"id": "services", "kind": "derived", "cost_group": "400", "label": "Technische Anlagen (je m² Wohnfläche)", "cost_query": {"de": "Haustechnik"}, "unit": "m2",
+     "formula": "living_area_m2", "rate": null,
+     "missing": "No open source splits KG 400 from KG 300 (only the combined KG 300+400 exists)."},
+    {"id": "site_prep", "kind": "derived", "cost_group": "200", "label": "Herrichten und Erschließen (je m² Wohnfläche)", "unit": "m2",
+     "formula": "living_area_m2", "rate": {"benchmark": {"cost_group": "200", "basis": "WFL"}}},
+    {"id": "site_works", "kind": "derived", "cost_group": "500", "label": "Außenanlagen (je m² Wohnfläche)", "unit": "m2",
+     "formula": "living_area_m2", "rate": {"benchmark": {"cost_group": "500", "basis": "WFL"}}},
+    {"id": "ancillary", "kind": "derived", "cost_group": "700", "label": "Baunebenkosten (je m² Wohnfläche)", "unit": "m2",
+     "formula": "living_area_m2", "rate": {"benchmark": {"cost_group": "700", "basis": "WFL"}}}
+  ]
+}

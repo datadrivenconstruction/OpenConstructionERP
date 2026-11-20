@@ -2778,5 +2778,15 @@
       "fail": "Le fichier n'indique aucun soumissionnaire",
       "suggestion": "Saisissez la raison sociale du soumissionnaire dans les données du fichier"
     }
+  },
+  "design": {
+    "estimate_unpriced": {
+      "fail": "La position '{position}' n'a pas de prix unitaire, l'estimation de conception l'exclut donc.",
+      "suggestion": "Saisissez un prix unitaire ou choisissez un article de coût pour cette position."
+    },
+    "revision_awaiting_decision": {
+      "fail": "La révision de maquette {number} attend son acceptation depuis {days} jours.",
+      "suggestion": "Acceptez ou refusez la révision pour que l'estimation suive la maquette actuelle."
+    }
   }
 }

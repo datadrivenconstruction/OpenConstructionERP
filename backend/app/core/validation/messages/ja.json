@@ -2778,5 +2778,15 @@
       "fail": "ファイルに入札者の名称がありません",
       "suggestion": "ファイルの入札者情報に会社名を入力してください"
     }
+  },
+  "design": {
+    "estimate_unpriced": {
+      "fail": "項目 '{position}' に単価がないため、設計見積に含まれていません。",
+      "suggestion": "この項目の単価を入力するか、コスト項目を選択してください。"
+    },
+    "revision_awaiting_decision": {
+      "fail": "モデル改訂 {number} は {days} 日間承認を待っています。",
+      "suggestion": "見積が現在のモデルに従うよう、改訂を承認または却下してください。"
+    }
   }
 }

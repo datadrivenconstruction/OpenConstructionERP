@@ -2778,5 +2778,15 @@
       "fail": "Plik nie podaje wykonawcy",
       "suggestion": "Wpisz nazwę firmy w danych wykonawcy w pliku"
     }
+  },
+  "design": {
+    "estimate_unpriced": {
+      "fail": "Pozycja '{position}' nie ma ceny jednostkowej, dlatego kosztorys projektu ją pomija.",
+      "suggestion": "Wpisz cenę jednostkową lub wybierz pozycję kosztową dla tej pozycji."
+    },
+    "revision_awaiting_decision": {
+      "fail": "Rewizja modelu {number} czeka na akceptację od {days} dni.",
+      "suggestion": "Zaakceptuj lub odrzuć rewizję, aby kosztorys odpowiadał bieżącemu modelowi."
+    }
   }
 }

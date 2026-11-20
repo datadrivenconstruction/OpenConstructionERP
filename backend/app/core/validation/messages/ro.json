@@ -2778,5 +2778,15 @@
       "fail": "Fișierul nu indică ofertantul",
       "suggestion": "Introduceți denumirea firmei în datele ofertantului din fișier"
     }
+  },
+  "design": {
+    "estimate_unpriced": {
+      "fail": "Poziția '{position}' nu are preț unitar, deci estimarea de proiectare o omite.",
+      "suggestion": "Introduceți un preț unitar sau alegeți un articol de cost pentru această poziție."
+    },
+    "revision_awaiting_decision": {
+      "fail": "Revizia de model {number} așteaptă acceptarea de {days} zile.",
+      "suggestion": "Acceptați sau respingeți revizia, ca estimarea să urmeze modelul actual."
+    }
   }
 }
