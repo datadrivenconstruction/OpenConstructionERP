@@ -13,6 +13,8 @@
  * Route: /projects/:projectId/bim  or  /bim
  */
 
+import { DesignOffer } from '@/modules/design/DesignOffer';
+import { ImportAsk } from '@/modules/design/ImportAsk';
 import { Fragment, useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import clsx from 'clsx';
 import { useTranslation } from 'react-i18next';
@@ -337,9 +339,12 @@ function ModelFilmstrip({ models, isLoading, activeModelId, onSelectModel, onDel
                 onDelete={() => onDeleteModel(m.id, m.name)} />
             ))
           ) : (
-            <span className="text-2xs text-content-quaternary">
-              {t('bim.no_models_yet', { defaultValue: 'No models uploaded yet' })}
-            </span>
+            <>
+              <span className="text-2xs text-content-quaternary">
+                {t('bim.no_models_yet', { defaultValue: 'No models uploaded yet' })}
+              </span>
+              <DesignOffer variant="empty" />
+            </>
           )}
           {/* Add model button */}
           <button
@@ -1961,6 +1966,7 @@ function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrum
                     </a>
                   </div>
                 </div>
+                <DesignOffer variant="empty" />
               </div>
             </div>
           </div>
@@ -2132,9 +2138,12 @@ function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrum
           </div>
           <div className="flex items-center gap-2 px-4 pb-2.5 overflow-x-auto">
             {(!landingModels || landingModels.length === 0) && (
-              <span className="text-2xs text-content-quaternary italic py-1">
-                {t('bim.no_models_yet', { defaultValue: 'No models uploaded yet' })}
-              </span>
+              <>
+                <span className="text-2xs text-content-quaternary italic py-1">
+                  {t('bim.no_models_yet', { defaultValue: 'No models uploaded yet' })}
+                </span>
+                <DesignOffer variant="empty" />
+              </>
             )}
             {(landingModels ?? []).map((m) => {
               const fmt = (m.model_format || m.format || '').toUpperCase();
@@ -3592,6 +3601,7 @@ export function BIMPage() {
       <>
         <LandingPage projectId={projectId} onUploadComplete={handleUploadComplete} breadcrumbItems={breadcrumbItems} models={models} onSelectModel={(id) => { setActiveModelId(id); setShowUploadOverride(false); setSelectedElementId(null); setMultiSelectedIds([]); }} onDeleteModel={handleDeleteModel} />
         <ConfirmDialog {...confirmProps} />
+        {projectId && <ImportAsk projectId={projectId} />}
       </>
     );
   }
@@ -4639,6 +4649,7 @@ export function BIMPage() {
         />
       )}
       <ConfirmDialog {...confirmProps} />
+      {projectId && <ImportAsk projectId={projectId} />}
     </div>
   );
 }
