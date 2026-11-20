@@ -589,26 +589,6 @@ export const navGroups: NavGroup[] = [
           'Trade and supply packages: invite bidders, level bids with plugs, award to a subcontract or a purchase order.',
       },
       {
-        labelKey: 'nav.supplier_rfq',
-        defaultLabel: 'Supplier RFQ',
-        to: '/rfq-bidding',
-        icon: Scale,
-        advancedOnly: true,
-        helpKey: 'sidebar.help.supplier_rfq',
-        defaultHelp: 'Ask suppliers for quotes on materials and services and award to a purchase order.',
-      },
-      {
-        labelKey: 'nav.main_contract_tender',
-        defaultLabel: 'Main contract tender',
-        to: '/tendering',
-        icon: FileText,
-        moduleKey: 'tendering',
-        advancedOnly: true,
-        helpKey: 'sidebar.help.main_contract_tender',
-        defaultHelp:
-          'Tender the main contract from the bill of quantities; the winning rates go back into the BOQ.',
-      },
-      {
         labelKey: 'nav.quote_capture',
         defaultLabel: 'Quote capture',
         to: '/quotes',

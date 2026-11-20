@@ -184,7 +184,7 @@ const MEP_SECTIONS: readonly WorkspaceSection[] = [
     labelKey: 'workspace.section.procurement',
     defaultLabel: 'Procurement and logistics',
     id: 'procurement',
-    rows: [{ to: '/procurement' }, { to: '/rfq-bidding' }, { to: '/site-logistics' }],
+    rows: [{ to: '/procurement' }, { to: '/tenders' }, { to: '/site-logistics' }],
   },
   {
     labelKey: 'workspace.section.commercial',

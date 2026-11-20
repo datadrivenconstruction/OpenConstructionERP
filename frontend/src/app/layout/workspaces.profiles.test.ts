@@ -67,7 +67,7 @@ const MEP_SECTIONS: Array<[string, string[]]> = [
     ['/daily-diary', '/correspondence', '/rfi', '/meetings', '/schedule', '/field-time', '/contacts'],
   ],
   ['engineering', ['/submittals', '/transmittals', '/sheets', '/files']],
-  ['procurement', ['/procurement', '/rfq-bidding', '/site-logistics']],
+  ['procurement', ['/procurement', '/tenders', '/site-logistics']],
   [
     'commercial',
     [
@@ -133,7 +133,7 @@ describe('the MEP contractor workspace', () => {
       ['/daily-diary', ['/field-reports']],
       ['/variations', ['/changeorders', '/moc']],
       ['/construction-control', ['/inspections', '/qms']],
-      ['/procurement', ['/supplier-catalogs', '/tendering', '/bid-management']],
+      ['/procurement', ['/supplier-catalogs', '/bid-management']],
     ];
     for (const [shown, others] of overlaps) {
       expect(routes.has(shown), shown).toBe(true);

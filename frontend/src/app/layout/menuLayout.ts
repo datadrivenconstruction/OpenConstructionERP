@@ -36,7 +36,7 @@ export interface MenuLayout {
 export const DEFAULT_MODE_ITEMS: Record<Exclude<MenuModeId, 'all'>, string[]> = {
   estimator: [
     '/', '/projects', '/takeoff?tab=measurements', '/dwg-takeoff', '/quantities', '/boq',
-    '/costs', '/assemblies', '/cost-match', '/tendering', '/quotes', '/validation',
+    '/costs', '/assemblies', '/cost-match', '/tenders', '/quotes', '/validation',
   ],
   site_manager: [
     '/', '/projects', '/daily-diary', '/schedule', '/tasks', '/rfi',

@@ -13,6 +13,7 @@ Gated by ``OE_TEST_DB=pg`` (see conftest).
 from __future__ import annotations
 
 import uuid
+from datetime import UTC, datetime
 from decimal import Decimal
 
 import pytest
@@ -528,3 +529,37 @@ async def test_a_failing_package_does_not_stop_the_batch(pg_session, monkeypatch
     assert outcomes[str(good.id)] == "copied"
     assert outcomes[str(bad.id)] == "failed"
     assert not report.ok
+
+
+async def test_the_tender_card_reads_a_copy_with_every_tab(pg_session) -> None:
+    from app.modules.bid_management.tenders import get_tender, list_tenders
+
+    project = await _project(pg_session)
+    package, _ = await _tender(pg_session, project)
+    pg_session.add(
+        TenderClarification(
+            package_id=package.id, number=1, question="Fire rating?", asked_at=datetime(2026, 12, 1, tzinfo=UTC)
+        )
+    )
+    await pg_session.flush()
+    await _copy(pg_session)
+    owner = str(project.owner_id)
+
+    rows = await list_tenders(
+        pg_session,
+        owner,
+        project_id=project.id,
+        kind=None,
+        source=None,
+        status_filter=None,
+        offset=0,
+        limit=100,
+        _perm=None,
+    )
+    (row,) = rows
+    assert (row.source, row.bid_count, row.lowest_total) == ("tendering", 2, Decimal("148200.00"))
+
+    card = await get_tender(row.id, pg_session, owner, _perm=None)
+    assert card.read_only and card.source_id == str(package.id)
+    assert (len(card.line_items), len(card.bidders), len(card.submissions)) == (2, 2, 2)
+    assert [q.question for q in card.questions] == ["Fire rating?"]

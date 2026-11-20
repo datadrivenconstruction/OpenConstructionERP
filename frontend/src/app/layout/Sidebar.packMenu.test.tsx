@@ -107,7 +107,7 @@ describe('Sidebar with a framework pack', () => {
     for (const kept of ['/site-logistics', '/costs', '/boq', '/takeoff', '/dwg-takeoff', '/bim', '/schedule']) {
       expect(next).not.toContain(kept);
     }
-    for (const kept of ['/validation', '/tendering', '/reports', '/', '/projects', '/settings', '/users', '/about']) {
+    for (const kept of ['/validation', '/tenders', '/reports', '/', '/projects', '/settings', '/users', '/about']) {
       expect(next).not.toContain(kept);
     }
     expect(next.every((entry) => !entry.startsWith('grp_'))).toBe(true);
