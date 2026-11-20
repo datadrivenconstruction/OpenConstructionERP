@@ -653,7 +653,7 @@ export function BidDayPage() {
     <div className="space-y-5 animate-fade-in pb-16">
       <Breadcrumb
         items={[
-          { label: t('tendering.title', { defaultValue: 'Tendering' }), to: '/tendering' },
+          { label: t('tendering.title', { defaultValue: 'Tendering' }), to: '/tenders' },
           { label: board.tender_name },
           { label: t('bid_day.title', { defaultValue: 'Bid day' }) },
         ]}
@@ -1094,7 +1094,7 @@ export function BidDayPage() {
       )}
 
       <p className="text-center text-2xs text-content-tertiary">
-        <Link to="/tendering" className="hover:underline">{t('bid_day.back', { defaultValue: 'Back to tendering' })}</Link>
+        <Link to="/tenders" className="hover:underline">{t('bid_day.back', { defaultValue: 'Back to tendering' })}</Link>
       </p>
     </div>
   );

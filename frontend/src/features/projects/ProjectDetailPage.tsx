@@ -1823,7 +1823,7 @@ export function ProjectDetailPage() {
 
   const { data: tenderPackages, isLoading: tenderingLoading } = useQuery({
     queryKey: ['tenderPackages', projectId],
-    queryFn: () => apiGet<TenderPackage[]>(`/v1/tendering/packages/?project_id=${projectId}`),
+    queryFn: () => apiGet<TenderPackage[]>(`/v1/bid-management/tenders/main-contract/packages/?project_id=${projectId}`),
     enabled: !!projectId && activeTab === 'tendering',
   });
 
@@ -3496,7 +3496,7 @@ export function ProjectDetailPage() {
                 size="sm"
                 icon={<ExternalLink size={14} />}
                 iconPosition="right"
-                onClick={() => navigate('/tendering')}
+                onClick={() => navigate('/tenders')}
               >
                 {t('projects.open_tendering', { defaultValue: 'Open Tendering' })}
               </Button>
@@ -3519,7 +3519,7 @@ export function ProjectDetailPage() {
                     variant="primary"
                     size="md"
                     icon={<Plus size={16} />}
-                    onClick={() => navigate('/tendering')}
+                    onClick={() => navigate('/tenders')}
                   >
                     {t('tendering.new_package', { defaultValue: 'New Tender Package' })}
                   </Button>

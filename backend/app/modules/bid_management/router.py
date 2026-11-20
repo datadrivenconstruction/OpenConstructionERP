@@ -1234,3 +1234,8 @@ async def notify_rejection(
 from app.modules.bid_management.tenders import router as _tenders_router  # noqa: E402
 
 router.include_router(_tenders_router)
+
+# ── Tenders: main contract and RFQ routes under the canonical tenders API ──
+from app.modules.bid_management.tender_routes import build_canonical_router  # noqa: E402
+
+router.include_router(build_canonical_router(), prefix="/tenders")

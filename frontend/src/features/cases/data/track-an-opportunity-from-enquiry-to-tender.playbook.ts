@@ -187,9 +187,9 @@ const playbook: Playbook = {
         "cases.track_an_opportunity_from_enquiry_to_tender.step.tender.why",
       whyDefault:
         "The commercial thread should run unbroken from first enquiry to submitted price. A gap is where scope and margin leak out.",
-      moduleLabel: "Tendering",
-      moduleLabelKey: "nav.tendering",
-      to: "/tendering",
+      moduleLabel: "Tenders",
+      moduleLabelKey: "tenders.title",
+      to: "/tenders",
     },
   ],
 };

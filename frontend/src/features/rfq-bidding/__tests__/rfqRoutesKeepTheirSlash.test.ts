@@ -43,40 +43,40 @@ beforeEach(() => {
 describe('RFQ bidding routes carry the trailing slash the server declares', () => {
   it('issues and validates an RFQ', async () => {
     await issueRFQ('r-1');
-    expect(apiPost).toHaveBeenCalledWith('/v1/rfq-bidding/r-1/issue/');
+    expect(apiPost).toHaveBeenCalledWith('/v1/bid-management/tenders/rfq/r-1/issue/');
     await validateRFQ('r-1');
-    expect(apiGet).toHaveBeenCalledWith('/v1/rfq-bidding/r-1/validate/');
+    expect(apiGet).toHaveBeenCalledWith('/v1/bid-management/tenders/rfq/r-1/validate/');
   });
 
   it('reads and adds scope lines, unwrapping the server page', async () => {
     vi.mocked(apiGet).mockResolvedValueOnce({ items: [{ id: 'l-1' }], total: 1 });
     const lines = await fetchScopeLines('r-1');
-    expect(apiGet).toHaveBeenCalledWith('/v1/rfq-bidding/r-1/lines/');
+    expect(apiGet).toHaveBeenCalledWith('/v1/bid-management/tenders/rfq/r-1/lines/');
     expect(lines).toEqual([{ id: 'l-1' }]);
     await addScopeLine('r-1', { description: 'Concrete', quantity: 1, unit: 'm3' } as never);
-    expect(apiPost).toHaveBeenCalledWith('/v1/rfq-bidding/r-1/lines/', expect.anything());
+    expect(apiPost).toHaveBeenCalledWith('/v1/bid-management/tenders/rfq/r-1/lines/', expect.anything());
   });
 
   it('reads the award and the comparison', async () => {
     await fetchAward('r-1');
-    expect(apiGet).toHaveBeenCalledWith('/v1/rfq-bidding/r-1/award/');
+    expect(apiGet).toHaveBeenCalledWith('/v1/bid-management/tenders/rfq/r-1/award/');
     await fetchComparison('r-1');
-    expect(apiGet).toHaveBeenCalledWith('/v1/rfq-bidding/r-1/comparison/');
+    expect(apiGet).toHaveBeenCalledWith('/v1/bid-management/tenders/rfq/r-1/comparison/');
   });
 
   it('lists the bids of one RFQ', async () => {
     await fetchBids('r-1');
-    expect(apiGet).toHaveBeenCalledWith('/v1/rfq-bidding/bids/?rfq_id=r-1');
+    expect(apiGet).toHaveBeenCalledWith('/v1/bid-management/tenders/rfq/bids/?rfq_id=r-1');
   });
 
   it('submits, evaluates and awards a bid', async () => {
     const bid = { rfq_id: 'r-1', bidder_contact_id: 'c-1', bid_amount: '1250.00', currency_code: 'EUR' };
     await submitBid(bid);
     // BidCreate requires bidder_contact_id and bid_amount and drops unknown keys.
-    expect(apiPost).toHaveBeenCalledWith('/v1/rfq-bidding/bids/', bid);
+    expect(apiPost).toHaveBeenCalledWith('/v1/bid-management/tenders/rfq/bids/', bid);
     await evaluateBid('b-1');
-    expect(apiPost).toHaveBeenCalledWith('/v1/rfq-bidding/bids/b-1/evaluate/');
+    expect(apiPost).toHaveBeenCalledWith('/v1/bid-management/tenders/rfq/bids/b-1/evaluate/');
     await awardBid('b-1');
-    expect(apiPost).toHaveBeenCalledWith('/v1/rfq-bidding/bids/b-1/award/');
+    expect(apiPost).toHaveBeenCalledWith('/v1/bid-management/tenders/rfq/bids/b-1/award/');
   });
 });

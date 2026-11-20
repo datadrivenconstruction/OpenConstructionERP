@@ -39,7 +39,7 @@ export async function fetchLinkTargets(projectId: string, kind: LinkKind): Promi
       return rows.map((b) => ({ id: b.id, code: b.code, title: b.title }));
     }
     case 'tender_package': {
-      const rows = await apiGet<Array<{ id: string; name: string }>>(`/v1/tendering/packages/?project_id=${pid}`);
+      const rows = await apiGet<Array<{ id: string; name: string }>>(`/v1/bid-management/tenders/main-contract/packages/?project_id=${pid}`);
       return rows.map((r) => ({ id: r.id, code: '', title: r.name }));
     }
     case 'rfq': {

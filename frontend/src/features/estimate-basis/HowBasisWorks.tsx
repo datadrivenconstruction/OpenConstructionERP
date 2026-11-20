@@ -129,7 +129,7 @@ export function HowBasisWorks() {
           <span className="font-medium text-content-secondary">
             {t('estimate_basis.flow_feeds', { defaultValue: 'Feeds:' })}
           </span>{' '}
-          <ModLink to="/tendering">
+          <ModLink to="/tenders">
             {t('estimate_basis.mod_tendering', { defaultValue: 'Tendering' })}
           </ModLink>
         </span>

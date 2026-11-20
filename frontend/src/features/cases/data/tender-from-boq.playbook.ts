@@ -98,9 +98,9 @@ const playbook: Playbook = {
       whyKey: "cases.tender_from_boq.step.package.why",
       whyDefault:
         "The package is what makes an in-house estimate issuable. Building it from the BOQ keeps scope, quantities and your budget number stitched to the estimate you already stand behind.",
-      moduleLabel: "Tendering",
-      moduleLabelKey: "tendering.title",
-      to: "/tendering",
+      moduleLabel: "Tenders",
+      moduleLabelKey: "tenders.title",
+      to: "/tenders",
     },
     {
       id: "distribute",
@@ -133,9 +133,9 @@ const playbook: Playbook = {
       whyKey: "cases.tender_from_boq.step.distribute.why",
       whyDefault:
         "A wider field of qualified bidders is what sharpens the price. Issuing from a single list also leaves a clean audit of who was asked and on what date, which matters if the award is ever questioned.",
-      moduleLabel: "Tendering",
-      moduleLabelKey: "tendering.title",
-      to: "/tendering",
+      moduleLabel: "Tenders",
+      moduleLabelKey: "tenders.title",
+      to: "/tenders",
     },
     {
       id: "compare",
@@ -168,9 +168,9 @@ const playbook: Playbook = {
       whyKey: "cases.tender_from_boq.step.compare.why",
       whyDefault:
         "The lowest bottom line is often the riskiest, not the best. Comparing rate against rate exposes the missing item, the keying error and the suicide price before you sign anything.",
-      moduleLabel: "Tendering",
-      moduleLabelKey: "tendering.title",
-      to: "/tendering",
+      moduleLabel: "Tenders",
+      moduleLabelKey: "tenders.title",
+      to: "/tenders",
     },
     {
       id: "award",
@@ -207,9 +207,9 @@ const playbook: Playbook = {
       whyKey: "cases.tender_from_boq.step.award.why",
       whyDefault:
         "Awarding ties the loop shut. Your estimate is refreshed with real market rates and procurement starts from live figures, so nobody rekeys a bill and nobody transposes a number.",
-      moduleLabel: "Tendering",
-      moduleLabelKey: "tendering.title",
-      to: "/tendering",
+      moduleLabel: "Tenders",
+      moduleLabelKey: "tenders.title",
+      to: "/tenders",
     },
   ],
 };

@@ -75,23 +75,23 @@ export interface ProjectDocumentOption {
 }
 
 export function fetchBillSource(packageId: string): Promise<BillSourceState> {
-  return apiGet(`/v1/tendering/packages/${packageId}/bill-source/`);
+  return apiGet(`/v1/bid-management/tenders/main-contract/packages/${packageId}/bill-source/`);
 }
 
 export function listPackageDocuments(packageId: string): Promise<PackageDocument[]> {
-  return apiGet<Page<PackageDocument>>(`/v1/tendering/packages/${packageId}/documents/`).then((page) => page.items);
+  return apiGet<Page<PackageDocument>>(`/v1/bid-management/tenders/main-contract/packages/${packageId}/documents/`).then((page) => page.items);
 }
 
 export function attachPackageDocuments(packageId: string, documentIds: string[]): Promise<PackageDocument[]> {
-  return apiPost(`/v1/tendering/packages/${packageId}/documents/`, { document_ids: documentIds });
+  return apiPost(`/v1/bid-management/tenders/main-contract/packages/${packageId}/documents/`, { document_ids: documentIds });
 }
 
 export function detachPackageDocument(packageId: string, linkId: string): Promise<void> {
-  return apiDelete(`/v1/tendering/packages/${packageId}/documents/${linkId}/`);
+  return apiDelete(`/v1/bid-management/tenders/main-contract/packages/${packageId}/documents/${linkId}/`);
 }
 
 export function listBidFiles(packageId: string): Promise<BidFile[]> {
-  return apiGet<Page<BidFile>>(`/v1/tendering/packages/${packageId}/bid-files/`).then((page) => page.items);
+  return apiGet<Page<BidFile>>(`/v1/bid-management/tenders/main-contract/packages/${packageId}/bid-files/`).then((page) => page.items);
 }
 
 export async function searchProjectDocuments(projectId: string, search: string): Promise<ProjectDocumentOption[]> {
@@ -115,7 +115,7 @@ export class AwardExportError extends Error {
 
 async function downloadAuthed(path: string, filename: string): Promise<void> {
   const token = getAuthToken();
-  const res = await fetch(`/api/v1/tendering/${path}`, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
+  const res = await fetch(`/api/v1/bid-management/tenders/main-contract/${path}`, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
   if (!res.ok) {
     let detail: unknown = null;
     try {

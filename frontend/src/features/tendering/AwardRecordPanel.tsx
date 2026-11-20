@@ -409,7 +409,7 @@ export function AwardRecordPanel({ packageId }: Props) {
   const handleDownload = async () => {
     try {
       const token = getAuthToken();
-      const response = await fetch(`/api/v1/tendering/packages/${packageId}/award-record/pdf/`, {
+      const response = await fetch(`/api/v1/bid-management/tenders/main-contract/packages/${packageId}/award-record/pdf/`, {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
       if (!response.ok) {

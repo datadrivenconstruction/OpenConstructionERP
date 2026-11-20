@@ -358,7 +358,7 @@ function HowCrmWorks() {
             {t('crm.mod_contracts', { defaultValue: 'Contracts' })}
           </ModLink>{' '}
           ·{' '}
-          <ModLink to="/tendering">
+          <ModLink to="/tenders">
             {t('crm.mod_tendering', { defaultValue: 'Tendering' })}
           </ModLink>
         </span>

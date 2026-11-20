@@ -585,7 +585,7 @@ function CreatePackageDialog({
 
   const createMutation = useMutation({
     mutationFn: () =>
-      apiPost<TenderPackage>('/v1/tendering/packages/', {
+      apiPost<TenderPackage>('/v1/bid-management/tenders/main-contract/packages/', {
         project_id: projectId,
         boq_id: boqId,
         name,
@@ -710,7 +710,7 @@ function AddBidDialog({
 
   const createMutation = useMutation({
     mutationFn: () =>
-      apiPost<BidData>(`/v1/tendering/packages/${packageId}/bids/`, {
+      apiPost<BidData>(`/v1/bid-management/tenders/main-contract/packages/${packageId}/bids/`, {
         company_name: companyName,
         contact_email: contactEmail,
         total_amount: totalAmount || '0',
@@ -1579,7 +1579,7 @@ function PackageDetail({
   // Fetch package with bids
   const { data: pkg, isLoading: pkgLoading, isError: pkgError } = useQuery({
     queryKey: ['tendering-package', packageId],
-    queryFn: () => apiGet<PackageWithBids>(`/v1/tendering/packages/${packageId}`),
+    queryFn: () => apiGet<PackageWithBids>(`/v1/bid-management/tenders/main-contract/packages/${packageId}`),
   });
 
   // Which part of the bill this package was raised over. Levelling already
@@ -1633,7 +1633,7 @@ function PackageDetail({
     error: comparisonErr,
   } = useQuery({
     queryKey: ['tendering-comparison', packageId],
-    queryFn: () => apiGet<BidComparison>(`/v1/tendering/packages/${packageId}/comparison/`),
+    queryFn: () => apiGet<BidComparison>(`/v1/bid-management/tenders/main-contract/packages/${packageId}/comparison/`),
   });
 
   // Award mutation — routes through the dedicated apply-winner endpoint so
@@ -1644,7 +1644,7 @@ function PackageDetail({
   const awardMutation = useMutation({
     mutationFn: (bidId: string) =>
       apiPost<AwardResult>(
-        `/v1/tendering/packages/${packageId}/apply-winner/?bid_id=${bidId}`,
+        `/v1/bid-management/tenders/main-contract/packages/${packageId}/apply-winner/?bid_id=${bidId}`,
         {},
       ),
     onSuccess: (result) => {
@@ -1680,7 +1680,7 @@ function PackageDetail({
   // package opts in, since a bidder's price is commercial information.
   const discloseMutation = useMutation({
     mutationFn: (disclose: boolean) =>
-      apiPatch<TenderPackage>(`/v1/tendering/packages/${packageId}`, {
+      apiPatch<TenderPackage>(`/v1/bid-management/tenders/main-contract/packages/${packageId}`, {
         metadata: { disclose_award_sum: disclose },
       }),
     onSuccess: () => {
@@ -1694,7 +1694,7 @@ function PackageDetail({
   // Update package status
   const updateStatusMutation = useMutation({
     mutationFn: (newStatus: string) =>
-      apiPatch<TenderPackage>(`/v1/tendering/packages/${packageId}`, {
+      apiPatch<TenderPackage>(`/v1/bid-management/tenders/main-contract/packages/${packageId}`, {
         status: newStatus,
       }),
     onSuccess: () => {
@@ -1869,7 +1869,7 @@ function PackageDetail({
     try {
       const token = getAuthToken();
       const r = await fetch(
-        `/api/v1/tendering/packages/${packageId}/export/pdf/`,
+        `/api/v1/bid-management/tenders/main-contract/packages/${packageId}/export/pdf/`,
         { headers: token ? { Authorization: `Bearer ${token}` } : {} },
       );
       if (!r.ok) {
@@ -1898,7 +1898,7 @@ function PackageDetail({
       try {
         const token = getAuthToken();
         const r = await fetch(
-          `/api/v1/tendering/packages/${packageId}/bids/${bidId}/${kind}/pdf/`,
+          `/api/v1/bid-management/tenders/main-contract/packages/${packageId}/bids/${bidId}/${kind}/pdf/`,
           { headers: token ? { Authorization: `Bearer ${token}` } : {} },
         );
         if (!r.ok) {
@@ -1921,7 +1921,7 @@ function PackageDetail({
     try {
       const token = getAuthToken();
       // The package's own lines, not the whole source bill.
-      const r = await fetch(`/api/v1/tendering/packages/${packageId}/export/gaeb-x83/`, {
+      const r = await fetch(`/api/v1/bid-management/tenders/main-contract/packages/${packageId}/export/gaeb-x83/`, {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
       if (!r.ok) {
@@ -1946,7 +1946,7 @@ function PackageDetail({
       try {
         const token = getAuthToken();
         const r = await fetch(
-          `/api/v1/tendering/packages/${packageId}/${path}?locale=${encodeURIComponent(i18n.language || 'en')}`,
+          `/api/v1/bid-management/tenders/main-contract/packages/${packageId}/${path}?locale=${encodeURIComponent(i18n.language || 'en')}`,
           { headers: token ? { Authorization: `Bearer ${token}` } : {} },
         );
         if (!r.ok) {
@@ -2102,7 +2102,7 @@ function PackageDetail({
                 variant="secondary"
                 size="sm"
                 icon={<Scale size={14} />}
-                onClick={() => navigate(`/tendering/${pkg.id}/bid-no-bid`)}
+                onClick={() => navigate(`/tenders/${pkg.id}/bid-no-bid`)}
                 data-testid="bid-no-bid-open"
                 title={t('bid_no_bid.open_hint', {
                   defaultValue: 'Score client, capacity, risk, margin and competition, then decide whether to bid',
@@ -2116,7 +2116,7 @@ function PackageDetail({
                 variant="primary"
                 size="sm"
                 icon={<Timer size={14} />}
-                onClick={() => navigate(`/tendering/${pkg.id}/bid-day`)}
+                onClick={() => navigate(`/tenders/${pkg.id}/bid-day`)}
                 data-testid="bid-day-open"
                 title={t('bid_day.open_hint', {
                   defaultValue: 'Live board for the last hours before submission: quotes, choices, markups and the bid total',
@@ -2896,7 +2896,7 @@ export function TenderingPage() {
     queryKey: ['tendering-packages', selectedProjectId],
     queryFn: () =>
       apiGet<TenderPackage[]>(
-        `/v1/tendering/packages/?project_id=${selectedProjectId}`,
+        `/v1/bid-management/tenders/main-contract/packages/?project_id=${selectedProjectId}`,
       ),
     enabled: !!selectedProjectId,
   });

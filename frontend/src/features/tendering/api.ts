@@ -3,7 +3,7 @@
 /**
  * API helpers for the Tendering module — integrated-5D-estimating-suite-style addenda + bid leveling.
  *
- * Backed by /api/v1/tendering/ — see backend/app/modules/tendering/router.py
+ * Backed by /api/v1/bid-management/tenders/main-contract/ — see backend/app/modules/tendering/router.py
  */
 
 import {
@@ -145,18 +145,18 @@ export interface LevelBidsResponse {
 /* ── Addenda ──────────────────────────────────────────────────────────── */
 
 export function listAddenda(packageId: string): Promise<Addendum[]> {
-  return apiGet<Addendum[]>(`/v1/tendering/packages/${packageId}/addenda/`);
+  return apiGet<Addendum[]>(`/v1/bid-management/tenders/main-contract/packages/${packageId}/addenda/`);
 }
 
 export function createAddendum(
   packageId: string,
   body: AddendumCreateBody,
 ): Promise<Addendum> {
-  return apiPost<Addendum>(`/v1/tendering/packages/${packageId}/addenda/`, body);
+  return apiPost<Addendum>(`/v1/bid-management/tenders/main-contract/packages/${packageId}/addenda/`, body);
 }
 
 export function publishAddendum(addendumId: string): Promise<Addendum> {
-  return apiPost<Addendum>(`/v1/tendering/addenda/${addendumId}/publish/`, {});
+  return apiPost<Addendum>(`/v1/bid-management/tenders/main-contract/addenda/${addendumId}/publish/`, {});
 }
 
 /** Minimal bidder shape needed to record an addendum acknowledgement. */
@@ -169,7 +169,7 @@ export function listPackageBidders(
   packageId: string,
 ): Promise<BidderSummary[]> {
   return apiGet<BidderSummary[]>(
-    `/v1/tendering/packages/${packageId}/bids/`,
+    `/v1/bid-management/tenders/main-contract/packages/${packageId}/bids/`,
   );
 }
 
@@ -177,7 +177,7 @@ export function acknowledgeAddendum(
   addendumId: string,
   bidderId: string,
 ): Promise<Addendum> {
-  return apiPost<Addendum>(`/v1/tendering/addenda/${addendumId}/acknowledge/`, {
+  return apiPost<Addendum>(`/v1/bid-management/tenders/main-contract/addenda/${addendumId}/acknowledge/`, {
     bidder_id: bidderId,
   });
 }
@@ -206,7 +206,7 @@ export interface Clarification {
 export async function listClarifications(packageId: string): Promise<Clarification[]> {
   const { items } = await fetchAllPages<Clarification>((offset, limit) =>
     apiGet<{ items: Clarification[] }>(
-      `/v1/tendering/packages/${packageId}/clarifications/?offset=${offset}&limit=${limit}`,
+      `/v1/bid-management/tenders/main-contract/packages/${packageId}/clarifications/?offset=${offset}&limit=${limit}`,
     ),
   );
   return items;
@@ -216,7 +216,7 @@ export function createClarification(
   packageId: string,
   body: { question: string; recipient_id?: string; asked_by_email?: string },
 ): Promise<Clarification> {
-  return apiPost<Clarification>(`/v1/tendering/packages/${packageId}/clarifications/`, body);
+  return apiPost<Clarification>(`/v1/bid-management/tenders/main-contract/packages/${packageId}/clarifications/`, body);
 }
 
 export function answerClarification(
@@ -224,21 +224,21 @@ export function answerClarification(
   clarificationId: string,
   answer: string,
 ): Promise<Clarification> {
-  return apiPost<Clarification>(`/v1/tendering/packages/${packageId}/clarifications/${clarificationId}/answer/`, { answer });
+  return apiPost<Clarification>(`/v1/bid-management/tenders/main-contract/packages/${packageId}/clarifications/${clarificationId}/answer/`, { answer });
 }
 
 export function publishClarification(
   packageId: string,
   clarificationId: string,
 ): Promise<Clarification> {
-  return apiPost<Clarification>(`/v1/tendering/packages/${packageId}/clarifications/${clarificationId}/publish/`, {});
+  return apiPost<Clarification>(`/v1/bid-management/tenders/main-contract/packages/${packageId}/clarifications/${clarificationId}/publish/`, {});
 }
 
 export function promoteClarification(
   packageId: string,
   clarificationId: string,
 ): Promise<Addendum> {
-  return apiPost<Addendum>(`/v1/tendering/packages/${packageId}/clarifications/${clarificationId}/promote/`, {});
+  return apiPost<Addendum>(`/v1/bid-management/tenders/main-contract/packages/${packageId}/clarifications/${clarificationId}/promote/`, {});
 }
 
 /* ── Timeline and jurisdiction rules ──────────────────────────────────── */
@@ -273,7 +273,7 @@ export interface TenderTimeline {
 }
 
 export function getTenderTimeline(packageId: string): Promise<TenderTimeline> {
-  return apiGet<TenderTimeline>(`/v1/tendering/packages/${packageId}/timeline/`);
+  return apiGet<TenderTimeline>(`/v1/bid-management/tenders/main-contract/packages/${packageId}/timeline/`);
 }
 
 export interface AddendaValidationResult {
@@ -293,21 +293,21 @@ export interface AddendaValidation {
 }
 
 export function getAddendaValidation(packageId: string): Promise<AddendaValidation> {
-  return apiGet<AddendaValidation>(`/v1/tendering/packages/${packageId}/addenda/validation/`);
+  return apiGet<AddendaValidation>(`/v1/bid-management/tenders/main-contract/packages/${packageId}/addenda/validation/`);
 }
 
 /* ── Bid leveling ─────────────────────────────────────────────────────── */
 
 export function levelBids(packageId: string): Promise<LevelBidsResponse> {
   return apiPost<LevelBidsResponse>(
-    `/v1/tendering/packages/${packageId}/level-bids/`,
+    `/v1/bid-management/tenders/main-contract/packages/${packageId}/level-bids/`,
     {},
   );
 }
 
 export function getLevelingMatrix(packageId: string): Promise<LevelingMatrix> {
   return apiGet<LevelingMatrix>(
-    `/v1/tendering/packages/${packageId}/leveling-matrix/`,
+    `/v1/bid-management/tenders/main-contract/packages/${packageId}/leveling-matrix/`,
   );
 }
 
@@ -338,7 +338,7 @@ export interface PackageScope {
 }
 
 export function getPackageScope(packageId: string): Promise<PackageScope> {
-  return apiGet<PackageScope>(`/v1/tendering/packages/${packageId}/scope`);
+  return apiGet<PackageScope>(`/v1/bid-management/tenders/main-contract/packages/${packageId}/scope`);
 }
 
 /* ── Award record (Vergabevermerk) ─────────────────────────────────────── */
@@ -402,7 +402,7 @@ export interface AwardRecord {
 }
 
 export function getAwardRecord(packageId: string): Promise<AwardRecord> {
-  return apiGet<AwardRecord>(`/v1/tendering/packages/${packageId}/award-record/`);
+  return apiGet<AwardRecord>(`/v1/bid-management/tenders/main-contract/packages/${packageId}/award-record/`);
 }
 
 /**
@@ -414,7 +414,7 @@ export function recordAwardRecordNote(
   body: { section: string; text: string; value?: string },
 ): Promise<AwardRecord> {
   return apiPost<AwardRecord>(
-    `/v1/tendering/packages/${packageId}/award-record/notes/`,
+    `/v1/bid-management/tenders/main-contract/packages/${packageId}/award-record/notes/`,
     body,
   );
 }
@@ -457,7 +457,7 @@ export interface DistributeResponse {
 
 export function listRecipients(packageId: string): Promise<Recipient[]> {
   return apiGet<Recipient[]>(
-    `/v1/tendering/packages/${packageId}/recipients/`,
+    `/v1/bid-management/tenders/main-contract/packages/${packageId}/recipients/`,
   );
 }
 
@@ -466,7 +466,7 @@ export function addRecipient(
   body: { company_name: string; email: string; subcontractor_id?: string | null },
 ): Promise<Recipient> {
   return apiPost<Recipient>(
-    `/v1/tendering/packages/${packageId}/recipients/`,
+    `/v1/bid-management/tenders/main-contract/packages/${packageId}/recipients/`,
     body,
   );
 }
@@ -504,7 +504,7 @@ export async function importRecipients<T extends RecipientImportPreview | Recipi
 ): Promise<T> {
   const body = new FormData();
   body.append('file', file);
-  const url = `${API_BASE}/v1/tendering/packages/${packageId}/recipients/import/${confirm ? '' : 'preview/'}`;
+  const url = `${API_BASE}/v1/bid-management/tenders/main-contract/packages/${packageId}/recipients/import/${confirm ? '' : 'preview/'}`;
   const response = await fetchWithAuth(url, { method: 'POST', body });
   const payload = await response.json().catch(() => null);
   if (!response.ok) throw new Error(extractErrorMessageFromBody(payload) ?? `HTTP ${response.status}`);
@@ -516,7 +516,7 @@ export function removeRecipient(
   recipientId: string,
 ): Promise<void> {
   return apiDelete(
-    `/v1/tendering/packages/${packageId}/recipients/${recipientId}`,
+    `/v1/bid-management/tenders/main-contract/packages/${packageId}/recipients/${recipientId}`,
   );
 }
 
@@ -525,7 +525,7 @@ export function distributePackage(
   body: { recipient_ids?: string[]; resend?: boolean; message?: string },
 ): Promise<DistributeResponse> {
   return apiPost<DistributeResponse>(
-    `/v1/tendering/packages/${packageId}/distribute/`,
+    `/v1/bid-management/tenders/main-contract/packages/${packageId}/distribute/`,
     body,
   );
 }
@@ -579,19 +579,19 @@ export function setSubmissionMode(
   packageId: string,
   body: { mode: SubmissionMode; dual_opening: boolean },
 ): Promise<unknown> {
-  return apiPut<unknown>(`/v1/tendering/packages/${packageId}/submission-mode/`, body);
+  return apiPut<unknown>(`/v1/bid-management/tenders/main-contract/packages/${packageId}/submission-mode/`, body);
 }
 
 export function getSealedStatus(packageId: string): Promise<SealedStatus> {
-  return apiGet<SealedStatus>(`/v1/tendering/packages/${packageId}/sealed/`);
+  return apiGet<SealedStatus>(`/v1/bid-management/tenders/main-contract/packages/${packageId}/sealed/`);
 }
 
 export function openSealedBids(packageId: string): Promise<SealedStatus> {
-  return apiPost<SealedStatus>(`/v1/tendering/packages/${packageId}/sealed/open/`, {});
+  return apiPost<SealedStatus>(`/v1/bid-management/tenders/main-contract/packages/${packageId}/sealed/open/`, {});
 }
 
 export function getBidIntegrity(bidId: string): Promise<BidIntegrity> {
-  return apiGet<BidIntegrity>(`/v1/tendering/bids/${bidId}/integrity/`);
+  return apiGet<BidIntegrity>(`/v1/bid-management/tenders/main-contract/bids/${bidId}/integrity/`);
 }
 
 /** The backend error code (detail) of a failed call, or an empty string. */
@@ -644,7 +644,7 @@ export async function importX84Bid<T>(
     body.append('company_name', company.name);
     body.append('contact_email', company.email);
   }
-  const url = `${API_BASE}/v1/tendering/packages/${packageId}/bids/import-x84/${company ? '' : 'preview/'}`;
+  const url = `${API_BASE}/v1/bid-management/tenders/main-contract/packages/${packageId}/bids/import-x84/${company ? '' : 'preview/'}`;
   const response = await fetchWithAuth(url, { method: 'POST', body });
   const payload = await response.json().catch(() => null);
   if (!response.ok) throw new Error(extractErrorMessageFromBody(payload) ?? `HTTP ${response.status}`);
@@ -736,7 +736,7 @@ export function packagePreviewQueryKey(packageId: string) {
 }
 
 export function getPackagePreview(packageId: string): Promise<PackagePreview> {
-  return apiGet<PackagePreview>(`/v1/tendering/packages/${packageId}/preview/`);
+  return apiGet<PackagePreview>(`/v1/bid-management/tenders/main-contract/packages/${packageId}/preview/`);
 }
 
 export interface PackageBudgetPatch {
@@ -747,17 +747,17 @@ export interface PackageBudgetPatch {
 }
 
 export function patchPackageBudget(packageId: string, body: PackageBudgetPatch): Promise<unknown> {
-  return apiPatch(`/v1/tendering/packages/${packageId}`, body);
+  return apiPatch(`/v1/bid-management/tenders/main-contract/packages/${packageId}`, body);
 }
 
 /* ── Delete or cancel a package (#575) ─────────────────────────────────── */
 
 export function deletePackage(packageId: string): Promise<void> {
-  return apiDelete(`/v1/tendering/packages/${packageId}`);
+  return apiDelete(`/v1/bid-management/tenders/main-contract/packages/${packageId}`);
 }
 
 export function cancelPackage(packageId: string, reason: string): Promise<unknown> {
-  return apiPost(`/v1/tendering/packages/${packageId}/cancel/`, { reason });
+  return apiPost(`/v1/bid-management/tenders/main-contract/packages/${packageId}/cancel/`, { reason });
 }
 
 /* ── Bids entered by the buyer (#573) ──────────────────────────────────── */
@@ -766,7 +766,7 @@ export function putBuyerPrices(
   bidId: string,
   body: { unit_prices: Record<string, string>; notes?: string },
 ): Promise<unknown> {
-  return apiPut(`/v1/tendering/bids/${bidId}/prices/`, body);
+  return apiPut(`/v1/bid-management/tenders/main-contract/bids/${bidId}/prices/`, body);
 }
 
 /* ── Package header, rejections in bulk, filing the award ─────────────── */
@@ -854,26 +854,26 @@ export interface FiledDocument {
 }
 
 export function getPackageHeader(packageId: string): Promise<PackageHeader> {
-  return apiGet<PackageHeader>(`/v1/tendering/packages/${packageId}/header/`);
+  return apiGet<PackageHeader>(`/v1/bid-management/tenders/main-contract/packages/${packageId}/header/`);
 }
 
 export function savePackageHeader(packageId: string, body: PackageHeaderInput): Promise<PackageHeader> {
-  return apiPut<PackageHeader>(`/v1/tendering/packages/${packageId}/header/`, body);
+  return apiPut<PackageHeader>(`/v1/bid-management/tenders/main-contract/packages/${packageId}/header/`, body);
 }
 
 export function getRejections(packageId: string): Promise<RejectionsPreview> {
-  return apiGet<RejectionsPreview>(`/v1/tendering/packages/${packageId}/rejections/`);
+  return apiGet<RejectionsPreview>(`/v1/bid-management/tenders/main-contract/packages/${packageId}/rejections/`);
 }
 
 export function sendRejections(packageId: string, bidIds: string[] = []): Promise<RejectionsSendResult> {
-  return apiPost<RejectionsSendResult>(`/v1/tendering/packages/${packageId}/rejections/send/`, {
+  return apiPost<RejectionsSendResult>(`/v1/bid-management/tenders/main-contract/packages/${packageId}/rejections/send/`, {
     bid_ids: bidIds,
   });
 }
 
 export function fileAwardDocuments(packageId: string): Promise<{ package_id: string; documents: FiledDocument[] }> {
   return apiPost<{ package_id: string; documents: FiledDocument[] }>(
-    `/v1/tendering/packages/${packageId}/award-documents/file/`,
+    `/v1/bid-management/tenders/main-contract/packages/${packageId}/award-documents/file/`,
     {},
   );
 }

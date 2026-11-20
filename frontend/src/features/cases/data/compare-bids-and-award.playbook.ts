@@ -63,9 +63,9 @@ const playbook: Playbook = {
       whyKey: "cases.compare_bids_and_award.step.open.why",
       whyDefault:
         "Bidders working from an earlier drawing set or a trimmed schedule are not competing on the same job. Nailing the common baseline now is what keeps the whole comparison downstream honest.",
-      moduleLabel: "Tendering",
-      moduleLabelKey: "nav.tendering",
-      to: "/tendering",
+      moduleLabel: "Tenders",
+      moduleLabelKey: "tenders.title",
+      to: "/tenders",
     },
     {
       id: "level",

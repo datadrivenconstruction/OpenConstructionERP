@@ -101,9 +101,9 @@ const playbook: Playbook = {
       whyKey: "cases.level_the_bids_and_buy_out_the_job.step.level.why",
       whyDefault:
         "The low bid is frequently the one that left the most out, and that is not dishonesty, it is two readings of the same drawings. Pricing the gaps is what turns three incomparable numbers into a decision, and it is the step a spreadsheet handles worst because the exclusions live in a letter and the numbers live in cells.",
-      moduleLabel: "Tendering",
-      moduleLabelKey: "tendering.title",
-      to: "/tendering",
+      moduleLabel: "Tenders",
+      moduleLabelKey: "tenders.title",
+      to: "/tenders",
     },
     {
       id: "award",
@@ -124,9 +124,9 @@ const playbook: Playbook = {
       whyKey: "cases.level_the_bids_and_buy_out_the_job.step.award.why",
       whyDefault:
         "On public and institutional work the reasoning gets read by somebody who was not in the room, sometimes months later. Writing it down while the comparison is in front of you takes minutes; reconstructing it from memory after a protest takes days and convinces nobody.",
-      moduleLabel: "Tendering",
-      moduleLabelKey: "tendering.title",
-      to: "/tendering",
+      moduleLabel: "Tenders",
+      moduleLabelKey: "tenders.title",
+      to: "/tenders",
     },
     {
       id: "buyout",

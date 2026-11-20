@@ -75,9 +75,9 @@ const playbook: Playbook = {
       whyKey: "cases.bid_for_a_government_works_contract_under_the_tenders_law.step.read.why",
       whyDefault:
         "Government bids are compared item by item against the authority's own numbering, so a bid that renumbers or merges items is hard to evaluate and easy to set aside. Keeping the issued structure intact also means an addendum landing three days before the deadline changes two lines rather than forcing a re-read of the whole bill.",
-      moduleLabel: "Tendering",
-      moduleLabelKey: "tendering.title",
-      to: "/tendering",
+      moduleLabel: "Tenders",
+      moduleLabelKey: "tenders.title",
+      to: "/tenders",
     },
     {
       id: "price",

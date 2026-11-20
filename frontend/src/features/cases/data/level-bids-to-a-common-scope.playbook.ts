@@ -109,9 +109,9 @@ const playbook: Playbook = {
       whyKey: "cases.level_bids_to_a_common_scope.step.compare.why",
       whyDefault:
         "A recommendation built on levelled numbers survives challenge. It shows the client you compared like for like and awarded on value rather than on whoever forgot the most.",
-      moduleLabel: "Tendering",
-      moduleLabelKey: "tendering.title",
-      to: "/tendering",
+      moduleLabel: "Tenders",
+      moduleLabelKey: "tenders.title",
+      to: "/tenders",
     },
   ],
 };

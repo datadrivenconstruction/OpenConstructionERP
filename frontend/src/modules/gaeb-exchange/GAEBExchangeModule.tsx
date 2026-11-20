@@ -542,7 +542,7 @@ export default function GAEBExchangeModule() {
           },
           {
             label: t('nav.tendering', { defaultValue: 'Tendering' }),
-            onClick: () => navigate('/tendering'),
+            onClick: () => navigate('/tenders'),
           },
         ]}
       >

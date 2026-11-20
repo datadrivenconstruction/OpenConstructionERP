@@ -47,9 +47,9 @@ const playbook: Playbook = {
       whyKey: "cases.build_a_preisspiegel_and_award.step.paket.why",
       whyDefault:
         "Every NU has to price the same positions with the same quantities. A package cut from the LV is what makes that true; three hand-made spreadsheet extracts are what makes a Preisspiegel impossible two weeks later.",
-      moduleLabel: "Tendering",
-      moduleLabelKey: "nav.tendering",
-      to: "/tendering",
+      moduleLabel: "Tenders",
+      moduleLabelKey: "tenders.title",
+      to: "/tenders",
     },
     {
       id: "nuwahl",
@@ -95,9 +95,9 @@ const playbook: Playbook = {
       whyKey: "cases.build_a_preisspiegel_and_award.step.anfrage.why",
       whyDefault:
         "The moment one NU prices a scope the others never saw, the comparison is dead and no amount of leveling brings it back. Issuing once and clarifying to everyone at once is what keeps all the columns answering the same question.",
-      moduleLabel: "Tendering",
-      moduleLabelKey: "nav.tendering",
-      to: "/tendering",
+      moduleLabel: "Tenders",
+      moduleLabelKey: "tenders.title",
+      to: "/tenders",
     },
     {
       id: "abgleich",
@@ -118,9 +118,9 @@ const playbook: Playbook = {
       whyKey: "cases.build_a_preisspiegel_and_award.step.abgleich.why",
       whyDefault:
         "This is the work the spreadsheet never does. Until the missing positions are priced back in, the lowest column belongs to whoever read the LV least carefully, and you meet the difference again as a Nachtrag once the trade is on site.",
-      moduleLabel: "Tendering",
-      moduleLabelKey: "nav.tendering",
-      to: "/tendering",
+      moduleLabel: "Tenders",
+      moduleLabelKey: "tenders.title",
+      to: "/tenders",
     },
     {
       id: "preisspiegel",
@@ -141,9 +141,9 @@ const playbook: Playbook = {
       whyKey: "cases.build_a_preisspiegel_and_award.step.preisspiegel.why",
       whyDefault:
         "A bottom line tells you what a firm will charge. The rows tell you whether they understood the job. A position priced at a third of everyone else is not a discount, it is a misreading that turns up later as a Nachtrag with your name on it.",
-      moduleLabel: "Tendering",
-      moduleLabelKey: "nav.tendering",
-      to: "/tendering",
+      moduleLabel: "Tenders",
+      moduleLabelKey: "tenders.title",
+      to: "/tenders",
     },
     {
       id: "vergabe",

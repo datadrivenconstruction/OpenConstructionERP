@@ -243,7 +243,7 @@ export const LIST_ANSWERS: Record<ListedKind, { path: string; payload: unknown; 
     currency: 'EUR',
   },
   tender_package: {
-    path: '/v1/tendering/packages/?project_id=p1&limit=100',
+    path: '/v1/bid-management/tenders/main-contract/packages/?project_id=p1&limit=100',
     payload: [TENDER_PACKAGE_ROW],
     id: 'tp1',
     label: 'Facade package',
@@ -257,7 +257,7 @@ export const LIST_ANSWERS: Record<ListedKind, { path: string; payload: unknown; 
     currency: 'EUR',
   },
   rfq: {
-    path: '/v1/rfq-bidding/?project_id=p1&limit=100',
+    path: '/v1/bid-management/tenders/rfq/?project_id=p1&limit=100',
     payload: paged(RFQ_ROW),
     id: 'rfq1',
     label: 'RFQ-0003 Lifts',

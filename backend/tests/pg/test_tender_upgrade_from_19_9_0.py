@@ -1,11 +1,12 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""PG: ``tmm01_tender_canonical_model`` upgrades a 19.9.0 or 19.10.0 database without losing a row.
+"""PG: ``tmm01_tender_canonical_model`` upgrades a 19.9.0 or 20.0.0 database without losing a row.
 
 The schema is put back into its 19.9.0 shape inside a rolled-back transaction:
 the columns and tables this revision adds are dropped, and so are the tendering
 columns and tables that arrived after 19.9.0, because the copy must read an old
-install that never had them. All three old models carry data: a tendering
+install that never had them. A 20.0.0 database keeps those, and its bid files
+and package documents must come through the upgrade untouched. All three old models carry data: a tendering
 package with bids, an RFQ with priced lines and an award, and a native
 bid-management package. After the upgrade every source row is still there,
 every old package has exactly one canonical copy, the reconcile is clean, and a
@@ -203,6 +204,27 @@ def _back_to(connection: Connection, release: str) -> None:
                 connection.execute(text(f'ALTER TABLE "{table}" DROP COLUMN "{name}" CASCADE'))
 
 
+def _seed_2000(connection: Connection, tender_id: str) -> None:
+    """Rows of the tables 20.0.0 added to tendering: a bidder's file and a sent document."""
+    from datetime import UTC, datetime
+
+    from app.modules.tendering.models import TenderBidFile, TenderPackageDocument
+
+    with Session(bind=connection, join_transaction_mode="create_savepoint") as s:
+        s.add(
+            TenderBidFile(
+                package_id=uuid.UUID(tender_id),
+                company_name="Nord",
+                kind="offer_pdf",
+                file_name="offer.pdf",
+                sha256="0" * 64,
+                uploaded_at=datetime(2027, 1, 5, 9, 0, tzinfo=UTC),
+            )
+        )
+        s.add(TenderPackageDocument(package_id=uuid.UUID(tender_id), document_id=uuid.uuid4()))
+        s.commit()
+
+
 def _upgrade(connection: Connection) -> None:
     with Operations.context(MigrationContext.configure(connection)):
         _revision().upgrade()
@@ -223,7 +245,7 @@ def _snapshot(connection: Connection, project: str) -> dict[str, int]:
     return out
 
 
-@pytest.mark.parametrize("release", ["19.9.0", "19.10.0"])
+@pytest.mark.parametrize("release", ["19.9.0", "20.0.0"])
 def test_tmm01_upgrades_an_older_database_with_every_row_kept(pg_conn: Connection, release: str) -> None:
     ids = _seed(pg_conn)
     if release != "19.9.0":
@@ -232,7 +254,9 @@ def test_tmm01_upgrades_an_older_database_with_every_row_kept(pg_conn: Connectio
             text("UPDATE oe_tendering_package SET trade = 'Drywall', bids_due = '2027-02-01' WHERE id = :i"),
             {"i": ids["tender"]},
         )
-    before = {t: _count(pg_conn, t) for t in _SOURCES}
+        _seed_2000(pg_conn, ids["tender"])
+    sources = (*_SOURCES, *(_TABLES_AFTER_1990 if release != "19.9.0" else ()))
+    before = {t: _count(pg_conn, t) for t in sources}
     native_before = _count(pg_conn, "oe_bid_management_package", "project_id = :p", p=ids["project"])
     _back_to(pg_conn, release)
     assert "legacy_source" not in {c["name"] for c in inspect(pg_conn).get_columns("oe_bid_management_package")}
@@ -241,7 +265,7 @@ def test_tmm01_upgrades_an_older_database_with_every_row_kept(pg_conn: Connectio
     _upgrade(pg_conn)
 
     after = _snapshot(pg_conn, ids["project"])
-    assert {t: after[t] for t in _SOURCES} == before  # nothing in the old modules was touched
+    assert {t: _count(pg_conn, t) for t in sources} == before  # nothing in the old modules was touched
     assert after["packages"] == native_before + 2  # one copy per old package, the native one kept
     for table, source in (("oe_tendering_package", ids["tender"]), ("oe_rfq_rfq", ids["rfq"])):
         assert _count(pg_conn, "oe_tender_legacy_map", "source_table = :t AND source_id = :s", t=table, s=source) == 1

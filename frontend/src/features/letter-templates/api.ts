@@ -69,7 +69,7 @@ export async function downloadTenderLetter(
   kind: 'award-letter' | 'rejection-letter',
   text: LetterText,
 ): Promise<Blob | null> {
-  const r = await fetchWithAuth(`${API_BASE}/v1/tendering/packages/${packageId}/bids/${bidId}/${kind}/pdf/`, {
+  const r = await fetchWithAuth(`${API_BASE}/v1/bid-management/tenders/main-contract/packages/${packageId}/bids/${bidId}/${kind}/pdf/`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(text),

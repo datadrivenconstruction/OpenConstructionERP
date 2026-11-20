@@ -52,9 +52,9 @@ const playbook: Playbook = {
       whyKey: "cases.register_and_grade_with_the_cidb_before_you_tender.step.designation.why",
       whyDefault:
         "The designation is the first thing an evaluation committee checks and the cheapest thing to fail on. A bid from a firm whose class of work does not cover the contract is not scored and then rejected, it is set aside before scoring, and the tender fee and three weeks of estimating go with it.",
-      moduleLabel: "Tendering",
-      moduleLabelKey: "tendering.title",
-      to: "/tendering",
+      moduleLabel: "Tenders",
+      moduleLabelKey: "tenders.title",
+      to: "/tenders",
     },
     {
       id: "ceiling",

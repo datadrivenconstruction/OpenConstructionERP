@@ -89,9 +89,9 @@ const playbook: Playbook = {
       whyKey: "cases.issue_a_tender_addendum_and_reissue.step.reissue.why",
       whyDefault:
         "Issuing to all on the same day and the same terms is the heart of a fair tender. Extending the deadline where it matters keeps the prices sharp instead of rushed.",
-      moduleLabel: "Tendering",
-      moduleLabelKey: "tendering.title",
-      to: "/tendering",
+      moduleLabel: "Tenders",
+      moduleLabelKey: "tenders.title",
+      to: "/tenders",
     },
     {
       id: "confirm",
@@ -110,9 +110,9 @@ const playbook: Playbook = {
       whyKey: "cases.issue_a_tender_addendum_and_reissue.step.confirm.why",
       whyDefault:
         "A bid priced without the latest addendum is worthless and has to be rejected. Confirming receipt from all is the cheap step that protects the whole exercise.",
-      moduleLabel: "Tendering",
-      moduleLabelKey: "tendering.title",
-      to: "/tendering",
+      moduleLabel: "Tenders",
+      moduleLabelKey: "tenders.title",
+      to: "/tenders",
     },
   ],
 };

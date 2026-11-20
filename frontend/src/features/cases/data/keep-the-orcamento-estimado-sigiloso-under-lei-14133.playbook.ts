@@ -96,9 +96,9 @@ const playbook: Playbook = {
       whyKey: "cases.keep_the_orcamento_estimado_sigiloso_under_lei_14133.step.decide.why",
       whyDefault:
         "Article 24 of Lei 14.133 of 2021 makes confidentiality conditional on a justification, so an estimate withheld without one is simply an estimate that was not published. Deciding before the edital also settles the question for everybody at once, instead of leaving each person to guess what may be sent to a bidder who asks.",
-      moduleLabel: "Tendering",
-      moduleLabelKey: "tendering.title",
-      to: "/tendering",
+      moduleLabel: "Tenders",
+      moduleLabelKey: "tenders.title",
+      to: "/tenders",
     },
     {
       id: "split",
