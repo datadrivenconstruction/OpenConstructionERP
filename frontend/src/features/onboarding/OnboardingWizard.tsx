@@ -1,5 +1,6 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
+import { DesignOffer } from '@/modules/design/DesignOffer';
 import { useState, useCallback, useEffect, useMemo, useRef, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, Link } from 'react-router-dom';
@@ -2728,6 +2729,7 @@ function StepModuleConfig({
             'We picked a set that matches your profile. It decides which modules are switched on for you - nothing is deleted, and you can change it any time in Settings.',
         })}
       />
+      <DesignOffer variant="tour" />
 
       <div className="mt-2 text-sm font-medium text-oe-blue">
         {enabledCount} / {totalCount}{' '}
@@ -4821,6 +4823,7 @@ export function StepFinish({
           defaultValue: 'You can adjust all settings later from the Settings page.',
         })}
       </p>
+      <DesignOffer variant="tour" />
 
       {onEdit && (
         <SetupSummary
