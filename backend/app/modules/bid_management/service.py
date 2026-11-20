@@ -992,6 +992,11 @@ class BidManagementService:
             package_type=data.package_type,
             created_by=user_id,
             metadata_=data.metadata,
+            boq_id=data.boq_id,
+            legal_entity_id=data.legal_entity_id,
+            cost_line_ids=data.cost_line_ids,
+            evaluation_method=data.evaluation_method,
+            require_full_scope=data.require_full_scope,
         )
         return await self.package_repo.create(package)
 

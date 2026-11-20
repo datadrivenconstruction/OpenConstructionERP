@@ -572,6 +572,14 @@ export const navGroups: NavGroup[] = [
         defaultHelp: 'Quick vendor quotes (RFQ) through to purchase orders.',
       },
       {
+        labelKey: 'tenders.title',
+        defaultLabel: 'Tenders',
+        to: '/tenders',
+        icon: Scale,
+        helpKey: 'tenders.nav_help',
+        defaultHelp: 'Every trade package and supplier quote request in one list, wherever it was created.',
+      },
+      {
         labelKey: 'nav.subcontract_packages',
         defaultLabel: 'Subcontract packages',
         to: '/bid-management',

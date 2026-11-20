@@ -943,6 +943,9 @@ const RebarSchedulePage = lazy(() =>
 const RFQBiddingPage = lazy(() =>
   import('@/features/rfq-bidding').then((m) => ({ default: m.RFQBiddingPage }))
 );
+const TendersPage = lazy(() =>
+  import('@/features/tenders').then((m) => ({ default: m.TendersPage }))
+);
 const SavedViewsPage = lazy(() =>
   import('@/features/saved-views').then((m) => ({ default: m.SavedViewsPage }))
 );
@@ -1586,6 +1589,8 @@ export default function App() {
         <Route path="/forms" element={<P title="Forms & checklists"><FormsPage /></P>} />
 
         <Route path="/funding" element={<P title="Public Funding"><FundingPage /></P>} />
+        <Route path="/tenders" element={<P title="Tenders"><TendersPage /></P>} />
+        <Route path="/projects/:projectId/tenders" element={<P title="Tenders"><TendersPage /></P>} />
         <Route path="/tendering" element={<P title="Tendering"><TenderingPage /></P>} />
         <Route path="/tendering/:tenderId/bid-day" element={<P title="Bid day"><BidDayPage /></P>} />
         <Route path="/tendering/:tenderId/bid-no-bid" element={<P title="Bid / no-bid"><BidNoBidPage /></P>} />

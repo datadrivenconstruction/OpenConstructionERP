@@ -16,6 +16,7 @@ from typing import Any
 from fastapi import APIRouter, Depends, Query, Response, status
 
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep, verify_project_access
+from app.modules.bid_management.legacy_adapter import LegacyTenderingRoute
 from app.modules.tendering.award_schemas import (
     AwardPreview,
     AwardTermsIn,
@@ -29,7 +30,7 @@ from app.modules.tendering.award_terms import AwardTermsService, bid_party, bidd
 from app.modules.tendering.sealed import SealedTenderService
 from app.modules.tendering.service import TenderingService
 
-router = APIRouter()
+router = APIRouter(route_class=LegacyTenderingRoute)
 
 
 async def _package(session: SessionDep, package_id: uuid.UUID, user_id: str, what: str) -> Any:

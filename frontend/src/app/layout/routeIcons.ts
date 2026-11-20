@@ -223,6 +223,7 @@ const EXTRA_ROUTE_ICONS: Record<string, LucideIcon> = {
   '/fx': Wallet,
   '/subcontractors': HardHat,
   '/bid-management': Scale,
+  '/tenders': Scale,
   '/tendering': FileText,
   // ── 9. Procurement & Change ───────────────────────────────────────
   '/variations': GitBranch,

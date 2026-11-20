@@ -17,6 +17,7 @@ from app.core.decimal_types import Decimal8_4, Decimal18_2, Decimal18_4, FiniteD
 
 _PACKAGE_STATUS = r"^(draft|published|open|closed|cancelled|awarded)$"
 _PACKAGE_TYPE = r"^(subcontract|supply)$"
+_EVALUATION_METHOD = r"^(lowest_price|best_value)$"
 _CONFIDENTIALITY = r"^(public|limited|confidential)$"
 _INVITATION_STATUS = r"^(pending|sent|opened|submitted|declined|expired)$"
 _BIDDER_STATUS = r"^(active|disqualified|withdrawn)$"
@@ -48,6 +49,11 @@ class BidPackageCreate(BaseModel):
     confidentiality_level: str = Field(default="limited", pattern=_CONFIDENTIALITY)
     package_type: str = Field(default="subcontract", pattern=_PACKAGE_TYPE)
     metadata: dict[str, Any] = Field(default_factory=dict)
+    boq_id: UUID | None = None
+    legal_entity_id: UUID | None = None
+    cost_line_ids: list[str] | None = Field(default=None, max_length=500)
+    evaluation_method: str | None = Field(default=None, pattern=_EVALUATION_METHOD)
+    require_full_scope: bool | None = None
 
     _currency_required = field_validator("currency")(_required_package_currency)
 
@@ -69,6 +75,11 @@ class BidPackageUpdate(BaseModel):
     confidentiality_level: str | None = Field(default=None, pattern=_CONFIDENTIALITY)
     package_type: str | None = Field(default=None, pattern=_PACKAGE_TYPE)
     metadata: dict[str, Any] | None = None
+    boq_id: UUID | None = None
+    legal_entity_id: UUID | None = None
+    cost_line_ids: list[str] | None = Field(default=None, max_length=500)
+    evaluation_method: str | None = Field(default=None, pattern=_EVALUATION_METHOD)
+    require_full_scope: bool | None = None
 
     _currency_required = field_validator("currency")(_required_package_currency)
 
@@ -97,6 +108,12 @@ class BidPackageResponse(BaseModel):
     awarded_at: str | None = None
     created_by: str | None = None
     metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="metadata_")
+    legacy_source: str | None = None
+    boq_id: UUID | None = None
+    legal_entity_id: UUID | None = None
+    cost_line_ids: list[Any] | None = None
+    evaluation_method: str | None = None
+    require_full_scope: bool | None = None
     created_at: datetime
     updated_at: datetime
 
@@ -216,6 +233,9 @@ class BidInvitationResponse(BaseModel):
     declined_at: str | None = None
     decline_reason: str | None = None
     status: str = "pending"
+    expires_at: str | None = None
+    revoked_at: str | None = None
+    draft_saved_at: str | None = None
     # token_hash is intentionally excluded - it is a server-side secret
     # used to authenticate magic-link bidder access and must never be
     # returned to API callers (including owner roles).
@@ -277,6 +297,8 @@ class BidderResponse(BaseModel):
     notes: str = ""
     subcontractor_id: UUID | None = None
     contact_id: UUID | None = None
+    withdrawn_at: str | None = None
+    withdrawn_reason: str | None = None
     created_at: datetime
     updated_at: datetime
 
@@ -340,6 +362,14 @@ class BidSubmissionResponse(BaseModel):
     is_valid: bool = False
     open_after_deadline: bool = False
     envelope_payload: dict[str, Any] = Field(default_factory=dict)
+    validity_days: int | None = None
+    exchange_rate: Decimal | None = None
+    exchange_rate_date: str | None = None
+    exchange_rate_source: str | None = None
+    admitted_by: str | None = None
+    admitted_at: str | None = None
+    admission_reason: str | None = None
+    late_reason: str | None = None
     created_at: datetime
     updated_at: datetime
 
@@ -387,7 +417,11 @@ class BidSubmissionLineResponse(BaseModel):
 
     id: UUID
     submission_id: UUID
-    line_item_id: UUID
+    # None for a free line the bidder added outside the package scope.
+    line_item_id: UUID | None = None
+    description: str | None = None
+    unit: str | None = None
+    unit_conversion_factor: Decimal | None = None
     unit_price: Decimal = Decimal("0")
     quantity_priced: Decimal = Decimal("0")
     total_price: Decimal = Decimal("0")
@@ -645,6 +679,10 @@ class BidAwardResponse(BaseModel):
     decision_signed_at: str | None = None
     contract_template_ref: str = ""
     notified_others_at: str | None = None
+    method: str | None = None
+    is_override: bool | None = None
+    recommended_bidder_id: UUID | None = None
+    basis: dict[str, Any] | None = None
     created_at: datetime
     updated_at: datetime
 

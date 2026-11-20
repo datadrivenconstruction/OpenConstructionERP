@@ -17,6 +17,7 @@ from pydantic import BaseModel, Field
 
 from app.core.validation.engine import ValidationContext, rule_registry
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep, verify_project_access
+from app.modules.bid_management.legacy_adapter import LegacyTenderingRoute
 from app.modules.tendering.addenda import AddendaService, published_addenda, timeline
 from app.modules.tendering.bid_portal import BidPortalService, enforce_rate_limit
 from app.modules.tendering.schemas import (
@@ -33,7 +34,7 @@ from app.modules.tendering.schemas import (
 from app.modules.tendering.service import TenderingService
 from app.modules.tendering.validators import ADDENDA_RULE_SET
 
-router = APIRouter()
+router = APIRouter(route_class=LegacyTenderingRoute)
 
 
 class PortalQuestion(BaseModel):

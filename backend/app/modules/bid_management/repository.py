@@ -92,7 +92,10 @@ class BidPackageRepository(_BaseRepo):
         return list(result.scalars().all()), total
 
     async def get_by_code(self, code: str) -> BidPackage | None:
-        result = await self.session.execute(select(BidPackage).where(BidPackage.code == code))
+        # Codes are unique across mirror packages too (legacy_mirror hides them otherwise).
+        result = await self.session.execute(
+            select(BidPackage).where(BidPackage.code == code).execution_options(include_tender_mirrors=True)
+        )
         return result.scalar_one_or_none()
 
 
