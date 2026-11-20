@@ -18,6 +18,8 @@ vi.mock('@/features/documents/api', () => ({ fetchDocuments: vi.fn(async () => (
 
 import BriefPage from '../BriefPage';
 
+vi.mock('react-i18next', async () => (await import('../testStrings')).i18nMock());
+
 const base = (version: number, floors: number): BriefDoc => ({
   schema: 'ddc-brief/1',
   brief_id: '11111111-1111-4111-8111-111111111111',

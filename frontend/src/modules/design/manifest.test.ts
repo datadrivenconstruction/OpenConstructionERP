@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { navGroups } from '@/app/layout/navCatalog';
+import { RU } from './testStrings';
 import { manifest } from './manifest';
 
 describe('Design menu section', () => {
@@ -17,7 +18,7 @@ describe('Design menu section', () => {
     expect(design!.items).toEqual([]); // rows come from the module only: no module, no group
     expect(design!.labelKey).toBe('design.title');
     expect(ids.indexOf('grp_design')).toBeLessThan(ids.indexOf('grp_takeoff'));
-    expect(manifest.translations?.ru?.['design.title']).toBe('Проектирование');
+    expect(RU['design.title']).toBe('Проектирование');
   });
 
   it('no longer files design pages under Takeoff', () => {

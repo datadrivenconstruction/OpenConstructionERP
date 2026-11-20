@@ -14,6 +14,7 @@ import pytest_asyncio
 # Revision files and BIM blobs of this suite go to a throwaway data directory.
 # Startup attaches demo model files for every demo project in the database, gigabytes on a long-lived
 # test database, so the directory goes when the run ends.
+os.environ.setdefault("OE_SKIP_SHOWCASE", "1")
 if "OE_DATA_DIR" not in os.environ:
     os.environ["OE_DATA_DIR"] = tempfile.mkdtemp(prefix="oe-design-tests-")
     atexit.register(shutil.rmtree, os.environ["OE_DATA_DIR"], True)

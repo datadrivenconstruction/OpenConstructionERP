@@ -4,6 +4,8 @@ import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { CiteDialog } from './CiteDialog';
 
+vi.mock('react-i18next', async () => (await import('./testStrings')).i18nMock());
+
 vi.mock('@/features/documents/api', () => ({
   fetchDocuments: vi.fn(async () => ({
     items: [

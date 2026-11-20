@@ -6,6 +6,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { PlotEditor } from './PlotEditor';
 import { PLOT_POINTER, newBrief } from './data/briefModel';
 
+vi.mock('react-i18next', async () => (await import('./testStrings')).i18nMock());
+
 vi.mock('./PlotMap', () => ({ default: () => <div />, PlotMap: () => <div /> }));
 
 function mount(onChange = vi.fn()) {
