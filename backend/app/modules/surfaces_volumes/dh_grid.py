@@ -30,6 +30,10 @@ def dh_grid(upper: Tin, lower: Tin, max_cells: int = MAX_CELLS) -> tuple[dict | 
     w, h = x1 - x0, y1 - y0
     cell = max(math.sqrt(w * h / max_cells), max(w, h) / 400.0, 0.05)
     nx, ny = max(math.ceil(w / cell), 1), max(math.ceil(h / cell), 1)
+    # Rounding each side up can overshoot the budget by a row or column; grow the cell until it fits.
+    while nx * ny > max_cells:
+        cell *= 1.01
+        nx, ny = max(math.ceil(w / cell), 1), max(math.ceil(h / cell), 1)
     dh = upper.sample_grid(x0, y0, cell, nx, ny) - lower.sample_grid(x0, y0, cell, nx, ny)
     values = [None if not math.isfinite(v) else round(float(v), 3) for v in dh.ravel()]
     return {"origin_e": x0, "origin_n": y0, "cell": cell, "nx": nx, "ny": ny, "dh": values}, dh
