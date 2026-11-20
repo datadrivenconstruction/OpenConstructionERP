@@ -6,8 +6,10 @@ photogrammetry and LiDAR exports (E57/LAS/LAZ/COPC/PLY/PCD/PTS/XYZ), turns a
 registered cloud into human-confirmed, validation-gated quantities, and lives in
 the dedicated "Reality Capture & 3D" sidebar group alongside Geo Hub and the BIM
 viewer. The FastAPI core stays thin: it stores metadata only and dispatches all
-heavy point-cloud work to ``services/cad-converter`` via the job runner. The core
-imports zero point-cloud libraries.
+heavy point-cloud work to ``services/cad-converter`` via the job runner. The
+exception is scan against design and cut/fill: LAS/LAZ (laspy, a base dependency)
+and E57 (optional ``pointcloud`` extra) are streamed in fixed chunks so the peak
+memory does not grow with the cloud.
 """
 
 from app.core.module_loader import ModuleManifest

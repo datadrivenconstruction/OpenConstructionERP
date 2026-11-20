@@ -208094,15 +208094,24 @@
         "__init__.py",
         "decode.py",
         "deviation.py",
+        "deviation_report.py",
+        "deviation_rules.py",
+        "grid.py",
         "manifest.py",
         "models.py",
         "permissions.py",
         "repository.py",
         "router.py",
+        "scan_design.py",
+        "scan_design_router.py",
+        "scan_design_schemas.py",
+        "scan_design_service.py",
         "schemas.py",
         "seed.py",
         "service.py",
         "sniff.py",
+        "stream.py",
+        "survey_demo.py",
         "tests/__init__.py",
         "tests/test_deviation.py",
         "tests/test_header_sniff.py",
@@ -208997,6 +209006,8 @@
         "bim_hub",
         "cad",
         "projects",
+        "setting_out",
+        "surfaces_volumes",
         "teams",
         "users"
       ]
@@ -341467,10 +341478,10 @@
     },
     {
       "name": "pointcloud",
-      "ts_files": 10,
+      "ts_files": 14,
       "css_files": 0,
-      "test_files": 3,
-      "total_files": 10
+      "test_files": 4,
+      "total_files": 14
     },
     {
       "name": "portal",
@@ -343419,6 +343430,8 @@
       "costs",
       "geo_hub",
       "projects",
+      "setting_out",
+      "surfaces_volumes",
       "takeoff",
       "teams",
       "uploads",
@@ -344108,9 +344121,9 @@
     "total_relationships": 264,
     "total_routes": 5553,
     "total_schemas": 5173,
-    "total_python_files": 3684,
+    "total_python_files": 3693,
     "frontend_features": 252,
-    "frontend_ts_files": 4450,
+    "frontend_ts_files": 4454,
     "frontend_backend_mapped": 224
   },
   "frontend_backend_mapping": {

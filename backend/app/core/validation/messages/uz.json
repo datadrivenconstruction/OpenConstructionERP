@@ -2778,5 +2778,35 @@
       "fail": "Faylda ishtirokchi nomi koʻrsatilmagan",
       "suggestion": "Fayldagi ishtirokchi maʼlumotlariga firma nomini kiriting"
     }
+  },
+  "pointcloud": {
+    "out_of_tolerance": {
+      "fail": "{surface} ustidagi skan nuqtalarining {share} % i ±{tol} mm ruxsat chegarasidan tashqarida; chegara {limit} %.",
+      "suggestion": "Issiqlik xaritasini oching, qizil va ko'k hududlarni obyektda tekshiring va hajmdan foydalanishdan oldin tuzating yoki qayta o'lchang."
+    },
+    "low_coverage": {
+      "fail": "Skan {surface} loyiha sirtining {share} % ini qamraydi; kamida {floor} % kutiladi.",
+      "suggestion": "Yetishmayotgan hududlarni skanerlang yoki statistikani faqat skanerlangan qism uchun deb o'qing."
+    },
+    "no_overlap": {
+      "fail": "{surface} loyiha sirti ustida birorta ham skan nuqtasi yo'q.",
+      "suggestion": "Skan va loyiha bir koordinatalar tizimida ekanini va to'g'ri sirt tanlanganini tekshiring."
+    }
+  },
+  "pointcloud_report": {
+    "title": "Skan va loyihani solishtirish",
+    "scan": "Skan",
+    "design": "Loyiha sirti",
+    "tolerance": "Ruxsat chegarasi",
+    "points": "Solishtirilgan / o'qilgan nuqtalar",
+    "mean": "O'rtacha og'ish",
+    "rms": "RMS",
+    "p95": "Mutlaq og'ishning P95 qiymati",
+    "within": "Ruxsat ichida",
+    "high": "Loyihadan yuqori",
+    "low": "Loyihadan past",
+    "coverage": "Qamralgan loyiha maydoni",
+    "findings": "Topilmalar",
+    "map": "Og'ish xaritasi (har blokdagi eng yomon katak)"
   }
 }

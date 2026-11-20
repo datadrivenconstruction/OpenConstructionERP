@@ -64,6 +64,8 @@ import {
 } from './api';
 import { PointCloudBackground } from './PointCloudBackground';
 import { PointCloudViewer } from './PointCloudViewer';
+import { ScanDesignPanel } from './ScanDesignPanel';
+import { deviationPointsPath } from './scanDesignApi';
 import { pointcloudGuide } from './pointcloudGuide';
 import { fmtFixed } from '@/shared/lib/formatters';
 import { PageHeader } from '@/shared/ui/PageHeader';
@@ -364,6 +366,9 @@ export function PointCloudPage() {
     if (picked && VIEWABLE_SCAN_STATUSES.includes(picked.status)) return picked;
     return scans.find((s) => VIEWABLE_SCAN_STATUSES.includes(s.status)) ?? null;
   }, [scans, selectedScanId]);
+  // A deviation report whose band colours replace the scan's own in the viewer.
+  const [heat, setHeat] = useState<{ scanId: string; reportId: string } | null>(null);
+  const heatReportId = heat && activeScan && heat.scanId === activeScan.id ? heat.reportId : null;
 
   // ── Upload state ──────────────────────────────────────────────────────
   const [file, setFile] = useState<File | null>(null);
@@ -896,13 +901,25 @@ export function PointCloudPage() {
           </Badge>
         </div>
         <PointCloudViewer
-          key={activeScan.id}
+          key={activeScan.id + (heatReportId ?? '')}
           scanId={activeScan.id}
           scanLabel={SOURCE_LABEL[activeScan.source_type] ?? activeScan.source_type}
+          pointsPath={heatReportId ? deviationPointsPath(heatReportId) : undefined}
         />
       </div>
     </Card>
   ) : null;
+
+  const designCard =
+    activeScan && activeScan.status === 'ready' && projectId ? (
+      <ScanDesignPanel
+        key={activeScan.id}
+        scanId={activeScan.id}
+        projectId={projectId}
+        heatReportId={heatReportId}
+        onHeatmap={(reportId) => setHeat(reportId ? { scanId: activeScan.id, reportId } : null)}
+      />
+    ) : null;
 
   return (
     <div className="relative space-y-5 animate-fade-in">
@@ -944,6 +961,7 @@ export function PointCloudPage() {
              The 3D viewer leads once a scan is loaded (mirrors the BIM hub);
              until then the uploader is the primary call to action. ──────── */}
       {activeScan ? viewerCard : !noProjects && uploadPrimary}
+      {designCard}
 
       {/* ── Scan registry ──────────────────────────────────────────────── */}
       {noProjects ? (

@@ -2778,5 +2778,35 @@
       "fail": "Datoteka ne navodi ponuditelja",
       "suggestion": "Upišite naziv tvrtke u podatke o ponuditelju u datoteci"
     }
+  },
+  "pointcloud": {
+    "out_of_tolerance": {
+      "fail": "{share} % točaka skena iznad {surface} izvan je tolerancije ±{tol} mm; granica je {limit} %.",
+      "suggestion": "Otvorite toplinsku kartu, provjerite na gradilištu crvena i plava područja te ih popravite ili ponovno snimite prije upotrebe količine."
+    },
+    "low_coverage": {
+      "fail": "Sken pokriva {share} % projektne plohe {surface}; očekuje se najmanje {floor} %.",
+      "suggestion": "Skenirajte područja koja nedostaju ili statistiku čitajte samo za skenirani dio."
+    },
+    "no_overlap": {
+      "fail": "Nijedna točka skena ne leži iznad projektne plohe {surface}.",
+      "suggestion": "Provjerite jesu li sken i projekt u istom koordinatnom sustavu i je li odabrana prava ploha."
+    }
+  },
+  "pointcloud_report": {
+    "title": "Sken naspram projekta",
+    "scan": "Sken",
+    "design": "Projektna ploha",
+    "tolerance": "Tolerancija",
+    "points": "Točaka uspoređeno / učitano",
+    "mean": "Srednje odstupanje",
+    "rms": "RMS",
+    "p95": "P95 apsolutnog odstupanja",
+    "within": "Unutar tolerancije",
+    "high": "Iznad projekta",
+    "low": "Ispod projekta",
+    "coverage": "Pokrivena projektna površina",
+    "findings": "Nalazi",
+    "map": "Karta odstupanja (najlošija ćelija po bloku)"
   }
 }

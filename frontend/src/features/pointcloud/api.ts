@@ -173,6 +173,8 @@ export interface FetchScanPointsOptions {
   signal?: AbortSignal;
   /** Streaming download progress; ``total`` is null without Content-Length. */
   onProgress?: (loadedBytes: number, totalBytes: number | null) => void;
+  /** Another OEPC source under /v1, e.g. a deviation report coloured by band. */
+  path?: string;
 }
 
 /**
@@ -187,13 +189,13 @@ export async function fetchScanPoints(
   scanId: string,
   options: FetchScanPointsOptions = {},
 ): Promise<ArrayBuffer> {
-  const { maxPoints, signal, onProgress } = options;
+  const { maxPoints, signal, onProgress, path } = options;
   const params = maxPoints ? `?max_points=${maxPoints}` : '';
   const headers: Record<string, string> = { Accept: 'application/octet-stream' };
   const token = getAuthToken();
   if (token) headers.Authorization = `Bearer ${token}`;
 
-  const res = await fetch(`${API_BASE}/v1/pointcloud/scans/${scanId}/points${params}`, {
+  const res = await fetch(`${API_BASE}${path ?? `/v1/pointcloud/scans/${scanId}/points`}${params}`, {
     headers,
     signal,
   });

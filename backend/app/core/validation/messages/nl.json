@@ -2778,5 +2778,35 @@
       "fail": "Het bestand vermeldt geen inschrijver",
       "suggestion": "Vul de bedrijfsnaam in bij de inschrijvergegevens in het bestand"
     }
+  },
+  "pointcloud": {
+    "out_of_tolerance": {
+      "fail": "{share} % van de scanpunten boven {surface} ligt buiten de tolerantie van ±{tol} mm; de grens is {limit} %.",
+      "suggestion": "Open de heatmap, controleer de rode en blauwe zones op de bouwplaats en herstel of meet ze opnieuw in voordat de hoeveelheid wordt gebruikt."
+    },
+    "low_coverage": {
+      "fail": "De scan dekt {share} % van ontwerpoppervlak {surface}; minstens {floor} % wordt verwacht.",
+      "suggestion": "Scan de ontbrekende zones, of lees de statistiek als alleen geldig voor het gescande deel."
+    },
+    "no_overlap": {
+      "fail": "Geen enkel scanpunt ligt boven ontwerpoppervlak {surface}.",
+      "suggestion": "Controleer of scan en ontwerp in hetzelfde coördinatenstelsel liggen en of het juiste oppervlak is gekozen."
+    }
+  },
+  "pointcloud_report": {
+    "title": "Scan tegen ontwerp",
+    "scan": "Scan",
+    "design": "Ontwerpoppervlak",
+    "tolerance": "Tolerantie",
+    "points": "Punten vergeleken / gelezen",
+    "mean": "Gemiddelde afwijking",
+    "rms": "RMS",
+    "p95": "P95 van de absolute afwijking",
+    "within": "Binnen tolerantie",
+    "high": "Boven ontwerp",
+    "low": "Onder ontwerp",
+    "coverage": "Gedekt ontwerpoppervlak",
+    "findings": "Bevindingen",
+    "map": "Afwijkingskaart (slechtste cel per blok)"
   }
 }

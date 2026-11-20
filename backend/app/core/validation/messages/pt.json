@@ -2778,5 +2778,35 @@
       "fail": "O arquivo não indica o proponente",
       "suggestion": "Indique o nome da empresa nos dados do proponente no arquivo"
     }
+  },
+  "pointcloud": {
+    "out_of_tolerance": {
+      "fail": "{share} % dos pontos do scan sobre {surface} estão fora da tolerância de ±{tol} mm; o limite é {limit} %.",
+      "suggestion": "Abra o mapa de calor, verifique em obra as zonas vermelhas e azuis e corrija-as ou volte a levantá-las antes de usar a quantidade."
+    },
+    "low_coverage": {
+      "fail": "O scan cobre {share} % da superfície de projeto {surface}; espera-se pelo menos {floor} %.",
+      "suggestion": "Digitalize as zonas em falta ou leia as estatísticas como relativas apenas à parte digitalizada."
+    },
+    "no_overlap": {
+      "fail": "Nenhum ponto do scan está sobre a superfície de projeto {surface}.",
+      "suggestion": "Verifique se o scan e o projeto estão no mesmo sistema de coordenadas e se a superfície certa foi escolhida."
+    }
+  },
+  "pointcloud_report": {
+    "title": "Scan contra projeto",
+    "scan": "Scan",
+    "design": "Superfície de projeto",
+    "tolerance": "Tolerância",
+    "points": "Pontos comparados / lidos",
+    "mean": "Desvio médio",
+    "rms": "RMS",
+    "p95": "P95 do desvio absoluto",
+    "within": "Dentro da tolerância",
+    "high": "Acima do projeto",
+    "low": "Abaixo do projeto",
+    "coverage": "Área de projeto coberta",
+    "findings": "Constatações",
+    "map": "Mapa de desvios (pior célula por bloco)"
   }
 }

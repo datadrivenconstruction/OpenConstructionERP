@@ -2778,5 +2778,35 @@
       "fail": "Filen anger ingen anbudsgivare",
       "suggestion": "Ange företagsnamnet i anbudsgivarens uppgifter i filen"
     }
+  },
+  "pointcloud": {
+    "out_of_tolerance": {
+      "fail": "{share} % av skanningspunkterna över {surface} ligger utanför toleransen ±{tol} mm; gränsen är {limit} %.",
+      "suggestion": "Öppna värmekartan, kontrollera de röda och blå områdena på plats och åtgärda eller mät in dem igen innan mängden används."
+    },
+    "low_coverage": {
+      "fail": "Skanningen täcker {share} % av projekterad yta {surface}; minst {floor} % förväntas.",
+      "suggestion": "Skanna de saknade områdena, eller läs statistiken som gällande endast den skannade delen."
+    },
+    "no_overlap": {
+      "fail": "Ingen skanningspunkt ligger över projekterad yta {surface}.",
+      "suggestion": "Kontrollera att skanning och projektering ligger i samma koordinatsystem och att rätt yta är vald."
+    }
+  },
+  "pointcloud_report": {
+    "title": "Skanning mot projektering",
+    "scan": "Skanning",
+    "design": "Projekterad yta",
+    "tolerance": "Tolerans",
+    "points": "Punkter jämförda / lästa",
+    "mean": "Medelavvikelse",
+    "rms": "RMS",
+    "p95": "P95 av absolut avvikelse",
+    "within": "Inom tolerans",
+    "high": "Över projektering",
+    "low": "Under projektering",
+    "coverage": "Täckt projekterad yta",
+    "findings": "Anmärkningar",
+    "map": "Avvikelsekarta (sämsta cell per block)"
   }
 }

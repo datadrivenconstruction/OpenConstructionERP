@@ -2778,5 +2778,35 @@
       "fail": "파일에 입찰자 이름이 없습니다",
       "suggestion": "파일의 입찰자 정보에 회사명을 입력하세요"
     }
+  },
+  "pointcloud": {
+    "out_of_tolerance": {
+      "fail": "{surface} 위 스캔 점의 {share} %가 허용오차 ±{tol} mm를 벗어납니다. 한도는 {limit} %입니다.",
+      "suggestion": "히트맵을 열어 빨간색과 파란색 구역을 현장에서 확인하고, 수량을 쓰기 전에 보수하거나 다시 측량하십시오."
+    },
+    "low_coverage": {
+      "fail": "스캔이 설계면 {surface}의 {share} %를 덮습니다. 최소 {floor} %가 필요합니다.",
+      "suggestion": "빠진 구역을 스캔하거나, 통계를 스캔된 부분에만 해당하는 것으로 읽으십시오."
+    },
+    "no_overlap": {
+      "fail": "설계면 {surface} 위에 스캔 점이 하나도 없습니다.",
+      "suggestion": "스캔과 설계가 같은 좌표계에 있고 올바른 면이 선택되었는지 확인하십시오."
+    }
+  },
+  "pointcloud_report": {
+    "title": "스캔 대 설계",
+    "scan": "스캔",
+    "design": "설계면",
+    "tolerance": "허용오차",
+    "points": "비교 / 읽은 점 수",
+    "mean": "평균 편차",
+    "rms": "RMS",
+    "p95": "절대 편차의 P95",
+    "within": "허용오차 이내",
+    "high": "설계보다 높음",
+    "low": "설계보다 낮음",
+    "coverage": "덮인 설계 면적",
+    "findings": "지적 사항",
+    "map": "편차 지도 (블록별 최악 셀)"
   }
 }

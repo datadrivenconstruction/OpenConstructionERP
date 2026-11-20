@@ -2778,5 +2778,35 @@
       "fail": "Il file non indica l'offerente",
       "suggestion": "Inserire la ragione sociale nei dati dell'offerente del file"
     }
+  },
+  "pointcloud": {
+    "out_of_tolerance": {
+      "fail": "Il {share} % dei punti della scansione su {surface} è fuori dalla tolleranza di ±{tol} mm; il limite è {limit} %.",
+      "suggestion": "Aprite la mappa di calore, verificate in cantiere le zone rosse e blu e correggetele o rilevatele di nuovo prima di usare la quantità."
+    },
+    "low_coverage": {
+      "fail": "La scansione copre il {share} % della superficie di progetto {surface}; è atteso almeno il {floor} %.",
+      "suggestion": "Scansionate le zone mancanti o leggete le statistiche come riferite alla sola parte scansionata."
+    },
+    "no_overlap": {
+      "fail": "Nessun punto della scansione si trova sopra la superficie di progetto {surface}.",
+      "suggestion": "Verificate che scansione e progetto siano nello stesso sistema di coordinate e che sia scelta la superficie giusta."
+    }
+  },
+  "pointcloud_report": {
+    "title": "Scansione contro progetto",
+    "scan": "Scansione",
+    "design": "Superficie di progetto",
+    "tolerance": "Tolleranza",
+    "points": "Punti confrontati / letti",
+    "mean": "Scostamento medio",
+    "rms": "RMS",
+    "p95": "P95 dello scostamento assoluto",
+    "within": "Entro tolleranza",
+    "high": "Sopra il progetto",
+    "low": "Sotto il progetto",
+    "coverage": "Area di progetto coperta",
+    "findings": "Rilievi",
+    "map": "Mappa degli scostamenti (cella peggiore per blocco)"
   }
 }

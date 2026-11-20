@@ -2778,5 +2778,35 @@
       "fail": "Dosyada teklif veren belirtilmemiş",
       "suggestion": "Dosyadaki teklif veren bilgilerine firma adını girin"
     }
+  },
+  "pointcloud": {
+    "out_of_tolerance": {
+      "fail": "{surface} üzerindeki tarama noktalarının % {share} kadarı ±{tol} mm toleransın dışında; sınır % {limit}.",
+      "suggestion": "Isı haritasını açın, kırmızı ve mavi alanları sahada kontrol edin ve miktar kullanılmadan önce düzeltin veya yeniden ölçün."
+    },
+    "low_coverage": {
+      "fail": "Tarama, {surface} proje yüzeyinin % {share} kadarını kapsıyor; en az % {floor} bekleniyor.",
+      "suggestion": "Eksik alanları tarayın veya istatistikleri yalnızca taranan kısım için geçerli sayın."
+    },
+    "no_overlap": {
+      "fail": "{surface} proje yüzeyinin üzerinde hiçbir tarama noktası yok.",
+      "suggestion": "Tarama ile projenin aynı koordinat sisteminde olduğunu ve doğru yüzeyin seçildiğini kontrol edin."
+    }
+  },
+  "pointcloud_report": {
+    "title": "Tarama ve proje karşılaştırması",
+    "scan": "Tarama",
+    "design": "Proje yüzeyi",
+    "tolerance": "Tolerans",
+    "points": "Karşılaştırılan / okunan nokta",
+    "mean": "Ortalama sapma",
+    "rms": "RMS",
+    "p95": "Mutlak sapmanın P95 değeri",
+    "within": "Tolerans içinde",
+    "high": "Projenin üstünde",
+    "low": "Projenin altında",
+    "coverage": "Kapsanan proje alanı",
+    "findings": "Bulgular",
+    "map": "Sapma haritası (blok başına en kötü hücre)"
   }
 }

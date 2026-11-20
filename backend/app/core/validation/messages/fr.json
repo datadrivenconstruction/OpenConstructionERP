@@ -2778,5 +2778,35 @@
       "fail": "Le fichier n'indique aucun soumissionnaire",
       "suggestion": "Saisissez la raison sociale du soumissionnaire dans les données du fichier"
     }
+  },
+  "pointcloud": {
+    "out_of_tolerance": {
+      "fail": "{share} % des points du scan sur {surface} sont hors de la tolérance de ±{tol} mm ; la limite est {limit} %.",
+      "suggestion": "Ouvrez la carte thermique, vérifiez sur site les zones rouges et bleues, et reprenez-les ou relevez-les à nouveau avant d'utiliser la quantité."
+    },
+    "low_coverage": {
+      "fail": "Le scan couvre {share} % de la surface projet {surface} ; au moins {floor} % est attendu.",
+      "suggestion": "Scannez les zones manquantes, ou lisez les statistiques comme portant sur la seule partie scannée."
+    },
+    "no_overlap": {
+      "fail": "Aucun point du scan ne se trouve au-dessus de la surface projet {surface}.",
+      "suggestion": "Vérifiez que le scan et le projet sont dans le même système de coordonnées et que la bonne surface est choisie."
+    }
+  },
+  "pointcloud_report": {
+    "title": "Scan contre projet",
+    "scan": "Scan",
+    "design": "Surface projet",
+    "tolerance": "Tolérance",
+    "points": "Points comparés / lus",
+    "mean": "Écart moyen",
+    "rms": "RMS",
+    "p95": "P95 de l'écart absolu",
+    "within": "Dans la tolérance",
+    "high": "Au-dessus du projet",
+    "low": "En dessous du projet",
+    "coverage": "Surface projet couverte",
+    "findings": "Constats",
+    "map": "Carte des écarts (pire cellule par bloc)"
   }
 }
