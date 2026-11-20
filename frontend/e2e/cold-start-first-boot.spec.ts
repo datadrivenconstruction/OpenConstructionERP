@@ -80,6 +80,7 @@ interface Census {
   byEndpoint: Record<string, number>;
   worstRepeat: { url: string; count: number };
   serverErrors: { url: string; status: number }[];
+  clientErrors: { url: string; status: number }[];
   consoleErrors: string[];
   pageErrors: string[];
 }
@@ -98,6 +99,13 @@ function watch(page: Page): { census: () => Census; stop: () => void } {
   let api = 0;
   let assets = 0;
   const serverErrors: { url: string; status: number }[] = [];
+  // Published and not asserted. A 4xx is an answer, and the page has a surface for
+  // most of them, but a browser logs every failed resource to the console at error
+  // level - so when the console-error ceiling below fails, this is the list that
+  // says which request caused it. The first run of this lane failed on exactly that:
+  // one console error reading "the server responded with a status of 401", with
+  // nothing in the report naming the URL that answered it.
+  const clientErrors: { url: string; status: number }[] = [];
   const consoleErrors: string[] = [];
   const pageErrors: string[] = [];
 
@@ -119,6 +127,8 @@ function watch(page: Page): { census: () => Census; stop: () => void } {
   const onResponse = (response: { url(): string; status(): number }): void => {
     if (response.status() >= 500) {
       serverErrors.push({ url: response.url(), status: response.status() });
+    } else if (response.status() >= 400) {
+      clientErrors.push({ url: response.url(), status: response.status() });
     }
   };
 
@@ -148,7 +158,7 @@ function watch(page: Page): { census: () => Census; stop: () => void } {
         byEndpoint[endpoint] = (byEndpoint[endpoint] ?? 0) + count;
         if (count > worstRepeat.count) worstRepeat = { url, count };
       }
-      return { total, api, assets, byEndpoint, worstRepeat, serverErrors, consoleErrors, pageErrors };
+      return { total, api, assets, byEndpoint, worstRepeat, serverErrors, clientErrors, consoleErrors, pageErrors };
     },
     stop: () => {
       page.off('request', onRequest);
@@ -181,6 +191,7 @@ test('the sign-in page asks for little and says nothing failed', async ({ page }
     by_endpoint: c.byEndpoint,
     worst_repeat: c.worstRepeat,
     server_errors: c.serverErrors,
+    client_errors: c.clientErrors,
     console_errors: c.consoleErrors,
     page_errors: c.pageErrors,
     load_failure_toast: toastSeen,
@@ -198,7 +209,10 @@ test('the sign-in page asks for little and says nothing failed', async ({ page }
 
   expect(c.serverErrors, `server answered 5xx: ${JSON.stringify(c.serverErrors)}`).toHaveLength(0);
   expect(c.pageErrors, `uncaught page errors: ${JSON.stringify(c.pageErrors)}`).toHaveLength(0);
-  expect(c.consoleErrors, `console errors: ${JSON.stringify(c.consoleErrors)}`).toHaveLength(0);
+  expect(
+    c.consoleErrors,
+    `console errors: ${JSON.stringify(c.consoleErrors)}; the API answers behind them: ${JSON.stringify(c.clientErrors)}`,
+  ).toHaveLength(0);
   expect(toastSeen, 'the sign-in page showed a load-failure toast before anything was asked of it').toBe(false);
 });
 

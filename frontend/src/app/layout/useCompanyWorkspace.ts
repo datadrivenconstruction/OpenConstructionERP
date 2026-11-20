@@ -87,7 +87,12 @@ export function useCompanyPresetKey(): string | null {
   // so the cache above stays this user's own answer and their first real
   // choice wins from then on. This is how one pack install reaches the people
   // who never open the setup wizard.
-  const { data: pack } = usePartnerPack();
+  // Gated exactly like the onboarding query above it, and for the same reason:
+  // this hook is reached from useViewModeDefault, which App mounts on every route
+  // including the sign-in and sign-up pages, where there is no session to answer
+  // with. Nothing is lost by not asking - a 401 carries no pack - and what is
+  // avoided is a failed request on the two pages a first-time installer reads.
+  const { data: pack } = usePartnerPack({ enabled: isAuthenticated });
   const packDefault = pack?.active ? (pack.manifest?.default_company_profile ?? null) : null;
 
   const ownKey = serverKey !== undefined ? serverKey : readCachedCompanyType();

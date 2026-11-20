@@ -71,10 +71,23 @@ export interface InstalledPacksResponse {
   installed: PartnerPackManifest[];
 }
 
-export function usePartnerPack() {
+/**
+ * Which pack this deployment has switched on.
+ *
+ * `enabled` exists because the endpoint answers only a signed-in caller: the
+ * partner-pack router is mounted behind `get_current_user_id`, so an anonymous
+ * request is a 401 with nothing in it. A 401 is not a quiet failure either - the
+ * browser logs it to the console as a failed resource, and this product's own
+ * error reporter posts it to `/api/v1/client-errors/`, so one mount of this hook
+ * on a page nobody has signed in to costs two requests and a console error a
+ * cold-start lane can see. Callers that can be mounted signed out pass
+ * `enabled`; the default is unchanged for every caller that cannot.
+ */
+export function usePartnerPack(options?: { enabled?: boolean }) {
   return useQuery<PartnerPackResponse>({
     queryKey: ['partner-pack', 'current'],
     queryFn: () => apiGet<PartnerPackResponse>('/v1/partner-pack/current'),
+    enabled: options?.enabled ?? true,
     staleTime: 5 * 60_000,
     gcTime: 30 * 60_000,
     refetchOnWindowFocus: false,
