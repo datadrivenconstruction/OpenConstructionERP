@@ -1593,7 +1593,15 @@ async def save_onboarding(
     # Also persist module preferences so the sidebar reflects the selection.
     # ``modules_for`` writes an explicit True/False for every known module and
     # forces core modules on, so a profile can never hide Projects/Settings/etc.
-    metadata["module_preferences"] = modules_for(effective_modules)
+    #
+    # Entries for modules the profiles do not govern (optional modules that bring
+    # their own switch, e.g. the design editor link) are not part of the chosen
+    # set. They keep the value the person gave them instead of being dropped.
+    from app.core import onboarding_presets as _presets
+
+    governed = set(_presets._ALL_MODULES)
+    kept = {k: v for k, v in (metadata.get("module_preferences") or {}).items() if k not in governed}
+    metadata["module_preferences"] = {**kept, **modules_for(effective_modules)}
 
     await service.update_profile(uuid.UUID(user_id), metadata_=metadata)
 
