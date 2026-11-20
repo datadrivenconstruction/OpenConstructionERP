@@ -1836,7 +1836,9 @@ function DetailView({
             src.number ||
             (src.kind === 'rfi'
               ? t('changeorders.source_kind_rfi', { defaultValue: 'RFI' })
-              : t('changeorders.source_kind_ncr', { defaultValue: 'NCR' }));
+              : src.kind === 'design_revision'
+                ? t('changeorders.source_kind_design', { defaultValue: 'Design revision' })
+                : t('changeorders.source_kind_ncr', { defaultValue: 'NCR' }));
           return (
             <div
               className="mb-4 flex items-start gap-2 rounded-lg border border-semantic-warning/30 bg-semantic-warning/5 p-3 text-sm text-content-secondary"
@@ -2236,16 +2238,28 @@ function DetailView({
                       ? t('changeorders.source_hint_rfi', {
                           defaultValue: 'Open the RFI this change order was raised from',
                         })
-                      : t('changeorders.source_hint_ncr', {
-                          defaultValue: 'Open the NCR this change order was raised from',
-                        })
+                      : sourcePill.kind === 'design_revision'
+                        ? t('changeorders.source_hint_design', {
+                            defaultValue: 'Open the design revision this change order was raised from',
+                          })
+                        : t('changeorders.source_hint_ncr', {
+                            defaultValue: 'Open the NCR this change order was raised from',
+                          })
                   }
                 >
-                  {sourcePill.kind === 'rfi' ? <HelpCircle size={12} /> : <AlertTriangle size={12} />}
+                  {sourcePill.kind === 'rfi' ? (
+                    <HelpCircle size={12} />
+                  ) : sourcePill.kind === 'design_revision' ? (
+                    <GitBranch size={12} />
+                  ) : (
+                    <AlertTriangle size={12} />
+                  )}
                   {sourcePill.number ||
                     (sourcePill.kind === 'rfi'
                       ? t('changeorders.source_kind_rfi', { defaultValue: 'RFI' })
-                      : t('changeorders.source_kind_ncr', { defaultValue: 'NCR' }))}
+                      : sourcePill.kind === 'design_revision'
+                        ? t('changeorders.source_kind_design', { defaultValue: 'Design revision' })
+                        : t('changeorders.source_kind_ncr', { defaultValue: 'NCR' }))}
                 </button>
               )}
               {linkedContractId && (

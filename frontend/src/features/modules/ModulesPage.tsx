@@ -66,6 +66,7 @@ import { useToastStore } from '@/stores/useToastStore';
 import { useModuleStore } from '@/stores/useModuleStore';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { getModulesByCategory } from '@/modules/_registry';
+import { moduleNames } from './moduleNames';
 import { translateManifestText } from '@/modules/_i18n';
 import { fmtList, fmtFixed } from '@/shared/lib/formatters';
 import { invalidateProjectLists } from '@/features/projects/invalidateProjectLists';
@@ -571,7 +572,7 @@ export function ModuleTogglesSection({
           message: t('modules.required_by', {
             defaultValue: '{{name}} is required by: {{deps}}',
             name,
-            deps: fmtList(blockedBy),
+            deps: fmtList(moduleNames(t, blockedBy)),
           }),
         });
         return;
@@ -1736,7 +1737,7 @@ function ModuleToggleCard({
             <span className="text-2xs text-semantic-warning truncate">
               {t('modules.required_by_short', {
                 defaultValue: 'Required by {{deps}}',
-                deps: fmtList((dependents ?? [])),
+                deps: fmtList(moduleNames(t, dependents ?? [])),
               })}
             </span>
           </div>
