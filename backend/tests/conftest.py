@@ -571,6 +571,23 @@ _module_state._resolve_data_dir = _resolve_data_dir_for_suite
 _pack_discovery._resolve_data_dir = _resolve_data_dir_for_suite
 _pack_state._resolve_data_dir = _resolve_data_dir_for_suite
 
+# A test that sets OE_DATA_DIR starts with a fresh data dir, and the legacy
+# home-state migration then copied the developer's ~/.openestimator/uploads (and
+# applied pack) into it: gigabytes per app start. The real home reads as empty;
+# a test that fakes ``Path.home`` keeps its fake.
+import app.core.home_state as _home_state  # noqa: E402
+
+_REAL_HOME = Path.home()
+_SUITE_LEGACY_HOME = Path(tempfile.mkdtemp(prefix="oe-tests-legacy-home-"))
+
+
+def _legacy_home_dir_for_suite(root: str, *parts: str) -> Path:
+    home = Path.home()
+    return (_SUITE_LEGACY_HOME if home == _REAL_HOME else home).joinpath(root, *parts)
+
+
+_home_state.legacy_home_dir = _legacy_home_dir_for_suite
+
 import app.core.audit  # noqa: E402,F401
 
 # Audit-log model needs to be registered with Base.metadata before
