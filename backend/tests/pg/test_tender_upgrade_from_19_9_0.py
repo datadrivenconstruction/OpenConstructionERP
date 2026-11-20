@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""PG: ``tmm01_tender_canonical_model`` upgrades a 19.9.0 database without losing a row.
+"""PG: ``tmm01_tender_canonical_model`` upgrades a 19.9.0 or 19.10.0 database without losing a row.
 
 The schema is put back into its 19.9.0 shape inside a rolled-back transaction:
 the columns and tables this revision adds are dropped, and so are the tendering
@@ -183,10 +183,12 @@ def _seed(connection: Connection) -> dict[str, str]:
         return {"project": str(project.id), "tender": str(tender.id), "rfq": str(rfq.id), "native": str(native.id)}
 
 
-def _back_to_19_9_0(connection: Connection) -> None:
+def _back_to(connection: Connection, release: str) -> None:
+    """The schema of ``release``: without tmm01, and for 19.9.0 also without the later tendering fields."""
     rev = _revision()
     insp = inspect(connection)
-    for table in (rev._MAP, rev._ADJUSTMENT, *_TABLES_AFTER_1990):
+    old = release == "19.9.0"
+    for table in (rev._MAP, rev._ADJUSTMENT, *(_TABLES_AFTER_1990 if old else ())):
         connection.execute(text(f'DROP TABLE IF EXISTS "{table}" CASCADE'))
     for table, columns in rev._NEW_COLUMNS.items():
         present = {c["name"] for c in insp.get_columns(table)}
@@ -194,7 +196,7 @@ def _back_to_19_9_0(connection: Connection) -> None:
             if name in present:
                 connection.execute(text(f'ALTER TABLE "{table}" DROP COLUMN "{name}" CASCADE'))
     connection.execute(text(f'ALTER TABLE "{rev._SUB_LINE}" ALTER COLUMN line_item_id SET NOT NULL'))
-    for table, columns in _TENDERING_AFTER_1990.items():
+    for table, columns in (_TENDERING_AFTER_1990 if old else {}).items():
         present = {c["name"] for c in insp.get_columns(table)}
         for name in columns:
             if name in present:
@@ -221,11 +223,18 @@ def _snapshot(connection: Connection, project: str) -> dict[str, int]:
     return out
 
 
-def test_tmm01_upgrades_a_19_9_0_database_with_every_row_kept(pg_conn: Connection) -> None:
+@pytest.mark.parametrize("release", ["19.9.0", "19.10.0"])
+def test_tmm01_upgrades_an_older_database_with_every_row_kept(pg_conn: Connection, release: str) -> None:
     ids = _seed(pg_conn)
+    if release != "19.9.0":
+        # Fields the tendering module grew after 19.9.0 travel with the copy.
+        pg_conn.execute(
+            text("UPDATE oe_tendering_package SET trade = 'Drywall', bids_due = '2027-02-01' WHERE id = :i"),
+            {"i": ids["tender"]},
+        )
     before = {t: _count(pg_conn, t) for t in _SOURCES}
     native_before = _count(pg_conn, "oe_bid_management_package", "project_id = :p", p=ids["project"])
-    _back_to_19_9_0(pg_conn)
+    _back_to(pg_conn, release)
     assert "legacy_source" not in {c["name"] for c in inspect(pg_conn).get_columns("oe_bid_management_package")}
     assert not inspect(pg_conn).has_table("oe_tender_legacy_map")
 
@@ -251,6 +260,16 @@ def test_tmm01_upgrades_a_19_9_0_database_with_every_row_kept(pg_conn: Connectio
     assert len(mine) == 2 and all(p.ok for p in mine), [p.line() for p in mine]
     totals = {p.source_table: (p.bids_target, str(p.total_target)) for p in mine}
     assert totals == {"oe_tendering_package": (2, "300199.99"), "oe_rfq_rfq": (1, "302400.00")}
+
+    if release != "19.9.0":
+        legacy = pg_conn.execute(
+            text(
+                "SELECT p.metadata FROM oe_bid_management_package p JOIN oe_tender_legacy_map m "
+                "ON m.target_id = p.id WHERE m.source_table = 'oe_tendering_package' AND m.source_id = :s"
+            ),
+            {"s": ids["tender"]},
+        ).scalar_one()["legacy"]
+        assert (legacy["trade"], legacy["bids_due"]) == ("Drywall", "2027-02-01")
 
     _upgrade(pg_conn)
     assert _snapshot(pg_conn, ids["project"]) == after
