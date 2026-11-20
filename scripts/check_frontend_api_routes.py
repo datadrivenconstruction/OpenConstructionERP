@@ -114,7 +114,9 @@ NAVIGATION_CALLEES = frozenset({"href", "src", "window.open", "EventSource"})
 # volumes, setting-out, land-parcels, monitoring, stockpiles, mine-survey); every call built on them is checked in full.
 # 249: the bidder-link logo address (bid-portal/api.ts) is a URL builder that returns a string for an <img src>;
 # there is no call to hand it to, and the route it names exists.
-MAX_PREFIX_ONLY = 249
+# 251: the offline plan-pin queue path and the sheet image URL for an <img src> (field/pinOnDrawing.ts); neither
+# has a call to hand the literal to, and both routes exist.
+MAX_PREFIX_ONLY = 251
 
 # Known unmatched calls that are right as they are. Key format:
 #   "<VERDICT> <METHOD|*> <path as written> @ <file under frontend/src>"

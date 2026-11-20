@@ -4,8 +4,6 @@
 
 import { apiGet, apiPost, apiPut } from '@/shared/lib/api';
 
-const BASE = '/v1/ai-agents/site';
-
 /** Every assistant answers with this envelope. */
 export interface SiteEnvelope<TItem> {
   proposal_id?: string;
@@ -117,37 +115,37 @@ export interface ConfirmResult {
 }
 
 export const fetchLatestBriefing = (projectId: string) =>
-  apiGet<BriefingEnvelope>(`${BASE}/briefing/latest?project_id=${encodeURIComponent(projectId)}`);
+  apiGet<BriefingEnvelope>(`/v1/ai-agents/site/briefing/latest?project_id=${encodeURIComponent(projectId)}`);
 
 export const runBriefing = (projectId: string, refresh: boolean) =>
-  apiPost<BriefingEnvelope>(`${BASE}/briefing/run`, { project_id: projectId, refresh });
+  apiPost<BriefingEnvelope>(`/v1/ai-agents/site/briefing/run`, { project_id: projectId, refresh });
 
 export const fetchSitePrefs = (projectId: string) =>
-  apiGet<SitePrefs>(`${BASE}/prefs?project_id=${encodeURIComponent(projectId)}`);
+  apiGet<SitePrefs>(`/v1/ai-agents/site/prefs?project_id=${encodeURIComponent(projectId)}`);
 
 export const saveSitePrefs = (prefs: Omit<SitePrefs, 'available_sections'>) =>
-  apiPut<SitePrefs>(`${BASE}/prefs`, prefs);
+  apiPut<SitePrefs>(`/v1/ai-agents/site/prefs`, prefs);
 
 export const draftDiary = (projectId: string, diaryDate: string, transcripts: string[]) =>
-  apiPost<DiaryDraftEnvelope>(`${BASE}/diary-draft`, {
+  apiPost<DiaryDraftEnvelope>(`/v1/ai-agents/site/diary-draft`, {
     project_id: projectId,
     diary_date: diaryDate,
     transcripts,
   });
 
-export const checkRfi = (rfiId: string) => apiPost<RfiCheckEnvelope>(`${BASE}/rfi-check/${rfiId}`);
+export const checkRfi = (rfiId: string) => apiPost<RfiCheckEnvelope>(`/v1/ai-agents/site/rfi-check/${rfiId}`);
 
 export const overrideRfiCheck = (rfiId: string, reason: string, proposalId?: string) =>
-  apiPost<{ recorded: boolean }>(`${BASE}/rfi-check/${rfiId}/override`, {
+  apiPost<{ recorded: boolean }>(`/v1/ai-agents/site/rfi-check/${rfiId}/override`, {
     reason,
     proposal_id: proposalId ?? null,
   });
 
 export const extractMeetingActions = (meetingId: string) =>
-  apiPost<MeetingActionsEnvelope>(`${BASE}/meeting-actions/${meetingId}`);
+  apiPost<MeetingActionsEnvelope>(`/v1/ai-agents/site/meeting-actions/${meetingId}`);
 
 export const confirmProposal = (proposalId: string, items: ConfirmSelection[]) =>
-  apiPost<ConfirmResult>(`${BASE}/proposals/${proposalId}/confirm`, { items });
+  apiPost<ConfirmResult>(`/v1/ai-agents/site/proposals/${proposalId}/confirm`, { items });
 
 export const rejectProposal = (proposalId: string, reason?: string) =>
-  apiPost<{ status: string }>(`${BASE}/proposals/${proposalId}/reject`, { reason: reason ?? null });
+  apiPost<{ status: string }>(`/v1/ai-agents/site/proposals/${proposalId}/reject`, { reason: reason ?? null });
