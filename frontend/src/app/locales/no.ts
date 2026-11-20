@@ -57056,6 +57056,8 @@ const resource = {
     "modules.catalog.mine_survey": "Gruvemåling",
     "modules.catalog.norm_pricing": "Normprising",
     "modules.catalog.project_tax": "Prosjektets skatteprofil",
+    "modules.catalog.central_purchasing": "Sentralt innkjøp",
+    "modules.catalog.dataflow": "Dataveier",
     "modules.pp_desc_eleven_areas_framework": "Byggherrens prosjektstyring i elleve styringsområder over to faser, prosjektutvikling og utførelse, med én gate mellom og ett godkjent rammedokument per område.",
     "modules.pp_name_pakistan_pk": "Byggepakke Pakistan",
     "modules.pp_name_peru_pe": "Byggepakke Peru",

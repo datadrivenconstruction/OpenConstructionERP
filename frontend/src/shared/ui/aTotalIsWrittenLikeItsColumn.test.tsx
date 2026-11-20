@@ -724,6 +724,8 @@ const HAND_INSPECTED: Record<string, string> = {
     'census cannot see it because the currency is resolved outside the footer cell.',
   'features/takeoff/components/MeasurementLedger.tsx':
     'CORRECT. Quantities and item counts only; the file names no currency anywhere.',
+  'features/survey/StagedPanel.tsx':
+    'CORRECT. Cut and fill volumes in cubic metres per stage; the footer sums earthwork volumes, not money.',
   'features/rebar-schedule/RebarSchedulePage.tsx':
     'CORRECT. Bar counts and total weight in kg; the footer sums physical quantities, not money.',
   'features/delivery_model/ComparisonPanel.tsx':

@@ -59621,6 +59621,8 @@ const resource = {
     "modules.catalog.monitoring": "Deformációfigyelés",
     "modules.catalog.norm_pricing": "Normaalapú árazás",
     "modules.catalog.project_tax": "Projekt adóprofilja",
+    "modules.catalog.central_purchasing": "Központi beszerzés",
+    "modules.catalog.dataflow": "Adatutak",
     "modules.pp_desc_eleven_areas_framework": "Projektirányítás a megrendelő oldalán tizenegy irányítási területen, két szakaszban, a projektfejlesztés és a kivitelezés során, köztük egy kapuval és területenként egy jóváhagyott keretdokumentummal.",
     "modules.pp_name_pakistan_pk": "Építőipari csomag: Pakisztán",
     "modules.pp_name_peru_pe": "Peru építési csomag",

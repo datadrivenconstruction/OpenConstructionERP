@@ -59216,6 +59216,8 @@ const resource = {
     "modules.catalog.monitoring": "監測",
     "modules.catalog.stockpiles": "料堆",
     "modules.catalog.mine_survey": "礦山測量",
+    "modules.catalog.central_purchasing": "集中採購",
+    "modules.catalog.dataflow": "數據路徑",
     "modules.pp_desc_eleven_areas_framework": "業主方在十一個管理領域開展項目管理，分為項目開發和施工實施兩個階段，兩階段之間設一個關口，每個領域有一份經批准的框架文件。",
     "modules.pp_name_pakistan_pk": "巴基斯坦建築數據包",
     "modules.pp_name_peru_pe": "秘魯建設包",

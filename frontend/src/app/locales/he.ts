@@ -57336,6 +57336,8 @@ const resource = {
     "modules.catalog.mine_survey": "מדידות מכרה",
     "modules.catalog.norm_pricing": "תמחור לפי תקנים",
     "modules.catalog.project_tax": "פרופיל המס של הפרויקט",
+    "modules.catalog.central_purchasing": "רכש מרכזי",
+    "modules.catalog.dataflow": "נתיבי נתונים",
     "modules.pp_desc_eleven_areas_framework": "ניהול הפרויקט מצד הבעלים באחד-עשר תחומי ניהול, בשני שלבים, פיתוח הפרויקט וביצוע הבנייה, עם שער החלטה אחד ביניהם ומסמך מסגרת מאושר אחד לכל תחום.",
     "modules.pp_name_pakistan_pk": "חבילת בנייה לפקיסטן",
     "modules.pp_name_peru_pe": "חבילת בנייה פרו",

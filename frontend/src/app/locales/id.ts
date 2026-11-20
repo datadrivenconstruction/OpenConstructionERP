@@ -56811,6 +56811,8 @@ const resource = {
     "modules.catalog.mine_survey": "Survei tambang",
     "modules.catalog.norm_pricing": "Penetapan harga berbasis norma",
     "modules.catalog.project_tax": "Profil pajak proyek",
+    "modules.catalog.central_purchasing": "Pengadaan terpusat",
+    "modules.catalog.dataflow": "Jalur data",
     "modules.pp_desc_eleven_areas_framework": "Manajemen proyek dari sisi pemilik dalam sebelas area manajemen, dalam dua fase, pengembangan proyek dan pelaksanaan konstruksi, dengan satu gerbang di antaranya dan satu dokumen kerangka yang disetujui untuk setiap area.",
     "modules.pp_name_pakistan_pk": "Paket Konstruksi Pakistan",
     "modules.pp_name_peru_pe": "Paket Konstruksi Peru",

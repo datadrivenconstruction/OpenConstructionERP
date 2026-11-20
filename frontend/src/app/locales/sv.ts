@@ -57671,6 +57671,8 @@ const resource = {
     "modules.catalog.mine_survey": "Gruvmätning",
     "modules.catalog.norm_pricing": "Normprissättning",
     "modules.catalog.project_tax": "Projektets skatteprofil",
+    "modules.catalog.central_purchasing": "Central upphandling",
+    "modules.catalog.dataflow": "Datavägar",
     "modules.pp_desc_eleven_areas_framework": "Byggherrens projektstyrning i elva styrningsområden under två faser, projektutveckling och genomförande, med en gate mellan dem och ett godkänt ramdokument per område.",
     "modules.pp_name_pakistan_pk": "Byggpaket Pakistan",
     "modules.pp_name_peru_pe": "Byggpaket Peru",

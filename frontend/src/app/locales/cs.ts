@@ -58318,6 +58318,8 @@ const resource = {
     "modules.catalog.monitoring": "Monitoring deformací",
     "modules.catalog.norm_pricing": "Oceňování podle norem",
     "modules.catalog.project_tax": "Daňový profil projektu",
+    "modules.catalog.central_purchasing": "Centrální nákup",
+    "modules.catalog.dataflow": "Datové cesty",
     "modules.pp_desc_eleven_areas_framework": "Řízení projektu ze strany investora v jedenácti oblastech řízení ve dvou fázích, vývoj projektu a realizace stavby, s jednou branou mezi nimi a jedním schváleným rámcovým dokumentem pro každou oblast.",
     "modules.pp_name_pakistan_pk": "Stavební balíček Pákistánu",
     "modules.pp_name_peru_pe": "Stavební balíček Peru",

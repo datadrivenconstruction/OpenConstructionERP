@@ -58263,6 +58263,8 @@ const resource = {
     "modules.catalog.mine_survey": "Rilievo di miniera",
     "modules.catalog.norm_pricing": "Prezzi a norma",
     "modules.catalog.project_tax": "Profilo fiscale del progetto",
+    "modules.catalog.central_purchasing": "Acquisti centralizzati",
+    "modules.catalog.dataflow": "Percorsi dei dati",
     "modules.pp_desc_eleven_areas_framework": "Gestione del progetto dal lato committente in undici ambiti gestionali su due fasi, sviluppo del progetto ed esecuzione dei lavori, con un gate tra le due e un documento quadro approvato per ciascun ambito.",
     "modules.pp_name_pakistan_pk": "Pacchetto Costruzioni Pakistan",
     "modules.pp_name_peru_pe": "Pacchetto costruzioni Perù",

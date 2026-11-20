@@ -51064,6 +51064,8 @@ const resource = {
     "modules.catalog.mine_survey": "Mine Survey",
     "modules.catalog.norm_pricing": "Norm Pricing",
     "modules.catalog.project_tax": "Project Tax Profile",
+    "modules.catalog.central_purchasing": "Central Purchasing",
+    "modules.catalog.dataflow": "Data paths",
     "modules.pp_name_pakistan_pk": "Pakistan Construction Pack",
     "modules.pp_name_peru_pe": "Peru Construction Pack",
     "modules.pp_name_hongkong_hk": "Hong Kong Construction Pack",

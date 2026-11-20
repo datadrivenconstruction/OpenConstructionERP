@@ -60102,6 +60102,8 @@ const resource = {
     "modules.catalog.mine_survey": "مساحة المناجم",
     "modules.catalog.norm_pricing": "التسعير بالمعايير",
     "modules.catalog.project_tax": "الملف الضريبي للمشروع",
+    "modules.catalog.central_purchasing": "المشتريات المركزية",
+    "modules.catalog.dataflow": "مسارات البيانات",
     "modules.pp_desc_eleven_areas_framework": "إطار إدارة المشروع من جهة المالك عبر أحد عشر مجالاً إدارياً على مرحلتين، هما تطوير المشروع وتنفيذ البناء، مع بوابة واحدة بينهما ووثيقة إطار معتمدة واحدة لكل مجال.",
     "modules.pp_name_pakistan_pk": "حزمة إنشاءات باكستان",
     "modules.pp_name_peru_pe": "حزمة إنشاءات بيرو",

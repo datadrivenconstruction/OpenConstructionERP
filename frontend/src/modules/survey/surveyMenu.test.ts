@@ -51,7 +51,7 @@ describe('Survey & Land menu group', () => {
     expect(rowsInGroup(useModuleStore.getState().isModuleEnabled)).toEqual([]);
     turn(true);
     expect(useModuleStore.getState().isModuleEnabled('survey_core')).toBe(true);
-    expect(rowsInGroup(useModuleStore.getState().isModuleEnabled)).toEqual(['/survey', '/survey/points']);
+    expect(rowsInGroup(useModuleStore.getState().isModuleEnabled)).toEqual(['/survey', '/survey/points', '/survey/calc']);
     turn(false);
     expect(rowsInGroup(useModuleStore.getState().isModuleEnabled)).toEqual([]);
   });
@@ -81,11 +81,12 @@ describe('survey module manifest', () => {
     expect(survey.description).toBe('survey.module_description');
   });
 
-  it('serves the overview at /survey and the register at /survey/points', () => {
-    expect(survey.routes.map((r) => r.path)).toEqual(['/survey', '/survey/points']);
+  it('serves the overview at /survey, the register at /survey/points and calculations at /survey/calc', () => {
+    expect(survey.routes.map((r) => r.path)).toEqual(['/survey', '/survey/points', '/survey/calc']);
     expect(survey.navItems.map((i) => [i.to, i.group])).toEqual([
       ['/survey', GROUP],
       ['/survey/points', GROUP],
+      ['/survey/calc', GROUP],
     ]);
   });
 

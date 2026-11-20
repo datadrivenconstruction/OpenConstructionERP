@@ -57390,6 +57390,8 @@ const resource = {
     "modules.catalog.mine_survey": "Rudarsko mjerenje",
     "modules.catalog.norm_pricing": "Određivanje cijena po normama",
     "modules.catalog.project_tax": "Porezni profil projekta",
+    "modules.catalog.central_purchasing": "Središnja nabava",
+    "modules.catalog.dataflow": "Putevi podataka",
     "modules.pp_desc_eleven_areas_framework": "Upravljanje projektom od strane investitora u jedanaest područja upravljanja u dvije faze, razvoj projekta i izvedba građenja, s jednom prekretnicom između njih i jednim odobrenim okvirnim dokumentom za svako područje.",
     "modules.pp_name_pakistan_pk": "Građevinski paket Pakistan",
     "modules.pp_name_peru_pe": "Građevinski paket Peru",
