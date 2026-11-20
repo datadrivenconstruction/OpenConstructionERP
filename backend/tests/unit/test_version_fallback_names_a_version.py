@@ -50,9 +50,9 @@ import pytest
 
 from app.cli import _resolve_version, cmd_version
 
-#: A version no tree is ever at, so an answer of exactly this one can only have
+#: A version no tree is ever at, and no real version contains it as a substring, so an answer of it can only have
 #: come from the metadata lookup and never from the pyproject beside the source.
-NOT_THIS_TREE = "0.0.1"
+NOT_THIS_TREE = "999.0.999"
 
 
 def _boom(*_args: Any, **_kwargs: Any) -> str:
