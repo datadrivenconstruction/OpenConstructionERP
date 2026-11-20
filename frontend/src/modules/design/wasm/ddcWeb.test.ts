@@ -40,7 +40,8 @@ describe('ddc_web.wasm', () => {
     await handle({ type: 'gen', id: 1, brief: brief() });
     await handle({ type: 'gen', id: 2, brief: '{"schema":"nope"}' });
     expect(out[0]).toEqual({ type: 'ready' });
-    const [one, two] = out.slice(1) as Extract<WorkerOut, { type: 'result' }>[];
+    const one = out[1] as Extract<WorkerOut, { type: 'result' }>;
+    const two = out[2] as Extract<WorkerOut, { type: 'result' }>;
     expect(one.id).toBe(1);
     expect(one.result.ok && glbNodes(one.result.glb).some((n) => n.key === 'b1/found/raft')).toBe(true);
     expect(two).toMatchObject({ id: 2, result: { ok: false } });

@@ -24,16 +24,16 @@ describe('web editor status line', () => {
   });
 
   it('refuses without a signing key and says so', () => {
-    expect(statusLine(base({ signing: { key: false, error: null } }), t)).toBe(EN['design.web_editor.problem.no_key']);
+    expect(statusLine(base({ signing: { key: false, error: null } }), t)).toBe(EN['design.web_editor.problem.no_key']!);
   });
 
   it('names a release that needs a newer platform', () => {
     const s = base({ feed: { state: 'available', version: '2.0.0', bridge: [2], problem: 'erp_too_old' } });
-    expect(statusLine(s, t)).toBe(EN['design.web_editor.problem.erp_too_old']);
+    expect(statusLine(s, t)).toBe(EN['design.web_editor.problem.erp_too_old']!);
   });
 
   it('keeps the engine message when no release is published', () => {
-    expect(statusLine(base({ feed: { state: 'absent' } }), t)).toBe(EN['design.web_editor.feed.absent']);
+    expect(statusLine(base({ feed: { state: 'absent' } }), t)).toBe(EN['design.web_editor.feed.absent']!);
   });
 
   it('shows download progress', () => {
@@ -43,7 +43,7 @@ describe('web editor status line', () => {
 
   it('maps every server code to a sentence that exists', () => {
     for (const code of ['no_key', 'signature_wrong_key', 'feed_unreachable', 'integrity', 'whatever', null]) {
-      expect(EN[problemKey(code)]).toBeTruthy();
+      expect(EN[problemKey(code)]!).toBeTruthy();
     }
   });
 });

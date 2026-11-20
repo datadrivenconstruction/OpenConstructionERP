@@ -150,7 +150,7 @@ describe('selection: linked in the ERP', () => {
   it('says so when nothing uses the selection, and asks nothing without one', async () => {
     api.links = { keys: ['x'], positions: [], activities: [], packages: [] };
     await mount(<LinkedInErp projectId="p1" keys={['x']} />);
-    expect(await screen.findByText(EN['design.links.none'])).toBeInTheDocument();
+    expect(await screen.findByText(EN['design.links.none']!)).toBeInTheDocument();
     cleanup();
     api.calls = [];
     await mount(<LinkedInErp projectId="p1" keys={[]} />);
@@ -177,7 +177,7 @@ describe('estimate position: where it lives', () => {
     const user = userEvent.setup();
     await mount(<PositionLinks projectId="p1" positionId="pos1" rule="slab" />);
     await user.click(screen.getByTestId('show-model-slab'));
-    expect(await screen.findByRole('alert')).toHaveTextContent(EN['design.links.no_elements']);
+    expect(await screen.findByRole('alert')).toHaveTextContent(EN['design.links.no_elements']!);
     expect(lastPath).toBe('/design/estimate');
   });
 });

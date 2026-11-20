@@ -142,9 +142,8 @@ function NoEstimate(props: {
           icon={<Calculator size={28} aria-hidden />}
           title={tr(t, 'design.estimate.no_revision')}
           description={tr(t, 'design.estimate.no_revision_hint')}
-        >
-          <Link className="text-oe-blue-text underline" to="/design/revisions">{tr(t, 'design.estimate.open_revisions')}</Link>
-        </EmptyState>
+          action={<Link className="text-oe-blue-text underline" to="/design/revisions">{tr(t, 'design.estimate.open_revisions')}</Link>}
+        />
       )}
       {props.rulesError && <ErrorState title={props.rulesError.title} hint={props.rulesError.hint} />}
       {props.rulesLoading && <Skeleton className="h-24 w-full" />}

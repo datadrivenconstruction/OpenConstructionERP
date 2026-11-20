@@ -412,7 +412,7 @@ function ModeSelect({ projectId, settings }: { projectId: string; settings: Chan
 }
 
 /** "Draft change order CO-... created -> open", or why there is none and a way to make it. Never approves. */
-function ChangeOrderNote({ revisionId, number, settings, locale }: {
+function ChangeOrderNote({ revisionId, number, settings }: {
   revisionId: string; number: number; settings: ChangeOrderSettings | undefined; locale: string;
 }) {
   const { t } = useTranslation();

@@ -56,11 +56,11 @@ describe('selection panel', () => {
   it('with nothing selected it shows the project in figures and the next steps', async () => {
     await mount([]);
     expect(await screen.findByTestId('snapshot-total')).toHaveTextContent(/^€\s?6,490,138$/);
-    expect(screen.getByTestId('snapshot-label')).toHaveTextContent(EN['design.estimate.priced_total']);
-    expect(screen.getByTestId('project-snapshot')).toHaveTextContent(EN['design.overview.step.model'] + '2');
+    expect(screen.getByTestId('snapshot-label')).toHaveTextContent(EN['design.estimate.priced_total']!);
+    expect(screen.getByTestId('project-snapshot')).toHaveTextContent(EN['design.overview.step.model']! + '2');
     expect(screen.getByTestId('snapshot-next-schedule')).toHaveAttribute('href', '/design/revisions');
-    expect(screen.getByTestId('snapshot-status-schedule')).toHaveTextContent(EN['design.overview.todo.schedule']);
-    expect(screen.getByTestId('snapshot-next-schedule')).toHaveTextContent(EN['design.overview.action.schedule']);
+    expect(screen.getByTestId('snapshot-status-schedule')).toHaveTextContent(EN['design.overview.todo.schedule']!);
+    expect(screen.getByTestId('snapshot-next-schedule')).toHaveTextContent(EN['design.overview.action.schedule']!);
     expect(screen.queryByTestId('block-estimate')).toBeNull();
   });
 
@@ -68,34 +68,34 @@ describe('selection panel', () => {
     m.mid = '5190000';
     await mount([]);
     expect(await screen.findByTestId('snapshot-total')).toHaveTextContent(/^€\s?5,190,000$/);
-    expect(screen.getByTestId('snapshot-label')).toHaveTextContent(`${EN['design.estimate.range']} · ${EN['design.estimate.mid']}`);
-    expect(screen.getByTestId('snapshot-priced')).toHaveTextContent(new RegExp(`${EN['design.estimate.priced_total']} €\\s?6,490,138`));
+    expect(screen.getByTestId('snapshot-label')).toHaveTextContent(`${EN['design.estimate.range']!} · ${EN['design.estimate.mid']!}`);
+    expect(screen.getByTestId('snapshot-priced')).toHaveTextContent(new RegExp(`${EN['design.estimate.priced_total']!} €\\s?6,490,138`));
   });
 
   it('shows every block: cost, quantities, BOQ, schedule, procurement, documents, field reports, remarks', async () => {
     await mount();
     expect(order()).toEqual(['estimate', 'quantities', 'boq', 'schedule', 'procurement', 'documents', 'field_reports', 'remarks']
-      .map((b) => EN[`design.panel.block.${b}`]));
+      .map((b) => EN[`design.panel.block.${b}`]!));
     expect(await screen.findByTestId('selection-quantities')).toHaveTextContent('Volume, m³12.5');
     expect(screen.getByTestId('doc-d1')).toHaveAttribute('href', '/documents?id=d1');
     expect(screen.getByTestId('doc-d1')).toHaveTextContent('Sheet, revision 3');
     expect(screen.getByTestId('remark-t1')).toHaveTextContent('Crack in wall');
     expect(screen.getByTestId('remark-t1')).toHaveTextContent('open · due 2027-04-01');
     expect(await screen.findByTestId('link-activity-a1')).toBeTruthy();
-    expect(within(screen.getByTestId('block-boq')).getByText(EN['design.panel.none.boq'])).toBeTruthy();
+    expect(within(screen.getByTestId('block-boq')).getByText(EN['design.panel.none.boq']!)).toBeTruthy();
   });
 
   it('blocks are hidden and reordered (buttons and Alt+arrows), remembered per user', async () => {
     const user = await mount();
     await user.click(screen.getByTestId('panel-customize'));
     expect(screen.getByTestId('panel-customize')).toHaveAttribute('aria-expanded', 'true');
-    const box = screen.getByRole('checkbox', { name: EN['design.panel.block.estimate'] });
+    const box = screen.getByRole('checkbox', { name: EN['design.panel.block.estimate']! });
     expect(document.activeElement).toBe(box);
     await user.keyboard('{Alt>}{ArrowDown}{/Alt}');
-    expect(order().slice(0, 2)).toEqual([EN['design.panel.block.quantities'], EN['design.panel.block.estimate']]);
-    expect(document.activeElement).toBe(screen.getByRole('checkbox', { name: EN['design.panel.block.estimate'] }));
+    expect(order().slice(0, 2)).toEqual([EN['design.panel.block.quantities']!, EN['design.panel.block.estimate']!]);
+    expect(document.activeElement).toBe(screen.getByRole('checkbox', { name: EN['design.panel.block.estimate']! }));
     await user.click(screen.getByRole('button', { name: 'Move Open remarks up' }));
-    await user.click(screen.getByRole('checkbox', { name: EN['design.panel.block.documents'] }));
+    await user.click(screen.getByRole('checkbox', { name: EN['design.panel.block.documents']! }));
     expect(screen.queryByTestId('block-documents')).toBeNull();
     await user.keyboard('{Escape}');
     expect(screen.queryByTestId('panel-chooser')).toBeNull();
@@ -106,7 +106,7 @@ describe('selection panel', () => {
     cleanup();
     m.user = 'u2';
     await mount();
-    expect(order()[0]).toBe(EN['design.panel.block.estimate']); // another person keeps the default
+    expect(order()[0]).toBe(EN['design.panel.block.estimate']!); // another person keeps the default
   });
 
   it('a block that cannot load says so and retries; hiding all says how to get them back', async () => {
@@ -115,11 +115,11 @@ describe('selection panel', () => {
     const docs = screen.getByTestId('block-documents');
     expect(await within(docs).findByText(/Could not be loaded/)).toBeTruthy();
     m.ctxFail = false;
-    await user.click(within(docs).getByRole('button', { name: EN['design.panel.retry'] }));
+    await user.click(within(docs).getByRole('button', { name: EN['design.panel.retry']! }));
     expect(await screen.findByTestId('doc-d1')).toBeTruthy();
     await user.click(screen.getByTestId('panel-customize'));
     for (const b of screen.getAllByRole('checkbox')) await user.click(b);
-    expect(screen.getByTestId('panel-all-hidden')).toHaveTextContent(EN['design.panel.all_hidden']);
+    expect(screen.getByTestId('panel-all-hidden')).toHaveTextContent(EN['design.panel.all_hidden']!);
     await user.click(screen.getByTestId('panel-reset'));
     expect(order()).toHaveLength(8);
   });
