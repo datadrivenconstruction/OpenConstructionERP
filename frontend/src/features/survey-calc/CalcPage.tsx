@@ -17,6 +17,7 @@ import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { useToastStore } from '@/stores/useToastStore';
 import { ANGLE_UNITS, fmtM, formatAngle, parseCoord, parseRing, type AngleUnit } from './angles';
 import { fmtNumber } from '@/shared/lib/formatters';
+import { TraverseTabHost } from '@/features/survey-plan/screens/TraverseTabHost';
 import {
   COGO_METHODS,
   getClasses,
@@ -699,7 +700,7 @@ export function CalcPage() {
         ]}
       />
       {tab === 'cogo' && <CogoTab projectId={projectId} />}
-      {tab === 'traverse' && <TraverseTab projectId={projectId} />}
+      {tab === 'traverse' && <TraverseTabHost projectId={projectId} classic={<TraverseTab projectId={projectId} />} />}
       {tab === 'level' && <LevelTab projectId={projectId} />}
     </div>
   );

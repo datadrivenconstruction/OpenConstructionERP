@@ -37,6 +37,7 @@ import {
 } from './api';
 import { ImportReadingsDialog } from './ImportReadingsDialog';
 import { LevelBadge, PointDrawer } from './PointDrawer';
+import { MonitoringMap } from '@/features/survey-plan/screens/MonitoringMap';
 import { fmtMm, fmtRate } from './levels';
 import { monitoringGuide } from './monitoringGuide';
 import { useOpenSurveyDemo } from '@/features/survey/useOpenSurveyDemo';
@@ -262,6 +263,12 @@ export default function MonitoringPage() {
             </table>
           </div>
         </Card>
+      )}
+
+      {rows.length > 0 && (
+        <CollapsibleSection storageKey="survey.monitoring.plan" title={t('plan.mon.title', { defaultValue: 'Points on the plan' })}>
+          <MonitoringMap projectId={projectId} canWrite={canWrite} onOpenPoint={setSelected} />
+        </CollapsibleSection>
       )}
 
       <ImportReadingsDialog open={importOpen} projectId={projectId} onClose={() => setImportOpen(false)} />
