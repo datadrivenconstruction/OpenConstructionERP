@@ -181,7 +181,7 @@ function PercentCell({
         value={value}
         disabled={disabled || noQty}
         aria-label={label}
-        className="oe-input h-7 w-16 px-1.5 text-end text-2xs tabular-nums"
+        className="oe-input-sm w-16 px-1.5 text-end text-2xs tabular-nums"
         onChange={(e) => setValue(e.target.value)}
         onBlur={commit}
         onKeyDown={(e) => {

@@ -182276,7 +182276,7 @@
             },
             {
               "name": "percent",
-              "type": "Decimal"
+              "type": "Decimal7_3"
             },
             {
               "name": "entry_date",
