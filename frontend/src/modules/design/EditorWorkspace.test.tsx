@@ -122,10 +122,10 @@ describe('editor workspace (generator in the module)', () => {
   it('is a workspace: values, canvas, selection panel, Create revision and the desktop editor', async () => {
     const user = await mount();
     expect(await screen.findByTestId('create-revision')).toBeTruthy();
-    expect(screen.getByTestId('engine-label').textContent).toBe(EN['design.workspace.engine_simple_short']);
-    expect(screen.getByTestId('engine-label').getAttribute('title')).toBe(EN['design.workspace.engine_simple']);
+    expect(screen.getByTestId('engine-label').textContent).toBe(EN['design.workspace.engine_simple_short']!);
+    expect(screen.getByTestId('engine-label').getAttribute('title')).toBe(EN['design.workspace.engine_simple']!);
     expect(screen.getByTestId('workspace-canvas')).toBeTruthy();
-    expect(screen.getByTestId('selection-panel').textContent).toContain(EN['design.workspace.side.none']);
+    expect(screen.getByTestId('selection-panel').textContent).toContain(EN['design.workspace.side.none']!);
     expect(screen.getByTestId('open-desktop').getAttribute('href')).toBe('/design/editor/desktop');
     // with today's engine, Create revision = the server build through the same intake
     await user.click(screen.getByTestId('create-revision'));
@@ -139,8 +139,8 @@ describe('editor workspace (generator in the module)', () => {
     ];
     const user = await mount();
     expect((await screen.findByTestId('tip-label')).textContent).toBe(
-      `${EN['design.revisions.number'].replace('{{number}}', '2')} · ${EN['design.revisions.status.shared']}`);
-    const floors = await screen.findByLabelText(EN['design.model.param.floors']);
+      `${EN['design.revisions.number']!.replace('{{number}}', '2')} · ${EN['design.revisions.status.shared']!}`);
+    const floors = await screen.findByLabelText(EN['design.model.param.floors']!);
     await user.clear(floors);
     await user.type(floors, '5');
     await waitFor(() => expect(screen.queryByTestId('tip-model')).toBeNull());
@@ -162,7 +162,7 @@ describe('editor workspace (generator in the module)', () => {
   it('without the edit right: look and select only, and it says why', async () => {
     api.rights = { edit: 'managers', can_edit: false, can_accept: false };
     await mount();
-    expect((await screen.findByTestId('view-why')).textContent).toBe(EN['design.workspace.view_rights']);
+    expect((await screen.findByTestId('view-why')).textContent).toBe(EN['design.workspace.view_rights']!);
     expect(screen.getByTestId('editor-workspace').dataset.mode).toBe('view');
     expect(screen.queryByTestId('create-revision')).toBeNull();
     expect(screen.queryByTestId('workspace-left')).toBeNull();
@@ -183,8 +183,8 @@ describe('editor workspace (generator in the module)', () => {
       summary: { proposed: ['/massing/floor_height_m', '/massing/floors_above'], defaults: [], questions: [], rejected: 0 },
     });
     const user = await mount();
-    await user.type(await screen.findByRole('textbox', { name: EN['design.workspace.ai.title'] }), 'five storeys, 3.1 m');
-    await user.click(screen.getByRole('button', { name: EN['design.workspace.ai.read'] }));
+    await user.type(await screen.findByRole('textbox', { name: EN['design.workspace.ai.title']! }), 'five storeys, 3.1 m');
+    await user.click(screen.getByRole('button', { name: EN['design.workspace.ai.read']! }));
     const list = await screen.findByTestId('ai-proposals');
     expect(api.extract).toHaveBeenCalledWith('p1', 'five storeys, 3.1 m', api.brief);
     expect(list.textContent).toContain('five storeys');
@@ -239,7 +239,7 @@ describe('editor workspace (browser editor over the bridge)', () => {
     emit({ bridge: 1, type: 'select', elements: [{ element_key: 'b1/w1', ifc_class: 'IfcWall' }] });
     expect(screen.getByTestId('selection-lines').textContent).toMatch(/82\.5.*88\.1/);
     await user.keyboard('{Escape}');
-    expect(screen.getByTestId('selection-panel').textContent).toContain(EN['design.workspace.side.none']);
+    expect(screen.getByTestId('selection-panel').textContent).toContain(EN['design.workspace.side.none']!);
 
     await user.click(screen.getByTestId('create-revision'));
     expect((await screen.findByTestId('revision-created')).textContent).toContain('Revision 3 created');

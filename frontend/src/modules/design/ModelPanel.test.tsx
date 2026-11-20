@@ -58,7 +58,6 @@ vi.mock('@/shared/ui/BIMViewer', () => ({
   },
 }));
 vi.mock('@/shared/ui', async () => {
-  const React = await import('react');
   return {
     Card: ({ children }: { children: React.ReactNode }) => <section>{children}</section>,
     CardHeader: ({ title }: { title: string }) => <header>{title}</header>,

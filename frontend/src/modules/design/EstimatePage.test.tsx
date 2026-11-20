@@ -55,10 +55,10 @@ vi.mock('./api', () => ({
 vi.mock('@/features/costs/CwicrMatchPanel', () => ({ CwicrMatchPanel: () => null }));
 vi.mock('@/shared/ui', async () => {
   const React = await import('react');
-  const box = (name: string) => ({ children, title, description, hint, onRetry }: Record<string, unknown>) =>
+  const box = (name: string) => ({ children, title, description, hint, onRetry, action }: Record<string, unknown>) =>
     React.createElement('div', { 'data-ui': name, role: name === 'ErrorState' ? 'alert' : undefined },
       React.createElement('p', null, title as string), React.createElement('p', null, (description ?? hint) as string),
-      onRetry ? React.createElement('button', { onClick: onRetry as () => void }, 'Retry') : null, children as never);
+      onRetry ? React.createElement('button', { onClick: onRetry as () => void }, 'Retry') : null, children as never, action as never);
   return {
     Badge: ({ children }: { children: React.ReactNode }) => <span data-badge>{children}</span>,
     Button: ({ children, loading, icon: _i, variant: _v, ...rest }: React.ButtonHTMLAttributes<HTMLButtonElement> & { loading?: boolean; icon?: unknown; variant?: string }) =>
@@ -256,7 +256,7 @@ describe('positions', () => {
     h.estimate = est({ cost_regions: [] });
     await mount();
     const link = await screen.findByTestId('no-cost-base');
-    expect(link.textContent).toBe(EN['design.estimate.cost_pick_none']);
+    expect(link.textContent).toBe(EN['design.estimate.cost_pick_none']!);
     expect(link.getAttribute('href')).toBe('/costs');
   });
 

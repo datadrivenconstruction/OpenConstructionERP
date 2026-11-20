@@ -124,10 +124,10 @@ describe('project start', () => {
     const user = await mount();
     const tabs = screen.getAllByRole('tab');
     expect(tabs.map((t) => t.textContent)).toEqual([
-      EN['design.start.way.describe'] + EN['design.start.way.describe_hint'],
-      EN['design.start.way.upload'] + EN['design.start.way.upload_hint'],
-      EN['design.start.way.template'] + EN['design.start.way.template_hint'],
-      EN['design.start.way.map'] + EN['design.start.way.map_hint'],
+      EN['design.start.way.describe']! + EN['design.start.way.describe_hint']!,
+      EN['design.start.way.upload']! + EN['design.start.way.upload_hint']!,
+      EN['design.start.way.template']! + EN['design.start.way.template_hint']!,
+      EN['design.start.way.map']! + EN['design.start.way.map_hint']!,
     ]);
     expect(tabs[0]).toHaveAttribute('aria-selected', 'true');
     tabs[0]!.focus();
@@ -143,13 +143,13 @@ describe('project start', () => {
 
   it('describe: AI reads the text, one summary shows all values with sources, doubtful first; one button confirms', async () => {
     const user = await mount();
-    await user.type(await screen.findByLabelText(EN['design.start.describe.label']), 'five storeys');
-    await user.click(screen.getByRole('button', { name: EN['design.start.describe.read'] }));
+    await user.type(await screen.findByLabelText(EN['design.start.describe.label']!), 'five storeys');
+    await user.click(screen.getByRole('button', { name: EN['design.start.describe.read']! }));
     const summary = await screen.findByTestId('proposal-summary');
     expect(api.extract).toHaveBeenCalledWith('p1', 'five storeys', null);
     const rows = within(summary).getAllByRole('listitem');
     expect(rows[0]).toHaveAttribute('data-doubt', 'no_quote'); // floor height: no quote -> first, highlighted
-    expect(rows[0]).toHaveTextContent(EN['design.start.doubt.no_quote']);
+    expect(rows[0]).toHaveTextContent(EN['design.start.doubt.no_quote']!);
     expect(rows[1]).toHaveTextContent('five storeys');
     expect(screen.getByTestId('summary-counts')).toHaveTextContent('to check: 1');
     // correct the doubtful value
@@ -157,7 +157,7 @@ describe('project start', () => {
     const input = within(rows[0]!).getByRole('textbox');
     await user.clear(input);
     await user.type(input, '3,0{Enter}');
-    expect(rows[0]).toHaveTextContent(EN['design.start.corrected']);
+    expect(rows[0]).toHaveTextContent(EN['design.start.corrected']!);
     expect(screen.getByTestId('summary-counts')).not.toHaveTextContent('to check');
     await user.click(screen.getByTestId('confirm-all'));
     await waitFor(() => expect(api.confirm).toHaveBeenCalled());
@@ -173,15 +173,15 @@ describe('project start', () => {
     api.extract.mockResolvedValue({ ...EXTRACTION, brief: { ...EXTRACTION.brief, provenance: {} },
       summary: { proposed: [], defaults: [], questions: [], rejected: 0, confirmed: ['/massing/floors_above'] } });
     const user = await mount();
-    await user.type(await screen.findByLabelText(EN['design.start.describe.label']), 'five storeys');
-    await user.click(screen.getByRole('button', { name: EN['design.start.describe.read'] }));
-    expect(await screen.findByTestId('summary-empty')).toHaveTextContent(EN['design.start.summary.known'].replace('{{count}}', '1'));
+    await user.type(await screen.findByLabelText(EN['design.start.describe.label']!), 'five storeys');
+    await user.click(screen.getByRole('button', { name: EN['design.start.describe.read']! }));
+    expect(await screen.findByTestId('summary-empty')).toHaveTextContent(EN['design.start.summary.known']!.replace('{{count}}', '1'));
   });
 
   it('a value can be left out, and Ctrl+Enter confirms the rest', async () => {
     const user = await mount();
-    await user.type(await screen.findByLabelText(EN['design.start.describe.label']), 'x');
-    await user.click(screen.getByRole('button', { name: EN['design.start.describe.read'] }));
+    await user.type(await screen.findByLabelText(EN['design.start.describe.label']!), 'x');
+    await user.click(screen.getByRole('button', { name: EN['design.start.describe.read']! }));
     await screen.findByTestId('proposal-summary');
     await user.click(screen.getByRole('button', { name: 'Leave out Floor height' }));
     expect(screen.getByTestId('confirm-all')).toHaveTextContent('Confirm all (1)');
@@ -201,10 +201,10 @@ describe('project start', () => {
     await user.click(screen.getByTestId('start-use-template'));
     const summary = await screen.findByTestId('proposal-summary');
     expect(summary).toHaveAttribute('data-origin', 'template');
-    expect(within(summary).getAllByRole('listitem')[0]).toHaveTextContent(EN['design.start.doubt.typical']);
+    expect(within(summary).getAllByRole('listitem')[0]).toHaveTextContent(EN['design.start.doubt.typical']!);
     // every row reads as words: field names and template values translated, lengths with their unit
     expect(summary.textContent).not.toMatch(/design\.|apartment_section/);
-    expect(summary).toHaveTextContent(EN['design.field.generator.template']);
+    expect(summary).toHaveTextContent(EN['design.field.generator.template']!);
     expect(summary).toHaveTextContent('3.6 m');
     expect(api.save).not.toHaveBeenCalled();
     await user.click(screen.getByTestId('confirm-all'));
@@ -220,7 +220,7 @@ describe('project start', () => {
     api.templatesFail = true;
     const user = await mount();
     await user.click(screen.getByTestId('way-template'));
-    expect(await screen.findByRole('alert')).toHaveTextContent(EN['design.start.template.failed']);
+    expect(await screen.findByRole('alert')).toHaveTextContent(EN['design.start.template.failed']!);
     api.templatesFail = false;
     await user.click(screen.getByRole('button', { name: 'retry' }));
     expect(await screen.findByTestId('template-school')).toBeTruthy();
@@ -235,10 +235,10 @@ describe('project start', () => {
     });
     const user = await mount();
     await user.click(screen.getByTestId('way-upload'));
-    const input = screen.getByLabelText(EN['design.start.upload.pick'], { selector: 'input' });
+    const input = screen.getByLabelText(EN['design.start.upload.pick']!, { selector: 'input' });
     fireEvent.change(input, { target: { files: [new File(['%PDF'], 'plan.pdf', { type: 'application/pdf' }), new File(['x'], 'notes.docx')] } });
     expect(screen.getByRole('alert')).toHaveTextContent('Not added: notes.docx');
-    await waitFor(() => expect(screen.getByTestId('start-files')).toHaveTextContent(EN['design.start.upload.ready']));
+    await waitFor(() => expect(screen.getByTestId('start-files')).toHaveTextContent(EN['design.start.upload.ready']!));
     expect(api.upload).toHaveBeenCalledWith('p1', expect.any(File), 'drawing');
     await user.click(screen.getByTestId('start-read-files'));
     const summary = await screen.findByTestId('proposal-summary');
@@ -255,18 +255,18 @@ describe('project start', () => {
     await user.click(screen.getByTestId('start-use-plot'));
     const summary = await screen.findByTestId('proposal-summary');
     expect(summary).toHaveTextContent(/Plot outline, [\d,.]+ m²/);
-    expect(summary).toHaveTextContent(EN['design.start.source.map']);
+    expect(summary).toHaveTextContent(EN['design.start.source.map']!);
   });
 
   it('without AI settings it says so and links to them', async () => {
     api.aiSettings = {};
     await mount();
-    expect(await screen.findByTestId('start-no-ai')).toHaveTextContent(EN['design.start.ai_settings']);
+    expect(await screen.findByTestId('start-no-ai')).toHaveTextContent(EN['design.start.ai_settings']!);
   });
 
   it('speaks Russian', async () => {
     await mount('ru');
-    expect(screen.getByText(RU['design.start.title'])).toBeTruthy();
-    expect(screen.getByTestId('way-map')).toHaveTextContent(RU['design.start.way.map']);
+    expect(screen.getByText(RU['design.start.title']!)).toBeTruthy();
+    expect(screen.getByTestId('way-map')).toHaveTextContent(RU['design.start.way.map']!);
   });
 });

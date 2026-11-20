@@ -21,7 +21,6 @@ vi.mock('./procurementApi', () => ({
   setupProcurement: (...a: unknown[]) => h.setup(...a),
 }));
 vi.mock('@/shared/ui', async () => {
-  const React = await import('react');
   return {
     Badge: ({ children }: { children: React.ReactNode }) => <span data-ui="badge">{children}</span>,
     Button: ({ children, variant: _v, ...rest }: React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: string }) =>
