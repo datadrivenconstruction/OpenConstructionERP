@@ -181919,6 +181919,13 @@
           "response_model": "list[PositionSummary]"
         },
         {
+          "method": "POST",
+          "path": "/positions/{boq_position_id}/percent",
+          "handler": "set_position_percent",
+          "response_model": "EntryResponse | None",
+          "request_schema": "SetPercent"
+        },
+        {
           "method": "GET",
           "path": "/running-bill/",
           "handler": "running_bill",
@@ -182132,6 +182139,27 @@
           ]
         },
         {
+          "class_name": "SectionRef",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "One BOQ section or subsection above a position, outermost first.",
+          "fields": [
+            {
+              "name": "id",
+              "type": "uuid.UUID"
+            },
+            {
+              "name": "ordinal",
+              "type": "str"
+            },
+            {
+              "name": "description",
+              "type": "str"
+            }
+          ]
+        },
+        {
           "class_name": "PositionSummary",
           "bases": [
             "BaseModel"
@@ -182141,6 +182169,20 @@
             {
               "name": "boq_position_id",
               "type": "uuid.UUID"
+            },
+            {
+              "name": "boq_id",
+              "type": "uuid.UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "boq_name",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "sections",
+              "type": "list[SectionRef]"
             },
             {
               "name": "ordinal",
@@ -182218,6 +182260,28 @@
             {
               "name": "can_certify",
               "type": "bool"
+            }
+          ]
+        },
+        {
+          "class_name": "SetPercent",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Bring a position's measured quantity to a share of its BOQ quantity in one line.",
+          "fields": [
+            {
+              "name": "project_id",
+              "type": "uuid.UUID"
+            },
+            {
+              "name": "percent",
+              "type": "Decimal"
+            },
+            {
+              "name": "entry_date",
+              "type": "date | None",
+              "default": "None"
             }
           ]
         },
@@ -341249,10 +341313,10 @@
     },
     {
       "name": "measurement-book",
-      "ts_files": 3,
+      "ts_files": 4,
       "css_files": 0,
-      "test_files": 0,
-      "total_files": 3
+      "test_files": 1,
+      "total_files": 4
     },
     {
       "name": "meetings",
@@ -341648,10 +341712,10 @@
     },
     {
       "name": "rfq-bidding",
-      "ts_files": 12,
+      "ts_files": 13,
       "css_files": 0,
-      "test_files": 7,
-      "total_files": 12
+      "test_files": 8,
+      "total_files": 13
     },
     {
       "name": "risk",
@@ -344042,11 +344106,11 @@
     "total_models": 974,
     "total_columns": 11431,
     "total_relationships": 264,
-    "total_routes": 5552,
-    "total_schemas": 5171,
+    "total_routes": 5553,
+    "total_schemas": 5173,
     "total_python_files": 3684,
     "frontend_features": 252,
-    "frontend_ts_files": 4448,
+    "frontend_ts_files": 4450,
     "frontend_backend_mapped": 224
   },
   "frontend_backend_mapping": {
