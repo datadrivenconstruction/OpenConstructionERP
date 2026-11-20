@@ -12,11 +12,14 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Button, WideModal } from '@/shared/ui';
 import { getErrorMessage } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
-import { listSurfaces, searchBoqPositions } from './volumesApi';
+import { listSurfaces, listVolumes } from './volumesApi';
+import { CertifyDialog } from './CertifyDialog';
 import {
   UNIT_TYPES,
   addEntry,
   addToClaim,
+  certifyEntry,
+  certifyEntryPreview,
   computeActual,
   createPeriod,
   currentMonth,
@@ -316,64 +319,30 @@ interface ClaimProps {
   onClaimed: (r: ClaimResult) => void;
 }
 
+/** The confirmed actual of a period to the open payment certificate, after a preview. */
 export function AddToClaimDialog({ open, projectId, entry, onClose, onClaimed }: ClaimProps) {
-  const { t } = useTranslation();
-  const [q, setQ] = useState('');
-  const [positionId, setPositionId] = useState('');
-  const { done, fail } = useDone(onClose);
-  const hits = useQuery({
-    queryKey: ['volumes', 'boq-positions', projectId, q],
-    queryFn: () => searchBoqPositions(projectId, q),
-    enabled: open,
+  const { i18n } = useTranslation();
+  const volumes = useQuery({
+    queryKey: ['volumes', 'list', projectId, i18n.language],
+    queryFn: () => listVolumes(projectId, i18n.language),
+    enabled: open && !!entry?.actual,
   });
-  const send = useMutation({
-    mutationFn: () => addToClaim(entry!.id, positionId),
-    onSuccess: (r) => {
-      onClaimed(r);
-      done();
-    },
-    onError: fail,
-  });
+  const v = (volumes.data ?? []).find((x) => x.id === entry?.actual?.volume_id);
+  if (!open || !entry) return null;
+  const amounts = v
+    ? { cut: v.cut_m3, fill: v.fill_m3, net: v.net_m3, loose_cut: v.loose_cut_m3 }
+    : { cut: entry.actual_m3 };
   return (
-    <WideModal
-      open={open}
+    <CertifyDialog
+      key={v ? 'full' : 'cut'}
+      open
+      projectId={projectId}
+      source={`${entry.unit_name} ${entry.actual?.code ?? ''}`.trim()}
+      amounts={amounts}
+      preview={(b) => certifyEntryPreview(entry.id, b)}
+      commit={(b) => certifyEntry(entry.id, b)}
+      progressOnly={(b) => addToClaim(entry.id, b).then(onClaimed)}
       onClose={onClose}
-      title={t('mine.action.add_to_claim', { defaultValue: 'Add to claim' })}
-      size="lg"
-      busy={send.isPending}
-      footer={
-        <Button variant="primary" disabled={!positionId} loading={send.isPending} onClick={() => send.mutate()} data-testid="mine-claim-confirm">
-          {t('mine.action.add_to_claim', { defaultValue: 'Add to claim' })}
-        </Button>
-      }
-    >
-      <div className="space-y-3 text-sm">
-        <input
-          className="oe-input w-full"
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          placeholder={t('volumes.send.search', { defaultValue: 'Search BOQ lines measured in m3' })}
-          data-testid="mine-claim-search"
-        />
-        <div className="max-h-64 overflow-y-auto rounded border border-border-light">
-          {(hits.data ?? []).length === 0 ? (
-            <p className="p-3 text-content-tertiary">{t('volumes.send.none', { defaultValue: 'No BOQ line in m3 matches.' })}</p>
-          ) : (
-            <ul>
-              {(hits.data ?? []).map((h) => (
-                <li key={h.id}>
-                  <label className="flex items-center gap-2 px-3 py-1.5 hover:bg-surface-secondary">
-                    <input type="radio" name="mine-position" checked={positionId === h.id} onChange={() => setPositionId(h.id)} />
-                    <span className="font-mono text-xs">{h.ordinal}</span>
-                    <span className="flex-1">{h.description}</span>
-                    <bdi dir="ltr" className="text-xs">{h.quantity} {h.unit}</bdi>
-                  </label>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-      </div>
-    </WideModal>
+    />
   );
 }

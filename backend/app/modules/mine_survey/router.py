@@ -20,6 +20,8 @@ Endpoints:
     POST   /entries/{entry_id}/confirm-actual       - confirm that volume (survey.confirm)
     POST   /entries/{entry_id}/truck-loads          - truck-count tonnes from a CSV
     POST   /entries/{entry_id}/add-to-claim         - progress entry for the confirmed actual (survey.confirm)
+    POST   /entries/{entry_id}/certify/preview      - what the open payment certificate would carry
+    POST   /entries/{entry_id}/certify              - progress entry + certificate line (survey.confirm)
     GET    /periods/{period_id}/report.pdf          - mine period report
     GET    /units/{unit_id}/materials               - ore/waste/low-grade polygons of a unit
     POST   /units/{unit_id}/materials[/import]      - add one, or import GeoJSON / drawing layers
@@ -47,6 +49,7 @@ from fastapi import APIRouter, Depends, Query, Response, status
 from app.core.document_locale import normalize_document_locale
 from app.core.i18n import SUPPORTED_LOCALES
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep, verify_project_access
+from app.modules.contracts.measured_quantity_schemas import MeasuredPreview
 from app.modules.mine_survey.depth import MineDepthService
 from app.modules.mine_survey.models import MineUnit
 from app.modules.mine_survey.schemas import (
@@ -66,6 +69,7 @@ from app.modules.mine_survey.schemas import (
     MaterialIn,
     MaterialListResponse,
     MaterialOut,
+    MineCertify,
     PatternCreate,
     PatternDetail,
     PatternListResponse,
@@ -267,6 +271,30 @@ async def add_to_claim(
 ) -> ClaimResult:
     service, e = await _entry(entry_id, session, user_id)
     return await service.add_to_claim(e, body, user_id)
+
+
+@router.post(
+    "/entries/{entry_id}/certify/preview",
+    response_model=MeasuredPreview,
+    dependencies=[*_READ, Depends(RequirePermission("contracts.read"))],
+)
+async def certify_preview(
+    entry_id: uuid.UUID, body: MineCertify, session: SessionDep, user_id: CurrentUserId
+) -> MeasuredPreview:
+    service, e = await _entry(entry_id, session, user_id)
+    return MeasuredPreview.model_validate(await service.certify_preview(e, body))
+
+
+@router.post(
+    "/entries/{entry_id}/certify",
+    response_model=MeasuredPreview,
+    dependencies=[*_CONFIRM, Depends(RequirePermission("contracts.update"))],
+)
+async def certify(
+    entry_id: uuid.UUID, body: MineCertify, session: SessionDep, user_id: CurrentUserId
+) -> MeasuredPreview:
+    service, e = await _entry(entry_id, session, user_id)
+    return MeasuredPreview.model_validate(await service.certify(e, body, user_id))
 
 
 # ── Report ─────────────────────────────────────────────────────────────────

@@ -10,12 +10,14 @@ learner: the computer suggests, the person confirms.
 
 from __future__ import annotations
 
+import logging
 import uuid
 from pathlib import Path
 from typing import Any
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
+logger = logging.getLogger(__name__)
 DATA = Path(__file__).resolve().parent.parent / "survey_core" / "demo" / "riverside"
 #: Demo templates whose install also seeds the survey course data.
 SURVEY_DEMOS = frozenset({"survey-riverside-yard"})
@@ -94,15 +96,29 @@ async def seed_survey_demo(session: AsyncSession, project_id: uuid.UUID, user_id
     piles = await seed_stockpile_demo(session, project_id, user_id)
     mine = await seed_mine_demo(session, project_id, user_id)
     pages = await _seed_site_pages(session, project_id, user_id)
+    pay = await _seed_pay(session, project_id, user_id, calc.id)
     return {
         **piles,
         **mine,
         **pages,
+        **pay,
         "survey_points": ground.imported + 4,
         "survey_surfaces": 2,
         "survey_volumes": 1,
         "survey_cut_m3": calc.cut_m3,
     }
+
+
+async def _seed_pay(session: AsyncSession, project_id: uuid.UUID, user_id: str, volume_id: uuid.UUID) -> dict[str, Any]:
+    """Subcontract, open certificate and haul tickets; a slim install without them keeps the survey data."""
+    from app.modules.surfaces_volumes.demo_pay import seed_pay_demo
+
+    try:
+        async with session.begin_nested():
+            return await seed_pay_demo(session, project_id, user_id, volume_id)
+    except Exception:  # noqa: BLE001 - a missing optional module drops only the payment part
+        logger.warning("Riverside Yard payment demo not seeded", exc_info=True)
+        return {}
 
 
 #: Morning check shots on the control: CP1 within the demo 20 mm, CP3 off by 29.5 mm (SRV-012).

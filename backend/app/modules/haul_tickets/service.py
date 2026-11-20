@@ -27,7 +27,7 @@ from app.modules.haul_tickets import importer, logic
 from app.modules.haul_tickets.models import HaulInvoice, HaulMaterial, HaulRate, HaulSettings, HaulTicket
 from app.modules.haul_tickets.repository import HaulRepository
 from app.modules.haul_tickets.schemas import InvoiceIn, MaterialIn, RateIn, SettingsIn, TicketCreate, TicketUpdate
-from app.modules.haul_tickets.validators import INVOICE_RULE_SET, evaluate
+from app.modules.haul_tickets.validators import INVOICE_RULE_SET, VARIANCE_RULE_SET, evaluate
 
 MAX_IMPORT_BYTES = 10 * 1024 * 1024
 MAX_PHOTO_BYTES = 8 * 1024 * 1024
@@ -54,13 +54,26 @@ def ticket_snapshot(row: HaulTicket) -> dict[str, Any]:
 
 def settings_snapshot(s: HaulSettings | None) -> dict[str, Any]:
     if s is None:
-        return {"mandatory_fields": [], "max_gross_t": None, "capacity_tolerance_pct": 10, "price_tolerance_pct": 1}
+        return {
+            "mandatory_fields": [],
+            "max_gross_t": None,
+            "capacity_tolerance_pct": 10,
+            "price_tolerance_pct": 1,
+            "haul_variance_pct": logic.DEFAULT_HAUL_VARIANCE_PCT,
+        }
     return {
         "mandatory_fields": list(s.mandatory_fields or []),
         "max_gross_t": str(s.max_gross_t) if s.max_gross_t is not None else None,
         "capacity_tolerance_pct": s.capacity_tolerance_pct,
         "price_tolerance_pct": s.price_tolerance_pct,
+        "haul_variance_pct": variance_threshold(s),
     }
+
+
+def variance_threshold(s: HaulSettings | None) -> int:
+    """The project's hauled vs excavated threshold in percent, or the default."""
+    value = getattr(s, "haul_variance_pct", None) if s is not None else None
+    return int(value) if value is not None else logic.DEFAULT_HAUL_VARIANCE_PCT
 
 
 class HaulTicketService:
@@ -137,6 +150,7 @@ class HaulTicketService:
         row.metadata_ = {}
         if row.signature:
             row.signed_at = datetime.now(UTC)
+        await self._check_links(row)
         await self._apply_rate_defaults(row)
         await self.recompute(row)
         await self.repo.add(row)
@@ -154,15 +168,33 @@ class HaulTicketService:
             s = await self.repo.settings(row.project_id)
             row.currency = (s.currency if s and s.currency else "") or await self._project_currency(row.project_id)
 
+    async def _check_links(self, row: HaulTicket) -> None:
+        """A ticket links only to a volume or stockpile of its own project."""
+        from app.modules.stockpiles.models import Stockpile  # noqa: PLC0415
+        from app.modules.surfaces_volumes.models import SurveyVolume  # noqa: PLC0415
+
+        for model, value, label in (
+            (SurveyVolume, row.survey_volume_id, "Volume"),
+            (Stockpile, row.stockpile_id, "Stockpile"),
+        ):
+            if value is None:
+                continue
+            target = await self.session.get(model, value)
+            if target is None or target.project_id != row.project_id:
+                raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, f"{label} not found in this project")
+
     def _ensure_editable(self, row: HaulTicket) -> None:
         if row.status in ("verified", "invoiced"):
             raise HTTPException(status.HTTP_409_CONFLICT, "A verified ticket is locked; return it to delivered first.")
 
     async def update(self, row: HaulTicket, data: TicketUpdate) -> HaulTicket:
-        self._ensure_editable(row)
         changes = data.model_dump(exclude_unset=True)
+        # Where the load came from is not a billed figure, so a verified ticket can still be linked.
+        if not set(changes) <= {"survey_volume_id", "stockpile_id"}:
+            self._ensure_editable(row)
         for key, value in changes.items():
             setattr(row, key, value)
+        await self._check_links(row)
         if "signature" in changes:
             row.signed_at = datetime.now(UTC) if row.signature else None
         await self._apply_rate_defaults(row)
@@ -527,6 +559,121 @@ class HaulTicketService:
         await self.session.flush()
         return inv
 
+    # ── hauled vs excavated ───────────────────────────────────────────────
+    async def _volume_family(self, project_id: uuid.UUID, volume_id: uuid.UUID) -> tuple[Any, set[uuid.UUID]]:
+        """The volume and every calculation duplicated from the same original (one excavation)."""
+        from app.modules.surfaces_volumes.models import SurveyVolume  # noqa: PLC0415
+
+        v = await self.session.get(SurveyVolume, volume_id)
+        if v is None or v.project_id != project_id:
+            raise HTTPException(status.HTTP_404_NOT_FOUND, "Volume not found in this project")
+        rows = await self.session.execute(
+            select(SurveyVolume.id, SurveyVolume.duplicated_from_id).where(SurveyVolume.project_id == project_id)
+        )
+        parent = {r[0]: r[1] for r in rows.all()}
+
+        def root(vid: uuid.UUID) -> uuid.UUID:
+            seen: set[uuid.UUID] = set()
+            while parent.get(vid) is not None and vid not in seen:
+                seen.add(vid)
+                vid = parent[vid]
+            return vid
+
+        origin = root(v.id)
+        return v, {vid for vid in parent if root(vid) == origin}
+
+    async def _last_pile_survey(self, project_id: uuid.UUID, stockpile_id: uuid.UUID) -> tuple[Any, Any]:
+        from app.modules.stockpiles.models import Stockpile, StockpileSurvey  # noqa: PLC0415
+
+        p = await self.session.get(Stockpile, stockpile_id)
+        if p is None or p.project_id != project_id:
+            raise HTTPException(status.HTTP_404_NOT_FOUND, "Stockpile not found in this project")
+        stmt = (
+            select(StockpileSurvey)
+            .where(StockpileSurvey.stockpile_id == p.id)
+            .order_by(StockpileSurvey.surveyed_on.desc(), StockpileSurvey.created_at.desc())
+            .limit(1)
+        )
+        return p, (await self.session.execute(stmt)).scalar_one_or_none()
+
+    async def hauled_vs_excavated(
+        self, project_id: uuid.UUID, *, volume_id: uuid.UUID | None = None, stockpile_id: uuid.UUID | None = None
+    ) -> dict[str, Any]:
+        """Excavated loose m3 against the m3 the linked tickets hauled, with the difference and its finding.
+
+        For a volume the excavated figure is cut x swell factor; a duplicate
+        re-measures the same excavation, so tickets linked to any calculation of
+        that family count. For a stockpile it is the volume of the last survey.
+        """
+        if (volume_id is None) == (stockpile_id is None):
+            raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, "Ask for one volume or one stockpile")
+        swell: Decimal | None = None
+        if volume_id is not None:
+            row, linked = await self._volume_family(project_id, volume_id)
+            swell = Decimal(str(row.swell_factor or 1))
+            excavated: Decimal | None = (Decimal(str(row.cut_m3 or 0)) * swell).quantize(logic.QTY_Q)
+            basis = "loose_cut" if swell != 1 else "bank_cut"
+            column = HaulTicket.survey_volume_id
+        else:
+            row, last = await self._last_pile_survey(project_id, stockpile_id)  # type: ignore[arg-type]
+            linked = {row.id}
+            excavated = Decimal(str(last.volume_m3)) if last is not None else None
+            basis = "stockpile_survey" if last is not None else "none"
+            column = HaulTicket.stockpile_id
+        stmt = select(HaulTicket).where(
+            HaulTicket.project_id == project_id, column.in_(linked), HaulTicket.status != "rejected"
+        )
+        tickets = list((await self.session.execute(stmt)).scalars().all())
+        groups: dict[str, dict[str, Any]] = {}
+        hauled = logic.ZERO
+        for t in tickets:
+            kind, m3 = logic.hauled_m3(
+                unit=t.unit,
+                volume_m3=t.volume_m3,
+                net_t=t.net_t,
+                loads=t.loads or 0,
+                capacity=t.vehicle_capacity,
+                density=await self._density(project_id, t.material_code),
+            )
+            g = groups.setdefault(kind, {"basis": kind, "tickets": 0, "loads": 0, "hauled_m3": logic.ZERO})
+            g["tickets"] += 1
+            g["loads"] += t.loads or 0
+            g["hauled_m3"] += m3
+            hauled += m3
+        threshold = variance_threshold(await self.repo.settings(project_id))
+        pct = logic.variance_pct(hauled, excavated) if tickets else None
+        snapshot = {
+            "code": row.code,
+            "excavated_m3": str(excavated) if excavated is not None else None,
+            "hauled_m3": str(hauled),
+            "difference_pct": str(pct) if pct is not None else None,
+            "threshold_pct": threshold,
+            "unresolved": groups.get("unresolved", {}).get("tickets", 0),
+        }
+        findings = await evaluate({"variance": snapshot}, rule_set=VARIANCE_RULE_SET, target_id=str(row.id))
+        order = ("volume", "weighbridge", "capacity", "unresolved")
+        return {
+            "target": "volume" if volume_id is not None else "stockpile",
+            "target_id": row.id,
+            "code": row.code,
+            "name": row.name,
+            "excavated_m3": excavated,
+            "excavated_basis": basis,
+            "swell_factor": swell,
+            "hauled_m3": hauled.quantize(logic.QTY_Q),
+            "tickets": len(tickets),
+            "loads": sum(g["loads"] for g in groups.values()),
+            "by_basis": [groups[k] for k in order if k in groups],
+            "difference_m3": (hauled - excavated).quantize(logic.QTY_Q) if excavated is not None and tickets else None,
+            "difference_pct": pct,
+            "threshold_pct": threshold,
+            "within_threshold": None if pct is None else abs(pct) <= threshold,
+            "findings": [
+                {"rule_id": f.rule_id, "severity": str(getattr(f.severity, "value", f.severity)), "message": f.message}
+                for f in findings
+            ],
+        }
+
     # ── disposal register ─────────────────────────────────────────────────
     async def disposal_rows(self, project_id: uuid.UUID, date_from: date | None, date_to: date | None) -> list[dict]:
         rows = await self.repo.list_tickets(project_id, date_from=date_from, date_to=date_to, haul_type="waste")
@@ -568,6 +715,7 @@ class HaulTicketService:
             mandatory_fields=[],
             capacity_tolerance_pct=10,
             price_tolerance_pct=1,
+            haul_variance_pct=logic.DEFAULT_HAUL_VARIANCE_PCT,
             waste_catalogue="",
             currency="",
         )

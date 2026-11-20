@@ -177,5 +177,169 @@
     "lesson_5": {
       "claim_quantity_m3": 11870.0
     }
+  },
+  "payment": {
+    "contract": {
+      "code": "RY-SUB-EW-01",
+      "title": "Earthworks subcontract - Riverside Yard",
+      "currency": "EUR",
+      "retention_pct": 5,
+      "start_date": "2026-10-01",
+      "end_date": "2027-03-31",
+      "line": {
+        "code": "1.02",
+        "description": "Bulk excavation",
+        "unit": "m3",
+        "quantity": 1500,
+        "unit_rate": 9.5,
+        "total_value": "14250.00"
+      },
+      "certificate": {
+        "number": "PC-01",
+        "period_start": "2026-10-01",
+        "period_end": "2026-10-31",
+        "status": "draft"
+      }
+    },
+    "lesson_1": {
+      "quantity_kind": "cut",
+      "quantity": "1470.000",
+      "percent_to_date": "98.0000",
+      "period_qty": "1470.0000",
+      "period_value": "13965.0000",
+      "findings": []
+    },
+    "lesson_2": {
+      "gross_amount": "13965.00",
+      "retention_amount": "698.25",
+      "net_due": "13266.75"
+    },
+    "lesson_3": {
+      "quantity_kind": "loose_cut",
+      "quantity": "1837.500",
+      "finding": "MQ-001",
+      "period_value": "14250.0000"
+    },
+    "haul": {
+      "haulier": "Uferbau Transport GmbH",
+      "currency": "EUR",
+      "rate_per_load": 95,
+      "truck_capacity_m3": 14,
+      "material": {
+        "code": "clay_loose",
+        "name": "Excavated clay, loose",
+        "density_t_m3": 1.5
+      },
+      "origin": "Riverside Yard, cut area",
+      "offsite_destination": "Licensed soil tip",
+      "internal_destination": "Fill area on site",
+      "offsite_position": "Disposal of surplus off site",
+      "internal_position": "Fill to platform, compacted in layers",
+      "receiver": "Site supervisor",
+      "tickets": [
+        {
+          "number": "HT-0101",
+          "date": "2026-10-05",
+          "loads": 12,
+          "plate": "B-UB 1201"
+        },
+        {
+          "number": "HT-0102",
+          "date": "2026-10-06",
+          "loads": 13,
+          "plate": "B-UB 1202"
+        },
+        {
+          "number": "HT-0103",
+          "date": "2026-10-07",
+          "loads": 11,
+          "plate": "B-UB 1203",
+          "net_t": 231.0
+        },
+        {
+          "number": "HT-0104",
+          "date": "2026-10-08",
+          "loads": 12,
+          "plate": "B-UB 1201",
+          "internal": true
+        },
+        {
+          "number": "HT-0105",
+          "date": "2026-10-09",
+          "loads": 14,
+          "plate": "B-UB 1204"
+        },
+        {
+          "number": "HT-0106",
+          "date": "2026-10-12",
+          "loads": 10,
+          "plate": "B-UB 1202",
+          "net_t": 210.0
+        },
+        {
+          "number": "HT-0107",
+          "date": "2026-10-13",
+          "loads": 12,
+          "plate": "B-UB 1203"
+        },
+        {
+          "number": "HT-0108",
+          "date": "2026-10-14",
+          "loads": 13,
+          "plate": "B-UB 1204",
+          "internal": true
+        },
+        {
+          "number": "HT-0109",
+          "date": "2026-10-15",
+          "loads": 11,
+          "plate": "B-UB 1201",
+          "net_t": 231.0
+        },
+        {
+          "number": "HT-0110",
+          "date": "2026-10-16",
+          "loads": 12,
+          "plate": "B-UB 1202"
+        }
+      ],
+      "invoice": {
+        "number": "UT-2026-1031",
+        "date": "2026-10-31",
+        "period_from": "2026-10-01",
+        "period_to": "2026-10-31",
+        "billed_loads": {
+          "HT-0105": 16
+        }
+      }
+    },
+    "lesson_4": {
+      "tickets": 10,
+      "loads": 120,
+      "hauled_m3": "1680.000",
+      "weighbridge_m3": "448.000",
+      "capacity_m3": "1232.000",
+      "bank": {
+        "excavated_m3": "1470.000",
+        "difference_m3": "210.000",
+        "difference_pct": "14.29",
+        "finding": "haul_variance.hauled_vs_excavated"
+      },
+      "loose": {
+        "swell_factor": 1.25,
+        "excavated_m3": "1837.500",
+        "difference_m3": "-157.500",
+        "difference_pct": "-8.57",
+        "within_threshold": true
+      },
+      "threshold_pct": 10
+    },
+    "lesson_5": {
+      "invoice_status": "discrepancies",
+      "mismatch_ticket": "HT-0105",
+      "mismatch_status": "quantity_mismatch",
+      "invoiced_total": "11590.00",
+      "expected_total": "11400.00"
+    }
   }
 }

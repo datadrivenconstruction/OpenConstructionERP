@@ -67816,6 +67816,8 @@
         "intl.py",
         "layouts.py",
         "manifest.py",
+        "measured_quantity.py",
+        "measured_quantity_schemas.py",
         "messages/__init__.py",
         "models.py",
         "pay_application.py",
@@ -159700,6 +159702,18 @@
               "nullable": true
             },
             {
+              "name": "survey_volume_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "stockpile_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
               "name": "cost_code",
               "annotation": "Mapped[str]",
               "sql_type": "String",
@@ -160022,6 +160036,12 @@
               "nullable": false
             },
             {
+              "name": "haul_variance_pct",
+              "annotation": "Mapped[int | None]",
+              "sql_type": "Integer",
+              "nullable": true
+            },
+            {
               "name": "waste_catalogue",
               "annotation": "Mapped[str]",
               "sql_type": "String",
@@ -160126,6 +160146,12 @@
           "handler": "summary",
           "response_model": "SummaryOut",
           "request_schema": "Literal['day', 'haulier', 'material', 'haul_type']"
+        },
+        {
+          "method": "GET",
+          "path": "/projects/{project_id}/hauled-vs-excavated",
+          "handler": "hauled_vs_excavated",
+          "response_model": "HauledVsExcavatedOut"
         },
         {
           "method": "GET",
@@ -160379,6 +160405,16 @@
               "default": "None"
             },
             {
+              "name": "survey_volume_id",
+              "type": "uuid.UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "stockpile_id",
+              "type": "uuid.UUID | None",
+              "default": "None"
+            },
+            {
               "name": "cost_code",
               "type": "str"
             },
@@ -160596,6 +160632,16 @@
             },
             {
               "name": "boq_position_id",
+              "type": "uuid.UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "survey_volume_id",
+              "type": "uuid.UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "stockpile_id",
               "type": "uuid.UUID | None",
               "default": "None"
             },
@@ -160856,6 +160902,16 @@
               "type": "uuid.UUID | None"
             },
             {
+              "name": "survey_volume_id",
+              "type": "uuid.UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "stockpile_id",
+              "type": "uuid.UUID | None",
+              "default": "None"
+            },
+            {
               "name": "cost_code",
               "type": "str"
             },
@@ -160984,6 +161040,10 @@
             },
             {
               "name": "price_tolerance_pct",
+              "type": "int"
+            },
+            {
+              "name": "haul_variance_pct",
               "type": "int"
             },
             {
@@ -161527,11 +161587,115 @@
               "default": "200"
             }
           ]
+        },
+        {
+          "class_name": "HaulBasisRow",
+          "bases": [
+            "_DecimalOut"
+          ],
+          "docstring": "Hauled m3 by how it was worked out: ticket volume, weighbridge tonnes / density, or loads x capacity.",
+          "fields": [
+            {
+              "name": "basis",
+              "type": "Literal['volume', 'weighbridge', 'capacity', 'unresolved']"
+            },
+            {
+              "name": "tickets",
+              "type": "int"
+            },
+            {
+              "name": "loads",
+              "type": "int"
+            },
+            {
+              "name": "hauled_m3",
+              "type": "Decimal"
+            }
+          ]
+        },
+        {
+          "class_name": "HauledVsExcavatedOut",
+          "bases": [
+            "_DecimalOut"
+          ],
+          "docstring": "Excavated loose m3 of a volume (cut x swell) or the last stockpile survey, against the tickets linked to it.",
+          "fields": [
+            {
+              "name": "target",
+              "type": "Literal['volume', 'stockpile']"
+            },
+            {
+              "name": "target_id",
+              "type": "uuid.UUID"
+            },
+            {
+              "name": "code",
+              "type": "str"
+            },
+            {
+              "name": "name",
+              "type": "str"
+            },
+            {
+              "name": "excavated_m3",
+              "type": "Decimal | None"
+            },
+            {
+              "name": "excavated_basis",
+              "type": "Literal['loose_cut', 'bank_cut', 'stockpile_survey', 'none']"
+            },
+            {
+              "name": "swell_factor",
+              "type": "Decimal | None",
+              "default": "None"
+            },
+            {
+              "name": "hauled_m3",
+              "type": "Decimal"
+            },
+            {
+              "name": "tickets",
+              "type": "int"
+            },
+            {
+              "name": "loads",
+              "type": "int"
+            },
+            {
+              "name": "by_basis",
+              "type": "list[HaulBasisRow]"
+            },
+            {
+              "name": "difference_m3",
+              "type": "Decimal | None",
+              "default": "None"
+            },
+            {
+              "name": "difference_pct",
+              "type": "Decimal | None",
+              "default": "None"
+            },
+            {
+              "name": "threshold_pct",
+              "type": "int"
+            },
+            {
+              "name": "within_threshold",
+              "type": "bool | None",
+              "default": "None"
+            },
+            {
+              "name": "findings",
+              "type": "list[FindingOut]"
+            }
+          ]
         }
       ],
       "import_dependencies": [
         "projects",
-        "site_logistics"
+        "site_logistics",
+        "stockpiles",
+        "surfaces_volumes"
       ]
     },
     {
@@ -186332,6 +186496,20 @@
           "request_schema": "AddToClaim"
         },
         {
+          "method": "POST",
+          "path": "/entries/{entry_id}/certify/preview",
+          "handler": "certify_preview",
+          "response_model": "MeasuredPreview",
+          "request_schema": "MineCertify"
+        },
+        {
+          "method": "POST",
+          "path": "/entries/{entry_id}/certify",
+          "handler": "certify",
+          "response_model": "MeasuredPreview",
+          "request_schema": "MineCertify"
+        },
+        {
           "method": "GET",
           "path": "/periods/{period_id}/report.pdf",
           "handler": "report_pdf"
@@ -186860,8 +187038,36 @@
               "type": "uuid.UUID"
             },
             {
+              "name": "quantity",
+              "type": "ClaimQuantity",
+              "default": "'cut'"
+            },
+            {
               "name": "notes",
               "type": "str"
+            }
+          ]
+        },
+        {
+          "class_name": "MineCertify",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Offer the confirmed actual to the open payment certificate of the contract billing the position.",
+          "fields": [
+            {
+              "name": "position_id",
+              "type": "uuid.UUID"
+            },
+            {
+              "name": "quantity",
+              "type": "ClaimQuantity",
+              "default": "'cut'"
+            },
+            {
+              "name": "claim_id",
+              "type": "uuid.UUID | None",
+              "default": "None"
             }
           ]
         },
@@ -187945,6 +188151,7 @@
         }
       ],
       "import_dependencies": [
+        "contracts",
         "projects",
         "surfaces_volumes",
         "survey_core",
@@ -311923,6 +312130,7 @@
       "files": [
         "__init__.py",
         "demo.py",
+        "demo_pay.py",
         "drawing_lines.py",
         "landxml.py",
         "manifest.py",
@@ -312471,6 +312679,20 @@
           "handler": "record_progress",
           "response_model": "RecordProgressResult",
           "request_schema": "RecordProgress"
+        },
+        {
+          "method": "POST",
+          "path": "/volumes/{volume_id}/certify/preview",
+          "handler": "certify_preview",
+          "response_model": "MeasuredPreview",
+          "request_schema": "CertifyQuantity"
+        },
+        {
+          "method": "POST",
+          "path": "/volumes/{volume_id}/certify",
+          "handler": "certify",
+          "response_model": "MeasuredPreview",
+          "request_schema": "CertifyQuantity"
         },
         {
           "method": "GET",
@@ -313150,6 +313372,34 @@
           ]
         },
         {
+          "class_name": "CertifyQuantity",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Offer a measured quantity to the open payment certificate; ``confirm`` is a separate call.",
+          "fields": [
+            {
+              "name": "position_id",
+              "type": "uuid.UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "quantity",
+              "type": "QuantityKind",
+              "default": "'cut'"
+            },
+            {
+              "name": "claim_id",
+              "type": "uuid.UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "period_label",
+              "type": "str"
+            }
+          ]
+        },
+        {
           "class_name": "RecordProgressResult",
           "bases": [
             "BaseModel"
@@ -313649,7 +313899,9 @@
       ],
       "import_dependencies": [
         "boq",
+        "contracts",
         "dwg_takeoff",
+        "haul_tickets",
         "land_parcels",
         "mine_survey",
         "monitoring",
@@ -341908,10 +342160,10 @@
     },
     {
       "name": "survey",
-      "ts_files": 44,
+      "ts_files": 47,
       "css_files": 0,
-      "test_files": 9,
-      "total_files": 44
+      "test_files": 10,
+      "total_files": 47
     },
     {
       "name": "survey-calc",
@@ -343084,7 +343336,9 @@
     ],
     "haul_tickets": [
       "projects",
-      "site_logistics"
+      "site_logistics",
+      "stockpiles",
+      "surfaces_volumes"
     ],
     "hse_advanced": [
       "projects",
@@ -343241,6 +343495,7 @@
     "mexico_pack": [],
     "middle_east_pack": [],
     "mine_survey": [
+      "contracts",
       "projects",
       "surfaces_volumes",
       "survey_core",
@@ -343960,7 +344215,9 @@
     ],
     "surfaces_volumes": [
       "boq",
+      "contracts",
       "dwg_takeoff",
+      "haul_tickets",
       "land_parcels",
       "mine_survey",
       "monitoring",
@@ -344104,13 +344361,13 @@
     "backend_modules": 260,
     "modules_with_manifests": 260,
     "total_models": 974,
-    "total_columns": 11431,
+    "total_columns": 11434,
     "total_relationships": 264,
-    "total_routes": 5553,
-    "total_schemas": 5173,
-    "total_python_files": 3684,
+    "total_routes": 5558,
+    "total_schemas": 5177,
+    "total_python_files": 3687,
     "frontend_features": 252,
-    "frontend_ts_files": 4450,
+    "frontend_ts_files": 4453,
     "frontend_backend_mapped": 224
   },
   "frontend_backend_mapping": {

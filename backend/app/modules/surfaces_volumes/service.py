@@ -28,6 +28,7 @@ from app.modules.surfaces_volumes.models import SurveySurface, SurveyVolume, Sur
 from app.modules.surfaces_volumes.repository import VolumesRepository
 from app.modules.surfaces_volumes.schemas import (
     BoqPositionHit,
+    CertifyQuantity,
     ConfirmRequest,
     Finding,
     LandXmlImport,
@@ -743,7 +744,12 @@ class VolumesService:
                 period_label=period,
                 percent_complete=round(pct, 3),
                 notes=note,
-                metadata={"quantity_source": self.source_chip(v, data.quantity), "quantity_m3": qty},
+                metadata={
+                    "quantity_source": self.source_chip(v, data.quantity),
+                    "quantity_m3": qty,
+                    "measured_quantity": str(qty),
+                    "measured_unit": "m3",
+                },
             ),
             user_id=user_id,
         )
@@ -764,6 +770,62 @@ class VolumesService:
             quantity_m3=qty,
             period_label=period,
         )
+
+    # ── Payment certificate ────────────────────────────────────────────────
+
+    async def _measured(self, v: SurveyVolume, data: CertifyQuantity) -> Any:
+        from app.modules.contracts.measured_quantity import MeasuredQuantity  # noqa: PLC0415
+
+        self._sendable(v)
+        pid = data.position_id or v.boq_position_id
+        if pid is None:
+            raise _bad("Send the result to a BOQ position first, or pick the position to certify against")
+        position, _boq = await self._position_in_project(v, pid)
+        qty = round(quantity_of(v, data.quantity), 3)
+        if qty < 0:
+            raise _bad("Net volume is fill: certify the fill quantity instead")
+        return MeasuredQuantity(
+            project_id=v.project_id,
+            boq_position_id=position.id,
+            quantity=Decimal(str(qty)),
+            unit="m3",
+            source=self.source_chip(v, data.quantity),
+            claim_id=data.claim_id,
+        )
+
+    async def certify_preview(self, v: SurveyVolume, data: CertifyQuantity) -> dict[str, Any]:
+        """What the open certificate line would carry for the chosen quantity; nothing is written."""
+        from app.modules.contracts import measured_quantity  # noqa: PLC0415
+
+        out = await measured_quantity.preview(self.session, await self._measured(v, data))
+        return {**out, "quantity_kind": data.quantity}
+
+    async def certify(self, v: SurveyVolume, data: CertifyQuantity, user_id: str) -> dict[str, Any]:
+        """Record the progress entry, then write the quantity into the open certificate (the person confirmed)."""
+        from app.modules.contracts import measured_quantity  # noqa: PLC0415
+
+        mq = await self._measured(v, data)
+        measured_quantity.ensure_committable(await measured_quantity.preview(self.session, mq))
+        entry = await self.record_progress(
+            v,
+            RecordProgress(position_id=mq.boq_position_id, period_label=data.period_label, quantity=data.quantity),
+            user_id,
+        )
+        out = await measured_quantity.commit(self.session, mq, actor_id=user_id)
+        claim = out["claim"]
+        await self._event(
+            v,
+            "certified",
+            user_id,
+            target_type="progress_claim",
+            target_id=str(claim["id"]),
+            quantity=float(mq.quantity),
+            details={"certificate": claim["number"], "quantity_kind": data.quantity},
+        )
+        await self._audit(
+            "update", v, user_id, {"sent_to": "progress_claim", "claim_id": str(claim["id"]), "m3": str(mq.quantity)}
+        )
+        return {**out, "quantity_kind": data.quantity, "progress_entry_id": entry.entry_id}
 
     async def note_report(self, v: SurveyVolume, user_id: str) -> None:
         await self._event(v, "report", user_id, target_type="pdf", target_id=f"{v.code}.pdf")

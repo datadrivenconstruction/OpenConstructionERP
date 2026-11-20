@@ -28,6 +28,7 @@ from app.modules.haul_tickets.schemas import (
     ExpectedDeliveryListResponse,
     ExpectedDeliveryOut,
     FindingOut,
+    HauledVsExcavatedOut,
     ImportCommitOut,
     ImportPreviewOut,
     InvoiceIn,
@@ -48,7 +49,7 @@ from app.modules.haul_tickets.schemas import (
     TicketUpdate,
     TransitionRequest,
 )
-from app.modules.haul_tickets.service import HaulTicketService
+from app.modules.haul_tickets.service import HaulTicketService, variance_threshold
 
 router = APIRouter(tags=["haul_tickets"])
 _READ = Depends(RequirePermission("haul_tickets.read"))
@@ -292,6 +293,22 @@ async def summary(
     return await HaulTicketService(session).summary(project_id, group_by, date_from, date_to, verified_only)
 
 
+@router.get("/projects/{project_id}/hauled-vs-excavated", response_model=HauledVsExcavatedOut, dependencies=[_READ])
+async def hauled_vs_excavated(
+    project_id: uuid.UUID,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    volume_id: uuid.UUID | None = Query(default=None),
+    stockpile_id: uuid.UUID | None = Query(default=None),
+) -> HauledVsExcavatedOut:
+    """Excavated loose m3 of a survey volume or stockpile against the m3 its linked tickets hauled."""
+    await verify_project_access(project_id, user_id, session)
+    out = await HaulTicketService(session).hauled_vs_excavated(
+        project_id, volume_id=volume_id, stockpile_id=stockpile_id
+    )
+    return HauledVsExcavatedOut.model_validate(out)
+
+
 @router.get("/projects/{project_id}/disposal-register", dependencies=[_READ])
 async def disposal_register(
     project_id: uuid.UUID,
@@ -392,6 +409,7 @@ def _settings_out(s: Any) -> SettingsOut:
         max_gross_t=s.max_gross_t,
         capacity_tolerance_pct=s.capacity_tolerance_pct if s.capacity_tolerance_pct is not None else 10,
         price_tolerance_pct=s.price_tolerance_pct if s.price_tolerance_pct is not None else 1,
+        haul_variance_pct=variance_threshold(s),
         waste_catalogue=s.waste_catalogue or "",
         currency=s.currency or "",
         candidates=list(logic.MANDATORY_CANDIDATES),

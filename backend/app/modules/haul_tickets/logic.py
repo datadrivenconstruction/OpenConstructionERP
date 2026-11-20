@@ -160,6 +160,43 @@ def billable_quantity(
     return Decimal(max(loads or 0, 0))
 
 
+#: Hauled vs excavated: a difference above this share is flagged unless the project sets its own.
+DEFAULT_HAUL_VARIANCE_PCT = 10
+
+
+def hauled_m3(
+    *,
+    unit: str,
+    volume_m3: Decimal | None,
+    net_t: Decimal | None,
+    loads: int,
+    capacity: Decimal | None,
+    density: Decimal | None,
+) -> tuple[str, Decimal]:
+    """Cubic metres one ticket hauled and how they were worked out.
+
+    In order of trust: the volume written on the ticket, the weighbridge net
+    tonnes over the material density, then loads times the truck capacity
+    (capacity is in the ticket unit, so a capacity in tonnes is divided by the
+    density too). ``("unresolved", 0)`` when none of these can be formed.
+    """
+    if volume_m3 is not None and volume_m3 > ZERO:
+        return "volume", volume_m3
+    if net_t is not None and net_t > ZERO and density:
+        return "weighbridge", (net_t / density).quantize(QTY_Q)
+    if capacity and loads and (unit != "t" or density):
+        cap = capacity / density if unit == "t" and density else capacity
+        return "capacity", (cap * Decimal(loads)).quantize(QTY_Q)
+    return "unresolved", ZERO
+
+
+def variance_pct(hauled: Decimal, excavated: Decimal | None) -> Decimal | None:
+    """Hauled over excavated in percent (+ means more hauled), or ``None`` without an excavated figure."""
+    if excavated is None or excavated <= ZERO:
+        return None
+    return ((hauled - excavated) * 100 / excavated).quantize(MONEY_Q, rounding=ROUND_HALF_UP)
+
+
 def amount(rate: Decimal | None, qty: Decimal) -> Decimal:
     if rate is None:
         return ZERO

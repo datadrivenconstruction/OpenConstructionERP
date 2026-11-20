@@ -152,9 +152,22 @@ class TruckLoadsImport(BaseModel):
     filename: str = Field(default="", max_length=255)
 
 
+#: Which measured quantity of the actual goes to the claim: cut, fill, net or loose cut.
+ClaimQuantity = Literal["cut", "fill", "net", "loose_cut"]
+
+
 class AddToClaim(BaseModel):
     position_id: uuid.UUID
+    quantity: ClaimQuantity = "cut"
     notes: str = Field(default="", max_length=1000)
+
+
+class MineCertify(BaseModel):
+    """Offer the confirmed actual to the open payment certificate of the contract billing the position."""
+
+    position_id: uuid.UUID
+    quantity: ClaimQuantity = "cut"
+    claim_id: uuid.UUID | None = None
 
 
 class ClaimResult(BaseModel):

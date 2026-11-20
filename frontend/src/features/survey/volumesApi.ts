@@ -224,6 +224,90 @@ export const recordProgress = (id: string, body: { position_id?: string; quantit
     `/v1/surfaces-volumes/volumes/${id}/record-progress`,
     body,
   );
+export interface MeasuredFinding {
+  rule_id: string;
+  severity: string;
+  message: string;
+  key: string;
+  params: Record<string, string>;
+}
+
+/** What a measured quantity would put on the open payment certificate; nothing is written yet. */
+export interface MeasuredPreview {
+  boq_position_id: string;
+  ordinal: string;
+  description: string;
+  boq_quantity: string;
+  boq_unit: string;
+  quantity: string;
+  unit: string;
+  quantity_kind: QuantityKind;
+  contract: { id: string; code: string; title: string; currency: string } | null;
+  line: { id: string; code: string; description: string; unit: string; quantity: string; unit_rate: string; total_value: string } | null;
+  claim: {
+    id: string;
+    number: string;
+    status: string;
+    currency: string;
+    gross_amount: string | null;
+    retention_amount: string | null;
+    net_due: string | null;
+  } | null;
+  figures: {
+    percent_to_date: string;
+    capped: boolean;
+    period_qty: string;
+    period_value: string;
+    prior_value: string;
+    cumulative_value: string;
+  } | null;
+  findings: MeasuredFinding[];
+  can_commit: boolean;
+  progress_entry_id?: string | null;
+}
+
+export interface CertifyInput {
+  position_id: string;
+  quantity: QuantityKind;
+  claim_id?: string;
+}
+
+export const certifyVolumePreview = (id: string, body: CertifyInput) =>
+  apiPost<MeasuredPreview>(`/v1/surfaces-volumes/volumes/${id}/certify/preview`, body);
+export const certifyVolume = (id: string, body: CertifyInput) =>
+  apiPost<MeasuredPreview>(`/v1/surfaces-volumes/volumes/${id}/certify`, body);
+
+export interface HaulBasisRow {
+  basis: 'volume' | 'weighbridge' | 'capacity' | 'unresolved';
+  tickets: number;
+  loads: number;
+  hauled_m3: string;
+}
+
+/** Excavated loose m3 of a volume or stockpile against the m3 its linked haul tickets carried. */
+export interface HauledVsExcavated {
+  target: 'volume' | 'stockpile';
+  target_id: string;
+  code: string;
+  name: string;
+  excavated_m3: string | null;
+  excavated_basis: 'loose_cut' | 'bank_cut' | 'stockpile_survey' | 'none';
+  swell_factor: string | null;
+  hauled_m3: string;
+  tickets: number;
+  loads: number;
+  by_basis: HaulBasisRow[];
+  difference_m3: string | null;
+  difference_pct: string | null;
+  threshold_pct: number;
+  within_threshold: boolean | null;
+  findings: { rule_id: string; severity: string; message: string }[];
+}
+
+export const hauledVsExcavated = (projectId: string, target: { volume_id?: string; stockpile_id?: string }) =>
+  apiGet<HauledVsExcavated>(
+    `/v1/haul_tickets/projects/${projectId}/hauled-vs-excavated?${new URLSearchParams(target as Record<string, string>).toString()}`,
+  );
 export const volumeHistory = (id: string) => apiGet<{ items: VolumeEvent[] }>(`/v1/surfaces-volumes/volumes/${id}/history`).then((r) => r.items);
 export const searchBoqPositions = (projectId: string, q: string) =>
   apiGet<{ items: BoqPositionHit[] }>(`/v1/surfaces-volumes/projects/${projectId}/boq-positions?q=${encodeURIComponent(q)}&unit=m3`).then((r) => r.items);

@@ -4696,7 +4696,12 @@ class ContractsService:
             if entry is None:
                 skipped_no_progress += 1
                 continue
-            observed_pct = Decimal(str(entry.percent_complete or 0))
+            # A measured quantity (survey, mine period) bills its own share of this line, not the
+            # share of the BOQ position it was recorded against.
+            from app.modules.contracts.measured_quantity import measured_pct_of_entry  # noqa: PLC0415
+
+            measured = measured_pct_of_entry(entry, ln) if adjusts is None else None
+            observed_pct = measured if measured is not None else Decimal(str(entry.percent_complete or 0))
             derived = compute_progress_claim_line(ln, observed_pct, prior_value=prior_by_line.get(ln.id, DEC_ZERO))
             items.append(
                 {

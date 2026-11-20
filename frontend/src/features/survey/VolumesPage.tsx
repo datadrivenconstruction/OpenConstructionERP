@@ -37,9 +37,13 @@ import { crsChipText } from './crsPicker';
 import { StagedPanel } from './StagedPanel';
 import { SurveyPlan } from './SurveyPlan';
 import { NewSurfaceDialog, NewVolumeDialog, SendToBoqDialog } from './VolumeDialogs';
+import { CertifyDialog } from './CertifyDialog';
+import { HauledVsExcavatedPanel } from './HauledVsExcavatedPanel';
 import { useOpenSurveyDemo } from './useOpenSurveyDemo';
 import { volumesGuide } from './volumesGuide';
 import {
+  certifyVolume,
+  certifyVolumePreview,
   confirmVolume,
   deleteSurface,
   duplicateVolume,
@@ -81,6 +85,7 @@ export default function VolumesPage() {
   const [volumeOpen, setVolumeOpen] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [sendOpen, setSendOpen] = useState(false);
+  const [certifyOpen, setCertifyOpen] = useState(false);
   const [sent, setSent] = useState<SendResult | null>(null);
   const [acks, setAcks] = useState<string[]>([]);
 
@@ -109,22 +114,6 @@ export default function VolumesPage() {
     onSuccess: (v) => {
       refresh();
       setSelectedId(v.id);
-    },
-    onError: fail,
-  });
-  const progress = useMutation({
-    mutationFn: (v: Volume) => recordProgress(v.id, { quantity: 'cut' }),
-    onSuccess: (r) => {
-      refresh();
-      addToast({
-        type: 'success',
-        title: t('volumes.progress.done', {
-          defaultValue: 'Progress recorded: {{m3}} m3 ({{pct}} %) for {{period}}',
-          m3: formatM3(r.quantity_m3, lang),
-          pct: Math.round(r.percent_complete),
-          period: r.period_label,
-        }),
-      });
     },
     onError: fail,
   });
@@ -355,7 +344,7 @@ export default function VolumesPage() {
         title={selected ? `${selected.code} ${selected.name}` : ''}
         subtitle={selected ? <StatusBadge status={selected.status} /> : undefined}
         widthClass="max-w-2xl"
-        busy={confirm.isPending || progress.isPending || duplicate.isPending}
+        busy={confirm.isPending || duplicate.isPending}
       >
         {selected && (
           <div className="space-y-4 text-sm" data-testid="volume-drawer">
@@ -448,12 +437,11 @@ export default function VolumesPage() {
               <Button
                 variant="secondary"
                 icon={<TrendingUp size={16} />}
-                disabled={selected.status === 'draft' || !selected.boq_position_id}
-                loading={progress.isPending}
-                onClick={() => progress.mutate(selected)}
+                disabled={selected.status === 'draft'}
+                onClick={() => setCertifyOpen(true)}
                 data-testid="volume-progress"
               >
-                {t('volumes.action.record_progress', { defaultValue: 'Record progress' })}
+                {t('certify.action', { defaultValue: 'Add to certificate' })}
               </Button>
               <Button
                 variant="secondary"
@@ -487,6 +475,8 @@ export default function VolumesPage() {
               <SurveyPlan plan={plan.data} isLoading={plan.isLoading} error={plan.error} onRetry={() => plan.refetch()} showLegend />
             </div>
 
+            {selected.status !== 'draft' && <HauledVsExcavatedPanel projectId={projectId} volumeId={selected.id} />}
+
             <div>
               <h3 className="oe-card-title mb-1">{t('volumes.history', { defaultValue: 'History' })}</h3>
               <ul className="space-y-1 text-xs" data-testid="volume-history">
@@ -516,6 +506,19 @@ export default function VolumesPage() {
           setSelectedId(v.id);
         }}
       />
+      {selected && certifyOpen && (
+        <CertifyDialog
+          open
+          projectId={projectId}
+          source={selected.code}
+          amounts={{ cut: selected.cut_m3, fill: selected.fill_m3, net: selected.net_m3, loose_cut: selected.loose_cut_m3 }}
+          initialPositionId={selected.boq_position_id}
+          preview={(b) => certifyVolumePreview(selected.id, b)}
+          commit={(b) => certifyVolume(selected.id, b)}
+          progressOnly={(b) => recordProgress(selected.id, b)}
+          onClose={() => setCertifyOpen(false)}
+        />
+      )}
       {selected && (
         <SendToBoqDialog
           open={sendOpen}
