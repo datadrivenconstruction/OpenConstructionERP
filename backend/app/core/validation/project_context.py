@@ -147,13 +147,16 @@ async def _contract_counts(session: AsyncSession, project_id: uuid.UUID) -> tupl
 
 
 async def _tender_count(session: AsyncSession, project_id: uuid.UUID) -> int | None:
-    """How many tender packages the project has, or ``None`` without the tendering module."""
+    """How many trade tenders the project has (one tender model, copies included), or ``None`` without it."""
     try:
-        from app.modules.tendering.models import TenderPackage
+        from app.modules.bid_management.models import BidPackage
     except ImportError:
         return None
     count = await session.scalar(
-        select(func.count()).select_from(TenderPackage).where(TenderPackage.project_id == project_id)
+        select(func.count())
+        .select_from(BidPackage)
+        .where(BidPackage.project_id == project_id, BidPackage.package_type == "subcontract")
+        .execution_options(include_tender_mirrors=True)
     )
     return int(count or 0)
 

@@ -44,6 +44,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 logger = logging.getLogger(__name__)
 
+# Reads that span the one tender model include the copies of old tendering and RFQ packages.
+_WITH_COPIES = {"include_tender_mirrors": True}
+
 
 # ── Portfolio access scoping (IDOR defence) ─────────────────────────────
 # A portfolio-mode call (``project_id is None``) must not silently
@@ -1985,12 +1988,9 @@ async def bid_win_rate_kpi(
 ) -> KPIComputation:
     """Won bids / submitted bids.
 
-    Sourced from ``tendering.TenderBid`` (its ``status`` distinguishes
-    won/awarded/accepted from pending/rejected). TenderBid has no direct
-    ``project_id`` - it hangs off ``TenderPackage`` - so a project scope is
-    applied by joining the package. When the tendering module is absent we
-    fall back to ``bid_management``: a win is a ``BidAward`` (one per
-    package) and total is the number of ``BidSubmission`` envelopes.
+    Read from the one tender model (``bid_management``, copies of tendering
+    packages and RFQs included): a win is a ``BidAward`` (one per package)
+    and total is the number of ``BidSubmission`` envelopes.
 
     Portfolio mode restricts to the caller's ``allowed_project_ids`` (when
     not ``None``) by joining the owning package, so a non-admin never counts
@@ -1998,84 +1998,51 @@ async def bid_win_rate_kpi(
     """
     won = 0
     total = 0
-    won_status = ("won", "awarded", "accepted")
     # In portfolio mode we still need the package join to scope by project.
     scope_portfolio = project_id is None and allowed_project_ids is not None
 
-    # Primary source: tendering.TenderBid
+    # One tender model: copies of tendering packages and RFQs are counted with the native packages.
     try:
-        from app.modules.tendering.models import TenderBid, TenderPackage  # type: ignore
+        from app.modules.bid_management.models import (  # type: ignore
+            BidAward,
+            Bidder,
+            BidPackage,
+            BidSubmission,
+        )
 
-        stmt = select(TenderBid)
+        # Total submissions for the scope.
+        sub_stmt = select(BidSubmission)
+        award_stmt = select(BidAward)
         if project_id is not None:
-            stmt = stmt.join(
-                TenderPackage,
-                TenderBid.package_id == TenderPackage.id,
-            ).where(TenderPackage.project_id == project_id)
+            # BidSubmission → Bidder → BidPackage(project_id)
+            sub_stmt = (
+                sub_stmt.join(Bidder, BidSubmission.bidder_id == Bidder.id)
+                .join(BidPackage, Bidder.package_id == BidPackage.id)
+                .where(BidPackage.project_id == project_id)
+            )
+            award_stmt = award_stmt.join(
+                BidPackage,
+                BidAward.package_id == BidPackage.id,
+            ).where(BidPackage.project_id == project_id)
         elif scope_portfolio:
-            stmt = stmt.join(
-                TenderPackage,
-                TenderBid.package_id == TenderPackage.id,
+            # Portfolio mode: restrict to the caller's accessible projects
+            # via the owning package.
+            sub_stmt = sub_stmt.join(Bidder, BidSubmission.bidder_id == Bidder.id).join(
+                BidPackage, Bidder.package_id == BidPackage.id
             )
-            stmt = (
-                stmt.where(false())
-                if not allowed_project_ids
-                else stmt.where(TenderPackage.project_id.in_(allowed_project_ids))
-            )
-        rows = (await session.execute(stmt)).scalars().all()
-        for row in rows:
-            total += 1
-            status_val = (getattr(row, "status", "") or "").lower()
-            if status_val in won_status:
-                won += 1
+            award_stmt = award_stmt.join(BidPackage, BidAward.package_id == BidPackage.id)
+            if not allowed_project_ids:
+                sub_stmt = sub_stmt.where(false())
+                award_stmt = award_stmt.where(false())
+            else:
+                sub_stmt = sub_stmt.where(BidPackage.project_id.in_(allowed_project_ids))
+                award_stmt = award_stmt.where(BidPackage.project_id.in_(allowed_project_ids))
+        total = len((await session.execute(sub_stmt.execution_options(**_WITH_COPIES))).scalars().all())
+        won = len((await session.execute(award_stmt.execution_options(**_WITH_COPIES))).scalars().all())
     except ImportError:
         pass
     except Exception:
-        logger.exception("bid_win_rate: tendering probe failed")
-
-    # Fallback: bid_management (awards vs submissions) when no tender bids.
-    if total == 0:
-        try:
-            from app.modules.bid_management.models import (  # type: ignore
-                BidAward,
-                Bidder,
-                BidPackage,
-                BidSubmission,
-            )
-
-            # Total submissions for the scope.
-            sub_stmt = select(BidSubmission)
-            award_stmt = select(BidAward)
-            if project_id is not None:
-                # BidSubmission → Bidder → BidPackage(project_id)
-                sub_stmt = (
-                    sub_stmt.join(Bidder, BidSubmission.bidder_id == Bidder.id)
-                    .join(BidPackage, Bidder.package_id == BidPackage.id)
-                    .where(BidPackage.project_id == project_id)
-                )
-                award_stmt = award_stmt.join(
-                    BidPackage,
-                    BidAward.package_id == BidPackage.id,
-                ).where(BidPackage.project_id == project_id)
-            elif scope_portfolio:
-                # Portfolio mode: restrict to the caller's accessible projects
-                # via the owning package.
-                sub_stmt = sub_stmt.join(Bidder, BidSubmission.bidder_id == Bidder.id).join(
-                    BidPackage, Bidder.package_id == BidPackage.id
-                )
-                award_stmt = award_stmt.join(BidPackage, BidAward.package_id == BidPackage.id)
-                if not allowed_project_ids:
-                    sub_stmt = sub_stmt.where(false())
-                    award_stmt = award_stmt.where(false())
-                else:
-                    sub_stmt = sub_stmt.where(BidPackage.project_id.in_(allowed_project_ids))
-                    award_stmt = award_stmt.where(BidPackage.project_id.in_(allowed_project_ids))
-            total = len((await session.execute(sub_stmt)).scalars().all())
-            won = len((await session.execute(award_stmt)).scalars().all())
-        except ImportError:
-            pass
-        except Exception:
-            logger.exception("bid_win_rate: bid_management probe failed")
+        logger.exception("bid_win_rate: bid_management probe failed")
 
     if total == 0:
         return KPIComputation(
