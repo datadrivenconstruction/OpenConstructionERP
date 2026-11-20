@@ -7,7 +7,7 @@
  * survey.confirm presses Confirm adjustment.
  */
 
-import { useMemo, useState } from 'react';
+import { Suspense, lazy, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { BookOpen, CheckCircle2, FileDown, Package, Plus, Scale, Send, TrendingDown, Warehouse } from 'lucide-react';
@@ -62,6 +62,8 @@ function VarianceBadge({ survey, tolerance }: { survey: PileSurvey | null; toler
     </Badge>
   );
 }
+
+const StockpilePlanView = lazy(() => import('@/features/survey-plan/screens/StockpilePlanView'));
 
 export default function StockpilesPage() {
   const { t, i18n } = useTranslation();
@@ -251,6 +253,12 @@ export default function StockpilesPage() {
                 {t('stockpiles.action.add_survey', { defaultValue: 'Add survey' })}
               </Button>
             </div>
+
+            {projectId && (
+              <Suspense fallback={<Skeleton className="h-64" />}>
+                <StockpilePlanView projectId={projectId} stockpileId={selected.id} />
+              </Suspense>
+            )}
 
             <h3 className="oe-card-title">{t('stockpiles.surveys', { defaultValue: 'Surveys' })}</h3>
             {surveys.length === 0 ? (

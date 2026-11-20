@@ -67351,6 +67351,8 @@ const resource = {
     "plan.tool.text": "Κείμενο",
     "plan.tool.text_default": "Σημείωση",
     "plan.tools": "Εργαλεία σχεδίου",
+    "plan.parcel.tab_editor": "Όρια και έλεγχοι",
+    "plan.tin.tab_pads": "Πλατείες και έδαφος",
   }
 } as { translation: Record<string, string> };
 

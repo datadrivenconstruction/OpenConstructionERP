@@ -54,8 +54,9 @@ import { useOpenSurveyDemo } from '@/features/survey/useOpenSurveyDemo';
 import { ViewOnlyNote, useSurveyAccess } from '@/features/survey/useSurveyAccess';
 
 const ParcelPlan = lazy(() => import('./ParcelPlan'));
+const ParcelEditor = lazy(() => import('@/features/survey-plan/screens/ParcelEditor'));
 
-type Tab = 'schedule' | 'plan' | 'rights';
+type Tab = 'schedule' | 'plan' | 'editor' | 'rights';
 
 export default function LandParcelsPage() {
   const { t, i18n } = useTranslation();
@@ -284,6 +285,7 @@ export default function LandParcelsPage() {
         tabs={[
           { id: 'schedule', label: t('survey.parcels.tab.schedule', { defaultValue: 'Schedule' }) },
           { id: 'plan', label: t('survey.parcels.tab.plan', { defaultValue: 'Plan' }) },
+          { id: 'editor', label: t('plan.parcel.tab_editor', { defaultValue: 'Boundaries and checks' }) },
           { id: 'rights', label: t('survey.parcels.tab.rights', { defaultValue: 'Parties & rights' }) },
         ]}
       />
@@ -346,6 +348,12 @@ export default function LandParcelsPage() {
             })}
           </p>
         </div>
+      )}
+
+      {tab === 'editor' && projectId && (
+        <Suspense fallback={<Skeleton className="h-[480px]" />}>
+          <ParcelEditor projectId={projectId} canWrite={canWrite} />
+        </Suspense>
       )}
 
       {tab === 'rights' && (

@@ -7,7 +7,7 @@
  * survey.confirm confirms.
  */
 
-import { useMemo, useState } from 'react';
+import { Suspense, lazy, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArrowDownToLine, ArrowUpFromLine, CheckCircle2, Copy, FileDown, Layers, Mountain, Plus, Scale, Send, TrendingUp } from 'lucide-react';
@@ -58,7 +58,9 @@ import {
 import { fmtFixed } from '@/shared/lib/formatters';
 import { ViewOnlyNote, useSurveyAccess } from './useSurveyAccess';
 
-type Tab = 'calculations' | 'surfaces' | 'staged' | 'plan';
+const ZonePadEditor = lazy(() => import('@/features/survey-plan/screens/ZonePadEditor'));
+
+type Tab = 'calculations' | 'surfaces' | 'staged' | 'plan' | 'pads';
 
 function StatusBadge({ status }: { status: Volume['status'] }) {
   const { t } = useTranslation();
@@ -226,6 +228,7 @@ export default function VolumesPage() {
           { id: 'surfaces', label: t('volumes.tab.surfaces', { defaultValue: 'Surfaces' }) },
           { id: 'staged', label: t('volumes.tab.staged', { defaultValue: 'Stages' }) },
           { id: 'plan', label: t('survey.tab.plan', { defaultValue: 'Plan' }) },
+          { id: 'pads', label: t('plan.tin.tab_pads', { defaultValue: 'Pads and terrain' }) },
         ]}
       />
 
@@ -346,6 +349,12 @@ export default function VolumesPage() {
       )}
 
       {tab === 'staged' && <StagedPanel projectId={projectId} surfaces={surfaces.data ?? []} />}
+
+      {tab === 'pads' && projectId && (
+        <Suspense fallback={<Skeleton className="h-[480px]" />}>
+          <ZonePadEditor projectId={projectId} canWrite={canWrite} surfaces={surfaces.data ?? []} />
+        </Suspense>
+      )}
 
       {tab === 'plan' && <SurveyPlan plan={plan.data} isLoading={plan.isLoading} error={plan.error} onRetry={() => plan.refetch()} showLegend />}
 

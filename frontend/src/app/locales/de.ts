@@ -70061,6 +70061,8 @@ const resource = {
     "plan.tool.text": "Text",
     "plan.tool.text_default": "Notiz",
     "plan.tools": "Planwerkzeuge",
+    "plan.parcel.tab_editor": "Grenzen und Prüfungen",
+    "plan.tin.tab_pads": "Planum und Gelände",
   }
 } as { translation: Record<string, string> };
 

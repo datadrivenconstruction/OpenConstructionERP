@@ -70611,6 +70611,8 @@ const resource = {
     "plan.tool.text": "نص",
     "plan.tool.text_default": "ملاحظة",
     "plan.tools": "أدوات المخطط",
+    "plan.parcel.tab_editor": "الحدود والفحوص",
+    "plan.tin.tab_pads": "المنصات والتضاريس",
   }
 } as { translation: Record<string, string> };
 
