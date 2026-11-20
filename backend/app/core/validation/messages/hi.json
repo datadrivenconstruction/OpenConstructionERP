@@ -2732,5 +2732,51 @@
       "fail": "{vendor} उपठेकेदार निर्देशिका में अवरुद्ध है और उसे अवार्ड नहीं दिया जा सकता।",
       "suggestion": "निर्देशिका में अवरोध हटाएँ या किसी अन्य फर्म को अवार्ड दें।"
     }
+  },
+  "gaeb_exchange": {
+    "item_description_not_empty": {
+      "fail": "मद {ordinal} में कोई पाठ नहीं है",
+      "suggestion": "मद को छोटा विवरण दें; प्राप्तकर्ता इसी के आधार पर बिल पढ़ता है"
+    },
+    "unit_specified_per_item": {
+      "fail": "मद {ordinal} में इकाई नहीं है",
+      "suggestion": "मद की इकाई चुनें (m, m2, m3, नग, ...)"
+    },
+    "quantity_present_x83": {
+      "fail": "मद {ordinal} में मात्रा नहीं है",
+      "suggestion": "वह मात्रा दर्ज करें जिसका मूल्य बोलीदाताओं से माँगा जाना है"
+    },
+    "unit_price_present_x84": {
+      "fail": "मद {ordinal} में इकाई दर नहीं है",
+      "suggestion": "फ़ाइल भेजने से पहले हर मद की दर भर दें"
+    },
+    "total_price_calculated_correctly": {
+      "fail": "मद {ordinal}: कुल {total} मात्रा × इकाई दर ({expected}) के बराबर नहीं है",
+      "suggestion": "मद का कुल योग दोबारा निकालें"
+    },
+    "lv_numbering_consistent": {
+      "fail": "मद संख्या {ordinal} एक से अधिक बार आई है",
+      "suggestion": "हर मद को अलग मद संख्या दें"
+    },
+    "oz_format_valid": {
+      "fail": "मद संख्या '{ordinal}' GAEB मद संख्या के प्रारूप में नहीं है",
+      "suggestion": "अधिकतम पाँच स्तर रखें, हर स्तर में 14 तक अक्षर या अंक, जैसे 01.02.0030"
+    },
+    "currency_element_present": {
+      "fail": "एक्सचेंज में कोई मुद्रा नहीं लिखी है",
+      "suggestion": "परियोजना की मुद्रा तय करें ताकि फ़ाइल में वह दर्ज हो"
+    },
+    "xml_schema_valid": {
+      "fail": "फ़ाइल वैध GAEB DA XML 3.3 नहीं है ({reason})",
+      "suggestion": "भेजने वाले प्रोग्राम से फ़ाइल दोबारा GAEB DA XML 3.3 के रूप में निर्यात करें"
+    },
+    "phase_structure_valid": {
+      "fail": "{phase} फ़ाइल का ढाँचा उसके चरण से मेल नहीं खाता: {problems}",
+      "suggestion": "जाँचें कि फ़ाइल सही चरण की है और पूरी है"
+    },
+    "bidder_info_present_x84": {
+      "fail": "फ़ाइल में बोलीदाता का नाम नहीं है",
+      "suggestion": "फ़ाइल के बोलीदाता विवरण में कंपनी का नाम दर्ज करें"
+    }
   }
 }

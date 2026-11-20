@@ -2732,5 +2732,51 @@
       "fail": "{vendor} ذیلی ٹھیکیداروں کی فہرست میں بلاک ہے اور اسے ایوارڈ نہیں دیا جا سکتا۔",
       "suggestion": "فہرست میں بلاک ہٹائیں یا کسی اور فرم کو ایوارڈ دیں۔"
     }
+  },
+  "gaeb_exchange": {
+    "item_description_not_empty": {
+      "fail": "آئٹم {ordinal} میں متن نہیں ہے",
+      "suggestion": "آئٹم کو مختصر متن دیں؛ وصول کنندہ اسی سے بل آف کوانٹیٹیز پڑھتا ہے"
+    },
+    "unit_specified_per_item": {
+      "fail": "آئٹم {ordinal} میں یونٹ نہیں ہے",
+      "suggestion": "آئٹم کا یونٹ درج کریں (m، m2، m3، نگ، ...)"
+    },
+    "quantity_present_x83": {
+      "fail": "آئٹم {ordinal} میں مقدار نہیں ہے",
+      "suggestion": "وہ مقدار درج کریں جس کی بولی دہندگان سے قیمت طلب کی جائے"
+    },
+    "unit_price_present_x84": {
+      "fail": "آئٹم {ordinal} میں یونٹ ریٹ نہیں ہے",
+      "suggestion": "فائل بھیجنے سے پہلے ہر آئٹم کی قیمت لگائیں"
+    },
+    "total_price_calculated_correctly": {
+      "fail": "آئٹم {ordinal}: کل {total} مقدار x یونٹ ریٹ ({expected}) کے برابر نہیں ہے",
+      "suggestion": "آئٹم کا کل دوبارہ شمار کریں"
+    },
+    "lv_numbering_consistent": {
+      "fail": "آئٹم نمبر {ordinal} ایک سے زیادہ بار استعمال ہوا ہے",
+      "suggestion": "ہر آئٹم کو اپنا الگ آئٹم نمبر دیں"
+    },
+    "oz_format_valid": {
+      "fail": "آئٹم نمبر '{ordinal}' GAEB آئٹم نمبر کے مطابق نہیں ہے",
+      "suggestion": "زیادہ سے زیادہ پانچ درجے استعمال کریں، ہر درجہ میں 14 حروف یا ہندسے تک، مثلاً 01.02.0030"
+    },
+    "currency_element_present": {
+      "fail": "تبادلے میں کرنسی درج نہیں ہے",
+      "suggestion": "پروجیکٹ کی کرنسی مقرر کریں تاکہ فائل میں وہ درج ہو"
+    },
+    "xml_schema_valid": {
+      "fail": "فائل درست GAEB DA XML 3.3 نہیں ہے ({reason})",
+      "suggestion": "بھیجنے والے پروگرام سے فائل دوبارہ GAEB DA XML 3.3 کے طور پر برآمد کریں"
+    },
+    "phase_structure_valid": {
+      "fail": "{phase} فائل کا ڈھانچہ اس کے مرحلے کے مطابق نہیں ہے: {problems}",
+      "suggestion": "جانچ لیں کہ فائل درست مرحلے کی ہے اور مکمل ہے"
+    },
+    "bidder_info_present_x84": {
+      "fail": "فائل میں بولی دہندہ کا نام درج نہیں ہے",
+      "suggestion": "فائل کے بولی دہندہ کے ڈیٹا میں کمپنی کا نام درج کریں"
+    }
   }
 }

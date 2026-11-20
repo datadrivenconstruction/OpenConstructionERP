@@ -2732,5 +2732,51 @@
       "fail": "{vendor} در فهرست پیمانکاران جزء مسدود است و نمی‌توان به او واگذار کرد.",
       "suggestion": "انسداد را در فهرست بردارید یا به شرکت دیگری واگذار کنید."
     }
+  },
+  "gaeb_exchange": {
+    "item_description_not_empty": {
+      "fail": "ردیف {ordinal} متن ندارد",
+      "suggestion": "برای ردیف یک شرح کوتاه بنویسید؛ گیرنده فهرست بها را بر اساس آن می‌خواند"
+    },
+    "unit_specified_per_item": {
+      "fail": "ردیف {ordinal} واحد ندارد",
+      "suggestion": "واحد ردیف را تعیین کنید (m، m2، m3، عدد، ...)"
+    },
+    "quantity_present_x83": {
+      "fail": "ردیف {ordinal} مقدار ندارد",
+      "suggestion": "مقداری را وارد کنید که از پیشنهاددهندگان خواسته می‌شود قیمت‌گذاری کنند"
+    },
+    "unit_price_present_x84": {
+      "fail": "ردیف {ordinal} فاقد نرخ واحد است",
+      "suggestion": "پیش از ارسال فایل، همه ردیف‌ها را قیمت‌گذاری کنید"
+    },
+    "total_price_calculated_correctly": {
+      "fail": "ردیف {ordinal}: جمع {total} برابر مقدار × نرخ واحد نیست ({expected})",
+      "suggestion": "جمع ردیف را دوباره محاسبه کنید"
+    },
+    "lv_numbering_consistent": {
+      "fail": "شماره ردیف {ordinal} بیش از یک بار استفاده شده است",
+      "suggestion": "به هر ردیف شماره‌ای مخصوص به خودش بدهید"
+    },
+    "oz_format_valid": {
+      "fail": "شماره ردیف '{ordinal}' با قالب شماره ردیف GAEB مطابقت ندارد",
+      "suggestion": "حداکثر پنج سطح، هر سطح تا ۱۴ حرف یا رقم، مثلاً 01.02.0030"
+    },
+    "currency_element_present": {
+      "fail": "در فایل تبادل، واحد پول ذکر نشده است",
+      "suggestion": "واحد پول پروژه را تعیین کنید تا در فایل درج شود"
+    },
+    "xml_schema_valid": {
+      "fail": "فایل معتبر GAEB DA XML 3.3 نیست ({reason})",
+      "suggestion": "فایل را از نرم‌افزار ارسال‌کننده دوباره به صورت GAEB DA XML 3.3 خروجی بگیرید"
+    },
+    "phase_structure_valid": {
+      "fail": "فایل {phase} ساختار مرحله خود را ندارد: {problems}",
+      "suggestion": "بررسی کنید که فایل مربوط به مرحله درست باشد و کامل باشد"
+    },
+    "bidder_info_present_x84": {
+      "fail": "فایل نام پیشنهاددهنده را ذکر نکرده است",
+      "suggestion": "نام شرکت را در اطلاعات پیشنهاددهنده فایل وارد کنید"
+    }
   }
 }

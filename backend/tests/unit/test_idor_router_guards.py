@@ -760,8 +760,32 @@ ROUTER_HANDLERS: dict[str, list[str]] = {
     # _verify_bid_access, and the addenda routes call verify_project_access on
     # the resolved package. The three public /bid-portal/{token}/ routes are
     # excluded in _NOT_ROUTER_GATED below.
+    "central_purchasing": [
+        "get_bundle",
+        "update_bundle",
+        "delete_bundle",
+        "preview",
+        "add_project",
+        "update_project",
+        "remove_project",
+        "add_line",
+        "update_line",
+        "delete_line",
+        "publish",
+        "award",
+        "call_off",
+        "catalogues",
+        "my_shares",
+        "cost_lines",
+    ],
     "tendering": [
         "get_package",
+        "file_award_documents",
+        "get_package_header",
+        "preview_rejections",
+        "put_package_header",
+        "send_rejections",
+        "validate_package_award",
         "get_package_bill_source",
         "export_package_gaeb_x86",
         "list_package_bid_files",
@@ -1292,6 +1316,9 @@ _GUARD_WRAPPERS = frozenset(
         # and the ``export.{ext}`` flavours. It resolves the set's owning
         # project and calls verify_project_access before reading any row.
         "_export_dispatch",
+        # central_purchasing.router: a bundle is opened only by its creator, an admin or someone who may
+        # open one of its projects (verify_project_access per project); anyone else gets 404.
+        "_open_bundle_or_404",
         # tendering.router: _verify_package_owner loads the package and calls
         # verify_project_access on its project; _verify_bid_access loads the
         # bid and delegates to _verify_package_owner for its package.

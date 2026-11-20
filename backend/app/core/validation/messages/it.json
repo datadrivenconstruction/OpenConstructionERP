@@ -2732,5 +2732,51 @@
       "fail": "{vendor} è bloccato nell'elenco subappaltatori e non può essere aggiudicatario.",
       "suggestion": "Rimuovere il blocco nell'elenco o aggiudicare a un'altra impresa."
     }
+  },
+  "gaeb_exchange": {
+    "item_description_not_empty": {
+      "fail": "La voce {ordinal} non ha testo",
+      "suggestion": "Inserire una descrizione breve per la voce; il destinatario legge il computo in base a questa"
+    },
+    "unit_specified_per_item": {
+      "fail": "La voce {ordinal} non ha unità di misura",
+      "suggestion": "Indicare l'unità di misura della voce (m, m2, m3, pz, ...)"
+    },
+    "quantity_present_x83": {
+      "fail": "La voce {ordinal} non ha quantità",
+      "suggestion": "Inserire la quantità che i concorrenti devono prezzare"
+    },
+    "unit_price_present_x84": {
+      "fail": "La voce {ordinal} non ha prezzo unitario",
+      "suggestion": "Prezzare tutte le voci prima dell'invio del file"
+    },
+    "total_price_calculated_correctly": {
+      "fail": "Voce {ordinal}: l'importo {total} non corrisponde a quantità x prezzo unitario ({expected})",
+      "suggestion": "Ricalcolare l'importo totale della voce"
+    },
+    "lv_numbering_consistent": {
+      "fail": "Il numero di voce {ordinal} è usato più di una volta",
+      "suggestion": "Assegnare a ogni voce un proprio numero"
+    },
+    "oz_format_valid": {
+      "fail": "Il numero di voce '{ordinal}' non rispetta il formato GAEB",
+      "suggestion": "Usare al massimo cinque livelli, fino a 14 lettere o cifre ciascuno, es. 01.02.0030"
+    },
+    "currency_element_present": {
+      "fail": "Lo scambio non indica una valuta",
+      "suggestion": "Impostare la valuta del progetto perché il file la riporti"
+    },
+    "xml_schema_valid": {
+      "fail": "Il file non è un GAEB DA XML 3.3 valido ({reason})",
+      "suggestion": "Esportare di nuovo il file dal programma mittente come GAEB DA XML 3.3"
+    },
+    "phase_structure_valid": {
+      "fail": "Il file {phase} non ha la struttura della sua fase: {problems}",
+      "suggestion": "Verificare che il file sia della fase corretta e che sia completo"
+    },
+    "bidder_info_present_x84": {
+      "fail": "Il file non indica l'offerente",
+      "suggestion": "Inserire la ragione sociale nei dati dell'offerente del file"
+    }
   }
 }

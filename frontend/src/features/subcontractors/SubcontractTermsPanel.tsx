@@ -15,6 +15,7 @@ import { Percent, Plus, Trash2 } from 'lucide-react';
 import { Badge, Button, EmptyState } from '@/shared/ui';
 import { MoneyDisplay } from '@/shared/ui/MoneyDisplay';
 import { useToastStore } from '@/stores/useToastStore';
+import { fmtList } from '@/shared/lib/formatters';
 import { listPaymentApplications, type Agreement } from './api';
 import {
   createLevy,
@@ -252,7 +253,7 @@ function CatalogueSection() {
               {t('subcontractors.terms_pack_offer', {
                 defaultValue: 'Your market pack lists {{count}} usual levies without rates: {{names}}.',
                 count: packMissing.length,
-                names: packMissing.map((d) => d.name).join(', '),
+                names: fmtList(packMissing.map((d) => d.name)),
               })}
             </p>
             <Button size="sm" variant="ghost" onClick={() => importPack.mutate()}>

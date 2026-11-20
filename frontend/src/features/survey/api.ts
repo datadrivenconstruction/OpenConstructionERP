@@ -367,7 +367,6 @@ export interface BulkResult {
   affected: number;
   skipped_locked: number;
 }
-export type ExportFormat = 'csv' | 'dxf' | 'landxml';
 
 export interface ControlCheck {
   id: string;

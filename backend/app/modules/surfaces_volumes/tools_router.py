@@ -47,9 +47,9 @@ async def import_point_cloud(
     await verify_project_access(project_id, user_id, session)
     filename = (file.filename or "").strip()
     if not filename.lower().endswith(_CLOUD_SUFFIXES):
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Upload a .las or .laz file")
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="Upload a .las or .laz file")
     if stat not in STATS:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="stat is min, mean or max")
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="stat is min, mean or max")
     if file.size is not None and file.size > MAX_CLOUD_BYTES:
         raise HTTPException(status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE, detail="The file is over 2 GB")
     return await SurfaceToolsService(session).import_cloud(

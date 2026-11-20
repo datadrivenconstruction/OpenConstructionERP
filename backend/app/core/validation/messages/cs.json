@@ -2732,5 +2732,51 @@
       "fail": "{vendor} je v registru subdodavatelů blokován a nelze mu zakázku zadat.",
       "suggestion": "Zrušte blokaci v registru nebo zadejte jiné firmě."
     }
+  },
+  "gaeb_exchange": {
+    "item_description_not_empty": {
+      "fail": "Položka {ordinal} nemá text",
+      "suggestion": "Doplňte položce krátký popis; podle něj příjemce čte rozpočet"
+    },
+    "unit_specified_per_item": {
+      "fail": "Položka {ordinal} nemá jednotku",
+      "suggestion": "Doplňte měrnou jednotku položky (m, m2, m3, ks, ...)"
+    },
+    "quantity_present_x83": {
+      "fail": "Položka {ordinal} nemá množství",
+      "suggestion": "Zadejte množství, které mají uchazeči ocenit"
+    },
+    "unit_price_present_x84": {
+      "fail": "Položka {ordinal} nemá jednotkovou cenu",
+      "suggestion": "Ocenit každou položku dříve, než soubor odejde"
+    },
+    "total_price_calculated_correctly": {
+      "fail": "Položka {ordinal}: celková cena {total} není množství × jednotková cena ({expected})",
+      "suggestion": "Přepočítejte celkovou cenu položky"
+    },
+    "lv_numbering_consistent": {
+      "fail": "Číslo položky {ordinal} je použito víckrát",
+      "suggestion": "Přiřaďte každé položce vlastní číslo"
+    },
+    "oz_format_valid": {
+      "fail": "Číslo položky '{ordinal}' neodpovídá formátu GAEB",
+      "suggestion": "Použijte nejvýše pět úrovní, každou až se 14 písmeny nebo číslicemi, např. 01.02.0030"
+    },
+    "currency_element_present": {
+      "fail": "Výměna neuvádí měnu",
+      "suggestion": "Nastavte měnu projektu, aby ji soubor uváděl"
+    },
+    "xml_schema_valid": {
+      "fail": "Soubor není platný GAEB DA XML 3.3 ({reason})",
+      "suggestion": "Soubor znovu exportujte z odesílacího programu jako GAEB DA XML 3.3"
+    },
+    "phase_structure_valid": {
+      "fail": "Soubor {phase} nemá strukturu své fáze: {problems}",
+      "suggestion": "Zkontrolujte, zda je soubor správné fáze a je úplný"
+    },
+    "bidder_info_present_x84": {
+      "fail": "Soubor neuvádí uchazeče",
+      "suggestion": "Doplňte název firmy do údajů o uchazeči v souboru"
+    }
   }
 }

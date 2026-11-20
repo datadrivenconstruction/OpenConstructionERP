@@ -469,6 +469,9 @@ teach identifiers that were never rule sets at all.
 | `bid_leveling` | Bid leveling sheet: plugged gaps and their share of the bid |
 | `bid_award` | Bid at the point of award |
 | `bid_outcome` | Recorded outcome of a bid |
+| `bidder_search` | Bidder search and prequalification evidence |
+| `gaeb_exchange` | GAEB bill exchange files at export and import |
+| `subcontract_terms` | Payment, retention and security terms of a subcontract |
 | `field_diary_capture` | Offline field diary captures |
 | `field_productivity` | Field productivity records |
 | `sheet_intake` | Drawing sheets at intake |

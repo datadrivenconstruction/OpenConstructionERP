@@ -7,7 +7,7 @@ without ``alembic upgrade``. The documents an award drafts are rows of
 ``oe_contracts_contract`` and ``oe_procurement_po``, which need no DDL.
 
 Revision ID: cpb01_central_purchasing_bundles
-Revises: svc01_survey_calcs
+Revises: svr01_survey_register_surfaces
 Create Date: 2026-11-19
 """
 
@@ -19,7 +19,7 @@ import sqlalchemy as sa
 from alembic import op
 
 revision: str = "cpb01_central_purchasing_bundles"
-down_revision: str | Sequence[str] | None = "svc01_survey_calcs"
+down_revision: str | Sequence[str] | None = "svr01_survey_register_surfaces"
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 

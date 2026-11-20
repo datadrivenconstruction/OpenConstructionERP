@@ -52,7 +52,9 @@ _CLASS = re.compile(r"^class (\w+)\(", re.M)
 # Keyed by owning class so that a module holding two of them stays legible and
 # so the pin does not churn every time a line moves.
 UNCONSTRAINED_DOCUMENT_REFERENCES: dict[str, tuple[str, ...]] = {
+    "boq": ("BOQExchangeSource.document_id",),
     "cde": ("DocumentRevision.document_id",),
+    "central_purchasing": ("AwardSplit.document_id",),
     "closeout": ("CloseoutBinding.document_id", "CloseoutDossier.document_id"),
     "engineering_brief": ("SpecificationIssue.document_id", "Study.document_id"),
     "guarantees": ("GuaranteeDocument.document_id",),
@@ -87,6 +89,7 @@ UNCONSTRAINED_DOCUMENT_REFERENCES: dict[str, tuple[str, ...]] = {
     "qms": ("QMSInspection.attachment_document_ids", "QMSInspectionAttachment.document_id"),
     "resumable_uploads": ("ResumableUploadSession.document_id",),
     "supplier_catalogs": ("CatalogItemAttachment.document_id",),
+    "tendering": ("TenderBidFile.document_id", "TenderPackageDocument.document_id"),
     "takeoff": (
         "AiTakeoffRun.document_id",
         "TakeoffDocument.source_document_id",

@@ -69,7 +69,7 @@ from app.modules.land_parcels.schemas import (
     WorkZoneListResponse,
 )
 from app.modules.land_parcels.service import ParcelService
-from app.modules.survey_core.permissions import require_survey_confirm
+from app.modules.survey_core.dependencies import require_survey_confirm
 
 router = APIRouter(tags=["land_parcels"])
 

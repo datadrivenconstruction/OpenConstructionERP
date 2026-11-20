@@ -2490,8 +2490,8 @@
       "no_profile": "Walang profile, magtakda ng isa",
       "d": "d (mm)",
       "dz": "dZ (mm)",
-      "scale": "Grid / ground",
-      "scale_line": "CSF {csf} (k {k}, h {h} m): {grid} m grid = {ground} m ground"
+      "scale": "Grid / lupa",
+      "scale_line": "CSF {csf} (k {k}, h {h} m): {grid} m grid = {ground} m lupa"
     },
     "profile_uncovered": {
       "fail": "Hindi saklaw ng profile ang chainage {c}.",
@@ -2731,6 +2731,52 @@
     "bidder_blocked": {
       "fail": "Naka-block ang {vendor} sa direktoryo ng subcontractor at hindi mabibigyan ng award.",
       "suggestion": "Alisin ang block sa direktoryo o i-award sa ibang kumpanya."
+    }
+  },
+  "gaeb_exchange": {
+    "item_description_not_empty": {
+      "fail": "Walang teksto ang item {ordinal}",
+      "suggestion": "Maglagay ng maikling teksto sa item; ito ang binabasa ng tatanggap sa bill"
+    },
+    "unit_specified_per_item": {
+      "fail": "Walang unit ang item {ordinal}",
+      "suggestion": "Itakda ang unit ng item (m, m2, m3, pcs, ...)"
+    },
+    "quantity_present_x83": {
+      "fail": "Walang dami ang item {ordinal}",
+      "suggestion": "Ilagay ang dami na hinihiling sa mga bidder na presyuhan"
+    },
+    "unit_price_present_x84": {
+      "fail": "Walang unit price ang item {ordinal}",
+      "suggestion": "Presyuhan ang bawat item bago ipadala ang file"
+    },
+    "total_price_calculated_correctly": {
+      "fail": "Item {ordinal}: ang total na {total} ay hindi katumbas ng dami × unit price ({expected})",
+      "suggestion": "Kalkulahin muli ang total ng item"
+    },
+    "lv_numbering_consistent": {
+      "fail": "Ginamit nang higit sa isang beses ang item number {ordinal}",
+      "suggestion": "Bigyan ng sariling item number ang bawat item"
+    },
+    "oz_format_valid": {
+      "fail": "Hindi tugma sa format ng GAEB item number ang '{ordinal}'",
+      "suggestion": "Gumamit ng hanggang limang antas, bawat isa ay hanggang 14 na letra o digit, hal. 01.02.0030"
+    },
+    "currency_element_present": {
+      "fail": "Walang nakasaad na currency sa palitan",
+      "suggestion": "Itakda ang currency ng proyekto para maisama ito sa file"
+    },
+    "xml_schema_valid": {
+      "fail": "Hindi valid na GAEB DA XML 3.3 ang file ({reason})",
+      "suggestion": "I-export muli ang file mula sa nagpapadalang programa bilang GAEB DA XML 3.3"
+    },
+    "phase_structure_valid": {
+      "fail": "Hindi tugma sa istruktura ng phase nito ang file na {phase}: {problems}",
+      "suggestion": "Tiyaking tama ang phase ng file at kumpleto ito"
+    },
+    "bidder_info_present_x84": {
+      "fail": "Walang pangalan ng bidder sa file",
+      "suggestion": "Ilagay ang pangalan ng kompanya sa datos ng bidder sa file"
     }
   }
 }

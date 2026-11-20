@@ -5,17 +5,15 @@
 Anyone with project read can view, an editor can import, and confirming
 (a detected CRS, a CRS change once points exist, later volumes and parcels)
 needs ``survey.confirm``: managers and admins by default, plus the surveyor
-role, which otherwise works as an editor.
+role, which otherwise works as an editor. Kept free of web-framework imports so
+scripts can read the registry; the FastAPI dependency lives in ``dependencies.py``.
 """
 
 from __future__ import annotations
 
-from typing import Annotated, Any
-
-from fastapi import Depends, HTTPException, status
+from typing import Any
 
 from app.core.permissions import Role, permission_registry
-from app.dependencies import get_current_user_payload
 
 SURVEYOR_ROLE = "surveyor"
 CONFIRM = "survey.confirm"
@@ -41,9 +39,3 @@ def can_confirm(payload: dict[str, Any]) -> bool:
     if CONFIRM in (payload.get("permissions") or []):
         return True
     return permission_registry.role_has_permission(role, CONFIRM)
-
-
-async def require_survey_confirm(payload: Annotated[dict[str, Any], Depends(get_current_user_payload)]) -> None:
-    """FastAPI dependency: 403 unless the caller may confirm survey results."""
-    if not can_confirm(payload):
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=f"Missing permission: {CONFIRM}")

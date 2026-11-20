@@ -2732,5 +2732,51 @@
       "fail": "{vendor} חסום במאגר קבלני המשנה ולא ניתן להעניק לו זכייה.",
       "suggestion": "הסירו את החסימה במאגר או העניקו לחברה אחרת."
     }
+  },
+  "gaeb_exchange": {
+    "item_description_not_empty": {
+      "fail": "לסעיף {ordinal} אין טקסט",
+      "suggestion": "הזינו לסעיף תיאור קצר; הנמען קורא את כתב הכמויות לפיו"
+    },
+    "unit_specified_per_item": {
+      "fail": "לסעיף {ordinal} אין יחידת מידה",
+      "suggestion": "הגדירו את יחידת המידה של הסעיף (m, m2, m3, יח', ...)"
+    },
+    "quantity_present_x83": {
+      "fail": "לסעיף {ordinal} אין כמות",
+      "suggestion": "הזינו את הכמות שהמציעים מתבקשים לתמחר"
+    },
+    "unit_price_present_x84": {
+      "fail": "לסעיף {ordinal} אין מחיר יחידה",
+      "suggestion": "תמחרו כל סעיף לפני שהקובץ יוצא"
+    },
+    "total_price_calculated_correctly": {
+      "fail": "סעיף {ordinal}: הסך {total} אינו כמות כפול מחיר יחידה ({expected})",
+      "suggestion": "חשבו מחדש את הסך של הסעיף"
+    },
+    "lv_numbering_consistent": {
+      "fail": "מספר הסעיף {ordinal} מופיע יותר מפעם אחת",
+      "suggestion": "תנו לכל סעיף מספר סעיף משלו"
+    },
+    "oz_format_valid": {
+      "fail": "מספר הסעיף '{ordinal}' אינו תואם לפורמט GAEB",
+      "suggestion": "השתמשו בעד חמש רמות, עד 14 אותיות או ספרות בכל רמה, למשל 01.02.0030"
+    },
+    "currency_element_present": {
+      "fail": "בקובץ לא מצוין מטבע",
+      "suggestion": "הגדירו את מטבע הפרויקט כדי שהקובץ יציין אותו"
+    },
+    "xml_schema_valid": {
+      "fail": "הקובץ אינו GAEB DA XML 3.3 תקין ({reason})",
+      "suggestion": "ייצאו מחדש את הקובץ מתוכנת השליחה כ-GAEB DA XML 3.3"
+    },
+    "phase_structure_valid": {
+      "fail": "לקובץ {phase} אין המבנה של השלב שלו: {problems}",
+      "suggestion": "בדקו שהקובץ הוא מהשלב הנכון ושהוא שלם"
+    },
+    "bidder_info_present_x84": {
+      "fail": "בקובץ לא מצוין שם המציע",
+      "suggestion": "הזינו את שם החברה בנתוני המציע בקובץ"
+    }
   }
 }

@@ -2732,5 +2732,51 @@
       "fail": "{vendor} on alltöövõtjate registris blokeeritud ja talle ei saa tellimust anda.",
       "suggestion": "Eemalda blokeering registris või vali teine ettevõte."
     }
+  },
+  "gaeb_exchange": {
+    "item_description_not_empty": {
+      "fail": "Positsioonil {ordinal} puudub tekst",
+      "suggestion": "Lisage positsioonile lühitekst; vastuvõtja loeb hankedokumenti selle järgi"
+    },
+    "unit_specified_per_item": {
+      "fail": "Positsioonil {ordinal} puudub ühik",
+      "suggestion": "Määrake positsiooni ühik (m, m2, m3, tk, ...)"
+    },
+    "quantity_present_x83": {
+      "fail": "Positsioonil {ordinal} puudub kogus",
+      "suggestion": "Sisestage kogus, mida pakkujatel palutakse hinnata"
+    },
+    "unit_price_present_x84": {
+      "fail": "Positsioonil {ordinal} puudub ühikuhind",
+      "suggestion": "Hinnake iga positsioon enne faili väljasaatmist"
+    },
+    "total_price_calculated_correctly": {
+      "fail": "Positsioon {ordinal}: kogusumma {total} ei ole kogus × ühikuhind ({expected})",
+      "suggestion": "Arvutage positsiooni kogusumma uuesti"
+    },
+    "lv_numbering_consistent": {
+      "fail": "Positsiooni number {ordinal} on kasutusel rohkem kui üks kord",
+      "suggestion": "Andke igale positsioonile oma number"
+    },
+    "oz_format_valid": {
+      "fail": "Positsiooni number '{ordinal}' ei vasta GAEB positsiooninumbri nõuetele",
+      "suggestion": "Kasutage kuni viit taset, igas kuni 14 tähte või numbrit, nt 01.02.0030"
+    },
+    "currency_element_present": {
+      "fail": "Vahetusfailis ei ole märgitud valuutat",
+      "suggestion": "Määrake projekti valuuta, et fail seda märgiks"
+    },
+    "xml_schema_valid": {
+      "fail": "Fail ei ole kehtiv GAEB DA XML 3.3 ({reason})",
+      "suggestion": "Eksportige fail saatvast programmist uuesti formaadis GAEB DA XML 3.3"
+    },
+    "phase_structure_valid": {
+      "fail": "Fail {phase} ei vasta oma faasi struktuurile: {problems}",
+      "suggestion": "Kontrollige, et fail on õige faasi oma ja on täielik"
+    },
+    "bidder_info_present_x84": {
+      "fail": "Failis ei ole nimetatud pakkujat",
+      "suggestion": "Sisestage faili pakkuja andmetesse ettevõtte nimi"
+    }
   }
 }

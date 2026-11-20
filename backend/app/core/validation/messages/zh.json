@@ -2732,5 +2732,51 @@
       "fail": "{vendor} 在分包商名录中被禁用，无法授标。",
       "suggestion": "在名录中解除禁用，或授标给其他公司。"
     }
+  },
+  "gaeb_exchange": {
+    "item_description_not_empty": {
+      "fail": "第 {ordinal} 项没有文字说明",
+      "suggestion": "为该项填写简短说明；接收方将据此阅读工程量清单"
+    },
+    "unit_specified_per_item": {
+      "fail": "第 {ordinal} 项没有单位",
+      "suggestion": "填写该项的计量单位（m、m2、m3、个等）"
+    },
+    "quantity_present_x83": {
+      "fail": "第 {ordinal} 项没有工程量",
+      "suggestion": "填写投标人需要报价的工程量"
+    },
+    "unit_price_present_x84": {
+      "fail": "第 {ordinal} 项没有单价",
+      "suggestion": "文件发出前为所有项目完成单价"
+    },
+    "total_price_calculated_correctly": {
+      "fail": "第 {ordinal} 项：合价 {total} 不等于工程量 x 单价（{expected}）",
+      "suggestion": "重新计算该项合价"
+    },
+    "lv_numbering_consistent": {
+      "fail": "项目编号 {ordinal} 被重复使用",
+      "suggestion": "为每个项目分配唯一的项目编号"
+    },
+    "oz_format_valid": {
+      "fail": "项目编号 '{ordinal}' 不符合 GAEB 项目编号格式",
+      "suggestion": "最多使用五级，每级不超过 14 个字母或数字，例如 01.02.0030"
+    },
+    "currency_element_present": {
+      "fail": "交换文件中未注明货币",
+      "suggestion": "设置项目货币，使文件中明确货币单位"
+    },
+    "xml_schema_valid": {
+      "fail": "文件不是有效的 GAEB DA XML 3.3 格式（{reason}）",
+      "suggestion": "请从发送程序重新导出为 GAEB DA XML 3.3 格式"
+    },
+    "phase_structure_valid": {
+      "fail": "{phase} 文件的结构与其阶段不符：{problems}",
+      "suggestion": "请检查文件所属阶段是否正确且内容完整"
+    },
+    "bidder_info_present_x84": {
+      "fail": "文件中未注明投标人",
+      "suggestion": "请在文件的投标人信息中填写公司名称"
+    }
   }
 }

@@ -14,7 +14,7 @@ import { useTranslation } from 'react-i18next';
 import { Ban, Download, FileText, FileUp, Paperclip } from 'lucide-react';
 
 import { Button } from '@/shared/ui';
-import { formatDateValue } from '@/shared/lib/formatters';
+import { fmtList, formatDateValue } from '@/shared/lib/formatters';
 
 import {
   BidPortalError,
@@ -252,12 +252,12 @@ export function BidExchangeSection({
                         <tr key={`${line.ordinal}-${index}`}>
                           <td className="font-mono">{line.ordinal}</td>
                           <td>
-                            {line.issues
-                              .map((issue) => {
+                            {fmtList(
+                              line.issues.map((issue) => {
                                 const [key, fallback] = ISSUE_KEYS[issue] ?? ['bid_portal.x84.issue_other', issue];
                                 return t(key, { defaultValue: fallback });
-                              })
-                              .join(', ')}
+                              }),
+                            )}
                           </td>
                         </tr>
                       ))}
@@ -269,7 +269,7 @@ export function BidExchangeSection({
                 <p className="text-content-secondary">
                   {t('bid_portal.x84.missing', {
                     defaultValue: 'Not in your file: {{items}}',
-                    items: x84.preview.missing_ordinals.slice(0, 20).join(', '),
+                    items: fmtList(x84.preview.missing_ordinals.slice(0, 20)),
                   })}
                 </p>
               )}

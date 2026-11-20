@@ -218,7 +218,7 @@ class RegisterService:
                 p.code = data.value.strip()
         elif data.action == "set_kind":
             if data.value not in point_export_kinds():
-                raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Unknown point kind")
+                raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="Unknown point kind")
             for p in free:
                 p.kind = data.value
         elif data.action == "move_to_set":
@@ -239,7 +239,7 @@ class RegisterService:
             }
             if any(s.stored_epsg != target.stored_epsg for s in sources.values()):
                 raise HTTPException(
-                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                     detail="The target set is in another coordinate system",
                 )
             for p in free:
@@ -357,7 +357,7 @@ class RegisterService:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Point not found")
         if cp.kind not in CONTROL_KINDS:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Only a control point or benchmark is checked"
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="Only a control point or benchmark is checked"
             )
         if data.measured_point_id is not None:
             m = await self.get_point(data.measured_point_id)
@@ -365,14 +365,14 @@ class RegisterService:
                 raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Point not found")
             if m.id == cp.id:
                 raise HTTPException(
-                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Pick a measured point, not the control"
+                    status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="Pick a measured point, not the control"
                 )
             e, n, z = float(m.e), float(m.n), _f(m.z)
         elif data.e is not None and data.n is not None:
             e, n, z = data.e, data.n, data.z
         else:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Give a measured point or E and N"
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="Give a measured point or E and N"
             )
         row = SurveyControlCheck(
             project_id=project_id,

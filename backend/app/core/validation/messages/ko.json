@@ -2732,5 +2732,51 @@
       "fail": "{vendor}는 협력업체 명부에서 차단되어 낙찰할 수 없습니다.",
       "suggestion": "명부에서 차단을 해제하거나 다른 업체에 낙찰하세요."
     }
+  },
+  "gaeb_exchange": {
+    "item_description_not_empty": {
+      "fail": "항목 {ordinal}에 내용이 없습니다",
+      "suggestion": "항목에 짧은 내용을 입력하세요. 수신자는 이를 기준으로 내역서를 확인합니다"
+    },
+    "unit_specified_per_item": {
+      "fail": "항목 {ordinal}에 단위가 없습니다",
+      "suggestion": "항목의 단위(m, m2, m3, 개, ...)를 입력하세요"
+    },
+    "quantity_present_x83": {
+      "fail": "항목 {ordinal}에 수량이 없습니다",
+      "suggestion": "입찰자가 단가를 적어야 할 수량을 입력하세요"
+    },
+    "unit_price_present_x84": {
+      "fail": "항목 {ordinal}에 단가가 없습니다",
+      "suggestion": "파일을 보내기 전에 모든 항목에 단가를 입력하세요"
+    },
+    "total_price_calculated_correctly": {
+      "fail": "항목 {ordinal}: 합계 {total}이(가) 수량 × 단가({expected})와 일치하지 않습니다",
+      "suggestion": "항목 합계를 다시 계산하세요"
+    },
+    "lv_numbering_consistent": {
+      "fail": "항목 번호 {ordinal}이(가) 두 번 이상 사용되었습니다",
+      "suggestion": "항목마다 고유한 항목 번호를 부여하세요"
+    },
+    "oz_format_valid": {
+      "fail": "항목 번호 '{ordinal}'이(가) GAEB 항목 번호 형식에 맞지 않습니다",
+      "suggestion": "최대 5단계까지, 단계마다 14자 이내의 영문자나 숫자를 사용하세요. 예: 01.02.0030"
+    },
+    "currency_element_present": {
+      "fail": "데이터 교환에 통화가 지정되어 있지 않습니다",
+      "suggestion": "파일에 표시되도록 프로젝트 통화를 설정하세요"
+    },
+    "xml_schema_valid": {
+      "fail": "파일이 유효한 GAEB DA XML 3.3이 아닙니다 ({reason})",
+      "suggestion": "보내는 프로그램에서 GAEB DA XML 3.3 형식으로 파일을 다시 내보내세요"
+    },
+    "phase_structure_valid": {
+      "fail": "{phase} 파일의 구조가 해당 단계와 맞지 않습니다: {problems}",
+      "suggestion": "파일이 올바른 단계이며 완전한지 확인하세요"
+    },
+    "bidder_info_present_x84": {
+      "fail": "파일에 입찰자 이름이 없습니다",
+      "suggestion": "파일의 입찰자 정보에 회사명을 입력하세요"
+    }
   }
 }

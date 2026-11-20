@@ -99,7 +99,7 @@ async def test_bulk_code_kind_move_and_delete(client: AsyncClient, header: dict,
 async def test_export_selection_csv_dxf_landxml(client: AsyncClient, header: dict, project_id: str) -> None:
     await _import(client, header, project_id)
     pts = await _points(client, header, project_id)
-    body = {"ids": [pts["CP1"]["id"]], "format": "csv", "preset": "PNEZD"}
+    body = {"ids": [pts["CP1"]["id"]], "format": "csv", "preset": "PNEZD", "header": False}
     r = await client.post(f"{CORE}/projects/{project_id}/points/export", json=body, headers=header)
     assert r.status_code == 200, r.text
     assert r.text == "CP1,5818990.0000,388990.0000,33.9000,CP,\n"

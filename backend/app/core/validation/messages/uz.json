@@ -2732,5 +2732,51 @@
       "fail": "{vendor} subpudratchilar reyestrida bloklangan, unga buyurtma berib bo'lmaydi.",
       "suggestion": "Reyestrda blokni olib tashlang yoki boshqa firmaga bering."
     }
+  },
+  "gaeb_exchange": {
+    "item_description_not_empty": {
+      "fail": "{ordinal}-pozitsiyada matn yoʻq",
+      "suggestion": "Pozitsiyaga qisqa matn kiriting; qabul qiluvchi hajmlar roʻyxatini shu matn boʻyicha oʻqiydi"
+    },
+    "unit_specified_per_item": {
+      "fail": "{ordinal}-pozitsiyada oʻlchov birligi yoʻq",
+      "suggestion": "Pozitsiyaning oʻlchov birligini kiriting (m, m2, m3, dona, ...)"
+    },
+    "quantity_present_x83": {
+      "fail": "{ordinal}-pozitsiyada miqdor yoʻq",
+      "suggestion": "Ishtirokchilar narx qoʻyishi kerak boʻlgan miqdorni kiriting"
+    },
+    "unit_price_present_x84": {
+      "fail": "{ordinal}-pozitsiyada birlik narx yoʻq",
+      "suggestion": "Fayl joʻnatilishidan oldin har bir pozitsiyaga narx qoʻying"
+    },
+    "total_price_calculated_correctly": {
+      "fail": "{ordinal}-pozitsiya: jami {total} miqdor x birlik narx ({expected}) ga teng emas",
+      "suggestion": "Pozitsiyaning jami summasini qayta hisoblang"
+    },
+    "lv_numbering_consistent": {
+      "fail": "{ordinal} pozitsiya raqami bir necha marta ishlatilgan",
+      "suggestion": "Har bir pozitsiyaga oʻz raqamini bering"
+    },
+    "oz_format_valid": {
+      "fail": "«{ordinal}» pozitsiya raqami GAEB pozitsiya raqami formatiga mos emas",
+      "suggestion": "Eng koʻpi bilan besh daraja ishlating, har biri 14 tagacha harf yoki raqamdan iborat, masalan 01.02.0030"
+    },
+    "currency_element_present": {
+      "fail": "Almashinuv faylida valyuta koʻrsatilmagan",
+      "suggestion": "Loyiha valyutasini belgilang, shunda fayl uni koʻrsatadi"
+    },
+    "xml_schema_valid": {
+      "fail": "Fayl GAEB DA XML 3.3 talabiga javob bermaydi ({reason})",
+      "suggestion": "Faylni joʻnatuvchi dasturdan GAEB DA XML 3.3 formatida qayta eksport qiling"
+    },
+    "phase_structure_valid": {
+      "fail": "{phase} fayli oʻz bosqichining tuzilmasiga ega emas: {problems}",
+      "suggestion": "Fayl toʻgʻri bosqichga tegishliligini va toʻliqligini tekshiring"
+    },
+    "bidder_info_present_x84": {
+      "fail": "Faylda ishtirokchi nomi koʻrsatilmagan",
+      "suggestion": "Fayldagi ishtirokchi maʼlumotlariga firma nomini kiriting"
+    }
   }
 }

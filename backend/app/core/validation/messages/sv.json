@@ -2732,5 +2732,51 @@
       "fail": "{vendor} är spärrad i underentreprenörsregistret och kan inte tilldelas.",
       "suggestion": "Häv spärren i registret eller tilldela ett annat företag."
     }
+  },
+  "gaeb_exchange": {
+    "item_description_not_empty": {
+      "fail": "Post {ordinal} saknar text",
+      "suggestion": "Ange en kort text för posten; mottagaren läser förteckningen utifrån den"
+    },
+    "unit_specified_per_item": {
+      "fail": "Post {ordinal} saknar enhet",
+      "suggestion": "Ange postens enhet (m, m2, m3, st, ...)"
+    },
+    "quantity_present_x83": {
+      "fail": "Post {ordinal} saknar kvantitet",
+      "suggestion": "Ange den kvantitet som anbudsgivarna ska prissätta"
+    },
+    "unit_price_present_x84": {
+      "fail": "Post {ordinal} saknar enhetspris",
+      "suggestion": "Prissätt alla poster innan filen skickas"
+    },
+    "total_price_calculated_correctly": {
+      "fail": "Post {ordinal}: summan {total} är inte kvantitet x enhetspris ({expected})",
+      "suggestion": "Räkna om postens summa"
+    },
+    "lv_numbering_consistent": {
+      "fail": "Postnummer {ordinal} används mer än en gång",
+      "suggestion": "Ge varje post ett eget postnummer"
+    },
+    "oz_format_valid": {
+      "fail": "Postnumret '{ordinal}' stämmer inte med ett GAEB-ordningsnummer",
+      "suggestion": "Använd högst fem nivåer med upp till 14 bokstäver eller siffror var, t.ex. 01.02.0030"
+    },
+    "currency_element_present": {
+      "fail": "Utbytet anger ingen valuta",
+      "suggestion": "Ange projektets valuta så att filen anger den"
+    },
+    "xml_schema_valid": {
+      "fail": "Filen är inte giltig GAEB DA XML 3.3 ({reason})",
+      "suggestion": "Exportera filen på nytt från avsändarprogrammet som GAEB DA XML 3.3"
+    },
+    "phase_structure_valid": {
+      "fail": "{phase}-filen har inte den struktur som hör till dess fas: {problems}",
+      "suggestion": "Kontrollera att filen avser rätt fas och är komplett"
+    },
+    "bidder_info_present_x84": {
+      "fail": "Filen anger ingen anbudsgivare",
+      "suggestion": "Ange företagsnamnet i anbudsgivarens uppgifter i filen"
+    }
   }
 }

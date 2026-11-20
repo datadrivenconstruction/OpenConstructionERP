@@ -40,7 +40,7 @@ from app.modules.stockpiles.schemas import (
     SurveyUpdate,
 )
 from app.modules.stockpiles.service import StockpileService
-from app.modules.survey_core.permissions import require_survey_confirm
+from app.modules.survey_core.dependencies import require_survey_confirm
 
 router = APIRouter(tags=["stockpiles"])
 

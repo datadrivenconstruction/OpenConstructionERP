@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import uuid
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep, verify_project_access
 from app.modules.central_purchasing.schemas import (
@@ -43,6 +43,41 @@ def _svc(session: SessionDep) -> CentralPurchasingService:
     return CentralPurchasingService(session)
 
 
+async def _may_open(session: SessionDep, row: object, user_id: str) -> bool:
+    """The bundle's creator, an admin, or a manager who may open every project in it.
+
+    A member of only some of the projects works through ``/my-shares``, which shows that project's
+    share and nothing of the others.
+    """
+    from app.modules.users.repository import UserRepository
+
+    if str(getattr(row, "created_by", "") or "") == str(user_id):
+        return True
+    try:
+        user = await UserRepository(session).get_by_id(uuid.UUID(str(user_id)))
+        if user is not None and getattr(user, "role", "") == "admin":
+            return True
+    except (ValueError, TypeError):
+        return False
+    links = list(getattr(row, "projects", None) or [])
+    if not links:
+        return False
+    for link in links:
+        try:
+            await verify_project_access(link.project_id, user_id, session)
+        except HTTPException:
+            return False
+    return True
+
+
+async def _open_bundle_or_404(svc: CentralPurchasingService, session: SessionDep, bundle_id: uuid.UUID, user_id: str):
+    """Load a bundle the caller may open; another company's bundle answers 404, like a missing one."""
+    row = await svc.get(bundle_id)
+    if not await _may_open(session, row, user_id):
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Bundle not found")
+    return row
+
+
 @router.get("/my-shares", response_model=list[MyShare], dependencies=[_READ_SHARE])
 async def my_shares(session: SessionDep, user_id: CurrentUserId, project_id: uuid.UUID = Query(...)) -> list[MyShare]:
     """The project's shares of published and awarded bundles: its quantities, budget and own document."""
@@ -51,10 +86,12 @@ async def my_shares(session: SessionDep, user_id: CurrentUserId, project_id: uui
 
 
 @router.get("/catalogues", response_model=list[Catalogue], dependencies=[_MANAGE])
-async def catalogues(session: SessionDep, bundle_id: uuid.UUID | None = Query(default=None)) -> list[Catalogue]:
+async def catalogues(
+    session: SessionDep, user_id: CurrentUserId, bundle_id: uuid.UUID | None = Query(default=None)
+) -> list[Catalogue]:
     """Cost code catalogues the group's markets contribute; empty when no pack applies."""
     svc = _svc(session)
-    row = await svc.get(bundle_id) if bundle_id else None
+    row = await _open_bundle_or_404(svc, session, bundle_id, user_id) if bundle_id else None
     return await svc.catalogues(row)
 
 
@@ -67,8 +104,11 @@ async def cost_lines(
 
 
 @router.get("/", response_model=list[BundleSummary], dependencies=[_MANAGE])
-async def list_bundles(session: SessionDep) -> list[BundleSummary]:
-    return await _svc(session).summaries()
+async def list_bundles(session: SessionDep, user_id: CurrentUserId) -> list[BundleSummary]:
+    svc = _svc(session)
+    rows = {r.id: r for r in await svc.repo.list()}
+    visible = [s for s in await svc.summaries() if s.id in rows and await _may_open(session, rows[s.id], user_id)]
+    return visible
 
 
 @router.post("/", response_model=BundleDetail, status_code=201, dependencies=[_MANAGE])
@@ -79,29 +119,33 @@ async def create_bundle(data: BundleCreate, session: SessionDep, user_id: Curren
 
 
 @router.get("/{bundle_id}", response_model=BundleDetail, dependencies=[_MANAGE])
-async def get_bundle(bundle_id: uuid.UUID, session: SessionDep) -> BundleDetail:
+async def get_bundle(bundle_id: uuid.UUID, session: SessionDep, user_id: CurrentUserId) -> BundleDetail:
     svc = _svc(session)
-    return await svc.detail(await svc.get(bundle_id))
+    return await svc.detail(await _open_bundle_or_404(svc, session, bundle_id, user_id))
 
 
 @router.patch("/{bundle_id}", response_model=BundleDetail, dependencies=[_MANAGE])
-async def update_bundle(bundle_id: uuid.UUID, data: BundleUpdate, session: SessionDep) -> BundleDetail:
+async def update_bundle(
+    bundle_id: uuid.UUID, data: BundleUpdate, session: SessionDep, user_id: CurrentUserId
+) -> BundleDetail:
     svc = _svc(session)
-    row = await svc.update(await svc.get(bundle_id), data)
+    row = await svc.update(await _open_bundle_or_404(svc, session, bundle_id, user_id), data)
     return await svc.detail(row)
 
 
 @router.delete("/{bundle_id}", status_code=204, dependencies=[_MANAGE])
-async def delete_bundle(bundle_id: uuid.UUID, session: SessionDep) -> None:
+async def delete_bundle(bundle_id: uuid.UUID, session: SessionDep, user_id: CurrentUserId) -> None:
     svc = _svc(session)
-    await svc.delete(await svc.get(bundle_id))
+    await svc.delete(await _open_bundle_or_404(svc, session, bundle_id, user_id))
 
 
 @router.post("/{bundle_id}/preview", response_model=BundleDetail, dependencies=[_MANAGE])
-async def preview(bundle_id: uuid.UUID, data: PreviewRequest, session: SessionDep) -> BundleDetail:
+async def preview(
+    bundle_id: uuid.UUID, data: PreviewRequest, session: SessionDep, user_id: CurrentUserId
+) -> BundleDetail:
     """The award split for terms not saved yet; nothing is written."""
     svc = _svc(session)
-    return await svc.detail(await svc.get(bundle_id), data)
+    return await svc.detail(await _open_bundle_or_404(svc, session, bundle_id, user_id), data)
 
 
 @router.post("/{bundle_id}/projects", response_model=BundleDetail, dependencies=[_MANAGE])
@@ -110,57 +154,63 @@ async def add_project(
 ) -> BundleDetail:
     await verify_project_access(data.project_id, user_id, session)
     svc = _svc(session)
-    row = await svc.get(bundle_id)
+    row = await _open_bundle_or_404(svc, session, bundle_id, user_id)
     await svc.add_project(row, data)
     return await svc.detail(row)
 
 
 @router.patch("/{bundle_id}/projects/{bp_id}", response_model=BundleDetail, dependencies=[_MANAGE])
 async def update_project(
-    bundle_id: uuid.UUID, bp_id: uuid.UUID, data: ProjectUpdate, session: SessionDep
+    bundle_id: uuid.UUID, bp_id: uuid.UUID, data: ProjectUpdate, session: SessionDep, user_id: CurrentUserId
 ) -> BundleDetail:
     svc = _svc(session)
-    row = await svc.get(bundle_id)
+    row = await _open_bundle_or_404(svc, session, bundle_id, user_id)
     await svc.update_project(row, bp_id, data)
     return await svc.detail(row)
 
 
 @router.delete("/{bundle_id}/projects/{bp_id}", response_model=BundleDetail, dependencies=[_MANAGE])
-async def remove_project(bundle_id: uuid.UUID, bp_id: uuid.UUID, session: SessionDep) -> BundleDetail:
+async def remove_project(
+    bundle_id: uuid.UUID, bp_id: uuid.UUID, session: SessionDep, user_id: CurrentUserId
+) -> BundleDetail:
     svc = _svc(session)
-    row = await svc.get(bundle_id)
+    row = await _open_bundle_or_404(svc, session, bundle_id, user_id)
     await svc.remove_project(row, bp_id)
     return await svc.detail(row)
 
 
 @router.post("/{bundle_id}/lines", response_model=BundleDetail, dependencies=[_MANAGE])
-async def add_line(bundle_id: uuid.UUID, data: LineIn, session: SessionDep) -> BundleDetail:
+async def add_line(bundle_id: uuid.UUID, data: LineIn, session: SessionDep, user_id: CurrentUserId) -> BundleDetail:
     svc = _svc(session)
-    row = await svc.get(bundle_id)
+    row = await _open_bundle_or_404(svc, session, bundle_id, user_id)
     await svc.add_line(row, data)
     return await svc.detail(row)
 
 
 @router.patch("/{bundle_id}/lines/{line_id}", response_model=BundleDetail, dependencies=[_MANAGE])
-async def update_line(bundle_id: uuid.UUID, line_id: uuid.UUID, data: LineUpdate, session: SessionDep) -> BundleDetail:
+async def update_line(
+    bundle_id: uuid.UUID, line_id: uuid.UUID, data: LineUpdate, session: SessionDep, user_id: CurrentUserId
+) -> BundleDetail:
     svc = _svc(session)
-    row = await svc.get(bundle_id)
+    row = await _open_bundle_or_404(svc, session, bundle_id, user_id)
     await svc.update_line(row, line_id, data)
     return await svc.detail(row)
 
 
 @router.delete("/{bundle_id}/lines/{line_id}", response_model=BundleDetail, dependencies=[_MANAGE])
-async def delete_line(bundle_id: uuid.UUID, line_id: uuid.UUID, session: SessionDep) -> BundleDetail:
+async def delete_line(
+    bundle_id: uuid.UUID, line_id: uuid.UUID, session: SessionDep, user_id: CurrentUserId
+) -> BundleDetail:
     svc = _svc(session)
-    row = await svc.get(bundle_id)
+    row = await _open_bundle_or_404(svc, session, bundle_id, user_id)
     await svc.delete_line(row, line_id)
     return await svc.detail(row)
 
 
 @router.post("/{bundle_id}/publish", response_model=BundleDetail, dependencies=[_MANAGE])
-async def publish(bundle_id: uuid.UUID, session: SessionDep) -> BundleDetail:
+async def publish(bundle_id: uuid.UUID, session: SessionDep, user_id: CurrentUserId) -> BundleDetail:
     svc = _svc(session)
-    row = await svc.publish(await svc.get(bundle_id))
+    row = await svc.publish(await _open_bundle_or_404(svc, session, bundle_id, user_id))
     return await svc.detail(row)
 
 
@@ -168,7 +218,7 @@ async def publish(bundle_id: uuid.UUID, session: SessionDep) -> BundleDetail:
 async def award(bundle_id: uuid.UUID, data: AwardRequest, session: SessionDep, user_id: CurrentUserId) -> BundleDetail:
     """Draft the per-project documents (or the framework agreements); nothing is signed."""
     svc = _svc(session)
-    row = await svc.award(await svc.get(bundle_id), data, user_id)
+    row = await svc.award(await _open_bundle_or_404(svc, session, bundle_id, user_id), data, user_id)
     return await svc.detail(row)
 
 
@@ -178,4 +228,4 @@ async def call_off(
 ) -> CallOffResult:
     await verify_project_access(data.project_id, user_id, session)
     svc = _svc(session)
-    return await svc.call_off(await svc.get(bundle_id), data, user_id)
+    return await svc.call_off(await _open_bundle_or_404(svc, session, bundle_id, user_id), data, user_id)

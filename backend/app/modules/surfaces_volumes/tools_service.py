@@ -25,7 +25,7 @@ from app.modules.surfaces_volumes.tin import Tin
 
 
 def _bad(detail: str) -> HTTPException:
-    return HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=detail)
+    return HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=detail)
 
 
 class SurfaceToolsService:

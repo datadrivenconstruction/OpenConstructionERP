@@ -56,7 +56,7 @@ from app.modules.surfaces_volumes.schemas import (
     VolumeUpdate,
 )
 from app.modules.surfaces_volumes.service import VolumesService
-from app.modules.survey_core.permissions import require_survey_confirm
+from app.modules.survey_core.dependencies import require_survey_confirm
 
 router = APIRouter(tags=["surfaces_volumes"])
 

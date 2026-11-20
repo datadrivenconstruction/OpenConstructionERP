@@ -2732,5 +2732,51 @@
       "fail": "{vendor} est bloqué dans l'annuaire des sous-traitants et ne peut pas être retenu.",
       "suggestion": "Levez le blocage dans l'annuaire ou attribuez à une autre entreprise."
     }
+  },
+  "gaeb_exchange": {
+    "item_description_not_empty": {
+      "fail": "Le poste {ordinal} n'a pas de libellé",
+      "suggestion": "Donnez au poste un libellé court ; le destinataire s'appuie dessus pour lire le bordereau"
+    },
+    "unit_specified_per_item": {
+      "fail": "Le poste {ordinal} n'a pas d'unité",
+      "suggestion": "Renseignez l'unité du poste (m, m2, m3, u, ...)"
+    },
+    "quantity_present_x83": {
+      "fail": "Le poste {ordinal} n'a pas de quantité",
+      "suggestion": "Saisissez la quantité que les soumissionnaires doivent chiffrer"
+    },
+    "unit_price_present_x84": {
+      "fail": "Le poste {ordinal} n'a pas de prix unitaire",
+      "suggestion": "Chiffrez chaque poste avant l'envoi du fichier"
+    },
+    "total_price_calculated_correctly": {
+      "fail": "Poste {ordinal} : le total {total} ne correspond pas à quantité × prix unitaire ({expected})",
+      "suggestion": "Recalculez le montant total du poste"
+    },
+    "lv_numbering_consistent": {
+      "fail": "Le numéro de poste {ordinal} est utilisé plusieurs fois",
+      "suggestion": "Attribuez à chaque poste un numéro qui lui est propre"
+    },
+    "oz_format_valid": {
+      "fail": "Le numéro de poste '{ordinal}' ne respecte pas le format GAEB",
+      "suggestion": "Utilisez cinq niveaux au maximum, de 14 lettres ou chiffres chacun, par ex. 01.02.0030"
+    },
+    "currency_element_present": {
+      "fail": "L'échange ne mentionne aucune devise",
+      "suggestion": "Renseignez la devise du projet pour qu'elle figure dans le fichier"
+    },
+    "xml_schema_valid": {
+      "fail": "Le fichier n'est pas un GAEB DA XML 3.3 valide ({reason})",
+      "suggestion": "Réexportez le fichier depuis le logiciel d'envoi au format GAEB DA XML 3.3"
+    },
+    "phase_structure_valid": {
+      "fail": "Le fichier {phase} ne respecte pas la structure de sa phase : {problems}",
+      "suggestion": "Vérifiez que le fichier correspond à la bonne phase et qu'il est complet"
+    },
+    "bidder_info_present_x84": {
+      "fail": "Le fichier n'indique aucun soumissionnaire",
+      "suggestion": "Saisissez la raison sociale du soumissionnaire dans les données du fichier"
+    }
   }
 }

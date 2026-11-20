@@ -2177,7 +2177,7 @@ async def validate_package_award(
 ) -> dict:
     """Run the ``tendering_award`` rule set: issuing company named, losers told."""
     from app.core.validation.engine import ValidationContext, rule_registry  # noqa: PLC0415
-    from app.modules.tendering.validators import AWARD_RULE_SET  # noqa: PLC0415
+    from app.modules.tendering.validators import ENTITY_AWARD_RULE_SET  # noqa: PLC0415
 
     package = await _verify_package_owner(service, session, package_id, user_id, payload)
     data = await award_flow.award_validation_payload(session, package)  # type: ignore[arg-type]
@@ -2191,7 +2191,7 @@ async def validate_package_award(
             "element_ref": r.element_ref,
             "suggestion": r.suggestion,
         }
-        for rule in rule_registry.get_rules_for_sets([AWARD_RULE_SET])
+        for rule in rule_registry.get_rules_for_sets([ENTITY_AWARD_RULE_SET])
         for r in await rule.validate(context)
     ]
     return {"package_id": str(package_id), "passed": all(r["passed"] for r in results), "results": results}

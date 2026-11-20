@@ -216,7 +216,7 @@ async def test_the_same_point_ids_in_two_projects_are_not_duplicates(client: Asy
         await _crs(client, header, pid)
         assert (await _import(client, header, pid, "CP1,1.0,2.0,3.0\n")).json()["problems"] == []
         report = (await client.post(f"{BASE}/projects/{pid}/validate", headers=header)).json()
-        assert report["findings"] == []
+        assert [f for f in report["findings"] if f["rule_id"] != "SRV-025"] == []
     # the same id elsewhere in the same project is a conflict; the other project never sees it
     second = await _import(client, header, ids[1], "CP1,500.0,2.0,3.0\n")
     assert second.json()["problems"][0]["rule_id"] == "SRV-003"
@@ -358,7 +358,7 @@ async def test_a_local_grid_project_needs_no_epsg_on_its_point_sets(
     result = (await _import(client, header, project_id)).json()
     assert result["point_set"]["stored_epsg"] is None
     report = (await client.post(f"{BASE}/projects/{project_id}/validate", headers=header)).json()
-    assert report["findings"] == []
+    assert [f for f in report["findings"] if f["rule_id"] != "SRV-025"] == []
 
 
 @pytest.mark.parametrize(
@@ -433,7 +433,11 @@ async def test_paging_and_filters_on_a_large_register(client: AsyncClient, heade
     for bad in ({"limit": 1001}, {"limit": 0}, {"offset": -1}, {"kind": "fence"}):
         assert (await client.get(points, params=bad, headers=header)).status_code == 422, bad
     summary = (await client.get(f"{BASE}/projects/{project_id}/summary", headers=header)).json()
-    assert (summary["points"], summary["control"], summary["findings"]) == (20_000, 200, 0)
+    assert (summary["points"], summary["control"], summary["findings"]) == (
+        20_000,
+        200,
+        1,
+    )  # SRV-025 states ground/grid
 
 
 async def test_filters_treat_wildcards_and_quotes_as_plain_text(
@@ -474,7 +478,7 @@ async def test_right_to_left_names_round_trip_through_the_register(
     report = (
         await client.post(f"{BASE}/projects/{project_id}/validate", params={"locale": "ar"}, headers=header)
     ).json()
-    assert report["findings"] == []
+    assert [f for f in report["findings"] if f["rule_id"] != "SRV-025"] == []
 
 
 async def test_the_validation_report_speaks_the_requested_language(

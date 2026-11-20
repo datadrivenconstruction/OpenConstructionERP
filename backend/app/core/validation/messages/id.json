@@ -2732,5 +2732,51 @@
       "fail": "{vendor} diblokir di direktori subkontraktor dan tidak dapat diberi penghargaan.",
       "suggestion": "Buka blokir di direktori atau berikan ke perusahaan lain."
     }
+  },
+  "gaeb_exchange": {
+    "item_description_not_empty": {
+      "fail": "Item {ordinal} tidak memiliki teks",
+      "suggestion": "Beri item teks singkat; penerima membaca daftar kuantitas berdasarkan teks ini"
+    },
+    "unit_specified_per_item": {
+      "fail": "Item {ordinal} tidak memiliki satuan",
+      "suggestion": "Isi satuan item (m, m2, m3, bh, ...)"
+    },
+    "quantity_present_x83": {
+      "fail": "Item {ordinal} tidak memiliki volume",
+      "suggestion": "Isi volume yang harus dihargai oleh para penawar"
+    },
+    "unit_price_present_x84": {
+      "fail": "Item {ordinal} tidak memiliki harga satuan",
+      "suggestion": "Beri harga setiap item sebelum file dikirim"
+    },
+    "total_price_calculated_correctly": {
+      "fail": "Item {ordinal}: total {total} bukan volume x harga satuan ({expected})",
+      "suggestion": "Hitung ulang total item"
+    },
+    "lv_numbering_consistent": {
+      "fail": "Nomor item {ordinal} dipakai lebih dari satu kali",
+      "suggestion": "Beri setiap item nomor item tersendiri"
+    },
+    "oz_format_valid": {
+      "fail": "Nomor item '{ordinal}' tidak sesuai dengan format nomor item GAEB",
+      "suggestion": "Gunakan paling banyak lima tingkat, masing-masing hingga 14 huruf atau angka, misalnya 01.02.0030"
+    },
+    "currency_element_present": {
+      "fail": "Pertukaran data tidak mencantumkan mata uang",
+      "suggestion": "Atur mata uang proyek agar file mencantumkannya"
+    },
+    "xml_schema_valid": {
+      "fail": "File bukan GAEB DA XML 3.3 yang valid ({reason})",
+      "suggestion": "Ekspor ulang file dari program pengirim sebagai GAEB DA XML 3.3"
+    },
+    "phase_structure_valid": {
+      "fail": "File {phase} tidak memiliki struktur yang sesuai dengan fasenya: {problems}",
+      "suggestion": "Periksa apakah file ini untuk fase yang benar dan sudah lengkap"
+    },
+    "bidder_info_present_x84": {
+      "fail": "File tidak mencantumkan nama penawar",
+      "suggestion": "Isi nama perusahaan pada data penawar di dalam file"
+    }
   }
 }

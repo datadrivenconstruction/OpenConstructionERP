@@ -210,8 +210,8 @@ async def test_x83_to_x84_to_x86_round_trip(client, staff):
 
     files = await client.get(f"/api/v1/tendering/packages/{pkg['package_id']}/bid-files/", headers=staff)
     assert files.status_code == 200
-    assert files.json()[0]["company_name"] == "Tiefbau Nord"
-    assert files.json()[0]["document_id"]
+    assert files.json()["items"][0]["company_name"] == "Tiefbau Nord"
+    assert files.json()["items"][0]["document_id"]
 
 
 async def test_the_x86_is_refused_once_a_quantity_changed(client, staff):

@@ -50,7 +50,7 @@ from app.modules.monitoring.schemas import (
     ValidationReportOut,
 )
 from app.modules.monitoring.service import MonitoringService
-from app.modules.survey_core.permissions import require_survey_confirm
+from app.modules.survey_core.dependencies import require_survey_confirm
 
 router = APIRouter(tags=["monitoring"])
 

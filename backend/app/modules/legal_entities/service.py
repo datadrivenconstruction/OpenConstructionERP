@@ -84,7 +84,7 @@ def _entity_logo(value: Any) -> str | None:
     logo = accepted_logo(value)
     if not logo or logo.startswith("data:image/svg"):
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail="The logo must be a PNG, JPEG or WebP image within the size limit",
         )
     return logo

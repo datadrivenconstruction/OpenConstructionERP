@@ -2732,5 +2732,51 @@
       "fail": "{vendor} is geblokkeerd in het onderaannemersregister en kan niet worden gegund.",
       "suggestion": "Hef de blokkade in het register op of gun aan een ander bedrijf."
     }
+  },
+  "gaeb_exchange": {
+    "item_description_not_empty": {
+      "fail": "Post {ordinal} heeft geen tekst",
+      "suggestion": "Geef de post een korte omschrijving; de ontvanger leest de hoeveelheidsstaat daarop"
+    },
+    "unit_specified_per_item": {
+      "fail": "Post {ordinal} heeft geen eenheid",
+      "suggestion": "Vul de eenheid van de post in (m, m2, m3, st, ...)"
+    },
+    "quantity_present_x83": {
+      "fail": "Post {ordinal} heeft geen hoeveelheid",
+      "suggestion": "Vul de hoeveelheid in die de inschrijvers moeten prijzen"
+    },
+    "unit_price_present_x84": {
+      "fail": "Post {ordinal} heeft geen eenheidsprijs",
+      "suggestion": "Prijs elke post voordat het bestand wordt verstuurd"
+    },
+    "total_price_calculated_correctly": {
+      "fail": "Post {ordinal}: totaal {total} is niet gelijk aan hoeveelheid x eenheidsprijs ({expected})",
+      "suggestion": "Bereken het totaal van de post opnieuw"
+    },
+    "lv_numbering_consistent": {
+      "fail": "Postnummer {ordinal} komt meer dan één keer voor",
+      "suggestion": "Geef elke post een eigen postnummer"
+    },
+    "oz_format_valid": {
+      "fail": "Postnummer '{ordinal}' past niet in een GAEB-postnummer",
+      "suggestion": "Gebruik maximaal vijf niveaus van elk tot 14 letters of cijfers, bijv. 01.02.0030"
+    },
+    "currency_element_present": {
+      "fail": "De uitwisseling vermeldt geen valuta",
+      "suggestion": "Stel de valuta van het project in, zodat het bestand deze vermeldt"
+    },
+    "xml_schema_valid": {
+      "fail": "Het bestand is geen geldig GAEB DA XML 3.3 ({reason})",
+      "suggestion": "Exporteer het bestand opnieuw uit het verzendende programma als GAEB DA XML 3.3"
+    },
+    "phase_structure_valid": {
+      "fail": "Het bestand {phase} heeft niet de structuur van zijn fase: {problems}",
+      "suggestion": "Controleer of het bestand van de juiste fase is en compleet is"
+    },
+    "bidder_info_present_x84": {
+      "fail": "Het bestand vermeldt geen inschrijver",
+      "suggestion": "Vul de bedrijfsnaam in bij de inschrijvergegevens in het bestand"
+    }
   }
 }

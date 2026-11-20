@@ -2732,5 +2732,51 @@
       "fail": "{vendor} er spærret i underentreprenørregistret og kan ikke tildeles.",
       "suggestion": "Ophæv spærringen i registret eller tildel et andet firma."
     }
+  },
+  "gaeb_exchange": {
+    "item_description_not_empty": {
+      "fail": "Post {ordinal} mangler tekst",
+      "suggestion": "Giv posten en kort tekst; modtageren læser opgørelsen ud fra den"
+    },
+    "unit_specified_per_item": {
+      "fail": "Post {ordinal} mangler enhed",
+      "suggestion": "Angiv posten enhed (m, m2, m3, stk., ...)"
+    },
+    "quantity_present_x83": {
+      "fail": "Post {ordinal} mangler mængde",
+      "suggestion": "Angiv den mængde, bydere skal prissætte"
+    },
+    "unit_price_present_x84": {
+      "fail": "Post {ordinal} mangler enhedspris",
+      "suggestion": "Prissæt alle poster, før filen sendes"
+    },
+    "total_price_calculated_correctly": {
+      "fail": "Post {ordinal}: totalen {total} er ikke mængde x enhedspris ({expected})",
+      "suggestion": "Genberegn postens total"
+    },
+    "lv_numbering_consistent": {
+      "fail": "Postnummer {ordinal} er brugt mere end én gang",
+      "suggestion": "Giv hver post sit eget postnummer"
+    },
+    "oz_format_valid": {
+      "fail": "Postnummeret '{ordinal}' passer ikke til et GAEB-postnummer",
+      "suggestion": "Brug højst fem niveauer med op til 14 bogstaver eller cifre, f.eks. 01.02.0030"
+    },
+    "currency_element_present": {
+      "fail": "Udvekslingen angiver ingen valuta",
+      "suggestion": "Angiv projektets valuta, så filen indeholder den"
+    },
+    "xml_schema_valid": {
+      "fail": "Filen er ikke gyldig GAEB DA XML 3.3 ({reason})",
+      "suggestion": "Eksportér filen igen fra afsendelsesprogrammet som GAEB DA XML 3.3"
+    },
+    "phase_structure_valid": {
+      "fail": "{phase}-filen har ikke strukturen for sin fase: {problems}",
+      "suggestion": "Kontrollér, at filen hører til den rigtige fase og er komplet"
+    },
+    "bidder_info_present_x84": {
+      "fail": "Filen angiver ingen bydere",
+      "suggestion": "Angiv firmanavnet i budgiverdata i filen"
+    }
   }
 }

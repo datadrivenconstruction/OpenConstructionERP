@@ -2732,5 +2732,51 @@
       "fail": "{vendor} は協力会社名簿で取引停止中のため、発注できません。",
       "suggestion": "名簿で停止を解除するか、別の会社に発注してください。"
     }
+  },
+  "gaeb_exchange": {
+    "item_description_not_empty": {
+      "fail": "明細 {ordinal} に文章がありません",
+      "suggestion": "明細に短い内容を入力してください。受領者はこれを基に内訳を確認します"
+    },
+    "unit_specified_per_item": {
+      "fail": "明細 {ordinal} に単位がありません",
+      "suggestion": "明細の単位（m, m2, m3, 個, ...）を設定してください"
+    },
+    "quantity_present_x83": {
+      "fail": "明細 {ordinal} に数量がありません",
+      "suggestion": "入札者に単価を入力してもらう数量を入力してください"
+    },
+    "unit_price_present_x84": {
+      "fail": "明細 {ordinal} に単価がありません",
+      "suggestion": "ファイルを送付する前に、すべての明細に単価を入力してください"
+    },
+    "total_price_calculated_correctly": {
+      "fail": "明細 {ordinal}: 合計 {total} が数量 × 単価（{expected}）と一致しません",
+      "suggestion": "明細の合計金額を再計算してください"
+    },
+    "lv_numbering_consistent": {
+      "fail": "明細番号 {ordinal} が複数回使われています",
+      "suggestion": "明細ごとに別々の明細番号を付けてください"
+    },
+    "oz_format_valid": {
+      "fail": "明細番号 '{ordinal}' はGAEBの明細番号の形式に合っていません",
+      "suggestion": "最大5階層まで、各階層は14文字以内の英数字を使用してください。例: 01.02.0030"
+    },
+    "currency_element_present": {
+      "fail": "データ交換に通貨が指定されていません",
+      "suggestion": "ファイルに記載されるよう、プロジェクトの通貨を設定してください"
+    },
+    "xml_schema_valid": {
+      "fail": "ファイルは有効な GAEB DA XML 3.3 ではありません（{reason}）",
+      "suggestion": "送信元のプログラムから GAEB DA XML 3.3 形式でファイルを再出力してください"
+    },
+    "phase_structure_valid": {
+      "fail": "{phase} のファイルは、そのフェーズの構造になっていません: {problems}",
+      "suggestion": "正しいフェーズのファイルで、内容が完全か確認してください"
+    },
+    "bidder_info_present_x84": {
+      "fail": "ファイルに入札者の名称がありません",
+      "suggestion": "ファイルの入札者情報に会社名を入力してください"
+    }
   }
 }

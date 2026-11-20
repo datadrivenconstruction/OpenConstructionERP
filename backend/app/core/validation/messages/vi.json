@@ -2732,5 +2732,51 @@
       "fail": "{vendor} bị chặn trong danh bạ nhà thầu phụ, không thể trao thầu.",
       "suggestion": "Gỡ chặn trong danh bạ hoặc trao cho công ty khác."
     }
+  },
+  "gaeb_exchange": {
+    "item_description_not_empty": {
+      "fail": "Hạng mục {ordinal} chưa có nội dung",
+      "suggestion": "Nhập tên ngắn cho hạng mục; bên nhận sẽ đối chiếu bảng khối lượng theo tên này"
+    },
+    "unit_specified_per_item": {
+      "fail": "Hạng mục {ordinal} chưa có đơn vị",
+      "suggestion": "Nhập đơn vị của hạng mục (m, m2, m3, cái, ...)"
+    },
+    "quantity_present_x83": {
+      "fail": "Hạng mục {ordinal} chưa có khối lượng",
+      "suggestion": "Nhập khối lượng mà nhà thầu cần báo giá"
+    },
+    "unit_price_present_x84": {
+      "fail": "Hạng mục {ordinal} chưa có đơn giá",
+      "suggestion": "Báo giá đầy đủ cho mọi hạng mục trước khi gửi file"
+    },
+    "total_price_calculated_correctly": {
+      "fail": "Hạng mục {ordinal}: thành tiền {total} không bằng khối lượng x đơn giá ({expected})",
+      "suggestion": "Tính lại thành tiền của hạng mục"
+    },
+    "lv_numbering_consistent": {
+      "fail": "Số thứ tự hạng mục {ordinal} được dùng nhiều hơn một lần",
+      "suggestion": "Gán cho mỗi hạng mục một số thứ tự riêng"
+    },
+    "oz_format_valid": {
+      "fail": "Số thứ tự '{ordinal}' không đúng định dạng mã hạng mục GAEB",
+      "suggestion": "Dùng tối đa năm cấp, mỗi cấp tối đa 14 ký tự chữ hoặc số, ví dụ 01.02.0030"
+    },
+    "currency_element_present": {
+      "fail": "File trao đổi không ghi đơn vị tiền tệ",
+      "suggestion": "Thiết lập tiền tệ của dự án để file có ghi nhận"
+    },
+    "xml_schema_valid": {
+      "fail": "File không phải GAEB DA XML 3.3 hợp lệ ({reason})",
+      "suggestion": "Xuất lại file từ phần mềm gửi dưới dạng GAEB DA XML 3.3"
+    },
+    "phase_structure_valid": {
+      "fail": "File {phase} không đúng cấu trúc của giai đoạn: {problems}",
+      "suggestion": "Kiểm tra file đúng giai đoạn và đã đầy đủ"
+    },
+    "bidder_info_present_x84": {
+      "fail": "File không ghi tên nhà thầu",
+      "suggestion": "Nhập tên công ty trong thông tin nhà thầu của file"
+    }
   }
 }

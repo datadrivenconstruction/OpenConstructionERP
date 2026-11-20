@@ -2732,5 +2732,51 @@
       "fail": "{vendor} taşeron rehberinde engelli ve ihale alamaz.",
       "suggestion": "Rehberdeki engeli kaldırın veya başka bir firmaya verin."
     }
+  },
+  "gaeb_exchange": {
+    "item_description_not_empty": {
+      "fail": "{ordinal} numaralı kalemin metni yok",
+      "suggestion": "Kaleme kısa bir metin girin; alıcı metraj cetvelini bu metinle okur"
+    },
+    "unit_specified_per_item": {
+      "fail": "{ordinal} numaralı kalemin birimi yok",
+      "suggestion": "Kalemin birimini girin (m, m2, m3, adet, ...)"
+    },
+    "quantity_present_x83": {
+      "fail": "{ordinal} numaralı kalemin miktarı yok",
+      "suggestion": "Teklif verenlerin fiyatlandırması istenen miktarı girin"
+    },
+    "unit_price_present_x84": {
+      "fail": "{ordinal} numaralı kalemin birim fiyatı yok",
+      "suggestion": "Dosya gönderilmeden önce her kalemi fiyatlandırın"
+    },
+    "total_price_calculated_correctly": {
+      "fail": "{ordinal} numaralı kalem: toplam {total}, miktar x birim fiyat ({expected}) değerine eşit değil",
+      "suggestion": "Kalemin toplam tutarını yeniden hesaplayın"
+    },
+    "lv_numbering_consistent": {
+      "fail": "{ordinal} kalem numarası birden fazla kullanılmış",
+      "suggestion": "Her kaleme kendine özgü bir kalem numarası verin"
+    },
+    "oz_format_valid": {
+      "fail": "'{ordinal}' kalem numarası bir GAEB kalem numarası biçimine uymuyor",
+      "suggestion": "En fazla beş düzey kullanın; her düzey en fazla 14 harf veya rakam içersin, ör. 01.02.0030"
+    },
+    "currency_element_present": {
+      "fail": "Veri alışverişinde para birimi belirtilmemiş",
+      "suggestion": "Dosyada yer alması için proje para birimini ayarlayın"
+    },
+    "xml_schema_valid": {
+      "fail": "Dosya geçerli bir GAEB DA XML 3.3 değil ({reason})",
+      "suggestion": "Dosyayı gönderen programdan GAEB DA XML 3.3 olarak yeniden dışa aktarın"
+    },
+    "phase_structure_valid": {
+      "fail": "{phase} dosyasının yapısı, ait olduğu aşamanın yapısıyla uyuşmuyor: {problems}",
+      "suggestion": "Dosyanın doğru aşamaya ait ve eksiksiz olduğunu kontrol edin"
+    },
+    "bidder_info_present_x84": {
+      "fail": "Dosyada teklif veren belirtilmemiş",
+      "suggestion": "Dosyadaki teklif veren bilgilerine firma adını girin"
+    }
   }
 }

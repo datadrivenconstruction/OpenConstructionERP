@@ -296,6 +296,8 @@ def _seed_package_with_boq(
         project_id=PROJECT_A,
         boq_id=boq_id,
         name="Concrete works",
+        trade=None,
+        cost_line_id=None,
         description="",
         status="collecting",
         deadline=None,

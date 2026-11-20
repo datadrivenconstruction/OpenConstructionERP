@@ -48,7 +48,8 @@ from app.dependencies import (
     verify_project_access,
 )
 from app.modules.survey_core.crs import search
-from app.modules.survey_core.permissions import can_confirm, require_survey_confirm
+from app.modules.survey_core.dependencies import require_survey_confirm
+from app.modules.survey_core.permissions import can_confirm
 from app.modules.survey_core.point_export import MEDIA_TYPES, export_filename
 from app.modules.survey_core.schemas import (
     CrsInfoListResponse,

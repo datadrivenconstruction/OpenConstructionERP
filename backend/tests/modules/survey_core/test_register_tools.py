@@ -20,22 +20,22 @@ POINTS = [
 
 
 def test_csv_pnezd_writes_north_before_east_and_keeps_an_empty_height() -> None:
-    text = to_csv(POINTS, "PNEZD")
+    text = to_csv(POINTS, "PNEZD", header=False)
     assert text.splitlines() == [
-        "CP1,5818990.0000,388990.0000,33.9000,CP,Control NW",
-        "101,5819002.5000,389001.2500,,TOE,",
+        "CP1,5818990.0000,388990.0000,33.9000,CP",
+        "101,5819002.5000,389001.2500,,TOE",
     ]
 
 
 def test_csv_penzd_with_header_and_semicolon() -> None:
     lines = to_csv(POINTS, "PENZD", ";", header=True).splitlines()
-    assert lines[0] == "point_id;e;n;z;code;description"
+    assert lines[0] == "P;E;N;Z;D"
     assert lines[1].startswith("CP1;388990.0000;5818990.0000;33.9000")
 
 
-def test_csv_refuses_a_preset_without_point_ids() -> None:
+def test_csv_refuses_an_unknown_preset() -> None:
     with pytest.raises(ValueError, match="preset"):
-        to_csv(POINTS, "ENZ")
+        to_csv(POINTS, "XYZQ")
 
 
 def test_landxml_round_trips_through_the_surface_reader() -> None:

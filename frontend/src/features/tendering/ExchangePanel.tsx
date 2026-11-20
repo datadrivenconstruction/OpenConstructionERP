@@ -12,7 +12,7 @@ import { useTranslation } from 'react-i18next';
 import { AlertTriangle, CheckCircle2, Download, FileText, Paperclip, X } from 'lucide-react';
 
 import { Button } from '@/shared/ui';
-import { formatDateValue } from '@/shared/lib/formatters';
+import { fmtList, formatDateValue } from '@/shared/lib/formatters';
 import { useToastStore } from '@/stores/useToastStore';
 
 import {
@@ -104,7 +104,7 @@ export function ExchangePanel({ pkg }: { pkg: ExchangePackage }) {
       case 'no_awarded_bid':
         return t('tendering.exchange.refused_no_award', { defaultValue: 'Award a bid first; the award file carries its prices.' });
       case 'x86_unpriced_lines':
-        return t('tendering.exchange.refused_unpriced', { defaultValue: 'The awarded bid leaves lines unpriced: {{items}}', items: (refusal?.ordinals ?? []).slice(0, 15).join(', ') });
+        return t('tendering.exchange.refused_unpriced', { defaultValue: 'The awarded bid leaves lines unpriced: {{items}}', items: fmtList((refusal?.ordinals ?? []).slice(0, 15)) });
       default:
         return t('tendering.export_failed', { defaultValue: 'Export failed' });
     }

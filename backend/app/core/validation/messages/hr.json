@@ -2732,5 +2732,51 @@
       "fail": "{vendor} je blokiran u registru podizvođača i ne može dobiti ugovor.",
       "suggestion": "Uklonite blokadu u registru ili dodijelite drugoj tvrtki."
     }
+  },
+  "gaeb_exchange": {
+    "item_description_not_empty": {
+      "fail": "Stavka {ordinal} nema tekst",
+      "suggestion": "Upišite kratak tekst stavke; primatelj po njemu čita troškovnik"
+    },
+    "unit_specified_per_item": {
+      "fail": "Stavka {ordinal} nema jedinicu mjere",
+      "suggestion": "Upišite jedinicu mjere stavke (m, m2, m3, kom, ...)"
+    },
+    "quantity_present_x83": {
+      "fail": "Stavka {ordinal} nema količinu",
+      "suggestion": "Upišite količinu koju ponuditelji trebaju ocijeniti"
+    },
+    "unit_price_present_x84": {
+      "fail": "Stavka {ordinal} nema jediničnu cijenu",
+      "suggestion": "Ocijenite svaku stavku prije slanja datoteke"
+    },
+    "total_price_calculated_correctly": {
+      "fail": "Stavka {ordinal}: ukupno {total} nije količina x jedinična cijena ({expected})",
+      "suggestion": "Ponovno izračunajte ukupni iznos stavke"
+    },
+    "lv_numbering_consistent": {
+      "fail": "Broj stavke {ordinal} koristi se više puta",
+      "suggestion": "Dajte svakoj stavki vlastiti broj"
+    },
+    "oz_format_valid": {
+      "fail": "Broj stavke '{ordinal}' ne odgovara GAEB formatu broja stavke",
+      "suggestion": "Koristite najviše pet razina, do 14 slova ili znamenki po razini, npr. 01.02.0030"
+    },
+    "currency_element_present": {
+      "fail": "Razmjena ne navodi valutu",
+      "suggestion": "Postavite valutu projekta da je datoteka navede"
+    },
+    "xml_schema_valid": {
+      "fail": "Datoteka nije valjani GAEB DA XML 3.3 ({reason})",
+      "suggestion": "Ponovno izvezite datoteku iz programa pošiljatelja kao GAEB DA XML 3.3"
+    },
+    "phase_structure_valid": {
+      "fail": "Datoteka {phase} nema strukturu svoje faze: {problems}",
+      "suggestion": "Provjerite je li datoteka prave faze i je li potpuna"
+    },
+    "bidder_info_present_x84": {
+      "fail": "Datoteka ne navodi ponuditelja",
+      "suggestion": "Upišite naziv tvrtke u podatke o ponuditelju u datoteci"
+    }
   }
 }

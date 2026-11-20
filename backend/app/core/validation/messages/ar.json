@@ -2732,5 +2732,51 @@
       "fail": "{vendor} محظور في دليل المقاولين من الباطن ولا يمكن الترسية عليه.",
       "suggestion": "ارفع الحظر في الدليل أو رسِّ على شركة أخرى."
     }
+  },
+  "gaeb_exchange": {
+    "item_description_not_empty": {
+      "fail": "البند {ordinal} لا يحتوي على نص",
+      "suggestion": "أدخل وصفًا موجزًا للبند؛ فالجهة المستلمة تقرأ جدول الكميات بحسبه"
+    },
+    "unit_specified_per_item": {
+      "fail": "البند {ordinal} لا يحتوي على وحدة قياس",
+      "suggestion": "حدد وحدة القياس للبند (م، م2، م3، قطعة، ...)"
+    },
+    "quantity_present_x83": {
+      "fail": "البند {ordinal} لا يحتوي على كمية",
+      "suggestion": "أدخل الكمية التي يُطلب من المقدّمين تسعيرها"
+    },
+    "unit_price_present_x84": {
+      "fail": "البند {ordinal} لا يحتوي على سعر وحدة",
+      "suggestion": "سعّر كل بند قبل إرسال الملف"
+    },
+    "total_price_calculated_correctly": {
+      "fail": "البند {ordinal}: الإجمالي {total} لا يساوي الكمية × سعر الوحدة ({expected})",
+      "suggestion": "أعد حساب إجمالي البند"
+    },
+    "lv_numbering_consistent": {
+      "fail": "رقم البند {ordinal} مستخدم أكثر من مرة",
+      "suggestion": "أعطِ كل بند رقمًا خاصًا به"
+    },
+    "oz_format_valid": {
+      "fail": "رقم البند '{ordinal}' لا يتوافق مع صيغة رقم بند GAEB",
+      "suggestion": "استخدم خمسة مستويات على الأكثر، لكل منها حتى 14 حرفًا أو رقمًا، مثل 01.02.0030"
+    },
+    "currency_element_present": {
+      "fail": "لم يُذكر في التبادل أي عملة",
+      "suggestion": "حدد عملة المشروع حتى يُدرجها الملف"
+    },
+    "xml_schema_valid": {
+      "fail": "الملف ليس ملف GAEB DA XML 3.3 صالحًا ({reason})",
+      "suggestion": "أعد تصدير الملف من البرنامج المُرسِل بصيغة GAEB DA XML 3.3"
+    },
+    "phase_structure_valid": {
+      "fail": "ملف {phase} لا يتطابق ببنيته مع مرحلته: {problems}",
+      "suggestion": "تحقق من أن الملف للمرحلة الصحيحة وأنه مكتمل"
+    },
+    "bidder_info_present_x84": {
+      "fail": "الملف لا يذكر اسم المقدّم للعرض",
+      "suggestion": "أدخل اسم الشركة في بيانات المقدّم للعرض في الملف"
+    }
   }
 }

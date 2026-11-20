@@ -97,7 +97,15 @@ class DocumentReference:
 
 #: Every unconstrained document reference in the platform, by owning module.
 DOCUMENT_REFERENCES: tuple[DocumentReference, ...] = (
+    DocumentReference("boq", "BOQExchangeSource", "oe_boq_exchange_source", "document_id", "scalar", "unlinks"),
     DocumentReference("cde", "DocumentRevision", "oe_cde_revision", "document_id", "scalar", "unlinks"),
+    DocumentReference(
+        "central_purchasing", "AwardSplit", "oe_central_purchasing_split", "document_id", "scalar", "unlinks"
+    ),
+    DocumentReference("tendering", "TenderBidFile", "oe_tendering_bid_file", "document_id", "scalar", "unlinks"),
+    DocumentReference(
+        "tendering", "TenderPackageDocument", "oe_tendering_package_document", "document_id", "scalar", "strands"
+    ),
     DocumentReference("closeout", "CloseoutBinding", "oe_closeout_binding", "document_id", "scalar", "unlinks"),
     DocumentReference("closeout", "CloseoutDossier", "oe_closeout_dossier", "document_id", "scalar", "unlinks"),
     DocumentReference(

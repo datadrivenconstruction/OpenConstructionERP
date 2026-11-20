@@ -41,7 +41,7 @@ import {
   type Guess,
   type PresetName,
 } from './importMapping';
-import { fmtFixed } from '@/shared/lib/formatters';
+import { fmtFixed, fmtList } from '@/shared/lib/formatters';
 
 const LABEL = 'oe-label';
 const INPUT = 'oe-input w-full';
@@ -401,7 +401,7 @@ export function SurveyImportDialog({ open, projectId, projectEpsg, onClose }: Pr
             <p className="text-sm text-semantic-warning">
               {t('survey.import.geoid_missing', {
                 defaultValue: 'Geoid grid {{grids}} is not installed: heights are kept as measured.',
-                grids: preview.missing_grids.join(', '),
+                grids: fmtList(preview.missing_grids ?? []),
               })}
             </p>
           )}

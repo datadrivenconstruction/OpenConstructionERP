@@ -2732,5 +2732,51 @@
       "fail": "{vendor} jest zablokowany w rejestrze podwykonawców i nie może otrzymać zamówienia.",
       "suggestion": "Zdejmij blokadę w rejestrze lub udziel zamówienia innej firmie."
     }
+  },
+  "gaeb_exchange": {
+    "item_description_not_empty": {
+      "fail": "Pozycja {ordinal} nie ma opisu",
+      "suggestion": "Nadaj pozycji krótki opis; odbiorca czyta według niego kosztorys"
+    },
+    "unit_specified_per_item": {
+      "fail": "Pozycja {ordinal} nie ma jednostki miary",
+      "suggestion": "Podaj jednostkę miary pozycji (m, m2, m3, szt., ...)"
+    },
+    "quantity_present_x83": {
+      "fail": "Pozycja {ordinal} nie ma ilości",
+      "suggestion": "Wpisz ilość, którą wykonawcy mają wycenić"
+    },
+    "unit_price_present_x84": {
+      "fail": "Pozycja {ordinal} nie ma ceny jednostkowej",
+      "suggestion": "Wyceń wszystkie pozycje przed wysłaniem pliku"
+    },
+    "total_price_calculated_correctly": {
+      "fail": "Pozycja {ordinal}: wartość {total} nie jest równa ilości x cenie jednostkowej ({expected})",
+      "suggestion": "Przelicz wartość pozycji"
+    },
+    "lv_numbering_consistent": {
+      "fail": "Numer pozycji {ordinal} występuje więcej niż raz",
+      "suggestion": "Nadaj każdej pozycji własny numer"
+    },
+    "oz_format_valid": {
+      "fail": "Numer pozycji '{ordinal}' nie odpowiada formatowi GAEB",
+      "suggestion": "Użyj najwyżej pięciu poziomów, każdy do 14 liter lub cyfr, np. 01.02.0030"
+    },
+    "currency_element_present": {
+      "fail": "Wymiana nie podaje waluty",
+      "suggestion": "Ustaw walutę projektu, aby plik ją zawierał"
+    },
+    "xml_schema_valid": {
+      "fail": "Plik nie jest poprawnym GAEB DA XML 3.3 ({reason})",
+      "suggestion": "Ponownie wyeksportuj plik z programu nadawcy jako GAEB DA XML 3.3"
+    },
+    "phase_structure_valid": {
+      "fail": "Plik {phase} nie ma struktury właściwej dla swojej fazy: {problems}",
+      "suggestion": "Sprawdź, czy plik dotyczy właściwej fazy i jest kompletny"
+    },
+    "bidder_info_present_x84": {
+      "fail": "Plik nie podaje wykonawcy",
+      "suggestion": "Wpisz nazwę firmy w danych wykonawcy w pliku"
+    }
   }
 }

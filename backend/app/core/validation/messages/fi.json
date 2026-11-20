@@ -2732,5 +2732,51 @@
       "fail": "{vendor} on estetty aliurakoitsijarekisterissä, eikä sille voi tehdä hankintaa.",
       "suggestion": "Poista esto rekisterissä tai valitse toinen yritys."
     }
+  },
+  "gaeb_exchange": {
+    "item_description_not_empty": {
+      "fail": "Kohdalta {ordinal} puuttuu teksti",
+      "suggestion": "Anna kohdalle lyhyt teksti; vastaanottaja lukee laskelman sen perusteella"
+    },
+    "unit_specified_per_item": {
+      "fail": "Kohdalta {ordinal} puuttuu yksikkö",
+      "suggestion": "Merkitse kohdan yksikkö (m, m2, m3, kpl, ...)"
+    },
+    "quantity_present_x83": {
+      "fail": "Kohdalta {ordinal} puuttuu määrä",
+      "suggestion": "Syötä määrä, jonka hinnoittelua tarjoajilta pyydetään"
+    },
+    "unit_price_present_x84": {
+      "fail": "Kohdalta {ordinal} puuttuu yksikköhinta",
+      "suggestion": "Hinnoittele jokainen kohta ennen tiedoston lähettämistä"
+    },
+    "total_price_calculated_correctly": {
+      "fail": "Kohta {ordinal}: summa {total} ei ole määrä × yksikköhinta ({expected})",
+      "suggestion": "Laske kohdan summa uudelleen"
+    },
+    "lv_numbering_consistent": {
+      "fail": "Kohdan numero {ordinal} on käytetty useammin kuin kerran",
+      "suggestion": "Anna jokaiselle kohdalle oma kohdenumero"
+    },
+    "oz_format_valid": {
+      "fail": "Kohdenumero '{ordinal}' ei vastaa GAEB-kohdenumeron muotoa",
+      "suggestion": "Käytä enintään viittä tasoa, joissa kussakin on enintään 14 kirjainta tai numeroa, esim. 01.02.0030"
+    },
+    "currency_element_present": {
+      "fail": "Vaihdossa ei ole ilmoitettu valuuttaa",
+      "suggestion": "Aseta hankkeen valuutta, jotta tiedosto ilmoittaa sen"
+    },
+    "xml_schema_valid": {
+      "fail": "Tiedosto ei ole kelvollinen GAEB DA XML 3.3 -tiedosto ({reason})",
+      "suggestion": "Vie tiedosto lähettävästä ohjelmasta uudelleen GAEB DA XML 3.3 -muodossa"
+    },
+    "phase_structure_valid": {
+      "fail": "Tiedoston {phase} rakenne ei vastaa sen vaihetta: {problems}",
+      "suggestion": "Tarkista, että tiedosto on oikeasta vaiheesta ja täydellinen"
+    },
+    "bidder_info_present_x84": {
+      "fail": "Tiedostossa ei ole nimetty tarjoajaa",
+      "suggestion": "Syötä yrityksen nimi tiedoston tarjoajatietoihin"
+    }
   }
 }

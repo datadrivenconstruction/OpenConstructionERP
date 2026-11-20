@@ -2732,5 +2732,51 @@
       "fail": "{vendor} er sperret i underentreprenørregisteret og kan ikke tildeles.",
       "suggestion": "Opphev sperren i registeret eller tildel et annet firma."
     }
+  },
+  "gaeb_exchange": {
+    "item_description_not_empty": {
+      "fail": "Post {ordinal} har ingen tekst",
+      "suggestion": "Gi posten en kort tekst; mottakeren leser mengdeoversikten etter den"
+    },
+    "unit_specified_per_item": {
+      "fail": "Post {ordinal} har ingen enhet",
+      "suggestion": "Angi enheten (m, m2, m3, stk, ...) for posten"
+    },
+    "quantity_present_x83": {
+      "fail": "Post {ordinal} har ingen mengde",
+      "suggestion": "Oppgi mengden som tilbyderne skal prise"
+    },
+    "unit_price_present_x84": {
+      "fail": "Post {ordinal} har ingen enhetspris",
+      "suggestion": "Sett pris på alle poster før filen sendes ut"
+    },
+    "total_price_calculated_correctly": {
+      "fail": "Post {ordinal}: totalbeløpet {total} er ikke mengde x enhetspris ({expected})",
+      "suggestion": "Beregn postens totalbeløp på nytt"
+    },
+    "lv_numbering_consistent": {
+      "fail": "Postnummer {ordinal} er brukt mer enn én gang",
+      "suggestion": "Gi hver post sitt eget postnummer"
+    },
+    "oz_format_valid": {
+      "fail": "Postnummeret '{ordinal}' passer ikke som GAEB-OZ",
+      "suggestion": "Bruk høyst fem nivåer med inntil 14 bokstaver eller siffer hver, f.eks. 01.02.0030"
+    },
+    "currency_element_present": {
+      "fail": "Utvekslingen oppgir ingen valuta",
+      "suggestion": "Angi prosjektvalutaen slik at filen inneholder den"
+    },
+    "xml_schema_valid": {
+      "fail": "Filen er ikke gyldig GAEB DA XML 3.3 ({reason})",
+      "suggestion": "Eksporter filen på nytt fra avsenderprogrammet som GAEB DA XML 3.3"
+    },
+    "phase_structure_valid": {
+      "fail": "{phase}-filen har ikke oppbygningen for sin fase: {problems}",
+      "suggestion": "Kontroller at filen tilhører riktig fase og er komplett"
+    },
+    "bidder_info_present_x84": {
+      "fail": "Filen oppgir ingen anbyder",
+      "suggestion": "Oppgi firmanavnet i anbyderdataene i filen"
+    }
   }
 }

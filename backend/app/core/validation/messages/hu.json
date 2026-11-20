@@ -2732,5 +2732,51 @@
       "fail": "A(z) {vendor} tiltott az alvállalkozói nyilvántartásban, nem kaphat megbízást.",
       "suggestion": "Oldja fel a tiltást a nyilvántartásban, vagy válasszon másik céget."
     }
+  },
+  "gaeb_exchange": {
+    "item_description_not_empty": {
+      "fail": "Az {ordinal} tételnek nincs szövege",
+      "suggestion": "Adjon a tételnek rövid szöveget; a címzett ez alapján olvassa a költségvetést"
+    },
+    "unit_specified_per_item": {
+      "fail": "Az {ordinal} tételnek nincs mértékegysége",
+      "suggestion": "Állítsa be a tétel mértékegységét (m, m2, m3, db, ...)"
+    },
+    "quantity_present_x83": {
+      "fail": "Az {ordinal} tételnek nincs mennyisége",
+      "suggestion": "Adja meg azt a mennyiséget, amelyet az ajánlattevőknek árazniuk kell"
+    },
+    "unit_price_present_x84": {
+      "fail": "Az {ordinal} tételnek nincs egységára",
+      "suggestion": "Árazza be az összes tételt, mielőtt a fájl kimegy"
+    },
+    "total_price_calculated_correctly": {
+      "fail": "{ordinal}. tétel: a {total} összeg nem egyezik a mennyiség és az egységár szorzatával ({expected})",
+      "suggestion": "Számítsa újra a tétel összegét"
+    },
+    "lv_numbering_consistent": {
+      "fail": "Az {ordinal} tételszám többször szerepel",
+      "suggestion": "Adjon minden tételnek saját tételszámot"
+    },
+    "oz_format_valid": {
+      "fail": "A '{ordinal}' tételszám nem felel meg a GAEB tételszám formátumának",
+      "suggestion": "Legfeljebb öt szintet használjon, szintenként legfeljebb 14 betűvel vagy számjeggyel, pl. 01.02.0030"
+    },
+    "currency_element_present": {
+      "fail": "A csere nem ad meg pénznemet",
+      "suggestion": "Állítsa be a projekt pénznemét, hogy a fájl feltüntesse"
+    },
+    "xml_schema_valid": {
+      "fail": "A fájl nem érvényes GAEB DA XML 3.3 ({reason})",
+      "suggestion": "Exportálja újra a fájlt a küldő programból GAEB DA XML 3.3 formátumban"
+    },
+    "phase_structure_valid": {
+      "fail": "A {phase} fájl szerkezete nem felel meg a fázisának: {problems}",
+      "suggestion": "Ellenőrizze, hogy a fájl a megfelelő fázisú-e és teljes-e"
+    },
+    "bidder_info_present_x84": {
+      "fail": "A fájl nem nevezi meg az ajánlattevőt",
+      "suggestion": "Adja meg a cég nevét a fájl ajánlattevői adataiban"
+    }
   }
 }

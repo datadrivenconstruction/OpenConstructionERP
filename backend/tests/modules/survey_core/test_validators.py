@@ -108,6 +108,20 @@ _SURVEY_KEYS = (
     "traverse_misclosure",
     "level_misclosure",
     "control_check",
+    "angular_misclosure",
+    "cogo_parallel",
+    "cogo_two_solutions",
+    "export_crs",
+    "foot_definition",
+    "geoid_missing",
+    "ground_grid",
+    "gsi_unit",
+    "legacy_grid",
+    "level_arithmetic",
+    "local_grid_points",
+    "local_grid_residual",
+    "local_grid_scale",
+    "raw_skipped",
 )
 
 

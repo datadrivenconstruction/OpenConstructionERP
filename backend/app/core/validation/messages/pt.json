@@ -2732,5 +2732,51 @@
       "fail": "{vendor} está bloqueado no diretório de subempreiteiros e não pode ser adjudicado.",
       "suggestion": "Retire o bloqueio no diretório ou adjudique a outra empresa."
     }
+  },
+  "gaeb_exchange": {
+    "item_description_not_empty": {
+      "fail": "O item {ordinal} não tem texto",
+      "suggestion": "Dê ao item um texto curto; o destinatário lê o orçamento por ele"
+    },
+    "unit_specified_per_item": {
+      "fail": "O item {ordinal} não tem unidade",
+      "suggestion": "Indique a unidade do item (m, m2, m3, un, ...)"
+    },
+    "quantity_present_x83": {
+      "fail": "O item {ordinal} não tem quantidade",
+      "suggestion": "Indique a quantidade que os concorrentes devem precificar"
+    },
+    "unit_price_present_x84": {
+      "fail": "O item {ordinal} não tem preço unitário",
+      "suggestion": "Precifique todos os itens antes de enviar o arquivo"
+    },
+    "total_price_calculated_correctly": {
+      "fail": "Item {ordinal}: total {total} não é igual a quantidade x preço unitário ({expected})",
+      "suggestion": "Recalcule o total do item"
+    },
+    "lv_numbering_consistent": {
+      "fail": "O número de item {ordinal} é usado mais de uma vez",
+      "suggestion": "Atribua a cada item um número próprio"
+    },
+    "oz_format_valid": {
+      "fail": "O número de item '{ordinal}' não corresponde a um número de item GAEB",
+      "suggestion": "Use no máximo cinco níveis, com até 14 letras ou algarismos cada, p. ex. 01.02.0030"
+    },
+    "currency_element_present": {
+      "fail": "A troca não indica moeda",
+      "suggestion": "Defina a moeda do projeto para que o arquivo a informe"
+    },
+    "xml_schema_valid": {
+      "fail": "O arquivo não é um GAEB DA XML 3.3 válido ({reason})",
+      "suggestion": "Exporte o arquivo novamente pelo programa de envio como GAEB DA XML 3.3"
+    },
+    "phase_structure_valid": {
+      "fail": "O arquivo {phase} não tem a estrutura da sua fase: {problems}",
+      "suggestion": "Verifique se o arquivo corresponde à fase correta e está completo"
+    },
+    "bidder_info_present_x84": {
+      "fail": "O arquivo não indica o proponente",
+      "suggestion": "Indique o nome da empresa nos dados do proponente no arquivo"
+    }
   }
 }
