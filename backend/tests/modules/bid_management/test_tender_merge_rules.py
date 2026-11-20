@@ -187,9 +187,7 @@ def test_every_old_route_but_the_portal_moves_under_the_tenders_api() -> None:
     app.include_router(rfq_router, prefix="/api/v1/rfq-bidding")
     routes = [r for r in app.routes if hasattr(r, "methods")]
     old = [r for r in routes if r.path.startswith(("/api/v1/tendering/", "/api/v1/rfq-bidding/"))]
-    moved = {
-        (legacy_adapter.successor_path(r.path), frozenset(r.methods)) for r in old if "/bid-portal/" not in r.path
-    }
+    moved = {(legacy_adapter.successor_path(r.path), frozenset(r.methods)) for r in old if "/bid-portal/" not in r.path}
     canonical = {
         (r.path, frozenset(r.methods))
         for r in routes
