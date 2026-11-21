@@ -73,6 +73,8 @@ describe('TendersPage', () => {
     expect(rfq?.getAttribute('href')).toMatch(/^\/tenders\/[0-9a-f-]+$/);
     expect(screen.getByText('Nord')).toBeInTheDocument();
     expect(mockGet.mock.calls[0]![0]).toContain(`project_id=${PROJECT_ID}`);
+    // On a phone the table scrolls inside its own wrapper, never the page.
+    expect(screen.getByTestId('tenders-table').parentElement).toHaveClass('overflow-x-auto');
   });
 
   it('asks the server for one kind when a kind tab is chosen', async () => {

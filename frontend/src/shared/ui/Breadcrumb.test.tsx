@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import { Breadcrumb } from './Breadcrumb';
@@ -12,6 +12,15 @@ function renderBreadcrumb(items: { label: string; to?: string }[]) {
 }
 
 describe('Breadcrumb', () => {
+  it('renders two crumbs with the same label without a duplicate-key warning', () => {
+    // A card still loading names itself after its list, so the trail reads "Tenders > Tenders".
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    renderBreadcrumb([{ label: 'Tenders', to: '/tenders' }, { label: 'Tenders' }]);
+    expect(screen.getAllByText('Tenders')).toHaveLength(2);
+    expect(error.mock.calls.some((c) => String(c[0]).includes('same key'))).toBe(false);
+    error.mockRestore();
+  });
+
   it('should render nothing when items array is empty', () => {
     const { container } = renderBreadcrumb([]);
     expect(container.querySelector('nav')).toBeNull();

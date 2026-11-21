@@ -9,6 +9,7 @@ import { Badge, Breadcrumb, Button, Card, EmptyState, ErrorState, KpiBand, Skele
 import { PageHeader } from '@/shared/ui/PageHeader';
 import { MoneyDisplay } from '@/shared/ui/MoneyDisplay';
 import { DateDisplay } from '@/shared/ui/DateDisplay';
+import { fmtQuantity } from '@/shared/lib/formatters';
 import { fetchTender, tenderEditPath, type TenderDetail } from './api';
 
 type Tab = 'scope' | 'bidders' | 'qa' | 'bids' | 'levelling' | 'award';
@@ -34,7 +35,7 @@ export function TenderCardPage() {
   }, [tender]);
 
   return (
-    <div className="space-y-5 animate-fade-in">
+    <div className="min-w-0 space-y-5 animate-fade-in">
       <Breadcrumb
         items={[{ label: t('tenders.title', { defaultValue: 'Tenders' }), to: '/tenders' }, { label: title }]}
       />
@@ -106,7 +107,9 @@ export function TenderCardPage() {
             ]}
           />
           <Card>
-            <TabBody tab={tab} tender={tender} bidderName={bidderName} />
+            <div className="overflow-x-auto">
+              <TabBody tab={tab} tender={tender} bidderName={bidderName} />
+            </div>
           </Card>
         </>
       )}
@@ -145,7 +148,7 @@ function TabBody({
               <td>{l.code}</td>
               <td className="text-content-primary">{l.description}</td>
               <td>{l.unit}</td>
-              <td className="num tabular-nums">{l.quantity}</td>
+              <td className="num tabular-nums">{fmtQuantity(l.quantity)}</td>
             </tr>
           ))}
         </tbody>
