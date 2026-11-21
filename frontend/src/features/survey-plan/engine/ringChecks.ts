@@ -9,6 +9,7 @@
 
 import type { GridXY, GridXYZ, PlanFeature } from '../types';
 import type { LiveCheck, LiveFinding } from './liveChecks';
+import { fmtFixed } from '@/shared/lib/formatters';
 
 const EPS = 1e-6;
 /** Overlaps smaller than this are rounding, not a claim on the same ground (server MIN_OVERLAP_M2). */
@@ -207,7 +208,7 @@ const centre = (ring: readonly GridXYZ[]): GridXY => {
   return [(x0 + x1) / 2, (y0 + y1) / 2];
 };
 const refOf = (f: PlanFeature) => String(f.properties.ref ?? f.properties.label ?? f.id);
-const fmt2 = (v: number) => v.toFixed(2);
+const fmt2 = (v: number) => fmtFixed(v, 2);
 
 /** PAR-001, 002, 004, 005, 006 over the features of the `parcels` layer. */
 export function parcelFindings(features: readonly PlanFeature[], s: ParcelCheckSettings): LiveFinding[] {
@@ -261,7 +262,7 @@ export function parcelFindings(features: readonly PlanFeature[], s: ParcelCheckS
         if (gap > 0 && gap <= s.gapToleranceM) {
           out.push({ ruleId: 'PAR-005', severity: 'warning', featureId: a.id, at: centre(ra),
             messageKey: 'plan.parcel.check.gap', defaultMessage: 'Parcels {{a}} and {{b}} leave a {{gap}} m gap',
-            params: { a: refOf(a), b: refOf(b), gap: gap.toFixed(3) } });
+            params: { a: refOf(a), b: refOf(b), gap: fmtFixed(gap, 3) } });
         }
       }
     }

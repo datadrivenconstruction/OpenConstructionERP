@@ -10,6 +10,7 @@
  */
 
 import type { AngleUnit, PlanConventions } from './conventions';
+import { fmtFixed } from '@/shared/lib/formatters';
 
 const GON = 0.9;
 
@@ -65,8 +66,8 @@ export function parseAngle(text: string, unit: AngleUnit): number | null {
 /** Text of `deg` in `unit`: DMS 12°34'56.0", deg 12.345678°, gon 13.71734 gon. */
 export function formatAngle(deg: number | null | undefined, unit: AngleUnit, decimals: 0 | 1 | 2 = 1): string {
   if (deg == null || !Number.isFinite(deg)) return '';
-  if (unit === 'gon') return `${(deg / GON).toFixed(4 + decimals)} gon`;
-  if (unit === 'deg') return `${deg.toFixed(5 + decimals)}°`;
+  if (unit === 'gon') return `${fmtFixed(deg / GON, 4 + decimals)} gon`;
+  if (unit === 'deg') return `${fmtFixed(deg, 5 + decimals)}°`;
   const sign = deg < 0 ? '-' : '';
   const scale = 10 ** decimals;
   let units = Math.round(Math.abs(deg) * 3600 * scale);

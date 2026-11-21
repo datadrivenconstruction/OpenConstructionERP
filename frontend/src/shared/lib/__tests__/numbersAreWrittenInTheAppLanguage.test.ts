@@ -482,6 +482,41 @@ const FIXED_ALLOWED: ReadonlyArray<{ file: string; snippet: string; why: string 
     snippet: 'const pct = (x: number) => `${(((x - lo) / span) * 100).toFixed(2)}%`;',
     why: 'A CSS percentage for the left and width of the band bar; the CSS grammar takes a dot and rejects a grouped number.',
   },
+  {
+    file: "features/survey-calc/CalcPage.tsx",
+    snippet: "s.distance_m != null ? ` ${s.distance_m.toFixed(3)}` : ''",
+    why: "Fills the station book textarea with a demo; the traverse parser reads the text straight back, so it keeps the canonical dot.",
+  },
+  {
+    file: "features/survey-calc/CalcPage.tsx",
+    snippet: "const cell = (v: number | null | undefined) => (v == null ? '-' : v.toFixed(3));",
+    why: "Cells of the level book textarea the run parser reads back; a grouped or comma number would split one reading into two.",
+  },
+  {
+    file: "features/survey-calc/CalcPage.tsx",
+    snippet: "setStartRl(d.start_rl.toFixed(3));",
+    why: "Value of the start level input, parsed back into a number when the run is computed.",
+  },
+  {
+    file: "features/survey-calc/CalcPage.tsx",
+    snippet: "setCloseRl(d.close_rl == null ? '' : d.close_rl.toFixed(3));",
+    why: "Value of the closing level input, parsed back into a number when the run is computed.",
+  },
+  {
+    file: "features/survey-plan/sections/LongSection.tsx",
+    snippet: "const d = run.map((p, j) => `${j ? 'L' : 'M'}${f.sx(p.ch).toFixed(1)},${f.sz(p.z).toFixed(1)}`).join('');",
+    why: "SVG path data for the ground line; the path grammar takes a dot and separates the pair with a comma.",
+  },
+  {
+    file: "features/survey-plan/sections/LongSection.tsx",
+    snippet: "const area = `${d}L${f.sx(run[run.length - 1]!.ch).toFixed(1)},${height - 28}L",
+    why: "SVG path data closing the ground fill under the same line; the path grammar takes a dot.",
+  },
+  {
+    file: "features/survey-plan/units/linear.ts",
+    snippet: "return fromMetres(metres, conv.linearUnit).toFixed(distanceDecimals(conv));",
+    why: "inputDistance writes the value of an editable distance field, which parseDistance reads back; formatDistance is the localised twin.",
+  },
   ];
 /* FIXED-ALLOWED:END */
 
@@ -679,8 +714,7 @@ describe('every number and date is written in the language the reader picked', (
   });
 
   it('lists every argued toFixed exemption, so adding one shows up as a diff', () => {
-    // Nineteen entries covering twenty-one sites in twelve files, against 139
-    // exempted by a rule.
+    // Twenty-seven entries, against well over a hundred sites exempted by a rule.
     // The ratio is the point: rules carry the categories that repeat, and
     // anything left over has to be argued in a sentence someone can disagree
     // with. A list long enough to skim is a list nobody reads.
@@ -705,6 +739,13 @@ describe('every number and date is written in the language the reader picked', (
       'features/geo-hub/utils.ts :: return `${sign}${Math.abs(value).toFixed(4)}°`;',
       'shared/ui/ProjectMap/streetThumbnail.ts :: return v.toFixed(4);',
       'features/cost-benchmarks/CostBenchmarksPage.tsx :: const pct = (x: number) => `${(((x - lo) / span) * 100).toFixed(2)}%`;',
+      "features/survey-calc/CalcPage.tsx :: s.distance_m != null ? ` ${s.distance_m.toFixed(3)}` : ''",
+      "features/survey-calc/CalcPage.tsx :: const cell = (v: number | null | undefined) => (v == null ? '-' : v.toFixed(3));",
+      "features/survey-calc/CalcPage.tsx :: setStartRl(d.start_rl.toFixed(3));",
+      "features/survey-calc/CalcPage.tsx :: setCloseRl(d.close_rl == null ? '' : d.close_rl.toFixed(3));",
+      "features/survey-plan/sections/LongSection.tsx :: const d = run.map((p, j) => `${j ? 'L' : 'M'}${f.sx(p.ch).toFixed(1)},${f.sz(p.z).toFixed(1)}`).join('');",
+      "features/survey-plan/sections/LongSection.tsx :: const area = `${d}L${f.sx(run[run.length - 1]!.ch).toFixed(1)},${height - 28}L",
+      "features/survey-plan/units/linear.ts :: return fromMetres(metres, conv.linearUnit).toFixed(distanceDecimals(conv));",
     ]);
     expect(FIXED_ALLOWED.filter((a) => a.why.length < 20)).toEqual([]);
     const stale = FIXED_ALLOWED.filter(
