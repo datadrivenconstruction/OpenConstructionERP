@@ -45,7 +45,7 @@ function useCurrency(projectId: string): string {
 }
 
 const ROW = 'block rounded-md border border-border-light px-2.5 py-1.5 hover:border-oe-blue hover:bg-surface-secondary focus-visible:outline focus-visible:outline-2 focus-visible:outline-oe-blue';
-const SUB = 'text-[11px] font-medium text-content-tertiary';
+const SUB = 'text-2xs font-medium text-content-tertiary';
 const H = 'text-xs font-semibold uppercase tracking-wide text-content-tertiary';
 
 function DraftRow({ l, cur }: { l: DraftLine; cur: string }) {
@@ -107,7 +107,7 @@ function BoqRows({ d }: { d: ElementLinks }) {
         <Link key={p.position_id} to={boqUrl(p)} className={ROW} data-testid={`link-position-${p.position_id}`}>
           <span className="flex items-baseline justify-between gap-2">
             <span className="truncate font-medium text-content-primary">{p.ordinal} {p.description}</span>
-            <span className="shrink-0 text-[11px] text-content-tertiary">{tr(t, `design.links.source.${p.source}`)}</span>
+            <span className="shrink-0 text-2xs text-content-tertiary">{tr(t, `design.links.source.${p.source}`)}</span>
           </span>
           <span className="tabular-nums text-content-secondary">{num(p.quantity)} {p.unit}</span>
         </Link>
@@ -136,7 +136,7 @@ function PackageRows({ d }: { d: ElementLinks }) {
         <Link key={k.package_id} to={packageUrl(k)} className={ROW} data-testid={`link-package-${k.package_id}`}>
           <span className="flex items-baseline justify-between gap-2">
             <span className="truncate font-medium text-content-primary">{k.name}</span>
-            <span className="shrink-0 text-[11px] text-content-tertiary">{k.status}</span>
+            <span className="shrink-0 text-2xs text-content-tertiary">{k.status}</span>
           </span>
         </Link>
       ))}
@@ -239,7 +239,7 @@ function Documents({ d }: { d: ElementContext }) {
         <Link key={x.document_id} to={x.url} className={ROW} data-testid={`doc-${x.document_id}`}>
           <span className="flex items-baseline justify-between gap-2">
             <span className="truncate font-medium text-content-primary">{x.name}</span>
-            <span className="shrink-0 text-[11px] text-content-tertiary">
+            <span className="shrink-0 text-2xs text-content-tertiary">
               {x.link_type === 'design_sheet' ? tr(t, 'design.panel.sheet', { revision: x.revision ?? '–' }) : x.category}
             </span>
           </span>
@@ -257,7 +257,7 @@ function Remarks({ d }: { d: ElementContext }) {
         <Link key={`${r.kind}-${r.id}`} to={r.url} className={ROW} data-testid={`remark-${r.id}`}>
           <span className="flex items-baseline justify-between gap-2">
             <span className="truncate font-medium text-content-primary">{r.title}</span>
-            <span className="shrink-0 text-[11px] text-content-tertiary">{tr(t, `design.panel.remark.${r.kind}`)}</span>
+            <span className="shrink-0 text-2xs text-content-tertiary">{tr(t, `design.panel.remark.${r.kind}`)}</span>
           </span>
           <span className="text-xs text-content-secondary">
             {r.status}{r.due ? ` · ${tr(t, 'design.panel.due', { date: String(r.due).slice(0, 10) })}` : ''}

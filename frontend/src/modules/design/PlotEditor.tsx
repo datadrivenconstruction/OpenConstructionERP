@@ -80,7 +80,7 @@ function CornerTable({ points, rows, onRows, onPoints }: {
       <legend className="px-1 text-sm font-medium">{tr(t, 'design.plot.coords_title')}</legend>
       <p id="plot-coords-hint" className="text-xs text-content-tertiary">{tr(t, 'design.plot.coords_hint')}</p>
       {shown.map(([lon, lat], i) => (
-        <div key={i} className="grid grid-cols-[1fr_1fr_auto] items-center gap-2">
+        <div key={i} className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] items-center gap-2">
           {([[lon, 0, 'design.plot.lon'], [lat, 1, 'design.plot.lat']] as const).map(([text, k, label]) => (
             <input
               key={k}
