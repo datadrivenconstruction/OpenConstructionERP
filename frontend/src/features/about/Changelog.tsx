@@ -67,6 +67,13 @@ const UNRELEASED: ChangelogEntry | null = null;
 // carry the long form and are left alone as the record of what shipped.
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '20.2.0',
+    date: '2026-11-21',
+    tag: 'NEW',
+    summary:
+      'Design gets its own section, from brief and revisions to the estimate, with a full browser editor installed on demand. Every module page opens its data paths, and CRM gains account contacts, lead to deal in one click and revenue by month.',
+  },
+  {
     version: '20.1.0',
     date: '2026-11-21',
     tag: 'NEW',

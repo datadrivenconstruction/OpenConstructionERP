@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 > **Tip:** This file is long. Use your browser's **Find** (Ctrl+F) to jump to a version number, or see the [Releases page](https://github.com/datadrivenconstruction/OpenConstructionERP/releases) for a per-release view with download links.
 
+## [20.2.0] - 2026-11-21
+
+Design gets its own section, from brief and revisions to the estimate, with a full browser editor installed on demand, and every module page opens its data paths.
+
+### Added
+
+- Design section. A design has a brief, revisions with acceptance and a link contract, and its model drives quantities into the estimate, activities into the schedule and packages into procurement. The section stays in the menu, and the light engine works without any download.
+- The full browser design editor is installed from the workspace settings on request, checked by checksum and signature, with progress, update and removal. Without a release signing key the page says so plainly instead of offering a broken install.
+- Design revisions are linked from change orders, viewers and takeoff, and design models open and can be picked in the BIM viewer.
+- The design workspace offers a quick concept mode and the full editor, and remembers the choice. The model panel follows the generator limits, so the number of apartments per floor depends on the building width.
+- The design overview shows the current revision, the estimate range, priced positions and linked elements at a glance, and Design has its own mark and colour in the menu.
+- The design editor page links to openconstructiondesign.com, the editor's own site with downloads and documentation, when the server sets no installer address of its own.
+- CRM: trade shows as a lead source, contacts per account, one click from lead to deal, an activity summary per owner and expected revenue by month.
+- Every module page has a Data paths button, and 30 more modules declare their data paths with translated descriptions.
+
+### Fixed
+
+- KPI freshness checks are bounded and back off, so a slow check no longer holds the cost model page.
+- Deal currency is validated as an ISO 4217 code and follows the user's preference instead of defaulting to EUR.
+- Applying a company profile keeps a person's own switches for modules the profile does not govern.
+- Angles in degrees, minutes and seconds use the number format of the language, and the DIN 18202 demo text is corrected.
+
 ## [20.1.0] - 2026-11-21
 
 Surveyors get a plan editor shared by every survey screen, five site survey workflows run end to end, tenders become one register, and data paths show swimlanes, roles and recent changes.
