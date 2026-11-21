@@ -20,7 +20,7 @@ export function contourFeatures(c: Contours, conv: PlanConventions, prefix = 'co
     geometry: l.closed && l.coords.length >= 3
       ? { type: 'Polygon' as const, coordinates: [l.coords.map((p) => [p[0], p[1]] as GridXYZ)] }
       : { type: 'LineString' as const, coordinates: l.coords.map((p) => [p[0], p[1]] as GridXYZ) },
-    properties: { z: l.z, index: l.index, label: l.index ? formatDistance(l.z, conv, false) : undefined, colour: 'var(--oe-map-topo)', fill: 'none' },
+    properties: { z: l.z, index: l.index, label: l.index ? formatDistance(l.z, conv, false) : undefined, colour: 'var(--oe-map-topo)', fill: 'none', width: l.index ? 1.2 : 0.6 },
   }));
 }
 
