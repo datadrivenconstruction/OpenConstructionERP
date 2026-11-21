@@ -16,6 +16,7 @@
  * Pure functions only — no Cesium, no React; keeps the picker testable
  * without a JSDOM map mock.
  */
+import { getNumberLocale } from '@/stores/usePreferencesStore';
 
 export type CoordAxis = 'lat' | 'lon';
 
@@ -85,8 +86,8 @@ export function ddToDms(value: number, axis: CoordAxis): DmsParts | null {
 /** Format a DMS breakdown as the conventional ``DD° MM' SS.s" H`` string. */
 export function formatDms(parts: DmsParts): string {
   const { degrees, minutes, seconds, hemisphere } = parts;
-  const sec = seconds.toFixed(2).replace(/0+$/, '').replace(/\.$/, '');
-  return `${degrees}° ${minutes}' ${sec || '0'}" ${hemisphere}`;
+  const sec = new Intl.NumberFormat(getNumberLocale(), { maximumFractionDigits: 2, useGrouping: false }).format(seconds);
+  return `${degrees}° ${minutes}' ${sec}" ${hemisphere}`;
 }
 
 /** Convenience — value+axis → ``DD° MM' SS.s" H``. */
