@@ -31,6 +31,7 @@ import {
 } from 'lucide-react';
 import clsx from 'clsx';
 import { Button, Badge, Card, Input, Breadcrumb, ConfirmDialog, DismissibleInfo } from '@/shared/ui';
+import { DataPathsButton } from '@/shared/ui/DataPaths/DataPathsButton';
 import { useConfirm } from '@/shared/hooks/useConfirm';
 import { apiGet, triggerDownload } from '@/shared/lib/api';
 import { fetchProjectList } from '@/shared/lib/projectList';
@@ -418,6 +419,7 @@ export function AssemblyEditorPage() {
           </div>
         </div>
         <div className="flex items-center gap-2 shrink-0">
+          <DataPathsButton />
           <Button
             variant="secondary"
             size="sm"

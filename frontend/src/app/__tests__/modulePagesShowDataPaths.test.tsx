@@ -79,6 +79,22 @@ describe('module pages show the Data paths button', () => {
     }
   }, 120_000);
 
+  // Project-scoped pages (/projects/<id>/<page>) belong to the module of the plain route.
+  it('shows the button on project-scoped module pages', async () => {
+    for (const route of ['/projects/p1/finance', '/projects/p1/geo', '/projects/p1/cde', '/inbound', '/files', '/dashboards']) {
+      mount(route);
+      await waitFor(() => expect(screen.getAllByTestId('data-paths-button')).toHaveLength(1), { timeout: 5000 }).catch(
+        () => {
+          throw new Error(`no Data paths button on ${route}`);
+        },
+      );
+      cleanup();
+    }
+    mount('/projects/p1/settings');
+    await new Promise((r) => setTimeout(r, 300));
+    expect(screen.queryAllByTestId('data-paths-button')).toHaveLength(0);
+  }, 60_000);
+
   it('keeps one button when the page also has How it works', async () => {
     for (const route of ['/boq', '/tendering', '/finance']) {
       mount(route, true);

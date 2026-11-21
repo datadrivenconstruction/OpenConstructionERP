@@ -19,6 +19,54 @@ const CORE_ROUTE_MODULE: Record<string, string> = {
   '/boq': 'oe_boq',
   '/costs': 'oe_costs',
   '/assemblies': 'oe_assemblies',
+  '/model-review': 'oe_bim_hub',
+  '/progress': 'oe_progress',
+  '/catalog': 'oe_catalog',
+  '/project-catalogue': 'oe_project_catalogue',
+  '/preliminaries': 'oe_preliminaries',
+  '/timeline': 'oe_timeline',
+  '/dashboards': 'oe_dashboards',
+  '/dashboard': 'oe_dashboard',
+  '/inbox': 'oe_dashboard',
+  '/photos': 'oe_photos',
+  '/files': 'oe_documents',
+  '/files/trash': 'oe_file_trash',
+  '/files/search': 'oe_file_search',
+  '/files/transmittals': 'oe_file_transmittals',
+  '/files/approvals': 'oe_file_approvals',
+  '/sheets': 'oe_documents',
+  '/deadlines': 'oe_deadlines',
+  '/credentials': 'oe_credentials',
+  '/users': 'oe_users',
+  '/teams': 'oe_teams',
+  '/admin/audit-log': 'oe_admin',
+  '/admin/webhook-targets': 'oe_notifications',
+  '/integrations': 'oe_integrations',
+  '/jobs': 'oe_jobs',
+  '/saved-views': 'oe_saved_views',
+  '/tax-rates': 'oe_i18n_foundation',
+  '/find': 'oe_retrieval',
+  '/notifications': 'oe_notifications',
+  '/project-intelligence': 'oe_project_intelligence',
+  '/analytics': 'oe_projects',
+  '/quality-concept': 'oe_quality_concept',
+  '/hse-frame': 'oe_hse_frame',
+  '/permits': 'oe_permits',
+  '/staffing': 'oe_staffing',
+  '/engineering-brief': 'oe_engineering_brief',
+  '/handbook': 'oe_project_handbook',
+  '/commitments': 'oe_commitment_release',
+  '/economics': 'oe_economics',
+  '/delivery': 'oe_delivery_model',
+  '/plant-register': 'oe_plant_register',
+  '/procurement-concept': 'oe_procurement_concept',
+  '/stakeholders': 'oe_stakeholders',
+  '/governance': 'oe_project_governance',
+  '/design': 'oe_design_management',
+  '/guarantees': 'oe_guarantees',
+  '/wip': 'oe_wip_report',
+  '/inbound': 'oe_inbound_capture',
+  '/eac/blocks': 'oe_eac',
 };
 
 // Plugin modules (survey and the like) register their menu rows in their own
@@ -179,8 +227,7 @@ export function moduleMeta(module: string): ModuleMeta {
   return meta;
 }
 
-/** Module owning a front-end path: the longest route prefix in the sidebar map, segment-aligned. */
-export function moduleForPath(pathname: string): string | null {
+function ownerOfPath(pathname: string): string | null {
   let best: { route: string; module: string } | null = null;
   for (const [route, owner] of routeOwners()) {
     if (route === '/') continue;
@@ -191,4 +238,15 @@ export function moduleForPath(pathname: string): string | null {
     }
   }
   return best?.module || null;
+}
+
+/** Module owning a front-end path: the longest route prefix in the sidebar map, segment-aligned.
+ *  A project-scoped page (`/projects/<id>/<page>`) belongs to the module of `/<page>`. */
+export function moduleForPath(pathname: string): string | null {
+  const page = /^\/projects\/[^/]+(\/.+)$/.exec(pathname)?.[1];
+  if (page) {
+    const inner = ownerOfPath(page);
+    if (inner) return inner;
+  }
+  return ownerOfPath(pathname);
 }

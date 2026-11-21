@@ -2,6 +2,7 @@
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 """Module builder manifest."""
 
+from app.core.data_paths import DataPaths
 from app.core.module_loader import InferenceDeclaration, InferenceRole, ModuleManifest
 
 manifest = ModuleManifest(
@@ -27,4 +28,5 @@ manifest = ModuleManifest(
             "into every module it produces, so a built module arrives declared rather than silent"
         ),
     ),
+    data_paths=DataPaths(reason="Generates and installs new modules; owns no project records of its own"),
 )

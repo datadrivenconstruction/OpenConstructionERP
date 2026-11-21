@@ -44,6 +44,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/shared/ui';
 import { Slider } from '@/shared/ui/Slider';
+import { DataPathsButton } from '@/shared/ui/DataPaths/DataPathsButton';
 import { useTabKeyboardNav } from '@/shared/hooks/useTabKeyboardNav';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
@@ -884,6 +885,8 @@ export function PdfComparePage() {
             {t('pdf_compare.back_to_markups', { defaultValue: 'Markups' })}
           </span>
         </Button>
+
+        <DataPathsButton />
 
         <div className="w-px h-5 bg-border-light" />
 

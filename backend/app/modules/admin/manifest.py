@@ -7,6 +7,7 @@ env-gate (e.g. qa-reset for crawler-driven test pipelines). Not loaded
 automatically against production unless the operator opts in via env.
 """
 
+from app.core.data_paths import DataPaths
 from app.core.module_loader import ModuleManifest
 
 manifest = ModuleManifest(
@@ -19,4 +20,5 @@ manifest = ModuleManifest(
     depends=["oe_users", "oe_projects"],
     auto_install=True,
     enabled=True,
+    data_paths=DataPaths(reason="Operator endpoints for QA pipelines; owns no project records"),
 )

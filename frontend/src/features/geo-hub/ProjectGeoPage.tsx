@@ -34,6 +34,7 @@ import {
   useRef,
   useState,
 } from 'react';
+import { DataPathsButton } from '@/shared/ui/DataPaths/DataPathsButton';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -815,6 +816,7 @@ export function ProjectGeoPage() {
           })}
         </p>
         <div className="ml-auto flex items-center gap-2">
+          <DataPathsButton />
           {data?.anchor && (
             <button
               type="button"

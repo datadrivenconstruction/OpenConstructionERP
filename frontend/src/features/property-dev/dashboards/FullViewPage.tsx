@@ -13,6 +13,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Building2 } from 'lucide-react';
 import { Breadcrumb, EmptyState } from '@/shared/ui';
+import { DataPathsButton } from '@/shared/ui/DataPaths/DataPathsButton';
 import { listDevelopments, type Development } from '../api';
 import { InventoryHeatmap } from './InventoryHeatmap';
 import { SalesVelocity } from './SalesVelocity';
@@ -167,6 +168,7 @@ export function FullViewPage() {
           <h1 className="text-lg font-semibold text-content-primary capitalize">
             {dashboardTitle}
           </h1>
+          <DataPathsButton />
         </div>
         <label className="flex items-center gap-2 text-xs">
           <span className="text-content-secondary">

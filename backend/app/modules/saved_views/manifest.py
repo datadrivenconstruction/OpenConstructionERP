@@ -2,6 +2,7 @@
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 """Saved Views module manifest."""
 
+from app.core.data_paths import DataPaths
 from app.core.module_loader import ModuleManifest
 
 manifest = ModuleManifest(
@@ -20,4 +21,5 @@ manifest = ModuleManifest(
     depends=["oe_users", "oe_projects", "oe_teams"],
     auto_install=True,
     enabled=True,
+    data_paths=DataPaths(reason="Stores saved filter definitions only; feeds no other module's numbers"),
 )
