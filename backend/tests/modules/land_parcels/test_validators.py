@@ -73,7 +73,8 @@ def test_profile_only_for_active_market() -> None:
     register_parcel_profile(profile)
     try:
         assert profile_for(["ZZ"]) is profile
-        assert profile_for(["DE"]) is NEUTRAL
+        # A market with no cadastre entry: DE gets one from cadastre.json once the app has started.
+        assert profile_for(["FR"]) is NEUTRAL
         assert profile_for(["*"]) is NEUTRAL
         assert profile.id_valid("12:34")
         assert not profile.id_valid("P-001")
