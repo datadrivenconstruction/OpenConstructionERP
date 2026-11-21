@@ -79,6 +79,30 @@ describe('module pages show the Data paths button', () => {
     }
   }, 120_000);
 
+  it('shows the button on every design page and the CRM and KPI pages', async () => {
+    const pages = [
+      '/design/overview',
+      '/design/start',
+      '/design/editor',
+      '/design/editor/desktop',
+      '/design/brief',
+      '/design/revisions',
+      '/design/acceptance',
+      '/design/estimate',
+      '/crm',
+      '/bi-dashboards',
+    ];
+    for (const route of pages) {
+      mount(route);
+      await waitFor(() => expect(screen.getAllByTestId('data-paths-button')).toHaveLength(1), { timeout: 5000 }).catch(
+        () => {
+          throw new Error(`no Data paths button on ${route}`);
+        },
+      );
+      cleanup();
+    }
+  }, 120_000);
+
   it('keeps one button when the page also has How it works', async () => {
     for (const route of ['/boq', '/tendering', '/finance']) {
       mount(route, true);
