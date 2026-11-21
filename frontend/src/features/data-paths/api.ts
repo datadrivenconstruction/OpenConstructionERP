@@ -191,6 +191,25 @@ export function usePlatformMap(projectId: string | null | undefined, enabled = t
   });
 }
 
+/**
+ * The map to draw now, and its live numbers when they land. The project map
+ * counts every declared path of every module before it answers, which takes
+ * seconds on a real project; the shape of the map does not depend on the
+ * project, so it is drawn from the project-less map first and the counts fill
+ * in when the project's answer arrives.
+ */
+export function usePlatformMapProgressive(projectId: string | null | undefined, enabled = true) {
+  const shape = usePlatformMap(null, enabled);
+  const live = usePlatformMap(projectId, enabled && !!projectId);
+  const data = (projectId ? live.data : undefined) ?? shape.data;
+  return {
+    data,
+    isLoading: !data && (shape.isLoading || live.isLoading),
+    isError: !data && shape.isError && (!projectId || live.isError),
+    countsLoading: !!projectId && !live.data && !live.isError,
+  };
+}
+
 export interface TraceStep {
   module: string;
   label: string;

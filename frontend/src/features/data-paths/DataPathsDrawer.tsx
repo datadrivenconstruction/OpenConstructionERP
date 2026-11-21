@@ -78,7 +78,8 @@ export function DataPathsDrawer({ module, open, onClose }: DataPathsDrawerProps)
           idPrefix="data-paths"
           size="sm"
         />
-        {query.isLoading && <div className="h-48 animate-pulse rounded-xl bg-surface-secondary" aria-busy="true" />}
+        {/* The flow tab draws its own map; only the list waits on the module's paths. */}
+        {query.isLoading && tab === 'list' && <div className="h-48 animate-pulse rounded-xl bg-surface-secondary" aria-busy="true" />}
         {query.isError && (
           <p className="text-sm text-semantic-error">
             {t('data_paths.load_failed', { defaultValue: 'The data paths could not be loaded.' })}
