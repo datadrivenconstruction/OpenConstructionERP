@@ -159,3 +159,23 @@ def test_ring_crossings_ignores_adjacent_edges() -> None:
 async def test_srv144_names_duplicate_codes() -> None:
     plan = {"library": [{"code": "EP"}, {"code": "ep"}, {"code": "TR"}]}
     assert [r.element_ref for r in await CodeDuplicateRule().validate(_ctx(plan))] == ["EP"]
+
+
+def test_the_riverside_library_knows_every_code_its_demo_points_use() -> None:
+    # The showcase opened with SRV-140 findings for PIT and BASE: the shipped library lacked them.
+    import json
+    from pathlib import Path
+
+    demo = Path(ref.__file__).resolve().parent / "demo" / "riverside"
+    library = json.loads((demo / "codes_riverside.json").read_text(encoding="utf-8"))["items"]
+    files = ("control.csv", "existing_ground.csv", "pit_2026-10-01.csv", "pit_2026-10-31.csv")
+    files += ("stockpile_A_base.csv", "stockpile_A_2026-10-12.csv")
+    codes = []
+    for name in files:
+        for line in (demo / name).read_text(encoding="utf-8").splitlines():
+            cols = line.split(",")
+            if len(cols) >= 5 and cols[1].replace(".", "", 1).isdigit():
+                codes.append(cols[4].strip())
+    assert {"PIT", "BASE"} <= {c.upper() for c in codes}
+    assert ref.unknown_codes(codes, library) == {}
+    assert all(entry["label"] for entry in library)

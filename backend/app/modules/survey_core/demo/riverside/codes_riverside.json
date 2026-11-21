@@ -1,5 +1,5 @@
 {
- "_doc": "Feature code library of the Riverside Yard demo: control, existing ground, two kerb strings EP1/EP2, the fence along the south edge, trees and manholes. Demo values, not a standard.",
+ "_doc": "Feature code library of the Riverside Yard demo: control, existing ground, two kerb strings EP1/EP2, the fence along the south edge, trees, manholes, the pit surface and the stockpile base and crest shots. Demo values, not a standard.",
  "items": [
   {
    "code": "CP",
@@ -54,6 +54,33 @@
    "smooth": false,
    "layer": "points",
    "colour": "utility"
+  },
+  {
+   "code": "PIT",
+   "label": "Pit surface (floor and faces)",
+   "symbol": "spot",
+   "line": "none",
+   "smooth": false,
+   "layer": "points",
+   "colour": "topo"
+  },
+  {
+   "code": "BASE",
+   "label": "Stockpile base (ground under the pile)",
+   "symbol": "spot",
+   "line": "none",
+   "smooth": false,
+   "layer": "points",
+   "colour": "topo"
+  },
+  {
+   "code": "PILE",
+   "label": "Stockpile surface",
+   "symbol": "spot",
+   "line": "none",
+   "smooth": false,
+   "layer": "points",
+   "colour": "topo"
   }
  ]
 }
