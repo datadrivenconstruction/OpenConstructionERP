@@ -53,6 +53,7 @@ import {
 } from 'lucide-react';
 import clsx from 'clsx';
 import { Badge, Button, Card, Input } from '@/shared/ui';
+import { DataPathsButton } from '@/shared/ui/DataPaths/DataPathsButton';
 import { getRouteIcon } from '@/app/layout/routeIcons';
 import { useToastStore } from '@/stores/useToastStore';
 import type { CaseBody, CaseFinding, CaseStepWire } from './api';
@@ -279,6 +280,7 @@ export function CaseEditorPage() {
           <ArrowLeft className="h-4 w-4" />
           {t('cases.back_to_list', { defaultValue: 'All cases' })}
         </Button>
+        <DataPathsButton />
         <h1 className="text-xl font-semibold text-content-primary">
           {caseId
             ? t('cases.editor.title_edit', { defaultValue: 'Edit case' })

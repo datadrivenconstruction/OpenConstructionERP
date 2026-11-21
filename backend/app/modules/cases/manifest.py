@@ -2,6 +2,7 @@
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 """Cases module manifest."""
 
+from app.core.data_paths import DataPaths
 from app.core.module_loader import ModuleManifest
 
 manifest = ModuleManifest(
@@ -20,4 +21,5 @@ manifest = ModuleManifest(
     depends=["oe_projects", "oe_users"],
     auto_install=True,
     enabled=True,
+    data_paths=DataPaths(reason="User-authored walkthroughs; they reference no project records"),
 )
