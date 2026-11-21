@@ -21,8 +21,8 @@
         "standard": "DIN 18202 Toleranzen im Hochbau",
         "edition": "2019",
         "items": {
-          "grid_line": {"h_mm": 16, "v_mm": 16, "clause": "Table 2 row 1 (plan, nominal 6 to 15 m) and row 2 (elevation, 3 to 6 m)", "status": "to_verify"},
-          "default": {"h_mm": 16, "v_mm": 16, "clause": "Table 2 row 1 (plan, nominal 6 to 15 m) and row 2 (elevation, 3 to 6 m)", "status": "to_verify"}
+          "grid_line": {"h_mm": 20, "v_mm": 16, "clause": "Table 1 row 1 (lengths in plan, nominal over 6 to 15 m: 20 mm); height 16 mm not yet checked against the Table 1 row for heights", "status": "to_verify"},
+          "default": {"h_mm": 20, "v_mm": 16, "clause": "Table 1 row 1 (lengths in plan, nominal over 6 to 15 m: 20 mm); height 16 mm not yet checked against the Table 1 row for heights", "status": "to_verify"}
         }
       },
       {"key": "pack:de_en_execution", "shared": "eu_execution", "name": "DIN EN 13670 / DIN EN 1090-2"}

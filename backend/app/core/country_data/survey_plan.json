@@ -599,6 +599,160 @@
    "conventions": {
     "axis": "YX"
    }
+  },
+  "CL": {
+   "conventions": {
+    "axis": "EN",
+    "directionFormat": "azimuth",
+    "azimuthZero": "north"
+   },
+   "paper": "A3",
+   "codes": [
+    {
+     "code": "CP",
+     "label": "Punto de control",
+     "symbol": "control",
+     "line": "none",
+     "smooth": false,
+     "layer": "control",
+     "colour": "control-fill"
+    },
+    {
+     "code": "EP",
+     "label": "Borde de pavimento",
+     "symbol": "kerb",
+     "line": "open",
+     "smooth": false,
+     "layer": "linework",
+     "colour": "kerb"
+    },
+    {
+     "code": "KB",
+     "label": "Solera",
+     "symbol": "kerb",
+     "line": "open",
+     "smooth": false,
+     "layer": "linework",
+     "colour": "kerb"
+    },
+    {
+     "code": "CL",
+     "label": "Eje",
+     "symbol": "spot",
+     "line": "open",
+     "smooth": false,
+     "layer": "linework",
+     "colour": "line"
+    },
+    {
+     "code": "FN",
+     "label": "Cerco",
+     "symbol": "post",
+     "line": "open",
+     "smooth": false,
+     "layer": "linework",
+     "colour": "fence"
+    },
+    {
+     "code": "WL",
+     "label": "Muro",
+     "symbol": "spot",
+     "line": "open",
+     "smooth": false,
+     "layer": "linework",
+     "colour": "building"
+    },
+    {
+     "code": "BLD",
+     "label": "Edificación",
+     "symbol": "spot",
+     "line": "closed",
+     "smooth": false,
+     "layer": "linework",
+     "colour": "building"
+    },
+    {
+     "code": "HDG",
+     "label": "Seto",
+     "symbol": "tree",
+     "line": "open",
+     "smooth": true,
+     "layer": "linework",
+     "colour": "tree"
+    },
+    {
+     "code": "TB",
+     "label": "Coronamiento de talud",
+     "symbol": "spot",
+     "line": "open",
+     "smooth": true,
+     "layer": "linework",
+     "colour": "line"
+    },
+    {
+     "code": "BB",
+     "label": "Pie de talud",
+     "symbol": "spot",
+     "line": "open",
+     "smooth": true,
+     "layer": "linework",
+     "colour": "line"
+    },
+    {
+     "code": "DT",
+     "label": "Cuneta o zanja",
+     "symbol": "spot",
+     "line": "open",
+     "smooth": true,
+     "layer": "linework",
+     "colour": "water"
+    },
+    {
+     "code": "TR",
+     "label": "Árbol",
+     "symbol": "tree",
+     "line": "none",
+     "smooth": false,
+     "layer": "points",
+     "colour": "tree"
+    },
+    {
+     "code": "MH",
+     "label": "Cámara de inspección",
+     "symbol": "manhole",
+     "line": "none",
+     "smooth": false,
+     "layer": "points",
+     "colour": "utility"
+    },
+    {
+     "code": "PO",
+     "label": "Poste",
+     "symbol": "post",
+     "line": "none",
+     "smooth": false,
+     "layer": "points",
+     "colour": "utility"
+    },
+    {
+     "code": "SP",
+     "label": "Punto de cota",
+     "symbol": "spot",
+     "line": "none",
+     "smooth": false,
+     "layer": "points",
+     "colour": "topo"
+    },
+    {
+     "code": "EG",
+     "label": "Terreno natural",
+     "symbol": "spot",
+     "line": "none",
+     "smooth": false,
+     "layer": "points",
+     "colour": "topo"
+    }
+   ]
   }
  }
 }

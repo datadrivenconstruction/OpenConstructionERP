@@ -104,3 +104,14 @@ def test_course_country_profiles(loaded: None, country: str) -> None:
 def test_demo_reference_is_the_label_alone() -> None:
     value = tol.DEMO_PROFILE.for_item("column")
     assert tolerance_reference(tol.DEMO_PROFILE, value) == "Demo values, not a standard"
+
+
+def test_din_18202_plan_tolerance_cites_table_1_not_the_angle_table(loaded: None) -> None:
+    # DIN 18202:2019 Table 1 (limit deviations for dimensions) gives 20 mm for plan lengths over 6 to 15 m;
+    # Table 2 is angular deviations and Table 3 flatness, so neither may be cited for a plan length.
+    profile = tol.builtin_profile("pack:de_din18202_2019", ["DE"])
+    assert profile is not None
+    for item in ("grid_line", "default"):
+        value = profile.for_item(item)
+        assert value is not None and value.h_mm == 20
+        assert "Table 1 row 1" in value.clause and "Table 2" not in value.clause
