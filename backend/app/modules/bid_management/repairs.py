@@ -64,3 +64,25 @@ TENDER_LEGACY_COPY = register_data_repair(
         never_delivered=NeverDelivered(table="oe_tender_legacy_map", identified_by=("source_table", "source_id")),
     )
 )
+
+
+async def _run_rfq_mirror_refresh(session: AsyncSession) -> int:
+    """Refresh RFQ mirrors copied without the bidder's firm, email or levelled range."""
+    from app.modules.bid_management.legacy_copy import refresh_stale_rfq_mirrors
+
+    return await session.run_sync(lambda sync_session: refresh_stale_rfq_mirrors(sync_session.connection()))
+
+
+#: Nature ``always_wrong``: earlier copies took the bidder's firm only from bid metadata,
+#: which the RFQ module leaves empty, and never filled the comparison header, so every
+#: such mirror read blank bidders and a 0.00 range. Only mirrors that still show it are
+#: re-copied; a refreshed mirror no longer matches, so a second pass changes nothing.
+TENDER_RFQ_MIRROR_REFRESH = register_data_repair(
+    DataRepair(
+        repair_id="tender_rfq_mirror_refresh",
+        revision="",
+        summary="Re-copy RFQ tender mirrors that lack the bidder's firm and email or the levelled bid range",
+        run=_run_rfq_mirror_refresh,
+        nature="always_wrong",
+    )
+)

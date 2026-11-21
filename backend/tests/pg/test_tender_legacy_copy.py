@@ -556,7 +556,7 @@ async def test_the_tender_card_reads_a_copy_with_every_tab(pg_session) -> None:
         limit=100,
         _perm=None,
     )
-    (row,) = rows
+    (row,) = rows.items
     assert (row.source, row.bid_count, row.lowest_total) == ("tendering", 2, Decimal("148200.00"))
 
     card = await get_tender(row.id, pg_session, owner, _perm=None)

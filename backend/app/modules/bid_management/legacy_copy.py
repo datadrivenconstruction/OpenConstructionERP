@@ -292,7 +292,7 @@ class Tables:
 def _import_models() -> None:
     import importlib  # noqa: PLC0415
 
-    for name in ("bid_management", "tendering", "rfq_bidding", "subcontractors"):
+    for name in ("bid_management", "tendering", "rfq_bidding", "subcontractors", "contacts"):
         try:
             importlib.import_module(f"app.modules.{name}.models")
         except ModuleNotFoundError:
@@ -581,6 +581,91 @@ class LegacyCopier:
             select(table.c.id).where(func.lower(table.c.legal_name) == name.lower()).limit(2)
         ).all()
         return str(rows[0][0]) if len(rows) == 1 else None
+
+    def _contact(self, contact_id: Any) -> tuple[str, str, str]:
+        """Company label, person name and email of a contacts row; blanks when there is none."""
+        table = self.t.get("oe_contacts_contact")
+        cid = _uuid(contact_id)
+        if table is None or cid is None:
+            return "", "", ""
+        row = self.conn.execute(select(table).where(table.c.id == cid)).mappings().first()
+        if row is None:
+            return "", "", ""
+        person = " ".join(str(row.get(k) or "").strip() for k in ("first_name", "last_name")).strip()
+        company = str(row.get("company_name") or row.get("legal_name") or "").strip() or person
+        return company, person, str(row.get("primary_email") or "").strip()
+
+    def _rfq_comparison(self, rfq: dict[str, Any], lines: list[dict[str, Any]], bids: list[dict[str, Any]]) -> Any:
+        """Rank the RFQ's quotes with the RFQ module's own comparison, read from the stored rows."""
+        from app.modules.rfq_bidding.comparison import compare  # noqa: PLC0415
+
+        def _s(value: Any) -> str | None:
+            if value is None:
+                return None
+            return format(value, "f") if isinstance(value, Decimal) else str(value)
+
+        bid_payload = []
+        for bid in bids:
+            bid_id = str(bid["id"])
+            meta = _json(bid.get("metadata"), {}) or {}
+            keys = ("bidder_contact_id", "bid_amount", "currency_code", "status", "submitted_at", "validity_days")
+            keys += ("is_awarded", "is_late", "admitted_at", "technical_score", "commercial_score")
+            bid_payload.append(
+                {
+                    **{k: bid.get(k) for k in keys},
+                    "id": bid_id,
+                    "exchange_rate": _s(bid.get("exchange_rate")),
+                    "exchange_rate_date": bid.get("exchange_rate_date"),
+                    "scope_confirmed": bool(meta.get("scope_confirmed")) if isinstance(meta, dict) else False,
+                    "lines": [
+                        {
+                            "id": str(bl["id"]),
+                            "rfq_line_id": _uuid(bl.get("rfq_line_id")),
+                            "description": bl.get("description"),
+                            "unit": bl.get("unit"),
+                            "quantity": _s(bl.get("quantity")),
+                            "unit_rate": _s(bl.get("unit_rate")),
+                            "amount": _s(bl.get("amount")),
+                            "unit_conversion_factor": _s(bl.get("unit_conversion_factor")),
+                            "is_excluded": bl.get("is_excluded"),
+                        }
+                        for bl in self._rows(self.t.get(RFQ_BID_LINE), "bid_id", bid_id)
+                    ],
+                    "adjustments": [
+                        {
+                            "id": str(adj["id"]),
+                            **{k: adj.get(k) for k in ("kind", "description", "currency_code", "source")},
+                            "amount": _s(adj.get("amount")),
+                            "included_in_bid": adj.get("included_in_bid"),
+                        }
+                        for adj in self._rows(self.t.get(RFQ_ADJUSTMENT), "bid_id", bid_id)
+                    ],
+                }
+            )
+        scope = []
+        for ln in lines:
+            line_meta = _json(ln.get("metadata"), {}) or {}
+            if not isinstance(line_meta, dict):
+                line_meta = {}
+            scope.append(
+                {
+                    "id": str(ln["id"]),
+                    **{k: ln.get(k) for k in ("line_no", "code", "description", "unit", "is_optional")},
+                    "quantity": _s(ln.get("quantity")),
+                    "estimate_rate": line_meta.get("estimate_rate"),
+                    "estimate_currency": line_meta.get("estimate_currency"),
+                }
+            )
+        payload = {
+            "currency_code": rfq.get("currency_code") or "",
+            "evaluation_method": rfq.get("evaluation_method"),
+            "technical_weight": _s(rfq.get("technical_weight")),
+            "require_full_scope": rfq.get("require_full_scope"),
+            "as_of": _now().date().isoformat(),
+            "lines": scope,
+            "bids": bid_payload,
+        }
+        return compare(payload)
 
     def _row(self, table: Table, row_id: str) -> dict[str, Any] | None:
         row = self.conn.execute(select(table).where(table.c.id == row_id)).mappings().first()
@@ -975,11 +1060,15 @@ class LegacyCopier:
         tech_weight = money(rfq.get("technical_weight")) or Decimal("0")
         tech_pct = int(max(Decimal(0), min(Decimal(100), tech_weight)).to_integral_value(ROUND_HALF_UP))
         bidder_by_bid: dict[str, str] = {}
+        bidder_ok: dict[str, bool] = {}
         submitted_invitations: set[str] = set()
         for bid in bids:
             bid_id = str(bid["id"])
             meta = dict(_json(bid.get("metadata"), {}) or {})
-            company = str(meta.get("company_name") or meta.get("bidder_name") or "")
+            # The RFQ module keeps the bidder as a contact; metadata names it only on imported quotes.
+            contact_company, contact_person, contact_email = self._contact(bid.get("bidder_contact_id"))
+            company = str(meta.get("company_name") or meta.get("bidder_name") or "") or contact_company
+            email = str(meta.get("contact_email") or "") or contact_email
             bidder_id = w.id_for(_K_RFQ_BIDDER, bid_id, BIDDER)
             bidder_by_bid[bid_id] = bidder_id
             raw_status = str(bid.get("status") or "")
@@ -989,12 +1078,15 @@ class LegacyCopier:
                 bidder_status = "disqualified"
             else:
                 bidder_status = "active"
+            bidder_ok[bid_id] = bidder_status == "active"
             w.add(
                 BIDDER,
                 {
                     "id": bidder_id,
                     "package_id": package_id,
                     "company_name": company[:255],
+                    "contact_name": contact_person[:255],
+                    "contact_email": email[:255],
                     "contact_id": _uuid(bid.get("bidder_contact_id")),
                     "subcontractor_id": self._resolve_subcontractor(company),
                     "status": bidder_status,
@@ -1016,6 +1108,7 @@ class LegacyCopier:
                         "package_id": package_id,
                         "bidder_ref_id": _uuid(contact),
                         "invitee_company_name": company[:255],
+                        "invitee_email": email[:255],
                         "status": "submitted",
                         "submission_received_at": _fit(bid.get("submitted_at"), 40),
                         "created_at": bid.get("created_at") or _now(),
@@ -1025,6 +1118,9 @@ class LegacyCopier:
                 for row in w.rows[INVITATION]:
                     if row["id"] == invitation_id:
                         row["status"] = "submitted"
+                        for col, value in (("invitee_company_name", company), ("invitee_email", email)):
+                            if col in row:
+                                row[col] = value[:255]
                         row["submission_received_at"] = _fit(bid.get("submitted_at"), 40)
             submitted_invitations.add(invitation_id)
             sub_id = w.id_for(RFQ_BID, bid_id, SUBMISSION)
@@ -1094,12 +1190,27 @@ class LegacyCopier:
                 )
 
         if bids:
+            # The header holds the levelled range and the recommendation the tender card shows.
+            result = self._rfq_comparison(rfq, lines, bids)
+            levelled = [money_2(q.normalised_amount) for q in result.ranked if q.normalised_amount is not None]
+            if not levelled:
+                levelled = [
+                    money_2(b.get("bid_amount"))
+                    for b in bids
+                    if bidder_ok.get(str(b["id"])) and money_2(b.get("bid_amount")) > 0
+                ]
+            recommended = bidder_by_bid.get(str(result.recommended_bid_id)) if result.recommended_bid_id else None
             comparison_id = w.id_for(_K_RFQ_COMPARISON, source_id, COMPARISON)
             w.add(
                 COMPARISON,
                 {
                     "id": comparison_id,
                     "package_id": package_id,
+                    "computed_at": _now().isoformat(timespec="seconds"),
+                    "normalized_low": min(levelled) if levelled else Decimal("0.00"),
+                    "normalized_high": max(levelled) if levelled else Decimal("0.00"),
+                    "recommended_bidder_id": recommended,
+                    "recommended_reason": "leveling.top_rank" if recommended else "",
                     "commercial_weight_pct": 100 - tech_pct,
                     "technical_weight_pct": tech_pct,
                     "technical_scoring_rule": {"method": rfq.get("evaluation_method")},
@@ -1107,6 +1218,8 @@ class LegacyCopier:
             )
             for bid in bids:
                 bid_id = str(bid["id"])
+                quote = result.get(bid_id)
+                normalised = quote.normalised_amount if quote is not None else None
                 w.add(
                     LEVELING,
                     {
@@ -1114,7 +1227,9 @@ class LegacyCopier:
                         "comparison_id": comparison_id,
                         "bidder_id": bidder_by_bid[bid_id],
                         "raw_total": money_2(bid.get("bid_amount")),
-                        "normalized_total": money_2(bid.get("bid_amount")),
+                        "normalized_total": money_2(bid.get("bid_amount") if normalised is None else normalised),
+                        "total_score": _num(quote.total_score, 4, "1e6") if quote and quote.total_score else Decimal(0),
+                        "rank": (quote.rank or 0) if quote is not None else 0,
                         "commercial_score": _num(bid.get("commercial_score"), 2, "1e6"),
                         "technical_score": _num(bid.get("technical_score"), 2, "1e6"),
                     },
@@ -1193,6 +1308,63 @@ class LegacyCopier:
         lm = self.t.need(LEGACY_MAP)
         self.conn.execute(delete(lm).where(and_(lm.c.source_table == source_table, lm.c.source_id == source_id)))
         return True
+
+
+def stale_rfq_mirrors(conn: Connection, *, reflect: bool = False) -> list[str]:
+    """RFQ ids whose mirror lacks what an earlier copy left out: the bidder's firm and email, the levelled range.
+
+    A mirror qualifies when one of its bidders names no firm or email although the linked contact has one,
+    or when its comparison reads a high of 0 while a valid bid carries a positive total. A refreshed mirror
+    no longer qualifies, so refreshing what this returns is idempotent.
+    """
+    t = Tables(conn, reflect=reflect)
+    if t.get(PACKAGE) is None or t.get(LEGACY_MAP) is None or not t.has(PACKAGE, "legacy_source"):
+        return []
+    pkg, bidder, comp = t.need(PACKAGE), t.need(BIDDER), t.need(COMPARISON)
+    inv, sub = t.need(INVITATION), t.need(SUBMISSION)
+    rfq_pkgs = select(pkg.c.id).where(pkg.c.legacy_source == SOURCE_RFQ)
+    stale: set[str] = set()
+    contact = t.get("oe_contacts_contact")
+    if contact is not None:
+        label = func.coalesce(contact.c.company_name, contact.c.legal_name, contact.c.first_name, contact.c.last_name)
+        rows = conn.execute(
+            select(bidder.c.package_id)
+            .select_from(bidder.join(contact, bidder.c.contact_id == contact.c.id))
+            .where(bidder.c.package_id.in_(rfq_pkgs))
+            .where(
+                ((bidder.c.company_name == "") & (func.coalesce(label, "") != ""))
+                | ((bidder.c.contact_email == "") & (func.coalesce(contact.c.primary_email, "") != ""))
+            )
+        ).all()
+        stale.update(str(r[0]) for r in rows)
+    priced = (
+        select(inv.c.package_id)
+        .select_from(sub.join(inv, sub.c.invitation_id == inv.c.id))
+        .where(sub.c.is_valid.is_(true()), sub.c.total_amount > 0)
+    )
+    rows = conn.execute(
+        select(comp.c.package_id).where(
+            comp.c.package_id.in_(rfq_pkgs), comp.c.normalized_high == 0, comp.c.package_id.in_(priced)
+        )
+    ).all()
+    stale.update(str(r[0]) for r in rows)
+    if not stale:
+        return []
+    lm = t.need(LEGACY_MAP)
+    found = conn.execute(
+        select(lm.c.source_id, lm.c.target_id).where(lm.c.source_table == RFQ, lm.c.target_table == PACKAGE)
+    ).all()
+    wanted = {s.replace("-", "").lower() for s in stale}
+    return sorted(str(r[0]) for r in found if str(r[1]).replace("-", "").lower() in wanted)
+
+
+def refresh_stale_rfq_mirrors(conn: Connection, *, reflect: bool = False) -> int:
+    """Re-copy the RFQ mirrors :func:`stale_rfq_mirrors` names. Returns the packages refreshed."""
+    ids = stale_rfq_mirrors(conn, reflect=reflect)
+    if not ids:
+        return 0
+    copier = LegacyCopier(conn, reflect=reflect)
+    return sum(1 for source_id in ids if copier.copy(SOURCE_RFQ, source_id).outcome in ("copied", "refreshed"))
 
 
 def copy_all(
