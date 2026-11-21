@@ -50,6 +50,9 @@ export interface FieldBookIn {
   class_key?: string;
   angular_k_sec?: number | null;
   min_ratio?: number | null;
+  /** `lsq` adds the least-squares adjustment with an error ellipse per station. */
+  method?: 'bowditch' | 'lsq';
+  instrument_key?: string;
   save_points?: boolean;
   note?: string;
 }

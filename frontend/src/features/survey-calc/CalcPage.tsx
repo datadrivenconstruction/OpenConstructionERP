@@ -511,7 +511,7 @@ function TraverseTab({ projectId }: { projectId: string | null }) {
               ))}
             </tbody>
           </table>
-          {r.lsq ? <LsqPanel result={r} /> : <TraverseSketch result={r} lsq={null} />}
+          {r.lsq ? <LsqPanel result={r} projectId={projectId} /> : <TraverseSketch result={r} lsq={null} projectId={projectId} />}
           <Findings items={r.findings} />
           {projectId && save.data?.traverse && (
             <SurveyLinksPanel projectId={projectId} kind="traverse" targetId={save.data.traverse.id} label={save.data.traverse.name} />

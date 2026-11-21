@@ -7,7 +7,7 @@
  * and the next click places the mark (or type E/N).
  */
 
-import { useMemo, useState } from 'react';
+import { lazy, Suspense, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Crosshair, MapPin } from 'lucide-react';
@@ -15,23 +15,25 @@ import { Button } from '@/shared/ui';
 import { getErrorMessage } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
 import { fmtMm } from '@/features/monitoring/levels';
-import type { MapToken } from '../cartography';
-import { planColour } from '../cartography';
+import type { FeatureShape, MapToken } from '../cartography';
 import { ARROW_SCALES, deviationArrow, mmPerArrowMetre, type ArrowScale } from '../engine/deviationArrows';
 import { usePlanConventions } from '../hooks';
+import { layer } from '../planLayers';
 import type { GridXY, PlanFeature } from '../types';
 import { axisLabelFor, parseDistance } from '../units';
 import { monitoringPlanApi, type MonitoringPlanPoint } from '../p3api';
-import { PlanSketch, type SketchShape, type SketchStyle } from './PlanSketch';
+import { MarkGlyph, PlanLegend, PlanPrintButton, marked } from './planMarks';
+
+const PlanCanvas = lazy(() => import('../PlanCanvas'));
 
 type Lvl = 'none' | 'ok' | 'alert' | 'action' | 'alarm';
 const LEVELS: Lvl[] = ['ok', 'alert', 'action', 'alarm', 'none'];
-const LEVEL_STYLE: Record<Lvl, { token: MapToken; shape: SketchShape }> = {
+const LEVEL_STYLE: Record<Lvl, { token: MapToken; shape: FeatureShape }> = {
   ok: { token: 'success', shape: 'circle' },
   alert: { token: 'warning', shape: 'diamond' },
   action: { token: 'error', shape: 'triangle' },
   alarm: { token: 'error', shape: 'square' },
-  none: { token: 'ink-2', shape: 'cross' },
+  none: { token: 'ink-2', shape: 'x' },
 };
 const LEVEL_DEFAULT: Record<Lvl, string> = { ok: 'OK', alert: 'Alert', action: 'Action', alarm: 'Alarm', none: 'No profile' };
 const lvl = (l: string): Lvl => (l in LEVEL_STYLE ? (l as Lvl) : 'none');
@@ -42,26 +44,23 @@ export function monitoringFeatures(items: readonly MonitoringPlanPoint[], scale:
   for (const p of items) {
     if (p.e == null || p.n == null) continue;
     const at: GridXY = [p.e, p.n];
-    out.push({ id: `mon:${p.id}`, layer: 'monitoring', geometry: { type: 'Point', coordinates: at }, properties: { role: 'point', level: lvl(p.level), label: p.code }, entityType: 'monitoring_point', entityId: p.id });
+    const st = LEVEL_STYLE[lvl(p.level)];
+    out.push(marked(
+      { id: `mon:${p.id}`, layer: 'monitoring', geometry: { type: 'Point', coordinates: at }, properties: { role: 'point', level: lvl(p.level), label: p.code }, entityType: 'monitoring_point', entityId: p.id },
+      { shape: st.shape, size: 5, colour: st.token, fill: st.token },
+    ));
     if (p.de_mm == null || p.dn_mm == null) continue;
     const a = deviationArrow(at, [p.e + p.de_mm / 1000, p.n + p.dn_mm / 1000], scale);
     if (!a.head.length) continue;
-    out.push({ id: `mon-arrow:${p.id}`, layer: 'monitoring', geometry: { type: 'LineString', coordinates: a.shaft }, properties: { role: 'arrow', level: lvl(p.level) } });
-    out.push({ id: `mon-head:${p.id}`, layer: 'monitoring', geometry: { type: 'Polygon', coordinates: [a.head] }, properties: { role: 'head', level: lvl(p.level) } });
+    out.push(marked({ id: `mon-arrow:${p.id}`, layer: 'monitoring_vectors', geometry: { type: 'LineString', coordinates: a.shaft }, properties: { role: 'arrow', level: lvl(p.level) } }, { colour: st.token, width: 2 }));
+    out.push(marked({ id: `mon-head:${p.id}`, layer: 'monitoring_vectors', geometry: { type: 'Polygon', coordinates: [a.head] }, properties: { role: 'head', level: lvl(p.level) } }, { colour: st.token, fill: st.token, fillOpacity: 1, width: 1 }));
   }
   return out;
 }
 
 function Glyph({ level }: { level: Lvl }) {
   const { token, shape } = LEVEL_STYLE[level];
-  const c = planColour(token);
-  const d =
-    shape === 'square' ? 'M3,3h8v8h-8Z' : shape === 'diamond' ? 'M7,1.5L12.5,7L7,12.5L1.5,7Z' : shape === 'triangle' ? 'M7,1.5L12.5,12L1.5,12Z' : shape === 'cross' ? 'M3,3L11,11M3,11L11,3' : 'M2.5,7a4.5,4.5 0 1,0 9,0a4.5,4.5 0 1,0 -9,0';
-  return (
-    <svg width={14} height={14} aria-hidden>
-      <path d={d} fill={shape === 'cross' ? 'none' : c} stroke={c} strokeWidth={shape === 'cross' ? 2 : 1} />
-    </svg>
-  );
+  return <MarkGlyph shape={shape} token={token} />;
 }
 
 export function MonitoringMap({ projectId, canWrite, onOpenPoint }: { projectId: string; canWrite: boolean; onOpenPoint?: (id: string) => void }) {
@@ -78,6 +77,13 @@ export function MonitoringMap({ projectId, canWrite, onOpenPoint }: { projectId:
   const offPlan = items.filter((p) => p.e == null || p.n == null);
   const features = useMemo(() => monitoringFeatures(items, scale), [items, scale]);
   const fit = useMemo(() => features.filter((f) => f.properties.role === 'point'), [features]);
+  const layers = useMemo(
+    () => [
+      { id: 'monitoring_vectors', titleKey: 'plan.mon.layer_vectors', defaultTitle: 'Displacement arrows', order: 138, features: features.filter((f) => f.layer === 'monitoring_vectors'), snappable: false, selectable: false },
+      layer('monitoring', fit),
+    ],
+    [features, fit],
+  );
 
   const place = useMutation({
     mutationFn: ({ id, p }: { id: string; p: GridXY }) => monitoringPlanApi.setPosition(id, p[0], p[1]),
@@ -95,53 +101,43 @@ export function MonitoringMap({ projectId, canWrite, onOpenPoint }: { projectId:
     onError: (e) => addToast({ type: 'error', title: getErrorMessage(e) }),
   });
 
-  const styleFor = (f: PlanFeature): SketchStyle | null => {
-    const st = LEVEL_STYLE[(f.properties.level as Lvl) ?? 'none'];
-    if (f.properties.role === 'point') return { shape: st.shape, size: 5, stroke: st.token, fill: st.shape === 'cross' ? undefined : st.token, label: String(f.properties.label ?? ''), top: true };
-    if (f.properties.role === 'arrow') return { stroke: st.token, width: 2 };
-    if (f.properties.role === 'head') return { stroke: st.token, fill: st.token, width: 1 };
-    return null;
-  };
   const counts = LEVELS.map((l) => [l, items.filter((p) => lvl(p.level) === l && p.e != null).length] as const);
   const typedE = parseDistance(typed.e, conv);
   const typedN = parseDistance(typed.n, conv);
 
   return (
     <div className="grid gap-4 p-3 lg:grid-cols-[minmax(0,3fr)_minmax(0,1fr)]" data-testid="monitoring-map">
-      <PlanSketch
-        features={features}
-        fitTo={fit}
-        styleFor={styleFor}
-        conventions={conv}
-        heightClass="h-[480px]"
-        cursor={placing ? 'crosshair' : 'default'}
-        onPick={(f) => f.entityId && onOpenPoint?.(f.entityId)}
-        onPlanClick={placing ? (p) => place.mutate({ id: placing, p }) : undefined}
-        testId="monitoring-plan"
-      >
-        {!fit.length && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 p-6 text-center text-sm text-content-tertiary">
-            {t('plan.mon.empty', { defaultValue: 'No point has a position yet. Set positions from the list, or import readings with E and N.' })}
-          </div>
-        )}
-        {placing && (
-          <div className="absolute start-3 top-3 rounded-lg border border-border-light bg-surface-primary/95 px-3 py-2 text-xs shadow-md">
-            {t('plan.mon.click_to_place', { defaultValue: 'Click the plan where {{code}} is', code: items.find((p) => p.id === placing)?.code ?? '' })}
-          </div>
-        )}
-        <div className="absolute bottom-3 end-3 space-y-1 rounded-lg border border-border-light bg-surface-primary/90 px-2.5 py-2 text-xs text-content-secondary" data-testid="monitoring-legend">
-          {counts.map(([l, n]) => (
-            <span key={l} className="flex items-center gap-1.5">
-              <Glyph level={l} />
-              {t(`plan.mon.level.${l}`, { defaultValue: LEVEL_DEFAULT[l] })}
-              <span className="font-mono text-content-tertiary">{n}</span>
-            </span>
-          ))}
-          <span className="block border-t border-border-light pt-1 text-content-tertiary">
-            {t('plan.stake.scale_legend', { defaultValue: 'Arrows x{{s}}: 1 m of arrow = {{mm}} mm', s: scale, mm: mmPerArrowMetre(scale) })}
-          </span>
-        </div>
-      </PlanSketch>
+      <Suspense fallback={<div className="h-[480px] animate-pulse rounded-lg border border-border-light bg-surface-secondary" />}>
+        <PlanCanvas
+          projectId={projectId}
+          layers={layers}
+          heightClass="h-[520px]"
+          inspector={false}
+          onSelect={(ids) => {
+            const id = ids.find((x) => x.startsWith('mon:'));
+            if (id) onOpenPoint?.(id.slice(4));
+          }}
+          pickPoint={placing ? (p) => place.mutate({ id: placing, p }) : undefined}
+          pickHint={placing ? t('plan.mon.click_to_place', { defaultValue: 'Click the plan where {{code}} is', code: items.find((p) => p.id === placing)?.code ?? '' }) : undefined}
+          empty={{ title: t('plan.mon.empty', { defaultValue: 'No point has a position yet. Set positions from the list, or import readings with E and N.' }) }}
+          toolbarSlot={<PlanPrintButton projectId={projectId} layers={layers} conventions={conv} title={t('plan.mon.print_title', { defaultValue: 'Monitoring points and displacements' })} testId="monitoring-print" />}
+          overlay={
+            <PlanLegend testId="monitoring-legend">
+              {counts.map(([l, n]) => (
+                <span key={l} className="flex items-center gap-1.5">
+                  <Glyph level={l} />
+                  {t(`plan.mon.level.${l}`, { defaultValue: LEVEL_DEFAULT[l] })}
+                  <span className="font-mono text-content-tertiary">{n}</span>
+                </span>
+              ))}
+              <span className="block border-t border-border-light pt-1 text-content-tertiary">
+                {t('plan.stake.scale_legend', { defaultValue: 'Arrows x{{s}}: 1 m of arrow = {{mm}} mm', s: scale, mm: mmPerArrowMetre(scale) })}
+              </span>
+            </PlanLegend>
+          }
+          testId="monitoring-plan"
+        />
+      </Suspense>
 
       <div className="space-y-3">
         <div className="flex h-8 w-fit rounded-lg border border-border-light p-0.5" role="group" aria-label={t('plan.stake.arrows', { defaultValue: 'Arrows' })}>

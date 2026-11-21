@@ -6,77 +6,72 @@
  * largest standardized one flagged, and the ellipse table.
  */
 
-import { useState } from 'react';
+import { lazy, Suspense, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Badge } from '@/shared/ui';
 import { fmtNumber } from '@/shared/lib/formatters';
+import { ellipseFeatures, ellipseScale } from '@/features/survey-plan/engine/errorEllipses';
+import { extentOf } from '@/features/survey-plan/engine/traverseSketch';
+import { layer } from '@/features/survey-plan/planLayers';
+import { EllipseGlyph, PlanLegend, marked } from '@/features/survey-plan/screens/planMarks';
+import type { GridXY, PlanFeature } from '@/features/survey-plan/types';
 import { fmtM } from './angles';
 import type { FieldTraverseOut } from './api';
-import { ellipseExaggeration, ellipseRotation, fitSketch, type LsqOut } from './adjustment';
+import type { LsqOut } from './adjustment';
 
-const W = 420;
-const H = 300;
+const PlanCanvas = lazy(() => import('@/features/survey-plan/PlanCanvas'));
 
-export function TraverseSketch({ result, lsq }: { result: FieldTraverseOut; lsq: LsqOut | null | undefined }) {
+/** The adjusted run and its error ellipses on the shared plan canvas. */
+export function TraverseSketch({ result, lsq, projectId }: { result: FieldTraverseOut; lsq: LsqOut | null | undefined; projectId?: string | null }) {
   const { t } = useTranslation();
   const [conf95, setConf95] = useState(false);
   const pts = lsq ? lsq.stations : result.stations;
-  if (pts.length < 2) return null;
-  const { at, scale } = fitSketch(pts, W, H);
-  const ring = pts.map((p) => at(p.e, p.n));
-  if (result.shape === 'loop') ring.push(ring[0]!);
-  const ellipses = lsq?.ellipses ?? [];
-  const exag = ellipseExaggeration(ellipses, Math.min(W, H) - 48);
   const factor = conf95 && lsq ? lsq.confidence_95 : 1;
-  const byId = new Map(pts.map((p) => [p.station_id, p]));
+  const plan = useMemo(() => {
+    const xy = pts.map((p): GridXY => [p.e, p.n]);
+    const run: PlanFeature[] = [];
+    if (xy.length >= 2) {
+      const line = result.shape === 'loop' ? [...xy, xy[0]!] : xy;
+      run.push(marked({ id: 'lsq-run', layer: 'traverse', geometry: { type: 'LineString', coordinates: line }, properties: {} }, { colour: 'accent', width: 2 }));
+    }
+    pts.forEach((p, i) =>
+      run.push(marked({ id: `lsq-stn:${i}`, layer: 'traverse', geometry: { type: 'Point', coordinates: [p.e, p.n] }, properties: { label: p.station_id } }, { shape: 'circle', size: 3.5, colour: 'ink', fill: 'bg' })),
+    );
+    const ellipses = (lsq?.ellipses ?? []).map((e) => ({ ...e, a_m: e.a_m * factor, b_m: e.b_m * factor }));
+    const scale = ellipseScale(ellipses, extentOf(pts));
+    const at = new Map(pts.map((p) => [p.station_id, [p.e, p.n] as GridXY]));
+    const rings = ellipseFeatures(ellipses, at, scale).map((f) =>
+      marked(f, f.properties.role === 'ellipse' ? { colour: 'misclosure', width: 1.25, fill: 'misclosure', fillOpacity: 0.08 } : { colour: 'misclosure', width: 0.75, dash: 'dot' }),
+    );
+    return { scale, count: ellipses.length, layers: [layer('traverse', run), layer('ellipses', rings)] };
+  }, [pts, result.shape, lsq, factor]);
+  if (pts.length < 2) return null;
   return (
-    <figure className="space-y-1">
-      <svg viewBox={`0 0 ${W} ${H}`} className="w-full rounded-md border border-border-light bg-surface-secondary" role="img" aria-label={t('survey.lsq.sketch', { defaultValue: 'Sketch with error ellipses' })} data-testid="traverse-sketch">
-        <polyline points={ring.map(([x, y]) => `${x},${y}`).join(' ')} fill="none" stroke="currentColor" className="text-oe-blue" strokeWidth={1.5} />
-        {ellipses.map((e) => {
-          const p = byId.get(e.ref);
-          if (!p) return null;
-          const [x, y] = at(p.e, p.n);
-          return (
-            <ellipse
-              key={e.ref}
-              cx={x}
-              cy={y}
-              rx={Math.max(e.b_m * exag * factor, 0.5)}
-              ry={Math.max(e.a_m * exag * factor, 0.5)}
-              transform={`rotate(${ellipseRotation(e.azimuth_deg)} ${x} ${y})`}
-              fill="none"
-              stroke="#c0392b"
-              strokeWidth={1.2}
-            />
-          );
-        })}
-        {pts.map((p) => {
-          const [x, y] = at(p.e, p.n);
-          return (
-            <g key={p.station_id}>
-              <circle cx={x} cy={y} r={2.5} fill="currentColor" className="text-content-primary" />
-              <text x={x + 5} y={y - 5} fontSize={11} className="fill-current">{p.station_id}</text>
-            </g>
-          );
-        })}
-        <text x={W - 16} y={16} fontSize={11} fontWeight="bold" className="fill-current">N</text>
-        <line x1={W - 12} y1={22} x2={W - 12} y2={42} stroke="currentColor" />
-      </svg>
-      {lsq && ellipses.length > 0 && (
-        <figcaption className="flex flex-wrap items-center gap-3 text-xs text-content-tertiary">
-          <span>{t('survey.lsq.exaggeration', { defaultValue: 'Ellipses exaggerated {{x}} times', x: fmtNumber(exag / scale, 0) })}</span>
-          <label className="flex items-center gap-1">
-            <input type="checkbox" checked={conf95} onChange={(e) => setConf95(e.target.checked)} />
-            {t('survey.lsq.conf95', { defaultValue: '95% ellipses' })}
-          </label>
-        </figcaption>
-      )}
-    </figure>
+    <Suspense fallback={<div className="h-[360px] animate-pulse rounded-lg border border-border-light bg-surface-secondary" />}>
+      <PlanCanvas
+        projectId={projectId ?? ''}
+        layers={plan.layers}
+        heightClass="h-[380px]"
+        inspector={false}
+        overlay={plan.count > 0 && (
+          <PlanLegend testId="lsq-legend">
+            <span className="flex items-center gap-1.5">
+              <EllipseGlyph token="misclosure" />
+              {t('survey.lsq.exaggeration', { defaultValue: 'Ellipses exaggerated {{x}} times', x: fmtNumber(plan.scale, 0) })}
+            </span>
+            <label className="flex items-center gap-1">
+              <input type="checkbox" checked={conf95} onChange={(e) => setConf95(e.target.checked)} />
+              {t('survey.lsq.conf95', { defaultValue: '95% ellipses' })}
+            </label>
+          </PlanLegend>
+        )}
+        testId="lsq-sketch"
+      />
+    </Suspense>
   );
 }
 
-export function LsqPanel({ result }: { result: FieldTraverseOut }) {
+export function LsqPanel({ result, projectId }: { result: FieldTraverseOut; projectId?: string | null }) {
   const { t } = useTranslation();
   const lsq = result.lsq;
   if (!lsq) return null;
@@ -96,7 +91,7 @@ export function LsqPanel({ result }: { result: FieldTraverseOut }) {
           <bdi dir="ltr">χ² {fmtNumber(lsq.vtpv, 2)} ∈ [{fmtNumber(lsq.chi2_lower, 2)}, {fmtNumber(lsq.chi2_upper, 2)}]</bdi>
         </span>
       </div>
-      <TraverseSketch result={result} lsq={lsq} />
+      <TraverseSketch result={result} lsq={lsq} projectId={projectId} />
       <div className="overflow-x-auto">
         <h4 className="oe-label">{t('survey.lsq.compare', { defaultValue: 'Bowditch and least squares side by side' })}</h4>
         <table className="oe-table w-full text-xs" data-testid="lsq-compare">

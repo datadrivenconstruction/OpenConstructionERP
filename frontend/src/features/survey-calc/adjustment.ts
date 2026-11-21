@@ -131,31 +131,3 @@ export async function downloadTraverseReport(traverse: FieldTraverseIn, title: s
   const name = (traverse.name || 'traverse').replace(/[^\w-]+/g, '_').slice(0, 60);
   triggerDownload(await res.blob(), `${name}_adjustment.pdf`);
 }
-
-/** SVG coordinates of a sketch: north up, fitted into width x height with a margin. */
-export function fitSketch(points: { e: number; n: number }[], width: number, height: number, margin = 24) {
-  const es = points.map((p) => p.e);
-  const ns = points.map((p) => p.n);
-  const minE = Math.min(...es);
-  const minN = Math.min(...ns);
-  const span = Math.max(Math.max(...es) - minE, Math.max(...ns) - minN, 1e-6);
-  const scale = Math.min((width - 2 * margin) / span, (height - 2 * margin) / span);
-  return {
-    scale,
-    at: (e: number, n: number): [number, number] => [margin + (e - minE) * scale, height - margin - (n - minN) * scale],
-  };
-}
-
-/**
- * SVG rotation of an ellipse whose major axis is drawn along screen y.
- * An azimuth is clockwise from north, and SVG rotates clockwise too.
- */
-export function ellipseRotation(azimuthDeg: number): number {
-  return ((azimuthDeg % 180) + 180) % 180;
-}
-
-/** Exaggeration that makes the largest ellipse a fixed share of the drawing span. */
-export function ellipseExaggeration(ellipses: Ellipse[], spanPx: number, share = 0.08): number {
-  const biggest = Math.max(0, ...ellipses.map((e) => e.a_m));
-  return biggest > 0 ? (spanPx * share) / biggest : 0;
-}
