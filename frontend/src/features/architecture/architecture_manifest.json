@@ -343461,17 +343461,17 @@
     },
     {
       "name": "survey-calc",
-      "ts_files": 11,
+      "ts_files": 10,
       "css_files": 0,
-      "test_files": 3,
-      "total_files": 11
+      "test_files": 2,
+      "total_files": 10
     },
     {
       "name": "survey-plan",
-      "ts_files": 75,
+      "ts_files": 77,
       "css_files": 0,
-      "test_files": 15,
-      "total_files": 76
+      "test_files": 16,
+      "total_files": 78
     },
     {
       "name": "sustainability",
@@ -345682,7 +345682,7 @@
     "total_schemas": 5202,
     "total_python_files": 3746,
     "frontend_features": 254,
-    "frontend_ts_files": 4552,
+    "frontend_ts_files": 4553,
     "frontend_backend_mapped": 224
   },
   "frontend_backend_mapping": {
