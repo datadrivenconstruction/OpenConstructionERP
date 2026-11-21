@@ -16,6 +16,7 @@ import type { MapRef, MarkerProps } from 'react-map-gl/maplibre';
 import { TILE_ATTRIBUTION_HTML, useStreetBasemapStyleUrl } from '@/shared/ui/ProjectMap/basemap';
 import type { MapPin } from '@/shared/lib/photoEvidence';
 import 'maplibre-gl/dist/maplibre-gl.css';
+import { useMapLibreLocale } from '@/shared/lib/mapLibreLocale';
 
 type MapLibreModule = typeof import('react-map-gl/maplibre');
 
@@ -37,6 +38,7 @@ interface FieldItemsMapProps {
 
 export function FieldItemsMap({ pins, total, onSelect, selectedId, className }: FieldItemsMapProps) {
   const { t } = useTranslation();
+  const mapLocale = useMapLibreLocale();
   const [mapLib, setMapLib] = useState<MapLibreModule | null>(null);
   const styleUrl = useStreetBasemapStyleUrl();
   const mapRef = useRef<MapRef | null>(null);
@@ -99,6 +101,7 @@ export function FieldItemsMap({ pins, total, onSelect, selectedId, className }: 
         </div>
       ) : Map && Marker && Attribution ? (
         <Map
+          locale={mapLocale}
           ref={(instance: MapRef | null) => {
             mapRef.current = instance;
           }}

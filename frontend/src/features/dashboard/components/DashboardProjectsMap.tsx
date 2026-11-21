@@ -19,6 +19,7 @@ import {
 // page until the browser commits the style sheet, which is the second
 // half of the "no-pins" bug the user reported.
 import 'maplibre-gl/dist/maplibre-gl.css';
+import { useMapLibreLocale } from '@/shared/lib/mapLibreLocale';
 
 const CACHE_PREFIX = 'oe.geocode.';
 const CACHE_TTL_MS = 1000 * 60 * 60 * 24 * 30;
@@ -193,6 +194,7 @@ export function resolveProjectCoords(p: ProjectPin): { lat: number; lng: number 
 
 export function DashboardProjectsMap({ projects, className, heightClass: heightClassProp }: DashboardProjectsMapProps) {
   const { t } = useTranslation();
+  const mapLocale = useMapLibreLocale();
   const navigate = useNavigate();
   const [resolved, setResolved] = useState<ResolvedMarker[]>([]);
   const [mapLib, setMapLib] = useState<MapLibreModule | null>(null);
@@ -358,6 +360,7 @@ export function DashboardProjectsMap({ projects, className, heightClass: heightC
     >
       {Map && Marker && Attribution ? (
         <Map
+          locale={mapLocale}
           ref={(instance: MapRef | null) => {
             mapRef.current = instance;
           }}
