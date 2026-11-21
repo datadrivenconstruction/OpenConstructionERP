@@ -2434,28 +2434,28 @@
       "suggestion": "پیش از پذیرش سرشکنی، ثبت مشاهده را بررسی کنید یا آن را دوباره اندازه بگیرید."
     },
     "code_unknown": {
-      "fail": "Code {code} is not in the code library ({count} points).",
-      "suggestion": "Add the code to the library or correct the points' codes."
+      "fail": "کد {code} در کتابخانه کد نیست ({count} نقطه).",
+      "suggestion": "کد را به کتابخانه اضافه کنید یا کدهای نقاط را اصلاح کنید."
     },
     "string_short": {
-      "fail": "String {name} has a single point, so no line is drawn.",
-      "suggestion": "Code a second point of the string or correct the string number."
+      "fail": "رشته {name} فقط یک نقطه دارد، بنابراین خطی رسم نمی‌شود.",
+      "suggestion": "نقطه دوم رشته را کدگذاری کنید یا شماره رشته را اصلاح کنید."
     },
     "string_short_closed": {
-      "fail": "String {name} is closed but has only {count} points.",
-      "suggestion": "A closed string needs at least three points."
+      "fail": "رشته {name} بسته است اما فقط {count} نقطه دارد.",
+      "suggestion": "رشته بسته دست‌کم به سه نقطه نیاز دارد."
     },
     "ring_open": {
-      "fail": "A drawn polygon has fewer than three distinct vertices.",
-      "suggestion": "Add vertices or delete the polygon."
+      "fail": "یک چندضلعی ترسیم‌شده کمتر از سه رأس متمایز دارد.",
+      "suggestion": "رأس اضافه کنید یا چندضلعی را حذف کنید."
     },
     "ring_crosses": {
-      "fail": "A drawn polygon crosses itself near E {e}, N {n}.",
-      "suggestion": "Move or delete a vertex so the edges no longer cross."
+      "fail": "یک چندضلعی ترسیم‌شده نزدیک E {e}، N {n} خودش را قطع می‌کند.",
+      "suggestion": "یک رأس را جابه‌جا یا حذف کنید تا لبه‌ها دیگر یکدیگر را قطع نکنند."
     },
     "code_duplicate": {
-      "fail": "The code library lists code {code} more than once.",
-      "suggestion": "Keep one entry per code."
+      "fail": "کتابخانه کد، کد {code} را بیش از یک بار دارد.",
+      "suggestion": "برای هر کد یک ورودی نگه دارید."
     }
   },
   "volumes": {
@@ -2860,7 +2860,7 @@
     "tolerance": "رواداری",
     "points": "نقاط مقایسه‌شده / خوانده‌شده",
     "mean": "میانگین انحراف",
-    "rms": "RMS",
+    "rms": "ریشه میانگین مربعات",
     "p95": "P95 انحراف مطلق",
     "within": "درون رواداری",
     "high": "بالاتر از طرح",

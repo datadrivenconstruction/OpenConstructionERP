@@ -2434,28 +2434,28 @@
       "suggestion": "समायोजन स्वीकार करने से पहले प्रेक्षण की प्रविष्टि जाँचें या उसे फिर से मापें।"
     },
     "code_unknown": {
-      "fail": "Code {code} is not in the code library ({count} points).",
-      "suggestion": "Add the code to the library or correct the points' codes."
+      "fail": "कोड {code} कोड लाइब्रेरी में नहीं है ({count} बिंदु)।",
+      "suggestion": "कोड को लाइब्रेरी में जोड़ें या बिंदुओं के कोड सही करें।"
     },
     "string_short": {
-      "fail": "String {name} has a single point, so no line is drawn.",
-      "suggestion": "Code a second point of the string or correct the string number."
+      "fail": "स्ट्रिंग {name} में केवल एक बिंदु है, इसलिए कोई रेखा नहीं खींची जाती।",
+      "suggestion": "स्ट्रिंग का दूसरा बिंदु कोड करें या स्ट्रिंग संख्या सही करें।"
     },
     "string_short_closed": {
-      "fail": "String {name} is closed but has only {count} points.",
-      "suggestion": "A closed string needs at least three points."
+      "fail": "स्ट्रिंग {name} बंद है लेकिन उसमें केवल {count} बिंदु हैं।",
+      "suggestion": "बंद स्ट्रिंग को कम से कम तीन बिंदु चाहिए।"
     },
     "ring_open": {
-      "fail": "A drawn polygon has fewer than three distinct vertices.",
-      "suggestion": "Add vertices or delete the polygon."
+      "fail": "बनाए गए बहुभुज में तीन से कम भिन्न शीर्ष हैं।",
+      "suggestion": "शीर्ष जोड़ें या बहुभुज हटाएँ।"
     },
     "ring_crosses": {
-      "fail": "A drawn polygon crosses itself near E {e}, N {n}.",
-      "suggestion": "Move or delete a vertex so the edges no longer cross."
+      "fail": "बनाया गया एक बहुभुज E {e}, N {n} के पास स्वयं को काटता है।",
+      "suggestion": "कोई शीर्ष हटाएँ या खिसकाएँ ताकि किनारे न कटें।"
     },
     "code_duplicate": {
-      "fail": "The code library lists code {code} more than once.",
-      "suggestion": "Keep one entry per code."
+      "fail": "कोड लाइब्रेरी में कोड {code} एक से अधिक बार है।",
+      "suggestion": "प्रति कोड एक ही प्रविष्टि रखें।"
     }
   },
   "volumes": {
@@ -2860,7 +2860,7 @@
     "tolerance": "सहनशीलता",
     "points": "तुलना किए / पढ़े गए बिंदु",
     "mean": "औसत विचलन",
-    "rms": "RMS",
+    "rms": "वर्ग माध्य मूल",
     "p95": "निरपेक्ष विचलन का P95",
     "within": "सहनशीलता के भीतर",
     "high": "डिज़ाइन से ऊपर",

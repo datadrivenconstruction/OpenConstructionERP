@@ -2434,28 +2434,28 @@
       "suggestion": "Kontroller hvordan observasjonen ble ført, eller mål den på nytt før utjevningen godtas."
     },
     "code_unknown": {
-      "fail": "Code {code} is not in the code library ({count} points).",
-      "suggestion": "Add the code to the library or correct the points' codes."
+      "fail": "Kode {code} finnes ikke i kodebiblioteket ({count} punkter).",
+      "suggestion": "Legg koden til i biblioteket, eller rett kodene til punktene."
     },
     "string_short": {
-      "fail": "String {name} has a single point, so no line is drawn.",
-      "suggestion": "Code a second point of the string or correct the string number."
+      "fail": "Strengen {name} har bare ett punkt, så det tegnes ingen linje.",
+      "suggestion": "Kod et andre punkt på strengen, eller rett strengnummeret."
     },
     "string_short_closed": {
-      "fail": "String {name} is closed but has only {count} points.",
-      "suggestion": "A closed string needs at least three points."
+      "fail": "Strengen {name} er lukket, men har bare {count} punkter.",
+      "suggestion": "En lukket streng trenger minst tre punkter."
     },
     "ring_open": {
-      "fail": "A drawn polygon has fewer than three distinct vertices.",
-      "suggestion": "Add vertices or delete the polygon."
+      "fail": "Et tegnet polygon har færre enn tre ulike hjørner.",
+      "suggestion": "Legg til hjørner, eller slett polygonet."
     },
     "ring_crosses": {
-      "fail": "A drawn polygon crosses itself near E {e}, N {n}.",
-      "suggestion": "Move or delete a vertex so the edges no longer cross."
+      "fail": "Et tegnet polygon krysser seg selv nær E {e}, N {n}.",
+      "suggestion": "Flytt eller slett et hjørne slik at kantene ikke lenger krysser hverandre."
     },
     "code_duplicate": {
-      "fail": "The code library lists code {code} more than once.",
-      "suggestion": "Keep one entry per code."
+      "fail": "Kodebiblioteket inneholder kode {code} mer enn én gang.",
+      "suggestion": "Behold én oppføring per kode."
     }
   },
   "volumes": {
@@ -2860,7 +2860,7 @@
     "tolerance": "Toleranse",
     "points": "Punkter sammenlignet / lest",
     "mean": "Gjennomsnittlig avvik",
-    "rms": "RMS",
+    "rms": "Kvadratisk middelverdi",
     "p95": "P95 av absolutt avvik",
     "within": "Innenfor toleranse",
     "high": "Over prosjekt",

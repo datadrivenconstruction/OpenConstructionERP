@@ -2434,28 +2434,28 @@
       "suggestion": "Tarkista havainnon kirjaus tai mittaa se uudelleen ennen tasoituksen hyväksymistä."
     },
     "code_unknown": {
-      "fail": "Code {code} is not in the code library ({count} points).",
-      "suggestion": "Add the code to the library or correct the points' codes."
+      "fail": "Koodia {code} ei ole koodikirjastossa ({count} pistettä).",
+      "suggestion": "Lisää koodi kirjastoon tai korjaa pisteiden koodit."
     },
     "string_short": {
-      "fail": "String {name} has a single point, so no line is drawn.",
-      "suggestion": "Code a second point of the string or correct the string number."
+      "fail": "Jonossa {name} on vain yksi piste, joten viivaa ei piirretä.",
+      "suggestion": "Koodaa jonolle toinen piste tai korjaa jonon numero."
     },
     "string_short_closed": {
-      "fail": "String {name} is closed but has only {count} points.",
-      "suggestion": "A closed string needs at least three points."
+      "fail": "Jono {name} on suljettu, mutta siinä on vain {count} pistettä.",
+      "suggestion": "Suljettu jono tarvitsee vähintään kolme pistettä."
     },
     "ring_open": {
-      "fail": "A drawn polygon has fewer than three distinct vertices.",
-      "suggestion": "Add vertices or delete the polygon."
+      "fail": "Piirretyssä monikulmiossa on alle kolme eri kulmapistettä.",
+      "suggestion": "Lisää kulmapisteitä tai poista monikulmio."
     },
     "ring_crosses": {
-      "fail": "A drawn polygon crosses itself near E {e}, N {n}.",
-      "suggestion": "Move or delete a vertex so the edges no longer cross."
+      "fail": "Piirretty monikulmio leikkaa itsensä lähellä kohtaa E {e}, N {n}.",
+      "suggestion": "Siirrä tai poista kulmapiste, jotta reunat eivät enää leikkaa."
     },
     "code_duplicate": {
-      "fail": "The code library lists code {code} more than once.",
-      "suggestion": "Keep one entry per code."
+      "fail": "Koodikirjasto sisältää koodin {code} useammin kuin kerran.",
+      "suggestion": "Säilytä yksi rivi koodia kohti."
     }
   },
   "volumes": {
@@ -2860,7 +2860,7 @@
     "tolerance": "Toleranssi",
     "points": "Pisteitä verrattu / luettu",
     "mean": "Keskipoikkeama",
-    "rms": "RMS",
+    "rms": "Neliöllinen keskiarvo",
     "p95": "Absoluuttisen poikkeaman P95",
     "within": "Toleranssin sisällä",
     "high": "Suunnitelman yläpuolella",

@@ -2434,28 +2434,28 @@
       "suggestion": "Periksa pencatatan pengamatan atau ukur ulang sebelum menerima perataan."
     },
     "code_unknown": {
-      "fail": "Code {code} is not in the code library ({count} points).",
-      "suggestion": "Add the code to the library or correct the points' codes."
+      "fail": "Kode {code} tidak ada di pustaka kode ({count} titik).",
+      "suggestion": "Tambahkan kode ke pustaka atau perbaiki kode titik."
     },
     "string_short": {
-      "fail": "String {name} has a single point, so no line is drawn.",
-      "suggestion": "Code a second point of the string or correct the string number."
+      "fail": "String {name} hanya memiliki satu titik, sehingga tidak ada garis yang digambar.",
+      "suggestion": "Beri kode titik kedua pada string atau perbaiki nomor string."
     },
     "string_short_closed": {
-      "fail": "String {name} is closed but has only {count} points.",
-      "suggestion": "A closed string needs at least three points."
+      "fail": "String {name} tertutup tetapi hanya memiliki {count} titik.",
+      "suggestion": "String tertutup memerlukan minimal tiga titik."
     },
     "ring_open": {
-      "fail": "A drawn polygon has fewer than three distinct vertices.",
-      "suggestion": "Add vertices or delete the polygon."
+      "fail": "Poligon yang digambar memiliki kurang dari tiga simpul berbeda.",
+      "suggestion": "Tambahkan simpul atau hapus poligon."
     },
     "ring_crosses": {
-      "fail": "A drawn polygon crosses itself near E {e}, N {n}.",
-      "suggestion": "Move or delete a vertex so the edges no longer cross."
+      "fail": "Poligon yang digambar memotong dirinya sendiri di dekat E {e}, N {n}.",
+      "suggestion": "Geser atau hapus satu simpul agar sisi-sisinya tidak lagi berpotongan."
     },
     "code_duplicate": {
-      "fail": "The code library lists code {code} more than once.",
-      "suggestion": "Keep one entry per code."
+      "fail": "Pustaka kode mencantumkan kode {code} lebih dari sekali.",
+      "suggestion": "Simpan satu entri per kode."
     }
   },
   "volumes": {
@@ -2860,7 +2860,7 @@
     "tolerance": "Toleransi",
     "points": "Titik dibandingkan / dibaca",
     "mean": "Deviasi rata-rata",
-    "rms": "RMS",
+    "rms": "Akar rata-rata kuadrat",
     "p95": "P95 deviasi absolut",
     "within": "Dalam toleransi",
     "high": "Di atas desain",

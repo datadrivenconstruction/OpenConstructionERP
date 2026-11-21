@@ -2434,28 +2434,28 @@
       "suggestion": "Kiểm tra việc ghi sổ trị đo hoặc đo lại trước khi chấp nhận bình sai."
     },
     "code_unknown": {
-      "fail": "Code {code} is not in the code library ({count} points).",
-      "suggestion": "Add the code to the library or correct the points' codes."
+      "fail": "Mã {code} không có trong thư viện mã ({count} điểm).",
+      "suggestion": "Thêm mã vào thư viện hoặc sửa mã của các điểm."
     },
     "string_short": {
-      "fail": "String {name} has a single point, so no line is drawn.",
-      "suggestion": "Code a second point of the string or correct the string number."
+      "fail": "Chuỗi {name} chỉ có một điểm nên không vẽ đường.",
+      "suggestion": "Mã hóa điểm thứ hai của chuỗi hoặc sửa số chuỗi."
     },
     "string_short_closed": {
-      "fail": "String {name} is closed but has only {count} points.",
-      "suggestion": "A closed string needs at least three points."
+      "fail": "Chuỗi {name} khép kín nhưng chỉ có {count} điểm.",
+      "suggestion": "Chuỗi khép kín cần ít nhất ba điểm."
     },
     "ring_open": {
-      "fail": "A drawn polygon has fewer than three distinct vertices.",
-      "suggestion": "Add vertices or delete the polygon."
+      "fail": "Một đa giác đã vẽ có ít hơn ba đỉnh khác nhau.",
+      "suggestion": "Thêm đỉnh hoặc xóa đa giác."
     },
     "ring_crosses": {
-      "fail": "A drawn polygon crosses itself near E {e}, N {n}.",
-      "suggestion": "Move or delete a vertex so the edges no longer cross."
+      "fail": "Một đa giác đã vẽ tự cắt chính nó gần E {e}, N {n}.",
+      "suggestion": "Di chuyển hoặc xóa một đỉnh để các cạnh không còn cắt nhau."
     },
     "code_duplicate": {
-      "fail": "The code library lists code {code} more than once.",
-      "suggestion": "Keep one entry per code."
+      "fail": "Thư viện mã liệt kê mã {code} nhiều hơn một lần.",
+      "suggestion": "Giữ một mục cho mỗi mã."
     }
   },
   "volumes": {
@@ -2860,7 +2860,7 @@
     "tolerance": "Dung sai",
     "points": "Điểm đã so sánh / đã đọc",
     "mean": "Độ lệch trung bình",
-    "rms": "RMS",
+    "rms": "Căn quân phương",
     "p95": "P95 của độ lệch tuyệt đối",
     "within": "Trong dung sai",
     "high": "Cao hơn thiết kế",

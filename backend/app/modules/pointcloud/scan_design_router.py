@@ -21,6 +21,8 @@ import uuid
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, Response, UploadFile, status
 
 from app.core.active_markets import ActiveMarkets
+from app.core.document_locale import normalize_document_locale
+from app.core.i18n import SUPPORTED_LOCALES
 from app.dependencies import CurrentUserId, CurrentUserPayload, RequirePermission, SessionDep, verify_project_access
 from app.modules.pointcloud.scan_design_schemas import (
     CutFillCreated,
@@ -163,7 +165,12 @@ async def export_report(
 ) -> Response:
     content, media, name = await ScanDesignService(session).report_export(report_id, payload, format, locale)
     return Response(
-        content=content, media_type=media, headers={"Content-Disposition": f'attachment; filename="{name}"'}
+        content=content,
+        media_type=media,
+        headers={
+            "Content-Disposition": f'attachment; filename="{name}"',
+            "Content-Language": normalize_document_locale(locale, SUPPORTED_LOCALES, "en"),
+        },
     )
 
 

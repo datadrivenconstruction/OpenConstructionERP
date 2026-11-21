@@ -2434,28 +2434,28 @@
       "suggestion": "調整を採用する前に、観測の記帳を確認するか再観測してください。"
     },
     "code_unknown": {
-      "fail": "Code {code} is not in the code library ({count} points).",
-      "suggestion": "Add the code to the library or correct the points' codes."
+      "fail": "コード {code} はコードライブラリにありません({count} 点)。",
+      "suggestion": "ライブラリにコードを追加するか、点のコードを修正してください。"
     },
     "string_short": {
-      "fail": "String {name} has a single point, so no line is drawn.",
-      "suggestion": "Code a second point of the string or correct the string number."
+      "fail": "ストリング {name} は点が1つしかないため、線は描画されません。",
+      "suggestion": "ストリングの2点目をコード付けするか、ストリング番号を修正してください。"
     },
     "string_short_closed": {
-      "fail": "String {name} is closed but has only {count} points.",
-      "suggestion": "A closed string needs at least three points."
+      "fail": "ストリング {name} は閉じていますが、点が {count} 点しかありません。",
+      "suggestion": "閉じたストリングには3点以上が必要です。"
     },
     "ring_open": {
-      "fail": "A drawn polygon has fewer than three distinct vertices.",
-      "suggestion": "Add vertices or delete the polygon."
+      "fail": "描画したポリゴンの異なる頂点が3つ未満です。",
+      "suggestion": "頂点を追加するか、ポリゴンを削除してください。"
     },
     "ring_crosses": {
-      "fail": "A drawn polygon crosses itself near E {e}, N {n}.",
-      "suggestion": "Move or delete a vertex so the edges no longer cross."
+      "fail": "描画したポリゴンが E {e}、N {n} 付近で自己交差しています。",
+      "suggestion": "辺が交差しないように頂点を移動または削除してください。"
     },
     "code_duplicate": {
-      "fail": "The code library lists code {code} more than once.",
-      "suggestion": "Keep one entry per code."
+      "fail": "コードライブラリにコード {code} が複数あります。",
+      "suggestion": "コードごとに1件だけ残してください。"
     }
   },
   "volumes": {
@@ -2860,7 +2860,7 @@
     "tolerance": "許容差",
     "points": "比較点数 / 読込点数",
     "mean": "平均偏差",
-    "rms": "RMS",
+    "rms": "二乗平均平方根",
     "p95": "絶対偏差の P95",
     "within": "許容差内",
     "high": "設計より高い",

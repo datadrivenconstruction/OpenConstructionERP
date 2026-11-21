@@ -2434,28 +2434,28 @@
       "suggestion": "Kontrollera hur observationen bokfördes eller mät om den innan utjämningen godtas."
     },
     "code_unknown": {
-      "fail": "Code {code} is not in the code library ({count} points).",
-      "suggestion": "Add the code to the library or correct the points' codes."
+      "fail": "Kod {code} finns inte i kodbiblioteket ({count} punkter).",
+      "suggestion": "Lägg till koden i biblioteket eller rätta punkternas koder."
     },
     "string_short": {
-      "fail": "String {name} has a single point, so no line is drawn.",
-      "suggestion": "Code a second point of the string or correct the string number."
+      "fail": "Strängen {name} har bara en punkt, så ingen linje ritas.",
+      "suggestion": "Koda en andra punkt på strängen eller rätta strängnumret."
     },
     "string_short_closed": {
-      "fail": "String {name} is closed but has only {count} points.",
-      "suggestion": "A closed string needs at least three points."
+      "fail": "Strängen {name} är sluten men har bara {count} punkter.",
+      "suggestion": "En sluten sträng behöver minst tre punkter."
     },
     "ring_open": {
-      "fail": "A drawn polygon has fewer than three distinct vertices.",
-      "suggestion": "Add vertices or delete the polygon."
+      "fail": "En ritad polygon har färre än tre olika hörnpunkter.",
+      "suggestion": "Lägg till hörnpunkter eller ta bort polygonen."
     },
     "ring_crosses": {
-      "fail": "A drawn polygon crosses itself near E {e}, N {n}.",
-      "suggestion": "Move or delete a vertex so the edges no longer cross."
+      "fail": "En ritad polygon korsar sig själv nära E {e}, N {n}.",
+      "suggestion": "Flytta eller ta bort en hörnpunkt så att kanterna inte längre korsar varandra."
     },
     "code_duplicate": {
-      "fail": "The code library lists code {code} more than once.",
-      "suggestion": "Keep one entry per code."
+      "fail": "Kodbiblioteket innehåller kod {code} mer än en gång.",
+      "suggestion": "Behåll en post per kod."
     }
   },
   "volumes": {
@@ -2860,7 +2860,7 @@
     "tolerance": "Tolerans",
     "points": "Punkter jämförda / lästa",
     "mean": "Medelavvikelse",
-    "rms": "RMS",
+    "rms": "Kvadratiskt medelvärde",
     "p95": "P95 av absolut avvikelse",
     "within": "Inom tolerans",
     "high": "Över projektering",

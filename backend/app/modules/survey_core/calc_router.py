@@ -24,6 +24,8 @@ from fastapi import APIRouter, Depends, Query, status
 from fastapi.responses import Response
 
 from app.core.active_markets import ActiveMarkets
+from app.core.document_locale import normalize_document_locale
+from app.core.i18n import SUPPORTED_LOCALES
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep, verify_project_access
 from app.modules.survey_core.calc_schemas import (
     CalcClassesOut,
@@ -72,7 +74,10 @@ async def calc_traverse_report(body: TraverseReportIn, markets: ActiveMarkets, l
     return Response(
         content=pdf,
         media_type="application/pdf",
-        headers={"Content-Disposition": f'attachment; filename="{name}_adjustment.pdf"'},
+        headers={
+            "Content-Disposition": f'attachment; filename="{name}_adjustment.pdf"',
+            "Content-Language": normalize_document_locale(locale, SUPPORTED_LOCALES, "en"),
+        },
     )
 
 

@@ -30,9 +30,11 @@ EXP = expected()
 def _flat_pad_las(z: float) -> bytes:
     import laspy
 
-    gx, gy = np.meshgrid(np.arange(389000.0, 389100.5, 2.0), np.arange(5819000.0, 5819060.5, 2.0))
+    # Gridded at 2 m the surface keeps cell centres, which sit 1 m inside the cloud's edge. The cloud is one
+    # cell wider than the pad on every side so the design surface still covers every scan point.
+    gx, gy = np.meshgrid(np.arange(388998.0, 389102.5, 2.0), np.arange(5818998.0, 5819062.5, 2.0))
     head = laspy.LasHeader(point_format=1, version="1.4")
-    head.offsets = [389000.0, 5819000.0, 0.0]
+    head.offsets = [388998.0, 5818998.0, 0.0]
     head.scales = [0.001, 0.001, 0.001]
     las = laspy.LasData(head)
     las.x, las.y, las.z = gx.ravel(), gy.ravel(), np.full(gx.size, z)
@@ -83,8 +85,10 @@ async def test_seeded_report_carries_the_expected_numbers(client: AsyncClient, h
         assert stats[key] == exp[key], key
     assert report["severity"] == exp["severity"]
     assert [f["rule_id"] for f in report["findings"]] == exp["findings"]
-    assert report["heat"]["nx"] > 0
+    assert report["heat"] is None  # the list leaves the heat grid out
 
+    one = await client.get(f"{PC}/deviation-reports/{report['id']}", headers=header)
+    assert one.json()["heat"]["nx"] > 0
     again = await client.get(f"{PC}/deviation-reports/{report['id']}", headers=header, params={"locale": "de"})
     assert again.status_code == 200
     assert "Scanpunkte" in again.json()["findings"][0]["message"]

@@ -2434,28 +2434,28 @@
       "suggestion": "조정을 채택하기 전에 관측 기록을 확인하거나 다시 관측하세요."
     },
     "code_unknown": {
-      "fail": "Code {code} is not in the code library ({count} points).",
-      "suggestion": "Add the code to the library or correct the points' codes."
+      "fail": "코드 {code}가 코드 라이브러리에 없습니다({count}개 점).",
+      "suggestion": "라이브러리에 코드를 추가하거나 점의 코드를 수정하세요."
     },
     "string_short": {
-      "fail": "String {name} has a single point, so no line is drawn.",
-      "suggestion": "Code a second point of the string or correct the string number."
+      "fail": "스트링 {name}에는 점이 하나뿐이어서 선이 그려지지 않습니다.",
+      "suggestion": "스트링의 두 번째 점을 코딩하거나 스트링 번호를 수정하세요."
     },
     "string_short_closed": {
-      "fail": "String {name} is closed but has only {count} points.",
-      "suggestion": "A closed string needs at least three points."
+      "fail": "스트링 {name}은 닫혀 있지만 점이 {count}개뿐입니다.",
+      "suggestion": "닫힌 스트링에는 점이 최소 3개 필요합니다."
     },
     "ring_open": {
-      "fail": "A drawn polygon has fewer than three distinct vertices.",
-      "suggestion": "Add vertices or delete the polygon."
+      "fail": "그려진 다각형의 서로 다른 꼭짓점이 3개 미만입니다.",
+      "suggestion": "꼭짓점을 추가하거나 다각형을 삭제하세요."
     },
     "ring_crosses": {
-      "fail": "A drawn polygon crosses itself near E {e}, N {n}.",
-      "suggestion": "Move or delete a vertex so the edges no longer cross."
+      "fail": "그려진 다각형이 E {e}, N {n} 근처에서 자기 자신과 교차합니다.",
+      "suggestion": "모서리가 더 이상 교차하지 않도록 꼭짓점을 옮기거나 삭제하세요."
     },
     "code_duplicate": {
-      "fail": "The code library lists code {code} more than once.",
-      "suggestion": "Keep one entry per code."
+      "fail": "코드 라이브러리에 코드 {code}가 두 번 이상 있습니다.",
+      "suggestion": "코드당 항목을 하나만 남기세요."
     }
   },
   "volumes": {
@@ -2860,7 +2860,7 @@
     "tolerance": "허용오차",
     "points": "비교 / 읽은 점 수",
     "mean": "평균 편차",
-    "rms": "RMS",
+    "rms": "제곱평균제곱근",
     "p95": "절대 편차의 P95",
     "within": "허용오차 이내",
     "high": "설계보다 높음",

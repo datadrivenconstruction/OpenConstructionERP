@@ -2434,28 +2434,28 @@
       "suggestion": "Ellenőrizze a mérés rögzítését, vagy mérje újra, mielőtt elfogadja a kiegyenlítést."
     },
     "code_unknown": {
-      "fail": "Code {code} is not in the code library ({count} points).",
-      "suggestion": "Add the code to the library or correct the points' codes."
+      "fail": "A(z) {code} kód nincs a kódkönyvtárban ({count} pont).",
+      "suggestion": "Vegye fel a kódot a könyvtárba, vagy javítsa a pontok kódjait."
     },
     "string_short": {
-      "fail": "String {name} has a single point, so no line is drawn.",
-      "suggestion": "Code a second point of the string or correct the string number."
+      "fail": "A(z) {name} vonalnak egyetlen pontja van, ezért nem készül vonal.",
+      "suggestion": "Kódoljon a vonalhoz egy második pontot, vagy javítsa a vonal számát."
     },
     "string_short_closed": {
-      "fail": "String {name} is closed but has only {count} points.",
-      "suggestion": "A closed string needs at least three points."
+      "fail": "A(z) {name} vonal zárt, de csak {count} pontja van.",
+      "suggestion": "A zárt vonalnak legalább három pont kell."
     },
     "ring_open": {
-      "fail": "A drawn polygon has fewer than three distinct vertices.",
-      "suggestion": "Add vertices or delete the polygon."
+      "fail": "Egy megrajzolt sokszögnek háromnál kevesebb különböző csúcsa van.",
+      "suggestion": "Adjon hozzá csúcsokat, vagy törölje a sokszöget."
     },
     "ring_crosses": {
-      "fail": "A drawn polygon crosses itself near E {e}, N {n}.",
-      "suggestion": "Move or delete a vertex so the edges no longer cross."
+      "fail": "Egy megrajzolt sokszög metszi önmagát E {e}, N {n} közelében.",
+      "suggestion": "Mozgasson vagy töröljön egy csúcsot, hogy az élek ne keresztezzék egymást."
     },
     "code_duplicate": {
-      "fail": "The code library lists code {code} more than once.",
-      "suggestion": "Keep one entry per code."
+      "fail": "A kódkönyvtár a(z) {code} kódot többször is tartalmazza.",
+      "suggestion": "Kódonként egy bejegyzést tartson meg."
     }
   },
   "volumes": {
@@ -2860,7 +2860,7 @@
     "tolerance": "Tűrés",
     "points": "Összevetett / beolvasott pontok",
     "mean": "Átlagos eltérés",
-    "rms": "RMS",
+    "rms": "Négyzetes középérték",
     "p95": "Az abszolút eltérés P95 értéke",
     "within": "Tűrésen belül",
     "high": "A terv felett",

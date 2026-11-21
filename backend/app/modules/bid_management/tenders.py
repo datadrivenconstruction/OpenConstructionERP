@@ -123,7 +123,16 @@ async def _package(session: Any, package_id: uuid.UUID, user_id: str) -> BidPack
     return pkg
 
 
-@router.get("/", response_model=list[TenderSummary])
+class TenderListResponse(BaseModel):
+    """A page of the Tenders list."""
+
+    items: list[TenderSummary]
+    total: int
+    offset: int = 0
+    limit: int = 100
+
+
+@router.get("/", response_model=TenderListResponse)
 async def list_tenders(
     session: SessionDep,
     user_id: CurrentUserId,
@@ -134,8 +143,8 @@ async def list_tenders(
     offset: int = Query(default=0, ge=0),
     limit: int = Query(default=100, ge=1, le=500),
     _perm: None = Depends(RequirePermission("bid_management.read")),
-) -> list[TenderSummary]:
-    """Every tender package of a project, native and copied, newest first."""
+) -> TenderListResponse:
+    """Tender packages of a project, native and copied, newest first."""
     await verify_project_access(project_id, user_id, session)
     stmt = select(BidPackage).where(BidPackage.project_id == project_id)
     if kind:
@@ -146,10 +155,17 @@ async def list_tenders(
         stmt = stmt.where(BidPackage.legacy_source == source)
     if status_filter:
         stmt = stmt.where(BidPackage.status == status_filter)
+    total = int(
+        (
+            await session.execute(
+                select(func.count()).select_from(stmt.order_by(None).subquery()).execution_options(**_ALL)
+            )
+        ).scalar_one()
+    )
     stmt = stmt.order_by(BidPackage.created_at.desc(), BidPackage.id).offset(offset).limit(limit)
     packages = list((await session.execute(stmt.execution_options(**_ALL))).scalars().all())
     if not packages:
-        return []
+        return TenderListResponse(items=[], total=total, offset=offset, limit=limit)
     ids = [p.id for p in packages]
     bids = (
         await session.execute(
@@ -193,7 +209,7 @@ async def list_tenders(
                 awarded_bidder=winner,
             )
         )
-    return out
+    return TenderListResponse(items=out, total=total, offset=offset, limit=limit)
 
 
 @router.get("/resolve/", response_model=TenderResolve)

@@ -2860,7 +2860,7 @@
     "tolerance": "Tolerancia",
     "points": "Puntos comparados / leídos",
     "mean": "Desviación media",
-    "rms": "RMS",
+    "rms": "Media cuadrática",
     "p95": "P95 de la desviación absoluta",
     "within": "Dentro de tolerancia",
     "high": "Por encima del proyecto",

@@ -2434,28 +2434,28 @@
       "suggestion": "راجع تسجيل الرصد أو أعد قياسه قبل قبول الضبط."
     },
     "code_unknown": {
-      "fail": "Code {code} is not in the code library ({count} points).",
-      "suggestion": "Add the code to the library or correct the points' codes."
+      "fail": "الرمز {code} غير موجود في مكتبة الرموز ({count} نقطة).",
+      "suggestion": "أضف الرمز إلى المكتبة أو صحح رموز النقاط."
     },
     "string_short": {
-      "fail": "String {name} has a single point, so no line is drawn.",
-      "suggestion": "Code a second point of the string or correct the string number."
+      "fail": "السلسلة {name} تحتوي على نقطة واحدة، لذا لا يُرسم خط.",
+      "suggestion": "رمّز نقطة ثانية للسلسلة أو صحح رقم السلسلة."
     },
     "string_short_closed": {
-      "fail": "String {name} is closed but has only {count} points.",
-      "suggestion": "A closed string needs at least three points."
+      "fail": "السلسلة {name} مغلقة لكنها تحتوي على {count} نقاط فقط.",
+      "suggestion": "السلسلة المغلقة تحتاج إلى ثلاث نقاط على الأقل."
     },
     "ring_open": {
-      "fail": "A drawn polygon has fewer than three distinct vertices.",
-      "suggestion": "Add vertices or delete the polygon."
+      "fail": "المضلع المرسوم له أقل من ثلاثة رؤوس مختلفة.",
+      "suggestion": "أضف رؤوساً أو احذف المضلع."
     },
     "ring_crosses": {
-      "fail": "A drawn polygon crosses itself near E {e}, N {n}.",
-      "suggestion": "Move or delete a vertex so the edges no longer cross."
+      "fail": "مضلع مرسوم يتقاطع مع نفسه قرب E {e}، N {n}.",
+      "suggestion": "حرّك رأساً أو احذفه حتى لا تتقاطع الأضلاع."
     },
     "code_duplicate": {
-      "fail": "The code library lists code {code} more than once.",
-      "suggestion": "Keep one entry per code."
+      "fail": "مكتبة الرموز تذكر الرمز {code} أكثر من مرة.",
+      "suggestion": "احتفظ بإدخال واحد لكل رمز."
     }
   },
   "volumes": {

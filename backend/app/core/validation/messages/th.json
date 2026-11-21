@@ -2434,28 +2434,28 @@
       "suggestion": "ตรวจการจดบันทึกค่าสังเกตหรือวัดใหม่ก่อนยอมรับการปรับแก้"
     },
     "code_unknown": {
-      "fail": "Code {code} is not in the code library ({count} points).",
-      "suggestion": "Add the code to the library or correct the points' codes."
+      "fail": "รหัส {code} ไม่อยู่ในไลบรารีรหัส ({count} จุด)",
+      "suggestion": "เพิ่มรหัสลงในไลบรารีหรือแก้รหัสของจุด"
     },
     "string_short": {
-      "fail": "String {name} has a single point, so no line is drawn.",
-      "suggestion": "Code a second point of the string or correct the string number."
+      "fail": "สตริง {name} มีเพียงจุดเดียว จึงไม่มีการวาดเส้น",
+      "suggestion": "ลงรหัสจุดที่สองของสตริงหรือแก้หมายเลขสตริง"
     },
     "string_short_closed": {
-      "fail": "String {name} is closed but has only {count} points.",
-      "suggestion": "A closed string needs at least three points."
+      "fail": "สตริง {name} ปิดแต่มีเพียง {count} จุด",
+      "suggestion": "สตริงที่ปิดต้องมีอย่างน้อยสามจุด"
     },
     "ring_open": {
-      "fail": "A drawn polygon has fewer than three distinct vertices.",
-      "suggestion": "Add vertices or delete the polygon."
+      "fail": "รูปหลายเหลี่ยมที่วาดมีจุดยอดต่างกันน้อยกว่าสามจุด",
+      "suggestion": "เพิ่มจุดยอดหรือลบรูปหลายเหลี่ยม"
     },
     "ring_crosses": {
-      "fail": "A drawn polygon crosses itself near E {e}, N {n}.",
-      "suggestion": "Move or delete a vertex so the edges no longer cross."
+      "fail": "รูปหลายเหลี่ยมที่วาดตัดกับตัวเองใกล้ E {e}, N {n}",
+      "suggestion": "ย้ายหรือลบจุดยอดเพื่อไม่ให้ขอบตัดกัน"
     },
     "code_duplicate": {
-      "fail": "The code library lists code {code} more than once.",
-      "suggestion": "Keep one entry per code."
+      "fail": "ไลบรารีรหัสมีรหัส {code} มากกว่าหนึ่งครั้ง",
+      "suggestion": "เก็บรายการเดียวต่อรหัส"
     }
   },
   "volumes": {
@@ -2860,7 +2860,7 @@
     "tolerance": "ค่าคลาดเคลื่อนที่ยอมรับ",
     "points": "จุดที่เปรียบเทียบ / อ่าน",
     "mean": "ค่าเบี่ยงเบนเฉลี่ย",
-    "rms": "RMS",
+    "rms": "ค่ารากกำลังสองเฉลี่ย",
     "p95": "P95 ของค่าเบี่ยงเบนสัมบูรณ์",
     "within": "อยู่ในเกณฑ์",
     "high": "สูงกว่าแบบ",

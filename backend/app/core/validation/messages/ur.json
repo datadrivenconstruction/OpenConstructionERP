@@ -2434,28 +2434,28 @@
       "suggestion": "ایڈجسٹمنٹ قبول کرنے سے پہلے مشاہدے کا اندراج چیک کریں یا اسے دوبارہ ناپیں۔"
     },
     "code_unknown": {
-      "fail": "Code {code} is not in the code library ({count} points).",
-      "suggestion": "Add the code to the library or correct the points' codes."
+      "fail": "کوڈ {code} کوڈ لائبریری میں نہیں ہے ({count} نقاط)۔",
+      "suggestion": "کوڈ کو لائبریری میں شامل کریں یا نقاط کے کوڈ درست کریں۔"
     },
     "string_short": {
-      "fail": "String {name} has a single point, so no line is drawn.",
-      "suggestion": "Code a second point of the string or correct the string number."
+      "fail": "اسٹرنگ {name} میں صرف ایک نقطہ ہے، اس لیے کوئی لکیر نہیں کھنچتی۔",
+      "suggestion": "اسٹرنگ کا دوسرا نقطہ کوڈ کریں یا اسٹرنگ نمبر درست کریں۔"
     },
     "string_short_closed": {
-      "fail": "String {name} is closed but has only {count} points.",
-      "suggestion": "A closed string needs at least three points."
+      "fail": "اسٹرنگ {name} بند ہے مگر اس میں صرف {count} نقاط ہیں۔",
+      "suggestion": "بند اسٹرنگ کو کم از کم تین نقاط درکار ہیں۔"
     },
     "ring_open": {
-      "fail": "A drawn polygon has fewer than three distinct vertices.",
-      "suggestion": "Add vertices or delete the polygon."
+      "fail": "بنائے گئے کثیرالاضلاع میں تین سے کم مختلف راس ہیں۔",
+      "suggestion": "راس شامل کریں یا کثیرالاضلاع حذف کریں۔"
     },
     "ring_crosses": {
-      "fail": "A drawn polygon crosses itself near E {e}, N {n}.",
-      "suggestion": "Move or delete a vertex so the edges no longer cross."
+      "fail": "بنایا گیا ایک کثیرالاضلاع E {e}، N {n} کے قریب خود کو کاٹتا ہے۔",
+      "suggestion": "کوئی راس ہٹائیں یا منتقل کریں تاکہ کنارے نہ کٹیں۔"
     },
     "code_duplicate": {
-      "fail": "The code library lists code {code} more than once.",
-      "suggestion": "Keep one entry per code."
+      "fail": "کوڈ لائبریری میں کوڈ {code} ایک سے زیادہ بار ہے۔",
+      "suggestion": "ہر کوڈ کے لیے ایک اندراج رکھیں۔"
     }
   },
   "volumes": {
@@ -2860,7 +2860,7 @@
     "tolerance": "ٹالرینس",
     "points": "موازنہ شدہ / پڑھے گئے پوائنٹس",
     "mean": "اوسط انحراف",
-    "rms": "RMS",
+    "rms": "جذر اوسط مربع",
     "p95": "مطلق انحراف کا P95",
     "within": "ٹالرینس کے اندر",
     "high": "ڈیزائن سے اوپر",

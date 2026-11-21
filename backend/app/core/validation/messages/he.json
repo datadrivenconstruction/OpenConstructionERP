@@ -2434,28 +2434,28 @@
       "suggestion": "בדוק את רישום התצפית או מדוד אותה שוב לפני קבלת התיאום."
     },
     "code_unknown": {
-      "fail": "Code {code} is not in the code library ({count} points).",
-      "suggestion": "Add the code to the library or correct the points' codes."
+      "fail": "הקוד {code} אינו בספריית הקודים ({count} נקודות).",
+      "suggestion": "הוסיפו את הקוד לספרייה או תקנו את קודי הנקודות."
     },
     "string_short": {
-      "fail": "String {name} has a single point, so no line is drawn.",
-      "suggestion": "Code a second point of the string or correct the string number."
+      "fail": "במחרוזת {name} יש נקודה אחת בלבד, ולכן לא נשרטט קו.",
+      "suggestion": "קודדו נקודה שנייה במחרוזת או תקנו את מספר המחרוזת."
     },
     "string_short_closed": {
-      "fail": "String {name} is closed but has only {count} points.",
-      "suggestion": "A closed string needs at least three points."
+      "fail": "המחרוזת {name} סגורה אך יש בה רק {count} נקודות.",
+      "suggestion": "מחרוזת סגורה דורשת לפחות שלוש נקודות."
     },
     "ring_open": {
-      "fail": "A drawn polygon has fewer than three distinct vertices.",
-      "suggestion": "Add vertices or delete the polygon."
+      "fail": "במצולע שנוצר יש פחות משלושה קדקודים שונים.",
+      "suggestion": "הוסיפו קדקודים או מחקו את המצולע."
     },
     "ring_crosses": {
-      "fail": "A drawn polygon crosses itself near E {e}, N {n}.",
-      "suggestion": "Move or delete a vertex so the edges no longer cross."
+      "fail": "מצולע שנוצר חוצה את עצמו ליד E {e}, N {n}.",
+      "suggestion": "הזיזו או מחקו קדקוד כך שהצלעות לא ייחתכו."
     },
     "code_duplicate": {
-      "fail": "The code library lists code {code} more than once.",
-      "suggestion": "Keep one entry per code."
+      "fail": "ספריית הקודים מכילה את הקוד {code} יותר מפעם אחת.",
+      "suggestion": "השאירו רשומה אחת לכל קוד."
     }
   },
   "volumes": {
@@ -2860,7 +2860,7 @@
     "tolerance": "סבולת",
     "points": "נקודות שהושוו / נקראו",
     "mean": "סטייה ממוצעת",
-    "rms": "RMS",
+    "rms": "שורש ממוצע הריבועים",
     "p95": "P95 של הסטייה המוחלטת",
     "within": "בתוך הסבולת",
     "high": "מעל התכנון",

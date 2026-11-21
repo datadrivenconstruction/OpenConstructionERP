@@ -2434,28 +2434,28 @@
       "suggestion": "Проверете записа на измерването или го повторете, преди да приемете изравнението."
     },
     "code_unknown": {
-      "fail": "Code {code} is not in the code library ({count} points).",
-      "suggestion": "Add the code to the library or correct the points' codes."
+      "fail": "Кодът {code} не е в библиотеката с кодове ({count} точки).",
+      "suggestion": "Добавете кода в библиотеката или поправете кодовете на точките."
     },
     "string_short": {
-      "fail": "String {name} has a single point, so no line is drawn.",
-      "suggestion": "Code a second point of the string or correct the string number."
+      "fail": "Низът {name} има само една точка, затова не се чертае линия.",
+      "suggestion": "Кодирайте втора точка на низа или поправете номера на низа."
     },
     "string_short_closed": {
-      "fail": "String {name} is closed but has only {count} points.",
-      "suggestion": "A closed string needs at least three points."
+      "fail": "Низът {name} е затворен, но има само {count} точки.",
+      "suggestion": "Затвореният низ изисква поне три точки."
     },
     "ring_open": {
-      "fail": "A drawn polygon has fewer than three distinct vertices.",
-      "suggestion": "Add vertices or delete the polygon."
+      "fail": "Начертан полигон има по-малко от три различни върха.",
+      "suggestion": "Добавете върхове или изтрийте полигона."
     },
     "ring_crosses": {
-      "fail": "A drawn polygon crosses itself near E {e}, N {n}.",
-      "suggestion": "Move or delete a vertex so the edges no longer cross."
+      "fail": "Начертан полигон се пресича сам близо до E {e}, N {n}.",
+      "suggestion": "Преместете или изтрийте връх, за да не се пресичат ръбовете."
     },
     "code_duplicate": {
-      "fail": "The code library lists code {code} more than once.",
-      "suggestion": "Keep one entry per code."
+      "fail": "Библиотеката с кодове съдържа код {code} повече от веднъж.",
+      "suggestion": "Оставете по един запис за код."
     }
   },
   "volumes": {
@@ -2860,7 +2860,7 @@
     "tolerance": "Допуск",
     "points": "Сравнени / прочетени точки",
     "mean": "Средно отклонение",
-    "rms": "RMS",
+    "rms": "Средноквадратично",
     "p95": "P95 на абсолютното отклонение",
     "within": "В допуск",
     "high": "Над проекта",

@@ -2434,28 +2434,28 @@
       "suggestion": "Tenglashtirishni qabul qilishdan oldin oʻlchash yozuvini tekshiring yoki qayta oʻlchang."
     },
     "code_unknown": {
-      "fail": "Code {code} is not in the code library ({count} points).",
-      "suggestion": "Add the code to the library or correct the points' codes."
+      "fail": "{code} kodi kod kutubxonasida yo'q ({count} nuqta).",
+      "suggestion": "Kodni kutubxonaga qo'shing yoki nuqtalar kodlarini to'g'rilang."
     },
     "string_short": {
-      "fail": "String {name} has a single point, so no line is drawn.",
-      "suggestion": "Code a second point of the string or correct the string number."
+      "fail": "{name} qatorida faqat bitta nuqta bor, shuning uchun chiziq chizilmaydi.",
+      "suggestion": "Qatorning ikkinchi nuqtasini kodlang yoki qator raqamini to'g'rilang."
     },
     "string_short_closed": {
-      "fail": "String {name} is closed but has only {count} points.",
-      "suggestion": "A closed string needs at least three points."
+      "fail": "{name} qatori yopiq, ammo unda faqat {count} nuqta bor.",
+      "suggestion": "Yopiq qator kamida uchta nuqtani talab qiladi."
     },
     "ring_open": {
-      "fail": "A drawn polygon has fewer than three distinct vertices.",
-      "suggestion": "Add vertices or delete the polygon."
+      "fail": "Chizilgan ko'pburchakda uchtadan kam turli cho'qqi bor.",
+      "suggestion": "Cho'qqilar qo'shing yoki ko'pburchakni o'chiring."
     },
     "ring_crosses": {
-      "fail": "A drawn polygon crosses itself near E {e}, N {n}.",
-      "suggestion": "Move or delete a vertex so the edges no longer cross."
+      "fail": "Chizilgan ko'pburchak E {e}, N {n} yaqinida o'zini kesib o'tadi.",
+      "suggestion": "Qirralar kesishmasligi uchun cho'qqini siljiting yoki o'chiring."
     },
     "code_duplicate": {
-      "fail": "The code library lists code {code} more than once.",
-      "suggestion": "Keep one entry per code."
+      "fail": "Kod kutubxonasida {code} kodi bir necha marta uchraydi.",
+      "suggestion": "Har bir kod uchun bitta yozuvni qoldiring."
     }
   },
   "volumes": {
@@ -2860,7 +2860,7 @@
     "tolerance": "Ruxsat chegarasi",
     "points": "Solishtirilgan / o'qilgan nuqtalar",
     "mean": "O'rtacha og'ish",
-    "rms": "RMS",
+    "rms": "O'rtacha kvadratik og'ish",
     "p95": "Mutlaq og'ishning P95 qiymati",
     "within": "Ruxsat ichida",
     "high": "Loyihadan yuqori",

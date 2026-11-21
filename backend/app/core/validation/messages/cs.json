@@ -2434,28 +2434,28 @@
       "suggestion": "Zkontrolujte zápis měření nebo jej opakujte, než vyrovnání přijmete."
     },
     "code_unknown": {
-      "fail": "Code {code} is not in the code library ({count} points).",
-      "suggestion": "Add the code to the library or correct the points' codes."
+      "fail": "Kód {code} není v knihovně kódů ({count} bodů).",
+      "suggestion": "Přidejte kód do knihovny nebo opravte kódy bodů."
     },
     "string_short": {
-      "fail": "String {name} has a single point, so no line is drawn.",
-      "suggestion": "Code a second point of the string or correct the string number."
+      "fail": "Řetězec {name} má jediný bod, proto se nekreslí čára.",
+      "suggestion": "Zakódujte druhý bod řetězce nebo opravte číslo řetězce."
     },
     "string_short_closed": {
-      "fail": "String {name} is closed but has only {count} points.",
-      "suggestion": "A closed string needs at least three points."
+      "fail": "Řetězec {name} je uzavřený, ale má jen {count} bodů.",
+      "suggestion": "Uzavřený řetězec potřebuje alespoň tři body."
     },
     "ring_open": {
-      "fail": "A drawn polygon has fewer than three distinct vertices.",
-      "suggestion": "Add vertices or delete the polygon."
+      "fail": "Nakreslený polygon má méně než tři různé vrcholy.",
+      "suggestion": "Přidejte vrcholy nebo polygon smažte."
     },
     "ring_crosses": {
-      "fail": "A drawn polygon crosses itself near E {e}, N {n}.",
-      "suggestion": "Move or delete a vertex so the edges no longer cross."
+      "fail": "Nakreslený polygon se protíná u E {e}, N {n}.",
+      "suggestion": "Posuňte nebo smažte vrchol, aby se hrany již neprotínaly."
     },
     "code_duplicate": {
-      "fail": "The code library lists code {code} more than once.",
-      "suggestion": "Keep one entry per code."
+      "fail": "Knihovna kódů obsahuje kód {code} vícekrát.",
+      "suggestion": "Ponechte jeden záznam pro každý kód."
     }
   },
   "volumes": {
@@ -2857,10 +2857,10 @@
     "title": "Sken proti projektu",
     "scan": "Sken",
     "design": "Projektová plocha",
-    "tolerance": "Tolerance",
+    "tolerance": "Přípustná odchylka",
     "points": "Bodů porovnáno / načteno",
     "mean": "Průměrná odchylka",
-    "rms": "RMS",
+    "rms": "Střední kvadratická odchylka",
     "p95": "P95 absolutní odchylky",
     "within": "V toleranci",
     "high": "Nad projektem",
