@@ -30,13 +30,21 @@ export function netTonnes(gross: string, tare: string): string | null {
   return (Math.round((g - t) * 1000) / 1000).toString();
 }
 
-export function totalsOf(rows: Pick<Ticket, 'quantity' | 'amount' | 'status'>[]) {
-  let quantity = 0;
+/**
+ * Totals per measure, the way the daily summary adds them: tonnes from net weights, cubic metres from
+ * volumes, loads as a count. A ticket counted in loads is never added to one counted in tonnes.
+ */
+export function totalsOf(rows: Pick<Ticket, 'net_t' | 'volume_m3' | 'loads' | 'amount' | 'status'>[]) {
+  let tonnes = 0;
+  let volume = 0;
+  let loads = 0;
   let amount = 0;
   for (const r of rows) {
     if (r.status === 'rejected') continue;
-    quantity += Number(r.quantity) || 0;
+    tonnes += Number(r.net_t) || 0;
+    volume += Number(r.volume_m3) || 0;
+    loads += Number(r.loads) || 0;
     amount += Number(r.amount) || 0;
   }
-  return { quantity, amount };
+  return { tonnes, volume, loads, amount };
 }

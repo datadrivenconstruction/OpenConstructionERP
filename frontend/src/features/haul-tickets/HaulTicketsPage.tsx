@@ -37,7 +37,8 @@ import {
   type Unit,
 } from './api';
 import { NEXT_STATUS, STATUS_VARIANT, netTonnes, totalsOf } from './model';
-import { fmtFixed } from '@/shared/lib/formatters';
+import { fmtFixed, fmtQuantity } from '@/shared/lib/formatters';
+import { DateDisplay } from '@/shared/ui/DateDisplay';
 
 type Tab = 'tickets' | 'summary' | 'invoices' | 'import';
 
@@ -190,13 +191,16 @@ function TicketsTab({ projectId }: { projectId: string }) {
           placeholder={t('haul.search', { defaultValue: 'Ticket, plate, haulier' })}
           aria-label={t('haul.search', { defaultValue: 'Ticket, plate, haulier' })}
         />
-        <span className="ml-auto text-sm text-content-secondary">
-          {t('haul.totals', {
-            defaultValue: '{{count}} tickets, {{qty}} counted, {{amount}} amount',
-            count: items.length,
-            qty: fmtFixed(totals.quantity, 2),
-            amount: fmtFixed(totals.amount, 2),
-          })}
+        <span className="ml-auto text-sm text-content-secondary tabular-nums" data-testid="haul-totals">
+          {[
+            `${t('haul.sum_tickets', { defaultValue: 'Tickets' })}: ${items.length}`,
+            `${t('haul.sum_tonnes', { defaultValue: 'Tonnes' })}: ${fmtQuantity(totals.tonnes)}`,
+            totals.volume ? `${t('haul.sum_volume', { defaultValue: 'm3' })}: ${fmtQuantity(totals.volume)}` : '',
+            totals.loads ? `${t('haul.f_loads', { defaultValue: 'Loads' })}: ${fmtQuantity(totals.loads)}` : '',
+            `${t('haul.col_amount', { defaultValue: 'Amount' })}: ${fmtFixed(totals.amount, 2)}`,
+          ]
+            .filter(Boolean)
+            .join(' · ')}
         </span>
         <Button size="sm" onClick={() => setAdding((v) => !v)}>
           <Plus size={14} className="mr-1" />
@@ -270,11 +274,11 @@ function TicketRow(props: {
           </ul>
         )}
       </td>
-      <td className="pr-3">{r.ticket_date}</td>
+      <td className="pr-3 whitespace-nowrap">{r.ticket_date ? <DateDisplay value={r.ticket_date} /> : '-'}</td>
       <td className="pr-3">{r.material_name || '-'}</td>
       <td className="pr-3">{r.haulier_name || '-'}</td>
-      <td className="pr-3 text-right tabular-nums">{r.net_t ?? '-'}</td>
-      <td className="pr-3 text-right tabular-nums">{r.amount}</td>
+      <td className="pr-3 text-right tabular-nums">{r.net_t != null ? fmtQuantity(r.net_t) : '-'}</td>
+      <td className="pr-3 text-right tabular-nums">{fmtFixed(Number(r.amount) || 0, 2)}</td>
       <td className="pr-3">
         <Badge variant={STATUS_VARIANT[r.status]}>{props.statusLabel}</Badge>
       </td>
@@ -477,10 +481,10 @@ function SummaryTab({ projectId }: { projectId: string }) {
               <tr key={`${r.key}-${i}`} className={clsx('border-b border-border-light', i === all.length - 1 && 'font-medium')}>
                 <td>{i === all.length - 1 ? t('haul.sum_total', { defaultValue: 'Total' }) : r.label}</td>
                 <td className="text-right tabular-nums">{r.tickets}</td>
-                <td className="text-right tabular-nums">{r.loads}</td>
-                <td className="text-right tabular-nums">{r.tonnes}</td>
-                <td className="text-right tabular-nums">{r.volume_m3}</td>
-                <td className="text-right tabular-nums">{r.amount}</td>
+                <td className="text-right tabular-nums">{fmtQuantity(r.loads)}</td>
+                <td className="text-right tabular-nums">{fmtQuantity(r.tonnes)}</td>
+                <td className="text-right tabular-nums">{fmtQuantity(r.volume_m3)}</td>
+                <td className="text-right tabular-nums">{fmtFixed(Number(r.amount) || 0, 2)}</td>
               </tr>
             ))}
           </tbody>

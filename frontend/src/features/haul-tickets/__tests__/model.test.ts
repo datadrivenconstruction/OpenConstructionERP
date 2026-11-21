@@ -11,10 +11,18 @@ describe('haul ticket model', () => {
   });
   it('skips rejected tickets in totals', () => {
     const t = totalsOf([
-      { quantity: '10', amount: '100', status: 'verified' },
-      { quantity: '5', amount: '50', status: 'rejected' },
+      { net_t: '10', volume_m3: null, loads: 1, amount: '100', status: 'verified' },
+      { net_t: '5', volume_m3: null, loads: 1, amount: '50', status: 'rejected' },
     ]);
-    expect(t).toEqual({ quantity: 10, amount: 100 });
+    expect(t).toEqual({ tonnes: 10, volume: 0, loads: 1, amount: 100 });
+  });
+  it('never adds loads to tonnes', () => {
+    // 672 t weighed plus 88 truck loads counted by the load must not read 760.
+    const t = totalsOf([
+      { net_t: '672', volume_m3: null, loads: 0, amount: '4872', status: 'verified' },
+      { net_t: null, volume_m3: '1100', loads: 88, amount: '7040', status: 'delivered' },
+    ]);
+    expect(t).toEqual({ tonnes: 672, volume: 1100, loads: 88, amount: 11912 });
   });
   it('has no way out of invoiced', () => {
     expect(NEXT_STATUS.invoiced).toEqual([]);
