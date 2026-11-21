@@ -334,3 +334,13 @@ describe('SideDrawer - nested overlay', () => {
     expect(onDrawerClose).toHaveBeenCalledTimes(1);
   });
 });
+
+describe('SideDrawer beside the app sidebar', () => {
+  it('reserves the sidebar width on lg so a wide panel never opens under the sidebar', () => {
+    renderDrawer({ widthClass: 'sm:max-w-[min(1440px,96vw)]' });
+    const root = screen.getByTestId('side-drawer-root');
+    // The sidebar sits on z-dropdown (50) above z-drawer (40); the panel starts beside it.
+    expect(root.className).toContain('lg:ps-sidebar');
+    expect(root.className).toContain('z-drawer');
+  });
+});
