@@ -317,6 +317,7 @@ export const ROUTE_BACKEND_MODULE: Record<string, string | readonly string[]> = 
   '/design/revisions': 'oe_design',
   '/design/acceptance': 'oe_design',
   '/design/estimate': 'oe_design',
+  '/design/start': 'oe_design',
   // Planning
   '/schedule': 'oe_schedule',
   '/schedule-advanced': 'oe_schedule_advanced',
