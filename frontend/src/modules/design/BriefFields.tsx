@@ -92,7 +92,7 @@ export function ProvenanceControl({ doc, pointer, onConfirm, confirmBlockedReaso
   const named = { field: fieldLabel(t, pointer), status: tr(t, `design.status.${status}`) };
   const focusRing = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue';
   return (
-    <span className="inline-flex items-center gap-1.5" data-testid={`prov-${pointer}`}>
+    <span className="inline-flex flex-wrap items-center gap-x-1.5" data-testid={`prov-${pointer}`}>
       <span title={provenanceTitle(t, entry)}>
         <Badge variant={STATUS_VARIANT[status]} size="sm">
           {tr(t, `design.status.${status}`)}
@@ -149,7 +149,7 @@ export function optionLabel(t: T, value: string): string {
 }
 
 /** One brief value: label, typed input, unit, provenance, validation message. */
-export function Field({ doc, pointer, errors, onChange, provenance, suggestions, compact, currency, onParseError }: FieldProps) {
+export function Field({ doc, pointer, errors, onChange, provenance, suggestions, currency, onParseError }: FieldProps) {
   const { t } = useTranslation();
   const id = useId();
   const spec: FieldSpec = fieldSpec(pointer);
@@ -240,9 +240,9 @@ export function Field({ doc, pointer, errors, onChange, provenance, suggestions,
   }
 
   return (
-    <div className={clsx('flex flex-col gap-1', compact ? 'min-w-0' : '')}>
-      <div className="flex items-center justify-between gap-2">
-        <label htmlFor={id} className="text-sm font-medium text-content-primary">
+    <div className="flex min-w-0 flex-col gap-1">
+      <div className="flex min-h-[2.75rem] flex-col items-start gap-0.5">
+        <label htmlFor={id} className="text-sm font-medium leading-5 text-content-primary">
           {fieldLabel(t, pointer)}
           {spec.required && <span className="ml-0.5 text-semantic-error" aria-hidden>*</span>}
         </label>

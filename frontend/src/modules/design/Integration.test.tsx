@@ -35,6 +35,7 @@ vi.mock('@/shared/lib/api', () => ({
 vi.mock('./api', () => ({
   LINK_VERSION: '1',
   fetchAccess: vi.fn(async () => ({ can_accept: api.canAccept, currency: null, lock: null })),
+  fetchEstimate: vi.fn(async () => (await import('./data/fixtures/estimate.de-residential.json')).default),
 }));
 vi.mock('@/shared/ui', () => {
   return {
@@ -44,6 +45,8 @@ vi.mock('@/shared/ui', () => {
     EmptyState: ({ title }: { title: string }) => <p>{title}</p>,
     ErrorState: ({ title }: { title: string }) => <p role="alert">{title}</p>,
     Skeleton: () => <div aria-busy="true" />,
+    KpiBand: ({ items }: { items: { key: string; label: string; value: string; sub?: string }[] }) => (
+      <ul>{items.map((i) => <li key={i.key} data-testid={`kpi-${i.key}`}>{i.label}|{i.value}|{i.sub ?? ''}</li>)}</ul>),
   };
 });
 vi.mock('@/stores/useProjectContextStore', () => {
@@ -195,6 +198,13 @@ describe('project overview', () => {
     expect(screen.getByTestId('step-schedule')).toHaveAttribute('data-state', 'todo');
     expect(screen.getByTestId('overview-next')).toHaveAttribute('href', '/design/acceptance');
     expect(screen.getByTestId('overview-next')).toHaveTextContent('Set up the schedule');
+    // headline figures: from the overview and the estimate, nothing guessed for what is not set up
+    expect(screen.getByTestId('kpi-revision')).toHaveTextContent('Revision 2');
+    // the estimate arrives after the overview: wait for it rather than the first paint
+    await waitFor(() => expect(screen.getByTestId('kpi-priced')).toHaveTextContent('3 / 14'));
+    expect(screen.getByTestId('kpi-priced')).toHaveTextContent('Without a rate: 11');
+    expect(screen.getByTestId('kpi-estimate')).toHaveTextContent(/132/);
+    expect(screen.getByTestId('kpi-linked')).toHaveTextContent('40');
   });
 
   it('puts a waiting revision first, and lets only the manager relink', async () => {

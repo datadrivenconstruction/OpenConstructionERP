@@ -34,7 +34,7 @@ def test_view_lists_only_generator_inputs_with_code_ranges():
     assert v["typology"] == "apartment_section" and v["brief_version"] == EXAMPLE["version"]
     by = {p["id"]: p for p in v["params"]}
     assert set(by) == {"floors", "floor_height", "width", "depth", "grid", "lift", "foundation", "roof", "roof_slope"}
-    assert (by["floors"]["min"], by["floors"]["max"], by["floors"]["value"]) == (1, 40, 5)
+    assert (by["floors"]["min"], by["floors"]["max"], by["floors"]["value"]) == (1, 200, 5)
     assert (by["floor_height"]["min"], by["floor_height"]["max"]) == (2.7, 6.0)
     assert (by["width"]["min"], by["width"]["max"], by["width"]["unit"]) == (6.0, 200.0, "m")
     assert (by["depth"]["min"], by["depth"]["max"]) == (7.6, 128.0)  # 2*3+1.6 .. 6.4+1.6+120
@@ -84,7 +84,7 @@ def test_apply_sets_confirms_and_refuses_out_of_range():
         mp.apply(
             EXAMPLE,
             {
-                "/massing/floors_above": 41,
+                "/massing/floors_above": 201,
                 "/massing/floor_height_m": 2.5,
                 "/structure/foundation": "piles",
                 "/site/max_floors": 3,
@@ -165,7 +165,7 @@ async def test_model_generate_gates(client, fake):
     uid, h, pid, version = await _project_with_brief(client)
     url = f"{BASE}/projects/{pid}/model/generate"
     ok = {"brief_version": version, "values": {"/massing/floors_above": 6}}
-    r = await client.post(url, headers=h, json={**ok, "values": {"/massing/floors_above": 99}})
+    r = await client.post(url, headers=h, json={**ok, "values": {"/massing/floors_above": 999}})
     assert r.status_code == 422 and r.json()["detail"]["errors"][0]["pointer"] == "/massing/floors_above"
     assert (await client.post(url, headers=h, json={**ok, "brief_version": version + 5})).status_code == 409
     viewer, hv = await make_user(client, role="viewer")
@@ -210,7 +210,7 @@ async def test_model_preview_is_the_generate_brief_and_stores_nothing(client, fa
     same = (await client.post(url, headers=h, json={"brief_version": version})).json()["brief"]
     head = (await client.get(f"{BASE}/projects/{pid}/brief", headers=h)).json()
     assert head["version"] == version and head["massing"]["floors_above"] == same["massing"]["floors_above"]
-    r = await client.post(url, headers=h, json={"brief_version": version, "values": {"/massing/floors_above": 99}})
+    r = await client.post(url, headers=h, json={"brief_version": version, "values": {"/massing/floors_above": 999}})
     assert r.status_code == 422
     assert (await client.post(url, headers=h, json={"brief_version": version + 1})).status_code == 409
     versions = (await client.get(f"{BASE}/projects/{pid}/brief/versions", headers=h)).json()
@@ -231,3 +231,20 @@ async def test_model_view_without_brief(client):
     uid, h = await make_user(client)
     pid = await make_project(uid)
     assert (await client.get(f"{BASE}/projects/{pid}/model", headers=h)).status_code == 404
+
+
+def test_units_per_floor_follow_the_width():
+    mp = _mp()
+    narrow = copy.deepcopy(EXAMPLE)
+    narrow["massing"]["footprint"]["width_m"] = 15.0  # 2 x floor(15 / 5) = 6 flats a floor
+    assert mp.view(narrow)["max_units_per_floor"] == 6
+    with pytest.raises(mp.BriefError):  # 20/5 + 20/5 = 8 > 6
+        mp.apply(narrow, {"/programme/units/0/count": 20, "/programme/units/1/count": 20}, user_id=U1, at=AT)
+    # widening in the same step lifts the limit: 60 m holds 24
+    out, _ = mp.apply(
+        EXAMPLE,
+        {"/massing/footprint/width_m": 60.0, "/programme/units/0/count": 50, "/programme/units/1/count": 50},
+        user_id=U1,
+        at=AT,
+    )
+    assert mp.view(out)["max_units_per_floor"] == 24

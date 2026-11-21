@@ -20,6 +20,7 @@ import { CORE_STEPS as CORE, ICON, stepState, stepText } from './overviewSteps';
 import { useProjectFromUrl } from './useProjectFromUrl';
 import { ProjectStart } from './ProjectStart';
 import { AddendumDrafts } from './AddendumDrafts';
+import { OverviewKpis } from './OverviewKpis';
 
 export { stepState } from './overviewSteps';
 
@@ -55,9 +56,8 @@ export function ProjectOverview({ projectId }: { projectId: string }) {
   const starting = !!q.data && !waiting && !steps.find((s) => s.id === 'model')?.done;
 
   return (
-    <div className="flex flex-col gap-5 p-4 sm:p-6">
-      <h1 className="text-xl font-semibold text-content-primary">{tr(t, 'design.overview.title')}</h1>
-      <PageHeader subtitle={tr(t, 'design.overview.subtitle')} />
+    <div className="flex flex-col gap-5 animate-fade-in">
+      <PageHeader srTitle={tr(t, 'design.overview.title')} subtitle={tr(t, 'design.overview.subtitle')} />
       {q.isError ? (
         <ErrorState title={tr(t, 'design.overview.load_failed')} hint={getErrorMessage(q.error)} onRetry={() => q.refetch()} />
       ) : q.isLoading ? (
@@ -106,6 +106,7 @@ export function ProjectOverview({ projectId }: { projectId: string }) {
             </div>
           </section>}
 
+          {!starting && <OverviewKpis projectId={projectId} steps={steps} />}
           {!starting && <AddendumDrafts projectId={projectId} />}
           <ol className="flex flex-col divide-y divide-border-light overflow-hidden rounded-xl border border-border-light bg-surface-primary"
             data-testid="overview-steps">

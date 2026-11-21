@@ -32,9 +32,11 @@ import { useIsoFrame } from './frameView';
 import { useRevisionCompare } from './useRevisionCompare';
 import GenerationPanel from './GenerationPanel';
 import ModelPanel from './ModelPanel';
+import { useProjectFromUrl } from './useProjectFromUrl';
 
 export default function RevisionsPage() {
   const { t } = useTranslation();
+  useProjectFromUrl();
   const projectId = useProjectContextStore((s) => s.activeProjectId);
   if (!projectId) {
     return (
@@ -51,7 +53,7 @@ export default function RevisionsPage() {
 function Revisions({ projectId }: { projectId: string }) {
   useQuietViewer();
   const iso = useIsoFrame();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const list = useQuery({ queryKey: ['design-revisions', projectId], queryFn: () => fetchRevisions(projectId) });
   // ?rev=<revision id> opens that revision (the estimate page links here).
   const [params] = useSearchParams();
@@ -84,9 +86,8 @@ function Revisions({ projectId }: { projectId: string }) {
   };
 
   return (
-    <div className="flex h-full min-h-0 flex-col gap-4 p-6">
-      <h1 className="text-xl font-semibold text-content-primary">{tr(t, 'design.revisions.title')}</h1>
-      <PageHeader subtitle={tr(t, 'design.revisions.subtitle')} />
+    <div className="flex h-full min-h-0 flex-col gap-5 animate-fade-in">
+      <PageHeader srTitle={tr(t, 'design.revisions.title')} subtitle={tr(t, 'design.revisions.subtitle')} />
       {/* one way to build a revision: the parameter panel, or the plain build where it has nothing to show */}
       <ModelPanel projectId={projectId} fallback={<GenerationPanel projectId={projectId} />} />
       <ImportedModels projectId={projectId} />
@@ -128,8 +129,8 @@ function Revisions({ projectId }: { projectId: string }) {
                       </div>
                       <div className="truncate text-sm text-content-secondary">{r.message || tr(t, 'design.revisions.no_message')}</div>
                       <div className="text-xs text-content-tertiary">
-                        {r.source_kind} - {new Date(r.created_at).toLocaleString()}
-                        {!hasModel(r) && ` - ${tr(t, 'design.revisions.no_model')}`}
+                        {tr(t, `design.revisions.source.${r.source_kind}`)} · {new Date(r.created_at).toLocaleString(i18n.language, { dateStyle: 'medium', timeStyle: 'short' })}
+                        {!hasModel(r) && ` · ${tr(t, 'design.revisions.no_model')}`}
                       </div>
                     </button>
                   </li>
@@ -214,7 +215,7 @@ function Revisions({ projectId }: { projectId: string }) {
                   <dt>{tr(t, 'design.revisions.el_storey')}</dt><dd>{selected.storey ?? '-'}</dd>
                   <dt>{tr(t, 'design.revisions.el_discipline')}</dt><dd>{selected.discipline}</dd>
                   {Object.entries(selected.quantities ?? {}).map(([k, v]) => (
-                    <div key={k} className="contents"><dt>{k}</dt><dd>{Number(v).toLocaleString(undefined, { maximumFractionDigits: 3 })}</dd></div>
+                    <div key={k} className="contents"><dt>{tr(t, `design.revisions.qty.${k}`, { defaultValue: k })}</dt><dd>{Number(v).toLocaleString(i18n.language, { maximumFractionDigits: 3 })}</dd></div>
                   ))}
                 </dl>
               </Card>

@@ -10,7 +10,7 @@ import { useModelViewerData } from '@/features/bim/useModelViewerData';
 import { tr } from './BriefFields';
 import { upAxis, type RevisionView } from './data/revisions';
 import { useIsoFrame } from './frameView';
-import { VIEWER_FRAME } from './useQuietViewer';
+import { useQuietViewer, VIEWER_FRAME } from './useQuietViewer';
 
 export function TipModel({ projectId, revision, onSelect }: {
   projectId: string; revision: RevisionView & { bim_model_id: string };
@@ -19,6 +19,7 @@ export function TipModel({ projectId, revision, onSelect }: {
   const { t } = useTranslation();
   const viewer = useModelViewerData(projectId, revision.bim_model_id);
   const iso = useIsoFrame();
+  useQuietViewer();
   return (
     <div ref={iso.box} data-testid="tip-model"
       className={`relative h-full min-h-[360px] overflow-hidden rounded-lg border border-border-light ${VIEWER_FRAME}`}>

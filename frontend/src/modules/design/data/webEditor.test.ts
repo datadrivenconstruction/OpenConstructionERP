@@ -3,7 +3,7 @@ import { createHash } from 'node:crypto';
 import { statSync } from 'node:fs';
 import { resolve } from 'node:path';
 import {
-  CONSENT_KEY, ENGINE_BYTES, bundleUrl, findPayload, loadState, prefetch, readConsent, resetLoadState,
+  CONSENT_KEY, ENGINE_BYTES, bundleUrl, findPayload, loadState, payloadBytes, prefetch, readConsent, resetLoadState,
   scheduleBackgroundLoad, writeConsent, type Payload,
 } from './webEditor';
 
@@ -137,6 +137,15 @@ describe('payload', () => {
       const p = await findPayload({ env: {}, origin: ORIGIN, engineUrl: '/w.wasm', installedUrl });
       expect(p.kind).toBe('engine');
     }
+  });
+
+  it('leaves on-demand files (locale catalogs, script fonts) to the page: not prefetched, not counted', async () => {
+    const m = manifest();
+    m.files.push({ path: 'i18n/de.json', bytes: 700, sha256: 'c'.repeat(64), load: 'on_demand' } as (typeof m.files)[number]);
+    const p = await findPayload({ env, origin: ORIGIN, engineUrl: '/w.wasm', fetchFn: json(m) });
+    if (p.kind !== 'editor') throw new Error(p.kind);
+    expect(p.assets.map((a) => a.url)).not.toContain(`${ORIGIN}/design-editor/i18n/de.json`);
+    expect(payloadBytes(p)).toBe(100);
   });
 
   it('falls back to the generator on another bridge major, a bad manifest or an HTML page', async () => {

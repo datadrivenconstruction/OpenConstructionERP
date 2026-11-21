@@ -157,9 +157,8 @@ function EditorLink({ projectId }: { projectId: string }) {
   const showNext = !!last && !expired || started;
 
   return (
-    <div className="flex max-w-3xl flex-col gap-4 p-4 sm:p-6">
-      <h1 className="text-xl font-semibold text-content-primary">{tr(t, 'design.editor.title')}</h1>
-      <PageHeader subtitle={tr(t, 'design.editor.subtitle')} />
+    <div className="flex max-w-3xl flex-col gap-5 animate-fade-in">
+      <PageHeader srTitle={tr(t, 'design.editor.title')} subtitle={tr(t, 'design.editor.subtitle')} />
       <Card padding="none">
         <CardHeader className="px-4 pt-4 pb-3" title={project.data?.name ?? tr(t, 'design.editor.title')} subtitle={tr(t, 'design.editor.how')} />
         <div className="flex flex-col gap-3 px-4 pb-4">

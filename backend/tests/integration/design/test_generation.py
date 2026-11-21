@@ -6,6 +6,7 @@ from __future__ import annotations
 import asyncio
 import copy
 import json
+import os
 import uuid
 import zipfile
 from pathlib import Path
@@ -27,7 +28,7 @@ pytestmark = pytest.mark.asyncio
 
 BASE = "/api/v1/design"
 SECRET = "ddcl_" + "a1B2c3D4e5F6g7H8"
-REAL_CLI = Path(r"C:\Users\Artem\Desktop\CC Projects\ddc-builds\link-int-878262bf8-debug\ddc.exe")
+REAL_CLI = Path(os.environ.get("DDC_CLI", "ddc.exe"))  # a built editor CLI; the test using it skips when missing
 
 
 # ── fake binary ─────────────────────────────────────────────────────────────

@@ -77,7 +77,9 @@ describe('GenerationPanel', () => {
   it('says why it is off: no generator on the server, unconfirmed brief, editor holds the lock', async () => {
     api.gen = { enabled: false, reason: 'Generation on the server is not set up: OE_DESIGN_DDC_CLI is not set.', job: null };
     await mount();
-    expect(await screen.findByTestId('generation-blocked')).toHaveTextContent('OE_DESIGN_DDC_CLI');
+    const off = await screen.findByTestId('generation-blocked');
+    expect(off).toHaveTextContent('Generation on the server is not available.');
+    expect(off).toHaveAttribute('title', expect.stringContaining('OE_DESIGN_DDC_CLI'));
     expect(screen.getByRole('button', { name: 'Generate revision' })).toBeDisabled();
     cleanup();
     api.gen = { enabled: true, reason: null, job: null };

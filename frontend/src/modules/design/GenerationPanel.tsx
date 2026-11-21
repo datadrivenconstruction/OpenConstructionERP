@@ -57,7 +57,7 @@ export default function GenerationPanel({ projectId }: { projectId: string }) {
   const doc = brief.data ?? null;
   const confirmed = !!doc && Object.values(doc.provenance ?? {}).every((e) => e.status === 'confirmed');
   const blocked = !state.data?.enabled
-    ? (state.data?.reason ?? tr(t, 'design.generate.unavailable'))
+    ? tr(t, 'design.generate.unavailable')
     : !doc || !confirmed
       ? tr(t, 'design.generate.brief_needed')
       : access.data.lock && !active
@@ -84,7 +84,8 @@ export default function GenerationPanel({ projectId }: { projectId: string }) {
             </Badge>
           )}
         </div>
-        {blocked && !active && <p className="text-sm text-content-secondary" data-testid="generation-blocked">{blocked}</p>}
+        {blocked && !active && <p className="text-sm text-content-secondary" data-testid="generation-blocked"
+            title={!state.data?.enabled ? (state.data?.reason ?? undefined) : undefined}>{blocked}</p>}
         {job && active && (
           <progress className="h-2 w-full" max={1} value={job.progress} aria-label={tr(t, 'design.generate.progress')} />
         )}

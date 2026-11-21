@@ -103,13 +103,19 @@ export interface EditorBundle {
   version: string;
   bridge: number[];
   entry: string;
-  files: { path: string; bytes: number; sha256: string }[];
+  /** `load` on_demand: the page fetches it itself when needed (locale catalogs, script fonts). */
+  files: { path: string; bytes: number; sha256: string; load?: 'start' | 'on_demand' }[];
 }
 
 export function checkBundle(doc: unknown): SchemaError[] {
   return validate(doc, rawEditorSchema as unknown as Schema);
 }
 
+/** Files the ERP downloads before the first open. */
+export function startFiles(b: EditorBundle): EditorBundle['files'] {
+  return b.files.filter((f) => f.load !== 'on_demand');
+}
+
 export function bundleBytes(b: EditorBundle): number {
-  return b.files.reduce((s, f) => s + f.bytes, 0);
+  return startFiles(b).reduce((s, f) => s + f.bytes, 0);
 }

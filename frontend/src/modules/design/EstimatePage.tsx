@@ -36,9 +36,11 @@ import {
 } from './data/estimate';
 import { hasText, tr } from './BriefFields';
 import { CostPicker } from './CostPicker';
+import { useProjectFromUrl } from './useProjectFromUrl';
 
 export default function EstimatePage() {
   const { t } = useTranslation();
+  useProjectFromUrl();
   const projectId = useProjectContextStore((s) => s.activeProjectId);
   if (!projectId) {
     return (
@@ -89,9 +91,8 @@ function EstimateScreen({ projectId }: { projectId: string }) {
   const accepted = revisions.filter((r) => r.status === 'published');
 
   return (
-    <div className="flex flex-col gap-4 p-4 sm:p-6">
-      <h1 className="text-xl font-semibold text-content-primary">{tr(t, 'design.estimate.title')}</h1>
-      <PageHeader subtitle={tr(t, 'design.estimate.subtitle')} />
+    <div className="flex flex-col gap-5 animate-fade-in">
+      <PageHeader srTitle={tr(t, 'design.estimate.title')} subtitle={tr(t, 'design.estimate.subtitle')} />
       {accessQ.isSuccess && !canManage && (
         <p role="note" data-testid="read-only" className="flex items-start gap-2 text-sm text-content-secondary">
           <ShieldAlert size={16} className="mt-0.5 shrink-0" aria-hidden />

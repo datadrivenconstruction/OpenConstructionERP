@@ -41,6 +41,7 @@ import { Field, RemoveButton, fieldLabel, tr, type ProvenanceProps } from './Bri
 import { useLeaveGuard } from './useLeaveGuard';
 import { PlotEditor } from './PlotEditor';
 import { CiteDialog } from './CiteDialog';
+import { useProjectFromUrl } from './useProjectFromUrl';
 
 const KINDS = roomKinds();
 
@@ -54,6 +55,7 @@ const SERVER_OWNED = new Set(['/schema', '/brief_id', '/project_id', '/version']
 
 export default function BriefPage() {
   const { t } = useTranslation();
+  useProjectFromUrl();
   const projectId = useProjectContextStore((s) => s.activeProjectId);
   if (!projectId) {
     return (
@@ -220,9 +222,8 @@ function BriefEditor({ projectId }: { projectId: string }) {
   const focus = addr?.lat != null && addr?.lng != null ? { lat: addr.lat, lng: addr.lng } : null;
 
   return (
-    <div className="space-y-5 pb-16" key={epoch}>
-      <h1 className="text-xl font-semibold text-content-primary">{tr(t, 'design.brief.title')}</h1>
-      <PageHeader
+    <div className="space-y-5 pb-32 animate-fade-in" key={epoch}>
+      <PageHeader srTitle={tr(t, 'design.brief.title')}
         subtitle={tr(t, 'design.brief.subtitle')}
         actions={
           <div className="flex flex-wrap items-center gap-2">
@@ -278,7 +279,7 @@ function BriefEditor({ projectId }: { projectId: string }) {
         onCite={(p, source) => { setDoc((d) => (d ? citeDocument(d, p, source) : d)); setDirty(true); }}
       />
 
-      <div className="grid gap-5 xl:grid-cols-2">
+      <div className="grid items-stretch gap-5 xl:grid-cols-2">
         {SECTIONS.filter((s) => s.id !== 'programme').map((section) => (
           <Card key={section.id} data-section={section.id}>
             <CardHeader title={tr(t, `design.section.${section.id}`)} />
@@ -392,12 +393,12 @@ function SpaceRow({ base, errors, fieldProps, onRemove }: {
 }) {
   const { t } = useTranslation();
   return (
-    <div className="grid items-start gap-3 rounded-lg bg-surface-secondary p-3 sm:grid-cols-[repeat(6,minmax(0,1fr))_auto]">
+    <div className="grid items-start gap-3 rounded-lg bg-surface-secondary p-3 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6">
       {SPACE_FIELDS.map((f) => (
         <Field key={f} compact pointer={`${base}/${f}`} errors={errorsAt(errors, `${base}/${f}`)}
           suggestions={f === 'kind' ? KINDS : undefined} {...fieldProps} />
       ))}
-      <div className="self-end">
+      <div className="justify-self-end sm:col-span-full">
         <RemoveButton label={tr(t, 'design.brief.remove')} onClick={onRemove} />
       </div>
     </div>

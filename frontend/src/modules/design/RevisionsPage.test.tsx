@@ -225,7 +225,7 @@ describe('RevisionsPage states', () => {
     const row = await screen.findByTestId('element-row');
     expect(row.textContent).toContain('Wall A');
     expect(row.textContent).toContain('EG');
-    expect(row.textContent).toContain('area_m2');
+    expect(row.textContent).toContain('Area, m²');
   });
 });
 

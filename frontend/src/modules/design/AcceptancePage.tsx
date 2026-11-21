@@ -212,9 +212,8 @@ function Acceptance({ projectId }: { projectId: string }) {
   const locale = i18n.language;
 
   return (
-    <div className="flex flex-col gap-4 p-4 sm:p-6">
-      <h1 className="text-xl font-semibold text-content-primary">{tr(t, 'design.acceptance.title')}</h1>
-      <PageHeader subtitle={tr(t, 'design.acceptance.subtitle')} />
+    <div className="flex flex-col gap-5 animate-fade-in">
+      <PageHeader srTitle={tr(t, 'design.acceptance.title')} subtitle={tr(t, 'design.acceptance.subtitle')} />
       {note}
 
       {waiting.length > 1 && (

@@ -1,7 +1,8 @@
 """In-ERP quick modelling: the brief values `ddc gen` really takes, with their ranges. Pure Python.
 
-Ranges, defaults and the brief->spec mapping mirror the editor at link/int 878262bf8:
-crates/gen/src/project/limits.rs (ParamDef), spec.rs (defaults(), read_footprint, MAX_APARTMENTS_PER_FLOOR)
+Ranges, defaults and the brief->spec mapping mirror the editor at e0abbb210: crates/gen/data/rules.json,
+crates/gen/src/project/spec.rs (defaults(), read_footprint, apartments_cap); tests/test_model_params_sync.py
+compares them while the editor sources sit beside this module
 and crates/app/src/link/gen.rs (map_brief). A value outside them is refused here, never clamped.
 """
 
@@ -15,13 +16,15 @@ from typing import Any
 
 from .brief_doc import _MISSING, BriefError, resolve, schema_errors
 
-GENERATOR_REF = "editor link/int 878262bf8: crates/gen/src/project/limits.rs, spec.rs; crates/app/src/link/gen.rs"
+GENERATOR_REF = (
+    "editor e0abbb210: crates/gen/data/rules.json, crates/gen/src/project/spec.rs; crates/app/src/link/gen.rs"
+)
 
-# typology -> (max floors, floor height m, room band depth m, corridor m)   spec.rs defaults(), limits.rs max_floors()
+# typology -> (max floors, floor height m, room band depth m, corridor m)   rules.json massing.floors_max_*, spec.rs defaults()
 TYPOLOGY = {
     "house": (3, 3.0, 4.8, 1.4),
-    "apartment_section": (40, 3.0, 6.4, 1.6),
-    "office": (40, 3.6, 6.0, 1.8),
+    "apartment_section": (200, 3.0, 6.4, 1.6),
+    "office": (200, 3.6, 6.0, 1.8),
     "school": (5, 3.6, 7.2, 2.6),
 }
 CATEGORY = {
@@ -32,7 +35,8 @@ CATEGORY = {
     "kindergarten": "school",
 }
 BAND_MIN, HALL_MAX = 3.0, 120.0
-MAX_APARTMENTS_PER_FLOOR = 12
+# rules room.apartments_max (default, max) and room.apartment_frontage (m)
+APARTMENTS_DEFAULT, APARTMENTS_TOP, APARTMENT_FRONTAGE = 12, 80, 5.0
 DWELLING_TYPOLOGIES = ("house", "apartment_section")
 
 
@@ -117,6 +121,14 @@ def _units(doc: dict) -> list[dict]:
     return [u for u in units if isinstance(u, dict)] if isinstance(units, list) else []
 
 
+def apartments_cap(doc: dict) -> int:
+    """spec.rs apartments_cap: with the width set, facade on both sides of the corridor / frontage per flat."""
+    w = _num(_value(doc, "/massing/footprint/width_m"))
+    if not w:
+        return APARTMENTS_DEFAULT
+    return min(APARTMENTS_TOP, 2 * max(1, math.floor(w / APARTMENT_FRONTAGE)))
+
+
 def per_floor(count: int, floors: int) -> int:
     """gen.rs: the brief counts units of the building, the spec those of one floor."""
     return max(1, math.ceil(count / max(1, floors)))
@@ -156,6 +168,7 @@ def view(doc: dict) -> dict[str, Any]:
         for p in params_for(doc, typ)
     ]
     units = []
+    cap = apartments_cap(doc)
     if typ in DWELLING_TYPOLOGIES:
         for i, u in enumerate(_units(doc)):
             count = int(u.get("count") or 1)
@@ -166,7 +179,7 @@ def view(doc: dict) -> dict[str, Any]:
                     "name": u.get("name"),
                     "value": count,
                     "min": 1,
-                    "max": MAX_APARTMENTS_PER_FLOOR * TYPOLOGY[typ][0],
+                    "max": cap * TYPOLOGY[typ][0],
                     "per_floor": per_floor(count, floors),
                     "overridden": "apartments" in over,
                 }
@@ -176,7 +189,10 @@ def view(doc: dict) -> dict[str, Any]:
         "brief_version": doc.get("version"),
         "params": params,
         "units": units,
-        "max_units_per_floor": MAX_APARTMENTS_PER_FLOOR if units else None,
+        "max_units_per_floor": cap if units else None,
+        # the form recomputes the cap while the width is edited (spec.rs apartments_cap)
+        "apartment_frontage": APARTMENT_FRONTAGE if units else None,
+        "apartments_top": APARTMENTS_TOP,
         "presets": presets(doc, typ),
         "reason": None,
         "source": GENERATOR_REF,
@@ -272,7 +288,7 @@ def apply(doc: dict, values: dict[str, Any], *, user_id: str, at: datetime) -> t
                 "int",
                 "units",
                 1,
-                MAX_APARTMENTS_PER_FLOOR * TYPOLOGY[typ][0],
+                APARTMENTS_TOP * TYPOLOGY[typ][0],
                 1,
                 spec_key="apartments",
                 nullable=False,
@@ -300,11 +316,12 @@ def apply(doc: dict, values: dict[str, Any], *, user_id: str, at: datetime) -> t
     floors = int(_value(out, "/massing/floors_above") or 1)
     if typ in DWELLING_TYPOLOGIES and _units(out):
         total = sum(per_floor(int(u.get("count") or 1), floors) for u in _units(out))
-        if total > MAX_APARTMENTS_PER_FLOOR:
+        cap = apartments_cap(out)
+        if total > cap:
             errors.append(
                 {
                     "pointer": "/programme/units",
-                    "message": f"{total} units on one floor; the generator places at most {MAX_APARTMENTS_PER_FLOOR}",
+                    "message": f"{total} units on one floor; the generator places at most {cap} at this width",
                 }
             )
     if errors:

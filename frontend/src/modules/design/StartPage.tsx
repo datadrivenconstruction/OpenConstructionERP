@@ -20,8 +20,8 @@ export default function StartPage() {
       description={tr(t, 'design.brief.no_project_hint')} />;
   }
   return (
-    <div className="flex flex-col gap-5 p-4 sm:p-6">
-      <h1 className="text-xl font-semibold text-content-primary">{tr(t, 'design.start.title')}</h1>
+    <div className="flex flex-col gap-5 animate-fade-in">
+      <h1 className="sr-only">{tr(t, 'design.start.title')}</h1>
       <ProjectStart key={projectId} projectId={projectId} steps={q.data?.steps ?? []} />
     </div>
   );

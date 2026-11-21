@@ -95,7 +95,12 @@ export function useModelEditor(projectId: string) {
     return out;
   }, [view, draft]);
   const unitsPerFloor = (view?.units ?? []).reduce((s, u) => s + perFloor(Number(value(u) ?? 1), floors), 0);
-  const tooMany = !!view?.max_units_per_floor && unitsPerFloor > view.max_units_per_floor;
+  const widthParam = view?.params.find((p) => p.id === 'width');
+  const width = widthParam ? Number(value(widthParam)) : NaN;
+  const maxPerFloor = view?.apartment_frontage && width > 0
+    ? Math.min(view.apartments_top ?? Infinity, 2 * Math.max(1, Math.floor(width / view.apartment_frontage)))
+    : view?.max_units_per_floor ?? null;
+  const tooMany = !!maxPerFloor && unitsPerFloor > maxPerFloor;
   const preview = usePreview(projectId, view?.brief_version, draft,
     !!view?.typology && Object.keys(problems).length === 0 && !tooMany);
 
@@ -117,8 +122,9 @@ export function useModelEditor(projectId: string) {
 
   const doc = brief.data ?? null;
   const unconfirmed = Object.entries(doc?.provenance ?? {}).some(([p, e]) => e.status !== 'confirmed' && !(p in draft));
+  const offReason = !gen.data?.enabled ? (gen.data?.reason ?? undefined) : undefined;
   const blocked = !gen.data?.enabled
-    ? (gen.data?.reason ?? tr(t, 'design.generate.unavailable'))
+    ? tr(t, 'design.generate.unavailable')
     : !doc || unconfirmed
       ? m('design.model.no_brief')
       : view && !view.typology
@@ -147,8 +153,8 @@ export function useModelEditor(projectId: string) {
     : typeof v === 'string' ? m(`design.model.option.${v}`) : v === null ? m('design.model.option.none') : String(v));
 
   const loading = access.isLoading || brief.isLoading || gen.isLoading;
-  return { m, access, brief, view, draft, setDraft, value, set, floors, problems, unitsPerFloor, tooMany, preview, start,
-    job, active, mine, elapsed, blocked, changed, invalid, startError, showPreview, fieldHint, shown, loading };
+  return { m, access, brief, view, draft, setDraft, value, set, floors, problems, unitsPerFloor, maxPerFloor, tooMany, preview, start,
+    job, active, mine, elapsed, blocked, offReason, changed, invalid, startError, showPreview, fieldHint, shown, loading };
 }
 
 export type ModelEditor = ReturnType<typeof useModelEditor>;
@@ -157,7 +163,7 @@ export type ModelEditor = ReturnType<typeof useModelEditor>;
 export default function ModelPanel({ projectId, fallback = null }: { projectId: string; fallback?: ReactNode }) {
   const { t } = useTranslation();
   const ed = useModelEditor(projectId);
-  const { m, access, preview, start, active, mine, elapsed, blocked, changed, invalid, startError, showPreview } = ed;
+  const { m, access, preview, start, active, mine, elapsed, blocked, offReason, changed, invalid, startError, showPreview } = ed;
   const rights = useQuery({ queryKey: ['design-rights', projectId], queryFn: () => fetchRights(projectId), retry: false });
   if (ed.loading || rights.isLoading) return null;
   // The server decides with the same rule (model_api: can_edit); an older server without rights keeps managers only.
@@ -167,7 +173,7 @@ export default function ModelPanel({ projectId, fallback = null }: { projectId: 
   return (
     <Card data-testid="model-panel">
       <CardHeader title={m('design.model.title')} subtitle={m('design.model.hint')} />
-      <div className={clsx('px-4 pb-4', showPreview && 'grid gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(480px,52%)]')}>
+      <div className={clsx('mt-4', showPreview && 'grid gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(480px,52%)]')}>
         <div className="flex min-w-0 flex-col gap-4">
           <ModelForm ed={ed} />
           <div className="flex flex-wrap items-center gap-3">
@@ -182,7 +188,8 @@ export default function ModelPanel({ projectId, fallback = null }: { projectId: 
               {changed > 0 ? m('design.model.changed_n', { count: changed }) : m('design.model.unchanged')}
             </span>
           </div>
-          {blocked && !active && <p className="text-sm text-content-secondary" data-testid="model-blocked">{blocked}</p>}
+          {blocked && !active && <p className="text-sm text-content-secondary" data-testid="model-blocked"
+            title={offReason}>{blocked}</p>}
           {startError && <p role="alert" className="text-sm text-semantic-error">{m('design.model.failed')}: {startError}</p>}
           {mine && ACTIVE.includes(mine.status) && (
             <progress className="h-2 w-full" max={1} value={mine.progress} aria-label={tr(t, 'design.generate.progress')} />
@@ -206,7 +213,7 @@ export default function ModelPanel({ projectId, fallback = null }: { projectId: 
 
 /** The generator's values with their ranges (presets, parameters, dwellings per type). */
 export function ModelForm({ ed, compact = false }: { ed: ModelEditor; compact?: boolean }) {
-  const { m, view, value, set, setDraft, problems, active, floors, tooMany, unitsPerFloor, fieldHint, shown } = ed;
+  const { m, view, value, set, setDraft, problems, active, floors, tooMany, unitsPerFloor, maxPerFloor, fieldHint, shown } = ed;
   // Beside the preview (xl) the form gets about half the card: two columns, so the viewer toolbar keeps one row.
   const grid = compact ? 'grid grid-cols-1 gap-3' : 'grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-2 2xl:grid-cols-3';
   return (
@@ -298,7 +305,7 @@ export function ModelForm({ ed, compact = false }: { ed: ModelEditor; compact?: 
               </div>
               {tooMany && (
                 <p role="alert" className="text-sm text-semantic-error">
-                  {m('design.model.units_too_many', { count: unitsPerFloor, max: view.max_units_per_floor })}
+                  {m('design.model.units_too_many', { count: unitsPerFloor, max: maxPerFloor })}
                 </p>
               )}
             </fieldset>

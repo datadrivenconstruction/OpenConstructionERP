@@ -82,6 +82,15 @@ function revisionError(t: ReturnType<typeof useTranslation>['t'], e: unknown): s
   return typeof body === 'string' ? body : err.message;
 }
 
+type EditorMode = 'quick' | 'full';
+const MODE_KEY = 'oe_design_editor_mode';
+function readEditorMode(): EditorMode {
+  try { return localStorage.getItem(MODE_KEY) === 'quick' ? 'quick' : 'full'; } catch { return 'full'; }
+}
+function writeEditorMode(m: EditorMode): void {
+  try { localStorage.setItem(MODE_KEY, m); } catch { /* private mode: the choice lasts for this page */ }
+}
+
 function Workspace({ projectId }: { projectId: string }) {
   const { t, i18n } = useTranslation();
   const qc = useQueryClient();
@@ -96,6 +105,9 @@ function Workspace({ projectId }: { projectId: string }) {
   const [created, setCreated] = useState<RevisionView | null>(null);
   const link = useRef<BridgeHost | null>(null);
   const device = useDevice();
+  // Both ways to work stay on offer: the quick concept from the brief values, or the full editor on the same project.
+  const [want, setWant] = useState<EditorMode>(readEditorMode);
+  const choose = (m: EditorMode) => { setBridge(null); setWant(m); writeEditorMode(m); };
 
   useEffect(() => {
     let live = true;
@@ -146,7 +158,7 @@ function Workspace({ projectId }: { projectId: string }) {
   });
 
   // The editor is used when the bundle is there and the bridge did not refuse or fail; otherwise today's engine.
-  const editorOn = payload?.kind === 'editor' && bridge?.status !== 'refused' && bridge?.status !== 'failed';
+  const editorOn = payload?.kind === 'editor' && want === 'full' && bridge?.status !== 'refused' && bridge?.status !== 'failed';
   const engineLabel = !payload ? '' : editorOn && bridge?.status === 'open'
     ? tr(t, 'design.workspace.engine_editor', { version: bridge.editor.version })
     : editorOn ? tr(t, 'design.workspace.engine_starting') : tr(t, 'design.workspace.engine_simple_short');
@@ -176,6 +188,21 @@ function Workspace({ projectId }: { projectId: string }) {
         </h1>
         <span className="truncate text-xs text-content-tertiary" data-testid="engine-label" title={engineHint || undefined}>{engineLabel}</span>
       </div>
+      {payload?.kind === 'editor' && (
+        <div role="group" aria-label={tr(t, 'design.workspace.mode_label')} data-testid="editor-mode"
+          className="inline-flex h-8 items-stretch rounded-md border border-border p-0.5">
+          {(['quick', 'full'] as const).map((m) => (
+            // unsaved work in the full editor is not dropped by a switch: leave it to Save or Discard first
+            <button key={m} type="button" aria-pressed={want === m} disabled={want !== m && dirty}
+              title={want !== m && dirty ? tr(t, 'design.workspace.leave') : undefined} onClick={() => choose(m)}
+              className={want === m
+                ? 'rounded px-2.5 text-sm font-medium text-content-primary bg-surface-secondary'
+                : 'rounded px-2.5 text-sm text-content-secondary hover:text-content-primary disabled:opacity-50'}>
+              {tr(t, `design.workspace.mode_${m}`)}
+            </button>
+          ))}
+        </div>
+      )}
       {editorOn && draftStatus && (
         <span role="status" aria-live="polite" data-testid="draft-status" className="flex items-center gap-1.5 text-xs text-content-secondary">
           {draftStatus}

@@ -98,6 +98,7 @@ import { NavItemBadge } from './NavItemBadge';
 import { MenuModeBar, MenuSuggestionCard, RailFlyoutGroup } from './MenuModeBar';
 import { MenuOrganizer } from './MenuOrganizer';
 import { chordForRoute, chordKey, chordRoutes, gChordPref } from '@/shared/lib/gChords';
+import { publicAsset } from '@/shared/lib/publicAsset';
 
 // The picker carries the curated icon catalogue; both load on first use.
 const MenuIconPicker = lazy(() => import('./MenuIconPicker'));
@@ -1888,6 +1889,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
               isCollapsed={isCollapsed}
               onToggle={() => toggleGroup(group.id)}
               iconified={iconified}
+              brand={group.brand}
               editMode={editMode}
               isGroupHidden={editingHiddenGroups.includes(group.id)}
               onToggleGroupHidden={() => toggleGroupHidden(group.id)}
@@ -2391,6 +2393,24 @@ function RowIconMenu({
   );
 }
 
+// The Learn card's frame and padding in the product colour: the section reads as its own product.
+const BRAND_TINT = clsx(
+  'rounded-xl p-1.5 border border-[color-mix(in_srgb,var(--oe-brand-design)_15%,transparent)]',
+  'bg-gradient-to-br from-[color-mix(in_srgb,var(--oe-brand-design)_7%,transparent)] via-[color-mix(in_srgb,var(--oe-brand-design)_3%,transparent)] to-transparent',
+  'dark:border-[color-mix(in_srgb,var(--oe-brand-design)_25%,transparent)] dark:from-[color-mix(in_srgb,var(--oe-brand-design)_14%,transparent)]',
+);
+
+/** The product's mark from the unmodified brand-kit SVGs, light or dark with the theme. */
+function BrandMark({ brand }: { brand: 'design' }) {
+  const src = (tone: 'light' | 'dark') => publicAsset(`/brand/${brand}/${brand}-mark-${tone}.svg`);
+  return (
+    <span className="relative inline-block h-4 w-4 shrink-0" aria-hidden>
+      <img src={src('light')} alt="" draggable={false} className="block h-full w-full dark:hidden" />
+      <img src={src('dark')} alt="" draggable={false} className="hidden h-full w-full dark:block" />
+    </span>
+  );
+}
+
 function NavGroupSection({
   label,
   description,
@@ -2401,9 +2421,12 @@ function NavGroupSection({
   editMode,
   isGroupHidden,
   onToggleGroupHidden,
+  brand,
 }: {
   label: string;
   description?: string;
+  /** Product group: its brand mark replaces the dot and the section sits on a light tint of the brand colour. */
+  brand?: 'design';
   isCollapsed: boolean;
   onToggle: () => void;
   children: React.ReactNode;
@@ -2437,7 +2460,7 @@ function NavGroupSection({
   }
   if (headers === 'divider' || headers === 'none') {
     return (
-      <div className={clsx('oe-nav-group mt-3 mb-0.5', editMode && isGroupHidden && 'opacity-50')}>
+      <div className={clsx('oe-nav-group mt-3 mb-0.5', brand && BRAND_TINT, editMode && isGroupHidden && 'opacity-50')}>
         <div className="mb-0.5 flex items-center gap-0.5">
           <button
             onClick={onToggle}
@@ -2453,6 +2476,7 @@ function NavGroupSection({
               'transition-colors duration-150',
             )}
           >
+            {brand && <BrandMark brand={brand} />}
             {/* Sentence case as written: CSS uppercase maps the Turkish i wrongly. */}
             <span className="max-w-[75%] truncate text-2xs font-medium text-content-tertiary group-hover:text-content-secondary">
               {label}
@@ -2494,7 +2518,7 @@ function NavGroupSection({
   // keyboard focus shows a clean ring without bleeding outside the
   // padded box.
   return (
-    <div className={clsx('oe-nav-group mt-3 mb-0.5', editMode && isGroupHidden && 'opacity-50')}>
+    <div className={clsx('oe-nav-group mt-3 mb-0.5', brand && BRAND_TINT, editMode && isGroupHidden && 'opacity-50')}>
       {/* Header row — the collapse toggle plus, in Edit-menu mode, a
           section-level Eye / EyeOff control. Kept as sibling buttons (not
           nested) so both stay valid, focusable controls. */}
@@ -2518,7 +2542,7 @@ function NavGroupSection({
         <span className="flex items-center gap-1.5 min-w-0">
           {/* Small leading dot — provides a calm visual rhythm down the
               sidebar so users can pick out group starts at a glance. */}
-          <span
+          {brand ? <BrandMark brand={brand} /> : <span
             className={clsx(
               'h-1 w-1 rounded-full shrink-0 transition-colors duration-150',
               isCollapsed
@@ -2526,7 +2550,7 @@ function NavGroupSection({
                 : 'bg-oe-blue/55 group-hover:bg-oe-blue',
             )}
             aria-hidden
-          />
+          />}
           <span className="text-2xs font-semibold uppercase tracking-wider text-content-tertiary group-hover:text-content-secondary transition-colors truncate">
             {label}
           </span>

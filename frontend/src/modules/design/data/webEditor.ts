@@ -5,7 +5,7 @@
  * Nothing is fetched without that yes; the choice can be changed on the editor page.
  */
 import { useSyncExternalStore } from 'react';
-import { BRIDGE_VERSION, bundleBytes, checkBundle, sha256Hex, type EditorBundle } from '../bridge/protocol';
+import { BRIDGE_VERSION, bundleBytes, checkBundle, sha256Hex, startFiles, type EditorBundle } from '../bridge/protocol';
 
 export const CONSENT_KEY = 'oe_design_web_editor';
 export const CACHE_NAME = 'oe-design-editor-v1';
@@ -75,7 +75,7 @@ export async function findPayload(opts: {
     if (!b.bridge.includes(BRIDGE_VERSION)) return { ...engine, fallback: `bridge ${b.bridge.join(',')}` };
     return {
       kind: 'editor', version: b.version, bundle: b, entryUrl: new URL(b.entry, at).href,
-      assets: b.files.map((f) => ({ url: new URL(f.path, at).href, bytes: f.bytes, sha256: f.sha256 })),
+      assets: startFiles(b).map((f) => ({ url: new URL(f.path, at).href, bytes: f.bytes, sha256: f.sha256 })),
     };
   } catch (e) {
     return { ...engine, fallback: e instanceof Error ? e.message : String(e) };

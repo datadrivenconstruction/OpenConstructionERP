@@ -7,11 +7,14 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
+import { Box } from 'lucide-react';
 import { BIMViewer } from '@/shared/ui/BIMViewer';
 import { useBIMViewerStore } from '@/stores/useBIMViewerStore';
 import type { BIMElementData } from '@/shared/ui/BIMViewer/ElementManager';
 import { previewBrief, type ModelValue } from './modelApi';
 import { useIsoFrame } from './frameView';
+import { fieldLabel } from './BriefFields';
 import { VIEWER_FRAME } from './useQuietViewer';
 import { countByClass, glbNodes, type GenResult, type WorkerOut } from './wasm/ddcWeb';
 import wasmUrl from './wasm/ddc_web.wasm?url';
@@ -22,7 +25,7 @@ const LOAD_TIMEOUT_MS = 20_000;
 export type PreviewState =
   | { status: 'off' }
   | { status: 'loading' }
-  | { status: 'none'; reason: string }
+  | { status: 'none'; reason: string; unconfirmed?: string[] }
   | { status: 'ready'; seq: number; url: string; elements: BIMElementData[]; counts: [string, number][]; ms: number; building: boolean };
 
 function startWorker(): Worker | null {
@@ -70,7 +73,7 @@ export function usePreview(projectId: string, briefVersion: number | undefined, 
         const { brief, problems } = await previewBrief(projectId, briefVersion, JSON.parse(key) as Record<string, ModelValue>);
         const w = worker.current;
         if (!w || id !== seq.current) return;
-        if (brief == null) { setState({ status: 'none', reason: problems?.message ?? '' }); return; }
+        if (brief == null) { setState({ status: 'none', reason: problems?.message ?? '', unconfirmed: problems?.unconfirmed }); return; }
         const result = await new Promise<GenResult>((resolve) => {
           waiting.current.set(id, resolve);
           w.postMessage({ type: 'gen', id, brief: JSON.stringify(brief) });
@@ -145,7 +148,17 @@ export function ModelPreview({ projectId, state, onSelect, tall = false }: {
           </span>
         )}
         {state.status === 'none' && (
-          <p className="p-3 text-sm text-content-secondary" title={state.reason || undefined}>{m('design.model.preview.none')}</p>
+          <p className="flex h-full flex-col items-center justify-center gap-2 p-6 text-center text-sm text-content-tertiary"
+            title={state.reason || undefined}>
+            <Box size={24} aria-hidden className="text-content-quaternary" />
+            {state.unconfirmed?.length ? (
+              <>
+                <span>{m('design.model.preview.unconfirmed', {
+                  fields: state.unconfirmed.map((p) => fieldLabel(t, p)).join(', ') })}</span>
+                <Link to="/design/brief" className="text-oe-blue-text underline">{m('design.model.preview.open_brief')}</Link>
+              </>
+            ) : m('design.model.preview.none')}
+          </p>
         )}
       </div>
       {state.status === 'ready' && !tall && (

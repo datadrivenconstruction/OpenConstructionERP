@@ -43,6 +43,9 @@ export interface ModelView {
   params: ModelParam[];
   units: ModelUnit[];
   max_units_per_floor: number | null;
+  /** facade one flat needs, m: with the width, flats per floor = 2 x floor(width / frontage), up to apartments_top */
+  apartment_frontage?: number | null;
+  apartments_top?: number;
   presets: ModelPreset[];
   reason: string | null;
   source: string;
@@ -65,7 +68,7 @@ export function generateModel(projectId: string, briefVersion: number, values: R
 }
 
 /** Dry run of generate: the brief `ddc gen --brief` would get for these values (server model_params.apply). */
-export interface PreviewAnswer { brief_version: number; brief: unknown; problems?: { message: string } }
+export interface PreviewAnswer { brief_version: number; brief: unknown; problems?: { message: string; unconfirmed?: string[] } }
 
 /** `brief` is null while the brief is not confirmed; `problems` says why. */
 export function previewBrief(projectId: string, briefVersion: number, values: Record<string, ModelValue>): Promise<PreviewAnswer> {

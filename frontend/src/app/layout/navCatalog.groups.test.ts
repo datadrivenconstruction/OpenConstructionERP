@@ -14,6 +14,7 @@ describe('menu groups', () => {
     expect(ids).toEqual([
       LEARN_GROUP_ID,
       'grp_overview',
+      'grp_design',
       'grp_takeoff',
       'grp_cost_data',
       'grp_estimating',

@@ -160,6 +160,8 @@ export interface NavGroup {
   items: NavItem[];
   defaultOpen: boolean;
   hideInSimple?: boolean; // Entire group hidden in simple mode
+  /** A group that is a product of the family (public/brand/<id>/): its mark and a light tint of its colour. */
+  brand?: 'design';
   /** A group of an opt-in module the person switched on themselves: next to a
    *  company workspace or work mode it stays in view instead of under "More modules". */
   keepInView?: boolean;
@@ -285,6 +287,7 @@ export const navGroups: NavGroup[] = [
     defaultLabel: 'Design',
     defaultOpen: true,
     keepInView: true,
+    brand: 'design',
     items: [],
   },
   // ── 2. TAKEOFF ─────────────────────────────────────────────────────
