@@ -167,7 +167,7 @@ async def test_the_old_paths_still_answer_and_name_their_successor(http_client, 
 async def test_the_tenders_list_shows_both_copies(http_client, tenders):
     resp = await http_client.get(f"{TENDERS}/", params={"project_id": tenders["project_id"]}, headers=tenders["a"])
     assert resp.status_code == 200, resp.text
-    sources = {row["source"]: row["id"] for row in resp.json()}
+    sources = {row["source"]: row["id"] for row in resp.json()["items"]}
     assert sources == {"tendering": tenders["package_canonical"], "rfq_bidding": tenders["rfq_canonical"]}
 
 
