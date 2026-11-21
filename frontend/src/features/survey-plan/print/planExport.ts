@@ -23,6 +23,15 @@ const STYLE: Record<string, { token: MapToken; aci: number; legend: PrintLayer['
   heat: { token: 'neutral', aci: 9, legend: 'swatch', fill: true },
   surfaces: { token: 'surface', aci: 4, legend: 'line' },
   sketch: { token: 'ink-2', aci: 7, legend: 'line' },
+  traverse: { token: 'accent', aci: 5, legend: 'line', lineMm: 0.35 },
+  misclosure: { token: 'misclosure', aci: 6, legend: 'line', lineMm: 0.35 },
+  ellipses: { token: 'misclosure', aci: 6, legend: 'line', lineMm: 0.18 },
+  alignment: { token: 'accent', aci: 5, legend: 'line', lineMm: 0.5 },
+  chainage: { token: 'ink', aci: 7, legend: 'line', lineMm: 0.18 },
+  stakes: { token: 'ink', aci: 7, legend: 'point' },
+  stake_deviation: { token: 'error', aci: 1, legend: 'line', lineMm: 0.25 },
+  monitoring: { token: 'ink', aci: 7, legend: 'point' },
+  monitoring_vectors: { token: 'error', aci: 1, legend: 'line', lineMm: 0.25 },
 };
 
 export function printLayers(layers: readonly PlanLayerSpec[], palette: MapPalette, title: (l: PlanLayerSpec) => string): PrintLayer[] {

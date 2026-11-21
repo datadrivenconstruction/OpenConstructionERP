@@ -313,6 +313,10 @@ export default function PlanCanvas(props: PlanCanvasProps) {
   }
 
   function addVertex(p: GridXY) {
+    if (props.pickPoint) {
+      props.pickPoint(p);
+      return;
+    }
     if (tool.onClick?.(p, ctx)) {
       if (tool.group === 'measure') setMeasurePts([...vertices, p].slice(-3));
       return;
@@ -385,7 +389,8 @@ export default function PlanCanvas(props: PlanCanvasProps) {
     [index, mpp, snapSettings, vertices],
   );
 
-  const drawing = tool.group === 'draw' || tool.group === 'measure' || tool.group === 'annotate' || (tool.collects && tool.collects !== 'none');
+  const picking = !!props.pickPoint;
+  const drawing = picking || tool.group === 'draw' || tool.group === 'measure' || tool.group === 'annotate' || (tool.collects && tool.collects !== 'none');
 
   const onMouseMove = (e: MapLayerMouseEvent) => {
     const raw = toGrid(e);
@@ -400,7 +405,7 @@ export default function PlanCanvas(props: PlanCanvasProps) {
       setScreen(pt ? { x: pt.x, y: pt.y } : null);
     } else setScreen(null);
     const down = downRef.current;
-    if (down && !drag && Math.hypot(e.point.x - down.x, e.point.y - down.y) > DRAG_PX && tool.id === SELECT_TOOL && !spaceHeld) {
+    if (down && !drag && Math.hypot(e.point.x - down.x, e.point.y - down.y) > DRAG_PX && tool.id === SELECT_TOOL && !spaceHeld && !picking) {
       const h = handleAt(down.at);
       if (h) setDrag(h);
       else {
@@ -415,7 +420,7 @@ export default function PlanCanvas(props: PlanCanvasProps) {
       else setDrag({ ...drag, at });
       return;
     }
-    if (tool.id === SELECT_TOOL) setHover(hitTest(raw)?.id ?? null);
+    if (tool.id === SELECT_TOOL && !picking) setHover(hitTest(raw)?.id ?? null);
   };
 
   const onMouseDown = (e: MapLayerMouseEvent) => {
@@ -468,6 +473,11 @@ export default function PlanCanvas(props: PlanCanvasProps) {
     }
     if (spaceHeld || tool.id === PAN_TOOL) return;
     const raw = toGrid(e);
+    if (picking) {
+      const s = snapFor(raw, e.originalEvent.altKey);
+      addVertex(s?.point ?? raw);
+      return;
+    }
     if (tool.id === SELECT_TOOL) {
       if (e.originalEvent.altKey) {
         const h = handleAt(raw);
@@ -680,8 +690,8 @@ export default function PlanCanvas(props: PlanCanvasProps) {
         return { id: f.id, e: c[0]!, n: c[1]!, code: String(f.properties.code ?? ''), sourceLine: (f.properties.source_line as number | null) ?? null };
       });
     const sketch = [...working.values()];
-    return runLiveChecks({ features: sketch, codes: library, points: codedPoints });
-  }, [layers, working, library]);
+    return [...runLiveChecks({ features: sketch, codes: library, points: codedPoints }), ...(props.findings ?? [])];
+  }, [layers, working, library, props.findings]);
 
   const focusFinding = useCallback(
     (f: LiveFinding) => {
@@ -693,6 +703,18 @@ export default function PlanCanvas(props: PlanCanvasProps) {
     },
     [featureById, fitTo, setSelection],
   );
+
+  // The screen's own list can hold the selection: follow it and frame what it picked.
+  const selKey = props.selectedIds?.join('|');
+  useEffect(() => {
+    if (selKey === undefined) return;
+    const ids = (props.selectedIds ?? []).filter((id) => featureById.has(id));
+    const cur = usePlanEditStore.getState().selection;
+    if (cur.size === ids.length && ids.every((id) => cur.has(id))) return;
+    setSelectionStore(ids);
+    if (ids.length > 0) fitTo(ids.map((id) => featureById.get(id)!), 120);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selKey]);
 
   // ── Focus feature at start ──────────────────────────────────────────────
   const fitted = useRef(false);
@@ -827,6 +849,13 @@ export default function PlanCanvas(props: PlanCanvasProps) {
     return gridLines(view.bbox, gridStep(mpp), vt.toView);
   }, [basemap, view.bbox, mpp, vt]);
 
+  const raster = props.raster;
+  const rasterCorners = useMemo(() => {
+    if (!raster) return null;
+    const [e0, n0, e1, n1] = raster.bounds;
+    return ([[e0, n1], [e1, n1], [e1, n0], [e0, n0]] as GridXY[]).map((c) => vt.toView(c)) as [[number, number], [number, number], [number, number], [number, number]];
+  }, [raster, vt]);
+
   const mapStyle = useMemo(
     () => (basemap === 'map' && canMap ? buildBasemapStyle('streets', theme) : paperStyle(palette.bg)),
     [basemap, canMap, theme, palette.bg],
@@ -949,7 +978,7 @@ export default function PlanCanvas(props: PlanCanvasProps) {
             touchPitch={false}
             doubleClickZoom={false}
             boxZoom={false}
-            dragPan={spaceHeld || tool.id === PAN_TOOL || (tool.id !== SELECT_TOOL && !drag)}
+            dragPan={spaceHeld || picking || tool.id === PAN_TOOL || (tool.id !== SELECT_TOOL && !drag)}
             cursor={cursorStyle}
             attributionControl={basemap === 'map' ? { compact: true } : false}
             onLoad={onLoad}
@@ -970,6 +999,11 @@ export default function PlanCanvas(props: PlanCanvasProps) {
               <Layer id="plan-grid-minor" type="line" filter={['==', ['get', 'major'], 0]} paint={{ 'line-color': palette.grid, 'line-width': 1 }} />
               <Layer id="plan-grid-major" type="line" filter={['==', ['get', 'major'], 1]} paint={{ 'line-color': palette['grid-major'], 'line-width': 1 }} />
             </Source>
+            {raster && rasterCorners && (
+              <Source id="plan-raster" type="image" url={raster.dataUrl} coordinates={rasterCorners}>
+                <Layer id="plan-raster-layer" type="raster" paint={{ 'raster-opacity': 0.9, 'raster-fade-duration': 0 }} />
+              </Source>
+            )}
             {sources.map(({ l, st, data, style }) => (
               <Source key={l.id} id={`plan-src-${l.id}`} type="geojson" data={data}>
                 {style.map((s) => (
@@ -1039,6 +1073,13 @@ export default function PlanCanvas(props: PlanCanvasProps) {
             <NorthArrow bearing={view.bearing} gridNorth={vt.gridNorthBearing} onReset={() => mapRef.current?.rotateTo(vt.gridNorthBearing)} />
             <ScaleBar mpp={mpp} conventions={conventions} />
           </div>
+
+          {picking && props.pickHint && (
+            <div className="pointer-events-none absolute start-1/2 top-3 z-10 -translate-x-1/2 rounded-lg border border-border-light bg-surface-elevated/95 px-3 py-1.5 text-xs text-content-primary shadow-md" data-testid="plan-pick-hint">
+              {props.pickHint}
+            </div>
+          )}
+          {props.overlay}
 
           {empty && props.empty && (
             <div className="pointer-events-none absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 p-6 text-center" data-testid="plan-empty">
