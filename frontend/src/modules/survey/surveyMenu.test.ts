@@ -92,7 +92,7 @@ describe('survey module manifest', () => {
   });
 
   it('keeps /survey answering while the module is off, with the setup page', () => {
-    expect(survey.offRoutes?.map((r) => r.path)).toEqual(['/survey']);
+    expect(survey.offRoutes?.map((r) => r.path)).toEqual(['/survey', '/survey/*']);
   });
 
   it('offers one collapsed setup row while the survey group is empty', () => {

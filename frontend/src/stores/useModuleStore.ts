@@ -140,6 +140,8 @@ function writeHiddenGroups(list: string[]): void {
 
 /** Debounce timer for saving preferences to server. */
 let saveTimer: ReturnType<typeof setTimeout> | null = null;
+/** The sync in flight, shared by every caller that asks while it runs. */
+let inflight: Promise<void> | null = null;
 
 /* ── Store interface ──────────────────────────────────────────────────── */
 
@@ -175,6 +177,14 @@ interface ModuleStore {
   saveToServer: () => void;
   /** Whether a server sync is in progress. */
   isSyncing: boolean;
+  /**
+   * True once this session has heard from the server (or failed to). Until
+   * then a module that is off locally may be on for the account, so its routes
+   * wait instead of answering 404 or the setup page.
+   */
+  serverLoaded: boolean;
+  /** Forget the server answer (sign-out), so the next account loads its own. */
+  resetServerLoaded: () => void;
 }
 
 export const useModuleStore = create<ModuleStore>((set, get) => ({
@@ -265,27 +275,37 @@ export const useModuleStore = create<ModuleStore>((set, get) => ({
   /* ── Server sync ─────────────────────────────────────────────────── */
 
   isSyncing: false,
+  serverLoaded: false,
 
-  syncFromServer: async () => {
-    set({ isSyncing: true });
-    try {
-      const resp = await apiGet<{ modules: Record<string, boolean> }>(
-        '/v1/users/me/module-preferences/',
-      );
-      const serverPrefs = resp.modules ?? resp;
-      set((state) => {
-        const merged = { ...state.enabledModules, ...withCanonicalIds(serverPrefs) };
-        try {
-          localStorage.setItem(STORE_KEY, JSON.stringify(merged));
-        } catch {
-          // ignore
-        }
-        return { enabledModules: merged, isSyncing: false };
-      });
-    } catch {
-      // Server may not support this endpoint yet — silently fall back to local
-      set({ isSyncing: false });
-    }
+  resetServerLoaded: () => set({ serverLoaded: false }),
+
+  syncFromServer: () => {
+    if (inflight) return inflight;
+    const run = async () => {
+      set({ isSyncing: true });
+      try {
+        const resp = await apiGet<{ modules: Record<string, boolean> }>(
+          '/v1/users/me/module-preferences/',
+        );
+        const serverPrefs = resp.modules ?? resp;
+        set((state) => {
+          const merged = { ...state.enabledModules, ...withCanonicalIds(serverPrefs) };
+          try {
+            localStorage.setItem(STORE_KEY, JSON.stringify(merged));
+          } catch {
+            // ignore
+          }
+          return { enabledModules: merged, isSyncing: false, serverLoaded: true };
+        });
+      } catch {
+        // Server may not support this endpoint yet — silently fall back to local
+        set({ isSyncing: false, serverLoaded: true });
+      }
+    };
+    inflight = run().finally(() => {
+      inflight = null;
+    });
+    return inflight;
   },
 
   saveToServer: () => {

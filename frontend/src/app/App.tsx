@@ -41,6 +41,7 @@ import { applyComfort, readComfort } from '@/shared/lib/comfort';
 import { applyMenu } from '@/shared/lib/menuAppearance';
 import { useBrandingStore } from '@/stores/useBrandingStore';
 import { usePreferencesStore } from '@/stores/usePreferencesStore';
+import { useModuleStore } from '@/stores/useModuleStore';
 import { hydrateInfoBlocksFromServer } from '@/stores/useInfoBlockPrefsStore';
 import { useViewModeDefault } from './layout/useViewModeDefault';
 import { ddcVerifyIntegrity, ddcInjectMeta, DDC_ORIGIN } from '@/shared/lib/ddc-integrity';
@@ -1301,6 +1302,13 @@ export default function App() {
     if (isAuthenticated) {
       void usePreferencesStore.getState().hydrateFromServer();
     }
+  }, [isAuthenticated]);
+
+  // Enabled modules are saved per account, so a new browser has to ask for
+  // them before routes of locally-off modules can answer (they wait meanwhile).
+  useEffect(() => {
+    if (isAuthenticated) void useModuleStore.getState().syncFromServer();
+    else useModuleStore.getState().resetServerLoaded();
   }, [isAuthenticated]);
 
   // Onboarding-tour migration (one-shot). The app used to mount two
