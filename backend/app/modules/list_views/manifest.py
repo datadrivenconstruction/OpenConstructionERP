@@ -3,6 +3,7 @@
 """List Views module manifest."""
 
 from app.core.module_loader import ModuleManifest
+from app.modules.list_views.data_paths import DATA_PATHS
 
 manifest = ModuleManifest(
     name="oe_list_views",
@@ -19,4 +20,5 @@ manifest = ModuleManifest(
     depends=["oe_users"],
     auto_install=True,
     enabled=True,
+    data_paths=DATA_PATHS,
 )

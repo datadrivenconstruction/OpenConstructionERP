@@ -3,6 +3,7 @@
 """Enterprise Workflows module manifest."""
 
 from app.core.module_loader import ModuleManifest
+from app.modules.enterprise_workflows.data_paths import DATA_PATHS
 
 manifest = ModuleManifest(
     name="oe_enterprise_workflows",
@@ -14,4 +15,5 @@ manifest = ModuleManifest(
     depends=["oe_users", "oe_projects"],
     auto_install=False,
     enabled=True,
+    data_paths=DATA_PATHS,
 )

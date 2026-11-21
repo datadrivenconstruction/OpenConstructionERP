@@ -3,6 +3,7 @@
 """Module manifest for oe_i18n_foundation."""
 
 from app.core.module_loader import ModuleManifest
+from app.modules.i18n_foundation.data_paths import DATA_PATHS
 
 manifest = ModuleManifest(
     name="oe_i18n_foundation",
@@ -14,4 +15,5 @@ manifest = ModuleManifest(
     depends=["oe_users"],
     auto_install=True,
     enabled=True,
+    data_paths=DATA_PATHS,
 )
