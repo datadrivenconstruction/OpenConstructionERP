@@ -342320,10 +342320,10 @@
     },
     {
       "name": "data-paths",
-      "ts_files": 20,
+      "ts_files": 22,
       "css_files": 0,
-      "test_files": 4,
-      "total_files": 20
+      "test_files": 6,
+      "total_files": 22
     },
     {
       "name": "data-security",
@@ -342460,10 +342460,10 @@
     },
     {
       "name": "erp-chat",
-      "ts_files": 76,
+      "ts_files": 77,
       "css_files": 2,
-      "test_files": 16,
-      "total_files": 78
+      "test_files": 17,
+      "total_files": 79
     },
     {
       "name": "esg",
@@ -342789,10 +342789,10 @@
     },
     {
       "name": "land-parcels",
-      "ts_files": 9,
+      "ts_files": 10,
       "css_files": 0,
-      "test_files": 2,
-      "total_files": 9
+      "test_files": 3,
+      "total_files": 10
     },
     {
       "name": "leasing",
@@ -343468,10 +343468,10 @@
     },
     {
       "name": "survey-plan",
-      "ts_files": 77,
+      "ts_files": 79,
       "css_files": 0,
-      "test_files": 16,
-      "total_files": 78
+      "test_files": 18,
+      "total_files": 80
     },
     {
       "name": "sustainability",
@@ -345682,7 +345682,7 @@
     "total_schemas": 5202,
     "total_python_files": 3746,
     "frontend_features": 254,
-    "frontend_ts_files": 4553,
+    "frontend_ts_files": 4559,
     "frontend_backend_mapped": 224
   },
   "frontend_backend_mapping": {
