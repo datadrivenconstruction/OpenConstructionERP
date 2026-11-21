@@ -3,6 +3,7 @@
 """Rebar schedule module manifest."""
 
 from app.core.module_loader import ModuleManifest
+from app.modules.rebar_schedule.data_paths import DATA_PATHS
 
 manifest = ModuleManifest(
     name="oe_rebar_schedule",
@@ -25,4 +26,5 @@ manifest = ModuleManifest(
     },
     auto_install=True,
     enabled=True,
+    data_paths=DATA_PATHS,
 )

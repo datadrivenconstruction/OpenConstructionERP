@@ -3,6 +3,7 @@
 """Design-side site-supervision module manifest."""
 
 from app.core.module_loader import ModuleManifest
+from app.modules.site_supervision.data_paths import DATA_PATHS
 
 manifest = ModuleManifest(
     name="oe_site_supervision",
@@ -25,4 +26,5 @@ manifest = ModuleManifest(
     depends=["oe_users", "oe_projects"],
     auto_install=True,
     enabled=True,
+    data_paths=DATA_PATHS,
 )

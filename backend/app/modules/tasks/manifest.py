@@ -3,6 +3,7 @@
 """Tasks module manifest."""
 
 from app.core.module_loader import ModuleManifest
+from app.modules.tasks.data_paths import DATA_PATHS
 
 manifest = ModuleManifest(
     name="oe_tasks",
@@ -17,4 +18,5 @@ manifest = ModuleManifest(
     depends=["oe_users", "oe_projects"],
     auto_install=True,
     enabled=True,
+    data_paths=DATA_PATHS,
 )
