@@ -2359,5 +2359,123 @@
     ],
     "key_count_at_seed": 3,
     "note": "TC and CT (tangent to curve, curve to tangent) are the native alignment point abbreviations in French, Italian and Romanian."
+  },
+  {
+    "locale_set": [
+      "da",
+      "de",
+      "en-GB",
+      "fil",
+      "sv"
+    ],
+    "key_count_at_seed": 5,
+    "note": "Revision is the native word for a model or drawing revision in Danish, German and Swedish, and the loanword in Filipino."
+  },
+  {
+    "locale_set": [
+      "en-GB",
+      "fil",
+      "fr",
+      "pt",
+      "pt-BR"
+    ],
+    "key_count_at_seed": 4,
+    "note": "Latitude and Longitude are spelled the same in French, Portuguese and Filipino."
+  },
+  {
+    "locale_set": [
+      "cs",
+      "da",
+      "en-GB",
+      "hr",
+      "id",
+      "nl",
+      "pl",
+      "ro",
+      "tr"
+    ],
+    "key_count_at_seed": 4,
+    "note": "Model is the native word for a building model in these languages."
+  },
+  {
+    "locale_set": [
+      "cs",
+      "en-GB"
+    ],
+    "key_count_at_seed": 3,
+    "note": "Role is the Czech word for a person's role."
+  },
+  {
+    "locale_set": [
+      "da",
+      "en-GB",
+      "fr",
+      "nl",
+      "no"
+    ],
+    "key_count_at_seed": 3,
+    "note": "Type is the native word for a kind or type in Danish, French, Dutch and Norwegian."
+  },
+  {
+    "locale_set": [
+      "en-GB",
+      "fr",
+      "nl",
+      "ro"
+    ],
+    "key_count_at_seed": 3,
+    "note": "Document is spelled the same in French, Dutch and Romanian."
+  },
+  {
+    "locale_set": [
+      "da",
+      "de",
+      "en-GB",
+      "fr",
+      "it",
+      "nl",
+      "sv"
+    ],
+    "key_count_at_seed": 3,
+    "note": "Budget is the native word in these languages."
+  },
+  {
+    "locale_set": [
+      "en-GB",
+      "sv"
+    ],
+    "key_count_at_seed": 3,
+    "note": "Area is the Swedish word for a floor area."
+  },
+  {
+    "locale_set": [
+      "en-GB",
+      "es",
+      "es-CL",
+      "es-CO",
+      "es-MX",
+      "it"
+    ],
+    "key_count_at_seed": 3,
+    "note": "No is the Spanish and Italian word for no."
+  },
+  {
+    "locale_set": [
+      "en-GB",
+      "fr",
+      "nl"
+    ],
+    "key_count_at_seed": 3,
+    "note": "Discipline, Service and Modules are spelled the same in French and Dutch."
+  },
+  {
+    "locale_set": [
+      "en-GB",
+      "fil",
+      "hr",
+      "it"
+    ],
+    "key_count_at_seed": 3,
+    "note": "Formula is spelled the same in Croatian, Italian and Filipino."
   }
 ]

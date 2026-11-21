@@ -2488,5 +2488,55 @@
     "en_value": "OK",
     "note": "monitoring level badge for a point within limits; OK reads the same in every shipped locale, ru included",
     "reason_category": "acronym"
+  },
+  "crm.src_web": {
+    "en_value": "Web",
+    "note": "lead source 'Web' (the web as a channel), kept as the loanword in most locales",
+    "reason_category": "cognate_loanword"
+  },
+  "design.error.server": {
+    "en_value": "{{param}}",
+    "note": "carries only the server's own message, nothing to translate",
+    "reason_category": "template_placeholder"
+  },
+  "design.model.elapsed": {
+    "en_value": "{{seconds}} s",
+    "note": "SI second symbol beside a counter",
+    "reason_category": "abbreviation"
+  },
+  "design.model.range": {
+    "en_value": "{{min}}–{{max}} {{unit}}",
+    "note": "a numeric range of placeholders and a dash",
+    "reason_category": "template_placeholder"
+  },
+  "design.model.unit.deg": {
+    "en_value": "°",
+    "note": "degree sign",
+    "reason_category": "symbol"
+  },
+  "design.model.unit.m": {
+    "en_value": "m",
+    "note": "SI metre symbol",
+    "reason_category": "abbreviation"
+  },
+  "design.option.empty": {
+    "en_value": "—",
+    "note": "dash for an empty choice",
+    "reason_category": "symbol"
+  },
+  "design.procurement.from_to": {
+    "en_value": "{{from}} → {{to}} {{unit}}",
+    "note": "two quantities joined by an arrow, placeholders only",
+    "reason_category": "template_only"
+  },
+  "design.unit.m": {
+    "en_value": "m",
+    "note": "SI metre symbol",
+    "reason_category": "abbreviation"
+  },
+  "design.unit.m2": {
+    "en_value": "m²",
+    "note": "SI square metre symbol",
+    "reason_category": "abbreviation"
   }
 }

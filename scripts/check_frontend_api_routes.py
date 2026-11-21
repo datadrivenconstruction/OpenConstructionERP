@@ -116,7 +116,9 @@ NAVIGATION_CALLEES = frozenset({"href", "src", "window.open", "EventSource"})
 # there is no call to hand it to, and the route it names exists.
 # 260: survey plan, scan to design and volume calls that end in a query-string helper (q(locale), an optional
 # survey or period id), plus the base consts of survey-plan/api.ts and screens/api.ts; every route they reach exists.
-MAX_PREFIX_ONLY = 260
+# 265: the per-project path builders of the design module (api.ts, draftApi.ts, linksApi.ts, suggestApi.ts) and
+# the revision file URL in data/workspace.ts handed to the viewer; every call built on them is checked in full.
+MAX_PREFIX_ONLY = 265
 
 # Known unmatched calls that are right as they are. Key format:
 #   "<VERDICT> <METHOD|*> <path as written> @ <file under frontend/src>"
