@@ -204,11 +204,12 @@ describe('EditorLinkPage', () => {
     expect(again.querySelector('summary')?.textContent).toContain('Do not have the editor');
   });
 
-  it('without a configured installer address it says so instead of linking nowhere', async () => {
+  it('without a configured installer address it links to the editor site', async () => {
     await mount(<EditorLinkPage />);
-    const hint = screen.getByTestId('installer-hint');
-    expect(hint.querySelector('a')).toBeNull();
-    expect(hint.textContent).toContain('administrator');
+    const link = screen.getByTestId('installer-link') as HTMLAnchorElement;
+    expect(link.href).toBe('https://openconstructiondesign.com/');
+    expect(link.rel).toContain('noopener');
+    expect((screen.getByTestId('editor-site') as HTMLAnchorElement).href).toBe('https://openconstructiondesign.com/');
   });
 
   it('the link code never reaches the page text', async () => {

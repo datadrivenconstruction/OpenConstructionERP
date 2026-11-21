@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { installerUrl, linkExpired, linkFileName, serializeLink, shouldOffer, type LinkFile } from './offer';
+import { EDITOR_SITE, installerUrl, linkExpired, linkFileName, serializeLink, shouldOffer, type LinkFile } from './offer';
 
 const link: LinkFile = {
   schema: 'ddc-link/1', erp_url: 'http://127.0.0.1:8000', project_id: 'p', project_name: 'Wohnhaus',
@@ -54,13 +54,14 @@ describe('serializeLink', () => {
 describe('installerUrl', () => {
   it('accepts an https address only', () => {
     expect(installerUrl({ VITE_DESIGN_EDITOR_URL: 'https://example.org/get' })).toBe('https://example.org/get');
-    expect(installerUrl({ VITE_DESIGN_EDITOR_URL: 'http://example.org/get' })).toBeNull();
-    expect(installerUrl({ VITE_DESIGN_EDITOR_URL: 'javascript:alert(1)' })).toBeNull();
+    expect(installerUrl({ VITE_DESIGN_EDITOR_URL: 'http://example.org/get' })).toBe(EDITOR_SITE);
+    expect(installerUrl({ VITE_DESIGN_EDITOR_URL: 'javascript:alert(1)' })).toBe(EDITOR_SITE);
   });
 
-  it('is absent without configuration', () => {
-    expect(installerUrl({})).toBeNull();
-    expect(installerUrl({ VITE_DESIGN_EDITOR_URL: '  ' })).toBeNull();
+  it('points at the editor site without configuration', () => {
+    expect(EDITOR_SITE).toBe('https://openconstructiondesign.com/');
+    expect(installerUrl({})).toBe(EDITOR_SITE);
+    expect(installerUrl({ VITE_DESIGN_EDITOR_URL: '  ' })).toBe(EDITOR_SITE);
   });
 });
 

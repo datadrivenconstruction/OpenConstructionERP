@@ -15,7 +15,7 @@ import { projectsApi } from '@/features/projects/api';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { useToastStore } from '@/stores/useToastStore';
 import { createLink, fetchAccess, fetchRevisions } from './api';
-import { INSTALLER_SEEN_KEY, installerUrl, linkExpired, linkFileName, serializeLink, type LinkFile } from './data/offer';
+import { EDITOR_SITE, INSTALLER_SEEN_KEY, installerUrl, linkExpired, linkFileName, serializeLink, type LinkFile } from './data/offer';
 import { linkFailure, minutesLeft, type LinkFailure } from './data/linkErrors';
 import { tr } from './BriefFields';
 import { desktopEditor, errorText, type Install, type Launch } from './desktopEditor';
@@ -267,17 +267,16 @@ function EditorLink({ projectId }: { projectId: string }) {
           {/* Always reachable; open by itself on the first visit. A person who closed the tab on the first visit finds it again. */}
           <details data-testid="installer-hint" open={!hintSeen} className="rounded border border-border-light bg-surface-secondary px-3 py-2 text-sm">
             <summary className="cursor-pointer">{tr(t, 'design.editor.no_editor')}</summary>
-            {installer ? (
-              <a className="mt-2 inline-flex items-center gap-1 text-oe-blue-text underline" href={installer} target="_blank" rel="noopener noreferrer">
-                {tr(t, 'design.editor.get')} <ExternalLink size={14} aria-hidden />
-              </a>
-            ) : (
-              <p className="mt-2 text-content-secondary">{tr(t, 'design.editor.no_installer_url')}</p>
-            )}
+            <a data-testid="installer-link" className="mt-2 inline-flex items-center gap-1 text-oe-blue-text underline" href={installer} target="_blank" rel="noopener noreferrer">
+              {tr(t, 'design.editor.get')} <ExternalLink size={14} aria-hidden />
+            </a>
             <p className="mt-2 text-content-secondary">{tr(t, 'design.editor.installed_steps')}</p>
             <p className="mt-1 text-content-secondary">{tr(t, 'design.editor.update_hint')}</p>
           </details>
           <p data-testid="mcp-hint" className="text-xs text-content-secondary">{tr(t, 'design.editor.mcp_hint')}</p>
+          <a data-testid="editor-site" className="inline-flex items-center gap-1 text-xs text-oe-blue-text underline" href={EDITOR_SITE} target="_blank" rel="noopener noreferrer">
+            {tr(t, 'design.editor.site')} <ExternalLink size={12} aria-hidden />
+          </a>
         </div>
       </Card>
     </div>

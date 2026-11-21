@@ -46,14 +46,17 @@ export function serializeLink(link: LinkFile): string {
   return `${JSON.stringify(link, null, 2)}\n`;
 }
 
-/** The installer address comes from the build; without one the page says where to look instead of linking nowhere. */
-export function installerUrl(env: Record<string, string | undefined>): string | null {
+/** The design editor's public site: downloads, editions and documentation. */
+export const EDITOR_SITE = 'https://openconstructiondesign.com/';
+
+/** A build may point at its own installer (https only); otherwise the editor's public site. */
+export function installerUrl(env: Record<string, string | undefined>): string {
   const raw = (env.VITE_DESIGN_EDITOR_URL ?? '').trim();
   try {
     const url = new URL(raw);
-    return url.protocol === 'https:' ? url.toString() : null;
+    return url.protocol === 'https:' ? url.toString() : EDITOR_SITE;
   } catch {
-    return null;
+    return EDITOR_SITE;
   }
 }
 
