@@ -1688,7 +1688,8 @@ jobs:
         # does chain on this step's outcome, and a red build skips it. That is
         # correct, since it would have no stylesheet to read, but it means this
         # run cannot be cited as evidence about that step.
-        run: npx vite build
+        # Same heap as the build script in package.json; the job-wide 9216 ran out while computing gzip sizes.
+        run: node --max-old-space-size=12288 ./node_modules/vite/bin/vite.js build
       - name: Check Tailwind class conflicts in the stylesheet the build produced
         if: ${{ !cancelled() && steps.install.outcome == 'success' && steps.build.outcome == 'success' }}
         # Reads the sheet vite just wrote rather than generating its own, so what

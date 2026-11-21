@@ -59,7 +59,7 @@ describe('demo profiles', () => {
     expect(s.slug).toBe('school-paris');
     expect(s.locale).toBe('fr');
     expect(s.groups).toContain('grp_procurement');
-    expect(s.modules).toContain('/tendering');
+    expect(s.modules).toContain('/tenders');
     useDemoSessionStore.getState().setDemo(null);
     expect(useDemoSessionStore.getState()).toMatchObject({ slug: null, groups: null, modules: null });
   });

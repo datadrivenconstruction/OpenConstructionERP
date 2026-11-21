@@ -1128,7 +1128,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "compare-bids-and-award"
       ],
       "routes": [
-        "/tendering",
+        "/tenders",
         "/subcontractors",
         "/procurement",
         "/reports",
@@ -1885,7 +1885,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "/validation",
         "/estimate-basis",
         "/reports",
-        "/tendering"
+        "/tenders"
       ],
       "result": "gaeb",
       "title": "Kostenvoranschlag und GAEB | Leistungsverzeichnis bepreisen",
@@ -1930,7 +1930,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "compare-bids-and-award"
       ],
       "routes": [
-        "/tendering",
+        "/tenders",
         "/subcontractors",
         "/procurement",
         "/reports",
@@ -2195,7 +2195,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "/norm-expansion",
         "/boq",
         "/cost-explorer",
-        "/tendering",
+        "/tenders",
         "/validation"
       ],
       "result": "cost",
@@ -2620,7 +2620,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       ],
       "routes": [
         "/bid-management",
-        "/tendering",
+        "/tenders",
         "/procurement",
         "/subcontractors",
         "/contracts"
@@ -2985,7 +2985,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       ],
       "routes": [
         "/bid-management",
-        "/tendering",
+        "/tenders",
         "/reports",
         "/procurement",
         "/subcontractors",
@@ -3324,7 +3324,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "raise-a-subcontract-order-from-the-award": 215
       },
       "routes": [
-        "/tendering",
+        "/tenders",
         "/subcontractors",
         "/contracts",
         "/reports",
@@ -3738,7 +3738,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "compare-bids-and-award"
       ],
       "routes": [
-        "/tendering",
+        "/tenders",
         "/subcontractors",
         "/contracts",
         "/reports",
@@ -4259,7 +4259,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       ],
       "routes": [
         "/bid-management",
-        "/tendering",
+        "/tenders",
         "/reports"
       ],
       "result": "award",
@@ -4664,7 +4664,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       ],
       "routes": [
         "/bid-management",
-        "/tendering",
+        "/tenders",
         "/reports",
         "/procurement",
         "/subcontractors",
@@ -5173,7 +5173,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "protect-the-programme-from-a-long-lead-item"
       ],
       "routes": [
-        "/tendering",
+        "/tenders",
         "/bid-management",
         "/reports",
         "/procurement",
@@ -5716,7 +5716,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "/norm-expansion",
         "/boq",
         "/cost-explorer",
-        "/tendering",
+        "/tenders",
         "/catalog",
         "/validation",
         "/reports"
@@ -5820,7 +5820,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "/boq",
         "/procurement",
         "/reports",
-        "/tendering",
+        "/tenders",
         "/bid-management"
       ],
       "result": "award",
@@ -6236,7 +6236,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       ],
       "routes": [
         "/boq",
-        "/tendering",
+        "/tenders",
         "/reports",
         "/files",
         "/bid-management",
@@ -6758,7 +6758,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       ],
       "routes": [
         "/boq",
-        "/tendering",
+        "/tenders",
         "/bid-management",
         "/files",
         "/cost-explorer",
@@ -6970,7 +6970,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "/contracts",
         "/costs",
         "/estimate-basis",
-        "/tendering",
+        "/tenders",
         "/bid-management",
         "/cost-explorer"
       ],
@@ -7018,7 +7018,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "level-bids-to-a-common-scope"
       ],
       "routes": [
-        "/tendering",
+        "/tenders",
         "/bid-management",
         "/reports",
         "/estimate-basis",
@@ -7289,7 +7289,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "package-a-subcontract-under-saudization-and-local-content"
       ],
       "routes": [
-        "/tendering",
+        "/tenders",
         "/subcontractors",
         "/contracts",
         "/reports",
@@ -7584,7 +7584,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "tender-from-boq"
       ],
       "routes": [
-        "/tendering",
+        "/tenders",
         "/bid-management",
         "/reports",
         "/boq"
@@ -7854,7 +7854,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "tender-from-boq"
       ],
       "routes": [
-        "/tendering",
+        "/tenders",
         "/bid-management",
         "/reports",
         "/boq"
@@ -8118,7 +8118,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "tender-from-boq"
       ],
       "routes": [
-        "/tendering",
+        "/tenders",
         "/bid-management",
         "/reports",
         "/boq"
@@ -8385,7 +8385,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "tender-from-boq"
       ],
       "routes": [
-        "/tendering",
+        "/tenders",
         "/bid-management",
         "/reports",
         "/boq"
@@ -8878,7 +8878,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       "region": "DE",
       "stage": "procure",
       "routes": [
-        "/tendering",
+        "/tenders",
         "/subcontractors",
         "/procurement",
         "/reports"
@@ -9107,7 +9107,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       "region": null,
       "stage": "procure",
       "routes": [
-        "/tendering",
+        "/tenders",
         "/bid-management",
         "/reports"
       ]
@@ -9134,7 +9134,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "/norm-expansion",
         "/boq",
         "/cost-explorer",
-        "/tendering"
+        "/tenders"
       ]
     },
     "compose-the-bdi-under-acordao-2622-2013-tcu": {
@@ -9306,7 +9306,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       "stage": "procure",
       "routes": [
         "/estimate-basis",
-        "/tendering",
+        "/tenders",
         "/bid-management",
         "/cost-explorer",
         "/contracts"
@@ -9398,7 +9398,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       "routes": [
         "/boq",
         "/procurement",
-        "/tendering",
+        "/tenders",
         "/subcontractors",
         "/reports"
       ]
@@ -9458,7 +9458,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       "stage": "procure",
       "routes": [
         "/boq",
-        "/tendering",
+        "/tenders",
         "/reports",
         "/files",
         "/bid-management",
@@ -9472,7 +9472,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       "stage": "procure",
       "routes": [
         "/bid-management",
-        "/tendering"
+        "/tenders"
       ]
     },
     "level-subcontract-bids-and-flow-the-terms-down": {
@@ -9481,7 +9481,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       "region": "CA",
       "stage": "procure",
       "routes": [
-        "/tendering",
+        "/tenders",
         "/subcontractors",
         "/contracts",
         "/reports"
@@ -9494,7 +9494,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       "stage": "procure",
       "routes": [
         "/bid-management",
-        "/tendering",
+        "/tenders",
         "/procurement"
       ]
     },
@@ -9605,7 +9605,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       "routes": [
         "/procurement",
         "/subcontractors",
-        "/tendering",
+        "/tenders",
         "/contracts",
         "/deadlines",
         "/reports",
@@ -10148,7 +10148,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       "stage": "procure",
       "routes": [
         "/boq",
-        "/tendering"
+        "/tenders"
       ]
     },
     "trade-payment-for-lien-rights": {
