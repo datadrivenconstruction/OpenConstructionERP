@@ -6,10 +6,11 @@
  * zenith), instrument and target heights. Every edit is reduced and closed on
  * the server within a quarter second; the sketch shows the observed run grey,
  * the adjusted run blue and the misclosure vector magenta, exaggerated by a
- * printed power of ten. A closure outside its class saves only with a reason.
+ * printed power of ten, with the least-squares error ellipse of every station
+ * at a printed exaggeration. A closure outside its class saves only with a reason.
  */
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { BookOpen, FileUp, Plus, Save, Trash2 } from 'lucide-react';
@@ -18,15 +19,17 @@ import { getErrorMessage } from '@/shared/lib/api';
 import { fmtNumber } from '@/shared/lib/formatters';
 import { useToastStore } from '@/stores/useToastStore';
 import { getClasses } from '@/features/survey-calc/api';
-import type { MapToken } from '../cartography';
-import { planColour } from '../cartography';
-import { traverseSketch } from '../engine/traverseSketch';
+import { ellipseFeatures, ellipseScale } from '../engine/errorEllipses';
+import { extentOf, traverseSketch } from '../engine/traverseSketch';
 import { usePlanConventions } from '../hooks';
-import type { PlanFeature } from '../types';
+import { layer } from '../planLayers';
+import type { GridXY, PlanFeature, PlanLayerSpec } from '../types';
 import { LINEAR_SYMBOL, axisLabelFor, formatAngle, formatCoord, formatDistance, inputDistance, parseDistance, type AngleUnit } from '../units';
 import { fieldBookApi, type AngleMode, type BookShape, type DistMode, type FieldBookIn, type ParsedBook } from '../p3api';
 import { FindingList } from './FindingList';
-import { PlanSketch, type SketchStyle } from './PlanSketch';
+import { EllipseGlyph, LineGlyph, PlanLegend, PlanPrintButton, marked, type MarkStyle } from './planMarks';
+
+const PlanCanvas = lazy(() => import('../PlanCanvas'));
 
 interface GridRow {
   station: string;
@@ -75,23 +78,29 @@ function Verdict({ value }: { value: string }) {
   );
 }
 
-const STYLE: Record<string, (f: PlanFeature) => SketchStyle> = {
-  raw: () => ({ stroke: 'ink-2', width: 1.25, dash: '5 4' }),
-  adjusted: () => ({ stroke: 'accent', width: 2.25 }),
-  station: (f) => ({ shape: 'circle', size: 4.5, stroke: 'accent', fill: 'bg', label: String(f.properties.label ?? '') }),
-  control: (f) => ({ shape: 'triangle', size: 6, stroke: 'ink', fill: 'control-fill', label: String(f.properties.label ?? ''), labelDy: 16 }),
-  misclosure: (f) => ({ stroke: 'misclosure', width: 2.5, label: String(f.properties.label ?? ''), labelToken: 'misclosure', top: true }),
+const MARK: Record<string, MarkStyle> = {
+  raw: { colour: 'ink-2', width: 1.25, dash: 'dash' },
+  adjusted: { colour: 'accent', width: 2.25 },
+  station: { shape: 'circle', size: 4.5, colour: 'accent', fill: 'bg' },
+  misclosure: { colour: 'misclosure', width: 2.5, labelColour: 'misclosure' },
+  ellipse: { colour: 'misclosure', width: 1.25, fill: 'misclosure', fillOpacity: 0.08 },
+  'ellipse-axis': { colour: 'misclosure', width: 0.75, dash: 'dot' },
 };
 
-function LegendItem({ token, dash, label }: { token: MapToken; dash?: string; label: string }) {
-  return (
-    <span className="flex items-center gap-1.5">
-      <svg width={22} height={8} aria-hidden>
-        <path d="M1,4H21" stroke={planColour(token)} strokeWidth={2} strokeDasharray={dash} />
-      </svg>
-      {label}
-    </span>
-  );
+/** Field book plan layers: the run, the misclosure vector, the error ellipses and the control. */
+export function traverseLayers(features: readonly PlanFeature[], ellipses: readonly PlanFeature[]): PlanLayerSpec[] {
+  const style = (f: PlanFeature) => {
+    const m = MARK[String(f.properties.role)];
+    return m ? marked(f, m) : f;
+  };
+  const run = features.filter((f) => f.layer === 'traverse' && f.properties.role !== 'misclosure').map(style);
+  const mis = features.filter((f) => f.properties.role === 'misclosure').map((f) => style({ ...f, layer: 'misclosure' }));
+  return [
+    layer('traverse', run),
+    { id: 'misclosure', titleKey: 'plan.trav.layer_misclosure', defaultTitle: 'Misclosure vector', order: 127, features: mis, snappable: false, selectable: false },
+    layer('ellipses', ellipses.map(style)),
+    layer('control', features.filter((f) => f.layer === 'control')),
+  ];
 }
 
 export function TraverseEntry({ projectId, canWrite }: { projectId: string | null; canWrite: boolean }) {
@@ -120,6 +129,9 @@ export function TraverseEntry({ projectId, canWrite }: { projectId: string | nul
   const [rows, setRows] = useState<GridRow[]>(() => [{ ...EMPTY_ROW }, { ...EMPTY_ROW }, { ...EMPTY_ROW }]);
   const [reason, setReason] = useState('');
   const [savePoints, setSavePoints] = useState(true);
+  const [instrument, setInstrument] = useState('ts_2');
+  const [showEllipses, setShowEllipses] = useState(true);
+  const [conf95, setConf95] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const touchedUnit = useRef(false);
   useEffect(() => {
@@ -203,8 +215,8 @@ export function TraverseEntry({ projectId, canWrite }: { projectId: string | nul
     return () => clearTimeout(h);
   }, [body]);
   const result = useQuery({
-    queryKey: ['survey-plan', 'field-book', projectId, debounced],
-    queryFn: () => fieldBookApi.compute(debounced!, projectId),
+    queryKey: ['survey-plan', 'field-book', projectId, debounced, instrument],
+    queryFn: () => fieldBookApi.compute({ ...debounced!, method: 'lsq', instrument_key: instrument }, projectId),
     enabled: !!debounced,
     placeholderData: (prev) => prev,
     retry: false,
@@ -233,6 +245,20 @@ export function TraverseEntry({ projectId, canWrite }: { projectId: string | nul
       control: shape === 'link' ? ctl : [],
     });
   }, [r, body?.start, shape]);
+  const lsq = r?.traverse.lsq ?? null;
+  const ellipse = useMemo(() => {
+    if (!lsq || !lsq.ellipses.length) return null;
+    const k = conf95 ? lsq.confidence_95 : 1;
+    const ellipses = lsq.ellipses.map((e) => ({ ...e, a_m: e.a_m * k, b_m: e.b_m * k }));
+    const at = new Map<string, GridXY>(lsq.stations.map((s) => [s.station_id, [s.e, s.n]]));
+    const scale = ellipseScale(ellipses, extentOf(lsq.stations));
+    return { scale, features: ellipseFeatures(ellipses, at, scale) };
+  }, [lsq, conf95]);
+  const layers = useMemo(
+    () => traverseLayers(sketch?.features ?? [], showEllipses ? (ellipse?.features ?? []) : []),
+    [sketch, ellipse, showEllipses],
+  );
+  const instruments = classes.data?.instruments ?? [];
 
   const setCell = (i: number, k: keyof GridRow, v: string) => setRows((rs) => rs.map((row, j) => (j === i ? { ...row, [k]: v } : row)));
   const addRow = () => setRows((rs) => [...rs, { ...EMPTY_ROW }]);
@@ -399,28 +425,57 @@ export function TraverseEntry({ projectId, canWrite }: { projectId: string | nul
       </Card>
 
       <div className="grid gap-4 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
-        <PlanSketch
-          features={sketch?.features ?? []}
-          styleFor={(f) => STYLE[String(f.properties.role)]?.(f) ?? null}
-          conventions={conv}
-          heightClass="h-[440px]"
-          testId="traverse-sketch"
-        >
-          {sketch && (
-            <div className="absolute bottom-3 end-3 flex flex-col gap-1 rounded-lg border border-border-light bg-surface-primary/90 px-2.5 py-2 text-xs text-content-secondary">
-              <LegendItem token="ink-2" dash="5 4" label={t('plan.trav.legend.observed', { defaultValue: 'As observed' })} />
-              <LegendItem token="accent" label={t('plan.trav.legend.adjusted', { defaultValue: 'Adjusted' })} />
-              {sketch.misclosure > 0 && (
-                <LegendItem token="misclosure" label={t('plan.trav.legend.misclosure', { defaultValue: 'Misclosure, drawn x{{k}}', k: fmtNumber(sketch.scale, 0) })} />
-              )}
-            </div>
-          )}
-          {!sketch && (
-            <div className="absolute inset-0 flex items-center justify-center p-6 text-center text-sm text-content-tertiary">
-              {t('plan.trav.sketch_empty', { defaultValue: 'The sketch draws itself as you book the stations. Or load the example.' })}
-            </div>
-          )}
-        </PlanSketch>
+        <Suspense fallback={<div className="h-[480px] animate-pulse rounded-lg border border-border-light bg-surface-secondary" />}>
+          <PlanCanvas
+            projectId={projectId ?? ''}
+            layers={layers}
+            heightClass="h-[480px]"
+            inspector={false}
+            empty={{ title: t('plan.trav.sketch_empty', { defaultValue: 'The sketch draws itself as you book the stations. Or load the example.' }) }}
+            toolbarSlot={
+              <>
+                {instruments.length > 0 && (
+                  <select className="oe-select w-auto" value={instrument} onChange={(e) => setInstrument(e.target.value)} aria-label={t('plan.trav.instrument', { defaultValue: 'Instrument class for the ellipses' })} data-testid="traverse-instrument">
+                    {instruments.map((i) => (
+                      <option key={i.key} value={i.key}>{t('survey.lsq.instrument_option', { defaultValue: '{{a}}" total station, {{d}} mm + {{p}} ppm', a: i.angle_sd_sec, d: i.dist_sd_mm, p: i.dist_ppm })}</option>
+                    ))}
+                  </select>
+                )}
+                {projectId && <PlanPrintButton projectId={projectId} layers={layers} conventions={conv} title={name.trim() || t('plan.trav.default_name', { defaultValue: 'Traverse' })} testId="traverse-print" />}
+              </>
+            }
+            overlay={sketch && (
+              <PlanLegend testId="traverse-legend">
+                <span className="flex items-center gap-1.5"><LineGlyph token="ink-2" dash="dash" />{t('plan.trav.legend.observed', { defaultValue: 'As observed' })}</span>
+                <span className="flex items-center gap-1.5"><LineGlyph token="accent" />{t('plan.trav.legend.adjusted', { defaultValue: 'Adjusted' })}</span>
+                {sketch.misclosure > 0 && (
+                  <span className="flex items-center gap-1.5"><LineGlyph token="misclosure" />{t('plan.trav.legend.misclosure', { defaultValue: 'Misclosure, drawn x{{k}}', k: fmtNumber(sketch.scale, 0) })}</span>
+                )}
+                {ellipse && (
+                  <button type="button" aria-pressed={showEllipses} onClick={() => setShowEllipses((v) => !v)}
+                    className={`flex items-center gap-1.5 text-start hover:text-content-primary ${showEllipses ? '' : 'text-content-quaternary line-through'}`} data-testid="traverse-ellipses-toggle">
+                    <EllipseGlyph token="misclosure" />
+                    {conf95
+                      ? t('plan.trav.legend.ellipses95', { defaultValue: 'Error ellipses, 95 %, drawn x{{k}}', k: fmtNumber(ellipse.scale, 0) })
+                      : t('plan.trav.legend.ellipses', { defaultValue: 'Error ellipses, one sigma, drawn x{{k}}', k: fmtNumber(ellipse.scale, 0) })}
+                  </button>
+                )}
+                {ellipse && showEllipses && (
+                  <label className="flex items-center gap-1.5 ps-7">
+                    <input type="checkbox" checked={conf95} onChange={(e) => setConf95(e.target.checked)} data-testid="traverse-ellipses-95" />
+                    {t('survey.lsq.conf95', { defaultValue: '95% ellipses' })}
+                  </label>
+                )}
+                {lsq && (
+                  <span className="block border-t border-border-light pt-1 text-content-tertiary" data-testid="traverse-sigma0">
+                    {t('plan.trav.legend.sigma0', { defaultValue: 'A posteriori sigma0 {{s}}, redundancy {{r}}', s: fmtNumber(lsq.sigma0, 2), r: lsq.redundancy })}
+                  </span>
+                )}
+              </PlanLegend>
+            )}
+            testId="traverse-sketch"
+          />
+        </Suspense>
 
         <Card className="p-4 space-y-3" data-testid="traverse-closure">
           {!tr ? (

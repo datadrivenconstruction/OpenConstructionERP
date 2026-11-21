@@ -8,7 +8,7 @@
  * cannot be saved.
  */
 
-import { useEffect, useMemo, useState } from 'react';
+import { lazy, Suspense, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { MousePointerClick, Save, Trash2 } from 'lucide-react';
@@ -17,18 +17,48 @@ import { getErrorMessage } from '@/shared/lib/api';
 import { fmtNumber } from '@/shared/lib/formatters';
 import { useToastStore } from '@/stores/useToastStore';
 import type { StakeoutRequestDetail } from '@/features/setting-out/api';
-import { planColour } from '../cartography';
 import { centreline, chainageTicks, designAlignment, ipsFromStored, pointAt, tickSegment, type IpInput } from '../engine/alignmentGeom';
 import { usePlanConventions } from '../hooks';
-import type { GridXY, PlanFeature } from '../types';
+import { layer } from '../planLayers';
+import type { GridXY, PlanFeature, PlanLayerSpec } from '../types';
 import { axisLabelFor, formatAngle, formatChainage, formatDistance, inputDistance, parseDistance } from '../units';
 import { alignmentApi, type AlignmentDesignIn } from '../p3api';
 import { SectionPanel } from '../sections/SectionPanel';
 import { FindingList } from './FindingList';
-import { PlanSketch, type SketchStyle } from './PlanSketch';
+import { LineGlyph, PlanLegend, PlanPrintButton, marked, type MarkStyle } from './planMarks';
+
+const PlanCanvas = lazy(() => import('../PlanCanvas'));
 
 const TICK = 20;
 const LABEL = 100;
+
+const MARK: Record<string, MarkStyle> = {
+  'ip-line': { colour: 'ink-2', width: 1, dash: 'dash' },
+  tangent: { colour: 'line', width: 2.5 },
+  arc: { colour: 'accent', width: 2.75, labelColour: 'accent' },
+  'arc-warn': { colour: 'warning', width: 2.75, labelColour: 'warning' },
+  'arc-bad': { colour: 'error', width: 2.75, dash: 'dash', labelColour: 'error' },
+  tp: { shape: 'circle', size: 2.5, colour: 'accent', fill: 'bg' },
+  tick: { colour: 'ink', width: 1 },
+  'tick-major': { colour: 'ink', width: 1.75 },
+  'tick-label': { shape: 'none' },
+  ip: { shape: 'diamond', size: 4.5, colour: 'ink', fill: 'bg' },
+  hover: { shape: 'circle', size: 5, colour: 'misclosure', fill: 'misclosure' },
+};
+
+/** Alignment plan layers: geometry and IPs, chainage ticks, and the section cursor. */
+export function alignmentLayers(features: readonly PlanFeature[]): PlanLayerSpec[] {
+  const styled = features.map((f) => {
+    const m = MARK[String(f.properties.role)];
+    return m ? marked(f, m) : f;
+  });
+  const isTick = (f: PlanFeature) => String(f.properties.role).startsWith('tick');
+  return [
+    layer('alignment', styled.filter((f) => f.layer === 'alignment' && !isTick(f))),
+    { id: 'chainage', titleKey: 'plan.align.layer_chainage', defaultTitle: 'Chainage ticks', order: 105, features: styled.filter(isTick), snappable: false, selectable: false },
+    layer('sections', styled.filter((f) => f.layer === 'sections'), { selectable: false, snappable: false }),
+  ];
+}
 
 interface IpText {
   name: string;
@@ -137,34 +167,7 @@ export function AlignmentEditor({ projectId, request, canWrite }: { projectId: s
     return out;
   }, [ips, design, ticks, belowMin.size, conv, hoverCh]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const styleFor = (f: PlanFeature): SketchStyle | null => {
-    switch (f.properties.role) {
-      case 'ip-line':
-        return { stroke: 'ink-2', width: 1, dash: '3 4' };
-      case 'tangent':
-        return { stroke: 'line', width: 2.5 };
-      case 'arc':
-        return { stroke: 'accent', width: 2.75, label: String(f.properties.label ?? ''), labelToken: 'accent' };
-      case 'arc-warn':
-        return { stroke: 'warning', width: 2.75, label: String(f.properties.label ?? ''), labelToken: 'warning' };
-      case 'arc-bad':
-        return { stroke: 'error', width: 2.75, dash: '6 3', label: String(f.properties.label ?? ''), labelToken: 'error' };
-      case 'tp':
-        return { shape: 'circle', size: 2.5, stroke: 'accent', fill: 'bg' };
-      case 'tick':
-        return { stroke: 'ink', width: 1 };
-      case 'tick-major':
-        return { stroke: 'ink', width: 1.75 };
-      case 'tick-label':
-        return { shape: 'none', label: String(f.properties.label ?? ''), labelDx: 4, labelDy: 4 };
-      case 'ip':
-        return { shape: 'diamond', size: 4.5, stroke: 'ink', fill: 'bg', label: String(f.properties.label ?? ''), top: true };
-      case 'hover':
-        return { shape: 'circle', size: 5, stroke: 'misclosure', fill: 'misclosure', top: true };
-      default:
-        return null;
-    }
-  };
+  const layers = useMemo(() => alignmentLayers(features), [features]);
 
   const setCell = (i: number, k: keyof IpText, v: string) => setRows((rs) => rs.map((r, j) => (j === i ? { ...r, [k]: v } : r)));
   const curveAt = (i: number) => design.curves.find((c) => c.ipIndex === i);
@@ -173,44 +176,53 @@ export function AlignmentEditor({ projectId, request, canWrite }: { projectId: s
   return (
     <div className="space-y-4 p-3" data-testid="alignment-editor">
       <div className="grid gap-4 xl:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
-        <PlanSketch
-          features={features}
-          fitTo={features.filter((f) => f.properties.role === 'ip')}
-          styleFor={styleFor}
-          conventions={conv}
-          heightClass="h-[460px]"
-          cursor={adding && canWrite ? 'crosshair' : 'default'}
-          selectedId={selected != null ? `ip:${selected}` : null}
-          onPick={(f) => (typeof f.properties.index === 'number' ? setSelected(f.properties.index) : undefined)}
-          onPlanClick={
-            adding && canWrite
-              ? (p) => setRows((rs) => [...rs, { name: `IP${rs.length}`, e: inputDistance(p[0], conv), n: inputDistance(p[1], conv), r: rs.length ? inputDistance(50, conv) : '' }])
-              : undefined
-          }
-          testId="alignment-plan"
-        >
-          <div className="absolute start-3 top-3 flex gap-2">
-            {canWrite && (
-              <Button size="sm" variant={adding ? 'primary' : 'secondary'} icon={<MousePointerClick size={14} />} aria-pressed={adding} onClick={() => setAdding((a) => !a)}>
-                {t('plan.align.add_ip', { defaultValue: 'Add IP by click' })}
-              </Button>
-            )}
-          </div>
-          <div className="absolute bottom-3 end-3 space-y-1 rounded-lg border border-border-light bg-surface-primary/90 px-2.5 py-2 text-xs text-content-secondary">
-            {([
-              ['line', t('plan.align.legend.tangent', { defaultValue: 'Tangent' })],
-              ['accent', t('plan.align.legend.arc', { defaultValue: 'Circular curve' })],
-              ['warning', t('plan.align.legend.below_min', { defaultValue: 'Below minimum radius' })],
-              ['error', t('plan.align.legend.overlap', { defaultValue: 'Curves overlap' })],
-            ] as const).map(([tok, label]) => (
-              <span key={tok} className="flex items-center gap-1.5">
-                <svg width={22} height={8} aria-hidden><path d="M1,4H21" stroke={planColour(tok)} strokeWidth={2.5} /></svg>
-                {label}
-              </span>
-            ))}
-            <span className="block text-content-tertiary">{t('plan.align.legend.ticks', { defaultValue: 'Ticks every {{a}} m, labels every {{b}} m', a: TICK, b: LABEL })}</span>
-          </div>
-        </PlanSketch>
+        <Suspense fallback={<div className="h-[480px] animate-pulse rounded-lg border border-border-light bg-surface-secondary" />}>
+          <PlanCanvas
+            projectId={projectId}
+            layers={layers}
+            heightClass="h-[500px]"
+            inspector={false}
+            selectedIds={selected != null ? [`ip:${selected}`] : []}
+            onSelect={(ids) => {
+              const id = ids.find((x) => x.startsWith('ip:'));
+              setSelected(id ? Number(id.slice(3)) : null);
+            }}
+            pickPoint={
+              adding && canWrite
+                ? (p: GridXY) => setRows((rs) => [...rs, { name: `IP${rs.length}`, e: inputDistance(p[0], conv), n: inputDistance(p[1], conv), r: rs.length ? inputDistance(50, conv) : '' }])
+                : undefined
+            }
+            pickHint={adding && canWrite ? t('plan.align.pick_hint', { defaultValue: 'Click the plan to place the next IP, or type its position' }) : undefined}
+            empty={{ title: t('plan.align.empty', { defaultValue: 'Click the plan to place the intersection points in order, then type a radius at each bend.' }) }}
+            toolbarSlot={
+              <>
+                {canWrite && (
+                  <Button size="sm" variant={adding ? 'primary' : 'secondary'} icon={<MousePointerClick size={14} />} aria-pressed={adding} onClick={() => setAdding((a) => !a)}>
+                    {t('plan.align.add_ip', { defaultValue: 'Add IP by click' })}
+                  </Button>
+                )}
+                <PlanPrintButton projectId={projectId} layers={layers} conventions={conv} title={request.name} testId="alignment-print" />
+              </>
+            }
+            overlay={
+              <PlanLegend testId="alignment-legend">
+                {([
+                  ['line', t('plan.align.legend.tangent', { defaultValue: 'Tangent' })],
+                  ['accent', t('plan.align.legend.arc', { defaultValue: 'Circular curve' })],
+                  ['warning', t('plan.align.legend.below_min', { defaultValue: 'Below minimum radius' })],
+                  ['error', t('plan.align.legend.overlap', { defaultValue: 'Curves overlap' })],
+                ] as const).map(([tok, label]) => (
+                  <span key={tok} className="flex items-center gap-1.5">
+                    <LineGlyph token={tok} width={2.5} />
+                    {label}
+                  </span>
+                ))}
+                <span className="block text-content-tertiary">{t('plan.align.legend.ticks', { defaultValue: 'Ticks every {{a}} m, labels every {{b}} m', a: TICK, b: LABEL })}</span>
+              </PlanLegend>
+            }
+            testId="alignment-plan"
+          />
+        </Suspense>
 
         <Card className="p-4 space-y-3">
           <div className="flex flex-wrap items-end gap-2">
