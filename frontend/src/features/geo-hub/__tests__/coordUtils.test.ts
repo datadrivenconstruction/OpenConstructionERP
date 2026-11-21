@@ -4,6 +4,7 @@
  * tolerant parsing.
  */
 
+import { usePreferencesStore } from '@/stores/usePreferencesStore';
 import { describe, expect, it } from 'vitest';
 
 import {
@@ -56,6 +57,16 @@ describe('ddToDms / formatDms', () => {
     const s = ddToDmsString(52.52, 'lat');
     expect(s).toMatch(/52°/);
     expect(s).toMatch(/N$/);
+  });
+  it('formatDms writes the seconds with the number locale decimal separator', () => {
+    usePreferencesStore.setState({ numberLocale: 'de-DE' });
+    try {
+      const s = formatDms({ degrees: 52, minutes: 31, seconds: 12.5, hemisphere: 'N' });
+      expect(s).toBe(`52° 31' 12,5" N`);
+      expect(parseDms(s, 'lat')).toBeCloseTo(52 + 31 / 60 + 12.5 / 3600, 6);
+    } finally {
+      usePreferencesStore.setState({ numberLocale: 'auto' });
+    }
   });
   it('formatDms handles 0 seconds gracefully', () => {
     const s = formatDms({

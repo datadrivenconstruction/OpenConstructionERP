@@ -11271,7 +11271,7 @@ async def _seed_module_data(
             },
             {
                 "title": "M-003 Ebenheitsabweichung Bodenplatte Kassenzone (slab flatness deviation, checkout zone)",
-                "description": "4 mm/2 m, DIN 18202 Tab. 3 Z. 3 überschritten. Ausgleichsspachtelung vor Industrieboden T23. Linked to NCR-02. Fällig 2026-07-10.",
+                "description": "6 mm/1 m gemessen, Grenzwert 4 mm (DIN 18202 Tab. 3 Z. 3, Messpunktabstand 1 m) überschritten. Ausgleichsspachtelung vor Industrieboden T23. Linked to NCR-02. Fällig 2026-07-10.",
                 "priority": "medium",
                 "status": "open",
                 "category": "structural",

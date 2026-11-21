@@ -1,6 +1,7 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 import { describe, expect, it } from 'vitest';
+import { usePreferencesStore } from '@/stores/usePreferencesStore';
 import {
   DEFAULT_CONVENTIONS,
   axisLabelFor,
@@ -199,5 +200,16 @@ describe('resolveConventions', () => {
     expect(c.linearUnit).toBe('ftUS');
     expect(c.angleDecimals).toBe(2);
     expect(c.chainage).toBe('metric');
+  });
+});
+
+describe('formatAngle DMS in a comma locale', () => {
+  it('writes the seconds with a decimal comma for de-DE', () => {
+    usePreferencesStore.setState({ numberLocale: 'de-DE' });
+    try {
+      expect(formatAngle(12 + 34 / 60 + 56.5 / 3600, 'dms', 1)).toBe(`12°34'56,5"`);
+    } finally {
+      usePreferencesStore.setState({ numberLocale: 'auto' });
+    }
   });
 });
