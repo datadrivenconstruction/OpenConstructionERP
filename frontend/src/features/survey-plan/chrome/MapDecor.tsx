@@ -7,6 +7,9 @@ import { niceBar } from '../engine/viewTransform';
 import { formatDistance } from '../units/linear';
 import type { PlanConventions } from '../units/conventions';
 
+/** Height the north arrow and its bottom offset take from the map's lower edge. */
+export const DECOR_CLEARANCE_PX = 56;
+
 export function ScaleBar({ mpp, conventions }: { mpp: number; conventions: PlanConventions }) {
   const { metres, px } = niceBar(mpp);
   if (!Number.isFinite(px) || px <= 0) return null;
@@ -36,7 +39,7 @@ export function NorthArrow({ bearing, gridNorth, onReset }: { bearing: number; g
     <button
       type="button"
       onClick={onReset}
-      className="flex h-11 w-11 items-center justify-center rounded-full border border-border-light bg-surface-elevated/90 shadow-sm backdrop-blur hover:bg-surface-secondary"
+      className="pointer-events-auto flex h-11 w-11 items-center justify-center rounded-full border border-border-light bg-surface-elevated/90 shadow-sm backdrop-blur hover:bg-surface-secondary"
       title={t('plan.north_reset', { defaultValue: 'Grid north up' })}
       aria-label={t('plan.north_reset', { defaultValue: 'Grid north up' })}
       data-testid="plan-north"

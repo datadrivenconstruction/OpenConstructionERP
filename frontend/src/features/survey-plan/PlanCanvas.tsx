@@ -38,7 +38,7 @@ import { BUILTIN_TOOLS, PAN_TOOL, SELECT_TOOL, defaultToolIds, legLabels, measur
 import { useDirty, usePlanEditStore } from './usePlanEditStore';
 import { Inspector } from './chrome/Inspector';
 import { LayerPanel, type Basemap } from './chrome/LayerPanel';
-import { NorthArrow, ScaleBar } from './chrome/MapDecor';
+import { DECOR_CLEARANCE_PX, NorthArrow, ScaleBar } from './chrome/MapDecor';
 import { PrecisionBar } from './chrome/PrecisionBar';
 import { ShortcutHelp } from './chrome/ShortcutHelp';
 import { SNAP_LABEL, SnapCursor, SnapIcon } from './chrome/SnapGlyph';
@@ -541,7 +541,8 @@ export default function PlanCanvas(props: PlanCanvasProps) {
           [ll[0], ll[1]],
           [ll[2], ll[3]],
         ],
-        { padding, bearing: vt.gridNorthBearing, duration: matchMedia?.('(prefers-reduced-motion: reduce)').matches ? 0 : 400, maxZoom: 22 },
+        // The north arrow and scale bar sit bottom-left: keep fitted points clear of them.
+        { padding: { top: padding, right: padding, left: padding, bottom: padding + DECOR_CLEARANCE_PX }, bearing: vt.gridNorthBearing, duration: matchMedia?.('(prefers-reduced-motion: reduce)').matches ? 0 : 400, maxZoom: 22 },
       );
     },
     [vt],
@@ -1069,7 +1070,7 @@ export default function PlanCanvas(props: PlanCanvasProps) {
             )}
           </div>
 
-          <div className="absolute bottom-3 start-3 z-10 flex items-end gap-3">
+          <div className="pointer-events-none absolute bottom-3 start-3 z-10 flex items-end gap-3" data-testid="plan-decor">
             <NorthArrow bearing={view.bearing} gridNorth={vt.gridNorthBearing} onReset={() => mapRef.current?.rotateTo(vt.gridNorthBearing)} />
             <ScaleBar mpp={mpp} conventions={conventions} />
           </div>

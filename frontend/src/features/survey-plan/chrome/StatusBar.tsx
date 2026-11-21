@@ -9,6 +9,8 @@ import type { PlanConventions } from '../units/conventions';
 import { RESIDUAL_WARN_MM } from '../engine/viewTransform';
 import type { GridXY, SnapResult } from '../types';
 import { SNAP_LABEL, SnapIcon } from './SnapGlyph';
+import { fmtFixed } from '@/shared/lib/formatters';
+import { useNumberLocale } from '@/stores/usePreferencesStore';
 
 interface Props {
   cursor: GridXY | null;
@@ -25,6 +27,7 @@ interface Props {
 
 export function StatusBar({ cursor, snap, snapOn, conventions, scale, csf, crsName, residualMm, selected, dirty }: Props) {
   const { t } = useTranslation();
+  useNumberLocale(); // re-render when the number locale moves
   const labels = axisLabelFor(conventions.axis);
   const ordered = cursor ? toDisplayOrder(cursor[0], cursor[1], conventions.axis) : null;
   const firstIsE = conventions.axis === 'EN' || conventions.axis === 'YX';
@@ -64,18 +67,18 @@ export function StatusBar({ cursor, snap, snapOn, conventions, scale, csf, crsNa
         {dirty && <span className="font-medium text-semantic-warning">{t('plan.status.unsaved', { defaultValue: 'Unsaved changes' })}</span>}
         {scale != null && (
           <bdi dir="ltr" className="font-mono tabular-nums">
-            1:{Math.round(scale).toLocaleString()}
+            1:{fmtFixed(Math.round(scale), 0)}
           </bdi>
         )}
         {csf != null && (
           <span title={t('plan.status.csf_hint', { defaultValue: 'Combined scale factor: grid distance = ground distance x CSF' })}>
-            CSF <bdi dir="ltr" className={`font-mono tabular-nums ${csfMatters(csf) ? 'text-content-primary' : ''}`}>{csf.toFixed(8)}</bdi>
+            CSF <bdi dir="ltr" className={`font-mono tabular-nums ${csfMatters(csf) ? 'text-content-primary' : ''}`}>{fmtFixed(csf, 8)}</bdi>
           </span>
         )}
         {residualMm != null && residualMm > RESIDUAL_WARN_MM && (
           <span className="inline-flex items-center gap-1 text-semantic-warning" data-testid="plan-residual-warning">
             <AlertTriangle size={12} aria-hidden />
-            {t('plan.status.residual', { defaultValue: 'Map display off by up to {{mm}} mm; coordinates stay exact', mm: residualMm.toFixed(1) })}
+            {t('plan.status.residual', { defaultValue: 'Map display off by up to {{mm}} mm; coordinates stay exact', mm: fmtFixed(residualMm, 1) })}
           </span>
         )}
         <span className="max-w-[16rem] truncate" title={crsName}>
