@@ -53934,6 +53934,8 @@ const resource = {
     "nav.estimate_archive": "Pitseeritud eelarved",
     "nav.china_tax": "Hiina käibemaks",
     "nav.central_purchasing": "Tsentraalsed hanked",
+    "nav.dispatch": "Dispetšertahvel",
+    "nav.haul_tickets": "Veokirjad",
     "sidebar.group.learn": "Õpi",
     "sidebar.group.assistant": "Assistent",
     "sidebar.group.plan": "Planeerimine ja ressursid",

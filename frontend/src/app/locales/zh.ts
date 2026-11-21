@@ -56213,6 +56213,8 @@ const resource = {
     "nav.estimate_archive": "封存预算",
     "nav.china_tax": "中国增值税",
     "nav.central_purchasing": "集中采购",
+    "nav.dispatch": "调度看板",
+    "nav.haul_tickets": "运输单据",
     "sidebar.group.learn": "学习",
     "sidebar.group.assistant": "助手",
     "sidebar.group.plan": "计划与资源",

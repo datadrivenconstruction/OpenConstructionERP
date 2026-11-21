@@ -54287,6 +54287,8 @@ const resource = {
     "nav.estimate_archive": "Zapečaćeni troškovnici",
     "nav.china_tax": "PDV Kina",
     "nav.central_purchasing": "Središnja nabava",
+    "nav.dispatch": "Ploča za dispečiranje",
+    "nav.haul_tickets": "Prijevozni listovi",
     "sidebar.group.learn": "Učenje",
     "sidebar.group.assistant": "Asistent",
     "sidebar.group.plan": "Planiranje i resursi",

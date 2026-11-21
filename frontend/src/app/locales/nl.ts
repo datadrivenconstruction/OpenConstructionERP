@@ -54865,6 +54865,8 @@ const resource = {
     "nav.estimate_archive": "Verzegelde begrotingen",
     "nav.china_tax": "Btw China",
     "nav.central_purchasing": "Centrale inkoop",
+    "nav.dispatch": "Planbord",
+    "nav.haul_tickets": "Transportbonnen",
     "sidebar.group.learn": "Leren",
     "sidebar.group.assistant": "Assistent",
     "sidebar.group.plan": "Planning en middelen",

@@ -53989,6 +53989,8 @@ const resource = {
     "nav.estimate_archive": "सील किए गए अनुमान",
     "nav.china_tax": "चीन वैट",
     "nav.central_purchasing": "केंद्रीय खरीद",
+    "nav.dispatch": "डिस्पैच बोर्ड",
+    "nav.haul_tickets": "ढुलाई टिकट",
     "sidebar.group.learn": "सीखें",
     "sidebar.group.assistant": "सहायक",
     "sidebar.group.plan": "योजना और संसाधन",

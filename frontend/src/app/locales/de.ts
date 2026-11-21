@@ -56430,6 +56430,8 @@ const resource = {
     "nav.estimate_archive": "Versiegelte Kalkulationen",
     "nav.china_tax": "China USt",
     "nav.central_purchasing": "Zentraleinkauf",
+    "nav.dispatch": "Disposition",
+    "nav.haul_tickets": "Lieferscheine",
     "sidebar.group.learn": "Lernen",
     "sidebar.group.assistant": "Assistent",
     "sidebar.group.plan": "Planung & Ressourcen",

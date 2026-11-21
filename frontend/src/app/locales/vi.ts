@@ -53752,6 +53752,8 @@ const resource = {
     "nav.estimate_archive": "Dự toán niêm phong",
     "nav.china_tax": "VAT Trung Quốc",
     "nav.central_purchasing": "Mua sắm tập trung",
+    "nav.dispatch": "Bảng điều phối",
+    "nav.haul_tickets": "Phiếu vận chuyển",
     "sidebar.group.learn": "Học tập",
     "sidebar.group.assistant": "Trợ lý",
     "sidebar.group.plan": "Kế hoạch và nguồn lực",

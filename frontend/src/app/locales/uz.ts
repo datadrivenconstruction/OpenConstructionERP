@@ -54916,6 +54916,8 @@ const resource = {
     "nav.estimate_archive": "Muhrlangan smetalar",
     "nav.china_tax": "Xitoy QQS",
     "nav.central_purchasing": "Markazlashgan xaridlar",
+    "nav.dispatch": "Dispetcherlik taxtasi",
+    "nav.haul_tickets": "Tashish taloni",
     "sidebar.group.learn": "Oʻrganish",
     "sidebar.group.assistant": "Yordamchi",
     "sidebar.group.plan": "Rejalashtirish va resurslar",

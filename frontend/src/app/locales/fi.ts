@@ -53988,6 +53988,8 @@ const resource = {
     "nav.estimate_archive": "Sinetöidyt laskelmat",
     "nav.china_tax": "ALV Kiina",
     "nav.central_purchasing": "Keskitetty hankinta",
+    "nav.dispatch": "Ajojärjestelytaulu",
+    "nav.haul_tickets": "Kuljetuskuitit",
     "sidebar.group.learn": "Opi",
     "sidebar.group.assistant": "Avustaja",
     "sidebar.group.plan": "Suunnittelu ja resurssit",

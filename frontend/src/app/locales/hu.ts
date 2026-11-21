@@ -56549,6 +56549,8 @@ const resource = {
     "nav.estimate_archive": "Lepecsételt költségvetések",
     "nav.china_tax": "ÁFA Kína",
     "nav.central_purchasing": "Központi beszerzés",
+    "nav.dispatch": "Diszpécsertábla",
+    "nav.haul_tickets": "Fuvarjegyek",
     "sidebar.group.learn": "Tanulás",
     "sidebar.group.assistant": "Asszisztens",
     "sidebar.group.plan": "Tervezés és erőforrások",

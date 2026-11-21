@@ -53743,6 +53743,8 @@ const resource = {
     "nav.estimate_archive": "Estimasi bersegel",
     "nav.china_tax": "PPN Tiongkok",
     "nav.central_purchasing": "Pengadaan terpusat",
+    "nav.dispatch": "Papan pengiriman",
+    "nav.haul_tickets": "Tiket angkut",
     "sidebar.group.learn": "Pelajari",
     "sidebar.group.assistant": "Asisten",
     "sidebar.group.plan": "Perencanaan & sumber daya",

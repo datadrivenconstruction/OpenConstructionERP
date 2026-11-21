@@ -55160,6 +55160,8 @@ const resource = {
     "nav.estimate_archive": "Computi sigillati",
     "nav.china_tax": "IVA Cina",
     "nav.central_purchasing": "Acquisti centralizzati",
+    "nav.dispatch": "Quadro di dispatching",
+    "nav.haul_tickets": "Bolle di trasporto",
     "sidebar.group.learn": "Impara",
     "sidebar.group.assistant": "Assistente",
     "sidebar.group.plan": "Pianificazione e risorse",

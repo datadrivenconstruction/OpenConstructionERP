@@ -55445,6 +55445,8 @@ const resource = {
     "nav.estimate_archive": "Zapieczętowane kosztorysy",
     "nav.china_tax": "VAT Chiny",
     "nav.central_purchasing": "Zakupy centralne",
+    "nav.dispatch": "Tablica dyspozytorska",
+    "nav.haul_tickets": "Karty przewozowe",
     "sidebar.group.learn": "Naucz się",
     "sidebar.group.assistant": "Asystent",
     "sidebar.group.plan": "Planowanie i zasoby",

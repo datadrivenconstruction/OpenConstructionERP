@@ -54360,6 +54360,8 @@ const resource = {
     "nav.estimate_archive": "봉인된 견적",
     "nav.china_tax": "중국 부가세",
     "nav.central_purchasing": "중앙 구매",
+    "nav.dispatch": "배차 보드",
+    "nav.haul_tickets": "운반 전표",
     "sidebar.group.learn": "학습",
     "sidebar.group.assistant": "어시스턴트",
     "sidebar.group.plan": "계획 및 자원",

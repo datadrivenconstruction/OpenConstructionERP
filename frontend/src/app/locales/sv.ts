@@ -54599,6 +54599,8 @@ const resource = {
     "nav.estimate_archive": "Förseglade kalkyler",
     "nav.china_tax": "Moms Kina",
     "nav.central_purchasing": "Central upphandling",
+    "nav.dispatch": "Avropstavla",
+    "nav.haul_tickets": "Körsedlar",
     "sidebar.group.learn": "Lär dig",
     "sidebar.group.assistant": "Assistent",
     "sidebar.group.plan": "Planering och resurser",

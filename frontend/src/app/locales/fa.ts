@@ -53946,6 +53946,8 @@ const resource = {
     "nav.estimate_archive": "برآوردهای مهرشده",
     "nav.china_tax": "مالیات بر ارزش افزوده چین",
     "nav.central_purchasing": "خرید متمرکز",
+    "nav.dispatch": "تابلوی اعزام",
+    "nav.haul_tickets": "برگه‌های حمل",
     "sidebar.group.learn": "آموزش",
     "sidebar.group.assistant": "دستیار",
     "sidebar.group.plan": "برنامه‌ریزی و منابع",

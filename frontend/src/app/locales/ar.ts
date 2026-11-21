@@ -56908,6 +56908,8 @@ const resource = {
     "nav.estimate_archive": "التقديرات المختومة",
     "nav.china_tax": "ضريبة القيمة المضافة الصين",
     "nav.central_purchasing": "المشتريات المركزية",
+    "nav.dispatch": "لوحة الإرسال",
+    "nav.haul_tickets": "تذاكر النقل",
     "sidebar.group.learn": "تعلّم",
     "sidebar.group.assistant": "المساعد",
     "sidebar.group.plan": "التخطيط والموارد",

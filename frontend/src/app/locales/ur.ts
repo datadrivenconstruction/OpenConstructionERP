@@ -53952,6 +53952,8 @@ const resource = {
     "nav.estimate_archive": "سیل شدہ تخمینے",
     "nav.china_tax": "چین ویلیو ایڈڈ ٹیکس",
     "nav.central_purchasing": "مرکزی خریداری",
+    "nav.dispatch": "ڈسپیچ بورڈ",
+    "nav.haul_tickets": "ڈھلائی ٹکٹ",
     "sidebar.group.learn": "سیکھیں",
     "sidebar.group.assistant": "معاون",
     "sidebar.group.plan": "منصوبہ بندی اور وسائل",

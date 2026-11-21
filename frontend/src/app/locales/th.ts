@@ -53744,6 +53744,8 @@ const resource = {
     "nav.estimate_archive": "ประมาณราคาที่ผนึก",
     "nav.china_tax": "ภาษีมูลค่าเพิ่มจีน",
     "nav.central_purchasing": "การจัดซื้อส่วนกลาง",
+    "nav.dispatch": "กระดานจัดส่ง",
+    "nav.haul_tickets": "ใบขนส่ง",
     "sidebar.group.learn": "เรียนรู้",
     "sidebar.group.assistant": "ผู้ช่วย",
     "sidebar.group.plan": "การวางแผนและทรัพยากร",

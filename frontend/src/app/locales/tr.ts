@@ -54865,6 +54865,8 @@ const resource = {
     "nav.estimate_archive": "Mühürlü keşifler",
     "nav.china_tax": "Çin KDV",
     "nav.central_purchasing": "Merkezi satın alma",
+    "nav.dispatch": "Sevk panosu",
+    "nav.haul_tickets": "Nakliye fişleri",
     "sidebar.group.learn": "Öğren",
     "sidebar.group.assistant": "Asistan",
     "sidebar.group.plan": "Planlama ve kaynaklar",

@@ -53944,6 +53944,8 @@ const resource = {
     "nav.estimate_archive": "Mga nakaselyong tantiya",
     "nav.china_tax": "VAT ng China",
     "nav.central_purchasing": "Central purchasing",
+    "nav.dispatch": "Dispatch board",
+    "nav.haul_tickets": "Mga tiket ng hakot",
     "sidebar.group.learn": "Matuto",
     "sidebar.group.assistant": "Assistant",
     "sidebar.group.plan": "Pagpaplano at mga resource",

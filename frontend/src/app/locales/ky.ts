@@ -54101,6 +54101,8 @@ const resource = {
     "nav.estimate_archive": "Мөөрлөнгөн сметалар",
     "nav.china_tax": "Кытай КНС",
     "nav.central_purchasing": "Борбордоштурулган сатып алуу",
+    "nav.dispatch": "Диспетчердик такта",
+    "nav.haul_tickets": "Ташуу талондору",
     "sidebar.group.learn": "Үйрөнүү",
     "sidebar.group.assistant": "Жардамчы",
     "sidebar.group.plan": "Пландоо жана ресурстар",

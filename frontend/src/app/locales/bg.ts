@@ -53988,6 +53988,8 @@ const resource = {
     "nav.estimate_archive": "Запечатани сметки",
     "nav.china_tax": "ДДС Китай",
     "nav.central_purchasing": "Централизирани покупки",
+    "nav.dispatch": "Табло за диспечеризация",
+    "nav.haul_tickets": "Талони за превоз",
     "sidebar.group.learn": "Обучение",
     "sidebar.group.assistant": "Асистент",
     "sidebar.group.plan": "Планиране и ресурси",

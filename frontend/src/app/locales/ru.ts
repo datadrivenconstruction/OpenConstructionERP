@@ -56924,6 +56924,8 @@ const resource = {
     "nav.estimate_archive": "Опечатанные сметы",
     "nav.china_tax": "НДС Китая",
     "nav.central_purchasing": "Централизованные закупки",
+    "nav.dispatch": "Диспетчерская доска",
+    "nav.haul_tickets": "Талоны на перевозку",
     "sidebar.group.learn": "Обучение",
     "sidebar.group.assistant": "Ассистент",
     "sidebar.group.plan": "Планирование и ресурсы",

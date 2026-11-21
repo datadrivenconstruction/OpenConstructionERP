@@ -54235,6 +54235,8 @@ const resource = {
     "nav.estimate_archive": "אומדנים חתומים",
     "nav.china_tax": "מע״מ סין",
     "nav.central_purchasing": "רכש מרכזי",
+    "nav.dispatch": "לוח שיגור",
+    "nav.haul_tickets": "תעודות הובלה",
     "sidebar.group.learn": "למידה",
     "sidebar.group.assistant": "עוזר",
     "sidebar.group.plan": "תכנון ומשאבים",

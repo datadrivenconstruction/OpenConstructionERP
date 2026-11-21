@@ -53984,6 +53984,8 @@ const resource = {
     "nav.estimate_archive": "Forseglede kalkyler",
     "nav.china_tax": "MVA Kina",
     "nav.central_purchasing": "Sentralt innkjøp",
+    "nav.dispatch": "Disponeringstavle",
+    "nav.haul_tickets": "Kjøresedler",
     "sidebar.group.learn": "Lær",
     "sidebar.group.assistant": "Assistent",
     "sidebar.group.plan": "Planlegging og ressurser",

@@ -55276,6 +55276,8 @@ const resource = {
     "nav.estimate_archive": "封印された見積",
     "nav.china_tax": "中国VAT",
     "nav.central_purchasing": "集中購買",
+    "nav.dispatch": "配車ボード",
+    "nav.haul_tickets": "運搬伝票",
     "sidebar.group.learn": "学ぶ",
     "sidebar.group.assistant": "アシスタント",
     "sidebar.group.plan": "計画とリソース",

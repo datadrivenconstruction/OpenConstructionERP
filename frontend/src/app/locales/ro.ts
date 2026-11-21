@@ -54277,6 +54277,8 @@ const resource = {
     "nav.estimate_archive": "Devize sigilate",
     "nav.china_tax": "TVA China",
     "nav.central_purchasing": "Achiziții centralizate",
+    "nav.dispatch": "Panou de dispecerat",
+    "nav.haul_tickets": "Bonuri de transport",
     "sidebar.group.learn": "Învățare",
     "sidebar.group.assistant": "Asistent",
     "sidebar.group.plan": "Planificare și resurse",

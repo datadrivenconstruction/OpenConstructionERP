@@ -54256,6 +54256,8 @@ const resource = {
     "nav.estimate_archive": "সিল করা প্রাক্কলন",
     "nav.china_tax": "চীন ভ্যাট",
     "nav.central_purchasing": "কেন্দ্রীয় ক্রয়",
+    "nav.dispatch": "ডিসপ্যাচ বোর্ড",
+    "nav.haul_tickets": "পরিবহন টিকিট",
     "sidebar.group.learn": "শিখুন",
     "sidebar.group.assistant": "সহকারী",
     "sidebar.group.plan": "পরিকল্পনা ও সম্পদ",

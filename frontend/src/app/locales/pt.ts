@@ -56852,6 +56852,8 @@ const resource = {
     "nav.estimate_archive": "Orçamentos selados",
     "nav.china_tax": "IVA da China",
     "nav.central_purchasing": "Compras centralizadas",
+    "nav.dispatch": "Quadro de despacho",
+    "nav.haul_tickets": "Guias de transporte",
     "sidebar.group.learn": "Aprender",
     "sidebar.group.assistant": "Assistente",
     "sidebar.group.plan": "Planeamento e recursos",

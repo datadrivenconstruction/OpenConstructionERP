@@ -55184,6 +55184,8 @@ const resource = {
     "nav.estimate_archive": "Zapečetěné rozpočty",
     "nav.china_tax": "DPH Čína",
     "nav.central_purchasing": "Centrální nákup",
+    "nav.dispatch": "Dispečerská tabule",
+    "nav.haul_tickets": "Přepravní lístky",
     "sidebar.group.learn": "Výuka",
     "sidebar.group.assistant": "Asistent",
     "sidebar.group.plan": "Plánování a zdroje",

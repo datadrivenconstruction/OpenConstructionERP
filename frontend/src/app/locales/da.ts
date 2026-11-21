@@ -53984,6 +53984,8 @@ const resource = {
     "nav.estimate_archive": "Forseglede kalkulationer",
     "nav.china_tax": "Moms Kina",
     "nav.central_purchasing": "Centralt indkøb",
+    "nav.dispatch": "Disponeringstavle",
+    "nav.haul_tickets": "Kørselssedler",
     "sidebar.group.learn": "Lær",
     "sidebar.group.assistant": "Assistent",
     "sidebar.group.plan": "Planlægning og ressourcer",

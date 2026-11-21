@@ -55992,6 +55992,8 @@ const resource = {
     "nav.estimate_archive": "Опечатані кошториси",
     "nav.china_tax": "ПДВ Китаю",
     "nav.central_purchasing": "Централізовані закупівлі",
+    "nav.dispatch": "Диспетчерська дошка",
+    "nav.haul_tickets": "Талони на перевезення",
     "sidebar.group.learn": "Навчання",
     "sidebar.group.assistant": "Асистент",
     "sidebar.group.plan": "Планування та ресурси",

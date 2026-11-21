@@ -53944,6 +53944,8 @@ const resource = {
     "nav.estimate_archive": "Σφραγισμένοι προϋπολογισμοί",
     "nav.china_tax": "ΦΠΑ Κίνα",
     "nav.central_purchasing": "Κεντρικές προμήθειες",
+    "nav.dispatch": "Πίνακας αποστολών",
+    "nav.haul_tickets": "Δελτία μεταφοράς",
     "sidebar.group.learn": "Εκμάθηση",
     "sidebar.group.assistant": "Βοηθός",
     "sidebar.group.plan": "Προγραμματισμός και πόροι",
