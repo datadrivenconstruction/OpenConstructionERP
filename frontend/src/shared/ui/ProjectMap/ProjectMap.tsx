@@ -289,6 +289,7 @@ async function geocode(query: string, signal?: AbortSignal): Promise<LatLng | nu
 // react-map-gl chunk (and its 220 KB CSS) via this module.
 export { buildGeocodeQuery } from './geocode';
 import { buildGeocodeQuery } from './geocode';
+import { useMapLibreLocale } from '@/shared/lib/mapLibreLocale';
 
 export function ProjectMap({
   lat,
@@ -302,6 +303,7 @@ export function ProjectMap({
   onResolved,
 }: ProjectMapProps) {
   const { t } = useTranslation();
+  const mapLocale = useMapLibreLocale();
   const hasExplicitCoords = isFiniteNumber(lat) && isFiniteNumber(lng);
 
   const [resolved, setResolved] = useState<LatLng | null>(
@@ -571,6 +573,7 @@ export function ProjectMap({
       )}
     >
       <Map
+        locale={mapLocale}
         initialViewState={{
           longitude: resolved.lng,
           latitude: resolved.lat,

@@ -71,6 +71,7 @@ import {
   buildBasemapStyle,
   type BasemapId,
 } from './mapStyles';
+import { useMapLibreLocale } from '@/shared/lib/mapLibreLocale';
 
 type ViewerMode = 'global' | 'project' | 'development';
 
@@ -209,6 +210,7 @@ export function MapLibreViewer({
   children,
 }: MapLibreViewerProps) {
   const { t } = useTranslation();
+  const mapLocale = useMapLibreLocale();
   const mapRef = useRef<MapRef>(null);
   const rafRef = useRef<number | null>(null);
   const meta = basemapMeta(basemap);
@@ -398,6 +400,7 @@ export function MapLibreViewer({
       data-pick-mode={pickMode ? 'on' : 'off'}
     >
       <Map
+        locale={mapLocale}
         ref={mapRef}
         initialViewState={initialView}
         mapStyle={buildBasemapStyle(basemap, theme)}

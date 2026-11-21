@@ -46,6 +46,7 @@ import { StatusBar } from './chrome/StatusBar';
 import { ToolRail } from './chrome/ToolRail';
 import type { GridXY, LayerViewState, MeasureResult, PlanCanvasProps, PlanFeature, PlanLayerSpec, PlanTool, SnapKind, SnapResult, SnapSettings, ToolContext } from './types';
 import { SNAP_KINDS } from './types';
+import { useMapLibreLocale } from '@/shared/lib/mapLibreLocale';
 
 const HIT_PX = 6;
 const HANDLE_PX = 8;
@@ -132,6 +133,7 @@ function midHandles(f: PlanFeature): { index: number; at: GridXY }[] {
 export default function PlanCanvas(props: PlanCanvasProps) {
   const { projectId, editable = false, heightClass = 'h-[32rem]', testId = 'plan-canvas' } = props;
   const { t } = useTranslation();
+  const mapLocale = useMapLibreLocale();
   const qc = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
   const theme = useThemeStore((s) => s.resolved);
@@ -975,6 +977,7 @@ export default function PlanCanvas(props: PlanCanvasProps) {
       <div className="relative flex min-h-0 flex-1">
         <div className="relative min-w-0 flex-1" style={{ cursor: cursorStyle }}>
           <Map
+            locale={mapLocale}
             ref={mapRef}
             mapStyle={mapStyle}
             initialViewState={{ longitude: 0, latitude: 0, zoom: 2 }}

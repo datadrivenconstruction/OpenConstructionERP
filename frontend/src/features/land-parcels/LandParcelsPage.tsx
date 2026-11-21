@@ -238,7 +238,6 @@ export default function LandParcelsPage() {
               <td className="text-right">{p.area_diff ? <QuantityDisplay value={p.area_diff} unit="m²" precision={2} /> : '-'}</td>
               <td>
                 <StatusDot variant={STATUS_VARIANT[p.status]} label={statusLabel(p.status)} />
-                <span className="ms-2">{statusLabel(p.status)}</span>
               </td>
               <td>{fmtList(p.rights_kinds.map((k) => t(`survey.parcels.right.${k}`, { defaultValue: k })))}</td>
               <td className="text-right">{p.acquisition_cost ? <MoneyDisplay amount={p.acquisition_cost} currency={p.currency} /> : '-'}</td>

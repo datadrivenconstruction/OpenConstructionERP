@@ -24,6 +24,7 @@ import { buildBasemapStyle } from '@/features/geo-hub/mapStyles';
 import { geoAuthHeaders } from '@/features/geo-hub/api';
 import { useThemeStore } from '@/stores/useThemeStore';
 import { fenceRing, type FenceShape, type LatLng } from './geometry';
+import { useMapLibreLocale } from '@/shared/lib/mapLibreLocale';
 
 export interface MapFence extends FenceShape {
   id: string;
@@ -80,6 +81,7 @@ function toCollection(
 export function GeofenceMap({ fences, draft, draftPoints = [], pins = [], focus, drawing, onMapClick }: GeofenceMapProps) {
   const mapRef = useRef<MapRef>(null);
   const theme = useThemeStore((s) => s.resolved);
+  const mapLocale = useMapLibreLocale();
 
   const initial = useMemo(() => {
     const first = focus ?? (pins[0] ? pins[0] : null);
@@ -132,6 +134,7 @@ export function GeofenceMap({ fences, draft, draftPoints = [], pins = [], focus,
 
   return (
     <Map
+      locale={mapLocale}
       ref={mapRef}
       initialViewState={initial}
       mapStyle={buildBasemapStyle('streets', theme)}
