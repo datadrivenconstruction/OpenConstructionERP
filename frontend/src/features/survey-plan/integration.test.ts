@@ -6,7 +6,7 @@ vi.mock('react-map-gl/maplibre', () => ({ default: () => null, Layer: () => null
 vi.mock('maplibre-gl/dist/maplibre-gl.css', () => ({}));
 vi.mock('@/shared/lib/mapLibre', () => ({}));
 
-const { chordOf } = await import('./PlanCanvas');
+const { chordOf, OPTIONS_BAR_CLASS } = await import('./PlanCanvas');
 const { pointFeature } = await import('./PlanEditorPage');
 const { planLayerSpecs } = await import('@/features/survey/SurveyPlan');
 
@@ -66,5 +66,14 @@ describe('legacy plan feed', () => {
     expect(bl.viewFeatures).toBeUndefined();
     expect(bl.features[0]!.geometry).toEqual({ type: 'LineString', coordinates: [[100, 200], [110, 200]] });
     expect(specs.find((l) => l.id === 'heat')!.features[0]!.properties).toMatchObject({ side: 'cut', dh: 0.4 });
+  });
+});
+
+describe('options bar', () => {
+  it('keeps one fixed row so starting a drawing tool does not push the plan down', () => {
+    const cls = OPTIONS_BAR_CLASS.split(' ');
+    expect(cls).toContain('h-12');
+    expect(cls).toContain('flex-nowrap');
+    expect(cls).not.toContain('flex-wrap');
   });
 });

@@ -81,6 +81,9 @@ function isTyping(target: EventTarget | null): boolean {
 }
 
 /** `Shift+M`, `Mod+Z`, `F3`, `?` from a key event, letters by physical key. */
+/** One fixed-height row: tool options scroll sideways instead of wrapping and pushing the plan down. */
+export const OPTIONS_BAR_CLASS = 'flex h-12 flex-nowrap items-center gap-2 border-b border-border-light bg-surface-elevated px-3';
+
 export function chordOf(e: Pick<KeyboardEvent, 'key' | 'code' | 'ctrlKey' | 'metaKey' | 'altKey' | 'shiftKey'>): string {
   let key = e.key;
   if (/^Key[A-Z]$/.test(e.code)) key = e.code.slice(3);
@@ -904,45 +907,47 @@ export default function PlanCanvas(props: PlanCanvasProps) {
       </div>
 
       {/* Options bar */}
-      <div className="flex min-h-12 flex-wrap items-center gap-2 border-b border-border-light bg-surface-elevated px-3 py-1.5" data-testid="plan-options">
-        <span className="text-sm font-semibold text-content-primary">{t(tool.labelKey, { defaultValue: tool.defaultLabel })}</span>
-        <span className="h-5 border-s border-border-light" aria-hidden />
-        <div className="flex items-center gap-0.5" role="group" aria-label={t('plan.snap.title', { defaultValue: 'Snap' })}>
-          <button
-            type="button"
-            onClick={() => setSnapSettings((s) => toggleAll(s))}
-            aria-pressed={snapSettings.enabled}
-            className={`h-8 rounded-md px-2 text-xs font-medium ${snapSettings.enabled ? 'bg-oe-blue/10 text-oe-blue-text' : 'text-content-tertiary hover:bg-surface-secondary'}`}
-            title={t('plan.keys.snap', { defaultValue: 'Snap on or off' }) + ' (F3)'}
-            data-testid="plan-snap-toggle"
-          >
-            {t('plan.snap.title', { defaultValue: 'Snap' })}
-          </button>
-          {SNAP_KINDS.map((k: SnapKind) => (
+      <div className={OPTIONS_BAR_CLASS} data-testid="plan-options">
+        <div className="flex min-w-0 flex-1 items-center gap-2 overflow-x-auto py-1 [scrollbar-width:thin]" data-testid="plan-options-scroll">
+          <span className="shrink-0 whitespace-nowrap text-sm font-semibold text-content-primary">{t(tool.labelKey, { defaultValue: tool.defaultLabel })}</span>
+          <span className="h-5 border-s border-border-light" aria-hidden />
+          <div className="flex shrink-0 items-center gap-0.5" role="group" aria-label={t('plan.snap.title', { defaultValue: 'Snap' })}>
             <button
-              key={k}
               type="button"
-              onClick={() => setSnapSettings((s) => setMode(s, k, !s.modes[k]))}
-              aria-pressed={snapSettings.modes[k]}
-              disabled={!snapSettings.enabled}
-              title={t(SNAP_LABEL[k][0], { defaultValue: SNAP_LABEL[k][1] })}
-              aria-label={t(SNAP_LABEL[k][0], { defaultValue: SNAP_LABEL[k][1] })}
-              className={`flex h-8 w-8 items-center justify-center rounded-md disabled:opacity-40 ${
-                snapSettings.modes[k] ? 'text-oe-blue-text' : 'text-content-quaternary hover:bg-surface-secondary'
-              }`}
+              onClick={() => setSnapSettings((s) => toggleAll(s))}
+              aria-pressed={snapSettings.enabled}
+              className={`h-8 rounded-md px-2 text-xs font-medium ${snapSettings.enabled ? 'bg-oe-blue/10 text-oe-blue-text' : 'text-content-tertiary hover:bg-surface-secondary'}`}
+              title={t('plan.keys.snap', { defaultValue: 'Snap on or off' }) + ' (F3)'}
+              data-testid="plan-snap-toggle"
             >
-              <SnapIcon kind={k} />
+              {t('plan.snap.title', { defaultValue: 'Snap' })}
             </button>
-          ))}
+            {SNAP_KINDS.map((k: SnapKind) => (
+              <button
+                key={k}
+                type="button"
+                onClick={() => setSnapSettings((s) => setMode(s, k, !s.modes[k]))}
+                aria-pressed={snapSettings.modes[k]}
+                disabled={!snapSettings.enabled}
+                title={t(SNAP_LABEL[k][0], { defaultValue: SNAP_LABEL[k][1] })}
+                aria-label={t(SNAP_LABEL[k][0], { defaultValue: SNAP_LABEL[k][1] })}
+                className={`flex h-8 w-8 items-center justify-center rounded-md disabled:opacity-40 ${
+                  snapSettings.modes[k] ? 'text-oe-blue-text' : 'text-content-quaternary hover:bg-surface-secondary'
+                }`}
+              >
+                <SnapIcon kind={k} />
+              </button>
+            ))}
+          </div>
+          {drawing && (
+            <>
+              <span className="h-5 border-s border-border-light" aria-hidden />
+              <PrecisionBar ctx={precisionCtx} onPoint={addVertex} focusToken={focusToken} />
+            </>
+          )}
+          {tool.options?.(ctx)}
         </div>
-        {drawing && (
-          <>
-            <span className="h-5 border-s border-border-light" aria-hidden />
-            <PrecisionBar ctx={precisionCtx} onPoint={addVertex} focusToken={focusToken} />
-          </>
-        )}
-        {tool.options?.(ctx)}
-        <div className="ms-auto flex items-center gap-1">
+        <div className="ms-auto flex shrink-0 items-center gap-1">
           {editable && (
             <>
               <button type="button" onClick={undoOne} disabled={!canUndo} className="flex h-9 w-9 items-center justify-center rounded-md text-content-secondary hover:bg-surface-secondary disabled:opacity-40" aria-label={t('plan.keys.undo', { defaultValue: 'Undo' })} title={`${t('plan.keys.undo', { defaultValue: 'Undo' })} (Ctrl+Z)`} data-testid="plan-undo">

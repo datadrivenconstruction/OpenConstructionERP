@@ -96,6 +96,13 @@ export function isFloatingChatHiddenOn(pathname: string): boolean {
   return FLOATING_CHAT_HIDDEN_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`));
 }
 
+/** Full-height canvases with a status bar along the bottom: the button rises above it. */
+export const FLOATING_CHAT_LIFTED_PREFIXES = ['/survey/plan'];
+
+export function isFloatingChatLiftedOn(pathname: string): boolean {
+  return FLOATING_CHAT_LIFTED_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`));
+}
+
 interface PersistedState {
   activeSessionId: string | null;
   lastReadAt: string; // ISO timestamp
