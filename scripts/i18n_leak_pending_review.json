@@ -3682,5 +3682,29 @@
     "en_value": "CP",
     "n": 24,
     "reason": "Crossed the count threshold when zh-HK joined: an acronym, unit or code several locales keep as written. Unresolved until a native reviewer decides per locale."
+  },
+  "plan.stake.deltas": {
+    "added_by": "wip/201-revB-20261121",
+    "differs_in": [
+      "ar",
+      "bg",
+      "bn",
+      "el",
+      "fa",
+      "he",
+      "hi",
+      "kk",
+      "ky",
+      "mn",
+      "ru",
+      "th",
+      "uk",
+      "ur",
+      "zh",
+      "zh-HK"
+    ],
+    "en_value": "dE {{de}} · dN {{dn}} · d {{d}} mm",
+    "n": 27,
+    "reason": "Setting-out deltas in millimetres: Latin-script locales write the unit as mm, so the whole string is legitimately identical there, while Cyrillic, Greek, Arabic-script, Indic, Thai and Chinese locales write the unit in their own script. Not allowlist material because ru differs; unresolved until a native reviewer confirms each Latin-script locale keeps mm."
   }
 }

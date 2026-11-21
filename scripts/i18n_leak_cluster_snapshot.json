@@ -2335,5 +2335,29 @@
     ],
     "key_count_at_seed": 3,
     "note": "Consultant is the native word in these languages; Pivot E N is a grid label."
+  },
+  {
+    "locale_set": [
+      "da",
+      "de",
+      "fr",
+      "hr",
+      "no",
+      "pl",
+      "ro",
+      "sv",
+      "tr"
+    ],
+    "key_count_at_seed": 3,
+    "note": "Plan is the native word for a drawing plan in these languages (plan.canvas, plan.stake.tab, survey.tab.plan)."
+  },
+  {
+    "locale_set": [
+      "fr",
+      "it",
+      "ro"
+    ],
+    "key_count_at_seed": 3,
+    "note": "TC and CT (tangent to curve, curve to tangent) are the native alignment point abbreviations in French, Italian and Romanian."
   }
 ]
