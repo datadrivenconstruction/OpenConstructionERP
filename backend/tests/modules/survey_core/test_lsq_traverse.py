@@ -250,3 +250,14 @@ def test_ellipse_orientation() -> None:
     e = ellipse(1e-6, 4e-6, 0.0)
     assert (round(e.a_m * 1000, 6), round(e.b_m * 1000, 6), e.azimuth_deg) == (2.0, 1.0, 0.0)
     assert ellipse(4e-6, 1e-6, 0.0).azimuth_deg == pytest.approx(90.0)
+
+
+def test_ellipse_of_a_correlated_covariance() -> None:
+    # Q = [[2, 1], [1, 2]] mm^2: eigenvalues 3 and 1, major axis on the E = N diagonal.
+    e = ellipse(2e-6, 2e-6, 1e-6)
+    assert e.a_m * 1000 == pytest.approx(math.sqrt(3.0))
+    assert e.b_m * 1000 == pytest.approx(1.0)
+    assert e.azimuth_deg == pytest.approx(45.0)
+    assert (e.sd_e_m * 1000, e.sd_n_m * 1000) == pytest.approx((math.sqrt(2.0), math.sqrt(2.0)))
+    # Negative correlation turns the major axis onto the other diagonal.
+    assert ellipse(2e-6, 2e-6, -1e-6).azimuth_deg == pytest.approx(135.0)
