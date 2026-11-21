@@ -213,7 +213,10 @@ export function SideDrawer({
       // Outer wrapper covers the viewport; backdrop click handler lives
       // here so any click NOT inside the panel collapses to close.
       onMouseDown={handleBackdrop}
-      className="fixed inset-0 z-drawer flex justify-end"
+      // The app sidebar (z-dropdown) stays in front on lg, so the panel only
+      // takes the width beside it, the same width the page content has.
+      className="fixed inset-0 z-drawer flex justify-end lg:ps-sidebar"
+      data-testid="side-drawer-root"
     >
       {/* Backdrop — separate node so we can fade it independently. */}
       <div
