@@ -28,7 +28,11 @@ export const manifest: ModuleManifest = {
     { path: '/survey/calc', title: 'survey.cogo.title', component: CalcPage },
   ],
   // An old /survey link still lands on a page that says how to switch survey on.
-  offRoutes: [{ path: '/survey', title: 'survey.page.overview', component: Setup }],
+  // Any /survey sub-page (a bookmark, another browser) says the same instead of 404.
+  offRoutes: [
+    { path: '/survey', title: 'survey.page.overview', component: Setup },
+    { path: '/survey/*', title: 'survey.page.overview', component: Setup },
+  ],
   navItems: [
     { labelKey: 'survey.page.overview', to: '/survey', icon: Compass, group: 'grp_survey' },
     { labelKey: 'survey.page.register', to: '/survey/points', icon: Crosshair, group: 'grp_survey' },

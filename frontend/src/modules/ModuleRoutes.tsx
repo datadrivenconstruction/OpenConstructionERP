@@ -11,6 +11,8 @@ import { Suspense } from 'react';
 import { Route } from 'react-router-dom';
 import { MODULE_REGISTRY } from './_registry';
 import { useModuleStore } from '@/stores/useModuleStore';
+import { useAuthStore } from '@/stores/useAuthStore';
+import type { ModuleManifest, ModuleRoute } from './_types';
 import { Loader2 } from 'lucide-react';
 
 /* ── Fallback spinner shown while a module chunk loads ─────────────── */
@@ -34,20 +36,44 @@ interface ModuleRoutesProps {
  * Returns an array of `<Route>` elements for all enabled module routes.
  * Must be spread inside a `<Routes>` block.
  */
+/**
+ * The routes to mount: an enabled module's own, a disabled one's `offRoutes`.
+ * While the account's module state is still on its way (`pending`), a module
+ * that is off only locally may be on for the account, so its real routes are
+ * mounted behind a spinner instead of answering 404 or the setup page; the
+ * list is rebuilt the moment the answer lands.
+ */
+export function selectModuleRoutes(
+  modules: readonly ModuleManifest[],
+  isModuleEnabled: (id: string) => boolean,
+  pending: boolean,
+): { route: ModuleRoute; waiting: boolean }[] {
+  return modules.flatMap((m) => {
+    if (isModuleEnabled(m.id)) return m.routes.map((route) => ({ route, waiting: false }));
+    if (pending) return m.routes.map((route) => ({ route, waiting: true }));
+    return (m.offRoutes ?? []).map((route) => ({ route, waiting: false }));
+  });
+}
+
 export function useModuleRouteElements({ Wrapper }: ModuleRoutesProps) {
   const { isModuleEnabled } = useModuleStore();
+  const serverLoaded = useModuleStore((s) => s.serverLoaded);
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
 
-  return MODULE_REGISTRY
-    .flatMap((m) => (isModuleEnabled(m.id) ? m.routes : (m.offRoutes ?? [])))
-    .map((route) => (
+  return selectModuleRoutes(MODULE_REGISTRY, isModuleEnabled, isAuthenticated && !serverLoaded)
+    .map(({ route, waiting }) => (
       <Route
         key={route.path}
         path={route.path}
         element={
           <Wrapper title={route.title}>
-            <Suspense fallback={<ModuleLoading />}>
-              <route.component />
-            </Suspense>
+            {waiting ? (
+              <ModuleLoading />
+            ) : (
+              <Suspense fallback={<ModuleLoading />}>
+                <route.component />
+              </Suspense>
+            )}
           </Wrapper>
         }
       />
