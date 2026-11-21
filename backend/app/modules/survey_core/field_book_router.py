@@ -77,6 +77,13 @@ class FieldBookIn(BaseModel):
     class_key: str = Field(default="", max_length=60)
     angular_k_sec: float | None = Field(default=None, gt=0, le=3600)
     min_ratio: int | None = Field(default=None, ge=100, le=10_000_000)
+    #: ``lsq`` adds the least-squares adjustment with error ellipses per station (Bowditch stays alongside).
+    method: Literal["bowditch", "lsq"] = "bowditch"
+    instrument_key: str = Field(default="", max_length=32)
+    angle_sd_sec: float | None = Field(default=None, gt=0, le=600)
+    dist_sd_mm: float | None = Field(default=None, ge=0, le=1000)
+    dist_ppm: float | None = Field(default=None, ge=0, le=1000)
+    centering_sd_mm: float | None = Field(default=None, ge=0, le=100)
     save_points: bool = False
     note: str = Field(default="", max_length=2000)
 
@@ -174,6 +181,12 @@ def to_traverse(body: FieldBookIn) -> tuple[fb.ReducedBook, FieldTraverseIn]:
         class_key=body.class_key,
         angular_k_sec=body.angular_k_sec,
         min_ratio=body.min_ratio,
+        method=body.method,
+        instrument_key=body.instrument_key,
+        angle_sd_sec=body.angle_sd_sec,
+        dist_sd_mm=body.dist_sd_mm,
+        dist_ppm=body.dist_ppm,
+        centering_sd_mm=body.centering_sd_mm,
         save_points=body.save_points,
         note=body.note,
     )
@@ -208,7 +221,15 @@ async def calc_field_book(
         await verify_project_access(project_id, user_id, session)
         prof = await CalcService(session).survey.profile(project_id)
         k, ratio = prof.angular_k_sec, prof.traverse_min_ratio
-    result = await CalcService.compute_traverse(traverse, markets, k, ratio, locale)
+    try:
+        result = await CalcService.compute_traverse(traverse, markets, k, ratio, locale)
+    except HTTPException:
+        # A book the least-squares model cannot solve still closes by the compass rule; the ellipses are left out.
+        if traverse.method != "lsq":
+            raise
+        result = await CalcService.compute_traverse(
+            traverse.model_copy(update={"method": "bowditch"}), markets, k, ratio, locale
+        )
     return _out(reduced, body, result)
 
 
