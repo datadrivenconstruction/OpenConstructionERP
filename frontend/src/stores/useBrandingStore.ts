@@ -65,6 +65,16 @@ export interface BrandingState {
    */
   legalLinkVisible: boolean;
   /**
+   * Whether this workspace asks PyPI and GitHub which release is newest.
+   *
+   * Default false, server-backed, and - like the two settings above it - never
+   * mirrored to localStorage, because a browser cache that remembered "on" would
+   * keep asking after an administrator turned it off. This is the one setting on
+   * the record that starts a connection nobody in the workspace made, so it is
+   * the one that waits to be asked for; About states which way it currently is.
+   */
+  updateCheckEnabled: boolean;
+  /**
    * Replace the user's logo. Pass `null` to clear (mode falls back
    * to whichever of `text` / `default` is appropriate).
    */
@@ -78,6 +88,8 @@ export interface BrandingState {
   setSupportDestination: (destination: SupportDestination | null) => void;
   /** Admin-only in effect: {@link persistToServer} is what makes it stick. */
   setLegalLinkVisible: (visible: boolean) => void;
+  /** Admin-only in effect: {@link persistToServer} is what makes it stick. */
+  setUpdateCheckEnabled: (enabled: boolean) => void;
   /** Clear all customisation and return to the default product brand. */
   reset: () => void;
   /**
@@ -107,18 +119,20 @@ interface ServerBranding {
   appearance?: { menu?: unknown } | null;
   support_destination?: { kind?: string; value?: string } | null;
   legal_link_visible?: boolean;
+  update_check_enabled?: boolean;
 }
 
 /**
- * Coerce the two server-only settings out of a branding payload.
+ * Coerce the three server-only settings out of a branding payload.
  *
  * Kept apart from {@link fromServer} on purpose: that one returns a
  * {@link Persisted}, i.e. exactly the four fields this browser caches, and these
- * two must never enter it.
+ * three must never enter it.
  */
 function serverSettings(r: ServerBranding): {
   supportDestination: SupportDestination | null;
   legalLinkVisible: boolean;
+  updateCheckEnabled: boolean;
 } {
   const raw = r.support_destination;
   const value = typeof raw?.value === 'string' ? raw.value.trim() : '';
@@ -126,7 +140,16 @@ function serverSettings(r: ServerBranding): {
     raw && (raw.kind === 'url' || raw.kind === 'email') && value ? { kind: raw.kind, value } : null;
   // Only an exact false hides the Legal link. A missing key, a corrupt file or a
   // hand-edited "yes" all fall to the safe default, which is to show it.
-  return { supportDestination, legalLinkVisible: r.legal_link_visible !== false };
+  //
+  // The version check is the mirror image, and for the same reason read from the
+  // other side: only an exact true starts it. The server sanitises to the same
+  // rule, so this is not a second opinion - it is the same answer, and a payload
+  // that lacks the key cannot be read as permission to phone out.
+  return {
+    supportDestination,
+    legalLinkVisible: r.legal_link_visible !== false,
+    updateCheckEnabled: r.update_check_enabled === true,
+  };
 }
 
 /** Coerce a server payload into a safe {@link Persisted} value. */
@@ -216,6 +239,7 @@ export const useBrandingStore = create<BrandingState>((set, get) => {
     ...initial,
     supportDestination: null,
     legalLinkVisible: true,
+    updateCheckEnabled: false,
     setLogo: (dataUrl, pngDataUrl = null) => {
       const current = get();
       if (!dataUrl) {
@@ -261,6 +285,7 @@ export const useBrandingStore = create<BrandingState>((set, get) => {
     },
     setSupportDestination: (destination) => set({ supportDestination: destination }),
     setLegalLinkVisible: (visible) => set({ legalLinkVisible: visible }),
+    setUpdateCheckEnabled: (enabled) => set({ updateCheckEnabled: enabled }),
     hydrateFromServer: async () => {
       try {
         const r = await apiGet<ServerBranding>('/v1/branding/');
@@ -270,14 +295,16 @@ export const useBrandingStore = create<BrandingState>((set, get) => {
         const current = get();
         // Applied BEFORE the comparison below, which only looks at the four
         // mirrored brand fields. Set them afterwards and an operator who changes
-        // nothing but the support destination - or nothing but the Legal link -
-        // is ignored on every load, because the brand fields are unchanged and
-        // this function returns early before reaching them.
+        // nothing but the support destination - or nothing but the Legal link, or
+        // nothing but the version check - is ignored on every load, because the
+        // brand fields are unchanged and this function returns early before
+        // reaching them.
         const settings = serverSettings(r);
         if (
           settings.supportDestination?.kind !== current.supportDestination?.kind ||
           settings.supportDestination?.value !== current.supportDestination?.value ||
-          settings.legalLinkVisible !== current.legalLinkVisible
+          settings.legalLinkVisible !== current.legalLinkVisible ||
+          settings.updateCheckEnabled !== current.updateCheckEnabled
         ) {
           set(settings);
         }
@@ -308,6 +335,7 @@ export const useBrandingStore = create<BrandingState>((set, get) => {
           company_name: s.companyName,
           support_destination: s.supportDestination,
           legal_link_visible: s.legalLinkVisible,
+          update_check_enabled: s.updateCheckEnabled,
         });
         return true;
       } catch {

@@ -229,12 +229,12 @@ curl -s "$BASE/api/v1/geo-hub/ogc/collections" \
   -H "X-API-Key: $OCE_API_KEY"
 ```
 
-## Workspace branding, and the two owner settings on it
+## Workspace branding, and the three owner settings on it
 
 `/api/v1/branding/` holds one JSON record per deployment: the logos and company
 name that appear in the app and print on exported documents, the workspace
-default appearance, and two settings that decide what the product points its
-users at.
+default appearance, and three settings that decide what the product points its
+users at - and, in the third case, what it asks on their behalf.
 
 | Method | Auth | What it does |
 | --- | --- | --- |
@@ -308,9 +308,52 @@ What turning it off does, and what it cannot do:
   the AGPL obligations. `docs/legal/COMMERCIAL-LICENSE.md` is the template for
   the first of those.
 
-The admin card that sets both of these is in Settings, under "Support and legal",
-beside the logos and the letterhead. Non-admins see the same card read-only: what
-the workspace decided is not a secret, only changing it is.
+### `update_check_enabled` - whether the product asks which version is newest
+
+```json
+{ "update_check_enabled": true }
+```
+
+Default `false`. Only an exact `true` starts the check: a missing key, a corrupt
+file, a hand-edited `"yes"` and a `1` all leave it off. That is the mirror image
+of `legal_link_visible`, and the two rules are not inconsistent - each resolves
+against the direction that needs permission. Hiding a licence pointer needs
+permission, so ambiguity shows the link. Asking the internet on somebody's behalf
+needs permission, so ambiguity stays quiet.
+
+What it governs, and what it does not:
+
+- `GET /api/system/version-check` answers `check_disabled: true` without touching
+  the network while this is off, so PyPI and GitHub are never asked which release
+  is newest. Turning it on takes effect on the next call, with no restart: the
+  policy is read per request rather than cached.
+- The web UI reads the same field and does not even ask its own backend while it is
+  off, which is the difference between "nothing leaves the server" and "nothing is
+  sent at all". About states which way the setting is, in the same sentence
+  Settings shows beside the switch.
+- Two older switches still win over a workspace that has turned it on, because
+  both mean "never" and neither is reachable from this endpoint:
+  `OE_DISABLE_UPDATE_CHECK` in the server's environment, and
+  `~/.openestimate/no-update-check`, which the desktop launcher's "Turn off update
+  checks" notice writes. An administrator cannot undo a user's opt-out from here,
+  and a `GET` still reports the workspace's own decision.
+- It does not govern the desktop launcher's failure screen, which asks GitHub only
+  when the person looking at it presses the button, nor
+  `GET /api/system/converters/version-check`, which compares each *installed DDC
+  converter* against GitHub for the converter banner. Neither is a self-check, and
+  the About sentence names the product rather than claiming nothing is ever asked.
+
+```bash
+curl -X PUT "$BASE/api/v1/branding/" \
+  -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+  -d '{"update_check_enabled": true}'
+```
+
+The admin card that sets the first two is in Settings, under "Support and legal",
+beside the logos and the letterhead. The card that sets the third is under "Data &
+Security", beside the panel that reports what else leaves the instance. Non-admins
+see all three read-only: what the workspace decided is not a secret, only changing
+it is.
 
 ## Response shapes
 

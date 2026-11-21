@@ -1,16 +1,23 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 /**
- * The two workspace settings that ride the branding record: where a bug report
- * is sent, and whether the footers point at /legal.
+ * The three workspace settings that ride the branding record: where a bug report
+ * is sent, whether the footers point at /legal, and whether this workspace asks
+ * the internet which release is newest.
  *
- * Both are server-backed and neither belongs in the localStorage mirror, and the
+ * All three are server-backed and none belongs in the localStorage mirror, and the
  * interesting failure is not a wrong value - it is a right value that never
  * arrives. `hydrateFromServer` compares the four mirrored brand fields and
  * returns early when they are unchanged, which is the common case: an operator
  * who sets a support destination has usually not touched the logo. Anything
  * applied after that comparison is silently dropped on every load, so the first
- * two tests below hydrate with the brand deliberately unchanged.
+ * tests below hydrate with the brand deliberately unchanged.
+ *
+ * The version check is the one of the three that defaults to off, and its
+ * ambiguity rule is the mirror image of the Legal link's: only an exact `true`
+ * starts it. A browser that remembered "on" would keep asking after an
+ * administrator turned it off, which is why it is server-backed like the other
+ * two and mirrored like neither.
  */
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -55,10 +62,15 @@ beforeEach(() => {
   apiGet.mockReset();
   apiPut.mockReset();
   apiPut.mockResolvedValue(undefined);
-  useBrandingStore.setState({ ...UNCHANGED_BRAND, supportDestination: null, legalLinkVisible: true });
+  useBrandingStore.setState({
+    ...UNCHANGED_BRAND,
+    supportDestination: null,
+    legalLinkVisible: true,
+    updateCheckEnabled: false,
+  });
 });
 
-describe('the branding store carries the two workspace settings', () => {
+describe('the branding store carries the three workspace settings', () => {
   it('applies a support destination when nothing about the brand changed', async () => {
     serve({ support_destination: MAILBOX });
 
@@ -79,10 +91,15 @@ describe('the branding store carries the two workspace settings', () => {
     expect(useBrandingStore.getState().legalLinkVisible).toBe(false);
   });
 
-  it('keeps both out of the localStorage mirror', async () => {
+  it('keeps all three out of the localStorage mirror', async () => {
     // With a brand change as well, so the mirror is genuinely written: what the
     // test is about is what lands in that cache, not whether it lands at all.
-    serve({ company_name: 'Changed Name', support_destination: MAILBOX, legal_link_visible: false });
+    serve({
+      company_name: 'Changed Name',
+      support_destination: MAILBOX,
+      legal_link_visible: false,
+      update_check_enabled: true,
+    });
 
     await useBrandingStore.getState().hydrateFromServer();
 
@@ -98,10 +115,15 @@ describe('the branding store carries the two workspace settings', () => {
     // hydration silently dropped everything.
     expect(useBrandingStore.getState().supportDestination).toEqual(MAILBOX);
     expect(useBrandingStore.getState().legalLinkVisible).toBe(false);
+    expect(useBrandingStore.getState().updateCheckEnabled).toBe(true);
   });
 
-  it('sends both in the PUT that makes a change workspace-wide', async () => {
-    useBrandingStore.setState({ supportDestination: MAILBOX, legalLinkVisible: false });
+  it('sends all three in the PUT that makes a change workspace-wide', async () => {
+    useBrandingStore.setState({
+      supportDestination: MAILBOX,
+      legalLinkVisible: false,
+      updateCheckEnabled: true,
+    });
 
     const ok = await useBrandingStore.getState().persistToServer();
 
@@ -111,9 +133,10 @@ describe('the branding store carries the two workspace settings', () => {
     expect(path).toBe('/v1/branding/');
     expect(body.support_destination).toEqual(MAILBOX);
     expect(body.legal_link_visible).toBe(false);
+    expect(body.update_check_enabled).toBe(true);
     // The brand still travels with them: the server merges by fields set, so a
     // payload that omitted the logo would not clear it, but one that omits these
-    // two would leave a stale destination in place.
+    // three would leave a stale destination in place.
     expect(body.company_name).toBe(UNCHANGED_BRAND.companyName);
   });
 
@@ -146,8 +169,37 @@ describe('the branding store carries the two workspace settings', () => {
     expect(useBrandingStore.getState().legalLinkVisible).toBe(false);
   });
 
-  it('leaves both alone when the server cannot be reached', async () => {
-    useBrandingStore.setState({ supportDestination: MAILBOX, legalLinkVisible: false });
+  it('asks only on an exact true, which is the Legal link rule read backwards', async () => {
+    // Anything ambiguous leaves the product silent. The direction that needs
+    // permission here is the outbound one, so a missing key, a hand-edited "yes"
+    // and a number all answer off - the opposite of the flag above, on purpose.
+    for (const odd of [undefined, null, 'yes', 1, 'true']) {
+      serve({ update_check_enabled: odd });
+      await useBrandingStore.getState().hydrateFromServer();
+      expect(useBrandingStore.getState().updateCheckEnabled).toBe(false);
+    }
+    serve({ update_check_enabled: true });
+    await useBrandingStore.getState().hydrateFromServer();
+    expect(useBrandingStore.getState().updateCheckEnabled).toBe(true);
+  });
+
+  it('applies a version-check change on its own, with the brand unchanged', async () => {
+    serve({ update_check_enabled: true });
+
+    await useBrandingStore.getState().hydrateFromServer();
+
+    expect(useBrandingStore.getState().updateCheckEnabled).toBe(true);
+    // The early return was still the path taken, so this is the case that happens
+    // in the field: an administrator turned one setting on and touched no logo.
+    expect(localStorage.getItem(STORAGE_KEY)).toBeNull();
+  });
+
+  it('leaves all three alone when the server cannot be reached', async () => {
+    useBrandingStore.setState({
+      supportDestination: MAILBOX,
+      legalLinkVisible: false,
+      updateCheckEnabled: true,
+    });
     apiGet.mockRejectedValue(new Error('offline'));
 
     await expect(useBrandingStore.getState().hydrateFromServer()).resolves.toBeUndefined();
@@ -157,6 +209,7 @@ describe('the branding store carries the two workspace settings', () => {
     // one fetch failed.
     expect(useBrandingStore.getState().supportDestination).toEqual(MAILBOX);
     expect(useBrandingStore.getState().legalLinkVisible).toBe(false);
+    expect(useBrandingStore.getState().updateCheckEnabled).toBe(true);
   });
 
   it('says a change did not reach the workspace when the PUT is refused', async () => {

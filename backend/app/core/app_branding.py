@@ -144,6 +144,12 @@ DEFAULT_BRANDING: dict[str, Any] = {
     # admin who has cleared the licence position turns it off.
     "support_destination": None,
     "legal_link_visible": True,
+    # Asking PyPI and GitHub which release is newest is a connection nobody in the
+    # workspace started, so it is off until an administrator turns it on. The
+    # ambiguity rule below is the mirror image of the visibility flag's, for the
+    # same reason: hiding a licence pointer and asking the internet are the two
+    # directions that need permission, so each resolves against itself.
+    "update_check_enabled": False,
 }
 
 
@@ -222,6 +228,7 @@ def sanitise(data: Any) -> dict[str, Any]:
         mode = "default"
 
     visible = data.get("legal_link_visible")
+    check = data.get("update_check_enabled")
 
     return {
         "mode": mode,
@@ -235,6 +242,12 @@ def sanitise(data: Any) -> dict[str, Any]:
         # offer, so the default and every ambiguous value fall on the side of
         # showing it: a corrupt file, a hand-edited "yes", a missing key.
         "legal_link_visible": visible is not False,
+        # Anything that is not exactly True means off, which is the same sentence
+        # written the other way round: an outbound connection is the direction
+        # that needs permission here, so a corrupt file, a hand-edited "yes", a
+        # number and a missing key all leave the product silent. The endpoint that
+        # reads this key is the one that makes the connection.
+        "update_check_enabled": check is True,
     }
 
 

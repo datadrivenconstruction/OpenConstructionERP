@@ -1,4 +1,4 @@
-"""The two workspace settings, exercised through the HTTP surface that serves them.
+"""The workspace settings, exercised through the HTTP surface that serves them.
 
 ``tests/integration/test_app_branding.py`` states the same contract against a real
 application, a real database and two real accounts. That tree is gated on push and
@@ -7,7 +7,7 @@ plus a frozen keyword chain it is documented not to extend - so a test there is
 gated only if it earns the marker, which ``backend/pyproject.toml`` defines as
 identity being the variable under test.
 
-Two of these assertions earn it and six do not. A refused URL scheme, a merge that
+Two of these assertions earn it and eight do not. A refused URL scheme, a merge that
 keeps an omitted field, a cleared destination and a page stored exactly as typed
 are about values, with an admin merely the actor, and the marker's definition
 names that neighbour as one that stays out. Marking the whole set anyway would
@@ -83,17 +83,22 @@ def sign_out(client: TestClient) -> None:
     client.app.dependency_overrides.pop(get_current_user_payload, None)
 
 
-def test_the_get_is_public_and_reports_both_defaults(client: TestClient) -> None:
+def test_the_get_is_public_and_reports_the_defaults(client: TestClient) -> None:
     """Read with no token, because the footers render before anybody signs in.
 
     ``support_destination`` null is the state in which the header leaves the
-    bug-report channel out of the menu entirely.
+    bug-report channel out of the menu entirely. ``update_check_enabled`` false is
+    the state in which the product asks nothing on the internet, and it is served
+    without a token for the same reason the Legal-link flag is: About states the
+    posture to every user, and a disclosure only an administrator could read would
+    not be a disclosure.
     """
     resp = client.get(API)
     assert resp.status_code == 200, resp.text
     body = resp.json()
     assert body["support_destination"] is None
     assert body["legal_link_visible"] is True
+    assert body["update_check_enabled"] is False
 
 
 def test_an_admin_sets_a_mailbox_and_an_anonymous_reader_sees_it(client: TestClient) -> None:
@@ -110,17 +115,22 @@ def test_an_admin_sets_a_mailbox_and_an_anonymous_reader_sees_it(client: TestCli
     assert anon.json()["support_destination"] == MAILBOX
 
 
-def test_a_viewer_is_refused_on_both_settings_and_changes_neither(client: TestClient) -> None:
+def test_a_viewer_is_refused_on_all_three_settings_and_changes_none(client: TestClient) -> None:
     sign_in_as(client, "viewer")
     destination = client.put(API, json={"support_destination": SUPPORT_PAGE})
     assert destination.status_code == 403, destination.text
     flag = client.put(API, json={"legal_link_visible": False})
     assert flag.status_code == 403, flag.text
+    # The one that starts a connection nobody asked for is the one a viewer must
+    # least be able to turn on for everybody else.
+    check = client.put(API, json={"update_check_enabled": True})
+    assert check.status_code == 403, check.text
 
     sign_out(client)
     body = client.get(API).json()
     assert body["support_destination"] is None
     assert body["legal_link_visible"] is True
+    assert body["update_check_enabled"] is False
 
 
 @pytest.mark.parametrize(
@@ -205,3 +215,51 @@ def test_clearing_the_destination_hides_the_channel_again(client: TestClient) ->
 
     sign_out(client)
     assert client.get(API).json()["support_destination"] is None
+
+
+def test_an_administrator_can_turn_the_version_check_on_and_off_again(client: TestClient) -> None:
+    """The allow side, and the half that makes the refusal above mean something.
+
+    Read back with no token, because that is how About reads the posture it states
+    to every user: what an administrator wrote has to be what a signed-out reader
+    gets, or the disclosure describes the record and not the installation.
+    """
+    sign_in_as(client, "admin")
+    on = client.put(API, json={"update_check_enabled": True})
+    assert on.status_code == 200, on.text
+    assert on.json()["update_check_enabled"] is True
+    sign_out(client)
+    assert client.get(API).json()["update_check_enabled"] is True
+
+    sign_in_as(client, "admin")
+    off = client.put(API, json={"update_check_enabled": False})
+    assert off.status_code == 200, off.text
+    assert off.json()["update_check_enabled"] is False
+    sign_out(client)
+    assert client.get(API).json()["update_check_enabled"] is False
+
+
+def test_saving_the_brand_leaves_the_version_check_as_it_was(client: TestClient) -> None:
+    """The merge is by ``model_fields_set``, so an omitted field persists.
+
+    Without it, uploading a logo or naming a support mailbox would silently turn
+    the outbound check on for the whole workspace - the exact failure the merge
+    exists to prevent, in the direction that sends a request nobody started.
+    """
+    sign_in_as(client, "admin")
+    client.put(API, json={"update_check_enabled": True})
+    brand = client.put(API, json={"company_name": "Meridian", "support_destination": MAILBOX})
+    assert brand.status_code == 200, brand.text
+
+    sign_out(client)
+    body = client.get(API).json()
+    assert body["company_name"] == "Meridian"
+    assert body["support_destination"] == MAILBOX
+    assert body["update_check_enabled"] is True
+
+    sign_in_as(client, "admin")
+    client.put(API, json={"update_check_enabled": False})
+    legal = client.put(API, json={"legal_link_visible": False})
+    assert legal.status_code == 200, legal.text
+    sign_out(client)
+    assert client.get(API).json()["update_check_enabled"] is False

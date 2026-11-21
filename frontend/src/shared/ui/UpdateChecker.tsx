@@ -47,6 +47,7 @@ import { copyToClipboard } from '@/shared/lib/browser';
 import { isTauri, openExternalUrl, openInNewTab } from '@/shared/lib/desktop';
 import { getIntlLocale } from '@/shared/lib/formatters';
 import { compareVersions, parseVersion } from '@/shared/lib/version';
+import { useBrandingStore } from '@/stores/useBrandingStore';
 
 /* ── One-click upgrade — starts `pip install --upgrade` server-side ───
  *
@@ -199,6 +200,21 @@ const NOTES_CAP = 500;
  * recording, a managed install upgraded by its own pipeline.
  */
 const UPDATE_CHECK_DISABLED = Boolean(import.meta.env.VITE_DISABLE_UPDATE_CHECK);
+
+/**
+ * Whether this workspace has asked for the automatic check.
+ *
+ * A build flag is a deployment's choice and this is a workspace's: the setting
+ * lives on the server-side branding record beside the support destination, an
+ * administrator turns it on in Settings, and it is false until they do. Reading it
+ * here rather than only on the server means an install that has not asked for the
+ * check does not even ask its own backend, which is the difference between
+ * "the server answers without reaching anywhere" and "nothing is sent at all" -
+ * and About says which of the two is true.
+ */
+function useWorkspaceUpdateCheckEnabled(): boolean {
+  return useBrandingStore((s) => s.updateCheckEnabled);
+}
 
 /** The answer from ``GET /api/system/version-check``.
  *
@@ -537,12 +553,15 @@ function notesExcerpt(notes: string, limit = 320): string {
  * produce.
  */
 export function useUpdateCheck(): VersionCheck | null {
+  // Off unless the workspace asked: the query never runs, so no request is made
+  // and the server is never given the chance to make one either.
+  const workspaceEnabled = useWorkspaceUpdateCheckEnabled();
   const { data } = useQuery<VersionCheck | null>({
     queryKey: ['system-version-check'],
     // Wrapped: react-query passes its context as the first argument, which
     // would otherwise land in `force`.
     queryFn: () => fetchVersionCheck(),
-    enabled: !UPDATE_CHECK_DISABLED,
+    enabled: !UPDATE_CHECK_DISABLED && workspaceEnabled,
     staleTime: VERSION_CHECK_TTL_MS,
     // Once a day, also in a window left open for days, which is how the
     // desktop app is used. The storm the old browser-side call produced was
@@ -555,7 +574,12 @@ export function useUpdateCheck(): VersionCheck | null {
     retry: false,
   });
 
-  return data && data.update_available ? data : null;
+  // `enabled: false` stops the next fetch but leaves an answer already in the
+  // cache alone, so the gate has to be applied to the return as well: an
+  // administrator who turns the check off is telling every notice to stop, and a
+  // badge that survives the switch is a badge that outlives the decision - the
+  // same reason the setting is not mirrored to localStorage.
+  return workspaceEnabled && data && data.update_available ? data : null;
 }
 
 /**

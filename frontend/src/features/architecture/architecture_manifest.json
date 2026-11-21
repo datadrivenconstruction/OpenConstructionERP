@@ -277271,10 +277271,10 @@
     },
     {
       "name": "settings",
-      "ts_files": 38,
+      "ts_files": 39,
       "css_files": 0,
       "test_files": 13,
-      "total_files": 38
+      "total_files": 39
     },
     {
       "name": "setup",
@@ -279088,7 +279088,7 @@
     "total_schemas": 4120,
     "total_python_files": 2812,
     "frontend_features": 208,
-    "frontend_ts_files": 3578,
+    "frontend_ts_files": 3579,
     "frontend_backend_mapped": 188
   },
   "frontend_backend_mapping": {

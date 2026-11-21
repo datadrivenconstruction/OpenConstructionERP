@@ -19,8 +19,10 @@
  *
  * What stays is what an About page is actually for. Which build is running, so a
  * support conversation starts from a fact. What the product does, in one line.
- * The release notes, which are product information about the installation in
- * front of you. And one link to /legal, which is the single place that states
+ * Whether this installation asks the internet which version is newest, because
+ * that is a fact about the installation in front of you and not a preference of
+ * whoever wrote the page. The release notes, which are product information about
+ * the installation in front of you. And one link to /legal, which is the single place that states
  * the licence, the attribution notice and the source offer - it is not restated
  * here, because two places saying it is two places to keep correct.
  *
@@ -32,6 +34,7 @@ import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { Card } from '@/shared/ui';
 import { APP_NAME } from '@/shared/lib/brandName';
+import { useUpdateCheckDisclosure } from '@/shared/lib/updateCheckDisclosure';
 import { APP_VERSION } from '@/shared/lib/version';
 import { Changelog, getRecentReleases } from './Changelog';
 
@@ -39,6 +42,9 @@ export function AboutPage() {
   const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
   const recent = getRecentReleases(3);
+  // One sentence, and the same one Settings shows next to the switch that decides
+  // it: a disclosure written twice is a disclosure that drifts.
+  const updateCheck = useUpdateCheckDisclosure();
 
   return (
     <div className="space-y-6" data-testid="about-page">
@@ -56,6 +62,9 @@ export function AboutPage() {
                 defaultValue:
                   'Construction cost estimation, project management and resource control',
               })}
+            </p>
+            <p className="mt-2 max-w-2xl text-xs text-content-tertiary" data-testid="about-update-check">
+              {updateCheck}
             </p>
           </div>
           <Link

@@ -158,6 +158,12 @@ class BrandingResponse(BaseModel):
     #: Whether footers show the Legal link. The /legal page itself, /api/source
     #: and the bundled LICENSE and NOTICE assets are never hidden by this.
     legal_link_visible: bool = True
+    #: Whether this workspace asks PyPI and GitHub which release is newest. Off in
+    #: a fresh install: it is a connection nobody in the workspace started, so it
+    #: waits for an administrator to ask for it. Served publicly for the same
+    #: reason the Legal-link flag is - a disclosure of what the product does has to
+    #: be readable by the users it describes, and not only by the admin who set it.
+    update_check_enabled: bool = False
 
 
 class BrandingUpdate(BaseModel):
@@ -182,6 +188,11 @@ class BrandingUpdate(BaseModel):
     #: Omitted keeps the stored value. A workspace that never set it is visible,
     #: which is the default the legal position requires.
     legal_link_visible: bool | None = None
+    #: Omitted keeps the stored value. A workspace that never set it does not ask
+    #: the internet, which is the opposite of the flag above on purpose: showing a
+    #: licence pointer and starting an outbound connection are the two directions
+    #: that need permission, so each defaults against itself.
+    update_check_enabled: bool | None = None
 
 
 @router.get("/branding/", response_model=BrandingResponse)

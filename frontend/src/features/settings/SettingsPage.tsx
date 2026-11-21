@@ -80,6 +80,7 @@ import {
 import { BIMConverterStatusBanner } from '@/features/bim/BIMConverterStatusBanner';
 import { converterName, converterVersionLabel } from '@/features/bim/converterText';
 import { DataSecurityPanel } from '@/features/data-security';
+import { UpdateCheckCard } from './UpdateCheckCard';
 import { DeleteAccountDialog } from './DeleteAccountDialog';
 import { DemoLeftoversPanel } from './DemoLeftoversPanel';
 import { ReferenceDataPanel } from './ReferenceDataPanel';
@@ -2128,7 +2129,14 @@ export function SettingsPage() {
 
           {/* ── DATA & SECURITY ──────────────────────────────────── */}
           {activeTab === 'security' && (
-            <div className="lg:col-span-2">
+            <div className="lg:col-span-2 space-y-4">
+              {/* The one part of the posture an administrator can change, above the
+                  panel that reports the rest of it. Rendered beside DataSecurityPanel
+                  rather than inside it on purpose: that panel answers from its own
+                  query and returns a skeleton or an error card while it does, and a
+                  switch that vanished because a posture read failed would be a switch
+                  nobody could find. */}
+              <UpdateCheckCard />
               <DataSecurityPanel />
             </div>
           )}

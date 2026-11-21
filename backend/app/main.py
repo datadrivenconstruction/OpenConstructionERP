@@ -3552,6 +3552,13 @@ def create_app() -> FastAPI:
         Signed-in callers only: the update notice lives inside the signed-in
         shell, and nothing before sign-in asks for it.
 
+        Asking at all is opt-in. A fresh workspace answers ``check_disabled``
+        without touching the network, and keeps doing so until an administrator
+        turns the version check on in Settings - see
+        :mod:`app.core.update_check_policy` for the three switches and their
+        precedence. ``force`` skips the cache; it has never skipped the policy, and
+        a user pressing About's button is not a workspace decision to phone out.
+
         Source of truth is **PyPI** (more reliable than GitHub releases -
         Trusted-Publisher OIDC always produces a wheel, GitHub release
         creation is sometimes skipped on hotfixes). Falls back to GitHub
@@ -3583,10 +3590,15 @@ def create_app() -> FastAPI:
         repo = "abdelnabym519-cpu/Construction-AI-OS"
         cache_key = "_version_check_cache"
 
-        # Turned off by the user from the desktop launcher's notice or by an
-        # administrator's OE_DISABLE_UPDATE_CHECK: answer from what we know and
-        # send nothing outward. Read on every call rather than cached, so the
-        # switch takes effect without a restart.
+        # Off unless this workspace asked for it. Three switches decide, and all
+        # three are read on every call rather than cached so a change takes effect
+        # without a restart: the workspace record's update_check_enabled, which an
+        # administrator sets in Settings and which is False in a fresh install;
+        # OE_DISABLE_UPDATE_CHECK, an operator's kill switch for every account; and
+        # the launcher's ~/.openestimate/no-update-check, a user's own opt-out. The
+        # two operator switches win over a workspace that asked, so turning the
+        # setting on in the product cannot undo an opt-out made outside it. When the
+        # answer is off we reply from what we already know and send nothing outward.
         if update_check_disabled():
             return {
                 "current_version": current,
