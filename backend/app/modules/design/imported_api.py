@@ -3,9 +3,9 @@
 from __future__ import annotations
 
 import uuid
-from typing import Literal
+from typing import Annotated, Literal
 
-from fastapi import HTTPException, status
+from fastapi import HTTPException, Query, status
 from pydantic import BaseModel
 from sqlalchemy.exc import IntegrityError
 
@@ -14,6 +14,13 @@ from app.dependencies import SessionDep
 from . import imported
 from .auth import PrincipalDep, require_project
 from .schemas import RevisionView
+
+
+class ImportedModelListResponse(BaseModel):
+    items: list[dict]
+    total: int
+    offset: int = 0
+    limit: int = 50
 
 
 class ImportRequest(BaseModel):
@@ -32,19 +39,31 @@ async def held_lock(session, project_id: uuid.UUID):
 def register(router, require_publisher) -> None:
     """``require_publisher(session, user_id)`` is the module's publish check (403 for read-only roles)."""
 
-    @router.get("/projects/{project_id}/imported-models")
-    async def imported_models(project_id: uuid.UUID, principal: PrincipalDep, session: SessionDep) -> list[dict]:
+    @router.get("/projects/{project_id}/imported-models", response_model=ImportedModelListResponse)
+    async def imported_models(
+        project_id: uuid.UUID,
+        principal: PrincipalDep,
+        session: SessionDep,
+        offset: Annotated[int, Query(ge=0)] = 0,
+        limit: Annotated[int, Query(ge=1, le=500)] = 50,
+    ) -> ImportedModelListResponse:
         await require_project(principal, project_id, session)
-        return [
-            {
-                "bim_model_id": str(m.id),
-                "name": m.name,
-                "model_format": m.model_format or "",
-                "element_count": m.element_count,
-                "created_at": m.created_at.isoformat() if m.created_at else None,
-            }
-            for m in await imported.candidates(session, project_id)
-        ]
+        models = await imported.candidates(session, project_id)
+        return ImportedModelListResponse(
+            items=[
+                {
+                    "bim_model_id": str(m.id),
+                    "name": m.name,
+                    "model_format": m.model_format or "",
+                    "element_count": m.element_count,
+                    "created_at": m.created_at.isoformat() if m.created_at else None,
+                }
+                for m in models[offset : offset + limit]
+            ],
+            total=len(models),
+            offset=offset,
+            limit=limit,
+        )
 
     @router.post(
         "/projects/{project_id}/revisions/import", response_model=RevisionView, status_code=status.HTTP_201_CREATED

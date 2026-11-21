@@ -58104,6 +58104,7 @@ const resource = {
     "modules.catalog.project_tax": "Данъчен профил на проекта",
     "modules.catalog.central_purchasing": "Централизирани покупки",
     "modules.catalog.dataflow": "Пътища на данните",
+    "modules.catalog.design": "Проектиране",
     "modules.pp_desc_eleven_areas_framework": "Управление на проекта от страна на инвеститора в единадесет области на управление през два етапа - развитие на проекта и изпълнение на строителството, с един гейт между тях и по един одобрен рамков документ за всяка област.",
     "modules.pp_name_pakistan_pk": "Строителен пакет Пакистан",
     "modules.pp_name_peru_pe": "Строителен пакет Перу",

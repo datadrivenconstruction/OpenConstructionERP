@@ -37,6 +37,7 @@ import {
 import { hasText, tr } from './BriefFields';
 import { CostPicker } from './CostPicker';
 import { useProjectFromUrl } from './useProjectFromUrl';
+import { fmtList } from '@/shared/lib/formatters';
 
 export default function EstimatePage() {
   const { t } = useTranslation();
@@ -252,10 +253,10 @@ function Totals({ est, locale, currency }: { est: Estimate; locale: string; curr
       </dl>
       {!r.total.complete && (
         <p role="note" data-testid="range-incomplete" className="px-4 pb-2 text-xs text-content-secondary">
-          {tr(t, 'design.estimate.range_incomplete', { groups: r.missing_groups.join(', ') })}
+          {tr(t, 'design.estimate.range_incomplete', { groups: fmtList(r.missing_groups) })}
         </p>
       )}
-      <p className="px-4 pb-2 text-xs text-content-secondary">{tr(t, 'design.estimate.range_scope', { excluded: r.not_in_range.join(', ') })}</p>
+      <p className="px-4 pb-2 text-xs text-content-secondary">{tr(t, 'design.estimate.range_scope', { excluded: fmtList(r.not_in_range) })}</p>
       <div className="flex flex-col gap-2 border-t border-border-light px-4 py-3 text-sm">
         <div data-testid="priced-total">
           <span className="text-content-tertiary">{tr(t, 'design.estimate.priced_total')} </span>
@@ -494,7 +495,7 @@ function Benchmarks({ est }: { est: Estimate }) {
             <li key={`${b.source_url}|${b.published}`} className="flex flex-col gap-1 px-4 py-3 text-sm">
               <span className="font-medium">{b.publisher}</span>
               <span className="text-xs text-content-secondary">
-                {tr(t, 'design.estimate.bench_meta', { published: b.published, year: b.price_level_year, groups: b.groups.join(', ') })}
+                {tr(t, 'design.estimate.bench_meta', { published: b.published, year: b.price_level_year, groups: fmtList(b.groups) })}
                 {b.derived && <> - {tr(t, 'design.estimate.bench_derived')}</>}
                 {b.vat_included === null && <> - {tr(t, 'design.estimate.bench_vat_unknown')}</>}
                 {b.vat_included === true && <> - {tr(t, 'design.estimate.bench_vat_incl')}</>}

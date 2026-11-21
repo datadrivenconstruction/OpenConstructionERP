@@ -124,7 +124,7 @@ async def test_upload_is_visible_through_the_bim_hub(client):
         assert (await client.get(f"{BASE}/revisions/{rev['revision_id']}/files/{path}", headers=tok)).status_code == 404
 
     listed = await client.get(f"{BASE}/projects/{pid}/revisions", headers=tok)
-    assert [x["revision_id"] for x in listed.json()] == [rev["revision_id"]]
+    assert [x["revision_id"] for x in listed.json()["items"]] == [rev["revision_id"]]
     one = await client.get(f"{BASE}/revisions/{rev['revision_id']}", headers=h)
     assert one.status_code == 200 and one.json()["manifest"]["files"] == manifest["files"]
     ctx = (await client.get(f"{BASE}/projects/{pid}/context", headers=tok)).json()
@@ -216,7 +216,7 @@ async def test_versions_diff_and_decisions(client):
     )
     assert sorted([rj.status_code, ac.status_code]) == [200, 409], (rj.text, ac.text)
 
-    listed = (await client.get(f"{BASE}/projects/{pid}/revisions", headers=tok)).json()
+    listed = (await client.get(f"{BASE}/projects/{pid}/revisions", headers=tok)).json()["items"]
     assert sorted(x["status"] for x in listed) in (
         ["archived", "archived", "archived", "published", "rejected"],
         ["archived", "archived", "published", "rejected", "rejected"],
@@ -290,7 +290,7 @@ async def test_bad_packages_are_rejected_whole(client, case):
         data = b"not a zip at all"
     r = await _upload(client, pid, tok, data)
     assert r.status_code == 422, (case, r.status_code, r.text)
-    assert (await client.get(f"{BASE}/projects/{pid}/revisions", headers=tok)).json() == []
+    assert (await client.get(f"{BASE}/projects/{pid}/revisions", headers=tok)).json()["items"] == []
     models = await client.get(f"{BIM}/", headers=h, params={"project_id": str(pid)})
     assert models.status_code == 200 and models.json()["items"] == [], models.text
 
@@ -319,7 +319,7 @@ async def test_upload_needs_the_lock_and_the_right_project(client):
     assert (await _upload(client, p2, tok, foreign)).status_code == 404
     assert (await _upload(client, pid, tok, data)).status_code == 201
     other_tok = await _token(client, h_owner, p2)
-    revs = (await client.get(f"{BASE}/projects/{pid}/revisions", headers=tok)).json()
+    revs = (await client.get(f"{BASE}/projects/{pid}/revisions", headers=tok)).json()["items"]
     assert (await client.get(f"{BASE}/revisions/{revs[0]['revision_id']}", headers=other_tok)).status_code == 404
 
 

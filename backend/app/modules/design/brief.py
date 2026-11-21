@@ -12,7 +12,7 @@ from typing import Annotated, Any
 
 from fastapi import APIRouter, Body, Header, HTTPException, Query, Response, status
 from pydantic import BaseModel, Field
-from sqlalchemy import select, update
+from sqlalchemy import func, select, update
 from sqlalchemy.exc import IntegrityError
 
 from app.dependencies import SessionDep
@@ -35,6 +35,13 @@ class BriefVersionView(BaseModel):
     action: str
     saved_by: uuid.UUID
     saved_at: Any
+
+
+class BriefVersionListResponse(BaseModel):
+    items: list[BriefVersionView]
+    total: int
+    offset: int = 0
+    limit: int = 50
 
 
 def _invalid(exc: BriefError) -> HTTPException:
@@ -151,22 +158,41 @@ async def get_brief(
     return _send(response, row.document)
 
 
-@router.get("/projects/{project_id}/brief/versions", response_model=list[BriefVersionView])
-async def list_brief_versions(project_id: uuid.UUID, principal: PrincipalDep, session: SessionDep) -> list:
+@router.get("/projects/{project_id}/brief/versions", response_model=BriefVersionListResponse)
+async def list_brief_versions(
+    project_id: uuid.UUID,
+    principal: PrincipalDep,
+    session: SessionDep,
+    offset: Annotated[int, Query(ge=0)] = 0,
+    limit: Annotated[int, Query(ge=1, le=500)] = 50,
+) -> BriefVersionListResponse:
     await require_project(principal, project_id, session)
     head = await _head(session, project_id)
     if head is None:
-        return []
+        return BriefVersionListResponse(items=[], total=0, offset=offset, limit=limit)
+    total = (
+        await session.execute(
+            select(func.count()).select_from(DesignBriefVersion).where(DesignBriefVersion.brief_id == head.id)
+        )
+    ).scalar_one()
     rows = (
         await session.execute(
             select(DesignBriefVersion)
             .where(DesignBriefVersion.brief_id == head.id)
             .order_by(DesignBriefVersion.version.desc())
+            .offset(offset)
+            .limit(limit)
         )
     ).scalars()
-    return [
-        BriefVersionView(version=r.version, action=r.action, saved_by=r.saved_by, saved_at=r.created_at) for r in rows
-    ]
+    return BriefVersionListResponse(
+        items=[
+            BriefVersionView(version=r.version, action=r.action, saved_by=r.saved_by, saved_at=r.created_at)
+            for r in rows
+        ],
+        total=total,
+        offset=offset,
+        limit=limit,
+    )
 
 
 @router.put("/projects/{project_id}/brief")

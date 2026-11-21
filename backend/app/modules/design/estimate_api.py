@@ -4,9 +4,9 @@ from __future__ import annotations
 
 import uuid
 from decimal import Decimal
-from typing import Any
+from typing import Annotated, Any
 
-from fastapi import HTTPException, status
+from fastapi import HTTPException, Query, status
 from pydantic import BaseModel, Field
 from sqlalchemy import select
 
@@ -16,6 +16,13 @@ from . import cost_suggest, links, rules
 from . import estimate as est
 from .auth import PrincipalDep, require_project
 from .models import DesignRevision
+
+
+class RuleListResponse(BaseModel):
+    items: list[dict[str, Any]]
+    total: int
+    offset: int = 0
+    limit: int = 50
 
 
 class StarterRequest(BaseModel):
@@ -59,11 +66,24 @@ def register(router, can_accept) -> None:
         if not await can_accept(session, principal.user_id, project):
             raise HTTPException(status.HTTP_403_FORBIDDEN, "Only a project manager may change the estimate")
 
-    @router.get("/projects/{project_id}/estimate/rules")
-    async def list_rules(project_id: uuid.UUID, principal: PrincipalDep, session: SessionDep) -> list[dict[str, Any]]:
+    @router.get("/projects/{project_id}/estimate/rules", response_model=RuleListResponse)
+    async def list_rules(
+        project_id: uuid.UUID,
+        principal: PrincipalDep,
+        session: SessionDep,
+        offset: Annotated[int, Query(ge=0)] = 0,
+        limit: Annotated[int, Query(ge=1, le=500)] = 50,
+    ) -> RuleListResponse:
         await require_project(principal, project_id, session)
         rows = await est._rule_rows(session, project_id)
-        return [{"id": r.code, "kind": r.kind, "enabled": r.enabled, **r.body} for r in rows]
+        return RuleListResponse(
+            items=[
+                {"id": r.code, "kind": r.kind, "enabled": r.enabled, **r.body} for r in rows[offset : offset + limit]
+            ],
+            total=len(rows),
+            offset=offset,
+            limit=limit,
+        )
 
     @router.post("/projects/{project_id}/estimate/rules/starter", status_code=status.HTTP_201_CREATED)
     async def install_starter(

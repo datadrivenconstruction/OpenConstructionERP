@@ -11,14 +11,25 @@ import tempfile
 import uuid
 from datetime import timedelta
 from pathlib import Path
-from typing import Literal
+from typing import Annotated, Literal
 
-from fastapi import APIRouter, BackgroundTasks, Depends, File, HTTPException, Request, Response, UploadFile, status
+from fastapi import (
+    APIRouter,
+    BackgroundTasks,
+    Depends,
+    File,
+    HTTPException,
+    Query,
+    Request,
+    Response,
+    UploadFile,
+    status,
+)
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import StreamingResponse
 from fastapi.routing import APIRoute
 from pydantic import BaseModel
-from sqlalchemy import select, update
+from sqlalchemy import func, select, update
 from sqlalchemy.exc import IntegrityError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
@@ -54,6 +65,7 @@ from .schemas import (
     LinkFile,
     LockView,
     RejectRequest,
+    RevisionListResponse,
     RevisionView,
 )
 from .settings import get_design_settings
@@ -536,21 +548,27 @@ async def upload_revision(
     return RevisionView.of(rev)
 
 
-@router.get("/projects/{project_id}/revisions", response_model=list[RevisionView])
-async def list_revisions(project_id: uuid.UUID, principal: PrincipalDep, session: SessionDep) -> list[RevisionView]:
+@router.get("/projects/{project_id}/revisions", response_model=RevisionListResponse)
+async def list_revisions(
+    project_id: uuid.UUID,
+    principal: PrincipalDep,
+    session: SessionDep,
+    offset: Annotated[int, Query(ge=0)] = 0,
+    limit: Annotated[int, Query(ge=1, le=500)] = 50,
+) -> RevisionListResponse:
     await require_project(principal, project_id, session)
+    where = (DesignRevision.project_id == project_id, DesignRevision.status.in_(VISIBLE))
+    total = (await session.execute(select(func.count()).select_from(DesignRevision).where(*where))).scalar_one()
     rows = (
         (
             await session.execute(
-                select(DesignRevision)
-                .where(DesignRevision.project_id == project_id, DesignRevision.status.in_(VISIBLE))
-                .order_by(DesignRevision.number.desc())
+                select(DesignRevision).where(*where).order_by(DesignRevision.number.desc()).offset(offset).limit(limit)
             )
         )
         .scalars()
         .all()
     )
-    return [RevisionView.of(r) for r in rows]
+    return RevisionListResponse(items=[RevisionView.of(r) for r in rows], total=total, offset=offset, limit=limit)
 
 
 async def _revision(session, principal, revision_id: uuid.UUID) -> DesignRevision:

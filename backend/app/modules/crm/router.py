@@ -24,6 +24,7 @@ from app.dependencies import (
 )
 from app.modules.crm.schemas import (
     AccountContactLinkCreate,
+    AccountContactListResponse,
     AccountContactResponse,
     AccountCreate,
     AccountResponse,
@@ -162,15 +163,22 @@ async def get_account(
     return AccountResponse.model_validate(account)
 
 
-@router.get("/accounts/{account_id}/contacts", response_model=list[AccountContactResponse])
+@router.get("/accounts/{account_id}/contacts", response_model=AccountContactListResponse)
 async def list_account_contacts(
     account_id: uuid.UUID,
+    offset: int = Query(default=0, ge=0),
+    limit: int = Query(default=50, ge=1, le=500),
     _perm: None = Depends(RequirePermission("crm.read")),
     service: CrmService = Depends(_get_service),
-) -> list[AccountContactResponse]:
+) -> AccountContactListResponse:
     """Contacts linked to the account, primary contact first."""
     rows = await service.list_account_contacts(account_id)
-    return [AccountContactResponse(**r) for r in rows]
+    return AccountContactListResponse(
+        items=[AccountContactResponse(**r) for r in rows[offset : offset + limit]],
+        total=len(rows),
+        offset=offset,
+        limit=limit,
+    )
 
 
 @router.post("/accounts/{account_id}/contacts", response_model=list[AccountContactResponse], status_code=201)

@@ -56,6 +56,7 @@ const resource = {
     "modules.catalog.doc_templates": "Documents & templates",
     "modules.catalog.estimate_archive": "Sealed Estimates",
     "modules.catalog.framework_agreements": "Framework Agreements",
+    "modules.catalog.design": "Design",
     "dashboard.layout.customize": "Customise",
     "dashboard.layout.title": "Customise dashboard",
     "rebar_schedule.diameter": "Dia (mm)",

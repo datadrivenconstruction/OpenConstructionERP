@@ -139,9 +139,9 @@ async def test_model_generate_writes_a_version_and_runs_the_job(client, fake):
     brief = (await client.get(f"{BASE}/projects/{pid}/brief", headers=h)).json()
     assert brief["version"] == version + 1 and brief["massing"]["floors_above"] == 6
     assert [p.argv[1] for p in fake.procs] == ["gen", "publish"]
-    versions = (await client.get(f"{BASE}/projects/{pid}/brief/versions", headers=h)).json()
+    versions = (await client.get(f"{BASE}/projects/{pid}/brief/versions", headers=h)).json()["items"]
     assert versions[0]["action"] == "model"
-    revs = (await client.get(f"{BASE}/projects/{pid}/revisions", headers=h)).json()
+    revs = (await client.get(f"{BASE}/projects/{pid}/revisions", headers=h)).json()["items"]
     assert revs[0]["revision_id"] == j["revision_id"]  # brief_version in the package: real ddc, tools/e2e test_95
 
 
@@ -213,7 +213,7 @@ async def test_model_preview_is_the_generate_brief_and_stores_nothing(client, fa
     r = await client.post(url, headers=h, json={"brief_version": version, "values": {"/massing/floors_above": 999}})
     assert r.status_code == 422
     assert (await client.post(url, headers=h, json={"brief_version": version + 1})).status_code == 409
-    versions = (await client.get(f"{BASE}/projects/{pid}/brief/versions", headers=h)).json()
+    versions = (await client.get(f"{BASE}/projects/{pid}/brief/versions", headers=h)).json()["items"]
     assert all(v["action"] != "model" for v in versions) and fake.procs == []
 
 

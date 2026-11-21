@@ -58981,6 +58981,7 @@ const resource = {
     "modules.catalog.project_tax": "Proje vergi profili",
     "modules.catalog.central_purchasing": "Merkezi satın alma",
     "modules.catalog.dataflow": "Veri yolları",
+    "modules.catalog.design": "Tasarım",
     "modules.pp_desc_eleven_areas_framework": "Proje yönetimi işveren tarafından on bir yönetim alanında, iki aşamada yürütülür: proje geliştirme ve yapım uygulaması. Aralarında bir kapı ve her alan için onaylanmış bir çerçeve belge bulunur.",
     "modules.pp_name_pakistan_pk": "Pakistan İnşaat Paketi",
     "modules.pp_name_peru_pe": "Peru İnşaat Paketi",

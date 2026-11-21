@@ -19,6 +19,8 @@ from typing import Any
 from fastapi import HTTPException, status
 from sqlalchemy import select
 
+from app.core import cost_scope
+
 from . import benchmarks, rules
 from .models import DesignEstimate, DesignEstimateBinding, DesignEstimateRule, DesignRevision
 
@@ -312,7 +314,6 @@ async def resolve_cost_rate(
     """Best ERP cost item for a rule in the project's region and currency, or None. Never invents a rate."""
     from app.core.match_service.region_language import language_for
     from app.modules.costs.matcher import match_cwicr_items
-    from app.modules.costs.models import CostItem
 
     currency = (getattr(project, "currency", None) or "").strip().upper()
     if not currency:
@@ -333,7 +334,7 @@ async def resolve_cost_rate(
                 best = (m.score, m)
     if best is None:
         return None
-    item = await session.get(CostItem, uuid.UUID(best[1].cost_item_id))
+    item = await cost_scope.get_cost_item(session, best[1].cost_item_id)
     if item is None or item.mass_basis:  # mass-priced items need the per-length conversion: pick by hand
         return None
     return q4(item.rate), await cost_provenance(session, item, auto=True, score=best[0])
@@ -875,7 +876,6 @@ async def price_position(
     The rate must be in the project currency: the estimate sums positions, a rate in another currency would be
     added as if it were the same.
     """
-    from app.modules.costs.models import CostItem
     from app.modules.projects.models import Project
 
     b = await _binding_of(session, project_id, position_id)
@@ -892,7 +892,7 @@ async def price_position(
             )
 
     if cost_item_id is not None:
-        item = await session.get(CostItem, cost_item_id)
+        item = await cost_scope.get_cost_item(session, cost_item_id)
         if item is None or not item.is_active:
             raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, "Cost item not found or inactive")
         if item.unit.strip().casefold() != pos.unit.strip().casefold():

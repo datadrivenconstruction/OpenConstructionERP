@@ -18,6 +18,7 @@ import { fieldLabel } from './BriefFields';
 import { VIEWER_FRAME } from './useQuietViewer';
 import { countByClass, glbNodes, type GenResult, type WorkerOut } from './wasm/ddcWeb';
 import wasmUrl from './wasm/ddc_web.wasm?url';
+import { fmtList } from '@/shared/lib/formatters';
 
 const DEBOUNCE_MS = 300;
 const LOAD_TIMEOUT_MS = 20_000;
@@ -154,7 +155,7 @@ export function ModelPreview({ projectId, state, onSelect, tall = false }: {
             {state.unconfirmed?.length ? (
               <>
                 <span>{m('design.model.preview.unconfirmed', {
-                  fields: state.unconfirmed.map((p) => fieldLabel(t, p)).join(', ') })}</span>
+                  fields: fmtList(state.unconfirmed.map((p) => fieldLabel(t, p))) })}</span>
                 <Link to="/design/brief" className="text-oe-blue-text underline">{m('design.model.preview.open_brief')}</Link>
               </>
             ) : m('design.model.preview.none')}

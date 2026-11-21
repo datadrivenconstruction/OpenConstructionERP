@@ -58,7 +58,7 @@ export function OwnerActivityCard() {
             value={from}
             max={to || undefined}
             onChange={(e) => setFrom(e.target.value)}
-            className="oe-input h-8"
+            className="oe-input"
             aria-label={t('crm.rep_from', { defaultValue: 'From' })}
           />
           <span>-</span>
@@ -67,7 +67,7 @@ export function OwnerActivityCard() {
             value={to}
             min={from || undefined}
             onChange={(e) => setTo(e.target.value)}
-            className="oe-input h-8"
+            className="oe-input"
             aria-label={t('crm.rep_to', { defaultValue: 'To' })}
           />
         </span>

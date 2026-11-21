@@ -329,7 +329,7 @@ def _members(data: bytes) -> list[tuple[str, bytes]]:
 async def _rejected(client, pid, tok, data, code=422, what=""):
     r = await _upload(client, pid, tok, data)
     assert r.status_code == code, (what, r.status_code, r.text[:300])
-    assert (await client.get(f"{BASE}/projects/{pid}/revisions", headers=tok)).json() == []
+    assert (await client.get(f"{BASE}/projects/{pid}/revisions", headers=tok)).json()["items"] == []
 
 
 async def test_truncated_archive(client):
@@ -426,7 +426,7 @@ async def test_oversized_member_and_oversized_json(client, monkeypatch):
     finally:
         monkeypatch.delenv("OE_DESIGN_REVISION_MAX_JSON_BYTES")
         get_design_settings.cache_clear()
-    assert (await client.get(f"{BASE}/projects/{pid}/revisions", headers=tok)).json() == []
+    assert (await client.get(f"{BASE}/projects/{pid}/revisions", headers=tok)).json()["items"] == []
 
 
 async def test_row_limit(client, monkeypatch):
@@ -489,7 +489,7 @@ async def test_parent_from_another_project(client):
     child, _ = package(p2, rows, parent_id=m1["revision_id"], parent_rows=rows)
     r = await _upload(client, p2, tok2, child)
     assert r.status_code in (409, 422), r.text
-    assert (await client.get(f"{BASE}/projects/{p2}/revisions", headers=tok2)).json() == []
+    assert (await client.get(f"{BASE}/projects/{p2}/revisions", headers=tok2)).json()["items"] == []
 
 
 async def test_accept_twice_and_reject_after_accept(client):
@@ -522,7 +522,7 @@ async def test_concurrent_uploads_of_the_first_revision(client):
     res = await asyncio.gather(*[_upload(client, pid, tok, d) for d in packs])
     assert all(r.status_code in (201, 409) for r in res), [r.text for r in res]
     # nothing is published yet, so several first revisions may wait side by side; their numbers never collide
-    listed = (await client.get(f"{BASE}/projects/{pid}/revisions", headers=tok)).json()
+    listed = (await client.get(f"{BASE}/projects/{pid}/revisions", headers=tok)).json()["items"]
     assert sorted(r["number"] for r in listed) == list(range(1, len(listed) + 1)) and len(listed) == sum(
         r.status_code == 201 for r in res
     )
@@ -533,7 +533,7 @@ async def test_the_same_package_uploaded_concurrently(client):
     data, _ = package(pid, example_rows())
     res = await asyncio.gather(*[_upload(client, pid, tok, data) for _ in range(3)])
     assert sorted(r.status_code for r in res).count(201) == 1
-    assert len((await client.get(f"{BASE}/projects/{pid}/revisions", headers=tok)).json()) == 1
+    assert len((await client.get(f"{BASE}/projects/{pid}/revisions", headers=tok)).json()["items"]) == 1
 
 
 # ── the live responses obey the schemas ─────────────────────────────────────
@@ -568,5 +568,5 @@ async def test_live_responses_validate_against_the_contract(client):
     rev2 = await _upload(client, pid, tok, data2)
     imp2 = await client.get(f"{BASE}/revisions/{rev2.json()['revision_id']}/impact", headers=h)
     assert imp2.status_code == 200 and _valid("impact.schema.json", imp2.json()) == [], imp2.text
-    listed = (await client.get(f"{BASE}/projects/{pid}/revisions", headers=tok)).json()
+    listed = (await client.get(f"{BASE}/projects/{pid}/revisions", headers=tok)).json()["items"]
     assert all(_valid("revision-view.schema.json", r) == [] for r in listed)

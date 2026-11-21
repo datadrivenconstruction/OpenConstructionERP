@@ -105,6 +105,13 @@ class RevisionView(BaseModel):
         )
 
 
+class RevisionListResponse(BaseModel):
+    items: list[RevisionView]
+    total: int
+    offset: int = 0
+    limit: int = 50
+
+
 class AcceptRequest(BaseModel):
     comment: str | None = Field(default=None, max_length=2000)
     # Project setting "ask": the person's answer to "also create a draft change order?" (R9).

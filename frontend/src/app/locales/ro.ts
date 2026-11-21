@@ -58424,6 +58424,7 @@ const resource = {
     "modules.catalog.project_tax": "Profilul fiscal al proiectului",
     "modules.catalog.central_purchasing": "Achiziții centralizate",
     "modules.catalog.dataflow": "Căile datelor",
+    "modules.catalog.design": "Design",
     "modules.pp_desc_eleven_areas_framework": "Managementul proiectului din partea beneficiarului în unsprezece arii de management, în două faze, dezvoltarea proiectului și execuția lucrărilor, cu o poartă între ele și un document-cadru aprobat pentru fiecare arie.",
     "modules.pp_name_pakistan_pk": "Pachet de construcții Pakistan",
     "modules.pp_name_peru_pe": "Pachet construcții Peru",

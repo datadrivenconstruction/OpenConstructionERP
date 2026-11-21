@@ -60547,6 +60547,7 @@ const resource = {
     "modules.catalog.project_tax": "Steuerprofil des Projekts",
     "modules.catalog.central_purchasing": "Zentraleinkauf",
     "modules.catalog.dataflow": "Datenwege",
+    "modules.catalog.design": "Planung",
     "modules.pp_name_pakistan_pk": "Pakistan-Baupaket",
     "modules.pp_name_peru_pe": "Peru-Baupaket",
     "modules.pp_name_hongkong_hk": "Hongkong-Baupaket",

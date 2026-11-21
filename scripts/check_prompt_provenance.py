@@ -218,6 +218,15 @@ AFFECTIVE_TERMS: tuple[str, ...] = (
 #: that is not here fails, which is the point.
 CLEARED_BY_READING: dict[tuple[str, str, str], str] = {
     (
+        "backend/app/modules/design/brief_api.py",
+        "complete",
+        "system",
+    ): (
+        "The closure's only caller is read_with_model in design/brief_model.py, which passes "
+        "system_prompt(): a fixed text built from the module's own FIELDS specs and option lists. "
+        "Document text travels in the prompt argument, never in system."
+    ),
+    (
         "backend/app/modules/doc_assistant/service.py",
         "_call",
         "system",

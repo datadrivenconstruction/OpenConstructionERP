@@ -61011,6 +61011,7 @@ const resource = {
     "modules.catalog.project_tax": "Perfil fiscal del proyecto",
     "modules.catalog.central_purchasing": "Compras centralizadas",
     "modules.catalog.dataflow": "Rutas de datos",
+    "modules.catalog.design": "Diseño",
     "modules.pp_desc_eleven_areas_framework": "Gestión del proyecto por parte de la propiedad en once áreas de gestión, en dos fases, desarrollo del proyecto y ejecución de la obra, con una puerta de control entre ambas y un documento marco aprobado por área.",
     "modules.pp_name_pakistan_pk": "Paquete de Construcción de Pakistán",
     "modules.pp_name_peru_pe": "Paquete de construcción Perú",

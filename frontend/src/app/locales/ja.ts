@@ -59388,6 +59388,7 @@ const resource = {
     "modules.catalog.project_tax": "プロジェクト税務プロファイル",
     "modules.catalog.central_purchasing": "集中購買",
     "modules.catalog.dataflow": "データの流れ",
+    "modules.catalog.design": "デザイン",
     "modules.pp_desc_eleven_areas_framework": "発注者側によるプロジェクトマネジメントを、事業開発と施工実行の2つのフェーズにまたがる11の管理領域で行います。フェーズの間には1つのゲートを置き、各領域で承認済みの枠組み文書を1つずつ持ちます。",
     "modules.pp_name_pakistan_pk": "パキスタン建設パック",
     "modules.pp_name_peru_pe": "ペルー建設パック",

@@ -231,7 +231,7 @@ async def test_brief_proposal_is_pending_until_a_person_applies(client, app_inst
     for item in rest:
         entry = brief["provenance"][item["pointer"]]
         assert entry["status"] == "confirmed" and entry["confirmed_by"] == str(uid), item["pointer"]
-    versions = (await client.get(f"{BASE}/projects/{pid}/brief/versions", headers=h)).json()
+    versions = (await client.get(f"{BASE}/projects/{pid}/brief/versions", headers=h)).json()["items"]
     assert [v["action"] for v in versions] == ["confirm", "save", "confirm", "save"]
     read = await _call(client, token, "design_get_brief", project_id=str(pid))
     assert read["structuredContent"]["version"] == 4
@@ -285,10 +285,10 @@ async def test_estimate_rules_proposal_needs_a_manager(client, app_instance):
         rationale="German project.",
     )
     assert not res["isError"], res
-    assert (await client.get(f"{BASE}/projects/{pid}/estimate/rules", headers=h_owner)).json() == []
+    assert (await client.get(f"{BASE}/projects/{pid}/estimate/rules", headers=h_owner)).json()["items"] == []
     r = await client.post(_apply_path(app_instance, res["structuredContent"]["action_id"]), headers=h_owner)
     assert r.status_code == 200 and r.json()["status"] == "applied", r.text
-    assert len((await client.get(f"{BASE}/projects/{pid}/estimate/rules", headers=h_owner)).json()) > 0
+    assert len((await client.get(f"{BASE}/projects/{pid}/estimate/rules", headers=h_owner)).json()["items"]) > 0
 
 
 async def test_ai_key_never_in_responses_or_logs(client, caplog):

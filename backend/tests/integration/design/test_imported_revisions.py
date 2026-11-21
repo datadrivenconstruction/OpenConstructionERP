@@ -117,7 +117,7 @@ async def test_imported_model_becomes_a_revision_rules_accept_and_chain(client):
     mid = await _converter_model(pid)
     bare = await _converter_model(pid, name="Leer.ifc", geometry=False)
 
-    listed = (await client.get(f"{BASE}/projects/{pid}/imported-models", headers=h)).json()
+    listed = (await client.get(f"{BASE}/projects/{pid}/imported-models", headers=h)).json()["items"]
     assert [m["bim_model_id"] for m in listed] == [str(mid), str(bare)], "the editor's own model is no candidate"
     body = {"bim_model_id": str(mid)}
     # nothing joins the chain while the editor holds the lock; never through a link token
@@ -143,7 +143,8 @@ async def test_imported_model_becomes_a_revision_rules_accept_and_chain(client):
     again = await client.post(f"{BASE}/projects/{pid}/revisions/import", json=body, headers=h)
     assert again.status_code == 409
     assert [
-        m["bim_model_id"] for m in (await client.get(f"{BASE}/projects/{pid}/imported-models", headers=h)).json()
+        m["bim_model_id"]
+        for m in (await client.get(f"{BASE}/projects/{pid}/imported-models", headers=h)).json()["items"]
     ] == [str(bare)]
     assert (await client.get(f"{BASE}/revisions/{rid}/files/model.ddc", headers=h)).status_code == 404
 
@@ -208,7 +209,7 @@ async def test_migration_wraps_existing_models_and_down_restores_them(client):
 
     up = await mig.upgrade(async_session_factory, pid)
     assert [w["bim_model_id"] for w in up["wrapped"]] == [str(first), str(second)] and up["skipped"] == []
-    revs = (await client.get(f"{BASE}/projects/{pid}/revisions", headers=h)).json()
+    revs = (await client.get(f"{BASE}/projects/{pid}/revisions", headers=h)).json()["items"]
     assert [(r["number"], r["source_kind"]) for r in revs] == [(2, "imported"), (1, "imported")]
     assert revs[0]["parent_revision_id"] == revs[1]["revision_id"]
     assert all(_valid("revision-view.schema.json", r) == [] for r in revs)
@@ -216,12 +217,12 @@ async def test_migration_wraps_existing_models_and_down_restores_them(client):
 
     down = await mig.downgrade(async_session_factory, pid)
     assert len(down["unwrapped"]) == 2 and down["kept"] == []
-    assert (await client.get(f"{BASE}/projects/{pid}/revisions", headers=h)).json() == []
+    assert (await client.get(f"{BASE}/projects/{pid}/revisions", headers=h)).json()["items"] == []
     assert {m: await _model(m) for m in (first, second)} == before, "parent, metadata and elements as before"
 
     # a decision is a person's act: down keeps an accepted wrapper and what it builds on
     await mig.upgrade(async_session_factory, pid)
-    revs = (await client.get(f"{BASE}/projects/{pid}/revisions", headers=h)).json()
+    revs = (await client.get(f"{BASE}/projects/{pid}/revisions", headers=h)).json()["items"]
     oldest = revs[-1]["revision_id"]
     assert (await client.post(f"{BASE}/revisions/{oldest}/accept", headers=h)).status_code == 200
     down = await mig.downgrade(async_session_factory, pid)

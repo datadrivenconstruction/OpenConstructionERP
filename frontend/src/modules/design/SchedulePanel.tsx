@@ -12,6 +12,7 @@ import { getErrorMessage } from '@/shared/lib/api';
 import { fetchScheduleImpact, setupSchedule } from './scheduleApi';
 import { changedRows, day, signedDays, type ScheduleRow } from './data/schedule';
 import { tr } from './BriefFields';
+import { fmtList } from '@/shared/lib/formatters';
 
 export function SchedulePanel({ projectId, revisionId, canManage, locale }: {
   projectId: string; revisionId: string; canManage: boolean; locale: string;
@@ -71,7 +72,7 @@ export function SchedulePanel({ projectId, revisionId, canManage, locale }: {
       </dl>
       {missing.length > 0 && (
         <p role="note" data-testid="schedule-missing" className="mx-4 mb-3 rounded border border-semantic-warning px-3 py-2 text-sm">
-          {tr(t, 'design.schedule.missing_n', { count: missing.length, list: missing.map((m) => m.label).join(', ') })}
+          {tr(t, 'design.schedule.missing_n', { count: missing.length, list: fmtList(missing.map((m) => m.label)) })}
         </p>
       )}
       {totals.overrides_kept > 0 && (

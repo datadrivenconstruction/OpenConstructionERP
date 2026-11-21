@@ -59623,6 +59623,7 @@ const resource = {
     "modules.catalog.project_tax": "Profil podatkowy projektu",
     "modules.catalog.central_purchasing": "Zakupy centralne",
     "modules.catalog.dataflow": "Ścieżki danych",
+    "modules.catalog.design": "Projektowanie",
     "modules.pp_desc_eleven_areas_framework": "Zarządzanie projektem po stronie inwestora w jedenastu obszarach zarządzania, w dwóch fazach, rozwoju projektu i realizacji budowy, z jedną bramką między nimi i jednym zatwierdzonym dokumentem ramowym dla każdego obszaru.",
     "modules.pp_name_pakistan_pk": "Pakiet budowlany Pakistan",
     "modules.pp_name_peru_pe": "Pakiet budowlany Peru",

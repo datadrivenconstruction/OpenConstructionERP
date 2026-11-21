@@ -22,9 +22,10 @@ def register(router: APIRouter) -> None:
         locale: str = Query(default="en", max_length=12),
     ) -> dict[str, Any]:
         from app.core.validation.engine import validation_engine
+        from app.core.validation.project_context import with_project_context
 
         await require_project(principal, project_id, session)
-        data = await validation_data(session, project_id)
+        data = await with_project_context(session, project_id, await validation_data(session, project_id))
         report = await validation_engine.validate(
             data=data,
             rule_sets=[DESIGN_RULE_SET],

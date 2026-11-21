@@ -197,6 +197,6 @@ describe('acceptance QA', () => {
     await mount('de');
     const r = await screen.findByTestId('row-a');
     expect(r.textContent).not.toMatch(/28\.4000/);
-    expect(r.textContent).not.toMatch(/ m2/);
+    expect(r.textContent).not.toMatch(/ m2\b/);
   });
 });

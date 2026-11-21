@@ -268,7 +268,7 @@ async def test_happy_path_two_revisions_secrets_hidden(client, fake):
     assert j["status"] == "done" and j["progress"] == 1 and j["error"] is None and j["revision_id"], j
     text = "\n".join(j["log_tail"])
     assert SECRET not in text and "abc.def" not in text and "<hidden>" in text and "built 12 elements" in text
-    revs = (await client.get(f"{BASE}/projects/{pid}/revisions", headers=h)).json()
+    revs = (await client.get(f"{BASE}/projects/{pid}/revisions", headers=h)).json()["items"]
     assert [(x["status"], x["revision_id"]) for x in revs] == [("shared", j["revision_id"])]
     assert await _lock_holder(client, h, pid) is None  # lock freed
     gen, pub = fake.procs[0].argv, fake.procs[1].argv
@@ -298,7 +298,7 @@ async def test_failed_command_reports_and_frees_the_project(client, fake):
     j = await _job(client, h, job_id)
     assert j["status"] == "failed" and "exit code 2" in j["error"] and "not confirmed" in j["error"]
     assert len(fake.procs) == 1  # publish never ran
-    assert (await client.get(f"{BASE}/projects/{pid}/revisions", headers=h)).json() == []
+    assert (await client.get(f"{BASE}/projects/{pid}/revisions", headers=h)).json()["items"] == []
     assert await _lock_holder(client, h, pid) is None
     fake.scripts = {}
     again = await _start(client, h, pid, version)
@@ -346,7 +346,7 @@ async def test_cancel_running_stops_the_process(client, fake):
     j = await _job(client, h, job_id)
     assert j["status"] == "cancelled" and "revision_id" not in j
     assert fake.procs[0].terminated and len(fake.procs) == 1
-    assert (await client.get(f"{BASE}/projects/{pid}/revisions", headers=h)).json() == []
+    assert (await client.get(f"{BASE}/projects/{pid}/revisions", headers=h)).json()["items"] == []
     assert await _lock_holder(client, h, pid) is None
 
 
@@ -558,7 +558,7 @@ async def test_real_ddc_generates_a_revision_and_a_second_one_on_top(client, mon
             await client.post(f"{BASE}/jobs/{job_id}/cancel", headers=h)
         assert j["status"] == "done", j
         ids.append(j["revision_id"])
-    revs = (await client.get(f"{BASE}/projects/{pid}/revisions", headers=h)).json()
+    revs = (await client.get(f"{BASE}/projects/{pid}/revisions", headers=h)).json()["items"]
     assert {x["revision_id"] for x in revs} == set(ids)
     second = next(x for x in revs if x["revision_id"] == ids[1])
     assert second["parent_revision_id"] == ids[0] and second["source_kind"] == "generated"
@@ -604,5 +604,8 @@ async def test_job_on_an_imported_tip_builds_on_the_last_design(client, fake):
     assert "--parent" not in fake.procs[-1].argv
     assert r4["parent_revision_id"] is None and r4["number"] == 4
     assert await accept(r4["revision_id"]) == 200
-    revs = {x["number"]: x["status"] for x in (await client.get(f"{BASE}/projects/{pid}/revisions", headers=h)).json()}
+    revs = {
+        x["number"]: x["status"]
+        for x in (await client.get(f"{BASE}/projects/{pid}/revisions", headers=h)).json()["items"]
+    }
     assert revs == {1: "archived", 2: "archived", 3: "shared", 4: "published"}

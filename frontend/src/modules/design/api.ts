@@ -50,7 +50,7 @@ export interface ImportedModel {
 
 /** Converter-imported models of the project that are not revisions yet, oldest first. */
 export function fetchImportedModels(projectId: string): Promise<ImportedModel[]> {
-  return apiGet<ImportedModel[]>(`/v1/design/projects/${projectId}/imported-models`);
+  return apiGet<{ items: ImportedModel[] }>(`/v1/design/projects/${projectId}/imported-models?limit=500`).then((r) => r.items);
 }
 
 /** Wraps an imported model as a revision awaiting acceptance; 409 while the project is being edited. */
@@ -62,7 +62,7 @@ export function importModel(projectId: string, bimModelId: string): Promise<Revi
 
 /** Revisions of a project, newest first. */
 export function fetchRevisions(projectId: string): Promise<RevisionView[]> {
-  return apiGet<RevisionView[]>(`/v1/design/projects/${projectId}/revisions`);
+  return apiGet<{ items: RevisionView[] }>(`/v1/design/projects/${projectId}/revisions?limit=500`).then((r) => r.items);
 }
 
 export interface ProjectAccess {
@@ -130,7 +130,7 @@ export function fetchEstimate(projectId: string): Promise<EstimateView> {
 }
 
 export function fetchEstimateRules(projectId: string): Promise<EstimateRule[]> {
-  return apiGet<EstimateRule[]>(`/v1/design/projects/${projectId}/estimate/rules`);
+  return apiGet<{ items: EstimateRule[] }>(`/v1/design/projects/${projectId}/estimate/rules?limit=500`).then((r) => r.items);
 }
 
 export function installStarterRules(projectId: string, country: string): Promise<{ rules: number; country: string }> {

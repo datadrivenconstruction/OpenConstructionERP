@@ -465,7 +465,8 @@ async def read_feed(settings: DesignSettings | None = None, *, fresh: bool = Fal
     except ReleaseError as exc:
         _feed_cache.__dict__.update(at=now, url=url, feed=None, error=exc)
         raise
-    except httpx.HTTPError as exc:
+    # A blocked or offline host (sandbox, air-gapped server) is the same answer as a failed request.
+    except (httpx.HTTPError, OSError, RuntimeError) as exc:
         err = ReleaseError("feed_unreachable", f"{type(exc).__name__}: {exc}")
         _feed_cache.__dict__.update(at=now, url=url, feed=None, error=err)
         raise err from exc

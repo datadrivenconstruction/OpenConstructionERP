@@ -600,7 +600,7 @@ export interface AccountContact {
 }
 
 export function listAccountContacts(accountId: string): Promise<AccountContact[]> {
-  return apiGet<AccountContact[]>(`/v1/crm/accounts/${accountId}/contacts`);
+  return apiGet<{ items: AccountContact[] }>(`/v1/crm/accounts/${accountId}/contacts?limit=500`).then((r) => r.items);
 }
 
 export function linkAccountContact(

@@ -61102,6 +61102,7 @@ const resource = {
     "modules.catalog.project_tax": "Налоговый профиль проекта",
     "modules.catalog.central_purchasing": "Централизованные закупки",
     "modules.catalog.dataflow": "Пути данных",
+    "modules.catalog.design": "Проектирование",
     "modules.pp_desc_eleven_areas_framework": "Управление проектом со стороны заказчика в одиннадцати областях управления в два этапа: развитие проекта и строительное исполнение. Между ними один гейт, а на каждую область один утверждённый рамочный документ.",
     "modules.pp_name_pakistan_pk": "Строительный пакет: Пакистан",
     "modules.pp_name_peru_pe": "Строительный пакет: Перу",

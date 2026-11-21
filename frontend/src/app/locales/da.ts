@@ -58100,6 +58100,7 @@ const resource = {
     "modules.catalog.project_tax": "Projektets skatteprofil",
     "modules.catalog.central_purchasing": "Centralt indkøb",
     "modules.catalog.dataflow": "Dataveje",
+    "modules.catalog.design": "Design",
     "modules.pp_desc_eleven_areas_framework": "Bygherrens projektstyring i elleve styringsområder over to faser, projektudvikling og udførelse, med én gate imellem og ét godkendt rammedokument pr. område.",
     "modules.pp_name_pakistan_pk": "Byggepakke Pakistan",
     "modules.pp_name_peru_pe": "Byggepakke Peru",

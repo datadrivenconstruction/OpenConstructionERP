@@ -26,6 +26,7 @@ import type { OverviewStep } from './linksApi';
 import { PlotEditor } from './PlotEditor';
 import { ProposalSummary, type SummaryOutcome } from './ProposalSummary';
 import { tr } from './BriefFields';
+import { fmtList } from '@/shared/lib/formatters';
 import {
   ACCEPT, acceptable, extractFromFiles, fetchTemplates, MAX_FILES, uploadSource, type StartTemplate,
 } from './startApi';
@@ -108,7 +109,7 @@ function UploadWay({ projectId, brief, aiReady, propose }: Ctx) {
     setError(null);
     const picked = [...list];
     const bad = picked.filter((f) => !acceptable(f.name));
-    if (bad.length) setError(tr(t, 'design.start.upload.wrong_type', { names: bad.map((f) => f.name).join(', ') }));
+    if (bad.length) setError(tr(t, 'design.start.upload.wrong_type', { names: fmtList(bad.map((f) => f.name)) }));
     const room = MAX_FILES - files.length;
     const ok = picked.filter((f) => acceptable(f.name)).slice(0, Math.max(0, room));
     if (picked.filter((f) => acceptable(f.name)).length > ok.length) setError(tr(t, 'design.start.upload.too_many', { count: MAX_FILES }));

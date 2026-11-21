@@ -17,6 +17,7 @@ import {
   type Provenance,
 } from './data/briefModel';
 import type { SchemaError } from './data/schemaCheck';
+import { fmtList } from '@/shared/lib/formatters';
 
 type T = ReturnType<typeof useTranslation>['t'];
 
@@ -67,7 +68,7 @@ function provenanceTitle(t: T, entry: Provenance | undefined): string {
     const parts = [tr(t, `design.source.${s.kind}`)];
     if (s.page) parts.push(tr(t, 'design.source.page', { page: s.page }));
     if (s.quote) parts.push(`“${s.quote}”`);
-    lines.push(parts.join(', '));
+    lines.push(fmtList(parts));
   }
   if (entry.note) lines.push(entry.note);
   return lines.join('\n');

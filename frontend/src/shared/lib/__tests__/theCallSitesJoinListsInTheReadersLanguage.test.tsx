@@ -186,6 +186,10 @@ describe('auditRowTooltip', () => {
 type Excluded = { file: string; sites: number; why: string };
 
 const KEPT_AS_PLAIN_COMMAS: readonly Excluded[] = [
+  // Design: a list value shown in a text input and parsed back on save, and enum choices in contract errors.
+  { file: 'modules/design/data/briefModel.ts', sites: 1, why: 'round-trip form field' },
+  { file: 'modules/design/bridge/protocol.ts', sites: 1, why: 'bridge contract error parameter' },
+  { file: 'modules/design/data/schemaCheck.ts', sites: 1, why: 'schema error parameter' },
   // Joined to seed a text input, split back apart when the form is saved.
   { file: 'features/correspondence/CorrespondencePage.tsx', sites: 2, why: 'round-trip form field' },
   { file: 'features/forms/TemplateBuilder.tsx', sites: 4, why: 'round-trip form field' },
@@ -262,7 +266,7 @@ describe('the rest of the product', () => {
     // root, or a regex that quietly stopped matching, returns an empty map and
     // every assertion after this one passes while checking nothing at all.
     expect(files.length).toBeGreaterThan(2000);
-    expect([...found.values()].reduce((a, b) => a + b, 0)).toBe(39);
+    expect([...found.values()].reduce((a, b) => a + b, 0)).toBe(42);
   });
 
   it('routes every list a reader sees through the helper, except the recorded ones', () => {

@@ -58066,6 +58066,7 @@ const resource = {
     "modules.catalog.project_tax": "منصوبے کا ٹیکس پروفائل",
     "modules.catalog.central_purchasing": "مرکزی خریداری",
     "modules.catalog.dataflow": "ڈیٹا کے راستے",
+    "modules.catalog.design": "ڈیزائن",
     "modules.pp_desc_eleven_areas_framework": "مالک کی جانب سے گیارہ انتظامی شعبوں میں پروجیکٹ مینجمنٹ، دو مراحل میں: پروجیکٹ کی ترقی اور تعمیراتی عمل درآمد، ان کے درمیان ایک گیٹ اور ہر شعبے کے لیے ایک منظور شدہ فریم ورک دستاویز۔",
     "modules.pp_name_pakistan_pk": "پاکستان تعمیراتی پیکج",
     "modules.pp_name_peru_pe": "پیرو تعمیراتی پیکیج",

@@ -559,6 +559,15 @@ class AccountContactResponse(BaseModel):
     phone: str | None = None
 
 
+class AccountContactListResponse(BaseModel):
+    """One page of the contacts linked to an account."""
+
+    items: list[AccountContactResponse]
+    total: int
+    offset: int = 0
+    limit: int = 50
+
+
 # ── Reports ───────────────────────────────────────────────────────────────
 
 
