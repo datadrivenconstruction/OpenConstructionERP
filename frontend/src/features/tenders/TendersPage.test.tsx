@@ -57,11 +57,16 @@ describe('TendersPage', () => {
   });
 
   it('lists native packages and copies of old tenders and RFQs together', async () => {
-    mockGet.mockResolvedValue([
-      row({ code: 'BP-001' }),
-      row({ code: 'TND-0001', source: 'tendering', status: 'awarded', awarded_bidder: 'Nord' }),
-      row({ code: 'RFQ-7', source: 'rfq_bidding', kind: 'supply', bid_count: 1 }),
-    ]);
+    mockGet.mockResolvedValue({
+      items: [
+        row({ code: 'BP-001' }),
+        row({ code: 'TND-0001', source: 'tendering', status: 'awarded', awarded_bidder: 'Nord' }),
+        row({ code: 'RFQ-7', source: 'rfq_bidding', kind: 'supply', bid_count: 1 }),
+      ],
+      total: 3,
+      offset: 0,
+      limit: 50,
+    });
     renderPage();
     expect(await screen.findByText('TND-0001')).toBeInTheDocument();
     const rfq = screen.getByText('RFQ-7').closest('a');
@@ -71,7 +76,7 @@ describe('TendersPage', () => {
   });
 
   it('asks the server for one kind when a kind tab is chosen', async () => {
-    mockGet.mockResolvedValue([]);
+    mockGet.mockResolvedValue({ items: [], total: 0, offset: 0, limit: 50 });
     renderPage();
     await screen.findByText('No tenders in this project yet.');
     await userEvent.click(screen.getByRole('tab', { name: 'Supply' }));

@@ -8,6 +8,7 @@
  */
 
 import { apiGet } from '@/shared/lib/api';
+import { fetchAllPages } from '@/shared/lib/apiHelpers';
 
 export type TenderKind = 'subcontract' | 'supply';
 export type TenderSource = 'native' | 'tendering' | 'rfq_bidding';
@@ -42,7 +43,12 @@ export function fetchTenders(projectId: string, filters: TenderFilters = {}): Pr
   const params = new URLSearchParams({ project_id: projectId });
   if (filters.kind) params.set('kind', filters.kind);
   if (filters.source) params.set('source', filters.source);
-  return apiGet<{ items: TenderSummary[] }>(`/v1/bid-management/tenders/?${params.toString()}`).then((page) => page.items);
+  return fetchAllPages<TenderSummary>((offset, limit) => {
+    const page = new URLSearchParams(params);
+    page.set('offset', String(offset));
+    page.set('limit', String(limit));
+    return apiGet<{ items: TenderSummary[] }>(`/v1/bid-management/tenders/?${page.toString()}`);
+  }).then((result) => result.items);
 }
 
 export interface TenderLine {
