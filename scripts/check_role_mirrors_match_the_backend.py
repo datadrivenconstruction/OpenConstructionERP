@@ -348,12 +348,16 @@ def _register_for(permission: str) -> None:
     if prefix in {"audit", "system"}:
         core_permissions.register_core_permissions()
         return
+    quoted = f'"{permission}"'
+    own = BACKEND / "app" / "modules" / prefix / "permissions.py"
     try:
+        if own.is_file() and quoted not in own.read_text(encoding="utf-8"):
+            # Two packages can share a prefix: `design.manage` belongs to `design_management`.
+            raise ImportError(f"{own.parent.name} does not declare {permission!r}")
         module = importlib.import_module(f"app.modules.{prefix}.permissions")
     except ImportError as exc:
         # The prefix is not always the package: `bim.*` is registered by
         # `bim_hub`. Fall back to the one module that declares the name.
-        quoted = f'"{permission}"'
         owners = sorted(
             p.parent.name
             for p in (BACKEND / "app" / "modules").glob("*/permissions.py")

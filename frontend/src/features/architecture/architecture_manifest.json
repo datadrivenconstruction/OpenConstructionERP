@@ -11838,6 +11838,7 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "intl.py",
         "manifest.py",
         "models.py",
@@ -28322,6 +28323,7 @@
       "files": [
         "__init__.py",
         "classifier.py",
+        "data_paths.py",
         "exporters/__init__.py",
         "exporters/excel_exporter.py",
         "exporters/ids_exporter.py",
@@ -60601,6 +60603,7 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "manifest.py",
         "messages/__init__.py",
         "models.py",
@@ -90058,6 +90061,7 @@
       "module_category": "business",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "events.py",
         "linear.py",
         "manifest.py",
@@ -124636,6 +124640,7 @@
       "module_category": "enterprise",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "entities.py",
         "intl.py",
         "manifest.py",
@@ -129906,6 +129911,7 @@
       "files": [
         "__init__.py",
         "catalogue.py",
+        "data_paths.py",
         "guard.py",
         "manifest.py",
         "models.py",
@@ -138721,6 +138727,7 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "manifest.py",
         "models.py",
         "permissions.py",
@@ -140358,6 +140365,7 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "manifest.py",
         "models.py",
         "permissions.py",
@@ -140520,6 +140528,7 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "events.py",
         "manifest.py",
         "models.py",
@@ -141069,6 +141078,7 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "manifest.py",
         "models.py",
         "permissions.py",
@@ -142097,6 +142107,7 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "manifest.py",
         "models.py",
         "permissions.py",
@@ -142691,6 +142702,7 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "jobs.py",
         "manifest.py",
         "models.py",
@@ -147066,6 +147078,7 @@
       "files": [
         "__init__.py",
         "conditional.py",
+        "data_paths.py",
         "formula.py",
         "manifest.py",
         "models.py",
@@ -152857,6 +152870,7 @@
       "module_category": "business",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "manifest.py",
         "messages/__init__.py",
         "models.py",
@@ -164003,6 +164017,7 @@
       "module_category": "business",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "events.py",
         "manifest.py",
         "models.py",
@@ -169251,6 +169266,7 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "ecb_fetcher.py",
         "manifest.py",
         "models.py",
@@ -171634,6 +171650,7 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "discord.py",
         "email_service.py",
         "event_catalogue.py",
@@ -172439,6 +172456,7 @@
       "module_category": "business",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "events.py",
         "manifest.py",
         "models.py",
@@ -179676,6 +179694,7 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "manifest.py",
         "models.py",
         "permissions.py",
@@ -214911,6 +214930,7 @@
       "files": [
         "__init__.py",
         "costing.py",
+        "data_paths.py",
         "events.py",
         "guard.py",
         "manifest.py",
@@ -229324,6 +229344,7 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "intl.py",
         "manifest.py",
         "models.py",
@@ -255160,6 +255181,7 @@
         "bbs.py",
         "bbs_service.py",
         "bbs_validators.py",
+        "data_paths.py",
         "events.py",
         "manifest.py",
         "models.py",
@@ -270119,6 +270141,7 @@
       "files": [
         "__init__.py",
         "_dateutil.py",
+        "data_paths.py",
         "events.py",
         "intl.py",
         "manifest.py",
@@ -293808,6 +293831,7 @@
       "module_category": "business",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "manifest.py",
         "models.py",
         "permissions.py",
@@ -296514,6 +296538,7 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "intl.py",
         "manifest.py",
         "models.py",
@@ -297644,6 +297669,7 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "intl.py",
         "manifest.py",
         "models.py",
@@ -321751,6 +321777,7 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "events.py",
         "manifest.py",
         "models.py",
@@ -322472,6 +322499,7 @@
       "files": [
         "__init__.py",
         "data.py",
+        "data_paths.py",
         "manifest.py",
         "models.py",
         "permissions.py",
@@ -326158,6 +326186,7 @@
       "module_category": "business",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "manifest.py",
         "models.py",
         "permissions.py",
@@ -341160,6 +341189,7 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "manifest.py",
         "models.py",
         "permissions.py",
@@ -347228,7 +347258,7 @@
     "total_relationships": 264,
     "total_routes": 5590,
     "total_schemas": 5217,
-    "total_python_files": 3805,
+    "total_python_files": 3835,
     "frontend_features": 254,
     "frontend_ts_files": 4568,
     "frontend_backend_mapped": 224
