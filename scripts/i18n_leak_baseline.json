@@ -2210,6 +2210,38 @@
       "uz"
     ]
   },
+  "haul.sum_volume": {
+    "en_value": "m³",
+    "leaked_locales": [
+      "cs",
+      "da",
+      "de",
+      "el",
+      "es",
+      "et",
+      "fi",
+      "fil",
+      "fr",
+      "hr",
+      "hu",
+      "id",
+      "it",
+      "ja",
+      "ko",
+      "nl",
+      "no",
+      "pl",
+      "pt",
+      "ro",
+      "sv",
+      "tr",
+      "ur",
+      "uz",
+      "vi",
+      "zh",
+      "zh-HK"
+    ]
+  },
   "hse.advanced.subtab_capa": {
     "en_value": "CAPAs",
     "leaked_locales": [
