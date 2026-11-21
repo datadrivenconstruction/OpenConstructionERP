@@ -179,3 +179,16 @@ def test_the_riverside_library_knows_every_code_its_demo_points_use() -> None:
     assert {"PIT", "BASE"} <= {c.upper() for c in codes}
     assert ref.unknown_codes(codes, library) == {}
     assert all(entry["label"] for entry in library)
+
+
+def test_chile_has_plan_conventions_and_a_spanish_code_library() -> None:
+    conv, source = ref.country_conventions("CL")
+    assert source == "country"
+    assert (conv["axis"], conv["directionFormat"], conv["linearUnit"]) == ("EN", "azimuth", "m")
+    codes = ref.country_codes("CL")
+    assert codes and ref.duplicate_codes(codes) == []
+    assert {c["code"]: c["label"] for c in codes}["KB"] == "Solera"
+    assert "CL" in ref.library_countries()
+    # The grids are the ones survey_reference already offers: SIRGAS-Chile 2016 / UTM 18S and 19S.
+    epsg = {h["epsg"] for h in ref._reference()["CL"]["horizontal"] if h["role"] == "primary"}
+    assert epsg == {9154, 9155}
