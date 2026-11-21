@@ -132,7 +132,8 @@ class _LegacyTenderRoute(APIRoute):
                 if found:
                     request.scope["path_params"] = {k: found.get(str(v), v) for k, v in params.items()}
             response = await original(request)
-            if deprecated:
+            # Judged on the path that was asked for too: a staged copy can carry a stale route path.
+            if deprecated and "/bid-portal/" not in request.url.path and not is_canonical_path(request.url.path):
                 for name, value in deprecation_headers(request.url.path).items():
                     response.headers.setdefault(name, value)
             return response
