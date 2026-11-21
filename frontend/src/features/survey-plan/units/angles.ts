@@ -75,7 +75,7 @@ export function formatAngle(deg: number | null | undefined, unit: AngleUnit, dec
   units -= d * 3600 * scale;
   const m = Math.floor(units / (60 * scale));
   const s = (units - m * 60 * scale) / scale;
-  const sText = decimals ? s.toFixed(decimals).padStart(3 + decimals, '0') : String(s).padStart(2, '0');
+  const sText = decimals ? fmtFixed(s, decimals).padStart(3 + decimals, '0') : String(s).padStart(2, '0');
   return `${sign}${d}°${String(m).padStart(2, '0')}'${sText}"`;
 }
 
