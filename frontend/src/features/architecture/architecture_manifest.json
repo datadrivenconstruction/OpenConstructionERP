@@ -342684,10 +342684,10 @@
     },
     {
       "name": "haul-tickets",
-      "ts_files": 5,
+      "ts_files": 6,
       "css_files": 0,
-      "test_files": 1,
-      "total_files": 5
+      "test_files": 2,
+      "total_files": 6
     },
     {
       "name": "help",
@@ -345682,7 +345682,7 @@
     "total_schemas": 5202,
     "total_python_files": 3746,
     "frontend_features": 254,
-    "frontend_ts_files": 4559,
+    "frontend_ts_files": 4560,
     "frontend_backend_mapped": 224
   },
   "frontend_backend_mapping": {

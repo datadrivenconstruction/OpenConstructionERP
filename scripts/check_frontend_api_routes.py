@@ -114,7 +114,9 @@ NAVIGATION_CALLEES = frozenset({"href", "src", "window.open", "EventSource"})
 # volumes, setting-out, land-parcels, monitoring, stockpiles, mine-survey); every call built on them is checked in full.
 # 249: the bidder-link logo address (bid-portal/api.ts) is a URL builder that returns a string for an <img src>;
 # there is no call to hand it to, and the route it names exists.
-MAX_PREFIX_ONLY = 249
+# 260: survey plan, scan to design and volume calls that end in a query-string helper (q(locale), an optional
+# survey or period id), plus the base consts of survey-plan/api.ts and screens/api.ts; every route they reach exists.
+MAX_PREFIX_ONLY = 260
 
 # Known unmatched calls that are right as they are. Key format:
 #   "<VERDICT> <METHOD|*> <path as written> @ <file under frontend/src>"
