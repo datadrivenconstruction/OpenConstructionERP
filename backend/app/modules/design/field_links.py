@@ -110,11 +110,11 @@ async def set_links(
     known = {k for k, _, _ in await links._elements(session, rev.bim_model_id)}
     bad = [k for k in keys if k not in known]
     if bad:
-        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, f"Not elements of the accepted revision: {bad[:5]}")
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, f"Not elements of the accepted revision: {bad[:5]}")
     pos_bad = [str(p) for p in position_ids if p not in g.positions]
     if pos_bad:
         raise HTTPException(
-            status.HTTP_422_UNPROCESSABLE_ENTITY, f"Not design positions of this project: {pos_bad[:5]}"
+            status.HTTP_422_UNPROCESSABLE_CONTENT, f"Not design positions of this project: {pos_bad[:5]}"
         )
     meta = dict(report.metadata_ or {})
     if keys or position_ids:

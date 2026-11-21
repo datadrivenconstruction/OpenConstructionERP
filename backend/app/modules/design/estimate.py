@@ -887,17 +887,17 @@ async def price_position(
     def _same_currency(code: str | None) -> None:
         if code and project_currency and code.strip().upper() != project_currency:
             raise HTTPException(
-                status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status.HTTP_422_UNPROCESSABLE_CONTENT,
                 f"The rate is in {code.strip().upper()}, the project is in {project_currency}",
             )
 
     if cost_item_id is not None:
         item = await cost_scope.get_cost_item(session, cost_item_id)
         if item is None or not item.is_active:
-            raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, "Cost item not found or inactive")
+            raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, "Cost item not found or inactive")
         if item.unit.strip().casefold() != pos.unit.strip().casefold():
             raise HTTPException(
-                status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status.HTTP_422_UNPROCESSABLE_CONTENT,
                 f"Cost item unit '{item.unit}' differs from the position unit '{pos.unit}'",
             )
         _same_currency(item.currency)
@@ -909,18 +909,18 @@ async def price_position(
 
         asm = await session.get(Assembly, assembly_id)
         if asm is None or not asm.is_active:
-            raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, "Assembly not found or inactive")
+            raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, "Assembly not found or inactive")
         if asm.unit.strip().casefold() != pos.unit.strip().casefold():
             raise HTTPException(
-                status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status.HTTP_422_UNPROCESSABLE_CONTENT,
                 f"Assembly unit '{asm.unit}' differs from the position unit '{pos.unit}'",
             )
         if not (asm.currency or "").strip():
-            raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, "The assembly names no currency")
+            raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, "The assembly names no currency")
         _same_currency(asm.currency)
         rate = q4(asm.total_rate)
         if rate <= 0:
-            raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, "The assembly has no rate")
+            raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, "The assembly has no rate")
         prov = {
             "assembly_id": str(asm.id),
             "code": asm.code,
@@ -937,7 +937,8 @@ async def price_position(
     else:
         if unit_rate is None or not source_url or not price_date:
             raise HTTPException(
-                status.HTTP_422_UNPROCESSABLE_ENTITY, "Give a cost_item_id, or unit_rate with source_url and price_date"
+                status.HTTP_422_UNPROCESSABLE_CONTENT,
+                "Give a cost_item_id, or unit_rate with source_url and price_date",
             )
         _same_currency(currency)
         rate, prov = q4(unit_rate), {"source_url": source_url, "price_date": price_date}

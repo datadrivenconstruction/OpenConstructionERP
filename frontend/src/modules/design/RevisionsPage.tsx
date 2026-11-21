@@ -33,6 +33,7 @@ import { useRevisionCompare } from './useRevisionCompare';
 import GenerationPanel from './GenerationPanel';
 import ModelPanel from './ModelPanel';
 import { useProjectFromUrl } from './useProjectFromUrl';
+import { fmtQuantity } from '@/shared/lib/formatters';
 
 export default function RevisionsPage() {
   const { t } = useTranslation();
@@ -215,7 +216,7 @@ function Revisions({ projectId }: { projectId: string }) {
                   <dt>{tr(t, 'design.revisions.el_storey')}</dt><dd>{selected.storey ?? '-'}</dd>
                   <dt>{tr(t, 'design.revisions.el_discipline')}</dt><dd>{selected.discipline}</dd>
                   {Object.entries(selected.quantities ?? {}).map(([k, v]) => (
-                    <div key={k} className="contents"><dt>{tr(t, `design.revisions.qty.${k}`, { defaultValue: k })}</dt><dd>{Number(v).toLocaleString(i18n.language, { maximumFractionDigits: 3 })}</dd></div>
+                    <div key={k} className="contents"><dt>{tr(t, `design.revisions.qty.${k}`, { defaultValue: k })}</dt><dd>{fmtQuantity(v as number | string, 3)}</dd></div>
                   ))}
                 </dl>
               </Card>

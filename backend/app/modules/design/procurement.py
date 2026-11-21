@@ -538,7 +538,7 @@ async def setup(session, project_id: uuid.UUID, group_by: str, user_id: uuid.UUI
     from app.modules.boq.schemas import BOQCreate
 
     if group_by not in GROUP_BY:
-        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, f"group_by is one of {', '.join(GROUP_BY)}")
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, f"group_by is one of {', '.join(GROUP_BY)}")
     if await _proc(session, project_id) is not None:
         raise HTTPException(status.HTTP_409_CONFLICT, "The project already has a design take-off")
     rev = (
@@ -576,7 +576,7 @@ async def set_basis(
 ) -> DesignTakeoffLine:
     """A person measures a line in another quantity key; the position takes the model value in that key."""
     if basis not in BASES:
-        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, f"basis is one of {', '.join(BASES)}")
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, f"basis is one of {', '.join(BASES)}")
     ln = await session.get(DesignTakeoffLine, line_id)
     proc = await _proc(session, project_id)
     if ln is None or proc is None or ln.project_id != project_id:

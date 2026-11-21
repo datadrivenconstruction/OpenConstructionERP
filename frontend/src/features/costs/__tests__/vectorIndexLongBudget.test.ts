@@ -403,9 +403,10 @@ describe('only the vector calls that own their reporting opt out of the toast', 
   // number that names a population stops being true the moment the population
   // moves, and nothing about deleting dead code makes a census recount itself.
   // The two BIM model status polls retry on the next tick, so a slow poll has nothing to report.
-  const EXPECTED_OPT_OUTS = 13;
+  // The cost model KPI freshness probe keeps the figures already on screen when it gives up.
+  const EXPECTED_OPT_OUTS = 14;
 
-  it('suppresses the global toast at exactly the thirteen sites that replace it', () => {
+  it('suppresses the global toast at exactly the fourteen sites that replace it', () => {
     const sites: string[] = [];
     for (const file of productionFiles()) {
       const where = relative(SRC, file).split(sep).join('/');
@@ -423,7 +424,8 @@ describe('only the vector calls that own their reporting opt out of the toast', 
         'whose card renders nothing on failure by design, and the two ' +
         'snapshot-restore POSTs, which answer their own abort by saying the ' +
         'restore is still running on the server, and the two BIM model status ' +
-        'polls, which retry on the next tick. A new one belongs here only if ' +
+        'polls, which retry on the next tick, and the cost model KPI freshness ' +
+        'probe, which keeps the figures on screen. A new one belongs here only if ' +
         'it reports the timeout itself or has nothing to report; if it does, ' +
         'change this number deliberately.',
     ).toBe(EXPECTED_OPT_OUTS);

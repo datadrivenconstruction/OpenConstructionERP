@@ -16,18 +16,19 @@ import { briefErrors, fieldSpec, formatValue, parseInput, tidy, PLOT_POINTER, ty
 import { areaM2, fromPolygon, type GeoPolygon } from './data/polygon';
 import { applySummary, type ProposalSet, type SummaryItem } from './data/proposals';
 import { fieldLabel, optionLabel, tr } from './BriefFields';
+import { fmtQuantity } from '@/shared/lib/formatters';
 
 export interface SummaryOutcome { brief: BriefDoc; confirmed: string[] }
 
 function useShow() {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   return (pointer: string, value: unknown): string => {
     if (pointer === PLOT_POINTER) {
       const m2 = areaM2(fromPolygon(value as GeoPolygon));
-      return tr(t, 'design.start.plot_value', { area: Math.round(m2).toLocaleString(i18n.language || 'en') });
+      return tr(t, 'design.start.plot_value', { area: fmtQuantity(Math.round(m2), 0) });
     }
     if (typeof value === 'number') {
-      const n = value.toLocaleString(i18n.language || 'en', { maximumFractionDigits: 3 });
+      const n = fmtQuantity(value, 3);
       let unit: string | undefined;
       try { unit = fieldSpec(pointer).unit; } catch { unit = undefined; }
       return unit && unit !== 'currency' ? `${n} ${unit}` : n;

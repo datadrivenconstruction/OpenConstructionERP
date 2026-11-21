@@ -29,7 +29,7 @@ def register(router, can_accept) -> None:
         """For the selected elements: the BOQ positions, schedule activities and tender packages they feed."""
         await require_project(principal, project_id, session)
         if len(keys) > MAX_KEYS:
-            raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, f"At most {MAX_KEYS} elements at once")
+            raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, f"At most {MAX_KEYS} elements at once")
         return await links.lookup(session, project_id, keys)
 
     @router.get("/projects/{project_id}/element-context")
@@ -39,7 +39,7 @@ def register(router, can_accept) -> None:
         """For the selected elements: linked documents and open remarks (tasks, punch items)."""
         await require_project(principal, project_id, session)
         if len(keys) > MAX_KEYS:
-            raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, f"At most {MAX_KEYS} elements at once")
+            raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, f"At most {MAX_KEYS} elements at once")
         return await element_context.context(session, project_id, keys)
 
     @router.get("/projects/{project_id}/positions/{position_id}/elements")
@@ -77,7 +77,7 @@ def register(router, can_accept) -> None:
         """The project's field reports; with ``keys`` only those that point at one of these elements."""
         await require_project(principal, project_id, session)
         if len(keys) > MAX_KEYS:
-            raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, f"At most {MAX_KEYS} elements at once")
+            raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, f"At most {MAX_KEYS} elements at once")
         items = (
             await field_links.for_elements(session, project_id, keys)
             if keys

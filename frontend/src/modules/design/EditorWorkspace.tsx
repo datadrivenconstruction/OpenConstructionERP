@@ -32,6 +32,7 @@ import { SelectionPanel } from './SelectionPanel';
 import { WorkspaceSettings } from './WorkspaceSettings';
 import { useLeaveGuard } from './useLeaveGuard';
 import { tr } from './BriefFields';
+import { getIntlLocale } from '@/shared/lib/formatters';
 
 export default function EditorWorkspacePage() {
   const { t } = useTranslation();
@@ -69,7 +70,7 @@ type DraftState = { status: 'idle' } | { status: 'saving' } | { status: 'saved';
 
 const time = (iso: string) => {
   const d = new Date(iso);
-  return Number.isNaN(d.getTime()) ? '' : d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+  return Number.isNaN(d.getTime()) ? '' : d.toLocaleTimeString(getIntlLocale(), { hour: '2-digit', minute: '2-digit' });
 };
 
 /** Why a revision could not be made, in words: someone else edits, or the chain moved on under the draft. */

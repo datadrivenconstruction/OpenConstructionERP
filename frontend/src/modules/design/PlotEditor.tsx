@@ -8,6 +8,7 @@ import { parseInput, fieldSpec } from './data/briefModel';
 import { PLOT_POINTER, getAt, type BriefDoc } from './data/briefModel';
 import { ProvenanceControl, errorText, tr, type ProvenanceProps } from './BriefFields';
 import type { SchemaError } from './data/schemaCheck';
+import { fmtFixed } from '@/shared/lib/formatters';
 
 const PlotMap = lazy(() => import('./PlotMap'));
 
@@ -28,15 +29,6 @@ export interface PlotEditorProps {
   provenance: Omit<ProvenanceProps, 'doc' | 'pointer'>;
 }
 
-/** Number in the app language (grouping, decimal mark, digits). */
-function formatNumber(lang: string, value: number, digits: number): string {
-  const options = { maximumFractionDigits: digits, minimumFractionDigits: digits };
-  try {
-    return new Intl.NumberFormat(lang, options).format(value);
-  } catch {
-    return new Intl.NumberFormat('en', options).format(value);
-  }
-}
 
 const NUMBER = fieldSpec('/massing/floor_height_m'); // any plain number field: same reading rules for coordinates
 /** Corners from typed cells, or null while any cell is empty or not a plain number. */
@@ -110,7 +102,7 @@ function CornerTable({ points, rows, onRows, onPoints }: {
 }
 
 export function PlotEditor({ doc, errors, focus, onChange, provenance }: PlotEditorProps) {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const stored = getAt(doc, PLOT_POINTER) as GeoPolygon | undefined;
   const [drawing, setDrawing] = useState(false);
   const [draft, setDraft] = useState<LngLat[]>([]);
@@ -197,11 +189,11 @@ export function PlotEditor({ doc, errors, focus, onChange, provenance }: PlotEdi
           </div>
           <div className="flex gap-1.5">
             <dt className="text-content-tertiary">{tr(t, 'design.plot.area')}</dt>
-            <dd className="font-medium tabular-nums">{measures ? `${formatNumber(i18n.language, measures.area, 0)} ${tr(t, 'design.unit.m2')}` : '—'}</dd>
+            <dd className="font-medium tabular-nums">{measures ? `${fmtFixed(measures.area, 0)} ${tr(t, 'design.unit.m2')}` : '—'}</dd>
           </div>
           <div className="flex gap-1.5">
             <dt className="text-content-tertiary">{tr(t, 'design.plot.perimeter')}</dt>
-            <dd className="font-medium tabular-nums">{measures ? `${formatNumber(i18n.language, measures.perimeter, 1)} ${tr(t, 'design.unit.m')}` : '—'}</dd>
+            <dd className="font-medium tabular-nums">{measures ? `${fmtFixed(measures.perimeter, 1)} ${tr(t, 'design.unit.m')}` : '—'}</dd>
           </div>
         </dl>
       </div>

@@ -60,7 +60,7 @@ def register(router, can_accept) -> None:
     ) -> dict[str, Any]:
         await manager(principal, project_id, session)
         if any(not 0 <= v <= 50 for v in body.crews.values()):
-            raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, "A crew is 1 to 50 people (0 clears it)")
+            raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, "A crew is 1 to 50 people (0 clears it)")
         s = await sch.set_crews(session, project_id, body.crews)
         await session.commit()
         return {"crews": s.crews}

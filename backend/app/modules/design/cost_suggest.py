@@ -205,7 +205,7 @@ async def confirm_cost_match(
             decided_by=user_id,
         )
     except (DecisionPayloadError, RunClosedError, LookupError, ValueError) as e:
-        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, str(e)) from e
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, str(e)) from e
     via = {
         "kind": "cost_match",
         "run_id": str(run.id),

@@ -37,7 +37,7 @@ import {
 import { hasText, tr } from './BriefFields';
 import { CostPicker } from './CostPicker';
 import { useProjectFromUrl } from './useProjectFromUrl';
-import { fmtList } from '@/shared/lib/formatters';
+import { fmtList, fmtQuantity } from '@/shared/lib/formatters';
 
 export default function EstimatePage() {
   const { t } = useTranslation();
@@ -103,7 +103,7 @@ function EstimateScreen({ projectId }: { projectId: string }) {
       {data.estimate ? (
         <>
           <Header est={data} canManage={canManage} accessReady={accessQ.isSuccess} run={run} revisions={revisions} />
-          <Totals est={data} locale={locale} currency={data.range.currency ?? accessQ.data?.currency ?? ''} />
+          <Totals est={data} currency={data.range.currency ?? accessQ.data?.currency ?? ''} />
           <Groups est={data} projectId={projectId} canManage={canManage} locale={locale} currency={accessQ.data?.currency ?? data.range.currency ?? ''} regions={data.cost_regions ?? []} />
           <Benchmarks est={data} />
         </>
@@ -233,7 +233,7 @@ function Header({ est, canManage, accessReady, run, revisions }: {
   );
 }
 
-function Totals({ est, locale, currency }: { est: Estimate; locale: string; currency: string }) {
+function Totals({ est, currency }: { est: Estimate; currency: string }) {
   const { t } = useTranslation();
   const r = est.range;
   const verdict = rangeVerdict(est);
@@ -242,7 +242,7 @@ function Totals({ est, locale, currency }: { est: Estimate; locale: string; curr
   return (
     <Card padding="none">
       <CardHeader className="px-4 pt-4 pb-3" title={tr(t, 'design.estimate.range')}
-        subtitle={tr(t, 'design.estimate.range_basis', { area: Number(r.basis_living_area_m2).toLocaleString(locale, { maximumFractionDigits: 1 }) })} />
+        subtitle={tr(t, 'design.estimate.range_basis', { area: fmtQuantity(r.basis_living_area_m2, 1) })} />
       <dl className="grid grid-cols-3 gap-2 px-4 pb-3 text-sm" data-testid="range-totals">
         {(['low', 'mid', 'high'] as const).map((k) => (
           <div key={k}>

@@ -92,7 +92,7 @@ async def run_extraction(
     if req.text and req.text.strip():
         docs.append(SourceDoc(None, "Pasted description", "text", pages=[req.text]))
     if not docs:
-        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, "Attach a document or give a description")
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, "Attach a document or give a description")
     if complete is None and req.use_ai:
         complete = await (
             provider_completer(session, user_id, editor=True) if req.editor else provider_completer(session, user_id)
@@ -128,7 +128,7 @@ async def answers(project_id: uuid.UUID, body: AnswersRequest, principal: Princi
     try:
         return apply_answers(body.brief, body.answers, user_id=str(principal.user_id))
     except AnswerError as exc:
-        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, exc.errors) from exc
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, exc.errors) from exc
 
 
 # ── ai_agents tool: proposals only, never a write ───────────────────────────

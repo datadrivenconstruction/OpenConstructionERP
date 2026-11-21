@@ -105,7 +105,7 @@ def register(router, can_accept) -> None:
         try:
             e = await est.install_rules(session, project_id, body, principal.user_id)
         except rules.RulesError as exc:
-            raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, str(exc)) from exc
+            raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, str(exc)) from exc
         await session.commit()
         return {"boq_id": str(e.boq_id), "rules": len(body["rules"])}
 
@@ -178,7 +178,7 @@ def register(router, can_accept) -> None:
             )
         else:
             raise HTTPException(
-                status.HTTP_422_UNPROCESSABLE_ENTITY, "Give an assembly_id, or result_id with cost_item_id"
+                status.HTTP_422_UNPROCESSABLE_CONTENT, "Give an assembly_id, or result_id with cost_item_id"
             )
         await session.commit()
 

@@ -6,6 +6,7 @@
  */
 import { useSyncExternalStore } from 'react';
 import { BRIDGE_VERSION, bundleBytes, checkBundle, sha256Hex, startFiles, type EditorBundle } from '../bridge/protocol';
+import { fmtFixed } from '@/shared/lib/formatters';
 
 export const CONSENT_KEY = 'oe_design_web_editor';
 export const CACHE_NAME = 'oe-design-editor-v1';
@@ -205,5 +206,5 @@ export function resetLoadState(): void {
 }
 
 export function megabytes(bytes: number): string {
-  return (bytes / 1_048_576).toFixed(1);
+  return fmtFixed(bytes / 1_048_576, 1);
 }

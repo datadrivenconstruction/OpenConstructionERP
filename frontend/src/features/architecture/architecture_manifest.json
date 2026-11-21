@@ -88166,7 +88166,7 @@
           "method": "GET",
           "path": "/accounts/{account_id}/contacts",
           "handler": "list_account_contacts",
-          "response_model": "list[AccountContactResponse]",
+          "response_model": "AccountContactListResponse",
           "request_schema": "None"
         },
         {
@@ -89949,6 +89949,33 @@
           ]
         },
         {
+          "class_name": "AccountContactListResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "One page of the contacts linked to an account.",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[AccountContactResponse]"
+            },
+            {
+              "name": "total",
+              "type": "int"
+            },
+            {
+              "name": "offset",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "limit",
+              "type": "int",
+              "default": "50"
+            }
+          ]
+        },
+        {
           "class_name": "OwnerActivitySummaryRow",
           "bases": [
             "BaseModel"
@@ -90024,7 +90051,7 @@
             },
             {
               "name": "expected",
-              "type": "Decimal"
+              "type": "FiniteDecimal"
             },
             {
               "name": "deals",
@@ -104801,7 +104828,7 @@
           "method": "GET",
           "path": "/projects/{project_id}/revisions",
           "handler": "list_revisions",
-          "response_model": "list[RevisionView]",
+          "response_model": "RevisionListResponse",
           "request_schema": "PrincipalDep"
         },
         {
@@ -105079,6 +105106,33 @@
             {
               "name": "manifest",
               "type": "dict"
+            }
+          ]
+        },
+        {
+          "class_name": "RevisionListResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[RevisionView]"
+            },
+            {
+              "name": "total",
+              "type": "int"
+            },
+            {
+              "name": "offset",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "limit",
+              "type": "int",
+              "default": "50"
             }
           ]
         },
@@ -347257,7 +347311,7 @@
     "total_columns": 11596,
     "total_relationships": 264,
     "total_routes": 5590,
-    "total_schemas": 5217,
+    "total_schemas": 5219,
     "total_python_files": 3835,
     "frontend_features": 254,
     "frontend_ts_files": 4568,

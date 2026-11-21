@@ -23,6 +23,8 @@ from typing import Any
 from fastapi import HTTPException, status
 from sqlalchemy import select
 
+from app.core.json_merge import merge_metadata
+
 from . import estimate as est_mod
 from .models import DesignEstimate, DesignRevision, DesignSchedule, DesignScheduleBinding
 
@@ -665,7 +667,7 @@ async def recompute(session, project_id: uuid.UUID, rev_id: uuid.UUID, model_id:
         flags = sorted(set(p.flags + (["override"] if override else [])))
         upd: dict[str, Any] = {
             "dependencies": deps,
-            "metadata": {**(a.metadata_ or {}), **_meta(p, rev_id, flags)},
+            "metadata": merge_metadata(a.metadata_, _meta(p, rev_id, flags)),
             "description": p.provenance.get("worked", ""),
         }
         if not override and cur != p.duration:
@@ -796,7 +798,7 @@ async def set_crews(session, project_id: uuid.UUID, crews: dict[str, int]) -> De
     rates = rates_for(sched.country, sched.use) or {"rates": {}}
     unknown = [c for c in crews if c not in rates["rates"]]
     if unknown:
-        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, f"Unknown rules: {', '.join(sorted(unknown))}")
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, f"Unknown rules: {', '.join(sorted(unknown))}")
     sched.crews = {k: v for k, v in crews.items() if v}
     await session.flush()
     return sched

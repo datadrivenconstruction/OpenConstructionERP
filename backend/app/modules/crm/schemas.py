@@ -591,7 +591,7 @@ class RevenueMonthRow(BaseModel):
 
     month: str  # YYYY-MM, or "" for deals with no expected close date
     currency: str
-    expected: Decimal
+    expected: FiniteDecimal
     deals: int
 
 

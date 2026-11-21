@@ -17,7 +17,7 @@ import {
   type Provenance,
 } from './data/briefModel';
 import type { SchemaError } from './data/schemaCheck';
-import { fmtList } from '@/shared/lib/formatters';
+import { fmtList, getIntlLocale } from '@/shared/lib/formatters';
 
 type T = ReturnType<typeof useTranslation>['t'];
 
@@ -62,7 +62,7 @@ function provenanceTitle(t: T, entry: Provenance | undefined): string {
   if (!entry) return '';
   const lines: string[] = [];
   if (entry.status === 'confirmed' && entry.confirmed_at) {
-    lines.push(tr(t, 'design.status.confirmed_by', { at: new Date(entry.confirmed_at).toLocaleString() }));
+    lines.push(tr(t, 'design.status.confirmed_by', { at: new Date(entry.confirmed_at).toLocaleString(getIntlLocale()) }));
   }
   for (const s of entry.sources ?? []) {
     const parts = [tr(t, `design.source.${s.kind}`)];

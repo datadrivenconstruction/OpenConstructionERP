@@ -24,6 +24,7 @@ import { tr } from './BriefFields';
 import { FieldReportLinks } from './FieldReportLinks';
 import { boqUrl, fetchElementContext, fetchLinks, fetchOverview, packageUrl, scheduleUrl } from './linksApi';
 import type { ElementContext, ElementLinks } from './linksApi';
+import { fmtQuantity } from '@/shared/lib/formatters';
 import {
   DEFAULT_LAYOUT, loadLayout, moveBlock, saveLayout, toggleBlock, visibleBlocks,
   type BlockId, type PanelLayout,
@@ -31,9 +32,8 @@ import {
 
 /** Figures in the language the page is shown in. */
 function useNum() {
-  const { i18n } = useTranslation();
-  const lang = i18n.language || 'en';
-  return (v: string | null | undefined) => (v === null || v === undefined ? '–' : Number(v).toLocaleString(lang, { maximumFractionDigits: 2 }));
+  useTranslation(); // re-render when the language changes
+  return (v: string | null | undefined) => (v === null || v === undefined ? '–' : fmtQuantity(v, 2));
 }
 
 /** The project's currency, from the estimate or the project setting. */

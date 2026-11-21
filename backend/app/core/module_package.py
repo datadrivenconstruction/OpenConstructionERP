@@ -64,7 +64,7 @@ KNOWN_NAV_GROUPS = frozenset(
         "grp_estimate_detail", "grp_change", "grp_records", "grp_field", "grp_site", "grp_resources",
         "grp_quality", "grp_handover", "grp_safety", "grp_esg", "grp_communication", "grp_documents",
         "grp_real_estate", "grp_finance", "grp_controls_bi", "grp_rate_buildup", "grp_estimating_ai",
-        "grp_automation_ai", "grp_survey",
+        "grp_automation_ai", "grp_survey", "grp_design",
     }
 )  # fmt: skip
 # Group ids folded into another group; mirrors NAV_GROUP_ALIASES in navCatalog.ts so manifests
