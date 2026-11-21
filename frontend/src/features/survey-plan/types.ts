@@ -11,6 +11,7 @@ import type { LucideIcon } from 'lucide-react';
 import type { ReactNode } from 'react';
 import type { FeatureCollection } from 'geojson';
 import type { PlanConventions } from './units/conventions';
+import type { LiveFinding } from './engine/liveChecks';
 
 // ── Geometry ──────────────────────────────────────────────────────────────
 
@@ -322,5 +323,17 @@ export interface PlanCanvasProps {
   conventions?: Partial<PlanConventions>;
   /** Empty state when no layer has features. */
   empty?: { title: string; action?: ReactNode };
+  /** Selection held by the screen (a list beside the plan); the canvas follows and frames it. */
+  selectedIds?: readonly string[];
+  /** Findings of the screen's own checks, marked on the plan with the canvas's live checks. */
+  findings?: readonly LiveFinding[];
+  /** A raster under the layers (shaded relief), placed by its grid bounds [e0, n0, e1, n1]. */
+  raster?: { dataUrl: string; bounds: [number, number, number, number] } | null;
+  /** Arms a one-point pick: the next click (snapped) or typed position goes here instead of the tools. */
+  pickPoint?: (at: GridXY) => void;
+  /** Hint shown on the plan while `pickPoint` is armed. */
+  pickHint?: string;
+  /** Screen overlays in the plan area (legend, scale note); positioned by the screen. */
+  overlay?: ReactNode;
   testId?: string;
 }

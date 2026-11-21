@@ -49,9 +49,21 @@ export function decorate(f: PlanFeature, o: DecorateOptions): Record<string, unk
     if (z != null) out.z_text = z.toFixed(o.zDecimals);
     out.priority = (p.kind === 'control' || f.layer === 'control' ? 100 : o.priority) as number;
   }
-  const token = typeof p.colour === 'string' ? (p.colour as MapToken) : null;
-  if (token && token in o.palette) out.colour_value = o.palette[token];
+  const colour = paletteValue(p.colour, o.palette);
+  if (colour) out.colour_value = colour;
+  const fill = paletteValue(p.fill, o.palette);
+  if (fill) out.fill_value = fill;
+  const label = paletteValue(p.label_colour, o.palette);
+  if (label) out.label_value = label;
   return out;
+}
+
+/** A map token (`parcel`) or its CSS variable (`var(--oe-map-parcel)`) as the resolved colour. */
+export function paletteValue(v: unknown, palette: MapPalette): string | null {
+  if (typeof v !== 'string' || !v) return null;
+  const m = /^var\(--oe-map-([a-z0-9-]+)\)$/.exec(v.trim());
+  const token = (m ? m[1] : v) as MapToken;
+  return token in palette ? palette[token] : null;
 }
 
 export function toCollection(features: readonly PlanFeature[], toView: ToView, o: DecorateOptions): FeatureCollection {

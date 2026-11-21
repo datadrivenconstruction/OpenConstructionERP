@@ -52,7 +52,7 @@ export function planColour(token: MapToken): string {
 }
 
 /** Symbol names that have an icon. */
-export const SYMBOLS = ['control', 'benchmark', 'spot', 'tree', 'post', 'manhole', 'kerb', 'cross', 'diamond', 'square'] as const;
+export const SYMBOLS = ['control', 'benchmark', 'spot', 'tree', 'post', 'manhole', 'kerb', 'cross', 'diamond', 'square', 'triangle'] as const;
 export type SymbolName = (typeof SYMBOLS)[number];
 
 /**
@@ -132,6 +132,13 @@ export function symbolImage(name: SymbolName, size = 20): { width: number; heigh
       break;
     case 'square':
       g.rect(m - r * 0.75, m - r * 0.75, r * 1.5, r * 1.5);
+      g.fill();
+      break;
+    case 'triangle':
+      g.moveTo(m, m - r);
+      g.lineTo(m + r * 0.9, m + r * 0.7);
+      g.lineTo(m - r * 0.9, m + r * 0.7);
+      g.closePath();
       g.fill();
       break;
     case 'spot':
@@ -245,10 +252,10 @@ export function defaultStyle(layer: PlanLayerId, o: StyleOptions): PlanStyleLaye
           type: 'fill',
           paint: {
             // RdBu, neutral inside the dead band.
-            'fill-color': [
+            'fill-color': ['coalesce', ['get', 'fill_value'], [
               'step', ['*', ['coalesce', ['get', 'dh'], 0], ['match', ['get', 'side'], 'cut', -1, 1]],
               p['cut-3'], -1, p['cut-2'], -0.5, p['cut-1'], -0.05, p.neutral, 0.05, p['fill-1'], 0.5, p['fill-2'], 1, p['fill-3'],
-            ],
+            ]],
             'fill-opacity': 0.75 * op,
           },
         },
@@ -274,13 +281,128 @@ export function defaultStyle(layer: PlanLayerId, o: StyleOptions): PlanStyleLaye
           paint: textPaint(p, p.ink),
         },
       ];
+    case 'parcels':
+      return featureStyle(p, op, { colour: p.parcel, fillOpacity: 0.14 });
+    case 'zones':
+      return featureStyle(p, op, { colour: p.zone, dash: 'dash' });
+    case 'pads':
+      return featureStyle(p, op, { colour: p.surface });
+    case 'contours':
+      return featureStyle(p, op, { colour: p.topo, width: 0.6 });
     default:
-      return [
-        { id: 'fill', type: 'fill', filter: geom('Polygon'), paint: { 'fill-color': p.accent, 'fill-opacity': 0.08 * op } },
-        { id: 'line', type: 'line', paint: { 'line-color': p['ink-2'], 'line-width': 1, 'line-opacity': op } },
-        { id: 'pt', type: 'circle', filter: geom('Point'), paint: { 'circle-radius': 3, 'circle-color': p['ink-2'], 'circle-opacity': op } },
-      ];
+      return featureStyle(p, op, { width: 1, fill: p.accent });
   }
+}
+
+/** Point shapes of `featureStyle`: `circle` draws as a circle, the rest as SDF symbols (`x` is a turned cross). */
+export const FEATURE_SHAPES = ['circle', 'square', 'diamond', 'triangle', 'cross', 'x', 'none'] as const;
+export type FeatureShape = (typeof FEATURE_SHAPES)[number];
+
+export interface FeatureStyleDefaults {
+  /** Stroke when a feature has no `colour`. */
+  colour?: string;
+  width?: number;
+  fillOpacity?: number;
+  /** Fill of polygons without `fill`; without it only polygons with a `fill` are filled. */
+  fill?: string;
+  dash?: FeatureDash;
+}
+
+export type FeatureDash = 'solid' | 'dash' | 'dot' | 'dashdot';
+const DASHES: Record<Exclude<FeatureDash, 'solid'>, number[]> = { dash: [3, 2], dot: [1, 2], dashdot: [4, 1.5, 1, 1.5] };
+
+/**
+ * Style driven by feature properties, for screen layers: `colour`, `fill` and
+ * `label_colour` (map tokens, resolved by render.ts; `colour: 'none'` drops the
+ * stroke), `width`, `dash`, `fill_opacity`, `shape`, `size` (px) and `label`.
+ * Features without them get the layer defaults.
+ */
+export function featureStyle(p: MapPalette, op: number, d: FeatureStyleDefaults): PlanStyleLayer[] {
+  const stroke = ['coalesce', ['get', 'colour_value'], d.colour ?? p['ink-2']];
+  const width = ['coalesce', ['get', 'width'], d.width ?? 1.5];
+  const notPoint = ['!=', ['geometry-type'], 'Point'];
+  const stroked = ['!=', ['get', 'colour'], 'none'];
+  const layerDash = d.dash ?? 'solid';
+  const lines = (['solid', 'dash', 'dot', 'dashdot'] as const).map((k): PlanStyleLayer => {
+    const own = ['==', ['get', 'dash'], k];
+    // Features without `dash` take the layer default.
+    const filter = k === layerDash ? ['any', own, ['!', ['has', 'dash']]] : own;
+    return {
+      id: `line-${k}`,
+      type: 'line',
+      filter: ['all', notPoint, stroked, filter],
+      layout: { 'line-join': 'round', 'line-cap': k === 'solid' ? 'round' : 'butt' },
+      paint: { 'line-color': stroke, 'line-width': width, 'line-opacity': op, ...(k === 'solid' ? {} : { 'line-dasharray': DASHES[k] }) },
+    };
+  });
+  const shape = ['coalesce', ['get', 'shape'], 'circle'];
+  const pointFill = ['coalesce', ['get', 'fill_value'], ['get', 'colour_value'], d.colour ?? p['ink-2']];
+  const pointStroke = ['coalesce', ['get', 'colour_value'], d.colour ?? p.ink];
+  return [
+    {
+      id: 'fill',
+      type: 'fill',
+      filter: ['all', ['==', ['geometry-type'], 'Polygon'], d.fill ? ['!=', ['get', 'fill'], 'none'] : ['has', 'fill_value']],
+      paint: { 'fill-color': ['coalesce', ['get', 'fill_value'], d.fill ?? p.accent], 'fill-opacity': ['*', ['coalesce', ['get', 'fill_opacity'], d.fillOpacity ?? 0.08], op] },
+    },
+    ...lines,
+    {
+      id: 'pt',
+      type: 'circle',
+      filter: ['all', ['==', ['geometry-type'], 'Point'], ['==', shape, 'circle']],
+      paint: {
+        'circle-radius': ['coalesce', ['get', 'size'], 3],
+        'circle-color': pointFill,
+        'circle-stroke-color': pointStroke,
+        'circle-stroke-width': ['coalesce', ['get', 'stroke_width'], 1.5],
+        'circle-opacity': op,
+        'circle-stroke-opacity': op,
+      },
+    },
+    {
+      id: 'sym',
+      type: 'symbol',
+      filter: ['all', ['==', ['geometry-type'], 'Point'], ['in', shape, ['literal', ['square', 'diamond', 'triangle', 'cross', 'x']]]],
+      layout: {
+        'icon-image': ['concat', 'oe-sym-', ['match', shape, 'x', 'cross', shape]],
+        'icon-rotate': ['match', shape, 'x', 45, 0],
+        'icon-size': ['/', ['coalesce', ['get', 'size'], 4.5], 3.5],
+        'icon-allow-overlap': true,
+        'icon-ignore-placement': true,
+      },
+      // SDF: the shape takes the fill and its halo the stroke, so a hollow mark has fill `bg`.
+      paint: { 'icon-color': pointFill, 'icon-halo-color': pointStroke, 'icon-halo-width': 1.25, 'icon-opacity': op },
+    },
+    {
+      id: 'label-pt',
+      type: 'symbol',
+      filter: ['all', ['==', ['geometry-type'], 'Point'], ['has', 'label'], ['!=', ['to-string', ['get', 'label']], '']],
+      layout: {
+        'text-field': ['to-string', ['get', 'label']],
+        'text-font': ['literal', FONT_REGULAR],
+        'text-size': 11,
+        'text-anchor': 'left',
+        'text-offset': [0.9, -0.6],
+        'text-optional': true,
+        'symbol-sort-key': ['-', 0, ['coalesce', ['get', 'priority'], 40]],
+      },
+      paint: { ...textPaint(p, p.ink), 'text-color': ['coalesce', ['get', 'label_value'], p.ink], 'text-opacity': op },
+    },
+    {
+      id: 'label-line',
+      type: 'symbol',
+      filter: ['all', notPoint, ['has', 'label'], ['!=', ['to-string', ['get', 'label']], '']],
+      layout: {
+        'text-field': ['to-string', ['get', 'label']],
+        'text-font': ['literal', FONT_REGULAR],
+        'text-size': 11,
+        'symbol-placement': 'line-center',
+        'text-keep-upright': true,
+        'text-offset': [0, -0.8],
+      },
+      paint: { ...textPaint(p, p.ink), 'text-color': ['coalesce', ['get', 'label_value'], ['get', 'colour_value'], p.ink], 'text-opacity': op },
+    },
+  ];
 }
 
 /** Overlay styles drawn above every layer: hover, selection, vertex handles, findings. */
