@@ -21,7 +21,7 @@ const ROUTE_STAGE: Record<string, LifecycleStage> = {
   '/bcf': 'design',
   '/boq': 'estimate',
   '/carbon': 'estimate',
-  '/tendering': 'procure',
+  '/tenders': 'procure',
   '/bid-management': 'procure',
   '/contracts': 'procure',
   '/schedule': 'plan',

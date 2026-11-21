@@ -33,7 +33,7 @@ const course = (slug: string, routes: string[], extra: Partial<AcademyItem> = {}
 
 const SAMPLE = [
   course('alpha-handover', ['/closeout']),
-  course('alpha-tender', ['/tendering']),
+  course('alpha-tender', ['/tenders']),
   course('alpha-takeoff', ['/takeoff'], { access: 'paid' }),
   course('alpha-estimate', ['/boq'], { country: 'GB' }),
   course('beta-one', ['/boq']),

@@ -106,7 +106,7 @@ const ROUTE_SUBJECT: Record<string, CoverSubject> = {
   '/requirements': 'bim',
   '/boq': 'estimate',
   '/costs': 'estimate',
-  '/tendering': 'tender',
+  '/tenders': 'tender',
   '/bid-management': 'tender',
   '/procurement': 'tender',
   '/schedule': 'schedule',

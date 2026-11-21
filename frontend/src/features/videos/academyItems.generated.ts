@@ -1353,7 +1353,7 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
     ],
     "country": "GB",
     "routes": [
-      "/tendering",
+      "/tenders",
       "/bid-management"
     ],
     "steps": [
@@ -1523,7 +1523,7 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
     "country": "BG",
     "routes": [
       "/boq",
-      "/tendering",
+      "/tenders",
       "/bid-management",
       "/contracts",
       "/variations",
@@ -1788,7 +1788,7 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
     "track": "Estimate and buy",
     "country": "BG",
     "routes": [
-      "/tendering",
+      "/tenders",
       "/bid-management",
       "/rfi",
       "/variations",
@@ -1974,7 +1974,7 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
     "country": "US",
     "routes": [
       "/boq",
-      "/tendering",
+      "/tenders",
       "/bid-management"
     ],
     "steps": [
@@ -2062,7 +2062,7 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
     "country": "PL",
     "routes": [
       "/boq",
-      "/tendering",
+      "/tenders",
       "/bid-management",
       "/contracts",
       "/variations",
@@ -2159,7 +2159,7 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
     "country": "US",
     "routes": [
       "/boq",
-      "/tendering",
+      "/tenders",
       "/bid-management",
       "/contracts",
       "/variations",
@@ -2256,7 +2256,7 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
     "country": "DE",
     "routes": [
       "/boq",
-      "/tendering",
+      "/tenders",
       "/bid-management",
       "/contracts",
       "/variations",
@@ -2921,7 +2921,7 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
     "country": "BR",
     "routes": [
       "/boq",
-      "/tendering",
+      "/tenders",
       "/bid-management"
     ],
     "steps": [
@@ -3087,7 +3087,7 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
     "country": "FR",
     "routes": [
       "/boq",
-      "/tendering",
+      "/tenders",
       "/bid-management",
       "/contracts",
       "/variations",
@@ -3257,7 +3257,7 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
     "country": "GB",
     "routes": [
       "/boq",
-      "/tendering",
+      "/tenders",
       "/bid-management",
       "/contracts",
       "/variations",
@@ -3354,7 +3354,7 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
     "country": "IT",
     "routes": [
       "/boq",
-      "/tendering",
+      "/tenders",
       "/bid-management",
       "/contracts",
       "/variations",
@@ -3451,7 +3451,7 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
     "country": "ES",
     "routes": [
       "/boq",
-      "/tendering",
+      "/tenders",
       "/bid-management",
       "/contracts",
       "/variations",
@@ -3882,7 +3882,7 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
     ],
     "market": "GB",
     "routes": [
-      "/tendering",
+      "/tenders",
       "/bid-management"
     ]
   },
@@ -5288,7 +5288,7 @@ export const ACADEMY_ITEMS: AcademyItem[] = [
       "tendering"
     ],
     "routes": [
-      "/tendering",
+      "/tenders",
       "/bid-management",
       "/rfq-bidding"
     ]

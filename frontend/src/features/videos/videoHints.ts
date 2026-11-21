@@ -37,7 +37,7 @@ export const VIDEO_HINTS: Record<VideoHintTopic, VideoHintSpot> = {
     ],
   },
   'bid-leveling': {
-    route: '/tendering',
+    route: '/tenders',
     chapters: [
       ['US05', 74], ['UK02', 137], ['CA03', 145], ['QC03', 133], ['ES03', 52],
       ['IT03', 77], ['BG05', 47], ['CN03', 92], ['DIN05', 67],

@@ -81,7 +81,7 @@ export const VIDEO_COUNT_BY_ROUTE: Record<string, number> = {
   "/tasks": 1,
   "/tax-rates": 1,
   "/tax-withholding": 3,
-  "/tendering": 22,
+  "/tenders": 22,
   "/validation": 39,
   "/value": 35,
   "/variations": 6,
@@ -269,6 +269,6 @@ export const ITEM_COUNT_BY_ROUTE: Record<string, number> = {
   "/schedule": 4,
   "/supplier-catalogs": 1,
   "/takeoff": 4,
-  "/tendering": 13,
+  "/tenders": 13,
   "/variations": 14
 };
