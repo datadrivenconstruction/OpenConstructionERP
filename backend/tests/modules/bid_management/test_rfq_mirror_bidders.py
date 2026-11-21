@@ -132,3 +132,39 @@ async def test_a_mirror_from_an_earlier_copy_is_repaired_once(session) -> None:
     _pkg, bidders, comparison = await _mirror(session, rfq_id)
     _assert_complete(bidders, comparison)
     assert str(rfq_id) not in await session.run_sync(lambda s: stale_rfq_mirrors(s.connection()))
+
+
+async def test_a_tendering_package_counts_before_and_after_its_copy(session) -> None:
+    # The old tendering routes still write; the mirror lands on commit, so the count may not wait for it.
+    from app.core.validation.project_context import _tender_count
+    from app.modules.projects.models import Project
+    from app.modules.tendering.models import TenderPackage
+    from app.modules.users.models import User
+
+    owner = User(email=f"tcnt-{uuid.uuid4().hex[:8]}@example.test", hashed_password="x", full_name="Buyer")
+    session.add(owner)
+    await session.flush()
+    project = Project(name="Tender count", owner_id=owner.id, currency="EUR")
+    session.add(project)
+    await session.flush()
+    session.add(TenderPackage(project_id=project.id, name="Package 1", description="", metadata_={}))
+    await session.flush()
+    assert await _tender_count(session, project.id) == 1
+    await session.run_sync(lambda s: copy_all(s.connection()))
+    assert await _tender_count(session, project.id) == 1
+    await session.rollback()
+
+
+async def test_canonical_tender_routes_are_current_and_old_ones_deprecated() -> None:
+    from fastapi import FastAPI
+    from fastapi.routing import APIRoute
+
+    from app.modules.bid_management.router import router
+    from app.modules.tendering.router import router as tendering_router
+
+    app = FastAPI()
+    app.include_router(router, prefix="/api/v1/bid-management")
+    app.include_router(tendering_router, prefix="/api/v1/tendering")
+    by_path = {(r.path, tuple(sorted(r.methods))): r.deprecated for r in app.routes if isinstance(r, APIRoute)}
+    assert by_path[("/api/v1/bid-management/tenders/main-contract/packages/", ("POST",))] is False
+    assert by_path[("/api/v1/tendering/packages/", ("POST",))] is True

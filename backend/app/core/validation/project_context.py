@@ -158,6 +158,26 @@ async def _tender_count(session: AsyncSession, project_id: uuid.UUID) -> int | N
         .where(BidPackage.project_id == project_id, BidPackage.package_type == "subcontract")
         .execution_options(include_tender_mirrors=True)
     )
+    return int(count or 0) + await _uncopied_tender_count(session, project_id)
+
+
+async def _uncopied_tender_count(session: AsyncSession, project_id: uuid.UUID) -> int:
+    """Tendering packages with no canonical copy yet.
+
+    The old tendering routes still write; their mirror is built when the transaction commits, and a
+    mirror that fails to build waits for the next copy run. Until then the package is still a tender.
+    """
+    try:
+        from app.modules.bid_management.models import TenderLegacyMap
+        from app.modules.tendering.models import TenderPackage
+    except ImportError:
+        return 0
+    copied = select(TenderLegacyMap.source_id).where(TenderLegacyMap.source_table == "oe_tendering_package")
+    count = await session.scalar(
+        select(func.count())
+        .select_from(TenderPackage)
+        .where(TenderPackage.project_id == project_id, TenderPackage.id.not_in(copied))
+    )
     return int(count or 0)
 
 
