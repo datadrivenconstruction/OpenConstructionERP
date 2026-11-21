@@ -527,9 +527,12 @@ class StockpileService:
         for s in await self.repo.surveys_of_project(project_id):
             latest.setdefault(s.stockpile_id, s)
         surveyed = sum((s.tonnes for s in latest.values()), Decimal(0))
-        book = sum((s.book_tonnes or Decimal(0) for s in latest.values()), Decimal(0))
+        # Book stock is what the stockpile cards show: the pile's own book, surveyed or not.
+        book = sum((p.book_tonnes or Decimal(0) for p in piles), Decimal(0))
+        # The variance compares each survey with the book it was measured against.
+        book_at_survey = sum((s.book_tonnes or Decimal(0) for s in latest.values()), Decimal(0))
         v = (
-            calc.variance(surveyed, book)
+            calc.variance(surveyed, book_at_survey)
             if latest and any(s.book_tonnes is not None for s in latest.values())
             else None
         )

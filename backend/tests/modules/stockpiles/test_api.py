@@ -57,6 +57,14 @@ async def test_demo_seeds_the_stockpile_and_lesson_1(client: AsyncClient, header
     assert pile["survey_count"] == 0
 
 
+async def test_the_summary_reads_the_book_stock_the_card_shows(client: AsyncClient, header: dict) -> None:
+    # Before any survey the KPI read 0 t while the card showed the 8,400 t on the books.
+    pid, pile = await _demo(client, header)
+    summary = (await client.get(f"{BASE}/projects/{pid}/summary", headers=header)).json()
+    assert summary["book_tonnes"] == pile["book_tonnes"] == EXPECTED["lesson_1"]["book_tonnes"]
+    assert summary["variance_pct"] is None
+
+
 async def test_lessons_2_to_4_survey_variance_and_confirmed_adjustment(client: AsyncClient, header: dict) -> None:
     pid, pile = await _demo(client, header)
 
