@@ -35,7 +35,7 @@ import { formatNumber } from '@/shared/lib/formatters';
 import type { EdgeOut, Importance, MapModule } from './api';
 import { chainOf, layeredLayout } from './layout';
 import { STAGES, moduleMeta } from './moduleMeta';
-import { moduleLabel } from './flowModel';
+import { edgeAriaLabel, moduleLabel } from './flowModel';
 import { useReducedMotion } from './motion';
 
 const STAGE_DEFAULTS: Record<string, string> = {
@@ -357,6 +357,7 @@ function Canvas({ modules, edges, focus, visible, lit, hovered, onHover, onSelec
           target: e.target,
           type: 'flow',
           focusable: false,
+          ariaLabel: edgeAriaLabel(t, e.source, e.target),
           data: {
             title: `${moduleLabel(t, e.source)} → ${moduleLabel(t, e.target)}${e.count !== null ? `: ${formatNumber(e.count)}` : ''}`,
             tone: moduleMeta(e.source).tone,

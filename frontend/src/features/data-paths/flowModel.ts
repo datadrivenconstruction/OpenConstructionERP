@@ -11,6 +11,7 @@ import { fmtList, formatNumber } from '@/shared/lib/formatters';
 
 import type { Importance, ModulePaths, PathOut, PathState } from './api';
 import { moduleMeta } from './moduleMeta';
+import { moduleDisplayNameKey } from '@/features/modules/moduleDisplayName';
 
 export interface FlowCard {
   id: string;
@@ -74,10 +75,22 @@ export function humanize(code: string): string {
     .replace(/^./, (c) => c.toUpperCase());
 }
 
+/**
+ * A module's name in the reader's language: its menu row's label, else the
+ * name Settings > Modules shows (`modules.catalog.*`); the manifest's English
+ * name only when neither is translated.
+ */
 export function moduleLabel(t: TFunction, module: string, fallback?: string): string {
   const meta = moduleMeta(module);
   const def = meta.defaultLabel ?? fallback ?? humanize(module);
-  return meta.labelKey ? String(t(meta.labelKey, { defaultValue: def })) : def;
+  return String(t(meta.labelKey ?? moduleDisplayNameKey(module), { defaultValue: def }));
+}
+
+/** Accessible name of a link between two modules, in place of React Flow's English "Edge from a to b". */
+export function edgeAriaLabel(t: TFunction, source: string, target: string): string {
+  return String(
+    t('data_paths.edge_aria', { defaultValue: 'Link from {{source}} to {{target}}', source: moduleLabel(t, source), target: moduleLabel(t, target) }),
+  );
 }
 
 function label(t: TFunction, key: string, fallback: string): string {

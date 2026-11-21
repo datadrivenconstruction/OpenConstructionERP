@@ -44,7 +44,7 @@ import { formatNumber } from '@/shared/lib/formatters';
 import { useThemeStore } from '@/stores/useThemeStore';
 
 import { useModuleChips, type Chip, type EdgeOut, type MapModule, type ModuleFocus } from './api';
-import { humanize, moduleLabel } from './flowModel';
+import { edgeAriaLabel, humanize, moduleLabel } from './flowModel';
 import { moduleMeta } from './moduleMeta';
 import { useReducedMotion } from './motion';
 import {
@@ -484,6 +484,7 @@ function CanvasInner(props: FocusCanvasProps) {
           source: e.source,
           target: e.target,
           type: 'link',
+          ariaLabel: edgeAriaLabel(t, external ? focus : e.source, e.target),
           data: {
             lit: !!lit?.edges.has(key),
             dim: !!lit && !lit.edges.has(key),
