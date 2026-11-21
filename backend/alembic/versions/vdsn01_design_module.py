@@ -8,7 +8,7 @@ created only when missing. The browser editor bundle is files under the data dir
 not rows, so it needs no DDL.
 
 Revision ID: vdsn01_design_module
-Revises: cpb01_central_purchasing_bundles
+Revises: vcrm02_account_contacts
 Create Date: 2026-11-20
 """
 
@@ -20,7 +20,7 @@ import sqlalchemy as sa
 from alembic import op
 
 revision: str = "vdsn01_design_module"
-down_revision: str | Sequence[str] | None = "cpb01_central_purchasing_bundles"
+down_revision: str | Sequence[str] | None = "vcrm02_account_contacts"
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 

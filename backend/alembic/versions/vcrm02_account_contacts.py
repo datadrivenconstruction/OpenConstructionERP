@@ -8,7 +8,7 @@ so a re-run changes nothing; a running install also gets the table from
 ``create_all``.
 
 Revision ID: vcrm02_account_contacts
-Revises: cpb01_central_purchasing_bundles
+Revises: vsrv03_survey_plan_editor
 Create Date: 2026-11-20
 """
 
@@ -21,7 +21,7 @@ import sqlalchemy as sa
 from alembic import op
 
 revision: str = "vcrm02_account_contacts"
-down_revision: Union[str, Sequence[str], None] = "cpb01_central_purchasing_bundles"
+down_revision: Union[str, Sequence[str], None] = "vsrv03_survey_plan_editor"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
