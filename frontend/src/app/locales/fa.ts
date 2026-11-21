@@ -57987,6 +57987,7 @@ const resource = {
     "design.web_editor.problem.no_permission": "نقش شما اجازه این کار را نمی‌دهد.",
     "design.web_editor.problem.busy": "یک دانلود در جریان است.",
     "design.web_editor.problem.other": "مشکلی پیش آمد. موتور سبک به کار ادامه می‌دهد.",
+    "design.web_editor.not_available_yet": "ویرایشگر کامل هنوز در دسترس نیست.",
     "modules.catalog.design_management": "مدیریت طراحی",
     "modules.catalog.engineering_brief": "خلاصه مهندسی",
     "modules.catalog.hse_frame": "چارچوب HSE",

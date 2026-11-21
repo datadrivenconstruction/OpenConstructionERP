@@ -79,6 +79,24 @@ async def make_project(owner: uuid.UUID, *, name: str = "Wohnhaus Test") -> uuid
     return pid
 
 
+@pytest_asyncio.fixture(autouse=True)
+async def _retire_seeded_cost_items(request):
+    """Cost items a test seeds (code ``DSG-``) are retired after it, or a later DE estimate would price from them."""
+    yield
+    if "client" not in request.fixturenames and "app_instance" not in request.fixturenames:
+        return
+    from sqlalchemy import update
+
+    from app.database import async_session_factory
+    from app.modules.costs.models import CostItem
+
+    async with async_session_factory() as s:
+        await s.execute(
+            update(CostItem).where(CostItem.code.like("DSG-%"), CostItem.is_active.is_(True)).values(is_active=False)
+        )
+        await s.commit()
+
+
 @pytest.fixture(autouse=True)
 def _fresh_exchange_limiter():
     """The unauthenticated exchange is throttled per address; every test starts with a clean budget."""

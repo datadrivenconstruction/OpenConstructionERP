@@ -57977,6 +57977,7 @@ const resource = {
     "design.web_editor.problem.no_permission": "Teie roll seda ei luba.",
     "design.web_editor.problem.busy": "Allalaadimine juba käib.",
     "design.web_editor.problem.other": "Midagi läks valesti. Kerge mootor töötab edasi.",
+    "design.web_editor.not_available_yet": "Täisredaktor pole veel saadaval.",
     "modules.catalog.design_management": "Projekteerimise haldus",
     "modules.catalog.engineering_brief": "Insenerikirjeldus",
     "modules.catalog.hse_frame": "HSE raamistik",

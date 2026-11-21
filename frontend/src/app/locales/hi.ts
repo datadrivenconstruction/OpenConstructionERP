@@ -58030,6 +58030,7 @@ const resource = {
     "design.web_editor.problem.no_permission": "आपकी भूमिका इसकी अनुमति नहीं देती।",
     "design.web_editor.problem.busy": "एक डाउनलोड पहले से चल रहा है।",
     "design.web_editor.problem.other": "कुछ गलत हो गया। हल्का इंजन काम करता रहता है।",
+    "design.web_editor.not_available_yet": "पूर्ण संपादक अभी उपलब्ध नहीं है।",
     "modules.catalog.design_management": "डिज़ाइन प्रबंधन",
     "modules.catalog.engineering_brief": "इंजीनियरिंग ब्रीफ",
     "modules.catalog.hse_frame": "HSE ढांचा",

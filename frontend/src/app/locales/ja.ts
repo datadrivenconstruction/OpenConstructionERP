@@ -59315,6 +59315,7 @@ const resource = {
     "design.web_editor.problem.no_permission": "あなたのロールではこの操作はできません。",
     "design.web_editor.problem.busy": "すでにダウンロード中です。",
     "design.web_editor.problem.other": "問題が発生しました。軽量エンジンは動き続けます。",
+    "design.web_editor.not_available_yet": "フルエディターはまだ利用できません。",
     "modules.catalog.design_management": "設計管理",
     "modules.catalog.engineering_brief": "エンジニアリング概要書",
     "modules.catalog.hse_frame": "HSE枠組み",

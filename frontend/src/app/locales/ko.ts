@@ -58399,6 +58399,7 @@ const resource = {
     "design.web_editor.problem.no_permission": "현재 역할로는 할 수 없습니다.",
     "design.web_editor.problem.busy": "이미 다운로드가 진행 중입니다.",
     "design.web_editor.problem.other": "문제가 발생했습니다. 경량 엔진은 계속 작동합니다.",
+    "design.web_editor.not_available_yet": "전체 편집기는 아직 사용할 수 없습니다.",
     "modules.catalog.design_management": "설계 관리",
     "modules.catalog.engineering_brief": "엔지니어링 브리프",
     "modules.catalog.hse_frame": "HSE 프레임워크",

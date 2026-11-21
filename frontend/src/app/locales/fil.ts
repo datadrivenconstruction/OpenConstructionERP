@@ -57985,6 +57985,7 @@ const resource = {
     "design.web_editor.problem.no_permission": "Hindi ito pinapayagan ng iyong tungkulin.",
     "design.web_editor.problem.busy": "May tumatakbong download na.",
     "design.web_editor.problem.other": "May nagkamali. Patuloy na gumagana ang magaan na engine.",
+    "design.web_editor.not_available_yet": "Hindi pa available ang buong editor.",
     "modules.catalog.design_management": "Design management",
     "modules.catalog.engineering_brief": "Engineering brief",
     "modules.catalog.hse_frame": "Balangkas ng HSE",

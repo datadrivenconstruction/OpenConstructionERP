@@ -58908,6 +58908,7 @@ const resource = {
     "design.web_editor.problem.no_permission": "Rolünüz buna izin vermiyor.",
     "design.web_editor.problem.busy": "Bir indirme zaten sürüyor.",
     "design.web_editor.problem.other": "Bir sorun oluştu. Hafif motor çalışmaya devam ediyor.",
+    "design.web_editor.not_available_yet": "Tam düzenleyici henüz kullanılamıyor.",
     "modules.catalog.design_management": "Tasarım yönetimi",
     "modules.catalog.engineering_brief": "Mühendislik brifi",
     "modules.catalog.hse_frame": "HSE çerçevesi",

@@ -60926,6 +60926,7 @@ const resource = {
     "design.web_editor.problem.no_permission": "A sua função não permite fazê-lo.",
     "design.web_editor.problem.busy": "Já há uma transferência em curso.",
     "design.web_editor.problem.other": "Algo correu mal. O motor leve continua a funcionar.",
+    "design.web_editor.not_available_yet": "O editor completo ainda não está disponível.",
     "modules.catalog.design_management": "Gestão da conceção",
     "modules.catalog.engineering_brief": "Brief de engenharia",
     "modules.catalog.hse_frame": "Marco HSE (SST)",

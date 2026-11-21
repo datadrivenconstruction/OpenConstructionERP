@@ -367,6 +367,7 @@ async def test_api_install_then_serve_precompressed(client, server, api_settings
     body = (await client.get(f"{BASE}/web-editor", headers=h)).json()
     assert body["install"]["state"] == "idle", body
     assert body["installed"]["version"] == "0.10.0" and body["update_available"] is False
+    assert body["is_admin"] is False and body["can_remove"] is False
     url = body["installed"]["manifest_url"]
     assert url == f"{BASE}/web-editor/files/0.10.0/manifest.json"
 

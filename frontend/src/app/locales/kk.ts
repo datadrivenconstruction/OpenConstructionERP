@@ -57988,6 +57988,7 @@ const resource = {
     "design.web_editor.problem.no_permission": "Рөліңіз бұған рұқсат бермейді.",
     "design.web_editor.problem.busy": "Жүктеу жүріп жатыр.",
     "design.web_editor.problem.other": "Бірдеңе дұрыс болмады. Жеңіл қозғалтқыш жұмысын жалғастырады.",
+    "design.web_editor.not_available_yet": "Толық редактор әзірге қолжетімсіз.",
     "modules.catalog.design_management": "Жобалауды басқару",
     "modules.catalog.engineering_brief": "Инженерлік брифинг",
     "modules.catalog.hse_frame": "HSE шеңбері",

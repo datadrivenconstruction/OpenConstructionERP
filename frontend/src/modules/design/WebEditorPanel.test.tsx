@@ -23,8 +23,18 @@ describe('web editor status line', () => {
     expect(statusLine(base(), t)).toBeNull();
   });
 
-  it('refuses without a signing key and says so', () => {
-    expect(statusLine(base({ signing: { key: false, error: null } }), t)).toBe(EN['design.web_editor.problem.no_key']!);
+  it('tells an admin without a signing key what to configure', () => {
+    const s = base({ signing: { key: false, error: null }, is_admin: true });
+    expect(statusLine(s, t)).toBe(EN['design.web_editor.problem.no_key']!);
+  });
+
+  it('tells everyone else without a signing key that the full editor is not available yet', () => {
+    for (const feed of [base().feed, { state: 'absent' as const }]) {
+      for (const error of [null, 'key_invalid']) {
+        const s = base({ signing: { key: false, error }, feed, is_admin: false });
+        expect(statusLine(s, t)).toBe('The full editor is not available yet.');
+      }
+    }
   });
 
   it('names a release that needs a newer platform', () => {

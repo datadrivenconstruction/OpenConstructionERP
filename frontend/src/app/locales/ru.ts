@@ -61029,6 +61029,7 @@ const resource = {
     "design.web_editor.problem.no_permission": "Вашей роли это недоступно.",
     "design.web_editor.problem.busy": "Загрузка уже идёт.",
     "design.web_editor.problem.other": "Что-то пошло не так. Облегчённый движок продолжает работать.",
+    "design.web_editor.not_available_yet": "Полный редактор пока недоступен.",
     "modules.catalog.design_management": "Управление проектированием",
     "modules.catalog.engineering_brief": "Инженерное задание",
     "modules.catalog.hse_frame": "Рамка HSE (охрана труда)",

@@ -60474,6 +60474,7 @@ const resource = {
     "design.web_editor.problem.no_permission": "Ihre Rolle darf das nicht.",
     "design.web_editor.problem.busy": "Ein Download läuft bereits.",
     "design.web_editor.problem.other": "Etwas ist schiefgegangen. Die schlanke Engine arbeitet weiter.",
+    "design.web_editor.not_available_yet": "Der vollständige Editor ist noch nicht verfügbar.",
     "modules.catalog.design_management": "Planungsmanagement",
     "modules.catalog.engineering_brief": "Planungsauftrag",
     "modules.catalog.hse_frame": "Arbeitsschutzrahmen (HSE)",

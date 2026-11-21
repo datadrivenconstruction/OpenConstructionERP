@@ -60185,6 +60185,7 @@ const resource = {
     "design.web_editor.problem.no_permission": "您的角色無權執行此操作。",
     "design.web_editor.problem.busy": "已有下載正在進行。",
     "design.web_editor.problem.other": "出現問題。輕量引擎繼續工作。",
+    "design.web_editor.not_available_yet": "完整編輯器暫未可用。",
     "modules.catalog.design_management": "設計管理",
     "modules.catalog.engineering_brief": "工程任務書",
     "modules.catalog.hse_frame": "HSE框架",

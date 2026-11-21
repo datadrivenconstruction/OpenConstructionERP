@@ -232,8 +232,8 @@ class BriefValuesSpec(_DesignSpec):
                 )
                 confirmed = True
             except BriefError as exc:
-                # Confirming needs a complete brief, as on the brief form: an incomplete one keeps the values
-                # saved as proposed, and the person confirms them in the form once the brief is complete.
+                # Gaps the draft already had do not block confirming (as on the brief form); a newly missing
+                # required value keeps the values saved as proposed, and the person confirms them in the form.
                 if any(e["message"] != "is required" for e in exc.errors):
                     raise
             if confirmed:

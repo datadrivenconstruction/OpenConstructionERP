@@ -58361,6 +58361,7 @@ const resource = {
     "design.web_editor.problem.no_permission": "Vaša uloga to ne dopušta.",
     "design.web_editor.problem.busy": "Preuzimanje je već u tijeku.",
     "design.web_editor.problem.other": "Nešto je pošlo po zlu. Lagani pogon i dalje radi.",
+    "design.web_editor.not_available_yet": "Puni uređivač još nije dostupan.",
     "modules.catalog.design_management": "Upravljanje projektiranjem",
     "modules.catalog.engineering_brief": "Inženjerski brief",
     "modules.catalog.hse_frame": "HSE okvir",

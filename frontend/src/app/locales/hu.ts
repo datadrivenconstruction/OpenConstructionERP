@@ -60592,6 +60592,7 @@ const resource = {
     "design.web_editor.problem.no_permission": "A szerepköre ezt nem engedi.",
     "design.web_editor.problem.busy": "Már fut egy letöltés.",
     "design.web_editor.problem.other": "Hiba történt. A könnyű motor tovább működik.",
+    "design.web_editor.not_available_yet": "A teljes szerkesztő még nem érhető el.",
     "modules.catalog.design_management": "Tervezésirányítás",
     "modules.catalog.engineering_brief": "Mérnöki összefoglaló",
     "modules.catalog.hse_frame": "HSE keretrendszer",

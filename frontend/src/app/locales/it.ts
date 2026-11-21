@@ -59234,6 +59234,7 @@ const resource = {
     "design.web_editor.problem.no_permission": "Il tuo ruolo non lo consente.",
     "design.web_editor.problem.busy": "Un download è già in corso.",
     "design.web_editor.problem.other": "Qualcosa è andato storto. Il motore leggero continua a funzionare.",
+    "design.web_editor.not_available_yet": "L'editor completo non è ancora disponibile.",
     "modules.catalog.design_management": "Gestione della progettazione",
     "modules.catalog.engineering_brief": "Brief di ingegneria",
     "modules.catalog.hse_frame": "Quadro HSE",

@@ -58027,6 +58027,7 @@ const resource = {
     "design.web_editor.problem.no_permission": "Din rolle må ikke dette.",
     "design.web_editor.problem.busy": "En download kører allerede.",
     "design.web_editor.problem.other": "Noget gik galt. Den lette motor kører videre.",
+    "design.web_editor.not_available_yet": "Den fulde editor er ikke tilgængelig endnu.",
     "modules.catalog.design_management": "Projekteringsstyring",
     "modules.catalog.engineering_brief": "Ingeniørbriefing",
     "modules.catalog.hse_frame": "HSE-ramme",

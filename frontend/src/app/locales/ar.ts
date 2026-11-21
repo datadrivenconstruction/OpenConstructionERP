@@ -61073,6 +61073,7 @@ const resource = {
     "design.web_editor.problem.no_permission": "دورك لا يسمح بذلك.",
     "design.web_editor.problem.busy": "يوجد تنزيل قيد التنفيذ بالفعل.",
     "design.web_editor.problem.other": "حدث خطأ ما. يستمر المحرك الخفيف في العمل.",
+    "design.web_editor.not_available_yet": "المحرر الكامل غير متاح بعد.",
     "modules.catalog.design_management": "إدارة التصميم",
     "modules.catalog.engineering_brief": "موجز هندسي",
     "modules.catalog.hse_frame": "إطار الصحة والسلامة والبيئة",

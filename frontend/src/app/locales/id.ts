@@ -57782,6 +57782,7 @@ const resource = {
     "design.web_editor.problem.no_permission": "Peran Anda tidak mengizinkan ini.",
     "design.web_editor.problem.busy": "Sebuah unduhan sedang berjalan.",
     "design.web_editor.problem.other": "Terjadi kesalahan. Mesin ringan tetap berjalan.",
+    "design.web_editor.not_available_yet": "Editor lengkap belum tersedia.",
     "modules.catalog.design_management": "Manajemen desain",
     "modules.catalog.engineering_brief": "Ringkasan teknik",
     "modules.catalog.hse_frame": "Kerangka HSE",

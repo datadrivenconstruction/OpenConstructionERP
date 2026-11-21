@@ -60097,6 +60097,7 @@ const resource = {
     "design.web_editor.problem.no_permission": "Вашій ролі це недоступно.",
     "design.web_editor.problem.busy": "Завантаження вже триває.",
     "design.web_editor.problem.other": "Щось пішло не так. Полегшений рушій працює далі.",
+    "design.web_editor.not_available_yet": "Повний редактор поки що недоступний.",
     "modules.catalog.design_management": "Управління проєктуванням",
     "modules.catalog.engineering_brief": "Інженерне завдання",
     "modules.catalog.hse_frame": "Рамка HSE (охорона праці)",

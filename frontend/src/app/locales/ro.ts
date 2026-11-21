@@ -58351,6 +58351,7 @@ const resource = {
     "design.web_editor.problem.no_permission": "Rolul dvs. nu permite acest lucru.",
     "design.web_editor.problem.busy": "O descărcare este deja în curs.",
     "design.web_editor.problem.other": "Ceva nu a mers bine. Motorul ușor funcționează în continuare.",
+    "design.web_editor.not_available_yet": "Editorul complet nu este încă disponibil.",
     "modules.catalog.design_management": "Gestionarea proiectării",
     "modules.catalog.engineering_brief": "Brief de inginerie",
     "modules.catalog.hse_frame": "Cadru HSE",

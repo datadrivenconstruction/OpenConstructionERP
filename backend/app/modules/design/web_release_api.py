@@ -77,6 +77,7 @@ async def status_view(session, user_id: str) -> dict[str, Any]:
         "update_available": bool(update),
         "can_install": role != "viewer" and key_ok,
         "can_remove": role == "admin",
+        "is_admin": role == "admin",
     }
 
 

@@ -57993,6 +57993,7 @@ const resource = {
     "design.web_editor.problem.no_permission": "آپ کا کردار اس کی اجازت نہیں دیتا۔",
     "design.web_editor.problem.busy": "ایک ڈاؤن لوڈ پہلے سے جاری ہے۔",
     "design.web_editor.problem.other": "کچھ غلط ہو گیا۔ ہلکا انجن کام کرتا رہتا ہے۔",
+    "design.web_editor.not_available_yet": "مکمل ایڈیٹر ابھی دستیاب نہیں ہے۔",
     "modules.catalog.design_management": "ڈیزائن مینجمنٹ",
     "modules.catalog.engineering_brief": "انجینئرنگ بریف",
     "modules.catalog.hse_frame": "HSE فریم ورک",

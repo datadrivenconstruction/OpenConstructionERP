@@ -58908,6 +58908,7 @@ const resource = {
     "design.web_editor.problem.no_permission": "Uw rol mag dit niet.",
     "design.web_editor.problem.busy": "Er loopt al een download.",
     "design.web_editor.problem.other": "Er ging iets mis. De lichte engine blijft werken.",
+    "design.web_editor.not_available_yet": "De volledige editor is nog niet beschikbaar.",
     "modules.catalog.design_management": "Ontwerpbeheer",
     "modules.catalog.engineering_brief": "Engineeringbrief",
     "modules.catalog.hse_frame": "HSE-kader",

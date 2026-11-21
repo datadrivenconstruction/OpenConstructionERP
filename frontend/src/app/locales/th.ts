@@ -57783,6 +57783,7 @@ const resource = {
     "design.web_editor.problem.no_permission": "บทบาทของคุณทำสิ่งนี้ไม่ได้",
     "design.web_editor.problem.busy": "มีการดาวน์โหลดอยู่แล้ว",
     "design.web_editor.problem.other": "เกิดข้อผิดพลาด เอนจินแบบเบายังทำงานต่อ",
+    "design.web_editor.not_available_yet": "โปรแกรมแก้ไขแบบเต็มยังไม่พร้อมใช้งาน",
     "modules.catalog.design_management": "การจัดการงานออกแบบ",
     "modules.catalog.engineering_brief": "สรุปงานวิศวกรรม",
     "modules.catalog.hse_frame": "กรอบงาน HSE",

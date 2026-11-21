@@ -58003,6 +58003,7 @@ const resource = {
     "design.web_editor.problem.no_permission": "Таны үүрэг үүнийг зөвшөөрөхгүй.",
     "design.web_editor.problem.busy": "Татаж байгаа нэг үйлдэл явагдаж байна.",
     "design.web_editor.problem.other": "Алдаа гарлаа. Хөнгөн хөдөлгүүр ажилласаар байна.",
+    "design.web_editor.not_available_yet": "Бүрэн засварлагч одоогоор ашиглах боломжгүй байна.",
     "modules.catalog.design_management": "Зураг төслийн удирдлага",
     "modules.catalog.engineering_brief": "Инженерийн товч тайлан",
     "modules.catalog.hse_frame": "HSE хүрээ",

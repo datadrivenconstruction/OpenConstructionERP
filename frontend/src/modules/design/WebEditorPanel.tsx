@@ -30,6 +30,8 @@ export function statusLine(s: WebEditorStatus, t: (k: string, o?: Record<string,
   if (s.install.state === 'unpacking') return t('design.web_editor.unpacking');
   if (s.install.state === 'failed') return t(problemKey(s.install.error));
   if (s.installed?.problem) return t(problemKey(s.installed.problem));
+  // Without a release key nothing can be fetched: an admin sees what to configure, everyone else a plain line.
+  if (!s.signing.key && !s.is_admin && !s.installed) return t('design.web_editor.not_available_yet');
   if (!s.signing.key && (s.feed.state === 'available' || s.signing.error)) {
     return t(problemKey(s.signing.error ?? 'no_key'));
   }

@@ -57987,6 +57987,7 @@ const resource = {
     "design.web_editor.problem.no_permission": "Ο ρόλος σας δεν το επιτρέπει.",
     "design.web_editor.problem.busy": "Μια λήψη βρίσκεται ήδη σε εξέλιξη.",
     "design.web_editor.problem.other": "Κάτι πήγε στραβά. Η ελαφριά μηχανή συνεχίζει να λειτουργεί.",
+    "design.web_editor.not_available_yet": "Ο πλήρης επεξεργαστής δεν είναι ακόμη διαθέσιμος.",
     "modules.catalog.design_management": "Διαχείριση μελέτης",
     "modules.catalog.engineering_brief": "Τεχνική σύνοψη",
     "modules.catalog.hse_frame": "Πλαίσιο HSE",

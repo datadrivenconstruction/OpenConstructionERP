@@ -58144,6 +58144,7 @@ const resource = {
     "design.web_editor.problem.no_permission": "Ролуңуз буга уруксат бербейт.",
     "design.web_editor.problem.busy": "Жүктөө жүрүп жатат.",
     "design.web_editor.problem.other": "Бир нерсе туура эмес болду. Жеңил кыймылдаткыч иштей берет.",
+    "design.web_editor.not_available_yet": "Толук редактор азырынча жеткиликсиз.",
     "modules.catalog.design_management": "Долбоорлоону башкаруу",
     "modules.catalog.engineering_brief": "Инженердик брифинг",
     "modules.catalog.hse_frame": "HSE алкагы",
