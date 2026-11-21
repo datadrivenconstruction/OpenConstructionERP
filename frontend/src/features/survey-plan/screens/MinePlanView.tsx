@@ -96,7 +96,7 @@ export function MinePlanView({ projectId, canvas }: MinePlanViewProps) {
         {DH_CLASSES.map((c) => (
           <span key={c.token} className="inline-flex items-center gap-1">
             <span className="inline-block h-2.5 w-3 rounded-sm" style={{ background: `var(--oe-map-${c.token})` }} />
-            <span className="text-[10px] text-content-tertiary">{Number.isFinite(c.min) ? `${c.min > 0 ? '+' : ''}${c.min}` : ''}</span>
+            <span className="text-2xs text-content-tertiary">{Number.isFinite(c.min) ? `${c.min > 0 ? '+' : ''}${c.min}` : ''}</span>
           </span>
         ))}
       </div>

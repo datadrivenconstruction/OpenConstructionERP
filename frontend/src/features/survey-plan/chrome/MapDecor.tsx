@@ -13,7 +13,7 @@ export function ScaleBar({ mpp, conventions }: { mpp: number; conventions: PlanC
   const text = formatDistance(metres, { ...conventions, precision: metres >= 1 ? 'mm' : conventions.precision }, true).replace(/\.0+(?=\s)/, '');
   return (
     <div className="pointer-events-none select-none" data-testid="plan-scale-bar" aria-hidden>
-      <div className="mb-0.5 text-[11px] font-medium" style={{ color: 'var(--oe-map-ink)', textShadow: '0 0 3px var(--oe-map-halo)' }}>
+      <div className="mb-0.5 text-2xs font-medium" style={{ color: 'var(--oe-map-ink)', textShadow: '0 0 3px var(--oe-map-halo)' }}>
         {text}
       </div>
       <div className="flex h-1.5" style={{ width: px, border: '1px solid var(--oe-map-ink)', background: 'var(--oe-map-halo)' }}>

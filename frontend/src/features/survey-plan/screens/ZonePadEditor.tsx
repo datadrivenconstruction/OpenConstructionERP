@@ -115,7 +115,7 @@ export function ZonePadEditor({ projectId, canWrite, surfaces, canvas }: ZonePad
       )}
       <label className="block">
         <span className="oe-label">{t('plan.tin.pad_outline', { defaultValue: 'Outline, one corner per line ({{a}} {{b}})', a: axes.e, b: axes.n })}</span>
-        <textarea className="oe-input h-28 w-full font-mono text-xs" value={outline} onChange={(e) => setOutline(e.target.value)} data-testid="plan-pad-outline" />
+        <textarea className="oe-input min-h-28 w-full font-mono text-xs" value={outline} onChange={(e) => setOutline(e.target.value)} data-testid="plan-pad-outline" />
       </label>
       {parsed.bad.length > 0 && (
         <p className="text-xs text-semantic-error">{t('plan.tin.pad_bad_lines', { defaultValue: 'Lines not read: {{lines}}', lines: parsed.bad.join(', ') })}</p>

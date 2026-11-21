@@ -56,7 +56,7 @@ export function SnapCursor({ kind, x, y, label }: { kind: SnapKind; x: number; y
         <Shape kind={kind} />
       </svg>
       <span
-        className="absolute start-4 top-3 whitespace-nowrap rounded px-1 py-px text-[11px] font-medium shadow-sm"
+        className="absolute start-4 top-3 whitespace-nowrap rounded px-1 py-px text-2xs font-medium shadow-sm"
         style={{ background: 'var(--oe-map-halo)', color: 'var(--oe-map-ink)' }}
       >
         {label}
