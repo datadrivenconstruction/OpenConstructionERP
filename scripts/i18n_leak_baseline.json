@@ -12189,5 +12189,39 @@
       "uz",
       "vi"
     ]
+  },
+  "data_paths.entity.webhook": {
+    "en_value": "Webhook",
+    "leaked_locales": [
+      "cs",
+      "da",
+      "de",
+      "el",
+      "es",
+      "fi",
+      "fil",
+      "fr",
+      "he",
+      "hr",
+      "hu",
+      "id",
+      "it",
+      "ja",
+      "kk",
+      "ko",
+      "ky",
+      "mn",
+      "nl",
+      "no",
+      "pl",
+      "pt",
+      "ro",
+      "sv",
+      "tr",
+      "uz",
+      "vi",
+      "zh",
+      "zh-HK"
+    ]
   }
 }
