@@ -67,6 +67,13 @@ const UNRELEASED: ChangelogEntry | null = null;
 // carry the long form and are left alone as the record of what shipped.
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '20.1.0',
+    date: '2026-11-21',
+    tag: 'NEW',
+    summary:
+      'Surveyors draw and edit points, lines and parcels on one plan shared by every survey screen, five site workflows run from field to payment, and tenders, bid packages and RFQs become one register. Data paths show who works where, live counts and the changes of the last 30 days.',
+  },
+  {
     version: '20.0.1',
     date: '2026-11-20',
     tag: 'FIX',

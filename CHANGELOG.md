@@ -7,6 +7,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 > **Tip:** This file is long. Use your browser's **Find** (Ctrl+F) to jump to a version number, or see the [Releases page](https://github.com/datadrivenconstruction/OpenConstructionERP/releases) for a per-release view with download links.
 
+## [20.1.0] - 2026-11-21
+
+Surveyors get a plan editor shared by every survey screen, five site survey workflows run end to end, tenders become one register, and data paths show swimlanes, roles and recent changes.
+
+### Added
+
+- Survey plan editor. Points, lines and parcels are drawn and edited on one canvas with snapping, measuring, layers, a map underlay and printing to scale. Traverses are entered by clicking stations, and the least squares adjustment draws error ellipses with a stated exaggeration.
+- Plans for parcels, surfaces, cut and fill zones, stockpiles, mines, road alignments by intersection points, cross sections, setting out and settlement monitoring, all on the same canvas.
+- Survey workflows from field to payment: earthworks volumes to the payment claim, setting out with non-conformance reports, traverse and levelling field books, stockpiles with haul tickets compared to excavated volumes, and settlement monitoring.
+- Point cloud checks of a scan against the design surface, with tolerances per country.
+- Tenders. Bid packages, tenders and RFQs are one register with one tender card. Old addresses redirect to it, and existing tenders and RFQs are copied in on upgrade.
+- Data paths show swimlanes by role, live counts, the impact of a change, a minimap, the inputs with their validation, traces and the changes of the last 30 days.
+
+### Fixed
+
+- A fresh data folder no longer copies the upload store of an old installation, which could fill the disk on first start.
+- Findings of setting out checks are listed in a stable order, and traverse face differences are rounded to a thousandth of an arc second.
+- Tenders copied from RFQs show their bidders and the low, high and recommended bid instead of blank names and 0,00; installs already upgraded are repaired on start.
+- The haul ticket header totals tonnes, cubic metres and loads separately, and the stockpile summary reads the book stock of piles that have no survey yet.
+- DIN 18202 plan tolerances for lengths over 6 to 15 m read 20 mm, and Chile gets plan conventions and a survey code library.
+- Survey modules no longer show a page not found while the module list is still loading after sign in.
+- Numbers, scales and dates on survey plans follow the language of the application, and map buttons are translated.
+- The data paths panel opens beside the menu instead of under it, names modules in the user's language and draws the project map before its counts arrive.
+- The tenders list scrolls inside its own frame on a phone.
+- Snapping on a plan stays fast when zoomed far out, and an empty plan opens at site scale.
+- The assistant button no longer covers the survey plan status bar, and haul ticket volumes read m³.
+- A legacy upload store moves into one data folder only; later new data folders start empty.
+
 ## [20.0.1] - 2026-11-20
 
 ### Fixed
