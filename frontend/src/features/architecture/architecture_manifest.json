@@ -17817,7 +17817,6 @@
         "schedule",
         "subcontractors",
         "tasks",
-        "tendering",
         "users",
         "variations"
       ]
@@ -19281,6 +19280,9 @@
         "award_route.py",
         "award_selection.py",
         "events.py",
+        "legacy_adapter.py",
+        "legacy_copy.py",
+        "legacy_mirror.py",
         "manifest.py",
         "models.py",
         "permissions.py",
@@ -19291,6 +19293,9 @@
         "schemas.py",
         "seed.py",
         "service.py",
+        "tender_routes.py",
+        "tender_rules.py",
+        "tenders.py",
         "validators.py"
       ],
       "manifest": {
@@ -19422,6 +19427,42 @@
               "annotation": "Mapped[dict]",
               "sql_type": "JSON",
               "nullable": false
+            },
+            {
+              "name": "legacy_source",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "boq_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "legal_entity_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "cost_line_ids",
+              "annotation": "Mapped[list | None]",
+              "sql_type": "JSON",
+              "nullable": true
+            },
+            {
+              "name": "evaluation_method",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "require_full_scope",
+              "annotation": "Mapped[bool | None]",
+              "sql_type": "Boolean",
+              "nullable": true
             }
           ],
           "relationships": [
@@ -19609,6 +19650,30 @@
               "annotation": "Mapped[str | None]",
               "sql_type": "String",
               "nullable": true
+            },
+            {
+              "name": "expires_at",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "revoked_at",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "draft_saved_at",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "draft",
+              "annotation": "Mapped[dict | None]",
+              "sql_type": "JSON",
+              "nullable": true
             }
           ],
           "relationships": [
@@ -19693,6 +19758,18 @@
               "annotation": "Mapped[str]",
               "sql_type": "Text",
               "nullable": false
+            },
+            {
+              "name": "withdrawn_at",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "withdrawn_reason",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "Text",
+              "nullable": true
             }
           ],
           "relationships": [
@@ -19785,6 +19862,54 @@
               "annotation": "Mapped[dict]",
               "sql_type": "JSON",
               "nullable": false
+            },
+            {
+              "name": "validity_days",
+              "annotation": "Mapped[int | None]",
+              "sql_type": "Integer",
+              "nullable": true
+            },
+            {
+              "name": "exchange_rate",
+              "annotation": "Mapped[Decimal | None]",
+              "sql_type": "Numeric",
+              "nullable": true
+            },
+            {
+              "name": "exchange_rate_date",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "exchange_rate_source",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "admitted_by",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "admitted_at",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "admission_reason",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "Text",
+              "nullable": true
+            },
+            {
+              "name": "late_reason",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "Text",
+              "nullable": true
             }
           ],
           "relationships": []
@@ -19804,11 +19929,29 @@
             },
             {
               "name": "line_item_id",
-              "annotation": "Mapped[uuid.UUID]",
+              "annotation": "Mapped[uuid.UUID | None]",
               "sql_type": "GUID",
-              "nullable": false,
+              "nullable": true,
               "is_fk": true,
               "fk_target": "oe_bid_management_line_item.id"
+            },
+            {
+              "name": "description",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "Text",
+              "nullable": true
+            },
+            {
+              "name": "unit",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "unit_conversion_factor",
+              "annotation": "Mapped[Decimal | None]",
+              "sql_type": "Numeric",
+              "nullable": true
             },
             {
               "name": "unit_price",
@@ -20213,6 +20356,30 @@
               "annotation": "Mapped[str | None]",
               "sql_type": "String",
               "nullable": true
+            },
+            {
+              "name": "method",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "is_override",
+              "annotation": "Mapped[bool | None]",
+              "sql_type": "Boolean",
+              "nullable": true
+            },
+            {
+              "name": "recommended_bidder_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "basis",
+              "annotation": "Mapped[dict | None]",
+              "sql_type": "JSON",
+              "nullable": true
             }
           ],
           "relationships": []
@@ -20252,6 +20419,102 @@
             },
             {
               "name": "notified_at",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            }
+          ],
+          "relationships": []
+        },
+        {
+          "class_name": "BidSubmissionAdjustment",
+          "tablename": "oe_bid_management_submission_adjustment",
+          "docstring": "A priced adjustment on a submission: an exclusion, a plug, a discount.",
+          "columns": [
+            {
+              "name": "submission_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_bid_management_submission.id"
+            },
+            {
+              "name": "kind",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "description",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "Text",
+              "nullable": true
+            },
+            {
+              "name": "amount",
+              "annotation": "Mapped[Decimal]",
+              "sql_type": "Numeric",
+              "nullable": false
+            },
+            {
+              "name": "currency",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "included_in_bid",
+              "annotation": "Mapped[bool]",
+              "sql_type": "Boolean",
+              "nullable": false
+            },
+            {
+              "name": "source",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            }
+          ],
+          "relationships": []
+        },
+        {
+          "class_name": "TenderLegacyMap",
+          "tablename": "oe_tender_legacy_map",
+          "docstring": "Where a row of the old tendering or rfq_bidding tables lives now.\n\nOne row per copied source row. It makes the copy re-runnable (a mapped row\nis updated, never copied twice) and lets old ids reach the canonical record.",
+          "columns": [
+            {
+              "name": "source_table",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "source_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false
+            },
+            {
+              "name": "target_table",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "target_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false
+            },
+            {
+              "name": "package_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "copied_at",
               "annotation": "Mapped[str | None]",
               "sql_type": "String",
               "nullable": true
@@ -20779,6 +21042,29 @@
             {
               "name": "metadata",
               "type": "dict[str, Any]"
+            },
+            {
+              "name": "boq_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "legal_entity_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "cost_line_ids",
+              "type": "list[str] | None"
+            },
+            {
+              "name": "evaluation_method",
+              "type": "str | None"
+            },
+            {
+              "name": "require_full_scope",
+              "type": "bool | None",
+              "default": "None"
             }
           ]
         },
@@ -20840,6 +21126,29 @@
             {
               "name": "metadata",
               "type": "dict[str, Any] | None",
+              "default": "None"
+            },
+            {
+              "name": "boq_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "legal_entity_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "cost_line_ids",
+              "type": "list[str] | None"
+            },
+            {
+              "name": "evaluation_method",
+              "type": "str | None"
+            },
+            {
+              "name": "require_full_scope",
+              "type": "bool | None",
               "default": "None"
             }
           ]
@@ -20940,6 +21249,36 @@
             {
               "name": "metadata",
               "type": "dict[str, Any]"
+            },
+            {
+              "name": "legacy_source",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "boq_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "legal_entity_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "cost_line_ids",
+              "type": "list[Any] | None",
+              "default": "None"
+            },
+            {
+              "name": "evaluation_method",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "require_full_scope",
+              "type": "bool | None",
+              "default": "None"
             },
             {
               "name": "created_at",
@@ -21288,6 +21627,21 @@
               "default": "'pending'"
             },
             {
+              "name": "expires_at",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "revoked_at",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "draft_saved_at",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
               "name": "created_at",
               "type": "datetime"
             },
@@ -21467,6 +21821,16 @@
               "default": "None"
             },
             {
+              "name": "withdrawn_at",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "withdrawn_reason",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
               "name": "created_at",
               "type": "datetime"
             },
@@ -21642,6 +22006,46 @@
               "type": "dict[str, Any]"
             },
             {
+              "name": "validity_days",
+              "type": "int | None",
+              "default": "None"
+            },
+            {
+              "name": "exchange_rate",
+              "type": "Decimal | None",
+              "default": "None"
+            },
+            {
+              "name": "exchange_rate_date",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "exchange_rate_source",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "admitted_by",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "admitted_at",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "admission_reason",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "late_reason",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
               "name": "created_at",
               "type": "datetime"
             },
@@ -21760,7 +22164,23 @@
             },
             {
               "name": "line_item_id",
-              "type": "UUID"
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "description",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "unit",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "unit_conversion_factor",
+              "type": "Decimal | None",
+              "default": "None"
             },
             {
               "name": "unit_price",
@@ -22450,6 +22870,26 @@
             {
               "name": "notified_others_at",
               "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "method",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "is_override",
+              "type": "bool | None",
+              "default": "None"
+            },
+            {
+              "name": "recommended_bidder_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "basis",
+              "type": "dict[str, Any] | None",
               "default": "None"
             },
             {
@@ -23435,6 +23875,7 @@
         "contracts",
         "costmodel",
         "procurement",
+        "rfq_bidding",
         "subcontractors",
         "tendering"
       ]
@@ -67816,6 +68257,8 @@
         "intl.py",
         "layouts.py",
         "manifest.py",
+        "measured_quantity.py",
+        "measured_quantity_schemas.py",
         "messages/__init__.py",
         "models.py",
         "pay_application.py",
@@ -92662,6 +93105,7 @@
       "files": [
         "__init__.py",
         "clock_headcount.py",
+        "data_paths.py",
         "events.py",
         "intl.py",
         "manifest.py",
@@ -98931,6 +99375,7 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "focus.py",
         "graph.py",
         "live.py",
         "manifest.py",
@@ -98940,6 +99385,7 @@
         "router.py",
         "schemas.py",
         "service.py",
+        "traces.py",
         "validators.py"
       ],
       "manifest": {
@@ -98984,6 +99430,41 @@
           "handler": "project_parties",
           "response_model": "ProjectParties",
           "request_schema": "None"
+        },
+        {
+          "method": "GET",
+          "path": "/focus/{module}/",
+          "handler": "module_focus",
+          "response_model": "ModuleFocus",
+          "request_schema": "ActiveMarkets"
+        },
+        {
+          "method": "GET",
+          "path": "/chips/{module}/",
+          "handler": "module_chips",
+          "response_model": "ModuleChips",
+          "request_schema": "ActiveMarkets"
+        },
+        {
+          "method": "GET",
+          "path": "/changes/{module}/",
+          "handler": "module_changes",
+          "response_model": "ModuleChanges",
+          "request_schema": "ActiveMarkets"
+        },
+        {
+          "method": "GET",
+          "path": "/traces/",
+          "handler": "list_traces",
+          "response_model": "TraceList",
+          "request_schema": "ActiveMarkets"
+        },
+        {
+          "method": "GET",
+          "path": "/coverage/",
+          "handler": "module_coverage",
+          "response_model": "CoverageOut",
+          "request_schema": "ActiveMarkets"
         }
       ],
       "schemas": [
@@ -99561,6 +100042,303 @@
             {
               "name": "parties",
               "type": "list[PartyOut]"
+            }
+          ]
+        },
+        {
+          "class_name": "DutyOut",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "role",
+              "type": "str"
+            },
+            {
+              "name": "label",
+              "type": "str"
+            }
+          ]
+        },
+        {
+          "class_name": "ExternalOut",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "kind",
+              "type": "str"
+            },
+            {
+              "name": "label",
+              "type": "str"
+            },
+            {
+              "name": "role",
+              "type": "str",
+              "default": "''"
+            }
+          ]
+        },
+        {
+          "class_name": "RuleOut",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "rule_id",
+              "type": "str"
+            },
+            {
+              "name": "name",
+              "type": "str"
+            },
+            {
+              "name": "severity",
+              "type": "str",
+              "default": "''"
+            }
+          ]
+        },
+        {
+          "class_name": "TraceStepOut",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "module",
+              "type": "str"
+            },
+            {
+              "name": "label",
+              "type": "str"
+            },
+            {
+              "name": "via",
+              "type": "str",
+              "default": "''"
+            }
+          ]
+        },
+        {
+          "class_name": "TraceOut",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "id",
+              "type": "str"
+            },
+            {
+              "name": "label",
+              "type": "str"
+            },
+            {
+              "name": "summary",
+              "type": "str"
+            },
+            {
+              "name": "steps",
+              "type": "list[TraceStepOut]"
+            },
+            {
+              "name": "at",
+              "type": "list[int]",
+              "description": "Step indexes that sit in the focused module"
+            }
+          ]
+        },
+        {
+          "class_name": "ModuleFocus",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "The right panel of the data paths window for one module.",
+          "fields": [
+            {
+              "name": "module",
+              "type": "str"
+            },
+            {
+              "name": "declared",
+              "type": "bool"
+            },
+            {
+              "name": "why",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "roles",
+              "type": "list[str]"
+            },
+            {
+              "name": "duties",
+              "type": "list[DutyOut]"
+            },
+            {
+              "name": "external",
+              "type": "list[ExternalOut]"
+            },
+            {
+              "name": "rules",
+              "type": "list[RuleOut]"
+            },
+            {
+              "name": "traces",
+              "type": "list[TraceOut]"
+            }
+          ]
+        },
+        {
+          "class_name": "ChipOut",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "id",
+              "type": "str"
+            },
+            {
+              "name": "label",
+              "type": "str"
+            },
+            {
+              "name": "count",
+              "type": "int"
+            },
+            {
+              "name": "tone",
+              "type": "str",
+              "default": "'neutral'"
+            }
+          ]
+        },
+        {
+          "class_name": "ModuleChips",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "module",
+              "type": "str"
+            },
+            {
+              "name": "chips",
+              "type": "list[ChipOut]"
+            },
+            {
+              "name": "generated_at",
+              "type": "datetime"
+            }
+          ]
+        },
+        {
+          "class_name": "ChangeOut",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "module",
+              "type": "str"
+            },
+            {
+              "name": "entity",
+              "type": "str"
+            },
+            {
+              "name": "entity_id",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "action",
+              "type": "str"
+            },
+            {
+              "name": "at",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "user",
+              "type": "str",
+              "default": "''"
+            }
+          ]
+        },
+        {
+          "class_name": "ModuleChanges",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "module",
+              "type": "str"
+            },
+            {
+              "name": "days",
+              "type": "int"
+            },
+            {
+              "name": "changes",
+              "type": "list[ChangeOut]"
+            }
+          ]
+        },
+        {
+          "class_name": "TraceList",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "traces",
+              "type": "list[TraceOut]"
+            }
+          ]
+        },
+        {
+          "class_name": "CoverageOut",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "declared",
+              "type": "int"
+            },
+            {
+              "name": "derived",
+              "type": "int"
+            },
+            {
+              "name": "none",
+              "type": "int"
+            },
+            {
+              "name": "modules",
+              "type": "dict[str, str]"
             }
           ]
         }
@@ -159700,6 +160478,18 @@
               "nullable": true
             },
             {
+              "name": "survey_volume_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "stockpile_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
               "name": "cost_code",
               "annotation": "Mapped[str]",
               "sql_type": "String",
@@ -160022,6 +160812,12 @@
               "nullable": false
             },
             {
+              "name": "haul_variance_pct",
+              "annotation": "Mapped[int | None]",
+              "sql_type": "Integer",
+              "nullable": true
+            },
+            {
               "name": "waste_catalogue",
               "annotation": "Mapped[str]",
               "sql_type": "String",
@@ -160126,6 +160922,12 @@
           "handler": "summary",
           "response_model": "SummaryOut",
           "request_schema": "Literal['day', 'haulier', 'material', 'haul_type']"
+        },
+        {
+          "method": "GET",
+          "path": "/projects/{project_id}/hauled-vs-excavated",
+          "handler": "hauled_vs_excavated",
+          "response_model": "HauledVsExcavatedOut"
         },
         {
           "method": "GET",
@@ -160379,6 +161181,16 @@
               "default": "None"
             },
             {
+              "name": "survey_volume_id",
+              "type": "uuid.UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "stockpile_id",
+              "type": "uuid.UUID | None",
+              "default": "None"
+            },
+            {
               "name": "cost_code",
               "type": "str"
             },
@@ -160596,6 +161408,16 @@
             },
             {
               "name": "boq_position_id",
+              "type": "uuid.UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "survey_volume_id",
+              "type": "uuid.UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "stockpile_id",
               "type": "uuid.UUID | None",
               "default": "None"
             },
@@ -160856,6 +161678,16 @@
               "type": "uuid.UUID | None"
             },
             {
+              "name": "survey_volume_id",
+              "type": "uuid.UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "stockpile_id",
+              "type": "uuid.UUID | None",
+              "default": "None"
+            },
+            {
               "name": "cost_code",
               "type": "str"
             },
@@ -160984,6 +161816,10 @@
             },
             {
               "name": "price_tolerance_pct",
+              "type": "int"
+            },
+            {
+              "name": "haul_variance_pct",
               "type": "int"
             },
             {
@@ -161527,11 +162363,115 @@
               "default": "200"
             }
           ]
+        },
+        {
+          "class_name": "HaulBasisRow",
+          "bases": [
+            "_DecimalOut"
+          ],
+          "docstring": "Hauled m3 by how it was worked out: ticket volume, weighbridge tonnes / density, or loads x capacity.",
+          "fields": [
+            {
+              "name": "basis",
+              "type": "Literal['volume', 'weighbridge', 'capacity', 'unresolved']"
+            },
+            {
+              "name": "tickets",
+              "type": "int"
+            },
+            {
+              "name": "loads",
+              "type": "int"
+            },
+            {
+              "name": "hauled_m3",
+              "type": "Decimal"
+            }
+          ]
+        },
+        {
+          "class_name": "HauledVsExcavatedOut",
+          "bases": [
+            "_DecimalOut"
+          ],
+          "docstring": "Excavated loose m3 of a volume (cut x swell) or the last stockpile survey, against the tickets linked to it.",
+          "fields": [
+            {
+              "name": "target",
+              "type": "Literal['volume', 'stockpile']"
+            },
+            {
+              "name": "target_id",
+              "type": "uuid.UUID"
+            },
+            {
+              "name": "code",
+              "type": "str"
+            },
+            {
+              "name": "name",
+              "type": "str"
+            },
+            {
+              "name": "excavated_m3",
+              "type": "Decimal | None"
+            },
+            {
+              "name": "excavated_basis",
+              "type": "Literal['loose_cut', 'bank_cut', 'stockpile_survey', 'none']"
+            },
+            {
+              "name": "swell_factor",
+              "type": "Decimal | None",
+              "default": "None"
+            },
+            {
+              "name": "hauled_m3",
+              "type": "Decimal"
+            },
+            {
+              "name": "tickets",
+              "type": "int"
+            },
+            {
+              "name": "loads",
+              "type": "int"
+            },
+            {
+              "name": "by_basis",
+              "type": "list[HaulBasisRow]"
+            },
+            {
+              "name": "difference_m3",
+              "type": "Decimal | None",
+              "default": "None"
+            },
+            {
+              "name": "difference_pct",
+              "type": "Decimal | None",
+              "default": "None"
+            },
+            {
+              "name": "threshold_pct",
+              "type": "int"
+            },
+            {
+              "name": "within_threshold",
+              "type": "bool | None",
+              "default": "None"
+            },
+            {
+              "name": "findings",
+              "type": "list[FindingOut]"
+            }
+          ]
         }
       ],
       "import_dependencies": [
         "projects",
-        "site_logistics"
+        "site_logistics",
+        "stockpiles",
+        "surfaces_volumes"
       ]
     },
     {
@@ -172130,14 +173070,18 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "cadastre.py",
         "calc_router.py",
         "calc_schemas.py",
         "calc_service.py",
         "calc_validators.py",
+        "data_paths.py",
         "geometry.py",
         "manifest.py",
         "models.py",
         "parcel_io.py",
+        "plan_router.py",
+        "plan_service.py",
         "profiles.py",
         "report.py",
         "repository.py",
@@ -172723,6 +173667,14 @@
             {
               "name": "accuracy_m",
               "type": "float | None"
+            },
+            {
+              "name": "corner_status",
+              "type": "str"
+            },
+            {
+              "name": "accuracy_class",
+              "type": "str"
             }
           ]
         },
@@ -172736,16 +173688,6 @@
             {
               "name": "seq",
               "type": "int"
-            },
-            {
-              "name": "corner_status",
-              "type": "str",
-              "default": "''"
-            },
-            {
-              "name": "accuracy_class",
-              "type": "str",
-              "default": "''"
             }
           ]
         },
@@ -173135,6 +174077,23 @@
           ]
         },
         {
+          "class_name": "MarkTypeOut",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "key",
+              "type": "str"
+            },
+            {
+              "name": "monumented",
+              "type": "bool"
+            }
+          ]
+        },
+        {
           "class_name": "ProfileOut",
           "bases": [
             "BaseModel"
@@ -173172,6 +174131,15 @@
             {
               "name": "export_formats",
               "type": "list[str]"
+            },
+            {
+              "name": "id_pattern",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "marks",
+              "type": "list[MarkTypeOut]"
             }
           ]
         },
@@ -173630,6 +174598,182 @@
               "name": "limit",
               "type": "int",
               "default": "50"
+            }
+          ]
+        },
+        {
+          "class_name": "WorkZoneIn",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "A work zone drawn on the plan: a ring in the project grid.",
+          "fields": [
+            {
+              "name": "name",
+              "type": "str"
+            },
+            {
+              "name": "ring",
+              "type": "list[tuple[float, float]]"
+            }
+          ]
+        },
+        {
+          "class_name": "TouchedParcel",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "parcel_id",
+              "type": "uuid.UUID"
+            },
+            {
+              "name": "parcel_ref",
+              "type": "str"
+            },
+            {
+              "name": "status",
+              "type": "str"
+            },
+            {
+              "name": "overlap_m2",
+              "type": "float"
+            },
+            {
+              "name": "blocking",
+              "type": "bool"
+            }
+          ]
+        },
+        {
+          "class_name": "WorkZoneDetail",
+          "bases": [
+            "WorkZoneOut"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "ring",
+              "type": "list[tuple[float, float]]"
+            },
+            {
+              "name": "touched",
+              "type": "list[TouchedParcel]"
+            },
+            {
+              "name": "findings",
+              "type": "list[FindingOut]"
+            }
+          ]
+        },
+        {
+          "class_name": "BoundaryPointRow",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "One boundary point of the register, shared by every parcel that has it as a corner.",
+          "fields": [
+            {
+              "name": "point_no",
+              "type": "str"
+            },
+            {
+              "name": "e",
+              "type": "float"
+            },
+            {
+              "name": "n",
+              "type": "float"
+            },
+            {
+              "name": "mark",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "monumented",
+              "type": "bool | None",
+              "default": "None"
+            },
+            {
+              "name": "accuracy_m",
+              "type": "float | None",
+              "default": "None"
+            },
+            {
+              "name": "corner_status",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "parcels",
+              "type": "list[str]"
+            },
+            {
+              "name": "mark_conflict",
+              "type": "bool",
+              "default": "False"
+            },
+            {
+              "name": "position_spread_m",
+              "type": "float",
+              "default": "0.0"
+            }
+          ]
+        },
+        {
+          "class_name": "BoundaryPointRegister",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[BoundaryPointRow]"
+            },
+            {
+              "name": "total",
+              "type": "int"
+            },
+            {
+              "name": "monumented",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "unmarked",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "conflicts",
+              "type": "int",
+              "default": "0"
+            }
+          ]
+        },
+        {
+          "class_name": "DemoLoadResult",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "parcels",
+              "type": "int"
+            },
+            {
+              "name": "work_zones",
+              "type": "int"
+            },
+            {
+              "name": "skipped",
+              "type": "bool",
+              "default": "False"
             }
           ]
         }
@@ -185601,10 +186745,13 @@
       "files": [
         "__init__.py",
         "calc.py",
+        "data_paths.py",
         "demo.py",
         "depth.py",
         "manifest.py",
         "models.py",
+        "plan.py",
+        "plan_router.py",
         "report_pdf.py",
         "repository.py",
         "router.py",
@@ -186332,6 +187479,20 @@
           "request_schema": "AddToClaim"
         },
         {
+          "method": "POST",
+          "path": "/entries/{entry_id}/certify/preview",
+          "handler": "certify_preview",
+          "response_model": "MeasuredPreview",
+          "request_schema": "MineCertify"
+        },
+        {
+          "method": "POST",
+          "path": "/entries/{entry_id}/certify",
+          "handler": "certify",
+          "response_model": "MeasuredPreview",
+          "request_schema": "MineCertify"
+        },
+        {
           "method": "GET",
           "path": "/periods/{period_id}/report.pdf",
           "handler": "report_pdf"
@@ -186860,8 +188021,36 @@
               "type": "uuid.UUID"
             },
             {
+              "name": "quantity",
+              "type": "ClaimQuantity",
+              "default": "'cut'"
+            },
+            {
               "name": "notes",
               "type": "str"
+            }
+          ]
+        },
+        {
+          "class_name": "MineCertify",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Offer the confirmed actual to the open payment certificate of the contract billing the position.",
+          "fields": [
+            {
+              "name": "position_id",
+              "type": "uuid.UUID"
+            },
+            {
+              "name": "quantity",
+              "type": "ClaimQuantity",
+              "default": "'cut'"
+            },
+            {
+              "name": "claim_id",
+              "type": "uuid.UUID | None",
+              "default": "None"
             }
           ]
         },
@@ -187945,6 +189134,7 @@
         }
       ],
       "import_dependencies": [
+        "contracts",
         "projects",
         "surfaces_volumes",
         "survey_core",
@@ -189473,9 +190663,11 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "manifest.py",
         "models.py",
         "monitoring_math.py",
+        "plan_router.py",
         "profiles.py",
         "readings_io.py",
         "report_pdf.py",
@@ -190013,6 +191205,21 @@
               "default": "''"
             },
             {
+              "name": "edition",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "clause",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "status",
+              "type": "str",
+              "default": "''"
+            },
+            {
               "name": "thresholds",
               "type": "ThresholdsOut"
             }
@@ -190149,6 +191356,33 @@
           ]
         },
         {
+          "class_name": "ForecastLevelOut",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "level",
+              "type": "Literal['alert', 'action', 'alarm']"
+            },
+            {
+              "name": "limit_mm",
+              "type": "float"
+            },
+            {
+              "name": "reached",
+              "type": "bool",
+              "default": "False"
+            },
+            {
+              "name": "days",
+              "type": "float | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
           "class_name": "PointOut",
           "bases": [
             "BaseModel"
@@ -190241,6 +191475,20 @@
               "name": "forecast_rate_mm_day",
               "type": "float | None",
               "default": "None"
+            },
+            {
+              "name": "forecast_approaching",
+              "type": "bool",
+              "default": "False"
+            },
+            {
+              "name": "forecast_epochs",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "forecast_levels",
+              "type": "list[ForecastLevelOut]"
             }
           ]
         },
@@ -190289,6 +191537,11 @@
               "name": "level",
               "type": "Level",
               "default": "'none'"
+            },
+            {
+              "name": "risk_id",
+              "type": "str | None",
+              "default": "None"
             }
           ]
         },
@@ -208092,6 +209345,7 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "data_paths.py",
         "decode.py",
         "deviation.py",
         "deviation_report.py",
@@ -284829,6 +286083,9 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "alignment_design.py",
+        "alignment_router.py",
+        "data_paths.py",
         "design_io.py",
         "manifest.py",
         "models.py",
@@ -284859,6 +286116,34 @@
         "enabled": true
       },
       "models": [
+        {
+          "class_name": "SettingOutSettings",
+          "tablename": "oe_setting_out_settings",
+          "docstring": "One project's setting-out defaults.",
+          "columns": [
+            {
+              "name": "project_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_projects_project.id"
+            },
+            {
+              "name": "default_tolerance_key",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "auto_ncr",
+              "annotation": "Mapped[bool]",
+              "sql_type": "Boolean",
+              "nullable": false
+            }
+          ],
+          "relationships": []
+        },
         {
           "class_name": "SettingOutToleranceProfile",
           "tablename": "oe_setting_out_tolerance_profile",
@@ -284944,6 +286229,12 @@
             },
             {
               "name": "tolerance_source",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "tolerance_reference",
               "annotation": "Mapped[str]",
               "sql_type": "String",
               "nullable": false
@@ -285219,6 +286510,24 @@
               "annotation": "Mapped[str | None]",
               "sql_type": "String",
               "nullable": true
+            },
+            {
+              "name": "deviation_accepted_at",
+              "annotation": "Mapped[datetime | None]",
+              "sql_type": "DateTime",
+              "nullable": true
+            },
+            {
+              "name": "deviation_accepted_by",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "deviation_note",
+              "annotation": "Mapped[str]",
+              "sql_type": "Text",
+              "nullable": false
             }
           ],
           "relationships": []
@@ -285238,6 +286547,25 @@
           "handler": "create_profile",
           "response_model": "ToleranceProfileOut",
           "request_schema": "ToleranceProfileCreate"
+        },
+        {
+          "method": "GET",
+          "path": "/projects/{project_id}/settings",
+          "handler": "get_settings",
+          "response_model": "SettingsOut"
+        },
+        {
+          "method": "PUT",
+          "path": "/projects/{project_id}/settings",
+          "handler": "set_settings",
+          "response_model": "SettingsOut",
+          "request_schema": "SettingsUpdate"
+        },
+        {
+          "method": "POST",
+          "path": "/projects/{project_id}/ncr-drafts",
+          "handler": "create_ncr_drafts",
+          "response_model": "BulkNcrOut"
         },
         {
           "method": "GET",
@@ -285350,6 +286678,13 @@
           "path": "/records/{record_id}/ncr",
           "handler": "create_ncr",
           "response_model": "NcrDraftOut"
+        },
+        {
+          "method": "POST",
+          "path": "/records/{record_id}/accept-deviation",
+          "handler": "accept_deviation",
+          "response_model": "RecordOut",
+          "request_schema": "AcceptDeviation"
         }
       ],
       "schemas": [
@@ -285367,6 +286702,34 @@
             {
               "name": "v_mm",
               "type": "float | None"
+            }
+          ]
+        },
+        {
+          "class_name": "ToleranceValueOut",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "h_mm",
+              "type": "float"
+            },
+            {
+              "name": "v_mm",
+              "type": "float | None",
+              "default": "None"
+            },
+            {
+              "name": "clause",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "status",
+              "type": "str",
+              "default": "''"
             }
           ]
         },
@@ -285400,8 +286763,50 @@
               "default": "''"
             },
             {
+              "name": "edition",
+              "type": "str",
+              "default": "''"
+            },
+            {
               "name": "items",
-              "type": "dict[str, ToleranceValue]"
+              "type": "dict[str, ToleranceValueOut]"
+            }
+          ]
+        },
+        {
+          "class_name": "SettingsOut",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "default_tolerance_key",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "auto_ncr",
+              "type": "bool",
+              "default": "False"
+            }
+          ]
+        },
+        {
+          "class_name": "SettingsUpdate",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "default_tolerance_key",
+              "type": "str | None"
+            },
+            {
+              "name": "auto_ncr",
+              "type": "bool | None",
+              "default": "None"
             }
           ]
         },
@@ -285614,6 +287019,34 @@
             {
               "name": "ncr_id",
               "type": "str | None"
+            },
+            {
+              "name": "deviation_accepted_at",
+              "type": "datetime | None",
+              "default": "None"
+            },
+            {
+              "name": "deviation_accepted_by",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "deviation_note",
+              "type": "str",
+              "default": "''"
+            }
+          ]
+        },
+        {
+          "class_name": "AcceptDeviation",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "note",
+              "type": "str"
             }
           ]
         },
@@ -285710,6 +287143,11 @@
             {
               "name": "tolerance_source",
               "type": "str"
+            },
+            {
+              "name": "tolerance_reference",
+              "type": "str",
+              "default": "''"
             },
             {
               "name": "tol_h_mm",
@@ -286008,6 +287446,24 @@
             {
               "name": "record_id",
               "type": "uuid.UUID"
+            }
+          ]
+        },
+        {
+          "class_name": "BulkNcrOut",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "created",
+              "type": "list[NcrDraftOut]"
+            },
+            {
+              "name": "skipped",
+              "type": "int",
+              "default": "0"
             }
           ]
         },
@@ -298879,9 +300335,12 @@
       "files": [
         "__init__.py",
         "calc.py",
+        "data_paths.py",
         "demo.py",
         "manifest.py",
         "models.py",
+        "plan.py",
+        "plan_router.py",
         "report_pdf.py",
         "repository.py",
         "router.py",
@@ -311933,15 +313392,25 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "contours.py",
+        "data_paths.py",
         "demo.py",
+        "demo_pay.py",
+        "dh_grid.py",
         "drawing_lines.py",
+        "geometry_router.py",
+        "geometry_schemas.py",
+        "geometry_service.py",
         "landxml.py",
         "manifest.py",
         "models.py",
+        "pad.py",
+        "pad_validators.py",
         "pointcloud.py",
         "report_pdf.py",
         "repository.py",
         "router.py",
+        "sampling.py",
         "schemas.py",
         "service.py",
         "staged.py",
@@ -312482,6 +313951,20 @@
           "handler": "record_progress",
           "response_model": "RecordProgressResult",
           "request_schema": "RecordProgress"
+        },
+        {
+          "method": "POST",
+          "path": "/volumes/{volume_id}/certify/preview",
+          "handler": "certify_preview",
+          "response_model": "MeasuredPreview",
+          "request_schema": "CertifyQuantity"
+        },
+        {
+          "method": "POST",
+          "path": "/volumes/{volume_id}/certify",
+          "handler": "certify",
+          "response_model": "MeasuredPreview",
+          "request_schema": "CertifyQuantity"
         },
         {
           "method": "GET",
@@ -313161,6 +314644,34 @@
           ]
         },
         {
+          "class_name": "CertifyQuantity",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Offer a measured quantity to the open payment certificate; ``confirm`` is a separate call.",
+          "fields": [
+            {
+              "name": "position_id",
+              "type": "uuid.UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "quantity",
+              "type": "QuantityKind",
+              "default": "'cut'"
+            },
+            {
+              "name": "claim_id",
+              "type": "uuid.UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "period_label",
+              "type": "str"
+            }
+          ]
+        },
+        {
           "class_name": "RecordProgressResult",
           "bases": [
             "BaseModel"
@@ -313660,7 +315171,9 @@
       ],
       "import_dependencies": [
         "boq",
+        "contracts",
         "dwg_takeoff",
+        "haul_tickets",
         "land_parcels",
         "mine_survey",
         "monitoring",
@@ -313685,14 +315198,28 @@
         "closure_classes.py",
         "cogo.py",
         "crs.py",
+        "data_paths.py",
         "dependencies.py",
+        "field_book.py",
+        "field_book_router.py",
         "field_traverse.py",
         "geodesy.py",
         "instrument_io.py",
         "level_book.py",
+        "lsq_traverse.py",
         "manifest.py",
         "models.py",
         "permissions.py",
+        "plan_demo.py",
+        "plan_export.py",
+        "plan_export_router.py",
+        "plan_models.py",
+        "plan_reference.py",
+        "plan_router.py",
+        "plan_schemas.py",
+        "plan_service.py",
+        "plan_validators.py",
+        "plan_view.py",
         "point_export.py",
         "point_io.py",
         "register_router.py",
@@ -313702,8 +315229,10 @@
         "router.py",
         "schemas.py",
         "service.py",
+        "survey_links.py",
         "survey_math.py",
         "traverse.py",
+        "traverse_report.py",
         "validators.py"
       ],
       "manifest": {
@@ -315983,8 +317512,14 @@
       ],
       "import_dependencies": [
         "cad",
+        "daily_diary",
+        "documents",
+        "file_references",
         "geo_hub",
-        "surfaces_volumes"
+        "legal_entities",
+        "projects",
+        "surfaces_volumes",
+        "users"
       ]
     },
     {
@@ -340785,10 +342320,10 @@
     },
     {
       "name": "data-paths",
-      "ts_files": 13,
+      "ts_files": 20,
       "css_files": 0,
-      "test_files": 2,
-      "total_files": 13
+      "test_files": 4,
+      "total_files": 20
     },
     {
       "name": "data-security",
@@ -341793,10 +343328,10 @@
     },
     {
       "name": "setting-out",
-      "ts_files": 11,
+      "ts_files": 13,
       "css_files": 0,
-      "test_files": 3,
-      "total_files": 11
+      "test_files": 4,
+      "total_files": 13
     },
     {
       "name": "settings",
@@ -341919,17 +343454,24 @@
     },
     {
       "name": "survey",
-      "ts_files": 44,
+      "ts_files": 47,
       "css_files": 0,
-      "test_files": 9,
-      "total_files": 44
+      "test_files": 10,
+      "total_files": 47
     },
     {
       "name": "survey-calc",
-      "ts_files": 7,
+      "ts_files": 11,
       "css_files": 0,
-      "test_files": 2,
-      "total_files": 7
+      "test_files": 3,
+      "total_files": 11
+    },
+    {
+      "name": "survey-plan",
+      "ts_files": 75,
+      "css_files": 0,
+      "test_files": 15,
+      "total_files": 76
     },
     {
       "name": "sustainability",
@@ -341986,6 +343528,13 @@
       "css_files": 0,
       "test_files": 17,
       "total_files": 48
+    },
+    {
+      "name": "tenders",
+      "ts_files": 7,
+      "css_files": 0,
+      "test_files": 2,
+      "total_files": 7
     },
     {
       "name": "timeline",
@@ -342198,7 +343747,6 @@
       "schedule",
       "subcontractors",
       "tasks",
-      "tendering",
       "users",
       "variations"
     ],
@@ -342221,6 +343769,7 @@
       "costmodel",
       "procurement",
       "projects",
+      "rfq_bidding",
       "subcontractors",
       "tendering",
       "users"
@@ -343095,7 +344644,9 @@
     ],
     "haul_tickets": [
       "projects",
-      "site_logistics"
+      "site_logistics",
+      "stockpiles",
+      "surfaces_volumes"
     ],
     "hse_advanced": [
       "projects",
@@ -343252,6 +344803,7 @@
     "mexico_pack": [],
     "middle_east_pack": [],
     "mine_survey": [
+      "contracts",
       "projects",
       "surfaces_volumes",
       "survey_core",
@@ -343973,7 +345525,9 @@
     ],
     "surfaces_volumes": [
       "boq",
+      "contracts",
       "dwg_takeoff",
+      "haul_tickets",
       "land_parcels",
       "mine_survey",
       "monitoring",
@@ -343986,9 +345540,14 @@
     ],
     "survey_core": [
       "cad",
+      "daily_diary",
+      "documents",
+      "file_references",
       "geo_hub",
+      "legal_entities",
       "projects",
-      "surfaces_volumes"
+      "surfaces_volumes",
+      "users"
     ],
     "takeoff": [
       "ai",
@@ -344116,14 +345675,14 @@
   "statistics": {
     "backend_modules": 260,
     "modules_with_manifests": 260,
-    "total_models": 974,
-    "total_columns": 11431,
+    "total_models": 977,
+    "total_columns": 11481,
     "total_relationships": 264,
-    "total_routes": 5553,
-    "total_schemas": 5173,
-    "total_python_files": 3693,
-    "frontend_features": 252,
-    "frontend_ts_files": 4454,
+    "total_routes": 5567,
+    "total_schemas": 5202,
+    "total_python_files": 3746,
+    "frontend_features": 254,
+    "frontend_ts_files": 4552,
     "frontend_backend_mapped": 224
   },
   "frontend_backend_mapping": {
@@ -344359,6 +345918,7 @@
     "supplier-catalogs": "supplier_catalogs",
     "survey": "mine_survey",
     "survey-calc": null,
+    "survey-plan": null,
     "sustainability": "ai",
     "takeoff": "takeoff",
     "tasks": "tasks",
@@ -344367,6 +345927,7 @@
     "teams": "teams",
     "temporary-works": "temporary_works",
     "tendering": "tendering",
+    "tenders": null,
     "timeline": "timeline",
     "translation": null,
     "transmittals": "transmittals",
