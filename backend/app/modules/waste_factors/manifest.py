@@ -3,6 +3,7 @@
 """Waste Factors module manifest."""
 
 from app.core.module_loader import ModuleManifest
+from app.modules.waste_factors.data_paths import DATA_PATHS
 
 manifest = ModuleManifest(
     name="oe_waste_factors",
@@ -14,4 +15,5 @@ manifest = ModuleManifest(
     depends=[],
     auto_install=True,
     enabled=True,
+    data_paths=DATA_PATHS,
 )
