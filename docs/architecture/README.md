@@ -261,3 +261,7 @@ Two optional stores add capability without becoming hard requirements:
 - **[Field worker mobile surface](./FIELD_WORKER_MOBILE_DESIGN.md)** is the design for
   the site-facing mobile surface: restricted access, thumb-zone layout, and offline
   tolerance.
+- **[Backend readiness state](./BACKEND_READINESS_DESIGN.md)** is a design note, not a
+  feature: why the port stays closed for the whole of a cold boot, what a readiness
+  state would have to answer and when it cannot, and the audits and tests that have to
+  come first. Nothing in it is implemented.
