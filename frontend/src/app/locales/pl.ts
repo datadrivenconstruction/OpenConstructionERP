@@ -59550,6 +59550,7 @@ const resource = {
     "design.web_editor.problem.no_permission": "Twoja rola na to nie pozwala.",
     "design.web_editor.problem.busy": "Pobieranie już trwa.",
     "design.web_editor.problem.other": "Coś poszło nie tak. Lekki silnik działa dalej.",
+    "design.web_editor.not_available_yet": "Pełny edytor nie jest jeszcze dostępny.",
     "modules.catalog.design_management": "Zarządzanie projektowaniem",
     "modules.catalog.engineering_brief": "Brief inżynierski",
     "modules.catalog.hse_frame": "Ramy HSE (BHP)",

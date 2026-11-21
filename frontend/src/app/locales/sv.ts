@@ -58642,6 +58642,7 @@ const resource = {
     "design.web_editor.problem.no_permission": "Din roll får inte göra detta.",
     "design.web_editor.problem.busy": "En nedladdning pågår redan.",
     "design.web_editor.problem.other": "Något gick fel. Den lätta motorn fortsätter att fungera.",
+    "design.web_editor.not_available_yet": "Den fullständiga editorn är inte tillgänglig ännu.",
     "modules.catalog.design_management": "Projekteringsstyrning",
     "modules.catalog.engineering_brief": "Ingenjörsunderlag",
     "modules.catalog.hse_frame": "HSE-ramverk",

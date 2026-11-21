@@ -57791,6 +57791,7 @@ const resource = {
     "design.web_editor.problem.no_permission": "Vai trò của bạn không được làm việc này.",
     "design.web_editor.problem.busy": "Đang có một lượt tải.",
     "design.web_editor.problem.other": "Đã xảy ra lỗi. Công cụ nhẹ vẫn hoạt động.",
+    "design.web_editor.not_available_yet": "Trình chỉnh sửa đầy đủ hiện chưa khả dụng.",
     "modules.catalog.design_management": "Quản lý thiết kế",
     "modules.catalog.engineering_brief": "Bản tóm tắt kỹ thuật",
     "modules.catalog.hse_frame": "Khung HSE",

@@ -54894,6 +54894,7 @@ const resource = {
     "design.web_editor.problem.no_permission": "Su rol no permite hacerlo.",
     "design.web_editor.problem.busy": "Ya hay una descarga en curso.",
     "design.web_editor.problem.other": "Algo salió mal. El motor ligero sigue funcionando.",
+    "design.web_editor.not_available_yet": "El editor completo aún no está disponible.",
     "modules.catalog.design_management": "Gestión del diseño",
     "modules.catalog.engineering_brief": "Memoria de ingeniería",
     "modules.catalog.hse_frame": "Marco HSE",

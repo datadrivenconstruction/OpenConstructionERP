@@ -58027,6 +58027,7 @@ const resource = {
     "design.web_editor.problem.no_permission": "Rollen din har ikke lov til dette.",
     "design.web_editor.problem.busy": "En nedlasting pågår allerede.",
     "design.web_editor.problem.other": "Noe gikk galt. Den lette motoren fortsetter å virke.",
+    "design.web_editor.not_available_yet": "Full editor er ikke tilgjengelig ennå.",
     "modules.catalog.design_management": "Prosjekteringsstyring",
     "modules.catalog.engineering_brief": "Ingeniørbrief",
     "modules.catalog.hse_frame": "HMS-rammeverk",

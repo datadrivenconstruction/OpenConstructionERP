@@ -58307,6 +58307,7 @@ const resource = {
     "design.web_editor.problem.no_permission": "התפקיד שלכם אינו מאפשר זאת.",
     "design.web_editor.problem.busy": "הורדה כבר מתבצעת.",
     "design.web_editor.problem.other": "משהו השתבש. המנוע הקל ממשיך לעבוד.",
+    "design.web_editor.not_available_yet": "העורך המלא עדיין אינו זמין.",
     "modules.catalog.design_management": "ניהול תכנון",
     "modules.catalog.engineering_brief": "תדריך הנדסי",
     "modules.catalog.hse_frame": "מסגרת HSE",

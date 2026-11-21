@@ -20,6 +20,7 @@ export interface WebEditorStatus {
   update_available: boolean;
   can_install: boolean;
   can_remove: boolean;
+  is_admin?: boolean;
 }
 
 export const WEB_EDITOR_KEY = ['design-web-editor'] as const;

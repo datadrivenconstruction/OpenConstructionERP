@@ -17,6 +17,16 @@ FEED_URL = "https://feed.test/erp-link/release/latest-web.json"
 ZIP_URL = "https://downloads.test/v0.10.0/OpenConstructionDesign-v0.10.0-web.zip"
 SIG_URL = ZIP_URL + ".minisig"
 
+
+def _brotli(b: bytes) -> bytes:
+    """Real brotli where the package is installed (httpx then decodes the response), a stand-in elsewhere."""
+    try:
+        import brotli
+    except ImportError:
+        return b"br:" + b
+    return brotli.compress(b)
+
+
 ENTRY_JS = b"export async function mount(element, host) { return { post() {}, unmount() {} }; }\n"
 WASM = b"\x00asm\x01\x00\x00\x00" + bytes(range(256)) * 64
 
@@ -75,7 +85,7 @@ def bundle_zip(
         for p, b in files.items():
             zf.writestr(folder + p, b + (b"x" if p == tamper else b""))
             zf.writestr(folder + p + ".gz", gzip.compress(b))
-            zf.writestr(folder + p + ".br", b"br:" + b)  # stands in for brotli output; served as is
+            zf.writestr(folder + p + ".br", _brotli(b))
         for p, b in (extra or {}).items():
             zf.writestr(p, b)
     return buf.getvalue()

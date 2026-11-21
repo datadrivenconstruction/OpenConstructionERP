@@ -59289,6 +59289,7 @@ const resource = {
     "design.web_editor.problem.no_permission": "Vaše role to nedovoluje.",
     "design.web_editor.problem.busy": "Stahování již probíhá.",
     "design.web_editor.problem.other": "Něco se pokazilo. Odlehčený engine dál funguje.",
+    "design.web_editor.not_available_yet": "Plný editor zatím není k dispozici.",
     "modules.catalog.design_management": "Správa projektování",
     "modules.catalog.engineering_brief": "Inženýrské zadání",
     "modules.catalog.hse_frame": "Rámec BOZP (HSE)",

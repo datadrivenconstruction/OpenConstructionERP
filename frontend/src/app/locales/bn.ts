@@ -58297,6 +58297,7 @@ const resource = {
     "design.web_editor.problem.no_permission": "আপনার ভূমিকা এটি অনুমোদন করে না।",
     "design.web_editor.problem.busy": "একটি ডাউনলোড ইতিমধ্যে চলছে।",
     "design.web_editor.problem.other": "কিছু ভুল হয়েছে। হালকা ইঞ্জিন চলতে থাকে।",
+    "design.web_editor.not_available_yet": "পূর্ণ সম্পাদক এখনও উপলব্ধ নয়।",
     "modules.catalog.design_management": "নকশা ব্যবস্থাপনা",
     "modules.catalog.engineering_brief": "ইঞ্জিনিয়ারিং ব্রিফ",
     "modules.catalog.hse_frame": "HSE কাঠামো",

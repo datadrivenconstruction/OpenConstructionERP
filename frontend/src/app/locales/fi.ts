@@ -58031,6 +58031,7 @@ const resource = {
     "design.web_editor.problem.no_permission": "Roolisi ei salli tätä.",
     "design.web_editor.problem.busy": "Lataus on jo käynnissä.",
     "design.web_editor.problem.other": "Jokin meni vikaan. Kevyt moottori toimii edelleen.",
+    "design.web_editor.not_available_yet": "Täysi editori ei ole vielä käytettävissä.",
     "modules.catalog.design_management": "Suunnittelun hallinta",
     "modules.catalog.engineering_brief": "Insinöörikuvaus",
     "modules.catalog.hse_frame": "HSE-kehikko",

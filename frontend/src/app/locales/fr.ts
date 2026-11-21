@@ -60933,6 +60933,7 @@ const resource = {
     "design.web_editor.problem.no_permission": "Votre rôle ne le permet pas.",
     "design.web_editor.problem.busy": "Un téléchargement est déjà en cours.",
     "design.web_editor.problem.other": "Une erreur s'est produite. Le moteur léger continue de fonctionner.",
+    "design.web_editor.not_available_yet": "L'éditeur complet n'est pas encore disponible.",
     "modules.catalog.design_management": "Gestion de la conception",
     "modules.catalog.engineering_brief": "Note de cadrage technique",
     "modules.catalog.hse_frame": "Cadre HSE",

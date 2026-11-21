@@ -9,6 +9,9 @@ from fastapi import HTTPException
 
 from app.modules.design import worker_guard
 
+# The probe reads the Celery app; installs without the `server` extra have no Celery, as in the core job tests.
+pytest.importorskip("celery")
+
 pytestmark = pytest.mark.asyncio
 
 

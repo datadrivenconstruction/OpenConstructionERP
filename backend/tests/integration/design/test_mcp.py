@@ -182,10 +182,11 @@ async def test_brief_proposal_is_pending_until_a_person_applies(client, app_inst
     assert (await client.post(path, headers=_h(token))).status_code == 401
     r = await client.post(path, headers=h)
     assert r.status_code == 200 and r.json()["status"] == "applied", r.text
-    # An incomplete brief is saved with the values still proposed: confirming needs a complete brief, as in the form.
+    # Applying saves the draft and confirms the values the person applied; the brief may still have gaps, as in the form.
     brief = (await client.get(f"{BASE}/projects/{pid}/brief", headers=h)).json()
-    assert brief["version"] == 1 and brief["country"] == "DE" and brief["massing"]["floors_above"] == 5
-    assert brief["provenance"]["/country"]["status"] == "proposed"
+    assert brief["version"] == 2 and brief["country"] == "DE" and brief["massing"]["floors_above"] == 5
+    assert brief["provenance"]["/country"]["status"] == "confirmed"
+    assert brief["provenance"]["/country"]["confirmed_by"] == str(uid)
     # A proposal based on an old version is refused, not merged.
     res = await _call(
         client,
@@ -216,24 +217,24 @@ async def test_brief_proposal_is_pending_until_a_person_applies(client, app_inst
         token,
         "propose_design_brief_values",
         project_id=str(pid),
-        base_version=1,
+        base_version=2,
         values=rest,
         confidence=0.8,
         rationale="Completes the brief.",
     )
     assert not res["isError"], res
-    assert (await client.get(f"{BASE}/projects/{pid}/brief", headers=h)).json()["version"] == 1
+    assert (await client.get(f"{BASE}/projects/{pid}/brief", headers=h)).json()["version"] == 2
     r = await client.post(_apply_path(app_instance, res["structuredContent"]["action_id"]), headers=h)
     assert r.status_code == 200 and r.json()["status"] == "applied", r.text
     brief = (await client.get(f"{BASE}/projects/{pid}/brief", headers=h)).json()
-    assert brief["version"] == 3
+    assert brief["version"] == 4
     for item in rest:
         entry = brief["provenance"][item["pointer"]]
         assert entry["status"] == "confirmed" and entry["confirmed_by"] == str(uid), item["pointer"]
     versions = (await client.get(f"{BASE}/projects/{pid}/brief/versions", headers=h)).json()
-    assert [v["action"] for v in versions] == ["confirm", "save", "save"]
+    assert [v["action"] for v in versions] == ["confirm", "save", "confirm", "save"]
     read = await _call(client, token, "design_get_brief", project_id=str(pid))
-    assert read["structuredContent"]["version"] == 3
+    assert read["structuredContent"]["version"] == 4
 
 
 async def test_revision_decision_is_pending_until_a_manager_applies(client, app_instance):

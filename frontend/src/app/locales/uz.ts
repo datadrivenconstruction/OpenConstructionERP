@@ -58959,6 +58959,7 @@ const resource = {
     "design.web_editor.problem.no_permission": "Rolingiz bunga ruxsat bermaydi.",
     "design.web_editor.problem.busy": "Yuklab olish allaqachon davom etmoqda.",
     "design.web_editor.problem.other": "Nimadir notoʻgʻri ketdi. Yengil dvigatel ishlashda davom etadi.",
+    "design.web_editor.not_available_yet": "Toʻliq muharrir hozircha mavjud emas.",
     "modules.catalog.design_management": "Loyihalashni boshqarish",
     "modules.catalog.engineering_brief": "Muhandislik brifi",
     "modules.catalog.hse_frame": "HSE tuzilmasi",

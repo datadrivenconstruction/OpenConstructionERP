@@ -52033,6 +52033,7 @@ const resource = {
     "design.web_editor.problem.no_permission": "Your role cannot do this.",
     "design.web_editor.problem.busy": "A download is already running.",
     "design.web_editor.problem.other": "Something went wrong. The light engine keeps working.",
+    "design.web_editor.not_available_yet": "The full editor is not available yet.",
     "modules.catalog.design_management": "Design management",
     "modules.catalog.engineering_brief": "Engineering brief",
     "modules.catalog.hse_frame": "HSE frame",

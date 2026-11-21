@@ -58031,6 +58031,7 @@ const resource = {
     "design.web_editor.problem.no_permission": "Вашата роля не позволява това.",
     "design.web_editor.problem.busy": "Вече тече изтегляне.",
     "design.web_editor.problem.other": "Нещо се обърка. Лекият двигател продължава да работи.",
+    "design.web_editor.not_available_yet": "Пълният редактор все още не е наличен.",
     "modules.catalog.design_management": "Управление на проектирането",
     "modules.catalog.engineering_brief": "Инженерно задание",
     "modules.catalog.hse_frame": "Рамка за ЗБУТ",
