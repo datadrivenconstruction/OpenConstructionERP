@@ -43,6 +43,12 @@ LEGACY_HOME_ROOT = ".openestimator"
 #: Records which legacy entries were already copied, so each copies once.
 MIGRATION_MARKER = ".home_state_migrated.json"
 
+#: Records, next to the legacy files, which data dir each entry was copied to.
+LEGACY_CLAIM = ".home_state_migrated_to.json"
+
+#: Set to a true value to skip the legacy copy (test runs, throwaway data dirs).
+SKIP_MIGRATION_ENV = "OE_SKIP_LEGACY_HOME_MIGRATION"
+
 
 def operator_data_dir() -> Path | None:
     """Return the operator data dir, or ``None`` when none is configured.
@@ -180,6 +186,21 @@ def _copy_missing(source: Path, target: Path) -> int:
     return copied
 
 
+def _read_claims(path: Path) -> dict[str, str]:
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return {}
+    return {str(k): str(v) for k, v in data.items()} if isinstance(data, dict) else {}
+
+
+def _write_claims(path: Path, claims: dict[str, str]) -> None:
+    try:
+        path.write_text(json.dumps(claims, indent=2, sort_keys=True), encoding="utf-8")
+    except OSError:
+        logger.warning("Could not record legacy home-state copy in %s", path, exc_info=True)
+
+
 def _read_marker(path: Path) -> set[str]:
     try:
         data = json.loads(path.read_text(encoding="utf-8"))
@@ -206,6 +227,8 @@ def migrate_legacy_home_state(entries: tuple[LegacyEntry, ...] = LEGACY_ENTRIES)
     target_root = operator_data_dir()
     if target_root is None:
         return []
+    if (os.environ.get(SKIP_MIGRATION_ENV) or "").strip().lower() in {"1", "true", "yes", "on"}:
+        return []
     marker = target_root / MIGRATION_MARKER
     done = _read_marker(marker)
     migrated: list[str] = []
@@ -214,6 +237,12 @@ def migrate_legacy_home_state(entries: tuple[LegacyEntry, ...] = LEGACY_ENTRIES)
             continue
         source = legacy_home_dir(entry.root, *entry.parts)
         target = target_root.joinpath(*entry.parts)
+        claim_file = legacy_home_dir(entry.root) / LEGACY_CLAIM
+        claims = _read_claims(claim_file)
+        claimed = claims.get(entry.key)
+        # A legacy entry moves to one data dir; later data dirs (test runs, temp dirs) start empty.
+        if claimed and not _same_path(Path(claimed), target):
+            continue
         try:
             if not source.exists() or _same_path(source, target):
                 continue
@@ -235,6 +264,8 @@ def migrate_legacy_home_state(entries: tuple[LegacyEntry, ...] = LEGACY_ENTRIES)
             logger.warning("Could not copy legacy %s to %s; will retry on next start", source, target, exc_info=True)
             continue
         logger.info("Copied %d legacy file(s) from %s to %s (original kept)", copied, source, target)
+        claims[entry.key] = str(target)
+        _write_claims(claim_file, claims)
         done.add(entry.key)
         migrated.append(entry.key)
     if migrated:

@@ -69,3 +69,21 @@ def test_boot_skips_pack_and_generic_showcase_alike(var: str, monkeypatch: pytes
 
     monkeypatch.setenv(var, "1")
     assert _boot_showcase_skip_reason() == var
+
+
+def test_a_legacy_store_moves_to_one_data_dir_only(
+    legacy: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    assert home_state.migrate_legacy_home_state(_UPLOADS) == [_UPLOADS[0].key]
+    assert (tmp_path / "data" / "uploads" / "project-a" / "drawing.pdf").exists()
+
+    monkeypatch.setenv("OE_DATA_DIR", str(tmp_path / "second"))
+    assert home_state.migrate_legacy_home_state(_UPLOADS) == []
+    assert not (tmp_path / "second" / "uploads").exists()
+
+
+def test_the_copy_can_be_switched_off(legacy: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv(home_state.SKIP_MIGRATION_ENV, "1")
+
+    assert home_state.migrate_legacy_home_state(_UPLOADS) == []
+    assert not (tmp_path / "data" / "uploads").exists()
