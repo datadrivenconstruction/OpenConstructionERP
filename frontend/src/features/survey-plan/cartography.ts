@@ -265,21 +265,22 @@ export function defaultStyle(layer: PlanLayerId, o: StyleOptions): PlanStyleLaye
         { id: 'fill', type: 'fill', filter: geom('Polygon'), paint: { 'fill-color': p.measure, 'fill-opacity': 0.12 } },
         { id: 'line', type: 'line', paint: { 'line-color': p.measure, 'line-width': 2, 'line-dasharray': [3, 1.5] } },
         { id: 'pt', type: 'circle', filter: geom('Point'), paint: { 'circle-radius': 3.5, 'circle-color': p.measure, 'circle-stroke-color': p.halo, 'circle-stroke-width': 1.5 } },
-        {
-          id: 'text',
-          type: 'symbol',
-          filter: ['has', 'text'],
+        // symbol-placement takes no data expressions, so lines and points get a layer each.
+        ...(['line-center', 'point'] as const).map((placement) => ({
+          id: placement === 'point' ? 'text' : 'text-line',
+          type: 'symbol' as const,
+          filter: ['all', ['has', 'text'], placement === 'point' ? ['!=', ['geometry-type'], 'LineString'] : geom('LineString')],
           layout: {
             'text-field': ['get', 'text'],
             'text-font': ['literal', FONT_BOLD],
             'text-size': 12,
-            'symbol-placement': ['match', ['geometry-type'], 'LineString', 'line-center', 'point'],
+            'symbol-placement': placement,
             'text-keep-upright': true,
             'text-offset': [0, -0.8],
             'text-allow-overlap': true,
           },
           paint: textPaint(p, p.ink),
-        },
+        })),
       ];
     case 'parcels':
       return featureStyle(p, op, { colour: p.parcel, fillOpacity: 0.14 });
