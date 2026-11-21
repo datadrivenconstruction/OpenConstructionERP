@@ -48,7 +48,7 @@ export function selectModuleRoutes(
   isModuleEnabled: (id: string) => boolean,
   pending: boolean,
 ): { route: ModuleRoute; waiting: boolean }[] {
-  return modules.flatMap((m) => {
+  return modules.flatMap((m): { route: ModuleRoute; waiting: boolean }[] => {
     if (isModuleEnabled(m.id)) return m.routes.map((route) => ({ route, waiting: false }));
     if (pending) return m.routes.map((route) => ({ route, waiting: true }));
     return (m.offRoutes ?? []).map((route) => ({ route, waiting: false }));

@@ -10,8 +10,9 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { Loader2 } from 'lucide-react';
 
-import { useModuleFocus, usePlatformMap } from './api';
+import { useModuleFocus, usePlatformMapProgressive } from './api';
 import { FocusCanvas, type LayoutMode } from './FocusCanvas';
 import { FocusPanel, type TraceState } from './FocusPanel';
 import { moduleMeta } from './moduleMeta';
@@ -62,7 +63,7 @@ export function FocusView({ module, projectId, enabled = true, deepLink = false,
   }, []);
   const [trace, setTrace] = useState<TraceState | null>(initialTrace);
 
-  const map = usePlatformMap(projectId, enabled);
+  const map = usePlatformMapProgressive(projectId, enabled);
   const info = useModuleFocus(focus, enabled);
   const active = useMemo(() => info.data?.traces.find((x) => x.id === trace?.id) ?? null, [info.data, trace?.id]);
 
@@ -138,7 +139,12 @@ export function FocusView({ module, projectId, enabled = true, deepLink = false,
     return map.isError ? (
       <p className="text-sm text-semantic-error">{t('data_paths.load_failed', { defaultValue: 'The data paths could not be loaded.' })}</p>
     ) : (
-      <div className="h-[520px] animate-pulse rounded-2xl bg-surface-secondary" aria-busy="true" />
+      <div className="flex h-[520px] items-center justify-center rounded-2xl bg-surface-secondary" role="status" aria-busy="true" data-testid="dp-focus-loading">
+        <span className="inline-flex items-center gap-2 text-sm text-content-tertiary">
+          <Loader2 size={16} className="animate-spin" aria-hidden />
+          {t('data_paths.loading_map', { defaultValue: 'Drawing the data paths' })}
+        </span>
+      </div>
     );
   }
 
