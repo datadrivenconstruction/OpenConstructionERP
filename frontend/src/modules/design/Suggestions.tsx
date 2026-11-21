@@ -42,7 +42,7 @@ export function Suggestions({ projectId, positionId, rule, onDone }: {
       <p className="text-xs text-content-secondary">{tr(t, 'design.estimate.suggest_hint')}</p>
       {cands.length > 0 && cm && (
         <ul className="flex flex-col gap-1">
-          <li className="text-[11px] font-medium text-content-tertiary">{tr(t, 'design.estimate.suggest_costmatch', { region: cm.region })}</li>
+          <li className="text-2xs font-medium text-content-tertiary">{tr(t, 'design.estimate.suggest_costmatch', { region: cm.region })}</li>
           {cands.map((c) => (
             <li key={c.cost_item_id} className="flex flex-wrap items-center gap-2 text-xs" data-testid={`cm-${c.cost_item_id}`}>
               <span className="font-medium">{c.code}</span>
@@ -58,7 +58,7 @@ export function Suggestions({ projectId, positionId, rule, onDone }: {
       )}
       {assemblies.length > 0 && (
         <ul className="flex flex-col gap-1">
-          <li className="text-[11px] font-medium text-content-tertiary">{tr(t, 'design.estimate.suggest_assemblies')}</li>
+          <li className="text-2xs font-medium text-content-tertiary">{tr(t, 'design.estimate.suggest_assemblies')}</li>
           {assemblies.map((a) => (
             <li key={a.assembly_id} className="flex flex-wrap items-center gap-2 text-xs" data-testid={`asm-${a.assembly_id}`}>
               <span className="font-medium">{a.code}</span>

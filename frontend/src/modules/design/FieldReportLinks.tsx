@@ -53,7 +53,7 @@ export function FieldReportLinks({ projectId, keys, inBlock = false }: { project
   const label = (r: FieldReportRow) => `${r.report_date} · ${r.report_type}${r.excerpt ? ` · ${r.excerpt.slice(0, 60)}` : ''}`;
   return (
     <div className="flex flex-col gap-1.5" data-testid="field-report-links">
-      {!inBlock && <p className="text-[11px] font-medium text-content-tertiary">{tr(t, 'design.reports.title')}</p>}
+      {!inBlock && <p className="text-2xs font-medium text-content-tertiary">{tr(t, 'design.reports.title')}</p>}
       {hits.isLoading ? <p className="text-content-tertiary">…</p>
         : items.length === 0 ? <p className="text-content-secondary">{tr(t, 'design.reports.none')}</p>
         : items.map((r) => (
