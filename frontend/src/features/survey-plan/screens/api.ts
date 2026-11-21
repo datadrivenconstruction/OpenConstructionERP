@@ -23,7 +23,7 @@ export interface GridParcel {
   points: GridCorner[];
 }
 export interface GridZone { id: string; name: string; ring: Array<[number, number]> }
-export interface PlanGrid {
+export interface SurveyGrid {
   epsg: number | null;
   id_pattern: string;
   gap_tolerance_m: string;
@@ -104,7 +104,7 @@ export interface PlanDxfLayer { id: string; aci: number; features: PlanDxfFeatur
 export interface PlanDxfBody { title: string; drawing_no: string; revision: string; scale: number; layers: PlanDxfLayer[] }
 
 export const p2Api = {
-  planGrid: (projectId: string) => apiGet<PlanGrid>(`${LP}/projects/${projectId}/plan-grid`),
+  surveyGrid: (projectId: string) => apiGet<SurveyGrid>(`${LP}/projects/${projectId}/plan-grid`),
   boundaryPoints: (projectId: string) => apiGet<BoundaryPointRegister>(`${LP}/projects/${projectId}/boundary-points`),
   setParcelPoints: (parcelId: string, points: GridCorner[]) => apiPut<unknown>(`${LP}/parcels/${parcelId}/points`, { points }),
   createZone: (projectId: string, body: { name: string; ring: Array<[number, number]> }) => apiPost<WorkZoneDetail>(`${LP}/projects/${projectId}/work-zones`, body),

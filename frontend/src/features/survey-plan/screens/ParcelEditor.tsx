@@ -14,6 +14,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Printer, RotateCcw, Save, Sparkles } from 'lucide-react';
 import { Button } from '@/shared/ui';
 import { getErrorMessage } from '@/shared/lib/api';
+import { fmtList } from '@/shared/lib/formatters';
 import { useToastStore } from '@/stores/useToastStore';
 import type { PlanCanvasProps } from '../types';
 import { usePlanConventions } from '../hooks';
@@ -37,7 +38,7 @@ export function ParcelEditor({ projectId, canWrite, canvas }: ParcelEditorProps)
   const qc = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
   const { conventions: conv } = usePlanConventions(projectId);
-  const grid = useQuery({ queryKey: p2Keys.grid(projectId), queryFn: () => p2Api.planGrid(projectId) });
+  const grid = useQuery({ queryKey: p2Keys.grid(projectId), queryFn: () => p2Api.surveyGrid(projectId) });
   const register = useQuery({ queryKey: p2Keys.points(projectId), queryFn: () => p2Api.boundaryPoints(projectId) });
   const profile = useQuery({
     queryKey: ['land-parcels', 'profile', projectId],
@@ -235,7 +236,7 @@ export function ParcelEditor({ projectId, canWrite, canvas }: ParcelEditorProps)
                     <td className="text-right">{formatCoord(a, conv)}</td>
                     <td className="text-right">{formatCoord(b, conv)}</td>
                     <td>{r.mark ? t(`plan.parcel.mark_${r.mark}`, { defaultValue: r.mark }) : '-'}</td>
-                    <td>{r.parcels.join(', ')}</td>
+                    <td>{fmtList(r.parcels)}</td>
                   </tr>
                 );
               })}

@@ -12,7 +12,7 @@ import { azimuthOf, formatDirection } from '../units/angles';
 import { formatArea, formatDistance } from '../units/linear';
 import { layer } from '../planLayers';
 import { ringAreaM2, type ParcelCheckSettings } from '../engine/ringChecks';
-import type { GridCorner, GridParcel, GridZone, PlanGrid } from './api';
+import type { GridCorner, GridParcel, GridZone, SurveyGrid } from './api';
 
 /** Working copy of a parcel's corners while it is edited (parcel id -> corners). */
 export type CornerEdits = Record<string, GridCorner[]>;
@@ -97,7 +97,7 @@ export function cornerFeatures(parcels: readonly GridParcel[], edits: CornerEdit
   return [...seen.values()];
 }
 
-export function parcelLayers(grid: PlanGrid, edits: CornerEdits, conv: PlanConventions, zoneEdits: Record<string, Array<[number, number]>> = {}): PlanLayerSpec[] {
+export function parcelLayers(grid: SurveyGrid, edits: CornerEdits, conv: PlanConventions, zoneEdits: Record<string, Array<[number, number]>> = {}): PlanLayerSpec[] {
   const parcels = grid.parcels.map((p) => parcelFeature(p, cornersOf(p, edits), conv));
   return [
     layer('parcels', parcels, { editable: true }),
@@ -117,7 +117,7 @@ export function parcelLayers(grid: PlanGrid, edits: CornerEdits, conv: PlanConve
 }
 
 /** Settings of the live checks from the server's grid answer. */
-export function checkSettings(grid: PlanGrid | undefined): ParcelCheckSettings {
+export function checkSettings(grid: SurveyGrid | undefined): ParcelCheckSettings {
   const tol = new Map<string, number>();
   for (const p of grid?.parcels ?? []) if (p.legal_area != null && p.tolerance_m2 != null) tol.set(String(Number(p.legal_area)), Number(p.tolerance_m2));
   return {
@@ -138,7 +138,7 @@ export interface AreaRow {
 }
 
 /** Computed against registered area per parcel, with the tolerance the server resolved (pack or neutral default). */
-export function areaComparison(grid: PlanGrid, edits: CornerEdits): AreaRow[] {
+export function areaComparison(grid: SurveyGrid, edits: CornerEdits): AreaRow[] {
   return grid.parcels.map((p) => {
     const computed = ringAreaM2(cornersOf(p, edits).map((c) => [c.e, c.n] as GridXYZ));
     const registered = p.legal_area != null ? Number(p.legal_area) : null;

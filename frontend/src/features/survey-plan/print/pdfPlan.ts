@@ -258,7 +258,8 @@ const tintOf = (c: [number, number, number], k = 0.85): [number, number, number]
 
 /** Text that Helvetica cannot draw goes through a canvas image so names in any script print. */
 function needsRaster(text: string): boolean {
-  return /[^\u0000-ÿ]/.test(text);
+  for (const ch of text) if ((ch.codePointAt(0) ?? 0) > 0xff) return true;
+  return false;
 }
 
 export function drawText(doc: jsPDF, text: string, x: number, y: number, sizePt: number, opts: { align?: 'left' | 'right' | 'center'; bold?: boolean } = {}): void {

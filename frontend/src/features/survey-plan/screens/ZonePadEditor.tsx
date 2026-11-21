@@ -13,6 +13,7 @@ import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Plus } from 'lucide-react';
 import { Button } from '@/shared/ui';
+import { fmtList } from '@/shared/lib/formatters';
 import { getErrorMessage } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
 import type { GridXYZ, PlanCanvasProps, PlanFeature } from '../types';
@@ -51,7 +52,7 @@ export function ZonePadEditor({ projectId, canWrite, surfaces, canvas }: ZonePad
   const qc = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
   const { conventions: conv } = usePlanConventions(projectId);
-  const grid = useQuery({ queryKey: p2Keys.grid(projectId), queryFn: () => p2Api.planGrid(projectId) });
+  const grid = useQuery({ queryKey: p2Keys.grid(projectId), queryFn: () => p2Api.surveyGrid(projectId) });
   const [name, setName] = useState('');
   const [outline, setOutline] = useState('');
   const [level, setLevel] = useState('');
@@ -118,7 +119,7 @@ export function ZonePadEditor({ projectId, canWrite, surfaces, canvas }: ZonePad
         <textarea className="oe-input min-h-28 w-full font-mono text-xs" value={outline} onChange={(e) => setOutline(e.target.value)} data-testid="plan-pad-outline" />
       </label>
       {parsed.bad.length > 0 && (
-        <p className="text-xs text-semantic-error">{t('plan.tin.pad_bad_lines', { defaultValue: 'Lines not read: {{lines}}', lines: parsed.bad.join(', ') })}</p>
+        <p className="text-xs text-semantic-error">{t('plan.tin.pad_bad_lines', { defaultValue: 'Lines not read: {{lines}}', lines: fmtList(parsed.bad.map(String)) })}</p>
       )}
       {parsed.ring.length >= 3 && (
         <p className="text-xs text-content-secondary">{t('plan.tin.pad_area', { defaultValue: 'Pad area {{area}}', area: formatArea(ringAreaM2(parsed.ring), conv) })}</p>

@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest';
 import { dhToken, heatFeatures } from './surfaceLayers';
 import { areaComparison } from './parcelLayers';
 import { parseOutline } from './ZonePadEditor';
-import type { PlanGrid } from './api';
+import type { SurveyGrid } from './api';
 
 describe('heatFeatures', () => {
   it('merges same-class cells of a row into one rectangle and skips the near-zero band', () => {
@@ -21,7 +21,7 @@ describe('heatFeatures', () => {
 describe('areaComparison', () => {
   it('compares the area from the edited corners with the register and the tolerance', () => {
     const corner = (label: string, e: number, n: number) => ({ label, e, n, mark: 'pin' });
-    const grid: PlanGrid = {
+    const grid: SurveyGrid = {
       epsg: null,
       id_pattern: '',
       gap_tolerance_m: '0.1',
