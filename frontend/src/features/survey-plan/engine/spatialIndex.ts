@@ -39,6 +39,13 @@ export class SpatialIndex {
     return `${i}:${j}`;
   }
 
+  private keyIn(k: string, i0: number, j0: number, i1: number, j1: number): boolean {
+    const c = k.indexOf(':');
+    const i = Number(k.slice(0, c));
+    const j = Number(k.slice(c + 1));
+    return i >= i0 && i <= i1 && j >= j0 && j <= j1;
+  }
+
   private cellOf(p: GridXY): [number, number] {
     return [Math.floor(p[0] / this.cell), Math.floor(p[1] / this.cell)];
   }
@@ -84,6 +91,11 @@ export class SpatialIndex {
     const out: IndexedVertex[] = [];
     const [i0, j0] = this.cellOf([p[0] - r, p[1] - r]);
     const [i1, j1] = this.cellOf([p[0] + r, p[1] + r]);
+    // Zoomed far out the window spans millions of cells; walking the stored buckets is then cheaper.
+    if ((i1 - i0 + 1) * (j1 - j0 + 1) > this.vertices.size) {
+      for (const [k, list] of this.vertices) if (this.keyIn(k, i0, j0, i1, j1)) out.push(...list);
+      return out;
+    }
     for (let i = i0; i <= i1; i++) for (let j = j0; j <= j1; j++) out.push(...(this.vertices.get(this.key(i, j)) ?? []));
     return out;
   }
@@ -93,7 +105,11 @@ export class SpatialIndex {
     const seen = new Set<IndexedSegment>();
     const [i0, j0] = this.cellOf([p[0] - r, p[1] - r]);
     const [i1, j1] = this.cellOf([p[0] + r, p[1] + r]);
-    for (let i = i0; i <= i1; i++) for (let j = j0; j <= j1; j++) for (const s of this.segments.get(this.key(i, j)) ?? []) seen.add(s);
+    if ((i1 - i0 + 1) * (j1 - j0 + 1) > this.segments.size) {
+      for (const [k, list] of this.segments) if (k !== '*' && this.keyIn(k, i0, j0, i1, j1)) for (const s of list) seen.add(s);
+    } else {
+      for (let i = i0; i <= i1; i++) for (let j = j0; j <= j1; j++) for (const s of this.segments.get(this.key(i, j)) ?? []) seen.add(s);
+    }
     for (const s of this.segments.get('*') ?? []) seen.add(s);
     return [...seen];
   }

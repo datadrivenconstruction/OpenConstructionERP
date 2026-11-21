@@ -738,7 +738,15 @@ export default function PlanCanvas(props: PlanCanvasProps) {
     readView();
   };
   useEffect(() => {
-    if (fitted.current || !mapRef.current || allFeatures.length === 0 || vtQuery.isLoading) return;
+    if (fitted.current || !mapRef.current || vtQuery.isLoading) return;
+    if (allFeatures.length === 0) {
+      // An empty plan opens at site scale on the grid origin, not at the whole globe.
+      // Not marked fitted: features that arrive later still get the extents fit.
+      if (!vt.origin || mapRef.current.getZoom() >= 10) return;
+      const [lng, lat] = vt.toView(vt.origin);
+      mapRef.current.jumpTo({ center: [lng, lat], zoom: 18, bearing: vt.gridNorthBearing });
+      return;
+    }
     fitted.current = true;
     const focus = props.focusFeatureId ? featureById.get(props.focusFeatureId) : null;
     if (focus) {

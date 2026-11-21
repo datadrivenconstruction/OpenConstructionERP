@@ -58478,7 +58478,7 @@ const resource = {
     "haul.verified_only": "Verified tickets only",
     "haul.sum_tickets": "Tickets",
     "haul.sum_tonnes": "Tonnes",
-    "haul.sum_volume": "m3",
+    "haul.sum_volume": "m³",
     "haul.sum_total": "Total",
     "haul.inv_empty_title": "No haulier invoices",
     "haul.inv_empty_desc": "Add an invoice to compare its lines with the verified tickets.",

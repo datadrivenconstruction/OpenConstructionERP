@@ -34,7 +34,7 @@ export function StatusBar({ cursor, snap, snapOn, conventions, scale, csf, crsNa
   const names = firstIsE ? [labels.e, labels.n] : [labels.n, labels.e];
   return (
     <div
-      className="flex min-h-8 flex-wrap items-center gap-x-4 gap-y-1 border-t border-border-light bg-surface-elevated px-3 py-1 text-xs text-content-secondary"
+      className="flex min-h-8 flex-wrap items-center gap-x-4 gap-y-1 border-t border-border-light bg-surface-elevated px-3 py-1 text-xs lg:pe-40 text-content-secondary"
       data-testid="plan-status-bar"
       role="status"
     >

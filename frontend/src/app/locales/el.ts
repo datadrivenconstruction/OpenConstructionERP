@@ -64849,7 +64849,7 @@ const resource = {
     "haul.sum_tickets": "Δελτία",
     "haul.sum_tonnes": "Τόνοι",
     "haul.sum_total": "Σύνολο",
-    "haul.sum_volume": "m3",
+    "haul.sum_volume": "m³",
     "haul.tab_import": "Εισαγωγή από ζυγαριά",
     "haul.tab_invoices": "Τιμολόγια μεταφορέων",
     "haul.tab_summary": "Σύνοψη",

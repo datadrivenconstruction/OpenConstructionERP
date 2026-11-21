@@ -23,6 +23,8 @@ export interface ViewTransform {
   gridNorthBearing: number;
   epsg: number | null;
   crsName: string;
+  /** Grid point the transform is fitted around; an empty plan opens here. */
+  origin?: GridXY;
 }
 
 function poly(c: readonly number[], u: number, v: number): number {
@@ -38,6 +40,7 @@ export function localTransform(e0: number, n0: number): ViewTransform {
     gridNorthBearing: 0,
     epsg: null,
     crsName: '',
+    origin: [e0, n0],
   };
 }
 
@@ -50,6 +53,7 @@ export function fromDTO(dto: ViewTransformDTO): ViewTransform {
   };
   return {
     kind: 'polynomial',
+    origin: [dto.e0, dto.n0],
     toView: fwd,
     toGrid: (ll) => {
       const p = (ll[0] - dto.lon0) / dto.q;

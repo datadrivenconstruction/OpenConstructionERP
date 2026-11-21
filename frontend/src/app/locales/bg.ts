@@ -64893,7 +64893,7 @@ const resource = {
     "haul.sum_tickets": "Талони",
     "haul.sum_tonnes": "Тонове",
     "haul.sum_total": "Общо",
-    "haul.sum_volume": "м3",
+    "haul.sum_volume": "м³",
     "haul.tab_import": "Импорт от кантара",
     "haul.tab_invoices": "Фактури от превозвачи",
     "haul.tab_summary": "Обобщение",

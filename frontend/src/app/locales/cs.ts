@@ -66212,7 +66212,7 @@ const resource = {
     "haul.sum_tickets": "Lístky",
     "haul.sum_tonnes": "Tuny",
     "haul.sum_total": "Celkem",
-    "haul.sum_volume": "m3",
+    "haul.sum_volume": "m³",
     "haul.tab_import": "Import z váhy",
     "haul.tab_invoices": "Faktury dopravců",
     "haul.tab_summary": "Souhrn",

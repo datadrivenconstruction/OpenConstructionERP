@@ -195,7 +195,7 @@ function TicketsTab({ projectId }: { projectId: string }) {
           {[
             `${t('haul.sum_tickets', { defaultValue: 'Tickets' })}: ${items.length}`,
             `${t('haul.sum_tonnes', { defaultValue: 'Tonnes' })}: ${fmtQuantity(totals.tonnes)}`,
-            totals.volume ? `${t('haul.sum_volume', { defaultValue: 'm3' })}: ${fmtQuantity(totals.volume)}` : '',
+            totals.volume ? `${t('haul.sum_volume', { defaultValue: 'm³' })}: ${fmtQuantity(totals.volume)}` : '',
             totals.loads ? `${t('haul.f_loads', { defaultValue: 'Loads' })}: ${fmtQuantity(totals.loads)}` : '',
             `${t('haul.col_amount', { defaultValue: 'Amount' })}: ${fmtFixed(totals.amount, 2)}`,
           ]
@@ -472,7 +472,7 @@ function SummaryTab({ projectId }: { projectId: string }) {
               <th className="text-right">{t('haul.sum_tickets', { defaultValue: 'Tickets' })}</th>
               <th className="text-right">{t('haul.f_loads', { defaultValue: 'Loads' })}</th>
               <th className="text-right">{t('haul.sum_tonnes', { defaultValue: 'Tonnes' })}</th>
-              <th className="text-right">{t('haul.sum_volume', { defaultValue: 'm3' })}</th>
+              <th className="text-right">{t('haul.sum_volume', { defaultValue: 'm³' })}</th>
               <th className="text-right">{t('haul.col_amount', { defaultValue: 'Amount' })}</th>
             </tr>
           </thead>

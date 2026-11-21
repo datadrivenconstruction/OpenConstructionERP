@@ -67527,7 +67527,7 @@ const resource = {
     "haul.sum_tickets": "Wiegescheine",
     "haul.sum_tonnes": "Tonnen",
     "haul.sum_total": "Gesamt",
-    "haul.sum_volume": "m3",
+    "haul.sum_volume": "m³",
     "haul.tab_import": "Import der Waage",
     "haul.tab_invoices": "Rechnungen der Transportunternehmer",
     "haul.tab_summary": "Übersicht",

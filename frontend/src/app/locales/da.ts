@@ -64889,7 +64889,7 @@ const resource = {
     "haul.sum_tickets": "Vejesedler",
     "haul.sum_tonnes": "Ton",
     "haul.sum_total": "I alt",
-    "haul.sum_volume": "m3",
+    "haul.sum_volume": "m³",
     "haul.tab_import": "Import fra vægt",
     "haul.tab_invoices": "Fakturaer fra vognmænd",
     "haul.tab_summary": "Oversigt",

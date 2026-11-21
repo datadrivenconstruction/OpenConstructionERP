@@ -67829,7 +67829,7 @@ const resource = {
     "haul.sum_tickets": "Boletas",
     "haul.sum_tonnes": "Toneladas",
     "haul.sum_total": "Total",
-    "haul.sum_volume": "m3",
+    "haul.sum_volume": "m³",
     "haul.tab_import": "Importar de la báscula",
     "haul.tab_invoices": "Facturas de transportistas",
     "haul.tab_summary": "Resumen",

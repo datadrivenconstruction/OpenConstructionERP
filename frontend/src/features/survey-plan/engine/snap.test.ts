@@ -2,7 +2,7 @@
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 import { describe, expect, it } from 'vitest';
 import type { PlanFeature, SnapKind, SnapSettings } from '../types';
-import { buildIndex } from './spatialIndex';
+import { buildIndex, SpatialIndex } from './spatialIndex';
 import { defaultSnapSettings, setMode, snap, toggleAll } from './snap';
 
 const line = (id: string, coords: [number, number][], label?: string): PlanFeature => ({
@@ -129,5 +129,18 @@ describe('spatial index', () => {
     for (let k = 0; k < 1000; k++) r = snap(idx, { cursor: [150.4, 150.3], radius: 1, settings: only('endpoint') });
     expect(performance.now() - t0).toBeLessThan(500);
     expect(r?.targetLabel).toBe('P5050');
+  });
+});
+
+describe('spatial index far zoomed out', () => {
+  it('answers a window of millions of cells without walking them', () => {
+    const idx = new SpatialIndex(5);
+    idx.addVertex({ p: [100, 100], featureId: 'a', index: 0 });
+    idx.addSegment({ a: [0, 0], b: [10, 0], featureId: 'b', index: 0 });
+    const t0 = performance.now();
+    expect(idx.queryVertices([0, 0], 5e7)).toHaveLength(1);
+    expect(idx.querySegments([0, 0], 5e7)).toHaveLength(1);
+    expect(idx.queryVertices([1e9, 1e9], 5e7)).toHaveLength(0);
+    expect(performance.now() - t0).toBeLessThan(200);
   });
 });
