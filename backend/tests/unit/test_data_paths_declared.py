@@ -55,11 +55,11 @@ FIRST_WAVE = (
 )
 
 # Ratchet: modules still without a declaration. Lower it when you declare one; never raise it.
-UNDECLARED_CEILING = 214
+UNDECLARED_CEILING = 195
 
 # Ratchet: modules with neither a declaration nor a derived link (country packs and
 # platform services such as backup, search, scim). Never raise it.
-UNLINKED_CEILING = 39
+UNLINKED_CEILING = 20
 
 EN_TS = Path(__file__).resolve().parents[3] / "frontend" / "src" / "app" / "locales" / "en.ts"
 
