@@ -14,8 +14,8 @@
 # Caddyfile first and here second. Editing this file to make CI green ships a
 # route that still 404s for every visitor.
 #
-# Extracted from: Caddyfile.live (sha256 30886b1bc7251179a4651f8983060f431e4ba8557222252fc4ddcc403d4f0efa)
-# Segments: 244
+# Extracted from: Caddyfile.live (sha256 da4e4ddcbdd0560864ed737c61ecdc10816c2162c1ff24d25f8c8f19e120187d)
+# Segments: 245
 5d
 about
 academy-courses
