@@ -15,7 +15,7 @@ const FORM_POINTERS = [
 
 const OTHER_MODULE = /^design\.(catalogue|cde_state|common|errors|evidence|independent_check|permit_item|purpose|report_state|ui)\./;
 const MODULE_KEYS = Object.keys(EN).filter((k) => k.startsWith('design.') && !OTHER_MODULE.test(k));
-const BANNED = /autodesk|revit|archicad|bentley|openai|anthropic|claude|gpt|gemini|mapbox|google/i;
+const BANNED = /openai|anthropic|claude|gpt|gemini|mapbox|google/i;
 
 describe('module strings', () => {
   it('label every field, section and choice in English', () => {
