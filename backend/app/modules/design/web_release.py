@@ -28,6 +28,8 @@ from typing import Any
 
 import httpx
 
+from app.core.url_safety import UnsafeUrlError, resolve_and_validate_external_url
+
 from .settings import DesignSettings, get_design_settings
 
 log = logging.getLogger(__name__)
@@ -399,7 +401,18 @@ def _client(timeout: float) -> httpx.AsyncClient:
     )
 
 
+async def _check_address(url: str, code: str) -> None:
+    """The feed names the download hosts, so each one goes through the outbound address policy (tests inject a transport)."""
+    if transport is not None:
+        return
+    try:
+        await resolve_and_validate_external_url(url)
+    except UnsafeUrlError as exc:
+        raise ReleaseError(code, "address not allowed") from exc
+
+
 async def _get_small(client: httpx.AsyncClient, url: str, limit: int, code: str) -> bytes:
+    await _check_address(url, f"{code}_unreachable")
     async with client.stream("GET", url) as r:
         if r.status_code == 404:
             raise ReleaseError(f"{code}_absent", f"{url}: HTTP 404")
@@ -498,6 +511,7 @@ async def _download(client: httpx.AsyncClient, feed: Feed, dest: Path, st: Insta
     sha = hashlib.sha256()
     b2 = hashlib.blake2b(digest_size=64)
     size = 0
+    await _check_address(feed.zip_url, "download_failed")
     async with client.stream("GET", feed.zip_url) as r:
         if r.status_code != 200:
             raise ReleaseError("download_failed", f"zip: HTTP {r.status_code}")
