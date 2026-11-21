@@ -47,6 +47,7 @@ import { ToolRail } from './chrome/ToolRail';
 import type { GridXY, LayerViewState, MeasureResult, PlanCanvasProps, PlanFeature, PlanLayerSpec, PlanTool, SnapKind, SnapResult, SnapSettings, ToolContext } from './types';
 import { SNAP_KINDS } from './types';
 import { useMapLibreLocale } from '@/shared/lib/mapLibreLocale';
+import { getIntlLocale } from '@/shared/lib/intlLocale';
 
 const HIT_PX = 6;
 const HANDLE_PX = 8;
@@ -574,7 +575,7 @@ export default function PlanCanvas(props: PlanCanvasProps) {
           title: t('plan.conflict', {
             defaultValue: '{{who}} changed this on {{when}}. Reload to see their version; your edits stay until you discard them.',
             who: d?.author_name || t('plan.history.someone', { defaultValue: 'someone' }),
-            when: d?.changed_at ? new Date(d.changed_at).toLocaleString() : '',
+            when: d?.changed_at ? new Date(d.changed_at).toLocaleString(getIntlLocale()) : '',
           }),
         });
       } else {

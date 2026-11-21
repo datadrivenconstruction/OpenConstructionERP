@@ -11,6 +11,7 @@ import { useTranslation } from 'react-i18next';
 import { planColour } from '../cartography';
 import { niceStep, runs, sectionFrame, type SectionPoint } from '../engine/sections';
 import { formatChainage, formatDistance, type PlanConventions } from '../units';
+import { fmtFixed } from '@/shared/lib/formatters';
 
 export interface LongSectionProps {
   points: readonly SectionPoint[];
@@ -110,7 +111,7 @@ export function LongSection({ points, conventions, labelEvery = 100, exaggeratio
         )}
       </svg>
       <figcaption className="text-xs text-content-tertiary">
-        {t('plan.section.exaggeration', { defaultValue: 'Heights drawn x{{v}}', v: f.vx >= 1.95 ? Math.round(f.vx) : f.vx.toFixed(1) })}
+        {t('plan.section.exaggeration', { defaultValue: 'Heights drawn x{{v}}', v: f.vx >= 1.95 ? Math.round(f.vx) : fmtFixed(f.vx, 1) })}
       </figcaption>
     </figure>
   );

@@ -12,6 +12,7 @@ import { Button } from '@/shared/ui';
 import { planColour } from '../cartography';
 import { niceStep, runs, sectionFrame, type CrossSection } from '../engine/sections';
 import { formatChainage, formatDistance, type PlanConventions } from '../units';
+import { fmtFixed } from '@/shared/lib/formatters';
 
 export function CrossSections({ sections, conventions, onStation }: { sections: readonly CrossSection[]; conventions: PlanConventions; onStation?: (ch: number) => void }) {
   const { t } = useTranslation();
@@ -58,7 +59,7 @@ export function CrossSections({ sections, conventions, onStation }: { sections: 
           <path key={j} d={run.map((p, q) => `${q ? 'L' : 'M'}${f.sx(p.offset).toFixed(1)},${f.sz(p.z).toFixed(1)}`).join('')} fill="none" stroke={planColour('topo')} strokeWidth={1.75} strokeLinejoin="round" />
         ))}
       </svg>
-      <figcaption className="text-xs text-content-tertiary">{t('plan.section.exaggeration', { defaultValue: 'Heights drawn x{{v}}', v: f.vx >= 1.95 ? Math.round(f.vx) : f.vx.toFixed(1) })}</figcaption>
+      <figcaption className="text-xs text-content-tertiary">{t('plan.section.exaggeration', { defaultValue: 'Heights drawn x{{v}}', v: f.vx >= 1.95 ? Math.round(f.vx) : fmtFixed(f.vx, 1) })}</figcaption>
     </figure>
   );
 }

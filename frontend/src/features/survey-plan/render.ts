@@ -11,6 +11,7 @@ import { parseCode, type CodeEntry } from './engine/linework';
 import type { BBox } from './engine/geometry';
 import type { ViewTransform } from './engine/viewTransform';
 import type { GridXY, GridXYZ, PlanFeature, PlanGeometry } from './types';
+import { fmtFixed } from '@/shared/lib/formatters';
 
 type ToView = ViewTransform['toView'];
 
@@ -46,7 +47,7 @@ export function decorate(f: PlanFeature, o: DecorateOptions): Record<string, unk
     const entry = code ? parseCode(code, o.library).entry : null;
     out.symbol = symbolFor(typeof p.kind === 'string' ? p.kind : f.layer === 'control' ? 'control' : undefined, entry?.symbol ?? (typeof p.symbol === 'string' ? p.symbol : undefined));
     const z = f.geometry.coordinates[2];
-    if (z != null) out.z_text = z.toFixed(o.zDecimals);
+    if (z != null) out.z_text = fmtFixed(z, o.zDecimals);
     out.priority = (p.kind === 'control' || f.layer === 'control' ? 100 : o.priority) as number;
   }
   const colour = paletteValue(p.colour, o.palette);

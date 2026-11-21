@@ -12,6 +12,7 @@ import type { LiveFinding } from '../engine/liveChecks';
 import { formatArea, formatCoordPair, formatDistance } from '../units/linear';
 import type { PlanConventions } from '../units/conventions';
 import type { MeasureResult, PlanFeature } from '../types';
+import { getIntlLocale } from '@/shared/lib/intlLocale';
 
 interface Props {
   projectId: string;
@@ -104,7 +105,7 @@ function HistoryList({ projectId, f }: { projectId: string; f: PlanFeature }) {
           <span className="min-w-0 flex-1 truncate text-content-secondary">
             {t(`plan.history.op_${e.op}`, { defaultValue: e.op })}
             {e.summary ? ` ${e.summary}` : ''} · {e.author_name || t('plan.history.someone', { defaultValue: 'someone' })} ·{' '}
-            {new Date(e.created_at).toLocaleString()}
+            {new Date(e.created_at).toLocaleString(getIntlLocale())}
           </span>
           {i > 0 && (
             <button

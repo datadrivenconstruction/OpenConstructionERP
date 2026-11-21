@@ -168,7 +168,7 @@ export function formatChainage(
   if (metres == null || !Number.isFinite(metres)) return '';
   const sign = metres < 0 ? '-' : '';
   const abs = Math.abs(metres);
-  if (format === 'km') return `${sign}km ${(abs / 1000).toFixed(decimals ?? 3)}`;
+  if (format === 'km') return `${sign}km ${fmtFixed(abs / 1000, decimals ?? 3)}`;
   if (format === 'imperial') {
     const unit = conv.linearUnit === 'm' ? 'ft' : conv.linearUnit;
     const d = decimals ?? 2;
