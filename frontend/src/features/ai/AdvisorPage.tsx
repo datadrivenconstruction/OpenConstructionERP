@@ -18,6 +18,7 @@ import {
   ArrowUpRight,
   RefreshCw,
 } from 'lucide-react';
+import { DataPathsButton } from '@/shared/ui/DataPaths/DataPathsButton';
 import { Breadcrumb, AIDisclaimerBanner, AITrustNote, DismissibleInfo, IntroRichText, ConfirmDialog } from '@/shared/ui';
 import { apiGet, apiPost } from '@/shared/lib/api';
 import { fmtNumber } from '@/shared/lib/formatters';
@@ -642,10 +643,10 @@ export function AdvisorPage() {
 
   return (
     <div className="w-full animate-fade-in flex flex-col" style={{ height: 'calc(100vh - 80px)' }}>
-      <Breadcrumb
-        items={[{ label: t('nav.ai_advisor', 'AI Cost Advisor') }]}
-        className="mb-3 shrink-0"
-      />
+      <div className="mb-3 flex shrink-0 items-center justify-between gap-3">
+        <Breadcrumb items={[{ label: t('nav.ai_advisor', 'AI Cost Advisor') }]} />
+        <DataPathsButton />
+      </div>
 
       {/* Canonical top block - the module name + icon are shown by the global
           top app bar. This chat page manages its own header bar below, so we

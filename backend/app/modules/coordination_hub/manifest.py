@@ -1,6 +1,7 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 """Coordination Hub module manifest."""
 
+from app.core.data_paths import DataPaths
 from app.core.module_loader import ModuleManifest
 
 manifest = ModuleManifest(
@@ -18,4 +19,5 @@ manifest = ModuleManifest(
     depends=["oe_projects", "oe_users"],
     auto_install=True,
     enabled=True,
+    data_paths=DataPaths(reason="Read-only dashboard over federations, clashes and BCF activity; owns no records"),
 )

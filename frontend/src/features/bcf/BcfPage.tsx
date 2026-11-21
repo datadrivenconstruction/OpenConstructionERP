@@ -13,6 +13,7 @@ import { fetchProjectList } from '@/shared/lib/projectList';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { BcfIssuesPanel } from './BcfIssuesPanel';
 import { IssueHubLink } from '@/features/issues/IssueHubLink';
+import { DataPathsButton } from '@/shared/ui/DataPaths/DataPathsButton';
 
 export function BcfPage() {
   const activeProjectId = useProjectContextStore((s) => s.activeProjectId);
@@ -29,7 +30,8 @@ export function BcfPage() {
               the route wrapper rather than inside BcfIssuesPanel because the
               panel is reused inside the model viewer, where the user has not
               navigated to a register and a link back to the hub is noise. */}
-          <div className="mb-3 flex justify-end">
+          <div className="mb-3 flex justify-end gap-2">
+            <DataPathsButton />
             <IssueHubLink />
           </div>
           <BcfIssuesPanel projectId={projectId} />

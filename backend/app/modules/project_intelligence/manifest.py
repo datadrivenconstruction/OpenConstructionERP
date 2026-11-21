@@ -2,6 +2,7 @@
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 """Project Intelligence module manifest."""
 
+from app.core.data_paths import DataPaths
 from app.core.module_loader import ModuleManifest
 
 manifest = ModuleManifest(
@@ -17,4 +18,5 @@ manifest = ModuleManifest(
     depends=["oe_projects"],
     auto_install=True,
     enabled=True,
+    data_paths=DataPaths(reason="Scores project completion from other modules' data and writes nothing back to them"),
 )

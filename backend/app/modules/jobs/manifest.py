@@ -8,6 +8,7 @@ thin - all heavy lifting lives in ``app/core/job*``; this package is just
 the HTTP surface.
 """
 
+from app.core.data_paths import DataPaths
 from app.core.module_loader import ModuleManifest
 
 manifest = ModuleManifest(
@@ -20,4 +21,5 @@ manifest = ModuleManifest(
     depends=[],
     auto_install=True,
     enabled=True,
+    data_paths=DataPaths(reason="Lists and cancels platform background jobs; owns no project records"),
 )

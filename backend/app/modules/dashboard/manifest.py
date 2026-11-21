@@ -7,6 +7,7 @@ dashboards). This module exposes a single ``GET /api/v1/dashboard/rollup/``
 endpoint that aggregates all 10 wave-2 widget payloads in one round-trip.
 """
 
+from app.core.data_paths import DataPaths
 from app.core.module_loader import ModuleManifest
 
 manifest = ModuleManifest(
@@ -26,4 +27,5 @@ manifest = ModuleManifest(
     depends=["oe_projects"],
     auto_install=True,
     enabled=True,
+    data_paths=DataPaths(reason="Reads other modules into dashboard widgets and writes nothing back"),
 )

@@ -9,6 +9,7 @@
  * `erp_chat.admin` permission server-side.
  */
 
+import { DataPathsButton } from '@/shared/ui/DataPaths/DataPathsButton';
 import { useEffect, useMemo, useState } from 'react';
 import { ThumbsUp, ThumbsDown, Cpu, Database, Activity } from 'lucide-react';
 import { getAdminStats } from './api';
@@ -132,6 +133,9 @@ export default function AdminStatsPage() {
         color: 'var(--chat-text-primary, #111827)',
       }}
     >
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 8 }}>
+        <DataPathsButton />
+      </div>
       <div
         style={{
           display: 'flex',
