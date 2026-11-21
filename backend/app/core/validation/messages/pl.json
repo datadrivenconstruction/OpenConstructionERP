@@ -2860,7 +2860,7 @@
     "tolerance": "Tolerancja",
     "points": "Punkty porównane / odczytane",
     "mean": "Średnie odchylenie",
-    "rms": "RMS",
+    "rms": "Średnia kwadratowa",
     "p95": "P95 odchylenia bezwzględnego",
     "within": "W tolerancji",
     "high": "Powyżej projektu",

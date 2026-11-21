@@ -2434,28 +2434,28 @@
       "suggestion": "Ελέγξτε την καταγραφή της παρατήρησης ή επαναλάβετέ την πριν αποδεχθείτε τη συνόρθωση."
     },
     "code_unknown": {
-      "fail": "Code {code} is not in the code library ({count} points).",
-      "suggestion": "Add the code to the library or correct the points' codes."
+      "fail": "Ο κωδικός {code} δεν υπάρχει στη βιβλιοθήκη κωδικών ({count} σημεία).",
+      "suggestion": "Προσθέστε τον κωδικό στη βιβλιοθήκη ή διορθώστε τους κωδικούς των σημείων."
     },
     "string_short": {
-      "fail": "String {name} has a single point, so no line is drawn.",
-      "suggestion": "Code a second point of the string or correct the string number."
+      "fail": "Η σειρά {name} έχει ένα μόνο σημείο, οπότε δεν σχεδιάζεται γραμμή.",
+      "suggestion": "Κωδικοποιήστε ένα δεύτερο σημείο της σειράς ή διορθώστε τον αριθμό της."
     },
     "string_short_closed": {
-      "fail": "String {name} is closed but has only {count} points.",
-      "suggestion": "A closed string needs at least three points."
+      "fail": "Η σειρά {name} είναι κλειστή αλλά έχει μόνο {count} σημεία.",
+      "suggestion": "Μια κλειστή σειρά χρειάζεται τουλάχιστον τρία σημεία."
     },
     "ring_open": {
-      "fail": "A drawn polygon has fewer than three distinct vertices.",
-      "suggestion": "Add vertices or delete the polygon."
+      "fail": "Ένα σχεδιασμένο πολύγωνο έχει λιγότερες από τρεις διακριτές κορυφές.",
+      "suggestion": "Προσθέστε κορυφές ή διαγράψτε το πολύγωνο."
     },
     "ring_crosses": {
-      "fail": "A drawn polygon crosses itself near E {e}, N {n}.",
-      "suggestion": "Move or delete a vertex so the edges no longer cross."
+      "fail": "Ένα σχεδιασμένο πολύγωνο τέμνει τον εαυτό του κοντά στο E {e}, N {n}.",
+      "suggestion": "Μετακινήστε ή διαγράψτε μια κορυφή ώστε οι πλευρές να μην τέμνονται."
     },
     "code_duplicate": {
-      "fail": "The code library lists code {code} more than once.",
-      "suggestion": "Keep one entry per code."
+      "fail": "Η βιβλιοθήκη κωδικών περιέχει τον κωδικό {code} περισσότερες από μία φορές.",
+      "suggestion": "Κρατήστε μία εγγραφή ανά κωδικό."
     }
   },
   "volumes": {
@@ -2860,7 +2860,7 @@
     "tolerance": "Ανοχή",
     "points": "Σημεία συγκρίθηκαν / αναγνώστηκαν",
     "mean": "Μέση απόκλιση",
-    "rms": "RMS",
+    "rms": "Ρίζα μέσου τετραγώνου",
     "p95": "P95 της απόλυτης απόκλισης",
     "within": "Εντός ανοχής",
     "high": "Πάνω από τη μελέτη",

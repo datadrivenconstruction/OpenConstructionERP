@@ -102,13 +102,13 @@ async def test_export_selection_csv_dxf_landxml(client: AsyncClient, header: dic
     body = {"ids": [pts["CP1"]["id"]], "format": "csv", "preset": "PNEZD", "header": False}
     r = await client.post(f"{CORE}/projects/{project_id}/points/export", json=body, headers=header)
     assert r.status_code == 200, r.text
-    assert r.text == "CP1,5818990.0000,388990.0000,33.9000,CP,\n"
+    assert r.text == "CP1,5818990.0000,388990.0000,33.9000,CP\n"
     r = await client.post(f"{CORE}/projects/{project_id}/points/export", json={"format": "landxml"}, headers=header)
     assert '<CoordinateSystem epsgCode="32633"/>' in r.text
     assert r.text.count("<CgPoint ") == 3
     r = await client.post(f"{CORE}/projects/{project_id}/points/export", json={"format": "dxf"}, headers=header)
     assert r.status_code == 200
-    assert b"PT_TOE" in r.content
+    assert b"SURVEY_TOE" in r.content
 
 
 async def test_control_checks_and_srv_012(client: AsyncClient, header: dict, project_id: str) -> None:

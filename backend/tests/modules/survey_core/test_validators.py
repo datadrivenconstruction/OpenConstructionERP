@@ -124,6 +124,12 @@ _SURVEY_KEYS = (
     "raw_skipped",
     "lsq_global_test",
     "lsq_outlier",
+    "code_duplicate",
+    "code_unknown",
+    "ring_crosses",
+    "ring_open",
+    "string_short",
+    "string_short_closed",
 )
 
 

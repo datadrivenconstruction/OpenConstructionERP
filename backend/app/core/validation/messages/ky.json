@@ -2434,28 +2434,28 @@
       "suggestion": "Теңдештирүүнү кабыл алуудан мурун өлчөөнүн жазуусун текшериңиз же кайра өлчөңүз."
     },
     "code_unknown": {
-      "fail": "Code {code} is not in the code library ({count} points).",
-      "suggestion": "Add the code to the library or correct the points' codes."
+      "fail": "{code} коду код китепканасында жок ({count} чекит).",
+      "suggestion": "Кодду китепканага кошуңуз же чекиттердин коддорун оңдоңуз."
     },
     "string_short": {
-      "fail": "String {name} has a single point, so no line is drawn.",
-      "suggestion": "Code a second point of the string or correct the string number."
+      "fail": "{name} сабында бир гана чекит бар, ошондуктан сызык тартылбайт.",
+      "suggestion": "Саптын экинчи чекитин коддоңуз же сап номерин оңдоңуз."
     },
     "string_short_closed": {
-      "fail": "String {name} is closed but has only {count} points.",
-      "suggestion": "A closed string needs at least three points."
+      "fail": "{name} сабы жабык, бирок анда {count} чекит гана бар.",
+      "suggestion": "Жабык сапка кеминде үч чекит керек."
     },
     "ring_open": {
-      "fail": "A drawn polygon has fewer than three distinct vertices.",
-      "suggestion": "Add vertices or delete the polygon."
+      "fail": "Тартылган көп бурчтукта үчтөн аз ар түрдүү чоку бар.",
+      "suggestion": "Чокуларды кошуңуз же көп бурчтукту өчүрүңүз."
     },
     "ring_crosses": {
-      "fail": "A drawn polygon crosses itself near E {e}, N {n}.",
-      "suggestion": "Move or delete a vertex so the edges no longer cross."
+      "fail": "Тартылган көп бурчтук E {e}, N {n} жанында өзүн кесип өтөт.",
+      "suggestion": "Кырлар кесилишпеши үчүн чокуну жылдырыңыз же өчүрүңүз."
     },
     "code_duplicate": {
-      "fail": "The code library lists code {code} more than once.",
-      "suggestion": "Keep one entry per code."
+      "fail": "Код китепканасында {code} коду бир нече жолу бар.",
+      "suggestion": "Ар бир код үчүн бир жазууну калтырыңыз."
     }
   },
   "volumes": {
@@ -2860,7 +2860,7 @@
     "tolerance": "Уруксат чеги",
     "points": "Салыштырылган / окулган чекиттер",
     "mean": "Орточо четтөө",
-    "rms": "RMS",
+    "rms": "Орточо квадраттык четтөө",
     "p95": "Абсолюттук четтөөнүн P95",
     "within": "Уруксат чегинде",
     "high": "Долбоордон жогору",

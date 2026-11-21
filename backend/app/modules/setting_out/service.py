@@ -781,7 +781,8 @@ class SettingOutService:
             project_id=str(project_id),
             metadata={"locale": locale},
         )
-        failed = [r for r in report.results if not r.passed]
+        # The engine yields rules in registry order, which is not stable; report them by rule id.
+        failed = sorted((r for r in report.results if not r.passed), key=lambda r: r.rule_id)
         return ValidationReportOut(
             status=str(getattr(report.status, "value", report.status)),
             error_count=len(report.errors),

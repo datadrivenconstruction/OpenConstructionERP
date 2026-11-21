@@ -2434,28 +2434,28 @@
       "suggestion": "Controleer hoe de waarneming is genoteerd of meet opnieuw voordat u de vereffening aanvaardt."
     },
     "code_unknown": {
-      "fail": "Code {code} is not in the code library ({count} points).",
-      "suggestion": "Add the code to the library or correct the points' codes."
+      "fail": "Code {code} staat niet in de codebibliotheek ({count} punten).",
+      "suggestion": "Voeg de code toe aan de bibliotheek of corrigeer de codes van de punten."
     },
     "string_short": {
-      "fail": "String {name} has a single point, so no line is drawn.",
-      "suggestion": "Code a second point of the string or correct the string number."
+      "fail": "String {name} heeft maar één punt, dus er wordt geen lijn getekend.",
+      "suggestion": "Codeer een tweede punt van de string of corrigeer het stringnummer."
     },
     "string_short_closed": {
-      "fail": "String {name} is closed but has only {count} points.",
-      "suggestion": "A closed string needs at least three points."
+      "fail": "String {name} is gesloten maar heeft slechts {count} punten.",
+      "suggestion": "Een gesloten string heeft minstens drie punten nodig."
     },
     "ring_open": {
-      "fail": "A drawn polygon has fewer than three distinct vertices.",
-      "suggestion": "Add vertices or delete the polygon."
+      "fail": "Een getekende polygoon heeft minder dan drie verschillende hoekpunten.",
+      "suggestion": "Voeg hoekpunten toe of verwijder de polygoon."
     },
     "ring_crosses": {
-      "fail": "A drawn polygon crosses itself near E {e}, N {n}.",
-      "suggestion": "Move or delete a vertex so the edges no longer cross."
+      "fail": "Een getekende polygoon snijdt zichzelf bij E {e}, N {n}.",
+      "suggestion": "Verplaats of verwijder een hoekpunt zodat de zijden elkaar niet meer kruisen."
     },
     "code_duplicate": {
-      "fail": "The code library lists code {code} more than once.",
-      "suggestion": "Keep one entry per code."
+      "fail": "De codebibliotheek bevat code {code} meer dan eens.",
+      "suggestion": "Houd één vermelding per code over."
     }
   },
   "volumes": {
@@ -2855,12 +2855,12 @@
   },
   "pointcloud_report": {
     "title": "Scan tegen ontwerp",
-    "scan": "Scan",
+    "scan": "Opname",
     "design": "Ontwerpoppervlak",
     "tolerance": "Tolerantie",
     "points": "Punten vergeleken / gelezen",
     "mean": "Gemiddelde afwijking",
-    "rms": "RMS",
+    "rms": "Kwadratisch gemiddelde",
     "p95": "P95 van de absolute afwijking",
     "within": "Binnen tolerantie",
     "high": "Boven ontwerp",

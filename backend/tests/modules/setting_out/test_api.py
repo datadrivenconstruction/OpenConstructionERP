@@ -161,7 +161,9 @@ async def test_profiles_show_demo_and_project_only(client: AsyncClient, header: 
     ]
     assert keys[0] == "demo"
     assert made.json()["key"] in keys
-    assert not any(k.startswith("pack:") for k in keys)
+    # Pack profiles follow the company's markets, which other tests sharing the database can set through
+    # their projects' countries; the market gating itself is covered in test_validators.
+    assert [k for k in keys if not k.startswith("pack:")] == ["demo", made.json()["key"]]
 
 
 async def test_stranger_cannot_read_or_write(

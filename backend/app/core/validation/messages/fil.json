@@ -2434,28 +2434,28 @@
       "suggestion": "Suriin kung paano naitala ang obserbasyon o sukatin muli bago tanggapin ang adjustment."
     },
     "code_unknown": {
-      "fail": "Code {code} is not in the code library ({count} points).",
-      "suggestion": "Add the code to the library or correct the points' codes."
+      "fail": "Ang code {code} ay wala sa code library ({count} punto).",
+      "suggestion": "Idagdag ang code sa library o itama ang mga code ng mga punto."
     },
     "string_short": {
-      "fail": "String {name} has a single point, so no line is drawn.",
-      "suggestion": "Code a second point of the string or correct the string number."
+      "fail": "Ang string {name} ay may isang punto lamang, kaya walang iginuguhit na linya.",
+      "suggestion": "Mag-code ng pangalawang punto ng string o itama ang numero ng string."
     },
     "string_short_closed": {
-      "fail": "String {name} is closed but has only {count} points.",
-      "suggestion": "A closed string needs at least three points."
+      "fail": "Ang string {name} ay sarado ngunit {count} punto lamang ang mayroon.",
+      "suggestion": "Ang saradong string ay nangangailangan ng hindi bababa sa tatlong punto."
     },
     "ring_open": {
-      "fail": "A drawn polygon has fewer than three distinct vertices.",
-      "suggestion": "Add vertices or delete the polygon."
+      "fail": "Ang isang iginuhit na polygon ay may wala pang tatlong magkakaibang vertex.",
+      "suggestion": "Magdagdag ng mga vertex o burahin ang polygon."
     },
     "ring_crosses": {
-      "fail": "A drawn polygon crosses itself near E {e}, N {n}.",
-      "suggestion": "Move or delete a vertex so the edges no longer cross."
+      "fail": "Ang isang iginuhit na polygon ay tumatawid sa sarili malapit sa E {e}, N {n}.",
+      "suggestion": "Ilipat o burahin ang isang vertex upang hindi na magtawiran ang mga gilid."
     },
     "code_duplicate": {
-      "fail": "The code library lists code {code} more than once.",
-      "suggestion": "Keep one entry per code."
+      "fail": "Ang code library ay naglilista ng code {code} nang higit sa isang beses.",
+      "suggestion": "Magtira ng isang entry bawat code."
     }
   },
   "volumes": {
@@ -2855,12 +2855,12 @@
   },
   "pointcloud_report": {
     "title": "Scan laban sa disenyo",
-    "scan": "Scan",
-    "design": "Design surface",
-    "tolerance": "Tolerance",
+    "scan": "Pag-scan",
+    "design": "Disenyo",
+    "tolerance": "Toleransya",
     "points": "Mga puntong pinaghambing / binasa",
     "mean": "Karaniwang paglihis",
-    "rms": "RMS",
+    "rms": "Root mean square",
     "p95": "P95 ng absolute na paglihis",
     "within": "Pasok sa tolerance",
     "high": "Mas mataas sa disenyo",

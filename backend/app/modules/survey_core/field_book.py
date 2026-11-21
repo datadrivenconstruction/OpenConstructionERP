@@ -83,7 +83,7 @@ def mean_faces(face_l: float | None, face_r: float | None) -> tuple[float, float
     if face_l is None or face_r is None:
         return _wrap360(face_l if face_l is not None else face_r), None  # type: ignore[arg-type]
     diff = _wrap180(face_l - face_r)
-    return _wrap360(face_r + diff / 2.0), diff * 3600.0
+    return _wrap360(face_r + diff / 2.0), round(diff * 3600.0, 3)
 
 
 def horizontal(row: BookRow) -> tuple[float | None, float | None]:

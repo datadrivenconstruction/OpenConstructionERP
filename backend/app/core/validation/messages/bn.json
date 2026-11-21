@@ -2434,28 +2434,28 @@
       "suggestion": "সমন্বয় গ্রহণের আগে পর্যবেক্ষণের লিপি যাচাই করুন বা আবার মাপুন।"
     },
     "code_unknown": {
-      "fail": "Code {code} is not in the code library ({count} points).",
-      "suggestion": "Add the code to the library or correct the points' codes."
+      "fail": "কোড {code} কোড লাইব্রেরিতে নেই ({count}টি বিন্দু)।",
+      "suggestion": "কোডটি লাইব্রেরিতে যোগ করুন বা বিন্দুর কোড ঠিক করুন।"
     },
     "string_short": {
-      "fail": "String {name} has a single point, so no line is drawn.",
-      "suggestion": "Code a second point of the string or correct the string number."
+      "fail": "স্ট্রিং {name}-এ মাত্র একটি বিন্দু আছে, তাই রেখা আঁকা হয় না।",
+      "suggestion": "স্ট্রিংয়ের দ্বিতীয় বিন্দু কোড করুন বা স্ট্রিং নম্বর ঠিক করুন।"
     },
     "string_short_closed": {
-      "fail": "String {name} is closed but has only {count} points.",
-      "suggestion": "A closed string needs at least three points."
+      "fail": "স্ট্রিং {name} বদ্ধ কিন্তু এতে মাত্র {count}টি বিন্দু আছে।",
+      "suggestion": "বদ্ধ স্ট্রিংয়ের জন্য কমপক্ষে তিনটি বিন্দু লাগে।"
     },
     "ring_open": {
-      "fail": "A drawn polygon has fewer than three distinct vertices.",
-      "suggestion": "Add vertices or delete the polygon."
+      "fail": "আঁকা বহুভুজে তিনটির কম স্বতন্ত্র শীর্ষবিন্দু আছে।",
+      "suggestion": "শীর্ষবিন্দু যোগ করুন বা বহুভুজটি মুছুন।"
     },
     "ring_crosses": {
-      "fail": "A drawn polygon crosses itself near E {e}, N {n}.",
-      "suggestion": "Move or delete a vertex so the edges no longer cross."
+      "fail": "আঁকা একটি বহুভুজ E {e}, N {n} এর কাছে নিজেকে ছেদ করেছে।",
+      "suggestion": "একটি শীর্ষবিন্দু সরান বা মুছুন যাতে প্রান্তগুলো আর ছেদ না করে।"
     },
     "code_duplicate": {
-      "fail": "The code library lists code {code} more than once.",
-      "suggestion": "Keep one entry per code."
+      "fail": "কোড লাইব্রেরিতে কোড {code} একাধিকবার আছে।",
+      "suggestion": "প্রতিটি কোডের জন্য একটি এন্ট্রি রাখুন।"
     }
   },
   "volumes": {
@@ -2860,7 +2860,7 @@
     "tolerance": "সহনসীমা",
     "points": "তুলনা করা / পড়া বিন্দু",
     "mean": "গড় বিচ্যুতি",
-    "rms": "RMS",
+    "rms": "মূল গড় বর্গ (আরএমএস)",
     "p95": "পরম বিচ্যুতির P95",
     "within": "সহনসীমার মধ্যে",
     "high": "নকশার উপরে",

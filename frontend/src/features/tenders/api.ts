@@ -42,7 +42,7 @@ export function fetchTenders(projectId: string, filters: TenderFilters = {}): Pr
   const params = new URLSearchParams({ project_id: projectId });
   if (filters.kind) params.set('kind', filters.kind);
   if (filters.source) params.set('source', filters.source);
-  return apiGet<TenderSummary[]>(`/v1/bid-management/tenders/?${params.toString()}`);
+  return apiGet<{ items: TenderSummary[] }>(`/v1/bid-management/tenders/?${params.toString()}`).then((page) => page.items);
 }
 
 export interface TenderLine {

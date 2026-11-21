@@ -2434,28 +2434,28 @@
       "suggestion": "Verificați înregistrarea observației sau repetați-o înainte de a accepta compensarea."
     },
     "code_unknown": {
-      "fail": "Code {code} is not in the code library ({count} points).",
-      "suggestion": "Add the code to the library or correct the points' codes."
+      "fail": "Codul {code} nu este în biblioteca de coduri ({count} puncte).",
+      "suggestion": "Adăugați codul în bibliotecă sau corectați codurile punctelor."
     },
     "string_short": {
-      "fail": "String {name} has a single point, so no line is drawn.",
-      "suggestion": "Code a second point of the string or correct the string number."
+      "fail": "Șirul {name} are un singur punct, deci nu se desenează nicio linie.",
+      "suggestion": "Codificați un al doilea punct al șirului sau corectați numărul șirului."
     },
     "string_short_closed": {
-      "fail": "String {name} is closed but has only {count} points.",
-      "suggestion": "A closed string needs at least three points."
+      "fail": "Șirul {name} este închis, dar are doar {count} puncte.",
+      "suggestion": "Un șir închis are nevoie de cel puțin trei puncte."
     },
     "ring_open": {
-      "fail": "A drawn polygon has fewer than three distinct vertices.",
-      "suggestion": "Add vertices or delete the polygon."
+      "fail": "Un poligon desenat are mai puțin de trei vârfuri distincte.",
+      "suggestion": "Adăugați vârfuri sau ștergeți poligonul."
     },
     "ring_crosses": {
-      "fail": "A drawn polygon crosses itself near E {e}, N {n}.",
-      "suggestion": "Move or delete a vertex so the edges no longer cross."
+      "fail": "Un poligon desenat se intersectează pe sine lângă E {e}, N {n}.",
+      "suggestion": "Mutați sau ștergeți un vârf astfel încât laturile să nu se mai încrucișeze."
     },
     "code_duplicate": {
-      "fail": "The code library lists code {code} more than once.",
-      "suggestion": "Keep one entry per code."
+      "fail": "Biblioteca de coduri conține codul {code} de mai multe ori.",
+      "suggestion": "Păstrați o singură intrare pentru fiecare cod."
     }
   },
   "volumes": {
@@ -2860,7 +2860,7 @@
     "tolerance": "Toleranță",
     "points": "Puncte comparate / citite",
     "mean": "Abatere medie",
-    "rms": "RMS",
+    "rms": "Media pătratică",
     "p95": "P95 al abaterii absolute",
     "within": "În toleranță",
     "high": "Peste proiect",

@@ -2434,28 +2434,28 @@
       "suggestion": "Dengelemeyi kabul etmeden önce ölçünün kaydını kontrol edin veya ölçüyü yineleyin."
     },
     "code_unknown": {
-      "fail": "Code {code} is not in the code library ({count} points).",
-      "suggestion": "Add the code to the library or correct the points' codes."
+      "fail": "{code} kodu kod kitaplığında yok ({count} nokta).",
+      "suggestion": "Kodu kitaplığa ekleyin veya noktaların kodlarını düzeltin."
     },
     "string_short": {
-      "fail": "String {name} has a single point, so no line is drawn.",
-      "suggestion": "Code a second point of the string or correct the string number."
+      "fail": "{name} dizisinde tek nokta var, bu yüzden çizgi çizilmez.",
+      "suggestion": "Dizinin ikinci noktasını kodlayın veya dizi numarasını düzeltin."
     },
     "string_short_closed": {
-      "fail": "String {name} is closed but has only {count} points.",
-      "suggestion": "A closed string needs at least three points."
+      "fail": "{name} dizisi kapalı ancak yalnızca {count} noktası var.",
+      "suggestion": "Kapalı bir dizi en az üç nokta gerektirir."
     },
     "ring_open": {
-      "fail": "A drawn polygon has fewer than three distinct vertices.",
-      "suggestion": "Add vertices or delete the polygon."
+      "fail": "Çizilen bir çokgenin üçten az farklı köşesi var.",
+      "suggestion": "Köşe ekleyin veya çokgeni silin."
     },
     "ring_crosses": {
-      "fail": "A drawn polygon crosses itself near E {e}, N {n}.",
-      "suggestion": "Move or delete a vertex so the edges no longer cross."
+      "fail": "Çizilen bir çokgen E {e}, N {n} yakınında kendini kesiyor.",
+      "suggestion": "Kenarlar artık kesişmesin diye bir köşeyi taşıyın veya silin."
     },
     "code_duplicate": {
-      "fail": "The code library lists code {code} more than once.",
-      "suggestion": "Keep one entry per code."
+      "fail": "Kod kitaplığında {code} kodu birden fazla kez geçiyor.",
+      "suggestion": "Her kod için tek bir kayıt bırakın."
     }
   },
   "volumes": {
@@ -2860,7 +2860,7 @@
     "tolerance": "Tolerans",
     "points": "Karşılaştırılan / okunan nokta",
     "mean": "Ortalama sapma",
-    "rms": "RMS",
+    "rms": "Karesel ortalama",
     "p95": "Mutlak sapmanın P95 değeri",
     "within": "Tolerans içinde",
     "high": "Projenin üstünde",

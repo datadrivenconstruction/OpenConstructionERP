@@ -2860,7 +2860,7 @@
     "tolerance": "Tolleranza",
     "points": "Punti confrontati / letti",
     "mean": "Scostamento medio",
-    "rms": "RMS",
+    "rms": "Media quadratica",
     "p95": "P95 dello scostamento assoluto",
     "within": "Entro tolleranza",
     "high": "Sopra il progetto",

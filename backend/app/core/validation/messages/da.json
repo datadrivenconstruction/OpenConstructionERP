@@ -2434,28 +2434,28 @@
       "suggestion": "Kontrollér hvordan observationen blev noteret, eller mål den igen, før udjævningen godkendes."
     },
     "code_unknown": {
-      "fail": "Code {code} is not in the code library ({count} points).",
-      "suggestion": "Add the code to the library or correct the points' codes."
+      "fail": "Kode {code} findes ikke i kodebiblioteket ({count} punkter).",
+      "suggestion": "Tilføj koden til biblioteket, eller ret punkternes koder."
     },
     "string_short": {
-      "fail": "String {name} has a single point, so no line is drawn.",
-      "suggestion": "Code a second point of the string or correct the string number."
+      "fail": "Stregen {name} har kun ét punkt, så der tegnes ingen linje.",
+      "suggestion": "Kod et andet punkt på stregen, eller ret stregnummeret."
     },
     "string_short_closed": {
-      "fail": "String {name} is closed but has only {count} points.",
-      "suggestion": "A closed string needs at least three points."
+      "fail": "Stregen {name} er lukket, men har kun {count} punkter.",
+      "suggestion": "En lukket streg kræver mindst tre punkter."
     },
     "ring_open": {
-      "fail": "A drawn polygon has fewer than three distinct vertices.",
-      "suggestion": "Add vertices or delete the polygon."
+      "fail": "Et tegnet polygon har færre end tre forskellige hjørner.",
+      "suggestion": "Tilføj hjørner, eller slet polygonet."
     },
     "ring_crosses": {
-      "fail": "A drawn polygon crosses itself near E {e}, N {n}.",
-      "suggestion": "Move or delete a vertex so the edges no longer cross."
+      "fail": "Et tegnet polygon skærer sig selv nær E {e}, N {n}.",
+      "suggestion": "Flyt eller slet et hjørne, så kanterne ikke længere krydser."
     },
     "code_duplicate": {
-      "fail": "The code library lists code {code} more than once.",
-      "suggestion": "Keep one entry per code."
+      "fail": "Kodebiblioteket indeholder kode {code} mere end én gang.",
+      "suggestion": "Behold én post pr. kode."
     }
   },
   "volumes": {
@@ -2857,10 +2857,10 @@
     "title": "Scanning mod projekt",
     "scan": "Scanning",
     "design": "Projekteret flade",
-    "tolerance": "Tolerance",
+    "tolerance": "Tolerancekrav",
     "points": "Punkter sammenlignet / læst",
     "mean": "Gennemsnitlig afvigelse",
-    "rms": "RMS",
+    "rms": "Kvadratisk middelværdi",
     "p95": "P95 af absolut afvigelse",
     "within": "Inden for tolerance",
     "high": "Over projekt",

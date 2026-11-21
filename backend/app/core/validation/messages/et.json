@@ -2434,28 +2434,28 @@
       "suggestion": "Kontrollige mõõtmise kirjet või mõõtke uuesti enne tasanduse aktsepteerimist."
     },
     "code_unknown": {
-      "fail": "Code {code} is not in the code library ({count} points).",
-      "suggestion": "Add the code to the library or correct the points' codes."
+      "fail": "Koodi {code} ei ole koodiraamatus ({count} punkti).",
+      "suggestion": "Lisage kood raamatusse või parandage punktide koodid."
     },
     "string_short": {
-      "fail": "String {name} has a single point, so no line is drawn.",
-      "suggestion": "Code a second point of the string or correct the string number."
+      "fail": "Stringil {name} on ainult üks punkt, seega joont ei joonistata.",
+      "suggestion": "Kodeerige stringi teine punkt või parandage stringi number."
     },
     "string_short_closed": {
-      "fail": "String {name} is closed but has only {count} points.",
-      "suggestion": "A closed string needs at least three points."
+      "fail": "String {name} on suletud, kuid sisaldab vaid {count} punkti.",
+      "suggestion": "Suletud string vajab vähemalt kolme punkti."
     },
     "ring_open": {
-      "fail": "A drawn polygon has fewer than three distinct vertices.",
-      "suggestion": "Add vertices or delete the polygon."
+      "fail": "Joonistatud hulknurgal on vähem kui kolm erinevat tippu.",
+      "suggestion": "Lisage tippe või kustutage hulknurk."
     },
     "ring_crosses": {
-      "fail": "A drawn polygon crosses itself near E {e}, N {n}.",
-      "suggestion": "Move or delete a vertex so the edges no longer cross."
+      "fail": "Joonistatud hulknurk lõikab ennast kohas E {e}, N {n}.",
+      "suggestion": "Liigutage või kustutage tipp, et servad enam ei ristuks."
     },
     "code_duplicate": {
-      "fail": "The code library lists code {code} more than once.",
-      "suggestion": "Keep one entry per code."
+      "fail": "Koodiraamatus on kood {code} mitu korda.",
+      "suggestion": "Jätke igale koodile üks kirje."
     }
   },
   "volumes": {
@@ -2860,7 +2860,7 @@
     "tolerance": "Tolerants",
     "points": "Punkte võrreldud / loetud",
     "mean": "Keskmine hälve",
-    "rms": "RMS",
+    "rms": "Ruutkeskmine",
     "p95": "Absoluutse hälbe P95",
     "within": "Tolerantsi piires",
     "high": "Projektist kõrgemal",

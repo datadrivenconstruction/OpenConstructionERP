@@ -67,6 +67,8 @@ RENDERING_ROUTES: dict[str, set[str]] = {
     "modules/monitoring/router.py": {"report_pdf"},
     "modules/setting_out/router.py": {"sheet_pdf"},
     "modules/stockpiles/router.py": {"report_pdf"},
+    "modules/pointcloud/scan_design_router.py": {"export_report"},
+    "modules/survey_core/calc_router.py": {"calc_traverse_report"},
     "modules/surfaces_volumes/router.py": {"report_pdf"},
     "modules/doc_templates/router.py": {"issue_pdf", "preview"},
     "core/branding_router.py": {"get_document_appearance_sample", "get_document_type_sample"},

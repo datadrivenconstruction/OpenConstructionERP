@@ -436,8 +436,8 @@ async def test_paging_and_filters_on_a_large_register(client: AsyncClient, heade
     assert (summary["points"], summary["control"], summary["findings"]) == (
         20_000,
         200,
-        1,
-    )  # SRV-025 states ground/grid
+        2,
+    )  # SRV-025 states ground/grid; SRV-140 notes the one code the default library lacks
 
 
 async def test_filters_treat_wildcards_and_quotes_as_plain_text(
@@ -478,7 +478,8 @@ async def test_right_to_left_names_round_trip_through_the_register(
     report = (
         await client.post(f"{BASE}/projects/{project_id}/validate", params={"locale": "ar"}, headers=header)
     ).json()
-    assert [f for f in report["findings"] if f["rule_id"] != "SRV-025"] == []
+    # SRV-140 is informational: BM is not in the default code library.
+    assert [f for f in report["findings"] if f["rule_id"] not in {"SRV-025", "SRV-140"}] == []
 
 
 async def test_the_validation_report_speaks_the_requested_language(
