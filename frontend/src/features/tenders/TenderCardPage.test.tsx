@@ -8,6 +8,7 @@ import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom';
 import { TenderCardPage } from './TenderCardPage';
 import { LegacyTenderRedirect } from './LegacyTenderRedirect';
 import type { TenderDetail } from './api';
+import { usePreferencesStore } from '@/stores/usePreferencesStore';
 
 vi.mock('@/shared/lib/api', async () => {
   const actual = await vi.importActual<typeof import('@/shared/lib/api')>('@/shared/lib/api');
@@ -82,6 +83,21 @@ describe('TenderCardPage', () => {
     expect(rows[0]).toHaveTextContent('Trockenbau Nord');
     await userEvent.click(screen.getByRole('tab', { name: /Q&A/ }));
     expect(screen.getByText('EI 30')).toBeInTheDocument();
+  });
+
+  it('writes scope quantities in the reader locale, without padded zeros', async () => {
+    usePreferencesStore.setState({ numberLocale: 'de-DE' });
+    const lines = [
+      { ...DETAIL.line_items[0], id: 'l1', quantity: '42.0000' },
+      { ...DETAIL.line_items[0], id: 'l2', quantity: '5200.5000' },
+    ];
+    mockGet.mockResolvedValue({ ...DETAIL, line_items: lines });
+    renderAt('/tenders/pkg-1');
+    const rows = (await screen.findAllByText('Partition 100 mm')).map((c) => c.closest('tr'));
+    expect(rows[0]).toHaveTextContent(/42$/);
+    expect(rows[1]).toHaveTextContent('5.200,5');
+    expect(screen.queryByText('42.0000')).toBeNull();
+    usePreferencesStore.setState({ numberLocale: 'auto' });
   });
 
   it('edits a copy in the editor of the module it came from', async () => {

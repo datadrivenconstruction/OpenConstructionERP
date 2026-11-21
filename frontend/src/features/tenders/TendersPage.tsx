@@ -61,7 +61,7 @@ export function TendersPage() {
   };
 
   return (
-    <div className="space-y-5 animate-fade-in">
+    <div className="min-w-0 space-y-5 animate-fade-in">
       <Breadcrumb items={[{ label: t('tenders.title', { defaultValue: 'Tenders' }) }]} />
       <PageHeader
         srTitle={t('tenders.title', { defaultValue: 'Tenders' })}
@@ -126,44 +126,46 @@ export function TendersPage() {
                 }
               />
             ) : (
-              <table className="oe-table w-full" data-testid="tenders-table">
-                <thead>
-                  <tr>
-                    <th>{t('tenders.col_code', { defaultValue: 'Code' })}</th>
-                    <th>{t('tenders.col_title', { defaultValue: 'Title' })}</th>
-                    <th>{t('tenders.source_filter', { defaultValue: 'Created in' })}</th>
-                    <th>{t('tenders.col_status', { defaultValue: 'Status' })}</th>
-                    <th>{t('tenders.col_deadline', { defaultValue: 'Bids due' })}</th>
-                    <th className="num">{t('tenders.col_bids', { defaultValue: 'Bids' })}</th>
-                    <th className="num">{t('tenders.col_lowest', { defaultValue: 'Lowest bid' })}</th>
-                    <th>{t('tenders.col_awarded', { defaultValue: 'Awarded to' })}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {rows.map((row) => (
-                    <tr key={row.id}>
-                      <td>
-                        <Link className="text-oe-blue" to={tenderCardPath(row.id)}>
-                          {row.code}
-                        </Link>
-                      </td>
-                      <td className="text-content-primary">{row.title}</td>
-                      <td>
-                        <Badge variant={row.source === 'native' ? 'neutral' : 'blue'}>{sourceLabel(row)}</Badge>
-                      </td>
-                      <td>{t(`bid_management.status_${row.status}`, { defaultValue: row.status })}</td>
-                      <td>{row.submission_deadline ? <DateDisplay value={row.submission_deadline} /> : null}</td>
-                      <td className="num tabular-nums">{row.bid_count}</td>
-                      <td className="num tabular-nums">
-                        {row.lowest_total != null ? (
-                          <MoneyDisplay amount={row.lowest_total} currency={row.currency} />
-                        ) : null}
-                      </td>
-                      <td>{row.awarded_bidder ?? ''}</td>
+              <div className="overflow-x-auto" data-testid="tenders-table-scroll">
+                <table className="oe-table w-full whitespace-nowrap" data-testid="tenders-table">
+                  <thead>
+                    <tr>
+                      <th>{t('tenders.col_code', { defaultValue: 'Code' })}</th>
+                      <th>{t('tenders.col_title', { defaultValue: 'Title' })}</th>
+                      <th>{t('tenders.source_filter', { defaultValue: 'Created in' })}</th>
+                      <th>{t('tenders.col_status', { defaultValue: 'Status' })}</th>
+                      <th>{t('tenders.col_deadline', { defaultValue: 'Bids due' })}</th>
+                      <th className="num">{t('tenders.col_bids', { defaultValue: 'Bids' })}</th>
+                      <th className="num">{t('tenders.col_lowest', { defaultValue: 'Lowest bid' })}</th>
+                      <th>{t('tenders.col_awarded', { defaultValue: 'Awarded to' })}</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {rows.map((row) => (
+                      <tr key={row.id}>
+                        <td>
+                          <Link className="text-oe-blue" to={tenderCardPath(row.id)}>
+                            {row.code}
+                          </Link>
+                        </td>
+                        <td className="text-content-primary">{row.title}</td>
+                        <td>
+                          <Badge variant={row.source === 'native' ? 'neutral' : 'blue'}>{sourceLabel(row)}</Badge>
+                        </td>
+                        <td>{t(`bid_management.status_${row.status}`, { defaultValue: row.status })}</td>
+                        <td>{row.submission_deadline ? <DateDisplay value={row.submission_deadline} /> : null}</td>
+                        <td className="num tabular-nums">{row.bid_count}</td>
+                        <td className="num tabular-nums">
+                          {row.lowest_total != null ? (
+                            <MoneyDisplay amount={row.lowest_total} currency={row.currency} />
+                          ) : null}
+                        </td>
+                        <td>{row.awarded_bidder ?? ''}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             )}
           </Card>
         </>

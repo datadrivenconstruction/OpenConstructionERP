@@ -53,6 +53,22 @@ export function fmtNumber(value: number | string | null | undefined, decimals = 
 }
 
 /**
+ * A measured quantity off the wire ("42.0000", "231.000"), written the way the
+ * reader writes numbers, without the trailing zeros a NUMERIC column pads with.
+ * Up to `maxDecimals` places are kept, so 18.35 stays 18.35 and 42.0000 reads 42.
+ * An unreadable value is returned as it came, never invented into a zero.
+ */
+export function fmtQuantity(value: number | string | null | undefined, maxDecimals = 3): string {
+  if (value == null || value === '') return '';
+  const n = typeof value === 'number' ? value : Number(value);
+  if (!Number.isFinite(n)) return String(value);
+  return new Intl.NumberFormat(getNumberLocale(), {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: maxDecimals,
+  }).format(n);
+}
+
+/**
  * `toFixed` with the reader's separators, and nothing else changed.
  *
  * `(1234.5).toFixed(2)` is `1234.50` for everyone on earth: the method takes
