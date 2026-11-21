@@ -99,7 +99,7 @@ export function PrecisionBar({ ctx, onPoint, focusToken }: Props) {
 
   return (
     <form
-      className="flex flex-wrap items-center gap-2"
+      className="flex shrink-0 flex-nowrap items-center gap-2"
       onSubmit={(e) => {
         e.preventDefault();
         commit();
@@ -117,7 +117,7 @@ export function PrecisionBar({ ctx, onPoint, focusToken }: Props) {
         {t(MODE_LABEL[fields.mode][0], { defaultValue: MODE_LABEL[fields.mode][1] })}
       </button>
       {order.map((name) => (
-        <label key={name} className="inline-flex items-center gap-1 text-xs text-content-tertiary">
+        <label key={name} className="inline-flex shrink-0 items-center gap-1 whitespace-nowrap text-xs text-content-tertiary">
           <span>{label(name)}</span>
           <input
             ref={(el) => {
@@ -145,7 +145,7 @@ export function PrecisionBar({ ctx, onPoint, focusToken }: Props) {
         {t('plan.input.add', { defaultValue: 'Add point' })}
       </button>
       {error && (
-        <span role="alert" className="text-xs text-semantic-error">
+        <span role="alert" ref={(el) => el?.scrollIntoView?.({ block: 'nearest', inline: 'nearest' })} className="whitespace-nowrap text-xs text-semantic-error">
           {error.text}
         </span>
       )}

@@ -29,6 +29,7 @@ import {
   DOCK_SHORTCUT_ARIA,
   DOCK_SHORTCUT_KEYS,
   isFloatingChatHiddenOn,
+  isFloatingChatLiftedOn,
   useFloatingChatStore,
 } from './useFloatingChat';
 import { useChatActionStore } from './actions/useChatActions';
@@ -93,7 +94,9 @@ export function FloatingChatButton() {
       aria-keyshortcuts={DOCK_SHORTCUT_ARIA}
       title={`${label} (${shortcut})`}
       className={[
-        'fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom))] end-4 z-dropdown lg:bottom-4',
+        isFloatingChatLiftedOn(location.pathname)
+          ? 'fixed bottom-[calc(10rem+env(safe-area-inset-bottom))] end-4 z-dropdown lg:bottom-14'
+          : 'fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom))] end-4 z-dropdown lg:bottom-4',
         'min-h-14 min-w-14 max-w-[calc(100vw-2rem)] rounded-full px-4 py-3',
         isOpen ? 'hidden' : 'flex',
         'items-center justify-center gap-2',
