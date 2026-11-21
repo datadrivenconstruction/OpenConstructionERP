@@ -2468,5 +2468,25 @@
     "en_value": "LandXML 1.2",
     "note": "format or coordinate-component label written the same in every locale",
     "reason_category": "standard_code"
+  },
+  "plan.align.col.deflection": {
+    "en_value": "Δ",
+    "note": "deflection angle column of the alignment table; the Greek delta is the surveying symbol in every locale, ru and the Arabic-script ones included",
+    "reason_category": "symbol"
+  },
+  "plan.align.col.radius": {
+    "en_value": "R",
+    "note": "curve radius column; R is the radius symbol in every locale's alignment tables, ru included",
+    "reason_category": "abbreviation"
+  },
+  "plan.align.col.tangent": {
+    "en_value": "T",
+    "note": "tangent length column; T is the symbol for tangent length in every locale including ru",
+    "reason_category": "abbreviation"
+  },
+  "plan.mon.level.ok": {
+    "en_value": "OK",
+    "note": "monitoring level badge for a point within limits; OK reads the same in every shipped locale, ru included",
+    "reason_category": "acronym"
   }
 }
