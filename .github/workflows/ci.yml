@@ -542,8 +542,14 @@ jobs:
         # workflow rather than as a skip inside the test on purpose: a skip
         # reports green having read nothing, and a green that means "I did
         # not look" is the failure this pair of steps exists to remove.
+        #
+        # Windows: the default fork heap there is about 4 GB, and with the 20.2
+        # locales one fork died at that ceiling twice while every file passed.
+        # Two forks at 6144 MB is 12 GB, inside the 16 GB runner.
         if: matrix.os != 'macos-latest'
-        run: npm run test
+        env:
+          NODE_OPTIONS: ${{ matrix.os == 'windows-latest' && '--max-old-space-size=6144' || '' }}
+        run: npm run test -- ${{ matrix.os == 'windows-latest' && '--maxWorkers=2' || '' }}
 
       - name: Run tests (no build output on this runner)
         # Red before this change, run 33282669278: every test passed - 678
