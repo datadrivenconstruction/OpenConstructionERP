@@ -527,6 +527,10 @@ async def seed_design_demo(session: AsyncSession, project_ids: Iterable[uuid.UUI
             totals["briefs"] += brief is not None
         except Exception:
             logger.warning("design demo seed: brief of %s skipped", project.id, exc_info=True)
+            brief = None
+        if brief is None:
+            # a project seeded before (or without a brief) is left as it is, so a re-run adds no rows
+            continue
         doc = await current_brief(session, project.id)
         floors = ((doc or {}).get("massing") or {}).get("floors_above")
         try:
