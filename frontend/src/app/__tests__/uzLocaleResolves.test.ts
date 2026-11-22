@@ -140,9 +140,15 @@ describe('uz resolves its hand-translated keys to Uzbek, not the English default
  * One further exception on the apostrophe check: a digit immediately
  * before the mark is never Uzbek grammar, it is the feet/inches prime
  * notation a US-market drawing example writes as `12'-6 3/4"` - en.ts uses
- * the same plain apostrophe there, and `fix_uz_apostrophes.py` carries the
- * identical digit guard so it never "corrects" that mark into a tutuq
- * belgisi.
+ * the same plain apostrophe there. The exception is the `(?<!\d)` in the
+ * `nonDimensionApostrophe` pattern in the first test below, and that pattern
+ * is the only place the rule lives. This paragraph used to send the reader to
+ * a script named `fix_uz_apostrophes.py` carrying the identical digit guard.
+ * No such file is tracked in this repository - `git ls-files | grep -i fix_uz`
+ * returns nothing - because the sweep that converted `uz.ts` to U+02BB ran as
+ * a one-off that was never committed. A citation to a file a reader cannot
+ * open is worse than no citation: it names an authority for the rule that
+ * does not exist, and the regex below is the whole of it.
  */
 /**
  * Keys whose Uzbek value still carries Cyrillic that did NOT travel with it
