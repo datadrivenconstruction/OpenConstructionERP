@@ -541,6 +541,28 @@ path, `PATCH .../participant-grants/{grant_id}/scope` and `POST .../participant-
 There is no suspend route: suspension is what a change of project ownership does, not something a
 caller asks for (question 4).
 
+**Adding those four routes tripped a security ratchet, and how it was cleared is part of this
+decision.** `scripts/check_security_class_ratchets.py` exists because three published advisories
+(GHSA-cvgq, GHSA-vwvr, GHSA-pvpj) were all the same class: a route takes a project or object id and
+checks the caller's role but never calls `verify_project_access`, which - row level security being a
+deliberate no-op on those paths - is the only boundary between projects. Every route whose path
+names an id and which reaches none of `ACCESS_PRIMITIVES` is a new site and fails the run. The four
+grant routes name `{project_id}` and call `resolve_grant_authority` instead, so all four were
+reported as new sites.
+
+They were cleared by adding `resolve_grant_authority` to `ACCESS_PRIMITIVES`, not by adding four
+entries to `scripts/security_class_baseline.json`, and the difference is not cosmetic. A baseline
+entry excuses a route forever: deleting the authority call from one of them afterwards would pass
+the guard, which is precisely the regression the ratchet exists to catch. An unrecognized primitive
+keeps failing until somebody reads the body. And the body does check the boundary - it loads the
+project and raises before any row is touched, 404 unless the caller's organization owns it, 409 when
+no organization does, with no platform-admin bypass - so it is *stricter* than `verify_project_access`,
+which admits team members and admins. Calling `verify_project_access` as well, purely to satisfy the
+ratchet by name, was rejected for the same reason the guard's own docstring gives: helpers are
+resolved to their bodies and never trusted by name, and a call added to quiet a static check is a
+line that says something untrue about the route. The reasoning is recorded in the guard's docstring
+beside the list it justifies, so the next person to read either half finds the other.
+
 ### 13.2 The scope vocabulary
 
 `read` / `contribute` / `steer` shipped as **`view` / `contribute` / `manage`**, with

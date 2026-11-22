@@ -34,6 +34,18 @@ What each check counts as handled:
     to the service does not count: GHSA-pvpj's mutators passed ``user_id`` on
     for the audit trail and checked nothing, so a check that lives in a service
     is a baseline entry with a reason, not a pass.
+
+    ``resolve_grant_authority`` is in the list because it *is* the boundary
+    check for the routes that call it, not a service that was handed an id: it
+    loads the project and raises before any row is touched, 404 unless the
+    caller's organization owns the project, 409 when no organization does, and
+    it has no platform-admin bypass - so it is stricter than
+    ``verify_project_access``, which admits team members and admins. Baseline
+    entries for those four routes were the alternative and were rejected: a
+    baseline entry excuses the route forever, so deleting the authority call
+    from one of them would pass this guard, whereas an unrecognized primitive
+    keeps failing until somebody reads the body. Only
+    ``app/modules/projects/router.py``'s four participant-grant routes call it.
   * ``authentication``: a route with an auth dependency in its signature, its
     decorator's ``dependencies=`` or its router's ``APIRouter(dependencies=)``.
   * ``outbound_url_safety``: a module that imports an HTTP client library and
@@ -74,6 +86,11 @@ ACCESS_PRIMITIVES = frozenset(
         "is_project_member",
         "tenant_scoped_owner_filter",
         "allowed_project_ids_for_similar",
+        # ADR 006. The participant-grant routes' boundary: the caller's
+        # organization has to own the project, and no admin bypass softens it.
+        # See the ``project_access`` bullet in this module's docstring for why
+        # this is a primitive rather than four baseline entries.
+        "resolve_grant_authority",
     }
 )
 
