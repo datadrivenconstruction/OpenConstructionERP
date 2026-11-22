@@ -370,11 +370,24 @@ def print_startup_banner(
     else:
         print(f"  {bar}     {_dim('frontend not bundled, API only at ' + url + '/api/docs')}")
     print(f"  {bar}")
+    from app.core.demo_login import demo_login_enabled
     from app.core.demo_seed import seed_demo_enabled
 
     if seed_demo_enabled():
         print(f"  {bar}  {_bold('Log in with the demo account')}")
-        print(f"  {bar}     demo@openconstructionerp.com  {_dim('/')}  {_dim('demo mode accepts any password')}")
+        # The password-free way in is the "Try demo" button on the sign-in
+        # page, which posts the demo email to /auth/demo-login and is gated by
+        # its own administrator switch. This line used to say "demo mode
+        # accepts any password", which was never true of the password form:
+        # that one verifies the seeded password, generated per install and
+        # written to .demo_credentials.json. Naming the button names the thing
+        # that actually needs no password, and reading the switch keeps the
+        # line honest once an administrator has turned the button off.
+        if demo_login_enabled(data_dir):
+            hint = 'the "Try demo" button on the sign-in page needs no password'
+        else:
+            hint = "the demo button is off - sign in with the generated password"
+        print(f"  {bar}     demo@openconstructionerp.com  {_dim('/')}  {_dim(hint)}")
     else:
         print(f"  {bar}  {_bold('Log in')}")
         print(f"  {bar}     {_dim('register the first account - it becomes the admin')}")

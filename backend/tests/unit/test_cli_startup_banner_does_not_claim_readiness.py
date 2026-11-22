@@ -56,8 +56,9 @@ def test_the_banner_still_hands_over_the_address_and_the_credentials(capsys, mon
 
     Demo data is opt-in, so what the banner hands over depends on the
     choice: with demo seeding on it names the demo login (and never a
-    fixed password - demo mode accepts any password, and real installs
-    generate one per installation); with seeding off it points at the
+    fixed password - the password-free way in is the "Try demo" button,
+    which is its own administrator switch, and real installs generate a
+    password per installation); with seeding off it points at the
     bootstrap path instead - the first registered account becomes the
     admin.
     """
