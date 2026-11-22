@@ -223,6 +223,7 @@ async def enrich_projects(project_ids: list[uuid.UUID]) -> dict[str, Any]:
             seed_daily_diary_showcase_de,
         )
         from app.modules.delivery_model.seed import seed_delivery_model_demo
+        from app.modules.design.seed import seed_design_demo
         from app.modules.design_management.seed import align_demo_wbs_with_references, seed_design_management_demo
         from app.modules.dispatch.seed import seed_dispatch_demo
         from app.modules.documents.documents_seed import seed_documents_demo
@@ -636,6 +637,9 @@ async def enrich_projects(project_ids: list[uuid.UUID]) -> dict[str, Any]:
             # the seeder in two to gain a few seconds would cost the ordering
             # rule its one obvious home.
             ("bcf", None, lambda s: seed_bcf_demo(s, _demo_pids)),
+            # The design brief cut from each project's record, confirmed, and the project's converter
+            # model as design revision 1. After bim_hub and clash, which read the same models unwrapped.
+            ("design", None, lambda s: seed_design_demo(s, _demo_pids)),
             # Last on purpose. It correlates rows that other modules wrote -
             # correspondence, change orders, variations, management of change -
             # and scores every pair with the module's own engine, so anything
