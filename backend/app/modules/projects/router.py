@@ -8,6 +8,12 @@ Endpoints:
     GET  /{project_id}       - Get project (auth required)
     PATCH /{project_id}      - Update project (auth required)
     DELETE /{project_id}     - Archive project (auth required)
+
+    POST   /{project_id}/participant-grants                       - Grant another
+        organization access (owning organization only, ADR 006)
+    GET    /{project_id}/participant-grants                       - List them
+    PATCH  /{project_id}/participant-grants/{grant_id}/scope      - Change the scope
+    POST   /{project_id}/participant-grants/{grant_id}/revoke     - Withdraw access
 """
 
 import logging
@@ -23,7 +29,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.background import BackgroundTask
 
 from app.core.content_disposition import attachment_disposition
-from app.dependencies import CurrentUserId, CurrentUserPayload, RequireRole, SessionDep, SettingsDep
+from app.dependencies import (
+    CurrentTenantId,
+    CurrentUserId,
+    CurrentUserPayload,
+    RequireRole,
+    SessionDep,
+    SettingsDep,
+)
 from app.modules.finance.variance import expected_outturn
 from app.modules.projects import profile_service
 from app.modules.projects.bundle_export import (
@@ -69,6 +82,21 @@ from app.modules.projects.file_manager_service import (
 from app.modules.projects.file_manager_service import (
     resolve_storage_locations as fm_resolve_locations,
 )
+from app.modules.projects.grants import (
+    change_scope as grant_change_scope,
+)
+from app.modules.projects.grants import (
+    create_grant as grant_create,
+)
+from app.modules.projects.grants import (
+    list_grants as grant_list,
+)
+from app.modules.projects.grants import (
+    resolve_grant_authority,
+)
+from app.modules.projects.grants import (
+    revoke_grant as grant_revoke,
+)
 from app.modules.projects.member_schemas import (
     AddProjectMemberRequest,
     BulkAddProjectMembersRequest,
@@ -86,6 +114,11 @@ from app.modules.projects.schemas import (
     MilestoneCreate,
     MilestoneResponse,
     MilestoneUpdate,
+    ParticipantGrantCreate,
+    ParticipantGrantListResponse,
+    ParticipantGrantResponse,
+    ParticipantGrantRevoke,
+    ParticipantGrantScopeChange,
     PresetRead,
     ProfileSpec,
     ProjectBackupResponse,
@@ -3717,3 +3750,172 @@ async def restore_project_from_backup(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to restore project from backup",
         )
+
+
+# ── Participant grants (ADR 006) ────────────────────────────────────────
+#
+# Four routes and one rule behind all of them: only the organization that owns
+# the project decides who else participates. ``resolve_grant_authority`` settles
+# that before anything is read or written, and it answers 404 rather than 403 for
+# a project the caller's company cannot see, so these endpoints do not become a
+# way to learn which project identifiers exist.
+#
+# What these routes do NOT do is open a project. A grant is the company layer of
+# a two-layer answer; the person layer - ``verify_project_access`` and the team
+# membership behind it - still has to say yes for any read or write to succeed,
+# and stage 3 is where the two are combined in one predicate. Nothing reads this
+# table yet, which is what makes this commit safe to ship on its own.
+#
+# ``SessionDep`` commits at the end of a successful request and rolls back on any
+# exception, so the handlers below commit nothing themselves: the grant and its
+# audit row are flushed inside the same transaction and land together or not at
+# all.
+
+
+@router.post(
+    "/{project_id}/participant-grants",
+    response_model=ParticipantGrantResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Grant another organization access to this project",
+    description=(
+        "Invite one organization to participate in this project, with a scope of `view`, `contribute` or `manage`. "
+        "Only the owning organization may do this, and only a person holding an active membership in it with the "
+        "`projects.grant` permission. There is no accept step: the grant is in force the moment it is written. "
+        "One live grant per organization per project - a second attempt is refused with 409 until the first is "
+        "revoked, and revoking keeps the row so the history survives."
+    ),
+)
+async def create_participant_grant(
+    project_id: uuid.UUID,
+    data: ParticipantGrantCreate,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    tenant_id: CurrentTenantId = None,
+) -> ParticipantGrantResponse:
+    """Create a participant grant and its audit row."""
+    authority = await resolve_grant_authority(
+        session,
+        project_id,
+        caller_user_id=user_id,
+        caller_organization_id=tenant_id,
+        caller_role=payload.get("role"),
+    )
+    grant = await grant_create(
+        session,
+        authority,
+        grantee_organization_id=data.grantee_organization_id,
+        scope=data.scope,
+        valid_from=data.valid_from,
+        valid_until=data.valid_until,
+        reason=data.reason,
+        metadata=data.metadata,
+    )
+    return ParticipantGrantResponse.model_validate(grant)
+
+
+@router.get(
+    "/{project_id}/participant-grants",
+    response_model=ParticipantGrantListResponse,
+    summary="List the organizations participating in this project",
+    description=(
+        "Every grant on this project, oldest first. Only the owning organization may list them: who else is in the "
+        "room is the owner's information, not a consequence of having been invited. Withdrawn grants are hidden "
+        "unless `include_revoked` is set; the rows are kept either way."
+    ),
+)
+async def list_participant_grants(
+    project_id: uuid.UUID,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    tenant_id: CurrentTenantId = None,
+    include_revoked: bool = Query(default=False, description="Also return grants that have been revoked."),
+) -> ParticipantGrantListResponse:
+    """List the grants on a project."""
+    authority = await resolve_grant_authority(
+        session,
+        project_id,
+        caller_user_id=user_id,
+        caller_organization_id=tenant_id,
+        caller_role=payload.get("role"),
+    )
+    grants = await grant_list(session, authority, include_revoked=include_revoked)
+    return ParticipantGrantListResponse(
+        project_id=authority.project.id,
+        items=[ParticipantGrantResponse.model_validate(grant) for grant in grants],
+        total=len(grants),
+        include_revoked=include_revoked,
+    )
+
+
+@router.patch(
+    "/{project_id}/participant-grants/{grant_id}/scope",
+    response_model=ParticipantGrantResponse,
+    summary="Change the scope of a participant grant",
+    description=(
+        "Widen or narrow what an invited organization may do, without replacing the grant: the row keeps its "
+        "identity, so the audit log holds the sequence of what this company was allowed to do against one grant id. "
+        "A revoked grant is history and cannot be changed - grant the organization access again instead."
+    ),
+)
+async def change_participant_grant_scope(
+    project_id: uuid.UUID,
+    grant_id: uuid.UUID,
+    data: ParticipantGrantScopeChange,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    tenant_id: CurrentTenantId = None,
+) -> ParticipantGrantResponse:
+    """Change a grant's scope and write the audit row."""
+    authority = await resolve_grant_authority(
+        session,
+        project_id,
+        caller_user_id=user_id,
+        caller_organization_id=tenant_id,
+        caller_role=payload.get("role"),
+    )
+    grant = await grant_change_scope(
+        session,
+        authority,
+        grant_id=grant_id,
+        scope=data.scope,
+        reason=data.reason,
+    )
+    return ParticipantGrantResponse.model_validate(grant)
+
+
+@router.post(
+    "/{project_id}/participant-grants/{grant_id}/revoke",
+    response_model=ParticipantGrantResponse,
+    summary="Withdraw an organization's access to this project",
+    description=(
+        "Close the grant. The row is kept with its author, moment and reason, and nothing the grantee produced is "
+        "touched: rows written under a grant carry the grantee's own tenant and stay the grantee's afterwards. "
+        "Revocation is not retroactive and is never implemented as an update over another table."
+    ),
+)
+async def revoke_participant_grant(
+    project_id: uuid.UUID,
+    grant_id: uuid.UUID,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    tenant_id: CurrentTenantId = None,
+    # Optional body, so ``POST .../revoke`` with nothing in it revokes. The
+    # reason is wanted and the schema documents why it is not required: refusing
+    # to close access over a missing sentence would leave the more dangerous
+    # state in place.
+    data: ParticipantGrantRevoke | None = Body(default=None),
+) -> ParticipantGrantResponse:
+    """Revoke a grant and write the audit row."""
+    authority = await resolve_grant_authority(
+        session,
+        project_id,
+        caller_user_id=user_id,
+        caller_organization_id=tenant_id,
+        caller_role=payload.get("role"),
+    )
+    grant = await grant_revoke(session, authority, grant_id=grant_id, reason=data.reason if data else None)
+    return ParticipantGrantResponse.model_validate(grant)

@@ -4,7 +4,7 @@
 
 import re
 from datetime import datetime
-from typing import Any
+from typing import Any, Literal
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, computed_field, field_validator
@@ -1545,3 +1545,129 @@ class ProjectRestoreResponse(BaseModel):
     markups_created: int = 0
     wbs_nodes_created: int = 0
     milestones_created: int = 0
+
+
+# ── Participant grants (ADR 006) ────────────────────────────────────────
+#
+# The vocabulary is spelled out here as a ``Literal`` and again in a check
+# constraint on the table, and both are wanted. The ``Literal`` is what makes a
+# bad scope a 422 with the three accepted values in the OpenAPI document, so a
+# client can build the picker from the schema; the constraint is what makes it
+# impossible for a row outside the vocabulary to exist however it was written -
+# by a repair, by an import, by a future endpoint that forgets. Neither one
+# alone covers both readers.
+
+#: What a grant allows. ``view`` reads, ``contribute`` writes rows the grantee
+#: then owns, ``manage`` decides for the project on the owner's behalf. Ranked
+#: in ``GRANT_SCOPE_RANK`` beside the model, which is where the ordering is
+#: enforced rather than inferred from the order of a tuple here.
+GrantScope = Literal["view", "contribute", "manage"]
+
+#: What a grant is. ``suspended`` is what an ownership change leaves behind
+#: (owner decision 4) and is reversible; ``revoked`` is history and is not.
+GrantStatus = Literal["active", "suspended", "revoked"]
+
+
+class ParticipantGrantCreate(BaseModel):
+    """Invite one organization to participate in one project.
+
+    The grantee is an organization and never a person (owner decision 8): an
+    individual consultant creates a one-person organization, which keeps the
+    question "which company is in this project" answerable from one column and
+    keeps the row out of reach of the mistake ADR 005 spent a repair fixing.
+
+    There is no ``status`` field, so a caller cannot create a grant that starts
+    suspended or revoked: a new grant is active or it is not a grant.
+    """
+
+    grantee_organization_id: UUID = Field(
+        description="The organization being invited in. Has to exist and must not be the project's own owner.",
+    )
+    scope: GrantScope = Field(
+        default="view",
+        description="What the grantee may do: read, write rows it then owns, or decide for the project.",
+    )
+    valid_from: datetime | None = Field(
+        default=None,
+        description="When the grant starts. Omit for immediately.",
+    )
+    valid_until: datetime | None = Field(
+        default=None,
+        description="When the grant ends on its own. Omit for open-ended. Has to be later than valid_from.",
+    )
+    reason: str | None = Field(
+        default=None,
+        max_length=500,
+        description=(
+            "Why this company is being invited in. Recorded on the audit row and not on the grant, "
+            "because it describes a decision rather than the access it produced."
+        ),
+    )
+    metadata: dict[str, Any] | None = Field(
+        default=None,
+        description="Free-form context stored with the grant: a contract reference, a tender number, a note.",
+    )
+
+
+class ParticipantGrantScopeChange(BaseModel):
+    """Widen or narrow what an existing grant allows.
+
+    A scope change keeps the grant's identity, so the sequence of what one
+    company was allowed to do is readable against one grant id in the audit log.
+    """
+
+    scope: GrantScope = Field(description="The new scope.")
+    reason: str | None = Field(default=None, max_length=500, description="Why the scope changed.")
+
+
+class ParticipantGrantRevoke(BaseModel):
+    """Close a company's access to a project.
+
+    ``reason`` is optional because a revocation is valid without one, and
+    refusing to close access over a missing sentence would leave the more
+    dangerous state in place: access that should have been withdrawn.
+    """
+
+    reason: str | None = Field(default=None, max_length=500, description="Why access was withdrawn.")
+
+
+class ParticipantGrantResponse(BaseModel):
+    """One grant, as the owning organization sees it.
+
+    ``is_live`` is read off the model's own property rather than recomputed
+    here, so there is one definition of "this grant is in force right now" and
+    it is the one the read predicate uses.
+    """
+
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
+
+    id: UUID
+    project_id: UUID
+    grantee_organization_id: UUID
+    granted_by_user_id: UUID | None = None
+    granted_on_behalf_of_organization_id: UUID
+    scope: str
+    status: str
+    valid_from: datetime | None = None
+    valid_until: datetime | None = None
+    revoked_at: datetime | None = None
+    revoked_by_user_id: UUID | None = None
+    revocation_reason: str | None = None
+    metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="metadata_")
+    is_live: bool
+    created_at: datetime
+    updated_at: datetime
+
+
+class ParticipantGrantListResponse(BaseModel):
+    """The grants on one project.
+
+    ``include_revoked`` is echoed back because the default hides withdrawn
+    grants, and a caller that gets an empty list has to be able to tell "nobody
+    was ever invited" from "everybody was" without a second request.
+    """
+
+    project_id: UUID
+    items: list[ParticipantGrantResponse]
+    total: int
+    include_revoked: bool = False

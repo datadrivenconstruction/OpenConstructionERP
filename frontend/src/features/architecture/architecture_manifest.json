@@ -183290,6 +183290,7 @@
         "country_configuration.py",
         "file_manager_schemas.py",
         "file_manager_service.py",
+        "grants.py",
         "manifest.py",
         "member_schemas.py",
         "member_service.py",
@@ -184495,6 +184496,34 @@
           "handler": "restore_project_from_backup",
           "response_model": "ProjectRestoreResponse",
           "request_schema": "ProjectRestoreRequest"
+        },
+        {
+          "method": "POST",
+          "path": "/{project_id}/participant-grants",
+          "handler": "create_participant_grant",
+          "response_model": "ParticipantGrantResponse",
+          "request_schema": "ParticipantGrantCreate"
+        },
+        {
+          "method": "GET",
+          "path": "/{project_id}/participant-grants",
+          "handler": "list_participant_grants",
+          "response_model": "ParticipantGrantListResponse",
+          "request_schema": "CurrentTenantId"
+        },
+        {
+          "method": "PATCH",
+          "path": "/{project_id}/participant-grants/{grant_id}/scope",
+          "handler": "change_participant_grant_scope",
+          "response_model": "ParticipantGrantResponse",
+          "request_schema": "ParticipantGrantScopeChange"
+        },
+        {
+          "method": "POST",
+          "path": "/{project_id}/participant-grants/{grant_id}/revoke",
+          "handler": "revoke_participant_grant",
+          "response_model": "ParticipantGrantResponse",
+          "request_schema": "CurrentTenantId"
         }
       ],
       "schemas": [
@@ -186710,6 +186739,183 @@
               "name": "milestones_created",
               "type": "int",
               "default": "0"
+            }
+          ]
+        },
+        {
+          "class_name": "ParticipantGrantCreate",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Invite one organization to participate in one project.\n\nThe grantee is an organization and never a person (owner decision 8): an\nindividual consultant creates a one-person organization, which keeps the\nquestion \"which company is in this project\" answerable from one column and\nkeeps the row out of reach of the mistake ADR 005 spent a repair fixing.\n\nThere is no ``status`` field, so a caller cannot create a grant that starts\nsuspended or revoked: a new grant is active or it is not a grant.",
+          "fields": [
+            {
+              "name": "grantee_organization_id",
+              "type": "UUID",
+              "description": "The organization being invited in. Has to exist and must not be the project's own owner."
+            },
+            {
+              "name": "scope",
+              "type": "GrantScope",
+              "description": "What the grantee may do: read, write rows it then owns, or decide for the project."
+            },
+            {
+              "name": "valid_from",
+              "type": "datetime | None",
+              "description": "When the grant starts. Omit for immediately."
+            },
+            {
+              "name": "valid_until",
+              "type": "datetime | None",
+              "description": "When the grant ends on its own. Omit for open-ended. Has to be later than valid_from."
+            },
+            {
+              "name": "reason",
+              "type": "str | None",
+              "description": "Why this company is being invited in. Recorded on the audit row and not on the grant, because it describes a decision rather than the access it produced."
+            },
+            {
+              "name": "metadata",
+              "type": "dict[str, Any] | None",
+              "description": "Free-form context stored with the grant: a contract reference, a tender number, a note."
+            }
+          ]
+        },
+        {
+          "class_name": "ParticipantGrantScopeChange",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Widen or narrow what an existing grant allows.\n\nA scope change keeps the grant's identity, so the sequence of what one\ncompany was allowed to do is readable against one grant id in the audit log.",
+          "fields": [
+            {
+              "name": "scope",
+              "type": "GrantScope",
+              "description": "The new scope."
+            },
+            {
+              "name": "reason",
+              "type": "str | None",
+              "description": "Why the scope changed."
+            }
+          ]
+        },
+        {
+          "class_name": "ParticipantGrantRevoke",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Close a company's access to a project.\n\n``reason`` is optional because a revocation is valid without one, and\nrefusing to close access over a missing sentence would leave the more\ndangerous state in place: access that should have been withdrawn.",
+          "fields": [
+            {
+              "name": "reason",
+              "type": "str | None",
+              "description": "Why access was withdrawn."
+            }
+          ]
+        },
+        {
+          "class_name": "ParticipantGrantResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "One grant, as the owning organization sees it.\n\n``is_live`` is read off the model's own property rather than recomputed\nhere, so there is one definition of \"this grant is in force right now\" and\nit is the one the read predicate uses.",
+          "fields": [
+            {
+              "name": "id",
+              "type": "UUID"
+            },
+            {
+              "name": "project_id",
+              "type": "UUID"
+            },
+            {
+              "name": "grantee_organization_id",
+              "type": "UUID"
+            },
+            {
+              "name": "granted_by_user_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "granted_on_behalf_of_organization_id",
+              "type": "UUID"
+            },
+            {
+              "name": "scope",
+              "type": "str"
+            },
+            {
+              "name": "status",
+              "type": "str"
+            },
+            {
+              "name": "valid_from",
+              "type": "datetime | None",
+              "default": "None"
+            },
+            {
+              "name": "valid_until",
+              "type": "datetime | None",
+              "default": "None"
+            },
+            {
+              "name": "revoked_at",
+              "type": "datetime | None",
+              "default": "None"
+            },
+            {
+              "name": "revoked_by_user_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "revocation_reason",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "metadata",
+              "type": "dict[str, Any]"
+            },
+            {
+              "name": "is_live",
+              "type": "bool"
+            },
+            {
+              "name": "created_at",
+              "type": "datetime"
+            },
+            {
+              "name": "updated_at",
+              "type": "datetime"
+            }
+          ]
+        },
+        {
+          "class_name": "ParticipantGrantListResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "The grants on one project.\n\n``include_revoked`` is echoed back because the default hides withdrawn\ngrants, and a caller that gets an empty list has to be able to tell \"nobody\nwas ever invited\" from \"everybody was\" without a second request.",
+          "fields": [
+            {
+              "name": "project_id",
+              "type": "UUID"
+            },
+            {
+              "name": "items",
+              "type": "list[ParticipantGrantResponse]"
+            },
+            {
+              "name": "total",
+              "type": "int"
+            },
+            {
+              "name": "include_revoked",
+              "type": "bool",
+              "default": "False"
             }
           ]
         }
@@ -279174,9 +279380,9 @@
     "total_models": 792,
     "total_columns": 9196,
     "total_relationships": 240,
-    "total_routes": 4627,
-    "total_schemas": 4120,
-    "total_python_files": 2812,
+    "total_routes": 4631,
+    "total_schemas": 4125,
+    "total_python_files": 2813,
     "frontend_features": 208,
     "frontend_ts_files": 3579,
     "frontend_backend_mapped": 188
