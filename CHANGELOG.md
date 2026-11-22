@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 > **Tip:** This file is long. Use your browser's **Find** (Ctrl+F) to jump to a version number, or see the [Releases page](https://github.com/datadrivenconstruction/OpenConstructionERP/releases) for a per-release view with download links.
 
+## [20.2.1] - 2026-11-22
+
+Every demo project now opens Design with a confirmed brief and a model, so the editor, revisions, acceptance and estimate show real work instead of empty pages.
+
+### Fixed
+
+- The design editor no longer spins "Updating the preview" forever on a project without a brief: it says no design exists yet and links to the brief.
+- On the read-only public demo the editor says the demo is read only, instead of blaming the visitor's role.
+- The browser editor's release signature key ships with the server, so signed editor bundles can be verified once they are published.
+
+### Added
+
+- The demo seed writes a confirmed design brief for every demo project from the project's own figures (use, floors, floor area, units, site) and turns the project's converter model into design revision 1. A shared sample model is used only for low-rise buildings; taller projects show the model built from their own brief.
+
 ## [20.2.0] - 2026-11-21
 
 Design gets its own section, from brief and revisions to the estimate, with a full browser editor installed on demand, and every module page opens its data paths.

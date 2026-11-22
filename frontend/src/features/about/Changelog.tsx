@@ -67,6 +67,13 @@ const UNRELEASED: ChangelogEntry | null = null;
 // carry the long form and are left alone as the record of what shipped.
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '20.2.1',
+    date: '2026-11-22',
+    tag: 'FIX',
+    summary:
+      'Every demo project opens Design with a confirmed brief and a model, and the editor explains a missing brief instead of loading forever.',
+  },
+  {
     version: '20.2.0',
     date: '2026-11-21',
     tag: 'NEW',
