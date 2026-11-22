@@ -500,6 +500,10 @@ async def _seed_estimate(session: AsyncSession, project_id: uuid.UUID, brief: di
         await est.install_rules(session, project_id, doc, user_id)
         rows = await est.recompute(session, project_id, rev.id, rev.bim_model_id, user_id)
         await links.sync(session, project_id)
+        # the validation seed ran before this step; report the new design BOQ now, or the next install would
+        from app.modules.validation.seed import seed_validation_demo
+
+        await seed_validation_demo(session, [project_id])
     return len(rows)
 
 
