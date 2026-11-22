@@ -1,310 +1,85 @@
-<div align="center">
-
 # Construction AI OS
-
-### A leading open-source workspace for construction project management
 
 <sub>A modified, independently maintained distribution of
 <a href="https://github.com/datadrivenconstruction/OpenConstructionERP">OpenConstructionERP</a>
 by Artem Boiko / DataDrivenConstruction (AGPL-3.0-or-later). Attribution and what changed: <a href="NOTICE">NOTICE</a>.</sub>
 
-Professional BOQ, CAD and BIM takeoff, 4D scheduling, 5D cost model, and tendering - all in one self-hosted platform.
-
-**Like WordPress for construction companies** - pick modules from the marketplace, drop in your own, or replace ours with custom-built ones. Same plug-and-play model, but for BOQ, scheduling, cost control, BIM, and tendering.
-
-[Source code](https://github.com/abdelnabym519-cpu/Construction-AI-OS) · [Documentation](docs/) · [Build on it](DEVELOPING.md) · [Report an issue](https://github.com/abdelnabym519-cpu/Construction-AI-OS/issues)
-
-<!-- Each badge row is one source line on purpose. A newline between two badges
-     renders as a line break here, which stacks them into a single column. -->
-[![License](https://img.shields.io/badge/license-AGPL--3.0-blue)](LICENSE) [![Version](https://img.shields.io/github/v/release/abdelnabym519-cpu/Construction-AI-OS?label=version&color=green)](https://github.com/abdelnabym519-cpu/Construction-AI-OS/releases/latest) [![Release downloads](https://img.shields.io/github/downloads/abdelnabym519-cpu/Construction-AI-OS/total?label=downloads&color=brightgreen)](https://github.com/abdelnabym519-cpu/Construction-AI-OS/releases) [![PyPI](https://img.shields.io/pypi/v/openconstructionerp?color=informational&label=pypi)](https://pypi.org/project/openconstructionerp/) [![Downloads (pepy · per month)](https://static.pepy.tech/personalized-badge/openconstructionerp?period=month&units=international_system&left_color=grey&right_color=blue&left_text=downloads%20(pepy%20%C2%B7%20per%20month))](https://pepy.tech/project/openconstructionerp) [![Stars](https://img.shields.io/github/stars/abdelnabym519-cpu/Construction-AI-OS?style=flat&logo=github)](https://github.com/abdelnabym519-cpu/Construction-AI-OS/stargazers) [![Last commit](https://img.shields.io/github/last-commit/abdelnabym519-cpu/Construction-AI-OS?color=informational)](https://github.com/abdelnabym519-cpu/Construction-AI-OS/commits/main)
-![Languages](https://img.shields.io/badge/languages-44-orange) ![Cost Items](https://img.shields.io/badge/cost_items-120%2C000%2B-red) [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/abdelnabym519-cpu/Construction-AI-OS/badge)](https://securityscorecards.dev/viewer/?uri=github.com/abdelnabym519-cpu/Construction-AI-OS) [![CodeQL](https://github.com/abdelnabym519-cpu/Construction-AI-OS/actions/workflows/codeql.yml/badge.svg)](https://github.com/abdelnabym519-cpu/Construction-AI-OS/actions/workflows/codeql.yml) [![Signed releases](https://img.shields.io/badge/releases-Sigstore_signed-8250df)](SECURITY.md)
-
-<img src="docs/screenshots/banner.png" alt="Construction AI OS: a honeycomb of the eight company types and fifteen professional roles the platform is built around, over a second honeycomb of its 190+ backend modules and the two shared libraries drawn beside them, each cell coloured by the category its own manifest declares and shaded by how many of the others it is wired to" width="800" />
-
-<br/><br/>
-
-### Download the free desktop app
-
-<sub>No Python, no Docker, nothing to set up. Pick your system and run it.</sub>
-
-<a href="https://github.com/abdelnabym519-cpu/Construction-AI-OS/releases/latest"><img src="https://img.shields.io/badge/Windows-Download%20.exe-0078D6?style=for-the-badge&logo=windows11&logoColor=white" alt="Download Construction AI OS for Windows" height="46"></a> &nbsp;&nbsp; <a href="https://github.com/abdelnabym519-cpu/Construction-AI-OS/releases/latest"><img src="https://img.shields.io/badge/macOS-Apple%20Silicon%20.dmg-111111?style=for-the-badge&logo=apple&logoColor=white" alt="Download Construction AI OS for macOS on Apple Silicon" height="46"></a> &nbsp;&nbsp; <a href="https://github.com/abdelnabym519-cpu/Construction-AI-OS/releases/latest"><img src="https://img.shields.io/badge/Linux-.deb%20%2F%20.AppImage-FCC624?style=for-the-badge&logo=linux&logoColor=black" alt="Download Construction AI OS for Linux" height="46"></a>
-
-<sub>Prefer the terminal? <code>pip install openconstructionerp</code> or Docker, see <a href="#quick-start">Quick Start</a> below.</sub>
-
-<br/>
-
-<table>
-<tr>
-<td align="center" width="16.66%"><b>120K+</b><br/><sub>cost&nbsp;items</sub></td>
-<td align="center" width="16.66%"><b>44</b><br/><sub>languages</sub></td>
-<td align="center" width="16.66%"><b>47</b><br/><sub>countries</sub></td>
-<td align="center" width="16.66%"><b>6</b><br/><sub>CAD&nbsp;formats</sub></td>
-<td align="center" width="16.66%"><b>190+</b><br/><sub>modules</sub></td>
-<td align="center" width="16.66%"><b>293</b><br/><sub>guided&nbsp;cases</sub></td>
-</tr>
-</table>
-
-</div>
-
----
-
-<details open>
-<summary><h2>Table of Contents</h2></summary>
-
-<table width="100%">
-<colgroup>
-<col width="33%" />
-<col width="34%" />
-<col width="33%" />
-</colgroup>
-<tr>
-<td valign="top">
-
-<picture><source media="(prefers-color-scheme: dark)" srcset="docs/readme-icons/rocket-dark.svg"><img src="docs/readme-icons/rocket-light.svg" width="14" align="center" alt=""></picture> **Get Started**
-- [Why Construction AI OS?](#why-construction-ai-os)
-- [A Look Inside](#a-look-inside)
-- [Quick Start](#quick-start)
-- [Demo Accounts](#demo-accounts)
-
-</td>
-<td valign="top">
-
-<picture><source media="(prefers-color-scheme: dark)" srcset="docs/readme-icons/credit-card-dark.svg"><img src="docs/readme-icons/credit-card-light.svg" width="14" align="center" alt=""></picture> **Estimating & Costs**
-- [Bill of Quantities](#-bill-of-quantities-boq-management)
-- [Cost Databases & Catalog](#-cost-databases--resource-catalog)
-- [CAD/BIM Takeoff & AI](#-cadbim-takeoff--ai-estimation)
-
-</td>
-<td valign="top">
-
-<picture><source media="(prefers-color-scheme: dark)" srcset="docs/readme-icons/shield-check-dark.svg"><img src="docs/readme-icons/shield-check-light.svg" width="14" align="center" alt=""></picture> **Quality & Setup**
-- [Guided Onboarding](#-guided-onboarding)
-- [All 190+ Modules](MODULES.md)
-
-</td>
-</tr>
-<tr>
-<td valign="top">
-
-<picture><source media="(prefers-color-scheme: dark)" srcset="docs/readme-icons/code-dark.svg"><img src="docs/readme-icons/code-light.svg" width="14" align="center" alt=""></picture> **Technical**
-- [Tech Stack](#tech-stack)
-- [Architecture](#architecture)
-- [Security](#security)
-
-</td>
-<td valign="top">
-
-<picture><source media="(prefers-color-scheme: dark)" srcset="docs/readme-icons/people-dark.svg"><img src="docs/readme-icons/people-light.svg" width="14" align="center" alt=""></picture> **Community**
-- [Contributors](#contributors)
-- [Support the Project](#support-the-project)
-- [AI Disclaimer](#ai-disclaimer)
-- [Trademarks](#trademarks)
-
-</td>
-<td valign="top">
-
-<picture><source media="(prefers-color-scheme: dark)" srcset="docs/readme-icons/law-dark.svg"><img src="docs/readme-icons/law-light.svg" width="14" align="center" alt=""></picture> **Legal & Privacy**
-- [License](#license)
-- [Privacy and Terms](#privacy-and-terms)
-
-</td>
-</tr>
-</table>
-
-</details>
-
----
-
-> **Ready to try it?** See the **[Getting Started guide](docs/getting-started.md)** for three ways to install (desktop app, pip, Docker) with prerequisites and step-by-step instructions, or jump straight to the **[Quick Start](#quick-start)** section below.
-
----
-
-## Why Construction AI OS?
-
-Construction cost estimation software is expensive, closed-source, and locked to specific regions. Construction AI OS changes that.
-
-| What you get | How it works |
-|-------------|-------------|
-| **Free forever** | AGPL-3.0 license. No subscriptions, no per-seat fees, no vendor lock-in. |
-| **Your data, your server** | Self-hosted. Everything runs on your machine - nothing leaves your network. |
-| **44 languages** | Full UI translation: English, German, French, Spanish, Portuguese, Russian, Chinese, Arabic, Hindi, Japanese, Korean, and 33 more. |
-| **30+ regional standards** | DIN 276, NRM 1/2, CSI MasterFormat, GAEB, ГЭСН, DPGF, GB/T 50500, CPWD, ÖNORM, Birim Fiyat, Sekisan, SINAPI, and more. |
-| **AI-powered** | Connect any LLM provider (Anthropic, OpenAI, Gemini, Mistral, Groq, DeepSeek) for smart estimation. |
-| **120,000+ cost items** | Nine cost bases covering 40+ markets - global CWICR plus eight national bases (China, Turkey, Brazil, Spain, Italy, Greece, Vietnam, Indonesia). |
-
-### The whole platform in your language
-
-The entire UI ships in **44 languages**, including full right-to-left support for Arabic, Urdu, Persian and Hebrew. Switch language from any screen and every label, message and report follows.
-
-<p align="center">
-🇬🇧 English &nbsp;·&nbsp; 🇩🇪 Deutsch &nbsp;·&nbsp; 🇫🇷 Français &nbsp;·&nbsp; 🇪🇸 Español &nbsp;·&nbsp; 🇲🇽 Español (MX) &nbsp;·&nbsp; 🇨🇱 Español (CL) &nbsp;·&nbsp; 🇨🇴 Español (CO) &nbsp;·&nbsp; 🇵🇹 Português &nbsp;·&nbsp; 🇧🇷 Português (BR) &nbsp;·&nbsp; 🇷🇺 Русский &nbsp;·&nbsp; 🇨🇳 简体中文 &nbsp;·&nbsp; 🇸🇦 العربية &nbsp;·&nbsp; 🇮🇳 हिन्दी &nbsp;·&nbsp; 🇹🇷 Türkçe &nbsp;·&nbsp; 🇮🇹 Italiano &nbsp;·&nbsp; 🇳🇱 Nederlands &nbsp;·&nbsp; 🇵🇱 Polski &nbsp;·&nbsp; 🇨🇿 Čeština &nbsp;·&nbsp; 🇯🇵 日本語 &nbsp;·&nbsp; 🇰🇷 한국어 &nbsp;·&nbsp; 🇸🇪 Svenska &nbsp;·&nbsp; 🇳🇴 Norsk &nbsp;·&nbsp; 🇩🇰 Dansk &nbsp;·&nbsp; 🇫🇮 Suomi &nbsp;·&nbsp; 🇧🇬 Български &nbsp;·&nbsp; 🇭🇷 Hrvatski &nbsp;·&nbsp; 🇭🇺 Magyar &nbsp;·&nbsp; 🇮🇩 Bahasa Indonesia &nbsp;·&nbsp; 🇷🇴 Română &nbsp;·&nbsp; 🇹🇭 ไทย &nbsp;·&nbsp; 🇻🇳 Tiếng Việt &nbsp;·&nbsp; 🇺🇦 Українська &nbsp;·&nbsp; 🇬🇷 Ελληνικά &nbsp;·&nbsp; 🇰🇬 Кыргызча &nbsp;·&nbsp; 🇰🇿 Қазақша &nbsp;·&nbsp; 🇧🇩 বাংলা &nbsp;·&nbsp; 🇪🇪 Eesti &nbsp;·&nbsp; 🇵🇭 Filipino &nbsp;·&nbsp; 🇵🇰 اردو &nbsp;·&nbsp; 🇮🇷 فارسی &nbsp;·&nbsp; 🇮🇱 עברית &nbsp;·&nbsp; 🇺🇿 Oʻzbekcha &nbsp;·&nbsp; 🇲🇳 Монгол
-</p>
-
-### How It Compares
-
-<table width="100%">
-<colgroup>
-<col width="26%" />
-<col width="20%" />
-<col width="14%" />
-<col width="13%" />
-<col width="14%" />
-<col width="13%" />
-</colgroup>
-<thead>
-<tr>
-<th align="left">Capability</th>
-<th align="center">Construction AI OS</th>
-<th align="center">Enterprise<br/>BIM</th>
-<th align="center">CAD<br/>Takeoff</th>
-<th align="center">Legacy<br/>Estimating</th>
-<th align="center">PDF<br/>Markup</th>
-</tr>
-</thead>
-<tbody>
-<tr><td><b>License</b></td><td align="center">AGPL-3.0 (free)</td><td align="center">Proprietary</td><td align="center">Proprietary</td><td align="center">Proprietary</td><td align="center">Proprietary</td></tr>
-<tr><td><b>Self-hosted / offline</b></td><td align="center">&#10004;</td><td align="center">&#10006;</td><td align="center">&#10006;</td><td align="center">&#9888; partial</td><td align="center">&#10006;</td></tr>
-<tr><td><b>Price</b></td><td align="center"><b>Free forever</b></td><td align="center">~&#8364;500/mo</td><td align="center">~&#8364;300/mo</td><td align="center">~&#8364;200/mo</td><td align="center">~&#8364;30/mo</td></tr>
-<tr><td><b>AI estimation</b></td><td align="center">&#10004; 20 LLM providers</td><td align="center">&#10006;</td><td align="center">&#10006;</td><td align="center">&#10006;</td><td align="center">&#10006;</td></tr>
-<tr><td><b>UI languages</b></td><td align="center"><b>44</b></td><td align="center">5</td><td align="center">3</td><td align="center">2</td><td align="center">8</td></tr>
-<tr><td><b>Regional standards</b></td><td align="center"><b>30+</b></td><td align="center">4</td><td align="center">3</td><td align="center">2</td><td align="center">-</td></tr>
-<tr><td><b>BOQ editor</b></td><td align="center">&#10004;</td><td align="center">&#10004;</td><td align="center">&#10004;</td><td align="center">&#10004;</td><td align="center">&#10006;</td></tr>
-<tr><td><b>CAD/BIM takeoff</b></td><td align="center">&#10004; RVT IFC DWG</td><td align="center">&#10004;</td><td align="center">&#10004;</td><td align="center">&#10006;</td><td align="center">PDF only</td></tr>
-<tr><td><b>4D/5D planning</b></td><td align="center">&#10004;</td><td align="center">&#10004;</td><td align="center">&#10006;</td><td align="center">&#10006;</td><td align="center">&#10006;</td></tr>
-<tr><td><b>Cost database included</b></td><td align="center">&#10004; 120K+ rates</td><td align="center">&#10006; extra</td><td align="center">&#10006; extra</td><td align="center">&#10006; extra</td><td align="center">&#10006;</td></tr>
-<tr><td><b>Resource catalog</b></td><td align="center">&#10004; 7K+ priced</td><td align="center">&#10006; extra</td><td align="center">&#10006;</td><td align="center">&#10006;</td><td align="center">&#10006;</td></tr>
-<tr><td><b>Validation engine</b></td><td align="center">&#10004; built-in rules</td><td align="center">&#9888; limited</td><td align="center">&#10006;</td><td align="center">&#10006;</td><td align="center">&#10006;</td></tr>
-<tr><td><b>REST API</b></td><td align="center">&#10004; full</td><td align="center">&#9888; limited</td><td align="center">&#10006;</td><td align="center">&#10006;</td><td align="center">&#10006;</td></tr>
-<tr><td><b>Real-time collab</b></td><td align="center">&#10004; soft locks</td><td align="center">&#10004;</td><td align="center">&#10006;</td><td align="center">&#10006;</td><td align="center">&#10006;</td></tr>
-<tr><td><b>Open data export</b></td><td align="center">&#10004; GAEB · XLSX · JSON</td><td align="center">&#9888; limited</td><td align="center">&#9888; limited</td><td align="center">&#9888; limited</td><td align="center">PDF only</td></tr>
-<tr><td><b>IDS / COBie requirements</b></td><td align="center">&#10004; import + export</td><td align="center">&#10006;</td><td align="center">&#10006;</td><td align="center">&#10006;</td><td align="center">&#10006;</td></tr>
-<tr><td><b>Property dev lifecycle</b></td><td align="center">&#10004; Lead → SPA → Handover</td><td align="center">&#10006;</td><td align="center">&#10006;</td><td align="center">&#10006;</td><td align="center">&#10006;</td></tr>
-<tr><td><b>3D globe / geo-anchor</b></td><td align="center">&#10004; Cesium 3D Tiles</td><td align="center">&#9888; map only</td><td align="center">&#10006;</td><td align="center">&#10006;</td><td align="center">&#10006;</td></tr>
-</tbody>
-</table>
-
-<sub>Comparison reflects typical category capabilities based on publicly available information. Pricing is approximate (per-seat, list price) and varies by vendor and region. Construction AI OS is an independent open-source project and is not affiliated with any commercial vendor in the categories above.</sub>
-
----
-
-## A Look Inside
-
-A quick tour of the main workspaces. Each one runs against the 70-project demo spanning 30+ countries that ships with a fresh install.
-
-- **Portfolio Dashboard** - every project on one live map, with multi-currency totals grouped by currency, never blended
-- **Projects** - localized projects worldwide; each card carries its site map, BIM / DWG / PDF badges and live value
-- **BOQ Editor** - keyboard-first bill of quantities with sections, assemblies, a live quality score and grand total
-- **Cost Database** - 120,000+ priced items across 9 cost bases, bilingual, searchable by code, unit or class
-- **3D BIM Viewer** - federated models in the browser with a category and storey breakdown, converted with DDC Converters 2.0
-- **Clash Detection** - geometric coordination across federated models, with a clash matrix and BCF export
-- **PDF Takeoff** - drop a drawing, let AI extract the quantities, then push them straight into the BOQ
-- **AI Estimate** - turn text, a photo, a PDF or a spreadsheet into a scoped BOQ in seconds, with confidence scores
-- **Validation** - built-in DIN 276, NRM and MasterFormat rules score every BOQ with a traffic-light report
-- **Cross-Project Analytics** - portfolio KPIs grouped by currency: budget, actuals and variance, project by project
-- **Finance & Earned Value** - budgets, invoices, payments and earned value tracked against the estimate
-
----
-
-## Key Features
-
-### <picture><source media="(prefers-color-scheme: dark)" srcset="docs/readme-icons/graph-dark.svg"><img src="docs/readme-icons/graph-light.svg" width="14" align="center" alt=""></picture> Bill of Quantities (BOQ) Management
-
-Build professional cost estimates with a powerful BOQ editor. The full lifecycle - from first sketch to final tender submission:
-
-<img src="docs/readme-diagrams/01-bill-of-quantities-boq.svg" alt="Estimating flow: upload PDF, CAD, photo or text, extract quantities, validate against DIN, NRM and MasterFormat rules, build the estimate in the BOQ editor, then tender, schedule and report" width="900" />
-
-- **Hierarchical BOQ structure** - Sections, positions, sub-positions with drag-and-drop reordering
-- **Inline editing** - Click any cell to edit. Tab between fields. Undo/redo with Ctrl+Z
-- **Resources & assemblies** - Link labor, materials, equipment to each position. Build reusable cost recipes
-- **Markups** - Overhead, profit, VAT, contingency - configure per project or use regional defaults
-- **Automatic calculations** - Quantity × unit rate = total. Section subtotals. Grand total with markups
-- **Validation** - Built-in rules check for missing quantities, zero prices, duplicate items, and compliance with DIN 276, NRM, MasterFormat
-- **Export** - Download as Excel, CSV, PDF report, or GAEB XML (X83)
-
-### <picture><source media="(prefers-color-scheme: dark)" srcset="docs/readme-icons/database-dark.svg"><img src="docs/readme-icons/database-light.svg" width="14" align="center" alt=""></picture> Cost Databases & Resource Catalog
-
-- **Cost bases** - 120,000+ cost items across 9 bases and 40+ markets: the global CWICR database covering all major construction trades, plus 8 national bases built on each country's own norm system (China, Turkey, Brazil, Spain, Italy, Greece, Vietnam, Indonesia)
-- **Smart search** - Find items by description, code, or classification. AI-powered semantic search matches meaning, not just keywords ("concrete wall" finds "reinforced partition C30/37")
-- **Resource catalog** - 7,000+ materials, equipment, labor rates, and operators. Build custom assemblies from catalog items
-- **Regional pricing** - Automatic price adjustment based on project location. Compare rates across regions
-- **Import your data** - Upload your own cost database from Excel, CSV, or connect via API
-
-### <picture><source media="(prefers-color-scheme: dark)" srcset="docs/readme-icons/tools-dark.svg"><img src="docs/readme-icons/tools-light.svg" width="14" align="center" alt=""></picture> CAD/BIM Takeoff & AI Estimation
-
-Extract quantities from any source - drawings, models, text, or photos:
-
-<img src="docs/readme-diagrams/02-cad-bim-takeoff-ai.svg" alt="Takeoff flow: CAD and BIM files go through DDC Converters 2.0 into canonical elements, PDFs and photos go through OCR and computer vision, and both are matched to classifications and prices in the BOQ" width="900" />
-
-
-- **CAD/BIM takeoff** - Upload RVT, IFC or DWG files. DDC converters extract elements with volumes, areas, and lengths automatically
-- **Interactive QTO** - Choose how to group extracted data: by Category, Type, Level, Family. Format-specific presets for RVT and IFC
-- **Linked geometry preview** - Click the BIM link badge on any BOQ position to see a 3D preview of linked elements with interactive rotate/zoom/pan controls
-- **BIM Quantity Picker** - Select quantities (area, volume, length) directly from linked BIM elements and apply them to BOQ positions. The source parameter name is shown next to the unit
-- **DWG polyline measurement** - Click any polyline in the DWG viewer to instantly see area, perimeter, and individual segment lengths with on-canvas labels
-- **PDF measurement** - Open construction drawings directly in the browser. Measure distances, areas, and count elements with calibrated scale
-- **AI estimation** - Describe your project in plain text, upload a building photo, or paste a PDF - AI generates a complete BOQ with quantities and market rates
-- **AI Cost Advisor** - Ask questions about pricing, materials, or estimation methodology. AI answers using your cost database as context
-- **Cost matching** - After AI generates an estimate, match each item against your CWICR database to replace AI-guessed rates with real market prices
-
-The platform also includes 3D globe visualization (Cesium), property development lifecycle, accommodation management, an AI assistant that prepares changes for a person to approve, BIM clash detection, 4D/5D scheduling, tendering and risk management, PDF markups, punch lists, daily diary with HSE tracking, and 30+ regional classification standards. See [MODULES.md](MODULES.md) for the full list of 190+ modules.
-
-### <picture><source media="(prefers-color-scheme: dark)" srcset="docs/readme-icons/rocket-dark.svg"><img src="docs/readme-icons/rocket-light.svg" width="14" align="center" alt=""></picture> Guided Onboarding
-
-1. **Choose language** - Select from 44 languages. The entire UI switches instantly
-2. **Select region** - Determines default cost database, currency, and classification standard
-3. **Load cost database** - One-click import of CWICR pricing data for your region (120,000+ items)
-4. **Import resource catalog** - Materials, labor, equipment, and pre-built assemblies
-5. **Configure AI** *(optional)* - Enter an API key from any supported LLM provider
-6. **Create your first project** - Set name, region, standard, and start estimating
-
----
-
-## Quick Start
-
-> **Problem while installing or starting?** See the installation guide in the repo: [English](docs/INSTALL_TROUBLESHOOTING.md), [Deutsch](docs/INSTALL_TROUBLESHOOTING.de.md), [Русский](docs/INSTALL_TROUBLESHOOTING.ru.md).
-
-### Easiest: download the desktop app (no Python, no setup)
-
-Download the installer for your operating system, run it, and Construction AI OS opens as a native desktop app. No Python, no pip, no Docker, and no database to set up. Everything runs locally on your machine.
-
-- Grab one straight from the **[latest release](https://github.com/abdelnabym519-cpu/Construction-AI-OS/releases/latest)**: Windows `.exe` installer, macOS `.dmg` (Apple Silicon), or Linux `.deb` / `.AppImage`.
-
-**Your operating system will warn you before it runs the installer, and that is expected.** There is no code signing certificate for this project yet, so the desktop builds are unsigned. On Windows, SmartScreen says "Windows protected your PC"; choose More info, then Run anyway. If Windows 11 Smart App Control blocks the app instead, there is no Run anyway button, and [Windows blocks the app](docs/desktop/WINDOWS_BLOCKED.md) explains the options. On macOS, Gatekeeper says the developer cannot be verified; open the app from the Finder context menu and choose Open, or clear it with `xattr -dr com.apple.quarantine` on the installed app. Linux packages are unaffected. If you would rather verify the download than trust the warning, every release carries `SHA256SUMS` together with a Sigstore signature and certificate, so you can check the bytes you received against what the build produced.
-
-There is no Intel macOS build at the moment. On an Intel Mac, use the pip or Docker route below.
-
-The first launch takes about a minute while it sets up your local database, then every launch after that is fast. Open source under AGPL-3.0.
-
-> **Prefer the command line?** The options below (pip, Docker, source) need Python 3.12+. Check with `python --version`.
-
-### pip install (full app, one command)
+A self-hosted workspace for construction cost estimating and project delivery.
+Estimating, cost data, CAD and BIM takeoff, scheduling, tendering, documents and
+site records run in one installation - on your own machine or on your own server -
+and its modules are enabled per project.
+
+[Source code](https://github.com/abdelnabym519-cpu/Construction-AI-OS) · [Documentation](docs/) · [Development](DEVELOPING.md) · [Report an issue](https://github.com/abdelnabym519-cpu/Construction-AI-OS/issues)
+
+## What it covers
+
+| Area | In it |
+| --- | --- |
+| Estimating | Hierarchical BOQ editor with inline editing, resources and assemblies, markups, validation against DIN 276 / NRM / MasterFormat, export to Excel, CSV, PDF and GAEB XML (X83) |
+| Cost data | Cost bases and a resource catalogue, semantic search across cost items, regional price adjustment, import from Excel or CSV or over the API |
+| Takeoff | RVT, IFC and DWG through the DDC converters; measurement on PDFs and images; quantities applied to BOQ positions with the source parameter shown beside the unit |
+| Delivery | 4D/5D scheduling, tendering, change orders, documents with versions, punch lists, daily diary with HSE tracking, clash detection |
+| AI | Estimate drafts from text, a photograph or a PDF, and a cost advisor that answers against your own cost database. A draft is not an estimate; see the AI disclaimer below |
+| Platform | One module per domain under `backend/app/modules`, enabled per project; a portal for people outside the installation; an HTTP API |
+
+Every module is listed in [MODULES.md](MODULES.md).
+
+## Install
+
+Installation and startup problems are covered in the troubleshooting guide:
+[English](docs/INSTALL_TROUBLESHOOTING.md), [Deutsch](docs/INSTALL_TROUBLESHOOTING.de.md),
+[Русский](docs/INSTALL_TROUBLESHOOTING.ru.md). Every route below except the
+desktop app needs Python 3.12 or newer; check with `python --version`.
+
+### Desktop app
+
+Download the installer for your system from the
+[latest release](https://github.com/abdelnabym519-cpu/Construction-AI-OS/releases/latest):
+Windows `.exe`, macOS `.dmg` (Apple Silicon), or Linux `.deb` / `.AppImage`.
+Nothing else to install - the database runs locally inside the app.
+
+**Your operating system warns you before it runs the installer, and that is
+expected.** The desktop builds are unsigned because this project has no code
+signing certificate. On Windows, SmartScreen says "Windows protected your PC";
+choose More info, then Run anyway. If Windows 11 Smart App Control blocks the app
+instead there is no Run anyway button, and
+[docs/desktop/WINDOWS_BLOCKED.md](docs/desktop/WINDOWS_BLOCKED.md) sets out the
+options. On macOS, Gatekeeper says the developer cannot be verified; open the app
+from the Finder context menu and choose Open, or clear it with
+`xattr -dr com.apple.quarantine`. Linux packages are unaffected. If you would
+rather verify a download than trust the warning, every release carries
+`SHA256SUMS` together with a Sigstore signature and certificate, so you can check
+the bytes you received against what the build produced.
+
+There is no Intel macOS build. On an Intel Mac, use pip or Docker.
+
+The first launch takes about a minute while it sets up the local database; every
+launch after that is fast.
+
+### pip
 
 ```bash
 pip install --upgrade openconstructionerp
 openconstructionerp
 ```
 
-That's it. The single wheel ships the backend plus the pre-built React frontend. The first run sets up a local embedded PostgreSQL database (no Docker, no setup), asks whether to load demo data, and opens your browser at **http://localhost:8080**. The first account you register becomes the admin; if you opted into demo data, the demo login (`demo@openconstructionerp.com`) accepts any password on a local install. No Node.js and no extra services. Every later run, just type `openconstructionerp` again. [PyPI package](https://pypi.org/project/openconstructionerp/).
+One wheel, carrying the backend and the pre-built frontend. The first run sets up
+a local embedded PostgreSQL database - no Docker and no separate server - asks
+whether to load demo data, and opens your browser at http://localhost:8080. Every
+later run is the same command.
 
-If the `openconstructionerp` command is not found after install, run it through Python instead. This works on every operating system and never depends on PATH:
+If the command is not found after install, run it through Python instead, which
+works on every operating system and never depends on PATH:
 
 ```bash
 python -m openconstructionerp
 ```
 
-> **Deploying on a server?** By default the app listens on `127.0.0.1` (localhost only). To make it reachable over the network, add `--host 0.0.0.0`:
->
-> ```bash
-> openconstructionerp serve --host 0.0.0.0 --port 8080
-> ```
->
-> For a production setup with systemd and reverse proxy, see [docs/INSTALL_LINUX.md](docs/INSTALL_LINUX.md).
+`openconstructionerp doctor` prints a per-check OK/WARN/ERROR report about the
+install it is run against. For PATH setup, including the Ubuntu and Debian
+PEP 668 workarounds, see [docs/getting-started.md](docs/getting-started.md).
 
-> **"Command not found"?** Install with [pipx](https://pipx.pypa.io) which handles PATH automatically. For platform-specific PATH setup and Ubuntu/Debian PEP 668 workarounds, see [docs/getting-started.md](docs/getting-started.md).
->
-> If something looks off, run `openconstructionerp doctor` for a per-check OK/WARN/ERROR report.
-
-### Alternative 1: One-line installer (handles PATH for you)
+### One-line installer
 
 ```bash
 # Linux / macOS
@@ -314,11 +89,14 @@ curl -fsSL https://raw.githubusercontent.com/abdelnabym519-cpu/Construction-AI-O
 irm https://raw.githubusercontent.com/abdelnabym519-cpu/Construction-AI-OS/main/scripts/install.ps1 | iex
 ```
 
-If you would rather not think about PATH at all, use this. It picks Docker if installed, otherwise uv, otherwise a dedicated Python virtual environment, installs Construction AI OS there, puts the `openconstructionerp` command on your PATH automatically, and finishes with a short panel showing the URL, how to sign in and how to start. It also offers to launch right away. Open a new terminal afterwards and `openconstructionerp` just works. Runs at **http://localhost:8080**.
+Chooses Docker if it is installed, otherwise uv, otherwise a dedicated virtual
+environment; installs there; puts the command on your PATH; and finishes with the
+URL and how to sign in. Open a new terminal afterwards. Runs at
+http://localhost:8080.
 
-### Alternative 2: Docker
+### Docker
 
-From the published image, no clone needed:
+From the published image:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/abdelnabym519-cpu/Construction-AI-OS/main/docker-compose.quickstart.yml       -o docker-compose.yml
@@ -328,7 +106,7 @@ echo "JWT_SECRET=$(openssl rand -hex 32)"           >> .env
 docker compose pull app && docker compose up -d
 ```
 
-Or build from source (also the better choice on Apple Silicon):
+Or build from source, which is also the better choice on Apple Silicon:
 
 ```bash
 git clone https://github.com/abdelnabym519-cpu/Construction-AI-OS.git
@@ -338,180 +116,110 @@ echo "JWT_SECRET=$(openssl rand -hex 32)"           >> .env
 make quickstart
 ```
 
-Open **http://localhost:8080**. On Windows PowerShell, see [docs/getting-started.md](docs/getting-started.md#path-c-docker) for the same steps in PowerShell (a plain `>` there writes a `.env` that Compose cannot read).
+Open http://localhost:8080. On Windows PowerShell the same steps need a different
+redirect - a plain `>` there writes a `.env` that Compose cannot read - and
+[docs/getting-started.md](docs/getting-started.md#path-c-docker) has them.
 
-### Alternative 3: Local development (clone + npm + uvicorn)
+### From source
 
 ```bash
 git clone https://github.com/abdelnabym519-cpu/Construction-AI-OS.git
 cd Construction-AI-OS
 
-# Install dependencies
 pip install -e ./backend[server]
 cd frontend && npm install && cd ..
 
-# Start (Linux/macOS)
+# Linux / macOS
 make dev
 
-# Start (Windows - two terminals)
+# Windows, two terminals
 # Terminal 1: cd backend && uvicorn app.main:create_app --factory --reload --port 8000
 # Terminal 2: cd frontend && npm run dev
 ```
 
-Open **http://localhost:5173** - for hacking on the codebase. Requires Python 3.12+ and Node.js 22 or newer.
+Opens http://localhost:5173. Needs Python 3.12+ and Node.js 22 or newer.
 
-### Demo Accounts
+### On a server
 
-Demo data is opt-in: it loads only when you answer Yes to the first-run prompt (or set `SEED_DEMO=true`, or `serve --demo`). When it loads, three demo accounts exist. On a local install the demo sign-in accepts any password. To pin passwords instead (for a team demo or CI), set these before the first start:
+By default the app listens on `127.0.0.1`, so only the machine it runs on can
+reach it. To make it reachable over a network:
 
-- `DEMO_USER_PASSWORD` - admin (`demo@openconstructionerp.com`)
-- `DEMO_ESTIMATOR_PASSWORD` - estimator (`estimator@openconstructionerp.com`)
-- `DEMO_MANAGER_PASSWORD` - manager (`manager@openconstructionerp.com`)
-
-| Account | Email | Password | Role |
-|---------|-------|----------|------|
-| Admin | `demo@openconstructionerp.com` | any (local demo sign-in) | Full access |
-| Estimator | `estimator@openconstructionerp.com` | any (local demo sign-in) | Estimator |
-| Manager | `manager@openconstructionerp.com` | any (local demo sign-in) | Manager |
-
-> Demo accounts include 70 pre-loaded projects across 30+ countries with complete BOQs, schedules and cost models, from a Berlin residential block and a Paris school to a Dubai warehouse, a Shanghai office tower, a Toronto condo and a Guangzhou renovation.
->
-> **Security note.** For any internet-exposed deployment, set the three
-> `DEMO_*_PASSWORD` variables to strong, unique secrets, or disable demo
-> accounts entirely with `DISABLE_DEMO_ACCOUNTS=1`. Do not reuse
-> passwords from examples, screenshots, or earlier versions of this README.
-
----
-
-## Tech Stack
-
-| Layer | Technology | Purpose |
-|-------|-----------|---------|
-| Backend | Python 3.12+ / FastAPI | Async API, Pydantic v2 validation, modular architecture |
-| Frontend | React 18 / TypeScript / Vite | SPA with code splitting, 44 languages |
-| Database | PostgreSQL 16+ (only) | OLTP with JSON columns; an embedded PostgreSQL starts automatically for local dev, so there is no Docker, no separate database, and nothing to configure |
-| UI | Tailwind CSS / AG Grid | Professional data grid, responsive design, dark mode |
-| AI | Any LLM via REST API | Anthropic, OpenAI, Gemini, Mistral, Groq, DeepSeek |
-| Vector Search | LanceDB (embedded) / Qdrant | Semantic cost item search, 384d or 3072d embeddings |
-| CAD/BIM | [DDC Converters 2.0](https://github.com/datadrivenconstruction) | RVT, IFC, DWG → structured quantities |
-| i18n | i18next | 44 languages, full RTL support |
-
-## Architecture
-
-> For a high-level system overview, stack diagram and module structure, see **[docs/architecture/OVERVIEW.md](docs/architecture/OVERVIEW.md)**.
-
-### How the platform turns raw CAD/BIM into structured ERP data
-
-<img src="docs/screenshots/architecture-pipeline.jpg" alt="Construction AI OS - Digitalization of Processes: Pipelines for Automatic Data Creation" width="100%" />
-
-Construction AI OS is built around **seven cooperating pipelines** that turn closed CAD/BIM files (RVT, IFC, DWG) into structured, queryable ERP data - without locking you into a proprietary stack. Every module in the platform plugs into one or more of these stages:
-
-1. **Mining** - collect existing project data (CAD/BIM models, CDE drops, COBie deliverables) into a semi-structured pool. Handled by `cad`, `documents`, `bim_hub`, `file_search` modules + the **DDC Converters 2.0** (RVT/IFC/DWG → canonical JSON).
-2. **QTO Check & Quantity Take-off rules** - apply rule sets per discipline / family / type to extract quantities deterministically. Handled by `takeoff`, `requirements`, `validation`, and the rule editor in `match-elements`.
-3. **BlackBox (company standard)** - codify your firm's classifications, formulas, unit factors and assembly recipes as a single canonical rule book (COBie / CFIHOS / SQL / Excel / Access). Handled by `costs`, `assemblies`, `catalog`, `cost_intelligence`.
-4. **New project modeling** - apply the BlackBox to a fresh model: geometry → filtering → grouping → verification → BOQ. Handled by `boq`, `projects`, `match-elements`, `clash`.
-5. **BlackBox mapping** - map a new project's raw element list onto the canonical rule book via vector + lexical + rule-based matchers. Handled by `match-elements` (7-stage pipeline) + AI Estimate.
-6. **Project-specific data (4D/5D/6D)** - derive scheduling, cost, hours, ordering and environmental footprint per group. Handled by `scheduling`, `advanced_schedule`, `5d_planner`, `risk`, `carbon`, `hse`.
-7. **Saving data & Machine Learning** - persist project history into the database, data lake and ML models so each new project starts further ahead. Handled by `analytics`, `bi_dashboards`, `ai_chat`, `cost_intelligence`, and the rule-learning loop in `clash` and `match-elements`.
-
-The right-hand side of the diagram is the **automatic data retrieval** layer that every UI surface (Dashboard, BOQ editor, /clash, /match-elements, /files, /scheduling) consumes: dashboards, calculations, reports, tables, charts, geometries, and ERP-ready exports - all driven from the same canonical store. The Machine-Learning column on the far right is where the platform progressively automates classification, parameterisation, recognition and marking, replacing manual steps (<picture><source media="(prefers-color-scheme: dark)" srcset="docs/readme-icons/tools-dark.svg"><img src="docs/readme-icons/tools-light.svg" width="14" align="center" alt=""></picture>) with automatic steps (<picture><source media="(prefers-color-scheme: dark)" srcset="docs/readme-icons/zap-dark.svg"><img src="docs/readme-icons/zap-light.svg" width="14" align="center" alt=""></picture>) over time.
-
-### Technical stack
-
-<img src="docs/readme-diagrams/09-technical-stack.svg" alt="Technical stack: React frontend over a FastAPI backend grouped into core, estimating, field, commercial, scheduling and AI modules, on PostgreSQL" width="900" />
-
-<details>
-<summary>Plain-text version (for screen readers or non-Mermaid renderers)</summary>
-
-```
-┌──────────────────────────────────────────────────┐
-│  Frontend (React SPA)                            │
-│  TypeScript · Tailwind · AG Grid · PDF.js        │
-└──────────────────┬───────────────────────────────┘
-                   │ REST + SSE
-┌──────────────────┴───────────────────────────────┐
-│  Backend (FastAPI)                               │
-│  190+ auto-discovered modules · Plugin system    │
-├──────────────────────────────────────────────────┤
-│  BOQ · Costs · Schedule · 5D · Validation · AI   │
-│  Takeoff · Tendering · Risk · Reports · Catalog  │
-│  Requirements · Markups · Punch List · BIM Hub   │
-│  PropDev · Geo Hub · Coordination · Clash AI     │
-│  Accommodation · Floating Chat · 26 widgets      │
-├──────────────────────────────────────────────────┤
-│  Database (PostgreSQL, embedded in dev)          │
-│  Vector DB (LanceDB / Qdrant)                    │
-│  CAD Converters (DDC Converters 2.0)             │
-│  CV Pipeline (PaddleOCR + YOLOv11)               │
-└──────────────────────────────────────────────────┘
+```bash
+openconstructionerp serve --host 0.0.0.0 --port 8080
 ```
 
-</details>
+Put a reverse proxy and TLS in front of it. For systemd and proxy configuration,
+see [docs/INSTALL_LINUX.md](docs/INSTALL_LINUX.md).
 
----
+### Demo data
 
-## Project growth of the original project
+Demo data is opt-in. It loads only when you answer Yes to the first-run prompt, or
+set `SEED_DEMO=true`, or start with `serve --demo`. `serve --no-demo` starts
+without it and persists that choice in `<data-dir>/demo_seed_choice.json`, so later
+starts stay clean too.
 
-<sub>The numbers and charts in this section describe the ORIGINAL
-OpenConstructionERP repository up to the point this distribution
-diverged from it, measured on 30 September 2026 from the GitHub API,
-PyPI and pypistats.org. This repository starts fresh.</sub>
+When it loads it creates three accounts - admin, estimator and manager - and offers
+a password-free demo sign-in. That sign-in is a separate switch an administrator
+can turn off from the Settings screen without a restart; it is persisted in
+`<data-dir>/demo_login_enabled.json`, it is on until somebody turns it off, and it
+is available only while demo data is seeded. Each account's password comes from
+`DEMO_USER_PASSWORD`, `DEMO_ESTIMATOR_PASSWORD` or `DEMO_MANAGER_PASSWORD` when you
+set them, and is otherwise generated per installation and written to
+`~/.openestimator/.demo_credentials.json` with mode 600. The startup log names that
+file and never prints a password.
 
-<table>
-<tr>
-<td align="center" width="12.5%"><b>878</b><br/><sub>stars</sub></td>
-<td align="center" width="12.5%"><b>278</b><br/><sub>forks</sub></td>
-<td align="center" width="12.5%"><b>16</b><br/><sub>watchers</sub></td>
-<td align="center" width="12.5%"><b>76</b><br/><sub>contributors</sub></td>
-<td align="center" width="12.5%"><b>291</b><br/><sub>releases</sub></td>
-<td align="center" width="12.5%"><b>18.2.0</b><br/><sub>latest&nbsp;release</sub></td>
-<td align="center" width="12.5%"><b>212</b><br/><sub>issues&nbsp;closed</sub></td>
-<td align="center" width="12.5%"><b>45,583</b><br/><sub>PyPI&nbsp;downloads</sub></td>
-</tr>
-</table>
+For a deployment anyone can reach, set those three variables to strong unique
+secrets before the first start, or start with `serve --no-demo`. Do not reuse a
+password from an example, a screenshot or an earlier version of this file.
 
-### Release downloads
+## Interface languages
 
-<sub>GitHub release assets only, does not include <code>pip install</code> from PyPI, <code>docker pull</code> from GHCR, <code>git clone</code>, or direct downloads.</sub>
+The interface is available in 44 languages, and choosing one switches the whole
+surface rather than the screen you are on. Right-to-left layouts are supported for
+the languages that need them.
 
-[![Downloads (pepy · per month)](https://static.pepy.tech/personalized-badge/openconstructionerp?period=month&units=international_system&left_color=grey&right_color=blue&left_text=downloads%20(pepy%20%C2%B7%20per%20month))](https://pepy.tech/project/openconstructionerp)
+The counts in this file are measured, not maintained by hand.
+`scripts/check_public_language_counts.py` reads every language count in this
+document and in [DEVELOPING.md](DEVELOPING.md), works out which question each one
+is asking, and checks it against the tree: 45 locale files in
+`frontend/src/app/locales/`, 44 entries in the `SUPPORTED_LANGUAGES` list in
+`frontend/src/app/i18n.ts`, and 38 distinct languages once a regional variant is
+folded into its base. The guard also fails when a count is reworded out of reach
+of its own check, so a number here cannot go stale quietly.
 
-<a href="https://github.com/datadrivenconstruction/OpenConstructionERP/releases">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="docs/readme-charts/download-history-dark.svg">
-    <source media="(prefers-color-scheme: light)" srcset="docs/readme-charts/download-history-light.svg">
-    <img alt="Original-project release downloads: 11,544 GitHub release asset downloads as of 30 September 2026, accumulated by release date" src="docs/readme-charts/download-history-light.svg" width="720">
-  </picture>
-</a>
+## Stack
 
-### Stars
+| Layer | Technology |
+| --- | --- |
+| Backend | Python 3.12+, FastAPI, Pydantic v2, SQLAlchemy |
+| Frontend | React 18, TypeScript, Vite, Tailwind CSS, AG Grid - 44 languages |
+| Database | PostgreSQL 16+; an embedded PostgreSQL starts automatically for local runs, so there is nothing to configure |
+| Vector search | LanceDB (embedded) or Qdrant |
+| CAD/BIM | [DDC Converters](https://github.com/datadrivenconstruction) for RVT, IFC and DWG |
+| i18n | i18next - 44 languages, full RTL support |
+| AI | Any LLM reachable over a REST API; bring your own key |
 
-<sub>Every current stargazer on the day they starred, one step per day, with nothing smoothed or filled in between.</sub>
+## Documentation
 
-<a href="https://github.com/datadrivenconstruction/OpenConstructionERP/stargazers">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="docs/readme-charts/star-history-dark.svg">
-    <source media="(prefers-color-scheme: light)" srcset="docs/readme-charts/star-history-light.svg">
-    <img alt="Original-project star history: 878 stars as of 30 September 2026, from 2 April 2026" src="docs/readme-charts/star-history-light.svg" width="720">
-  </picture>
-</a>
-
----
-
-## Support the Project
-
-Construction AI OS is maintained in this repository and builds on OpenConstructionERP by [DataDrivenConstruction](https://datadrivenconstruction.io). If you find it useful:
-
-- ⭐ **[Star this repo](https://github.com/abdelnabym519-cpu/Construction-AI-OS)** - helps others discover this distribution
-- <picture><source media="(prefers-color-scheme: dark)" srcset="docs/readme-icons/bug-dark.svg"><img src="docs/readme-icons/bug-light.svg" width="14" align="center" alt=""></picture> **[Report issues](https://github.com/abdelnabym519-cpu/Construction-AI-OS/issues)** - help this distribution improve
-
-## Contributors
-
-The platform this distribution builds on was shaped by the people who reported bugs, requested features, and asked the sharp questions that pushed it forward - they are credited in **[CONTRIBUTORS.md](CONTRIBUTORS.md)**. For how contributions work in THIS repository, see **[CONTRIBUTING.md](CONTRIBUTING.md)**. Want to be credited here? [Open an issue](https://github.com/abdelnabym519-cpu/Construction-AI-OS/issues).
+| Page | What it is |
+| --- | --- |
+| [docs/](docs/) | Everything that ships with the code |
+| [docs/getting-started.md](docs/getting-started.md) | First run, PATH, platform notes |
+| [docs/INSTALL_LINUX.md](docs/INSTALL_LINUX.md) | Server install with systemd and a reverse proxy |
+| [docs/architecture/README.md](docs/architecture/README.md) | Where the architecture notes start |
+| [docs/architecture/OVERVIEW.md](docs/architecture/OVERVIEW.md) | System overview, stack and module structure |
+| [docs/api/README.md](docs/api/README.md) | The HTTP surface |
+| [DEVELOPING.md](DEVELOPING.md) | Building, testing and the guard lanes |
+| [MODULES.md](MODULES.md) | The module list |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | How contributions work in this repository |
+| [CONTRIBUTORS.md](CONTRIBUTORS.md) | The people credited for the platform this distribution builds on |
 
 ## Security
 
-Report vulnerabilities privately via [GitHub Security Advisories](https://github.com/abdelnabym519-cpu/Construction-AI-OS/security/advisories/new) on this repository. See [SECURITY.md](SECURITY.md) for the full coordinated-disclosure policy and supported versions.
+Report vulnerabilities privately via
+[GitHub Security Advisories](https://github.com/abdelnabym519-cpu/Construction-AI-OS/security/advisories/new)
+on this repository. See [SECURITY.md](SECURITY.md) for the full
+coordinated-disclosure policy and supported versions.
 
 ## AI disclaimer
 
@@ -529,10 +237,6 @@ based on publicly available information. Construction AI OS is an
 independent modified distribution of the original OpenConstructionERP
 project and is not affiliated with, endorsed by, or sponsored by any
 third-party trademark owners. Full attributions in [NOTICE](NOTICE).
-
-## Development and Contribution Model
-
-We integrate all changes through one reviewed and tested development line to keep the many interconnected modules stable, secure and consistent, so the GitHub contributor list shows fewer names than the people who have shaped the project. See [CONTRIBUTING.md](CONTRIBUTING.md) for how to contribute.
 
 ## License
 
@@ -562,5 +266,3 @@ has the details.
 - [TERMS.md](docs/legal/TERMS.md) - terms of use for the hosted instance
 - [COOKIES.md](docs/legal/COOKIES.md) - browser storage inventory
 - [SECURITY.md](SECURITY.md) - responsible disclosure
-
----

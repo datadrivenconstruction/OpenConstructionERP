@@ -86,14 +86,41 @@ class Rule:
         self.floor = floor
 
 
+# Three of these floors are 0, and a floor of 0 is not a deleted rule. It says
+# "no document has to carry this shape", not "this shape is unchecked": the
+# pattern still reads the shape wherever it appears, a wrong number in it still
+# fails, and --selftest still proves the rule can read its shape at all, because
+# the fixture carries all three. Keeping a rule nothing requires is cheaper than
+# losing the check the day the shape comes back.
+#
+# They went to 0 together, in the commit that rewrote README.md as a short
+# product page. That page carries no shields badge row, no HTML honeycomb of
+# headline statistics, and no table comparing this product with proprietary ones,
+# so all three shapes left the tree at once: each had exactly one claim, and all
+# three claims were README furniture rather than a sentence a reader needs. The
+# language counts themselves did not go anywhere - the page states them in prose
+# and in its stack table, and now also states the two counts that used to live
+# only in DEVELOPING.md (locale files, and entries in the language list), so the
+# population this guard reads is six claims in README.md and four in
+# DEVELOPING.md rather than eight and four. What the lower floors give up is the
+# guarantee that a badge exists to be wrong, which is not a guarantee anyone
+# wanted; what they keep is that a badge which comes back has to be right.
 RULES = [
-    Rule("shields badge", r"/badge/languages-(\d+)-", "offered", 1),
-    Rule("headline stat cell", r"<b>(\d+)</b><br/><sub>languages</sub>", "offered", 1),
-    Rule("comparison table row", r"<b>UI languages</b>.*?<b>(\d+)</b>", "offered", 1),
+    Rule("shields badge", r"/badge/languages-(\d+)-", "offered", 0),
+    Rule("headline stat cell", r"<b>(\d+)</b><br/><sub>languages</sub>", "offered", 0),
+    Rule("comparison table row", r"<b>UI languages</b>.*?<b>(\d+)</b>", "offered", 0),
+    # Still 3, and still README.md that carries all three: one sentence in the
+    # interface-languages section and two rows of the stack table. A fourth claim
+    # would be padding and a second would leave a floor above the population, so
+    # the floor sits exactly on what the documents say and losing any one of them
+    # fails.
     Rule("prose count of languages", r"(?<![\d.,])(\d+) languages\b", "offered", 3),
     # The README stack rows stopped counting locale files and the picker in
     # c17f3cf6c (they say "44 languages" now, which the prose rule reads), so
-    # one claim of each is left, in DEVELOPING.md.
+    # one claim of each is left, in DEVELOPING.md. README.md counts them again in
+    # its interface-languages section, which is why these three rules now read
+    # two documents rather than one; the floors stay at 1 because one claim each
+    # is still the minimum that proves the rule has not lost sight of its shape.
     Rule("count of locale bundles", r"(?<![\d.,])(\d+) locale files\b", "files", 1),
     Rule(
         "offered in the picker",
