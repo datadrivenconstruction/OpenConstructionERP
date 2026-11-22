@@ -31,6 +31,7 @@ import { AiBriefBox, type AiOutcome } from './AiBriefBox';
 import { SelectionPanel } from './SelectionPanel';
 import { WorkspaceSettings } from './WorkspaceSettings';
 import { useLeaveGuard } from './useLeaveGuard';
+import { useDemoServer } from '@/shared/lib/useDemoModules';
 import { tr } from './BriefFields';
 import { getIntlLocale } from '@/shared/lib/formatters';
 
@@ -121,10 +122,13 @@ function Workspace({ projectId }: { projectId: string }) {
 
   const project = useQuery({ queryKey: ['projects', projectId], queryFn: () => projectsApi.get(projectId) });
   const rights = useQuery({ queryKey: ['design-rights', projectId], queryFn: () => fetchRights(projectId) });
+  const demoServer = useDemoServer();
   const draft = useQuery({ queryKey: ['design-draft', projectId], queryFn: () => fetchDraft(projectId) });
   const mode: 'edit' | 'view' = rights.data?.can_edit && device === 'edit' ? 'edit' : 'view';
   const viewWhy = !rights.data || mode === 'edit' ? null
-    : !rights.data.can_edit ? tr(t, rights.data.edit === 'managers' ? 'design.workspace.view_rights' : 'design.workspace.view_role')
+    // the public demo signs everyone in read-only: that, not the person's role, is why
+    : !rights.data.can_edit ? tr(t, demoServer ? 'design.workspace.view_demo'
+      : rights.data.edit === 'managers' ? 'design.workspace.view_rights' : 'design.workspace.view_role')
       : tr(t, 'design.workspace.view_device');
 
   const select = useCallback((els: SelectedElement[]) => setSelection(els), []);
@@ -282,6 +286,7 @@ function EngineMode({ projectId, header, banners, selection, onSelect, canEdit, 
   const tipModel = ed.changed === 0 && tip?.bim_model_id ? { ...tip, bim_model_id: tip.bim_model_id } : null;
   const { m } = ed;
   const doc = ed.brief.data ?? null;
+  const noDesign = ed.brief.isSuccess && doc === null && revs.isSuccess && !tip?.bim_model_id;
   const [formOpen, setFormOpen] = useState(() => readFormOpen());
   const formToggle = useRef<HTMLButtonElement>(null);
   const moveFocus = useRef(false);
@@ -346,6 +351,18 @@ function EngineMode({ projectId, header, banners, selection, onSelect, canEdit, 
         <div className="order-1 flex min-h-[60dvh] min-w-0 flex-col lg:order-none lg:min-h-0" data-testid="workspace-canvas">
           {tipModel ? (
             <TipModel projectId={projectId} revision={tipModel} onSelect={(el) => onSelect(el ? [el] : [])} />
+          ) : noDesign || ed.modelFailed ? (
+            // without a brief nothing can be built: say so instead of a preview that never starts
+            <div className="flex flex-1 flex-col items-center justify-center gap-2 p-6 text-center" data-testid="no-design">
+              <p className="text-sm text-content-secondary">
+                {tr(t, ed.modelFailed ? 'design.workspace.model_failed' : 'design.workspace.no_design')}
+              </p>
+              {noDesign && (
+                <Link className="text-sm font-medium text-oe-blue-text underline" to="/design/brief" data-testid="no-design-brief">
+                  {tr(t, 'design.workspace.write_brief')}
+                </Link>
+              )}
+            </div>
           ) : ed.preview.status === 'off' ? (
             <p className="p-3 text-sm text-content-secondary">{tr(t, 'design.workspace.no_engine')}</p>
           ) : (

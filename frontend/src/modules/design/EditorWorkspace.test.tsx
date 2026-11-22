@@ -28,7 +28,9 @@ const api = vi.hoisted(() => ({
   makeRevision: vi.fn(),
   payload: { kind: 'engine', version: 'ddc_web', assets: [{ url: 'x', bytes: 635678 }] } as unknown,
   revs: [] as unknown[],
+  demo: false,
 }));
+const BRIEF = api.brief;
 
 vi.mock('react-i18next', async () => await vi.importActual('react-i18next'));
 vi.mock('@/stores/useProjectContextStore', () => ({
@@ -68,6 +70,7 @@ vi.mock('./draftApi', () => ({
   putAiChoice: vi.fn(),
   putRights: vi.fn(),
 }));
+vi.mock('@/shared/lib/useDemoModules', () => ({ useDemoServer: () => api.demo }));
 vi.mock('@/shared/ui/BIMViewer', () => ({ BIMViewer: () => <div data-testid="viewer" /> }));
 vi.mock('@/features/bim/useModelViewerData', () => ({
   useModelViewerData: () => ({ elements: [], geometryUrl: null, isLoadingElements: false, activeModel: null }),
@@ -109,6 +112,8 @@ beforeEach(() => {
   api.rights = { edit: 'members', can_edit: true, can_accept: true };
   api.draft = null;
   api.revs = [];
+  api.brief = BRIEF;
+  api.demo = false;
   api.payload = { kind: 'engine', version: 'ddc_web', assets: [{ url: 'x', bytes: 635678 }] };
   api.saveDraft.mockReset();
   api.makeRevision.mockReset();
@@ -157,6 +162,22 @@ describe('editor workspace (generator in the module)', () => {
     await user.click(screen.getByTestId('form-close'));
     expect(screen.queryByTestId('workspace-left')).toBeNull();
     expect(document.activeElement).toBe(screen.getByTestId('form-open'));
+  });
+
+  it('no brief and no revision: says so and links to the brief, no preview that never starts', async () => {
+    api.brief = null;
+    await mount();
+    const empty = await screen.findByTestId('no-design');
+    expect(empty.textContent).toContain(EN['design.workspace.no_design']!);
+    expect(screen.getByTestId('no-design-brief').getAttribute('href')).toBe('/design/brief');
+    expect(screen.queryByText(EN['design.model.preview.building']!)).toBeNull();
+  });
+
+  it('on the read-only public demo the view-only notice names the demo, not the role', async () => {
+    api.demo = true;
+    api.rights = { edit: 'members', can_edit: false, can_accept: false };
+    await mount();
+    expect((await screen.findByTestId('view-why')).textContent).toBe(EN['design.workspace.view_demo']!);
   });
 
   it('without the edit right: look and select only, and it says why', async () => {

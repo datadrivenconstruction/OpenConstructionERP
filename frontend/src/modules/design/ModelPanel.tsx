@@ -154,7 +154,8 @@ export function useModelEditor(projectId: string) {
 
   const loading = access.isLoading || brief.isLoading || gen.isLoading;
   return { m, access, brief, view, draft, setDraft, value, set, floors, problems, unitsPerFloor, maxPerFloor, tooMany, preview, start,
-    job, active, mine, elapsed, blocked, offReason, changed, invalid, startError, showPreview, fieldHint, shown, loading };
+    job, active, mine, elapsed, blocked, offReason, changed, invalid, startError, showPreview, fieldHint, shown, loading,
+    modelFailed: model.isError };
 }
 
 export type ModelEditor = ReturnType<typeof useModelEditor>;
