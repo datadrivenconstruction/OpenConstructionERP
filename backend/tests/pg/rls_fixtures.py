@@ -26,14 +26,20 @@ and named so they cannot collide with a model.
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from dataclasses import dataclass
 from types import SimpleNamespace
 from typing import TYPE_CHECKING, Any
 
 from sqlalchemy import text
 
-from app.core.rls import APP_ROLE, GUC_NAME, SYSTEM_ROLE
-from app.core.rls_setup import _POLICY_NAME, _role_setup_statements, policy_is_strict
+from app.core.rls import APP_ROLE, GRANTED_GUC_NAME, GUC_NAME, SYSTEM_ROLE
+from app.core.rls_setup import (
+    _GRANT_POLICY_NAME,
+    _POLICY_NAME,
+    _role_setup_statements,
+    policy_is_strict,
+)
 
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncConnection, AsyncEngine
@@ -46,6 +52,19 @@ PROBE_SECOND = "oe_rls_probe_second_row"
 #: Probe stand-in for ``oe_users_user``, so a tenant value can be recognised as
 #: a user id without writing to the application's real user table.
 PROBE_USERS = "oe_rls_probe_users"
+#: Project-scoped probe tables: a ``tenant_id`` *and* a ``project_id``, which is
+#: the shape a participant grant can widen (ADR 006). Two of them, for the same
+#: reason there are two tenant probes - a policy decision has to be shown to
+#: apply per table rather than once for the database.
+PROBE_PROJECT = "oe_rls_probe_project_row"
+PROBE_PROJECT_SECOND = "oe_rls_probe_project_second_row"
+
+#: Project identifiers, and deliberately not UUID-shaped for the same reason the
+#: tenant identifiers are not: a value that reads as a project rather than as a
+#: person keeps the two confusions ADR 005 and ADR 006 each exist to prevent
+#: from being reproduced inside the test that guards them.
+PROJECT_ALPHA = "project-alpha-probe"
+PROJECT_BETA = "project-beta-probe"
 
 #: Tenant identifiers. Deliberately not UUID-shaped: the readiness report treats
 #: a tenant value that matches a row in the users table as the ``tenant_is_user``
@@ -95,6 +114,27 @@ def probe_base(*names: str) -> SimpleNamespace:
     return SimpleNamespace(metadata=SimpleNamespace(sorted_tables=tables, tables={t.name: t for t in tables}))
 
 
+class _ProjectProbeTable(_ProbeTable):
+    """A probe table that :func:`app.core.rls_setup.both_column_tables` accepts.
+
+    That function asks for ``tenant_id`` and ``project_id`` in ``table.columns``,
+    so the stand-in carries both. Inheriting the tenant probe's shape rather than
+    writing a second one keeps the two arms of the predicate being tested against
+    the same kind of table, which is the point: the grant arm is an addition to
+    the tenant arm and not a different mechanism.
+    """
+
+    def __init__(self, name: str) -> None:
+        super().__init__(name)
+        self.columns = {**self.columns, "project_id": None}
+
+
+def project_probe_base(*names: str) -> SimpleNamespace:
+    """A fake declarative ``Base`` carrying probe tables with both columns."""
+    tables = [_ProjectProbeTable(name) for name in names]
+    return SimpleNamespace(metadata=SimpleNamespace(sorted_tables=tables, tables={t.name: t for t in tables}))
+
+
 async def ensure_roles(conn: AsyncConnection) -> None:
     """Create and grant the RLS roles exactly as provisioning does.
 
@@ -119,6 +159,39 @@ async def create_probe_tables(conn: AsyncConnection, *names: str) -> None:
             text(f'CREATE TABLE IF NOT EXISTS "{name}" (id varchar(64) PRIMARY KEY, tenant_id varchar(36), label text)')
         )
         await conn.execute(text(f'GRANT SELECT, INSERT, UPDATE, DELETE ON "{name}" TO "{APP_ROLE}", "{SYSTEM_ROLE}"'))
+
+
+async def create_project_probe_tables(conn: AsyncConnection, *names: str) -> None:
+    """Create committed project-scoped probe tables the restricted role can reach.
+
+    Same reasoning as :func:`create_probe_tables`, with a ``project_id`` beside
+    the ``tenant_id`` and an index on each: the grant arm matches a project id
+    against a list, and a table with no index on either column would measure a
+    sequential scan rather than the plan a real project-scoped table gets.
+    """
+    for name in names:
+        await conn.execute(
+            text(
+                f'CREATE TABLE IF NOT EXISTS "{name}" ('
+                "id varchar(64) PRIMARY KEY, tenant_id varchar(36), project_id varchar(36), label text)"
+            )
+        )
+        await conn.execute(text(f'CREATE INDEX IF NOT EXISTS "{name}_tenant_ix" ON "{name}" (tenant_id)'))
+        await conn.execute(text(f'CREATE INDEX IF NOT EXISTS "{name}_project_ix" ON "{name}" (project_id)'))
+        await conn.execute(text(f'GRANT SELECT, INSERT, UPDATE, DELETE ON "{name}" TO "{APP_ROLE}", "{SYSTEM_ROLE}"'))
+
+
+async def seed_project(conn: AsyncConnection, table: str, rows: tuple[str, str | None, str | None, str]) -> None:
+    """Insert one project-scoped row, ``rows`` being ``(id, tenant_id, project_id, label)``."""
+    row_id, tenant_id, project_id, label = rows
+    await conn.execute(
+        text(
+            f'INSERT INTO "{table}" (id, tenant_id, project_id, label) VALUES (:i, :t, :p, :l) '
+            "ON CONFLICT (id) DO UPDATE SET tenant_id = EXCLUDED.tenant_id, "
+            "project_id = EXCLUDED.project_id, label = EXCLUDED.label"
+        ),
+        {"i": row_id, "t": tenant_id, "p": project_id, "l": label},
+    )
 
 
 async def create_probe_users(conn: AsyncConnection, *user_ids: str) -> None:
@@ -161,6 +234,7 @@ async def as_app_role(
     fetch: bool = False,
     commit: bool = False,
     role: str = APP_ROLE,
+    granted_projects: Sequence[str] | None = None,
 ) -> RoleOutcome:
     """Run one statement as the restricted role, with ``tenant`` bound.
 
@@ -171,6 +245,14 @@ async def as_app_role(
     ``role`` defaults to the request role; pass :data:`app.core.rls.SYSTEM_ROLE`
     to observe the ``BYPASSRLS`` role the platform reserves for trusted system
     work, which is the difference between "policied" and "deliberately not".
+
+    ``granted_projects`` binds the second GUC, ``app.granted_projects``, beside
+    the tenant, which is what the grant arm of the predicate reads (ADR 006).
+    Left as ``None`` the second GUC is not set at all, so a caller that does not
+    care about grants observes exactly what it observed before the arm existed -
+    including the fail-closed answer, because an unset GUC and an empty one match
+    the same nothing. Pass ``()`` to bind an empty list on purpose, which is what
+    a caller whose company holds no live grant gets.
 
     By default the transaction is rolled back, which is right for a visibility
     question. A write test passes ``commit=True`` instead, so what it asserts
@@ -184,6 +266,11 @@ async def as_app_role(
             text("SELECT set_config(:key, :value, true)"),
             {"key": GUC_NAME, "value": "" if tenant is None else tenant},
         )
+        if granted_projects is not None:
+            await conn.execute(
+                text("SELECT set_config(:key, :value, true)"),
+                {"key": GRANTED_GUC_NAME, "value": ",".join(granted_projects)},
+            )
         identity = (
             await conn.execute(
                 text("SELECT current_user, session_user, (SELECT rolsuper FROM pg_roles WHERE rolname = current_user)")
@@ -220,6 +307,38 @@ async def admin_rows(engine: AsyncEngine, sql: str, params: dict[str, Any] | Non
     async with engine.connect() as conn:
         result = await conn.execute(text(sql), params or {})
         return [tuple(r) for r in result.fetchall()]
+
+
+async def installed_grant_policy(conn: AsyncConnection, table: str) -> dict[str, Any]:
+    """The grant arm's deparsed predicate, its command, and the table's RLS flags.
+
+    Read separately from :func:`installed_policy` because the two policies are
+    separate objects in the catalog and the interesting fact about this one is
+    that it is ``FOR SELECT``: permissive ``WITH CHECK`` expressions are OR'd as
+    well as ``USING`` ones, so a grant arm on writes would let a grantee insert a
+    row carrying the owner's tenant into a project it was only invited to read.
+    """
+    row = (
+        await conn.execute(
+            text(
+                "SELECT c.relrowsecurity, c.relforcerowsecurity, p.qual, p.cmd "
+                "FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace "
+                "LEFT JOIN pg_policies p ON p.schemaname = 'public' AND p.tablename = c.relname "
+                "AND p.policyname = :p "
+                "WHERE n.nspname = 'public' AND c.relname = :t"
+            ),
+            {"t": table, "p": _GRANT_POLICY_NAME},
+        )
+    ).one()
+    qual = row[2]
+    return {
+        "rls_enabled": bool(row[0]),
+        "forced": bool(row[1]),
+        "qual": qual,
+        "cmd": row[3],
+        "installed": qual is not None,
+        "policy_name": _GRANT_POLICY_NAME,
+    }
 
 
 async def installed_policy(conn: AsyncConnection, table: str) -> dict[str, Any]:

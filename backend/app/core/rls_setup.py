@@ -37,7 +37,7 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncConnection, AsyncEngine
 
 from app.config import get_settings
-from app.core.rls import APP_ROLE, GUC_NAME, SYSTEM_ROLE, rls_enabled
+from app.core.rls import APP_ROLE, GRANTED_GUC_NAME, GUC_NAME, SYSTEM_ROLE, rls_enabled
 
 logger = logging.getLogger(__name__)
 
@@ -58,6 +58,20 @@ _POLICY_NAME = "oe_tenant_isolation"
 
 # The tenant-scoping column. Only tables that declare it are policied.
 _TENANT_COLUMN = "tenant_id"
+
+# The project-scoping column. A table carrying both is one a grant can widen,
+# because the grant arm has a project to match against; a table with a tenant and
+# no project has nothing a grant could name.
+_PROJECT_COLUMN = "project_id"
+
+# Name of the second policy, the grant arm (ADR 006). A different name from
+# ``_POLICY_NAME`` and not a replacement for it: permissive policies on one table
+# are OR'd, so installing a second one *adds* an arm to the predicate instead of
+# rewriting the arm that is already there. The tenant policy this file has always
+# installed keeps its name, its predicate and its ``IS NULL`` discriminator, which
+# is what lets :func:`policy_is_strict` keep reading a mode off a deparsed qual
+# without learning a third shape.
+_GRANT_POLICY_NAME = "oe_project_grant_read"
 
 # Global reference data that must never be tenant-filtered even if it somehow
 # grew a ``tenant_id`` column - filtering it would break every tenant. These
@@ -138,6 +152,78 @@ def strict_predicate() -> str:
     hide live business data from its own owners.
     """
     return f"({_TENANT_COLUMN}::text = current_setting('{GUC_NAME}', true))"
+
+
+def grant_read_predicate() -> str:
+    """The grant arm: rows of a project the caller's company was invited to.
+
+    Reads the second GUC, which the ``after_begin`` listener in
+    :mod:`app.core.rls` stamps beside ``app.current_tenant`` with the ids of the
+    projects the caller's organization holds a live grant on. ``string_to_array``
+    over an empty setting yields one empty element rather than an empty array, and
+    an empty element matches no ``project_id``, so a caller with no grants reaches
+    nothing through this arm - it fails closed the same way the tenant arm does
+    for an anonymous caller.
+
+    Cast to text for the reason :func:`permissive_predicate` casts: a native-uuid
+    column compared against ``current_setting`` raises "operator does not exist"
+    and 500s every read, and the cast keeps the predicate correct for any column
+    type.
+
+    ``ANY`` over an array rather than a correlated ``EXISTS`` against the grant
+    table, which the ADR rejected and the million-row measurement beside this
+    module is what settles: the array is built once per request and the planner
+    turns the predicate into a hash semi-join against a value it already has,
+    while ``EXISTS`` re-plans a lookup per candidate row.
+    """
+    return f"({_PROJECT_COLUMN}::text = ANY (string_to_array(current_setting('{GRANTED_GUC_NAME}', true), ',')))"
+
+
+def both_column_tables(base) -> list[str]:  # noqa: ANN001 - declarative Base
+    """Tables a grant can widen: a ``tenant_id`` and a ``project_id``.
+
+    Intersected with :func:`tenant_tables` rather than recomputed, so the two
+    lists can never disagree about which tables carry a tenant, and the defensive
+    deny-set applies to both arms.
+    """
+    names: list[str] = []
+    for table in base.metadata.sorted_tables:
+        if table.name in _NEVER_POLICY:
+            continue
+        if _TENANT_COLUMN in table.columns and _PROJECT_COLUMN in table.columns:
+            names.append(table.name)
+    return names
+
+
+def _grant_policy_statements(table_name: str) -> list[str]:
+    """Idempotent DDL that installs the grant arm on one both-column table.
+
+    ``FOR SELECT`` and not ``FOR ALL``, which is the whole of the write story:
+    permissive ``WITH CHECK`` expressions are OR'd too, so a grant arm on writes
+    would let a grantee insert a row carrying the *owner's* ``tenant_id`` into a
+    project it was merely invited to. Restricting this policy to reads leaves
+    inserts, updates and deletes governed by the tenant policy alone, so a
+    grantee writes rows carrying its own tenant and those rows stay its own
+    afterwards - owner decision 3, enforced by the database rather than by
+    every call site remembering it.
+
+    No ``ENABLE``/``FORCE`` here: the tenant policy already ran both on this
+    table, and running them again would be a second statement whose only effect
+    is to make the provisioning log harder to read.
+    """
+    quoted = f'"{table_name}"'
+    return [
+        f"""DO $$ BEGIN
+              IF NOT EXISTS (
+                SELECT 1 FROM pg_policies
+                WHERE schemaname = 'public' AND tablename = '{table_name}' AND policyname = '{_GRANT_POLICY_NAME}'
+              ) THEN
+                CREATE POLICY "{_GRANT_POLICY_NAME}" ON {quoted}
+                  FOR SELECT
+                  USING {grant_read_predicate()};
+              END IF;
+            END $$;""",
+    ]
 
 
 def policy_is_strict(qual: str | None) -> bool | None:
@@ -279,7 +365,13 @@ def strict_readiness_verdict(report: dict[str, object]) -> tuple[bool, list[str]
     return False, codes or ["readiness_unknown"]
 
 
-async def apply_rls(conn: AsyncConnection, base, *, strict: bool = False) -> dict[str, int]:  # noqa: ANN001 - Base
+async def apply_rls(  # noqa: ANN001 - Base
+    conn: AsyncConnection,
+    base,
+    *,
+    strict: bool = False,
+    grants: bool = False,
+) -> dict[str, int]:
     """Provision RLS roles + per-table policies. No-op unless the flag is on.
 
     Called from :func:`app.core.postgres_migrator.postgres_auto_migrate` inside
@@ -339,18 +431,68 @@ async def apply_rls(conn: AsyncConnection, base, *, strict: bool = False) -> dic
         if applied:
             tables_done += 1
 
+    granted = await _apply_grant_policies(conn, base, grants=grants)
+
     logger.info(
-        "RLS enforcement provisioned: %d role statements, %d/%d tenant tables policied, mode=%s, %d policy(ies) replaced",
+        "RLS enforcement provisioned: %d role statements, %d/%d tenant tables policied, mode=%s, "
+        "%d policy(ies) replaced, %d grant arm(s)",
         roles_applied,
         tables_done,
         len(tables),
         "strict" if effective_strict else "permissive",
         replaced,
+        granted,
     )
     stats: dict[str, int] = {"roles": roles_applied, "tables": tables_done, "policies_replaced": replaced}
     if refused:
         stats["strict_refused"] = len(refused)
+    stats["grant_tables"] = granted
     return stats
+
+
+async def _apply_grant_policies(conn: AsyncConnection, base, *, grants: bool) -> int:  # noqa: ANN001 - Base
+    """Install the grant arm where it is wanted and remove it where it is not.
+
+    Removal is the half that matters. ``CREATE POLICY`` here is guarded on
+    ``pg_policies`` and so never replaces an installed policy, which means a grant
+    arm would otherwise survive an operator turning ``OE_PROJECT_GRANTS`` back off
+    and keep widening reads after the rollback - the same trap the strict-mode
+    transition is written to avoid. Turning the flag off is therefore a real
+    rollback: every grant policy is dropped, and the tenant policy that was never
+    touched is still there to answer on its own.
+
+    Returns the number of both-column tables left holding the grant arm, which is
+    zero when the flag is off.
+    """
+    wide = both_column_tables(base)
+    if not grants:
+        for name in wide:
+            await _run_best_effort(
+                conn,
+                [f'DROP POLICY IF EXISTS "{_GRANT_POLICY_NAME}" ON "{name}"'],
+                what=f"grant-policy-rollback {name}",
+            )
+        return 0
+    armed = 0
+    for name in wide:
+        if await _run_best_effort(conn, _grant_policy_statements(name), what=f"grant-policy {name}"):
+            armed += 1
+    return armed
+
+
+def grants_requested() -> bool:
+    """Return True when the operator asked for cross-organization participation.
+
+    A separate reader for the same reason :func:`strict_requested` is one: a test
+    monkeypatches this exactly as it monkeypatches the enforcement flag, and the
+    two flags resolve the same way. Unlike strict, this is not a sub-mode of
+    ``rls_enforce`` - the application-layer arm is live with row-level security
+    off, which is the state every install is in today - but
+    :func:`apply_rls` still returns before consulting it when enforcement is off,
+    because with no policies installed there is nothing for a second policy to
+    widen.
+    """
+    return bool(get_settings().project_grants_enforce)
 
 
 def strict_requested() -> bool:
@@ -401,7 +543,7 @@ async def provision_rls(engine: AsyncEngine, base) -> dict[str, int]:  # noqa: A
         # Never stall live traffic: cap how long any policy/grant DDL waits for
         # its lock. A busy table simply defers to the next boot.
         await conn.execute(text("SET LOCAL lock_timeout = '3s'"))
-        return await apply_rls(conn, base, strict=strict_requested())
+        return await apply_rls(conn, base, strict=strict_requested(), grants=grants_requested())
 
 
 async def _take_rls_lock(conn: AsyncConnection) -> bool:

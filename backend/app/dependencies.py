@@ -951,6 +951,23 @@ async def verify_project_access(
     except Exception:
         logger.exception("Admin-role lookup failed during project access check")
 
+    # The company layer (ADR 006), checked before the person layer and only while
+    # ``OE_PROJECT_GRANTS`` is on. It is deliberately NOT an admin bypass of the
+    # kind above: reading another company's project is what a platform
+    # administrator is for, while deciding that another company participates is
+    # not, which is why ``app.modules.projects.grants`` has no bypass at all.
+    #
+    # Answering before the owner and membership checks is what makes the two
+    # layers an AND rather than an OR. A team membership alone stops opening a
+    # project whose company never invited the caller's company in - the hole the
+    # ``project_frameworks`` union widened into a leak - and a grant alone opens
+    # nothing, because the person still has to be on the team.
+    if not _company_layer_allows(project):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Project not found",
+        )
+
     # Owner has full access.
     if str(getattr(project, "owner_id", "")) == str(user_id):
         return
@@ -969,6 +986,35 @@ async def verify_project_access(
     raise HTTPException(
         status_code=status.HTTP_404_NOT_FOUND,
         detail="Project not found",
+    )
+
+
+def _company_layer_allows(project: object) -> bool:
+    """Whether the caller's company may reach ``project`` at all (ADR 006).
+
+    ``True`` whenever the flag is off, so every project-scoped read on a default
+    install behaves byte-for-byte as it did before the grant table existed. With
+    the flag on it reads the two values the request already resolved - the
+    caller's organization from the ``tenant_id`` claim, and the projects their
+    company holds a live grant on from the GUC binding - and asks
+    :func:`app.modules.projects.grants.company_may_read_project`, which is pure
+    and issues no query.
+
+    Read from the request context rather than passed in, because this guard has
+    more call sites than any other in the codebase and its signature is what they
+    all agree on. A context that bound nothing - a background job, a test with a
+    bare session - answers with an empty grant list, so the ownership arm still
+    works and the grant arm fails closed.
+    """
+    from app.core import rls
+    from app.modules.projects.grants import company_may_read_project
+
+    if not rls.grants_enabled():
+        return True
+    return company_may_read_project(
+        project,
+        caller_organization_id=rls.current_request_tenant(),
+        granted_project_ids=rls.current_request_granted_projects() or (),
     )
 
 
@@ -1027,7 +1073,28 @@ async def accessible_project_ids(
     except Exception:
         logger.exception("Admin-role lookup failed during accessible-projects scan")
 
-    stmt = select(Project.id).where((Project.owner_id == uid) | (Project.id.in_(member_project_ids_subquery(uid))))
+    # The same two layers as ``verify_project_access``, expressed as one statement
+    # so a listing and the project it opens can never disagree: the person arm
+    # (owner or team member) OR'd with the projects the caller's company was
+    # invited to, then AND'd with the company arm. Without the second half a list
+    # would offer a project that opens as "Project not found", which is the
+    # mismatch ``live_only`` exists to prevent.
+    from app.core import rls
+    from app.modules.projects.grants import live_granted_project_ids
+
+    grants_on = rls.grants_enabled()
+    caller_organization = rls.current_request_tenant() if grants_on else None
+    granted = await live_granted_project_ids(session, caller_organization) if grants_on else []
+
+    person_arm = (Project.owner_id == uid) | (Project.id.in_(member_project_ids_subquery(uid)))
+    if granted:
+        person_arm = person_arm | Project.id.in_(granted)
+    stmt = select(Project.id).where(person_arm)
+    if grants_on:
+        company_arm = Project.organization_id.is_(None) | Project.id.in_(granted or [""])
+        if caller_organization is not None:
+            company_arm = company_arm | (Project.organization_id == caller_organization)
+        stmt = stmt.where(company_arm)
     if live_only:
         stmt = stmt.where(Project.status != "archived")
     rows = (await session.execute(stmt)).scalars().all()
@@ -1264,6 +1331,61 @@ AuditContextDep = Annotated[None, Depends(audit_context_dep)]
 
 
 # ── Row-level-security request context ──────────────────────────────────────
+
+
+async def granted_projects_context(
+    tenant_id: CurrentTenantId = None,
+) -> AsyncGenerator[None, None]:
+    """Bind the projects the caller's company holds a live grant on (ADR 006).
+
+    Mounted as a global dependency immediately after
+    :func:`rls_request_context`, so the second GUC is bound before any handler
+    runs and the ``after_begin`` listener in :mod:`app.core.rls` can stamp it
+    beside ``app.current_tenant`` when the first transaction of the request opens.
+    Bound here rather than in the listener because the listener is synchronous and
+    the answer is a query.
+
+    One query per request while ``OE_PROJECT_GRANTS`` is on, and none at all while
+    it is off - the flag is read first and an off install binds an empty tuple
+    without touching the database, which is what keeps the default path free.
+    The session is a short one of its own rather than the request's, because this
+    dependency runs before the handler and must not begin the request's
+    transaction as a side effect of asking a question.
+
+    A caller with no organization binds an empty tuple and not "unset": unset
+    would leave whatever an earlier task on this worker bound in place, and a
+    request that inherited somebody else's grants is the one failure this whole
+    design cannot tolerate.
+    """
+    from app.core import rls
+
+    if not rls.grants_enabled() or tenant_id is None:
+        token = rls.set_request_granted_projects(())
+        try:
+            yield
+        finally:
+            rls.reset_request_granted_projects(token)
+        return
+
+    from app.database import async_session_factory
+    from app.modules.projects.grants import live_granted_project_ids
+
+    try:
+        async with async_session_factory() as session:
+            granted = await live_granted_project_ids(session, tenant_id)
+    except Exception:
+        # Fail closed rather than fail open. An unreadable grant table means this
+        # caller's company reaches nothing through the grant arm; the ownership arm
+        # is untouched, so a company still sees its own projects while the failure
+        # is logged and investigated.
+        logger.exception("Granted-project lookup failed; binding an empty grant arm")
+        granted = []
+
+    token = rls.set_request_granted_projects(granted)
+    try:
+        yield
+    finally:
+        rls.reset_request_granted_projects(token)
 
 
 async def rls_request_context(

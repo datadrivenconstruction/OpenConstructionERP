@@ -106,7 +106,7 @@ from app.core.self_upgrade import (
     runtime_upgrade_enabled,
     runtime_upgrade_refusal,
 )
-from app.dependencies import RequireRole, get_current_user_id, rls_request_context
+from app.dependencies import RequireRole, get_current_user_id, granted_projects_context, rls_request_context
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -2045,7 +2045,14 @@ def create_app() -> FastAPI:
         # a refused request must not pay for token decoding or a tenant lookup,
         # and an anonymous caller must get the 403 rather than a 401. Inert
         # unless OE_DEMO_READ_ONLY is on - see app.core.demo_read_only.
-        dependencies=[Depends(demo_read_only_guard), Depends(rls_request_context)],
+        # ``granted_projects_context`` runs after ``rls_request_context`` on
+        # purpose: it binds the projects the caller's company was invited to
+        # (ADR 006), and it needs the tenant that dependency just resolved.
+        dependencies=[
+            Depends(demo_read_only_guard),
+            Depends(rls_request_context),
+            Depends(granted_projects_context),
+        ],
         # NOTE: do NOT set default_response_class=ORJSONResponse here.
         # FastAPI's own deprecation warning explains why: "FastAPI now
         # serializes data directly to JSON bytes via Pydantic when a

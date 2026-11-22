@@ -583,6 +583,39 @@ class Settings(BaseSettings):
     # only ever creates. Env: ``OE_RLS_STRICT``.
     rls_strict: bool = False
 
+    # Cross-organization project participation (ADR 006). When True a project is
+    # readable by the companies it was granted to as well as by the company that
+    # owns it, at both layers:
+    #
+    # * the application layer, where ``verify_project_access`` and
+    #   ``accessible_project_ids`` gain a company arm - the caller's organization
+    #   has to own the project or hold a live grant on it - which is checked
+    #   *before* the person arm, so a grant and a team membership are both
+    #   needed and neither one alone opens a project;
+    # * the database layer, where a second permissive ``FOR SELECT`` policy is
+    #   provisioned on every table carrying both ``tenant_id`` and ``project_id``.
+    #   Permissive policies are OR'd, so the two-arm predicate emerges from the
+    #   policy that is already installed plus this one, and the existing tenant
+    #   policy is left byte-identical - including for writes, which stay on the
+    #   tenant arm alone so a grantee writes rows carrying its own tenant and
+    #   never the owner's.
+    #
+    # The second GUC, ``app.granted_projects``, is computed once per request from
+    # the live grants of the caller's organization and set by the same listener
+    # that sets ``app.current_tenant``. Both arms fail closed: an empty list
+    # matches no project, and a caller naming no organization reaches neither arm.
+    #
+    # Default False, and the flag is not a sub-mode of ``rls_enforce``: the
+    # application arm is live with row-level security off, which is the state
+    # every install is in today, while the database arm only has an effect once
+    # policies exist. With the flag off nothing is provisioned, no extra query is
+    # issued and the emitted SQL is byte-identical, so turning participation on
+    # is an explicit, reversible operator decision. ADR 006 makes grants a
+    # precondition for ``rls_strict`` rather than a consequence of it: a strict
+    # predicate with no grant arm would hide a partner company's rows from the
+    # project they were invited to. Env: ``OE_PROJECT_GRANTS``.
+    project_grants_enforce: bool = False
+
     # ── Public read-only demo ────────────────────────────────────────────
     # When True, the deployment refuses every request that would change
     # persistent state and answers 403 with ``{"error": "demo_read_only",

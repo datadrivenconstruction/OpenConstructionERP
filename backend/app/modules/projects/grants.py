@@ -56,7 +56,7 @@ from datetime import UTC, datetime
 from typing import Any
 
 from fastapi import HTTPException, status
-from sqlalchemy import select
+from sqlalchemy import or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.audit_log import log_activity
@@ -573,6 +573,93 @@ async def suspend_grants_on_ownership_change(
     return grants
 
 
+# ── the read arm ────────────────────────────────────────────────────────────
+#
+# Everything above decides who may *change* participation. What follows is what a
+# grant is for: the company layer of the two-layer answer to "may this caller
+# reach this project". It is the same rule in two places on purpose - a Python
+# helper for the application layer, which resolves a project by id and has to
+# answer 404 rather than leak existence, and a SQL predicate for the database
+# layer, which is ``app.core.rls_setup.grant_read_predicate`` and answers over
+# rows the application never enumerated. The two read the same columns with the
+# same conditions, and ``tests/pg/test_a_grant_opens_exactly_the_project_it_names.py``
+# is what fails if they drift.
+
+
+async def live_granted_project_ids(session: AsyncSession, organization_id: str | uuid.UUID | None) -> list[str]:
+    """The projects this organization holds a grant on right now, oldest first.
+
+    Computed once per request by :func:`app.dependencies.granted_projects_context`
+    and bound to the ``app.granted_projects`` GUC beside the tenant, so the
+    database arm of the predicate reads a value that was resolved once rather than
+    a subquery re-planned per row.
+
+    "Right now" is the model's :attr:`ProjectParticipantGrant.is_live` expressed
+    in SQL: ``status == 'active'`` and inside the window, with both ends optional.
+    The two have to agree because one decides what the application layer allows
+    and the other decides what the database returns, and a caller who is refused
+    by one and served by the other has found a hole. Revoked, suspended and
+    expired grants are absent from the result, which is how a withdrawal closes
+    access without touching a single row the grantee wrote.
+
+    An organization that holds nothing gets an empty list, and an empty list is
+    not the same as no answer: the GUC is stamped empty and the grant arm matches
+    no project, which is the fail-closed direction.
+    """
+    if organization_id is None:
+        return []
+    now = datetime.now(UTC)
+    stmt = (
+        select(ProjectParticipantGrant.project_id)
+        .where(
+            ProjectParticipantGrant.grantee_organization_id == organization_id,
+            ProjectParticipantGrant.status == "active",
+            or_(ProjectParticipantGrant.valid_from.is_(None), ProjectParticipantGrant.valid_from <= now),
+            or_(ProjectParticipantGrant.valid_until.is_(None), ProjectParticipantGrant.valid_until > now),
+        )
+        .order_by(ProjectParticipantGrant.created_at, ProjectParticipantGrant.id)
+    )
+    return [str(row) for row in (await session.execute(stmt)).scalars().all()]
+
+
+def company_may_read_project(
+    project: Project,
+    *,
+    caller_organization_id: str | None,
+    granted_project_ids: Sequence[str],
+) -> bool:
+    """Whether the caller's company owns this project or was invited into it.
+
+    Pure: no session and no query, because the two inputs it needs are already
+    resolved per request - the caller's organization from the token's ``tenant_id``
+    claim, and the granted project ids from :func:`live_granted_project_ids`. That
+    is what makes it cheap enough to sit in front of every project-scoped read.
+
+    Three answers deserve their own line:
+
+    * A project with no owning organization passes. There is no company layer to
+      fail, and refusing would hide every project the boot backfill has not
+      resolved yet from the people working on them - a stricter rule than ADR 006
+      asks for, applied at the moment an install is least able to absorb it. The
+      readiness report's ``tenant_is_null`` blocker is where those projects stay
+      visible.
+    * A caller naming no organization is refused. A credential that says which
+      person it is but not which company cannot satisfy a company check, and
+      guessing one from the person is precisely the confusion ADR 005 removed.
+    * Ownership is compared as text, because ``Project.organization_id`` is a
+      ``GUID`` - a varchar(36) today - and the claim is a string. Comparing a
+      ``UUID`` to a ``str`` would silently answer False for an owner.
+    """
+    owning = getattr(project, "organization_id", None)
+    if owning is None:
+        return True
+    if caller_organization_id is None:
+        return False
+    if str(owning) == caller_organization_id:
+        return True
+    return str(project.id) in {str(identifier) for identifier in granted_project_ids}
+
+
 # ── internals ───────────────────────────────────────────────────────────────
 
 
@@ -726,7 +813,9 @@ __all__ = [
     "GRANT_STATUSES",
     "GrantAuthority",
     "change_scope",
+    "company_may_read_project",
     "create_grant",
+    "live_granted_project_ids",
     "list_grants",
     "resolve_grant_authority",
     "revoke_grant",

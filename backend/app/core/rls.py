@@ -36,6 +36,7 @@ from __future__ import annotations
 
 import contextlib
 import logging
+from collections.abc import Sequence
 from contextvars import ContextVar, Token
 from typing import Any, Final
 
@@ -68,6 +69,13 @@ _UNSET: Final = object()
 # Per-request tenant, bound at request entry and read when a transaction begins.
 _request_tenant: ContextVar[Any] = ContextVar("rls_request_tenant", default=_UNSET)
 
+# Per-request list of project ids the caller's organization holds a live grant on
+# (ADR 006). Bound beside the tenant by the same dependency and read by the same
+# listener, so the two GUCs a two-arm policy needs are set together and never one
+# without the other. A tuple of ids rather than a joined string: the listener does
+# the joining, so no caller can bind a value that already contains the separator.
+_request_granted_projects: ContextVar[Any] = ContextVar("rls_request_granted_projects", default=_UNSET)
+
 # Guards one-time listener registration so a re-import (or a test that rebuilds
 # the engine) does not stack duplicate listeners on the same Session class.
 _installed: set[int] = set()
@@ -84,6 +92,46 @@ def rls_enabled() -> bool:
     return bool(get_settings().rls_enforce)
 
 
+#: The GUC that carries the projects the caller's company was invited to. Set by
+#: the same listener that sets :data:`GUC_NAME`, and read by the second policy
+#: provisioned on tables carrying both ``tenant_id`` and ``project_id``.
+GRANTED_GUC_NAME: Final[str] = "app.granted_projects"
+
+
+def grants_enabled() -> bool:
+    """Return True when cross-organization project participation is switched on.
+
+    Reads the cached settings singleton beside :func:`rls_enabled`, and a settings
+    failure propagates for the same reason: this flag decides whether a second GUC
+    is stamped and whether a second policy is provisioned, so answering "off"
+    because the settings could not be read would silently narrow what a caller
+    whose company was invited in is allowed to see.
+    """
+    return bool(get_settings().project_grants_enforce)
+
+
+def set_request_granted_projects(project_ids: Sequence[str] | None) -> Token[Any]:
+    """Bind the projects the caller's company holds a live grant on.
+
+    ``None`` and ``()`` both stamp an empty GUC, which the grant arm matches
+    nothing against: a caller with no grants sees only their own company's rows,
+    which is the one of the two answers that is safe to be wrong about.
+    """
+    return _request_granted_projects.set(tuple(project_ids or ()))
+
+
+def current_request_granted_projects() -> tuple[str, ...] | None:
+    """The projects bound to this context, or None when nothing bound them."""
+    value = _request_granted_projects.get()
+    return None if value is _UNSET else tuple(value)
+
+
+def reset_request_granted_projects(token: Token[Any]) -> None:
+    """Undo a :func:`set_request_granted_projects`, tolerating a stale token."""
+    with contextlib.suppress(ValueError, LookupError):
+        _request_granted_projects.reset(token)
+
+
 def set_request_tenant(tenant_id: str | None) -> Token[Any]:
     """Bind ``tenant_id`` (or ``None`` for anonymous) to the current context.
 
@@ -96,7 +144,7 @@ def set_request_tenant(tenant_id: str | None) -> Token[Any]:
 
 
 @contextlib.asynccontextmanager
-async def bound_tenant(tenant_id: str | None) -> Any:
+async def bound_tenant(tenant_id: str | None, granted_projects: Sequence[str] | None = None) -> Any:
     """Bind a tenant around work that has no request to inherit one from.
 
     The request path binds through :func:`app.dependencies.rls_request_context`,
@@ -118,10 +166,15 @@ async def bound_tenant(tenant_id: str | None) -> Any:
     listener ignores the value, so this costs a ContextVar and changes nothing on a
     default install.
     """
+    # Both are bound even when ``granted_projects`` is not passed, so a background
+    # path that binds a tenant cannot leave a grant list behind that the next task
+    # on this worker would inherit and read projects nobody granted it.
     token = set_request_tenant(tenant_id)
+    granted_token = set_request_granted_projects(granted_projects)
     try:
         yield tenant_id
     finally:
+        reset_request_granted_projects(granted_token)
         reset_request_tenant(token)
 
 
@@ -166,6 +219,22 @@ def install(session_class: type[Session]) -> None:
         connection.execute(
             text("SELECT set_config(:name, :val, true)"),
             {"name": GUC_NAME, "val": value or ""},
+        )
+        if not grants_enabled():
+            # Off means the second statement is not issued at all, so a default
+            # install pays one round trip per transaction exactly as it did before
+            # the grant arm existed.
+            return
+        granted = _request_granted_projects.get()
+        connection.execute(
+            text("SELECT set_config(:name, :val, true)"),
+            {
+                "name": GRANTED_GUC_NAME,
+                # Unset is stamped empty rather than left alone: a transaction that
+                # inherited a list bound by earlier work on the same task would read
+                # projects nobody granted it. Fail closed, same as the tenant arm.
+                "val": ",".join(granted) if granted is not _UNSET else "",
+            },
         )
 
     # Failed registration must remain retryable, not masquerade as installed.
