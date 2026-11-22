@@ -183621,6 +183621,96 @@
           "relationships": []
         },
         {
+          "class_name": "ProjectParticipantGrant",
+          "tablename": "oe_projects_participant_grant",
+          "docstring": "One company's participation in one project it does not own. ADR 006.\n\nThe edge ``Project -> Grant -> grantee Organization`` in the ownership graph,\nand the answer to the question ADR 005 left open: a project belongs to one\norganization, so what happens when work on it belongs to more than one.\n\n**The grantee is an organization, never a user** (owner decision 8). A\ncompany participates and its members inherit that participation through\ntheir membership of the company, which is the composition ADR 005 already\nestablished. An individual consultant who needs access creates a one-person\norganization: one rule for everybody, and no second kind of participant\nwhose authorization has to be resolved differently. The column is a foreign\nkey to ``oe_users_organization`` and there is no user-shaped alternative to\nit, so the mistake ADR 005 spent a repair fixing - a person's id in a\ncompany's column - cannot be repeated here by accident.\n\n**A grant is one of two layers, and both must answer yes.** This is the\ncompany layer: is the caller's organization the owner of the project or a\nlive grantee on it. The person layer stays where it is,\n``verify_project_access`` and ``is_project_member``: is this specific person\non the project's team. A company-level grant with no team membership does\nnot open a project, because that would let a company's entire staff read a\nproject nobody assigned them to. Team membership with no company\nparticipation does not open it either, which is the case that existed before\nthis table and is the hole it closes.\n\n**It carries no ``tenant_id`` of its own**, for the same reason\n``Organization`` carries none: a grant is not inside a tenant, it is a\nstatement about the relation between two of them. A tenant column here would\nput the table in ``tenant_tables()`` and give it a policy comparing its own\nidentity with the caller's, which would hide every grant from the grantee it\nnames - the one reader that has to see it.\n\n**Revoked rows are kept.** Revocation is an event with an author, a moment\nand a reason, not a deletion, so the sequence of grants on a project is\nreconstructible from this table alone even if ``oe_activity_log`` is pruned.\nThat is also why the uniqueness is a *partial* index over the live rows: one\nlive grant per company per project, and re-granting after a revocation\ninserts a new row rather than resurrecting the old one, so the history\nsurvives and the live set the predicate reads stays unambiguous.\n\n**Nothing about a grant is retroactive.** Revoking one stops the predicate\nmatching from the moment the row is written; it does not delete, re-stamp or\nhide anything, and it must never be implemented as an unbounded ``UPDATE``.\nRows a grantee wrote under a grant carry the grantee's own ``tenant_id``\n(owner decision 3), so they stay the grantee's afterwards and the project's\nowner can no longer read them through the project arm. That is the intended\nanswer, not a leak in the other direction: ownership follows the author's\ncompany, which is what keeps the row's own tenant scope honest.",
+          "columns": [
+            {
+              "name": "project_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_projects_project.id"
+            },
+            {
+              "name": "grantee_organization_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_users_organization.id"
+            },
+            {
+              "name": "granted_by_user_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true,
+              "is_fk": true,
+              "fk_target": "oe_users_user.id"
+            },
+            {
+              "name": "granted_on_behalf_of_organization_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_users_organization.id"
+            },
+            {
+              "name": "scope",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "status",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "valid_from",
+              "annotation": "Mapped[datetime | None]",
+              "sql_type": "DateTime",
+              "nullable": true
+            },
+            {
+              "name": "valid_until",
+              "annotation": "Mapped[datetime | None]",
+              "sql_type": "DateTime",
+              "nullable": true
+            },
+            {
+              "name": "revoked_at",
+              "annotation": "Mapped[datetime | None]",
+              "sql_type": "DateTime",
+              "nullable": true
+            },
+            {
+              "name": "revoked_by_user_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true,
+              "is_fk": true,
+              "fk_target": "oe_users_user.id"
+            },
+            {
+              "name": "revocation_reason",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "metadata_",
+              "annotation": "Mapped[dict]",
+              "sql_type": "JSON",
+              "nullable": false
+            }
+          ],
+          "relationships": []
+        },
+        {
           "class_name": "ProjectWBS",
           "tablename": "oe_projects_wbs",
           "docstring": "Work Breakdown Structure node for a project.\n\nSupports hierarchical decomposition of project scope into cost, schedule,\nor scope-oriented WBS trees.  Each node can carry planned cost/hours for\nearned-value analysis.",
@@ -279081,8 +279171,8 @@
   "statistics": {
     "backend_modules": 215,
     "modules_with_manifests": 213,
-    "total_models": 791,
-    "total_columns": 9184,
+    "total_models": 792,
+    "total_columns": 9196,
     "total_relationships": 240,
     "total_routes": 4627,
     "total_schemas": 4120,

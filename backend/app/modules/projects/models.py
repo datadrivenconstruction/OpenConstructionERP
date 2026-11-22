@@ -8,6 +8,8 @@ Tables:
     oe_projects_milestone        - project milestones (payment, approval, handover)
     oe_projects_match_settings   - per-project element-to-CWICR auto-match settings
     oe_projects_demo_tombstone   - demo projects the user removed, kept out of later boots
+    oe_projects_participant_grant - a company's granted participation in a project
+                                    it does not own (ADR 006)
 """
 
 # ── Match-settings defaults (v2.8.0) ─────────────────────────────────────
@@ -20,11 +22,12 @@ Tables:
 # were saved with - these constants only pin the *new-row* default.
 import os as _os
 import uuid
-from datetime import datetime
+from datetime import UTC, datetime
 
 from sqlalchemy import (
     JSON,
     Boolean,
+    CheckConstraint,
     DateTime,
     Float,
     ForeignKey,
@@ -34,6 +37,7 @@ from sqlalchemy import (
     Text,
     UniqueConstraint,
     func,
+    text,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -335,6 +339,221 @@ class ProjectStatusHistory(Base):
 
     def __repr__(self) -> str:
         return f"<ProjectStatusHistory project={self.project_id} {self.from_status}->{self.to_status}>"
+
+
+#: What a grant lets the grantee company do (ADR 006, owner decision 7).
+#:
+#: A three-value vocabulary rather than a reference to an RBAC permission set,
+#: so a grant says something a contract can say: this company may look, this
+#: company may add its own work, this company may steer the project. Ordered
+#: from least to most authority, which is the order :data:`GRANT_SCOPE_RANK`
+#: below makes explicit so a comparison never depends on tuple position.
+GRANT_SCOPES = ("view", "contribute", "manage")
+
+#: The same three values, least authority first, for "at least this scope".
+GRANT_SCOPE_RANK = {scope: rank for rank, scope in enumerate(GRANT_SCOPES)}
+
+#: What state a grant is in. Mirrors ``Membership.status`` on purpose, so the
+#: two authorization layers a caller passes through read the same way and a
+#: screen can show both without translating one of them.
+#:
+#: There is deliberately no ``offered``. The owner decided a grant is
+#: unilateral (ADR 006, decision 2): the company that owns the project decides
+#: who participates, and nothing waits for the grantee to accept. A status that
+#: nothing can ever hold is a vocabulary entry that reads as a state machine
+#: with a missing transition.
+GRANT_STATUSES = ("active", "suspended", "revoked")
+
+
+class ProjectParticipantGrant(Base):
+    """One company's participation in one project it does not own. ADR 006.
+
+    The edge ``Project -> Grant -> grantee Organization`` in the ownership graph,
+    and the answer to the question ADR 005 left open: a project belongs to one
+    organization, so what happens when work on it belongs to more than one.
+
+    **The grantee is an organization, never a user** (owner decision 8). A
+    company participates and its members inherit that participation through
+    their membership of the company, which is the composition ADR 005 already
+    established. An individual consultant who needs access creates a one-person
+    organization: one rule for everybody, and no second kind of participant
+    whose authorization has to be resolved differently. The column is a foreign
+    key to ``oe_users_organization`` and there is no user-shaped alternative to
+    it, so the mistake ADR 005 spent a repair fixing - a person's id in a
+    company's column - cannot be repeated here by accident.
+
+    **A grant is one of two layers, and both must answer yes.** This is the
+    company layer: is the caller's organization the owner of the project or a
+    live grantee on it. The person layer stays where it is,
+    ``verify_project_access`` and ``is_project_member``: is this specific person
+    on the project's team. A company-level grant with no team membership does
+    not open a project, because that would let a company's entire staff read a
+    project nobody assigned them to. Team membership with no company
+    participation does not open it either, which is the case that existed before
+    this table and is the hole it closes.
+
+    **It carries no ``tenant_id`` of its own**, for the same reason
+    ``Organization`` carries none: a grant is not inside a tenant, it is a
+    statement about the relation between two of them. A tenant column here would
+    put the table in ``tenant_tables()`` and give it a policy comparing its own
+    identity with the caller's, which would hide every grant from the grantee it
+    names - the one reader that has to see it.
+
+    **Revoked rows are kept.** Revocation is an event with an author, a moment
+    and a reason, not a deletion, so the sequence of grants on a project is
+    reconstructible from this table alone even if ``oe_activity_log`` is pruned.
+    That is also why the uniqueness is a *partial* index over the live rows: one
+    live grant per company per project, and re-granting after a revocation
+    inserts a new row rather than resurrecting the old one, so the history
+    survives and the live set the predicate reads stays unambiguous.
+
+    **Nothing about a grant is retroactive.** Revoking one stops the predicate
+    matching from the moment the row is written; it does not delete, re-stamp or
+    hide anything, and it must never be implemented as an unbounded ``UPDATE``.
+    Rows a grantee wrote under a grant carry the grantee's own ``tenant_id``
+    (owner decision 3), so they stay the grantee's afterwards and the project's
+    owner can no longer read them through the project arm. That is the intended
+    answer, not a leak in the other direction: ownership follows the author's
+    company, which is what keeps the row's own tenant scope honest.
+    """
+
+    __tablename__ = "oe_projects_participant_grant"
+    __table_args__ = (
+        # One LIVE grant per company per project. Partial rather than plain so
+        # that a revoked row does not block the re-grant that replaces it, and
+        # so the constraint the predicate relies on - at most one row to read
+        # per (project, company) - is the one the database enforces.
+        Index(
+            "uq_projects_participant_grant_live",
+            "project_id",
+            "grantee_organization_id",
+            unique=True,
+            postgresql_where=text("status <> 'revoked'"),
+            sqlite_where=text("status <> 'revoked'"),
+        ),
+        # Both ends optional, because an open-ended grant is the normal one and
+        # a tender period or a site handover is the normal reason to close it.
+        # What is not allowed is a window that ends before it starts.
+        CheckConstraint(
+            "valid_from IS NULL OR valid_until IS NULL OR valid_until > valid_from",
+            name="ck_participant_grant_window",
+        ),
+        # Not a free string, in the database and not only in the schema layer:
+        # a value outside the vocabulary would be a grant nobody can interpret,
+        # and every reader of ``scope`` would have to invent a default for it.
+        CheckConstraint(
+            "scope IN ('view', 'contribute', 'manage')",
+            name="ck_participant_grant_scope",
+        ),
+        CheckConstraint(
+            "status IN ('active', 'suspended', 'revoked')",
+            name="ck_participant_grant_status",
+        ),
+        # Every index on this table is named explicitly, including the two that
+        # the naming convention would have produced legally. Two reasons: the
+        # convention's ``ix_%(column_0_label)s`` for
+        # ``granted_on_behalf_of_organization_id`` resolves to 69 characters,
+        # which PostgreSQL will not store as written, and a migration has to
+        # spell the same names ``create_all`` produces or the boot heal adds a
+        # second copy of a constraint it cannot recognise
+        # (``app.core.postgres_migrator._effective_name`` exists because that
+        # happened). One scheme across the table means neither side has to
+        # remember which columns were short enough to be left to the convention.
+        Index("ix_projects_participant_grant_project", "project_id"),
+        Index("ix_projects_participant_grant_grantee", "grantee_organization_id"),
+        # The lookup the ownership change uses: every grant this company made,
+        # which is what has to be suspended when the project stops being theirs.
+        Index("ix_projects_participant_grant_on_behalf", "granted_on_behalf_of_organization_id"),
+    )
+
+    # ``CASCADE``: a grant on a deleted project is a statement about nothing.
+    # Projects are archived rather than deleted in the ordinary course, so this
+    # fires on a purge and not on a delete a user can perform by accident.
+    project_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(),
+        ForeignKey("oe_projects_project.id", ondelete="CASCADE", name="fk_projects_participant_grant_project"),
+        nullable=False,
+    )
+    # The participating company. ``CASCADE`` because a grant naming an
+    # organization that no longer exists authorizes nobody and reads as a
+    # dangling edge in the graph this table is.
+    grantee_organization_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(),
+        ForeignKey("oe_users_organization.id", ondelete="CASCADE", name="fk_projects_participant_grant_grantee"),
+        nullable=False,
+    )
+    # The human who decided. ``SET NULL`` and not ``CASCADE``: the decision
+    # outlives the person, and deleting a user must not delete the record that
+    # a company was given access to a project. Nullable for the same reason it
+    # is nulled - after that it is still a fact that the grant was made.
+    granted_by_user_id: Mapped[uuid.UUID | None] = mapped_column(
+        GUID(),
+        ForeignKey("oe_users_user.id", ondelete="SET NULL", name="fk_projects_participant_grant_granted_by"),
+        nullable=True,
+    )
+    # The owning company at the moment of the grant. Recorded because ownership
+    # can move and the authority to grant moves with it: this is the column that
+    # says who was entitled to make this decision, which is the question a
+    # suspended grant has to answer when it is reviewed.
+    granted_on_behalf_of_organization_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(),
+        ForeignKey(
+            "oe_users_organization.id",
+            ondelete="CASCADE",
+            name="fk_projects_participant_grant_on_behalf",
+        ),
+        nullable=False,
+    )
+    scope: Mapped[str] = mapped_column(String(32), nullable=False, default="view")
+    # ``active`` / ``suspended`` / ``revoked``. Suspended is not revoked: it is
+    # what a grant becomes when the project changes owner (owner decision 4),
+    # pending a review by whoever owns it now, and it can go back to active
+    # without anybody re-deciding the whole grant.
+    status: Mapped[str] = mapped_column(String(16), nullable=False, default="active")
+    valid_from: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    valid_until: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    revoked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    revoked_by_user_id: Mapped[uuid.UUID | None] = mapped_column(
+        GUID(),
+        ForeignKey("oe_users_user.id", ondelete="SET NULL", name="fk_projects_participant_grant_revoked_by"),
+        nullable=True,
+    )
+    revocation_reason: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
+        "metadata",
+        JSON,
+        nullable=False,
+        default=dict,
+        server_default="{}",
+    )
+
+    @property
+    def is_live(self) -> bool:
+        """Whether this grant authorizes anything right now.
+
+        One rule, in one place, because four readers have to agree on it: the
+        per-request project list, the row-level predicate, the read path it
+        replaced, and the screen that lists a project's participants. A grant is
+        live when it is ``active`` and inside its window; an expired grant is
+        not a revoked one and stays readable as history without being readable
+        as authority.
+
+        Naive about timezones on purpose - both ends are stored aware and
+        compared against an aware ``now()``, so the comparison is between two
+        instants and never between an instant and a wall clock.
+        """
+        if self.status != "active":
+            return False
+        now = datetime.now(UTC)
+        if self.valid_from is not None and self.valid_from > now:
+            return False
+        return not (self.valid_until is not None and self.valid_until <= now)
+
+    def __repr__(self) -> str:
+        return (
+            f"<ProjectParticipantGrant project={self.project_id} "
+            f"grantee={self.grantee_organization_id} {self.scope}/{self.status}>"
+        )
 
 
 class ProjectWBS(Base):
