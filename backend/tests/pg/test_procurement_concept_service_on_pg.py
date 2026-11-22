@@ -41,6 +41,7 @@ from tests.pg.procurement_concept_fixtures import (
     add_condition,
     add_contract_package,
     add_frame_document,
+    add_participation_grant,
     add_procurement_area,
     approve,
     bind_frame_document,
@@ -901,11 +902,64 @@ async def test_a_framework_in_another_currency_cannot_be_called_off(world: World
         assert await s.get(AwardPackage, world.packages["S1"]) is None
 
 
-async def test_a_project_member_calls_off_the_framework_of_the_projects_company(world: World) -> None:
-    """Finding 19: the tenant is the user on shipped installs; the framework belongs to the project's company."""
+async def test_a_project_member_calls_off_the_projects_framework_once_their_company_participates(
+    world: World,
+) -> None:
+    """Finding 19, with the question ADR 006 added in front of it.
+
+    The finding still holds and is still the point of this test: the framework
+    belongs to the project's company and not to the person calling it off, so a
+    member of the project's team works against an agreement their own company does
+    not hold. What changed is that the member's *company* now has to have been
+    invited in.
+
+    Until it is, both halves refuse. The read returns nothing, and the write
+    answers the same 404 it answers for an agreement that does not exist - which is
+    the more important half, because a read that hides an agreement while the write
+    still accepts its id is not one rule, and the write is the one that commits a
+    company's money against an agreement belonging to a company that never agreed
+    to this project.
+
+    The two identities are asserted to be different companies first, because that
+    difference is the whole content of "no grant": without it the test would pass
+    on the ownership arm and say nothing about participation.
+    """
     fw = await _framework(world, "FW-1")
     await add_procurement_area(world, world.area_owner)
     await add_contract_package(world, "S1", "supply")
+    caller = str(world.tenants[world.area_owner])
+    assert world.tenants[world.area_owner] != world.tenants[world.manager]
+
+    # The project's own company reads its own agreements and needs no grant to: it
+    # wrote them. This is the arm that distinguishes "participation is required" from
+    # "participation is required of everybody", which would be a worse bug than the one
+    # being fixed - a company locked out of its own project - and it is asserted first
+    # so the assertions below can be read as a change of company and not as a change of
+    # rule.
+    owners_view = await svc_call(world, "project_frameworks", world.project_id, str(world.tenants[world.manager]))
+    assert [f.id for f in owners_view] == [fw.id]
+    # And a caller naming no company reads nothing, even on a project that has
+    # frameworks and even though a grant could not name them either: no company, no
+    # participation, no agreements (ADR 005).
+    assert await svc_call(world, "project_frameworks", world.project_id, None) == []
+
+    # Before any grant: the reader is on the project's team, and sees nothing.
+    assert await svc_call(world, "project_frameworks", world.project_id, caller) == []
+    with pytest.raises(ProcurementError) as refused:
+        async with world.factory() as s:
+            await ProcurementConceptService(s).put_package(
+                world.project_id,
+                world.packages["S1"],
+                _call_off(fw),
+                actor_id=world.area_owner,
+                can_manage=False,
+                tenant_id=caller,
+            )
+    assert refused.value.status_code == 404
+    assert refused.value.code == "framework_not_found"
+
+    await add_participation_grant(world, world.area_owner)
+
     async with world.factory() as s:
         row = await ProcurementConceptService(s).put_package(
             world.project_id,
@@ -913,14 +967,71 @@ async def test_a_project_member_calls_off_the_framework_of_the_projects_company(
             _call_off(fw),
             actor_id=world.area_owner,
             can_manage=False,
-            tenant_id=str(world.tenants[world.area_owner]),
+            tenant_id=caller,
         )
         await s.commit()
     assert row.framework_agreement_id == fw.id
-    listed = await svc_call(world, "project_frameworks", world.project_id, str(world.tenants[world.area_owner]))
+    listed = await svc_call(world, "project_frameworks", world.project_id, caller)
     assert [f.id for f in listed] == [fw.id]
     # Their own company list stays empty, and so does a stranger's view of the project list.
-    assert await svc_call(world, "list_frameworks", str(world.tenants[world.area_owner])) == []
+    assert await svc_call(world, "list_frameworks", caller) == []
+
+
+async def test_a_withdrawn_grant_closes_the_call_off_again(world: World) -> None:
+    """Revocation is not retroactive, and it is not optional either.
+
+    The package that was already called off keeps its framework: nothing here
+    rewrites a row the grantee produced, which is owner decision 3 and the reason
+    ``revoke_grant`` issues no ``UPDATE`` against any table but the grant table and
+    the audit log. What closes is the next decision - the reader sees no framework
+    and a further call-off is refused - so a withdrawal takes effect from the
+    moment it is written and not one row later.
+    """
+    fw = await _framework(world, "FW-1")
+    await add_procurement_area(world, world.area_owner)
+    await add_contract_package(world, "S1", "supply")
+    await add_contract_package(world, "S2", "supply")
+    caller = str(world.tenants[world.area_owner])
+    grant_id = await add_participation_grant(world, world.area_owner)
+
+    async with world.factory() as s:
+        row = await ProcurementConceptService(s).put_package(
+            world.project_id,
+            world.packages["S1"],
+            _call_off(fw),
+            actor_id=world.area_owner,
+            can_manage=False,
+            tenant_id=caller,
+        )
+        await s.commit()
+    assert row.framework_agreement_id == fw.id
+
+    from app.modules.projects.models import ProjectParticipantGrant
+
+    async with world.factory() as s:
+        grant = await s.get(ProjectParticipantGrant, grant_id)
+        grant.status = "revoked"
+        await s.commit()
+
+    assert await svc_call(world, "project_frameworks", world.project_id, caller) == []
+    with pytest.raises(ProcurementError) as refused:
+        async with world.factory() as s:
+            await ProcurementConceptService(s).put_package(
+                world.project_id,
+                world.packages["S2"],
+                _call_off(fw),
+                actor_id=world.area_owner,
+                can_manage=False,
+                tenant_id=caller,
+            )
+    assert refused.value.status_code == 404
+
+    # The row written while the grant was live is untouched, and still names the
+    # framework it called off.
+    async with world.factory() as s:
+        kept = await s.get(AwardPackage, world.packages["S1"])
+    assert kept is not None
+    assert kept.framework_agreement_id == fw.id
 
 
 async def test_a_purchase_order_of_another_company_does_not_consume_the_framework(world: World) -> None:

@@ -33,7 +33,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from app.modules.procurement_concept.models import FrameworkAgreement
 from app.modules.procurement_concept.service import ProcurementConceptService
-from app.modules.projects.models import Project
+from app.modules.projects.models import Project, ProjectParticipantGrant
 from app.modules.users.models import Membership, Organization, User
 from tests._pg import isolated_engine
 
@@ -135,6 +135,33 @@ async def test_a_legacy_project_names_its_owners_company() -> None:
             # company, on the project's team, asking which frameworks a package here may
             # call off. Narrowing to their own company is the silent-empty failure this
             # test exists to refuse.
+            #
+            # Since ADR 006 there is a second question in front of the same answer -
+            # does the reader's company participate in this project - and both halves are
+            # asserted, because the fallback this test exists to pin is what makes the
+            # second one answerable at all: with no company resolved there is nobody to
+            # have invited anybody, and the read is empty for a reason that has nothing
+            # to do with participation.
+            assert await svc.project_frameworks(project, str(theirs)) == []
+
+            session.add(
+                ProjectParticipantGrant(
+                    project_id=project,
+                    grantee_organization_id=theirs,
+                    # ``_legacy_project`` returns the two companies and not the owner's
+                    # id, and the column is nullable for exactly this case: a grant whose
+                    # author is a boot repair or a data import rather than a person. The
+                    # company it was made on behalf of is the one that matters here,
+                    # because that is what an ownership change suspends against.
+                    granted_by_user_id=None,
+                    granted_on_behalf_of_organization_id=ours,
+                    scope="view",
+                    status="active",
+                    metadata_={},
+                )
+            )
+            await session.flush()
+
             rows = await svc.project_frameworks(project, str(theirs))
             assert [r.code for r in rows] == ["FW-LEGACY"]
 

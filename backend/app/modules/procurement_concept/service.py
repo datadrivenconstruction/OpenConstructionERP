@@ -2123,11 +2123,52 @@ class ProcurementConceptService:
         )
 
     async def project_frameworks(self, project_id: uuid.UUID, tenant_id: str | None) -> list[FrameworkAgreement]:
-        """Frameworks a package of this project may call off: the project's company's and the caller's own."""
-        tenants = [t for t in dict.fromkeys((await self.project_tenant(project_id), tenant_id)) if t]
-        out: list[FrameworkAgreement] = []
-        for t in tenants:
-            out += await self.list_frameworks(t)
+        """Frameworks a package of this project may call off: the participating companies' and no others'.
+
+        This used to union the project's company's frameworks with the caller's own
+        behind nothing but ``verify_project_access`` - owner, admin or team member -
+        which made any team member of a project a reader of the framework agreements
+        of a company they did not belong to, with no grant, no scope, no expiry and no
+        audit row, and made the caller's own agreements callable on somebody else's
+        project. Both halves were the same missing question: does the caller's company
+        participate in this project?
+
+        ADR 006 is where that question got an answer, so the union is now gated on it.
+        Three cases, in the order they are cheap to decide:
+
+        * a project whose company cannot be resolved exposes none of its frameworks.
+          :meth:`project_tenant` already answers ``None`` only when there is nothing
+          honest to derive, and guessing a company here would hand one company's
+          agreements to another on the strength of a column nobody filled in;
+        * the caller's own company is the project's, so one list answers;
+        * the caller's company holds a live grant on the project, so both lists
+          answer - the project's company's frameworks, which is what a participant is
+          invited in to call off, and the caller's own, which is what lets a partner
+          bring the agreements it already has to a project it was invited to.
+
+        A caller whose company participates in nothing gets an empty list, which is
+        indistinguishable from "this project has no frameworks". That is the right
+        answer to give and the reason the closure is here rather than in the route:
+        the route already refuses a caller who cannot see the project at all, so the
+        only thing left to decide is which companies' agreements a caller who *can*
+        see it may call off, and that is a question about participation rather than
+        about visibility.
+
+        Any live scope answers, including ``view``. Reading which agreements exist is
+        what ``view`` is for; calling one off writes a package and goes through the
+        permission the route already checks.
+        """
+        from app.modules.projects.grants import holds_live_grant
+
+        owner = await self.project_tenant(project_id)
+        if owner is None or not tenant_id:
+            return []
+        if tenant_id == owner:
+            return await self.list_frameworks(owner)
+        if not await holds_live_grant(self.session, project_id=project_id, organization_id=tenant_id):
+            return []
+        out = await self.list_frameworks(owner)
+        out += await self.list_frameworks(tenant_id)
         return out
 
     async def create_framework(
@@ -2338,12 +2379,34 @@ class ProcurementConceptService:
         }
 
     async def _link_framework(self, project_id: uuid.UUID, award: AwardPackage, tenant_id: str | None) -> None:
-        """Calling off: a framework of the project's company, active, same currency, with value left (rule 13).
+        """Calling off: a framework of a participating company, active, same currency, with value left (rule 13).
 
         The framework is locked while the remainder is read, so two call-offs
         cannot both take the last of it.
+
+        Whose framework may be called off is the same question
+        :meth:`project_frameworks` answers, and it is answered the same way, because
+        a read that hides an agreement and a write that still accepts its id are
+        not one rule: the write is the worse half, since it commits a company's
+        money against an agreement belonging to a company that never agreed to this
+        project. It used to accept a framework of the caller's company *or* of the
+        project's, behind nothing but the route's ``verify_project_access``, so a
+        team member from a third company could call off the project owner's
+        agreement on the owner's package.
+
+        Now only a company that participates may call anything off, and it may call
+        off its own agreements or the project owner's - which is what being invited
+        in means. A caller naming no company participates in nothing (ADR 005), and
+        the answer is the same 404 the reader gets for an agreement that is not
+        there, so this does not become a way to ask which companies were invited.
         """
+        from app.modules.projects.grants import holds_live_grant
+
         company = await self.project_tenant(project_id)
+        participates = bool(tenant_id) and (
+            tenant_id == company
+            or await holds_live_grant(self.session, project_id=project_id, organization_id=tenant_id)
+        )
         fw = (
             (
                 await self.session.execute(
@@ -2355,7 +2418,8 @@ class ProcurementConceptService:
             .scalars()
             .first()
         )
-        if fw is None or fw.tenant_id not in {t for t in (tenant_id, company) if t}:
+        allowed = {t for t in (tenant_id, company) if t} if participates else set()
+        if fw is None or fw.tenant_id not in allowed:
             raise not_found("framework_not_found")
         if fw.state != "active":
             raise conflict("framework_not_active", detail=fw.state)

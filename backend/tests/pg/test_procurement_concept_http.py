@@ -30,6 +30,7 @@ from tests.pg.procurement_concept_fixtures import (
     World,
     add_condition,
     add_contract_package,
+    add_participation_grant,
     add_procurement_area,
     bind_frame_document,
     build_world,
@@ -253,7 +254,21 @@ async def test_frameworks_belong_to_the_callers_company(world: World) -> None:
         in_project = await c.get(_p(world, "/frameworks"))
     assert theirs.json()["items"] == []
     assert [one.status_code, ledger.status_code, patch.status_code, in_project.status_code] == [404, 404, 404, 404]
-    # A member of the project sees the project's company frameworks, without owning them.
+    # A member of the project sees the project's company frameworks, without owning
+    # them - once their company has been invited in. Being on the team is the person
+    # half of the answer and used to be the whole of it, which is the leak
+    # ``test_a_project_member_reads_another_companys_frameworks_only_once_a_grant_exists``
+    # below replaces a characterization of. Both halves are asserted here too, in the
+    # same order, so this test keeps saying what it always said about ownership: the
+    # framework belongs to the manager's company, and the reader's own list stays empty
+    # whichever way the project read answers.
+    async with client_as(world, world.area_owner, "editor") as c:
+        before = await c.get(_p(world, "/frameworks"))
+    assert before.status_code == 200, before.text
+    assert before.json()["items"] == []
+
+    await add_participation_grant(world, world.area_owner)
+
     async with client_as(world, world.area_owner, "editor") as c:
         seen = await c.get(_p(world, "/frameworks"))
         own = await c.get(f"{BASE}/frameworks")
@@ -379,6 +394,12 @@ async def test_candidate_profile_and_framework_can_flags(world: World) -> None:
         mine = (await c.get(f"{BASE}/frameworks")).json()
         assert mine["can"]["create"] == YES
         assert mine["items"][0]["can"] == {"edit": YES, "transitions": ["active", "terminated"]}
+    # The editor is on the project's team and belongs to a different company, so the
+    # project's frameworks are listed to them only once that company participates. This
+    # test is about the shape of ``can`` and not about participation - which
+    # ``test_frameworks_belong_to_the_callers_company`` pins - so the grant is set up
+    # here rather than asserted on, and the assertions below are unchanged.
+    await add_participation_grant(world, world.editor)
     async with client_as(world, world.editor, "editor") as c:
         cands = (await c.get(_pkg(world, tail="/candidates"))).json()["can"]
         assert (cands["add"], cands["score"], cands["reference"]) == (YES, YES, YES)
@@ -675,24 +696,41 @@ async def test_a_project_without_a_phase_model_answers_unknown_and_empty_pickers
         assert (item.state, item.detail) == ("unknown", "procurement_area_unresolved")
 
 
-async def test_a_project_member_reads_another_companys_frameworks_because_no_grant_exists_yet(world: World) -> None:
-    """CHARACTERIZATION. Today's behaviour, recorded so that it cannot change silently.
+async def test_a_project_member_reads_another_companys_frameworks_only_once_a_grant_exists(world: World) -> None:
+    """The leak this test used to characterize is closed, and the route still answers.
 
-    ``project_frameworks`` unions the project's company's frameworks with the caller's
-    own, and the only gate in front of it is ``verify_project_access``: owner, admin or
-    team member. So any team member of a project reads the framework agreements of a
-    company they do not belong to - with no grant, no scope, no expiry and no audit row.
-    The reader below is on the project's team and belongs to a different company, and the
-    framework does not appear in their own company's list, so the visibility comes from
-    the project arm of the union and from nothing else.
+    This was ``test_a_project_member_reads_another_companys_frameworks_because_no_grant_exists_yet``,
+    and its docstring began ``CHARACTERIZATION. Today's behaviour, recorded so that it
+    cannot change silently`` and ended ``Changing what this test asserts is therefore a
+    deliberate act that has to happen together with the grant feature and not before
+    it.`` That is what happened. ``project_frameworks`` unioned the project's company's
+    frameworks with the caller's own behind nothing but ``verify_project_access`` -
+    owner, admin or team member - so any team member of a project read the framework
+    agreements of a company they did not belong to, with no grant, no scope, no expiry
+    and no audit row. ADR 006 named this call site as the first thing the participant
+    predicate replaces; the grant table, the grant API and the predicate now exist, and
+    the union is gated on participation.
 
-    This is not an endorsement and it is not the target shape. ADR 006,
-    ``docs/adr/006-project-participant-grants.md``, records the owner's decision that
-    cross-organization participation goes through an explicit project participant grant,
-    names this call site as the first thing that predicate replaces, and lists it on the
-    Phase 02c list as a security item. Changing what this test asserts is therefore a
-    deliberate act that has to happen together with the grant feature and not before it.
+    The characterization is replaced rather than deleted, and the replacement asserts
+    the same three facts from the other side: the reader is on the project's team and
+    belongs to a different company, the framework is not in their own company's list,
+    so whatever they see comes from the project arm and from nothing else. What changed
+    is that the project arm now asks whether their company was invited in.
+
+    The route still answers 200 with an empty list rather than 403 or 404, and that is
+    deliberate: the reader *can* see the project, so refusing the request would tell
+    them something false about the project, and an empty list of frameworks is the same
+    answer the route gives for a project that genuinely has none. The distinction this
+    route is not allowed to blur is which project a caller may open, and that is
+    ``verify_project_access``'s job, tested in ``test_procurement_concept_idor.py``.
+
+    Both withdrawn shapes are asserted as well, because a grant that could be created
+    and not withdrawn would be a leak with extra steps: revocation closes the read from
+    the moment the row is written, and suspension - what an ownership change leaves
+    behind - closes it the same way while keeping the row reversible.
     """
+    from app.modules.projects.models import ProjectParticipantGrant
+
     body = {
         "code": "FW-NO-GRANT",
         "title": "Rebar",
@@ -710,11 +748,43 @@ async def test_a_project_member_reads_another_companys_frameworks_because_no_gra
 
     # The reader is a member of the project's team and belongs to a different company.
     # That the two companies differ is the whole content of "no grant": there is no
-    # participation record of any kind behind the read that succeeds below.
+    # participation record of any kind behind the read that is refused below.
     assert world.tenants[world.area_owner] != world.tenants[world.manager]
     async with client_as(world, world.area_owner, "editor") as c:
         through_the_project = await c.get(_p(world, "/frameworks"))
         their_own_company = await c.get(f"{BASE}/frameworks")
     assert through_the_project.status_code == 200, through_the_project.text
-    assert [f["id"] for f in through_the_project.json()["items"]] == [fw_id]
+    assert through_the_project.json()["items"] == []
     assert their_own_company.json()["items"] == []
+
+    # The owner's own view is unchanged by any of this: a company needs no grant to
+    # read the agreements it wrote.
+    async with client_as(world, world.manager, "manager") as c:
+        owners_view = await c.get(_p(world, "/frameworks"))
+    assert [f["id"] for f in owners_view.json()["items"]] == [fw_id]
+
+    grant_id = await add_participation_grant(world, world.area_owner)
+
+    async with client_as(world, world.area_owner, "editor") as c:
+        invited = await c.get(_p(world, "/frameworks"))
+    assert invited.status_code == 200, invited.text
+    assert [f["id"] for f in invited.json()["items"]] == [fw_id]
+    # Their own company still holds nothing, so the framework they now see came from
+    # the project arm and from nothing else - the same attribution the characterization
+    # made, now with a participation record behind it.
+    async with client_as(world, world.area_owner, "editor") as c:
+        assert (await c.get(f"{BASE}/frameworks")).json()["items"] == []
+
+    for withdrawn in ("revoked", "suspended"):
+        async with world.factory() as s:
+            grant = await s.get(ProjectParticipantGrant, grant_id)
+            grant.status = withdrawn
+            await s.commit()
+        async with client_as(world, world.area_owner, "editor") as c:
+            after = await c.get(_p(world, "/frameworks"))
+        assert after.status_code == 200, after.text
+        assert after.json()["items"] == [], withdrawn
+        async with world.factory() as s:
+            grant = await s.get(ProjectParticipantGrant, grant_id)
+            grant.status = "active"
+            await s.commit()

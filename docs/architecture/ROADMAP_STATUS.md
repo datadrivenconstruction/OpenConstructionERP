@@ -555,8 +555,8 @@ person being a tenant and therefore never actually built two of them.
 Named here rather than implemented, because each one needs a decision this phase does not have
 the evidence to make: whose tenant is a scheduled run, and is a startup seed writing to one
 company or to the install. One row below is struck through because it was closed after the list
-was first written; it stays on the list, since a closed gap that disappears from the record
-looks like a gap nobody ever found. `tests/unit/test_which_paths_bind_a_tenant_and_which_still_do_not.py`
+was first written, and a second was closed afterwards; both stay on the list, since a closed gap
+that disappears from the record looks like a gap nobody ever found. `tests/unit/test_which_paths_bind_a_tenant_and_which_still_do_not.py`
 asserts that these paths still bind nothing, so closing one has to be a deliberate change that
 moves it to the bound list.
 
@@ -569,32 +569,47 @@ moves it to the bound list.
 | `app/modules/ai_agents/events.py` | :140, inside `with cost_scope.caller_scope(agent_user_id)` | Bind the originating user's organization | The same, for event-triggered runs |
 | `app/core/job_runner.py` | `_default_session_factory` at :86, which is where a job's session comes from | Bind per job from the job's owner, or run under `oe_system` for platform work | The same, for every queued job |
 | `app/modules/property_dev/service.py` | :3562, `resolved_tenant = tenant_id if tenant_id is not None else str(data.tenant_id)` | Confirm the tenant in use is the caller's and never one supplied in the request body | A tenant taken from a payload body would be caller-chosen, which is the one shape of this bug that is an authorization hole rather than a visibility one |
-| `app/modules/procurement_concept/service.py` | `project_frameworks`, the union over `[project_tenant(project_id), caller_tenant]` | **Security.** Replace the project arm of that union with an explicit project participant grant check, per [ADR 006](../adr/006-project-participant-grants.md) stage 5 | Any team member of a project reads another company's framework agreements with no grant, no scope, no expiry and no audit row; the only gate in front of it is `verify_project_access`, which answers the person question and not the company one. Characterized rather than endorsed by `tests/pg/test_procurement_concept_http.py::test_a_project_member_reads_another_companys_frameworks_because_no_grant_exists_yet`, which fails if the behaviour changes in either direction, so closing it has to be deliberate |
+| ~~`app/modules/procurement_concept/service.py`~~ **closed** | `project_frameworks`, the union over `[project_tenant(project_id), caller_tenant]`, and its write-side twin `_link_framework` | **Security.** Replaced by an explicit project participant grant check, per [ADR 006](../adr/006-project-participant-grants.md) stage 5 | Was: any team member of a project read another company's framework agreements with no grant, no scope, no expiry and no audit row, and could call one off on the owner's package, because the only gate in front of both was `verify_project_access`, which answers the person question and not the company one. Both halves now ask whether the caller's company holds a live grant, and both were pinned by characterization tests that fail if the behaviour changes in either direction - so closing them was the deliberate act those tests demanded, and each replacement says in its docstring that it used to assert the opposite. Neither half could be a policy: `oe_procurement_concept_framework` carries `tenant_id` and no `project_id`, and `oe_procurement_concept_award_package` the reverse, so no row exists on which both arms could be evaluated. ADR 006 section 13.5 |
 
 **Ordered work, and what must come first.** The rows above are background paths that bind no
 tenant. One further item belongs on this list and ahead of them in consequence, because it gates a
 switch rather than a code path.
 
-1. **Project participant grants** - [ADR 006](../adr/006-project-participant-grants.md). Design
-   only: nothing implemented, no model, no migration, no route, no policy on the tree. A project
-   belongs to one organization and other organizations participate through explicit grants, and
-   the target predicate is "the caller's organization owns the row, **or** it holds a live grant on
-   the project the row belongs to". **This must precede enabling `OE_RLS_STRICT` on any default
-   path, and must precede Phase 03.** The reason is specific rather than procedural: strict mode
-   installs the single-arm equality predicate
+1. **Project participant grants** - [ADR 006](../adr/006-project-participant-grants.md),
+   **accepted, and the part of it that gates strict mode is implemented.** A project belongs to one
+   organization and other organizations participate through explicit grants. On the tree: the
+   `oe_projects_participant_grant` table and revision `v3326_project_participant_grant`; a service
+   in `app/modules/projects/grants.py` with create, change-scope, list and revoke, plus the
+   suspension that a change of project ownership triggers; four routes under
+   `/api/v1/projects/{project_id}/participant-grants`; a second GUC `app.granted_projects` bound
+   once per request behind `OE_PROJECT_GRANTS`; and a second permissive `FOR SELECT` policy
+   `oe_project_grant_read` installed beside the untouched `oe_tenant_isolation` policy on all
+   **10** tables that carry both a `tenant_id` and a `project_id` column. Permissive policies are
+   OR'd, so the two together are the target predicate - "the caller's organization owns the row,
+   **or** it holds a live grant on the project the row belongs to" - while writes stay governed by
+   the tenant policy alone, which is how a grantee's rows carry the grantee's own `tenant_id`.
+   Measured on one million `oe_pipeline` rows, the worst of three query shapes cost **1.0046x** the
+   single-condition baseline against an owner's bar of **1.25**.
+
+   **What is still open, and what it still gates.** The **147** project-scoped-only model files
+   (**420** `project_id` columns, no `tenant_id` for either arm to match) remain gated in the route
+   by `verify_project_access` and have no database policy. Strict mode installs the single-arm
+   equality predicate
    `(tenant_id)::text = current_setting('app.current_tenant', true)`, which cannot express
-   participation, so turning it on before grants exist refuses every cross-company project read
-   that works today - starting with the `project_frameworks` union, which is how a project member
-   currently reads the project's company's frameworks. Size of the job, measured on this tree:
-   **30** `tenant_id` columns across **16** model files against **419** `project_id` columns across
-   **147**, with **11** files carrying both. The both-column files are where a grant can be
-   enforced with no schema change at all; the project-only majority cannot be policied by
-   `tenant_id` because they do not have one, and adding it to all of them is the mechanical sweep
-   Phase 02 rejected.
+   participation, so **`OE_RLS_STRICT` is still blocked - by that half of the work, no longer by
+   grants.** Two further gaps are recorded in ADR 006 section 13.7 rather than left implicit:
+   `scope` is stored, ranked and audited but not yet differentiated, so a `view` grant answers what
+   a `manage` grant does today; and no agent tool exposes grants, which is a statement about the
+   current tree and not a guard that keeps it true. Size of the job as originally measured: **30**
+   `tenant_id` columns across **16** model files by source grep, reconciled in ADR 006 section 12.1
+   to **31** policied tables - the grep matched a `previous_tenant_id` ledger column and never
+   covered `oe_activity_log` or `oe_job_run`, which are declared outside `app/modules`.
 2. **The six background paths in the table above**, in the order listed, each closed by a
    deliberate change that moves it out of the unbound list asserted by
    `tests/unit/test_which_paths_bind_a_tenant_and_which_still_do_not.py`.
-3. **Only then strict mode**, and only with ADR 006 stage 4's million-row measurements in hand.
+3. **Only then strict mode.** ADR 006 stage 4's million-row measurements are in hand and inside the
+   budget (worst ratio 1.0046 against 1.25), so the remaining gate on strict mode is the
+   project-scoped-only half of item 1, not the measurement.
 
 ### Operating the tenancy repair on first boot
 

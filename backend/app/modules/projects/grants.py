@@ -622,6 +622,40 @@ async def live_granted_project_ids(session: AsyncSession, organization_id: str |
     return [str(row) for row in (await session.execute(stmt)).scalars().all()]
 
 
+async def holds_live_grant(
+    session: AsyncSession,
+    *,
+    project_id: uuid.UUID | str,
+    organization_id: str | uuid.UUID | None,
+) -> bool:
+    """Whether this company holds a grant on this project that is in force now.
+
+    The single-project form of :func:`live_granted_project_ids`, for a read path
+    that already knows which project it is asking about and does not want to
+    resolve the caller's whole participation to answer one question. Same
+    conditions, so the two cannot disagree about what "live" means.
+
+    ``organization_id=None`` answers False rather than raising: a caller naming no
+    company participates in nothing, which is the fail-closed direction and the
+    same answer :func:`company_may_read_project` gives.
+    """
+    if organization_id is None:
+        return False
+    now = datetime.now(UTC)
+    stmt = (
+        select(ProjectParticipantGrant.id)
+        .where(
+            ProjectParticipantGrant.project_id == project_id,
+            ProjectParticipantGrant.grantee_organization_id == organization_id,
+            ProjectParticipantGrant.status == "active",
+            or_(ProjectParticipantGrant.valid_from.is_(None), ProjectParticipantGrant.valid_from <= now),
+            or_(ProjectParticipantGrant.valid_until.is_(None), ProjectParticipantGrant.valid_until > now),
+        )
+        .limit(1)
+    )
+    return (await session.execute(stmt)).first() is not None
+
+
 def company_may_read_project(
     project: Project,
     *,
@@ -815,6 +849,7 @@ __all__ = [
     "change_scope",
     "company_may_read_project",
     "create_grant",
+    "holds_live_grant",
     "live_granted_project_ids",
     "list_grants",
     "resolve_grant_authority",

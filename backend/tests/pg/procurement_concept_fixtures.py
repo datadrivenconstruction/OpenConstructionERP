@@ -413,6 +413,48 @@ async def put(
         return row
 
 
+async def add_participation_grant(
+    w: World,
+    grantee: uuid.UUID,
+    *,
+    project_id: uuid.UUID | None = None,
+    scope: str = "view",
+    status: str = "active",
+) -> uuid.UUID:
+    """A grant from the project's company to ``grantee``'s, written the way the API writes it.
+
+    ``grantee`` is a caller, not a company, because that is how every other builder
+    in this file is addressed and because the point of the fixture is that the two
+    are different values: the row it writes names the caller's *organization*, which
+    is what a grant is for, and the person who decided, which is what the audit
+    trail is for.
+
+    ``status`` builds the withdrawn shapes - a suspended grant is what an ownership
+    change leaves behind and a revoked one is history - so a test can ask what a
+    call-off does when the invitation it relied on is no longer in force. The row is
+    written directly rather than through ``POST /participant-grants`` because these
+    fixtures build a world and are not testing the grant API, which
+    ``test_only_the_owning_organization_decides_who_participates_in_a_project``
+    tests over HTTP against the same table.
+    """
+    from app.modules.projects.models import ProjectParticipantGrant
+
+    project = project_id or w.project_id
+    grant = ProjectParticipantGrant(
+        project_id=project,
+        grantee_organization_id=w.tenants[grantee],
+        granted_by_user_id=w.manager,
+        granted_on_behalf_of_organization_id=w.tenants[w.manager],
+        scope=scope,
+        status=status,
+        metadata_={},
+    )
+    async with w.factory() as s:
+        s.add(grant)
+        await s.commit()
+    return grant.id
+
+
 async def svc_call(w: World, fn: str, *args: Any, **kw: Any) -> Any:
     async with w.factory() as s:
         out = await getattr(ProcurementConceptService(s), fn)(*args, **kw)
