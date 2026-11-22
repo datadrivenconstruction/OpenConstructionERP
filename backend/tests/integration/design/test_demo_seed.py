@@ -205,6 +205,22 @@ async def test_seed_brief_without_a_model_and_no_estimate_for_other_uses(client)
     assert editor["typology"] == "office"
 
 
+async def test_shared_sample_model_is_never_the_design_of_a_tower(client):
+    uid, _ = await make_user(client, role="admin")
+    low = await _demo_project(uid, {"demo_id": "low-test", "storeys": 4, "gfa_m2": 2400, "apartments": 16})
+    towers = [
+        await _demo_project(uid, {"demo_id": f"tower-{i}", "storeys": 30, "gfa_m2": 60000}, name=f"Tower {i}")
+        for i in range(2)
+    ]
+    for pid in [low, *towers]:
+        await _converter_model(pid)  # the same sample model in three projects
+
+    counts = await _run([low, *towers])
+    assert counts["briefs"] == 3 and counts["revisions"] == 1
+    assert (await _state(low))[0] == 1
+    assert [(await _state(t))[0] for t in towers] == [0, 0]
+
+
 # ── who may edit: an administrator does, a viewer does not ──
 
 

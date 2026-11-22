@@ -418,8 +418,39 @@ async def _seed_brief(session: AsyncSession, project: Any, user_id: uuid.UUID) -
     return confirmed
 
 
-async def _seed_revision(session: AsyncSession, project_id: uuid.UUID, user_id: uuid.UUID):
-    """The project's richest converter model as revision 1, through ``imported.wrap``; None when there is none."""
+GENERIC_SAMPLE_PROJECTS = 3  # a model with the same name and size in this many projects is the shared sample
+GENERIC_SAMPLE_MAX_FLOORS = 6  # the shared sample is a low-rise building: never the model of a tower
+
+
+def _signature(model: Any) -> tuple[str, int]:
+    return ((model.name or "").strip().lower(), int(model.element_count or 0))
+
+
+async def generic_samples(session: AsyncSession, project_ids: Iterable[uuid.UUID]) -> set[tuple[str, int]]:
+    """Signatures of models that sit in many demo projects at once: a shared sample, not that project's building."""
+    from collections import Counter
+
+    from . import imported
+
+    seen: Counter[tuple[str, int]] = Counter()
+    for pid in project_ids:
+        seen.update({_signature(m) for m in await imported.candidates(session, pid)})
+    return {sig for sig, n in seen.items() if n >= GENERIC_SAMPLE_PROJECTS}
+
+
+async def _seed_revision(
+    session: AsyncSession,
+    project_id: uuid.UUID,
+    user_id: uuid.UUID,
+    *,
+    generic: set[tuple[str, int]] | frozenset[tuple[str, int]] = frozenset(),
+    floors_above: int | None = None,
+):
+    """The project's richest converter model as revision 1, through ``imported.wrap``; None when there is none.
+
+    A shared sample model is skipped for buildings taller than it, so a tower never shows a small house as its
+    design; the editor then shows the model built from the project's own brief.
+    """
     from . import imported
     from .imported_api import held_lock
     from .models import DesignRevision
@@ -431,7 +462,10 @@ async def _seed_revision(session: AsyncSession, project_id: uuid.UUID, user_id: 
     if await held_lock(session, project_id) is not None:
         return None
     models = sorted(await imported.candidates(session, project_id), key=lambda m: -(m.element_count or 0))
+    tall = floors_above is None or floors_above > GENERIC_SAMPLE_MAX_FLOORS
     for model in models:
+        if tall and _signature(model) in generic:
+            continue
         try:
             async with session.begin_nested():
                 return await imported.wrap(session, model, user_id=user_id, depth_level=DEPTH_LEVEL)
@@ -481,7 +515,9 @@ async def seed_design_demo(session: AsyncSession, project_ids: Iterable[uuid.UUI
     if not ids:
         return totals
     projects = (await session.execute(select(Project).where(Project.id.in_(ids)))).scalars().all()
-    for project in [p for p in projects if demo_id_of(p.metadata_)]:
+    demos = [p for p in projects if demo_id_of(p.metadata_)]
+    generic = await generic_samples(session, [p.id for p in demos])
+    for project in demos:
         user_id = await _owner(session, project)
         if user_id is None:
             continue
@@ -491,13 +527,14 @@ async def seed_design_demo(session: AsyncSession, project_ids: Iterable[uuid.UUI
             totals["briefs"] += brief is not None
         except Exception:
             logger.warning("design demo seed: brief of %s skipped", project.id, exc_info=True)
+        doc = await current_brief(session, project.id)
+        floors = ((doc or {}).get("massing") or {}).get("floors_above")
         try:
-            rev = await _seed_revision(session, project.id, user_id)
+            rev = await _seed_revision(session, project.id, user_id, generic=generic, floors_above=floors)
             totals["revisions"] += rev is not None
         except Exception:
             logger.warning("design demo seed: revision of %s skipped", project.id, exc_info=True)
             rev = None
-        doc = await current_brief(session, project.id)
         if doc is None:
             continue
         try:
