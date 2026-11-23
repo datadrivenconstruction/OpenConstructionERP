@@ -69647,6 +69647,10 @@ const resource = {
     "map.ui.ctrl_scroll": "Ctrl + kotačić za zumiranje karte",
     "map.ui.cmd_scroll": "⌘ + kotačić za zumiranje karte",
     "map.ui.two_fingers": "Pomičite kartu s dva prsta",
+    "validation_findings.title": "Rezultati provjere",
+    "validation_findings.severity_error": "Pogreška",
+    "validation_findings.severity_warning": "Upozorenje",
+    "validation_findings.severity_info": "Napomena",
   }
 } as { translation: Record<string, string> };
 

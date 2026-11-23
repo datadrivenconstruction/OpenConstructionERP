@@ -69011,6 +69011,10 @@ const resource = {
     "map.ui.ctrl_scroll": "Ctrl + cuộn để thu phóng bản đồ",
     "map.ui.cmd_scroll": "⌘ + cuộn để thu phóng bản đồ",
     "map.ui.two_fingers": "Dùng hai ngón tay để di chuyển bản đồ",
+    "validation_findings.title": "Kết quả kiểm tra",
+    "validation_findings.severity_error": "Lỗi",
+    "validation_findings.severity_warning": "Cảnh báo",
+    "validation_findings.severity_info": "Ghi chú",
   }
 } as { translation: Record<string, string> };
 

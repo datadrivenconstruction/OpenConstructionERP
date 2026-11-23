@@ -71496,6 +71496,10 @@ const resource = {
     "map.ui.ctrl_scroll": "按 Ctrl 并滚动以缩放地图",
     "map.ui.cmd_scroll": "按 ⌘ 并滚动以缩放地图",
     "map.ui.two_fingers": "用两根手指移动地图",
+    "validation_findings.title": "校验结果",
+    "validation_findings.severity_error": "错误",
+    "validation_findings.severity_warning": "警告",
+    "validation_findings.severity_info": "备注",
   }
 } as { translation: Record<string, string> };
 

@@ -71427,6 +71427,10 @@ const resource = {
     "map.ui.ctrl_scroll": "Ctrl + коліщатко миші для масштабу карти",
     "map.ui.cmd_scroll": "⌘ + коліщатко миші для масштабу карти",
     "map.ui.two_fingers": "Двома пальцями переміщуйте карту",
+    "validation_findings.title": "Результати перевірки",
+    "validation_findings.severity_error": "Помилка",
+    "validation_findings.severity_warning": "Попередження",
+    "validation_findings.severity_info": "Примітка",
   }
 } as { translation: Record<string, string> };
 

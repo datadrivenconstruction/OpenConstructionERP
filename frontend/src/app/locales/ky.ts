@@ -69387,6 +69387,10 @@ const resource = {
     "map.ui.ctrl_scroll": "Картаны масштабдоо үчүн Ctrl + дөңгөлөк",
     "map.ui.cmd_scroll": "Картаны масштабдоо үчүн ⌘ + дөңгөлөк",
     "map.ui.two_fingers": "Картаны эки манжа менен жылдырыңыз",
+    "validation_findings.title": "Текшерүү жыйынтыктары",
+    "validation_findings.severity_error": "Ката",
+    "validation_findings.severity_warning": "Эскертүү",
+    "validation_findings.severity_info": "Эскертме",
   }
 } as { translation: Record<string, string> };
 

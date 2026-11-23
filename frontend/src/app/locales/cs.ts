@@ -23484,6 +23484,7 @@ const resource = {
     "project_intelligence.insights.spi": "SPI",
     "project_intelligence.insights.vac": "VAC (odchylka)",
     "project_intelligence.insights.variance_days": "{{count}} dnů",
+    "project_intelligence.insights.findings_title": "Kontroly prognózy",
     "project_intelligence.intro_body": "Čte vaše živé BOQ, nákladový model, harmonogram a registr rizik a hodnotí, jak připravený je tento odhad k odeslání (BOQ 40 %, nákladový model 30 %, validace 20 %, riziko 10 %). Kritické mezery jsou nejrychlejší cestou ke zvýšení tohoto hodnocení - každá z nich odkazuje přímo na obrazovku, která ji opraví. Poradce ve spodní části odpovídá na otázky specifické pro projekt.",
     "project_intelligence.intro_link_boq": "Editor BOQ",
     "project_intelligence.intro_link_validation": "Validace",
@@ -70619,6 +70620,10 @@ const resource = {
     "map.ui.ctrl_scroll": "Ctrl + kolečko pro přiblížení mapy",
     "map.ui.cmd_scroll": "⌘ + kolečko pro přiblížení mapy",
     "map.ui.two_fingers": "Mapu posouvejte dvěma prsty",
+    "validation_findings.title": "Výsledky kontroly",
+    "validation_findings.severity_error": "Chyba",
+    "validation_findings.severity_warning": "Varování",
+    "validation_findings.severity_info": "Poznámka",
   }
 } as { translation: Record<string, string> };
 

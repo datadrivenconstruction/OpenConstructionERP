@@ -23489,6 +23489,7 @@ const resource = {
     "project_intelligence.insights.spi": "SPI",
     "project_intelligence.insights.vac": "VAC (hälve)",
     "project_intelligence.insights.variance_days": "{{count}} päev(a)",
+    "project_intelligence.insights.findings_title": "Prognoosi kontrollid",
     "project_intelligence.intro_body": "See loeb teie elavat mahutabelit, kulumudelit, ajakava ja riskiregistrit ning hindab, kui valmis see hinnang väljasaatmiseks on (mahutabel 40%, kulumudel 30%, valideerimine 20%, risk 10%). Kriitilised lüngad on kiireimad viisid selle hinde tõstmiseks, iga üks viib otse ekraanile, kus see parandatakse. All olev nõustaja vastab projektispetsiifilistele küsimustele.",
     "project_intelligence.intro_link_boq": "mahutabeli redaktor",
     "project_intelligence.intro_link_validation": "Valideerimine",
@@ -69226,6 +69227,10 @@ const resource = {
     "map.ui.ctrl_scroll": "Ctrl + kerimine kaardi suumimiseks",
     "map.ui.cmd_scroll": "⌘ + kerimine kaardi suumimiseks",
     "map.ui.two_fingers": "Liiguta kaarti kahe sõrmega",
+    "validation_findings.title": "Valideerimise tulemused",
+    "validation_findings.severity_error": "Viga",
+    "validation_findings.severity_warning": "Hoiatus",
+    "validation_findings.severity_info": "Märkus",
   }
 } as { translation: Record<string, string> };
 

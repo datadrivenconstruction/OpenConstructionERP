@@ -23230,6 +23230,7 @@ const resource = {
     "project_intelligence.insights.spi": "SPI",
     "project_intelligence.insights.vac": "VAC (Abweichung)",
     "project_intelligence.insights.variance_days": "{{count}} Tag(e)",
+    "project_intelligence.insights.findings_title": "Prognoseprüfungen",
     "project_intelligence.intro_body": "Es liest Ihr aktuelles LV, Kostenmodell, den Terminplan und das Risikoregister und bewertet, wie bereit diese Kalkulation für die Abgabe ist (LV 40%, Kostenmodell 30%, Validierung 20%, Risiko 10%). Kritische Lücken sind der schnellste Weg, diese Bewertung zu verbessern - jede verlinkt direkt zur Ansicht, die sie behebt. Der Berater am unteren Rand beantwortet projektspezifische Fragen.",
     "project_intelligence.intro_link_boq": "LV-Editor",
     "project_intelligence.intro_link_validation": "Validierung",
@@ -71946,6 +71947,10 @@ const resource = {
     "map.ui.ctrl_scroll": "Strg + Mausrad zum Zoomen der Karte",
     "map.ui.cmd_scroll": "⌘ + Mausrad zum Zoomen der Karte",
     "map.ui.two_fingers": "Mit zwei Fingern die Karte verschieben",
+    "validation_findings.title": "Prüfergebnisse",
+    "validation_findings.severity_error": "Fehler",
+    "validation_findings.severity_warning": "Warnung",
+    "validation_findings.severity_info": "Hinweis",
   }
 } as { translation: Record<string, string> };
 

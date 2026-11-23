@@ -69273,6 +69273,10 @@ const resource = {
     "map.ui.ctrl_scroll": "मानचित्र ज़ूम करने के लिए Ctrl + स्क्रॉल",
     "map.ui.cmd_scroll": "मानचित्र ज़ूम करने के लिए ⌘ + स्क्रॉल",
     "map.ui.two_fingers": "मानचित्र को दो उंगलियों से खिसकाएँ",
+    "validation_findings.title": "सत्यापन के निष्कर्ष",
+    "validation_findings.severity_error": "त्रुटि",
+    "validation_findings.severity_warning": "चेतावनी",
+    "validation_findings.severity_info": "टिप्पणी",
   }
 } as { translation: Record<string, string> };
 

@@ -22997,6 +22997,7 @@ const resource = {
     "project_intelligence.insights.spi": "SPI",
     "project_intelligence.insights.vac": "VAC (écart)",
     "project_intelligence.insights.variance_days": "{{count}} jour(s)",
+    "project_intelligence.insights.findings_title": "Contrôles de la prévision",
     "project_intelligence.intro_body": "Il lit votre DQE, votre modèle de coûts, votre planning et votre registre des risques en temps réel et évalue à quel point cette estimation est prête à partir (DQE 40 %, modèle de coûts 30 %, validation 20 %, risque 10 %). Les lacunes critiques sont les moyens les plus rapides d'améliorer cette note : chacune renvoie directement à l'écran qui la corrige. Le conseiller en bas répond aux questions propres au projet.",
     "project_intelligence.intro_link_boq": "Éditeur DQE",
     "project_intelligence.intro_link_validation": "Validation",
@@ -72227,6 +72228,10 @@ const resource = {
     "map.ui.ctrl_scroll": "Ctrl + molette pour zoomer la carte",
     "map.ui.cmd_scroll": "⌘ + molette pour zoomer la carte",
     "map.ui.two_fingers": "Déplacez la carte avec deux doigts",
+    "validation_findings.title": "Résultats de validation",
+    "validation_findings.severity_error": "Erreur",
+    "validation_findings.severity_warning": "Avertissement",
+    "validation_findings.severity_info": "Remarque",
   }
 } as { translation: Record<string, string> };
 

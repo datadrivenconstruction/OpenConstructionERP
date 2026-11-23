@@ -23470,6 +23470,7 @@ const resource = {
     "project_intelligence.insights.spi": "SPI",
     "project_intelligence.insights.vac": "VAC (afvigelse)",
     "project_intelligence.insights.variance_days": "{{count}} dag(e)",
+    "project_intelligence.insights.findings_title": "Prognosekontroller",
     "project_intelligence.intro_body": "Den læser din aktuelle BOQ, omkostningsmodel, tidsplan og risikoregister og bedømmer, hvor klar dette estimat er til at gå ud (BOQ 40%, omkostningsmodel 30%, validering 20%, risiko 10%). Kritiske mangler er de hurtigste måder at hæve karakteren på - hver enkelt linker direkte til den skærm, der retter den. Rådgiveren nederst besvarer projektspecifikke spørgsmål.",
     "project_intelligence.intro_link_boq": "BOQ-editor",
     "project_intelligence.intro_link_validation": "Validering",
@@ -69276,6 +69277,10 @@ const resource = {
     "map.ui.ctrl_scroll": "Ctrl + rul for at zoome på kortet",
     "map.ui.cmd_scroll": "⌘ + rul for at zoome på kortet",
     "map.ui.two_fingers": "Flyt kortet med to fingre",
+    "validation_findings.title": "Valideringsresultater",
+    "validation_findings.severity_error": "Fejl",
+    "validation_findings.severity_warning": "Advarsel",
+    "validation_findings.severity_info": "Bemærkning",
   }
 } as { translation: Record<string, string> };
 

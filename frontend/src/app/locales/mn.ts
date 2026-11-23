@@ -69289,6 +69289,10 @@ const resource = {
     "map.ui.ctrl_scroll": "Газрын зургийг томруулахдаа Ctrl + дугуй",
     "map.ui.cmd_scroll": "Газрын зургийг томруулахдаа ⌘ + дугуй",
     "map.ui.two_fingers": "Газрын зургийг хоёр хуруугаар зөөнө үү",
+    "validation_findings.title": "Баталгаажуулалтын үр дүн",
+    "validation_findings.severity_error": "Алдаа",
+    "validation_findings.severity_warning": "Анхааруулга",
+    "validation_findings.severity_info": "Тэмдэглэл",
   }
 } as { translation: Record<string, string> };
 

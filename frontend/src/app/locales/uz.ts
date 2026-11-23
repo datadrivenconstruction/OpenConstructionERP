@@ -70202,6 +70202,10 @@ const resource = {
     "map.ui.ctrl_scroll": "Xaritani kattalashtirish uchun Ctrl + aylantirish",
     "map.ui.cmd_scroll": "Xaritani kattalashtirish uchun ⌘ + aylantirish",
     "map.ui.two_fingers": "Xaritani ikki barmoq bilan suring",
+    "validation_findings.title": "Tekshiruv natijalari",
+    "validation_findings.severity_error": "Xato",
+    "validation_findings.severity_warning": "Ogohlantirish",
+    "validation_findings.severity_info": "Izoh",
   }
 } as { translation: Record<string, string> };
 
