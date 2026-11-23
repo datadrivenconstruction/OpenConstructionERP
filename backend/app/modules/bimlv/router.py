@@ -69,7 +69,9 @@ async def import_container(
     except BimLvContainerError as exc:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(exc)) from exc
 
+    await service.check_container(project_id, parsed, block=True)
     result = await service.materialize_links(project_id, parsed, session, user_id=user_id)
+    findings = await service.check_container(project_id, parsed, result)
 
     return BimLvImportResponse(
         created=result.created,
@@ -87,6 +89,7 @@ async def import_container(
             checksum=parsed.model_ref.checksum,
         ),
         warnings=parsed.warnings,
+        findings=findings,
     )
 
 

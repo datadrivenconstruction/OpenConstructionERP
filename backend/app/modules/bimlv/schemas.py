@@ -37,3 +37,7 @@ class BimLvImportResponse(BaseModel):
     position_count: int = Field(0, description="LV positions found in the container")
     model_reference: ModelReferenceOut = Field(default_factory=ModelReferenceOut)
     warnings: list[str] = Field(default_factory=list)
+    findings: list[dict] = Field(
+        default_factory=list,
+        description="Findings of the BIM-LV rules, worded in the caller's language.",
+    )

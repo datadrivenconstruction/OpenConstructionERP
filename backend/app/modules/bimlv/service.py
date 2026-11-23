@@ -310,3 +310,45 @@ async def export_container(boq_id: uuid.UUID, db: AsyncSession) -> ContainerExpo
         position_count=len(positions),
         link_count=link_count,
     )
+
+
+async def check_container(
+    project_id: uuid.UUID,
+    parsed: ParsedContainer,
+    result: MaterializeResult | None = None,
+    *,
+    block: bool = False,
+) -> list[dict]:
+    """Run the BIM-LV rules over a parsed container, and over its materialisation when given.
+
+    Errors raise the coded 422 when ``block`` is set (before any link is written); otherwise every
+    failing rule comes back as a finding in the caller's language.
+    """
+    from app.core.validation.cost_gate import finding, raise_on_errors, run_rule_set  # noqa: PLC0415
+    from app.modules.bimlv.validators import BIMLV_RULE_SET  # noqa: PLC0415
+
+    data: dict = {
+        "container": {
+            "project_id": str(project_id),
+            "positions": [
+                {"ordinal": p.ordinal, "quantity": p.quantity, "unit_rate": p.unit_rate} for p in parsed.positions
+            ],
+            "mapping": parsed.mapping,
+            "model_ref": {
+                "filename": parsed.model_ref.filename,
+                "model_id": parsed.model_ref.model_id,
+                "guid": parsed.model_ref.guid,
+            },
+        }
+    }
+    if result is not None:
+        data["result"] = {
+            "unmatched_ordinals": result.unmatched_ordinals,
+            "unmatched_guids": result.unmatched_guids,
+        }
+    report = await run_rule_set(
+        BIMLV_RULE_SET, data, target_type="bimlv_container", target_id=str(project_id), project_id=str(project_id)
+    )
+    if block:
+        raise_on_errors(report, error="bimlv_rules_failed")
+    return [finding(r) for r in [*report.errors, *report.warnings]]
