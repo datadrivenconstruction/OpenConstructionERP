@@ -120,7 +120,8 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
             # regular video host is left off on purpose: it sets cookies on
             # embed, which is why the page does not use it.
             "frame-src 'self' blob: data: https://www.youtube-nocookie.com; "
-            "connect-src 'self' https://www.google-analytics.com "
+            # The design editor builds its model in the browser and the viewer fetch()es it as a data: URL.
+            "connect-src 'self' data: blob: https://www.google-analytics.com "
             "https://*.google-analytics.com https://*.analytics.google.com "
             "https://api.github.com "
             "https://tiles.openfreemap.org https://*.openfreemap.org "

@@ -155,3 +155,11 @@ def test_custom_csp_override() -> None:
     client = TestClient(app)
     r = client.get("/ping")
     assert r.headers.get("Content-Security-Policy") == custom
+
+
+def test_connect_src_lets_the_viewer_read_a_model_built_in_the_browser() -> None:
+    from app.middleware.security_headers import SecurityHeadersMiddleware
+
+    csp = SecurityHeadersMiddleware(app=None)._csp
+    connect = next(d for d in csp.split(";") if d.strip().startswith("connect-src")).split()
+    assert "data:" in connect and "blob:" in connect
