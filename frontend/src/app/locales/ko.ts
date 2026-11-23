@@ -69645,6 +69645,10 @@ const resource = {
     "map.ui.ctrl_scroll": "Ctrl + 스크롤로 지도 확대/축소",
     "map.ui.cmd_scroll": "⌘ + 스크롤로 지도 확대/축소",
     "map.ui.two_fingers": "두 손가락으로 지도 이동",
+    "validation_findings.title": "검증 결과",
+    "validation_findings.severity_error": "오류",
+    "validation_findings.severity_warning": "경고",
+    "validation_findings.severity_info": "참고",
   }
 } as { translation: Record<string, string> };
 

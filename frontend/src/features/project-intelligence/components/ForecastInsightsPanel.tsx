@@ -38,6 +38,7 @@ import {
 import { apiGet } from '@/shared/lib/api';
 import { MoneyDisplay } from '@/shared/ui/MoneyDisplay';
 import { fmtFixed } from '@/shared/lib/formatters';
+import { FindingsList, type ValidationFinding } from '@/shared/ui/FindingsList';
 
 interface CostForecast {
   available: boolean;
@@ -86,6 +87,7 @@ interface ProjectForecast {
   schedule: ScheduleSlip;
   risk: CostOverrunRisk;
   review_required: boolean;
+  findings?: ValidationFinding[];
 }
 
 interface ForecastInsightsPanelProps {
@@ -209,6 +211,14 @@ export function ForecastInsightsPanel({ projectId }: ForecastInsightsPanelProps)
           })}
         </p>
       </div>
+
+      <FindingsList
+        findings={data.findings}
+        title={t('project_intelligence.insights.findings_title', {
+          defaultValue: 'Forecast checks',
+        })}
+        testId="forecast-insights-findings"
+      />
 
       {/* Cost tiles */}
       {cost.available ? (

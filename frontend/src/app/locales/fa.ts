@@ -22548,6 +22548,7 @@ const resource = {
     "project_intelligence.insights.spi": "SPI",
     "project_intelligence.insights.vac": "VAC (انحراف)",
     "project_intelligence.insights.variance_days": "{{count}} روز",
+    "project_intelligence.insights.findings_title": "بررسی‌های پیش‌بینی",
     "project_intelligence.intro_body": "این ابزار صورت مقادیر زنده، مدل هزینه، زمان‌بندی و دفتر ریسک شما را می‌خواند و درجه آمادگی این برآورد برای ارسال را می‌سنجد (صورت مقادیر ۴۰٪، مدل هزینه ۳۰٪، اعتبارسنجی ۲۰٪، ریسک ۱۰٪). شکاف‌های بحرانی سریع‌ترین راه برای بالابردن آن درجه هستند، هر کدام مستقیماً به صفحه‌ای که آن را برطرف می‌کند پیوند می‌خورد. مشاور در پایین به سؤالات مخصوص پروژه پاسخ می‌دهد.",
     "project_intelligence.intro_link_boq": "ویرایشگر صورت مقادیر",
     "project_intelligence.intro_link_validation": "اعتبارسنجی",
@@ -69256,6 +69257,10 @@ const resource = {
     "map.ui.ctrl_scroll": "Ctrl + اسکرول برای بزرگ‌نمایی نقشه",
     "map.ui.cmd_scroll": "⌘ + اسکرول برای بزرگ‌نمایی نقشه",
     "map.ui.two_fingers": "نقشه را با دو انگشت جابه‌جا کنید",
+    "validation_findings.title": "نتایج اعتبارسنجی",
+    "validation_findings.severity_error": "خطا",
+    "validation_findings.severity_warning": "هشدار",
+    "validation_findings.severity_info": "یادداشت",
   }
 } as { translation: Record<string, string> };
 

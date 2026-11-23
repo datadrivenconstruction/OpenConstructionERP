@@ -70561,6 +70561,10 @@ const resource = {
     "map.ui.ctrl_scroll": "Ctrl + スクロールで地図を拡大縮小",
     "map.ui.cmd_scroll": "⌘ + スクロールで地図を拡大縮小",
     "map.ui.two_fingers": "2本の指で地図を移動",
+    "validation_findings.title": "検証結果",
+    "validation_findings.severity_error": "エラー",
+    "validation_findings.severity_warning": "警告",
+    "validation_findings.severity_info": "注記",
   }
 } as { translation: Record<string, string> };
 

@@ -72246,6 +72246,10 @@ const resource = {
     "map.ui.ctrl_scroll": "Ctrl + roda para ampliar o mapa",
     "map.ui.cmd_scroll": "⌘ + roda para ampliar o mapa",
     "map.ui.two_fingers": "Mova o mapa com dois dedos",
+    "validation_findings.title": "Resultados da validação",
+    "validation_findings.severity_error": "Erro",
+    "validation_findings.severity_warning": "Aviso",
+    "validation_findings.severity_info": "Nota",
   }
 } as { translation: Record<string, string> };
 

@@ -69672,6 +69672,10 @@ const resource = {
     "map.ui.ctrl_scroll": "Ctrl + rotiță pentru a mări harta",
     "map.ui.cmd_scroll": "⌘ + rotiță pentru a mări harta",
     "map.ui.two_fingers": "Mutați harta cu două degete",
+    "validation_findings.title": "Rezultatele validării",
+    "validation_findings.severity_error": "Eroare",
+    "validation_findings.severity_warning": "Avertisment",
+    "validation_findings.severity_info": "Notă",
   }
 } as { translation: Record<string, string> };
 

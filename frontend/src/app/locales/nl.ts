@@ -70183,6 +70183,10 @@ const resource = {
     "map.ui.ctrl_scroll": "Ctrl + scrollen om op de kaart te zoomen",
     "map.ui.cmd_scroll": "⌘ + scrollen om op de kaart te zoomen",
     "map.ui.two_fingers": "Verschuif de kaart met twee vingers",
+    "validation_findings.title": "Validatieresultaten",
+    "validation_findings.severity_error": "Fout",
+    "validation_findings.severity_warning": "Waarschuwing",
+    "validation_findings.severity_info": "Opmerking",
   }
 } as { translation: Record<string, string> };
 

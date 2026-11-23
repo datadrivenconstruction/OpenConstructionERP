@@ -22464,6 +22464,7 @@ const resource = {
     "project_intelligence.insights.spi": "SPI",
     "project_intelligence.insights.vac": "VAC (ভেরিয়েন্স)",
     "project_intelligence.insights.variance_days": "{{count}} দিন",
+    "project_intelligence.insights.findings_title": "পূর্বাভাস যাচাই",
     "project_intelligence.intro_body": "এটি আপনার লাইভ BOQ, কস্ট মডেল, সময়সূচী ও ঝুঁকি রেজিস্টার পড়ে এবং এই এস্টিমেট প্রকাশের জন্য কতটা প্রস্তুত তা গ্রেড করে (BOQ 40%, Cost Model 30%, ভ্যালিডেশন 20%, Risk 10%)। Critical Gaps সেই গ্রেড বাড়ানোর দ্রুততম উপায়, প্রতিটি সরাসরি সেই স্ক্রিনে লিংক করে যা এটি ঠিক করে। নিচের উপদেষ্টা প্রকল্প-নির্দিষ্ট প্রশ্নের উত্তর দেয়।",
     "project_intelligence.intro_link_boq": "BOQ এডিটর",
     "project_intelligence.intro_link_validation": "ভ্যালিডেশন",
@@ -69566,6 +69567,10 @@ const resource = {
     "map.ui.ctrl_scroll": "মানচিত্র জুম করতে Ctrl + স্ক্রল",
     "map.ui.cmd_scroll": "মানচিত্র জুম করতে ⌘ + স্ক্রল",
     "map.ui.two_fingers": "দুই আঙুলে মানচিত্র সরান",
+    "validation_findings.title": "যাচাইয়ের ফলাফল",
+    "validation_findings.severity_error": "ত্রুটি",
+    "validation_findings.severity_warning": "সতর্কতা",
+    "validation_findings.severity_info": "নোট",
   }
 } as { translation: Record<string, string> };
 

@@ -70177,6 +70177,10 @@ const resource = {
     "map.ui.ctrl_scroll": "Haritayı yakınlaştırmak için Ctrl + kaydırma",
     "map.ui.cmd_scroll": "Haritayı yakınlaştırmak için ⌘ + kaydırma",
     "map.ui.two_fingers": "Haritayı iki parmakla taşıyın",
+    "validation_findings.title": "Doğrulama bulguları",
+    "validation_findings.severity_error": "Hata",
+    "validation_findings.severity_warning": "Uyarı",
+    "validation_findings.severity_info": "Not",
   }
 } as { translation: Record<string, string> };
 

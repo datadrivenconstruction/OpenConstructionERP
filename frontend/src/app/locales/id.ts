@@ -69028,6 +69028,10 @@ const resource = {
     "map.ui.ctrl_scroll": "Ctrl + gulir untuk memperbesar peta",
     "map.ui.cmd_scroll": "⌘ + gulir untuk memperbesar peta",
     "map.ui.two_fingers": "Geser peta dengan dua jari",
+    "validation_findings.title": "Hasil validasi",
+    "validation_findings.severity_error": "Kesalahan",
+    "validation_findings.severity_warning": "Peringatan",
+    "validation_findings.severity_info": "Catatan",
   }
 } as { translation: Record<string, string> };
 

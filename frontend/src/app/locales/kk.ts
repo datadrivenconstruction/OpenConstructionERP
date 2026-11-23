@@ -69257,6 +69257,10 @@ const resource = {
     "map.ui.ctrl_scroll": "Картаны масштабтау үшін Ctrl + дөңгелек",
     "map.ui.cmd_scroll": "Картаны масштабтау үшін ⌘ + дөңгелек",
     "map.ui.two_fingers": "Картаны екі саусақпен жылжытыңыз",
+    "validation_findings.title": "Тексеру нәтижелері",
+    "validation_findings.severity_error": "Қате",
+    "validation_findings.severity_warning": "Ескерту",
+    "validation_findings.severity_info": "Ескертпе",
   }
 } as { translation: Record<string, string> };
 

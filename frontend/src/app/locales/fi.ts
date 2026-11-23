@@ -23215,6 +23215,7 @@ const resource = {
     "project_intelligence.insights.spi": "SPI",
     "project_intelligence.insights.vac": "VAC (poikkeama)",
     "project_intelligence.insights.variance_days": "{{count}} päivä(ä)",
+    "project_intelligence.insights.findings_title": "Ennusteen tarkistukset",
     "project_intelligence.intro_body": "Se lukee live-BOQ:si, kustannusmallisi, aikataulusi ja riskirekisterisi ja arvioi, kuinka valmis tämä arvio on lähetettäväksi (BOQ 40 %, kustannusmalli 30 %, validointi 20 %, riski 10 %). Kriittiset puutteet ovat nopeimmat tavat nostaa tuota arvosanaa - jokainen linkittää suoraan näytölle, joka korjaa sen. Alhaalla oleva neuvonantaja vastaa projektikohtaisiin kysymyksiin.",
     "project_intelligence.intro_link_boq": "BOQ-editori",
     "project_intelligence.intro_link_validation": "Validointi",
@@ -69306,6 +69307,10 @@ const resource = {
     "map.ui.ctrl_scroll": "Ctrl + rullaus zoomaa karttaa",
     "map.ui.cmd_scroll": "⌘ + rullaus zoomaa karttaa",
     "map.ui.two_fingers": "Siirrä karttaa kahdella sormella",
+    "validation_findings.title": "Validoinnin tulokset",
+    "validation_findings.severity_error": "Virhe",
+    "validation_findings.severity_warning": "Varoitus",
+    "validation_findings.severity_info": "Huomautus",
   }
 } as { translation: Record<string, string> };
 

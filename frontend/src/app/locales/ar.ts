@@ -24315,6 +24315,7 @@ const resource = {
     "project_intelligence.insights.spi": "SPI",
     "project_intelligence.insights.vac": "VAC (انحراف)",
     "project_intelligence.insights.variance_days": "{{count}} يوم",
+    "project_intelligence.insights.findings_title": "فحوصات التوقعات",
     "project_intelligence.intro_body": "يقرأ جدول الكميات BOQ الحي ونموذج التكلفة والجدول الزمني وسجل المخاطر، ويقيّم مدى جاهزية هذا التقدير للإصدار (BOQ بنسبة 40%، نموذج التكلفة 30%، التحقق 20%، المخاطر 10%). الثغرات الحرجة هي أسرع طرق رفع هذا التقييم - كل واحدة تنقلك مباشرةً إلى الشاشة التي تعالجها. يجيب المستشار في الأسفل عن أسئلة خاصة بالمشروع.",
     "project_intelligence.intro_link_boq": "محرّر BOQ",
     "project_intelligence.intro_link_validation": "التحقق",
@@ -72522,6 +72523,10 @@ const resource = {
     "map.ui.ctrl_scroll": "Ctrl + التمرير لتكبير الخريطة",
     "map.ui.cmd_scroll": "⌘ + التمرير لتكبير الخريطة",
     "map.ui.two_fingers": "حرّك الخريطة بإصبعين",
+    "validation_findings.title": "نتائج التحقق",
+    "validation_findings.severity_error": "خطأ",
+    "validation_findings.severity_warning": "تحذير",
+    "validation_findings.severity_info": "ملاحظة",
   }
 } as { translation: Record<string, string> };
 

@@ -19304,6 +19304,7 @@ const resource = {
     "project_intelligence.insights.spi": "SPI",
     "project_intelligence.insights.vac": "VAC (variance)",
     "project_intelligence.insights.variance_days": "{{count}} day(s)",
+    "project_intelligence.insights.findings_title": "Forecast checks",
     "project_intelligence.intro_body": "It reads your live BOQ, cost model, schedule and risk register and grades how ready this estimate is to go out (BOQ 40%, Cost Model 30%, Validation 20%, Risk 10%). Critical Gaps are the fastest ways to raise that grade, each one links straight to the screen that fixes it. The advisor at the bottom answers project-specific questions.",
     "project_intelligence.intro_link_boq": "BOQ editor",
     "project_intelligence.intro_link_validation": "Validation",
@@ -63597,6 +63598,10 @@ const resource = {
     "map.ui.ctrl_scroll": "Use Ctrl + scroll to zoom the map",
     "map.ui.cmd_scroll": "Use ⌘ + scroll to zoom the map",
     "map.ui.two_fingers": "Use two fingers to move the map",
+    "validation_findings.title": "Validation findings",
+    "validation_findings.severity_error": "Error",
+    "validation_findings.severity_warning": "Warning",
+    "validation_findings.severity_info": "Note",
   }
 } as { translation: Record<string, string> };
 

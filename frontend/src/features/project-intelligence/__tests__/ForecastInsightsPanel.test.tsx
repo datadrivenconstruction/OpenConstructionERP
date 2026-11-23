@@ -152,4 +152,20 @@ describe('ForecastInsightsPanel', () => {
     expect(screen.getByTestId('forecast-insights-risk-score')).toHaveTextContent('0');
     expect(screen.getByTestId('forecast-insights-rationale')).toBeInTheDocument();
   });
+
+  it('shows forecast findings when present and hides the block when empty', async () => {
+    apiGet.mockResolvedValue({
+      ...FULL_FORECAST,
+      findings: [{ rule_id: 'pi.x', severity: 'warning', message: 'CPI is implausible', params: { cpi: 42 } }],
+    });
+    const { unmount } = render(<ForecastInsightsPanel projectId="p1" />);
+    await waitFor(() => expect(screen.getByTestId('forecast-insights-findings')).toBeInTheDocument());
+    expect(screen.getByText(/CPI is implausible/)).toBeInTheDocument();
+    unmount();
+
+    apiGet.mockResolvedValue({ ...FULL_FORECAST, findings: [] });
+    render(<ForecastInsightsPanel projectId="p1" />);
+    await waitFor(() => expect(screen.getByTestId('forecast-insights-cost-tiles')).toBeInTheDocument());
+    expect(screen.queryByTestId('forecast-insights-findings')).not.toBeInTheDocument();
+  });
 });

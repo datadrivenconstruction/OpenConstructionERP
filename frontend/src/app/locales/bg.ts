@@ -23550,6 +23550,7 @@ const resource = {
     "project_intelligence.insights.spi": "SPI",
     "project_intelligence.insights.vac": "VAC (отклонение)",
     "project_intelligence.insights.variance_days": "{{count}} ден(дни)",
+    "project_intelligence.insights.findings_title": "Проверки на прогнозата",
     "project_intelligence.intro_body": "Тя чете вашата актуална BOQ, разходен модел, график и регистър на рисковете и оценява колко готова е тази оценка да бъде изпратена (BOQ 40%, разходен модел 30%, валидиране 20%, риск 10%). Критичните пропуски са най-бързите начини да повишите тази оценка - всеки от тях води директно към екрана, който го отстранява. Съветникът най-долу отговаря на специфични за проекта въпроси.",
     "project_intelligence.intro_link_boq": "BOQ редактор",
     "project_intelligence.intro_link_validation": "Валидиране",
@@ -69300,6 +69301,10 @@ const resource = {
     "map.ui.ctrl_scroll": "Ctrl + колелце за мащаб на картата",
     "map.ui.cmd_scroll": "⌘ + колелце за мащаб на картата",
     "map.ui.two_fingers": "Местете картата с два пръста",
+    "validation_findings.title": "Резултати от проверката",
+    "validation_findings.severity_error": "Грешка",
+    "validation_findings.severity_warning": "Предупреждение",
+    "validation_findings.severity_info": "Забележка",
   }
 } as { translation: Record<string, string> };
 

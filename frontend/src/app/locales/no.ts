@@ -69302,6 +69302,10 @@ const resource = {
     "map.ui.ctrl_scroll": "Ctrl + rull for å zoome kartet",
     "map.ui.cmd_scroll": "⌘ + rull for å zoome kartet",
     "map.ui.two_fingers": "Flytt kartet med to fingre",
+    "validation_findings.title": "Valideringsresultater",
+    "validation_findings.severity_error": "Feil",
+    "validation_findings.severity_warning": "Advarsel",
+    "validation_findings.severity_info": "Merknad",
   }
 } as { translation: Record<string, string> };
 

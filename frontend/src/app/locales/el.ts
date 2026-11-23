@@ -22625,6 +22625,7 @@ const resource = {
     "project_intelligence.insights.spi": "SPI",
     "project_intelligence.insights.vac": "VAC (απόκλιση)",
     "project_intelligence.insights.variance_days": "{{count}} ημέρα(ες)",
+    "project_intelligence.insights.findings_title": "Έλεγχοι πρόβλεψης",
     "project_intelligence.intro_body": "Διαβάζει το ζωντανό BOQ, το μοντέλο κόστους, το χρονοδιάγραμμα και το μητρώο κινδύνων σας και βαθμολογεί πόσο έτοιμη είναι αυτή η εκτίμηση για δημοσίευση (BOQ 40%, Μοντέλο Κόστους 30%, Επικύρωση 20%, Κίνδυνος 10%). Τα Κρίσιμα Κενά είναι ο ταχύτερος τρόπος να ανεβάσετε αυτή τη βαθμολογία, το καθένα οδηγεί απευθείας στην οθόνη που το διορθώνει. Ο σύμβουλος στο κάτω μέρος απαντά σε ερωτήσεις σχετικές με το έργο.",
     "project_intelligence.intro_link_boq": "Επεξεργαστής BOQ",
     "project_intelligence.intro_link_validation": "Επικύρωση",
@@ -69262,6 +69263,10 @@ const resource = {
     "map.ui.ctrl_scroll": "Ctrl + κύλιση για μεγέθυνση του χάρτη",
     "map.ui.cmd_scroll": "⌘ + κύλιση για μεγέθυνση του χάρτη",
     "map.ui.two_fingers": "Μετακινήστε τον χάρτη με δύο δάχτυλα",
+    "validation_findings.title": "Ευρήματα ελέγχου",
+    "validation_findings.severity_error": "Σφάλμα",
+    "validation_findings.severity_warning": "Προειδοποίηση",
+    "validation_findings.severity_info": "Σημείωση",
   }
 } as { translation: Record<string, string> };
 

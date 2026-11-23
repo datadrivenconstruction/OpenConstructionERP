@@ -22772,6 +22772,7 @@ const resource = {
     "project_intelligence.insights.spi": "SPI",
     "project_intelligence.insights.vac": "VAC (סטייה)",
     "project_intelligence.insights.variance_days": "{{count}} ימים",
+    "project_intelligence.insights.findings_title": "בדיקות תחזית",
     "project_intelligence.intro_body": "הוא קורא את כתב הכמויות החי, מודל העלות, לוח הזמנים ומרשם הסיכונים שלכם ומדרג עד כמה האומדן הזה מוכן לצאת (כתב כמויות 40%, מודל עלות 30%, אימות 20%, סיכון 10%). פערים קריטיים הן הדרכים המהירות ביותר להעלות את הציון הזה, כל אחד מקשר ישירות למסך שמתקן אותו. היועץ בתחתית עונה על שאלות ספציפיות לפרויקט.",
     "project_intelligence.intro_link_boq": "עורך כתב הכמויות",
     "project_intelligence.intro_link_validation": "אימות",
@@ -69634,6 +69635,10 @@ const resource = {
     "map.ui.ctrl_scroll": "Ctrl + גלילה להגדלת המפה",
     "map.ui.cmd_scroll": "⌘ + גלילה להגדלת המפה",
     "map.ui.two_fingers": "הזיזו את המפה בשתי אצבעות",
+    "validation_findings.title": "ממצאי אימות",
+    "validation_findings.severity_error": "שגיאה",
+    "validation_findings.severity_warning": "אזהרה",
+    "validation_findings.severity_info": "הערה",
   }
 } as { translation: Record<string, string> };
 

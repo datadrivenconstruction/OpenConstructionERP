@@ -22470,6 +22470,7 @@ const resource = {
     "project_intelligence.insights.spi": "SPI",
     "project_intelligence.insights.vac": "VAC (pagkakaiba)",
     "project_intelligence.insights.variance_days": "{{count}} araw",
+    "project_intelligence.insights.findings_title": "Mga pagsusuri ng forecast",
     "project_intelligence.intro_body": "Binabasa nito ang iyong live na BOQ, cost model, iskedyul at risk register at binibigyang marka kung gaano kahanda ilabas ang estimate na ito (BOQ 40%, Cost Model 30%, Pagsusuri 20%, Risk 10%). Ang Kritikal na mga Kakulangan ang pinakamabilis na paraan para itaas ang markang iyon, direktang naka-link ang bawat isa sa screen na nag-aayos nito. Sinasagot ng advisor sa ibaba ang mga tanong na partikular sa proyekto.",
     "project_intelligence.intro_link_boq": "Editor ng BOQ",
     "project_intelligence.intro_link_validation": "Pagsusuri",
@@ -69260,6 +69261,10 @@ const resource = {
     "map.ui.ctrl_scroll": "Ctrl + scroll para mag-zoom sa mapa",
     "map.ui.cmd_scroll": "⌘ + scroll para mag-zoom sa mapa",
     "map.ui.two_fingers": "Gamitin ang dalawang daliri para galawin ang mapa",
+    "validation_findings.title": "Mga resulta ng pagpapatunay",
+    "validation_findings.severity_error": "Error",
+    "validation_findings.severity_warning": "Babala",
+    "validation_findings.severity_info": "Paalala",
   }
 } as { translation: Record<string, string> };
 

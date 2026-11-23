@@ -72609,6 +72609,10 @@ const resource = {
     "map.ui.ctrl_scroll": "Ctrl + колесо мыши для масштаба карты",
     "map.ui.cmd_scroll": "⌘ + колесо мыши для масштаба карты",
     "map.ui.two_fingers": "Двумя пальцами перемещайте карту",
+    "validation_findings.title": "Результаты проверки",
+    "validation_findings.severity_error": "Ошибка",
+    "validation_findings.severity_warning": "Предупреждение",
+    "validation_findings.severity_info": "Примечание",
   }
 } as { translation: Record<string, string> };
 

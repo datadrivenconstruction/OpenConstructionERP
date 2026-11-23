@@ -70906,6 +70906,10 @@ const resource = {
     "map.ui.ctrl_scroll": "Ctrl + kółko, aby powiększyć mapę",
     "map.ui.cmd_scroll": "⌘ + kółko, aby powiększyć mapę",
     "map.ui.two_fingers": "Przesuwaj mapę dwoma palcami",
+    "validation_findings.title": "Wyniki walidacji",
+    "validation_findings.severity_error": "Błąd",
+    "validation_findings.severity_warning": "Ostrzeżenie",
+    "validation_findings.severity_info": "Uwaga",
   }
 } as { translation: Record<string, string> };
 

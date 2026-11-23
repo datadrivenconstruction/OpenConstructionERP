@@ -69029,6 +69029,10 @@ const resource = {
     "map.ui.ctrl_scroll": "กด Ctrl + เลื่อนเพื่อซูมแผนที่",
     "map.ui.cmd_scroll": "กด ⌘ + เลื่อนเพื่อซูมแผนที่",
     "map.ui.two_fingers": "ใช้สองนิ้วเลื่อนแผนที่",
+    "validation_findings.title": "ผลการตรวจสอบ",
+    "validation_findings.severity_error": "ข้อผิดพลาด",
+    "validation_findings.severity_warning": "คำเตือน",
+    "validation_findings.severity_info": "หมายเหตุ",
   }
 } as { translation: Record<string, string> };
 

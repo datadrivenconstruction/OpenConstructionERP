@@ -70554,6 +70554,10 @@ const resource = {
     "map.ui.ctrl_scroll": "Ctrl + rotella per ingrandire la mappa",
     "map.ui.cmd_scroll": "⌘ + rotella per ingrandire la mappa",
     "map.ui.two_fingers": "Sposta la mappa con due dita",
+    "validation_findings.title": "Esiti della validazione",
+    "validation_findings.severity_error": "Errore",
+    "validation_findings.severity_warning": "Avviso",
+    "validation_findings.severity_info": "Nota",
   }
 } as { translation: Record<string, string> };
 

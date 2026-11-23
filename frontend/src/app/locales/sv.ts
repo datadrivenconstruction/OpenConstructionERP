@@ -69917,6 +69917,10 @@ const resource = {
     "map.ui.ctrl_scroll": "Ctrl + scroll för att zooma kartan",
     "map.ui.cmd_scroll": "⌘ + scroll för att zooma kartan",
     "map.ui.two_fingers": "Flytta kartan med två fingrar",
+    "validation_findings.title": "Valideringsresultat",
+    "validation_findings.severity_error": "Fel",
+    "validation_findings.severity_warning": "Varning",
+    "validation_findings.severity_info": "Notering",
   }
 } as { translation: Record<string, string> };
 

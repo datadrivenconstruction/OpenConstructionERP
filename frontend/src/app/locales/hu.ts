@@ -71861,6 +71861,10 @@ const resource = {
     "map.ui.ctrl_scroll": "Ctrl + görgő a térkép nagyításához",
     "map.ui.cmd_scroll": "⌘ + görgő a térkép nagyításához",
     "map.ui.two_fingers": "Két ujjal mozgassa a térképet",
+    "validation_findings.title": "Ellenőrzési eredmények",
+    "validation_findings.severity_error": "Hiba",
+    "validation_findings.severity_warning": "Figyelmeztetés",
+    "validation_findings.severity_info": "Megjegyzés",
   }
 } as { translation: Record<string, string> };
 

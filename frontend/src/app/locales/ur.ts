@@ -69262,6 +69262,10 @@ const resource = {
     "map.ui.ctrl_scroll": "نقشہ زوم کرنے کے لیے Ctrl + اسکرول",
     "map.ui.cmd_scroll": "نقشہ زوم کرنے کے لیے ⌘ + اسکرول",
     "map.ui.two_fingers": "نقشہ دو انگلیوں سے ہلائیں",
+    "validation_findings.title": "توثیق کے نتائج",
+    "validation_findings.severity_error": "خرابی",
+    "validation_findings.severity_warning": "انتباہ",
+    "validation_findings.severity_info": "نوٹ",
   }
 } as { translation: Record<string, string> };
 
