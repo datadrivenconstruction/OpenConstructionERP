@@ -26,3 +26,7 @@ async def on_startup() -> None:
     )
 
     register_project_intelligence_permissions()
+
+    from app.modules.project_intelligence.validators import register_project_intelligence_validation_rules
+
+    register_project_intelligence_validation_rules()

@@ -286,3 +286,24 @@ class ForecastService:
         except Exception:
             logger.debug("forecast: risk count failed for %s", project_id, exc_info=True)
             return 0
+
+
+async def check_forecast(forecast: ProjectForecast) -> list[dict]:
+    """Run the project intelligence rules over a finished forecast.
+
+    The forecast is read-only analytics, so nothing blocks: every failing rule
+    is returned as a finding in the caller's language and the screen shows it.
+    """
+    from dataclasses import asdict  # noqa: PLC0415
+
+    from app.core.validation.cost_gate import finding, run_rule_set  # noqa: PLC0415
+    from app.modules.project_intelligence.validators import PROJECT_INTELLIGENCE_RULE_SET  # noqa: PLC0415
+
+    report = await run_rule_set(
+        PROJECT_INTELLIGENCE_RULE_SET,
+        {"forecast": asdict(forecast)},
+        target_type="project_forecast",
+        target_id=forecast.project_id,
+        project_id=forecast.project_id or None,
+    )
+    return [finding(r) for r in [*report.errors, *report.warnings]]

@@ -66,7 +66,7 @@ from app.modules.project_intelligence.schemas import (
     SnoozeForecastRequest,
 )
 from app.modules.project_intelligence.scorer import compute_score
-from app.modules.project_intelligence.service import ForecastService
+from app.modules.project_intelligence.service import ForecastService, check_forecast
 
 router = APIRouter(tags=["Project Intelligence"])
 logger = logging.getLogger(__name__)
@@ -747,4 +747,5 @@ async def get_project_forecast(
         schedule=ScheduleSlipResponse(**asdict(forecast.schedule)),
         risk=CostOverrunRiskResponse(**asdict(forecast.risk)),
         review_required=forecast.review_required,
+        findings=await check_forecast(forecast),
     )

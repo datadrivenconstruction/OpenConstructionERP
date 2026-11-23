@@ -347,3 +347,7 @@ class ProjectForecastResponse(BaseModel):
     schedule: ScheduleSlipResponse = Field(default_factory=ScheduleSlipResponse)
     risk: CostOverrunRiskResponse = Field(default_factory=CostOverrunRiskResponse)
     review_required: bool = True
+    findings: list[dict] = Field(
+        default_factory=list,
+        description="Findings of the project intelligence rules, worded in the caller's language.",
+    )
