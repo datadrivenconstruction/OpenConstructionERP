@@ -209,6 +209,8 @@ _READ_ONLY_ENDPOINTS = (
     "app.modules.formwork.router:validate_project",
     "app.modules.labor_rates.router:compute_rate",
     "app.modules.project_intelligence.router:get_recommendations",
+    # Dry run of design generation: builds the brief the in-browser model preview draws, stores nothing.
+    "app.modules.design.model_api:register.<locals>.model_preview",
     # Logs the report and writes no row; a browser reports errors before sign-in too.
     "app.modules.client_errors.router:submit_client_error",
 )
