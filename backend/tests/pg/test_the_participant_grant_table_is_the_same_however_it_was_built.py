@@ -660,7 +660,14 @@ async def test_the_foreign_keys_cascade_where_the_design_says_they_do(pg_session
     )
 
     await pg_session.execute(text(f'DELETE FROM "{_PROJECT}" WHERE id = :id'), {"id": install.project})
-    after_project = await pg_session.scalar(text(f'SELECT count(*) FROM "{_GRANT}"'))
+    # Counted for *this* project rather than over the table. The lane shares one
+    # database across every file in ``tests/pg`` and isolates by rolling back, so a
+    # global count is an assertion about every other test's housekeeping as well as
+    # about this cascade - and the claim here is only that a grant on a deleted
+    # project went with it.
+    after_project = await pg_session.scalar(
+        text(f'SELECT count(*) FROM "{_GRANT}" WHERE project_id = :id'), {"id": install.project}
+    )
     facts = await _role_facts(pg_session)
 
     assert author is None, "deleting the author should null the reference, not remove the grant"
@@ -695,17 +702,33 @@ async def test_downgrade_removes_the_grant_table_and_leaves_everything_else_stan
         {"id": str(uuid.uuid4()), "entity": install.grant},
     )
     audit_rows = await pg_session.scalar(text(f'SELECT count(*) FROM "{_ACTIVITY}"'))
+    # Counted before as well as after, and compared with itself rather than with a
+    # literal. This lane builds one database for the whole of ``tests/pg`` and
+    # isolates each test by rolling its transaction back, so "the projects table
+    # holds one row" is a claim about every test that ran before this one as much
+    # as about this downgrade - and it is the wrong claim to make. What the
+    # downgrade has to leave alone is what was there when it started, so that is
+    # what is measured, and the rows this install owns are then asked for by id:
+    # a count that did not move says nothing was destroyed, and an id that still
+    # resolves says *these* rows are the ones that survived.
+    survived = {
+        _PROJECT: (install.project,),
+        _ORGANIZATION: (install.owner_org, install.grantee_org),
+        _USER: (install.owner_user, install.author_user, install.grantee_user),
+        "oe_users_membership": (install.membership,),
+    }
+    before = {table: await pg_session.scalar(text(f'SELECT count(*) FROM "{table}"')) for table in survived}
 
     await _run_revision(pg_session, "downgrade")
     facts = await _role_facts(pg_session)
 
     assert not await _table_exists(pg_session, _GRANT), "the downgrade left the table behind"
-    assert await pg_session.scalar(text(f'SELECT count(*) FROM "{_PROJECT}"')) == 1
-    assert await pg_session.scalar(text(f'SELECT count(*) FROM "{_ORGANIZATION}"')) == 2
-    assert await pg_session.scalar(text(f'SELECT count(*) FROM "{_USER}"')) == 3
-    assert await pg_session.scalar(text('SELECT count(*) FROM "oe_users_membership"')) == 1, (
-        "a grant authorizes a company; it is not a membership, and removing it must not touch one"
-    )
+    after = {table: await pg_session.scalar(text(f'SELECT count(*) FROM "{table}"')) for table in survived}
+    assert after == before, f"the downgrade took collateral with it: {before} -> {after}"
+    for table, ids in survived.items():
+        for row_id in ids:
+            present = await pg_session.scalar(text(f'SELECT count(*) FROM "{table}" WHERE id = :id'), {"id": row_id})
+            assert present == 1, f"{table} {row_id} did not survive the downgrade"
     assert await pg_session.scalar(text(f'SELECT count(*) FROM "{_ACTIVITY}"')) == audit_rows, (
         "the audit trail is the record that survives a downgrade; it must not go with the table"
     )

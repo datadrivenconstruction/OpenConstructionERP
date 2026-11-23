@@ -87,6 +87,9 @@ async def _run_revision(session, direction: str) -> None:  # noqa: ANN001
     module = _load_revision()
     connection = await session.connection()
 
+    if direction == "downgrade":
+        await _drop_later_dependents(session)
+
     def _apply(sync_connection) -> None:  # noqa: ANN001
         context = MigrationContext.configure(sync_connection)
         operations = Operations(context)
@@ -112,12 +115,83 @@ async def _role_facts(session) -> dict[str, object]:  # noqa: ANN001
     return {"current_user": row.current_user, "session_user": row.session_user, "rolsuper": row.rolsuper}
 
 
+#: Tables a *later* revision added that hold a foreign key into the tenancy schema
+#: this revision creates. They are not this revision's objects, and nothing here
+#: tests them; they are moved only because a foreign key from a later table makes
+#: ``DROP TABLE`` refuse.
+#:
+#: ``oe_projects_participant_grant`` (ADR 006, revision ``v3326``) references the
+#: organization twice: as the grantee, and as the company the grant was made on
+#: behalf of. Named rather than cascaded, because ``DROP TABLE ... CASCADE`` would
+#: remove a table belonging to another revision silently, and a helper that
+#: destroys something it was not asked about is how a test starts passing for the
+#: wrong reason.
+_DEPENDENTS_OF_ORGANIZATION = ("oe_projects_participant_grant",)
+
+#: The two references that belong to *this* revision and that its own
+#: ``downgrade()`` removes - the column it adds to the project, and the membership
+#: table it creates. Tolerated by the catalog question below, because a helper that
+#: runs before the revision does has to expect them, and because naming them is what
+#: makes the question about anything else.
+_TENANCYS_OWN_REFERENCES = frozenset({_PROJECT, _MEMBERSHIP})
+
+
+async def _drop_later_dependents(session) -> None:  # noqa: ANN001
+    """Move the tables a later revision hung off this revision's schema.
+
+    A real ``alembic downgrade`` reaches ``v3325`` by running ``v3326``'s
+    downgrade first, so the grant table would already be gone and the organization
+    table would drop without argument. This file drives one revision's
+    ``downgrade()`` by hand, which is the right way to test that revision and the
+    reason the later one has to be stood in for here.
+
+    The catalog question is what keeps the list above honest. A dependent nobody
+    added does not fail as "this helper is out of date"; it fails as an ``asyncpg``
+    ``DependentObjectsStillExistError`` naming a constraint, several frames below
+    anything that explains it - which is how the grant table arrived, with five
+    tests in this file failing on a drop that had nothing to do with tenancy.
+    Asked before the drop rather than after, because after a successful drop the
+    table has no oid for the question to compare against. ``to_regclass`` rather
+    than a cast, so a database that never had the table asks nothing of it.
+    """
+    for dependent in _DEPENDENTS_OF_ORGANIZATION:
+        await session.execute(text(f"DROP TABLE IF EXISTS {dependent}"))
+    still_referencing = [
+        (row.dependent_table, row.conname)
+        for row in (
+            await session.execute(
+                text(
+                    "SELECT conrelid::regclass::text AS dependent_table, conname "
+                    "FROM pg_constraint "
+                    "WHERE contype = 'f' "
+                    "  AND confrelid = to_regclass('oe_users_organization') "
+                    "ORDER BY 1, 2"
+                )
+            )
+        ).all()
+        if row.dependent_table not in _TENANCYS_OWN_REFERENCES
+    ]
+    assert not still_referencing, (
+        "the organization table cannot be dropped while a table this revision does not own still "
+        f"references it; add each one to _DEPENDENTS_OF_ORGANIZATION: {still_referencing}"
+    )
+
+
 async def _drop_tenancy_schema(session) -> None:  # noqa: ANN001
     """Remove what the revision creates, in the order its own dependencies allow.
 
     The session's schema is built by ``create_all``, so these tables exist before
     a test starts. Removing them is what lets ``upgrade()`` be tested as the thing
     that builds the schema rather than as a no-op that happens to pass.
+
+    Two kinds of object have to move before the organization table can be dropped,
+    and they are handled separately because they are different claims. The
+    revision's own objects - the project's column and its constraint, the ledger,
+    the membership - are what ``downgrade()`` removes, so removing them here is
+    what makes the test a test; they are the statements below. The tables a later
+    revision hung off this schema are not this revision's business at all, and
+    :func:`_drop_later_dependents` moves them and says why. Everything is inside
+    the fixture's transaction, so nothing is actually lost.
     """
     for statement in (
         f"ALTER TABLE {_PROJECT} DROP CONSTRAINT IF EXISTS "
@@ -126,9 +200,10 @@ async def _drop_tenancy_schema(session) -> None:  # noqa: ANN001
         f"ALTER TABLE {_PROJECT} DROP COLUMN IF EXISTS organization_id",
         f"DROP TABLE IF EXISTS {_LEDGER}",
         f"DROP TABLE IF EXISTS {_MEMBERSHIP}",
-        f"DROP TABLE IF EXISTS {_ORGANIZATION}",
     ):
         await session.execute(text(statement))
+    await _drop_later_dependents(session)
+    await session.execute(text(f"DROP TABLE IF EXISTS {_ORGANIZATION}"))
 
 
 async def _insert(session, table: str, **columns: object) -> str:  # noqa: ANN001
