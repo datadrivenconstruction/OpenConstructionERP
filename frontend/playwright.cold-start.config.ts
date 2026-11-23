@@ -30,11 +30,23 @@ export default defineConfig({
   fullyParallel: false,
   retries: 0,
   workers: 1,
-  // The sign-in page is watched for 45s by the first test, on top of a cold
-  // navigation on a server that has just finished starting. Four minutes is
-  // above that with room, and it is a ceiling rather than a budget: a test that
-  // uses it has already failed the thing the lane measures.
-  timeout: 240_000,
+  // A ceiling, not a budget: a test that comes near it has already failed the
+  // thing the lane measures. What it has to sit above is the sum of the ceilings
+  // the spec's own waits can consume, so that the message a reader gets is the
+  // step's - "the Support and legal card did not render within 120000ms", with
+  // the timings that go with it - rather than a bare "Test timeout exceeded".
+  //
+  // Nothing else bounds a navigation here. Playwright Test's `navigationTimeout`
+  // defaults to 0, meaning no timeout, and `page.goto` takes its default from
+  // that, so in this configuration a navigation is bounded only by this number
+  // (@playwright/test 1.63's own types say so for both options). That makes this
+  // the outer bound on every step in the spec, and the two heaviest tests are
+  // what size it: the second test's waits sum to 330s and the last test's to
+  // 360s, three of them at COLD_STEP_TIMEOUT_MS. Eight minutes is above both
+  // with room for the navigations between them, and the job's own
+  // `timeout-minutes: 40` remains the bound on a lane in which everything hangs
+  // at once.
+  timeout: 480_000,
   expect: { timeout: 15_000 },
   reporter: [['list']],
   outputDir: 'test-results/cold-start',

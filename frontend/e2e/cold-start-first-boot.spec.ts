@@ -40,8 +40,14 @@
  * JSON object. `scripts/ci/browser_cold_start_lane.py` reads those lines back
  * out of Playwright's own JSON report and turns them into job annotations, so
  * the counts are visible on the run and not only in a log nobody downloads.
- * The line is printed before the assertions run, which is deliberate: a lane
- * that fails on a count is exactly the lane whose count somebody needs to read.
+ * The line is printed before the assertions run wherever the test has evidence
+ * to lose, which is deliberate: a lane that fails on a count is exactly the
+ * lane whose count somebody needs to read. The second test is the exception and
+ * can be, because each of its steps asserts as it goes and carries its own
+ * message. The driver reads the failures out of the same report - Playwright
+ * records the title, the message and the step durations of every test that did
+ * not pass - and annotates each one, so a red run of this lane names the test
+ * that stopped rather than only the exit code it stopped with.
  */
 import { test, expect, type Page } from '@playwright/test';
 
@@ -59,6 +65,38 @@ const RECORD_WINDOW_MS = Number(process.env.OE_COLD_START_RECORD_WINDOW_MS ?? '4
 /** Ceilings. Each one is a number a person reported exceeding, or a loop bound. */
 const MAX_API_REQUESTS = 60;
 const MAX_REPEATS_OF_ONE_URL = 5;
+
+/**
+ * How long the last test gives each of its waits, and why that test's waits and
+ * only that test's.
+ *
+ * The Windows leg of this lane failed once with the product code byte-identical
+ * to the run before it that passed: the whole difference between those two
+ * commits was two backend PostgreSQL test files, which this lane never installs
+ * and never executes. Both runs ran the same four tests against a cold install.
+ * The passing one reported 76.7s of Playwright time against a 90.8s boot and all
+ * four tests expected; the failing one reported 143.2s against a 100.9s boot and
+ * three expected, one unexpected. The record window in the first test is 45s on
+ * both, so the three tests that act on the product took about 32s when the leg
+ * passed and about 98s when it failed: one exhausted 60s ceiling plus the
+ * reporting around it, in the last test, which is the only test whose metrics
+ * line never reached the run.
+ *
+ * Which of that test's three waits ran out is not known, and widening one of them
+ * on a guess about which it was would leave the other two where they are for the
+ * next run to find. All three are the same kind of wait against the same cold
+ * server, so all three move together. 120s is about four times what this platform
+ * was measured doing when it passed, and the step timings printed with the report
+ * are what keep that from being a quietly widened door: a slow step is still a
+ * slow step in the numbers, and if one of these ceilings runs out again the
+ * annotation carries the boot time to read it against.
+ *
+ * The first three tests keep their own ceilings on purpose. They passed on both
+ * platforms in both runs, the first test's wait bounds the first paint after a
+ * cold boot which is the thing this lane exists to measure, and a lane that moves
+ * every ceiling it has after one failure has stopped measuring anything.
+ */
+const COLD_STEP_TIMEOUT_MS = 120_000;
 
 /** The first account on this install. Policy-compliant: letters, digits, 8+. */
 const OWNER_EMAIL = 'browser-lane-owner@example.com';
@@ -315,12 +353,33 @@ test('the sign-up form does not ask how the visitor found us', async ({ page }) 
 test('settings shows support and legal without naming where this software comes from', async ({ page }) => {
   // Signed in as the account the second test made; a signed-out visit to
   // /settings is a redirect and would measure nothing.
+  //
+  // This test watches the page and prints before it asserts, as the first and
+  // third tests do and the second cannot: the second test's report summarises
+  // actions that each carried their own assertion, so a failure there is named
+  // by the assertion that failed. This one used to print last, and the run that
+  // failed it therefore published nothing about itself at all - no URL, no
+  // timings, no console errors - which is the reason the driver now also
+  // annotates every failing test out of Playwright's own report.
+  const { census, stop } = watch(page);
+  const timings: Record<string, number> = {};
+  let stepStartedAt = Date.now();
+  /** Record how long the step just finished took, and start the next one. */
+  const mark = (step: string): void => {
+    timings[step] = Date.now() - stepStartedAt;
+    stepStartedAt = Date.now();
+  };
+
   await page.goto('/login');
-  await expect(page.locator('#login-password')).toBeVisible({ timeout: 60_000 });
+  await expect(page.locator('#login-password')).toBeVisible({ timeout: COLD_STEP_TIMEOUT_MS });
+  mark('sign-in page painted');
   await page.locator('input[type="email"]').fill(OWNER_EMAIL);
   await page.locator('#login-password').fill(OWNER_PASSWORD);
   await page.locator('button[type="submit"]').click();
-  await expect(page).not.toHaveURL(/\/login/, { timeout: 60_000 });
+  await expect(page, 'still on the sign-in form after signing in through it').not.toHaveURL(/\/login/, {
+    timeout: COLD_STEP_TIMEOUT_MS,
+  });
+  mark('signed in');
 
   // The card lives on the Company & documents tab. SettingsPage reads ?tab= and
   // defaults to 'general', so a plain /settings renders a page that does not
@@ -328,32 +387,105 @@ test('settings shows support and legal without naming where this software comes 
   // rather than on anything the card says. This is the route a person clicks
   // through to, spelled as the URL the page itself publishes.
   await page.goto('/settings?tab=company');
-  const cardHeading = page.getByText(/support and legal/i).first();
-  await expect(cardHeading, 'the Support and legal card did not render').toBeVisible({ timeout: 60_000 });
+  mark('settings navigated');
 
-  // The card, and not the page: /settings carries panels about many things and
-  // an assertion over the whole document would fail on a sentence this lane has
-  // no opinion about. The innermost container that holds the heading is the
-  // card, which is what the report asked about.
-  const card = page
-    .locator('section, article, aside, div')
-    .filter({ has: page.getByText(/support and legal/i) })
-    .last();
-  const cardText = (await card.textContent()) ?? '';
+  // The card by the handle the product's own tests use -
+  // CompanyDocumentsSettings.tsx puts data-testid="support-and-legal" on the
+  // Card and CompanyDocumentsSettings.test.tsx asks for exactly that - rather
+  // than by its heading text. Two reasons, and the second is a defect this test
+  // had.
+  //
+  // The heading is `settings.support.title`, a translation key that happens to
+  // carry the same English sentence in all forty-three bundles today. A handle
+  // does not depend on that staying true.
+  //
+  // The text locator this test filtered on resolved to the *innermost* element
+  // holding the heading, because `.last()` over a document-order list of nested
+  // matches is the deepest of them. So `cardText` was the heading and its
+  // subtitle, the assertion below read two sentences of a card that renders ten,
+  // and the comment that called it "the card, and not the page" described an
+  // intention the locator never carried out: whatever the card said underneath
+  // its own title, this test agreed with it.
+  const card = page.locator('[data-testid="support-and-legal"]');
+  let cardError = '';
+  try {
+    await expect(card, 'the Support and legal card did not render').toBeVisible({
+      timeout: COLD_STEP_TIMEOUT_MS,
+    });
+  } catch (error) {
+    // Caught so the report still prints. A card that never rendered is the one
+    // outcome where the evidence matters most, and an exception thrown here
+    // would take the evidence with it. The first few lines rather than the first
+    // one, because a wait that runs out puts its subject in the call log below
+    // the sentence: "waiting for locator('[data-testid="support-and-legal"]')"
+    // is the part that says what was looked for.
+    cardError = String((error as { message?: string } | undefined)?.message ?? error)
+      .split('\n')
+      .map((line) => line.trim())
+      .filter((line) => line !== '')
+      .slice(0, 4)
+      .join(' | ');
+  }
+  mark('card waited for');
+  const cardRendered = cardError === '';
 
+  // The door from this card to the source offer, which is what makes the card
+  // allowed to be quiet about where the software comes from: it is not quiet
+  // about the licence. The link renders whether or not the footers show it.
+  const legalLinkCount = await card.locator('a[href="/legal"]').count();
+  // Published and not asserted. This notice is the one thing in the card that
+  // names a licence, so it is the one thing the origin assertion below can trip
+  // on, and it renders only when an administrator has hidden the Legal link -
+  // which a fresh install has not done, which is also why the runs that passed
+  // measured no origin anywhere on the page.
+  const agplNoticeCount = await page.locator('[data-testid="legal-agpl-notice"]').count();
+
+  const cardText = cardRendered ? ((await card.textContent()) ?? '') : '';
   const pageText = (await page.locator('body').textContent()) ?? '';
+  const c = census();
+  stop();
+  mark('evidence gathered');
+
   const origins = /open source|AGPL|GitHub/i;
 
   report('settings support and legal', {
-    card_rendered: true,
+    card_rendered: cardRendered,
+    card_error: cardError.slice(0, 300),
+    url: page.url(),
+    step_timeout_ms: COLD_STEP_TIMEOUT_MS,
+    timings_ms: timings,
+    legal_link_count: legalLinkCount,
+    agpl_notice_count: agplNoticeCount,
     card_names_an_origin: origins.test(cardText),
     card_matches: (cardText.match(new RegExp(origins.source, 'gi')) ?? []).slice(0, 10),
     page_names_an_origin: origins.test(pageText),
     page_matches: (pageText.match(new RegExp(origins.source, 'gi')) ?? []).slice(0, 10),
+    api_requests: c.api,
+    server_errors: c.serverErrors,
+    console_errors: c.consoleErrors,
+    page_errors: c.pageErrors,
   });
 
   expect(
+    cardRendered,
+    `the Support and legal card did not render within ${COLD_STEP_TIMEOUT_MS}ms; url=${page.url()} ` +
+      `timings=${JSON.stringify(timings)} card_error="${cardError.slice(0, 200)}" ` +
+      `console_errors=${JSON.stringify(c.consoleErrors)} page_errors=${JSON.stringify(c.pageErrors)} ` +
+      `server_errors=${JSON.stringify(c.serverErrors)}`,
+  ).toBe(true);
+
+  expect(
+    legalLinkCount,
+    'the card no longer links to /legal, where the source offer this card exists to keep lives',
+  ).toBeGreaterThan(0);
+
+  expect(
     origins.test(cardText),
-    `the Support and legal card names where this software comes from: ${JSON.stringify(cardText.match(new RegExp(origins.source, 'gi')))}`,
+    'the Support and legal card names where this software comes from: ' +
+      `${JSON.stringify(cardText.match(new RegExp(origins.source, 'gi')))}. ` +
+      'If the match is "AGPL", the cause is the notice at data-testid="legal-agpl-notice", which this card shows ' +
+      "when an administrator hides the Legal link: that notice is the licence's own requirement and must not be " +
+      'removed to make this pass. A fresh install shows the link and hides the notice, so on a cold start this ' +
+      'sentence means the card grew a vendor, a repository or a claim about its origins.',
   ).toBe(false);
 });

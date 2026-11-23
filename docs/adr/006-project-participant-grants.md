@@ -726,3 +726,79 @@ of an assertion that used to pin the leak: the HTTP characterization named above
 service test, and the legacy-project test's framework read. Question 1's answer is what authorizes
 those reversals, and each test says so in its own docstring so the reversal cannot be read as a
 regression that somebody quietly accepted.
+
+### 13.9 Two things the first CI run of this ADR taught, which a later revision will need
+
+The PostgreSQL lane failed at `9ef684f9`, the first run that carried the whole of this ADR, and the
+run page named six tests. Five of them were not this ADR's tests, and all five carried the same
+error; the annotations below are that run's own text, with the five repeated lines of it folded into
+one under the names of the tests it stopped:
+
+```
+tests.pg.test_tenancy_backfill_on_a_populated_database::test_upgrade_builds_the_tenancy_schema_when_it_is_absent
+tests.pg.test_tenancy_backfill_on_a_populated_database::test_upgrade_run_twice_builds_the_same_schema_once
+tests.pg.test_tenancy_backfill_on_a_populated_database::test_the_repair_reports_zero_on_a_database_without_the_schema
+tests.pg.test_tenancy_backfill_on_a_populated_database::test_downgrade_puts_a_populated_database_back_and_removes_the_schema
+tests.pg.test_tenancy_backfill_on_a_populated_database::test_downgrade_on_an_install_that_never_ran_the_repair_changes_no_data
+  sqlalchemy.exc.DBAPIError: ... <class 'asyncpg.exceptions.DependentObjectsStillExistError'>:
+  cannot drop table oe_users_organization because other objects depend on it
+tests.pg.test_the_participant_grant_table_is_the_same_however_it_was_built::test_downgrade_removes_the_grant_table_and_leaves_everything_else_standing
+  assert 2 == 1
+totals: collected=80 passed=75 failed=5 errored=0 skipped=0
+```
+
+Neither cause is a defect in the grant feature. Both are properties of how this ADR's table meets
+tests that were written before it, and both will be met again by whatever revision adds the next
+table with a foreign key into an existing one.
+
+**A revision is not only tested against the schema it was written on.**
+`oe_projects_participant_grant` references `oe_users_organization` twice - as the grantee
+(`fk_projects_participant_grant_grantee`) and as the company the grant was made on behalf of
+(`fk_projects_participant_grant_on_behalf`). A real `alembic downgrade` reaches `v3325` by running
+`v3326`'s downgrade first, so those references would already be gone; but the tenancy test drives
+one revision's `downgrade()` by hand, which is the right way to test that revision and the reason it
+met a table belonging to a later one. Its teardown dropped the organization table and the database
+refused. The fix is `_drop_later_dependents`, which drops the dependents this ADR added
+(`_DEPENDENTS_OF_ORGANIZATION`), then asks the catalog whether any others remain
+(`contype = 'f' AND confrelid = to_regclass('oe_users_organization')`) and fails as a sentence
+naming them if one does. Three details are load-bearing, and each one cost a run to find:
+
+* it is called from **both** places that run that DDL - `_run_revision`, before any hand-driven
+  downgrade, and `_drop_tenancy_schema`, after the revision's own statements - because patching only
+  the fixture left the same five failures standing;
+* the cast has to be `to_regclass(...)`, since a table that has just been dropped has no oid for
+  `::regclass` to resolve, and the completeness question therefore has to be asked *before* the drop
+  it is checking;
+* the catalog's answer is filtered by `_TENANCYS_OWN_REFERENCES` (`oe_projects_project`,
+  `oe_users_membership`), the two references that belong to the revision being tested and that its
+  own `downgrade()` removes, or the helper names as offenders the very tables it is helping to take
+  away.
+
+`DROP TABLE ... CASCADE` was not used, and should not be: in a fixture it turns "something new
+depends on this" into a silent widening of what the fixture deletes, which is how a test starts
+passing for a reason nobody can state.
+
+**`tests/pg` is one database, so an absolute row count is not a local claim.** The sixth failure was
+`assert 2 == 1` in a test that counted projects after a cascade, in this ADR's own file. It passed
+when that file ran alone and failed in the lane, because every test in `tests/pg` shares one
+database and isolation is rollback-only: a literal `count(*) == 1` is also an assertion about every
+test that ran before it. The grant-table tests now assert before-and-after deltas, survival by id,
+and cascade counts scoped `WHERE project_id = :id`. Any test written against this ADR's table should
+do the same, and a later revision that adds a row to a shared table should expect to meet this one.
+
+One gap this run showed and did not close: `totals` above says `failed=5` while six tests failed,
+because `scripts/publish_test_counts.py` is handed eight `--target` files in the lane's own workflow,
+`.github/workflows/ci-postgres.yml`, and none of the eight is this ADR's. The sixth failure still
+reached the run page - the script annotates every failure in the report, not only its targets' - but
+the totals a reader compares against did not cover it, and a file that is not a target can skip
+entirely without the lane noticing. Adding this ADR's files as targets is the fix, and it needs a run
+to confirm that none of them skips, because the step passes `--fail-on-skip`; that is a change to
+make with the evidence in hand rather than blind at the head of a pull request.
+
+The same head's two other red jobs - `Browser cold start (windows-latest)`, and `CLI cold start`,
+which is a gate over both cold-start lanes and was red because the browser leg was - were not this
+ADR's either. The whole difference between the run that failed them and the run before it, which
+passed, is two files under `backend/tests/pg`, which those lanes never install and never execute.
+What they taught is recorded where the next reader of those lanes will look for it: in
+`scripts/ci/browser_cold_start_lane.py`, in `frontend/e2e/cold-start-first-boot.spec.ts`, in
+`scripts/test_browser_cold_start_lane.py`, and in the pull request that carries them.
