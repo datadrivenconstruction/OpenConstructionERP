@@ -997,11 +997,27 @@ jobs:
     # have a recorded history of being cancelled for capacity, which would put a
     # third leg here whose red means nothing about the product.
     needs: [frontend]
-    # Skipped rather than failed when the build it downloads did not happen.
-    # `frontend` is a matrix, so a capacity cancellation on its macOS leg reads
-    # as a failure of the whole job and would otherwise turn this lane red for
-    # an event that touched neither the interface nor the server.
-    if: ${{ !cancelled() && needs.frontend.result == 'success' }}
+    # Skipped rather than failed when the build it downloads did not happen, and
+    # not skipped when it did happen. `frontend` is a matrix over three OSes, but
+    # only its ubuntu-latest leg uploads `frontend-dist`, so
+    # `needs.frontend.result` is an aggregate of three legs and this lane was
+    # reading it as one verdict about the bundle. At 07d623f7 the macOS leg was
+    # never acquired by a hosted runner, the aggregate came back `cancelled`, and
+    # the whole lane skipped - with the 66,351,876 byte bundle it exists to open
+    # sitting unexpired in that same run's artifacts, uploaded by the ubuntu leg,
+    # which had passed, with the windows leg passed beside it. Two legs that
+    # build nothing this lane uses must not be able to suppress it, and a skip
+    # here is worse than a red here: the run reads green and the evidence is
+    # simply absent.
+    #
+    # So `cancelled` is tolerated beside `success`, and `failure` and `skipped`
+    # are not. A frontend that genuinely failed is already red on the run, and
+    # twenty minutes of browser work on a bundle from a build that broke answers
+    # nothing. The tolerance is deliberately asymmetric about the leg that
+    # matters: if ubuntu is the leg that was never acquired there is no artifact
+    # at all, and the refusal step below names that instead of letting the
+    # download action report a generic "unable to find any artifacts".
+    if: ${{ !cancelled() && (needs.frontend.result == 'success' || needs.frontend.result == 'cancelled') }}
     runs-on: ${{ matrix.os }}
     # The CLI's own wait for health is 900s, and Playwright's per-test ceiling
     # is 240s with a 45s recording window inside it. The margin above both is
@@ -1032,6 +1048,12 @@ jobs:
 
       - name: Download the built interface
         id: dist
+        # continue-on-error so that a missing artifact is named by the step
+        # below, which knows that only the ubuntu-latest leg of Frontend CI
+        # uploads it, instead of by this action's generic complaint that it
+        # could not find any artifact for the workflow. `outcome` still reports
+        # what really happened, and that is what the next step reads.
+        continue-on-error: true
         uses: actions/download-artifact@v4
         with:
           name: frontend-dist
@@ -1043,14 +1065,28 @@ jobs:
         # 404 for every route, and the browser would report a clean, quiet,
         # almost-empty first boot. Naming it here keeps that from being read as
         # a pass further down.
-        if: ${{ !cancelled() && steps.dist.outcome == 'success' }}
+        #
+        # There are two ways to arrive here with no bundle and they are not the
+        # same event, so they are not reported with the same sentence: the
+        # download itself failing means no leg ever uploaded `frontend-dist`,
+        # which points at the conclusion of the ubuntu-latest leg of Frontend CI
+        # on this run, while a download that succeeded and produced nothing
+        # means an empty bundle was uploaded. Both stop the lane.
+        if: ${{ !cancelled() }}
+        env:
+          DIST_OUTCOME: ${{ steps.dist.outcome }}
         shell: bash
         run: |
-          test -f frontend/dist/index.html || {
-            echo "::error::frontend/dist/index.html is missing; the downloaded bundle is empty"
+          if test -f frontend/dist/index.html; then
+            echo "built interface: $(ls frontend/dist | wc -l) entries"
+            exit 0
+          fi
+          if test "$DIST_OUTCOME" != success; then
+            echo "::error::frontend-dist was never uploaded: only the ubuntu-latest leg of Frontend CI builds and uploads it, and the download of it concluded '$DIST_OUTCOME' on this run"
             exit 1
-          }
-          echo "built interface: $(ls frontend/dist | wc -l) entries"
+          fi
+          echo "::error::frontend/dist/index.html is missing; the downloaded bundle is empty"
+          exit 1
 
       - name: Install dependencies
         working-directory: frontend
@@ -1126,7 +1162,11 @@ jobs:
           #   skipped   the browser lane's frontend build did not happen, which
           #             is a failure of a different lane and already red on the
           #             run. Reporting it here as well would name this gate as
-          #             the thing that broke.
+          #             the thing that broke. Since that lane stopped reading
+          #             three legs as one verdict about its bundle, this value
+          #             can only mean the frontend job really failed or really
+          #             did not run - not that a leg which builds nothing the
+          #             lane uses was never allocated a runner.
           #   cancelled a leg's runner was taken away after it was allocated.
           #   abandoned a leg's runner never arrived. This is the value the
           #             macOS leg of the CLI matrix above aggregated to at

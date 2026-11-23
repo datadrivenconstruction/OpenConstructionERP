@@ -802,3 +802,18 @@ passed, is two files under `backend/tests/pg`, which those lanes never install a
 What they taught is recorded where the next reader of those lanes will look for it: in
 `scripts/ci/browser_cold_start_lane.py`, in `frontend/e2e/cold-start-first-boot.spec.ts`, in
 `scripts/test_browser_cold_start_lane.py`, and in the pull request that carries them.
+
+Two later runs of the same lanes taught two more things, and both are now pinned by a test that
+executes the workflow's own text rather than left in a comment beside it. At `68c4f4f7` the gate
+failed with `the CLI cold start lane did not pass: abandoned` on a run where everything that ran
+had passed: `abandoned` is what the CLI matrix aggregated to when its macOS leg was never acquired
+by a hosted runner, and a leg that never ran is not a verdict about the product. At `07d623f7` the
+browser lane skipped whole, and the run it skipped on had uploaded the bundle the lane exists to
+open - `frontend-dist`, 66,351,876 bytes, unexpired, in that same run's artifacts - because the
+lane's `if` read `needs.frontend.result`, an aggregate of three legs, as one verdict about a bundle
+only the `ubuntu-latest` leg builds, and the macOS leg beside it had been cancelled for capacity.
+Those two are in
+`backend/tests/unit/test_the_cold_start_gate_tells_a_leg_that_never_ran_from_a_product_that_failed.py`
+and `backend/tests/unit/test_the_browser_lane_is_not_suppressed_by_a_leg_that_built_no_bundle.py`.
+Neither is this ADR's subject either, and both are recorded here because this section is where the
+pull request's account of what its own CI taught it lives.
