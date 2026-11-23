@@ -2,7 +2,7 @@
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 """Data paths of the waste_factors module (see app.core.data_paths)."""
 
-from app.core.data_paths import DataPaths, Duty, Entity, Param
+from app.core.data_paths import DataPath, DataPaths, Duty, Entity, Param
 
 DATA_PATHS = DataPaths(
     why="data_paths.why.waste_factors",
@@ -18,6 +18,18 @@ DATA_PATHS = DataPaths(
     parameters=(
         Param(
             "WasteFactor.factor", drives=("oe_norm_expansion:material_waste",), label="data_paths.param.waste_factor"
+        ),
+    ),
+    outputs=(
+        DataPath(
+            "oe_norm_expansion",
+            "WasteFactor",
+            via="WasteFactor.category",
+            label="data_paths.entity.waste_factor",
+            route="/norm-expansion",
+            importance="high",
+            breaks="data_paths.breaks.no_waste_gross_up",
+            scope="global",
         ),
     ),
 )

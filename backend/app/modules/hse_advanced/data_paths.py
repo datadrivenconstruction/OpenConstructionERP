@@ -33,5 +33,14 @@ DATA_PATHS = DataPaths(
             breaks="data_paths.breaks.action_without_incident",
             where=(Where("source_type", "eq", "incident"),),
         ),
+        DataPath(
+            "oe_safety",
+            "HSEIncidentInvestigation",
+            via="HSEIncidentInvestigation.incident_ref",
+            label="data_paths.entity.incident_investigation",
+            route="/safety",
+            importance="high",
+            breaks="data_paths.breaks.investigation_without_incident",
+        ),
     ),
 )

@@ -2,7 +2,7 @@
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 """Data paths of the site_supervision module (see app.core.data_paths)."""
 
-from app.core.data_paths import DataPath, DataPaths, Duty, Entity
+from app.core.data_paths import DataPath, DataPaths, Duty, Entity, Where
 
 DATA_PATHS = DataPaths(
     why="data_paths.why.site_supervision",
@@ -27,6 +27,16 @@ DATA_PATHS = DataPaths(
             via="SupervisionVisit.project_id",
             label="data_paths.entity.project",
             route="/projects",
+        ),
+    ),
+    outputs=(
+        DataPath(
+            "oe_moc",
+            "SupervisionEntry",
+            via="SupervisionEntry.links_to_change_ref",
+            label="data_paths.entity.moc_entry",
+            route="/moc",
+            where=(Where("links_to_change_ref", "not_null"),),
         ),
     ),
 )
