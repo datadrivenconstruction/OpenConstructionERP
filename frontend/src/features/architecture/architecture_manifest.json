@@ -28965,7 +28965,8 @@
         "manifest.py",
         "router.py",
         "schemas.py",
-        "service.py"
+        "service.py",
+        "validators.py"
       ],
       "manifest": {
         "name": "oe_bimlv",
@@ -29072,6 +29073,11 @@
             {
               "name": "warnings",
               "type": "list[str]"
+            },
+            {
+              "name": "findings",
+              "type": "list[dict]",
+              "description": "Findings of the BIM-LV rules, worded in the caller's language."
             }
           ]
         }
@@ -61084,6 +61090,21 @@
             {
               "name": "suggestions",
               "type": "list[str]"
+            },
+            {
+              "name": "requires_confirmation",
+              "type": "bool",
+              "default": "True"
+            },
+            {
+              "name": "ai_used",
+              "type": "bool",
+              "default": "False"
+            },
+            {
+              "name": "low_confidence",
+              "type": "bool",
+              "default": "False"
             }
           ]
         }
@@ -93374,6 +93395,7 @@
         "clock_headcount.py",
         "data_paths.py",
         "events.py",
+        "field_report_links.py",
         "intl.py",
         "manifest.py",
         "models.py",
@@ -96447,6 +96469,7 @@
       "import_dependencies": [
         "documents",
         "field_time",
+        "fieldreports",
         "project_governance",
         "projects",
         "punchlist",
@@ -111977,6 +112000,7 @@
         "photos_seed.py",
         "references.py",
         "repository.py",
+        "revisions.py",
         "router.py",
         "schemas.py",
         "service.py",
@@ -112776,6 +112800,27 @@
           "path": "/{document_id}/references",
           "handler": "get_document_references",
           "response_model": "DocumentReferencesResponse",
+          "request_schema": "DocumentService"
+        },
+        {
+          "method": "GET",
+          "path": "/{document_id}/revision-chain/",
+          "handler": "get_revision_chain",
+          "response_model": "RevisionChainResponse",
+          "request_schema": "DocumentService"
+        },
+        {
+          "method": "POST",
+          "path": "/{document_id}/make-current/",
+          "handler": "make_current_revision",
+          "response_model": "DocumentResponse",
+          "request_schema": "None"
+        },
+        {
+          "method": "GET",
+          "path": "/{document_id}/linked-records/",
+          "handler": "get_linked_records",
+          "response_model": "LinkedRecordsResponse",
           "request_schema": "DocumentService"
         },
         {
@@ -114390,15 +114435,128 @@
               "default": "False"
             }
           ]
+        },
+        {
+          "class_name": "RevisionChainItem",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "One revision in a document's chain.",
+          "fields": [
+            {
+              "name": "id",
+              "type": "UUID"
+            },
+            {
+              "name": "name",
+              "type": "str"
+            },
+            {
+              "name": "revision_code",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "drawing_number",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "cde_state",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "is_current_revision",
+              "type": "bool",
+              "default": "True"
+            },
+            {
+              "name": "created_at",
+              "type": "datetime"
+            }
+          ]
+        },
+        {
+          "class_name": "RevisionChainResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Every revision of a document, oldest first, with the current one named.",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[RevisionChainItem]"
+            },
+            {
+              "name": "current_document_id",
+              "type": "UUID | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "LinkedRecord",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "An RFI, NCR or change order that points at a document.",
+          "fields": [
+            {
+              "name": "id",
+              "type": "UUID"
+            },
+            {
+              "name": "number",
+              "type": "str"
+            },
+            {
+              "name": "title",
+              "type": "str"
+            },
+            {
+              "name": "status",
+              "type": "str"
+            },
+            {
+              "name": "on_superseded_revision",
+              "type": "bool",
+              "default": "False"
+            }
+          ]
+        },
+        {
+          "class_name": "LinkedRecordsResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "RFIs, NCRs and change orders that point at a document.",
+          "fields": [
+            {
+              "name": "rfis",
+              "type": "list[LinkedRecord]"
+            },
+            {
+              "name": "ncrs",
+              "type": "list[LinkedRecord]"
+            },
+            {
+              "name": "change_orders",
+              "type": "list[LinkedRecord]"
+            }
+          ]
         }
       ],
       "import_dependencies": [
         "ai",
         "bim_hub",
         "cde",
+        "changeorders",
         "file_versions",
+        "ncr",
         "project_governance",
         "projects",
+        "rfi",
         "takeoff",
         "teams",
         "users",
@@ -142167,6 +142325,7 @@
         "manifest.py",
         "models.py",
         "permissions.py",
+        "revision_check.py",
         "router.py",
         "schemas.py",
         "service.py"
@@ -142748,6 +142907,8 @@
         }
       ],
       "import_dependencies": [
+        "documents",
+        "file_versions",
         "projects",
         "users"
       ]
@@ -147338,6 +147499,12 @@
               "nullable": true
             },
             {
+              "name": "linked_ncr_id",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
               "name": "created_by",
               "annotation": "Mapped[str | None]",
               "sql_type": "String",
@@ -147444,6 +147611,12 @@
           "method": "POST",
           "path": "/submissions/{submission_id}/create-inspection",
           "handler": "create_inspection_from_submission"
+        },
+        {
+          "method": "POST",
+          "path": "/submissions/{submission_id}/raise-ncr",
+          "handler": "raise_ncr_from_submission",
+          "request_schema": "RaiseNcrRequest | None"
         }
       ],
       "schemas": [
@@ -147928,6 +148101,11 @@
               "default": "None"
             },
             {
+              "name": "linked_ncr_id",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
               "name": "created_by",
               "type": "str | None",
               "default": "None"
@@ -148013,6 +148191,23 @@
           ]
         },
         {
+          "class_name": "RaiseNcrRequest",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Optional overrides when raising an NCR from a failed form.",
+          "fields": [
+            {
+              "name": "ncr_type",
+              "type": "str | None"
+            },
+            {
+              "name": "severity",
+              "type": "str | None"
+            }
+          ]
+        },
+        {
           "class_name": "FieldIssueOut",
           "bases": [
             "BaseModel"
@@ -148064,6 +148259,7 @@
       "import_dependencies": [
         "contacts",
         "inspections",
+        "ncr",
         "projects",
         "users"
       ]
@@ -165471,7 +165667,7 @@
           "path": "/kpi/project/{project_id}",
           "handler": "project_kpi",
           "response_model": "KPIResponse",
-          "request_schema": "Decimal"
+          "request_schema": "Decimal | None"
         },
         {
           "method": "GET",
@@ -167628,6 +167824,11 @@
               "type": "Decimal"
             },
             {
+              "name": "hours_source",
+              "type": "str",
+              "default": "'none'"
+            },
+            {
               "name": "recordable_count",
               "type": "int",
               "default": "0"
@@ -167639,11 +167840,23 @@
             },
             {
               "name": "trir",
-              "type": "Decimal"
+              "type": "Decimal | None",
+              "default": "None"
             },
             {
               "name": "ltifr",
-              "type": "Decimal"
+              "type": "Decimal | None",
+              "default": "None"
+            },
+            {
+              "name": "trir_base",
+              "type": "int",
+              "default": "200000"
+            },
+            {
+              "name": "ltifr_base",
+              "type": "int",
+              "default": "1000000"
             },
             {
               "name": "days_without_lti",
@@ -167911,6 +168124,7 @@
         }
       ],
       "import_dependencies": [
+        "field_time",
         "projects",
         "safety"
       ]
@@ -193676,6 +193890,12 @@
               "nullable": true
             },
             {
+              "name": "linked_document_ids",
+              "annotation": "Mapped[list]",
+              "sql_type": "JSON",
+              "nullable": false
+            },
+            {
               "name": "change_order_id",
               "annotation": "Mapped[str | None]",
               "sql_type": "String",
@@ -193853,6 +194073,10 @@
               "type": "str | None"
             },
             {
+              "name": "linked_document_ids",
+              "type": "list[str] | None"
+            },
+            {
               "name": "package_ref",
               "type": "str | None"
             },
@@ -193941,6 +194165,10 @@
             {
               "name": "linked_inspection_id",
               "type": "str | None"
+            },
+            {
+              "name": "linked_document_ids",
+              "type": "list[str] | None"
             },
             {
               "name": "package_ref",
@@ -194058,6 +194286,10 @@
               "default": "None"
             },
             {
+              "name": "linked_document_ids",
+              "type": "list[str]"
+            },
+            {
               "name": "package_ref",
               "type": "str | None",
               "default": "None"
@@ -194136,6 +194368,7 @@
       ],
       "import_dependencies": [
         "changeorders",
+        "documents",
         "notifications",
         "projects"
       ]
@@ -194155,7 +194388,8 @@
         "router.py",
         "schemas.py",
         "seed.py",
-        "service.py"
+        "service.py",
+        "validators.py"
       ],
       "manifest": {
         "name": "oe_norm_expansion",
@@ -194556,6 +194790,10 @@
             {
               "name": "updated_at",
               "type": "datetime"
+            },
+            {
+              "name": "validation_warnings",
+              "type": "list[dict[str, Any]]"
             }
           ]
         },
@@ -208009,6 +208247,13 @@
       "routes": [
         {
           "method": "GET",
+          "path": "/projects/{project_id}/drawings/",
+          "handler": "list_drawings",
+          "response_model": "PlanRoomDrawingsResponse",
+          "request_schema": "PlanRoomService"
+        },
+        {
+          "method": "GET",
           "path": "/{document_id}/pages/{page}/overlays",
           "handler": "get_overlays",
           "response_model": "OverlaysResponse",
@@ -208370,6 +208615,11 @@
               "name": "is_current_revision",
               "type": "bool | None",
               "default": "None"
+            },
+            {
+              "name": "current_document_id",
+              "type": "str | None",
+              "default": "None"
             }
           ]
         },
@@ -208407,6 +208657,71 @@
             {
               "name": "photos",
               "type": "list[OverlayPhoto]"
+            }
+          ]
+        },
+        {
+          "class_name": "PlanRoomDrawing",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "One drawing the Plan Room can open, with its place in the revision chain.",
+          "fields": [
+            {
+              "name": "id",
+              "type": "str"
+            },
+            {
+              "name": "filename",
+              "type": "str"
+            },
+            {
+              "name": "revision_code",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "drawing_number",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "discipline",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "cde_state",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "is_current_revision",
+              "type": "bool",
+              "default": "True"
+            },
+            {
+              "name": "current_document_id",
+              "type": "str | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "PlanRoomDrawingsResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Drawings of a project; ``superseded_hidden`` counts earlier revisions left out.",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[PlanRoomDrawing]"
+            },
+            {
+              "name": "superseded_hidden",
+              "type": "int",
+              "default": "0"
             }
           ]
         }
@@ -228114,7 +228429,8 @@
         "router.py",
         "schemas.py",
         "scorer.py",
-        "service.py"
+        "service.py",
+        "validators.py"
       ],
       "manifest": {
         "name": "oe_project_intelligence",
@@ -229380,6 +229696,11 @@
               "name": "review_required",
               "type": "bool",
               "default": "True"
+            },
+            {
+              "name": "findings",
+              "type": "list[dict]",
+              "description": "Findings of the project intelligence rules, worded in the caller's language."
             }
           ]
         }
@@ -270199,6 +270520,7 @@
         "_dateutil.py",
         "data_paths.py",
         "events.py",
+        "field_report_links.py",
         "intl.py",
         "manifest.py",
         "models.py",
@@ -271586,6 +271908,7 @@
         }
       ],
       "import_dependencies": [
+        "fieldreports",
         "notifications",
         "projects",
         "site_sensors"
@@ -343628,10 +343951,10 @@
     },
     {
       "name": "boq",
-      "ts_files": 288,
+      "ts_files": 290,
       "css_files": 0,
-      "test_files": 141,
-      "total_files": 288
+      "test_files": 143,
+      "total_files": 290
     },
     {
       "name": "buyer-portal",
@@ -343929,10 +344252,10 @@
     },
     {
       "name": "data-paths",
-      "ts_files": 22,
+      "ts_files": 25,
       "css_files": 0,
-      "test_files": 6,
-      "total_files": 22
+      "test_files": 7,
+      "total_files": 25
     },
     {
       "name": "data-security",
@@ -344006,10 +344329,10 @@
     },
     {
       "name": "documents",
-      "ts_files": 11,
+      "ts_files": 12,
       "css_files": 0,
       "test_files": 4,
-      "total_files": 11
+      "total_files": 12
     },
     {
       "name": "drawing-compare",
@@ -344867,10 +345190,10 @@
     },
     {
       "name": "rfq-bidding",
-      "ts_files": 13,
+      "ts_files": 15,
       "css_files": 0,
-      "test_files": 8,
-      "total_files": 13
+      "test_files": 9,
+      "total_files": 15
     },
     {
       "name": "risk",
@@ -345813,6 +346136,7 @@
     "daily_diary": [
       "documents",
       "field_time",
+      "fieldreports",
       "project_governance",
       "projects",
       "punchlist",
@@ -345979,9 +346303,12 @@
       "ai",
       "bim_hub",
       "cde",
+      "changeorders",
       "file_versions",
+      "ncr",
       "project_governance",
       "projects",
+      "rfi",
       "takeoff",
       "teams",
       "users",
@@ -346183,6 +346510,8 @@
       "projects"
     ],
     "file_transmittals": [
+      "documents",
+      "file_versions",
       "projects",
       "users"
     ],
@@ -346223,6 +346552,7 @@
     "forms": [
       "contacts",
       "inspections",
+      "ncr",
       "projects",
       "users"
     ],
@@ -346284,6 +346614,7 @@
       "surfaces_volumes"
     ],
     "hse_advanced": [
+      "field_time",
       "projects",
       "safety",
       "users"
@@ -346468,6 +346799,7 @@
     ],
     "ncr": [
       "changeorders",
+      "documents",
       "notifications",
       "projects",
       "users"
@@ -346969,6 +347301,7 @@
     "russia_pack": [],
     "sa_pack": [],
     "safety": [
+      "fieldreports",
       "notifications",
       "projects",
       "site_sensors",
@@ -347311,13 +347644,13 @@
     "backend_modules": 261,
     "modules_with_manifests": 261,
     "total_models": 992,
-    "total_columns": 11596,
+    "total_columns": 11598,
     "total_relationships": 264,
-    "total_routes": 5590,
-    "total_schemas": 5219,
-    "total_python_files": 3836,
+    "total_routes": 5595,
+    "total_schemas": 5226,
+    "total_python_files": 3843,
     "frontend_features": 254,
-    "frontend_ts_files": 4568,
+    "frontend_ts_files": 4576,
     "frontend_backend_mapped": 224
   },
   "frontend_backend_mapping": {
