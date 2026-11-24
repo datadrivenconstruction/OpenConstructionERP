@@ -22576,6 +22576,7 @@ const resource = {
     "project_intelligence.insights.spi": "SPI",
     "project_intelligence.insights.vac": "VAC (ауытқу)",
     "project_intelligence.insights.variance_days": "{{count}} күн",
+    "project_intelligence.insights.findings_title": "Болжам тексерулері",
     "project_intelligence.intro_body": "Ол сіздің тікелей BOQ, шығын моделі, кесте және тәуекел тізілімін оқып, бұл сметаның шығуға қаншалықты дайын екенін бағалайды (BOQ 40%, Шығын Моделі 30%, Тексеру 20%, Тәуекел 10%). Сыни Олқылықтар осы бағаны көтерудің ең жылдам жолдары, әрқайсысы оны түзейтін экранға тікелей сілтеме жасайды. Астыдағы кеңесші жобаға тән сұрақтарға жауап береді.",
     "project_intelligence.intro_link_boq": "BOQ өңдегіші",
     "project_intelligence.intro_link_validation": "Тексеру",

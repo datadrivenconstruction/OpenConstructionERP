@@ -19507,6 +19507,7 @@ const resource = {
     "project_intelligence.insights.spi": "SPI",
     "project_intelligence.insights.vac": "VAC (айырма)",
     "project_intelligence.insights.variance_days": "{{count}} күн",
+    "project_intelligence.insights.findings_title": "Болжол текшерүүлөрү",
     "project_intelligence.intro_body": "Ал сиздин тирүү БОКуңузду, наркы моделиңизди, графигиңизди жана тобокелдик реестриңизди окуп, бул сметанын чыгууга канчалык даяр экенин баалайт (БОК 40%, Наркы модели 30%, Текшерүү 20%, Тобокелдик 10%). Маанилүү Боштуктар бул баа берүүнү жогорулатуунун эң тез жолу, ар бирисине түз эле аны оңдогон экранга шилтеме бар. Ылдыйкы кеңешчи долбоорго тиешелүү суроолорго жооп берет.",
     "project_intelligence.intro_link_boq": "БОК редактору",
     "project_intelligence.intro_link_validation": "Текшерүү",

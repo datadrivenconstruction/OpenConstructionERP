@@ -23482,6 +23482,7 @@ const resource = {
     "project_intelligence.insights.spi": "SPI",
     "project_intelligence.insights.vac": "VAC (avvikelse)",
     "project_intelligence.insights.variance_days": "{{count}} dag(ar)",
+    "project_intelligence.insights.findings_title": "Prognoskontroller",
     "project_intelligence.intro_body": "Den läser din levande BOQ, kostnadsmodell, tidplan och riskregister och betygsätter hur redo denna kalkyl är att lämnas ut (BOQ 40 %, Kostnadsmodell 30 %, Validering 20 %, Risk 10 %). Kritiska brister är de snabbaste sätten att höja det betyget - var och en länkar direkt till skärmen som åtgärdar den. Rådgivaren längst ner besvarar projektspecifika frågor.",
     "project_intelligence.intro_link_boq": "BOQ-editor",
     "project_intelligence.intro_link_validation": "Validering",

@@ -22218,6 +22218,7 @@ const resource = {
     "project_intelligence.insights.spi": "SPI",
     "project_intelligence.insights.vac": "VAC (desvio)",
     "project_intelligence.insights.variance_days": "{{count}} dia(s)",
+    "project_intelligence.insights.findings_title": "Verificações da previsão",
     "project_intelligence.intro_body": "Lê o seu BOQ, modelo de custos, cronograma e registro de riscos em direto e classifica o quão pronta esta estimativa está para sair (BOQ 40%, Modelo de custos 30%, Validação 20%, Risco 10%). As Lacunas Críticas são a forma mais rápida de subir essa classificação - cada uma liga diretamente à tela que a resolve. O conselheiro no fundo responde a perguntas específicas do projeto.",
     "project_intelligence.intro_link_boq": "Editor de BOQ",
     "project_intelligence.intro_link_validation": "Validação",

@@ -23596,6 +23596,7 @@ const resource = {
     "project_intelligence.insights.spi": "SPI",
     "project_intelligence.insights.vac": "VAC（偏差）",
     "project_intelligence.insights.variance_days": "{{count}} 天",
+    "project_intelligence.insights.findings_title": "預測檢查",
     "project_intelligence.intro_body": "它讀取您實時的工料清單、成本模型、進度計劃及風險登記冊，並對本估算的可投出就緒度進行評級（工料清單 40%、成本模型 30%、驗證 20%、風險 10%）。關鍵缺口是提升該評級最快的途徑，每一項都直接連結到可修復它的頁面。底部的顧問可回答項目特定問題。",
     "project_intelligence.intro_link_boq": "工料清單編輯器",
     "project_intelligence.intro_link_validation": "驗證",

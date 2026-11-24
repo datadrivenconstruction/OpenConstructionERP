@@ -23152,6 +23152,7 @@ const resource = {
     "project_intelligence.insights.spi": "SPI",
     "project_intelligence.insights.vac": "VAC (sai lệch)",
     "project_intelligence.insights.variance_days": "{{count}} ngày",
+    "project_intelligence.insights.findings_title": "Kiểm tra dự báo",
     "project_intelligence.intro_body": "Nó đọc BOQ, mô hình chi phí, tiến độ và sổ rủi ro trực tiếp của bạn và chấm điểm mức độ sẵn sàng để gửi đi của dự toán này (BOQ 40%, Mô hình chi phí 30%, Kiểm tra 20%, Rủi ro 10%). Các khoảng trống quan trọng là cách nhanh nhất để nâng điểm số đó - mỗi mục liên kết thẳng đến màn hình khắc phục nó. Trợ lý ở cuối trả lời các câu hỏi riêng của dự án.",
     "project_intelligence.intro_link_boq": "Trình soạn thảo BOQ",
     "project_intelligence.intro_link_validation": "Kiểm tra",

@@ -23273,6 +23273,7 @@ const resource = {
     "project_intelligence.insights.spi": "SPI",
     "project_intelligence.insights.vac": "VAC (차이)",
     "project_intelligence.insights.variance_days": "{{count}}일",
+    "project_intelligence.insights.findings_title": "예측 점검",
     "project_intelligence.intro_body": "실시간 내역서, 원가 모델, 일정, 리스크 등록부를 읽어 이 견적이 제출될 준비가 얼마나 되었는지 평가합니다(내역서 40%, 원가 모델 30%, 검증 20%, 리스크 10%). 핵심 미비점은 등급을 올리는 가장 빠른 방법으로, 각 항목은 이를 해결하는 화면으로 바로 연결됩니다. 하단의 어드바이저는 프로젝트별 질문에 답합니다.",
     "project_intelligence.intro_link_boq": "내역서 편집기",
     "project_intelligence.intro_link_validation": "검증",

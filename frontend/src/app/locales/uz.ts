@@ -23153,6 +23153,7 @@ const resource = {
     "project_intelligence.insights.spi": "SPI",
     "project_intelligence.insights.vac": "VAC (farq)",
     "project_intelligence.insights.variance_days": "{{count}} kun",
+    "project_intelligence.insights.findings_title": "Prognoz tekshiruvlari",
     "project_intelligence.intro_body": "U jonli BOQ, xarajat modeli, jadval va xavf reyestringizni oʻqiydi va bu smetaning chiqishga qanchalik tayyorligini baholaydi (BOQ 40%, Xarajat modeli 30%, Validatsiya 20%, Xavf 10%). Tanqidiy boʻshliqlar bu bahoni koʻtarishning eng tez yoʻli, har biri uni tuzatadigan ekranga toʻgʻridan-toʻgʻri bogʻlanadi. Pastdagi maslahatchi loyihaga xos savollarga javob beradi.",
     "project_intelligence.intro_link_boq": "BOQ tahrirlovchisi",
     "project_intelligence.intro_link_validation": "Validatsiya",

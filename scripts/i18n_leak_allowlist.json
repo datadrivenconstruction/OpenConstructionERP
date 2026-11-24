@@ -2538,5 +2538,10 @@
     "en_value": "m²",
     "note": "SI square metre symbol",
     "reason_category": "abbreviation"
+  },
+  "data_paths.ov_and_more": {
+    "en_value": "{{list}} +{{count}}",
+    "note": "template only: an already localised list followed by +N for the items not shown; no translatable word",
+    "reason_category": "template_only"
   }
 }

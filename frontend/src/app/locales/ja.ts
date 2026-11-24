@@ -23273,6 +23273,7 @@ const resource = {
     "project_intelligence.insights.spi": "SPI",
     "project_intelligence.insights.vac": "VAC（差異）",
     "project_intelligence.insights.variance_days": "{{count}} 日",
+    "project_intelligence.insights.findings_title": "予測チェック",
     "project_intelligence.intro_body": "ライブの内訳書、コストモデル、スケジュール、リスク台帳を読み取り、この見積もりがどれだけ提出準備が整っているかを評価します（内訳書 40%、コストモデル 30%、検証 20%、リスク 10%）。重大なギャップはその評価を高める最速の方法で、それぞれが修正画面へ直接リンクします。下部のアドバイザーがプロジェクト固有の質問に回答します。",
     "project_intelligence.intro_link_boq": "内訳書エディタ",
     "project_intelligence.intro_link_validation": "検証",
