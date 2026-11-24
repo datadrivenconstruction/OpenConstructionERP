@@ -23321,6 +23321,7 @@ const resource = {
     "project_intelligence.insights.spi": "SPI",
     "project_intelligence.insights.vac": "VAC (ผลต่าง)",
     "project_intelligence.insights.variance_days": "{{count}} วัน",
+    "project_intelligence.insights.findings_title": "การตรวจสอบการคาดการณ์",
     "project_intelligence.intro_body": "ระบบอ่าน BOQ แบบจำลองต้นทุน แผนงาน และทะเบียนความเสี่ยงที่เป็นปัจจุบันของคุณ แล้วให้คะแนนความพร้อมของการประมาณราคานี้ที่จะส่งออก (BOQ 40% แบบจำลองต้นทุน 30% การตรวจสอบความถูกต้อง 20% ความเสี่ยง 10%) ช่องว่างวิกฤตคือวิธีที่เร็วที่สุดในการเพิ่มคะแนนนั้น แต่ละรายการเชื่อมตรงไปยังหน้าจอที่แก้ไขได้ ที่ปรึกษาด้านล่างตอบคำถามเฉพาะโครงการ",
     "project_intelligence.intro_link_boq": "ตัวแก้ไข BOQ",
     "project_intelligence.intro_link_validation": "การตรวจสอบความถูกต้อง",

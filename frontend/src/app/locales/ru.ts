@@ -23988,6 +23988,7 @@ const resource = {
     "project_intelligence.insights.spi": "SPI",
     "project_intelligence.insights.vac": "VAC (отклонение)",
     "project_intelligence.insights.variance_days": "{{count}} дн.",
+    "project_intelligence.insights.findings_title": "Проверки прогноза",
     "project_intelligence.intro_body": "Она читает вашу актуальную BOQ, модель стоимости, график и реестр рисков и оценивает, насколько эта смета готова к выпуску (BOQ 40%, модель стоимости 30%, валидация 20%, риски 10%). Критические пробелы, самый быстрый способ повысить оценку, каждый ведёт прямо на экран, где его можно устранить. Советник внизу отвечает на вопросы по конкретному проекту.",
     "project_intelligence.intro_link_boq": "Редактор BOQ",
     "project_intelligence.intro_link_validation": "Валидация",

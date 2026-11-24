@@ -68505,7 +68505,7 @@ const resource = {
     "data_paths.entity.permit_application": "Mga aplikasyon sa permit",
     "data_paths.entity.rate_proposal": "Mga panukalang rate",
     "data_paths.entity.reverse_charge": "Mga desisyon sa reverse charge",
-    "data_paths.entity.sub_payment_application": "Mga aplikasyon sa bayad ng subcontractor",
+    "data_paths.entity.sub_payment_application": "Mga paghahabol sa bayad ng subcontractor",
     "data_paths.entity.takeoff_file": "Mga file ng takeoff",
     "data_paths.entity.field_report": "Ulat sa site",
     "data_paths.param.application_date": "Petsa ng aplikasyon",

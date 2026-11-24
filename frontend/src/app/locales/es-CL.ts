@@ -22171,6 +22171,7 @@ const resource = {
     "project_intelligence.insights.spi": "SPI",
     "project_intelligence.insights.vac": "VAC (desviación)",
     "project_intelligence.insights.variance_days": "{{count}} día(s)",
+    "project_intelligence.insights.findings_title": "Comprobaciones del pronóstico",
     "project_intelligence.intro_body": "Lee tu BOQ, modelo de costos, cronograma y registro de riesgos en vivo y califica lo preparada que está esta estimación para salir (BOQ 40%, Modelo de costos 30%, Validación 20%, Riesgo 10%). Las brechas críticas son la forma más rápida de subir esa nota: cada una enlaza directamente a la pantalla que la corrige. El asesor de abajo responde preguntas específicas del proyecto.",
     "project_intelligence.intro_link_boq": "Editor de BOQ",
     "project_intelligence.intro_link_validation": "Validación",

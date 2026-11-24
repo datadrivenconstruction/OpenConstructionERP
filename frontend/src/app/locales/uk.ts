@@ -23615,6 +23615,7 @@ const resource = {
     "project_intelligence.insights.spi": "SPI",
     "project_intelligence.insights.vac": "VAC (відхилення)",
     "project_intelligence.insights.variance_days": "дн.: {{count}}",
+    "project_intelligence.insights.findings_title": "Перевірки прогнозу",
     "project_intelligence.intro_body": "Читає вашу живу ВОР, модель вартості, графік і реєстр ризиків та оцінює, наскільки цей кошторис готовий до випуску (ВОР 40%, модель вартості 30%, валідація 20%, ризик 10%). «Критичні прогалини» - найшвидший спосіб підняти цю оцінку, кожна веде прямо до екрана, що її виправляє. Радник внизу відповідає на питання, специфічні для проєкту.",
     "project_intelligence.intro_link_boq": "Редактор ВОР",
     "project_intelligence.intro_link_validation": "Валідація",

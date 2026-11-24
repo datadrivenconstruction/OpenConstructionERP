@@ -23553,6 +23553,7 @@ const resource = {
     "project_intelligence.insights.spi": "SPI",
     "project_intelligence.insights.vac": "VAC (abatere)",
     "project_intelligence.insights.variance_days": "{{count}} zile",
+    "project_intelligence.insights.findings_title": "Verificări ale prognozei",
     "project_intelligence.intro_body": "Citește BOQ-ul live, modelul de cost, graficul și registrul de riscuri și evaluează cât de pregătită este această estimare pentru a fi trimisă (BOQ 40%, Model de cost 30%, Validare 20%, Risc 10%). Lacunele critice sunt cele mai rapide moduri de a ridica acea notă - fiecare se leagă direct de ecranul care o rezolvă. Consilierul din partea de jos răspunde la întrebări specifice proiectului.",
     "project_intelligence.intro_link_boq": "Editor BOQ",
     "project_intelligence.intro_link_validation": "Validare",

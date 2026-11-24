@@ -23292,6 +23292,7 @@ const resource = {
     "project_intelligence.insights.spi": "SPI",
     "project_intelligence.insights.vac": "VAC (avvik)",
     "project_intelligence.insights.variance_days": "{{count}} dag(er)",
+    "project_intelligence.insights.findings_title": "Prognosekontroller",
     "project_intelligence.intro_body": "Den leser din aktive BOQ, kostnadsmodell, plan og risikoregister og gir karakter på hvor klart dette estimatet er til å sendes ut (BOQ 40 %, Kostnadsmodell 30 %, Validering 20 %, Risiko 10 %). Kritiske mangler er de raskeste måtene å heve karakteren på - hver av dem lenker rett til skjermen som retter dem. Rådgiveren nederst svarer på prosjektspesifikke spørsmål.",
     "project_intelligence.intro_link_boq": "BOQ-editor",
     "project_intelligence.intro_link_validation": "Validering",

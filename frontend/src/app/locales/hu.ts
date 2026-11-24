@@ -23054,6 +23054,7 @@ const resource = {
     "project_intelligence.insights.spi": "SPI",
     "project_intelligence.insights.vac": "VAC (eltérés)",
     "project_intelligence.insights.variance_days": "{{count}} nap",
+    "project_intelligence.insights.findings_title": "Előrejelzés-ellenőrzések",
     "project_intelligence.intro_body": "Beolvassa az élő költségvetését, költségmodelljét, ütemtervét és kockázati nyilvántartását, és osztályozza, mennyire áll készen ez a becslés a kiküldésre (Költségvetés 40%, Költségmodell 30%, Validálás 20%, Kockázat 10%). A Kritikus hiányosságok a leggyorsabb módok ennek az osztályzatnak az emelésére, mindegyik egyenesen ahhoz a képernyőhöz vezet, amely megoldja azt. Az alsó tanácsadó projektspecifikus kérdésekre válaszol.",
     "project_intelligence.intro_link_boq": "Költségvetés-szerkesztő",
     "project_intelligence.intro_link_validation": "Validálás",

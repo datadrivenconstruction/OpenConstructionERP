@@ -23432,6 +23432,7 @@ const resource = {
     "project_intelligence.insights.spi": "SPI",
     "project_intelligence.insights.vac": "VAC (scostamento)",
     "project_intelligence.insights.variance_days": "{{count}} giorno/i",
+    "project_intelligence.insights.findings_title": "Controlli della previsione",
     "project_intelligence.intro_body": "Legge il tuo computo metrico, modello di costo, pianificazione e registro dei rischi in tempo reale e valuta quanto è pronta questa stima per essere presentata (Computo metrico 40%, Modello di costo 30%, Validazione 20%, Rischio 10%). Le Lacune critiche sono i modi più rapidi per migliorare quel voto: ciascuna rimanda direttamente alla schermata che la risolve. L'advisor in basso risponde a domande specifiche sul progetto.",
     "project_intelligence.intro_link_boq": "Editor del computo metrico",
     "project_intelligence.intro_link_validation": "Validazione",

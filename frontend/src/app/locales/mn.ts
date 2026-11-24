@@ -23422,6 +23422,7 @@ const resource = {
     "project_intelligence.insights.spi": "SPI",
     "project_intelligence.insights.vac": "VAC (зөрүү)",
     "project_intelligence.insights.variance_days": "{{count}} өдөр",
+    "project_intelligence.insights.findings_title": "Таамаглалын шалгалт",
     "project_intelligence.intro_body": "Энэ нь таны идэвхтэй BOQ, зардлын загвар, хуваарь, эрсдэлийн бүртгэлийг уншиж энэ тооцоо гарахад хэр бэлэн болсныг үнэлдэг (BOQ 40%, Зардлын загвар 30%, Баталгаажуулалт 20%, Эрсдэл 10%). Чухал Дутагдлууд нь тэр үнэлгээг өсгөх хамгийн хурдан арга, тус бүр засдаг дэлгэц рүү шууд холбогддог. Доорх зөвлөгч нь төсөлд тусгайлсан асуултад хариулна.",
     "project_intelligence.intro_link_boq": "BOQ засварлагч",
     "project_intelligence.intro_link_validation": "Баталгаажуулалт",

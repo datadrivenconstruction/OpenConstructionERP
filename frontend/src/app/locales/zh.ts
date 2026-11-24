@@ -23323,6 +23323,7 @@ const resource = {
     "project_intelligence.insights.spi": "SPI",
     "project_intelligence.insights.vac": "VAC（偏差）",
     "project_intelligence.insights.variance_days": "{{count}} 天",
+    "project_intelligence.insights.findings_title": "预测检查",
     "project_intelligence.intro_body": "它读取您实时的工程量清单、成本模型、进度计划及风险登记册，并对本估算的可投出就绪度进行评级（工程量清单 40%、成本模型 30%、验证 20%、风险 10%）。关键缺口是提升该评级最快的途径，每一项都直接链接到可修复它的页面。底部的顾问可回答项目特定问题。",
     "project_intelligence.intro_link_boq": "工程量清单编辑器",
     "project_intelligence.intro_link_validation": "验证",

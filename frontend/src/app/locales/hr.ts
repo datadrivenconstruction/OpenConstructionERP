@@ -23321,6 +23321,7 @@ const resource = {
     "project_intelligence.insights.spi": "SPI",
     "project_intelligence.insights.vac": "VAC (odstupanje)",
     "project_intelligence.insights.variance_days": "{{count}} dana",
+    "project_intelligence.insights.findings_title": "Provjere prognoze",
     "project_intelligence.intro_body": "Čita vaš živi BOQ, model troškova, raspored i registar rizika te ocjenjuje koliko je ova procjena spremna za slanje (BOQ 40%, model troškova 30%, validacija 20%, rizik 10%). Kritični nedostaci najbrži su način za podizanje te ocjene - svaki vodi izravno na zaslon koji ga ispravlja. Savjetnik na dnu odgovara na pitanja specifična za projekt.",
     "project_intelligence.intro_link_boq": "BOQ uređivač",
     "project_intelligence.intro_link_validation": "Validacija",

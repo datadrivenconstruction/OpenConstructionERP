@@ -23888,6 +23888,7 @@ const resource = {
     "project_intelligence.insights.spi": "SPI",
     "project_intelligence.insights.vac": "VAC (sapma)",
     "project_intelligence.insights.variance_days": "{{count}} gün",
+    "project_intelligence.insights.findings_title": "Tahmin kontrolleri",
     "project_intelligence.intro_body": "Canlı BOQ'unuzu, maliyet modelinizi, cetvelinizi ve risk kaydınızı okur ve bu tahminin teklif vermeye ne kadar hazır olduğunu derecelendirir (BOQ %40, Maliyet Modeli %30, Doğrulama %20, Risk %10). Kritik Boşluklar bu notu yükseltmenin en hızlı yollarıdır - her biri onu düzelten ekrana doğrudan bağlanır. Alttaki danışman, projeye özgü soruları yanıtlar.",
     "project_intelligence.intro_link_boq": "BOQ düzenleyici",
     "project_intelligence.intro_link_validation": "Doğrulama",

@@ -23099,6 +23099,7 @@ const resource = {
     "project_intelligence.insights.spi": "SPI",
     "project_intelligence.insights.vac": "VAC (varians)",
     "project_intelligence.insights.variance_days": "{{count}} hari",
+    "project_intelligence.insights.findings_title": "Pemeriksaan prakiraan",
     "project_intelligence.intro_body": "Ini membaca BOQ langsung, model biaya, jadwal, dan risk register Anda dan menilai seberapa siap estimasi ini untuk dikirim (BOQ 40%, Model Biaya 30%, Validasi 20%, Risiko 10%). Critical Gaps adalah cara tercepat menaikkan nilai itu - masing-masing tertaut langsung ke layar yang memperbaikinya. Penasihat di bagian bawah menjawab pertanyaan khusus proyek.",
     "project_intelligence.intro_link_boq": "Editor BOQ",
     "project_intelligence.intro_link_validation": "Validasi",

@@ -22640,6 +22640,7 @@ const resource = {
     "project_intelligence.insights.spi": "SPI",
     "project_intelligence.insights.vac": "VAC (فرق)",
     "project_intelligence.insights.variance_days": "{{count}} دن",
+    "project_intelligence.insights.findings_title": "پیش گوئی کی جانچ",
     "project_intelligence.intro_body": "یہ آپ کا لائیو BOQ، لاگت ماڈل، شیڈول اور خطرہ رجسٹر پڑھتا ہے اور درجہ دیتا ہے کہ یہ تخمینہ جاری ہونے کے لیے کتنا تیار ہے (BOQ 40%، لاگت ماڈل 30%، تصدیق 20%، خطرہ 10%)۔ Critical Gaps اس درجے کو بڑھانے کے تیز ترین طریقے ہیں، ہر ایک سیدھا اس اسکرین سے جڑتا ہے جو اسے ٹھیک کرتی ہے۔ نیچے موجود advisor پروجیکٹ-مخصوص سوالات کے جواب دیتا ہے۔",
     "project_intelligence.intro_link_boq": "BOQ ایڈیٹر",
     "project_intelligence.intro_link_validation": "تصدیق",

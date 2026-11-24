@@ -23945,6 +23945,7 @@ const resource = {
     "project_intelligence.insights.spi": "SPI",
     "project_intelligence.insights.vac": "VAC (odchylenie)",
     "project_intelligence.insights.variance_days": "{{count}} dni",
+    "project_intelligence.insights.findings_title": "Kontrole prognozy",
     "project_intelligence.intro_body": "Odczytuje Twój żywy BOQ, model kosztowy, harmonogram i rejestr ryzyka oraz ocenia, jak gotowy jest ten kosztorys do wysłania (BOQ 40%, model kosztowy 30%, walidacja 20%, ryzyko 10%). Krytyczne luki to najszybsze sposoby na podniesienie tej oceny - każda prowadzi prosto do ekranu, który ją usuwa. Doradca na dole odpowiada na pytania specyficzne dla projektu.",
     "project_intelligence.intro_link_boq": "Edytor BOQ",
     "project_intelligence.intro_link_validation": "Walidacja",

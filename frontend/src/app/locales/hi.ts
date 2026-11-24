@@ -23491,6 +23491,7 @@ const resource = {
     "project_intelligence.insights.spi": "SPI",
     "project_intelligence.insights.vac": "VAC (विचलन)",
     "project_intelligence.insights.variance_days": "{{count}} दिन",
+    "project_intelligence.insights.findings_title": "पूर्वानुमान जाँच",
     "project_intelligence.intro_body": "यह आपके लाइव BOQ, लागत मॉडल, अनुसूची और जोखिम रजिस्टर को पढ़ता है और आँकता है कि यह अनुमान बाहर जाने के लिए कितना तैयार है (BOQ 40%, लागत मॉडल 30%, सत्यापन 20%, जोखिम 10%)। महत्वपूर्ण अंतराल उस ग्रेड को बढ़ाने के सबसे तेज़ तरीके हैं - प्रत्येक सीधे उस स्क्रीन से जुड़ता है जो उसे ठीक करती है। नीचे का सलाहकार परियोजना-विशिष्ट प्रश्नों का उत्तर देता है।",
     "project_intelligence.intro_link_boq": "BOQ संपादक",
     "project_intelligence.intro_link_validation": "सत्यापन",

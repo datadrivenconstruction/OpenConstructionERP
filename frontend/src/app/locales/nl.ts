@@ -23150,6 +23150,7 @@ const resource = {
     "project_intelligence.insights.spi": "SPI",
     "project_intelligence.insights.vac": "VAC (afwijking)",
     "project_intelligence.insights.variance_days": "{{count}} dag(en)",
+    "project_intelligence.insights.findings_title": "Prognosecontroles",
     "project_intelligence.intro_body": "Het leest uw live BOQ, kostenmodel, planning en risicoregister en beoordeelt hoe gereed deze raming is om uit te gaan (BOQ 40%, Kostenmodel 30%, Validatie 20%, Risico 10%). Kritieke hiaten zijn de snelste manieren om die beoordeling te verhogen - elk verwijst rechtstreeks naar het scherm dat het oplost. De adviseur onderaan beantwoordt projectspecifieke vragen.",
     "project_intelligence.intro_link_boq": "BOQ-editor",
     "project_intelligence.intro_link_validation": "Validatie",
