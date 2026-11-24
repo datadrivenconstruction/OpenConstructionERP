@@ -98,6 +98,7 @@ describe('RFQ list edit action', () => {
         title: 'Concrete a, revised',
         description: 'C30/37 for the slab',
         submission_deadline: '2026-12-15',
+        issued_to_contacts: [],
       }),
     );
   });

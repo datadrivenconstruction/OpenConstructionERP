@@ -55,6 +55,7 @@ import {
 } from './api';
 import { useRfqAwardOrders, type RfqOrderLookup } from './useRfqAwardOrders';
 import { BoqResourcePicker } from './BoqResourcePicker';
+import { RfqInviteePicker, RfqLinesEditor } from './RfqEditorPanels';
 import type { AwardLookup, AwardOrderLite } from '@/shared/hooks/useAwardOutcome';
 
 /** A bidder is stored as a contact id; this is how the page names it. */
@@ -631,7 +632,7 @@ export function RFQBiddingPage() {
       {editingRfq && (
         <CreateRFQDialog
           projectId={projectId}
-          editing={editingRfq}
+          editing={rfqs.find((r) => r.id === editingRfq.id) ?? editingRfq}
           onSubmit={() => undefined}
           onUpdate={(payload) => updateMutation.mutate({ id: editingRfq.id, payload })}
           onClose={() => setEditingRfq(null)}
@@ -1448,7 +1449,7 @@ function CreateRFQDialog({
   t,
 }: {
   projectId: string;
-  /** Set to edit this RFQ's header instead of creating one; scope lines are not touched. */
+  /** Set to edit this RFQ instead of creating one; its lines are saved by their own calls. */
   editing?: RFQ;
   onSubmit: (payload: RFQCreatePayload) => void;
   onUpdate?: (payload: RFQUpdatePayload) => void;
@@ -1462,6 +1463,7 @@ function CreateRFQDialog({
   const [scopeSource, setScopeSource] = useState<'empty' | 'boq'>('empty');
   const [boqId, setBoqId] = useState('');
   const [selectedResources, setSelectedResources] = useState<Set<string>>(new Set());
+  const [invitees, setInvitees] = useState<string[]>(editing?.issued_to_contacts ?? []);
   const fromBoq = scopeSource === 'boq';
   const canSubmit = !!title.trim() && (!fromBoq || selectedResources.size > 0);
 
@@ -1474,6 +1476,7 @@ function CreateRFQDialog({
           title: title.trim(),
           description: description.trim() || null,
           submission_deadline: dueDate || null,
+          issued_to_contacts: invitees,
         });
         return;
       }
@@ -1482,17 +1485,18 @@ function CreateRFQDialog({
         title: title.trim(),
         description: description.trim() || undefined,
         submission_deadline: dueDate || undefined,
+        ...(invitees.length > 0 ? { issued_to_contacts: invitees } : {}),
         ...(fromBoq ? { boq_id: boqId, boq_resource_keys: [...selectedResources] } : {}),
       });
     },
-    [projectId, editing, title, description, dueDate, onSubmit, onUpdate, canSubmit, fromBoq, boqId, selectedResources],
+    [projectId, editing, title, description, dueDate, invitees, onSubmit, onUpdate, canSubmit, fromBoq, boqId, selectedResources],
   );
 
   return (
     <WideModal
       open
       onClose={onClose}
-      size={fromBoq ? 'lg' : 'sm'}
+      size={fromBoq || editing ? 'lg' : 'sm'}
       busy={loading}
       title={
         editing
@@ -1555,6 +1559,10 @@ function CreateRFQDialog({
               className="oe-input"
             />
           </div>
+
+          {editing && <RfqLinesEditor rfq={editing} t={t} />}
+
+          <RfqInviteePicker selected={invitees} onChange={setInvitees} t={t} />
 
           {!editing && (
           <fieldset>

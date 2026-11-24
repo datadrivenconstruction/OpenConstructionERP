@@ -78,6 +78,8 @@ export interface RFQCreatePayload {
   description?: string;
   submission_deadline?: string;
   currency_code?: string;
+  /** Contact ids the RFQ is sent to. */
+  issued_to_contacts?: string[];
   /** With `boq_resource_keys`: the BOQ the picked resources come from. */
   boq_id?: string;
   /** Keys from `fetchBoqResources`; the server turns each into a scope line. */
@@ -110,6 +112,8 @@ export interface RFQUpdatePayload {
   /** `null` clears the deadline. */
   submission_deadline?: string | null;
   status?: RFQStatus;
+  /** Contact ids the RFQ is sent to; editable after the RFQ is out too. */
+  issued_to_contacts?: string[];
 }
 
 /* ── Scope lines ──────────────────────────────────────────────────────── */
@@ -139,6 +143,9 @@ export interface ScopeLineCreatePayload {
   is_optional?: boolean;
   notes?: string;
 }
+
+/** RFQLineUpdate. */
+export type ScopeLineUpdatePayload = Partial<ScopeLineCreatePayload>;
 
 /* ── Bids ─────────────────────────────────────────────────────────────── */
 
@@ -325,6 +332,21 @@ export async function addScopeLine(
   payload: ScopeLineCreatePayload,
 ): Promise<ScopeLine> {
   return apiPost<ScopeLine, ScopeLineCreatePayload>(`/v1/bid-management/tenders/rfq/${rfqId}/lines/`, payload);
+}
+
+export async function updateScopeLine(
+  rfqId: string,
+  lineId: string,
+  payload: ScopeLineUpdatePayload,
+): Promise<ScopeLine> {
+  return apiPatch<ScopeLine, ScopeLineUpdatePayload>(
+    `/v1/bid-management/tenders/rfq/${rfqId}/lines/${lineId}`,
+    payload,
+  );
+}
+
+export async function deleteScopeLine(rfqId: string, lineId: string): Promise<void> {
+  return apiDelete(`/v1/bid-management/tenders/rfq/${rfqId}/lines/${lineId}`);
 }
 
 export async function fetchComparison(rfqId: string): Promise<ComparisonResponse> {
