@@ -7,7 +7,7 @@ drawing can list the non-conformities raised against it. Additive only: the
 column carries a server default, so the boot heal and ``alembic upgrade`` agree.
 
 Revision ID: vdoc01_ncr_linked_documents
-Revises: vdsn01_design_module
+Revises: vhsef01_form_ncr_link
 Create Date: 2026-11-24
 """
 
@@ -19,7 +19,7 @@ import sqlalchemy as sa
 from alembic import op
 
 revision: str = "vdoc01_ncr_linked_documents"
-down_revision: str | Sequence[str] | None = "vdsn01_design_module"
+down_revision: str | Sequence[str] | None = "vhsef01_form_ncr_link"
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 
