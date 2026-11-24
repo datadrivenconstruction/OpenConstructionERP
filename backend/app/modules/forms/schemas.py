@@ -204,6 +204,7 @@ class SubmissionResponse(BaseModel):
     completed_at: str | None = None
     completed_by: str | None = None
     linked_inspection_id: str | None = None
+    linked_ncr_id: str | None = None
     created_by: str | None = None
     metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="metadata_")
     created_at: datetime
@@ -228,6 +229,13 @@ class SubmissionSummary(BaseModel):
     created_by: str | None = None
     created_at: datetime
     updated_at: datetime
+
+
+class RaiseNcrRequest(BaseModel):
+    """Optional overrides when raising an NCR from a failed form."""
+
+    ncr_type: str | None = Field(default=None, pattern=r"^(material|workmanship|design|documentation|safety)$")
+    severity: str | None = Field(default=None, pattern=r"^(critical|major|minor|observation)$")
 
 
 # ── Shared error / meta payloads ─────────────────────────────────────────────

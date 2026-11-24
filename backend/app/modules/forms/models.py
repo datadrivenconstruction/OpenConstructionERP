@@ -159,6 +159,8 @@ class FormSubmission(Base):
     # inspection raised from it (see router.create-inspection). Nullable string,
     # never a hard FK, so the forms module carries no dependency on inspections.
     linked_inspection_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
+    # The NCR raised from this form's failed checklist items (one per submission).
+    linked_ncr_id: Mapped[str | None] = mapped_column(String(36), nullable=True, index=True)
 
     created_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
 

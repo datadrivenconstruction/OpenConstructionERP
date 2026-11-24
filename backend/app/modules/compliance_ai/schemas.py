@@ -62,6 +62,11 @@ class NlVerifyResponse(BaseModel):
     matched_pattern: str | None = None
     errors: list[str] = Field(default_factory=list)
     suggestions: list[str] = Field(default_factory=list)
+    # Principle 7: this is a suggestion only. Nothing is stored or activated until a
+    # person reviews the rule and saves it; the flags tell the UI how much to trust it.
+    requires_confirmation: bool = True
+    ai_used: bool = False
+    low_confidence: bool = False
 
 
 __all__ = [

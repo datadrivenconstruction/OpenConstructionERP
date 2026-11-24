@@ -65,6 +65,7 @@ from app.modules.hse_advanced.schemas import (
     JSATemplateCreate,
     JSATemplateUpdate,
     JSAUpdate,
+    KPIResponse,
     PermitCreate,
     PermitPrerequisitesPayload,
     PermitPrerequisiteStatus,
@@ -330,20 +331,65 @@ def is_permit_active(permit: Any, now: datetime | None = None) -> bool:
     return ws <= now <= we
 
 
-def compute_trir(recordable_count: int, hours_worked: Decimal | float | int) -> Decimal:
-    """Pure: TRIR = recordable × 200000 / hours_worked. Returns 0 on zero hours."""
+# Exposure bases a rate may be quoted per. 200,000 h is the OSHA convention
+# (100 full-time workers for a year), 1,000,000 h is the ILO / ISO 45001 and
+# European convention. TRIR defaults to the former, LTIFR to the latter.
+RATE_BASES: tuple[int, ...] = (200_000, 1_000_000)
+DEFAULT_TRIR_BASE = 200_000
+DEFAULT_LTIFR_BASE = 1_000_000
+
+# Incident types that cannot be a recordable injury or a lost-time case.
+_NON_INJURY_TYPES = frozenset({"near_miss", "property_damage", "environmental"})
+_RECORDABLE_TREATMENTS = frozenset({"medical", "hospital", "fatality"})
+
+
+def _rate(count: int, hours_worked: Decimal | float | int | None, base: int) -> Decimal:
     hw = Decimal(str(hours_worked)) if hours_worked is not None else Decimal("0")
     if hw <= 0:
         return Decimal("0")
-    return (Decimal(recordable_count) * Decimal("200000") / hw).quantize(Decimal("0.0001"))
+    return (Decimal(count) * Decimal(base) / hw).quantize(Decimal("0.0001"))
 
 
-def compute_ltifr(lti_count: int, hours_worked: Decimal | float | int) -> Decimal:
-    """Pure: LTIFR = LTI × 1_000_000 / hours_worked. Returns 0 on zero hours."""
-    hw = Decimal(str(hours_worked)) if hours_worked is not None else Decimal("0")
-    if hw <= 0:
-        return Decimal("0")
-    return (Decimal(lti_count) * Decimal("1000000") / hw).quantize(Decimal("0.0001"))
+def compute_trir(
+    recordable_count: int,
+    hours_worked: Decimal | float | int,
+    base: int = DEFAULT_TRIR_BASE,
+) -> Decimal:
+    """Pure: TRIR = recordable x base / hours_worked (base 200,000 by default). 0 on zero hours."""
+    return _rate(recordable_count, hours_worked, base)
+
+
+def compute_ltifr(
+    lti_count: int,
+    hours_worked: Decimal | float | int,
+    base: int = DEFAULT_LTIFR_BASE,
+) -> Decimal:
+    """Pure: LTIFR = LTI x base / hours_worked (base 1,000,000 by default). 0 on zero hours."""
+    return _rate(lti_count, hours_worked, base)
+
+
+def is_lost_time_incident(incident: Any) -> bool:
+    """A lost-time injury: days away from work, or a fatality. Restricted duty alone is not LTI."""
+    if (getattr(incident, "incident_type", None) or "") in _NON_INJURY_TYPES:
+        return False
+    if (getattr(incident, "treatment_type", None) or "") == "fatality":
+        return True
+    return max(int(getattr(incident, "days_lost", 0) or 0), int(getattr(incident, "days_away", 0) or 0)) > 0
+
+
+def is_recordable_incident(incident: Any) -> bool:
+    """OSHA 1904.7 style: flagged recordable, treatment beyond first aid, or any days away / restricted.
+
+    Every lost-time case is recordable, so recordable >= LTI always holds.
+    """
+    if (getattr(incident, "incident_type", None) or "") in _NON_INJURY_TYPES:
+        return False
+    return (
+        bool(getattr(incident, "osha_recordable", False))
+        or (getattr(incident, "treatment_type", None) or "") in _RECORDABLE_TREATMENTS
+        or is_lost_time_incident(incident)
+        or int(getattr(incident, "days_restricted", 0) or 0) > 0
+    )
 
 
 def days_without_lti(incident_dates: list[date | str], today: date | None = None) -> int:
@@ -655,6 +701,77 @@ def _render_osha_300_csv(header: tuple[str, ...], rows: list[list[str]]) -> str:
 
 class HSEAdvancedService:
     """Business logic for the HSE Advanced module."""
+
+    async def labour_hours_from_field_time(
+        self, project_id: uuid.UUID, start: date | None, end: date | None
+    ) -> Decimal:
+        """Approved, live (not reversed) labour hours booked in field time for the period."""
+        from sqlalchemy import func
+
+        from app.modules.field_time.models import FieldTimesheet, FieldTimesheetLine
+
+        stmt = (
+            select(func.coalesce(func.sum(FieldTimesheetLine.hours), 0))
+            .join(FieldTimesheet, FieldTimesheet.id == FieldTimesheetLine.timesheet_id)
+            .where(
+                FieldTimesheet.project_id == project_id,
+                FieldTimesheet.status == "approved",
+                FieldTimesheet.reverses_id.is_(None),
+                FieldTimesheetLine.resource_id.is_not(None),
+            )
+        )
+        if start:
+            stmt = stmt.where(FieldTimesheet.date >= start)
+        if end:
+            stmt = stmt.where(FieldTimesheet.date <= end)
+        return Decimal(str((await self.session.execute(stmt)).scalar_one() or 0))
+
+    async def project_kpi(
+        self,
+        project_id: uuid.UUID,
+        *,
+        hours_worked: Decimal | None,
+        period_start: date | None,
+        period_end: date | None,
+        trir_base: int = DEFAULT_TRIR_BASE,
+        ltifr_base: int = DEFAULT_LTIFR_BASE,
+    ) -> KPIResponse:
+        """TRIR / LTIFR / days without LTI from real incidents and exposure hours."""
+        stmt = select(SafetyIncident).where(SafetyIncident.project_id == project_id)
+        incidents = list((await self.session.execute(stmt)).scalars().all())
+        lo = period_start.isoformat() if period_start else None
+        hi = period_end.isoformat() if period_end else None
+        in_period = [
+            i
+            for i in incidents
+            if (lo is None or i.incident_date[:10] >= lo) and (hi is None or i.incident_date[:10] <= hi)
+        ]
+
+        recordable = sum(1 for i in in_period if is_recordable_incident(i))
+        lti_dates = [i.incident_date for i in incidents if is_lost_time_incident(i)]
+        lti = sum(1 for i in in_period if is_lost_time_incident(i))
+
+        if hours_worked is not None and hours_worked > 0:
+            hours, source = hours_worked, "supplied"
+        else:
+            hours = await self.labour_hours_from_field_time(project_id, period_start, period_end)
+            source = "field_time" if hours > 0 else "none"
+
+        dwlti = days_without_lti(lti_dates)
+        return KPIResponse(
+            project_id=project_id,
+            period_start=period_start,
+            period_end=period_end,
+            hours_worked=hours,
+            hours_source=source,
+            recordable_count=recordable,
+            lti_count=lti,
+            trir=compute_trir(recordable, hours, trir_base) if hours > 0 else None,
+            ltifr=compute_ltifr(lti, hours, ltifr_base) if hours > 0 else None,
+            trir_base=trir_base,
+            ltifr_base=ltifr_base,
+            days_without_lti=dwlti if dwlti < 9999 else None,
+        )
 
     def __init__(self, session: AsyncSession) -> None:
         self.session = session

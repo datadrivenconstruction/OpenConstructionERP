@@ -838,10 +838,15 @@ class KPIResponse(BaseModel):
     period_start: date | None = None
     period_end: date | None = None
     hours_worked: Decimal = Field(default=Decimal("0"))
+    # "supplied" (caller figure), "field_time" (approved labour hours) or "none".
+    hours_source: str = "none"
     recordable_count: int = 0
     lti_count: int = 0
-    trir: Decimal = Field(default=Decimal("0"))
-    ltifr: Decimal = Field(default=Decimal("0"))
+    # Null when there are no exposure hours: a rate over zero hours is unknown, not zero.
+    trir: Decimal | None = None
+    ltifr: Decimal | None = None
+    trir_base: int = 200_000
+    ltifr_base: int = 1_000_000
     days_without_lti: int | None = None
 
 

@@ -16,6 +16,7 @@ import {
   Download,
   ShieldCheck,
   CircleAlert,
+  TriangleAlert,
   Loader2,
   Trash2,
 } from 'lucide-react';
@@ -30,6 +31,7 @@ import {
   deleteSubmission,
   downloadSubmissionPdf,
   createInspectionFromSubmission,
+  raiseNcrFromSubmission,
   type AnswerMap,
   type AnswerValue,
   type FieldIssue,
@@ -184,6 +186,25 @@ export function FormFiller({ open, onClose, submissionId, onChanged }: FormFille
       addToast({ type: 'error', title: t('common.error', { defaultValue: 'Error' }), message: getErrorMessage(e) }),
   });
 
+  const ncrMut = useMutation({
+    mutationFn: () => raiseNcrFromSubmission(submissionId as string),
+    onSuccess: (res) => {
+      qc.invalidateQueries({ queryKey: ['forms', 'submission', submissionId] });
+      addToast({
+        type: 'success',
+        title: res.created
+          ? t('forms.ncr_created', { defaultValue: 'NCR raised' })
+          : t('forms.ncr_exists', { defaultValue: 'NCR already linked' }),
+        message: res.ncr_number,
+      });
+      afterChange();
+    },
+    onError: (e: unknown) =>
+      addToast({ type: 'error', title: t('common.error', { defaultValue: 'Error' }), message: getErrorMessage(e) }),
+  });
+
+  const canRaiseNcr = readOnly && submission?.result === 'fail' && !submission?.linked_ncr_id;
+
   const canRaiseInspection =
     readOnly &&
     !submission?.linked_inspection_id &&
@@ -311,6 +332,21 @@ export function FormFiller({ open, onClose, submissionId, onChanged }: FormFille
                   >
                     {t('forms.raise_inspection', { defaultValue: 'Raise inspection' })}
                   </Button>
+                )}
+                {canRaiseNcr && (
+                  <Button
+                    variant="secondary"
+                    icon={<TriangleAlert size={16} />}
+                    loading={ncrMut.isPending}
+                    onClick={() => ncrMut.mutate()}
+                  >
+                    {t('forms.raise_ncr', { defaultValue: 'Raise NCR' })}
+                  </Button>
+                )}
+                {submission.linked_ncr_id && (
+                  <Badge variant="blue" size="sm">
+                    {t('forms.ncr_linked', { defaultValue: 'NCR linked' })}
+                  </Badge>
                 )}
                 {submission.linked_inspection_id && (
                   <Badge variant="blue" size="sm">

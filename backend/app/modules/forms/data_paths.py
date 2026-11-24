@@ -26,5 +26,12 @@ DATA_PATHS = DataPaths(
             label="data_paths.entity.inspection",
             where=(Where("linked_inspection_id", "not_null"),),
         ),
+        DataPath(
+            "oe_ncr",
+            "FormSubmission",
+            via="FormSubmission.linked_ncr_id",
+            label="data_paths.entity.ncr",
+            where=(Where("linked_ncr_id", "not_null"),),
+        ),
     ),
 )

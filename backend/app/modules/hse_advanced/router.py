@@ -9,7 +9,7 @@ import uuid
 from datetime import UTC, date, datetime
 from decimal import Decimal
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import Response
 from sqlalchemy import select
 
@@ -72,9 +72,10 @@ from app.modules.hse_advanced.schemas import (
     ToolboxTopicUpdate,
 )
 from app.modules.hse_advanced.service import (
+    DEFAULT_LTIFR_BASE,
+    DEFAULT_TRIR_BASE,
+    RATE_BASES,
     HSEAdvancedService,
-    compute_ltifr,
-    compute_trir,
     incident_escalation_matrix,
 )
 
@@ -1081,54 +1082,41 @@ async def project_kpi(
     project_id: uuid.UUID,
     session: SessionDep,
     user_id: CurrentUserId = None,  # type: ignore[assignment]
-    hours_worked: Decimal = Query(default=Decimal("0"), ge=0),
+    hours_worked: Decimal | None = Query(
+        default=None,
+        ge=0,
+        description="Exposure hours. Omit to use the approved labour hours booked in field time.",
+    ),
     period_start: date | None = Query(default=None),
     period_end: date | None = Query(default=None),
+    trir_base: int = Query(
+        default=DEFAULT_TRIR_BASE, description="TRIR is quoted per this many hours (200000 or 1000000)."
+    ),
+    ltifr_base: int = Query(
+        default=DEFAULT_LTIFR_BASE, description="LTIFR is quoted per this many hours (200000 or 1000000)."
+    ),
     service: HSEAdvancedService = Depends(_get_service),
 ) -> KPIResponse:
-    """Return TRIR / LTIFR / days-without-LTI for a project.
+    """Return TRIR / LTIFR / days-without-LTI for a project and period.
 
-    Recordable / LTI counts are read off the existing safety module; the
-    formulae are pure helpers exposed from this module's service layer.
+    Incidents are read off the safety module and filtered to the period. Exposure
+    hours are the supplied figure, else the approved labour hours in field time
+    for the same period; with neither, the rates are null rather than a false zero.
     """
     await verify_project_access(project_id, user_id, session)
+    for name, base in (("trir_base", trir_base), ("ltifr_base", ltifr_base)):
+        if base not in RATE_BASES:
+            raise HTTPException(status_code=422, detail=f"{name} must be one of {list(RATE_BASES)}")
+    if period_start and period_end and period_end < period_start:
+        raise HTTPException(status_code=422, detail="period_end is before period_start")
 
-    # Pull lightweight counts from the safety module without coupling tightly.
-    from sqlalchemy import select
-
-    from app.modules.safety.models import SafetyIncident
-
-    inc_stmt = select(SafetyIncident).where(SafetyIncident.project_id == project_id)
-    incs = list((await session.execute(inc_stmt)).scalars().all())
-
-    # OSHA 29 CFR 1904.7: a case is recordable if it involves medical
-    # treatment beyond first aid, hospitalisation or fatality - OR any
-    # days away from work / restricted duty. Counting only the treatment
-    # types would undercount (a lost-time case logged with no/“first_aid”
-    # treatment_type is still recordable), which is mathematically
-    # impossible (recordable >= lti must always hold) and corrupts TRIR.
-    recordable_treatments = {"medical", "hospital", "fatality"}
-    recordable = sum(1 for i in incs if (i.treatment_type or "") in recordable_treatments or (i.days_lost or 0) > 0)
-    lti = sum(1 for i in incs if (i.days_lost or 0) > 0)
-
-    trir = compute_trir(recordable, hours_worked)
-    ltifr = compute_ltifr(lti, hours_worked)
-
-    lti_dates = [i.incident_date for i in incs if (i.days_lost or 0) > 0]
-    from app.modules.hse_advanced.service import days_without_lti as _dwlti
-
-    dwlti = _dwlti(lti_dates)
-
-    return KPIResponse(
-        project_id=project_id,
+    return await service.project_kpi(
+        project_id,
+        hours_worked=hours_worked,
         period_start=period_start,
         period_end=period_end,
-        hours_worked=hours_worked,
-        recordable_count=recordable,
-        lti_count=lti,
-        trir=trir,
-        ltifr=ltifr,
-        days_without_lti=dwlti if dwlti < 9999 else None,
+        trir_base=trir_base,
+        ltifr_base=ltifr_base,
     )
 
 

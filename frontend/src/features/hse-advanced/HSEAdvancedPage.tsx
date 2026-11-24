@@ -55,6 +55,7 @@ import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { useToastStore } from '@/stores/useToastStore';
 import { useTabKeyboardNav } from '@/shared/hooks/useTabKeyboardNav';
 import { isDateOnlyPast } from '@/shared/lib/dates';
+import { getIntlLocale } from '@/shared/lib/formatters';
 import {
   fetchInvestigations,
   fetchJSAs,
@@ -989,6 +990,11 @@ function HSEKpiStrip({ projectId }: { projectId: string }) {
     return null;
   }
 
+  const kpiData = kpiQ.data as HSEKpi | undefined;
+  const fmtBase = (n: number) => new Intl.NumberFormat(getIntlLocale()).format(n);
+  const fmtRate = (v: string | number | null | undefined, empty: string) =>
+    v === null || v === undefined ? empty : new Intl.NumberFormat(getIntlLocale(), { maximumFractionDigits: 2 }).format(Number(v));
+
   const ltiTone: KpiTone =
     stats.daysSinceLti === null
       ? 'neutral'
@@ -1002,7 +1008,7 @@ function HSEKpiStrip({ projectId }: { projectId: string }) {
 
   return (
     <div
-      className="grid grid-cols-2 md:grid-cols-4 gap-3"
+      className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3"
       data-testid="hse-kpi-strip"
       aria-label={t('hse_advanced.kpi_aria', { defaultValue: 'HSE key indicators' })}
     >
@@ -1043,6 +1049,20 @@ function HSEKpiStrip({ projectId }: { projectId: string }) {
         icon={<Clock size={16} />}
         tone={ltiTone}
         testId="hse-kpi-days-since-lti"
+      />
+      <KpiCard
+        label={t('hse_advanced.kpi_trir', { defaultValue: 'TRIR per {{base}} h', base: fmtBase(kpiData?.trir_base ?? 200000) })}
+        value={fmtRate(kpiData?.trir, t('hse_advanced.kpi_no_hours', { defaultValue: 'No hours' }))}
+        icon={<ShieldAlert size={16} />}
+        tone="neutral"
+        testId="hse-kpi-trir"
+      />
+      <KpiCard
+        label={t('hse_advanced.kpi_ltifr', { defaultValue: 'LTIFR per {{base}} h', base: fmtBase(kpiData?.ltifr_base ?? 1000000) })}
+        value={fmtRate(kpiData?.ltifr, t('hse_advanced.kpi_no_hours', { defaultValue: 'No hours' }))}
+        icon={<ShieldAlert size={16} />}
+        tone="neutral"
+        testId="hse-kpi-ltifr"
       />
     </div>
   );

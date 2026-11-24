@@ -176,6 +176,7 @@ export interface SubmissionDetail extends SubmissionSummary {
   answers: AnswerMap;
   completed_by: string | null;
   linked_inspection_id: string | null;
+  linked_ncr_id: string | null;
   metadata: Record<string, unknown>;
 }
 
@@ -305,6 +306,17 @@ export interface CreateInspectionResult {
 
 export function createInspectionFromSubmission(id: string): Promise<CreateInspectionResult> {
   return apiPost<CreateInspectionResult>(`/v1/forms/submissions/${id}/create-inspection`, {});
+}
+
+export interface RaiseNcrResult {
+  ncr_id: string;
+  ncr_number?: string;
+  submission_id: string;
+  created: boolean;
+}
+
+export function raiseNcrFromSubmission(id: string): Promise<RaiseNcrResult> {
+  return apiPost<RaiseNcrResult>(`/v1/forms/submissions/${id}/raise-ncr`, {});
 }
 
 /**

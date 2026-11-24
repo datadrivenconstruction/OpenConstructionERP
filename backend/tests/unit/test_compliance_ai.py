@@ -131,6 +131,10 @@ async def test_from_nl_happy_path_pattern_match(app_factory):
         # YAML render succeeded (string, not None).
         assert isinstance(body["dsl_yaml"], str)
         assert "scope: wall" in body["dsl_yaml"]
+        # Principle 7: a suggestion, never an applied rule.
+        assert body["requires_confirmation"] is True
+        assert body["ai_used"] is False
+        assert body["low_confidence"] is False
     finally:
         app.dependency_overrides.clear()
 

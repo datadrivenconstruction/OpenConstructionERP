@@ -55,6 +55,9 @@ logger = logging.getLogger(__name__)
 # tokens of hallucinated prose.
 _AI_MAX_TOKENS = 1024
 
+# Below this a suggestion is shown with a "check carefully" warning.
+LOW_CONFIDENCE_THRESHOLD = 0.6
+
 
 async def _build_ai_caller(
     user_id: str | None,
@@ -215,6 +218,9 @@ async def verify_nl_rule(
         matched_pattern=result.matched_pattern,
         errors=list(result.errors),
         suggestions=list(result.suggestions),
+        requires_confirmation=True,
+        ai_used=result.used_method == "ai",
+        low_confidence=result.confidence < LOW_CONFIDENCE_THRESHOLD,
     )
 
 

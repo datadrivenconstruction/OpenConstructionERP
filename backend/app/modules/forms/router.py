@@ -22,6 +22,7 @@ Submissions (a template filled into a project):
     DELETE /submissions/{id}                - delete a submission
     GET    /submissions/{id}/export/pdf     - download the filled form as PDF
     POST   /submissions/{id}/create-inspection - raise a QA inspection from a form
+    POST   /submissions/{id}/raise-ncr      - raise an NCR from a failed form
 """
 
 from __future__ import annotations
@@ -40,6 +41,7 @@ from app.modules.forms.models import FormSubmission, FormTemplate
 from app.modules.forms.schemas import (
     CategoryInfo,
     CompleteSubmissionRequest,
+    RaiseNcrRequest,
     SubmissionCreate,
     SubmissionResponse,
     SubmissionSummary,
@@ -132,6 +134,7 @@ def _submission_response(s: FormSubmission) -> SubmissionResponse:
         completed_at=s.completed_at,
         completed_by=s.completed_by,
         linked_inspection_id=s.linked_inspection_id,
+        linked_ncr_id=s.linked_ncr_id,
         created_by=s.created_by,
         metadata=getattr(s, "metadata_", {}) or {},
         created_at=s.created_at,
@@ -492,6 +495,81 @@ async def create_inspection_from_submission(
     return {
         "inspection_id": str(inspection.id),
         "inspection_number": inspection.inspection_number,
+        "submission_id": str(submission_id),
+        "created": True,
+    }
+
+
+@router.post("/submissions/{submission_id}/raise-ncr", status_code=201, dependencies=[_UPDATE])
+async def raise_ncr_from_submission(
+    submission_id: uuid.UUID,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    body: RaiseNcrRequest | None = None,
+) -> dict[str, Any]:
+    """Raise a non-conformance report from a completed form that failed.
+
+    A person confirms by pressing the button; nothing is raised automatically.
+    The NCR lists every failed checklist item, points back at the form (and at the
+    inspection raised from it, when there is one) and is stored on the submission
+    so a second call returns the same NCR instead of a duplicate.
+    """
+    svc = _service(session)
+    submission = await svc.get_submission(submission_id)
+    await verify_project_access(submission.project_id, str(user_id), session)
+
+    if submission.status != "completed":
+        raise HTTPException(status_code=400, detail="Only a completed form can raise an NCR.")
+    if submission.result != "fail":
+        raise HTTPException(status_code=400, detail="Only a form with a failed result can raise an NCR.")
+    if submission.linked_ncr_id:
+        return {"ncr_id": submission.linked_ncr_id, "submission_id": str(submission_id), "created": False}
+
+    try:
+        from app.modules.ncr.schemas import NCRCreate
+        from app.modules.ncr.service import NCRService
+    except ImportError:
+        raise HTTPException(status_code=501, detail="NCR module is not available.")
+
+    answers = submission.answers_data or {}
+    failed = [
+        f
+        for f in submission.template_snapshot or []
+        if str(f.get("type")) == "pass_fail_na"
+        and str(answers.get(str(f.get("key", "")), "")).strip().lower() == "fail"
+    ]
+    lines = [f"- {str(f.get('label') or f.get('key'))}" for f in failed]
+    category = str(submission.template_category or "").lower()
+    ncr_type = (body.ncr_type if body else None) or ("safety" if category == "safety" else "workmanship")
+    # A failed mandatory item is a major non-conformance; failed optional items only a minor one.
+    severity = (body.severity if body else None) or ("major" if any(f.get("required") for f in failed) else "minor")
+
+    header = f"Raised from form {submission.submission_number}. Failed checklist items:"
+    description = "\n".join([header, *lines])[:10000]
+
+    ncr = await NCRService(session).create_ncr(
+        NCRCreate(
+            project_id=submission.project_id,
+            title=f"{submission.template_name}: {len(failed)} failed ({submission.submission_number})"[:500],
+            description=description,
+            ncr_type=ncr_type,
+            severity=severity,
+            status="identified",
+            location_description=submission.location,
+            linked_inspection_id=submission.linked_inspection_id,
+            metadata={
+                "source": "forms",
+                "submission_id": str(submission_id),
+                "submission_number": submission.submission_number,
+            },
+        ),
+        user_id=str(user_id),
+    )
+    await svc.repo.update_submission_fields(submission_id, linked_ncr_id=str(ncr.id))
+    logger.info("NCR %s raised from form submission %s", ncr.id, submission_id)
+    return {
+        "ncr_id": str(ncr.id),
+        "ncr_number": ncr.ncr_number,
         "submission_id": str(submission_id),
         "created": True,
     }

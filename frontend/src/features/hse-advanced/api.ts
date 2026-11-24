@@ -326,10 +326,14 @@ export interface HSEKpi {
   period_start: string | null;
   period_end: string | null;
   hours_worked: string | number;
+  hours_source: 'supplied' | 'field_time' | 'none';
   recordable_count: number;
   lti_count: number;
-  trir: string | number;
-  ltifr: string | number;
+  // null when no exposure hours are booked: the rate is unknown, not zero.
+  trir: string | number | null;
+  ltifr: string | number | null;
+  trir_base: number;
+  ltifr_base: number;
   days_without_lti: number | null;
 }
 
