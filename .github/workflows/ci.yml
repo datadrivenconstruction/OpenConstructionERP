@@ -1182,8 +1182,17 @@ jobs:
     needs: [cli-cold-start, cli-browser-cold-start]
     if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
+    permissions:
+      # Only to read this run's own job list in the step below, which is what lets
+      # the gate say WHICH leg never ran instead of reading an aggregate that
+      # cannot. The same permission, for the same reason, that ci-full.yml's gate
+      # carries.
+      actions: read
+      contents: read
     steps:
       - name: Require both cold-start lanes to pass
+        env:
+          GH_TOKEN: ${{ github.token }}
         shell: bash
         run: |
           probe="${{ needs.cli-cold-start.result }}"
@@ -1191,54 +1200,116 @@ jobs:
           echo "cli-cold-start: $probe"
           echo "cli-browser-cold-start: $browser"
 
-          # One function for both lanes, because the same outcomes arrive for
-          # either and two copies of the reasoning drift apart.
+          # Those two values are aggregates, and an aggregate cannot say WHICH leg
+          # never ran. That cost a false red at 68c4f4f7, when the macOS leg of the
+          # CLI matrix was never acquired by a hosted runner and the gate read
+          # `abandoned` as a verdict about the product; the fix tolerated the three
+          # values that mean "no verdict" on either lane. Tolerating them on either
+          # lane is too much, and this step is the correction.
           #
-          # Three outcomes are not the product's, and are said out loud rather
-          # than failed on:
+          # The two lanes are not the same shape. The CLI matrix carries three legs
+          # and the macOS one is the leg this repository has a recorded history of
+          # losing to capacity, so a missing runner there is an event about GitHub
+          # and is published as a warning naming the leg. The browser matrix carries
+          # two legs, ubuntu and windows, and both are legs this gate exists for: a
+          # lane whose ubuntu or windows leg did not run has not shown that a fresh
+          # install works, whatever the reason it did not run. An aggregate of
+          # `skipped` or `abandoned` over a two-leg matrix says one of those two is
+          # missing and cannot say which, so it has to fail - which is also why the
+          # browser lane's own skip, when its frontend build did not happen, now
+          # fails here instead of being warned about: the frontend failure is red on
+          # the run, and this gate's job is not to be quiet about it, it is to say
+          # whether a fresh install was shown to work. It was not.
           #
-          #   skipped   the browser lane's frontend build did not happen, which
-          #             is a failure of a different lane and already red on the
-          #             run. Reporting it here as well would name this gate as
-          #             the thing that broke. Since that lane stopped reading
-          #             three legs as one verdict about its bundle, this value
-          #             can only mean the frontend job really failed or really
-          #             did not run - not that a leg which builds nothing the
-          #             lane uses was never allocated a runner.
-          #   cancelled a leg's runner was taken away after it was allocated.
-          #   abandoned a leg's runner never arrived. This is the value the
-          #             macOS leg of the CLI matrix above aggregated to at
-          #             68c4f4f7, where the gate reported "the CLI cold start
-          #             lane did not pass: abandoned" while both browser legs,
-          #             both CLI legs that ran, and the PostgreSQL suite had all
-          #             passed. The macOS hosted runners in this repository have
-          #             a recorded history of exactly that, and it is why the
-          #             browser matrix has no macOS leg at all.
-          #
-          # A leg that never ran is not evidence about a fresh install, and
-          # nothing is hidden by treating it as none: each leg's own conclusion
-          # is on the run page beside this verdict, and a leg that *failed*
-          # aggregates to `failure`, which still errors and still stops here.
-          verdict() {
-            case "$2" in
-              success)
-                return 0
+          # So the legs are read from this run's own job list, the way ci-full.yml
+          # reads its own, and the verdicts are per leg.
+          read_ok=1
+          legs=$(gh api --paginate \
+            "repos/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}/jobs?per_page=100" \
+            --jq '.jobs[] | select((.name | startswith("CLI cold start (")) or (.name | startswith("Browser cold start ("))) | [.name, (.conclusion // .status)] | @tsv') || read_ok=0
+
+          # The last row for a name wins, so a re-run's attempt cannot be read
+          # beside the one it replaced.
+          leg() {
+            printf '%s\n' "$legs" | awk -F '\t' -v want="$1" '
+              $1 == want { seen = $2 }
+              END { print (seen == "" ? "absent" : seen) }'
+          }
+
+          rc=0
+
+          required() {
+            value=$(leg "$1")
+            echo "  $1: $value"
+            if [ "$value" != success ]; then
+              echo "::error::$1 reported $value, and this gate requires it to have succeeded: it is one of the legs that shows a fresh install works, and a leg that did not run shows nothing whatever the reason it did not"
+              rc=1
+            fi
+          }
+
+          macos() {
+            value=$(leg "$1")
+            echo "  $1: $value"
+            case "$value" in
+              success) ;;
+              absent)
+                echo "::error::$1 is not in this run's job list at all, which is not one of the three values this gate tolerates from it"
+                rc=1
                 ;;
               skipped | cancelled | abandoned)
-                echo "::warning::the $1 lane reported $2, which says a leg of it never ran rather than that the product failed; this gate is green on the legs that did run, and each leg's own conclusion is on the run page"
-                return 0
+                echo "::warning::$1 reported $value, which says its runner never arrived rather than that the product failed; every leg this gate requires has succeeded"
                 ;;
               *)
-                echo "::error::the $1 lane did not pass: $2"
-                return 1
+                echo "::error::$1 reported $value, which is a verdict about the product and not a runner that never arrived"
+                rc=1
                 ;;
             esac
           }
 
-          rc=0
-          verdict "CLI cold start" "$probe" || rc=1
-          verdict "browser cold start" "$browser" || rc=1
+          if [ "$read_ok" -eq 0 ]; then
+            echo "::warning::could not read this run's job list, so there are no per-leg verdicts and this gate falls back to the two aggregates. That fallback cannot say which leg never ran, so it tolerates nothing: an aggregate of success is the only one that cannot be true unless every leg ran and passed."
+            for lane in "CLI cold start|$probe" "browser cold start|$browser"; do
+              label=${lane%%|*}
+              value=${lane##*|}
+              echo "  $label: $value (aggregate, legs unreadable)"
+              if [ "$value" != success ]; then
+                echo "::error::the $label lane reported $value and this gate cannot see its legs, so it cannot tell a macOS runner that never arrived from a leg that failed"
+                rc=1
+              fi
+            done
+          else
+            if [ -z "$legs" ]; then
+              echo "::error::zero cold-start legs ran: this run has no CLI cold start or Browser cold start job in it at all, so it holds no evidence about a fresh install in either direction"
+            fi
+            echo "per-leg verdicts read from this run:"
+            required "CLI cold start (ubuntu-latest)"
+            required "CLI cold start (windows-latest)"
+            macos "CLI cold start (macos-latest)"
+            required "Browser cold start (ubuntu-latest)"
+            required "Browser cold start (windows-latest)"
+
+            # Drift guard. If every leg this gate knows of succeeded, the matrix's
+            # own aggregate has to agree; if it does not, the matrix has a leg this
+            # gate was never told about, and guessing that it was another macOS leg
+            # is how a real failure would get tolerated. The macOS leg is asked
+            # first because a runner it never got is the one honest reason for the
+            # CLI aggregate to disagree with three green legs.
+            if [ "$rc" -eq 0 ]; then
+              if [ "$probe" != success ] && [ "$(leg "CLI cold start (macos-latest)")" = success ]; then
+                echo "::error::the CLI cold start matrix reported $probe while every leg this gate knows of succeeded, so the matrix has a leg this gate was never told about"
+                rc=1
+              fi
+              if [ "$browser" != success ]; then
+                echo "::error::the browser cold start matrix reported $browser while both legs this gate knows of succeeded, so the matrix has a leg this gate was never told about"
+                rc=1
+              fi
+            fi
+          fi
+
           if [ "$rc" -eq 0 ]; then
-            echo "Both cold-start lanes passed, or reported only legs that never ran."
+            echo "Every cold-start leg this gate requires has succeeded."
+            if [ "$read_ok" -eq 1 ]; then
+              echo "::notice::cold-start legs: CLI ubuntu=$(leg "CLI cold start (ubuntu-latest)") windows=$(leg "CLI cold start (windows-latest)") macos=$(leg "CLI cold start (macos-latest)"); browser ubuntu=$(leg "Browser cold start (ubuntu-latest)") windows=$(leg "Browser cold start (windows-latest)")"
+            fi
           fi
           exit "$rc"
