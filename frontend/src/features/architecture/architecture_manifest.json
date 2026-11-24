@@ -28965,7 +28965,8 @@
         "manifest.py",
         "router.py",
         "schemas.py",
-        "service.py"
+        "service.py",
+        "validators.py"
       ],
       "manifest": {
         "name": "oe_bimlv",
@@ -29072,6 +29073,11 @@
             {
               "name": "warnings",
               "type": "list[str]"
+            },
+            {
+              "name": "findings",
+              "type": "list[dict]",
+              "description": "Findings of the BIM-LV rules, worded in the caller's language."
             }
           ]
         }
@@ -228114,7 +228120,8 @@
         "router.py",
         "schemas.py",
         "scorer.py",
-        "service.py"
+        "service.py",
+        "validators.py"
       ],
       "manifest": {
         "name": "oe_project_intelligence",
@@ -229380,6 +229387,11 @@
               "name": "review_required",
               "type": "bool",
               "default": "True"
+            },
+            {
+              "name": "findings",
+              "type": "list[dict]",
+              "description": "Findings of the project intelligence rules, worded in the caller's language."
             }
           ]
         }
@@ -343929,10 +343941,10 @@
     },
     {
       "name": "data-paths",
-      "ts_files": 22,
+      "ts_files": 25,
       "css_files": 0,
-      "test_files": 6,
-      "total_files": 22
+      "test_files": 7,
+      "total_files": 25
     },
     {
       "name": "data-security",
@@ -347315,9 +347327,9 @@
     "total_relationships": 264,
     "total_routes": 5590,
     "total_schemas": 5219,
-    "total_python_files": 3836,
+    "total_python_files": 3838,
     "frontend_features": 254,
-    "frontend_ts_files": 4568,
+    "frontend_ts_files": 4571,
     "frontend_backend_mapped": 224
   },
   "frontend_backend_mapping": {

@@ -7,6 +7,7 @@
  */
 import { AlertCircle, AlertTriangle, Info } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { fmtList } from '@/shared/lib/formatters';
 
 export interface ValidationFinding {
   rule_id?: string;
@@ -76,7 +77,7 @@ export function FindingsList({ findings, title, testId = 'findings-list' }: Find
                 <span>{f.message ?? f.rule_name ?? f.rule_id}</span>
                 {values.length > 0 && (
                   <span className="ml-1.5 tabular-nums text-content-tertiary">
-                    ({values.join(', ')})
+                    ({fmtList(values)})
                   </span>
                 )}
                 {f.suggestion && (
