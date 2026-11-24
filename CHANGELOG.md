@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 > **Tip:** This file is long. Use your browser's **Find** (Ctrl+F) to jump to a version number, or see the [Releases page](https://github.com/datadrivenconstruction/OpenConstructionERP/releases) for a per-release view with download links.
 
+## [20.3.0] - 2026-11-24
+
+The data paths panel on every module page now opens on a plain-words overview: where the numbers come from, what the module holds right now, who uses them next, and which gaps break what.
+
+### Added
+
+- Data paths overview tab: a three-step story with live counts and amounts, a health strip naming each empty path and what it breaks with a link to fix it, inputs, module and outputs side by side, and the settings that change the numbers.
+- Real inputs and outputs for fourteen modules that showed almost nothing, among them costs, tax withholding, temporary works, safety, file transmittals, daily diary and authority submissions.
+- Forecast validation in project intelligence: seven rules check earned value identities, currency and input ranges, and the findings appear next to the forecast without blocking it.
+- BIM to LV validation: five rules check ordinals, quantities, prices and links, and a broken container is refused before anything is written.
+
+### Fixed
+
+- The design editor previews its model on the read-only demo, and the viewer loads a model built in the browser.
+
 ## [20.2.1] - 2026-11-22
 
 Every demo project now opens Design with a confirmed brief and a model, so the editor, revisions, acceptance and estimate show real work instead of empty pages.

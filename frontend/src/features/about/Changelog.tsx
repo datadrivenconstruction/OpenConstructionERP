@@ -67,6 +67,13 @@ const UNRELEASED: ChangelogEntry | null = null;
 // carry the long form and are left alone as the record of what shipped.
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '20.3.0',
+    date: '2026-11-24',
+    tag: 'NEW',
+    summary:
+      'Data paths open on a plain-words overview with live numbers and the gaps that break the next step. Fourteen more modules show their real inputs and outputs, and forecasts and BIM to LV imports are checked by new validation rules.',
+  },
+  {
     version: '20.2.1',
     date: '2026-11-22',
     tag: 'FIX',
