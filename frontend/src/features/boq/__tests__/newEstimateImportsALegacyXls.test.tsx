@@ -57,14 +57,33 @@ describe('New estimate import', () => {
     expect(accept).toContain('.xls');
   });
 
-  it('raises no alert for an .xls and posts it to the import after creating the BOQ', async () => {
+  it('raises no alert for an .xls and posts it to the import after the preview', async () => {
     create.mockResolvedValue({ id: 'boq-1' });
-    const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue(
-      new Response(JSON.stringify({ imported: 3, skipped: 0, total_items: 3, errors: [], source_format: 'xls' }), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' },
-      }),
-    );
+    const reply = (body: unknown) =>
+      new Response(JSON.stringify(body), { status: 200, headers: { 'Content-Type': 'application/json' } });
+    const fetchSpy = vi.spyOn(globalThis, 'fetch').mockImplementation(async (input) => {
+      const url = String(input);
+      if (url.includes('/import/auto/')) {
+        return reply({ imported: 3, skipped: 0, total_items: 3, errors: [], source_format: 'xls' });
+      }
+      if (url.includes('/import/preview/')) {
+        return reply({
+          positions: [
+            { ordinal: '1', code: '', description: 'Wall', unit: 'm2', quantity: 1, unit_rate: '10.00', total: '10.00', is_section: false },
+          ],
+          total_positions: 1,
+          total_sections: 0,
+          currency: 'HUF',
+          source_format: 'xls',
+          warnings: [],
+          errors: [],
+          skipped: 0,
+          truncated: false,
+          metadata: { original_columns: ['A'], column_mapping: {}, header_row: 1 },
+        });
+      }
+      return reply({ round_trip: false, counts: { created: 0, updated: 0, would_delete: 0, conflicts: 0 } });
+    });
     await openImport();
     pick('koltsegvetes.xls');
 
@@ -72,6 +91,10 @@ describe('New estimate import', () => {
     fireEvent.submit(screen.getByTestId('create-boq-file-picker').closest('form') as HTMLFormElement);
 
     await waitFor(() => expect(create).toHaveBeenCalledTimes(1));
+    const next = await screen.findByRole('button', { name: 'Continue' });
+    await waitFor(() => expect(next).not.toBeDisabled());
+    fireEvent.click(next);
+    fireEvent.click(await screen.findByRole('button', { name: 'Import' }));
     await waitFor(() =>
       expect(fetchSpy.mock.calls.some(([url]) => String(url).includes('/boqs/boq-1/import/auto/'))).toBe(true),
     );
