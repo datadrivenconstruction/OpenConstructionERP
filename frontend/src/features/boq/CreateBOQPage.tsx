@@ -14,6 +14,7 @@ import { boqApi } from './api';
 import { importFailureFromBody } from './importFailureText';
 import { ImportJobFailedError, isImportJob, waitForImportJob } from './importJob';
 import { useDismiss } from '@/shared/hooks/useDismiss';
+import { ImportPreviewDialog } from './ImportPreviewDialog';
 
 interface Project {
   id: string;
@@ -95,6 +96,11 @@ export function CreateBOQModal({ open, onClose, defaultProjectId }: CreateBOQMod
   const [error, setError] = useState<string | null>(null);
   const [touched, setTouched] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  // A spreadsheet is previewed with its column mapping in the editor's import
+  // dialog; the new bill exists only to receive it and goes away if the user
+  // backs out.
+  const [mappingFor, setMappingFor] = useState<{ boqId: string; file: File } | null>(null);
+  const mappingImported = useRef(false);
 
   const { data: projects } = useQuery({
     queryKey: ['projects'],
@@ -162,6 +168,12 @@ export function CreateBOQModal({ open, onClose, defaultProjectId }: CreateBOQMod
         base_date: baseDate.trim() || null,
         tax_date: taxDate.trim() || null,
       });
+
+      if (startMode === 'import' && file && /\.(xlsx|xls|csv)$/i.test(file.name)) {
+        mappingImported.current = false;
+        setMappingFor({ boqId: boq.id, file });
+        return;
+      }
 
       if (startMode === 'import' && file) {
         addToast({
@@ -285,13 +297,45 @@ export function CreateBOQModal({ open, onClose, defaultProjectId }: CreateBOQMod
     }
   };
 
-  const dismiss = useDismiss({ onClose, busy, enabled: open });
+  const dismiss = useDismiss({ onClose, busy, enabled: open && !mappingFor });
   if (!open) return null;
+
+  const mappingImportDone = () => {
+    mappingImported.current = true;
+    queryClient.invalidateQueries({ queryKey: ['boqs', selectedProjectId] });
+    queryClient.invalidateQueries({ queryKey: ['all-boqs'] });
+    const id = mappingFor?.boqId;
+    setMappingFor(null);
+    onClose();
+    if (id) navigate(`/boq/${id}`);
+  };
+
+  const mappingDialogClosed = async () => {
+    if (mappingImported.current || !mappingFor) return;
+    // Backed out before importing: remove the bill made for it, keep the form.
+    const { boqId } = mappingFor;
+    setMappingFor(null);
+    await boqApi.deleteBoq(boqId).catch(() => undefined);
+    queryClient.invalidateQueries({ queryKey: ['boqs', selectedProjectId] });
+    queryClient.invalidateQueries({ queryKey: ['all-boqs'] });
+  };
 
   const submitLabel =
     startMode === 'import'
       ? t('boq.create_and_import', { defaultValue: 'Create and import' })
       : t('boq.create_boq', { defaultValue: 'Create BOQ' });
+
+  if (mappingFor) {
+    return (
+      <ImportPreviewDialog
+        open
+        onClose={mappingDialogClosed}
+        boqId={mappingFor.boqId}
+        initialFile={mappingFor.file}
+        onImported={mappingImportDone}
+      />
+    );
+  }
 
   return (
     <div {...dismiss} className="fixed inset-0 z-modal flex items-center justify-center">

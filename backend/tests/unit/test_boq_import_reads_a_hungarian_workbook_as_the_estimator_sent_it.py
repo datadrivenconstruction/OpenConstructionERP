@@ -244,14 +244,14 @@ def test_the_workbook_profile_reads_hungarian_numbers_the_same_way(text: str, va
     assert _number(text) == value
 
 
-def test_a_cell_that_is_not_a_number_is_an_error_on_its_row() -> None:
+def test_a_quantity_cell_that_is_not_a_number_keeps_its_row_at_zero_with_a_warning() -> None:
     rows = [hu_boq.HEADER, ["1", "", "Földkiemelés", "sok", "m3", "0", "1 850", "", ""]]
     result = _parse("".join(";".join(row) + "\r\n" for row in rows).encode())
 
-    assert _lines(result) == []
-    [error] = result.errors
-    assert error["row"] == 2
-    assert "sok" in error["error"]
+    assert result.errors == []
+    [line] = _lines(result)
+    assert line.quantity == 0.0
+    assert any("'sok'" in w["message"] and w["row"] == 2 for w in result.warnings)
 
 
 # ── Files that cannot be read ──────────────────────────────────────────────

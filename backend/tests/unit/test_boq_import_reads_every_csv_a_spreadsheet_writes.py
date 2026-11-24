@@ -122,7 +122,8 @@ def test_a_sep_line_does_not_shift_the_row_numbers_the_messages_name() -> None:
     content = ("sep=;\n" + "Pos;Beschreibung;Einheit;Menge;Einheitspreis\n1;Wand;m2;zwölf;55\n").encode("utf-8")
     result = _import(content)
 
-    assert [error["row"] for error in result.errors] == [3]
+    assert result.errors == []
+    assert [w["row"] for w in result.warnings if "zwölf" in w["message"]] == [3]
 
 
 @pytest.mark.parametrize("bom", [b"\xff\xfe", b"\xfe\xff", b"\xff\xfe\x00\x00", b"\x00\x00\xfe\xff"])

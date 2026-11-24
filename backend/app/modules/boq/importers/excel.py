@@ -2576,16 +2576,12 @@ def _rows_to_positions(
                 result.warnings.extend(_dot_thousands_warnings(row, row_idx, ordinal))
             if comma_thousands:
                 result.warnings.extend(_comma_thousands_warnings(row, row_idx, ordinal))
-            if q_err is not None:
-                result.errors.append(
-                    {
-                        "row": row_idx,
-                        "ordinal": ordinal,
-                        "error": f"Invalid quantity at row {row_idx}: {q_err}",
-                    }
-                )
-                continue
-            if r_err is not None:
+            # A text cell in the quantity or rate column ("PM", "Inclus", "-")
+            # is part of the bill: keep the line at 0 and quote the text.
+            text_cells: dict[str, str] = {}
+            if r_err is not None and any(not _is_blank_value(row.get(k)) for k in _SPLIT_COLUMNS):
+                # An unread half of a split rate: pricing the other half alone
+                # would be a guess, so the row is reported instead.
                 result.errors.append(
                     {
                         "row": row_idx,
@@ -2594,6 +2590,23 @@ def _rows_to_positions(
                     }
                 )
                 continue
+            for field, err, raw in (("quantity", q_err, quantity_raw), ("unit_rate", r_err, unit_rate_raw)):
+                if err is None:
+                    continue
+                shown = str(raw).strip()
+                text_cells[field] = shown
+                result.warnings.append(
+                    {
+                        "row": row_idx,
+                        "ordinal": ordinal,
+                        "severity": "warning",
+                        "message": f"{'Quantity' if field == 'quantity' else 'Unit rate'} '{shown}' is not a number: imported at 0.",
+                    }
+                )
+            if q_err is not None:
+                quantity = 0.0
+            if r_err is not None:
+                unit_rate = 0.0
             assert quantity is not None
             assert unit_rate is not None
 
@@ -2695,6 +2708,8 @@ def _rows_to_positions(
             metadata: dict[str, Any] = {"import_row_index": row_idx}
             if row.get("_sheet"):
                 metadata["import_sheet"] = row["_sheet"]
+            if text_cells:
+                metadata["non_numeric_cells"] = text_cells
             if contingency is not None:
                 metadata["contingency"] = True
             split = _split_metadata(row, header_language, dot_thousands=dot_thousands, comma_thousands=comma_thousands)

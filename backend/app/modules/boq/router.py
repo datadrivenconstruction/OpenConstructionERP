@@ -7723,26 +7723,26 @@ def _prepare_rows(
             unit_rate_raw = row.get("unit_rate")
             quantity, q_err = _parse_numeric_cell(quantity_raw)
             unit_rate, r_err = _parse_numeric_cell(unit_rate_raw)
+            # Text in the quantity or rate column ("PM", "Inclus", "-") keeps
+            # the line at 0 with a warning that quotes the cell.
+            text_cells: dict[str, str] = {}
+            for field, err, raw in (("quantity", q_err, quantity_raw), ("unit_rate", r_err, unit_rate_raw)):
+                if err is None:
+                    continue
+                shown = str(raw).strip()
+                text_cells[field] = shown
+                warnings_list.append(
+                    {
+                        "row": row_idx,
+                        "ordinal": str(row.get("ordinal", "")).strip() or str(auto_ordinal),
+                        "severity": "warning",
+                        "message": f"{'Quantity' if field == 'quantity' else 'Unit rate'} '{shown}' is not a number: imported at 0.",
+                    }
+                )
             if q_err is not None:
-                errors.append(
-                    {
-                        "row": row_idx,
-                        "ordinal": str(row.get("ordinal", "")).strip() or str(auto_ordinal),
-                        "error": f"Invalid quantity at row {row_idx}: {q_err}",
-                        "data": {k: str(v)[:100] for k, v in row.items()},
-                    }
-                )
-                continue
+                quantity = 0.0
             if r_err is not None:
-                errors.append(
-                    {
-                        "row": row_idx,
-                        "ordinal": str(row.get("ordinal", "")).strip() or str(auto_ordinal),
-                        "error": f"Invalid unit_rate at row {row_idx}: {r_err}",
-                        "data": {k: str(v)[:100] for k, v in row.items()},
-                    }
-                )
-                continue
+                unit_rate = 0.0
             assert quantity is not None  # narrowed: q_err was None
             assert unit_rate is not None
 
@@ -7851,6 +7851,8 @@ def _prepare_rows(
 
             # Stamp import provenance for a later round-trip export.
             pos_metadata: dict[str, Any] = {}
+            if text_cells:
+                pos_metadata["non_numeric_cells"] = text_cells
             if import_meta:
                 pos_metadata["import_source"] = file_name or "excel"
                 pos_metadata["import_row_index"] = row_idx

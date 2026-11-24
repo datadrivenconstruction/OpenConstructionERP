@@ -48,9 +48,10 @@ interface PreviewPosition {
   code: string;
   description: string;
   unit: string;
-  quantity: number | null;
-  unit_rate: number | null;
-  total: number | null;
+  quantity: string | number | null;
+  /** Money arrives as a decimal string ("12.50") so no precision is lost. */
+  unit_rate: string | number | null;
+  total: string | number | null;
   is_section: boolean;
 }
 
@@ -97,6 +98,8 @@ interface ImportPreviewDialogProps {
   onImported: () => void;
   /** Open the stored exchange report of a finished import. */
   onFidelityReport?: (reportId: string) => void;
+  /** A file chosen before the dialog opened; it is previewed at once. */
+  initialFile?: File | null;
 }
 
 type Step = 'upload' | 'preview' | 'confirm';
@@ -126,14 +129,14 @@ const SUPPORTED_FORMATS = ['GAEB', 'Excel', 'PDF', 'CSV', 'XPWE'] as const;
 
 const MAX_PREVIEW_ROWS = 500;
 
-function fmtNumber(v: number | null | undefined): string {
-  if (v == null) return '';
-  return fmtFixed(v, 2);
+function fmtNumber(v: number | string | null | undefined): string {
+  if (v == null || v === '') return '';
+  return fmtFixed(typeof v === 'number' ? v : Number(v), 2);
 }
 
 /* ── Component ──────────────────────────────────────────────────────── */
 
-export function ImportPreviewDialog({ open, onClose, boqId, onImported, onFidelityReport }: ImportPreviewDialogProps) {
+export function ImportPreviewDialog({ open, onClose, boqId, onImported, onFidelityReport, initialFile }: ImportPreviewDialogProps) {
   const [fidelityExpanded, setFidelityExpanded] = useState(false);
   const { t } = useTranslation();
   const addToast = useToastStore((s) => s.addToast);
@@ -420,6 +423,18 @@ export function ImportPreviewDialog({ open, onClose, boqId, onImported, onFideli
       jobWaitRef.current = null;
     }
   }, [file, boqId, addToast, t, onImported, onClose, previewedMapping, reviewMutation]);
+
+  const preloaded = useRef<File | null>(null);
+  useEffect(() => {
+    if (!open) {
+      preloaded.current = null;
+      return;
+    }
+    if (initialFile && preloaded.current !== initialFile) {
+      preloaded.current = initialFile;
+      void handleFile(initialFile);
+    }
+  }, [open, initialFile, handleFile]);
 
   /* ── Drag & drop handlers ───────────────────────────────────────── */
 
