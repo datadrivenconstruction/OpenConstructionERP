@@ -77,6 +77,7 @@ from app.core.demo_read_only import (
     read_only_refusal,
 )
 from app.core.deployment_posture import build_data_security_posture
+from app.core.fk_conflict import foreign_key_conflict
 from app.core.module_loader import module_loader
 
 # How many CHECK and FOREIGN KEY constraints in this schema have never been
@@ -2656,6 +2657,10 @@ def create_app() -> FastAPI:
 
     @app.exception_handler(Exception)
     async def global_exception_handler(request: Request, exc: Exception) -> JSONResponse:
+        fk_conflict = foreign_key_conflict(exc)
+        if fk_conflict is not None:
+            logger.info("FK conflict on %s %s: %s", request.method, request.url.path, fk_conflict)
+            return JSONResponse(status_code=409, content=fk_conflict)
         demo_refusal = _demo_read_only_in_chain(exc)
         if demo_refusal is not None:
             logger.info(

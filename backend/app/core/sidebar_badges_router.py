@@ -40,73 +40,42 @@ async def sidebar_badges(
     project_id: uuid.UUID = Query(...),
     user_id: CurrentUserId = None,  # type: ignore[assignment]
 ) -> SidebarBadgesResponse:
-    """Return open-item counts for sidebar badges in a single query batch.
+    """Return open-item counts for sidebar badges in one round trip.
 
-    Uses COUNT queries (no full row fetches) for minimal DB load.
-    Gracefully returns 0 for any module whose table doesn't exist yet.
+    The four counts are scalar subqueries of a single SELECT, each served by a
+    ``project_id`` index, so the endpoint costs one statement however many
+    modules contribute. Returns zeros if the statement fails (module tables
+    not created yet) instead of an error, since badges are decoration.
     """
-    tasks_open = 0
-    rfi_open = 0
-    safety_open = 0
+    from app.modules.rfi.models import RFI
+    from app.modules.safety.models import SafetyIncident, SafetyObservation
+    from app.modules.tasks.models import Task
 
-    # Tasks: count non-completed tasks
+    def _count(model: type, *conditions: object) -> object:
+        return select(func.count()).select_from(model).where(*conditions).scalar_subquery()
+
+    stmt = select(
+        _count(Task, Task.project_id == project_id, Task.status.notin_(["completed"])).label("tasks"),
+        _count(RFI, RFI.project_id == project_id, RFI.status.in_(["draft", "open"])).label("rfi"),
+        _count(
+            SafetyIncident,
+            SafetyIncident.project_id == project_id,
+            SafetyIncident.status.in_(["reported", "investigating"]),
+        ).label("incidents"),
+        _count(
+            SafetyObservation,
+            SafetyObservation.project_id == project_id,
+            SafetyObservation.status.in_(["open", "in_progress"]),
+        ).label("observations"),
+    )
     try:
-        from app.modules.tasks.models import Task
-
-        result = await session.execute(
-            select(func.count())
-            .select_from(Task)
-            .where(
-                Task.project_id == project_id,
-                Task.status.notin_(["completed"]),
-            )
-        )
-        tasks_open = result.scalar() or 0
+        row = (await session.execute(stmt)).one()
     except Exception:
-        logger.debug("Tasks table not available for sidebar badges", exc_info=True)
-
-    # RFIs: count draft + open
-    try:
-        from app.modules.rfi.models import RFI
-
-        result = await session.execute(
-            select(func.count())
-            .select_from(RFI)
-            .where(
-                RFI.project_id == project_id,
-                RFI.status.in_(["draft", "open"]),
-            )
-        )
-        rfi_open = result.scalar() or 0
-    except Exception:
-        logger.debug("RFI table not available for sidebar badges", exc_info=True)
-
-    # Safety: open incidents + open observations
-    try:
-        from app.modules.safety.models import SafetyIncident, SafetyObservation
-
-        inc_result = await session.execute(
-            select(func.count())
-            .select_from(SafetyIncident)
-            .where(
-                SafetyIncident.project_id == project_id,
-                SafetyIncident.status.in_(["reported", "investigating"]),
-            )
-        )
-        obs_result = await session.execute(
-            select(func.count())
-            .select_from(SafetyObservation)
-            .where(
-                SafetyObservation.project_id == project_id,
-                SafetyObservation.status.in_(["open", "in_progress"]),
-            )
-        )
-        safety_open = (inc_result.scalar() or 0) + (obs_result.scalar() or 0)
-    except Exception:
-        logger.debug("Safety tables not available for sidebar badges", exc_info=True)
+        logger.debug("Sidebar badge counts unavailable", exc_info=True)
+        return SidebarBadgesResponse()
 
     return SidebarBadgesResponse(
-        tasks_open=tasks_open,
-        rfi_open=rfi_open,
-        safety_open=safety_open,
+        tasks_open=row.tasks or 0,
+        rfi_open=row.rfi or 0,
+        safety_open=(row.incidents or 0) + (row.observations or 0),
     )

@@ -36,6 +36,7 @@ import { useAuthStore } from '@/stores/useAuthStore';
 import { canDeleteBoq } from './canDeleteBoq';
 import { CreateBOQModal } from './CreateBOQPage';
 import { BOQRenameDialog } from './BOQRenameDialog';
+import { ConfirmDialog } from '@/shared/ui/ConfirmDialog';
 import { TemplateFromBoqDialog } from './TemplateFromBoqDialog';
 import { projectFilterOptions } from './projectFilterOptions';
 import { useDemoScope } from '@/shared/lib/useDemoScope';
@@ -1673,6 +1674,18 @@ export function BOQListPage() {
           onClose={() => setTemplateTarget(null)}
         />
       )}
+      {/* The table view has no inline confirm strip, so its trash button opens this dialog. */}
+      <ConfirmDialog
+        open={viewMode === 'table' && confirmDeleteId !== null}
+        onConfirm={() => { if (confirmDeleteId) deleteMutation.mutate(confirmDeleteId); }}
+        onCancel={() => setConfirmDeleteId(null)}
+        title={t('boq.delete_confirm_title', { defaultValue: 'Delete this estimate?' })}
+        message={t('boq.delete_confirm_message', { defaultValue: 'The estimate and all its positions will be removed. This cannot be undone.' })}
+        confirmLabel={t('common.delete')}
+        cancelLabel={t('common.cancel')}
+        variant="danger"
+        loading={deleteMutation.isPending}
+      />
       {renameTarget && (
         <BOQRenameDialog
           key={renameTarget.id}

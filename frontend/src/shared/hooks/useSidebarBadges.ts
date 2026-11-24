@@ -27,6 +27,8 @@ export interface SidebarBadgeCounts {
   safety: number;
 }
 
+export const BADGES_TIMEOUT_MS = 10_000;
+
 const EMPTY: SidebarBadgeCounts = { tasks: 0, rfi: 0, safety: 0 };
 
 export function useSidebarBadges(): SidebarBadgeCounts {
@@ -34,10 +36,14 @@ export function useSidebarBadges(): SidebarBadgeCounts {
 
   const { data } = useQuery({
     queryKey: ['sidebar-badges', projectId],
+    // Badges are decoration: a slow server must not hold a request for 90 s or
+    // raise a timeout toast, so give up early and quietly and try next interval.
     queryFn: () =>
       apiGet<SidebarBadgesResponse>(
         `/v1/sidebar/badges/?project_id=${encodeURIComponent(projectId!)}`,
+        { timeoutMs: BADGES_TIMEOUT_MS, suppressTimeoutToast: true },
       ),
+    retry: false,
     enabled: !!projectId,
     staleTime: 60_000, // 60 seconds — avoid refetching on every render
     refetchInterval: 120_000, // refresh every 2 minutes in background

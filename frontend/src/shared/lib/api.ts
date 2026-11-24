@@ -383,6 +383,29 @@ export function reportIfDemoReadOnly(status: number, body: unknown): boolean {
  * the same defence is used in `buildHeaders` above. Our own English is the
  * floor, which is still not the server's.
  */
+/**
+ * A delete the database refused because other records still point at the row.
+ * The backend answers 409 with `code: "fk_conflict"` and the referencing
+ * table in `blocked_by`; say so in the user's language instead of a raw detail.
+ */
+export function fkConflictMessage(status: number, body: unknown): string | null {
+  if (status !== 409 || !body || typeof body !== 'object') return null;
+  const b = body as { code?: unknown; blocked_by?: unknown };
+  if (b.code !== 'fk_conflict') return null;
+  const what = typeof b.blocked_by === 'string' && b.blocked_by ? b.blocked_by : null;
+  const fallback = what
+    ? `Cannot delete: linked ${what} records still use it. Remove or relink them first.`
+    : 'Cannot delete: other records still use it. Remove or relink them first.';
+  try {
+    const translated = what
+      ? i18next.t('errors.fk_conflict_named', { what, defaultValue: fallback })
+      : i18next.t('errors.fk_conflict', { defaultValue: fallback });
+    return typeof translated === 'string' && translated.length > 0 ? translated : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
 function demoRefusalMessage(): string {
   const fallback = 'This is a demonstration, so that change was not saved.';
   try {
@@ -474,7 +497,7 @@ export class ApiError extends Error {
       ? demoRefusalMessage()
       : isDemoUploadRefusal(status, body)
         ? demoUploadRefusalMessage()
-        : extractErrorMessageFromBody(body);
+        : (fkConflictMessage(status, body) ?? extractErrorMessageFromBody(body));
     super(fromBody ?? statusFallbackMessage(status));
     this.name = 'ApiError';
   }
