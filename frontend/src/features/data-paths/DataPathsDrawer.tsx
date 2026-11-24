@@ -8,7 +8,7 @@
 import { useId, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Download, ExternalLink, Map as MapIcon, Network, List as ListIcon, Users } from 'lucide-react';
+import { Download, ExternalLink, LayoutDashboard, Map as MapIcon, Network, List as ListIcon, Users } from 'lucide-react';
 
 import { SideDrawer } from '@/shared/ui/SideDrawer';
 import { TabBar } from '@/shared/ui/TabBar';
@@ -17,13 +17,13 @@ import { useProjectContextStore } from '@/stores/useProjectContextStore';
 
 import { useModulePaths, useProjectParties, type EdgeOut } from './api';
 import { buildFlowModel, humanize, listRows, moduleLabel, type FlowModel } from './flowModel';
+import { DataPathsOverview } from './DataPathsOverview';
 import { FocusView } from './FocusView';
 import { PartiesHoneycomb } from './PartiesHoneycomb';
 import { buildCsv, buildFlowSvg, download, svgToPng, themeColors } from './exportDataPaths';
-import { useNarrow } from './motion';
 import { fmtList } from '@/shared/lib/formatters';
 
-type Tab = 'flow' | 'list' | 'people';
+type Tab = 'overview' | 'flow' | 'list' | 'people';
 
 export interface DataPathsDrawerProps {
   module: string;
@@ -34,9 +34,8 @@ export interface DataPathsDrawerProps {
 export function DataPathsDrawer({ module, open, onClose }: DataPathsDrawerProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const narrow = useNarrow();
   const projectId = useProjectContextStore((s) => s.activeProjectId);
-  const [tab, setTab] = useState<Tab>(narrow ? 'list' : 'flow');
+  const [tab, setTab] = useState<Tab>('overview');
   const query = useModulePaths(module, projectId, open);
   const parties = useProjectParties(projectId, open && tab === 'people');
   const model = useMemo(() => (query.data ? buildFlowModel(t, query.data) : null), [query.data, t]);
@@ -57,17 +56,18 @@ export function DataPathsDrawer({ module, open, onClose }: DataPathsDrawerProps)
           ? t('data_paths.subtitle_project', { defaultValue: 'Live numbers for the current project' })
           : t('data_paths.subtitle_no_project', { defaultValue: 'Pick a project to see live numbers' })
       }
-      widthClass={tab === 'flow' ? 'sm:max-w-[min(1440px,96vw)]' : 'sm:max-w-3xl'}
+      widthClass={tab === 'flow' || tab === 'overview' ? 'sm:max-w-[min(1440px,96vw)]' : 'sm:max-w-3xl'}
       headerActions={model ? <ExportMenu model={model} /> : null}
     >
       <div className="space-y-4 p-4" data-testid="data-paths-drawer">
-        {model?.why && (
+        {model?.why && tab !== 'overview' && (
           <p id={descId} className="rounded-lg bg-surface-secondary px-3 py-2 text-sm text-content-secondary">
             {model.why}
           </p>
         )}
         <TabBar<Tab>
           tabs={[
+            { id: 'overview', label: t('data_paths.tab_overview', { defaultValue: 'Overview' }), icon: <LayoutDashboard size={14} /> },
             { id: 'flow', label: t('data_paths.tab_flow', { defaultValue: 'Flow' }), icon: <Network size={14} /> },
             { id: 'list', label: t('data_paths.tab_list', { defaultValue: 'List' }), icon: <ListIcon size={14} /> },
             { id: 'people', label: t('data_paths.tab_people', { defaultValue: 'People' }), icon: <Users size={14} /> },
@@ -79,7 +79,7 @@ export function DataPathsDrawer({ module, open, onClose }: DataPathsDrawerProps)
           size="sm"
         />
         {/* The flow tab draws its own map; only the list waits on the module's paths. */}
-        {query.isLoading && tab === 'list' && <div className="h-48 animate-pulse rounded-xl bg-surface-secondary" aria-busy="true" />}
+        {query.isLoading && (tab === 'list' || tab === 'overview') && <div className="h-48 animate-pulse rounded-xl bg-surface-secondary" aria-busy="true" />}
         {query.isError && (
           <p className="text-sm text-semantic-error">
             {t('data_paths.load_failed', { defaultValue: 'The data paths could not be loaded.' })}
@@ -98,6 +98,7 @@ export function DataPathsDrawer({ module, open, onClose }: DataPathsDrawerProps)
             onPeople={() => setTab('people')}
           />
         )}
+        {model && tab === 'overview' && <DataPathsOverview model={model} />}
         {model && tab === 'list' && <DataPathsList model={model} />}
         {tab === 'people' && (
           projectId ? (
