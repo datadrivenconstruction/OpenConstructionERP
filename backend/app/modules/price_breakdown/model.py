@@ -323,8 +323,8 @@ class PriceBreakdown:
         of 12.5% is 12.5% in Santiago and in Frankfurt. Only the amounts follow
         the currency.
         """
-        kt = self.kind_totals
         money = money_quantum(self.currency)
+        r = self.rounded_lines()
         return {
             "position_ref": self.position_ref,
             "description": self.description,
@@ -339,27 +339,69 @@ class PriceBreakdown:
                     "unit": c.unit,
                     "quantity": _q(c.quantity, _4P),
                     "unit_cost": _q(c.unit_cost, money),
-                    "amount": _q(c.amount, money),
+                    "amount": str(amount),
                 }
-                for c in self.components
+                for c, amount in zip(self.components, r["amounts"], strict=True)
             ],
-            "kind_totals": {k.value: _q(v, money) for k, v in kt.items()},
+            "kind_totals": {k.value: str(v) for k, v in r["kind_totals"].items()},
             "kind_i18n_keys": {k.value: kind_i18n_key(k) for k in ResourceKind},
             "i18n_keys": dict(LINE_I18N_KEYS),
-            "direct_unit_cost": _q(self.direct_unit_cost, money),
+            "direct_unit_cost": str(r["direct"]),
             "overhead_pct": _q(self.overhead_pct, _2P),
-            "overhead_amount": _q(self.overhead_amount, money),
+            "overhead_amount": str(r["overhead"]),
             "risk_pct": _q(self.risk_pct, _2P),
-            "risk_amount": _q(self.risk_amount, money),
+            "risk_amount": str(r["risk"]),
             "profit_pct": _q(self.profit_pct, _2P),
-            "profit_amount": _q(self.profit_amount, money),
-            "unit_rate": _q(self.unit_rate, money),
-            "position_total": _q(self.position_total, money),
+            "profit_amount": str(r["profit"]),
+            "unit_rate": str(r["unit_rate"]),
+            "position_total": str(r["position_total"]),
+        }
+
+    def rounded_lines(self) -> dict:
+        """Every printed line at the currency's precision, built so the sheet adds up.
+
+        Rounding each exact figure on its own lets the printed labour, material and
+        plant amounts miss the printed rate by a cent. Here each component is rounded
+        once, the kind totals and direct cost are sums of those, each markup is taken
+        on the rounded running subtotal, and the position total is the rounded rate
+        times the quantity, as a tendered rate is priced.
+        """
+        money = money_quantum(self.currency)
+
+        def rnd(value: Decimal) -> Decimal:
+            return value.quantize(money, rounding=ROUND_HALF_UP)
+
+        amounts = [rnd(c.amount) for c in self.components]
+        kind_totals = {k: Decimal("0").quantize(money) for k in ResourceKind}
+        for c, amount in zip(self.components, amounts, strict=True):
+            kind_totals[c.kind] += amount
+        direct = sum(amounts, Decimal("0").quantize(money))
+        overhead = rnd(direct * self.overhead_pct / 100)
+        risk = rnd((direct + overhead) * self.risk_pct / 100)
+        profit = rnd((direct + overhead + risk) * self.profit_pct / 100)
+        unit_rate = direct + overhead + risk + profit
+        return {
+            "amounts": amounts,
+            "kind_totals": kind_totals,
+            "direct": direct,
+            "overhead": overhead,
+            "risk": risk,
+            "profit": profit,
+            "unit_rate": unit_rate,
+            "position_total": rnd(unit_rate * self.position_quantity),
         }
 
 
 def _q(value: Decimal, quant: Decimal) -> str:
     return str(_dec(value).quantize(quant, rounding=ROUND_HALF_UP))
+
+
+def _first(raw: dict, *keys: str) -> object:
+    """First key with a value; an explicit 0 counts (a zero quantity is not one unit)."""
+    for key in keys:
+        if raw.get(key) not in (None, ""):
+            return raw[key]
+    return None
 
 
 def build_breakdown(
@@ -389,8 +431,8 @@ def build_breakdown(
             CostComponent(
                 kind=coerce_kind(raw.get("kind") or raw.get("resource_type")),
                 description=raw.get("description") or raw.get("name") or "-",
-                quantity=_dec(raw.get("quantity") or raw.get("factor"), "1"),
-                unit_cost=_dec(raw.get("unit_cost") or raw.get("unit_rate") or raw.get("price")),
+                quantity=_dec(_first(raw, "quantity", "factor"), "1"),
+                unit_cost=_dec(_first(raw, "unit_cost", "unit_rate", "price")),
                 unit=raw.get("unit") or "",
                 amount=_dec(raw.get("amount")) if raw.get("amount") not in (None, "") else Decimal("0"),
             ).normalised()

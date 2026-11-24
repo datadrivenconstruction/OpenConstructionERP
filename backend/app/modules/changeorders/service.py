@@ -2586,6 +2586,52 @@ class ChangeOrderService:
             meta.pop(OVERRIDE_META_KEY, None)
         item.metadata_ = meta
 
+    async def _price_from_bill(self, order: ChangeOrder, data: ChangeOrderItemCreate) -> ChangeOrderItemCreate:
+        """Value an item picked from a bill position at that position's contract rate.
+
+        Blank original quantity, original rate and unit come from the position; a
+        modified item with no new rate keeps the contract rate, the usual rule for
+        valuing varied work of the same character. A position from another project
+        is refused.
+        """
+        raw = (data.metadata or {}).get("boq_position_id")
+        if not raw:
+            return data
+        try:
+            position_id = uuid.UUID(str(raw))
+            from sqlalchemy import select  # noqa: PLC0415
+
+            from app.modules.boq.models import BOQ, Position  # noqa: PLC0415
+
+            row = (
+                await self.session.execute(
+                    select(Position, BOQ.project_id)
+                    .join(BOQ, BOQ.id == Position.boq_id)
+                    .where(Position.id == position_id)
+                )
+            ).first()
+        except (ValueError, AttributeError, ImportError):
+            return data
+        if row is None or row[1] != order.project_id:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                detail={
+                    "problem": "boq_position_not_in_project",
+                    "message": "The bill position is not in this project.",
+                },
+            )
+        position = row[0]
+        patch: dict[str, Any] = {}
+        if _dec(data.original_quantity) == 0 and data.change_type != "added":
+            patch["original_quantity"] = str(_dec(position.quantity))
+        if _dec(data.original_rate) == 0 and data.change_type != "added":
+            patch["original_rate"] = str(_dec(position.unit_rate))
+        if _dec(data.new_rate) == 0 and data.change_type == "modified" and _dec(data.new_quantity) > 0:
+            patch["new_rate"] = str(_dec(position.unit_rate))
+        if not data.unit and position.unit:
+            patch["unit"] = position.unit[:20]
+        return data.model_copy(update=patch) if patch else data
+
     async def add_item(
         self,
         order_id: uuid.UUID,
@@ -2611,6 +2657,7 @@ class ChangeOrderService:
         # expires the session, so accessing `order.code` afterwards would
         # trigger a lazy load and crash with MissingGreenlet in async context.
         order_code = order.code
+        data = await self._price_from_bill(order, data)
 
         # Decimal money math - go through ``str()`` so a float like 0.1
         # doesn't enter the calculation as 0.1000000000000000055…; round

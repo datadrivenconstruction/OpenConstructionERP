@@ -56,6 +56,26 @@ def _norm_to_response(norm: ProductionNorm) -> NormResponse:
     return NormResponse.model_validate(norm)
 
 
+async def _norm_with_findings(norm: ProductionNorm) -> NormResponse:
+    """Response for a written norm, carrying the norm_expansion rule warnings."""
+    from app.core.validation.money_rules import enforce_rule_set  # noqa: PLC0415
+    from app.modules.norm_expansion.validators import NORM_EXPANSION_RULE_SET  # noqa: PLC0415
+
+    response = _norm_to_response(norm)
+    response.validation_warnings = await enforce_rule_set(
+        {
+            "norm": response.model_dump(
+                mode="json", include={"work_key", "labor_hours_per_unit", "machine_hours_per_unit", "materials"}
+            )
+        },
+        rule_set=NORM_EXPANSION_RULE_SET,
+        target_type="production_norm",
+        target_id=str(norm.id),
+        error_code="norm_rules_failed",
+    )
+    return response
+
+
 def _expansion_to_response(
     norm: ProductionNorm,
     result: ExpansionResult,
@@ -122,7 +142,7 @@ async def create_norm(
         norm = await service.create_norm(data)
     except WorkKeyExistsError as exc:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
-    return _norm_to_response(norm)
+    return await _norm_with_findings(norm)
 
 
 @router.get("/norms/{norm_id}", response_model=NormResponse)
@@ -156,7 +176,7 @@ async def update_norm(
     except WorkKeyExistsError as exc:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
     assert norm is not None  # the load_or_404 above proved existence
-    return _norm_to_response(norm)
+    return await _norm_with_findings(norm)
 
 
 @router.delete(
