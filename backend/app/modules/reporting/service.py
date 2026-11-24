@@ -14,6 +14,7 @@ import html
 import logging
 import uuid
 from datetime import UTC, datetime
+from decimal import Decimal, InvalidOperation
 from types import SimpleNamespace
 from typing import Any
 
@@ -184,6 +185,27 @@ class ReportingService:
 
     async def get_latest_kpi(self, project_id: uuid.UUID) -> KPISnapshot | None:
         """Get the most recent KPI snapshot for a project."""
+        return await self.kpi_repo.get_latest(project_id)
+
+    async def get_fresh_kpi(self, project_id: uuid.UUID) -> KPISnapshot | None:
+        """Return today's KPI snapshot, recomputing it from the source modules when stale.
+
+        The stored snapshot is a cache of figures owned by finance, cost model,
+        schedule, safety, RFI, submittals and risk. When the latest row is older
+        than today (or missing) it is rebuilt from those modules so a screen or
+        report never shows last week's numbers next to this week's source data.
+        A snapshot already stored for today (including a manual one) is kept.
+        On any failure the last stored snapshot is returned unchanged.
+        """
+        latest = await self.kpi_repo.get_latest(project_id)
+        today = datetime.now(UTC).strftime("%Y-%m-%d")
+        if latest is not None and latest.snapshot_date >= today:
+            return latest
+        try:
+            await self._recalc_project_kpis(self.session, project_id, today)
+        except Exception:
+            logger.warning("reporting.get_fresh_kpi recalculation failed for project_id=%s", project_id, exc_info=True)
+            return latest
         return await self.kpi_repo.get_latest(project_id)
 
     async def list_kpi_history(
@@ -1130,7 +1152,7 @@ class ReportingService:
             snapshot["overview"] = dict(header)
 
         # ── KPI snapshot → kpi / schedule / risk / issues sections ──
-        kpi = await self.get_latest_kpi(project_id)
+        kpi = await self.get_fresh_kpi(project_id)
         if kpi is not None:
             kpi_block: dict[str, object] = {}
             if kpi.cpi is not None:
@@ -1170,16 +1192,34 @@ class ReportingService:
             dash = await FinanceService(self.session).get_dashboard(project_id=project_id)
             dash_data = dash.model_dump() if hasattr(dash, "model_dump") else dict(dash)
 
-            # Money always reads in the report's *resolved* currency - never
-            # the finance dashboard's own currency. Blending the two would
-            # let a USD-override report show EUR-denominated finance figures
-            # (or vice versa), which is exactly the cross-currency leak the
-            # tests guard against. We do not FX-convert here: the values are
-            # presented under one declared code, and any real conversion is
-            # the caller's responsibility upstream.
+            # The finance dashboard is expressed in the project base currency.
+            # A report in another currency (override) converts through the
+            # project's FX table; with no rate we keep the dashboard's own
+            # currency code rather than relabel the number.
+            dash_currency = str(dash_data.get("currency") or "").upper()
+            rate: Decimal | None = None
+            money_currency = currency
+            if dash_currency and dash_currency != currency:
+                from app.modules.finance.service import _project_fx_map
+
+                fx_map = _project_fx_map(project)
+                try:
+                    if currency in fx_map and dash_currency == str(getattr(project, "currency", "") or "").upper():
+                        rate = Decimal("1") / Decimal(fx_map[currency])
+                except (InvalidOperation, ZeroDivisionError):
+                    rate = None
+                if rate is None:
+                    money_currency = dash_currency
+                    snapshot["currency_note"] = {"figures_currency": dash_currency, "report_currency": currency}
+
             def _money(value: object) -> str:
                 num = value if value is not None else 0
-                return f"{num} {currency}".strip()
+                if rate is not None:
+                    try:
+                        num = (Decimal(str(num)) * rate).quantize(Decimal("0.01"))
+                    except InvalidOperation:
+                        pass
+                return f"{num} {money_currency}".strip()
 
             summary_block: dict[str, object] = {}
             if dash_data.get("total_budget_revised") is not None:
@@ -1479,12 +1519,25 @@ class ReportingService:
 
             safety_svc = SafetyService(session)
             safety_stats = await safety_svc.get_stats(pid)
-            open_observations = getattr(safety_stats, "total_observations", 0) - getattr(
-                safety_stats, "closed_observations", 0
+            # Same definitions the Safety screens use: an incident is open
+            # until it is "closed"; an observation is open while "open" or
+            # "in_progress" (safety_indicators._OPEN_OBS_STATUSES).
+            by_status = getattr(safety_stats, "incidents_by_status", None) or {}
+            open_defects = sum(int(n) for st, n in by_status.items() if st != "closed")
+            from app.modules.safety.models import SafetyObservation
+            from app.modules.safety.safety_indicators import _OPEN_OBS_STATUSES
+
+            open_observations = int(
+                (
+                    await session.execute(
+                        select(func.count(SafetyObservation.id)).where(
+                            SafetyObservation.project_id == pid,
+                            SafetyObservation.status.in_(sorted(_OPEN_OBS_STATUSES)),
+                        )
+                    )
+                ).scalar_one()
+                or 0
             )
-            if open_observations < 0:
-                open_observations = 0
-            open_defects = getattr(safety_stats, "total_incidents", 0)
         except Exception:
             logger.warning(
                 "reporting.kpi_recalc safety.get_stats failed for project_id=%s - "
@@ -1544,13 +1597,31 @@ class ReportingService:
             sched_ids = [r[0] for r in sched_result.all()]
 
             if sched_ids:
-                avg_progress = (
+                # Duration-weighted mean over leaf activities, the same
+                # weighting the schedule uses to roll a summary row up
+                # (weight = max(duration, 1)). Summary rows are skipped:
+                # they already aggregate their children, so counting them
+                # would weight every parent twice.
+                rows = (
                     await session.execute(
-                        select(func.avg(cast(Activity.progress_pct, Float))).where(Activity.schedule_id.in_(sched_ids))
+                        select(Activity.progress_pct, Activity.duration_days).where(
+                            Activity.schedule_id.in_(sched_ids),
+                            Activity.activity_type != "summary",
+                        )
                     )
-                ).scalar_one()
-                if avg_progress is not None:
-                    schedule_progress_pct = str(round(avg_progress, 1))
+                ).all()
+                total_w = 0.0
+                weighted = 0.0
+                for pct, dur in rows:
+                    try:
+                        value = float(pct)
+                    except (TypeError, ValueError):
+                        value = 0.0
+                    weight = float(max(dur or 0, 1))
+                    weighted += min(max(value, 0.0), 100.0) * weight
+                    total_w += weight
+                if total_w > 0:
+                    schedule_progress_pct = str(round(weighted / total_w, 1))
         except Exception:
             logger.warning(
                 "reporting.kpi_recalc schedule.avg_progress failed for project_id=%s - "

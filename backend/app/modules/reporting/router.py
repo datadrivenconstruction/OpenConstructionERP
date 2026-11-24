@@ -60,7 +60,7 @@ async def get_latest_kpi(
 ) -> KPISnapshotResponse | None:
     """Get the latest KPI snapshot for a project."""
     await verify_project_access(project_id, user_id, session)
-    snapshot = await service.get_latest_kpi(project_id)
+    snapshot = await service.get_fresh_kpi(project_id)
     if snapshot is None:
         return None
     return KPISnapshotResponse.model_validate(snapshot)
