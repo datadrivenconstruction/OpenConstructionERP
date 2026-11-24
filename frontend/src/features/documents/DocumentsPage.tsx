@@ -6,7 +6,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Upload, FileText, Image, FileSpreadsheet, File, Trash2, Download,
   Search, X, Loader2, FolderOpen, ChevronDown, HardDrive, Eye,
-  MoreHorizontal, Pencil, Tag, Ruler, Send,
+  MoreHorizontal, Pencil, Tag, Ruler, Send, GitBranch,
 } from 'lucide-react';
 import { Button, Badge, EmptyState, Breadcrumb, RecoveryCard, ViewInBIMButton, ModuleGuideButton } from '@/shared/ui';
 import { RequiresProject } from '@/shared/auth/RequiresProject';
@@ -14,6 +14,7 @@ import SimilarItemsPanel from '@/shared/ui/SimilarItemsPanel';
 import { DateDisplay } from '@/shared/ui/DateDisplay';
 import { apiGet, apiDelete, apiPatch, downloadWithAuth, isTruncated, type Page } from '@/shared/lib/api';
 import { downloadDocumentBlob } from './api';
+import { DocumentRevisionsDialog } from './DocumentRevisionsDialog';
 import { TruncationNotice } from '@/shared/ui/TruncationNotice';
 import { uuid } from '@/shared/lib/browser';
 import { useToastStore } from '@/stores/useToastStore';
@@ -45,6 +46,7 @@ interface DocItem {
   tags: string[];
   created_at: string;
   revision_code?: string | null;
+  is_current_revision?: boolean | null;
   drawing_number?: string | null;
   cde_state?: 'wip' | 'shared' | 'published' | 'archived' | null;
   suitability_code?: string | null;
@@ -540,6 +542,7 @@ export function DocumentsPage() {
   const [revisionFilter, setRevisionFilter] = useState<'all' | 'latest' | 'versioned'>('all');
   const [dragOver, setDragOver] = useState(false);
   const [previewDoc, setPreviewDoc] = useState<DocItem | null>(null);
+  const [revisionsDoc, setRevisionsDoc] = useState<DocItem | null>(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [renameDoc, setRenameDoc] = useState<{ id: string; name: string } | null>(null);
@@ -1382,6 +1385,11 @@ export function DocumentsPage() {
                           </Badge>
                         </span>
                       )}
+                      {doc.is_current_revision === false && (
+                        <Badge variant="warning" size="sm">
+                          {t('plan_room.revision_superseded', { defaultValue: 'Superseded' })}
+                        </Badge>
+                      )}
                       {doc.drawing_number && (
                         <span className="text-2xs font-mono text-content-tertiary" title={t('documents.drawing_number', { defaultValue: 'Drawing number' })}>
                           {doc.drawing_number}
@@ -1471,6 +1479,14 @@ export function DocumentsPage() {
                             className="absolute right-0 top-full mt-1 w-44 rounded-lg border border-border-light bg-surface-elevated shadow-xl z-20 py-1 animate-fade-in"
                             role="menu"
                           >
+                            <button
+                              role="menuitem"
+                              onClick={() => { setOpenMenuId(null); setRevisionsDoc(doc); }}
+                              className="flex w-full items-center gap-2 px-3 py-2 text-xs text-content-primary hover:bg-surface-secondary transition-colors"
+                            >
+                              <GitBranch size={14} className="text-content-tertiary" />
+                              {t('documents.revisions_action', { defaultValue: 'Revisions and links' })}
+                            </button>
                             {previewKind && (
                               <button
                                 role="menuitem"
@@ -1757,6 +1773,13 @@ export function DocumentsPage() {
       )}
 
       {/* ── Preview modal ───────────────────────────────────────────────── */}
+      {revisionsDoc && (
+        <DocumentRevisionsDialog
+          documentId={revisionsDoc.id}
+          documentName={revisionsDoc.name}
+          onClose={() => setRevisionsDoc(null)}
+        />
+      )}
       {previewDoc && (
         <PreviewModal doc={previewDoc} onClose={handleClosePreview} />
       )}

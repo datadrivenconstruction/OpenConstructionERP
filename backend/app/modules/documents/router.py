@@ -25,6 +25,7 @@ import mimetypes
 import uuid
 from datetime import datetime
 from pathlib import Path
+from typing import Any
 
 from fastapi import APIRouter, Depends, File, Form, Header, HTTPException, Query, Request, Response, UploadFile, status
 from fastapi.responses import FileResponse
@@ -60,10 +61,13 @@ from app.modules.documents.schemas import (
     DocumentResponse,
     DocumentSummary,
     DocumentUpdate,
+    LinkedRecordsResponse,
     PhotoListResponse,
     PhotoResponse,
     PhotoUpdate,
     RecentPhotoResponse,
+    RevisionChainItem,
+    RevisionChainResponse,
     ShareLinkAccessRequest,
     ShareLinkAccessResponse,
     ShareLinkCreate,
@@ -2190,6 +2194,91 @@ async def get_document_references(
     require_read(role)
 
     return await service.get_references(document_id)
+
+
+async def _readable_document(
+    document_id: uuid.UUID,
+    user_id: str,
+    session: SessionDep,
+    service: DocumentService,
+) -> Any:
+    """Load a document the caller may read: project membership plus folder read."""
+    doc = await service.get_document(document_id)
+    await _verify_project_membership_or_404(doc.project_id, user_id, session)
+    from app.modules.documents.folder_permissions_service import (
+        folder_access_for,
+        kind_and_path_for_document,
+        require_read,
+    )
+
+    kind, path = kind_and_path_for_document(doc.category)
+    role = await folder_access_for(
+        session,
+        project_id=doc.project_id,
+        user_id=uuid.UUID(str(user_id)),
+        scope_kind=kind,
+        scope_path=path,
+    )
+    require_read(role)
+    return doc
+
+
+@router.get("/{document_id}/revision-chain/", response_model=RevisionChainResponse)
+async def get_revision_chain(
+    document_id: uuid.UUID,
+    user_id: CurrentUserId,
+    session: SessionDep,
+    service: DocumentService = Depends(_get_service),
+) -> RevisionChainResponse:
+    """List every revision of the document's chain; exactly one is current."""
+    from app.modules.documents import revisions
+
+    doc = await _readable_document(document_id, user_id, session, service)
+    members = await revisions.chain_members(session, doc)
+    current = [m for m in members if not revisions.is_superseded(m)]
+    return RevisionChainResponse(
+        items=[
+            RevisionChainItem(
+                id=m.id,
+                name=m.name,
+                revision_code=m.revision_code,
+                drawing_number=m.drawing_number,
+                cde_state=m.cde_state,
+                is_current_revision=not revisions.is_superseded(m),
+                created_at=m.created_at,
+            )
+            for m in members
+        ],
+        current_document_id=current[-1].id if current else None,
+    )
+
+
+@router.post("/{document_id}/make-current/", response_model=DocumentResponse)
+async def make_current_revision(
+    document_id: uuid.UUID,
+    user_id: CurrentUserId,
+    session: SessionDep,
+    _perm: None = Depends(RequirePermission("documents.update")),
+    service: DocumentService = Depends(_get_service),
+) -> DocumentResponse:
+    """Make this revision the current one; every other revision of the chain is superseded."""
+    doc = await _readable_document(document_id, user_id, session, service)
+    doc = await service.make_current_revision(doc, str(user_id))
+    return _doc_to_response(doc)
+
+
+@router.get("/{document_id}/linked-records/", response_model=LinkedRecordsResponse)
+async def get_linked_records(
+    document_id: uuid.UUID,
+    user_id: CurrentUserId,
+    session: SessionDep,
+    service: DocumentService = Depends(_get_service),
+) -> LinkedRecordsResponse:
+    """RFIs, NCRs and change orders that point at this document."""
+    from app.modules.documents import revisions
+
+    doc = await _readable_document(document_id, user_id, session, service)
+    return LinkedRecordsResponse(**await revisions.linked_records(session, doc))
 
 
 @router.delete("/{document_id}", status_code=204)

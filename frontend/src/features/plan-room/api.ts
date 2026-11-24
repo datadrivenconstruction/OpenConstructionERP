@@ -19,7 +19,7 @@
  * PlanRoomViewer for how each is projected onto the canvas).
  */
 
-import { apiGet, apiPost, apiDelete, type Page } from '@/shared/lib/api';
+import { apiGet, apiPost, apiDelete } from '@/shared/lib/api';
 
 /* ── Overlay composite (read) ──────────────────────────────────────────── */
 
@@ -100,6 +100,8 @@ export interface OverlayVersion {
   document_id: string;
   revision_code: string | null;
   is_current_revision: boolean | null;
+  /** The revision to open instead when this one is superseded. */
+  current_document_id: string | null;
 }
 
 export interface OverlaysResponse {
@@ -169,11 +171,23 @@ export async function deletePlanPin(pinId: string): Promise<void> {
 export interface PlanRoomDrawing {
   id: string;
   filename: string;
+  revision_code?: string | null;
+  drawing_number?: string | null;
+  discipline?: string | null;
+  cde_state?: string | null;
+  is_current_revision?: boolean;
+  /** Set on a superseded revision: the revision that replaced it. */
+  current_document_id?: string | null;
 }
 
-/** The slice of a documents-list row the drawing filter reads. */
+/** Drawings of a project; `superseded_hidden` counts earlier revisions left out of the list. */
+export interface PlanRoomDrawingList {
+  items: PlanRoomDrawing[];
+  superseded_hidden: number;
+}
+
+/** The slice of a document row the drawing filter reads. */
 interface DocumentRow {
-  id: string;
   filename?: string;
   name?: string;
   mime_type?: string | null;
@@ -193,16 +207,21 @@ export function isDrawingDocument(row: { filename?: string; name?: string; mime_
 }
 
 /**
- * List the project documents that can be opened in the Plan Room: the PDFs
- * among the project documents (see {@link isDrawingDocument}).
+ * The issued, current PDF drawings of a project. Earlier (superseded) revisions
+ * are left out unless `includeSuperseded` is set; the response says how many.
  */
+export async function fetchPlanRoomDrawingList(
+  projectId: string,
+  includeSuperseded = false,
+): Promise<PlanRoomDrawingList> {
+  if (!projectId) return { items: [], superseded_hidden: 0 };
+  const flag = includeSuperseded ? '?include_superseded=true' : '';
+  return apiGet<PlanRoomDrawingList>(`${BASE}/projects/${projectId}/drawings/${flag}`);
+}
+
+/** The drawings alone (current revisions), for callers that need no revision controls. */
 export async function fetchPlanRoomDrawings(projectId: string): Promise<PlanRoomDrawing[]> {
-  if (!projectId) return [];
-  const page = await apiGet<Page<DocumentRow>>(`/v1/documents/?project_id=${projectId}&limit=500`);
-  return page.items.filter(isDrawingDocument).map((r) => ({
-    id: r.id,
-    filename: r.filename ?? r.name ?? '',
-  }));
+  return (await fetchPlanRoomDrawingList(projectId)).items;
 }
 
 /* ── Helpers ───────────────────────────────────────────────────────────── */

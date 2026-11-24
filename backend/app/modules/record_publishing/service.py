@@ -61,6 +61,9 @@ logger = logging.getLogger(__name__)
 _RECORD_KEY_PREFIX = "published_records"
 # Transmittal item kind for a published record (a generated report artefact).
 _RECORD_FILE_KIND = "report"
+# Only a finished record is distributed: a closed/signed/archived diary and issued minutes.
+_PUBLISHABLE_DIARY_STATUSES = frozenset({"closed", "signed", "archived"})
+_ISSUED_MINUTES_STATUS = "issued"
 
 # Same-origin URL templates the caller forwards to recipients. The ack URL is
 # the public acknowledgement endpoint on the transmittals module; the record URL
@@ -170,6 +173,12 @@ async def _render_daily_diary(session: AsyncSession, source_id: uuid.UUID) -> Re
 
     diary_service = DailyDiaryService(session)
     diary = await diary_service.get_diary(source_id)  # raises 404 when missing
+    # An open diary is still being written; only a closed (or signed, archived) one is a record.
+    if diary.status not in _PUBLISHABLE_DIARY_STATUSES:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="This diary is still open; close it before publishing it as a record",
+        )
     pdf_bytes, diary_date = await diary_service.generate_diary_pdf(source_id)
     label = "Daily Site Diary"
     subject = f"{label} - {diary_date}" if diary_date else label
@@ -223,6 +232,12 @@ async def _render_meeting_minutes(session: AsyncSession, source_id: uuid.UUID) -
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail="This meeting has no confirmed minutes to publish yet",
+        )
+    # Draft minutes are a working text a human has not yet approved; only issued minutes are the record.
+    if minutes.status != _ISSUED_MINUTES_STATUS:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="The minutes are still a draft; issue them before publishing them as a record",
         )
 
     proj_name = (

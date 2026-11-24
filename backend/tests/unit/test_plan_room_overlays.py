@@ -270,3 +270,57 @@ class TestPinRoundTrip:
                 json={"page": 2, "x": 0.4, "y": 0.6},
             )
         assert resp.status_code == 400, resp.text
+
+
+# -- 6. Revision control over the HTTP surface ------------------------------
+
+
+class TestRevisionControl:
+    @pytest.mark.asyncio
+    async def test_pin_on_a_superseded_drawing_is_refused(self, db_session):
+        owner_id = await _make_user(db_session)
+        project_id = await _make_project(db_session, owner_id)
+        old = Document(project_id=project_id, name="A-101 Rev A.pdf", revision_code="A", is_current_revision=False)
+        db_session.add(old)
+        await db_session.flush()
+        app = _build_app(db_session, caller_id=str(owner_id))
+
+        transport = httpx.ASGITransport(app=app)
+        async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
+            resp = await client.post(f"/v1/plan-room/{old.id}/pages/1/pins", json={"page": 1, "x": 0.4, "y": 0.6})
+        assert resp.status_code == 409, resp.text
+
+    @pytest.mark.asyncio
+    async def test_drawings_endpoint_lists_current_and_counts_superseded(self, db_session):
+        owner_id = await _make_user(db_session)
+        project_id = await _make_project(db_session, owner_id)
+        old = Document(
+            project_id=project_id,
+            name="Rev A.pdf",
+            mime_type="application/pdf",
+            revision_code="A",
+            is_current_revision=False,
+        )
+        db_session.add(old)
+        await db_session.flush()
+        new = Document(
+            project_id=project_id,
+            name="Rev B.pdf",
+            mime_type="application/pdf",
+            revision_code="B",
+            parent_document_id=old.id,
+            cde_state="published",
+        )
+        db_session.add(new)
+        await db_session.flush()
+        app = _build_app(db_session, caller_id=str(owner_id))
+
+        transport = httpx.ASGITransport(app=app)
+        async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
+            resp = await client.get(f"/v1/plan-room/projects/{project_id}/drawings/")
+            full = await client.get(f"/v1/plan-room/projects/{project_id}/drawings/?include_superseded=true")
+        assert resp.status_code == 200, resp.text
+        body = resp.json()
+        assert [d["id"] for d in body["items"]] == [str(new.id)]
+        assert body["superseded_hidden"] == 1
+        assert {d["id"] for d in full.json()["items"]} == {str(old.id), str(new.id)}

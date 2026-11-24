@@ -30,6 +30,7 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
+from app.modules.file_transmittals import revision_check
 from app.modules.file_transmittals.models import (
     TRANSMITTAL_REASONS,
     FileTransmittal,
@@ -443,6 +444,11 @@ class TransmittalService:
                 status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail=f"Unknown reason_code '{data.reason_code}'",
             )
+        # Resolve every item before anything is written, so a refused item leaves no half-made draft.
+        pinned: list[str | None | bool] = [
+            await revision_check.pin_item(self.session, data.project_id, data.reason_code, it.file_kind, it.file_id)
+            for it in data.items
+        ]
         number = await self._next_number(data.project_id)
         now = datetime.now(UTC)
         sender_uuid: uuid.UUID | None = None
@@ -471,7 +477,7 @@ class TransmittalService:
                     file_kind=it.file_kind,
                     file_id=it.file_id,
                     canonical_name_snapshot=it.canonical_name_snapshot,
-                    file_version_snapshot=it.file_version_snapshot,
+                    file_version_snapshot=it.file_version_snapshot if pinned[idx] is False else pinned[idx],
                     sort_order=it.sort_order or idx,
                 )
             )
@@ -507,6 +513,9 @@ class TransmittalService:
         """Append an item to an existing transmittal (draft only)."""
         transmittal = await self.get(transmittal_id)
         self._assert_draft(transmittal)
+        pinned = await revision_check.pin_item(
+            self.session, transmittal.project_id, transmittal.reason_code, item.file_kind, item.file_id
+        )
         # Compute next sort order.
         next_order = max((it.sort_order for it in transmittal.items), default=-1) + 1
         row = FileTransmittalItem(
@@ -514,7 +523,7 @@ class TransmittalService:
             file_kind=item.file_kind,
             file_id=item.file_id,
             canonical_name_snapshot=item.canonical_name_snapshot,
-            file_version_snapshot=item.file_version_snapshot,
+            file_version_snapshot=item.file_version_snapshot if pinned is False else pinned,
             sort_order=item.sort_order or next_order,
         )
         self.session.add(row)
@@ -581,6 +590,11 @@ class TransmittalService:
         transmittal = await self.get(transmittal_id)
         if transmittal.status != "draft":
             return transmittal
+
+        # A revision superseded while the draft sat open must not go out.
+        await revision_check.recheck_items(
+            self.session, transmittal.project_id, transmittal.reason_code, list(transmittal.items)
+        )
 
         now = datetime.now(UTC)
         transmittal.sent_at = now

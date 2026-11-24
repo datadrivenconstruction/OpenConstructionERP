@@ -32,6 +32,8 @@ from app.modules.plan_room.schemas import (
     OverlaysResponse,
     OverlayVersion,
     PlanPinCreate,
+    PlanRoomDrawing,
+    PlanRoomDrawingsResponse,
 )
 
 logger = logging.getLogger(__name__)
@@ -44,6 +46,14 @@ def _num_to_str(value: Any) -> str | None:
     if isinstance(value, Decimal):
         return str(value)
     return str(value)
+
+
+def _is_pdf(document: Any) -> bool:  # noqa: ANN401 - ORM row
+    """Whether a document can be opened as a drawing sheet (the viewer renders PDFs only)."""
+    mime = (getattr(document, "mime_type", "") or "").strip().lower()
+    if mime:
+        return mime in ("application/pdf", "application/x-pdf")
+    return (getattr(document, "name", "") or "").strip().lower().endswith(".pdf")
 
 
 class PlanRoomService:
@@ -82,10 +92,14 @@ class PlanRoomService:
     async def get_overlays(self, document: Any, page: int) -> OverlaysResponse:
         """Composite every overlay on a document page into one payload."""
         document_id = str(document.id)
+        current_id: str | None = None
+        if getattr(document, "is_current_revision", None) is False:
+            current_id = await self._current_document_id(document)
         version = OverlayVersion(
             document_id=document_id,
             revision_code=getattr(document, "revision_code", None),
             is_current_revision=getattr(document, "is_current_revision", None),
+            current_document_id=current_id,
         )
         punch_pins = await self._punch_pins(document_id, page)
         plan_pins = await self._plan_pins(document_id, page)
@@ -98,6 +112,66 @@ class PlanRoomService:
             measurements=await self._measurements(document_id, page),
             photos=await self._photos(document_id),
         )
+
+    async def _current_document_id(self, document: Any) -> str | None:  # noqa: ANN401 - ORM row
+        """Id of the current revision of the document's chain, or ``None``."""
+        try:
+            from app.modules.documents import revisions
+
+            current = await revisions.current_revision(self.session, document)
+        except Exception:  # noqa: BLE001 - fail soft
+            logger.debug("plan_room: current revision lookup failed", exc_info=True)
+            return None
+        return str(current.id) if current is not None and current.id != document.id else None
+
+    async def list_drawings(
+        self, project_id: uuid.UUID, *, include_superseded: bool = False
+    ) -> PlanRoomDrawingsResponse:
+        """PDF drawings of a project that are issued: current revision, not work-in-progress or archived.
+
+        A document with no CDE state predates the CDE workflow and counts as issued. Earlier
+        revisions are left out unless asked for; ``superseded_hidden`` says how many.
+        """
+        from app.modules.documents.models import Document
+        from app.modules.documents.revisions import is_superseded
+
+        rows = (
+            (
+                await self.session.execute(
+                    select(Document).where(Document.project_id == project_id).order_by(Document.name)
+                )
+            )
+            .scalars()
+            .all()
+        )
+        pdfs = [d for d in rows if _is_pdf(d)]
+        current_by_root: dict[Any, Any] = {}
+        for d in pdfs:
+            if not is_superseded(d):
+                current_by_root[d.parent_document_id or d.id] = d.id
+        items: list[PlanRoomDrawing] = []
+        hidden = 0
+        for d in pdfs:
+            superseded = is_superseded(d)
+            if d.cde_state in ("wip", "archived") and not superseded:
+                continue
+            if superseded and not include_superseded:
+                hidden += 1
+                continue
+            current_id = current_by_root.get(d.parent_document_id or d.id) if superseded else None
+            items.append(
+                PlanRoomDrawing(
+                    id=str(d.id),
+                    filename=d.name,
+                    revision_code=d.revision_code,
+                    drawing_number=d.drawing_number,
+                    discipline=d.discipline,
+                    cde_state=d.cde_state,
+                    is_current_revision=not superseded,
+                    current_document_id=str(current_id) if current_id else None,
+                )
+            )
+        return PlanRoomDrawingsResponse(items=items, superseded_hidden=hidden)
 
     async def _plan_pins(self, document_id: str, page: int) -> list[OverlayPin]:
         """Positioned Plan Room photo / note pins (owned by this module)."""

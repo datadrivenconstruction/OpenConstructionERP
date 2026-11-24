@@ -43,7 +43,7 @@ import {
   createPlanPin,
   deletePlanPin,
   fetchOverlays,
-  fetchPlanRoomDrawings,
+  fetchPlanRoomDrawingList,
   type OverlayPhoto,
   type OverlayPin,
   type OverlaysResponse,
@@ -109,13 +109,15 @@ export function PlanRoomPage({ documentId: documentIdProp, initialPage }: PlanRo
   const projectName =
     activeProjectName || projects.find((p) => p.id === projectId)?.name || '';
 
+  const [showSuperseded, setShowSuperseded] = useState(false);
   const drawingsQuery = useQuery({
-    queryKey: ['plan-room-drawings', projectId],
-    queryFn: () => fetchPlanRoomDrawings(projectId),
+    queryKey: ['plan-room-drawings', projectId, showSuperseded],
+    queryFn: () => fetchPlanRoomDrawingList(projectId, showSuperseded),
     enabled: !!projectId,
     staleTime: 60_000,
   });
-  const drawings = useMemo(() => drawingsQuery.data ?? [], [drawingsQuery.data]);
+  const drawings = useMemo(() => drawingsQuery.data?.items ?? [], [drawingsQuery.data]);
+  const supersededHidden = drawingsQuery.data?.superseded_hidden ?? 0;
   const drawingsLoading = !!projectId && drawingsQuery.isLoading;
   const noDrawings = !!projectId && drawingsQuery.isSuccess && drawings.length === 0;
 
@@ -307,6 +309,7 @@ export function PlanRoomPage({ documentId: documentIdProp, initialPage }: PlanRo
       {drawingsLoading ? (
         <Skeleton className="h-9 w-full max-w-md" />
       ) : drawings.length > 0 ? (
+        <>
         <div className="flex flex-wrap items-center gap-3">
           <div className="flex min-w-0 flex-1 items-center gap-2">
             <MapIcon size={16} className="shrink-0 text-content-tertiary" />
@@ -323,12 +326,57 @@ export function PlanRoomPage({ documentId: documentIdProp, initialPage }: PlanRo
               {drawings.map((d) => (
                 <option key={d.id} value={d.id}>
                   {d.filename || d.id.slice(0, 8)}
+                  {d.revision_code ? ` · ${d.revision_code}` : ''}
+                  {d.is_current_revision === false
+                    ? ` · ${t('plan_room.revision_superseded', { defaultValue: 'Superseded' })}`
+                    : ''}
                 </option>
               ))}
             </select>
           </div>
           {overlays?.version && <RevisionIndicator version={overlays.version} />}
+          {(supersededHidden > 0 || showSuperseded) && (
+            <label className="inline-flex items-center gap-1.5 text-xs text-content-secondary">
+              <input
+                type="checkbox"
+                checked={showSuperseded}
+                onChange={(e) => setShowSuperseded(e.target.checked)}
+              />
+              {t('plan_room.show_superseded', {
+                defaultValue: 'Show earlier revisions ({{n}} hidden)',
+                n: supersededHidden,
+              })}
+            </label>
+          )}
         </div>
+        {overlays?.version && overlays.version.is_current_revision === false && (
+          <div
+            role="status"
+            className="flex flex-wrap items-center gap-3 rounded-lg border border-semantic-warning/40 bg-semantic-warning-bg px-3 py-2 text-sm text-content-primary"
+            data-testid="plan-room-superseded-banner"
+          >
+            <span className="min-w-0 flex-1">
+              {t('plan_room.superseded_banner', {
+                defaultValue:
+                  'This revision has been superseded. Do not build from it. New marks cannot be placed on it.',
+              })}
+            </span>
+            {overlays.version.current_document_id && (
+              <button
+                type="button"
+                className="oe-btn-secondary text-xs"
+                onClick={() => {
+                  setSelectedDocId(overlays.version.current_document_id ?? '');
+                  setPage(1);
+                  setPlacing(false);
+                }}
+              >
+                {t('plan_room.open_current', { defaultValue: 'Open the current revision' })}
+              </button>
+            )}
+          </div>
+        )}
+        </>
       ) : null}
 
       {/* Body */}
@@ -397,7 +445,7 @@ export function PlanRoomPage({ documentId: documentIdProp, initialPage }: PlanRo
               }}
               overlays={overlays}
               visibility={visibility}
-              canWrite={canWrite}
+              canWrite={canWrite && overlays?.version?.is_current_revision !== false}
               placing={placing}
               onStartPlacing={() => setPlacing(true)}
               onCancelPlacing={() => setPlacing(false)}

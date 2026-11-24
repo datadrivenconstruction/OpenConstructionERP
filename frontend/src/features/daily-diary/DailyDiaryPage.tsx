@@ -1309,14 +1309,21 @@ function TodayTab({
             size="sm"
             icon={<Send size={14} />}
             onClick={() => setPublishOpen(true)}
+            disabled={diary.status === 'open'}
             data-testid="daily-diary-publish"
             aria-label={t('record_publishing.publish_action', {
               defaultValue: 'Publish and distribute',
             })}
-            title={t('daily_diary.publish_hint', {
-              defaultValue:
-                'Publish this diary as a signed PDF and send it to named recipients who acknowledge receipt, in one step.',
-            })}
+            title={
+              diary.status === 'open'
+                ? t('daily_diary.publish_open_hint', {
+                    defaultValue: 'Close the diary before publishing it as a record.',
+                  })
+                : t('daily_diary.publish_hint', {
+                    defaultValue:
+                      'Publish this diary as a signed PDF and send it to named recipients who acknowledge receipt, in one step.',
+                  })
+            }
           >
             {t('record_publishing.publish_action', {
               defaultValue: 'Publish and distribute',

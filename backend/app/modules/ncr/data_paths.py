@@ -25,6 +25,13 @@ DATA_PATHS = DataPaths(
             importance="high",
             breaks="data_paths.breaks.no_defect_trail",
         ),
+        DataPath(
+            "oe_documents",
+            "NCR",
+            via="NCR.linked_document_ids",
+            label="data_paths.entity.document",
+            route="/documents",
+        ),
     ),
     outputs=(
         DataPath(

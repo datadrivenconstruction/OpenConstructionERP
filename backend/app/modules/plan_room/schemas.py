@@ -134,6 +134,8 @@ class OverlayVersion(BaseModel):
     document_id: str
     revision_code: str | None = None
     is_current_revision: bool | None = None
+    # The revision to open instead when this one is superseded (None when this is current).
+    current_document_id: str | None = None
 
 
 class OverlaysResponse(BaseModel):
@@ -146,3 +148,23 @@ class OverlaysResponse(BaseModel):
     markups: list[OverlayMarkup] = Field(default_factory=list)
     measurements: list[OverlayMeasurement] = Field(default_factory=list)
     photos: list[OverlayPhoto] = Field(default_factory=list)
+
+
+class PlanRoomDrawing(BaseModel):
+    """One drawing the Plan Room can open, with its place in the revision chain."""
+
+    id: str
+    filename: str
+    revision_code: str | None = None
+    drawing_number: str | None = None
+    discipline: str | None = None
+    cde_state: str | None = None
+    is_current_revision: bool = True
+    current_document_id: str | None = None
+
+
+class PlanRoomDrawingsResponse(BaseModel):
+    """Drawings of a project; ``superseded_hidden`` counts earlier revisions left out."""
+
+    items: list[PlanRoomDrawing]
+    superseded_hidden: int = 0

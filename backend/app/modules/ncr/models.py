@@ -58,6 +58,15 @@ class NCR(Base):
     # NULL means the accuracy was not reported, not that it was perfect.
     location_accuracy_m: Mapped[Decimal | None] = mapped_column(Numeric(6, 2), nullable=True)
     linked_inspection_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
+    # Drawings / documents the non-conformity concerns (document UUID strings). A JSON array,
+    # not an association table: a handful per NCR, read-mostly. Lets the document side list
+    # every NCR raised against it, and flag one raised against a superseded revision.
+    linked_document_ids: Mapped[list] = mapped_column(  # type: ignore[assignment]
+        JSON,
+        nullable=False,
+        default=list,
+        server_default="[]",
+    )
     change_order_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
     # Contract package the NCR belongs to (soft ref); a partial handover counts only
     # the NCRs of its own packages.

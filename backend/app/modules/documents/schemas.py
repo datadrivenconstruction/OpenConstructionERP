@@ -809,3 +809,40 @@ class DocumentBatchDeleteRequest(BaseModel):
 
     ids: list[UUID] = Field(..., min_length=1, max_length=_BATCH_MAX_IDS)
     acknowledge_references: bool = False
+
+
+class RevisionChainItem(BaseModel):
+    """One revision in a document's chain."""
+
+    id: UUID
+    name: str
+    revision_code: str | None = None
+    drawing_number: str | None = None
+    cde_state: str | None = None
+    is_current_revision: bool = True
+    created_at: datetime
+
+
+class RevisionChainResponse(BaseModel):
+    """Every revision of a document, oldest first, with the current one named."""
+
+    items: list[RevisionChainItem]
+    current_document_id: UUID | None = None
+
+
+class LinkedRecord(BaseModel):
+    """An RFI, NCR or change order that points at a document."""
+
+    id: UUID
+    number: str
+    title: str
+    status: str
+    on_superseded_revision: bool = False
+
+
+class LinkedRecordsResponse(BaseModel):
+    """RFIs, NCRs and change orders that point at a document."""
+
+    rfis: list[LinkedRecord] = Field(default_factory=list)
+    ncrs: list[LinkedRecord] = Field(default_factory=list)
+    change_orders: list[LinkedRecord] = Field(default_factory=list)

@@ -449,3 +449,49 @@ export async function uploadDocumentRevision(
   }
   return res.json();
 }
+
+/* ── Revision chain and linked records ───────────────────────────────── */
+
+export interface RevisionChainItem {
+  id: string;
+  name: string;
+  revision_code: string | null;
+  drawing_number: string | null;
+  cde_state: string | null;
+  is_current_revision: boolean;
+  created_at: string;
+}
+
+export interface RevisionChain {
+  items: RevisionChainItem[];
+  current_document_id: string | null;
+}
+
+/** Every revision of the document's chain, oldest first; exactly one is current. */
+export async function fetchRevisionChain(id: string): Promise<RevisionChain> {
+  return apiGet<RevisionChain>(`/v1/documents/${id}/revision-chain/`);
+}
+
+/** Make this revision the current one; the other revisions of the chain become superseded. */
+export async function makeRevisionCurrent(id: string): Promise<void> {
+  await apiPost(`/v1/documents/${id}/make-current/`, {});
+}
+
+export interface LinkedRecord {
+  id: string;
+  number: string;
+  title: string;
+  status: string;
+  on_superseded_revision: boolean;
+}
+
+export interface LinkedRecords {
+  rfis: LinkedRecord[];
+  ncrs: LinkedRecord[];
+  change_orders: LinkedRecord[];
+}
+
+/** RFIs, NCRs and change orders that point at a document. */
+export async function fetchLinkedRecords(id: string): Promise<LinkedRecords> {
+  return apiGet<LinkedRecords>(`/v1/documents/${id}/linked-records/`);
+}

@@ -5,6 +5,7 @@
 Route prefix (mounted by the module loader): ``/api/v1/plan-room``.
 
 Endpoints:
+    GET    /projects/{project_id}/drawings/       - issued, current drawings of a project
     GET    /{document_id}/pages/{page}/overlays  - read-only overlay composite
     POST   /{document_id}/pages/{page}/pins       - drop a positioned pin
     DELETE /pins/{pin_id}                          - remove a positioned pin
@@ -31,6 +32,7 @@ from app.modules.plan_room.schemas import (
     OverlaysResponse,
     PlanPinCreate,
     PlanPinResponse,
+    PlanRoomDrawingsResponse,
 )
 from app.modules.plan_room.service import PlanRoomService
 
@@ -42,6 +44,23 @@ _WRITE = Depends(RequirePermission("plan_room.write"))
 
 def _get_service(session: SessionDep) -> PlanRoomService:
     return PlanRoomService(session)
+
+
+@router.get(
+    "/projects/{project_id}/drawings/",
+    response_model=PlanRoomDrawingsResponse,
+    dependencies=[_READ],
+)
+async def list_drawings(
+    project_id: uuid.UUID,
+    user_id: CurrentUserId,
+    session: SessionDep,
+    include_superseded: bool = False,
+    service: PlanRoomService = Depends(_get_service),
+) -> PlanRoomDrawingsResponse:
+    """List the issued, current drawings of a project (earlier revisions on request)."""
+    await verify_project_access(project_id, user_id, session)
+    return await service.list_drawings(project_id, include_superseded=include_superseded)
 
 
 @router.get(
@@ -83,6 +102,11 @@ async def create_pin(
     if document is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found")
     await verify_project_access(document.project_id, user_id, session)
+    if getattr(document, "is_current_revision", None) is False:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="This drawing revision is superseded; place the pin on the current revision",
+        )
     if data.page != page:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,

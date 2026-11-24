@@ -26,7 +26,7 @@ vi.mock('@/shared/lib/api', async () => {
 import { apiGet } from '@/shared/lib/api';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { PlanRoomPage } from './PlanRoomPage';
-import { fetchPlanRoomDrawings, isDrawingDocument } from './api';
+import { fetchPlanRoomDrawingList, fetchPlanRoomDrawings, isDrawingDocument } from './api';
 
 const NON_DRAWINGS = [
   { id: 'doc-xlsx', name: 'boq.xlsx', mime_type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' },
@@ -36,7 +36,7 @@ const NON_DRAWINGS = [
 
 function stubApi(documents: unknown[]) {
   (apiGet as ReturnType<typeof vi.fn>).mockImplementation((url: string) => {
-    if (url.startsWith('/v1/documents/')) return Promise.resolve({ items: documents, total: documents.length });
+    if (url.startsWith('/v1/plan-room/projects/')) return Promise.resolve({ items: documents, superseded_hidden: 0 });
     if (url.startsWith('/v1/projects')) return Promise.resolve([{ id: 'proj-1', name: 'Tower A' }]);
     return Promise.resolve([]);
   });
@@ -68,9 +68,19 @@ describe('isDrawingDocument', () => {
     expect(isDrawingDocument({ filename: 'plan.dwg', mime_type: null })).toBe(false);
   });
 
-  it('filters the fetched project documents down to drawings', async () => {
-    stubApi([...NON_DRAWINGS, { id: 'doc-pdf', name: 'A-101.pdf', mime_type: 'application/pdf' }]);
-    await expect(fetchPlanRoomDrawings('proj-1')).resolves.toEqual([{ id: 'doc-pdf', filename: 'A-101.pdf' }]);
+  it('reads the issued, current drawings from the plan-room endpoint', async () => {
+    stubApi([{ id: 'doc-pdf', filename: 'A-101.pdf', revision_code: 'C.01', is_current_revision: true }]);
+    const items = await fetchPlanRoomDrawings('proj-1');
+    expect(items).toEqual([
+      { id: 'doc-pdf', filename: 'A-101.pdf', revision_code: 'C.01', is_current_revision: true },
+    ]);
+    expect(apiGet).toHaveBeenCalledWith('/v1/plan-room/projects/proj-1/drawings/');
+  });
+
+  it('asks for earlier revisions only when told to', async () => {
+    stubApi([]);
+    await fetchPlanRoomDrawingList('proj-1', true);
+    expect(apiGet).toHaveBeenCalledWith('/v1/plan-room/projects/proj-1/drawings/?include_superseded=true');
   });
 });
 
@@ -86,7 +96,7 @@ describe('PlanRoomPage entry states', () => {
 
   it('offers the upload page when the project has no drawings', async () => {
     useProjectContextStore.setState({ activeProjectId: 'proj-1', activeProjectName: 'Tower A' });
-    stubApi(NON_DRAWINGS);
+    stubApi([]);
     renderPage();
 
     expect(await screen.findByText('No drawings in this project yet')).toBeInTheDocument();

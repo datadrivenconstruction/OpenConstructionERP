@@ -71,6 +71,25 @@ async def _seed_project(session) -> tuple[uuid.UUID, uuid.UUID]:
     return project.id, user.id
 
 
+async def _document(session, project_id: uuid.UUID, name: str = "doc.pdf", **fields) -> str:
+    """A register row for a transmittal item; returns its id as the wire string."""
+    from app.modules.documents.models import Document
+
+    doc = Document(project_id=project_id, name=name, **fields)
+    session.add(doc)
+    await session.flush()
+    return str(doc.id)
+
+
+async def _sheet(session, project_id: uuid.UUID, **fields) -> str:
+    from app.modules.documents.models import Sheet
+
+    sheet = Sheet(project_id=project_id, page_number=1, **fields)
+    session.add(sheet)
+    await session.flush()
+    return str(sheet.id)
+
+
 # ── create + send + cover bytes ──────────────────────────────────────────
 
 
@@ -86,6 +105,8 @@ async def test_create_draft_with_items_recipients_then_send(db_session):
 
     project_id, user_id = await _seed_project(db_session)
     service = TransmittalService(db_session)
+    doc_id = await _document(db_session, project_id, "R1-Architectural-Plans.pdf")
+    sheet_id = await _sheet(db_session, project_id, sheet_number="A-101")
 
     data = TransmittalCreate(
         project_id=project_id,
@@ -95,14 +116,14 @@ async def test_create_draft_with_items_recipients_then_send(db_session):
         items=[
             TransmittalItemCreate(
                 file_kind="document",
-                file_id="doc-001",
+                file_id=doc_id,
                 canonical_name_snapshot="R1-Architectural-Plans.pdf",
                 file_version_snapshot="v2",
                 sort_order=0,
             ),
             TransmittalItemCreate(
                 file_kind="sheet",
-                file_id="sheet-001",
+                file_id=sheet_id,
                 canonical_name_snapshot="A-101.dwg",
                 sort_order=1,
             ),
@@ -254,6 +275,8 @@ async def test_remove_item(db_session):
 
     project_id, user_id = await _seed_project(db_session)
     service = TransmittalService(db_session)
+    d1 = await _document(db_session, project_id, "x.pdf")
+    d2 = await _document(db_session, project_id, "y.pdf")
 
     draft = await service.create_draft(
         TransmittalCreate(
@@ -263,12 +286,12 @@ async def test_remove_item(db_session):
             items=[
                 TransmittalItemCreate(
                     file_kind="document",
-                    file_id="d1",
+                    file_id=d1,
                     canonical_name_snapshot="x.pdf",
                 ),
                 TransmittalItemCreate(
                     file_kind="document",
-                    file_id="d2",
+                    file_id=d2,
                     canonical_name_snapshot="y.pdf",
                 ),
             ],

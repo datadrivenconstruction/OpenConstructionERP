@@ -1035,6 +1035,31 @@ class DocumentService:
 
         return document
 
+    async def make_current_revision(self, document: Document, user_id: str) -> Document:
+        """Make ``document`` the one current revision of its chain (the others become superseded)."""
+        from app.modules.documents import revisions
+
+        demoted = await revisions.make_current(self.session, document)
+        await self.session.refresh(document)
+        await record_activity(
+            self.session,
+            document.id,
+            user_id or None,
+            "revision_made_current",
+            {"revision_code": document.revision_code or "", "superseded": [str(d) for d in demoted]},
+        )
+        try:
+            from app.core.events import event_bus
+
+            event_bus.publish_detached(
+                "documents.document.updated",
+                {"project_id": str(document.project_id), "document_id": str(document.id)},
+                source_module="oe_documents",
+            )
+        except Exception:  # noqa: BLE001 - best-effort index refresh
+            logger.debug("revision event publish failed", exc_info=True)
+        return document
+
     # ── Read ───────────────────────────────────────────────────────────────
 
     async def get_document(self, document_id: uuid.UUID) -> Document:
@@ -1247,9 +1272,11 @@ class DocumentService:
         if fields.get("is_current_revision") is True:
             parent_id = fields.get("parent_document_id", document.parent_document_id)
             if parent_id is not None:
+                # The root of the chain counts as a member: a child cannot be made
+                # current while the root (or a sibling) still is.
                 stmt = select(Document).where(
-                    Document.parent_document_id == parent_id,
-                    Document.is_current_revision.is_(True),
+                    (Document.id == parent_id) | (Document.parent_document_id == parent_id),
+                    Document.is_current_revision.is_not(False),
                     Document.id != document_id,
                 )
                 existing = (await self.session.execute(stmt)).scalars().first()
@@ -1259,7 +1286,7 @@ class DocumentService:
                         detail=(
                             f"Revision conflict: document {existing.id} is "
                             f"already the current revision under parent "
-                            f"{parent_id}. Demote it first."
+                            f"{parent_id}. Demote it first, or use make-current."
                         ),
                     )
 

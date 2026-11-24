@@ -45,6 +45,43 @@ class NCRService:
         self.session = session
         self.repo = NCRRepository(session)
 
+    async def _check_documents(self, project_id: uuid.UUID, document_ids: list[str]) -> list[str]:
+        """Return *document_ids* normalised and de-duplicated, or 400 unless all are documents of the project."""
+        from sqlalchemy import select  # noqa: PLC0415
+
+        from app.modules.documents.models import Document  # noqa: PLC0415
+
+        wanted: list[str] = []
+        for raw in document_ids:
+            try:
+                value = str(uuid.UUID(str(raw).strip()))
+            except ValueError as exc:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="linked_document_ids holds a value that is not a document id",
+                ) from exc
+            if value not in wanted:
+                wanted.append(value)
+        if not wanted:
+            return []
+        found = (
+            (
+                await self.session.execute(
+                    select(Document.id).where(
+                        Document.project_id == project_id, Document.id.in_([uuid.UUID(w) for w in wanted])
+                    )
+                )
+            )
+            .scalars()
+            .all()
+        )
+        if len(found) != len(wanted):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="linked_document_ids names a document that is not in this project",
+            )
+        return wanted
+
     async def _check_change_order(self, project_id: uuid.UUID, change_order_id: str) -> str:
         """Return *change_order_id* normalised, or 400 unless it is a change order of the project.
 
@@ -184,6 +221,7 @@ class NCRService:
             location_lon=data.location_lon,
             location_accuracy_m=data.location_accuracy_m,
             linked_inspection_id=data.linked_inspection_id,
+            linked_document_ids=await self._check_documents(data.project_id, data.linked_document_ids or []),
             package_ref=data.package_ref,
             change_order_id=change_order_id,
             due_date=data.due_date,
@@ -328,6 +366,10 @@ class NCRService:
         fields: dict[str, Any] = data.model_dump(exclude_unset=True)
         # Checked only when it changes: a row written before the check may hold
         # a free string, and echoing it back on an unrelated edit must not fail.
+        if "linked_document_ids" in fields:
+            fields["linked_document_ids"] = await self._check_documents(
+                ncr.project_id, fields["linked_document_ids"] or []
+            )
         if fields.get("change_order_id") and fields["change_order_id"] != ncr.change_order_id:
             fields["change_order_id"] = await self._check_change_order(ncr.project_id, fields["change_order_id"])
         # Merge a partial metadata patch into the existing column instead of
