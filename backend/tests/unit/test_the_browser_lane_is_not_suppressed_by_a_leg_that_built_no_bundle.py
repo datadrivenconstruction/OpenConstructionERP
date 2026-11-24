@@ -18,11 +18,29 @@ bytes, uploaded by the ubuntu leg that had passed with the windows leg passed
 beside it. A skip is worse than a red here. A red lane is read; a green run with
 the evidence absent is only noticed by someone who goes looking for the lane.
 
-So the lane runs on ``success`` and on ``cancelled`` and still refuses ``failure``
-and ``skipped``, and the asymmetry about the leg that actually matters moved into
-the refusal step: if ubuntu is the leg that never ran then there is no artifact,
-and that step names the leg that owed it instead of letting the download action
-report that it could not find any artifact for the workflow.
+So the lane now refuses ``failure`` and ``skipped`` - a frontend that genuinely
+broke is already red on the run, and twenty minutes of browser work against its
+bundle answers nothing - and tolerates every other value. Naming the tolerated
+ones instead took a second run: the first fix accepted ``success`` and
+``cancelled``, and at ``ca8efd9e`` the lane skipped again on the same three legs,
+ubuntu passed, windows passed, macOS never acquired. The gate on that same run
+published the value a matrix really aggregates to when one of its legs is
+cancelled for capacity, ``abandoned``, which is not one of the four results GitHub
+documents and is what the CLI matrix reported at ``68c4f4f7`` too. An allow list
+here has to guess the next undocumented value; a deny list does not.
+
+The asymmetry about the leg that actually matters moved into the refusal step: if
+ubuntu is the leg that never ran then there is no artifact, and that step names
+the leg that owed it instead of letting the download action report that it could
+not find any artifact for the workflow.
+
+``ca8efd9e`` also caught this file, on macOS, in the one backend shard that was
+given a runner: ``built interface: 2 entries`` came back as ``built interface:
+       2 entries``, because BSD ``wc -l`` pads its count to a fixed width and GNU
+does not. One test of 16,288 collected failed, and it was this one. The step now
+strips the padding and these cases compare against whitespace-collapsed output
+while still asserting that no padding was printed, so the sentence stays portable
+without the portability going untested.
 
 The cases below evaluate the lane's own ``if`` expression and execute the refusal
 step's own script, both read out of the workflow rather than copied into this
@@ -49,6 +67,7 @@ BUILDER = "frontend"
 #: Step names, pinned rather than taken by index so that a step added above one of
 #: them cannot silently change what this file reads or executes.
 UPLOAD_STEP = "Upload the built bundle"
+RECORD_STEP = "Record what the frontend matrix reported"
 DOWNLOAD_STEP = "Download the built interface"
 REFUSAL_STEP = "Refuse to run against an interface that was not built"
 BROWSER_STEP = "Start it through the CLI and drive a browser through the first session"
@@ -59,18 +78,23 @@ UPLOADED_BY = "ubuntu-latest"
 _BASH = shutil.which("bash")
 
 #: (the frontend matrix's aggregate result, whether the run itself was cancelled,
-#: whether the lane runs). ``cancelled`` beside ``success`` is the fix: it is what
-#: a matrix reports when a leg was never given a runner, and two of the three legs
-#: build nothing this lane downloads. ``failure`` and ``skipped`` stay refused,
-#: because a frontend that genuinely broke is already red on the run and twenty
-#: minutes of browser work on its bundle answers nothing.
+#: whether the lane runs). ``abandoned`` and ``cancelled`` beside ``success`` are
+#: the fix: those are what a matrix reports when a leg was never given a runner,
+#: and two of the three legs build nothing this lane downloads. ``failure`` and
+#: ``skipped`` stay refused, because a frontend that genuinely broke is already red
+#: on the run and twenty minutes of browser work on its bundle answers nothing.
 IF_CASES = [
     ("success", False, True),
     ("cancelled", False, True),
+    # The value a matrix really reports when a leg was never acquired, published
+    # by the gate's own warning at ca8efd9e. The allow list this replaced did not
+    # contain it, which is why the lane skipped a second time.
+    ("abandoned", False, True),
     ("failure", False, False),
     ("skipped", False, False),
     ("success", True, False),
     ("cancelled", True, False),
+    ("abandoned", True, False),
     ("failure", True, False),
 ]
 
@@ -176,16 +200,22 @@ def test_the_lane_says_which_leg_owed_it_a_bundle_it_did_not_get(
 ) -> None:
     finished = _run_refusal(tmp_path, outcome, bundle_on_disk=bundle_on_disk)
 
-    assert finished.returncode == expected_code, finished.stdout + finished.stderr
-    assert expected_line in finished.stdout, finished.stdout
+    printed = finished.stdout
+    assert finished.returncode == expected_code, printed + finished.stderr
+    # Collapsed, because BSD `wc -l` pads its count and GNU does not, and this
+    # file runs on all three while the step it executes runs on two.
+    assert expected_line in " ".join(printed.split()), printed
     if expected_code == 0:
-        assert "::error::" not in finished.stdout, "a lane that found its bundle should not have errored on the way"
+        assert "::error::" not in printed, "a lane that found its bundle should not have errored on the way"
+        # Collapsing would also hide the padding, so forbid it outright: a count
+        # only comparable on one platform is a count nobody can put in a ceiling.
+        assert "  " not in printed.strip(), printed
     else:
-        assert "::error::" in finished.stdout, finished.stdout
+        assert "::error::" in printed, printed
         if outcome != "success":
             # A leg that never uploaded has to be reported with the outcome that
             # says so, or a reader cannot tell this from an empty bundle.
-            assert outcome in finished.stdout, "the annotation has to carry the outcome it was given"
+            assert outcome in printed, "the annotation has to carry the outcome it was given"
 
 
 def test_the_bundle_still_comes_from_one_leg_and_that_leg_still_builds_it() -> None:
@@ -237,4 +267,23 @@ def test_the_refusal_happens_before_anything_can_measure_the_missing_bundle() ->
     """Order is part of the claim: naming a gap only helps if the lane stops at it."""
     order = _step_order(LANE)
 
+    assert order.index(RECORD_STEP) < order.index(DOWNLOAD_STEP)
     assert order.index(DOWNLOAD_STEP) < order.index(REFUSAL_STEP) < order.index(BROWSER_STEP)
+
+
+def test_the_lane_publishes_the_aggregate_it_was_given() -> None:
+    """The one number a reader of the run cannot otherwise see.
+
+    GitHub publishes each leg's conclusion and publishes nothing about the
+    aggregate it computed from them, so at ``ca8efd9e`` the value this lane's
+    ``if`` had been given was unknowable from the run page and had to be deduced
+    from a warning the gate over a different matrix happened to print. An
+    annotation is on the run page; a log line is not, and logs are what nobody
+    downloads.
+    """
+    record = _steps(LANE)[RECORD_STEP]
+
+    assert record["if"] == "${{ !cancelled() }}"
+    assert record["shell"] == "bash"
+    assert "${{ needs.frontend.result }}" in record["run"]
+    assert "::notice::" in record["run"]

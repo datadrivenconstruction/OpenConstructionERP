@@ -1002,22 +1002,35 @@ jobs:
     # only its ubuntu-latest leg uploads `frontend-dist`, so
     # `needs.frontend.result` is an aggregate of three legs and this lane was
     # reading it as one verdict about the bundle. At 07d623f7 the macOS leg was
-    # never acquired by a hosted runner, the aggregate came back `cancelled`, and
-    # the whole lane skipped - with the 66,351,876 byte bundle it exists to open
-    # sitting unexpired in that same run's artifacts, uploaded by the ubuntu leg,
-    # which had passed, with the windows leg passed beside it. Two legs that
-    # build nothing this lane uses must not be able to suppress it, and a skip
-    # here is worse than a red here: the run reads green and the evidence is
-    # simply absent.
+    # never acquired by a hosted runner and the whole lane skipped, with the
+    # 66,351,876 byte bundle it exists to open sitting unexpired in that same
+    # run's artifacts, uploaded by the ubuntu leg, which had passed, with the
+    # windows leg passed beside it. Two legs that build nothing this lane uses
+    # must not be able to suppress it, and a skip here is worse than a red here:
+    # the run reads green and the evidence is simply absent.
     #
-    # So `cancelled` is tolerated beside `success`, and `failure` and `skipped`
-    # are not. A frontend that genuinely failed is already red on the run, and
-    # twenty minutes of browser work on a bundle from a build that broke answers
-    # nothing. The tolerance is deliberately asymmetric about the leg that
+    # The first fix at this guessed the aggregate's value and accepted `success`
+    # beside `cancelled`. The next run, ca8efd9e, skipped the lane again on the
+    # same three legs - ubuntu passed, windows passed, macOS never acquired - and
+    # the gate on that same run published what a matrix really aggregates to when
+    # one of its legs is cancelled for capacity:
+    #
+    #   ::warning::the CLI cold start lane reported abandoned, which says a leg
+    #   of it never ran rather than that the product failed
+    #
+    # `abandoned` is not one of the four results GitHub documents, and it is what
+    # the CLI matrix reported at 68c4f4f7 as well, which is why the gate already
+    # tolerates it. So this condition names what it refuses instead of what it
+    # accepts: `failure`, because a frontend that genuinely broke is already red
+    # on the run and twenty minutes of browser work against its bundle answers
+    # nothing, and `skipped`, because a frontend that never ran built nothing.
+    # Every other value lets the lane run, because an allow list here has to guess
+    # the next undocumented value and a deny list does not, and guessing one is
+    # what cost a run. The tolerance is deliberately asymmetric about the leg that
     # matters: if ubuntu is the leg that was never acquired there is no artifact
     # at all, and the refusal step below names that instead of letting the
     # download action report a generic "unable to find any artifacts".
-    if: ${{ !cancelled() && (needs.frontend.result == 'success' || needs.frontend.result == 'cancelled') }}
+    if: ${{ !cancelled() && needs.frontend.result != 'failure' && needs.frontend.result != 'skipped' }}
     runs-on: ${{ matrix.os }}
     # The CLI's own wait for health is 900s, and Playwright's per-test ceiling
     # is 240s with a 45s recording window inside it. The margin above both is
@@ -1045,6 +1058,23 @@ jobs:
           python-version: "3.12"
           cache: pip
           cache-dependency-path: backend/pyproject.toml
+
+      - name: Record what the frontend matrix reported
+        # The aggregate this lane's `if` reads is the one number a reader of the
+        # run cannot otherwise see: GitHub publishes each leg's conclusion, and
+        # publishes nothing about what it computed from them. At ca8efd9e the only
+        # reason the value was knowable at all was that the gate over the CLI
+        # matrix happened to print its own in a warning. So the lane prints the
+        # one it was given, as an annotation rather than a log line, because logs
+        # are what nobody downloads and an annotation is on the run page.
+        #
+        # It prints only when the lane runs, which is every value except the two
+        # the condition refuses, and both of those are already visible in the
+        # frontend legs' own conclusions.
+        if: ${{ !cancelled() }}
+        shell: bash
+        run: |
+          echo "::notice::the frontend matrix reported ${{ needs.frontend.result }}, and this lane ran because that is neither failure nor skipped"
 
       - name: Download the built interface
         id: dist
@@ -1078,7 +1108,15 @@ jobs:
         shell: bash
         run: |
           if test -f frontend/dist/index.html; then
-            echo "built interface: $(ls frontend/dist | wc -l) entries"
+            # `wc -l` pads its count to a fixed width on BSD, which is what macOS
+            # carries, and not on GNU or on the Git Bash coreutils Windows
+            # carries, so the same directory printed "built interface: 2 entries"
+            # on one platform and "built interface:        2 entries" on another.
+            # This lane runs on two platforms and the test that executes this
+            # script runs on three, and a count that is only comparable on one of
+            # them is a count nobody can put in a ceiling.
+            entries=$(ls frontend/dist | wc -l | tr -d '[:space:]')
+            echo "built interface: $entries entries"
             exit 0
           fi
           if test "$DIST_OUTCOME" != success; then
