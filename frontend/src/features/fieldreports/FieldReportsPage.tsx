@@ -2,9 +2,9 @@
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 import { clampInput } from '@/shared/lib/clampInput';
 import { PhotoStrip } from '@/features/photos/components/PhotoStrip';
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { RaiseNoticeButton } from '@/features/variations/RaiseNoticeButton';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import clsx from 'clsx';
@@ -63,6 +63,7 @@ import { usePreferencesStore } from '@/stores/usePreferencesStore';
 import { todayLocalISO } from '@/shared/lib/dates';
 import { useWeekStartsOn, type WeekStartsOn } from '@/shared/lib/weekStart';
 import {
+  fetchFieldReport,
   fetchFieldReports,
   fetchFieldReportSummary,
   fetchFieldReportCalendar,
@@ -441,6 +442,28 @@ export function FieldReportsPage() {
     setEditingReport(report);
     setShowModal(true);
   }, []);
+
+  // Deep link from the daily diary: /field-reports?report=<id> opens that report.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const linkedReportId = searchParams.get('report');
+  useEffect(() => {
+    if (!linkedReportId) return;
+    let alive = true;
+    fetchFieldReport(linkedReportId)
+      .then((report) => {
+        if (alive) handleOpenEdit(report);
+      })
+      .catch(() => undefined)
+      .finally(() => {
+        if (!alive) return;
+        const next = new URLSearchParams(searchParams);
+        next.delete('report');
+        setSearchParams(next, { replace: true });
+      });
+    return () => {
+      alive = false;
+    };
+  }, [linkedReportId, handleOpenEdit, searchParams, setSearchParams]);
 
   const handleDelete = useCallback(
     async (id: string) => {

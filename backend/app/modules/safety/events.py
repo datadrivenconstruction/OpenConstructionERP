@@ -74,8 +74,24 @@ async def _on_sensor_exceedance(event: Event) -> None:
         logger.debug("safety: sensor exceedance record failed", exc_info=True)
 
 
+async def _on_field_report_submitted(event: Event) -> None:
+    """``fieldreports.report.submitted`` -> observation for the report's safety text."""
+    if not (event.data or {}).get("has_safety_incident"):
+        return
+    from app.database import async_session_factory
+    from app.modules.safety.field_report_links import record_field_report_safety
+
+    try:
+        async with async_session_factory() as session:
+            if await record_field_report_safety(session, event.data or {}) is not None:
+                await session.commit()
+    except Exception:
+        logger.debug("safety: field report observation failed", exc_info=True)
+
+
 def register_subscribers() -> None:
     """Idempotently subscribe the safety module's cross-module handlers."""
     event_bus.subscribe_once("safety.threshold_alert_triggered", _on_threshold_alert)
     event_bus.subscribe_once("site_sensors.limit.exceeded", _on_sensor_exceedance)
-    logger.info("Safety: 2 cross-module subscriber(s) registered")
+    event_bus.subscribe_once("fieldreports.report.submitted", _on_field_report_submitted)
+    logger.info("Safety: 3 cross-module subscriber(s) registered")

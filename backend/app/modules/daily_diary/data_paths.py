@@ -29,6 +29,13 @@ DATA_PATHS = DataPaths(
             where=(Where("source_module", "eq", "schedule_advanced"),),
         ),
         DataPath(
+            "oe_fieldreports",
+            "FieldReport",
+            via="DiaryEntry.source_ref",
+            label="data_paths.entity.field_report",
+            route="/field-reports",
+        ),
+        DataPath(
             "oe_site_sensors",
             "SensorAlert",
             via="SensorAlert.diary_id",

@@ -471,20 +471,24 @@ class FieldReportService:
         report.validation_warnings = warnings  # type: ignore[attr-defined]
         logger.info("Field report submitted: %s", report_id)
 
-        if isinstance(schedule_progress, list) and schedule_progress:
-            from app.core.events import event_bus
+        # Always published: photos, safety and the daily diary listen too,
+        # not only schedule progress (which ignores an empty list).
+        from app.core.events import event_bus
 
-            event_bus.publish_detached(
-                "fieldreports.report.submitted",
-                {
-                    "report_id": str(report_id),
-                    "project_id": project_id_s,
-                    "report_date": str(report.report_date),
-                    "schedule_progress": schedule_progress,
-                    "submitted_by": getattr(report, "created_by", None),
-                },
-                source_module="oe_fieldreports",
-            )
+        event_bus.publish_detached(
+            "fieldreports.report.submitted",
+            {
+                "report_id": str(report_id),
+                "project_id": project_id_s,
+                "report_date": str(report.report_date),
+                "schedule_progress": schedule_progress if isinstance(schedule_progress, list) else [],
+                "submitted_by": str(report.created_by) if report.created_by else None,
+                "delay_hours": float(report.delay_hours or 0),
+                "weather_condition": report.weather_condition,
+                "has_safety_incident": bool((report.safety_incidents or "").strip()),
+            },
+            source_module="oe_fieldreports",
+        )
 
         # Publish the labour log so the cost model and payroll can roll up
         # hours x rate. Best-effort: a failure here must not block submission.

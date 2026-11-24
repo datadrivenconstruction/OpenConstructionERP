@@ -22,6 +22,13 @@ DATA_PATHS = DataPaths(
     ),
     inputs=(
         DataPath(
+            "oe_fieldreports",
+            "FieldReport",
+            via="SafetyObservation.metadata_.field_report_id",
+            label="data_paths.entity.field_report",
+            route="/field-reports",
+        ),
+        DataPath(
             "oe_site_sensors",
             "SensorAlert",
             via="SafetyObservation.metadata_.sensor_alert_id",

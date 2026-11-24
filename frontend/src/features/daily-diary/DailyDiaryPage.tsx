@@ -187,6 +187,19 @@ function entryTypeLabel(t: TFn, type: EntryType): string {
   });
 }
 
+// Entries written by other modules carry title_key + params so they read in
+// the user's language; the stored English title is the fallback.
+function entryTitle(
+  t: TFn,
+  e: { title: string; metadata?: Record<string, unknown> | null },
+): string {
+  const meta = e.metadata ?? {};
+  const key = typeof meta.title_key === 'string' ? meta.title_key : '';
+  if (!key) return e.title;
+  const params = meta.params && typeof meta.params === 'object' ? (meta.params as Record<string, unknown>) : {};
+  return t(key, { ...params, defaultValue: e.title });
+}
+
 const SIGNER_ROLE_LABEL_EN: Record<SignerRole, string> = {
   owner: 'Owner',
   supervisor: 'Site supervisor',
@@ -1969,6 +1982,12 @@ function EntriesTimeline({
       navigate(`/inspections?highlight=${ref}`);
     } else if (mod === 'safety' || mod === 'hse') {
       navigate(`/safety?highlight=${ref}`);
+    } else if (mod === 'fieldreports') {
+      navigate(`/field-reports?report=${ref}`);
+    } else if (mod === 'schedule_advanced') {
+      navigate('/schedule');
+    } else if (mod === 'site_sensors') {
+      navigate('/site-sensors');
     }
   };
 
@@ -2196,7 +2215,7 @@ function EntriesTimeline({
                     <Badge variant="neutral" size="sm">
                       {entryTypeLabel(t, e.entry_type)}
                     </Badge>
-                    <span className="font-medium truncate">{e.title || '—'}</span>
+                    <span className="font-medium truncate">{entryTitle(t, e) || '—'}</span>
                     <SavedOnDeviceBadge flag={e._offline} />
                   </div>
                   {e.description && (
@@ -2218,7 +2237,9 @@ function EntriesTimeline({
                           ? t('daily_diary.view_incident', { defaultValue: 'View incident' })
                           : e.source_module === 'survey_core'
                             ? t('daily_diary.view_survey', { defaultValue: 'View survey' })
-                            : t('daily_diary.view_source', { defaultValue: 'View source' })}
+                            : e.source_module === 'fieldreports'
+                              ? t('daily_diary.view_field_report', { defaultValue: 'View field report' })
+                              : t('daily_diary.view_source', { defaultValue: 'View source' })}
                     </button>
                   )}
                   <p className="mt-1 text-2xs text-content-tertiary">

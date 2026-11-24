@@ -233,6 +233,19 @@ async def _on_sensor_event(event: Event) -> None:
         logger.debug("daily_diary: site sensor entry failed", exc_info=True)
 
 
+async def _on_field_report_submitted(event: Event) -> None:
+    """Submitted field report -> linked entry in that day's open diary."""
+    from app.database import async_session_factory  # noqa: PLC0415
+    from app.modules.daily_diary.field_report_links import link_field_report  # noqa: PLC0415
+
+    try:
+        async with async_session_factory() as session:
+            if await link_field_report(session, event.data or {}) is not None:
+                await session.commit()
+    except Exception:
+        logger.debug("daily_diary: field report link failed", exc_info=True)
+
+
 def register_subscribers() -> None:
     """Idempotently subscribe daily-diary cross-module handlers."""
     event_bus.subscribe_once("daily_diary.closed", _on_diary_closed)
@@ -243,4 +256,5 @@ def register_subscribers() -> None:
     event_bus.subscribe_once("schedule_advanced.commitment.completed", _on_lps_commitment_completed)
     event_bus.subscribe_once("site_sensors.limit.exceeded", _on_sensor_event)
     event_bus.subscribe_once("site_sensors.strip.struck", _on_sensor_event)
-    logger.info("Daily Diary: 8 cross-module subscriber(s) registered")
+    event_bus.subscribe_once("fieldreports.report.submitted", _on_field_report_submitted)
+    logger.info("Daily Diary: 9 cross-module subscriber(s) registered")
