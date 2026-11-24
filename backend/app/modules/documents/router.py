@@ -2201,11 +2201,19 @@ async def _readable_document(
     user_id: str,
     session: SessionDep,
     service: DocumentService,
+    *,
+    write: bool = False,
 ) -> Any:
-    """Load a document the caller may read: project membership plus folder read."""
+    """Load a document the caller may read: project membership plus folder read.
+
+    ``write=True`` additionally needs a folder role that may write, so a viewer
+    grant cannot change a document's revision state. A refusal is a 404, like
+    every other denial here.
+    """
     doc = await service.get_document(document_id)
     await _verify_project_membership_or_404(doc.project_id, user_id, session)
     from app.modules.documents.folder_permissions_service import (
+        can_write,
         folder_access_for,
         kind_and_path_for_document,
         require_read,
@@ -2220,6 +2228,8 @@ async def _readable_document(
         scope_path=path,
     )
     require_read(role)
+    if write and role != "owner" and not can_write(role):
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
     return doc
 
 
@@ -2262,7 +2272,7 @@ async def make_current_revision(
     service: DocumentService = Depends(_get_service),
 ) -> DocumentResponse:
     """Make this revision the current one; every other revision of the chain is superseded."""
-    doc = await _readable_document(document_id, user_id, session, service)
+    doc = await _readable_document(document_id, user_id, session, service, write=True)
     doc = await service.make_current_revision(doc, str(user_id))
     return _doc_to_response(doc)
 

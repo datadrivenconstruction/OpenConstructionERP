@@ -2,7 +2,7 @@
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 """Pin every column that points at a document without the database enforcing it.
 
-Thirty-four columns across twenty-one modules hold a document id that no
+Thirty-five columns across twenty-one modules hold a document id that no
 foreign key constrains. Six other document columns do carry one, so the
 unconstrained ones are a choice made repeatedly rather than a convention the
 codebase lacks: the usual reason given in the comments is portability, a
@@ -16,17 +16,17 @@ in_use/referenced/reference-count check anywhere in the module. Afterwards it
 publishes ``documents.document.deleted`` detached, and exactly three
 subscribers exist for that name: the documents module's own handler, the
 file_search indexer and the file_references purger. None of those three owns
-any of the thirty-four columns below.
+any of the thirty-five columns below.
 
 One consumer is handled, and how it is handled is the strongest evidence that
 the gap is real. ``takeoff`` has its blobs preserved by a direct call placed
 inline in the delete path, and the comment there says why it is not driven off
 the event: the publish is detached, so a subscriber would race the unlink and
 lose nondeterministically, passing on a developer's box and failing on a
-loaded one. That reasoning applies to all thirty-three other referrers equally.
+loaded one. That reasoning applies to all thirty-four other referrers equally.
 They just have nobody calling for them.
 
-So deleting a document leaves dangling ids in up to thirty-three places, and
+So deleting a document leaves dangling ids in up to thirty-four places, and
 the user is asked to confirm with a dialog whose entire text is "Delete?".
 
 This gate does not fix that. Adding a reference-count endpoint spanning these
@@ -82,6 +82,7 @@ UNCONSTRAINED_DOCUMENT_REFERENCES: dict[str, tuple[str, ...]] = {
     "fieldreports": ("FieldReport.document_ids",),
     "markups": ("Markup.document_id", "ScaleConfig.document_id"),
     "meetings": ("Meeting.document_ids",),
+    "ncr": ("NCR.linked_document_ids",),
     "plan_room": ("PlanPin.document_id",),
     "portal": ("PortalDocumentAccessLog.document_id",),
     "procurement": ("GoodsReceiptCertificate.document_id",),

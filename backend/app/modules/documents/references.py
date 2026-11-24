@@ -2,7 +2,7 @@
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 """What still points at a document, so a delete can say what it costs.
 
-Thirty-four columns across twenty-one modules hold a document id that no
+Thirty-five columns across twenty-one modules hold a document id that no
 foreign key constrains. ``delete_document`` removes the row unconditionally:
 it never asks whether anything still points at the id, and the three
 subscribers of ``documents.document.deleted`` (the module's own handler, the
@@ -19,7 +19,7 @@ not meant to be invisible.
 
 Why the list is curated rather than discovered
 ----------------------------------------------
-Matching column names at runtime finds the same thirty-four, and that
+Matching column names at runtime finds the same thirty-five, and that
 agreement is what the gate in ``tests/unit/test_document_reference_integrity``
 checks. It is not safe as the source of truth, because in this codebase a
 column called ``document_id`` does not always mean a document:
@@ -215,6 +215,9 @@ DOCUMENT_REFERENCES: tuple[DocumentReference, ...] = (
         "scalar",
         "unlinks",
     ),
+    # Drawings an NCR was raised against. Deleting the drawing leaves the NCR and
+    # its disposition in place and drops only the pointer back to the sheet.
+    DocumentReference("ncr", "NCR", "oe_ncr_ncr", "linked_document_ids", "array", "unlinks"),
     DocumentReference("fieldreports", "FieldReport", "oe_fieldreports_report", "document_ids", "array", "unlinks"),
     DocumentReference("engineering_brief", "Study", "oe_engbrief_study", "document_id", "scalar", "unlinks"),
     DocumentReference(
@@ -409,7 +412,7 @@ async def count_references(session: AsyncSession, document_id: uuid.UUID) -> dic
     """Count the rows still pointing at ``document_id``, keyed by reference.
 
     One round trip: the per-table counts are UNION ALL'd into a single
-    statement rather than issued as thirty-four queries. Only non-zero
+    statement rather than issued as thirty-five queries. Only non-zero
     counts come back, so the caller can treat an empty mapping as "nothing
     references this".
 
@@ -479,7 +482,7 @@ async def count_references_many(
     :func:`count_references` once per id would, and the tests hold it to that,
     but with one statement per reference and chunk instead of one per
     document: a batch delete of a few hundred drawings would otherwise be a
-    few hundred round trips, each a union of thirty-four mostly unindexed
+    few hundred round trips, each a union of thirty-five mostly unindexed
     scans.
 
     Scalar columns are grouped by value in SQL. The JSON array columns cannot

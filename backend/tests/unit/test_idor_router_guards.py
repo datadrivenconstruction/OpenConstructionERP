@@ -707,6 +707,9 @@ ROUTER_HANDLERS: dict[str, list[str]] = {
         "get_sheet_thumbnail",
         "confirm_sheet_extraction",
         "get_sheet_versions",
+        "get_revision_chain",
+        "make_current_revision",
+        "get_linked_records",
         "list_document_activity",
         "list_document_share_links",
         "revoke_document_share_link",
@@ -1290,6 +1293,9 @@ _GUARD_WRAPPERS = frozenset(
         # documents.router replaced raw verify_project_access with a strict
         # superset that *also* checks folder ACLs (v2.9.42 refactor).
         "_verify_project_membership_or_404",
+        # documents.router: project membership plus folder read (and folder
+        # write for mutations) in one helper, used by the revision routes.
+        "_readable_document",
         # Audit B5, takeoff document access helper (gates by owning project
         # or owner-user for standalone uploads).
         "_verify_takeoff_doc_access",
