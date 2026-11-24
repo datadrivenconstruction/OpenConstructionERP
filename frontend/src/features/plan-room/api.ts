@@ -186,13 +186,6 @@ export interface PlanRoomDrawingList {
   superseded_hidden: number;
 }
 
-/** The slice of a document row the drawing filter reads. */
-interface DocumentRow {
-  filename?: string;
-  name?: string;
-  mime_type?: string | null;
-}
-
 /**
  * Whether a project document can be opened as a drawing sheet. The viewer
  * renders with pdf.js, so only PDFs qualify: a spreadsheet, an IFC model or a
