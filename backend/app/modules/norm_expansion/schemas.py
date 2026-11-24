@@ -155,6 +155,8 @@ class NormResponse(BaseModel):
     materials: list[NormMaterialResponse] = Field(default_factory=list)
     created_at: datetime
     updated_at: datetime
+    # Rule findings (norm_expansion rule set) after a write; never blocking.
+    validation_warnings: list[dict[str, Any]] = Field(default_factory=list)
 
     @field_serializer("labor_hours_per_unit", "machine_hours_per_unit")
     def _ser_coeff(self, v: Decimal) -> str:
