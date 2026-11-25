@@ -60,7 +60,7 @@ export function SchedulePanel({ projectId, revisionId, canManage, locale }: {
     <Card padding="none" data-testid="schedule-panel">
       <CardHeader className="px-4 pt-4 pb-3" title={title} />
       <p className="px-4 pb-3 text-sm">
-        <Link className="text-oe-blue-text underline" to="/schedule" data-testid="schedule-link">{tr(t, 'design.schedule.open')}</Link>
+        <Link className="text-oe-blue-text underline" to={`/schedule?project_id=${encodeURIComponent(projectId)}`} data-testid="schedule-link">{tr(t, 'design.schedule.open')}</Link>
       </p>
       <dl className="grid grid-cols-3 gap-2 px-4 pb-3 text-sm" data-testid="schedule-totals">
         <div><dt className="text-content-tertiary">{tr(t, 'design.schedule.finish_now')}</dt><dd>{day(totals.current_finish, locale)}</dd></div>

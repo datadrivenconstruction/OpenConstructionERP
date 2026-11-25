@@ -266,3 +266,18 @@ async def test_snapshot_empty_for_unknown_schedule(session: AsyncSession):
     service = ScheduleSnapshotService(session, resolver=_FixedResolver({}))
     statuses = await service.snapshot(uuid.uuid4(), date(2026, 4, 1), model_version_id=None)
     assert statuses == {}
+
+
+async def test_default_resolver_reads_the_engine_result_without_a_stub():
+    """The real EAC engine resolves a stable-id predicate to exactly the named elements."""
+    from app.modules.design.schedule import element_predicate
+    from app.modules.schedule.service_4d import DefaultEacResolver
+
+    async def loader(_session, *, model_version_id):
+        return [{"stable_id": k, "properties": {}, "quantities": {}} for k in ("w-eg", "w-og", "slab")]
+
+    resolver = DefaultEacResolver(None, element_loader=loader)
+    got = await resolver.resolve(
+        rule_id=None, predicate_json=element_predicate(["w-og", "w-eg"]), model_version_id=uuid.uuid4()
+    )
+    assert sorted(got) == ["w-eg", "w-og"]

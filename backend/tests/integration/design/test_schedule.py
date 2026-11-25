@@ -303,3 +303,72 @@ async def test_no_schedule_means_no_delta(client):
     r1 = (await _upload(client, pid, tok, d1)).json()["revision_id"]
     imp = (await client.get(f"{BASE}/revisions/{r1}/schedule-impact", headers=h)).json()
     assert imp == {"schema": "ddc-schedule-impact/1", "revision_id": r1, "schedule": False}
+
+
+async def _model_of(revision_id):
+    from app.database import async_session_factory
+    from app.modules.design.models import DesignRevision
+
+    async with async_session_factory() as s:
+        return (await s.get(DesignRevision, uuid.UUID(revision_id))).bim_model_id
+
+
+async def test_design_activities_drive_4d_and_5d(client):
+    """Each design activity links the elements it builds (4D) and carries its position money (5D)."""
+    from datetime import date as _date
+
+    from app.database import async_session_factory
+    from app.modules.boq.models import Position
+    from app.modules.schedule.service_4d import ScheduleSnapshotService
+
+    uid, h, pid, tok, r1, r2, sch, est = await _project_with_schedule(client)
+    wall_pos = next(a for a in sch["activities"] if a["rule"] == "wall_ext")["boq_position_ids"][0]
+    async with async_session_factory() as s:
+        pos = await s.get(Position, uuid.UUID(wall_pos))
+        pos.unit_rate = "50"  # a priced wall: EUR 50 per unit
+        await s.commit()
+    assert (await client.post(f"{BASE}/revisions/{r2}/accept", headers=h)).status_code == 200
+    after = (await client.get(f"{BASE}/projects/{pid}/schedule", headers=h)).json()
+    acts = {(a["rule"], a["storey"]): a for a in after["activities"]}
+    eg, og = acts[("wall_ext", "EG")], acts[("wall_ext", "1.OG")]
+    model_id = await _model_of(r2)
+    sid = uuid.UUID(after["schedule_id"])
+    async with async_session_factory() as s:
+        snap = ScheduleSnapshotService(s)
+        before = await snap.snapshot(sid, _date.fromisoformat("2027-02-01"), model_id)
+        assert before[WALL] == "not_started" and before[WALL_1OG] == "not_started"
+        mid = await snap.snapshot(sid, _date.fromisoformat(og["start"][:10]), model_id)
+        assert mid[WALL_1OG] == "in_progress" and mid[WALL] == "delayed"  # EG wall finished on paper, 0 % recorded
+        cost = await snap.cost_snapshot(sid, _date.fromisoformat("2030-01-01"), model_id)
+        by_act = {str(a.id): a for a in await _list_acts(s, sid)}
+        pos = await s.get(Position, uuid.UUID(eg["boq_position_ids"][0]))
+        total = Decimal(str(pos.total))
+    # one wall position, two storeys: the money splits by quantity and adds back to the position total
+    eg_cost, og_cost = by_act[eg["activity_id"]].cost_planned, by_act[og["activity_id"]].cost_planned
+    assert total > 0 and abs(eg_cost + og_cost - total) <= Decimal("0.01")
+    q_eg, q_og = Decimal(eg["provenance"]["quantity"]), Decimal(og["provenance"]["quantity"])
+    assert eg_cost == (total * q_eg / (q_eg + q_og)).quantize(Decimal("0.01"))
+    assert cost["has_cost_data"] is True and Decimal(str(cost["totals"]["bac"])) >= total - Decimal("0.01")
+
+
+async def _list_acts(s, sid):
+    from app.modules.schedule.service import ScheduleService
+
+    acts, _ = await ScheduleService(s).activity_repo.list_for_schedule(sid, limit=None)
+    return acts
+
+
+async def test_bill_quantity_edit_leaves_design_durations_to_the_model(client):
+    """A BOQ quantity edit must not rescale a model-planned activity (it would read as a person's override)."""
+    from app.database import async_session_factory
+    from app.modules.schedule.boq_followup import follow_position_quantity
+
+    uid, h, pid, tok, r1, r2, sch, est = await _project_with_schedule(client)
+    slab = next(a for a in sch["activities"] if a["rule"] == "slab")
+    async with async_session_factory() as s:
+        moved = await follow_position_quantity(s, uuid.UUID(slab["boq_position_ids"][0]), old_quantity="1")
+        await s.commit()
+    assert moved == []
+    again = (await client.get(f"{BASE}/projects/{pid}/schedule", headers=h)).json()
+    now = next(a for a in again["activities"] if a["activity_id"] == slab["activity_id"])
+    assert now["days"] == slab["days"] and not now["override"]
