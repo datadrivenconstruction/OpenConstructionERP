@@ -2885,6 +2885,20 @@
     "estimate_quantity_missing": {
       "fail": "'{position}' kaleminin modelden gelen miktarı yok veya bazı elemanlarında ölçülmüş miktar bulunmuyor.",
       "suggestion": "Seçilen elemanların ölçülmüş miktarı olduğunu kontrol edin veya miktarı elle girin."
+    },
+    "brief_plausible": {
+      "unknown_type": "'{value}' bina türü bilinmiyor.",
+      "gfa_invalid": "Brüt alan pozitif bir sayı olmalıdır.",
+      "storeys_invalid": "Kat sayısı en az 1 olan bir tam sayı olmalıdır.",
+      "storeys_over_type_max": "Bu bina türü en fazla {max} katlı planlanır.",
+      "quality_invalid": "Kalite ekonomik, standart veya yüksek olmalıdır.",
+      "height_over_limit": "Katlar {height} m'ye ulaşıyor, {limit} m yükseklik sınırının üstünde.",
+      "clear_height_below_minimum": "{clear} m net yükseklik ülkenin {minimum} m asgarisinin altında.",
+      "storey_too_small": "Her kat {footprint} m2 olur, {minimum} m2 asgarinin altında.",
+      "footprint_over_plot": "{footprint} m2 taban alanı {plot} m2 parselden büyük.",
+      "fx_invalid": "Döviz kuru pozitif bir sayı olmalıdır.",
+      "source_missing": "Bu bina türü için '{field}' değerini veren bir kaynak yok; brife girin.",
+      "wwr_invalid": "Pencere oranı 0 ile 1 arasında olmalıdır."
     }
   }
 }

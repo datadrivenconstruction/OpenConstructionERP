@@ -2885,6 +2885,20 @@
     "estimate_quantity_missing": {
       "fail": "Položka '{position}' nemá množství z modelu nebo některé její prvky nemají změřené množství.",
       "suggestion": "Zkontrolujte, zda vybrané prvky mají změřené množství, nebo zadejte množství ručně."
+    },
+    "brief_plausible": {
+      "unknown_type": "Typ budovy '{value}' není znám.",
+      "gfa_invalid": "Hrubá podlahová plocha musí být kladné číslo.",
+      "storeys_invalid": "Počet podlaží musí být celé číslo alespoň 1.",
+      "storeys_over_type_max": "Tento typ budovy se navrhuje nejvýše s {max} podlažími.",
+      "quality_invalid": "Kvalita musí být úsporná, standardní nebo vysoká.",
+      "height_over_limit": "Podlaží dosahují {height} m, nad výškový limit {limit} m.",
+      "clear_height_below_minimum": "Světlá výška {clear} m je pod minimem země {minimum} m.",
+      "storey_too_small": "Každé podlaží by mělo {footprint} m2, méně než minimum {minimum} m2.",
+      "footprint_over_plot": "Zastavěná plocha {footprint} m2 je větší než pozemek {plot} m2.",
+      "fx_invalid": "Směnný kurz musí být kladné číslo.",
+      "source_missing": "Pro tento typ budovy žádný zdroj neuvádí '{field}'; zadejte jej v zadání.",
+      "wwr_invalid": "Podíl oken musí být mezi 0 a 1."
     }
   }
 }

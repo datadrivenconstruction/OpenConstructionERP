@@ -2885,6 +2885,20 @@
     "estimate_quantity_missing": {
       "fail": "Stavka '{position}' nema količinu iz modela ili neki njezini elementi nemaju izmjerenu količinu.",
       "suggestion": "Provjerite imaju li odabrani elementi izmjerenu količinu ili unesite količinu ručno."
+    },
+    "brief_plausible": {
+      "unknown_type": "Vrsta zgrade '{value}' nije poznata.",
+      "gfa_invalid": "Bruto površina mora biti pozitivan broj.",
+      "storeys_invalid": "Broj etaža mora biti cijeli broj od najmanje 1.",
+      "storeys_over_type_max": "Ova vrsta zgrade projektira se s najviše {max} etaža.",
+      "quality_invalid": "Kvaliteta mora biti ekonomična, standardna ili visoka.",
+      "height_over_limit": "Etaže dosežu {height} m, iznad ograničenja visine od {limit} m.",
+      "clear_height_below_minimum": "Svijetla visina od {clear} m ispod je minimuma zemlje od {minimum} m.",
+      "storey_too_small": "Svaka etaža imala bi {footprint} m2, ispod minimuma od {minimum} m2.",
+      "footprint_over_plot": "Tlocrtna površina od {footprint} m2 veća je od parcele od {plot} m2.",
+      "fx_invalid": "Tečaj mora biti pozitivan broj.",
+      "source_missing": "Nijedan izvor ne daje '{field}' za ovu vrstu zgrade; unesite ga u projektni zadatak.",
+      "wwr_invalid": "Udio prozora mora biti između 0 i 1."
     }
   }
 }

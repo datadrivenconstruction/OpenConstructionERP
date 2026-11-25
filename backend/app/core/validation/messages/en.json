@@ -2885,6 +2885,20 @@
     "estimate_quantity_missing": {
       "fail": "The position '{position}' has no quantity from the model, or some of its elements carry no measured quantity.",
       "suggestion": "Check that the selected elements carry the measured quantity, or enter the quantity by hand."
+    },
+    "brief_plausible": {
+      "unknown_type": "The building type '{value}' is not one the quick massing knows.",
+      "gfa_invalid": "The gross floor area must be a positive number.",
+      "storeys_invalid": "The number of storeys must be a whole number of at least 1.",
+      "storeys_over_type_max": "This building type is planned with at most {max} storeys.",
+      "quality_invalid": "The quality must be economy, standard or high.",
+      "height_over_limit": "The storeys reach {height} m, above the height limit of {limit} m.",
+      "clear_height_below_minimum": "The clear room height of {clear} m is below the country minimum of {minimum} m.",
+      "storey_too_small": "Each storey would be {footprint} m2, below the {minimum} m2 the generator's smallest width and depth allow.",
+      "footprint_over_plot": "The footprint of {footprint} m2 is larger than the plot of {plot} m2.",
+      "fx_invalid": "The exchange rate must be a positive number.",
+      "source_missing": "No source gives '{field}' for this building type; enter it in the brief.",
+      "wwr_invalid": "The window ratio must be between 0 and 1."
     }
   }
 }

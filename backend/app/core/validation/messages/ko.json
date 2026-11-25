@@ -2885,6 +2885,20 @@
     "estimate_quantity_missing": {
       "fail": "항목 '{position}'에 모델 수량이 없거나 일부 요소에 측정 수량이 없습니다.",
       "suggestion": "선택한 요소에 측정 수량이 있는지 확인하거나 수량을 직접 입력하십시오."
+    },
+    "brief_plausible": {
+      "unknown_type": "건물 유형 '{value}'을(를) 알 수 없습니다.",
+      "gfa_invalid": "연면적은 양수여야 합니다.",
+      "storeys_invalid": "층수는 1 이상의 정수여야 합니다.",
+      "storeys_over_type_max": "이 건물 유형은 최대 {max}층으로 계획됩니다.",
+      "quality_invalid": "품질은 경제, 표준, 고급 중 하나여야 합니다.",
+      "height_over_limit": "층 높이가 {height} m로 높이 제한 {limit} m를 넘습니다.",
+      "clear_height_below_minimum": "반자높이 {clear} m가 국가 최소값 {minimum} m보다 낮습니다.",
+      "storey_too_small": "각 층이 {footprint} m2로 최소 {minimum} m2보다 작습니다.",
+      "footprint_over_plot": "건축면적 {footprint} m2가 대지 {plot} m2보다 큽니다.",
+      "fx_invalid": "환율은 양수여야 합니다.",
+      "source_missing": "이 건물 유형의 '{field}' 값을 주는 출처가 없습니다. 브리프에 입력하세요.",
+      "wwr_invalid": "창면적비는 0과 1 사이여야 합니다."
     }
   }
 }

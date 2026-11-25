@@ -2885,6 +2885,20 @@
     "estimate_quantity_missing": {
       "fail": "A posição '{position}' não tem quantidade do modelo, ou alguns dos seus elementos não têm quantidade medida.",
       "suggestion": "Verifique se os elementos selecionados têm a quantidade medida ou introduza a quantidade manualmente."
+    },
+    "brief_plausible": {
+      "unknown_type": "O tipo de edifício '{value}' não é conhecido.",
+      "gfa_invalid": "A área bruta deve ser um número positivo.",
+      "storeys_invalid": "O número de pisos deve ser um inteiro de pelo menos 1.",
+      "storeys_over_type_max": "Este tipo de edifício é projetado com no máximo {max} pisos.",
+      "quality_invalid": "A qualidade deve ser económica, padrão ou alta.",
+      "height_over_limit": "Os pisos atingem {height} m, acima do limite de altura de {limit} m.",
+      "clear_height_below_minimum": "O pé-direito livre de {clear} m está abaixo do mínimo do país, {minimum} m.",
+      "storey_too_small": "Cada piso teria {footprint} m2, abaixo do mínimo de {minimum} m2.",
+      "footprint_over_plot": "A implantação de {footprint} m2 é maior do que o lote de {plot} m2.",
+      "fx_invalid": "A taxa de câmbio deve ser um número positivo.",
+      "source_missing": "Nenhuma fonte indica '{field}' para este tipo de edifício; introduza-o no programa.",
+      "wwr_invalid": "A proporção de janelas deve estar entre 0 e 1."
     }
   }
 }

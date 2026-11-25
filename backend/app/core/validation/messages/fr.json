@@ -2885,6 +2885,20 @@
     "estimate_quantity_missing": {
       "fail": "Le poste '{position}' n’a pas de quantité issue du modèle, ou certains de ses éléments n’ont pas de quantité mesurée.",
       "suggestion": "Vérifiez que les éléments sélectionnés portent la quantité mesurée, ou saisissez la quantité à la main."
+    },
+    "brief_plausible": {
+      "unknown_type": "Le type de bâtiment '{value}' n'est pas connu.",
+      "gfa_invalid": "La surface de plancher doit être un nombre positif.",
+      "storeys_invalid": "Le nombre de niveaux doit être un entier d'au moins 1.",
+      "storeys_over_type_max": "Ce type de bâtiment se conçoit avec au plus {max} niveaux.",
+      "quality_invalid": "La qualité doit être économique, standard ou élevée.",
+      "height_over_limit": "Les niveaux atteignent {height} m, au-dessus de la limite de {limit} m.",
+      "clear_height_below_minimum": "La hauteur libre de {clear} m est inférieure au minimum du pays, {minimum} m.",
+      "storey_too_small": "Chaque niveau ferait {footprint} m2, sous le minimum de {minimum} m2.",
+      "footprint_over_plot": "L'emprise de {footprint} m2 dépasse la parcelle de {plot} m2.",
+      "fx_invalid": "Le taux de change doit être un nombre positif.",
+      "source_missing": "Aucune source ne donne '{field}' pour ce type de bâtiment ; saisissez-le dans le programme.",
+      "wwr_invalid": "La part vitrée doit être comprise entre 0 et 1."
     }
   }
 }

@@ -2885,6 +2885,20 @@
     "estimate_quantity_missing": {
       "fail": "De post '{position}' heeft geen hoeveelheid uit het model, of sommige elementen hebben geen gemeten hoeveelheid.",
       "suggestion": "Controleer of de gekozen elementen de gemeten hoeveelheid hebben, of voer de hoeveelheid handmatig in."
+    },
+    "brief_plausible": {
+      "unknown_type": "Het gebouwtype '{value}' is niet bekend.",
+      "gfa_invalid": "Het bruto vloeroppervlak moet een positief getal zijn.",
+      "storeys_invalid": "Het aantal bouwlagen moet een geheel getal van minstens 1 zijn.",
+      "storeys_over_type_max": "Dit gebouwtype wordt met hoogstens {max} bouwlagen ontworpen.",
+      "quality_invalid": "De kwaliteit moet sober, standaard of hoog zijn.",
+      "height_over_limit": "De bouwlagen reiken tot {height} m, boven de hoogtegrens van {limit} m.",
+      "clear_height_below_minimum": "De vrije hoogte van {clear} m ligt onder het landelijke minimum van {minimum} m.",
+      "storey_too_small": "Elke bouwlaag zou {footprint} m2 zijn, onder het minimum van {minimum} m2.",
+      "footprint_over_plot": "Het bebouwd oppervlak van {footprint} m2 is groter dan het perceel van {plot} m2.",
+      "fx_invalid": "De wisselkoers moet een positief getal zijn.",
+      "source_missing": "Geen bron geeft '{field}' voor dit gebouwtype; vul het in het programma in.",
+      "wwr_invalid": "Het raamaandeel moet tussen 0 en 1 liggen."
     }
   }
 }

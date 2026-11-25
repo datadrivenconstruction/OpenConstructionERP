@@ -2885,6 +2885,20 @@
     "estimate_quantity_missing": {
       "fail": "Poziția '{position}' nu are cantitate din model sau unele dintre elementele sale nu au cantitate măsurată.",
       "suggestion": "Verificați dacă elementele selectate au cantitatea măsurată sau introduceți cantitatea manual."
+    },
+    "brief_plausible": {
+      "unknown_type": "Tipul de clădire '{value}' nu este cunoscut.",
+      "gfa_invalid": "Aria desfășurată trebuie să fie un număr pozitiv.",
+      "storeys_invalid": "Numărul de niveluri trebuie să fie un întreg de cel puțin 1.",
+      "storeys_over_type_max": "Acest tip de clădire se proiectează cu cel mult {max} niveluri.",
+      "quality_invalid": "Calitatea trebuie să fie economică, standard sau ridicată.",
+      "height_over_limit": "Nivelurile ajung la {height} m, peste limita de înălțime de {limit} m.",
+      "clear_height_below_minimum": "Înălțimea liberă de {clear} m este sub minimul țării de {minimum} m.",
+      "storey_too_small": "Fiecare nivel ar avea {footprint} m2, sub minimul de {minimum} m2.",
+      "footprint_over_plot": "Amprenta de {footprint} m2 este mai mare decât terenul de {plot} m2.",
+      "fx_invalid": "Cursul de schimb trebuie să fie un număr pozitiv.",
+      "source_missing": "Nicio sursă nu dă '{field}' pentru acest tip de clădire; introduceți-l în temă.",
+      "wwr_invalid": "Proporția ferestrelor trebuie să fie între 0 și 1."
     }
   }
 }

@@ -2885,6 +2885,20 @@
     "estimate_quantity_missing": {
       "fail": "La partida '{position}' no tiene cantidad del modelo, o algunos de sus elementos no tienen cantidad medida.",
       "suggestion": "Compruebe que los elementos seleccionados tienen la cantidad medida o introduzca la cantidad a mano."
+    },
+    "brief_plausible": {
+      "unknown_type": "El tipo de edificio '{value}' no es conocido.",
+      "gfa_invalid": "La superficie construida debe ser un número positivo.",
+      "storeys_invalid": "El número de plantas debe ser un entero de al menos 1.",
+      "storeys_over_type_max": "Este tipo de edificio se proyecta con un máximo de {max} plantas.",
+      "quality_invalid": "La calidad debe ser económica, estándar o alta.",
+      "height_over_limit": "Las plantas alcanzan {height} m, por encima del límite de {limit} m.",
+      "clear_height_below_minimum": "La altura libre de {clear} m está por debajo del mínimo del país, {minimum} m.",
+      "storey_too_small": "Cada planta tendría {footprint} m2, por debajo del mínimo de {minimum} m2.",
+      "footprint_over_plot": "La huella de {footprint} m2 es mayor que la parcela de {plot} m2.",
+      "fx_invalid": "El tipo de cambio debe ser un número positivo.",
+      "source_missing": "Ninguna fuente da '{field}' para este tipo de edificio; indíquelo en el programa.",
+      "wwr_invalid": "La proporción de ventanas debe estar entre 0 y 1."
     }
   }
 }

@@ -1,0 +1,15 @@
+{
+  "schema": "ddc-massing/1",
+  "notes": "Building types the quick massing accepts. Types the generator builds take floor height, depth, grid, roof, storey limit and lift from the generator sources (model_params.py, editor spec.rs/rules.json). Other types have no sourced defaults: the brief must give floor height and depth, else the massing is refused with source_missing. Nothing here is a guessed number.",
+  "types": {
+    "office": {"generator_category": "office", "band": "office"},
+    "residential_multi": {"generator_category": "residential_multi", "band": "residential"},
+    "residential_single": {"generator_category": "residential_single", "band": "residential"},
+    "school": {"generator_category": "school", "band": null},
+    "kindergarten": {"generator_category": "kindergarten", "band": null},
+    "hotel": {"generator_category": null, "band": null},
+    "healthcare": {"generator_category": null, "band": null},
+    "retail": {"generator_category": null, "band": null},
+    "warehouse": {"generator_category": null, "band": null}
+  }
+}

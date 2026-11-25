@@ -2885,6 +2885,20 @@
     "estimate_quantity_missing": {
       "fail": "לסעיף '{position}' אין כמות מהמודל, או שלחלק מהרכיבים שלו אין כמות מדודה.",
       "suggestion": "ודאו שלרכיבים שנבחרו יש כמות מדודה, או הזינו את הכמות ידנית."
+    },
+    "brief_plausible": {
+      "unknown_type": "סוג המבנה '{value}' אינו מוכר.",
+      "gfa_invalid": "השטח הברוטו חייב להיות מספר חיובי.",
+      "storeys_invalid": "מספר הקומות חייב להיות מספר שלם של 1 לפחות.",
+      "storeys_over_type_max": "סוג מבנה זה מתוכנן עד {max} קומות.",
+      "quality_invalid": "האיכות חייבת להיות חסכונית, רגילה או גבוהה.",
+      "height_over_limit": "הקומות מגיעות ל-{height} מ', מעל מגבלת הגובה {limit} מ'.",
+      "clear_height_below_minimum": "הגובה הנקי {clear} מ' נמוך מהמינימום במדינה {minimum} מ'.",
+      "storey_too_small": "כל קומה תהיה {footprint} מ\"ר, פחות מהמינימום {minimum} מ\"ר.",
+      "footprint_over_plot": "תכסית של {footprint} מ\"ר גדולה מהמגרש של {plot} מ\"ר.",
+      "fx_invalid": "שער החליפין חייב להיות מספר חיובי.",
+      "source_missing": "אין מקור שנותן '{field}' לסוג מבנה זה; הזינו אותו בפרוגרמה.",
+      "wwr_invalid": "יחס החלונות חייב להיות בין 0 ל-1."
     }
   }
 }
