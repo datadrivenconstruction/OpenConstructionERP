@@ -2886,5 +2886,20 @@
       "fail": "Položka '{position}' nemá množství z modelu nebo některé její prvky nemají změřené množství.",
       "suggestion": "Zkontrolujte, zda vybrané prvky mají změřené množství, nebo zadejte množství ručně."
     }
+  },
+  "bim_link": {
+    "elements_unlinked": {
+      "fail": "Model {model}: {count} prvků typu {element_type} není propojeno s žádnou položkou rozpočtu.",
+      "suggestion": "Propojte prvky v prohlížeči BIM nebo dejte položce jednotku, kterou model měří (m, m2, m3, kg, ks)."
+    },
+    "position_no_elements": {
+      "fail": "Položka {ordinal} je vázána na model {model}, ale žádný prvek tohoto modelu s ní není propojen.",
+      "suggestion": "Propojte prvky v prohlížeči BIM nebo dejte položce jednotku, kterou model měří (m, m2, m3, kg, ks)."
+    },
+    "unit_no_quantity": {
+      "fail": "Položka {ordinal} v {unit} nedostává množství z {count} propojených prvků: model pro ně nemá hodnotu tohoto rozměru.",
+      "suggestion": "Propojte prvky v prohlížeči BIM nebo dejte položce jednotku, kterou model měří (m, m2, m3, kg, ks)."
+    },
+    "suggestion": "Propojte prvky v prohlížeči BIM nebo dejte položce jednotku, kterou model měří (m, m2, m3, kg, ks)."
   }
 }

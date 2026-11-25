@@ -2886,5 +2886,20 @@
       "fail": "A(z) '{position}' tétel nem kapott mennyiséget a modellből, vagy egyes elemeinek nincs mért mennyisége.",
       "suggestion": "Ellenőrizze, hogy a kiválasztott elemeknek van-e mért mennyisége, vagy adja meg kézzel a mennyiséget."
     }
+  },
+  "bim_link": {
+    "elements_unlinked": {
+      "fail": "{model} modell: {count} {element_type} típusú elem nincs egyetlen költségvetési tételhez sem kapcsolva.",
+      "suggestion": "Kapcsolja az elemeket a BIM-nézőben, vagy adjon a tételnek olyan mértékegységet, amelyet a modell mér (m, m2, m3, kg, db)."
+    },
+    "position_no_elements": {
+      "fail": "A(z) {ordinal} tétel a(z) {model} modellhez van kötve, de a modell egyetlen eleme sincs hozzá kapcsolva.",
+      "suggestion": "Kapcsolja az elemeket a BIM-nézőben, vagy adjon a tételnek olyan mértékegységet, amelyet a modell mér (m, m2, m3, kg, db)."
+    },
+    "unit_no_quantity": {
+      "fail": "A(z) {ordinal} tétel ({unit}) nem kap mennyiséget a(z) {count} kapcsolt elemétől: a modellben nincs ilyen dimenziójú érték hozzájuk.",
+      "suggestion": "Kapcsolja az elemeket a BIM-nézőben, vagy adjon a tételnek olyan mértékegységet, amelyet a modell mér (m, m2, m3, kg, db)."
+    },
+    "suggestion": "Kapcsolja az elemeket a BIM-nézőben, vagy adjon a tételnek olyan mértékegységet, amelyet a modell mér (m, m2, m3, kg, db)."
   }
 }

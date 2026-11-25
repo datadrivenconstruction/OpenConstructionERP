@@ -2886,5 +2886,20 @@
       "fail": "Le poste '{position}' n’a pas de quantité issue du modèle, ou certains de ses éléments n’ont pas de quantité mesurée.",
       "suggestion": "Vérifiez que les éléments sélectionnés portent la quantité mesurée, ou saisissez la quantité à la main."
     }
+  },
+  "bim_link": {
+    "elements_unlinked": {
+      "fail": "Maquette {model} : {count} éléments de type {element_type} ne sont liés à aucun poste du devis.",
+      "suggestion": "Liez les éléments dans la visionneuse BIM, ou donnez au poste une unité que la maquette mesure (m, m2, m3, kg, pièces)."
+    },
+    "position_no_elements": {
+      "fail": "Le poste {ordinal} est rattaché à la maquette {model}, mais aucun élément de cette maquette n'y est lié.",
+      "suggestion": "Liez les éléments dans la visionneuse BIM, ou donnez au poste une unité que la maquette mesure (m, m2, m3, kg, pièces)."
+    },
+    "unit_no_quantity": {
+      "fail": "Le poste {ordinal} en {unit} ne reçoit aucune quantité de ses {count} éléments liés : la maquette n'a pas de valeur de cette dimension pour eux.",
+      "suggestion": "Liez les éléments dans la visionneuse BIM, ou donnez au poste une unité que la maquette mesure (m, m2, m3, kg, pièces)."
+    },
+    "suggestion": "Liez les éléments dans la visionneuse BIM, ou donnez au poste une unité que la maquette mesure (m, m2, m3, kg, pièces)."
   }
 }

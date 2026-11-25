@@ -2886,5 +2886,20 @@
       "fail": "Nimikkeellä '{position}' ei ole mallista saatua määrää, tai osalta sen elementeistä puuttuu mitattu määrä.",
       "suggestion": "Tarkista, että valituilla elementeillä on mitattu määrä, tai syötä määrä käsin."
     }
+  },
+  "bim_link": {
+    "elements_unlinked": {
+      "fail": "Malli {model}: {count} tyypin {element_type} elementtiä ei ole linkitetty mihinkään laskelman nimikkeeseen.",
+      "suggestion": "Linkitä elementit BIM-katseluohjelmassa tai anna nimikkeelle yksikkö, jota malli mittaa (m, m2, m3, kg, kpl)."
+    },
+    "position_no_elements": {
+      "fail": "Nimike {ordinal} on sidottu malliin {model}, mutta yhtään sen mallin elementtiä ei ole linkitetty siihen.",
+      "suggestion": "Linkitä elementit BIM-katseluohjelmassa tai anna nimikkeelle yksikkö, jota malli mittaa (m, m2, m3, kg, kpl)."
+    },
+    "unit_no_quantity": {
+      "fail": "Nimike {ordinal} yksikössä {unit} ei saa määrää {count} linkitetystä elementistään: mallissa ei ole niille sen ulottuvuuden arvoa.",
+      "suggestion": "Linkitä elementit BIM-katseluohjelmassa tai anna nimikkeelle yksikkö, jota malli mittaa (m, m2, m3, kg, kpl)."
+    },
+    "suggestion": "Linkitä elementit BIM-katseluohjelmassa tai anna nimikkeelle yksikkö, jota malli mittaa (m, m2, m3, kg, kpl)."
   }
 }

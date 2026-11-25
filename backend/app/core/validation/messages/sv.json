@@ -2886,5 +2886,20 @@
       "fail": "Posten '{position}' har ingen mängd från modellen, eller saknar några av dess element uppmätt mängd.",
       "suggestion": "Kontrollera att de valda elementen har uppmätt mängd, eller ange mängden manuellt."
     }
+  },
+  "bim_link": {
+    "elements_unlinked": {
+      "fail": "Modell {model}: {count} element av typen {element_type} är inte kopplade till någon post i kalkylen.",
+      "suggestion": "Koppla elementen i BIM-visaren eller ge posten en enhet som modellen mäter (m, m2, m3, kg, st)."
+    },
+    "position_no_elements": {
+      "fail": "Post {ordinal} är bunden till modell {model}, men inget element i den modellen är kopplat till den.",
+      "suggestion": "Koppla elementen i BIM-visaren eller ge posten en enhet som modellen mäter (m, m2, m3, kg, st)."
+    },
+    "unit_no_quantity": {
+      "fail": "Post {ordinal} i {unit} får ingen mängd från sina {count} kopplade element: modellen har inget värde i den dimensionen för dem.",
+      "suggestion": "Koppla elementen i BIM-visaren eller ge posten en enhet som modellen mäter (m, m2, m3, kg, st)."
+    },
+    "suggestion": "Koppla elementen i BIM-visaren eller ge posten en enhet som modellen mäter (m, m2, m3, kg, st)."
   }
 }

@@ -2886,5 +2886,20 @@
       "fail": "Poziția '{position}' nu are cantitate din model sau unele dintre elementele sale nu au cantitate măsurată.",
       "suggestion": "Verificați dacă elementele selectate au cantitatea măsurată sau introduceți cantitatea manual."
     }
+  },
+  "bim_link": {
+    "elements_unlinked": {
+      "fail": "Modelul {model}: {count} elemente de tipul {element_type} nu sunt legate de niciun articol din deviz.",
+      "suggestion": "Legați elementele în vizualizatorul BIM sau dați articolului o unitate pe care modelul o măsoară (m, m2, m3, kg, buc)."
+    },
+    "position_no_elements": {
+      "fail": "Articolul {ordinal} este asociat modelului {model}, dar niciun element al acelui model nu este legat de el.",
+      "suggestion": "Legați elementele în vizualizatorul BIM sau dați articolului o unitate pe care modelul o măsoară (m, m2, m3, kg, buc)."
+    },
+    "unit_no_quantity": {
+      "fail": "Articolul {ordinal} în {unit} nu primește cantitate de la cele {count} elemente legate: modelul nu are pentru ele o valoare în acea dimensiune.",
+      "suggestion": "Legați elementele în vizualizatorul BIM sau dați articolului o unitate pe care modelul o măsoară (m, m2, m3, kg, buc)."
+    },
+    "suggestion": "Legați elementele în vizualizatorul BIM sau dați articolului o unitate pe care modelul o măsoară (m, m2, m3, kg, buc)."
   }
 }

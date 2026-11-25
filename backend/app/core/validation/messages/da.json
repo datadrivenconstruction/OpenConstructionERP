@@ -2886,5 +2886,20 @@
       "fail": "Posten '{position}' har ingen mængde fra modellen, eller nogle af dens elementer har ingen målt mængde.",
       "suggestion": "Kontroller, at de valgte elementer har den målte mængde, eller indtast mængden manuelt."
     }
+  },
+  "bim_link": {
+    "elements_unlinked": {
+      "fail": "Model {model}: {count} elementer af typen {element_type} er ikke knyttet til nogen post i overslaget.",
+      "suggestion": "Knyt elementerne i BIM-fremviseren, eller giv posten en enhed, som modellen måler (m, m2, m3, kg, stk)."
+    },
+    "position_no_elements": {
+      "fail": "Post {ordinal} er bundet til model {model}, men intet element i den model er knyttet til den.",
+      "suggestion": "Knyt elementerne i BIM-fremviseren, eller giv posten en enhed, som modellen måler (m, m2, m3, kg, stk)."
+    },
+    "unit_no_quantity": {
+      "fail": "Post {ordinal} i {unit} får ingen mængde fra sine {count} knyttede elementer: modellen har ingen værdi i den dimension for dem.",
+      "suggestion": "Knyt elementerne i BIM-fremviseren, eller giv posten en enhed, som modellen måler (m, m2, m3, kg, stk)."
+    },
+    "suggestion": "Knyt elementerne i BIM-fremviseren, eller giv posten en enhed, som modellen måler (m, m2, m3, kg, stk)."
   }
 }

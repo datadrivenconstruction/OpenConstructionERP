@@ -2886,5 +2886,20 @@
       "fail": "Item '{position}' tidak memiliki kuantitas dari model, atau sebagian elemennya tidak memiliki kuantitas terukur.",
       "suggestion": "Periksa apakah elemen yang dipilih memiliki kuantitas terukur, atau masukkan kuantitas secara manual."
     }
+  },
+  "bim_link": {
+    "elements_unlinked": {
+      "fail": "Model {model}: {count} elemen bertipe {element_type} tidak tertaut ke item BOQ mana pun.",
+      "suggestion": "Tautkan elemen di penampil BIM, atau beri item satuan yang diukur model (m, m2, m3, kg, buah)."
+    },
+    "position_no_elements": {
+      "fail": "Item {ordinal} terikat ke model {model}, tetapi tidak ada elemen model itu yang tertaut ke item tersebut.",
+      "suggestion": "Tautkan elemen di penampil BIM, atau beri item satuan yang diukur model (m, m2, m3, kg, buah)."
+    },
+    "unit_no_quantity": {
+      "fail": "Item {ordinal} dalam {unit} tidak mendapat kuantitas dari {count} elemen tertautnya: model tidak memiliki nilai dimensi itu untuk elemen tersebut.",
+      "suggestion": "Tautkan elemen di penampil BIM, atau beri item satuan yang diukur model (m, m2, m3, kg, buah)."
+    },
+    "suggestion": "Tautkan elemen di penampil BIM, atau beri item satuan yang diukur model (m, m2, m3, kg, buah)."
   }
 }

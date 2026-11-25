@@ -2886,5 +2886,20 @@
       "fail": "Pozycja '{position}' nie ma ilości z modelu lub część jej elementów nie ma zmierzonej ilości.",
       "suggestion": "Sprawdź, czy wybrane elementy mają zmierzoną ilość, lub wpisz ilość ręcznie."
     }
+  },
+  "bim_link": {
+    "elements_unlinked": {
+      "fail": "Model {model}: {count} elementów typu {element_type} nie jest powiązanych z żadną pozycją kosztorysu.",
+      "suggestion": "Powiąż elementy w przeglądarce BIM albo nadaj pozycji jednostkę, którą mierzy model (m, m2, m3, kg, szt.)."
+    },
+    "position_no_elements": {
+      "fail": "Pozycja {ordinal} jest przypisana do modelu {model}, ale żaden element tego modelu nie jest z nią powiązany.",
+      "suggestion": "Powiąż elementy w przeglądarce BIM albo nadaj pozycji jednostkę, którą mierzy model (m, m2, m3, kg, szt.)."
+    },
+    "unit_no_quantity": {
+      "fail": "Pozycja {ordinal} w {unit} nie otrzymuje ilości z {count} powiązanych elementów: model nie ma dla nich wartości w tym wymiarze.",
+      "suggestion": "Powiąż elementy w przeglądarce BIM albo nadaj pozycji jednostkę, którą mierzy model (m, m2, m3, kg, szt.)."
+    },
+    "suggestion": "Powiąż elementy w przeglądarce BIM albo nadaj pozycji jednostkę, którą mierzy model (m, m2, m3, kg, szt.)."
   }
 }

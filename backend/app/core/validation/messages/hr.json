@@ -2886,5 +2886,20 @@
       "fail": "Stavka '{position}' nema količinu iz modela ili neki njezini elementi nemaju izmjerenu količinu.",
       "suggestion": "Provjerite imaju li odabrani elementi izmjerenu količinu ili unesite količinu ručno."
     }
+  },
+  "bim_link": {
+    "elements_unlinked": {
+      "fail": "Model {model}: {count} elemenata tipa {element_type} nije povezano ni s jednom stavkom troškovnika.",
+      "suggestion": "Povežite elemente u BIM pregledniku ili stavci dodijelite jedinicu koju model mjeri (m, m2, m3, kg, kom)."
+    },
+    "position_no_elements": {
+      "fail": "Stavka {ordinal} vezana je uz model {model}, ali nijedan element tog modela nije s njom povezan.",
+      "suggestion": "Povežite elemente u BIM pregledniku ili stavci dodijelite jedinicu koju model mjeri (m, m2, m3, kg, kom)."
+    },
+    "unit_no_quantity": {
+      "fail": "Stavka {ordinal} u {unit} ne dobiva količinu od svojih {count} povezanih elemenata: model za njih nema vrijednost te dimenzije.",
+      "suggestion": "Povežite elemente u BIM pregledniku ili stavci dodijelite jedinicu koju model mjeri (m, m2, m3, kg, kom)."
+    },
+    "suggestion": "Povežite elemente u BIM pregledniku ili stavci dodijelite jedinicu koju model mjeri (m, m2, m3, kg, kom)."
   }
 }

@@ -37,6 +37,7 @@ from app.core.validation.messages import translate
 from app.modules.bim_hub import file_storage as bim_file_storage
 from app.modules.bim_hub.dataframe_store import sidecar_state
 from app.modules.bim_hub.glb_cache import convert_dae_once
+from app.modules.bim_hub.link_quantity import link_quantity
 from app.modules.bim_hub.models import (
     BIMElement,
     BIMElementGroup,
@@ -2575,9 +2576,11 @@ class BIMHubService:
 
         # Re-fetch the newly-created elements in a single round trip so
         # callers receive non-expired ORM instances that Pydantic can
-        # serialise without lazy loads.
+        # serialise without lazy loads. The model holds exactly these rows
+        # now; filtering by id put one bind per element in the query, past
+        # PostgreSQL's 32 767 limit on a 50 000-element model.
         refresh_stmt = (
-            select(BIMElement).where(BIMElement.id.in_(created_ids)).options(selectinload(BIMElement.boq_links))
+            select(BIMElement).where(BIMElement.model_id == model_id).options(selectinload(BIMElement.boq_links))
         )
         refreshed = list((await self.session.execute(refresh_stmt)).scalars().all())
         # Preserve the insertion order the caller requested - the IN
@@ -2667,6 +2670,98 @@ class BIMHubService:
             entry["element_ids"].append(row.bim_element_id)
 
         return list(agg.values())
+
+    async def link_check(self, model_id: uuid.UUID) -> dict[str, Any]:
+        """Coverage of one model in the bill, run through the ``bim_link`` rules.
+
+        Counts elements linked to no position (per element type), and lists
+        the positions bound to the model with their live link count and the
+        status of their last quantity sync. Three aggregate queries, whatever
+        the model size.
+        """
+        from app.core.validation.cost_gate import finding, run_rule_set  # noqa: PLC0415
+        from app.modules.bim_hub.validators import BIM_LINK_RULE_SET  # noqa: PLC0415
+
+        model = await self.get_model(model_id)
+        linked_exists = select(BOQElementLink.id).where(BOQElementLink.bim_element_id == BIMElement.id).exists()
+        unlinked_rows = (
+            await self.session.execute(
+                select(BIMElement.element_type, func.count(BIMElement.id))
+                .where(BIMElement.model_id == model_id, ~linked_exists)
+                .group_by(BIMElement.element_type)
+                .order_by(func.count(BIMElement.id).desc())
+            )
+        ).all()
+        element_total = int(
+            (
+                await self.session.execute(select(func.count(BIMElement.id)).where(BIMElement.model_id == model_id))
+            ).scalar_one()
+        )
+        link_counts = dict(
+            (
+                await self.session.execute(
+                    select(BOQElementLink.boq_position_id, func.count(BOQElementLink.id))
+                    .join(BIMElement, BIMElement.id == BOQElementLink.bim_element_id)
+                    .where(BIMElement.model_id == model_id)
+                    .group_by(BOQElementLink.boq_position_id)
+                )
+            ).all()
+        )
+        pos_rows = (
+            await self.session.execute(
+                select(Position.id, Position.ordinal, Position.unit, Position.metadata_).where(
+                    or_(Position.cad_model_id == str(model_id), Position.id.in_(list(link_counts)))
+                )
+            )
+        ).all()
+        positions = []
+        for pid, ordinal, unit, meta in pos_rows:
+            record = (meta or {}).get("bim_link_quantity") if isinstance(meta, dict) else None
+            record = record if isinstance(record, dict) else {}
+            positions.append(
+                {
+                    "id": str(pid),
+                    "ordinal": ordinal,
+                    "unit": unit,
+                    "linked": int(link_counts.get(pid, 0)),
+                    "status": record.get("status") or "",
+                    "manual_kept": bool(record.get("manual_kept")),
+                }
+            )
+        unlinked = [{"element_type": t or "", "count": int(n)} for t, n in unlinked_rows]
+        data = {
+            "model": {"id": str(model.id), "name": model.name, "version": model.version},
+            "unlinked_by_type": unlinked,
+            "positions": positions,
+        }
+        report = await run_rule_set(
+            BIM_LINK_RULE_SET,
+            data,
+            target_type="bim_model",
+            target_id=str(model_id),
+            project_id=str(model.project_id),
+        )
+        return {
+            "model_id": str(model.id),
+            "element_total": element_total,
+            "unlinked_total": sum(r["count"] for r in unlinked),
+            "unlinked_by_type": unlinked,
+            "positions": positions,
+            "findings": [finding(r) for r in [*report.errors, *report.warnings]],
+        }
+
+    async def restore_model_quantity(self, position_id: uuid.UUID) -> None:
+        """Drop a kept manual quantity and take the model figure again."""
+        pos = await self.session.get(Position, position_id)
+        if pos is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="BOQ position not found")
+        meta = dict(pos.metadata_ or {})
+        record = meta.get("bim_link_quantity")
+        if isinstance(record, dict):
+            meta["bim_link_quantity"] = {**record, "applied_quantity": None, "manual_kept": False}
+            pos.metadata_ = meta
+            await self.session.flush()
+        await self._sync_boq_quantity_from_links(position_id)
 
     async def create_link(
         self,
@@ -2890,135 +2985,81 @@ class BIMHubService:
         self,
         position_id: uuid.UUID,
     ) -> None:
-        """Recompute ``Position.quantity`` from all linked BIM element quantities.
+        """Recompute ``Position.quantity`` from the linked elements and record how.
 
-        Strategy: sum the *dimensionally-correct* quantity field from
-        linked elements based on the position's unit:
+        The figure comes from :func:`app.modules.bim_hub.link_quantity.link_quantity`:
+        count units count elements (E-XMOD-003), geometric units sum the
+        dimensionally right SI key and convert it by an exact Decimal factor
+        (kg -> t divides by 1000, D-TKC-005; m -> ft, m2 -> sf, m3 -> cy ...).
+        A unit of no known dimension, or elements with no value for it, leave
+        the quantity alone (D-TKC-028) and the provenance says why.
 
-        - m3 / m³           → Σ volume_m3
-        - m2 / m²           → Σ area_m2
-        - m / lfm / lm      → Σ length_m
-        - kg                → Σ weight_kg
-        - t (metric tonne)  → Σ weight_kg ÷ 1000   (D-TKC-005)
-        - pcs / St / ea / … → element *count*       (E-XMOD-003)
-
-        Correctness invariants (these were the v1.9.0 defects):
-
-        * **E-XMOD-003** - a count position (``pcs``/``St``/``ea``/
-          ``lsum``/…) must NEVER take volume/area/weight. It gets the
-          number of linked elements (1 per element) so "7.5 pcs of
-          walls" can no longer happen.
-        * **D-TKC-005** - a tonne position divides ``weight_kg`` by
-          1000 so 4000 kg → 4 t, not 4000 t.
-        * **D-TKC-028** - if NO dimensionally-correct quantity exists
-          for the unit, the position is left untouched. We never fall
-          back to "first non-zero numeric value" (which silently summed
-          an area into a length position, etc.). The estimator's manual
-          value is preserved instead of being corrupted.
+        The provenance lands in ``Position.metadata["bim_link_quantity"]``:
+        models and versions, element count, keys used, factor, formula and the
+        ids that carried no value. A quantity the estimator edited after the
+        model last set it is kept; the model figure is recorded beside it as
+        ``model_quantity`` with ``manual_kept`` so the difference stays visible.
+        Elements are read in one query, never one per link.
         """
         pos = await self.session.get(Position, position_id)
         if pos is None:
             return
 
-        links = await self.link_repo.list_by_boq_position(position_id)
-        if not links:
-            return
-
-        # Canonical ASCII unit token (m³→m3, M2→m2, …) so the mapping
-        # below is locale/encoding independent.
-        unit = normalize_unit_token(pos.unit)
-
-        # ── Count units: quantity = number of linked elements ─────────
-        # No geometric substitution - this is the E-XMOD-003 fix.
-        if unit in _COUNT_UNITS:
-            count_total = 0
-            for lnk in links:
-                elem = await self.element_repo.get(lnk.bim_element_id)
-                if elem is not None:
-                    count_total += 1
-            if count_total > 0:
-                pos.quantity = str(count_total)
-                try:
-                    rate = Decimal(pos.unit_rate or "0")
-                    pos.total = str((Decimal(count_total) * rate).quantize(Decimal("0.01")))
-                except (InvalidOperation, TypeError, ValueError):
-                    pass
-                await self.session.flush()
-                logger.info(
-                    "BOQ position %s (count unit %r) quantity auto-set to %d linked BIM element(s)",
-                    position_id,
-                    pos.unit,
-                    count_total,
-                )
-            return
-
-        # ── Geometric units: dimension-locked quantity key ────────────
-        _UNIT_TO_QKEY: dict[str, list[str]] = {
-            "m3": ["volume_m3", "Volume", "volume"],
-            "m2": ["area_m2", "Area", "area"],
-            "m": ["length_m", "Length", "length"],
-            "lfm": ["length_m", "Length", "length"],
-            "lm": ["length_m", "Length", "length"],
-            "kg": ["weight_kg", "Weight", "weight"],
-            "t": ["weight_kg", "Weight", "weight"],
-            "to": ["weight_kg", "Weight", "weight"],
-        }
-        preferred_keys = _UNIT_TO_QKEY.get(unit, [])
-        if not preferred_keys:
-            # D-TKC-028 - unknown / non-geometric unit and not a known
-            # count unit: do NOT guess a dimension. Leaving the manual
-            # quantity intact is strictly safer than summing an
-            # arbitrary geometric value of the wrong dimension.
-            logger.info(
-                "BOQ position %s unit %r has no dimensionally-correct "
-                "BIM quantity mapping - manual quantity left untouched "
-                "(no arbitrary fallback)",
-                position_id,
-                pos.unit,
+        rows = (
+            await self.session.execute(
+                select(BIMElement.stable_id, BIMElement.quantities, BIMModel.id, BIMModel.name, BIMModel.version)
+                .join(BOQElementLink, BOQElementLink.bim_element_id == BIMElement.id)
+                .join(BIMModel, BIMModel.id == BIMElement.model_id)
+                .where(BOQElementLink.boq_position_id == position_id)
             )
+        ).all()
+        if not rows:
             return
 
-        # kg → 1, t → 1/1000 (D-TKC-005: tonne conversion).
-        scale = Decimal("0.001") if unit in ("t", "to") else Decimal("1")
+        unit = normalize_unit_token(pos.unit)
+        result = link_quantity(unit, ((r[0], r[1]) for r in rows), count_units=_COUNT_UNITS)
+        models: dict[str, dict[str, Any]] = {}
+        for r in rows:
+            entry = models.setdefault(str(r[2]), {"model_id": str(r[2]), "name": r[3], "version": r[4], "elements": 0})
+            entry["elements"] += 1
 
-        total = Decimal(0)
-        for lnk in links:
-            elem = await self.element_repo.get(lnk.bim_element_id)
-            if elem is None:
-                continue
-            qtys = elem.quantities or {}
+        meta = dict(pos.metadata_ or {})
+        previous = meta.get("bim_link_quantity") if isinstance(meta.get("bim_link_quantity"), dict) else None
+        record = result.as_record()
+        record["models"] = list(models.values())
+        record["computed_at"] = datetime.now(UTC).isoformat()
 
-            value: Decimal | None = None
-            for key in preferred_keys:
-                raw = qtys.get(key)
-                if raw is not None:
-                    try:
-                        value = Decimal(str(raw))
-                        break
-                    except (InvalidOperation, TypeError, ValueError):
-                        continue
+        manual_kept = False
+        if result.quantity is not None and previous and previous.get("applied_quantity") is not None:
+            try:
+                manual_kept = Decimal(str(pos.quantity or "0")) != Decimal(str(previous["applied_quantity"]))
+            except (InvalidOperation, TypeError, ValueError):
+                manual_kept = True
+        record["manual_kept"] = manual_kept
 
-            # D-TKC-028 - NO arbitrary fallback. An element that lacks
-            # the dimensionally-correct quantity simply contributes 0.
-            if value is not None and value > 0:
-                total += value * scale
-
-        if total > 0:
-            # Round to 4 decimal places to avoid floating-point noise
-            pos.quantity = str(total.quantize(Decimal("0.0001")))
-            # Also recompute total = quantity * unit_rate
+        if result.quantity is not None and result.quantity > 0 and not manual_kept:
+            pos.quantity = str(result.quantity)
+            record["applied_quantity"] = str(result.quantity)
             try:
                 rate = Decimal(pos.unit_rate or "0")
-                pos.total = str((total * rate).quantize(Decimal("0.01")))
+                pos.total = str((result.quantity * rate).quantize(Decimal("0.01")))
             except (InvalidOperation, TypeError, ValueError):
                 pass
-            await self.session.flush()
-            logger.info(
-                "BOQ position %s quantity auto-updated to %s from %d linked BIM elements",
-                position_id,
-                pos.quantity,
-                len(links),
-            )
+        else:
+            record["model_quantity"] = None if result.quantity is None else str(result.quantity)
+            if previous and previous.get("applied_quantity") is not None:
+                record["applied_quantity"] = previous["applied_quantity"]
+        meta["bim_link_quantity"] = record
+        pos.metadata_ = meta
+        await self.session.flush()
+        logger.info(
+            "BOQ position %s quantity from %d linked BIM element(s): status=%s quantity=%s manual_kept=%s",
+            position_id,
+            len(rows),
+            result.status,
+            result.quantity,
+            manual_kept,
+        )
 
     async def _remove_cad_element_id(
         self,
@@ -3456,23 +3497,35 @@ class BIMHubService:
         links_created = 0
         existing_elem_ids = await self._existing_link_element_ids(position.id)
 
+        # One insert batch and one cad_element_ids rewrite for the whole rule:
+        # a flush and a JSON-array rewrite per element was quadratic in model size.
+        new_links: list[BOQElementLink] = []
         for element, _raw, _adjusted in matches:
             if element.id in existing_elem_ids:
                 continue  # idempotent - dup UNIQUE would 500 us otherwise
-
-            link = BOQElementLink(
-                boq_position_id=position.id,
-                bim_element_id=element.id,
-                link_type="rule_based",
-                confidence="high",
-                rule_id=str(rule.id),
-                metadata_={},
+            new_links.append(
+                BOQElementLink(
+                    boq_position_id=position.id,
+                    bim_element_id=element.id,
+                    link_type="rule_based",
+                    confidence="high",
+                    rule_id=str(rule.id),
+                    metadata_={},
+                )
             )
-            await self.link_repo.create(link)
-
-            await self._append_cad_element_id(position.id, element.id)
             existing_elem_ids.add(element.id)
-            links_created += 1
+        if new_links:
+            self.session.add_all(new_links)
+            current = list(position.cad_element_ids or [])
+            known = set(current)
+            for link in new_links:
+                elem_str = str(link.bim_element_id)
+                if elem_str not in known:
+                    current.append(elem_str)
+                    known.add(elem_str)
+            position.cad_element_ids = current
+            await self.session.flush()
+            links_created = len(new_links)
 
         return links_created, positions_created
 
@@ -3877,12 +3930,12 @@ class BIMHubService:
         The rules page's "Test this rule" used to run a browser copy of the
         engine on element rows the list endpoint sends without properties, so
         a property filter matched nothing there while apply matched. This is
-        the apply path itself: same element read (50 000 cap), same sidecar
+        the apply path itself: same element read (every element), same sidecar
         read for properties the import's 30-key cap dropped, same matcher and
         quantity math.
         """
         model = await self.get_model(request.model_id)
-        elements, _ = await self.element_repo.list_for_model(model.id, offset=0, limit=50000)
+        elements, _ = await self.element_repo.list_for_model(model.id, offset=0, limit=None)
 
         matches: list[QuantityRulePreviewMatch] = []
         skips: list[QuantityRulePreviewSkip] = []
@@ -4281,9 +4334,21 @@ class BIMHubService:
         if existing is not None:
             return existing
 
-        # Load all elements for both models
-        old_elements, _ = await self.element_repo.list_for_model(old_model.id, offset=0, limit=50000)
-        new_elements, _ = await self.element_repo.list_for_model(new_model.id, offset=0, limit=50000)
+        # Every element of both models, columns only: a page limit here dropped
+        # the elements past it into "deleted" / "added".
+        async def _diff_rows(mid: uuid.UUID) -> list[Any]:
+            stmt = select(
+                BIMElement.stable_id,
+                BIMElement.element_type,
+                BIMElement.name,
+                BIMElement.geometry_hash,
+                BIMElement.quantities,
+                BIMElement.properties,
+            ).where(BIMElement.model_id == mid)
+            return list((await self.session.execute(stmt)).all())
+
+        old_elements = await _diff_rows(old_model.id)
+        new_elements = await _diff_rows(new_model.id)
 
         old_by_sid = {e.stable_id: e for e in old_elements}
         new_by_sid = {e.stable_id: e for e in new_elements}

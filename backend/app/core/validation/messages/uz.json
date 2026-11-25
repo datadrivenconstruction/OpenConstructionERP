@@ -2886,5 +2886,20 @@
       "fail": "'{position}' pozitsiyasi modeldan miqdor olmadi yoki uning ayrim elementlarida o‘lchangan miqdor yo‘q.",
       "suggestion": "Tanlangan elementlarda o‘lchangan miqdor borligini tekshiring yoki miqdorni qo‘lda kiriting."
     }
+  },
+  "bim_link": {
+    "elements_unlinked": {
+      "fail": "{model} modeli: {element_type} turidagi {count} ta element smetaning hech bir pozitsiyasiga bog'lanmagan.",
+      "suggestion": "Elementlarni BIM ko'ruvchida bog'lang yoki pozitsiyaga model o'lchaydigan birlikni bering (m, m2, m3, kg, dona)."
+    },
+    "position_no_elements": {
+      "fail": "{ordinal} pozitsiyasi {model} modeliga biriktirilgan, lekin bu modelning birorta elementi unga bog'lanmagan.",
+      "suggestion": "Elementlarni BIM ko'ruvchida bog'lang yoki pozitsiyaga model o'lchaydigan birlikni bering (m, m2, m3, kg, dona)."
+    },
+    "unit_no_quantity": {
+      "fail": "{unit} birligidagi {ordinal} pozitsiyasi bog'langan {count} ta elementdan miqdor olmaydi: modelda ular uchun bu o'lchamning qiymati yo'q.",
+      "suggestion": "Elementlarni BIM ko'ruvchida bog'lang yoki pozitsiyaga model o'lchaydigan birlikni bering (m, m2, m3, kg, dona)."
+    },
+    "suggestion": "Elementlarni BIM ko'ruvchida bog'lang yoki pozitsiyaga model o'lchaydigan birlikni bering (m, m2, m3, kg, dona)."
   }
 }

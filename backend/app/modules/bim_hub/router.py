@@ -95,6 +95,7 @@ from app.modules.bim_hub.schemas import (
     BIMElementGroupUpdate,
     BIMElementListResponse,
     BIMElementResponse,
+    BIMLinkCheckResponse,
     BIMModelBOQLinkAggregate,
     BIMModelBOQLinksResponse,
     BIMModelCreate,
@@ -4107,6 +4108,30 @@ async def list_model_boq_links(
         items=[BIMModelBOQLinkAggregate.model_validate(r) for r in rows],
         total=len(rows),
     )
+
+
+@router.get("/models/{model_id}/link-check/", response_model=BIMLinkCheckResponse)
+async def model_link_check(
+    model_id: uuid.UUID,
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    _perm: None = Depends(RequirePermission("bim.read")),
+    service: BIMHubService = Depends(_get_service),
+) -> BIMLinkCheckResponse:
+    """Unlinked elements, positions without elements and unit gaps of one model."""
+    await _verify_model_access(service, model_id, user_id or "")
+    return BIMLinkCheckResponse.model_validate(await service.link_check(model_id))
+
+
+@router.post("/links/restore-model-quantity/", status_code=204)
+async def restore_model_quantity(
+    boq_position_id: uuid.UUID = Query(...),
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    _perm: None = Depends(RequirePermission("bim.update")),
+    service: BIMHubService = Depends(_get_service),
+) -> None:
+    """Replace a kept manual quantity with the figure of the linked elements."""
+    await _verify_boq_position_access(service, boq_position_id, user_id or "")
+    await service.restore_model_quantity(boq_position_id)
 
 
 @router.post("/links/", response_model=BOQElementLinkResponse, status_code=201)

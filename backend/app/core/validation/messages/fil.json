@@ -2886,5 +2886,20 @@
       "fail": "Ang item na '{position}' ay walang dami mula sa modelo, o ang ilan sa mga elemento nito ay walang nasukat na dami.",
       "suggestion": "Tiyaking may nasukat na dami ang mga napiling elemento, o ilagay nang mano-mano ang dami."
     }
+  },
+  "bim_link": {
+    "elements_unlinked": {
+      "fail": "Model {model}: {count} elemento ng uring {element_type} ang hindi naka-link sa anumang item ng BOQ.",
+      "suggestion": "I-link ang mga elemento sa BIM viewer, o bigyan ang item ng yunit na sinusukat ng model (m, m2, m3, kg, piraso)."
+    },
+    "position_no_elements": {
+      "fail": "Ang item {ordinal} ay nakatali sa model {model}, pero walang elemento ng model na iyon ang naka-link dito.",
+      "suggestion": "I-link ang mga elemento sa BIM viewer, o bigyan ang item ng yunit na sinusukat ng model (m, m2, m3, kg, piraso)."
+    },
+    "unit_no_quantity": {
+      "fail": "Ang item {ordinal} sa {unit} ay walang nakukuhang dami mula sa {count} naka-link na elemento nito: walang halaga ang model sa dimensiyong iyon para sa kanila.",
+      "suggestion": "I-link ang mga elemento sa BIM viewer, o bigyan ang item ng yunit na sinusukat ng model (m, m2, m3, kg, piraso)."
+    },
+    "suggestion": "I-link ang mga elemento sa BIM viewer, o bigyan ang item ng yunit na sinusukat ng model (m, m2, m3, kg, piraso)."
   }
 }

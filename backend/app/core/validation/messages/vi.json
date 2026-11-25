@@ -2886,5 +2886,20 @@
       "fail": "Hạng mục '{position}' không có khối lượng từ mô hình, hoặc một số cấu kiện của nó không có khối lượng đo.",
       "suggestion": "Kiểm tra các cấu kiện đã chọn có khối lượng đo, hoặc nhập khối lượng thủ công."
     }
+  },
+  "bim_link": {
+    "elements_unlinked": {
+      "fail": "Mô hình {model}: {count} cấu kiện loại {element_type} chưa liên kết với hạng mục dự toán nào.",
+      "suggestion": "Liên kết cấu kiện trong trình xem BIM, hoặc đặt cho hạng mục đơn vị mà mô hình đo được (m, m2, m3, kg, cái)."
+    },
+    "position_no_elements": {
+      "fail": "Hạng mục {ordinal} gắn với mô hình {model}, nhưng không có cấu kiện nào của mô hình đó liên kết với nó.",
+      "suggestion": "Liên kết cấu kiện trong trình xem BIM, hoặc đặt cho hạng mục đơn vị mà mô hình đo được (m, m2, m3, kg, cái)."
+    },
+    "unit_no_quantity": {
+      "fail": "Hạng mục {ordinal} đơn vị {unit} không nhận được khối lượng từ {count} cấu kiện liên kết: mô hình không có giá trị theo chiều đó cho chúng.",
+      "suggestion": "Liên kết cấu kiện trong trình xem BIM, hoặc đặt cho hạng mục đơn vị mà mô hình đo được (m, m2, m3, kg, cái)."
+    },
+    "suggestion": "Liên kết cấu kiện trong trình xem BIM, hoặc đặt cho hạng mục đơn vị mà mô hình đo được (m, m2, m3, kg, cái)."
   }
 }

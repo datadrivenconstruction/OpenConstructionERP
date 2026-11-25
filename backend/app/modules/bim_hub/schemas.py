@@ -798,6 +798,35 @@ class BIMModelBOQLinksResponse(BaseModel):
     total: int = 0
 
 
+class BIMLinkCheckType(BaseModel):
+    """Elements of one type linked to no BOQ position."""
+
+    element_type: str = ""
+    count: int = 0
+
+
+class BIMLinkCheckPosition(BaseModel):
+    """A BOQ position bound to the model, with its live link count."""
+
+    id: str
+    ordinal: str | None = None
+    unit: str | None = None
+    linked: int = 0
+    status: str = ""
+    manual_kept: bool = False
+
+
+class BIMLinkCheckResponse(BaseModel):
+    """Coverage of one model in the bill and the ``bim_link`` rule findings."""
+
+    model_id: str
+    element_total: int = 0
+    unlinked_total: int = 0
+    unlinked_by_type: list[BIMLinkCheckType] = Field(default_factory=list)
+    positions: list[BIMLinkCheckPosition] = Field(default_factory=list)
+    findings: list[dict[str, Any]] = Field(default_factory=list)
+
+
 # ── BIMQuantityMap schemas ───────────────────────────────────────────────────
 
 
