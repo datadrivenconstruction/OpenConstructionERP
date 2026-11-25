@@ -95,7 +95,7 @@ def evaluate(seeds: list[int], pipeline: str = "current") -> dict[str, Any]:
         unit_buckets += sum(len(v) - 1 for v in spellings.values())
         by_key = {}
         for d, u, q, c in rows:
-            by_key.setdefault((d, round(q, 3)), []).append((u, c))
+            by_key.setdefault((d, round(float(q), 3)), []).append((u, c))
         for it, lab in zip(items, labels, strict=True):
             hits = by_key.get((it["description"], round(it["quantity"], 3)), [])
             if lab == "invented":

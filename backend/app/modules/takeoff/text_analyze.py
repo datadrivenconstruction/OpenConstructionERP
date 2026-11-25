@@ -13,11 +13,14 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass, field
+from decimal import Decimal, InvalidOperation
 from typing import Any
 
 # Below the 0.62 medium band: an ungrounded quantity always needs a human look.
 UNGROUNDED_MAX_CONFIDENCE = 0.55
 _REL_TOL = 0.001  # a model may round 1,234.56 to 1234.6, not further
+_REL_TOL_D = Decimal("0.001")
+_TINY = Decimal("1e-9")
 
 _UNIT_ALIASES: dict[str, str] = {
     "m2": "m2",
@@ -97,7 +100,7 @@ _NUMBER = re.compile(r"(?<![\w.,])\d{1,3}(?:[   .,]\d{3})+(?:[.,]\d+)?(?![\d]
 @dataclass
 class CheckedItem:
     description: str
-    quantity: float
+    quantity: Decimal
     unit: str
     category: str
     confidence: float
@@ -202,7 +205,18 @@ def _context_line(text: str, start: int, end: int) -> str:
     return above[above.rfind("\n") + 1 :]
 
 
-def _grounding(qty: float, unit: str, desc: str, text: str, numbers: list[tuple[float, int, int]]) -> int | None:
+def as_quantity(value: Any) -> Decimal:
+    """A quantity as an exact decimal; anything unreadable or non-finite is zero."""
+    if value is None or isinstance(value, bool):
+        return Decimal(0)
+    try:
+        out = value if isinstance(value, Decimal) else Decimal(str(value).strip())
+    except (InvalidOperation, ValueError):
+        return Decimal(0)
+    return out if out.is_finite() else Decimal(0)
+
+
+def _grounding(qty: Decimal, unit: str, desc: str, text: str, numbers: list[tuple[float, int, int]]) -> int | None:
     """Offset of the source number that backs ``qty``, or ``None``.
 
     The number's line must describe the item (share a word with it) and must not
@@ -211,7 +225,7 @@ def _grounding(qty: float, unit: str, desc: str, text: str, numbers: list[tuple[
     """
     words = _words(desc)
     for v, start, end in numbers:
-        if abs(v - qty) > _REL_TOL * max(abs(qty), 1e-9):
+        if abs(Decimal(repr(v)) - qty) > _REL_TOL_D * max(abs(qty), _TINY):
             continue
         found_unit = _unit_after(text, end)
         if found_unit is not None and found_unit != unit:
@@ -224,19 +238,19 @@ def _grounding(qty: float, unit: str, desc: str, text: str, numbers: list[tuple[
 def check_items(items: list[dict[str, Any]], source_text: str) -> list[CheckedItem]:
     """Ground and normalise parsed items; never merge or drop one.
 
-    Each item needs ``description``, ``quantity`` (float, already band-clamped),
+    Each item needs ``description``, ``quantity`` (a decimal, already band-clamped),
     ``unit``, ``category`` and ``confidence`` (the model's score or the router's
     heuristic). Order is preserved; a row identical to an earlier one is kept
     and flagged ``repeated_line`` for the estimator to confirm.
     """
     numbers = source_numbers(source_text)
     out: list[CheckedItem] = []
-    seen: set[tuple[str, str, float]] = set()
+    seen: set[tuple[str, str, Decimal]] = set()
     for it in items:
-        qty = float(it.get("quantity") or 0.0)
+        qty = as_quantity(it.get("quantity"))
         unit = normalize_unit(str(it.get("unit") or ""))
         desc = str(it.get("description") or "").strip()
-        key = (_norm_desc(desc), unit, round(qty, 3))
+        key = (_norm_desc(desc), unit, qty.quantize(Decimal("0.001")))
         llm = float(it.get("confidence") or 0.0)
         flags: list[str] = []
         if key in seen:
