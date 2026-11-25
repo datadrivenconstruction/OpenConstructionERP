@@ -102,6 +102,8 @@ from app.modules.costs.schemas import (
     RegionalAdjustResponse,
     RegionalIndexResponse,
     RepriceResponse,
+    ResourceChangeRequest,
+    ResourceImpactResponse,
     ResourcePriceBulkRequest,
     ResourcePriceListResponse,
     ResourcePriceRow,
@@ -1276,6 +1278,75 @@ async def reprice_region_endpoint(
     if not dry_run:
         _invalidate_cost_cache()
     return RepriceResponse(**result.as_dict())
+
+
+@router.post(
+    "/resource-prices/{region}/impact/",
+    response_model=ResourceImpactResponse,
+    dependencies=[Depends(RequirePermission("costs.read"))],
+)
+async def preview_resource_change(
+    region: str,
+    body: ResourceChangeRequest,
+    user_id: CurrentUserId,
+    session: SessionDep,
+) -> ResourceImpactResponse:
+    """Dry run of a resource change: work items, assemblies and bills it touches, with deltas.
+
+    Nothing is written. Bills are listed for information; they follow only when
+    their estimator runs price alignment on them.
+    """
+    from app.modules.costs.resource_impact import ResourceImpactService, ResourceNotFoundError
+
+    try:
+        res = await ResourceImpactService(session).preview(
+            region, body.resource_key, new_unit_price=body.new_unit_price, new_name=body.new_name, user_id=user_id
+        )
+    except ResourceNotFoundError as exc:
+        raise HTTPException(status_code=404, detail="Resource not found on this price sheet") from exc
+    return ResourceImpactResponse(**res.as_dict())
+
+
+@router.post(
+    "/resource-prices/{region}/impact/apply/",
+    response_model=ResourceImpactResponse,
+    dependencies=[Depends(RequirePermission("costs.update"))],
+)
+async def apply_resource_change(
+    region: str,
+    body: ResourceChangeRequest,
+    user_id: CurrentUserId,
+    session: SessionDep,
+) -> ResourceImpactResponse:
+    """Apply a previewed resource change to every work item that uses it, in one transaction.
+
+    Refused with 409 when the change has blocking findings or the number of
+    work items differs from ``expected_cost_items`` (the preview is stale).
+    """
+    from app.modules.costs.resource_impact import (
+        ResourceChangeRefusedError,
+        ResourceImpactService,
+        ResourceNotFoundError,
+    )
+
+    try:
+        res = await ResourceImpactService(session).apply(
+            region,
+            body.resource_key,
+            new_unit_price=body.new_unit_price,
+            new_name=body.new_name,
+            expected_cost_items=body.expected_cost_items,
+            user_id=user_id,
+        )
+    except ResourceNotFoundError as exc:
+        raise HTTPException(status_code=404, detail="Resource not found on this price sheet") from exc
+    except ResourceChangeRefusedError as exc:
+        raise HTTPException(
+            status_code=409,
+            detail={"message": str(exc), "issues": [i.code for i in exc.issues]},
+        ) from exc
+    _invalidate_cost_cache()
+    return ResourceImpactResponse(**res.as_dict())
 
 
 @router.post(

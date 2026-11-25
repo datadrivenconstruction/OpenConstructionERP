@@ -1236,6 +1236,10 @@
       "norm_collapsed": "Posisyong {ordinal}: nawala ang catalogue norm sa resource rows at dami ng posisyon ang laman sa halip, kaya hindi muling kinalkula ang unit rate mula sa mga ito",
       "whole_position_quantities": "Posisyong {ordinal}: dami ng buong posisyon ang laman ng resource rows sa halip na per-unit norms, kaya hindi muling kinalkula ang unit rate mula sa mga ito",
       "suggestion": "Suriin ang buildup; kalkulahin muli ang posisyon mula sa catalogue item nito sa pamamagitan ng resource norm review o itama ang mga row nang mano-mano"
+    },
+    "aligned_rate_kept": {
+      "fail": "Item {ordinal}: inayon ang mga presyo ng resource sa listahan ng presyo, pero pinanatili ang unit rate dahil hindi ito muling makukuwenta mula sa mga hanay ng resource",
+      "suggestion": "Suriin ang mga hanay ng resource ng item at itakda nang mano-mano ang unit rate, o ayusin ang breakdown at kuwentahin muli ang mga presyo."
     }
   },
   "poland": {

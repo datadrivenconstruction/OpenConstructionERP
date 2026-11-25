@@ -1236,6 +1236,10 @@
       "norm_collapsed": "Stavka {ordinal}: redci resursa izgubili su kataloški normativ i umjesto njega sadrže količinu stavke, pa jedinična cijena nije ponovno izvedena iz njih",
       "whole_position_quantities": "Stavka {ordinal}: redci resursa sadrže količine cijele stavke umjesto normativa po jedinici, pa jedinična cijena nije ponovno izvedena iz njih",
       "suggestion": "Pregledajte analizu; ponovno izvedite stavku iz kataloga kroz pregled normativa resursa ili ručno ispravite retke"
+    },
+    "aligned_rate_kept": {
+      "fail": "Stavka {ordinal}: cijene resursa usklađene su s cjenikom, ali jedinična cijena je zadržana jer je redovi resursa ne mogu ponovno izvesti",
+      "suggestion": "Provjerite redove resursa stavke i ručno postavite jediničnu cijenu ili ispravite kalkulaciju i ponovno izračunajte cijene."
     }
   },
   "poland": {

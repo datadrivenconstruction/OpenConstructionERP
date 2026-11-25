@@ -1254,6 +1254,10 @@
       "norm_collapsed": "Position {ordinal}: die Ressourcenzeilen haben ihren Katalogansatz verloren und tragen stattdessen die Positionsmenge, daher wurde der Einheitspreis nicht aus ihnen neu abgeleitet",
       "whole_position_quantities": "Position {ordinal}: die Ressourcenzeilen tragen Gesamtmengen der Position statt Ansätzen je Einheit, daher wurde der Einheitspreis nicht aus ihnen neu abgeleitet",
       "suggestion": "Aufbau prüfen - die Position über die Ressourcenansatz-Prüfung aus ihrer Katalogposition neu ableiten oder die Zeilen von Hand korrigieren"
+    },
+    "aligned_rate_kept": {
+      "fail": "Position {ordinal}: Die Ressourcenpreise wurden an die Preisliste angeglichen, der Einheitspreis blieb jedoch unverändert, weil die Ressourcenzeilen ihn nicht neu ableiten können",
+      "suggestion": "Prüfen Sie die Ressourcenzeilen der Position und setzen Sie den Einheitspreis von Hand oder korrigieren Sie die Kalkulation und berechnen Sie die Preise neu."
     }
   },
   "poland": {

@@ -1236,6 +1236,10 @@
       "norm_collapsed": "Post {ordinal}: de middelenregels zijn hun catalogusnorm kwijt en bevatten in plaats daarvan de totale posthoeveelheid; de eenheidsprijs is daarom niet opnieuw uit die regels afgeleid",
       "whole_position_quantities": "Post {ordinal}: de middelenregels bevatten hoeveelheden voor de hele post in plaats van verbruiksnormen per eenheid; de eenheidsprijs is daarom niet opnieuw uit die regels afgeleid",
       "suggestion": "Controleer de prijsopbouw: leid de post via de beoordeling van de middelennormen opnieuw af uit de cataloguspost, of corrigeer de regels handmatig"
+    },
+    "aligned_rate_kept": {
+      "fail": "Post {ordinal}: de resourceprijzen zijn gelijkgetrokken met de prijslijst, maar de eenheidsprijs is behouden omdat de resourceregels hem niet opnieuw kunnen afleiden",
+      "suggestion": "Controleer de resourceregels van de post en stel de eenheidsprijs handmatig in, of herstel de opbouw en herbereken de prijzen."
     }
   },
   "poland": {

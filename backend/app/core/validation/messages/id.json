@@ -1236,6 +1236,10 @@
       "norm_collapsed": "Item {ordinal}: baris sumber daya kehilangan norma katalog dan memuat kuantitas item sebagai gantinya, sehingga harga satuan tidak dihitung ulang darinya",
       "whole_position_quantities": "Item {ordinal}: baris sumber daya memuat kuantitas seluruh item, bukan norma per satuan, sehingga harga satuan tidak dihitung ulang darinya",
       "suggestion": "Tinjau analisisnya; hitung ulang item dari katalog melalui tinjauan norma sumber daya atau perbaiki baris secara manual"
+    },
+    "aligned_rate_kept": {
+      "fail": "Item {ordinal}: harga sumber daya telah diselaraskan dengan daftar harga, tetapi harga satuan dipertahankan karena baris sumber daya tidak dapat menurunkannya kembali",
+      "suggestion": "Periksa baris sumber daya item dan tetapkan harga satuan secara manual, atau perbaiki analisa lalu hitung ulang harga."
     }
   },
   "poland": {

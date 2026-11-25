@@ -1236,6 +1236,10 @@
       "norm_collapsed": "Nimike {ordinal}: resurssirivit ovat menettäneet luettelon normin ja sisältävät sen sijaan nimikkeen määrän, joten yksikköhintaa ei johdettu niistä uudelleen",
       "whole_position_quantities": "Nimike {ordinal}: resurssirivit sisältävät koko nimikkeen määrät yksikkökohtaisten normien sijaan, joten yksikköhintaa ei johdettu niistä uudelleen",
       "suggestion": "Tarkista analyysi; johda nimike uudelleen luettelon nimikkeestä resurssinormien tarkastuksen kautta tai korjaa rivit käsin"
+    },
+    "aligned_rate_kept": {
+      "fail": "Nimike {ordinal}: resurssien hinnat on yhdenmukaistettu hinnaston kanssa, mutta yksikköhinta säilytettiin, koska resurssirivit eivät pysty johtamaan sitä uudelleen",
+      "suggestion": "Tarkista nimikkeen resurssirivit ja aseta yksikköhinta käsin tai korjaa laskelma ja laske hinnat uudelleen."
     }
   },
   "poland": {

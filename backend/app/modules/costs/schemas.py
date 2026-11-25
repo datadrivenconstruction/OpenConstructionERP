@@ -1139,3 +1139,86 @@ class MatchIndexRequest(BaseModel):
     region: str = Field(..., min_length=1, max_length=50)
     language: str = Field(..., min_length=2, max_length=10)
     country: str | None = Field(default=None, max_length=2)
+
+
+# ── Resource change impact (preview, then apply) ────────────────────────────
+
+
+class ResourceChangeRequest(BaseModel):
+    """A proposed change to one resource of a region's price sheet.
+
+    Leave a field out to keep it. ``expected_cost_items`` is the count the
+    preview showed; apply refuses when the region moved since, so a person
+    always confirms the numbers that are written.
+    """
+
+    resource_key: str = Field(..., min_length=1, max_length=300)
+    new_unit_price: DecimalMoney | None = Field(default=None, ge=0)
+    new_name: str | None = Field(default=None, max_length=300)
+    expected_cost_items: int | None = Field(default=None, ge=0)
+
+
+class ResourceImpactCostItem(BaseModel):
+    """One work item that uses the resource, with the rate it would get."""
+
+    id: UUID
+    code: str
+    description: str
+    unit: str
+    lines: int
+    old_rate: DecimalMoney
+    new_rate: DecimalMoney
+    delta: DecimalMoney
+
+
+class ResourceImpactAssembly(BaseModel):
+    """One assembly built on an affected work item (delta before bid factor)."""
+
+    id: UUID
+    code: str
+    name: str
+    components: int
+    delta: DecimalMoney
+
+
+class ResourceImpactBoq(BaseModel):
+    """One bill whose resource rows carry the resource (not changed by apply)."""
+
+    boq_id: UUID
+    boq_name: str
+    project_id: UUID
+    positions: int
+    delta_total: DecimalMoney
+
+
+class ResourceImpactIssue(BaseModel):
+    """A finding of the change checks; ``blocking`` ones stop the apply."""
+
+    code: str
+    blocking: bool
+    detail: str = ""
+
+
+class ResourceImpactResponse(BaseModel):
+    """Preview (or result) of a resource change across the platform."""
+
+    region: str
+    resource_key: str
+    new_resource_key: str
+    old_name: str
+    new_name: str
+    old_unit_price: DecimalMoney
+    new_unit_price: DecimalMoney
+    currency: str
+    cost_items_count: int
+    cost_items_unreadable: int
+    cost_items_delta_total: DecimalMoney
+    cost_items: list[ResourceImpactCostItem]
+    assemblies_count: int
+    assemblies: list[ResourceImpactAssembly]
+    boq_positions_count: int
+    boqs: list[ResourceImpactBoq]
+    issues: list[ResourceImpactIssue]
+    truncated: bool = False
+    applied: bool = False
+    audit_id: UUID | None = None

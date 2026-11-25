@@ -1236,6 +1236,10 @@
       "norm_collapsed": "Voce {ordinal}: le righe delle risorse hanno perso il rendimento di catalogo e riportano invece la quantità della voce, quindi il prezzo unitario non è stato ricalcolato a partire da esse",
       "whole_position_quantities": "Voce {ordinal}: le righe delle risorse riportano le quantità dell'intera voce invece dei rendimenti per unità, quindi il prezzo unitario non è stato ricalcolato a partire da esse",
       "suggestion": "Verificare l'analisi di prezzo - ricalcolare la voce a partire dal suo elemento di catalogo tramite la revisione dei rendimenti delle risorse, oppure correggere manualmente le righe"
+    },
+    "aligned_rate_kept": {
+      "fail": "Voce {ordinal}: i prezzi delle risorse sono stati allineati al listino, ma il prezzo unitario è stato mantenuto perché le righe delle risorse non permettono di ricalcolarlo",
+      "suggestion": "Controlla le righe delle risorse della voce e imposta il prezzo unitario a mano, oppure correggi l'analisi e ricalcola i prezzi."
     }
   },
   "poland": {

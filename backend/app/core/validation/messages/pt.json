@@ -1236,6 +1236,10 @@
       "norm_collapsed": "Item {ordinal}: as linhas de recursos perderam os coeficientes do catálogo e contêm a quantidade do item em seu lugar; por isso, o preço unitário não foi recalculado a partir delas",
       "whole_position_quantities": "Item {ordinal}: as linhas de recursos contêm as quantidades do item inteiro, em vez dos coeficientes de consumo por unidade; por isso, o preço unitário não foi recalculado a partir delas",
       "suggestion": "Revise a composição: recalcule o item a partir da referência do catálogo por meio da revisão dos coeficientes dos recursos ou corrija as linhas manualmente"
+    },
+    "aligned_rate_kept": {
+      "fail": "Item {ordinal}: os preços dos recursos foram alinhados com a tabela de preços, mas o preço unitário foi mantido porque as linhas de recursos não permitem recalculá-lo",
+      "suggestion": "Revise as linhas de recursos do item e defina o preço unitário manualmente, ou corrija a composição e recalcule os preços."
     }
   },
   "poland": {

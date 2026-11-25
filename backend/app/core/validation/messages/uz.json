@@ -1236,6 +1236,10 @@
       "norm_collapsed": "{ordinal} pozitsiya: resurs satrlari katalog meʼyorini yoʻqotib, uning oʻrniga pozitsiya miqdorini saqlamoqda, shu sababli birlik narxi ular asosida qayta hisoblanmadi",
       "whole_position_quantities": "{ordinal} pozitsiya: resurs satrlarida birlik meʼyorlari oʻrniga butun pozitsiya miqdorlari bor, shu sababli birlik narxi ular asosida qayta hisoblanmadi",
       "suggestion": "Narx tarkibini tekshiring: resurs meʼyorlarini koʻrib chiqish orqali pozitsiyani uning katalog bandidan qayta hisoblang yoki satrlarni qoʻlda tuzating"
+    },
+    "aligned_rate_kept": {
+      "fail": "{ordinal}-pozitsiya: resurs narxlari narxlar varag'iga moslashtirildi, lekin birlik narxi saqlab qolindi, chunki resurs qatorlari uni qayta hisoblay olmaydi",
+      "suggestion": "Pozitsiyaning resurs qatorlarini tekshiring va birlik narxini qo'lda kiriting yoki kalkulyatsiyani tuzatib, narxlarni qayta hisoblang."
     }
   },
   "poland": {

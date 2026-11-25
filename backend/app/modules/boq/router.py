@@ -205,6 +205,9 @@ from app.modules.boq.schemas import (
     PositionResponse,
     PositionUpdate,
     PrerequisiteItem,
+    PriceAlignmentApplyRequest,
+    PriceAlignmentApplyResult,
+    PriceAlignmentPreview,
     PricingAnomaly,
     QuantityLinkApplyRequest,
     QuantityLinkApplyResponse,
@@ -4198,6 +4201,48 @@ async def recalculate_rates(
     """
     await _verify_boq_owner(session, boq_id, _user_id, payload)
     return await service.recalculate_rates(boq_id)
+
+
+@router.get(
+    "/boqs/{boq_id}/price-alignment/",
+    summary="Preview resource price alignment with a price sheet",
+    response_model=PriceAlignmentPreview,
+    dependencies=[Depends(RequirePermission("boq.read"))],
+)
+async def preview_price_alignment(
+    boq_id: uuid.UUID,
+    _user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    region: str = Query(..., min_length=1, max_length=50, description="Region of the resource price sheet."),
+) -> PriceAlignmentPreview:
+    """List resources whose price in the bill differs from the region's price sheet. Writes nothing."""
+    from app.modules.boq.price_alignment import preview_alignment
+
+    await _verify_boq_owner(session, boq_id, _user_id, payload)
+    return PriceAlignmentPreview(**await preview_alignment(session, boq_id, region))
+
+
+@router.post(
+    "/boqs/{boq_id}/price-alignment/apply/",
+    summary="Align selected resource prices with a price sheet",
+    response_model=PriceAlignmentApplyResult,
+    dependencies=[Depends(RequirePermission("boq.update"))],
+)
+async def apply_price_alignment(
+    boq_id: uuid.UUID,
+    body: PriceAlignmentApplyRequest,
+    _user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+) -> PriceAlignmentApplyResult:
+    """Rewrite the selected resources' rows at the sheet price and re-derive unit rates. 409 on a locked bill."""
+    from app.modules.boq.price_alignment import apply_alignment
+
+    await _verify_boq_owner(session, boq_id, _user_id, payload)
+    return PriceAlignmentApplyResult(
+        **await apply_alignment(session, boq_id, body.region, body.resource_keys, user_id=_user_id)
+    )
 
 
 @router.post(

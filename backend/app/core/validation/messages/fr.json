@@ -1236,6 +1236,10 @@
       "norm_collapsed": "Poste {ordinal} : les lignes de ressources ont perdu leur norme de consommation du catalogue et portent à la place la quantité du poste ; le prix unitaire n'a donc pas été recalculé à partir de ces lignes",
       "whole_position_quantities": "Poste {ordinal} : les lignes de ressources portent les quantités du poste entier au lieu des normes de consommation par unité ; le prix unitaire n'a donc pas été recalculé à partir de ces lignes",
       "suggestion": "Vérifiez la décomposition : recalculez le poste à partir de son article de catalogue via l'examen des normes de ressources, ou corrigez les lignes manuellement"
+    },
+    "aligned_rate_kept": {
+      "fail": "Poste {ordinal} : les prix des ressources ont été alignés sur la grille de prix, mais le prix unitaire a été conservé car les lignes de ressources ne permettent pas de le recalculer",
+      "suggestion": "Vérifiez les lignes de ressources du poste et fixez le prix unitaire à la main, ou corrigez la décomposition et recalculez les prix."
     }
   },
   "poland": {

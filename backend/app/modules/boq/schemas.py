@@ -3116,3 +3116,67 @@ class ApplyRiskContingencyRequest(BaseModel):
     source: Literal["positions", "register"] = "positions"
     #: ``fixed`` writes the amount, ``percentage`` a share of the direct cost that follows quantity edits.
     mode: Literal["fixed", "percentage"] = "fixed"
+
+
+# ── Resource price alignment with a region's price sheet ────────────────────
+
+
+class PriceAlignmentRow(BaseModel):
+    """One resource whose price in the bill differs from the sheet."""
+
+    resource_key: str
+    name: str
+    code: str
+    unit: str
+    currency: str
+    old_prices: list[str]
+    new_price: str
+    delta: str
+    positions: int
+    rows: int
+    amount_delta: str
+    position_ids: list[str]
+
+    @field_validator("old_prices", mode="before")
+    @classmethod
+    def _old_as_str(cls, v: Any) -> list[str]:
+        return [str(x) for x in v or []]
+
+    @field_validator("new_price", "delta", "amount_delta", mode="before")
+    @classmethod
+    def _money_as_str(cls, v: Any) -> str:
+        return str(v)
+
+
+class PriceAlignmentPreview(BaseModel):
+    """Dry run of aligning a bill with a region's resource price sheet."""
+
+    boq_id: UUID
+    region: str
+    sheet_resources: int
+    rows: list[PriceAlignmentRow]
+    rows_skipped_currency: int
+    amount_delta_total: str
+
+    @field_validator("amount_delta_total", mode="before")
+    @classmethod
+    def _total_as_str(cls, v: Any) -> str:
+        return str(v)
+
+
+class PriceAlignmentApplyRequest(BaseModel):
+    """The resources the estimator selected from the preview."""
+
+    region: str = Field(..., min_length=1, max_length=50)
+    resource_keys: list[str] = Field(..., min_length=1, max_length=5000)
+
+
+class PriceAlignmentApplyResult(BaseModel):
+    """What the alignment wrote."""
+
+    boq_id: UUID
+    region: str
+    positions_changed: int
+    rows_changed: int
+    rates_kept: int
+    audit_id: UUID

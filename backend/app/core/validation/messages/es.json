@@ -1254,6 +1254,10 @@
       "norm_collapsed": "Posición {ordinal}: las filas de recursos perdieron su rendimiento de catálogo y llevan la cantidad de la posición en su lugar, por lo que el precio unitario no se volvió a derivar de ellas",
       "whole_position_quantities": "Posición {ordinal}: las filas de recursos llevan cantidades de toda la posición en vez de rendimientos por unidad, por lo que el precio unitario no se volvió a derivar de ellas",
       "suggestion": "Revise el descompuesto - vuelva a derivar la posición desde su elemento de catálogo mediante la revisión de rendimientos de recursos, o corrija las filas a mano"
+    },
+    "aligned_rate_kept": {
+      "fail": "Partida {ordinal}: los precios de los recursos se alinearon con la lista de precios, pero se mantuvo el precio unitario porque las filas de recursos no pueden recalcularlo",
+      "suggestion": "Revise las filas de recursos de la partida y fije el precio unitario a mano, o corrija la descomposición y recalcule los precios."
     }
   },
   "poland": {

@@ -1236,6 +1236,10 @@
       "norm_collapsed": "{ordinal} pozu: kaynak satırları katalog normunu kaybedip yerine poz miktarını taşıyor; bu nedenle birim fiyat bunlardan yeniden türetilmedi",
       "whole_position_quantities": "{ordinal} pozu: kaynak satırları birim başına norm yerine tüm pozun miktarlarını taşıyor; bu nedenle birim fiyat bunlardan yeniden türetilmedi",
       "suggestion": "Analizi inceleyin; kaynak normu incelemesi yoluyla pozu katalog kaleminden yeniden türetin veya satırları elle düzeltin"
+    },
+    "aligned_rate_kept": {
+      "fail": "Kalem {ordinal}: kaynak fiyatları fiyat listesiyle eşitlendi, ancak kaynak satırları birim fiyatı yeniden türetemediği için birim fiyat korundu",
+      "suggestion": "Kalemin kaynak satırlarını inceleyin ve birim fiyatı elle girin ya da analizi düzeltip fiyatları yeniden hesaplayın."
     }
   },
   "poland": {

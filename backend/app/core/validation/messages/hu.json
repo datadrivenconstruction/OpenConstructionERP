@@ -1236,6 +1236,10 @@
       "norm_collapsed": "A(z) {ordinal}. tétel erőforrássorai elvesztették a katalógus szerinti normát, és helyette a teljes tételmennyiséget tartalmazzák, ezért az egységár nem számítódott újra belőlük",
       "whole_position_quantities": "A(z) {ordinal}. tétel erőforrássoraiban egységre vetített normák helyett a teljes tétel mennyiségei szerepelnek, ezért az egységár nem számítódott újra belőlük",
       "suggestion": "Ellenőrizze az erőforrás-bontást: az erőforrásnormák felülvizsgálatával származtassa újra a tételt a katalógustételből, vagy kézzel javítsa a sorokat"
+    },
+    "aligned_rate_kept": {
+      "fail": "{ordinal}. tétel: az erőforrásárak az árjegyzékhez lettek igazítva, de az egységár megmaradt, mert az erőforrássorokból nem vezethető le újra",
+      "suggestion": "Ellenőrizze a tétel erőforrássorait, és adja meg kézzel az egységárat, vagy javítsa a kalkulációt és számolja újra az árakat."
     }
   },
   "poland": {

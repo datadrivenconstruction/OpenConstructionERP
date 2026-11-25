@@ -1236,6 +1236,10 @@
       "norm_collapsed": "Poziția {ordinal}: rândurile de resurse și-au pierdut norma de catalog și conțin în schimb cantitatea poziției, deci prețul unitar nu a fost recalculat din ele",
       "whole_position_quantities": "Poziția {ordinal}: rândurile de resurse conțin cantități pentru întreaga poziție în loc de norme pe unitate, deci prețul unitar nu a fost recalculat din ele",
       "suggestion": "Verificați analiza – recalculați poziția din articolul său de catalog prin verificarea normelor de resurse sau corectați rândurile manual"
+    },
+    "aligned_rate_kept": {
+      "fail": "Poziția {ordinal}: prețurile resurselor au fost aliniate cu lista de prețuri, dar prețul unitar a fost păstrat deoarece rândurile de resurse nu îl pot recalcula",
+      "suggestion": "Verificați rândurile de resurse ale poziției și stabiliți prețul unitar manual sau corectați analiza și recalculați prețurile."
     }
   },
   "poland": {

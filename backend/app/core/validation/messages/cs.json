@@ -1236,6 +1236,10 @@
       "norm_collapsed": "Položka {ordinal}: řádky zdrojů ztratily katalogovou normu a místo ní obsahují množství položky, takže z nich nebyla znovu odvozena jednotková cena",
       "whole_position_quantities": "Položka {ordinal}: řádky zdrojů obsahují množství celé položky místo norem na jednotku, takže z nich nebyla znovu odvozena jednotková cena",
       "suggestion": "Zkontrolujte kalkulaci – znovu odvoďte položku z katalogu prostřednictvím kontroly norem zdrojů nebo řádky opravte ručně"
+    },
+    "aligned_rate_kept": {
+      "fail": "Položka {ordinal}: ceny zdrojů byly sladěny s ceníkem, ale jednotková cena zůstala, protože řádky zdrojů ji nedokážou znovu odvodit",
+      "suggestion": "Zkontrolujte řádky zdrojů položky a nastavte jednotkovou cenu ručně, nebo opravte kalkulaci a přepočítejte ceny."
     }
   },
   "poland": {

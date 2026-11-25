@@ -1236,6 +1236,10 @@
       "norm_collapsed": "Post {ordinal}: ressourcerækkerne har mistet katalogets normtal og indeholder i stedet postens mængde, så enhedsprisen blev ikke genberegnet ud fra dem",
       "whole_position_quantities": "Post {ordinal}: ressourcerækkerne indeholder mængder for hele posten i stedet for normtal pr. enhed, så enhedsprisen blev ikke genberegnet ud fra dem",
       "suggestion": "Gennemgå prisopbygningen – genberegn posten ud fra dens katalogpost gennem gennemgangen af ressourcenormtal, eller ret rækkerne manuelt"
+    },
+    "aligned_rate_kept": {
+      "fail": "Post {ordinal}: ressourcepriserne er afstemt med prislisten, men enhedsprisen er bevaret, fordi ressourcelinjerne ikke kan udlede den igen",
+      "suggestion": "Gennemgå postens ressourcelinjer og angiv enhedsprisen manuelt, eller ret kalkulationen og genberegn priserne."
     }
   },
   "poland": {

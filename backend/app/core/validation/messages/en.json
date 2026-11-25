@@ -1272,6 +1272,10 @@
       "norm_collapsed": "Position {ordinal}: the resource rows lost their catalogue norm and hold the position quantity instead, so the unit rate was not re-derived from them",
       "whole_position_quantities": "Position {ordinal}: the resource rows hold whole-position quantities instead of per-unit norms, so the unit rate was not re-derived from them",
       "suggestion": "Review the buildup - re-derive the position from its catalogue item through the resource norm review, or correct the rows by hand"
+    },
+    "aligned_rate_kept": {
+      "fail": "Position {ordinal}: resource prices were aligned with the price sheet, but the unit rate was kept because the resource rows cannot re-derive it",
+      "suggestion": "Review the resource rows of the position and set the unit rate by hand, or fix the buildup and recalculate rates."
     }
   },
   "poland": {
