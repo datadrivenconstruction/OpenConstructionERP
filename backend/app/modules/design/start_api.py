@@ -99,8 +99,9 @@ def register(router) -> None:
     async def quick_for_project(
         project_id: uuid.UUID, body: QuickBrief, principal: PrincipalDep, session: SessionDep
     ) -> dict[str, Any]:
-        """The same in the project's currency and country; the exchange rate comes from the project's own fx_rates
-        when it lists the band currency, else from the body (a rate the person confirmed)."""
+        """The same in the project's currency and country (the project's own, never the body's); the exchange rate
+        comes from the project's own fx_rates when it lists the band currency, else from the body (a rate the
+        person confirmed)."""
         from app.modules.projects.models import Project
 
         await require_project(principal, project_id, session)
@@ -108,9 +109,9 @@ def register(router) -> None:
         brief = _brief(body)
         if project.currency:
             brief["currency"] = project.currency
-        if project.country_code and "country" not in brief:
+        if project.country_code:  # the project's country wins over the body's
             brief["country"] = project.country_code
         rate, src = quick.project_fx(brief.get("currency") or "", project.fx_rates)
         if rate:
-            brief["fx_rate"], brief["fx_source"] = rate, src
-        return quick.build(brief)
+            brief["fx_rate"] = rate
+        return quick.build(brief, fx_source=src)

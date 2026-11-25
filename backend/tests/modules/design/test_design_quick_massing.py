@@ -5,7 +5,7 @@ corridor 1.8 m): depth 2 x 6.0 + 1.8 = 13.8 m, footprint 600 m2, width 43.48 m, 
 Slabs: ground 600 + 3 suspended x 600 = 2,400 m2 (= GFA), flat roof 600 m2. Height 14.4 m, external wall
 114.56 x 14.4 = 1,649.61 m2. Grid 7.2 m (defaults_for): 7 x 2 bays, 8 x 3 = 24 columns a storey.
 Standard quality prices at the reference band median (cost_benchmark_reference.json office/din276 p50,
-3,100 EUR/m2): 7,440,000 EUR, inside p10..p90. Window ratio and durations have no source: null and flagged.
+3,100 EUR/m2): 7,440,000 EUR, band p10..p90 2,200..4,300 EUR/m2. Window ratio and durations have no source: null and flagged.
 """
 
 from __future__ import annotations
@@ -25,7 +25,8 @@ def _q(result: dict, code: str) -> float:
 
 def test_office_2400_m2_four_storeys_geometry():
     r = quick.build(OFFICE)
-    assert r["issues"] == []
+    # DE has a clear-height minimum but no source gives the slab zone: said, not assumed
+    assert [(i["code"], i["field"]) for i in r["issues"]] == [("source_missing", "slab_zone_m")]
     m = r["model"]
     assert m["footprint"] == {"width_m": 43.48, "depth_m": 13.8, "area_m2": 600.0}
     assert [lv["elevation_m"] for lv in m["levels"]] == [0.0, 3.6, 7.2, 10.8]
@@ -57,9 +58,7 @@ def test_office_cost_is_median_band_and_inside_benchmark():
     assert c["currency"] == "EUR"
     assert Decimal(c["total"]) == Decimal("7440000")
     assert Decimal(c["per_m2"]) == Decimal("3100")
-    assert c["benchmark"]["within"] is True
     assert c["benchmark"]["low"] == "2200" and c["benchmark"]["high"] == "4300"
-    assert sum(Decimal(line["amount"]) for line in c["lines"]) == Decimal("7440000")
     walls = next(line for line in c["lines"] if line["code"] == "330")
     assert walls["quantity"] == pytest.approx(1649.61) and walls["unit"] == "m2"
     assert "office/din276/330/p50" in walls["provenance"]["ref"]
@@ -166,3 +165,38 @@ def test_a_market_without_its_own_band_gets_no_price(country):
     cost = quick.build(brief)["cost"]
     assert cost["total"] is None and cost["reason"] == "no_band_market" and cost["flag"] == "source_missing"
     assert cost["lines"] == []
+
+
+def test_benchmark_carries_no_self_comparison():
+    # the price is the band's own percentile, so "inside the band" would always be true: not reported
+    assert "within" not in quick.build(OFFICE)["cost"]["benchmark"]
+
+
+def test_element_lines_carry_their_own_range_and_no_remainder():
+    c = quick.build(OFFICE)["cost"]
+    assert "other" not in {line["code"] for line in c["lines"]}
+    walls = next(line for line in c["lines"] if line["code"] == "330")
+    assert Decimal(walls["range"]["p50"]) == Decimal(walls["amount"])
+    assert Decimal(walls["range"]["p10"]) <= Decimal(walls["range"]["p50"]) <= Decimal(walls["range"]["p90"])
+
+
+def test_missing_slab_zone_is_flagged_not_assumed_zero():
+    issues = quick.check({**OFFICE, "floor_height_m": 2.45})
+    codes = {(i["code"], i["field"], i["severity"]) for i in issues}
+    assert ("source_missing", "slab_zone_m", "warning") in codes
+    assert "clear_height_below_minimum" not in {i["code"] for i in issues}
+
+
+def test_depth_beyond_a_square_footprint_is_derived_and_flagged():
+    r = quick.build({**OFFICE, "depth_m": 40})
+    d = r["model"]["inputs"]["depth_m"]
+    assert d["value"] == pytest.approx(24.49) and d["flag"] == "depth_clipped"
+    assert d["provenance"]["status"] == "derived" and d["given"]["value"] == 40
+    assert "depth_clipped" in {i["code"] for i in r["issues"]}
+    assert quick.build(OFFICE)["model"]["inputs"]["depth_m"]["flag"] is None
+
+
+def test_fx_source_cannot_come_from_the_brief():
+    r = quick.build({**OFFICE, "currency": "USD", "fx_rate": "1.10", "fx_source": "project.fx_rates[EUR]"})
+    assert r["cost"]["fx_source"] == "brief"
+    assert quick.build({**OFFICE, "currency": "USD", "fx_rate": "1.1"}, fx_source="x")["cost"]["fx_source"] == "x"

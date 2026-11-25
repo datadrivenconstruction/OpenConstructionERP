@@ -1,5 +1,14 @@
 {
- "issues": [],
+ "issues": [
+  {
+   "code": "source_missing",
+   "field": "slab_zone_m",
+   "severity": "warning",
+   "params": {
+    "field": "slab_zone_m"
+   }
+  }
+ ],
  "generator": true,
  "model": {
   "levels": [
@@ -45,7 +54,8 @@
      "ref": "editor e0abbb210: crates/gen/data/rules.json, crates/gen/src/project/spec.rs; crates/app/src/link/gen.rs",
      "formula": null,
      "status": "default"
-    }
+    },
+    "flag": null
    },
    "depth_m": {
     "value": 13.8,
@@ -54,7 +64,8 @@
      "ref": "editor e0abbb210: crates/gen/data/rules.json, crates/gen/src/project/spec.rs; crates/app/src/link/gen.rs",
      "formula": "2 × band + corridor",
      "status": "default"
-    }
+    },
+    "flag": null
    },
    "grid_m": {
     "value": 7.2,
@@ -63,7 +74,8 @@
      "ref": "editor e0abbb210: crates/gen/data/rules.json, crates/gen/src/project/spec.rs; crates/app/src/link/gen.rs",
      "formula": null,
      "status": "default"
-    }
+    },
+    "flag": null
    },
    "roof": {
     "value": "flat",
@@ -72,7 +84,8 @@
      "ref": "editor e0abbb210: crates/gen/data/rules.json, crates/gen/src/project/spec.rs; crates/app/src/link/gen.rs",
      "formula": null,
      "status": "default"
-    }
+    },
+    "flag": null
    },
    "lift": {
     "value": true,
@@ -81,7 +94,8 @@
      "ref": "editor e0abbb210: crates/gen/data/rules.json, crates/gen/src/project/spec.rs; crates/app/src/link/gen.rs",
      "formula": null,
      "status": "default"
-    }
+    },
+    "flag": null
    },
    "max_storeys": {
     "value": 200,
@@ -90,7 +104,8 @@
      "ref": "editor e0abbb210: crates/gen/data/rules.json, crates/gen/src/project/spec.rs; crates/app/src/link/gen.rs",
      "formula": null,
      "status": "default"
-    }
+    },
+    "flag": null
    },
    "depth_min_m": {
     "value": 7.8,
@@ -99,7 +114,8 @@
      "ref": "editor e0abbb210: crates/gen/data/rules.json, crates/gen/src/project/spec.rs; crates/app/src/link/gen.rs",
      "formula": null,
      "status": "default"
-    }
+    },
+    "flag": null
    }
   },
   "quantities": [
@@ -231,6 +247,11 @@
     "unit": "m2",
     "unit_rate": "611.05",
     "amount": "1008000",
+    "range": {
+     "p10": "672000",
+     "p50": "1008000",
+     "p90": "1488000"
+    },
     "provenance": {
      "source": "benchmark",
      "ref": "app/core/country_data/cost_benchmark_reference.json office/din276/330/p50",
@@ -243,6 +264,11 @@
     "unit": "m2",
     "unit_rate": "150",
     "amount": "360000",
+    "range": {
+     "p10": "216000",
+     "p50": "360000",
+     "p90": "552000"
+    },
     "provenance": {
      "source": "benchmark",
      "ref": "app/core/country_data/cost_benchmark_reference.json office/din276/340/p50",
@@ -255,6 +281,11 @@
     "unit": "m2",
     "unit_rate": "240",
     "amount": "576000",
+    "range": {
+     "p10": "408000",
+     "p50": "576000",
+     "p90": "840000"
+    },
     "provenance": {
      "source": "benchmark",
      "ref": "app/core/country_data/cost_benchmark_reference.json office/din276/350/p50",
@@ -267,6 +298,11 @@
     "unit": "m2",
     "unit_rate": "480",
     "amount": "288000",
+    "range": {
+     "p10": "168000",
+     "p50": "288000",
+     "p90": "456000"
+    },
     "provenance": {
      "source": "benchmark",
      "ref": "app/core/country_data/cost_benchmark_reference.json office/din276/360/p50",
@@ -279,6 +315,11 @@
     "unit": "m2",
     "unit_rate": "70",
     "amount": "168000",
+    "range": {
+     "p10": "96000",
+     "p50": "168000",
+     "p90": "264000"
+    },
     "provenance": {
      "source": "benchmark",
      "ref": "app/core/country_data/cost_benchmark_reference.json office/din276/410/p50",
@@ -291,6 +332,11 @@
     "unit": "m2",
     "unit_rate": "130",
     "amount": "312000",
+    "range": {
+     "p10": "192000",
+     "p50": "312000",
+     "p90": "480000"
+    },
     "provenance": {
      "source": "benchmark",
      "ref": "app/core/country_data/cost_benchmark_reference.json office/din276/420/p50",
@@ -303,22 +349,15 @@
     "unit": "m2",
     "unit_rate": "170",
     "amount": "408000",
+    "range": {
+     "p10": "264000",
+     "p50": "408000",
+     "p90": "624000"
+    },
     "provenance": {
      "source": "benchmark",
      "ref": "app/core/country_data/cost_benchmark_reference.json office/din276/440/p50",
      "formula": "band rate per m2 GFA × GFA × fx; unit rate = amount ÷ quantity"
-    }
-   },
-   {
-    "code": "other",
-    "quantity": 2400.0,
-    "unit": "m2",
-    "unit_rate": null,
-    "amount": "4320000",
-    "provenance": {
-     "source": "benchmark",
-     "ref": "app/core/country_data/cost_benchmark_reference.json office/din276/total/p50",
-     "formula": "band total × GFA − element lines"
     }
    }
   ],
@@ -326,7 +365,7 @@
    "low": "2200",
    "mid": "3100",
    "high": "4300",
-   "within": true
+   "ref": "app/core/country_data/cost_benchmark_reference.json office/din276/total"
   },
   "reason": null
  },
