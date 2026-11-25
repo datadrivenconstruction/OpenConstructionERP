@@ -174,6 +174,8 @@ async def test_off_and_always(client):
     ).status_code == 200
     v = (await client.get(f"{BASE}/revisions/{r2}/change-order", headers=h)).json()
     assert v["mode"] == "off" and v["state"] == "none" and v["snapshot"] is False
+    # the cost history is kept even with change orders off
+    assert "cost" in v
     assert (await client.post(f"{BASE}/revisions/{r2}/change-order", headers=h)).status_code == 409
     assert await _orders(pid) == []
 

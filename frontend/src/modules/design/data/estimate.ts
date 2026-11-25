@@ -118,8 +118,12 @@ export type EstimateView =
       /** null = not checkable (no priced cost base); never read it as "inside". */
       inside_range: boolean | null;
       inside_range_note: string | null;
-      /** Stable code of the note: unpriced_or_unsourced. */
+      /** Stable code of the note: unpriced_or_unsourced | currency_mismatch. */
       inside_range_note_code?: string | null;
+      /** Project currency: positions and BOQ totals are in it; the range may be in another. */
+      currency?: string | null;
+      /** The ERP BOQ totals: direct cost, markups and the grand total with markups. */
+      boq?: { direct_cost: string; markups_total: string; grand_total: string; currency: string | null };
     };
 
 export type Estimate = Extract<EstimateView, { estimate: true }>;
