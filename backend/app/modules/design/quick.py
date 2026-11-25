@@ -284,10 +284,12 @@ def _cost(brief: dict[str, Any], model: dict[str, Any]) -> dict[str, Any]:
         "needs_expert_review": ref["needs_expert_review"],
     }
     if band is None:
+        # the market names no band standard of its own, or its standard has no band for this type
+        market_known = std is not None and any(b["standard"] == std for b in ref["bands"])
         return {
             **base,
             "total": None,
-            "reason": "no_band",
+            "reason": "no_band_type" if market_known else "no_band_market",
             "flag": "source_missing",
             "market": std,
             "currency": brief.get("currency"),

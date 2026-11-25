@@ -95,4 +95,4 @@ async def test_us_project_gets_no_german_prices(client):
         f"{BASE}/quick", json={**OFFICE, "country": "US", "currency": "USD", "fx_rate": "1.1"}, headers={**h, **LINK}
     )
     assert r.status_code == 200, r.text
-    assert r.json()["cost"]["reason"] == "no_band" and r.json()["cost"]["total"] is None
+    assert r.json()["cost"]["reason"] == "no_band_market" and r.json()["cost"]["total"] is None

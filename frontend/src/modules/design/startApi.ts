@@ -49,7 +49,7 @@ export interface QuickIssue { code: string; field: string; severity: 'error' | '
 export interface QuickQuantity { code: string; value: number | null; unit: string; provenance: Provenance; flag: string | null }
 export interface QuickLine { code: string; quantity: number | null; unit: string; unit_rate: string | null; amount: string; provenance: Provenance }
 export interface QuickCost {
-  currency: string | null; total: string | null; per_m2?: string; reason: 'no_band' | 'currency' | null; flag?: string;
+  currency: string | null; total: string | null; per_m2?: string; reason: 'no_band_type' | 'no_band_market' | 'currency' | null; flag?: string;
   band_currency?: string; lines?: QuickLine[]; needs_expert_review: boolean; base_date: string; ref: string;
   benchmark?: { low: string; mid: string; high: string; within: boolean };
 }

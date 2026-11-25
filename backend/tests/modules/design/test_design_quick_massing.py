@@ -86,7 +86,7 @@ def test_type_without_sourced_defaults_needs_them_in_the_brief():
     r = quick.build({**brief, "floor_height_m": 10, "depth_m": 50})
     assert r["model"]["footprint"] == {"width_m": 100.0, "depth_m": 50.0, "area_m2": 5000.0}
     assert r["model"]["grid"] is None
-    assert r["cost"]["total"] is None and r["cost"]["reason"] == "no_band"
+    assert r["cost"]["total"] is None and r["cost"]["reason"] == "no_band_type"
     assert r["generator"] is False
 
 
@@ -164,5 +164,5 @@ def test_non_positive_dimensions_are_refused_not_divided_by(patch):
 def test_a_market_without_its_own_band_gets_no_price(country):
     brief = {k: v for k, v in {**OFFICE, "country": country, "currency": "USD", "fx_rate": "1.1"}.items() if v}
     cost = quick.build(brief)["cost"]
-    assert cost["total"] is None and cost["reason"] == "no_band" and cost["flag"] == "source_missing"
+    assert cost["total"] is None and cost["reason"] == "no_band_market" and cost["flag"] == "source_missing"
     assert cost["lines"] == []
