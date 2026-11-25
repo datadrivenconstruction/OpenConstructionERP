@@ -18,7 +18,22 @@ pytestmark = pytest.mark.asyncio
 
 BASE = "/api/v1/design"
 # The writes the editor's contract needs (lock, revision push, model generation and brief/draft work it drives).
-EDITOR_WRITES: set[tuple[str, str]] = set()
+P = "/api/v1/design/projects/{project_id}"
+EDITOR_WRITES: set[tuple[str, str]] = {
+    ("POST", f"{P}/lock"),
+    ("POST", f"{P}/lock/heartbeat"),
+    ("DELETE", f"{P}/lock"),
+    ("POST", f"{P}/revisions"),
+    ("PUT", f"{P}/draft"),
+    ("DELETE", f"{P}/draft"),
+    ("POST", f"{P}/draft/revision"),
+    ("POST", f"{P}/model/preview"),
+    ("POST", f"{P}/model/generate"),
+    ("POST", f"{P}/generate"),
+    ("POST", "/api/v1/design/jobs/{job_id}/cancel"),
+    ("POST", f"{P}/brief/answers"),
+    ("POST", f"{P}/brief/confirm"),
+}
 _PARAM = re.compile(r"\{([^}:]+)(?::path)?\}")
 
 
@@ -90,7 +105,8 @@ async def test_design_writes_a_link_token_reaches_are_the_editor_contract(app_in
             continue
         for method in sorted(route.methods - {"GET", "HEAD", "OPTIONS"}):
             r = await client.request(method, _fill(route.path, pid), json={}, headers=tok)
-            if r.status_code not in (401, 403):
+            # Only a 2xx or a 409 proves the handler ran for this token: 404 and 422 come before any check.
+            if r.status_code < 300 or r.status_code == 409:
                 reached.add((method, route.path))
     print(sorted(reached))
     assert reached <= EDITOR_WRITES, sorted(reached - EDITOR_WRITES)
