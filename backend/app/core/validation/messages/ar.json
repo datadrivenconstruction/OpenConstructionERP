@@ -716,6 +716,10 @@
     "constraint_conflict": {
       "fail": "النشاط '{activity}' مقيّد بـ {constraint} عند {date}، لكن الأنشطة السابقة تسمح به بعد {days} يومًا فقط.",
       "suggestion": "انقل تاريخ القيد أو اختصر سلسلة الأنشطة السابقة أو اقبل الفائض السالب."
+    },
+    "duration_follows_bill_quantity": {
+      "fail": "تم تقدير {activity} لكمية {planned}، وجدول الكميات يحتوي الآن على {current}.",
+      "suggestion": "احفظ البند مرة أخرى لإعادة حساب المدة، أو اكتب مدة لتثبيتها."
     }
   },
   "sheet_completeness": {

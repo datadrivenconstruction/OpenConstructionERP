@@ -716,6 +716,10 @@
     "constraint_conflict": {
       "fail": "작업 '{activity}'은(는) {constraint}에 의해 {date}로 제약되지만, 선행 작업은 {days}일 뒤에야 허용합니다.",
       "suggestion": "제약 날짜를 옮기거나, 선행 작업 체인을 줄이거나, 음수 여유를 받아들이세요."
+    },
+    "duration_follows_bill_quantity": {
+      "fail": "{activity}은(는) 수량 {planned} 기준으로 산정되었으나 내역서는 현재 {current}입니다.",
+      "suggestion": "항목을 다시 저장해 기간을 재계산하거나, 기간을 직접 입력해 고정하세요."
     }
   },
   "sheet_completeness": {

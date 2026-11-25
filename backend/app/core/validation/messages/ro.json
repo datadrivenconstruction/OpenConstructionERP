@@ -716,6 +716,10 @@
     "constraint_conflict": {
       "fail": "Activitatea '{activity}' este constrânsă de {constraint} la {date}, dar predecesoarele o permit abia peste {days} zile.",
       "suggestion": "Mutați data constrângerii, scurtați lanțul de predecesoare sau acceptați marja negativă."
+    },
+    "duration_follows_bill_quantity": {
+      "fail": "{activity} a fost dimensionată pentru o cantitate de {planned}, devizul are acum {current}.",
+      "suggestion": "Salvați din nou poziția pentru a recalcula durata sau introduceți o durată pentru a o fixa."
     }
   },
   "sheet_completeness": {

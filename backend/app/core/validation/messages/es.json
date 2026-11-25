@@ -734,6 +734,10 @@
     "constraint_conflict": {
       "fail": "La actividad '{activity}' está restringida por {constraint} al {date}, pero sus predecesoras solo la permiten {days} días después.",
       "suggestion": "Mueva la fecha de restricción, acorte la cadena de predecesoras o acepte la holgura negativa."
+    },
+    "duration_follows_bill_quantity": {
+      "fail": "{activity} se dimensionó para una cantidad de {planned}, el presupuesto tiene ahora {current}.",
+      "suggestion": "Guarde de nuevo la partida para recalcular la duración, o escriba una duración para fijarla."
     }
   },
   "sheet_completeness": {

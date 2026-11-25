@@ -2492,6 +2492,11 @@ class ScheduleService:
         current_status = activity.status
 
         fields = data.model_dump(exclude_unset=True)
+        # A typed duration or finish pins the length: a BOQ quantity change no
+        # longer rescales it (see ``boq_followup``) until metadata unlocks it.
+        typed_length = fields.get("duration_days") is not None or fields.get("end_date") is not None
+        incoming_meta = fields.get("metadata")
+        lock_told = isinstance(incoming_meta, dict) and "duration_locked" in incoming_meta
 
         # The assignee is checked only when it changes to a new contact, and
         # the code only when it changes to a new value: clients resend
@@ -2628,6 +2633,16 @@ class ScheduleService:
         # never block a no-op edit of a finished activity. Run before write.
         if becomes_completed and not was_completed:
             await self._assert_predecessors_complete(activity_id)
+
+        if (
+            typed_length
+            and not lock_told
+            and fields.get("duration_days") is not None
+            and fields["duration_days"] != activity.duration_days
+            and activity.boq_position_ids
+        ):
+            base_meta = fields.get("metadata_", activity.metadata_)
+            fields["metadata_"] = {**(base_meta if isinstance(base_meta, dict) else {}), "duration_locked": True}
 
         if fields:
             await self.activity_repo.update_fields(activity_id, **fields)

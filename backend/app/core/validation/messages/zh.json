@@ -716,6 +716,10 @@
     "constraint_conflict": {
       "fail": "活动“{activity}”被 {constraint} 约束在 {date}，但其前置活动要晚 {days} 天才允许。",
       "suggestion": "请移动约束日期、缩短前置活动链，或接受负浮动。"
+    },
+    "duration_follows_bill_quantity": {
+      "fail": "{activity} 按数量 {planned} 计算工期，清单现在为 {current}。",
+      "suggestion": "重新保存该清单项以重算工期，或手动输入工期将其锁定。"
     }
   },
   "sheet_completeness": {

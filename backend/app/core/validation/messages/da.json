@@ -716,6 +716,10 @@
     "constraint_conflict": {
       "fail": "Aktiviteten '{activity}' er begrænset af {constraint} til {date}, men dens forgængere tillader det først {days} dage senere.",
       "suggestion": "Flyt begrænsningsdatoen, forkort forgængerkæden, eller accepter den negative slæk."
+    },
+    "duration_follows_bill_quantity": {
+      "fail": "{activity} blev dimensioneret til en mængde på {planned}, tilbudslisten har nu {current}.",
+      "suggestion": "Gem posten igen for at genberegne varigheden, eller indtast en varighed for at låse den."
     }
   },
   "sheet_completeness": {

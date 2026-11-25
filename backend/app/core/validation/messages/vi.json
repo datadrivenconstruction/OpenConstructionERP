@@ -716,6 +716,10 @@
     "constraint_conflict": {
       "fail": "Hoạt động '{activity}' bị {constraint} ràng buộc vào {date}, nhưng các hoạt động đứng trước chỉ cho phép muộn hơn {days} ngày.",
       "suggestion": "Dời ngày ràng buộc, rút ngắn chuỗi hoạt động đứng trước hoặc chấp nhận độ trễ âm."
+    },
+    "duration_follows_bill_quantity": {
+      "fail": "{activity} được tính cho khối lượng {planned}, bảng khối lượng hiện là {current}.",
+      "suggestion": "Lưu lại hạng mục để tính lại thời lượng, hoặc nhập thời lượng để cố định nó."
     }
   },
   "sheet_completeness": {

@@ -716,6 +716,10 @@
     "constraint_conflict": {
       "fail": "アクティビティ「{activity}」は {constraint} により {date} に制約されていますが、先行作業では {days} 日後でないと可能になりません。",
       "suggestion": "制約日を動かす、先行作業の連鎖を短くする、または負のフロートを受け入れてください。"
+    },
+    "duration_follows_bill_quantity": {
+      "fail": "{activity} は数量 {planned} で工期を算定しましたが、内訳書は現在 {current} です。",
+      "suggestion": "項目を再保存して工期を再計算するか、工期を入力して固定してください。"
     }
   },
   "sheet_completeness": {

@@ -716,6 +716,10 @@
     "constraint_conflict": {
       "fail": "Ang aktibidad na '{activity}' ay nililimitahan ng {constraint} sa {date}, ngunit pinapayagan lamang ito ng mga nauna nang {days} araw na mas huli.",
       "suggestion": "Ilipat ang petsa ng limitasyon, paikliin ang kadena ng mga nauna, o tanggapin ang negatibong float."
+    },
+    "duration_follows_bill_quantity": {
+      "fail": "Ang {activity} ay tinantiya para sa dami na {planned}, ang bill ay may {current} na ngayon.",
+      "suggestion": "I-save muli ang item para muling kalkulahin ang tagal, o i-type ang tagal para i-lock ito."
     }
   },
   "sheet_completeness": {

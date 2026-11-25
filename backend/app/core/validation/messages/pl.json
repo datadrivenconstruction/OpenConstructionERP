@@ -716,6 +716,10 @@
     "constraint_conflict": {
       "fail": "Czynność '{activity}' jest ograniczona przez {constraint} do {date}, ale jej poprzedniki pozwalają na to dopiero {days} dni później.",
       "suggestion": "Przesuń datę ograniczenia, skróć łańcuch poprzedników lub zaakceptuj ujemny zapas."
+    },
+    "duration_follows_bill_quantity": {
+      "fail": "{activity} zaplanowano dla ilości {planned}, przedmiar zawiera teraz {current}.",
+      "suggestion": "Zapisz pozycję ponownie, aby przeliczyć czas trwania, lub wpisz czas trwania, aby go zablokować."
     }
   },
   "sheet_completeness": {

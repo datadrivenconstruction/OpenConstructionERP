@@ -716,6 +716,10 @@
     "constraint_conflict": {
       "fail": "Vorgang '{activity}' ist durch {constraint} auf den {date} festgelegt, die Vorgänger erlauben ihn aber erst {days} Tage später.",
       "suggestion": "Das Einschränkungsdatum verschieben, die Vorgängerkette verkürzen oder die negative Pufferzeit akzeptieren."
+    },
+    "duration_follows_bill_quantity": {
+      "fail": "{activity} wurde für eine Menge von {planned} bemessen, das LV enthält jetzt {current}.",
+      "suggestion": "Position erneut speichern, um die Dauer anzupassen, oder eine Dauer eintippen, um sie festzuhalten."
     }
   },
   "sheet_completeness": {

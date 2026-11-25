@@ -734,6 +734,10 @@
     "constraint_conflict": {
       "fail": "Activity '{activity}' is constrained by {constraint} to {date}, but its predecessors allow it only {days} days later.",
       "suggestion": "Move the constraint date, shorten the predecessor chain, or accept the negative float."
+    },
+    "duration_follows_bill_quantity": {
+      "fail": "{activity} was sized for a quantity of {planned}, the bill now holds {current}.",
+      "suggestion": "Save the position again to rescale the activity, or type a duration to pin it."
     }
   },
   "sheet_completeness": {

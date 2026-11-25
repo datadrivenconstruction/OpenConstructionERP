@@ -716,6 +716,10 @@
     "constraint_conflict": {
       "fail": "فعالیت '{activity}' با {constraint} به {date} محدود شده، اما پیش‌نیازهایش فقط {days} روز بعد اجازه می‌دهند.",
       "suggestion": "تاریخ محدودیت را جابه‌جا کنید، زنجیره پیش‌نیازها را کوتاه کنید یا شناوری منفی را بپذیرید."
+    },
+    "duration_follows_bill_quantity": {
+      "fail": "{activity} برای مقدار {planned} برآورد شده، فهرست مقادیر اکنون {current} است.",
+      "suggestion": "ردیف را دوباره ذخیره کنید تا مدت دوباره محاسبه شود، یا مدتی وارد کنید تا ثابت بماند."
     }
   },
   "sheet_completeness": {
