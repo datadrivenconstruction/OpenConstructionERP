@@ -84,6 +84,7 @@ from app.modules.users.schemas import (
     UserUpdate,
 )
 from app.modules.users.service import UserService
+from app.modules.users.sidebar_layouts import SidebarLayoutError, read_layouts, validate_layouts
 
 
 class ModulePreferencesPayload(BaseModel):
@@ -101,6 +102,20 @@ class CustomUnitsPayload(BaseModel):
     """
 
     units: list[str]
+
+
+class SidebarLayoutItem(BaseModel):
+    """One named sidebar layout."""
+
+    id: str
+    name: str
+    data: dict[str, Any]
+
+
+class SidebarLayoutsPayload(BaseModel):
+    """The user's saved sidebar layouts."""
+
+    layouts: list[SidebarLayoutItem] = Field(default_factory=list)
 
 
 class SidebarPreferencesPayload(BaseModel):
@@ -1130,6 +1145,41 @@ async def save_sidebar_preferences(
     metadata["sidebar_hidden_modules"] = cleaned
     await service.update_profile(uuid.UUID(user_id), metadata_=metadata)
     return SidebarPreferencesPayload(hidden_modules=cleaned)
+
+
+@router.get("/me/sidebar-layouts/", response_model=SidebarLayoutsPayload)
+async def get_sidebar_layouts(
+    user_id: CurrentUserId,
+    service: UserService = Depends(_get_service),
+) -> SidebarLayoutsPayload:
+    """List the current user's named sidebar layouts."""
+    user = await service.get_user(uuid.UUID(user_id))
+    return SidebarLayoutsPayload.model_validate({"layouts": read_layouts(user.metadata_)})
+
+
+@router.put("/me/sidebar-layouts/", response_model=SidebarLayoutsPayload)
+async def save_sidebar_layouts(
+    data: SidebarLayoutsPayload,
+    user_id: CurrentUserId,
+    service: UserService = Depends(_get_service),
+) -> SidebarLayoutsPayload:
+    """Replace the current user's sidebar layouts.
+
+    Names are trimmed, non-empty, at most 60 characters and unique per user;
+    at most 20 layouts are kept. A broken rule answers 422 with a stable code.
+    """
+    try:
+        cleaned = validate_layouts([item.model_dump() for item in data.layouts])
+    except SidebarLayoutError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail={"code": exc.code, "message": str(exc)},
+        ) from exc
+    user = await service.get_user(uuid.UUID(user_id))
+    metadata: dict[str, Any] = dict(user.metadata_ or {})
+    metadata["sidebar_layouts"] = cleaned
+    await service.update_profile(uuid.UUID(user_id), metadata_=metadata)
+    return SidebarLayoutsPayload.model_validate({"layouts": cleaned})
 
 
 # ── Dashboard Layout ──────────────────────────────────────────────────────

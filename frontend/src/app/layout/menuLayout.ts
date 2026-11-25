@@ -73,6 +73,10 @@ export type MenuLayoutAction =
   | { type: 'toggleModeItem'; mode: Exclude<MenuModeId, 'all'>; route: string }
   | { type: 'resetMode'; mode: Exclude<MenuModeId, 'all'> }
   | { type: 'setRail'; rail: RailState }
+  | {
+      type: 'replace';
+      menu: Pick<MenuLayout, 'order' | 'groupOrder' | 'userGroups' | 'modes' | 'activeMode'>;
+    }
   | { type: 'reset' };
 
 /** Move one entry, clamped to the list; returns the same array when nothing moves. */
@@ -167,6 +171,9 @@ export function menuLayoutReducer(state: MenuLayout, action: MenuLayoutAction): 
     }
     case 'setRail':
       return { ...state, rail: action.rail };
+    case 'replace':
+      // Switching to a saved layout: arrangement and work mode, not the sidebar style.
+      return { ...state, ...action.menu };
     case 'reset':
       // Keep the chosen mode and sidebar style; reset is about the arrangement.
       return { ...DEFAULT_MENU_LAYOUT, activeMode: state.activeMode, rail: state.rail };
