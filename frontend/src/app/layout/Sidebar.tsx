@@ -93,6 +93,8 @@ import { useAppearanceStore } from '@/stores/useAppearanceStore';
 import { sectionTone, useMenuIcon } from './menuIcons';
 import { applyOrder, modeItems } from './menuLayout';
 import { useMenuLayoutStore } from './useMenuLayoutStore';
+import { SidebarLayoutsPanel } from './SidebarLayoutsPanel';
+import type { SidebarLayoutData } from './sidebarLayouts';
 import { suggestMenuChanges } from './menuUsage';
 import { NavItemBadge } from './NavItemBadge';
 import { MenuModeBar, MenuSuggestionCard, RailFlyoutGroup } from './MenuModeBar';
@@ -865,6 +867,38 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
     setEditingHidden([]);
     setEditingHiddenGroups([]);
   }, [editingHidden, editingHiddenGroups, setHiddenModules, setHiddenGroups]);
+
+  // Named layouts: what "Save current" captures (the Edit-menu working copy
+  // while editing) and what switching to one writes back.
+  const layoutSnapshot = useMemo<SidebarLayoutData>(
+    () => ({
+      hiddenModules: editMode ? editingHidden : hiddenModules,
+      hiddenGroups: editMode ? editingHiddenGroups : hiddenGroups,
+      pinned,
+      menu: {
+        order: menuLayout.order,
+        groupOrder: menuLayout.groupOrder,
+        userGroups: menuLayout.userGroups,
+        modes: menuLayout.modes,
+        activeMode: menuLayout.activeMode,
+      },
+      viewMode: isAdvanced ? 'advanced' : 'simple',
+    }),
+    [editMode, editingHidden, editingHiddenGroups, hiddenModules, hiddenGroups, pinned, menuLayout, isAdvanced],
+  );
+
+  const applyLayout = useCallback(
+    (data: SidebarLayoutData) => {
+      setHiddenModules(data.hiddenModules);
+      setHiddenGroups(data.hiddenGroups);
+      setEditingHidden(data.hiddenModules);
+      setEditingHiddenGroups(data.hiddenGroups);
+      setPinned(data.pinned.slice(0, MAX_PINNED));
+      dispatchMenu({ type: 'replace', menu: data.menu });
+      useViewModeStore.getState().setMode(data.viewMode);
+    },
+    [setHiddenModules, setHiddenGroups, dispatchMenu],
+  );
 
   const toggleItemHidden = useCallback((route: string) => {
     setEditingHidden((prev) =>
@@ -2156,6 +2190,8 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
             )}
           </div>
         )}
+
+        {!iconified && editMode && <SidebarLayoutsPanel current={layoutSnapshot} onApply={applyLayout} />}
 
         {/* Update notification — compact clickable card in the sidebar; the
             whole card opens a full-screen modal with highlights + install
