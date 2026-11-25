@@ -42,6 +42,7 @@ import { projectFilterOptions } from './projectFilterOptions';
 import { useDemoScope } from '@/shared/lib/useDemoScope';
 import { scopeToProject } from '@/shared/lib/demoScope';
 import { DemoScopeNotice } from '@/shared/ui/DemoScopeNotice';
+import { designRecordName } from '@/shared/lib/designRecordName';
 
 interface Project {
   id: string;
@@ -312,7 +313,7 @@ function CompareModal({ boqIdA, boqIdB, currencyA, currencyB, onClose }: Compare
                 {/* BOQ A summary */}
                 <div className="rounded-xl border border-border-light bg-surface-elevated p-4">
                   <div className="oe-overline mb-1">A</div>
-                  <div className="text-sm font-semibold text-content-primary truncate">{boqA.name}</div>
+                  <div className="text-sm font-semibold text-content-primary truncate">{designRecordName(t, boqA.name)}</div>
                   <div className="mt-2 flex items-baseline gap-2">
                     <span className="text-xl font-semibold text-content-primary tabular-nums">{currencyFmt.format(totalA)}</span>
                     <span className="text-xs text-content-tertiary">{currencyA || '--'}</span>
@@ -323,7 +324,7 @@ function CompareModal({ boqIdA, boqIdB, currencyA, currencyB, onClose }: Compare
                 {/* BOQ B summary */}
                 <div className="rounded-xl border border-border-light bg-surface-elevated p-4">
                   <div className="oe-overline mb-1">B</div>
-                  <div className="text-sm font-semibold text-content-primary truncate">{boqB.name}</div>
+                  <div className="text-sm font-semibold text-content-primary truncate">{designRecordName(t, boqB.name)}</div>
                   <div className="mt-2 flex items-baseline gap-2">
                     <span className="text-xl font-semibold text-content-primary tabular-nums">{currencyFmt.format(totalB)}</span>
                     <span className="text-xs text-content-tertiary">{currencyB || '--'}</span>
@@ -1317,7 +1318,7 @@ export function BOQListPage() {
                 {/* Name (mobile: full width with status badge) */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium text-content-primary truncate">{boq.name}</span>
+                    <span className="text-sm font-medium text-content-primary truncate">{designRecordName(t, boq.name)}</span>
                     <Badge variant={statusVariant(boq.status)} size="sm" dot className="sm:hidden shrink-0">{statusLabel(boq.status)}</Badge>
                   </div>
                   {/* Mobile-only: project + positions on second line */}
@@ -1433,9 +1434,9 @@ export function BOQListPage() {
                 <div>
                   <h3
                     className="oe-card-title line-clamp-2"
-                    title={boq.name}
+                    title={designRecordName(t, boq.name)}
                   >
-                    {boq.name}
+                    {designRecordName(t, boq.name)}
                   </h3>
                   <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-content-tertiary">
                     <span className="max-w-[55%] truncate">{boq.projectName}</span>

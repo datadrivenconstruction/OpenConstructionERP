@@ -45,6 +45,9 @@ ISSUED = ("issued", "collecting", "evaluating", "awarded", "closed")
 BOQ_NAME = "design_takeoff"
 BOQ_NAME_KEY = "design.takeoff.boq_name"
 PACKAGE_NAME_KEY = "design.takeoff.package_name"
+# Addendum title code ``design_revision_quantities:<revision number>``; shown via ADDENDUM_TITLE_KEY
+ADDENDUM_TITLE = "design_revision_quantities"
+ADDENDUM_TITLE_KEY = "design.addendum.revision_title"
 MAX_CHANGES = 200  # per package, newest kept
 MAX_ADDENDUM_KEYS = 200  # linked element keys kept per addendum line
 BASIS_NOTE = (
@@ -489,7 +492,7 @@ async def _addendum_draft(
     if sheets:
         text += ["", f"Drawings of revision {number}: " + ", ".join(_sheet_number(d) for d in sheets)]
     data = AddendumCreate(
-        title=f"Design revision {number}: quantity changes"[:200],
+        title=addendum_title(number),
         body="\n".join(text)[:10000],
         boq_changes=[
             AddendumBOQChange(
@@ -717,6 +720,11 @@ def for_change_order(imp: dict[str, Any] | None) -> dict[str, Any] | None:
             "issued_packages_affected",
         )
     }
+
+
+def addendum_title(revision_number: int) -> str:
+    """Neutral title code of a revision addendum; the UI renders it through ``ADDENDUM_TITLE_KEY``."""
+    return f"{ADDENDUM_TITLE}:{int(revision_number)}"
 
 
 def package_name(ifc_class: str) -> str:

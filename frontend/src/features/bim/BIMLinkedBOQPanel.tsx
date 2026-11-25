@@ -3,10 +3,10 @@
 import { useMemo, useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
-import { Search, X, Link2, Hash, ExternalLink, Loader2, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { Search, X, Link2, Hash, ExternalLink, Loader2, AlertTriangle, CheckCircle2, Box } from 'lucide-react';
 import type { BIMElementData } from '@/shared/ui/BIMViewer';
 import type { BIMBOQLinkBrief } from '@/shared/ui/BIMViewer/ElementManager';
-import { fetchBIMLinkCheck, fetchBIMModelBOQLinks } from './api';
+import { fetchBIMLinkCheck, fetchBIMModelBOQLinks, fetchBIMUnlinkedElementIds } from './api';
 import { useDisplayQuantity } from '@/shared/hooks/useDisplayQuantity';
 import { getNumberLocale } from '@/stores/usePreferencesStore';
 
@@ -62,6 +62,22 @@ export default function BIMLinkedBOQPanel({
     enabled: !!modelId,
     staleTime: 30_000,
   });
+
+  const [unlinkedBusy, setUnlinkedBusy] = useState(false);
+  const [unlinkedError, setUnlinkedError] = useState(false);
+  const showUnlinkedIn3D = useCallback(async () => {
+    setUnlinkedBusy(true);
+    setUnlinkedError(false);
+    try {
+      const ids = await fetchBIMUnlinkedElementIds(modelId);
+      setActivePositionId(null);
+      onHighlightElements(ids);
+    } catch {
+      setUnlinkedError(true);
+    } finally {
+      setUnlinkedBusy(false);
+    }
+  }, [modelId, onHighlightElements]);
 
   // Fallback deep-link BOQ id when none was supplied by the parent -
   // derived from the aggregate so "Open in BOQ" keeps working.
@@ -241,6 +257,23 @@ export default function BIMLinkedBOQPanel({
                     })
                   : t('bim.link_check_positions', { defaultValue: 'Some linked positions need attention' })}
               </p>
+              {checkQuery.data.unlinked_total > 0 && (
+                <button
+                  type="button"
+                  onClick={showUnlinkedIn3D}
+                  disabled={unlinkedBusy}
+                  data-testid="bim-link-check-show-3d"
+                  className="mt-1 inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-2xs font-medium text-oe-blue-text hover:bg-oe-blue-subtle disabled:opacity-50"
+                >
+                  {unlinkedBusy ? <Loader2 size={11} className="animate-spin" /> : <Box size={11} />}
+                  {t('bim.link_check_show_3d', { defaultValue: 'Show unlinked elements in 3D' })}
+                </button>
+              )}
+              {unlinkedError && (
+                <p className="mt-0.5 text-2xs text-semantic-error" role="alert">
+                  {t('bim.link_check_show_3d_failed', { defaultValue: 'Could not load the unlinked elements' })}
+                </p>
+              )}
               <ul className="mt-1 space-y-0.5 max-h-32 overflow-y-auto">
                 {checkQuery.data.findings.slice(0, 8).map((f, i) => (
                   <li

@@ -111,6 +111,7 @@ import { contractDeepLink } from '@/shared/lib/changeChainLinks';
 import { bidPackageDeepLink, boqDeepLink, PROCUREMENT_LINK, RFQ_LINK } from '@/shared/lib/awardChainLinks';
 import { listPackages as listBidPackages } from '@/features/bid-management/api';
 import { VideoHint } from '@/features/videos/VideoHint';
+import { designRecordName } from '@/shared/lib/designRecordName';
 
 // English fallbacks for the computed `tendering.prequal_*` keys. The default used to be
 // the raw value, so until the key lands in a locale the screen shows the bare
@@ -864,7 +865,7 @@ function PackageCard({
         </div>
         <div className="min-w-0 flex-1">
           <h3 className="oe-card-title truncate">
-            {pkg.name}
+            {designRecordName(t, pkg.name)}
           </h3>
           <div className="mt-0.5 flex items-center gap-3 text-xs text-content-secondary">
             <span className="flex items-center gap-1">
@@ -1995,7 +1996,7 @@ function PackageDetail({
       <Card>
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h3 className="oe-section-title">{pkg.name}</h3>
+            <h3 className="oe-section-title">{designRecordName(t, pkg.name)}</h3>
             {pkg.description && (
               <p className="mt-0.5 text-sm text-content-secondary">{pkg.description}</p>
             )}

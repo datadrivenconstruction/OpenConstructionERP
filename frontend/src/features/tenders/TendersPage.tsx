@@ -19,6 +19,7 @@ import {
   type TenderSource,
   type TenderSummary,
 } from './api';
+import { designRecordName } from '@/shared/lib/designRecordName';
 
 type KindTab = 'all' | TenderKind;
 
@@ -148,7 +149,7 @@ export function TendersPage() {
                             {row.code}
                           </Link>
                         </td>
-                        <td className="text-content-primary">{row.title}</td>
+                        <td className="text-content-primary">{designRecordName(t, row.title)}</td>
                         <td>
                           <Badge variant={row.source === 'native' ? 'neutral' : 'blue'}>{sourceLabel(row)}</Badge>
                         </td>

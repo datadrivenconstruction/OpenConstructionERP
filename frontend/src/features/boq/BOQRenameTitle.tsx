@@ -10,6 +10,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pencil } from 'lucide-react';
 
+import { designRecordName } from '@/shared/lib/designRecordName';
 import { useRenameBOQ } from './useRenameBOQ';
 
 interface BOQRenameTitleProps {
@@ -78,7 +79,7 @@ export function BOQRenameTitle({ boqId, name, locked }: BOQRenameTitleProps) {
   return (
     <>
       <h1 className="text-lg font-semibold text-content-primary truncate" onDoubleClick={start}>
-        {name}
+        {designRecordName(t, name)}
       </h1>
       {!locked && (
         <button

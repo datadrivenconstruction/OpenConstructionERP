@@ -193,6 +193,11 @@ const resource = {
     "boq.bim_prov_missing": "Linked elements without a value in this unit (they add nothing): {{count}}",
     "boq.bim_prov_manual_kept": "Your quantity is kept. The model gives {{quantity}}.",
     "boq.bim_prov_no_quantity": "The model has no value in {{unit}} for these elements, so the quantity was not changed.",
+    "boq.restore_model_qty": "Restore model quantity",
+    "boq.restore_model_qty_confirm": "Replace your quantity {{manual}} with the model quantity {{model}} {{unit}}?",
+    "boq.restore_model_qty_done": "Model quantity restored: {{quantity}} {{unit}}",
+    "boq.restore_model_qty_provenance": "Linked elements: {{elements}}. Formula: {{formula}}",
+    "boq.restore_model_qty_failed": "Could not restore the model quantity",
     "auth.or": "or",
     "auth.sso_login": "Sign in with SSO",
     "auth.oidc_errors.no_code": "No authorisation code received from the identity provider.",
@@ -2523,6 +2528,7 @@ const resource = {
     "design.addendum.row": "{{name}}: addendum {{no}} for design revision {{revision}}",
     "design.addendum.contents": "Positions: {{lines}} · linked elements: {{elements}} · sheets: {{sheets}}",
     "design.addendum.review": "Review and send",
+    "design.addendum.revision_title": "Design revision {{number}}: quantity changes",
     "design.panel.title": "Selection",
     "design.panel.customize": "Blocks",
     "design.panel.customize_hint": "Show or hide blocks and set their order. Alt+↑/↓ moves the focused block. Kept for you in this browser.",
@@ -2775,6 +2781,8 @@ const resource = {
     "bim.link_check_unlinked": "{{unlinked}} of {{total}} elements are not linked to the BOQ",
     "bim.link_check_positions": "Some linked positions need attention",
     "bim.link_check_more": "+{{count}} more",
+    "bim.link_check_show_3d": "Show unlinked elements in 3D",
+    "bim.link_check_show_3d_failed": "Could not load the unlinked elements",
   }
 } as { translation: Record<string, string> };
 

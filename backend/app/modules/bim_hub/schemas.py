@@ -827,6 +827,22 @@ class BIMLinkCheckResponse(BaseModel):
     findings: list[dict[str, Any]] = Field(default_factory=list)
 
 
+class BIMUnlinkedElementsResponse(BaseModel):
+    """Ids of a model's elements linked to no BOQ position."""
+
+    model_id: str
+    element_ids: list[str] = Field(default_factory=list)
+
+
+class RestoredModelQuantityResponse(BaseModel):
+    """A position's quantity after the model figure replaced a manual one, with the provenance written."""
+
+    position_id: str
+    quantity: str | None = None
+    unit: str | None = None
+    provenance: dict[str, Any] | None = None
+
+
 # ── BIMQuantityMap schemas ───────────────────────────────────────────────────
 
 

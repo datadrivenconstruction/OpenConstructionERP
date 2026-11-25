@@ -1,0 +1,49 @@
+// DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
+// Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
+//
+// The design take-off writes neutral codes into the BOQ, tender packages, RFQs and addenda; every page that shows
+// such a record reads it through one formatter, in the reader's language, and older free-text rows stay readable.
+import { describe, expect, it } from 'vitest';
+import i18next from 'i18next';
+
+import de from '@/app/locales/de';
+import en from '@/app/locales/en';
+import { designRecordName } from '../designRecordName';
+
+async function tFor(lng: 'en' | 'de') {
+  const inst = i18next.createInstance();
+  await inst.init({ lng, resources: { en: { translation: en.translation }, de: { translation: de.translation } } });
+  return inst.t.bind(inst);
+}
+
+describe('designRecordName', () => {
+  it('renders a take-off package code in English and German', async () => {
+    expect(designRecordName(await tFor('en'), 'design_takeoff:IfcWall')).toContain('IfcWall');
+    expect(designRecordName(await tFor('en'), 'design_takeoff:IfcWall')).not.toContain('design_takeoff');
+    expect(designRecordName(await tFor('de'), 'design_takeoff:IfcWall')).toBe(
+      String((await tFor('de'))('design.takeoff.package_name', { ifc_class: 'IfcWall' })),
+    );
+  });
+
+  it('renders the take-off bill code', async () => {
+    const t = await tFor('en');
+    expect(designRecordName(t, 'design_takeoff')).toBe(String(t('design.takeoff.boq_name')));
+    expect(designRecordName(t, 'design_takeoff')).not.toBe('design_takeoff');
+  });
+
+  it('renders an addendum title code with its revision number', async () => {
+    expect(designRecordName(await tFor('en'), 'design_revision_quantities:3')).toBe(
+      'Design revision 3: quantity changes',
+    );
+    expect(designRecordName(await tFor('de'), 'design_revision_quantities:3')).toBe(
+      'Planungsrevision 3: Mengenänderungen',
+    );
+  });
+
+  it('leaves names a person typed, and old English addendum titles, as they are', async () => {
+    const t = await tFor('de');
+    expect(designRecordName(t, 'Design revision 2: quantity changes')).toBe('Design revision 2: quantity changes');
+    expect(designRecordName(t, 'Rohbau Los 1')).toBe('Rohbau Los 1');
+    expect(designRecordName(t, null)).toBe('');
+  });
+});

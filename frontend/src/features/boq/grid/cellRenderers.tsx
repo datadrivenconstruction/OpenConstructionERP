@@ -62,6 +62,7 @@ import { parseDecimalInput } from '@/shared/lib/parseDecimal';
 import { getNumberLocale } from '@/stores/usePreferencesStore';
 import { quantityFractionDigits } from './quantityFormat';
 import { bimLinkState, bimLinkTooltip, readBimLinkRecord } from './bimLinkProvenance';
+import { RestoreModelQuantityButton } from './RestoreModelQuantityButton';
 import { localizedUnitCode } from '@/shared/lib/unitLabels';
 import type { DisplayQuantityApi } from '@/shared/hooks/useDisplayQuantity';
 import { useFxRatesStore, getFxRate } from '@/stores/useFxRatesStore';
@@ -5729,6 +5730,15 @@ export function QuantityCellRenderer(params: ICellRendererParams) {
         className={`flex items-center justify-end gap-1 w-full h-full text-xs tabular-nums leading-[32px] ${colorClass}`}
         title={titleText}
       >
+        {linkState === 'manual_kept' && !ctx?.readOnly && data.id && (
+          <RestoreModelQuantityButton
+            positionId={String(data.id)}
+            boqId={(data.boq_id as string | undefined) ?? null}
+            manualQuantity={formatted}
+            modelQuantity={linkRec?.model_quantity}
+            unit={(data.unit as string | undefined) ?? ''}
+          />
+        )}
         <Icon className="w-3 h-3 opacity-80" aria-hidden="true" />
         <span>{formatted}</span>
       </span>

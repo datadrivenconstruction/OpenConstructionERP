@@ -2804,8 +2804,16 @@ class BIMHubService:
             "findings": [finding(r) for r in [*report.errors, *report.warnings]],
         }
 
-    async def restore_model_quantity(self, position_id: uuid.UUID) -> None:
-        """Drop a kept manual quantity and take the model figure again."""
+    async def unlinked_element_ids(self, model_id: uuid.UUID) -> list[str]:
+        """Ids of the model's elements linked to no BOQ position, for highlighting in the viewer."""
+        linked_exists = select(BOQElementLink.id).where(BOQElementLink.bim_element_id == BIMElement.id).exists()
+        rows = await self.session.execute(
+            select(BIMElement.id).where(BIMElement.model_id == model_id, ~linked_exists).order_by(BIMElement.stable_id)
+        )
+        return [str(r) for r in rows.scalars().all()]
+
+    async def restore_model_quantity(self, position_id: uuid.UUID) -> dict[str, Any]:
+        """Drop a kept manual quantity, take the model figure again, and return the new quantity with its provenance."""
         pos = await self.session.get(Position, position_id)
         if pos is None:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="BOQ position not found")
@@ -2816,6 +2824,14 @@ class BIMHubService:
             pos.metadata_ = meta
             await self.session.flush()
         await self._sync_boq_quantity_from_links(position_id)
+        await self.session.refresh(pos)
+        record = (pos.metadata_ or {}).get("bim_link_quantity")
+        return {
+            "position_id": str(pos.id),
+            "quantity": pos.quantity,
+            "unit": pos.unit,
+            "provenance": record if isinstance(record, dict) else None,
+        }
 
     async def create_link(
         self,
@@ -3038,6 +3054,8 @@ class BIMHubService:
     async def _sync_boq_quantity_from_links(
         self,
         position_id: uuid.UUID,
+        *,
+        unrecorded_quantity_is_manual: bool = False,
     ) -> None:
         """Recompute ``Position.quantity`` from the linked elements and record how.
 
@@ -3054,6 +3072,10 @@ class BIMHubService:
         model last set it is kept; the model figure is recorded beside it as
         ``model_quantity`` with ``manual_kept`` so the difference stays visible.
         Elements are read in one query, never one per link.
+
+        ``unrecorded_quantity_is_manual``: a non-zero quantity on a position the
+        model never set (no previous record) counts as the estimator's own and is
+        kept; rules linking into an existing position pass it.
         """
         pos = await self.session.get(Position, position_id)
         if pos is None:
@@ -3089,6 +3111,14 @@ class BIMHubService:
                 manual_kept = Decimal(str(pos.quantity or "0")) != Decimal(str(previous["applied_quantity"]))
             except (InvalidOperation, TypeError, ValueError):
                 manual_kept = True
+        elif result.quantity is not None and previous and previous.get("manual_kept"):
+            manual_kept = True  # an override kept earlier stays until a person restores the model figure
+        elif result.quantity is not None and previous is None and unrecorded_quantity_is_manual:
+            try:
+                current = Decimal(str(pos.quantity or "0"))
+            except (InvalidOperation, TypeError, ValueError):
+                current = Decimal(0)
+            manual_kept = current != 0 and current != result.quantity
         record["manual_kept"] = manual_kept
 
         if result.quantity is not None and result.quantity > 0 and not manual_kept:
@@ -3515,6 +3545,7 @@ class BIMHubService:
             target=target,
             project_id=model.project_id,
         )
+        existing_target = position is not None
         positions_created = 0
 
         if position is None:
@@ -3580,6 +3611,9 @@ class BIMHubService:
             position.cad_element_ids = current
             await self.session.flush()
             links_created = len(new_links)
+            if existing_target:
+                # A position the rule only links into takes the linked elements' figure; a manual one is kept, flagged
+                await self._sync_boq_quantity_from_links(position.id, unrecorded_quantity_is_manual=True)
 
         return links_created, positions_created
 

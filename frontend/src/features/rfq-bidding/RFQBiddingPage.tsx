@@ -57,6 +57,7 @@ import { useRfqAwardOrders, type RfqOrderLookup } from './useRfqAwardOrders';
 import { BoqResourcePicker } from './BoqResourcePicker';
 import { RfqInviteePicker, RfqLinesEditor } from './RfqEditorPanels';
 import type { AwardLookup, AwardOrderLite } from '@/shared/hooks/useAwardOutcome';
+import { designRecordName } from '@/shared/lib/designRecordName';
 
 /** A bidder is stored as a contact id; this is how the page names it. */
 type BidderName = (contactId: string) => string;
@@ -757,7 +758,7 @@ function RFQListPanel({
             >
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-sm font-semibold text-content-primary">{rfq.title}</span>
+                  <span className="text-sm font-semibold text-content-primary">{designRecordName(t, rfq.title)}</span>
                   <Badge variant={STATUS_BADGE[rfq.status]} dot size="sm">
                     {statusLabel(rfq.status, t)}
                   </Badge>
@@ -894,7 +895,7 @@ function ComparisonPanel({
         >
           <option value="">{t('rfq_bidding.choose_rfq', { defaultValue: 'Choose an RFQ...' })}</option>
           {comparableRfqs.map((r) => (
-            <option key={r.id} value={r.id}>{r.title}</option>
+            <option key={r.id} value={r.id}>{designRecordName(t, r.title)}</option>
           ))}
         </select>
       </div>
@@ -1296,7 +1297,7 @@ function AwardsPanel({
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
                   <CheckCircle2 className="h-4 w-4 text-semantic-success" aria-hidden />
-                  <span className="text-sm font-semibold text-content-primary">{rfq.title}</span>
+                  <span className="text-sm font-semibold text-content-primary">{designRecordName(t, rfq.title)}</span>
                   <Badge variant="success" dot size="sm">
                     {statusLabel(rfq.status, t)}
                   </Badge>

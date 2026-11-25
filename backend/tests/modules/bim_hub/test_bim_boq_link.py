@@ -227,3 +227,75 @@ async def test_link_check_flags_gaps(session) -> None:
     assert by_rule["bim_link.positions_have_elements"]["params"]["ordinal"] == "3"
     await session.refresh(hours)
     assert hours.quantity == "8"
+
+
+async def _wall_rule(svc, pid, pos) -> None:
+    from app.modules.bim_hub.schemas import BIMQuantityMapCreate
+
+    await svc.create_quantity_map(
+        BIMQuantityMapCreate(
+            project_id=pid,
+            name="Walls",
+            element_type_filter="Wall",
+            quantity_source="volume_m3",
+            unit="m3",
+            boq_target={"position_id": str(pos.id)},
+        )
+    )
+
+
+async def _apply(svc, model_id) -> None:
+    from app.modules.bim_hub.schemas import QuantityMapApplyRequest
+
+    preview = await svc.apply_quantity_maps(QuantityMapApplyRequest(model_id=model_id, dry_run=True))
+    await svc.apply_quantity_maps(
+        QuantityMapApplyRequest(model_id=model_id, dry_run=False, preview_fingerprint=preview.preview_fingerprint)
+    )
+
+
+@pytest.mark.asyncio
+async def test_rule_into_existing_position_recomputes_its_quantity(session) -> None:
+    svc = BIMHubService(session)
+    pid = await _project(session)
+    pos = await _position(session, pid, unit="m3", rate="100")
+    model, _elems = await _model(session, pid, [("Wall", {"volume_m3": 2.5}), ("Wall", {"volume_m3": 1.5})])
+    await _wall_rule(svc, pid, pos)
+    await _apply(svc, model.id)
+    await session.refresh(pos)
+    assert pos.quantity == "4.0000"
+    assert pos.total == "400.00"
+    rec = pos.metadata_["bim_link_quantity"]
+    assert rec["applied_quantity"] == "4.0000"
+    assert rec["element_count"] == 2
+    assert rec["manual_kept"] is False
+
+
+@pytest.mark.asyncio
+async def test_rule_into_existing_position_keeps_a_manual_quantity_flagged(session) -> None:
+    svc = BIMHubService(session)
+    pid = await _project(session)
+    pos = await _position(session, pid, unit="m3", quantity="12", rate="100")
+    model, _elems = await _model(session, pid, [("Wall", {"volume_m3": 2.5}), ("Wall", {"volume_m3": 1.5})])
+    await _wall_rule(svc, pid, pos)
+    await _apply(svc, model.id)
+    await session.refresh(pos)
+    assert pos.quantity == "12"
+    rec = pos.metadata_["bim_link_quantity"]
+    assert rec["manual_kept"] is True
+    assert rec["model_quantity"] == "4.0000"
+
+    restored = await svc.restore_model_quantity(pos.id)
+    assert restored["quantity"] == "4.0000"
+    assert restored["provenance"]["manual_kept"] is False
+    assert restored["provenance"]["applied_quantity"] == "4.0000"
+    assert restored["provenance"]["formula"] == "sum(volume_m3) x 1 [m3 -> m3]"
+
+
+@pytest.mark.asyncio
+async def test_unlinked_element_ids_are_the_elements_without_a_link(session) -> None:
+    svc = BIMHubService(session)
+    pid = await _project(session)
+    pos = await _position(session, pid, unit="m3")
+    model, elems = await _model(session, pid, [("Wall", {"volume_m3": 2}), ("Door", {}), ("Door", {})])
+    await svc.create_links_bulk(pos.id, elems[:1])
+    assert await svc.unlinked_element_ids(model.id) == [str(elems[1].id), str(elems[2].id)]

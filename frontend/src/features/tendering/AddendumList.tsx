@@ -47,6 +47,7 @@ import {
   listPackageBidders,
   publishAddendum,
 } from './api';
+import { designRecordName } from '@/shared/lib/designRecordName';
 
 interface Props {
   packageId: string;
@@ -539,7 +540,7 @@ function AddendumRow({
               })}
             </span>
             <span className="text-sm text-content-primary truncate">
-              {addendum.title}
+              {designRecordName(t, addendum.title)}
             </span>
             {isPublished ? (
               <Badge variant="success" size="sm">

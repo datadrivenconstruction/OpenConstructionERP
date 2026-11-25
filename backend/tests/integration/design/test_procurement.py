@@ -251,7 +251,7 @@ async def test_issued_package_follows_and_records_each_change(client):
         assert await svc.list_addenda(next(p for p in await _packages(pid) if p.name.endswith("IfcWall")).id) == []
     assert add.published_at is None and add.revision_no == 1
     rev_no = (await client.get(f"{BASE}/revisions/{r2}", headers=h)).json()["number"]
-    assert add.title == f"Design revision {rev_no}: quantity changes"
+    assert add.title == f"design_revision_quantities:{rev_no}"
     [bc] = add.boq_changes
     assert (bc["op"], bc["quantity_before"], bc["quantity_after"], bc["unit"]) == (
         "change",

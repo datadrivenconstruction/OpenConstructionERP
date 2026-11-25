@@ -29,6 +29,7 @@ import type { BIMElementData, BIMModelData } from '@/shared/ui/BIMViewer';
 import { postWithUploadProgress } from '@/shared/lib/uploadWithProgress';
 import type { SandboxMatchRow, SandboxRule, SandboxRunResult, SandboxSkipRow } from './ruleSandbox';
 import type { PropertyFilterValue } from './ruleOperators';
+import type { BimLinkQuantityRecord } from '@/features/boq/grid/bimLinkProvenance';
 
 /* ── Format helpers ────────────────────────────────────────────────────── */
 
@@ -814,6 +815,28 @@ export interface BIMLinkCheckResponse {
  *  (rule set ``bim_link``; messages arrive in the caller's language). */
 export async function fetchBIMLinkCheck(modelId: string): Promise<BIMLinkCheckResponse> {
   return apiGet<BIMLinkCheckResponse>(`/v1/bim_hub/models/${encodeURIComponent(modelId)}/link-check/`);
+}
+
+/** Ids of the model's elements linked to no BOQ position ("show in 3D" of the link check). */
+export async function fetchBIMUnlinkedElementIds(modelId: string): Promise<string[]> {
+  const res = await apiGet<{ model_id: string; element_ids: string[] }>(
+    `/v1/bim_hub/models/${encodeURIComponent(modelId)}/unlinked-elements/`,
+  );
+  return res.element_ids;
+}
+
+export interface RestoredModelQuantity {
+  position_id: string;
+  quantity: string | null;
+  unit: string | null;
+  provenance: BimLinkQuantityRecord | null;
+}
+
+/** Replace a kept manual quantity with the linked elements' figure; returns the provenance written. */
+export async function restoreModelQuantity(positionId: string): Promise<RestoredModelQuantity> {
+  return apiPost<RestoredModelQuantity>(
+    `/v1/bim_hub/links/restore-model-quantity/?boq_position_id=${encodeURIComponent(positionId)}`,
+  );
 }
 
 /** Fetch the geometry file as a blob and return an object URL.

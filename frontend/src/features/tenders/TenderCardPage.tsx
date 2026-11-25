@@ -11,6 +11,7 @@ import { MoneyDisplay } from '@/shared/ui/MoneyDisplay';
 import { DateDisplay } from '@/shared/ui/DateDisplay';
 import { fmtQuantity } from '@/shared/lib/formatters';
 import { fetchTender, tenderEditPath, type TenderDetail } from './api';
+import { designRecordName } from '@/shared/lib/designRecordName';
 
 type Tab = 'scope' | 'bidders' | 'qa' | 'bids' | 'levelling' | 'award';
 
@@ -28,7 +29,7 @@ export function TenderCardPage() {
     return (id: string | null | undefined) => (id ? names.get(id) ?? '' : '');
   }, [tender]);
 
-  const title = tender ? `${tender.package.code} ${tender.package.title}`.trim() : t('tenders.title', { defaultValue: 'Tenders' });
+  const title = tender ? `${tender.package.code} ${designRecordName(t, tender.package.title)}`.trim() : t('tenders.title', { defaultValue: 'Tenders' });
   const lowest = useMemo(() => {
     const totals = (tender?.submissions ?? []).map((s) => Number(s.total_amount)).filter((n) => Number.isFinite(n) && n > 0);
     return totals.length ? Math.min(...totals) : null;
@@ -44,7 +45,7 @@ export function TenderCardPage() {
         subtitle={
           tender ? (
             <span className="text-lg font-semibold text-content-primary">
-              <span className="text-content-tertiary tabular-nums">{tender.package.code}</span> {tender.package.title}
+              <span className="text-content-tertiary tabular-nums">{tender.package.code}</span> {designRecordName(t, tender.package.title)}
             </span>
           ) : (
             t('tenders.card_loading', { defaultValue: 'Loading the tender.' })
