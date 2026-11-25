@@ -287,14 +287,14 @@ async def test_change_order_carries_the_schedule_delta(client):
     async with async_session_factory() as s:
         order = (
             await s.execute(
-                select(ChangeOrder).where(ChangeOrder.project_id == pid, ChangeOrder.title.like("Design revision R2%"))
+                select(ChangeOrder).where(ChangeOrder.project_id == pid, ChangeOrder.title.like("design_revision:2%"))
             )
         ).scalar_one()
     meta = order.metadata_["design"]["schedule"]
     assert meta["delta_days"] == imp["totals"]["delta_days"] > 0
     assert order.schedule_impact_days == imp["totals"]["delta_days"]
     assert meta["complete"] is False and "roof" in meta["rate_missing"]
-    assert "Schedule: finish" in order.description and "no sourced productivity rate" in order.description
+    assert "[co:schedule|" in order.description and "[co:schedule_rates|" in order.description
 
 
 async def test_no_schedule_means_no_delta(client):

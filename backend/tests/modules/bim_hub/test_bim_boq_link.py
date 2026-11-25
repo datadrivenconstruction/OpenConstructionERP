@@ -299,3 +299,18 @@ async def test_unlinked_element_ids_are_the_elements_without_a_link(session) -> 
     model, elems = await _model(session, pid, [("Wall", {"volume_m3": 2}), ("Door", {}), ("Door", {})])
     await svc.create_links_bulk(pos.id, elems[:1])
     assert await svc.unlinked_element_ids(model.id) == [str(elems[1].id), str(elems[2].id)]
+
+
+@pytest.mark.asyncio
+async def test_unlinked_ids_are_the_ids_the_viewer_loads_not_stable_ids(session) -> None:
+    """The viewer keys meshes by the element ``id`` of the elements list; the stable id is another field."""
+    svc = BIMHubService(session)
+    pid = await _project(session)
+    pos = await _position(session, pid, unit="m3")
+    model, elems = await _model(session, pid, [("Wall", {"volume_m3": 2}), ("Door", {}), ("Door", {})])
+    await svc.create_links_bulk(pos.id, elems[:1])
+    viewer_ids = {str(e.id) for e in (await svc.list_elements(model.id))[0]}
+    unlinked = await svc.unlinked_element_ids(model.id)
+    assert len(unlinked) == 2
+    assert set(unlinked) <= viewer_ids
+    assert not set(unlinked) & {e.stable_id for e in elems}

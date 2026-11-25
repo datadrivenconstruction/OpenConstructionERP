@@ -6,6 +6,7 @@ elements come from the BIM hub's model diff. Nothing is approved here: a person 
 
 from __future__ import annotations
 
+import json
 import uuid
 from decimal import ROUND_HALF_UP, Decimal
 from typing import Any
@@ -135,37 +136,44 @@ def _unpriced(r: dict[str, Any]) -> bool:
     return Decimal(r["unit_rate"]) == 0
 
 
+def co_token(key: str, **params: Any) -> str:
+    """Neutral token for a generated sentence; the UI renders it in the reader's language (``designRecordText``)."""
+    return f"[co:{key}|{json.dumps(params, sort_keys=True, ensure_ascii=False)}]" if params else f"[co:{key}]"
+
+
 def _description(rev: DesignRevision, snap: dict[str, Any], unpriced: int) -> str:
-    imp = snap["impact"]
-    lines = [f"Accepted design revision R{rev.number}." + (f" {rev.message}" if rev.message else "")]
+    lines: list[str] = []
     els = snap.get("elements") or {}
     if "added_count" in els:
         lines.append(
-            f"Elements: {els['added_count']} added, {els['removed_count']} removed, {els['changed_count']} changed."
+            co_token("elements", added=els["added_count"], removed=els["removed_count"], changed=els["changed_count"])
         )
-    if not imp.get("estimate"):
-        lines.append("The project has no design estimate: no cost delta was computed.")
+    if not (snap.get("impact") or {}).get("estimate"):
+        lines.append(co_token("no_estimate"))
     if unpriced:
-        lines.append(f"{unpriced} position(s) have no rate: their quantity change is listed without an amount.")
+        lines.append(co_token("unpriced", count=unpriced))
     sch = snap.get("schedule") or {}
     if sch.get("schedule"):
         tot = sch["totals"]
         lines.append(
-            f"Schedule: finish {tot['current_finish']} -> {tot['after_finish']} ({tot['delta_days']:+d} days)."
+            co_token(
+                "schedule", **{"from": tot["current_finish"], "to": tot["after_finish"], "days": tot["delta_days"]}
+            )
         )
         if not sch.get("complete"):
-            lines.append(
-                f"{len(sch['rate_missing'])} trade(s) have no sourced productivity rate and are not in the "
-                "schedule delta."
-            )
+            lines.append(co_token("schedule_rates", count=len(sch["rate_missing"])))
     prc = (snap.get("procurement") or {}).get("totals")
     if prc:
         lines.append(
-            f"Procurement: {prc['lines_changed']} take-off line(s) change, {prc['lines_added']} added, "
-            f"{prc['lines_removed']} removed, in {prc['packages_affected']} package(s); "
-            f"{prc['issued_packages_affected']} of them already issued (an addendum is a person's call)."
+            co_token(
+                "procurement",
+                changed=prc["lines_changed"],
+                added=prc["lines_added"],
+                removed=prc["lines_removed"],
+                packages=prc["packages_affected"],
+                issued=prc["issued_packages_affected"],
+            )
         )
-    lines.append(f"Revision and acceptance screen: {acceptance_url(rev.id)}")
     return "\n".join(lines)[:5000]
 
 
@@ -253,7 +261,7 @@ async def create(session, rev: DesignRevision, row: DesignChangeOrder, user_id: 
     est = (
         await session.execute(select(DesignEstimate).where(DesignEstimate.project_id == rev.project_id))
     ).scalar_one_or_none()
-    title = f"Design revision R{rev.number}" + (f": {rev.message}" if rev.message else "")
+    title = f"design_revision:{rev.number}" + (f":{rev.message}" if rev.message else "")
     svc = ChangeOrderService(session)
     order = await svc.create_order(
         ChangeOrderCreate(
@@ -269,7 +277,7 @@ async def create(session, rev: DesignRevision, row: DesignChangeOrder, user_id: 
     for i, r in enumerate(rows):
         label = f"{r['ordinal'] or r['cost_group']} {r['label']}"
         if _unpriced(r):
-            label += " (no rate: amount not costed)"
+            label += " " + co_token("item_unpriced")
         item_meta = {
             "design_rule": r["rule"],
             "cost_group": r["cost_group"],
