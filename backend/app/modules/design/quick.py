@@ -176,14 +176,21 @@ def check(brief: dict[str, Any]) -> list[dict[str, Any]]:
         out.append(_issue("height_over_limit", "storeys", height=round(storeys * height, 2), limit=lim))
     minimum = (_country().get(str(brief.get("country") or "").upper()) or {}).get("min_clear_height_m")
     if height and minimum is not None:
-        clear = round(height - (v.get("slab_zone_m", (0.0,))[0]), 3)
-        if clear < minimum:
-            out.append(_issue("clear_height_below_minimum", "floor_height_m", clear=clear, minimum=minimum))
+        if "slab_zone_m" not in v:
+            # no source gives the slab zone: the clear height is unknown, so it is not checked
+            out.append(_issue("source_missing", "slab_zone_m", "warning", field="slab_zone_m"))
+        else:
+            clear = round(height - v["slab_zone_m"][0], 3)
+            if clear < minimum:
+                out.append(_issue("clear_height_below_minimum", "floor_height_m", clear=clear, minimum=minimum))
     if gfa is not None and gfa > 0:
         footprint = gfa / storeys
         plot = _num(brief.get("plot_area_m2"))
         if plot is not None and footprint > plot:
             out.append(_issue("footprint_over_plot", "plot_area_m2", footprint=round(footprint, 1), plot=plot))
+        depth = v.get("depth_m", (None,))[0]
+        if depth and depth > math.sqrt(footprint):
+            out.append(_issue("depth_clipped", "depth_m", "warning", depth=depth, used=round(math.sqrt(footprint), 2)))
         if "depth_min_m" in v:
             smallest = round(v["depth_min_m"][0] * mp.params_for({}, _gen(brief["building_type"]))[2].min, 1)
             if footprint < smallest:
@@ -208,6 +215,15 @@ def _model(brief: dict[str, Any], v: dict[str, tuple[Any, dict[str, Any]]]) -> d
     h, depth_in = v["floor_height_m"][0], v["depth_m"][0]
     area = gfa / storeys
     depth = min(depth_in, math.sqrt(area))
+    inputs_out = {k: {"value": val, "provenance": p, "flag": None} for k, (val, p) in v.items()}
+    if depth < depth_in:
+        # the given depth cannot fit a footprint this small: the square footprint is used and said so
+        inputs_out["depth_m"] = {
+            "value": round(depth, 2),
+            "provenance": _src("formula", REF_TYPES, "√(GFA ÷ storeys)", "derived"),
+            "flag": "depth_clipped",
+            "given": {"value": depth_in, "provenance": v["depth_m"][1]},
+        }
     width = area / depth
     perim = 2 * (width + depth)
     grid = v.get("grid_m", (None,))[0]
@@ -239,7 +255,7 @@ def _model(brief: dict[str, Any], v: dict[str, tuple[Any, dict[str, Any]]]) -> d
         "footprint": {"width_m": round(width, 2), "depth_m": round(depth, 2), "area_m2": round(area, 2)},
         "grid": gridinfo,
         "roof_form": roof_form,
-        "inputs": {k: {"value": val, "provenance": p} for k, (val, p) in v.items()},
+        "inputs": inputs_out,
         "quantities": [
             q("floor_area", gfa, "m2", None, _src("brief", "brief", None, "confirmed")),
             q("slab_ground", area, "m2", "GFA ÷ storeys"),
@@ -271,7 +287,7 @@ def _s(d: Decimal | None) -> str | None:
     return format(d.normalize(), "f") if d == d.to_integral_value() else format(d, "f")
 
 
-def _cost(brief: dict[str, Any], model: dict[str, Any]) -> dict[str, Any]:
+def _cost(brief: dict[str, Any], model: dict[str, Any], fx_source: str | None) -> dict[str, Any]:
     ref = _bands()
     band_type = _data()["types"][brief["building_type"]]["band"]
     # only the band this market's own data names; never another market's prices converted by a rate
@@ -305,13 +321,13 @@ def _cost(brief: dict[str, Any], model: dict[str, Any]) -> dict[str, Any]:
     pct = QUALITY[brief.get("quality") or "standard"]
     gfa = Decimal(str(brief["gfa_m2"]))
     qty = {x["code"]: x["value"] for x in model["quantities"]}
-    lines, used = [], Decimal(0)
+    # percentiles do not add up: each element and the total carry their own p10..p90, nothing is a remainder
+    lines = []
     for code, qcode in ELEMENTS.items():
         el = band["elements"].get(code)
         if el is None:
             continue
         amount = Decimal(el[pct]) * gfa * fx
-        used += amount
         q = qty.get(qcode)
         rate = (amount / Decimal(str(q))).quantize(Decimal("0.01"), ROUND_HALF_UP) if q else None
         lines.append(
@@ -321,6 +337,7 @@ def _cost(brief: dict[str, Any], model: dict[str, Any]) -> dict[str, Any]:
                 "unit": "m2",
                 "unit_rate": _s(rate),
                 "amount": _s(amount),
+                "range": {k: _s(Decimal(el[k]) * gfa * fx) for k in ("p10", "p50", "p90")},
                 "provenance": {
                     "source": "benchmark",
                     "ref": f"{REF_BANDS} {band_type}/din276/{code}/{pct}",
@@ -329,27 +346,13 @@ def _cost(brief: dict[str, Any], model: dict[str, Any]) -> dict[str, Any]:
             }
         )
     total = Decimal(band["total"][pct]) * gfa * fx
-    lines.append(
-        {
-            "code": "other",
-            "quantity": qty["floor_area"],
-            "unit": "m2",
-            "unit_rate": None,
-            "amount": _s(total - used),
-            "provenance": {
-                "source": "benchmark",
-                "ref": f"{REF_BANDS} {band_type}/din276/total/{pct}",
-                "formula": "band total × GFA − element lines",
-            },
-        }
-    )
     lo, hi = Decimal(band["total"]["p10"]) * fx, Decimal(band["total"]["p90"]) * fx
     per = total / gfa
     return {
         **base,
         "currency": cur,
         "fx_rate": _s(fx) if cur != ref["currency"] else None,
-        "fx_source": brief.get("fx_source") or ("brief" if cur != ref["currency"] else None),
+        "fx_source": (fx_source or "brief") if cur != ref["currency"] else None,
         "quality": pct,
         "total": _s(total),
         "per_m2": _s(per),
@@ -358,7 +361,7 @@ def _cost(brief: dict[str, Any], model: dict[str, Any]) -> dict[str, Any]:
             "low": _s(lo),
             "mid": _s(Decimal(band["total"]["p50"]) * fx),
             "high": _s(hi),
-            "within": lo <= per <= hi,
+            "ref": f"{REF_BANDS} {band_type}/din276/total",
         },
         "reason": None,
     }
@@ -374,8 +377,10 @@ def _schedule() -> dict[str, Any]:
     }
 
 
-def build(brief: dict[str, Any]) -> dict[str, Any]:
-    """Model, cost and programme for a short brief; with blocking issues only the issues come back."""
+def build(brief: dict[str, Any], *, fx_source: str | None = None) -> dict[str, Any]:
+    """Model, cost and programme for a short brief; with blocking issues only the issues come back.
+
+    ``fx_source`` names where a rate came from (the server sets it; a brief cannot claim one)."""
     issues = check(brief)
     if any(i["severity"] == "error" for i in issues):
         return {"issues": issues, "model": None, "cost": None, "schedule": None, "suggestions": [], "generator": None}
@@ -405,7 +410,7 @@ def build(brief: dict[str, Any]) -> dict[str, Any]:
         "issues": issues,
         "generator": _gen(brief["building_type"]) is not None,
         "model": model,
-        "cost": _cost(brief, model),
+        "cost": _cost(brief, model, fx_source),
         "schedule": _schedule(),
         "suggestions": suggestions,
     }

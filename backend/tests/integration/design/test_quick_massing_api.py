@@ -63,6 +63,20 @@ async def test_project_quick_uses_project_currency_and_is_tenant_scoped(client):
     assert denied.status_code in (403, 404)
 
 
+async def test_project_country_wins_over_the_body_country(client):
+    from app.database import async_session_factory
+    from app.modules.projects.models import Project
+
+    owner, h = await make_user(client)
+    pid = await make_project(owner)
+    async with async_session_factory() as s:
+        p = await s.get(Project, pid)
+        p.currency, p.country_code = "EUR", "US"
+        await s.commit()
+    cost = (await client.post(f"{BASE}/projects/{pid}/quick", json=OFFICE, headers={**h, **LINK})).json()["cost"]
+    assert cost["total"] is None and cost["reason"] == "no_band_market"  # the body said DE; the project is US
+
+
 async def test_brief_findings_show_in_project_validation(client):
     owner, h = await make_user(client)
     pid = await make_project(owner)
@@ -75,7 +89,8 @@ async def test_brief_findings_show_in_project_validation(client):
     r = await client.get(f"{BASE}/projects/{pid}/validation", headers={**h, **LINK})
     assert r.status_code == 200, r.text
     found = [f for f in r.json()["findings"] if f["rule_id"] == "design.brief_plausible"]
-    assert [f["ref"] for f in found] == ["storeys"]
+    # the brief names no slab zone, so the clear height is flagged unsourced, not checked against zero
+    assert [f["ref"] for f in found] == ["storeys", "slab_zone_m"]
     assert "15.0" in found[0]["message"] and "12" in found[0]["message"]
 
 
