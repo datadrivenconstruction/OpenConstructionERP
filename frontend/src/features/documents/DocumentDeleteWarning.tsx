@@ -57,6 +57,7 @@ const MODULE_LABEL_KEYS: Record<string, string> = {
   guarantees: 'guarantees.title',
   hse_frame: 'hseFrame.title',
   markups: 'markups.title',
+  ncr: 'nav.ncr',
   meetings: 'meetings.title',
   plan_room: 'plan_room.title',
   portal: 'portal.title',

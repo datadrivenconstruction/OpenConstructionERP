@@ -573,6 +573,8 @@ def _checker_for(
     """
     if category in ("2", "3"):
         others = tuple(f for f in parties.firms if f != designer)
+        if not others:
+            others = tuple(e for e in parties.engineers if e != designer)
         return rng.choice(others) if others else None
     candidates = tuple(e for e in parties.engineers if e != parties.twc_name)
     if candidates:
@@ -804,6 +806,13 @@ async def _seed_project(
 
         designer = rng.choice(parties.firms) if parties.firms else None
         checker = _checker_for(rng, parties, spec.category, designer)
+        if checker is None and spec.category in ("2", "3") and status not in _PRE_PERMIT_STATUSES:
+            # No independent checker exists in this project, so the design cannot be shown as checked.
+            status = _DESIGN_SUBMITTED
+            design_window, load_window, strike_window = _DATE_PLAN[status]
+            design_due = _offset(rng, design_window, anchor=today)
+            load_date = _offset(rng, load_window, anchor=today)
+            strike_date = _offset(rng, strike_window, anchor=today)
 
         item = await service.create_item(
             project_id,
