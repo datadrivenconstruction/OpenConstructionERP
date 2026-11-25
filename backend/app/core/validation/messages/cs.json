@@ -716,6 +716,10 @@
     "constraint_conflict": {
       "fail": "Činnost '{activity}' je omezena {constraint} na {date}, ale její předchůdci to umožňují až o {days} dní později.",
       "suggestion": "Posuňte datum omezení, zkraťte řetězec předchůdců nebo přijměte zápornou rezervu."
+    },
+    "duration_follows_bill_quantity": {
+      "fail": "{activity} byla dimenzována pro množství {planned}, rozpočet nyní obsahuje {current}.",
+      "suggestion": "Znovu uložte položku pro přepočet doby trvání, nebo dobu zadejte ručně a tím ji zafixujte."
     }
   },
   "sheet_completeness": {

@@ -716,6 +716,10 @@
     "constraint_conflict": {
       "fail": "Aktivnost '{activity}' ograničena je s {constraint} na {date}, ali je prethodnici dopuštaju tek {days} dana kasnije.",
       "suggestion": "Pomaknite datum ograničenja, skratite lanac prethodnika ili prihvatite negativnu zalihu."
+    },
+    "duration_follows_bill_quantity": {
+      "fail": "{activity} je dimenzionirana za količinu {planned}, troškovnik sada sadrži {current}.",
+      "suggestion": "Ponovno spremite stavku za preračun trajanja ili upišite trajanje da ga zaključate."
     }
   },
   "sheet_completeness": {

@@ -286,6 +286,66 @@ class DatesMatchImportSource(ValidationRule):
         return results
 
 
+class DurationFollowsBillQuantity(ValidationRule):
+    """A BOQ-linked activity sized for a quantity the bill no longer holds.
+
+    Reads ``position_quantities`` (``{position_id: quantity}``) from the payload
+    and, per activity linked to exactly one position, the quantity its duration
+    was sized for (``metadata.quantity``). Fails where the two differ and the
+    duration is not pinned by hand (``metadata.duration_locked``): the dates no
+    longer follow the bill. Rows without a recorded quantity are not judged.
+    """
+
+    rule_id = "schedule_quality.duration_follows_bill_quantity"
+    name = "Duration follows the BOQ quantity"
+    standard = SCHEDULE_RULE_SET
+    severity = Severity.WARNING
+    category = RuleCategory.CONSISTENCY
+    description = "Flags a BOQ-linked activity whose duration was sized for a quantity the bill no longer holds."
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        from app.modules.schedule.boq_followup import DURATION_LOCKED_KEY, to_decimal
+
+        data = context.data
+        quantities = data.get("position_quantities") if isinstance(data, dict) else None
+        if not isinstance(quantities, dict) or not quantities:
+            return []
+        locale = _locale(context)
+        results: list[RuleResult] = []
+        for activity in _activities(context):
+            linked = activity.get("boq_position_ids") or []
+            meta = activity.get("metadata") if isinstance(activity.get("metadata"), dict) else {}
+            if len(linked) != 1 or meta.get(DURATION_LOCKED_KEY):
+                continue
+            sized_for = to_decimal(meta.get("quantity"))
+            current = to_decimal(quantities.get(str(linked[0])))
+            if sized_for is None or current is None:
+                continue
+            passed = sized_for == current
+            results.append(
+                RuleResult(
+                    rule_id=self.rule_id,
+                    rule_name=self.name,
+                    severity=self.severity,
+                    category=self.category,
+                    passed=passed,
+                    message=translate("common.ok", locale=locale)
+                    if passed
+                    else translate(
+                        f"{self.rule_id}.fail",
+                        locale=locale,
+                        activity=_label(activity),
+                        planned=str(sized_for),
+                        current=str(current),
+                    ),
+                    element_ref=str(activity.get("id")) if activity.get("id") else None,
+                    details={"planned_quantity": str(sized_for), "bill_quantity": str(current)},
+                    suggestion=None if passed else translate(f"{self.rule_id}.suggestion", locale=locale),
+                )
+            )
+        return results
+
+
 class ConstraintDateMissing(ValidationRule):
     """A dated constraint (start no earlier, must finish on ...) without a date.
 
@@ -854,6 +914,7 @@ class PdfImportLinksResolve(_PdfIssueRule):
 _SCHEDULE_RULES: tuple[ValidationRule, ...] = (
     DurationCountedOnProjectWeek(),
     DatesMatchImportSource(),
+    DurationFollowsBillQuantity(),
     ConstraintDateMissing(),
     ConstraintConflictsWithLogic(),
     SnapshotCostCoverage(),

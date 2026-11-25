@@ -716,6 +716,10 @@
     "constraint_conflict": {
       "fail": "Aktivitas '{activity}' dibatasi oleh {constraint} pada {date}, tetapi pendahulunya hanya mengizinkannya {days} hari lebih lambat.",
       "suggestion": "Geser tanggal kendala, persingkat rantai pendahulu, atau terima float negatif."
+    },
+    "duration_follows_bill_quantity": {
+      "fail": "{activity} dihitung untuk kuantitas {planned}, RAB sekarang berisi {current}.",
+      "suggestion": "Simpan item lagi untuk menghitung ulang durasi, atau ketik durasi untuk menguncinya."
     }
   },
   "sheet_completeness": {

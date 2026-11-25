@@ -716,6 +716,10 @@
     "constraint_conflict": {
       "fail": "'{activity}' ishi {constraint} bilan {date} sanasiga cheklangan, lekin undan oldingi ishlar buni faqat {days} kundan keyin ruxsat etadi.",
       "suggestion": "Cheklov sanasini siljiting, oldingi ishlar zanjirini qisqartiring yoki manfiy zaxirani qabul qiling."
+    },
+    "duration_follows_bill_quantity": {
+      "fail": "{activity} {planned} hajm uchun hisoblangan, smetada hozir {current}.",
+      "suggestion": "Davomiylikni qayta hisoblash uchun pozitsiyani qayta saqlang yoki uni qotirish uchun davomiylikni kiriting."
     }
   },
   "sheet_completeness": {

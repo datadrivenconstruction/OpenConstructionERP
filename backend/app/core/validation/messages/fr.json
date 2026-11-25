@@ -716,6 +716,10 @@
     "constraint_conflict": {
       "fail": "L'activité « {activity} » est contrainte par {constraint} au {date}, mais ses prédécesseurs ne la permettent que {days} jours plus tard.",
       "suggestion": "Déplacez la date de contrainte, raccourcissez la chaîne de prédécesseurs ou acceptez la marge négative."
+    },
+    "duration_follows_bill_quantity": {
+      "fail": "{activity} a été dimensionnée pour une quantité de {planned}, le métré indique maintenant {current}.",
+      "suggestion": "Enregistrez à nouveau la position pour recalculer la durée, ou saisissez une durée pour la figer."
     }
   },
   "sheet_completeness": {

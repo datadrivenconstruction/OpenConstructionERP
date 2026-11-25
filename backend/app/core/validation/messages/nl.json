@@ -716,6 +716,10 @@
     "constraint_conflict": {
       "fail": "Activiteit '{activity}' is door {constraint} beperkt tot {date}, maar de voorgangers staan het pas {days} dagen later toe.",
       "suggestion": "Verschuif de beperkingsdatum, verkort de keten van voorgangers of accepteer de negatieve speling."
+    },
+    "duration_follows_bill_quantity": {
+      "fail": "{activity} is berekend op een hoeveelheid van {planned}, de begroting bevat nu {current}.",
+      "suggestion": "Sla de post opnieuw op om de duur te herberekenen, of typ een duur om die vast te zetten."
     }
   },
   "sheet_completeness": {

@@ -198,3 +198,47 @@ async def _on_strength_reached(event: Event) -> None:
 
 
 event_bus.subscribe_once("site_sensors.strength.reached", _on_strength_reached)
+
+
+# ── Activities follow the bill's quantities ─────────────────────────────────
+
+
+def _quantity_change(data: dict[str, Any]) -> tuple[bool, Any]:
+    """Whether a position event may move a quantity, and the old value when it says."""
+    changes = data.get("changes")
+    if not isinstance(changes, dict) or not changes:
+        return True, None
+    if "propagated_from" in changes:
+        return True, None
+    entry = changes.get("quantity")
+    if entry is None:
+        return False, None
+    return True, entry.get("old") if isinstance(entry, dict) else None
+
+
+async def _on_bill_position_updated(event: Event) -> None:
+    """``boq.position.updated`` -> rescale linked activities and reflow, detached."""
+    data = event.data or {}
+    raw = data.get("position_id")
+    moves, old_quantity = _quantity_change(data)
+    if not raw or not moves:
+        return
+    try:
+        position_id = uuid.UUID(str(raw))
+    except ValueError:
+        return
+    _log_failures(_follow_quantity(position_id, old_quantity), name="schedule.boq_quantity_followup")
+
+
+async def _follow_quantity(position_id: uuid.UUID, old_quantity: Any) -> None:
+    from app.modules.schedule.boq_followup import follow_position_quantity
+
+    try:
+        async with async_session_factory() as session:
+            await follow_position_quantity(session, position_id, old_quantity)
+            await session.commit()
+    except Exception:
+        logger.exception("boq.position.updated schedule follow-up failed for position=%s", position_id)
+
+
+event_bus.subscribe_once("boq.position.updated", _on_bill_position_updated)

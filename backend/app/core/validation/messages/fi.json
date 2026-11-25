@@ -716,6 +716,10 @@
     "constraint_conflict": {
       "fail": "Toimintoa '{activity}' rajoittaa {constraint} päivään {date}, mutta sen edeltäjät sallivat sen vasta {days} päivää myöhemmin.",
       "suggestion": "Siirrä rajoituspäivää, lyhennä edeltäjäketjua tai hyväksy negatiivinen väljyys."
+    },
+    "duration_follows_bill_quantity": {
+      "fail": "{activity} mitoitettiin määrälle {planned}, määräluettelossa on nyt {current}.",
+      "suggestion": "Tallenna nimike uudelleen keston uudelleenlaskentaa varten tai kirjoita kesto lukitaksesi sen."
     }
   },
   "sheet_completeness": {

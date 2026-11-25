@@ -716,6 +716,10 @@
     "constraint_conflict": {
       "fail": "A(z) '{activity}' tevékenységet a(z) {constraint} korlátozza erre a napra: {date}, de az elődök csak {days} nappal később teszik lehetővé.",
       "suggestion": "Tolja el a korlátozás dátumát, rövidítse az elődláncot, vagy fogadja el a negatív tartalékot."
+    },
+    "duration_follows_bill_quantity": {
+      "fail": "{activity} {planned} mennyiségre lett méretezve, a költségvetésben most {current} szerepel.",
+      "suggestion": "Mentse újra a tételt az időtartam újraszámításához, vagy írja be az időtartamot a rögzítéséhez."
     }
   },
   "sheet_completeness": {

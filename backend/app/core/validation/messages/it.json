@@ -716,6 +716,10 @@
     "constraint_conflict": {
       "fail": "L'attività '{activity}' è vincolata da {constraint} al {date}, ma le sue predecessori la consentono solo {days} giorni dopo.",
       "suggestion": "Sposti la data del vincolo, accorci la catena delle predecessori o accetti lo scorrimento negativo."
+    },
+    "duration_follows_bill_quantity": {
+      "fail": "{activity} è stata dimensionata per una quantità di {planned}, il computo ora riporta {current}.",
+      "suggestion": "Salvate di nuovo la voce per ricalcolare la durata, oppure digitate una durata per bloccarla."
     }
   },
   "sheet_completeness": {

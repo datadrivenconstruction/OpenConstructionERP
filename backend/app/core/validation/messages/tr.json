@@ -716,6 +716,10 @@
     "constraint_conflict": {
       "fail": "'{activity}' faaliyeti {constraint} ile {date} tarihine kısıtlı, ancak öncülleri buna ancak {days} gün sonra izin veriyor.",
       "suggestion": "Kısıt tarihini kaydırın, öncül zincirini kısaltın veya negatif bolluğu kabul edin."
+    },
+    "duration_follows_bill_quantity": {
+      "fail": "{activity} {planned} miktarına göre boyutlandırıldı, keşif şimdi {current} içeriyor.",
+      "suggestion": "Süreyi yeniden hesaplamak için pozu tekrar kaydedin veya sabitlemek için bir süre girin."
     }
   },
   "sheet_completeness": {

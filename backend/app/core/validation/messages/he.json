@@ -716,6 +716,10 @@
     "constraint_conflict": {
       "fail": "הפעילות '{activity}' מוגבלת על ידי {constraint} ל-{date}, אך קודמיה מאפשרים זאת רק {days} ימים מאוחר יותר.",
       "suggestion": "הזיזו את תאריך האילוץ, קצרו את שרשרת הקודמים או קבלו את הרפיון השלילי."
+    },
+    "duration_follows_bill_quantity": {
+      "fail": "{activity} תוכננה לכמות של {planned}, כתב הכמויות מכיל כעת {current}.",
+      "suggestion": "שמרו את הסעיף שוב כדי לחשב מחדש את המשך, או הקלידו משך כדי לנעול אותו."
     }
   },
   "sheet_completeness": {

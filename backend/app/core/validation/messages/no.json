@@ -716,6 +716,10 @@
     "constraint_conflict": {
       "fail": "Aktiviteten '{activity}' er begrenset av {constraint} til {date}, men forgjengerne tillater det først {days} dager senere.",
       "suggestion": "Flytt begrensningsdatoen, forkort forgjengerkjeden, eller godta den negative slakken."
+    },
+    "duration_follows_bill_quantity": {
+      "fail": "{activity} ble dimensjonert for en mengde på {planned}, mengdebeskrivelsen har nå {current}.",
+      "suggestion": "Lagre posten på nytt for å beregne varigheten på nytt, eller skriv inn en varighet for å låse den."
     }
   },
   "sheet_completeness": {

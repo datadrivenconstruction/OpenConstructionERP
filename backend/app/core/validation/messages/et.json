@@ -716,6 +716,10 @@
     "constraint_conflict": {
       "fail": "Tegevust '{activity}' piirab {constraint} kuupäevaga {date}, kuid selle eelnevad tegevused võimaldavad seda alles {days} päeva hiljem.",
       "suggestion": "Nihutage piirangu kuupäeva, lühendage eelnevate tegevuste ahelat või nõustuge negatiivse varuga."
+    },
+    "duration_follows_bill_quantity": {
+      "fail": "{activity} arvestati kogusele {planned}, eelarves on nüüd {current}.",
+      "suggestion": "Salvesta positsioon uuesti, et kestus ümber arvutada, või sisesta kestus käsitsi, et see lukustada."
     }
   },
   "sheet_completeness": {
