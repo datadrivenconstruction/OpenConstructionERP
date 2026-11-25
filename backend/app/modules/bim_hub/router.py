@@ -1063,9 +1063,10 @@ async def upload_bim_data(
     # --- Validate data file ---
     data_filename = (data_file.filename or "").lower()
     if not data_filename.endswith((".csv", ".xlsx", ".xls")):
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Unsupported data file type. Please upload CSV (.csv) or Excel (.xlsx) file.",
+        raise _refusal(
+            "unsupported_data_file_type",
+            "Unsupported data file type. Please upload CSV (.csv) or Excel (.xlsx) file.",
+            filename=data_file.filename or "",
         )
 
     # Stream the element table to a bounded temp file (1 MB chunks, aborts past
@@ -1117,21 +1118,24 @@ async def upload_bim_data(
         else:
             rows = _parse_bim_rows_from_csv(data_content)
     except ValueError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Failed to parse data file: {exc}",
+        raise _refusal(
+            "data_file_unreadable",
+            f"Failed to parse data file: {exc}",
+            filename=data_file.filename or "",
         ) from exc
     except Exception as exc:
         logger.exception("Unexpected error parsing BIM data file")
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Failed to parse data file: {exc}",
+        raise _refusal(
+            "data_file_unreadable",
+            f"Failed to parse data file: {exc}",
+            filename=data_file.filename or "",
         ) from exc
 
     if not rows:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="No data rows found in the uploaded file.",
+        raise _refusal(
+            "no_data_rows",
+            "No data rows found in the uploaded file.",
+            filename=data_file.filename or "",
         )
 
     # Stream the geometry (if any) to a bounded temp file and keep it on disk
@@ -1163,9 +1167,10 @@ async def upload_bim_data(
         # --- Convert rows to element dicts ---
         element_dicts = _rows_to_elements(rows, has_geometry=has_geometry)
         if not element_dicts:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="No valid elements found. Ensure the file has an 'element_id' column.",
+            raise _refusal(
+                "no_valid_elements",
+                "No valid elements found. Ensure the file has an 'element_id' column.",
+                filename=data_file.filename or "",
             )
 
         # --- Determine format from geometry file extension ---
@@ -5306,6 +5311,28 @@ async def export_cobie_xlsx(
             "Content-Disposition": attachment_disposition(filename),
             "Content-Length": str(len(xlsx_bytes)),
         },
+    )
+
+
+@router.get("/models/{model_id}/export/elements.{fmt}")
+async def export_elements(
+    model_id: uuid.UUID,
+    fmt: str,
+    storey: str | None = Query(default=None, max_length=255),
+    element_type: str | None = Query(default=None, max_length=100),
+    discipline: str | None = Query(default=None, max_length=50),
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    _perm: None = Depends(RequirePermission("bim.read")),
+    service: BIMHubService = Depends(_get_service),
+) -> StreamingResponse:
+    """Export the model's elements (category, level, properties, quantities) as csv, json or xlsx."""
+    await _verify_model_access(service, model_id, user_id or "")
+    filters = {k: v for k, v in {"storey": storey, "element_type": element_type, "discipline": discipline}.items() if v}
+    data, media, filename = await service.export_elements(model_id, fmt, filters=filters or None)
+    return StreamingResponse(
+        io.BytesIO(data),
+        media_type=media,
+        headers={"Content-Disposition": attachment_disposition(filename), "Content-Length": str(len(data))},
     )
 
 
