@@ -240,6 +240,7 @@ class SafetyStatsResponse(BaseModel):
 
     total_incidents: int = 0
     total_observations: int = 0
+    open_observations: int = Field(default=0, description="Observations still open or in progress.")
     days_without_incident: int | None = Field(
         default=None,
         description=(

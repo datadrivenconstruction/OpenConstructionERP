@@ -1524,20 +1524,7 @@ class ReportingService:
             # "in_progress" (safety_indicators._OPEN_OBS_STATUSES).
             by_status = getattr(safety_stats, "incidents_by_status", None) or {}
             open_defects = sum(int(n) for st, n in by_status.items() if st != "closed")
-            from app.modules.safety.models import SafetyObservation
-            from app.modules.safety.safety_indicators import _OPEN_OBS_STATUSES
-
-            open_observations = int(
-                (
-                    await session.execute(
-                        select(func.count(SafetyObservation.id)).where(
-                            SafetyObservation.project_id == pid,
-                            SafetyObservation.status.in_(sorted(_OPEN_OBS_STATUSES)),
-                        )
-                    )
-                ).scalar_one()
-                or 0
-            )
+            open_observations = int(getattr(safety_stats, "open_observations", 0) or 0)
         except Exception:
             logger.warning(
                 "reporting.kpi_recalc safety.get_stats failed for project_id=%s - "

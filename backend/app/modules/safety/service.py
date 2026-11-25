@@ -19,6 +19,7 @@ from app.modules.safety._dateutil import canonicalize_incident_date, parse_incid
 from app.modules.safety.models import SafetyIncident, SafetyObservation
 from app.modules.safety.repository import IncidentRepository, ObservationRepository
 from app.modules.safety.safety_indicators import (
+    _OPEN_OBS_STATUSES,
     IncidentInput,
     ObservationInput,
     SafetyIndicators,
@@ -748,6 +749,7 @@ class SafetyService:
         return SafetyStatsResponse(
             total_incidents=total_incidents,
             total_observations=total_observations,
+            open_observations=sum(1 for o in observations if o.status in _OPEN_OBS_STATUSES),
             days_without_incident=days_without_incident,
             days_without_incident_status=days_without_incident_status,
             unparseable_incident_dates=unparseable_incident_dates,
