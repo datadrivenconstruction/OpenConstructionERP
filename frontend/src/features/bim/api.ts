@@ -792,6 +792,30 @@ export async function fetchBIMModelBOQLinks(
   );
 }
 
+export interface BIMLinkCheckFinding {
+  rule_id: string;
+  severity: 'error' | 'warning' | 'info';
+  message: string;
+  params: Record<string, string>;
+  element_ref: string;
+  suggestion: string | null;
+}
+
+export interface BIMLinkCheckResponse {
+  model_id: string;
+  element_total: number;
+  unlinked_total: number;
+  unlinked_by_type: { element_type: string; count: number }[];
+  positions: { id: string; ordinal: string | null; unit: string | null; linked: number; status: string; manual_kept: boolean }[];
+  findings: BIMLinkCheckFinding[];
+}
+
+/** Unlinked elements, positions without elements and unit gaps of one model
+ *  (rule set ``bim_link``; messages arrive in the caller's language). */
+export async function fetchBIMLinkCheck(modelId: string): Promise<BIMLinkCheckResponse> {
+  return apiGet<BIMLinkCheckResponse>(`/v1/bim_hub/models/${encodeURIComponent(modelId)}/link-check/`);
+}
+
 /** Fetch the geometry file as a blob and return an object URL.
  *
  * Uses the Authorization header instead of a query-param token to avoid

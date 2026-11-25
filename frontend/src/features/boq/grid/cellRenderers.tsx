@@ -61,6 +61,7 @@ import { reuseNumberFormat } from '@/shared/lib/money';
 import { parseDecimalInput } from '@/shared/lib/parseDecimal';
 import { getNumberLocale } from '@/stores/usePreferencesStore';
 import { quantityFractionDigits } from './quantityFormat';
+import { bimLinkState, bimLinkTooltip, readBimLinkRecord } from './bimLinkProvenance';
 import { localizedUnitCode } from '@/shared/lib/unitLabels';
 import type { DisplayQuantityApi } from '@/shared/hooks/useDisplayQuantity';
 import { useFxRatesStore, getFxRate } from '@/stores/useFxRatesStore';
@@ -5632,6 +5633,7 @@ export function ResourceFullWidthRenderer(params: ICellRendererParams) {
 
 export function QuantityCellRenderer(params: ICellRendererParams) {
   const { data, value, context } = params;
+  const { t } = useTranslation();
   if (!data || data._isSection || data._isFooter) {
     // Footer rows (Direct Cost / Net Total / VAT / Gross Total) must not
     // display a numeric Qty — totals don't have a meaningful quantity (Bug 15).
@@ -5665,9 +5667,12 @@ export function QuantityCellRenderer(params: ICellRendererParams) {
   }
 
   const meta = (data.metadata ?? {}) as Record<string, unknown>;
-  const hasBimSource = !!meta.bim_qty_source;
   const hasPdfSource = !!meta.pdf_measurement_source;
   const hasDwgSource = !!meta.dwg_annotation_source;
+  // Quantity taken from linked model elements: provenance from the last link sync.
+  const linkRec = hasPdfSource || hasDwgSource ? null : readBimLinkRecord(meta);
+  const linkState = bimLinkState(linkRec);
+  const hasBimSource = !!meta.bim_qty_source || linkState !== null;
   const formulaSource = typeof meta.formula === 'string' ? meta.formula : null;
 
   let colorClass = '';
@@ -5679,8 +5684,12 @@ export function QuantityCellRenderer(params: ICellRendererParams) {
     colorClass = 'font-semibold text-semantic-warning';
     titleText = String(meta.dwg_annotation_source);
   } else if (hasBimSource) {
-    colorClass = 'font-semibold text-semantic-success';
-    titleText = String(meta.bim_qty_source);
+    colorClass = linkState === 'manual_kept' || linkState === 'no_quantity'
+      ? 'font-semibold text-semantic-warning'
+      : 'font-semibold text-semantic-success';
+    titleText = [meta.bim_qty_source ? String(meta.bim_qty_source) : '', linkRec ? bimLinkTooltip(linkRec, t) : '']
+      .filter(Boolean)
+      .join('\n');
   } else if (formulaSource) {
     // Issue #90: cells with a stored formula get a violet accent + the
     // formula string in the title so a user knows the qty is computed.
