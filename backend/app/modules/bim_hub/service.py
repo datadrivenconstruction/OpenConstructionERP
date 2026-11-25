@@ -22,7 +22,7 @@ from decimal import Decimal, InvalidOperation
 from functools import lru_cache
 from pathlib import Path
 from types import SimpleNamespace
-from typing import Any, NamedTuple
+from typing import IO, Any, NamedTuple
 
 from fastapi import HTTPException, status
 from sqlalchemy import func, or_, select
@@ -825,6 +825,10 @@ def _bim_data_dir() -> Path:
     from app.core.storage import resolve_data_dir
 
     return resolve_data_dir() / "bim"
+
+
+#: Rows one XLSX element export may hold: the workbook is built in memory (3 GB server budget).
+XLSX_EXPORT_MAX_ROWS = 50_000
 
 
 def _element_matches_filters(element: Any, filters: dict) -> bool:
@@ -2283,31 +2287,81 @@ class BIMHubService:
         fmt: str,
         *,
         filters: dict | None = None,
-    ) -> tuple[bytes, str, str]:
-        """Export a model's elements as CSV, JSON or XLSX.
+    ) -> tuple[IO[bytes], str, str]:
+        """Export a model's elements as CSV, JSON or XLSX into a spooled file (memory up to 8 MB, then disk).
 
-        Returns ``(bytes, media_type, filename)``; 404 if the model is missing,
-        400 for an unknown format.
+        The filters run in SQL and the rows are paged in; CSV and JSON are written page by page. XLSX is built
+        in memory, so it is capped at ``XLSX_EXPORT_MAX_ROWS`` (413 ``export_too_large_for_xlsx`` beyond it).
+        Returns ``(file at position 0, media_type, filename)``; 404 if the model is missing, 400 for an unknown format.
         """
-        from app.modules.bim_hub.exporters.elements import ELEMENT_EXPORT_FORMATS, build_elements_export
+        import codecs
+        import tempfile
 
-        if fmt not in ELEMENT_EXPORT_FORMATS:
+        from app.modules.bim_hub.exporters import elements as ex
+
+        if fmt not in ex.ELEMENT_EXPORT_FORMATS:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Unsupported export format: {fmt}")
         model = await self.get_model(model_id)
-        elements: list[BIMElement] = []
-        offset = 0
-        page_size = 5000
-        while True:
-            batch, total = await self.element_repo.list_for_model(model_id, offset=offset, limit=page_size)
-            elements.extend(batch)
-            if offset + page_size >= total or not batch:
-                break
-            offset += page_size
-        if filters:
-            elements = [e for e in elements if _element_matches_filters(e, filters)]
-        data, media = await asyncio.to_thread(build_elements_export, elements, fmt)
+        where = [BIMElement.model_id == model_id]
+        for name, want in (filters or {}).items():
+            if name not in ("storey", "element_type", "discipline") or not want:
+                continue
+            col = getattr(BIMElement, name)
+            where.append(col.in_(list(want)) if isinstance(want, (list, tuple, set)) else col == want)
+        order = (BIMElement.element_type, BIMElement.stable_id, BIMElement.id)
+        page_size = 2000
+
+        async def pages(*cols):
+            offset = 0
+            while True:
+                stmt = select(*cols) if cols else select(BIMElement)
+                stmt = stmt.where(*where).order_by(*order).offset(offset).limit(page_size)
+                res = await self.session.execute(stmt)
+                batch = list(res.all() if cols else res.scalars().all())
+                if not batch:
+                    return
+                yield batch
+                if not cols:
+                    for el in batch:
+                        self.session.expunge(el)
+                offset += page_size
+
+        if fmt == "xlsx":
+            rows = (await self.session.execute(select(func.count()).select_from(BIMElement).where(*where))).scalar_one()
+            if rows > XLSX_EXPORT_MAX_ROWS:
+                raise HTTPException(
+                    status_code=status.HTTP_413_CONTENT_TOO_LARGE,
+                    detail={
+                        "code": "export_too_large_for_xlsx",
+                        "message": "Too many elements for one workbook; export CSV or JSON, or filter.",
+                        "params": {"rows": rows, "max": XLSX_EXPORT_MAX_ROWS},
+                    },
+                )
+            els = [e async for batch in pages() for e in batch]
+            data = await asyncio.to_thread(ex.build_xlsx, els)
+            out: IO[bytes] = tempfile.SpooledTemporaryFile(max_size=8 * 1024 * 1024)  # noqa: SIM115
+            out.write(data)
+        else:
+            out = tempfile.SpooledTemporaryFile(max_size=8 * 1024 * 1024)  # noqa: SIM115
+            if fmt == "csv":
+                out.write(codecs.BOM_UTF8)
+            text_out = codecs.getwriter("utf-8")(out)
+            if fmt == "csv":
+                props: dict[str, None] = {}
+                qtys: dict[str, None] = {}
+                async for batch in pages(BIMElement.properties, BIMElement.quantities):
+                    ex.columns(batch, props, qtys)
+                writer = ex.CsvWriter(text_out, props, qtys)
+                async for batch in pages():
+                    writer.write(batch)
+            else:
+                jw = ex.JsonWriter(text_out)
+                async for batch in pages():
+                    jw.write(batch)
+                jw.close()
+        out.seek(0)
         safe_name = (model.name or "model").replace(" ", "_").replace("/", "_")
-        return data, media, f"Elements_{safe_name}.{fmt}"
+        return out, ex.media_type(fmt), f"Elements_{safe_name}.{fmt}"
 
     async def ensure_element(
         self,

@@ -1118,18 +1118,11 @@ async def upload_bim_data(
         else:
             rows = _parse_bim_rows_from_csv(data_content)
     except ValueError as exc:
-        raise _refusal(
-            "data_file_unreadable",
-            f"Failed to parse data file: {exc}",
-            filename=data_file.filename or "",
-        ) from exc
+        logger.info("BIM data file %r unreadable: %s", data_file.filename, exc)
+        raise _refusal("data_file_unreadable", "Failed to parse data file.", filename=data_file.filename or "") from exc
     except Exception as exc:
         logger.exception("Unexpected error parsing BIM data file")
-        raise _refusal(
-            "data_file_unreadable",
-            f"Failed to parse data file: {exc}",
-            filename=data_file.filename or "",
-        ) from exc
+        raise _refusal("data_file_unreadable", "Failed to parse data file.", filename=data_file.filename or "") from exc
 
     if not rows:
         raise _refusal(
@@ -1281,8 +1274,8 @@ _DRAWING_EXTENSIONS = {".dwg", ".dxf"}
 def _refusal(code: str, message: str, **params: object) -> HTTPException:
     """A 400 whose ``detail`` carries a code the UI translates.
 
-    ``message`` is the English fallback for API clients and logs; the UI maps
-    ``code`` to its own text and fills it from ``params``.
+    ``message`` is a fixed English fallback for API clients, never exception text (that goes
+    to the log); the UI maps ``code`` to its own text and fills it from ``params``.
     """
     return HTTPException(
         status_code=status.HTTP_400_BAD_REQUEST,
@@ -1336,7 +1329,10 @@ def _refuse_if_signature_mismatch(head: bytes, filename: str) -> None:
     try:
         _require_sig(head, ALLOWED_BIM_TYPES, filename=filename)
     except FileSignatureMismatch as exc:
-        raise _refusal("file_content_mismatch", str(exc), filename=filename) from exc
+        logger.info("BIM upload %r refused: %s", filename, exc)
+        raise _refusal(
+            "file_content_mismatch", "The file content does not match a supported CAD format.", filename=filename
+        ) from exc
 
 
 # Formats that require an external converter binary. IFC has a built-in
@@ -5328,11 +5324,19 @@ async def export_elements(
     """Export the model's elements (category, level, properties, quantities) as csv, json or xlsx."""
     await _verify_model_access(service, model_id, user_id or "")
     filters = {k: v for k, v in {"storey": storey, "element_type": element_type, "discipline": discipline}.items() if v}
-    data, media, filename = await service.export_elements(model_id, fmt, filters=filters or None)
+    out, media, filename = await service.export_elements(model_id, fmt, filters=filters or None)
+    size = out.seek(0, io.SEEK_END)
+    out.seek(0)
+
+    def chunks():
+        with out:
+            while block := out.read(256 * 1024):
+                yield block
+
     return StreamingResponse(
-        io.BytesIO(data),
+        chunks(),
         media_type=media,
-        headers={"Content-Disposition": attachment_disposition(filename), "Content-Length": str(len(data))},
+        headers={"Content-Disposition": attachment_disposition(filename), "Content-Length": str(size)},
     )
 
 

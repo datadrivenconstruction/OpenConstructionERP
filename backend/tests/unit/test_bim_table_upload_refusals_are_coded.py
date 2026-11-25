@@ -33,3 +33,20 @@ async def test_empty_table_is_coded() -> None:
 async def test_table_without_ids_is_coded() -> None:
     d = await _refusal(b"foo,bar\n1,2\n", "elements.csv")
     assert d["code"] in {"no_valid_elements", "data_file_unreadable"}
+
+
+@pytest.mark.asyncio
+async def test_unreadable_table_refusal_carries_no_exception_text() -> None:
+    d = await _refusal(b"PK\x03\x04 not a workbook", "elements.xlsx")
+    assert d["code"] == "data_file_unreadable"
+    assert d["message"] == "Failed to parse data file."
+
+
+def test_signature_mismatch_refusal_carries_no_exception_text() -> None:
+    from app.modules.bim_hub import router as bim_router
+
+    with pytest.raises(HTTPException) as exc:
+        bim_router._refuse_if_signature_mismatch(b"%PDF-1.7 ", "model.rvt")
+    assert exc.value.detail["code"] == "file_content_mismatch"
+    assert exc.value.detail["message"] == "The file content does not match a supported CAD format."
+    assert exc.value.detail["params"] == {"filename": "model.rvt"}
