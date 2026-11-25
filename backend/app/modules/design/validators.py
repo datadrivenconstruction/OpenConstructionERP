@@ -280,8 +280,8 @@ async def record(session: Any, project_id: uuid.UUID, user_id: uuid.UUID | None,
     from app.modules.validation.service import ValidationModuleService
 
     _, report = await run(session, project_id)
-    return await ValidationModuleService(session).record_boq_report(
-        project_id, project_id, report, [DESIGN_RULE_SET], user_id=user_id, source=source, target_type="design_project"
+    return await ValidationModuleService(session).record_report(
+        project_id, "design_project", str(project_id), report, [DESIGN_RULE_SET], user_id=user_id, source=source
     )
 
 

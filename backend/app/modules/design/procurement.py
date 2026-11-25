@@ -708,3 +708,81 @@ def for_change_order(imp: dict[str, Any] | None) -> dict[str, Any] | None:
             "issued_packages_affected",
         )
     }
+
+
+async def rfq_from_package(session, project_id: uuid.UUID, ifc_class: str, user_id: uuid.UUID):
+    """A DRAFT request for quotation for one take-off package: every scope line says where its quantity came from.
+
+    Created through the RFQ module's own service, unissued; a person checks it and sends it. One RFQ per package.
+    """
+    from app.core import record_provenance as provenance
+    from app.modules.projects.models import Project
+    from app.modules.rfq_bidding.models import RFQ
+    from app.modules.rfq_bidding.schemas import RFQCreate, RFQLineCreate
+    from app.modules.rfq_bidding.service import RFQService
+
+    proc = await _proc(session, project_id)
+    section = (await _sections(session, project_id)).get(ifc_class) if proc is not None else None
+    if section is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "No take-off package for this class")
+    existing = (await session.execute(select(RFQ).where(RFQ.project_id == project_id))).scalars()
+    for r in existing:
+        if (provenance.read(r.metadata_) or {}).get("takeoff_section_id") == str(section.id):
+            raise HTTPException(status.HTTP_409_CONFLICT, "This package already has a request for quotation")
+    lines = sorted(
+        (ln for ln in (await _lines(session, project_id)).values() if ln.ifc_class == ifc_class),
+        key=lambda x: x.group_key,
+    )
+    svc = est_mod._svc(session)
+    positions = {p.id: p for p in await svc.position_repo.list_by_ids([ln.position_id for ln in lines])}
+    project = await session.get(Project, project_id)
+    pkg = await _package(session, section.package_id)
+    scope = []
+    for ln in lines:
+        pos = positions.get(ln.position_id)
+        if pos is None:  # a position a person deleted is not procured
+            continue
+        qty = est_mod.q4(pos.quantity)
+        scope.append(
+            RFQLineCreate(
+                code=(pos.ordinal or "")[:50] or None,
+                description=ln.label,
+                unit=UNITS[ln.basis],
+                quantity=qty,
+                metadata={
+                    provenance.KEY: provenance.make(
+                        "takeoff",
+                        "oe_design",
+                        revision_id=str(ln.revision_id) if ln.revision_id else None,
+                        boq_position_id=str(ln.position_id),
+                        rule=f"takeoff:{ln.group_key}",
+                        field=ln.basis,
+                        ifc_class=ln.ifc_class,
+                        basis=ln.basis,
+                        quantity=est_mod.dstr(qty),
+                        model_quantity=ln.model_quantity,
+                        quantity_override=ln.model_quantity is not None and est_mod.q4(ln.model_quantity) != qty,
+                        elements=ln.element_count,
+                    )
+                },
+            )
+        )
+    if not scope:
+        raise HTTPException(status.HTTP_409_CONFLICT, "The package has no scope lines to ask prices for")
+    data = RFQCreate(
+        project_id=project_id,
+        title=(pkg.name if pkg is not None else f"Design take-off: {ifc_class}")[:500],
+        currency_code=(getattr(project, "currency", None) or "EUR")[:10],
+        lines=scope,
+        metadata={
+            provenance.KEY: provenance.make(
+                "takeoff_package",
+                "oe_design",
+                revision_id=str(proc.revision_id) if proc.revision_id else None,
+                takeoff_section_id=str(section.id),
+                tender_package_id=str(section.package_id) if section.package_id else None,
+                ifc_class=ifc_class,
+            )
+        },
+    )
+    return await RFQService(session).create_rfq(data, user_id=str(user_id))

@@ -20,6 +20,7 @@ from fastapi import HTTPException, status
 from sqlalchemy import select
 
 from app.core import cost_scope
+from app.core import record_provenance as provenance
 
 from . import benchmarks, rules
 from .models import DesignEstimate, DesignEstimateBinding, DesignEstimateRule, DesignRevision
@@ -513,7 +514,7 @@ async def recompute(
         await _apply_cost_rate(session, svc, project, est, rule, pos, c)
         row = Row(b, rule, pos, c, _overridden(pos, b, c.quantity))
         rows.append(row)
-        await _stamp_source(svc, pos, rule, rev_id, c, override=row.override)
+        meta = _stamped(pos, rule, rev_id, c, override=row.override)
         b.model_quantity, b.element_keys, b.revision_id, b.provenance = (
             dstr(c.quantity),
             c.element_keys,
@@ -522,16 +523,14 @@ async def recompute(
         )
         if rule.kind == "model" and c.element_keys:
             await _sync_link(svc, b, model_id, c, rule.body["quantity"], user_id)
+            await svc.position_repo.update_fields(pos.id, metadata_=meta)
+            pos.metadata_ = meta
             if not row.override:
                 to_apply.append(row)
             continue
         if rule.kind == "model" and b.link_id is not None:
             await svc.quantity_link_repo.update_fields(b.link_id, element_stable_ids=[], status="broken")
-        if not row.override:
-            await _write_quantity(svc, b, pos, c.quantity)
-            await _provenance(svc, pos, b, c)
-            if c.unit_rate is not None and q4(pos.unit_rate) == 0:
-                await _write_rate(svc, pos, c.unit_rate, c.provenance)
+        await _write_position(svc, b, pos, c, meta, apply=not row.override)
     if to_apply:
         res = await svc.apply_quantity_links(est.boq_id, [r.binding.link_id for r in to_apply], applied_by=user_id)
         skipped = [r for r in res.results if not r.applied]
@@ -598,13 +597,15 @@ async def _sync_link(
     )
 
 
-async def _write_quantity(svc, b: DesignEstimateBinding, pos, qty: Decimal) -> None:
-    from app.modules.boq.service import _compute_total
+def _rate_meta(meta: dict[str, Any], rate: str, prov: dict[str, Any]) -> None:
+    meta["design_rate"] = {**(prov.get("benchmark") or prov.get("rate") or {}), "applied": rate}
+    if provenance.read(meta) is not None:
+        meta[provenance.KEY] = {**meta[provenance.KEY], **_rate_fields(meta)}
 
-    qs = dstr(qty)
-    await svc.position_repo.update_fields(pos.id, quantity=qs, total=_compute_total(qs, pos.unit_rate))
-    pos.quantity = qs
-    b.last_applied_quantity = qs
+
+def _rate_fields(meta: dict[str, Any]) -> dict[str, Any]:
+    dr = meta.get("design_rate") if isinstance(meta.get("design_rate"), dict) else None
+    return {"rate_code": (dr or {}).get("code"), "rate": dr}
 
 
 async def _write_rate(svc, pos, rate: Decimal, prov: dict[str, Any]) -> None:
@@ -612,36 +613,47 @@ async def _write_rate(svc, pos, rate: Decimal, prov: dict[str, Any]) -> None:
 
     rs = dstr(rate)
     meta = dict(pos.metadata_ or {})
-    meta["design_rate"] = {**(prov.get("benchmark") or prov.get("rate") or {}), "applied": rs}
-    if isinstance(meta.get("source"), dict):
-        meta["source"] = {**meta["source"], "rate": meta["design_rate"]}
+    _rate_meta(meta, rs, prov)
     await svc.position_repo.update_fields(pos.id, unit_rate=rs, total=_compute_total(pos.quantity, rs), metadata_=meta)
     pos.unit_rate, pos.metadata_ = rs, meta
 
 
-async def _stamp_source(svc, pos, rule, rev_id, c: Computed, *, override: bool) -> None:
-    """Neutral ``metadata.source`` on the position: what every module downstream copies to trace the number."""
+def _stamped(pos, rule, rev_id, c: Computed, *, override: bool) -> dict[str, Any]:
+    """The position's metadata with its ``provenance`` (see app.core.provenance) for this run; not written."""
     q = rule.body.get("quantity") or {}
     meta = dict(pos.metadata_ or {})
-    meta["source"] = {
-        "module": "oe_design",
-        "revision_id": str(rev_id) if rev_id else None,
-        "rule": rule.code,
-        "kind": rule.kind,
-        "quantity_field": q.get("field") if isinstance(q, dict) else None,
-        "formula": (q.get("formula") if isinstance(q, dict) else None) or rule.body.get("formula"),
-        "element_count": len(c.element_keys or []),
-        "quantity_override": override,
-        "rate": meta.get("design_rate"),
-    }
-    await svc.position_repo.update_fields(pos.id, metadata_=meta)
+    meta[provenance.KEY] = provenance.make(
+        "derived_rule" if rule.kind == "derived" else f"{rule.kind}_rule",
+        "oe_design",
+        revision_id=str(rev_id) if rev_id else None,
+        boq_position_id=str(pos.id),
+        rule=rule.code,
+        field=q.get("field") if isinstance(q, dict) else None,
+        formula=(q.get("formula") if isinstance(q, dict) else None) or rule.body.get("formula"),
+        quantity=dstr(c.quantity),
+        quantity_override=override,
+        elements=len(c.element_keys or []),
+        **_rate_fields(meta),
+    )
+    return meta
+
+
+async def _write_position(svc, b: DesignEstimateBinding, pos, c: Computed, meta: dict[str, Any], *, apply: bool):
+    """One UPDATE per position: quantity, rate, total and metadata together."""
+    from app.modules.boq.service import _compute_total
+
+    fields: dict[str, Any] = {"metadata_": meta}
+    if apply:
+        qs, rate = dstr(c.quantity), pos.unit_rate
+        meta["design_derivation" if b.kind == "derived" else "design_selection"] = c.provenance
+        if c.unit_rate is not None and q4(pos.unit_rate) == 0:
+            rate = dstr(c.unit_rate)
+            _rate_meta(meta, rate, c.provenance)
+        fields.update(quantity=qs, unit_rate=rate, total=_compute_total(qs, rate))
+        b.last_applied_quantity = qs
+        pos.quantity, pos.unit_rate = qs, rate
+    await svc.position_repo.update_fields(pos.id, **fields)
     pos.metadata_ = meta
-
-
-async def _provenance(svc, pos, b: DesignEstimateBinding, c: Computed) -> None:
-    meta = dict(pos.metadata_ or {})
-    meta["design_derivation" if b.kind == "derived" else "design_selection"] = c.provenance
-    await svc.position_repo.update_fields(pos.id, metadata_=meta)
 
 
 async def recompute_on_accept(

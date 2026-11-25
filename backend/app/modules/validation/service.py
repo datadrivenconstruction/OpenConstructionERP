@@ -103,30 +103,43 @@ class ValidationModuleService:
         *,
         user_id: uuid.UUID | None = None,
         source: str | None = None,
-        target_type: str = "boq",
     ) -> ValidationReport:
-        """Store a finished BOQ validation run and publish ``validation.report.created``.
+        """Store a finished BOQ validation run; see :meth:`record_report`."""
+        return await self.record_report(
+            project_id, "boq", str(boq_id), engine_report, rule_sets, user_id=user_id, source=source
+        )
 
-        Every path that validates a whole BOQ writes through here, so the
-        stored row has one shape whoever ran it: the validation page, or the
-        Validate button in the BOQ editor. A run that is not stored is
-        invisible to everything that reads reports (the validation page, the
-        dashboard, the cross-project status), so an estimate that was checked
-        would read as never checked.
+    async def record_report(
+        self,
+        project_id: uuid.UUID,
+        target_type: str,
+        target_id: str,
+        engine_report: EngineReport,
+        rule_sets: list[str],
+        *,
+        user_id: uuid.UUID | None = None,
+        source: str | None = None,
+    ) -> ValidationReport:
+        """Store a finished validation run and publish ``validation.report.created``.
+
+        Every path that validates a whole target writes through here, so the
+        stored row has one shape whoever ran it: the validation page, the
+        Validate button in the BOQ editor, or another module's project-wide
+        rule set (``design_project``). A run that is not stored is invisible to
+        everything that reads reports (the validation page, the dashboard, the
+        cross-project status).
 
         This writes the report only. Escalation (``validation.results.errors_found``,
         which raises an NCR per report) stays with the caller.
 
         Args:
-            project_id: Project owning the BOQ.
-            boq_id: The validated BOQ.
+            project_id: Project owning the target.
+            target_type: What was validated (``boq``, ``design_project``).
+            target_id: Its id.
             engine_report: The engine's report for the run.
             rule_sets: The rule sets the run was asked for.
             user_id: Who ran it, if known.
-            source: Where the run came from, kept in the metadata
-                (for example ``boq_editor``).
-            target_type: What was validated; another module's whole-project run
-                (``design_project``) stores through here with ``boq_id`` as its target id.
+            source: Where the run came from, kept in the metadata.
 
         Returns:
             The stored report row (flushed, not committed).
@@ -159,7 +172,7 @@ class ValidationModuleService:
             id=uuid.uuid4(),
             project_id=project_id,
             target_type=target_type,
-            target_id=str(boq_id),
+            target_id=target_id,
             rule_set="+".join(rule_sets),
             status=engine_report.status.value,
             score=(None if engine_report.score is None else str(round(engine_report.score, 4))),
@@ -185,7 +198,7 @@ class ValidationModuleService:
                     "report_id": str(db_report.id),
                     "project_id": str(project_id),
                     "target_type": target_type,
-                    "target_id": str(boq_id),
+                    "target_id": target_id,
                     "status": engine_report.status.value,
                 },
                 source_module="oe_validation",
