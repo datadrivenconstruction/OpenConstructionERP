@@ -1236,6 +1236,10 @@
       "norm_collapsed": "Công tác {ordinal}: các dòng nguồn lực mất định mức danh mục và thay bằng khối lượng công tác nên đơn giá không được tính lại từ chúng",
       "whole_position_quantities": "Công tác {ordinal}: các dòng nguồn lực chứa lượng cho toàn bộ công tác thay vì định mức trên một đơn vị nên đơn giá không được tính lại từ chúng",
       "suggestion": "Kiểm tra phân tích đơn giá; tính lại công tác từ mục danh mục qua bước xem xét định mức nguồn lực hoặc sửa các dòng thủ công"
+    },
+    "aligned_rate_kept": {
+      "fail": "Hạng mục {ordinal}: giá tài nguyên đã được đồng bộ với bảng giá, nhưng đơn giá được giữ nguyên vì các dòng tài nguyên không thể tính lại nó",
+      "suggestion": "Kiểm tra các dòng tài nguyên của hạng mục và nhập đơn giá thủ công, hoặc sửa phân tích rồi tính lại đơn giá."
     }
   },
   "poland": {

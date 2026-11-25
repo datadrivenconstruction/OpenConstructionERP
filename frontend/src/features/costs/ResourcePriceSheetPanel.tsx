@@ -45,6 +45,7 @@ import {
   type ResourcePriceRow,
   type ResourceType,
 } from './useResourcePrices';
+import { ResourceImpactDialog } from './ResourceImpactDialog';
 import { getNumberLocale } from '@/stores/usePreferencesStore';
 import { fmtList } from '@/shared/lib/formatters';
 
@@ -118,6 +119,7 @@ export function ResourcePriceSheetPanel({
   const currency = regionInfo?.currency ?? '';
 
   // Filters.
+  const [impactRow, setImpactRow] = useState<ResourcePriceRow | null>(null);
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [resourceType, setResourceType] = useState<string>('');
@@ -368,6 +370,9 @@ export function ResourcePriceSheetPanel({
 
   return (
     <Card padding="none" className={clsx('overflow-hidden', className)}>
+      {impactRow && (
+        <ResourceImpactDialog region={region} row={impactRow} onClose={() => setImpactRow(null)} />
+      )}
       {/* Header */}
       <div className="flex flex-wrap items-start justify-between gap-3 px-5 pt-5 pb-3">
         <div className="flex items-start gap-3">
@@ -668,6 +673,7 @@ export function ResourcePriceSheetPanel({
                           </div>
                         </td>
                         <td className="align-top">
+                          <div className="flex items-center gap-2">
                           {row.source === 'user' ? (
                             <Badge variant="blue" size="sm">
                               {t('costs.resource_prices.source_edited', { defaultValue: 'Edited' })}
@@ -679,6 +685,15 @@ export function ResourcePriceSheetPanel({
                               })}
                             </Badge>
                           )}
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setImpactRow(row)}
+                              data-testid="resource-impact-open"
+                            >
+                              {t('costs.resource_impact.open', { defaultValue: 'Change' })}
+                            </Button>
+                          </div>
                         </td>
                       </tr>
                     );

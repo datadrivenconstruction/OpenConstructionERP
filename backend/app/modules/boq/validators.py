@@ -859,7 +859,47 @@ _BOQ_MARKUP_RULES: tuple[ValidationRule, ...] = (
     TenderAdjustmentIsPlausible(),
 )
 
+
+class AlignedPriceNotInRate(ValidationRule):
+    """Resource prices were aligned with the sheet but the unit rate stayed."""
+
+    rule_id = "boq.resources.aligned_rate_kept"
+    name = "Aligned resource prices did not reach the unit rate"
+    standard = "universal"
+    severity = Severity.WARNING
+    category = RuleCategory.CONSISTENCY
+    description = (
+        "Price alignment rewrote the resource rows of this position, but its buildup "
+        "cannot re-derive the unit rate, so the rate still reflects the old prices."
+    )
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        """One finding per leaf position stamped ``rate_kept`` by price alignment."""
+        locale = _locale(context)
+        results: list[RuleResult] = []
+        for position in _leaf_positions(context):
+            stamp = _position_metadata(position).get("price_alignment")
+            if not isinstance(stamp, dict) or not stamp.get("rate_kept"):
+                continue
+            ordinal = str(position.get("ordinal") or "?")
+            results.append(
+                RuleResult(
+                    rule_id=self.rule_id,
+                    rule_name=self.name,
+                    severity=self.severity,
+                    category=self.category,
+                    passed=False,
+                    message=translate("boq_resources.aligned_rate_kept.fail", locale, ordinal=ordinal),
+                    element_ref=str(position.get("id")) if position.get("id") else None,
+                    suggestion=translate("boq_resources.aligned_rate_kept.suggestion", locale),
+                    details={"region": stamp.get("region"), "rows": len(stamp.get("rows") or [])},
+                )
+            )
+        return results
+
+
 _BOQ_RESOURCE_RULES: tuple[ValidationRule, ...] = (
+    AlignedPriceNotInRate(),
     UnitRateNotRederivedFromUntrustedBuildup(),
     EmbeddedExportRoundingGap(),
     TakeoffQuantityWithoutDrawingRevision(),

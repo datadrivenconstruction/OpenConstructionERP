@@ -165,6 +165,7 @@ import { HistoricalRangePanel } from '@/features/analytics/HistoricalRange';
 import { RenumberDialog, type RenumberScheme, type RenumberCustom } from './RenumberDialog';
 import { LinkedPositionsModal } from './LinkedPositionsModal';
 import { repointedMetadata } from './repointedMetadata';
+import { PriceAlignmentDialog } from './PriceAlignmentDialog';
 import { fmtList } from '@/shared/lib/formatters';
 
 /* ── Re-exports for tests ────────────────────────────────────────────── */
@@ -3625,6 +3626,7 @@ export function BOQEditorPage() {
 
   const [isRecalculating, setIsRecalculating] = useState(false);
   const [showRecalcConfirm, setShowRecalcConfirm] = useState(false);
+  const [showPriceAlignment, setShowPriceAlignment] = useState(false);
 
   const doRecalculate = useCallback(async () => {
     if (!boqId) return;
@@ -6220,6 +6222,14 @@ export function BOQEditorPage() {
         />
       )}
 
+      {showPriceAlignment && boqId && (
+        <PriceAlignmentDialog
+          boqId={boqId}
+          onClose={() => setShowPriceAlignment(false)}
+          onApplied={invalidateAll}
+        />
+      )}
+
       {/* ── Update Rates Confirmation Dialog ────────────────────────── */}
       {showRecalcConfirm && (
         <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/70 backdrop-blur-lg animate-fade-in" onClick={() => setShowRecalcConfirm(false)}>
@@ -6248,6 +6258,17 @@ export function BOQEditorPage() {
             <div className="flex items-center justify-end gap-2 px-6 py-4 border-t border-border-light bg-surface-secondary/30">
               <Button variant="ghost" size="sm" onClick={() => setShowRecalcConfirm(false)}>
                 {t('common.cancel', { defaultValue: 'Cancel' })}
+              </Button>
+              <Button
+                variant="secondary"
+                size="sm"
+                data-testid="boq-price-alignment-open"
+                onClick={() => {
+                  setShowRecalcConfirm(false);
+                  setShowPriceAlignment(true);
+                }}
+              >
+                {t('boq.price_alignment.open', { defaultValue: 'Align with price sheet' })}
               </Button>
               <Button variant="primary" size="sm" onClick={doRecalculate} loading={isRecalculating}>
                 {t('boq.recalc_confirm_button', { defaultValue: 'Update Rates' })}

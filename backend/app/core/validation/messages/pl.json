@@ -1236,6 +1236,10 @@
       "norm_collapsed": "Pozycja {ordinal}: wiersze zasobów utraciły normę katalogową i zamiast niej zawierają ilość pozycji, więc nie przeliczono na ich podstawie ceny jednostkowej",
       "whole_position_quantities": "Pozycja {ordinal}: wiersze zasobów zawierają ilości dla całej pozycji zamiast jednostkowych norm nakładów, więc nie przeliczono na ich podstawie ceny jednostkowej",
       "suggestion": "Sprawdź kalkulację — przelicz pozycję z jej podstawy katalogowej przez przegląd norm nakładów zasobów lub popraw wiersze ręcznie"
+    },
+    "aligned_rate_kept": {
+      "fail": "Pozycja {ordinal}: ceny zasobów zostały wyrównane z cennikiem, ale cena jednostkowa pozostała bez zmian, ponieważ wiersze zasobów nie pozwalają jej przeliczyć",
+      "suggestion": "Sprawdź wiersze zasobów pozycji i ustaw cenę jednostkową ręcznie lub popraw kalkulację i przelicz ceny."
     }
   },
   "poland": {

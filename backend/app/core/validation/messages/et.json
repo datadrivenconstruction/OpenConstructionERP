@@ -1236,6 +1236,10 @@
       "norm_collapsed": "Rida {ordinal}: ressursiread kaotasid katalooginormi ja sisaldavad selle asemel rea kogust, seega ühikuhinda neist uuesti ei tuletatud",
       "whole_position_quantities": "Rida {ordinal}: ressursiread sisaldavad kogu rea koguseid ühikupõhiste normide asemel, seega ühikuhinda neist uuesti ei tuletatud",
       "suggestion": "Vaadake analüüs üle; tuletage rida uuesti kataloogireast ressursinormide ülevaatuse kaudu või parandage read käsitsi"
+    },
+    "aligned_rate_kept": {
+      "fail": "Positsioon {ordinal}: ressursihinnad viidi hinnakirjaga vastavusse, kuid ühikuhind jäeti alles, sest ressursiread ei suuda seda uuesti tuletada",
+      "suggestion": "Kontrollige positsiooni ressursiridu ja määrake ühikuhind käsitsi või parandage kalkulatsioon ja arvutage hinnad uuesti."
     }
   },
   "poland": {
