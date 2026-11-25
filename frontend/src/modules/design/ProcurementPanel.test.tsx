@@ -49,7 +49,7 @@ const impact = (rows: TakeoffRow[], over: Partial<ProcurementImpact> = {}): Proc
 });
 const NONE = { schema: 'ddc-procurement-impact/1', revision_id: 'r2', procurement: false };
 
-async function mount(lang: 'en' | 'ru' = 'en', canManage = true) {
+async function mount(lang: 'en' | 'ru' = 'en', canManage = true, needsAccepted = false) {
   const inst = i18n.createInstance();
   await inst.use(initReactI18next).init({
     lng: lang, fallbackLng: 'en', resources: { en: { translation: EN }, ru: { translation: RU } },
@@ -59,7 +59,7 @@ async function mount(lang: 'en' | 'ru' = 'en', canManage = true) {
   render(
     <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
       <I18nextProvider i18n={inst}><MemoryRouter>
-        <ProcurementPanel projectId="p1" revisionId="r2" canManage={canManage} />
+        <ProcurementPanel projectId="p1" revisionId="r2" canManage={canManage} needsAccepted={needsAccepted} />
       </MemoryRouter></I18nextProvider>
     </QueryClientProvider>,
   );
@@ -130,6 +130,13 @@ describe('ProcurementPanel', () => {
     await user.click(screen.getByTestId('procurement-setup'));
     expect(h.setup).toHaveBeenCalledWith('p1', 'ifc_class');
     expect(await screen.findByTestId('procurement-totals')).toBeTruthy();
+  });
+
+  it('waits for an accepted revision before a take-off, and says so', async () => {
+    h.impact = NONE;
+    await mount('en', true, true);
+    expect(await screen.findByTestId('procurement-setup')).toBeDisabled();
+    expect(screen.getByTestId('procurement-needs-accepted')).toHaveTextContent(EN['design.procurement.needs_accepted']!);
   });
 
   it('tells others who can create it', async () => {

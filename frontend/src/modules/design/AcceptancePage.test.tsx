@@ -257,8 +257,8 @@ describe('AcceptancePage impact', () => {
     h.impact = impact([row('a')], { current: '0', after: '0', delta: '0', unpriced_positions: 3 });
     await mount();
     const note = await screen.findByTestId('unpriced');
-    expect(note.textContent).toContain('3 positions have no price');
-    expect(note.textContent).toContain('count as zero');
+    expect(note.textContent).toContain('Positions without a price: 3. They are left out of the totals.');
+    expect(note.textContent).toContain('left out of the totals');
     expect(screen.getByTestId('unpriced-link').getAttribute('href')).toBe('/design/estimate');
   });
 

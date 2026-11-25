@@ -16,8 +16,10 @@ import { changedRows, signed, type TakeoffRow } from './data/procurement';
 import { tr } from './BriefFields';
 import { takeoffName } from './data/takeoffName';
 
-export function ProcurementPanel({ projectId, revisionId, canManage }: {
+export function ProcurementPanel({ projectId, revisionId, canManage, needsAccepted = false }: {
   projectId: string; revisionId: string; canManage: boolean;
+  /** No revision is accepted yet: the take-off sums accepted elements, so setup waits for one. */
+  needsAccepted?: boolean;
 }) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -53,9 +55,15 @@ export function ProcurementPanel({ projectId, revisionId, canManage }: {
                   <option value="ifc_class">{tr(t, 'design.procurement.by_class')}</option>
                 </select>
               </label>
-              <Button variant="secondary" onClick={() => setup.mutate()} disabled={setup.isPending} data-testid="procurement-setup">
+              <Button variant="secondary" onClick={() => setup.mutate()} disabled={setup.isPending || needsAccepted} data-testid="procurement-setup"
+                aria-describedby={needsAccepted ? 'procurement-needs-accepted' : undefined}>
                 {tr(t, 'design.procurement.setup')}
               </Button>
+              {needsAccepted && (
+                <p id="procurement-needs-accepted" className="basis-full text-xs" data-testid="procurement-needs-accepted">
+                  {tr(t, 'design.procurement.needs_accepted')}
+                </p>
+              )}
             </div>
           ) : (
             <p className="text-xs">{tr(t, 'design.procurement.setup_by_manager')}</p>

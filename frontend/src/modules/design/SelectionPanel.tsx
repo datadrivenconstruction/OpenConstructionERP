@@ -16,10 +16,10 @@ import { useAuthStore } from '@/stores/useAuthStore';
 import { fetchAccess, fetchEstimate } from './api';
 import { moneyExact, moneyWhole, pickCurrency } from './money';
 import { CORE_STEPS, ICON, stepState, stepText } from './overviewSteps';
-import type { EstimateView } from './data/estimate';
+import type { EstimatePosition, EstimateView } from './data/estimate';
 import type { SelectedElement } from './bridge/protocol';
 import type { DraftLine, DraftView } from './draftApi';
-import { changedLines, draftLinesFor, linesFor } from './data/workspace';
+import { changedLines, draftLineState, draftLinesFor, linesFor, positionState, pricedTotal, type LineState } from './data/workspace';
 import { tr } from './BriefFields';
 import { FieldReportLinks } from './FieldReportLinks';
 import { boqUrl, fetchElementContext, fetchLinks, fetchOverview, packageUrl, scheduleUrl } from './linksApi';
@@ -48,19 +48,63 @@ const ROW = 'block rounded-md border border-border-light px-2.5 py-1.5 hover:bor
 const SUB = 'text-2xs font-medium text-content-tertiary';
 const H = 'text-xs font-semibold uppercase tracking-wide text-content-tertiary';
 
-function DraftRow({ l, cur }: { l: DraftLine; cur: string }) {
+/** The cost databases the estimate prices from, null when none is loaded for the country. */
+function useCostSource(projectId: string): string | null {
+  const estimate = useQuery({ queryKey: ['design-estimate', projectId], queryFn: () => fetchEstimate(projectId), retry: false });
+  const e = estimate.data && estimate.data.estimate ? estimate.data : null;
+  return e?.cost_regions && e.cost_regions.length > 0 ? e.cost_regions.join(', ') : null;
+}
+
+const FIX = 'font-medium text-oe-blue-text underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-oe-blue';
+
+/** Why a line has no money and where to fix it; nothing for a priced line. */
+function Unpriced({ state, source }: { state: LineState; source: string | null }) {
   const { t } = useTranslation();
+  if (state === 'priced') return null;
+  const text = state === 'not_accepted' ? tr(t, 'design.panel.unpriced.not_accepted')
+    : state === 'no_quantity' ? tr(t, 'design.panel.unpriced.no_quantity')
+      : source ? tr(t, 'design.panel.unpriced.no_rate', { source }) : tr(t, 'design.panel.unpriced.no_source');
+  const [to, fix] = state === 'not_accepted' ? ['/design/acceptance', 'design.panel.unpriced.fix_accept']
+    : state === 'no_rate' && !source ? ['/costs/import', 'design.panel.unpriced.fix_source']
+      : ['/design/estimate', 'design.panel.unpriced.fix_rate'];
+  return (
+    <p className="text-xs text-semantic-warning" data-testid="line-unpriced" data-state={state}>
+      {text}{' · '}
+      <Link className={FIX} to={to}>{tr(t, fix)}</Link>
+    </p>
+  );
+}
+
+/** "Priced lines: x · n of N priced"; the money is left out when nothing is priced. */
+function PricedSum({ sum, cur, testId, totalKey = 'design.panel.priced_total', total }: {
+  sum: ReturnType<typeof pricedTotal>; cur: string; testId: string; totalKey?: string; total?: string | number;
+}) {
+  const { t } = useTranslation();
+  return (
+    <p className="tabular-nums text-content-secondary" data-testid={testId}>
+      {sum.priced > 0 && <>{tr(t, totalKey, { total: moneyWhole(total ?? sum.total, cur) })} · </>}
+      <span className={sum.priced < sum.count ? 'text-semantic-warning' : undefined}>
+        {tr(t, 'design.panel.priced_n', { priced: sum.priced, count: sum.count })}
+      </span>
+    </p>
+  );
+}
+
+function DraftRow({ l, cur, source }: { l: DraftLine; cur: string; source: string | null }) {
   const num = useNum();
+  const state = draftLineState(l);
   const moved = l.quantity !== null && l.current_quantity !== null && Number(l.quantity) !== Number(l.current_quantity);
   return (
     <li className="rounded-md border border-border-light px-2.5 py-1.5" data-testid={`line-${l.rule}`}>
       <p className="font-medium text-content-primary">{l.description}</p>
-      <p className="tabular-nums text-content-secondary">
-        {moved ? <><s className="text-content-tertiary">{num(l.current_quantity)}</s> → <b className="text-content-primary">{num(l.quantity)}</b></> : num(l.quantity)}
-        {' '}{l.unit ?? ''}
-        {l.unit_rate && Number(l.unit_rate) > 0 ? <> × {moneyExact(l.unit_rate, cur)} = <b className="font-medium text-content-primary">{moneyWhole(l.total, cur)}</b></> : null}
-      </p>
-      {l.flags.includes('rate_missing') && <p className="text-xs text-content-tertiary">{tr(t, 'design.workspace.side.rate_missing')}</p>}
+      {l.quantity !== null && (
+        <p className="tabular-nums text-content-secondary">
+          {moved ? <><s className="text-content-tertiary">{num(l.current_quantity)}</s> → <b className="text-content-primary">{num(l.quantity)}</b></> : num(l.quantity)}
+          {' '}{l.unit ?? ''}
+          {state === 'priced' && <> × {moneyExact(l.unit_rate, cur)} = <b className="font-medium text-content-primary">{moneyWhole(l.total, cur)}</b></>}
+        </p>
+      )}
+      <Unpriced state={state} source={source} />
     </li>
   );
 }
@@ -170,11 +214,14 @@ export function LinkedInErp({ projectId, keys }: { projectId: string; keys: stri
   );
 }
 
-function EstimateBlock({ projectId, selection, draft }: { projectId: string; selection: SelectedElement[]; draft: DraftView | null }) {
+function EstimateBlock({ projectId, selection, draft, outside = false }: {
+  projectId: string; selection: SelectedElement[]; draft: DraftView | null; outside?: boolean;
+}) {
   const { t } = useTranslation();
   const num = useNum();
   const estimate = useQuery({ queryKey: ['design-estimate', projectId], queryFn: () => fetchEstimate(projectId), retry: false });
   const cur = useCurrency(projectId);
+  const source = useCostSource(projectId);
   const data: EstimateView | undefined = estimate.data;
   const positions = data && data.estimate ? data.positions : null;
   const exact = draftLinesFor(selection, draft);
@@ -183,7 +230,8 @@ function EstimateBlock({ projectId, selection, draft }: { projectId: string; sel
     return (
       <>
         <p className="text-xs text-content-tertiary">{tr(t, 'design.workspace.side.draft')}</p>
-        <ul className="flex flex-col gap-2" data-testid="selection-lines">{exact.map((l) => <DraftRow key={l.rule} l={l} cur={cur} />)}</ul>
+        <ul className="flex flex-col gap-2" data-testid="selection-lines">{exact.map((l) => <DraftRow key={l.rule} l={l} cur={cur} source={source} />)}</ul>
+        {exact.length > 1 && <PricedSum sum={pricedTotal(exact.map((l) => ({ state: draftLineState(l), total: l.total })))} cur={cur} testId="selection-cost" />}
       </>
     );
   }
@@ -197,21 +245,24 @@ function EstimateBlock({ projectId, selection, draft }: { projectId: string; sel
     );
   }
   if (guessed.length === 0) return <p className="text-content-secondary">{tr(t, 'design.workspace.side.no_lines')}</p>;
-  const total = guessed.reduce((s, { position: p }) => s + (Number(p.total) || 0), 0);
+  // an element the accepted model does not hold: the estimate lines are not about it yet
+  const state = (p: EstimatePosition): LineState => (outside ? 'not_accepted' : positionState(p));
+  const sum = pricedTotal(guessed.map(({ position: p }) => ({ state: state(p), total: p.total })));
   return (
     <>
       <ul className="flex flex-col gap-2" data-testid="selection-lines">
         {guessed.map(({ position: p, match }) => (
           <li key={p.position_id} className="rounded-md border border-border-light px-2.5 py-1.5">
             <p className="font-medium text-content-primary">{p.ordinal} {p.description}</p>
-            <p className="tabular-nums text-content-secondary">{num(p.quantity)} {p.unit} × {moneyExact(p.unit_rate, cur)} = <b className="font-medium text-content-primary">{moneyWhole(p.total, cur)}</b></p>
+            {state(p) === 'priced' && (
+              <p className="tabular-nums text-content-secondary">{num(p.quantity)} {p.unit} × {moneyExact(p.unit_rate, cur)} = <b className="font-medium text-content-primary">{moneyWhole(p.total, cur)}</b></p>
+            )}
+            <Unpriced state={state(p)} source={source} />
             {match === 'maybe' && <p className="text-xs text-content-tertiary">{tr(t, 'design.workspace.side.maybe')}</p>}
           </li>
         ))}
       </ul>
-      {guessed.length > 1 && (
-        <p className="tabular-nums text-content-secondary" data-testid="selection-cost">{tr(t, 'design.panel.cost', { total: moneyWhole(total, cur) })}</p>
-      )}
+      {guessed.length > 1 && <PricedSum sum={sum} cur={cur} testId="selection-cost" />}
     </>
   );
 }
@@ -279,6 +330,8 @@ function ProjectSnapshot({ projectId }: { projectId: string }) {
   const next = steps.filter((s) => stepState(s) !== 'done').slice(0, 3);
   const counted = steps.filter((s) => s.done && s.count !== null && ['model', 'schedule', 'procurement', 'documents'].includes(s.id));
   const unpriced = e ? e.positions.filter((p) => !(Number(p.unit_rate) > 0)).length : 0;
+  // a rate on a line that matches nothing in the accepted model still prices nothing
+  const priced = e ? e.positions.filter((p) => positionState(p) === 'priced').length : 0;
   const mid = Number(e?.range?.total?.mid) || 0;
   const loading = estimate.isLoading || overview.isLoading;
   return (
@@ -297,12 +350,13 @@ function ProjectSnapshot({ projectId }: { projectId: string }) {
               <span className="text-xs text-content-tertiary" data-testid="snapshot-label">
                 {mid > 0 ? `${tr(t, 'design.estimate.range')} · ${tr(t, 'design.estimate.mid')}` : tr(t, 'design.estimate.priced_total')}</span>
               <span className="text-2xl font-semibold tabular-nums leading-tight text-content-primary" data-testid="snapshot-total">
-                {e ? moneyWhole(mid > 0 ? mid : e.total, cur) : '–'}</span>
+                {/* nothing priced: no figure, not a 0 */}
+                {e && (mid > 0 || priced > 0) ? moneyWhole(mid > 0 ? mid : e.total, cur) : '–'}</span>
               {!e && <span className="text-xs text-content-secondary">{tr(t, 'design.panel.snapshot.no_estimate')}</span>}
               {e && (
                 <span className="text-xs text-content-secondary">
                   {mid > 0 && <span data-testid="snapshot-priced">{tr(t, 'design.estimate.priced_total')} {Number(e.total) !== 0 ? moneyWhole(e.total, cur) : '–'} · </span>}
-                  {tr(t, 'design.panel.snapshot.lines_n', { count: e.positions.length })}
+                  {tr(t, 'design.panel.priced_n', { priced, count: e.positions.length })}
                   {unpriced > 0 && <> · <span className="text-semantic-warning">{tr(t, 'design.panel.snapshot.unpriced_n', { count: unpriced })}</span></>}
                 </span>
               )}
@@ -423,6 +477,7 @@ export function SelectionPanel({ projectId, selection, draft }: {
 }) {
   const { t } = useTranslation();
   const cur = useCurrency(projectId);
+  const source = useCostSource(projectId);
   const userId = useAuthStore((s) => s.userId);
   const [layout, setLayout] = useState<PanelLayout>(() => loadLayout(userId));
   const [choosing, setChoosing] = useState(false);
@@ -437,7 +492,7 @@ export function SelectionPanel({ projectId, selection, draft }: {
 
   const body = (id: BlockId): ReactNode => {
     switch (id) {
-      case 'estimate': return <EstimateBlock projectId={projectId} selection={selection} draft={draft ?? null} />;
+      case 'estimate': return <EstimateBlock projectId={projectId} selection={selection} draft={draft ?? null} outside={ctx.data?.found === 0} />;
       case 'quantities': return <States q={ctx} empty={(d) => d.quantities.length === 0} none={tr(t, ctx.data?.found === 0 ? 'design.panel.not_in_model' : 'design.panel.none.quantities')}>{(d) => <Quantities d={d} />}</States>;
       case 'boq': return <States q={links} empty={(d) => d.positions.length === 0} none={tr(t, 'design.panel.none.boq')}>{(d) => <BoqRows d={d} />}</States>;
       case 'schedule': return <States q={links} empty={(d) => d.activities.length === 0} none={tr(t, 'design.panel.none.schedule')}>{(d) => <ScheduleRows d={d} />}</States>;
@@ -450,8 +505,8 @@ export function SelectionPanel({ projectId, selection, draft }: {
   const shown = visibleBlocks(layout);
 
   return (
-    <aside data-testid="selection-panel" aria-label={tr(t, 'design.panel.title')}
-      className="flex min-w-0 flex-col gap-4 overflow-auto text-sm">
+    <aside data-testid="selection-panel" aria-label={tr(t, 'design.panel.title')} tabIndex={-1}
+      className="flex min-w-0 flex-col gap-4 overflow-auto rounded-md text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-oe-blue">
       <header className="flex flex-col gap-2">
         <div className="flex items-center justify-between gap-2">
           <h2 className={H}>{tr(t, 'design.panel.title')}</h2>
@@ -482,10 +537,11 @@ export function SelectionPanel({ projectId, selection, draft }: {
           {changed.length === 0 ? (
             <p className="text-content-secondary">{tr(t, 'design.workspace.impact.none')}</p>
           ) : (
-            <ul className="flex flex-col gap-2">{changed.map((l) => <DraftRow key={l.rule} l={l} cur={cur} />)}</ul>
+            <ul className="flex flex-col gap-2">{changed.map((l) => <DraftRow key={l.rule} l={l} cur={cur} source={source} />)}</ul>
           )}
-          {Number(draft.estimate.model_total) > 0 && (
-            <p className="tabular-nums text-content-secondary">{tr(t, 'design.workspace.impact.total', { total: moneyWhole(draft.estimate.model_total, cur) })}</p>
+          {draft.estimate.lines.length > 0 && (
+            <PricedSum sum={pricedTotal(draft.estimate.lines.map((l) => ({ state: draftLineState(l), total: l.total })))} cur={cur}
+              testId="impact-total" totalKey="design.workspace.impact.total" total={draft.estimate.model_total} />
           )}
         </section>
       )}
