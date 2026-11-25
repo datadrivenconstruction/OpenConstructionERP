@@ -10,7 +10,10 @@ import type { QuickResult } from './startApi';
 const h = vi.hoisted(() => ({ run: vi.fn() }));
 
 vi.mock('react-i18next', async () => await vi.importActual('react-i18next'));
-vi.mock('@/shared/lib/api', () => ({ getErrorMessage: (e: unknown) => String(e) }));
+vi.mock('@/shared/lib/api', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/shared/lib/api')>()),
+  getErrorMessage: (e: unknown) => String(e),
+}));
 vi.mock('./startApi', () => ({
   fetchQuickTypes: vi.fn(async () => ({ types: [{ id: 'office', generator: true, priced: true }] })),
   runQuick: (...a: unknown[]) => h.run(...a),
