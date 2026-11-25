@@ -120,7 +120,7 @@ describe('SchedulePanel', () => {
     expect(note.textContent).toBe('2 trades have no sourced productivity rate and are not in this change: Dächer, Fenster.');
     expect(screen.getByTestId('schedule-overrides').textContent).toBe('Durations set by a person are kept: 1.');
     expect(screen.getByTestId('schedule-assumption').textContent).toContain('ceil(quantity × labour hours per unit');
-    expect(screen.getByTestId('schedule-link').getAttribute('href')).toBe('/schedule');
+    expect(screen.getByTestId('schedule-link').getAttribute('href')).toBe('/schedule?project_id=p1');
   });
 
   it('says when nothing changes', async () => {

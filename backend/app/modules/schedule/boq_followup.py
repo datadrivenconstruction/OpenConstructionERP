@@ -177,6 +177,9 @@ async def follow_position_quantity(
         meta = dict(activity.metadata_) if isinstance(activity.metadata_, dict) else {}
         if meta.get(DURATION_LOCKED_KEY) or activity.status == "completed":
             continue
+        if isinstance(meta.get("design"), dict) and meta["design"].get("rule"):
+            # The model-driven planner owns this duration (sourced rate per storey); it reflows on accept.
+            continue
         if (activity.activity_type or "task") in _SKIPPED_TYPES:
             continue
         before = to_decimal(old_quantity)

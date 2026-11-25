@@ -174,6 +174,7 @@ class Planned:
     provenance: dict[str, Any] = field(default_factory=dict)
     position_id: uuid.UUID | None = None
     preds: list[Slot] = field(default_factory=list)  # resolved to active slots
+    element_keys: list[str] = field(default_factory=list)  # model elements this activity builds (4D)
 
     @property
     def slot(self) -> Slot:
@@ -291,6 +292,7 @@ async def build_plan(
             crew, crew_src = crew_for(rate, rate["unit"], sched.crews or {}, code)
             days = duration_days(qty, h, crew, cal["hours_per_day"])
             p.quantity, p.unit = qty, unit
+            p.element_keys = list(groups.get(s, []))
             p.duration = days if days > 0 else None
             if days == 0:
                 p.flags.append("no_match")
@@ -707,9 +709,80 @@ async def recompute(session, project_id: uuid.UUID, rev_id: uuid.UUID, model_id:
         b.flags, b.revision_id = flags, rev_id
     sched.revision_id = rev_id
     await session.flush()
+    await _sync_elements_and_cost(session, plan, bindings)
     if written or bindings:
         await _reschedule(session, svc, sched.schedule_id)
     return written
+
+
+def element_predicate(keys: list[str]) -> dict[str, Any]:
+    """EAC predicate that matches exactly the model elements of one activity (stable ids)."""
+    return {
+        "schema_version": "2.0",
+        "name": "Design activity elements",
+        "output_mode": "boolean",
+        "selector": {"kind": "geometry_filter"},  # no bounds: every element; the predicate narrows
+        "predicate": {
+            "kind": "triplet",
+            "attribute": {"kind": "exact", "name": "stable_id"},
+            "constraint": {"operator": "in", "values": sorted(keys)},
+        },
+    }
+
+
+def _is_element_predicate(pred: Any) -> bool:
+    inner = (pred or {}).get("predicate") if isinstance(pred, dict) else None
+    return isinstance(inner, dict) and (inner.get("attribute") or {}).get("name") == "stable_id"
+
+
+async def _sync_elements_and_cost(session, plan: Plan, bindings: dict[Slot, DesignScheduleBinding]) -> None:
+    """4D and 5D for the design activities: each one links the elements it builds and carries its share of the
+    position's money (position total split over the rule's storeys by quantity). Absent work: no link, no cost."""
+    from app.modules.boq.models import Position
+    from app.modules.schedule.models import Activity, EacScheduleLink
+
+    qty_of_rule: dict[str, Decimal] = {}
+    for p in plan.slots.values():
+        if p.active:
+            qty_of_rule[p.rule] = qty_of_rule.get(p.rule, Decimal(0)) + p.quantity
+    totals: dict[uuid.UUID, Decimal | None] = {}
+    for slot, b in bindings.items():
+        a = await session.get(Activity, b.activity_id)
+        if a is None:
+            continue
+        p = plan.slots.get(slot)
+        keys = p.element_keys if p is not None and p.active else []
+        links = (await session.execute(select(EacScheduleLink).where(EacScheduleLink.task_id == a.id))).scalars().all()
+        ours = [lk for lk in links if _is_element_predicate(lk.predicate_json)]
+        for lk in ours[1:] if keys else ours:
+            await session.delete(lk)
+        if keys:
+            pred = element_predicate(keys)
+            if ours:
+                ours[0].predicate_json, ours[0].matched_element_count = pred, len(keys)
+            else:
+                session.add(
+                    EacScheduleLink(
+                        task_id=a.id, predicate_json=pred, mode="partial_match", matched_element_count=len(keys)
+                    )
+                )
+        cost: Decimal | None = Decimal(0)
+        if p is not None and p.active and p.position_id is not None:
+            if p.position_id not in totals:
+                pos = await session.get(Position, p.position_id)
+                totals[p.position_id] = _money(pos.total if pos is not None else None)
+            total, share = totals[p.position_id], qty_of_rule.get(p.rule) or Decimal(0)
+            cost = (total * p.quantity / share).quantize(Decimal("0.01")) if total is not None and share > 0 else None
+        if cost is not None or a.cost_planned is not None:
+            a.cost_planned = cost
+    await session.flush()
+
+
+def _money(v: Any) -> Decimal | None:
+    try:
+        return Decimal(str(v)) if v not in (None, "") else None
+    except ArithmeticError:
+        return None
 
 
 async def _reschedule(session, svc, schedule_id: uuid.UUID) -> None:

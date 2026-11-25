@@ -151,11 +151,11 @@ class DefaultEacResolver:
             logger.warning("EAC dry_run_rule failed: %s", exc)
             return []
 
-        # ``ExecutionResult.elements`` is a list of ElementResult; matched
-        # rows are ``passed=True``. ``element_id`` is the canonical id we
-        # stored in ``elements[i]['stable_id']``.
+        # ``ExecutionResult.boolean_results`` holds one ElementResult per
+        # selected element; matched rows are ``passed=True``. ``element_id``
+        # is the canonical id stored in ``elements[i]['stable_id']``.
         matched: list[str] = []
-        for elem in getattr(result, "elements", []):
+        for elem in result.boolean_results:
             if getattr(elem, "passed", False):
                 eid = getattr(elem, "element_id", None)
                 if eid:
