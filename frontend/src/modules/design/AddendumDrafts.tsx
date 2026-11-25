@@ -9,6 +9,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { ArrowRight, FileWarning } from 'lucide-react';
 import { tr } from './BriefFields';
+import { takeoffName } from './data/takeoffName';
 import { packageUrl } from './linksApi';
 import { fetchProcurement } from './procurementApi';
 
@@ -17,7 +18,7 @@ export function AddendumDrafts({ projectId }: { projectId: string }) {
   const q = useQuery({ queryKey: ['design-procurement', projectId], queryFn: () => fetchProcurement(projectId), retry: false });
   const rows = (q.data?.packages ?? []).flatMap((p) => (p.addenda ?? [])
     .filter((a) => a.state === 'draft' && p.package_id)
-    .map((a) => ({ ...a, package_id: p.package_id!, name: p.name ?? p.ifc_class })));
+    .map((a) => ({ ...a, package_id: p.package_id!, name: takeoffName(t, p.name) || p.ifc_class })));
   if (!rows.length) return null;
   return (
     <section aria-labelledby="addenda-title" data-testid="addendum-drafts"

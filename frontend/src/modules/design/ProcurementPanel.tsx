@@ -14,6 +14,7 @@ import { getErrorMessage } from '@/shared/lib/api';
 import { fetchProcurementImpact, setupProcurement } from './procurementApi';
 import { changedRows, signed, type TakeoffRow } from './data/procurement';
 import { tr } from './BriefFields';
+import { takeoffName } from './data/takeoffName';
 
 export function ProcurementPanel({ projectId, revisionId, canManage }: {
   projectId: string; revisionId: string; canManage: boolean;
@@ -138,7 +139,7 @@ function Row({ row }: { row: TakeoffRow }) {
       </div>
       <div className="text-xs text-content-tertiary">
         {row.package
-          ? tr(t, 'design.procurement.package_status', { name: row.package.name, status: row.package.status })
+          ? tr(t, 'design.procurement.package_status', { name: takeoffName(t, row.package.name), status: row.package.status })
           : tr(t, 'design.procurement.package_new')}
       </div>
     </li>
