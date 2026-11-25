@@ -412,7 +412,9 @@ async def overview(session, project_id: uuid.UUID, user_id: uuid.UUID) -> dict[s
     ).scalar_one()
     co_n = (
         await session.execute(
-            select(func.count()).select_from(DesignChangeOrder).where(DesignChangeOrder.project_id == project_id)
+            select(func.count())
+            .select_from(DesignChangeOrder)
+            .where(DesignChangeOrder.project_id == project_id, DesignChangeOrder.change_order_id.is_not(None))
         )
     ).scalar_one()
 

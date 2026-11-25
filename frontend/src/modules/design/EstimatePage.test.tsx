@@ -460,3 +460,28 @@ describe('answer of a real ERP (live capture)', () => {
     expect(screen.getByTestId('subtotal-200').textContent).toContain('3,042');
   });
 });
+
+describe('money in the project currency', () => {
+  it('shows the project currency, BOQ totals with markups and the new flags', async () => {
+    const e = est({
+      currency: 'CHF',
+      boq: { direct_cost: '49044.00', markups_total: '4904.40', grand_total: '53948.40', currency: 'CHF' },
+      inside_range: null,
+      inside_range_note: 'server text',
+      inside_range_note_code: 'currency_mismatch',
+    });
+    withPosition(e, 'wall_ext', { flags: ['quantity_missing'] });
+    const site = e.positions.find((p) => p.rule === 'site_works');
+    if (site) withPosition(e, 'site_works', { flags: ['rate_missing'], provenance: { ...site.provenance, missing_code: 'currency_mismatch' } });
+    h.estimate = e;
+    await mount();
+    expect((await screen.findByTestId('project-currency')).textContent).toBe(EN['design.estimate.project_currency'].replace('{{currency}}', 'CHF'));
+    const boq = screen.getByTestId('boq-totals');
+    expect(within(boq).getByText(EN['design.estimate.boq_grand_total'])).toBeTruthy();
+    expect(boq.textContent).toMatch(/53,948\.40/);
+    expect(boq.textContent).toMatch(/CHF/);
+    expect(screen.getByTestId('check-unknown').textContent).toContain(EN['design.estimate.note.currency_mismatch']);
+    expect(within(screen.getByTestId('pos-wall_ext')).getByText(EN['design.estimate.flag.quantity_missing'])).toBeTruthy();
+    if (site) expect(within(screen.getByTestId('pos-site_works')).getByText(EN['design.estimate.flag.currency_mismatch'])).toBeTruthy();
+  });
+});

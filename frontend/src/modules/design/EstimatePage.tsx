@@ -103,8 +103,8 @@ function EstimateScreen({ projectId }: { projectId: string }) {
       {data.estimate ? (
         <>
           <Header est={data} canManage={canManage} accessReady={accessQ.isSuccess} run={run} revisions={revisions} />
-          <Totals est={data} currency={data.range.currency ?? accessQ.data?.currency ?? ''} />
-          <Groups est={data} projectId={projectId} canManage={canManage} locale={locale} currency={accessQ.data?.currency ?? data.range.currency ?? ''} regions={data.cost_regions ?? []} />
+          <Totals est={data} currency={data.range.currency ?? accessQ.data?.currency ?? ''} projectCurrency={data.currency ?? accessQ.data?.currency ?? data.range.currency ?? ''} />
+          <Groups est={data} projectId={projectId} canManage={canManage} locale={locale} currency={data.currency ?? accessQ.data?.currency ?? data.range.currency ?? ''} regions={data.cost_regions ?? []} />
           <Benchmarks est={data} />
         </>
       ) : (
@@ -233,7 +233,7 @@ function Header({ est, canManage, accessReady, run, revisions }: {
   );
 }
 
-function Totals({ est, currency }: { est: Estimate; currency: string }) {
+function Totals({ est, currency, projectCurrency }: { est: Estimate; currency: string; projectCurrency: string }) {
   const { t } = useTranslation();
   const r = est.range;
   const verdict = rangeVerdict(est);
@@ -260,8 +260,23 @@ function Totals({ est, currency }: { est: Estimate; currency: string }) {
       <div className="flex flex-col gap-2 border-t border-border-light px-4 py-3 text-sm">
         <div data-testid="priced-total">
           <span className="text-content-tertiary">{tr(t, 'design.estimate.priced_total')} </span>
-          {priced ? <strong className="tabular-nums">{moneyWhole(est.total, currency)}</strong> : <span>{tr(t, 'design.estimate.nothing_priced')}</span>}
+          {priced ? <strong className="tabular-nums">{moneyWhole(est.total, projectCurrency)}</strong> : <span>{tr(t, 'design.estimate.nothing_priced')}</span>}
         </div>
+        {projectCurrency && (
+          <div className="text-xs text-content-secondary" data-testid="project-currency">
+            {tr(t, 'design.estimate.project_currency', { currency: projectCurrency })}
+          </div>
+        )}
+        {est.boq && (
+          <dl className="grid grid-cols-3 gap-2" data-testid="boq-totals">
+            {(['direct_cost', 'markups_total', 'grand_total'] as const).map((k) => (
+              <div key={k}>
+                <dt className="text-content-tertiary">{tr(t, `design.estimate.boq_${k}`)}</dt>
+                <dd className={`tabular-nums ${k === 'grand_total' ? 'font-semibold text-content-primary' : ''}`}>{moneyExact(est.boq![k], est.boq!.currency ?? projectCurrency)}</dd>
+              </div>
+            ))}
+          </dl>
+        )}
         {verdict === 'unknown' && (
           <p role="note" data-testid="check-unknown" className="rounded border border-semantic-warning px-3 py-2">
             <strong>{tr(t, 'design.estimate.not_checkable')}</strong>{' '}
@@ -354,7 +369,11 @@ function PositionRow({ p, projectId, canManage, locale, currency, regions }: {
   const { t } = useTranslation();
   const unit = unitLabel(p.unit, locale);
   const unpriced = isUnpriced(p);
-  const flags = p.flags.filter((f) => f !== 'override' && f !== 'unpriced' && f !== 'cost_auto');
+  const missingCode = (p.provenance as { missing_code?: string } | null | undefined)?.missing_code;
+  const flags = [
+    ...p.flags.filter((f) => f !== 'override' && f !== 'unpriced' && f !== 'cost_auto'),
+    ...(missingCode === 'currency_mismatch' ? ['currency_mismatch'] : []),
+  ];
   const delta = overrideDelta(p);
   return (
     <li className="flex flex-col gap-1 border-t border-border-light px-4 py-3" data-testid={`pos-${p.rule}`}>

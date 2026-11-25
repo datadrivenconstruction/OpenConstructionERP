@@ -84,3 +84,17 @@ async def test_revision_moves_priced_quantities_keeps_overrides_and_currency(cli
     co = (await client.get(f"{BASE}/revisions/{rev2['revision_id']}/change-order", headers=h)).json()
     assert co["cost"]["before"] == "49044.00" and co["cost"]["after"] == "49500.00"
     assert co["cost"]["delta"] == "456.00" and co["cost"]["currency"] == "CHF"
+
+    # with change orders off the next revision still keeps its before/after totals
+    off = await client.put(f"{BASE}/projects/{pid}/change-orders/settings", json={"mode": "off"}, headers=h)
+    assert off.status_code == 200, off.text
+    rows3 = _rows2()
+    next(r for r in rows3 if r["element_key"] == "b1/s00/slab/0").update(
+        area_m2=410.0, geometry_hash="0badc0de0badc0de"
+    )
+    d3, _ = package(pid, rows3, parent_id=m2["revision_id"], parent_rows=_rows2())
+    rev3 = (await _upload(client, pid, tok, d3)).json()
+    assert (await client.post(f"{BASE}/revisions/{rev3['revision_id']}/accept", headers=h)).status_code == 200
+    co3 = (await client.get(f"{BASE}/revisions/{rev3['revision_id']}/change-order", headers=h)).json()
+    assert co3["snapshot"] is False and co3["change_order"] is None
+    assert co3["cost"]["before"] == "49500.00" and co3["cost"]["after"] == "50100.00"

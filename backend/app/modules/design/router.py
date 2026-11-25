@@ -668,7 +668,10 @@ async def decide_accept(
     if make_order:
         await co.require_create(session, user_id)
     # The cost delta is taken before the positions move.
-    snap = await co.snapshot(session, rev) if co_mode != "off" else None
+    # Taken in every mode, so each accepted revision keeps its before/after cost; "off" only skips the order.
+    snap = await co.snapshot(session, rev)
+    if co_mode == "off":
+        snap["change_orders_off"] = True
     # Row lock on the published revision: a parallel accept waits here, then sees it archived.
     latest = (
         await session.execute(

@@ -342,6 +342,9 @@ async def view(session, rev: DesignRevision) -> dict[str, Any]:
     if row is None:
         return out
     out["cost"] = cost_history(row.snapshot)
+    if row.change_order_id is None and (row.snapshot or {}).get("change_orders_off"):
+        out["snapshot"] = False  # accepted while change orders were off: history only, no order from it
+        return out
     if row.change_order_id is None:
         out["state"] = "declined"
         return out
@@ -375,7 +378,7 @@ async def create_later(session, rev: DesignRevision, user_id: uuid.UUID) -> None
             select(DesignChangeOrder).where(DesignChangeOrder.revision_id == rev.id).with_for_update()
         )
     ).scalar_one_or_none()
-    if row is None:
+    if row is None or (row.change_order_id is None and (row.snapshot or {}).get("change_orders_off")):
         raise HTTPException(
             status.HTTP_409_CONFLICT,
             "This revision was accepted while change orders were off: there is no cost snapshot",
