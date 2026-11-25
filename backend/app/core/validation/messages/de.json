@@ -2901,5 +2901,20 @@
       "wwr_invalid": "Der Fensterflaechenanteil muss zwischen 0 und 1 liegen.",
       "value_invalid": "'{field}' muss eine positive Zahl in einem plausiblen Bereich sein."
     }
+  },
+  "bim_link": {
+    "elements_unlinked": {
+      "fail": "Modell {model}: {count} Elemente vom Typ {element_type} sind keiner LV-Position zugeordnet.",
+      "suggestion": "Verknüpfen Sie die Elemente im BIM-Viewer oder geben Sie der Position eine Einheit, die das Modell misst (m, m2, m3, kg, Stück)."
+    },
+    "position_no_elements": {
+      "fail": "Position {ordinal} ist an Modell {model} gebunden, aber kein Element dieses Modells ist mit ihr verknüpft.",
+      "suggestion": "Verknüpfen Sie die Elemente im BIM-Viewer oder geben Sie der Position eine Einheit, die das Modell misst (m, m2, m3, kg, Stück)."
+    },
+    "unit_no_quantity": {
+      "fail": "Position {ordinal} in {unit} erhält aus ihren {count} verknüpften Elementen keine Menge: Das Modell hat für sie keinen Wert dieser Dimension.",
+      "suggestion": "Verknüpfen Sie die Elemente im BIM-Viewer oder geben Sie der Position eine Einheit, die das Modell misst (m, m2, m3, kg, Stück)."
+    },
+    "suggestion": "Verknüpfen Sie die Elemente im BIM-Viewer oder geben Sie der Position eine Einheit, die das Modell misst (m, m2, m3, kg, Stück)."
   }
 }

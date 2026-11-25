@@ -2901,5 +2901,20 @@
       "wwr_invalid": "Deraza ulushi 0 va 1 oralig'ida bo'lishi kerak.",
       "value_invalid": "'{field}' maqbul oraliqdagi musbat son bo'lishi kerak."
     }
+  },
+  "bim_link": {
+    "elements_unlinked": {
+      "fail": "{model} modeli: {element_type} turidagi {count} ta element smetaning hech bir pozitsiyasiga bog'lanmagan.",
+      "suggestion": "Elementlarni BIM ko'ruvchida bog'lang yoki pozitsiyaga model o'lchaydigan birlikni bering (m, m2, m3, kg, dona)."
+    },
+    "position_no_elements": {
+      "fail": "{ordinal} pozitsiyasi {model} modeliga biriktirilgan, lekin bu modelning birorta elementi unga bog'lanmagan.",
+      "suggestion": "Elementlarni BIM ko'ruvchida bog'lang yoki pozitsiyaga model o'lchaydigan birlikni bering (m, m2, m3, kg, dona)."
+    },
+    "unit_no_quantity": {
+      "fail": "{unit} birligidagi {ordinal} pozitsiyasi bog'langan {count} ta elementdan miqdor olmaydi: modelda ular uchun bu o'lchamning qiymati yo'q.",
+      "suggestion": "Elementlarni BIM ko'ruvchida bog'lang yoki pozitsiyaga model o'lchaydigan birlikni bering (m, m2, m3, kg, dona)."
+    },
+    "suggestion": "Elementlarni BIM ko'ruvchida bog'lang yoki pozitsiyaga model o'lchaydigan birlikni bering (m, m2, m3, kg, dona)."
   }
 }

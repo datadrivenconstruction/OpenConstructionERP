@@ -80,24 +80,8 @@ _MAX_IDS_IN_DETAILS = 20
 _QTY_QUANTUM = Decimal("0.0001")
 _MAX_HISTORY = 50
 
-# Unit to element quantity keys, kept identical to the table inside
-# ``BIMHubService._sync_boq_quantity_from_links``, which is what set the
-# quantity of a manually linked position in the first place. A proposal
-# computed with any other table would report a change on the first look at an
-# untouched model. ``tests/integration/test_boq_change_review.py`` pins the two
-# together: a line synced by the BIM Hub must read back with
-# ``previous_model_quantity`` equal to its stored quantity.
-_UNIT_TO_QUANTITY_KEYS: dict[str, tuple[str, ...]] = {
-    "m3": ("volume_m3", "Volume", "volume"),
-    "m2": ("area_m2", "Area", "area"),
-    "m": ("length_m", "Length", "length"),
-    "lfm": ("length_m", "Length", "length"),
-    "lm": ("length_m", "Length", "length"),
-    "kg": ("weight_kg", "Weight", "weight"),
-    "t": ("weight_kg", "Weight", "weight"),
-    "to": ("weight_kg", "Weight", "weight"),
-}
-_TONNE_UNITS = frozenset({"t", "to"})
+# The unit-to-quantity table lives in ``bim_hub.link_quantity``, shared with the link-time sync, so a
+# synced line reads back with ``previous_model_quantity`` equal to its stored quantity.
 
 # A model version counts as the newest one only once its elements are in.
 # ``ready`` and its synonyms are what the converter pipeline writes when it
@@ -392,31 +376,16 @@ def unit_method_quantity(unit: str, elements: Sequence[_Elem]) -> Decimal | None
     nothing, and a unit with no known dimension returns ``None``: there is no
     figure to propose, exactly as the BIM Hub leaves such a position alone.
     """
+    from app.modules.bim_hub.link_quantity import STATUS_UNIT_UNSUPPORTED, link_quantity
     from app.modules.bim_hub.service import _COUNT_UNITS, normalize_unit_token
 
     token = normalize_unit_token(unit)
     if token in _COUNT_UNITS:
         return Decimal(len(elements))
-    keys = _UNIT_TO_QUANTITY_KEYS.get(token)
-    if not keys:
+    result = link_quantity(token, (("", e.quantities) for e in elements), count_units=_COUNT_UNITS)
+    if result.status == STATUS_UNIT_UNSUPPORTED:
         return None
-    scale = Decimal("0.001") if token in _TONNE_UNITS else Decimal("1")
-    total = Decimal("0")
-    for elem in elements:
-        quantities = elem.quantities or {}
-        value: Decimal | None = None
-        for key in keys:
-            raw = quantities.get(key)
-            if raw is None:
-                continue
-            try:
-                value = Decimal(str(raw))
-                break
-            except (InvalidOperation, TypeError, ValueError):
-                continue
-        if value is not None and value.is_finite() and value > 0:
-            total += value * scale
-    return _q(total)
+    return result.quantity if result.quantity is not None else _q(Decimal(0))
 
 
 def rule_method_quantity(rule: Any, elements: Sequence[_Elem]) -> Decimal | None:
@@ -1711,6 +1680,10 @@ class ChangeReviewService:
             history.append(provenance)
             meta["bim_quantity_update"] = provenance
             meta["bim_quantity_update_history"] = history[-_MAX_HISTORY:]
+            link_record = meta.get("bim_link_quantity")
+            if isinstance(link_record, dict):
+                # An accepted proposal is a model figure, not a manual edit.
+                meta["bim_link_quantity"] = {**link_record, "applied_quantity": new_qty, "manual_kept": False}
             await repo.update_fields(
                 pid,
                 quantity=new_qty,

@@ -2901,5 +2901,20 @@
       "wwr_invalid": "Az ablakarány 0 és 1 között legyen.",
       "value_invalid": "A(z) '{field}' értéknek pozitív számnak kell lennie ésszerű tartományban."
     }
+  },
+  "bim_link": {
+    "elements_unlinked": {
+      "fail": "{model} modell: {count} {element_type} típusú elem nincs egyetlen költségvetési tételhez sem kapcsolva.",
+      "suggestion": "Kapcsolja az elemeket a BIM-nézőben, vagy adjon a tételnek olyan mértékegységet, amelyet a modell mér (m, m2, m3, kg, db)."
+    },
+    "position_no_elements": {
+      "fail": "A(z) {ordinal} tétel a(z) {model} modellhez van kötve, de a modell egyetlen eleme sincs hozzá kapcsolva.",
+      "suggestion": "Kapcsolja az elemeket a BIM-nézőben, vagy adjon a tételnek olyan mértékegységet, amelyet a modell mér (m, m2, m3, kg, db)."
+    },
+    "unit_no_quantity": {
+      "fail": "A(z) {ordinal} tétel ({unit}) nem kap mennyiséget a(z) {count} kapcsolt elemétől: a modellben nincs ilyen dimenziójú érték hozzájuk.",
+      "suggestion": "Kapcsolja az elemeket a BIM-nézőben, vagy adjon a tételnek olyan mértékegységet, amelyet a modell mér (m, m2, m3, kg, db)."
+    },
+    "suggestion": "Kapcsolja az elemeket a BIM-nézőben, vagy adjon a tételnek olyan mértékegységet, amelyet a modell mér (m, m2, m3, kg, db)."
   }
 }

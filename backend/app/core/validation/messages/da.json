@@ -2901,5 +2901,20 @@
       "wwr_invalid": "Vinduesandelen skal være mellem 0 og 1.",
       "value_invalid": "'{field}' skal være et positivt tal i et rimeligt interval."
     }
+  },
+  "bim_link": {
+    "elements_unlinked": {
+      "fail": "Model {model}: {count} elementer af typen {element_type} er ikke knyttet til nogen post i overslaget.",
+      "suggestion": "Knyt elementerne i BIM-fremviseren, eller giv posten en enhed, som modellen måler (m, m2, m3, kg, stk)."
+    },
+    "position_no_elements": {
+      "fail": "Post {ordinal} er bundet til model {model}, men intet element i den model er knyttet til den.",
+      "suggestion": "Knyt elementerne i BIM-fremviseren, eller giv posten en enhed, som modellen måler (m, m2, m3, kg, stk)."
+    },
+    "unit_no_quantity": {
+      "fail": "Post {ordinal} i {unit} får ingen mængde fra sine {count} knyttede elementer: modellen har ingen værdi i den dimension for dem.",
+      "suggestion": "Knyt elementerne i BIM-fremviseren, eller giv posten en enhed, som modellen måler (m, m2, m3, kg, stk)."
+    },
+    "suggestion": "Knyt elementerne i BIM-fremviseren, eller giv posten en enhed, som modellen måler (m, m2, m3, kg, stk)."
   }
 }

@@ -2901,5 +2901,20 @@
       "wwr_invalid": "Rasio jendela harus antara 0 dan 1.",
       "value_invalid": "'{field}' harus berupa angka positif dalam rentang yang wajar."
     }
+  },
+  "bim_link": {
+    "elements_unlinked": {
+      "fail": "Model {model}: {count} elemen bertipe {element_type} tidak tertaut ke item BOQ mana pun.",
+      "suggestion": "Tautkan elemen di penampil BIM, atau beri item satuan yang diukur model (m, m2, m3, kg, buah)."
+    },
+    "position_no_elements": {
+      "fail": "Item {ordinal} terikat ke model {model}, tetapi tidak ada elemen model itu yang tertaut ke item tersebut.",
+      "suggestion": "Tautkan elemen di penampil BIM, atau beri item satuan yang diukur model (m, m2, m3, kg, buah)."
+    },
+    "unit_no_quantity": {
+      "fail": "Item {ordinal} dalam {unit} tidak mendapat kuantitas dari {count} elemen tertautnya: model tidak memiliki nilai dimensi itu untuk elemen tersebut.",
+      "suggestion": "Tautkan elemen di penampil BIM, atau beri item satuan yang diukur model (m, m2, m3, kg, buah)."
+    },
+    "suggestion": "Tautkan elemen di penampil BIM, atau beri item satuan yang diukur model (m, m2, m3, kg, buah)."
   }
 }

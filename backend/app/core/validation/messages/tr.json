@@ -2901,5 +2901,20 @@
       "wwr_invalid": "Pencere oranı 0 ile 1 arasında olmalıdır.",
       "value_invalid": "'{field}' makul bir aralıkta pozitif bir sayı olmalıdır."
     }
+  },
+  "bim_link": {
+    "elements_unlinked": {
+      "fail": "Model {model}: {element_type} türündeki {count} eleman hiçbir keşif kalemine bağlı değil.",
+      "suggestion": "Elemanları BIM görüntüleyicide bağlayın veya kaleme modelin ölçtüğü bir birim verin (m, m2, m3, kg, adet)."
+    },
+    "position_no_elements": {
+      "fail": "{ordinal} kalemi {model} modeline bağlı, ancak bu modelin hiçbir elemanı ona bağlanmamış.",
+      "suggestion": "Elemanları BIM görüntüleyicide bağlayın veya kaleme modelin ölçtüğü bir birim verin (m, m2, m3, kg, adet)."
+    },
+    "unit_no_quantity": {
+      "fail": "{unit} birimindeki {ordinal} kalemi, bağlı {count} elemanından miktar almıyor: modelde bunlar için bu boyutta bir değer yok.",
+      "suggestion": "Elemanları BIM görüntüleyicide bağlayın veya kaleme modelin ölçtüğü bir birim verin (m, m2, m3, kg, adet)."
+    },
+    "suggestion": "Elemanları BIM görüntüleyicide bağlayın veya kaleme modelin ölçtüğü bir birim verin (m, m2, m3, kg, adet)."
   }
 }

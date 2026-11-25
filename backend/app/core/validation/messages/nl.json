@@ -2901,5 +2901,20 @@
       "wwr_invalid": "Het raamaandeel moet tussen 0 en 1 liggen.",
       "value_invalid": "'{field}' moet een positief getal binnen een aannemelijk bereik zijn."
     }
+  },
+  "bim_link": {
+    "elements_unlinked": {
+      "fail": "Model {model}: {count} elementen van type {element_type} zijn aan geen enkele begrotingspost gekoppeld.",
+      "suggestion": "Koppel de elementen in de BIM-viewer of geef de post een eenheid die het model meet (m, m2, m3, kg, stuks)."
+    },
+    "position_no_elements": {
+      "fail": "Post {ordinal} is aan model {model} gebonden, maar geen element van dat model is eraan gekoppeld.",
+      "suggestion": "Koppel de elementen in de BIM-viewer of geef de post een eenheid die het model meet (m, m2, m3, kg, stuks)."
+    },
+    "unit_no_quantity": {
+      "fail": "Post {ordinal} in {unit} krijgt geen hoeveelheid van de {count} gekoppelde elementen: het model heeft voor hen geen waarde in die dimensie.",
+      "suggestion": "Koppel de elementen in de BIM-viewer of geef de post een eenheid die het model meet (m, m2, m3, kg, stuks)."
+    },
+    "suggestion": "Koppel de elementen in de BIM-viewer of geef de post een eenheid die het model meet (m, m2, m3, kg, stuks)."
   }
 }

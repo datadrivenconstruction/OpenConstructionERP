@@ -2901,5 +2901,20 @@
       "wwr_invalid": "A proporção de janelas deve estar entre 0 e 1.",
       "value_invalid": "'{field}' deve ser um número positivo num intervalo plausível."
     }
+  },
+  "bim_link": {
+    "elements_unlinked": {
+      "fail": "Modelo {model}: {count} elementos do tipo {element_type} não estão ligados a nenhum item do orçamento.",
+      "suggestion": "Ligue os elementos no visualizador BIM ou dê ao item uma unidade que o modelo mede (m, m2, m3, kg, unidades)."
+    },
+    "position_no_elements": {
+      "fail": "O item {ordinal} está associado ao modelo {model}, mas nenhum elemento desse modelo está ligado a ele.",
+      "suggestion": "Ligue os elementos no visualizador BIM ou dê ao item uma unidade que o modelo mede (m, m2, m3, kg, unidades)."
+    },
+    "unit_no_quantity": {
+      "fail": "O item {ordinal} em {unit} não recebe quantidade dos seus {count} elementos ligados: o modelo não tem valor dessa dimensão para eles.",
+      "suggestion": "Ligue os elementos no visualizador BIM ou dê ao item uma unidade que o modelo mede (m, m2, m3, kg, unidades)."
+    },
+    "suggestion": "Ligue os elementos no visualizador BIM ou dê ao item uma unidade que o modelo mede (m, m2, m3, kg, unidades)."
   }
 }

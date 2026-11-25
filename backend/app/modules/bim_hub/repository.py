@@ -193,9 +193,9 @@ class BIMElementRepository:
         storey: str | None = None,
         discipline: str | None = None,
         offset: int = 0,
-        limit: int = 200,
+        limit: int | None = 200,
     ) -> tuple[list[BIMElement], int]:
-        """List elements for a model with optional filters and pagination.
+        """List elements for a model with optional filters and pagination (``limit=None``: all).
 
         BOQ links are NOT loaded in list queries to avoid N+1.
         """

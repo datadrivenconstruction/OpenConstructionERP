@@ -2901,5 +2901,20 @@
       "wwr_invalid": "La proporción de ventanas debe estar entre 0 y 1.",
       "value_invalid": "'{field}' debe ser un número positivo en un rango plausible."
     }
+  },
+  "bim_link": {
+    "elements_unlinked": {
+      "fail": "Modelo {model}: {count} elementos del tipo {element_type} no están vinculados a ninguna partida del presupuesto.",
+      "suggestion": "Vincule los elementos en el visor BIM o asigne a la partida una unidad que el modelo mida (m, m2, m3, kg, unidades)."
+    },
+    "position_no_elements": {
+      "fail": "La partida {ordinal} está asociada al modelo {model}, pero ningún elemento de ese modelo está vinculado a ella.",
+      "suggestion": "Vincule los elementos en el visor BIM o asigne a la partida una unidad que el modelo mida (m, m2, m3, kg, unidades)."
+    },
+    "unit_no_quantity": {
+      "fail": "La partida {ordinal} en {unit} no recibe cantidad de sus {count} elementos vinculados: el modelo no tiene valor de esa dimensión para ellos.",
+      "suggestion": "Vincule los elementos en el visor BIM o asigne a la partida una unidad que el modelo mida (m, m2, m3, kg, unidades)."
+    },
+    "suggestion": "Vincule los elementos en el visor BIM o asigne a la partida una unidad que el modelo mida (m, m2, m3, kg, unidades)."
   }
 }

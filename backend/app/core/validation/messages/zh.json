@@ -2901,5 +2901,20 @@
       "wwr_invalid": "窗墙比必须在 0 到 1 之间。",
       "value_invalid": "'{field}' 必须是合理范围内的正数。"
     }
+  },
+  "bim_link": {
+    "elements_unlinked": {
+      "fail": "模型 {model}：{count} 个 {element_type} 类型的构件未关联任何清单项。",
+      "suggestion": "请在 BIM 查看器中关联构件，或为清单项设置模型可计量的单位（m、m2、m3、kg、个）。"
+    },
+    "position_no_elements": {
+      "fail": "清单项 {ordinal} 绑定到模型 {model}，但该模型没有任何构件与其关联。",
+      "suggestion": "请在 BIM 查看器中关联构件，或为清单项设置模型可计量的单位（m、m2、m3、kg、个）。"
+    },
+    "unit_no_quantity": {
+      "fail": "单位为 {unit} 的清单项 {ordinal} 无法从其 {count} 个关联构件获得工程量：模型中没有这些构件该维度的数值。",
+      "suggestion": "请在 BIM 查看器中关联构件，或为清单项设置模型可计量的单位（m、m2、m3、kg、个）。"
+    },
+    "suggestion": "请在 BIM 查看器中关联构件，或为清单项设置模型可计量的单位（m、m2、m3、kg、个）。"
   }
 }

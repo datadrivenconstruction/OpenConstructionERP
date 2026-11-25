@@ -2901,5 +2901,20 @@
       "wwr_invalid": "La quota di finestre deve essere tra 0 e 1.",
       "value_invalid": "'{field}' deve essere un numero positivo in un intervallo plausibile."
     }
+  },
+  "bim_link": {
+    "elements_unlinked": {
+      "fail": "Modello {model}: {count} elementi di tipo {element_type} non sono collegati ad alcuna voce del computo.",
+      "suggestion": "Collega gli elementi nel visualizzatore BIM oppure assegna alla voce un'unità che il modello misura (m, m2, m3, kg, pezzi)."
+    },
+    "position_no_elements": {
+      "fail": "La voce {ordinal} è associata al modello {model}, ma nessun elemento di quel modello è collegato a essa.",
+      "suggestion": "Collega gli elementi nel visualizzatore BIM oppure assegna alla voce un'unità che il modello misura (m, m2, m3, kg, pezzi)."
+    },
+    "unit_no_quantity": {
+      "fail": "La voce {ordinal} in {unit} non riceve quantità dai suoi {count} elementi collegati: il modello non ha un valore di quella dimensione per essi.",
+      "suggestion": "Collega gli elementi nel visualizzatore BIM oppure assegna alla voce un'unità che il modello misura (m, m2, m3, kg, pezzi)."
+    },
+    "suggestion": "Collega gli elementi nel visualizzatore BIM oppure assegna alla voce un'unità che il modello misura (m, m2, m3, kg, pezzi)."
   }
 }

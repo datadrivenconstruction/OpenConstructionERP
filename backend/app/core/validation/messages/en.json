@@ -2901,5 +2901,20 @@
       "wwr_invalid": "The window ratio must be between 0 and 1.",
       "value_invalid": "'{field}' must be a positive number in a plausible range."
     }
+  },
+  "bim_link": {
+    "elements_unlinked": {
+      "fail": "Model {model}: {count} elements of type {element_type} are not linked to any BOQ position.",
+      "suggestion": "Link the elements in the BIM viewer, or give the position a unit the model measures (m, m2, m3, kg, pieces)."
+    },
+    "position_no_elements": {
+      "fail": "Position {ordinal} is bound to model {model}, but no element of that model is linked to it.",
+      "suggestion": "Link the elements in the BIM viewer, or give the position a unit the model measures (m, m2, m3, kg, pieces)."
+    },
+    "unit_no_quantity": {
+      "fail": "Position {ordinal} in {unit} takes no quantity from its {count} linked elements: the model has no value of that dimension for them.",
+      "suggestion": "Link the elements in the BIM viewer, or give the position a unit the model measures (m, m2, m3, kg, pieces)."
+    },
+    "suggestion": "Link the elements in the BIM viewer, or give the position a unit the model measures (m, m2, m3, kg, pieces)."
   }
 }

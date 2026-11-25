@@ -2901,5 +2901,20 @@
       "wwr_invalid": "창면적비는 0과 1 사이여야 합니다.",
       "value_invalid": "'{field}'은(는) 타당한 범위의 양수여야 합니다."
     }
+  },
+  "bim_link": {
+    "elements_unlinked": {
+      "fail": "모델 {model}: {element_type} 유형의 요소 {count}개가 어떤 내역 항목에도 연결되지 않았습니다.",
+      "suggestion": "BIM 뷰어에서 요소를 연결하거나 모델이 측정하는 단위(m, m2, m3, kg, 개)를 항목에 지정하십시오."
+    },
+    "position_no_elements": {
+      "fail": "항목 {ordinal}은(는) 모델 {model}에 연결되어 있지만 해당 모델의 요소가 하나도 연결되어 있지 않습니다.",
+      "suggestion": "BIM 뷰어에서 요소를 연결하거나 모델이 측정하는 단위(m, m2, m3, kg, 개)를 항목에 지정하십시오."
+    },
+    "unit_no_quantity": {
+      "fail": "단위 {unit}의 항목 {ordinal}은(는) 연결된 요소 {count}개에서 수량을 받지 못합니다. 모델에 해당 차원의 값이 없습니다.",
+      "suggestion": "BIM 뷰어에서 요소를 연결하거나 모델이 측정하는 단위(m, m2, m3, kg, 개)를 항목에 지정하십시오."
+    },
+    "suggestion": "BIM 뷰어에서 요소를 연결하거나 모델이 측정하는 단위(m, m2, m3, kg, 개)를 항목에 지정하십시오."
   }
 }

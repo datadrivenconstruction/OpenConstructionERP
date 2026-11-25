@@ -2901,5 +2901,20 @@
       "wwr_invalid": "Fönsterandelen måste vara mellan 0 och 1.",
       "value_invalid": "'{field}' måste vara ett positivt tal i ett rimligt intervall."
     }
+  },
+  "bim_link": {
+    "elements_unlinked": {
+      "fail": "Modell {model}: {count} element av typen {element_type} är inte kopplade till någon post i kalkylen.",
+      "suggestion": "Koppla elementen i BIM-visaren eller ge posten en enhet som modellen mäter (m, m2, m3, kg, st)."
+    },
+    "position_no_elements": {
+      "fail": "Post {ordinal} är bunden till modell {model}, men inget element i den modellen är kopplat till den.",
+      "suggestion": "Koppla elementen i BIM-visaren eller ge posten en enhet som modellen mäter (m, m2, m3, kg, st)."
+    },
+    "unit_no_quantity": {
+      "fail": "Post {ordinal} i {unit} får ingen mängd från sina {count} kopplade element: modellen har inget värde i den dimensionen för dem.",
+      "suggestion": "Koppla elementen i BIM-visaren eller ge posten en enhet som modellen mäter (m, m2, m3, kg, st)."
+    },
+    "suggestion": "Koppla elementen i BIM-visaren eller ge posten en enhet som modellen mäter (m, m2, m3, kg, st)."
   }
 }

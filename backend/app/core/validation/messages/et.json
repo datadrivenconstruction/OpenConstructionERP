@@ -2901,5 +2901,20 @@
       "wwr_invalid": "Akende osakaal peab olema vahemikus 0 kuni 1.",
       "value_invalid": "'{field}' peab olema positiivne arv usutavas vahemikus."
     }
+  },
+  "bim_link": {
+    "elements_unlinked": {
+      "fail": "Mudel {model}: {count} tüüpi {element_type} elementi ei ole seotud ühegi eelarve positsiooniga.",
+      "suggestion": "Seo elemendid BIM-vaaturis või anna positsioonile ühik, mida mudel mõõdab (m, m2, m3, kg, tk)."
+    },
+    "position_no_elements": {
+      "fail": "Positsioon {ordinal} on seotud mudeliga {model}, kuid ükski selle mudeli element pole sellega seotud.",
+      "suggestion": "Seo elemendid BIM-vaaturis või anna positsioonile ühik, mida mudel mõõdab (m, m2, m3, kg, tk)."
+    },
+    "unit_no_quantity": {
+      "fail": "Positsioon {ordinal} ühikus {unit} ei saa kogust oma {count} seotud elemendilt: mudelil pole neile selle mõõtme väärtust.",
+      "suggestion": "Seo elemendid BIM-vaaturis või anna positsioonile ühik, mida mudel mõõdab (m, m2, m3, kg, tk)."
+    },
+    "suggestion": "Seo elemendid BIM-vaaturis või anna positsioonile ühik, mida mudel mõõdab (m, m2, m3, kg, tk)."
   }
 }

@@ -2901,5 +2901,20 @@
       "wwr_invalid": "窓面積率は0から1の間でなければなりません。",
       "value_invalid": "'{field}' は妥当な範囲の正の数でなければなりません。"
     }
+  },
+  "bim_link": {
+    "elements_unlinked": {
+      "fail": "モデル {model}：タイプ {element_type} の要素 {count} 件が、どの数量明細にもリンクされていません。",
+      "suggestion": "BIM ビューアで要素をリンクするか、モデルが計測する単位（m、m2、m3、kg、個）を明細に設定してください。"
+    },
+    "position_no_elements": {
+      "fail": "明細 {ordinal} はモデル {model} に紐づいていますが、そのモデルの要素は 1 件もリンクされていません。",
+      "suggestion": "BIM ビューアで要素をリンクするか、モデルが計測する単位（m、m2、m3、kg、個）を明細に設定してください。"
+    },
+    "unit_no_quantity": {
+      "fail": "単位 {unit} の明細 {ordinal} は、リンクされた {count} 件の要素から数量を得られません。モデルにその次元の値がありません。",
+      "suggestion": "BIM ビューアで要素をリンクするか、モデルが計測する単位（m、m2、m3、kg、個）を明細に設定してください。"
+    },
+    "suggestion": "BIM ビューアで要素をリンクするか、モデルが計測する単位（m、m2、m3、kg、個）を明細に設定してください。"
   }
 }
