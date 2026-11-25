@@ -2898,7 +2898,8 @@
       "footprint_over_plot": "Fodaftrykket på {footprint} m2 er større end grunden på {plot} m2.",
       "fx_invalid": "Valutakursen skal være et positivt tal.",
       "source_missing": "Ingen kilde angiver '{field}' for denne bygningstype; angiv den i programmet.",
-      "wwr_invalid": "Vinduesandelen skal være mellem 0 og 1."
+      "wwr_invalid": "Vinduesandelen skal være mellem 0 og 1.",
+      "value_invalid": "'{field}' skal være et positivt tal i et rimeligt interval."
     }
   }
 }

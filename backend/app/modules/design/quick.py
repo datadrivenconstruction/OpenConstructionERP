@@ -37,6 +37,7 @@ ELEMENTS = {
     "420": "floor_area",
     "440": "floor_area",
 }
+POSITIVE = ("floor_height_m", "depth_m", "grid_m", "plot_area_m2", "max_height_m")
 PHASES = ("substructure", "frame", "envelope", "services_fitout", "commissioning")
 
 
@@ -81,8 +82,8 @@ def _dec(v: Any) -> Decimal | None:
     return d if d.is_finite() else None
 
 
-def _issue(code: str, field: str, severity: str = "error", **params: Any) -> dict[str, Any]:
-    return {"code": code, "field": field, "severity": severity, "params": params}
+def _issue(code: str, where: str, severity: str = "error", **params: Any) -> dict[str, Any]:
+    return {"code": code, "field": where, "severity": severity, "params": params}
 
 
 def _src(kind: str, ref: str, formula: str | None = None, status: str = "default") -> dict[str, Any]:
@@ -112,6 +113,44 @@ def inputs(brief: dict[str, Any]) -> dict[str, tuple[Any, dict[str, Any]]]:
     return out
 
 
+def from_brief_doc(doc: dict[str, Any] | None) -> dict[str, Any] | None:
+    """The short brief inside a project's design brief document (``brief.schema.json``); None if it has no GFA.
+
+    GFA is the brief's own ``gross_floor_area_m2``, else footprint width × depth × storeys (both brief values)."""
+    if not isinstance(doc, dict) or (doc.get("use") or {}).get("category") not in _data()["types"]:
+        return None
+    massing, site = doc.get("massing") or {}, doc.get("site") or {}
+    storeys = massing.get("floors_above")
+    fp = massing.get("footprint") or {}
+    gfa = _num(massing.get("gross_floor_area_m2"))
+    if gfa is None and _num(fp.get("width_m")) and _num(fp.get("depth_m")) and isinstance(storeys, int):
+        gfa = fp["width_m"] * fp["depth_m"] * storeys
+    if gfa is None:
+        return None
+    out = {
+        "building_type": (doc.get("use") or {}).get("category"),
+        "gfa_m2": gfa,
+        "storeys": storeys,
+        "country": doc.get("country"),
+        "floor_height_m": massing.get("floor_height_m"),
+        "depth_m": fp.get("depth_m"),
+        "max_height_m": site.get("max_height_m"),
+    }
+    return {k: v for k, v in out.items() if v is not None}
+
+
+def project_fx(base: str, fx_rates: list | None) -> tuple[str | None, str | None]:
+    """Rate of the band currency in the project's base currency from the project's own ``fx_rates`` (base units per
+    1 foreign unit), with where it came from; (None, None) when the project does not list it."""
+    band = _bands()["currency"]
+    if base.upper() == band:
+        return None, None
+    for r in fx_rates or []:
+        if isinstance(r, dict) and str(r.get("code", "")).upper() == band and _dec(r.get("rate")):
+            return str(r["rate"]), f"project.fx_rates[{band}]"
+    return None, None
+
+
 def check(brief: dict[str, Any]) -> list[dict[str, Any]]:
     """Implausible, contradictory or unsourced brief values, every one at once."""
     out: list[dict[str, Any]] = []
@@ -126,7 +165,7 @@ def check(brief: dict[str, Any]) -> list[dict[str, Any]]:
     v = inputs(brief)
     for k in ("floor_height_m", "depth_m"):
         if k not in v:
-            out.append(_issue("source_missing", k))
+            out.append(_issue("source_missing", k, field=k))
     if "max_storeys" in v and storeys > v["max_storeys"][0]:
         out.append(_issue("storeys_over_type_max", "storeys", max=v["max_storeys"][0]))
     if brief.get("quality", "standard") not in QUALITY:
@@ -149,6 +188,12 @@ def check(brief: dict[str, Any]) -> list[dict[str, Any]]:
             smallest = round(v["depth_min_m"][0] * mp.params_for({}, _gen(brief["building_type"]))[2].min, 1)
             if footprint < smallest:
                 out.append(_issue("storey_too_small", "gfa_m2", footprint=round(footprint, 1), minimum=smallest))
+    for k in POSITIVE:
+        if k in brief and brief[k] is not None and not ((_num(brief[k]) or 0) > 0):
+            out.append(_issue("value_invalid", k, field=k))
+    zone = brief.get("slab_zone_m")
+    if zone is not None and (_num(zone) is None or not 0 <= zone < (height or 0)):
+        out.append(_issue("value_invalid", "slab_zone_m", field="slab_zone_m"))
     wwr = _num(brief.get("wwr"))
     if wwr is not None and not 0 <= wwr <= 1:
         out.append(_issue("wwr_invalid", "wwr"))
@@ -229,7 +274,9 @@ def _s(d: Decimal | None) -> str | None:
 def _cost(brief: dict[str, Any], model: dict[str, Any]) -> dict[str, Any]:
     ref = _bands()
     band_type = _data()["types"][brief["building_type"]]["band"]
-    band = next((b for b in ref["bands"] if b["project_type"] == band_type and b["standard"] == "din276"), None)
+    # only the band this market's own data names; never another market's prices converted by a rate
+    std = (_country().get(str(brief.get("country") or "").upper()) or {}).get("cost_band_standard")
+    band = next((b for b in ref["bands"] if b["project_type"] == band_type and b["standard"] == std), None)
     base = {
         "source": ref["source"],
         "ref": REF_BANDS,
@@ -237,7 +284,15 @@ def _cost(brief: dict[str, Any], model: dict[str, Any]) -> dict[str, Any]:
         "needs_expert_review": ref["needs_expert_review"],
     }
     if band is None:
-        return {**base, "total": None, "reason": "no_band", "currency": brief.get("currency"), "lines": []}
+        return {
+            **base,
+            "total": None,
+            "reason": "no_band",
+            "flag": "source_missing",
+            "market": std,
+            "currency": brief.get("currency"),
+            "lines": [],
+        }
     cur = (brief.get("currency") or ref["currency"]).upper()
     fx = Decimal(1)
     if cur != ref["currency"]:
@@ -292,6 +347,7 @@ def _cost(brief: dict[str, Any], model: dict[str, Any]) -> dict[str, Any]:
         **base,
         "currency": cur,
         "fx_rate": _s(fx) if cur != ref["currency"] else None,
+        "fx_source": brief.get("fx_source") or ("brief" if cur != ref["currency"] else None),
         "quality": pct,
         "total": _s(total),
         "per_m2": _s(per),

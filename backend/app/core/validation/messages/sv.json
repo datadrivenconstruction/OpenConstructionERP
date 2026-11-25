@@ -2898,7 +2898,8 @@
       "footprint_over_plot": "Fotavtrycket på {footprint} m2 är större än tomten på {plot} m2.",
       "fx_invalid": "Växelkursen måste vara ett positivt tal.",
       "source_missing": "Ingen källa anger '{field}' för denna byggnadstyp; ange det i programmet.",
-      "wwr_invalid": "Fönsterandelen måste vara mellan 0 och 1."
+      "wwr_invalid": "Fönsterandelen måste vara mellan 0 och 1.",
+      "value_invalid": "'{field}' måste vara ett positivt tal i ett rimligt intervall."
     }
   }
 }

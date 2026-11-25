@@ -148,3 +148,21 @@ def test_frontend_fixture_is_the_real_output():
     if not fixture.exists():
         pytest.skip("frontend tree not beside the backend")
     assert json.loads(fixture.read_text(encoding="utf-8")) == json.loads(json.dumps(quick.build(OFFICE)))
+
+
+@pytest.mark.parametrize(
+    "patch",
+    [{"depth_m": 0}, {"depth_m": -5}, {"floor_height_m": -3}, {"grid_m": 0}, {"slab_zone_m": 4}, {"max_height_m": 0}],
+)
+def test_non_positive_dimensions_are_refused_not_divided_by(patch):
+    r = quick.build({**OFFICE, **patch})
+    assert r["model"] is None
+    assert "value_invalid" in {i["code"] for i in r["issues"]}
+
+
+@pytest.mark.parametrize("country", ["US", "AE", None])
+def test_a_market_without_its_own_band_gets_no_price(country):
+    brief = {k: v for k, v in {**OFFICE, "country": country, "currency": "USD", "fx_rate": "1.1"}.items() if v}
+    cost = quick.build(brief)["cost"]
+    assert cost["total"] is None and cost["reason"] == "no_band" and cost["flag"] == "source_missing"
+    assert cost["lines"] == []

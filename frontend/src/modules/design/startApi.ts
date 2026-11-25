@@ -49,7 +49,7 @@ export interface QuickIssue { code: string; field: string; severity: 'error' | '
 export interface QuickQuantity { code: string; value: number | null; unit: string; provenance: Provenance; flag: string | null }
 export interface QuickLine { code: string; quantity: number | null; unit: string; unit_rate: string | null; amount: string; provenance: Provenance }
 export interface QuickCost {
-  currency: string | null; total: string | null; per_m2?: string; reason: 'no_band' | 'currency' | null;
+  currency: string | null; total: string | null; per_m2?: string; reason: 'no_band' | 'currency' | null; flag?: string;
   band_currency?: string; lines?: QuickLine[]; needs_expert_review: boolean; base_date: string; ref: string;
   benchmark?: { low: string; mid: string; high: string; within: boolean };
 }
@@ -70,5 +70,6 @@ export interface QuickResult {
 export const fetchQuickTypes = () =>
   apiGet<{ types: { id: string; generator: boolean; priced: boolean }[] }>('/v1/design/quick/types', { headers: HEADERS });
 
-export const runQuick = (brief: QuickBrief) =>
-  apiPost<QuickResult, QuickBrief>('/v1/design/quick', brief, { headers: HEADERS });
+/** In the project: the server takes the project's currency, country and fx_rates. */
+export const runQuick = (projectId: string, brief: QuickBrief) =>
+  apiPost<QuickResult, QuickBrief>(`/v1/design/projects/${projectId}/quick`, brief, { headers: HEADERS });

@@ -2898,7 +2898,8 @@
       "footprint_over_plot": "Het bebouwd oppervlak van {footprint} m2 is groter dan het perceel van {plot} m2.",
       "fx_invalid": "De wisselkoers moet een positief getal zijn.",
       "source_missing": "Geen bron geeft '{field}' voor dit gebouwtype; vul het in het programma in.",
-      "wwr_invalid": "Het raamaandeel moet tussen 0 en 1 liggen."
+      "wwr_invalid": "Het raamaandeel moet tussen 0 en 1 liggen.",
+      "value_invalid": "'{field}' moet een positief getal binnen een aannemelijk bereik zijn."
     }
   }
 }

@@ -2898,7 +2898,8 @@
       "footprint_over_plot": "A implantação de {footprint} m2 é maior do que o lote de {plot} m2.",
       "fx_invalid": "A taxa de câmbio deve ser um número positivo.",
       "source_missing": "Nenhuma fonte indica '{field}' para este tipo de edifício; introduza-o no programa.",
-      "wwr_invalid": "A proporção de janelas deve estar entre 0 e 1."
+      "wwr_invalid": "A proporção de janelas deve estar entre 0 e 1.",
+      "value_invalid": "'{field}' deve ser um número positivo num intervalo plausível."
     }
   }
 }

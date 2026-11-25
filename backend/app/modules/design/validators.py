@@ -232,8 +232,10 @@ async def validation_data(session: Any, project_id: uuid.UUID) -> dict[str, Any]
     """What the rule set reads: the design estimate positions and the revisions awaiting a decision."""
     from sqlalchemy import select
 
+    from .brief import current_brief
     from .estimate import summary
     from .models import DesignRevision
+    from .quick import from_brief_doc
 
     est = await summary(session, project_id)
     rows = (
@@ -242,6 +244,7 @@ async def validation_data(session: Any, project_id: uuid.UUID) -> dict[str, Any]
         )
     ).scalars()
     return {
+        "quick_brief": from_brief_doc(await current_brief(session, project_id)),
         "positions": est.get("positions", []) if est.get("estimate") else [],
         "revisions": [
             {

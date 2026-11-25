@@ -26,17 +26,17 @@ function num(s: string): number | undefined {
   return s.trim() && Number.isFinite(v) ? v : undefined;
 }
 
-export function QuickMassing({ country, currency }: { country?: string | null; currency?: string | null }) {
+export function QuickMassing({ projectId, country }: { projectId: string; country?: string | null }) {
   const { t } = useTranslation();
   const types = useQuery({ queryKey: ['design-quick-types'], queryFn: fetchQuickTypes });
   const [form, setForm] = useState<Record<string, string>>({ building_type: 'office', gfa_m2: '2400', storeys: '4', quality: 'standard' });
-  const run = useMutation({ mutationFn: (b: QuickBrief) => runQuick(b) });
+  const run = useMutation({ mutationFn: (b: QuickBrief) => runQuick(projectId, b) });
   const set = (k: string, v: string) => setForm((f) => ({ ...f, [k]: v }));
 
   const submit = () => {
     const brief: QuickBrief = {
       building_type: form.building_type!, gfa_m2: num(form.gfa_m2 ?? '') ?? 0, storeys: Math.trunc(num(form.storeys ?? '') ?? 0),
-      quality: (form.quality as Quality) ?? 'standard', country: country ?? undefined, currency: currency ?? undefined,
+      quality: (form.quality as Quality) ?? 'standard', country: country ?? undefined,
       fx_rate: form.fx_rate?.trim() || undefined,
     };
     for (const k of OPTIONAL) { const v = num(form[k] ?? ''); if (v !== undefined) brief[k] = v; }
@@ -162,7 +162,7 @@ function QuickResultView({ r, onUse }: { r: QuickResult; onUse: (k: string, v: n
           <ul className="mt-1 flex flex-col gap-0.5">
             {r.schedule.phases.map((p) => (
               <li key={p.code}>{tr(t, `design.quick.phase.${p.code}`)}: {p.days == null || p.start_day == null
-                ? tr(t, 'design.quick.no_source') : tr(t, 'design.quick.phase_span', { start: p.start_day, count: p.days })}</li>
+                ? tr(t, 'design.quick.no_source') : tr(t, 'design.quick.phase_span', { start: p.start_day, days: p.days })}</li>
             ))}
           </ul>
         </div>

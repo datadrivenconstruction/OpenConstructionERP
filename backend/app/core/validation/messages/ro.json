@@ -2898,7 +2898,8 @@
       "footprint_over_plot": "Amprenta de {footprint} m2 este mai mare decât terenul de {plot} m2.",
       "fx_invalid": "Cursul de schimb trebuie să fie un număr pozitiv.",
       "source_missing": "Nicio sursă nu dă '{field}' pentru acest tip de clădire; introduceți-l în temă.",
-      "wwr_invalid": "Proporția ferestrelor trebuie să fie între 0 și 1."
+      "wwr_invalid": "Proporția ferestrelor trebuie să fie între 0 și 1.",
+      "value_invalid": "'{field}' trebuie să fie un număr pozitiv într-un interval plauzibil."
     }
   }
 }

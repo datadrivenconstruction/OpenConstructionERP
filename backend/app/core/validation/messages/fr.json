@@ -2898,7 +2898,8 @@
       "footprint_over_plot": "L'emprise de {footprint} m2 dépasse la parcelle de {plot} m2.",
       "fx_invalid": "Le taux de change doit être un nombre positif.",
       "source_missing": "Aucune source ne donne '{field}' pour ce type de bâtiment ; saisissez-le dans le programme.",
-      "wwr_invalid": "La part vitrée doit être comprise entre 0 et 1."
+      "wwr_invalid": "La part vitrée doit être comprise entre 0 et 1.",
+      "value_invalid": "'{field}' doit être un nombre positif dans une plage plausible."
     }
   }
 }

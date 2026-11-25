@@ -2898,7 +2898,8 @@
       "footprint_over_plot": "La huella de {footprint} m2 es mayor que la parcela de {plot} m2.",
       "fx_invalid": "El tipo de cambio debe ser un número positivo.",
       "source_missing": "Ninguna fuente da '{field}' para este tipo de edificio; indíquelo en el programa.",
-      "wwr_invalid": "La proporción de ventanas debe estar entre 0 y 1."
+      "wwr_invalid": "La proporción de ventanas debe estar entre 0 y 1.",
+      "value_invalid": "'{field}' debe ser un número positivo en un rango plausible."
     }
   }
 }

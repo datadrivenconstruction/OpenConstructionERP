@@ -2898,7 +2898,8 @@
       "footprint_over_plot": "Diện tích xây dựng {footprint} m2 lớn hơn lô đất {plot} m2.",
       "fx_invalid": "Tỷ giá phải là số dương.",
       "source_missing": "Không có nguồn nào cho '{field}' với loại công trình này; hãy nhập vào nhiệm vụ.",
-      "wwr_invalid": "Tỷ lệ cửa sổ phải nằm trong khoảng 0 đến 1."
+      "wwr_invalid": "Tỷ lệ cửa sổ phải nằm trong khoảng 0 đến 1.",
+      "value_invalid": "'{field}' phải là số dương trong khoảng hợp lý."
     }
   }
 }

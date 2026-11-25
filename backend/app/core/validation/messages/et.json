@@ -2898,7 +2898,8 @@
       "footprint_over_plot": "Ehitisealune pind {footprint} m2 on suurem kui krunt {plot} m2.",
       "fx_invalid": "Vahetuskurss peab olema positiivne arv.",
       "source_missing": "Ükski allikas ei anna selle hoonetüübi jaoks väärtust '{field}'; sisestage see lähteülesandes.",
-      "wwr_invalid": "Akende osakaal peab olema vahemikus 0 kuni 1."
+      "wwr_invalid": "Akende osakaal peab olema vahemikus 0 kuni 1.",
+      "value_invalid": "'{field}' peab olema positiivne arv usutavas vahemikus."
     }
   }
 }

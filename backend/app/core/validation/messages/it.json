@@ -2898,7 +2898,8 @@
       "footprint_over_plot": "L'impronta di {footprint} m2 supera il lotto di {plot} m2.",
       "fx_invalid": "Il tasso di cambio deve essere un numero positivo.",
       "source_missing": "Nessuna fonte fornisce '{field}' per questo tipo di edificio; inseritelo nel programma.",
-      "wwr_invalid": "La quota di finestre deve essere tra 0 e 1."
+      "wwr_invalid": "La quota di finestre deve essere tra 0 e 1.",
+      "value_invalid": "'{field}' deve essere un numero positivo in un intervallo plausibile."
     }
   }
 }

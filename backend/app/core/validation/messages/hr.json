@@ -2898,7 +2898,8 @@
       "footprint_over_plot": "Tlocrtna površina od {footprint} m2 veća je od parcele od {plot} m2.",
       "fx_invalid": "Tečaj mora biti pozitivan broj.",
       "source_missing": "Nijedan izvor ne daje '{field}' za ovu vrstu zgrade; unesite ga u projektni zadatak.",
-      "wwr_invalid": "Udio prozora mora biti između 0 i 1."
+      "wwr_invalid": "Udio prozora mora biti između 0 i 1.",
+      "value_invalid": "'{field}' mora biti pozitivan broj u razumnom rasponu."
     }
   }
 }

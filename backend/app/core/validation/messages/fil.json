@@ -2898,7 +2898,8 @@
       "footprint_over_plot": "Ang sakop na {footprint} m2 ay mas malaki kaysa sa lote na {plot} m2.",
       "fx_invalid": "Ang palitan ng pera ay dapat positibong numero.",
       "source_missing": "Walang pinagmulang nagbibigay ng '{field}' para sa uring ito ng gusali; ilagay ito sa brief.",
-      "wwr_invalid": "Ang ratio ng bintana ay dapat nasa pagitan ng 0 at 1."
+      "wwr_invalid": "Ang ratio ng bintana ay dapat nasa pagitan ng 0 at 1.",
+      "value_invalid": "Ang '{field}' ay dapat positibong numero sa makatwirang saklaw."
     }
   }
 }

@@ -1,8 +1,15 @@
 {
   "schema": "ddc-design-massing-country/1",
-  "notes": "Per-country values the quick massing checks a brief against. A country without an entry gets no such check.",
+  "notes": "Per-country values the quick massing uses. min_clear_height_m: the brief check. cost_band_standard: which band of cost_benchmark_reference.json prices this market (that file's din276 bands are EUR per m2 GFA by DIN 276 cost groups, the German standard). A country without an entry gets no such check and no price.",
   "countries": {
-    "DE": {"min_clear_height_m": 2.40, "source": "Musterbauordnung (MBO) par. 47 (1): Aufenthaltsraeume muessen eine lichte Raumhoehe von mindestens 2,40 m haben"},
-    "US": {"min_clear_height_m": 2.286, "source": "International Building Code 2021, section 1208.2: occupiable spaces, habitable spaces and corridors shall have a ceiling height of not less than 7 feet 6 inches (2286 mm)"}
+    "DE": {
+      "min_clear_height_m": 2.4,
+      "source": "Musterbauordnung (MBO) par. 47 (1): Aufenthaltsraeume muessen eine lichte Raumhoehe von mindestens 2,40 m haben",
+      "cost_band_standard": "din276"
+    },
+    "US": {
+      "min_clear_height_m": 2.286,
+      "source": "International Building Code 2021, section 1208.2: occupiable spaces, habitable spaces and corridors shall have a ceiling height of not less than 7 feet 6 inches (2286 mm)"
+    }
   }
 }

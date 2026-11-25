@@ -2898,7 +2898,8 @@
       "footprint_over_plot": "建築面積 {footprint} m2 が敷地 {plot} m2 より大きいです。",
       "fx_invalid": "為替レートは正の数でなければなりません。",
       "source_missing": "この建物種別の '{field}' を示す出典がありません。ブリーフに入力してください。",
-      "wwr_invalid": "窓面積率は0から1の間でなければなりません。"
+      "wwr_invalid": "窓面積率は0から1の間でなければなりません。",
+      "value_invalid": "'{field}' は妥当な範囲の正の数でなければなりません。"
     }
   }
 }

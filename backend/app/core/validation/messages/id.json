@@ -2898,7 +2898,8 @@
       "footprint_over_plot": "Tapak {footprint} m2 lebih besar dari kavling {plot} m2.",
       "fx_invalid": "Kurs harus berupa angka positif.",
       "source_missing": "Tidak ada sumber yang memberi '{field}' untuk jenis bangunan ini; isikan di brief.",
-      "wwr_invalid": "Rasio jendela harus antara 0 dan 1."
+      "wwr_invalid": "Rasio jendela harus antara 0 dan 1.",
+      "value_invalid": "'{field}' harus berupa angka positif dalam rentang yang wajar."
     }
   }
 }
