@@ -178,7 +178,7 @@ function Acceptance({ projectId }: { projectId: string }) {
   if (revisionsQ.isError) {
     return <ErrorState title={tr(t, 'design.revisions.load_failed')} hint={getErrorMessage(revisionsQ.error)} onRetry={() => revisionsQ.refetch()} />;
   }
-  if (revisionsQ.isLoading) return <Skeleton className="m-6 h-48" />;
+  if (revisionsQ.isLoading) return <Skeleton className="h-48 w-full" />;
   if (!rev) {
     return (
       <div className="flex flex-col gap-3">

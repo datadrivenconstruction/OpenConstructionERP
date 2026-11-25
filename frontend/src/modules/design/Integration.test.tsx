@@ -15,6 +15,7 @@ const api = vi.hoisted(() => ({
   overview: null as unknown,
   elements: null as unknown,
   canAccept: true,
+  zeroEstimate: false,
 }));
 
 vi.mock('react-i18next', async () => await vi.importActual('react-i18next'));
@@ -35,7 +36,10 @@ vi.mock('@/shared/lib/api', () => ({
 vi.mock('./api', () => ({
   LINK_VERSION: '1',
   fetchAccess: vi.fn(async () => ({ can_accept: api.canAccept, currency: null, lock: null })),
-  fetchEstimate: vi.fn(async () => (await import('./data/fixtures/estimate.de-residential.json')).default),
+  fetchEstimate: vi.fn(async () => {
+    const f = (await import('./data/fixtures/estimate.de-residential.json')).default;
+    return api.zeroEstimate ? { ...f, total: '0', range: { ...f.range, total: { low: '0', mid: '0', high: '0', complete: false } } } : f;
+  }),
 }));
 vi.mock('@/shared/ui', () => {
   return {
@@ -112,6 +116,7 @@ async function mount(ui: ReactNode, lang = 'en') {
 beforeEach(() => {
   cleanup();
   api.calls = [];
+  api.zeroEstimate = false;
   api.links = LINKS;
   api.overview = OVERVIEW();
   api.canAccept = true;
@@ -205,6 +210,14 @@ describe('project overview', () => {
     expect(screen.getByTestId('kpi-priced')).toHaveTextContent('Without a rate: 11');
     expect(screen.getByTestId('kpi-estimate')).toHaveTextContent(/132/);
     expect(screen.getByTestId('kpi-linked')).toHaveTextContent('40');
+  });
+
+  it('shows no range tile figure when nothing is priced', async () => {
+    api.zeroEstimate = true;
+    api.overview = OVERVIEW();
+    await mount(<ProjectOverview projectId="p1" />);
+    await waitFor(() => expect(screen.getByTestId('kpi-priced')).toHaveTextContent('3 / 14'));
+    expect(screen.getByTestId('kpi-estimate')).not.toHaveTextContent(/€|0/);
   });
 
   it('puts a waiting revision first, and lets only the manager relink', async () => {

@@ -33,7 +33,7 @@ import { useRevisionCompare } from './useRevisionCompare';
 import GenerationPanel from './GenerationPanel';
 import ModelPanel from './ModelPanel';
 import { useProjectFromUrl } from './useProjectFromUrl';
-import { fmtQuantity } from '@/shared/lib/formatters';
+import { fmtQuantity, getIntlLocale } from '@/shared/lib/formatters';
 
 export default function RevisionsPage() {
   const { t } = useTranslation();
@@ -54,7 +54,7 @@ export default function RevisionsPage() {
 function Revisions({ projectId }: { projectId: string }) {
   useQuietViewer();
   const iso = useIsoFrame();
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const list = useQuery({ queryKey: ['design-revisions', projectId], queryFn: () => fetchRevisions(projectId) });
   // ?rev=<revision id> opens that revision (the estimate page links here).
   const [params] = useSearchParams();
@@ -130,7 +130,7 @@ function Revisions({ projectId }: { projectId: string }) {
                       </div>
                       <div className="truncate text-sm text-content-secondary">{r.message || tr(t, 'design.revisions.no_message')}</div>
                       <div className="text-xs text-content-tertiary">
-                        {tr(t, `design.revisions.source.${r.source_kind}`)} · {new Date(r.created_at).toLocaleString(i18n.language, { dateStyle: 'medium', timeStyle: 'short' })}
+                        {tr(t, `design.revisions.source.${r.source_kind}`)} · {new Date(r.created_at).toLocaleString(getIntlLocale(), { dateStyle: 'medium', timeStyle: 'short' })}
                         {!hasModel(r) && ` · ${tr(t, 'design.revisions.no_model')}`}
                       </div>
                     </button>

@@ -291,13 +291,14 @@ function ProjectSnapshot({ projectId }: { projectId: string }) {
         <h3 id="snap-figures" className={H}>{tr(t, 'design.panel.snapshot.title')}</h3>
         {loading ? <p className="text-content-tertiary" aria-busy="true">…</p> : (
           <>
-            <Link to="/design/estimate" data-testid="snapshot-estimate"
+            <Link to="/design/estimate" data-testid="snapshot-estimate" title={tr(t, 'design.panel.snapshot.src')}
               className="flex flex-col gap-0.5 rounded-lg border border-border-light bg-surface-primary px-3 py-2.5 hover:border-oe-blue focus-visible:outline focus-visible:outline-2 focus-visible:outline-oe-blue">
               {/* Same hero figure and labels as the estimate page: the range mid, then the priced lines' sum. */}
               <span className="text-xs text-content-tertiary" data-testid="snapshot-label">
                 {mid > 0 ? `${tr(t, 'design.estimate.range')} · ${tr(t, 'design.estimate.mid')}` : tr(t, 'design.estimate.priced_total')}</span>
               <span className="text-2xl font-semibold tabular-nums leading-tight text-content-primary" data-testid="snapshot-total">
                 {e ? moneyWhole(mid > 0 ? mid : e.total, cur) : '–'}</span>
+              {!e && <span className="text-xs text-content-secondary">{tr(t, 'design.panel.snapshot.no_estimate')}</span>}
               {e && (
                 <span className="text-xs text-content-secondary">
                   {mid > 0 && <span data-testid="snapshot-priced">{tr(t, 'design.estimate.priced_total')} {Number(e.total) !== 0 ? moneyWhole(e.total, cur) : '–'} · </span>}
