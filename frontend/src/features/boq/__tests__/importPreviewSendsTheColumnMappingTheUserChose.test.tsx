@@ -149,7 +149,7 @@ describe('import preview column mapping', () => {
 
     const next = await screen.findByRole('button', { name: 'Continue' });
     await waitFor(() => expect(next).not.toBeDisabled());
-    fireEvent.click(screen.getByRole('button', { name: /Column mapping/ }));
+    // Original columns are present, so the mapping is already open.
     fireEvent.change(screen.getByRole('combobox', { name: 'Sor' }), { target: { value: 'ordinal' } });
 
     expect(next).toBeDisabled();
