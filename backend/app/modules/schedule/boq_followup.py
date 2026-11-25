@@ -102,14 +102,30 @@ def position_effort_hours(
     )
     labour = effort.labour_hours / max(effort.crew or crew, 1)
     machine = effort.machine_hours / max(effort.machine_sets or machine_sets, 1)
+    if effort.source == "estimated_fallback" and labour <= 0:
+        # The unit production-rate table, as the generator's duration basis reads it.
+        from app.modules.schedule.service import fallback_production_rate
+
+        labour = float(quantity) * fallback_production_rate(unit) / max(crew, 1)
+    if labour <= 0 and machine <= 0:
+        # Cost-proportional and minimum durations carry no hours: their days are the measure.
+        return float(max(effort.labour_days, effort.machine_days, 0)) * hours_per_day
     return max(labour, machine, 0.0)
 
 
-def scaled_duration(old_days: int, old_hours: float, new_hours: float) -> int:
-    """The stored working-day duration scaled by the effort ratio, at least one day."""
+def scaled_duration(old_days: int, old_hours: float, new_hours: float, hours_per_day: float = 8.0) -> int:
+    """The stored working-day duration moved by the change in norm days, at least one day.
+
+    Norm days are the crew hours over a working day, rounded up as the
+    generator rounds them. The stored duration keeps its ratio to its norm, so
+    a plan the generator shortened to fit its window stays shortened.
+    """
+    hpd = hours_per_day if hours_per_day > 0 else 8.0
+    new_norm = max(1, math.ceil(new_hours / hpd)) if new_hours > 0 else 1
     if old_hours <= 0 or old_days <= 0:
-        return max(1, math.ceil(new_hours / 8.0)) if new_hours > 0 else max(old_days, 1)
-    return max(1, round(old_days * new_hours / old_hours))
+        return new_norm
+    old_norm = max(1, math.ceil(old_hours / hpd))
+    return max(1, round(old_days * new_norm / old_norm))
 
 
 async def follow_position_quantity(
@@ -183,7 +199,7 @@ async def follow_position_quantity(
             old_hours += share
             new_hours += share
         old_days = int(activity.duration_days or 0)
-        new_days = scaled_duration(old_days, old_hours, new_hours)
+        new_days = scaled_duration(old_days, old_hours, new_hours, hours_per_day)
         meta["quantity"] = str(new_qty) if len(activity.boq_position_ids or []) == 1 else meta.get("quantity")
         fields: dict[str, Any] = {"metadata_": meta}
         if new_days != old_days:
