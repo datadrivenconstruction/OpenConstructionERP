@@ -24,7 +24,7 @@ def register(router: APIRouter) -> None:
         await require_project(principal, project_id, session)
         data, report = await run(session, project_id, locale)
         return {
-            "checked": {"positions": len(data["positions"]), "revisions": len(data["revisions"])},
+            "checked": {"positions": len(data["design_positions"]), "revisions": len(data["revisions"])},
             "findings": [
                 {
                     "rule_id": r.rule_id,

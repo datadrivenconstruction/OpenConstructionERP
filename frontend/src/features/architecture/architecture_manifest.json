@@ -25170,9 +25170,17 @@
           "request_schema": "None"
         },
         {
+          "method": "GET",
+          "path": "/models/{model_id}/unlinked-elements/",
+          "handler": "model_unlinked_elements",
+          "response_model": "BIMUnlinkedElementsResponse",
+          "request_schema": "None"
+        },
+        {
           "method": "POST",
           "path": "/links/restore-model-quantity/",
           "handler": "restore_model_quantity",
+          "response_model": "RestoredModelQuantityResponse",
           "request_schema": "None"
         },
         {
@@ -26872,6 +26880,47 @@
             {
               "name": "findings",
               "type": "list[dict[str, Any]]"
+            }
+          ]
+        },
+        {
+          "class_name": "BIMUnlinkedElementsResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Ids of a model's elements linked to no BOQ position.",
+          "fields": [
+            {
+              "name": "element_ids",
+              "type": "list[str]"
+            }
+          ]
+        },
+        {
+          "class_name": "RestoredModelQuantityResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "A position's quantity after the model figure replaced a manual one, with the provenance written.",
+          "fields": [
+            {
+              "name": "position_id",
+              "type": "str"
+            },
+            {
+              "name": "quantity",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "unit",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "provenance",
+              "type": "dict[str, Any] | None",
+              "default": "None"
             }
           ]
         },
@@ -344059,10 +344108,10 @@
     },
     {
       "name": "bim",
-      "ts_files": 142,
+      "ts_files": 143,
       "css_files": 0,
-      "test_files": 52,
-      "total_files": 143
+      "test_files": 53,
+      "total_files": 144
     },
     {
       "name": "bim_requirements",
@@ -344080,10 +344129,10 @@
     },
     {
       "name": "boq",
-      "ts_files": 292,
+      "ts_files": 294,
       "css_files": 0,
-      "test_files": 144,
-      "total_files": 292
+      "test_files": 145,
+      "total_files": 294
     },
     {
       "name": "buyer-portal",
@@ -347776,11 +347825,11 @@
     "total_models": 992,
     "total_columns": 11598,
     "total_relationships": 264,
-    "total_routes": 5600,
-    "total_schemas": 5229,
+    "total_routes": 5601,
+    "total_schemas": 5231,
     "total_python_files": 3848,
     "frontend_features": 254,
-    "frontend_ts_files": 4579,
+    "frontend_ts_files": 4582,
     "frontend_backend_mapped": 224
   },
   "frontend_backend_mapping": {
