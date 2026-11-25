@@ -9,6 +9,14 @@ import { Button, Card, CardHeader } from '@/shared/ui';
 import { fetchLinkStatus, revokeEditor } from './linksApi';
 import { tr } from './BriefFields';
 
+const ERROR_CODES = new Set(['link_status_erp_only', 'editor_link_not_found', 'unlink_not_allowed']);
+
+/** The server's error code as a translated sentence; unknown codes fall back to a generic one. */
+export function linkStatusError(t: (k: string) => string, e: unknown): string {
+  const code = (e as { body?: { detail?: { code?: string } } })?.body?.detail?.code;
+  return t(code && ERROR_CODES.has(code) ? `design.link_status.error.${code}` : 'design.link_status.error.other');
+}
+
 const when = (iso: string | null, lang: string): string =>
   iso ? new Date(iso).toLocaleString(lang, { dateStyle: 'medium', timeStyle: 'short' }) : '';
 
@@ -49,6 +57,7 @@ export function LinkStatus({ projectId }: { projectId: string }) {
             </Button>
           </div>
         ))}
+        {revoke.isError && <p role="alert" data-testid="link-error" className="text-semantic-error">{linkStatusError((k) => tr(t, k), revoke.error)}</p>}
         {lastRev && (
           <p data-testid="link-last-revision" className="text-content-secondary" title={lastRev.package_sha256}>
             {tr(t, 'design.link_status.last_revision_by', { number: lastRev.number, who: lastRev.author ?? '', when: when(lastRev.received_at, lang) })}

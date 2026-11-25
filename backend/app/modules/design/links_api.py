@@ -22,6 +22,11 @@ class ReportLinks(BaseModel):
     position_ids: list[uuid.UUID] = Field(default_factory=list, max_length=MAX_KEYS)
 
 
+def _coded(status_code: int, code: str, message: str) -> HTTPException:
+    """``code`` is the i18n key suffix ``design.link_status.error.<code>``; ``message`` is for logs and old clients."""
+    return HTTPException(status_code, {"code": code, "message": message})
+
+
 def register(router, can_accept) -> None:
     @router.get("/projects/{project_id}/links")
     async def element_links(
@@ -73,8 +78,11 @@ def register(router, can_accept) -> None:
 
         await require_project(principal, project_id, session)
         if principal.via_link:
-            raise HTTPException(status.HTTP_403_FORBIDDEN, "Link status is read in the ERP")
+            raise _coded(status.HTTP_403_FORBIDDEN, "link_status_erp_only", "Link status is read in the ERP")
+        from app.modules.projects.models import Project
+
         now = now_utc()
+        sees_all = await can_accept(session, principal.user_id, await session.get(Project, project_id))
         tokens = (
             (
                 await session.execute(
@@ -98,7 +106,7 @@ def register(router, can_accept) -> None:
                 "expires_at": t.expires_at,
             }
             for t in tokens
-            if as_aware(t.expires_at) > now
+            if as_aware(t.expires_at) > now and (sees_all or t.user_id == principal.user_id)
         ]
         pending = (
             await session.execute(
@@ -150,14 +158,16 @@ def register(router, can_accept) -> None:
 
         await require_project(principal, project_id, session)
         if principal.via_link:
-            raise HTTPException(status.HTTP_403_FORBIDDEN, "Editors are unlinked from the ERP")
+            raise _coded(status.HTTP_403_FORBIDDEN, "link_status_erp_only", "Editors are unlinked from the ERP")
         row = await session.get(DesignLinkToken, token_id)
         if row is None or row.project_id != project_id or row.revoked_at is not None:
-            raise HTTPException(status.HTTP_404_NOT_FOUND, "Editor link not found")
+            raise _coded(status.HTTP_404_NOT_FOUND, "editor_link_not_found", "Editor link not found")
         if row.user_id != principal.user_id and not await can_accept(
             session, principal.user_id, await session.get(Project, project_id)
         ):
-            raise HTTPException(status.HTTP_403_FORBIDDEN, "Only the holder or a manager may unlink an editor")
+            raise _coded(
+                status.HTTP_403_FORBIDDEN, "unlink_not_allowed", "Only the holder or a manager may unlink an editor"
+            )
         await session.execute(
             update(DesignLinkToken)
             .where(DesignLinkToken.id == token_id, DesignLinkToken.revoked_at.is_(None))

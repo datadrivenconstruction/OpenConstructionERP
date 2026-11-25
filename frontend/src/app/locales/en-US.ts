@@ -1735,6 +1735,7 @@ const resource = {
     "design.model.units": "Dwelling units in the building",
     "design.model.units_too_many": "{{count}} dwelling units on one floor; the generator places at most {{max}}.",
     "design.workspace.ai.placeholder": "For example: residential block, 4 stories, 16 apartments, flat roof",
+    "design.workspace.too_large": "This model is larger than this ERP accepts. Ask an administrator to raise the revision size limit.",
     "design.overview.next.procurement": "Next: the take-off. Its bid packages follow the model.",
     "design.overview.state.procurement": "Bid packages: {{count}}",
     "design.links.tendering": "Bid packages",
@@ -1755,8 +1756,12 @@ const resource = {
     "design.link_status.never_used": "Not used yet",
     "design.link_status.expires": "access until {{when}}",
     "design.link_status.revoke": "Unlink",
-    "design.link_status.last_revision_by": "#{{number}} · {{who}} · Last revision received {{when}}",
+    "design.link_status.last_revision_by": "Revision {{number}} by {{who}}, received {{when}}",
     "design.link_status.pending": "Revisions awaiting a decision: {{n}}",
+    "design.link_status.error.link_status_erp_only": "Editor links are managed in the ERP, not from the editor.",
+    "design.link_status.error.editor_link_not_found": "This editor link no longer exists.",
+    "design.link_status.error.unlink_not_allowed": "Only the person who linked this editor or a project manager can unlink it.",
+    "design.link_status.error.other": "The editor could not be unlinked. Try again.",
   }
 } as { translation: Record<string, string> };
 

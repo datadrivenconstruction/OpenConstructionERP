@@ -75,12 +75,13 @@ const time = (iso: string) => {
 };
 
 /** Why a revision could not be made, in words: someone else edits, or the chain moved on under the draft. */
-function revisionError(t: ReturnType<typeof useTranslation>['t'], e: unknown): string {
+export function revisionError(t: ReturnType<typeof useTranslation>['t'], e: unknown): string {
   const err = bridgeError(e);
   const body = (e as { body?: { detail?: unknown } })?.body?.detail;
   const who = body && typeof body === 'object' ? (body as { held_by?: string }).held_by : undefined;
   if (err.code === 'locked' && who) return tr(t, 'design.workspace.locked', { who });
   if (err.code === 'locked') return tr(t, 'design.workspace.stale');
+  if (body && typeof body === 'object' && (body as { code?: string }).code === 'revision_too_large') return tr(t, 'design.workspace.too_large');
   return typeof body === 'string' ? body : err.message;
 }
 

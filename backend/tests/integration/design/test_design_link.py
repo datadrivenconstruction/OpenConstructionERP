@@ -130,3 +130,51 @@ async def test_access_reports_role_and_foreign_lock(client):
     # Through a link token nobody can accept, whatever their role.
     via = (await client.get(f"{BASE}/projects/{pid}/access", headers=tok)).json()
     assert via["can_accept"] is False
+
+
+async def test_open_in_editor_carries_the_project_and_revision_and_stays_in_scope(client):
+    from .ddcrev import example_rows, package
+
+    uid, h = await make_user(client)
+    pid = await make_project(uid, name="Haus Nord")
+    stranger, h_stranger = await make_user(client)
+    other = await make_project(stranger, name="Fremd")
+    tok = await _token(client, h, pid)
+    auth = {"Authorization": f"Bearer {tok}", **LINK}
+    assert (await client.post(f"{BASE}/projects/{pid}/lock", headers=auth)).status_code == 200
+    data, m = package(pid, example_rows())
+    up = await client.post(f"{BASE}/projects/{pid}/revisions", headers=auth, files={"package": ("m.ddcrev", data)})
+    assert up.status_code == 201, up.text
+    rid = up.json()["revision_id"]
+
+    r = await client.post(
+        f"{BASE}/link/code", json={"project_id": str(pid), "action": "open", "revision_id": rid}, headers=h
+    )
+    assert r.status_code == 200, r.text
+    link = r.json()
+    assert (link["action"], link["project_id"], link["project_name"], link["revision_id"]) == (
+        "open",
+        str(pid),
+        "Haus Nord",
+        rid,
+    )
+    assert link["erp_url"].startswith("http")
+    x = await client.post(f"{BASE}/link/exchange", json={"code": link["code"], "client": {"name": "desk"}})
+    opened = {"Authorization": f"Bearer {x.json()['token']}", **LINK}
+    assert x.json()["project_id"] == str(pid)
+    ctx = (await client.get(f"{BASE}/projects/{pid}/context", headers=opened)).json()
+    assert ctx["latest_revision"] == {"revision_id": rid, "number": 1, "status": "shared"}
+    listed = (await client.get(f"{BASE}/revisions/{rid}", headers=opened)).json()["manifest"]["files"]
+    path = next(f["path"] for f in listed if f["path"].endswith(".parquet"))
+    assert (await client.get(f"{BASE}/revisions/{rid}/files/{path}", headers=opened)).status_code == 200
+
+    # A revision of this project cannot be opened from another project, nor by someone without access.
+    wrong = await client.post(
+        f"{BASE}/link/code", json={"project_id": str(other), "action": "open", "revision_id": rid}, headers=h_stranger
+    )
+    assert wrong.status_code == 404
+    foreign = await client.post(
+        f"{BASE}/link/code", json={"project_id": str(pid), "action": "open", "revision_id": rid}, headers=h_stranger
+    )
+    assert foreign.status_code in (403, 404)
+    assert (await client.get(f"{BASE}/projects/{other}/context", headers=opened)).status_code == 404

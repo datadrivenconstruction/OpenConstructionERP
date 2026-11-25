@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import uuid
+
 import pytest
 
 from .conftest import LINK, make_project, make_user
@@ -71,3 +73,32 @@ async def test_revoke_cuts_the_editor_off_and_stays_in_its_project(client):
     assert (await client.get(f"{BASE}/projects/{pid}/context", headers=tok)).status_code == 401
     after = (await client.get(f"{BASE}/projects/{pid}/link/status", headers=h_owner)).json()
     assert after["editors"] == []
+
+
+async def test_a_member_sees_only_their_own_editor_a_manager_sees_all(client):
+    from .test_drafts import _member
+
+    owner, h_owner = await make_user(client)
+    member, h_member = await make_user(client)
+    pid = await make_project(owner)
+    await _member(pid, member)
+    await _token(client, h_owner, pid, name="owner-desk")
+    await _token(client, h_member, pid, name="member-desk")
+    mine = (await client.get(f"{BASE}/projects/{pid}/link/status", headers=h_member)).json()["editors"]
+    assert [e["client_name"] for e in mine] == ["member-desk"]
+    every = (await client.get(f"{BASE}/projects/{pid}/link/status", headers=h_owner)).json()["editors"]
+    assert {e["client_name"] for e in every} == {"owner-desk", "member-desk"}
+    # A member cannot unlink the owner's editor; the error names a code the UI translates.
+    owners = next(e["id"] for e in every if e["client_name"] == "owner-desk")
+    denied = await client.delete(f"{BASE}/projects/{pid}/link/editors/{owners}", headers=h_member)
+    assert denied.status_code == 403 and denied.json()["detail"]["code"] == "unlink_not_allowed"
+
+
+async def test_link_status_errors_are_coded(client):
+    uid, h = await make_user(client)
+    pid = await make_project(uid)
+    tok = await _token(client, h, pid)
+    r = await client.get(f"{BASE}/projects/{pid}/link/status", headers=tok)
+    assert r.status_code == 403 and r.json()["detail"]["code"] == "link_status_erp_only"
+    gone = await client.delete(f"{BASE}/projects/{pid}/link/editors/{uuid.uuid4()}", headers=h)
+    assert gone.status_code == 404 and gone.json()["detail"]["code"] == "editor_link_not_found"
