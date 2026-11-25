@@ -1,7 +1,7 @@
 {
   "name": "openconstructionerp-frontend",
   "private": true,
-  "version": "20.3.0",
+  "version": "20.4.0",
   "type": "module",
   "scripts": {
     "dev": "node --max-old-space-size=8192 ./node_modules/vite/bin/vite.js",

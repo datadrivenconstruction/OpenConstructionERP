@@ -67,6 +67,13 @@ const UNRELEASED: ChangelogEntry | null = null;
 // carry the long form and are left alone as the record of what shipped.
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '20.4.0',
+    date: '2026-11-25',
+    tag: 'NEW',
+    summary:
+      'Design numbers travel from brief and model to estimate, bill, RFQ and change order, and each one shows its source. Model quantities on BOQ positions can be traced and restored, and unlinked elements are listed.',
+  },
+  {
     version: '20.3.0',
     date: '2026-11-24',
     tag: 'NEW',

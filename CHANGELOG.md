@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 > **Tip:** This file is long. Use your browser's **Find** (Ctrl+F) to jump to a version number, or see the [Releases page](https://github.com/datadrivenconstruction/OpenConstructionERP/releases) for a per-release view with download links.
 
+## [20.4.0] - 2026-11-25
+
+Design numbers now travel from the brief and the model to the estimate, the bill, procurement and the change order, and every figure says where it came from.
+
+### Added
+
+- Quick massing from a short brief: a cost range per element with its sources, and flags where a source is missing or a depth was clipped.
+- Draft RFQ from a take-off package, a cost plan drill-down, and revision cost history without change orders.
+- Model quantities on BOQ positions carry their source, can be restored from the model, and unlinked model elements are listed with a way to show them in 3D.
+- Export model data as CSV, JSON or XLSX, with BIM link validation rules.
+- Applied rate statistics per cost item, and schedule activities linked to the BOQ rescale when a quantity changes.
+
+### Fixed
+
+- The browser editor opens the model it was given, unpriced lines say why, and the editor has a keyboard way out.
+- Estimate money stays in the project currency, link status and element exports filter in the database, and an RFQ without a project currency is refused with a clear code.
+- Design validation on a fresh install, AI take-off quantities kept as decimals, and missing locale keys in 41 languages.
+
 ## [20.3.0] - 2026-11-24
 
 The data paths panel on every module page now opens on a plain-words overview: where the numbers come from, what the module holds right now, who uses them next, and which gaps break what.
