@@ -20,6 +20,7 @@ from typing import Any
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core import record_provenance as provenance
 from app.core.events import event_bus
 from app.core.json_merge import merge_metadata
 from app.modules.costmodel.contract_exposure import compute_contract_exposure
@@ -226,6 +227,17 @@ def is_budget_line_overrun(planned: object, actual: object, threshold_pct: objec
 
     limit = planned_d * (Decimal("1") + threshold / Decimal("100"))
     return actual_d >= limit
+
+
+def split_cents(amount: Decimal, parts: int) -> list[Decimal]:
+    """Split an amount into ``parts`` cent amounts that add back to it exactly (largest remainder).
+
+    ``100 / 3`` is ``33.34, 33.33, 33.33``: the leftover cents go to the earliest parts.
+    """
+    total_cents = int((amount * 100).quantize(Decimal("1")))
+    base, extra = divmod(abs(total_cents), parts)
+    sign = -1 if total_cents < 0 else 1
+    return [Decimal(sign * (base + (1 if i < extra else 0))) / 100 for i in range(parts)]
 
 
 class CostModelService:
@@ -1558,15 +1570,14 @@ class CostModelService:
                 forecast_amount=str(total),
                 currency=line_currency,
                 metadata_={
-                    "source": {
-                        "module": "oe_boq",
-                        "boq_id": str(boq_id),
-                        "boq_position_id": str(pos.id),
-                        "ordinal": pos.ordinal,
-                        "quantity": str(pos.quantity),
-                        "unit_rate": str(pos.unit_rate),
-                        "origin": pos_meta.get("source") if isinstance(pos_meta, dict) else None,
-                    }
+                    provenance.KEY: provenance.make(
+                        "boq_position",
+                        "oe_boq",
+                        boq_position_id=str(pos.id),
+                        quantity=str(pos.quantity),
+                        rate={"unit_rate": str(pos.unit_rate), "ordinal": pos.ordinal, "boq_id": str(boq_id)},
+                        origin=provenance.read(pos_meta),
+                    )
                 },
             )
             lines.append(line)
@@ -1678,7 +1689,7 @@ class CostModelService:
                     {
                         "budget_line_id": str(bl.id),
                         "boq_position_id": str(bl.boq_position_id) if bl.boq_position_id else "",
-                        "amount": str(part.quantize(Decimal("0.01"))),
+                        "amount": str(part),
                     }
                 )
 
@@ -1686,16 +1697,15 @@ class CostModelService:
                 # Spread evenly across months
                 months = _month_range(start[:7], end[:7])
                 if months:
-                    per_month = amount / len(months)
-                    for m in months:
-                        _add(m, per_month)
+                    for m, part in zip(months, split_cents(amount, len(months)), strict=True):
+                        _add(m, part)
                 else:
                     # Fallback: single period
-                    _add(start[:7], amount)
+                    _add(start[:7], split_cents(amount, 1)[0])
             else:
                 # No schedule - use a generic unscheduled bucket.
                 # Keep the sentinel <= 10 chars to fit the period column (varchar(10)).
-                _add("unsched", amount)
+                _add("unsched", split_cents(amount, 1)[0])
 
         # Build cash flow entries with running cumulative
         entries: list[CashFlow] = []
@@ -1710,10 +1720,10 @@ class CostModelService:
                 period=period,
                 category="total",
                 planned_inflow="0",
-                planned_outflow=str(round(float(outflow), 2)),
+                planned_outflow=str(outflow),
                 actual_inflow="0",
                 actual_outflow="0",
-                cumulative_planned=str(round(float(cumulative), 2)),
+                cumulative_planned=str(cumulative),
                 cumulative_actual="0",
                 metadata_={"sources": period_sources.get(period, [])},
             )

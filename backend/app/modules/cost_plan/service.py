@@ -30,6 +30,7 @@ from typing import Any, Literal
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core import record_provenance as provenance
 from app.modules.boq.models import Position
 from app.modules.boq.service import (
     BOQService,
@@ -244,3 +245,60 @@ def _decimal_or_none(raw: Any) -> Decimal | None:
     except (InvalidOperation, ValueError, TypeError):
         return None
     return value if value.is_finite() else None
+
+
+async def cost_plan_sources(session: AsyncSession, boq_id: uuid.UUID, code: str) -> dict[str, Any]:
+    """The bill positions one cost-plan row sums, each with the amount it adds and where it came from.
+
+    ``code`` is an element (``2.1``), a group (``2``, every position placed in it) or ``unallocated``.
+    The amounts are the plan's own leaf amounts, so they add up to the row's total to the cent.
+    """
+    from app.modules.cost_plan.engine import _raw_text, load_nrm1_catalogue, normalise_code, place_code
+
+    service = BOQService(session)
+    boq = await service.get_boq(boq_id)
+    positions = await service.position_repo.list_all_for_boq(boq_id)
+    base_currency, fx_map = await service._resolve_project_fx(boq_id)  # noqa: SLF001 - the bill's own FX read
+    inherited = _inherited_codes(positions)
+    table = load_nrm1_catalogue()
+    wanted = "unallocated" if code == "unallocated" else normalise_code(code)
+    rows: list[dict[str, Any]] = []
+    total = Decimal("0")
+    for position in positions:
+        if _is_section(position):
+            continue
+        own = _nrm_code(position)
+        placement = place_code(own if _raw_text(own) is not None else inherited.get(position.id), table)
+        hit = (
+            not placement.allocated
+            if wanted == "unallocated"
+            else wanted is not None and wanted in (placement.element_code, placement.group_code)
+        )
+        if not hit:
+            continue
+        amount = _leaf_total_base_with_resources(position, fx_map, base_currency or "")
+        total += amount
+        meta = position.metadata_
+        rows.append(
+            {
+                "position_id": str(position.id),
+                "ordinal": position.ordinal or "",
+                "description": position.description or "",
+                "quantity": str(position.quantity),
+                "unit": position.unit or "",
+                "unit_rate": str(position.unit_rate),
+                "amount": str(amount),
+                "group_code": placement.group_code,
+                "element_code": placement.element_code,
+                "reason": placement.reason,
+                "code_inherited": _raw_text(own) is None and placement.allocated,
+                "provenance": provenance.read(meta),
+            }
+        )
+    return {
+        "boq_id": str(boq.id),
+        "code": wanted,
+        "currency": (base_currency or "").upper(),
+        "total": str(total),
+        "positions": rows,
+    }

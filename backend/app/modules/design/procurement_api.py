@@ -58,6 +58,19 @@ def register(router, can_accept) -> None:
             raise
         return await prc.summary(session, project_id)
 
+    @router.post("/projects/{project_id}/procurement/packages/{ifc_class}/rfq", status_code=status.HTTP_201_CREATED)
+    async def package_rfq(
+        project_id: uuid.UUID, ifc_class: str, principal: PrincipalDep, session: SessionDep
+    ) -> dict[str, Any]:
+        await manager(principal, project_id, session)
+        try:
+            rfq = await prc.rfq_from_package(session, project_id, ifc_class, principal.user_id)
+            await session.commit()
+        except HTTPException:
+            await session.rollback()
+            raise
+        return {"rfq_id": str(rfq.id), "rfq_number": rfq.rfq_number, "status": rfq.status, "url": "/rfq-bidding"}
+
     @router.put("/projects/{project_id}/procurement/settings")
     async def settings(
         project_id: uuid.UUID, body: FollowRequest, principal: PrincipalDep, session: SessionDep

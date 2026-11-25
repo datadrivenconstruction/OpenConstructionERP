@@ -46,6 +46,13 @@ DATA_PATHS = DataPaths(
             route="/changeorders",
         ),
         DataPath(
+            "oe_rfq_bidding",
+            "RFQ",
+            via="RFQ.metadata_.provenance",
+            label="data_paths.entity.rfq",
+            route="/rfq-bidding",
+        ),
+        DataPath(
             "oe_documents",
             "Document",
             via="Document.metadata_.design",

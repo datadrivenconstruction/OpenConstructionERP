@@ -30,7 +30,7 @@ from app.dependencies import CurrentUserId, RequirePermission, SessionDep, verif
 from app.modules.boq.models import BOQ
 from app.modules.cost_plan.export import DEFAULT_LOCALE, EXPORT_LOCALES, build_cost_plan_workbook
 from app.modules.cost_plan.schemas import CostPlanResponse
-from app.modules.cost_plan.service import build_nrm1_cost_plan, check_cost_plan
+from app.modules.cost_plan.service import build_nrm1_cost_plan, check_cost_plan, cost_plan_sources
 
 router = APIRouter()
 
@@ -64,6 +64,18 @@ async def get_nrm1_cost_plan(
     await _verify_boq_access(session, boq_id, user_id)
     plan = await build_nrm1_cost_plan(session, boq_id, entered_gifa=gifa)
     return await check_cost_plan(plan, block=False)
+
+
+@router.get("/boqs/{boq_id}/nrm1/sources", dependencies=[_READ])
+async def get_nrm1_sources(
+    boq_id: uuid.UUID,
+    user_id: CurrentUserId,
+    session: SessionDep,
+    code: Annotated[str, Query(min_length=1, max_length=20, description="Element, group or 'unallocated'.")],
+) -> dict:
+    """Drill into one cost-plan row: the bill positions it sums and the source each one carries."""
+    await _verify_boq_access(session, boq_id, user_id)
+    return await cost_plan_sources(session, boq_id, code)
 
 
 @router.get("/boqs/{boq_id}/nrm1/export.xlsx", dependencies=[_READ], response_class=Response)
