@@ -7,12 +7,17 @@ corrects what is needed and confirms them all; only then do they become brief va
 
 from __future__ import annotations
 
+import uuid
+from decimal import Decimal
 from typing import Any, Literal
 
 from pydantic import BaseModel, Field
+from sqlalchemy import select
+
+from app.dependencies import SessionDep
 
 from . import quick
-from .auth import PrincipalDep
+from .auth import PrincipalDep, require_project
 from .model_params import CATEGORY, GENERATOR_REF, TYPOLOGY
 
 # (id, brief use category); the generator typology follows from the category (model_params.CATEGORY)
@@ -52,19 +57,26 @@ class QuickBrief(BaseModel):
     """A short brief: what an estimator knows in the first minute."""
 
     building_type: str = Field(max_length=40)
-    gfa_m2: float
-    storeys: int
-    country: str | None = Field(default=None, max_length=2)
+    gfa_m2: float = Field(gt=0, le=10_000_000)
+    storeys: int = Field(ge=1, le=200)
+    country: str | None = Field(default=None, min_length=2, max_length=2)
     quality: Literal["economy", "standard", "high"] = "standard"
-    floor_height_m: float | None = None
-    depth_m: float | None = None
-    grid_m: float | None = None
-    wwr: float | None = None
-    slab_zone_m: float | None = None
-    plot_area_m2: float | None = None
-    max_height_m: float | None = None
-    currency: str | None = Field(default=None, max_length=3)
-    fx_rate: str | None = Field(default=None, max_length=20)
+    floor_height_m: float | None = Field(default=None, gt=0, le=20)
+    depth_m: float | None = Field(default=None, gt=0, le=500)
+    grid_m: float | None = Field(default=None, gt=0, le=50)
+    wwr: float | None = Field(default=None, ge=0, le=1)
+    slab_zone_m: float | None = Field(default=None, ge=0, lt=3)
+    plot_area_m2: float | None = Field(default=None, gt=0, le=100_000_000)
+    max_height_m: float | None = Field(default=None, gt=0, le=1000)
+    currency: str | None = Field(default=None, min_length=3, max_length=3)
+    fx_rate: Decimal | None = Field(default=None, gt=0, max_digits=20, decimal_places=10)
+
+
+def _brief(body: QuickBrief) -> dict[str, Any]:
+    out = body.model_dump(exclude_none=True)
+    if "fx_rate" in out:
+        out["fx_rate"] = str(out["fx_rate"])
+    return out
 
 
 def register(router) -> None:
@@ -81,4 +93,24 @@ def register(router) -> None:
     @router.post("/quick")
     async def quick_build(body: QuickBrief, principal: PrincipalDep) -> dict[str, Any]:
         """Model quantities, elemental cost range and phase programme for a short brief. Nothing is stored."""
-        return quick.build(body.model_dump(exclude_none=True))
+        return quick.build(_brief(body))
+
+    @router.post("/projects/{project_id}/quick")
+    async def quick_for_project(
+        project_id: uuid.UUID, body: QuickBrief, principal: PrincipalDep, session: SessionDep
+    ) -> dict[str, Any]:
+        """The same in the project's currency and country; the exchange rate comes from the project's own fx_rates
+        when it lists the band currency, else from the body (a rate the person confirmed)."""
+        from app.modules.projects.models import Project
+
+        await require_project(principal, project_id, session)
+        project = (await session.execute(select(Project).where(Project.id == project_id))).scalar_one()
+        brief = _brief(body)
+        if project.currency:
+            brief["currency"] = project.currency
+        if project.country_code and "country" not in brief:
+            brief["country"] = project.country_code
+        rate, src = quick.project_fx(brief.get("currency") or "", project.fx_rates)
+        if rate:
+            brief["fx_rate"], brief["fx_source"] = rate, src
+        return quick.build(brief)

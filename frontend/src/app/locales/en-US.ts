@@ -1747,6 +1747,8 @@ const resource = {
     "design.addendum.title": "Bid addendum drafts to review: {{count}}",
     "design.addendum.hint": "An accepted revision changed packages already issued to bidders. A draft addendum is prepared for each; nothing is sent until you review and publish it in Bidding.",
     "design.panel.none.procurement": "No bid package holds this selection.",
+    "design.quick.subtitle": "Type, floor area and storeys give a first model, a priced breakdown and a schedule. Nothing is saved.",
+    "design.quick.kpi.programme": "Schedule",
   }
 } as { translation: Record<string, string> };
 

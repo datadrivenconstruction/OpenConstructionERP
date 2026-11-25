@@ -2898,7 +2898,8 @@
       "footprint_over_plot": "Die Grundflaeche von {footprint} m2 ist groesser als das Grundstueck mit {plot} m2.",
       "fx_invalid": "Der Wechselkurs muss eine positive Zahl sein.",
       "source_missing": "Keine Quelle liefert '{field}' fuer diesen Gebaeudetyp; bitte im Raumprogramm angeben.",
-      "wwr_invalid": "Der Fensterflaechenanteil muss zwischen 0 und 1 liegen."
+      "wwr_invalid": "Der Fensterflaechenanteil muss zwischen 0 und 1 liegen.",
+      "value_invalid": "'{field}' muss eine positive Zahl in einem plausiblen Bereich sein."
     }
   }
 }

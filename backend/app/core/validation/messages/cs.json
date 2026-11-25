@@ -2898,7 +2898,8 @@
       "footprint_over_plot": "Zastavěná plocha {footprint} m2 je větší než pozemek {plot} m2.",
       "fx_invalid": "Směnný kurz musí být kladné číslo.",
       "source_missing": "Pro tento typ budovy žádný zdroj neuvádí '{field}'; zadejte jej v zadání.",
-      "wwr_invalid": "Podíl oken musí být mezi 0 a 1."
+      "wwr_invalid": "Podíl oken musí být mezi 0 a 1.",
+      "value_invalid": "'{field}' musí být kladné číslo v rozumném rozsahu."
     }
   }
 }

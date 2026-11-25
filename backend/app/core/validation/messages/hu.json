@@ -2898,7 +2898,8 @@
       "footprint_over_plot": "A(z) {footprint} m2 beépített terület nagyobb a(z) {plot} m2 teleknél.",
       "fx_invalid": "Az árfolyamnak pozitív számnak kell lennie.",
       "source_missing": "Egyetlen forrás sem adja meg a(z) '{field}' értéket ehhez az épülettípushoz; adja meg a programban.",
-      "wwr_invalid": "Az ablakarány 0 és 1 között legyen."
+      "wwr_invalid": "Az ablakarány 0 és 1 között legyen.",
+      "value_invalid": "A(z) '{field}' értéknek pozitív számnak kell lennie ésszerű tartományban."
     }
   }
 }

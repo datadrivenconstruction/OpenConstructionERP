@@ -220,6 +220,7 @@
   "needs_expert_review": true,
   "currency": "EUR",
   "fx_rate": null,
+  "fx_source": null,
   "quality": "p50",
   "total": "7440000",
   "per_m2": "3100",

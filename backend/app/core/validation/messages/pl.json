@@ -2898,7 +2898,8 @@
       "footprint_over_plot": "Powierzchnia zabudowy {footprint} m2 jest większa niż działka {plot} m2.",
       "fx_invalid": "Kurs wymiany musi być liczbą dodatnią.",
       "source_missing": "Żadne źródło nie podaje '{field}' dla tego typu budynku; wpisz to w założeniach.",
-      "wwr_invalid": "Udział okien musi wynosić od 0 do 1."
+      "wwr_invalid": "Udział okien musi wynosić od 0 do 1.",
+      "value_invalid": "'{field}' musi być liczbą dodatnią w rozsądnym zakresie."
     }
   }
 }

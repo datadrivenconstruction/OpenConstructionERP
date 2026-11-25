@@ -2898,7 +2898,8 @@
       "footprint_over_plot": "The footprint of {footprint} m2 is larger than the plot of {plot} m2.",
       "fx_invalid": "The exchange rate must be a positive number.",
       "source_missing": "No source gives '{field}' for this building type; enter it in the brief.",
-      "wwr_invalid": "The window ratio must be between 0 and 1."
+      "wwr_invalid": "The window ratio must be between 0 and 1.",
+      "value_invalid": "'{field}' must be a positive number in a plausible range."
     }
   }
 }

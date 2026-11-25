@@ -2898,7 +2898,8 @@
       "footprint_over_plot": "占地面积 {footprint} 平方米大于地块 {plot} 平方米。",
       "fx_invalid": "汇率必须为正数。",
       "source_missing": "没有来源给出此类建筑的 '{field}'；请在任务书中填写。",
-      "wwr_invalid": "窗墙比必须在 0 到 1 之间。"
+      "wwr_invalid": "窗墙比必须在 0 到 1 之间。",
+      "value_invalid": "'{field}' 必须是合理范围内的正数。"
     }
   }
 }

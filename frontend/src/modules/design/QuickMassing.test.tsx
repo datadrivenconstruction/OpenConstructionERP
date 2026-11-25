@@ -34,18 +34,18 @@ async function mount() {
   });
   render(
     <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
-      <I18nextProvider i18n={inst}><QuickMassing country="DE" currency="EUR" /></I18nextProvider>
+      <I18nextProvider i18n={inst}><QuickMassing projectId="p1" country="DE" /></I18nextProvider>
     </QueryClientProvider>,
   );
 }
 
 describe('QuickMassing', () => {
-  it('sends the short brief with project country and currency, shows model, cost and programme', async () => {
+  it('sends the short brief to the project endpoint, shows model, cost and programme', async () => {
     h.run.mockResolvedValue(RESULT);
     await mount();
     await userEvent.click(screen.getByRole('button', { name: EN['design.quick.run']! }));
-    expect(h.run).toHaveBeenCalledWith(expect.objectContaining({
-      building_type: 'office', gfa_m2: 2400, storeys: 4, quality: 'standard', country: 'DE', currency: 'EUR',
+    expect(h.run).toHaveBeenCalledWith('p1', expect.objectContaining({
+      building_type: 'office', gfa_m2: 2400, storeys: 4, quality: 'standard', country: 'DE',
     }));
     await waitFor(() => expect(screen.getByTestId('quick-kpis')).toBeTruthy());
     expect(screen.getByText(EN['design.quick.q.wall_ext']!)).toBeTruthy();

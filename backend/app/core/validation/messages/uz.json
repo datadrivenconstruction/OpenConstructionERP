@@ -2898,7 +2898,8 @@
       "footprint_over_plot": "{footprint} m2 qurilish izi {plot} m2 uchastkadan katta.",
       "fx_invalid": "Valyuta kursi musbat son bo'lishi kerak.",
       "source_missing": "Bu bino turi uchun '{field}' qiymatini beradigan manba yo'q; uni topshiriqqa kiriting.",
-      "wwr_invalid": "Deraza ulushi 0 va 1 oralig'ida bo'lishi kerak."
+      "wwr_invalid": "Deraza ulushi 0 va 1 oralig'ida bo'lishi kerak.",
+      "value_invalid": "'{field}' maqbul oraliqdagi musbat son bo'lishi kerak."
     }
   }
 }

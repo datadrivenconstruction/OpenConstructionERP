@@ -26,7 +26,7 @@ export default function StartPage() {
     <div className="flex flex-col gap-5 animate-fade-in">
       <h1 className="sr-only">{tr(t, 'design.start.title')}</h1>
       <ProjectStart key={projectId} projectId={projectId} steps={q.data?.steps ?? []} />
-      <QuickMassing country={project.data?.country_code} currency={project.data?.currency} />
+      <QuickMassing projectId={projectId} country={project.data?.country_code} />
     </div>
   );
 }

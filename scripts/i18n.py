@@ -38,6 +38,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from check_i18n_key_nesting import LOCALES, NOT_LOCALES, translation_span  # noqa: E402
 
 _KEY_LINE = re.compile(rb'^(\s*)"((?:[^"\\]|\\.)*)":\s*(.*?)(,?)\s*$')
+_PLURAL = re.compile(r"^(.+)_(zero|one|two|few|many)$")
 _PLACEHOLDER = re.compile(r"\{\{\s*([^}\s]+?)\s*(?:,[^}]*)?\}\}")
 
 
@@ -165,6 +166,16 @@ class Bundle:
         self.index[new] = self.index.pop(old)
         self.order = [(n, new if k == old else k) for n, k in self.order]
 
+    def remove(self, keys: set[str]) -> int:
+        """Delete every line of ``keys`` (duplicates too); returns how many lines went."""
+        drop = {n for n, k in self.order if k in keys}
+        if not drop:
+            return 0
+        self.lines = [ln for i, ln in enumerate(self.lines) if i not in drop]
+        self.end -= len(drop)
+        self._scan()
+        return len(drop)
+
     def save(self) -> None:
         tmp = self.path.with_name(self.path.name + ".tmp")
         tmp.write_bytes(b"\n".join(self.lines))
@@ -243,6 +254,23 @@ def cmd_rename(args: argparse.Namespace) -> int:
     return 0 if changed else 1
 
 
+def cmd_remove(args: argparse.Namespace) -> int:
+    keys = set(args.keys)
+    if args.file:
+        keys |= set(_read_keys(args.file))
+    if not keys:
+        raise SystemExit("remove needs keys or --file")
+    total = 0
+    for lang in all_langs():
+        bundle = Bundle(lang)
+        n = bundle.remove(keys)
+        if n:
+            bundle.save()
+            total += n
+    print(f"removed {total} line(s) of {len(keys)} key(s)")
+    return 0 if total else 1
+
+
 def _read_keys(path: str) -> list[str]:
     text = Path(path).read_text(encoding="utf-8")
     try:
@@ -281,6 +309,9 @@ def cmd_import(args: argparse.Namespace) -> int:
     fresh: dict[str, str] = {}
     for key, value in patch.items():
         source = en.get(key)
+        plural = _PLURAL.match(key)
+        if source is None and plural:  # a plural form English lacks (_few, _many...) follows its _other key
+            source = en.get(plural.group(1) + "_other")
         # Importing into en itself is how a batch of new source keys lands.
         if source is None and args.lang != "en":
             print(f"skip '{key}': not in en.ts", file=sys.stderr)
@@ -330,6 +361,11 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("old")
     p.add_argument("new")
     p.set_defaults(func=cmd_rename)
+
+    p = sub.add_parser("remove", help="delete keys from every bundle")
+    p.add_argument("keys", nargs="*")
+    p.add_argument("--file", help="JSON object/array or one key per line")
+    p.set_defaults(func=cmd_remove)
 
     p = sub.add_parser("export", help="write {key: english} for a translator")
     p.add_argument("--lang", required=True)

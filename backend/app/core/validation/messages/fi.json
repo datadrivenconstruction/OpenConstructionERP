@@ -2898,7 +2898,8 @@
       "footprint_over_plot": "Rakennusala {footprint} m2 on suurempi kuin tontti {plot} m2.",
       "fx_invalid": "Vaihtokurssin on oltava positiivinen luku.",
       "source_missing": "Mikään lähde ei anna arvoa '{field}' tälle rakennustyypille; anna se tilaohjelmassa.",
-      "wwr_invalid": "Ikkunaosuuden on oltava välillä 0 ja 1."
+      "wwr_invalid": "Ikkunaosuuden on oltava välillä 0 ja 1.",
+      "value_invalid": "Arvon '{field}' on oltava positiivinen luku uskottavalla välillä."
     }
   }
 }

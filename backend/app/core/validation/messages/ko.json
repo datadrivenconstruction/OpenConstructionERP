@@ -2898,7 +2898,8 @@
       "footprint_over_plot": "건축면적 {footprint} m2가 대지 {plot} m2보다 큽니다.",
       "fx_invalid": "환율은 양수여야 합니다.",
       "source_missing": "이 건물 유형의 '{field}' 값을 주는 출처가 없습니다. 브리프에 입력하세요.",
-      "wwr_invalid": "창면적비는 0과 1 사이여야 합니다."
+      "wwr_invalid": "창면적비는 0과 1 사이여야 합니다.",
+      "value_invalid": "'{field}'은(는) 타당한 범위의 양수여야 합니다."
     }
   }
 }
