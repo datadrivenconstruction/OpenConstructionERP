@@ -656,6 +656,19 @@ async def _write_position(svc, b: DesignEstimateBinding, pos, c: Computed, meta:
     pos.metadata_ = meta
 
 
+async def _write_quantity(svc, ln, pos, qty: Decimal) -> None:
+    """Set a bill position's quantity from the model and remember it as the last applied value.
+
+    ``ln`` is any row that tracks ``last_applied_quantity`` (an estimate binding or a take-off line).
+    """
+    from app.modules.boq.service import _compute_total
+
+    qs = dstr(qty)
+    await svc.position_repo.update_fields(pos.id, quantity=qs, total=_compute_total(qs, pos.unit_rate))
+    ln.last_applied_quantity = qs
+    pos.quantity = qs
+
+
 async def recompute_on_accept(
     session, project_id: uuid.UUID, revision_id: uuid.UUID, model_id: uuid.UUID, user_id: uuid.UUID
 ) -> None:
