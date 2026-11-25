@@ -12,7 +12,7 @@ from sqlalchemy import func, select, update
 from app.dependencies import SessionDep
 
 from . import element_context, field_links, integration, links
-from .auth import PrincipalDep, as_aware, now_utc, require_project
+from .auth import PrincipalDep, now_utc, require_project
 
 MAX_KEYS = 500
 
@@ -83,12 +83,17 @@ def register(router, can_accept) -> None:
 
         now = now_utc()
         sees_all = await can_accept(session, principal.user_id, await session.get(Project, project_id))
+        live = [
+            DesignLinkToken.project_id == project_id,
+            DesignLinkToken.revoked_at.is_(None),
+            DesignLinkToken.expires_at > now,
+        ]
+        if not sees_all:
+            live.append(DesignLinkToken.user_id == principal.user_id)
         tokens = (
             (
                 await session.execute(
-                    select(DesignLinkToken)
-                    .where(DesignLinkToken.project_id == project_id, DesignLinkToken.revoked_at.is_(None))
-                    .order_by(DesignLinkToken.last_used_at.desc().nulls_last())
+                    select(DesignLinkToken).where(*live).order_by(DesignLinkToken.last_used_at.desc().nulls_last())
                 )
             )
             .scalars()
@@ -106,7 +111,6 @@ def register(router, can_accept) -> None:
                 "expires_at": t.expires_at,
             }
             for t in tokens
-            if as_aware(t.expires_at) > now and (sees_all or t.user_id == principal.user_id)
         ]
         pending = (
             await session.execute(
@@ -117,9 +121,10 @@ def register(router, can_accept) -> None:
         ).scalar_one()
         from app.modules.users.models import User
 
-        last = (
+        row = (
             await session.execute(
-                select(DesignRevision)
+                select(DesignRevision, User.full_name, User.email)
+                .outerjoin(User, User.id == DesignRevision.author_user_id)
                 .where(
                     DesignRevision.project_id == project_id,
                     DesignRevision.status.in_(("shared", "published", "rejected", "archived")),
@@ -127,17 +132,17 @@ def register(router, can_accept) -> None:
                 .order_by(DesignRevision.number.desc())
                 .limit(1)
             )
-        ).scalar_one_or_none()
+        ).one_or_none()
+        last = row[0] if row else None
         trace = None
-        if last is not None:
-            author = await session.get(User, last.author_user_id) if last.author_user_id else None
+        if row is not None:
             trace = {
                 "revision_id": str(last.id),
                 "number": last.number,
                 "status": last.status,
                 "source_kind": last.source_kind,
                 "package_sha256": last.package_sha256,
-                "author": (author.full_name or author.email) if author else None,
+                "author": (row.full_name or row.email) if last.author_user_id else None,
                 "received_at": last.created_at,
             }
         return {
