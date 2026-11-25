@@ -60,6 +60,7 @@ from app.dependencies import (
     RequirePermission,
     RequireRole,
     SessionDep,
+    accessible_project_ids,
     verify_project_access,
 )
 from app.modules.costs import base_registry, base_state
@@ -8109,8 +8110,6 @@ async def get_cost_item_usage_counts(
     the rows that actually have usage. Public, mirroring the certainty
     batch endpoint.
     """
-    _ = user
-
     # De-duplicate, preserving order; the schema already caps ``ids`` length
     # so the grouped IN() can't fan out unboundedly.
     seen: set[uuid.UUID] = set()
@@ -8123,10 +8122,12 @@ async def get_cost_item_usage_counts(
     # items this caller may read.
     readable = await cost_scope.visible_ids(session, ordered_ids)
     ordered_ids = [item_id for item_id in ordered_ids if str(item_id) in readable]
-    if not ordered_ids:
+    # Uses count only in the caller's live projects, never another tenant's.
+    projects = await accessible_project_ids(session, (user or {}).get("sub"), live_only=True)
+    if not ordered_ids or (projects is not None and not projects):
         return {}
 
-    from sqlalchemy import func
+    from sqlalchemy import func, true
 
     from app.modules.costs.models import CostItemUsage
 
@@ -8136,6 +8137,7 @@ async def get_cost_item_usage_counts(
             func.count(CostItemUsage.id).label("cnt"),
         )
         .where(CostItemUsage.cost_item_id.in_(ordered_ids))
+        .where(CostItemUsage.project_id.in_(projects) if projects is not None else true())
         .group_by(CostItemUsage.cost_item_id)
     )
     # Only non-zero rows survive the GROUP BY; emit them as string keys so
@@ -8154,13 +8156,14 @@ async def get_cost_item_usage_stats(
     How many BOQ lines applied each visible rate and the spread of the unit
     rates they applied it at, in the item's currency, as exact decimal
     strings. One grouped query per page; ids never applied are omitted.
-    Readable items only, like ``/usage-counts/``.
+    Readable items only, and only uses in the caller's live projects: the
+    prices another company applied are its own business.
     """
-    _ = user
     ordered_ids = list(dict.fromkeys(body.ids))
     readable = await cost_scope.visible_ids(session, ordered_ids)
     ordered_ids = [item_id for item_id in ordered_ids if str(item_id) in readable]
-    return await applied_rate_stats(session, ordered_ids)
+    projects = await accessible_project_ids(session, (user or {}).get("sub"), live_only=True)
+    return await applied_rate_stats(session, ordered_ids, projects)
 
 
 @router.get("/{item_id}/certainty/", response_model=CertaintyBadge)

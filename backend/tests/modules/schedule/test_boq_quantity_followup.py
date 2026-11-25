@@ -203,3 +203,44 @@ def test_crew_reads_the_generated_resources() -> None:
     rows = [{"type": "labor", "count": 3}, {"type": "equipment", "count": 2}, SimpleNamespace()]
     assert _crew(rows) == (3, 2)
     assert _crew(None) == (1, 1)
+
+
+@pytest.mark.asyncio
+async def test_the_committed_bill_edit_reaches_the_schedule_through_the_event(monkeypatch) -> None:
+    """The real path: publish after commit, handler opens its own session and commits."""
+    import asyncio
+
+    from sqlalchemy.ext.asyncio import async_sessionmaker
+
+    import app.database
+    from app.modules.boq.schemas import PositionUpdate
+    from app.modules.boq.service import BOQService
+    from app.modules.schedule import events as schedule_events
+    from app.modules.schedule.models import Activity
+    from tests._pg import isolated_engine
+
+    async with isolated_engine() as engine:
+        factory = async_sessionmaker(engine, expire_on_commit=False)
+        # Every session the handlers open lands in this throwaway database.
+        monkeypatch.setattr(app.database, "async_session_factory", factory)
+        monkeypatch.setattr(schedule_events, "async_session_factory", factory)
+
+        async with factory() as session:
+            _service, schedule_id, ids = await _plan(session)
+            pour = (await _by_name(session, schedule_id))["Pour"]
+            pour_id, pour_days = pour.id, pour.duration_days
+            await session.commit()
+
+        async with factory() as session:
+            await BOQService(session).update_position(ids["Pour"], PositionUpdate(quantity=200))
+            await session.commit()
+
+        days = pour_days
+        for _ in range(100):
+            await asyncio.sleep(0.1)
+            async with factory() as check:
+                days = (await check.get(Activity, pour_id)).duration_days
+            if days != pour_days:
+                break
+        assert pour_days < days <= 2 * pour_days
+        await asyncio.sleep(0.5)  # let the other detached handlers finish before the database is dropped
