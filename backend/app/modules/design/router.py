@@ -330,13 +330,14 @@ async def _acquire(project_id: uuid.UUID, principal, session, *, renew: bool = F
         # The server worker holds the model for its run; the same person's editor must not slip in beside it.
         if await active_job(session, project_id) is not None:
             raise HTTPException(
-                status.HTTP_409_CONFLICT, {"message": "Project is being edited", "held_by": "generation job"}
+                status.HTTP_409_CONFLICT,
+                {"code": "lock_held", "message": "Project is being edited", "held_by": "generation job"},
             )
     if renew:
         # A heartbeat extends a lock the caller still holds; a lost one must show as lost, not be re-taken.
         held = await _lock_view(session, project_id, principal.user_id)
         if held is None or not held.mine or as_aware(held.expires_at) <= now_utc():
-            raise HTTPException(status.HTTP_409_CONFLICT, "lock lost")
+            raise HTTPException(status.HTTP_409_CONFLICT, {"code": "lock_lost", "message": "lock lost"})
     try:
         lock = await CollabLockService(session).acquire(
             entity_type=LOCK_ENTITY, entity_id=project_id, user_id=principal.user_id, ttl_seconds=LOCK_TTL_S
@@ -347,6 +348,7 @@ async def _acquire(project_id: uuid.UUID, principal, session, *, renew: bool = F
         raise HTTPException(
             status.HTTP_409_CONFLICT,
             {
+                "code": "lock_held",
                 "message": "Project is being edited",
                 "held_by": c.current_holder_name,
                 "expires_at": c.expires_at.isoformat(),
@@ -409,15 +411,23 @@ async def _ingest(
     seen = await session.get(DesignRevision, revision_id)
     if seen is not None:
         # A retry after a lost answer sends the same bytes again: hand back what it made while undecided.
-        if seen.project_id == project_id and seen.status == "shared" and seen.package_sha256 == upload.sha256_hex:
+        if (
+            seen.project_id == project_id
+            and seen.status == "shared"
+            and seen.package_sha256 == upload.sha256_hex
+            and seen.author_user_id == principal.user_id
+        ):
             return seen, True
-        raise HTTPException(status.HTTP_409_CONFLICT, "This revision was already uploaded")
+        raise HTTPException(
+            status.HTTP_409_CONFLICT, {"code": "package_mismatch", "message": "This revision was already uploaded"}
+        )
     latest = await rv.design_tip(session, project_id)
     parent_id = uuid.UUID(manifest.parent_revision_id) if manifest.parent_revision_id else None
     if (latest.id if latest else None) != parent_id:
         raise HTTPException(
             status.HTTP_409_CONFLICT,
             {
+                "code": "revision_conflict",
                 "message": "parent_revision_id must be the newest revision that is neither rejected nor archived "
                 "nor an imported model",
                 "latest_published": str(latest.id) if latest else None,
@@ -450,7 +460,10 @@ async def _ingest(
         await session.commit()
     except IntegrityError as exc:
         await session.rollback()
-        raise HTTPException(status.HTTP_409_CONFLICT, "This revision or revision number is being uploaded") from exc
+        raise HTTPException(
+            status.HTTP_409_CONFLICT,
+            {"code": "revision_conflict", "message": "This revision or revision number is being uploaded"},
+        ) from exc
 
     created: list[uuid.UUID] = []
     sheets = {
@@ -503,6 +516,14 @@ async def _ingest(
     return await session.get(DesignRevision, revision_id, populate_existing=True), False
 
 
+def _too_large(message: str, limit_bytes: int | None) -> HTTPException:
+    """413 with a stable code the ERP and the editor translate; ``message`` stays for old clients."""
+    detail: dict = {"code": "revision_too_large", "message": message}
+    if limit_bytes is not None:
+        detail["limit_bytes"] = limit_bytes
+    return HTTPException(status.HTTP_413_REQUEST_ENTITY_TOO_LARGE, detail)
+
+
 @router.post("/projects/{project_id}/revisions", response_model=RevisionView, status_code=status.HTTP_201_CREATED)
 async def upload_revision(
     project_id: uuid.UUID,
@@ -526,7 +547,10 @@ async def upload_revision(
     ):
         raise HTTPException(status.HTTP_403_FORBIDDEN, "On this project only managers create revisions")
     if not await holds_lock(session, project_id, principal.user_id):
-        raise HTTPException(status.HTTP_409_CONFLICT, "Take the project lock before publishing a revision")
+        raise HTTPException(
+            status.HTTP_409_CONFLICT,
+            {"code": "lock_lost", "message": "Take the project lock before publishing a revision"},
+        )
     settings = get_design_settings()
     limits = Limits(
         max_unpacked=settings.revision_max_unpacked_bytes,
@@ -540,7 +564,7 @@ async def upload_revision(
                 stream_upload_to_temp(package, max_bytes=settings.revision_max_bytes, suffix=".ddcrev")
             )
         except ValueError as exc:
-            raise HTTPException(status.HTTP_413_REQUEST_ENTITY_TOO_LARGE, str(exc)) from exc
+            raise _too_large(str(exc), settings.revision_max_bytes) from exc
         if not has_zip_magic(upload.head):
             raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, "package is not a zip archive")
         work_dir = Path(stack.enter_context(tempfile.TemporaryDirectory(prefix="oe-ddcrev-")))
@@ -549,6 +573,8 @@ async def upload_revision(
                 verify_package, upload.path, work_dir / "pkg", project_id=str(project_id), limits=limits
             )
         except PackageRejected as exc:
+            if exc.status_code == status.HTTP_413_REQUEST_ENTITY_TOO_LARGE:
+                raise _too_large(str(exc.detail), None) from exc
             raise HTTPException(exc.status_code, exc.detail) from exc
         rev, replayed = await _ingest(session, background, project_id, principal, pkg, upload, work_dir)
     if replayed:

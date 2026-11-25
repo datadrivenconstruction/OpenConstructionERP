@@ -45,8 +45,20 @@ A link token is a bearer token for one project and one user:
   decision; once decided, or with a different package
   under a used `revision_id`, it answers `409`.
 - Limits (server settings): 2 GiB upload, 8 GiB unpacked, 64 MiB per JSON member and GLB JSON chunk,
-  2,000,000 element rows. Over a limit answers `413`; a malformed package answers `422`.
+  2,000,000 element rows. Over a limit answers `413` with `detail.code = "revision_too_large"`, a `message`,
+  and `limit_bytes` when the upload size was the limit; a malformed package answers `422`.
 - A stored revision has status `shared`: it waits for a decision and changes nothing in the ERP yet.
+
+## Conflict codes
+
+Every `409` on the link carries `detail = {code, message, ...}`; clients branch on `code`, never on the text:
+
+| code | when | extra fields |
+|---|---|---|
+| `lock_held` | someone else (or a generation job) holds the editing lock | `held_by`, `expires_at` |
+| `lock_lost` | heartbeat on a lock the caller no longer holds, or upload without the lock | |
+| `revision_conflict` | `parent_revision_id` is not the chain tip, or a parallel upload took the number | `latest_published` |
+| `package_mismatch` | a used `revision_id` arrives with different bytes, or after it was decided | |
 
 ## Review and acceptance (in the ERP)
 

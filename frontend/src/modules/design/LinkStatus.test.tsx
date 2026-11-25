@@ -69,4 +69,12 @@ describe('LinkStatus', () => {
     await userEvent.click(await screen.findByRole('button', { name: 'Trennen' }));
     await waitFor(() => expect(h.revoke).toHaveBeenCalledWith('p1', 'e1'));
   });
+
+  it('translates a refused unlink from its code', async () => {
+    h.status = { editors: [editor], pending_revisions: 0, last_revision_at: null, last_revision: null };
+    h.revoke.mockRejectedValue(Object.assign(new Error('403'), { body: { detail: { code: 'unlink_not_allowed', message: 'x' } } }));
+    await mount('de');
+    await userEvent.click(await screen.findByRole('button', { name: 'Trennen' }));
+    expect(await screen.findByTestId('link-error')).toHaveTextContent(DE['design.link_status.error.unlink_not_allowed']);
+  });
 });

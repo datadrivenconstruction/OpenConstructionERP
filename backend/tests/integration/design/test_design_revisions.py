@@ -332,13 +332,17 @@ async def test_size_limits(client, monkeypatch):
         monkeypatch.setenv("OE_DESIGN_REVISION_MAX_BYTES", "1000")
         get_design_settings.cache_clear()
         data, _ = package(pid, rows)
-        assert (await _upload(client, pid, tok, data)).status_code == 413
+        big = await _upload(client, pid, tok, data)
+        assert big.status_code == 413
+        assert big.json()["detail"]["code"] == "revision_too_large" and big.json()["detail"]["limit_bytes"] == 1000
+        assert big.json()["detail"]["message"] and big.headers["X-DDC-Link"] == "1"
         monkeypatch.delenv("OE_DESIGN_REVISION_MAX_BYTES")
         monkeypatch.setenv("OE_DESIGN_REVISION_MAX_UNPACKED_BYTES", str(2_000_000))
         get_design_settings.cache_clear()
         bomb, _ = package(pid, rows, files={"thumb.png": b"\0" * 3_000_000})
         assert len(bomb) < 100_000
-        assert (await _upload(client, pid, tok, bomb)).status_code == 413
+        unpacked = await _upload(client, pid, tok, bomb)
+        assert unpacked.status_code == 413 and unpacked.json()["detail"]["code"] == "revision_too_large"
     finally:
         monkeypatch.delenv("OE_DESIGN_REVISION_MAX_BYTES", raising=False)
         monkeypatch.delenv("OE_DESIGN_REVISION_MAX_UNPACKED_BYTES", raising=False)
@@ -369,3 +373,40 @@ async def test_a_different_package_under_a_used_revision_id_is_a_conflict(client
     other, _ = package(pid, rows, revision_id=m["revision_id"])
     clash = await _upload(client, pid, tok, other)
     assert clash.status_code == 409, clash.text
+    assert clash.json()["detail"]["code"] == "package_mismatch" and clash.json()["detail"]["message"]
+
+
+async def test_every_link_conflict_names_its_code(client):
+    uid, h, pid, tok = await _linked_project(client)
+    rows = example_rows()
+    d1, m1 = package(pid, rows)
+    assert (await _upload(client, pid, tok, d1)).status_code == 201
+    # parent mismatch: a second first revision while R1 is the tip
+    stale, _ = package(pid, rows)
+    moved = await _upload(client, pid, tok, stale)
+    assert moved.status_code == 409
+    assert moved.json()["detail"]["code"] == "revision_conflict" and moved.json()["detail"]["latest_published"]
+    # someone else's lock (an admin reaches every project)
+    other, h_other = await make_user(client, role="admin")
+    held = await client.post(f"{BASE}/projects/{pid}/lock", headers={**h_other, **LINK})
+    assert held.status_code == 409 and held.json()["detail"]["code"] == "lock_held", held.text
+    # lock released by the holder: heartbeat and upload both say the lock is lost
+    assert (await client.delete(f"{BASE}/projects/{pid}/lock", headers=tok)).status_code == 204
+    beat = await client.post(f"{BASE}/projects/{pid}/lock/heartbeat", headers=tok)
+    assert beat.status_code == 409 and beat.json()["detail"] == {"code": "lock_lost", "message": "lock lost"}
+    d2, _ = package(pid, rows, parent_id=m1["revision_id"], parent_rows=rows)
+    no_lock = await _upload(client, pid, tok, d2)
+    assert no_lock.status_code == 409 and no_lock.json()["detail"]["code"] == "lock_lost"
+    assert no_lock.json()["detail"]["message"].startswith("Take the project lock")
+
+
+async def test_a_retry_from_another_person_is_not_a_replay(client):
+    """Only the author's own retry gets the stored revision back; anyone else gets a package_mismatch."""
+    uid, h, pid, tok = await _linked_project(client)
+    data, _ = package(pid, example_rows())
+    assert (await _upload(client, pid, tok, data)).status_code == 201
+    admin, h_admin = await make_user(client, role="admin")
+    assert (await client.delete(f"{BASE}/projects/{pid}/lock", headers=tok)).status_code == 204
+    assert (await client.post(f"{BASE}/projects/{pid}/lock", headers={**h_admin, **LINK})).status_code == 200
+    other = await _upload(client, pid, {**h_admin, **LINK}, data)
+    assert other.status_code == 409 and other.json()["detail"]["code"] == "package_mismatch", other.text
