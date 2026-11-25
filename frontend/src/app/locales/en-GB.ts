@@ -2617,6 +2617,12 @@ const resource = {
     "design.web_editor.problem.busy": "A download is already running.",
     "design.web_editor.problem.other": "Something went wrong. The light engine keeps working.",
     "design.web_editor.not_available_yet": "The full editor is not available yet.",
+    "api_errors.unsupported_data_file_type": "{{filename}} is not a CSV or Excel table. Upload a .csv or .xlsx element table, or an RVT or IFC model.",
+    "api_errors.data_file_unreadable": "{{filename}} could not be read as an element table. Check that it is a valid CSV or Excel file and export it again.",
+    "api_errors.no_data_rows": "{{filename}} has no data rows.",
+    "api_errors.no_valid_elements": "No elements found in {{filename}}. The table needs an element_id column.",
+    "bim.data_export_label": "Model data",
+    "bim.data_export_failed": "Data export failed",
   }
 } as { translation: Record<string, string> };
 
