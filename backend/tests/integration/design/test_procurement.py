@@ -154,9 +154,9 @@ async def test_setup_raises_one_tender_package_per_ifc_class(client):
 
     pkgs = await _packages(pid)
     assert [p.name for p in pkgs] == [
-        "Design take-off: IfcDoor",
-        "Design take-off: IfcSlab",
-        "Design take-off: IfcWall",
+        "design_takeoff:IfcDoor",
+        "design_takeoff:IfcSlab",
+        "design_takeoff:IfcWall",
     ]
     assert {p.status for p in pkgs} == {"draft"} and len({p.boq_id for p in pkgs}) == 1
     wall_pkg = pkgs[2]
@@ -220,8 +220,8 @@ async def test_impact_equals_take_off_after_accept_and_overrides_survive(client)
     assert D(aw["quantity"]) == 90 and aw["override"] and D(aw["model_quantity"]) == D("165.0") and aw["elements"] == 2
     assert D(asl["quantity"]) == D("160.48") and not asl["override"]
     pk = {p.name: p for p in await _packages(pid)}
-    assert D(pk["Design take-off: IfcWall"].meta["line_item_template"][0]["quantity"]) == 90  # the package follows
-    assert D(pk["Design take-off: IfcSlab"].meta["line_item_template"][0]["quantity"]) == D("160.48")
+    assert D(pk["design_takeoff:IfcWall"].meta["line_item_template"][0]["quantity"]) == 90  # the package follows
+    assert D(pk["design_takeoff:IfcSlab"].meta["line_item_template"][0]["quantity"]) == D("160.48")
     again = (await client.get(f"{BASE}/revisions/{r2}/procurement-impact", headers=h)).json()
     assert again["totals"]["lines_changed"] == 0 and again["totals"]["overrides_kept"] == 1
 
@@ -329,8 +329,8 @@ async def test_new_type_extends_its_package_and_a_new_class_gets_one(client):
     after = (await client.get(f"{BASE}/projects/{pid}/procurement", headers=h)).json()
     assert _line(after, "column/rc-300")["unit"] == "m" and D(_line(after, "column/rc-300")["quantity"]) == D("2.8")
     pk = {p.name: p for p in await _packages(pid)}
-    assert set(pk) == {f"Design take-off: {c}" for c in ("IfcDoor", "IfcSlab", "IfcWall", "IfcColumn")}
-    assert len(pk["Design take-off: IfcWall"].meta["line_item_template"]) == 2  # the new wall type joined its package
+    assert set(pk) == {f"design_takeoff:{c}" for c in ("IfcDoor", "IfcSlab", "IfcWall", "IfcColumn")}
+    assert len(pk["design_takeoff:IfcWall"].meta["line_item_template"]) == 2  # the new wall type joined its package
 
 
 async def test_person_can_switch_the_basis_and_pause_following(client):
