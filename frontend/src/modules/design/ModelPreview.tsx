@@ -110,15 +110,18 @@ function asDataUrl(blob: Blob): Promise<string> {
   });
 }
 
-export function ModelPreview({ projectId, state, onSelect, tall = false }: {
+export function ModelPreview({ projectId, state, onSelect, tall = false, genOff = false }: {
   projectId: string; state: Exclude<PreviewState, { status: 'off' }>;
   /** The picked element (key and IFC class from the preview GLB), null when the pick is cleared. */
   onSelect?: (el: { element_key: string; ifc_class: string } | null) => void;
   tall?: boolean;
+  /** The server generator is off: the caption names the path that does build a revision. */
+  genOff?: boolean;
 }) {
   const { t } = useTranslation();
   const m = (key: string, o?: Record<string, unknown>) => t(key, o) as string;
   const iso = useIsoFrame();
+  const caption = genOff ? 'design.model.preview.label_editor' : 'design.model.preview.label';
   // The viewer's model summary would cover the small design model on open: closed here, the person's setting
   // comes back when the preview goes.
   useEffect(() => {
@@ -129,8 +132,8 @@ export function ModelPreview({ projectId, state, onSelect, tall = false }: {
   }, []);
   return (
     <aside className={`flex min-w-0 flex-col gap-2 ${tall ? 'h-full min-h-[360px]' : ''}`} data-testid="model-preview"
-      aria-label={m('design.model.preview.label')} title={tall ? m('design.model.preview.label') : undefined}>
-      {!tall && <p className="text-sm font-medium text-content-primary">{m('design.model.preview.label')}</p>}
+      aria-label={m(caption)} title={tall ? m(caption) : undefined}>
+      {!tall && <p className="text-sm font-medium text-content-primary" data-testid="preview-caption">{m(caption)}</p>}
       <div ref={iso.box} className={`relative ${tall ? 'min-h-0 flex-1' : 'h-[320px]'} overflow-hidden rounded-lg border border-border-light ${VIEWER_FRAME}`}>
         {/* portal: a click shows the loaded element's own data; no /bim_hub request for a model the server lacks */}
         {state.status === 'ready' && (

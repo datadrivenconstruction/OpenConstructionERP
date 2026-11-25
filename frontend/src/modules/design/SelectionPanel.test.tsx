@@ -12,7 +12,7 @@ vi.mock('react-i18next', async () => await vi.importActual('react-i18next'));
 vi.mock('@/stores/useAuthStore', () => ({ useAuthStore: (sel: (s: { userId: string }) => unknown) => sel({ userId: m.user }) }));
 vi.mock('./api', () => ({
   LINK_VERSION: '1',
-  fetchEstimate: vi.fn(async () => ({ estimate: true, total: '6490138.4', positions: [], range: { currency: 'EUR', ...(m.mid ? { total: { low: '1', mid: m.mid, high: '2' } } : {}) } })),
+  fetchEstimate: vi.fn(async () => ({ estimate: true, total: '6490138.4', positions: [{ rule: 'slab', kind: 'model', unit_rate: '120', total: '6490138.4', flags: [], provenance: {} }], range: { currency: 'EUR', ...(m.mid ? { total: { low: '1', mid: m.mid, high: '2' } } : {}) } })),
   fetchAccess: vi.fn(async () => ({ currency: 'EUR' })),
 }));
 vi.mock('./FieldReportLinks', () => ({ FieldReportLinks: () => <p>reports</p> }));
@@ -33,8 +33,9 @@ vi.mock('./linksApi', async () => ({
 }));
 
 import { SelectionPanel } from './SelectionPanel';
+import type { DraftLine, DraftView } from './draftApi';
 
-async function mount(selection: { element_key: string; ifc_class?: string }[] = [{ element_key: 'w1', ifc_class: 'IfcWall' }]) {
+async function mount(selection: { element_key: string; ifc_class?: string }[] = [{ element_key: 'w1', ifc_class: 'IfcWall' }], draft: DraftView | null = null) {
   const inst = i18n.createInstance();
   await inst.use(initReactI18next).init({ lng: 'en', resources: { en: { translation: EN } }, keySeparator: false,
     nsSeparator: false, interpolation: { escapeValue: false } });
@@ -42,7 +43,7 @@ async function mount(selection: { element_key: string; ifc_class?: string }[] = 
   render(
     <I18nextProvider i18n={inst}>
       <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
-        <MemoryRouter><SelectionPanel projectId="p1" selection={selection} /></MemoryRouter>
+        <MemoryRouter><SelectionPanel projectId="p1" selection={selection} draft={draft} /></MemoryRouter>
       </QueryClientProvider>
     </I18nextProvider>,
   );
@@ -57,6 +58,7 @@ describe('selection panel', () => {
     await mount([]);
     expect(await screen.findByTestId('snapshot-total')).toHaveTextContent(/^€\s?6,490,138$/);
     expect(screen.getByTestId('snapshot-label')).toHaveTextContent(EN['design.estimate.priced_total']!);
+    expect(screen.getByTestId('snapshot-estimate')).toHaveTextContent('1 of 1 priced');
     expect(screen.getByTestId('project-snapshot')).toHaveTextContent(EN['design.overview.step.model']! + '2');
     expect(screen.getByTestId('snapshot-next-schedule')).toHaveAttribute('href', '/design/revisions');
     expect(screen.getByTestId('snapshot-status-schedule')).toHaveTextContent(EN['design.overview.todo.schedule']!);
@@ -122,5 +124,25 @@ describe('selection panel', () => {
     expect(screen.getByTestId('panel-all-hidden')).toHaveTextContent(EN['design.panel.all_hidden']!);
     await user.click(screen.getByTestId('panel-reset'));
     expect(order()).toHaveLength(8);
+  });
+
+  it('a line without a rate or outside the accepted model shows why, never a 0 total', async () => {
+    const line = (o: Partial<DraftLine>): DraftLine => ({ rule: 'r', unit: 'm2', elements: 1, element_keys: ['w1'], quantity: '20',
+      current_quantity: '20', unit_rate: '50', total: '1000', current_total: '1000', position_id: 'p', description: 'Priced wall', flags: [], ...o });
+    const draft = { project_id: 'p1', revision_id: 'r', parent_revision_id: null, package_sha256: 'a', package_bytes: 1, element_count: 1,
+      updated_at: '2026-11-25T10:00:00Z', estimate: { estimate: true, model_total: '1000', lines: [
+        line({}),
+        line({ rule: 'wall_ext', description: 'Outer wall', unit_rate: '0', total: null, flags: ['rate_missing'] }),
+        line({ rule: 'stair', description: 'stair', unit_rate: null, total: null, current_quantity: null, position_id: null, flags: ['no_position'] }),
+      ] } } as DraftView;
+    await mount([{ element_key: 'w1', ifc_class: 'IfcWall' }], draft);
+    const unpriced = within(screen.getByTestId('line-wall_ext'));
+    expect(unpriced.getByTestId('line-unpriced')).toHaveTextContent(EN['design.panel.unpriced.no_source']!);
+    expect(unpriced.getByRole('link')).toHaveAttribute('href', '/costs/import');
+    expect(screen.getByTestId('line-wall_ext')).not.toHaveTextContent('€');
+    expect(within(screen.getByTestId('line-stair')).getByRole('link')).toHaveAttribute('href', '/design/acceptance');
+    expect(screen.getByTestId('line-stair')).toHaveTextContent(EN['design.panel.unpriced.not_accepted']!);
+    expect(screen.getByTestId('selection-cost')).toHaveTextContent(/1,000/);
+    expect(screen.getByTestId('selection-cost')).toHaveTextContent('1 of 3 priced');
   });
 });

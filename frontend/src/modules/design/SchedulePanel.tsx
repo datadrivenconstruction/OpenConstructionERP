@@ -75,7 +75,10 @@ export function SchedulePanel({ projectId, revisionId, canManage, locale, needsE
         <div><dt className="text-content-tertiary">{tr(t, 'design.schedule.finish_after')}</dt><dd>{day(totals.after_finish, locale)}</dd></div>
         <div>
           <dt className="text-content-tertiary">{tr(t, 'design.schedule.delta')}</dt>
-          <dd className={`font-medium ${tone}`} data-testid="schedule-delta">{tr(t, 'design.schedule.days', { value: signedDays(totals.delta_days) })}</dd>
+          <dd className={`font-medium ${tone}`} data-testid="schedule-delta">
+            {/* no finish on either side: there is nothing to compare, not a change of 0 days */}
+            {totals.current_finish || totals.after_finish ? tr(t, 'design.schedule.days', { value: signedDays(totals.delta_days) }) : '—'}
+          </dd>
         </div>
       </dl>
       {missing.length > 0 && (

@@ -185,4 +185,11 @@ describe('SchedulePanel', () => {
     expect((await screen.findByTestId('schedule-delta')).textContent).toBe('+7 дн.');
     expect(screen.getByText('Окончание после')).toBeTruthy();
   });
+
+  it('without a finish on either side the change is a dash, not 0 days', async () => {
+    const base = impact([]);
+    h.impact = { ...base, totals: { ...base.totals!, current_finish: null, after_finish: null, delta_days: 0 } };
+    await mount();
+    expect(await screen.findByTestId('schedule-delta')).toHaveTextContent(/^—$/);
+  });
 });

@@ -3,8 +3,8 @@ import { checkMessage } from '../bridge/protocol';
 import type { EstimatePosition } from './estimate';
 import type { RevisionView } from './revisions';
 import type { BriefDoc } from './briefModel';
-import { aiConfigured, aiServices, chainTip, changedLines, deviceMode, draftLinesFor, importOnlyTip, keepConfirmed, linesFor, openMessage, proposals, ruleMatch } from './workspace';
-import type { DraftView } from '../draftApi';
+import { aiConfigured, aiServices, chainTip, changedLines, deviceMode, draftHeader, draftLineState, draftLinesFor, positionState, pricedTotal, importOnlyTip, keepConfirmed, linesFor, openMessage, proposals, ruleMatch } from './workspace';
+import type { DraftLine, DraftView } from '../draftApi';
 
 const PID = '746402cb-14a8-430c-b3b9-9c6908fa75d7';
 const rev = (n: number, status: RevisionView['status'], imported = false): RevisionView => ({
@@ -127,5 +127,39 @@ describe('AI draft', () => {
     expect(aiConfigured({ a_api_key_set: true })).toBe(true);
     expect(aiConfigured({ b_base_url: 'http://localhost:11434' })).toBe(true);
     expect(aiServices({ b_base_url: 'http://localhost:11434', a_api_key_set: true, c_api_key_set: false })).toEqual(['a', 'b']);
+  });
+});
+
+describe('unpriced lines stay empty', () => {
+  const line = (o: Partial<DraftLine>): DraftLine => ({ rule: 'r', unit: 'm2', elements: 1, element_keys: ['k'], quantity: '12.5',
+    current_quantity: '12.5', unit_rate: '80', total: '1000', current_total: '1000', position_id: 'p', description: 'r', flags: [], ...o });
+  it('names why a line has no money', () => {
+    expect(draftLineState(line({}))).toBe('priced');
+    expect(draftLineState(line({ unit_rate: '0', total: null, flags: ['rate_missing'] }))).toBe('no_rate');
+    expect(draftLineState(line({ unit_rate: null, total: null, position_id: null, current_quantity: null, flags: ['no_position'] }))).toBe('not_accepted');
+    expect(draftLineState(line({ quantity: null, total: null, flags: ['formula_not_in_draft'] }))).toBe('no_quantity');
+  });
+  it('a zero rate on a position is unpriced, not a 0 total', () => {
+    expect(positionState({ unit_rate: '0.00', flags: ['unpriced'] } as unknown as EstimatePosition)).toBe('no_rate');
+    expect(positionState({ unit_rate: '45.10', flags: [] } as unknown as EstimatePosition)).toBe('priced');
+    expect(positionState({ unit_rate: '0', flags: ['cost_no_match', 'no_match', 'unpriced'] } as unknown as EstimatePosition)).toBe('not_accepted');
+  });
+  it('totals only priced lines and says n of N', () => {
+    expect(pricedTotal([{ state: 'priced', total: '1000' }, { state: 'no_rate', total: null }, { state: 'priced', total: '250.5' }]))
+      .toEqual({ total: 1250.5, priced: 2, count: 3 });
+    expect(pricedTotal([{ state: 'no_rate', total: '0' }])).toEqual({ total: 0, priced: 0, count: 1 });
+  });
+});
+
+describe('draft header', () => {
+  const h = (o: Partial<Parameters<typeof draftHeader>[0]>) => draftHeader({ status: 'idle', hasDraft: false, dirty: false, tip: null, ...o });
+  it('never says "no draft" beside unsent edits or a drawn tip', () => {
+    expect(h({ dirty: true })).toBe('pending');
+    expect(h({ tip: 2 })).toBe('tip');
+    expect(h({})).toBe('none');
+    expect(h({ hasDraft: true })).toBe('saved');
+    expect(h({ hasDraft: true, dirty: true })).toBe('pending');
+    expect(h({ status: 'saving', hasDraft: true })).toBe('saving');
+    expect(h({ status: 'failed' })).toBe('failed');
   });
 });

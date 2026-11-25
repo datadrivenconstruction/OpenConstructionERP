@@ -173,7 +173,7 @@ export default function ModelPanel({ projectId, fallback = null }: { projectId: 
 
   return (
     <Card data-testid="model-panel">
-      <CardHeader title={m('design.model.title')} subtitle={m('design.model.hint')} />
+      <CardHeader title={m('design.model.title')} subtitle={m(ed.genOff ? 'design.model.hint_editor' : 'design.model.hint')} />
       {/* without the server generator the form cannot make a revision: say so first and point to the editor */}
       {ed.genOff && (
         <p className="mt-3 rounded-lg border border-border-light bg-surface-secondary px-3 py-2 text-sm text-content-secondary" data-testid="model-gen-off" title={offReason}>
@@ -213,7 +213,7 @@ export default function ModelPanel({ projectId, fallback = null }: { projectId: 
             </div>
           )}
         </div>
-        {showPreview && preview.status !== 'off' && <ModelPreview projectId={projectId} state={preview} />}
+        {showPreview && preview.status !== 'off' && <ModelPreview projectId={projectId} state={preview} genOff={ed.genOff} />}
       </div>
     </Card>
   );

@@ -19,7 +19,7 @@ import { selectionFromUrl } from './linksApi';
 import { fetchAiSettings, fetchBrief, fetchRevisions } from './api';
 import { bridgeError, connectBridge, framePort, modulePort, type BridgeHost, type BridgeState, type EditorModule } from './bridge/host';
 import { DRAFT_FILE, type SelectedElement } from './bridge/protocol';
-import { aiConfigured, chainTip, deviceMode, importOnlyTip, openMessage } from './data/workspace';
+import { aiConfigured, chainTip, deviceMode, draftHeader, importOnlyTip, openMessage } from './data/workspace';
 import { readConsent, type Payload } from './data/webEditor';
 import { currentPayload, startBackgroundLoad } from './editorPayload';
 import { fetchDraft, fetchRights, makeRevision, readDraftPackage, readRevisionFile, saveDraft, type DesignRights, type DraftView } from './draftApi';
@@ -124,6 +124,7 @@ function Workspace({ projectId }: { projectId: string }) {
   const rights = useQuery({ queryKey: ['design-rights', projectId], queryFn: () => fetchRights(projectId) });
   const demoServer = useDemoServer();
   const draft = useQuery({ queryKey: ['design-draft', projectId], queryFn: () => fetchDraft(projectId) });
+  const revs = useQuery({ queryKey: ['design-revisions', projectId], queryFn: () => fetchRevisions(projectId) });
   const mode: 'edit' | 'view' = rights.data?.can_edit && device === 'edit' ? 'edit' : 'view';
   const viewWhy = !rights.data || mode === 'edit' ? null
     // the public demo signs everyone in read-only: that, not the person's role, is why
@@ -146,8 +147,9 @@ function Workspace({ projectId }: { projectId: string }) {
       setSelection([]);
       link.current?.select([]);
     };
-    document.addEventListener('keydown', key);
-    return () => document.removeEventListener('keydown', key);
+    // capture: the editor canvas stops Esc from bubbling once it has used it to cancel a tool
+    document.addEventListener('keydown', key, true);
+    return () => document.removeEventListener('keydown', key, true);
   }, []);
 
   const make = useMutation({
@@ -169,11 +171,15 @@ function Workspace({ projectId }: { projectId: string }) {
     : editorOn ? tr(t, 'design.workspace.engine_starting') : tr(t, 'design.workspace.engine_simple_short');
   const engineHint = payload && !editorOn ? tr(t, 'design.workspace.engine_simple') : '';
 
+  const tipNo = chainTip(revs.data ?? [])?.number ?? null;
+  const head = draftHeader({ status: draftState.status, hasDraft: !!draft.data, dirty, tip: tipNo });
   const draftStatus = mode === 'view' ? null
-    : draftState.status === 'saving' ? <><Loader2 size={14} className="animate-spin" aria-hidden />{tr(t, 'design.workspace.draft.saving')}</>
-      : draftState.status === 'failed' ? <><CloudOff size={14} className="text-semantic-error" aria-hidden />{tr(t, 'design.workspace.draft.failed', { reason: draftState.reason })}</>
-        : draft.data ? <><Check size={14} className="text-semantic-success" aria-hidden />{tr(t, 'design.workspace.draft.saved', { time: time(draftState.status === 'saved' ? draftState.at : draft.data.updated_at) })}</>
-          : <span className="text-content-tertiary">{tr(t, 'design.workspace.draft.none')}</span>;
+    : head === 'saving' ? <><Loader2 size={14} className="animate-spin" aria-hidden />{tr(t, 'design.workspace.draft.saving')}</>
+      : head === 'failed' && draftState.status === 'failed' ? <><CloudOff size={14} className="text-semantic-error" aria-hidden />{tr(t, 'design.workspace.draft.failed', { reason: draftState.reason })}</>
+        : head === 'saved' && draft.data ? <><Check size={14} className="text-semantic-success" aria-hidden />{tr(t, 'design.workspace.draft.saved', { time: time(draftState.status === 'saved' ? draftState.at : draft.data.updated_at) })}</>
+          : head === 'pending' ? <span className="text-content-secondary">{tr(t, 'design.workspace.draft.pending')}</span>
+            : head === 'tip' ? <span className="text-content-tertiary">{tr(t, 'design.workspace.draft.none_since', { number: tipNo })}</span>
+              : <span className="text-content-tertiary">{tr(t, 'design.workspace.draft.none')}</span>;
 
   const createButton = mode === 'edit' && editorOn ? (
     <Button size="sm" icon={<GitCommitVertical size={14} aria-hidden />} loading={make.isPending} data-testid="create-revision"
@@ -187,7 +193,7 @@ function Workspace({ projectId }: { projectId: string }) {
   const header = (engineAction: ReactNode) => (
     <header className="flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-border-light bg-surface-primary px-4 py-2">
       <div className="me-auto flex min-w-0 flex-col">
-        <h1 className="truncate text-base font-semibold text-content-primary">
+        <h1 className="truncate text-base font-semibold text-content-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-oe-blue" tabIndex={-1} data-testid="workspace-title">
           {tr(t, 'design.editor.title')}
           {project.data?.name ? <span className="font-normal text-content-secondary"> · {project.data.name}</span> : null}
         </h1>
@@ -367,7 +373,7 @@ function EngineMode({ projectId, header, banners, selection, onSelect, canEdit, 
           ) : ed.preview.status === 'off' ? (
             <p className="p-3 text-sm text-content-secondary">{tr(t, 'design.workspace.no_engine')}</p>
           ) : (
-            <ModelPreview projectId={projectId} state={ed.preview} tall onSelect={(el) => onSelect(el ? [el] : [])} />
+            <ModelPreview projectId={projectId} state={ed.preview} genOff={ed.genOff} tall onSelect={(el) => onSelect(el ? [el] : [])} />
           )}
         </div>
         <div className="order-3 min-w-0 lg:order-none lg:overflow-auto"><SelectionPanel projectId={projectId} selection={selection} /></div>
@@ -393,8 +399,8 @@ function EditorCanvas({ projectId, payload, locale, mode, rights, onLink, onStat
   const revs = useQuery({ queryKey: ['design-revisions', projectId], queryFn: () => fetchRevisions(projectId) });
   const imported = revs.data ? importOnlyTip(revs.data) : null;
   // what open() reads changes with the device and the rights; the bridge itself stays connected
-  const live = useRef({ mode, rights, locale });
-  live.current = { mode, rights, locale };
+  const live = useRef({ mode, rights, locale, label: '' });
+  live.current = { mode, rights, locale, label: tr(t, 'design.editor.title') };
 
   const open = useCallback(async () => {
     const [project, revisions, doc, aiSettings, mine] = await Promise.all([
@@ -420,7 +426,7 @@ function EditorCanvas({ projectId, payload, locale, mode, rights, onLink, onStat
           const frame = document.createElement('iframe');
           frame.setAttribute('sandbox', 'allow-scripts');
           frame.className = 'h-full w-full border-0';
-          frame.title = 'design-editor';
+          frame.title = live.current.label;
           port = framePort(frame);
           frame.src = payload.entryUrl;
           el.appendChild(frame);
@@ -479,8 +485,18 @@ function EditorCanvas({ projectId, payload, locale, mode, rights, onLink, onStat
       </p>
     )}
     <div className="grid min-h-0 flex-1 grid-cols-1 gap-3 overflow-auto p-3 lg:grid-cols-[minmax(0,1fr)_320px] lg:overflow-hidden">
-      <div className="relative min-h-[50dvh] min-w-0 overflow-hidden rounded-lg border border-border-light lg:min-h-0">
-        <div ref={host} className="h-full w-full" data-testid="editor-host" />
+      {/* the editor keeps Tab for its own tools: F6 leaves it for the side panel, Shift+F6 for the page header */}
+      <div className="relative min-h-[50dvh] min-w-0 overflow-hidden rounded-lg border border-border-light focus-within:outline focus-within:outline-2 focus-within:outline-oe-blue lg:min-h-0"
+        onKeyDownCapture={(e) => {
+          if (e.key !== 'F6') return;
+          e.preventDefault();
+          e.stopPropagation();
+          const to = document.querySelector<HTMLElement>(e.shiftKey ? '[data-testid="workspace-title"]' : '[data-testid="selection-panel"]');
+          to?.focus();
+        }}>
+        <div ref={host} className="h-full w-full" data-testid="editor-host" role="region" aria-label={tr(t, 'design.editor.title')}
+          aria-describedby="editor-keys" />
+        <p id="editor-keys" className="sr-only">{tr(t, 'design.workspace.keys_hint')}</p>
         {aiAsk && (
           <div className="absolute inset-y-0 start-0 w-[min(340px,100%)] overflow-auto border-e border-border-light bg-surface-primary p-3 shadow-lg" role="dialog"
             aria-label={tr(t, 'design.workspace.ai.title')} aria-modal="false">

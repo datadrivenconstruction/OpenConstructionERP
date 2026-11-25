@@ -383,6 +383,7 @@ function Acceptance({ projectId }: { projectId: string }) {
             projectId={projectId}
             revisionId={rev.revision_id}
             canManage={!!accessQ.data?.can_accept}
+            needsAccepted={!latestPublished}
           />
 
         </div>
@@ -532,7 +533,7 @@ function ImpactPanel(props: {
       )}
       {totals && totals.unpriced_positions > 0 && (
         <p className="px-4 pb-2 text-xs text-content-secondary" data-testid="unpriced">
-          {tr(t, 'design.acceptance.unpriced_n', { count: totals.unpriced_positions })}{' '}
+          {tr(t, 'design.acceptance.unpriced_left_out', { count: totals.unpriced_positions })}{' '}
           <Link className="text-oe-blue-text underline" to="/design/estimate" data-testid="unpriced-link">{tr(t, 'design.acceptance.see_estimate')}</Link>
         </p>
       )}
@@ -577,8 +578,8 @@ function RowGroup({ title, rows, locale, currency, focusRow, onFocus, testid }: 
                   {isZero(r.quantity_delta) ? '' : ' ('}
                   {isZero(r.quantity_delta) ? null : <Delta value={r.quantity_delta} locale={locale} plain />}
                   {isZero(r.quantity_delta) ? '' : ')'}
-                  {' - '}
-                  <Delta value={r.cost_delta} locale={locale} unit={currency} warn={r.flags.includes('no_match')} />
+                  {/* no rate: the badge says why; a money delta here would be a fabricated 0 */}
+                  {Number(r.unit_rate) > 0 && <>{' - '}<Delta value={r.cost_delta} locale={locale} unit={currency} warn={r.flags.includes('no_match')} /></>}
                 </span>
                 {r.override && r.override_quantity !== null && (
                   <span className="text-xs text-content-secondary">

@@ -113,6 +113,44 @@ export function draftLinesFor(elements: SelectedElement[], draft: DraftView | nu
   return draft.estimate.lines.filter((l) => l.element_keys.some((k) => keys.has(k)));
 }
 
+/**
+ * Why a line carries no money: a missing source stays empty and flagged, never a 0 (no rate, a rule not run on the
+ * accepted model, a quantity the draft cannot evaluate).
+ */
+export type LineState = 'priced' | 'no_rate' | 'not_accepted' | 'no_quantity';
+
+export function draftLineState(l: DraftLine): LineState {
+  if (l.flags.includes('no_position')) return 'not_accepted';
+  if (l.quantity === null) return 'no_quantity';
+  return Number(l.unit_rate) > 0 && l.total !== null ? 'priced' : 'no_rate';
+}
+
+/** A rule that matched nothing in the accepted model has no line for the element yet. */
+export function positionState(p: EstimatePosition): LineState {
+  if (p.flags.includes('no_match')) return 'not_accepted';
+  return Number(p.unit_rate) > 0 && !p.flags.includes('rate_missing') ? 'priced' : 'no_rate';
+}
+
+/** Total over priced lines only, with how many of all lines that is. */
+export function pricedTotal(lines: { state: LineState; total: string | null }[]): { total: number; priced: number; count: number } {
+  const priced = lines.filter((l) => l.state === 'priced');
+  return { total: priced.reduce((s, l) => s + (Number(l.total) || 0), 0), priced: priced.length, count: lines.length };
+}
+
+/**
+ * What the header says about the person's draft. Without a draft on the server it still tells unsent edits (the
+ * editor saves a few seconds after the last change) from a model that is simply the chain tip.
+ */
+export type DraftHeader = 'saving' | 'failed' | 'saved' | 'pending' | 'tip' | 'none';
+
+export function draftHeader(o: { status: 'idle' | 'saving' | 'saved' | 'failed'; hasDraft: boolean; dirty: boolean; tip: number | null }): DraftHeader {
+  if (o.status === 'saving') return 'saving';
+  if (o.status === 'failed') return 'failed';
+  if (o.hasDraft) return o.dirty ? 'pending' : 'saved';
+  if (o.dirty) return 'pending';
+  return o.tip !== null ? 'tip' : 'none';
+}
+
 /** Lines whose draft quantity differs from the estimate's, for the "what changes" list. */
 export function changedLines(draft: DraftView | null): DraftLine[] {
   if (!draft) return [];
