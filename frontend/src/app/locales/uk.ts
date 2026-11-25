@@ -25085,6 +25085,8 @@ const resource = {
     "costs.usage.used_count_with_age_many": "Використана в {{count}} позиціях кошторису, востаннє {{age}}",
     "costs.usage.used_count_with_age_one": "Використана в {{count}} позиції кошторису, востаннє {{age}}",
     "costs.usage.used_count_with_age_other": "Використана в {{count}} позиції кошторису, востаннє {{age}}",
+    "costs.usage.applied_spread_title": "Позицій кошторису з цією розцінкою: {{lines}}. Застосовані ціни: мін. {{min}}, середнє {{avg}}, макс. {{max}}",
+    "costs.usage.applied_spread": "мін. {{min}} / сер. {{avg}} / макс. {{max}}",
     "crm.no_contact": "- Немає контакту -",
     "crm.no_project": "- Немає проєкту -",
     "daily_diary.entries_sealed": "Журнал опечатано - записи доступні лише для читання.",

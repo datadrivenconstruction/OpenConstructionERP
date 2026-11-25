@@ -24753,6 +24753,8 @@ const resource = {
     "costs.usage.used_count_with_age": "In {{count}} Angebotsposition verwendet, zuletzt {{age}}",
     "costs.usage.used_count_with_age_one": "In {{count}} Angebotsposition verwendet, zuletzt {{age}}",
     "costs.usage.used_count_with_age_other": "In {{count}} Angebotspositionen verwendet, zuletzt {{age}}",
+    "costs.usage.applied_spread_title": "LV-Positionen mit diesem Preis: {{lines}}. Angesetzte Preise: min. {{min}}, Mittel {{avg}}, max. {{max}}",
+    "costs.usage.applied_spread": "min. {{min}} / Ø {{avg}} / max. {{max}}",
     "crm.no_contact": "- Kein Kontakt -",
     "crm.no_project": "- Kein Projekt -",
     "daily_diary.entries_sealed": "Bautagebuch ist versiegelt - Einträge sind schreibgeschützt.",

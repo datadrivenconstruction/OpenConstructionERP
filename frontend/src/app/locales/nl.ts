@@ -24706,6 +24706,8 @@ const resource = {
     "costs.usage.used_count_with_age": "Gebruikt in {{count}} ramingpositie, laatst {{age}}",
     "costs.usage.used_count_with_age_one": "Gebruikt in {{count}} ramingpositie, laatst {{age}}",
     "costs.usage.used_count_with_age_other": "Gebruikt in {{count}} ramingposities, laatst {{age}}",
+    "costs.usage.applied_spread_title": "Begrotingsregels met deze prijs: {{lines}}. Toegepaste prijzen: min {{min}}, gemiddeld {{avg}}, max {{max}}",
+    "costs.usage.applied_spread": "min {{min}} / gem. {{avg}} / max {{max}}",
     "costs_catalogs.catalog_label": "Catalogus",
     "costs_catalogs.confirm_delete_item": "Dit kostenitem verwijderen? Het wordt verwijderd uit de zoekfunctie en uit zijn catalogus.",
     "costs_catalogs.create": "Catalogus aanmaken",

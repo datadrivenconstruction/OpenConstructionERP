@@ -24640,6 +24640,8 @@ const resource = {
     "costs.usage.used_count_with_age": "{{count}} ta smeta pozitsiyasida ishlatilgan, oxirgisi {{age}}",
     "costs.usage.used_count_with_age_one": "{{count}} ta smeta pozitsiyasida ishlatilgan, oxirgisi {{age}}",
     "costs.usage.used_count_with_age_other": "{{count}} ta smeta pozitsiyasida ishlatilgan, oxirgisi {{age}}",
+    "costs.usage.applied_spread_title": "Ushbu narxni ishlatgan smeta qatorlari: {{lines}}. Qoʻllangan narxlar: eng kam {{min}}, oʻrtacha {{avg}}, eng koʻp {{max}}",
+    "costs.usage.applied_spread": "eng kam {{min}} / oʻrtacha {{avg}} / eng koʻp {{max}}",
     "crm.no_contact": "- Kontakt yoʻq -",
     "crm.no_project": "- Loyiha yoʻq -",
     "daily_diary.entries_sealed": "Kundalik muhrlangan - yozuvlar faqat oʻqish uchun.",

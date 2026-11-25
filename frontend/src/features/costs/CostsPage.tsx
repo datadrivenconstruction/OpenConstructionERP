@@ -55,12 +55,13 @@ import { usePreferencesStore } from '@/stores/usePreferencesStore';
 import type { CostItemMetadata, CertaintyBadge as CertaintyBadgeData, CostCatalog } from './api';
 import { buildBoqPositionDraft, massEffectiveUnitRate, type FullCostItem } from './addToBoqHelpers';
 import { componentDisplayNumbers } from './costComponentDisplay';
-import { fetchUsageCounts, fetchCostCatalogs } from './api';
+import { fetchUsageCounts, fetchUsageStats, fetchCostCatalogs } from './api';
+import type { AppliedRateStats } from './api';
 import { CatalogsSection } from './CatalogsSection';
 import { CostDatabaseInvite } from './CostDatabaseInvite';
 import { CustomCategoryList } from './CustomCategoryList';
 import { costsGuide } from './costsGuide';
-import { UsageBadge } from './UsageBadge';
+import { AppliedRateSpread, UsageBadge } from './UsageBadge';
 import { EscalationCalculator } from './EscalationCalculator';
 import { RegionalAdjustPanel } from './RegionalAdjustPanel';
 import { useDemoScope } from '@/shared/lib/useDemoScope';
@@ -987,6 +988,14 @@ export function CostsPage() {
     staleTime: 30_000,
     retry: 1,
   });
+  // Min / average / max of the rates BOQ lines applied each visible item at.
+  const { data: usageStats } = useQuery<Record<string, AppliedRateStats>>({
+    queryKey: ['costs', 'usage', 'stats', certaintyKey],
+    queryFn: () => fetchUsageStats(visibleIds),
+    enabled: visibleIds.length > 0,
+    staleTime: 30_000,
+    retry: 1,
+  });
 
   // Active filter count & clear all
   const activeFilterCount =
@@ -1730,6 +1739,7 @@ export function CostsPage() {
                         isFavourite={favourites.has(item.id)}
                         band={certaintyById.get(item.id) ?? null}
                         usageCount={usageCounts?.[item.id] ?? 0}
+                        rateStats={usageStats?.[item.id] ?? null}
                         regionCurrency={regionCurrency}
                         onSelect={() => toggleSelect(item.id)}
                         onToggle={() => setExpandedId(isExpanded ? null : item.id)}
@@ -3489,6 +3499,7 @@ function CostItemRow({
   isFavourite,
   band,
   usageCount,
+  rateStats,
   regionCurrency,
   onSelect,
   onToggle,
@@ -3512,6 +3523,8 @@ function CostItemRow({
   /** How many estimate (BOQ) positions this item is used in (page-level
    *  batch fetch). 0 = not yet used. */
   usageCount: number;
+  /** Spread of the rates BOQ lines applied this item at (page-level batch). */
+  rateStats: AppliedRateStats | null;
   /** Active region's currency — fallback when the row's own is empty. */
   regionCurrency: string;
   onSelect: () => void;
@@ -3682,6 +3695,10 @@ function CostItemRow({
               </Badge>
             )}
           </div>
+          <AppliedRateSpread
+            stats={rateStats}
+            format={(amount) => fmtMoney(Number(amount), rateStats?.currency || rowCurrency)}
+          />
         </td>
         <td className="px-4 py-3 text-center">
           {cls.collection || cls.code || cls.din276 ? (

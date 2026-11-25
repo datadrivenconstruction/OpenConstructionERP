@@ -24526,6 +24526,8 @@ const resource = {
     "costs.usage.used_count_other": "ใช้ในรายการประมาณราคา {{count}} รายการ",
     "costs.usage.used_count_with_age": "ใช้ในรายการประมาณราคา {{count}} รายการ, ล่าสุด {{age}}",
     "costs.usage.used_count_with_age_other": "ใช้ในรายการประมาณราคา {{count}} รายการ, ล่าสุด {{age}}",
+    "costs.usage.applied_spread_title": "รายการ BOQ ที่ใช้ราคานี้: {{lines}} ราคาที่ใช้: ต่ำสุด {{min}} เฉลี่ย {{avg}} สูงสุด {{max}}",
+    "costs.usage.applied_spread": "ต่ำสุด {{min}} / เฉลี่ย {{avg}} / สูงสุด {{max}}",
     "costs_catalogs.catalog_label": "แคตตาล็อก",
     "costs_catalogs.confirm_delete_item": "ลบรายการต้นทุนนี้หรือไม่? รายการจะถูกนำออกจากการค้นหาและจากแคตตาล็อก",
     "costs_catalogs.create": "สร้างแคตตาล็อก",

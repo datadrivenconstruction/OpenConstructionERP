@@ -24292,6 +24292,8 @@ const resource = {
     "costs.usage.used_count_other": "Digunakan dalam {{count}} posisi estimasi",
     "costs.usage.used_count_with_age": "Digunakan dalam {{count}} posisi estimasi, terakhir {{age}}",
     "costs.usage.used_count_with_age_other": "Digunakan dalam {{count}} posisi estimasi, terakhir {{age}}",
+    "costs.usage.applied_spread_title": "Baris RAB yang memakai harga ini: {{lines}}. Harga yang diterapkan: min {{min}}, rata-rata {{avg}}, maks {{max}}",
+    "costs.usage.applied_spread": "min {{min}} / rata-rata {{avg}} / maks {{max}}",
     "costs_catalogs.catalog_label": "Katalog",
     "costs_catalogs.confirm_delete_item": "Hapus item biaya ini? Item dihapus dari pencarian dan dari katalognya.",
     "costs_catalogs.create": "Buat katalog",

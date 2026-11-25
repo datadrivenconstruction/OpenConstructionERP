@@ -24907,6 +24907,8 @@ const resource = {
     "costs.usage.used_count_with_age_many": "Utilizada em {{count}} posições de orçamento, a última {{age}}",
     "costs.usage.used_count_with_age_one": "Utilizada em {{count}} posição de orçamento, a última {{age}}",
     "costs.usage.used_count_with_age_other": "Utilizada em {{count}} posições de orçamento, a última {{age}}",
+    "costs.usage.applied_spread_title": "Linhas de orçamento com este preço: {{lines}}. Preços aplicados: mín. {{min}}, média {{avg}}, máx. {{max}}",
+    "costs.usage.applied_spread": "mín. {{min}} / méd. {{avg}} / máx. {{max}}",
     "costs_catalogs.catalog_label": "Catálogo",
     "costs_catalogs.confirm_delete_item": "Eliminar este item de custo? Ele é removido da pesquisa e do seu catálogo.",
     "costs_catalogs.create": "Criar catálogo",

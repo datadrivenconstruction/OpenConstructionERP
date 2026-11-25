@@ -9,7 +9,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { render } from '@testing-library/react';
-import { UsageBadge } from './UsageBadge';
+import { AppliedRateSpread, UsageBadge } from './UsageBadge';
 
 function band(over = {}) {
   return {
@@ -82,5 +82,28 @@ describe('UsageBadge', () => {
     // phrase, e.g. "Used in 2 estimate positions, last 0d ago".
     expect(el?.getAttribute('title')).toMatch(/2 estimate position/);
     expect(el?.getAttribute('title')).toMatch(/last/);
+  });
+});
+
+describe('AppliedRateSpread', () => {
+  const stats = { boq_lines: 5, rate_count: 4, min: '10.0000', avg: '11.8750', max: '14.0000', currency: 'EUR' };
+
+  it('shows min, average and max of the applied rates and the citing lines', () => {
+    const { container } = render(<AppliedRateSpread stats={stats} format={(a) => `${a} EUR`} />);
+    const el = container.querySelector('[data-applied-spread]');
+    expect(el?.getAttribute('data-applied-spread')).toBe('5');
+    expect(el?.textContent).toContain('10.0000 EUR');
+    expect(el?.textContent).toContain('11.8750 EUR');
+    expect(el?.textContent).toContain('14.0000 EUR');
+    expect(el?.getAttribute('title')).toMatch(/5/);
+  });
+
+  it('renders nothing for a rate never applied in its own currency', () => {
+    const { container } = render(
+      <AppliedRateSpread stats={{ ...stats, rate_count: 0, min: null, avg: null, max: null }} format={(a) => a} />,
+    );
+    expect(container.querySelector('[data-applied-spread]')).toBeNull();
+    const empty = render(<AppliedRateSpread stats={null} format={(a) => a} />);
+    expect(empty.container.querySelector('[data-applied-spread]')).toBeNull();
   });
 });

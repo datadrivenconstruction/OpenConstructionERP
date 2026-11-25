@@ -24452,6 +24452,8 @@ const resource = {
     "costs.usage.used_count_with_age": "Käytetty {{count}} arviopositiossa, viimeksi {{age}}",
     "costs.usage.used_count_with_age_one": "Käytetty {{count}} arviopositiossa, viimeksi {{age}}",
     "costs.usage.used_count_with_age_other": "Käytetty {{count}} arviopositiossa, viimeksi {{age}}",
+    "costs.usage.applied_spread_title": "Tätä hintaa käyttävät määräluettelon rivit: {{lines}}. Käytetyt hinnat: min. {{min}}, keskiarvo {{avg}}, maks. {{max}}",
+    "costs.usage.applied_spread": "min. {{min}} / ka. {{avg}} / maks. {{max}}",
     "costs_catalogs.catalog_label": "Luettelo",
     "costs_catalogs.confirm_delete_item": "Poistetaanko tämä kustannusnimike? Se poistetaan hausta ja luettelostaan.",
     "costs_catalogs.create": "Luo luettelo",

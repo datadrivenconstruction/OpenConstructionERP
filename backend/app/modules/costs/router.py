@@ -67,6 +67,7 @@ from app.modules.costs.intelligence import (
     CostCertaintyService,
     CostUsageRecorder,
     RegionalIndexService,
+    applied_rate_stats,
 )
 from app.modules.costs.matcher import (
     MatchResult,
@@ -8140,6 +8141,26 @@ async def get_cost_item_usage_counts(
     # Only non-zero rows survive the GROUP BY; emit them as string keys so
     # the JSON object matches the frontend's ``Record<string, number>``.
     return {str(row[0]): int(row[1] or 0) for row in rows.all()}
+
+
+@router.post("/usage-stats/")
+async def get_cost_item_usage_stats(
+    body: UsageCountsRequest,
+    session: SessionDep,
+    user: OptionalUserPayload,
+) -> dict[str, dict[str, object]]:
+    """Return ``{cost_item_id: {boq_lines, rate_count, min, avg, max, currency}}``.
+
+    How many BOQ lines applied each visible rate and the spread of the unit
+    rates they applied it at, in the item's currency, as exact decimal
+    strings. One grouped query per page; ids never applied are omitted.
+    Readable items only, like ``/usage-counts/``.
+    """
+    _ = user
+    ordered_ids = list(dict.fromkeys(body.ids))
+    readable = await cost_scope.visible_ids(session, ordered_ids)
+    ordered_ids = [item_id for item_id in ordered_ids if str(item_id) in readable]
+    return await applied_rate_stats(session, ordered_ids)
 
 
 @router.get("/{item_id}/certainty/", response_model=CertaintyBadge)

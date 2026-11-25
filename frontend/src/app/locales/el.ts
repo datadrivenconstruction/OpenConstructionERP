@@ -23804,6 +23804,8 @@ const resource = {
     "costs.usage.used_count_with_age": "Χρησιμοποιήθηκε σε {{count}} θέση εκτίμησης, τελευταία φορά {{age}}",
     "costs.usage.used_count_with_age_one": "Χρησιμοποιήθηκε σε {{count}} θέση εκτίμησης, τελευταία φορά {{age}}",
     "costs.usage.used_count_with_age_other": "Χρησιμοποιήθηκε σε {{count}} θέσεις εκτίμησης, τελευταία φορά {{age}}",
+    "costs.usage.applied_spread_title": "Θέσεις προϋπολογισμού με αυτή την τιμή: {{lines}}. Εφαρμοσμένες τιμές: ελάχ. {{min}}, μέση {{avg}}, μέγ. {{max}}",
+    "costs.usage.applied_spread": "ελάχ. {{min}} / μέση {{avg}} / μέγ. {{max}}",
     "crm.no_contact": "- Καμία επαφή -",
     "crm.no_project": "- Κανένα έργο -",
     "schedule_advanced.target_clear": "Καθαρισμός στόχου",

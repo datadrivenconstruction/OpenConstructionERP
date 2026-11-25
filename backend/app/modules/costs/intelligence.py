@@ -303,3 +303,60 @@ class CostCertaintyService:
         # ``price_freshness`` so they never collide with the usage fields above.
         badge.update(price_freshness(item.price_as_of, item.rate))
         return badge
+
+
+# ── Applied-rate spread ───────────────────────────────────────────────────────
+
+
+async def applied_rate_stats(session: AsyncSession, ids: list[uuid.UUID]) -> dict[str, dict[str, object]]:
+    """Min / average / max of the unit rates each item was applied at in BOQ lines.
+
+    Reads the usage ledger (``context = "boq"``) with one grouped query on its
+    ``(cost_item_id, used_at)`` index. The spread is kept in the item's own
+    currency: rows recorded in another currency are counted in ``boq_lines``
+    but not in the spread, rows with no captured currency are taken as the
+    item's. Amounts are exact decimals, returned as strings. Ids with no BOQ
+    use are omitted.
+    """
+    if not ids:
+        return {}
+    currencies = dict((await session.execute(select(CostItem.id, CostItem.currency).where(CostItem.id.in_(ids)))).all())
+    rows = await session.execute(
+        select(
+            CostItemUsage.cost_item_id,
+            CostItemUsage.currency_at_use,
+            func.count(CostItemUsage.id),
+            func.min(CostItemUsage.unit_rate_at_use),
+            func.max(CostItemUsage.unit_rate_at_use),
+            func.sum(CostItemUsage.unit_rate_at_use),
+        )
+        .where(CostItemUsage.cost_item_id.in_(ids), CostItemUsage.context == "boq")
+        .group_by(CostItemUsage.cost_item_id, CostItemUsage.currency_at_use)
+    )
+    acc: dict[uuid.UUID, dict[str, object]] = {}
+    for item_id, currency, count, low, high, total in rows.all():
+        own = (currencies.get(item_id) or "").strip().upper()
+        entry = acc.setdefault(
+            item_id, {"boq_lines": 0, "n": 0, "min": None, "max": None, "sum": Decimal(0), "currency": own}
+        )
+        entry["boq_lines"] = int(entry["boq_lines"]) + int(count or 0)
+        if currency is not None and own and currency.strip().upper() != own:
+            continue
+        low_d, high_d = Decimal(str(low)), Decimal(str(high))
+        entry["n"] = int(entry["n"]) + int(count or 0)
+        entry["min"] = low_d if entry["min"] is None else min(entry["min"], low_d)  # type: ignore[type-var]
+        entry["max"] = high_d if entry["max"] is None else max(entry["max"], high_d)  # type: ignore[type-var]
+        entry["sum"] = entry["sum"] + Decimal(str(total or 0))  # type: ignore[operator]
+    out: dict[str, dict[str, object]] = {}
+    quantum = Decimal("0.0001")
+    for item_id, e in acc.items():
+        n = int(e["n"])
+        out[str(item_id)] = {
+            "boq_lines": e["boq_lines"],
+            "rate_count": n,
+            "min": str(e["min"]) if e["min"] is not None else None,
+            "avg": str((e["sum"] / n).quantize(quantum)) if n else None,  # type: ignore[operator]
+            "max": str(e["max"]) if e["max"] is not None else None,
+            "currency": e["currency"] or None,
+        }
+    return out

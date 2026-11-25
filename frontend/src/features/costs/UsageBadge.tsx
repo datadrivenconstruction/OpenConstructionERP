@@ -24,7 +24,7 @@ import { useTranslation } from 'react-i18next';
 import { Check } from 'lucide-react';
 import clsx from 'clsx';
 
-import type { CertaintyBadge as CertaintyBadgeData } from './api';
+import type { AppliedRateStats, CertaintyBadge as CertaintyBadgeData } from './api';
 
 /** Sentinel age the backend uses for "never logged". Mirrors
  *  ``intelligence.py::NEVER_USED_AGE_DAYS`` (rounded for the day-diff). */
@@ -134,6 +134,47 @@ export function UsageBadge({ count, band, className }: UsageBadgeProps) {
     >
       <Check size={10} strokeWidth={3} className="shrink-0" />
       {count}
+    </span>
+  );
+}
+
+/** The spread of unit rates BOQ lines applied this rate at, under its price.
+ *  Shown once a rate has been applied with a rate in its own currency. */
+export function AppliedRateSpread({
+  stats,
+  format,
+}: {
+  stats: AppliedRateStats | null | undefined;
+  /** Formats one decimal-string amount in the row's currency. */
+  format: (amount: string) => string;
+}) {
+  const { t } = useTranslation();
+  if (!stats || !stats.rate_count || stats.min == null || stats.max == null || stats.avg == null) {
+    return null;
+  }
+  const min = format(stats.min);
+  const avg = format(stats.avg);
+  const max = format(stats.max);
+  const title = t('costs.usage.applied_spread_title', {
+    lines: stats.boq_lines,
+    min,
+    avg,
+    max,
+    defaultValue: 'BOQ lines citing this rate: {{lines}}. Applied rates: min {{min}}, average {{avg}}, max {{max}}',
+  });
+  return (
+    <span
+      data-applied-spread={stats.boq_lines}
+      title={title}
+      aria-label={title}
+      className="block text-2xs font-normal text-content-tertiary tabular-nums"
+    >
+      {t('costs.usage.applied_spread', {
+        min,
+        avg,
+        max,
+        defaultValue: 'min {{min}} / avg {{avg}} / max {{max}}',
+      })}
     </span>
   );
 }

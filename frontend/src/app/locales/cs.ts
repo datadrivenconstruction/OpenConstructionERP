@@ -24726,6 +24726,8 @@ const resource = {
     "costs.usage.used_count_with_age_many": "Použito v {{count}} pozice odhadu, naposledy {{age}}",
     "costs.usage.used_count_with_age_one": "Použito v {{count}} pozici odhadu, naposledy {{age}}",
     "costs.usage.used_count_with_age_other": "Použito v {{count}} pozicích odhadu, naposledy {{age}}",
+    "costs.usage.applied_spread_title": "Položky rozpočtu s touto cenou: {{lines}}. Použité ceny: min. {{min}}, průměr {{avg}}, max. {{max}}",
+    "costs.usage.applied_spread": "min. {{min}} / prům. {{avg}} / max. {{max}}",
     "crm.no_contact": "- Žádný kontakt -",
     "crm.no_project": "- Žádný projekt -",
     "daily_diary.entries_sealed": "Deník je uzamčen - záznamy jsou pouze ke čtení.",

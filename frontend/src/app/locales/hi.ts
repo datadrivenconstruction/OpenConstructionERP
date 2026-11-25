@@ -24735,6 +24735,8 @@ const resource = {
   "costs.usage.used_count_with_age": "{{count}} अनुमान पद में उपयोग किया गया, अंतिम {{age}}",
   "costs.usage.used_count_with_age_one": "{{count}} अनुमान पद में उपयोग किया गया, अंतिम {{age}}",
   "costs.usage.used_count_with_age_other": "{{count}} अनुमान पदों में उपयोग किया गया, अंतिम {{age}}",
+  "costs.usage.applied_spread_title": "इस दर वाली BOQ पंक्तियाँ: {{lines}}। लागू दरें: न्यूनतम {{min}}, औसत {{avg}}, अधिकतम {{max}}",
+  "costs.usage.applied_spread": "न्यूनतम {{min}} / औसत {{avg}} / अधिकतम {{max}}",
   "crm.no_contact": "- कोई संपर्क नहीं -",
   "crm.no_project": "- कोई परियोजना नहीं -",
   "daily_diary.entries_sealed": "डायरी सील है - प्रविष्टियाँ केवल-पढ़ने योग्य हैं।",

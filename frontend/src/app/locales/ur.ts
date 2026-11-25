@@ -23817,6 +23817,8 @@ const resource = {
     "costs.usage.used_count_with_age": "{{count}} تخمینہ پوزیشن میں استعمال ہوا، آخری بار {{age}}",
     "costs.usage.used_count_with_age_one": "{{count}} تخمینہ پوزیشن میں استعمال ہوا، آخری بار {{age}}",
     "costs.usage.used_count_with_age_other": "{{count}} تخمینہ پوزیشنوں میں استعمال ہوا، آخری بار {{age}}",
+    "costs.usage.applied_spread_title": "اس ریٹ والی بل آئٹمز: {{lines}}۔ لاگو ریٹ: کم از کم {{min}}، اوسط {{avg}}، زیادہ سے زیادہ {{max}}",
+    "costs.usage.applied_spread": "کم {{min}} / اوسط {{avg}} / زیادہ {{max}}",
     "crm.no_contact": "- کوئی رابطہ نہیں -",
     "crm.no_project": "- کوئی پروجیکٹ نہیں -",
     "schedule_advanced.target_clear": "ہدف صاف کریں",

@@ -24820,6 +24820,8 @@ const resource = {
     "costs.usage.used_count_with_age": "Използвана в {{count}} позиция от калкулация, последно {{age}}",
     "costs.usage.used_count_with_age_one": "Използвана в {{count}} позиция от калкулация, последно {{age}}",
     "costs.usage.used_count_with_age_other": "Използвана в {{count}} позиции от калкулация, последно {{age}}",
+    "costs.usage.applied_spread_title": "Позиции от сметката с тази цена: {{lines}}. Приложени цени: мин. {{min}}, средно {{avg}}, макс. {{max}}",
+    "costs.usage.applied_spread": "мин. {{min}} / ср. {{avg}} / макс. {{max}}",
     "crm.no_contact": "- Без контакт -",
     "crm.no_project": "- Без проект -",
     "daily_diary.entries_sealed": "Дневникът е запечатан - записите са само за четене.",

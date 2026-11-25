@@ -23953,6 +23953,8 @@ const resource = {
     "costs.usage.used_count_with_age_one": "נעשה בו שימוש ב-{{count}} סעיף אומדן, לאחרונה {{age}}",
     "costs.usage.used_count_with_age_other": "נעשה בו שימוש ב-{{count}} סעיפי אומדן, לאחרונה {{age}}",
     "costs.usage.used_count_with_age_two": "נעשה בו שימוש ב-{{count}} סעיפי אומדן, לאחרונה {{age}}",
+    "costs.usage.applied_spread_title": "סעיפי כתב כמויות שמשתמשים במחיר זה: {{lines}}. מחירים שהוחלו: מינימום {{min}}, ממוצע {{avg}}, מקסימום {{max}}",
+    "costs.usage.applied_spread": "מינימום {{min}} / ממוצע {{avg}} / מקסימום {{max}}",
     "crm.no_contact": "- אין איש קשר -",
     "crm.no_project": "- אין פרויקט -",
     "schedule_advanced.target_clear": "ניקוי יעד",

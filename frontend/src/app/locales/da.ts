@@ -24734,6 +24734,8 @@ const resource = {
     "costs.usage.used_count_with_age": "Brugt i {{count}} estimatposition, sidst {{age}}",
     "costs.usage.used_count_with_age_one": "Brugt i {{count}} estimatposition, sidst {{age}}",
     "costs.usage.used_count_with_age_other": "Brugt i {{count}} estimatpositioner, sidst {{age}}",
+    "costs.usage.applied_spread_title": "Tilbudslisteposter med denne pris: {{lines}}. Anvendte priser: min. {{min}}, gennemsnit {{avg}}, maks. {{max}}",
+    "costs.usage.applied_spread": "min. {{min}} / gns. {{avg}} / maks. {{max}}",
     "costs_catalogs.catalog_label": "Katalog",
     "costs_catalogs.confirm_delete_item": "Slet denne omkostningspost? Den fjernes fra søgning og fra sit katalog.",
     "costs_catalogs.create": "Opret katalog",

@@ -23347,6 +23347,8 @@ const resource = {
     "costs.usage.used_count_with_age": "Usada en {{count}} posición de presupuesto, la última {{age}}",
     "costs.usage.used_count": "Usada en {{count}} posición de presupuesto",
     "costs.usage.unused": "Aún no se ha usado en ningún presupuesto",
+    "costs.usage.applied_spread_title": "Ítems que citan este precio: {{lines}}. Precios aplicados: mín. {{min}}, promedio {{avg}}, máx. {{max}}",
+    "costs.usage.applied_spread": "mín. {{min}} / prom. {{avg}} / máx. {{max}}",
     "costs.certainty.never_used": "nunca usada",
     "costs.certainty.age_years": "hace {{count}}a",
     "costs.certainty.age_months": "hace {{count}}mes",
