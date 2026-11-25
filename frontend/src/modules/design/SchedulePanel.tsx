@@ -14,8 +14,10 @@ import { changedRows, day, signedDays, type ScheduleRow } from './data/schedule'
 import { tr } from './BriefFields';
 import { fmtList } from '@/shared/lib/formatters';
 
-export function SchedulePanel({ projectId, revisionId, canManage, locale }: {
+export function SchedulePanel({ projectId, revisionId, canManage, locale, needsEstimate }: {
   projectId: string; revisionId: string; canManage: boolean; locale: string;
+  /** True when the project has no estimate: the schedule is planned from its positions, so setup waits for it. */
+  needsEstimate?: boolean;
 }) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -38,9 +40,15 @@ export function SchedulePanel({ projectId, revisionId, canManage, locale }: {
           <p data-testid="no-schedule">{tr(t, 'design.schedule.none')}</p>
           {canManage ? (
             <div>
-              <Button variant="secondary" onClick={() => setup.mutate()} disabled={setup.isPending} data-testid="schedule-setup">
+              <Button variant="secondary" onClick={() => setup.mutate()} disabled={setup.isPending || needsEstimate} data-testid="schedule-setup">
                 {tr(t, 'design.schedule.setup')}
               </Button>
+              {needsEstimate && (
+                <p className="mt-2 text-xs" data-testid="schedule-needs-estimate">
+                  {tr(t, 'design.schedule.needs_estimate')}{' '}
+                  <Link className="text-oe-blue-text underline" to="/design/estimate">{tr(t, 'design.acceptance.see_estimate')}</Link>
+                </p>
+              )}
             </div>
           ) : (
             <p className="text-xs">{tr(t, 'design.schedule.setup_by_manager')}</p>

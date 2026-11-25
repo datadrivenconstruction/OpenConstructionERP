@@ -72,8 +72,8 @@ vi.mock('@/shared/ui', async () => {
       React.createElement('p', null, hint as string), action as never, children as never);
   return {
     Badge: ({ children }: { children: React.ReactNode }) => <span>{children}</span>,
-    Button: ({ children, onClick, disabled }: { children: React.ReactNode; onClick?: () => void; disabled?: boolean }) =>
-      <button type="button" onClick={onClick} disabled={disabled}>{children}</button>,
+    Button: ({ children, onClick, disabled, 'data-testid': testId }: { children: React.ReactNode; onClick?: () => void; disabled?: boolean; 'data-testid'?: string }) =>
+      <button type="button" onClick={onClick} disabled={disabled} data-testid={testId}>{children}</button>,
     Card: ({ children }: { children: React.ReactNode }) => <section>{children}</section>,
     CardHeader: ({ title, subtitle }: { title: string; subtitle?: string }) => <header>{title}{subtitle}</header>,
     EmptyState: div('EmptyState'), ErrorState: div('ErrorState'), PageHeader: ({ srTitle, subtitle }: { srTitle?: string; subtitle?: string }) => <header><h1>{srTitle}</h1><p>{subtitle}</p></header>,
@@ -206,6 +206,20 @@ describe('RevisionsPage states', () => {
     expect(await screen.findByText('Awaiting decision')).toBeTruthy();
     await user.click(screen.getByRole('button', { name: /Revision 1/ }));
     expect((await screen.findByTestId('viewer')).textContent).toContain('m1');
+  });
+
+  it('offers to open the latest revision that has a model instead of an empty panel', async () => {
+    state.revisions = [rev(2, { bim_model_id: null }), rev(1)];
+    const user = await mount();
+    await user.click(await screen.findByTestId('open-latest'));
+    expect((await screen.findByTestId('viewer')).textContent).toContain('m1');
+  });
+
+  it('says so when no revision has a model, with no open button', async () => {
+    state.revisions = [rev(1, { bim_model_id: null })];
+    await mount();
+    expect(await screen.findByText(/None of the revisions has a model yet/)).toBeTruthy();
+    expect(screen.queryByTestId('open-latest')).toBeNull();
   });
 
   it('a revision without a model is listed but cannot be opened or compared', async () => {

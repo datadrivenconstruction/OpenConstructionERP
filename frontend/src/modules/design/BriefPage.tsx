@@ -279,7 +279,7 @@ function BriefEditor({ projectId }: { projectId: string }) {
         onCite={(p, source) => { setDoc((d) => (d ? citeDocument(d, p, source) : d)); setDirty(true); }}
       />
 
-      <div className="grid items-stretch gap-5 xl:grid-cols-2">
+      <div className="grid items-stretch gap-5 2xl:grid-cols-2">
         {SECTIONS.filter((s) => s.id !== 'programme').map((section) => (
           <Card key={section.id} data-section={section.id}>
             <CardHeader title={tr(t, `design.section.${section.id}`)} />

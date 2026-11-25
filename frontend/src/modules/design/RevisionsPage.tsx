@@ -76,6 +76,7 @@ function Revisions({ projectId }: { projectId: string }) {
     ? (side === 'head' ? head : base)
     : (revisions.find((r) => r.revision_id === openId) ?? null);
   const modelId = shown?.bim_model_id ?? null;
+  const latestWithModel = revisions.filter(hasModel).sort((a, b) => b.number - a.number)[0] ?? null;
 
   const viewer = useModelViewerData(projectId, modelId);
   const { cmp, failed } = useRevisionCompare(comparing ? base : null, comparing ? head : null);
@@ -105,7 +106,7 @@ function Revisions({ projectId }: { projectId: string }) {
         />
       ) : (
         <div className="flex min-h-0 flex-1 flex-col gap-4 lg:flex-row">
-          <Card padding="none" className="w-full shrink-0 overflow-auto lg:w-[360px]">
+          <Card padding="none" className="w-full shrink-0 overflow-auto lg:w-[360px] lg:self-start">
             <CardHeader className="px-4 pt-4 pb-3" title={tr(t, 'design.revisions.list')} subtitle={tr(t, 'design.revisions.compare_hint')} />
             <ul className="divide-y divide-border-light" data-testid="revision-list">
               {revisions.map((r) => {
@@ -202,7 +203,12 @@ function Revisions({ projectId }: { projectId: string }) {
                 <EmptyState
                   icon={<Boxes size={28} aria-hidden />}
                   title={tr(t, 'design.revisions.pick')}
-                  description={tr(t, 'design.revisions.pick_hint')}
+                  description={latestWithModel ? tr(t, 'design.revisions.pick_hint') : tr(t, 'design.revisions.none_with_model')}
+                  action={latestWithModel ? (
+                    <Button variant="primary" size="sm" data-testid="open-latest" onClick={() => open(latestWithModel)}>
+                      {tr(t, 'design.revisions.open_latest', { number: latestWithModel.number })}
+                    </Button>
+                  ) : undefined}
                 />
               )}
             </div>

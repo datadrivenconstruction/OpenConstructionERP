@@ -377,6 +377,7 @@ function Acceptance({ projectId }: { projectId: string }) {
             revisionId={rev.revision_id}
             canManage={!!accessQ.data?.can_accept}
             locale={locale}
+            needsEstimate={impact ? !impact.estimate : undefined}
           />
           <ProcurementPanel
             projectId={projectId}
@@ -509,6 +510,8 @@ function ImpactPanel(props: {
   const same = impact.rows.length - attention.length - rest.length;
   const totals = impact.totals;
   const collapsed = collapsedByNoMatch(impact);
+  // Nothing priced on either side: zero euros would read as a result, the unpriced note below says why.
+  const unpricedAll = !!totals && totals.unpriced_positions > 0 && Number(totals.current) === 0 && Number(totals.after) === 0;
   return (
     <Card padding="none">
       <CardHeader className="px-4 pt-4 pb-3" title={tr(t, 'design.acceptance.estimate')} />
@@ -517,9 +520,9 @@ function ImpactPanel(props: {
       </p>
       {totals && (
         <dl className="grid grid-cols-3 gap-2 px-4 pb-3 text-sm" data-testid="totals">
-          <div><dt className="text-content-tertiary">{tr(t, 'design.acceptance.current')}</dt><dd>{moneyExact(totals.current, currency)}</dd></div>
-          <div><dt className="text-content-tertiary">{tr(t, 'design.acceptance.after')}</dt><dd>{moneyExact(totals.after, currency)}</dd></div>
-          <div><dt className="text-content-tertiary">{tr(t, 'design.acceptance.delta')}</dt><dd className="font-medium"><Delta value={totals.delta} locale={locale} unit={currency} warn={collapsed} /></dd></div>
+          <div><dt className="text-content-tertiary">{tr(t, 'design.acceptance.current')}</dt><dd>{unpricedAll ? '–' : moneyExact(totals.current, currency)}</dd></div>
+          <div><dt className="text-content-tertiary">{tr(t, 'design.acceptance.after')}</dt><dd>{unpricedAll ? '–' : moneyExact(totals.after, currency)}</dd></div>
+          <div><dt className="text-content-tertiary">{tr(t, 'design.acceptance.delta')}</dt><dd className="font-medium">{unpricedAll ? '–' : <Delta value={totals.delta} locale={locale} unit={currency} warn={collapsed} />}</dd></div>
         </dl>
       )}
       {collapsed && (
