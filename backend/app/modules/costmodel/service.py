@@ -1557,6 +1557,17 @@ class CostModelService:
                 actual_amount="0",
                 forecast_amount=str(total),
                 currency=line_currency,
+                metadata_={
+                    "source": {
+                        "module": "oe_boq",
+                        "boq_id": str(boq_id),
+                        "boq_position_id": str(pos.id),
+                        "ordinal": pos.ordinal,
+                        "quantity": str(pos.quantity),
+                        "unit_rate": str(pos.unit_rate),
+                        "origin": pos_meta.get("source") if isinstance(pos_meta, dict) else None,
+                    }
+                },
             )
             lines.append(line)
 
@@ -1628,6 +1639,8 @@ class CostModelService:
         # else over the primary schedule; only a line with neither is unscheduled.
         # Without this every such line piled into one bucket and the S-curve was a dot.
         activity_months: dict[str, tuple[str, str]] = {}
+        position_months: dict[str, tuple[str, str]] = {}
+        period_sources: dict[str, list[dict[str, str]]] = {}
         project_months: tuple[str, str] | None = None
         if any(not (bl.period_start and bl.period_end) for bl in budget_lines):
             from app.modules.schedule.repository import ActivityRepository, ScheduleRepository
@@ -1639,7 +1652,11 @@ class CostModelService:
                 activities, _ = await ActivityRepository(self.session).list_for_schedule(schedule.id, limit=10000)
                 for act in activities:
                     if act.start_date and act.end_date:
-                        activity_months[str(act.id)] = (str(act.start_date)[:10], str(act.end_date)[:10])
+                        months_of = (str(act.start_date)[:10], str(act.end_date)[:10])
+                        activity_months[str(act.id)] = months_of
+                        # a line without its own activity follows the activity that builds its position
+                        for pid in act.boq_position_ids or []:
+                            position_months.setdefault(str(pid), months_of)
 
         for bl in budget_lines:
             line_ccy = (bl.currency or "").strip().upper()
@@ -1651,7 +1668,19 @@ class CostModelService:
             end = bl.period_end
             if not (start and end):
                 own = activity_months.get(str(bl.activity_id)) if bl.activity_id is not None else None
+                if own is None and bl.boq_position_id is not None:
+                    own = position_months.get(str(bl.boq_position_id))
                 start, end = own or project_months or (start, end)
+
+            def _add(period: str, part: Decimal, bl=bl) -> None:
+                period_outflows[period] = period_outflows.get(period, Decimal("0")) + part
+                period_sources.setdefault(period, []).append(
+                    {
+                        "budget_line_id": str(bl.id),
+                        "boq_position_id": str(bl.boq_position_id) if bl.boq_position_id else "",
+                        "amount": str(part.quantize(Decimal("0.01"))),
+                    }
+                )
 
             if start and end and len(start) >= 7 and len(end) >= 7:
                 # Spread evenly across months
@@ -1659,15 +1688,14 @@ class CostModelService:
                 if months:
                     per_month = amount / len(months)
                     for m in months:
-                        period_outflows[m] = period_outflows.get(m, Decimal("0")) + per_month
+                        _add(m, per_month)
                 else:
                     # Fallback: single period
-                    p = start[:7]
-                    period_outflows[p] = period_outflows.get(p, Decimal("0")) + amount
+                    _add(start[:7], amount)
             else:
                 # No schedule - use a generic unscheduled bucket.
                 # Keep the sentinel <= 10 chars to fit the period column (varchar(10)).
-                period_outflows["unsched"] = period_outflows.get("unsched", Decimal("0")) + amount
+                _add("unsched", amount)
 
         # Build cash flow entries with running cumulative
         entries: list[CashFlow] = []
@@ -1687,6 +1715,7 @@ class CostModelService:
                 actual_outflow="0",
                 cumulative_planned=str(round(float(cumulative), 2)),
                 cumulative_actual="0",
+                metadata_={"sources": period_sources.get(period, [])},
             )
             entries.append(entry)
 

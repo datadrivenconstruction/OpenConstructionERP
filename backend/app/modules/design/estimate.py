@@ -513,6 +513,7 @@ async def recompute(
         await _apply_cost_rate(session, svc, project, est, rule, pos, c)
         row = Row(b, rule, pos, c, _overridden(pos, b, c.quantity))
         rows.append(row)
+        await _stamp_source(svc, pos, rule, rev_id, c, override=row.override)
         b.model_quantity, b.element_keys, b.revision_id, b.provenance = (
             dstr(c.quantity),
             c.element_keys,
@@ -612,8 +613,29 @@ async def _write_rate(svc, pos, rate: Decimal, prov: dict[str, Any]) -> None:
     rs = dstr(rate)
     meta = dict(pos.metadata_ or {})
     meta["design_rate"] = {**(prov.get("benchmark") or prov.get("rate") or {}), "applied": rs}
+    if isinstance(meta.get("source"), dict):
+        meta["source"] = {**meta["source"], "rate": meta["design_rate"]}
     await svc.position_repo.update_fields(pos.id, unit_rate=rs, total=_compute_total(pos.quantity, rs), metadata_=meta)
     pos.unit_rate, pos.metadata_ = rs, meta
+
+
+async def _stamp_source(svc, pos, rule, rev_id, c: Computed, *, override: bool) -> None:
+    """Neutral ``metadata.source`` on the position: what every module downstream copies to trace the number."""
+    q = rule.body.get("quantity") or {}
+    meta = dict(pos.metadata_ or {})
+    meta["source"] = {
+        "module": "oe_design",
+        "revision_id": str(rev_id) if rev_id else None,
+        "rule": rule.code,
+        "kind": rule.kind,
+        "quantity_field": q.get("field") if isinstance(q, dict) else None,
+        "formula": (q.get("formula") if isinstance(q, dict) else None) or rule.body.get("formula"),
+        "element_count": len(c.element_keys or []),
+        "quantity_override": override,
+        "rate": meta.get("design_rate"),
+    }
+    await svc.position_repo.update_fields(pos.id, metadata_=meta)
+    pos.metadata_ = meta
 
 
 async def _provenance(svc, pos, b: DesignEstimateBinding, c: Computed) -> None:

@@ -10,7 +10,7 @@ from fastapi import APIRouter, Query
 from app.dependencies import SessionDep
 
 from .auth import PrincipalDep, require_project
-from .validators import DESIGN_RULE_SET, validation_data
+from .validators import run
 
 
 def register(router: APIRouter) -> None:
@@ -21,19 +21,8 @@ def register(router: APIRouter) -> None:
         session: SessionDep,
         locale: str = Query(default="en", max_length=12),
     ) -> dict[str, Any]:
-        from app.core.validation.engine import validation_engine
-        from app.core.validation.project_context import with_project_context
-
         await require_project(principal, project_id, session)
-        data = await with_project_context(session, project_id, await validation_data(session, project_id))
-        report = await validation_engine.validate(
-            data=data,
-            rule_sets=[DESIGN_RULE_SET],
-            target_type="design_project",
-            target_id=str(project_id),
-            project_id=str(project_id),
-            metadata={"locale": locale},
-        )
+        data, report = await run(session, project_id, locale)
         return {
             "checked": {"positions": len(data["positions"]), "revisions": len(data["revisions"])},
             "findings": [

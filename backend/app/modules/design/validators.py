@@ -203,4 +203,31 @@ async def validation_data(session: Any, project_id: uuid.UUID) -> dict[str, Any]
     }
 
 
+async def run(session: Any, project_id: uuid.UUID, locale: str = "en") -> tuple[dict[str, Any], Any]:
+    """Run the ``design`` rule set over one project: the data it read and the engine report."""
+    from app.core.validation.engine import validation_engine
+    from app.core.validation.project_context import with_project_context
+
+    data = await with_project_context(session, project_id, await validation_data(session, project_id))
+    report = await validation_engine.validate(
+        data=data,
+        rule_sets=[DESIGN_RULE_SET],
+        target_type="design_project",
+        target_id=str(project_id),
+        project_id=str(project_id),
+        metadata={"locale": locale},
+    )
+    return data, report
+
+
+async def record(session: Any, project_id: uuid.UUID, user_id: uuid.UUID | None, source: str) -> Any:
+    """Run the rule set and store the report, so the project's validation view lists the design next to the bill."""
+    from app.modules.validation.service import ValidationModuleService
+
+    _, report = await run(session, project_id)
+    return await ValidationModuleService(session).record_boq_report(
+        project_id, project_id, report, [DESIGN_RULE_SET], user_id=user_id, source=source, target_type="design_project"
+    )
+
+
 register_design_rules()
