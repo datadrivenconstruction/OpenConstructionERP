@@ -346,6 +346,13 @@ async def on_decided(session, rev: DesignRevision, decision: str, user_id: uuid.
         "documents": await _best_effort(session, "mark documents", mark_docs),
         "sheets": await _best_effort(session, "mark sheet register", mark_register),
     }
+    if decision == "accepted":
+        from .validators import record
+
+        report = await _best_effort(
+            session, "validation report", lambda: record(session, rev.project_id, user_id, "design_accept")
+        )
+        out["validation_report"] = str(report.id) if report is not None else None
     if rev.author_user_id and rev.author_user_id != user_id:
         out["notified"] = await _best_effort(
             session, "notify author", lambda: _notify(session, [rev.author_user_id], f"revision_{decision}", rev)

@@ -103,6 +103,7 @@ class ValidationModuleService:
         *,
         user_id: uuid.UUID | None = None,
         source: str | None = None,
+        target_type: str = "boq",
     ) -> ValidationReport:
         """Store a finished BOQ validation run and publish ``validation.report.created``.
 
@@ -124,6 +125,8 @@ class ValidationModuleService:
             user_id: Who ran it, if known.
             source: Where the run came from, kept in the metadata
                 (for example ``boq_editor``).
+            target_type: What was validated; another module's whole-project run
+                (``design_project``) stores through here with ``boq_id`` as its target id.
 
         Returns:
             The stored report row (flushed, not committed).
@@ -155,7 +158,7 @@ class ValidationModuleService:
         db_report = ValidationReport(
             id=uuid.uuid4(),
             project_id=project_id,
-            target_type="boq",
+            target_type=target_type,
             target_id=str(boq_id),
             rule_set="+".join(rule_sets),
             status=engine_report.status.value,
@@ -181,7 +184,7 @@ class ValidationModuleService:
                 {
                     "report_id": str(db_report.id),
                     "project_id": str(project_id),
-                    "target_type": "boq",
+                    "target_type": target_type,
                     "target_id": str(boq_id),
                     "status": engine_report.status.value,
                 },
