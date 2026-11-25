@@ -2386,3 +2386,35 @@ export async function exportBoqXlsx(modelId: string, body: BoqExportRequestBody)
   const filename = parseAttachmentFilename(resp.headers.get('Content-Disposition'), 'BOQ.xlsx');
   triggerDownload(blob, filename);
 }
+
+export type ElementsExportFormat = 'csv' | 'json' | 'xlsx';
+
+/** Path of the model-data export (no trailing slash: a redirect drops the auth header). */
+export function elementsExportPath(
+  modelId: string,
+  format: ElementsExportFormat,
+  filters: { storey?: string; element_type?: string; discipline?: string } = {},
+): string {
+  const qs = new URLSearchParams();
+  for (const [k, v] of Object.entries(filters)) if (v) qs.set(k, v);
+  const q = qs.toString();
+  return `${API_BASE}/v1/bim_hub/models/${encodeURIComponent(modelId)}/export/elements.${format}${q ? `?${q}` : ''}`;
+}
+
+/** Download the model's elements (category, level, properties, quantities) as CSV, JSON or XLSX. */
+export async function exportElementsData(
+  modelId: string,
+  format: ElementsExportFormat,
+  filters: { storey?: string; element_type?: string; discipline?: string } = {},
+): Promise<void> {
+  const token = getAuthToken();
+  const headers: Record<string, string> = { Accept: '*/*' };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+  const resp = await fetch(elementsExportPath(modelId, format, filters), { headers });
+  if (!resp.ok) {
+    throw new Error(`Export failed (HTTP ${resp.status})`);
+  }
+  const blob = await resp.blob();
+  const filename = parseAttachmentFilename(resp.headers.get('Content-Disposition'), `elements.${format}`);
+  triggerDownload(blob, filename);
+}

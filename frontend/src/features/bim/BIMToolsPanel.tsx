@@ -31,6 +31,8 @@ import { useToastStore } from '@/stores/useToastStore';
 import { useDisplayQuantity } from '@/shared/hooks/useDisplayQuantity';
 import {
   exportBoqXlsx,
+  exportElementsData,
+  type ElementsExportFormat,
   buildBoqExportBody,
   type BoqExportContext,
   type BoqExportScope,
@@ -268,6 +270,24 @@ export default function BIMToolsPanel({
       setExporting(false);
     }
   }, [getExportContext, exportScope, exportGroupBy, modelId, t]);
+
+  const handleExportData = useCallback(
+    async (format: ElementsExportFormat) => {
+      setExporting(true);
+      try {
+        await exportElementsData(modelId, format);
+      } catch (e) {
+        useToastStore.getState().addToast({
+          type: 'error',
+          title: t('bim.data_export_failed', { defaultValue: 'Data export failed' }),
+          message: e instanceof Error ? e.message : String(e),
+        });
+      } finally {
+        setExporting(false);
+      }
+    },
+    [modelId, t],
+  );
 
   return (
     <div className="flex flex-col gap-4 p-3">
@@ -673,6 +693,23 @@ export default function BIMToolsPanel({
             ? t('bim.boq_export_running', { defaultValue: 'Exporting…' })
             : t('bim.boq_export_button', { defaultValue: 'Export BOQ (Excel)' })}
         </button>
+        <div className="flex items-center gap-1" data-testid="elements-export-row">
+          <span className="text-2xs text-content-tertiary">
+            {t('bim.data_export_label', { defaultValue: 'Model data' })}
+          </span>
+          {(['csv', 'json', 'xlsx'] as const).map((f) => (
+            <button
+              key={f}
+              type="button"
+              onClick={() => void handleExportData(f)}
+              disabled={exporting}
+              data-testid={`elements-export-${f}`}
+              className="px-2 py-1 rounded-md text-2xs font-medium border border-border-light bg-surface-secondary text-content-secondary hover:bg-surface-tertiary disabled:opacity-60"
+            >
+              {f.toUpperCase()}
+            </button>
+          ))}
+        </div>
         {onOpenReport && (
           <button
             type="button"

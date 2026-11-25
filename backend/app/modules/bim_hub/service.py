@@ -2277,6 +2277,38 @@ class BIMHubService:
         filename = f"BOQ_{safe_name}.xlsx"
         return xlsx, filename
 
+    async def export_elements(
+        self,
+        model_id: uuid.UUID,
+        fmt: str,
+        *,
+        filters: dict | None = None,
+    ) -> tuple[bytes, str, str]:
+        """Export a model's elements as CSV, JSON or XLSX.
+
+        Returns ``(bytes, media_type, filename)``; 404 if the model is missing,
+        400 for an unknown format.
+        """
+        from app.modules.bim_hub.exporters.elements import ELEMENT_EXPORT_FORMATS, build_elements_export
+
+        if fmt not in ELEMENT_EXPORT_FORMATS:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Unsupported export format: {fmt}")
+        model = await self.get_model(model_id)
+        elements: list[BIMElement] = []
+        offset = 0
+        page_size = 5000
+        while True:
+            batch, total = await self.element_repo.list_for_model(model_id, offset=offset, limit=page_size)
+            elements.extend(batch)
+            if offset + page_size >= total or not batch:
+                break
+            offset += page_size
+        if filters:
+            elements = [e for e in elements if _element_matches_filters(e, filters)]
+        data, media = await asyncio.to_thread(build_elements_export, elements, fmt)
+        safe_name = (model.name or "model").replace(" ", "_").replace("/", "_")
+        return data, media, f"Elements_{safe_name}.{fmt}"
+
     async def ensure_element(
         self,
         model_id: uuid.UUID,
