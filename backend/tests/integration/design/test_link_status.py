@@ -102,3 +102,26 @@ async def test_link_status_errors_are_coded(client):
     assert r.status_code == 403 and r.json()["detail"]["code"] == "link_status_erp_only"
     gone = await client.delete(f"{BASE}/projects/{pid}/link/editors/{uuid.uuid4()}", headers=h)
     assert gone.status_code == 404 and gone.json()["detail"]["code"] == "editor_link_not_found"
+
+
+async def test_an_expired_token_is_not_listed(client):
+    from datetime import UTC, datetime, timedelta
+
+    from sqlalchemy import update
+
+    from app.database import async_session_factory
+    from app.modules.design.models import DesignLinkToken
+
+    uid, h = await make_user(client)
+    pid = await make_project(uid)
+    await _token(client, h, pid, name="old")
+    await _token(client, h, pid, name="new")
+    async with async_session_factory() as s:
+        await s.execute(
+            update(DesignLinkToken)
+            .where(DesignLinkToken.project_id == pid, DesignLinkToken.client_name == "old")
+            .values(expires_at=datetime.now(UTC) - timedelta(minutes=1))
+        )
+        await s.commit()
+    body = (await client.get(f"{BASE}/projects/{pid}/link/status", headers=h)).json()
+    assert [e["client_name"] for e in body["editors"]] == ["new"]
