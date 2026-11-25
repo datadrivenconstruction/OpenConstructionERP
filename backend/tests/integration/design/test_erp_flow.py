@@ -152,6 +152,79 @@ async def test_a_design_package_becomes_a_draft_rfq_whose_lines_name_their_sourc
     assert D(src["quantity"]) == D("82.5") and src["quantity_override"] is False and src["basis"] == "area_m2"
 
 
+async def _taken_off(client):
+    uid, h, pid, tok = await _linked_project(client)
+    d1, _ = package(pid, example_rows())
+    rev = (await _upload(client, pid, tok, d1)).json()
+    assert (await client.post(f"{BASE}/revisions/{rev['revision_id']}/accept", headers=h)).status_code == 200
+    s = await client.post(f"{BASE}/projects/{pid}/procurement/setup", json={"group_by": "type_key"}, headers=h)
+    assert s.status_code == 201, s.text
+    return uid, h, pid
+
+
+async def test_rfq_without_a_project_currency_is_refused_with_a_code(client):
+    _, h, pid = await _taken_off(client)
+    await _set_currency(pid, "")
+    r = await client.post(f"{BASE}/projects/{pid}/procurement/packages/IfcWall/rfq", headers=h)
+    assert r.status_code == 422 and r.json()["detail"]["code"] == "project_currency_missing"
+    await _set_currency(pid, "CHF")
+    made = await client.post(f"{BASE}/projects/{pid}/procurement/packages/IfcWall/rfq", headers=h)
+    assert made.status_code == 201, made.text
+    one = (await client.get(f"/api/v1/rfq-bidding/{made.json()['rfq_id']}", headers=h)).json()
+    assert one["currency_code"] == "CHF"
+
+
+async def test_take_off_names_are_neutral_codes_with_an_i18n_key(client):
+    import uuid
+
+    from sqlalchemy import select
+
+    from app.database import async_session_factory
+    from app.modules.boq.models import BOQ
+    from app.modules.tendering.models import TenderPackage
+
+    _, h, pid = await _taken_off(client)
+    async with async_session_factory() as s:
+        boq = (await s.execute(select(BOQ).where(BOQ.project_id == uuid.UUID(str(pid))))).scalars().all()
+        pkgs = (await s.execute(select(TenderPackage).where(TenderPackage.project_id == uuid.UUID(str(pid))))).scalars()
+        pkgs = list(pkgs)
+    takeoff = next(b for b in boq if b.name == "design_takeoff")
+    assert takeoff.metadata_["name_key"] == "design.takeoff.boq_name"
+    wall = next(p for p in pkgs if p.name == "design_takeoff:IfcWall")
+    assert wall.metadata_["name_key"] == "design.takeoff.package_name"
+    assert wall.metadata_["name_params"] == {"ifc_class": "IfcWall"}
+    assert all("Design take-off" not in (p.name + (p.description or "")) for p in pkgs)
+
+
+async def test_two_rfq_requests_for_one_package_make_one_rfq(client):
+    import asyncio
+    import uuid
+
+    from fastapi import HTTPException
+    from sqlalchemy import select
+
+    from app.database import async_session_factory
+    from app.modules.design import procurement as prc
+    from app.modules.rfq_bidding.models import RFQ
+
+    uid, _, pid = await _taken_off(client)
+
+    async def one():
+        async with async_session_factory() as s:
+            try:
+                await prc.rfq_from_package(s, uuid.UUID(str(pid)), "IfcWall", uuid.UUID(str(uid)))
+                await s.commit()
+                return 201
+            except HTTPException as exc:
+                await s.rollback()
+                return exc.status_code
+
+    assert sorted(await asyncio.gather(one(), one())) == [201, 409]
+    async with async_session_factory() as s:
+        rows = (await s.execute(select(RFQ).where(RFQ.project_id == uuid.UUID(str(pid))))).scalars().all()
+    assert len(rows) == 1
+
+
 async def test_data_paths_show_design_reaching_documents_and_validation():
     from app.modules.design.data_paths import DATA_PATHS
 

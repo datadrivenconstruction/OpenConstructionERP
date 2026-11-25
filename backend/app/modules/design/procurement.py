@@ -18,6 +18,7 @@ Nothing is priced and no lead time is assumed: unit rates stay 0 and every line 
 
 from __future__ import annotations
 
+import hashlib
 import json
 import uuid
 from dataclasses import dataclass, field
@@ -27,7 +28,7 @@ from pathlib import Path
 from typing import Any
 
 from fastapi import HTTPException, status
-from sqlalchemy import select
+from sqlalchemy import select, text
 
 from . import estimate as est_mod
 from .models import DesignProcurement, DesignRevision, DesignTakeoffLine, DesignTakeoffSection
@@ -40,6 +41,10 @@ GROUP_BY = ("type_key", "ifc_class")
 ZERO = Decimal(0)
 TENDER_URL = "/tendering"
 ISSUED = ("issued", "collecting", "evaluating", "awarded", "closed")
+# Names written into other modules' records are neutral codes; the UI renders them through these i18n keys
+BOQ_NAME = "design_takeoff"
+BOQ_NAME_KEY = "design.takeoff.boq_name"
+PACKAGE_NAME_KEY = "design.takeoff.package_name"
 MAX_CHANGES = 200  # per package, newest kept
 MAX_ADDENDUM_KEYS = 200  # linked element keys kept per addendum line
 BASIS_NOTE = (
@@ -389,10 +394,13 @@ async def _sync_packages(
                     project_id=proc.project_id,
                     boq_id=proc.boq_id,
                     section_ids=[sec.position_id],
-                    package_name=f"Design take-off: {cls}"[:255],
-                    package_description="Quantities from accepted design revisions, by element type. "
-                    "No prices and no lead times are assumed.",
-                    metadata={"origin": "design_takeoff"},
+                    package_name=package_name(cls),
+                    package_description="",
+                    metadata={
+                        "origin": "design_takeoff",
+                        "name_key": PACKAGE_NAME_KEY,
+                        "name_params": {"ifc_class": cls},
+                    },
                 ),
                 actor_id=str(user_id),
             )
@@ -551,10 +559,11 @@ async def setup(session, project_id: uuid.UUID, group_by: str, user_id: uuid.UUI
     boq = await est_mod._svc(session).create_boq(
         BOQCreate(
             project_id=project_id,
-            name="Design take-off",
-            description="Material take-off by element type from accepted model revisions",
+            name=BOQ_NAME,
+            description="",
         )
     )
+    boq.metadata_ = {**(boq.metadata_ or {}), "name_key": BOQ_NAME_KEY}
     proc = DesignProcurement(project_id=project_id, boq_id=boq.id, group_by=group_by, follow=True, created_by=user_id)
     session.add(proc)
     await session.flush()
@@ -710,6 +719,15 @@ def for_change_order(imp: dict[str, Any] | None) -> dict[str, Any] | None:
     }
 
 
+def package_name(ifc_class: str) -> str:
+    """Neutral name code of a take-off package (``design_takeoff:<IFC class>``); shown via ``PACKAGE_NAME_KEY``."""
+    return f"{BOQ_NAME}:{ifc_class}"[:255]
+
+
+def _lock_key(section_id: uuid.UUID) -> int:
+    return int.from_bytes(hashlib.sha256(f"design-rfq:{section_id}".encode()).digest()[:8], "big", signed=True)
+
+
 async def rfq_from_package(session, project_id: uuid.UUID, ifc_class: str, user_id: uuid.UUID):
     """A DRAFT request for quotation for one take-off package: every scope line says where its quantity came from.
 
@@ -725,6 +743,15 @@ async def rfq_from_package(session, project_id: uuid.UUID, ifc_class: str, user_
     section = (await _sections(session, project_id)).get(ifc_class) if proc is not None else None
     if section is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "No take-off package for this class")
+    project = await session.get(Project, project_id)
+    if not getattr(project, "currency", None):
+        raise HTTPException(
+            status.HTTP_422_UNPROCESSABLE_CONTENT,
+            {"code": "project_currency_missing", "message": "Set the project currency before asking for prices"},
+        )
+    if session.bind.dialect.name == "postgresql":
+        # two requests for the same package serialise here, so the duplicate check below sees the first one's row
+        await session.execute(text("SELECT pg_advisory_xact_lock(:k)"), {"k": _lock_key(section.id)})
     existing = (await session.execute(select(RFQ).where(RFQ.project_id == project_id))).scalars()
     for r in existing:
         if (provenance.read(r.metadata_) or {}).get("takeoff_section_id") == str(section.id):
@@ -735,7 +762,6 @@ async def rfq_from_package(session, project_id: uuid.UUID, ifc_class: str, user_
     )
     svc = est_mod._svc(session)
     positions = {p.id: p for p in await svc.position_repo.list_by_ids([ln.position_id for ln in lines])}
-    project = await session.get(Project, project_id)
     pkg = await _package(session, section.package_id)
     scope = []
     for ln in lines:
@@ -771,8 +797,8 @@ async def rfq_from_package(session, project_id: uuid.UUID, ifc_class: str, user_
         raise HTTPException(status.HTTP_409_CONFLICT, "The package has no scope lines to ask prices for")
     data = RFQCreate(
         project_id=project_id,
-        title=(pkg.name if pkg is not None else f"Design take-off: {ifc_class}")[:500],
-        currency_code=(getattr(project, "currency", None) or "EUR")[:10],
+        title=(pkg.name if pkg is not None else package_name(ifc_class))[:500],
+        currency_code=project.currency[:10],
         lines=scope,
         metadata={
             provenance.KEY: provenance.make(
@@ -782,7 +808,9 @@ async def rfq_from_package(session, project_id: uuid.UUID, ifc_class: str, user_
                 takeoff_section_id=str(section.id),
                 tender_package_id=str(section.package_id) if section.package_id else None,
                 ifc_class=ifc_class,
-            )
+            ),
+            "name_key": PACKAGE_NAME_KEY,
+            "name_params": {"ifc_class": ifc_class},
         },
     )
     return await RFQService(session).create_rfq(data, user_id=str(user_id))
