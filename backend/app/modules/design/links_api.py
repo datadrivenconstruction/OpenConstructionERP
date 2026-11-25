@@ -5,13 +5,14 @@ from __future__ import annotations
 import uuid
 from typing import Any
 
-from fastapi import HTTPException, Query, status
+from fastapi import HTTPException, Query, Response, status
 from pydantic import BaseModel, Field
+from sqlalchemy import func, select, update
 
 from app.dependencies import SessionDep
 
 from . import element_context, field_links, integration, links
-from .auth import PrincipalDep, require_project
+from .auth import PrincipalDep, as_aware, now_utc, require_project
 
 MAX_KEYS = 500
 
@@ -64,6 +65,106 @@ def register(router, can_accept) -> None:
         out = await links.sync(session, project_id)
         await session.commit()
         return out
+
+    @router.get("/projects/{project_id}/link/status")
+    async def link_status(project_id: uuid.UUID, principal: PrincipalDep, session: SessionDep) -> dict[str, Any]:
+        """Editors linked to this project (live tokens only), their last call, and revisions awaiting a decision."""
+        from .models import DesignLinkToken, DesignRevision
+
+        await require_project(principal, project_id, session)
+        if principal.via_link:
+            raise HTTPException(status.HTTP_403_FORBIDDEN, "Link status is read in the ERP")
+        now = now_utc()
+        tokens = (
+            (
+                await session.execute(
+                    select(DesignLinkToken)
+                    .where(DesignLinkToken.project_id == project_id, DesignLinkToken.revoked_at.is_(None))
+                    .order_by(DesignLinkToken.last_used_at.desc().nulls_last())
+                )
+            )
+            .scalars()
+            .all()
+        )
+        editors = [
+            {
+                "id": str(t.id),
+                "client_name": t.client_name,
+                "client_version": t.client_version,
+                "client_os": t.client_os,
+                "mine": t.user_id == principal.user_id,
+                "linked_at": t.created_at,
+                "last_used_at": t.last_used_at,
+                "expires_at": t.expires_at,
+            }
+            for t in tokens
+            if as_aware(t.expires_at) > now
+        ]
+        pending = (
+            await session.execute(
+                select(func.count())
+                .select_from(DesignRevision)
+                .where(DesignRevision.project_id == project_id, DesignRevision.status == "shared")
+            )
+        ).scalar_one()
+        from app.modules.users.models import User
+
+        last = (
+            await session.execute(
+                select(DesignRevision)
+                .where(
+                    DesignRevision.project_id == project_id,
+                    DesignRevision.status.in_(("shared", "published", "rejected", "archived")),
+                )
+                .order_by(DesignRevision.number.desc())
+                .limit(1)
+            )
+        ).scalar_one_or_none()
+        trace = None
+        if last is not None:
+            author = await session.get(User, last.author_user_id) if last.author_user_id else None
+            trace = {
+                "revision_id": str(last.id),
+                "number": last.number,
+                "status": last.status,
+                "source_kind": last.source_kind,
+                "package_sha256": last.package_sha256,
+                "author": (author.full_name or author.email) if author else None,
+                "received_at": last.created_at,
+            }
+        return {
+            "editors": editors,
+            "pending_revisions": pending,
+            "last_revision_at": last.created_at if last else None,
+            "last_revision": trace,
+        }
+
+    @router.delete("/projects/{project_id}/link/editors/{token_id}", status_code=status.HTTP_204_NO_CONTENT)
+    async def revoke_editor(
+        project_id: uuid.UUID, token_id: uuid.UUID, principal: PrincipalDep, session: SessionDep
+    ) -> Response:
+        """Cut one editor off; its holder or a project manager may. The token dies at once."""
+        from app.modules.projects.models import Project
+
+        from .models import DesignLinkToken
+
+        await require_project(principal, project_id, session)
+        if principal.via_link:
+            raise HTTPException(status.HTTP_403_FORBIDDEN, "Editors are unlinked from the ERP")
+        row = await session.get(DesignLinkToken, token_id)
+        if row is None or row.project_id != project_id or row.revoked_at is not None:
+            raise HTTPException(status.HTTP_404_NOT_FOUND, "Editor link not found")
+        if row.user_id != principal.user_id and not await can_accept(
+            session, principal.user_id, await session.get(Project, project_id)
+        ):
+            raise HTTPException(status.HTTP_403_FORBIDDEN, "Only the holder or a manager may unlink an editor")
+        await session.execute(
+            update(DesignLinkToken)
+            .where(DesignLinkToken.id == token_id, DesignLinkToken.revoked_at.is_(None))
+            .values(revoked_at=now_utc())
+        )
+        await session.commit()
+        return Response(status_code=status.HTTP_204_NO_CONTENT)
 
     @router.get("/projects/{project_id}/overview")
     async def overview(project_id: uuid.UUID, principal: PrincipalDep, session: SessionDep) -> dict[str, Any]:

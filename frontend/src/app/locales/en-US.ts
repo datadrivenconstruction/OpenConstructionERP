@@ -1749,6 +1749,16 @@ const resource = {
     "design.panel.none.procurement": "No bid package holds this selection.",
     "design.quick.subtitle": "Type, floor area and storeys give a first model, a priced breakdown and a schedule. Nothing is saved.",
     "design.quick.kpi.programme": "Schedule",
+    "design.link_status.title": "Editor link",
+    "design.link_status.connected": "Connected editors: {{n}}",
+    "design.link_status.none": "No editor is linked to this project.",
+    "design.link_status.editor": "Design editor",
+    "design.link_status.last_sync": "Last sync {{when}}",
+    "design.link_status.never_used": "Not used yet",
+    "design.link_status.expires": "access until {{when}}",
+    "design.link_status.revoke": "Unlink",
+    "design.link_status.last_revision_by": "#{{number}} · {{who}} · Last revision received {{when}}",
+    "design.link_status.pending": "Revisions awaiting a decision: {{n}}",
   }
 } as { translation: Record<string, string> };
 

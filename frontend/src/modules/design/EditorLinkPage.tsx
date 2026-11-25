@@ -15,6 +15,7 @@ import { projectsApi } from '@/features/projects/api';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { useToastStore } from '@/stores/useToastStore';
 import { createLink, fetchAccess, fetchRevisions } from './api';
+import { LinkStatus } from './LinkStatus';
 import { EDITOR_SITE, INSTALLER_SEEN_KEY, installerUrl, linkExpired, linkFileName, serializeLink, type LinkFile } from './data/offer';
 import { linkFailure, minutesLeft, type LinkFailure } from './data/linkErrors';
 import { tr } from './BriefFields';
@@ -279,6 +280,7 @@ function EditorLink({ projectId }: { projectId: string }) {
           </a>
         </div>
       </Card>
+      <LinkStatus projectId={projectId} />
     </div>
   );
 }

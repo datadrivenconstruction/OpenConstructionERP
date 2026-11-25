@@ -32,6 +32,7 @@ vi.mock('@/stores/useModuleStore', () => ({
 }));
 vi.mock('@/shared/lib/api', () => ({ getErrorMessage: (e: unknown) => (e instanceof Error ? e.message : String(e)) }));
 vi.mock('@/features/projects/api', () => ({ projectsApi: { get: vi.fn(async () => ({ id: 'p1', name: 'Wohnhaus Beispielstraße' })) } }));
+vi.mock('./LinkStatus', () => ({ LinkStatus: () => null }));
 vi.mock('./api', () => ({ createLink: (...a: unknown[]) => h.createLink(...a), fetchRevisions: async () => h.revisions, fetchAccess: async () => h.access }));
 vi.mock('@/shared/ui', async () => {
   return {
