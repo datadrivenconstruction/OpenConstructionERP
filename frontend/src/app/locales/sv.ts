@@ -24745,6 +24745,8 @@ const resource = {
     "costs.usage.used_count_with_age": "Använt i {{count}} kalkylposition, senast {{age}}",
     "costs.usage.used_count_with_age_one": "Använt i {{count}} kalkylposition, senast {{age}}",
     "costs.usage.used_count_with_age_other": "Använt i {{count}} kalkylpositioner, senast {{age}}",
+    "costs.usage.applied_spread_title": "Mängdposter med detta pris: {{lines}}. Tillämpade priser: min {{min}}, medel {{avg}}, max {{max}}",
+    "costs.usage.applied_spread": "min {{min}} / medel {{avg}} / max {{max}}",
     "costs_catalogs.catalog_label": "Katalog",
     "costs_catalogs.confirm_delete_item": "Ta bort denna kostnadspost? Den tas bort från sökningen och från sin katalog.",
     "costs_catalogs.create": "Skapa katalog",

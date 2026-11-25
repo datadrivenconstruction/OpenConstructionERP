@@ -24960,6 +24960,8 @@ const resource = {
     "costs.usage.used_count_with_age_many": "Usata in {{count}} di posizioni di stima, ultima volta {{age}}",
     "costs.usage.used_count_with_age_one": "Usata in {{count}} posizione di stima, ultima volta {{age}}",
     "costs.usage.used_count_with_age_other": "Usata in {{count}} posizioni di stima, ultima volta {{age}}",
+    "costs.usage.applied_spread_title": "Voci di computo con questo prezzo: {{lines}}. Prezzi applicati: min {{min}}, media {{avg}}, max {{max}}",
+    "costs.usage.applied_spread": "min {{min}} / media {{avg}} / max {{max}}",
     "costs_catalogs.catalog_label": "Catalogo",
     "costs_catalogs.confirm_delete_item": "Eliminare questa voce di costo? Viene rimossa dalla ricerca e dal suo catalogo.",
     "costs_catalogs.create": "Crea catalogo",

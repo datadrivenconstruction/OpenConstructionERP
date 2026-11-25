@@ -24669,6 +24669,8 @@ const resource = {
     "costs.usage.used_count_with_age": "Kasutatud {{count}} hinnangupositsioonis, viimati {{age}}",
     "costs.usage.used_count_with_age_one": "Kasutatud {{count}} hinnangupositsioonis, viimati {{age}}",
     "costs.usage.used_count_with_age_other": "Kasutatud {{count}} hinnangupositsioonis, viimati {{age}}",
+    "costs.usage.applied_spread_title": "Seda hinda kasutavad eelarveread: {{lines}}. Rakendatud hinnad: min {{min}}, keskmine {{avg}}, max {{max}}",
+    "costs.usage.applied_spread": "min {{min}} / kesk. {{avg}} / max {{max}}",
     "crm.no_contact": "- Kontakt puudub -",
     "crm.no_project": "- Projekt puudub -",
     "schedule_advanced.target_clear": "Tühjenda sihtmärk",

@@ -24358,6 +24358,8 @@ const resource = {
     "costs.usage.used_count_other": "Đã dùng trong {{count}} vị trí ước tính",
     "costs.usage.used_count_with_age": "Đã dùng trong {{count}} vị trí ước tính, lần cuối {{age}}",
     "costs.usage.used_count_with_age_other": "Đã dùng trong {{count}} vị trí ước tính, lần cuối {{age}}",
+    "costs.usage.applied_spread_title": "Dòng dự toán dùng đơn giá này: {{lines}}. Đơn giá đã áp dụng: thấp nhất {{min}}, trung bình {{avg}}, cao nhất {{max}}",
+    "costs.usage.applied_spread": "thấp {{min}} / TB {{avg}} / cao {{max}}",
     "costs_catalogs.catalog_label": "Danh mục",
     "costs_catalogs.confirm_delete_item": "Xóa mục chi phí này? Mục sẽ bị loại khỏi tìm kiếm và khỏi danh mục của nó.",
     "costs_catalogs.create": "Tạo danh mục",

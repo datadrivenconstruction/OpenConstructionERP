@@ -24809,6 +24809,8 @@ const resource = {
     "costs.usage.used_count_with_age_few": "Folosit în {{count}} poziții de estimare, ultima utilizare {{age}}",
     "costs.usage.used_count_with_age_one": "Folosit în {{count}} poziție de estimare, ultima utilizare {{age}}",
     "costs.usage.used_count_with_age_other": "Folosit în {{count}} de poziții de estimare, ultima utilizare {{age}}",
+    "costs.usage.applied_spread_title": "Poziții de deviz cu acest preț: {{lines}}. Prețuri aplicate: min. {{min}}, medie {{avg}}, max. {{max}}",
+    "costs.usage.applied_spread": "min. {{min}} / med. {{avg}} / max. {{max}}",
     "crm.no_contact": "- Fără contact -",
     "crm.no_project": "- Fără proiect -",
     "daily_diary.entries_sealed": "Jurnalul este sigilat, înregistrările sunt doar pentru citire.",

@@ -24479,6 +24479,8 @@ const resource = {
     "costs.usage.used_count_other": "{{count}} 件の見積項目で使用",
     "costs.usage.used_count_with_age": "{{count}} 件の見積項目で使用、最終 {{age}}",
     "costs.usage.used_count_with_age_other": "{{count}} 件の見積項目で使用、最終 {{age}}",
+    "costs.usage.applied_spread_title": "この単価を使う内訳行：{{lines}}。適用単価：最小 {{min}}、平均 {{avg}}、最大 {{max}}",
+    "costs.usage.applied_spread": "最小 {{min}} / 平均 {{avg}} / 最大 {{max}}",
     "costs_catalogs.catalog_label": "カタログ",
     "costs_catalogs.confirm_delete_item": "この品目を削除しますか？検索とカタログから削除されます。",
     "costs_catalogs.create": "カタログを作成",

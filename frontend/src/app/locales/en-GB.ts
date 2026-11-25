@@ -110,6 +110,8 @@ const resource = {
     "rfq_bidding.category_machinery": "Machinery",
 
     "costs.labor": "Labour",
+    "costs.usage.applied_spread_title": "BOQ lines citing this rate: {{lines}}. Applied rates: min {{min}}, average {{avg}}, max {{max}}",
+    "costs.usage.applied_spread": "min {{min}} / avg {{avg}} / max {{max}}",
     "boq.add_scoped_markup": "Add markup for section",
     "boq.scope_to_section": "Scope to section...",
     "boq.in_review": "In Review",

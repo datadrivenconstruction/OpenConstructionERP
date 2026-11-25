@@ -24233,6 +24233,8 @@ const resource = {
     "costs.usage.used_count_one": "{{count}} becslési pozícióban használva",
     "costs.usage.used_count_other": "{{count}} becslési pozícióban használva",
     "costs.usage.unused": "Még nincs használva egyetlen becslésben sem",
+    "costs.usage.applied_spread_title": "Ezt az árat használó költségvetési tételek: {{lines}}. Alkalmazott árak: min. {{min}}, átlag {{avg}}, max. {{max}}",
+    "costs.usage.applied_spread": "min. {{min}} / átl. {{avg}} / max. {{max}}",
     "costs.certainty.never_used": "sosem használt",
     "costs.certainty.age_years": "{{count}} éve",
     "costs.certainty.age_months": "{{count}} hónapja",

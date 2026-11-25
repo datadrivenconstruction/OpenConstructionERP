@@ -24652,6 +24652,8 @@ const resource = {
     "costs.usage.used_count_with_age_many": "Utilisé dans {{count}} de positions d'estimation, dernière utilisation {{age}}",
     "costs.usage.used_count_with_age_one": "Utilisé dans {{count}} position d'estimation, dernière utilisation {{age}}",
     "costs.usage.used_count_with_age_other": "Utilisé dans {{count}} positions d'estimation, dernière utilisation {{age}}",
+    "costs.usage.applied_spread_title": "Lignes de métré citant ce prix : {{lines}}. Prix appliqués : min {{min}}, moyenne {{avg}}, max {{max}}",
+    "costs.usage.applied_spread": "min {{min}} / moy. {{avg}} / max {{max}}",
     "crm.no_contact": "- Aucun contact -",
     "crm.no_project": "- Aucun projet -",
     "daily_diary.entries_sealed": "Le journal est scellé - les entrées sont en lecture seule.",

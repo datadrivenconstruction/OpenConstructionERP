@@ -23644,6 +23644,8 @@ const resource = {
     "costs.usage.used_count_with_age": "{{count}}টি এস্টিমেট পজিশনে ব্যবহৃত, শেষ {{age}}",
     "costs.usage.used_count_with_age_one": "{{count}}টি এস্টিমেট পজিশনে ব্যবহৃত, শেষ {{age}}",
     "costs.usage.used_count_with_age_other": "{{count}}টি এস্টিমেট পজিশনে ব্যবহৃত, শেষ {{age}}",
+    "costs.usage.applied_spread_title": "এই দর ব্যবহারকারী BOQ লাইন: {{lines}}। প্রয়োগকৃত দর: সর্বনিম্ন {{min}}, গড় {{avg}}, সর্বোচ্চ {{max}}",
+    "costs.usage.applied_spread": "সর্বনিম্ন {{min}} / গড় {{avg}} / সর্বোচ্চ {{max}}",
     "crm.no_contact": "- কোনো যোগাযোগ নেই -",
     "crm.no_project": "- কোনো প্রকল্প নেই -",
     "schedule_advanced.target_clear": "লক্ষ্য পরিষ্কার",

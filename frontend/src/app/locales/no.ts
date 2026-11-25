@@ -24553,6 +24553,8 @@ const resource = {
     "costs.usage.used_count_with_age": "Brukt i {{count}} estimatpost, sist {{age}}",
     "costs.usage.used_count_with_age_one": "Brukt i {{count}} estimatpost, sist {{age}}",
     "costs.usage.used_count_with_age_other": "Brukt i {{count}} estimatposter, sist {{age}}",
+    "costs.usage.applied_spread_title": "Mengdeposter med denne prisen: {{lines}}. Brukte priser: min. {{min}}, snitt {{avg}}, maks. {{max}}",
+    "costs.usage.applied_spread": "min. {{min}} / snitt {{avg}} / maks. {{max}}",
     "costs_catalogs.catalog_label": "Katalog",
     "costs_catalogs.confirm_delete_item": "Slette denne kostnadsposten? Den fjernes fra søk og fra katalogen sin.",
     "costs_catalogs.create": "Opprett katalog",

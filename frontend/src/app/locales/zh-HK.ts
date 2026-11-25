@@ -24770,6 +24770,8 @@ const resource = {
     "costs.usage.used_count_with_age": "已用於 {{count}} 個估算條目，最近 {{age}}",
     "costs.usage.used_count_with_age_one": "已用於 {{count}} 個估算條目，最近 {{age}}",
     "costs.usage.used_count_with_age_other": "已用於 {{count}} 個估算條目，最近 {{age}}",
+    "costs.usage.applied_spread_title": "引用此單價的清單行：{{lines}}。應用單價：最低 {{min}}，平均 {{avg}}，最高 {{max}}",
+    "costs.usage.applied_spread": "最低 {{min}} / 平均 {{avg}} / 最高 {{max}}",
     "crm.no_contact": "- 無聯繫人 -",
     "crm.no_project": "- 無項目 -",
     "daily_diary.entries_sealed": "日誌已封存 - 條目為只讀。",

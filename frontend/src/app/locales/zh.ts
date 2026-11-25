@@ -24527,6 +24527,8 @@ const resource = {
     "costs.usage.used_count_other": "已用于 {{count}} 个估算条目",
     "costs.usage.used_count_with_age": "已用于 {{count}} 个估算条目，最近 {{age}}",
     "costs.usage.used_count_with_age_other": "已用于 {{count}} 个估算条目，最近 {{age}}",
+    "costs.usage.applied_spread_title": "引用此单价的清单行：{{lines}}。应用单价：最低 {{min}}，平均 {{avg}}，最高 {{max}}",
+    "costs.usage.applied_spread": "最低 {{min}} / 平均 {{avg}} / 最高 {{max}}",
     "costs_catalogs.catalog_label": "目录",
     "costs_catalogs.confirm_delete_item": "删除此成本条目？它将从搜索和所属目录中移除。",
     "costs_catalogs.create": "创建目录",

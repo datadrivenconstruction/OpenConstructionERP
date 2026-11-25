@@ -21602,6 +21602,8 @@ const resource = {
     "costs.usage.used_count_with_age": "{{count}} смета позициясында колдонулган, акыркысы {{age}}",
     "costs.usage.used_count_with_age_one": "{{count}} смета позициясында колдонулган, акыркысы {{age}}",
     "costs.usage.used_count_with_age_other": "{{count}} смета позициясында колдонулган, акыркысы {{age}}",
+    "costs.usage.applied_spread_title": "Ушул бааны колдонгон смета саптары: {{lines}}. Колдонулган баалар: эң аз {{min}}, орточо {{avg}}, эң көп {{max}}",
+    "costs.usage.applied_spread": "эң аз {{min}} / орт. {{avg}} / эң көп {{max}}",
     "costs_catalogs.catalog_label": "Каталог",
     "costs_catalogs.confirm_delete_item": "Бул чыгым позициясын жоюсузбу? Ал изденүүдөн жана каталогунан алынып салынат.",
     "costs_catalogs.create": "Каталог түзүү",

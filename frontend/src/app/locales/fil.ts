@@ -23650,6 +23650,8 @@ const resource = {
     "costs.usage.used_count_with_age": "Ginamit sa {{count}} posisyon ng estimate, huli noong {{age}}",
     "costs.usage.used_count_with_age_one": "Ginamit sa {{count}} posisyon ng estimate, huli noong {{age}}",
     "costs.usage.used_count_with_age_other": "Ginamit sa {{count}} posisyon ng estimate, huli noong {{age}}",
+    "costs.usage.applied_spread_title": "Mga linya ng BOQ na gumagamit ng presyong ito: {{lines}}. Mga inilapat na presyo: pinakamababa {{min}}, karaniwan {{avg}}, pinakamataas {{max}}",
+    "costs.usage.applied_spread": "pinakamababa {{min}} / karaniwan {{avg}} / pinakamataas {{max}}",
     "crm.no_contact": "- Walang contact -",
     "crm.no_project": "- Walang proyekto -",
     "schedule_advanced.target_clear": "Linisin ang target",

@@ -24479,6 +24479,8 @@ const resource = {
     "costs.usage.used_count_other": "견적 항목 {{count}}개에서 사용됨",
     "costs.usage.used_count_with_age": "견적 항목 {{count}}개에서 사용됨, 최근 {{age}}",
     "costs.usage.used_count_with_age_other": "견적 항목 {{count}}개에서 사용됨, 최근 {{age}}",
+    "costs.usage.applied_spread_title": "이 단가를 쓰는 내역 행: {{lines}}. 적용 단가: 최소 {{min}}, 평균 {{avg}}, 최대 {{max}}",
+    "costs.usage.applied_spread": "최소 {{min}} / 평균 {{avg}} / 최대 {{max}}",
     "costs_catalogs.catalog_label": "카탈로그",
     "costs_catalogs.confirm_delete_item": "이 원가 항목을 삭제할까요? 검색과 해당 카탈로그에서 제거됩니다.",
     "costs_catalogs.create": "카탈로그 생성",

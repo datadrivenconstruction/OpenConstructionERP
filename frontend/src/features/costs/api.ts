@@ -402,6 +402,29 @@ export async function fetchUsageCounts(
   );
 }
 
+/** How many BOQ lines applied a rate and the spread they applied it at.
+ *  Amounts are exact decimal strings in the item's currency. */
+export interface AppliedRateStats {
+  boq_lines: number;
+  rate_count: number;
+  min: string | null;
+  avg: string | null;
+  max: string | null;
+  currency: string | null;
+}
+
+/** Batch-fetch applied-rate stats for a page of cost items; ids never
+ *  applied in a BOQ line are omitted. */
+export async function fetchUsageStats(
+  ids: string[],
+): Promise<Record<string, AppliedRateStats>> {
+  if (ids.length === 0) return {};
+  return apiPost<Record<string, AppliedRateStats>, { ids: string[] }>(
+    '/v1/costs/usage-stats/',
+    { ids },
+  );
+}
+
 /** Record a usage event so the next certainty fetch reflects it. */
 export async function recordCostItemUsage(
   costItemId: string,

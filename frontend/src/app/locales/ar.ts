@@ -25530,6 +25530,8 @@ const resource = {
     "costs.usage.used_count_with_age_other": "مُستخدَم في {{count}} بند تقدير، آخرها {{age}}",
     "costs.usage.used_count_with_age_two": "مُستخدَم في {{count}} بندَي تقدير، آخرها {{age}}",
     "costs.usage.used_count_with_age_zero": "مُستخدَم في {{count}} بنود تقدير، آخرها {{age}}",
+    "costs.usage.applied_spread_title": "بنود جدول الكميات التي تستخدم هذا السعر: {{lines}}. الأسعار المطبقة: الأدنى {{min}}، المتوسط {{avg}}، الأعلى {{max}}",
+    "costs.usage.applied_spread": "الأدنى {{min}} / المتوسط {{avg}} / الأعلى {{max}}",
     "crm.no_contact": "- لا جهة اتصال -",
     "crm.no_project": "- لا مشروع -",
     "schedule_advanced.target_clear": "موعد الإزالة المستهدف",

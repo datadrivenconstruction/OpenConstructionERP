@@ -23754,6 +23754,8 @@ const resource = {
     "costs.usage.used_count_with_age": "{{count}} смета позициясында пайдаланылды, соңғысы {{age}}",
     "costs.usage.used_count_with_age_one": "{{count}} смета позициясында пайдаланылды, соңғысы {{age}}",
     "costs.usage.used_count_with_age_other": "{{count}} смета позициясында пайдаланылды, соңғысы {{age}}",
+    "costs.usage.applied_spread_title": "Осы бағаны қолданатын смета жолдары: {{lines}}. Қолданылған бағалар: ең аз {{min}}, орташа {{avg}}, ең көп {{max}}",
+    "costs.usage.applied_spread": "ең аз {{min}} / орт. {{avg}} / ең көп {{max}}",
     "crm.no_contact": "- Байланыс жоқ -",
     "crm.no_project": "- Жоба жоқ -",
     "schedule_advanced.target_clear": "Мақсатты тазалау",

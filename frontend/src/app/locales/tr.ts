@@ -25154,6 +25154,8 @@ const resource = {
     "costs.usage.used_count_with_age": "{{count}} keşif pozisyonunda kullanıldı, son {{age}}",
     "costs.usage.used_count_with_age_one": "{{count}} keşif pozisyonunda kullanıldı, son kullanım {{age}}",
     "costs.usage.used_count_with_age_other": "{{count}} keşif pozisyonunda kullanıldı, son kullanım {{age}}",
+    "costs.usage.applied_spread_title": "Bu fiyatı kullanan keşif kalemleri: {{lines}}. Uygulanan fiyatlar: en az {{min}}, ortalama {{avg}}, en çok {{max}}",
+    "costs.usage.applied_spread": "en az {{min}} / ort. {{avg}} / en çok {{max}}",
     "crm.no_contact": "- Kişi yok -",
     "crm.no_project": "- Proje yok -",
     "daily_diary.entries_sealed": "Günlük mühürlendi - kayıtlar salt okunur.",

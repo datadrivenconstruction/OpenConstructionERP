@@ -25195,6 +25195,8 @@ const resource = {
     "costs.usage.used_count_with_age_many": "Использована в {{count}} позициях сметы, последний раз {{age}}",
     "costs.usage.used_count_with_age_one": "Использована в {{count}} позиции сметы, последний раз {{age}}",
     "costs.usage.used_count_with_age_other": "Использована в {{count}} позиции сметы, последний раз {{age}}",
+    "costs.usage.applied_spread_title": "Позиций сметы с этой расценкой: {{lines}}. Применённые цены: мин. {{min}}, среднее {{avg}}, макс. {{max}}",
+    "costs.usage.applied_spread": "мин. {{min}} / ср. {{avg}} / макс. {{max}}",
     "crm.no_contact": "- Без контакта -",
     "crm.no_project": "- Без проекта -",
     "daily_diary.entries_sealed": "Журнал закрыт - записи доступны только для чтения.",

@@ -24688,6 +24688,8 @@ const resource = {
     "costs.usage.used_count_with_age": "{{count}} үнэлгээний позицид ашигласан, сүүлд {{age}}",
     "costs.usage.used_count_with_age_one": "{{count}} үнэлгээний позицид ашигласан, сүүлд {{age}}",
     "costs.usage.used_count_with_age_other": "{{count}} үнэлгээний позицид ашигласан, сүүлд {{age}}",
+    "costs.usage.applied_spread_title": "Энэ үнийг ашигласан төсвийн мөр: {{lines}}. Хэрэглэсэн үнэ: доод {{min}}, дундаж {{avg}}, дээд {{max}}",
+    "costs.usage.applied_spread": "доод {{min}} / дундаж {{avg}} / дээд {{max}}",
     "crm.no_contact": "- Холбоо барих хүн алга -",
     "crm.no_project": "- Төсөл алга -",
     "daily_diary.entries_sealed": "Тэмдэглэл лацдагдсан. Бичлэгүүд зөвхөн уншигдана.",

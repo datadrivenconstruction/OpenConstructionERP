@@ -23727,6 +23727,8 @@ const resource = {
     "costs.usage.used_count_with_age": "در {{count}} موقعیت برآورد استفاده‌شده، آخرین‌بار {{age}}",
     "costs.usage.used_count_with_age_one": "در {{count}} موقعیت برآورد استفاده‌شده، آخرین‌بار {{age}}",
     "costs.usage.used_count_with_age_other": "در {{count}} موقعیت برآورد استفاده‌شده، آخرین‌بار {{age}}",
+    "costs.usage.applied_spread_title": "ردیف‌های فهرست مقادیر با این بها: {{lines}}. بهای اعمال‌شده: کمینه {{min}}، میانگین {{avg}}، بیشینه {{max}}",
+    "costs.usage.applied_spread": "کمینه {{min}} / میانگین {{avg}} / بیشینه {{max}}",
     "crm.no_contact": "- بدون مخاطب -",
     "crm.no_project": "- بدون پروژه -",
     "schedule_advanced.target_clear": "پاک کردن هدف",

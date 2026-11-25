@@ -24529,6 +24529,8 @@ const resource = {
     "costs.usage.used_count_with_age_few": "Korišteno u {{count}} stavke procjene, zadnje {{age}}",
     "costs.usage.used_count_with_age_one": "Korišteno u {{count}} stavci procjene, zadnje {{age}}",
     "costs.usage.used_count_with_age_other": "Korišteno u {{count}} stavki procjene, zadnje {{age}}",
+    "costs.usage.applied_spread_title": "Stavke troškovnika s ovom cijenom: {{lines}}. Primijenjene cijene: min. {{min}}, prosjek {{avg}}, maks. {{max}}",
+    "costs.usage.applied_spread": "min. {{min}} / pros. {{avg}} / maks. {{max}}",
     "crm.no_contact": "- Bez kontakta -",
     "crm.no_project": "- Bez projekta -",
     "daily_diary.entries_sealed": "Dnevnik je zapečaćen - unosi su samo za čitanje.",

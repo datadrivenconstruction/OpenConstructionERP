@@ -21452,6 +21452,8 @@ const resource = {
     "costs.usage.used_count_with_age": "Used in {{count}} estimate position, last {{age}}",
     "costs.usage.used_count_with_age_one": "Used in {{count}} estimate position, last {{age}}",
     "costs.usage.used_count_with_age_other": "Used in {{count}} estimate positions, last {{age}}",
+    "costs.usage.applied_spread_title": "BOQ lines citing this rate: {{lines}}. Applied rates: min {{min}}, average {{avg}}, max {{max}}",
+    "costs.usage.applied_spread": "min {{min}} / avg {{avg}} / max {{max}}",
     "costs_catalogs.catalog_label": "Catalog",
     "costs_catalogs.confirm_delete_item": "Delete this cost item? It is removed from search and from its catalog.",
     "costs_catalogs.create": "Create catalog",

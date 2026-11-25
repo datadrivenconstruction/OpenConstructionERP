@@ -25184,6 +25184,8 @@ const resource = {
     "costs.usage.used_count_with_age_many": "Użyte w {{count}} pozycjach kosztorysowych, ostatnio {{age}}",
     "costs.usage.used_count_with_age_one": "Użyte w {{count}} pozycji kosztorysowej, ostatnio {{age}}",
     "costs.usage.used_count_with_age_other": "Użyte w {{count}} pozycji kosztorysowej, ostatnio {{age}}",
+    "costs.usage.applied_spread_title": "Pozycje kosztorysu z tą ceną: {{lines}}. Zastosowane ceny: min. {{min}}, średnia {{avg}}, maks. {{max}}",
+    "costs.usage.applied_spread": "min. {{min}} / śr. {{avg}} / maks. {{max}}",
     "crm.no_contact": "- Brak kontaktu -",
     "crm.no_project": "- Brak projektu -",
     "daily_diary.entries_sealed": "Dziennik jest zamknięty - wpisy są tylko do odczytu.",
