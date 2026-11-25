@@ -68,7 +68,7 @@ class EstimateUnpriced(ValidationRule):
         data = context.data if isinstance(context.data, dict) else {}
         locale = _locale(context)
         results: list[RuleResult] = []
-        for pos in data.get("positions") or []:
+        for pos in data.get("design_positions") or []:
             missing = _zero(pos.get("unit_rate"))
             text = str(pos.get("description") or pos.get("rule") or "")
             results.append(
@@ -101,7 +101,7 @@ class EstimateQuantityMissing(ValidationRule):
         data = context.data if isinstance(context.data, dict) else {}
         locale = _locale(context)
         results: list[RuleResult] = []
-        for pos in data.get("positions") or []:
+        for pos in data.get("design_positions") or []:
             flags = set(pos.get("flags") or [])
             if "override" in flags:
                 missing = False
@@ -245,7 +245,7 @@ async def validation_data(session: Any, project_id: uuid.UUID) -> dict[str, Any]
     ).scalars()
     return {
         "quick_brief": from_brief_doc(await current_brief(session, project_id)),
-        "positions": est.get("positions", []) if est.get("estimate") else [],
+        "design_positions": est.get("positions", []) if est.get("estimate") else [],
         "revisions": [
             {
                 "revision_id": str(r.id),
