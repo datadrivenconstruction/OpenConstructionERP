@@ -77,7 +77,7 @@ async def test_save_versions_and_if_match(client):
     assert got.json()["massing"]["floors_above"] == 6 and got.headers["ETag"] == '"2"'
     old = await client.get(url, params={"version": 1}, headers=h)
     assert old.json()["massing"]["floors_above"] == 5 and old.json()["brief_id"] == doc["brief_id"]
-    versions = (await client.get(f"{url}/versions", headers=h)).json()
+    versions = (await client.get(f"{url}/versions", headers=h)).json()["items"]
     assert [v["version"] for v in versions] == [2, 1] and versions[0]["saved_by"] == str(uid)
 
 
