@@ -6952,6 +6952,7 @@ export function BOQEditorPage() {
         boqId={boqId!}
         onImported={invalidateAll}
         onFidelityReport={openFidelityReport}
+        onStructure={() => setStructureOpen(true)}
       />
       {boqId && (
         <ExchangeFidelityDialog

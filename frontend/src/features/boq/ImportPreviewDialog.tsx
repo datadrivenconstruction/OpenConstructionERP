@@ -100,6 +100,8 @@ interface ImportPreviewDialogProps {
   onFidelityReport?: (reportId: string) => void;
   /** A file chosen before the dialog opened; it is previewed at once. */
   initialFile?: File | null;
+  /** Open the bill structuring tool on the freshly imported bill. */
+  onStructure?: () => void;
 }
 
 type Step = 'upload' | 'preview' | 'confirm';
@@ -136,7 +138,7 @@ function fmtNumber(v: number | string | null | undefined): string {
 
 /* ── Component ──────────────────────────────────────────────────────── */
 
-export function ImportPreviewDialog({ open, onClose, boqId, onImported, onFidelityReport, initialFile }: ImportPreviewDialogProps) {
+export function ImportPreviewDialog({ open, onClose, boqId, onImported, onFidelityReport, initialFile, onStructure }: ImportPreviewDialogProps) {
   const [fidelityExpanded, setFidelityExpanded] = useState(false);
   const { t } = useTranslation();
   const addToast = useToastStore((s) => s.addToast);
@@ -251,8 +253,11 @@ export function ImportPreviewDialog({ open, onClose, boqId, onImported, onFideli
           const read = data.metadata?.column_mapping ?? {};
           setReadMapping(read);
           setColumnMapping(read);
-          // A header the importer could not read is fixed here, so open it.
-          setMappingExpanded(data.errors.some((e) => e.code === 'header_not_recognised'));
+          // Spreadsheet columns are what the user came to check, so show them open.
+          setMappingExpanded(
+            (data.metadata?.original_columns?.length ?? 0) > 0 ||
+              data.errors.some((e) => e.code === 'header_not_recognised'),
+          );
         }
         setStep('preview');
       } catch (err) {
@@ -388,7 +393,11 @@ export function ImportPreviewDialog({ open, onClose, boqId, onImported, onFideli
           count: imported,
         }),
         message: unmapped.length > 0 ? unmapped.map((w) => importIssueText(w, t, fmtNumber)).join('\n') : undefined,
-        action: fidelityAction,
+        action:
+          fidelityAction ??
+          (imported > 0 && onStructure
+            ? { label: t('boq.structure_title', { defaultValue: 'Structure the bill' }), onClick: onStructure }
+            : undefined),
       });
 
       onImported();
@@ -422,7 +431,7 @@ export function ImportPreviewDialog({ open, onClose, boqId, onImported, onFideli
       setJobProgress(null);
       jobWaitRef.current = null;
     }
-  }, [file, boqId, addToast, t, onImported, onClose, previewedMapping, reviewMutation]);
+  }, [file, boqId, addToast, t, onImported, onStructure, onClose, previewedMapping, reviewMutation]);
 
   const preloaded = useRef<File | null>(null);
   useEffect(() => {
