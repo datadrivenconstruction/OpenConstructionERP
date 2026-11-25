@@ -55,7 +55,7 @@ const impact = (rows: ScheduleRow[], over: Partial<ScheduleImpact> = {}): Schedu
 });
 const NONE = { schema: 'ddc-schedule-impact/1', revision_id: 'r2', schedule: false };
 
-async function mount(lang: 'en' | 'ru' | 'de' = 'en', canManage = true) {
+async function mount(lang: 'en' | 'ru' | 'de' = 'en', canManage = true, needsEstimate = false) {
   const inst = i18n.createInstance();
   await inst.use(initReactI18next).init({
     lng: lang, fallbackLng: 'en', resources: { en: { translation: EN }, ru: { translation: RU }, de: { translation: DE } },
@@ -65,7 +65,7 @@ async function mount(lang: 'en' | 'ru' | 'de' = 'en', canManage = true) {
   render(
     <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
       <I18nextProvider i18n={inst}><MemoryRouter>
-        <SchedulePanel projectId="p1" revisionId="r2" canManage={canManage} locale="en-US" />
+        <SchedulePanel projectId="p1" revisionId="r2" canManage={canManage} locale="en-US" needsEstimate={needsEstimate} />
       </MemoryRouter></I18nextProvider>
     </QueryClientProvider>,
   );
@@ -141,6 +141,14 @@ describe('SchedulePanel', () => {
     await user.click(screen.getByTestId('schedule-setup'));
     expect(h.setup).toHaveBeenCalledWith('p1');
     expect(await screen.findByTestId('schedule-totals')).toBeTruthy();
+  });
+
+  it('holds setup back and points to the estimate while the project has none', async () => {
+    h.impact = NONE;
+    await mount('en', true, true);
+    await screen.findByTestId('no-schedule');
+    expect((screen.getByTestId('schedule-setup') as HTMLButtonElement).disabled).toBe(true);
+    expect(screen.getByTestId('schedule-needs-estimate').textContent).toMatch(/Compute the estimate first/);
   });
 
   it('tells others who can set it up', async () => {

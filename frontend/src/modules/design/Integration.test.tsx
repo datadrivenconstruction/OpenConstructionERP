@@ -242,6 +242,8 @@ describe('project overview', () => {
     expect(stepState({ id: 'model', done: true, count: 3, waiting: 1, url: '' })).toBe('waiting');
     expect(stepState({ id: 'tasks', done: true, count: 0, url: '' })).toBe('done');
     expect(stepState({ id: 'estimate', done: false, count: 0, url: '' })).toBe('todo');
+    expect(stepState({ id: 'bim', done: true, count: 0, url: '' })).toBe('todo');
+    expect(stepState({ id: 'bim', done: true, count: 5, url: '' })).toBe('done');
   });
 
   it('speaks Russian', async () => {

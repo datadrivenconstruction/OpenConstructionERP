@@ -18,6 +18,8 @@ export const CORE_STEPS: StepId[] = ['brief', 'model', 'estimate', 'schedule', '
 export function stepState(s: OverviewStep): 'done' | 'waiting' | 'todo' {
   if (s.id === 'model' && (s.waiting ?? 0) > 0) return 'waiting';
   if (s.id === 'tasks') return (s.count ?? 0) > 0 ? 'waiting' : 'done';
+  // An accepted model with no element linked to a position is not a finished link.
+  if (s.id === 'bim') return s.done && (s.count ?? 0) > 0 ? 'done' : 'todo';
   return s.done ? 'done' : 'todo';
 }
 
@@ -33,7 +35,7 @@ export function stepText(t: ReturnType<typeof useTranslation>['t'], s: OverviewS
   if (state === 'todo' && s.id === 'schedule' && all.find((x) => x.id === 'estimate')?.done) {
     return tr(t, 'design.overview.todo.schedule_ready');
   }
-  if (state === 'todo') return tr(t, `design.overview.todo.${s.id}`);
+  if (state === 'todo' && !(s.id === 'bim' && s.done)) return tr(t, `design.overview.todo.${s.id}`);
   if (s.id === 'tasks' && !s.count) return tr(t, 'design.overview.state.tasks_none');
   return tr(t, `design.overview.state.${s.id}`, { count: s.count ?? 0 });
 }
