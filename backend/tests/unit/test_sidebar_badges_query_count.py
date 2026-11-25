@@ -3,26 +3,40 @@
 import uuid
 
 import pytest
+import pytest_asyncio
 from sqlalchemy import event
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.sidebar_badges_router import sidebar_badges
 from app.modules.rfi.models import RFI
-from app.modules.safety.models import SafetyIncident, SafetyObservation
 from app.modules.tasks.models import Task
 
-_TABLES = [Task.__table__, RFI.__table__, SafetyIncident.__table__, SafetyObservation.__table__]
 
-
-@pytest.fixture
+@pytest_asyncio.fixture
 async def session():
-    engine = create_async_engine("sqlite+aiosqlite:///:memory:")
+    import app.modules.projects.models  # noqa: F401
+    import app.modules.safety.models  # noqa: F401
+    import app.modules.users.models  # noqa: F401
+    from app.database import Base, async_session_factory, engine
+
     async with engine.begin() as conn:
-        await conn.run_sync(lambda c: Task.metadata.create_all(c, tables=_TABLES))
-    maker = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
-    async with maker() as s:
+        await conn.run_sync(Base.metadata.create_all)
+    async with async_session_factory() as s:
         yield s
-    await engine.dispose()
+        await s.rollback()
+
+
+async def _project(session: AsyncSession) -> uuid.UUID:
+    from app.modules.projects.models import Project
+    from app.modules.users.models import User
+
+    user = User(email=f"badges-{uuid.uuid4().hex[:8]}@test.io", hashed_password="x", full_name="B", role="editor")
+    session.add(user)
+    await session.flush()
+    project = Project(name="Badges", owner_id=user.id)
+    session.add(project)
+    await session.flush()
+    return project.id
 
 
 async def _insert(session: AsyncSession, table, **values) -> None:
@@ -31,8 +45,8 @@ async def _insert(session: AsyncSession, table, **values) -> None:
 
 @pytest.mark.asyncio
 async def test_badges_issue_one_statement_and_count_open_items(session: AsyncSession) -> None:
-    project = uuid.uuid4()
-    other = uuid.uuid4()
+    project = await _project(session)
+    other = await _project(session)
     statements: list[str] = []
 
     def _record(conn, cursor, statement, *args) -> None:  # noqa: ANN001

@@ -73,7 +73,7 @@ describe('import preview money', () => {
         />
       </QueryClientProvider>,
     );
-    expect(await screen.findByText(/1[\s,.  ]?850[.,]00/)).toBeTruthy();
+    expect(await screen.findByText(/1[\s,.\u00a0\u202f]?850[.,]00/)).toBeTruthy();
     expect(String(fetchSpy.mock.calls[0]![0])).toBe('/api/v1/boq/import/preview/');
   });
 });
