@@ -2389,16 +2389,14 @@ export async function exportBoqXlsx(modelId: string, body: BoqExportRequestBody)
 
 export type ElementsExportFormat = 'csv' | 'json' | 'xlsx';
 
-/** Path of the model-data export (no trailing slash: a redirect drops the auth header). */
-export function elementsExportPath(
-  modelId: string,
-  format: ElementsExportFormat,
+/** Query string of the model-data export: only the filters that are set, or empty. */
+export function elementsExportQuery(
   filters: { storey?: string; element_type?: string; discipline?: string } = {},
 ): string {
   const qs = new URLSearchParams();
   for (const [k, v] of Object.entries(filters)) if (v) qs.set(k, v);
   const q = qs.toString();
-  return `${API_BASE}/v1/bim_hub/models/${encodeURIComponent(modelId)}/export/elements.${format}${q ? `?${q}` : ''}`;
+  return q ? `?${q}` : '';
 }
 
 /** Download the model's elements (category, level, properties, quantities) as CSV, JSON or XLSX. */
@@ -2410,7 +2408,11 @@ export async function exportElementsData(
   const token = getAuthToken();
   const headers: Record<string, string> = { Accept: '*/*' };
   if (token) headers['Authorization'] = `Bearer ${token}`;
-  const resp = await fetch(elementsExportPath(modelId, format, filters), { headers });
+  // No trailing slash: a redirect drops the auth header.
+  const resp = await fetch(
+    `${API_BASE}/v1/bim_hub/models/${encodeURIComponent(modelId)}/export/elements.${format}${elementsExportQuery(filters)}`,
+    { headers },
+  );
   if (!resp.ok) {
     throw new Error(`Export failed (HTTP ${resp.status})`);
   }

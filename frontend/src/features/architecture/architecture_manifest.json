@@ -24417,6 +24417,7 @@
         "exporters/__init__.py",
         "exporters/boq_xlsx.py",
         "exporters/cobie.py",
+        "exporters/elements.py",
         "file_storage.py",
         "glb_cache.py",
         "ifc_processor.py",
@@ -25350,6 +25351,12 @@
           "method": "GET",
           "path": "/models/{model_id}/export/cobie.xlsx",
           "handler": "export_cobie_xlsx",
+          "request_schema": "None"
+        },
+        {
+          "method": "GET",
+          "path": "/models/{model_id}/export/elements.{fmt}",
+          "handler": "export_elements",
           "request_schema": "None"
         },
         {
@@ -79468,6 +79475,11 @@
         },
         {
           "method": "GET",
+          "path": "/boqs/{boq_id}/nrm1/sources",
+          "handler": "get_nrm1_sources"
+        },
+        {
+          "method": "GET",
           "path": "/boqs/{boq_id}/nrm1/export.xlsx",
           "handler": "export_nrm1_cost_plan",
           "request_schema": "GifaParam"
@@ -84900,6 +84912,12 @@
           "method": "POST",
           "path": "/usage-counts/",
           "handler": "get_cost_item_usage_counts",
+          "request_schema": "UsageCountsRequest"
+        },
+        {
+          "method": "POST",
+          "path": "/usage-stats/",
+          "handler": "get_cost_item_usage_stats",
           "request_schema": "UsageCountsRequest"
         },
         {
@@ -103951,6 +103969,7 @@
         "procurement.py",
         "procurement_api.py",
         "procurement_models.py",
+        "quick.py",
         "revisions.py",
         "router.py",
         "rules.py",
@@ -105211,6 +105230,7 @@
         "notifications",
         "projects",
         "qms",
+        "rfq_bidding",
         "schedule",
         "tasks",
         "tendering",
@@ -271531,6 +271551,11 @@
               "default": "0"
             },
             {
+              "name": "open_observations",
+              "type": "int",
+              "description": "Observations still open or in progress."
+            },
+            {
               "name": "days_without_incident",
               "type": "int | None",
               "description": "Calendar days since the last incident. None when there are no incidents, OR when incidents exist but none had a usable date (see days_without_incident_status to disambiguate)."
@@ -272692,6 +272717,7 @@
         "activity_move.py",
         "baseline_revisions.py",
         "baseline_router.py",
+        "boq_followup.py",
         "boq_plan.py",
         "codes_bandtree.py",
         "codes_grouped.py",
@@ -343930,10 +343956,10 @@
     },
     {
       "name": "bim",
-      "ts_files": 141,
+      "ts_files": 142,
       "css_files": 0,
-      "test_files": 51,
-      "total_files": 142
+      "test_files": 52,
+      "total_files": 143
     },
     {
       "name": "bim_requirements",
@@ -346238,6 +346264,7 @@
       "notifications",
       "projects",
       "qms",
+      "rfq_bidding",
       "schedule",
       "tasks",
       "tendering",
@@ -347646,11 +347673,11 @@
     "total_models": 992,
     "total_columns": 11598,
     "total_relationships": 264,
-    "total_routes": 5595,
+    "total_routes": 5598,
     "total_schemas": 5226,
-    "total_python_files": 3843,
+    "total_python_files": 3846,
     "frontend_features": 254,
-    "frontend_ts_files": 4576,
+    "frontend_ts_files": 4577,
     "frontend_backend_mapped": 224
   },
   "frontend_backend_mapping": {
