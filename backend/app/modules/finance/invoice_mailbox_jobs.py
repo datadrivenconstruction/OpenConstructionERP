@@ -44,6 +44,11 @@ async def _loop(interval: int, first: int) -> None:
 def register_jobs(interval: int = _INTERVAL_SECONDS, first: int = _FIRST_TICK_SECONDS) -> asyncio.Task[None] | None:
     """Schedule the poll; ``None`` when one already runs or there is no event loop."""
     global _ACTIVE_TASK
+    from app.core.processes.semantic import fast_startup
+
+    # A tick inside a test run opens its own session mid-test and breaks the test's savepoints.
+    if fast_startup():
+        return None
     if _ACTIVE_TASK is not None and not _ACTIVE_TASK.done():
         return None
     try:
