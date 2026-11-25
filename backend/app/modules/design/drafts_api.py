@@ -288,7 +288,7 @@ def register(router, can_accept, can_publish, acquire, holds_lock, ingest) -> No
                 except PackageRejected as exc:
                     raise HTTPException(exc.status_code, exc.detail) from exc
                 upload = _Upload(src, d.package_sha256, d.package_bytes, d.package[:8])
-                rev = await ingest(session, background, project_id, principal, pkg, upload, Path(tmp))
+                rev, _ = await ingest(session, background, project_id, principal, pkg, upload, Path(tmp))
             await session.execute(delete(DesignDraft).where(DesignDraft.id == d.id))
             await session.commit()
             return RevisionView.of(rev)

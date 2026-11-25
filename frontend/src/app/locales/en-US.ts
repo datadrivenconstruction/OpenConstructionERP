@@ -1747,6 +1747,16 @@ const resource = {
     "design.addendum.title": "Bid addendum drafts to review: {{count}}",
     "design.addendum.hint": "An accepted revision changed packages already issued to bidders. A draft addendum is prepared for each; nothing is sent until you review and publish it in Bidding.",
     "design.panel.none.procurement": "No bid package holds this selection.",
+    "design.link_status.title": "Editor link",
+    "design.link_status.connected": "Connected editors: {{n}}",
+    "design.link_status.none": "No editor is linked to this project.",
+    "design.link_status.editor": "Design editor",
+    "design.link_status.last_sync": "Last sync {{when}}",
+    "design.link_status.never_used": "Not used yet",
+    "design.link_status.expires": "access until {{when}}",
+    "design.link_status.revoke": "Unlink",
+    "design.link_status.last_revision_by": "#{{number}} · {{who}} · Last revision received {{when}}",
+    "design.link_status.pending": "Revisions awaiting a decision: {{n}}",
   }
 } as { translation: Record<string, string> };
 

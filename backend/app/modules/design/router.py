@@ -395,7 +395,8 @@ async def holds_lock(session, project_id: uuid.UUID, user_id: uuid.UUID) -> bool
 
 async def _ingest(
     session, background: BackgroundTasks, project_id: uuid.UUID, principal, pkg, upload, work_dir: Path
-) -> DesignRevision:
+) -> tuple[DesignRevision, bool]:
+    """Store a verified package; ``True`` when it is a retry of one already stored."""
     from sqlalchemy import delete
 
     from app.modules.projects.models import Project
@@ -405,7 +406,11 @@ async def _ingest(
     manifest = pkg.manifest
     revision_id = uuid.UUID(manifest.revision_id)
     await rv.sweep_stale_uploads(session, project_id, get_design_settings().revision_stale_upload_seconds)
-    if await session.get(DesignRevision, revision_id) is not None:
+    seen = await session.get(DesignRevision, revision_id)
+    if seen is not None:
+        # A retry after a lost answer sends the same bytes again: hand back what it made while undecided.
+        if seen.project_id == project_id and seen.status == "shared" and seen.package_sha256 == upload.sha256_hex:
+            return seen, True
         raise HTTPException(status.HTTP_409_CONFLICT, "This revision was already uploaded")
     latest = await rv.design_tip(session, project_id)
     parent_id = uuid.UUID(manifest.parent_revision_id) if manifest.parent_revision_id else None
@@ -495,7 +500,7 @@ async def _ingest(
     except Exception:  # noqa: BLE001 - the revision is in; drawings, task and notice are extras
         await session.rollback()
         log.warning("design: revision %s shared without its ERP side effects", revision_id, exc_info=True)
-    return await session.get(DesignRevision, revision_id, populate_existing=True)
+    return await session.get(DesignRevision, revision_id, populate_existing=True), False
 
 
 @router.post("/projects/{project_id}/revisions", response_model=RevisionView, status_code=status.HTTP_201_CREATED)
@@ -504,6 +509,7 @@ async def upload_revision(
     principal: PrincipalDep,
     session: SessionDep,
     background: BackgroundTasks,
+    response: Response,
     package: UploadFile = File(...),
 ) -> RevisionView:
     from app.core.partner_pack._safe_extract import has_zip_magic
@@ -544,7 +550,9 @@ async def upload_revision(
             )
         except PackageRejected as exc:
             raise HTTPException(exc.status_code, exc.detail) from exc
-        rev = await _ingest(session, background, project_id, principal, pkg, upload, work_dir)
+        rev, replayed = await _ingest(session, background, project_id, principal, pkg, upload, work_dir)
+    if replayed:
+        response.status_code = status.HTTP_200_OK
     return RevisionView.of(rev)
 
 

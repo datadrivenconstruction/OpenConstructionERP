@@ -344,3 +344,28 @@ async def test_size_limits(client, monkeypatch):
         monkeypatch.delenv("OE_DESIGN_REVISION_MAX_UNPACKED_BYTES", raising=False)
         get_design_settings.cache_clear()
     assert (await _upload(client, pid, tok, data)).status_code == 201
+
+
+async def test_a_retried_upload_returns_the_revision_it_already_made(client):
+    """The editor retries when the answer was lost: same bytes give the same revision, not a 409."""
+    uid, h, pid, tok = await _linked_project(client)
+    data, _ = package(pid, example_rows())
+    first = await _upload(client, pid, tok, data)
+    assert first.status_code == 201, first.text
+    again = await _upload(client, pid, tok, data)
+    assert again.status_code == 200, again.text
+    assert again.json()["revision_id"] == first.json()["revision_id"]
+    assert again.json()["number"] == first.json()["number"]
+    revs = (await client.get(f"{BASE}/projects/{pid}/revisions", headers=tok)).json()
+    assert revs["total"] == 1
+
+
+async def test_a_different_package_under_a_used_revision_id_is_a_conflict(client):
+    uid, h, pid, tok = await _linked_project(client)
+    data, m = package(pid, example_rows())
+    assert (await _upload(client, pid, tok, data)).status_code == 201
+    rows = example_rows()
+    rows[0]["length_m"] = 99.0
+    other, _ = package(pid, rows, revision_id=m["revision_id"])
+    clash = await _upload(client, pid, tok, other)
+    assert clash.status_code == 409, clash.text

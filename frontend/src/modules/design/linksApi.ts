@@ -4,7 +4,7 @@
  * feeds, the elements behind a position, and the project overview module by module. Also the ERP addresses that
  * open each of them, so every link can be followed both ways.
  */
-import { apiGet, apiPost, apiPut } from '@/shared/lib/api';
+import { apiDelete, apiGet, apiPost, apiPut } from '@/shared/lib/api';
 import { LINK_VERSION } from './api';
 import type { SelectedElement } from './bridge/protocol';
 
@@ -110,4 +110,26 @@ export function fetchElementContext(projectId: string, keys: string[]): Promise<
   const q = new URLSearchParams();
   for (const k of keys.slice(0, MAX_KEYS)) q.append('keys', k);
   return apiGet<ElementContext>(`${P(projectId)}/element-context?${q.toString()}`, { headers: HEADERS });
+}
+
+export interface LinkedEditor {
+  id: string; client_name: string; client_version: string; client_os: string; mine: boolean;
+  linked_at: string; last_used_at: string | null; expires_at: string;
+}
+export interface LinkRevisionTrace {
+  revision_id: string; number: number; status: string; source_kind: string; package_sha256: string;
+  author: string | null; received_at: string;
+}
+export interface LinkStatusView {
+  editors: LinkedEditor[]; pending_revisions: number; last_revision_at: string | null; last_revision: LinkRevisionTrace | null;
+}
+
+/** Live editor tokens of the project and what waits for a decision (ERP session only). */
+export function fetchLinkStatus(projectId: string): Promise<LinkStatusView> {
+  return apiGet<LinkStatusView>(`${P(projectId)}/link/status`);
+}
+
+/** Unlink one editor: its token stops working at once. */
+export function revokeEditor(projectId: string, editorId: string): Promise<void> {
+  return apiDelete<void>(`${P(projectId)}/link/editors/${editorId}`);
 }

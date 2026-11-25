@@ -568,7 +568,9 @@ async def run_job(job_id: uuid.UUID, *, tick: float | None = None) -> None:
             background = BackgroundTasks()
             async with factory() as s:
                 try:
-                    rev = await _ingest(s, background, project_id, Principal(user_id, False, None), pkg, upload, work)
+                    rev, _ = await _ingest(
+                        s, background, project_id, Principal(user_id, False, None), pkg, upload, work
+                    )
                 except HTTPException as exc:
                     detail = exc.detail if isinstance(exc.detail, str) else (exc.detail or {}).get("message", "")
                     raise JobFailed(f"The revision could not be stored: {detail}") from exc
