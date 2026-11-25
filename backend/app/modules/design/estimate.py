@@ -40,6 +40,12 @@ def q4(value: Any) -> Decimal:
     return _to_decimal(_quantize_money_str(_to_decimal(value)))
 
 
+def _round_currency(value: Any) -> Decimal:
+    from app.modules.boq.service import _round_currency as rc
+
+    return rc(value)
+
+
 def dstr(value: Any) -> str:
     from app.modules.boq.service import _quantize_money_str
 
@@ -396,6 +402,23 @@ async def _ensure_binding(session, est: DesignEstimate, rule: DesignEstimateRule
     return b
 
 
+def _project_currency(project) -> str:
+    return (getattr(project, "currency", None) or "").strip().upper()
+
+
+def _drop_foreign_benchmark(est: DesignEstimate, project, c: Computed) -> None:
+    """A benchmark in another currency than the project's is never written as a rate: no conversion is guessed."""
+    if c.unit_rate is None or "benchmark" not in c.provenance:
+        return
+    cur, bench = _project_currency(project), (benchmarks.currency(est.country, est.use) or "").upper()
+    if not cur or not bench or cur == bench:
+        return
+    c.unit_rate = None
+    c.flags.append("rate_missing")
+    c.provenance["missing"] = f"The benchmark is in {bench}, the project is in {cur}."
+    c.provenance["missing_code"] = "currency_mismatch"
+
+
 def est_classification(est: DesignEstimate) -> str:
     return "din276" if est.country == "DE" else "classification"
 
@@ -482,6 +505,7 @@ async def recompute(
         if rule.kind == "manual":
             continue
         pos, c = positions.get(b.position_id), computed[rule.code]
+        _drop_foreign_benchmark(est, project, c)
         if pos is None:  # deleted in the BOQ module: not recreated, kept as a flagged binding
             b.model_quantity, b.element_keys, b.revision_id = dstr(c.quantity), c.element_keys, rev_id
             b.flags = ["position_deleted"]
@@ -658,6 +682,12 @@ async def impact(session, rev: DesignRevision) -> dict[str, Any]:
     rule_rows = await _rule_rows(session, rev.project_id)
     bindings = await _bindings(session, rev.project_id)
     computed, _ = await evaluate(session, est, rule_rows, rev.bim_model_id)
+    from app.modules.projects.models import Project
+
+    project = await session.get(Project, rev.project_id)
+    for c in computed.values():
+        _drop_foreign_benchmark(est, project, c)
+    out["currency"] = _project_currency(project) or None
     positions = {p.id: p for p in await svc.position_repo.list_by_ids([b.position_id for b in bindings.values()])}
     cur_total = new_total = ZERO
     unpriced = 0
@@ -799,10 +829,17 @@ async def summary(session, project_id: uuid.UUID) -> dict[str, Any]:
     unpriced = [r.code for p, b, r in items if q4(p.unit_rate) == 0]
     rng = range_report(est, items, depth)
     t = rng["total"]
-    complete = not unpriced and rng["total"]["complete"]
+    currency = _project_currency(proj) or None
+    same_currency = not currency or not rng["currency"] or currency == rng["currency"].upper()
+    complete = not unpriced and rng["total"]["complete"] and same_currency
     inside: bool | None = None
     if complete:
         inside = Decimal(t["low"]) <= total <= Decimal(t["high"])
+    note_code = None if complete else ("unpriced_or_unsourced" if same_currency else "currency_mismatch")
+    bt = (await svc.compute_boq_totals([est.boq_id])).get(est.boq_id) or {}
+    boq_totals = {
+        k: format(_round_currency(bt.get(k)), "f") for k in ("direct_cost", "markups_total", "grand_total")
+    } | {"currency": bt.get("base_currency") or currency}
     return {
         "estimate": True,
         "boq_id": str(est.boq_id),
@@ -810,6 +847,8 @@ async def summary(session, project_id: uuid.UUID) -> dict[str, Any]:
         "depth_level": depth,
         "country": est.country,
         "use": est.use,
+        "currency": currency,
+        "boq": boq_totals,
         "cost_regions": await cost_regions(session, est.country, getattr(proj, "region", None)),
         "positions": [
             {
@@ -837,10 +876,14 @@ async def summary(session, project_id: uuid.UUID) -> dict[str, Any]:
         "unpriced_positions": unpriced,
         "range": rng,
         "inside_range": inside,
-        "inside_range_note_code": None if complete else "unpriced_or_unsourced",
+        "inside_range_note_code": note_code,
         "inside_range_note": None
         if complete
-        else "Not comparable: some positions are unpriced or a range group has no sourced benchmark.",
+        else (
+            "Not comparable: some positions are unpriced or a range group has no sourced benchmark."
+            if same_currency
+            else "Not comparable: the benchmark range is in another currency than the project."
+        ),
     }
 
 

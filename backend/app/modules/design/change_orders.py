@@ -7,7 +7,7 @@ elements come from the BIM hub's model diff. Nothing is approved here: a person 
 from __future__ import annotations
 
 import uuid
-from decimal import Decimal
+from decimal import ROUND_HALF_UP, Decimal
 from typing import Any
 
 from fastapi import HTTPException, status
@@ -304,6 +304,25 @@ async def create(session, rev: DesignRevision, row: DesignChangeOrder, user_id: 
     return order_id
 
 
+def cost_history(snap: dict[str, Any]) -> dict[str, Any] | None:
+    """Estimate total before and after the accept, read from the snapshot taken before positions moved."""
+    imp = (snap or {}).get("impact") or {}
+    t = imp.get("totals")
+    if not t:
+        return None
+
+    def money(v: Any) -> str:
+        return format(Decimal(str(v)).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP), "f")
+
+    return {
+        "before": money(t["current"]),
+        "after": money(t["after"]),
+        "delta": money(t["delta"]),
+        "unpriced_positions": t.get("unpriced_positions", 0),
+        "currency": imp.get("currency"),
+    }
+
+
 async def view(session, rev: DesignRevision) -> dict[str, Any]:
     from app.modules.changeorders.models import ChangeOrder
 
@@ -322,6 +341,7 @@ async def view(session, rev: DesignRevision) -> dict[str, Any]:
     }
     if row is None:
         return out
+    out["cost"] = cost_history(row.snapshot)
     if row.change_order_id is None:
         out["state"] = "declined"
         return out
