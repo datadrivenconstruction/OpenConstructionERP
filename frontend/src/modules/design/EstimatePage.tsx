@@ -85,7 +85,7 @@ function EstimateScreen({ projectId }: { projectId: string }) {
     const f = failure(t, estimateQ.error, 'design.estimate.load_failed');
     return <ErrorState title={f.title} hint={f.hint} onRetry={() => estimateQ.refetch()} />;
   }
-  if (estimateQ.isLoading || !estimateQ.data) return <Skeleton className="m-6 h-48" data-testid="estimate-loading" />;
+  if (estimateQ.isLoading || !estimateQ.data) return <Skeleton className="h-48 w-full" data-testid="estimate-loading" />;
 
   const data = estimateQ.data;
   const revisions = revisionsQ.data ?? [];
@@ -158,8 +158,10 @@ function NoEstimate(props: {
               <input
                 value={shown}
                 maxLength={2}
+                placeholder="DE"
+                aria-describedby="est-country-hint"
                 onChange={(e) => setCountry(e.target.value.toUpperCase())}
-                className="w-20 rounded border border-border-light bg-surface-primary px-2 py-1 uppercase"
+                className="oe-input w-20 uppercase"
               />
             </label>
             <Button variant="primary" disabled={blocked || !/^[A-Za-z]{2}$/.test(shown) || props.starter.isPending}
@@ -167,6 +169,7 @@ function NoEstimate(props: {
               {tr(t, 'design.estimate.install_starter')}
             </Button>
           </div>
+          <p id="est-country-hint" className="px-4 pb-3 text-xs text-content-secondary">{tr(t, 'design.estimate.country_hint')}</p>
           {blocked && props.accessReady && <p className="px-4 pb-3 text-xs text-content-secondary">{tr(t, 'design.estimate.manager_only')}</p>}
           {props.starter.isError && <MutationError err={props.starter.error} fallback="design.estimate.starter_failed" />}
         </Card>
@@ -239,15 +242,18 @@ function Totals({ est, currency, projectCurrency }: { est: Estimate; currency: s
   const verdict = rangeVerdict(est);
   const placement = totalPlacement(est);
   const priced = Number(est.total) !== 0;
+  // Nothing priced: a row of zero euros would read as a result; show a dash and the reason below instead.
+  const rangeEmpty = !priced && !r.total.complete && (['low', 'mid', 'high'] as const).every((k) => Number(r.total[k]) === 0);
+  const hasArea = Number(r.basis_living_area_m2) > 0;
   return (
     <Card padding="none">
       <CardHeader className="px-4 pt-4 pb-3" title={tr(t, 'design.estimate.range')}
-        subtitle={tr(t, 'design.estimate.range_basis', { area: fmtQuantity(r.basis_living_area_m2, 1) })} />
+        subtitle={hasArea ? tr(t, 'design.estimate.range_basis', { area: fmtQuantity(r.basis_living_area_m2, 1) }) : undefined} />
       <dl className="grid grid-cols-3 gap-2 px-4 pb-3 text-sm" data-testid="range-totals">
         {(['low', 'mid', 'high'] as const).map((k) => (
           <div key={k}>
             <dt className="text-content-tertiary">{tr(t, `design.estimate.${k}`)}</dt>
-            <dd className={`break-words tabular-nums ${k === 'mid' ? 'text-xl font-semibold text-content-primary' : 'text-base text-content-secondary'}`}>{moneyWhole(r.total[k], currency)}</dd>
+            <dd className={`break-words tabular-nums ${k === 'mid' ? 'text-xl font-semibold text-content-primary' : 'text-base text-content-secondary'}`}>{rangeEmpty ? '–' : moneyWhole(r.total[k], currency)}</dd>
           </div>
         ))}
       </dl>
@@ -268,14 +274,19 @@ function Totals({ est, currency, projectCurrency }: { est: Estimate; currency: s
           </div>
         )}
         {est.boq && (
+          <>
           <dl className="grid grid-cols-3 gap-2" data-testid="boq-totals">
             {(['direct_cost', 'markups_total', 'grand_total'] as const).map((k) => (
               <div key={k}>
                 <dt className="text-content-tertiary">{tr(t, `design.estimate.boq_${k}`)}</dt>
-                <dd className={`tabular-nums ${k === 'grand_total' ? 'font-semibold text-content-primary' : ''}`}>{moneyExact(est.boq![k], est.boq!.currency ?? projectCurrency)}</dd>
+                <dd className={`tabular-nums ${k === 'grand_total' ? 'font-semibold text-content-primary' : ''}`}>{priced ? moneyExact(est.boq![k], est.boq!.currency ?? projectCurrency) : '–'}</dd>
               </div>
             ))}
           </dl>
+          <Link to={`/boq/${encodeURIComponent(est.boq_id)}`} data-testid="boq-open" className="text-xs text-oe-blue-text underline">
+            {tr(t, 'design.estimate.boq_open')}
+          </Link>
+          </>
         )}
         {verdict === 'unknown' && (
           <p role="note" data-testid="check-unknown" className="rounded border border-semantic-warning px-3 py-2">

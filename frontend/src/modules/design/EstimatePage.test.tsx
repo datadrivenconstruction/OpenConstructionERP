@@ -156,6 +156,17 @@ describe('estimate with a range', () => {
     expect((await screen.findByTestId('check-outside')).textContent).not.toMatch(/below/);
   });
 
+  it('shows dashes, not zero euros, when nothing is priced and no range can be formed', async () => {
+    const b = clone(base);
+    h.estimate = est({ total: '0', range: { ...b.range, basis_living_area_m2: '0',
+      total: { low: '0', mid: '0', high: '0', complete: false } } });
+    await mount();
+    const totals = await screen.findByTestId('range-totals');
+    expect(within(totals).queryByText(/€/)).toBeNull();
+    expect(within(totals).getAllByText('–')).toHaveLength(3);
+    expect(screen.queryByText(/Living area/)).toBeNull();
+  });
+
   it('lists each benchmark once with publisher, url and date', async () => {
     await mount();
     const list = await screen.findByTestId('benchmark-list');

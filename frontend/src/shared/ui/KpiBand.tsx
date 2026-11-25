@@ -44,6 +44,8 @@ export interface KpiBandItem {
   deltaDirection?: 'up' | 'down' | 'flat';
   /** Optional click handler - turns the tile into a button for drill-down. */
   onClick?: () => void;
+  /** Native tooltip: where the figure comes from. */
+  title?: string;
   /** Accessible label when the tile is interactive. */
   ariaLabel?: string;
 }
@@ -96,6 +98,7 @@ export function KpiBand({ items, columns, size = 'md', className }: KpiBandProps
             delta={item.delta}
             deltaDirection={item.deltaDirection}
             size={size}
+            title={item.title}
             {...(interactive
               ? {
                   onClick: item.onClick,

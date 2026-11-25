@@ -42,30 +42,32 @@ export function OverviewKpis({ projectId, steps }: { projectId: string; steps: O
   const currency = e ? (e.range.currency ?? access.data?.currency ?? '') : '';
   const n = e?.positions.length ?? 0;
   const unpriced = e?.unpriced_positions.length ?? 0;
+  // No sourced rate yet: a range of zero euros would read as a result, so the tile says it has none.
+  const hasRange = !!e && !(!e.range.total.complete && Number(e.range.total.mid) === 0 && Number(e.total) === 0);
 
   const items: KpiBandItem[] = [
     {
-      key: 'revision', icon: Boxes, label: tr(t, 'design.overview.kpi.revision'), onClick: go('model'),
+      key: 'revision', title: tr(t, 'design.overview.kpi.src_revision'), icon: Boxes, label: tr(t, 'design.overview.kpi.revision'), onClick: go('model'),
       value: model?.current ? tr(t, 'design.revisions.number', { number: model.current }) : none,
       sub: model?.waiting ? tr(t, 'design.overview.state.waiting', { count: model.waiting })
         : tr(t, 'design.overview.kpi.revisions', { count: model?.count ?? 0 }),
       tone: model?.waiting ? 'warning' : undefined,
     },
     {
-      key: 'estimate', icon: Calculator, label: tr(t, 'design.overview.kpi.estimate'), onClick: go('estimate'),
-      value: e ? compact(e.range.total.mid, currency) : est.isLoading ? '…' : none,
-      ariaLabel: e ? `${tr(t, 'design.overview.kpi.estimate')}: ${moneyWhole(e.range.total.mid, currency)}` : undefined,
-      sub: e ? tr(t, 'design.overview.kpi.range', {
+      key: 'estimate', title: tr(t, 'design.overview.kpi.src_estimate'), icon: Calculator, label: tr(t, 'design.overview.kpi.estimate'), onClick: go('estimate'),
+      value: e && hasRange ? compact(e.range.total.mid, currency) : est.isLoading && !e ? '…' : none,
+      ariaLabel: e && hasRange ? `${tr(t, 'design.overview.kpi.estimate')}: ${moneyWhole(e.range.total.mid, currency)}` : undefined,
+      sub: e && hasRange ? tr(t, 'design.overview.kpi.range', {
         low: compact(e.range.total.low, currency), high: compact(e.range.total.high, currency) }) : undefined,
     },
     {
-      key: 'priced', icon: ListChecks, label: tr(t, 'design.overview.kpi.priced'), onClick: go('estimate'),
+      key: 'priced', title: tr(t, 'design.overview.kpi.src_priced'), icon: ListChecks, label: tr(t, 'design.overview.kpi.priced'), onClick: go('estimate'),
       value: e ? `${n - unpriced} / ${n}` : none,
       sub: e && unpriced ? tr(t, 'design.overview.kpi.unpriced', { count: unpriced }) : undefined,
       tone: e && unpriced ? 'warning' : undefined,
     },
     {
-      key: 'linked', icon: Link2, label: tr(t, 'design.overview.kpi.linked'), onClick: go('bim'),
+      key: 'linked', title: tr(t, 'design.overview.kpi.src_linked'), icon: Link2, label: tr(t, 'design.overview.kpi.linked'), onClick: go('bim'),
       value: step('bim')?.done ? (step('bim')?.count ?? 0).toLocaleString(getNumberLocale()) : none,
     },
   ];
