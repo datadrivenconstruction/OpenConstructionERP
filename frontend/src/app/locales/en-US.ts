@@ -1697,6 +1697,8 @@ const resource = {
     "measurement_book.f_breadth": "Width",
     "accountingSync.sync.push_hint_review": "Check the documents you reviewed below, then post them. Payments recorded in your books come back.",
     "api_errors.auth.sso_required": "Your organization requires single sign-on. Use the SSO button to sign in.",
+    "api_errors.project_currency_missing": "Set the project currency before asking for prices.",
+    "api_errors.export_too_large_for_xlsx": "Too many elements ({{rows}}) for one workbook, the limit is {{max}}. Export CSV or JSON, or filter the model.",
     "capital_plan.empty_desc": "Import the projects of this program to see how their cost lands on the yearly budget.",
     "site_sensors.import.bad_time": "Time not recognized",
     "normPricing.subtitle": "Hourly labor rates from the estimate wage and the grade table of {{base}}, and the markup caps of the funding type. Lines cite norm codes like {{example}}.",
@@ -1744,6 +1746,11 @@ const resource = {
     "design.panel.none.procurement": "No bid package holds this selection.",
     "design.quick.subtitle": "Type, floor area and storeys give a first model, a priced breakdown and a schedule. Nothing is saved.",
     "design.quick.kpi.programme": "Schedule",
+    "design.quick.issue.depth_clipped": "A depth of {{depth}} m does not fit this storey area; a square footprint {{used}} m deep is used.",
+    "design.quick.band_range": "Reference band {{low}} to {{high}} per m2.",
+    "design.quick.unit_m": "m",
+    "design.quick.field_invalid": "Enter a valid positive number.",
+    "design.quick.fields_invalid": "Some values are out of range; check the marked fields.",
     "design.link_status.title": "Editor link",
     "design.link_status.connected": "Connected editors: {{n}}",
     "design.link_status.none": "No editor is linked to this project.",
@@ -1758,6 +1765,8 @@ const resource = {
     "design.link_status.error.editor_link_not_found": "This editor link no longer exists.",
     "design.link_status.error.unlink_not_allowed": "Only the person who linked this editor or a project manager can unlink it.",
     "design.link_status.error.other": "The editor could not be unlinked. Try again.",
+    "design.takeoff.boq_name": "Design take-off",
+    "design.takeoff.package_name": "Design take-off: {{ifc_class}}",
   }
 } as { translation: Record<string, string> };
 

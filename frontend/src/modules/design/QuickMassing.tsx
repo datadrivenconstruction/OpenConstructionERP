@@ -9,7 +9,7 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { Calculator, Loader2 } from 'lucide-react';
 import { Button } from '@/shared/ui';
-import { getErrorMessage } from '@/shared/lib/api';
+import { ApiError, getErrorMessage } from '@/shared/lib/api';
 import { fmtCurrency, fmtNumber, fmtQuantity } from '@/shared/lib/formatters';
 import { tr } from './BriefFields';
 import { fetchQuickTypes, runQuick, type Provenance, type Quality, type QuickBrief, type QuickResult } from './startApi';
@@ -26,16 +26,41 @@ function num(s: string): number | undefined {
   return s.trim() && Number.isFinite(v) ? v : undefined;
 }
 
+/** Fields the brief cannot be run without, or whose value is not a positive number; empty optional fields are fine. */
+function invalidFields(form: Record<string, string>): string[] {
+  const bad: string[] = [];
+  for (const k of ['gfa_m2', 'storeys']) { const v = num(form[k] ?? ''); if (v === undefined || v <= 0) bad.push(k); }
+  for (const k of [...OPTIONAL, 'fx_rate']) {
+    const s = form[k] ?? '';
+    if (!s.trim()) continue;
+    const v = num(s);
+    if (v === undefined || v < 0 || (v === 0 && k !== 'wwr' && k !== 'slab_zone_m')) bad.push(k);
+  }
+  return bad;
+}
+
+/** A 422 from request validation names the fields; anything else is shown through its coded message. */
+function serverFields(err: unknown): string[] {
+  if (!(err instanceof ApiError) || err.status !== 422) return [];
+  const detail = (err.body as { detail?: unknown } | null)?.detail;
+  if (!Array.isArray(detail)) return [];
+  return detail.map((d) => (Array.isArray(d?.loc) ? String(d.loc[d.loc.length - 1]) : '')).filter(Boolean);
+}
+
 export function QuickMassing({ projectId, country }: { projectId: string; country?: string | null }) {
   const { t } = useTranslation();
   const types = useQuery({ queryKey: ['design-quick-types'], queryFn: fetchQuickTypes });
   const [form, setForm] = useState<Record<string, string>>({ building_type: 'office', gfa_m2: '2400', storeys: '4', quality: 'standard' });
   const run = useMutation({ mutationFn: (b: QuickBrief) => runQuick(projectId, b) });
-  const set = (k: string, v: string) => setForm((f) => ({ ...f, [k]: v }));
+  const [bad, setBad] = useState<string[]>([]);
+  const set = (k: string, v: string) => { setForm((f) => ({ ...f, [k]: v })); setBad((b) => b.filter((x) => x !== k)); };
 
   const submit = () => {
+    const wrong = invalidFields(form);
+    setBad(wrong);
+    if (wrong.length) return;
     const brief: QuickBrief = {
-      building_type: form.building_type!, gfa_m2: num(form.gfa_m2 ?? '') ?? 0, storeys: Math.trunc(num(form.storeys ?? '') ?? 0),
+      building_type: form.building_type!, gfa_m2: num(form.gfa_m2!)!, storeys: Math.trunc(num(form.storeys!)!),
       quality: (form.quality as Quality) ?? 'standard', country: country ?? undefined,
       fx_rate: form.fx_rate?.trim() || undefined,
     };
@@ -43,9 +68,11 @@ export function QuickMassing({ projectId, country }: { projectId: string; countr
     run.mutate(brief);
   };
 
+  const wrongFields = [...bad, ...serverFields(run.error)];
   const field = (k: string, input: React.ReactNode) => (
     <label key={k} className="flex flex-col gap-1 text-xs text-content-secondary">
       {tr(t, `design.quick.field.${k}`)}{input}
+      {wrongFields.includes(k) && <span role="alert" className="text-semantic-error">{tr(t, 'design.quick.field_invalid')}</span>}
     </label>
   );
   const box = 'rounded-md border border-border bg-surface-primary px-2 py-1.5 text-sm text-content-primary';
@@ -73,8 +100,9 @@ export function QuickMassing({ projectId, country }: { projectId: string; countr
           </select>
         ))}
         {OPTIONAL.map((k) => field(k, <input className={box} inputMode="decimal" value={form[k] ?? ''} onChange={(e) => set(k, e.target.value)} />))}
-        {r?.cost?.reason === 'currency' && field('fx_rate', (
-          <input className={box} inputMode="decimal" value={form.fx_rate ?? ''} placeholder={`1 ${r.cost.band_currency} = ? ${r.cost.currency}`}
+        {field('fx_rate', (
+          <input className={box} inputMode="decimal" value={form.fx_rate ?? ''}
+            placeholder={r?.cost?.band_currency && r.cost.currency ? `1 ${r.cost.band_currency} = ? ${r.cost.currency}` : undefined}
             onChange={(e) => set('fx_rate', e.target.value)} />
         ))}
       </div>
@@ -84,7 +112,11 @@ export function QuickMassing({ projectId, country }: { projectId: string; countr
           {tr(t, 'design.quick.run')}
         </Button>
       </div>
-      {run.isError && <p role="alert" className="text-sm text-semantic-error">{getErrorMessage(run.error)}</p>}
+      {run.isError && (
+        <p role="alert" className="text-sm text-semantic-error">
+          {serverFields(run.error).length ? tr(t, 'design.quick.fields_invalid') : getErrorMessage(run.error)}
+        </p>
+      )}
       {r && <QuickResultView r={r} onUse={(k, v) => set(k, String(v))} />}
     </section>
   );
@@ -109,8 +141,8 @@ function QuickResultView({ r, onUse }: { r: QuickResult; onUse: (k: string, v: n
           {r.generator === false && <p className="text-xs text-content-tertiary">{tr(t, 'design.quick.no_generator')}</p>}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3" data-testid="quick-kpis">
             <Kpi label={tr(t, 'design.quick.kpi.footprint')}
-              value={`${fmtNumber(r.model.footprint.width_m, 1)} × ${fmtNumber(r.model.footprint.depth_m, 1)} m`} />
-            <Kpi label={tr(t, 'design.quick.kpi.height')} value={`${fmtNumber(r.model.height_m, 1)} m`} />
+              value={`${fmtNumber(r.model.footprint.width_m, 1)} × ${fmtNumber(r.model.footprint.depth_m, 1)} ${tr(t, 'design.quick.unit_m')}`} />
+            <Kpi label={tr(t, 'design.quick.kpi.height')} value={`${fmtNumber(r.model.height_m, 1)} ${tr(t, 'design.quick.unit_m')}`} />
             <Kpi label={tr(t, 'design.quick.kpi.total')} value={r.cost?.total ? fmtCurrency(r.cost.total, cur) : '—'}
               hint={r.cost?.per_m2 ? tr(t, 'design.quick.per_m2', { value: fmtCurrency(r.cost.per_m2, cur) }) : undefined} />
             <Kpi label={tr(t, 'design.quick.kpi.programme')}
@@ -118,8 +150,8 @@ function QuickResultView({ r, onUse }: { r: QuickResult; onUse: (k: string, v: n
           </div>
           {r.cost?.reason && <p className="text-sm text-content-secondary">{tr(t, `design.quick.reason.${r.cost.reason}`)}</p>}
           {r.cost?.benchmark && (
-            <p className={r.cost.benchmark.within ? 'text-sm text-semantic-success' : 'text-sm text-semantic-warning'}>
-              {tr(t, r.cost.benchmark.within ? 'design.quick.band_within' : 'design.quick.band_outside', {
+            <p className="text-sm text-content-secondary" title={r.cost.benchmark.ref}>
+              {tr(t, 'design.quick.band_range', {
                 low: fmtCurrency(r.cost.benchmark.low, cur), high: fmtCurrency(r.cost.benchmark.high, cur) })}
               {r.cost.needs_expert_review && ` ${tr(t, 'design.quick.review')}`}
             </p>
@@ -144,7 +176,7 @@ function QuickResultView({ r, onUse }: { r: QuickResult; onUse: (k: string, v: n
                 <tbody>
                   {r.cost.lines.map((l) => (
                     <tr key={l.code} className="border-t border-border-light" title={provText(t, l.provenance)}>
-                      <td className="py-1">{l.code === 'other' ? tr(t, 'design.quick.other') : `KG ${l.code}`}</td>
+                      <td className="py-1">{`KG ${l.code}`}</td>
                       <td className="py-1 text-right tabular-nums">{l.quantity == null ? '—' : `${fmtQuantity(l.quantity)} ${l.unit}`}</td>
                       <td className="py-1 text-right tabular-nums">{fmtCurrency(l.amount, cur)}</td>
                     </tr>
