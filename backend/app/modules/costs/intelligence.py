@@ -23,7 +23,7 @@ from datetime import UTC, date, datetime
 from decimal import Decimal
 from typing import Literal
 
-from sqlalchemy import desc, func, select
+from sqlalchemy import desc, func, select, true
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.costs.models import CostItem, CostItemUsage, RegionalIndex
@@ -308,7 +308,11 @@ class CostCertaintyService:
 # ── Applied-rate spread ───────────────────────────────────────────────────────
 
 
-async def applied_rate_stats(session: AsyncSession, ids: list[uuid.UUID]) -> dict[str, dict[str, object]]:
+async def applied_rate_stats(
+    session: AsyncSession,
+    ids: list[uuid.UUID],
+    project_ids: set[uuid.UUID] | None,
+) -> dict[str, dict[str, object]]:
     """Min / average / max of the unit rates each item was applied at in BOQ lines.
 
     Reads the usage ledger (``context = "boq"``) with one grouped query on its
@@ -317,8 +321,11 @@ async def applied_rate_stats(session: AsyncSession, ids: list[uuid.UUID]) -> dic
     but not in the spread, rows with no captured currency are taken as the
     item's. Amounts are exact decimals, returned as strings. Ids with no BOQ
     use are omitted.
+
+    Only uses in ``project_ids`` count (``None`` = every project, for admins),
+    so one company never sees the prices another applied.
     """
-    if not ids:
+    if not ids or (project_ids is not None and not project_ids):
         return {}
     currencies = dict((await session.execute(select(CostItem.id, CostItem.currency).where(CostItem.id.in_(ids)))).all())
     rows = await session.execute(
@@ -331,6 +338,7 @@ async def applied_rate_stats(session: AsyncSession, ids: list[uuid.UUID]) -> dic
             func.sum(CostItemUsage.unit_rate_at_use),
         )
         .where(CostItemUsage.cost_item_id.in_(ids), CostItemUsage.context == "boq")
+        .where(CostItemUsage.project_id.in_(project_ids) if project_ids is not None else true())
         .group_by(CostItemUsage.cost_item_id, CostItemUsage.currency_at_use)
     )
     acc: dict[uuid.UUID, dict[str, object]] = {}

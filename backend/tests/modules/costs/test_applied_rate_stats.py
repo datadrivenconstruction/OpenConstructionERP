@@ -47,7 +47,7 @@ async def test_spread_and_citations_follow_the_worked_example() -> None:
             await rec.record(item_id, project_id=project, unit_rate_at_use=Decimal(rate), currency_at_use=cur)
         await rec.record(item_id, project_id=project, unit_rate_at_use=Decimal("50"), context="assembly")
 
-        stats = await applied_rate_stats(session, [item_id, unused])
+        stats = await applied_rate_stats(session, [item_id, unused], {project})
 
         assert set(stats) == {str(item_id)}
         row = stats[str(item_id)]
@@ -62,4 +62,22 @@ async def test_spread_and_citations_follow_the_worked_example() -> None:
 @pytest.mark.asyncio
 async def test_no_ids_answers_nothing() -> None:
     async with transactional_session() as session:
-        assert await applied_rate_stats(session, []) == {}
+        assert await applied_rate_stats(session, [], None) == {}
+        assert await applied_rate_stats(session, [uuid.uuid4()], set()) == {}
+
+
+@pytest.mark.asyncio
+async def test_another_tenants_applications_never_move_my_stats() -> None:
+    async with transactional_session() as session:
+        item_id = await _item(session)
+        mine, theirs = uuid.uuid4(), uuid.uuid4()
+        rec = CostUsageRecorder(session)
+        await rec.record(item_id, project_id=mine, unit_rate_at_use=Decimal("10"), currency_at_use="EUR")
+        before = await applied_rate_stats(session, [item_id], {mine})
+        for rate in ("1", "500", "9999"):
+            await rec.record(item_id, project_id=theirs, unit_rate_at_use=Decimal(rate), currency_at_use="EUR")
+        after = await applied_rate_stats(session, [item_id], {mine})
+        assert after == before
+        assert after[str(item_id)]["boq_lines"] == 1
+        assert after[str(item_id)]["max"] == "10.0000"
+        assert await applied_rate_stats(session, [item_id], {uuid.uuid4()}) == {}
