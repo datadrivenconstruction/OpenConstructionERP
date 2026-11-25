@@ -24421,6 +24421,7 @@
         "file_storage.py",
         "glb_cache.py",
         "ifc_processor.py",
+        "link_quantity.py",
         "manifest.py",
         "mesh_formats.py",
         "models.py",
@@ -24437,6 +24438,7 @@
         "service.py",
         "smart_views.py",
         "tiler.py",
+        "validators.py",
         "vector_adapter.py"
       ],
       "manifest": {
@@ -25158,6 +25160,19 @@
           "path": "/models/{model_id}/boq-links/",
           "handler": "list_model_boq_links",
           "response_model": "BIMModelBOQLinksResponse",
+          "request_schema": "None"
+        },
+        {
+          "method": "GET",
+          "path": "/models/{model_id}/link-check/",
+          "handler": "model_link_check",
+          "response_model": "BIMLinkCheckResponse",
+          "request_schema": "None"
+        },
+        {
+          "method": "POST",
+          "path": "/links/restore-model-quantity/",
+          "handler": "restore_model_quantity",
           "request_schema": "None"
         },
         {
@@ -26769,6 +26784,94 @@
               "name": "total",
               "type": "int",
               "default": "0"
+            }
+          ]
+        },
+        {
+          "class_name": "BIMLinkCheckType",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Elements of one type linked to no BOQ position.",
+          "fields": [
+            {
+              "name": "element_type",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "count",
+              "type": "int",
+              "default": "0"
+            }
+          ]
+        },
+        {
+          "class_name": "BIMLinkCheckPosition",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "A BOQ position bound to the model, with its live link count.",
+          "fields": [
+            {
+              "name": "id",
+              "type": "str"
+            },
+            {
+              "name": "ordinal",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "unit",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "linked",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "status",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "manual_kept",
+              "type": "bool",
+              "default": "False"
+            }
+          ]
+        },
+        {
+          "class_name": "BIMLinkCheckResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Coverage of one model in the bill and the ``bim_link`` rule findings.",
+          "fields": [
+            {
+              "name": "element_total",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "unlinked_total",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "unlinked_by_type",
+              "type": "list[BIMLinkCheckType]"
+            },
+            {
+              "name": "positions",
+              "type": "list[BIMLinkCheckPosition]"
+            },
+            {
+              "name": "findings",
+              "type": "list[dict[str, Any]]"
             }
           ]
         },
@@ -343977,10 +344080,10 @@
     },
     {
       "name": "boq",
-      "ts_files": 290,
+      "ts_files": 292,
       "css_files": 0,
-      "test_files": 143,
-      "total_files": 290
+      "test_files": 144,
+      "total_files": 292
     },
     {
       "name": "buyer-portal",
@@ -347673,11 +347776,11 @@
     "total_models": 992,
     "total_columns": 11598,
     "total_relationships": 264,
-    "total_routes": 5598,
-    "total_schemas": 5226,
-    "total_python_files": 3846,
+    "total_routes": 5600,
+    "total_schemas": 5229,
+    "total_python_files": 3848,
     "frontend_features": 254,
-    "frontend_ts_files": 4577,
+    "frontend_ts_files": 4579,
     "frontend_backend_mapped": 224
   },
   "frontend_backend_mapping": {

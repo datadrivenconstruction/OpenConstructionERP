@@ -261,7 +261,7 @@ def cmd_remove(args: argparse.Namespace) -> int:
     if not keys:
         raise SystemExit("remove needs keys or --file")
     total = 0
-    for lang in all_langs():
+    for lang in args.lang or all_langs():
         bundle = Bundle(lang)
         n = bundle.remove(keys)
         if n:
@@ -365,6 +365,7 @@ def build_parser() -> argparse.ArgumentParser:
     p = sub.add_parser("remove", help="delete keys from every bundle")
     p.add_argument("keys", nargs="*")
     p.add_argument("--file", help="JSON object/array or one key per line")
+    p.add_argument("--lang", action="append", help="only these bundles (repeatable); default every bundle")
     p.set_defaults(func=cmd_remove)
 
     p = sub.add_parser("export", help="write {key: english} for a translator")

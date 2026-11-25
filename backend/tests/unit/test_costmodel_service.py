@@ -660,7 +660,13 @@ async def test_cash_flow_spreads_unperioded_lines_over_their_activity(monkeypatc
     act = uuid.uuid4()
     await service.budget_repo.create(  # type: ignore[attr-defined]
         SimpleNamespace(
-            project_id=pid, activity_id=act, planned_amount="400", currency="", period_start=None, period_end=None
+            project_id=pid,
+            activity_id=act,
+            boq_position_id=None,
+            planned_amount="400",
+            currency="",
+            period_start=None,
+            period_end=None,
         )
     )
 
@@ -686,7 +692,7 @@ async def test_cash_flow_spreads_unperioded_lines_over_their_activity(monkeypatc
         def __init__(self, *_a: Any, **_k: Any) -> None: ...
 
         async def list_for_schedule(self, schedule_id: uuid.UUID, *, limit: int = 10000) -> tuple[list[Any], int]:
-            return [SimpleNamespace(id=act, start_date="2026-03-01", end_date="2026-06-30")], 1
+            return [SimpleNamespace(id=act, start_date="2026-03-01", end_date="2026-06-30", boq_position_ids=[])], 1
 
     monkeypatch.setattr(schedule_repo_mod, "ScheduleRepository", _SchedRepo)
     monkeypatch.setattr(schedule_repo_mod, "ActivityRepository", _ActivityRepo)
@@ -694,4 +700,4 @@ async def test_cash_flow_spreads_unperioded_lines_over_their_activity(monkeypatc
     entries = await service.generate_cash_flow_from_schedule(pid)
 
     assert [e.period for e in entries] == ["2026-03", "2026-04", "2026-05", "2026-06"]
-    assert entries[-1].cumulative_planned == "400.0"
+    assert entries[-1].cumulative_planned == "400"

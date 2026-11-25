@@ -95,6 +95,8 @@ def _position(
     return SimpleNamespace(
         id=uuid.uuid4(),
         total=total,
+        quantity="1",
+        unit_rate=total,
         ordinal=ordinal,
         description=description,
         metadata_=metadata or {},

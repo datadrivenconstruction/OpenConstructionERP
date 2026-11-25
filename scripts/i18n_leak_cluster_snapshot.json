@@ -2477,5 +2477,14 @@
     ],
     "key_count_at_seed": 3,
     "note": "Formula is spelled the same in Croatian, Italian and Filipino."
+  },
+  {
+    "locale_set": [
+      "de",
+      "en-GB",
+      "fil"
+    ],
+    "key_count_at_seed": 3,
+    "note": "Kindergarten is the native word in German and the loanword in English and Filipino."
   }
 ]

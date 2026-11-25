@@ -2543,5 +2543,10 @@
     "en_value": "{{list}} +{{count}}",
     "note": "template only: an already localised list followed by +N for the items not shown; no translatable word",
     "reason_category": "template_only"
+  },
+  "design.quick.unit_m": {
+    "en_value": "m",
+    "note": "SI unit symbol for metre beside a building dimension, written the same way in every Latin-script locale",
+    "reason_category": "symbol"
   }
 }

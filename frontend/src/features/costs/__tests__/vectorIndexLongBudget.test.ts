@@ -404,9 +404,10 @@ describe('only the vector calls that own their reporting opt out of the toast', 
   // moves, and nothing about deleting dead code makes a census recount itself.
   // The two BIM model status polls retry on the next tick, so a slow poll has nothing to report.
   // The cost model KPI freshness probe keeps the figures already on screen when it gives up.
-  const EXPECTED_OPT_OUTS = 14;
+  // The sidebar badge poll is decoration and simply tries again on the next interval.
+  const EXPECTED_OPT_OUTS = 15;
 
-  it('suppresses the global toast at exactly the fourteen sites that replace it', () => {
+  it('suppresses the global toast at exactly the fifteen sites that replace it', () => {
     const sites: string[] = [];
     for (const file of productionFiles()) {
       const where = relative(SRC, file).split(sep).join('/');

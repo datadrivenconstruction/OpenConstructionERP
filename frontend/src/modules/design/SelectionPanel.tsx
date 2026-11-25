@@ -13,6 +13,7 @@ import { useTranslation } from 'react-i18next';
 import { ArrowDown, ArrowRight, ArrowUp, Check, MousePointerClick, SlidersHorizontal } from 'lucide-react';
 import clsx from 'clsx';
 import { useAuthStore } from '@/stores/useAuthStore';
+import { fmtList } from '@/shared/lib/formatters';
 import { fetchAccess, fetchEstimate } from './api';
 import { moneyExact, moneyWhole, pickCurrency } from './money';
 import { CORE_STEPS, ICON, stepState, stepText } from './overviewSteps';
@@ -52,7 +53,7 @@ const H = 'text-xs font-semibold uppercase tracking-wide text-content-tertiary';
 function useCostSource(projectId: string): string | null {
   const estimate = useQuery({ queryKey: ['design-estimate', projectId], queryFn: () => fetchEstimate(projectId), retry: false });
   const e = estimate.data && estimate.data.estimate ? estimate.data : null;
-  return e?.cost_regions && e.cost_regions.length > 0 ? e.cost_regions.join(', ') : null;
+  return e?.cost_regions && e.cost_regions.length > 0 ? fmtList(e.cost_regions) : null;
 }
 
 const FIX = 'font-medium text-oe-blue-text underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-oe-blue';

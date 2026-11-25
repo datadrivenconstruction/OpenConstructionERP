@@ -183,6 +183,8 @@ async def test_generate_budget_is_idempotent_per_boq_position(
             ordinal=f"1.{i}",
             description=f"Position {i}",
             total=str(1000 * (i + 1)),
+            quantity="1",
+            unit_rate=str(1000 * (i + 1)),
         )
         for i, pid in enumerate(pos_ids)
     ]

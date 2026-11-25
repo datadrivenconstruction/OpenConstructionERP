@@ -55,7 +55,7 @@ import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { useToastStore } from '@/stores/useToastStore';
 import { useTabKeyboardNav } from '@/shared/hooks/useTabKeyboardNav';
 import { isDateOnlyPast } from '@/shared/lib/dates';
-import { getIntlLocale } from '@/shared/lib/formatters';
+import { getNumberLocale } from '@/stores/usePreferencesStore';
 import {
   fetchInvestigations,
   fetchJSAs,
@@ -991,9 +991,9 @@ function HSEKpiStrip({ projectId }: { projectId: string }) {
   }
 
   const kpiData = kpiQ.data as HSEKpi | undefined;
-  const fmtBase = (n: number) => new Intl.NumberFormat(getIntlLocale()).format(n);
+  const fmtBase = (n: number) => new Intl.NumberFormat(getNumberLocale()).format(n);
   const fmtRate = (v: string | number | null | undefined, empty: string) =>
-    v === null || v === undefined ? empty : new Intl.NumberFormat(getIntlLocale(), { maximumFractionDigits: 2 }).format(Number(v));
+    v === null || v === undefined ? empty : new Intl.NumberFormat(getNumberLocale(), { maximumFractionDigits: 2 }).format(Number(v));
 
   const ltiTone: KpiTone =
     stats.daysSinceLti === null
