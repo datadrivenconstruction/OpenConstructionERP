@@ -71,6 +71,26 @@ describe('connectBridge', () => {
     expect(h.dirty).toHaveBeenCalledWith(true);
   });
 
+  it('answers a read_file the editor posts while it handles open (the real bundle asks for the model at once)', async () => {
+    const sent: HostMsg[] = [];
+    let cb: ((m: unknown) => void) | null = null;
+    const port: Port = {
+      send: (m) => {
+        sent.push(m);
+        if (m.type === 'open') cb?.({ bridge: 1, type: 'read_file', request_id: 'r1', path: 'model.ddc' });
+      },
+      listen: (f) => { cb = f; return () => { cb = null; }; },
+      close: vi.fn(),
+    };
+    const h = handlers();
+    connectBridge(port, h);
+    cb!(READY);
+    await flush();
+    await flush();
+    expect(h.readFile).toHaveBeenCalledWith('model.ddc');
+    expect(sent[1]).toMatchObject({ type: 'file', request_id: 'r1', ok: true });
+  });
+
   it('refuses an editor without a common major and opens nothing', async () => {
     const { port, sent, emit } = memoryPort();
     const h = handlers();

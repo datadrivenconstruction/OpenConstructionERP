@@ -132,8 +132,9 @@ export function connectBridge(port: Port, h: HostHandlers, opts: { readyTimeoutM
     }
     try {
       opened = await h.open();
-      send(opened);
+      // open first: the editor may ask for the model's files while it still handles this message
       open = true;
+      send(opened);
       h.state({ status: 'open', editor: m.editor });
     } catch (e) {
       h.state({ status: 'failed', reason: e instanceof Error ? e.message : String(e) });

@@ -14,6 +14,17 @@ export function chainTip(revs: RevisionView[]): RevisionView | null {
     .reduce<RevisionView | null>((best, r) => (!best || r.number > best.number ? r : best), null);
 }
 
+/**
+ * The newest imported model when the chain has no design yet: the editor opens empty, and the page says why
+ * (an import is a converter model, not a package the editor can open).
+ */
+export function importOnlyTip(revs: RevisionView[]): RevisionView | null {
+  if (chainTip(revs)) return null;
+  return revs
+    .filter((r) => (r.status === 'shared' || r.status === 'published') && isImported(r))
+    .reduce<RevisionView | null>((best, r) => (!best || r.number > best.number ? r : best), null);
+}
+
 interface ManifestFile { path: string; role: string; bytes: number }
 
 export function openMessage(o: {
