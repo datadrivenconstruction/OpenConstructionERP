@@ -72,7 +72,9 @@ export function ProjectOverview({ projectId }: { projectId: string }) {
                   {tr(t, 'design.overview.progress', { done: doneCore, total: core.length })}
                 </h2>
                 <p className="text-sm text-content-secondary">
-                  {next ? tr(t, `design.overview.next.${next.id}`) : tr(t, 'design.overview.all_linked')}
+                  {/* a revision is waiting: deciding on it is the next step, not building a first one */}
+                  {waiting && next?.id === 'model' ? tr(t, 'design.overview.next.review')
+                    : next ? tr(t, `design.overview.next.${next.id}`) : tr(t, 'design.overview.all_linked')}
                 </p>
               </div>
               <div className="flex flex-wrap gap-2">

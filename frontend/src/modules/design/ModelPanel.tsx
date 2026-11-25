@@ -155,7 +155,7 @@ export function useModelEditor(projectId: string) {
   const loading = access.isLoading || brief.isLoading || gen.isLoading;
   return { m, access, brief, view, draft, setDraft, value, set, floors, problems, unitsPerFloor, maxPerFloor, tooMany, preview, start,
     job, active, mine, elapsed, blocked, offReason, changed, invalid, startError, showPreview, fieldHint, shown, loading,
-    modelFailed: model.isError };
+    modelFailed: model.isError, genOff: !!gen.data && !gen.data.enabled };
 }
 
 export type ModelEditor = ReturnType<typeof useModelEditor>;
@@ -174,6 +174,13 @@ export default function ModelPanel({ projectId, fallback = null }: { projectId: 
   return (
     <Card data-testid="model-panel">
       <CardHeader title={m('design.model.title')} subtitle={m('design.model.hint')} />
+      {/* without the server generator the form cannot make a revision: say so first and point to the editor */}
+      {ed.genOff && (
+        <p className="mt-3 rounded-lg border border-border-light bg-surface-secondary px-3 py-2 text-sm text-content-secondary" data-testid="model-gen-off" title={offReason}>
+          {tr(t, 'design.generate.unavailable')} {tr(t, 'design.generate.unavailable_next')}{' '}
+          <Link className="font-medium text-oe-blue-text underline" to="/design/editor">{tr(t, 'design.editor.open')}</Link>
+        </p>
+      )}
       <div className={clsx('mt-4', showPreview && 'grid gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(480px,52%)]')}>
         <div className="flex min-w-0 flex-col gap-4">
           <ModelForm ed={ed} />
@@ -189,7 +196,7 @@ export default function ModelPanel({ projectId, fallback = null }: { projectId: 
               {changed > 0 ? m('design.model.changed_n', { count: changed }) : m('design.model.unchanged')}
             </span>
           </div>
-          {blocked && !active && <p className="text-sm text-content-secondary" data-testid="model-blocked"
+          {blocked && !active && !ed.genOff && <p className="text-sm text-content-secondary" data-testid="model-blocked"
             title={offReason}>{blocked}</p>}
           {startError && <p role="alert" className="text-sm text-semantic-error">{m('design.model.failed')}: {startError}</p>}
           {mine && ACTIVE.includes(mine.status) && (

@@ -19,7 +19,7 @@ import { selectionFromUrl } from './linksApi';
 import { fetchAiSettings, fetchBrief, fetchRevisions } from './api';
 import { bridgeError, connectBridge, framePort, modulePort, type BridgeHost, type BridgeState, type EditorModule } from './bridge/host';
 import { DRAFT_FILE, type SelectedElement } from './bridge/protocol';
-import { aiConfigured, chainTip, deviceMode, openMessage } from './data/workspace';
+import { aiConfigured, chainTip, deviceMode, importOnlyTip, openMessage } from './data/workspace';
 import { readConsent, type Payload } from './data/webEditor';
 import { currentPayload, startBackgroundLoad } from './editorPayload';
 import { fetchDraft, fetchRights, makeRevision, readDraftPackage, readRevisionFile, saveDraft, type DesignRights, type DraftView } from './draftApi';
@@ -215,9 +215,10 @@ function Workspace({ projectId }: { projectId: string }) {
       )}
       {createButton}
       {engineAction}
-      <Link to="/design/editor/desktop" data-testid="open-desktop"
-        className="inline-flex h-8 items-center gap-1.5 rounded-md border border-border px-3 text-sm text-content-primary hover:bg-surface-secondary focus-visible:outline focus-visible:outline-2 focus-visible:outline-oe-blue">
-        <Monitor size={14} aria-hidden /> <span className="hidden sm:inline">{tr(t, 'design.workspace.desktop')}</span>
+      {/* icon only until the header has room, so the row never wraps beside the draft status */}
+      <Link to="/design/editor/desktop" data-testid="open-desktop" title={tr(t, 'design.workspace.desktop')}
+        className="inline-flex h-8 items-center gap-1.5 rounded-md border border-border px-2.5 text-sm text-content-primary hover:bg-surface-secondary focus-visible:outline focus-visible:outline-2 focus-visible:outline-oe-blue">
+        <Monitor size={14} aria-hidden /> <span className="sr-only 2xl:not-sr-only">{tr(t, 'design.workspace.desktop')}</span>
       </Link>
       <WorkspaceSettings projectId={projectId} rights={rights.data} />
     </header>
@@ -389,6 +390,8 @@ function EditorCanvas({ projectId, payload, locale, mode, rights, onLink, onStat
   const [aiAsk, setAiAsk] = useState<{ text: string; resolve: (o: AiOutcome) => void } | null>(null);
   const brief = useQuery({ queryKey: ['design-brief', projectId], queryFn: () => fetchBrief(projectId) });
   const ai = useQuery({ queryKey: ['ai-settings'], queryFn: fetchAiSettings, staleTime: 60_000 });
+  const revs = useQuery({ queryKey: ['design-revisions', projectId], queryFn: () => fetchRevisions(projectId) });
+  const imported = revs.data ? importOnlyTip(revs.data) : null;
   // what open() reads changes with the device and the rights; the bridge itself stays connected
   const live = useRef({ mode, rights, locale });
   live.current = { mode, rights, locale };
@@ -468,6 +471,13 @@ function EditorCanvas({ projectId, payload, locale, mode, rights, onLink, onStat
   }, [payload.entryUrl, projectId]);
 
   return (
+    <>
+    {imported && !draft && (
+      <p role="status" data-testid="imported-tip" className="flex flex-wrap items-center gap-x-2 border-b border-border-light bg-surface-secondary px-4 py-1.5 text-sm text-content-secondary">
+        {tr(t, 'design.workspace.imported_tip', { number: imported.number })}
+        <Link className="text-oe-blue-text underline" to="/design/revisions">{tr(t, 'design.workspace.imported_tip_link')}</Link>
+      </p>
+    )}
     <div className="grid min-h-0 flex-1 grid-cols-1 gap-3 overflow-auto p-3 lg:grid-cols-[minmax(0,1fr)_320px] lg:overflow-hidden">
       <div className="relative min-h-[50dvh] min-w-0 overflow-hidden rounded-lg border border-border-light lg:min-h-0">
         <div ref={host} className="h-full w-full" data-testid="editor-host" />
@@ -481,5 +491,6 @@ function EditorCanvas({ projectId, payload, locale, mode, rights, onLink, onStat
       </div>
       <div className="min-w-0 lg:overflow-auto"><SelectionPanel projectId={projectId} selection={selection} draft={draft} /></div>
     </div>
+    </>
   );
 }

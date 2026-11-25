@@ -3,7 +3,7 @@ import { checkMessage } from '../bridge/protocol';
 import type { EstimatePosition } from './estimate';
 import type { RevisionView } from './revisions';
 import type { BriefDoc } from './briefModel';
-import { aiConfigured, aiServices, chainTip, changedLines, deviceMode, draftLinesFor, keepConfirmed, linesFor, openMessage, proposals, ruleMatch } from './workspace';
+import { aiConfigured, aiServices, chainTip, changedLines, deviceMode, draftLinesFor, importOnlyTip, keepConfirmed, linesFor, openMessage, proposals, ruleMatch } from './workspace';
 import type { DraftView } from '../draftApi';
 
 const PID = '746402cb-14a8-430c-b3b9-9c6908fa75d7';
@@ -13,6 +13,14 @@ const rev = (n: number, status: RevisionView['status'], imported = false): Revis
   decided_at: null, decision_comment: null, created_at: '2026-11-15T10:00:00Z',
   manifest: imported ? { schema: 'ddc-import/1' } : ({ schema: 'ddc-revision/1', files: [{ path: 'geometry.glb', role: 'geometry', bytes: 9, sha256: 'a'.repeat(64) }] } as RevisionView['manifest']),
 } as RevisionView);
+
+describe('import-only chain', () => {
+  it('names the newest import only while the chain has no design revision', () => {
+    expect(importOnlyTip([rev(1, 'shared', true), rev(2, 'published', true), rev(3, 'rejected', true)])?.number).toBe(2);
+    expect(importOnlyTip([rev(1, 'shared', true), rev(2, 'shared')])).toBeNull();
+    expect(importOnlyTip([])).toBeNull();
+  });
+});
 
 describe('open message', () => {
   it('names the chain tip (never an import, never rejected) and passes the contract schema', () => {
