@@ -75,6 +75,6 @@ describe('LinkStatus', () => {
     h.revoke.mockRejectedValue(Object.assign(new Error('403'), { body: { detail: { code: 'unlink_not_allowed', message: 'x' } } }));
     await mount('de');
     await userEvent.click(await screen.findByRole('button', { name: 'Trennen' }));
-    expect(await screen.findByTestId('link-error')).toHaveTextContent(DE['design.link_status.error.unlink_not_allowed']);
+    expect(await screen.findByTestId('link-error')).toHaveTextContent(DE['design.link_status.error.unlink_not_allowed']!);
   });
 });
