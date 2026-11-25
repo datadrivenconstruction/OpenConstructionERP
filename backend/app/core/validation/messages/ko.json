@@ -2877,6 +2877,10 @@
     "revision_awaiting_decision": {
       "fail": "모델 개정 {number}이(가) {days}일째 승인을 기다리고 있습니다.",
       "suggestion": "견적이 현재 모델을 따르도록 개정을 승인하거나 반려하세요."
+    },
+    "estimate_quantity_missing": {
+      "fail": "항목 '{position}'에 모델 수량이 없거나 일부 요소에 측정 수량이 없습니다.",
+      "suggestion": "선택한 요소에 측정 수량이 있는지 확인하거나 수량을 직접 입력하십시오."
     }
   }
 }

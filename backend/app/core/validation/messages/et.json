@@ -2877,6 +2877,10 @@
     "revision_awaiting_decision": {
       "fail": "Mudeli redaktsioon {number} on {days} päeva vastuvõttu oodanud.",
       "suggestion": "Võtke redaktsioon vastu või lükake see tagasi, et kalkulatsioon järgiks praegust mudelit."
+    },
+    "estimate_quantity_missing": {
+      "fail": "Positsioonil '{position}' puudub mudelist saadud kogus või osal selle elementidest puudub mõõdetud kogus.",
+      "suggestion": "Kontrollige, et valitud elementidel on mõõdetud kogus, või sisestage kogus käsitsi."
     }
   }
 }

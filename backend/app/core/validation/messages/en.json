@@ -2877,6 +2877,10 @@
     "revision_awaiting_decision": {
       "fail": "Model revision {number} has waited {days} days for acceptance.",
       "suggestion": "Accept or reject the revision so the estimate follows the current model."
+    },
+    "estimate_quantity_missing": {
+      "fail": "The position '{position}' has no quantity from the model, or some of its elements carry no measured quantity.",
+      "suggestion": "Check that the selected elements carry the measured quantity, or enter the quantity by hand."
     }
   }
 }

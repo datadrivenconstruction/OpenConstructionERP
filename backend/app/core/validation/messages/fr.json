@@ -2877,6 +2877,10 @@
     "revision_awaiting_decision": {
       "fail": "La révision de maquette {number} attend son acceptation depuis {days} jours.",
       "suggestion": "Acceptez ou refusez la révision pour que l'estimation suive la maquette actuelle."
+    },
+    "estimate_quantity_missing": {
+      "fail": "Le poste '{position}' n’a pas de quantité issue du modèle, ou certains de ses éléments n’ont pas de quantité mesurée.",
+      "suggestion": "Vérifiez que les éléments sélectionnés portent la quantité mesurée, ou saisissez la quantité à la main."
     }
   }
 }

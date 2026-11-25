@@ -2877,6 +2877,10 @@
     "revision_awaiting_decision": {
       "fail": "Mallin revisio {number} on odottanut hyväksyntää {days} päivää.",
       "suggestion": "Hyväksy tai hylkää revisio, jotta kustannusarvio seuraa nykyistä mallia."
+    },
+    "estimate_quantity_missing": {
+      "fail": "Nimikkeellä '{position}' ei ole mallista saatua määrää, tai osalta sen elementeistä puuttuu mitattu määrä.",
+      "suggestion": "Tarkista, että valituilla elementeillä on mitattu määrä, tai syötä määrä käsin."
     }
   }
 }

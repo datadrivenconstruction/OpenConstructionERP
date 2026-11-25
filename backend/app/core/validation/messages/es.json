@@ -2877,6 +2877,10 @@
     "revision_awaiting_decision": {
       "fail": "La revisión del modelo {number} lleva {days} días esperando aceptación.",
       "suggestion": "Acepte o rechace la revisión para que el presupuesto siga el modelo actual."
+    },
+    "estimate_quantity_missing": {
+      "fail": "La partida '{position}' no tiene cantidad del modelo, o algunos de sus elementos no tienen cantidad medida.",
+      "suggestion": "Compruebe que los elementos seleccionados tienen la cantidad medida o introduzca la cantidad a mano."
     }
   }
 }

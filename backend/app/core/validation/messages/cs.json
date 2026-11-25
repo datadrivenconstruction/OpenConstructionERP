@@ -2877,6 +2877,10 @@
     "revision_awaiting_decision": {
       "fail": "Revize modelu {number} čeká na převzetí již {days} dní.",
       "suggestion": "Revizi přijměte nebo zamítněte, aby odhad nákladů odpovídal aktuálnímu modelu."
+    },
+    "estimate_quantity_missing": {
+      "fail": "Položka '{position}' nemá množství z modelu nebo některé její prvky nemají změřené množství.",
+      "suggestion": "Zkontrolujte, zda vybrané prvky mají změřené množství, nebo zadejte množství ručně."
     }
   }
 }
