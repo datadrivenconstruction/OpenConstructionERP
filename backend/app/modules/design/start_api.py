@@ -7,8 +7,11 @@ corrects what is needed and confirms them all; only then do they become brief va
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Literal
 
+from pydantic import BaseModel, Field
+
+from . import quick
 from .auth import PrincipalDep
 from .model_params import CATEGORY, GENERATOR_REF, TYPOLOGY
 
@@ -45,8 +48,37 @@ def templates() -> list[dict[str, Any]]:
     return out
 
 
+class QuickBrief(BaseModel):
+    """A short brief: what an estimator knows in the first minute."""
+
+    building_type: str = Field(max_length=40)
+    gfa_m2: float
+    storeys: int
+    country: str | None = Field(default=None, max_length=2)
+    quality: Literal["economy", "standard", "high"] = "standard"
+    floor_height_m: float | None = None
+    depth_m: float | None = None
+    grid_m: float | None = None
+    wwr: float | None = None
+    slab_zone_m: float | None = None
+    plot_area_m2: float | None = None
+    max_height_m: float | None = None
+    currency: str | None = Field(default=None, max_length=3)
+    fx_rate: str | None = Field(default=None, max_length=20)
+
+
 def register(router) -> None:
     @router.get("/templates")
     async def list_templates(principal: PrincipalDep) -> dict[str, Any]:
         """Templates for a new project (static: the generator's own typologies)."""
         return {"templates": templates(), "source": GENERATOR_REF}
+
+    @router.get("/quick/types")
+    async def quick_types(principal: PrincipalDep) -> dict[str, Any]:
+        """Building types the quick massing models, and which of them the generator builds and the band prices."""
+        return {"types": quick.types()}
+
+    @router.post("/quick")
+    async def quick_build(body: QuickBrief, principal: PrincipalDep) -> dict[str, Any]:
+        """Model quantities, elemental cost range and phase programme for a short brief. Nothing is stored."""
+        return quick.build(body.model_dump(exclude_none=True))

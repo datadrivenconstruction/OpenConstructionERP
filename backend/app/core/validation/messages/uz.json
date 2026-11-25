@@ -2885,6 +2885,20 @@
     "estimate_quantity_missing": {
       "fail": "'{position}' pozitsiyasi modeldan miqdor olmadi yoki uning ayrim elementlarida o‘lchangan miqdor yo‘q.",
       "suggestion": "Tanlangan elementlarda o‘lchangan miqdor borligini tekshiring yoki miqdorni qo‘lda kiriting."
+    },
+    "brief_plausible": {
+      "unknown_type": "'{value}' bino turi noma'lum.",
+      "gfa_invalid": "Umumiy maydon musbat son bo'lishi kerak.",
+      "storeys_invalid": "Qavatlar soni kamida 1 butun son bo'lishi kerak.",
+      "storeys_over_type_max": "Bu bino turi ko'pi bilan {max} qavatli loyihalanadi.",
+      "quality_invalid": "Sifat tejamkor, standart yoki yuqori bo'lishi kerak.",
+      "height_over_limit": "Qavatlar {height} m ga yetadi, {limit} m balandlik chegarasidan yuqori.",
+      "clear_height_below_minimum": "{clear} m toza balandlik mamlakat minimumi {minimum} m dan past.",
+      "storey_too_small": "Har bir qavat {footprint} m2 bo'ladi, minimum {minimum} m2 dan kam.",
+      "footprint_over_plot": "{footprint} m2 qurilish izi {plot} m2 uchastkadan katta.",
+      "fx_invalid": "Valyuta kursi musbat son bo'lishi kerak.",
+      "source_missing": "Bu bino turi uchun '{field}' qiymatini beradigan manba yo'q; uni topshiriqqa kiriting.",
+      "wwr_invalid": "Deraza ulushi 0 va 1 oralig'ida bo'lishi kerak."
     }
   }
 }

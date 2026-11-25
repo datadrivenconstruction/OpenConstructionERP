@@ -2885,6 +2885,20 @@
     "estimate_quantity_missing": {
       "fail": "La voce '{position}' non ha una quantità dal modello, oppure alcuni dei suoi elementi non hanno una quantità misurata.",
       "suggestion": "Verificare che gli elementi selezionati abbiano la quantità misurata o inserire la quantità a mano."
+    },
+    "brief_plausible": {
+      "unknown_type": "Il tipo di edificio '{value}' non è noto.",
+      "gfa_invalid": "La superficie lorda deve essere un numero positivo.",
+      "storeys_invalid": "Il numero di piani deve essere un intero di almeno 1.",
+      "storeys_over_type_max": "Questo tipo di edificio si progetta con al massimo {max} piani.",
+      "quality_invalid": "La qualità deve essere economica, standard o alta.",
+      "height_over_limit": "I piani raggiungono {height} m, oltre il limite di altezza di {limit} m.",
+      "clear_height_below_minimum": "L'altezza netta di {clear} m è sotto il minimo nazionale di {minimum} m.",
+      "storey_too_small": "Ogni piano sarebbe {footprint} m2, sotto il minimo di {minimum} m2.",
+      "footprint_over_plot": "L'impronta di {footprint} m2 supera il lotto di {plot} m2.",
+      "fx_invalid": "Il tasso di cambio deve essere un numero positivo.",
+      "source_missing": "Nessuna fonte fornisce '{field}' per questo tipo di edificio; inseritelo nel programma.",
+      "wwr_invalid": "La quota di finestre deve essere tra 0 e 1."
     }
   }
 }

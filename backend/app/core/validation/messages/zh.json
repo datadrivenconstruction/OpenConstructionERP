@@ -2885,6 +2885,20 @@
     "estimate_quantity_missing": {
       "fail": "条目“{position}”没有来自模型的工程量，或其部分构件没有测量工程量。",
       "suggestion": "请检查所选构件是否带有测量工程量，或手动输入工程量。"
+    },
+    "brief_plausible": {
+      "unknown_type": "未知的建筑类型 '{value}'。",
+      "gfa_invalid": "总建筑面积必须为正数。",
+      "storeys_invalid": "层数必须为不小于 1 的整数。",
+      "storeys_over_type_max": "此类建筑最多按 {max} 层规划。",
+      "quality_invalid": "质量必须为经济、标准或高档。",
+      "height_over_limit": "楼层高度达到 {height} 米，超过限高 {limit} 米。",
+      "clear_height_below_minimum": "净高 {clear} 米低于本国最低值 {minimum} 米。",
+      "storey_too_small": "每层将为 {footprint} 平方米，低于最小值 {minimum} 平方米。",
+      "footprint_over_plot": "占地面积 {footprint} 平方米大于地块 {plot} 平方米。",
+      "fx_invalid": "汇率必须为正数。",
+      "source_missing": "没有来源给出此类建筑的 '{field}'；请在任务书中填写。",
+      "wwr_invalid": "窗墙比必须在 0 到 1 之间。"
     }
   }
 }

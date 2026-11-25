@@ -2885,6 +2885,20 @@
     "estimate_quantity_missing": {
       "fail": "Item '{position}' tidak memiliki kuantitas dari model, atau sebagian elemennya tidak memiliki kuantitas terukur.",
       "suggestion": "Periksa apakah elemen yang dipilih memiliki kuantitas terukur, atau masukkan kuantitas secara manual."
+    },
+    "brief_plausible": {
+      "unknown_type": "Jenis bangunan '{value}' tidak dikenal.",
+      "gfa_invalid": "Luas lantai kotor harus berupa angka positif.",
+      "storeys_invalid": "Jumlah lantai harus bilangan bulat minimal 1.",
+      "storeys_over_type_max": "Jenis bangunan ini direncanakan paling banyak {max} lantai.",
+      "quality_invalid": "Kualitas harus ekonomis, standar, atau tinggi.",
+      "height_over_limit": "Lantai mencapai {height} m, di atas batas tinggi {limit} m.",
+      "clear_height_below_minimum": "Tinggi bersih {clear} m di bawah minimum negara {minimum} m.",
+      "storey_too_small": "Setiap lantai akan {footprint} m2, di bawah minimum {minimum} m2.",
+      "footprint_over_plot": "Tapak {footprint} m2 lebih besar dari kavling {plot} m2.",
+      "fx_invalid": "Kurs harus berupa angka positif.",
+      "source_missing": "Tidak ada sumber yang memberi '{field}' untuk jenis bangunan ini; isikan di brief.",
+      "wwr_invalid": "Rasio jendela harus antara 0 dan 1."
     }
   }
 }

@@ -2885,6 +2885,20 @@
     "estimate_quantity_missing": {
       "fail": "Die Position '{position}' hat keine Menge aus dem Modell, oder einigen ihrer Elemente fehlt die gemessene Menge.",
       "suggestion": "Prüfen Sie, ob die gewählten Elemente die gemessene Menge tragen, oder geben Sie die Menge von Hand ein."
+    },
+    "brief_plausible": {
+      "unknown_type": "Der Gebaeudetyp '{value}' ist der Schnellmassung nicht bekannt.",
+      "gfa_invalid": "Die Bruttogrundflaeche muss eine positive Zahl sein.",
+      "storeys_invalid": "Die Geschosszahl muss eine ganze Zahl von mindestens 1 sein.",
+      "storeys_over_type_max": "Dieser Gebaeudetyp wird mit hoechstens {max} Geschossen geplant.",
+      "quality_invalid": "Die Qualitaet muss einfach, mittel oder hoch sein.",
+      "height_over_limit": "Die Geschosse erreichen {height} m, ueber der zulaessigen Hoehe von {limit} m.",
+      "clear_height_below_minimum": "Die lichte Raumhoehe von {clear} m liegt unter dem Mindestmass von {minimum} m.",
+      "storey_too_small": "Jedes Geschoss haette {footprint} m2, weniger als die {minimum} m2 aus kleinster Breite und Tiefe des Generators.",
+      "footprint_over_plot": "Die Grundflaeche von {footprint} m2 ist groesser als das Grundstueck mit {plot} m2.",
+      "fx_invalid": "Der Wechselkurs muss eine positive Zahl sein.",
+      "source_missing": "Keine Quelle liefert '{field}' fuer diesen Gebaeudetyp; bitte im Raumprogramm angeben.",
+      "wwr_invalid": "Der Fensterflaechenanteil muss zwischen 0 und 1 liegen."
     }
   }
 }

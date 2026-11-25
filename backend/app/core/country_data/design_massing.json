@@ -1,0 +1,8 @@
+{
+  "schema": "ddc-design-massing-country/1",
+  "notes": "Per-country values the quick massing checks a brief against. A country without an entry gets no such check.",
+  "countries": {
+    "DE": {"min_clear_height_m": 2.40, "source": "Musterbauordnung (MBO) par. 47 (1): Aufenthaltsraeume muessen eine lichte Raumhoehe von mindestens 2,40 m haben"},
+    "US": {"min_clear_height_m": 2.286, "source": "International Building Code 2021, section 1208.2: occupiable spaces, habitable spaces and corridors shall have a ceiling height of not less than 7 feet 6 inches (2286 mm)"}
+  }
+}

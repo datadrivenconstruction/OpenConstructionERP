@@ -2885,6 +2885,20 @@
     "estimate_quantity_missing": {
       "fail": "Ang item na '{position}' ay walang dami mula sa modelo, o ang ilan sa mga elemento nito ay walang nasukat na dami.",
       "suggestion": "Tiyaking may nasukat na dami ang mga napiling elemento, o ilagay nang mano-mano ang dami."
+    },
+    "brief_plausible": {
+      "unknown_type": "Hindi kilala ang uri ng gusali na '{value}'.",
+      "gfa_invalid": "Ang kabuuang floor area ay dapat positibong numero.",
+      "storeys_invalid": "Ang bilang ng palapag ay dapat buong numero na hindi bababa sa 1.",
+      "storeys_over_type_max": "Ang uring ito ng gusali ay pinaplano nang hanggang {max} palapag.",
+      "quality_invalid": "Ang kalidad ay dapat matipid, karaniwan o mataas.",
+      "height_over_limit": "Umaabot ang mga palapag sa {height} m, lampas sa limitasyong {limit} m.",
+      "clear_height_below_minimum": "Ang malinaw na taas na {clear} m ay mas mababa sa minimum ng bansa na {minimum} m.",
+      "storey_too_small": "Bawat palapag ay magiging {footprint} m2, mas mababa sa minimum na {minimum} m2.",
+      "footprint_over_plot": "Ang sakop na {footprint} m2 ay mas malaki kaysa sa lote na {plot} m2.",
+      "fx_invalid": "Ang palitan ng pera ay dapat positibong numero.",
+      "source_missing": "Walang pinagmulang nagbibigay ng '{field}' para sa uring ito ng gusali; ilagay ito sa brief.",
+      "wwr_invalid": "Ang ratio ng bintana ay dapat nasa pagitan ng 0 at 1."
     }
   }
 }

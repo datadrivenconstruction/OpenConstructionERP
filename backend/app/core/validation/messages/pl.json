@@ -2885,6 +2885,20 @@
     "estimate_quantity_missing": {
       "fail": "Pozycja '{position}' nie ma ilości z modelu lub część jej elementów nie ma zmierzonej ilości.",
       "suggestion": "Sprawdź, czy wybrane elementy mają zmierzoną ilość, lub wpisz ilość ręcznie."
+    },
+    "brief_plausible": {
+      "unknown_type": "Typ budynku '{value}' jest nieznany.",
+      "gfa_invalid": "Powierzchnia całkowita musi być liczbą dodatnią.",
+      "storeys_invalid": "Liczba kondygnacji musi być liczbą całkowitą co najmniej 1.",
+      "storeys_over_type_max": "Ten typ budynku projektuje się z najwyżej {max} kondygnacjami.",
+      "quality_invalid": "Jakość musi być ekonomiczna, standardowa lub wysoka.",
+      "height_over_limit": "Kondygnacje sięgają {height} m, powyżej limitu wysokości {limit} m.",
+      "clear_height_below_minimum": "Wysokość w świetle {clear} m jest poniżej minimum kraju {minimum} m.",
+      "storey_too_small": "Każda kondygnacja miałaby {footprint} m2, poniżej minimum {minimum} m2.",
+      "footprint_over_plot": "Powierzchnia zabudowy {footprint} m2 jest większa niż działka {plot} m2.",
+      "fx_invalid": "Kurs wymiany musi być liczbą dodatnią.",
+      "source_missing": "Żadne źródło nie podaje '{field}' dla tego typu budynku; wpisz to w założeniach.",
+      "wwr_invalid": "Udział okien musi wynosić od 0 do 1."
     }
   }
 }

@@ -2885,6 +2885,20 @@
     "estimate_quantity_missing": {
       "fail": "Nimikkeellä '{position}' ei ole mallista saatua määrää, tai osalta sen elementeistä puuttuu mitattu määrä.",
       "suggestion": "Tarkista, että valituilla elementeillä on mitattu määrä, tai syötä määrä käsin."
+    },
+    "brief_plausible": {
+      "unknown_type": "Rakennustyyppi '{value}' ei ole tiedossa.",
+      "gfa_invalid": "Bruttoalan on oltava positiivinen luku.",
+      "storeys_invalid": "Kerrosmäärän on oltava kokonaisluku, vähintään 1.",
+      "storeys_over_type_max": "Tämä rakennustyyppi suunnitellaan enintään {max} kerroksiseksi.",
+      "quality_invalid": "Laadun on oltava edullinen, tavallinen tai korkea.",
+      "height_over_limit": "Kerrokset ulottuvat {height} m:iin, yli korkeusrajan {limit} m.",
+      "clear_height_below_minimum": "Vapaa huonekorkeus {clear} m alittaa maan vähimmäisarvon {minimum} m.",
+      "storey_too_small": "Jokainen kerros olisi {footprint} m2, alle vähimmäisarvon {minimum} m2.",
+      "footprint_over_plot": "Rakennusala {footprint} m2 on suurempi kuin tontti {plot} m2.",
+      "fx_invalid": "Vaihtokurssin on oltava positiivinen luku.",
+      "source_missing": "Mikään lähde ei anna arvoa '{field}' tälle rakennustyypille; anna se tilaohjelmassa.",
+      "wwr_invalid": "Ikkunaosuuden on oltava välillä 0 ja 1."
     }
   }
 }

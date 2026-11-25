@@ -8,6 +8,8 @@ import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { tr } from './BriefFields';
 import { fetchOverview } from './linksApi';
 import { ProjectStart } from './ProjectStart';
+import { QuickMassing } from './QuickMassing';
+import { projectsApi } from '@/features/projects/api';
 import { useProjectFromUrl } from './useProjectFromUrl';
 
 export default function StartPage() {
@@ -15,6 +17,7 @@ export default function StartPage() {
   useProjectFromUrl();
   const projectId = useProjectContextStore((s) => s.activeProjectId);
   const q = useQuery({ queryKey: ['design-overview', projectId], queryFn: () => fetchOverview(projectId!), enabled: !!projectId });
+  const project = useQuery({ queryKey: ['projects', projectId], queryFn: () => projectsApi.get(projectId!), enabled: !!projectId });
   if (!projectId) {
     return <EmptyState icon={<FolderOpen size={28} aria-hidden />} title={tr(t, 'design.brief.no_project')}
       description={tr(t, 'design.brief.no_project_hint')} />;
@@ -23,6 +26,7 @@ export default function StartPage() {
     <div className="flex flex-col gap-5 animate-fade-in">
       <h1 className="sr-only">{tr(t, 'design.start.title')}</h1>
       <ProjectStart key={projectId} projectId={projectId} steps={q.data?.steps ?? []} />
+      <QuickMassing country={project.data?.country_code} currency={project.data?.currency} />
     </div>
   );
 }

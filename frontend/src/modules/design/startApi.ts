@@ -35,3 +35,40 @@ export function extractFromFiles(projectId: string, documentIds: string[], curre
     { headers: HEADERS },
   );
 }
+
+/** Quick massing from a short brief (design/quick.py): computed on the server, nothing is stored. */
+export type Quality = 'economy' | 'standard' | 'high';
+export interface QuickBrief {
+  building_type: string; gfa_m2: number; storeys: number; country?: string; quality: Quality;
+  floor_height_m?: number; depth_m?: number; grid_m?: number; wwr?: number; slab_zone_m?: number;
+  plot_area_m2?: number; max_height_m?: number; currency?: string; fx_rate?: string;
+}
+/** Where a number came from: brief, generator source, country data, benchmark or formula; `ref` names the file. */
+export interface Provenance { source: string; ref: string; formula: string | null; status?: string; note?: string }
+export interface QuickIssue { code: string; field: string; severity: 'error' | 'warning'; params: Record<string, unknown> }
+export interface QuickQuantity { code: string; value: number | null; unit: string; provenance: Provenance; flag: string | null }
+export interface QuickLine { code: string; quantity: number | null; unit: string; unit_rate: string | null; amount: string; provenance: Provenance }
+export interface QuickCost {
+  currency: string | null; total: string | null; per_m2?: string; reason: 'no_band' | 'currency' | null;
+  band_currency?: string; lines?: QuickLine[]; needs_expert_review: boolean; base_date: string; ref: string;
+  benchmark?: { low: string; mid: string; high: string; within: boolean };
+}
+export interface QuickPhase { code: string; start_day: number | null; days: number | null; flag: string | null }
+export interface QuickSuggestion { pointer: string; value: number | string | boolean; provenance: Provenance }
+export interface QuickResult {
+  issues: QuickIssue[]; generator: boolean | null; suggestions: QuickSuggestion[];
+  model: null | {
+    height_m: number; roof_form: string | null; levels: { index: number; elevation_m: number }[];
+    footprint: { width_m: number; depth_m: number; area_m2: number };
+    grid: { spacing_m: number; bays_x: number; bays_y: number; columns_per_storey: number } | null;
+    quantities: QuickQuantity[];
+  };
+  cost: QuickCost | null;
+  schedule: null | { phases: QuickPhase[]; total_days: number | null; reason: string | null };
+}
+
+export const fetchQuickTypes = () =>
+  apiGet<{ types: { id: string; generator: boolean; priced: boolean }[] }>('/v1/design/quick/types', { headers: HEADERS });
+
+export const runQuick = (brief: QuickBrief) =>
+  apiPost<QuickResult, QuickBrief>('/v1/design/quick', brief, { headers: HEADERS });

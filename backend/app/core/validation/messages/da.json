@@ -2885,6 +2885,20 @@
     "estimate_quantity_missing": {
       "fail": "Posten '{position}' har ingen mængde fra modellen, eller nogle af dens elementer har ingen målt mængde.",
       "suggestion": "Kontroller, at de valgte elementer har den målte mængde, eller indtast mængden manuelt."
+    },
+    "brief_plausible": {
+      "unknown_type": "Bygningstypen '{value}' er ukendt.",
+      "gfa_invalid": "Bruttoetagearealet skal være et positivt tal.",
+      "storeys_invalid": "Antal etager skal være et helt tal på mindst 1.",
+      "storeys_over_type_max": "Denne bygningstype planlægges med højst {max} etager.",
+      "quality_invalid": "Kvaliteten skal være økonomi, standard eller høj.",
+      "height_over_limit": "Etagerne når {height} m, over højdegrænsen på {limit} m.",
+      "clear_height_below_minimum": "Den frie rumhøjde på {clear} m er under landets minimum på {minimum} m.",
+      "storey_too_small": "Hver etage ville være {footprint} m2, under minimum på {minimum} m2.",
+      "footprint_over_plot": "Fodaftrykket på {footprint} m2 er større end grunden på {plot} m2.",
+      "fx_invalid": "Valutakursen skal være et positivt tal.",
+      "source_missing": "Ingen kilde angiver '{field}' for denne bygningstype; angiv den i programmet.",
+      "wwr_invalid": "Vinduesandelen skal være mellem 0 og 1."
     }
   }
 }

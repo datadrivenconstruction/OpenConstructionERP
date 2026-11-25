@@ -1,0 +1,431 @@
+{
+ "issues": [],
+ "generator": true,
+ "model": {
+  "levels": [
+   {
+    "index": 0,
+    "elevation_m": 0.0,
+    "height_m": 3.6
+   },
+   {
+    "index": 1,
+    "elevation_m": 3.6,
+    "height_m": 3.6
+   },
+   {
+    "index": 2,
+    "elevation_m": 7.2,
+    "height_m": 3.6
+   },
+   {
+    "index": 3,
+    "elevation_m": 10.8,
+    "height_m": 3.6
+   }
+  ],
+  "height_m": 14.4,
+  "footprint": {
+   "width_m": 43.48,
+   "depth_m": 13.8,
+   "area_m2": 600.0
+  },
+  "grid": {
+   "spacing_m": 7.2,
+   "bays_x": 7,
+   "bays_y": 2,
+   "columns_per_storey": 24
+  },
+  "roof_form": "flat",
+  "inputs": {
+   "floor_height_m": {
+    "value": 3.6,
+    "provenance": {
+     "source": "generator",
+     "ref": "editor e0abbb210: crates/gen/data/rules.json, crates/gen/src/project/spec.rs; crates/app/src/link/gen.rs",
+     "formula": null,
+     "status": "default"
+    }
+   },
+   "depth_m": {
+    "value": 13.8,
+    "provenance": {
+     "source": "generator",
+     "ref": "editor e0abbb210: crates/gen/data/rules.json, crates/gen/src/project/spec.rs; crates/app/src/link/gen.rs",
+     "formula": "2 × band + corridor",
+     "status": "default"
+    }
+   },
+   "grid_m": {
+    "value": 7.2,
+    "provenance": {
+     "source": "generator",
+     "ref": "editor e0abbb210: crates/gen/data/rules.json, crates/gen/src/project/spec.rs; crates/app/src/link/gen.rs",
+     "formula": null,
+     "status": "default"
+    }
+   },
+   "roof": {
+    "value": "flat",
+    "provenance": {
+     "source": "generator",
+     "ref": "editor e0abbb210: crates/gen/data/rules.json, crates/gen/src/project/spec.rs; crates/app/src/link/gen.rs",
+     "formula": null,
+     "status": "default"
+    }
+   },
+   "lift": {
+    "value": true,
+    "provenance": {
+     "source": "generator",
+     "ref": "editor e0abbb210: crates/gen/data/rules.json, crates/gen/src/project/spec.rs; crates/app/src/link/gen.rs",
+     "formula": null,
+     "status": "default"
+    }
+   },
+   "max_storeys": {
+    "value": 200,
+    "provenance": {
+     "source": "generator",
+     "ref": "editor e0abbb210: crates/gen/data/rules.json, crates/gen/src/project/spec.rs; crates/app/src/link/gen.rs",
+     "formula": null,
+     "status": "default"
+    }
+   },
+   "depth_min_m": {
+    "value": 7.8,
+    "provenance": {
+     "source": "generator",
+     "ref": "editor e0abbb210: crates/gen/data/rules.json, crates/gen/src/project/spec.rs; crates/app/src/link/gen.rs",
+     "formula": null,
+     "status": "default"
+    }
+   }
+  },
+  "quantities": [
+   {
+    "code": "floor_area",
+    "value": 2400.0,
+    "unit": "m2",
+    "provenance": {
+     "source": "brief",
+     "ref": "brief",
+     "formula": null,
+     "status": "confirmed"
+    },
+    "flag": null
+   },
+   {
+    "code": "slab_ground",
+    "value": 600.0,
+    "unit": "m2",
+    "provenance": {
+     "source": "formula",
+     "ref": "app/modules/design/data/massing/typologies.json",
+     "formula": "GFA ÷ storeys",
+     "status": "derived"
+    },
+    "flag": null
+   },
+   {
+    "code": "slab_suspended",
+    "value": 1800.0,
+    "unit": "m2",
+    "provenance": {
+     "source": "formula",
+     "ref": "app/modules/design/data/massing/typologies.json",
+     "formula": "GFA ÷ storeys × (storeys − 1)",
+     "status": "derived"
+    },
+    "flag": null
+   },
+   {
+    "code": "roof",
+    "value": 600.0,
+    "unit": "m2",
+    "provenance": {
+     "source": "formula",
+     "ref": "app/modules/design/data/massing/typologies.json",
+     "formula": "footprint (flat roof); pitched roof needs the slope",
+     "status": "derived"
+    },
+    "flag": null
+   },
+   {
+    "code": "wall_ext_length",
+    "value": 458.23,
+    "unit": "m",
+    "provenance": {
+     "source": "formula",
+     "ref": "app/modules/design/data/massing/typologies.json",
+     "formula": "2 × (width + depth) × storeys",
+     "status": "derived"
+    },
+    "flag": null
+   },
+   {
+    "code": "wall_ext",
+    "value": 1649.61,
+    "unit": "m2",
+    "provenance": {
+     "source": "formula",
+     "ref": "app/modules/design/data/massing/typologies.json",
+     "formula": "perimeter × storey height × storeys",
+     "status": "derived"
+    },
+    "flag": null
+   },
+   {
+    "code": "openings",
+    "value": null,
+    "unit": "m2",
+    "provenance": {
+     "source": "none",
+     "ref": "",
+     "formula": "external wall × window ratio (brief)",
+     "status": "none"
+    },
+    "flag": "source_missing"
+   },
+   {
+    "code": "columns",
+    "value": 96,
+    "unit": "pcs",
+    "provenance": {
+     "source": "formula",
+     "ref": "app/modules/design/data/massing/typologies.json",
+     "formula": "(ceil(width ÷ grid) + 1) × (ceil(depth ÷ grid) + 1) × storeys",
+     "status": "derived"
+    },
+    "flag": null
+   },
+   {
+    "code": "lifts",
+    "value": 1,
+    "unit": "pcs",
+    "provenance": {
+     "source": "generator",
+     "ref": "editor e0abbb210: crates/gen/data/rules.json, crates/gen/src/project/spec.rs; crates/app/src/link/gen.rs",
+     "formula": null,
+     "status": "default"
+    },
+    "flag": null
+   }
+  ]
+ },
+ "cost": {
+  "source": "Open reference band: indicative cost per m2 GFA ranges, pending calibration against the open cost database assemblies and the country packs. Used only where your own completed projects are too few.",
+  "ref": "app/core/country_data/cost_benchmark_reference.json",
+  "base_date": "2025-01",
+  "needs_expert_review": true,
+  "currency": "EUR",
+  "fx_rate": null,
+  "quality": "p50",
+  "total": "7440000",
+  "per_m2": "3100",
+  "lines": [
+   {
+    "code": "330",
+    "quantity": 1649.61,
+    "unit": "m2",
+    "unit_rate": "611.05",
+    "amount": "1008000",
+    "provenance": {
+     "source": "benchmark",
+     "ref": "app/core/country_data/cost_benchmark_reference.json office/din276/330/p50",
+     "formula": "band rate per m2 GFA × GFA × fx; unit rate = amount ÷ quantity"
+    }
+   },
+   {
+    "code": "340",
+    "quantity": 2400.0,
+    "unit": "m2",
+    "unit_rate": "150",
+    "amount": "360000",
+    "provenance": {
+     "source": "benchmark",
+     "ref": "app/core/country_data/cost_benchmark_reference.json office/din276/340/p50",
+     "formula": "band rate per m2 GFA × GFA × fx; unit rate = amount ÷ quantity"
+    }
+   },
+   {
+    "code": "350",
+    "quantity": 2400.0,
+    "unit": "m2",
+    "unit_rate": "240",
+    "amount": "576000",
+    "provenance": {
+     "source": "benchmark",
+     "ref": "app/core/country_data/cost_benchmark_reference.json office/din276/350/p50",
+     "formula": "band rate per m2 GFA × GFA × fx; unit rate = amount ÷ quantity"
+    }
+   },
+   {
+    "code": "360",
+    "quantity": 600.0,
+    "unit": "m2",
+    "unit_rate": "480",
+    "amount": "288000",
+    "provenance": {
+     "source": "benchmark",
+     "ref": "app/core/country_data/cost_benchmark_reference.json office/din276/360/p50",
+     "formula": "band rate per m2 GFA × GFA × fx; unit rate = amount ÷ quantity"
+    }
+   },
+   {
+    "code": "410",
+    "quantity": 2400.0,
+    "unit": "m2",
+    "unit_rate": "70",
+    "amount": "168000",
+    "provenance": {
+     "source": "benchmark",
+     "ref": "app/core/country_data/cost_benchmark_reference.json office/din276/410/p50",
+     "formula": "band rate per m2 GFA × GFA × fx; unit rate = amount ÷ quantity"
+    }
+   },
+   {
+    "code": "420",
+    "quantity": 2400.0,
+    "unit": "m2",
+    "unit_rate": "130",
+    "amount": "312000",
+    "provenance": {
+     "source": "benchmark",
+     "ref": "app/core/country_data/cost_benchmark_reference.json office/din276/420/p50",
+     "formula": "band rate per m2 GFA × GFA × fx; unit rate = amount ÷ quantity"
+    }
+   },
+   {
+    "code": "440",
+    "quantity": 2400.0,
+    "unit": "m2",
+    "unit_rate": "170",
+    "amount": "408000",
+    "provenance": {
+     "source": "benchmark",
+     "ref": "app/core/country_data/cost_benchmark_reference.json office/din276/440/p50",
+     "formula": "band rate per m2 GFA × GFA × fx; unit rate = amount ÷ quantity"
+    }
+   },
+   {
+    "code": "other",
+    "quantity": 2400.0,
+    "unit": "m2",
+    "unit_rate": null,
+    "amount": "4320000",
+    "provenance": {
+     "source": "benchmark",
+     "ref": "app/core/country_data/cost_benchmark_reference.json office/din276/total/p50",
+     "formula": "band total × GFA − element lines"
+    }
+   }
+  ],
+  "benchmark": {
+   "low": "2200",
+   "mid": "3100",
+   "high": "4300",
+   "within": true
+  },
+  "reason": null
+ },
+ "schedule": {
+  "phases": [
+   {
+    "code": "substructure",
+    "start_day": null,
+    "days": null,
+    "flag": "rate_missing"
+   },
+   {
+    "code": "frame",
+    "start_day": null,
+    "days": null,
+    "flag": "rate_missing"
+   },
+   {
+    "code": "envelope",
+    "start_day": null,
+    "days": null,
+    "flag": "rate_missing"
+   },
+   {
+    "code": "services_fitout",
+    "start_day": null,
+    "days": null,
+    "flag": "rate_missing"
+   },
+   {
+    "code": "commissioning",
+    "start_day": null,
+    "days": null,
+    "flag": "rate_missing"
+   }
+  ],
+  "total_days": null,
+  "reason": "rate_missing"
+ },
+ "suggestions": [
+  {
+   "pointer": "floor_height_m",
+   "value": 3.6,
+   "provenance": {
+    "source": "generator",
+    "ref": "editor e0abbb210: crates/gen/data/rules.json, crates/gen/src/project/spec.rs; crates/app/src/link/gen.rs",
+    "formula": null,
+    "status": "default"
+   }
+  },
+  {
+   "pointer": "depth_m",
+   "value": 13.8,
+   "provenance": {
+    "source": "generator",
+    "ref": "editor e0abbb210: crates/gen/data/rules.json, crates/gen/src/project/spec.rs; crates/app/src/link/gen.rs",
+    "formula": "2 × band + corridor",
+    "status": "default"
+   }
+  },
+  {
+   "pointer": "grid_m",
+   "value": 7.2,
+   "provenance": {
+    "source": "generator",
+    "ref": "editor e0abbb210: crates/gen/data/rules.json, crates/gen/src/project/spec.rs; crates/app/src/link/gen.rs",
+    "formula": null,
+    "status": "default"
+   }
+  },
+  {
+   "pointer": "roof",
+   "value": "flat",
+   "provenance": {
+    "source": "generator",
+    "ref": "editor e0abbb210: crates/gen/data/rules.json, crates/gen/src/project/spec.rs; crates/app/src/link/gen.rs",
+    "formula": null,
+    "status": "default"
+   }
+  },
+  {
+   "pointer": "lift",
+   "value": true,
+   "provenance": {
+    "source": "generator",
+    "ref": "editor e0abbb210: crates/gen/data/rules.json, crates/gen/src/project/spec.rs; crates/app/src/link/gen.rs",
+    "formula": null,
+    "status": "default"
+   }
+  },
+  {
+   "pointer": "min_clear_height_m",
+   "value": 2.4,
+   "provenance": {
+    "source": "country",
+    "ref": "app/core/country_data/design_massing.json",
+    "formula": null,
+    "status": "default",
+    "note": "Musterbauordnung (MBO) par. 47 (1): Aufenthaltsraeume muessen eine lichte Raumhoehe von mindestens 2,40 m haben"
+   }
+  }
+ ]
+}

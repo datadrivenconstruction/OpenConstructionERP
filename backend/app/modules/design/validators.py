@@ -8,6 +8,8 @@ Rule set ``design``, run over one project (``GET /api/v1/design/projects/{id}/va
   or some selected elements lack the measured quantity, so the estimate is short. Kept overrides pass.
 * ``design.revision_awaiting_decision`` - INFO. A shared revision has waited longer than
   ``REVIEW_AFTER_DAYS`` for acceptance; the estimate, schedule and procurement still follow the older one.
+* ``design.brief_plausible`` - ERROR. A short brief for the quick massing contradicts itself or the country's
+  minimum (storeys over the height limit, footprint over the plot, clear height under the minimum).
 """
 
 from __future__ import annotations
@@ -167,7 +169,57 @@ class RevisionAwaitingDecision(ValidationRule):
         return results
 
 
-_RULES: list[ValidationRule] = [EstimateUnpriced(), EstimateQuantityMissing(), RevisionAwaitingDecision()]
+class BriefPlausible(ValidationRule):
+    """A quick-massing brief is consistent: storeys, height, footprint, plot and country minimum agree."""
+
+    rule_id = "design.brief_plausible"
+    name = "Design brief is plausible"
+    standard = DESIGN_RULE_SET
+    severity = Severity.ERROR
+    category = RuleCategory.CONSISTENCY
+    description = "Storeys, floor height, GFA, plot and height limit of the brief contradict each other."
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        from .quick import check
+
+        data = context.data if isinstance(context.data, dict) else {}
+        brief = data.get("quick_brief")
+        if not isinstance(brief, dict):
+            return []
+        locale = _locale(context)
+        issues = check(brief)
+        if not issues:
+            return [
+                RuleResult(
+                    rule_id=self.rule_id,
+                    rule_name=self.name,
+                    severity=self.severity,
+                    category=self.category,
+                    passed=True,
+                    message="OK",
+                )
+            ]
+        return [
+            RuleResult(
+                rule_id=self.rule_id,
+                rule_name=self.name,
+                severity=Severity.ERROR if i["severity"] == "error" else Severity.WARNING,
+                category=self.category,
+                passed=False,
+                message=translate(f"design.brief_plausible.{i['code']}", locale, **i["params"]),
+                element_ref=i["field"],
+                details={"code": i["code"], **i["params"]},
+            )
+            for i in issues
+        ]
+
+
+_RULES: list[ValidationRule] = [
+    EstimateUnpriced(),
+    EstimateQuantityMissing(),
+    RevisionAwaitingDecision(),
+    BriefPlausible(),
+]
 
 
 def register_design_rules() -> None:

@@ -2885,6 +2885,20 @@
     "estimate_quantity_missing": {
       "fail": "Positsioonil '{position}' puudub mudelist saadud kogus või osal selle elementidest puudub mõõdetud kogus.",
       "suggestion": "Kontrollige, et valitud elementidel on mõõdetud kogus, või sisestage kogus käsitsi."
+    },
+    "brief_plausible": {
+      "unknown_type": "Hoone tüüp '{value}' ei ole teada.",
+      "gfa_invalid": "Brutopind peab olema positiivne arv.",
+      "storeys_invalid": "Korruste arv peab olema täisarv vähemalt 1.",
+      "storeys_over_type_max": "Seda hoonetüüpi kavandatakse kuni {max} korrusega.",
+      "quality_invalid": "Kvaliteet peab olema säästlik, tavaline või kõrge.",
+      "height_over_limit": "Korrused ulatuvad {height} m-ni, üle kõrguspiirangu {limit} m.",
+      "clear_height_below_minimum": "Puhaskõrgus {clear} m on alla riigi miinimumi {minimum} m.",
+      "storey_too_small": "Iga korrus oleks {footprint} m2, alla miinimumi {minimum} m2.",
+      "footprint_over_plot": "Ehitisealune pind {footprint} m2 on suurem kui krunt {plot} m2.",
+      "fx_invalid": "Vahetuskurss peab olema positiivne arv.",
+      "source_missing": "Ükski allikas ei anna selle hoonetüübi jaoks väärtust '{field}'; sisestage see lähteülesandes.",
+      "wwr_invalid": "Akende osakaal peab olema vahemikus 0 kuni 1."
     }
   }
 }

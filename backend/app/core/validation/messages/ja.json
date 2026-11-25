@@ -2885,6 +2885,20 @@
     "estimate_quantity_missing": {
       "fail": "項目「{position}」にモデルからの数量がないか、一部の要素に計測数量がありません。",
       "suggestion": "選択した要素に計測数量があるか確認するか、数量を手入力してください。"
+    },
+    "brief_plausible": {
+      "unknown_type": "建物種別 '{value}' は不明です。",
+      "gfa_invalid": "延床面積は正の数でなければなりません。",
+      "storeys_invalid": "階数は1以上の整数でなければなりません。",
+      "storeys_over_type_max": "この建物種別は最大 {max} 階で計画されます。",
+      "quality_invalid": "品質はエコノミー、標準、高のいずれかです。",
+      "height_over_limit": "階の高さが {height} m に達し、高さ制限 {limit} m を超えています。",
+      "clear_height_below_minimum": "天井高 {clear} m は国の最低値 {minimum} m を下回っています。",
+      "storey_too_small": "各階は {footprint} m2 となり、最小値 {minimum} m2 を下回ります。",
+      "footprint_over_plot": "建築面積 {footprint} m2 が敷地 {plot} m2 より大きいです。",
+      "fx_invalid": "為替レートは正の数でなければなりません。",
+      "source_missing": "この建物種別の '{field}' を示す出典がありません。ブリーフに入力してください。",
+      "wwr_invalid": "窓面積率は0から1の間でなければなりません。"
     }
   }
 }

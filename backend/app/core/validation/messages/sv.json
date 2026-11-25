@@ -2885,6 +2885,20 @@
     "estimate_quantity_missing": {
       "fail": "Posten '{position}' har ingen mängd från modellen, eller saknar några av dess element uppmätt mängd.",
       "suggestion": "Kontrollera att de valda elementen har uppmätt mängd, eller ange mängden manuellt."
+    },
+    "brief_plausible": {
+      "unknown_type": "Byggnadstypen '{value}' är okänd.",
+      "gfa_invalid": "Bruttoarean måste vara ett positivt tal.",
+      "storeys_invalid": "Antal våningar måste vara ett heltal på minst 1.",
+      "storeys_over_type_max": "Denna byggnadstyp planeras med högst {max} våningar.",
+      "quality_invalid": "Kvaliteten måste vara ekonomi, standard eller hög.",
+      "height_over_limit": "Våningarna når {height} m, över höjdgränsen på {limit} m.",
+      "clear_height_below_minimum": "Den fria rumshöjden på {clear} m är under landets minimum på {minimum} m.",
+      "storey_too_small": "Varje våning skulle bli {footprint} m2, under minimum på {minimum} m2.",
+      "footprint_over_plot": "Fotavtrycket på {footprint} m2 är större än tomten på {plot} m2.",
+      "fx_invalid": "Växelkursen måste vara ett positivt tal.",
+      "source_missing": "Ingen källa anger '{field}' för denna byggnadstyp; ange det i programmet.",
+      "wwr_invalid": "Fönsterandelen måste vara mellan 0 och 1."
     }
   }
 }
