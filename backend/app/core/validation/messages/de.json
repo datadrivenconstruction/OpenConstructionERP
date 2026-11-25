@@ -2881,6 +2881,10 @@
     "revision_awaiting_decision": {
       "fail": "Die Modellrevision {number} wartet seit {days} Tagen auf die Abnahme.",
       "suggestion": "Nehmen Sie die Revision an oder lehnen Sie sie ab, damit die Kostenschätzung dem aktuellen Modell folgt."
+    },
+    "estimate_quantity_missing": {
+      "fail": "Die Position '{position}' hat keine Menge aus dem Modell, oder einigen ihrer Elemente fehlt die gemessene Menge.",
+      "suggestion": "Prüfen Sie, ob die gewählten Elemente die gemessene Menge tragen, oder geben Sie die Menge von Hand ein."
     }
   }
 }

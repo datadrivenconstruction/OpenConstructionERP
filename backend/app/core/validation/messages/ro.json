@@ -2881,6 +2881,10 @@
     "revision_awaiting_decision": {
       "fail": "Revizia de model {number} așteaptă acceptarea de {days} zile.",
       "suggestion": "Acceptați sau respingeți revizia, ca estimarea să urmeze modelul actual."
+    },
+    "estimate_quantity_missing": {
+      "fail": "Poziția '{position}' nu are cantitate din model sau unele dintre elementele sale nu au cantitate măsurată.",
+      "suggestion": "Verificați dacă elementele selectate au cantitatea măsurată sau introduceți cantitatea manual."
     }
   }
 }

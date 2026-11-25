@@ -4,6 +4,8 @@ Rule set ``design``, run over one project (``GET /api/v1/design/projects/{id}/va
 
 * ``design.estimate_unpriced`` - WARNING. A position the model drives has no unit rate, so the design
   estimate total leaves it out. Nothing is guessed: the person prices it or picks a cost item.
+* ``design.estimate_quantity_missing`` - WARNING. A position the rules drive got no quantity (nothing matched)
+  or some selected elements lack the measured quantity, so the estimate is short. Kept overrides pass.
 * ``design.revision_awaiting_decision`` - INFO. A shared revision has waited longer than
   ``REVIEW_AFTER_DAYS`` for acceptance; the estimate, schedule and procurement still follow the older one.
 """
@@ -83,6 +85,45 @@ class EstimateUnpriced(ValidationRule):
         return results
 
 
+class EstimateQuantityMissing(ValidationRule):
+    """Every rule-driven estimate position has a quantity taken from all its elements."""
+
+    rule_id = "design.estimate_quantity_missing"
+    name = "Design estimate positions have quantities"
+    standard = DESIGN_RULE_SET
+    severity = Severity.WARNING
+    category = RuleCategory.COMPLETENESS
+    description = "A position matched no elements, or some of its elements carry no measured quantity."
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        data = context.data if isinstance(context.data, dict) else {}
+        locale = _locale(context)
+        results: list[RuleResult] = []
+        for pos in data.get("positions") or []:
+            flags = set(pos.get("flags") or [])
+            if "override" in flags:
+                missing = False
+            else:
+                missing = "quantity_missing" in flags or "no_match" in flags or _zero(pos.get("quantity"))
+            text = str(pos.get("description") or pos.get("rule") or "")
+            results.append(
+                RuleResult(
+                    rule_id=self.rule_id,
+                    rule_name=self.name,
+                    severity=self.severity,
+                    category=self.category,
+                    passed=not missing,
+                    message=translate("design.estimate_quantity_missing.fail", locale, position=text)
+                    if missing
+                    else "OK",
+                    element_ref=str(pos.get("position_id") or "") or None,
+                    suggestion=translate("design.estimate_quantity_missing.suggestion", locale) if missing else None,
+                    details={"rule": pos.get("rule"), "unit": pos.get("unit"), "flags": sorted(flags)},
+                )
+            )
+        return results
+
+
 class RevisionAwaitingDecision(ValidationRule):
     """A shared revision is accepted or rejected within the review window."""
 
@@ -126,7 +167,7 @@ class RevisionAwaitingDecision(ValidationRule):
         return results
 
 
-_RULES: list[ValidationRule] = [EstimateUnpriced(), RevisionAwaitingDecision()]
+_RULES: list[ValidationRule] = [EstimateUnpriced(), EstimateQuantityMissing(), RevisionAwaitingDecision()]
 
 
 def register_design_rules() -> None:

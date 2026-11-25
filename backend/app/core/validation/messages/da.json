@@ -2881,6 +2881,10 @@
     "revision_awaiting_decision": {
       "fail": "Modelrevision {number} har ventet {days} dage på godkendelse.",
       "suggestion": "Godkend eller afvis revisionen, så overslaget følger den aktuelle model."
+    },
+    "estimate_quantity_missing": {
+      "fail": "Posten '{position}' har ingen mængde fra modellen, eller nogle af dens elementer har ingen målt mængde.",
+      "suggestion": "Kontroller, at de valgte elementer har den målte mængde, eller indtast mængden manuelt."
     }
   }
 }

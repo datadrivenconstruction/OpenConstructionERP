@@ -2881,6 +2881,10 @@
     "revision_awaiting_decision": {
       "fail": "Model reviziyasi {number} {days} kundan beri qabul qilinishini kutmoqda.",
       "suggestion": "Smeta joriy modelga mos bo'lishi uchun reviziyani qabul qiling yoki rad eting."
+    },
+    "estimate_quantity_missing": {
+      "fail": "'{position}' pozitsiyasi modeldan miqdor olmadi yoki uning ayrim elementlarida o‘lchangan miqdor yo‘q.",
+      "suggestion": "Tanlangan elementlarda o‘lchangan miqdor borligini tekshiring yoki miqdorni qo‘lda kiriting."
     }
   }
 }

@@ -2881,6 +2881,10 @@
     "revision_awaiting_decision": {
       "fail": "模型修订 {number} 已等待验收 {days} 天。",
       "suggestion": "请接受或拒绝该修订，使估算与当前模型一致。"
+    },
+    "estimate_quantity_missing": {
+      "fail": "条目“{position}”没有来自模型的工程量，或其部分构件没有测量工程量。",
+      "suggestion": "请检查所选构件是否带有测量工程量，或手动输入工程量。"
     }
   }
 }

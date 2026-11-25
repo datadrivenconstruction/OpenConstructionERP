@@ -2881,6 +2881,10 @@
     "revision_awaiting_decision": {
       "fail": "{days} araw nang naghihintay ng pagtanggap ang model revision {number}.",
       "suggestion": "Tanggapin o tanggihan ang revision para sundan ng estimate ang kasalukuyang model."
+    },
+    "estimate_quantity_missing": {
+      "fail": "Ang item na '{position}' ay walang dami mula sa modelo, o ang ilan sa mga elemento nito ay walang nasukat na dami.",
+      "suggestion": "Tiyaking may nasukat na dami ang mga napiling elemento, o ilagay nang mano-mano ang dami."
     }
   }
 }

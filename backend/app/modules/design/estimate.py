@@ -147,9 +147,11 @@ async def eval_model_rule(
         projection_mode="formula" if q.get("formula") else "field",
         formula=q.get("formula"),
     )
+    flags: list[str] = []
     if missing:
         prov["elements_without_quantity"] = len(missing)
-    return Computed(value, keys, [], prov)
+        flags.append("quantity_missing")
+    return Computed(value, keys, flags, prov)
 
 
 def eval_derived_rule(
@@ -632,6 +634,12 @@ async def _diff_by_type(rev: DesignRevision) -> list[Any]:
         return []
 
 
+def _impact_rate(position_rate: Any, rule_rate: Decimal | None) -> Decimal:
+    """The rate accepting would leave: an unpriced position takes the rule's rate, a priced one keeps its own."""
+    current = q4(position_rate or 0)
+    return current if current != 0 else q4(rule_rate or 0)
+
+
 async def impact(session, rev: DesignRevision) -> dict[str, Any]:
     """Position-level delta if ``rev`` were accepted now. Writes nothing."""
     est = (
@@ -663,7 +671,7 @@ async def impact(session, rev: DesignRevision) -> dict[str, Any]:
         cur_q = q4(pos.quantity) if pos is not None else ZERO
         override = bool(b and pos is not None and _overridden(pos, b, c.quantity))
         eff = cur_q if override else new_model
-        rate = q4(pos.unit_rate) if pos is not None else q4(c.unit_rate or 0)
+        rate = _impact_rate(pos.unit_rate if pos is not None else None, c.unit_rate)
         cur_total += cur_q * rate
         new_total += eff * rate
         if rate == 0:

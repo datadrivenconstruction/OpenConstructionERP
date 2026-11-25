@@ -2881,6 +2881,10 @@
     "revision_awaiting_decision": {
       "fail": "モデル改訂 {number} は {days} 日間承認を待っています。",
       "suggestion": "見積が現在のモデルに従うよう、改訂を承認または却下してください。"
+    },
+    "estimate_quantity_missing": {
+      "fail": "項目「{position}」にモデルからの数量がないか、一部の要素に計測数量がありません。",
+      "suggestion": "選択した要素に計測数量があるか確認するか、数量を手入力してください。"
     }
   }
 }

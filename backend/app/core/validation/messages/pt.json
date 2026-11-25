@@ -2881,6 +2881,10 @@
     "revision_awaiting_decision": {
       "fail": "A revisão do modelo {number} aguarda aceitação há {days} dias.",
       "suggestion": "Aceite ou rejeite a revisão para que a estimativa acompanhe o modelo atual."
+    },
+    "estimate_quantity_missing": {
+      "fail": "A posição '{position}' não tem quantidade do modelo, ou alguns dos seus elementos não têm quantidade medida.",
+      "suggestion": "Verifique se os elementos selecionados têm a quantidade medida ou introduza a quantidade manualmente."
     }
   }
 }

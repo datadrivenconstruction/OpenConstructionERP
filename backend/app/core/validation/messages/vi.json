@@ -2881,6 +2881,10 @@
     "revision_awaiting_decision": {
       "fail": "Phiên bản mô hình {number} đã chờ nghiệm thu {days} ngày.",
       "suggestion": "Chấp nhận hoặc từ chối phiên bản để dự toán theo mô hình hiện tại."
+    },
+    "estimate_quantity_missing": {
+      "fail": "Hạng mục '{position}' không có khối lượng từ mô hình, hoặc một số cấu kiện của nó không có khối lượng đo.",
+      "suggestion": "Kiểm tra các cấu kiện đã chọn có khối lượng đo, hoặc nhập khối lượng thủ công."
     }
   }
 }

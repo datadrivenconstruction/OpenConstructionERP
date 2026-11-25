@@ -2881,6 +2881,10 @@
     "revision_awaiting_decision": {
       "fail": "Rewizja modelu {number} czeka na akceptację od {days} dni.",
       "suggestion": "Zaakceptuj lub odrzuć rewizję, aby kosztorys odpowiadał bieżącemu modelowi."
+    },
+    "estimate_quantity_missing": {
+      "fail": "Pozycja '{position}' nie ma ilości z modelu lub część jej elementów nie ma zmierzonej ilości.",
+      "suggestion": "Sprawdź, czy wybrane elementy mają zmierzoną ilość, lub wpisz ilość ręcznie."
     }
   }
 }

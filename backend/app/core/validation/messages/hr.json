@@ -2881,6 +2881,10 @@
     "revision_awaiting_decision": {
       "fail": "Revizija modela {number} čeka prihvaćanje već {days} dana.",
       "suggestion": "Prihvatite ili odbijte reviziju kako bi procjena pratila trenutačni model."
+    },
+    "estimate_quantity_missing": {
+      "fail": "Stavka '{position}' nema količinu iz modela ili neki njezini elementi nemaju izmjerenu količinu.",
+      "suggestion": "Provjerite imaju li odabrani elementi izmjerenu količinu ili unesite količinu ručno."
     }
   }
 }

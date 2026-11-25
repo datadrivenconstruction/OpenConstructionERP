@@ -2881,6 +2881,10 @@
     "revision_awaiting_decision": {
       "fail": "Revisi model {number} sudah {days} hari menunggu penerimaan.",
       "suggestion": "Terima atau tolak revisi agar estimasi mengikuti model terkini."
+    },
+    "estimate_quantity_missing": {
+      "fail": "Item '{position}' tidak memiliki kuantitas dari model, atau sebagian elemennya tidak memiliki kuantitas terukur.",
+      "suggestion": "Periksa apakah elemen yang dipilih memiliki kuantitas terukur, atau masukkan kuantitas secara manual."
     }
   }
 }

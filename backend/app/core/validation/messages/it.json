@@ -2881,6 +2881,10 @@
     "revision_awaiting_decision": {
       "fail": "La revisione del modello {number} attende l'accettazione da {days} giorni.",
       "suggestion": "Accetta o rifiuta la revisione perché la stima segua il modello attuale."
+    },
+    "estimate_quantity_missing": {
+      "fail": "La voce '{position}' non ha una quantità dal modello, oppure alcuni dei suoi elementi non hanno una quantità misurata.",
+      "suggestion": "Verificare che gli elementi selezionati abbiano la quantità misurata o inserire la quantità a mano."
     }
   }
 }

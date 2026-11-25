@@ -2881,6 +2881,10 @@
     "revision_awaiting_decision": {
       "fail": "Modelrevisie {number} wacht al {days} dagen op acceptatie.",
       "suggestion": "Accepteer of weiger de revisie, zodat de raming het huidige model volgt."
+    },
+    "estimate_quantity_missing": {
+      "fail": "De post '{position}' heeft geen hoeveelheid uit het model, of sommige elementen hebben geen gemeten hoeveelheid.",
+      "suggestion": "Controleer of de gekozen elementen de gemeten hoeveelheid hebben, of voer de hoeveelheid handmatig in."
     }
   }
 }
