@@ -371,7 +371,7 @@ async def test_change_order_carries_the_take_off_delta(client):
     async with async_session_factory() as s:
         order = (
             await s.execute(
-                select(ChangeOrder).where(ChangeOrder.project_id == pid, ChangeOrder.title.like("Design revision R2%"))
+                select(ChangeOrder).where(ChangeOrder.project_id == pid, ChangeOrder.title.like("design_revision:2%"))
             )
         ).scalar_one()
     meta = order.metadata_["design"]["procurement"]
@@ -387,7 +387,11 @@ async def test_change_order_carries_the_take_off_delta(client):
             "issued_packages_affected",
         )
     }
-    assert meta["lines_changed"] == 2 and "Procurement: 2 take-off line(s) change" in order.description
+    assert (
+        meta["lines_changed"] == 2
+        and '[co:procurement|{"added"' in order.description
+        and '"changed": 2' in order.description
+    )
 
 
 async def test_a_package_a_person_deleted_is_not_recreated(client):

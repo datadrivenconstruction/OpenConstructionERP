@@ -8,7 +8,7 @@ import i18next from 'i18next';
 
 import de from '@/app/locales/de';
 import en from '@/app/locales/en';
-import { designRecordName } from '../designRecordName';
+import { designRecordName, designRecordText } from '../designRecordName';
 
 async function tFor(lng: 'en' | 'de') {
   const inst = i18next.createInstance();
@@ -38,6 +38,22 @@ describe('designRecordName', () => {
     expect(designRecordName(await tFor('de'), 'design_revision_quantities:3')).toBe(
       'Planungsrevision 3: Mengenänderungen',
     );
+  });
+
+  it('renders a change order title code, keeping the revision message a person typed', async () => {
+    expect(designRecordName(await tFor('en'), 'design_revision:2')).toBe('Design revision 2');
+    expect(designRecordName(await tFor('de'), 'design_revision:2:Fassade neu')).toBe('Planungsrevision 2: Fassade neu');
+  });
+
+  it('renders change order description tokens and leaves older English text alone', async () => {
+    const de = await tFor('de');
+    const text = '[co:elements|{"added": 1, "changed": 4, "removed": 2}]\n[co:no_estimate]';
+    expect(designRecordText(de, text)).toBe(
+      'Elemente: 1 hinzugefügt, 2 entfernt, 4 geändert.\nDas Projekt hat keine Planungskalkulation: Es wurde kein Kostenunterschied berechnet.',
+    );
+    expect(designRecordText(await tFor('en'), 'Walls [co:item_unpriced]')).toBe('Walls (no rate: amount not costed)');
+    expect(designRecordText(de, 'Accepted design revision R2.')).toBe('Accepted design revision R2.');
+    expect(designRecordText(de, null)).toBe('');
   });
 
   it('leaves names a person typed, and old English addendum titles, as they are', async () => {

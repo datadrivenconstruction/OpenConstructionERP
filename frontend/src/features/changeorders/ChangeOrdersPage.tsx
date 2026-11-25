@@ -2,6 +2,7 @@
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 import { useState, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
+import { designRecordName, designRecordText } from '@/shared/lib/designRecordName';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useHasPermission } from '@/shared/lib/permissionGates';
 import { normalizeListResponse } from '@/shared/lib/apiHelpers';
@@ -1902,9 +1903,9 @@ function DetailView({
               <h1 className="text-xl font-semibold text-content-primary">{order.code}</h1>
               <Badge variant={STATUS_COLORS[order.status] || 'neutral'}>{translateStatus(order.status, t)}</Badge>
             </div>
-            <h2 className="mt-1 text-lg text-content-secondary">{order.title}</h2>
+            <h2 className="mt-1 text-lg text-content-secondary">{designRecordName(t, order.title)}</h2>
             {order.description && (
-              <p className="mt-2 text-sm text-content-tertiary max-w-2xl">{order.description}</p>
+              <p className="mt-2 text-sm text-content-tertiary max-w-2xl whitespace-pre-line">{designRecordText(t, order.description)}</p>
             )}
           </div>
 
@@ -2464,7 +2465,7 @@ function DetailView({
                   return (
                   <tr key={item.id} className="last:border-0">
                     <td>
-                      {item.description}
+                      {designRecordText(t, item.description)}
                       <AccountChooser
                         compact
                         projectId={order.project_id}
@@ -2980,8 +2981,8 @@ export function ChangeOrdersPage() {
                           wide. w-full + max-w-0 hands it whatever the seven
                           fixed columns do not use, and truncates only past
                           that. */}
-                      <td className="font-medium w-full max-w-0 truncate" title={order.title}>
-                        {order.title}
+                      <td className="font-medium w-full max-w-0 truncate" title={designRecordName(t, order.title)}>
+                        {designRecordName(t, order.title)}
                       </td>
                       <td>
                         <Badge variant={STATUS_COLORS[order.status] || 'neutral'}>{translateStatus(order.status, t)}</Badge>

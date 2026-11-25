@@ -117,8 +117,11 @@ async def test_accept_with_change_order_carries_impact_and_elements(client):
     # unpriced: no rate is guessed, the item says so and is flagged
     slab = items["slab"]
     assert D(slab.new_rate) == 0 and D(slab.cost_delta) == 0 and slab.metadata_["unpriced"] is True
-    assert "no rate" in slab.description and "slab" in order.metadata_["design"]["estimate"]["unpriced_positions"]
-    assert "have no rate" in order.description and co["unpriced_positions"] >= 1
+    assert (
+        "[co:item_unpriced]" in slab.description
+        and "slab" in order.metadata_["design"]["estimate"]["unpriced_positions"]
+    )
+    assert '[co:unpriced|{"count": ' in order.description and co["unpriced_positions"] >= 1
 
     # changed elements, keyed like the BIM elements, and the way back to the revision
     meta = order.metadata_
@@ -127,7 +130,7 @@ async def test_accept_with_change_order_carries_impact_and_elements(client):
     assert els["added"] == [NEW_DOOR] and els["removed"] == [DOOR] and {WALL, SLAB} <= set(els["changed"])
     assert els["bim_diff_id"] and els["bim_model_id"] != els["parent_bim_model_id"]
     assert meta["design"]["acceptance_url"] == f"/design/acceptance?revision={r2}"
-    assert f"/design/acceptance?revision={r2}" in order.description
+    assert order.title.split(":")[:2] == ["design_revision", "2"]
     assert meta["design"]["schedule"] is None and order.schedule_impact_days == 0
 
     # idempotent: asking again returns the same order; the revision cannot be accepted twice
@@ -188,7 +191,7 @@ async def test_off_and_always(client):
     orders = await _orders(pid)
     assert len(orders) == 2 and all(o.status == "draft" for o in orders)
     r1_order = next(o for o in orders if o.metadata_["design_revision_id"] == r1)
-    assert "no design estimate" in r1_order.description and await _items(r1_order.id) == []
+    assert "[co:no_estimate]" in r1_order.description and await _items(r1_order.id) == []
 
 
 async def test_setting_and_creation_need_their_roles(client):
