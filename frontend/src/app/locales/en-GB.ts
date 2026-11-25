@@ -188,6 +188,11 @@ const resource = {
     "boq.priced_from_published_rates": "Prices are published unit prices",
     "boq.priced_from_published_rates_hint": "They already contain overhead and profit. Validation warns if a markup adds them again.",
     "boq.gaeb_long_text": "Long text",
+    "boq.bim_prov_model": "Model {{name}} v{{version}}, elements: {{count}}",
+    "boq.bim_prov_formula": "Formula: {{formula}}",
+    "boq.bim_prov_missing": "Linked elements without a value in this unit (they add nothing): {{count}}",
+    "boq.bim_prov_manual_kept": "Your quantity is kept. The model gives {{quantity}}.",
+    "boq.bim_prov_no_quantity": "The model has no value in {{unit}} for these elements, so the quantity was not changed.",
     "auth.or": "or",
     "auth.sso_login": "Sign in with SSO",
     "auth.oidc_errors.no_code": "No authorisation code received from the identity provider.",
@@ -2623,6 +2628,10 @@ const resource = {
     "api_errors.no_valid_elements": "No elements found in {{filename}}. The table needs an element_id column.",
     "bim.data_export_label": "Model data",
     "bim.data_export_failed": "Data export failed",
+    "bim.link_check_clean": "Every element is linked and every linked position has its quantity.",
+    "bim.link_check_unlinked": "{{unlinked}} of {{total}} elements are not linked to the BOQ",
+    "bim.link_check_positions": "Some linked positions need attention",
+    "bim.link_check_more": "+{{count}} more",
   }
 } as { translation: Record<string, string> };
 

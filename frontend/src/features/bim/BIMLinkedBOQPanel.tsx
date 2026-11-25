@@ -3,10 +3,10 @@
 import { useMemo, useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
-import { Search, X, Link2, Hash, ExternalLink, Loader2 } from 'lucide-react';
+import { Search, X, Link2, Hash, ExternalLink, Loader2, AlertTriangle, CheckCircle2 } from 'lucide-react';
 import type { BIMElementData } from '@/shared/ui/BIMViewer';
 import type { BIMBOQLinkBrief } from '@/shared/ui/BIMViewer/ElementManager';
-import { fetchBIMModelBOQLinks } from './api';
+import { fetchBIMLinkCheck, fetchBIMModelBOQLinks } from './api';
 import { useDisplayQuantity } from '@/shared/hooks/useDisplayQuantity';
 import { getNumberLocale } from '@/stores/usePreferencesStore';
 
@@ -52,6 +52,13 @@ export default function BIMLinkedBOQPanel({
   const linksQuery = useQuery({
     queryKey: ['bim-model-boq-links', modelId],
     queryFn: () => fetchBIMModelBOQLinks(modelId),
+    enabled: !!modelId,
+    staleTime: 30_000,
+  });
+
+  const checkQuery = useQuery({
+    queryKey: ['bim-model-link-check', modelId],
+    queryFn: () => fetchBIMLinkCheck(modelId),
     enabled: !!modelId,
     staleTime: 30_000,
   });
@@ -214,6 +221,46 @@ export default function BIMLinkedBOQPanel({
           })}
         </div>
       </div>
+
+      {checkQuery.data && (
+        <div className="px-4 py-2 border-b border-border-light shrink-0" data-testid="bim-link-check">
+          {checkQuery.data.findings.length === 0 ? (
+            <p className="flex items-center gap-1.5 text-2xs text-semantic-success">
+              <CheckCircle2 size={12} className="shrink-0" />
+              {t('bim.link_check_clean', { defaultValue: 'Every element is linked and every linked position has its quantity.' })}
+            </p>
+          ) : (
+            <div className="rounded-md bg-semantic-warning-bg border border-semantic-warning/30 px-2.5 py-1.5">
+              <p className="flex items-center gap-1.5 text-2xs font-semibold text-semantic-warning">
+                <AlertTriangle size={12} className="shrink-0" />
+                {checkQuery.data.unlinked_total > 0
+                  ? t('bim.link_check_unlinked', {
+                      defaultValue: '{{unlinked}} of {{total}} elements are not linked to the BOQ',
+                      unlinked: checkQuery.data.unlinked_total,
+                      total: checkQuery.data.element_total,
+                    })
+                  : t('bim.link_check_positions', { defaultValue: 'Some linked positions need attention' })}
+              </p>
+              <ul className="mt-1 space-y-0.5 max-h-32 overflow-y-auto">
+                {checkQuery.data.findings.slice(0, 8).map((f, i) => (
+                  <li
+                    key={`${f.rule_id}-${f.element_ref}-${i}`}
+                    className={`text-2xs ${f.severity === 'error' ? 'text-semantic-error' : 'text-content-secondary'}`}
+                    title={f.suggestion ?? undefined}
+                  >
+                    {f.message}
+                  </li>
+                ))}
+              </ul>
+              {checkQuery.data.findings.length > 8 && (
+                <p className="mt-0.5 text-2xs text-content-tertiary">
+                  {t('bim.link_check_more', { defaultValue: '+{{count}} more', count: checkQuery.data.findings.length - 8 })}
+                </p>
+              )}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Position list */}
       <div className="flex-1 overflow-y-auto">
