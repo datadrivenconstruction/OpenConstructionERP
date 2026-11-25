@@ -40,6 +40,7 @@ import threading
 import time as _time
 import uuid as _uuid
 from datetime import UTC, datetime, timedelta
+from decimal import ROUND_HALF_UP, Decimal
 from pathlib import Path
 from statistics import mean as _mean
 from typing import Any
@@ -4195,7 +4196,7 @@ def _derive_element_confidence(
     llm_score: Any,
     *,
     description: str,
-    quantity: float,
+    quantity: Decimal | float,
     raw_unit: str,
 ) -> float:
     """Derive a per-element confidence for an AI-extracted BOQ item.
@@ -4333,7 +4334,7 @@ async def analyze_document(
         parsed = []
 
     # 7. Convert to the AnalysisResult format expected by frontend
-    from app.modules.takeoff.text_analyze import check_items
+    from app.modules.takeoff.text_analyze import as_quantity, check_items
 
     elements: list[dict[str, Any]] = []
     candidates: list[dict[str, Any]] = []
@@ -4344,8 +4345,9 @@ async def analyze_document(
     # plausible band so a malicious / confused response can't pollute the
     # BOQ. Sane upper bounds: quantity 10_000_000 (1M m² building),
     # unit_rate 1_000_000 currency units (luxury fitout per m²).
-    _MAX_QUANTITY = 10_000_000.0
+    _MAX_QUANTITY = Decimal("10000000")
     _MAX_UNIT_RATE = 1_000_000.0
+    _QTY_STEP = Decimal("0.01")
 
     for idx, item in enumerate(parsed):
         if not isinstance(item, dict):
@@ -4355,10 +4357,9 @@ async def analyze_document(
         if len(description) < 3:
             continue
 
-        try:
-            quantity = float(item.get("quantity", 0))
-        except (ValueError, TypeError):
-            quantity = 0.0
+        # Exact from the model's text to the response: a quantity never
+        # passes through a float on its way to the BOQ.
+        quantity = as_quantity(item.get("quantity", 0))
         # Negative quantities are nonsense; outside-band values are
         # almost certainly hallucinations.
         if quantity < 0 or quantity > _MAX_QUANTITY:
@@ -4367,7 +4368,7 @@ async def analyze_document(
                 quantity,
                 idx,
             )
-            quantity = 0.0
+            quantity = Decimal(0)
 
         raw_unit = str(item.get("unit", "")).strip()
         unit = raw_unit or "pcs"
@@ -4416,7 +4417,7 @@ async def analyze_document(
                 "id": f"ai_{idx + 1}",
                 "category": category,
                 "description": row.description,
-                "quantity": round(quantity, 2),
+                "quantity": quantity.quantize(_QTY_STEP, rounding=ROUND_HALF_UP),
                 "unit": unit,
                 "confidence": row.confidence,
                 "grounded": row.grounded,
@@ -4436,7 +4437,7 @@ async def analyze_document(
             categories[bucket_key] = {
                 "category": category,
                 "count": 0,
-                "total_quantity": 0,
+                "total_quantity": Decimal(0),
                 "unit": unit,
             }
         categories[bucket_key]["count"] += 1
