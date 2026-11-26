@@ -63517,6 +63517,7 @@ const resource = {
     "costs.match_index.error_store_unavailable": "无法连接搜索存储。请检查向量搜索服务后重试。",
     "costs.match_index.error_invalid_request": "请选择目录的语言后重试。",
     "costs.match_index.error_index_failed": "建立索引时出错而停止。请重试；已建立索引的条目会保留。",
+    "costs.base_market_editors_only": "只有编辑者可以安装市场版本",
     "costs.resource_impact.open": "修改",
     "costs.resource_impact.title": "修改资源",
     "costs.resource_impact.subtitle": "先查看此修改的影响范围，再应用。",

@@ -61253,6 +61253,7 @@ const resource = {
     "costs.match_index.error_store_unavailable": "دسترسی به مخزن جستجو ممکن نیست. سرویس جستجوی برداری را بررسی کنید و دوباره تلاش کنید.",
     "costs.match_index.error_invalid_request": "زبان کاتالوگ را انتخاب کنید و دوباره تلاش کنید.",
     "costs.match_index.error_index_failed": "فهرست‌گذاری با خطا متوقف شد. دوباره تلاش کنید؛ ردیف‌های فهرست‌گذاری‌شده حفظ می‌شوند.",
+    "costs.base_market_editors_only": "فقط ویراستاران می‌توانند گونه بازار را نصب کنند",
     "costs.resource_impact.open": "تغییر",
     "costs.resource_impact.title": "تغییر منبع",
     "costs.resource_impact.subtitle": "ببینید این تغییر بر چه اثر می‌گذارد، سپس آن را اعمال کنید.",

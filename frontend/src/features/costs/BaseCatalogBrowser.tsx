@@ -89,6 +89,9 @@ interface BaseCatalogBrowserProps {
    *  hides the market cards: loading one as a plain base would install the
    *  home language instead of the card's. */
   onReprice?: (variant: BaseVariant) => void;
+  /** False for roles that may not install a market: the cards stay listed, the
+   *  install control is disabled with a caption saying who can use it. */
+  canReprice?: boolean;
   /** This browser's cached market token per base_region (e.g.
    *  { ZH_CHINA: 'GB_LONDON_en' }). The server's stored state in
    *  `catalog.base_states` wins wherever it knows one; this fills in only for a
@@ -165,6 +168,7 @@ interface CardProps {
    *  when already loaded, switch the active market). Distinct from onSetActive,
    *  which stays for the global family's set-active-database. */
   onReprice?: (variant: BaseVariant) => void;
+  canReprice?: boolean;
   /** Home card of a base priced into a market: offer the way back. */
   onRestoreHome?: (variant: BaseVariant) => void;
   /** Home card of a base whose last market switch has not finished. */
@@ -186,6 +190,7 @@ function BaseVariantCard({
   onSelect,
   onSetActive,
   onReprice,
+  canReprice = true,
   onRestoreHome,
   unfinishedSwitch = false,
   elapsedSeconds,
@@ -196,6 +201,9 @@ function BaseVariantCard({
   // reprice handler is wired (the import page); on surfaces without it, market
   // variants fall back to the standard "load this base" action below.
   const isMarket = variant.market_catalog !== '' && !!onReprice;
+  const lockedTitle = canReprice
+    ? undefined
+    : t('costs.base_market_editors_only', { defaultValue: 'Only editors can install a market variant' });
 
   const border = selected
     ? 'border-oe-blue/60 bg-oe-blue-subtle/25 ring-1 ring-oe-blue/30'
@@ -292,6 +300,11 @@ function BaseVariantCard({
       {/* Action */}
       {mode === 'load' && (
         <div className="mt-3">
+          {isMarket && !canReprice && !loading && !(loaded && active) && (
+            <div className="mb-1.5 text-2xs text-content-tertiary" data-testid="base-market-locked-note">
+              {lockedTitle}
+            </div>
+          )}
           {isMarket ? (
             // National market card: not loaded -> load + price into; loaded but
             // not the active market -> switch; loaded + active -> a badge.
@@ -309,7 +322,8 @@ function BaseVariantCard({
             ) : loaded ? (
               <button
                 type="button"
-                disabled={disabled}
+                disabled={disabled || !canReprice}
+                title={lockedTitle}
                 onClick={() => onReprice?.(variant)}
                 className={`${ACTION_SECONDARY_CLASS} disabled:opacity-50`}
               >
@@ -318,9 +332,10 @@ function BaseVariantCard({
             ) : (
               <button
                 type="button"
-                disabled={disabled}
+                disabled={disabled || !canReprice}
+                title={lockedTitle}
                 onClick={() => onReprice?.(variant)}
-                className={ACTION_PRIMARY_CLASS}
+                className={`${ACTION_PRIMARY_CLASS} disabled:opacity-50`}
               >
                 <Download size={14} />
                 {t('costs.base_market_load', { defaultValue: 'Price into {{market}}', market: variant.market })}
@@ -397,6 +412,7 @@ export function BaseCatalogBrowser({
   onSelect,
   onSetActive,
   onReprice,
+  canReprice = true,
   activeMarkets,
   onRestoreHome,
   elapsedSeconds,
@@ -507,6 +523,7 @@ export function BaseCatalogBrowser({
       onSelect={onSelect}
       onSetActive={onSetActive}
       onReprice={onReprice}
+      canReprice={canReprice}
       onRestoreHome={onRestoreHome && offersReturnHome(variant) ? onRestoreHome : undefined}
       unfinishedSwitch={
         variant.market_catalog === '' && catalog.base_states?.[variant.base_region]?.market_state === 'switching'

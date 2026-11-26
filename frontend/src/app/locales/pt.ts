@@ -64197,6 +64197,7 @@ const resource = {
     "costs.match_index.error_store_unavailable": "Não é possível aceder ao armazenamento de pesquisa. Verifique o serviço de pesquisa vetorial e tente novamente.",
     "costs.match_index.error_invalid_request": "Escolha o idioma do catálogo e tente novamente.",
     "costs.match_index.error_index_failed": "A indexação parou com um erro. Tente novamente; os itens já indexados são mantidos.",
+    "costs.base_market_editors_only": "Apenas editores podem instalar uma variante de mercado",
     "costs.resource_impact.open": "Alterar",
     "costs.resource_impact.title": "Alterar recurso",
     "costs.resource_impact.subtitle": "Veja o que a alteração afeta e depois aplique.",

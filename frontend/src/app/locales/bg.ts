@@ -61297,6 +61297,7 @@ const resource = {
     "costs.match_index.error_store_unavailable": "Хранилището за търсене не е достъпно. Проверете услугата за векторно търсене и опитайте отново.",
     "costs.match_index.error_invalid_request": "Изберете езика на каталога и опитайте отново.",
     "costs.match_index.error_index_failed": "Индексирането спря с грешка. Опитайте отново; вече индексираните позиции се запазват.",
+    "costs.base_market_editors_only": "Само редакторите могат да инсталират пазарен вариант",
     "costs.resource_impact.open": "Промяна",
     "costs.resource_impact.title": "Промяна на ресурс",
     "costs.resource_impact.subtitle": "Вижте какво засяга промяната, след това я приложете.",

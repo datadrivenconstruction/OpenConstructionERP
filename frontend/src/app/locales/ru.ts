@@ -64310,6 +64310,7 @@ const resource = {
     "costs.match_index.error_store_unavailable": "Хранилище поиска недоступно. Проверьте службу векторного поиска и повторите попытку.",
     "costs.match_index.error_invalid_request": "Выберите язык каталога и повторите попытку.",
     "costs.match_index.error_index_failed": "Индексация остановилась с ошибкой. Повторите попытку; уже проиндексированные позиции сохранены.",
+    "costs.base_market_editors_only": "Рыночный вариант могут установить только редакторы",
     "costs.resource_impact.open": "Изменить",
     "costs.resource_impact.title": "Изменить ресурс",
     "costs.resource_impact.subtitle": "Посмотрите, что затронет изменение, затем примените его.",

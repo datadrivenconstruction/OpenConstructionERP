@@ -64204,6 +64204,7 @@ const resource = {
     "costs.match_index.error_store_unavailable": "Le magasin de recherche est inaccessible. Vérifiez le service de recherche vectorielle et réessayez.",
     "costs.match_index.error_invalid_request": "Choisissez la langue du catalogue et réessayez.",
     "costs.match_index.error_index_failed": "L'indexation s'est arrêtée sur une erreur. Réessayez ; les articles déjà indexés sont conservés.",
+    "costs.base_market_editors_only": "Seuls les éditeurs peuvent installer une variante de marché",
     "costs.resource_impact.open": "Modifier",
     "costs.resource_impact.title": "Modifier la ressource",
     "costs.resource_impact.subtitle": "Voyez ce que touche la modification, puis appliquez-la.",

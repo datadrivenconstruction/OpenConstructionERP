@@ -61274,6 +61274,7 @@ const resource = {
     "costs.match_index.error_store_unavailable": "Хайлтын сангаас холбогдож чадсангүй. Вектор хайлтын үйлчилгээг шалгаад дахин оролдоно уу.",
     "costs.match_index.error_invalid_request": "Каталогийн хэлийг сонгоод дахин оролдоно уу.",
     "costs.match_index.error_index_failed": "Индексжүүлэлт алдаатай зогссон. Дахин оролдоно уу; өмнө индексжсэн зүйлс хадгалагдана.",
+    "costs.base_market_editors_only": "Зах зээлийн хувилбарыг зөвхөн редакторууд суулгаж чадна",
     "costs.resource_impact.open": "Өөрчлөх",
     "costs.resource_impact.title": "Нөөцийг өөрчлөх",
     "costs.resource_impact.subtitle": "Өөрчлөлт юунд нөлөөлөхийг хараад дараа нь хэрэгжүүлнэ үү.",

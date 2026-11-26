@@ -61293,6 +61293,7 @@ const resource = {
     "costs.match_index.error_store_unavailable": "Søgelageret kan ikke nås. Tjek vektorsøgningstjenesten, og prøv igen.",
     "costs.match_index.error_invalid_request": "Vælg katalogets sprog, og prøv igen.",
     "costs.match_index.error_index_failed": "Indekseringen stoppede med en fejl. Prøv igen; poster, der allerede er indekseret, bevares.",
+    "costs.base_market_editors_only": "Kun redaktører kan installere en markedsvariant",
     "costs.resource_impact.open": "Ændr",
     "costs.resource_impact.title": "Ændr ressource",
     "costs.resource_impact.subtitle": "Se hvad ændringen påvirker, og anvend den derefter.",

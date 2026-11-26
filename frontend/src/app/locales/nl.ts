@@ -62174,6 +62174,7 @@ const resource = {
     "costs.match_index.error_store_unavailable": "De zoekopslag is niet bereikbaar. Controleer de vectorzoekdienst en probeer het opnieuw.",
     "costs.match_index.error_invalid_request": "Kies de taal van de catalogus en probeer het opnieuw.",
     "costs.match_index.error_index_failed": "Indexeren is gestopt met een fout. Probeer het opnieuw; reeds geïndexeerde posten blijven behouden.",
+    "costs.base_market_editors_only": "Alleen editors kunnen een marktvariant installeren",
     "costs.resource_impact.open": "Wijzigen",
     "costs.resource_impact.title": "Resource wijzigen",
     "costs.resource_impact.subtitle": "Bekijk wat de wijziging raakt en pas haar daarna toe.",

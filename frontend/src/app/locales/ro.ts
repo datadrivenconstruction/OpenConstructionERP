@@ -61622,6 +61622,7 @@ const resource = {
     "costs.match_index.error_store_unavailable": "Depozitul de căutare nu poate fi contactat. Verifică serviciul de căutare vectorială și încearcă din nou.",
     "costs.match_index.error_invalid_request": "Alege limba catalogului și încearcă din nou.",
     "costs.match_index.error_index_failed": "Indexarea s-a oprit cu o eroare. Încearcă din nou; articolele deja indexate sunt păstrate.",
+    "costs.base_market_editors_only": "Doar editorii pot instala o variantă de piață",
     "costs.resource_impact.open": "Modifică",
     "costs.resource_impact.title": "Modifică resursa",
     "costs.resource_impact.subtitle": "Vedeți ce afectează modificarea, apoi aplicați-o.",

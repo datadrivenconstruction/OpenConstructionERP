@@ -61259,6 +61259,7 @@ const resource = {
     "costs.match_index.error_store_unavailable": "سرچ اسٹور تک رسائی نہیں ہو رہی۔ ویکٹر سرچ سروس چیک کریں اور دوبارہ کوشش کریں۔",
     "costs.match_index.error_invalid_request": "کیٹلاگ کی زبان منتخب کریں اور دوبارہ کوشش کریں۔",
     "costs.match_index.error_index_failed": "انڈیکسنگ ایک خرابی کے ساتھ رک گئی۔ دوبارہ کوشش کریں؛ پہلے سے انڈیکس شدہ آئٹمز محفوظ رہتے ہیں۔",
+    "costs.base_market_editors_only": "مارکیٹ ویریئنٹ صرف ایڈیٹرز انسٹال کر سکتے ہیں",
     "costs.resource_impact.open": "تبدیل کریں",
     "costs.resource_impact.title": "وسیلہ تبدیل کریں",
     "costs.resource_impact.subtitle": "دیکھیں کہ تبدیلی کس پر اثر ڈالتی ہے، پھر اسے لاگو کریں۔",

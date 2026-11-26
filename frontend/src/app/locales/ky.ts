@@ -61410,6 +61410,7 @@ const resource = {
     "costs.match_index.error_store_unavailable": "Издөө сактагычына туташуу мүмкүн эмес. Вектордук издөө кызматын текшерип, кайра аракет кылыңыз.",
     "costs.match_index.error_invalid_request": "Каталогдун тилин тандап, кайра аракет кылыңыз.",
     "costs.match_index.error_index_failed": "Индекстөө ката менен токтоду. Кайра аракет кылыңыз; мурун индекстелген позициялар сакталат.",
+    "costs.base_market_editors_only": "Базар вариантын редакторлор гана орното алат",
     "costs.resource_impact.open": "Өзгөртүү",
     "costs.resource_impact.title": "Ресурсту өзгөртүү",
     "costs.resource_impact.subtitle": "Өзгөрүү эмнеге таасир этерин көрүп, анан колдонуңуз.",

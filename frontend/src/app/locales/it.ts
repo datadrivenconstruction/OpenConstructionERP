@@ -62505,6 +62505,7 @@ const resource = {
     "costs.match_index.error_store_unavailable": "L'archivio di ricerca non è raggiungibile. Controlla il servizio di ricerca vettoriale e riprova.",
     "costs.match_index.error_invalid_request": "Scegli la lingua del catalogo e riprova.",
     "costs.match_index.error_index_failed": "L'indicizzazione si è fermata con un errore. Riprova; le voci già indicizzate vengono mantenute.",
+    "costs.base_market_editors_only": "Solo gli editor possono installare una variante di mercato",
     "costs.resource_impact.open": "Modifica",
     "costs.resource_impact.title": "Modifica risorsa",
     "costs.resource_impact.subtitle": "Guarda cosa tocca la modifica, poi applicala.",

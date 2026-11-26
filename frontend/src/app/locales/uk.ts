@@ -63373,6 +63373,7 @@ const resource = {
     "costs.match_index.error_store_unavailable": "Сховище пошуку недоступне. Перевірте службу векторного пошуку та повторіть спробу.",
     "costs.match_index.error_invalid_request": "Оберіть мову каталогу та повторіть спробу.",
     "costs.match_index.error_index_failed": "Індексація зупинилася з помилкою. Повторіть спробу; уже проіндексовані позиції збережено.",
+    "costs.base_market_editors_only": "Ринковий варіант можуть встановити лише редактори",
     "costs.resource_impact.open": "Змінити",
     "costs.resource_impact.title": "Змінити ресурс",
     "costs.resource_impact.subtitle": "Перегляньте, що зачепить зміна, потім застосуйте її.",

@@ -61578,6 +61578,7 @@ const resource = {
     "costs.match_index.error_store_unavailable": "אין גישה למאגר החיפוש. בדקו את שירות החיפוש הווקטורי ונסו שוב.",
     "costs.match_index.error_invalid_request": "בחרו את שפת הקטלוג ונסו שוב.",
     "costs.match_index.error_index_failed": "האינדוקס נעצר בשגיאה. נסו שוב; סעיפים שכבר אונדקסו נשמרים.",
+    "costs.base_market_editors_only": "רק עורכים יכולים להתקין וריאנט שוק",
     "costs.resource_impact.open": "שינוי",
     "costs.resource_impact.title": "שינוי משאב",
     "costs.resource_impact.subtitle": "ראו על מה השינוי משפיע ואז החילו אותו.",

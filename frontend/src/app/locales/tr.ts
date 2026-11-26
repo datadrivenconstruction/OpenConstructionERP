@@ -62174,6 +62174,7 @@ const resource = {
     "costs.match_index.error_store_unavailable": "Arama deposuna ulaşılamıyor. Vektör arama hizmetini kontrol edip yeniden deneyin.",
     "costs.match_index.error_invalid_request": "Katalogun dilini seçip yeniden deneyin.",
     "costs.match_index.error_index_failed": "Dizinleme bir hatayla durdu. Yeniden deneyin; önceden dizinlenen kalemler korunur.",
+    "costs.base_market_editors_only": "Pazar varyantını yalnızca editörler yükleyebilir",
     "costs.resource_impact.open": "Değiştir",
     "costs.resource_impact.title": "Kaynağı değiştir",
     "costs.resource_impact.subtitle": "Değişikliğin neyi etkilediğini görün, sonra uygulayın.",

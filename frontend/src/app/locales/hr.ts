@@ -61632,6 +61632,7 @@ const resource = {
     "costs.match_index.error_store_unavailable": "Spremište pretraživanja nije dostupno. Provjerite uslugu vektorskog pretraživanja i pokušajte ponovno.",
     "costs.match_index.error_invalid_request": "Odaberite jezik kataloga i pokušajte ponovno.",
     "costs.match_index.error_index_failed": "Indeksiranje je stalo zbog pogreške. Pokušajte ponovno; već indeksirane stavke ostaju sačuvane.",
+    "costs.base_market_editors_only": "Tržišnu varijantu mogu instalirati samo urednici",
     "costs.resource_impact.open": "Promijeni",
     "costs.resource_impact.title": "Promijeni resurs",
     "costs.resource_impact.subtitle": "Pogledajte na što utječe promjena, zatim je primijenite.",

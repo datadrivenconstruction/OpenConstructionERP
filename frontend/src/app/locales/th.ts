@@ -61048,6 +61048,7 @@ const resource = {
     "costs.match_index.error_store_unavailable": "เข้าถึงที่เก็บการค้นหาไม่ได้ ตรวจสอบบริการค้นหาแบบเวกเตอร์แล้วลองอีกครั้ง",
     "costs.match_index.error_invalid_request": "เลือกภาษาของแคตตาล็อกแล้วลองอีกครั้ง",
     "costs.match_index.error_index_failed": "การจัดทำดัชนีหยุดเพราะเกิดข้อผิดพลาด ลองอีกครั้ง รายการที่จัดทำดัชนีไว้แล้วจะยังอยู่",
+    "costs.base_market_editors_only": "เฉพาะบรรณาธิการเท่านั้นที่ติดตั้งตัวแปรตลาดได้",
     "costs.resource_impact.open": "เปลี่ยน",
     "costs.resource_impact.title": "เปลี่ยนทรัพยากร",
     "costs.resource_impact.subtitle": "ดูว่าการเปลี่ยนแปลงกระทบอะไร แล้วจึงนำไปใช้",

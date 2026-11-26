@@ -61563,6 +61563,7 @@ const resource = {
     "costs.match_index.error_store_unavailable": "সার্চ স্টোরে পৌঁছানো যাচ্ছে না। ভেক্টর সার্চ সার্ভিস দেখুন এবং আবার চেষ্টা করুন।",
     "costs.match_index.error_invalid_request": "ক্যাটালগের ভাষা বেছে নিন এবং আবার চেষ্টা করুন।",
     "costs.match_index.error_index_failed": "ইনডেক্সিং একটি ত্রুটিতে থেমে গেছে। আবার চেষ্টা করুন; আগে ইনডেক্স হওয়া আইটেম থেকে যায়।",
+    "costs.base_market_editors_only": "শুধুমাত্র সম্পাদকরা বাজার ভেরিয়েন্ট ইনস্টল করতে পারেন",
     "costs.resource_impact.open": "পরিবর্তন",
     "costs.resource_impact.title": "রিসোর্স পরিবর্তন",
     "costs.resource_impact.subtitle": "পরিবর্তনটি কী কী প্রভাবিত করে দেখুন, তারপর প্রয়োগ করুন।",

@@ -64364,6 +64364,7 @@ const resource = {
     "costs.match_index.error_store_unavailable": "تعذّر الوصول إلى مخزن البحث. تحقق من خدمة البحث المتجهي وحاول مرة أخرى.",
     "costs.match_index.error_invalid_request": "اختر لغة الكتالوج وحاول مرة أخرى.",
     "costs.match_index.error_index_failed": "توقفت الفهرسة بسبب خطأ. حاول مرة أخرى؛ البنود المفهرسة سابقًا محفوظة.",
+    "costs.base_market_editors_only": "يمكن للمحررين فقط تثبيت متغير السوق",
     "costs.resource_impact.open": "تغيير",
     "costs.resource_impact.title": "تغيير المورد",
     "costs.resource_impact.subtitle": "اطّلع على ما يمسّه التغيير ثم طبّقه.",

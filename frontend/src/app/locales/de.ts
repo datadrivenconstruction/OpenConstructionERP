@@ -63746,6 +63746,7 @@ const resource = {
     "costs.match_index.error_store_unavailable": "Der Suchspeicher ist nicht erreichbar. Prüfen Sie den Vektorsuchdienst und versuchen Sie es erneut.",
     "costs.match_index.error_invalid_request": "Wählen Sie die Sprache des Katalogs und versuchen Sie es erneut.",
     "costs.match_index.error_index_failed": "Die Indizierung wurde mit einem Fehler beendet. Versuchen Sie es erneut; bereits indizierte Positionen bleiben erhalten.",
+    "costs.base_market_editors_only": "Nur Bearbeiter können eine Marktvariante installieren",
     "costs.resource_impact.open": "Ändern",
     "costs.resource_impact.title": "Ressource ändern",
     "costs.resource_impact.subtitle": "Vorschau der Auswirkungen ansehen, dann übernehmen.",

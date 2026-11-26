@@ -61047,6 +61047,7 @@ const resource = {
     "costs.match_index.error_store_unavailable": "Penyimpanan pencarian tidak dapat dijangkau. Periksa layanan pencarian vektor lalu coba lagi.",
     "costs.match_index.error_invalid_request": "Pilih bahasa katalog lalu coba lagi.",
     "costs.match_index.error_index_failed": "Pengindeksan berhenti karena kesalahan. Coba lagi; item yang sudah diindeks tetap tersimpan.",
+    "costs.base_market_editors_only": "Hanya editor yang dapat menginstal varian pasar",
     "costs.resource_impact.open": "Ubah",
     "costs.resource_impact.title": "Ubah sumber daya",
     "costs.resource_impact.subtitle": "Lihat apa yang terdampak, lalu terapkan.",

@@ -61908,6 +61908,7 @@ const resource = {
     "costs.match_index.error_store_unavailable": "Sökarkivet kan inte nås. Kontrollera vektorsökningstjänsten och försök igen.",
     "costs.match_index.error_invalid_request": "Välj katalogens språk och försök igen.",
     "costs.match_index.error_index_failed": "Indexeringen avbröts med ett fel. Försök igen; poster som redan är indexerade finns kvar.",
+    "costs.base_market_editors_only": "Endast redaktörer kan installera en marknadsvariant",
     "costs.resource_impact.open": "Ändra",
     "costs.resource_impact.title": "Ändra resurs",
     "costs.resource_impact.subtitle": "Se vad ändringen påverkar och tillämpa den sedan.",

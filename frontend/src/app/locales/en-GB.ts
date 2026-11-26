@@ -112,6 +112,7 @@ const resource = {
     "costs.labor": "Labour",
     "costs.usage.applied_spread_title": "BOQ lines citing this rate: {{lines}}. Applied rates: min {{min}}, average {{avg}}, max {{max}}",
     "costs.usage.applied_spread": "min {{min}} / avg {{avg}} / max {{max}}",
+    "costs.base_market_editors_only": "Only editors can install a market variant",
     "costs.resource_impact.refused_stale": "The price sheet changed since the preview. Run the preview again.",
     "costs.resource_impact.refused_truncated": "Too many work items use this resource to change it in one step.",
     "boq.add_scoped_markup": "Add markup for section",

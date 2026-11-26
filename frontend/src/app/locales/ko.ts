@@ -61664,6 +61664,7 @@ const resource = {
     "costs.match_index.error_store_unavailable": "검색 저장소에 연결할 수 없습니다. 벡터 검색 서비스를 확인한 후 다시 시도하세요.",
     "costs.match_index.error_invalid_request": "카탈로그 언어를 선택한 후 다시 시도하세요.",
     "costs.match_index.error_index_failed": "오류로 색인이 중단되었습니다. 다시 시도하세요. 이미 색인된 항목은 유지됩니다.",
+    "costs.base_market_editors_only": "편집자만 시장 변형을 설치할 수 있습니다",
     "costs.resource_impact.open": "변경",
     "costs.resource_impact.title": "자원 변경",
     "costs.resource_impact.subtitle": "변경이 무엇에 영향을 주는지 확인한 뒤 적용하세요.",

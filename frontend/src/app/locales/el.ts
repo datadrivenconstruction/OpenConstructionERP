@@ -61253,6 +61253,7 @@ const resource = {
     "costs.match_index.error_store_unavailable": "Δεν είναι δυνατή η πρόσβαση στον χώρο αποθήκευσης αναζήτησης. Ελέγξτε την υπηρεσία διανυσματικής αναζήτησης και δοκιμάστε ξανά.",
     "costs.match_index.error_invalid_request": "Επιλέξτε τη γλώσσα του καταλόγου και δοκιμάστε ξανά.",
     "costs.match_index.error_index_failed": "Η ευρετηρίαση σταμάτησε με σφάλμα. Δοκιμάστε ξανά· οι θέσεις που έχουν ήδη ευρετηριαστεί διατηρούνται.",
+    "costs.base_market_editors_only": "Μόνο οι επεξεργαστές μπορούν να εγκαταστήσουν παραλλαγή αγοράς",
     "costs.resource_impact.open": "Αλλαγή",
     "costs.resource_impact.title": "Αλλαγή πόρου",
     "costs.resource_impact.subtitle": "Δείτε τι επηρεάζει η αλλαγή και μετά εφαρμόστε την.",

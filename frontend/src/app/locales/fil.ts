@@ -61251,6 +61251,7 @@ const resource = {
     "costs.match_index.error_store_unavailable": "Hindi maabot ang search store. Suriin ang vector search service at subukan muli.",
     "costs.match_index.error_invalid_request": "Piliin ang wika ng katalogo at subukan muli.",
     "costs.match_index.error_index_failed": "Huminto ang pag-index dahil sa error. Subukan muli; nananatili ang mga item na na-index na.",
+    "costs.base_market_editors_only": "Mga editor lamang ang maaaring mag-install ng market variant",
     "costs.resource_impact.open": "Baguhin",
     "costs.resource_impact.title": "Baguhin ang resource",
     "costs.resource_impact.subtitle": "Tingnan kung ano ang tatamaan ng pagbabago, saka ito ilapat.",

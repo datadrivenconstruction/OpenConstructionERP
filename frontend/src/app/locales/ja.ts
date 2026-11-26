@@ -62580,6 +62580,7 @@ const resource = {
     "costs.match_index.error_store_unavailable": "検索ストアに接続できません。ベクトル検索サービスを確認して、もう一度お試しください。",
     "costs.match_index.error_invalid_request": "カタログの言語を選んで、もう一度お試しください。",
     "costs.match_index.error_index_failed": "エラーでインデックスが停止しました。もう一度お試しください。インデックス済みの項目は保持されます。",
+    "costs.base_market_editors_only": "マーケットバリアントをインストールできるのは編集者のみです",
     "costs.resource_impact.open": "変更",
     "costs.resource_impact.title": "資源を変更",
     "costs.resource_impact.subtitle": "変更の影響を確認してから適用します。",

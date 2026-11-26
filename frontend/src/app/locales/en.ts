@@ -55305,6 +55305,7 @@ const resource = {
     "costs.match_index.error_store_unavailable": "The search store cannot be reached. Check the vector search service and try again.",
     "costs.match_index.error_invalid_request": "Choose the language of the catalogue and try again.",
     "costs.match_index.error_index_failed": "Indexing stopped with an error. Try again; items already indexed are kept.",
+    "costs.base_market_editors_only": "Only editors can install a market variant",
     "costs.resource_impact.open": "Change",
     "costs.resource_impact.title": "Change resource",
     "costs.resource_impact.subtitle": "Preview what this change touches, then apply it.",

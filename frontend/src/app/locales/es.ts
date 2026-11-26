@@ -64209,6 +64209,7 @@ const resource = {
     "costs.match_index.error_store_unavailable": "No se puede acceder al almacén de búsqueda. Revisa el servicio de búsqueda vectorial e inténtalo de nuevo.",
     "costs.match_index.error_invalid_request": "Elige el idioma del catálogo e inténtalo de nuevo.",
     "costs.match_index.error_index_failed": "La indexación se detuvo por un error. Inténtalo de nuevo; las partidas ya indexadas se conservan.",
+    "costs.base_market_editors_only": "Solo los editores pueden instalar una variante de mercado",
     "costs.resource_impact.open": "Cambiar",
     "costs.resource_impact.title": "Cambiar recurso",
     "costs.resource_impact.subtitle": "Vea a qué afecta el cambio y luego aplíquelo.",

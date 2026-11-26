@@ -62565,6 +62565,7 @@ const resource = {
     "costs.match_index.error_store_unavailable": "Úložiště vyhledávání není dostupné. Zkontrolujte službu vektorového vyhledávání a zkuste to znovu.",
     "costs.match_index.error_invalid_request": "Vyberte jazyk katalogu a zkuste to znovu.",
     "costs.match_index.error_index_failed": "Indexování skončilo chybou. Zkuste to znovu; už zaindexované položky zůstávají.",
+    "costs.base_market_editors_only": "Tržní variantu mohou nainstalovat pouze editoři",
     "costs.resource_impact.open": "Změnit",
     "costs.resource_impact.title": "Změnit zdroj",
     "costs.resource_impact.subtitle": "Podívejte se, čeho se změna týká, a pak ji použijte.",

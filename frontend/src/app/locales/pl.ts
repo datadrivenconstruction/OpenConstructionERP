@@ -62826,6 +62826,7 @@ const resource = {
     "costs.match_index.error_store_unavailable": "Magazyn wyszukiwania jest nieosiągalny. Sprawdź usługę wyszukiwania wektorowego i spróbuj ponownie.",
     "costs.match_index.error_invalid_request": "Wybierz język katalogu i spróbuj ponownie.",
     "costs.match_index.error_index_failed": "Indeksowanie zatrzymało się z błędem. Spróbuj ponownie; pozycje już zaindeksowane zostają zachowane.",
+    "costs.base_market_editors_only": "Wariant rynkowy mogą zainstalować tylko edytorzy",
     "costs.resource_impact.open": "Zmień",
     "costs.resource_impact.title": "Zmień zasób",
     "costs.resource_impact.subtitle": "Zobacz, czego dotyczy zmiana, a potem ją zastosuj.",
