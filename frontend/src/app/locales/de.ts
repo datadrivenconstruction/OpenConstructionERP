@@ -72106,7 +72106,7 @@ const resource = {
     "data_paths.entity.file_saved_view": "Gespeicherte Dateiansicht",
     "data_paths.entity.file_trash": "Papierkorb (Dateien)",
     "data_paths.entity.invoice_mailbox": "Rechnungspostfach",
-    "data_paths.entity.tileset": "Tileset",
+    "data_paths.entity.tileset": "Kachelsatz",
     "data_paths.entity.haul_ticket": "Transportschein",
     "data_paths.entity.webhook_endpoint": "Webhook-Endpunkt",
     "data_paths.entity.interface_record": "Schnittstellendatensatz",

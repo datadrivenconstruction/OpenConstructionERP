@@ -72745,7 +72745,7 @@ const resource = {
     "data_paths.entity.file_saved_view": "Сохранённое представление файла",
     "data_paths.entity.file_trash": "Корзина файлов",
     "data_paths.entity.invoice_mailbox": "Почтовый ящик счетов",
-    "data_paths.entity.tileset": "Tileset",
+    "data_paths.entity.tileset": "Набор тайлов",
     "data_paths.entity.haul_ticket": "Транспортная накладная",
     "data_paths.entity.webhook_endpoint": "Конечная точка webhook",
     "data_paths.entity.interface_record": "Запись интерфейса",

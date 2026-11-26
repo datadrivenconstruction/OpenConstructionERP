@@ -69390,7 +69390,7 @@ const resource = {
     "data_paths.entity.file_saved_view": "نمای ذخیره‌شده فایل",
     "data_paths.entity.file_trash": "سطل زباله فایل",
     "data_paths.entity.invoice_mailbox": "صندوق ایمیل فاکتور",
-    "data_paths.entity.tileset": "Tileset",
+    "data_paths.entity.tileset": "مجموعه کاشی",
     "data_paths.entity.haul_ticket": "برگه حمل",
     "data_paths.entity.webhook_endpoint": "endpoint Webhook",
     "data_paths.entity.interface_record": "رکورد رابط",

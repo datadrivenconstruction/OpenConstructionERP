@@ -2553,5 +2553,10 @@
     "en_value": "m",
     "note": "SI unit symbol for metre beside a building dimension, written the same way in every Latin-script locale",
     "reason_category": "symbol"
+  },
+  "data_paths.entity.pipeline": {
+    "en_value": "Pipeline",
+    "note": "label of the pipelines module (a data-processing workflow, not a sales funnel); the Latin-script locales that match en (cs, da, de, es*, fil, fr, id, it, kk, ky, mn, nl, no, pl, pt*, ro, sv, tr, uz) borrow the IT term and already ship its siblings pipeline_stage, pipeline_run as 'pipeline' (de Pipeline-Stufe, fr Etape de pipeline, pl Uruchomienie pipeline); the languages that do not borrow it translate it (ru Konveyer, hu Csovezetek, fi Putkisto, hr cjevovod, ja, zh), so the identical cells are agreement on a word and not English showing through",
+    "reason_category": "cognate_loanword"
   }
 }
