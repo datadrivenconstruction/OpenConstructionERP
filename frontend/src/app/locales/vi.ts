@@ -61081,6 +61081,8 @@ const resource = {
     "costs.resource_impact.issue_key_collision": "Một tài nguyên khác trong vùng đã có tên này.",
     "costs.resource_impact.issue_unreadable_lines": "Một số công tác có tài nguyên này mà không có khối lượng, sẽ được giữ nguyên.",
     "costs.resource_impact.issue_zero_price": "Giá 0 khiến tài nguyên chưa có giá.",
+    "costs.resource_impact.refused_stale": "Bảng giá đã thay đổi kể từ bản xem trước. Hãy chạy lại bản xem trước.",
+    "costs.resource_impact.refused_truncated": "Có quá nhiều hạng mục công việc dùng tài nguyên này để thay đổi trong một bước.",
     "match.wizard.importedCataloguesGroup": "Danh mục đã nhập",
     "processes.match_catalogue_indexer.name": "Bộ lập chỉ mục danh mục cho Match",
     "processes.match_catalogue_indexer.purpose": "Chuẩn bị các bảng giá đã nhập để CAD-BIM Match có thể gợi ý các hạng mục của chúng.",

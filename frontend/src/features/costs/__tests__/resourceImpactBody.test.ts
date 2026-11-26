@@ -1,6 +1,13 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
-import { buildChangeBody, resourceImpactApi } from '../ResourceImpactDialog';
+import { ApiError } from '@/shared/lib/api';
+
+import {
+  applyRefusalCode,
+  buildChangeBody,
+  invalidateAfterApply,
+  resourceImpactApi,
+} from '../ResourceImpactDialog';
 
 const row = { resource_key: 'CEM-1', resource_name: 'Cement CEM I', unit_price: '100.00' };
 
@@ -23,5 +30,20 @@ describe('buildChangeBody', () => {
   it('exposes preview and apply as separate calls', () => {
     expect(typeof resourceImpactApi.preview).toBe('function');
     expect(typeof resourceImpactApi.apply).toBe('function');
+  });
+});
+
+describe('apply refusal and refresh', () => {
+  it('reads the refusal code from a 409 only', () => {
+    const body = { detail: { code: 'resource.change.stale_preview', message: 'x' } };
+    expect(applyRefusalCode(new ApiError(409, 'Conflict', body))).toBe('resource.change.stale_preview');
+    expect(applyRefusalCode(new ApiError(500, 'Error', body))).toBeNull();
+    expect(applyRefusalCode(new Error('x'))).toBeNull();
+  });
+
+  it('invalidates every costs query after apply', () => {
+    const invalidateQueries = vi.fn();
+    invalidateAfterApply({ invalidateQueries });
+    expect(invalidateQueries).toHaveBeenCalledWith({ queryKey: ['costs'] });
   });
 });

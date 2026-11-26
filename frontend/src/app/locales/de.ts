@@ -63771,6 +63771,8 @@ const resource = {
     "costs.resource_impact.issue_key_collision": "Eine andere Ressource dieser Region trägt bereits diesen Namen.",
     "costs.resource_impact.issue_unreadable_lines": "Einige Positionen enthalten diese Ressource ohne Menge und bleiben unverändert.",
     "costs.resource_impact.issue_zero_price": "Ein Preis von 0 lässt die Ressource ohne Preis.",
+    "costs.resource_impact.refused_stale": "Die Preisliste hat sich seit der Vorschau geändert. Führen Sie die Vorschau erneut aus.",
+    "costs.resource_impact.refused_truncated": "Zu viele Leistungspositionen verwenden diese Ressource, um sie in einem Schritt zu ändern.",
     "match.wizard.importedCataloguesGroup": "Importierte Kataloge",
     "processes.match_catalogue_indexer.name": "Katalog-Indexer für Match",
     "processes.match_catalogue_indexer.purpose": "Bereitet importierte Preislisten vor, damit CAD-BIM Match deren Positionen vorschlagen kann.",

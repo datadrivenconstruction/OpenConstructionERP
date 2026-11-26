@@ -1156,6 +1156,8 @@ class ResourceChangeRequest(BaseModel):
     new_unit_price: DecimalMoney | None = Field(default=None, ge=0)
     new_name: str | None = Field(default=None, max_length=300)
     expected_cost_items: int | None = Field(default=None, ge=0)
+    expected_old_unit_price: DecimalMoney | None = Field(default=None, ge=0)
+    expected_new_unit_price: DecimalMoney | None = Field(default=None, ge=0)
 
 
 class ResourceImpactCostItem(BaseModel):

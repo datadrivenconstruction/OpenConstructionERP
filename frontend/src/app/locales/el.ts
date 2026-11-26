@@ -61278,6 +61278,8 @@ const resource = {
     "costs.resource_impact.issue_key_collision": "Άλλος πόρος της περιοχής έχει ήδη αυτό το όνομα.",
     "costs.resource_impact.issue_unreadable_lines": "Ορισμένα άρθρα έχουν τον πόρο χωρίς ποσότητα και δεν θα αλλάξουν.",
     "costs.resource_impact.issue_zero_price": "Τιμή 0 αφήνει τον πόρο χωρίς τιμή.",
+    "costs.resource_impact.refused_stale": "Ο τιμοκατάλογος άλλαξε μετά την προεπισκόπηση. Εκτελέστε ξανά την προεπισκόπηση.",
+    "costs.resource_impact.refused_truncated": "Πάρα πολλά άρθρα εργασιών χρησιμοποιούν αυτόν τον πόρο για να αλλάξει σε ένα βήμα.",
     "match.wizard.importedCataloguesGroup": "Εισαγμένοι κατάλογοι",
     "processes.match_catalogue_indexer.name": "Ευρετηριαστής καταλόγων για το Match",
     "processes.match_catalogue_indexer.purpose": "Προετοιμάζει τους εισαγμένους τιμοκαταλόγους ώστε το CAD-BIM Match να προτείνει τις θέσεις τους.",

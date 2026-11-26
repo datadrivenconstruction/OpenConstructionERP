@@ -57809,6 +57809,8 @@ const resource = {
     "costs.match_index.error_store_unavailable": "Não foi possível acessar o armazenamento de busca. Verifique o serviço de busca vetorial e tente novamente.",
     "costs.match_index.error_invalid_request": "Escolha o idioma do catálogo e tente novamente.",
     "costs.match_index.error_index_failed": "A indexação parou com um erro. Tente novamente; os itens já indexados são mantidos.",
+    "costs.resource_impact.refused_stale": "A tabela de preços mudou desde a pré-visualização. Execute-a novamente.",
+    "costs.resource_impact.refused_truncated": "Itens de trabalho demais usam este recurso para alterá-lo em uma única etapa.",
     "match.wizard.importedCataloguesGroup": "Catálogos importados",
     "processes.match_catalogue_indexer.name": "Indexador de catálogos para o Match",
     "processes.match_catalogue_indexer.purpose": "Prepara as listas de preços importadas para que o CAD-BIM Match possa sugerir os respectivos itens.",

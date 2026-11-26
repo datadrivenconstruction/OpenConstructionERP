@@ -61588,6 +61588,8 @@ const resource = {
     "costs.resource_impact.issue_key_collision": "এই অঞ্চলের আরেকটি রিসোর্সের এই নাম আছে।",
     "costs.resource_impact.issue_unreadable_lines": "কিছু আইটেমে রিসোর্সটি পরিমাণ ছাড়া আছে, সেগুলো বদলানো হবে না।",
     "costs.resource_impact.issue_zero_price": "0 দাম রিসোর্সটিকে দামহীন রাখে।",
+    "costs.resource_impact.refused_stale": "পূর্বরূপের পর মূল্য তালিকা বদলেছে। পূর্বরূপ আবার চালান।",
+    "costs.resource_impact.refused_truncated": "অনেক বেশি কাজের আইটেম এই রিসোর্স ব্যবহার করে, তাই এক ধাপে বদলানো যাবে না।",
     "match.wizard.importedCataloguesGroup": "আমদানি করা ক্যাটালগ",
     "processes.match_catalogue_indexer.name": "Match-এর জন্য ক্যাটালগ ইনডেক্সার",
     "processes.match_catalogue_indexer.purpose": "আমদানি করা মূল্য তালিকা প্রস্তুত করে, যাতে CAD-BIM Match তার আইটেম সাজেস্ট করতে পারে।",

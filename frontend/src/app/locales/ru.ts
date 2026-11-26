@@ -64335,6 +64335,8 @@ const resource = {
     "costs.resource_impact.issue_key_collision": "В этом регионе уже есть другой ресурс с таким наименованием.",
     "costs.resource_impact.issue_unreadable_lines": "В некоторых расценках ресурс указан без количества, они не будут изменены.",
     "costs.resource_impact.issue_zero_price": "Цена 0 оставляет ресурс без цены.",
+    "costs.resource_impact.refused_stale": "Прайс-лист изменился после предпросмотра. Запустите предпросмотр снова.",
+    "costs.resource_impact.refused_truncated": "Этот ресурс используют слишком много работ, чтобы изменить его за один шаг.",
     "match.wizard.importedCataloguesGroup": "Импортированные каталоги",
     "processes.match_catalogue_indexer.name": "Индексатор каталогов для Match",
     "processes.match_catalogue_indexer.purpose": "Готовит импортированные прайс-листы, чтобы CAD-BIM Match мог подсказывать их позиции.",

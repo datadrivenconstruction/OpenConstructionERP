@@ -180,6 +180,47 @@ async def test_apply_writes_rates_name_and_sheet_and_audits() -> None:
 
 
 @pytest.mark.asyncio
+async def test_apply_refuses_a_truncated_scan(monkeypatch: pytest.MonkeyPatch) -> None:
+    from sqlalchemy import select
+
+    from app.modules.costs import resource_impact
+    from app.modules.costs.models import CostItem, ResourcePrice
+
+    monkeypatch.setattr(resource_impact, "_MAX_ITEMS", 1)
+    monkeypatch.setattr(resource_impact, "_SCAN_ROWS", 1)
+    async with transactional_session() as session:
+        ids = await _seed(session)
+        svc = ResourceImpactService(session)
+        with pytest.raises(ResourceChangeRefusedError) as err:
+            await svc.apply(REGION, "CEM-1", new_unit_price=Decimal("120"))
+        assert err.value.code == "resource.change.truncated"
+        row = (await session.execute(select(ResourcePrice).where(ResourcePrice.region == REGION))).scalar_one()
+        assert row.unit_price == "100.00"
+        w1 = (await session.execute(select(CostItem).where(CostItem.id == ids["W1"]))).scalar_one()
+        assert w1.rate == "80.00"
+
+
+@pytest.mark.asyncio
+async def test_apply_refuses_when_the_sheet_price_moved_since_the_preview() -> None:
+    async with transactional_session() as session:
+        await _seed(session)
+        svc = ResourceImpactService(session)
+        for stale in ({"expected_old_unit_price": Decimal("95")}, {"expected_new_unit_price": Decimal("125")}):
+            with pytest.raises(ResourceChangeRefusedError) as err:
+                await svc.apply(REGION, "CEM-1", new_unit_price=Decimal("120"), expected_cost_items=2, **stale)
+            assert err.value.code == "resource.change.stale_preview"
+        res = await svc.apply(
+            REGION,
+            "CEM-1",
+            new_unit_price=Decimal("120"),
+            expected_cost_items=2,
+            expected_old_unit_price=Decimal("100"),
+            expected_new_unit_price=Decimal("120.00"),
+        )
+        assert res.applied
+
+
+@pytest.mark.asyncio
 async def test_bill_positions_of_inaccessible_projects_are_not_counted() -> None:
     from app.modules.boq.models import BOQ, Position
     from app.modules.projects.models import Project

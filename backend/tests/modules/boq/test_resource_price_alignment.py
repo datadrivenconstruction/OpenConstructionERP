@@ -40,6 +40,23 @@ def _positions() -> list[dict]:
     ]
 
 
+def test_leaf_split_is_linear_on_a_large_bill() -> None:
+    import time
+    from types import SimpleNamespace
+
+    from app.modules.boq.price_alignment import _leaf_inputs, _leaves
+
+    root = uuid.uuid4()
+    rows = [SimpleNamespace(id=root, parent_id=None, quantity="1", metadata_={})]
+    rows += [SimpleNamespace(id=uuid.uuid4(), parent_id=root, quantity="1", metadata_={}) for _ in range(20_000)]
+    started = time.perf_counter()
+    leaves = _leaves(rows)
+    assert time.perf_counter() - started < 1.0
+    assert len(leaves) == 20_000
+    assert root not in {p.id for p in leaves}
+    assert [r["id"] for r in _leaf_inputs(rows)] == [p.id for p in leaves]
+
+
 def test_drift_follows_the_worked_example() -> None:
     groups, skipped = find_drift(_positions(), SHEET)
     by_key = {g["resource_key"]: g for g in groups}

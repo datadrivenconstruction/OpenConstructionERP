@@ -61268,6 +61268,8 @@ const resource = {
     "costs.resource_impact.issue_key_collision": "Selle piirkonna teisel ressursil on juba see nimi.",
     "costs.resource_impact.issue_unreadable_lines": "Mõnes töös on ressurss ilma koguseta ja neid ei muudeta.",
     "costs.resource_impact.issue_zero_price": "Hind 0 jätab ressursi hinnata.",
+    "costs.resource_impact.refused_stale": "Hinnakiri on pärast eelvaadet muutunud. Käivitage eelvaade uuesti.",
+    "costs.resource_impact.refused_truncated": "Liiga paljud tööd kasutavad seda ressurssi, et seda ühe sammuga muuta.",
     "match.wizard.importedCataloguesGroup": "Imporditud kataloogid",
     "processes.match_catalogue_indexer.name": "Kataloogide indekseerija Matchi jaoks",
     "processes.match_catalogue_indexer.purpose": "Valmistab imporditud hinnakirjad ette, et CAD-BIM Match saaks pakkuda nende positsioone.",

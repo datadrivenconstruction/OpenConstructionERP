@@ -1623,6 +1623,8 @@ const resource = {
     "buyer_portal.payments.empty": "No payment schedule has been issued yet. Your agent will share it once your contract is finalized.",
     "carbon.sixd.wl_op_intensity": "Modeled intensity (kWh/m2/yr, optional)",
     "costs.favourites": "Favorites",
+    "costs.resource_impact.refused_stale": "The price sheet changed since the preview. Run the preview again.",
+    "costs.resource_impact.refused_truncated": "Too many work items use this resource to change it in one step.",
     "crm.empty_leads_desc": "Leads are inbound inquiries - qualify them, then convert to deals.",
     "crm.flow_1_desc": "Log an inbound inquiry, with the person pulled from Contacts.",
     "crm.flow_intro": "The CRM turns an inquiry into a qualified deal, moves it across the pipeline, and hands a win off to delivery. People come from Contacts; won work flows on to bids and contracts.",

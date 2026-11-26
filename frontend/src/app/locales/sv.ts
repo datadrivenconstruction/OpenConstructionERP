@@ -61933,6 +61933,8 @@ const resource = {
     "costs.resource_impact.issue_key_collision": "En annan resurs i regionen har redan detta namn.",
     "costs.resource_impact.issue_unreadable_lines": "Vissa arbetsposter har resursen utan mängd och lämnas orörda.",
     "costs.resource_impact.issue_zero_price": "Ett pris på 0 lämnar resursen oprissatt.",
+    "costs.resource_impact.refused_stale": "Prislistan har ändrats sedan förhandsvisningen. Kör förhandsvisningen igen.",
+    "costs.resource_impact.refused_truncated": "För många arbetsposter använder resursen för att ändra den i ett steg.",
     "match.wizard.importedCataloguesGroup": "Importerade kataloger",
     "processes.match_catalogue_indexer.name": "Katalogindexerare för Match",
     "processes.match_catalogue_indexer.purpose": "Förbereder importerade prislistor så att CAD-BIM Match kan föreslå deras poster.",

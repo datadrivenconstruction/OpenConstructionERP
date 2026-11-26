@@ -1347,6 +1347,8 @@ async def apply_resource_change(
             new_unit_price=body.new_unit_price,
             new_name=body.new_name,
             expected_cost_items=body.expected_cost_items,
+            expected_old_unit_price=body.expected_old_unit_price,
+            expected_new_unit_price=body.expected_new_unit_price,
             user_id=user_id,
             project_ids=project_ids,
             scope_projects=True,
@@ -1356,7 +1358,7 @@ async def apply_resource_change(
     except ResourceChangeRefusedError as exc:
         raise HTTPException(
             status_code=409,
-            detail={"message": str(exc), "issues": [i.code for i in exc.issues]},
+            detail={"message": str(exc), "code": exc.code, "issues": [i.code for i in exc.issues]},
         ) from exc
     _invalidate_cost_cache()
     return ResourceImpactResponse(**res.as_dict())

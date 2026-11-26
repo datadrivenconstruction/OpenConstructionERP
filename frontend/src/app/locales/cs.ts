@@ -62590,6 +62590,8 @@ const resource = {
     "costs.resource_impact.issue_key_collision": "Jiný zdroj v tomto regionu už má tento název.",
     "costs.resource_impact.issue_unreadable_lines": "Některé položky obsahují tento zdroj bez množství a zůstanou beze změny.",
     "costs.resource_impact.issue_zero_price": "Cena 0 ponechá zdroj bez ceny.",
+    "costs.resource_impact.refused_stale": "Ceník se od náhledu změnil. Spusťte náhled znovu.",
+    "costs.resource_impact.refused_truncated": "Tento zdroj používá příliš mnoho položek prací, než aby šel změnit v jednom kroku.",
     "match.wizard.importedCataloguesGroup": "Importované katalogy",
     "processes.match_catalogue_indexer.name": "Indexátor katalogů pro Match",
     "processes.match_catalogue_indexer.purpose": "Připraví importované ceníky, aby CAD-BIM Match mohl navrhovat jejich položky.",

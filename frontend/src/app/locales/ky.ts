@@ -61435,6 +61435,8 @@ const resource = {
     "costs.resource_impact.issue_key_collision": "Бул аймакта мындай аталыштагы башка ресурс бар.",
     "costs.resource_impact.issue_unreadable_lines": "Айрым бааларда ресурс өлчөмсүз көрсөтүлгөн, алар өзгөртүлбөйт.",
     "costs.resource_impact.issue_zero_price": "0 баа ресурсту баасыз калтырат.",
+    "costs.resource_impact.refused_stale": "Баа тизмеси алдын ала көрүүдөн кийин өзгөрдү. Алдын ала көрүүнү кайра иштетиңиз.",
+    "costs.resource_impact.refused_truncated": "Бул ресурсту бир кадамда өзгөртүү үчүн аны өтө көп иш колдонот.",
     "match.wizard.importedCataloguesGroup": "Импорттолгон каталогдор",
     "processes.match_catalogue_indexer.name": "Match үчүн каталог индекстегичи",
     "processes.match_catalogue_indexer.purpose": "Импорттолгон баа тизмелерин даярдайт, ошондо CAD-BIM Match алардын позицияларын сунуштай алат.",

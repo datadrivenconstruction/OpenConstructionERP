@@ -55330,6 +55330,8 @@ const resource = {
     "costs.resource_impact.issue_key_collision": "Another resource of this region already has this name.",
     "costs.resource_impact.issue_unreadable_lines": "Some work items carry this resource without a quantity and will be left alone.",
     "costs.resource_impact.issue_zero_price": "A price of 0 leaves the resource unpriced.",
+    "costs.resource_impact.refused_stale": "The price sheet changed since the preview. Run the preview again.",
+    "costs.resource_impact.refused_truncated": "Too many work items use this resource to change it in one step.",
     "match.wizard.importedCataloguesGroup": "Imported catalogues",
     "processes.match_catalogue_indexer.name": "Catalogue indexer for Match",
     "processes.match_catalogue_indexer.purpose": "Prepares imported price lists so CAD-BIM Match can suggest their items.",

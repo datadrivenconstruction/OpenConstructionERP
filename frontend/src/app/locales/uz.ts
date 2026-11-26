@@ -62250,6 +62250,8 @@ const resource = {
     "costs.resource_impact.issue_key_collision": "Bu hududdagi boshqa resurs allaqachon shu nomga ega.",
     "costs.resource_impact.issue_unreadable_lines": "Ayrim bandlarda resurs miqdorsiz koʻrsatilgan, ular oʻzgartirilmaydi.",
     "costs.resource_impact.issue_zero_price": "0 narx resursni narxsiz qoldiradi.",
+    "costs.resource_impact.refused_stale": "Narxlar roʻyxati koʻrib chiqilgandan keyin oʻzgardi. Koʻrib chiqishni qayta ishga tushiring.",
+    "costs.resource_impact.refused_truncated": "Bu resursdan juda koʻp ish bandlari foydalanadi, uni bir qadamda oʻzgartirib boʻlmaydi.",
     "match.wizard.importedCataloguesGroup": "Import qilingan kataloglar",
     "processes.match_catalogue_indexer.name": "Match uchun katalog indekslagich",
     "processes.match_catalogue_indexer.purpose": "Import qilingan narxlar roʻyxatlarini tayyorlaydi, shunda CAD-BIM Match ularning pozitsiyalarini taklif qila oladi.",

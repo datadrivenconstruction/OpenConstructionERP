@@ -61321,6 +61321,8 @@ const resource = {
     "costs.resource_impact.issue_key_collision": "इस क्षेत्र के किसी अन्य संसाधन का यही नाम है।",
     "costs.resource_impact.issue_unreadable_lines": "कुछ मदों में यह संसाधन बिना मात्रा के है, उन्हें नहीं बदला जाएगा।",
     "costs.resource_impact.issue_zero_price": "0 मूल्य संसाधन को बिना मूल्य छोड़ देता है।",
+    "costs.resource_impact.refused_stale": "पूर्वावलोकन के बाद मूल्य सूची बदल गई है। पूर्वावलोकन फिर से चलाएँ।",
+    "costs.resource_impact.refused_truncated": "इस संसाधन का उपयोग बहुत अधिक कार्य मदें करती हैं, इसे एक चरण में नहीं बदला जा सकता।",
     "match.wizard.importedCataloguesGroup": "आयात किए गए कैटलॉग",
     "processes.match_catalogue_indexer.name": "Match के लिए कैटलॉग इंडेक्सर",
     "processes.match_catalogue_indexer.purpose": "आयात की गई मूल्य सूचियों को तैयार करता है ताकि CAD-BIM Match उनके आइटम सुझा सके।",

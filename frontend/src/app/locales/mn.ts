@@ -61299,6 +61299,8 @@ const resource = {
     "costs.resource_impact.issue_key_collision": "Энэ бүсийн өөр нөөц аль хэдийн энэ нэртэй.",
     "costs.resource_impact.issue_unreadable_lines": "Зарим зүйлд энэ нөөц тоо хэмжээгүй байгаа тул өөрчлөгдөхгүй.",
     "costs.resource_impact.issue_zero_price": "0 үнэ нөөцийг үнэгүй үлдээнэ.",
+    "costs.resource_impact.refused_stale": "Урьдчилан харсны дараа үнийн жагсаалт өөрчлөгдсөн. Урьдчилан харахыг дахин ажиллуулна уу.",
+    "costs.resource_impact.refused_truncated": "Энэ нөөцийг хэт олон ажлын зүйл ашигладаг тул нэг алхамаар өөрчлөх боломжгүй.",
     "match.wizard.importedCataloguesGroup": "Импортолсон каталогууд",
     "processes.match_catalogue_indexer.name": "Match-д зориулсан каталогийн индексжүүлэгч",
     "processes.match_catalogue_indexer.purpose": "Импортолсон үнийн жагсаалтыг бэлтгэж, CAD-BIM Match-д тэдгээрийн зүйлсийг санал болгох боломж олгоно.",

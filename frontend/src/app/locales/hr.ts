@@ -61657,6 +61657,8 @@ const resource = {
     "costs.resource_impact.issue_key_collision": "Drugi resurs u ovoj regiji već ima ovaj naziv.",
     "costs.resource_impact.issue_unreadable_lines": "Neke stavke sadrže resurs bez količine i ostaju nepromijenjene.",
     "costs.resource_impact.issue_zero_price": "Cijena 0 ostavlja resurs bez cijene.",
+    "costs.resource_impact.refused_stale": "Cjenik se promijenio od pregleda. Ponovno pokrenite pregled.",
+    "costs.resource_impact.refused_truncated": "Previše stavki radova koristi ovaj resurs da bi se promijenio u jednom koraku.",
     "match.wizard.importedCataloguesGroup": "Uvezeni katalozi",
     "processes.match_catalogue_indexer.name": "Indekser kataloga za Match",
     "processes.match_catalogue_indexer.purpose": "Priprema uvezene cjenike kako bi CAD-BIM Match mogao predlagati njihove stavke.",

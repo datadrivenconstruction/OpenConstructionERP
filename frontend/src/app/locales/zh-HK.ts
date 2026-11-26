@@ -63428,6 +63428,8 @@ const resource = {
     "costs.match_index.error_store_unavailable": "無法連接搜尋存儲。請檢查向量搜尋服務後重試。",
     "costs.match_index.error_invalid_request": "請選擇目錄的語言後重試。",
     "costs.match_index.error_index_failed": "建立索引時出錯而停止。請重試；已建立索引的條目會保留。",
+    "costs.resource_impact.refused_stale": "價格表在預覽後已更改。請重新執行預覽。",
+    "costs.resource_impact.refused_truncated": "使用此資源的工作項目過多，無法一步更改。",
     "match.wizard.importedCataloguesGroup": "匯入的目錄",
     "processes.match_catalogue_indexer.name": "Match 目錄索引器",
     "processes.match_catalogue_indexer.purpose": "準備匯入的價目表，使 CAD-BIM Match 能推薦其中的條目。",

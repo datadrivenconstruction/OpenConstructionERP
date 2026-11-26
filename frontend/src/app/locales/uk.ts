@@ -63398,6 +63398,8 @@ const resource = {
     "costs.resource_impact.issue_key_collision": "У цьому регіоні вже є інший ресурс із такою назвою.",
     "costs.resource_impact.issue_unreadable_lines": "У деяких розцінках ресурс указано без кількості, їх не буде змінено.",
     "costs.resource_impact.issue_zero_price": "Ціна 0 залишає ресурс без ціни.",
+    "costs.resource_impact.refused_stale": "Прайс-лист змінився після попереднього перегляду. Запустіть перегляд знову.",
+    "costs.resource_impact.refused_truncated": "Цей ресурс використовує надто багато робіт, щоб змінити його за один крок.",
     "match.wizard.importedCataloguesGroup": "Імпортовані каталоги",
     "processes.match_catalogue_indexer.name": "Індексатор каталогів для Match",
     "processes.match_catalogue_indexer.purpose": "Готує імпортовані прайс-листи, щоб CAD-BIM Match міг підказувати їхні позиції.",

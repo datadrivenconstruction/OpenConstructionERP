@@ -61603,6 +61603,8 @@ const resource = {
     "costs.resource_impact.issue_key_collision": "למשאב אחר באזור זה כבר יש שם זה.",
     "costs.resource_impact.issue_unreadable_lines": "בחלק מהסעיפים המשאב מופיע ללא כמות והם לא ישתנו.",
     "costs.resource_impact.issue_zero_price": "מחיר 0 משאיר את המשאב ללא תמחור.",
+    "costs.resource_impact.refused_stale": "המחירון השתנה מאז התצוגה המקדימה. הפעל שוב את התצוגה המקדימה.",
+    "costs.resource_impact.refused_truncated": "יותר מדי סעיפי עבודה משתמשים במשאב זה כדי לשנותו בצעד אחד.",
     "match.wizard.importedCataloguesGroup": "קטלוגים מיובאים",
     "processes.match_catalogue_indexer.name": "מאנדקס קטלוגים עבור Match",
     "processes.match_catalogue_indexer.purpose": "מכין מחירונים מיובאים כדי ש-CAD-BIM Match יוכל להציע את הסעיפים שלהם.",

@@ -61278,6 +61278,8 @@ const resource = {
     "costs.resource_impact.issue_key_collision": "منبع دیگری در این منطقه همین نام را دارد.",
     "costs.resource_impact.issue_unreadable_lines": "برخی ردیف‌ها این منبع را بدون مقدار دارند و دست‌نخورده می‌مانند.",
     "costs.resource_impact.issue_zero_price": "قیمت 0 منبع را بدون قیمت می‌گذارد.",
+    "costs.resource_impact.refused_stale": "فهرست قیمت از زمان پیش‌نمایش تغییر کرده است. پیش‌نمایش را دوباره اجرا کنید.",
+    "costs.resource_impact.refused_truncated": "تعداد اقلام کاری که از این منبع استفاده می‌کنند برای تغییر در یک مرحله بیش از حد است.",
     "match.wizard.importedCataloguesGroup": "کاتالوگ‌های واردشده",
     "processes.match_catalogue_indexer.name": "فهرست‌گذار کاتالوگ برای Match",
     "processes.match_catalogue_indexer.purpose": "فهرست‌های قیمت واردشده را آماده می‌کند تا CAD-BIM Match بتواند ردیف‌های آن‌ها را پیشنهاد دهد.",

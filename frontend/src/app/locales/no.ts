@@ -61318,6 +61318,8 @@ const resource = {
     "costs.resource_impact.issue_key_collision": "En annen ressurs i regionen har allerede dette navnet.",
     "costs.resource_impact.issue_unreadable_lines": "Noen arbeidsposter har ressursen uten mengde og blir ikke endret.",
     "costs.resource_impact.issue_zero_price": "En pris på 0 lar ressursen stå uten pris.",
+    "costs.resource_impact.refused_stale": "Prislisten er endret siden forhåndsvisningen. Kjør forhåndsvisningen på nytt.",
+    "costs.resource_impact.refused_truncated": "For mange arbeidsposter bruker ressursen til å endre den i ett trinn.",
     "match.wizard.importedCataloguesGroup": "Importerte kataloger",
     "processes.match_catalogue_indexer.name": "Katalogindekserer for Match",
     "processes.match_catalogue_indexer.purpose": "Gjør importerte prislister klare slik at CAD-BIM Match kan foreslå postene deres.",
