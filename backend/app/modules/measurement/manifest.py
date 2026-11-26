@@ -3,6 +3,7 @@
 """Measurement module manifest."""
 
 from app.core.module_loader import ModuleManifest
+from app.modules.measurement.data_paths import DATA_PATHS
 
 manifest = ModuleManifest(
     name="oe_measurement",
@@ -16,4 +17,5 @@ manifest = ModuleManifest(
     depends=[],  # pure library; boq and others depend on us, not the other way
     auto_install=True,
     enabled=True,
+    data_paths=DATA_PATHS,
 )

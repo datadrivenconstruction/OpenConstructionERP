@@ -3,6 +3,7 @@
 """Match module manifest - auto-mounted at ``/api/v1/match/``."""
 
 from app.core.module_loader import ModuleManifest
+from app.modules.match.data_paths import DATA_PATHS
 
 manifest = ModuleManifest(
     name="oe_match",
@@ -19,4 +20,5 @@ manifest = ModuleManifest(
     optional_depends=["oe_ai"],
     auto_install=True,
     enabled=True,
+    data_paths=DATA_PATHS,
 )

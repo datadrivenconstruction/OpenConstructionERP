@@ -3,6 +3,7 @@
 """Norm pricing module manifest."""
 
 from app.core.module_loader import ModuleManifest
+from app.modules.norm_pricing.data_paths import DATA_PATHS
 
 manifest = ModuleManifest(
     name="oe_norm_pricing",
@@ -20,4 +21,5 @@ manifest = ModuleManifest(
     depends=["oe_projects", "oe_boq"],
     auto_install=True,
     enabled=True,
+    data_paths=DATA_PATHS,
 )

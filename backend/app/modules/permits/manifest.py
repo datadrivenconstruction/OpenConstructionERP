@@ -3,6 +3,7 @@
 """Permits module manifest."""
 
 from app.core.module_loader import ModuleManifest
+from app.modules.permits.data_paths import DATA_PATHS
 
 manifest = ModuleManifest(
     name="oe_permits",
@@ -20,4 +21,5 @@ manifest = ModuleManifest(
     depends=["oe_users", "oe_projects", "oe_approval_routes", "oe_project_governance", "oe_schedule"],
     auto_install=True,
     enabled=True,
+    data_paths=DATA_PATHS,
 )

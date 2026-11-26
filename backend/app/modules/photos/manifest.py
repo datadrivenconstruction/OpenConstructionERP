@@ -3,6 +3,7 @@
 """Photos module manifest."""
 
 from app.core.module_loader import ModuleManifest
+from app.modules.photos.data_paths import DATA_PATHS
 
 manifest = ModuleManifest(
     name="oe_photos",
@@ -21,4 +22,5 @@ manifest = ModuleManifest(
     optional_depends=["oe_plan_room", "oe_geo_hub", "oe_ai"],
     auto_install=True,
     enabled=True,
+    data_paths=DATA_PATHS,
 )

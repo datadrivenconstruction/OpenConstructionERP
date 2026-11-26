@@ -3,6 +3,7 @@
 """Project catalogue module manifest."""
 
 from app.core.module_loader import ModuleManifest
+from app.modules.project_catalogue.data_paths import DATA_PATHS
 
 manifest = ModuleManifest(
     name="oe_project_catalogue",
@@ -20,4 +21,5 @@ manifest = ModuleManifest(
     optional_depends=["oe_catalog"],
     auto_install=True,
     enabled=True,
+    data_paths=DATA_PATHS,
 )

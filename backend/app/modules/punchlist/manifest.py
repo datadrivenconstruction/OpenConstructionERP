@@ -3,6 +3,7 @@
 """Punch List module manifest."""
 
 from app.core.module_loader import ModuleManifest
+from app.modules.punchlist.data_paths import DATA_PATHS
 
 manifest = ModuleManifest(
     name="oe_punchlist",
@@ -14,4 +15,5 @@ manifest = ModuleManifest(
     depends=["oe_projects"],
     auto_install=True,
     enabled=True,
+    data_paths=DATA_PATHS,
 )

@@ -3,6 +3,7 @@
 """Lessons learned module manifest."""
 
 from app.core.module_loader import ModuleManifest
+from app.modules.lessons_learned.data_paths import DATA_PATHS
 
 manifest = ModuleManifest(
     name="oe_lessons_learned",
@@ -19,4 +20,5 @@ manifest = ModuleManifest(
     optional_depends=["oe_risk", "oe_boq"],
     auto_install=True,
     enabled=True,
+    data_paths=DATA_PATHS,
 )

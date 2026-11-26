@@ -3,6 +3,7 @@
 """Module manifest for oe_mexico_pack."""
 
 from app.core.module_loader import ModuleManifest
+from app.modules.mexico_pack.data_paths import DATA_PATHS
 
 manifest = ModuleManifest(
     name="oe_mexico_pack",
@@ -27,4 +28,5 @@ manifest = ModuleManifest(
     markets=["MX"],
     auto_install=False,
     enabled=True,
+    data_paths=DATA_PATHS,
 )
