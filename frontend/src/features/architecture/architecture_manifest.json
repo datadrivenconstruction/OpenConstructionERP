@@ -345100,10 +345100,10 @@
     },
     {
       "name": "costs",
-      "ts_files": 53,
+      "ts_files": 54,
       "css_files": 0,
-      "test_files": 23,
-      "total_files": 53
+      "test_files": 24,
+      "total_files": 54
     },
     {
       "name": "credentials",
@@ -348556,7 +348556,7 @@
     "total_schemas": 5246,
     "total_python_files": 3855,
     "frontend_features": 254,
-    "frontend_ts_files": 4590,
+    "frontend_ts_files": 4591,
     "frontend_backend_mapped": 224
   },
   "frontend_backend_mapping": {
