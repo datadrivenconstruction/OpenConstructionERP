@@ -16,6 +16,8 @@ import { getErrorMessage } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
 import { createNcrDraft, recordStake, type Stake, type StakeState } from './api';
 import { fmtCoord, fmtMm, instantDelta, parseDecimal } from './verdict';
+import { useRoleReason } from '@/shared/lib/permissionReason';
+import { DisabledGroup } from '@/shared/ui/DisabledGroup';
 
 export interface StakeCardProps {
   stake: Stake;
@@ -48,6 +50,7 @@ export function VerdictBadge({ state }: { state: StakeState }) {
 }
 
 export function StakeCard({ stake, tolH, tolV, instrument, controlRef, canWrite = true }: StakeCardProps) {
+  const canWriteReason = useRoleReason(canWrite, 'editor');
   const { t, i18n } = useTranslation();
   const qc = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
@@ -157,7 +160,7 @@ export function StakeCard({ stake, tolH, tolV, instrument, controlRef, canWrite 
         </div>
       )}
 
-      {canWrite && (
+      <DisabledGroup reason={canWriteReason}>
         <>
           <div className="grid grid-cols-2 gap-2">
             {field(`e-${stake.id}`, t('survey.setting_out.field.measured_e', { defaultValue: 'Measured E (m)' }),
@@ -192,7 +195,7 @@ export function StakeCard({ stake, tolH, tolV, instrument, controlRef, canWrite 
             {t('survey.setting_out.action.save_measurement', { defaultValue: 'Save measurement' })}
           </Button>
         </>
-      )}
+      </DisabledGroup>
 
       {saved && !live && saved.verdict === 'fail' && (
         saved.ncr_id ? (

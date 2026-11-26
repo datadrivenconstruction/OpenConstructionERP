@@ -20,6 +20,7 @@ import { useToastStore } from '@/stores/useToastStore';
 import { getPaymentInsuranceCheck, overridePaymentInsurance, type PaymentApplication } from './api';
 import { describeComplianceReasons } from './complianceReasons';
 import { PaymentApprovalActions, type PaymentApprovalActionsProps } from './PaymentApprovalActions';
+import { useRoleReason } from '@/shared/lib/permissionReason';
 
 const MIN_REASON = 10;
 
@@ -39,6 +40,7 @@ export function PaymentInsuranceGate({ paymentId }: { paymentId: string }) {
   const role = useAuthStore((s) => s.userRole);
   const rank = (ROLE_RANK as Readonly<Record<string, number>>)[normalizeRole(role)] ?? Number.NEGATIVE_INFINITY;
   const isManager = rank >= ROLE_RANK.manager;
+  const isManagerReason = useRoleReason(isManager, 'manager');
   const [open, setOpen] = useState(false);
   const [reason, setReason] = useState('');
 
@@ -89,17 +91,15 @@ export function PaymentInsuranceGate({ paymentId }: { paymentId: string }) {
         {t('subcontractors.insurance.gate_title', { defaultValue: 'Payment held: mandatory insurance has lapsed' })}
       </p>
       {data.reasons.length > 0 && <p className="mt-0.5">{describeComplianceReasons(data.reasons, t)}</p>}
-      {isManager && (
-        <Button
-          variant="secondary"
-          size="sm"
-          className="mt-1"
-          onClick={() => setOpen(true)}
-          data-testid="insurance-override-open"
-        >
-          {t('subcontractors.insurance.override_button', { defaultValue: 'Override with reason' })}
-        </Button>
-      )}
+      <Button disabledReason={isManagerReason}
+        variant="secondary"
+        size="sm"
+        className="mt-1"
+        onClick={() => setOpen(true)}
+        data-testid="insurance-override-open"
+      >
+        {t('subcontractors.insurance.override_button', { defaultValue: 'Override with reason' })}
+      </Button>
       <WideModal
         open={open}
         onClose={() => setOpen(false)}

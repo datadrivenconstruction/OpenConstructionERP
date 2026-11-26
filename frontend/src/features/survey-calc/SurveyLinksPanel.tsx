@@ -18,6 +18,8 @@ import { useToastStore } from '@/stores/useToastStore';
 import { fetchDocuments, fetchPhotos } from '@/features/documents/api';
 import { createReference } from '@/features/file-references/api';
 import { getSurveyLinks, linkDiary, type SurveyLinkKind } from './adjustment';
+import { useRoleReason } from '@/shared/lib/permissionReason';
+import { DisabledGroup } from '@/shared/ui/DisabledGroup';
 
 interface Props {
   projectId: string;
@@ -31,6 +33,7 @@ interface Props {
 const today = () => new Date().toISOString().slice(0, 10);
 
 export function SurveyLinksPanel({ projectId, kind, targetId, label, canWrite = true }: Props) {
+  const canWriteReason = useRoleReason(canWrite, 'editor');
   const { t } = useTranslation();
   const qc = useQueryClient();
   const navigate = useNavigate();
@@ -112,7 +115,7 @@ export function SurveyLinksPanel({ projectId, kind, targetId, label, canWrite = 
           </li>
         ))}
       </ul>
-      {canWrite && (
+      <DisabledGroup reason={canWriteReason}>
         <div className="flex flex-wrap gap-2">
           <Button size="sm" variant="secondary" onClick={() => setDiaryOpen((v) => !v)}>
             {t('survey.links.add_diary', { defaultValue: 'Record in site diary' })}
@@ -121,7 +124,7 @@ export function SurveyLinksPanel({ projectId, kind, targetId, label, canWrite = 
             {t('survey.links.add_document', { defaultValue: 'Link document or photo' })}
           </Button>
         </div>
-      )}
+      </DisabledGroup>
       {diaryOpen && (
         <div className="grid grid-cols-2 gap-2 rounded-md border border-border-light p-2">
           <label className="block">

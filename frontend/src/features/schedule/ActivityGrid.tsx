@@ -16,6 +16,7 @@ import { ActivityDeleteDialog, activityDeleteTarget, type ActivityDeleteTarget }
 import { scheduleErrorMessage } from './errors';
 import { fmtList } from '@/shared/lib/formatters';
 import { useHasPermission } from '@/shared/lib/permissionGates';
+import { useRoleReason } from '@/shared/lib/permissionReason';
 
 const TYPES = ['task', 'milestone', 'summary'] as const;
 
@@ -110,7 +111,9 @@ export function ActivityGrid({
 
   const [deleteTarget, setDeleteTarget] = useState<ActivityDeleteTarget | null>(null);
   const canDelete = useHasPermission('schedule.delete');
+  const canDeleteReason = useRoleReason(canDelete, 'editor');
   const canMove = useHasPermission('schedule.update');
+  const canMoveReason = useRoleReason(canMove, 'editor');
 
   const invalidateGantt = () =>
     queryClient.invalidateQueries({ queryKey: ['gantt', scheduleId] });
@@ -757,69 +760,66 @@ export function ActivityGrid({
                       </button>
                     </td>
                     <td className="whitespace-nowrap text-right">
-                      {canMove && (
-                        <>
-                          <button
-                            type="button"
-                            data-testid={`grid-move-up-${a.id}`}
-                            onClick={() => moves.up && moveMutation.mutate({ id: a.id, body: moves.up })}
-                            disabled={!moves.up || moveMutation.isPending}
-                            title={t('schedule.move_up', { defaultValue: 'Move up' })}
-                            aria-label={t('schedule.move_up', { defaultValue: 'Move up' })}
-                            className="inline-flex items-center rounded-md p-1 text-content-tertiary transition-colors hover:bg-surface-secondary hover:text-content-primary disabled:opacity-30"
-                          >
-                            <ArrowUp size={14} />
-                          </button>
-                          <button
-                            type="button"
-                            data-testid={`grid-move-down-${a.id}`}
-                            onClick={() => moves.down && moveMutation.mutate({ id: a.id, body: moves.down })}
-                            disabled={!moves.down || moveMutation.isPending}
-                            title={t('schedule.move_down', { defaultValue: 'Move down' })}
-                            aria-label={t('schedule.move_down', { defaultValue: 'Move down' })}
-                            className="inline-flex items-center rounded-md p-1 text-content-tertiary transition-colors hover:bg-surface-secondary hover:text-content-primary disabled:opacity-30"
-                          >
-                            <ArrowDown size={14} />
-                          </button>
-                          <select
-                            data-testid={`grid-move-to-${a.id}`}
-                            aria-label={t('schedule.move_to_section', { defaultValue: 'Move to section...' })}
-                            className="oe-select oe-input-sm ms-1 w-7 cursor-pointer bg-transparent"
-                            value=""
-                            disabled={moveMutation.isPending}
-                            onChange={(e) => {
-                              const v = e.target.value;
-                              if (!v) return;
-                              moveMutation.mutate({
-                                id: a.id,
-                                body: v === '__top__' ? { to_top_level: true } : { parent_id: v },
-                              });
-                            }}
-                          >
-                            <option value="">{t('schedule.move_to_section', { defaultValue: 'Move to section...' })}</option>
-                            {a.parent_id && (
-                              <option value="__top__">{t('schedule.no_parent', { defaultValue: 'Top level (no parent)' })}</option>
-                            )}
-                            {moveChoices.map((sec) => (
-                              <option key={sec.id} value={sec.id}>
-                                {sec.wbs_code ? `${sec.wbs_code} ${sec.name}` : sec.name}
-                              </option>
-                            ))}
-                          </select>
-                        </>
-                      )}
-                      {canDelete && (
+                      <>
                         <button
                           type="button"
-                          data-testid={`grid-delete-${a.id}`}
-                          onClick={() => handleDelete(a)}
-                          disabled={deleteMutation.isPending}
-                          title={t('schedule.delete_activity', { defaultValue: 'Delete activity' })}
-                          className="inline-flex items-center rounded-md p-1 text-content-tertiary transition-colors hover:bg-semantic-error/10 hover:text-semantic-error"
+                          data-testid={`grid-move-up-${a.id}`}
+                          onClick={() => moves.up && moveMutation.mutate({ id: a.id, body: moves.up })}
+                          disabled={!canMove || !moves.up || moveMutation.isPending}
+                          title={canMoveReason ?? t('schedule.move_up', { defaultValue: 'Move up' })}
+                          aria-label={t('schedule.move_up', { defaultValue: 'Move up' })}
+                          className="inline-flex items-center rounded-md p-1 text-content-tertiary transition-colors hover:bg-surface-secondary hover:text-content-primary disabled:opacity-30"
                         >
-                          <Trash2 size={14} />
+                          <ArrowUp size={14} />
                         </button>
-                      )}
+                        <button
+                          type="button"
+                          data-testid={`grid-move-down-${a.id}`}
+                          onClick={() => moves.down && moveMutation.mutate({ id: a.id, body: moves.down })}
+                          disabled={!canMove || !moves.down || moveMutation.isPending}
+                          title={canMoveReason ?? t('schedule.move_down', { defaultValue: 'Move down' })}
+                          aria-label={t('schedule.move_down', { defaultValue: 'Move down' })}
+                          className="inline-flex items-center rounded-md p-1 text-content-tertiary transition-colors hover:bg-surface-secondary hover:text-content-primary disabled:opacity-30"
+                        >
+                          <ArrowDown size={14} />
+                        </button>
+                        <select
+                          data-testid={`grid-move-to-${a.id}`}
+                          aria-label={t('schedule.move_to_section', { defaultValue: 'Move to section...' })}
+                          className="oe-select oe-input-sm ms-1 w-7 cursor-pointer bg-transparent"
+                          value=""
+                          disabled={!canMove || moveMutation.isPending}
+                          title={canMoveReason}
+                          onChange={(e) => {
+                            const v = e.target.value;
+                            if (!v) return;
+                            moveMutation.mutate({
+                              id: a.id,
+                              body: v === '__top__' ? { to_top_level: true } : { parent_id: v },
+                            });
+                          }}
+                        >
+                          <option value="">{t('schedule.move_to_section', { defaultValue: 'Move to section...' })}</option>
+                          {a.parent_id && (
+                            <option value="__top__">{t('schedule.no_parent', { defaultValue: 'Top level (no parent)' })}</option>
+                          )}
+                          {moveChoices.map((sec) => (
+                            <option key={sec.id} value={sec.id}>
+                              {sec.wbs_code ? `${sec.wbs_code} ${sec.name}` : sec.name}
+                            </option>
+                          ))}
+                        </select>
+                      </>
+                      <button
+                        type="button"
+                        data-testid={`grid-delete-${a.id}`}
+                        onClick={() => handleDelete(a)}
+                        disabled={!canDelete || deleteMutation.isPending}
+                        title={canDeleteReason ?? t('schedule.delete_activity', { defaultValue: 'Delete activity' })}
+                        className="inline-flex items-center rounded-md p-1 text-content-tertiary transition-colors hover:bg-semantic-error/10 hover:text-semantic-error"
+                      >
+                        <Trash2 size={14} />
+                      </button>
                     </td>
                   </tr>
                 );

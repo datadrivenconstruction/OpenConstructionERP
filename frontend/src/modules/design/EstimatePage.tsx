@@ -38,6 +38,7 @@ import { hasText, tr } from './BriefFields';
 import { CostPicker } from './CostPicker';
 import { useProjectFromUrl } from './useProjectFromUrl';
 import { fmtList, fmtQuantity } from '@/shared/lib/formatters';
+import { useRoleReason } from '@/shared/lib/permissionReason';
 
 export default function EstimatePage() {
   const { t } = useTranslation();
@@ -432,6 +433,7 @@ function CostSource({ c, rule }: { c: CostItemSource; rule: string }) {
 }
 
 function ReasonEditor({ p, projectId, canManage }: { p: EstimatePosition; projectId: string; canManage: boolean }) {
+  const canManageReason = useRoleReason(canManage, 'manager');
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [text, setText] = useState(p.override_reason ?? '');
@@ -454,13 +456,11 @@ function ReasonEditor({ p, projectId, canManage }: { p: EstimatePosition; projec
         />
       </label>
       {!p.override_reason && !dirty && <span className="text-xs text-content-tertiary">{tr(t, 'design.estimate.reason_missing')}</span>}
-      {canManage && (
-        <div>
-          <Button variant="secondary" disabled={!dirty || save.isPending} loading={save.isPending} onClick={() => save.mutate()}>
-            {tr(t, 'design.estimate.reason_save')}
-          </Button>
-        </div>
-      )}
+      <div>
+        <Button disabledReason={canManageReason} variant="secondary" disabled={!dirty || save.isPending} loading={save.isPending} onClick={() => save.mutate()}>
+          {tr(t, 'design.estimate.reason_save')}
+        </Button>
+      </div>
       {save.isError && <MutationError err={save.error} fallback="design.estimate.reason_failed" />}
     </div>
   );

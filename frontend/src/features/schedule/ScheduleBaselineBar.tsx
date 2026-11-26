@@ -16,6 +16,7 @@ import { ApiError, getErrorMessage } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
 import { scheduleApi, type GanttPaper, type ScheduleBaseline } from './api';
 import { approvalOf, baselinesOfSchedule, effectiveBaseline } from './baselineOverlay';
+import { useRoleReason } from '@/shared/lib/permissionReason';
 
 const NONE = '__none__';
 const PAPERS: GanttPaper[] = ['A3', 'A4', 'LETTER', 'LEGAL'];
@@ -37,6 +38,7 @@ export function ScheduleBaselineBar({
   onBaselineChange,
   onUserSelect,
 }: ScheduleBaselineBarProps) {
+  const canEditReason = useRoleReason(canEdit, 'editor');
   const { t } = useTranslation();
   const addToast = useToastStore((s) => s.addToast);
   const queryClient = useQueryClient();
@@ -146,8 +148,8 @@ export function ScheduleBaselineBar({
           </option>
         ))}
       </select>
-      {canEdit && selected && !(selected.is_active && approvalOf(selected)) && (
-        <Button
+      {selected && !(selected.is_active && approvalOf(selected)) && (
+        <Button disabledReason={canEditReason}
           variant="secondary"
           size="sm"
           icon={<BadgeCheck size={14} />}
@@ -160,20 +162,18 @@ export function ScheduleBaselineBar({
           {t('schedule.baselines.approve', { defaultValue: 'Approve' })}
         </Button>
       )}
-      {canEdit && (
-        <Button
-          variant="secondary"
-          size="sm"
-          icon={<Bookmark size={14} />}
-          aria-expanded={capturing}
-          onClick={() => setCapturing((v) => !v)}
-          title={t('schedule.baselines.save_tooltip', {
-            defaultValue: 'Freeze the current plan as the next baseline (B0, B1, ...). It never changes afterwards.',
-          })}
-        >
-          {t('schedule.baselines.save', { defaultValue: 'Save baseline' })}
-        </Button>
-      )}
+      <Button disabledReason={canEditReason}
+        variant="secondary"
+        size="sm"
+        icon={<Bookmark size={14} />}
+        aria-expanded={capturing}
+        onClick={() => setCapturing((v) => !v)}
+        title={t('schedule.baselines.save_tooltip', {
+          defaultValue: 'Freeze the current plan as the next baseline (B0, B1, ...). It never changes afterwards.',
+        })}
+      >
+        {t('schedule.baselines.save', { defaultValue: 'Save baseline' })}
+      </Button>
       <select
         className="oe-select h-8 w-auto py-0 text-xs"
         aria-label={t('schedule.gantt_pdf.paper_aria', { defaultValue: 'Paper size' })}
