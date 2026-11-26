@@ -14,6 +14,8 @@ import { getErrorMessage } from '@/shared/lib/api';
 import { fmtFixed } from '@/shared/lib/formatters';
 import { useToastStore } from '@/stores/useToastStore';
 import { createPattern, getPattern, importAsDrilled, listPatterns, stakeListUrl, type BlastHole } from './mineApi';
+import { useRoleReason } from '@/shared/lib/permissionReason';
+import { DisabledGroup } from '@/shared/ui/DisabledGroup';
 
 const m3 = (v: number | null | undefined) => (v == null ? '' : fmtFixed(v, 3));
 
@@ -29,6 +31,7 @@ function HoleVerdict({ h }: { h: BlastHole }) {
 }
 
 export function MineBlastCard({ projectId, canWrite }: { projectId: string; canWrite: boolean }) {
+  const canWriteReason = useRoleReason(canWrite, 'editor');
   const { t, i18n } = useTranslation();
   const qc = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
@@ -154,7 +157,7 @@ export function MineBlastCard({ projectId, canWrite }: { projectId: string; canW
                 </span>
               )}
             </div>
-            {canWrite && (
+            <DisabledGroup reason={canWriteReason}>
               <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
                 <label className="flex-1 text-sm">
                   {t('mine.blast.drilled_csv', { defaultValue: 'As-drilled holes, same columns as the design' })}
@@ -164,7 +167,7 @@ export function MineBlastCard({ projectId, canWrite }: { projectId: string; canW
                   {t('mine.blast.import_drilled', { defaultValue: 'Import as-drilled' })}
                 </Button>
               </div>
-            )}
+            </DisabledGroup>
             {d.findings.length > 0 && (
               <ul className="space-y-1 text-sm">
                 {d.findings.map((f, i) => (

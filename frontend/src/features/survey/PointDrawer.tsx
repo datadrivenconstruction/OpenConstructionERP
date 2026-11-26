@@ -12,8 +12,10 @@ import { Lock } from 'lucide-react';
 import { Badge, Button, SideDrawer, Skeleton } from '@/shared/ui';
 import { getErrorMessage } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
-import { POINT_KINDS, deletePoint, getPoint, updatePoint, type PointKind, type PointUpdate } from './api';
+import { POINT_KINDS, deletePoint, getPoint, updatePoint, type PointKind, type PointUpdate } from './api';
+
 import { fmtNumber } from '@/shared/lib/formatters';
+import { useRoleReason } from '@/shared/lib/permissionReason';
 
 interface Props {
   pointId: string | null;
@@ -94,6 +96,7 @@ export function PointDrawer({ pointId, canWrite, onClose }: Props) {
   });
 
   const d = detail.data;
+  const canWriteReason = useRoleReason(canWrite, 'editor');
   const editable = canWrite && !!d && !d.locked;
   const patch = form && base ? pointPatch(base, form) : {};
   const dirty = Object.keys(patch).length > 0;
@@ -175,10 +178,10 @@ export function PointDrawer({ pointId, canWrite, onClose }: Props) {
               </ul>
             )}
           </div>
-          {canWrite && (
-            <div className="flex justify-between gap-2 border-t border-border-light pt-3">
+          <div className="flex justify-between gap-2 border-t border-border-light pt-3">
               <Button
                 variant="ghost"
+                disabledReason={canWriteReason}
                 disabled={d.locked}
                 onClick={() => {
                   if (window.confirm(t('survey.point.delete_confirm', { defaultValue: 'Delete point {{id}}?', id: d.point_id }))) remove.mutate();
@@ -186,11 +189,10 @@ export function PointDrawer({ pointId, canWrite, onClose }: Props) {
               >
                 {t('common.delete', { defaultValue: 'Delete' })}
               </Button>
-              <Button variant="primary" disabled={!editable || !dirty} loading={save.isPending} onClick={() => save.mutate(patch)} data-testid="point-save">
+              <Button variant="primary" disabledReason={canWriteReason} disabled={!editable || !dirty} loading={save.isPending} onClick={() => save.mutate(patch)} data-testid="point-save">
                 {t('common.save', { defaultValue: 'Save' })}
               </Button>
-            </div>
-          )}
+          </div>
         </div>
       )}
     </SideDrawer>

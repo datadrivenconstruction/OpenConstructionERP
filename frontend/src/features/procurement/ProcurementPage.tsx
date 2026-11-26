@@ -2330,6 +2330,7 @@ function GoodsReceiptsTab({
   // authoritative and an error toast surfaces any server-side denial.
   const canReceive =
     userRole === 'admin' || userRole === 'manager' || userRole === 'editor';
+  const canReceiveReason = useRoleReason(canReceive, 'editor');
   const [search, setSearch] = useState('');
   const [showRecord, setShowRecord] = useState(false);
 
@@ -2436,18 +2437,16 @@ function GoodsReceiptsTab({
             className="oe-input ps-9"
           />
         </div>
-        {canReceive && (
-          <div className="shrink-0">
-            <Button
-              variant="primary"
-              size="sm"
-              icon={<Plus size={14} />}
-              onClick={() => setShowRecord(true)}
-            >
-              {t('procurement.record_delivery', { defaultValue: 'Record Delivery' })}
-            </Button>
-          </div>
-        )}
+        <div className="shrink-0">
+          <Button disabledReason={canReceiveReason}
+            variant="primary"
+            size="sm"
+            icon={<Plus size={14} />}
+            onClick={() => setShowRecord(true)}
+          >
+            {t('procurement.record_delivery', { defaultValue: 'Record Delivery' })}
+          </Button>
+        </div>
       </div>
 
       {/* Table */}

@@ -56,11 +56,13 @@ import { useOpenSurveyDemo } from './useOpenSurveyDemo';
 import { ViewOnlyNote, useSurveyAccess } from './useSurveyAccess';
 import { deleteTraverse, getRegisterPlan, listTraverses, type Traverse } from './volumesApi';
 import { fmtFixed } from '@/shared/lib/formatters';
+import { useRoleReason } from '@/shared/lib/permissionReason';
 
 type Tab = 'points' | 'control' | 'sets' | 'traverses' | 'plan';
 const coord = (v: number | null | undefined) => (v == null ? '' : fmtFixed(v, 3));
 
 export default function SurveyRegisterPage() {
+  const canWriteReason = useRoleReason(canWrite, 'editor');
   const { t, i18n } = useTranslation();
   const qc = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
@@ -208,27 +210,25 @@ export default function SurveyRegisterPage() {
 
   const actions = (
     <div className="flex flex-wrap gap-2">
-      {canWrite && (
-      <>
-      <Button variant="primary" icon={<FileUp size={16} />} onClick={() => setImportOpen(true)} data-testid="survey-import">
-        {t('survey.action.import_points', { defaultValue: 'Import points' })}
-      </Button>
-      <Button
-        variant="secondary"
-        icon={<Route size={16} />}
-        onClick={() => {
-          setShownTraverse(null);
-          setTraverseOpen(true);
-        }}
-        data-testid="survey-new-traverse"
-      >
-        {t('survey.action.new_traverse', { defaultValue: 'New traverse' })}
-      </Button>
-      <Button variant="secondary" icon={<Grid3x3 size={16} />} onClick={() => setLocalOpen(true)} data-testid="survey-local-grid-open">
-        {t('survey.action.local_grid', { defaultValue: 'Local grid' })}
-      </Button>
-      </>
-      )}
+    <>
+    <Button disabledReason={canWriteReason} variant="primary" icon={<FileUp size={16} />} onClick={() => setImportOpen(true)} data-testid="survey-import">
+      {t('survey.action.import_points', { defaultValue: 'Import points' })}
+    </Button>
+    <Button disabledReason={canWriteReason}
+      variant="secondary"
+      icon={<Route size={16} />}
+      onClick={() => {
+        setShownTraverse(null);
+        setTraverseOpen(true);
+      }}
+      data-testid="survey-new-traverse"
+    >
+      {t('survey.action.new_traverse', { defaultValue: 'New traverse' })}
+    </Button>
+    <Button disabledReason={canWriteReason} variant="secondary" icon={<Grid3x3 size={16} />} onClick={() => setLocalOpen(true)} data-testid="survey-local-grid-open">
+      {t('survey.action.local_grid', { defaultValue: 'Local grid' })}
+    </Button>
+    </>
       <SurveyExportMenu
         target={{ kind: 'register', projectId: projectId!, pointKind: kind || undefined, setId: setFilter || undefined }}
         disabled={!summary.data?.points}
@@ -410,11 +410,9 @@ export default function SurveyRegisterPage() {
               title={t('survey.empty', { defaultValue: 'No survey points yet. Import a CSV from your instrument.' })}
               action={
                 <div className="flex gap-2 justify-center">
-                  {canWrite && (
-                    <Button variant="primary" onClick={() => setImportOpen(true)}>
-                      {t('survey.action.import_points', { defaultValue: 'Import points' })}
-                    </Button>
-                  )}
+                  <Button disabledReason={canWriteReason} variant="primary" onClick={() => setImportOpen(true)}>
+                    {t('survey.action.import_points', { defaultValue: 'Import points' })}
+                  </Button>
                   <Button variant="secondary" loading={demo.busy} onClick={() => void demo.open()} data-testid="survey-open-demo">
                     {t('survey.action.open_demo', { defaultValue: 'Open demo project' })}
                   </Button>

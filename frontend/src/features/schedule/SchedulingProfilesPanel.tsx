@@ -25,6 +25,7 @@ import {
   type SchedulingProfile,
 } from './interopApi';
 import { formatShift, isChangedActivity, sortedEffects } from './interopLogic';
+import { useRoleReason } from '@/shared/lib/permissionReason';
 
 interface SchedulingProfilesPanelProps {
   scheduleId: string;
@@ -73,6 +74,7 @@ function emptyDraft(): ProfileDraft {
 }
 
 export function SchedulingProfilesPanel({ scheduleId, projectId, canEdit }: SchedulingProfilesPanelProps) {
+  const canEditReason = useRoleReason(canEdit, 'editor');
   const { t } = useTranslation();
   const addToast = useToastStore((s) => s.addToast);
   const queryClient = useQueryClient();
@@ -252,35 +254,33 @@ export function SchedulingProfilesPanel({ scheduleId, projectId, canEdit }: Sche
                   {p.critical_rule === 'total_float' && ` (${p.critical_float_threshold})`}
                 </div>
               </div>
-              {canEdit && (
-                <div className="flex gap-1">
-                  <Button variant="ghost" size="sm" icon={<Pencil size={14} />} onClick={() => setEditing(p)}>
-                    {t('common.edit', { defaultValue: 'Edit' })}
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    icon={<Trash2 size={14} />}
-                    onClick={async () => {
-                      const ok = await confirm({
-                        title: t('schedule.profiles.delete_title', { defaultValue: 'Delete this profile?' }),
-                        message: t('schedule.profiles.delete_message', {
-                          defaultValue: 'Schedules that use it will fall back to the project default.',
-                        }),
-                        confirmLabel: t('common.delete', { defaultValue: 'Delete' }),
-                        variant: 'danger',
-                      });
-                      if (ok) remove.mutate(p.id);
-                    }}
-                  >
-                    {t('common.delete', { defaultValue: 'Delete' })}
-                  </Button>
-                </div>
-              )}
+              <div className="flex gap-1">
+                <Button disabledReason={canEditReason} variant="ghost" size="sm" icon={<Pencil size={14} />} onClick={() => setEditing(p)}>
+                  {t('common.edit', { defaultValue: 'Edit' })}
+                </Button>
+                <Button disabledReason={canEditReason}
+                  variant="ghost"
+                  size="sm"
+                  icon={<Trash2 size={14} />}
+                  onClick={async () => {
+                    const ok = await confirm({
+                      title: t('schedule.profiles.delete_title', { defaultValue: 'Delete this profile?' }),
+                      message: t('schedule.profiles.delete_message', {
+                        defaultValue: 'Schedules that use it will fall back to the project default.',
+                      }),
+                      confirmLabel: t('common.delete', { defaultValue: 'Delete' }),
+                      variant: 'danger',
+                    });
+                    if (ok) remove.mutate(p.id);
+                  }}
+                >
+                  {t('common.delete', { defaultValue: 'Delete' })}
+                </Button>
+              </div>
             </div>
           ))}
-          {canEdit && editing === null && (
-            <Button variant="ghost" size="sm" icon={<Plus size={14} />} onClick={() => setEditing('new')}>
+          {editing === null && (
+            <Button disabledReason={canEditReason} variant="ghost" size="sm" icon={<Plus size={14} />} onClick={() => setEditing('new')}>
               {t('schedule.profiles.add', { defaultValue: 'Add profile' })}
             </Button>
           )}

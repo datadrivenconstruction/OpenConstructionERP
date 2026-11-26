@@ -52,6 +52,7 @@ import {
 import { projectsApi, type Project } from '@/features/projects/api';
 import { fmtPercent, getIntlLocale, fmtFixed } from '@/shared/lib/formatters';
 import { ModuleProcessesNotice } from '@/features/processes';
+import { useRoleReason } from '@/shared/lib/permissionReason';
 
 // Roles allowed to trigger the portfolio-wide KPI recompute. The backend
 // gates /kpi/recalculate-all/ behind reporting.distribute (MANAGER), so
@@ -376,6 +377,7 @@ export function ReportingPage() {
   const userRole = useAuthStore((s) => s.userRole);
   const addToast = useToastStore((s) => s.addToast);
   const canRecalculate = RECALC_ROLES.has((userRole ?? '').toLowerCase());
+  const canRecalculateReason = useRoleReason(canRecalculate, 'manager');
 
   const [tab, setTab] = useState<DashboardTab>('executive');
   // `loading` tracks ONLY the fast projects.list() fetch. The audit's
@@ -614,19 +616,17 @@ export function ReportingPage() {
         actions={
           <div className="flex items-center gap-2">
             <ModuleGuideButton content={reportingGuide} />
-            {canRecalculate && (
-              <Button
-                variant="primary"
-                size="sm"
-                onClick={handleRecalculate}
-                disabled={recalculating}
-                icon={
-                  recalculating ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />
-                }
-              >
-                {t('reporting.recalculate', { defaultValue: 'Recalculate KPIs' })}
-              </Button>
-            )}
+            <Button disabledReason={canRecalculateReason}
+              variant="primary"
+              size="sm"
+              onClick={handleRecalculate}
+              disabled={recalculating}
+              icon={
+                recalculating ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />
+              }
+            >
+              {t('reporting.recalculate', { defaultValue: 'Recalculate KPIs' })}
+            </Button>
           </div>
         }
       />

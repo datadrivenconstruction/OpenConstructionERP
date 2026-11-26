@@ -35,6 +35,8 @@ import {
   type RequiredField,
 } from './requestTypes';
 import { fmtList } from '@/shared/lib/formatters';
+import { useRoleReason } from '@/shared/lib/permissionReason';
+import { DisabledGroup } from '@/shared/ui/DisabledGroup';
 
 const inputCls =
   'oe-input oe-input-lg';
@@ -95,6 +97,7 @@ export function RequestTypesDialog({
   const qc = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
   const canManage = useHasPermission('rfi.types.manage');
+  const canManageReason = useRoleReason(canManage, 'manager');
   const fieldLabel = useRequiredFieldLabel();
   const [form, setForm] = useState<NewTypeForm>(EMPTY_NEW_TYPE);
 
@@ -268,20 +271,18 @@ export function RequestTypesDialog({
             <p className="text-2xs text-content-tertiary">
               {preset.types.map((pt) => pt.code).join(' · ')}
             </p>
-            {canManage && (
-              <div>
-                <Button
-                  size="sm"
-                  variant="secondary"
-                  icon={<Download size={14} />}
-                  loading={loadMut.isPending && loadMut.variables === preset.code}
-                  disabled={loadMut.isPending}
-                  onClick={() => loadMut.mutate(preset.code)}
-                >
-                  {t('rfi.types.load_preset', { defaultValue: 'Load into project' })}
-                </Button>
-              </div>
-            )}
+            <div>
+              <Button disabledReason={canManageReason}
+                size="sm"
+                variant="secondary"
+                icon={<Download size={14} />}
+                loading={loadMut.isPending && loadMut.variables === preset.code}
+                disabled={loadMut.isPending}
+                onClick={() => loadMut.mutate(preset.code)}
+              >
+                {t('rfi.types.load_preset', { defaultValue: 'Load into project' })}
+              </Button>
+            </div>
           </div>
         ))}
       </WideModalSection>
@@ -407,7 +408,7 @@ export function RequestTypesDialog({
       </WideModalSection>
 
       {/* ── Add a type ── */}
-      {canManage && (
+      <DisabledGroup reason={canManageReason}>
         <WideModalSection title={t('rfi.types.section_add', { defaultValue: 'Add a type' })} columns={2}>
           <WideModalField
             label={t('rfi.types.field_code', { defaultValue: 'Code' })}
@@ -533,7 +534,7 @@ export function RequestTypesDialog({
             </Button>
           </div>
         </WideModalSection>
-      )}
+      </DisabledGroup>
 
       {/* ── Register check (validation rule set "rfi") ── */}
       <WideModalSection title={t('rfi.types.section_check', { defaultValue: 'Register check' })}>

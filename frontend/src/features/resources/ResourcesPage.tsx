@@ -3247,9 +3247,11 @@ function AssignmentsTab({
                 <table className="oe-table-compact">
                   <thead>
                     <tr>
-                      {canEdit && (
+                      {(
                         <th className="w-8 print:hidden">
                           <input
+                              disabled={!canEdit}
+                              title={editReason}
                             type="checkbox"
                             aria-label={t('common.select_all', {
                               defaultValue: 'Select all',
@@ -3318,9 +3320,11 @@ function AssignmentsTab({
                           )}
                           data-testid={`assign-row-${a.id}`}
                         >
-                          {canEdit && (
+                          {(
                             <td className="print:hidden">
                               <input
+                                  disabled={!canEdit}
+                                  title={editReason}
                                 type="checkbox"
                                 checked={isSelected}
                                 onChange={() => toggleOne(a.id)}
@@ -4077,8 +4081,10 @@ function AssignmentTable({
   // cancel which is resources.assign (EDITOR). Hide affordances the user
   // cannot exercise so they don't click a button that always 403s.
   const canConfirm = userRole === 'admin' || userRole === 'manager';
+  const canConfirmReason = useRoleReason(canConfirm, 'manager');
   const canDecline =
     userRole === 'admin' || userRole === 'manager' || userRole === 'editor';
+  const canDeclineReason = useRoleReason(canDecline, 'editor');
   return (
     <div className="overflow-x-auto rounded border border-border-light">
       <table className="oe-table-compact">
@@ -4121,28 +4127,24 @@ function AssignmentTable({
               <td className="text-right">
                 {a.status === 'proposed' && (canConfirm || canDecline) ? (
                   <div className="inline-flex gap-1">
-                    {canConfirm && (
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        icon={<CheckCircle2 size={12} />}
-                        onClick={() => onConfirm(a.id)}
-                        disabled={busy}
-                      >
-                        {t('resources.confirm', { defaultValue: 'Confirm' })}
-                      </Button>
-                    )}
-                    {canDecline && (
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        icon={<XCircle size={12} />}
-                        onClick={() => onDecline(a.id)}
-                        disabled={busy}
-                      >
-                        {t('resources.decline', { defaultValue: 'Decline' })}
-                      </Button>
-                    )}
+                    <Button disabledReason={canConfirmReason}
+                      size="sm"
+                      variant="ghost"
+                      icon={<CheckCircle2 size={12} />}
+                      onClick={() => onConfirm(a.id)}
+                      disabled={busy}
+                    >
+                      {t('resources.confirm', { defaultValue: 'Confirm' })}
+                    </Button>
+                    <Button disabledReason={canDeclineReason}
+                      size="sm"
+                      variant="ghost"
+                      icon={<XCircle size={12} />}
+                      onClick={() => onDecline(a.id)}
+                      disabled={busy}
+                    >
+                      {t('resources.decline', { defaultValue: 'Decline' })}
+                    </Button>
                   </div>
                 ) : null}
               </td>

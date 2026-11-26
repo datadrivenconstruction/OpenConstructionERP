@@ -105,6 +105,7 @@ import type {
   CriticalPathResponse,
   RiskAnalysisResponse,
 } from './api';
+import { useRoleReason } from '@/shared/lib/permissionReason';
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
 
@@ -1184,6 +1185,7 @@ export function ScheduleDetail({
   const [deleteTarget, setDeleteTarget] = useState<ActivityDeleteTarget | null>(null);
   // A viewer sees the plan but none of the buttons the server would refuse.
   const canEditSchedule = useHasPermission('schedule.update');
+  const canEditScheduleReason = useRoleReason(canEditSchedule, 'editor');
   const canDeleteSchedule = useHasPermission('schedule.delete');
   const [zoomLevel, setZoomLevel] = useState<ZoomLevel>('week');
   const [viewMode, setViewMode] = useState<
@@ -1834,18 +1836,16 @@ export function ScheduleDetail({
               {t('schedule.progress_sheet.open', { defaultValue: 'Progress sheet' })}
             </Button>
           )}
-          {canEditSchedule && (
-            <Button
-              variant="secondary"
-              icon={<FileBarChart size={16} />}
-              onClick={() => setShowGenerateBOQ(true)}
-              data-guide="schedule-generate"
-            >
-              {hasActivities
-                ? t('schedule.regenerate_from_boq', { defaultValue: 'Regenerate from BOQ' })
-                : t('schedule.generate_from_boq', 'Generate from BOQ')}
-            </Button>
-          )}
+          <Button disabledReason={canEditScheduleReason}
+            variant="secondary"
+            icon={<FileBarChart size={16} />}
+            onClick={() => setShowGenerateBOQ(true)}
+            data-guide="schedule-generate"
+          >
+            {hasActivities
+              ? t('schedule.regenerate_from_boq', { defaultValue: 'Regenerate from BOQ' })
+              : t('schedule.generate_from_boq', 'Generate from BOQ')}
+          </Button>
           {/* Clear all activities, next to Regenerate: the schedule itself stays.
               Only before activation; an active plan is changed row by row. */}
           {hasActivities && canDeleteSchedule && schedule.status === 'draft' && (
@@ -2017,15 +2017,13 @@ export function ScheduleDetail({
             </Button>
           )}
           <ScheduleLifecycleActions schedule={{ ...schedule, ...scheduleRecord }} onChanged={onBack} />
-          {canEditSchedule && (
-            <Button
-              variant="primary"
-              icon={<Plus size={16} />}
-              onClick={() => setShowAddActivity(true)}
-            >
-              {t('schedule.add_activity', 'Add Activity')}
-            </Button>
-          )}
+          <Button disabledReason={canEditScheduleReason}
+            variant="primary"
+            icon={<Plus size={16} />}
+            onClick={() => setShowAddActivity(true)}
+          >
+            {t('schedule.add_activity', 'Add Activity')}
+          </Button>
         </div>
       </div>
 

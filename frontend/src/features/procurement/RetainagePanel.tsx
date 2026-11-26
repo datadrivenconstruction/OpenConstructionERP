@@ -24,6 +24,8 @@ import { useToastStore } from '@/stores/useToastStore';
 import { getErrorMessage } from '@/shared/lib/api';
 import { listPORetainageReleases, releasePORetainage } from './api';
 import { fmtPercent, fmtFixed } from '@/shared/lib/formatters';
+import { useRoleReason } from '@/shared/lib/permissionReason';
+import { DisabledGroup } from '@/shared/ui/DisabledGroup';
 
 interface RetainagePanelProps {
   open: boolean;
@@ -51,6 +53,7 @@ export function RetainagePanel({
   retentionPercent,
   canRelease,
 }: RetainagePanelProps) {
+  const canReleaseReason = useRoleReason(canRelease, 'manager');
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
@@ -154,7 +157,7 @@ export function RetainagePanel({
         </div>
 
         {/* ── Release form (MANAGER only) ────────────────────────────────── */}
-        {canRelease && (
+        <DisabledGroup reason={canReleaseReason}>
           <form
             className="rounded-lg border border-border bg-surface-secondary/40 p-4 space-y-3"
             onSubmit={(e) => {
@@ -235,7 +238,7 @@ export function RetainagePanel({
               </Button>
             </div>
           </form>
-        )}
+        </DisabledGroup>
 
         {/* ── Release log ────────────────────────────────────────────────── */}
         <div>

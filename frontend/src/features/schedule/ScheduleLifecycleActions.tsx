@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Archive, RotateCcw, Trash2 } from 'lucide-react';
+import { usePermissionReason } from '@/shared/lib/permissionReason';
 import { useHasPermission } from '@/shared/lib/permissionGates';
 import { useConfirm } from '@/shared/hooks/useConfirm';
 import { Button, ConfirmDialog } from '@/shared/ui';
@@ -23,6 +24,7 @@ export function ScheduleLifecycleActions({ schedule, onChanged, compact = false 
   const queryClient = useQueryClient();
   const toast = useToastStore((s) => s.addToast);
   const canArchive = useHasPermission('schedule.delete');
+  const archiveReason = usePermissionReason('schedule.delete');
   const isPurgeAdmin = useHasPermission('schedule.purge');
   const [busy, setBusy] = useState(false);
   const { confirm, ...confirmProps } = useConfirm();
@@ -89,7 +91,7 @@ export function ScheduleLifecycleActions({ schedule, onChanged, compact = false 
   };
 
   return <div className="flex shrink-0 flex-wrap items-center gap-1" onClick={(event) => event.stopPropagation()}>
-    {canArchive && <Button variant="ghost" size="sm" disabled={busy}
+    <Button variant="ghost" size="sm" disabled={busy} disabledReason={archiveReason}
       aria-label={t(archived ? 'schedule.restore_named' : 'schedule.archive_named', { name: schedule.name })}
       title={archived ? t('common.restore') : t('schedule.archive_then_delete_hint', {
         defaultValue: 'Archive this schedule. Once archived, the project owner can delete it permanently.',
@@ -97,11 +99,11 @@ export function ScheduleLifecycleActions({ schedule, onChanged, compact = false 
       icon={archived ? <RotateCcw size={14} /> : <Archive size={14} />}
       onClick={() => void act(archived ? 'restore' : 'archive')}>
       {!compact && t(archived ? 'common.restore' : 'common.archive')}
-    </Button>}
+    </Button>
     {/* Delete is always where people look for it. On a schedule still in use
         it explains that archiving comes first, says who may delete the
         archive, and offers the archiving. */}
-    {canArchive && !archived && <Button variant="ghost" size="sm" disabled={busy}
+    {!archived && <Button variant="ghost" size="sm" disabled={busy} disabledReason={archiveReason}
       aria-label={t('schedule.delete_named', { defaultValue: 'Delete {{name}}', name: schedule.name })}
       title={t('schedule.delete_needs_archive_title', { defaultValue: 'Deleting starts with archiving' })}
       icon={<Trash2 size={14} />} onClick={() => void act('delete_active')}>

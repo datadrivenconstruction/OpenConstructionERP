@@ -24,6 +24,7 @@ import { Plus, X, Trash2, UserPlus } from 'lucide-react';
 import { apiGet, apiPost, apiDelete } from '@/shared/lib/api';
 import { UserSearchInput } from '@/shared/ui/UserSearchInput';
 import { useDismiss } from '@/shared/hooks/useDismiss';
+import { useRoleReason } from '@/shared/lib/permissionReason';
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -344,6 +345,7 @@ export function TeamStrip({
   canManage = true,
   initialMembers,
 }: TeamStripProps) {
+  const canManageReason = useRoleReason(canManage, 'manager');
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [listOpen, setListOpen] = useState(false);
@@ -446,35 +448,36 @@ export function TeamStrip({
         )}
         {/* Render the manage shortcut even when the strip is empty so the
             owner can always invite the first member. */}
-        {canManage && (
-          <>
-            <button
+        <>
+          <button disabled={!canManage}
+            type="button"
+            onClick={() => setAddOpen(true)}
+            className="ml-1 inline-flex items-center justify-center h-8 w-8 rounded-full border border-dashed border-border text-content-tertiary hover:text-oe-blue hover:border-oe-blue transition-colors"
+            data-testid="team-strip-add-button"
+            aria-label={t('projects.team.add_member', {
+              defaultValue: 'Add member',
+            })}
+            title={
+              canManageReason ??
+              t('projects.team.add_member', {
+                defaultValue: 'Add member',
+              })
+            }
+          >
+            <Plus size={16} />
+          </button>
+          {members.length > 0 && (
+            <button disabled={!canManage} title={canManageReason}
               type="button"
-              onClick={() => setAddOpen(true)}
-              className="ml-1 inline-flex items-center justify-center h-8 w-8 rounded-full border border-dashed border-border text-content-tertiary hover:text-oe-blue hover:border-oe-blue transition-colors"
-              data-testid="team-strip-add-button"
-              aria-label={t('projects.team.add_member', {
-                defaultValue: 'Add member',
-              })}
-              title={t('projects.team.add_member', {
-                defaultValue: 'Add member',
-              })}
+              onClick={() => setListOpen(true)}
+              className="text-xs text-content-tertiary hover:text-content-primary inline-flex items-center gap-1"
+              data-testid="team-strip-manage"
             >
-              <Plus size={16} />
+              <UserPlus size={12} />
+              {t('projects.team.manage', { defaultValue: 'Manage' })}
             </button>
-            {members.length > 0 && (
-              <button
-                type="button"
-                onClick={() => setListOpen(true)}
-                className="text-xs text-content-tertiary hover:text-content-primary inline-flex items-center gap-1"
-                data-testid="team-strip-manage"
-              >
-                <UserPlus size={12} />
-                {t('projects.team.manage', { defaultValue: 'Manage' })}
-              </button>
-            )}
-          </>
-        )}
+          )}
+        </>
       </div>
 
       {listOpen && (
