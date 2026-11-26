@@ -3,6 +3,7 @@
 """Module manifest for oe_dach_pack."""
 
 from app.core.module_loader import ModuleManifest
+from app.modules.dach_pack.data_paths import DATA_PATHS
 
 manifest = ModuleManifest(
     name="oe_dach_pack",
@@ -22,4 +23,5 @@ manifest = ModuleManifest(
     markets=["DE", "AT", "CH"],
     auto_install=False,
     enabled=True,
+    data_paths=DATA_PATHS,
 )

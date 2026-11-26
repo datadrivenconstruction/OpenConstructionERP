@@ -3,6 +3,7 @@
 """Egyptian Tax Authority e-invoicing adapter manifest."""
 
 from app.core.module_loader import ModuleManifest
+from app.modules.einvoice_eta.data_paths import DATA_PATHS
 
 manifest = ModuleManifest(
     name="oe_einvoice_eta",
@@ -23,4 +24,5 @@ manifest = ModuleManifest(
     depends=["oe_einvoice_clearance"],
     auto_install=True,
     enabled=True,
+    data_paths=DATA_PATHS,
 )

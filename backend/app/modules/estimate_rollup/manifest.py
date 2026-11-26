@@ -2,6 +2,7 @@
 """Estimate-rollup module manifest."""
 
 from app.core.module_loader import ModuleManifest
+from app.modules.estimate_rollup.data_paths import DATA_PATHS
 
 manifest = ModuleManifest(
     name="oe_estimate_rollup",
@@ -24,4 +25,5 @@ manifest = ModuleManifest(
     depends=["oe_boq", "oe_projects", "oe_preliminaries", "oe_allowances"],
     auto_install=True,
     enabled=True,
+    data_paths=DATA_PATHS,
 )

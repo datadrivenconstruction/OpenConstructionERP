@@ -3,6 +3,7 @@
 """E-invoice module manifest."""
 
 from app.core.module_loader import ModuleManifest
+from app.modules.einvoice.data_paths import DATA_PATHS
 
 manifest = ModuleManifest(
     name="oe_einvoice",
@@ -20,4 +21,5 @@ manifest = ModuleManifest(
     depends=[],  # pure library; finance depends on us, not the other way
     auto_install=True,
     enabled=True,
+    data_paths=DATA_PATHS,
 )
