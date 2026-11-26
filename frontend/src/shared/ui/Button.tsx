@@ -99,6 +99,8 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         aria-disabled={isDisabled || undefined}
         aria-busy={loading || undefined}
         title={reason ?? title}
+        // The reason takes the tooltip; the control keeps its own name.
+        aria-label={reason && title && !props['aria-label'] ? title : undefined}
         className={clsx(
           'inline-flex items-center justify-center',
           'font-medium whitespace-nowrap select-none',
