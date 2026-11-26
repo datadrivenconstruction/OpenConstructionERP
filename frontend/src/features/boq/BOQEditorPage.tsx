@@ -18,7 +18,7 @@ import {
   mayStillBeRunning,
   VECTOR_READY_MIN_COUNT,
 } from '@/features/costs/vectorIndex';
-import { toNum } from '@/shared/lib/money';
+import { formatCurrency, toNum } from '@/shared/lib/money';
 import { useToastStore } from '@/stores/useToastStore';
 import { useRecentStore } from '@/stores/useRecentStore';
 import { useAuthStore } from '@/stores/useAuthStore';
@@ -157,6 +157,7 @@ import { RecurringLinesPanel } from './RecurringLinesPanel';
 import { QualityScoreRing, TipsPanel, QuickAddFAB, EmptyBOQOnboarding, ExportWarningDialog } from './BOQSummaryPanel';
 import { ActivityPanel } from './ActivityPanel';
 import { CostDatabaseSearchModal, AssemblyPickerModal } from './BOQModals';
+import { InsertAssemblyModal, type ApplyToPositionResult } from './InsertAssemblyModal';
 import { CatalogPickerModal, type CatalogResource } from './CatalogPickerModal';
 import { CustomColumnsDialog } from './CustomColumnsDialog';
 import { BOQVariablesDialog } from './BOQVariablesDialog';
@@ -1481,6 +1482,7 @@ export function BOQEditorPage() {
   const [aiCopilotPositionId, setAiCopilotPositionId] = useState<string | null>(null);
   const [costDbModalOpen, setCostDbModalOpen] = useState(false);
   const [assemblyModalOpen, setAssemblyModalOpen] = useState(false);
+  const [insertAssemblyFor, setInsertAssemblyFor] = useState<string | null>(null);
   const [excelPasteOpen, setExcelPasteOpen] = useState(false);
   const [customColumnsOpen, setCustomColumnsOpen] = useState(false);
   const [variablesOpen, setVariablesOpen] = useState(false);
@@ -5934,6 +5936,7 @@ export function BOQEditorPage() {
           anomalyMap={anomalyMap}
           onApplyAnomalySuggestion={handleApplyAnomalySuggestion}
           onSaveAsAssembly={handleSaveAsAssembly}
+          onInsertAssembly={setInsertAssemblyFor}
           onSaveQuantityAsVariable={handleSaveQuantityAsVariable}
           customColumns={boqCustomColumns}
           showResourceSplit={showResourceSplit}
@@ -6162,6 +6165,53 @@ export function BOQEditorPage() {
           }}
         />
       )}
+
+      {/* ── Insert assembly into an existing position ────────────────── */}
+      {insertAssemblyFor && (() => {
+        const target = (boq?.positions ?? []).find((p) => p.id === insertAssemblyFor);
+        if (!target) return null;
+        return (
+          <InsertAssemblyModal
+            position={{
+              id: target.id,
+              ordinal: target.ordinal,
+              description: target.description,
+              unit: target.unit,
+              metadata: (target.metadata ?? null) as Record<string, unknown> | null,
+            }}
+            onClose={() => setInsertAssemblyFor(null)}
+            onApplied={(res: ApplyToPositionResult) => {
+              setInsertAssemblyFor(null);
+              // The server already saved it; the undo entry puts the old resources and rate back.
+              if (res.previous) {
+                undoStackRef.current.push({
+                  type: 'update',
+                  positionId: res.position_id,
+                  oldData: { metadata: res.previous.metadata, unit_rate: Number(res.previous.unit_rate) },
+                  newData: { unit_rate: Number(res.after.unit_rate) },
+                });
+                if (undoStackRef.current.length > UNDO_STACK_LIMIT) undoStackRef.current.shift();
+                redoStackRef.current = [];
+                setUndoRedoVersion((v) => v + 1);
+              }
+              invalidateAll();
+              addToast({
+                type: 'success',
+                title: t('boq.insert_assembly.applied', {
+                  defaultValue: '{{code}} inserted: {{before}} → {{after}} per {{unit}}',
+                  code: res.assembly_code,
+                  before: formatCurrency(res.before.unit_rate, res.currency || undefined),
+                  after: formatCurrency(res.after.unit_rate, res.currency || undefined),
+                  unit: res.position_unit,
+                }),
+                action: res.previous
+                  ? { label: t('common.undo', { defaultValue: 'Undo' }), onClick: () => handleUndo() }
+                  : undefined,
+              });
+            }}
+          />
+        );
+      })()}
 
       {/* ── Catalog Picker Modal ─────────────────────────────────────── */}
       <CatalogPickerModal
@@ -6841,7 +6891,7 @@ export function BOQEditorPage() {
               <span className="text-content-secondary">{t('boq.shortcut_lock', { defaultValue: 'Lock / Unlock Estimate' })}</span>
 
               <kbd className="inline-flex items-center rounded border border-border-light bg-surface-secondary px-1.5 py-0.5 text-xs font-mono">Alt+L</kbd>
-              <span className="text-content-secondary">{t('boq.edit_texts', { defaultValue: 'Edit Kurztext and Langtext' })}</span>
+              <span className="text-content-secondary">{t('boq.edit_texts', { defaultValue: 'Edit short and long text' })}</span>
 
               <kbd className="inline-flex items-center rounded border border-border-light bg-surface-secondary px-1.5 py-0.5 text-xs font-mono">{t('boq.shortcut_ctrl_z', { defaultValue: 'Ctrl+Z' })}</kbd>
               <span className="text-content-secondary">{t('boq.shortcut_undo', { defaultValue: 'Undo' })}</span>
