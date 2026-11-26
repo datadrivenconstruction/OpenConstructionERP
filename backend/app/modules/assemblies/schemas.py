@@ -510,6 +510,26 @@ class ApplyToBOQRequest(BaseModel):
     _finite_parameter_values = field_validator("parameter_values")(_check_parameter_values)
 
 
+class ApplyToPositionRequest(BaseModel):
+    """Request body for pricing an existing BOQ position from an assembly.
+
+    ``factor`` is how many assembly units one unit of the position takes (1 when
+    both share a unit; 0.0929 to price a square-foot line from a square-metre
+    assembly). ``replace`` swaps the position's resources for the assembly's,
+    ``append`` adds them. ``dry_run`` returns the result without saving it.
+    """
+
+    position_id: UUID
+    factor: float = Field(default=1.0, gt=0.0, le=10000.0, allow_inf_nan=False)
+    mode: Literal["replace", "append"] = "replace"
+    region: str | None = Field(default=None, max_length=100)
+    parameter_values: dict[str, float] = Field(default_factory=dict)
+    dry_run: bool = False
+    version: int | None = Field(default=None, ge=0)
+
+    _finite_parameter_values = field_validator("parameter_values")(_check_parameter_values)
+
+
 # ── Parametric validation & expand preview (Issue #365) ──────────────────────
 
 

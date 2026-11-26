@@ -16,6 +16,7 @@ import time
 import uuid
 from collections.abc import Sequence
 from decimal import Decimal, InvalidOperation
+from typing import Any
 
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -42,6 +43,7 @@ from app.modules.assemblies.parametric import (
 from app.modules.assemblies.repository import AssemblyRepository, ComponentRepository
 from app.modules.assemblies.schemas import (
     ApplyToBOQRequest,
+    ApplyToPositionRequest,
     AssemblyCreate,
     AssemblyExport,
     AssemblyUpdate,
@@ -1316,9 +1318,67 @@ class AssemblyService(AssemblyTaxMixin):
         Raises:
             HTTPException 404 if assembly or BOQ not found.
         """
-        from app.modules.boq.repository import BOQRepository
         from app.modules.boq.schemas import PositionCreate
         from app.modules.boq.service import BOQService
+
+        assembly, effective_rate, metadata = await self._price_for_boq(
+            assembly_id,
+            boq_id=data.boq_id,
+            region=data.region,
+            parameter_values=dict(getattr(data, "parameter_values", None) or {}),
+        )
+        ordinal = data.ordinal if data.ordinal else f"ASM-{assembly.code}"
+        position_data = PositionCreate(
+            boq_id=data.boq_id,
+            ordinal=ordinal,
+            description=f"{assembly.name} [{assembly.code}]",
+            unit=assembly.unit,
+            quantity=data.quantity,
+            unit_rate=float(effective_rate),
+            classification=assembly.classification,
+            source="assembly",
+            metadata=metadata,
+        )
+
+        boq_service = BOQService(self.session)
+        position = await boq_service.add_position(position_data)
+
+        await _safe_publish(
+            "assemblies.applied_to_boq",
+            {
+                "assembly_id": str(assembly_id),
+                "boq_id": str(data.boq_id),
+                "position_id": str(position.id),
+            },
+            source_module="oe_assemblies",
+        )
+
+        logger.info(
+            "Assembly %s applied to BOQ %s as position %s",
+            assembly.code,
+            data.boq_id,
+            position.id,
+        )
+        return position
+
+    async def _price_for_boq(
+        self,
+        assembly_id: uuid.UUID,
+        *,
+        boq_id: uuid.UUID,
+        region: str | None,
+        parameter_values: dict[str, float],
+    ) -> tuple[Assembly, Decimal, dict[str, Any]]:
+        """Price an assembly for a bill: the unit rate and the position metadata it carries.
+
+        Shared by :meth:`apply_to_boq` (new position) and :meth:`apply_to_position`
+        (existing position), so both land the same rate, resources and provenance.
+
+        Returns:
+            ``(assembly, effective_rate, metadata)``; ``metadata["resources"]`` holds
+            the per-unit resource rows whose ``quantity * unit_rate`` sum to the rate.
+        """
+        from app.modules.boq.repository import BOQRepository
         from app.modules.projects.repository import ProjectRepository
 
         assembly = await self.get_assembly(assembly_id)
@@ -1348,7 +1408,7 @@ class AssemblyService(AssemblyTaxMixin):
         project_currency = ""
         try:
             boq_repo = BOQRepository(self.session)
-            target_boq = await boq_repo.get_by_id(data.boq_id)
+            target_boq = await boq_repo.get_by_id(boq_id)
             if target_boq is not None:
                 project_repo = ProjectRepository(self.session)
                 project = await project_repo.get_by_id(target_boq.project_id)
@@ -1434,9 +1494,9 @@ class AssemblyService(AssemblyTaxMixin):
         # region is absent or its stored factor is garbage / non-finite,
         # mirroring the effective_rate fall-through contract.
         regional_mult = Decimal("1")
-        if data.region and data.region in assembly.regional_factors:
+        if region and region in assembly.regional_factors:
             try:
-                factor = Decimal(str(assembly.regional_factors[data.region]))
+                factor = Decimal(str(assembly.regional_factors[region]))
             except (InvalidOperation, ValueError):
                 factor = Decimal("1")
             if not factor.is_finite() or factor < 0:
@@ -1465,8 +1525,6 @@ class AssemblyService(AssemblyTaxMixin):
             # bound. Land at 0 rather than poison the BOQ.
             effective_rate = Decimal("0")
 
-        ordinal = data.ordinal if data.ordinal else f"ASM-{assembly.code}"
-
         # Fetch components separately to avoid MissingGreenlet (noload on get_assembly)
         components = await self.component_repo.list_for_assembly(assembly_id)
 
@@ -1479,7 +1537,6 @@ class AssemblyService(AssemblyTaxMixin):
         # maps a component id to its Decimal quantity; a line without a formula
         # (or whose stale formula fails to evaluate) keeps its static quantity.
         assembly_parameters = list(assembly.parameters or [])
-        parameter_values = dict(getattr(data, "parameter_values", None) or {})
         computed_quantities: dict[str, Decimal] = {}
         has_component_formula = any((c.quantity_formula or "").strip() for c in components)
         if assembly_parameters or has_component_formula:
@@ -1684,74 +1741,232 @@ class AssemblyService(AssemblyTaxMixin):
             if assembly_metadata.get("work_key"):
                 norm_provenance["work_key"] = str(assembly_metadata["work_key"])
 
-        position_data = PositionCreate(
-            boq_id=data.boq_id,
-            ordinal=ordinal,
-            description=f"{assembly.name} [{assembly.code}]",
-            unit=assembly.unit,
-            quantity=data.quantity,
-            unit_rate=float(effective_rate),
-            classification=assembly.classification,
-            source="assembly",
-            metadata={
-                "assembly_id": str(assembly_id),
-                "assembly_code": assembly.code,
-                "bid_factor": assembly.bid_factor,
-                "region": data.region,
-                # When converted, the position now holds project-currency
-                # values, so its currency IS the project currency. When
-                # not converted it stays in the assembly's own currency.
-                "currency": (project_currency if currency_converted else assembly.currency),
-                "resources": resources,
-                # Standard key the BOQ UI reads to render the M/L/E
-                # mini-badge - see ``backend/app/modules/boq/models.py``
-                # docstring for the metadata vocabulary.
-                "resource_breakdown": resource_breakdown,
-                # Audit trail: exactly one of these is present when the
-                # assembly currency differed from the project's - a
-                # ``currency_converted`` record (FX applied) or a
-                # non-blocking ``currency_mismatch`` flag (Issue #128).
-                **({"currency_converted": currency_converted} if currency_converted else {}),
-                **({"currency_mismatch": currency_warning} if currency_warning else {}),
-                # Issue #365 provenance - the parameter definitions and the
-                # input values used to expand this position (present only for a
-                # parametric assembly / when values were supplied).
-                **({"parameters": assembly_parameters} if assembly_parameters else {}),
-                **({"parameter_values": parameter_values} if parameter_values else {}),
-                # Issue #457 - present only when the assembly was built from a
-                # production norm; see the note above the dict.
-                **norm_provenance,
-                # Issue #559 - per-unit split of the cost into net, tax in cost and recoverable tax;
-                # present only for a project that uses component tax. The bill's own tax markups are separate.
-                **(
-                    {"component_tax": assembly_metadata["tax_totals"]}
-                    if isinstance(assembly_metadata.get("tax_totals"), dict)
-                    and await self.tax_context(assembly) is not None
-                    else {}
-                ),
-            },
-        )
+        metadata: dict[str, Any] = {
+            "assembly_id": str(assembly_id),
+            "assembly_code": assembly.code,
+            "bid_factor": assembly.bid_factor,
+            "region": region,
+            # When converted, the position now holds project-currency
+            # values, so its currency IS the project currency. When
+            # not converted it stays in the assembly's own currency.
+            "currency": (project_currency if currency_converted else assembly.currency),
+            "resources": resources,
+            # Standard key the BOQ UI reads to render the M/L/E
+            # mini-badge - see ``backend/app/modules/boq/models.py``
+            # docstring for the metadata vocabulary.
+            "resource_breakdown": resource_breakdown,
+            # Audit trail: exactly one of these is present when the
+            # assembly currency differed from the project's - a
+            # ``currency_converted`` record (FX applied) or a
+            # non-blocking ``currency_mismatch`` flag (Issue #128).
+            **({"currency_converted": currency_converted} if currency_converted else {}),
+            **({"currency_mismatch": currency_warning} if currency_warning else {}),
+            # Issue #365 provenance - the parameter definitions and the
+            # input values used to expand this position (present only for a
+            # parametric assembly / when values were supplied).
+            **({"parameters": assembly_parameters} if assembly_parameters else {}),
+            **({"parameter_values": parameter_values} if parameter_values else {}),
+            # Issue #457 - present only when the assembly was built from a
+            # production norm; see the note above the dict.
+            **norm_provenance,
+            # Issue #559 - per-unit split of the cost into net, tax in cost and recoverable tax;
+            # present only for a project that uses component tax. The bill's own tax markups are separate.
+            **(
+                {"component_tax": assembly_metadata["tax_totals"]}
+                if isinstance(assembly_metadata.get("tax_totals"), dict)
+                and await self.tax_context(assembly) is not None
+                else {}
+            ),
+        }
+        return assembly, effective_rate, metadata
+
+    async def apply_to_position(
+        self,
+        assembly_id: uuid.UUID,
+        data: ApplyToPositionRequest,
+        *,
+        actor_id: uuid.UUID | None = None,
+    ) -> dict[str, Any]:
+        """Price an existing BOQ position from an assembly, or preview that with ``dry_run``.
+
+        The assembly is priced exactly as :meth:`apply_to_boq` prices a new
+        position. Its resource rows are scaled by ``factor`` (how many assembly
+        units one position unit takes) and either replace the position's rows or
+        are added to them. The position keeps its ordinal, description, unit and
+        quantity; its unit rate becomes the sum of the resulting rows.
+
+        Args:
+            assembly_id: Source assembly identifier.
+            data: Target position, factor, mode, optional region and parameters.
+            actor_id: Caller, for the BOQ activity log.
+
+        Returns:
+            Preview or result: rate and total before and after, the rows the
+            assembly contributes, warnings, and on a real apply the position's
+            previous metadata and unit rate so the client can undo it.
+
+        Raises:
+            HTTPException 404 if the assembly or position is missing, 409 if the
+            bill is locked, 422 when rows would be added to a position whose rows
+            are entered for the whole position.
+        """
+        from app.modules.boq.resource_basis import BASIS_KEY, PER_POSITION, resource_basis
+        from app.modules.boq.schemas import PositionUpdate
+        from app.modules.boq.service import BOQService, _derived_unit_rate_str
 
         boq_service = BOQService(self.session)
-        position = await boq_service.add_position(position_data)
+        position = await boq_service.position_repo.get_by_id(data.position_id)
+        if position is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=translate("errors.position_not_found", locale=get_locale()),
+            )
+        if not data.dry_run:
+            await boq_service._ensure_boq_writable(position.boq_id)
+
+        assembly, _rate, priced = await self._price_for_boq(
+            assembly_id,
+            boq_id=position.boq_id,
+            region=data.region,
+            parameter_values=dict(data.parameter_values),
+        )
+
+        factor = Decimal(str(data.factor))
+        mismatch = priced.get("currency_mismatch")
+        added_rows: list[dict[str, Any]] = []
+        for src in priced.get("resources") or []:
+            row = dict(src)
+            row["quantity"] = float(Decimal(str(src.get("quantity") or 0)) * factor)
+            row["total"] = float(Decimal(str(src.get("total") or 0)) * factor)
+            row["assembly_code"] = assembly.code
+            # An unconverted foreign-currency assembly keeps its currency on each
+            # row, so the bill's FX rollup converts or excludes it visibly.
+            if mismatch:
+                row["currency"] = priced.get("currency")
+            added_rows.append(row)
+
+        stored_meta = dict(position.metadata_) if isinstance(position.metadata_, dict) else {}
+        old_rows = [dict(r) for r in (stored_meta.get("resources") or []) if isinstance(r, dict)]
+        if data.mode == "append" and old_rows and resource_basis(stored_meta) == PER_POSITION:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                detail=(
+                    "The resources of this position are entered for the whole position; "
+                    "replace them, or switch the position to per-unit resources first."
+                ),
+            )
+
+        new_rows = added_rows if data.mode == "replace" else [*old_rows, *added_rows]
+        new_meta = dict(stored_meta)
+        new_meta["resources"] = new_rows
+        if data.mode == "replace":
+            new_meta.pop(BASIS_KEY, None)
+        breakdown: dict[str, Decimal] = {}
+        for row in new_rows:
+            rtype = str(row.get("type") or "material")
+            try:
+                sub = Decimal(str(row.get("quantity") or 0)) * Decimal(str(row.get("unit_rate") or 0))
+            except (InvalidOperation, ValueError):
+                continue
+            if sub.is_finite():
+                breakdown[rtype] = breakdown.get(rtype, Decimal("0")) + sub
+        subtotal = sum(breakdown.values(), Decimal("0"))
+        new_meta["resource_breakdown"] = (
+            {k: {"total": float(v), "pct": float(v / subtotal * Decimal("100"))} for k, v in breakdown.items()}
+            if subtotal > 0
+            else {}
+        )
+        for key in (
+            "currency_converted",
+            "currency_mismatch",
+            "parameters",
+            "parameter_values",
+            "norm_id",
+            "work_key",
+            "component_tax",
+        ):
+            if key in priced:
+                new_meta[key] = priced[key]
+        new_meta["assembly_id"] = str(assembly_id)
+        new_meta["assembly_code"] = assembly.code
+        new_meta["applied_assembly"] = {
+            "assembly_id": str(assembly_id),
+            "code": assembly.code,
+            "name": assembly.name,
+            "unit": assembly.unit,
+            "factor": str(factor),
+            "mode": data.mode,
+        }
+
+        base_ccy, fx_map = await boq_service._resolve_project_fx(position.boq_id)
+        quantity = Decimal(str(position.quantity or 0))
+        before_rate = Decimal(str(position.unit_rate or 0))
+        assembly_rate = Decimal(_derived_unit_rate_str(added_rows, {}, quantity, fx_map, base_ccy or ""))
+        after_rate = Decimal(_derived_unit_rate_str(new_rows, new_meta, quantity, fx_map, base_ccy or ""))
+
+        warnings: list[dict[str, str]] = []
+        pos_unit = (position.unit or "").strip().lower()
+        asm_unit = (assembly.unit or "").strip().lower()
+        if pos_unit and asm_unit and pos_unit != asm_unit:
+            warnings.append({"code": "unit_mismatch", "assembly_unit": assembly.unit, "position_unit": position.unit})
+        if mismatch:
+            warnings.append(
+                {
+                    "code": "currency_mismatch",
+                    "assembly_currency": str(mismatch.get("assembly_currency", "")),
+                    "project_currency": str(mismatch.get("project_currency", "")),
+                }
+            )
+        if not added_rows:
+            warnings.append({"code": "no_components"})
+
+        result: dict[str, Any] = {
+            "position_id": str(position.id),
+            "boq_id": str(position.boq_id),
+            "assembly_id": str(assembly_id),
+            "assembly_code": assembly.code,
+            "assembly_name": assembly.name,
+            "assembly_unit": assembly.unit,
+            "position_unit": position.unit,
+            "mode": data.mode,
+            "factor": str(factor),
+            "dry_run": data.dry_run,
+            "currency": base_ccy or str(priced.get("currency") or ""),
+            "quantity": str(quantity),
+            "assembly_rate": str(assembly_rate),
+            "before": {
+                "unit_rate": str(before_rate),
+                "total": str(before_rate * quantity),
+                "resource_count": len(old_rows),
+            },
+            "after": {
+                "unit_rate": str(after_rate),
+                "total": str(after_rate * quantity),
+                "resource_count": len(new_rows),
+            },
+            "resources": added_rows,
+            "warnings": warnings,
+        }
+        if data.dry_run:
+            return result
+
+        updated = await boq_service.update_position(
+            position.id,
+            PositionUpdate(metadata=new_meta, unit_rate=after_rate, version=data.version),
+            actor_id=actor_id,
+        )
+        landed = Decimal(str(updated.unit_rate or 0))
+        result["after"]["unit_rate"] = str(landed)
+        result["after"]["total"] = str(Decimal(str(updated.total or 0)))
+        result["previous"] = {"unit_rate": str(before_rate), "metadata": stored_meta}
 
         await _safe_publish(
-            "assemblies.applied_to_boq",
-            {
-                "assembly_id": str(assembly_id),
-                "boq_id": str(data.boq_id),
-                "position_id": str(position.id),
-            },
+            "assemblies.applied_to_position",
+            {"assembly_id": str(assembly_id), "boq_id": str(position.boq_id), "position_id": str(position.id)},
             source_module="oe_assemblies",
         )
-
-        logger.info(
-            "Assembly %s applied to BOQ %s as position %s",
-            assembly.code,
-            data.boq_id,
-            position.id,
-        )
-        return position
+        logger.info("Assembly %s applied to position %s (%s, x%s)", assembly.code, position.id, data.mode, factor)
+        return result
 
     async def clone_assembly(
         self,

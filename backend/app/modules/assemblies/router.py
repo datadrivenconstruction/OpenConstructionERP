@@ -13,6 +13,7 @@ Endpoints:
     PATCH  /{assembly_id}/components/{cid}      - Update a component
     DELETE /{assembly_id}/components/{cid}      - Delete a component
     POST   /{assembly_id}/apply-to-boq          - Apply assembly to a BOQ
+    POST   /{assembly_id}/apply-to-position     - Price an existing BOQ position from it
     POST   /{assembly_id}/clone                 - Clone assembly
 """
 
@@ -32,6 +33,7 @@ from app.modules.assemblies.schemas import (
     ApplyTemplateRequest,
     ApplyTemplateResponse,
     ApplyToBOQRequest,
+    ApplyToPositionRequest,
     AssemblyCreate,
     AssemblyImportRequest,
     AssemblyImportResponse,
@@ -653,6 +655,41 @@ async def apply_to_boq(
         "assembly_id": str(assembly_id),
         "message": "Assembly applied to BOQ successfully",
     }
+
+
+@router.post(
+    "/{assembly_id}/apply-to-position/",
+    dependencies=[Depends(RequirePermission("boq.update"))],
+)
+async def apply_to_position(
+    assembly_id: uuid.UUID,
+    data: ApplyToPositionRequest,
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    service: AssemblyService = Depends(_get_service),
+) -> dict:
+    """Price an existing BOQ position from an assembly (``dry_run`` previews it).
+
+    The assembly's resources replace or join the position's own and its unit
+    rate is recomputed from them. Both the assembly and the bill that holds the
+    position must belong to the caller.
+    """
+    from app.modules.boq.repository import PositionRepository
+
+    await _verify_assembly_owner(session, assembly_id, user_id, payload)
+    position = await PositionRepository(session).get_by_id(data.position_id)
+    if position is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=translate("errors.position_not_found", locale=get_locale()),
+        )
+    await _verify_target_boq_owner(session, position.boq_id, user_id, payload)
+    try:
+        actor = uuid.UUID(str(user_id))
+    except (TypeError, ValueError):
+        actor = None
+    return await service.apply_to_position(assembly_id, data, actor_id=actor)
 
 
 # ── Parametric assemblies (Issue #365) ───────────────────────────────────────

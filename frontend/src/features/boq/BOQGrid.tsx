@@ -611,6 +611,8 @@ export interface BOQGridProps {
   onApplyAnomalySuggestion?: (positionId: string, suggestedRate: number) => void;
   /** Save a BOQ position as a reusable assembly */
   onSaveAsAssembly?: (positionId: string) => void;
+  /** Fill an existing position's resources and rate from one of the user's assemblies */
+  onInsertAssembly?: (positionId: string) => void;
   /**
    * Issue #292 - capture this position's quantity as a reusable named BOQ
    * variable. The quantity is metric-canonical (the same convention the
@@ -778,6 +780,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
   anomalyMap,
   onApplyAnomalySuggestion,
   onSaveAsAssembly,
+  onInsertAssembly,
   customColumns,
   showResourceSplit,
   showResourceSplitPill,
@@ -3469,7 +3472,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
               const costItemId = meta?.cost_item_id as string | undefined;
               return <>
                 <CtxItem icon={<FileText size={14}/>}
-                  label={t('boq.edit_texts', { defaultValue: 'Edit Kurztext and Langtext' })}
+                  label={t('boq.edit_texts', { defaultValue: 'Edit short and long text' })}
                   onClick={() => { openTextEditor(d.id as string, 'long'); closeContextMenu(); }}
                 />
                 {/* Resources section */}
@@ -3583,7 +3586,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
                   const capped = childWouldExceedCap(d.id as string);
                   return (
                     <CtxItem icon={<Plus size={14}/>}
-                      label={t('boq.add_child_position', { defaultValue: 'Add Child Partida' })}
+                      label={t('boq.add_child_position', { defaultValue: 'Add sub-item' })}
                       disabled={capped}
                       title={capped ? depthCapTooltip : undefined}
                       onClick={() => { onAddChildPosition(d.id as string); closeContextMenu(); }}
@@ -3624,7 +3627,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
                 <CtxItem icon={<MessageSquare size={14}/>}
                   label={cmtCount > 0
                     ? t('boq.view_comments', { defaultValue: 'Comments ({{count}})', count: cmtCount })
-                    : t('boq.add_comment', { defaultValue: 'Add Comment' })
+                    : t('boq.add_comment', { defaultValue: 'Add comment' })
                   }
                   onClick={() => { gridContext.onAddComment(d.id as string); closeContextMenu(); }}
                 />
@@ -3633,6 +3636,14 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
                   label={t('boq.save_to_database', { defaultValue: 'Save to Catalog' })}
                   onClick={() => { onSaveToDatabase(d.id as string); closeContextMenu(); }}
                 />
+                {onInsertAssembly && (
+                  <CtxItem icon={<Layers size={14}/>}
+                    label={t('boq.insert_assembly.menu', { defaultValue: 'Insert assembly…' })}
+                    disabled={readOnly}
+                    title={readOnly ? t('boq.insert_assembly.read_only', { defaultValue: 'Positions here are read-only, so an assembly cannot be inserted.' }) : undefined}
+                    onClick={() => { onInsertAssembly(d.id as string); closeContextMenu(); }}
+                  />
+                )}
                 {onSaveAsAssembly && (
                   <CtxItem icon={<Layers size={14}/>}
                     label={t('boq.save_as_assembly', { defaultValue: 'Save as Assembly' })}
