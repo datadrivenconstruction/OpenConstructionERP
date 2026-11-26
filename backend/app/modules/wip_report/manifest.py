@@ -3,6 +3,7 @@
 """WIP​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠ report module manifest."""
 
 from app.core.module_loader import ModuleManifest
+from app.modules.wip_report.data_paths import DATA_PATHS
 
 manifest = ModuleManifest(
     name="oe_wip_report",
@@ -21,4 +22,5 @@ manifest = ModuleManifest(
     optional_depends=["oe_contracts", "oe_changeorders", "oe_cvr", "oe_finance"],
     auto_install=True,
     enabled=True,
+    data_paths=DATA_PATHS,
 )

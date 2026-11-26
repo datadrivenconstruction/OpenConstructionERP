@@ -3,6 +3,7 @@
 """Rate-feedback module manifest."""
 
 from app.core.module_loader import InferenceDeclaration, InferenceRole, ModuleManifest
+from app.modules.rate_feedback.data_paths import DATA_PATHS
 
 manifest = ModuleManifest(
     name="oe_rate_feedback",
@@ -29,4 +30,5 @@ manifest = ModuleManifest(
             "projects. Nothing is learned and no model is loaded; a person confirms every change."
         ),
     ),
+    data_paths=DATA_PATHS,
 )

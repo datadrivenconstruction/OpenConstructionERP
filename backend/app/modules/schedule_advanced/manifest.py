@@ -3,6 +3,7 @@
 """Schedule Advanced module manifest."""
 
 from app.core.module_loader import ModuleManifest
+from app.modules.schedule_advanced.data_paths import DATA_PATHS
 
 manifest = ModuleManifest(
     name="oe_schedule_advanced",
@@ -17,4 +18,5 @@ manifest = ModuleManifest(
     depends=["oe_users", "oe_projects"],
     auto_install=True,
     enabled=True,
+    data_paths=DATA_PATHS,
 )

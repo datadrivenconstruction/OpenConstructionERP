@@ -3,6 +3,7 @@
 """Quote​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠ capture module manifest."""
 
 from app.core.module_loader import ModuleManifest
+from app.modules.quote_capture.data_paths import DATA_PATHS
 
 manifest = ModuleManifest(
     name="oe_quote_capture",
@@ -23,4 +24,5 @@ manifest = ModuleManifest(
     optional_depends=["oe_ai", "oe_boq", "oe_procurement", "oe_supplier_catalogs"],
     auto_install=True,
     enabled=True,
+    data_paths=DATA_PATHS,
 )

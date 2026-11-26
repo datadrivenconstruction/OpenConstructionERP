@@ -3,6 +3,7 @@
 """RFQ Bidding module manifest."""
 
 from app.core.module_loader import ModuleManifest
+from app.modules.rfq_bidding.data_paths import DATA_PATHS
 
 manifest = ModuleManifest(
     name="oe_rfq_bidding",
@@ -14,4 +15,5 @@ manifest = ModuleManifest(
     depends=["oe_users", "oe_projects", "oe_contacts", "oe_procurement", "oe_bid_management"],
     auto_install=False,
     enabled=True,
+    data_paths=DATA_PATHS,
 )

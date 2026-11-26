@@ -3,6 +3,7 @@
 """Site Logistics & Delivery module manifest."""
 
 from app.core.module_loader import ModuleManifest
+from app.modules.site_logistics.data_paths import DATA_PATHS
 
 manifest = ModuleManifest(
     name="oe_site_logistics",
@@ -28,4 +29,5 @@ manifest = ModuleManifest(
     depends=["oe_projects", "oe_users", "oe_boq", "oe_project_governance", "oe_schedule", "oe_documents"],
     auto_install=True,
     enabled=True,
+    data_paths=DATA_PATHS,
 )

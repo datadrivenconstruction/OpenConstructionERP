@@ -3,6 +3,7 @@
 """Conceptual (ROM) estimate module manifest."""
 
 from app.core.module_loader import ModuleManifest
+from app.modules.rom_estimate.data_paths import DATA_PATHS
 
 manifest = ModuleManifest(
     name="oe_rom_estimate",
@@ -18,4 +19,5 @@ manifest = ModuleManifest(
     display_name_i18n={"de": "Grobkostenschätzung", "ru": "Концептуальная оценка"},
     auto_install=True,
     enabled=True,
+    data_paths=DATA_PATHS,
 )

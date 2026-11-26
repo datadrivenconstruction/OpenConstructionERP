@@ -54,8 +54,8 @@ FIRST_WAVE = (
     "oe_ncr",
 )
 
-# Ratchet: modules still without a declaration. Lower it when you declare one; never raise it.
-UNDECLARED_CEILING = 195
+# Every module declares its data paths; an isolated one says so in `reason`.
+UNDECLARED_CEILING = 0
 
 # Ratchet: modules with neither a declaration nor a derived link (country packs and
 # platform services such as backup, search, scim). Never raise it.
@@ -111,6 +111,16 @@ def test_undeclared_modules_only_shrink(manifests: dict) -> None:
     assert len(undeclared) <= UNDECLARED_CEILING, (
         f"{len(undeclared)} modules without data_paths, ceiling {UNDECLARED_CEILING}: declare the new module"
     )
+
+
+def test_every_module_directory_is_discovered_and_declared(manifests: dict) -> None:
+    """Every ``app/modules/<m>/manifest.py`` is loaded and carries a declaration (file or inline)."""
+    modules_dir = Path(__file__).resolve().parents[2] / "app" / "modules"
+    dirs = sorted(p.parent.name for p in modules_dir.glob("*/manifest.py"))
+    loaded = {module_dir(n) for n in manifests}
+    assert [d for d in dirs if d not in loaded] == [], "module directories the loader does not discover"
+    undeclared = sorted(n for n, m in manifests.items() if m.data_paths is None)
+    assert undeclared == [], f"modules without data_paths: {undeclared}"
 
 
 def test_every_declared_reference_resolves(manifests: dict, models: dict) -> None:

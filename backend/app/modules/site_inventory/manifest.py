@@ -3,6 +3,7 @@
 """Site-inventory module manifest."""
 
 from app.core.module_loader import ModuleManifest
+from app.modules.site_inventory.data_paths import DATA_PATHS
 
 manifest = ModuleManifest(
     name="oe_site_inventory",
@@ -26,4 +27,5 @@ manifest = ModuleManifest(
     optional_depends=["oe_progress", "oe_costs"],
     auto_install=True,
     enabled=True,
+    data_paths=DATA_PATHS,
 )
