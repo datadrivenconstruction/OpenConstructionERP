@@ -51,6 +51,8 @@ import { useToastStore } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { useCostDatabaseStore, REGION_MAP } from '@/stores/useCostDatabaseStore';
 import { useAuthStore } from '@/stores/useAuthStore';
+import { useHasPermission } from '@/shared/lib/permissionGates';
+import { useRoleReason } from '@/shared/lib/permissionReason';
 import { usePreferencesStore } from '@/stores/usePreferencesStore';
 import type { CostItemMetadata, CertaintyBadge as CertaintyBadgeData, CostCatalog } from './api';
 import { buildBoqPositionDraft, massEffectiveUnitRate, type FullCostItem } from './addToBoqHelpers';
@@ -895,6 +897,11 @@ export function CostsPage() {
     placeholderData: (prev) => prev,
   });
 
+  // Edit needs costs.update and delete costs.delete; the backend refuses the rest with 403.
+  const canUpdateCosts = useHasPermission('costs.update');
+  const canDeleteCosts = useHasPermission('costs.delete');
+  const editReason = useRoleReason(canUpdateCosts, 'editor');
+  const deleteReason = useRoleReason(canDeleteCosts, 'manager');
   const deleteMutation = useMutation({
     mutationFn: (id: string) => apiDelete(`/v1/costs/${id}`),
     onSuccess: () => {
@@ -1747,6 +1754,8 @@ export function CostsPage() {
                         onBenchmark={() => handleBenchmark(item)}
                         onToggleFavourite={() => toggleFavourite(item.id)}
                         onDelete={(id) => deleteMutation.mutate(id)}
+                        editReason={editReason}
+                        deleteReason={deleteReason}
                         onEdit={() => setEditItem(item)}
                         fmt={fmt}
                         fmtMoney={fmtMoney}
@@ -3508,6 +3517,8 @@ function CostItemRow({
   onToggleFavourite,
   onDelete,
   onEdit,
+  editReason,
+  deleteReason,
   fmt,
   fmtMoney,
   t,
@@ -3538,6 +3549,9 @@ function CostItemRow({
   /** Open the inline editor - only offered for user-owned rows (source
    *  manual / file_import / custom). */
   onEdit?: () => void;
+  /** Set when the role cannot edit or delete: the control stays, disabled, saying who can. */
+  editReason?: string;
+  deleteReason?: string;
   fmt: (n: number) => string;
   /** Currency-aware money formatter — renders the ISO code with the figure. */
   fmtMoney: (n: number, currency?: string | null) => string;
@@ -3745,8 +3759,10 @@ function CostItemRow({
               <>
                 <button
                   onClick={(e) => { e.stopPropagation(); onEdit?.(); }}
-                  title={t('common.edit', { defaultValue: 'Edit' })}
-                  className="flex h-7 w-7 shrink-0 items-center justify-center rounded text-content-tertiary hover:text-oe-blue-text hover:bg-oe-blue-subtle transition-colors"
+                  disabled={!!editReason}
+                  aria-label={t('common.edit', { defaultValue: 'Edit' })}
+                  title={editReason ?? t('common.edit', { defaultValue: 'Edit' })}
+                  className="flex h-7 w-7 shrink-0 items-center justify-center rounded text-content-tertiary hover:text-oe-blue-text hover:bg-oe-blue-subtle transition-colors disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-content-tertiary"
                 >
                   <Pencil size={14} />
                 </button>
@@ -3759,8 +3775,10 @@ function CostItemRow({
                     });
                     if (ok) onDelete?.(item.id);
                   }}
-                  title={t('common.delete', { defaultValue: 'Delete' })}
-                  className="flex h-7 w-7 shrink-0 items-center justify-center rounded text-content-tertiary hover:text-semantic-error hover:bg-semantic-error-bg transition-colors"
+                  disabled={!!deleteReason}
+                  aria-label={t('common.delete', { defaultValue: 'Delete' })}
+                  title={deleteReason ?? t('common.delete', { defaultValue: 'Delete' })}
+                  className="flex h-7 w-7 shrink-0 items-center justify-center rounded text-content-tertiary hover:text-semantic-error hover:bg-semantic-error-bg transition-colors disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-content-tertiary"
                 >
                   <Trash2 size={14} />
                 </button>

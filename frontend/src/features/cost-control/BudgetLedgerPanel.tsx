@@ -14,6 +14,7 @@ import { Badge, Button, ConfirmDialog, Skeleton, TabBar } from '@/shared/ui';
 import { useConfirm } from '@/shared/hooks/useConfirm';
 import { parseMoneyInput } from '@/shared/lib/parseDecimal';
 import type { BadgeVariant } from '@/shared/ui';
+import { useRoleReason } from '@/shared/lib/permissionReason';
 import { fmtCurrency, fmtList, fmtNumberForInput } from '@/shared/lib/formatters';
 import { getErrorMessage } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
@@ -81,6 +82,8 @@ export function BudgetLedgerPanel({ projectId, currency, canEdit, canManage }: P
   const { confirm, ...confirmProps } = useConfirm();
   const queryClient = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
+  const editReason = useRoleReason(canEdit, 'editor');
+  const manageReason = useRoleReason(canManage, 'manager');
   const [view, setView] = useState<View>('transfers');
   const [form, setForm] = useState<LedgerKind | null>(null);
   const [rejecting, setRejecting] = useState<{ kind: LedgerKind; id: string } | null>(null);
@@ -157,22 +160,22 @@ export function BudgetLedgerPanel({ projectId, currency, canEdit, canManage }: P
 
   const actions = (kind: LedgerKind, id: string, status: LedgerStatus) => (
     <div className="flex shrink-0 flex-wrap items-center gap-2">
-      {status === 'draft' && canEdit && (
+      {status === 'draft' && (
         <>
-          <Button size="sm" disabled={busy} onClick={() => step.mutate({ kind, id, step: 'submit' })}>
+          <Button size="sm" disabled={busy} disabledReason={editReason} onClick={() => step.mutate({ kind, id, step: 'submit' })}>
             {t('cost_control.ledger.submit', { defaultValue: 'Submit' })}
           </Button>
-          <Button size="sm" variant="ghost" disabled={busy} onClick={() => void discard(kind, id)}>
+          <Button size="sm" variant="ghost" disabled={busy} disabledReason={editReason} onClick={() => void discard(kind, id)}>
             {t('cost_control.ledger.delete', { defaultValue: 'Delete' })}
           </Button>
         </>
       )}
-      {status === 'submitted' && canManage && (
+      {status === 'submitted' && (
         <>
-          <Button size="sm" disabled={busy} onClick={() => void approve(kind, id)}>
+          <Button size="sm" disabled={busy} disabledReason={manageReason} onClick={() => void approve(kind, id)}>
             {t('cost_control.ledger.approve', { defaultValue: 'Approve' })}
           </Button>
-          <Button size="sm" variant="ghost" disabled={busy} onClick={() => setRejecting({ kind, id })}>
+          <Button size="sm" variant="ghost" disabled={busy} disabledReason={manageReason} onClick={() => setRejecting({ kind, id })}>
             {t('cost_control.ledger.reject', { defaultValue: 'Reject' })}
           </Button>
         </>
@@ -312,16 +315,14 @@ export function BudgetLedgerPanel({ projectId, currency, canEdit, canManage }: P
             {t('cost_control.ledger.pending', { defaultValue: '{{n}} waiting for a decision', n: pending })}
           </Badge>
         )}
-        {canEdit && (
-          <div className="ms-auto flex flex-wrap gap-2">
-            <Button size="sm" variant="secondary" onClick={() => setForm('transfer')}>
-              {t('cost_control.ledger.new_transfer', { defaultValue: 'Move budget' })}
-            </Button>
-            <Button size="sm" variant="secondary" onClick={() => setForm('modification')}>
-              {t('cost_control.ledger.new_modification', { defaultValue: 'Add a budget change' })}
-            </Button>
-          </div>
-        )}
+        <div className="ms-auto flex flex-wrap gap-2">
+          <Button size="sm" variant="secondary" disabledReason={editReason} onClick={() => setForm('transfer')}>
+            {t('cost_control.ledger.new_transfer', { defaultValue: 'Move budget' })}
+          </Button>
+          <Button size="sm" variant="secondary" disabledReason={editReason} onClick={() => setForm('modification')}>
+            {t('cost_control.ledger.new_modification', { defaultValue: 'Add a budget change' })}
+          </Button>
+        </div>
       </div>
       <p className="px-4 pt-1 text-xs text-content-tertiary">
         {t('cost_control.ledger.hint', {

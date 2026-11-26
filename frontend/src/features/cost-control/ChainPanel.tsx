@@ -23,6 +23,7 @@ import { Badge, Button, Skeleton } from '@/shared/ui';
 import { fmtCurrency } from '@/shared/lib/formatters';
 import { getErrorMessage } from '@/shared/lib/api';
 import { useHasPermission } from '@/shared/lib/permissionGates';
+import { useRoleReason } from '@/shared/lib/permissionReason';
 import { useToastStore } from '@/stores/useToastStore';
 import { CostLinePicker } from '@/features/costmodel/CostLinePicker';
 import { OverrideReasonDialog } from '@/features/costmodel/OverrideReasonDialog';
@@ -84,6 +85,7 @@ function Bucket({
   onPut: (item: SuspenseItem, costLineId: string) => void;
 }) {
   const { t } = useTranslation();
+  const editReason = useRoleReason(canEdit, 'editor');
   const [open, setOpen] = useState(false);
   const [showAll, setShowAll] = useState(false);
   const rows = showAll ? bucket.items : bucket.items.slice(0, PREVIEW_ROWS);
@@ -137,17 +139,15 @@ function Bucket({
                 <span className="shrink-0 text-sm tabular-nums text-content-secondary">
                   {fmtCurrency(item.amount, currency)}
                 </span>
-                {canEdit && (
-                  <div className="w-56 max-w-full">
-                    <CostLinePicker
-                      projectId={projectId}
-                      value=""
-                      onChange={(v) => v && onPut(item, v)}
-                      disabled={busy}
-                      data-testid={`suspense-put-${item.id}`}
-                    />
-                  </div>
-                )}
+                <div className="w-56 max-w-full" title={editReason}>
+                  <CostLinePicker
+                    projectId={projectId}
+                    value=""
+                    onChange={(v) => v && onPut(item, v)}
+                    disabled={busy || !canEdit}
+                    data-testid={`suspense-put-${item.id}`}
+                  />
+                </div>
               </li>
             ))}
           </ul>
@@ -211,6 +211,7 @@ export function ChainPanel({ projectId, currency, canEdit }: ChainPanelProps) {
   const queryClient = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
   const canCreateContracts = useHasPermission('contracts.create');
+  const chainEditReason = useRoleReason(canEdit, 'editor');
   const [askReason, setAskReason] = useState<AssignBody | null>(null);
 
   const chain = useQuery({
@@ -302,13 +303,14 @@ export function ChainPanel({ projectId, currency, canEdit }: ChainPanelProps) {
             })}
           </p>
         </div>
-        {canEdit && inheritable > 0 && (
+        {inheritable > 0 && (
           <Button
             variant="secondary"
             size="sm"
             icon={<Wand2 size={14} />}
             onClick={() => inherit.mutate()}
             disabled={busy}
+            disabledReason={chainEditReason}
             data-testid="chain-inherit-all"
           >
             {t('cost_control.chain.inherit_all', {

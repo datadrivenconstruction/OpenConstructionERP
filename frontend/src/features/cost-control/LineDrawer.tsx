@@ -19,6 +19,7 @@ import { useToastStore } from '@/stores/useToastStore';
 import { costControlApi, num, type CostControlRow, type LineHistory } from './api';
 import { methodHelp, sourceExplanation, sourceLabel, sourceTone, stageLabel } from './labels';
 import { LineMethodSection } from './LineMethodSection';
+import { useRoleReason } from '@/shared/lib/permissionReason';
 
 interface TimelineEntry {
   date: string;
@@ -84,6 +85,7 @@ export function LineDrawer({ projectId, row, currency, canEdit, onClose }: LineD
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
+  const editReason = useRoleReason(canEdit, 'editor');
   const [amount, setAmount] = useState('');
   const [reason, setReason] = useState('');
   const [documentRef, setDocumentRef] = useState('');
@@ -216,17 +218,16 @@ export function LineDrawer({ projectId, row, currency, canEdit, onClose }: LineD
             <LineMethodSection projectId={projectId} history={history} currency={currency} canEdit={canEdit} />
           )}
 
-          {canEdit && (
-            <section>
-              {!editing ? (
+          <section>
+              {!editing || !canEdit ? (
                 <div className="flex flex-wrap gap-2">
-                  <Button variant="secondary" size="sm" icon={<PenLine size={14} />} onClick={() => setEditing(true)}>
+                  <Button variant="secondary" size="sm" icon={<PenLine size={14} />} disabledReason={editReason} onClick={() => setEditing(true)}>
                     {current.override
                       ? t('cost_control.override_change', { defaultValue: 'Change your forecast' })
                       : t('cost_control.override_set', { defaultValue: 'Enter your own forecast' })}
                   </Button>
                   {current.override && (
-                    <Button variant="ghost" size="sm" onClick={() => clear.mutate()} disabled={clear.isPending}>
+                    <Button variant="ghost" size="sm" onClick={() => clear.mutate()} disabled={clear.isPending} disabledReason={editReason}>
                       {t('cost_control.override_clear', { defaultValue: 'Use the automatic forecast again' })}
                     </Button>
                   )}
@@ -301,8 +302,7 @@ export function LineDrawer({ projectId, row, currency, canEdit, onClose }: LineD
                   </div>
                 </form>
               )}
-            </section>
-          )}
+          </section>
 
           <section>
             <h3 className="oe-card-title mb-3">
