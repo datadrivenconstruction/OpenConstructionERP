@@ -2315,6 +2315,10 @@
       "certified_within_assessed": {
         "fail": "Redak {line}: ovjerena količina {certified} veća je od procijenjene {assessed}",
         "suggestion": "Ovjerite najviše procijenjeno ili najprije ponovno procijenite redak"
+      },
+      "cumulative_not_decreasing": {
+        "fail": "Stavka {line}: kumulativ {cumulative} niži je od prethodnog {prior} bez napomene",
+        "suggestion": "Dodajte napomenu koja objašnjava ponovnu izmjeru ili ispravak"
       }
     }
   },

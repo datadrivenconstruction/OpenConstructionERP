@@ -38,6 +38,7 @@ from app.core.content_disposition import attachment_disposition
 from app.core.i18n import get_locale
 from app.core.json_merge import merge_metadata
 from app.core.validation.messages import translate
+from app.core.valuation_grid import ValuationGridResponse, ValuationNote
 from app.dependencies import (
     CurrentUserId,
     RequirePermission,
@@ -1555,6 +1556,53 @@ async def update_claim_line_quantities(
             metadata={k: {"from": before[k], "to": str(v)} for k, v in fields.items()},
         )
     return (await _with_valuation_findings([obj], target_id=str(obj.progress_claim_id)))[0]
+
+
+@router.get("/progress-claims/{claim_id}/valuation-grid", response_model=ValuationGridResponse)
+async def get_claim_valuation_grid(
+    claim_id: uuid.UUID,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    _perm: None = Depends(RequirePermission("contracts.read")),
+) -> ValuationGridResponse:
+    """Submitted, assessed and certified quantity and amount per line, each with its source."""
+    from app.modules.contracts.valuation_grid import build_claim_grid
+
+    claim = await _verify_claim_access(session, claim_id, user_id)
+    return ValuationGridResponse(**await build_claim_grid(session, claim))
+
+
+@router.put("/progress-claims/{claim_id}/valuation-note", response_model=ValuationGridResponse)
+async def set_claim_valuation_note(
+    claim_id: uuid.UUID,
+    data: ValuationNote,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    _perm: None = Depends(RequirePermission("contracts.update")),
+) -> ValuationGridResponse:
+    """Record why a running total went down (or any remark on the valuation). Audited."""
+    from sqlalchemy.orm.attributes import flag_modified
+
+    from app.core.audit_log import log_activity
+    from app.modules.contracts.valuation_grid import NOTE_KEY, build_claim_grid, claim_note
+
+    claim = await _verify_claim_access(session, claim_id, user_id)
+    before = claim_note(claim)
+    meta = dict(claim.metadata_ or {})
+    meta[NOTE_KEY] = data.note.strip()
+    claim.metadata_ = meta
+    flag_modified(claim, "metadata_")
+    await session.flush()
+    await log_activity(
+        session,
+        actor_id=user_id,
+        entity_type="progress_claim",
+        entity_id=str(claim_id),
+        action="valuation_note_updated",
+        module="contracts",
+        metadata={"from": before, "to": meta[NOTE_KEY]},
+    )
+    return ValuationGridResponse(**await build_claim_grid(session, claim))
 
 
 @router.post(

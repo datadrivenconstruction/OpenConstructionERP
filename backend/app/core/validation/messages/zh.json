@@ -2315,6 +2315,10 @@
       "certified_within_assessed": {
         "fail": "第 {line} 行：核定数量 {certified} 大于审核数量 {assessed}",
         "suggestion": "核定数量不应超过审核数量，或先重新审核该行"
+      },
+      "cumulative_not_decreasing": {
+        "fail": "第 {line} 行：累计 {cumulative} 低于上期 {prior}，且无说明",
+        "suggestion": "请添加说明，解释重新计量或更正的原因"
       }
     }
   },

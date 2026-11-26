@@ -17,6 +17,7 @@ import {
   isTruncated,
   type Page,
 } from '@/shared/lib/api';
+import type { ValuationGridData } from '@/shared/ui/ValuationGrid';
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
 
@@ -879,6 +880,21 @@ export function getPaymentApplicationLinePage(
  * application carries one line per work package, so the loop runs once in
  * practice and exists for the job that outgrows a page.
  */
+/** Claimed, assessed and certified quantity and amount per line, each with its source. */
+export function getPaymentApplicationValuationGrid(paymentId: string): Promise<ValuationGridData> {
+  return apiGet<ValuationGridData>(
+    `/v1/subcontractors/payment-applications/${encodeURIComponent(paymentId)}/valuation-grid`,
+  );
+}
+
+/** Record the pay application's valuation note (why a running total went down). */
+export function setPaymentApplicationValuationNote(paymentId: string, note: string): Promise<ValuationGridData> {
+  return apiPut<ValuationGridData>(
+    `/v1/subcontractors/payment-applications/${encodeURIComponent(paymentId)}/valuation-note`,
+    { note },
+  );
+}
+
 export async function listPaymentApplicationLines(paymentId: string): Promise<PaymentApplicationLine[]> {
   const first = await getPaymentApplicationLinePage(paymentId);
   const rows = [...first.items];

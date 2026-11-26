@@ -2315,6 +2315,10 @@
       "certified_within_assessed": {
         "fail": "Riga {line}: quantità certificata {certified} superiore a quella valutata {assessed}",
         "suggestion": "Certificate al massimo quanto valutato, oppure rivalutate prima la riga"
+      },
+      "cumulative_not_decreasing": {
+        "fail": "Riga {line}: il progressivo {cumulative} è inferiore al precedente {prior} senza nota",
+        "suggestion": "Aggiungi una nota che spieghi la rimisurazione o la correzione"
       }
     }
   },

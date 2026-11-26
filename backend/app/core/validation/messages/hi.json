@@ -2315,6 +2315,10 @@
       "certified_within_assessed": {
         "fail": "लाइन {line}: प्रमाणित मात्रा {certified} आकलित {assessed} से अधिक है",
         "suggestion": "अधिकतम आकलित मात्रा प्रमाणित करें, या पहले लाइन का फिर से आकलन करें"
+      },
+      "cumulative_not_decreasing": {
+        "fail": "पंक्ति {line}: संचयी योग {cumulative} पिछले {prior} से कम है, कोई टिप्पणी नहीं",
+        "suggestion": "पुनर्मापन या सुधार का कारण बताने वाली टिप्पणी जोड़ें"
       }
     }
   },

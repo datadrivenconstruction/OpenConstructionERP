@@ -2315,6 +2315,10 @@
       "certified_within_assessed": {
         "fail": "Rida {line}: sertifitseeritud kogus {certified} ületab hinnatud {assessed}",
         "suggestion": "Sertifitseerige kõige rohkem hinnatut või hinnake rida esmalt uuesti"
+      },
+      "cumulative_not_decreasing": {
+        "fail": "Rida {line}: kumulatiivne {cumulative} on eelmisest {prior} väiksem ja märkus puudub",
+        "suggestion": "Lisage märkus, mis selgitab ümbermõõtmist või parandust"
       }
     }
   },

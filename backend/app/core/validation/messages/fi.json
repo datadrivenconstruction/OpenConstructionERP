@@ -2315,6 +2315,10 @@
       "certified_within_assessed": {
         "fail": "Rivi {line}: varmennettu määrä {certified} ylittää arvioidun {assessed}",
         "suggestion": "Varmenna enintään arvioitu määrä tai arvioi rivi ensin uudelleen"
+      },
+      "cumulative_not_decreasing": {
+        "fail": "Rivi {line}: kertymä {cumulative} on edellistä {prior} pienempi ilman huomautusta",
+        "suggestion": "Lisää huomautus, joka selittää uudelleenmittauksen tai korjauksen"
       }
     }
   },

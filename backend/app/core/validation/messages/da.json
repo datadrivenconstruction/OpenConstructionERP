@@ -2315,6 +2315,10 @@
       "certified_within_assessed": {
         "fail": "Linje {line}: certificeret mængde {certified} er over den vurderede {assessed}",
         "suggestion": "Certificér højst det vurderede, eller vurdér linjen igen først"
+      },
+      "cumulative_not_decreasing": {
+        "fail": "Linje {line}: akkumuleret {cumulative} er under forrige {prior} uden note",
+        "suggestion": "Tilføj en note, der forklarer genopmålingen eller rettelsen"
       }
     }
   },

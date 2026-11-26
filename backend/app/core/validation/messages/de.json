@@ -2315,6 +2315,10 @@
       "certified_within_assessed": {
         "fail": "Position {line}: bescheinigte Menge {certified} liegt über der geprüften {assessed}",
         "suggestion": "Bescheinigen Sie höchstens die geprüfte Menge oder prüfen Sie die Position erneut"
+      },
+      "cumulative_not_decreasing": {
+        "fail": "Position {line}: kumulierter Stand {cumulative} liegt unter dem vorherigen {prior}, ohne Vermerk",
+        "suggestion": "Erfassen Sie einen Vermerk, der das Aufmaß oder die Korrektur begründet"
       }
     }
   },

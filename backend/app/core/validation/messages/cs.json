@@ -2315,6 +2315,10 @@
       "certified_within_assessed": {
         "fail": "Řádek {line}: certifikované množství {certified} je vyšší než posouzené {assessed}",
         "suggestion": "Certifikujte nejvýše posouzené množství, nebo řádek nejprve znovu posuďte"
+      },
+      "cumulative_not_decreasing": {
+        "fail": "Položka {line}: kumulativní stav {cumulative} je pod předchozím {prior} bez poznámky",
+        "suggestion": "Doplňte poznámku vysvětlující přeměření nebo opravu"
       }
     }
   },

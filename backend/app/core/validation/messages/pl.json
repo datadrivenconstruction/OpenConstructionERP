@@ -2315,6 +2315,10 @@
       "certified_within_assessed": {
         "fail": "Pozycja {line}: ilość poświadczona {certified} przekracza ocenioną {assessed}",
         "suggestion": "Poświadczaj najwyżej to, co oceniono, albo najpierw oceń pozycję ponownie"
+      },
+      "cumulative_not_decreasing": {
+        "fail": "Pozycja {line}: narastająco {cumulative} jest poniżej poprzedniego {prior} bez uwagi",
+        "suggestion": "Dodaj uwagę wyjaśniającą ponowny obmiar lub korektę"
       }
     }
   },

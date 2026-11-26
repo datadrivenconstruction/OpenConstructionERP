@@ -2315,6 +2315,10 @@
       "certified_within_assessed": {
         "fail": "明細 {line}: 認定数量 {certified} が査定数量 {assessed} を超えています",
         "suggestion": "認定は査定数量までとするか、先に明細を再査定してください"
+      },
+      "cumulative_not_decreasing": {
+        "fail": "行 {line}: 累計 {cumulative} が前回の {prior} を下回っていますが、注記がありません",
+        "suggestion": "再計測または訂正の理由を注記してください"
       }
     }
   },

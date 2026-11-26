@@ -2315,6 +2315,10 @@
       "certified_within_assessed": {
         "fail": "บรรทัด {line}: ปริมาณที่รับรอง {certified} สูงกว่าที่ประเมิน {assessed}",
         "suggestion": "รับรองไม่เกินที่ประเมิน หรือประเมินบรรทัดใหม่ก่อน"
+      },
+      "cumulative_not_decreasing": {
+        "fail": "รายการ {line}: ยอดสะสม {cumulative} ต่ำกว่าครั้งก่อน {prior} โดยไม่มีหมายเหตุ",
+        "suggestion": "เพิ่มหมายเหตุอธิบายการวัดใหม่หรือการแก้ไข"
       }
     }
   },

@@ -2315,6 +2315,10 @@
       "certified_within_assessed": {
         "fail": "لائن {line}: تصدیق شدہ مقدار {certified} جانچی گئی {assessed} سے زیادہ ہے",
         "suggestion": "زیادہ سے زیادہ جانچی گئی مقدار کی تصدیق کریں، یا پہلے لائن دوبارہ جانچیں"
+      },
+      "cumulative_not_decreasing": {
+        "fail": "سطر {line}: مجموعی میزان {cumulative} پچھلے {prior} سے کم ہے، کوئی نوٹ نہیں",
+        "suggestion": "دوبارہ پیمائش یا درستی کی وجہ بتانے والا نوٹ شامل کریں"
       }
     }
   },

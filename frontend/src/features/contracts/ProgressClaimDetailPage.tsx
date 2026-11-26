@@ -57,7 +57,9 @@ import {
 } from './api';
 import { ClaimValidationPanel, claimValidationKey } from './ClaimValidationPanel';
 import { ClaimPeriod } from './ClaimPeriod';
-import { invalidateClaimAfterLineWrite } from './claimQueries';
+import { invalidateClaimAfterLineWrite, valuationGridKey } from './claimQueries';
+import { getClaimValuationGrid, setClaimValuationNote } from './api';
+import { ValuationGrid } from '@/shared/ui/ValuationGrid';
 import { contractsTabHref } from './contractsTabs';
 import { PopulatePreviewModal } from './PopulatePreviewModal';
 import { ProgressClaimLineTable } from './ProgressClaimLineTable';
@@ -489,6 +491,27 @@ export function ProgressClaimDetailPage() {
           claimStatus={claim.status}
           isLoading={linesQ.isLoading}
           contractLines={sovQ.data ?? []}
+        />
+      </Card>
+
+      <Card padding="sm" data-testid="claim-valuation-grid-card">
+        <h3 className="oe-card-title">
+          {t('valuation_grid.title', { defaultValue: 'Submitted, assessed and certified' })}
+        </h3>
+        <p className="oe-subtitle">
+          {t('valuation_grid.subtitle', {
+            defaultValue: 'Each figure shows where it comes from. Hover an amount to see its source.',
+          })}
+        </p>
+        <ValuationGrid
+          queryKey={valuationGridKey(claimId as string)}
+          fetchGrid={() => getClaimValuationGrid(claimId as string)}
+          saveNote={
+            claim.status === 'certified' || claim.status === 'paid'
+              ? undefined
+              : (note) => setClaimValuationNote(claimId as string, note)
+          }
+          cumulativeIsMoney
         />
       </Card>
 

@@ -2315,6 +2315,10 @@
       "certified_within_assessed": {
         "fail": "שורה {line}: הכמות שאושרה {certified} גבוהה מהכמות שהוערכה {assessed}",
         "suggestion": "אשרו לכל היותר את מה שהוערך, או העריכו את השורה מחדש קודם"
+      },
+      "cumulative_not_decreasing": {
+        "fail": "שורה {line}: הסכום המצטבר {cumulative} נמוך מהקודם {prior} ללא הערה",
+        "suggestion": "הוסיפו הערה המסבירה את המדידה החוזרת או התיקון"
       }
     }
   },

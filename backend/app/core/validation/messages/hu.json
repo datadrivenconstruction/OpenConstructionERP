@@ -2315,6 +2315,10 @@
       "certified_within_assessed": {
         "fail": "{line} sor: az igazolt mennyiség ({certified}) meghaladja az értékeltet ({assessed})",
         "suggestion": "Legfeljebb az értékelt mennyiséget igazolja, vagy előbb értékelje újra a sort"
+      },
+      "cumulative_not_decreasing": {
+        "fail": "{line}. tétel: a halmozott {cumulative} kisebb az előző {prior} értéknél, megjegyzés nélkül",
+        "suggestion": "Írjon megjegyzést az újramérés vagy javítás okáról"
       }
     }
   },

@@ -22,8 +22,10 @@ Payload blocks, one per check:
 ``route_steps``
     ``[{ordinal, amount_min, amount_max}]``: the steps of one approval route.
 ``valuation_lines``
-    ``[{id, label, submitted, assessed, certified}]``: quantities of one
-    progress claim or subcontractor payment application.
+    ``[{id, label, submitted, assessed, certified, prior_cumulative,
+    cumulative, note}]``: quantities of one progress claim or subcontractor
+    payment application; the cumulative pair is the line's running total
+    before and after this document, the note the document's explanation.
 """
 
 from __future__ import annotations
@@ -287,6 +289,37 @@ def check_certified_within_assessed(payload: dict[str, Any]) -> list[Finding]:
     return _stage_check(payload, "assessed", "certified")
 
 
+# ── valuation.cumulative_not_decreasing ────────────────────────────────────
+
+
+def check_cumulative_not_decreasing(payload: dict[str, Any]) -> list[Finding]:
+    """A line's running total should not fall below the previous document's without a note.
+
+    A first document has no prior total and is never flagged. A drop is a
+    legitimate remeasure or correction only when someone wrote down why.
+    """
+    out: list[Finding] = []
+    for row in _rows(payload, "valuation_lines"):
+        prior = _dec(row.get("prior_cumulative"))
+        current = _dec(row.get("cumulative"))
+        if prior is None or current is None or current >= prior:
+            continue
+        if str(row.get("note") or "").strip():
+            continue
+        out.append(
+            Finding(
+                element_ref=str(row.get("id") or ""),
+                params={
+                    "line": str(row.get("label") or row.get("id") or ""),
+                    "prior": _fmt(prior),
+                    "cumulative": _fmt(current),
+                },
+                details={"prior": _fmt(prior), "cumulative": _fmt(current)},
+            )
+        )
+    return out
+
+
 CHECKS: dict[str, Any] = {
     "cvr.target_rate_basis": check_target_rate_basis,
     "cvr.unmapped_cost": check_unmapped_cost,
@@ -294,4 +327,5 @@ CHECKS: dict[str, Any] = {
     "approval_routes.bands_contiguous": check_bands_contiguous,
     "valuation.assessed_within_submitted": check_assessed_within_submitted,
     "valuation.certified_within_assessed": check_certified_within_assessed,
+    "valuation.cumulative_not_decreasing": check_cumulative_not_decreasing,
 }
