@@ -36,6 +36,7 @@ import {
 
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
+import { useRoleGate } from '@/shared/lib/useRoleGate';
 import { Badge } from '@/shared/ui/Badge';
 import { EmptyState } from '@/shared/ui/EmptyState';
 import { DateDisplay } from '@/shared/ui/DateDisplay';
@@ -86,6 +87,7 @@ export function ClashSmartIssuesPanel({ projectId }: ClashSmartIssuesPanelProps)
   const { t } = useTranslation();
   const qc = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
+  const write = useRoleGate('editor');
 
   const [statusFilter, setStatusFilter] = useState<ClashIssueStatus | 'all'>(
     'all',
@@ -426,6 +428,7 @@ export function ClashSmartIssuesPanel({ projectId }: ClashSmartIssuesPanelProps)
                               unsuppressMut.isPending &&
                               unsuppressMut.variables === issue.id
                             }
+                            disabledReason={write.reason}
                             disabled={busy && !isSuppressingRow}
                             onClick={() => unsuppressMut.mutate(issue.id)}
                             data-testid={`clash-issue-unsuppress-${issue.id}`}
@@ -440,6 +443,7 @@ export function ClashSmartIssuesPanel({ projectId }: ClashSmartIssuesPanelProps)
                             <Button
                               variant="ghost"
                               size="sm"
+                              disabledReason={write.reason}
                               disabled={busy}
                               onClick={() => openSuppress(issue.id)}
                               data-testid={`clash-issue-suppress-${issue.id}`}
