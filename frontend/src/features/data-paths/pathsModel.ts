@@ -5,6 +5,8 @@
 // trace of one parameter, and the platform map columns by project phase.
 // Everything here reads the API payload; nothing is invented.
 
+import { compareNames } from '@/shared/lib/collator';
+
 import type { MapModule, ModulePaths, ParamOut, PathOut, PlatformMap, StaleOut } from './api';
 
 // ── Module diagram geometry ───────────────────────────────────────────────
@@ -160,7 +162,7 @@ export function phaseColumns(map: PlatformMap, focus: string | null, label: (m: 
       phase,
       modules: map.modules
         .filter((m) => m.declared && m.phase === phase)
-        .sort((a, b) => label(a).localeCompare(label(b)))
+        .sort((a, b) => compareNames(label(a), label(b)))
         .map((module) => ({ module, relation: rel.get(module.name) ?? null })),
     }))
     .filter((c) => c.modules.length > 0);
