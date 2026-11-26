@@ -15,6 +15,7 @@ import {
   apiPost,
   apiPatch,
   apiDelete,
+  ApiError,
   extractErrorMessageFromBody,
   triggerDownload,
   getAuthToken,
@@ -1157,23 +1158,38 @@ export async function uploadBIMData(
   } catch (networkErr) {
     // Re-throw AbortError as-is so callers can distinguish cancellation
     if (networkErr instanceof DOMException && networkErr.name === 'AbortError') throw networkErr;
-    throw new Error(
-      'Cannot connect to server. Please check that the backend is running and try again.',
-    );
+    throw modelUploadNetworkError();
   }
 
-  if (!response.ok) {
-    let detail = `Upload failed (HTTP ${response.status})`;
-    try {
-      const body = await response.json();
-      detail = extractErrorMessageFromBody(body) ?? detail;
-    } catch {
-      // ignore parse errors
-    }
-    throw new Error(detail);
-  }
+  if (!response.ok) throw await modelUploadFailure(response);
 
   return response.json();
+}
+
+/** The error a model upload throws when the server could not be reached. */
+export function modelUploadNetworkError(): Error {
+  return new Error(
+    i18next.t('bim.upload_network_error', {
+      defaultValue: 'Cannot connect to server. Please check that the backend is running and try again.',
+    }),
+  );
+}
+
+/**
+ * The error a refused model upload throws, in the reader's language.
+ *
+ * Coded refusals are translated by `ApiError`. The body-size and rate guards
+ * answer with fixed English sentences, so for those the status speaks instead.
+ */
+export async function modelUploadFailure(response: Response): Promise<ApiError> {
+  let body: unknown = null;
+  try {
+    body = await response.json();
+  } catch {
+    // not JSON: the status-based message is used
+  }
+  if (response.status === 413 || response.status === 429) body = null;
+  return new ApiError(response.status, response.statusText, body);
 }
 
 /** Delete a BIM model and all its elements. */
@@ -1869,21 +1885,10 @@ export async function uploadCADFile(
   } catch (networkErr) {
     // Re-throw AbortError as-is so callers can distinguish cancellation
     if (networkErr instanceof DOMException && networkErr.name === 'AbortError') throw networkErr;
-    throw new Error(
-      'Cannot connect to server. Please check that the backend is running and try again.',
-    );
+    throw modelUploadNetworkError();
   }
 
-  if (!response.ok) {
-    let detail = `Upload failed (HTTP ${response.status})`;
-    try {
-      const body = await response.json();
-      detail = extractErrorMessageFromBody(body) ?? detail;
-    } catch {
-      // ignore parse errors
-    }
-    throw new Error(detail);
-  }
+  if (!response.ok) throw await modelUploadFailure(response);
 
   return response.json();
 }

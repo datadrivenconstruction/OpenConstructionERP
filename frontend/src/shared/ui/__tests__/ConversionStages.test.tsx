@@ -14,6 +14,7 @@ import {
   limitMinutes,
   stageFromServer,
   stageStates,
+  stagesFor,
 } from '@/shared/lib/conversionStages';
 
 describe('conversion stage helpers', () => {
@@ -43,6 +44,19 @@ describe('conversion stage helpers', () => {
     expect(conversionErrorKind('zero_elements')).toBe('empty');
     expect(conversionErrorKind('something_new')).toBe('generic');
   });
+
+  it('does not blame the file for a server-side failure', () => {
+    // `unexpected` is an exception on the server, not a damaged file.
+    expect(conversionErrorKind('unexpected')).toBe('generic');
+  });
+
+  it('shows the queue step only while the file waits for a free converter', () => {
+    expect(stageFromServer('waiting_for_converter')).toBe('queue');
+    expect(stagesFor(BIM_STAGES, 'convert')).toBe(BIM_STAGES);
+    const queued = stagesFor(BIM_STAGES, 'queue');
+    expect(queued).toEqual(['upload', 'queue', 'converter', 'convert', 'model3d', 'table']);
+    expect(stageStates(queued, 'queue')).toEqual(['done', 'current', 'pending', 'pending', 'pending', 'pending']);
+  });
 });
 
 describe('ConversionStages', () => {
@@ -61,6 +75,14 @@ describe('ConversionStages', () => {
     expect(items.map((li) => li.getAttribute('data-state'))).toEqual(['done', 'done', 'current', 'pending', 'pending']);
     expect(screen.getByTestId('conversion-elapsed').textContent).toContain('30');
     expect(screen.getByTestId('conversion-note').textContent).toMatch(/leave this page/i);
+  });
+
+  it('tells a queued upload that another file is converting', () => {
+    render(<ConversionStages stages={stagesFor(BIM_STAGES, 'queue')} current="queue" format="IFC" />);
+    const items = screen.getAllByRole('listitem');
+    expect(items).toHaveLength(6);
+    expect(items[1]?.getAttribute('data-state')).toBe('current');
+    expect(items[1]?.textContent).toMatch(/waiting for the converter/i);
   });
 
   it('asks to keep the tab open and shows the real percent during upload', () => {

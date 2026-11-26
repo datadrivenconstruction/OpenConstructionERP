@@ -8,7 +8,7 @@
  * process no matter where the file went in.
  */
 
-export type ConversionStageId = 'upload' | 'converter' | 'convert' | 'model3d' | 'table' | 'entities';
+export type ConversionStageId = 'upload' | 'queue' | 'converter' | 'convert' | 'model3d' | 'table' | 'entities';
 
 /** Stages of a BIM model (RVT, IFC), in the order the server runs them. */
 export const BIM_STAGES: readonly ConversionStageId[] = ['upload', 'converter', 'convert', 'model3d', 'table'];
@@ -19,6 +19,8 @@ export const DWG_STAGES: readonly ConversionStageId[] = ['upload', 'converter', 
 /** Backend `conversion_stage` value to UI stage. Unknown values read as the long conversion step. */
 export function stageFromServer(value: string | null | undefined): ConversionStageId {
   switch (value) {
+    case 'waiting_for_converter':
+      return 'queue';
     case 'preparing_converter':
       return 'converter';
     case 'building_3d':
@@ -30,6 +32,12 @@ export function stageFromServer(value: string | null | undefined): ConversionSta
     default:
       return 'convert';
   }
+}
+
+/** The stage list to show: the queue step appears only while a file actually waits for a free converter. */
+export function stagesFor(stages: readonly ConversionStageId[], current: ConversionStageId): readonly ConversionStageId[] {
+  if (current !== 'queue' || stages.includes('queue')) return stages;
+  return [stages[0] ?? 'upload', 'queue', ...stages.slice(1)];
 }
 
 export type StageState = 'done' | 'current' | 'pending';
@@ -57,7 +65,6 @@ export function conversionErrorKind(code: string | null | undefined): Conversion
     case 'parse_failed':
     case 'no_entities':
     case 'unclassified_rows':
-    case 'unexpected':
       return 'unreadable';
     case 'converter_missing':
     case 'ddc_not_found':
@@ -156,6 +163,13 @@ export function stageText(t: Translate, id: ConversionStageId, vars: { format?: 
       return {
         label: t('conv.stage_upload', { defaultValue: 'Uploading the file' }),
         hint: t('conv.stage_upload_hint', { defaultValue: 'Sending the file to the server. Keep this tab open until it finishes.' }),
+      };
+    case 'queue':
+      return {
+        label: t('conv.stage_queue', { defaultValue: 'Waiting for the converter' }),
+        hint: t('conv.stage_queue_hint', {
+          defaultValue: 'Another file is being converted on this server. Yours starts as soon as that one finishes.',
+        }),
       };
     case 'converter':
       return {

@@ -12,6 +12,7 @@
 import { useRef, useEffect, useState, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { disciplineLabel } from '@/shared/lib/disciplineLabel';
+import { placeholderFromConverterWithoutMesh } from '@/shared/lib/placeholderGeometry';
 import { MatchSuggestionsPanel } from '@/features/match';
 import clsx from 'clsx';
 import {
@@ -1048,6 +1049,9 @@ export function BIMViewer({
     }
     return false;
   }, [elements, modelMetadata]);
+  /** The converter ran and wrote the element table but no mesh for this format
+   *  (the Windows IFC converter 2.0.0): installing a converter would change nothing. */
+  const placeholderWithoutMesh = placeholderFromConverterWithoutMesh(modelMetadata);
 
   /** "Generated geometry" caption dismissal, same per-model persistence as the
    *  placeholder banner above but a separate decision (and a separate key) so
@@ -3488,12 +3492,18 @@ export function BIMViewer({
                 })}
               </span>
               <span>{' - '}</span>
-              <span>
-                {t('bim.placeholder_banner.body', {
-                  defaultValue:
-                    'install DDC IFC Converter for accurate meshes.',
-                })}
+              <span data-testid="bim-placeholder-banner-body">
+                {placeholderWithoutMesh
+                  ? t('bim.placeholder_banner.body_no_mesh', {
+                      defaultValue:
+                        'the converter on this server reads this format without 3D meshes. Boxes stand in for the elements; properties and quantities come from the file.',
+                    })
+                  : t('bim.placeholder_banner.body', {
+                      defaultValue:
+                        'install DDC IFC Converter for accurate meshes.',
+                    })}
               </span>{' '}
+              {!placeholderWithoutMesh && (
               <a
                 href="https://github.com/datadrivenconstruction/cad2data-Revit-IFC-DWG"
                 target="_blank"
@@ -3502,6 +3512,7 @@ export function BIMViewer({
               >
                 {t('bim.placeholder_banner.learn_more', { defaultValue: 'Learn more →' })}
               </a>
+              )}
             </div>
             <button
               type="button"
