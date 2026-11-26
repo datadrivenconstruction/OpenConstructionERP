@@ -44,6 +44,7 @@ _SCAN_ROWS = 2000
 _MAX_ITEMS = 250_000
 _MAX_POSITIONS = 50_000
 _SAMPLE = 200
+_UNSET: Any = object()
 
 
 class ResourceNotFoundError(LookupError):
@@ -179,6 +180,8 @@ class ResourceImpactService:
         new_unit_price: Decimal | None = None,
         new_name: str | None = None,
         user_id: str | None = None,
+        project_ids: set[uuid.UUID] | None = None,
+        scope_projects: bool = False,
     ) -> ImpactResult:
         """Compute the effect of the change without writing anything."""
         row = (
@@ -205,7 +208,7 @@ class ResourceImpactService:
         rename = name if name != row.resource_name else None
         await self._scan_cost_items(res, rename)
         await self._scan_assemblies(res)
-        await self._scan_positions(res, user_id)
+        await self._scan_positions(res, user_id, project_ids if scope_projects else _UNSET)
         existing = set(
             (
                 await self.session.execute(
@@ -238,10 +241,18 @@ class ResourceImpactService:
         new_name: str | None = None,
         expected_cost_items: int | None = None,
         user_id: str | None = None,
+        project_ids: set[uuid.UUID] | None = None,
+        scope_projects: bool = False,
     ) -> ImpactResult:
         """Write the previewed change in one transaction and audit it."""
         res = await self.preview(
-            region, resource_key, new_unit_price=new_unit_price, new_name=new_name, user_id=user_id
+            region,
+            resource_key,
+            new_unit_price=new_unit_price,
+            new_name=new_name,
+            user_id=user_id,
+            project_ids=project_ids,
+            scope_projects=scope_projects,
         )
         blocking = [i for i in res.issues if i.blocking]
         if blocking:
@@ -419,12 +430,15 @@ class ResourceImpactService:
             )
         res.assemblies.sort(key=lambda r: abs(r["delta"]), reverse=True)
 
-    async def _scan_positions(self, res: ImpactResult, user_id: str | None) -> None:
+    async def _scan_positions(self, res: ImpactResult, user_id: str | None, scope: Any = None) -> None:
         from app.dependencies import accessible_project_ids
         from app.modules.boq.models import BOQ, Position
         from app.modules.boq.price_alignment import position_row_delta
 
-        project_ids = await accessible_project_ids(self.session, user_id, live_only=True)
+        if scope is _UNSET:
+            project_ids = await accessible_project_ids(self.session, user_id, live_only=True)
+        else:
+            project_ids = scope
         if project_ids is not None and not project_ids:
             return
         stmt = (

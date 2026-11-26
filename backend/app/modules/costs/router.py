@@ -1296,11 +1296,20 @@ async def preview_resource_change(
     Nothing is written. Bills are listed for information; they follow only when
     their estimator runs price alignment on them.
     """
+    from app.dependencies import accessible_project_ids
     from app.modules.costs.resource_impact import ResourceImpactService, ResourceNotFoundError
 
+    # Bill positions are counted only in projects the caller can reach.
+    project_ids = await accessible_project_ids(session, user_id, live_only=True)
     try:
         res = await ResourceImpactService(session).preview(
-            region, body.resource_key, new_unit_price=body.new_unit_price, new_name=body.new_name, user_id=user_id
+            region,
+            body.resource_key,
+            new_unit_price=body.new_unit_price,
+            new_name=body.new_name,
+            user_id=user_id,
+            project_ids=project_ids,
+            scope_projects=True,
         )
     except ResourceNotFoundError as exc:
         raise HTTPException(status_code=404, detail="Resource not found on this price sheet") from exc
@@ -1323,12 +1332,14 @@ async def apply_resource_change(
     Refused with 409 when the change has blocking findings or the number of
     work items differs from ``expected_cost_items`` (the preview is stale).
     """
+    from app.dependencies import accessible_project_ids
     from app.modules.costs.resource_impact import (
         ResourceChangeRefusedError,
         ResourceImpactService,
         ResourceNotFoundError,
     )
 
+    project_ids = await accessible_project_ids(session, user_id, live_only=True)
     try:
         res = await ResourceImpactService(session).apply(
             region,
@@ -1337,6 +1348,8 @@ async def apply_resource_change(
             new_name=body.new_name,
             expected_cost_items=body.expected_cost_items,
             user_id=user_id,
+            project_ids=project_ids,
+            scope_projects=True,
         )
     except ResourceNotFoundError as exc:
         raise HTTPException(status_code=404, detail="Resource not found on this price sheet") from exc
