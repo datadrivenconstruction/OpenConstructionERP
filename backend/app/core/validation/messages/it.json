@@ -12,6 +12,10 @@
       "fail": "La previsione supera l'importo pianificato.",
       "suggestion": "Verifica l'origine della previsione; se prevedi risparmi, inserisci una previsione manuale con la motivazione."
     },
+    "forecast_over_target": {
+      "fail": "La previsione supera il costo obiettivo delle voci di questa riga di costo.",
+      "suggestion": "Confronta ordini e subappalti con i prezzi obiettivo; registra una previsione manuale motivata se l'obiettivo non regge più."
+    },
     "partly_awarded": {
       "fail": "Solo una parte dell'importo pianificato è aggiudicata; la previsione potrebbe non includere lavori ancora da affidare.",
       "suggestion": "Se su questa voce ci sono ancora lavori da affidare, inserisci una previsione manuale."

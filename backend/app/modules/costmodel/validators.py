@@ -35,6 +35,7 @@ from app.modules.costmodel.chain_rules import register_cost_chain_rules
 from app.modules.costmodel.cost_control import (
     FINDING_CERTIFIED_OVER_COMMITTED,
     FINDING_OVER_PLAN,
+    FINDING_OVER_TARGET,
     FINDING_PARTLY_AWARDED,
     FINDING_PENDING_CHANGES,
     FINDING_STALE_SNAPSHOT,
@@ -130,6 +131,13 @@ class ForecastOverPlanRule(_CostControlRule):
     description = "A cost line whose forecast exceeds its budget (or its estimate when there is no budget)."
 
 
+class ForecastOverTargetRule(_CostControlRule):
+    rule_id = FINDING_OVER_TARGET
+    name = "Forecast above target cost"
+    severity = Severity.WARNING
+    description = "A cost line whose forecast exceeds the target cost of its bill positions (quantity x target rate)."
+
+
 class PartlyAwardedRule(_CostControlRule):
     rule_id = FINDING_PARTLY_AWARDED
     name = "Line only partly awarded"
@@ -156,6 +164,7 @@ COST_CONTROL_RULES: tuple[type[_CostControlRule], ...] = (
     UnassignedMoneyRule,
     CertifiedOverCommittedRule,
     ForecastOverPlanRule,
+    ForecastOverTargetRule,
     PartlyAwardedRule,
     PendingChangesRule,
     StaleSnapshotRule,

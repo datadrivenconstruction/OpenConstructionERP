@@ -12,6 +12,10 @@
       "fail": "Tahmin, planlanan tutarın üzerinde.",
       "suggestion": "Tahminin kaynağını kontrol edin; tasarruf bekliyorsanız gerekçesiyle manuel tahmin girin."
     },
+    "forecast_over_target": {
+      "fail": "Tahmin, bu maliyet satırındaki kalemlerin hedef maliyetinin üzerinde.",
+      "suggestion": "Siparişleri ve taşeron sözleşmelerini hedef fiyatlarla karşılaştırın; hedef artık tutmuyorsa gerekçeli bir manuel tahmin girin."
+    },
     "partly_awarded": {
       "fail": "Planlanan tutarın yalnızca bir kısmı ihale edilmiş; tahminde henüz ihale edilecek işler eksik olabilir.",
       "suggestion": "Bu kalemde ihale edilecek iş kaldıysa manuel tahmin girin."

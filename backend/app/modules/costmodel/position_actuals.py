@@ -101,6 +101,8 @@ from decimal import Decimal, InvalidOperation
 from sqlalchemy import case, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.modules.boq.budget_basis import BASIS_TARGET, position_budget
+
 #: Money is quantised to two places on the way out, quantities to four, which
 #: matches ``site_inventory.ledger`` and keeps a rate of 0.0001 from being
 #: rounded away before it is multiplied by a quantity.
@@ -190,6 +192,10 @@ class PositionActuals:
     estimate_quantity: Decimal = _ZERO
     estimate_unit_rate: Decimal = _ZERO
     estimate_amount: Decimal = _ZERO
+    #: What the position may cost: quantity x target rate when it has one, else
+    #: the estimate (:mod:`app.modules.boq.budget_basis`); ``budget_basis`` says which.
+    cost_budget_amount: Decimal = _ZERO
+    budget_basis: str = "unit_rate"
 
     budget_planned: Decimal = _ZERO
     budget_actual: Decimal = _ZERO
@@ -236,13 +242,16 @@ class PositionActuals:
 
     @property
     def uncommitted_amount(self) -> Decimal:
-        """Estimate not yet committed to a purchase order.
+        """Cost budget not yet committed to a purchase order.
+
+        The cost budget is the target cost when the position has a target rate,
+        so ordering within the sale price but above the target shows as negative.
 
         The number the founder asked for by name. Negative means more has been
         ordered against the item than was estimated for it, which is a finding
         rather than an error, so it is reported signed rather than floored.
         """
-        return (self.estimate_amount - self.committed_amount).quantize(_MONEY_Q)
+        return (self.cost_budget_amount - self.committed_amount).quantize(_MONEY_Q)
 
 
 @dataclass
@@ -256,6 +265,7 @@ class PositionActualsReport:
     def totals(self) -> dict[str, Decimal]:
         keys = (
             "estimate_amount",
+            "cost_budget_amount",
             "budget_planned",
             "budget_actual",
             "committed_amount",
@@ -265,7 +275,7 @@ class PositionActualsReport:
             "consumed_amount",
         )
         out = {k: sum((getattr(r, k) for r in self.rows), _ZERO) for k in keys}
-        out["uncommitted_amount"] = out["estimate_amount"] - out["committed_amount"]
+        out["uncommitted_amount"] = out["cost_budget_amount"] - out["committed_amount"]
         totals = {k: v.quantize(_MONEY_Q) for k, v in out.items()}
         # Hours quantise to their own scale rather than to money's. No project
         # total for hours per unit: adding up rates over positions in different
@@ -312,6 +322,8 @@ def assemble_rows(
         line_budget = budget.get(key, {})
 
         estimate_amount = _to_decimal(getattr(pos, "total", None))
+        cost_budget = position_budget(pos)
+        cost_budget_amount = cost_budget.amount if cost_budget.basis == BASIS_TARGET else estimate_amount
         pct_raw = installed_pct.get(pos.id)
         installed_percent = Decimal(str(pct_raw)).quantize(_PCT_Q) if pct_raw is not None else None
         installed_amount = (
@@ -337,6 +349,8 @@ def assemble_rows(
                 estimate_quantity=_to_decimal(getattr(pos, "quantity", None)).quantize(_QTY_Q),
                 estimate_unit_rate=_to_decimal(getattr(pos, "unit_rate", None)),
                 estimate_amount=estimate_amount.quantize(_MONEY_Q),
+                cost_budget_amount=cost_budget_amount.quantize(_MONEY_Q),
+                budget_basis=cost_budget.basis,
                 budget_planned=line_budget.get("planned", _ZERO).quantize(_MONEY_Q),
                 budget_actual=line_budget.get("actual", _ZERO).quantize(_MONEY_Q),
                 committed_amount=committed.get(key, _ZERO).quantize(_MONEY_Q),

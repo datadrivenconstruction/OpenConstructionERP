@@ -32,7 +32,7 @@ in the tests run without a database.
 from __future__ import annotations
 
 import uuid
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from decimal import Decimal, InvalidOperation
 
 from sqlalchemy import select
@@ -76,6 +76,40 @@ class LineFigures:
         self.sub_value += other.sub_value
         self.received_qty += other.received_qty
         self.received_value += other.received_value
+
+
+@dataclass
+class SourceRecord:
+    """One order item or subcontract line behind a grid row, cut to the row's cost line.
+
+    The drill-down of a grid number: the committed and received figures of the
+    row are exactly the sum of its source records.
+    """
+
+    kind: str  # "purchase_order" or "subcontract"
+    document_id: uuid.UUID
+    document_number: str
+    document_title: str
+    status: str
+    line_id: uuid.UUID
+    description: str
+    committed_qty: Decimal = ZERO
+    committed_value: Decimal = ZERO
+    received_qty: Decimal = ZERO
+    received_value: Decimal = ZERO
+
+
+KIND_PURCHASE_ORDER = "purchase_order"
+KIND_SUBCONTRACT = "subcontract"
+
+_SOURCE_FIELD = {
+    "po_qty": "committed_qty",
+    "po_value": "committed_value",
+    "sub_qty": "committed_qty",
+    "sub_value": "committed_value",
+    "received_qty": "received_qty",
+    "received_value": "received_value",
+}
 
 
 @dataclass(frozen=True)
@@ -192,8 +226,13 @@ def _spread(
     value_field: str,
     qty: Decimal,
     value: Decimal,
+    sources: dict[str, dict[str, SourceRecord]] | None = None,
+    record: SourceRecord | None = None,
 ) -> None:
-    """Add one source row to its cost line(s), cut by the stored split."""
+    """Add one source row to its cost line(s), cut by the stored split.
+
+    With ``sources`` the same cut is also booked on the source record, per cost line.
+    """
     from app.modules.costmodel.inheritance import expand
 
     shares = dict(getattr(vector, "shares", ()) or ())
@@ -204,10 +243,23 @@ def _spread(
         bucket = acc.setdefault(line_id, LineFigures())
         setattr(bucket, qty_field, getattr(bucket, qty_field) + qty * fraction)
         setattr(bucket, value_field, getattr(bucket, value_field) + part)
+        if sources is not None and record is not None:
+            entry = sources.setdefault(line_id, {}).setdefault(str(record.line_id), replace(record))
+            q_attr, v_attr = _SOURCE_FIELD[qty_field], _SOURCE_FIELD[value_field]
+            setattr(entry, q_attr, getattr(entry, q_attr) + qty * fraction)
+            setattr(entry, v_attr, getattr(entry, v_attr) + part)
 
 
-async def figures_by_cost_line(session: AsyncSession, project_id: uuid.UUID) -> dict[str, LineFigures]:
-    """Committed and received quantity and value per cost line, in project currency."""
+async def figures_by_cost_line(
+    session: AsyncSession,
+    project_id: uuid.UUID,
+    sources: dict[str, dict[str, SourceRecord]] | None = None,
+) -> dict[str, LineFigures]:
+    """Committed and received quantity and value per cost line, in project currency.
+
+    Pass ``sources`` to also collect, per cost line, the order items and
+    subcontract lines the figures come from.
+    """
     from app.modules.costmodel.inheritance import SOURCE_CONTRACT_LINE, SOURCE_PO_ITEM, row_vectors
     from app.modules.costmodel.repository import BudgetLineRepository, _amount_in_base
 
@@ -232,6 +284,10 @@ async def figures_by_cost_line(session: AsyncSession, project_id: uuid.UUID) -> 
                     PurchaseOrderItem.amount,
                     PurchaseOrderItem.unit_rate,
                     PurchaseOrder.currency_code,
+                    PurchaseOrder.id,
+                    PurchaseOrder.po_number,
+                    PurchaseOrder.status,
+                    PurchaseOrderItem.description,
                 )
                 .join(PurchaseOrder, PurchaseOrder.id == PurchaseOrderItem.po_id)
                 .where(
@@ -243,8 +299,18 @@ async def figures_by_cost_line(session: AsyncSession, project_id: uuid.UUID) -> 
         ).all()
         vectors = await row_vectors(session, SOURCE_PO_ITEM, {r[0]: r[1] for r in po_rows})
         rate_by_item: dict[uuid.UUID, tuple[Decimal, str]] = {}
-        for item_id, _line, qty, amount, unit_rate, ccy in po_rows:
+        po_records: dict[uuid.UUID, SourceRecord] = {}
+        for item_id, _line, qty, amount, unit_rate, ccy, po_id, po_number, po_status, item_desc in po_rows:
             vector = vectors[str(item_id)]
+            po_records[item_id] = SourceRecord(
+                kind=KIND_PURCHASE_ORDER,
+                document_id=po_id,
+                document_number=po_number or "",
+                document_title="",
+                status=po_status or "",
+                line_id=item_id,
+                description=item_desc or "",
+            )
             _spread(
                 acc,
                 vector,
@@ -252,6 +318,8 @@ async def figures_by_cost_line(session: AsyncSession, project_id: uuid.UUID) -> 
                 value_field="po_value",
                 qty=_dec(qty),
                 value=in_base(_dec(amount), ccy),
+                sources=sources,
+                record=po_records[item_id],
             )
             rate_by_item[item_id] = (_dec(unit_rate), ccy or "")
 
@@ -276,6 +344,8 @@ async def figures_by_cost_line(session: AsyncSession, project_id: uuid.UUID) -> 
                     value_field="received_value",
                     qty=qty,
                     value=in_base(qty * rate, ccy),
+                    sources=sources,
+                    record=po_records[po_item_id],
                 )
 
     try:
@@ -292,6 +362,11 @@ async def figures_by_cost_line(session: AsyncSession, project_id: uuid.UUID) -> 
                     ContractLine.total_value,
                     ContractLine.unit_rate,
                     Contract.currency,
+                    Contract.id,
+                    Contract.code,
+                    Contract.title,
+                    Contract.status,
+                    ContractLine.description,
                 )
                 .join(Contract, Contract.id == ContractLine.contract_id)
                 .where(
@@ -304,7 +379,17 @@ async def figures_by_cost_line(session: AsyncSession, project_id: uuid.UUID) -> 
         ).all()
         vectors = await row_vectors(session, SOURCE_CONTRACT_LINE, {r[0]: r[1] for r in sub_rows})
         line_meta: dict[uuid.UUID, tuple[Decimal, str]] = {}
-        for line_id, _cl, qty, total, unit_rate, ccy in sub_rows:
+        sub_records: dict[uuid.UUID, SourceRecord] = {}
+        for line_id, _cl, qty, total, unit_rate, ccy, contract_id, code, title, c_status, line_desc in sub_rows:
+            sub_records[line_id] = SourceRecord(
+                kind=KIND_SUBCONTRACT,
+                document_id=contract_id,
+                document_number=code or "",
+                document_title=title or "",
+                status=c_status or "",
+                line_id=line_id,
+                description=line_desc or "",
+            )
             _spread(
                 acc,
                 vectors[str(line_id)],
@@ -312,6 +397,8 @@ async def figures_by_cost_line(session: AsyncSession, project_id: uuid.UUID) -> 
                 value_field="sub_value",
                 qty=_dec(qty),
                 value=in_base(_dec(total), ccy),
+                sources=sources,
+                record=sub_records[line_id],
             )
             line_meta[line_id] = (_dec(unit_rate), ccy or "")
 
@@ -338,6 +425,8 @@ async def figures_by_cost_line(session: AsyncSession, project_id: uuid.UUID) -> 
                     value_field="received_value",
                     qty=qty,
                     value=in_base(value, ccy),
+                    sources=sources,
+                    record=sub_records[contract_line_id],
                 )
     return acc
 
@@ -364,3 +453,36 @@ async def build_commitment_grid(
         return grid
     grid.rows = assemble_grid(list(positions), await figures_by_cost_line(session, project_id))
     return grid
+
+
+async def position_sources(
+    session: AsyncSession,
+    project_id: uuid.UUID,
+    position_id: uuid.UUID,
+) -> tuple[object | None, list[SourceRecord]]:
+    """The position and the order items and subcontract lines behind its grid row.
+
+    ``(None, [])`` when the position is not on this project; ``(position, [])``
+    when it has no cost line or nothing is committed against it yet.
+    """
+    from app.modules.boq.models import BOQ, Position
+
+    pos = (
+        await session.execute(
+            select(Position)
+            .join(BOQ, BOQ.id == Position.boq_id)
+            .where(Position.id == position_id, BOQ.project_id == project_id)
+        )
+    ).scalar_one_or_none()
+    if pos is None or pos.cost_line_id is None:
+        return pos, []
+    collected: dict[str, dict[str, SourceRecord]] = {}
+    await figures_by_cost_line(session, project_id, sources=collected)
+    records = list(collected.get(str(pos.cost_line_id), {}).values())
+    for rec in records:
+        rec.committed_qty = rec.committed_qty.quantize(_QTY_Q)
+        rec.committed_value = rec.committed_value.quantize(_MONEY_Q)
+        rec.received_qty = rec.received_qty.quantize(_QTY_Q)
+        rec.received_value = rec.received_value.quantize(_MONEY_Q)
+    records.sort(key=lambda r: (r.kind, r.document_number, r.description))
+    return pos, records

@@ -12,6 +12,10 @@
       "fail": "Ennuste on suunniteltua summaa suurempi.",
       "suggestion": "Tarkista ennusteen lähde; kirjaa manuaalinen ennuste perusteluineen, jos odotat säästöjä."
     },
+    "forecast_over_target": {
+      "fail": "Ennuste ylittää tämän kustannusrivin nimikkeiden tavoitekustannuksen.",
+      "suggestion": "Vertaa tilauksia ja aliurakoita tavoitehintoihin; kirjaa perusteltu manuaalinen ennuste, jos tavoite ei enää pidä."
+    },
     "partly_awarded": {
       "fail": "Vain osa suunnitellusta summasta on kilpailutettu; ennusteesta voi puuttua vielä kilpailutettavaa työtä.",
       "suggestion": "Jos tällä rivillä on vielä kilpailutettavaa työtä, syötä manuaalinen ennuste."

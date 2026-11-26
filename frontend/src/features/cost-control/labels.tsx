@@ -334,6 +334,12 @@ export function findingTitle(t: TFunction, finding: CostControlFinding): string 
         code: finding.code,
         pct: d.pct ? fmtNumber(d.pct, 1) : '',
       });
+    case 'cost_control.forecast_over_target':
+      return t('cost_control.finding_over_target', {
+        defaultValue: '{{code}}: forecast {{pct}}% above target cost',
+        code: finding.code,
+        pct: d.pct ? fmtNumber(d.pct, 1) : '',
+      });
     case 'cost_control.partly_awarded':
       return t('cost_control.finding_partly_awarded', {
         defaultValue: '{{code}}: only {{pct}}% of the plan is awarded',
@@ -372,6 +378,10 @@ export function findingHint(t: TFunction, finding: CostControlFinding): string {
     case 'cost_control.forecast_over_plan':
       return t('cost_control.finding_over_plan_hint', {
         defaultValue: 'Open the line to see where the figure comes from.',
+      });
+    case 'cost_control.forecast_over_target':
+      return t('cost_control.finding_over_target_hint', {
+        defaultValue: 'Within the plan, above the target rates of the bill positions. Compare the orders with the targets.',
       });
     case 'cost_control.partly_awarded':
       return t('cost_control.finding_partly_awarded_hint', {

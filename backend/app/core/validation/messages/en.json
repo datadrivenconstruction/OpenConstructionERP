@@ -12,6 +12,10 @@
       "fail": "The forecast is above the planned amount.",
       "suggestion": "Check the source of the forecast; record a manual forecast with a reason if you expect savings."
     },
+    "forecast_over_target": {
+      "fail": "The forecast is above the target cost of the bill positions on this line.",
+      "suggestion": "Compare the orders and subcontracts with the target rates; record a manual forecast with a reason if the target no longer holds."
+    },
     "partly_awarded": {
       "fail": "Only part of the planned amount is awarded; the forecast may be missing work still to let.",
       "suggestion": "If more work is still to be let on this line, enter a manual forecast."

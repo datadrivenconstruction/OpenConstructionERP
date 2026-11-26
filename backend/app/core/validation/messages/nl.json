@@ -12,6 +12,10 @@
       "fail": "De prognose ligt boven het geplande bedrag.",
       "suggestion": "Controleer de bron van de prognose; leg een handmatige prognose met reden vast als u besparingen verwacht."
     },
+    "forecast_over_target": {
+      "fail": "De prognose ligt boven de doelkosten van de posten op deze kostenregel.",
+      "suggestion": "Vergelijk de bestellingen en onderaannemingen met de doelprijzen; leg een handmatige prognose met reden vast als het doel niet meer haalbaar is."
+    },
     "partly_awarded": {
       "fail": "Slechts een deel van het geplande bedrag is gegund; de prognose mist mogelijk nog te gunnen werk.",
       "suggestion": "Als op deze regel nog werk te gunnen is, voer dan een handmatige prognose in."

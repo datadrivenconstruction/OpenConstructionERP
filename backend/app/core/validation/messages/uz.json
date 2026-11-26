@@ -12,6 +12,10 @@
       "fail": "Prognoz rejalashtirilgan summadan yuqori.",
       "suggestion": "Prognoz manbasini tekshiring; tejash kutsangiz, sababi bilan qo'lda prognoz kiriting."
     },
+    "forecast_over_target": {
+      "fail": "Prognoz ushbu xarajat moddasidagi pozitsiyalarning maqsadli tannarxidan yuqori.",
+      "suggestion": "Buyurtmalar va subpudratlarni maqsadli narxlar bilan solishtiring; maqsad endi amal qilmasa, asosi bilan qo'lda prognoz kiriting."
+    },
     "partly_awarded": {
       "fail": "Rejalashtirilgan summaning faqat bir qismi berilgan; prognozda hali berilmagan ishlar yetishmasligi mumkin.",
       "suggestion": "Bu qatorda hali beriladigan ish qolgan bo'lsa, qo'lda prognoz kiriting."

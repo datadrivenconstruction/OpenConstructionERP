@@ -3,7 +3,7 @@
  * unit rate), what orders and subcontracts have committed, what remains to buy
  * and what has been received. Figures come straight from the API.
  */
-import { useState } from 'react';
+import { Fragment, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { ChevronDown, ChevronRight } from 'lucide-react';
@@ -12,6 +12,7 @@ import { fmtNumber } from '@/shared/lib/formatters';
 import { formatCurrency, toNum } from '@/shared/lib/money';
 import { fetchCommitmentGrid } from './api';
 import { CommercialFindings } from './CommercialFindings';
+import { CommitmentSources } from './CommitmentSources';
 
 function qty(value: string): string {
   const n = toNum(value);
@@ -21,6 +22,7 @@ function qty(value: string): string {
 export function CommitmentGridCard({ projectId }: { projectId: string }) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
+  const [expanded, setExpanded] = useState<string | null>(null);
   const { data, isLoading, isError, error, refetch } = useQuery({
     queryKey: ['commitment-grid', projectId],
     queryFn: () => fetchCommitmentGrid(projectId),
@@ -80,10 +82,22 @@ export function CommitmentGridCard({ projectId }: { projectId: string }) {
                   <tbody>
                     {data.rows.map((row) => {
                       const over = row.over_committed_qty || row.over_committed_value;
+                      const isOpen = expanded === row.boq_position_id;
                       return (
-                        <tr key={row.boq_position_id}>
+                        <Fragment key={row.boq_position_id}>
+                        <tr>
                           <td className="pr-3">
                             <div className="flex items-center gap-1.5">
+                              <button
+                                type="button"
+                                className="text-content-tertiary hover:text-content-primary"
+                                aria-expanded={isOpen}
+                                aria-label={t('commercial_control.show_sources', { defaultValue: 'Show the orders and subcontracts behind this line' })}
+                                title={t('commercial_control.show_sources', { defaultValue: 'Show the orders and subcontracts behind this line' })}
+                                onClick={() => setExpanded(isOpen ? null : row.boq_position_id)}
+                              >
+                                {isOpen ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+                              </button>
                               <span className="font-medium">{row.ordinal || '-'}</span>
                               <span className="max-w-[18rem] truncate text-content-secondary" title={row.description}>
                                 {row.description}
@@ -113,6 +127,18 @@ export function CommitmentGridCard({ projectId }: { projectId: string }) {
                           <td className="pr-3 text-right tabular-nums text-content-tertiary">{qty(row.received_qty)}</td>
                           <td className="pr-3 text-right tabular-nums text-content-tertiary">{formatCurrency(row.received_value, currency)}</td>
                         </tr>
+                        {isOpen && (
+                          <tr>
+                            <td colSpan={9} className="bg-surface-secondary px-3 py-2">
+                              <CommitmentSources
+                                projectId={projectId}
+                                positionId={row.boq_position_id}
+                                onCostSpine={row.on_cost_spine}
+                              />
+                            </td>
+                          </tr>
+                        )}
+                        </Fragment>
                       );
                     })}
                   </tbody>

@@ -12,6 +12,10 @@
       "fail": "Dự báo cao hơn số tiền kế hoạch.",
       "suggestion": "Kiểm tra nguồn của dự báo; nếu dự kiến tiết kiệm, hãy nhập dự báo thủ công kèm lý do."
     },
+    "forecast_over_target": {
+      "fail": "Dự báo vượt chi phí mục tiêu của các hạng mục trên dòng chi phí này.",
+      "suggestion": "So sánh đơn đặt hàng và hợp đồng thầu phụ với đơn giá mục tiêu; nếu mục tiêu không còn phù hợp, hãy nhập dự báo thủ công kèm lý do."
+    },
     "partly_awarded": {
       "fail": "Chỉ một phần số tiền kế hoạch đã được giao thầu; dự báo có thể thiếu phần việc còn phải giao.",
       "suggestion": "Nếu dòng này còn việc phải giao thầu, hãy nhập dự báo thủ công."

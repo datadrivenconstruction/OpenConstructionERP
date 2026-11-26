@@ -12,6 +12,10 @@
       "fail": "Az előrejelzés meghaladja a tervezett összeget.",
       "suggestion": "Ellenőrizze az előrejelzés forrását; ha megtakarításra számít, rögzítsen indoklással kézi előrejelzést."
     },
+    "forecast_over_target": {
+      "fail": "Az előrejelzés meghaladja a költségsor tételeinek célköltségét.",
+      "suggestion": "Vesse össze a megrendeléseket és alvállalkozói szerződéseket a célárakkal; ha a cél már nem tartható, rögzítsen indokolt kézi előrejelzést."
+    },
     "partly_awarded": {
       "fail": "A tervezett összegnek csak egy része van odaítélve; az előrejelzésből hiányozhat a még kiadandó munka.",
       "suggestion": "Ha ezen a soron még kiadandó munka van, adjon meg kézi előrejelzést."

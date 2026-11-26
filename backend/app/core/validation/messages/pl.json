@@ -12,6 +12,10 @@
       "fail": "Prognoza jest wyższa niż kwota planowana.",
       "suggestion": "Sprawdź źródło prognozy; jeśli spodziewasz się oszczędności, wprowadź prognozę ręczną z uzasadnieniem."
     },
+    "forecast_over_target": {
+      "fail": "Prognoza przekracza koszt docelowy pozycji tej linii kosztowej.",
+      "suggestion": "Porównaj zamówienia i podwykonawstwa z cenami docelowymi; wprowadź ręczną prognozę z uzasadnieniem, jeśli cel jest już nieosiągalny."
+    },
     "partly_awarded": {
       "fail": "Zlecono tylko część kwoty planowanej; w prognozie mogą brakować robót, które jeszcze trzeba zlecić.",
       "suggestion": "Jeśli na tej pozycji kosztowej są jeszcze roboty do zlecenia, wprowadź prognozę ręczną."

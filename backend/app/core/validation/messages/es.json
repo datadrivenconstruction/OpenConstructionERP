@@ -12,6 +12,10 @@
       "fail": "La previsión supera el importe planificado.",
       "suggestion": "Revise el origen de la previsión; registre una previsión manual con motivo si espera ahorros."
     },
+    "forecast_over_target": {
+      "fail": "La previsión supera el coste objetivo de las partidas de esta línea de coste.",
+      "suggestion": "Compare los pedidos y subcontratos con los precios objetivo; registre una previsión manual con su motivo si el objetivo ya no se sostiene."
+    },
     "partly_awarded": {
       "fail": "Solo se ha adjudicado una parte del importe planificado; la previsión podría omitir trabajos aún por adjudicar.",
       "suggestion": "Si en esta partida aún quedan trabajos por adjudicar, introduzca una previsión manual."

@@ -12,6 +12,10 @@
       "fail": "Prognoza depășește suma planificată.",
       "suggestion": "Verificați sursa prognozei; dacă vă așteptați la economii, introduceți o prognoză manuală cu motivul."
     },
+    "forecast_over_target": {
+      "fail": "Prognoza depășește costul țintă al pozițiilor de pe această linie de cost.",
+      "suggestion": "Comparați comenzile și subcontractele cu prețurile țintă; înregistrați o prognoză manuală motivată dacă ținta nu mai este valabilă."
+    },
     "partly_awarded": {
       "fail": "Doar o parte din suma planificată este atribuită; prognozei îi pot lipsi lucrări încă de atribuit.",
       "suggestion": "Dacă pe această linie mai sunt lucrări de atribuit, introduceți o prognoză manuală."

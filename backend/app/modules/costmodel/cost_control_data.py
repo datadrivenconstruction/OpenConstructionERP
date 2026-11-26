@@ -124,6 +124,50 @@ class ControlData:
     unassigned_invoiced: Decimal = ZERO
     # Change orders waiting for a decision, per cost line, from the lines of those orders.
     pending_by_line: dict[str, Decimal] = field(default_factory=dict)
+    # Target cost of the bill positions on each cost line, only lines where some position has a target rate.
+    target: dict[str, Decimal] = field(default_factory=dict)
+
+
+def target_by_cost_line(positions: list[Any]) -> dict[str, Decimal]:
+    """Quantity x target rate summed per cost line. Pure.
+
+    Only positions that carry a target rate count, so a line whose positions
+    have none is absent rather than zero: there is no target to compare with.
+    """
+    from app.modules.boq.budget_basis import BASIS_TARGET, is_priced_line, position_budget
+
+    out: dict[str, Decimal] = {}
+    for pos in positions:
+        line_id = getattr(pos, "cost_line_id", None)
+        if line_id is None or not is_priced_line(pos):
+            continue
+        budget = position_budget(pos)
+        if budget.basis != BASIS_TARGET:
+            continue
+        key = str(line_id)
+        out[key] = out.get(key, ZERO) + budget.amount
+    return {k: v.quantize(CENT) for k, v in out.items()}
+
+
+async def _target_by_cost_line(session: AsyncSession, project_id: uuid.UUID) -> dict[str, Decimal]:
+    try:
+        from app.modules.boq.models import BOQ, Position
+        from app.modules.boq.repository import _IN_BILL_REGISTER
+    except ImportError:  # pragma: no cover - boq not installed
+        return {}
+    rows = (
+        await session.execute(
+            select(Position.cost_line_id, Position.unit, Position.quantity, Position.unit_rate, Position.target_rate)
+            .join(BOQ, BOQ.id == Position.boq_id)
+            .where(
+                BOQ.project_id == project_id,
+                _IN_BILL_REGISTER,
+                Position.cost_line_id.is_not(None),
+                Position.target_rate.is_not(None),
+            )
+        )
+    ).all()
+    return target_by_cost_line(list(rows))
 
 
 def _dec(value: object) -> str:
@@ -559,4 +603,5 @@ async def load_control_data(session: AsyncSession, project_id: uuid.UUID) -> Con
         unassigned_measured=unassigned_measured,
         unassigned_invoiced=unassigned_invoiced,
         pending_by_line=pending_by_line,
+        target=await _target_by_cost_line(session, project_id),
     )

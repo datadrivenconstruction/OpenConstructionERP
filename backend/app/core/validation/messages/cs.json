@@ -12,6 +12,10 @@
       "fail": "Prognóza je vyšší než plánovaná částka.",
       "suggestion": "Zkontrolujte zdroj prognózy; pokud očekáváte úspory, zadejte ruční prognózu s odůvodněním."
     },
+    "forecast_over_target": {
+      "fail": "Prognóza převyšuje cílové náklady položek tohoto nákladového řádku.",
+      "suggestion": "Porovnejte objednávky a subdodávky s cílovými cenami; pokud cíl už neplatí, zadejte ruční prognózu s odůvodněním."
+    },
     "partly_awarded": {
       "fail": "Zadána je jen část plánované částky; v prognóze mohou chybět práce, které se teprve zadají.",
       "suggestion": "Pokud je na této položce ještě co zadávat, zadejte ruční prognózu."
