@@ -80,6 +80,7 @@ import { usePreferencesStore } from '@/stores/usePreferencesStore';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { getErrorMessage, ApiError } from '@/shared/lib/api';
+import { useRoleReason } from '@/shared/lib/permissionReason';
 import { EditBuyerModal } from './EditBuyerModal';
 import { BuyerAccessLinkPanel } from '@/features/buyer-portal/BuyerAccessLinkPanel';
 import { DocumentPreviewModal } from './DocumentPreviewModal';
@@ -1730,6 +1731,8 @@ function LeadDetailDrawer({
     const normalized = userRole.toLowerCase();
     return ROLES_WITH_LEAD_DELETE.includes(normalized);
   }, [userRole]);
+  const editReason = useRoleReason(canEdit, 'editor');
+  const deleteReason = useRoleReason(canDelete, 'manager');
 
   const leadFromList = leads.find((l) => l.id === leadId);
   // Deep links (e.g. /property-dev?tab=leads&leadId=… from a Contact's
@@ -1854,17 +1857,17 @@ function LeadDetailDrawer({
           {t('propdev.convert', { defaultValue: 'Convert' })}
         </button>
       )}
-      {canDelete && (
-        <button
-          type="button"
-          onClick={() => setConfirmDelete(true)}
-          className="inline-flex items-center gap-1 rounded-lg border border-semantic-error/30 px-2 py-1 text-xs font-medium text-semantic-error hover:bg-semantic-error-bg"
-          data-testid="delete-lead-btn"
-        >
-          <Trash2 size={12} />
-          {t('common.delete', { defaultValue: 'Delete' })}
-        </button>
-      )}
+      <button
+        type="button"
+        onClick={() => setConfirmDelete(true)}
+        disabled={!canDelete}
+        title={deleteReason}
+        className="inline-flex items-center gap-1 rounded-lg border border-semantic-error/30 px-2 py-1 text-xs font-medium text-semantic-error hover:bg-semantic-error-bg disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent"
+        data-testid="delete-lead-btn"
+      >
+        <Trash2 size={12} />
+        {t('common.delete', { defaultValue: 'Delete' })}
+      </button>
     </div>
   );
 
@@ -1900,6 +1903,7 @@ function LeadDetailDrawer({
               className={inputCls}
               value={form.full_name}
               disabled={!canEdit}
+              title={editReason}
               onChange={(e) => setForm({ ...form, full_name: e.target.value })}
             />
           </label>
@@ -1912,6 +1916,7 @@ function LeadDetailDrawer({
               className={inputCls}
               value={form.email}
               disabled={!canEdit}
+              title={editReason}
               onChange={(e) => setForm({ ...form, email: e.target.value })}
             />
           </label>
@@ -1923,6 +1928,7 @@ function LeadDetailDrawer({
               className={inputCls}
               value={form.phone}
               disabled={!canEdit}
+              title={editReason}
               onChange={(e) => setForm({ ...form, phone: e.target.value })}
             />
           </label>
@@ -1934,6 +1940,7 @@ function LeadDetailDrawer({
               className="oe-select"
               value={form.source}
               disabled={!canEdit}
+              title={editReason}
               onChange={(e) =>
                 setForm({ ...form, source: e.target.value as LeadSource })
               }
@@ -1958,6 +1965,7 @@ function LeadDetailDrawer({
               className={inputCls}
               value={form.lead_score}
               disabled={!canEdit}
+              title={editReason}
               onChange={(e) =>
                 setForm({ ...form, lead_score: e.target.value })
               }
@@ -1980,6 +1988,7 @@ function LeadDetailDrawer({
               className="oe-select"
               value={form.status}
               disabled={!canEdit}
+              title={editReason}
               onChange={(e) =>
                 setForm({ ...form, status: e.target.value as LeadStatus })
               }
@@ -2004,23 +2013,23 @@ function LeadDetailDrawer({
             className="oe-textarea"
             value={form.notes}
             disabled={!canEdit}
+            title={editReason}
             onChange={(e) => setForm({ ...form, notes: e.target.value })}
           />
         </label>
 
-        {canEdit && (
-          <div className="flex justify-end">
-            <Button
-              variant="primary"
-              icon={updateMut.isPending ? <Loader2 size={14} /> : <Check size={14} />}
-              loading={updateMut.isPending}
-              onClick={() => updateMut.mutate()}
-              data-testid="save-lead-btn"
-            >
-              {t('common.save', { defaultValue: 'Save changes' })}
-            </Button>
-          </div>
-        )}
+        <div className="flex justify-end">
+          <Button
+            variant="primary"
+            icon={updateMut.isPending ? <Loader2 size={14} /> : <Check size={14} />}
+            loading={updateMut.isPending}
+            disabledReason={editReason}
+            onClick={() => updateMut.mutate()}
+            data-testid="save-lead-btn"
+          >
+            {t('common.save', { defaultValue: 'Save changes' })}
+          </Button>
+        </div>
 
         {lead.converted_to_buyer_id && (
           <Card padding="sm">

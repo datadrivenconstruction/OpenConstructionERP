@@ -249,11 +249,14 @@ describe('CuttingPage', () => {
     expect(api.applyPlan).not.toHaveBeenCalled();
   });
 
-  it('hides editing controls from a viewer', async () => {
+  it('shows a viewer the job actions disabled, saying an editor can', async () => {
     useAuthStore.setState({ userRole: 'viewer' });
     renderPage();
     expect(await screen.findByRole('heading', { name: 'Rebar 16 level 2' })).toBeTruthy();
-    expect(screen.queryByRole('button', { name: 'Optimise' })).toBeNull();
+    const optimise = screen.getByRole('button', { name: 'Optimise' });
+    expect(optimise).toBeDisabled();
+    expect(optimise).toHaveAttribute('title', 'Only an editor, manager or administrator can do this.');
+    // Creating a job is an inline form, still offered only to editors.
     expect(screen.queryByRole('button', { name: 'New job' })).toBeNull();
   });
 

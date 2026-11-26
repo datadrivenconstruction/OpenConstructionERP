@@ -43,6 +43,7 @@ import {
 } from '@/shared/ui';
 import { ConfirmDialog } from '@/shared/ui/ConfirmDialog';
 import { getErrorMessage } from '@/shared/lib/api';
+import { useRoleReason } from '@/shared/lib/permissionReason';
 import { fmtCurrency, fmtList, fmtNumber } from '@/shared/lib/formatters';
 import { normalizeRole, ROLE_RANK } from '@/shared/lib/roles';
 import { useAuthStore } from '@/stores/useAuthStore';
@@ -402,6 +403,7 @@ function JobList({
 
 function JobEditor({ jobId, projectId, canEdit }: { jobId: string; projectId: string; canEdit: boolean }) {
   const { t, i18n } = useTranslation();
+  const editReason = useRoleReason(canEdit, 'editor');
   const queryClient = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
   const jobQuery = useQuery({ queryKey: QK.job(jobId), queryFn: () => fetchJob(jobId) });
@@ -522,19 +524,17 @@ function JobEditor({ jobId, projectId, canEdit }: { jobId: string; projectId: st
               )}
             </div>
           </div>
-          {canEdit && (
-            <div className="flex flex-wrap gap-2">
-              <Button variant="secondary" size="sm" onClick={() => validateMut.mutate()} loading={validateMut.isPending}>
-                {t('cutting.validate', { defaultValue: 'Validate' })}
-              </Button>
-              <Button size="sm" icon={<Play size={14} />} onClick={() => optimiseMut.mutate()} loading={optimiseMut.isPending}>
-                {t('cutting.optimise', { defaultValue: 'Optimise' })}
-              </Button>
-              <Button variant="ghost" size="sm" icon={<Trash2 size={14} />} onClick={() => setConfirmDelete(true)}>
-                {t('cutting.delete_job', { defaultValue: 'Delete' })}
-              </Button>
-            </div>
-          )}
+          <div className="flex flex-wrap gap-2">
+            <Button variant="secondary" size="sm" disabledReason={editReason} onClick={() => validateMut.mutate()} loading={validateMut.isPending}>
+              {t('cutting.validate', { defaultValue: 'Validate' })}
+            </Button>
+            <Button size="sm" icon={<Play size={14} />} disabledReason={editReason} onClick={() => optimiseMut.mutate()} loading={optimiseMut.isPending}>
+              {t('cutting.optimise', { defaultValue: 'Optimise' })}
+            </Button>
+            <Button variant="ghost" size="sm" icon={<Trash2 size={14} />} disabledReason={editReason} onClick={() => setConfirmDelete(true)}>
+              {t('cutting.delete_job', { defaultValue: 'Delete' })}
+            </Button>
+          </div>
         </div>
         <SettingsForm job={job} canEdit={canEdit} onSaved={refresh} />
       </Card>
@@ -813,6 +813,7 @@ function PiecesTable({
   onChange: (rows: CuttingPiece[]) => void;
 }) {
   const { t } = useTranslation();
+  const editReason = useRoleReason(canEdit, 'editor');
   const [paste, setPaste] = useState('');
   const [showPaste, setShowPaste] = useState(false);
   const set = (i: number, patch: Partial<CuttingPiece>) => onChange(pieces.map((p, j) => (j === i ? { ...p, ...patch } : p)));
@@ -875,12 +876,12 @@ function PiecesTable({
           </tbody>
         </table>
       </div>
-      {canEdit && (
         <div className="flex flex-wrap gap-2">
           <Button
             variant="ghost"
             size="sm"
             icon={<Plus size={14} />}
+            disabledReason={editReason}
             onClick={() =>
               onChange([
                 ...pieces,
@@ -890,11 +891,10 @@ function PiecesTable({
           >
             {t('cutting.add_piece', { defaultValue: 'Add piece' })}
           </Button>
-          <Button variant="ghost" size="sm" icon={<ClipboardPaste size={14} />} onClick={() => setShowPaste((v) => !v)}>
+          <Button variant="ghost" size="sm" icon={<ClipboardPaste size={14} />} disabledReason={editReason} onClick={() => setShowPaste((v) => !v)}>
             {t('cutting.paste_rows', { defaultValue: 'Paste from spreadsheet' })}
           </Button>
         </div>
-      )}
       {showPaste && (
         <div className="space-y-2">
           <textarea

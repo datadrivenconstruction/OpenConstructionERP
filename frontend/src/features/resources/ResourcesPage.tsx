@@ -9,6 +9,7 @@ import {
   useQueryClient,
 } from '@tanstack/react-query';
 import { useHasPermission } from '@/shared/lib/permissionGates';
+import { roleAtLeast, useRoleReason } from '@/shared/lib/permissionReason';
 import clsx from 'clsx';
 import {
   Users,
@@ -2969,11 +2970,10 @@ function AssignmentsTab({
   const qc = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
   const userRole = useAuthStore((s) => s.userRole);
-  // Editor / manager / admin can mutate. Lower roles see a read-only view
-  // with the action buttons hidden (the backend RBAC will reject anyway,
-  // but we hide the affordance to keep the UI honest).
-  const canEdit =
-    userRole === 'admin' || userRole === 'manager' || userRole === 'editor';
+  // Editor / manager / admin can mutate. Lower roles see the same rows; the row
+  // actions stay, disabled with the reason (selection only feeds bulk delete).
+  const canEdit = roleAtLeast(userRole, 'editor');
+  const editReason = useRoleReason(canEdit, 'editor');
 
   const idToName = useMemo(() => {
     const m: Record<string, string> = {};
@@ -3451,14 +3451,14 @@ function AssignmentsTab({
                             </Badge>
                           </td>
                           <td className="text-right print:hidden">
-                            {canEdit ? (
                               <div className="inline-flex gap-1">
                                 <button
                                   type="button"
                                   onClick={() => setEditing(a)}
-                                  className="rounded p-1 text-content-secondary hover:text-oe-blue-text hover:bg-oe-blue-subtle"
+                                  className="rounded p-1 text-content-secondary hover:text-oe-blue-text hover:bg-oe-blue-subtle disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent"
                                   aria-label={t('common.edit', { defaultValue: 'Edit' })}
-                                  title={t('common.edit', { defaultValue: 'Edit' })}
+                                  title={editReason ?? t('common.edit', { defaultValue: 'Edit' })}
+                                  disabled={!canEdit}
                                   data-testid={`assign-edit-${a.id}`}
                                 >
                                   <Pencil size={14} />
@@ -3466,27 +3466,17 @@ function AssignmentsTab({
                                 <button
                                   type="button"
                                   onClick={() => setDeleteTarget(a)}
-                                  className="rounded p-1 text-content-secondary hover:text-semantic-error hover:bg-semantic-error-bg"
+                                  className="rounded p-1 text-content-secondary hover:text-semantic-error hover:bg-semantic-error-bg disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent"
                                   aria-label={t('common.delete', {
                                     defaultValue: 'Delete',
                                   })}
-                                  title={t('common.delete', { defaultValue: 'Delete' })}
+                                  title={editReason ?? t('common.delete', { defaultValue: 'Delete' })}
+                                  disabled={!canEdit}
                                   data-testid={`assign-delete-${a.id}`}
                                 >
                                   <Trash2 size={14} />
                                 </button>
                               </div>
-                            ) : (
-                              <span
-                                className="text-xs text-content-tertiary"
-                                title={t('resources.readonly_hint', {
-                                  defaultValue:
-                                    'Read-only - ask a manager to edit assignments',
-                                })}
-                              >
-                                —
-                              </span>
-                            )}
                           </td>
                         </tr>
                       );

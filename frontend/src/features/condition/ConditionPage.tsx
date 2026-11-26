@@ -33,6 +33,7 @@ import { RequiresProject } from '@/shared/auth/RequiresProject';
 import { getErrorMessage } from '@/shared/lib/api';
 import { fmtCurrency, fmtDate, fmtNumber, fmtPercent } from '@/shared/lib/formatters';
 import { useHasPermission } from '@/shared/lib/permissionGates';
+import { usePermissionReason } from '@/shared/lib/permissionReason';
 import { useToastStore } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { listSeries } from '@/features/price-index/api';
@@ -164,6 +165,8 @@ export function ConditionPage() {
   const projectId = useProjectContextStore((s) => s.activeProjectId) ?? '';
   const canCreate = useHasPermission('condition.create');
   const canApprove = useHasPermission('condition.approve');
+  const createReason = usePermissionReason('condition.create');
+  const approveReason = usePermissionReason('condition.approve');
   const [tab, setTab] = useState<Tab>('ratings');
   const [showModal, setShowModal] = useState(false);
   const thisYear = new Date().getFullYear();
@@ -284,18 +287,18 @@ export function ConditionPage() {
         )}
       </td>
       <td className="py-2 text-right">
-        {a.status === 'proposed' && canApprove && (
+        {a.status === 'proposed' && (
           <span className="inline-flex gap-1">
-            <Button size="sm" variant="secondary" icon={<CheckCircle2 size={14} />} onClick={() => actionMut.mutate({ id: a.id, patch: { status: 'approved' } })}>
+            <Button size="sm" variant="secondary" icon={<CheckCircle2 size={14} />} disabledReason={approveReason} onClick={() => actionMut.mutate({ id: a.id, patch: { status: 'approved' } })}>
               {t('condition.approve', { defaultValue: 'Approve' })}
             </Button>
-            <Button size="sm" variant="ghost" icon={<XCircle size={14} />} onClick={() => actionMut.mutate({ id: a.id, patch: { status: 'rejected' } })}>
+            <Button size="sm" variant="ghost" icon={<XCircle size={14} />} disabledReason={approveReason} onClick={() => actionMut.mutate({ id: a.id, patch: { status: 'rejected' } })}>
               {t('condition.reject', { defaultValue: 'Reject' })}
             </Button>
           </span>
         )}
-        {a.status === 'approved' && canCreate && (
-          <Button size="sm" variant="ghost" onClick={() => actionMut.mutate({ id: a.id, patch: { status: 'done' } })}>
+        {a.status === 'approved' && (
+          <Button size="sm" variant="ghost" disabledReason={createReason} onClick={() => actionMut.mutate({ id: a.id, patch: { status: 'done' } })}>
             {t('condition.mark_done', { defaultValue: 'Mark done' })}
           </Button>
         )}
@@ -312,8 +315,8 @@ export function ConditionPage() {
             'Rate assets and building elements on a configurable condition scale and turn the ratings into a costed multi-year maintenance plan.',
         })}
         actions={
-          canCreate && projectId ? (
-            <Button variant="primary" size="sm" icon={<Plus size={14} />} onClick={() => setShowModal(true)} data-testid="condition-new">
+          projectId ? (
+            <Button variant="primary" size="sm" icon={<Plus size={14} />} disabledReason={createReason} onClick={() => setShowModal(true)} data-testid="condition-new">
               {t('condition.new_rating', { defaultValue: 'Record condition' })}
             </Button>
           ) : undefined
@@ -389,16 +392,16 @@ export function ConditionPage() {
                         </td>
                         <td className="text-content-secondary">{a.assessed_at ? fmtDate(a.assessed_at) : '-'}</td>
                         <td className="text-right">
-                          {canApprove && (
-                            <button
-                              type="button"
-                              className="text-content-tertiary hover:text-semantic-error"
-                              aria-label={t('common.delete', { defaultValue: 'Delete' })}
-                              onClick={() => deleteMut.mutate(a.id)}
-                            >
-                              <Trash2 size={14} />
-                            </button>
-                          )}
+                          <button
+                            type="button"
+                            className="text-content-tertiary hover:text-semantic-error disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:text-content-tertiary"
+                            aria-label={t('common.delete', { defaultValue: 'Delete' })}
+                            title={approveReason}
+                            disabled={!canApprove}
+                            onClick={() => deleteMut.mutate(a.id)}
+                          >
+                            <Trash2 size={14} />
+                          </button>
                         </td>
                       </tr>
                     ))}
@@ -443,19 +446,15 @@ export function ConditionPage() {
                     {t('condition.include_proposed', { defaultValue: 'Include proposals not yet approved' })}
                   </label>
                   <span className="flex-1" />
-                  {canCreate && (
-                    <Button size="sm" variant="secondary" icon={<Wand2 size={14} />} loading={deriveMut.isPending} onClick={() => deriveMut.mutate()} data-testid="condition-derive">
-                      {t('condition.derive', { defaultValue: 'Propose actions from ratings' })}
-                    </Button>
-                  )}
+                  <Button size="sm" variant="secondary" icon={<Wand2 size={14} />} loading={deriveMut.isPending} disabledReason={createReason} onClick={() => deriveMut.mutate()} data-testid="condition-derive">
+                    {t('condition.derive', { defaultValue: 'Propose actions from ratings' })}
+                  </Button>
                   <Button size="sm" variant="secondary" icon={<Download size={14} />} loading={exportMut.isPending} onClick={() => exportMut.mutate()}>
                     {t('condition.export_csv', { defaultValue: 'Export CSV' })}
                   </Button>
-                  {canApprove && (
-                    <Button size="sm" variant="secondary" icon={<ShieldCheck size={14} />} loading={applyMut.isPending} onClick={() => applyMut.mutate()}>
-                      {t('condition.apply_assets', { defaultValue: 'Write to asset register' })}
-                    </Button>
-                  )}
+                  <Button size="sm" variant="secondary" icon={<ShieldCheck size={14} />} loading={applyMut.isPending} disabledReason={approveReason} onClick={() => applyMut.mutate()}>
+                    {t('condition.apply_assets', { defaultValue: 'Write to asset register' })}
+                  </Button>
                 </div>
               </Card>
 
