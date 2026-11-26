@@ -19,6 +19,7 @@
 
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useRoleGate } from '@/shared/lib/useRoleGate';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Plus,
@@ -96,6 +97,7 @@ interface SectionProps {
 
 export function MaterialsLabsSection({ projectId }: SectionProps) {
   const { t } = useTranslation();
+  const write = useRoleGate('editor');
   const qc = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
 
@@ -251,6 +253,7 @@ export function MaterialsLabsSection({ projectId }: SectionProps) {
             variant="primary"
             size="sm"
             icon={<Plus className="h-4 w-4" />}
+            disabledReason={write.reason}
             onClick={() => setShowCreateMaterial(true)}
           >
             {t('construction_control.material.new', { defaultValue: 'New material' })}
@@ -404,6 +407,7 @@ export function MaterialsLabsSection({ projectId }: SectionProps) {
                               <Button
                                 variant="secondary"
                                 size="sm"
+                                disabledReason={write.reason}
                                 onClick={() => setReviewTarget(m)}
                               >
                                 {t('construction_control.material.review', {
@@ -433,6 +437,7 @@ export function MaterialsLabsSection({ projectId }: SectionProps) {
             variant="primary"
             size="sm"
             icon={<Plus className="h-4 w-4" />}
+            disabledReason={write.reason}
             onClick={() => setShowCreateTest(true)}
           >
             {t('construction_control.test.new', { defaultValue: 'New test result' })}
@@ -590,6 +595,7 @@ export function MaterialsLabsSection({ projectId }: SectionProps) {
                               <Button
                                 variant="secondary"
                                 size="sm"
+                                disabledReason={write.reason}
                                 onClick={() => setRecordTarget(x)}
                               >
                                 {t('construction_control.test.record', {

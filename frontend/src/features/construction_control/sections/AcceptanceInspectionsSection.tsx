@@ -15,6 +15,7 @@
 
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useRoleGate } from '@/shared/lib/useRoleGate';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Plus,
@@ -76,6 +77,7 @@ interface SectionProps {
 
 export function AcceptanceInspectionsSection({ projectId }: SectionProps) {
   const { t } = useTranslation();
+  const write = useRoleGate('editor');
   const qc = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
   const [showCreate, setShowCreate] = useState(false);
@@ -175,6 +177,7 @@ export function AcceptanceInspectionsSection({ projectId }: SectionProps) {
             variant="primary"
             size="sm"
             icon={<Plus className="h-4 w-4" />}
+            disabledReason={write.reason}
             onClick={() => setShowCreate(true)}
           >
             {t('construction_control.inspection.new', { defaultValue: 'New inspection' })}
@@ -299,6 +302,7 @@ export function AcceptanceInspectionsSection({ projectId }: SectionProps) {
                               <Button
                                 variant="secondary"
                                 size="sm"
+                                disabledReason={write.reason}
                                 onClick={() => setResultTarget(insp)}
                               >
                                 {t('construction_control.inspection.record', {

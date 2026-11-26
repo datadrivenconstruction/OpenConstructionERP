@@ -17,6 +17,7 @@
 
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useRoleGate } from '@/shared/lib/useRoleGate';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Plus,
@@ -92,6 +93,8 @@ interface SectionProps {
 
 export function HoldWitnessSection({ projectId }: SectionProps) {
   const { t } = useTranslation();
+  const write = useRoleGate('editor');
+  const manage = useRoleGate('manager');
   const qc = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
   const [showCreate, setShowCreate] = useState(false);
@@ -193,6 +196,7 @@ export function HoldWitnessSection({ projectId }: SectionProps) {
           variant="primary"
           size="sm"
           icon={<Plus className="h-4 w-4" />}
+          disabledReason={write.reason}
           onClick={() => setShowCreate(true)}
         >
           {t('construction_control.gate.new', { defaultValue: 'New gate' })}
@@ -324,6 +328,7 @@ export function HoldWitnessSection({ projectId }: SectionProps) {
                               variant="secondary"
                               size="sm"
                               icon={<Unlock className="h-3.5 w-3.5" />}
+                              disabledReason={manage.reason}
                               onClick={() => setReleaseTarget(gate)}
                             >
                               {t('construction_control.gate.release', { defaultValue: 'Release' })}
@@ -334,6 +339,7 @@ export function HoldWitnessSection({ projectId }: SectionProps) {
                               variant="ghost"
                               size="sm"
                               icon={<Ban className="h-3.5 w-3.5" />}
+                              disabledReason={manage.reason}
                               onClick={() => setWaiveTarget(gate)}
                             >
                               {t('construction_control.gate.waive', { defaultValue: 'Waive' })}

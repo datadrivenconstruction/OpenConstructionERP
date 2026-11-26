@@ -15,6 +15,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter } from 'react-router-dom';
+import { useAuthStore } from '@/stores/useAuthStore';
 
 import { AsBuiltSection } from './AsBuiltSection';
 import * as api from '../api';
@@ -107,6 +108,7 @@ function renderSection() {
 
 beforeEach(() => {
   vi.clearAllMocks();
+  useAuthStore.setState({ userRole: 'admin' } as never);
   mockedApi.listAsBuilt.mockResolvedValue([]);
   mockedApi.listCriteria.mockResolvedValue([]);
 });

@@ -20,6 +20,7 @@ import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter } from 'react-router-dom';
+import { useAuthStore } from '@/stores/useAuthStore';
 import { useToastStore } from '@/stores/useToastStore';
 
 // Automock the whole feature-local API so every export is a vi.fn(). A partial
@@ -109,6 +110,7 @@ function renderSection() {
 
 describe('AcceptanceInspectionsSection', () => {
   beforeEach(() => {
+    useAuthStore.setState({ userRole: 'admin' } as never);
     vi.clearAllMocks();
     // Toasts are stored in a zustand store (rendered elsewhere by a Toaster),
     // so reset the store between tests and assert on its state, not the DOM.

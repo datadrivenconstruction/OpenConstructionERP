@@ -26,6 +26,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useRoleGate } from '@/shared/lib/useRoleGate';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Plus,
@@ -100,6 +101,8 @@ interface SectionProps {
 
 export function HandoverSection({ projectId }: SectionProps) {
   const { t } = useTranslation();
+  const write = useRoleGate('editor');
+  const manage = useRoleGate('manager');
   const qc = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
 
@@ -253,6 +256,7 @@ export function HandoverSection({ projectId }: SectionProps) {
           variant="primary"
           size="sm"
           icon={<Plus className="h-4 w-4" />}
+          disabledReason={write.reason}
           onClick={() => setShowCreate(true)}
         >
           {t('construction_control.handover.new', { defaultValue: 'New package' })}
@@ -441,6 +445,8 @@ function PackageDetail({
   revoking: boolean;
 }) {
   const { t } = useTranslation();
+  const write = useRoleGate('editor');
+  const manage = useRoleGate('manager');
 
   const gatesQuery = useQuery({
     queryKey: ['cc', 'handover-gates', pkg.id],
@@ -519,6 +525,7 @@ function PackageDetail({
               variant="secondary"
               size="sm"
               icon={<Boxes className="h-4 w-4" />}
+              disabledReason={write.reason}
               onClick={onAssemble}
               loading={assembling}
               disabled={assembling}
@@ -533,6 +540,7 @@ function PackageDetail({
               variant="secondary"
               size="sm"
               icon={<ShieldAlert className="h-4 w-4" />}
+              disabledReason={manage.reason}
               onClick={onOverride}
               data-testid="cc-handover-override"
             >
@@ -545,6 +553,7 @@ function PackageDetail({
               variant="primary"
               size="sm"
               icon={<Stamp className="h-4 w-4" />}
+              disabledReason={manage.reason}
               onClick={onIssue}
               disabled={!canIssue}
               title={
@@ -565,6 +574,7 @@ function PackageDetail({
               variant="ghost"
               size="sm"
               icon={<Undo2 className="h-4 w-4" />}
+              disabledReason={manage.reason}
               onClick={onRevoke}
               loading={revoking}
               disabled={revoking}
