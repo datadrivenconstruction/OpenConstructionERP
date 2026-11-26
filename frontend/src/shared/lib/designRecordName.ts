@@ -5,6 +5,7 @@ import type { TFunction } from 'i18next';
 type T = TFunction | ((key: string, options?: Record<string, unknown>) => unknown);
 
 const TAKEOFF = 'design_takeoff';
+const ESTIMATE = 'design_estimate';
 const ADDENDUM_RE = /^design_revision_quantities:(\d+)$/;
 const CHANGE_ORDER_RE = /^design_revision:(\d+)(?::([\s\S]*))?$/;
 const TOKEN_RE = /\[co:(\w+)(?:\|(\{[^\]]*\}))?\]/g;
@@ -13,6 +14,7 @@ export function designRecordName(t: T, name: string | null | undefined): string 
   if (!name) return '';
   const tt = t as (key: string, options?: Record<string, unknown>) => unknown;
   if (name === TAKEOFF) return String(tt('design.takeoff.boq_name'));
+  if (name === ESTIMATE) return String(tt('design.estimate.boq_name'));
   if (name.startsWith(`${TAKEOFF}:`)) {
     return String(tt('design.takeoff.package_name', { ifc_class: name.slice(TAKEOFF.length + 1) }));
   }

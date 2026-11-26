@@ -151,6 +151,8 @@ async def test_accept_with_change_order_carries_impact_and_elements(client):
     assert {p.id for p in await _positions(boq_id)} == before
     marker = [p for p in await _positions(boq_id) if p.unit == "section"]
     assert [m.metadata_["change_order_id"] for m in marker] == [co["id"]]
+    # the marker row carries a neutral token, rendered in the reader's language by the grid
+    assert marker[0].description == f'[co:in_estimate|{{"code": "{co["code"]}", "number": 2}}]'
 
 
 async def test_ask_declined_then_created_later_once(client):

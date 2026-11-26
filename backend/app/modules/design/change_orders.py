@@ -205,7 +205,7 @@ async def _mark_in_estimate(
             boq_id=est.boq_id,
             parent_id=None,
             ordinal=f"CO-{code}",
-            description=f"{code}: already in this estimate through design revision R{rev.number}",
+            description=co_token("in_estimate", code=code, number=rev.number),
             unit="section",
             quantity="0",
             unit_rate="0",

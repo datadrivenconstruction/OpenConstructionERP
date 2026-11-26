@@ -56,6 +56,17 @@ describe('designRecordName', () => {
     expect(designRecordText(de, null)).toBe('');
   });
 
+  it('renders the estimate-row token and the design estimate bill name', async () => {
+    const de = await tFor('de');
+    expect(designRecordText(await tFor('en'), '[co:in_estimate|{"code": "CO-007", "number": 3}]')).toBe(
+      'CO-007: already in this estimate through design revision R3',
+    );
+    expect(designRecordText(de, '[co:in_estimate|{"code": "CO-007", "number": 3}]')).toBe(
+      'CO-007: bereits in dieser Kalkulation durch Planungsrevision R3',
+    );
+    expect(designRecordName(de, 'design_estimate')).toBe('Planungskalkulation');
+  });
+
   it('leaves names a person typed, and old English addendum titles, as they are', async () => {
     const t = await tFor('de');
     expect(designRecordName(t, 'Design revision 2: quantity changes')).toBe('Design revision 2: quantity changes');

@@ -69,6 +69,7 @@ import { useFxRatesStore, getFxRate } from '@/stores/useFxRatesStore';
 import { isFormula, evaluateFormula } from './cellEditors';
 import { VariantPicker } from '@/features/costs/VariantPicker';
 import type { CostVariant, VariantStats } from '@/features/costs/api';
+import { designRecordText } from '@/shared/lib/designRecordName';
 
 /* ── Variant suffix stripper ──────────────────────────────────────────
  *  Legacy CWICR position-mode applies appended "(Variant: <label>)" /
@@ -1298,7 +1299,7 @@ export function DescriptionCellRenderer(params: ICellRendererParams) {
   // Strip legacy "(Variant: …)" trailing parenthetical — variant choice
   // is already displayed via the blue Variant pill on this row, so the
   // duplicated text is just noise on legacy applies.
-  const displayValue = stripVariantSuffix(value as string | null | undefined);
+  const displayValue = designRecordText(t as never, stripVariantSuffix(value as string | null | undefined));
 
   // Langtext mode: off keeps the single truncated Kurztext line; "first
   // lines" clamps Kurztext and Langtext to two lines each; full (or a row
