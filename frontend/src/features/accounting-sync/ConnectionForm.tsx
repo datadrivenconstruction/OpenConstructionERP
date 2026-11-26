@@ -101,6 +101,7 @@ export function ConnectionForm({
   catalog,
   pending,
   readOnly,
+  readOnlyReason,
   submitLabel,
   onSubmit,
   onCancel,
@@ -112,6 +113,8 @@ export function ConnectionForm({
   catalog: TemplateCatalog | undefined;
   pending: boolean;
   readOnly: boolean;
+  /** Why the form cannot be saved; the save button stays visible, disabled. */
+  readOnlyReason?: string;
   submitLabel: string;
   onSubmit: (body: ConnectionCreate & ConnectionUpdate) => void;
   onCancel?: () => void;
@@ -268,11 +271,9 @@ export function ConnectionForm({
             {t('common.cancel', { defaultValue: 'Cancel' })}
           </Button>
         )}
-        {!readOnly && (
-          <Button type="submit" variant="primary" loading={pending} disabled={!valid}>
-            {submitLabel}
-          </Button>
-        )}
+        <Button type="submit" variant="primary" loading={pending} disabled={!valid} disabledReason={readOnly ? readOnlyReason : undefined}>
+          {submitLabel}
+        </Button>
       </div>
     </form>
   );

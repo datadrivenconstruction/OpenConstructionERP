@@ -17,6 +17,7 @@ import { PageHeader } from '@/shared/ui/PageHeader';
 import { DateDisplay } from '@/shared/ui/DateDisplay';
 import { useConfirm } from '@/shared/hooks/useConfirm';
 import { useAuthStore } from '@/stores/useAuthStore';
+import { roleAtLeast, useRoleReason } from '@/shared/lib/permissionReason';
 import { useToastStore } from '@/stores/useToastStore';
 import { getErrorMessage } from '@/shared/lib/api';
 import { projectsApi } from '@/features/projects/api';
@@ -172,7 +173,10 @@ function ConnectionCard({ c, selected, onSelect }: { c: Connection; selected: bo
 export function AccountingSyncPage() {
   const { t } = useTranslation();
   const addToast = useToastStore((s) => s.addToast);
-  const isAdmin = useAuthStore((s) => s.userRole) === 'admin';
+  const userRole = useAuthStore((s) => s.userRole);
+  const isAdmin = userRole === 'admin';
+  const canPost = roleAtLeast(userRole, 'manager');
+  const adminReason = useRoleReason(isAdmin, 'admin');
   const { confirm, ...confirmProps } = useConfirm();
   const [params, setParams] = useSearchParams();
   const connectionsQ = useConnections();
@@ -230,11 +234,9 @@ export function AccountingSyncPage() {
           defaultValue: 'Send invoices and bills to your accounting software, or hand your accountant a file.',
         })}
         actions={
-          isAdmin ? (
-            <Button variant="primary" size="sm" icon={<Plus size={14} />} onClick={() => setAddOpen(true)}>
-              {t('accountingSync.add.title', { defaultValue: 'Add connection' })}
-            </Button>
-          ) : undefined
+          <Button variant="primary" size="sm" icon={<Plus size={14} />} disabledReason={adminReason} onClick={() => setAddOpen(true)}>
+            {t('accountingSync.add.title', { defaultValue: 'Add connection' })}
+          </Button>
         }
       />
 
@@ -249,11 +251,9 @@ export function AccountingSyncPage() {
               defaultValue: 'Connect Xero or QBO for a live sync, or set up DATEV, a journal or SAF-T to export files.',
             })}
             action={
-              isAdmin ? (
-                <Button variant="primary" icon={<Plus size={14} />} onClick={() => setAddOpen(true)}>
-                  {t('accountingSync.add.title', { defaultValue: 'Add connection' })}
-                </Button>
-              ) : undefined
+              <Button variant="primary" icon={<Plus size={14} />} disabledReason={adminReason} onClick={() => setAddOpen(true)}>
+                {t('accountingSync.add.title', { defaultValue: 'Add connection' })}
+              </Button>
             }
           />
           {!isAdmin && (
@@ -280,7 +280,7 @@ export function AccountingSyncPage() {
                 idPrefix="accounting-sync"
               />
               <div role="tabpanel" id={tabIds('accounting-sync').panelId(activeTab)} aria-labelledby={tabIds('accounting-sync').tabId(activeTab)}>
-                {activeTab === 'sync' && <SyncTab connection={selected} range={range} onRange={setRange} canEdit={isAdmin} />}
+                {activeTab === 'sync' && <SyncTab connection={selected} range={range} onRange={setRange} canEdit={canPost} />}
                 {activeTab === 'mapping' && <MappingTab connectionId={selected.id} canEdit={isAdmin} />}
                 {activeTab === 'exports' && <ExportsTab connection={selected} range={range} onRange={setRange} />}
                 {activeTab === 'settings' && (
@@ -298,6 +298,7 @@ export function AccountingSyncPage() {
                       catalog={catalogQ.data}
                       pending={updateMut.isPending}
                       readOnly={!isAdmin}
+                      readOnlyReason={adminReason}
                       submitLabel={t('accountingSync.settings.save', { defaultValue: 'Save settings' })}
                       onSubmit={(body) =>
                         updateMut.mutate(
@@ -309,7 +310,7 @@ export function AccountingSyncPage() {
                         )
                       }
                       extraActions={
-                        isAdmin ? (
+                        (
                           <>
                             {LIVE_PROVIDERS.includes(selected.provider) && (
                               <Button
@@ -317,6 +318,7 @@ export function AccountingSyncPage() {
                                 variant="secondary"
                                 icon={<KeyRound size={14} />}
                                 loading={authMut.isPending}
+                                disabledReason={adminReason}
                                 disabled={!selected.client_id || !selected.has_client_secret}
                                 onClick={() =>
                                   authMut.mutate(selected.id, {
@@ -330,11 +332,11 @@ export function AccountingSyncPage() {
                                   : t('accountingSync.settings.authorise', { defaultValue: 'Authorise' })}
                               </Button>
                             )}
-                            <Button type="button" variant="ghost" icon={<Trash2 size={14} />} onClick={() => handleDelete(selected)}>
+                            <Button type="button" variant="ghost" icon={<Trash2 size={14} />} disabledReason={adminReason} onClick={() => handleDelete(selected)}>
                               {t('accountingSync.delete.confirm', { defaultValue: 'Delete' })}
                             </Button>
                           </>
-                        ) : undefined
+                        )
                       }
                     />
                     {LIVE_PROVIDERS.includes(selected.provider) && (!selected.client_id || !selected.has_client_secret) && (

@@ -12,6 +12,7 @@ import { Button, Card, ConfirmDialog } from '@/shared/ui';
 import { useConfirm } from '@/shared/hooks/useConfirm';
 import { useToastStore } from '@/stores/useToastStore';
 import { getErrorMessage } from '@/shared/lib/api';
+import { useRoleReason } from '@/shared/lib/permissionReason';
 import {
   applyTemplate,
   saveMappings,
@@ -27,6 +28,7 @@ import { compactInputCls, inputCls, warnInputCls } from './ui';
 
 export function MappingTab({ connectionId, canEdit }: { connectionId: string; canEdit: boolean }) {
   const { t } = useTranslation();
+  const editReason = useRoleReason(canEdit, 'admin');
   const addToast = useToastStore((s) => s.addToast);
   const { confirm, ...confirmProps } = useConfirm();
   const q = useMappings(connectionId);
@@ -89,7 +91,7 @@ export function MappingTab({ connectionId, canEdit }: { connectionId: string; ca
               ))}
             </select>
           </label>
-          <Button variant="secondary" onClick={handleApply} disabled={!canEdit || !template} loading={applyMut.isPending}>
+          <Button variant="secondary" onClick={handleApply} disabledReason={editReason} disabled={!canEdit || !template} loading={applyMut.isPending}>
             {t('accountingSync.mapping.apply', { defaultValue: 'Apply template' })}
           </Button>
         </div>
@@ -186,10 +188,12 @@ export function MappingTab({ connectionId, canEdit }: { connectionId: string; ca
         </div>
       </Card>
 
-      {canEdit && (
+      {(
         <div className="flex justify-end">
           <Button
             variant="primary"
+            disabledReason={editReason}
+            disabled={!canEdit}
             loading={saveMut.isPending}
             onClick={() =>
               saveMut.mutate(undefined, {

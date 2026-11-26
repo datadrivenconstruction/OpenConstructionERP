@@ -14,6 +14,7 @@ import { Button, Card, EmptyState } from '@/shared/ui';
 import { DateDisplay } from '@/shared/ui/DateDisplay';
 import { useToastStore } from '@/stores/useToastStore';
 import { getErrorMessage } from '@/shared/lib/api';
+import { useRoleReason } from '@/shared/lib/permissionReason';
 import {
   LIVE_PROVIDERS,
   LOG_PAGE_SIZE,
@@ -80,6 +81,7 @@ export function SyncTab({
   const log = logQ.data;
   const total = log?.total ?? 0;
   const blocked = needsAuthorisation(connection);
+  const postReason = useRoleReason(canEdit, 'manager');
 
   return (
     <div className="space-y-4" data-testid="accounting-sync-sync">
@@ -89,6 +91,7 @@ export function SyncTab({
             <Button
               variant="primary"
               icon={<Upload size={14} />}
+              disabledReason={postReason}
               disabled={!canEdit || blocked || selected.size === 0}
               loading={pushMut.isPending}
               onClick={() =>
@@ -101,6 +104,7 @@ export function SyncTab({
             <Button
               variant="secondary"
               icon={<Download size={14} />}
+              disabledReason={postReason}
               disabled={!canEdit || blocked}
               loading={pullMut.isPending}
               onClick={() => pullMut.mutate(undefined, { onSuccess: resultToast, onError })}
@@ -263,9 +267,10 @@ export function SyncTab({
                     <td className="max-w-[18rem] pr-3 text-content-secondary">{e.error_reason || '—'}</td>
                     <td className="pr-3 text-right tabular-nums text-content-secondary">{e.attempt}</td>
                     <td className="text-right">
-                      {canRetry(e) && canEdit && (
+                      {canRetry(e) && (
                         <Button
                           variant="ghost"
+                          disabledReason={postReason}
                           size="sm"
                           icon={<RotateCcw size={14} />}
                           loading={retryMut.isPending && retryMut.variables === e.id}
