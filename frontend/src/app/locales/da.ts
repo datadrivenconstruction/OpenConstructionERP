@@ -69557,6 +69557,9 @@ const resource = {
     "validation_findings.severity_error": "Fejl",
     "validation_findings.severity_warning": "Advarsel",
     "validation_findings.severity_info": "Bemærkning",
+    "permissions.reason.editor_only": "Kun en redaktør, leder eller administrator kan gøre dette.",
+    "permissions.reason.manager_only": "Kun en leder eller administrator kan gøre dette.",
+    "permissions.reason.admin_only": "Kun en administrator kan gøre dette.",
   }
 } as { translation: Record<string, string> };
 

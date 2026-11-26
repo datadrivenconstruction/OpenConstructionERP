@@ -71776,6 +71776,9 @@ const resource = {
     "validation_findings.severity_error": "错误",
     "validation_findings.severity_warning": "警告",
     "validation_findings.severity_info": "备注",
+    "permissions.reason.editor_only": "只有编辑者、经理或管理员可以执行此操作。",
+    "permissions.reason.manager_only": "只有经理或管理员可以执行此操作。",
+    "permissions.reason.admin_only": "只有管理员可以执行此操作。",
   }
 } as { translation: Record<string, string> };
 

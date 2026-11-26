@@ -69668,6 +69668,9 @@ const resource = {
     "validation_findings.severity_error": "Ката",
     "validation_findings.severity_warning": "Эскертүү",
     "validation_findings.severity_info": "Эскертме",
+    "permissions.reason.editor_only": "Муну редактор, менеджер же администратор гана жасай алат.",
+    "permissions.reason.manager_only": "Муну менеджер же администратор гана жасай алат.",
+    "permissions.reason.admin_only": "Муну администратор гана жасай алат.",
   }
 } as { translation: Record<string, string> };
 

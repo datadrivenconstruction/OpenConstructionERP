@@ -72502,6 +72502,9 @@ const resource = {
     "validation_findings.severity_error": "Erro",
     "validation_findings.severity_warning": "Aviso",
     "validation_findings.severity_info": "Nota",
+    "permissions.reason.editor_only": "Apenas um editor, gestor ou administrador pode fazer isto.",
+    "permissions.reason.manager_only": "Apenas um gestor ou administrador pode fazer isto.",
+    "permissions.reason.admin_only": "Apenas um administrador pode fazer isto.",
   }
 } as { translation: Record<string, string> };
 

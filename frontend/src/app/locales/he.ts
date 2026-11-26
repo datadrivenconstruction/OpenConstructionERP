@@ -69890,6 +69890,9 @@ const resource = {
     "validation_findings.severity_error": "שגיאה",
     "validation_findings.severity_warning": "אזהרה",
     "validation_findings.severity_info": "הערה",
+    "permissions.reason.editor_only": "רק עורך, מנהל או מנהל מערכת יכולים לבצע פעולה זו.",
+    "permissions.reason.manager_only": "רק מנהל או מנהל מערכת יכולים לבצע פעולה זו.",
+    "permissions.reason.admin_only": "רק מנהל מערכת יכול לבצע פעולה זו.",
   }
 } as { translation: Record<string, string> };
 

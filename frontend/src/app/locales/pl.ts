@@ -71163,6 +71163,9 @@ const resource = {
     "validation_findings.severity_error": "Błąd",
     "validation_findings.severity_warning": "Ostrzeżenie",
     "validation_findings.severity_info": "Uwaga",
+    "permissions.reason.editor_only": "Tę czynność może wykonać tylko redaktor, kierownik lub administrator.",
+    "permissions.reason.manager_only": "Tę czynność może wykonać tylko kierownik lub administrator.",
+    "permissions.reason.admin_only": "Tę czynność może wykonać tylko administrator.",
   }
 } as { translation: Record<string, string> };
 

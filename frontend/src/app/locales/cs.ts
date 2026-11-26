@@ -70902,6 +70902,9 @@ const resource = {
     "validation_findings.severity_error": "Chyba",
     "validation_findings.severity_warning": "Varování",
     "validation_findings.severity_info": "Poznámka",
+    "permissions.reason.editor_only": "Tuto akci může provést pouze editor, manažer nebo správce.",
+    "permissions.reason.manager_only": "Tuto akci může provést pouze manažer nebo správce.",
+    "permissions.reason.admin_only": "Tuto akci může provést pouze správce.",
   }
 } as { translation: Record<string, string> };
 

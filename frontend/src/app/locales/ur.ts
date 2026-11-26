@@ -69517,6 +69517,9 @@ const resource = {
     "validation_findings.severity_error": "خرابی",
     "validation_findings.severity_warning": "انتباہ",
     "validation_findings.severity_info": "نوٹ",
+    "permissions.reason.editor_only": "صرف ایڈیٹر، مینیجر یا ایڈمنسٹریٹر ہی یہ کر سکتا ہے۔",
+    "permissions.reason.manager_only": "صرف مینیجر یا ایڈمنسٹریٹر ہی یہ کر سکتا ہے۔",
+    "permissions.reason.admin_only": "صرف ایڈمنسٹریٹر ہی یہ کر سکتا ہے۔",
   }
 } as { translation: Record<string, string> };
 

@@ -72266,6 +72266,9 @@ const resource = {
     "map.ui.ctrl_scroll": "按 Ctrl 並捲動以縮放地圖",
     "map.ui.cmd_scroll": "按 ⌘ 並捲動以縮放地圖",
     "map.ui.two_fingers": "用兩隻手指移動地圖",
+    "permissions.reason.editor_only": "只有編輯者、經理或管理員可以執行此操作。",
+    "permissions.reason.manager_only": "只有經理或管理員可以執行此操作。",
+    "permissions.reason.admin_only": "只有管理員可以執行此操作。",
   }
 } as { translation: Record<string, string> };
 

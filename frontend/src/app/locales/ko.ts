@@ -69899,6 +69899,9 @@ const resource = {
     "validation_findings.severity_error": "오류",
     "validation_findings.severity_warning": "경고",
     "validation_findings.severity_info": "참고",
+    "permissions.reason.editor_only": "편집자, 관리자 또는 시스템 관리자만 이 작업을 수행할 수 있습니다.",
+    "permissions.reason.manager_only": "관리자 또는 시스템 관리자만 이 작업을 수행할 수 있습니다.",
+    "permissions.reason.admin_only": "시스템 관리자만 이 작업을 수행할 수 있습니다.",
   }
 } as { translation: Record<string, string> };
 

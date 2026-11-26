@@ -72227,6 +72227,9 @@ const resource = {
     "validation_findings.severity_error": "Fehler",
     "validation_findings.severity_warning": "Warnung",
     "validation_findings.severity_info": "Hinweis",
+    "permissions.reason.editor_only": "Nur Bearbeiter, Manager oder Administratoren können diese Aktion ausführen.",
+    "permissions.reason.manager_only": "Nur Manager oder Administratoren können diese Aktion ausführen.",
+    "permissions.reason.admin_only": "Nur Administratoren können diese Aktion ausführen.",
   }
 } as { translation: Record<string, string> };
 

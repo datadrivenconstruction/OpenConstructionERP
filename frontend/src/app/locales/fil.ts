@@ -69515,6 +69515,9 @@ const resource = {
     "validation_findings.severity_error": "Error",
     "validation_findings.severity_warning": "Babala",
     "validation_findings.severity_info": "Paalala",
+    "permissions.reason.editor_only": "Isang editor, manager o administrator lamang ang makakagawa nito.",
+    "permissions.reason.manager_only": "Isang manager o administrator lamang ang makakagawa nito.",
+    "permissions.reason.admin_only": "Isang administrator lamang ang makakagawa nito.",
   }
 } as { translation: Record<string, string> };
 

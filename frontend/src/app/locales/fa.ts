@@ -69511,6 +69511,9 @@ const resource = {
     "validation_findings.severity_error": "خطا",
     "validation_findings.severity_warning": "هشدار",
     "validation_findings.severity_info": "یادداشت",
+    "permissions.reason.editor_only": "فقط ویرایشگر، مدیر یا مدیر سیستم می‌تواند این کار را انجام دهد.",
+    "permissions.reason.manager_only": "فقط مدیر یا مدیر سیستم می‌تواند این کار را انجام دهد.",
+    "permissions.reason.admin_only": "فقط مدیر سیستم می‌تواند این کار را انجام دهد.",
   }
 } as { translation: Record<string, string> };
 

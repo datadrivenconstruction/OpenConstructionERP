@@ -69507,6 +69507,9 @@ const resource = {
     "validation_findings.severity_error": "Viga",
     "validation_findings.severity_warning": "Hoiatus",
     "validation_findings.severity_info": "Märkus",
+    "permissions.reason.editor_only": "Seda saab teha ainult toimetaja, juht või administraator.",
+    "permissions.reason.manager_only": "Seda saab teha ainult juht või administraator.",
+    "permissions.reason.admin_only": "Seda saab teha ainult administraator.",
   }
 } as { translation: Record<string, string> };
 

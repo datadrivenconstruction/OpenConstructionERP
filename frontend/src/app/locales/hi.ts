@@ -69554,6 +69554,9 @@ const resource = {
     "validation_findings.severity_error": "त्रुटि",
     "validation_findings.severity_warning": "चेतावनी",
     "validation_findings.severity_info": "टिप्पणी",
+    "permissions.reason.editor_only": "केवल संपादक, प्रबंधक या व्यवस्थापक ही यह कर सकते हैं।",
+    "permissions.reason.manager_only": "केवल प्रबंधक या व्यवस्थापक ही यह कर सकते हैं।",
+    "permissions.reason.admin_only": "केवल व्यवस्थापक ही यह कर सकते हैं।",
   }
 } as { translation: Record<string, string> };
 

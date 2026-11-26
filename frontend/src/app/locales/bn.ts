@@ -69821,6 +69821,9 @@ const resource = {
     "validation_findings.severity_error": "ত্রুটি",
     "validation_findings.severity_warning": "সতর্কতা",
     "validation_findings.severity_info": "নোট",
+    "permissions.reason.editor_only": "শুধুমাত্র একজন সম্পাদক, ম্যানেজার বা অ্যাডমিনিস্ট্রেটর এটি করতে পারেন।",
+    "permissions.reason.manager_only": "শুধুমাত্র একজন ম্যানেজার বা অ্যাডমিনিস্ট্রেটর এটি করতে পারেন।",
+    "permissions.reason.admin_only": "শুধুমাত্র একজন অ্যাডমিনিস্ট্রেটর এটি করতে পারেন।",
   }
 } as { translation: Record<string, string> };
 

@@ -70810,6 +70810,9 @@ const resource = {
     "validation_findings.severity_error": "Errore",
     "validation_findings.severity_warning": "Avviso",
     "validation_findings.severity_info": "Nota",
+    "permissions.reason.editor_only": "Solo un editor, un responsabile o un amministratore può eseguire questa azione.",
+    "permissions.reason.manager_only": "Solo un responsabile o un amministratore può eseguire questa azione.",
+    "permissions.reason.admin_only": "Solo un amministratore può eseguire questa azione.",
   }
 } as { translation: Record<string, string> };
 

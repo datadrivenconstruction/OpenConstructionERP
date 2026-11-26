@@ -70815,6 +70815,9 @@ const resource = {
     "validation_findings.severity_error": "エラー",
     "validation_findings.severity_warning": "警告",
     "validation_findings.severity_info": "注記",
+    "permissions.reason.editor_only": "この操作は編集者、マネージャー、または管理者のみが実行できます。",
+    "permissions.reason.manager_only": "この操作はマネージャーまたは管理者のみが実行できます。",
+    "permissions.reason.admin_only": "この操作は管理者のみが実行できます。",
   }
 } as { translation: Record<string, string> };
 

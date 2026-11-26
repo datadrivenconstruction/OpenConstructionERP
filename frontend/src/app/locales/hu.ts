@@ -72116,6 +72116,9 @@ const resource = {
     "validation_findings.severity_error": "Hiba",
     "validation_findings.severity_warning": "Figyelmeztetés",
     "validation_findings.severity_info": "Megjegyzés",
+    "permissions.reason.editor_only": "Ezt csak szerkesztő, vezető vagy rendszergazda teheti meg.",
+    "permissions.reason.manager_only": "Ezt csak vezető vagy rendszergazda teheti meg.",
+    "permissions.reason.admin_only": "Ezt csak rendszergazda teheti meg.",
   }
 } as { translation: Record<string, string> };
 

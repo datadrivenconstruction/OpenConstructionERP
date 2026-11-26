@@ -63852,6 +63852,9 @@ const resource = {
     "validation_findings.severity_error": "Error",
     "validation_findings.severity_warning": "Warning",
     "validation_findings.severity_info": "Note",
+    "permissions.reason.editor_only": "Only an editor, manager or administrator can do this.",
+    "permissions.reason.manager_only": "Only a manager or administrator can do this.",
+    "permissions.reason.admin_only": "Only an administrator can do this.",
   }
 } as { translation: Record<string, string> };
 

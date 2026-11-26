@@ -69291,6 +69291,9 @@ const resource = {
     "validation_findings.severity_error": "Lỗi",
     "validation_findings.severity_warning": "Cảnh báo",
     "validation_findings.severity_info": "Ghi chú",
+    "permissions.reason.editor_only": "Chỉ biên tập viên, quản lý hoặc quản trị viên mới có thể thực hiện thao tác này.",
+    "permissions.reason.manager_only": "Chỉ quản lý hoặc quản trị viên mới có thể thực hiện thao tác này.",
+    "permissions.reason.admin_only": "Chỉ quản trị viên mới có thể thực hiện thao tác này.",
   }
 } as { translation: Record<string, string> };
 

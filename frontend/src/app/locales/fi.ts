@@ -69561,6 +69561,9 @@ const resource = {
     "validation_findings.severity_error": "Virhe",
     "validation_findings.severity_warning": "Varoitus",
     "validation_findings.severity_info": "Huomautus",
+    "permissions.reason.editor_only": "Vain muokkaaja, esihenkilö tai ylläpitäjä voi tehdä tämän.",
+    "permissions.reason.manager_only": "Vain esihenkilö tai ylläpitäjä voi tehdä tämän.",
+    "permissions.reason.admin_only": "Vain ylläpitäjä voi tehdä tämän.",
   }
 } as { translation: Record<string, string> };
 

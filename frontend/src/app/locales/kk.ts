@@ -69512,6 +69512,9 @@ const resource = {
     "validation_findings.severity_error": "Қате",
     "validation_findings.severity_warning": "Ескерту",
     "validation_findings.severity_info": "Ескертпе",
+    "permissions.reason.editor_only": "Мұны тек редактор, менеджер немесе әкімші жасай алады.",
+    "permissions.reason.manager_only": "Мұны тек менеджер немесе әкімші жасай алады.",
+    "permissions.reason.admin_only": "Мұны тек әкімші жасай алады.",
   }
 } as { translation: Record<string, string> };
 

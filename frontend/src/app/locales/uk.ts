@@ -71710,6 +71710,9 @@ const resource = {
     "validation_findings.severity_error": "Помилка",
     "validation_findings.severity_warning": "Попередження",
     "validation_findings.severity_info": "Примітка",
+    "permissions.reason.editor_only": "Це може зробити лише редактор, менеджер або адміністратор.",
+    "permissions.reason.manager_only": "Це може зробити лише менеджер або адміністратор.",
+    "permissions.reason.admin_only": "Це може зробити лише адміністратор.",
   }
 } as { translation: Record<string, string> };
 

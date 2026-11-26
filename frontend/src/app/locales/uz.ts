@@ -70483,6 +70483,9 @@ const resource = {
     "validation_findings.severity_error": "Xato",
     "validation_findings.severity_warning": "Ogohlantirish",
     "validation_findings.severity_info": "Izoh",
+    "permissions.reason.editor_only": "Buni faqat muharrir, menejer yoki administrator bajara oladi.",
+    "permissions.reason.manager_only": "Buni faqat menejer yoki administrator bajara oladi.",
+    "permissions.reason.admin_only": "Buni faqat administrator bajara oladi.",
   }
 } as { translation: Record<string, string> };
 

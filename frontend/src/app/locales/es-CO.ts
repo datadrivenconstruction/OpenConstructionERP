@@ -62435,6 +62435,9 @@ const resource = {
     "data_paths.ov_gap_not_installed": "{{module}} no está instalado, así que {{entity}} no fluye",
     "data_paths.ov_gap_no_access": "No tiene acceso a {{entity}} en {{module}}",
     "data_paths.ov_gap_stale": "{{entity}} en {{module}} cambió tras copiarse: {{count}}",
+    "permissions.reason.editor_only": "Solo un editor, un gerente o un administrador puede hacer esto.",
+    "permissions.reason.manager_only": "Solo un gerente o un administrador puede hacer esto.",
+    "permissions.reason.admin_only": "Solo un administrador puede hacer esto.",
     // --- /Draft lender preparation ---
   }
 } as { translation: Record<string, string> };

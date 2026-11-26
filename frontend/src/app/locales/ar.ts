@@ -72781,6 +72781,9 @@ const resource = {
     "validation_findings.severity_error": "خطأ",
     "validation_findings.severity_warning": "تحذير",
     "validation_findings.severity_info": "ملاحظة",
+    "permissions.reason.editor_only": "لا يمكن تنفيذ هذا الإجراء إلا من قبل محرر أو مدير أو مسؤول النظام.",
+    "permissions.reason.manager_only": "لا يمكن تنفيذ هذا الإجراء إلا من قبل مدير أو مسؤول النظام.",
+    "permissions.reason.admin_only": "لا يمكن تنفيذ هذا الإجراء إلا من قبل مسؤول النظام.",
   }
 } as { translation: Record<string, string> };
 

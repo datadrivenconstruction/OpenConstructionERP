@@ -69557,6 +69557,9 @@ const resource = {
     "validation_findings.severity_error": "Feil",
     "validation_findings.severity_warning": "Advarsel",
     "validation_findings.severity_info": "Merknad",
+    "permissions.reason.editor_only": "Bare en redaktør, leder eller administrator kan gjøre dette.",
+    "permissions.reason.manager_only": "Bare en leder eller administrator kan gjøre dette.",
+    "permissions.reason.admin_only": "Bare en administrator kan gjøre dette.",
   }
 } as { translation: Record<string, string> };
 

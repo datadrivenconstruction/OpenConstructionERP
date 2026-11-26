@@ -69517,6 +69517,9 @@ const resource = {
     "validation_findings.severity_error": "Σφάλμα",
     "validation_findings.severity_warning": "Προειδοποίηση",
     "validation_findings.severity_info": "Σημείωση",
+    "permissions.reason.editor_only": "Μόνο συντάκτης, διαχειριστής έργου ή διαχειριστής συστήματος μπορεί να το κάνει αυτό.",
+    "permissions.reason.manager_only": "Μόνο διαχειριστής έργου ή διαχειριστής συστήματος μπορεί να το κάνει αυτό.",
+    "permissions.reason.admin_only": "Μόνο ο διαχειριστής συστήματος μπορεί να το κάνει αυτό.",
   }
 } as { translation: Record<string, string> };
 

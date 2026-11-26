@@ -70432,6 +70432,9 @@ const resource = {
     "validation_findings.severity_error": "Hata",
     "validation_findings.severity_warning": "Uyarı",
     "validation_findings.severity_info": "Not",
+    "permissions.reason.editor_only": "Bunu yalnızca bir editör, yönetici veya sistem yöneticisi yapabilir.",
+    "permissions.reason.manager_only": "Bunu yalnızca bir yönetici veya sistem yöneticisi yapabilir.",
+    "permissions.reason.admin_only": "Bunu yalnızca bir sistem yöneticisi yapabilir.",
   }
 } as { translation: Record<string, string> };
 

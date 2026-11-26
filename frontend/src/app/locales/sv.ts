@@ -70172,6 +70172,9 @@ const resource = {
     "validation_findings.severity_error": "Fel",
     "validation_findings.severity_warning": "Varning",
     "validation_findings.severity_info": "Notering",
+    "permissions.reason.editor_only": "Endast en redaktör, chef eller administratör kan göra detta.",
+    "permissions.reason.manager_only": "Endast en chef eller administratör kan göra detta.",
+    "permissions.reason.admin_only": "Endast en administratör kan göra detta.",
   }
 } as { translation: Record<string, string> };
 

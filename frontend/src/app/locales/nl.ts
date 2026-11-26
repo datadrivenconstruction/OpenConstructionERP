@@ -70438,6 +70438,9 @@ const resource = {
     "validation_findings.severity_error": "Fout",
     "validation_findings.severity_warning": "Waarschuwing",
     "validation_findings.severity_info": "Opmerking",
+    "permissions.reason.editor_only": "Alleen een redacteur, manager of beheerder kan dit doen.",
+    "permissions.reason.manager_only": "Alleen een manager of beheerder kan dit doen.",
+    "permissions.reason.admin_only": "Alleen een beheerder kan dit doen.",
   }
 } as { translation: Record<string, string> };
 

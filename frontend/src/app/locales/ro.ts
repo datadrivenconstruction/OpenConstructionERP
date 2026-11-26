@@ -69928,6 +69928,9 @@ const resource = {
     "validation_findings.severity_error": "Eroare",
     "validation_findings.severity_warning": "Avertisment",
     "validation_findings.severity_info": "Notă",
+    "permissions.reason.editor_only": "Doar un editor, un manager sau un administrator poate face acest lucru.",
+    "permissions.reason.manager_only": "Doar un manager sau un administrator poate face acest lucru.",
+    "permissions.reason.admin_only": "Doar un administrator poate face acest lucru.",
   }
 } as { translation: Record<string, string> };
 

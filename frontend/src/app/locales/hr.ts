@@ -69929,6 +69929,9 @@ const resource = {
     "validation_findings.severity_error": "Pogreška",
     "validation_findings.severity_warning": "Upozorenje",
     "validation_findings.severity_info": "Napomena",
+    "permissions.reason.editor_only": "Ovo može učiniti samo urednik, voditelj ili administrator.",
+    "permissions.reason.manager_only": "Ovo može učiniti samo voditelj ili administrator.",
+    "permissions.reason.admin_only": "Ovo može učiniti samo administrator.",
   }
 } as { translation: Record<string, string> };
 

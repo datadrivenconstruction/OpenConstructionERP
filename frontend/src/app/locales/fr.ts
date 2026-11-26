@@ -72509,6 +72509,9 @@ const resource = {
     "validation_findings.severity_error": "Erreur",
     "validation_findings.severity_warning": "Avertissement",
     "validation_findings.severity_info": "Remarque",
+    "permissions.reason.editor_only": "Seul un éditeur, un responsable ou un administrateur peut effectuer cette action.",
+    "permissions.reason.manager_only": "Seul un responsable ou un administrateur peut effectuer cette action.",
+    "permissions.reason.admin_only": "Seul un administrateur peut effectuer cette action.",
   }
 } as { translation: Record<string, string> };
 

@@ -72866,6 +72866,9 @@ const resource = {
     "validation_findings.severity_error": "Ошибка",
     "validation_findings.severity_warning": "Предупреждение",
     "validation_findings.severity_info": "Примечание",
+    "permissions.reason.editor_only": "Это может сделать только редактор, менеджер или администратор.",
+    "permissions.reason.manager_only": "Это может сделать только менеджер или администратор.",
+    "permissions.reason.admin_only": "Это может сделать только администратор.",
   }
 } as { translation: Record<string, string> };
 

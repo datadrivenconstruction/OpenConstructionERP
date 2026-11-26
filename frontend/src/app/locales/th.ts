@@ -69283,6 +69283,9 @@ const resource = {
     "validation_findings.severity_error": "ข้อผิดพลาด",
     "validation_findings.severity_warning": "คำเตือน",
     "validation_findings.severity_info": "หมายเหตุ",
+    "permissions.reason.editor_only": "เฉพาะผู้แก้ไข ผู้จัดการ หรือผู้ดูแลระบบเท่านั้นที่ทำสิ่งนี้ได้",
+    "permissions.reason.manager_only": "เฉพาะผู้จัดการหรือผู้ดูแลระบบเท่านั้นที่ทำสิ่งนี้ได้",
+    "permissions.reason.admin_only": "เฉพาะผู้ดูแลระบบเท่านั้นที่ทำสิ่งนี้ได้",
   }
 } as { translation: Record<string, string> };
 
