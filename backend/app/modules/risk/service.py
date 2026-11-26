@@ -37,7 +37,7 @@ from app.modules.risk.contingency import (
     risk_weight,
     to_decimal,
 )
-from app.modules.risk.mc_core import CostItem, draw, simulate_cost
+from app.modules.risk.mc_core import CostItem, draw, quantile, simulate_cost, widen_point
 from app.modules.risk.mc_core import pert_triple_or_point as _pert_triple_or_point
 from app.modules.risk.mc_core import safe_float as _safe_float
 from app.modules.risk.models import RiskItem
@@ -628,8 +628,17 @@ class RiskService:
         *,
         iterations: int = 10000,
         mode: Literal["cost", "schedule", "both"] = "both",
+        confidence: int = 80,
+        range_low_pct: float = 0.0,
+        range_high_pct: float = 0.0,
     ) -> dict[str, Any]:
         """Run a Monte Carlo simulation across this project's risks.
+
+        ``confidence`` is the percentile the team plans to (P80 by default); the
+        result reports it as ``target_cost`` / ``target_schedule_days`` next to the
+        fixed P50/P80/P90/P95. ``range_low_pct`` / ``range_high_pct`` spread a risk
+        that has a single cost or delay figure instead of a three-point estimate;
+        at 0/0 such a risk is a fixed value, as before.
 
         Uses ``random.triangular(low, high, mode)`` per risk per iteration
         - a PERT-style three-point estimate sampling - and multiplies each
@@ -654,6 +663,14 @@ class RiskService:
         # Bound iterations defensively even though the schema already
         # enforces 1000 ≤ iterations ≤ 100 000.
         iterations = max(1, min(int(iterations), 100_000))
+        confidence = max(50, min(int(confidence), 99))
+        range_low_pct = max(0.0, min(float(range_low_pct), 90.0))
+        range_high_pct = max(0.0, min(float(range_high_pct), 300.0))
+        settings: dict[str, Any] = {
+            "confidence": confidence,
+            "range_low_pct": range_low_pct,
+            "range_high_pct": range_high_pct,
+        }
 
         # ── One query, no N+1: load every risk for the project once. ──
         items = await self.repo.all_for_project(project_id)
@@ -669,14 +686,20 @@ class RiskService:
                 "mode": mode,
                 "p50_cost": None,
                 "p80_cost": None,
+                "p90_cost": None,
                 "p95_cost": None,
+                "target_cost": None,
                 "p50_schedule_days": None,
                 "p80_schedule_days": None,
+                "p90_schedule_days": None,
                 "p95_schedule_days": None,
+                "target_schedule_days": None,
+                "point_estimate_risks": 0,
                 "histogram_bins": [],
                 "tornado": [],
                 "currency": currency,
                 "mixed_currency": False,
+                **settings,
             }
 
         # Build per-risk PERT triples. Where a triple is incomplete we
@@ -725,6 +748,14 @@ class RiskService:
                     fallback=float(item.impact_schedule_days or 0),
                 )
             )
+
+        # Single-value risks take the chosen range; three-point estimates stand.
+        point_estimate_ids: set[int] = set()
+        for idx in range(len(items)):
+            cost_triples[idx], c_point = widen_point(cost_triples[idx], range_low_pct, range_high_pct)
+            schedule_triples[idx], s_point = widen_point(schedule_triples[idx], range_low_pct, range_high_pct)
+            if (c_point and mode != "schedule") or (s_point and mode != "cost"):
+                point_estimate_ids.add(idx)
 
         # Currency honesty (F-PFO-RISK-04): the per-iteration cost sum blends
         # every risk's cost draw into one number, which is only meaningful when
@@ -789,17 +820,15 @@ class RiskService:
         # ── Percentile read-out ─────────────────────────────────────
         # Suppress the cost percentiles when currencies are mixed (a blended
         # total would be mislabelled under one currency).
-        if sample_cost and cost_currency_ok:
-            p50_cost, p80_cost, p95_cost = _percentiles(cost_totals)
-        else:
-            p50_cost, p80_cost, p95_cost = None, None, None
-        if sample_schedule:
-            ps50, ps80, ps95 = _percentiles(schedule_totals)
-            p50_sched = int(round(ps50)) if ps50 is not None else None
-            p80_sched = int(round(ps80)) if ps80 is not None else None
-            p95_sched = int(round(ps95)) if ps95 is not None else None
-        else:
-            p50_sched = p80_sched = p95_sched = None
+        levels = (50, 80, 90, 95, confidence)
+        cost_q: dict[int, float | None] = dict.fromkeys(levels)
+        sched_q: dict[int, int | None] = dict.fromkeys(levels)
+        if sample_cost and cost_currency_ok and cost_totals:
+            ordered = sorted(cost_totals)
+            cost_q = {lv: quantile(ordered, lv / 100.0) for lv in levels}
+        if sample_schedule and schedule_totals:
+            ordered = sorted(schedule_totals)
+            sched_q = {lv: int(round(quantile(ordered, lv / 100.0))) for lv in levels}
 
         # ── Histogram: 10 equal-width bins over the cost distribution
         # (or schedule if cost wasn't sampled). The frontend draws this
@@ -847,16 +876,22 @@ class RiskService:
             "iterations": iterations,
             "risk_count": len(items),
             "mode": mode,
-            "p50_cost": _round_or_none(p50_cost),
-            "p80_cost": _round_or_none(p80_cost),
-            "p95_cost": _round_or_none(p95_cost),
-            "p50_schedule_days": p50_sched,
-            "p80_schedule_days": p80_sched,
-            "p95_schedule_days": p95_sched,
+            "p50_cost": _round_or_none(cost_q[50]),
+            "p80_cost": _round_or_none(cost_q[80]),
+            "p90_cost": _round_or_none(cost_q[90]),
+            "p95_cost": _round_or_none(cost_q[95]),
+            "target_cost": _round_or_none(cost_q[confidence]),
+            "p50_schedule_days": sched_q[50],
+            "p80_schedule_days": sched_q[80],
+            "p90_schedule_days": sched_q[90],
+            "p95_schedule_days": sched_q[95],
+            "target_schedule_days": sched_q[confidence],
+            "point_estimate_risks": len(point_estimate_ids),
             "histogram_bins": histogram_bins,
             "tornado": tornado_entries,
             "currency": currency,
             "mixed_currency": mixed_currency,
+            **settings,
         }
 
         # Persist the snapshot on every risk so a page refresh keeps the
@@ -884,6 +919,14 @@ class RiskService:
             },
         )
         return result
+
+    async def last_simulation(self, project_id: uuid.UUID) -> dict[str, Any] | None:
+        """The project's most recent simulation, as stamped on its risks, or ``None``."""
+        for item in await self.repo.all_for_project(project_id):
+            snap = item.last_simulation
+            if isinstance(snap, dict) and snap.get("iterations"):
+                return snap
+        return None
 
     # ── Risk-based contingency (EMV vs the finance contingency line) ─────
 

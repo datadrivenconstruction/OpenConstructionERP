@@ -37,6 +37,22 @@ def pert_triple_or_point(p10: object, p50: object, p90: object, *, fallback: flo
     return lo, mid, hi
 
 
+def widen_point(
+    triple: tuple[float, float, float], low_pct: float, high_pct: float
+) -> tuple[tuple[float, float, float], bool]:
+    """Spread a single-value estimate into ``value * (1 - low%)`` .. ``value * (1 + high%)``.
+
+    Returns the triple and whether it was a single value. A real three-point
+    estimate is returned unchanged: the range only stands in where nobody gave one.
+    """
+    lo, mid, hi = triple
+    if hi > lo or mid <= 0.0:
+        return triple, False
+    if low_pct <= 0.0 and high_pct <= 0.0:
+        return triple, True
+    return (mid * (1.0 - low_pct / 100.0), mid, mid * (1.0 + high_pct / 100.0)), True
+
+
 def draw(rng: random.Random | object, lo: float, mid: float, hi: float) -> float:
     """One triangular draw; ``random.triangular`` takes (low, high, mode), not (low, mode, high)."""
     return rng.triangular(lo, hi, mid) if hi > lo else mid  # type: ignore[attr-defined]

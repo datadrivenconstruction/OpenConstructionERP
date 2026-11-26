@@ -288,3 +288,94 @@ async def test_simulate_schedule_only_mode(session):
     assert res["mode"] == "schedule"
     assert res["p50_cost"] is None
     assert res["p50_schedule_days"] is not None
+
+
+# ── Planning confidence and the range for single-value risks ─────────────
+#
+# Worked example: three risks carry one figure each (10k, 20k, 30k at 50, 30
+# and 70 per cent), so the weighted total is fixed and P50 = P80 = P95.
+# A range of -20 % / +50 % spreads each figure; the percentiles then rise from
+# P50 to P95 and the chosen P70 sits between P50 and P80.
+
+
+@pytest.mark.asyncio
+async def test_range_spreads_single_value_risks(session):
+    svc = RiskService(session)
+    await svc.create_risk(_create(title="A", probability=0.5, impact_cost=10_000))
+    await svc.create_risk(_create(title="B", probability=0.3, impact_cost=20_000))
+    await svc.create_risk(_create(title="C", probability=0.7, impact_cost=30_000))
+
+    fixed = (await svc.simulate(PROJECT_ID, iterations=1000, mode="cost"))["p50_cost"]
+    random.seed(7)
+    res = await svc.simulate(
+        PROJECT_ID, iterations=2000, mode="cost", confidence=70, range_low_pct=20, range_high_pct=50
+    )
+
+    assert res["point_estimate_risks"] == 3
+    assert (res["confidence"], res["range_low_pct"], res["range_high_pct"]) == (70, 20.0, 50.0)
+    p50, p70, p80, p90, p95 = (res[k] for k in ("p50_cost", "target_cost", "p80_cost", "p90_cost", "p95_cost"))
+    assert p50 < p70 < p80 < p90 < p95
+    # Every draw stays inside the stated range of the fixed total.
+    assert p50 >= Decimal(str(fixed)) * Decimal("0.8")
+    assert p95 <= Decimal(str(fixed)) * Decimal("1.5")
+
+
+@pytest.mark.asyncio
+async def test_zero_range_keeps_the_old_fixed_result(session):
+    svc = RiskService(session)
+    await svc.create_risk(_create(title="A", probability=0.5, impact_cost=10_000))
+
+    res = await svc.simulate(PROJECT_ID, iterations=1000, mode="cost", confidence=90)
+
+    assert res["p50_cost"] == res["target_cost"] == res["p95_cost"]
+    assert res["point_estimate_risks"] == 1
+
+
+@pytest.mark.asyncio
+async def test_range_leaves_three_point_estimates_alone(session):
+    svc = RiskService(session)
+    await _seed_three_risks(svc)
+
+    random.seed(11)
+    plain = await svc.simulate(PROJECT_ID, iterations=1000, mode="cost")
+    random.seed(11)
+    ranged = await svc.simulate(PROJECT_ID, iterations=1000, mode="cost", range_low_pct=50, range_high_pct=200)
+
+    assert ranged["point_estimate_risks"] == 0
+    assert ranged["p80_cost"] == plain["p80_cost"]
+
+
+@pytest.mark.asyncio
+async def test_last_run_keeps_its_settings(session):
+    svc = RiskService(session)
+    await _seed_three_risks(svc)
+    assert await svc.last_simulation(EMPTY_PROJECT_ID) is None
+
+    await svc.simulate(PROJECT_ID, iterations=1000, mode="both", confidence=90, range_high_pct=25)
+    last = await svc.last_simulation(PROJECT_ID)
+
+    assert last is not None
+    assert (last["confidence"], last["range_high_pct"]) == (90, 25.0)
+    assert last["target_cost"] == last["p90_cost"]
+    assert last["target_schedule_days"] == last["p90_schedule_days"]
+
+
+@pytest.mark.parametrize(
+    "kw",
+    [{"confidence": 49}, {"confidence": 100}, {"range_low_pct": -1}, {"range_low_pct": 91}, {"range_high_pct": 301}],
+)
+def test_simulate_request_bounds(kw):
+    from pydantic import ValidationError
+
+    from app.modules.risk.schemas import RiskSimulateRequest
+
+    with pytest.raises(ValidationError):
+        RiskSimulateRequest(**kw)
+
+
+def test_widen_point_only_touches_single_values():
+    from app.modules.risk.mc_core import widen_point
+
+    assert widen_point((100.0, 100.0, 100.0), 20, 50) == ((80.0, 100.0, 150.0), True)
+    assert widen_point((50.0, 100.0, 200.0), 20, 50) == ((50.0, 100.0, 200.0), False)
+    assert widen_point((0.0, 0.0, 0.0), 20, 50) == ((0.0, 0.0, 0.0), False)
