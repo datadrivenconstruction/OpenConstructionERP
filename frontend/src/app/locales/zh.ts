@@ -63478,6 +63478,7 @@ const resource = {
     "costs.match_index.error_store_unavailable": "无法连接搜索存储。请检查向量搜索服务后重试。",
     "costs.match_index.error_invalid_request": "请选择目录的语言后重试。",
     "costs.match_index.error_index_failed": "建立索引时出错而停止。请重试；已建立索引的条目会保留。",
+    "costs.base_market_editors_only": "只有编辑者可以安装市场版本",
     "match.wizard.importedCataloguesGroup": "导入的目录",
     "processes.match_catalogue_indexer.name": "Match 目录索引器",
     "processes.match_catalogue_indexer.purpose": "准备导入的价目表，使 CAD-BIM Match 能推荐其中的条目。",

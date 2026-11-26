@@ -61220,6 +61220,7 @@ const resource = {
     "costs.match_index.error_store_unavailable": "سرچ اسٹور تک رسائی نہیں ہو رہی۔ ویکٹر سرچ سروس چیک کریں اور دوبارہ کوشش کریں۔",
     "costs.match_index.error_invalid_request": "کیٹلاگ کی زبان منتخب کریں اور دوبارہ کوشش کریں۔",
     "costs.match_index.error_index_failed": "انڈیکسنگ ایک خرابی کے ساتھ رک گئی۔ دوبارہ کوشش کریں؛ پہلے سے انڈیکس شدہ آئٹمز محفوظ رہتے ہیں۔",
+    "costs.base_market_editors_only": "مارکیٹ ویریئنٹ صرف ایڈیٹرز انسٹال کر سکتے ہیں",
     "match.wizard.importedCataloguesGroup": "درآمد شدہ کیٹلاگ",
     "processes.match_catalogue_indexer.name": "Match کے لیے کیٹلاگ انڈیکسر",
     "processes.match_catalogue_indexer.purpose": "درآمد شدہ قیمتوں کی فہرستیں تیار کرتا ہے تاکہ CAD-BIM Match ان کے آئٹمز تجویز کر سکے۔",

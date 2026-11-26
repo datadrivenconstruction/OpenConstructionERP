@@ -61258,6 +61258,7 @@ const resource = {
     "costs.match_index.error_store_unavailable": "Hakutallennusta ei tavoiteta. Tarkista vektorihakupalvelu ja yritä uudelleen.",
     "costs.match_index.error_invalid_request": "Valitse luettelon kieli ja yritä uudelleen.",
     "costs.match_index.error_index_failed": "Indeksointi pysähtyi virheeseen. Yritä uudelleen; jo indeksoidut nimikkeet säilyvät.",
+    "costs.base_market_editors_only": "Vain muokkaajat voivat asentaa markkinavariantin",
     "match.wizard.importedCataloguesGroup": "Tuodut luettelot",
     "processes.match_catalogue_indexer.name": "Luetteloiden indeksoija Matchia varten",
     "processes.match_catalogue_indexer.purpose": "Valmistelee tuodut hinnastot, jotta CAD-BIM Match voi ehdottaa niiden nimikkeitä.",

@@ -112,6 +112,7 @@ const resource = {
     "costs.labor": "Labour",
     "costs.usage.applied_spread_title": "BOQ lines citing this rate: {{lines}}. Applied rates: min {{min}}, average {{avg}}, max {{max}}",
     "costs.usage.applied_spread": "min {{min}} / avg {{avg}} / max {{max}}",
+    "costs.base_market_editors_only": "Only editors can install a market variant",
     "boq.add_scoped_markup": "Add markup for section",
     "boq.scope_to_section": "Scope to section...",
     "boq.in_review": "In Review",

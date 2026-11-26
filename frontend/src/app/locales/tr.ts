@@ -62135,6 +62135,7 @@ const resource = {
     "costs.match_index.error_store_unavailable": "Arama deposuna ulaşılamıyor. Vektör arama hizmetini kontrol edip yeniden deneyin.",
     "costs.match_index.error_invalid_request": "Katalogun dilini seçip yeniden deneyin.",
     "costs.match_index.error_index_failed": "Dizinleme bir hatayla durdu. Yeniden deneyin; önceden dizinlenen kalemler korunur.",
+    "costs.base_market_editors_only": "Pazar varyantını yalnızca editörler yükleyebilir",
     "match.wizard.importedCataloguesGroup": "İçe aktarılan kataloglar",
     "processes.match_catalogue_indexer.name": "Match için katalog dizinleyici",
     "processes.match_catalogue_indexer.purpose": "İçe aktarılan birim fiyat listelerini, CAD-BIM Match kalemlerini önerebilsin diye hazırlar.",

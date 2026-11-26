@@ -63819,6 +63819,7 @@ const resource = {
     "costs.match_index.error_store_unavailable": "A keresési tároló nem érhető el. Ellenőrizze a vektorkereső szolgáltatást, és próbálja újra.",
     "costs.match_index.error_invalid_request": "Válassza ki a katalógus nyelvét, és próbálja újra.",
     "costs.match_index.error_index_failed": "Az indexelés hibával leállt. Próbálja újra; a már indexelt tételek megmaradnak.",
+    "costs.base_market_editors_only": "Piaci változatot csak szerkesztők telepíthetnek",
     "match.wizard.importedCataloguesGroup": "Importált katalógusok",
     "processes.match_catalogue_indexer.name": "Katalógusindexelő a Matchhez",
     "processes.match_catalogue_indexer.purpose": "Előkészíti az importált árlistákat, hogy a CAD-BIM Match javasolhassa a tételeiket.",

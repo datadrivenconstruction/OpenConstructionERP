@@ -61215,6 +61215,7 @@ const resource = {
     "costs.match_index.error_store_unavailable": "Іздеу қоймасына қосылу мүмкін емес. Векторлық іздеу қызметін тексеріп, қайталап көріңіз.",
     "costs.match_index.error_invalid_request": "Каталог тілін таңдап, қайталап көріңіз.",
     "costs.match_index.error_index_failed": "Индекстеу қатемен тоқтады. Қайталап көріңіз; бұрын индекстелген позициялар сақталады.",
+    "costs.base_market_editors_only": "Нарық нұсқасын тек редакторлар орната алады",
     "match.wizard.importedCataloguesGroup": "Импортталған каталогтар",
     "processes.match_catalogue_indexer.name": "Match үшін каталог индекстеушісі",
     "processes.match_catalogue_indexer.purpose": "Импортталған бағалар тізімін дайындайды, сонда CAD-BIM Match олардың позицияларын ұсына алады.",

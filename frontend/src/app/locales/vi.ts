@@ -61017,6 +61017,7 @@ const resource = {
     "costs.match_index.error_store_unavailable": "Không kết nối được kho tìm kiếm. Hãy kiểm tra dịch vụ tìm kiếm vector rồi thử lại.",
     "costs.match_index.error_invalid_request": "Hãy chọn ngôn ngữ của danh mục rồi thử lại.",
     "costs.match_index.error_index_failed": "Việc lập chỉ mục dừng do lỗi. Hãy thử lại; các hạng mục đã lập chỉ mục vẫn được giữ.",
+    "costs.base_market_editors_only": "Chỉ biên tập viên mới có thể cài đặt biến thể thị trường",
     "match.wizard.importedCataloguesGroup": "Danh mục đã nhập",
     "processes.match_catalogue_indexer.name": "Bộ lập chỉ mục danh mục cho Match",
     "processes.match_catalogue_indexer.purpose": "Chuẩn bị các bảng giá đã nhập để CAD-BIM Match có thể gợi ý các hạng mục của chúng.",

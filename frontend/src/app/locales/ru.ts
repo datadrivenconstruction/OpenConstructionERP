@@ -64271,6 +64271,7 @@ const resource = {
     "costs.match_index.error_store_unavailable": "Хранилище поиска недоступно. Проверьте службу векторного поиска и повторите попытку.",
     "costs.match_index.error_invalid_request": "Выберите язык каталога и повторите попытку.",
     "costs.match_index.error_index_failed": "Индексация остановилась с ошибкой. Повторите попытку; уже проиндексированные позиции сохранены.",
+    "costs.base_market_editors_only": "Рыночный вариант могут установить только редакторы",
     "match.wizard.importedCataloguesGroup": "Импортированные каталоги",
     "processes.match_catalogue_indexer.name": "Индексатор каталогов для Match",
     "processes.match_catalogue_indexer.purpose": "Готовит импортированные прайс-листы, чтобы CAD-BIM Match мог подсказывать их позиции.",

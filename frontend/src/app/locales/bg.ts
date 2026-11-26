@@ -61258,6 +61258,7 @@ const resource = {
     "costs.match_index.error_store_unavailable": "Хранилището за търсене не е достъпно. Проверете услугата за векторно търсене и опитайте отново.",
     "costs.match_index.error_invalid_request": "Изберете езика на каталога и опитайте отново.",
     "costs.match_index.error_index_failed": "Индексирането спря с грешка. Опитайте отново; вече индексираните позиции се запазват.",
+    "costs.base_market_editors_only": "Само редакторите могат да инсталират пазарен вариант",
     "match.wizard.importedCataloguesGroup": "Импортирани каталози",
     "processes.match_catalogue_indexer.name": "Индексатор на каталози за Match",
     "processes.match_catalogue_indexer.purpose": "Подготвя импортираните ценови листи, за да може CAD-BIM Match да предлага техните позиции.",

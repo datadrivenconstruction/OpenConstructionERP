@@ -63707,6 +63707,7 @@ const resource = {
     "costs.match_index.error_store_unavailable": "Der Suchspeicher ist nicht erreichbar. Prüfen Sie den Vektorsuchdienst und versuchen Sie es erneut.",
     "costs.match_index.error_invalid_request": "Wählen Sie die Sprache des Katalogs und versuchen Sie es erneut.",
     "costs.match_index.error_index_failed": "Die Indizierung wurde mit einem Fehler beendet. Versuchen Sie es erneut; bereits indizierte Positionen bleiben erhalten.",
+    "costs.base_market_editors_only": "Nur Bearbeiter können eine Marktvariante installieren",
     "match.wizard.importedCataloguesGroup": "Importierte Kataloge",
     "processes.match_catalogue_indexer.name": "Katalog-Indexer für Match",
     "processes.match_catalogue_indexer.purpose": "Bereitet importierte Preislisten vor, damit CAD-BIM Match deren Positionen vorschlagen kann.",

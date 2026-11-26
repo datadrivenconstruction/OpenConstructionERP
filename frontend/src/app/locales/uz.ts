@@ -62186,6 +62186,7 @@ const resource = {
     "costs.match_index.error_store_unavailable": "Qidiruv omboriga ulanib boʻlmadi. Vektorli qidiruv xizmatini tekshirib, qayta urinib koʻring.",
     "costs.match_index.error_invalid_request": "Katalog tilini tanlab, qayta urinib koʻring.",
     "costs.match_index.error_index_failed": "Indekslash xatolik bilan toʻxtadi. Qayta urinib koʻring; avval indekslangan pozitsiyalar saqlanadi.",
+    "costs.base_market_editors_only": "Bozor variantini faqat muharrirlar oʻrnata oladi",
     "match.wizard.importedCataloguesGroup": "Import qilingan kataloglar",
     "processes.match_catalogue_indexer.name": "Match uchun katalog indekslagich",
     "processes.match_catalogue_indexer.purpose": "Import qilingan narxlar roʻyxatlarini tayyorlaydi, shunda CAD-BIM Match ularning pozitsiyalarini taklif qila oladi.",

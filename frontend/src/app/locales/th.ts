@@ -61009,6 +61009,7 @@ const resource = {
     "costs.match_index.error_store_unavailable": "เข้าถึงที่เก็บการค้นหาไม่ได้ ตรวจสอบบริการค้นหาแบบเวกเตอร์แล้วลองอีกครั้ง",
     "costs.match_index.error_invalid_request": "เลือกภาษาของแคตตาล็อกแล้วลองอีกครั้ง",
     "costs.match_index.error_index_failed": "การจัดทำดัชนีหยุดเพราะเกิดข้อผิดพลาด ลองอีกครั้ง รายการที่จัดทำดัชนีไว้แล้วจะยังอยู่",
+    "costs.base_market_editors_only": "เฉพาะบรรณาธิการเท่านั้นที่ติดตั้งตัวแปรตลาดได้",
     "match.wizard.importedCataloguesGroup": "แคตตาล็อกที่นำเข้า",
     "processes.match_catalogue_indexer.name": "ตัวจัดทำดัชนีแคตตาล็อกสำหรับ Match",
     "processes.match_catalogue_indexer.purpose": "เตรียมบัญชีราคาที่นำเข้า เพื่อให้ CAD-BIM Match แนะนำรายการจากบัญชีนั้นได้",

@@ -62526,6 +62526,7 @@ const resource = {
     "costs.match_index.error_store_unavailable": "Úložiště vyhledávání není dostupné. Zkontrolujte službu vektorového vyhledávání a zkuste to znovu.",
     "costs.match_index.error_invalid_request": "Vyberte jazyk katalogu a zkuste to znovu.",
     "costs.match_index.error_index_failed": "Indexování skončilo chybou. Zkuste to znovu; už zaindexované položky zůstávají.",
+    "costs.base_market_editors_only": "Tržní variantu mohou nainstalovat pouze editoři",
     "match.wizard.importedCataloguesGroup": "Importované katalogy",
     "processes.match_catalogue_indexer.name": "Indexátor katalogů pro Match",
     "processes.match_catalogue_indexer.purpose": "Připraví importované ceníky, aby CAD-BIM Match mohl navrhovat jejich položky.",

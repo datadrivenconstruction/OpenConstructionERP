@@ -61214,6 +61214,7 @@ const resource = {
     "costs.match_index.error_store_unavailable": "دسترسی به مخزن جستجو ممکن نیست. سرویس جستجوی برداری را بررسی کنید و دوباره تلاش کنید.",
     "costs.match_index.error_invalid_request": "زبان کاتالوگ را انتخاب کنید و دوباره تلاش کنید.",
     "costs.match_index.error_index_failed": "فهرست‌گذاری با خطا متوقف شد. دوباره تلاش کنید؛ ردیف‌های فهرست‌گذاری‌شده حفظ می‌شوند.",
+    "costs.base_market_editors_only": "فقط ویراستاران می‌توانند گونه بازار را نصب کنند",
     "match.wizard.importedCataloguesGroup": "کاتالوگ‌های واردشده",
     "processes.match_catalogue_indexer.name": "فهرست‌گذار کاتالوگ برای Match",
     "processes.match_catalogue_indexer.purpose": "فهرست‌های قیمت واردشده را آماده می‌کند تا CAD-BIM Match بتواند ردیف‌های آن‌ها را پیشنهاد دهد.",

@@ -61524,6 +61524,7 @@ const resource = {
     "costs.match_index.error_store_unavailable": "সার্চ স্টোরে পৌঁছানো যাচ্ছে না। ভেক্টর সার্চ সার্ভিস দেখুন এবং আবার চেষ্টা করুন।",
     "costs.match_index.error_invalid_request": "ক্যাটালগের ভাষা বেছে নিন এবং আবার চেষ্টা করুন।",
     "costs.match_index.error_index_failed": "ইনডেক্সিং একটি ত্রুটিতে থেমে গেছে। আবার চেষ্টা করুন; আগে ইনডেক্স হওয়া আইটেম থেকে যায়।",
+    "costs.base_market_editors_only": "শুধুমাত্র সম্পাদকরা বাজার ভেরিয়েন্ট ইনস্টল করতে পারেন",
     "match.wizard.importedCataloguesGroup": "আমদানি করা ক্যাটালগ",
     "processes.match_catalogue_indexer.name": "Match-এর জন্য ক্যাটালগ ইনডেক্সার",
     "processes.match_catalogue_indexer.purpose": "আমদানি করা মূল্য তালিকা প্রস্তুত করে, যাতে CAD-BIM Match তার আইটেম সাজেস্ট করতে পারে।",

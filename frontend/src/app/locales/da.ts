@@ -61254,6 +61254,7 @@ const resource = {
     "costs.match_index.error_store_unavailable": "Søgelageret kan ikke nås. Tjek vektorsøgningstjenesten, og prøv igen.",
     "costs.match_index.error_invalid_request": "Vælg katalogets sprog, og prøv igen.",
     "costs.match_index.error_index_failed": "Indekseringen stoppede med en fejl. Prøv igen; poster, der allerede er indekseret, bevares.",
+    "costs.base_market_editors_only": "Kun redaktører kan installere en markedsvariant",
     "match.wizard.importedCataloguesGroup": "Importerede kataloger",
     "processes.match_catalogue_indexer.name": "Katalogindekserer til Match",
     "processes.match_catalogue_indexer.purpose": "Gør importerede prislister klar, så CAD-BIM Match kan foreslå deres poster.",

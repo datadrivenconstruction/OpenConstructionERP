@@ -61257,6 +61257,7 @@ const resource = {
     "costs.match_index.error_store_unavailable": "सर्च स्टोर तक पहुँच नहीं हो पा रही। वेक्टर सर्च सेवा जाँचें और फिर कोशिश करें।",
     "costs.match_index.error_invalid_request": "कैटलॉग की भाषा चुनें और फिर कोशिश करें।",
     "costs.match_index.error_index_failed": "इंडेक्सिंग किसी त्रुटि के साथ रुक गई। फिर कोशिश करें; पहले से इंडेक्स हो चुके आइटम सुरक्षित रहते हैं।",
+    "costs.base_market_editors_only": "केवल संपादक ही बाज़ार संस्करण इंस्टॉल कर सकते हैं",
     "match.wizard.importedCataloguesGroup": "आयात किए गए कैटलॉग",
     "processes.match_catalogue_indexer.name": "Match के लिए कैटलॉग इंडेक्सर",
     "processes.match_catalogue_indexer.purpose": "आयात की गई मूल्य सूचियों को तैयार करता है ताकि CAD-BIM Match उनके आइटम सुझा सके।",

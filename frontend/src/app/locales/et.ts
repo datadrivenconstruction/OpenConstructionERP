@@ -61204,6 +61204,7 @@ const resource = {
     "costs.match_index.error_store_unavailable": "Otsingumälu pole kättesaadav. Kontrolli vektorotsingu teenust ja proovi uuesti.",
     "costs.match_index.error_invalid_request": "Vali kataloogi keel ja proovi uuesti.",
     "costs.match_index.error_index_failed": "Indekseerimine peatus veaga. Proovi uuesti; juba indekseeritud positsioonid säilivad.",
+    "costs.base_market_editors_only": "Turuvariandi saavad paigaldada ainult toimetajad",
     "match.wizard.importedCataloguesGroup": "Imporditud kataloogid",
     "processes.match_catalogue_indexer.name": "Kataloogide indekseerija Matchi jaoks",
     "processes.match_catalogue_indexer.purpose": "Valmistab imporditud hinnakirjad ette, et CAD-BIM Match saaks pakkuda nende positsioone.",

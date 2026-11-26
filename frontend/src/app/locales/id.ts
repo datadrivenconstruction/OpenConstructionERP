@@ -61008,6 +61008,7 @@ const resource = {
     "costs.match_index.error_store_unavailable": "Penyimpanan pencarian tidak dapat dijangkau. Periksa layanan pencarian vektor lalu coba lagi.",
     "costs.match_index.error_invalid_request": "Pilih bahasa katalog lalu coba lagi.",
     "costs.match_index.error_index_failed": "Pengindeksan berhenti karena kesalahan. Coba lagi; item yang sudah diindeks tetap tersimpan.",
+    "costs.base_market_editors_only": "Hanya editor yang dapat menginstal varian pasar",
     "match.wizard.importedCataloguesGroup": "Katalog impor",
     "processes.match_catalogue_indexer.name": "Pengindeks katalog untuk Match",
     "processes.match_catalogue_indexer.purpose": "Menyiapkan daftar harga hasil impor agar CAD-BIM Match dapat menyarankan item-itemnya.",

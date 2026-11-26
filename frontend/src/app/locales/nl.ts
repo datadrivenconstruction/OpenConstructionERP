@@ -62135,6 +62135,7 @@ const resource = {
     "costs.match_index.error_store_unavailable": "De zoekopslag is niet bereikbaar. Controleer de vectorzoekdienst en probeer het opnieuw.",
     "costs.match_index.error_invalid_request": "Kies de taal van de catalogus en probeer het opnieuw.",
     "costs.match_index.error_index_failed": "Indexeren is gestopt met een fout. Probeer het opnieuw; reeds geïndexeerde posten blijven behouden.",
+    "costs.base_market_editors_only": "Alleen editors kunnen een marktvariant installeren",
     "match.wizard.importedCataloguesGroup": "Geïmporteerde catalogi",
     "processes.match_catalogue_indexer.name": "Catalogusindexeerder voor Match",
     "processes.match_catalogue_indexer.purpose": "Bereidt geïmporteerde prijslijsten voor zodat CAD-BIM Match de posten ervan kan voorstellen.",

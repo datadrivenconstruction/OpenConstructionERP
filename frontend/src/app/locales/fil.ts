@@ -61212,6 +61212,7 @@ const resource = {
     "costs.match_index.error_store_unavailable": "Hindi maabot ang search store. Suriin ang vector search service at subukan muli.",
     "costs.match_index.error_invalid_request": "Piliin ang wika ng katalogo at subukan muli.",
     "costs.match_index.error_index_failed": "Huminto ang pag-index dahil sa error. Subukan muli; nananatili ang mga item na na-index na.",
+    "costs.base_market_editors_only": "Mga editor lamang ang maaaring mag-install ng market variant",
     "match.wizard.importedCataloguesGroup": "Mga na-import na katalogo",
     "processes.match_catalogue_indexer.name": "Indexer ng katalogo para sa Match",
     "processes.match_catalogue_indexer.purpose": "Inihahanda ang mga na-import na listahan ng presyo para maimungkahi ng CAD-BIM Match ang mga item nito.",

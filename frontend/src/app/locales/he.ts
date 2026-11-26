@@ -61539,6 +61539,7 @@ const resource = {
     "costs.match_index.error_store_unavailable": "אין גישה למאגר החיפוש. בדקו את שירות החיפוש הווקטורי ונסו שוב.",
     "costs.match_index.error_invalid_request": "בחרו את שפת הקטלוג ונסו שוב.",
     "costs.match_index.error_index_failed": "האינדוקס נעצר בשגיאה. נסו שוב; סעיפים שכבר אונדקסו נשמרים.",
+    "costs.base_market_editors_only": "רק עורכים יכולים להתקין וריאנט שוק",
     "match.wizard.importedCataloguesGroup": "קטלוגים מיובאים",
     "processes.match_catalogue_indexer.name": "מאנדקס קטלוגים עבור Match",
     "processes.match_catalogue_indexer.purpose": "מכין מחירונים מיובאים כדי ש-CAD-BIM Match יוכל להציע את הסעיפים שלהם.",

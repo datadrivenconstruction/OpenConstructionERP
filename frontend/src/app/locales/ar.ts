@@ -64325,6 +64325,7 @@ const resource = {
     "costs.match_index.error_store_unavailable": "تعذّر الوصول إلى مخزن البحث. تحقق من خدمة البحث المتجهي وحاول مرة أخرى.",
     "costs.match_index.error_invalid_request": "اختر لغة الكتالوج وحاول مرة أخرى.",
     "costs.match_index.error_index_failed": "توقفت الفهرسة بسبب خطأ. حاول مرة أخرى؛ البنود المفهرسة سابقًا محفوظة.",
+    "costs.base_market_editors_only": "يمكن للمحررين فقط تثبيت متغير السوق",
     "match.wizard.importedCataloguesGroup": "الكتالوجات المستوردة",
     "processes.match_catalogue_indexer.name": "مفهرس الكتالوجات لأجل Match",
     "processes.match_catalogue_indexer.purpose": "يجهّز قوائم الأسعار المستوردة ليتمكن CAD-BIM Match من اقتراح بنودها.",

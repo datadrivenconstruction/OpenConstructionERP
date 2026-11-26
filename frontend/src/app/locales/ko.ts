@@ -61625,6 +61625,7 @@ const resource = {
     "costs.match_index.error_store_unavailable": "검색 저장소에 연결할 수 없습니다. 벡터 검색 서비스를 확인한 후 다시 시도하세요.",
     "costs.match_index.error_invalid_request": "카탈로그 언어를 선택한 후 다시 시도하세요.",
     "costs.match_index.error_index_failed": "오류로 색인이 중단되었습니다. 다시 시도하세요. 이미 색인된 항목은 유지됩니다.",
+    "costs.base_market_editors_only": "편집자만 시장 변형을 설치할 수 있습니다",
     "match.wizard.importedCataloguesGroup": "가져온 카탈로그",
     "processes.match_catalogue_indexer.name": "Match용 카탈로그 인덱서",
     "processes.match_catalogue_indexer.purpose": "가져온 단가표를 준비하여 CAD-BIM Match가 그 항목을 제안할 수 있게 합니다.",

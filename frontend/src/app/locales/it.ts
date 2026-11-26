@@ -62466,6 +62466,7 @@ const resource = {
     "costs.match_index.error_store_unavailable": "L'archivio di ricerca non è raggiungibile. Controlla il servizio di ricerca vettoriale e riprova.",
     "costs.match_index.error_invalid_request": "Scegli la lingua del catalogo e riprova.",
     "costs.match_index.error_index_failed": "L'indicizzazione si è fermata con un errore. Riprova; le voci già indicizzate vengono mantenute.",
+    "costs.base_market_editors_only": "Solo gli editor possono installare una variante di mercato",
     "match.wizard.importedCataloguesGroup": "Cataloghi importati",
     "processes.match_catalogue_indexer.name": "Indicizzatore di cataloghi per Match",
     "processes.match_catalogue_indexer.purpose": "Prepara i prezzari importati affinché CAD-BIM Match possa suggerirne le voci.",

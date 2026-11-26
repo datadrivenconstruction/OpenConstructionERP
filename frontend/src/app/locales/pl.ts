@@ -62787,6 +62787,7 @@ const resource = {
     "costs.match_index.error_store_unavailable": "Magazyn wyszukiwania jest nieosiągalny. Sprawdź usługę wyszukiwania wektorowego i spróbuj ponownie.",
     "costs.match_index.error_invalid_request": "Wybierz język katalogu i spróbuj ponownie.",
     "costs.match_index.error_index_failed": "Indeksowanie zatrzymało się z błędem. Spróbuj ponownie; pozycje już zaindeksowane zostają zachowane.",
+    "costs.base_market_editors_only": "Wariant rynkowy mogą zainstalować tylko edytorzy",
     "match.wizard.importedCataloguesGroup": "Zaimportowane katalogi",
     "processes.match_catalogue_indexer.name": "Indeksator katalogów dla Match",
     "processes.match_catalogue_indexer.purpose": "Przygotowuje zaimportowane cenniki, aby CAD-BIM Match mógł podpowiadać ich pozycje.",

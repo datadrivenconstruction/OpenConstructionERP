@@ -61869,6 +61869,7 @@ const resource = {
     "costs.match_index.error_store_unavailable": "Sökarkivet kan inte nås. Kontrollera vektorsökningstjänsten och försök igen.",
     "costs.match_index.error_invalid_request": "Välj katalogens språk och försök igen.",
     "costs.match_index.error_index_failed": "Indexeringen avbröts med ett fel. Försök igen; poster som redan är indexerade finns kvar.",
+    "costs.base_market_editors_only": "Endast redaktörer kan installera en marknadsvariant",
     "match.wizard.importedCataloguesGroup": "Importerade kataloger",
     "processes.match_catalogue_indexer.name": "Katalogindexerare för Match",
     "processes.match_catalogue_indexer.purpose": "Förbereder importerade prislistor så att CAD-BIM Match kan föreslå deras poster.",

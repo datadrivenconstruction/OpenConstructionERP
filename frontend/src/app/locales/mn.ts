@@ -61235,6 +61235,7 @@ const resource = {
     "costs.match_index.error_store_unavailable": "Хайлтын сангаас холбогдож чадсангүй. Вектор хайлтын үйлчилгээг шалгаад дахин оролдоно уу.",
     "costs.match_index.error_invalid_request": "Каталогийн хэлийг сонгоод дахин оролдоно уу.",
     "costs.match_index.error_index_failed": "Индексжүүлэлт алдаатай зогссон. Дахин оролдоно уу; өмнө индексжсэн зүйлс хадгалагдана.",
+    "costs.base_market_editors_only": "Зах зээлийн хувилбарыг зөвхөн редакторууд суулгаж чадна",
     "match.wizard.importedCataloguesGroup": "Импортолсон каталогууд",
     "processes.match_catalogue_indexer.name": "Match-д зориулсан каталогийн индексжүүлэгч",
     "processes.match_catalogue_indexer.purpose": "Импортолсон үнийн жагсаалтыг бэлтгэж, CAD-BIM Match-д тэдгээрийн зүйлсийг санал болгох боломж олгоно.",
