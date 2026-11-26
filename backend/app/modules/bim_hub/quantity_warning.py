@@ -92,3 +92,23 @@ def quantity_warning(
             "geometry/linking only.",
         )
     return None
+
+
+# Why a model shows boxes instead of meshes, mirrored by the BIM viewer banner.
+PLACEHOLDER_CONVERTER_NO_MESH = "converter_no_mesh"
+PLACEHOLDER_CONVERTER_MISSING = "converter_missing"
+PLACEHOLDER_CONVERTER_FAILED = "converter_failed"
+
+
+def placeholder_reason(result: dict, *, converter_failed: bool = False) -> str:
+    """Return why a converted model carries placeholder boxes.
+
+    ``converter_no_mesh`` means the converter ran and wrote the element table
+    but no 3D mesh for this format, so installing a converter would change
+    nothing. The other two codes do call for the converter.
+    """
+    if result.get("converter_used"):
+        return PLACEHOLDER_CONVERTER_NO_MESH
+    if converter_failed:
+        return PLACEHOLDER_CONVERTER_FAILED
+    return PLACEHOLDER_CONVERTER_MISSING

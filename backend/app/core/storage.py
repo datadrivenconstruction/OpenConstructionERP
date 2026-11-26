@@ -1478,6 +1478,24 @@ def _is_not_found(exc: BaseException) -> bool:
     return False
 
 
+async def copy_stored_blob_to_path(backend: StorageBackend, key: str, dest: Path) -> int:
+    """Copy a stored blob to ``dest`` without holding it in memory; return the byte count.
+
+    A local backend copies file to file; any other backend is streamed chunk by
+    chunk. Raises :class:`FileNotFoundError` when ``key`` does not exist.
+    """
+    local = backend.local_path(key)
+    if local is not None and local.is_file():
+        await asyncio.to_thread(shutil.copyfile, local, dest)
+        return dest.stat().st_size
+    written = 0
+    with dest.open("wb") as fh:
+        async for chunk in backend.open_stream(key):
+            await asyncio.to_thread(fh.write, chunk)
+            written += len(chunk)
+    return written
+
+
 # ──────────────────────────────────────────────────────────────────────────
 # Factory
 # ──────────────────────────────────────────────────────────────────────────

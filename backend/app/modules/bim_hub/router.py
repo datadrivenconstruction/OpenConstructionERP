@@ -83,7 +83,7 @@ from app.core.validation.messages import translate
 from app.dependencies import CurrentUserId, RequirePermission, RequireRole, SessionDep, accessible_project_ids
 from app.modules.bim_hub import file_storage as bim_file_storage
 from app.modules.bim_hub.mesh_formats import is_mesh_geometry_ext, mesh_upload_hint
-from app.modules.bim_hub.quantity_warning import quantity_warning
+from app.modules.bim_hub.quantity_warning import placeholder_reason, quantity_warning
 from app.modules.bim_hub.schemas import (
     AssetInfoUpdateRequest,
     AssetListResponse,
@@ -1555,10 +1555,11 @@ async def _process_cad_in_background(
 
     from sqlalchemy import select
 
-    from app.core.storage import get_storage_backend
+    from app.core.storage import copy_stored_blob_to_path, get_storage_backend
     from app.database import async_session_factory
     from app.modules.bim_hub.ifc_processor import process_ifc_file
     from app.modules.bim_hub.models import BIMElement, BIMModel
+    from app.modules.boq.ddc_runner import converter_slots_busy, slot_acquired_hook
 
     model_uuid = _uuid.UUID(model_id)
 
@@ -1683,13 +1684,12 @@ async def _process_cad_in_background(
             )
 
     try:
-        content = await get_storage_backend().get(cad_storage_key)
-        await _set_conversion_stage(model_uuid, "converting")
-
         with tempfile.TemporaryDirectory(prefix="oe-bim-bg-") as _tmp_str:
             _tmp_dir = _Path(_tmp_str)
             _tmp_cad_path = _tmp_dir / f"original{ext}"
-            await asyncio.to_thread(_tmp_cad_path.write_bytes, content)
+            # Chunked copy: a 500 MB model must not sit in the worker's heap on a 3 GB host.
+            await copy_stored_blob_to_path(get_storage_backend(), cad_storage_key, _tmp_cad_path)
+            await _set_conversion_stage(model_uuid, "waiting_for_converter" if converter_slots_busy() else "converting")
 
             # Bind a failure record to this upload before handing the
             # conversion to the thread pool. Other uploads convert at the
@@ -1701,9 +1701,22 @@ async def _process_cad_in_background(
             # the scope is still open.
             from app.modules.bim_hub.ifc_processor import ddc_failure_scope
 
-            with ddc_failure_scope() as _ddc_record:
-                result = await asyncio.to_thread(process_ifc_file, _tmp_cad_path, _tmp_dir, conversion_depth)
-                ddc_failure = dict(_ddc_record)
+            # Once a queued conversion gets its slot, the progress clock restarts:
+            # time spent waiting must not count against the conversion time limit.
+            _loop = asyncio.get_running_loop()
+
+            def _on_slot() -> None:
+                asyncio.run_coroutine_threadsafe(
+                    _set_conversion_stage(model_uuid, "converting", begin=True, fmt=ext), _loop
+                )
+
+            _hook_token = slot_acquired_hook.set(_on_slot)
+            try:
+                with ddc_failure_scope() as _ddc_record:
+                    result = await asyncio.to_thread(process_ifc_file, _tmp_cad_path, _tmp_dir, conversion_depth)
+                    ddc_failure = dict(_ddc_record)
+            finally:
+                slot_acquired_hook.reset(_hook_token)
             element_count = result["element_count"]
             await _set_conversion_stage(model_uuid, "building_3d")
 
@@ -1862,6 +1875,13 @@ async def _process_cad_in_background(
                     # with DDC v{X}" badge on the BIM model card and the
                     # /about page. Both keys are optional: missing values
                     # leave the badge hidden (v3.12.0 / Stream D).
+                    # Why the boxes are boxes: the viewer must not offer to install a
+                    # converter that ran and simply writes no mesh for this format.
+                    **(
+                        {"placeholder_reason": placeholder_reason(result, converter_failed=converter_failed)}
+                        if (result.get("geometry_quality") or result.get("geometry_type")) == "placeholder"
+                        else {}
+                    ),
                     **({"converter_version": result["converter_version"]} if result.get("converter_version") else {}),
                     **({"converter_source": result["converter_source"]} if result.get("converter_source") else {}),
                     # Honesty signal - set when the import only succeeded
@@ -2159,9 +2179,10 @@ async def _process_cad_in_background(
                 model = (await session.execute(select(BIMModel).where(BIMModel.id == model_uuid))).scalar_one_or_none()
                 if model is not None:
                     model.status = "error"
+                    # Exception text stays in the log above; users get a fixed sentence.
                     model.error_message = (
-                        f"Processing failed: {exc}. Click Retry to try again, or "
-                        f"contact support if this keeps happening."
+                        "Processing failed on the server. Click Retry to try again, or "
+                        "contact support if this keeps happening."
                     )
                     meta = dict(model.metadata_ or {})
                     meta["error_code"] = "unexpected"
@@ -2338,6 +2359,7 @@ async def upload_cad_file(
     ),
     conversion_depth: str = Query(
         default="standard",
+        pattern="^(standard|medium|complete)$",
         description=(
             "DDC conversion depth: 'standard' (~15 basic columns, fastest),"
             " 'medium' (DDC standard + full property promotion, ~900 columns),"
