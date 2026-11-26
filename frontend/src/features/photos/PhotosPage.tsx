@@ -27,6 +27,7 @@ import {
   fetchTimeline,
   fetchValidation,
   listPhotos,
+  patchPhoto,
   photosKeys,
   startExport,
   type Album,
@@ -45,7 +46,6 @@ import {
 } from './model';
 import { AlbumManager } from './components/AlbumManager';
 import { BulkBar } from './components/BulkBar';
-import { updatePhoto, type PhotoCategory as DocPhotoCategory } from '@/features/documents/api';
 import { BeforeAfterSlider } from './components/BeforeAfterSlider';
 import { PhotoLightbox } from './components/PhotoLightbox';
 import { PhotoUploadDropzone } from './components/PhotoUploadDropzone';
@@ -336,7 +336,7 @@ function PhotosArchive({ projectId }: { projectId: string }) {
       const sug = categorySuggestion(photo)!;
       const lower = new Set(photo.tags.map((x) => x.toLowerCase()));
       const tags = [...photo.tags, ...sug.tags.filter((x) => !lower.has(x.toLowerCase()))];
-      return updatePhoto(photo.id, { category: sug.category as DocPhotoCategory, tags });
+      return patchPhoto(photo.id, { category: sug.category, tags });
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: photosKeys.all });

@@ -167,7 +167,7 @@ export function PhotoLightbox({ photo, photos = [], onClose, onNavigate }: Photo
           </div>
         </div>
 
-        <PhotoMetaEditor photo={photo} />
+        <PhotoMetaEditor photo={photo} onChange={onNavigate} />
 
         <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-xs">
           <dt className="text-content-tertiary">{t('photoArchive.meta.taken')}</dt>

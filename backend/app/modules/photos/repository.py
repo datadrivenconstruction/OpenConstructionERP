@@ -253,6 +253,18 @@ class PhotosRepository:
         )
         return [r for (r,) in (await self.session.execute(stmt)).all()]
 
+    async def album_ids_for(self, photo_ids: list[uuid.UUID]) -> dict[uuid.UUID, list[uuid.UUID]]:
+        """Albums each photo is in, keyed by photo id."""
+        out: dict[uuid.UUID, list[uuid.UUID]] = {pid: [] for pid in photo_ids}
+        if not photo_ids:
+            return out
+        stmt = select(photo_album_item.c.photo_id, photo_album_item.c.album_id).where(
+            photo_album_item.c.photo_id.in_(photo_ids)
+        )
+        for pid, aid in (await self.session.execute(stmt)).all():
+            out.setdefault(pid, []).append(aid)
+        return out
+
     async def add_album_items(self, album_id: uuid.UUID, photo_ids: list[uuid.UUID]) -> int:
         existing = set(await self.album_photo_ids(album_id))
         position = len(existing)

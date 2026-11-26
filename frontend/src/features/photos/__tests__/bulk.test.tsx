@@ -4,14 +4,16 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter } from 'react-router-dom';
 import type { ReactNode } from 'react';
 
-vi.mock('@/features/documents/api', () => ({ updatePhoto: vi.fn() }));
 vi.mock('../api', async (importOriginal) => ({
   ...(await importOriginal<typeof import('../api')>()),
   deletePhoto: vi.fn(),
+  patchPhoto: vi.fn(),
+  setPhotoAlbums: vi.fn(),
+  fetchAlbums: vi.fn(),
 }));
 
-import { updatePhoto } from '@/features/documents/api';
 import * as api from '../api';
+import { useAuthStore } from '@/stores/useAuthStore';
 import type { ArchivePhoto } from '../api';
 import { BulkBar } from '../components/BulkBar';
 import { PhotoMetaEditor, dayDiaryRoute, raiseRoute } from '../components/PhotoMetaEditor';
@@ -58,9 +60,13 @@ function wrap(ui: ReactNode) {
   );
 }
 
+const updatePhoto = vi.mocked(api.patchPhoto);
+
 beforeEach(() => {
   vi.clearAllMocks();
-  vi.mocked(updatePhoto).mockResolvedValue({} as never);
+  useAuthStore.setState({ userRole: 'editor' });
+  updatePhoto.mockResolvedValue({} as never);
+  vi.mocked(api.fetchAlbums).mockResolvedValue([]);
 });
 
 const photos = [photo('a', { tags: ['Rebar'] }), photo('b', { category: 'defect', tags: ['field'] }), photo('c')];
@@ -75,7 +81,7 @@ describe('bulk category', () => {
   });
 
   it('keeps the failed photos selected', async () => {
-    vi.mocked(updatePhoto).mockRejectedValueOnce(new Error('no'));
+    updatePhoto.mockRejectedValueOnce(new Error('no'));
     const onSelect = vi.fn();
     wrap(<BulkBar photos={photos} selected={['a', 'c']} allIds={['a', 'b', 'c']} onSelect={onSelect} />);
     fireEvent.change(screen.getByRole('combobox', { name: /category/i }), { target: { value: 'safety' } });
@@ -151,5 +157,65 @@ describe('kept gallery behaviour', () => {
     expect(raiseRoute(p, 'punch')).toBe('/punchlist?create=true&photo_id=r&title=Crack');
     expect(raiseRoute(p, 'ncr').startsWith('/ncr?')).toBe(true);
     expect(dayDiaryRoute(p)).toBe('/daily-diary?date=2026-10-05');
+  });
+});
+
+describe('photo detail drawer: category and album', () => {
+  const albums = [
+    { id: 'al-1', project_id: 'proj', name: 'Punch walk L2', description: null, cover_photo_id: null, sort_order: 0, photo_count: 3, created_at: null },
+    { id: 'al-2', project_id: 'proj', name: 'Handover', description: null, cover_photo_id: null, sort_order: 1, photo_count: 0, created_at: null },
+  ];
+
+  it('keeps the chosen category after the save and reads it back from the server', async () => {
+    updatePhoto.mockResolvedValue(photo('x', { category: 'defect' }));
+    const onChange = vi.fn();
+    wrap(<PhotoMetaEditor photo={photo('x')} onChange={onChange} />);
+    const select = screen.getByTestId('photo-category-select') as HTMLSelectElement;
+    fireEvent.change(select, { target: { value: 'defect' } });
+    await waitFor(() => expect(updatePhoto).toHaveBeenCalledWith('x', { category: 'defect' }));
+    await screen.findByTestId('photo-saved-category');
+    expect(select.value).toBe('defect');
+    expect(onChange).toHaveBeenCalledWith(expect.objectContaining({ id: 'x', category: 'defect' }));
+  });
+
+  it('goes back to the stored category when the save fails', async () => {
+    updatePhoto.mockRejectedValueOnce(new Error('no'));
+    wrap(<PhotoMetaEditor photo={photo('x', { category: 'progress' })} />);
+    const select = screen.getByTestId('photo-category-select') as HTMLSelectElement;
+    fireEvent.change(select, { target: { value: 'safety' } });
+    await waitFor(() => expect(select.value).toBe('progress'));
+  });
+
+  it('puts the photo in an album and takes it out again', async () => {
+    vi.mocked(api.fetchAlbums).mockResolvedValue(albums);
+    vi.mocked(api.setPhotoAlbums).mockResolvedValueOnce(photo('x', { album_ids: ['al-2'] }));
+    wrap(<PhotoMetaEditor photo={photo('x', { album_ids: ['al-1'] })} />);
+    const select = (await screen.findByTestId('photo-album-select')) as HTMLSelectElement;
+    await waitFor(() => expect(select.value).toBe('al-1'));
+    fireEvent.change(select, { target: { value: 'al-2' } });
+    await waitFor(() => expect(api.setPhotoAlbums).toHaveBeenCalledWith('x', ['al-2']));
+    await screen.findByTestId('photo-saved-album');
+    expect(select.value).toBe('al-2');
+
+    vi.mocked(api.setPhotoAlbums).mockResolvedValueOnce(photo('x', { album_ids: [] }));
+    fireEvent.change(select, { target: { value: '' } });
+    await waitFor(() => expect(api.setPhotoAlbums).toHaveBeenLastCalledWith('x', []));
+    await waitFor(() => expect(select.value).toBe(''));
+  });
+
+  it('says when the project has no albums yet', async () => {
+    wrap(<PhotoMetaEditor photo={photo('x')} />);
+    expect(await screen.findByText('photoArchive.meta.no_albums_hint')).toBeInTheDocument();
+  });
+
+  it('shows a viewer the values but not the controls to change them', async () => {
+    useAuthStore.setState({ userRole: 'viewer' });
+    vi.mocked(api.fetchAlbums).mockResolvedValue(albums);
+    wrap(<PhotoMetaEditor photo={photo('x', { category: 'defect' })} />);
+    const category = screen.getByTestId('photo-category-select') as HTMLSelectElement;
+    expect(category).toBeDisabled();
+    expect(category.value).toBe('defect');
+    expect(category.closest('label')).toHaveAttribute('title', 'photoArchive.meta.edit_needs_editor');
+    expect(await screen.findByTestId('photo-album-select')).toBeDisabled();
   });
 });

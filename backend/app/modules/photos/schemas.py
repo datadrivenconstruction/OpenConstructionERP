@@ -10,6 +10,10 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from app.modules.documents.schemas import PHOTO_CATEGORIES
+
+_CATEGORY_PATTERN = f"^({'|'.join(PHOTO_CATEGORIES)})$"
+
 TargetKind = Literal[
     "boq_position",
     "schedule_activity",
@@ -64,6 +68,7 @@ class PhotoOut(BaseModel):
     file_url: str
     thumb_url: str
     links: list[PhotoLinkOut] = Field(default_factory=list)
+    album_ids: list[uuid.UUID] = Field(default_factory=list)
 
 
 class PhotoPage(BaseModel):
@@ -100,7 +105,8 @@ class PhotoListResponse(BaseModel):
 
 class PhotoPatch(BaseModel):
     caption: str | None = Field(default=None, max_length=2000)
-    category: str | None = Field(default=None, max_length=100)
+    # The same closed set the documents module and the gallery filter use.
+    category: str | None = Field(default=None, pattern=_CATEGORY_PATTERN)
     tags: list[str] | None = None
     taken_at: datetime | None = None
     gps_lat: float | None = Field(default=None, ge=-90, le=90)
@@ -141,6 +147,12 @@ class AlbumListResponse(BaseModel):
     total: int
     offset: int = 0
     limit: int = 200
+
+
+class PhotoAlbumsIn(BaseModel):
+    """The albums one photo belongs to, replacing its current set; empty takes it out of all."""
+
+    album_ids: list[uuid.UUID] = Field(default_factory=list, max_length=50)
 
 
 class AlbumItemsIn(BaseModel):
