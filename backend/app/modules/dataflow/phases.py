@@ -12,42 +12,171 @@ from typing import Any
 
 PHASES: tuple[str, ...] = ("site", "design", "estimate", "tender", "construction", "finance", "platform")
 
-_TABLE: dict[str, tuple[str, ...]] = {
-    "site": (
-        "survey_core land_parcels mine_survey pointcloud setting_out site_prep surfaces_volumes stockpiles "
-        "geo_hub site_sensors site_logistics"
-    ).split(),
-    "design": (
-        "design design_management design_options bim_requirements authority_submission interface_management "
-        "file_transmittals file_approvals file_versions file_references file_comments file_distribution "
-        "file_tags file_search file_saved_views file_favorites file_trash cad bim_hub bcf clash clash_ai_triage "
-        "clash_cost_impact coordination_hub drawing_compare cde requirements engineering_brief transmittals "
-        "plan_room documents"
-    ).split(),
-    "estimate": (
-        "takeoff dwg_takeoff boq costs assemblies validation waste_factors rebar_schedule cutting prefab "
-        "formwork estimate_basis estimate_checks estimate_rollup estimate_archive rom_estimate cost_plan "
-        "cost_benchmarks cost_explorer cost_match catalog labor_rates norm_pricing norm_expansion price_index "
-        "price_breakdown measurement match match_elements markups preliminaries allowances ai_estimator "
-        "supplier_catalogs source_data"
-    ).split(),
-    "tender": (
-        "tendering procurement central_purchasing contracts changeorders bid_management bid_day bid_no_bid "
-        "rfq_bidding offers quote_capture subcontractors framework_agreements procurement_concept "
-        "commitment_release variations win_loss"
-    ).split(),
-    "construction": (
-        "schedule schedule_advanced daily_diary field_diary fieldreports site_supervision construction_control "
-        "safety hse_advanced hse_frame ncr temporary_works monitoring inspections punchlist rfi submittals "
-        "quality_concept qms commissioning closeout defects_liability progress measurement_book resources "
-        "equipment plant_register field_time haul_tickets site_inventory meetings photos permits "
-        "moc owner_schedule"
-    ).split(),
-    "finance": (
-        "costmodel full_evm finance funding payment_clock tax_withholding payment_release cvr eac wip_report "
-        "cash_flow einvoice certified_payroll payroll project_tax accounting_sync reconciliation claims_evidence "
-        "cost_recovery guarantees economics capital_plan postcalc"
-    ).split(),
+_TABLE: dict[str, list[str]] = {
+    "site": [
+        "survey_core",
+        "land_parcels",
+        "mine_survey",
+        "pointcloud",
+        "setting_out",
+        "site_prep",
+        "surfaces_volumes",
+        "stockpiles",
+        "geo_hub",
+        "site_sensors",
+        "site_logistics",
+    ],
+    "design": [
+        "design",
+        "design_management",
+        "design_options",
+        "bim_requirements",
+        "authority_submission",
+        "interface_management",
+        "file_transmittals",
+        "file_approvals",
+        "file_versions",
+        "file_references",
+        "file_comments",
+        "file_distribution",
+        "file_tags",
+        "file_search",
+        "file_saved_views",
+        "file_favorites",
+        "file_trash",
+        "cad",
+        "bim_hub",
+        "bcf",
+        "clash",
+        "clash_ai_triage",
+        "clash_cost_impact",
+        "coordination_hub",
+        "drawing_compare",
+        "cde",
+        "requirements",
+        "engineering_brief",
+        "transmittals",
+        "plan_room",
+        "documents",
+    ],
+    "estimate": [
+        "takeoff",
+        "dwg_takeoff",
+        "boq",
+        "costs",
+        "assemblies",
+        "validation",
+        "waste_factors",
+        "rebar_schedule",
+        "cutting",
+        "prefab",
+        "formwork",
+        "estimate_basis",
+        "estimate_checks",
+        "estimate_rollup",
+        "estimate_archive",
+        "rom_estimate",
+        "cost_plan",
+        "cost_benchmarks",
+        "cost_explorer",
+        "cost_match",
+        "catalog",
+        "labor_rates",
+        "norm_pricing",
+        "norm_expansion",
+        "price_index",
+        "price_breakdown",
+        "measurement",
+        "match",
+        "match_elements",
+        "markups",
+        "preliminaries",
+        "allowances",
+        "ai_estimator",
+        "supplier_catalogs",
+        "source_data",
+    ],
+    "tender": [
+        "tendering",
+        "procurement",
+        "central_purchasing",
+        "contracts",
+        "changeorders",
+        "bid_management",
+        "bid_day",
+        "bid_no_bid",
+        "rfq_bidding",
+        "offers",
+        "quote_capture",
+        "subcontractors",
+        "framework_agreements",
+        "procurement_concept",
+        "commitment_release",
+        "variations",
+        "win_loss",
+    ],
+    "construction": [
+        "schedule",
+        "schedule_advanced",
+        "daily_diary",
+        "field_diary",
+        "fieldreports",
+        "site_supervision",
+        "construction_control",
+        "safety",
+        "hse_advanced",
+        "hse_frame",
+        "ncr",
+        "temporary_works",
+        "monitoring",
+        "inspections",
+        "punchlist",
+        "rfi",
+        "submittals",
+        "quality_concept",
+        "qms",
+        "commissioning",
+        "closeout",
+        "defects_liability",
+        "progress",
+        "measurement_book",
+        "resources",
+        "equipment",
+        "plant_register",
+        "field_time",
+        "haul_tickets",
+        "site_inventory",
+        "meetings",
+        "photos",
+        "permits",
+        "moc",
+        "owner_schedule",
+    ],
+    "finance": [
+        "costmodel",
+        "full_evm",
+        "finance",
+        "funding",
+        "payment_clock",
+        "tax_withholding",
+        "payment_release",
+        "cvr",
+        "eac",
+        "wip_report",
+        "cash_flow",
+        "einvoice",
+        "certified_payroll",
+        "payroll",
+        "project_tax",
+        "accounting_sync",
+        "reconciliation",
+        "claims_evidence",
+        "cost_recovery",
+        "guarantees",
+        "economics",
+        "capital_plan",
+        "postcalc",
+    ],
 }
 
 PHASE_OF: dict[str, str] = {module: phase for phase, modules in _TABLE.items() for module in modules}

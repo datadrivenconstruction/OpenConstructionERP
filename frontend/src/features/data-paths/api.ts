@@ -49,6 +49,8 @@ export interface PathOut {
   route: string;
   importance: Importance;
   breaks: string;
+  /** i18n key of the short label drawn on the link; empty when the module declares none. */
+  edge?: string;
   live: Live;
 }
 
@@ -85,6 +87,7 @@ export interface ModulePaths {
   installed: boolean;
   why: string;
   roles: string[];
+  phase?: string;
   project_id: string | null;
   currency: string;
   entities: EntityOut[];
@@ -100,6 +103,8 @@ export interface MapModule {
   name: string;
   display_name: string;
   category: string;
+  /** Project phase id, the platform map column. */
+  phase: string;
   declared: boolean;
   installed: boolean;
   why: string;
@@ -128,6 +133,8 @@ export interface PlatformMap {
   modules: MapModule[];
   edges: EdgeOut[];
   health: HealthItem[];
+  /** Phase ids in project order. */
+  phases: string[];
   generated_at: string;
 }
 

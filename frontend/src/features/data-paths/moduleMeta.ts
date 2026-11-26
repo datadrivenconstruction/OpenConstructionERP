@@ -3,9 +3,8 @@
 //
 // Front-end facts about a backend module for the data path views: its route,
 // its translated name (the sidebar's own label), its family (the sidebar
-// section, with that section's tone) and its workflow stage (the column it
-// sits in, left to right: capture -> estimate -> tender -> contract ->
-// execution -> finance).
+// section, with that section's tone). The project phase of a module comes
+// from the API (MapModule.phase), never from here.
 
 import { ROUTE_BACKEND_MODULE } from '@/app/layout/Sidebar';
 import type { LucideIcon } from 'lucide-react';
@@ -89,63 +88,9 @@ export interface ModuleMeta {
   familyDefaultLabel: string | null;
   /** `var(--oe-tone-N)` of the sidebar section; neutral when the module has no menu row. */
   tone: string;
-  stage: number;
   /** The module's menu icon; null when it has no menu row. */
   icon: LucideIcon | null;
 }
-
-/** Workflow stages, left to right. Platform modules sit in their own band. */
-export const STAGES = ['capture', 'estimate', 'tender', 'contract', 'execution', 'finance', 'platform'] as const;
-export type Stage = (typeof STAGES)[number];
-
-const STAGE_BY_GROUP: Record<string, Stage> = {
-  grp_takeoff: 'capture',
-  grp_drawings: 'capture',
-  grp_reality: 'capture',
-  grp_survey: 'capture',
-  grp_coordination: 'capture',
-  grp_cost_data: 'estimate',
-  grp_estimating: 'estimate',
-  grp_estimate_detail: 'estimate',
-  grp_rate_buildup: 'estimate',
-  grp_estimating_ai: 'estimate',
-  grp_procurement: 'tender',
-  grp_commercial: 'contract',
-  grp_change: 'contract',
-  grp_scheduling: 'execution',
-  grp_field: 'execution',
-  grp_site: 'execution',
-  grp_resources: 'execution',
-  grp_records: 'execution',
-  grp_quality: 'execution',
-  grp_safety: 'execution',
-  grp_handover: 'execution',
-  grp_documents: 'execution',
-  grp_esg: 'execution',
-  grp_finance: 'finance',
-  grp_cost_control: 'finance',
-  grp_controls_bi: 'finance',
-  grp_real_estate: 'finance',
-};
-
-// The estimating-to-cash spine is pinned so the picture reads the same in every menu layout.
-const STAGE_OVERRIDE: Record<string, Stage> = {
-  oe_takeoff: 'capture',
-  oe_boq: 'estimate',
-  oe_costs: 'estimate',
-  oe_validation: 'estimate',
-  oe_tendering: 'tender',
-  oe_procurement: 'tender',
-  oe_contracts: 'contract',
-  oe_changeorders: 'contract',
-  oe_schedule: 'execution',
-  oe_construction_control: 'execution',
-  oe_ncr: 'execution',
-  oe_finance: 'finance',
-  oe_payment_clock: 'finance',
-  oe_costmodel: 'finance',
-  oe_full_evm: 'finance',
-};
 
 interface RouteFacts {
   route: string;
@@ -208,8 +153,6 @@ export function moduleMeta(module: string): ModuleMeta {
   const hit = metaCache.get(module);
   if (hit) return hit;
   const facts = routeIndex().get(module);
-  const groupStage = facts?.groupId ? STAGE_BY_GROUP[facts.groupId] : undefined;
-  const stage = STAGE_OVERRIDE[module] ?? groupStage ?? 'platform';
   const toneIndex = facts?.route ? sectionTone(facts.route) : undefined;
   const meta: ModuleMeta = {
     module,
@@ -220,7 +163,6 @@ export function moduleMeta(module: string): ModuleMeta {
     familyLabelKey: facts?.groupLabelKey || null,
     familyDefaultLabel: facts?.groupDefaultLabel ?? null,
     tone: toneIndex === undefined ? 'var(--oe-text-tertiary)' : `var(--oe-tone-${toneIndex})`,
-    stage: STAGES.indexOf(stage),
     icon: facts?.icon ?? null,
   };
   metaCache.set(module, meta);

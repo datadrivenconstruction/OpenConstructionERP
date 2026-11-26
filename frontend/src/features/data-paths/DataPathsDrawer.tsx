@@ -18,7 +18,7 @@ import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { useModulePaths, useProjectParties, type EdgeOut } from './api';
 import { buildFlowModel, humanize, listRows, moduleLabel, type FlowModel } from './flowModel';
 import { DataPathsOverview } from './DataPathsOverview';
-import { FocusView } from './FocusView';
+import { ModulePathsView } from './ModulePathsView';
 import { PartiesHoneycomb } from './PartiesHoneycomb';
 import { buildCsv, buildFlowSvg, download, svgToPng, themeColors } from './exportDataPaths';
 import { fmtList } from '@/shared/lib/formatters';
@@ -86,16 +86,14 @@ export function DataPathsDrawer({ module, open, onClose }: DataPathsDrawerProps)
           </p>
         )}
         {tab === 'flow' && (
-          <FocusView
+          <ModulePathsView
             module={module}
             projectId={projectId}
             enabled={open}
-            canvasHeight="max(480px, calc(100vh - 300px))"
-            onOpenModule={(route) => {
+            onOpen={(route) => {
               onClose();
               navigate(route);
             }}
-            onPeople={() => setTab('people')}
           />
         )}
         {model && tab === 'overview' && <DataPathsOverview model={model} />}
