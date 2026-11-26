@@ -529,6 +529,97 @@ class DisciplineCoverageRule(BIMModelRule):
         ]
 
 
+# Category values a converter or importer writes when it found none.
+_NO_CATEGORY_VALUES = frozenset({"", "unknown", "none", "null", "n/a"})
+
+
+class ElementsHaveCategoryRule(BIMModelRule):
+    """Flag elements imported without a category."""
+
+    rule_id = "bim.model.elements_have_category"
+    name = "Every element should have a category"
+    severity = "warning"
+    description = (
+        "Elements without a category cannot be filtered, grouped into BOQ "
+        "positions or matched to cost items by type. They usually come from a "
+        "converter row the exporter could not classify. One finding lists them."
+    )
+
+    def evaluate(self, elements: list[Any], context: BIMModelContext) -> list[BIMModelRuleResult]:
+        missing = [
+            _element_primary_id(elem)
+            for elem in elements
+            if str(getattr(elem, "element_type", None) or "").strip().lower() in _NO_CATEGORY_VALUES
+        ]
+        if not missing:
+            return []
+        return [
+            self._fail(
+                f"{len(missing)} of {len(elements)} elements have no category; "
+                "they cannot be grouped or matched to cost items by type",
+                details={"count": len(missing), "total": len(elements), "element_ids": missing[:_DETAIL_CAP]},
+            )
+        ]
+
+
+def _quantity_numbers(elem: Any) -> list[float]:
+    """Numeric quantity values of an element; text that is not a number is ignored."""
+    quantities = getattr(elem, "quantities", None)
+    if not isinstance(quantities, dict):
+        return []
+    numbers: list[float] = []
+    for value in quantities.values():
+        number = _coerce_number(value)
+        if number is not None:
+            numbers.append(number)
+    return numbers
+
+
+class ZeroQuantitiesRule(BIMModelRule):
+    """Flag elements whose quantities are all zero, and models with no quantity at all."""
+
+    rule_id = "bim.model.zero_quantities"
+    name = "Imported quantities should not be zero"
+    severity = "warning"
+    description = (
+        "An element whose every quantity is 0 adds nothing to a linked BOQ "
+        "position, which hides it from the estimate. A model where no element "
+        "carries any quantity can only be counted, never measured. Elements with "
+        "no quantities at all (furniture, fixtures) are fine on their own."
+    )
+
+    def evaluate(self, elements: list[Any], context: BIMModelContext) -> list[BIMModelRuleResult]:
+        zero_ids: list[str] = []
+        any_positive = False
+        for elem in elements:
+            numbers = _quantity_numbers(elem)
+            if any(n != 0 for n in numbers):
+                any_positive = True
+            elif numbers:
+                zero_ids.append(_element_primary_id(elem))
+        if not any_positive and not zero_ids:
+            return [
+                self._fail(
+                    "No element carries a quantity; linked BOQ positions can only count elements, "
+                    "not measure area, volume or length",
+                    details={"reason": "no_quantities", "total": len(elements)},
+                )
+            ]
+        if not zero_ids:
+            return []
+        return [
+            self._fail(
+                f"{len(zero_ids)} elements carry only zero quantities; a BOQ position linked to them gets 0",
+                details={
+                    "reason": "zero_values",
+                    "count": len(zero_ids),
+                    "total": len(elements),
+                    "element_ids": zero_ids[:_DETAIL_CAP],
+                },
+            )
+        ]
+
+
 # ── Registry ─────────────────────────────────────────────────────────────────
 
 BIM_MODEL_RULES: list[BIMModelRule] = [
@@ -540,6 +631,8 @@ BIM_MODEL_RULES: list[BIMModelRule] = [
     ClassificationCoverageRule(),
     SpatialStructureRule(),
     DisciplineCoverageRule(),
+    ElementsHaveCategoryRule(),
+    ZeroQuantitiesRule(),
 ]
 """Ordered list of enabled model-level BIM rules."""
 
