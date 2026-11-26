@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 > **Tip:** This file is long. Use your browser's **Find** (Ctrl+F) to jump to a version number, or see the [Releases page](https://github.com/datadrivenconstruction/OpenConstructionERP/releases) for a per-release view with download links.
 
+## [20.4.1] - 2026-11-26
+
+Cost control reads deeper: a CVR report rolls up the WBS tree, claims and pay applications get a stage grid, and every commitment opens to the orders and subcontract lines behind it.
+
+### Added
+
+- CVR by WBS: budget, committed, cost, value, forecast and margin per WBS node with drill-down to the report lines, checked by a reconciliation rule.
+- Valuation grid for client progress claims and subcontractor pay applications: quantity and amount per stage, cumulative certified, and a warning when a running total drops without a note.
+- Commitment grid rows open to the order items and subcontract lines behind them, and cost control carries the target cost per cost line with a warning when the forecast passes it.
+- Preview a resource price or name change across work items, assemblies and bill positions before applying it in one audited step, and align bill prices with the price sheet.
+- Named menu layouts: save the current menu arrangement under a name and switch between layouts.
+- Spreadsheet import opens the column mapping when original columns are present and offers to structure the imported bill.
+
+### Fixed
+
+- The two benchmark pages have distinct names in every language: market benchmarks and past project benchmarks.
+- Market variants of cost databases are listed for every role; only editors can install one, and the button says why.
+- Stale or truncated resource changes are refused, and price alignment and resource impact respect project access.
+- Generated design texts, the estimate marker row and the design estimate bill read in the language of the interface.
+- Uzbek text uses the correct apostrophe marks.
+
 ## [20.4.0] - 2026-11-25
 
 Design numbers now travel from the brief and the model to the estimate, the bill, procurement and the change order, and every figure says where it came from.

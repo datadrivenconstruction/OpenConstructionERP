@@ -67,6 +67,13 @@ const UNRELEASED: ChangelogEntry | null = null;
 // carry the long form and are left alone as the record of what shipped.
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '20.4.1',
+    date: '2026-11-26',
+    tag: 'NEW',
+    summary:
+      'CVR reports roll up the WBS tree, claims and pay applications get a stage grid, and each commitment opens to the orders behind it. Resource price changes can be previewed before they apply, and menu layouts can be saved by name.',
+  },
+  {
     version: '20.4.0',
     date: '2026-11-25',
     tag: 'NEW',
