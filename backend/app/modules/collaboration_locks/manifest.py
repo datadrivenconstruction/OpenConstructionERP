@@ -10,6 +10,7 @@ rows are deferred to v1.5 / v2.0.
 """
 
 from app.core.module_loader import ModuleManifest
+from app.modules.collaboration_locks.data_paths import DATA_PATHS
 
 manifest = ModuleManifest(
     name="oe_collaboration_locks",
@@ -24,4 +25,5 @@ manifest = ModuleManifest(
     depends=["oe_users"],
     auto_install=True,
     enabled=True,
+    data_paths=DATA_PATHS,
 )

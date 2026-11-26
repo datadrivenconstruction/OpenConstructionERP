@@ -2,6 +2,7 @@
 """Cost Explorer module manifest."""
 
 from app.core.module_loader import ModuleManifest
+from app.modules.cost_explorer.data_paths import DATA_PATHS
 
 manifest = ModuleManifest(
     name="oe_cost_explorer",
@@ -22,4 +23,5 @@ manifest = ModuleManifest(
     depends=["oe_costs", "oe_catalog"],
     auto_install=True,
     enabled=True,
+    data_paths=DATA_PATHS,
 )

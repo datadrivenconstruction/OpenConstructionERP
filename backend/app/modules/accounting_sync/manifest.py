@@ -3,6 +3,7 @@
 """Accounting​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠ sync module manifest."""
 
 from app.core.module_loader import ModuleManifest
+from app.modules.accounting_sync.data_paths import DATA_PATHS
 
 manifest = ModuleManifest(
     name="oe_accounting_sync",
@@ -21,4 +22,5 @@ manifest = ModuleManifest(
     optional_depends=["oe_contacts", "oe_guarantees", "oe_notifications", "oe_subcontractors", "oe_procurement"],
     auto_install=True,
     enabled=True,
+    data_paths=DATA_PATHS,
 )

@@ -12,6 +12,7 @@ endpoint, so no schema migration is required.
 """
 
 from app.core.module_loader import ModuleManifest
+from app.modules.assets.data_paths import DATA_PATHS
 
 manifest = ModuleManifest(
     name="oe_assets",
@@ -30,4 +31,5 @@ manifest = ModuleManifest(
     optional_depends=["oe_notifications"],
     auto_install=True,
     enabled=True,
+    data_paths=DATA_PATHS,
 )

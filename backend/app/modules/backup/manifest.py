@@ -1,6 +1,7 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 from app.core.module_loader import ModuleManifest
+from app.modules.backup.data_paths import DATA_PATHS
 
 manifest = ModuleManifest(
     name="oe_backup",
@@ -11,4 +12,5 @@ manifest = ModuleManifest(
     category="core",
     depends=[],
     auto_install=True,
+    data_paths=DATA_PATHS,
 )

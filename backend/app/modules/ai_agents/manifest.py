@@ -3,6 +3,7 @@
 """AI Agents module manifest."""
 
 from app.core.module_loader import ModuleManifest
+from app.modules.ai_agents.data_paths import DATA_PATHS
 
 manifest = ModuleManifest(
     name="oe_ai_agents",
@@ -18,4 +19,5 @@ manifest = ModuleManifest(
     depends=["oe_ai", "oe_projects"],
     auto_install=True,
     enabled=True,
+    data_paths=DATA_PATHS,
 )

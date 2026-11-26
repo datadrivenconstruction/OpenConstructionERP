@@ -3,6 +3,7 @@
 """AI Estimation module manifest."""
 
 from app.core.module_loader import InferenceDeclaration, InferenceRole, ModuleManifest
+from app.modules.ai.data_paths import DATA_PATHS
 
 manifest = ModuleManifest(
     name="oe_ai",
@@ -26,4 +27,5 @@ manifest = ModuleManifest(
             "infers anything until an operator supplies credentials of their own"
         ),
     ),
+    data_paths=DATA_PATHS,
 )

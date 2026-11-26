@@ -3,6 +3,7 @@
 """Capital plan module manifest."""
 
 from app.core.module_loader import ModuleManifest
+from app.modules.capital_plan.data_paths import DATA_PATHS
 
 manifest = ModuleManifest(
     name="oe_capital_plan",
@@ -17,4 +18,5 @@ manifest = ModuleManifest(
     depends=["oe_users", "oe_projects", "oe_portfolio"],
     auto_install=True,
     enabled=True,
+    data_paths=DATA_PATHS,
 )

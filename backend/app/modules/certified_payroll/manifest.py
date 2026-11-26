@@ -3,6 +3,7 @@
 """Module manifest for oe_certified_payroll."""
 
 from app.core.module_loader import ModuleManifest
+from app.modules.certified_payroll.data_paths import DATA_PATHS
 
 manifest = ModuleManifest(
     name="oe_certified_payroll",
@@ -27,4 +28,5 @@ manifest = ModuleManifest(
     # nobody asked it.
     auto_install=False,
     enabled=True,
+    data_paths=DATA_PATHS,
 )

@@ -3,6 +3,7 @@
 """Bid / no-bid scorecard module manifest."""
 
 from app.core.module_loader import ModuleManifest
+from app.modules.bid_no_bid.data_paths import DATA_PATHS
 
 manifest = ModuleManifest(
     name="oe_bid_no_bid",
@@ -20,4 +21,5 @@ manifest = ModuleManifest(
     optional_depends=["oe_crm"],
     auto_install=True,
     enabled=True,
+    data_paths=DATA_PATHS,
 )

@@ -3,6 +3,7 @@
 """Commitment release module manifest."""
 
 from app.core.module_loader import ModuleManifest
+from app.modules.commitment_release.data_paths import DATA_PATHS
 
 manifest = ModuleManifest(
     name="oe_commitment_release",
@@ -21,4 +22,5 @@ manifest = ModuleManifest(
     depends=["oe_users", "oe_projects", "oe_approval_routes", "oe_project_governance", "oe_costmodel"],
     auto_install=True,
     enabled=True,
+    data_paths=DATA_PATHS,
 )

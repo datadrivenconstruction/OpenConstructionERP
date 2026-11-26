@@ -3,6 +3,7 @@
 """Condition module manifest."""
 
 from app.core.module_loader import ModuleManifest
+from app.modules.condition.data_paths import DATA_PATHS
 
 manifest = ModuleManifest(
     name="oe_condition",
@@ -20,4 +21,5 @@ manifest = ModuleManifest(
     optional_depends=["oe_inspections", "oe_bim_hub", "oe_price_index", "oe_carbon"],
     auto_install=True,
     enabled=True,
+    data_paths=DATA_PATHS,
 )
