@@ -63,6 +63,7 @@ import { InsightsPanel, InsightsToggleButton, useModuleInsights } from '@/featur
 import { buildProcurementInsights } from './procurementInsights';
 import { VendorPrequalBadge } from './VendorPrequalBadge';
 import { BillPositionPicker } from './BillPositionPicker';
+import { BudgetLinePicker } from '@/features/costmodel/BudgetLinePicker';
 import { RetainagePanel, RetainageBadge } from './RetainagePanel';
 import { SupplierConfirmationModal } from './SupplierConfirmationModal';
 import { POStatusPipeline } from './POStatusPipeline';
@@ -172,6 +173,8 @@ interface POItemResponse {
   // the money row holds no position column. Null for a line bought outside the
   // bill, and for one whose cost line came from no position.
   boq_position_id: string | null;
+  // The budget line (cost code x cost type) the line's commitment rolls into.
+  budget_line_id?: string | null;
   // The requisition line this order line was raised from by a conversion,
   // null for a line typed into the order by hand.
   requisition_item_id?: string | null;
@@ -243,6 +246,8 @@ interface POLineItemForm {
    * this form. See `backend/app/modules/procurement/cost_spine.py`.
    */
   boq_position_id: string | null;
+  /** Budget line the commitment is booked to; carried through an edit so replacing lines keeps it. */
+  budget_line_id?: string | null;
   /**
    * The requisition line this order line came from, carried through an edit
    * untouched. A PATCH that replaces the lines rewrites every row, and a line
@@ -262,7 +267,7 @@ interface POLineItemForm {
 
 /** The figures of a line, without its delivery requirements. */
 function lineFigures(items: POLineItemForm[]) {
-  return items.map((li) => [li.description, li.quantity, li.unit, li.unit_rate, li.amount, li.boq_position_id, li.cost_category ?? '']);
+  return items.map((li) => [li.description, li.quantity, li.unit, li.unit_rate, li.amount, li.boq_position_id, li.cost_category ?? '', li.budget_line_id ?? null]);
 }
 
 
@@ -321,6 +326,7 @@ function poFormFromResponse(po: POResponse, projectCurrency: string): POFormStat
             // quietly send the line back unattributed. The picker resolves the
             // id to a readable position even when it sorts past the first page.
             boq_position_id: it.boq_position_id ?? null,
+            budget_line_id: it.budget_line_id ?? null,
             requisition_item_id: it.requisition_item_id ?? null,
             cost_category: it.cost_category ?? '',
             wbs_id: it.wbs_id ?? null,
@@ -906,6 +912,13 @@ function PurchaseOrdersTab({
     }));
   };
 
+  const setLineBudgetLine = (idx: number, budgetLineId: string | null) => {
+    setPoForm((prev) => ({
+      ...prev,
+      items: prev.items.map((li, i) => (i === idx ? { ...li, budget_line_id: budgetLineId } : li)),
+    }));
+  };
+
   const addLineItem = () => {
     setPoForm((prev) => ({ ...prev, items: [...prev.items, { ...emptyLine }] }));
   };
@@ -999,6 +1012,7 @@ function PurchaseOrdersTab({
             // same as an unlinked line without asking the server to resolve it.
             cost_category: li.cost_category?.trim() || undefined,
             boq_position_id: li.boq_position_id || undefined,
+            budget_line_id: li.budget_line_id || undefined,
             required_certificate_type: li.required_certificate_type || undefined,
             requires_inspection: Boolean(li.requires_inspection),
             sort_order: idx,
@@ -1070,6 +1084,7 @@ function PurchaseOrdersTab({
             amount: li.amount || '0',
             unit_rate: li.unit_rate || '0',
             boq_position_id: li.boq_position_id || undefined,
+            budget_line_id: li.budget_line_id || undefined,
             requisition_item_id: li.requisition_item_id || undefined,
             cost_category: li.cost_category?.trim() || undefined,
             wbs_id: li.wbs_id || undefined,
@@ -1469,6 +1484,22 @@ function PurchaseOrdersTab({
                         onChange={(boqPositionId) => setLinePosition(idx, boqPositionId)}
                         line={idx + 1}
                         disabled={figuresLocked}
+                      />
+                      <BudgetLinePicker
+                        projectId={projectId}
+                        value={li.budget_line_id ?? null}
+                        onChange={(budgetLineId) => setLineBudgetLine(idx, budgetLineId)}
+                        line={idx + 1}
+                        disabled={figuresLocked || !canEditPO}
+                        disabledReason={
+                          !canEditPO
+                            ? t('costmodel.ctg_pick_readonly', {
+                                defaultValue: 'Your role can read budget lines but not change this link.',
+                              })
+                            : t('costmodel.ctg_pick_locked', {
+                                defaultValue: 'Locked once the order leaves draft.',
+                              })
+                        }
                       />
                       <input
                         value={li.cost_category ?? ''}

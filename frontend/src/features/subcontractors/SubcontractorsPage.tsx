@@ -1367,6 +1367,7 @@ function AgreementRow({ agreement }: { agreement: Agreement }) {
           />
         </span>
       </div>
+      <AgreementBudgetLine agreement={agreement} />
       <LienWaiverRequirementToggle agreement={agreement} />
       <AgreementChangesSection agreementId={agreement.id} />
       <AgreementDocumentsPanel agreement={agreement} />
@@ -1387,6 +1388,52 @@ function AgreementRow({ agreement }: { agreement: Agreement }) {
         </div>
       )}
     </Card>
+  );
+}
+
+/**
+ * Budget line (cost code x cost type) an agreement commits against. Editors
+ * change it; read-only roles see the same control disabled with the reason.
+ */
+function AgreementBudgetLine({ agreement }: { agreement: Agreement }) {
+  const { t } = useTranslation();
+  const qc = useQueryClient();
+  const addToast = useToastStore((s) => s.addToast);
+  const userRole = useAuthStore((s) => s.userRole);
+  const canEdit = userRole === 'admin' || userRole === 'manager' || userRole === 'editor';
+
+  const mutation = useMutation({
+    mutationFn: (budgetLineId: string | null) =>
+      updateAgreement(agreement.id, { budget_line_id: budgetLineId }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['subcontractors'] });
+      qc.invalidateQueries({ queryKey: ['costmodel'] });
+    },
+    onError: (err) => addToast({ type: 'error', title: getErrorMessage(err) }),
+  });
+
+  return (
+    <div className="mt-3 flex items-center justify-between gap-3 border-t border-border-light pt-3">
+      <span className="text-xs text-content-secondary">
+        {t('costmodel.ctg_pick_label', { defaultValue: 'Budget line' })}
+      </span>
+      <div className="min-w-0 max-w-[60%] flex-1">
+        <BudgetLinePicker
+          projectId={agreement.project_id}
+          value={agreement.budget_line_id ?? null}
+          onChange={(id) => mutation.mutate(id)}
+          disabled={!canEdit || mutation.isPending}
+          disabledReason={
+            canEdit
+              ? undefined
+              : t('costmodel.ctg_pick_readonly', {
+                  defaultValue: 'Your role can read budget lines but not change this link.',
+                })
+          }
+          data-testid="agreement-budget-line-inline"
+        />
+      </div>
+    </div>
   );
 }
 
