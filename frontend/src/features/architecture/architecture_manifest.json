@@ -68621,6 +68621,7 @@
         "sov_posting.py",
         "subcontract_protection.py",
         "validators.py",
+        "valuation_grid.py",
         "vat_regime_rules.py"
       ],
       "manifest": {
@@ -70789,6 +70790,20 @@
           "handler": "update_claim_line_quantities",
           "response_model": "ProgressClaimLineResponse",
           "request_schema": "ProgressClaimLineQuantities"
+        },
+        {
+          "method": "GET",
+          "path": "/progress-claims/{claim_id}/valuation-grid",
+          "handler": "get_claim_valuation_grid",
+          "response_model": "ValuationGridResponse",
+          "request_schema": "None"
+        },
+        {
+          "method": "PUT",
+          "path": "/progress-claims/{claim_id}/valuation-note",
+          "handler": "set_claim_valuation_note",
+          "response_model": "ValuationGridResponse",
+          "request_schema": "ValuationNote"
         },
         {
           "method": "POST",
@@ -82241,6 +82256,12 @@
         },
         {
           "method": "GET",
+          "path": "/projects/{project_id}/spine/commitment-grid/{position_id}/sources/",
+          "handler": "get_commitment_sources",
+          "response_model": "CommitmentSourcesResponse"
+        },
+        {
+          "method": "GET",
           "path": "/projects/{project_id}/spine/position-actuals/",
           "handler": "get_position_actuals",
           "response_model": "PositionActualsResponse"
@@ -84203,6 +84224,15 @@
               "type": "FiniteDecimal"
             },
             {
+              "name": "cost_budget_amount",
+              "type": "FiniteDecimal"
+            },
+            {
+              "name": "budget_basis",
+              "type": "str",
+              "default": "'unit_rate'"
+            },
+            {
               "name": "budget_planned",
               "type": "FiniteDecimal"
             },
@@ -84430,6 +84460,90 @@
             {
               "name": "findings",
               "type": "list[dict[str, Any]]"
+            }
+          ]
+        },
+        {
+          "class_name": "CommitmentSourceRow",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "One order item or subcontract line behind a commitment grid row, in project currency.",
+          "fields": [
+            {
+              "name": "kind",
+              "type": "str"
+            },
+            {
+              "name": "document_id",
+              "type": "UUID"
+            },
+            {
+              "name": "document_number",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "document_title",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "status",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "line_id",
+              "type": "UUID"
+            },
+            {
+              "name": "description",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "committed_qty",
+              "type": "FiniteDecimal"
+            },
+            {
+              "name": "committed_value",
+              "type": "FiniteDecimal"
+            },
+            {
+              "name": "received_qty",
+              "type": "FiniteDecimal"
+            },
+            {
+              "name": "received_value",
+              "type": "FiniteDecimal"
+            }
+          ]
+        },
+        {
+          "class_name": "CommitmentSourcesResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "The sources of one grid row; empty when the position has no cost line or nothing is committed.",
+          "fields": [
+            {
+              "name": "currency",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "boq_position_id",
+              "type": "UUID"
+            },
+            {
+              "name": "cost_line_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "sources",
+              "type": "list[CommitmentSourceRow]"
             }
           ]
         }
@@ -303844,7 +303958,8 @@
         "terms_router.py",
         "terms_schemas.py",
         "terms_service.py",
-        "validators.py"
+        "validators.py",
+        "valuation_grid.py"
       ],
       "manifest": {
         "name": "oe_subcontractors",
@@ -305398,6 +305513,20 @@
           "handler": "update_payment_application_line_quantities",
           "response_model": "PaymentApplicationLineResponse",
           "request_schema": "PaymentApplicationLineQuantities"
+        },
+        {
+          "method": "GET",
+          "path": "/payment-applications/{payment_id}/valuation-grid",
+          "handler": "get_payment_application_valuation_grid",
+          "response_model": "ValuationGridResponse",
+          "request_schema": "None"
+        },
+        {
+          "method": "PUT",
+          "path": "/payment-applications/{payment_id}/valuation-note",
+          "handler": "set_payment_application_valuation_note",
+          "response_model": "ValuationGridResponse",
+          "request_schema": "ValuationNote"
         },
         {
           "method": "GET",
@@ -334190,6 +334319,7 @@
         "router.py",
         "schemas.py",
         "service.py",
+        "sidebar_layouts.py",
         "sso_enforce.py",
         "validators.py"
       ],
@@ -334720,6 +334850,20 @@
           "handler": "save_sidebar_preferences",
           "response_model": "SidebarPreferencesPayload",
           "request_schema": "SidebarPreferencesPayload"
+        },
+        {
+          "method": "GET",
+          "path": "/me/sidebar-layouts/",
+          "handler": "get_sidebar_layouts",
+          "response_model": "SidebarLayoutsPayload",
+          "request_schema": "UserService"
+        },
+        {
+          "method": "PUT",
+          "path": "/me/sidebar-layouts/",
+          "handler": "save_sidebar_layouts",
+          "response_model": "SidebarLayoutsPayload",
+          "request_schema": "SidebarLayoutsPayload"
         },
         {
           "method": "GET",
@@ -344517,10 +344661,10 @@
     },
     {
       "name": "bim",
-      "ts_files": 143,
+      "ts_files": 144,
       "css_files": 0,
-      "test_files": 53,
-      "total_files": 144
+      "test_files": 54,
+      "total_files": 145
     },
     {
       "name": "bim_requirements",
@@ -344811,10 +344955,10 @@
     },
     {
       "name": "cvr",
-      "ts_files": 9,
+      "ts_files": 11,
       "css_files": 0,
-      "test_files": 2,
-      "total_files": 9
+      "test_files": 3,
+      "total_files": 11
     },
     {
       "name": "daily-diary",
@@ -348235,11 +348379,11 @@
     "total_models": 992,
     "total_columns": 11598,
     "total_relationships": 264,
-    "total_routes": 5605,
-    "total_schemas": 5241,
-    "total_python_files": 3851,
+    "total_routes": 5612,
+    "total_schemas": 5243,
+    "total_python_files": 3854,
     "frontend_features": 254,
-    "frontend_ts_files": 4585,
+    "frontend_ts_files": 4588,
     "frontend_backend_mapped": 224
   },
   "frontend_backend_mapping": {
