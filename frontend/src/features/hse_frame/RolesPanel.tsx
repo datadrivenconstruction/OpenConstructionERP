@@ -27,6 +27,7 @@ interface Props {
   duties: Duties | null;
   write: HseWrite;
   canEdit: boolean;
+  editReason?: string;
 }
 
 /** Whether a role is compulsory under the facts: true, false or undecided. */
@@ -108,7 +109,7 @@ function AddRole({ projectId, kind, write }: { projectId: string; kind: CatRole;
   );
 }
 
-export function RolesPanel({ projectId, roles, catalogue, duties, write, canEdit }: Props) {
+export function RolesPanel({ projectId, roles, catalogue, duties, write, canEdit, editReason }: Props) {
   const { t, i18n } = useTranslation();
   const [removing, setRemoving] = useState<RemoveTarget | null>(null);
   return (
@@ -155,19 +156,19 @@ export function RolesPanel({ projectId, roles, catalogue, duties, write, canEdit
                           .join(' | ')}
                       </span>
                     </span>
-                    {canEdit && (
+                    {(canEdit || editReason) && (
                       <span className="flex gap-1">
                         {r.status === 'proposed' && (
-                          <Button size="sm" variant="secondary" disabled={write.pending || !(r.person_name || r.person_user_id)} onClick={() => write.send(() => patchRole(projectId, r.id, { status: 'appointed', appointed_on: localToday() }))}>
+                          <Button size="sm" variant="secondary" disabledReason={editReason} disabled={write.pending || !(r.person_name || r.person_user_id)} onClick={() => write.send(() => patchRole(projectId, r.id, { status: 'appointed', appointed_on: localToday() }))}>
                             {t('hseFrame.role.appoint', { defaultValue: 'Appoint' })}
                           </Button>
                         )}
                         {r.status === 'appointed' && (
-                          <Button size="sm" variant="ghost" disabled={write.pending} onClick={() => write.send(() => patchRole(projectId, r.id, { status: 'ended', ends_on: localToday() }))}>
+                          <Button size="sm" variant="ghost" disabledReason={editReason} disabled={write.pending} onClick={() => write.send(() => patchRole(projectId, r.id, { status: 'ended', ends_on: localToday() }))}>
                             {t('hseFrame.role.end', { defaultValue: 'End' })}
                           </Button>
                         )}
-                        <Button size="sm" variant="ghost" disabled={write.pending} onClick={() => setRemoving({ name: fmtList([kind.national_name || labelOf(kind, i18n.language), r.person_name]), run: () => deleteRole(projectId, r.id) })}>
+                        <Button size="sm" variant="ghost" disabledReason={editReason} disabled={write.pending} onClick={() => setRemoving({ name: fmtList([kind.national_name || labelOf(kind, i18n.language), r.person_name]), run: () => deleteRole(projectId, r.id) })}>
                           {t('common.delete', { defaultValue: 'Delete' })}
                         </Button>
                       </span>
@@ -176,7 +177,11 @@ export function RolesPanel({ projectId, roles, catalogue, duties, write, canEdit
                 ))}
               </ul>
             )}
-            {canEdit && <AddRole projectId={projectId} kind={kind} write={write} />}
+            {(canEdit || editReason) && (
+              <fieldset disabled={!canEdit} title={editReason} className="m-0 min-w-0 border-0 p-0">
+                <AddRole projectId={projectId} kind={kind} write={write} />
+              </fieldset>
+            )}
           </section>
         );
       })}

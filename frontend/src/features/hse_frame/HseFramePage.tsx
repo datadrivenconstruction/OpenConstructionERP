@@ -21,6 +21,7 @@ import { SkeletonTable } from '@/shared/ui/SkeletonLoader';
 import { TabBar } from '@/shared/ui/TabBar';
 import { getErrorMessage } from '@/shared/lib/api';
 import { useHasPermission } from '@/shared/lib/permissionGates';
+import { usePermissionReason } from '@/shared/lib/permissionReason';
 
 import { createFrame } from './api';
 import {
@@ -48,6 +49,9 @@ export function HseFramePage() {
   const canEdit = useHasPermission('hse_frame.edit');
   const canManage = useHasPermission('hse_frame.manage');
   const canApprove = useHasPermission('hse_frame.approve');
+  const editReason = usePermissionReason('hse_frame.edit');
+  const manageReason = usePermissionReason('hse_frame.manage');
+  const approveReason = usePermissionReason('hse_frame.approve');
 
   const frameQ = useFrame(projectId);
   const hasFrame = !!frameQ.data?.frame;
@@ -176,6 +180,9 @@ export function HseFramePage() {
           canEdit={canEdit && open}
           canManage={canManage}
           canApprove={canApprove}
+          editReason={editReason}
+          manageReason={manageReason}
+          approveReason={approveReason}
         />
       )}
       {tab === 'register' && (
@@ -186,6 +193,8 @@ export function HseFramePage() {
           write={write}
           canEdit={canEdit && open}
           canManage={canManage && open}
+          editReason={editReason}
+          manageReason={manageReason}
         />
       )}
       {tab === 'roles' && (
@@ -196,6 +205,7 @@ export function HseFramePage() {
           duties={frameQ.data.duties}
           write={write}
           canEdit={canEdit && open}
+          editReason={editReason}
         />
       )}
       {tab === 'checks' && (
