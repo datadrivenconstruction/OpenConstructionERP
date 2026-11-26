@@ -83,13 +83,13 @@ describe('a delivery on the board', () => {
     expect(onApprove).toHaveBeenCalledTimes(1);
   });
 
-  it('offers no decision and no change to a reader without the right', () => {
+  it('shows the decisions and changes to a reader without the right, disabled', () => {
     const no = { allowed: false, applies: true, reason: 'permission_denied' };
     renderRow({ edit: no, delete: no, approve: no, reject: no });
-    expect(screen.queryByRole('button', { name: 'Approve' })).toBeNull();
-    expect(screen.queryByRole('button', { name: 'Reject' })).toBeNull();
-    expect(screen.queryByRole('button', { name: 'Edit delivery' })).toBeNull();
-    expect(screen.queryByRole('button', { name: 'Delete' })).toBeNull();
+    for (const name of ['Approve', 'Reject', 'Edit delivery', 'Delete']) {
+      expect(screen.getByRole('button', { name })).toBeDisabled();
+    }
+    expect(screen.getByRole('button', { name: 'Approve' })).toHaveAttribute('title');
   });
 
   it('says on the row what the server could not check, and still lets the approval through', () => {
