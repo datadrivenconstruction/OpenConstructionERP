@@ -18,6 +18,7 @@ import { fmtList, getIntlLocale } from '@/shared/lib/formatters';
 import { useNameCollator } from '@/shared/lib/collator';
 import { unitLabel } from '@/shared/lib/unitLabels';
 import { copyToClipboard } from '@/shared/lib/browser';
+import { usePermissionReason } from '@/shared/lib/permissionReason';
 import { useToastStore } from '@/stores/useToastStore';
 import {
   assembliesApi,
@@ -85,6 +86,7 @@ function downloadFile(content: string, filename: string, mimeType: string) {
 
 export function AssembliesPage() {
   const { t } = useTranslation();
+  const editReason = usePermissionReason('assemblies.update');
   const navigate = useNavigate();
   const location = useLocation();
   const queryClient = useQueryClient();
@@ -490,6 +492,7 @@ export function AssembliesPage() {
             variant="secondary"
             size="sm"
             icon={<Upload size={14} />}
+            disabledReason={editReason}
             onClick={() => setShowImportModal(true)}
           >
             {t('assemblies.import', { defaultValue: 'Import' })}
@@ -499,6 +502,7 @@ export function AssembliesPage() {
             variant="secondary"
             size="sm"
             icon={<Sparkles size={14} />}
+            disabledReason={editReason}
             onClick={() => setShowAiGenerate(true)}
           >
             {t('assemblies.ai_generate', { defaultValue: 'AI Generate' })}
@@ -508,6 +512,7 @@ export function AssembliesPage() {
             variant="primary"
             size="sm"
             icon={<Plus size={14} />}
+            disabledReason={editReason}
             onClick={() => setCreateModalOpen(true)}
           >
             {t('assemblies.new_assembly', 'New Assembly')}
@@ -843,13 +848,14 @@ export function AssembliesPage() {
             <Button variant="secondary" size="sm" icon={<Download size={14} />} onClick={handleBulkExport}>
               {t('assemblies.bulk_export', { defaultValue: 'Export selected' })}
             </Button>
-            <Button variant="secondary" size="sm" icon={<Tag size={14} />} onClick={() => setShowBulkTag(true)}>
+            <Button variant="secondary" size="sm" icon={<Tag size={14} />} disabledReason={editReason} onClick={() => setShowBulkTag(true)}>
               {t('assemblies.bulk_tag', { defaultValue: 'Add tag' })}
             </Button>
             <Button
               variant="secondary"
               size="sm"
               icon={<Trash2 size={14} />}
+              disabledReason={editReason}
               onClick={() => setShowBulkConfirmDelete(true)}
               className="text-semantic-error border-semantic-error/30 hover:bg-semantic-error-bg"
             >
@@ -1150,6 +1156,7 @@ function AssemblyTable({
   onDelete: (id: string) => void;
 }) {
   const { t } = useTranslation();
+  const editReason = usePermissionReason('assemblies.update');
   // Two-step inline confirm for per-row delete (id armed for deletion). Keeps
   // the table compact while still guarding against an accidental click.
   const [confirmId, setConfirmId] = useState<string | null>(null);
@@ -1266,8 +1273,9 @@ function AssemblyTable({
                       <button
                         type="button"
                         onClick={() => setConfirmId(a.id)}
-                        className="opacity-0 group-hover:opacity-100 focus:opacity-100 inline-flex h-7 w-7 items-center justify-center rounded-md text-content-tertiary hover:bg-semantic-error-bg hover:text-semantic-error transition-all"
-                        title={t('assemblies.delete_confirm', { defaultValue: 'Delete assembly?' })}
+                        disabled={!!editReason}
+                        className="opacity-0 group-hover:opacity-100 focus:opacity-100 inline-flex h-7 w-7 items-center justify-center rounded-md text-content-tertiary hover:bg-semantic-error-bg hover:text-semantic-error transition-all disabled:cursor-not-allowed disabled:opacity-40"
+                        title={editReason ?? t('assemblies.delete_confirm', { defaultValue: 'Delete assembly?' })}
                         aria-label={t('a11y.assemblies.delete_row', {
                           defaultValue: 'Delete assembly {{name}}',
                           name: a.name,
@@ -1760,6 +1768,7 @@ function AssemblyCard({
   onToggleSelect: () => void;
 }) {
   const { t } = useTranslation();
+  const editReason = usePermissionReason('assemblies.update');
   const [menuOpen, setMenuOpen] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
@@ -1894,6 +1903,8 @@ function AssemblyCard({
             </button>
             <button
               onClick={() => { setMenuOpen(false); onDuplicate(); }}
+              disabled={!!editReason}
+              title={editReason}
               className="flex w-full items-center gap-2 px-3 py-2 text-sm text-content-primary hover:bg-surface-secondary transition-colors"
             >
               <Copy size={14} /> {t('assemblies.duplicate', { defaultValue: 'Duplicate & Edit' })}
@@ -1917,6 +1928,8 @@ function AssemblyCard({
             <div className="h-px bg-border-light" />
             <button
               onClick={() => { setMenuOpen(false); setConfirmDelete(true); }}
+              disabled={!!editReason}
+              title={editReason}
               className="flex w-full items-center gap-2 px-3 py-2 text-sm text-semantic-error hover:bg-semantic-error-bg transition-colors"
             >
               <Trash2 size={14} /> {t('common.delete', { defaultValue: 'Delete' })}

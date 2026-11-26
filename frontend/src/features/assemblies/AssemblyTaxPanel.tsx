@@ -11,6 +11,7 @@ import { Lock, RefreshCw, Unlock } from 'lucide-react';
 import { Button, Card } from '@/shared/ui';
 import { useToastStore } from '@/stores/useToastStore';
 import { getErrorMessage } from '@/shared/lib/api';
+import { useRoleReason } from '@/shared/lib/permissionReason';
 import { assembliesApi, type AssemblyWithComponents } from './api';
 import { assemblyTaxTotals, isAssemblyApproved } from './componentTax';
 
@@ -30,6 +31,7 @@ export function AssemblyTaxPanel({
   fmt: (n: number) => string;
 }) {
   const { t } = useTranslation();
+  const editReason = useRoleReason(canEdit, 'editor');
   const queryClient = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
   const totals = assemblyTaxTotals(assembly);
@@ -114,6 +116,7 @@ export function AssemblyTaxPanel({
           size="sm"
           icon={<RefreshCw size={13} />}
           loading={recalc.isPending}
+          disabledReason={editReason}
           disabled={!canEdit || approved}
           title={t('assemblies.tax.recalc_hint', {
             defaultValue:
@@ -127,6 +130,7 @@ export function AssemblyTaxPanel({
           variant="ghost"
           size="sm"
           icon={approved ? <Unlock size={13} /> : <Lock size={13} />}
+          disabledReason={editReason}
           disabled={!canEdit}
           loading={approve.isPending}
           onClick={() => approve.mutate(!approved)}
