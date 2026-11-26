@@ -21,7 +21,6 @@ import {
   type SidebarLayoutData,
 } from './sidebarLayouts';
 
-const ENDPOINT = '/v1/users/me/sidebar-layouts/';
 
 interface LayoutsPayload {
   layouts: SidebarLayout[];
@@ -46,7 +45,7 @@ export const useSidebarLayoutsStore = create<SidebarLayoutsState>((set, get) => 
     const previous = get().layouts;
     set({ layouts: next });
     try {
-      const saved = await apiPut<LayoutsPayload, LayoutsPayload>(ENDPOINT, { layouts: next });
+      const saved = await apiPut<LayoutsPayload, LayoutsPayload>('/v1/users/me/sidebar-layouts/', { layouts: next });
       set({ layouts: sanitizeLayouts(saved.layouts) });
       return { ok: true, id };
     } catch {
@@ -60,7 +59,7 @@ export const useSidebarLayoutsStore = create<SidebarLayoutsState>((set, get) => 
     loaded: false,
     load: async () => {
       try {
-        const data = await apiGet<LayoutsPayload>(ENDPOINT);
+        const data = await apiGet<LayoutsPayload>('/v1/users/me/sidebar-layouts/');
         set({ layouts: sanitizeLayouts(data.layouts), loaded: true });
       } catch {
         set({ loaded: true });
