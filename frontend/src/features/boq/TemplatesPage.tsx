@@ -26,6 +26,7 @@ import { Button, Badge, Breadcrumb, DismissibleInfo } from '@/shared/ui';
 import { PageHeader } from '@/shared/ui/PageHeader';
 import { useToastStore } from '@/stores/useToastStore';
 import { apiGet, apiPost, ApiError } from '@/shared/lib/api';
+import { useRoleGate } from '@/shared/lib/useRoleGate';
 import { fmtNumber } from '@/shared/lib/formatters';
 import { useDisplayQuantity } from '@/shared/hooks/useDisplayQuantity';
 import { parseDecimalInput } from '@/shared/lib/parseDecimal';
@@ -88,6 +89,7 @@ const fmtCurrency = { format: (value: number) => fmtNumber(value, 2) };
 
 export function TemplatesPage() {
   const { t } = useTranslation();
+  const write = useRoleGate('editor');
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
@@ -284,6 +286,7 @@ export function TemplatesPage() {
           size="sm"
           icon={<FilePlus2 size={14} />}
           data-testid="tpl-from-estimate"
+          disabledReason={write.reason}
           onClick={() => setFromEstimateOpen(true)}
         >
           {t('boq_templates.from_estimate', { defaultValue: 'From an existing estimate' })}
@@ -428,6 +431,7 @@ export function TemplatesPage() {
                 icon={<Pencil size={14} />}
                 loading={duplicateMutation.isPending}
                 data-testid="tpl-edit"
+                disabledReason={write.reason}
                 onClick={() =>
                   selected.builtin === false
                     ? navigate(`/templates/${selected.id}`)
@@ -445,6 +449,7 @@ export function TemplatesPage() {
                     size="sm"
                     icon={<Copy size={14} />}
                     loading={duplicateMutation.isPending}
+                    disabledReason={write.reason}
                     onClick={() => duplicateMutation.mutate(selected.id)}
                   >
                     {t('boq_templates.duplicate', { defaultValue: 'Duplicate' })}
@@ -455,6 +460,7 @@ export function TemplatesPage() {
                     icon={<Trash2 size={14} />}
                     loading={deleteMutation.isPending}
                     data-testid="tpl-delete"
+                    disabledReason={write.reason}
                     onClick={() => {
                       if (window.confirm(t('boq_templates.delete_confirm', { defaultValue: 'Delete this template? Bills already made from it are not affected.' }))) {
                         deleteMutation.mutate(selected.id);
@@ -559,6 +565,7 @@ export function TemplatesPage() {
                   )
                 }
                 onClick={handleCreate}
+                disabledReason={write.reason}
                 disabled={!projectId || createMutation.isPending}
                 className="w-full btn-shimmer"
               >
