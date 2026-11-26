@@ -30,6 +30,7 @@ import { BarBendingSchedulePanel } from './BarBendingSchedulePanel';
 import { downloadWithAuth, getErrorMessage, isTruncated } from '@/shared/lib/api';
 import { normalizeRole, ROLE_RANK } from '@/shared/lib/roles';
 import { useAuthStore } from '@/stores/useAuthStore';
+import { useRoleReason } from '@/shared/lib/permissionReason';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import {
   deleteImport,
@@ -402,6 +403,8 @@ export function RebarSchedulePage() {
   const rank = roleRank(useAuthStore((s) => s.userRole));
   const canImport = rank >= ROLE_RANK.editor;
   const canDelete = rank >= ROLE_RANK.manager;
+  const importReason = useRoleReason(canImport, 'editor');
+  const deleteReason = useRoleReason(canDelete, 'manager');
 
   // -- State ---------------------------------------------------------------
   const [view, setView] = useState<View>('list');
@@ -665,9 +668,10 @@ export function RebarSchedulePage() {
               >
                 {t('common.cancel', { defaultValue: 'Cancel' })}
               </Button>
-              {canImport && (
+              {(
                 <Button
                   variant={hasErrors ? 'danger' : 'primary'}
+                  disabledReason={importReason}
                   onClick={handleConfirmImport}
                   disabled={importing}
                   loading={importing}
@@ -769,9 +773,10 @@ export function RebarSchedulePage() {
               >
                 {t('rebar_schedule.export', { defaultValue: 'Export .abs' })}
               </Button>
-              {canDelete && (
+              {(
                 <Button
                   variant="danger"
+                  disabledReason={deleteReason}
                   onClick={() => setDeleteTarget(selectedImport)}
                   icon={<Trash2 className="h-4 w-4" aria-hidden />}
                 >
@@ -966,7 +971,7 @@ export function RebarSchedulePage() {
       )}
 
       {/* Import panel: what is accepted, where it comes from, where it goes */}
-      {canImport ? (
+      <>
         <section
           aria-labelledby="rebar-import-title"
           onDragOver={(e) => {
@@ -974,7 +979,10 @@ export function RebarSchedulePage() {
             setDragOver(true);
           }}
           onDragLeave={() => setDragOver(false)}
-          onDrop={handleDrop}
+          onDrop={(e) => {
+            if (canImport) handleDrop(e);
+            else e.preventDefault();
+          }}
           className={`rounded-xl border-2 border-dashed p-5 transition-colors ${
             dragOver ? 'border-oe-blue bg-oe-blue/5' : 'border-border-light bg-surface-elevated/90'
           }`}
@@ -1048,7 +1056,8 @@ export function RebarSchedulePage() {
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                disabled={uploading}
+                disabled={uploading || !canImport}
+                title={importReason}
                 className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-oe-blue px-3 py-2 text-sm font-medium text-content-inverse hover:opacity-90 disabled:opacity-40 transition-colors"
               >
                 {uploading ? (
@@ -1064,7 +1073,8 @@ export function RebarSchedulePage() {
               <button
                 type="button"
                 onClick={() => void handleTrySample()}
-                disabled={uploading}
+                disabled={uploading || !canImport}
+                title={importReason}
                 className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-border bg-surface-primary px-3 py-1.5 text-xs font-medium text-content-primary hover:bg-surface-secondary disabled:opacity-40 transition-colors"
               >
                 <FlaskConical className="h-3.5 w-3.5" aria-hidden />
@@ -1081,13 +1091,14 @@ export function RebarSchedulePage() {
             </div>
           </div>
         </section>
-      ) : (
-        <p className="rounded-lg border border-border-light bg-surface-secondary p-3 text-xs text-content-secondary">
-          {t('rebar_schedule.import_needs_editor', {
-            defaultValue: 'You can open the imports below. Importing a new .abs file needs editor access to this project.',
-          })}
-        </p>
-      )}
+        {!canImport && (
+          <p className="rounded-lg border border-border-light bg-surface-secondary p-3 text-xs text-content-secondary">
+            {t('rebar_schedule.import_needs_editor', {
+              defaultValue: 'You can open the imports below. Importing a new .abs file needs editor access to this project.',
+            })}
+          </p>
+        )}
+      </>
 
       {uploadError && (
         <div className="rounded-lg border border-semantic-error/30 bg-semantic-error-bg p-3 text-sm text-semantic-error">
@@ -1163,13 +1174,15 @@ export function RebarSchedulePage() {
                 </span>
                 <span className="tabular-nums">{formatWeight(imp.total_weight_kg, t)}</span>
               </div>
-              {canDelete && (
+              {(
                 <button
+                  disabled={!canDelete}
+                  title={deleteReason}
                   onClick={(e) => {
                     e.stopPropagation();
-                    setDeleteTarget(imp);
+                    if (canDelete) setDeleteTarget(imp);
                   }}
-                  className="shrink-0 rounded-lg p-2 text-content-tertiary hover:bg-semantic-error-bg hover:text-semantic-error transition-colors"
+                  className="shrink-0 rounded-lg p-2 text-content-tertiary hover:bg-semantic-error-bg hover:text-semantic-error transition-colors disabled:cursor-not-allowed disabled:opacity-40"
                   aria-label={t('common.delete', { defaultValue: 'Delete' })}
                 >
                   <Trash2 className="h-4 w-4" aria-hidden />

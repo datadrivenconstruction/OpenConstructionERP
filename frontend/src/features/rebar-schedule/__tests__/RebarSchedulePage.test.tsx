@@ -258,13 +258,17 @@ describe('RebarSchedulePage with the backend response shapes', () => {
     await waitFor(() => expect(apiMocks.apiDelete).toHaveBeenCalledWith(`/v1/rebar-schedule/imports/${IMPORT_ID}`));
   });
 
-  it('offers neither upload nor delete to a viewer', async () => {
+  it('shows a viewer upload and delete, disabled, each with the reason', async () => {
     useAuthStore.setState({ userRole: 'viewer' });
-    const { container } = renderPage();
+    renderPage();
     await screen.findByText('wall_B1.abs');
 
-    expect(container.querySelector('input[type="file"]')).toBeNull();
-    expect(screen.queryByRole('button', { name: /^Delete$/ })).not.toBeInTheDocument();
+    const choose = screen.getByRole('button', { name: /Choose \.abs file/ });
+    expect(choose).toBeDisabled();
+    expect(choose).toHaveAttribute('title', 'Only an editor, manager or administrator can do this.');
+    const del = screen.getByRole('button', { name: /^Delete$/ });
+    expect(del).toBeDisabled();
+    expect(del).toHaveAttribute('title', 'Only a manager or administrator can do this.');
   });
 
   it('says on an empty project what to import, from where, into which project, with a sample', async () => {
