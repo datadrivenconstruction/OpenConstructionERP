@@ -69594,7 +69594,7 @@ const resource = {
     "data_paths.entity.file_saved_view": "תצוגה שמורה של קובץ",
     "data_paths.entity.file_trash": "פח קבצים",
     "data_paths.entity.invoice_mailbox": "תיבת דואר חשבוניות",
-    "data_paths.entity.tileset": "Tileset",
+    "data_paths.entity.tileset": "ערכת אריחים",
     "data_paths.entity.haul_ticket": "תעודת הובלה",
     "data_paths.entity.webhook_endpoint": "נקודת קצה Webhook",
     "data_paths.entity.interface_record": "רשומת ממשק",
