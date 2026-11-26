@@ -21,6 +21,8 @@ import { useToastStore } from '@/stores/useToastStore';
 import { downloadTenderLetter, getLetterTemplate, saveLetterTemplate } from './api';
 import { LetterTextEditor, hasBlockingIssue } from './LetterTextEditor';
 import type { LetterText } from './letterRules';
+import { useRoleReason } from '@/shared/lib/permissionReason';
+import { DisabledGroup } from '@/shared/ui/DisabledGroup';
 
 export interface LetterEditDialogProps {
   open: boolean;
@@ -38,6 +40,7 @@ export function LetterEditDialog({ open, onClose, packageId, projectId, bidId, k
   const addToast = useToastStore((s) => s.addToast);
   const userRole = useAuthStore((s) => s.userRole);
   const canSaveTemplate = userRole === 'admin' || userRole === 'manager';
+  const canSaveTemplateReason = useRoleReason(canSaveTemplate, 'manager');
   const key = kind === 'award-letter' ? 'tendering.award_letter' : 'tendering.rejection_letter';
 
   const resolved = useQuery({
@@ -90,7 +93,7 @@ export function LetterEditDialog({ open, onClose, packageId, projectId, bidId, k
       testId="letter-edit-dialog"
       footer={
         <div className="flex w-full flex-wrap items-center justify-end gap-3">
-          {canSaveTemplate && (
+          <DisabledGroup reason={canSaveTemplateReason}>
             <label className="mr-auto flex items-center gap-2 text-sm text-content-secondary">
               <input
                 type="checkbox"
@@ -100,7 +103,7 @@ export function LetterEditDialog({ open, onClose, packageId, projectId, bidId, k
               />
               {t('letter_templates.save_as_template', { defaultValue: 'Also save as the template for this language' })}
             </label>
-          )}
+          </DisabledGroup>
           {canSaveTemplate && (
             // The firm-wide wording and look of this letter live with every other document's.
             <Link

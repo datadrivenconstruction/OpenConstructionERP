@@ -71,6 +71,7 @@ import {
   type CompanyProfile,
   type CompanyTextField,
 } from './companyProfile';
+import { useRoleReason } from '@/shared/lib/permissionReason';
 
 type CompanyForm = Record<CompanyTextField, string>;
 
@@ -250,6 +251,7 @@ function LetterheadSettings() {
   // The roles the server's admin gate lets through: superuser and owner are
   // aliases of admin there. A manager lands read-only, as the server would.
   const canEdit = userRole === 'admin' || userRole === 'superuser' || userRole === 'owner';
+  const canEditReason = useRoleReason(canEdit, 'admin');
 
   const profileQ = useQuery({
     queryKey: COMPANY_PROFILE_KEY,
@@ -667,31 +669,29 @@ function LetterheadSettings() {
               </div>
             </div>
 
-            {canEdit && (
-              <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-border pt-3">
-                <Button
-                  variant="primary"
-                  size="sm"
-                  icon={
-                    saveM.isPending ? (
-                      <Loader2 size={14} className="animate-spin" />
-                    ) : (
-                      <Save size={14} />
-                    )
-                  }
-                  disabled={!dirty || saveM.isPending}
-                  onClick={save}
-                  data-testid="company-save"
-                >
-                  {t('settings.company.save', { defaultValue: 'Save company details' })}
-                </Button>
-                {dirty && (
-                  <span className="text-xs text-content-secondary">
-                    {t('settings.company.unsaved', { defaultValue: 'Unsaved changes' })}
-                  </span>
-                )}
-              </div>
-            )}
+            <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-border pt-3">
+              <Button disabledReason={canEditReason}
+                variant="primary"
+                size="sm"
+                icon={
+                  saveM.isPending ? (
+                    <Loader2 size={14} className="animate-spin" />
+                  ) : (
+                    <Save size={14} />
+                  )
+                }
+                disabled={!dirty || saveM.isPending}
+                onClick={save}
+                data-testid="company-save"
+              >
+                {t('settings.company.save', { defaultValue: 'Save company details' })}
+              </Button>
+              {dirty && (
+                <span className="text-xs text-content-secondary">
+                  {t('settings.company.unsaved', { defaultValue: 'Unsaved changes' })}
+                </span>
+              )}
+            </div>
           </>
         )}
       </Card>
@@ -763,6 +763,7 @@ function LogoSlot({
   onFile,
   onRemove,
 }: LogoSlotProps) {
+  const canEditReason = useRoleReason(canEdit, 'admin');
   const { t } = useTranslation();
   const fileRef = useRef<HTMLInputElement>(null);
   const [dragging, setDragging] = useState(false);
@@ -836,31 +837,29 @@ function LogoSlot({
             <LogoTile src={dataUrl} dark={false} label={t('settings.company.on_white', { defaultValue: 'On white' })} />
             <LogoTile src={dataUrl} dark label={t('settings.company.on_dark', { defaultValue: 'On dark' })} />
           </div>
-          {canEdit && (
-            <div className="mt-3 flex flex-wrap gap-2">
-              <Button
-                variant="secondary"
-                size="sm"
-                icon={busy ? <Loader2 size={14} className="animate-spin" /> : <Upload size={14} />}
-                onClick={browse}
-                disabled={!ready}
-              >
-                {t('settings.company.logo_replace', { defaultValue: 'Replace' })}
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                icon={<Trash2 size={14} />}
-                onClick={() => {
-                  setProblem(null);
-                  onRemove();
-                }}
-                disabled={busy}
-              >
-                {t('common.remove', { defaultValue: 'Remove' })}
-              </Button>
-            </div>
-          )}
+          <div className="mt-3 flex flex-wrap gap-2">
+            <Button disabledReason={canEditReason}
+              variant="secondary"
+              size="sm"
+              icon={busy ? <Loader2 size={14} className="animate-spin" /> : <Upload size={14} />}
+              onClick={browse}
+              disabled={!ready}
+            >
+              {t('settings.company.logo_replace', { defaultValue: 'Replace' })}
+            </Button>
+            <Button disabledReason={canEditReason}
+              variant="ghost"
+              size="sm"
+              icon={<Trash2 size={14} />}
+              onClick={() => {
+                setProblem(null);
+                onRemove();
+              }}
+              disabled={busy}
+            >
+              {t('common.remove', { defaultValue: 'Remove' })}
+            </Button>
+          </div>
         </>
       ) : canEdit ? (
         <div

@@ -52,6 +52,7 @@ import {
   unknownFields,
 } from './docTemplateText';
 import { languageLabel, useBlockLabel, useFieldGroupLabel, useKindLabel } from './labels';
+import { useRoleReason } from '@/shared/lib/permissionReason';
 
 interface Props {
   kindKey: string;
@@ -64,6 +65,7 @@ interface Props {
 const MAX_SIGNATURE_BYTES = 300 * 1024;
 
 export function DocTemplateEditor({ kindKey, initialLocale, canEdit, emailEnabled, onClose }: Props) {
+  const canEditReason = useRoleReason(canEdit, 'admin');
   const { t, i18n } = useTranslation();
   const qc = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
@@ -256,15 +258,13 @@ export function DocTemplateEditor({ kindKey, initialLocale, canEdit, emailEnable
                       })
                     : t('settings.document_templates.uses_default', { defaultValue: 'Uses default text' })}
                 </span>
-                {canEdit && (
-                  <button
-                    type="button"
-                    className="font-medium text-oe-blue hover:underline"
-                    onClick={() => setText({ ...state.data.default_text })}
-                  >
-                    {t('settings.document_templates.start_from_default', { defaultValue: 'Start from default' })}
-                  </button>
-                )}
+                <button disabled={!canEdit} title={canEditReason}
+                  type="button"
+                  className="font-medium text-oe-blue hover:underline"
+                  onClick={() => setText({ ...state.data.default_text })}
+                >
+                  {t('settings.document_templates.start_from_default', { defaultValue: 'Start from default' })}
+                </button>
               </div>
             )}
 
@@ -334,8 +334,8 @@ export function DocTemplateEditor({ kindKey, initialLocale, canEdit, emailEnable
                   {t('settings.document_templates.restore', { defaultValue: 'Restore' })}
                 </button>
               )}
-              {canEdit && state.data.published_text && (
-                <button type="button" className="font-medium text-oe-blue hover:underline" onClick={() => setConfirmReset(true)}>
+              {state.data.published_text && (
+                <button disabled={!canEdit} title={canEditReason} type="button" className="font-medium text-oe-blue hover:underline" onClick={() => setConfirmReset(true)}>
                   {t('settings.document_templates.reset_default', { defaultValue: 'Reset to default' })}
                 </button>
               )}

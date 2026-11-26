@@ -59,6 +59,7 @@ import {
   type DocumentTypeField,
   type DocumentTypeOverride,
 } from './documentTemplates';
+import { useRoleReason } from '@/shared/lib/permissionReason';
 
 const SELECT_CLS =
   'oe-select oe-input-sm';
@@ -179,6 +180,7 @@ function sameOverride(a: DocumentTypeOverride, b: DocumentTypeOverride): boolean
 }
 
 function DocumentTypeRow({ entry, workspace, options, letterhead, canEdit }: DocumentTypeRowProps) {
+  const canEditReason = useRoleReason(canEdit, 'admin');
   const { t } = useTranslation();
   const addToast = useToastStore((s) => s.addToast);
   const qc = useQueryClient();
@@ -394,32 +396,30 @@ function DocumentTypeRow({ entry, workspace, options, letterhead, canEdit }: Doc
           )}
 
           <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-border pt-3">
-            {canEdit && (
-              <>
-                <Button
-                  variant="primary"
-                  size="sm"
-                  icon={
-                    saveM.isPending ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />
-                  }
-                  disabled={!dirty || busy}
-                  onClick={save}
-                  data-testid={`doc-type-save-${entry.key}`}
-                >
-                  {t('common.save', { defaultValue: 'Save' })}
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  icon={<RotateCcw size={14} />}
-                  disabled={!ownLook || busy}
-                  onClick={() => resetM.mutate()}
-                  data-testid={`doc-type-reset-${entry.key}`}
-                >
-                  {t('settings.document_templates.reset', { defaultValue: 'Use the look above' })}
-                </Button>
-              </>
-            )}
+            <>
+              <Button disabledReason={canEditReason}
+                variant="primary"
+                size="sm"
+                icon={
+                  saveM.isPending ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />
+                }
+                disabled={!dirty || busy}
+                onClick={save}
+                data-testid={`doc-type-save-${entry.key}`}
+              >
+                {t('common.save', { defaultValue: 'Save' })}
+              </Button>
+              <Button disabledReason={canEditReason}
+                variant="ghost"
+                size="sm"
+                icon={<RotateCcw size={14} />}
+                disabled={!ownLook || busy}
+                onClick={() => resetM.mutate()}
+                data-testid={`doc-type-reset-${entry.key}`}
+              >
+                {t('settings.document_templates.reset', { defaultValue: 'Use the look above' })}
+              </Button>
+            </>
             <Button
               variant="secondary"
               size="sm"
@@ -459,6 +459,7 @@ function sameSections(a: readonly string[], b: readonly string[]): boolean {
 }
 
 function SectionsEditor({ entry, canEdit, onStored }: SectionsEditorProps) {
+  const canEditReason = useRoleReason(canEdit, 'admin');
   const { t } = useTranslation();
   const addToast = useToastStore((s) => s.addToast);
   const sections = entry.sections ?? [];
@@ -523,20 +524,18 @@ function SectionsEditor({ entry, canEdit, onStored }: SectionsEditorProps) {
           );
         })}
       </div>
-      {canEdit && (
-        <div className="mt-3">
-          <Button
-            variant="secondary"
-            size="sm"
-            icon={saveM.isPending ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
-            disabled={!dirty || saveM.isPending}
-            onClick={() => saveM.mutate()}
-            data-testid={`doc-type-sections-save-${entry.key}`}
-          >
-            {t('settings.document_templates.sections_save', { defaultValue: 'Save sections' })}
-          </Button>
-        </div>
-      )}
+      <div className="mt-3">
+        <Button disabledReason={canEditReason}
+          variant="secondary"
+          size="sm"
+          icon={saveM.isPending ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
+          disabled={!dirty || saveM.isPending}
+          onClick={() => saveM.mutate()}
+          data-testid={`doc-type-sections-save-${entry.key}`}
+        >
+          {t('settings.document_templates.sections_save', { defaultValue: 'Save sections' })}
+        </Button>
+      </div>
     </div>
   );
 }

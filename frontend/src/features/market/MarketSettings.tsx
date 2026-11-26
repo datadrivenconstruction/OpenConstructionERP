@@ -21,6 +21,8 @@ import { EInvoiceSetupCard } from '@/features/einvoice-clearance/EInvoiceSetupCa
 import { einvoiceScopeMarkets } from '@/features/einvoice-clearance/useEInvoiceMarkets';
 import { SurveySetupCard } from '@/features/survey/SurveySetupCard';
 import { MARKET_QUERY_KEY, saveMarketProfile, useMarketScope, type MarketProfile } from './api';
+import { useRoleReason } from '@/shared/lib/permissionReason';
+import { DisabledGroup } from '@/shared/ui/DisabledGroup';
 
 const UNITS_OPTIONS = [
   { value: 'metric', key: 'market.units_metric', fallback: 'Metric' },
@@ -63,6 +65,7 @@ export function MarketSettings() {
   }, [i18n.language]);
 
   const canEdit = !!scope?.can_edit;
+  const canEditReason = useRoleReason(canEdit, 'admin');
   const dirty = !!scope && JSON.stringify(scope.profile) !== JSON.stringify(draft);
   const primaryCode = draft.primary?.country ?? '';
   const primaryName = primaryCode ? regionDisplayName(primaryCode, i18n.language) : '';
@@ -191,25 +194,23 @@ export function MarketSettings() {
                 className="inline-flex items-center gap-1 rounded-full bg-surface-secondary px-2.5 py-1 text-xs text-content-primary"
               >
                 {regionDisplayName(m.country, i18n.language)}
-                {canEdit && (
-                  <button
-                    type="button"
-                    aria-label={t('market.remove', { defaultValue: 'Remove market' })}
-                    onClick={() =>
-                      setPending({
-                        profile: { ...draft, extra_markets: draft.extra_markets.filter((x) => x.country !== m.country) },
-                        country: m.country,
-                        adding: false,
-                      })
-                    }
-                  >
-                    <X size={12} aria-hidden />
-                  </button>
-                )}
+                <button disabled={!canEdit} title={canEditReason}
+                  type="button"
+                  aria-label={t('market.remove', { defaultValue: 'Remove market' })}
+                  onClick={() =>
+                    setPending({
+                      profile: { ...draft, extra_markets: draft.extra_markets.filter((x) => x.country !== m.country) },
+                      country: m.country,
+                      adding: false,
+                    })
+                  }
+                >
+                  <X size={12} aria-hidden />
+                </button>
               </span>
             ))}
           </div>
-          {canEdit && (
+          <DisabledGroup reason={canEditReason}>
             <div className="mt-3 flex items-end gap-2">
               <label className="block flex-1 text-xs font-medium text-content-secondary">
                 {t('market.add', { defaultValue: 'Add market' })}
@@ -253,7 +254,7 @@ export function MarketSettings() {
                   : t('market.add', { defaultValue: 'Add market' })}
               </Button>
             </div>
-          )}
+          </DisabledGroup>
           <p className="mt-3 text-xs text-content-tertiary">
             {t('market.data_safe', { defaultValue: 'Your data is never deleted; hidden modules can be shown again.' })}
           </p>
