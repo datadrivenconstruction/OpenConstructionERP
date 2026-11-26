@@ -103,6 +103,14 @@ jobs:
           cd backend
           python -m build --wheel --outdir ../dist/
 
+      - name: Keep the wheel as a run artifact
+        # The demo server installs this file, so keep it even when PyPI refuses the upload.
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: wheel
+          path: dist/*.whl
+          retention-days: 30
+
       - name: Check the wheel fits, per file and against the project total
         shell: bash
         run: |
