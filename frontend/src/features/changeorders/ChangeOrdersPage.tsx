@@ -4,6 +4,7 @@ import { useState, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useHasPermission } from '@/shared/lib/permissionGates';
+import { roleAtLeast, useRoleReason } from '@/shared/lib/permissionReason';
 import { normalizeListResponse } from '@/shared/lib/apiHelpers';
 import { resolvePartyName } from '@/shared/lib/partyName';
 import {
@@ -1490,13 +1491,14 @@ function DetailView({
   const [showAddItem, setShowAddItem] = useState(false);
   const [showChainBuilder, setShowChainBuilder] = useState(false);
 
-  // Only admins and managers can approve/reject change orders. Backend
-  // permission `changeorders.approve` enforces this server-side; we hide
-  // the buttons in the UI to give a better experience than 403 errors.
-  const canApprove = userRole === 'admin' || userRole === 'manager';
-  // Marking a CO executed is an editor-level operation (changeorders.update),
-  // so it is available to editors too, not just approvers.
-  const canExecute = userRole === 'admin' || userRole === 'manager' || userRole === 'editor';
+  // Only admins and managers can approve/reject change orders (backend
+  // `changeorders.approve`). Everyone sees the buttons; below manager they are
+  // disabled with the reason, so nobody clicks into a 403.
+  const canApprove = roleAtLeast(userRole, 'manager');
+  const approveReason = useRoleReason(canApprove, 'manager');
+  // Line items need changeorders.update (editor).
+  const editReason = useRoleReason(roleAtLeast(userRole, 'editor'), 'editor');
+  // Marking a CO executed is editor-level (changeorders.update), like the line items.
   const currentUserId = useMemo(
     () => decodeUserIdFromToken(accessToken),
     [accessToken],
@@ -1969,9 +1971,16 @@ function DetailView({
             {order.status === 'submitted' &&
               !order.current_approval_step &&
               approvals.length === 0 && (
-              canApprove ? (
-                <>
-                  <Button variant="primary" size="sm" onClick={async () => {
+              <>
+                {!canApprove && (
+                  <div className="flex items-center gap-2 rounded-lg border border-semantic-warning/30 bg-semantic-warning-bg px-3 py-1.5">
+                    <CheckCircle2 size={14} className="text-semantic-warning" />
+                    <p className="text-xs font-medium text-semantic-warning">
+                      {t('changeorders.pending_approval', { defaultValue: 'Awaiting approval' })}
+                    </p>
+                  </div>
+                )}
+                  <Button variant="primary" size="sm" disabledReason={approveReason} onClick={async () => {
                     const ok = await confirm({
                       title: t('changeorders.approve_confirm_title', { defaultValue: 'Approve change order?' }),
                       message: t('changeorders.approve_confirm', { defaultValue: 'Approve this change order? Cost impact will be applied to the project budget.' }),
@@ -1983,7 +1992,7 @@ function DetailView({
                     <CheckCircle2 size={14} className="mr-1.5" />
                     {t('changeorders.approve', { defaultValue: 'Approve' })}
                   </Button>
-                  <Button variant="ghost" size="sm" onClick={async () => {
+                  <Button variant="ghost" size="sm" disabledReason={approveReason} onClick={async () => {
                     const ok = await confirm({
                       title: t('changeorders.reject_confirm_title', { defaultValue: 'Reject change order?' }),
                       message: t('changeorders.reject_confirm', { defaultValue: 'Reject this change order?' }),
@@ -1995,30 +2004,13 @@ function DetailView({
                     <XCircle size={14} className="mr-1.5" />
                     {t('changeorders.reject', { defaultValue: 'Reject' })}
                   </Button>
-                </>
-              ) : (
-                // Non-admin/manager: show clear "awaiting approval" state instead
-                // of an Approve button that would just return 403.
-                <div className="flex items-center gap-2 rounded-lg border border-semantic-warning/30 bg-semantic-warning-bg px-3 py-1.5">
-                  <CheckCircle2 size={14} className="text-semantic-warning" />
-                  <div className="text-xs">
-                    <p className="font-medium text-semantic-warning">
-                      {t('changeorders.pending_approval', { defaultValue: 'Awaiting approval' })}
-                    </p>
-                    <p className="text-semantic-warning">
-                      {t('changeorders.pending_approval_hint', {
-                        defaultValue: 'Only managers and admins can approve.',
-                      })}
-                    </p>
-                  </div>
-                </div>
-              )
+              </>
             )}
             {/* Terminal step: an approved CO whose work has been done on site.
                 Moves it approved -> executed so dashboards can tell committed
                 from realised scope. */}
-            {order.status === 'approved' && canExecute && (
-              <Button variant="secondary" size="sm" onClick={async () => {
+            {order.status === 'approved' && (
+              <Button variant="secondary" size="sm" disabledReason={editReason} onClick={async () => {
                 const ok = await confirm({
                   title: t('changeorders.execute_confirm_title', { defaultValue: 'Mark as executed?' }),
                   message: t('changeorders.execute_confirm', { defaultValue: 'Mark this change order as executed? This records that the scope change has been carried out on site. It cannot be undone.' }),
@@ -2338,8 +2330,7 @@ function DetailView({
           a chain already or is in 'submitted' state (so an admin/manager
           can start one). Hidden on plain draft/approved/rejected COs with
           no chain to avoid cluttering simple workflows. */}
-      {(approvals.length > 0 ||
-        (order.status === 'submitted' && canApprove)) && (
+      {(approvals.length > 0 || order.status === 'submitted') && (
         <div className="mb-6">
           <div className="flex items-center justify-between mb-3">
             <h3 className="oe-section-title">
@@ -2348,11 +2339,11 @@ function DetailView({
               })}
             </h3>
             {approvals.length === 0 &&
-              order.status === 'submitted' &&
-              canApprove && (
+              order.status === 'submitted' && (
                 <Button
                   variant="secondary"
                   size="sm"
+                  disabledReason={approveReason}
                   onClick={() => setShowChainBuilder(true)}
                   disabled={startChainMut.isPending}
                 >
@@ -2412,7 +2403,7 @@ function DetailView({
           {t('changeorders.items', { defaultValue: 'Line Items' })} ({order.items.length})
         </h3>
         {canEdit && (
-          <Button variant="secondary" size="sm" onClick={() => setShowAddItem(true)}>
+          <Button variant="secondary" size="sm" disabledReason={editReason} onClick={() => setShowAddItem(true)}>
             <Plus size={14} className="mr-1.5" />
             {t('changeorders.add_item', { defaultValue: 'Add Item' })}
           </Button>
@@ -2426,7 +2417,7 @@ function DetailView({
             title={t('changeorders.no_items', { defaultValue: 'No items yet' })}
             description={t('changeorders.no_items_desc', { defaultValue: 'Add line items to define the scope change' })}
             action={
-              canEdit
+              canEdit && !editReason
                 ? { label: t('changeorders.add_item', { defaultValue: 'Add Item' }), onClick: () => setShowAddItem(true) }
                 : undefined
             }
@@ -2501,8 +2492,9 @@ function DetailView({
                             });
                             if (ok) deleteItemMut.mutate(item.id);
                           }}
-                          className="text-content-tertiary hover:text-semantic-error transition-colors"
-                          title={t('common.delete', { defaultValue: 'Delete' })}
+                          disabled={!!editReason}
+                          className="text-content-tertiary hover:text-semantic-error transition-colors disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:text-content-tertiary"
+                          title={editReason ?? t('common.delete', { defaultValue: 'Delete' })}
                           aria-label={t('changeorders.delete_item_aria', {
                             defaultValue: 'Delete item: {{desc}}',
                             desc: item.description,

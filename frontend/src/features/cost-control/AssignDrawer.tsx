@@ -12,6 +12,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { CheckCircle2 } from 'lucide-react';
 
 import { Button, Skeleton } from '@/shared/ui';
+import { useRoleReason } from '@/shared/lib/permissionReason';
 import { SideDrawer } from '@/shared/ui/SideDrawer';
 import { SearchableSelect, type SearchableSelectOption } from '@/shared/ui/SearchableSelect';
 import { sumMoneyStrings } from '@/shared/lib/exactDecimal';
@@ -40,6 +41,7 @@ export interface AssignDrawerProps {
 
 export function AssignDrawer({ open, projectId, currency, canEdit, onClose, onOpen5d }: AssignDrawerProps) {
   const { t } = useTranslation();
+  const editReason = useRoleReason(canEdit, 'editor');
   const queryClient = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
 
@@ -167,14 +169,14 @@ export function AssignDrawer({ open, projectId, currency, canEdit, onClose, onOp
                     )}
                   </div>
                 </div>
-                {canEdit && group.items.length > 1 && (
-                  <div className="w-64 max-w-full">
+                {group.items.length > 1 && (
+                  <div className="w-64 max-w-full" title={editReason}>
                     <SearchableSelect
                       value=""
                       onChange={(v) => put(v, group.items)}
                       options={options}
                       placeholder={t('cost_control.assign_all', { defaultValue: 'All lines to...' })}
-                      disabled={assign.isPending}
+                      disabled={assign.isPending || !canEdit}
                       data-testid={`assign-all-${group.id}`}
                     />
                   </div>
@@ -192,18 +194,16 @@ export function AssignDrawer({ open, projectId, currency, canEdit, onClose, onOp
                     <span className="shrink-0 text-sm tabular-nums text-content-secondary">
                       {fmtCurrency(item.amount, currency)}
                     </span>
-                    {canEdit && (
-                      <div className="w-56 max-w-full">
-                        <SearchableSelect
-                          value=""
-                          onChange={(v) => put(v, [item])}
-                          options={options}
-                          placeholder={placeholder}
-                          disabled={assign.isPending}
-                          data-testid={`assign-${item.id}`}
-                        />
-                      </div>
-                    )}
+                    <div className="w-56 max-w-full" title={editReason}>
+                      <SearchableSelect
+                        value=""
+                        onChange={(v) => put(v, [item])}
+                        options={options}
+                        placeholder={placeholder}
+                        disabled={assign.isPending || !canEdit}
+                        data-testid={`assign-${item.id}`}
+                      />
+                    </div>
                   </li>
                 ))}
               </ul>

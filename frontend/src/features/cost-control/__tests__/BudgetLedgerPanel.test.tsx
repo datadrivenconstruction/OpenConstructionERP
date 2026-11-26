@@ -105,13 +105,16 @@ describe('BudgetLedgerPanel', () => {
     await screen.findByTestId('transfer-BT-001');
     fireEvent.click(screen.getByRole('button', { name: 'Submit' }));
     await waitFor(() => expect(budgetLedgerApi.step).toHaveBeenCalledWith('p-1', 'transfer', 't-1', 'submit', ''));
-    expect(screen.queryByRole('button', { name: 'Approve' })).toBeNull();
+    // Approve stays on screen for an editor, disabled, saying who can.
+    const approve = screen.getByRole('button', { name: 'Approve' });
+    expect(approve).toBeDisabled();
+    expect(approve).toHaveAttribute('title', 'Only a manager or administrator can do this.');
   });
 
   it('a manager approves a submitted entry', async () => {
     renderPanel(false, true);
     await screen.findByTestId('transfer-BT-002');
-    expect(screen.queryByRole('button', { name: 'Submit' })).toBeNull();
+    expect(screen.getByRole('button', { name: 'Submit' })).toBeDisabled();
     fireEvent.click(screen.getByRole('button', { name: 'Approve' }));
     expect(budgetLedgerApi.step).not.toHaveBeenCalled();
     const approveDialog = await screen.findByRole('alertdialog');
@@ -165,12 +168,21 @@ describe('BudgetLedgerPanel', () => {
     );
   });
 
-  it('a viewer sees the ledger but no buttons', async () => {
+  it('a viewer sees the same ledger and buttons, each disabled with who can use it', async () => {
     renderPanel(false, false);
     await screen.findByTestId('transfer-BT-001');
-    expect(screen.queryByRole('button', { name: 'Submit' })).toBeNull();
-    expect(screen.queryByRole('button', { name: 'Approve' })).toBeNull();
-    expect(screen.queryByRole('button', { name: 'Move budget' })).toBeNull();
+    const editorOnly = 'Only an editor, manager or administrator can do this.';
+    for (const name of ['Submit', 'Move budget', 'Add a budget change']) {
+      const button = screen.getByRole('button', { name });
+      expect(button).toBeDisabled();
+      expect(button).toHaveAttribute('title', editorOnly);
+    }
+    expect(screen.getByRole('button', { name: 'Approve' })).toHaveAttribute(
+      'title',
+      'Only a manager or administrator can do this.',
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Approve' }));
+    expect(budgetLedgerApi.step).not.toHaveBeenCalled();
   });
 
   it('saves a transfer as two legs that add up to zero', async () => {
