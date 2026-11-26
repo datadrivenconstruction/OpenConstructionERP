@@ -143,6 +143,7 @@ import {
   conversionErrorText,
   limitMinutes,
   stageFromServer,
+  stagesFor,
 } from '@/shared/lib/conversionStages';
 import {
   BIMUploadDuplicatePrompt,
@@ -244,7 +245,8 @@ function ModelFilmstrip({ models, isLoading, activeModelId, onSelectModel, onDel
   activeModelId: string | null;
   onSelectModel: (id: string) => void;
   onDeleteModel: (id: string, name: string) => void;
-  onUpload: () => void;
+  /** Absent for a reader without `bim.create`: the add tile is not offered. */
+  onUpload?: () => void;
 }) {
   const { t } = useTranslation();
   const [expanded, setExpanded] = useState(true);
@@ -347,6 +349,7 @@ function ModelFilmstrip({ models, isLoading, activeModelId, onSelectModel, onDel
             </>
           )}
           {/* Add model button */}
+          {onUpload && (
           <button
             onClick={onUpload}
             className="flex items-center justify-center shrink-0 w-16 h-16 rounded-xl border-2 border-dashed border-border-medium hover:border-oe-blue/50 hover:bg-oe-blue/5 transition-all group"
@@ -355,6 +358,7 @@ function ModelFilmstrip({ models, isLoading, activeModelId, onSelectModel, onDel
           >
             <Plus size={20} className="text-content-quaternary group-hover:text-oe-blue transition-colors" />
           </button>
+          )}
         </div>
       </div>
     </div>
@@ -1229,12 +1233,16 @@ function UploadPanel({
 
 /* ── Non-Ready Model Overlay ─────────────────────────────────────────── */
 
-function NonReadyOverlay({ model, onUploadConverted, onDelete, onRetry, onInstallConverter }: {
+function NonReadyOverlay({ model, onUploadConverted, onDelete, onRetry, onInstallConverter, canUpload = true, canDelete = true }: {
   model: BIMModelData | null;
   onUploadConverted: () => void;
   onDelete: () => void;
   onRetry: () => Promise<void>;
   onInstallConverter: (converterId: string) => Promise<void>;
+  /** `bim.create`: retry, install and re-upload are writes a reader cannot make. */
+  canUpload?: boolean;
+  /** `bim.delete`. */
+  canDelete?: boolean;
 }) {
   const { t } = useTranslation();
   const [isRetrying, setIsRetrying] = useState(false);
@@ -1463,10 +1471,11 @@ function NonReadyOverlay({ model, onUploadConverted, onDelete, onRetry, onInstal
     !isProcessing && errorCode !== 'no_products' && backendMessage ? backendMessage : null;
 
   const showInstallButton =
-    !isProcessing
+    canUpload
+    && !isProcessing
     && (errorCode === 'ddc_not_found' || isOutdatedConverter)
     && !!converterId;
-  const showRetryButton = !isProcessing && !showInstallButton;
+  const showRetryButton = canUpload && !isProcessing && !showInstallButton;
 
   // Localised override for the converter_outdated branch - when the
   // backend ships ``cause="converter_outdated"`` (i.e. exit-15 from an
@@ -1531,7 +1540,7 @@ function NonReadyOverlay({ model, onUploadConverted, onDelete, onRetry, onInstal
         {isProcessing && (
           <div className="mx-auto max-w-sm mb-6" data-testid="bim-overlay-processing">
             <ConversionStages
-              stages={BIM_STAGES}
+              stages={stagesFor(BIM_STAGES, stageFromServer(model.conversion_stage))}
               current={stageFromServer(model.conversion_stage)}
               format={fmt}
               startedAt={processingStartedAt}
@@ -1566,12 +1575,23 @@ function NonReadyOverlay({ model, onUploadConverted, onDelete, onRetry, onInstal
                   : t('bim.overlay_retry_btn', { defaultValue: 'Retry conversion' })}
               </button>
             )}
+            {canUpload && (
             <button onClick={onUploadConverted} aria-label={t('bim.overlay_upload_converted_btn')} className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-surface-primary border border-border-light text-content-secondary text-sm font-medium hover:bg-surface-secondary transition-colors">
               <UploadCloud size={16} /> {t('bim.overlay_upload_converted_btn')}
             </button>
+            )}
+            {canDelete && (
             <button onClick={onDelete} aria-label={t('bim.overlay_delete_btn')} className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-surface-primary border border-border-light text-content-secondary text-sm font-medium hover:bg-semantic-error-bg hover:text-semantic-error hover:border-semantic-error/30 transition-colors">
               <Trash2 size={16} /> {t('bim.overlay_delete_btn')}
             </button>
+            )}
+            {!canUpload && (
+              <p data-testid="bim-overlay-read-only" className="w-full text-xs text-content-tertiary">
+                {t('bim.overlay_read_only', {
+                  defaultValue: 'Your role can view models but not upload or re-process them. Ask an editor to fix this one.',
+                })}
+              </p>
+            )}
           </div>
         )}
       </div>
@@ -1588,6 +1608,7 @@ function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrum
   onDeleteModel?: (id: string, name: string) => void;
 }) {
   const { t } = useTranslation();
+  const canUpload = useHasPermission('bim.create');
   const converterRanges = useConverterRanges(['rvt', 'ifc']);
   const navigate = useNavigate();
   const [file, setFile] = useState<File | null>(null);
@@ -1759,6 +1780,7 @@ function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrum
 
             {/* LEFT - Upload card */}
             <div className="flex flex-col">
+              {canUpload ? (
               <div className="rounded-2xl bg-white dark:bg-gray-800/60 border border-border-light shadow-lg shadow-black/5 dark:shadow-black/20 p-6 flex flex-col h-full">
                 <label
                   aria-label={t('bim.landing_dropzone_aria', { defaultValue: 'Drop a BIM model, drawing or 3D mesh file here, or click to browse' })}
@@ -1905,6 +1927,15 @@ function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrum
                   </div>
                 )}
               </div>
+              ) : (
+                <div data-testid="bim-landing-read-only" className="rounded-2xl bg-white dark:bg-gray-800/60 border border-border-light shadow-lg shadow-black/5 dark:shadow-black/20 p-6 flex flex-col h-full items-center justify-center text-center">
+                  <p className="text-sm text-content-secondary">
+                    {t('bim.landing_read_only', {
+                      defaultValue: 'Your role can open the models of this project but not upload new ones. Ask an editor to upload the model.',
+                    })}
+                  </p>
+                </div>
+              )}
 
               {pendingDuplicate && (
                 <div className="mt-3">
@@ -2309,6 +2340,9 @@ export function BIMPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   // Linking elements to a position (POST /bim_hub/links/) needs bim.create.
   const canCreateBimLinks = useHasPermission('bim.create');
+  // The same gate covers model uploads: the server answers 403 to a reader anyway.
+  const canUploadModels = canCreateBimLinks;
+  const canDeleteModels = useHasPermission('bim.delete');
   // "Link from model" in the BOQ editor lands here with one position in the
   // query. Read once, on mount: the model-URL sync below rewrites the path
   // and drops the query string.
@@ -4301,6 +4335,8 @@ export function BIMPage() {
         {isModelNonReady ? (
           <NonReadyOverlay
             model={activeModel ?? null}
+            canUpload={canUploadModels}
+            canDelete={canDeleteModels}
             onUploadConverted={() => {
               if (activeModel) {
                 setUploadConvertedName(activeModel.name);
@@ -4471,7 +4507,7 @@ export function BIMPage() {
           </div>
         )}
 
-        {uploadOpen && (
+        {uploadOpen && canUploadModels && (
           <UploadPanel
             projectId={projectId}
             onUploadComplete={handleUploadComplete}
@@ -4578,7 +4614,7 @@ export function BIMPage() {
         activeModelId={activeModelId}
         onSelectModel={(id) => { setActiveModelId(id); setSelectedElementId(null); setMultiSelectedIds([]); }}
         onDeleteModel={handleDeleteModel}
-        onUpload={() => setUploadOpen(true)}
+        onUpload={canUploadModels ? () => setUploadOpen(true) : undefined}
       />
 
       {/* BIM ↔ BOQ linking modal - opened from the properties panel

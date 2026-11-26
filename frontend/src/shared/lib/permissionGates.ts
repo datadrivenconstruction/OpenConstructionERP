@@ -58,6 +58,7 @@ export const PERMISSION_MIN_ROLE = {
   'boq.delete': 'editor',
   'boq.import': 'editor',
   'bim.create': 'editor',
+  'bim.delete': 'manager',
   'hse_frame.edit': 'editor',
   'hse_frame.manage': 'manager',
   'hse_frame.approve': 'manager',
