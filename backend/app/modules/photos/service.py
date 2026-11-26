@@ -263,8 +263,13 @@ class PhotosService:
         return photo
 
     async def with_links(self, photos: list[ProjectPhoto]) -> list[dict[str, Any]]:
-        links = await self.repo.links_for([p.id for p in photos])
-        return [photo_out(p, links.get(p.id, [])) for p in photos]
+        ids = [p.id for p in photos]
+        links = await self.repo.links_for(ids)
+        albums = await self.repo.album_ids_for(ids)
+        out = [photo_out(p, links.get(p.id, [])) for p in photos]
+        for row in out:
+            row["album_ids"] = albums.get(row["id"], [])
+        return out
 
     async def search(
         self, project_id: uuid.UUID, filters: PhotoFilters, *, cursor: str | None, limit: int
@@ -724,6 +729,35 @@ class PhotosService:
             album.cover_photo_id = remaining[0] if remaining else None
         await self.session.flush()
         return {"removed": removed, "photo_count": await self.repo.album_count(album.id)}
+
+    async def set_photo_albums(self, photo: ProjectPhoto, album_ids: list[uuid.UUID]) -> list[uuid.UUID]:
+        """Put one photo in exactly these albums of its own project.
+
+        An album of another project, or one that does not exist, answers 404 like
+        any album the caller cannot see. Covers follow the membership the way the
+        bulk add and remove routes keep them.
+        """
+        wanted = list(dict.fromkeys(album_ids))
+        albums: list[PhotoAlbum] = []
+        for aid in wanted:
+            album = await self.repo.get_album(aid)
+            if album is None or album.project_id != photo.project_id:
+                raise _err(status.HTTP_404_NOT_FOUND, "photos.errors.album_not_found")
+            albums.append(album)
+        current = (await self.repo.album_ids_for([photo.id])).get(photo.id, [])
+        for aid in current:
+            if aid not in wanted:
+                await self.remove_album_items(await self.get_album(aid), [photo.id])
+        for album in albums:
+            if album.id not in current:
+                await self.add_album_items(album, [photo.id])
+        publish_after_commit(
+            self.session,
+            "photos.photo.updated",
+            {"photo_id": str(photo.id), "project_id": str(photo.project_id), "fields": ["albums"]},
+            source_module=SOURCE,
+        )
+        return wanted
 
     async def _same_project(self, project_id: uuid.UUID, photo_ids: list[uuid.UUID]) -> list[ProjectPhoto]:
         photos: list[ProjectPhoto] = []

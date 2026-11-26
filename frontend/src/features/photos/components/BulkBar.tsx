@@ -6,9 +6,8 @@ import { useTranslation } from 'react-i18next';
 import { useQueryClient } from '@tanstack/react-query';
 import { Tag, Trash2 } from 'lucide-react';
 import { ConfirmDialog } from '@/shared/ui';
-import { updatePhoto, type PhotoCategory as DocPhotoCategory } from '@/features/documents/api';
 import { useToastStore } from '@/stores/useToastStore';
-import { deletePhoto, photosKeys, type ArchivePhoto } from '../api';
+import { deletePhoto, patchPhoto, photosKeys, type ArchivePhoto } from '../api';
 import { bulkPatch, parseTags, PHOTO_CATEGORIES, type BulkAction } from '../model';
 
 interface BulkBarProps {
@@ -38,7 +37,7 @@ export function BulkBar({ photos, selected, allIds, onSelect, children }: BulkBa
       const body = bulkPatch(p, action);
       if (!body) continue;
       try {
-        await updatePhoto(p.id, { ...body, category: body.category as DocPhotoCategory | undefined });
+        await patchPhoto(p.id, body);
         changed += 1;
       } catch {
         failed.push(p.id);

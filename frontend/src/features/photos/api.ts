@@ -1,7 +1,7 @@
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 // Photo archive API: one photo entity for every module, served by /api/v1/photos/.
 
-import { apiDelete, apiGet, apiPatch, apiPost, fetchWithAuth, downloadWithAuth } from '@/shared/lib/api';
+import { apiDelete, apiGet, apiPatch, apiPost, apiPut, fetchWithAuth, downloadWithAuth } from '@/shared/lib/api';
 import type { DeviceCapture } from '@/shared/lib/photoEvidence';
 import { filtersToQuery, type PhotoFilters } from './model';
 
@@ -55,6 +55,8 @@ export interface ArchivePhoto {
   file_url: string;
   thumb_url: string;
   links: PhotoLink[];
+  /** Albums of the same project this photo is in. */
+  album_ids?: string[];
 }
 
 export interface PhotoPage {
@@ -199,6 +201,9 @@ export const patchPhoto = (
 ) =>
   apiPatch<ArchivePhoto>(`/v1/photos/${id}/`, body);
 
+/** Put one photo in exactly these albums of its project; an empty list takes it out of all. */
+export const setPhotoAlbums = (id: string, albumIds: string[]) =>
+  apiPut<ArchivePhoto>(`/v1/photos/${id}/albums/`, { album_ids: albumIds });
 export const deletePhoto = (id: string) => apiDelete<{ result: 'deleted' | 'archived' }>(`/v1/photos/${id}/`);
 
 export const fetchByTarget = async (projectId: string, kind: string, id: string): Promise<ArchivePhoto[]> =>

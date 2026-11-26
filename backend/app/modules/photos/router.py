@@ -53,6 +53,7 @@ from app.modules.photos.schemas import (
     ExportStatus,
     JobOut,
     LinkIn,
+    PhotoAlbumsIn,
     PhotoLinkOut,
     PhotoListResponse,
     PhotoOut,
@@ -571,6 +572,20 @@ async def patch_photo(
     if ("gps_lat" in changes) != ("gps_lon" in changes):
         raise _fail(status.HTTP_422_UNPROCESSABLE_CONTENT, "photos.errors.gps_pair")
     await service.patch(photo, changes, user_id)
+    return (await service.with_links([photo]))[0]
+
+
+@router.put("/{photo_id}/albums/", response_model=PhotoOut)
+async def set_photo_albums(
+    photo_id: uuid.UUID,
+    body: PhotoAlbumsIn,
+    user_id: CurrentUserId,
+    service: PhotosService = Depends(_svc),
+    _: None = Depends(RequirePermission("photos.edit")),
+) -> dict[str, Any]:
+    """Set the albums a photo belongs to; every album must be in the photo's project."""
+    photo = await _photo_for(photo_id, user_id, service)
+    await service.set_photo_albums(photo, list(body.album_ids))
     return (await service.with_links([photo]))[0]
 
 
