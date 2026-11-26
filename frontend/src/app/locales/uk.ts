@@ -71807,11 +71807,11 @@ const resource = {
     "valuation_grid.tag_missing": "немає розцінки",
     "valuation_grid.first_document": "перший",
     "valuation_grid.line": "Рядок",
-    "valuation_grid.cumulative_certified": "Підтверджено наростаючим (к-сть)",
+    "valuation_grid.cumulative_certified": "Підтверджено з початку робіт (к-сть)",
     "valuation_grid.running_total": "Наростаючий підсумок: раніше / зараз",
     "valuation_grid.qty": "К-сть",
     "valuation_grid.amount": "Сума",
-    "valuation_grid.total_priced": "Разом за оціненими рядками",
+    "valuation_grid.total_priced": "Разом за рядками з ціною",
     "valuation_grid.note": "Примітка до оцінки (чому наростаючий підсумок зменшився)",
     "valuation_grid.save_note": "Зберегти примітку",
   }

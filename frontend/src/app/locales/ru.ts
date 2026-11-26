@@ -72963,11 +72963,11 @@ const resource = {
     "valuation_grid.tag_missing": "нет расценки",
     "valuation_grid.first_document": "первый",
     "valuation_grid.line": "Строка",
-    "valuation_grid.cumulative_certified": "Подтверждено нарастающим (кол-во)",
+    "valuation_grid.cumulative_certified": "Подтверждено с начала работ (кол-во)",
     "valuation_grid.running_total": "Нарастающий итог: ранее / сейчас",
     "valuation_grid.qty": "Кол-во",
     "valuation_grid.amount": "Сумма",
-    "valuation_grid.total_priced": "Итого по оценённым строкам",
+    "valuation_grid.total_priced": "Итого по строкам с ценой",
     "valuation_grid.note": "Примечание к оценке (почему нарастающий итог уменьшился)",
     "valuation_grid.save_note": "Сохранить примечание",
   }
