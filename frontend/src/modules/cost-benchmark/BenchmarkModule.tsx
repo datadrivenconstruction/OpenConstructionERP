@@ -268,7 +268,7 @@ export default function BenchmarkModule() {
         </div>
         <div className="min-w-0">
           <h1 className="text-xl font-semibold text-content-primary">
-            {t('benchmarks.title', { defaultValue: 'Cost Benchmarks' })}
+            {t('benchmarks.title', { defaultValue: 'Market benchmarks' })}
           </h1>
           <p className="text-sm text-content-tertiary">
             {t('benchmarks.subtitle', { defaultValue: 'Compare your estimate against industry benchmarks' })}

@@ -286,7 +286,7 @@ export const TITLE_I18N_MAP: Record<string, string> = {
   'Site Sensors': 'nav.site_sensors',
   'Labor Rates': 'nav.labor_rates',
   'Payroll': 'nav.payroll',
-  'Cost benchmarks': 'nav.cost_benchmarks',
+  'Past project benchmarks': 'nav.cost_benchmarks',
   'Condition & Maintenance Plan': 'condition.title',
   'Leasing': 'leasing.title',
   'Measurement book': 'measurement_book.title',
