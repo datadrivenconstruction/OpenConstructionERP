@@ -3,6 +3,7 @@
 """Timeline module manifest."""
 
 from app.core.module_loader import ModuleManifest
+from app.modules.timeline.data_paths import DATA_PATHS
 
 manifest = ModuleManifest(
     name="oe_timeline",
@@ -20,4 +21,5 @@ manifest = ModuleManifest(
     depends=["oe_users", "oe_projects"],
     auto_install=True,
     enabled=True,
+    data_paths=DATA_PATHS,
 )

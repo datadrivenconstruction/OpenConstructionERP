@@ -9,6 +9,7 @@ deployments.
 """
 
 from app.core.module_loader import ModuleManifest
+from app.modules.uploads.data_paths import DATA_PATHS
 
 manifest = ModuleManifest(
     name="oe_uploads",
@@ -19,4 +20,5 @@ manifest = ModuleManifest(
     category="core",
     auto_install=True,
     enabled=True,
+    data_paths=DATA_PATHS,
 )

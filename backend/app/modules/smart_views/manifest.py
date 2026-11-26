@@ -2,6 +2,7 @@
 """Smart Views module manifest."""
 
 from app.core.module_loader import InferenceDeclaration, InferenceRole, ModuleManifest
+from app.modules.smart_views.data_paths import DATA_PATHS
 
 manifest = ModuleManifest(
     name="oe_smart_views",
@@ -32,4 +33,5 @@ manifest = ModuleManifest(
             "is exactly why this module is declared rather than left to be read by its name"
         ),
     ),
+    data_paths=DATA_PATHS,
 )

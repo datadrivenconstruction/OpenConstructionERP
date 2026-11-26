@@ -3,6 +3,7 @@
 """Variations module manifest."""
 
 from app.core.module_loader import ModuleManifest
+from app.modules.variations.data_paths import DATA_PATHS
 
 manifest = ModuleManifest(
     name="oe_variations",
@@ -20,4 +21,5 @@ manifest = ModuleManifest(
     depends=["oe_users", "oe_projects", "oe_boq"],
     auto_install=True,
     enabled=True,
+    data_paths=DATA_PATHS,
 )

@@ -3,6 +3,7 @@
 """External-review-authority (expertise cycle) module manifest."""
 
 from app.core.module_loader import ModuleManifest
+from app.modules.review_authority.data_paths import DATA_PATHS
 
 manifest = ModuleManifest(
     name="oe_review_authority",
@@ -24,4 +25,5 @@ manifest = ModuleManifest(
     depends=["oe_users", "oe_projects"],
     auto_install=True,
     enabled=True,
+    data_paths=DATA_PATHS,
 )

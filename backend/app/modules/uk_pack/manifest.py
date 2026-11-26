@@ -3,6 +3,7 @@
 """Module manifest for oe_uk_pack."""
 
 from app.core.module_loader import ModuleManifest
+from app.modules.uk_pack.data_paths import DATA_PATHS
 
 manifest = ModuleManifest(
     name="oe_uk_pack",
@@ -22,4 +23,5 @@ manifest = ModuleManifest(
     markets=["GB"],
     auto_install=False,
     enabled=True,
+    data_paths=DATA_PATHS,
 )

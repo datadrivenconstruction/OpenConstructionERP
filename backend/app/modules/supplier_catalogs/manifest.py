@@ -3,6 +3,7 @@
 """Supplier Catalogs module manifest."""
 
 from app.core.module_loader import ModuleManifest
+from app.modules.supplier_catalogs.data_paths import DATA_PATHS
 
 manifest = ModuleManifest(
     name="oe_supplier_catalogs",
@@ -18,4 +19,5 @@ manifest = ModuleManifest(
     depends=["oe_projects", "oe_users", "oe_procurement"],
     auto_install=True,
     enabled=True,
+    data_paths=DATA_PATHS,
 )

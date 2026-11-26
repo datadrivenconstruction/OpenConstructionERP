@@ -3,6 +3,7 @@
 """Service charges module manifest."""
 
 from app.core.module_loader import ModuleManifest
+from app.modules.service_charges.data_paths import DATA_PATHS
 
 manifest = ModuleManifest(
     name="oe_service_charges",
@@ -19,4 +20,5 @@ manifest = ModuleManifest(
     optional_depends=["oe_legal_entities", "oe_service", "oe_contacts"],
     auto_install=True,
     enabled=True,
+    data_paths=DATA_PATHS,
 )

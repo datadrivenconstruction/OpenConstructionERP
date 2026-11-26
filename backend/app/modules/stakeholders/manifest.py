@@ -3,6 +3,7 @@
 """Stakeholders module manifest."""
 
 from app.core.module_loader import ModuleManifest
+from app.modules.stakeholders.data_paths import DATA_PATHS
 
 manifest = ModuleManifest(
     name="oe_stakeholders",
@@ -21,4 +22,5 @@ manifest = ModuleManifest(
     depends=["oe_users", "oe_projects", "oe_teams", "oe_contacts", "oe_approval_routes", "oe_project_governance"],
     auto_install=True,
     enabled=True,
+    data_paths=DATA_PATHS,
 )
