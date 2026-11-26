@@ -17,11 +17,13 @@ from app.modules.validation.rules.bim_model_rule import (
     ClassificationCoverageRule,
     DisciplineCoverageRule,
     DuplicateIdentifierRule,
+    ElementsHaveCategoryRule,
     GeoreferenceSanityRule,
     ModelCompletenessRule,
     SpatialStructureRule,
     UniqueMarksPerCategoryRule,
     UnitConsistencyRule,
+    ZeroQuantitiesRule,
     get_model_rules_by_ids,
 )
 
@@ -57,9 +59,11 @@ def test_registry_ids_unique_and_filterable() -> None:
         "bim.model.classification_coverage",
         "bim.model.spatial_structure",
         "bim.model.discipline_coverage",
+        "bim.model.elements_have_category",
+        "bim.model.zero_quantities",
     ]
     assert len(ids) == len(set(ids))  # no duplicate ids
-    assert len(get_model_rules_by_ids(None)) == 8
+    assert len(get_model_rules_by_ids(None)) == 10
     only = get_model_rules_by_ids(["bim.model.duplicate_identifier"])
     assert len(only) == 1 and only[0].rule_id == "bim.model.duplicate_identifier"
 
@@ -391,3 +395,68 @@ class TestDisciplineCoverage:
     def test_sparse_does_not_crash(self) -> None:
         # Elements without a discipline attribute at all -> flagged, no raise.
         assert len(self.rule.evaluate([el()], ctx())) == 1
+
+
+# ── Imported-model hygiene: category and quantities -------------------------
+
+
+class TestElementsHaveCategory:
+    def test_every_element_categorised_passes(self) -> None:
+        rule = ElementsHaveCategoryRule()
+        elements = [el(id="a", element_type="Walls"), el(id="b", element_type="IfcSlab")]
+        assert rule.evaluate(elements, ctx()) == []
+
+    def test_blank_unknown_and_none_categories_are_counted_once(self) -> None:
+        # Worked example: 5 elements, 4 without a usable category.
+        rule = ElementsHaveCategoryRule()
+        elements = [
+            el(id="a", element_type="Walls"),
+            el(id="b", element_type=""),
+            el(id="c", element_type=None),
+            el(id="d", element_type="Unknown"),
+            el(id="e", element_type="None"),
+        ]
+        results = rule.evaluate(elements, ctx())
+        assert len(results) == 1
+        finding = results[0]
+        assert finding.severity == "warning"
+        assert finding.details["count"] == 4
+        assert finding.details["total"] == 5
+        assert finding.details["element_ids"] == ["b", "c", "d", "e"]
+
+    def test_sparse_element_never_raises(self) -> None:
+        rule = ElementsHaveCategoryRule()
+        assert len(rule.evaluate([SimpleNamespace(id="x")], ctx())) == 1
+
+
+class TestZeroQuantities:
+    def test_positive_quantities_pass(self) -> None:
+        rule = ZeroQuantitiesRule()
+        elements = [el(id="a", quantities={"Area": 7.6, "Volume": 1.52}), el(id="b", quantities={})]
+        assert rule.evaluate(elements, ctx()) == []
+
+    def test_explicit_zeros_are_flagged_with_the_elements(self) -> None:
+        # Worked example: a wall whose converter row wrote Area 0 and Volume 0.
+        rule = ZeroQuantitiesRule()
+        elements = [
+            el(id="a", quantities={"Area": 7.6}),
+            el(id="b", quantities={"Area": 0, "Volume": 0.0}),
+            el(id="c", quantities={"Length": "0"}),
+        ]
+        results = rule.evaluate(elements, ctx())
+        assert [r.details.get("reason") for r in results] == ["zero_values"]
+        assert results[0].details["count"] == 2
+        assert results[0].details["element_ids"] == ["b", "c"]
+
+    def test_model_without_any_quantity_is_flagged(self) -> None:
+        # Worked example: an RVT export of family types only, no element has a quantity.
+        rule = ZeroQuantitiesRule()
+        elements = [el(id="a", quantities={}), el(id="b", quantities=None)]
+        results = rule.evaluate(elements, ctx())
+        assert [r.details.get("reason") for r in results] == ["no_quantities"]
+        assert results[0].details["total"] == 2
+
+    def test_odd_shapes_never_raise(self) -> None:
+        rule = ZeroQuantitiesRule()
+        elements = [el(id="a", quantities={"Area": "n/a"}), SimpleNamespace(id="z"), el(id="b", quantities={"Area": 3})]
+        assert rule.evaluate(elements, ctx()) == []
