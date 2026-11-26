@@ -3,6 +3,7 @@
 """Drawing revision compare module manifest."""
 
 from app.core.module_loader import ModuleManifest
+from app.modules.drawing_compare.data_paths import DATA_PATHS
 
 manifest = ModuleManifest(
     name="oe_drawing_compare",
@@ -19,4 +20,5 @@ manifest = ModuleManifest(
     optional_depends=["oe_takeoff", "oe_dwg_takeoff", "oe_documents", "oe_markups", "oe_rfi", "oe_boq"],
     auto_install=True,
     enabled=True,
+    data_paths=DATA_PATHS,
 )

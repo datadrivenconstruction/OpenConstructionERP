@@ -3,6 +3,7 @@
 """Document assistant module manifest."""
 
 from app.core.module_loader import ModuleManifest
+from app.modules.doc_assistant.data_paths import DATA_PATHS
 
 manifest = ModuleManifest(
     name="oe_doc_assistant",
@@ -18,4 +19,5 @@ manifest = ModuleManifest(
     depends=["oe_users", "oe_projects", "oe_documents", "oe_file_search", "oe_rfi"],
     auto_install=True,
     enabled=True,
+    data_paths=DATA_PATHS,
 )

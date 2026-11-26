@@ -9,6 +9,7 @@ databases, the 5D cost model, reporting and tendering when those are installed.
 """
 
 from app.core.module_loader import ModuleManifest
+from app.modules.design_options.data_paths import DATA_PATHS
 
 manifest = ModuleManifest(
     name="oe_design_options",
@@ -34,4 +35,5 @@ manifest = ModuleManifest(
     ],
     auto_install=True,
     enabled=True,
+    data_paths=DATA_PATHS,
 )

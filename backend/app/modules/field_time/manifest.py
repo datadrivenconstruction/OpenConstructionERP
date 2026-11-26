@@ -2,6 +2,7 @@
 """Field Time module manifest."""
 
 from app.core.module_loader import ModuleManifest
+from app.modules.field_time.data_paths import DATA_PATHS
 
 manifest = ModuleManifest(
     name="oe_field_time",
@@ -33,4 +34,5 @@ manifest = ModuleManifest(
     ],
     auto_install=True,
     enabled=True,
+    data_paths=DATA_PATHS,
 )

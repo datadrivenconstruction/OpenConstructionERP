@@ -3,6 +3,7 @@
 """ERP Chat module manifest."""
 
 from app.core.module_loader import InferenceDeclaration, InferenceRole, ModuleManifest
+from app.modules.erp_chat.data_paths import DATA_PATHS
 
 manifest = ModuleManifest(
     name="oe_erp_chat",
@@ -39,4 +40,5 @@ manifest = ModuleManifest(
             "describing two different things with one word"
         ),
     ),
+    data_paths=DATA_PATHS,
 )

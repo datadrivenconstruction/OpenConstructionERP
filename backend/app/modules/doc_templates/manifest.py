@@ -3,6 +3,7 @@
 """Documents and templates module manifest."""
 
 from app.core.module_loader import ModuleManifest
+from app.modules.doc_templates.data_paths import DATA_PATHS
 
 manifest = ModuleManifest(
     name="oe_doc_templates",
@@ -19,4 +20,5 @@ manifest = ModuleManifest(
     optional_depends=["oe_tendering", "oe_letter_templates", "oe_finance", "oe_changeorders", "oe_offers"],
     auto_install=True,
     enabled=True,
+    data_paths=DATA_PATHS,
 )

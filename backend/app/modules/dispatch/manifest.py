@@ -3,6 +3,7 @@
 """Dispatch board module manifest."""
 
 from app.core.module_loader import ModuleManifest
+from app.modules.dispatch.data_paths import DATA_PATHS
 
 manifest = ModuleManifest(
     name="oe_dispatch",
@@ -18,4 +19,5 @@ manifest = ModuleManifest(
     optional_depends=["oe_field_time", "oe_notifications", "oe_labor_rates"],
     auto_install=True,
     enabled=True,
+    data_paths=DATA_PATHS,
 )

@@ -3,6 +3,7 @@
 """File full-text search module manifest."""
 
 from app.core.module_loader import InferenceDeclaration, InferenceRole, ModuleManifest
+from app.modules.file_search.data_paths import DATA_PATHS
 
 manifest = ModuleManifest(
     name="oe_file_search",
@@ -28,4 +29,5 @@ manifest = ModuleManifest(
             "path beside it is ordinary parsing"
         ),
     ),
+    data_paths=DATA_PATHS,
 )

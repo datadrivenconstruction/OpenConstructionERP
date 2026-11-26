@@ -3,6 +3,7 @@
 """Engineering brief module manifest."""
 
 from app.core.module_loader import ModuleManifest
+from app.modules.engineering_brief.data_paths import DATA_PATHS
 
 manifest = ModuleManifest(
     name="oe_engineering_brief",
@@ -21,4 +22,5 @@ manifest = ModuleManifest(
     depends=["oe_users", "oe_projects", "oe_project_governance", "oe_requirements", "oe_schedule"],
     auto_install=True,
     enabled=True,
+    data_paths=DATA_PATHS,
 )

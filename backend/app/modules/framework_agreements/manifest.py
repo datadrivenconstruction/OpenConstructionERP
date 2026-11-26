@@ -3,6 +3,7 @@
 """Framework agreements module manifest."""
 
 from app.core.module_loader import ModuleManifest
+from app.modules.framework_agreements.data_paths import DATA_PATHS
 
 manifest = ModuleManifest(
     name="oe_framework_agreements",
@@ -19,4 +20,5 @@ manifest = ModuleManifest(
     markets=["EU", "GB", "US"],
     auto_install=True,
     enabled=True,
+    data_paths=DATA_PATHS,
 )

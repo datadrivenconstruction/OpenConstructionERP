@@ -3,6 +3,7 @@
 """Guarantees​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠ register module manifest."""
 
 from app.core.module_loader import ModuleManifest
+from app.modules.guarantees.data_paths import DATA_PATHS
 
 manifest = ModuleManifest(
     name="oe_guarantees",
@@ -23,4 +24,5 @@ manifest = ModuleManifest(
     optional_depends=["oe_contracts", "oe_documents", "oe_notifications", "oe_subcontractors", "oe_tendering"],
     auto_install=True,
     enabled=True,
+    data_paths=DATA_PATHS,
 )

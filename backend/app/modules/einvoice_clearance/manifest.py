@@ -3,6 +3,7 @@
 """E-invoice clearance module manifest."""
 
 from app.core.module_loader import ModuleManifest
+from app.modules.einvoice_clearance.data_paths import DATA_PATHS
 from app.modules.einvoice_clearance.regimes import SUPPORTED_COUNTRIES
 
 manifest = ModuleManifest(
@@ -27,4 +28,5 @@ manifest = ModuleManifest(
     markets=list(SUPPORTED_COUNTRIES),
     auto_install=True,
     enabled=True,
+    data_paths=DATA_PATHS,
 )

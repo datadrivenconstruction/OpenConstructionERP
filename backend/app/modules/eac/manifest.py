@@ -9,6 +9,7 @@ executor, etc.) build on top of these contracts.
 """
 
 from app.core.module_loader import ModuleManifest
+from app.modules.eac.data_paths import DATA_PATHS
 
 manifest = ModuleManifest(
     name="oe_eac",
@@ -24,4 +25,5 @@ manifest = ModuleManifest(
     depends=["oe_users", "oe_projects"],
     auto_install=True,
     enabled=True,
+    data_paths=DATA_PATHS,
 )

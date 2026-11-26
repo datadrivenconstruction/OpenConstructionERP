@@ -3,6 +3,7 @@
 """Saudi ZATCA FATOORA e-invoicing manifest."""
 
 from app.core.module_loader import ModuleManifest
+from app.modules.einvoice_zatca.data_paths import DATA_PATHS
 
 manifest = ModuleManifest(
     name="oe_einvoice_zatca",
@@ -22,4 +23,5 @@ manifest = ModuleManifest(
     depends=["oe_einvoice_clearance"],
     auto_install=True,
     enabled=True,
+    data_paths=DATA_PATHS,
 )

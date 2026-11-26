@@ -3,6 +3,7 @@
 """HSE frame module manifest."""
 
 from app.core.module_loader import ModuleManifest
+from app.modules.hse_frame.data_paths import DATA_PATHS
 
 manifest = ModuleManifest(
     name="oe_hse_frame",
@@ -22,4 +23,5 @@ manifest = ModuleManifest(
     depends=["oe_users", "oe_projects", "oe_project_governance"],
     auto_install=True,
     enabled=True,
+    data_paths=DATA_PATHS,
 )

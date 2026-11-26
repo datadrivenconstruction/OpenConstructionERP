@@ -3,6 +3,7 @@
 """Sealed estimate module manifest."""
 
 from app.core.module_loader import ModuleManifest
+from app.modules.estimate_archive.data_paths import DATA_PATHS
 from app.modules.estimate_archive.policy import markets
 
 manifest = ModuleManifest(
@@ -20,4 +21,5 @@ manifest = ModuleManifest(
     markets=markets(),
     auto_install=True,
     enabled=True,
+    data_paths=DATA_PATHS,
 )
