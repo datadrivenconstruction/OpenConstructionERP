@@ -70,7 +70,7 @@ export const useSidebarLayoutsStore = create<SidebarLayoutsState>((set, get) => 
       const error = validateLayoutName(name, get().layouts);
       if (error) return { ok: false, error };
       const next = addLayout(get().layouts, name, data);
-      return commit(next, next[next.length - 1].id);
+      return commit(next, next[next.length - 1]?.id ?? '');
     },
     rename: async (id, name) => {
       const error = validateLayoutName(name, get().layouts, id);
