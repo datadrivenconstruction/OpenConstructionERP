@@ -27,6 +27,7 @@ import {
 } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter } from 'react-router-dom';
+import { useAuthStore } from '@/stores/useAuthStore';
 
 import type { ApprovalRoute } from '../types';
 
@@ -175,6 +176,7 @@ function renderPage() {
 }
 
 beforeEach(() => {
+  useAuthStore.setState({ userRole: 'admin' } as never);
   cleanup();
   vi.clearAllMocks();
 });

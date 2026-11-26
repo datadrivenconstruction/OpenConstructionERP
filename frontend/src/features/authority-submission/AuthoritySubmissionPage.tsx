@@ -2,6 +2,7 @@
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 import React, { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useRoleGate } from '@/shared/lib/useRoleGate';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useParams } from 'react-router-dom';
 import clsx from 'clsx';
@@ -419,6 +420,8 @@ const SubmissionRow = React.memo(function SubmissionRow({
 }) {
   const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
+  const write = useRoleGate('editor');
+  const manage = useRoleGate('manager');
 
   const { data: rendered, isFetching: renderLoading } = useQuery({
     queryKey: ['authority-submission-render', item.id],
@@ -533,6 +536,7 @@ const SubmissionRow = React.memo(function SubmissionRow({
               variant="secondary"
               size="sm"
               icon={<ShieldCheck size={14} />}
+              disabledReason={write.reason}
               disabled={isBusy}
               onClick={(e) => {
                 e.stopPropagation();
@@ -545,6 +549,7 @@ const SubmissionRow = React.memo(function SubmissionRow({
               variant="secondary"
               size="sm"
               icon={<FileCode2 size={14} />}
+              disabledReason={write.reason}
               disabled={isBusy}
               onClick={(e) => {
                 e.stopPropagation();
@@ -557,6 +562,7 @@ const SubmissionRow = React.memo(function SubmissionRow({
               variant="primary"
               size="sm"
               icon={<Send size={14} />}
+              disabledReason={manage.reason}
               disabled={isBusy || !canSubmit}
               title={
                 !canSubmit
@@ -578,6 +584,7 @@ const SubmissionRow = React.memo(function SubmissionRow({
                 key={target}
                 variant="ghost"
                 size="sm"
+                disabledReason={write.reason}
                 disabled={isBusy}
                 onClick={(e) => {
                   e.stopPropagation();
@@ -597,6 +604,7 @@ const SubmissionRow = React.memo(function SubmissionRow({
               variant="secondary"
               size="sm"
               icon={<Pencil size={14} />}
+              disabledReason={write.reason}
               onClick={(e) => {
                 e.stopPropagation();
                 onEdit(item);
@@ -609,6 +617,7 @@ const SubmissionRow = React.memo(function SubmissionRow({
               size="sm"
               className="text-semantic-error hover:bg-semantic-error-bg"
               icon={<Trash2 size={14} />}
+              disabledReason={manage.reason}
               onClick={(e) => {
                 e.stopPropagation();
                 onDelete(item);
@@ -703,6 +712,7 @@ function HowAuthoritySubmissionWorks() {
 
 export function AuthoritySubmissionPage() {
   const { t } = useTranslation();
+  const write = useRoleGate('editor');
   const { projectId: routeProjectId } = useParams<{ projectId: string }>();
   const qc = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
@@ -965,6 +975,7 @@ export function AuthoritySubmissionPage() {
               variant="primary"
               size="sm"
               onClick={() => setShowCreateModal(true)}
+              disabledReason={write.reason}
               disabled={!projectId}
               title={!projectId ? t('common.select_project_first', { defaultValue: 'Please select a project first' }) : undefined}
               className="shrink-0 whitespace-nowrap"
@@ -1051,10 +1062,11 @@ export function AuthoritySubmissionPage() {
             }
             action={
               !searchQuery && !statusFilter
-                ? {
-                    label: t('authority_submission.new_submission', { defaultValue: 'New Submission' }),
-                    onClick: () => setShowCreateModal(true),
-                  }
+                ? (
+                    <Button variant="primary" disabledReason={write.reason} onClick={() => setShowCreateModal(true)}>
+                      {t('authority_submission.new_submission', { defaultValue: 'New Submission' })}
+                    </Button>
+                  )
                 : undefined
             }
           />

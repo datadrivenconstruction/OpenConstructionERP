@@ -23,6 +23,7 @@
 
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useRoleGate } from '@/shared/lib/useRoleGate';
 import {
   useMutation,
   useQuery,
@@ -209,6 +210,7 @@ export function ApprovalInstanceCard({
   // is shared with RouteEditor and RFIDetailPage, so the request fires
   // once per page and comes from cache afterwards.
   const canListUsers = useHasPermission('users.list');
+  const write = useRoleGate('editor');
   const { data: userList = [] } = useQuery<{ id: string; email: string; full_name: string }[]>({
     queryKey: ['users-search'],
     queryFn: () => apiGet('/v1/users/?limit=100&is_active=true'),
@@ -360,6 +362,7 @@ export function ApprovalInstanceCard({
               size="sm"
               variant="ghost"
               onClick={() => setShowStartPicker(true)}
+              disabledReason={write.reason}
               icon={<PlayCircle size={14} />}
             >
               {t('approvalRoutes.startApproval', { defaultValue: 'Start approval' })}
@@ -400,6 +403,7 @@ export function ApprovalInstanceCard({
                 size="sm"
                 variant="primary"
                 onClick={() => startMut.mutate(route.id)}
+                disabledReason={write.reason}
                 loading={startMut.isPending && startMut.variables === route.id}
                 disabled={startMut.isPending}
                 icon={<PlayCircle size={14} />}
@@ -481,6 +485,7 @@ export function ApprovalInstanceCard({
               size="sm"
               variant="ghost"
               onClick={() => cancelMut.mutate(activeInstance.id)}
+              disabledReason={write.reason}
               loading={cancelMut.isPending}
               icon={<Ban size={14} />}
             >
@@ -560,6 +565,7 @@ export function StepRow({
   // have not already decided. For a user-pinned step only the named user
   // may act; role steps are open to any approver with the decide
   // permission (the backend is the authority — a 403 surfaces as a toast).
+  const decide = useRoleGate('editor');
   const isNamedApprover =
     step.approver_user_id != null && step.approver_user_id === currentUserId;
   const isRoleStep = step.approver_user_id == null;
@@ -650,6 +656,7 @@ export function StepRow({
               size="sm"
               variant="secondary"
               onClick={() => onDecide('rejected')}
+              disabledReason={decide.reason}
               loading={deciding}
               icon={<XCircle size={14} />}
               data-testid={`approval-reject-${step.id}`}
@@ -660,6 +667,7 @@ export function StepRow({
               size="sm"
               variant="primary"
               onClick={() => onDecide('approved')}
+              disabledReason={decide.reason}
               loading={deciding}
               icon={<CheckCircle2 size={14} />}
               data-testid={`approval-approve-${step.id}`}

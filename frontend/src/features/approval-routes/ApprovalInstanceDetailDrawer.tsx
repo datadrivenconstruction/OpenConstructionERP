@@ -25,6 +25,7 @@
 
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useRoleGate } from '@/shared/lib/useRoleGate';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useHasPermission } from '@/shared/lib/permissionGates';
 import { Ban, UserCog } from 'lucide-react';
@@ -184,6 +185,8 @@ export function ApprovalInstanceDetailDrawer({
   });
 
   const canListUsers = useHasPermission('users.list');
+  const write = useRoleGate('editor');
+  const manage = useRoleGate('manager');
   const { data: userList = [] } = useQuery<{ id: string; email: string; full_name: string }[]>({
     queryKey: ['users-search'],
     queryFn: () => apiGet('/v1/users/?limit=100&is_active=true'),
@@ -305,6 +308,7 @@ export function ApprovalInstanceDetailDrawer({
                   size="sm"
                   variant="secondary"
                   onClick={() => setReassignOpen(true)}
+                  disabledReason={manage.reason}
                   disabled={busy}
                   icon={<UserCog size={14} />}
                   data-testid="instance-reassign-button"
@@ -317,6 +321,7 @@ export function ApprovalInstanceDetailDrawer({
                   size="sm"
                   variant="ghost"
                   onClick={() => cancelMut.mutate()}
+                  disabledReason={write.reason}
                   loading={cancelMut.isPending}
                   disabled={busy}
                   icon={<Ban size={14} />}
