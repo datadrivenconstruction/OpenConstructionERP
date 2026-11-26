@@ -15,6 +15,7 @@
 
 import { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useRoleGate } from '@/shared/lib/useRoleGate';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import {
   useQuery,
@@ -104,6 +105,7 @@ const KIND_VARIANT: Record<AccommodationKind, 'blue' | 'success' | 'warning'> =
 
 export function AccommodationListPage() {
   const { t } = useTranslation();
+  const write = useRoleGate('editor');
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
@@ -281,6 +283,7 @@ export function AccommodationListPage() {
               variant="primary"
               size="sm"
               onClick={() => setCreateOpen(true)}
+              disabledReason={write.reason}
               data-testid="accommodation-new-button"
               className="hidden sm:inline-flex"
             >
@@ -506,10 +509,11 @@ export function AccommodationListPage() {
                   }),
                   onClick: clearBlockFilter,
                 }
-              : {
-                  label: t('accommodation.new', { defaultValue: 'New accommodation' }),
-                  onClick: () => setCreateOpen(true),
-                }
+              : (
+                  <Button variant="primary" disabledReason={write.reason} onClick={() => setCreateOpen(true)}>
+                    {t('accommodation.new', { defaultValue: 'New accommodation' })}
+                  </Button>
+                )
           }
         />
       ) : (
@@ -572,6 +576,8 @@ export function AccommodationListPage() {
       <button
         type="button"
         onClick={() => setCreateOpen(true)}
+        disabled={!write.allowed}
+        title={write.reason}
         data-testid="accommodation-new-fab"
         aria-label={t('accommodation.new', {
           defaultValue: 'New accommodation',
