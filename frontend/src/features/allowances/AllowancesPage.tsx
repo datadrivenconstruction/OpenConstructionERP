@@ -17,6 +17,7 @@
 import { Fragment, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useRoleGate } from '@/shared/lib/useRoleGate';
 import { useParams } from 'react-router-dom';
 import { Plus, Trash2, TrendingDown, AlertTriangle, Wallet } from 'lucide-react';
 import { Button, Card, Badge, EmptyState, RecoveryCard, SkeletonTable } from '@/shared/ui';
@@ -315,6 +316,7 @@ function RegisterTable({
   onDelete: (id: string) => void;
 }) {
   const { t } = useTranslation();
+  const write = useRoleGate('editor');
   const typeLabel = useTypeLabel();
   const groups = useMemo(() => groupAllowancesByType(allowances), [allowances]);
 
@@ -375,7 +377,9 @@ function RegisterTable({
                           <button
                             type="button"
                             onClick={() => onOpenDrawdown(a.id)}
-                            className="inline-flex items-center gap-1 rounded px-1.5 py-1 text-2xs font-medium text-oe-blue hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                            disabled={!write.allowed}
+                            title={write.reason}
+                            className="inline-flex items-center gap-1 rounded px-1.5 py-1 text-2xs font-medium text-oe-blue hover:bg-blue-50 dark:hover:bg-blue-900/20 disabled:cursor-not-allowed disabled:opacity-50"
                           >
                             <TrendingDown size={14} />
                             {t('allowances.draw_down', { defaultValue: 'Draw down' })}
@@ -383,7 +387,9 @@ function RegisterTable({
                           <button
                             type="button"
                             onClick={() => onDelete(a.id)}
-                            className="rounded p-1 text-content-tertiary hover:bg-semantic-error-bg hover:text-semantic-error"
+                            disabled={!write.allowed}
+                            title={write.reason}
+                            className="rounded p-1 text-content-tertiary hover:bg-semantic-error-bg hover:text-semantic-error disabled:cursor-not-allowed disabled:opacity-50"
                             aria-label={t('allowances.delete', { defaultValue: 'Delete allowance' })}
                           >
                             <Trash2 size={14} />
@@ -413,6 +419,7 @@ function RegisterTable({
 
 export function AllowancesPage() {
   const { t } = useTranslation();
+  const write = useRoleGate('editor');
   const { projectId: routeProjectId } = useParams<{ projectId: string }>();
   const qc = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
@@ -497,7 +504,7 @@ export function AllowancesPage() {
             {/* Insights toggle - shows or hides this module's visualization
                 panel. Leads the cluster so charts are one obvious click away. */}
             <InsightsToggleButton open={insights.open} onClick={insights.toggle} />
-            <Button variant="primary" size="sm" onClick={() => setShowAdd((v) => !v)}>
+            <Button variant="primary" size="sm" disabledReason={write.reason} onClick={() => setShowAdd((v) => !v)}>
               <Plus size={16} className="mr-1.5 shrink-0" />
               {t('allowances.new', { defaultValue: 'New allowance' })}
             </Button>
