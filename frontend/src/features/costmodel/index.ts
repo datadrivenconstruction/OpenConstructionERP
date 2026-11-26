@@ -3,6 +3,8 @@
 export { CostModelPage } from './CostModelPage';
 export { CostSpinePanel } from './CostSpinePanel';
 export { ContractExposurePanel } from './ContractExposurePanel';
+export { CostTypeGridPanel } from './CostTypeGridPanel';
+export { BudgetLinePicker } from './BudgetLinePicker';
 export { ControlAccountTree } from './ControlAccountTree';
 export { GenerateSpineButton } from './GenerateSpineButton';
 export { CostLineRollupDrawer } from './CostLineRollupDrawer';

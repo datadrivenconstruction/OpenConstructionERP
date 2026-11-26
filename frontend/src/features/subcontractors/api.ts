@@ -159,6 +159,8 @@ export interface Agreement {
   // The same subcontract written in the contracts module, when there is one.
   // The agreement then carries the budget commitment and the contract does not.
   contract_id?: string | null;
+  // The budget line (cost code x cost type) the agreement's value commits against.
+  budget_line_id?: string | null;
   notes?: string | null;
   created_by?: string | null;
   metadata: Record<string, unknown>;
@@ -359,6 +361,7 @@ export interface CreateAgreementPayload {
   start_date?: string;
   end_date?: string;
   contract_id?: string;
+  budget_line_id?: string;
 }
 
 /** Draw up an agreement. It is born a draft; activating it signs it. */
@@ -371,7 +374,7 @@ export function updateAgreement(
   data: Partial<
     Pick<
       Agreement,
-      'title' | 'status' | 'notes' | 'requires_lien_waiver' | 'prime_contract_id' | 'contract_id'
+      'title' | 'status' | 'notes' | 'requires_lien_waiver' | 'prime_contract_id' | 'contract_id' | 'budget_line_id'
     >
   >,
 ): Promise<Agreement> {

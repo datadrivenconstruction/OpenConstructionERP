@@ -20,6 +20,7 @@ import { Button, WideModal, WideModalField, WideModalSection } from '@/shared/ui
 import { MoneyDisplay } from '@/shared/ui/MoneyDisplay';
 import { useToastStore } from '@/stores/useToastStore';
 import { projectsApi } from '@/features/projects/api';
+import { BudgetLinePicker } from '@/features/costmodel/BudgetLinePicker';
 import { listContracts, type ContractItem, type CountryDefaultField } from '@/features/contracts/api';
 import {
   DefaultHint,
@@ -87,6 +88,7 @@ interface AgreementFormState {
   start_date: string;
   end_date: string;
   contract_id: string;
+  budget_line_id: string;
 }
 
 export function AgreementFormModal({
@@ -112,6 +114,7 @@ export function AgreementFormModal({
     start_date: '',
     end_date: '',
     contract_id: '',
+    budget_line_id: '',
   });
   const set = <K extends keyof AgreementFormState>(key: K, value: AgreementFormState[K]) =>
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -176,6 +179,7 @@ export function AgreementFormModal({
         start_date: form.start_date || undefined,
         end_date: form.end_date || undefined,
         contract_id: form.contract_id || undefined,
+        budget_line_id: form.budget_line_id || undefined,
       }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['subcontractors'] });
@@ -264,6 +268,14 @@ export function AgreementFormModal({
               </option>
             ))}
           </select>
+        </WideModalField>
+        <WideModalField label={t('costmodel.ctg_pick_label', { defaultValue: 'Budget line' })} span={2}>
+          <BudgetLinePicker
+            projectId={projectId}
+            value={form.budget_line_id || null}
+            onChange={(id) => set('budget_line_id', id ?? '')}
+            data-testid="agreement-budget-line"
+          />
         </WideModalField>
         <WideModalField label={t('subcontractors.agreement_value')} required>
           <input

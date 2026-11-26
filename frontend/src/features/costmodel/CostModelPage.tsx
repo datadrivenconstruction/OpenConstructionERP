@@ -48,6 +48,7 @@ import { CostBenchmark } from './CostBenchmark';
 import { CostSpinePanel } from './CostSpinePanel';
 import { CostStructurePanel } from './CostStructurePanel';
 import { ContractExposurePanel } from './ContractExposurePanel';
+import { CostTypeGridPanel } from './CostTypeGridPanel';
 import { CashFlowForecastPanel } from './CashFlowForecastPanel';
 import { costmodelGuide } from './costmodelGuide';
 import { BudgetLineThresholdEditor, parseThreshold } from './BudgetLineThresholdEditor';
@@ -2642,6 +2643,9 @@ function FiveDDashboard({ project }: { project: Project }) {
 
       {/* Contract Exposure (committed vs budget by cost group) */}
       <ContractExposurePanel projectId={project.id} currency={currency} />
+
+      {/* Budget, committed, actual, forecast and EAC per cost code x cost type */}
+      <CostTypeGridPanel projectId={project.id} currency={currency} />
 
       {/* Editable Budget Lines */}
       {hasBudget && (
