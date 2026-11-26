@@ -18,8 +18,8 @@
  * render currency-less numbers rather than mislabelling.
  */
 
-import { useMemo, useState } from 'react';
-import { useMutation } from '@tanstack/react-query';
+import { useEffect, useMemo, useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import {
   Bar,
@@ -39,6 +39,7 @@ import { useHasPermission } from '@/shared/lib/permissionGates';
 import { getNumberLocale } from '@/stores/usePreferencesStore';
 
 import {
+  fetchLastSimulation,
   simulateRisk,
   type RiskHistogramBin,
   type RiskSimulateMode,
@@ -55,6 +56,20 @@ const ITERATIONS_MIN = 1000;
 const ITERATIONS_MAX = 100_000;
 const ITERATIONS_DEFAULT = 10_000;
 const TORNADO_TOP_N = 8;
+export const CONFIDENCE_MIN = 50;
+export const CONFIDENCE_MAX = 99;
+export const RANGE_LOW_MAX = 90;
+export const RANGE_HIGH_MAX = 300;
+
+/** A whole number inside [min, max] from a typed value, or null when it is not one. */
+export function parseBounded(raw: string, min: number, max: number, integer = false): number | null {
+  const text = raw.trim().replace(',', '.');
+  if (!/^\d+(\.\d+)?$/.test(text)) return null;
+  const v = Number(text);
+  if (!Number.isFinite(v) || v < min || v > max) return null;
+  if (integer && !Number.isInteger(v)) return null;
+  return v;
+}
 
 function fmtCurrencyOrPlain(
   n: number | string | null | undefined,
@@ -110,14 +125,61 @@ export function MonteCarloTab({ projectId, currency }: MonteCarloTabProps) {
   const canRun = useHasPermission('risk.update');
   const addToast = useToastStore((s) => s.addToast);
 
+  const qc = useQueryClient();
   const [iterations, setIterations] = useState<number>(ITERATIONS_DEFAULT);
   const [mode, setMode] = useState<RiskSimulateMode>('both');
   const [result, setResult] = useState<RiskSimulationResult | null>(null);
+  const [confidenceText, setConfidenceText] = useState('80');
+  const [lowText, setLowText] = useState('0');
+  const [highText, setHighText] = useState('0');
+  const confidence = parseBounded(confidenceText, CONFIDENCE_MIN, CONFIDENCE_MAX, true);
+  const rangeLow = parseBounded(lowText, 0, RANGE_LOW_MAX);
+  const rangeHigh = parseBounded(highText, 0, RANGE_HIGH_MAX);
+  const settingsValid = confidence !== null && rangeLow !== null && rangeHigh !== null;
+
+  // The last run is stored with the settings it used; reopening the tab shows
+  // it again and puts those settings back in the form.
+  const last = useQuery({
+    queryKey: ['risk-simulation-last', projectId],
+    queryFn: () => fetchLastSimulation(projectId),
+    enabled: Boolean(projectId),
+    staleTime: 60_000,
+  });
+  useEffect(() => {
+    const snap = last.data;
+    if (!snap || result) return;
+    setResult(snap);
+    setMode(snap.mode);
+    setIterations(snap.iterations);
+    setConfidenceText(String(snap.confidence ?? 80));
+    setLowText(String(snap.range_low_pct ?? 0));
+    setHighText(String(snap.range_high_pct ?? 0));
+    // Only the first load seeds the form; later runs set the result directly.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [last.data]);
+
+  const ranAt = {
+    confidence: result?.confidence ?? 80,
+    low: result?.range_low_pct ?? 0,
+    high: result?.range_high_pct ?? 0,
+  };
+  const settingsChanged =
+    result !== null &&
+    settingsValid &&
+    (confidence !== ranAt.confidence || rangeLow !== ranAt.low || rangeHigh !== ranAt.high || mode !== result.mode);
 
   const runMut = useMutation({
-    mutationFn: () => simulateRisk(projectId, { iterations, mode }),
+    mutationFn: () =>
+      simulateRisk(projectId, {
+        iterations,
+        mode,
+        confidence: confidence ?? 80,
+        range_low_pct: rangeLow ?? 0,
+        range_high_pct: rangeHigh ?? 0,
+      }),
     onSuccess: (data) => {
       setResult(data);
+      qc.setQueryData(['risk-simulation-last', projectId], data);
       addToast({
         type: 'success',
         title: t('risk.montecarlo.run_done', {
@@ -220,16 +282,90 @@ export function MonteCarloTab({ projectId, currency }: MonteCarloTabProps) {
             </select>
           </div>
 
+          <div>
+            <label htmlFor="mc-confidence" className="oe-label">
+              {t('risk.montecarlo.confidence', { defaultValue: 'Confidence level (P)' })}
+            </label>
+            <div className="flex items-center gap-1">
+              <input
+                id="mc-confidence"
+                type="text"
+                inputMode="numeric"
+                value={confidenceText}
+                onChange={(e) => setConfidenceText(e.target.value)}
+                aria-invalid={confidence === null || undefined}
+                aria-describedby="mc-confidence-hint"
+                className={`oe-input oe-input-lg w-20 tabular-nums ${confidence === null ? 'border-semantic-error' : ''}`}
+              />
+              <span className="text-sm text-content-tertiary">%</span>
+            </div>
+            <p id="mc-confidence-hint" className={`mt-1 text-2xs ${confidence === null ? 'text-semantic-error' : 'text-content-tertiary'}`}>
+              {confidence === null
+                ? t('risk.montecarlo.confidence_invalid', {
+                    defaultValue: 'Enter a whole number from {{min}} to {{max}}.',
+                    min: CONFIDENCE_MIN,
+                    max: CONFIDENCE_MAX,
+                  })
+                : t('risk.montecarlo.confidence_hint', {
+                    defaultValue: '{{min}} – {{max}}, usually 80',
+                    min: CONFIDENCE_MIN,
+                    max: CONFIDENCE_MAX,
+                  })}
+            </p>
+          </div>
+
+          <fieldset>
+            <legend className="oe-label">
+              {t('risk.montecarlo.range', { defaultValue: 'Range for single-figure risks' })}
+            </legend>
+            <div className="flex items-center gap-1">
+              <span className="text-sm text-content-tertiary">−</span>
+              <input
+                id="mc-range-low"
+                type="text"
+                inputMode="decimal"
+                value={lowText}
+                onChange={(e) => setLowText(e.target.value)}
+                aria-label={t('risk.montecarlo.range_low', { defaultValue: 'Below the figure, per cent' })}
+                aria-invalid={rangeLow === null || undefined}
+                className={`oe-input oe-input-lg w-16 tabular-nums ${rangeLow === null ? 'border-semantic-error' : ''}`}
+              />
+              <span className="text-sm text-content-tertiary">% / +</span>
+              <input
+                id="mc-range-high"
+                type="text"
+                inputMode="decimal"
+                value={highText}
+                onChange={(e) => setHighText(e.target.value)}
+                aria-label={t('risk.montecarlo.range_high', { defaultValue: 'Above the figure, per cent' })}
+                aria-invalid={rangeHigh === null || undefined}
+                className={`oe-input oe-input-lg w-16 tabular-nums ${rangeHigh === null ? 'border-semantic-error' : ''}`}
+              />
+              <span className="text-sm text-content-tertiary">%</span>
+            </div>
+            <p className={`mt-1 text-2xs ${rangeLow === null || rangeHigh === null ? 'text-semantic-error' : 'text-content-tertiary'}`}>
+              {rangeLow === null || rangeHigh === null
+                ? t('risk.montecarlo.range_invalid', {
+                    defaultValue: 'Below: 0 to {{low}} %. Above: 0 to {{high}} %.',
+                    low: RANGE_LOW_MAX,
+                    high: RANGE_HIGH_MAX,
+                  })
+                : t('risk.montecarlo.range_hint', { defaultValue: '0 / 0 keeps those risks fixed' })}
+            </p>
+          </fieldset>
+
           <Button
             variant="primary"
             onClick={() => runMut.mutate()}
-            disabled={runMut.isPending || !projectId || !canRun}
+            disabled={runMut.isPending || !projectId || !canRun || !settingsValid}
             title={
-              canRun
-                ? undefined
-                : t('risk.montecarlo.run_needs_editor', {
+              !canRun
+                ? t('risk.montecarlo.run_needs_editor', {
                     defaultValue: 'Running a simulation needs the editor role.',
                   })
+                : !settingsValid
+                  ? t('risk.montecarlo.fix_settings', { defaultValue: 'Correct the highlighted settings first.' })
+                  : undefined
             }
             icon={
               runMut.isPending ? (
@@ -244,6 +380,20 @@ export function MonteCarloTab({ projectId, currency }: MonteCarloTabProps) {
               : t('risk.montecarlo.run', { defaultValue: 'Run simulation' })}
           </Button>
         </div>
+        <p className="mt-3 text-xs text-content-secondary" data-testid="mc-explainer">
+          {t('risk.montecarlo.confidence_explainer', {
+            defaultValue:
+              'The confidence level is the share of simulated outcomes the reserve covers. At P{{p}}, {{p}} of every 100 runs cost no more than the figure; raising it gives a larger, safer reserve, lowering it a leaner one. The range spreads risks that have one cost or delay figure instead of an optimistic, likely and pessimistic estimate.',
+            p: confidence ?? CONFIDENCE_MIN,
+          })}
+        </p>
+        {settingsChanged && (
+          <p className="mt-2 text-xs text-semantic-warning" role="status">
+            {t('risk.montecarlo.settings_changed', {
+              defaultValue: 'The settings differ from the last run. Run the simulation again to update the figures.',
+            })}
+          </p>
+        )}
       </Card>
 
       {/* ── Last-run chips ────────────────────────────────────────── */}
@@ -259,6 +409,26 @@ export function MonteCarloTab({ projectId, currency }: MonteCarloTabProps) {
               })}
             </h3>
           </div>
+          {result.risk_count > 0 && (
+            <p className="-mt-1 mb-3 text-xs text-content-tertiary" data-testid="mc-ran-at">
+              {t('risk.montecarlo.ran_at', {
+                defaultValue: 'Planned to P{{p}}; single-figure risks spread −{{low}} % / +{{high}} %.',
+                p: ranAt.confidence,
+                low: ranAt.low,
+                high: ranAt.high,
+              })}
+            </p>
+          )}
+          {result.risk_count > 0 && (result.point_estimate_risks ?? 0) > 0 && ranAt.low === 0 && ranAt.high === 0 && (
+            <p className="mb-3 rounded-lg bg-semantic-warning-bg px-3 py-2 text-xs text-semantic-warning" data-testid="mc-point-warning">
+              {t('risk.montecarlo.point_estimates_fixed', {
+                defaultValue:
+                  'Risks with a single figure: {{n}} of {{total}}. They do not vary, so P50, P80 and P95 can come out equal. Give them an optimistic and a pessimistic estimate, or set a range above.',
+                n: result.point_estimate_risks,
+                total: result.risk_count,
+              })}
+            </p>
+          )}
 
           {result.risk_count === 0 ? (
             <EmptyState
@@ -272,9 +442,14 @@ export function MonteCarloTab({ projectId, currency }: MonteCarloTabProps) {
               })}
             />
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
               {showCostChips && (
                 <>
+                  <Chip
+                    label={t('risk.montecarlo.target_cost', { defaultValue: 'P{{p}} Cost (plan)', p: ranAt.confidence })}
+                    value={fmtCurrencyOrPlain(result.target_cost ?? result.p80_cost, currency)}
+                    tone="info"
+                  />
                   <Chip
                     label={t('risk.montecarlo.p50_cost', { defaultValue: 'P50 Cost' })}
                     value={fmtCurrencyOrPlain(result.p50_cost, currency)}
@@ -286,6 +461,11 @@ export function MonteCarloTab({ projectId, currency }: MonteCarloTabProps) {
                     tone="warning"
                   />
                   <Chip
+                    label={t('risk.montecarlo.p90_cost', { defaultValue: 'P90 Cost' })}
+                    value={fmtCurrencyOrPlain(result.p90_cost ?? null, currency)}
+                    tone="error"
+                  />
+                  <Chip
                     label={t('risk.montecarlo.p95_cost', { defaultValue: 'P95 Cost' })}
                     value={fmtCurrencyOrPlain(result.p95_cost, currency)}
                     tone="error"
@@ -294,6 +474,14 @@ export function MonteCarloTab({ projectId, currency }: MonteCarloTabProps) {
               )}
               {showScheduleChips && (
                 <>
+                  <Chip
+                    label={t('risk.montecarlo.target_schedule', {
+                      defaultValue: 'P{{p}} Schedule (plan)',
+                      p: ranAt.confidence,
+                    })}
+                    value={fmtDays(result.target_schedule_days ?? result.p80_schedule_days, t)}
+                    tone="info"
+                  />
                   <Chip
                     label={t('risk.montecarlo.p50_schedule', {
                       defaultValue: 'P50 Schedule',
@@ -307,6 +495,11 @@ export function MonteCarloTab({ projectId, currency }: MonteCarloTabProps) {
                     })}
                     value={fmtDays(result.p80_schedule_days, t)}
                     tone="warning"
+                  />
+                  <Chip
+                    label={t('risk.montecarlo.p90_schedule', { defaultValue: 'P90 Schedule' })}
+                    value={fmtDays(result.p90_schedule_days ?? null, t)}
+                    tone="error"
                   />
                   <Chip
                     label={t('risk.montecarlo.p95_schedule', {
@@ -374,7 +567,7 @@ export function MonteCarloTab({ projectId, currency }: MonteCarloTabProps) {
       )}
 
       {/* ── Empty state when no run yet ────────────────────────────── */}
-      {!result && !runMut.isPending && (
+      {!result && !runMut.isPending && !last.isLoading && (
         <Card className="p-6">
           <EmptyState
             icon={<TrendingUp size={28} strokeWidth={1.5} />}
@@ -397,7 +590,7 @@ export function MonteCarloTab({ projectId, currency }: MonteCarloTabProps) {
 interface ChipProps {
   label: string;
   value: string;
-  tone: 'success' | 'warning' | 'error';
+  tone: 'success' | 'warning' | 'error' | 'info';
 }
 
 function Chip({ label, value, tone }: ChipProps) {
@@ -405,6 +598,7 @@ function Chip({ label, value, tone }: ChipProps) {
     success: 'bg-semantic-success-bg text-semantic-success',
     warning: 'bg-semantic-warning-bg text-semantic-warning',
     error: 'bg-semantic-error-bg text-semantic-error',
+    info: 'bg-semantic-info-bg text-semantic-info ring-1 ring-semantic-info/30',
   };
   return (
     <div className={`rounded-lg px-3 py-2 ${toneCls[tone]}`}>

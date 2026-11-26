@@ -359,6 +359,13 @@ class RiskSimulateRequest(BaseModel):
 
     iterations: int = Field(default=10000, ge=1000, le=100000)
     mode: Literal["cost", "schedule", "both"] = "both"
+    # The percentile the team plans to: P80 means a four in five chance the
+    # risks cost no more than the figure. 50 is the median, 99 the near-worst case.
+    confidence: int = Field(default=80, ge=50, le=99)
+    # Spread for a risk that carries one cost or delay figure and no three-point
+    # estimate: low and high as percentages of that figure. 0/0 keeps it fixed.
+    range_low_pct: float = Field(default=0.0, ge=0.0, le=90.0, allow_inf_nan=False)
+    range_high_pct: float = Field(default=0.0, ge=0.0, le=300.0, allow_inf_nan=False)
 
 
 class RiskTornadoEntry(BaseModel):
@@ -396,10 +403,19 @@ class RiskSimulationResult(BaseModel):
     mode: Literal["cost", "schedule", "both"]
     p50_cost: Decimal | None = None
     p80_cost: Decimal | None = None
+    p90_cost: Decimal | None = None
     p95_cost: Decimal | None = None
+    target_cost: Decimal | None = None
     p50_schedule_days: int | None = None
     p80_schedule_days: int | None = None
+    p90_schedule_days: int | None = None
     p95_schedule_days: int | None = None
+    target_schedule_days: int | None = None
+    confidence: int = 80
+    range_low_pct: float = 0.0
+    range_high_pct: float = 0.0
+    # Risks that carry a single figure, so the range above is what spreads them.
+    point_estimate_risks: int = 0
     histogram_bins: list[RiskHistogramBin] = Field(default_factory=list)
     tornado: list[RiskTornadoEntry] = Field(default_factory=list)
     currency: str = ""

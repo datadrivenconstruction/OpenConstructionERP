@@ -262,8 +262,28 @@ async def simulate_risks(
         project_id,
         iterations=body.iterations,
         mode=body.mode,
+        confidence=body.confidence,
+        range_low_pct=body.range_low_pct,
+        range_high_pct=body.range_high_pct,
     )
     return RiskSimulationResult(**data)
+
+
+@router.get(
+    "/projects/{project_id}/simulate/last",
+    response_model=RiskSimulationResult | None,
+    dependencies=[Depends(RequirePermission("risk.read"))],
+)
+async def last_simulation(
+    project_id: uuid.UUID,
+    user_id: CurrentUserId,
+    session: SessionDep,
+    service: RiskService = Depends(_get_service),
+) -> RiskSimulationResult | None:
+    """The project's last simulation with the settings it ran at, or null before the first run."""
+    await verify_project_access(project_id, user_id, session)
+    data = await service.last_simulation(project_id)
+    return RiskSimulationResult(**data) if data else None
 
 
 # ── Risk-based contingency (EMV vs the finance contingency line) ─────────
