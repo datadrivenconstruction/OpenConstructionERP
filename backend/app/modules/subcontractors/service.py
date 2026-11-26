@@ -1276,6 +1276,8 @@ class SubcontractorService(ProgressBillingMixin):
             await self._assert_prime_contract(data.prime_contract_id, data.project_id)
         if data.contract_id is not None:
             await self._assert_subcontract_contract(data.contract_id, data.project_id)
+        if data.budget_line_id is not None:
+            await self._assert_budget_line(data.budget_line_id, data.project_id)
         retention_percent, release_event, defaults_stamp = await self._agreement_retention_terms(data)
         entity = SubcontractAgreement(
             subcontractor_id=data.subcontractor_id,
@@ -1290,6 +1292,7 @@ class SubcontractorService(ProgressBillingMixin):
             requires_lien_waiver=data.requires_lien_waiver,
             prime_contract_id=data.prime_contract_id,
             contract_id=data.contract_id,
+            budget_line_id=data.budget_line_id,
             notes=data.notes,
             metadata_={"country_defaults": defaults_stamp} if defaults_stamp else {},
             # Born unsigned. Set explicitly rather than leaning on the column
@@ -1395,6 +1398,8 @@ class SubcontractorService(ProgressBillingMixin):
         linking = fields.get("contract_id") is not None and fields["contract_id"] != entity.contract_id
         if linking:
             await self._assert_subcontract_contract(fields["contract_id"], entity.project_id)
+        if fields.get("budget_line_id") is not None:
+            await self._assert_budget_line(fields["budget_line_id"], entity.project_id)
         if fields:
             await self.agreements.update_fields(agreement_id, **fields)
             await self.session.refresh(entity)
@@ -1455,6 +1460,7 @@ class SubcontractorService(ProgressBillingMixin):
             "insurance_expiry_date": _iso(insurance_expiry),
             "as_of": datetime.now(UTC).date().isoformat(),
             "contract_id": str(agreement.contract_id) if agreement.contract_id else None,
+            **await self._budget_line_payload(agreement),
             "twin_candidates": await self._twin_candidates_for(agreement),
             "unlinked_contacts": await self._unlinked_contact_names(agreement.subcontractor_id),
             **await self._documents_payload(agreement),
@@ -1587,6 +1593,27 @@ class SubcontractorService(ProgressBillingMixin):
 
         agreements, contracts = await self._twin_records(project_id)
         return match_unlinked_twins(agreements, contracts)
+
+    async def _budget_line_payload(self, agreement: SubcontractAgreement) -> dict[str, Any]:
+        """The budget line the agreement is booked to and its cost type, for the validation payload.
+
+        ``budget_line_category`` is present only when the line could be read;
+        a stub session in a unit test or a missing cost-control module leaves it
+        out, so the type rule stays silent rather than guessing.
+        """
+        budget_line_id = getattr(agreement, "budget_line_id", None)
+        out: dict[str, Any] = {"budget_line_id": str(budget_line_id) if budget_line_id else None}
+        if not budget_line_id:
+            return out
+        try:
+            from app.modules.costmodel.models import BudgetLine  # noqa: PLC0415
+
+            line = await self.session.get(BudgetLine, budget_line_id)
+        except Exception as exc:  # pragma: no cover - defensive
+            logger.debug("Budget line lookup skipped for %s: %s", agreement.id, exc)
+            return out
+        out["budget_line_category"] = line.category if line is not None else None
+        return out
 
     async def _twin_candidates_for(self, agreement: SubcontractAgreement) -> list[dict[str, Any]]:
         """The likely twins of one agreement, for its validation payload.
@@ -2532,6 +2559,17 @@ class SubcontractorService(ProgressBillingMixin):
                 status.HTTP_422_UNPROCESSABLE_CONTENT,
                 "prime_contract_not_client",
                 "The prime contract must be the contract with the client, not another subcontract.",
+            )
+
+    async def _assert_budget_line(self, budget_line_id: uuid.UUID, project_id: uuid.UUID) -> None:
+        """422 unless ``budget_line_id`` is a cost-control budget line on the agreement's project."""
+        from app.modules.costmodel.budget_line_lookup import budget_line_on_project  # noqa: PLC0415
+
+        if not await budget_line_on_project(self.session, budget_line_id, project_id):
+            raise self._refuse(
+                status.HTTP_422_UNPROCESSABLE_CONTENT,
+                "budget_line_not_on_project",
+                "The budget line must be a budget line on the same project as the agreement.",
             )
 
     async def _assert_subcontract_contract(self, contract_id: uuid.UUID, project_id: uuid.UUID) -> None:

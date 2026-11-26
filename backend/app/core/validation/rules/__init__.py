@@ -11903,6 +11903,28 @@ class ProcurementPOLineCostCoded(_ProcurementRule):
     check_name = "check_line_cost_coded"
 
 
+class ProcurementPOLineBudgetLine(_ProcurementRule):
+    """Each line should be booked to a budget line (cost code x cost type)."""
+
+    rule_id = "procurement.po_line_budget_line"
+    name = "Purchase Order Line Booked To A Budget Line"
+    severity = Severity.WARNING
+    category = RuleCategory.COMPLETENESS
+    description = "Flags a line that names no budget line, so its commitment is shared over every cost type."
+    check_name = "check_line_budget_line"
+
+
+class ProcurementPOLineBudgetTypeKnown(_ProcurementRule):
+    """The budget line a line is booked to should carry a known cost type."""
+
+    rule_id = "procurement.po_line_budget_type_known"
+    name = "Purchase Order Line Cost Type Known"
+    severity = Severity.WARNING
+    category = RuleCategory.CONSISTENCY
+    description = "Flags a line whose budget line is missing or has a cost type outside the shared vocabulary."
+    check_name = "check_line_budget_type_known"
+
+
 # ── Supplier invoice against its purchase order (simple three-way match) ────
 #
 # Run by ``ProcurementService.check_invoice_against_po`` while an invoice linked
@@ -12366,6 +12388,17 @@ class SubcontractAgreementDatesOrdered(_SubcontractRule):
     category = RuleCategory.CONSISTENCY
     description = "Flags an agreement whose end date is earlier than its start date."
     check_name = "check_dates_ordered"
+
+
+class SubcontractAgreementBudgetLine(_SubcontractRule):
+    """An agreement should be booked to a budget line (cost code x cost type)."""
+
+    rule_id = "subcontract.agreement_budget_line"
+    name = "Subcontract Agreement Booked To A Budget Line"
+    severity = Severity.WARNING
+    category = RuleCategory.COMPLETENESS
+    description = "Flags an agreement with no budget line, or one whose cost type is outside the shared vocabulary."
+    check_name = "check_budget_line"
 
 
 class SubcontractAgreementCurrencySet(_SubcontractRule):
@@ -13297,6 +13330,8 @@ def register_builtin_rules() -> None:
         (ProcurementPORetentionWithinBounds(), ["procurement"]),
         (ProcurementPODeliveryAfterIssue(), ["procurement"]),
         (ProcurementPOLineCostCoded(), ["procurement"]),
+        (ProcurementPOLineBudgetLine(), ["procurement"]),
+        (ProcurementPOLineBudgetTypeKnown(), ["procurement"]),
         # Supplier invoice against its order. Registered into "invoice_po_match",
         # which ProcurementService.check_invoice_against_po passes explicitly.
         (ProcurementInvoiceWithinOrder(), ["invoice_po_match"]),
@@ -13342,6 +13377,7 @@ def register_builtin_rules() -> None:
         (SubcontractInsuranceValidAtStart(), ["subcontract"]),
         (SubcontractUnlinkedContractTwin(), ["subcontract"]),
         (SubcontractContactLinked(), ["subcontract"]),
+        (SubcontractAgreementBudgetLine(), ["subcontract"]),
         (SubcontractRequiredDocuments(), ["subcontract", "subcontract_pay_app"]),
         # Subcontract pay applications (progress billing against the schedule of values)
         (SubcontractPayAppLineOverComplete(), ["subcontract_pay_app"]),

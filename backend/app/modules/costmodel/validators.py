@@ -45,6 +45,7 @@ from app.modules.costmodel.cost_control import (
     line_findings,
     project_findings,
 )
+from app.modules.costmodel.cost_type_rules import register_cost_type_rules
 from app.modules.costmodel.forecast_rules import register_cost_forecast_rules
 from app.modules.costmodel.structure_rules import register_cost_structure_rules
 
@@ -184,6 +185,7 @@ def register_costmodel_validation_rules() -> None:
     register_cost_forecast_rules()
     register_cashflow_forecast_rules()
     register_budget_ledger_rules()
+    register_cost_type_rules()
     logger.debug("Registered cost control validation rules")
 
 

@@ -314,6 +314,11 @@ async def test_aggregate_by_project_converts_foreign_currency_lines(
 
     monkeypatch.setattr(BudgetLineRepository, "_spine_committed_by_cost_line", _no_spine)
 
+    async def _no_explicit(_self: Any, _pid: uuid.UUID, _base: str, _fx: dict[str, str]) -> list[Any]:
+        return []
+
+    monkeypatch.setattr(BudgetLineRepository, "_explicit_commitments", _no_explicit)
+
     aggregates = await repo.aggregate_by_project(project_id)
 
     # 1000 EUR + (1000 USD * 0.9) = 1900 EUR

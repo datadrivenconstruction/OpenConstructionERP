@@ -884,6 +884,14 @@
     "receipt_inspection_closed": {
       "fail": "Le contrôle à réception du bon de réception {receipt} de la commande {po} n'est pas encore validé",
       "suggestion": "Terminez le contrôle, ou consignez la raison pour laquelle le matériau peut être payé avant"
+    },
+    "po_line_budget_line": {
+      "fail": "La ligne {line} n'est rattachée à aucune ligne budgétaire (code de coût et type de coût)",
+      "suggestion": "Choisissez la ligne budgétaire sur laquelle cette ligne s'engage"
+    },
+    "po_line_budget_type_known": {
+      "fail": "La ligne {line} est rattachée à une ligne budgétaire de catégorie \"{category}\", qui n'est pas un type de coût",
+      "suggestion": "Rattachez la ligne à une ligne budgétaire de type main-d'œuvre, matériaux, matériel, sous-traitance ou autre"
     }
   },
   "subcontract": {
@@ -984,6 +992,10 @@
     "payment_discount_reconciles": {
       "fail": "L'escompte est de {discount}, mais le taux convenu sur le montant à payer donne {expected}",
       "suggestion": "Recalculez l'escompte à partir du taux convenu et du montant à payer."
+    },
+    "agreement_budget_line": {
+      "fail": "Le contrat n'est rattaché à aucune ligne budgétaire de type de coût connu",
+      "suggestion": "Choisissez la ligne budgétaire sur laquelle cette sous-traitance s'engage"
     }
   },
   "submittal": {
@@ -2932,5 +2944,15 @@
       "suggestion": "Liez les éléments dans la visionneuse BIM, ou donnez au poste une unité que la maquette mesure (m, m2, m3, kg, pièces)."
     },
     "suggestion": "Liez les éléments dans la visionneuse BIM, ou donnez au poste une unité que la maquette mesure (m, m2, m3, kg, pièces)."
+  },
+  "cost_types": {
+    "position_unsplit": {
+      "fail": "{line} n'a aucune ressource, tout son budget est donc allé à Autre",
+      "suggestion": "Ajoutez les ressources de la position ou déplacez le montant vers le bon type de coût"
+    },
+    "unknown_type": {
+      "fail": "{line} a la catégorie \"{category}\", qui n'est pas un type de coût",
+      "suggestion": "Définissez la ligne en main-d'œuvre, matériaux, matériel, sous-traitance ou autre"
+    }
   }
 }

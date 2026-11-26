@@ -32,6 +32,8 @@ from app.core.validation.rules import (
     ProcurementPODeliveryAfterIssue,
     ProcurementPOHasLines,
     ProcurementPOLineAmount,
+    ProcurementPOLineBudgetLine,
+    ProcurementPOLineBudgetTypeKnown,
     ProcurementPOLineCostCoded,
     ProcurementPONoNegativeLine,
     ProcurementPORetentionWithinBounds,
@@ -55,6 +57,8 @@ PROCUREMENT_RULES = [
     ProcurementPORetentionWithinBounds,
     ProcurementPODeliveryAfterIssue,
     ProcurementPOLineCostCoded,
+    ProcurementPOLineBudgetLine,
+    ProcurementPOLineBudgetTypeKnown,
 ]
 
 
@@ -69,6 +73,8 @@ def _line(**overrides: Any) -> dict[str, Any]:
         "wbs_id": "3.2.1",
         "cost_category": "materials",
         "cost_line_id": None,
+        "budget_line_id": "7c0e2a52-1f43-4a39-9d47-0b7d3c1d2e01",
+        "budget_line_category": "material",
         "sort_order": 0,
     }
     line.update(overrides)
@@ -291,6 +297,32 @@ class TestLineCostCoded:
     def test_a_wholly_uncoded_line_is_flagged(self) -> None:
         po = _po(items=[_line(wbs_id=None, cost_category=None, cost_line_id=None)])
         assert len(po_checks.check_line_cost_coded(po)) == 1
+
+
+class TestLineBudgetLine:
+    def test_line_booked_to_a_budget_line_passes(self) -> None:
+        assert po_checks.check_line_budget_line(_po()) == []
+
+    def test_line_without_a_budget_line_is_flagged(self) -> None:
+        findings = po_checks.check_line_budget_line(_po(items=[_line(budget_line_id=None)]))
+        assert [f.params["line"] for f in findings] == ["1 (C30/37 ready-mix concrete)"]
+
+    def test_known_cost_type_passes(self) -> None:
+        for category in ("labor", "material", "equipment", "subcontractor", "other", "overhead"):
+            assert po_checks.check_line_budget_type_known(_po(items=[_line(budget_line_category=category)])) == []
+
+    def test_free_text_category_is_flagged(self) -> None:
+        findings = po_checks.check_line_budget_type_known(_po(items=[_line(budget_line_category="Earthworks")]))
+        assert len(findings) == 1
+        assert findings[0].params["category"] == "Earthworks"
+
+    def test_deleted_budget_line_is_flagged(self) -> None:
+        assert len(po_checks.check_line_budget_type_known(_po(items=[_line(budget_line_category=None)]))) == 1
+
+    def test_line_without_budget_line_is_not_judged_for_type(self) -> None:
+        line = _line(budget_line_id=None)
+        line.pop("budget_line_category")
+        assert po_checks.check_line_budget_type_known(_po(items=[line])) == []
 
 
 class TestLineLabel:

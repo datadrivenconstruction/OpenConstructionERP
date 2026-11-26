@@ -356,6 +356,57 @@ class BudgetLineRepository:
         """
         return await CostSpineRepository(self.session).committed_by_cost_line(project_id)
 
+    async def _explicit_commitments(
+        self, project_id: uuid.UUID, base: str, fx: dict[str, str]
+    ) -> list[tuple[str, str | None, Decimal]]:
+        """Commitments booked to a named budget line, in the project base currency.
+
+        A purchase-order item or a subcontract agreement that picked a budget
+        line (cost code x cost type) commits to exactly that line. Returns
+        ``(budget_line_id, cost_line_id or None, amount)`` per document line;
+        the cost line is the one the document also counts on in the spine, so
+        the caller can take the amount out of that cost line's shared pool.
+        Purchase orders count in the same statuses as the spine; an agreement
+        counts while live and only without a contract twin (the twin's lines
+        are the commitment then). Extracted so unit tests can stub it.
+        """
+        from app.modules.procurement.models import PurchaseOrder, PurchaseOrderItem
+        from app.modules.subcontractors.models import SubcontractAgreement
+
+        out: list[tuple[str, str | None, Decimal]] = []
+        po_stmt = (
+            select(
+                PurchaseOrderItem.budget_line_id,
+                PurchaseOrderItem.cost_line_id,
+                PurchaseOrderItem.amount,
+                PurchaseOrder.currency_code,
+            )
+            .join(PurchaseOrder, PurchaseOrder.id == PurchaseOrderItem.po_id)
+            .where(
+                PurchaseOrder.project_id == project_id,
+                PurchaseOrder.status.in_(_PO_COMMITTED_STATUSES),
+                PurchaseOrderItem.budget_line_id.is_not(None),
+            )
+        )
+        for budget_line_id, cost_line_id, amount, ccy in (await self.session.execute(po_stmt)).all():
+            value = _amount_in_base(amount, (ccy or "").strip().upper(), base, fx)
+            out.append((str(budget_line_id), str(cost_line_id) if cost_line_id else None, value))
+
+        sub_stmt = select(
+            SubcontractAgreement.budget_line_id,
+            SubcontractAgreement.total_value,
+            SubcontractAgreement.currency,
+        ).where(
+            SubcontractAgreement.project_id == project_id,
+            SubcontractAgreement.budget_line_id.is_not(None),
+            SubcontractAgreement.contract_id.is_(None),
+            SubcontractAgreement.status.in_(_AGREEMENT_LIVE_STATUSES),
+        )
+        for budget_line_id, total_value, ccy in (await self.session.execute(sub_stmt)).all():
+            raw = str(total_value) if total_value is not None else "0"
+            out.append((str(budget_line_id), None, _amount_in_base(raw, (ccy or "").strip().upper(), base, fx)))
+        return out
+
     async def _committed_in_base(
         self,
         project_id: uuid.UUID,
@@ -380,12 +431,26 @@ class BudgetLineRepository:
         shares add up exactly. Document value on a cost line with no budget line in the
         project is returned separately as the unbudgeted commitment.
 
+        A purchase-order item or subcontract agreement that names a budget line
+        commits to that line alone: its amount is taken out of its cost line's
+        shared pool before the split and added to the named line, so a
+        material order never spreads onto the labour line of the same cost code.
+
         Returns:
             ``(per_line, unbudgeted, from_documents)`` where ``per_line`` is
             aligned with ``lines`` and ``from_documents`` holds the indexes
             whose value came from purchase orders and contracts.
         """
-        spine = await self._spine_committed_by_cost_line(project_id)
+        spine = dict(await self._spine_committed_by_cost_line(project_id))
+        line_index = {str(line.id): idx for idx, line in enumerate(lines)}
+        explicit: dict[int, Decimal] = {}
+        for budget_line_id, cost_line_key, amount in await self._explicit_commitments(project_id, base, fx):
+            idx = line_index.get(budget_line_id)
+            if idx is None:
+                continue  # a budget line of another project, or deleted: the spine keeps the amount
+            explicit[idx] = explicit.get(idx, Decimal("0")) + amount
+            if cost_line_key is not None and cost_line_key in spine:
+                spine[cost_line_key] = max(spine[cost_line_key] - amount, Decimal("0"))
 
         per_line: list[Decimal] = []
         groups: dict[str, list[int]] = {}
@@ -423,8 +488,13 @@ class BudgetLineRepository:
                     allocated += share
                 per_line[i] = share
 
+        grouped = {i for indexes in groups.values() for i in indexes}
+        for idx, amount in explicit.items():
+            # A named line's manual committed is superseded, as for any line with documents.
+            per_line[idx] = (per_line[idx] if idx in grouped else Decimal("0")) + amount.quantize(cent)
+
         unbudgeted = sum((value for key, value in spine.items() if key not in groups), Decimal("0"))
-        from_documents = {i for indexes in groups.values() for i in indexes}
+        from_documents = grouped | set(explicit)
         return per_line, unbudgeted, from_documents
 
     async def effective_committed(
@@ -644,6 +714,15 @@ class BudgetLineRepository:
         )
         result = await self.session.execute(stmt)
         return result.scalars().first()
+
+    async def list_by_position(self, project_id: uuid.UUID, boq_position_id: uuid.UUID) -> list[BudgetLine]:
+        """Every budget line wired to one BOQ position (one per cost type), oldest first."""
+        stmt = (
+            select(BudgetLine)
+            .where(BudgetLine.project_id == project_id, BudgetLine.boq_position_id == boq_position_id)
+            .order_by(BudgetLine.created_at.asc(), BudgetLine.id.asc())
+        )
+        return list((await self.session.execute(stmt)).scalars().all())
 
     async def existing_position_ids(self, project_id: uuid.UUID) -> set[uuid.UUID]:
         """Return the set of BOQ position IDs already wired to a budget line.
@@ -1445,6 +1524,8 @@ def _strict_money(raw: object) -> Decimal:
 
 #: Purchase-order states that bind the project to pay.
 _PO_COMMITTED_STATUSES = ("issued", "partially_received", "completed")
+#: Subcontract agreements bind the project while live (same statuses as the commitment grid).
+_AGREEMENT_LIVE_STATUSES = ("active", "suspended", "completed")
 
 #: Contract states that bind nobody yet or any longer. ``cancelled`` and
 #: ``void`` are not in the contract FSM today; listing them keeps a future or

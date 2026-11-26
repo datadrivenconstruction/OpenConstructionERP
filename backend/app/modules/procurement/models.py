@@ -209,6 +209,11 @@ class PurchaseOrderItem(Base):
     # ── Cost Spine linkage (v6.4) ────────────────────────────────────────
     # Additive nullable link to the cost line this PO item commits against.
     cost_line_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, index=True)
+    # The budget line (cost code x cost type) the buyer booked this line to.
+    # When set, the line's committed value rolls into that budget line rather
+    # than being shared over every budget line of its cost line. Plain GUID, no
+    # FK: cost control is another module.
+    budget_line_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, index=True)
     sort_order: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     # The requisition line this order line was converted from (issue #516).
     # Written only by the requisition-to-order conversion and carried through

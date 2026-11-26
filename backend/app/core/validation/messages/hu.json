@@ -884,6 +884,14 @@
     "receipt_inspection_closed": {
       "fail": "A(z) {po} megrendeléshez tartozó {receipt} áruátvételi bizonylat beérkezési ellenőrzése még nem sikeres",
       "suggestion": "Fejezze be az ellenőrzést, vagy rögzítse, miért fizethető ki az anyag annak lezárulása előtt"
+    },
+    "po_line_budget_line": {
+      "fail": "A(z) {line} sor nincs költségvetési sorhoz rendelve (költségkód és költségnem)",
+      "suggestion": "Válassza ki a költségvetési sort, amelyet ez a sor terhel"
+    },
+    "po_line_budget_type_known": {
+      "fail": "A(z) {line} sor olyan költségvetési sorhoz van rendelve, amelynek kategóriája \"{category}\", ez nem költségnem",
+      "suggestion": "Rendelje a sort munkadíj, anyag, gép, alvállalkozó vagy egyéb típusú költségvetési sorhoz"
     }
   },
   "subcontract": {
@@ -984,6 +992,10 @@
     "payment_discount_reconciles": {
       "fail": "A fizetési engedmény {discount}, de a megállapodott kulcs a fizetendő összegre {expected}",
       "suggestion": "Számolja újra az engedményt a megállapodott kulcsból és a fizetendő összegből."
+    },
+    "agreement_budget_line": {
+      "fail": "A szerződés nincs ismert költségnemű költségvetési sorhoz rendelve",
+      "suggestion": "Válassza ki a költségvetési sort, amelyet ez az alvállalkozás terhel"
     }
   },
   "submittal": {
@@ -2932,5 +2944,15 @@
       "suggestion": "Kapcsolja az elemeket a BIM-nézőben, vagy adjon a tételnek olyan mértékegységet, amelyet a modell mér (m, m2, m3, kg, db)."
     },
     "suggestion": "Kapcsolja az elemeket a BIM-nézőben, vagy adjon a tételnek olyan mértékegységet, amelyet a modell mér (m, m2, m3, kg, db)."
+  },
+  "cost_types": {
+    "position_unsplit": {
+      "fail": "A(z) {line} tételnek nincsenek erőforrásai, így a teljes költségvetés az Egyéb alá került",
+      "suggestion": "Adja meg a tétel erőforrásait, vagy helyezze át az összeget a megfelelő költségnemre"
+    },
+    "unknown_type": {
+      "fail": "A(z) {line} kategóriája \"{category}\", ez nem költségnem",
+      "suggestion": "Állítsa a sort munkadíjra, anyagra, gépre, alvállalkozóra vagy egyébre"
+    }
   }
 }

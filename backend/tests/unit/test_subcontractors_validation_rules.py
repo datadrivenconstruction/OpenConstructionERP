@@ -63,6 +63,8 @@ def _agreement(**overrides: object) -> dict:
         "end_date": "2026-12-20",
         "insurance_expiry_date": "2027-01-31",
         "as_of": TODAY,
+        "budget_line_id": "5b1c1e9e-3a7d-4c8e-9f20-6a2d8c4e7b10",
+        "budget_line_category": "subcontractor",
         "work_packages": [
             {
                 "name": "Ductwork",
@@ -286,6 +288,24 @@ class TestCurrencySet:
 # ---------------------------------------------------------------------------
 # Reachability
 # ---------------------------------------------------------------------------
+
+
+class TestBudgetLine:
+    def test_booked_to_a_subcontract_line_passes(self) -> None:
+        assert checks.check_budget_line(_agreement()) == []
+
+    def test_no_budget_line_is_flagged(self) -> None:
+        findings = checks.check_budget_line(_agreement(budget_line_id=None))
+        assert [f.details["problem"] for f in findings] == ["missing"]
+
+    def test_free_text_category_is_flagged(self) -> None:
+        findings = checks.check_budget_line(_agreement(budget_line_category="Mechanical"))
+        assert [f.details["problem"] for f in findings] == ["unknown_type"]
+
+    def test_unreadable_budget_line_is_not_judged(self) -> None:
+        agreement = _agreement()
+        agreement.pop("budget_line_category")
+        assert checks.check_budget_line(agreement) == []
 
 
 class TestReachability:

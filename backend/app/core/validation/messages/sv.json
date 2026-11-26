@@ -884,6 +884,14 @@
     "receipt_inspection_closed": {
       "fail": "Den inkommande kontrollen av godsmottagning {receipt} på beställning {po} är ännu inte godkänd",
       "suggestion": "Slutför kontrollen, eller dokumentera varför materialet får betalas före den"
+    },
+    "po_line_budget_line": {
+      "fail": "Rad {line} är inte bokförd på en budgetrad (kostnadskod och kostnadsslag)",
+      "suggestion": "Välj den budgetrad som raden binder"
+    },
+    "po_line_budget_type_known": {
+      "fail": "Rad {line} är bokförd på en budgetrad med kategorin \"{category}\", som inte är ett kostnadsslag",
+      "suggestion": "Bokför raden på en budgetrad av typen arbete, material, maskiner, underentreprenad eller övrigt"
     }
   },
   "subcontract": {
@@ -984,6 +992,10 @@
     "payment_discount_reconciles": {
       "fail": "Kassarabatten är {discount}, men den avtalade satsen på beloppet att betala ger {expected}",
       "suggestion": "Räkna om rabatten från den avtalade satsen och beloppet att betala."
+    },
+    "agreement_budget_line": {
+      "fail": "Avtalet är inte bokfört på en budgetrad med ett känt kostnadsslag",
+      "suggestion": "Välj den budgetrad som denna underentreprenad binder"
     }
   },
   "submittal": {
@@ -2932,5 +2944,15 @@
       "suggestion": "Koppla elementen i BIM-visaren eller ge posten en enhet som modellen mäter (m, m2, m3, kg, st)."
     },
     "suggestion": "Koppla elementen i BIM-visaren eller ge posten en enhet som modellen mäter (m, m2, m3, kg, st)."
+  },
+  "cost_types": {
+    "position_unsplit": {
+      "fail": "{line} har inga resurser, så hela budgeten gick till Övrigt",
+      "suggestion": "Lägg till postens resurser eller flytta beloppet till rätt kostnadsslag"
+    },
+    "unknown_type": {
+      "fail": "{line} har kategorin \"{category}\", som inte är ett kostnadsslag",
+      "suggestion": "Sätt raden till arbete, material, maskiner, underentreprenad eller övrigt"
+    }
   }
 }

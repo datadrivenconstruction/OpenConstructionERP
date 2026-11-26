@@ -21,9 +21,12 @@ from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core import record_provenance as provenance
+from app.core.cost_types import BUDGET_CATEGORIES, CostTypeShare, normalize_cost_type, split_by_cost_type
+from app.core.cost_types import OTHER as OTHER_COST_TYPE
 from app.core.events import event_bus
 from app.core.json_merge import merge_metadata
 from app.modules.costmodel.contract_exposure import compute_contract_exposure
+from app.modules.costmodel.cost_type_rules import SPLIT_BASIS_NO_RESOURCES
 from app.modules.costmodel.models import (
     BudgetLine,
     CashFlow,
@@ -87,10 +90,81 @@ logger = logging.getLogger(__name__)
 # Allowed cost categories for an actual-cost posting (Gap B). Mirrors the
 # BudgetLine.category doc plus the what-if/dashboard category vocabulary. An
 # empty / None category is always allowed (the "uncategorised" sentinel).
-_ACTUAL_COST_CATEGORIES = frozenset({"material", "labor", "equipment", "subcontractor", "overhead", "contingency"})
+_ACTUAL_COST_CATEGORIES = BUDGET_CATEGORIES
 
 # metadata.kind marker for budget lines auto-maintained by actual-cost postings.
 _ACTUAL_POSTING_MARKER = "actual_posting_auto"
+
+
+#: Budget line metadata key recording how a bill position's total was split over cost types.
+COST_TYPE_SPLIT_KEY = "cost_type_split"
+SPLIT_BASIS_RESOURCES = "resources"
+
+
+def _budget_lines_by_cost_type(
+    project_id: uuid.UUID,
+    boq_id: uuid.UUID,
+    pos: Any,
+    total: Decimal,
+    currency: str,
+    shares: list[CostTypeShare],
+    *,
+    origin: Any,
+) -> list[BudgetLine]:
+    """One budget line per cost type of a bill position, each traceable to the resources it was cut by.
+
+    A position without usable resources becomes a single ``other`` line for its
+    whole total, marked so the ``cost_types`` rules can ask for a breakdown.
+    """
+    weight_total = sum((s.weight for s in shares), Decimal("0"))
+    if shares:
+        parts = [
+            (
+                s.cost_type,
+                s.amount,
+                {
+                    "basis": SPLIT_BASIS_RESOURCES,
+                    "weight": str(s.weight),
+                    "weight_total": str(weight_total),
+                    "resource_count": s.resource_count,
+                },
+            )
+            for s in shares
+        ]
+    else:
+        parts = [(OTHER_COST_TYPE, total, {"basis": SPLIT_BASIS_NO_RESOURCES})]
+    out: list[BudgetLine] = []
+    for cost_type, amount, split in parts:
+        out.append(
+            BudgetLine(
+                project_id=project_id,
+                boq_position_id=pos.id,
+                category=cost_type,
+                description=f"{pos.ordinal} - {pos.description[:200]}",
+                planned_amount=str(amount),
+                committed_amount="0",
+                actual_amount="0",
+                forecast_amount=str(amount),
+                currency=currency,
+                metadata_={
+                    provenance.KEY: provenance.make(
+                        "boq_position",
+                        "oe_boq",
+                        boq_position_id=str(pos.id),
+                        quantity=str(pos.quantity),
+                        rate={"unit_rate": str(pos.unit_rate), "ordinal": pos.ordinal, "boq_id": str(boq_id)},
+                        origin=origin,
+                    ),
+                    COST_TYPE_SPLIT_KEY: {**split, "position_total": str(total)},
+                },
+            )
+        )
+    return out
+
+
+def _canonical_category(raw: str) -> str:
+    """A budget category as stored: resource spellings fold into the cost type, anything else is kept as typed."""
+    return normalize_cost_type(raw) or raw
 
 
 def _str_to_float(value: str | None) -> float:
@@ -741,7 +815,7 @@ class CostModelService:
             project_id=data.project_id,
             boq_position_id=data.boq_position_id,
             activity_id=data.activity_id,
-            category=data.category,
+            category=_canonical_category(data.category),
             description=data.description,
             planned_amount=str(data.planned_amount),
             committed_amount=str(data.committed_amount),
@@ -813,6 +887,9 @@ class CostModelService:
                         ),
                     )
                 fields.pop("committed_amount")
+
+        if fields.get("category") is not None:
+            fields["category"] = _canonical_category(fields["category"])
 
         # Convert float values to strings for storage
         for key in ("planned_amount", "committed_amount", "actual_amount", "forecast_amount"):
@@ -1492,6 +1569,27 @@ class CostModelService:
         earned = (total * pct / Decimal("100")).quantize(Decimal("0.01"))
 
         line_id = line.id
+        siblings = [
+            sib
+            for sib in await self.budget_repo.list_by_position(project_id, boq_position_id)
+            if isinstance(sib.metadata_, dict) and COST_TYPE_SPLIT_KEY in sib.metadata_
+        ]
+        if len(siblings) > 1:
+            # A position split over cost types earns on each of its lines in
+            # proportion to the line's planned share, the last taking the rest.
+            planned = [max(_str_to_decimal(sib.planned_amount), Decimal("0")) for sib in siblings]
+            planned_sum = sum(planned, Decimal("0"))
+            allotted = Decimal("0")
+            for idx, sib in enumerate(siblings):
+                if idx == len(siblings) - 1:
+                    part = earned - allotted
+                elif planned_sum > 0:
+                    part = (earned * planned[idx] / planned_sum).quantize(Decimal("0.01"))
+                    allotted += part
+                else:
+                    part = Decimal("0")
+                await self.budget_repo.update_fields(sib.id, earned_amount=part)
+            return await self.budget_repo.get_by_id(line_id)
         await self.budget_repo.update_fields(line_id, earned_amount=earned)
         logger.info(
             "Earned value updated: position=%s line=%s pct=%s earned=%s",
@@ -1505,7 +1603,10 @@ class CostModelService:
     async def generate_budget_from_boq(self, project_id: uuid.UUID, boq_id: uuid.UUID) -> list[BudgetLine]:
         """Auto-generate budget lines from BOQ positions.
 
-        Each BOQ position becomes a budget line with planned_amount = position total.
+        Each BOQ position becomes one budget line per cost type found in its
+        resources (labour, material, equipment, subcontract, other), the
+        position total cut by the resources' shares so the lines add up to it.
+        A position without resources becomes one ``other`` line for its total.
         Existing budget lines for the project are NOT deleted - new lines are appended.
 
         Idempotency (R5 audit, May 2026):
@@ -1551,6 +1652,15 @@ class CostModelService:
         currency = await self._project_currency(project_id)
         project_ccy_norm = (currency or "").strip().upper()
 
+        # Resource rows priced in another currency weigh in the project base
+        # when the position's total is split over cost types.
+        from app.modules.boq.service import resource_fx_factor
+
+        fx_base, fx_map = await self.budget_repo._project_fx_context(project_id)
+
+        def _fx(code: str) -> Decimal | None:
+            return resource_fx_factor(code, fx_base, fx_map)
+
         lines: list[BudgetLine] = []
         for pos in positions:
             if pos.id in existing:
@@ -1559,28 +1669,18 @@ class CostModelService:
             pos_meta = getattr(pos, "metadata_", None)
             pos_ccy = str(pos_meta.get("currency") or "").strip().upper() if isinstance(pos_meta, dict) else ""
             line_currency = pos_ccy if pos_ccy and pos_ccy != project_ccy_norm else currency
-            line = BudgetLine(
-                project_id=project_id,
-                boq_position_id=pos.id,
-                category="material",  # Default; user can reclassify later
-                description=f"{pos.ordinal} - {pos.description[:200]}",
-                planned_amount=str(total),
-                committed_amount="0",
-                actual_amount="0",
-                forecast_amount=str(total),
-                currency=line_currency,
-                metadata_={
-                    provenance.KEY: provenance.make(
-                        "boq_position",
-                        "oe_boq",
-                        boq_position_id=str(pos.id),
-                        quantity=str(pos.quantity),
-                        rate={"unit_rate": str(pos.unit_rate), "ordinal": pos.ordinal, "boq_id": str(boq_id)},
-                        origin=provenance.read(pos_meta),
-                    )
-                },
+            resources = pos_meta.get("resources") if isinstance(pos_meta, dict) else None
+            lines.extend(
+                _budget_lines_by_cost_type(
+                    project_id,
+                    boq_id,
+                    pos,
+                    total,
+                    line_currency,
+                    split_by_cost_type(total, resources if isinstance(resources, list) else None, fx_factor=_fx),
+                    origin=provenance.read(pos_meta),
+                )
             )
-            lines.append(line)
 
         if not lines:
             logger.info(
@@ -3119,7 +3219,7 @@ class CostSpineService:
             control_account_id = cost_line.control_account_id
 
         # ── 3. Validate category ──────────────────────────────────────────
-        normalized_category = (cost_category or "").strip().lower()
+        normalized_category = normalize_cost_type(cost_category) or (cost_category or "").strip().lower()
         if normalized_category and normalized_category not in _ACTUAL_COST_CATEGORIES:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,

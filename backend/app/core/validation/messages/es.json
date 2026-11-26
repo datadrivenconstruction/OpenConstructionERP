@@ -902,6 +902,14 @@
     "receipt_inspection_closed": {
       "fail": "La inspección de recepción del albarán {receipt} del pedido {po} todavía no está superada",
       "suggestion": "Complete la inspección o deje constancia de por qué el material puede pagarse antes"
+    },
+    "po_line_budget_line": {
+      "fail": "La línea {line} no está asignada a una línea de presupuesto (código y tipo de coste)",
+      "suggestion": "Elija la línea de presupuesto a la que compromete esta línea"
+    },
+    "po_line_budget_type_known": {
+      "fail": "La línea {line} está asignada a una línea de presupuesto con la categoría \"{category}\", que no es un tipo de coste",
+      "suggestion": "Asigne la línea a una línea de presupuesto de tipo mano de obra, material, equipo, subcontrato u otros"
     }
   },
   "subcontract": {
@@ -1002,6 +1010,10 @@
     "payment_discount_reconciles": {
       "fail": "El descuento por pronto pago es {discount}, pero la tasa pactada sobre el importe a pagar da {expected}",
       "suggestion": "Recalcule el descuento con la tasa pactada y el importe a pagar."
+    },
+    "agreement_budget_line": {
+      "fail": "El contrato no está asignado a una línea de presupuesto con un tipo de coste conocido",
+      "suggestion": "Elija la línea de presupuesto a la que compromete este subcontrato"
     }
   },
   "submittal": {
@@ -2932,5 +2944,15 @@
       "suggestion": "Vincule los elementos en el visor BIM o asigne a la partida una unidad que el modelo mida (m, m2, m3, kg, unidades)."
     },
     "suggestion": "Vincule los elementos en el visor BIM o asigne a la partida una unidad que el modelo mida (m, m2, m3, kg, unidades)."
+  },
+  "cost_types": {
+    "position_unsplit": {
+      "fail": "{line} no tiene recursos, así que todo su presupuesto fue a Otros",
+      "suggestion": "Añada los recursos de la partida o mueva el importe al tipo de coste correcto"
+    },
+    "unknown_type": {
+      "fail": "{line} tiene la categoría \"{category}\", que no es un tipo de coste",
+      "suggestion": "Asigne a la línea mano de obra, material, equipo, subcontrato u otros"
+    }
   }
 }

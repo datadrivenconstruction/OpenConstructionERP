@@ -884,6 +884,14 @@
     "receipt_inspection_closed": {
       "fail": "{po} siparişine ait {receipt} mal kabul kaydının giriş kontrolü henüz geçilmedi",
       "suggestion": "Kontrolü tamamlayın veya malzemenin kontrolden önce neden ödenebileceğini kaydedin"
+    },
+    "po_line_budget_line": {
+      "fail": "{line} satırı bir bütçe satırına (maliyet kodu ve maliyet türü) bağlı değil",
+      "suggestion": "Bu satırın taahhüt ettiği bütçe satırını seçin"
+    },
+    "po_line_budget_type_known": {
+      "fail": "{line} satırı, maliyet türü olmayan \"{category}\" kategorili bir bütçe satırına bağlı",
+      "suggestion": "Satırı işçilik, malzeme, ekipman, taşeron veya diğer türünde bir bütçe satırına bağlayın"
     }
   },
   "subcontract": {
@@ -984,6 +992,10 @@
     "payment_discount_reconciles": {
       "fail": "Erken ödeme iskontosu {discount}, ancak ödenecek tutar üzerinden anlaşılan oran {expected} veriyor",
       "suggestion": "İskontoyu anlaşılan oran ve ödenecek tutardan yeniden hesaplayın."
+    },
+    "agreement_budget_line": {
+      "fail": "Sözleşme bilinen bir maliyet türüne sahip bir bütçe satırına bağlı değil",
+      "suggestion": "Bu taşeronun taahhüt ettiği bütçe satırını seçin"
     }
   },
   "submittal": {
@@ -2932,5 +2944,15 @@
       "suggestion": "Elemanları BIM görüntüleyicide bağlayın veya kaleme modelin ölçtüğü bir birim verin (m, m2, m3, kg, adet)."
     },
     "suggestion": "Elemanları BIM görüntüleyicide bağlayın veya kaleme modelin ölçtüğü bir birim verin (m, m2, m3, kg, adet)."
+  },
+  "cost_types": {
+    "position_unsplit": {
+      "fail": "{line} kaynak içermiyor, bu yüzden bütçesinin tamamı Diğer'e gitti",
+      "suggestion": "Pozun kaynaklarını ekleyin veya tutarı doğru maliyet türüne taşıyın"
+    },
+    "unknown_type": {
+      "fail": "{line} kategorisi \"{category}\", bu bir maliyet türü değil",
+      "suggestion": "Satırı işçilik, malzeme, ekipman, taşeron veya diğer olarak ayarlayın"
+    }
   }
 }

@@ -884,6 +884,14 @@
     "receipt_inspection_closed": {
       "fail": "Kiểm tra đầu vào của phiếu nhập kho {receipt} thuộc đơn đặt hàng {po} chưa đạt",
       "suggestion": "Hoàn tất kiểm tra, hoặc ghi lại lý do vật tư có thể được thanh toán trước khi kiểm tra"
+    },
+    "po_line_budget_line": {
+      "fail": "Dòng {line} chưa được gán vào dòng ngân sách (mã chi phí và loại chi phí)",
+      "suggestion": "Chọn dòng ngân sách mà dòng này cam kết"
+    },
+    "po_line_budget_type_known": {
+      "fail": "Dòng {line} được gán vào dòng ngân sách có danh mục \"{category}\", không phải loại chi phí",
+      "suggestion": "Gán dòng vào dòng ngân sách loại nhân công, vật liệu, thiết bị, thầu phụ hoặc khác"
     }
   },
   "subcontract": {
@@ -984,6 +992,10 @@
     "payment_discount_reconciles": {
       "fail": "Chiết khấu thanh toán là {discount}, nhưng tỷ lệ đã thỏa thuận trên số tiền phải trả cho ra {expected}",
       "suggestion": "Tính lại chiết khấu theo tỷ lệ đã thỏa thuận và số tiền phải trả."
+    },
+    "agreement_budget_line": {
+      "fail": "Hợp đồng chưa được gán vào dòng ngân sách có loại chi phí đã biết",
+      "suggestion": "Chọn dòng ngân sách mà hợp đồng thầu phụ này cam kết"
     }
   },
   "submittal": {
@@ -2932,5 +2944,15 @@
       "suggestion": "Liên kết cấu kiện trong trình xem BIM, hoặc đặt cho hạng mục đơn vị mà mô hình đo được (m, m2, m3, kg, cái)."
     },
     "suggestion": "Liên kết cấu kiện trong trình xem BIM, hoặc đặt cho hạng mục đơn vị mà mô hình đo được (m, m2, m3, kg, cái)."
+  },
+  "cost_types": {
+    "position_unsplit": {
+      "fail": "{line} không có tài nguyên nên toàn bộ ngân sách được đưa vào Khác",
+      "suggestion": "Thêm tài nguyên của hạng mục hoặc chuyển số tiền sang đúng loại chi phí"
+    },
+    "unknown_type": {
+      "fail": "{line} có danh mục \"{category}\", không phải loại chi phí",
+      "suggestion": "Đặt dòng thành nhân công, vật liệu, thiết bị, thầu phụ hoặc khác"
+    }
   }
 }

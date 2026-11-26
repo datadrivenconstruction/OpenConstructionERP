@@ -884,6 +884,14 @@
     "receipt_inspection_closed": {
       "fail": "Den indgående kontrol af modtagelse {receipt} på bestilling {po} er endnu ikke bestået",
       "suggestion": "Gennemfør kontrollen, eller notér hvorfor materialet må betales før den"
+    },
+    "po_line_budget_line": {
+      "fail": "Linje {line} er ikke bogført på en budgetlinje (omkostningskode og omkostningstype)",
+      "suggestion": "Vælg den budgetlinje, som denne linje forpligter"
+    },
+    "po_line_budget_type_known": {
+      "fail": "Linje {line} er bogført på en budgetlinje med kategorien \"{category}\", som ikke er en omkostningstype",
+      "suggestion": "Bogfør linjen på en budgetlinje af typen arbejdsløn, materialer, materiel, underentreprise eller andet"
     }
   },
   "subcontract": {
@@ -984,6 +992,10 @@
     "payment_discount_reconciles": {
       "fail": "Kontantrabatten er {discount}, men den aftalte sats af beløbet til betaling giver {expected}",
       "suggestion": "Genberegn rabatten ud fra den aftalte sats og beløbet til betaling."
+    },
+    "agreement_budget_line": {
+      "fail": "Aftalen er ikke bogført på en budgetlinje med en kendt omkostningstype",
+      "suggestion": "Vælg den budgetlinje, som denne underentreprise forpligter"
     }
   },
   "submittal": {
@@ -2932,5 +2944,15 @@
       "suggestion": "Knyt elementerne i BIM-fremviseren, eller giv posten en enhed, som modellen måler (m, m2, m3, kg, stk)."
     },
     "suggestion": "Knyt elementerne i BIM-fremviseren, eller giv posten en enhed, som modellen måler (m, m2, m3, kg, stk)."
+  },
+  "cost_types": {
+    "position_unsplit": {
+      "fail": "{line} har ingen ressourcer, så hele budgettet gik til Andet",
+      "suggestion": "Tilføj postens ressourcer, eller flyt beløbet til den rigtige omkostningstype"
+    },
+    "unknown_type": {
+      "fail": "{line} har kategorien \"{category}\", som ikke er en omkostningstype",
+      "suggestion": "Sæt linjen til arbejdsløn, materialer, materiel, underentreprise eller andet"
+    }
   }
 }

@@ -884,6 +884,14 @@
     "receipt_inspection_closed": {
       "fail": "発注{po}の入荷記録{receipt}の受入検査が、まだ合格していません",
       "suggestion": "検査を完了するか、検査前に支払いが認められる理由を記録してください"
+    },
+    "po_line_budget_line": {
+      "fail": "明細 {line} は予算行（原価コードと原価区分）に計上されていません",
+      "suggestion": "この明細が計上される予算行を選んでください"
+    },
+    "po_line_budget_type_known": {
+      "fail": "明細 {line} は区分「{category}」の予算行に計上されていますが、これは原価区分ではありません",
+      "suggestion": "明細を労務費、材料費、機械費、外注費、その他のいずれかの予算行に計上してください"
     }
   },
   "subcontract": {
@@ -984,6 +992,10 @@
     "payment_discount_reconciles": {
       "fail": "支払割引は {discount} ですが、支払額に合意した率を掛けると {expected} です",
       "suggestion": "合意した率と支払額から割引を再計算してください。"
+    },
+    "agreement_budget_line": {
+      "fail": "契約は既知の原価区分を持つ予算行に計上されていません",
+      "suggestion": "この下請契約が計上される予算行を選んでください"
     }
   },
   "submittal": {
@@ -2932,5 +2944,15 @@
       "suggestion": "BIM ビューアで要素をリンクするか、モデルが計測する単位（m、m2、m3、kg、個）を明細に設定してください。"
     },
     "suggestion": "BIM ビューアで要素をリンクするか、モデルが計測する単位（m、m2、m3、kg、個）を明細に設定してください。"
+  },
+  "cost_types": {
+    "position_unsplit": {
+      "fail": "{line} には資源がないため、予算全額がその他に入りました",
+      "suggestion": "項目の資源を追加するか、金額を正しい原価区分に移してください"
+    },
+    "unknown_type": {
+      "fail": "{line} の区分は「{category}」で、原価区分ではありません",
+      "suggestion": "行を労務費、材料費、機械費、外注費、その他のいずれかに設定してください"
+    }
   }
 }

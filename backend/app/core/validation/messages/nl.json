@@ -884,6 +884,14 @@
     "receipt_inspection_closed": {
       "fail": "De inkomende keuring van goederenontvangst {receipt} bij bestelling {po} is nog niet geslaagd",
       "suggestion": "Rond de keuring af, of leg vast waarom het materiaal al vóór de keuring betaald mag worden"
+    },
+    "po_line_budget_line": {
+      "fail": "Regel {line} is niet geboekt op een budgetregel (kostencode en kostensoort)",
+      "suggestion": "Kies de budgetregel waarop deze regel verplicht"
+    },
+    "po_line_budget_type_known": {
+      "fail": "Regel {line} is geboekt op een budgetregel met categorie \"{category}\", die geen kostensoort is",
+      "suggestion": "Boek de regel op een budgetregel van het type arbeid, materiaal, materieel, onderaanneming of overig"
     }
   },
   "subcontract": {
@@ -984,6 +992,10 @@
     "payment_discount_reconciles": {
       "fail": "De betalingskorting is {discount}, maar het afgesproken percentage van het te betalen bedrag geeft {expected}",
       "suggestion": "Herbereken de korting uit het afgesproken percentage en het te betalen bedrag."
+    },
+    "agreement_budget_line": {
+      "fail": "De overeenkomst is niet geboekt op een budgetregel met een bekende kostensoort",
+      "suggestion": "Kies de budgetregel waarop deze onderaanneming verplicht"
     }
   },
   "submittal": {
@@ -2932,5 +2944,15 @@
       "suggestion": "Koppel de elementen in de BIM-viewer of geef de post een eenheid die het model meet (m, m2, m3, kg, stuks)."
     },
     "suggestion": "Koppel de elementen in de BIM-viewer of geef de post een eenheid die het model meet (m, m2, m3, kg, stuks)."
+  },
+  "cost_types": {
+    "position_unsplit": {
+      "fail": "{line} heeft geen middelen, dus het hele budget ging naar Overig",
+      "suggestion": "Voeg de middelen van de post toe of verplaats het bedrag naar de juiste kostensoort"
+    },
+    "unknown_type": {
+      "fail": "{line} heeft de categorie \"{category}\", die geen kostensoort is",
+      "suggestion": "Zet de regel op arbeid, materiaal, materieel, onderaanneming of overig"
+    }
   }
 }

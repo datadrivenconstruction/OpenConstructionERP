@@ -884,6 +884,14 @@
     "receipt_inspection_closed": {
       "fail": "{po} buyurtma bo'yicha {receipt} mahsulot qabul qilish hujjatining kirish nazorati hali o'tmagan",
       "suggestion": "Nazoratni yakunlang yoki materialga nazoratdan oldin to'lov qilinishi mumkin bo'lgan sababni qayd eting"
+    },
+    "po_line_budget_line": {
+      "fail": "{line} qatori byudjet qatoriga (xarajat kodi va xarajat turi) biriktirilmagan",
+      "suggestion": "Bu qator majburiyat oladigan byudjet qatorini tanlang"
+    },
+    "po_line_budget_type_known": {
+      "fail": "{line} qatori \"{category}\" toifali byudjet qatoriga biriktirilgan, bu xarajat turi emas",
+      "suggestion": "Qatorni mehnat, materiallar, texnika, subpudrat yoki boshqa turdagi byudjet qatoriga biriktiring"
     }
   },
   "subcontract": {
@@ -984,6 +992,10 @@
     "payment_discount_reconciles": {
       "fail": "Toʻlov chegirmasi {discount}, lekin toʻlanadigan summadan kelishilgan stavka {expected} beradi",
       "suggestion": "Chegirmani kelishilgan stavka va toʻlanadigan summadan qayta hisoblang."
+    },
+    "agreement_budget_line": {
+      "fail": "Shartnoma ma'lum xarajat turiga ega byudjet qatoriga biriktirilmagan",
+      "suggestion": "Bu subpudrat majburiyat oladigan byudjet qatorini tanlang"
     }
   },
   "submittal": {
@@ -2932,5 +2944,15 @@
       "suggestion": "Elementlarni BIM ko'ruvchida bog'lang yoki pozitsiyaga model o'lchaydigan birlikni bering (m, m2, m3, kg, dona)."
     },
     "suggestion": "Elementlarni BIM ko'ruvchida bog'lang yoki pozitsiyaga model o'lchaydigan birlikni bering (m, m2, m3, kg, dona)."
+  },
+  "cost_types": {
+    "position_unsplit": {
+      "fail": "{line} da resurslar yo'q, shuning uchun butun byudjet Boshqaga ketdi",
+      "suggestion": "Pozitsiya resurslarini qo'shing yoki summani to'g'ri xarajat turiga o'tkazing"
+    },
+    "unknown_type": {
+      "fail": "{line} toifasi \"{category}\", bu xarajat turi emas",
+      "suggestion": "Qatorga mehnat, materiallar, texnika, subpudrat yoki boshqani belgilang"
+    }
   }
 }

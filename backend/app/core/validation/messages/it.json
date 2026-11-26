@@ -884,6 +884,14 @@
     "receipt_inspection_closed": {
       "fail": "Il controllo in ingresso del documento di entrata merce {receipt} sull'ordine {po} non è ancora superato",
       "suggestion": "Completate il controllo, oppure registrate il motivo per cui il materiale può essere pagato prima"
+    },
+    "po_line_budget_line": {
+      "fail": "La riga {line} non è imputata a una riga di budget (codice e tipo di costo)",
+      "suggestion": "Scegli la riga di budget su cui impegna questa riga"
+    },
+    "po_line_budget_type_known": {
+      "fail": "La riga {line} è imputata a una riga di budget con categoria \"{category}\", che non è un tipo di costo",
+      "suggestion": "Imputa la riga a una riga di budget di tipo manodopera, materiale, attrezzatura, subappalto o altro"
     }
   },
   "subcontract": {
@@ -984,6 +992,10 @@
     "payment_discount_reconciles": {
       "fail": "Lo sconto per pagamento anticipato è {discount}, ma l'aliquota concordata sull'importo da pagare dà {expected}",
       "suggestion": "Ricalcola lo sconto dall'aliquota concordata e dall'importo da pagare."
+    },
+    "agreement_budget_line": {
+      "fail": "Il contratto non è imputato a una riga di budget con un tipo di costo noto",
+      "suggestion": "Scegli la riga di budget su cui impegna questo subappalto"
     }
   },
   "submittal": {
@@ -2932,5 +2944,15 @@
       "suggestion": "Collega gli elementi nel visualizzatore BIM oppure assegna alla voce un'unità che il modello misura (m, m2, m3, kg, pezzi)."
     },
     "suggestion": "Collega gli elementi nel visualizzatore BIM oppure assegna alla voce un'unità che il modello misura (m, m2, m3, kg, pezzi)."
+  },
+  "cost_types": {
+    "position_unsplit": {
+      "fail": "{line} non ha risorse, quindi tutto il budget è andato in Altro",
+      "suggestion": "Aggiungi le risorse della voce o sposta l'importo sul tipo di costo corretto"
+    },
+    "unknown_type": {
+      "fail": "{line} ha la categoria \"{category}\", che non è un tipo di costo",
+      "suggestion": "Imposta la riga su manodopera, materiale, attrezzatura, subappalto o altro"
+    }
   }
 }

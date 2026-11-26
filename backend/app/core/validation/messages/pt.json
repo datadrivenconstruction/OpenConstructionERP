@@ -884,6 +884,14 @@
     "receipt_inspection_closed": {
       "fail": "A inspeção de recebimento do material {receipt} do pedido {po} ainda não foi aprovada",
       "suggestion": "Conclua a inspeção ou registre o motivo pelo qual o material pode ser pago antes dela"
+    },
+    "po_line_budget_line": {
+      "fail": "A linha {line} não está atribuída a uma linha de orçamento (código e tipo de custo)",
+      "suggestion": "Escolha a linha de orçamento a que esta linha se compromete"
+    },
+    "po_line_budget_type_known": {
+      "fail": "A linha {line} está atribuída a uma linha de orçamento com a categoria \"{category}\", que não é um tipo de custo",
+      "suggestion": "Atribua a linha a uma linha de orçamento do tipo mão de obra, material, equipamento, subempreitada ou outros"
     }
   },
   "subcontract": {
@@ -984,6 +992,10 @@
     "payment_discount_reconciles": {
       "fail": "O desconto por pronto pagamento é {discount}, mas a taxa acordada sobre o valor a pagar dá {expected}",
       "suggestion": "Recalcule o desconto a partir da taxa acordada e do valor a pagar."
+    },
+    "agreement_budget_line": {
+      "fail": "O contrato não está atribuído a uma linha de orçamento com um tipo de custo conhecido",
+      "suggestion": "Escolha a linha de orçamento a que esta subempreitada se compromete"
     }
   },
   "submittal": {
@@ -2932,5 +2944,15 @@
       "suggestion": "Ligue os elementos no visualizador BIM ou dê ao item uma unidade que o modelo mede (m, m2, m3, kg, unidades)."
     },
     "suggestion": "Ligue os elementos no visualizador BIM ou dê ao item uma unidade que o modelo mede (m, m2, m3, kg, unidades)."
+  },
+  "cost_types": {
+    "position_unsplit": {
+      "fail": "{line} não tem recursos, por isso todo o orçamento foi para Outros",
+      "suggestion": "Adicione os recursos do item ou mova o valor para o tipo de custo correto"
+    },
+    "unknown_type": {
+      "fail": "{line} tem a categoria \"{category}\", que não é um tipo de custo",
+      "suggestion": "Defina a linha como mão de obra, material, equipamento, subempreitada ou outros"
+    }
   }
 }
