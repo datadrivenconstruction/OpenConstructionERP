@@ -7,7 +7,7 @@ from app.core.module_loader import ModuleManifest
 manifest = ModuleManifest(
     name="oe_cost_benchmarks",
     version="1.0.0",
-    display_name="Past Project Benchmarks",
+    display_name="Past project benchmarks",
     description=(
         "Benchmarks from the company's own completed projects: final cost per m2 GFA and per "
         "functional unit and by element group (DIN 276, NRM 1, MasterFormat, Uniformat), normalised "
