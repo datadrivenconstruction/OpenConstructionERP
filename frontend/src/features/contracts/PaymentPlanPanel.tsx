@@ -67,6 +67,7 @@ import {
   type PaymentPlanLine,
 } from './api';
 import { PaymentPlanLineForm, kindLabel, triggerLabel } from './PaymentPlanLineForm';
+import { useRoleReason } from '@/shared/lib/permissionReason';
 
 /** The `error` code a 409 / 422 from the raise-claim route carries, if any. */
 function errorCode(err: unknown): string | null {
@@ -227,7 +228,9 @@ export function PaymentPlanPanel({
   const addToast = useToastStore((s) => s.addToast);
   const canCreate = useHasPermission('contracts.create');
   const canUpdate = useHasPermission('contracts.update');
+  const canUpdateReason = useRoleReason(canUpdate, 'editor');
   const canDelete = useHasPermission('contracts.delete');
+  const canDeleteReason = useRoleReason(canDelete, 'manager');
   const canClaim = useHasPermission('contracts.submit_claim');
 
   const [editing, setEditing] = useState<string | 'new' | null>(null);
@@ -437,8 +440,8 @@ export function PaymentPlanPanel({
                     {t('contracts.plan_raise_claim', { defaultValue: 'Create claim' })}
                   </Button>
                 )}
-                {canUpdate && line.status === 'pending' && (
-                  <Button
+                {line.status === 'pending' && (
+                  <Button disabledReason={canUpdateReason}
                     variant="ghost"
                     size="sm"
                     onClick={() => reachMut.mutate(line.id)}
@@ -451,26 +454,22 @@ export function PaymentPlanPanel({
                     {t('contracts.plan_mark_reached', { defaultValue: 'Mark as reached' })}
                   </Button>
                 )}
-                {canUpdate && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    icon={<Pencil size={14} />}
-                    onClick={() => setEditing(line.id)}
-                  >
-                    {t('common.edit', { defaultValue: 'Edit' })}
-                  </Button>
-                )}
-                {canDelete && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    icon={<Trash2 size={14} />}
-                    aria-label={t('contracts.plan_delete', { defaultValue: 'Delete instalment' })}
-                    onClick={() => setPendingDelete(line)}
-                    disabled={deleteMut.isPending}
-                  />
-                )}
+                <Button disabledReason={canUpdateReason}
+                  variant="ghost"
+                  size="sm"
+                  icon={<Pencil size={14} />}
+                  onClick={() => setEditing(line.id)}
+                >
+                  {t('common.edit', { defaultValue: 'Edit' })}
+                </Button>
+                <Button disabledReason={canDeleteReason}
+                  variant="ghost"
+                  size="sm"
+                  icon={<Trash2 size={14} />}
+                  aria-label={t('contracts.plan_delete', { defaultValue: 'Delete instalment' })}
+                  onClick={() => setPendingDelete(line)}
+                  disabled={deleteMut.isPending}
+                />
               </div>
             )}
 

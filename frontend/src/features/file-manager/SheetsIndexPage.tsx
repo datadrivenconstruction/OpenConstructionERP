@@ -32,6 +32,7 @@ import {
 import { InsightsPanel, InsightsToggleButton, useModuleInsights } from '@/features/insights';
 import { RequiresProject } from '@/shared/auth/RequiresProject';
 import { apiGet, type Page } from '@/shared/lib/api';
+import { useRoleReason } from '@/shared/lib/permissionReason';
 import { useHasPermission } from '@/shared/lib/permissionGates';
 import { fetchProjectList } from '@/shared/lib/projectList';
 import { ConfirmDialog } from '@/shared/ui/ConfirmDialog';
@@ -284,6 +285,7 @@ export function SheetsIndexPage() {
   const [rereadResult, setRereadResult] = useState<SheetRereadSummary | null>(null);
   const [rereadError, setRereadError] = useState<string | null>(null);
   const canEdit = useHasPermission('documents.update');
+  const canEditReason = useRoleReason(canEdit, 'editor');
   const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set());
   const [bulkError, setBulkError] = useState<string | null>(null);
   // One input for the whole page - both triggers open it. A second one would
@@ -635,8 +637,8 @@ export function SheetsIndexPage() {
               {t('sheets.filter_current_only', { defaultValue: 'Current revisions only' })}
             </label>
             <div className="sm:ms-auto flex flex-wrap items-center gap-2">
-              {canEdit && reviewCount > 0 && (
-                <Button
+              {reviewCount > 0 && (
+                <Button disabledReason={canEditReason}
                   variant="secondary"
                   icon={<CheckCheck size={14} />}
                   loading={confirmAllMutation.isPending}
@@ -653,8 +655,8 @@ export function SheetsIndexPage() {
                   })}
                 </Button>
               )}
-              {canEdit && sheets.length > 0 && (
-                <Button
+              {sheets.length > 0 && (
+                <Button disabledReason={canEditReason}
                   variant="secondary"
                   icon={<RefreshCw size={14} />}
                   loading={rereadMutation.isPending}
@@ -897,9 +899,9 @@ export function SheetsIndexPage() {
                 <table className="oe-table">
                   <thead className="sticky top-0 z-10 backdrop-blur-sm">
                     <tr>
-                      {canEdit && (
+                      {(
                         <th className="w-10">
-                          <input
+                          <input disabled={!canEdit} title={canEditReason}
                             type="checkbox"
                             aria-label={t('sheets.select_all', { defaultValue: 'Select all sheets shown' })}
                             checked={filtered.length > 0 && filtered.every((s) => selectedIds.has(s.id))}
@@ -931,7 +933,7 @@ export function SheetsIndexPage() {
                       <th className="text-center">
                         {t('sheets.col_current', { defaultValue: 'Current?' })}
                       </th>
-                      {canEdit && reviewCount > 0 && (
+                      {reviewCount > 0 && (
                         <th className="text-center">
                           {t('sheets.col_review', { defaultValue: 'Review' })}
                         </th>
@@ -951,9 +953,9 @@ export function SheetsIndexPage() {
                           selectedIds.has(s.id) && 'bg-oe-blue/5',
                         )}
                       >
-                        {canEdit && (
+                        {(
                           <td className="w-10" onClick={(e) => e.stopPropagation()}>
-                            <input
+                            <input disabled={!canEdit} title={canEditReason}
                               type="checkbox"
                               aria-label={t('sheets.select_row', {
                                 defaultValue: 'Select sheet {{number}}',
@@ -1064,10 +1066,10 @@ export function SheetsIndexPage() {
                             </span>
                           )}
                         </td>
-                        {canEdit && reviewCount > 0 && (
+                        {reviewCount > 0 && (
                           <td className="text-center" onClick={(e) => e.stopPropagation()}>
                             {needsReview(s) && !ocrUnavailable(s) && (
-                              <Button
+                              <Button disabledReason={canEditReason}
                                 variant="secondary"
                                 size="sm"
                                 loading={confirmRowMutation.isPending && confirmRowMutation.variables === s.id}

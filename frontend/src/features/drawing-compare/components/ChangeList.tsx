@@ -24,6 +24,8 @@ import {
   type DrawingChange,
   type RemeasureResult,
 } from '../api';
+import { useRoleReason } from '@/shared/lib/permissionReason';
+import { DisabledGroup } from '@/shared/ui/DisabledGroup';
 
 const KIND_VARIANT: Record<ChangeKind, 'blue' | 'error' | 'warning' | 'purple'> = {
   added: 'blue',
@@ -145,6 +147,7 @@ interface ChangeRowProps {
 }
 
 function ChangeRow({ change, comparison, selected, onSelect, canWrite, onRemeasure }: ChangeRowProps) {
+  const canWriteReason = useRoleReason(canWrite, 'editor');
   const { t } = useTranslation();
   const addToast = useToastStore((s) => s.addToast);
   const handlers = useChangeMutation(comparison.id);
@@ -242,7 +245,7 @@ function ChangeRow({ change, comparison, selected, onSelect, canWrite, onRemeasu
           </div>
         </div>
       </div>
-      {canWrite && (
+      <DisabledGroup reason={canWriteReason}>
         <div className="mt-2 flex flex-col gap-1.5">
           <div className="flex flex-wrap gap-1">
             <Button
@@ -289,7 +292,7 @@ function ChangeRow({ change, comparison, selected, onSelect, canWrite, onRemeasu
             className="oe-textarea-sm w-full resize-y"
           />
         </div>
-      )}
+      </DisabledGroup>
       {!canWrite && change.comment && <p className="mt-1 text-xs text-content-secondary">{change.comment}</p>}
     </li>
   );

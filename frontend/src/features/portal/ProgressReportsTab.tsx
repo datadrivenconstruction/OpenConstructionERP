@@ -19,6 +19,7 @@ import {
   unpublishProgressReport,
   type ProgressReport,
 } from './api';
+import { useRoleReason } from '@/shared/lib/permissionReason';
 
 const inputCls =
   'oe-select w-full';
@@ -181,6 +182,7 @@ function ReportRow({ report }: { report: ProgressReport }) {
   const published = !!report.published_at;
   // Releasing to the client is a manager call; an editor sees the state only.
   const canPublish = useHasPermission('reporting.distribute');
+  const canPublishReason = useRoleReason(canPublish, 'manager');
 
   const visibilityMut = useMutation({
     mutationFn: () =>
@@ -315,25 +317,24 @@ function ReportRow({ report }: { report: ProgressReport }) {
       </td>
       <td className="px-4 py-2">
         <div className="flex items-center justify-end gap-1.5">
-          {canPublish && (
-          <button
-            type="button"
-            disabled={(!ready && !published) || visibilityMut.isPending}
-            onClick={() => visibilityMut.mutate()}
-            className="inline-flex items-center gap-1 rounded-md border border-border-light bg-surface-primary px-2.5 py-1 text-xs font-medium text-content-secondary transition-colors hover:border-oe-blue hover:text-oe-blue disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            {visibilityMut.isPending ? (
-              <Loader2 size={12} className="animate-spin" />
-            ) : published ? (
-              <EyeOff size={12} />
-            ) : (
-              <Eye size={12} />
-            )}
-            {published
-              ? t('portal.progress_unpublish', { defaultValue: 'Hide from client' })
-              : t('portal.progress_publish', { defaultValue: 'Show to client' })}
-          </button>
+        <button
+          type="button"
+          disabled={(!ready && !published) || visibilityMut.isPending || !canPublish}
+          title={canPublishReason}
+          onClick={() => visibilityMut.mutate()}
+          className="inline-flex items-center gap-1 rounded-md border border-border-light bg-surface-primary px-2.5 py-1 text-xs font-medium text-content-secondary transition-colors hover:border-oe-blue hover:text-oe-blue disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          {visibilityMut.isPending ? (
+            <Loader2 size={12} className="animate-spin" />
+          ) : published ? (
+            <EyeOff size={12} />
+          ) : (
+            <Eye size={12} />
           )}
+          {published
+            ? t('portal.progress_unpublish', { defaultValue: 'Hide from client' })
+            : t('portal.progress_publish', { defaultValue: 'Show to client' })}
+        </button>
           <button
             type="button"
             disabled={!ready || busy !== null}

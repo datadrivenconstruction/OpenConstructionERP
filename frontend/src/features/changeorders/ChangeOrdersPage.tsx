@@ -85,6 +85,7 @@ import { AccountChooser, overrideReason } from '@/features/costmodel/AccountChoo
 import { OverrideReasonDialog } from '@/features/costmodel/OverrideReasonDialog';
 import { problemOf } from '@/features/costmodel/structureApi';
 import { VideoHint } from '@/features/videos/VideoHint';
+import { DisabledGroup } from '@/shared/ui/DisabledGroup';
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
 
@@ -627,6 +628,7 @@ function AddItemDialog({
   const [costLineId, setCostLineId] = useState('');
   const [askReason, setAskReason] = useState(false);
   const canCost = useHasPermission('costmodel.write');
+  const canCostReason = useRoleReason(canCost, 'editor');
   const addToast = useToastStore((s) => s.addToast);
 
   // Pre-fill the form from a chosen BOQ position. The position's quantity/rate
@@ -797,7 +799,7 @@ function AddItemDialog({
             className={`oe-input-lg ${fieldCls}`}
           />
         </WideModalField>
-        {canCost && (
+        <DisabledGroup reason={canCostReason}>
           <WideModalField
             label={t('changeorders.cost_line', { defaultValue: 'Cost line' })}
             span={2}
@@ -818,7 +820,7 @@ function AddItemDialog({
               data-testid="co-item-cost-line"
             />
           </WideModalField>
-        )}
+        </DisabledGroup>
       </WideModalSection>
 
       <WideModalSection

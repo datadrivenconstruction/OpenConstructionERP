@@ -84,6 +84,7 @@ import {
 } from './api';
 import { LinearPlanDiagram, SheetPlanDiagram } from './CuttingDiagram';
 import { nextRef, oversizePieces, parsePastedPieces, pieceCount, positiveDecimal, uniqueRefs } from './cuttingMath';
+import { DisabledGroup } from '@/shared/ui/DisabledGroup';
 
 type TFn = (key: string, opts?: Record<string, unknown>) => string;
 
@@ -311,6 +312,7 @@ function JobList({
   onSelect: (id: string) => void;
   canEdit: boolean;
 }) {
+  const canEditReason = useRoleReason(canEdit, 'editor');
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
@@ -365,7 +367,7 @@ function JobList({
           ))}
         </ul>
       )}
-      {canEdit && (
+      <DisabledGroup reason={canEditReason}>
         <form
           className="space-y-2 border-t border-border-light pt-3"
           onSubmit={(e) => {
@@ -392,7 +394,7 @@ function JobList({
             {t('cutting.new_job', { defaultValue: 'New job' })}
           </Button>
         </form>
-      )}
+      </DisabledGroup>
     </Card>
   );
 }
@@ -402,6 +404,7 @@ function JobList({
 // ---------------------------------------------------------------------------
 
 function JobEditor({ jobId, projectId, canEdit }: { jobId: string; projectId: string; canEdit: boolean }) {
+  const canEditReason = useRoleReason(canEdit, 'editor');
   const { t, i18n } = useTranslation();
   const editReason = useRoleReason(canEdit, 'editor');
   const queryClient = useQueryClient();
@@ -544,7 +547,9 @@ function JobEditor({ jobId, projectId, canEdit }: { jobId: string; projectId: st
           <h3 className="oe-card-title">
             {t('cutting.pieces_title', { defaultValue: 'Cut list, pieces: {{n}}', n: pieceCount(pieces) })}
           </h3>
-          {canEdit && <ImportBar job={job} projectId={projectId} onImported={onImported} onError={onError} />}
+          <DisabledGroup reason={canEditReason}>
+            <ImportBar job={job} projectId={projectId} onImported={onImported} onError={onError} />
+          </DisabledGroup>
         </div>
         <PiecesTable
           kind={job.kind}
@@ -570,7 +575,9 @@ function JobEditor({ jobId, projectId, canEdit }: { jobId: string; projectId: st
       <Card className="space-y-3 p-4">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h3 className="oe-card-title">{t('cutting.stock_title', { defaultValue: 'Stock on offer' })}</h3>
-          {canEdit && <InventoryPicker job={job} projectId={projectId} onAdded={refresh} onError={onError} />}
+          <DisabledGroup reason={canEditReason}>
+            <InventoryPicker job={job} projectId={projectId} onAdded={refresh} onError={onError} />
+          </DisabledGroup>
         </div>
         <StocksTable
           kind={job.kind}
@@ -625,6 +632,7 @@ function JobEditor({ jobId, projectId, canEdit }: { jobId: string; projectId: st
 // ---------------------------------------------------------------------------
 
 function SettingsForm({ job, canEdit, onSaved }: { job: CuttingJob; canEdit: boolean; onSaved: (job: CuttingJob) => void }) {
+  const canEditReason = useRoleReason(canEdit, 'editor');
   const { t } = useTranslation();
   const addToast = useToastStore((s) => s.addToast);
   const [form, setForm] = useState<JobSettings>(() => settingsOf(job));
@@ -689,7 +697,7 @@ function SettingsForm({ job, canEdit, onSaved }: { job: CuttingJob; canEdit: boo
               {t('cutting.linked', { defaultValue: 'Linked: {{id}}', id: form.boq_position_id })}
             </div>
           )}
-          {canEdit && (
+          <DisabledGroup reason={canEditReason}>
             <div className="flex flex-wrap gap-2">
               <BOQPicker projectId={job.project_id} selectedBoqId={boqId} onSelectBoq={setBoqId} showProjectSelector={false} />
               {positionsQuery.data && (
@@ -710,7 +718,7 @@ function SettingsForm({ job, canEdit, onSaved }: { job: CuttingJob; canEdit: boo
                 </select>
               )}
             </div>
-          )}
+          </DisabledGroup>
         </div>
         <div className="space-y-1 text-xs text-content-secondary">
           <span>{t('cutting.link_requisition', { defaultValue: 'Requisition line to update (draft)' })}</span>
@@ -719,7 +727,7 @@ function SettingsForm({ job, canEdit, onSaved }: { job: CuttingJob; canEdit: boo
               {t('cutting.linked', { defaultValue: 'Linked: {{id}}', id: form.procurement_req_item_id })}
             </div>
           )}
-          {canEdit && (
+          <DisabledGroup reason={canEditReason}>
             <div className="flex flex-wrap gap-2">
               <select
                 className="oe-select"
@@ -750,7 +758,7 @@ function SettingsForm({ job, canEdit, onSaved }: { job: CuttingJob; canEdit: boo
                 </select>
               )}
             </div>
-          )}
+          </DisabledGroup>
         </div>
       </div>
       {canEdit && changed && (
@@ -812,6 +820,7 @@ function PiecesTable({
   canEdit: boolean;
   onChange: (rows: CuttingPiece[]) => void;
 }) {
+  const canEditReason = useRoleReason(canEdit, 'editor');
   const { t } = useTranslation();
   const editReason = useRoleReason(canEdit, 'editor');
   const [paste, setPaste] = useState('');
@@ -860,16 +869,14 @@ function PiecesTable({
                 )}
                 <td>{cellInput(p.label, (v) => set(i, { label: v }), t('cutting.col_label', { defaultValue: 'Description' }), !canEdit)}</td>
                 <td className="w-8">
-                  {canEdit && (
-                    <button
-                      type="button"
-                      onClick={() => onChange(pieces.filter((_, j) => j !== i))}
-                      aria-label={t('cutting.remove_row', { defaultValue: 'Remove row' })}
-                      className="text-content-tertiary hover:text-semantic-error"
-                    >
-                      <Trash2 size={14} />
-                    </button>
-                  )}
+                  <button disabled={!canEdit} title={canEditReason}
+                    type="button"
+                    onClick={() => onChange(pieces.filter((_, j) => j !== i))}
+                    aria-label={t('cutting.remove_row', { defaultValue: 'Remove row' })}
+                    className="text-content-tertiary hover:text-semantic-error"
+                  >
+                    <Trash2 size={14} />
+                  </button>
                 </td>
               </tr>
             ))}
@@ -939,6 +946,7 @@ function StocksTable({
   canEdit: boolean;
   onChange: (rows: CuttingStock[]) => void;
 }) {
+  const canEditReason = useRoleReason(canEdit, 'editor');
   const { t } = useTranslation();
   const set = (i: number, patch: Partial<CuttingStock>) => onChange(stocks.map((s, j) => (j === i ? { ...s, ...patch } : s)));
   return (
@@ -988,46 +996,42 @@ function StocksTable({
                 </td>
                 <td>{cellInput(s.label, (v) => set(i, { label: v }), t('cutting.col_label', { defaultValue: 'Description' }), !canEdit)}</td>
                 <td className="w-8">
-                  {canEdit && (
-                    <button
-                      type="button"
-                      onClick={() => onChange(stocks.filter((_, j) => j !== i))}
-                      aria-label={t('cutting.remove_row', { defaultValue: 'Remove row' })}
-                      className="text-content-tertiary hover:text-semantic-error"
-                    >
-                      <Trash2 size={14} />
-                    </button>
-                  )}
+                  <button disabled={!canEdit} title={canEditReason}
+                    type="button"
+                    onClick={() => onChange(stocks.filter((_, j) => j !== i))}
+                    aria-label={t('cutting.remove_row', { defaultValue: 'Remove row' })}
+                    className="text-content-tertiary hover:text-semantic-error"
+                  >
+                    <Trash2 size={14} />
+                  </button>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-      {canEdit && (
-        <Button
-          variant="ghost"
-          size="sm"
-          icon={<Plus size={14} />}
-          onClick={() =>
-            onChange([
-              ...stocks,
-              {
-                ref: nextRef(stocks, 'S'),
-                label: '',
-                length_mm: kind === 'sheet' ? '2500' : '12000',
-                width_mm: kind === 'sheet' ? '1250' : null,
-                unit_cost: '0',
-                available: null,
-                is_offcut: false,
-                inventory_item_id: null,
-              },
-            ])
-          }
-        >
-          {t('cutting.add_stock', { defaultValue: 'Add stock size' })}
-        </Button>
-      )}
+      <Button disabledReason={canEditReason}
+        variant="ghost"
+        size="sm"
+        icon={<Plus size={14} />}
+        onClick={() =>
+          onChange([
+            ...stocks,
+            {
+              ref: nextRef(stocks, 'S'),
+              label: '',
+              length_mm: kind === 'sheet' ? '2500' : '12000',
+              width_mm: kind === 'sheet' ? '1250' : null,
+              unit_cost: '0',
+              available: null,
+              is_offcut: false,
+              inventory_item_id: null,
+            },
+          ])
+        }
+      >
+        {t('cutting.add_stock', { defaultValue: 'Add stock size' })}
+      </Button>
     </div>
   );
 }
@@ -1340,6 +1344,7 @@ function PlanPanel({
   onChanged: () => void;
 }) {
   const { t } = useTranslation();
+  const canEditReason = useRoleReason(canEdit, 'editor');
   const addToast = useToastStore((s) => s.addToast);
   const [showProposal, setShowProposal] = useState(false);
   const unit = plan.kind === 'sheet' ? 'm2' : 'm';
@@ -1399,13 +1404,13 @@ function PlanPanel({
           <Button variant="secondary" size="sm" icon={<Download size={14} />} onClick={() => void downloadPlan(plan.id, 'xlsx', locale)}>
             {t('cutting.export_xlsx', { defaultValue: 'Workbook' })}
           </Button>
-          {canEdit && (job.boq_position_id || job.procurement_req_item_id) && (
-            <Button size="sm" onClick={() => setShowProposal((v) => !v)}>
+          {(job.boq_position_id || job.procurement_req_item_id) && (
+            <Button size="sm" disabledReason={canEditReason} onClick={() => setShowProposal((v) => !v)}>
               {t('cutting.propose', { defaultValue: 'Propose quantities' })}
             </Button>
           )}
-          {canEdit && !plan.inventory_synced_at && (plan.offcuts.length > 0 || plan.stock_usage.some((u) => u.is_offcut)) && (
-            <Button variant="secondary" size="sm" icon={<PackageOpen size={14} />} loading={returnMut.isPending} onClick={() => returnMut.mutate()}>
+          {!plan.inventory_synced_at && (plan.offcuts.length > 0 || plan.stock_usage.some((u) => u.is_offcut)) && (
+            <Button variant="secondary" size="sm" disabledReason={canEditReason} icon={<PackageOpen size={14} />} loading={returnMut.isPending} onClick={() => returnMut.mutate()}>
               {t('cutting.return_offcuts', { defaultValue: 'Book offcuts in inventory' })}
             </Button>
           )}

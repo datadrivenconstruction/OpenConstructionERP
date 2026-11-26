@@ -57,6 +57,8 @@ import {
   type ResourceIndexValue,
   type WorkedExampleLabels,
 } from './resourceIndexApi';
+import { useRoleReason } from '@/shared/lib/permissionReason';
+import { DisabledGroup } from '@/shared/ui/DisabledGroup';
 
 const QK = {
   indices: ['price-index', 'resource-index', 'indices'] as const,
@@ -1086,6 +1088,7 @@ function ReferenceData({
   // server; a person without it reads the tables and is not offered controls
   // that could only answer 403.
   const canManage = useHasPermission('price_index.manage');
+  const canManageReason = useRoleReason(canManage, 'editor');
   const onError = (e: unknown) =>
     addToast({ type: 'error', title: t('common.error', { defaultValue: 'Error' }), message: getErrorMessage(e) });
   const refresh = () => {
@@ -1200,16 +1203,14 @@ function ReferenceData({
                     )}
                   </td>
                   <td className="text-right">
-                    {canManage && (
-                      <button
-                        type="button"
-                        className="rounded p-1 text-content-tertiary hover:text-semantic-error"
-                        aria-label={t('common.delete', { defaultValue: 'Delete' })}
-                        onClick={() => deleteIdx.mutate(i.id)}
-                      >
-                        <Trash2 className="h-4 w-4" aria-hidden />
-                      </button>
-                    )}
+                    <button disabled={!canManage} title={canManageReason}
+                      type="button"
+                      className="rounded p-1 text-content-tertiary hover:text-semantic-error"
+                      aria-label={t('common.delete', { defaultValue: 'Delete' })}
+                      onClick={() => deleteIdx.mutate(i.id)}
+                    >
+                      <Trash2 className="h-4 w-4" aria-hidden />
+                    </button>
                   </td>
                 </tr>
               ))}
@@ -1221,7 +1222,7 @@ function ReferenceData({
             </p>
           )}
         </div>
-        {canManage && (
+        <DisabledGroup reason={canManageReason}>
           <>
             <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
               <Input
@@ -1259,7 +1260,7 @@ function ReferenceData({
               {t('price_index.ri.add_index', { defaultValue: 'Add index' })}
             </Button>
           </>
-        )}
+        </DisabledGroup>
       </Card>
 
       <Card>
@@ -1316,23 +1317,21 @@ function ReferenceData({
                     )}
                   </td>
                   <td className="text-right">
-                    {canManage && (
-                      <button
-                        type="button"
-                        className="rounded p-1 text-content-tertiary hover:text-semantic-error"
-                        aria-label={t('common.delete', { defaultValue: 'Delete' })}
-                        onClick={() => deleteNorm.mutate(n.id)}
-                      >
-                        <Trash2 className="h-4 w-4" aria-hidden />
-                      </button>
-                    )}
+                    <button disabled={!canManage} title={canManageReason}
+                      type="button"
+                      className="rounded p-1 text-content-tertiary hover:text-semantic-error"
+                      aria-label={t('common.delete', { defaultValue: 'Delete' })}
+                      onClick={() => deleteNorm.mutate(n.id)}
+                    >
+                      <Trash2 className="h-4 w-4" aria-hidden />
+                    </button>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
-        {canManage && (
+        <DisabledGroup reason={canManageReason}>
           <>
             <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
               <Input
@@ -1370,7 +1369,7 @@ function ReferenceData({
               {t('price_index.ri.add_norm', { defaultValue: 'Add work type' })}
             </Button>
           </>
-        )}
+        </DisabledGroup>
       </Card>
     </div>
   );

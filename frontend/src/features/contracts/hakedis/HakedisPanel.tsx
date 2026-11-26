@@ -65,6 +65,8 @@ import { DERIVED_REASONS, TAX_SET_REASONS, reasonSentence, type ReasonContext } 
 import { CHOICE_OF_FIGURE, HakedisSummaryTable } from './HakedisSummaryTable';
 import { HakedisTaxes } from './HakedisTaxes';
 import { HakedisWorksTable } from './HakedisWorksTable';
+import { roleReasonText } from '@/shared/lib/permissionReason';
+import { DisabledGroup } from '@/shared/ui/DisabledGroup';
 
 /** Rules whose finding is already said by a line or by the tax block. */
 const FINDINGS_SAID_ELSEWHERE: readonly string[] = [
@@ -149,6 +151,7 @@ export function HakedisPanel({ source, enabled = true, className }: HakedisPanel
   if (!doc || !context) return null;
 
   const canEdit = doc.editable && rankOf(role) >= ROLE_RANK.editor;
+  const canEditReason = rankOf(role) >= ROLE_RANK.editor ? undefined : roleReasonText(t, 'editor');
   // A refusal recorded before the certificate was completed says nothing once
   // the server calls it ready, or once it has been certified.
   const refusal = !doc.frozen && !doc.can_certify ? (refusalQ.data ?? null) : null;
@@ -419,13 +422,13 @@ export function HakedisPanel({ source, enabled = true, className }: HakedisPanel
         </div>
       </div>
 
-      {canEdit && (
+      <DisabledGroup reason={canEditReason}>
         <label className="mt-3 flex items-start gap-2 text-sm text-content-primary">
           <input
             type="checkbox"
             className="mt-1"
             checked={doc.options.is_final}
-            disabled={finalMut.isPending}
+            disabled={finalMut.isPending || !doc.editable}
             onChange={(e) => finalMut.mutate(e.target.checked)}
             data-testid="hakedis-final-toggle"
           />
@@ -433,7 +436,7 @@ export function HakedisPanel({ source, enabled = true, className }: HakedisPanel
             {t('hakedis.options.is_final', { defaultValue: 'This is the final certificate of the contract' })}
           </span>
         </label>
-      )}
+      </DisabledGroup>
       {finalMut.isError && (
         <div className="mt-2">
           <RefusalNote t={t} refusal={readRefusal(finalMut.error)} />
