@@ -505,18 +505,19 @@ class EquipmentService:
             entity.next_due_meter = computed["next_due_meter"]
         return await self.schedule_repo.create(entity)
 
-    async def generate_due_work_orders(
+    async def due_schedules(
         self,
         equipment_id: uuid.UUID | None = None,
         lookahead_hours: float = 50.0,
-    ) -> list[MaintenanceWorkOrder]:
-        """Generate WO stubs for schedules within ``lookahead_hours`` of due.
+    ) -> list[tuple[MaintenanceSchedule, str]]:
+        """Schedules within ``lookahead_hours`` of due that have no open work order yet.
 
+        Read-only: returns ``(schedule, scheduled_for)`` pairs and writes nothing.
         For 'hours' / 'km' triggers, compares against Equipment.hour_meter /
         Equipment.odometer_km. For 'date' triggers, compares against today.
         """
         active_schedules = await self.schedule_repo.list_active()
-        created: list[MaintenanceWorkOrder] = []
+        due: list[tuple[MaintenanceSchedule, str]] = []
         today = date.today()
         today_iso = today.isoformat()
 
@@ -562,7 +563,17 @@ class EquipmentService:
             already_open = any(wo.schedule_id == schedule.id for wo in existing_q[0])
             if already_open:
                 continue
+            due.append((schedule, scheduled_for))
+        return due
 
+    async def generate_due_work_orders(
+        self,
+        equipment_id: uuid.UUID | None = None,
+        lookahead_hours: float = 50.0,
+    ) -> list[MaintenanceWorkOrder]:
+        """Create a work-order stub for every schedule ``due_schedules`` reports."""
+        created: list[MaintenanceWorkOrder] = []
+        for schedule, scheduled_for in await self.due_schedules(equipment_id, lookahead_hours):
             wo = MaintenanceWorkOrder(
                 equipment_id=schedule.equipment_id,
                 schedule_id=schedule.id,

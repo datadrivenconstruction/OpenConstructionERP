@@ -906,7 +906,7 @@ async def post_goods_receipt(
 @router.get(
     "/migration/preview",
     response_model=MigrationPreview,
-    dependencies=[Depends(RequirePermission("supplier_catalogs.po.create"))],
+    dependencies=[Depends(RequirePermission("supplier_catalogs.vendor.read"))],
 )
 async def migration_preview(
     user_id: CurrentUserId,
