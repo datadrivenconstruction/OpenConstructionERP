@@ -16,6 +16,7 @@ import { useTranslation } from 'react-i18next';
 import { Trash2, Plus } from 'lucide-react';
 
 import { Button } from '@/shared/ui/Button';
+import { useRoleGate } from '@/shared/lib/useRoleGate';
 import { WideModal } from '@/shared/ui/WideModal';
 import { useToastStore } from '@/stores/useToastStore';
 
@@ -55,6 +56,7 @@ export function ClashRuleEditor({
     queryFn: () => clashApi.listRules(projectId, runId),
     enabled: open && !!projectId && !!runId,
   });
+  const manage = useRoleGate('manager');
 
   // Editor state — initial value seeded once from the server payload,
   // then user-controlled until Save.
@@ -112,6 +114,7 @@ export function ClashRuleEditor({
           </Button>
           <Button
             variant="primary"
+            disabledReason={manage.reason}
             disabled={!canSave || save.isPending}
             onClick={() => save.mutate()}
             loading={save.isPending}

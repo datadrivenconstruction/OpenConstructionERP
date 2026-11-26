@@ -11,6 +11,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { useAuthStore } from '@/stores/useAuthStore';
 import {
   render,
   screen,
@@ -85,6 +86,7 @@ function renderPanel(projectId = 'p-1') {
 
 beforeEach(() => {
   vi.clearAllMocks();
+  useAuthStore.setState({ userRole: 'admin' } as never);
   cleanup();
 });
 

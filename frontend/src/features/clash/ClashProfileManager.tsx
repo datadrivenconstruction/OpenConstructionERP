@@ -38,6 +38,7 @@ import {
 } from 'lucide-react';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
+import { useRoleGate } from '@/shared/lib/useRoleGate';
 import { Badge } from '@/shared/ui/Badge';
 import { Breadcrumb } from '@/shared/ui/Breadcrumb';
 import { PageHeader } from '@/shared/ui/PageHeader';
@@ -125,6 +126,7 @@ function formToBody(
 
 export default function ClashProfileManager() {
   const { t } = useTranslation();
+  const write = useRoleGate('editor');
   const qc = useQueryClient();
   const navigate = useNavigate();
   const [params] = useSearchParams();
@@ -327,7 +329,7 @@ export default function ClashProfileManager() {
                 })}
               </Button>
             </Link>
-            <Button size="sm" icon={<Plus className="w-4 h-4" />} onClick={startCreate}>
+            <Button size="sm" icon={<Plus className="w-4 h-4" />} disabledReason={write.reason} onClick={startCreate}>
               {t('clash.profiles.new', { defaultValue: 'New profile' })}
             </Button>
           </>
@@ -490,6 +492,8 @@ function ProfileDetail({
   onApply: () => void;
 }) {
   const { t } = useTranslation();
+  const write = useRoleGate('editor');
+  const manage = useRoleGate('manager');
   const rows: Array<[string, string]> = [
     [
       t('clash.profiles.field.type', { defaultValue: 'Clash type' }),
@@ -542,6 +546,7 @@ function ProfileDetail({
           <Button
             size="sm"
             icon={<Play className="w-4 h-4" />}
+            disabledReason={write.reason}
             onClick={onApply}
           >
             {t('clash.profiles.apply', { defaultValue: 'Apply' })}
@@ -550,6 +555,7 @@ function ProfileDetail({
             variant="secondary"
             size="sm"
             icon={<Pencil className="w-4 h-4" />}
+            disabledReason={write.reason}
             onClick={onEdit}
           >
             {t('common.edit', { defaultValue: 'Edit' })}
@@ -558,6 +564,7 @@ function ProfileDetail({
             variant="secondary"
             size="sm"
             icon={<Copy className="w-4 h-4" />}
+            disabledReason={write.reason}
             onClick={onDuplicate}
           >
             {t('common.duplicate', { defaultValue: 'Duplicate' })}
@@ -566,6 +573,7 @@ function ProfileDetail({
             variant="ghost"
             size="sm"
             icon={<Trash2 className="w-4 h-4" />}
+            disabledReason={manage.reason}
             onClick={onDelete}
           >
             {t('common.delete', { defaultValue: 'Delete' })}

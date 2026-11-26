@@ -90,6 +90,7 @@ import { useConfirm } from '@/shared/hooks/useConfirm';
 import { useTabKeyboardNav } from '@/shared/hooks/useTabKeyboardNav';
 import { useToastStore } from '@/stores/useToastStore';
 import { useAuthStore } from '@/stores/useAuthStore';
+import { useRoleGate } from '@/shared/lib/useRoleGate';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import {
   clashApi,
@@ -488,6 +489,8 @@ function DisciplineChip({ name }: { name: string }) {
 
 export function ClashDetectionPage() {
   const { t } = useTranslation();
+  const write = useRoleGate('editor');
+  const manage = useRoleGate('manager');
   const addToast = useToastStore((s) => s.addToast);
   const qc = useQueryClient();
   const { confirm, ...confirmProps } = useConfirm();
@@ -2541,6 +2544,7 @@ export function ClashDetectionPage() {
                     clearanceMisconfigured
                   }
                   icon={<Play className="h-4 w-4" />}
+                  disabledReason={write.reason}
                   onClick={() => runMut.mutate()}
                 >
                   {t('clash.run', { defaultValue: 'Run clash detection' })}
@@ -2586,6 +2590,7 @@ export function ClashDetectionPage() {
                   loading={saveProfileMut.isPending}
                   disabled={!saveProfileName.trim() || saveProfileMut.isPending}
                   icon={<Save className="h-4 w-4" />}
+                  disabledReason={write.reason}
                   onClick={() => saveProfileMut.mutate()}
                 >
                   {t('common.save', { defaultValue: 'Save' })}
@@ -2699,6 +2704,8 @@ export function ClashDetectionPage() {
                   </button>
                   <button
                     type="button"
+                    disabled={!manage.allowed}
+                    title={manage.reason}
                     aria-label={t('common.delete', {
                       defaultValue: 'Delete',
                     })}
@@ -2720,7 +2727,7 @@ export function ClashDetectionPage() {
                       if (!ok) return;
                       delMut.mutate(r.id);
                     }}
-                    className="text-content-tertiary hover:text-semantic-error"
+                    className="text-content-tertiary hover:text-semantic-error disabled:cursor-not-allowed disabled:opacity-40"
                   >
                     <Trash2 className="h-3.5 w-3.5" />
                   </button>
@@ -3241,6 +3248,7 @@ export function ClashDetectionPage() {
                       size="sm"
                       loading={importBcfMut.isPending}
                       icon={<FileUp className="h-4 w-4" />}
+                      disabledReason={write.reason}
                       onClick={() => bcfFileInputRef.current?.click()}
                     >
                       {t('clash.import_bcf', {
@@ -3904,6 +3912,7 @@ export function ClashDetectionPage() {
                                     return (
                                       <button
                                         type="button"
+                                        disabled={!write.allowed}
                                         onClick={() =>
                                           severityMut.mutate({
                                             id: r.id,
@@ -4851,6 +4860,7 @@ function StatusWorkflow({
   onChange: (s: string) => void;
   t: TFn;
 }) {
+  const write = useRoleGate('editor');
   const idx = STATUS_FLOW.indexOf(status as StatusOpt);
   const inFlow = idx >= 0;
   const terminal = !inFlow;
@@ -4865,7 +4875,8 @@ function StatusWorkflow({
             key={s}
             type="button"
             onClick={() => onChange(s)}
-            title={t(`clash.status.${s}`, { defaultValue: s })}
+            disabled={!write.allowed}
+            title={write.reason ?? t(`clash.status.${s}`, { defaultValue: s })}
             className={clsx(
               'h-6 rounded-full px-2 text-2xs font-medium capitalize transition-colors',
               isActive &&
@@ -4883,10 +4894,12 @@ function StatusWorkflow({
       })}
       <button
         type="button"
-        disabled={!next}
+        disabled={!next || !write.allowed}
         onClick={() => next && onChange(next)}
         title={
-          next
+          !write.allowed
+            ? write.reason
+            : next
             ? t('clash.status_advance', {
                 defaultValue: 'Advance to {{s}}',
                 s: t(`clash.status.${next}`, { defaultValue: next }),
@@ -4906,6 +4919,7 @@ function StatusWorkflow({
       </button>
       <select
         value={terminal ? status : ''}
+        disabled={!write.allowed}
         onChange={(e) => {
           if (e.target.value) onChange(e.target.value);
         }}
@@ -4913,7 +4927,7 @@ function StatusWorkflow({
           'oe-select-sm',
           terminal ? '' : '',
         )}
-        title={t('clash.status_terminal_picker', {
+        title={write.reason ?? t('clash.status_terminal_picker', {
           defaultValue: 'Pick a terminal status',
         })}
       >
@@ -4962,10 +4976,12 @@ function BulkActionsBar({
   onViewIn3D: () => void;
   t: TFn;
 }) {
+  const write = useRoleGate('editor');
+  const locked = busy || !write.allowed;
   const [assignee, setAssignee] = useState('');
   const [suppressReason, setSuppressReason] = useState('');
   return (
-    <div className="flex flex-wrap items-center gap-2 border-t border-oe-blue/30 bg-oe-blue/[0.05] p-3 text-xs">
+    <div title={write.reason} className="flex flex-wrap items-center gap-2 border-t border-oe-blue/30 bg-oe-blue/[0.05] p-3 text-xs">
       <span className="font-semibold text-oe-blue">
         {t('clash.bulk_selected', {
           defaultValue: '{{n}} selected - apply to all:',
@@ -4991,7 +5007,7 @@ function BulkActionsBar({
           {t('clash.bulk_severity', { defaultValue: 'Severity' })}
         </span>
         <select
-          disabled={busy}
+          disabled={locked}
           defaultValue=""
           onChange={(e) => {
             const v = e.target.value as ClashSeverity | '';
@@ -5015,7 +5031,7 @@ function BulkActionsBar({
           {t('clash.bulk_status', { defaultValue: 'Status' })}
         </span>
         <select
-          disabled={busy}
+          disabled={locked}
           defaultValue=""
           onChange={(e) => {
             const v = e.target.value;
@@ -5049,7 +5065,7 @@ function BulkActionsBar({
         <Button
           size="sm"
           variant="secondary"
-          disabled={busy}
+          disabled={locked}
           onClick={() => onSetAssignee(assignee)}
         >
           {t('clash.bulk_assign_apply', { defaultValue: 'Apply' })}

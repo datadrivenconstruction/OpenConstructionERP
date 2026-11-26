@@ -18,6 +18,7 @@ import { useTranslation } from 'react-i18next';
 import { Lightbulb, Check, X } from 'lucide-react';
 
 import { Button } from '@/shared/ui/Button';
+import { useRoleGate } from '@/shared/lib/useRoleGate';
 import { WideModal } from '@/shared/ui/WideModal';
 import { useToastStore } from '@/stores/useToastStore';
 
@@ -36,6 +37,7 @@ export function ClashRuleSuggestionBanner({
   const { t } = useTranslation();
   const qc = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
+  const manage = useRoleGate('manager');
   const [reviewOpen, setReviewOpen] = useState(false);
   const [dismissed, setDismissed] = useState<Set<string>>(new Set());
 
@@ -162,6 +164,7 @@ export function ClashRuleSuggestionBanner({
                     variant="primary"
                     icon={<Check size={14} />}
                     loading={apply.isPending}
+                    disabledReason={manage.reason}
                     onClick={() => apply.mutate(s)}
                   >
                     {t('clash.suggestions.apply', { defaultValue: 'Apply' })}
