@@ -3,6 +3,7 @@
 """BIM-LV container module manifest (DIN SPEC 91350)."""
 
 from app.core.module_loader import ModuleManifest
+from app.modules.bimlv.data_paths import DATA_PATHS
 
 manifest = ModuleManifest(
     name="oe_bimlv",
@@ -18,4 +19,5 @@ manifest = ModuleManifest(
     depends=["oe_boq", "oe_bim_hub"],
     auto_install=True,
     enabled=True,
+    data_paths=DATA_PATHS,
 )

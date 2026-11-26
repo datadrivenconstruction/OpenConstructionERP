@@ -3,6 +3,7 @@
 """Assemblies & Calculations module manifest."""
 
 from app.core.module_loader import ModuleManifest
+from app.modules.assemblies.data_paths import DATA_PATHS
 
 manifest = ModuleManifest(
     name="oe_assemblies",
@@ -20,4 +21,5 @@ manifest = ModuleManifest(
     depends=["oe_costs", "oe_fx"],
     auto_install=True,
     enabled=True,
+    data_paths=DATA_PATHS,
 )

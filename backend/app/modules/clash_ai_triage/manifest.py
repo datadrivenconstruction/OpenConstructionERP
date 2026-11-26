@@ -2,6 +2,7 @@
 """Clash AI Triage module manifest."""
 
 from app.core.module_loader import ModuleManifest
+from app.modules.clash_ai_triage.data_paths import DATA_PATHS
 
 manifest = ModuleManifest(
     name="oe_clash_ai_triage",
@@ -18,4 +19,5 @@ manifest = ModuleManifest(
     depends=["oe_clash", "oe_projects", "oe_ai"],
     auto_install=True,
     enabled=True,
+    data_paths=DATA_PATHS,
 )

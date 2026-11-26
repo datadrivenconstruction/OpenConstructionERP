@@ -2,6 +2,7 @@
 """Clash detection module manifest."""
 
 from app.core.module_loader import ModuleManifest
+from app.modules.clash.data_paths import DATA_PATHS
 
 manifest = ModuleManifest(
     name="oe_clash",
@@ -17,4 +18,5 @@ manifest = ModuleManifest(
     depends=["oe_projects", "oe_users", "oe_bim_hub", "oe_bcf"],
     auto_install=True,
     enabled=True,
+    data_paths=DATA_PATHS,
 )

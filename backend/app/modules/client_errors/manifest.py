@@ -3,6 +3,7 @@
 """Client-error sink module manifest."""
 
 from app.core.module_loader import ModuleManifest
+from app.modules.client_errors.data_paths import DATA_PATHS
 
 manifest = ModuleManifest(
     name="oe_client_errors",
@@ -18,4 +19,5 @@ manifest = ModuleManifest(
     depends=[],
     auto_install=True,
     enabled=True,
+    data_paths=DATA_PATHS,
 )

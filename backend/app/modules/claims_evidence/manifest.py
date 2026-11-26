@@ -3,6 +3,7 @@
 """Claims evidence-pack module manifest."""
 
 from app.core.module_loader import ModuleManifest
+from app.modules.claims_evidence.data_paths import DATA_PATHS
 
 manifest = ModuleManifest(
     name="oe_claims_evidence",
@@ -27,4 +28,5 @@ manifest = ModuleManifest(
     ],
     auto_install=True,
     enabled=True,
+    data_paths=DATA_PATHS,
 )

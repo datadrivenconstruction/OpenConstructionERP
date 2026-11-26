@@ -3,6 +3,7 @@
 """AI Estimate Builder module manifest."""
 
 from app.core.module_loader import ModuleManifest
+from app.modules.ai_estimator.data_paths import DATA_PATHS
 
 manifest = ModuleManifest(
     name="oe_ai_estimator",
@@ -27,4 +28,5 @@ manifest = ModuleManifest(
     ],
     auto_install=True,
     enabled=True,
+    data_paths=DATA_PATHS,
 )

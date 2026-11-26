@@ -3,6 +3,7 @@
 """Bid day module manifest."""
 
 from app.core.module_loader import ModuleManifest
+from app.modules.bid_day.data_paths import DATA_PATHS
 
 manifest = ModuleManifest(
     name="oe_bid_day",
@@ -22,4 +23,5 @@ manifest = ModuleManifest(
     optional_depends=["oe_fx", "oe_boq", "oe_collaboration_locks"],
     auto_install=True,
     enabled=True,
+    data_paths=DATA_PATHS,
 )

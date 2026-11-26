@@ -3,6 +3,7 @@
 """BCF (BIM Collaboration Format) module manifest."""
 
 from app.core.module_loader import ModuleManifest
+from app.modules.bcf.data_paths import DATA_PATHS
 
 manifest = ModuleManifest(
     name="oe_bcf",
@@ -17,4 +18,5 @@ manifest = ModuleManifest(
     depends=["oe_projects", "oe_users"],
     auto_install=True,
     enabled=True,
+    data_paths=DATA_PATHS,
 )

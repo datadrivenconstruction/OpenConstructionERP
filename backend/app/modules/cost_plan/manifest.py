@@ -3,6 +3,7 @@
 """Elemental cost plan module manifest."""
 
 from app.core.module_loader import ModuleManifest
+from app.modules.cost_plan.data_paths import DATA_PATHS
 
 manifest = ModuleManifest(
     name="oe_cost_plan",
@@ -22,4 +23,5 @@ manifest = ModuleManifest(
     depends=["oe_boq", "oe_projects"],
     auto_install=True,
     enabled=True,
+    data_paths=DATA_PATHS,
 )
