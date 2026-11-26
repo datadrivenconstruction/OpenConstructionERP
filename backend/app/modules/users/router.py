@@ -1172,7 +1172,7 @@ async def save_sidebar_layouts(
         cleaned = validate_layouts([item.model_dump() for item in data.layouts])
     except SidebarLayoutError as exc:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail={"code": exc.code, "message": str(exc)},
         ) from exc
     user = await service.get_user(uuid.UUID(user_id))
