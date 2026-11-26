@@ -884,6 +884,14 @@
     "receipt_inspection_closed": {
       "fail": "Inspeksi masuk untuk bukti penerimaan barang {receipt} pada pesanan {po} belum lulus",
       "suggestion": "Selesaikan inspeksi, atau catat alasan material boleh dibayar sebelum inspeksi selesai"
+    },
+    "po_line_budget_line": {
+      "fail": "Baris {line} belum dibebankan ke baris anggaran (kode biaya dan jenis biaya)",
+      "suggestion": "Pilih baris anggaran yang diikat oleh baris ini"
+    },
+    "po_line_budget_type_known": {
+      "fail": "Baris {line} dibebankan ke baris anggaran berkategori \"{category}\", yang bukan jenis biaya",
+      "suggestion": "Bebankan baris ke baris anggaran jenis upah, material, peralatan, subkontrak, atau lainnya"
     }
   },
   "subcontract": {
@@ -984,6 +992,10 @@
     "payment_discount_reconciles": {
       "fail": "Diskon pembayaran {discount}, tetapi tarif yang disepakati atas jumlah yang dibayar menghasilkan {expected}",
       "suggestion": "Hitung ulang diskon dari tarif yang disepakati dan jumlah yang dibayar."
+    },
+    "agreement_budget_line": {
+      "fail": "Perjanjian belum dibebankan ke baris anggaran dengan jenis biaya yang dikenal",
+      "suggestion": "Pilih baris anggaran yang diikat oleh subkontrak ini"
     }
   },
   "submittal": {
@@ -2932,5 +2944,15 @@
       "suggestion": "Tautkan elemen di penampil BIM, atau beri item satuan yang diukur model (m, m2, m3, kg, buah)."
     },
     "suggestion": "Tautkan elemen di penampil BIM, atau beri item satuan yang diukur model (m, m2, m3, kg, buah)."
+  },
+  "cost_types": {
+    "position_unsplit": {
+      "fail": "{line} tidak punya sumber daya, jadi seluruh anggarannya masuk ke Lainnya",
+      "suggestion": "Tambahkan sumber daya item atau pindahkan jumlahnya ke jenis biaya yang benar"
+    },
+    "unknown_type": {
+      "fail": "{line} berkategori \"{category}\", yang bukan jenis biaya",
+      "suggestion": "Atur baris menjadi upah, material, peralatan, subkontrak, atau lainnya"
+    }
   }
 }

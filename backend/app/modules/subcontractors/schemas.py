@@ -517,6 +517,8 @@ class AgreementCreate(BaseModel):
     requires_lien_waiver: bool = False
     prime_contract_id: UUID | None = None
     contract_id: UUID | None = None
+    # Cost-control budget line (cost code x cost type) the subcontract commits against.
+    budget_line_id: UUID | None = None
     notes: str | None = None
 
     @field_validator("currency")
@@ -576,6 +578,7 @@ class AgreementUpdate(BaseModel):
     requires_lien_waiver: bool | None = None
     prime_contract_id: UUID | None = None
     contract_id: UUID | None = None
+    budget_line_id: UUID | None = None
     status: str | None = Field(
         default=None,
         pattern=r"^(draft|active|completed|terminated)$",
@@ -606,6 +609,7 @@ class AgreementResponse(BaseModel):
     requires_lien_waiver: bool = False
     prime_contract_id: UUID | None = None
     contract_id: UUID | None = None
+    budget_line_id: UUID | None = None
     status: str = "draft"
     notes: str | None = None
     created_by: str | None = None

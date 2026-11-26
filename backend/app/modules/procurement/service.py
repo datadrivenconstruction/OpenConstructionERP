@@ -22,6 +22,7 @@ from decimal import ROUND_HALF_UP, Decimal, InvalidOperation
 from typing import Any
 
 from fastapi import HTTPException, status
+from sqlalchemy import select
 from sqlalchemy import update as sa_update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -967,6 +968,7 @@ class ProcurementService:
             data.project_id,
             [(item.cost_line_id, item.boq_position_id) for item in data.items],
         )
+        await self._refuse_foreign_budget_lines(data.project_id, data.items)
 
         explicit_po_number = data.po_number
         # Mirrors changeorders BUG-354: MAX(po_number)+1 is not atomic, so two
@@ -994,6 +996,7 @@ class ProcurementService:
                 wbs_id=item_data.wbs_id,
                 cost_category=item_data.cost_category,
                 cost_line_id=item_cost_line_ids[idx],
+                budget_line_id=item_data.budget_line_id,
                 requisition_item_id=item_data.requisition_item_id,
                 sort_order=item_data.sort_order if item_data.sort_order else idx,
                 required_certificate_type=item_data.required_certificate_type,
@@ -1244,6 +1247,7 @@ class ProcurementService:
                 [(item.cost_line_id, item.boq_position_id) for item in data.items],
             )
             await self._refuse_foreign_requisition_links(po, data.items)
+            await self._refuse_foreign_budget_lines(po.project_id, data.items)
 
         # The VAT rate drives the tax (issue #515). An absolute tax stated
         # without a rate detaches the order from the rate it had; a stated
@@ -1337,6 +1341,7 @@ class ProcurementService:
                     wbs_id=item_data.wbs_id,
                     cost_category=item_data.cost_category,
                     cost_line_id=item_cost_line_ids[idx],
+                    budget_line_id=item_data.budget_line_id,
                     requisition_item_id=item_data.requisition_item_id,
                     sort_order=item_data.sort_order if item_data.sort_order else idx,
                     required_certificate_type=item_data.required_certificate_type,
@@ -1915,16 +1920,46 @@ class ProcurementService:
                     "wbs_id": item.wbs_id,
                     "cost_category": item.cost_category,
                     "cost_line_id": (str(item.cost_line_id) if item.cost_line_id else None),
+                    "budget_line_id": (str(item.budget_line_id) if item.budget_line_id else None),
                     "sort_order": item.sort_order,
                 }
                 for item in sorted(po.items, key=lambda i: (i.sort_order, str(i.id)))
             ],
         }
 
+    async def _refuse_foreign_budget_lines(self, project_id: uuid.UUID, items: Sequence[Any]) -> None:
+        """422 when a line names a budget line that is not on the order's project."""
+        from app.modules.costmodel.budget_line_lookup import budget_line_on_project
+
+        for item in items:
+            budget_line_id = getattr(item, "budget_line_id", None)
+            if budget_line_id is not None and not await budget_line_on_project(
+                self.session, budget_line_id, project_id
+            ):
+                raise HTTPException(
+                    status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                    detail="The budget line must be a budget line on the same project as the order.",
+                )
+
+    async def _with_budget_line_types(self, payload: dict[str, Any]) -> dict[str, Any]:
+        """Add the cost type (budget line category) of each line's chosen budget line to the payload."""
+        items = payload.get("items") or []
+        ids = {uuid.UUID(str(it["budget_line_id"])) for it in items if it.get("budget_line_id")}
+        if not ids:
+            return payload
+        from app.modules.costmodel.models import BudgetLine
+
+        rows = await self.session.execute(select(BudgetLine.id, BudgetLine.category).where(BudgetLine.id.in_(ids)))
+        categories = {str(line_id): category for line_id, category in rows.all()}
+        for it in items:
+            if it.get("budget_line_id"):
+                it["budget_line_category"] = categories.get(str(it["budget_line_id"]))
+        return payload
+
     async def _validate_po(self, po: PurchaseOrder, *, operation: str) -> ValidationReport:
         """Run the ``procurement`` rule set against a purchase order."""
         return await validation_engine.validate(
-            data=self._validation_payload(po),
+            data=await self._with_budget_line_types(self._validation_payload(po)),
             rule_sets=[PROCUREMENT_RULE_SET],
             target_type="purchase_order",
             target_id=str(po.id),

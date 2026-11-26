@@ -1970,3 +1970,9 @@ router.include_router(_cashflow_forecast_router)
 from app.modules.costmodel.budget_ledger_router import router as _budget_ledger_router  # noqa: E402
 
 router.include_router(_budget_ledger_router)
+
+# ── Cost-type grid: budget and forecast per cost code x cost type ───────────
+
+from app.modules.costmodel.cost_type_router import router as _cost_type_router  # noqa: E402
+
+router.include_router(_cost_type_router)

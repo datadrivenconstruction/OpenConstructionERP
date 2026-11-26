@@ -884,6 +884,14 @@
     "receipt_inspection_closed": {
       "fail": "Controlul de intrare al recepției de marfă {receipt} de pe comanda {po} nu a fost încă trecut",
       "suggestion": "Finalizați controlul sau consemnați de ce materialul poate fi plătit înainte"
+    },
+    "po_line_budget_line": {
+      "fail": "Linia {line} nu este alocată unei linii de buget (cod și tip de cost)",
+      "suggestion": "Alegeți linia de buget pe care o angajează această linie"
+    },
+    "po_line_budget_type_known": {
+      "fail": "Linia {line} este alocată unei linii de buget cu categoria \"{category}\", care nu este un tip de cost",
+      "suggestion": "Alocați linia unei linii de buget de tip manoperă, material, utilaj, subcontractare sau altele"
     }
   },
   "subcontract": {
@@ -984,6 +992,10 @@
     "payment_discount_reconciles": {
       "fail": "Discountul pentru plată rapidă este {discount}, dar cota convenită din suma de plată dă {expected}",
       "suggestion": "Recalculați discountul din cota convenită și suma de plată."
+    },
+    "agreement_budget_line": {
+      "fail": "Contractul nu este alocat unei linii de buget cu un tip de cost cunoscut",
+      "suggestion": "Alegeți linia de buget pe care o angajează această subcontractare"
     }
   },
   "submittal": {
@@ -2932,5 +2944,15 @@
       "suggestion": "Legați elementele în vizualizatorul BIM sau dați articolului o unitate pe care modelul o măsoară (m, m2, m3, kg, buc)."
     },
     "suggestion": "Legați elementele în vizualizatorul BIM sau dați articolului o unitate pe care modelul o măsoară (m, m2, m3, kg, buc)."
+  },
+  "cost_types": {
+    "position_unsplit": {
+      "fail": "{line} nu are resurse, așa că tot bugetul a mers la Altele",
+      "suggestion": "Adăugați resursele articolului sau mutați suma pe tipul de cost corect"
+    },
+    "unknown_type": {
+      "fail": "{line} are categoria \"{category}\", care nu este un tip de cost",
+      "suggestion": "Setați linia pe manoperă, material, utilaj, subcontractare sau altele"
+    }
   }
 }

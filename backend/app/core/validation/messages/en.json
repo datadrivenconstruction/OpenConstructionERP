@@ -920,6 +920,14 @@
     "receipt_inspection_closed": {
       "fail": "The incoming inspection of goods receipt {receipt} on order {po} is not passed yet",
       "suggestion": "Complete the inspection, or record why the material may be paid before it"
+    },
+    "po_line_budget_line": {
+      "fail": "Line {line} is not booked to a budget line (cost code and cost type)",
+      "suggestion": "Pick the budget line this line commits against"
+    },
+    "po_line_budget_type_known": {
+      "fail": "Line {line} is booked to a budget line with the category \"{category}\", which is not a cost type",
+      "suggestion": "Book the line to a budget line of type labour, material, equipment, subcontract or other"
     }
   },
   "subcontract": {
@@ -1020,6 +1028,10 @@
     "payment_discount_reconciles": {
       "fail": "The payment discount is {discount}, but the agreed rate of the payable amount gives {expected}",
       "suggestion": "Recalculate the discount from the agreed rate and the payable amount."
+    },
+    "agreement_budget_line": {
+      "fail": "The agreement is not booked to a budget line with a known cost type",
+      "suggestion": "Pick the budget line this subcontract commits against"
     }
   },
   "submittal": {
@@ -2932,5 +2944,15 @@
       "suggestion": "Link the elements in the BIM viewer, or give the position a unit the model measures (m, m2, m3, kg, pieces)."
     },
     "suggestion": "Link the elements in the BIM viewer, or give the position a unit the model measures (m, m2, m3, kg, pieces)."
+  },
+  "cost_types": {
+    "position_unsplit": {
+      "fail": "{line} has no resources, so its whole budget went to Other",
+      "suggestion": "Add the position's resources, or move the amount to the right cost type"
+    },
+    "unknown_type": {
+      "fail": "{line} has the category \"{category}\", which is not a cost type",
+      "suggestion": "Set the line to labour, material, equipment, subcontract or other"
+    }
   }
 }

@@ -282,6 +282,11 @@ class SubcontractAgreement(Base):
     # is set the agreement carries the commitment and the contract does not.
     # Plain GUID with no ORM foreign key, like ``prime_contract_id``.
     contract_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, index=True)
+    # The cost-control budget line (cost code x cost type) this subcontract
+    # commits against. A live agreement without a contract twin commits its
+    # value there; with a twin the contract's lines carry the commitment. Plain
+    # GUID, no FK, per the cross-module convention.
+    budget_line_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, index=True)
     status: Mapped[str] = mapped_column(
         String(32),
         nullable=False,

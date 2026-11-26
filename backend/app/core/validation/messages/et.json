@@ -884,6 +884,14 @@
     "receipt_inspection_closed": {
       "fail": "Kaubasaadetise vastuvõtu {receipt} sisseveakontroll tellimusel {po} pole veel läbitud",
       "suggestion": "Viige kontroll lõpule või märkige, miks võib materjali eest enne kontrolli maksta"
+    },
+    "po_line_budget_line": {
+      "fail": "Rida {line} ei ole kirjendatud eelarvereale (kulukood ja kuluiik)",
+      "suggestion": "Valige eelarverida, mida see rida seob"
+    },
+    "po_line_budget_type_known": {
+      "fail": "Rida {line} on kirjendatud eelarvereale kategooriaga \"{category}\", mis ei ole kuluiik",
+      "suggestion": "Kirjendage rida eelarvereale tüübiga töö, materjal, masinad, alltöövõtt või muu"
     }
   },
   "subcontract": {
@@ -984,6 +992,10 @@
     "payment_discount_reconciles": {
       "fail": "Kassasoodustus on {discount}, kuid kokkulepitud määr makstavast summast annab {expected}",
       "suggestion": "Arvutage soodustus kokkulepitud määrast ja makstavast summast uuesti."
+    },
+    "agreement_budget_line": {
+      "fail": "Leping ei ole kirjendatud teadaoleva kuluiigiga eelarvereale",
+      "suggestion": "Valige eelarverida, mida see alltöövõtt seob"
     }
   },
   "submittal": {
@@ -2932,5 +2944,15 @@
       "suggestion": "Seo elemendid BIM-vaaturis või anna positsioonile ühik, mida mudel mõõdab (m, m2, m3, kg, tk)."
     },
     "suggestion": "Seo elemendid BIM-vaaturis või anna positsioonile ühik, mida mudel mõõdab (m, m2, m3, kg, tk)."
+  },
+  "cost_types": {
+    "position_unsplit": {
+      "fail": "{line} ei oma ressursse, seega läks kogu eelarve reale Muu",
+      "suggestion": "Lisage positsiooni ressursid või viige summa õigele kuluiigile"
+    },
+    "unknown_type": {
+      "fail": "{line} kategooria on \"{category}\", mis ei ole kuluiik",
+      "suggestion": "Määrake reale töö, materjal, masinad, alltöövõtt või muu"
+    }
   }
 }

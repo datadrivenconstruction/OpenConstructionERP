@@ -21,6 +21,7 @@ from pydantic import (
     model_validator,
 )
 
+from app.core.cost_types import to_cost_type
 from app.core.decimal_types import FiniteDecimal
 from app.modules.costs.buildup import buildup_rate as _buildup_rate
 from app.modules.costs.hazards import hazards_in as _hazards_in
@@ -1033,6 +1034,12 @@ class ResourcePriceRow(BaseModel):
     currency: str = Field(default="", description="ISO 4217 currency of the price.")
     source: str = Field(default="cwicr_import", description="cwicr_import (seeded) | user (edited).")
     is_active: bool = True
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def cost_type(self) -> str:
+        """The cost type this resource books to in cost control (operator -> labor, machinery -> equipment)."""
+        return to_cost_type(self.resource_type)
 
 
 class ResourcePriceStats(BaseModel):

@@ -106,6 +106,10 @@ class POItemCreate(BaseModel):
         max_length=36,
         description="Cost line to commit against. Takes precedence over boq_position_id.",
     )
+    budget_line_id: UUID | None = Field(
+        default=None,
+        description="Budget line (cost code x cost type) the line's commitment rolls into.",
+    )
     # Issue #516: the requisition line this order line was converted from.
     # Only the conversion writes it on a new order; a PATCH that replaces the
     # lines of an order sends it back so the link survives the edit, and the
@@ -293,6 +297,7 @@ class POItemResponse(BaseModel):
     amount: str = "0"
     wbs_id: str | None = None
     cost_category: str | None = None
+    budget_line_id: UUID | None = None
     # Read back so the caller can tell a line that reached the cost spine from
     # one that did not. A position on a project whose spine has not been
     # generated resolves to null, which is a legitimate outcome rather than an

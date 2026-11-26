@@ -884,6 +884,14 @@
     "receipt_inspection_closed": {
       "fail": "Vstupní kontrola příjemky {receipt} k objednávce {po} zatím nebyla úspěšně dokončena",
       "suggestion": "Dokončete kontrolu, nebo zaznamenejte, z jakého důvodu smí být materiál zaplacen dříve"
+    },
+    "po_line_budget_line": {
+      "fail": "Řádek {line} není přiřazen k rozpočtové položce (kód a druh nákladu)",
+      "suggestion": "Vyberte rozpočtovou položku, kterou tento řádek zavazuje"
+    },
+    "po_line_budget_type_known": {
+      "fail": "Řádek {line} je přiřazen k rozpočtové položce s kategorií \"{category}\", která není druhem nákladu",
+      "suggestion": "Přiřaďte řádek k rozpočtové položce typu práce, materiál, stroje, subdodávka nebo ostatní"
     }
   },
   "subcontract": {
@@ -984,6 +992,10 @@
     "payment_discount_reconciles": {
       "fail": "Skonto činí {discount}, ale sjednaná sazba z částky k úhradě dává {expected}",
       "suggestion": "Přepočítejte skonto ze sjednané sazby a částky k úhradě."
+    },
+    "agreement_budget_line": {
+      "fail": "Smlouva není přiřazena k rozpočtové položce se známým druhem nákladu",
+      "suggestion": "Vyberte rozpočtovou položku, kterou tato subdodávka zavazuje"
     }
   },
   "submittal": {
@@ -2932,5 +2944,15 @@
       "suggestion": "Propojte prvky v prohlížeči BIM nebo dejte položce jednotku, kterou model měří (m, m2, m3, kg, ks)."
     },
     "suggestion": "Propojte prvky v prohlížeči BIM nebo dejte položce jednotku, kterou model měří (m, m2, m3, kg, ks)."
+  },
+  "cost_types": {
+    "position_unsplit": {
+      "fail": "{line} nemá žádné zdroje, proto celý rozpočet šel do Ostatní",
+      "suggestion": "Doplňte zdroje položky nebo přesuňte částku na správný druh nákladu"
+    },
+    "unknown_type": {
+      "fail": "{line} má kategorii \"{category}\", která není druhem nákladu",
+      "suggestion": "Nastavte řádek na práci, materiál, stroje, subdodávku nebo ostatní"
+    }
   }
 }

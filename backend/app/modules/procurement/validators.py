@@ -37,6 +37,9 @@ from datetime import date
 from decimal import Decimal, InvalidOperation
 from typing import Any
 
+# The shared cost-type vocabulary, pure standard library like this file.
+from app.core.cost_types import is_budget_category
+
 # The one spelling an amount gets anywhere in this platform. It lives in its own
 # module precisely so that this file can keep the standard-library-only contract
 # its docstring declares: the same function is what the core validation rules
@@ -351,6 +354,49 @@ def check_line_cost_coded(po: dict[str, Any]) -> list[Finding]:
                     element_ref=line_label(index, item),
                     params={"line": line_label(index, item)},
                     details={"wbs_id": None, "cost_category": None, "cost_line_id": None},
+                )
+            )
+    return findings
+
+
+def check_line_budget_line(po: dict[str, Any]) -> list[Finding]:
+    """Each line should be booked to a budget line (cost code x cost type).
+
+    Without one the commitment is shared over every budget line of its cost
+    code, so a material order also reads as committed labour. WARNING: the
+    budget may not be split yet when the order is raised.
+    """
+    findings: list[Finding] = []
+    for index, item in enumerate(_items(po)):
+        if not str(item.get("budget_line_id") or "").strip():
+            findings.append(
+                Finding(
+                    element_ref=line_label(index, item),
+                    params={"line": line_label(index, item)},
+                    details={"budget_line_id": None},
+                )
+            )
+    return findings
+
+
+def check_line_budget_type_known(po: dict[str, Any]) -> list[Finding]:
+    """A line's budget line should carry a cost type from the shared vocabulary.
+
+    The payload carries ``budget_line_category`` when the line names a budget
+    line; a value outside the vocabulary (an older free-text category) cannot be
+    reported per cost type. A budget line that no longer exists is reported too.
+    """
+    findings: list[Finding] = []
+    for index, item in enumerate(_items(po)):
+        if not str(item.get("budget_line_id") or "").strip() or "budget_line_category" not in item:
+            continue
+        category = item.get("budget_line_category")
+        if category is None or not is_budget_category(category):
+            findings.append(
+                Finding(
+                    element_ref=line_label(index, item),
+                    params={"line": line_label(index, item), "category": str(category or "")},
+                    details={"budget_line_id": item.get("budget_line_id"), "category": category},
                 )
             )
     return findings

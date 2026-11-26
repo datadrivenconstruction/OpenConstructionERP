@@ -884,6 +884,14 @@
     "receipt_inspection_closed": {
       "fail": "订单{po}的收货单{receipt}的入库检验尚未通过",
       "suggestion": "请完成检验，或记录为何该材料可以在检验前付款"
+    },
+    "po_line_budget_line": {
+      "fail": "第 {line} 行未计入预算行（成本代码和成本类型）",
+      "suggestion": "请选择此行所承诺的预算行"
+    },
+    "po_line_budget_type_known": {
+      "fail": "第 {line} 行计入了类别为“{category}”的预算行，该类别不是成本类型",
+      "suggestion": "请将此行计入人工、材料、机械、分包或其他类型的预算行"
     }
   },
   "subcontract": {
@@ -984,6 +992,10 @@
     "payment_discount_reconciles": {
       "fail": "付款折扣为 {discount}，但按约定比例计算应付金额得 {expected}",
       "suggestion": "请按约定比例和应付金额重新计算折扣。"
+    },
+    "agreement_budget_line": {
+      "fail": "该合同未计入具有已知成本类型的预算行",
+      "suggestion": "请选择此分包所承诺的预算行"
     }
   },
   "submittal": {
@@ -2932,5 +2944,15 @@
       "suggestion": "请在 BIM 查看器中关联构件，或为清单项设置模型可计量的单位（m、m2、m3、kg、个）。"
     },
     "suggestion": "请在 BIM 查看器中关联构件，或为清单项设置模型可计量的单位（m、m2、m3、kg、个）。"
+  },
+  "cost_types": {
+    "position_unsplit": {
+      "fail": "{line} 没有资源，因此全部预算计入了其他",
+      "suggestion": "请补充清单项的资源，或将金额移到正确的成本类型"
+    },
+    "unknown_type": {
+      "fail": "{line} 的类别为“{category}”，不是成本类型",
+      "suggestion": "请将此行设为人工、材料、机械、分包或其他"
+    }
   }
 }

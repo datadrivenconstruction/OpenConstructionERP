@@ -884,6 +884,14 @@
     "receipt_inspection_closed": {
       "fail": "Ulazna kontrola primke {receipt} za narudžbu {po} još nije uspješno prošla",
       "suggestion": "Dovršite kontrolu ili zabilježite zašto se materijal smije platiti prije nje"
+    },
+    "po_line_budget_line": {
+      "fail": "Stavka {line} nije knjižena na proračunsku stavku (šifra i vrsta troška)",
+      "suggestion": "Odaberite proračunsku stavku koju ova stavka obvezuje"
+    },
+    "po_line_budget_type_known": {
+      "fail": "Stavka {line} knjižena je na proračunsku stavku s kategorijom \"{category}\", koja nije vrsta troška",
+      "suggestion": "Knjižite stavku na proračunsku stavku vrste rad, materijal, oprema, podugovor ili ostalo"
     }
   },
   "subcontract": {
@@ -984,6 +992,10 @@
     "payment_discount_reconciles": {
       "fail": "Popust za plaćanje iznosi {discount}, ali dogovorena stopa od iznosa za plaćanje daje {expected}",
       "suggestion": "Ponovno izračunajte popust iz dogovorene stope i iznosa za plaćanje."
+    },
+    "agreement_budget_line": {
+      "fail": "Ugovor nije knjižen na proračunsku stavku s poznatom vrstom troška",
+      "suggestion": "Odaberite proračunsku stavku koju ovaj podugovor obvezuje"
     }
   },
   "submittal": {
@@ -2932,5 +2944,15 @@
       "suggestion": "Povežite elemente u BIM pregledniku ili stavci dodijelite jedinicu koju model mjeri (m, m2, m3, kg, kom)."
     },
     "suggestion": "Povežite elemente u BIM pregledniku ili stavci dodijelite jedinicu koju model mjeri (m, m2, m3, kg, kom)."
+  },
+  "cost_types": {
+    "position_unsplit": {
+      "fail": "{line} nema resursa, pa je cijeli proračun otišao u Ostalo",
+      "suggestion": "Dodajte resurse stavke ili premjestite iznos na pravu vrstu troška"
+    },
+    "unknown_type": {
+      "fail": "{line} ima kategoriju \"{category}\", koja nije vrsta troška",
+      "suggestion": "Postavite stavku na rad, materijal, opremu, podugovor ili ostalo"
+    }
   }
 }

@@ -884,6 +884,14 @@
     "receipt_inspection_closed": {
       "fail": "Tilauksen {po} tavaran vastaanottokirjauksen {receipt} saapumistarkastus ei ole vielä läpäisty",
       "suggestion": "Suorita tarkastus loppuun tai kirjaa, miksi materiaali voidaan maksaa ennen sitä"
+    },
+    "po_line_budget_line": {
+      "fail": "Rivi {line} ei ole kirjattu budjettiriville (kustannuskoodi ja kustannuslaji)",
+      "suggestion": "Valitse budjettirivi, jota tämä rivi sitoo"
+    },
+    "po_line_budget_type_known": {
+      "fail": "Rivi {line} on kirjattu budjettiriville, jonka luokka \"{category}\" ei ole kustannuslaji",
+      "suggestion": "Kirjaa rivi budjettiriville, jonka laji on työ, materiaali, kalusto, aliurakka tai muu"
     }
   },
   "subcontract": {
@@ -984,6 +992,10 @@
     "payment_discount_reconciles": {
       "fail": "Kassa-alennus on {discount}, mutta sovittu prosentti maksettavasta summasta antaa {expected}",
       "suggestion": "Laske alennus uudelleen sovitusta prosentista ja maksettavasta summasta."
+    },
+    "agreement_budget_line": {
+      "fail": "Sopimusta ei ole kirjattu budjettiriville, jolla on tunnettu kustannuslaji",
+      "suggestion": "Valitse budjettirivi, jota tämä aliurakka sitoo"
     }
   },
   "submittal": {
@@ -2932,5 +2944,15 @@
       "suggestion": "Linkitä elementit BIM-katseluohjelmassa tai anna nimikkeelle yksikkö, jota malli mittaa (m, m2, m3, kg, kpl)."
     },
     "suggestion": "Linkitä elementit BIM-katseluohjelmassa tai anna nimikkeelle yksikkö, jota malli mittaa (m, m2, m3, kg, kpl)."
+  },
+  "cost_types": {
+    "position_unsplit": {
+      "fail": "Kohteella {line} ei ole resursseja, joten koko budjetti meni kohtaan Muu",
+      "suggestion": "Lisää nimikkeen resurssit tai siirrä summa oikealle kustannuslajille"
+    },
+    "unknown_type": {
+      "fail": "Kohteen {line} luokka \"{category}\" ei ole kustannuslaji",
+      "suggestion": "Aseta riville työ, materiaali, kalusto, aliurakka tai muu"
+    }
   }
 }

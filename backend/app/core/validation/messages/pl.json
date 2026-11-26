@@ -884,6 +884,14 @@
     "receipt_inspection_closed": {
       "fail": "Kontrola przyjęciowa dostawy {receipt} do zamówienia {po} nie została jeszcze zaliczona",
       "suggestion": "Zakończ kontrolę albo zapisz, dlaczego materiał może zostać opłacony przed jej zakończeniem"
+    },
+    "po_line_budget_line": {
+      "fail": "Pozycja {line} nie jest przypisana do linii budżetu (kod i rodzaj kosztu)",
+      "suggestion": "Wybierz linię budżetu, którą obciąża ta pozycja"
+    },
+    "po_line_budget_type_known": {
+      "fail": "Pozycja {line} jest przypisana do linii budżetu z kategorią \"{category}\", która nie jest rodzajem kosztu",
+      "suggestion": "Przypisz pozycję do linii budżetu typu robocizna, materiały, sprzęt, podwykonawstwo lub inne"
     }
   },
   "subcontract": {
@@ -984,6 +992,10 @@
     "payment_discount_reconciles": {
       "fail": "Skonto wynosi {discount}, ale uzgodniona stawka od kwoty do zapłaty daje {expected}",
       "suggestion": "Przelicz skonto z uzgodnionej stawki i kwoty do zapłaty."
+    },
+    "agreement_budget_line": {
+      "fail": "Umowa nie jest przypisana do linii budżetu o znanym rodzaju kosztu",
+      "suggestion": "Wybierz linię budżetu, którą obciąża to podwykonawstwo"
     }
   },
   "submittal": {
@@ -2932,5 +2944,15 @@
       "suggestion": "Powiąż elementy w przeglądarce BIM albo nadaj pozycji jednostkę, którą mierzy model (m, m2, m3, kg, szt.)."
     },
     "suggestion": "Powiąż elementy w przeglądarce BIM albo nadaj pozycji jednostkę, którą mierzy model (m, m2, m3, kg, szt.)."
+  },
+  "cost_types": {
+    "position_unsplit": {
+      "fail": "{line} nie ma zasobów, więc cały budżet trafił do Inne",
+      "suggestion": "Dodaj zasoby pozycji lub przenieś kwotę na właściwy rodzaj kosztu"
+    },
+    "unknown_type": {
+      "fail": "{line} ma kategorię \"{category}\", która nie jest rodzajem kosztu",
+      "suggestion": "Ustaw dla linii robociznę, materiały, sprzęt, podwykonawstwo lub inne"
+    }
   }
 }

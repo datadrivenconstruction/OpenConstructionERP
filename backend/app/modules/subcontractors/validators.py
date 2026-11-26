@@ -41,6 +41,9 @@ from datetime import date
 from decimal import Decimal, InvalidOperation
 from typing import Any
 
+# The shared cost-type vocabulary, pure standard library like this file.
+from app.core.cost_types import is_budget_category
+
 # The one spelling an amount gets anywhere in this platform. It lives in its own
 # module precisely so that this file can keep the standard-library-only contract
 # its docstring declares: the same function is what the core validation rules
@@ -286,6 +289,35 @@ def check_currency_set(agreement: dict[str, Any]) -> list[Finding]:
     if str(agreement.get("currency") or "").strip():
         return []
     return [Finding(element_ref=_agreement_ref(agreement), details={"currency": ""})]
+
+
+def check_budget_line(agreement: dict[str, Any]) -> list[Finding]:
+    """The agreement should be booked to a budget line carrying a known cost type.
+
+    Without a budget line the subcontract's value reaches no cost code x cost
+    type in cost control. With one whose category is outside the shared
+    vocabulary (or that no longer exists, ``budget_line_category`` None) the
+    commitment cannot be reported per cost type. The type is judged only when
+    the payload carries ``budget_line_category``.
+    """
+    if not str(agreement.get("budget_line_id") or "").strip():
+        return [
+            Finding(
+                element_ref=_agreement_ref(agreement), params={"problem": "missing"}, details={"problem": "missing"}
+            )
+        ]
+    if "budget_line_category" not in agreement:
+        return []
+    category = agreement.get("budget_line_category")
+    if category is not None and is_budget_category(category):
+        return []
+    return [
+        Finding(
+            element_ref=_agreement_ref(agreement),
+            params={"problem": "unknown_type"},
+            details={"problem": "unknown_type", "category": category},
+        )
+    ]
 
 
 def check_retention_within_bounds(agreement: dict[str, Any]) -> list[Finding]:

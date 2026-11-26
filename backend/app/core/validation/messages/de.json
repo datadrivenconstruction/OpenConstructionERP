@@ -902,6 +902,14 @@
     "receipt_inspection_closed": {
       "fail": "Die Eingangsprüfung zu Wareneingang {receipt} der Bestellung {po} ist noch nicht bestanden",
       "suggestion": "Schließen Sie die Prüfung ab oder halten Sie fest, warum das Material vorher bezahlt werden darf"
+    },
+    "po_line_budget_line": {
+      "fail": "Position {line} ist keiner Budgetzeile (Kostencode und Kostenart) zugeordnet",
+      "suggestion": "Wählen Sie die Budgetzeile, auf die diese Position bindet"
+    },
+    "po_line_budget_type_known": {
+      "fail": "Position {line} ist einer Budgetzeile mit der Kategorie \"{category}\" zugeordnet, die keine Kostenart ist",
+      "suggestion": "Ordnen Sie die Position einer Budgetzeile der Art Lohn, Material, Gerät, Nachunternehmer oder Sonstiges zu"
     }
   },
   "subcontract": {
@@ -1002,6 +1010,10 @@
     "payment_discount_reconciles": {
       "fail": "Das Skonto beträgt {discount}, der vereinbarte Satz auf den Auszahlungsbetrag ergibt aber {expected}",
       "suggestion": "Berechnen Sie das Skonto aus dem vereinbarten Satz und dem Auszahlungsbetrag neu."
+    },
+    "agreement_budget_line": {
+      "fail": "Der Vertrag ist keiner Budgetzeile mit bekannter Kostenart zugeordnet",
+      "suggestion": "Wählen Sie die Budgetzeile, auf die dieser Nachunternehmervertrag bindet"
     }
   },
   "submittal": {
@@ -2932,5 +2944,15 @@
       "suggestion": "Verknüpfen Sie die Elemente im BIM-Viewer oder geben Sie der Position eine Einheit, die das Modell misst (m, m2, m3, kg, Stück)."
     },
     "suggestion": "Verknüpfen Sie die Elemente im BIM-Viewer oder geben Sie der Position eine Einheit, die das Modell misst (m, m2, m3, kg, Stück)."
+  },
+  "cost_types": {
+    "position_unsplit": {
+      "fail": "{line} hat keine Ressourcen, daher ging das ganze Budget an Sonstiges",
+      "suggestion": "Ergänzen Sie die Ressourcen der Position oder verschieben Sie den Betrag auf die richtige Kostenart"
+    },
+    "unknown_type": {
+      "fail": "{line} hat die Kategorie \"{category}\", die keine Kostenart ist",
+      "suggestion": "Setzen Sie die Zeile auf Lohn, Material, Gerät, Nachunternehmer oder Sonstiges"
+    }
   }
 }

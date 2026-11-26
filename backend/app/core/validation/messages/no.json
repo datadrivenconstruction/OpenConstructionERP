@@ -884,6 +884,14 @@
     "receipt_inspection_closed": {
       "fail": "Innkommende kontroll av varemottak {receipt} på bestilling {po} er ikke bestått ennå",
       "suggestion": "Fullfør kontrollen, eller før opp hvorfor materialet kan betales før den"
+    },
+    "po_line_budget_line": {
+      "fail": "Linje {line} er ikke ført på en budsjettlinje (kostnadskode og kostnadstype)",
+      "suggestion": "Velg budsjettlinjen denne linjen binder"
+    },
+    "po_line_budget_type_known": {
+      "fail": "Linje {line} er ført på en budsjettlinje med kategorien \"{category}\", som ikke er en kostnadstype",
+      "suggestion": "Før linjen på en budsjettlinje av typen arbeid, materialer, maskiner, underentreprise eller annet"
     }
   },
   "subcontract": {
@@ -984,6 +992,10 @@
     "payment_discount_reconciles": {
       "fail": "Kontantrabatten er {discount}, men den avtalte satsen av beløpet til betaling gir {expected}",
       "suggestion": "Beregn rabatten på nytt fra avtalt sats og beløpet til betaling."
+    },
+    "agreement_budget_line": {
+      "fail": "Avtalen er ikke ført på en budsjettlinje med en kjent kostnadstype",
+      "suggestion": "Velg budsjettlinjen denne underentreprisen binder"
     }
   },
   "submittal": {
@@ -2932,5 +2944,15 @@
       "suggestion": "Koble elementene i BIM-visningen, eller gi posten en enhet som modellen måler (m, m2, m3, kg, stk)."
     },
     "suggestion": "Koble elementene i BIM-visningen, eller gi posten en enhet som modellen måler (m, m2, m3, kg, stk)."
+  },
+  "cost_types": {
+    "position_unsplit": {
+      "fail": "{line} har ingen ressurser, så hele budsjettet gikk til Annet",
+      "suggestion": "Legg til postens ressurser, eller flytt beløpet til riktig kostnadstype"
+    },
+    "unknown_type": {
+      "fail": "{line} har kategorien \"{category}\", som ikke er en kostnadstype",
+      "suggestion": "Sett linjen til arbeid, materialer, maskiner, underentreprise eller annet"
+    }
   }
 }

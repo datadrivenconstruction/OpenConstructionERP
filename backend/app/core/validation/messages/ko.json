@@ -884,6 +884,14 @@
     "receipt_inspection_closed": {
       "fail": "발주 {po}의 입고 기록 {receipt}에 대한 수입 검사가 아직 합격하지 않았습니다",
       "suggestion": "검사를 완료하거나, 검사 전에 자재 대금을 지급해도 되는 이유를 기록하세요"
+    },
+    "po_line_budget_line": {
+      "fail": "{line} 행이 예산 행(원가 코드와 원가 유형)에 배정되지 않았습니다",
+      "suggestion": "이 행이 약정하는 예산 행을 선택하세요"
+    },
+    "po_line_budget_type_known": {
+      "fail": "{line} 행이 원가 유형이 아닌 \"{category}\" 범주의 예산 행에 배정되어 있습니다",
+      "suggestion": "행을 노무비, 재료비, 장비비, 하도급 또는 기타 유형의 예산 행에 배정하세요"
     }
   },
   "subcontract": {
@@ -984,6 +992,10 @@
     "payment_discount_reconciles": {
       "fail": "지급 할인은 {discount}인데 지급액에 합의한 율을 적용하면 {expected}입니다",
       "suggestion": "합의한 율과 지급액으로 할인을 다시 계산하세요."
+    },
+    "agreement_budget_line": {
+      "fail": "계약이 알려진 원가 유형의 예산 행에 배정되지 않았습니다",
+      "suggestion": "이 하도급이 약정하는 예산 행을 선택하세요"
     }
   },
   "submittal": {
@@ -2932,5 +2944,15 @@
       "suggestion": "BIM 뷰어에서 요소를 연결하거나 모델이 측정하는 단위(m, m2, m3, kg, 개)를 항목에 지정하십시오."
     },
     "suggestion": "BIM 뷰어에서 요소를 연결하거나 모델이 측정하는 단위(m, m2, m3, kg, 개)를 항목에 지정하십시오."
+  },
+  "cost_types": {
+    "position_unsplit": {
+      "fail": "{line}에 자원이 없어 예산 전체가 기타로 들어갔습니다",
+      "suggestion": "항목의 자원을 추가하거나 금액을 올바른 원가 유형으로 옮기세요"
+    },
+    "unknown_type": {
+      "fail": "{line}의 범주는 \"{category}\"이며 원가 유형이 아닙니다",
+      "suggestion": "행을 노무비, 재료비, 장비비, 하도급 또는 기타로 설정하세요"
+    }
   }
 }
