@@ -16,6 +16,7 @@ import { TabBar } from '@/shared/ui/TabBar';
 import { EmptyState } from '@/shared/ui/EmptyState';
 import { ErrorState } from '@/shared/ui/ErrorState';
 import { Skeleton } from '@/shared/ui/Skeleton';
+import { useNameCollator } from '@/shared/lib/collator';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 
 import { usePlatformMap, type HealthItem } from './api';
@@ -41,14 +42,15 @@ export function DataPathsPage() {
   const [query, setQuery] = useState('');
 
   const map = usePlatformMap(projectId);
+  const byName = useNameCollator();
 
   const declared = useMemo(
     () =>
       (map.data?.modules ?? [])
         .filter((m) => m.declared || m.name === focus)
         .map((m) => ({ name: m.name, label: moduleLabel(t, m.name, m.display_name) }))
-        .sort((a, b) => a.label.localeCompare(b.label)),
-    [map.data, focus, t],
+        .sort((a, b) => byName(a.label, b.label)),
+    [map.data, focus, t, byName],
   );
 
   const go = (next: { module?: string | null; view?: View; field?: string | null }) => {

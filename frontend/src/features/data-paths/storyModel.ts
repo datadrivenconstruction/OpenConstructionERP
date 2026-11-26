@@ -4,6 +4,8 @@
 // The plain-words reading of one module's paths: which inputs carry data,
 // which are empty or broken and what that breaks, in order of importance.
 
+import { compareNames } from '@/shared/lib/collator';
+
 import type { Importance } from './api';
 import type { FlowCard, FlowModel } from './flowModel';
 
@@ -17,7 +19,7 @@ export interface Gap {
 const RANK: Record<Importance, number> = { critical: 0, high: 1, supporting: 2 };
 
 export function byImportance(a: FlowCard, b: FlowCard): number {
-  return RANK[a.importance] - RANK[b.importance] || a.moduleLabel.localeCompare(b.moduleLabel);
+  return RANK[a.importance] - RANK[b.importance] || compareNames(a.moduleLabel, b.moduleLabel);
 }
 
 /** Why a path carries nothing useful now, or null when it is fine. */
