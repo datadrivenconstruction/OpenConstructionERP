@@ -444,6 +444,7 @@ class BudgetLineRepository:
         spine = dict(await self._spine_committed_by_cost_line(project_id))
         line_index = {str(line.id): idx for idx, line in enumerate(lines)}
         explicit: dict[int, Decimal] = {}
+        reduced: set[str] = set()
         for budget_line_id, cost_line_key, amount in await self._explicit_commitments(project_id, base, fx):
             idx = line_index.get(budget_line_id)
             if idx is None:
@@ -451,6 +452,10 @@ class BudgetLineRepository:
             explicit[idx] = explicit.get(idx, Decimal("0")) + amount
             if cost_line_key is not None and cost_line_key in spine:
                 spine[cost_line_key] = max(spine[cost_line_key] - amount, Decimal("0"))
+                reduced.add(cost_line_key)
+        # A pool fully named onto budget lines leaves nothing to share: the cost code's other lines
+        # keep their own committed value instead of reading as "from documents" at zero.
+        spine = {key: value for key, value in spine.items() if key not in reduced or value > 0}
 
         per_line: list[Decimal] = []
         groups: dict[str, list[int]] = {}
