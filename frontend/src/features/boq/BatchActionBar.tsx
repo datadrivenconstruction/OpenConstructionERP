@@ -6,6 +6,7 @@ import { Trash2, Ruler, X, ChevronDown, Percent, Hash, Tag, Replace, Equal } fro
 import { useFocusTrap } from '@/shared/hooks/useFocusTrap';
 import { parseDecimalInput } from '@/shared/lib/parseDecimal';
 import { useHasPermission } from '@/shared/lib/permissionGates';
+import { useRoleReason } from '@/shared/lib/permissionReason';
 import { getUnitsForLocale } from './boqHelpers';
 import type { SectionToDelete } from './batchSelection';
 
@@ -90,6 +91,7 @@ export function BatchActionBar({
   const { t } = useTranslation();
   // Same gate as the grid's delete controls: the server answers `boq.delete`.
   const canDelete = useHasPermission('boq.delete');
+  const deleteReason = useRoleReason(canDelete, 'editor');
   const [unitDropdownOpen, setUnitDropdownOpen] = useState(false);
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
   const [factorDialog, setFactorDialog] = useState<FactorDialogState | null>(null);
@@ -238,17 +240,17 @@ export function BatchActionBar({
           <div className="h-5 w-px bg-border-light" />
 
           {/* Delete selected */}
-          {canDelete && (
           <button
             type="button"
             onClick={handleDeleteClick}
+            disabled={!canDelete}
+            title={deleteReason}
             aria-label={t('boq.batch_delete', { defaultValue: 'Delete selected' })}
-            className="inline-flex items-center gap-1.5 rounded-lg bg-semantic-error/10 px-3 py-1.5 text-xs font-medium text-semantic-error hover:bg-semantic-error/20 transition-colors"
+            className="inline-flex items-center gap-1.5 rounded-lg bg-semantic-error/10 px-3 py-1.5 text-xs font-medium text-semantic-error hover:bg-semantic-error/20 transition-colors disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-semantic-error/10"
           >
             <Trash2 size={14} />
             {t('boq.batch_delete', { defaultValue: 'Delete selected' })}
           </button>
-          )}
 
           {/* Change unit */}
           <div ref={unitDropdownRef} className="relative">

@@ -4,7 +4,7 @@
  * "Delete selected" in the batch bar is a `boq.delete` call (EDITOR and up on
  * the server), like the grid's own delete controls. A viewer can still select
  * rows and change their unit or classification (`boq.update` is VIEWER), so the
- * bar stays; only Delete goes.
+ * bar stays and Delete stays on it, disabled, saying who can delete.
  */
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { render, cleanup, screen } from '@testing-library/react';
@@ -32,13 +32,15 @@ describe('BatchActionBar delete gate', () => {
   it('offers Delete selected to an editor', () => {
     useAuthStore.setState({ userRole: 'editor' });
     renderBar();
-    expect(screen.getByRole('button', { name: 'Delete selected' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Delete selected' })).toBeEnabled();
   });
 
-  it('offers no Delete selected to a viewer, but keeps the rest of the bar', () => {
+  it('shows Delete selected to a viewer disabled with the reason, and keeps the rest of the bar', () => {
     useAuthStore.setState({ userRole: 'viewer' });
     renderBar();
-    expect(screen.queryByRole('button', { name: 'Delete selected' })).toBeNull();
+    const button = screen.getByRole('button', { name: 'Delete selected' });
+    expect(button).toBeDisabled();
+    expect(button).toHaveAttribute('title', 'Only an editor, manager or administrator can do this.');
     expect(screen.getByRole('button', { name: 'Change unit' })).toBeTruthy();
   });
 });

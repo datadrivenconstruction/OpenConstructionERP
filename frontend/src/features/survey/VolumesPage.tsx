@@ -60,6 +60,7 @@ import {
   type Volume,
 } from './volumesApi';
 import { fmtFixed } from '@/shared/lib/formatters';
+import { useRoleReason } from '@/shared/lib/permissionReason';
 import { ViewOnlyNote, useSurveyAccess } from './useSurveyAccess';
 
 const ZonePadEditor = lazy(() => import('@/features/survey-plan/screens/ZonePadEditor'));
@@ -76,6 +77,7 @@ function StatusBadge({ status }: { status: Volume['status'] }) {
 export default function VolumesPage() {
   const { t, i18n } = useTranslation();
   const { canWrite } = useSurveyAccess();
+  const writeReason = useRoleReason(canWrite, 'editor');
   const lang = i18n.language;
   const qc = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
@@ -170,12 +172,13 @@ export default function VolumesPage() {
         variant="primary"
         icon={<Plus size={16} />}
         onClick={() => setVolumeOpen(true)}
-        disabled={!canWrite || (surfaces.data ?? []).length < 2}
+        disabled={(surfaces.data ?? []).length < 2}
+        disabledReason={writeReason}
         data-testid="volumes-new"
       >
         {t('volumes.action.new_volume', { defaultValue: 'New volume' })}
       </Button>
-      <Button variant="secondary" icon={<Layers size={16} />} onClick={() => setSurfaceOpen(true)} data-testid="volumes-new-surface" disabled={!canWrite}>
+      <Button variant="secondary" icon={<Layers size={16} />} onClick={() => setSurfaceOpen(true)} data-testid="volumes-new-surface" disabledReason={writeReason}>
         {t('volumes.action.new_surface', { defaultValue: 'New surface' })}
       </Button>
       <ModuleGuideButton content={volumesGuide} />

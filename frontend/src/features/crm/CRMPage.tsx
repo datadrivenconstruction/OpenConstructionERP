@@ -96,6 +96,7 @@ import { DateDisplay } from '@/shared/ui/DateDisplay';
 import { TruncationNotice } from '@/shared/ui/TruncationNotice';
 import { useToastStore } from '@/stores/useToastStore';
 import { getErrorMessage } from '@/shared/lib/api';
+import { roleAtLeast, useRoleReason } from '@/shared/lib/permissionReason';
 import { fetchContact, fetchContacts, type Contact } from '@/features/contacts/api';
 import { projectsApi, type Project } from '@/features/projects/api';
 import {
@@ -1306,7 +1307,8 @@ function DealDrawer({
   const [confirmDeleteDeal, setConfirmDeleteDeal] = useState(false);
   // Deleting a deal is gated on MANAGER server-side (`crm.delete`).
   const userRole = useAuthStore((s) => s.userRole);
-  const canDeleteDeal = userRole === 'admin' || userRole === 'manager';
+  const canDeleteDeal = roleAtLeast(userRole, 'manager');
+  const deleteDealReason = useRoleReason(canDeleteDeal, 'manager');
 
   const usersQ = useQuery({
     queryKey: ['crm', 'assignable-users'],
@@ -2050,7 +2052,6 @@ function DealDrawer({
             )}
           </Card>
 
-          {canDeleteDeal && (
             <Card padding="sm">
               {opp.status === 'won' ? (
                 <p className="text-xs text-content-tertiary">
@@ -2071,6 +2072,7 @@ function DealDrawer({
                     icon={<Trash2 size={14} />}
                     onClick={() => setConfirmDeleteDeal(true)}
                     disabled={deleteDealMut.isPending}
+                    disabledReason={deleteDealReason}
                     className="text-semantic-error hover:bg-semantic-error/10"
                   >
                     {t('crm.delete_deal', { defaultValue: 'Delete deal' })}
@@ -2078,7 +2080,6 @@ function DealDrawer({
                 </>
               )}
             </Card>
-          )}
         </div>
       <ConfirmDialog
         open={confirmDeleteDeal}
@@ -2233,7 +2234,8 @@ function LeadDrawer({
   // Deleting a lead is gated on MANAGER server-side (`crm.delete`), so the
   // control is hidden below that rather than offered and refused with a 403.
   const userRole = useAuthStore((s) => s.userRole);
-  const canDelete = userRole === 'admin' || userRole === 'manager';
+  const canDelete = roleAtLeast(userRole, 'manager');
+  const deleteLeadReason = useRoleReason(canDelete, 'manager');
   const [confirmDelete, setConfirmDelete] = useState(false);
   // The server's structured 409, kept so the drawer can name what is holding
   // the lead instead of showing a bare error toast that disappears.
@@ -2605,7 +2607,6 @@ function LeadDrawer({
               A lead already converted is not offered the control at all - the
               drawer can see that from `converted_opportunity_id` and there is
               no point offering a button whose only outcome is a refusal. */}
-          {canDelete && (
             <Card padding="sm">
               <p className="oe-overline mb-1">
                 {t('crm.remove_lead_heading', { defaultValue: 'Remove lead' })}
@@ -2633,6 +2634,7 @@ function LeadDrawer({
                       setConfirmDelete(true);
                     }}
                     disabled={deleteMut.isPending}
+                    disabledReason={deleteLeadReason}
                     className="text-semantic-error hover:bg-semantic-error/10"
                   >
                     {t('crm.remove_lead_action', { defaultValue: 'Delete lead' })}
@@ -2705,7 +2707,6 @@ function LeadDrawer({
                 </div>
               )}
             </Card>
-          )}
         </div>
     </SideDrawer>
 
