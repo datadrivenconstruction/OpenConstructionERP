@@ -10,6 +10,7 @@
 
 import { useMemo, useState, type ComponentType } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useRoleReason } from '@/shared/lib/permissionReason';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Printer, RotateCcw, Save, Sparkles } from 'lucide-react';
 import { Button } from '@/shared/ui';
@@ -35,6 +36,7 @@ export interface ParcelEditorProps {
 
 export function ParcelEditor({ projectId, canWrite, canvas }: ParcelEditorProps) {
   const { t } = useTranslation();
+  const writeReason = useRoleReason(canWrite, 'editor');
   const qc = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
   const { conventions: conv } = usePlanConventions(projectId);
@@ -104,8 +106,8 @@ export function ParcelEditor({ projectId, canWrite, canvas }: ParcelEditorProps)
 
   const toolbar = (
     <>
-      {canWrite && grid.data && grid.data.parcels.length === 0 && (
-        <Button variant="secondary" size="sm" icon={<Sparkles size={14} />} loading={demo.isPending} onClick={() => demo.mutate()} data-testid="plan-parcel-demo">
+      {grid.data && grid.data.parcels.length === 0 && (
+        <Button variant="secondary" size="sm" icon={<Sparkles size={14} />} disabledReason={writeReason} loading={demo.isPending} onClick={() => demo.mutate()} data-testid="plan-parcel-demo">
           {t('plan.parcel.load_demo', { defaultValue: 'Load riverside demo' })}
         </Button>
       )}
@@ -114,11 +116,9 @@ export function ParcelEditor({ projectId, canWrite, canvas }: ParcelEditorProps)
           {t('plan.parcel.discard', { defaultValue: 'Discard changes' })}
         </Button>
       )}
-      {canWrite && (
-        <Button variant="primary" size="sm" icon={<Save size={14} />} disabled={!dirty.length} loading={save.isPending} onClick={() => save.mutate()} data-testid="plan-parcel-save">
-          {t('plan.parcel.save', { defaultValue: 'Save boundaries' })}
-        </Button>
-      )}
+      <Button variant="primary" size="sm" icon={<Save size={14} />} disabledReason={writeReason} disabled={!dirty.length} loading={save.isPending} onClick={() => save.mutate()} data-testid="plan-parcel-save">
+        {t('plan.parcel.save', { defaultValue: 'Save boundaries' })}
+      </Button>
       <Button variant="secondary" size="sm" icon={<Printer size={14} />} disabled={!layers.some((l) => l.features.length)} onClick={() => setPrinting(true)} data-testid="plan-parcel-print">
         {t('plan.print.action', { defaultValue: 'Print plan' })}
       </Button>

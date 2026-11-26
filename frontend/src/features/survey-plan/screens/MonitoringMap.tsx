@@ -9,6 +9,7 @@
 
 import { lazy, Suspense, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useRoleReason } from '@/shared/lib/permissionReason';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Crosshair, MapPin } from 'lucide-react';
 import { Button } from '@/shared/ui';
@@ -65,6 +66,7 @@ function Glyph({ level }: { level: Lvl }) {
 
 export function MonitoringMap({ projectId, canWrite, onOpenPoint }: { projectId: string; canWrite: boolean; onOpenPoint?: (id: string) => void }) {
   const { t } = useTranslation();
+  const writeReason = useRoleReason(canWrite, 'editor');
   const qc = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
   const { conventions: conv } = usePlanConventions(projectId);
@@ -162,7 +164,7 @@ export function MonitoringMap({ projectId, canWrite, onOpenPoint }: { projectId:
                     <span className="truncate text-content-tertiary">{p.name}</span>
                     {p.displacement_mm != null && <span className="ms-auto font-mono text-xs">{fmtMm(p.displacement_mm)}</span>}
                   </div>
-                  {canWrite && (placing === p.id ? (
+                  {(placing === p.id && canWrite ? (
                     <div className="flex gap-1">
                       <input className="oe-input-sm w-full font-mono" dir="ltr" placeholder={axes.e} aria-label={axes.e} value={typed.e} onChange={(e) => setTyped((s) => ({ ...s, e: e.target.value }))} />
                       <input className="oe-input-sm w-full font-mono" dir="ltr" placeholder={axes.n} aria-label={axes.n} value={typed.n} onChange={(e) => setTyped((s) => ({ ...s, n: e.target.value }))} />
@@ -173,7 +175,7 @@ export function MonitoringMap({ projectId, canWrite, onOpenPoint }: { projectId:
                       <Button size="sm" variant="ghost" onClick={() => setPlacing(null)}>{t('common.cancel', { defaultValue: 'Cancel' })}</Button>
                     </div>
                   ) : (
-                    <Button size="sm" variant="secondary" icon={<Crosshair size={14} />} onClick={() => setPlacing(p.id)}>
+                    <Button size="sm" variant="secondary" icon={<Crosshair size={14} />} disabledReason={writeReason} onClick={() => setPlacing(p.id)}>
                       {t('plan.mon.set_position', { defaultValue: 'Set position' })}
                     </Button>
                   ))}
@@ -181,8 +183,8 @@ export function MonitoringMap({ projectId, canWrite, onOpenPoint }: { projectId:
               ))}
             </ul>
           )}
-          {canWrite && offPlan.length > 0 && (
-            <Button size="sm" variant="ghost" className="mt-2" icon={<MapPin size={14} />} loading={demo.isPending} onClick={() => demo.mutate()}>
+          {offPlan.length > 0 && (
+            <Button size="sm" variant="ghost" className="mt-2" icon={<MapPin size={14} />} disabledReason={writeReason} loading={demo.isPending} onClick={() => demo.mutate()}>
               {t('plan.mon.demo_positions', { defaultValue: 'Use the example positions' })}
             </Button>
           )}

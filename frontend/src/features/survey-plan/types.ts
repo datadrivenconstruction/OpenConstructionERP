@@ -301,8 +301,10 @@ export interface PlanCanvasProps {
   tools?: string[];
   /** Tools a package adds (alignment IP tool, section tool). */
   extraTools?: PlanTool[];
-  /** False hides every editing tool (viewers). */
+  /** False takes every editing tool away (viewers). */
   editable?: boolean;
+  /** With `editable` false: why. The editing tools and Save then stay visible, disabled, with this reason. */
+  readOnlyReason?: string;
   /** Layer the draw tools write to at start. */
   activeLayer?: PlanLayerId;
   /** Show the inspector at start (desktop). */

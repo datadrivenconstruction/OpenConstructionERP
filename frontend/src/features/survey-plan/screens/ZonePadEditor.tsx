@@ -10,6 +10,7 @@
 
 import { useMemo, useState, type ComponentType } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useRoleReason } from '@/shared/lib/permissionReason';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Plus } from 'lucide-react';
 import { Button } from '@/shared/ui';
@@ -49,6 +50,7 @@ export interface ZonePadEditorProps {
 
 export function ZonePadEditor({ projectId, canWrite, surfaces, canvas }: ZonePadEditorProps) {
   const { t } = useTranslation();
+  const writeReason = useRoleReason(canWrite, 'editor');
   const qc = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
   const { conventions: conv } = usePlanConventions(projectId);
@@ -101,7 +103,8 @@ export function ZonePadEditor({ projectId, canWrite, surfaces, canvas }: ZonePad
   const axes = axisLabelFor(conv.axis);
   const blocked = findings.some((f) => f.severity === 'error') || parsed.bad.length > 0;
 
-  const side = canWrite ? (
+  const side = (
+    <fieldset disabled={!canWrite} title={writeReason} className="m-0 min-w-0 border-0 p-0">
     <section className="space-y-2" data-testid="plan-pad-form">
       <h3 className="font-semibold text-content-primary">{t('plan.tin.pad_title', { defaultValue: 'Design pad' })}</h3>
       <input className="oe-input w-full" placeholder={t('plan.tin.pad_name', { defaultValue: 'Name' })} value={name} onChange={(e) => setName(e.target.value)} />
@@ -153,7 +156,8 @@ export function ZonePadEditor({ projectId, canWrite, surfaces, canvas }: ZonePad
         {t('plan.tin.pad_create', { defaultValue: 'Create pad surface' })}
       </Button>
     </section>
-  ) : null;
+    </fieldset>
+  );
 
   return (
     <SurfaceView projectId={projectId} surfaces={surfaces} extraLayers={extra} findings={findings} side={side} canvas={canvas}

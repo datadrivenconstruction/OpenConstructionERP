@@ -228,6 +228,12 @@ export default function PlanCanvas(props: PlanCanvasProps) {
     const all = [...BUILTIN_TOOLS, ...(props.extraTools ?? [])];
     return all.filter((x) => (ids.includes(x.id) || (props.extraTools ?? []).includes(x)) && (editable || !x.edits));
   }, [props.tools, props.extraTools, editable]);
+  // A reader keeps the editing tools on the rail, disabled, so the same tools are on screen for every role.
+  const lockedTools = useMemo(() => {
+    if (editable || !props.readOnlyReason) return [] as PlanTool[];
+    const ids = props.tools ?? defaultToolIds(true);
+    return BUILTIN_TOOLS.filter((x) => ids.includes(x.id) && x.edits);
+  }, [props.tools, props.readOnlyReason, editable]);
   const [toolId, setToolId] = useState<string>(SELECT_TOOL);
   const tool: PlanTool = tools.find((x) => x.id === toolId) ?? tools[0] ?? BUILTIN_TOOLS[0]!;
   const [vertices, setVertices] = useState<GridXY[]>([]);
@@ -959,7 +965,7 @@ export default function PlanCanvas(props: PlanCanvasProps) {
           {tool.options?.(ctx)}
         </div>
         <div className="ms-auto flex shrink-0 items-center gap-1">
-          {editable && (
+          {(editable || props.readOnlyReason) && (
             <>
               <button type="button" onClick={undoOne} disabled={!canUndo} className="flex h-9 w-9 items-center justify-center rounded-md text-content-secondary hover:bg-surface-secondary disabled:opacity-40" aria-label={t('plan.keys.undo', { defaultValue: 'Undo' })} title={`${t('plan.keys.undo', { defaultValue: 'Undo' })} (Ctrl+Z)`} data-testid="plan-undo">
                 <Undo2 size={16} aria-hidden />
@@ -970,7 +976,8 @@ export default function PlanCanvas(props: PlanCanvasProps) {
               <button
                 type="button"
                 onClick={() => void save()}
-                disabled={!dirty || saving}
+                disabled={!editable || !dirty || saving}
+                title={editable ? undefined : props.readOnlyReason}
                 className="inline-flex h-9 items-center gap-1.5 rounded-md bg-oe-blue px-3 text-sm font-medium text-content-inverse hover:bg-oe-blue-hover disabled:opacity-40"
                 data-testid="plan-save"
               >
@@ -1051,7 +1058,7 @@ export default function PlanCanvas(props: PlanCanvasProps) {
           )}
 
           <div className="absolute start-3 top-3 z-10">
-            <ToolRail tools={tools} active={tool.id} onPick={pickTool} />
+            <ToolRail tools={tools} active={tool.id} onPick={pickTool} locked={lockedTools} lockedReason={props.readOnlyReason} />
           </div>
 
           <div className="absolute end-3 top-3 z-10 flex flex-col items-end gap-2">

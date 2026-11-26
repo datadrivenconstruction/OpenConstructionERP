@@ -11,11 +11,14 @@ interface Props {
   tools: PlanTool[];
   active: string;
   onPick: (id: string) => void;
+  /** Tools this user may not use: shown disabled, with `lockedReason` as the tooltip. */
+  locked?: PlanTool[];
+  lockedReason?: string;
 }
 
-export function ToolRail({ tools, active, onPick }: Props) {
+export function ToolRail({ tools, active, onPick, locked = [], lockedReason }: Props) {
   const { t } = useTranslation();
-  const groups = GROUP_ORDER.map((g) => tools.filter((tool) => tool.group === g)).filter((g) => g.length > 0);
+  const groups = GROUP_ORDER.map((g) => [...tools, ...locked].filter((tool) => tool.group === g)).filter((g) => g.length > 0);
   return (
     <div
       role="toolbar"
@@ -30,18 +33,20 @@ export function ToolRail({ tools, active, onPick }: Props) {
             const Icon = tool.icon;
             const label = t(tool.labelKey, { defaultValue: tool.defaultLabel });
             const on = tool.id === active;
+            const isLocked = locked.includes(tool);
             return (
               <button
                 key={tool.id}
                 type="button"
                 onClick={() => onPick(tool.id)}
+                disabled={isLocked}
                 aria-pressed={on}
                 aria-label={tool.shortcut ? `${label} (${tool.shortcut})` : label}
-                title={tool.shortcut ? `${label}  ${tool.shortcut}` : label}
+                title={isLocked && lockedReason ? lockedReason : tool.shortcut ? `${label}  ${tool.shortcut}` : label}
                 data-testid={`plan-tool-${tool.id}`}
                 className={`flex h-11 w-11 items-center justify-center rounded-lg motion-safe:transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue ${
                   on ? 'bg-oe-blue text-content-inverse shadow-sm' : 'text-content-secondary hover:bg-surface-secondary hover:text-content-primary'
-                }`}
+                } ${isLocked ? 'cursor-not-allowed opacity-40' : ''                }`}
               >
                 <Icon size={18} strokeWidth={on ? 2.2 : 1.8} aria-hidden />
               </button>

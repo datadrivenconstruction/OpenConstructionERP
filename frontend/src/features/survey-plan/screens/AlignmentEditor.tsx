@@ -10,6 +10,7 @@
 
 import { lazy, Suspense, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useRoleReason } from '@/shared/lib/permissionReason';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { MousePointerClick, Save, Trash2 } from 'lucide-react';
 import { Badge, Button, Card } from '@/shared/ui';
@@ -69,6 +70,7 @@ interface IpText {
 
 export function AlignmentEditor({ projectId, request, canWrite }: { projectId: string; request: StakeoutRequestDetail; canWrite: boolean }) {
   const { t } = useTranslation();
+  const writeReason = useRoleReason(canWrite, 'editor');
   const qc = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
   const { conventions: conv } = usePlanConventions(projectId);
@@ -196,11 +198,9 @@ export function AlignmentEditor({ projectId, request, canWrite }: { projectId: s
             empty={{ title: t('plan.align.empty', { defaultValue: 'Click the plan to place the intersection points in order, then type a radius at each bend.' }) }}
             toolbarSlot={
               <>
-                {canWrite && (
-                  <Button size="sm" variant={adding ? 'primary' : 'secondary'} icon={<MousePointerClick size={14} />} aria-pressed={adding} onClick={() => setAdding((a) => !a)}>
-                    {t('plan.align.add_ip', { defaultValue: 'Add IP by click' })}
-                  </Button>
-                )}
+                <Button size="sm" variant={adding ? 'primary' : 'secondary'} icon={<MousePointerClick size={14} />} aria-pressed={adding} disabledReason={writeReason} onClick={() => setAdding((a) => !a)}>
+                  {t('plan.align.add_ip', { defaultValue: 'Add IP by click' })}
+                </Button>
                 <PlanPrintButton projectId={projectId} layers={layers} conventions={conv} title={request.name} testId="alignment-print" />
               </>
             }
@@ -279,10 +279,8 @@ export function AlignmentEditor({ projectId, request, canWrite }: { projectId: s
                       <td className={`text-right font-mono ${tone}`}>{c ? formatDistance(c.tangent, conv, false) : ''}</td>
                       <td className="text-right font-mono">{c ? formatChainage(c.tcCh, conv.chainage, conv) : ''}</td>
                       <td>
-                        {canWrite && (
-                          <Button size="sm" variant="ghost" icon={<Trash2 size={14} />} aria-label={t('plan.align.remove_ip', { defaultValue: 'Remove IP' })}
-                            onClick={(e) => { e.stopPropagation(); setRows((rs) => rs.filter((_, j) => j !== i)); setSelected(null); }} />
-                        )}
+                        <Button size="sm" variant="ghost" icon={<Trash2 size={14} />} aria-label={t('plan.align.remove_ip', { defaultValue: 'Remove IP' })} disabledReason={writeReason}
+                          onClick={(e) => { e.stopPropagation(); setRows((rs) => rs.filter((_, j) => j !== i)); setSelected(null); }} />
                       </td>
                     </tr>
                   );
@@ -297,11 +295,9 @@ export function AlignmentEditor({ projectId, request, canWrite }: { projectId: s
             </p>
           ))}
           <FindingList items={check.data?.findings ?? []} testId="alignment-findings" />
-          {canWrite && (
-            <Button icon={<Save size={14} />} disabled={!body || !design.fits} loading={save.isPending} onClick={() => save.mutate()}>
-              {t('plan.align.save', { defaultValue: 'Save alignment' })}
-            </Button>
-          )}
+          <Button icon={<Save size={14} />} disabledReason={writeReason} disabled={!body || !design.fits} loading={save.isPending} onClick={() => save.mutate()}>
+            {t('plan.align.save', { defaultValue: 'Save alignment' })}
+          </Button>
         </Card>
       </div>
       {design.elements.length > 0 && (
