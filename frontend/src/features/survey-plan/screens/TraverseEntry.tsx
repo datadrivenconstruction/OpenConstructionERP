@@ -12,6 +12,7 @@
 
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useRoleReason } from '@/shared/lib/permissionReason';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { BookOpen, FileUp, Plus, Save, Trash2 } from 'lucide-react';
 import { Badge, Button, Card } from '@/shared/ui';
@@ -105,6 +106,7 @@ export function traverseLayers(features: readonly PlanFeature[], ellipses: reado
 
 export function TraverseEntry({ projectId, canWrite }: { projectId: string | null; canWrite: boolean }) {
   const { t } = useTranslation();
+  const writeReason = useRoleReason(canWrite, 'editor');
   const addToast = useToastStore((s) => s.addToast);
   const { conventions: conv } = usePlanConventions(projectId);
   const axes = axisLabelFor(conv.axis);
@@ -522,8 +524,8 @@ export function TraverseEntry({ projectId, canWrite }: { projectId: string | nul
                 </tbody>
               </table>
               <FindingList items={tr.findings} testId="traverse-findings" />
-              {projectId && canWrite && (
-                <div className="space-y-2 border-t border-border-light pt-3">
+              {projectId && (
+                <fieldset disabled={!canWrite} title={writeReason} className="m-0 min-w-0 space-y-2 border-0 border-t border-border-light p-0 pt-3">
                   {failing && (
                     <label className="block">
                       <span className="oe-label">{t('plan.trav.reason', { defaultValue: 'Reason to accept a closure outside its class' })}</span>
@@ -534,10 +536,10 @@ export function TraverseEntry({ projectId, canWrite }: { projectId: string | nul
                     <input type="checkbox" checked={savePoints} onChange={(e) => setSavePoints(e.target.checked)} />
                     {t('plan.trav.save_points', { defaultValue: 'Add the adjusted stations to the point register' })}
                   </label>
-                  <Button icon={<Save size={14} />} disabled={!body || (failing && !reason.trim())} loading={save.isPending} onClick={() => save.mutate()}>
+                  <Button icon={<Save size={14} />} disabledReason={writeReason} disabled={!body || (failing && !reason.trim())} loading={save.isPending} onClick={() => save.mutate()}>
                     {t('plan.trav.accept', { defaultValue: 'Accept and save' })}
                   </Button>
-                </div>
+                </fieldset>
               )}
             </>
           )}

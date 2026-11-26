@@ -17,6 +17,7 @@ import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { useSurveyAccess } from '@/features/survey/useSurveyAccess';
 import { planApi, planKeys, type PlanPointOut } from './api';
 import PlanCanvas from './PlanCanvas';
+import { useRoleReason } from '@/shared/lib/permissionReason';
 import { layer } from './planLayers';
 import type { PlanFeature, PlanLayerSpec } from './types';
 
@@ -40,6 +41,7 @@ export default function PlanEditorPage() {
   const { t } = useTranslation();
   const projectId = useProjectContextStore((s) => s.activeProjectId);
   const { canWrite } = useSurveyAccess();
+  const readOnlyReason = useRoleReason(canWrite, 'editor');
   const [params] = useSearchParams();
   const enabled = !!projectId;
   const points = useQuery({ queryKey: planKeys.points(projectId ?? ''), queryFn: () => planApi.points(projectId!), enabled });
@@ -78,6 +80,7 @@ export default function PlanEditorPage() {
         projectId={projectId}
         layers={layers}
         editable={canWrite}
+        readOnlyReason={readOnlyReason}
         focusFeatureId={focus}
         heightClass="h-[calc(100vh-11rem)] min-h-[28rem]"
         testId="plan-editor"
