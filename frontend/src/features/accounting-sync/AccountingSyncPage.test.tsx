@@ -159,11 +159,13 @@ describe('AccountingSyncPage', () => {
     expect(secret.value).toBe('');
   });
 
-  it('hides the add button from a non-admin', async () => {
+  it('keeps the add button for a non-admin, disabled, with the reason', async () => {
     useAuthStore.setState({ userRole: 'viewer' });
     wrap(<AccountingSyncPage />);
     await screen.findByTestId('connection-c1');
-    expect(screen.queryByRole('button', { name: 'Add connection' })).toBeNull();
+    const add = screen.getByRole('button', { name: 'Add connection' });
+    expect(add).toBeDisabled();
+    expect(add).toHaveAttribute('title', 'Only an administrator can do this.');
   });
 });
 
