@@ -382,13 +382,22 @@ describe('editing an order past draft', () => {
     expect(screen.getByRole('button', { name: 'Edit purchase order' })).toBeInTheDocument();
   });
 
-  it('shows no Edit to a viewer', async () => {
+  it('shows Edit to a viewer disabled, saying an editor can', async () => {
     useAuthStore.setState({ userRole: 'viewer' });
     servePO('draft');
     renderProcurementPage();
     await screen.findByText('PO-0001');
-    expect(screen.queryByRole('button', { name: 'Edit' })).toBeNull();
-    expect(screen.queryByRole('button', { name: 'Edit purchase order' })).toBeNull();
+    const reason = 'Only an editor, manager or administrator can do this.';
+    for (const name of ['Edit', 'Edit purchase order']) {
+      const button = screen.getByRole('button', { name });
+      expect(button).toBeDisabled();
+      expect(button).toHaveAttribute('title', reason);
+    }
+    // Manager actions stay on the row too, disabled with their own reason.
+    expect(screen.getByRole('button', { name: 'Approve PO (commits budget)' })).toHaveAttribute(
+      'title',
+      'Only a manager or administrator can do this.',
+    );
   });
 });
 
