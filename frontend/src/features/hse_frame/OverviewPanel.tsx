@@ -43,6 +43,10 @@ interface Props {
   canManage: boolean;
   /** Approve: the approve permission. */
   canApprove: boolean;
+  /** Why the user may not edit, manage or approve; the actions stay visible, disabled. */
+  editReason?: string;
+  manageReason?: string;
+  approveReason?: string;
 }
 
 const STATE_ICON: Record<ReadinessState, typeof CheckCircle2> = {
@@ -63,7 +67,7 @@ function numberOrNull(value: string): number | null {
   return Number.isFinite(n) ? n : null;
 }
 
-function FactsForm({ projectId, frame, catalogue, write, canEdit }: Pick<Props, 'projectId' | 'frame' | 'catalogue' | 'write' | 'canEdit'>) {
+function FactsForm({ projectId, frame, catalogue, write, canEdit, editReason }: Pick<Props, 'projectId' | 'frame' | 'catalogue' | 'write' | 'canEdit' | 'editReason'>) {
   const { t, i18n } = useTranslation();
   const [draft, setDraft] = useState<FramePatch>({});
   const value = <K extends keyof FramePatch>(key: K) => (key in draft ? draft[key] : frame[key as keyof Frame]) as never;
@@ -176,10 +180,11 @@ function FactsForm({ projectId, frame, catalogue, write, canEdit }: Pick<Props, 
           {t('hseFrame.facts.assessed', { defaultValue: 'The hazardous works have been assessed (none ticked means none planned)' })}
         </label>
       </fieldset>
-      {canEdit && (
+      {(canEdit || editReason) && (
         <div className="mt-3 flex gap-2">
           <Button
             size="sm"
+            disabledReason={editReason}
             disabled={!dirty || write.pending}
             onClick={() => write.send(() => patchFrame(projectId, draft), () => setDraft({}))}
             data-testid="facts-save"
@@ -283,7 +288,7 @@ function SummaryList({ summary }: { summary: Summary | undefined }) {
 
 export function OverviewPanel(props: Props) {
   const { t } = useTranslation();
-  const { projectId, frame, write, canEdit, canManage, canApprove } = props;
+  const { projectId, frame, write, canEdit, canManage, canApprove, editReason, manageReason, approveReason } = props;
   const [note, setNote] = useState<string | null>(null);
   return (
     <div className="space-y-4" data-testid="overview-panel">
@@ -291,11 +296,12 @@ export function OverviewPanel(props: Props) {
         <Badge variant={frame.state === 'binding' || frame.state === 'approved' ? 'success' : frame.state === 'in_review' ? 'blue' : frame.state === 'revising' ? 'warning' : 'neutral'} dot>
           {t(`hseFrame.state.${frame.state}`, { defaultValue: frame.state.replace('_', ' ') })}
         </Badge>
-        {canEdit && (
+        {(canEdit || editReason) && (
           <>
             <Button
               size="sm"
               variant="secondary"
+              disabledReason={editReason}
               disabled={write.pending}
               onClick={() =>
                 write.send(() => applyTemplates(projectId), (r) =>
@@ -309,6 +315,7 @@ export function OverviewPanel(props: Props) {
             <Button
               size="sm"
               variant="secondary"
+              disabledReason={editReason}
               disabled={write.pending}
               onClick={() =>
                 write.send(() => consolidatePermitConditions(projectId), (r) =>
@@ -321,18 +328,18 @@ export function OverviewPanel(props: Props) {
             </Button>
           </>
         )}
-        {canManage && (frame.state === 'draft' || frame.state === 'revising') && (
-          <Button size="sm" disabled={write.pending} onClick={() => write.send(() => submitFrame(projectId))} data-testid="frame-submit">
+        {(canManage || manageReason) && (frame.state === 'draft' || frame.state === 'revising') && (
+          <Button size="sm" disabledReason={manageReason} disabled={write.pending} onClick={() => write.send(() => submitFrame(projectId))} data-testid="frame-submit">
             {t('hseFrame.actions.submit', { defaultValue: 'Submit for review' })}
           </Button>
         )}
-        {canApprove && frame.state === 'in_review' && (
-          <Button size="sm" disabled={write.pending} onClick={() => write.send(() => approveFrame(projectId))} data-testid="frame-approve">
+        {(canApprove || approveReason) && frame.state === 'in_review' && (
+          <Button size="sm" disabledReason={approveReason} disabled={write.pending} onClick={() => write.send(() => approveFrame(projectId))} data-testid="frame-approve">
             {t('hseFrame.actions.approve', { defaultValue: 'Approve' })}
           </Button>
         )}
-        {canManage && (frame.state === 'in_review' || frame.state === 'approved' || frame.state === 'binding') && (
-          <Button size="sm" variant="ghost" disabled={write.pending} onClick={() => write.send(() => reviseFrame(projectId))} data-testid="frame-revise">
+        {(canManage || manageReason) && (frame.state === 'in_review' || frame.state === 'approved' || frame.state === 'binding') && (
+          <Button size="sm" variant="ghost" disabledReason={manageReason} disabled={write.pending} onClick={() => write.send(() => reviseFrame(projectId))} data-testid="frame-revise">
             {t('hseFrame.actions.revise', { defaultValue: 'Revise' })}
           </Button>
         )}
@@ -342,7 +349,7 @@ export function OverviewPanel(props: Props) {
         <DutyList duties={props.duties} />
         <ReadinessList readiness={props.readiness} catalogue={props.catalogue} />
       </div>
-      <FactsForm projectId={projectId} frame={frame} catalogue={props.catalogue} write={write} canEdit={canEdit} />
+      <FactsForm projectId={projectId} frame={frame} catalogue={props.catalogue} write={write} canEdit={canEdit} editReason={editReason} />
       <SummaryList summary={props.summary} />
     </div>
   );

@@ -38,6 +38,8 @@ interface Props {
   write: HseWrite;
   canEdit: boolean;
   canManage: boolean;
+  editReason?: string;
+  manageReason?: string;
 }
 
 const STATUS_TONE: Record<Item['status'], BadgeVariant> = {
@@ -91,7 +93,7 @@ function LinkPicker({ projectId, item, catalogue, write }: { projectId: string; 
   );
 }
 
-function ItemRow({ projectId, item, catalogue, write, canEdit, canManage, onRemove }: Props & { item: Item; onRemove: (target: RemoveTarget) => void }) {
+function ItemRow({ projectId, item, catalogue, write, canEdit, canManage, editReason, manageReason, onRemove }: Props & { item: Item; onRemove: (target: RemoveTarget) => void }) {
   const { t, i18n } = useTranslation();
   const [panel, setPanel] = useState<'none' | 'meet' | 'waive' | 'link'>('none');
   const [note, setNote] = useState('');
@@ -128,8 +130,8 @@ function ItemRow({ projectId, item, catalogue, write, canEdit, canManage, onRemo
                 {t(`hseFrame.link_kind.${l.link_kind}`, { defaultValue: l.link_kind.replace(/_/g, ' ') })}
                 {l.fact ? `: ${[l.fact.number, l.fact.title, l.fact.status].filter(Boolean).join(' | ')}` : ''}
               </span>
-              {canEdit && (
-                <button type="button" className="text-content-tertiary hover:text-semantic-error" aria-label={t('hseFrame.link.remove', { defaultValue: 'Remove link' })} onClick={() => onRemove({ name: [t(`hseFrame.link_kind.${l.link_kind}`, { defaultValue: l.link_kind.replace(/_/g, ' ') }), l.fact?.number].filter(Boolean).join(' '), run: () => removeLink(projectId, item.id, l.id) })}>
+              {(canEdit || editReason) && (
+                <button type="button" disabled={!canEdit} title={editReason} className="text-content-tertiary hover:text-semantic-error disabled:cursor-not-allowed disabled:opacity-50" aria-label={t('hseFrame.link.remove', { defaultValue: 'Remove link' })} onClick={() => onRemove({ name: [t(`hseFrame.link_kind.${l.link_kind}`, { defaultValue: l.link_kind.replace(/_/g, ' ') }), l.fact?.number].filter(Boolean).join(' '), run: () => removeLink(projectId, item.id, l.id) })}>
                   <X size={12} />
                 </button>
               )}
@@ -145,28 +147,28 @@ function ItemRow({ projectId, item, catalogue, write, canEdit, canManage, onRemo
       {(item.status === 'waived' || item.status === 'not_applicable') && (
         <p className="mt-1 text-xs text-content-secondary">{item.waive_reason}</p>
       )}
-      {canEdit && (
+      {(canEdit || editReason) && (
         <div className="mt-2 flex flex-wrap gap-2">
           {open && (
-            <Button size="sm" variant="secondary" onClick={() => setPanel(panel === 'meet' ? 'none' : 'meet')} data-testid="item-meet">
+            <Button size="sm" variant="secondary" disabledReason={editReason} onClick={() => setPanel(panel === 'meet' ? 'none' : 'meet')} data-testid="item-meet">
               {t('hseFrame.item.meet', { defaultValue: 'Mark met' })}
             </Button>
           )}
-          {open && canManage && (
-            <Button size="sm" variant="ghost" onClick={() => setPanel(panel === 'waive' ? 'none' : 'waive')} data-testid="item-waive">
+          {open && (canManage || manageReason || editReason) && (
+            <Button size="sm" variant="ghost" disabledReason={editReason ?? manageReason} onClick={() => setPanel(panel === 'waive' ? 'none' : 'waive')} data-testid="item-waive">
               {t('hseFrame.item.waive', { defaultValue: 'Waive' })}
             </Button>
           )}
           {!open && (
-            <Button size="sm" variant="ghost" onClick={() => write.send(() => reopenItem(projectId, item.id))}>
+            <Button size="sm" variant="ghost" disabledReason={editReason} onClick={() => write.send(() => reopenItem(projectId, item.id))}>
               {t('hseFrame.item.reopen', { defaultValue: 'Reopen' })}
             </Button>
           )}
-          <Button size="sm" variant="ghost" onClick={() => setPanel(panel === 'link' ? 'none' : 'link')}>
+          <Button size="sm" variant="ghost" disabledReason={editReason} onClick={() => setPanel(panel === 'link' ? 'none' : 'link')}>
             {t('hseFrame.item.link', { defaultValue: 'Link a record' })}
           </Button>
           {item.source === 'manual' && (
-            <Button size="sm" variant="ghost" onClick={() => onRemove({ name: item.title, run: () => deleteItem(projectId, item.id) })}>
+            <Button size="sm" variant="ghost" disabledReason={editReason} onClick={() => onRemove({ name: item.title, run: () => deleteItem(projectId, item.id) })}>
               {t('common.delete', { defaultValue: 'Delete' })}
             </Button>
           )}
@@ -273,7 +275,11 @@ export function RegisterPanel(props: Props) {
           </section>
         );
       })}
-      {props.canEdit && <AddItem projectId={props.projectId} catalogue={props.catalogue} write={props.write} />}
+      {(props.canEdit || props.editReason) && (
+        <fieldset disabled={!props.canEdit} title={props.editReason} className="m-0 min-w-0 border-0 p-0">
+          <AddItem projectId={props.projectId} catalogue={props.catalogue} write={props.write} />
+        </fieldset>
+      )}
       <RemoveConfirm target={removing} write={props.write} onClose={() => setRemoving(null)} />
     </div>
   );
