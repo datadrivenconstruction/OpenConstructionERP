@@ -20,8 +20,10 @@ import { Badge, Button, Card, EmptyState, ErrorState, SkeletonTable } from '@/sh
 import type { LegalEntity } from './api';
 import { CompanyDrawer } from './CompanyDrawer';
 import { useCompanies } from './useCompanies';
+import { useRoleReason } from '@/shared/lib/permissionReason';
 
 export function CompaniesCard({ canEdit }: { canEdit: boolean }) {
+  const canEditReason = useRoleReason(canEdit, 'admin');
   const { t } = useTranslation();
   const companiesQ = useCompanies();
   // `new` opens an empty drawer; an id opens that company.
@@ -60,11 +62,9 @@ export function CompaniesCard({ canEdit }: { canEdit: boolean }) {
           defaultValue: 'Add the company that signs your contracts and invoices.',
         })}
         action={
-          canEdit ? (
-            <Button size="sm" icon={<Plus size={14} />} onClick={() => setOpen('new')}>
-              {t('legal_entities.add', { defaultValue: 'Add company' })}
-            </Button>
-          ) : undefined
+          <Button size="sm" icon={<Plus size={14} />} disabledReason={canEditReason} onClick={() => setOpen('new')}>
+            {t('legal_entities.add', { defaultValue: 'Add company' })}
+          </Button>
         }
       />
     );
@@ -80,11 +80,9 @@ export function CompaniesCard({ canEdit }: { canEdit: boolean }) {
         >
           {t('legal_entities.only_one', { defaultValue: '{{name}} is your only company.', name: only.legal_name || only.name })}
         </button>
-        {canEdit && (
-          <Button variant="secondary" size="sm" icon={<Plus size={14} />} onClick={() => setOpen('new')}>
-            {t('legal_entities.add_another', { defaultValue: 'Add another company' })}
-          </Button>
-        )}
+        <Button disabledReason={canEditReason} variant="secondary" size="sm" icon={<Plus size={14} />} onClick={() => setOpen('new')}>
+          {t('legal_entities.add_another', { defaultValue: 'Add another company' })}
+        </Button>
       </div>
     );
   } else {
@@ -162,8 +160,8 @@ export function CompaniesCard({ canEdit }: { canEdit: boolean }) {
             </p>
           </div>
         </div>
-        {canEdit && companies.length > 1 && (
-          <Button size="sm" icon={<Plus size={14} />} onClick={() => setOpen('new')}>
+        {companies.length > 1 && (
+          <Button size="sm" disabledReason={canEditReason} icon={<Plus size={14} />} onClick={() => setOpen('new')}>
             {t('legal_entities.add', { defaultValue: 'Add company' })}
           </Button>
         )}

@@ -48,13 +48,13 @@ function company(over: Partial<LegalEntity>): LegalEntity {
   };
 }
 
-function renderCard(items: LegalEntity[]) {
+function renderCard(items: LegalEntity[], canEdit = true) {
   apiGetMock.mockImplementation(async () => ({ items, total: items.length }));
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
     <QueryClientProvider client={client}>
       <MemoryRouter>
-        <CompaniesCard canEdit />
+        <CompaniesCard canEdit={canEdit} />
       </MemoryRouter>
     </QueryClientProvider>,
   );
@@ -90,5 +90,12 @@ describe('CompaniesCard', () => {
   it('offers to add the first company when there is none', async () => {
     renderCard([]);
     expect(await screen.findByRole('button', { name: /add company/i })).toBeInTheDocument();
+  });
+
+  it('keeps the add button for a viewer, disabled, naming who can use it', async () => {
+    renderCard([], false);
+    const add = await screen.findByRole('button', { name: /add company/i });
+    expect(add).toBeDisabled();
+    expect(add).toHaveAttribute('title', expect.stringMatching(/administrator/i));
   });
 });

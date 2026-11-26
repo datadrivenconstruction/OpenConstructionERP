@@ -5356,6 +5356,8 @@ function PlotDetailDrawer({
     const n = userRole.toLowerCase();
     return ROLES_WITH_OWNER_SCOPED_DELETE.includes(n);
   }, [userRole]);
+  const editReason = useRoleReason(canEdit, 'editor');
+  const deleteReason = useRoleReason(canDelete, 'manager');
 
   const dq = useDisplayQuantity();
   const plot = plots.find((p) => p.id === plotId);
@@ -5391,22 +5393,22 @@ function PlotDetailDrawer({
   });
 
   const transitions = plot ? PLOT_STATUS_TRANSITIONS[plot.status] : [];
-  const canChangeStatus = canEdit && transitions.length > 0;
+  const canChangeStatus = transitions.length > 0;
 
-  const headerActions = (plot && (canEdit || canDelete)) ? (
+  const headerActions = plot ? (
     <div className="inline-flex items-center gap-1">
-      {canEdit && (
-        <button
-          type="button"
-          onClick={() => setEditOpen(true)}
-          className="inline-flex items-center gap-1 rounded-lg border border-border-light px-2 py-1 text-xs font-medium text-content-secondary hover:bg-surface-secondary hover:text-content-primary"
-          data-testid="open-edit-plot"
-        >
-          <Pencil size={12} />
-          {t('common.edit', { defaultValue: 'Edit' })}
-        </button>
-      )}
-      {canDelete && plot.status !== 'sold' && plot.status !== 'handed_over' && (
+      <button
+        type="button"
+        onClick={() => setEditOpen(true)}
+        disabled={!canEdit}
+        title={editReason}
+        className="inline-flex items-center gap-1 rounded-lg border border-border-light px-2 py-1 text-xs font-medium text-content-secondary hover:bg-surface-secondary hover:text-content-primary disabled:cursor-not-allowed disabled:opacity-50"
+        data-testid="open-edit-plot"
+      >
+        <Pencil size={12} />
+        {t('common.edit', { defaultValue: 'Edit' })}
+      </button>
+      {plot.status !== 'sold' && plot.status !== 'handed_over' && (
         <button
           type="button"
           onClick={async () => {
@@ -5424,8 +5426,9 @@ function PlotDetailDrawer({
             if (!ok) return;
             deleteMu.mutate();
           }}
-          className="inline-flex items-center gap-1 rounded-lg border border-semantic-error/30 px-2 py-1 text-xs font-medium text-semantic-error hover:bg-semantic-error-bg"
-          disabled={deleteMu.isPending}
+          className="inline-flex items-center gap-1 rounded-lg border border-semantic-error/30 px-2 py-1 text-xs font-medium text-semantic-error hover:bg-semantic-error-bg disabled:cursor-not-allowed disabled:opacity-50"
+          disabled={deleteMu.isPending || !canDelete}
+          title={deleteReason}
           data-testid="delete-plot"
         >
           <Trash2 size={12} />
@@ -5469,6 +5472,8 @@ function PlotDetailDrawer({
                     className="inline-flex items-center gap-1 rounded-lg focus:outline-none focus:ring-2 focus:ring-oe-blue/40"
                     aria-haspopup="menu"
                     aria-expanded={statusMenuOpen}
+                    disabled={!canEdit}
+                    title={editReason}
                     data-testid="plot-status-pill"
                   >
                     <Badge variant={PLOT_STATUS_VARIANT[plot.status]} dot>{t(`propdev.plot.status.${plot.status}`, { defaultValue: PLOT_STATUS_LABELS[plot.status] ?? plot.status })}</Badge>
@@ -5910,6 +5915,8 @@ export function BuyerDetailDrawer({
     const normalized = userRole.toLowerCase();
     return ROLES_WITH_OWNER_SCOPED_DELETE.includes(normalized);
   }, [userRole]);
+  const editReason = useRoleReason(canEdit, 'editor');
+  const deleteReason = useRoleReason(canDelete, 'manager');
   const [editOpen, setEditOpen] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [confirmCancel, setConfirmCancel] = useState(false);
@@ -5973,19 +5980,18 @@ export function BuyerDetailDrawer({
   // phase so it wins the race for the keystroke.
   const headerActions = (
     <div className="flex items-center gap-1">
-      {canEdit && (
-        <button
-          type="button"
-          onClick={() => setEditOpen(true)}
-          className="inline-flex items-center gap-1 rounded-lg border border-border-light px-2 py-1 text-xs font-medium text-content-secondary hover:bg-surface-secondary hover:text-content-primary"
-          data-testid="open-edit-buyer"
-        >
-          <Pencil size={12} />
-          {t('propdev.edit_buyer', { defaultValue: 'Edit' })}
-        </button>
-      )}
-      {canEdit &&
-        buyer &&
+      <button
+        type="button"
+        onClick={() => setEditOpen(true)}
+        disabled={!canEdit}
+        title={editReason}
+        className="inline-flex items-center gap-1 rounded-lg border border-border-light px-2 py-1 text-xs font-medium text-content-secondary hover:bg-surface-secondary hover:text-content-primary disabled:cursor-not-allowed disabled:opacity-50"
+        data-testid="open-edit-buyer"
+      >
+        <Pencil size={12} />
+        {t('propdev.edit_buyer', { defaultValue: 'Edit' })}
+      </button>
+      {buyer &&
         buyer.status !== 'cancelled' &&
         buyer.status !== 'completed' && (
           <button
@@ -5993,25 +5999,29 @@ export function BuyerDetailDrawer({
             onClick={() => setConfirmCancel(true)}
             className="inline-flex items-center gap-1 rounded-lg border border-border-light px-2 py-1 text-xs font-medium text-semantic-warning hover:bg-semantic-warning-bg hover:border-semantic-warning/30"
             data-testid="cancel-buyer-btn"
-            title={t('propdev.cancel_buyer_hint', {
-              defaultValue: 'Cancel buyer and compute deposit forfeiture',
-            })}
+            disabled={!canEdit}
+            title={
+              editReason ??
+              t('propdev.cancel_buyer_hint', {
+                defaultValue: 'Cancel buyer and compute deposit forfeiture',
+              })
+            }
           >
             <XCircle size={12} />
             {t('propdev.cancel_buyer', { defaultValue: 'Cancel' })}
           </button>
         )}
-      {canDelete && (
-        <button
-          type="button"
-          onClick={() => setConfirmDelete(true)}
-          className="inline-flex items-center gap-1 rounded-lg border border-semantic-error/30 px-2 py-1 text-xs font-medium text-semantic-error hover:bg-semantic-error-bg"
-          data-testid="delete-buyer-btn"
-        >
-          <Trash2 size={12} />
-          {t('common.delete', { defaultValue: 'Delete' })}
-        </button>
-      )}
+      <button
+        type="button"
+        onClick={() => setConfirmDelete(true)}
+        disabled={!canDelete}
+        title={deleteReason}
+        className="inline-flex items-center gap-1 rounded-lg border border-semantic-error/30 px-2 py-1 text-xs font-medium text-semantic-error hover:bg-semantic-error-bg disabled:cursor-not-allowed disabled:opacity-50"
+        data-testid="delete-buyer-btn"
+      >
+        <Trash2 size={12} />
+        {t('common.delete', { defaultValue: 'Delete' })}
+      </button>
     </div>
   );
   return (

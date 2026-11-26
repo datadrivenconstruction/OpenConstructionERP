@@ -33,6 +33,8 @@ import {
   type MemberRole,
   type TaxIdValue,
 } from './api';
+import { useRoleReason } from '@/shared/lib/permissionReason';
+import { DisabledGroup } from '@/shared/ui/DisabledGroup';
 
 interface Props {
   company: LegalEntity | null;
@@ -85,6 +87,7 @@ interface UserRow {
 }
 
 export function CompanyDrawer({ company, isFirst, canEdit, onClose }: Props) {
+  const canEditReason = useRoleReason(canEdit, 'admin');
   const { t } = useTranslation();
   const qc = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
@@ -354,19 +357,17 @@ export function CompanyDrawer({ company, isFirst, canEdit, onClose }: Props) {
                     <bdi className="font-mono text-xs">{b.code}</bdi> {b.name}
                     {b.address?.city ? <span className="text-content-tertiary"> · {b.address.city}</span> : null}
                   </span>
-                  {canEdit && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      icon={<Trash2 size={14} />}
-                      aria-label={t('legal_entities.delete_branch', { defaultValue: 'Delete site' })}
-                      onClick={() => removeSiteM.mutate(b.id)}
-                    />
-                  )}
+                  <Button disabledReason={canEditReason}
+                    variant="ghost"
+                    size="sm"
+                    icon={<Trash2 size={14} />}
+                    aria-label={t('legal_entities.delete_branch', { defaultValue: 'Delete site' })}
+                    onClick={() => removeSiteM.mutate(b.id)}
+                  />
                 </li>
               ))}
             </ul>
-            {canEdit && (
+            <DisabledGroup reason={canEditReason}>
               <div className="flex items-end gap-2">
                 <input
                   className="oe-input w-24"
@@ -398,7 +399,7 @@ export function CompanyDrawer({ company, isFirst, canEdit, onClose }: Props) {
                   {t('legal_entities.add_site', { defaultValue: 'Add site' })}
                 </Button>
               </div>
-            )}
+            </DisabledGroup>
           </section>
         )}
 
@@ -423,20 +424,18 @@ export function CompanyDrawer({ company, isFirst, canEdit, onClose }: Props) {
                         </option>
                       ))}
                     </select>
-                    {canEdit && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        icon={<Trash2 size={14} />}
-                        aria-label={t('legal_entities.remove_person', { defaultValue: 'Remove person' })}
-                        onClick={() => removePersonM.mutate(m.id)}
-                      />
-                    )}
+                    <Button disabledReason={canEditReason}
+                      variant="ghost"
+                      size="sm"
+                      icon={<Trash2 size={14} />}
+                      aria-label={t('legal_entities.remove_person', { defaultValue: 'Remove person' })}
+                      onClick={() => removePersonM.mutate(m.id)}
+                    />
                   </span>
                 </li>
               ))}
             </ul>
-            {canEdit && (
+            <DisabledGroup reason={canEditReason}>
               <div className="flex items-center gap-2">
                 <SearchableSelect
                   className="flex-1"
@@ -450,7 +449,7 @@ export function CompanyDrawer({ company, isFirst, canEdit, onClose }: Props) {
                   {t('legal_entities.add_person', { defaultValue: 'Add person' })}
                 </Button>
               </div>
-            )}
+            </DisabledGroup>
           </section>
         )}
 

@@ -30,6 +30,7 @@ import {
 } from './api';
 import { LetterTextEditor, hasBlockingIssue } from './LetterTextEditor';
 import { sameText, type LetterText } from './letterRules';
+import { useRoleReason } from '@/shared/lib/permissionReason';
 
 const LANGUAGE_NAMES: Record<string, string> = {};
 
@@ -67,6 +68,7 @@ export function LetterTemplatesSettings() {
   const addToast = useToastStore((s) => s.addToast);
   const userRole = useAuthStore((s) => s.userRole);
   const canEdit = userRole === 'admin' || userRole === 'manager';
+  const canEditReason = useRoleReason(canEdit, 'manager');
   const letterTitle = useLetterTitle();
   const moduleTitle = useModuleTitle();
 
@@ -227,27 +229,25 @@ export function LetterTemplatesSettings() {
           ) : (
             <LetterTextEditor value={draft} onChange={setDraft} placeholders={placeholders} readOnly={!canEdit} />
           )}
-          {canEdit && (
-            <div className="mt-4 flex flex-wrap justify-end gap-2">
-              <Button
-                variant="secondary"
-                icon={<RotateCcw size={16} />}
-                disabled={!customised || reset.isPending}
-                onClick={() => reset.mutate()}
-              >
-                {t('letter_templates.reset', { defaultValue: 'Reset to default' })}
-              </Button>
-              <Button
-                variant="primary"
-                icon={<Save size={16} />}
-                disabled={!dirty || blocked || save.isPending}
-                loading={save.isPending}
-                onClick={() => save.mutate()}
-              >
-                {t('letter_templates.save', { defaultValue: 'Save template' })}
-              </Button>
-            </div>
-          )}
+          <div className="mt-4 flex flex-wrap justify-end gap-2">
+            <Button disabledReason={canEditReason}
+              variant="secondary"
+              icon={<RotateCcw size={16} />}
+              disabled={!customised || reset.isPending}
+              onClick={() => reset.mutate()}
+            >
+              {t('letter_templates.reset', { defaultValue: 'Reset to default' })}
+            </Button>
+            <Button disabledReason={canEditReason}
+              variant="primary"
+              icon={<Save size={16} />}
+              disabled={!dirty || blocked || save.isPending}
+              loading={save.isPending}
+              onClick={() => save.mutate()}
+            >
+              {t('letter_templates.save', { defaultValue: 'Save template' })}
+            </Button>
+          </div>
         </Card>
 
         <Card padding="sm">
