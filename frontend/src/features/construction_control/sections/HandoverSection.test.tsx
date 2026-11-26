@@ -17,6 +17,7 @@ import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter } from 'react-router-dom';
+import { useAuthStore } from '@/stores/useAuthStore';
 
 // Automock the whole feature-local API so every export is a vi.fn(). A partial
 // factory mock here would bleed across the construction_control suite (the
@@ -99,6 +100,7 @@ function renderSection() {
 
 describe('HandoverSection', () => {
   beforeEach(() => {
+    useAuthStore.setState({ userRole: 'admin' } as never);
     vi.clearAllMocks();
     (listHandoverPackages as AnyFn).mockResolvedValue([makePackage()]);
     (getHandoverGates as AnyFn).mockResolvedValue(makeGate());

@@ -20,6 +20,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter } from 'react-router-dom';
+import { useAuthStore } from '@/stores/useAuthStore';
 
 import { MaterialsLabsSection } from './MaterialsLabsSection';
 import * as api from '../api';
@@ -139,6 +140,7 @@ const mockedApi = vi.mocked(api);
 
 beforeEach(() => {
   vi.clearAllMocks();
+  useAuthStore.setState({ userRole: 'admin' } as never);
   mockedApi.listMaterials.mockResolvedValue([material()]);
   mockedApi.listTestResults.mockResolvedValue([testResult()]);
   mockedApi.createMaterial.mockResolvedValue(material({ id: 'mat-new' }));

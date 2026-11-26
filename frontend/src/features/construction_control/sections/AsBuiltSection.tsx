@@ -19,6 +19,7 @@
 
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useRoleGate } from '@/shared/lib/useRoleGate';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Plus,
@@ -135,6 +136,8 @@ type ActionKind = 'survey' | 'verify' | 'sign';
 
 export function AsBuiltSection({ projectId }: SectionProps) {
   const { t } = useTranslation();
+  const write = useRoleGate('editor');
+  const manage = useRoleGate('manager');
   const qc = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
   const [showCreate, setShowCreate] = useState(false);
@@ -322,6 +325,7 @@ export function AsBuiltSection({ projectId }: SectionProps) {
           variant="secondary"
           size="sm"
           icon={<ScanLine className="h-4 w-4" />}
+          disabledReason={write.reason}
           onClick={() => setShowImport(true)}
         >
           {t('construction_control.asbuilt.import', { defaultValue: 'Import from scan' })}
@@ -330,6 +334,7 @@ export function AsBuiltSection({ projectId }: SectionProps) {
           variant="primary"
           size="sm"
           icon={<Plus className="h-4 w-4" />}
+          disabledReason={write.reason}
           onClick={() => setShowCreate(true)}
         >
           {t('construction_control.asbuilt.new', { defaultValue: 'New record' })}
@@ -460,6 +465,7 @@ export function AsBuiltSection({ projectId }: SectionProps) {
                             <Button
                               variant="secondary"
                               size="sm"
+                              disabledReason={write.reason}
                               onClick={() => setAction({ kind: 'survey', record: r })}
                             >
                               {t('construction_control.asbuilt.record_survey', {
@@ -471,6 +477,7 @@ export function AsBuiltSection({ projectId }: SectionProps) {
                             <Button
                               variant="secondary"
                               size="sm"
+                              disabledReason={manage.reason}
                               onClick={() => setAction({ kind: 'verify', record: r })}
                             >
                               {t('construction_control.asbuilt.verify', { defaultValue: 'Verify' })}
@@ -481,6 +488,7 @@ export function AsBuiltSection({ projectId }: SectionProps) {
                               variant="primary"
                               size="sm"
                               icon={<ShieldCheck className="h-4 w-4" />}
+                              disabledReason={manage.reason}
                               onClick={() => setAction({ kind: 'sign', record: r })}
                             >
                               {t('construction_control.asbuilt.sign', {
