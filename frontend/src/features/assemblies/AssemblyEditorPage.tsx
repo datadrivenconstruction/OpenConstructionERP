@@ -5,6 +5,7 @@ import { useState, useCallback, useRef, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useHasPermission } from '@/shared/lib/permissionGates';
+import { usePermissionReason } from '@/shared/lib/permissionReason';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   Plus,
@@ -89,9 +90,7 @@ export function AssemblyEditorPage() {
   // the table's controls are disabled, and no handler sends a write the
   // server refuses (drag reorder and inline edits used to, on every try).
   const canEditAssembly = useHasPermission('assemblies.update');
-  const editHint = canEditAssembly
-    ? undefined
-    : t('errors.forbidden', { defaultValue: "You don't have permission to perform this action." });
+  const editHint = usePermissionReason('assemblies.update');
 
   // Drag state for component reordering
   const dragIdx = useRef<number | null>(null);
@@ -282,7 +281,7 @@ export function AssemblyEditorPage() {
 
   const handleAddTag = useCallback(() => {
     const tag = tagInput.trim().toLowerCase();
-    if (!tag || !assembly) return;
+    if (!tag || !assembly || !canEditAssembly) return;
     const currentTags: string[] = assembly.tags ?? [];
     if (currentTags.includes(tag)) {
       setTagInput('');
@@ -290,13 +289,13 @@ export function AssemblyEditorPage() {
     }
     tagsMutation.mutate([...currentTags, tag]);
     setTagInput('');
-  }, [tagInput, assembly, tagsMutation]);
+  }, [tagInput, assembly, tagsMutation, canEditAssembly]);
 
   const handleRemoveTag = useCallback((tag: string) => {
-    if (!assembly) return;
+    if (!assembly || !canEditAssembly) return;
     const currentTags: string[] = assembly.tags ?? [];
     tagsMutation.mutate(currentTags.filter((t) => t !== tag));
-  }, [assembly, tagsMutation]);
+  }, [assembly, tagsMutation, canEditAssembly]);
 
   // Decimals come from the assembly's own currency, not from a literal 2. An
   // assembly priced in CLP, JPY or KRW has no minor unit, so cents there are
@@ -589,6 +588,8 @@ export function AssemblyEditorPage() {
                 {tag}
                 <button aria-label={t('common.remove_tag', { tag, defaultValue: 'Remove tag {{tag}}' })}
                   onClick={() => handleRemoveTag(tag)}
+                disabled={!canEditAssembly}
+                title={editHint}
                   className="ml-1 flex h-4 w-4 items-center justify-center rounded-full hover:bg-violet-200 dark:hover:bg-violet-800/40 transition-colors"
                 >
                   <X size={10} />
@@ -612,7 +613,8 @@ export function AssemblyEditorPage() {
                 variant="secondary"
                 size="sm"
                 onClick={handleAddTag}
-                disabled={!tagInput.trim()}
+                disabled={!tagInput.trim() || !canEditAssembly}
+                title={editHint}
                 className="h-7 px-2 text-xs"
               >
                 +
