@@ -378,6 +378,16 @@ class MaintenanceWorkOrderUpdate(BaseModel):
     currency: str | None = Field(default=None, max_length=3)
 
 
+class MaintenanceDueItem(BaseModel):
+    """A schedule that is due within the lookahead and has no open work order yet."""
+
+    schedule_id: UUID
+    equipment_id: UUID
+    trigger_type: str
+    scheduled_for: str
+    description: str | None = None
+
+
 class MaintenanceWorkOrderResponse(BaseModel):
     """Maintenance work order returned from the API."""
 

@@ -104,6 +104,7 @@ from app.modules.equipment.schemas import (
     InspectionCreate,
     InspectionResponse,
     InspectionUpdate,
+    MaintenanceDueItem,
     MaintenanceScheduleCreate,
     MaintenanceScheduleResponse,
     MaintenanceScheduleUpdate,
@@ -433,6 +434,30 @@ async def delete_schedule(
 
 @router.get(
     "/maintenance-schedules/due-within",
+    response_model=list[MaintenanceDueItem],
+)
+async def list_due_schedules(
+    hours: float = Query(default=50.0, ge=0),
+    equipment_id: uuid.UUID | None = Query(default=None),
+    _perm: None = Depends(RequirePermission("equipment.read")),
+    service: EquipmentService = Depends(_get_service),
+) -> list[MaintenanceDueItem]:
+    """Schedules within `hours` of due that have no open work order. Writes nothing."""
+    due = await service.due_schedules(equipment_id=equipment_id, lookahead_hours=hours)
+    return [
+        MaintenanceDueItem(
+            schedule_id=s.id,
+            equipment_id=s.equipment_id,
+            trigger_type=s.trigger_type,
+            scheduled_for=scheduled_for,
+            description=s.description,
+        )
+        for s, scheduled_for in due
+    ]
+
+
+@router.post(
+    "/maintenance-schedules/due-within/work-orders",
     response_model=list[MaintenanceWorkOrderResponse],
 )
 async def generate_due_work_orders(
@@ -441,7 +466,7 @@ async def generate_due_work_orders(
     _perm: None = Depends(RequirePermission("equipment.update")),
     service: EquipmentService = Depends(_get_service),
 ) -> list[MaintenanceWorkOrderResponse]:
-    """Generate work-order stubs for schedules within `hours` of due."""
+    """Create work-order stubs for schedules within `hours` of due."""
     wos = await service.generate_due_work_orders(
         equipment_id=equipment_id,
         lookahead_hours=hours,

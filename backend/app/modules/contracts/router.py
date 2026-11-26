@@ -1402,7 +1402,7 @@ async def populate_claim_from_progress(
     session: SessionDep,
     user_id: CurrentUserId,
     boq_position_ids: list[uuid.UUID] | None = Query(default=None),
-    _perm: None = Depends(RequirePermission("contracts.update")),
+    _perm: None = Depends(RequirePermission("contracts.read")),
 ) -> ProgressClaimPopulatePreviewResponse:
     """Preview claim lines derived from the latest progress observations.
 
@@ -1411,7 +1411,7 @@ async def populate_claim_from_progress(
     to a BOQ position with at least one progress observation are included; lines
     that are unlinked, have no observation yet, or carry a different currency
     than the claim are skipped and counted (so the UI can hint why). Requires
-    ``contracts.update`` and project-level access on the owning project.
+    ``contracts.read`` and project-level access; committing the lines needs ``contracts.update``.
     """
     await _verify_claim_access(session, claim_id, user_id)
     service = ContractsService(session)
