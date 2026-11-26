@@ -2762,7 +2762,7 @@ const TAB_KEYS: TabKey[] = ['deliveries', 'timeline', 'coverage', 'gates', 'layd
 /** Why this reader may not take an action that exists: the server's reason, else the plain role sentence. */
 function whyNot(t: TFn, verdict: Verdict | undefined): string | undefined {
   if (!denied(verdict)) return undefined;
-  return reasonText(t, verdict) ?? roleReasonText(t, 'editor');
+  return reasonText(t, verdict) ?? roleReasonText(t as unknown as Parameters<typeof roleReasonText>[0], 'editor');
 }
 
 export function SiteLogisticsPage() {

@@ -102,7 +102,6 @@ interface SectionProps {
 export function HandoverSection({ projectId }: SectionProps) {
   const { t } = useTranslation();
   const write = useRoleGate('editor');
-  const manage = useRoleGate('manager');
   const qc = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
 
