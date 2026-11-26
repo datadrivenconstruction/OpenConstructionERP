@@ -27,7 +27,7 @@ pip install --upgrade openconstructionerp && openconstructionerp
 
 <!-- Each badge row is one source line on purpose. A newline between two badges
      renders as a line break here, which stacks them into a single column. -->
-[![License](https://img.shields.io/badge/license-AGPL--3.0-blue)](LICENSE) [![Version](https://img.shields.io/github/v/release/datadrivenconstruction/OpenConstructionERP?label=version&color=green)](https://github.com/datadrivenconstruction/OpenConstructionERP/releases/latest) [![Release downloads](https://img.shields.io/github/downloads/datadrivenconstruction/OpenConstructionERP/total?label=downloads&color=brightgreen)](https://github.com/datadrivenconstruction/OpenConstructionERP/releases) [![PyPI](https://img.shields.io/pypi/v/openconstructionerp?color=informational&label=pypi)](https://pypi.org/project/openconstructionerp/) [![Downloads (pepy · per month)](https://static.pepy.tech/personalized-badge/openconstructionerp?period=month&units=international_system&left_color=grey&right_color=blue&left_text=downloads%20(pepy%20%C2%B7%20per%20month))](https://pepy.tech/project/openconstructionerp) [![Stars](https://img.shields.io/github/stars/datadrivenconstruction/OpenConstructionERP?style=flat&logo=github)](https://github.com/datadrivenconstruction/OpenConstructionERP/stargazers) [![Last commit](https://img.shields.io/github/last-commit/datadrivenconstruction/OpenConstructionERP?color=informational)](https://github.com/datadrivenconstruction/OpenConstructionERP/commits/main)
+[![License](https://img.shields.io/badge/license-AGPL--3.0-blue)](LICENSE) [![Version](https://img.shields.io/github/v/release/datadrivenconstruction/OpenConstructionERP?label=version&color=green)](https://github.com/datadrivenconstruction/OpenConstructionERP/releases/latest) [![Downloads, all sources](https://img.shields.io/badge/downloads-197k%2B%20all%20sources-brightgreen)](#downloads-by-source) [![Release downloads](https://img.shields.io/github/downloads/datadrivenconstruction/OpenConstructionERP/total?label=GitHub%20downloads&color=brightgreen)](https://github.com/datadrivenconstruction/OpenConstructionERP/releases) [![PyPI](https://img.shields.io/pypi/v/openconstructionerp?color=informational&label=pypi)](https://pypi.org/project/openconstructionerp/) [![Downloads (pepy · per month)](https://static.pepy.tech/personalized-badge/openconstructionerp?period=month&units=international_system&left_color=grey&right_color=blue&left_text=downloads%20(pepy%20%C2%B7%20per%20month))](https://pepy.tech/project/openconstructionerp) [![Stars](https://img.shields.io/github/stars/datadrivenconstruction/OpenConstructionERP?style=flat&logo=github)](https://github.com/datadrivenconstruction/OpenConstructionERP/stargazers) [![Last commit](https://img.shields.io/github/last-commit/datadrivenconstruction/OpenConstructionERP?color=informational)](https://github.com/datadrivenconstruction/OpenConstructionERP/commits/main)
 ![Languages](https://img.shields.io/badge/languages-45-orange) ![Cost Items](https://img.shields.io/badge/cost_items-120%2C000%2B-red) [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/datadrivenconstruction/OpenConstructionERP/badge)](https://securityscorecards.dev/viewer/?uri=github.com/datadrivenconstruction/OpenConstructionERP) [![CodeQL](https://github.com/datadrivenconstruction/OpenConstructionERP/actions/workflows/codeql.yml/badge.svg)](https://github.com/datadrivenconstruction/OpenConstructionERP/actions/workflows/codeql.yml) [![Signed releases](https://img.shields.io/badge/releases-Sigstore_signed-8250df)](SECURITY.md)
 
 <video src="https://github.com/user-attachments/assets/20b9b585-93ac-4829-a3dc-0ede9ca9e2fc" controls width="800" playsinline>
@@ -582,32 +582,43 @@ The right-hand side of the diagram is the **automatic data retrieval** layer tha
 
 ## Project growth
 
-<sub>Measured on 6 November 2026 from the GitHub API, PyPI and pypistats.org.</sub>
+<sub>Measured on 26 November 2026 from the GitHub API, the GitHub container registry page and pepy.tech.</sub>
 
 <table>
 <tr>
-<td align="center" width="12.5%"><b>1,268</b><br/><sub>stars</sub></td>
-<td align="center" width="12.5%"><b>395</b><br/><sub>forks</sub></td>
-<td align="center" width="12.5%"><b>16</b><br/><sub>watchers</sub></td>
-<td align="center" width="12.5%"><b>78</b><br/><sub>contributors</sub></td>
-<td align="center" width="12.5%"><b>305</b><br/><sub>releases</sub></td>
-<td align="center" width="12.5%"><b>19.1.0</b><br/><sub>latest&nbsp;release</sub></td>
-<td align="center" width="12.5%"><b>235</b><br/><sub>issues&nbsp;closed</sub></td>
-<td align="center" width="12.5%"><b>49,094</b><br/><sub>PyPI&nbsp;downloads</sub></td>
+<td align="center" width="12.5%"><b>197,000+</b><br/><sub>downloads, all&nbsp;sources</sub></td>
+<td align="center" width="12.5%"><b>1,501</b><br/><sub>stars</sub></td>
+<td align="center" width="12.5%"><b>452</b><br/><sub>forks</sub></td>
+<td align="center" width="12.5%"><b>18</b><br/><sub>watchers</sub></td>
+<td align="center" width="12.5%"><b>79</b><br/><sub>contributors</sub></td>
+<td align="center" width="12.5%"><b>323</b><br/><sub>releases</sub></td>
+<td align="center" width="12.5%"><b>20.4.0</b><br/><sub>latest&nbsp;release</sub></td>
+<td align="center" width="12.5%"><b>264</b><br/><sub>issues&nbsp;closed</sub></td>
 </tr>
 </table>
 
-### Release downloads
+### Downloads by source
 
-<sub>GitHub release assets only, does not include <code>pip install</code> from PyPI, <code>docker pull</code> from GHCR, <code>git clone</code>, or direct downloads from <a href="https://openconstructionerp.com/download">openconstructionerp.com</a>.</sub>
+| Source | Downloads | How it is counted |
+|---|---:|---|
+| PyPI, `pip install openconstructionerp` | 164,407 | all time, [pepy.tech](https://pepy.tech/project/openconstructionerp) |
+| Desktop installers and release files on GitHub | 20,857 | sum of every release asset, [GitHub releases](https://github.com/datadrivenconstruction/OpenConstructionERP/releases) |
+| Docker image, `docker pull ghcr.io/datadrivenconstruction/openconstructionerp` | 12,100 | total pulls as the [container registry](https://github.com/datadrivenconstruction/OpenConstructionERP/pkgs/container/openconstructionerp) shows it (12.1K) |
+| **Total** | **197,000+** | |
+
+<sub>Not counted: `git clone` (GitHub keeps only the last 14 days: 45,984 clones by 2,334 unique cloners on 26 November 2026, much of it automated) and copies passed on inside companies.</sub>
 
 [![Downloads (pepy · per month)](https://static.pepy.tech/personalized-badge/openconstructionerp?period=month&units=international_system&left_color=grey&right_color=blue&left_text=downloads%20(pepy%20%C2%B7%20per%20month))](https://pepy.tech/project/openconstructionerp)
+
+### Release downloads
+
+<sub>GitHub release assets only, accumulated by release date.</sub>
 
 <a href="https://github.com/datadrivenconstruction/OpenConstructionERP/releases">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="docs/readme-charts/download-history-dark.svg">
     <source media="(prefers-color-scheme: light)" srcset="docs/readme-charts/download-history-light.svg">
-    <img alt="OpenConstructionERP release downloads: 17,498 GitHub release asset downloads as of 6 November 2026, accumulated by release date" src="docs/readme-charts/download-history-light.svg" width="720">
+    <img alt="OpenConstructionERP release downloads: 20,857 GitHub release asset downloads as of 26 November 2026, accumulated by release date" src="docs/readme-charts/download-history-light.svg" width="720">
   </picture>
 </a>
 
@@ -619,7 +630,7 @@ The right-hand side of the diagram is the **automatic data retrieval** layer tha
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="docs/readme-charts/star-history-dark.svg">
     <source media="(prefers-color-scheme: light)" srcset="docs/readme-charts/star-history-light.svg">
-    <img alt="OpenConstructionERP star history: 1,268 stars as of 6 November 2026, from 2 April 2026" src="docs/readme-charts/star-history-light.svg" width="720">
+    <img alt="OpenConstructionERP star history: 1,501 stars as of 26 November 2026, from 2 April 2026" src="docs/readme-charts/star-history-light.svg" width="720">
   </picture>
 </a>
 
