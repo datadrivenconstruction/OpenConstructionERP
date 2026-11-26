@@ -10,6 +10,7 @@
 
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useRoleGate } from '@/shared/lib/useRoleGate';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Edit3,
@@ -56,6 +57,8 @@ type TabId = 'routes' | 'instances' | 'analytics';
 
 export function ApprovalRoutesPage() {
   const { t } = useTranslation();
+  const write = useRoleGate('editor');
+  const manage = useRoleGate('manager');
   const qc = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
 
@@ -171,6 +174,7 @@ export function ApprovalRoutesPage() {
             variant="secondary"
             size="sm"
             onClick={() => setDelegationOpen(true)}
+            disabledReason={write.reason}
             icon={<UserCheck size={14} />}
             data-testid="open-delegation-manager"
           >
@@ -179,6 +183,7 @@ export function ApprovalRoutesPage() {
           <Button
             variant="primary"
             size="sm"
+            disabledReason={write.reason}
             onClick={() => {
               setEditingRoute(null);
               setEditorOpen(true);
@@ -413,8 +418,9 @@ export function ApprovalRoutesPage() {
                                         setEditingRoute(r);
                                         setEditorOpen(true);
                                       }}
-                                      className="p-1 rounded hover:bg-surface-secondary text-content-tertiary transition-colors"
-                                      title={t('common.edit', {
+                                      disabled={!write.allowed}
+                                      className="p-1 rounded hover:bg-surface-secondary text-content-tertiary transition-colors disabled:cursor-not-allowed disabled:opacity-40"
+                                      title={write.reason ?? t('common.edit', {
                                         defaultValue: 'Edit',
                                       })}
                                     >
@@ -422,8 +428,9 @@ export function ApprovalRoutesPage() {
                                     </button>
                                     <button
                                       onClick={() => setDeleteTarget(r)}
-                                      className="p-1 rounded hover:bg-surface-secondary text-semantic-error/70 hover:text-semantic-error transition-colors"
-                                      title={t('common.delete', {
+                                      disabled={!manage.allowed}
+                                      className="p-1 rounded hover:bg-surface-secondary text-semantic-error/70 hover:text-semantic-error transition-colors disabled:cursor-not-allowed disabled:opacity-40"
+                                      title={manage.reason ?? t('common.delete', {
                                         defaultValue: 'Delete',
                                       })}
                                     >
