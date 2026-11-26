@@ -2307,6 +2307,10 @@
       "certified_within_assessed": {
         "fail": "Rad {line}: certifierad mängd {certified} överstiger bedömd {assessed}",
         "suggestion": "Certifiera högst det som bedömts, eller bedöm raden på nytt först"
+      },
+      "cumulative_not_decreasing": {
+        "fail": "Rad {line}: ackumulerat {cumulative} är lägre än föregående {prior} utan anteckning",
+        "suggestion": "Lägg till en anteckning som förklarar ommätningen eller rättelsen"
       }
     }
   },

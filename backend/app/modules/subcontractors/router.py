@@ -39,6 +39,7 @@ from app.core.file_signature import (
 )
 from app.core.file_signature import require as require_signature
 from app.core.storage import module_uploads_dir
+from app.core.valuation_grid import ValuationGridResponse, ValuationNote
 from app.dependencies import (
     CurrentUserId,
     RequirePermission,
@@ -1086,6 +1087,63 @@ async def update_payment_application_line_quantities(
         _valuation_findings_input([entity]), target_type="subcontract_payment_line", target_id=str(line_id)
     )
     return resp
+
+
+async def _load_application_for_grid(
+    payment_id: uuid.UUID, user_id: str, session: SessionDep, svc: SubcontractorService
+) -> Any:
+    pa = await svc.payments.get_by_id(payment_id)
+    if pa is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Payment application not found")
+    await _verify_agreement_project(pa.agreement_id, user_id, session, svc)
+    return pa
+
+
+@router.get("/payment-applications/{payment_id}/valuation-grid", response_model=ValuationGridResponse)
+async def get_payment_application_valuation_grid(
+    payment_id: uuid.UUID,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    _perm: None = Depends(RequirePermission("subcontractors.read")),
+) -> ValuationGridResponse:
+    """Claimed, assessed and certified quantity and amount per line, each with its source."""
+    from app.modules.subcontractors.valuation_grid import build_application_grid
+
+    pa = await _load_application_for_grid(payment_id, user_id, session, SubcontractorService(session))
+    return ValuationGridResponse(**await build_application_grid(session, pa))
+
+
+@router.put("/payment-applications/{payment_id}/valuation-note", response_model=ValuationGridResponse)
+async def set_payment_application_valuation_note(
+    payment_id: uuid.UUID,
+    data: ValuationNote,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    _perm: None = Depends(RequirePermission("subcontractors.update")),
+) -> ValuationGridResponse:
+    """Record why a running total went down (or any remark on the valuation). Audited."""
+    from sqlalchemy.orm.attributes import flag_modified
+
+    from app.core.audit_log import log_activity
+    from app.modules.subcontractors.valuation_grid import NOTE_KEY, application_note, build_application_grid
+
+    pa = await _load_application_for_grid(payment_id, user_id, session, SubcontractorService(session))
+    before = application_note(pa)
+    meta = dict(pa.metadata_ or {})
+    meta[NOTE_KEY] = data.note.strip()
+    pa.metadata_ = meta
+    flag_modified(pa, "metadata_")
+    await session.flush()
+    await log_activity(
+        session,
+        actor_id=user_id,
+        entity_type="sub_payment_application",
+        entity_id=str(payment_id),
+        action="valuation_note_updated",
+        module="subcontractors",
+        metadata={"from": before, "to": meta[NOTE_KEY]},
+    )
+    return ValuationGridResponse(**await build_application_grid(session, pa))
 
 
 # ── GC claim rollup ────────────────────────────────────────────────────

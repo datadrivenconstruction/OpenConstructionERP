@@ -33,6 +33,10 @@ export function paymentApplicationKey(claimId: string) {
 }
 
 /** Every claims list, whichever contract it is filtered to. */
+export function valuationGridKey(claimId: string) {
+  return ['contracts', 'claim-valuation-grid', claimId] as const;
+}
+
 export const CLAIMS_LIST_KEY = ['contracts', 'claims'] as const;
 
 /**
@@ -44,6 +48,7 @@ export const CLAIMS_LIST_KEY = ['contracts', 'claims'] as const;
 export function invalidateClaimAfterLineWrite(qc: QueryClient, claimId: string): void {
   qc.invalidateQueries({ queryKey: claimKey(claimId) });
   qc.invalidateQueries({ queryKey: claimLinesKey(claimId) });
+  qc.invalidateQueries({ queryKey: valuationGridKey(claimId) });
   qc.invalidateQueries({ queryKey: aiaApplicationKey(claimId) });
   qc.invalidateQueries({ queryKey: CLAIMS_LIST_KEY });
 }

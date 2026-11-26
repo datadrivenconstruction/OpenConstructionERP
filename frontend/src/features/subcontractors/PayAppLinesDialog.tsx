@@ -26,8 +26,11 @@ import { Button } from '@/shared/ui';
 import { fmtNumber } from '@/shared/lib/formatters';
 import { WideModal, WideModalSection } from '@/shared/ui/WideModal';
 import { MoneyDisplay } from '@/shared/ui/MoneyDisplay';
+import { ValuationGrid } from '@/shared/ui/ValuationGrid';
 import {
+  getPaymentApplicationValuationGrid,
   listPaymentApplicationLines,
+  setPaymentApplicationValuationNote,
   listWorkPackages,
   updatePaymentApplicationLineQuantities,
   type ApprovedLineAmount,
@@ -143,6 +146,7 @@ export function PayAppLinesDialog({
     onSuccess: (out) => {
       setQtyFindings((prev) => ({ ...prev, ...out }));
       qc.invalidateQueries({ queryKey: ['subcontractors', 'pay-app-lines', payment.id] });
+      qc.invalidateQueries({ queryKey: ['subcontractors', 'pay-app-valuation-grid', payment.id] });
     },
   });
   const qtyCell = (ln: PaymentApplicationLine, field: QtyField, label: string) =>
@@ -422,6 +426,18 @@ export function PayAppLinesDialog({
             <span>{payable === null ? '—' : money(payable)}</span>
           </p>
         )}
+      </WideModalSection>
+      <WideModalSection>
+        <h3 className="oe-card-title">
+          {t('valuation_grid.title', { defaultValue: 'Submitted, assessed and certified' })}
+        </h3>
+        <ValuationGrid
+          queryKey={['subcontractors', 'pay-app-valuation-grid', payment.id]}
+          fetchGrid={() => getPaymentApplicationValuationGrid(payment.id)}
+          saveNote={
+            payment.status === 'paid' ? undefined : (note) => setPaymentApplicationValuationNote(payment.id, note)
+          }
+        />
       </WideModalSection>
     </WideModal>
   );

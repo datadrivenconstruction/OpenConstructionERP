@@ -2307,6 +2307,10 @@
       "certified_within_assessed": {
         "fail": "{line} satırı: onaylanan miktar {certified}, değerlendirilen {assessed} miktarından fazla",
         "suggestion": "En fazla değerlendirileni onaylayın veya satırı önce yeniden değerlendirin"
+      },
+      "cumulative_not_decreasing": {
+        "fail": "Satır {line}: kümülatif toplam {cumulative}, önceki {prior} değerinin altında ve not yok",
+        "suggestion": "Yeniden ölçümü veya düzeltmeyi açıklayan bir not ekleyin"
       }
     }
   },

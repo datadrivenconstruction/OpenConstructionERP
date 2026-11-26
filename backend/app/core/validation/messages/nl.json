@@ -2307,6 +2307,10 @@
       "certified_within_assessed": {
         "fail": "Regel {line}: gecertificeerde hoeveelheid {certified} ligt boven de beoordeelde {assessed}",
         "suggestion": "Certificeer hooguit wat is beoordeeld, of beoordeel de regel eerst opnieuw"
+      },
+      "cumulative_not_decreasing": {
+        "fail": "Regel {line}: cumulatief {cumulative} ligt onder het vorige {prior} zonder notitie",
+        "suggestion": "Voeg een notitie toe die de hermeting of correctie verklaart"
       }
     }
   },

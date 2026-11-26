@@ -2307,6 +2307,10 @@
       "certified_within_assessed": {
         "fail": "Line {line}: certified quantity {certified} is above the assessed {assessed}",
         "suggestion": "Certify at most what was assessed, or reassess the line first"
+      },
+      "cumulative_not_decreasing": {
+        "fail": "Line {line}: running total {cumulative} is below the previous {prior} with no note",
+        "suggestion": "Write a valuation note explaining the remeasure or correction"
       }
     }
   },

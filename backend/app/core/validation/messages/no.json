@@ -2307,6 +2307,10 @@
       "certified_within_assessed": {
         "fail": "Linje {line}: sertifisert mengde {certified} er over vurdert {assessed}",
         "suggestion": "Sertifiser høyst det som er vurdert, eller vurder linjen på nytt først"
+      },
+      "cumulative_not_decreasing": {
+        "fail": "Linje {line}: akkumulert {cumulative} er lavere enn forrige {prior} uten merknad",
+        "suggestion": "Legg til en merknad som forklarer ommålingen eller rettelsen"
       }
     }
   },

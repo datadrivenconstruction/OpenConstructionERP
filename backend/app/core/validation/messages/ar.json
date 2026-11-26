@@ -2307,6 +2307,10 @@
       "certified_within_assessed": {
         "fail": "السطر {line}: الكمية المعتمدة {certified} أكبر من المقيّمة {assessed}",
         "suggestion": "اعتمد بحد أقصى ما قُيّم، أو أعد تقييم السطر أولًا"
+      },
+      "cumulative_not_decreasing": {
+        "fail": "البند {line}: الإجمالي التراكمي {cumulative} أقل من السابق {prior} دون ملاحظة",
+        "suggestion": "أضف ملاحظة توضح إعادة القياس أو التصحيح"
       }
     }
   },

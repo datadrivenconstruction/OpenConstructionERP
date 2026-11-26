@@ -2307,6 +2307,10 @@
       "certified_within_assessed": {
         "fail": "Ред {line}: сертифицирано количество {certified} е над оцененото {assessed}",
         "suggestion": "Сертифицирайте най-много оцененото или първо преоценете реда"
+      },
+      "cumulative_not_decreasing": {
+        "fail": "Ред {line}: натрупаният сбор {cumulative} е под предишния {prior} без бележка",
+        "suggestion": "Добавете бележка, обясняваща премерването или корекцията"
       }
     }
   },

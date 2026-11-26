@@ -2307,6 +2307,10 @@
       "certified_within_assessed": {
         "fail": "Baris {line}: kuantitas tersertifikasi {certified} melebihi yang dinilai {assessed}",
         "suggestion": "Sertifikasi paling banyak yang dinilai, atau nilai ulang barisnya dahulu"
+      },
+      "cumulative_not_decreasing": {
+        "fail": "Baris {line}: kumulatif {cumulative} di bawah sebelumnya {prior} tanpa catatan",
+        "suggestion": "Tambahkan catatan yang menjelaskan pengukuran ulang atau koreksi"
       }
     }
   },

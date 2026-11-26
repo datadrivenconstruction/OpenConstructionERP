@@ -39,6 +39,7 @@ _BLOCKS: dict[str, str] = {
     "approval_routes.bands_contiguous": "route_steps",
     "valuation.assessed_within_submitted": "valuation_lines",
     "valuation.certified_within_assessed": "valuation_lines",
+    "valuation.cumulative_not_decreasing": "valuation_lines",
 }
 
 
@@ -140,6 +141,14 @@ class CertifiedWithinAssessedRule(_CommercialRule):
     description = "Flags a valuation line whose certified quantity is above the quantity assessed."
 
 
+class CumulativeNotDecreasingRule(_CommercialRule):
+    rule_id = "valuation.cumulative_not_decreasing"
+    name = "Cumulative Not Decreasing"
+    severity = Severity.WARNING
+    category = RuleCategory.CONSISTENCY
+    description = "Flags a valuation line whose running total falls below the previous document's with no note."
+
+
 COMMERCIAL_CONTROL_RULES: tuple[ValidationRule, ...] = (
     TargetRateBasisRule(),
     UnmappedCostRule(),
@@ -147,6 +156,7 @@ COMMERCIAL_CONTROL_RULES: tuple[ValidationRule, ...] = (
     BandsContiguousRule(),
     AssessedWithinSubmittedRule(),
     CertifiedWithinAssessedRule(),
+    CumulativeNotDecreasingRule(),
 )
 
 

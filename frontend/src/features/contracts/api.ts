@@ -21,6 +21,7 @@ import {
   getAuthToken,
   triggerDownload,
 } from '@/shared/lib/api';
+import type { ValuationGridData } from '@/shared/ui/ValuationGrid';
 import type { Page } from '@/shared/lib/api';
 import { downloadRecordPdf } from '@/shared/lib/documentExport';
 
@@ -856,6 +857,19 @@ export function updateClaimLineQuantities(
   data: { assessed_qty?: string; certified_qty?: string },
 ): Promise<ProgressClaimLine> {
   return apiPatch<ProgressClaimLine>(`/v1/contracts/progress-claim-lines/${lineId}/quantities`, data);
+}
+
+/** Submitted, assessed and certified quantity and amount per line, each with its source. */
+export function getClaimValuationGrid(claimId: string): Promise<ValuationGridData> {
+  return apiGet<ValuationGridData>(`/v1/contracts/progress-claims/${encodeURIComponent(claimId)}/valuation-grid`);
+}
+
+/** Record the claim's valuation note (why a running total went down). */
+export function setClaimValuationNote(claimId: string, note: string): Promise<ValuationGridData> {
+  return apiPut<ValuationGridData>(
+    `/v1/contracts/progress-claims/${encodeURIComponent(claimId)}/valuation-note`,
+    { note },
+  );
 }
 
 /* ── Progress bridge (Gap I) ──────────────────────────────────────────── */

@@ -2307,6 +2307,10 @@
       "certified_within_assessed": {
         "fail": "{line} qator: tasdiqlangan miqdor {certified} baholangan {assessed} dan ko'p",
         "suggestion": "Ko'pi bilan baholanganini tasdiqlang yoki avval qatorni qayta baholang"
+      },
+      "cumulative_not_decreasing": {
+        "fail": "{line}-qator: yigʻma jami {cumulative} oldingi {prior} dan past, izoh yoʻq",
+        "suggestion": "Qayta oʻlchash yoki tuzatishni tushuntiruvchi izoh qoʻshing"
       }
     }
   },

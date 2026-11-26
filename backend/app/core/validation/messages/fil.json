@@ -2307,6 +2307,10 @@
       "certified_within_assessed": {
         "fail": "Linya {line}: ang sertipikadong dami na {certified} ay lampas sa tinasang {assessed}",
         "suggestion": "Sertipikahan nang hindi lalampas sa tinasa, o tasahin muna muli ang linya"
+      },
+      "cumulative_not_decreasing": {
+        "fail": "Linya {line}: ang naipong kabuuan {cumulative} ay mas mababa sa nakaraang {prior} nang walang tala",
+        "suggestion": "Magdagdag ng tala na nagpapaliwanag ng muling pagsukat o pagwawasto"
       }
     }
   },

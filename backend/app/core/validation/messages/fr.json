@@ -2307,6 +2307,10 @@
       "certified_within_assessed": {
         "fail": "Ligne {line} : la quantité certifiée {certified} dépasse la quantité évaluée {assessed}",
         "suggestion": "Certifiez au plus ce qui a été évalué, ou réévaluez d'abord la ligne"
+      },
+      "cumulative_not_decreasing": {
+        "fail": "Ligne {line} : le cumul {cumulative} est inférieur au précédent {prior} sans note",
+        "suggestion": "Ajoutez une note expliquant le remétré ou la correction"
       }
     }
   },

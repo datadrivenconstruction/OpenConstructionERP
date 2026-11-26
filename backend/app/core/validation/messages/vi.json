@@ -2307,6 +2307,10 @@
       "certified_within_assessed": {
         "fail": "Dòng {line}: khối lượng xác nhận {certified} vượt khối lượng thẩm định {assessed}",
         "suggestion": "Xác nhận tối đa phần đã thẩm định, hoặc thẩm định lại dòng trước"
+      },
+      "cumulative_not_decreasing": {
+        "fail": "Dòng {line}: lũy kế {cumulative} thấp hơn kỳ trước {prior} mà không có ghi chú",
+        "suggestion": "Thêm ghi chú giải thích việc đo lại hoặc điều chỉnh"
       }
     }
   },

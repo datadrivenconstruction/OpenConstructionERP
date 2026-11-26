@@ -2307,6 +2307,10 @@
       "certified_within_assessed": {
         "fail": "행 {line}: 확인 수량 {certified}이(가) 사정 수량 {assessed}보다 큽니다",
         "suggestion": "사정한 수량까지만 확인하거나 먼저 행을 다시 사정하세요"
+      },
+      "cumulative_not_decreasing": {
+        "fail": "{line} 행: 누계 {cumulative}이(가) 이전 {prior}보다 낮지만 메모가 없습니다",
+        "suggestion": "재측정 또는 정정 사유를 메모로 남기세요"
       }
     }
   },

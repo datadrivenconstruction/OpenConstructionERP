@@ -2307,6 +2307,10 @@
       "certified_within_assessed": {
         "fail": "Linia {line}: cantitatea certificată {certified} depășește cea evaluată {assessed}",
         "suggestion": "Certificați cel mult cât s-a evaluat sau reevaluați mai întâi linia"
+      },
+      "cumulative_not_decreasing": {
+        "fail": "Linia {line}: cumulatul {cumulative} este sub cel anterior {prior} fără notă",
+        "suggestion": "Adăugați o notă care explică remăsurarea sau corecția"
       }
     }
   },
