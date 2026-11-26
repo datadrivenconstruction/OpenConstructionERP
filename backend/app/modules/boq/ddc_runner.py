@@ -66,6 +66,10 @@ import re
 import struct
 import subprocess
 import sys
+import threading
+from collections.abc import Callable, Iterator
+from contextlib import contextmanager
+from contextvars import ContextVar
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -207,6 +211,81 @@ def convert_timeout_s(fmt: str) -> int:
     return default
 
 
+# ── Conversion slots ──────────────────────────────────────────────────────
+#
+# One RVT conversion can take more than a gigabyte of memory. On the 3 GB host
+# the platform targets, two uploads converting side by side are enough to get
+# the process killed, so conversions queue for a slot instead of piling up.
+
+#: Conversions allowed at once unless ``OE_CONVERT_MAX_PARALLEL`` says otherwise.
+DEFAULT_MAX_PARALLEL_CONVERSIONS = 1
+
+#: Called (in the converter thread) once this conversion holds a slot.
+slot_acquired_hook: ContextVar[Callable[[], None] | None] = ContextVar("ddc_slot_acquired_hook", default=None)
+
+_slots_lock = threading.Lock()
+_slots: threading.BoundedSemaphore | None = None
+_slots_size = 0
+_slots_in_use = 0
+
+
+def max_parallel_conversions() -> int:
+    """Conversions allowed at once: ``OE_CONVERT_MAX_PARALLEL`` (a positive integer), default 1."""
+    raw = (os.getenv("OE_CONVERT_MAX_PARALLEL") or "").strip()
+    try:
+        value = int(raw)
+    except ValueError:
+        return DEFAULT_MAX_PARALLEL_CONVERSIONS
+    return value if value > 0 else DEFAULT_MAX_PARALLEL_CONVERSIONS
+
+
+def _slot_semaphore() -> threading.BoundedSemaphore:
+    global _slots, _slots_size
+    with _slots_lock:
+        if _slots is None:
+            _slots_size = max_parallel_conversions()
+            _slots = threading.BoundedSemaphore(_slots_size)
+        return _slots
+
+
+def converter_slots_busy() -> bool:
+    """True when a new conversion would have to wait for a running one to finish."""
+    _slot_semaphore()
+    with _slots_lock:
+        return _slots_in_use >= _slots_size
+
+
+@contextmanager
+def converter_slot() -> Iterator[None]:
+    """Hold one conversion slot for the duration of the block, waiting for it if needed."""
+    global _slots_in_use
+    sem = _slot_semaphore()
+    sem.acquire()
+    with _slots_lock:
+        _slots_in_use += 1
+    try:
+        hook = slot_acquired_hook.get()
+        if hook is not None:
+            try:
+                hook()
+            except Exception:  # noqa: BLE001 - a progress hint must never stop the conversion
+                logger.debug("slot_acquired_hook failed", exc_info=True)
+        yield
+    finally:
+        with _slots_lock:
+            _slots_in_use -= 1
+        sem.release()
+
+
+def _reset_converter_slots() -> None:
+    """Forget the slot pool so the next conversion re-reads ``OE_CONVERT_MAX_PARALLEL`` (tests)."""
+    global _slots, _slots_size, _slots_in_use
+    with _slots_lock:
+        _slots = None
+        _slots_size = 0
+        _slots_in_use = 0
+
+
 def run_converter(
     fmt: str, exe: Path, input_path: Path, work_dir: Path, *, timeout: float | None = None
 ) -> ConverterRun:
@@ -247,11 +326,12 @@ def run_converter(
             **kwargs,
         )
 
-    proc = _call(cmd)
-    if fmt == "ifc" and proc.returncode == 2 and b"--glb" in (proc.stderr or b""):
-        # A converter build older than the 3D model option: tables only.
-        cmd = build_command(fmt, exe, input_path, out_dir, timeout=timeout, glb=False)
+    with converter_slot():
         proc = _call(cmd)
+        if fmt == "ifc" and proc.returncode == 2 and b"--glb" in (proc.stderr or b""):
+            # A converter build older than the 3D model option: tables only.
+            cmd = build_command(fmt, exe, input_path, out_dir, timeout=timeout, glb=False)
+            proc = _call(cmd)
     run = ConverterRun(
         fmt=fmt,
         command=cmd,
