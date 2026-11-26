@@ -29311,6 +29311,7 @@
         "pdf_details_router.py",
         "pdf_export.py",
         "permissions.py",
+        "price_alignment.py",
         "price_list_carry.py",
         "quantity_baseline.py",
         "quantity_formula.py",
@@ -30751,6 +30752,19 @@
           "path": "/boqs/{boq_id}/recalculate-rates/",
           "handler": "recalculate_rates",
           "request_schema": "BOQService"
+        },
+        {
+          "method": "GET",
+          "path": "/boqs/{boq_id}/price-alignment/",
+          "handler": "preview_price_alignment",
+          "response_model": "PriceAlignmentPreview"
+        },
+        {
+          "method": "POST",
+          "path": "/boqs/{boq_id}/price-alignment/apply/",
+          "handler": "apply_price_alignment",
+          "response_model": "PriceAlignmentApplyResult",
+          "request_schema": "PriceAlignmentApplyRequest"
         },
         {
           "method": "POST",
@@ -35835,6 +35849,146 @@
               "name": "mode",
               "type": "Literal['fixed', 'percentage']",
               "default": "'fixed'"
+            }
+          ]
+        },
+        {
+          "class_name": "PriceAlignmentRow",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "One resource whose price in the bill differs from the sheet.",
+          "fields": [
+            {
+              "name": "resource_key",
+              "type": "str"
+            },
+            {
+              "name": "name",
+              "type": "str"
+            },
+            {
+              "name": "code",
+              "type": "str"
+            },
+            {
+              "name": "unit",
+              "type": "str"
+            },
+            {
+              "name": "currency",
+              "type": "str"
+            },
+            {
+              "name": "old_prices",
+              "type": "list[str]"
+            },
+            {
+              "name": "new_price",
+              "type": "str"
+            },
+            {
+              "name": "delta",
+              "type": "str"
+            },
+            {
+              "name": "positions",
+              "type": "int"
+            },
+            {
+              "name": "rows",
+              "type": "int"
+            },
+            {
+              "name": "amount_delta",
+              "type": "str"
+            },
+            {
+              "name": "position_ids",
+              "type": "list[str]"
+            }
+          ]
+        },
+        {
+          "class_name": "PriceAlignmentPreview",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Dry run of aligning a bill with a region's resource price sheet.",
+          "fields": [
+            {
+              "name": "boq_id",
+              "type": "UUID"
+            },
+            {
+              "name": "region",
+              "type": "str"
+            },
+            {
+              "name": "sheet_resources",
+              "type": "int"
+            },
+            {
+              "name": "rows",
+              "type": "list[PriceAlignmentRow]"
+            },
+            {
+              "name": "rows_skipped_currency",
+              "type": "int"
+            },
+            {
+              "name": "amount_delta_total",
+              "type": "str"
+            }
+          ]
+        },
+        {
+          "class_name": "PriceAlignmentApplyRequest",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "The resources the estimator selected from the preview.",
+          "fields": [
+            {
+              "name": "region",
+              "type": "str"
+            },
+            {
+              "name": "resource_keys",
+              "type": "list[str]"
+            }
+          ]
+        },
+        {
+          "class_name": "PriceAlignmentApplyResult",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "What the alignment wrote.",
+          "fields": [
+            {
+              "name": "boq_id",
+              "type": "UUID"
+            },
+            {
+              "name": "region",
+              "type": "str"
+            },
+            {
+              "name": "positions_changed",
+              "type": "int"
+            },
+            {
+              "name": "rows_changed",
+              "type": "int"
+            },
+            {
+              "name": "rates_kept",
+              "type": "int"
+            },
+            {
+              "name": "audit_id",
+              "type": "UUID"
             }
           ]
         }
@@ -84345,11 +84499,13 @@
         "query_builder.py",
         "region_currency.py",
         "repository.py",
+        "resource_impact.py",
         "resource_pricing.py",
         "router.py",
         "schemas.py",
         "service.py",
         "translations/__init__.py",
+        "validators.py",
         "vector_adapter.py"
       ],
       "manifest": {
@@ -84804,6 +84960,20 @@
           "handler": "reprice_region_endpoint",
           "response_model": "RepriceResponse",
           "request_schema": "ResourcePriceService"
+        },
+        {
+          "method": "POST",
+          "path": "/resource-prices/{region}/impact/",
+          "handler": "preview_resource_change",
+          "response_model": "ResourceImpactResponse",
+          "request_schema": "ResourceChangeRequest"
+        },
+        {
+          "method": "POST",
+          "path": "/resource-prices/{region}/impact/apply/",
+          "handler": "apply_resource_change",
+          "response_model": "ResourceImpactResponse",
+          "request_schema": "ResourceChangeRequest"
         },
         {
           "method": "POST",
@@ -86531,9 +86701,248 @@
               "type": "str | None"
             }
           ]
+        },
+        {
+          "class_name": "ResourceChangeRequest",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "A proposed change to one resource of a region's price sheet.\n\nLeave a field out to keep it. ``expected_cost_items`` is the count the\npreview showed; apply refuses when the region moved since, so a person\nalways confirms the numbers that are written.",
+          "fields": [
+            {
+              "name": "resource_key",
+              "type": "str"
+            },
+            {
+              "name": "new_unit_price",
+              "type": "DecimalMoney | None"
+            },
+            {
+              "name": "new_name",
+              "type": "str | None"
+            },
+            {
+              "name": "expected_cost_items",
+              "type": "int | None"
+            }
+          ]
+        },
+        {
+          "class_name": "ResourceImpactCostItem",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "One work item that uses the resource, with the rate it would get.",
+          "fields": [
+            {
+              "name": "id",
+              "type": "UUID"
+            },
+            {
+              "name": "code",
+              "type": "str"
+            },
+            {
+              "name": "description",
+              "type": "str"
+            },
+            {
+              "name": "unit",
+              "type": "str"
+            },
+            {
+              "name": "lines",
+              "type": "int"
+            },
+            {
+              "name": "old_rate",
+              "type": "DecimalMoney"
+            },
+            {
+              "name": "new_rate",
+              "type": "DecimalMoney"
+            },
+            {
+              "name": "delta",
+              "type": "DecimalMoney"
+            }
+          ]
+        },
+        {
+          "class_name": "ResourceImpactAssembly",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "One assembly built on an affected work item (delta before bid factor).",
+          "fields": [
+            {
+              "name": "id",
+              "type": "UUID"
+            },
+            {
+              "name": "code",
+              "type": "str"
+            },
+            {
+              "name": "name",
+              "type": "str"
+            },
+            {
+              "name": "components",
+              "type": "int"
+            },
+            {
+              "name": "delta",
+              "type": "DecimalMoney"
+            }
+          ]
+        },
+        {
+          "class_name": "ResourceImpactBoq",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "One bill whose resource rows carry the resource (not changed by apply).",
+          "fields": [
+            {
+              "name": "boq_id",
+              "type": "UUID"
+            },
+            {
+              "name": "boq_name",
+              "type": "str"
+            },
+            {
+              "name": "project_id",
+              "type": "UUID"
+            },
+            {
+              "name": "positions",
+              "type": "int"
+            },
+            {
+              "name": "delta_total",
+              "type": "DecimalMoney"
+            }
+          ]
+        },
+        {
+          "class_name": "ResourceImpactIssue",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "A finding of the change checks; ``blocking`` ones stop the apply.",
+          "fields": [
+            {
+              "name": "code",
+              "type": "str"
+            },
+            {
+              "name": "blocking",
+              "type": "bool"
+            },
+            {
+              "name": "detail",
+              "type": "str",
+              "default": "''"
+            }
+          ]
+        },
+        {
+          "class_name": "ResourceImpactResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Preview (or result) of a resource change across the platform.",
+          "fields": [
+            {
+              "name": "region",
+              "type": "str"
+            },
+            {
+              "name": "resource_key",
+              "type": "str"
+            },
+            {
+              "name": "new_resource_key",
+              "type": "str"
+            },
+            {
+              "name": "old_name",
+              "type": "str"
+            },
+            {
+              "name": "new_name",
+              "type": "str"
+            },
+            {
+              "name": "old_unit_price",
+              "type": "DecimalMoney"
+            },
+            {
+              "name": "new_unit_price",
+              "type": "DecimalMoney"
+            },
+            {
+              "name": "currency",
+              "type": "str"
+            },
+            {
+              "name": "cost_items_count",
+              "type": "int"
+            },
+            {
+              "name": "cost_items_unreadable",
+              "type": "int"
+            },
+            {
+              "name": "cost_items_delta_total",
+              "type": "DecimalMoney"
+            },
+            {
+              "name": "cost_items",
+              "type": "list[ResourceImpactCostItem]"
+            },
+            {
+              "name": "assemblies_count",
+              "type": "int"
+            },
+            {
+              "name": "assemblies",
+              "type": "list[ResourceImpactAssembly]"
+            },
+            {
+              "name": "boq_positions_count",
+              "type": "int"
+            },
+            {
+              "name": "boqs",
+              "type": "list[ResourceImpactBoq]"
+            },
+            {
+              "name": "issues",
+              "type": "list[ResourceImpactIssue]"
+            },
+            {
+              "name": "truncated",
+              "type": "bool",
+              "default": "False"
+            },
+            {
+              "name": "applied",
+              "type": "bool",
+              "default": "False"
+            },
+            {
+              "name": "audit_id",
+              "type": "UUID | None",
+              "default": "None"
+            }
+          ]
         }
       ],
       "import_dependencies": [
+        "assemblies",
         "bim_hub",
         "boq",
         "catalog",
@@ -344129,10 +344538,10 @@
     },
     {
       "name": "boq",
-      "ts_files": 294,
+      "ts_files": 295,
       "css_files": 0,
       "test_files": 145,
-      "total_files": 294
+      "total_files": 295
     },
     {
       "name": "buyer-portal",
@@ -344374,10 +344783,10 @@
     },
     {
       "name": "costs",
-      "ts_files": 51,
+      "ts_files": 53,
       "css_files": 0,
-      "test_files": 22,
-      "total_files": 51
+      "test_files": 23,
+      "total_files": 53
     },
     {
       "name": "credentials",
@@ -346271,6 +346680,7 @@
       "variations"
     ],
     "costs": [
+      "assemblies",
       "bim_hub",
       "boq",
       "catalog",
@@ -347825,11 +348235,11 @@
     "total_models": 992,
     "total_columns": 11598,
     "total_relationships": 264,
-    "total_routes": 5601,
-    "total_schemas": 5231,
-    "total_python_files": 3848,
+    "total_routes": 5605,
+    "total_schemas": 5241,
+    "total_python_files": 3851,
     "frontend_features": 254,
-    "frontend_ts_files": 4582,
+    "frontend_ts_files": 4585,
     "frontend_backend_mapped": 224
   },
   "frontend_backend_mapping": {

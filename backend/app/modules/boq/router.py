@@ -417,6 +417,20 @@ async def _verify_boqs_owner(
         )
 
 
+async def _verify_boq_project(session: SessionDep, boq_id: uuid.UUID, user_id: str) -> None:
+    """Resolve the bill's project and run the shared project access check on it (404 when missing or denied)."""
+    from sqlalchemy import select
+
+    from app.modules.boq.models import BOQ
+
+    project_id = (await session.execute(select(BOQ.project_id).where(BOQ.id == boq_id))).scalar_one_or_none()
+    if project_id is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=translate("errors.boq_not_found", locale=get_locale())
+        )
+    await verify_project_access(project_id, user_id, session)
+
+
 async def _verify_project_owner_for_boq(
     session: SessionDep,
     project_id: uuid.UUID,
@@ -4219,7 +4233,7 @@ async def preview_price_alignment(
     """List resources whose price in the bill differs from the region's price sheet. Writes nothing."""
     from app.modules.boq.price_alignment import preview_alignment
 
-    await _verify_boq_owner(session, boq_id, _user_id, payload)
+    await _verify_boq_project(session, boq_id, _user_id)
     return PriceAlignmentPreview(**await preview_alignment(session, boq_id, region))
 
 
@@ -4239,7 +4253,7 @@ async def apply_price_alignment(
     """Rewrite the selected resources' rows at the sheet price and re-derive unit rates. 409 on a locked bill."""
     from app.modules.boq.price_alignment import apply_alignment
 
-    await _verify_boq_owner(session, boq_id, _user_id, payload)
+    await _verify_boq_project(session, boq_id, _user_id)
     return PriceAlignmentApplyResult(
         **await apply_alignment(session, boq_id, body.region, body.resource_keys, user_id=_user_id)
     )

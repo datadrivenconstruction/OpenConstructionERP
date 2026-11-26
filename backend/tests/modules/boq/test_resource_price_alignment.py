@@ -133,3 +133,29 @@ async def test_apply_rewrites_selected_rows_and_rederives_rates() -> None:
         assert Decimal(p2.unit_rate) == Decimal("180.00")
         assert p3.metadata_["resources"][0]["unit_rate"] == 90
         assert p1.metadata_["price_alignment"]["rows"][0]["to"] == "120"
+
+
+@pytest.mark.asyncio
+async def test_another_users_bill_is_refused_on_both_alignment_routes() -> None:
+    from fastapi import HTTPException
+
+    from app.modules.boq.models import BOQ
+    from app.modules.boq.router import apply_price_alignment, preview_price_alignment
+    from app.modules.boq.schemas import PriceAlignmentApplyRequest
+    from app.modules.projects.models import Project
+
+    async with transactional_session(disable_fks=True) as session:
+        owner, stranger = uuid.uuid4(), str(uuid.uuid4())
+        project = Project(id=uuid.uuid4(), name="P", owner_id=owner)
+        boq = BOQ(id=uuid.uuid4(), project_id=project.id, name="B")
+        session.add_all([project, boq])
+        await session.flush()
+        with pytest.raises(HTTPException) as exc:
+            await preview_price_alignment(boq.id, stranger, {}, session, region=REGION)
+        assert exc.value.status_code == 404
+        body = PriceAlignmentApplyRequest(region=REGION, resource_keys=["CEM-1"])
+        with pytest.raises(HTTPException) as exc:
+            await apply_price_alignment(boq.id, body, stranger, {}, session)
+        assert exc.value.status_code == 404
+        preview = await preview_price_alignment(boq.id, str(owner), {}, session, region=REGION)
+        assert preview.rows == []

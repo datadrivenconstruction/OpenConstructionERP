@@ -177,3 +177,37 @@ async def test_apply_writes_rates_name_and_sheet_and_audits() -> None:
         audit = (await session.execute(select(AuditEntry).where(AuditEntry.id == res.audit_id))).scalar_one()
         assert audit.details["cost_items"] == 2
         assert audit.details["old_unit_price"] == "100.00"
+
+
+@pytest.mark.asyncio
+async def test_bill_positions_of_inaccessible_projects_are_not_counted() -> None:
+    from app.modules.boq.models import BOQ, Position
+    from app.modules.projects.models import Project
+
+    async with transactional_session(disable_fks=True) as session:
+        await _seed(session)
+        owner, stranger = uuid.uuid4(), str(uuid.uuid4())
+        project = Project(id=uuid.uuid4(), name="P", owner_id=owner)
+        boq = BOQ(id=uuid.uuid4(), project_id=project.id, name="B")
+        session.add_all([project, boq])
+        await session.flush()
+        session.add(
+            Position(
+                id=uuid.uuid4(),
+                boq_id=boq.id,
+                ordinal="01",
+                description="p",
+                unit="m3",
+                quantity="1",
+                unit_rate="80.00",
+                total="80.00",
+                source="manual",
+                metadata_={"resources": [_cem(0.3, cost=30.0)]},
+            )
+        )
+        await session.flush()
+        svc = ResourceImpactService(session)
+        mine = await svc.preview(REGION, "CEM-1", new_unit_price=Decimal("120"), user_id=str(owner))
+        theirs = await svc.preview(REGION, "CEM-1", new_unit_price=Decimal("120"), user_id=stranger)
+        assert mine.boq_positions_count == 1
+        assert theirs.boq_positions_count == 0
