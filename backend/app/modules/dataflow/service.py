@@ -23,6 +23,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.data_paths import DataPath, Importance, Latest, Sum
 from app.modules.dataflow import live
 from app.modules.dataflow.graph import Graph, module_dir
+from app.modules.dataflow.phases import PHASES, phase_of
 from app.modules.dataflow.registry import REGISTRY, CounterSpec
 from app.modules.dataflow.schemas import (
     EdgeOut,
@@ -211,6 +212,7 @@ async def module_paths(
         installed=module in graph.loaded,
         why=decl.why if decl else "",
         roles=list(decl.roles) if decl else [],
+        phase=phase_of(module, graph.manifests.get(module)),
         project_id=project_id,
         generated_at=datetime.now(UTC),
     )
@@ -249,6 +251,7 @@ async def module_paths(
                     route=_route(path.route, project_id),
                     importance=str(path.importance),
                     breaks=path.breaks,
+                    edge=path.edge,
                     live=live_item,
                 )
             )
@@ -317,6 +320,7 @@ async def platform_map(
             name=name,
             display_name=getattr(manifest, "display_name", name),
             category=getattr(manifest, "category", "core"),
+            phase=phase_of(name, manifest),
             declared=decl is not None,
             installed=name in graph.loaded,
             why=decl.why if decl else "",
@@ -390,7 +394,12 @@ async def platform_map(
             )
         )
     return PlatformMap(
-        project_id=project_id, modules=modules, edges=edges, health=health, generated_at=datetime.now(UTC)
+        project_id=project_id,
+        modules=modules,
+        edges=edges,
+        health=health,
+        phases=list(PHASES),
+        generated_at=datetime.now(UTC),
     )
 
 
