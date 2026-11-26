@@ -3,6 +3,7 @@
 """Phone-log module manifest."""
 
 from app.core.module_loader import InferenceDeclaration, InferenceRole, ModuleManifest
+from app.modules.phonelog.data_paths import DATA_PATHS
 
 manifest = ModuleManifest(
     name="oe_phonelog",
@@ -32,4 +33,5 @@ manifest = ModuleManifest(
             "edits before it becomes a record. The module name describes filing, not inference"
         ),
     ),
+    data_paths=DATA_PATHS,
 )

@@ -2,6 +2,7 @@
 """Payroll module manifest."""
 
 from app.core.module_loader import ModuleManifest
+from app.modules.payroll.data_paths import DATA_PATHS
 
 manifest = ModuleManifest(
     name="oe_payroll",
@@ -19,4 +20,5 @@ manifest = ModuleManifest(
     optional_depends=["oe_field_time", "oe_costmodel", "oe_notifications", "oe_certified_payroll"],
     auto_install=True,
     enabled=True,
+    data_paths=DATA_PATHS,
 )

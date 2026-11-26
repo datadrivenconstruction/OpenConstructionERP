@@ -3,6 +3,7 @@
 """Procurement concept module manifest."""
 
 from app.core.module_loader import ModuleManifest
+from app.modules.procurement_concept.data_paths import DATA_PATHS
 
 manifest = ModuleManifest(
     name="oe_procurement_concept",
@@ -22,4 +23,5 @@ manifest = ModuleManifest(
     depends=["oe_users", "oe_projects", "oe_project_governance", "oe_bid_management", "oe_rfq_bidding"],
     auto_install=True,
     enabled=True,
+    data_paths=DATA_PATHS,
 )

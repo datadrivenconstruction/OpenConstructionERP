@@ -3,6 +3,7 @@
 """Plan Room module manifest."""
 
 from app.core.module_loader import ModuleManifest
+from app.modules.plan_room.data_paths import DATA_PATHS
 
 manifest = ModuleManifest(
     name="oe_plan_room",
@@ -20,4 +21,5 @@ manifest = ModuleManifest(
     optional_depends=["oe_punchlist", "oe_markups", "oe_takeoff"],
     auto_install=True,
     enabled=True,
+    data_paths=DATA_PATHS,
 )

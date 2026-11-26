@@ -3,6 +3,7 @@
 """Module manifest for oe_project_tax."""
 
 from app.core.module_loader import ModuleManifest
+from app.modules.project_tax.data_paths import DATA_PATHS
 
 manifest = ModuleManifest(
     name="oe_project_tax",
@@ -23,4 +24,5 @@ manifest = ModuleManifest(
     depends=["oe_projects", "oe_users"],
     auto_install=True,
     enabled=True,
+    data_paths=DATA_PATHS,
 )

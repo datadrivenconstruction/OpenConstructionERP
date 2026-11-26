@@ -3,6 +3,7 @@
 """Pipeline Builder module manifest."""
 
 from app.core.module_loader import ModuleManifest
+from app.modules.pipelines.data_paths import DATA_PATHS
 
 manifest = ModuleManifest(
     name="oe_pipelines",
@@ -18,4 +19,5 @@ manifest = ModuleManifest(
     depends=["oe_users", "oe_projects", "oe_validation"],
     auto_install=False,
     enabled=True,
+    data_paths=DATA_PATHS,
 )

@@ -7,6 +7,7 @@ and BCF API 3.0 format for interoperability with external BIM tools.
 """
 
 from app.core.module_loader import ModuleManifest
+from app.modules.opencde_api.data_paths import DATA_PATHS
 
 manifest = ModuleManifest(
     name="oe_opencde_api",
@@ -19,4 +20,5 @@ manifest = ModuleManifest(
     optional_depends=["oe_documents"],
     auto_install=True,
     enabled=True,
+    data_paths=DATA_PATHS,
 )

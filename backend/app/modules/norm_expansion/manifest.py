@@ -3,6 +3,7 @@
 """Production-norm expansion module manifest."""
 
 from app.core.module_loader import InferenceDeclaration, InferenceRole, ModuleManifest
+from app.modules.norm_expansion.data_paths import DATA_PATHS
 
 manifest = ModuleManifest(
     name="oe_norm_expansion",
@@ -29,4 +30,5 @@ manifest = ModuleManifest(
             "obligation for it"
         ),
     ),
+    data_paths=DATA_PATHS,
 )

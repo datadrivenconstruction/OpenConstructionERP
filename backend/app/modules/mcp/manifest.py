@@ -3,6 +3,7 @@
 """MCP server module manifest."""
 
 from app.core.module_loader import InferenceDeclaration, InferenceRole, ModuleManifest
+from app.modules.mcp.data_paths import DATA_PATHS
 
 manifest = ModuleManifest(
     name="oe_mcp",
@@ -33,4 +34,5 @@ manifest = ModuleManifest(
             "Changes view, under the gates of that record's own REST route for that person"
         ),
     ),
+    data_paths=DATA_PATHS,
 )
