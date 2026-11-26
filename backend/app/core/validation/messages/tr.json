@@ -2283,6 +2283,10 @@
       "unmapped_cost": {
         "fail": "{kind} {label} için WBS veya maliyet kodu yok: taahhüt {committed}, gerçekleşen {actual}",
         "suggestion": "CVR'nin yerleştirebilmesi için sipariş satırını, taşeron sözleşmesini veya faturayı bir WBS öğesine atayın"
+      },
+      "wbs_rollup_reconciles": {
+        "fail": "İKY {label}: {field} {total}, ancak kendi satırları ve alt öğeleri toplamı {parts}",
+        "suggestion": "Raporu maliyet yapısından yenileyin veya proje dışındaki bir İKY öğesine bağlı satırları kontrol edin"
       }
     },
     "procurement": {

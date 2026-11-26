@@ -35,6 +35,7 @@ RULE_SET = "commercial_control"
 _BLOCKS: dict[str, str] = {
     "cvr.target_rate_basis": "budget_positions",
     "cvr.unmapped_cost": "unmapped_sources",
+    "cvr.wbs_rollup_reconciles": "wbs_rollup_nodes",
     "procurement.line_over_committed": "grid_rows",
     "approval_routes.bands_contiguous": "route_steps",
     "valuation.assessed_within_submitted": "valuation_lines",
@@ -109,6 +110,14 @@ class UnmappedCostRule(_CommercialRule):
     description = "Flags a commitment or actual cost that carries no WBS or cost code, so the CVR cannot place it."
 
 
+class WbsRollupReconcilesRule(_CommercialRule):
+    rule_id = "cvr.wbs_rollup_reconciles"
+    name = "WBS Rollup Reconciles"
+    severity = Severity.ERROR
+    category = RuleCategory.CONSISTENCY
+    description = "A WBS parent equals its own lines plus its children; the report equals its roots plus unallocated."
+
+
 class LineOverCommittedRule(_CommercialRule):
     rule_id = "procurement.line_over_committed"
     name = "Bill Line Over-Committed"
@@ -152,6 +161,7 @@ class CumulativeNotDecreasingRule(_CommercialRule):
 COMMERCIAL_CONTROL_RULES: tuple[ValidationRule, ...] = (
     TargetRateBasisRule(),
     UnmappedCostRule(),
+    WbsRollupReconcilesRule(),
     LineOverCommittedRule(),
     BandsContiguousRule(),
     AssessedWithinSubmittedRule(),

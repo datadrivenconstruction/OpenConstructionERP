@@ -2283,6 +2283,10 @@
       "unmapped_cost": {
         "fail": "{kind} {label}: puudub WBS ja kulukood, kohustus {committed}, tegelik {actual}",
         "suggestion": "Siduge tellimuse rida, alltöövõtt või arve WBS-elemendiga, et CVR saaks selle paigutada"
+      },
+      "wbs_rollup_reconciles": {
+        "fail": "WBS {label}: {field} on {total}, kuid oma read ja alamelemendid annavad {parts}",
+        "suggestion": "Värskenda aruannet kulustruktuurist või kontrolli ridu, mis on seotud projektivälise WBS-elemendiga"
       }
     },
     "procurement": {

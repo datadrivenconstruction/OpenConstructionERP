@@ -2283,6 +2283,10 @@
       "unmapped_cost": {
         "fail": "{kind} {label} کا کوئی WBS یا لاگت کوڈ نہیں: واجب {committed}، اصل {actual}",
         "suggestion": "آرڈر لائن، ذیلی ٹھیکہ یا انوائس کو WBS عنصر سے منسلک کریں تاکہ CVR اسے شامل کر سکے"
+      },
+      "wbs_rollup_reconciles": {
+        "fail": "WBS {label}: {field} کی قدر {total} ہے مگر اپنی سطریں اور ذیلی عناصر کا مجموعہ {parts} ہے",
+        "suggestion": "رپورٹ کو لاگت کے ڈھانچے سے تازہ کریں یا منصوبے سے باہر کے عنصر سے جڑی سطریں چیک کریں"
       }
     },
     "procurement": {

@@ -2283,6 +2283,10 @@
       "unmapped_cost": {
         "fail": "{kind} {label} heeft geen WBS of kostencode: verplicht {committed}, werkelijk {actual}",
         "suggestion": "Boek de orderregel, onderaanneming of factuur op een WBS-element zodat de CVR hem kan plaatsen"
+      },
+      "wbs_rollup_reconciles": {
+        "fail": "WBS {label}: {field} is {total}, maar eigen regels en onderliggende elementen tellen op tot {parts}",
+        "suggestion": "Vul het rapport opnieuw vanuit de kostenstructuur of controleer regels op een WBS-element buiten dit project"
       }
     },
     "procurement": {

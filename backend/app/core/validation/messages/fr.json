@@ -2283,6 +2283,10 @@
       "unmapped_cost": {
         "fail": "{kind} {label} n'a ni WBS ni code de coût : engagé {committed}, réel {actual}",
         "suggestion": "Imputez la ligne de commande, la sous-traitance ou la facture à un élément du WBS pour que le CVR puisse la placer"
+      },
+      "wbs_rollup_reconciles": {
+        "fail": "WBS {label} : {field} vaut {total}, mais ses lignes et ses enfants totalisent {parts}",
+        "suggestion": "Actualisez le rapport depuis la structure de coûts ou vérifiez les lignes affectées à un élément WBS hors projet"
       }
     },
     "procurement": {

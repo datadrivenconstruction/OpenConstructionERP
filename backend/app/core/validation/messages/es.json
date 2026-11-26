@@ -2283,6 +2283,10 @@
       "unmapped_cost": {
         "fail": "{kind} {label} no tiene EDT ni código de coste: comprometido {committed}, real {actual}",
         "suggestion": "Asigne la línea de pedido, el subcontrato o la factura a un elemento de la EDT para que el CVR pueda ubicarlo"
+      },
+      "wbs_rollup_reconciles": {
+        "fail": "EDT {label}: {field} es {total}, pero sus líneas y sus hijos suman {parts}",
+        "suggestion": "Actualice el informe desde la estructura de costes o revise las líneas asignadas a un elemento EDT fuera del proyecto"
       }
     },
     "procurement": {

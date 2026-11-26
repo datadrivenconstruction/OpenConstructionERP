@@ -2283,6 +2283,10 @@
       "unmapped_cost": {
         "fail": "{kind} {label} nu are WBS sau cod de cost: angajat {committed}, realizat {actual}",
         "suggestion": "Alocați linia de comandă, subcontractul sau factura unui element WBS ca CVR să o poată încadra"
+      },
+      "wbs_rollup_reconciles": {
+        "fail": "WBS {label}: {field} este {total}, dar liniile proprii și copiii însumează {parts}",
+        "suggestion": "Actualizați raportul din structura de costuri sau verificați liniile alocate unui element WBS din afara proiectului"
       }
     },
     "procurement": {

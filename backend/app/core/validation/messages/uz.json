@@ -2283,6 +2283,10 @@
       "unmapped_cost": {
         "fail": "{kind} {label} uchun WBS yoki xarajat kodi yo'q: majburiyat {committed}, haqiqiy {actual}",
         "suggestion": "CVR uni hisobga olishi uchun buyurtma qatori, subpudrat yoki hisob-fakturani WBS elementiga biriktiring"
+      },
+      "wbs_rollup_reconciles": {
+        "fail": "WBS {label}: {field} {total}, lekin oʻz qatorlari va quyi elementlar yigʻindisi {parts}",
+        "suggestion": "Hisobotni xarajat tuzilmasidan yangilang yoki loyihadan tashqari WBS elementiga bogʻlangan qatorlarni tekshiring"
       }
     },
     "procurement": {

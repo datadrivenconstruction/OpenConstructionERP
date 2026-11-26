@@ -2283,6 +2283,10 @@
       "unmapped_cost": {
         "fail": "{kind} {label} 没有 WBS 或成本编码：已承诺 {committed}，实际 {actual}",
         "suggestion": "请将订单行、分包或发票归入一个 WBS 元素，以便成本价值核对表能够归集"
+      },
+      "wbs_rollup_reconciles": {
+        "fail": "WBS {label}：{field} 为 {total}，但其自身行与子项合计为 {parts}",
+        "suggestion": "从成本结构刷新报告，或检查挂在项目外 WBS 元素上的行"
       }
     },
     "procurement": {

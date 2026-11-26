@@ -92597,7 +92597,8 @@
         "spine_rollup.py",
         "tests/__init__.py",
         "tests/test_cvr_math.py",
-        "validators.py"
+        "validators.py",
+        "wbs_tree.py"
       ],
       "manifest": {
         "name": "oe_cvr",
@@ -92956,6 +92957,13 @@
           "path": "/reports/{report_id}/summary/",
           "handler": "get_report_summary",
           "response_model": "CvrSummaryResponse",
+          "request_schema": "CvrService"
+        },
+        {
+          "method": "GET",
+          "path": "/reports/{report_id}/wbs-rollup/",
+          "handler": "get_report_wbs_rollup",
+          "response_model": "CvrWbsRollupResponse",
           "request_schema": "CvrService"
         },
         {
@@ -94022,6 +94030,163 @@
             {
               "name": "totals",
               "type": "dict[str, DecimalMoney]"
+            },
+            {
+              "name": "findings",
+              "type": "list[dict[str, Any]]"
+            }
+          ]
+        },
+        {
+          "class_name": "CvrWbsFigures",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Budget, commitment, cost, value and forecast of one WBS node (or the report).",
+          "fields": [
+            {
+              "name": "budget_cost",
+              "type": "DecimalMoney"
+            },
+            {
+              "name": "committed_cost",
+              "type": "DecimalMoney"
+            },
+            {
+              "name": "cost_to_date",
+              "type": "DecimalMoney"
+            },
+            {
+              "name": "value_to_date",
+              "type": "DecimalMoney"
+            },
+            {
+              "name": "forecast_cost",
+              "type": "DecimalMoney"
+            },
+            {
+              "name": "forecast_value",
+              "type": "DecimalMoney"
+            },
+            {
+              "name": "margin_to_date",
+              "type": "DecimalMoney"
+            },
+            {
+              "name": "forecast_margin",
+              "type": "DecimalMoney"
+            },
+            {
+              "name": "forecast_margin_pct",
+              "type": "DecimalMoney"
+            }
+          ]
+        },
+        {
+          "class_name": "CvrWbsNode",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "One WBS element: figures beneath it and the report lines they come from.",
+          "fields": [
+            {
+              "name": "id",
+              "type": "str"
+            },
+            {
+              "name": "parent_id",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "code",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "name",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "depth",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "child_count",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "line_ids",
+              "type": "list[str]"
+            },
+            {
+              "name": "line_count",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "positions",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "own",
+              "type": "CvrWbsFigures"
+            },
+            {
+              "name": "total",
+              "type": "CvrWbsFigures"
+            }
+          ]
+        },
+        {
+          "class_name": "CvrWbsRollupResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "A CVR report rolled up the project's WBS tree, parents before children.",
+          "fields": [
+            {
+              "name": "report_id",
+              "type": "UUID"
+            },
+            {
+              "name": "project_id",
+              "type": "UUID"
+            },
+            {
+              "name": "period",
+              "type": "str"
+            },
+            {
+              "name": "currency",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "line_count",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "wbs_count",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "nodes",
+              "type": "list[CvrWbsNode]"
+            },
+            {
+              "name": "unallocated",
+              "type": "CvrWbsNode"
+            },
+            {
+              "name": "totals",
+              "type": "CvrWbsFigures"
             },
             {
               "name": "findings",
@@ -344955,10 +345120,10 @@
     },
     {
       "name": "cvr",
-      "ts_files": 11,
+      "ts_files": 13,
       "css_files": 0,
-      "test_files": 3,
-      "total_files": 11
+      "test_files": 4,
+      "total_files": 13
     },
     {
       "name": "daily-diary",
@@ -348379,11 +348544,11 @@
     "total_models": 992,
     "total_columns": 11598,
     "total_relationships": 264,
-    "total_routes": 5612,
-    "total_schemas": 5243,
-    "total_python_files": 3854,
+    "total_routes": 5613,
+    "total_schemas": 5246,
+    "total_python_files": 3855,
     "frontend_features": 254,
-    "frontend_ts_files": 4588,
+    "frontend_ts_files": 4590,
     "frontend_backend_mapped": 224
   },
   "frontend_backend_mapping": {

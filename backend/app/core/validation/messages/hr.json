@@ -2283,6 +2283,10 @@
       "unmapped_cost": {
         "fail": "{kind} {label} nema WBS ni šifru troška: ugovoreno {committed}, stvarno {actual}",
         "suggestion": "Knjižite stavku narudžbe, podugovor ili račun na element WBS-a kako bi ga CVR mogao smjestiti"
+      },
+      "wbs_rollup_reconciles": {
+        "fail": "WBS {label}: {field} iznosi {total}, a vlastite stavke i podređeni elementi daju {parts}",
+        "suggestion": "Osvježite izvješće iz strukture troškova ili provjerite stavke vezane uz WBS element izvan projekta"
       }
     },
     "procurement": {

@@ -2283,6 +2283,10 @@
       "unmapped_cost": {
         "fail": "{kind} {label} saknar WBS och kostnadskod: åtaget {committed}, utfall {actual}",
         "suggestion": "Kontera orderraden, underentreprenaden eller fakturan på ett WBS-element så att CVR kan placera den"
+      },
+      "wbs_rollup_reconciles": {
+        "fail": "WBS {label}: {field} är {total}, men egna rader och underelement summerar till {parts}",
+        "suggestion": "Uppdatera rapporten från kostnadsstrukturen eller kontrollera rader bokade på ett WBS-element utanför projektet"
       }
     },
     "procurement": {

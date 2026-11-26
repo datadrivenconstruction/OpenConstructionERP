@@ -2283,6 +2283,10 @@
       "unmapped_cost": {
         "fail": "{kind} {label} का कोई WBS या लागत कोड नहीं: प्रतिबद्ध {committed}, वास्तविक {actual}",
         "suggestion": "ऑर्डर लाइन, उप-ठेका या बिल को किसी WBS तत्व से जोड़ें ताकि CVR उसे रख सके"
+      },
+      "wbs_rollup_reconciles": {
+        "fail": "WBS {label}: {field} {total} है, पर इसकी अपनी पंक्तियों और उप-तत्वों का योग {parts} है",
+        "suggestion": "रिपोर्ट को लागत ढांचे से ताज़ा करें या परियोजना से बाहर के WBS तत्व से जुड़ी पंक्तियाँ जाँचें"
       }
     },
     "procurement": {

@@ -2283,6 +2283,10 @@
       "unmapped_cost": {
         "fail": "{kind} {label} nie ma WBS ani kodu kosztu: zaangażowane {committed}, rzeczywiste {actual}",
         "suggestion": "Przypisz pozycję zamówienia, podwykonawstwo lub fakturę do elementu WBS, aby CVR mógł ją ująć"
+      },
+      "wbs_rollup_reconciles": {
+        "fail": "WBS {label}: {field} wynosi {total}, a własne pozycje i elementy podrzędne sumują się do {parts}",
+        "suggestion": "Odśwież raport ze struktury kosztów lub sprawdź pozycje przypisane do elementu WBS spoza projektu"
       }
     },
     "procurement": {

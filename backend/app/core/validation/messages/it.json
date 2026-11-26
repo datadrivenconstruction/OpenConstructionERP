@@ -2283,6 +2283,10 @@
       "unmapped_cost": {
         "fail": "{kind} {label} non ha WBS né codice di costo: impegnato {committed}, consuntivo {actual}",
         "suggestion": "Imputate la riga d'ordine, il subappalto o la fattura a un elemento WBS perché il CVR possa collocarla"
+      },
+      "wbs_rollup_reconciles": {
+        "fail": "WBS {label}: {field} è {total}, ma le sue righe e i figli sommano {parts}",
+        "suggestion": "Aggiorna il report dalla struttura dei costi o controlla le righe assegnate a un elemento WBS esterno al progetto"
       }
     },
     "procurement": {

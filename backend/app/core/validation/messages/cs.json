@@ -2283,6 +2283,10 @@
       "unmapped_cost": {
         "fail": "{kind} {label} nemá WBS ani nákladový kód: zavázáno {committed}, skutečnost {actual}",
         "suggestion": "Přiřaďte řádek objednávky, subdodávku nebo fakturu k prvku WBS, aby ji CVR mohl zařadit"
+      },
+      "wbs_rollup_reconciles": {
+        "fail": "WBS {label}: {field} je {total}, ale vlastní řádky a podřízené prvky dávají {parts}",
+        "suggestion": "Obnovte výkaz ze struktury nákladů nebo zkontrolujte řádky přiřazené k prvku WBS mimo projekt"
       }
     },
     "procurement": {

@@ -80,6 +80,7 @@ import {
 } from './api';
 import { CommercialFindings } from './CommercialFindings';
 import { CommitmentGridCard } from './CommitmentGridCard';
+import { WbsRollupCard } from './WbsRollupCard';
 import { InsightsPanel, InsightsToggleButton, useModuleInsights } from '@/features/insights';
 import { buildCvrInsights } from './cvrInsights';
 import { payappDraftFromClaim, progressClaimLabel } from './payappFromClaim';
@@ -911,6 +912,8 @@ export function CvrPage() {
           </Card>
         </>
       )}
+
+      {selectedReportId && <WbsRollupCard reportId={selectedReportId} lines={lines} />}
 
       {projectId && <CommitmentGridCard projectId={projectId} />}
 

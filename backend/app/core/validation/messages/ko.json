@@ -2283,6 +2283,10 @@
       "unmapped_cost": {
         "fail": "{kind} {label}에 WBS나 원가 코드가 없습니다: 약정 {committed}, 실적 {actual}",
         "suggestion": "CVR이 배치할 수 있도록 발주 행, 하도급 또는 송장을 WBS 요소에 연결하세요"
+      },
+      "wbs_rollup_reconciles": {
+        "fail": "WBS {label}: {field}은(는) {total}이지만 자체 행과 하위 요소의 합계는 {parts}입니다",
+        "suggestion": "원가 구조에서 보고서를 새로 고치거나 프로젝트 밖 WBS 요소에 연결된 행을 확인하세요"
       }
     },
     "procurement": {
