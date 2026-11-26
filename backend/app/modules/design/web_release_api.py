@@ -31,8 +31,12 @@ def manifest_url(installed: wr.Installed) -> str:
     return f"{FILES_PREFIX}/{installed.version}/manifest.json"
 
 
-async def status_view(session, user_id: str) -> dict[str, Any]:
-    """What this ERP has (engine, installed bundle), what the feed offers, and whether this person may fetch it."""
+async def status_view(session, user_id: str, *, with_feed: bool = True) -> dict[str, Any]:
+    """What this ERP has (engine, installed bundle), what the feed offers, and whether this person may fetch it.
+
+    ``with_feed=False`` answers from disk only: opening the editor must not wait on a release host that may be
+    slow or unreachable (air-gapped servers); the feed is then ``not_checked``.
+    """
     s = get_design_settings()
     installed = wr.read_installed(wr.editor_root(s))
     try:
@@ -40,19 +44,20 @@ async def status_view(session, user_id: str) -> dict[str, Any]:
         key_error = None
     except wr.ReleaseError as exc:
         key_ok, key_error = False, exc.code
-    feed: dict[str, Any]
-    try:
-        f = await wr.read_feed(s)
-        feed = {
-            "state": "available",
-            "version": f.version,
-            "bytes": f.zip_bytes,
-            "bridge": list(f.bridge),
-            "published_at": f.published_at or None,
-            "problem": wr.bridge_problem(f.bridge),
-        }
-    except wr.ReleaseError as exc:
-        feed = {"state": exc.code.removeprefix("feed_") if exc.code.startswith("feed_") else "invalid"}
+    feed: dict[str, Any] = {"state": "not_checked"}
+    if with_feed:
+        try:
+            f = await wr.read_feed(s)
+            feed = {
+                "state": "available",
+                "version": f.version,
+                "bytes": f.zip_bytes,
+                "bridge": list(f.bridge),
+                "published_at": f.published_at or None,
+                "problem": wr.bridge_problem(f.bridge),
+            }
+        except wr.ReleaseError as exc:
+            feed = {"state": exc.code.removeprefix("feed_") if exc.code.startswith("feed_") else "invalid"}
     role = await _role(session, user_id)
     update = (
         feed.get("state") == "available"
@@ -83,8 +88,8 @@ async def status_view(session, user_id: str) -> dict[str, Any]:
 
 def register(router: APIRouter) -> None:
     @router.get("/web-editor")
-    async def web_editor_status(session: SessionDep, user_id: CurrentUserId) -> dict[str, Any]:
-        return await status_view(session, user_id)
+    async def web_editor_status(session: SessionDep, user_id: CurrentUserId, feed: bool = True) -> dict[str, Any]:
+        return await status_view(session, user_id, with_feed=feed)
 
     @router.post("/web-editor/install", status_code=status.HTTP_202_ACCEPTED)
     async def web_editor_install(session: SessionDep, user_id: CurrentUserId) -> dict[str, Any]:

@@ -21,7 +21,9 @@ import { bridgeError, connectBridge, framePort, modulePort, type BridgeHost, typ
 import { DRAFT_FILE, type SelectedElement } from './bridge/protocol';
 import { aiConfigured, chainTip, deviceMode, draftHeader, importOnlyTip, openMessage } from './data/workspace';
 import { readConsent, type Payload } from './data/webEditor';
-import { currentPayload, startBackgroundLoad } from './editorPayload';
+import { currentPayload, forgetPayload, startBackgroundLoad, usePayloadGeneration } from './editorPayload';
+import { busy, fetchLocalWebEditorStatus, WEB_EDITOR_LOCAL_KEY } from './webEditorApi';
+import { statusLine } from './WebEditorPanel';
 import { fetchDraft, fetchRights, makeRevision, readDraftPackage, readRevisionFile, saveDraft, type DesignRights, type DraftView } from './draftApi';
 import type { RevisionView } from './data/revisions';
 import { ACTIVE, ModelForm, useModelEditor } from './ModelPanel';
@@ -112,13 +114,30 @@ function Workspace({ projectId }: { projectId: string }) {
   const [want, setWant] = useState<EditorMode>(readEditorMode);
   const choose = (m: EditorMode) => { setBridge(null); setWant(m); writeEditorMode(m); };
 
+  // An install, update or removal changes the payload; unsaved edits in the open editor are saved before the switch.
+  const generation = usePayloadGeneration();
+  const [readAt, setReadAt] = useState(generation);
+  useEffect(() => { if (!dirty) setReadAt(generation); }, [generation, dirty]);
   useEffect(() => {
     let live = true;
     void currentPayload().then((p) => { if (live) setPayload(p); });
     // the page itself is the strongest hint the editor will be wanted: finish a load the person agreed to
     if (readConsent() === 'yes') void startBackgroundLoad('yes');
     return () => { live = false; };
-  }, []);
+  }, [readAt]);
+  // An install started from the settings runs on the server after the popover is closed: follow it here and switch
+  // to the new bundle the moment it is unpacked (the previous version's files are gone by then), without a reload.
+  const install = useQuery({
+    queryKey: WEB_EDITOR_LOCAL_KEY, queryFn: fetchLocalWebEditorStatus, staleTime: 60_000,
+    refetchInterval: (q) => (busy(q.state.data) ? 1000 : false),
+  });
+  const wasBusy = useRef(false);
+  useEffect(() => {
+    const now = busy(install.data);
+    if (wasBusy.current && !now && install.data?.installed) forgetPayload();
+    wasBusy.current = now;
+  }, [install.data]);
+  const installing = install.data && busy(install.data) ? statusLine(install.data, (k, o) => tr(t, k, o)) : null;
   useLeaveGuard(dirty || draftState.status === 'saving', tr(t, 'design.workspace.leave'));
 
   const project = useQuery({ queryKey: ['projects', projectId], queryFn: () => projectsApi.get(projectId) });
@@ -198,7 +217,7 @@ function Workspace({ projectId }: { projectId: string }) {
           {tr(t, 'design.editor.title')}
           {project.data?.name ? <span className="font-normal text-content-secondary"> · {project.data.name}</span> : null}
         </h1>
-        <span className="truncate text-xs text-content-tertiary" data-testid="engine-label" title={engineHint || undefined}>{engineLabel}</span>
+        <span className="truncate text-xs text-content-tertiary" data-testid="engine-label" title={engineHint || undefined}>{installing ?? engineLabel}</span>
       </div>
       {payload?.kind === 'editor' && (
         <div role="group" aria-label={tr(t, 'design.workspace.mode_label')} data-testid="editor-mode"
@@ -253,6 +272,7 @@ function Workspace({ projectId }: { projectId: string }) {
           {header(null)}
           {banners}
           <EditorCanvas projectId={projectId} payload={payload} locale={i18n.language} mode={mode} rights={rights.data}
+            starting={bridge?.status !== 'open'}
             onLink={(l) => { link.current = l; }} onState={setBridge} onSelect={select} onDirty={setDirty}
             onDraft={(d) => setDraftState(d)} selection={selection} draft={draft.data ?? null} />
         </>
@@ -385,8 +405,10 @@ function EngineMode({ projectId, header, banners, selection, onSelect, canEdit, 
 
 /* ── The browser editor, over the bridge ─────────────────────────────── */
 
-function EditorCanvas({ projectId, payload, locale, mode, rights, onLink, onState, onSelect, onDirty, onDraft, selection, draft }: {
+function EditorCanvas({ projectId, payload, locale, mode, rights, starting, onLink, onState, onSelect, onDirty, onDraft, selection, draft }: {
   projectId: string; payload: Extract<Payload, { kind: 'editor' }>; locale: string; mode: 'edit' | 'view';
+  /** Until the editor answers: its engine (tens of MB the first time) is still loading. */
+  starting: boolean;
   rights: DesignRights | undefined; onLink: (l: BridgeHost | null) => void;
   onState: (s: BridgeState) => void; onSelect: (s: SelectedElement[]) => void; onDirty: (d: boolean) => void;
   onDraft: (d: DraftState) => void; selection: SelectedElement[]; draft: DraftView | null;
@@ -498,6 +520,12 @@ function EditorCanvas({ projectId, payload, locale, mode, rights, onLink, onStat
         <div ref={host} className="h-full w-full" data-testid="editor-host" role="region" aria-label={tr(t, 'design.editor.title')}
           aria-describedby="editor-keys" />
         <p id="editor-keys" className="sr-only">{tr(t, 'design.workspace.keys_hint')}</p>
+        {starting && (
+          <div className="pointer-events-none absolute inset-0 flex items-center justify-center gap-2 text-sm text-content-secondary"
+            role="status" aria-busy="true" data-testid="editor-starting">
+            <Loader2 size={16} className="animate-spin" aria-hidden />{tr(t, 'design.workspace.engine_starting')}
+          </div>
+        )}
         {aiAsk && (
           <div className="absolute inset-y-0 start-0 w-[min(340px,100%)] overflow-auto border-e border-border-light bg-surface-primary p-3 shadow-lg" role="dialog"
             aria-label={tr(t, 'design.workspace.ai.title')} aria-modal="false">
