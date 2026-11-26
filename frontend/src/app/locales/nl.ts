@@ -62199,6 +62199,8 @@ const resource = {
     "costs.resource_impact.issue_key_collision": "Een andere resource in deze regio heeft al deze naam.",
     "costs.resource_impact.issue_unreadable_lines": "Sommige werkposten bevatten deze resource zonder hoeveelheid en blijven ongewijzigd.",
     "costs.resource_impact.issue_zero_price": "Een prijs van 0 laat de resource ongeprijsd.",
+    "costs.resource_impact.refused_stale": "De prijslijst is gewijzigd sinds het voorbeeld. Voer het voorbeeld opnieuw uit.",
+    "costs.resource_impact.refused_truncated": "Te veel werkposten gebruiken deze resource om die in één stap te wijzigen.",
     "match.wizard.importedCataloguesGroup": "Geïmporteerde catalogi",
     "processes.match_catalogue_indexer.name": "Catalogusindexeerder voor Match",
     "processes.match_catalogue_indexer.purpose": "Bereidt geïmporteerde prijslijsten voor zodat CAD-BIM Match de posten ervan kan voorstellen.",

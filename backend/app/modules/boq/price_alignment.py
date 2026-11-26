@@ -174,12 +174,15 @@ async def load_sheet(session: AsyncSession, region: str) -> dict[str, tuple[Deci
     return out
 
 
-def _leaf_inputs(positions: list[Any]) -> list[dict[str, Any]]:
+def _leaves(positions: list[Any]) -> list[Any]:
     parents = {p.parent_id for p in positions if p.parent_id}
+    return [p for p in positions if p.id not in parents]
+
+
+def _leaf_inputs(positions: list[Any]) -> list[dict[str, Any]]:
     return [
         {"id": p.id, "quantity": p.quantity, "metadata": p.metadata_ if isinstance(p.metadata_, dict) else {}}
-        for p in positions
-        if p.id not in parents
+        for p in _leaves(positions)
     ]
 
 
@@ -220,8 +223,7 @@ async def apply_alignment(
     positions = await service.position_repo.list_all_for_boq(boq_id)
     snapshots = [
         (p.id, p.source, p.quantity, dict(p.metadata_) if isinstance(p.metadata_, dict) else {})
-        for p in positions
-        if p.id not in {q.parent_id for q in positions if q.parent_id}
+        for p in _leaves(positions)
     ]
     fx_base, fx_map = await service._resolve_project_fx(boq_id)
     stamp_at = datetime.now(UTC).isoformat()

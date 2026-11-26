@@ -54,9 +54,12 @@ class ResourceNotFoundError(LookupError):
 class ResourceChangeRefusedError(ValueError):
     """The change has blocking findings or the region moved since the preview."""
 
-    def __init__(self, message: str, issues: list[ChangeIssue] | None = None) -> None:
+    def __init__(
+        self, message: str, issues: list[ChangeIssue] | None = None, code: str = "resource.change.refused"
+    ) -> None:
         super().__init__(message)
         self.issues = issues or []
+        self.code = code
 
 
 def rewrite_components(
@@ -240,11 +243,19 @@ class ResourceImpactService:
         new_unit_price: Decimal | None = None,
         new_name: str | None = None,
         expected_cost_items: int | None = None,
+        expected_old_unit_price: Decimal | None = None,
+        expected_new_unit_price: Decimal | None = None,
         user_id: str | None = None,
         project_ids: set[uuid.UUID] | None = None,
         scope_projects: bool = False,
     ) -> ImpactResult:
         """Write the previewed change in one transaction and audit it."""
+        # Lock the sheet row first so a concurrent change cannot slip between preview and write.
+        await self.session.execute(
+            select(ResourcePrice.id)
+            .where(ResourcePrice.region == region, ResourcePrice.resource_key == resource_key)
+            .with_for_update()
+        )
         res = await self.preview(
             region,
             resource_key,
@@ -256,11 +267,22 @@ class ResourceImpactService:
         )
         blocking = [i for i in res.issues if i.blocking]
         if blocking:
-            raise ResourceChangeRefusedError("blocking findings", blocking)
-        if expected_cost_items is not None and expected_cost_items != res.cost_items_count:
+            raise ResourceChangeRefusedError("blocking findings", blocking, code="resource.change.blocking")
+        if res.truncated:
             raise ResourceChangeRefusedError(
-                f"the region changed since the preview: {res.cost_items_count} work items use the resource now, "
-                f"the preview showed {expected_cost_items}"
+                f"more than {_MAX_ITEMS} work items use the resource; the change cannot be applied in one step",
+                code="resource.change.truncated",
+            )
+        stale = expected_cost_items is not None and expected_cost_items != res.cost_items_count
+        if expected_old_unit_price is not None and _q2(expected_old_unit_price) != _q2(res.old_unit_price):
+            stale = True
+        if expected_new_unit_price is not None and _q2(expected_new_unit_price) != res.new_unit_price:
+            stale = True
+        if stale:
+            raise ResourceChangeRefusedError(
+                f"the region changed since the preview: {res.cost_items_count} work items use the resource now "
+                f"at {res.old_unit_price}, the preview showed {expected_cost_items} at {expected_old_unit_price}",
+                code="resource.change.stale_preview",
             )
         rename = res.new_name if res.new_name != res.old_name else None
         ids = list(res._writes)

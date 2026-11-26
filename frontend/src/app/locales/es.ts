@@ -64234,6 +64234,8 @@ const resource = {
     "costs.resource_impact.issue_key_collision": "Otro recurso de esta región ya tiene este nombre.",
     "costs.resource_impact.issue_unreadable_lines": "Algunas partidas llevan este recurso sin cantidad y no se modificarán.",
     "costs.resource_impact.issue_zero_price": "Un precio de 0 deja el recurso sin precio.",
+    "costs.resource_impact.refused_stale": "La lista de precios cambió desde la vista previa. Vuelva a ejecutarla.",
+    "costs.resource_impact.refused_truncated": "Demasiadas partidas usan este recurso para cambiarlo en un solo paso.",
     "match.wizard.importedCataloguesGroup": "Catálogos importados",
     "processes.match_catalogue_indexer.name": "Indexador de catálogos para Match",
     "processes.match_catalogue_indexer.purpose": "Prepara las listas de precios importadas para que CAD-BIM Match pueda sugerir sus partidas.",

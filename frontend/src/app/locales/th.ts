@@ -61073,6 +61073,8 @@ const resource = {
     "costs.resource_impact.issue_key_collision": "ทรัพยากรอื่นในภูมิภาคนี้ใช้ชื่อนี้แล้ว",
     "costs.resource_impact.issue_unreadable_lines": "บางรายการมีทรัพยากรนี้โดยไม่มีปริมาณ จะไม่ถูกเปลี่ยน",
     "costs.resource_impact.issue_zero_price": "ราคา 0 ทำให้ทรัพยากรไม่มีราคา",
+    "costs.resource_impact.refused_stale": "รายการราคาเปลี่ยนไปหลังการแสดงตัวอย่าง โปรดเรียกดูตัวอย่างอีกครั้ง",
+    "costs.resource_impact.refused_truncated": "มีรายการงานที่ใช้ทรัพยากรนี้มากเกินไปจนไม่สามารถเปลี่ยนได้ในขั้นตอนเดียว",
     "match.wizard.importedCataloguesGroup": "แคตตาล็อกที่นำเข้า",
     "processes.match_catalogue_indexer.name": "ตัวจัดทำดัชนีแคตตาล็อกสำหรับ Match",
     "processes.match_catalogue_indexer.purpose": "เตรียมบัญชีราคาที่นำเข้า เพื่อให้ CAD-BIM Match แนะนำรายการจากบัญชีนั้นได้",

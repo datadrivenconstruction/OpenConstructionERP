@@ -61284,6 +61284,8 @@ const resource = {
     "costs.resource_impact.issue_key_collision": "اس علاقے کے ایک اور وسیلے کا یہی نام ہے۔",
     "costs.resource_impact.issue_unreadable_lines": "کچھ آئٹمز میں یہ وسیلہ بغیر مقدار کے ہے، وہ تبدیل نہیں ہوں گے۔",
     "costs.resource_impact.issue_zero_price": "0 قیمت وسیلے کو بغیر قیمت چھوڑ دیتی ہے۔",
+    "costs.resource_impact.refused_stale": "پیش نظارہ کے بعد قیمتوں کی فہرست بدل گئی ہے۔ پیش نظارہ دوبارہ چلائیں۔",
+    "costs.resource_impact.refused_truncated": "اس وسیلے کو بہت زیادہ کام کی اشیاء استعمال کرتی ہیں، اسے ایک قدم میں نہیں بدلا جا سکتا۔",
     "match.wizard.importedCataloguesGroup": "درآمد شدہ کیٹلاگ",
     "processes.match_catalogue_indexer.name": "Match کے لیے کیٹلاگ انڈیکسر",
     "processes.match_catalogue_indexer.purpose": "درآمد شدہ قیمتوں کی فہرستیں تیار کرتا ہے تاکہ CAD-BIM Match ان کے آئٹمز تجویز کر سکے۔",

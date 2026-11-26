@@ -62530,6 +62530,8 @@ const resource = {
     "costs.resource_impact.issue_key_collision": "Un'altra risorsa di questa regione ha già questo nome.",
     "costs.resource_impact.issue_unreadable_lines": "Alcune voci contengono questa risorsa senza quantità e resteranno invariate.",
     "costs.resource_impact.issue_zero_price": "Un prezzo di 0 lascia la risorsa senza prezzo.",
+    "costs.resource_impact.refused_stale": "Il listino prezzi è cambiato dall'anteprima. Esegui di nuovo l'anteprima.",
+    "costs.resource_impact.refused_truncated": "Troppe voci di lavoro usano questa risorsa per modificarla in un solo passaggio.",
     "match.wizard.importedCataloguesGroup": "Cataloghi importati",
     "processes.match_catalogue_indexer.name": "Indicizzatore di cataloghi per Match",
     "processes.match_catalogue_indexer.purpose": "Prepara i prezzari importati affinché CAD-BIM Match possa suggerirne le voci.",

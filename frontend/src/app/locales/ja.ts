@@ -62605,6 +62605,8 @@ const resource = {
     "costs.resource_impact.issue_key_collision": "この地域の別の資源が既にこの名称を使っています。",
     "costs.resource_impact.issue_unreadable_lines": "数量のない行でこの資源を含む項目があり、それらは変更されません。",
     "costs.resource_impact.issue_zero_price": "単価0では資源が未設定のままになります。",
+    "costs.resource_impact.refused_stale": "プレビュー後に価格表が変更されました。もう一度プレビューを実行してください。",
+    "costs.resource_impact.refused_truncated": "このリソースを使用する作業項目が多すぎるため、一度に変更できません。",
     "match.wizard.importedCataloguesGroup": "取り込み済みカタログ",
     "processes.match_catalogue_indexer.name": "Match 用カタログインデクサー",
     "processes.match_catalogue_indexer.purpose": "取り込んだ単価表を準備し、CAD-BIM Match がその項目を提案できるようにします。",

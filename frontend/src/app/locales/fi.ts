@@ -61322,6 +61322,8 @@ const resource = {
     "costs.resource_impact.issue_key_collision": "Toisella alueen resurssilla on jo tämä nimi.",
     "costs.resource_impact.issue_unreadable_lines": "Osassa nimikkeitä resurssilla ei ole määrää, eikä niitä muuteta.",
     "costs.resource_impact.issue_zero_price": "Hinta 0 jättää resurssin hinnoittelematta.",
+    "costs.resource_impact.refused_stale": "Hinnasto on muuttunut esikatselun jälkeen. Suorita esikatselu uudelleen.",
+    "costs.resource_impact.refused_truncated": "Liian moni työnimike käyttää resurssia, jotta sen voisi muuttaa yhdellä kertaa.",
     "match.wizard.importedCataloguesGroup": "Tuodut luettelot",
     "processes.match_catalogue_indexer.name": "Luetteloiden indeksoija Matchia varten",
     "processes.match_catalogue_indexer.purpose": "Valmistelee tuodut hinnastot, jotta CAD-BIM Match voi ehdottaa niiden nimikkeitä.",

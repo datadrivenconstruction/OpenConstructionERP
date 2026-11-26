@@ -61322,6 +61322,8 @@ const resource = {
     "costs.resource_impact.issue_key_collision": "Друг ресурс в този регион вече носи това име.",
     "costs.resource_impact.issue_unreadable_lines": "Някои позиции съдържат ресурса без количество и няма да бъдат променени.",
     "costs.resource_impact.issue_zero_price": "Цена 0 оставя ресурса без цена.",
+    "costs.resource_impact.refused_stale": "Ценоразписът се промени след прегледа. Пуснете прегледа отново.",
+    "costs.resource_impact.refused_truncated": "Твърде много работи използват този ресурс, за да се промени с една стъпка.",
     "match.wizard.importedCataloguesGroup": "Импортирани каталози",
     "processes.match_catalogue_indexer.name": "Индексатор на каталози за Match",
     "processes.match_catalogue_indexer.purpose": "Подготвя импортираните ценови листи, за да може CAD-BIM Match да предлага техните позиции.",

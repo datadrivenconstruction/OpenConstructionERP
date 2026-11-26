@@ -61276,6 +61276,8 @@ const resource = {
     "costs.resource_impact.issue_key_collision": "May ibang resource sa rehiyong ito na may ganitong pangalan.",
     "costs.resource_impact.issue_unreadable_lines": "May mga item na may resource na ito na walang dami at hindi babaguhin.",
     "costs.resource_impact.issue_zero_price": "Ang presyong 0 ay iniiwang walang presyo ang resource.",
+    "costs.resource_impact.refused_stale": "Nagbago ang listahan ng presyo mula sa preview. Patakbuhin muli ang preview.",
+    "costs.resource_impact.refused_truncated": "Masyadong maraming work item ang gumagamit ng resource na ito para baguhin ito sa isang hakbang.",
     "match.wizard.importedCataloguesGroup": "Mga na-import na katalogo",
     "processes.match_catalogue_indexer.name": "Indexer ng katalogo para sa Match",
     "processes.match_catalogue_indexer.purpose": "Inihahanda ang mga na-import na listahan ng presyo para maimungkahi ng CAD-BIM Match ang mga item nito.",

@@ -64389,6 +64389,8 @@ const resource = {
     "costs.resource_impact.issue_key_collision": "يحمل مورد آخر في هذه المنطقة هذا الاسم بالفعل.",
     "costs.resource_impact.issue_unreadable_lines": "بعض البنود تحمل هذا المورد بلا كمية وستبقى دون تغيير.",
     "costs.resource_impact.issue_zero_price": "السعر 0 يترك المورد بلا تسعير.",
+    "costs.resource_impact.refused_stale": "تغيّرت قائمة الأسعار منذ المعاينة. شغّل المعاينة مرة أخرى.",
+    "costs.resource_impact.refused_truncated": "عدد بنود الأعمال التي تستخدم هذا المورد كبير جدًا لتغييره في خطوة واحدة.",
     "match.wizard.importedCataloguesGroup": "الكتالوجات المستوردة",
     "processes.match_catalogue_indexer.name": "مفهرس الكتالوجات لأجل Match",
     "processes.match_catalogue_indexer.purpose": "يجهّز قوائم الأسعار المستوردة ليتمكن CAD-BIM Match من اقتراح بنودها.",

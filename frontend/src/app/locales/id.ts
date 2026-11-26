@@ -61072,6 +61072,8 @@ const resource = {
     "costs.resource_impact.issue_key_collision": "Sumber daya lain di wilayah ini sudah memakai nama ini.",
     "costs.resource_impact.issue_unreadable_lines": "Beberapa item memuat sumber daya ini tanpa kuantitas dan tidak akan diubah.",
     "costs.resource_impact.issue_zero_price": "Harga 0 membuat sumber daya tanpa harga.",
+    "costs.resource_impact.refused_stale": "Daftar harga berubah sejak pratinjau. Jalankan pratinjau lagi.",
+    "costs.resource_impact.refused_truncated": "Terlalu banyak item pekerjaan memakai sumber daya ini untuk diubah dalam satu langkah.",
     "match.wizard.importedCataloguesGroup": "Katalog impor",
     "processes.match_catalogue_indexer.name": "Pengindeks katalog untuk Match",
     "processes.match_catalogue_indexer.purpose": "Menyiapkan daftar harga hasil impor agar CAD-BIM Match dapat menyarankan item-itemnya.",

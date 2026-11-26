@@ -7,11 +7,11 @@
 
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { type QueryClient, useMutation, useQueryClient } from '@tanstack/react-query';
 import { AlertTriangle, Eye } from 'lucide-react';
 
 import { Button, WideModal } from '@/shared/ui';
-import { apiPost, getErrorMessage } from '@/shared/lib/api';
+import { ApiError, apiPost, getErrorMessage } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
 
 import type { ResourcePriceRow } from './useResourcePrices';
@@ -59,6 +59,20 @@ export interface ResourceChangeBody {
   new_unit_price?: string;
   new_name?: string;
   expected_cost_items?: number;
+  expected_old_unit_price?: string;
+  expected_new_unit_price?: string;
+}
+
+/** Refusal code the server puts on a 409 from apply, if any. */
+export function applyRefusalCode(e: unknown): string | null {
+  if (!(e instanceof ApiError) || e.status !== 409) return null;
+  const detail = (e.body as { detail?: { code?: unknown } } | null)?.detail;
+  return typeof detail?.code === 'string' ? detail.code : null;
+}
+
+/** After a resource change, every cost view may show a repriced item. */
+export function invalidateAfterApply(qc: Pick<QueryClient, 'invalidateQueries'>): void {
+  void qc.invalidateQueries({ queryKey: ['costs'] });
 }
 
 const enc = encodeURIComponent;
@@ -115,7 +129,12 @@ export function ResourceImpactDialog({ region, row, onClose }: Props) {
   });
   const applyMut = useMutation({
     mutationFn: () =>
-      resourceImpactApi.apply(region, { ...body, expected_cost_items: preview?.cost_items_count }),
+      resourceImpactApi.apply(region, {
+        ...body,
+        expected_cost_items: preview?.cost_items_count,
+        expected_old_unit_price: preview?.old_unit_price,
+        expected_new_unit_price: preview?.new_unit_price,
+      }),
     onSuccess: (res) => {
       addToast({
         type: 'success',
@@ -125,15 +144,28 @@ export function ResourceImpactDialog({ region, row, onClose }: Props) {
           n: res.cost_items_count,
         }),
       });
-      void qc.invalidateQueries({ queryKey: ['costs', 'resource-prices', region] });
+      invalidateAfterApply(qc);
       onClose();
     },
-    onError: (e) =>
+    onError: (e) => {
+      const code = applyRefusalCode(e);
+      const message =
+        code === 'resource.change.stale_preview'
+          ? t('costs.resource_impact.refused_stale', {
+              defaultValue: 'The price sheet changed since the preview. Run the preview again.',
+            })
+          : code === 'resource.change.truncated'
+            ? t('costs.resource_impact.refused_truncated', {
+                defaultValue: 'Too many work items use this resource to change it in one step.',
+              })
+            : getErrorMessage(e);
+      if (code === 'resource.change.stale_preview') setPreview(null);
       addToast({
         type: 'error',
         title: t('costs.resource_impact.apply_failed', { defaultValue: 'Change not applied' }),
-        message: getErrorMessage(e),
-      }),
+        message,
+      });
+    },
   });
 
   const blocking = preview?.issues.some((i) => i.blocking) ?? false;

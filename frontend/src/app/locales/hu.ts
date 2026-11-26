@@ -63883,6 +63883,8 @@ const resource = {
     "costs.resource_impact.issue_key_collision": "A régió egy másik erőforrásának már ez a neve.",
     "costs.resource_impact.issue_unreadable_lines": "Egyes tételekben az erőforrás mennyiség nélkül szerepel, ezek változatlanok maradnak.",
     "costs.resource_impact.issue_zero_price": "A 0 ár árazatlanul hagyja az erőforrást.",
+    "costs.resource_impact.refused_stale": "Az árlista megváltozott az előnézet óta. Futtassa újra az előnézetet.",
+    "costs.resource_impact.refused_truncated": "Túl sok munkatétel használja ezt az erőforrást ahhoz, hogy egy lépésben módosítsa.",
     "match.wizard.importedCataloguesGroup": "Importált katalógusok",
     "processes.match_catalogue_indexer.name": "Katalógusindexelő a Matchhez",
     "processes.match_catalogue_indexer.purpose": "Előkészíti az importált árlistákat, hogy a CAD-BIM Match javasolhassa a tételeiket.",

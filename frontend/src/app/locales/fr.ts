@@ -64229,6 +64229,8 @@ const resource = {
     "costs.resource_impact.issue_key_collision": "Une autre ressource de cette région porte déjà ce nom.",
     "costs.resource_impact.issue_unreadable_lines": "Certains ouvrages portent cette ressource sans quantité et resteront inchangés.",
     "costs.resource_impact.issue_zero_price": "Un prix de 0 laisse la ressource sans prix.",
+    "costs.resource_impact.refused_stale": "La liste de prix a changé depuis l'aperçu. Relancez l'aperçu.",
+    "costs.resource_impact.refused_truncated": "Trop d'ouvrages utilisent cette ressource pour la modifier en une seule étape.",
     "match.wizard.importedCataloguesGroup": "Catalogues importés",
     "processes.match_catalogue_indexer.name": "Indexeur de catalogues pour Match",
     "processes.match_catalogue_indexer.purpose": "Prépare les bordereaux de prix importés pour que CAD-BIM Match puisse proposer leurs articles.",

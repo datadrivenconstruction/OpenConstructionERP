@@ -62199,6 +62199,8 @@ const resource = {
     "costs.resource_impact.issue_key_collision": "Bu bölgedeki başka bir kaynak zaten bu ada sahip.",
     "costs.resource_impact.issue_unreadable_lines": "Bazı pozlarda kaynak miktarsız yer alıyor, bunlar değiştirilmeyecek.",
     "costs.resource_impact.issue_zero_price": "0 fiyat kaynağı fiyatsız bırakır.",
+    "costs.resource_impact.refused_stale": "Fiyat listesi önizlemeden sonra değişti. Önizlemeyi yeniden çalıştırın.",
+    "costs.resource_impact.refused_truncated": "Bu kaynağı tek adımda değiştirmek için çok fazla iş kalemi kullanıyor.",
     "match.wizard.importedCataloguesGroup": "İçe aktarılan kataloglar",
     "processes.match_catalogue_indexer.name": "Match için katalog dizinleyici",
     "processes.match_catalogue_indexer.purpose": "İçe aktarılan birim fiyat listelerini, CAD-BIM Match kalemlerini önerebilsin diye hazırlar.",

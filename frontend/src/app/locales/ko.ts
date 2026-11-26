@@ -61689,6 +61689,8 @@ const resource = {
     "costs.resource_impact.issue_key_collision": "이 지역의 다른 자원이 이미 이 이름을 사용합니다.",
     "costs.resource_impact.issue_unreadable_lines": "일부 항목은 수량 없이 이 자원을 포함하며 변경되지 않습니다.",
     "costs.resource_impact.issue_zero_price": "단가 0은 자원을 미책정 상태로 둡니다.",
+    "costs.resource_impact.refused_stale": "미리보기 이후 가격표가 변경되었습니다. 미리보기를 다시 실행하세요.",
+    "costs.resource_impact.refused_truncated": "이 자원을 사용하는 작업 항목이 너무 많아 한 번에 변경할 수 없습니다.",
     "match.wizard.importedCataloguesGroup": "가져온 카탈로그",
     "processes.match_catalogue_indexer.name": "Match용 카탈로그 인덱서",
     "processes.match_catalogue_indexer.purpose": "가져온 단가표를 준비하여 CAD-BIM Match가 그 항목을 제안할 수 있게 합니다.",

@@ -63542,6 +63542,8 @@ const resource = {
     "costs.resource_impact.issue_key_collision": "该地区已有同名的其他资源。",
     "costs.resource_impact.issue_unreadable_lines": "部分子目中该资源没有数量，将保持不变。",
     "costs.resource_impact.issue_zero_price": "单价为 0 会使资源变为未定价。",
+    "costs.resource_impact.refused_stale": "价格表在预览后已更改。请重新运行预览。",
+    "costs.resource_impact.refused_truncated": "使用此资源的工作项过多，无法一步更改。",
     "match.wizard.importedCataloguesGroup": "导入的目录",
     "processes.match_catalogue_indexer.name": "Match 目录索引器",
     "processes.match_catalogue_indexer.purpose": "准备导入的价目表，使 CAD-BIM Match 能推荐其中的条目。",

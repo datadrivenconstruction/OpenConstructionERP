@@ -62851,6 +62851,8 @@ const resource = {
     "costs.resource_impact.issue_key_collision": "Inny zasób w tym regionie ma już tę nazwę.",
     "costs.resource_impact.issue_unreadable_lines": "Niektóre pozycje zawierają ten zasób bez ilości i pozostaną bez zmian.",
     "costs.resource_impact.issue_zero_price": "Cena 0 pozostawia zasób bez ceny.",
+    "costs.resource_impact.refused_stale": "Cennik zmienił się od podglądu. Uruchom podgląd ponownie.",
+    "costs.resource_impact.refused_truncated": "Zbyt wiele pozycji robót używa tego zasobu, aby zmienić go w jednym kroku.",
     "match.wizard.importedCataloguesGroup": "Zaimportowane katalogi",
     "processes.match_catalogue_indexer.name": "Indeksator katalogów dla Match",
     "processes.match_catalogue_indexer.purpose": "Przygotowuje zaimportowane cenniki, aby CAD-BIM Match mógł podpowiadać ich pozycje.",

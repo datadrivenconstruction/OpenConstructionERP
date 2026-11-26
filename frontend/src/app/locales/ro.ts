@@ -61647,6 +61647,8 @@ const resource = {
     "costs.resource_impact.issue_key_collision": "O altă resursă din regiune are deja acest nume.",
     "costs.resource_impact.issue_unreadable_lines": "Unele articole conțin resursa fără cantitate și rămân neschimbate.",
     "costs.resource_impact.issue_zero_price": "Un preț 0 lasă resursa fără preț.",
+    "costs.resource_impact.refused_stale": "Lista de prețuri s-a schimbat de la previzualizare. Rulați din nou previzualizarea.",
+    "costs.resource_impact.refused_truncated": "Prea multe articole de lucrări folosesc această resursă pentru a o modifica într-un singur pas.",
     "match.wizard.importedCataloguesGroup": "Cataloage importate",
     "processes.match_catalogue_indexer.name": "Indexator de cataloage pentru Match",
     "processes.match_catalogue_indexer.purpose": "Pregătește listele de prețuri importate pentru ca CAD-BIM Match să poată sugera articolele lor.",
