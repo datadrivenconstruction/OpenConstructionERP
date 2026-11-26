@@ -25,6 +25,7 @@ import {
   type PaymentTerms,
   type PaymentTermsBody,
 } from './paymentsApi';
+import { useRoleReason } from '@/shared/lib/permissionReason';
 
 const INPUT = 'w-full';
 
@@ -109,6 +110,7 @@ export function TermsDrawer({
   canEdit: boolean;
   onClose: () => void;
 }) {
+  const canEditReason = useRoleReason(canEdit, 'editor');
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
@@ -417,11 +419,9 @@ export function TermsDrawer({
                 ? t('cost_control.pay.cancel', { defaultValue: 'Cancel' })
                 : t('cost_control.pay.close', { defaultValue: 'Close' })}
             </Button>
-            {canEdit && (
-              <Button type="submit" variant="primary" size="sm" loading={save.isPending} data-testid="terms-save">
-                {t('cost_control.pay.terms_save', { defaultValue: 'Save terms' })}
-              </Button>
-            )}
+            <Button disabledReason={canEditReason} type="submit" variant="primary" size="sm" loading={save.isPending} data-testid="terms-save">
+              {t('cost_control.pay.terms_save', { defaultValue: 'Save terms' })}
+            </Button>
           </div>
         </form>
       )}

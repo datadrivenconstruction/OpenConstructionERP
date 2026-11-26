@@ -52,6 +52,7 @@ import {
   publishScenario,
   type SimulateImpactResponse,
 } from './api';
+import { useRoleReason } from '@/shared/lib/permissionReason';
 
 function fmtMoney(value: string, currency: string): string {
   const n = Number(value);
@@ -130,6 +131,7 @@ export function ImpactSimulator({
    *  has a visible, lasting effect. */
   savedScenarios?: SavedScenario[];
 }) {
+  const canPublishReason = useRoleReason(canPublish, 'editor');
   const { t } = useTranslation();
   const addToast = useToastStore((s) => s.addToast);
   const queryClient = useQueryClient();
@@ -506,17 +508,15 @@ export function ImpactSimulator({
                     {t('changeorders.impact_as_of', { defaultValue: 'Forecast as of' })}{' '}
                     {fmtDateTime(data.as_of)}
                   </span>
-                  {canPublish && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => publishMut.mutate()}
-                      disabled={publishMut.isPending}
-                    >
-                      <Save size={14} className="mr-1" />
-                      {t('changeorders.impact_publish', { defaultValue: 'Save scenario' })}
-                    </Button>
-                  )}
+                  <Button disabledReason={canPublishReason}
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => publishMut.mutate()}
+                    disabled={publishMut.isPending}
+                  >
+                    <Save size={14} className="mr-1" />
+                    {t('changeorders.impact_publish', { defaultValue: 'Save scenario' })}
+                  </Button>
                 </div>
               </div>
             </div>

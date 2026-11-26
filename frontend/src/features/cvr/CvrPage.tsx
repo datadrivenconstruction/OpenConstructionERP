@@ -86,6 +86,7 @@ import { buildCvrInsights } from './cvrInsights';
 import { payappDraftFromClaim, progressClaimLabel } from './payappFromClaim';
 import { fmtList, fmtPercent } from '@/shared/lib/formatters';
 import { toDecimalPayloadString } from '@/shared/lib/parseDecimal';
+import { useRoleReason } from '@/shared/lib/permissionReason';
 
 interface Project {
   id: string;
@@ -261,6 +262,7 @@ function LinesTable({
   onDelete: (lineId: string) => void;
   onEdit: (line: CvrLine) => void;
 }) {
+  const canEditReason = useRoleReason(canEdit, 'editor');
   const { t } = useTranslation();
 
   // Budget and committed columns appear once a line carries them (filled from the cost spine).
@@ -291,7 +293,7 @@ function LinesTable({
             <th className="pr-3 text-right">{t('cvr.col_forecast_cost', { defaultValue: 'Forecast cost' })}</th>
             <th className="pr-3 text-right">{t('cvr.col_forecast_value', { defaultValue: 'Forecast value' })}</th>
             <th className="pr-3 text-right">{t('cvr.col_margin', { defaultValue: 'Margin' })}</th>
-            {canEdit && <th className="pl-1" />}
+            <th className="pl-1" />
           </tr>
         </thead>
         <tbody>
@@ -319,28 +321,26 @@ function LinesTable({
                 <td className={'pr-3 text-right font-semibold tabular-nums ' + (marginPositive ? 'text-semantic-success' : 'text-semantic-error')}>
                   {formatCurrency(line.margin_to_date, currency)}
                 </td>
-                {canEdit && (
-                  <td className="pl-1 text-right">
-                    <div className="flex items-center justify-end gap-1">
-                      <button
-                        type="button"
-                        onClick={() => onEdit(line)}
-                        className="rounded p-1 text-content-tertiary hover:bg-surface-secondary hover:text-content-primary"
-                        aria-label={t('cvr.edit_line', { defaultValue: 'Edit cost head' })}
-                      >
-                        <Pencil size={14} />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => onDelete(line.id)}
-                        className="rounded p-1 text-content-tertiary hover:bg-semantic-error-bg hover:text-semantic-error"
-                        aria-label={t('cvr.delete_line', { defaultValue: 'Delete cost head' })}
-                      >
-                        <Trash2 size={14} />
-                      </button>
-                    </div>
-                  </td>
-                )}
+                <td className="pl-1 text-right">
+                  <div className="flex items-center justify-end gap-1">
+                    <button disabled={!canEdit} title={canEditReason}
+                      type="button"
+                      onClick={() => onEdit(line)}
+                      className="rounded p-1 text-content-tertiary hover:bg-surface-secondary hover:text-content-primary"
+                      aria-label={t('cvr.edit_line', { defaultValue: 'Edit cost head' })}
+                    >
+                      <Pencil size={14} />
+                    </button>
+                    <button disabled={!canEdit} title={canEditReason}
+                      type="button"
+                      onClick={() => onDelete(line.id)}
+                      className="rounded p-1 text-content-tertiary hover:bg-semantic-error-bg hover:text-semantic-error"
+                      aria-label={t('cvr.delete_line', { defaultValue: 'Delete cost head' })}
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
+                </td>
               </tr>
             );
           })}
@@ -358,7 +358,7 @@ function LinesTable({
               <td className={'pr-3 text-right tabular-nums ' + (toNum(summary.margin_to_date) >= 0 ? 'text-semantic-success' : 'text-semantic-error')}>
                 {formatCurrency(summary.margin_to_date, currency)}
               </td>
-              {canEdit && <td />}
+              <td />
             </tr>
           </tfoot>
         )}
@@ -502,6 +502,7 @@ export function CvrPage() {
   );
   const reportCurrency = selectedReport?.currency ?? '';
   const canEdit = selectedReport?.status !== 'final';
+  const canEditReason = useRoleReason(canEdit, 'editor');
 
   // Selected report detail
   const { data: summary } = useQuery({
@@ -812,16 +813,15 @@ export function CvrPage() {
                 {reportList && <TruncationNotice page={reportList} />}
               </div>
               <div className="flex items-center gap-2">
-                {canEdit && (
-                  <Button variant="secondary" size="sm" disabled={finalizeMut.isPending} onClick={() => finalizeMut.mutate()}>
-                    <Lock size={14} className="mr-1 shrink-0" />
-                    {t('cvr.finalize', { defaultValue: 'Finalize' })}
-                  </Button>
-                )}
+                <Button disabledReason={canEditReason} variant="secondary" size="sm" disabled={finalizeMut.isPending} onClick={() => finalizeMut.mutate()}>
+                  <Lock size={14} className="mr-1 shrink-0" />
+                  {t('cvr.finalize', { defaultValue: 'Finalize' })}
+                </Button>
                 <button
                   type="button"
                   onClick={() => deleteReportMut.mutate()}
-                  disabled={deleteReportMut.isPending}
+                  disabled={deleteReportMut.isPending || !canEdit}
+                  title={canEditReason}
                   className="rounded-lg p-1.5 text-content-tertiary hover:bg-semantic-error-bg hover:text-semantic-error"
                   aria-label={t('cvr.delete_report', { defaultValue: 'Delete report' })}
                 >

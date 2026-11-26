@@ -18,6 +18,8 @@ import { useToastStore } from '@/stores/useToastStore';
 import { fwkApi, fwkKeys, type AgreementDetail } from './api';
 import { FindingList } from './NewOrderModal';
 import { statusVariant } from './status';
+import { useRoleReason } from '@/shared/lib/permissionReason';
+import { DisabledGroup } from '@/shared/ui/DisabledGroup';
 
 interface Props {
   orderId: string;
@@ -30,6 +32,7 @@ interface Props {
 type Tab = 'lines' | 'extras';
 
 export function OrderDrawer({ orderId, agreement, canIssue, canOverride, onClose }: Props) {
+  const canIssueReason = useRoleReason(canIssue, 'editor');
   const { t } = useTranslation();
   const qc = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
@@ -107,7 +110,7 @@ export function OrderDrawer({ orderId, agreement, canIssue, canOverride, onClose
           )}
           <FindingList findings={o.findings} />
 
-          {canIssue && (
+          <DisabledGroup reason={canIssueReason}>
             <div className="flex flex-wrap items-end gap-2">
               {draft && overCap && (canOverride || agreement.terms.override_policy === 'warn') && (
                 <label className="flex min-w-[260px] flex-1 flex-col gap-1">
@@ -143,7 +146,7 @@ export function OrderDrawer({ orderId, agreement, canIssue, canOverride, onClose
                 </Button>
               )}
             </div>
-          )}
+          </DisabledGroup>
 
           <TabBar<Tab>
             ariaLabel={t('framework.term.order', { defaultValue: 'Call-off order' })}

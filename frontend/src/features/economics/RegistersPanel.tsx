@@ -41,6 +41,8 @@ import {
   VAT_TREATMENT,
   type KeyText,
 } from './labels';
+import { useRoleReason } from '@/shared/lib/permissionReason';
+import { DisabledGroup } from '@/shared/ui/DisabledGroup';
 
 const SECURITY_KINDS = Object.keys(SECURITY_KIND) as SecurityKind[];
 const SECURITY_STATUSES = Object.keys(SECURITY_STATUS) as SecurityStatus[];
@@ -95,6 +97,7 @@ function StatusSelect<T extends string>({
 }
 
 function SecuritiesSection({ projectId, data, canEdit, currency }: { projectId: string; data: Registers; canEdit: boolean; currency: string }) {
+  const canEditReason = useRoleReason(canEdit, 'editor');
   const { t } = useTranslation();
   const { money } = useMoney(currency);
   const day = useDay();
@@ -150,7 +153,7 @@ function SecuritiesSection({ projectId, data, canEdit, currency }: { projectId: 
                   )}
                 </td>
                 <td className="text-right">
-                  {canEdit && (
+                  <DisabledGroup reason={canEditReason}>
                     <ConfirmDelete
                       label={t('economics.registers.delete_security', { defaultValue: 'Delete the security' })}
                       title={t('economics.confirm.title', { defaultValue: 'Delete this entry?' })}
@@ -160,14 +163,14 @@ function SecuritiesSection({ projectId, data, canEdit, currency }: { projectId: 
                       })}
                       onConfirm={() => remove(row.id)}
                     />
-                  )}
+                  </DisabledGroup>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-      {canEdit && (
+      <DisabledGroup reason={canEditReason}>
         <div className="rounded-lg border border-border p-3">
           <AddRow
             submitLabel={t('economics.registers.add_security', { defaultValue: 'Add a security' })}
@@ -209,12 +212,13 @@ function SecuritiesSection({ projectId, data, canEdit, currency }: { projectId: 
             </Field>
           </AddRow>
         </div>
-      )}
+      </DisabledGroup>
     </Section>
   );
 }
 
 function InsuranceSection({ projectId, data, canEdit, currency }: { projectId: string; data: Registers; canEdit: boolean; currency: string }) {
+  const canEditReason = useRoleReason(canEdit, 'editor');
   const { t } = useTranslation();
   const { money } = useMoney(currency);
   const day = useDay();
@@ -272,7 +276,7 @@ function InsuranceSection({ projectId, data, canEdit, currency }: { projectId: s
                   )}
                 </td>
                 <td className="text-right">
-                  {canEdit && (
+                  <DisabledGroup reason={canEditReason}>
                     <ConfirmDelete
                       label={t('economics.registers.delete_insurance', { defaultValue: 'Delete the insurance' })}
                       title={t('economics.confirm.title', { defaultValue: 'Delete this entry?' })}
@@ -282,14 +286,14 @@ function InsuranceSection({ projectId, data, canEdit, currency }: { projectId: s
                       })}
                       onConfirm={() => remove(row.id)}
                     />
-                  )}
+                  </DisabledGroup>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-      {canEdit && (
+      <DisabledGroup reason={canEditReason}>
         <div className="rounded-lg border border-border p-3">
           <AddRow
             submitLabel={t('economics.registers.add_insurance', { defaultValue: 'Add an insurance' })}
@@ -331,12 +335,13 @@ function InsuranceSection({ projectId, data, canEdit, currency }: { projectId: s
             </Field>
           </AddRow>
         </div>
-      )}
+      </DisabledGroup>
     </Section>
   );
 }
 
 function TaxSection({ projectId, data, canEdit }: { projectId: string; data: Registers; canEdit: boolean }) {
+  const canEditReason = useRoleReason(canEdit, 'editor');
   const { t } = useTranslation();
   const tax = data.tax;
   const save = useEconomicsAction(projectId, (body: Record<string, unknown>) => putTax(projectId, body));
@@ -385,7 +390,7 @@ function TaxSection({ projectId, data, canEdit }: { projectId: string; data: Reg
           </p>
         )}
       </div>
-      {canEdit && (
+      <DisabledGroup reason={canEditReason}>
         <div className="rounded-lg border border-border p-3">
           <AddRow
             submitLabel={t('economics.registers.save_tax', { defaultValue: 'Save the tax treatment' })}
@@ -424,12 +429,13 @@ function TaxSection({ projectId, data, canEdit }: { projectId: string; data: Reg
             </label>
           </AddRow>
         </div>
-      )}
+      </DisabledGroup>
     </Section>
   );
 }
 
 function ProcessCard({ projectId, row, canEdit }: { projectId: string; row: ProcessRow; canEdit: boolean }) {
+  const canEditReason = useRoleReason(canEdit, 'editor');
   const { t } = useTranslation();
   const day = useDay();
   const save = useEconomicsAction(projectId, (body: Record<string, unknown>) => putProcess(projectId, row.area, body));
@@ -446,16 +452,7 @@ function ProcessCard({ projectId, row, canEdit }: { projectId: string; row: Proc
             : t('economics.registers.process_open', { defaultValue: 'Open' })}
         </Badge>
       </div>
-      {!canEdit && (
-        <>
-          <p className="text-sm text-content-secondary">{orDash(row.description)}</p>
-          <p className="text-xs text-content-secondary">
-            {t('economics.registers.owner', { defaultValue: 'Responsible' })}: {orDash(row.owner)}
-            {row.set_up_on && ` - ${day(row.set_up_on)}`}
-          </p>
-        </>
-      )}
-      {canEdit && (
+      <DisabledGroup reason={canEditReason}>
         <AddRow
           submitLabel={t('economics.registers.save_process', { defaultValue: 'Save' })}
           onSubmit={() => save({ owner: owner.trim(), description: description.trim(), status: done ? 'set_up' : 'open' })}
@@ -471,7 +468,7 @@ function ProcessCard({ projectId, row, canEdit }: { projectId: string; row: Proc
             {t('economics.registers.process_is_set_up', { defaultValue: 'The process is set up' })}
           </label>
         </AddRow>
-      )}
+      </DisabledGroup>
     </div>
   );
 }

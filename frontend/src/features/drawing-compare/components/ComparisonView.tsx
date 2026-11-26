@@ -20,6 +20,7 @@ import { asRaster, overlayCanvas, useSheetPair } from '../lib/useSheetPair';
 import type { Affine } from '../lib/transform';
 import { ChangeList } from './ChangeList';
 import { CompareViewer, type ViewerMode, type ViewerRegion } from './CompareViewer';
+import { useRoleReason } from '@/shared/lib/permissionReason';
 
 interface ComparisonViewProps {
   comparison: Comparison;
@@ -35,6 +36,7 @@ const LIGHT: Record<string, string> = {
 };
 
 export function ComparisonView({ comparison, canWrite, canDelete, onDeleted }: ComparisonViewProps) {
+  const canDeleteReason = useRoleReason(canDelete, 'manager');
   const { t } = useTranslation();
   const addToast = useToastStore((s) => s.addToast);
   const [selected, setSelected] = useState<string | null>(null);
@@ -128,11 +130,9 @@ export function ComparisonView({ comparison, canWrite, canDelete, onDeleted }: C
             >
               {t('drawing_compare.export_report', { defaultValue: 'Change report (PDF)' })}
             </Button>
-            {canDelete && (
-              <Button size="sm" variant="ghost" icon={<Trash2 size={14} />} onClick={() => setConfirmDelete(true)}>
-                {t('common.delete', { defaultValue: 'Delete' })}
-              </Button>
-            )}
+            <Button disabledReason={canDeleteReason} size="sm" variant="ghost" icon={<Trash2 size={14} />} onClick={() => setConfirmDelete(true)}>
+              {t('common.delete', { defaultValue: 'Delete' })}
+            </Button>
           </div>
         </div>
       </div>

@@ -19,6 +19,7 @@ import { CostLinePicker, useCostLineLabel } from './CostLinePicker';
 import { OverrideReasonDialog } from './OverrideReasonDialog';
 import { problemMessage } from './problemMessages';
 import { problemOf } from './structureApi';
+import { useRoleReason } from '@/shared/lib/permissionReason';
 
 /** Where a row's cost line came from, as the server records it. */
 export function costLineSourceLabel(t: TFunction, source: string | null | undefined): string {
@@ -75,6 +76,7 @@ export function AccountChooser({
   onSaved,
   compact = false,
 }: AccountChooserProps) {
+  const canEditReason = useRoleReason(canEdit, 'editor');
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
@@ -149,17 +151,15 @@ export function AccountChooser({
           <span className={costLineId ? 'text-content-secondary' : 'text-semantic-warning'}>{label}</span>
           {from && <span>({from})</span>}
           {reason && <span className="italic" title={reason}>“{reason}”</span>}
-          {canEdit && (
-            <button
-              type="button"
-              className="inline-flex items-center gap-0.5 text-oe-blue hover:underline"
-              onClick={() => setEditing(true)}
-              data-testid={`account-change-${targetId}`}
-            >
-              <PenLine size={12} />
-              {t('costmodel.account.change', { defaultValue: 'Change' })}
-            </button>
-          )}
+          <button disabled={!canEdit} title={canEditReason}
+            type="button"
+            className="inline-flex items-center gap-0.5 text-oe-blue hover:underline"
+            onClick={() => setEditing(true)}
+            data-testid={`account-change-${targetId}`}
+          >
+            <PenLine size={12} />
+            {t('costmodel.account.change', { defaultValue: 'Change' })}
+          </button>
         </span>
       )}
       <OverrideReasonDialog
