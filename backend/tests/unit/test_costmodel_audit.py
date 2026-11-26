@@ -86,6 +86,9 @@ class _StubBudgetRepo:
     def set_aggregate(self, **values: str) -> None:
         self._aggregate.update(values)
 
+    async def _project_fx_context(self, project_id: Any) -> tuple[str, dict[str, str]]:
+        return "", {}
+
     async def create(self, line: Any) -> Any:
         if getattr(line, "id", None) is None:
             line.id = uuid.uuid4()
