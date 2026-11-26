@@ -54,7 +54,9 @@ import { FlowSelect } from './plan/FlowSelect';
 import { SiteClockNotice } from './plan/SiteClockNotice';
 import { GateLimits } from './plan/GateLimits';
 import { BoardCanNotice, useBoardCreate } from './plan/boardCan';
-import { denied, humanise, offered, reasonText, shown } from './plan/rules';
+import { absent, denied, humanise, offered, reasonText } from './plan/rules';
+import { roleReasonText } from '@/shared/lib/permissionReason';
+import type { Verdict } from './plan/api';
 import { served, type TFn } from './plan/texts';
 import { DismissibleInfo } from '@/shared/ui/DismissibleInfo';
 import { RequiresProject } from '@/shared/auth/RequiresProject';
@@ -914,8 +916,8 @@ export function DeliveryRow({
   const navigate = useNavigate();
   // The server says what may be done with this delivery, and why not.
   const can = delivery.can ?? {};
-  const canEdit = offered(can.edit);
-  const canDelete = offered(can.delete);
+  const editReason = whyNot(t as TFn, can.edit);
+  const deleteReason = whyNot(t as TFn, can.delete);
   const cfg = STATUS_CONFIG[delivery.status] ?? STATUS_CONFIG.requested;
   const lines = delivery.lines ?? [];
 
@@ -1015,34 +1017,35 @@ export function DeliveryRow({
 
       {/* Actions */}
       <div className="flex items-center gap-1.5 shrink-0">
-        {shown(can.approve) && (delivery.status === 'requested' || delivery.status === 'rejected') && (
+        {!absent(can.approve) && (delivery.status === 'requested' || delivery.status === 'rejected') && (
           <Button
             variant="primary"
             size="sm"
             disabled={busy || denied(can.approve)}
-            title={reasonText(t as TFn, can.approve)}
+            title={whyNot(t as TFn, can.approve)}
             onClick={() => onApprove(delivery)}
           >
             <Check size={14} className="mr-1" />
             {t('siteLogistics.action_approve', { defaultValue: 'Approve' })}
           </Button>
         )}
-        {shown(can.reject) && (delivery.status === 'requested' || delivery.status === 'approved') && (
+        {!absent(can.reject) && (delivery.status === 'requested' || delivery.status === 'approved') && (
           <Button
             variant="ghost"
             size="sm"
             disabled={busy || denied(can.reject)}
-            title={reasonText(t as TFn, can.reject)}
+            title={whyNot(t as TFn, can.reject)}
             onClick={() => onReject(delivery)}
           >
             <Ban size={14} className="mr-1" />
             {t('siteLogistics.action_reject', { defaultValue: 'Reject' })}
           </Button>
         )}
-        {canEdit && delivery.status === 'approved' && (
+        {!absent(can.edit) && delivery.status === 'approved' && (
           <Button
             variant="ghost"
             size="sm"
+            disabledReason={editReason}
             disabled={busy}
             onClick={() => onAdvance(delivery, 'arrived')}
             title={t('siteLogistics.action_mark_arrived', { defaultValue: 'Mark arrived' })}
@@ -1051,10 +1054,11 @@ export function DeliveryRow({
             {t('siteLogistics.action_mark_arrived', { defaultValue: 'Mark arrived' })}
           </Button>
         )}
-        {canEdit && delivery.status === 'arrived' && (
+        {!absent(can.edit) && delivery.status === 'arrived' && (
           <Button
             variant="ghost"
             size="sm"
+            disabledReason={editReason}
             disabled={busy}
             onClick={() => onAdvance(delivery, 'completed')}
             title={t('siteLogistics.action_mark_completed', { defaultValue: 'Mark completed' })}
@@ -1063,23 +1067,24 @@ export function DeliveryRow({
             {t('siteLogistics.action_mark_completed', { defaultValue: 'Mark completed' })}
           </Button>
         )}
-        {canEdit && (
+        {!absent(can.edit) && (
           <button
             onClick={() => onEdit(delivery)}
-            disabled={busy}
+            disabled={busy || !!editReason}
             aria-label={t('siteLogistics.action_edit', { defaultValue: 'Edit delivery' })}
-            title={t('siteLogistics.action_edit', { defaultValue: 'Edit delivery' })}
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-content-primary transition-colors disabled:opacity-40"
+            title={editReason ?? t('siteLogistics.action_edit', { defaultValue: 'Edit delivery' })}
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-content-primary transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
           >
             <Pencil size={14} />
           </button>
         )}
-        {canDelete && (
+        {!absent(can.delete) && (
           <button
             onClick={() => onDelete(delivery)}
-            disabled={busy}
+            disabled={busy || !!deleteReason}
             aria-label={t('common.delete', { defaultValue: 'Delete' })}
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-semantic-error/10 hover:text-semantic-error transition-colors disabled:opacity-40"
+            title={deleteReason}
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-semantic-error/10 hover:text-semantic-error transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
           >
             <Trash2 size={14} />
           </button>
@@ -1298,12 +1303,11 @@ function DeliveryBoard({
                 })
           }
           action={
-            !day && !gateFilter && !statusFilter && offered(mayBook)
-              ? {
-                  label: t('siteLogistics.book_delivery', { defaultValue: 'Book delivery' }),
-                  onClick: onBook,
-                }
-              : undefined
+            !day && !gateFilter && !statusFilter && !absent(mayBook) ? (
+              <Button variant="primary" disabledReason={whyNot(t as TFn, mayBook)} onClick={onBook}>
+                {t('siteLogistics.book_delivery', { defaultValue: 'Book delivery' })}
+              </Button>
+            ) : undefined
           }
         />
       ) : (
@@ -1351,7 +1355,9 @@ function GatesPanel({ projectId }: { projectId: string }) {
   const { t } = useTranslation();
   const qc = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
-  const canCreate = offered(useBoardCreate(projectId, 'gate'));
+  const createVerdict = useBoardCreate(projectId, 'gate');
+  const canCreate = offered(createVerdict);
+  const createReason = whyNot(t as TFn, createVerdict);
 
   const [name, setName] = useState('');
   const [openTime, setOpenTime] = useState('07:00');
@@ -1424,8 +1430,9 @@ function GatesPanel({ projectId }: { projectId: string }) {
   return (
     <div className="space-y-4">
       {del.dialog}
-      {canCreate && (
+      {!absent(createVerdict) && (
         <Card padding="none" className="p-4">
+          <fieldset disabled={!canCreate} title={createReason} className="m-0 min-w-0 border-0 p-0">
           <p className="text-sm font-medium text-content-primary mb-3">
             {t('siteLogistics.add_gate', { defaultValue: 'Add a gate' })}
           </p>
@@ -1485,6 +1492,7 @@ function GatesPanel({ projectId }: { projectId: string }) {
               })}
             </p>
           )}
+          </fieldset>
         </Card>
       )}
 
@@ -1531,7 +1539,8 @@ function GateCard({
 }) {
   const { t } = useTranslation();
   const canEdit = offered(gate.can?.edit);
-  const canDelete = offered(gate.can?.delete);
+  const editReason = whyNot(t as TFn, gate.can?.edit);
+  const deleteReason = whyNot(t as TFn, gate.can?.delete);
   const [editing, setEditing] = useState(false);
 
   if (editing) {
@@ -1556,21 +1565,22 @@ function GateCard({
           <span className="text-sm font-semibold text-content-primary truncate">{gate.name}</span>
         </div>
         <div className="flex items-center gap-1 shrink-0">
-          {canEdit && (
+          {!absent(gate.can?.edit) && (
             <button
               onClick={() => setEditing(true)}
-              disabled={busy}
+              disabled={busy || !!editReason}
               aria-label={t('siteLogistics.edit_gate', { defaultValue: 'Edit gate' })}
-              title={t('siteLogistics.edit_gate', { defaultValue: 'Edit gate' })}
+              title={editReason ?? t('siteLogistics.edit_gate', { defaultValue: 'Edit gate' })}
               className="flex h-7 w-7 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-content-primary transition-colors disabled:opacity-40"
             >
               <Pencil size={14} />
             </button>
           )}
-          {canDelete && (
+          {!absent(gate.can?.delete) && (
             <button
               onClick={onDelete}
-              disabled={busy}
+              disabled={busy || !!deleteReason}
+              title={deleteReason}
               aria-label={t('common.delete', { defaultValue: 'Delete' })}
               className="flex h-7 w-7 items-center justify-center rounded-lg text-content-tertiary hover:bg-semantic-error/10 hover:text-semantic-error transition-colors disabled:opacity-40"
             >
@@ -1590,7 +1600,7 @@ function GateCard({
         })}
       </div>
       {gate.notes && <p className="text-2xs text-content-tertiary">{gate.notes}</p>}
-      <GateLimits gate={gate} canEdit={canEdit} />
+      <GateLimits gate={gate} canEdit={canEdit} editReason={editReason} />
     </Card>
   );
 }
@@ -1709,7 +1719,9 @@ function LaydownPanel({ projectId }: { projectId: string }) {
   const { t } = useTranslation();
   const qc = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
-  const canCreate = offered(useBoardCreate(projectId, 'zone'));
+  const createVerdict = useBoardCreate(projectId, 'zone');
+  const canCreate = offered(createVerdict);
+  const createReason = whyNot(t as TFn, createVerdict);
 
   const [name, setName] = useState('');
   const [capacityDesc, setCapacityDesc] = useState('');
@@ -1785,8 +1797,9 @@ function LaydownPanel({ projectId }: { projectId: string }) {
   return (
     <div className="space-y-4">
       {del.dialog}
-      {canCreate && (
+      {!absent(createVerdict) && (
         <Card padding="none" className="p-4">
+          <fieldset disabled={!canCreate} title={createReason} className="m-0 min-w-0 border-0 p-0">
           <p className="text-sm font-medium text-content-primary mb-3">
             {t('siteLogistics.add_zone', { defaultValue: 'Add a laydown zone' })}
           </p>
@@ -1826,6 +1839,7 @@ function LaydownPanel({ projectId }: { projectId: string }) {
               {t('siteLogistics.add_zone', { defaultValue: 'Add a laydown zone' })}
             </Button>
           </div>
+          </fieldset>
         </Card>
       )}
 
@@ -1871,8 +1885,8 @@ function LaydownCard({
   savePending: boolean;
 }) {
   const { t } = useTranslation();
-  const canEdit = offered(zone.can?.edit);
-  const canDelete = offered(zone.can?.delete);
+  const editReason = whyNot(t as TFn, zone.can?.edit);
+  const deleteReason = whyNot(t as TFn, zone.can?.delete);
   const [editing, setEditing] = useState(false);
 
   if (editing) {
@@ -1897,21 +1911,22 @@ function LaydownCard({
           <span className="text-sm font-semibold text-content-primary truncate">{zone.name}</span>
         </div>
         <div className="flex items-center gap-1 shrink-0">
-          {canEdit && (
+          {!absent(zone.can?.edit) && (
             <button
               onClick={() => setEditing(true)}
-              disabled={busy}
+              disabled={busy || !!editReason}
               aria-label={t('siteLogistics.edit_zone', { defaultValue: 'Edit zone' })}
-              title={t('siteLogistics.edit_zone', { defaultValue: 'Edit zone' })}
+              title={editReason ?? t('siteLogistics.edit_zone', { defaultValue: 'Edit zone' })}
               className="flex h-7 w-7 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-content-primary transition-colors disabled:opacity-40"
             >
               <Pencil size={14} />
             </button>
           )}
-          {canDelete && (
+          {!absent(zone.can?.delete) && (
             <button
               onClick={onDelete}
-              disabled={busy}
+              disabled={busy || !!deleteReason}
+              title={deleteReason}
               aria-label={t('common.delete', { defaultValue: 'Delete' })}
               className="flex h-7 w-7 items-center justify-center rounded-lg text-content-tertiary hover:bg-semantic-error/10 hover:text-semantic-error transition-colors disabled:opacity-40"
             >
@@ -2328,12 +2343,11 @@ function GateTimeline({
               'Add a gate and book deliveries to see the day laid out gate by gate, hour by hour.',
           })}
           action={
-            offered(mayBook)
-              ? {
-                  label: t('siteLogistics.book_delivery', { defaultValue: 'Book delivery' }),
-                  onClick: onBook,
-                }
-              : undefined
+            !absent(mayBook) ? (
+              <Button variant="primary" disabledReason={whyNot(t as TFn, mayBook)} onClick={onBook}>
+                {t('siteLogistics.book_delivery', { defaultValue: 'Book delivery' })}
+              </Button>
+            ) : undefined
           }
         />
       ) : (
@@ -2744,6 +2758,12 @@ function useConfirmDelete() {
 type TabKey = 'deliveries' | 'timeline' | 'coverage' | 'gates' | 'laydown' | 'plan';
 
 const TAB_KEYS: TabKey[] = ['deliveries', 'timeline', 'coverage', 'gates', 'laydown', 'plan'];
+
+/** Why this reader may not take an action that exists: the server's reason, else the plain role sentence. */
+function whyNot(t: TFn, verdict: Verdict | undefined): string | undefined {
+  if (!denied(verdict)) return undefined;
+  return reasonText(t, verdict) ?? roleReasonText(t, 'editor');
+}
 
 export function SiteLogisticsPage() {
   const { t } = useTranslation();

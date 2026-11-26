@@ -25,7 +25,7 @@ export const GATE_LIMITS = [
   'turning_radius_m',
 ] as const;
 
-export function GateLimits({ gate, canEdit }: { gate: Gate; canEdit: boolean }) {
+export function GateLimits({ gate, canEdit, editReason }: { gate: Gate; canEdit: boolean; editReason?: string }) {
   const words = useWords();
   const { t } = words;
   const qc = useQueryClient();
@@ -46,10 +46,12 @@ export function GateLimits({ gate, canEdit }: { gate: Gate; canEdit: boolean }) 
           <Weight size={12} className="text-content-tertiary" aria-hidden />
           {tx(t, 'gate.limits')}
         </span>
-        {canEdit && (
+        {(canEdit || editReason) && (
           <button
             type="button"
-            className="text-xs font-medium text-oe-blue hover:underline"
+            disabled={!canEdit}
+            title={editReason}
+            className="text-xs font-medium text-oe-blue hover:underline disabled:cursor-not-allowed disabled:opacity-50 disabled:no-underline"
             onClick={() => setEditing(true)}
             data-testid="gate-limits-edit"
           >
