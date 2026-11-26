@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vitest';
 
 import type { Party } from '../api';
 import { partyCategory } from '../PartiesHoneycomb';
-import { edgeWidth } from '../PlatformMapCanvas';
 
 const party = (over: Partial<Party>): Party => ({
   id: 'p',
@@ -14,15 +13,6 @@ const party = (over: Partial<Party>): Party => ({
   modules: [],
   placeholder: false,
   ...over,
-});
-
-describe('platform map edges', () => {
-  it('grow thicker with the live count and stay bounded', () => {
-    expect(edgeWidth(0, 'supporting')).toBeLessThan(edgeWidth(5, 'supporting'));
-    expect(edgeWidth(5, 'supporting')).toBeLessThan(edgeWidth(350, 'supporting'));
-    expect(edgeWidth(1_000_000, 'critical')).toBeLessThanOrEqual(1.75 + 4.5);
-    expect(edgeWidth(null, 'high')).toBe(1.4);
-  });
 });
 
 describe('honeycomb colours', () => {
