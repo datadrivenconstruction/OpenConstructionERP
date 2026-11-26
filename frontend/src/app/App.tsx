@@ -1873,7 +1873,7 @@ export default function App() {
             true. Same for the two registers below. */}
         <Route path="/projects/:projectId/equipment" element={<Navigate to="/equipment" replace />} />
         <Route path="/payroll" element={<P title="Payroll"><PayrollPage /></P>} />
-        <Route path="/cost-benchmarks" element={<P title="Cost benchmarks"><CostBenchmarksPage /></P>} />
+        <Route path="/cost-benchmarks" element={<P title="Past project benchmarks"><CostBenchmarksPage /></P>} />
         <Route path="/projects/:projectId/payroll" element={<P title="Payroll"><PayrollPage /></P>} />
         <Route path="/certified-payroll" element={<P title="Certified Payroll"><CertifiedPayrollPage /></P>} />
         <Route path="/projects/:projectId/certified-payroll" element={<P title="Certified Payroll"><CertifiedPayrollPage /></P>} />

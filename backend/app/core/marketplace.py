@@ -820,7 +820,7 @@ MARKETPLACE_MODULES: list[MarketplaceModule] = [
     ),
     MarketplaceModule(
         id="analytics-benchmarks",
-        name="Cost Benchmarks",
+        name="Market Benchmarks",
         description="Compare your estimates against regional benchmarks. Regional cost-per-m2 data (including UK construction cost index) with building type normalization.",
         category="analytics",
         icon="BarChart3",

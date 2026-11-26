@@ -77,7 +77,7 @@ export const costDataControlModules: ModuleExplanation[] = [
     category: 'cost_data',
     keywords: 'benchmark cost per m2 percentile din 276 comparison',
     titleKey: 'howto.benchmarks.title',
-    titleDefault: 'Cost Benchmarks',
+    titleDefault: 'Market benchmarks',
     summaryKey: 'howto.benchmarks.summary',
     summaryDefault: 'Sanity-check your cost per m2 against typical ranges for the building type.',
     whatKey: 'howto.benchmarks.what',

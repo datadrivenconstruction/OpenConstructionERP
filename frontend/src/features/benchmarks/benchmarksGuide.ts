@@ -14,7 +14,7 @@ import type { ModuleGuideContent } from '@/shared/ui';
 
 export const benchmarksGuide: ModuleGuideContent = {
   titleKey: 'guide.benchmarks.title',
-  titleDefault: 'Cost Benchmarks',
+  titleDefault: 'Market benchmarks',
   introKey: 'guide.benchmarks.intro',
   introDefault:
     'Benchmarks tell you whether your estimate is normal for the kind of building you are pricing. You enter a total cost and a floor area, and the page shows where your cost per square metre sits against typical industry figures.',

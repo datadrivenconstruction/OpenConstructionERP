@@ -564,9 +564,9 @@ export default function CostBenchmarksPage() {
 
   return (
     <div className="space-y-5 animate-fade-in">
-      <Breadcrumb items={[{ label: t('nav.cost_benchmarks', { defaultValue: 'Cost benchmarks' }) }]} />
+      <Breadcrumb items={[{ label: t('nav.cost_benchmarks', { defaultValue: 'Past project benchmarks' }) }]} />
       <PageHeader
-        srTitle={t('cost_benchmarks.title', { defaultValue: 'Cost benchmarks' })}
+        srTitle={t('cost_benchmarks.title', { defaultValue: 'Past project benchmarks' })}
         subtitle={t('cost_benchmarks.subtitle', {
           defaultValue: 'Check an estimate against the cost per m2 of your completed projects, element by element.',
         })}
