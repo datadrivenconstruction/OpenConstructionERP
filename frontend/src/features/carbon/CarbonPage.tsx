@@ -1256,6 +1256,7 @@ function InventoryDrawer({
   onClose: () => void;
 }) {
   const { t } = useTranslation();
+  const write = useRoleGate('editor');
   const qc = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
   const { confirm, setLoading, ...confirmProps } = useConfirm();

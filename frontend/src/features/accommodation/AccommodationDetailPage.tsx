@@ -586,7 +586,6 @@ function OccupancySubTabs({
 function RoomsTab({ data }: { data: AccommodationDetail }) {
   const { t } = useTranslation();
   const write = useRoleGate('editor');
-  const manage = useRoleGate('manager');
   const [bulkOpen, setBulkOpen] = useState(false);
   const [assignRoom, setAssignRoom] = useState<Room | null>(null);
   const queryClient = useQueryClient();
@@ -961,7 +960,6 @@ function AssignOccupantModal({
 function BookingsTab({ data }: { data: AccommodationDetail }) {
   const { t } = useTranslation();
   const write = useRoleGate('editor');
-  const manage = useRoleGate('manager');
   const queryClient = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
 
@@ -1694,7 +1692,6 @@ function BookingChargesPanel({
 }) {
   const { t } = useTranslation();
   const write = useRoleGate('editor');
-  const manage = useRoleGate('manager');
   const navigate = useNavigate();
   const [editorOpen, setEditorOpen] = useState(false);
   const [editCharge, setEditCharge] = useState<Charge | null>(null);
