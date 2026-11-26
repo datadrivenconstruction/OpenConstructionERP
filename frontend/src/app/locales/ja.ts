@@ -70962,6 +70962,9 @@ const resource = {
     "valuation_grid.total_priced": "単価のある行の合計",
     "valuation_grid.note": "出来高メモ（累計が減った理由）",
     "valuation_grid.save_note": "メモを保存",
+    "permissions.reason.editor_only": "この操作は編集者、マネージャー、または管理者のみが実行できます。",
+    "permissions.reason.manager_only": "この操作はマネージャーまたは管理者のみが実行できます。",
+    "permissions.reason.admin_only": "この操作は管理者のみが実行できます。",
   }
 } as { translation: Record<string, string> };
 

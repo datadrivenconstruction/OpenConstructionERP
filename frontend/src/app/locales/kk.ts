@@ -69659,6 +69659,9 @@ const resource = {
     "valuation_grid.total_priced": "Бағаланған жолдар жиыны",
     "valuation_grid.note": "Бағалау ескертпесі (жинақталған неге азайды)",
     "valuation_grid.save_note": "Ескертпені сақтау",
+    "permissions.reason.editor_only": "Мұны тек редактор, менеджер немесе әкімші жасай алады.",
+    "permissions.reason.manager_only": "Мұны тек менеджер немесе әкімші жасай алады.",
+    "permissions.reason.admin_only": "Мұны тек әкімші жасай алады.",
   }
 } as { translation: Record<string, string> };
 

@@ -69664,6 +69664,9 @@ const resource = {
     "valuation_grid.total_priced": "قیمت والی سطروں کا میزان",
     "valuation_grid.note": "تخمینہ نوٹ (مجموعی میزان کیوں کم ہوا)",
     "valuation_grid.save_note": "نوٹ محفوظ کریں",
+    "permissions.reason.editor_only": "صرف ایڈیٹر، مینیجر یا ایڈمنسٹریٹر ہی یہ کر سکتا ہے۔",
+    "permissions.reason.manager_only": "صرف مینیجر یا ایڈمنسٹریٹر ہی یہ کر سکتا ہے۔",
+    "permissions.reason.admin_only": "صرف ایڈمنسٹریٹر ہی یہ کر سکتا ہے۔",
   }
 } as { translation: Record<string, string> };
 

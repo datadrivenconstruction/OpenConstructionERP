@@ -72928,6 +72928,9 @@ const resource = {
     "valuation_grid.total_priced": "إجمالي البنود المسعّرة",
     "valuation_grid.note": "ملاحظة التقييم (لماذا انخفض الإجمالي التراكمي)",
     "valuation_grid.save_note": "حفظ الملاحظة",
+    "permissions.reason.editor_only": "لا يمكن تنفيذ هذا الإجراء إلا من قبل محرر أو مدير أو مسؤول النظام.",
+    "permissions.reason.manager_only": "لا يمكن تنفيذ هذا الإجراء إلا من قبل مدير أو مسؤول النظام.",
+    "permissions.reason.admin_only": "لا يمكن تنفيذ هذا الإجراء إلا من قبل مسؤول النظام.",
   }
 } as { translation: Record<string, string> };
 

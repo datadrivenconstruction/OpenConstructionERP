@@ -12,6 +12,12 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   loading?: boolean;
   icon?: React.ReactNode;
   iconPosition?: 'left' | 'right';
+  /**
+   * Why the action is unavailable to this user ("Only a manager can do this").
+   * A non-empty reason disables the button and shows the reason as its tooltip;
+   * the button stays visible, so a reader sees what exists and who can use it.
+   */
+  disabledReason?: string | null;
 }
 
 // One control system for the whole platform: every size shares the same 8px
@@ -71,15 +77,18 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       icon,
       iconPosition = 'left',
       disabled,
+      disabledReason,
       className,
       children,
+      title,
       ...props
     },
     ref,
   ) => {
     const forcedSize = useContext(ButtonSizeOverrideContext);
     const effSize = forcedSize ?? size;
-    const isDisabled = disabled || loading;
+    const reason = disabledReason?.trim() || undefined;
+    const isDisabled = disabled || loading || !!reason;
     const iconOnly = !children && !!icon && !loading;
 
     return (
@@ -87,7 +96,9 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         ref={ref}
         data-oe-button={variant}
         disabled={isDisabled}
+        aria-disabled={isDisabled || undefined}
         aria-busy={loading || undefined}
+        title={reason ?? title}
         className={clsx(
           'inline-flex items-center justify-center',
           'font-medium whitespace-nowrap select-none',
@@ -97,7 +108,8 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           variantStyles[variant],
           sizeStyles[effSize],
           iconOnly && iconOnlyStyles[effSize],
-          isDisabled && 'pointer-events-none',
+          // A reason needs the pointer to reach the button, or its tooltip never shows.
+          isDisabled && (reason ? 'cursor-not-allowed active:scale-100' : 'pointer-events-none'),
           isDisabled && !loading && 'opacity-40',
           className,
         )}

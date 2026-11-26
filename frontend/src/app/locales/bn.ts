@@ -69968,6 +69968,9 @@ const resource = {
     "valuation_grid.total_priced": "মূল্যযুক্ত লাইনের মোট",
     "valuation_grid.note": "মূল্যায়ন নোট (ক্রমযোজিত মোট কেন কমল)",
     "valuation_grid.save_note": "নোট সংরক্ষণ",
+    "permissions.reason.editor_only": "শুধুমাত্র একজন সম্পাদক, ম্যানেজার বা অ্যাডমিনিস্ট্রেটর এটি করতে পারেন।",
+    "permissions.reason.manager_only": "শুধুমাত্র একজন ম্যানেজার বা অ্যাডমিনিস্ট্রেটর এটি করতে পারেন।",
+    "permissions.reason.admin_only": "শুধুমাত্র একজন অ্যাডমিনিস্ট্রেটর এটি করতে পারেন।",
   }
 } as { translation: Record<string, string> };
 

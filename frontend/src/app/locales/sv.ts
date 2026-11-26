@@ -70319,6 +70319,9 @@ const resource = {
     "valuation_grid.total_priced": "Summa prissatta rader",
     "valuation_grid.note": "Värderingsanteckning (varför ett ackumulerat värde sjönk)",
     "valuation_grid.save_note": "Spara anteckning",
+    "permissions.reason.editor_only": "Endast en redaktör, chef eller administratör kan göra detta.",
+    "permissions.reason.manager_only": "Endast en chef eller administratör kan göra detta.",
+    "permissions.reason.admin_only": "Endast en administratör kan göra detta.",
   }
 } as { translation: Record<string, string> };
 

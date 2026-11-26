@@ -69654,6 +69654,9 @@ const resource = {
     "valuation_grid.total_priced": "Hinnatud ridade summa",
     "valuation_grid.note": "Hindamismärkus (miks kumulatiivne vähenes)",
     "valuation_grid.save_note": "Salvesta märkus",
+    "permissions.reason.editor_only": "Seda saab teha ainult toimetaja, juht või administraator.",
+    "permissions.reason.manager_only": "Seda saab teha ainult juht või administraator.",
+    "permissions.reason.admin_only": "Seda saab teha ainult administraator.",
   }
 } as { translation: Record<string, string> };
 

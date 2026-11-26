@@ -72649,6 +72649,9 @@ const resource = {
     "valuation_grid.total_priced": "Total das linhas com preço",
     "valuation_grid.note": "Nota de medição (porque um acumulado desceu)",
     "valuation_grid.save_note": "Guardar nota",
+    "permissions.reason.editor_only": "Apenas um editor, gestor ou administrador pode fazer isto.",
+    "permissions.reason.manager_only": "Apenas um gestor ou administrador pode fazer isto.",
+    "permissions.reason.admin_only": "Apenas um administrador pode fazer isto.",
   }
 } as { translation: Record<string, string> };
 

@@ -69438,6 +69438,9 @@ const resource = {
     "valuation_grid.total_priced": "Tổng các dòng có giá",
     "valuation_grid.note": "Ghi chú nghiệm thu (vì sao lũy kế giảm)",
     "valuation_grid.save_note": "Lưu ghi chú",
+    "permissions.reason.editor_only": "Chỉ biên tập viên, quản lý hoặc quản trị viên mới có thể thực hiện thao tác này.",
+    "permissions.reason.manager_only": "Chỉ quản lý hoặc quản trị viên mới có thể thực hiện thao tác này.",
+    "permissions.reason.admin_only": "Chỉ quản trị viên mới có thể thực hiện thao tác này.",
   }
 } as { translation: Record<string, string> };
 

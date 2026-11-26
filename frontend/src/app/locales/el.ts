@@ -69664,6 +69664,9 @@ const resource = {
     "valuation_grid.total_priced": "Σύνολο αποτιμημένων γραμμών",
     "valuation_grid.note": "Σημείωση αποτίμησης (γιατί μειώθηκε το σωρευτικό)",
     "valuation_grid.save_note": "Αποθήκευση σημείωσης",
+    "permissions.reason.editor_only": "Μόνο συντάκτης, διαχειριστής έργου ή διαχειριστής συστήματος μπορεί να το κάνει αυτό.",
+    "permissions.reason.manager_only": "Μόνο διαχειριστής έργου ή διαχειριστής συστήματος μπορεί να το κάνει αυτό.",
+    "permissions.reason.admin_only": "Μόνο ο διαχειριστής συστήματος μπορεί να το κάνει αυτό.",
   }
 } as { translation: Record<string, string> };
 

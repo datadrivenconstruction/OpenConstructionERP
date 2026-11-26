@@ -69708,6 +69708,9 @@ const resource = {
     "valuation_grid.total_priced": "Hinnoiteltujen rivien summa",
     "valuation_grid.note": "Arviointihuomautus (miksi kertymä laski)",
     "valuation_grid.save_note": "Tallenna huomautus",
+    "permissions.reason.editor_only": "Vain muokkaaja, esihenkilö tai ylläpitäjä voi tehdä tämän.",
+    "permissions.reason.manager_only": "Vain esihenkilö tai ylläpitäjä voi tehdä tämän.",
+    "permissions.reason.admin_only": "Vain ylläpitäjä voi tehdä tämän.",
   }
 } as { translation: Record<string, string> };
 

@@ -63999,6 +63999,9 @@ const resource = {
     "valuation_grid.total_priced": "Total of priced lines",
     "valuation_grid.note": "Valuation note (why a running total went down)",
     "valuation_grid.save_note": "Save note",
+    "permissions.reason.editor_only": "Only an editor, manager or administrator can do this.",
+    "permissions.reason.manager_only": "Only a manager or administrator can do this.",
+    "permissions.reason.admin_only": "Only an administrator can do this.",
   }
 } as { translation: Record<string, string> };
 

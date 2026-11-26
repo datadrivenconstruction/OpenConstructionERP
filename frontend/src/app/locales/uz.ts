@@ -70630,6 +70630,9 @@ const resource = {
     "valuation_grid.total_priced": "Narxlangan qatorlar jami",
     "valuation_grid.note": "Baholash izohi (yigʻma nega kamaydi)",
     "valuation_grid.save_note": "Izohni saqlash",
+    "permissions.reason.editor_only": "Buni faqat muharrir, menejer yoki administrator bajara oladi.",
+    "permissions.reason.manager_only": "Buni faqat menejer yoki administrator bajara oladi.",
+    "permissions.reason.admin_only": "Buni faqat administrator bajara oladi.",
   }
 } as { translation: Record<string, string> };
 

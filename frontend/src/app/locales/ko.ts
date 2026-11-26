@@ -70046,6 +70046,9 @@ const resource = {
     "valuation_grid.total_priced": "단가가 있는 항목 합계",
     "valuation_grid.note": "기성 메모 (누계가 줄어든 이유)",
     "valuation_grid.save_note": "메모 저장",
+    "permissions.reason.editor_only": "편집자, 관리자 또는 시스템 관리자만 이 작업을 수행할 수 있습니다.",
+    "permissions.reason.manager_only": "관리자 또는 시스템 관리자만 이 작업을 수행할 수 있습니다.",
+    "permissions.reason.admin_only": "시스템 관리자만 이 작업을 수행할 수 있습니다.",
   }
 } as { translation: Record<string, string> };
 

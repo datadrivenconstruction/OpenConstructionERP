@@ -69429,6 +69429,9 @@ const resource = {
     "valuation_grid.total_priced": "Total baris berharga",
     "valuation_grid.note": "Catatan penilaian (mengapa kumulatif turun)",
     "valuation_grid.save_note": "Simpan catatan",
+    "permissions.reason.editor_only": "Hanya editor, manajer, atau administrator yang dapat melakukan ini.",
+    "permissions.reason.manager_only": "Hanya manajer atau administrator yang dapat melakukan ini.",
+    "permissions.reason.admin_only": "Hanya administrator yang dapat melakukan ini.",
   }
 } as { translation: Record<string, string> };
 

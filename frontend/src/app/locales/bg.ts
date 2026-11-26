@@ -69702,6 +69702,9 @@ const resource = {
     "valuation_grid.total_priced": "Общо остойностени редове",
     "valuation_grid.note": "Бележка към оценката (защо натрупаното е намаляло)",
     "valuation_grid.save_note": "Запази бележката",
+    "permissions.reason.editor_only": "Само редактор, мениджър или администратор може да направи това.",
+    "permissions.reason.manager_only": "Само мениджър или администратор може да направи това.",
+    "permissions.reason.admin_only": "Само администратор може да направи това.",
   }
 } as { translation: Record<string, string> };
 

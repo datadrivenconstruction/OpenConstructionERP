@@ -71923,6 +71923,9 @@ const resource = {
     "valuation_grid.total_priced": "已计价行合计",
     "valuation_grid.note": "计量说明（累计为何下降）",
     "valuation_grid.save_note": "保存说明",
+    "permissions.reason.editor_only": "只有编辑者、经理或管理员可以执行此操作。",
+    "permissions.reason.manager_only": "只有经理或管理员可以执行此操作。",
+    "permissions.reason.admin_only": "只有管理员可以执行此操作。",
   }
 } as { translation: Record<string, string> };
 

@@ -71857,6 +71857,9 @@ const resource = {
     "valuation_grid.total_priced": "Разом за рядками з ціною",
     "valuation_grid.note": "Примітка до оцінки (чому наростаючий підсумок зменшився)",
     "valuation_grid.save_note": "Зберегти примітку",
+    "permissions.reason.editor_only": "Це може зробити лише редактор, менеджер або адміністратор.",
+    "permissions.reason.manager_only": "Це може зробити лише менеджер або адміністратор.",
+    "permissions.reason.admin_only": "Це може зробити лише адміністратор.",
   }
 } as { translation: Record<string, string> };
 

@@ -70037,6 +70037,9 @@ const resource = {
     "valuation_grid.total_priced": "סך השורות המתומחרות",
     "valuation_grid.note": "הערת הערכה (מדוע המצטבר ירד)",
     "valuation_grid.save_note": "שמירת הערה",
+    "permissions.reason.editor_only": "רק עורך, מנהל או מנהל מערכת יכולים לבצע פעולה זו.",
+    "permissions.reason.manager_only": "רק מנהל או מנהל מערכת יכולים לבצע פעולה זו.",
+    "permissions.reason.admin_only": "רק מנהל מערכת יכול לבצע פעולה זו.",
   }
 } as { translation: Record<string, string> };
 

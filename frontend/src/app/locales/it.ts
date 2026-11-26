@@ -70957,6 +70957,9 @@ const resource = {
     "valuation_grid.total_priced": "Totale righe valorizzate",
     "valuation_grid.note": "Nota di valutazione (perché un progressivo è sceso)",
     "valuation_grid.save_note": "Salva nota",
+    "permissions.reason.editor_only": "Solo un editor, un responsabile o un amministratore può eseguire questa azione.",
+    "permissions.reason.manager_only": "Solo un responsabile o un amministratore può eseguire questa azione.",
+    "permissions.reason.admin_only": "Solo un amministratore può eseguire questa azione.",
   }
 } as { translation: Record<string, string> };
 

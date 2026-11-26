@@ -70579,6 +70579,9 @@ const resource = {
     "valuation_grid.total_priced": "Fiyatlı satırların toplamı",
     "valuation_grid.note": "Değerleme notu (kümülatif neden düştü)",
     "valuation_grid.save_note": "Notu kaydet",
+    "permissions.reason.editor_only": "Bunu yalnızca bir editör, yönetici veya sistem yöneticisi yapabilir.",
+    "permissions.reason.manager_only": "Bunu yalnızca bir yönetici veya sistem yöneticisi yapabilir.",
+    "permissions.reason.admin_only": "Bunu yalnızca bir sistem yöneticisi yapabilir.",
   }
 } as { translation: Record<string, string> };
 

@@ -69658,6 +69658,9 @@ const resource = {
     "valuation_grid.total_priced": "جمع ردیف‌های قیمت‌گذاری‌شده",
     "valuation_grid.note": "یادداشت ارزیابی (چرا جمع تجمعی کاهش یافت)",
     "valuation_grid.save_note": "ذخیره یادداشت",
+    "permissions.reason.editor_only": "فقط ویرایشگر، مدیر یا مدیر سیستم می‌تواند این کار را انجام دهد.",
+    "permissions.reason.manager_only": "فقط مدیر یا مدیر سیستم می‌تواند این کار را انجام دهد.",
+    "permissions.reason.admin_only": "فقط مدیر سیستم می‌تواند این کار را انجام دهد.",
   }
 } as { translation: Record<string, string> };
 

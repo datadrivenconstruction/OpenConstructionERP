@@ -72263,6 +72263,9 @@ const resource = {
     "valuation_grid.total_priced": "Árazott tételek összesen",
     "valuation_grid.note": "Értékelési megjegyzés (miért csökkent a halmozott érték)",
     "valuation_grid.save_note": "Megjegyzés mentése",
+    "permissions.reason.editor_only": "Ezt csak szerkesztő, vezető vagy rendszergazda teheti meg.",
+    "permissions.reason.manager_only": "Ezt csak vezető vagy rendszergazda teheti meg.",
+    "permissions.reason.admin_only": "Ezt csak rendszergazda teheti meg.",
   }
 } as { translation: Record<string, string> };
 

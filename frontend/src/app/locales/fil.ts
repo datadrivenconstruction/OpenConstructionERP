@@ -69662,6 +69662,9 @@ const resource = {
     "valuation_grid.total_priced": "Kabuuan ng mga linyang may presyo",
     "valuation_grid.note": "Tala ng pagtatasa (bakit bumaba ang naipon)",
     "valuation_grid.save_note": "I-save ang tala",
+    "permissions.reason.editor_only": "Isang editor, manager o administrator lamang ang makakagawa nito.",
+    "permissions.reason.manager_only": "Isang manager o administrator lamang ang makakagawa nito.",
+    "permissions.reason.admin_only": "Isang administrator lamang ang makakagawa nito.",
   }
 } as { translation: Record<string, string> };
 

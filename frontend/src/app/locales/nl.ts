@@ -70585,6 +70585,9 @@ const resource = {
     "valuation_grid.total_priced": "Totaal geprijsde regels",
     "valuation_grid.note": "Waarderingsnotitie (waarom een cumulatief daalde)",
     "valuation_grid.save_note": "Notitie opslaan",
+    "permissions.reason.editor_only": "Alleen een redacteur, manager of beheerder kan dit doen.",
+    "permissions.reason.manager_only": "Alleen een manager of beheerder kan dit doen.",
+    "permissions.reason.admin_only": "Alleen een beheerder kan dit doen.",
   }
 } as { translation: Record<string, string> };
 

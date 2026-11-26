@@ -69815,6 +69815,9 @@ const resource = {
     "valuation_grid.total_priced": "Бааланган саптардын жыйындысы",
     "valuation_grid.note": "Баалоо эскертүүсү (топтолгон эмне үчүн азайды)",
     "valuation_grid.save_note": "Эскертүүнү сактоо",
+    "permissions.reason.editor_only": "Муну редактор, менеджер же администратор гана жасай алат.",
+    "permissions.reason.manager_only": "Муну менеджер же администратор гана жасай алат.",
+    "permissions.reason.admin_only": "Муну администратор гана жасай алат.",
   }
 } as { translation: Record<string, string> };
 

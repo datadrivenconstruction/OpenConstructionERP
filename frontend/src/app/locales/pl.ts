@@ -71310,6 +71310,9 @@ const resource = {
     "valuation_grid.total_priced": "Suma wycenionych pozycji",
     "valuation_grid.note": "Uwaga do wyceny (dlaczego wartość narastająca spadła)",
     "valuation_grid.save_note": "Zapisz uwagę",
+    "permissions.reason.editor_only": "Tę czynność może wykonać tylko redaktor, kierownik lub administrator.",
+    "permissions.reason.manager_only": "Tę czynność może wykonać tylko kierownik lub administrator.",
+    "permissions.reason.admin_only": "Tę czynność może wykonać tylko administrator.",
   }
 } as { translation: Record<string, string> };
 

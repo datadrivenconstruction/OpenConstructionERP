@@ -72374,6 +72374,9 @@ const resource = {
     "valuation_grid.total_priced": "Summe der bepreisten Positionen",
     "valuation_grid.note": "Bewertungsvermerk (warum ein kumulierter Stand gesunken ist)",
     "valuation_grid.save_note": "Vermerk speichern",
+    "permissions.reason.editor_only": "Nur Bearbeiter, Manager oder Administratoren können diese Aktion ausführen.",
+    "permissions.reason.manager_only": "Nur Manager oder Administratoren können diese Aktion ausführen.",
+    "permissions.reason.admin_only": "Nur Administratoren können diese Aktion ausführen.",
   }
 } as { translation: Record<string, string> };
 

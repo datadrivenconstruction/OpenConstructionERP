@@ -72661,6 +72661,9 @@ const resource = {
     "valuation_grid.total_priced": "Total de líneas valoradas",
     "valuation_grid.note": "Nota de valoración (por qué bajó un acumulado)",
     "valuation_grid.save_note": "Guardar nota",
+    "permissions.reason.editor_only": "Solo un editor, un gestor o un administrador puede hacer esto.",
+    "permissions.reason.manager_only": "Solo un gestor o un administrador puede hacer esto.",
+    "permissions.reason.admin_only": "Solo un administrador puede hacer esto.",
   }
 } as { translation: Record<string, string> };
 

@@ -69717,6 +69717,9 @@ const resource = {
     "valuation_grid.total_priced": "Үнэлсэн мөрүүдийн нийт",
     "valuation_grid.note": "Үнэлгээний тэмдэглэл (хуримтлал яагаад буурсан)",
     "valuation_grid.save_note": "Тэмдэглэл хадгалах",
+    "permissions.reason.editor_only": "Үүнийг зөвхөн засварлагч, менежер эсвэл администратор хийж чадна.",
+    "permissions.reason.manager_only": "Үүнийг зөвхөн менежер эсвэл администратор хийж чадна.",
+    "permissions.reason.admin_only": "Үүнийг зөвхөн администратор хийж чадна.",
   }
 } as { translation: Record<string, string> };
 

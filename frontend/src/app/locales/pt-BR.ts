@@ -62578,6 +62578,9 @@ const resource = {
     "valuation_grid.total_priced": "Total das linhas com preço",
     "valuation_grid.note": "Nota de medição (por que um acumulado caiu)",
     "valuation_grid.save_note": "Salvar nota",
+    "permissions.reason.editor_only": "Somente um editor, gerente ou administrador pode fazer isso.",
+    "permissions.reason.manager_only": "Somente um gerente ou administrador pode fazer isso.",
+    "permissions.reason.admin_only": "Somente um administrador pode fazer isso.",
     // --- /Draft lender preparation ---
   }
 } as { translation: Record<string, string> };

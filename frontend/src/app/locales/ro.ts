@@ -70075,6 +70075,9 @@ const resource = {
     "valuation_grid.total_priced": "Totalul liniilor evaluate",
     "valuation_grid.note": "Notă de evaluare (de ce a scăzut un cumulat)",
     "valuation_grid.save_note": "Salvează nota",
+    "permissions.reason.editor_only": "Doar un editor, un manager sau un administrator poate face acest lucru.",
+    "permissions.reason.manager_only": "Doar un manager sau un administrator poate face acest lucru.",
+    "permissions.reason.admin_only": "Doar un administrator poate face acest lucru.",
   }
 } as { translation: Record<string, string> };
 

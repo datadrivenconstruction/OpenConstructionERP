@@ -69704,6 +69704,9 @@ const resource = {
     "valuation_grid.total_priced": "Sum af prissatte linjer",
     "valuation_grid.note": "Vurderingsnote (hvorfor en akkumuleret værdi faldt)",
     "valuation_grid.save_note": "Gem note",
+    "permissions.reason.editor_only": "Kun en redaktør, leder eller administrator kan gøre dette.",
+    "permissions.reason.manager_only": "Kun en leder eller administrator kan gøre dette.",
+    "permissions.reason.admin_only": "Kun en administrator kan gøre dette.",
   }
 } as { translation: Record<string, string> };
 

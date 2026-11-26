@@ -72371,6 +72371,9 @@ const resource = {
     "valuation_grid.total_priced": "已計價行合計",
     "valuation_grid.note": "計量說明（累計為何下降）",
     "valuation_grid.save_note": "儲存說明",
+    "permissions.reason.editor_only": "只有編輯者、經理或管理員可以執行此操作。",
+    "permissions.reason.manager_only": "只有經理或管理員可以執行此操作。",
+    "permissions.reason.admin_only": "只有管理員可以執行此操作。",
   }
 } as { translation: Record<string, string> };
 

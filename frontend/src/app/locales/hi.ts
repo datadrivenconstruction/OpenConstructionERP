@@ -69701,6 +69701,9 @@ const resource = {
     "valuation_grid.total_priced": "मूल्यांकित पंक्तियों का योग",
     "valuation_grid.note": "मूल्यांकन टिप्पणी (संचयी योग क्यों घटा)",
     "valuation_grid.save_note": "टिप्पणी सहेजें",
+    "permissions.reason.editor_only": "केवल संपादक, प्रबंधक या व्यवस्थापक ही यह कर सकते हैं।",
+    "permissions.reason.manager_only": "केवल प्रबंधक या व्यवस्थापक ही यह कर सकते हैं।",
+    "permissions.reason.admin_only": "केवल व्यवस्थापक ही यह कर सकते हैं।",
   }
 } as { translation: Record<string, string> };
 

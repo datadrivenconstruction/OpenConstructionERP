@@ -69430,6 +69430,9 @@ const resource = {
     "valuation_grid.total_priced": "รวมรายการที่มีราคา",
     "valuation_grid.note": "หมายเหตุการประเมิน (เหตุใดยอดสะสมลดลง)",
     "valuation_grid.save_note": "บันทึกหมายเหตุ",
+    "permissions.reason.editor_only": "เฉพาะผู้แก้ไข ผู้จัดการ หรือผู้ดูแลระบบเท่านั้นที่ทำสิ่งนี้ได้",
+    "permissions.reason.manager_only": "เฉพาะผู้จัดการหรือผู้ดูแลระบบเท่านั้นที่ทำสิ่งนี้ได้",
+    "permissions.reason.admin_only": "เฉพาะผู้ดูแลระบบเท่านั้นที่ทำสิ่งนี้ได้",
   }
 } as { translation: Record<string, string> };
 

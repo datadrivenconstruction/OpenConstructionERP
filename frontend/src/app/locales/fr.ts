@@ -72656,6 +72656,9 @@ const resource = {
     "valuation_grid.total_priced": "Total des lignes valorisées",
     "valuation_grid.note": "Note d'évaluation (pourquoi un cumul a baissé)",
     "valuation_grid.save_note": "Enregistrer la note",
+    "permissions.reason.editor_only": "Seul un éditeur, un responsable ou un administrateur peut effectuer cette action.",
+    "permissions.reason.manager_only": "Seul un responsable ou un administrateur peut effectuer cette action.",
+    "permissions.reason.admin_only": "Seul un administrateur peut effectuer cette action.",
   }
 } as { translation: Record<string, string> };
 

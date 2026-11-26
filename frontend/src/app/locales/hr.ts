@@ -70076,6 +70076,9 @@ const resource = {
     "valuation_grid.total_priced": "Ukupno vrednovanih stavki",
     "valuation_grid.note": "Napomena uz procjenu (zašto je kumulativ pao)",
     "valuation_grid.save_note": "Spremi napomenu",
+    "permissions.reason.editor_only": "Ovo može učiniti samo urednik, voditelj ili administrator.",
+    "permissions.reason.manager_only": "Ovo može učiniti samo voditelj ili administrator.",
+    "permissions.reason.admin_only": "Ovo može učiniti samo administrator.",
   }
 } as { translation: Record<string, string> };
 

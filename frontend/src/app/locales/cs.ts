@@ -71049,6 +71049,9 @@ const resource = {
     "valuation_grid.total_priced": "Součet oceněných položek",
     "valuation_grid.note": "Poznámka k ocenění (proč kumulativní stav klesl)",
     "valuation_grid.save_note": "Uložit poznámku",
+    "permissions.reason.editor_only": "Tuto akci může provést pouze editor, manažer nebo správce.",
+    "permissions.reason.manager_only": "Tuto akci může provést pouze manažer nebo správce.",
+    "permissions.reason.admin_only": "Tuto akci může provést pouze správce.",
   }
 } as { translation: Record<string, string> };
 

@@ -73013,6 +73013,9 @@ const resource = {
     "valuation_grid.total_priced": "Итого по строкам с ценой",
     "valuation_grid.note": "Примечание к оценке (почему нарастающий итог уменьшился)",
     "valuation_grid.save_note": "Сохранить примечание",
+    "permissions.reason.editor_only": "Это может сделать только редактор, менеджер или администратор.",
+    "permissions.reason.manager_only": "Это может сделать только менеджер или администратор.",
+    "permissions.reason.admin_only": "Это может сделать только администратор.",
   }
 } as { translation: Record<string, string> };
 
