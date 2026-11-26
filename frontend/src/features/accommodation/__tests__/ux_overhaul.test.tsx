@@ -21,6 +21,7 @@ import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter } from 'react-router-dom';
+import { useAuthStore } from '@/stores/useAuthStore';
 
 vi.mock('../api', () => ({
   listAccommodations: vi.fn(),
@@ -152,7 +153,10 @@ function makeAccommodationDetail(over: Partial<Record<string, unknown>> = {}) {
 }
 
 describe('AccommodationListPage - empty + error states', () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    vi.clearAllMocks();
+    useAuthStore.setState({ userRole: 'admin' } as never);
+  });
 
   it('renders the warm EmptyState with a CTA when no accommodations exist', async () => {
     (listAccommodations as ReturnType<typeof vi.fn>).mockResolvedValue([]);
@@ -233,7 +237,10 @@ describe('AccommodationListPage - empty + error states', () => {
 });
 
 describe('AccommodationDetailPage - IA grouping', () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    vi.clearAllMocks();
+    useAuthStore.setState({ userRole: 'admin' } as never);
+  });
 
   it('renders the 3-block tab strip + Settings, plus the KPI row', async () => {
     (getAccommodation as ReturnType<typeof vi.fn>).mockResolvedValue(
@@ -323,7 +330,10 @@ describe('AccommodationDetailPage - IA grouping', () => {
 });
 
 describe('AccommodationCalendar - navigation', () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    vi.clearAllMocks();
+    useAuthStore.setState({ userRole: 'admin' } as never);
+  });
 
   it('Next button moves the visible week forward by 7 days', async () => {
     (getAccommodation as ReturnType<typeof vi.fn>).mockResolvedValue(

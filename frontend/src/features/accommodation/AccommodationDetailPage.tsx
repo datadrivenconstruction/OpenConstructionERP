@@ -27,6 +27,7 @@
 
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useRoleGate } from '@/shared/lib/useRoleGate';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
   useQuery,
@@ -584,6 +585,8 @@ function OccupancySubTabs({
 
 function RoomsTab({ data }: { data: AccommodationDetail }) {
   const { t } = useTranslation();
+  const write = useRoleGate('editor');
+  const manage = useRoleGate('manager');
   const [bulkOpen, setBulkOpen] = useState(false);
   const [assignRoom, setAssignRoom] = useState<Room | null>(null);
   const queryClient = useQueryClient();
@@ -624,6 +627,7 @@ function RoomsTab({ data }: { data: AccommodationDetail }) {
           variant="primary"
           size="sm"
           onClick={() => setBulkOpen(true)}
+          disabledReason={write.reason}
           data-testid="accommodation-rooms-bulk-add"
         >
           <Plus size={14} className="mr-1.5" aria-hidden="true" />
@@ -956,6 +960,8 @@ function AssignOccupantModal({
 
 function BookingsTab({ data }: { data: AccommodationDetail }) {
   const { t } = useTranslation();
+  const write = useRoleGate('editor');
+  const manage = useRoleGate('manager');
   const queryClient = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
 
@@ -1053,6 +1059,7 @@ function BookingsTab({ data }: { data: AccommodationDetail }) {
           variant="primary"
           size="sm"
           onClick={() => setPickerRoom(data.rooms[0] ?? null)}
+          disabledReason={write.reason}
           disabled={data.rooms.length === 0}
           data-testid="bookings-new-button"
         >
@@ -1686,6 +1693,8 @@ function BookingChargesPanel({
   bookingId: string;
 }) {
   const { t } = useTranslation();
+  const write = useRoleGate('editor');
+  const manage = useRoleGate('manager');
   const navigate = useNavigate();
   const [editorOpen, setEditorOpen] = useState(false);
   const [editCharge, setEditCharge] = useState<Charge | null>(null);
@@ -1806,6 +1815,7 @@ function BookingChargesPanel({
           variant="primary"
           size="sm"
           onClick={() => setEditorOpen(true)}
+          disabledReason={write.reason}
           data-testid="charges-add-button"
         >
           <Plus size={12} className="mr-1" aria-hidden="true" />
@@ -2769,6 +2779,8 @@ function SettingsTab({
   onDeleted: () => void;
 }) {
   const { t } = useTranslation();
+  const write = useRoleGate('editor');
+  const manage = useRoleGate('manager');
   const addToast = useToastStore((s) => s.addToast);
   const queryClient = useQueryClient();
 
@@ -2955,6 +2967,7 @@ function SettingsTab({
               variant="primary"
               size="sm"
               onClick={() => saveMutation.mutate()}
+              disabledReason={write.reason}
               loading={saveMutation.isPending}
               data-testid="accommodation-settings-save"
             >
@@ -2993,6 +3006,7 @@ function SettingsTab({
                 variant="secondary"
                 size="sm"
                 onClick={() => bootstrapMutation.mutate()}
+                disabledReason={write.reason}
                 loading={bootstrapMutation.isPending}
                 disabled={!blockId.trim()}
                 data-testid="accommodation-bootstrap-run"
@@ -3024,6 +3038,7 @@ function SettingsTab({
               variant="danger"
               size="sm"
               onClick={() => setConfirmDeleteOpen(true)}
+              disabledReason={manage.reason}
               data-testid="accommodation-delete-button"
             >
               <Trash2 size={14} className="mr-1.5" aria-hidden="true" />
