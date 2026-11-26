@@ -29,6 +29,7 @@ const api = vi.hoisted(() => ({
   payload: { kind: 'engine', version: 'ddc_web', assets: [{ url: 'x', bytes: 635678 }] } as unknown,
   revs: [] as unknown[],
   demo: false,
+  local: { install: { state: 'idle', version: null, done: 0, total: 0, error: null }, installed: null } as unknown,
 }));
 const BRIEF = api.brief;
 
@@ -55,9 +56,14 @@ vi.mock('./modelApi', async () => ({
   generateModel: api.generate,
   previewBrief: vi.fn(async () => ({ brief_version: 4, brief: {} })),
 }));
-vi.mock('./editorPayload', () => ({
+vi.mock('./editorPayload', async () => ({
+  ...(await vi.importActual<object>('./editorPayload')),
   currentPayload: vi.fn(async () => api.payload),
   startBackgroundLoad: vi.fn(() => null),
+}));
+vi.mock('./webEditorApi', async () => ({
+  ...(await vi.importActual<object>('./webEditorApi')),
+  fetchLocalWebEditorStatus: vi.fn(async () => api.local),
 }));
 vi.mock('./draftApi', () => ({
   fetchRights: vi.fn(async () => api.rights),
@@ -115,6 +121,7 @@ beforeEach(() => {
   api.brief = BRIEF;
   api.demo = false;
   api.payload = { kind: 'engine', version: 'ddc_web', assets: [{ url: 'x', bytes: 635678 }] };
+  api.local = { install: { state: 'idle', version: null, done: 0, total: 0, error: null }, installed: null };
   api.saveDraft.mockReset();
   api.makeRevision.mockReset();
   api.generate.mockClear();
@@ -220,6 +227,24 @@ describe('editor workspace (generator in the module)', () => {
   });
 });
 
+describe('editor workspace (full editor installed while the page is open)', () => {
+  it('shows the server download in the header and opens the full editor when it is unpacked, without a reload', async () => {
+    api.local = { install: { state: 'downloading', version: '1.2.0-web.1', done: 52_428_800, total: 101_323_351, error: null }, installed: null };
+    await mount();
+    await waitFor(() => expect(screen.getByTestId('engine-label').textContent).toBe(
+      EN['design.web_editor.downloading']!.replace('{{done}}', '50.0').replace('{{total}}', '96.6')));
+    expect(screen.queryByTestId('editor-host')).toBeNull();
+    api.payload = { kind: 'editor', version: '1.2.0-web.1', entryUrl: '/editor/index.html', assets: [], bundle: {} };
+    api.local = {
+      install: { state: 'idle', version: '1.2.0-web.1', done: 101_323_351, total: 101_323_351, error: null },
+      installed: { version: '1.2.0-web.1', bridge: [1], bytes: 1, installed_at: null, manifest_url: '/m', problem: null },
+    };
+    await waitFor(() => expect(screen.getByTestId('editor-host').querySelector('iframe')).toBeTruthy(), { timeout: 4000 });
+    expect(screen.getByTestId('engine-label').textContent).toBe(EN['design.workspace.engine_starting']!);
+    expect(screen.getByTestId('editor-starting').textContent).toBe(EN['design.workspace.engine_starting']!); // its engine loads
+  });
+});
+
 describe('editor workspace (browser editor over the bridge)', () => {
   const PID = '746402cb-14a8-430c-b3b9-9c6908fa75d7';
   const DRAFT = {
@@ -247,6 +272,7 @@ describe('editor workspace (browser editor over the bridge)', () => {
     emit({ bridge: 1, type: 'ready', versions: [1], editor: { name: 'editor', version: '0.4.0' } });
     await waitFor(() => expect(toHost).toHaveLength(1));
     expect(toHost[0]).toMatchObject({ type: 'open', mode: 'edit', draft: null, permissions: { can_edit: true, can_accept: true } });
+    await waitFor(() => expect(screen.queryByTestId('editor-starting')).toBeNull());
     expect((screen.getByTestId('create-revision') as HTMLButtonElement).disabled).toBe(true); // nothing to make yet
 
     const sha = Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', PKG))).map((b) => b.toString(16).padStart(2, '0')).join('');

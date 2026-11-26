@@ -11,7 +11,8 @@ export interface WebEditorStatus {
     manifest_url: string; problem: BridgeProblem;
   } | null;
   feed: {
-    state: 'available' | 'absent' | 'unreachable' | 'invalid' | 'off';
+    /** not_checked: asked with feed=false (what is on this server only, no call to the release host). */
+    state: 'available' | 'absent' | 'unreachable' | 'invalid' | 'off' | 'not_checked';
     version?: string; bytes?: number; bridge?: number[]; published_at?: string | null; problem?: BridgeProblem;
   };
   signing: { key: boolean; error: string | null };
@@ -24,14 +25,18 @@ export interface WebEditorStatus {
 }
 
 export const WEB_EDITOR_KEY = ['design-web-editor'] as const;
+/** The same status without the release feed; invalidating WEB_EDITOR_KEY refreshes it too. */
+export const WEB_EDITOR_LOCAL_KEY = [...WEB_EDITOR_KEY, 'local'] as const;
 
 export const fetchWebEditorStatus = () => apiGet<WebEditorStatus>('/v1/design/web-editor');
+/** Installed bundle and install progress only: never waits on the release host. */
+export const fetchLocalWebEditorStatus = () => apiGet<WebEditorStatus>('/v1/design/web-editor?feed=false');
 export const startWebEditorInstall = () => apiPost<WebEditorStatus>('/v1/design/web-editor/install', {});
 export const removeWebEditor = () => apiDelete('/v1/design/web-editor');
 
 /** The installed bundle's manifest URL when it speaks our bridge, else null (engine mode). */
 export async function installedManifestUrl(): Promise<string | null> {
-  const s = await fetchWebEditorStatus();
+  const s = await fetchLocalWebEditorStatus();
   return s.installed && !s.installed.problem ? s.installed.manifest_url : null;
 }
 

@@ -106,6 +106,49 @@ def test_bridge_problem_names_the_side_to_update():
     assert wr.bridge_problem([2]) == "erp_too_old"
 
 
+# The first published browser release, as its feed, signature and bundle manifest were read from the release host.
+PUBLISHED_FEED = {
+    "schema": "ddc-web-release/1",
+    "version": "1.2.0-web.1",
+    "tag": "v1.2.0-web.1",
+    "bridge": [1],
+    "zip": {
+        "url": "https://github.com/datadrivenconstruction/OpenConstructionDesign/releases/download/v1.2.0-web.1/"
+        "OpenConstructionDesign-v1.2.0-web.1-web.zip",
+        "bytes": 101323351,
+        "sha256": "a4ef74962203c7be97b1773e041e5429a57f22de14323acf16ddd4203faf8c2d",
+    },
+    "signature_url": "https://github.com/datadrivenconstruction/OpenConstructionDesign/releases/download/v1.2.0-web.1/"
+    "OpenConstructionDesign-v1.2.0-web.1-web.zip.minisig",
+    "published_at": "2026-11-26T12:29:29Z",
+}
+PUBLISHED_SIG = (
+    "untrusted comment: signature from minisign secret key\n"
+    "RURQEsHei00Jv03YfIWd1gNR02mVwa5meSAn873O67Pw5lFZz9wtQGgey0HDx42bxv6LkCNTpg39HAnE7dR+09mRt0nkR+twCgk=\n"
+    "trusted comment: OpenConstructionDesign v1.2.0-web.1 web\n"
+    "21vS9wWotqql+1xWAiyHr3Cq31lHDDrb56F/z2e5fFekEn1hvvsWo2UD1c9bPfqOi/MgzZ+ZwLre9m30UBD2BA==\n"
+)
+PUBLISHED_MANIFEST = Path(__file__).parent / "fixtures" / "web-editor-1.2.0-web.1.json"
+
+
+def test_published_release_is_accepted_and_signed_with_the_committed_key():
+    feed = wr.parse_feed(PUBLISHED_FEED, DesignSettings().web_release_max_bytes)
+    assert feed.version == "1.2.0-web.1" and wr.bridge_problem(feed.bridge) is None
+    key = wr.parse_public_key(wr.PUBKEY_FILE.read_text(encoding="utf-8"))
+    assert key.key_id[::-1].hex().upper() == "BF094D8BDEC11250"  # minisign prints the id little-endian
+    sig = wr.parse_signature(PUBLISHED_SIG)
+    assert sig.algorithm == b"ED" and sig.key_id == key.key_id
+
+
+def test_published_bundle_manifest_is_accepted():
+    doc = wr._check_manifest(json.loads(PUBLISHED_MANIFEST.read_text(encoding="utf-8")))
+    assert doc["entry"] == "ddc-editor.js" and wr.bridge_problem(doc["bridge"]) is None
+    start = [f for f in doc["files"] if f.get("load") != "on_demand"]
+    assert [f["path"] for f in start] == ["ddc-editor.js", "ddc_web_editor.js", "ddc_web_editor_bg.wasm"]
+    unpacked = sum(f["bytes"] for f in doc["files"])
+    assert unpacked < DesignSettings().web_release_max_unpacked_bytes
+
+
 # ── Minisign ────────────────────────────────────────────────────────────────
 
 
@@ -350,6 +393,22 @@ async def test_api_engine_mode_while_the_feed_is_absent(client, server, api_sett
     assert body["host_bridge"] == [1]
     r = await client.post(f"{BASE}/web-editor/install", headers=h)
     assert r.status_code == 409 and r.json()["detail"]["code"] == "no_key"
+
+
+@pytest.mark.asyncio
+async def test_api_status_without_feed_answers_from_disk(client, server, api_settings, monkeypatch):
+    api_settings(None)
+
+    async def no_feed(*_a, **_k):
+        raise AssertionError("the release host was asked")
+
+    monkeypatch.setattr(wr, "read_feed", no_feed)
+    _, h = await make_user(client)
+    r = await client.get(f"{BASE}/web-editor", params={"feed": "false"}, headers=h)
+    assert r.status_code == 200, r.text
+    body = r.json()
+    assert body["feed"] == {"state": "not_checked"} and body["update_available"] is False
+    assert body["installed"] is None and body["install"]["state"] == "idle"
 
 
 @pytest.mark.asyncio

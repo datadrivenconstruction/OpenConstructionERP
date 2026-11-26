@@ -1,0 +1,337 @@
+{
+  "schema": "ddc-web-editor/1",
+  "version": "1.2.0-web.1",
+  "bridge": [
+    1
+  ],
+  "entry": "ddc-editor.js",
+  "files": [
+    {
+      "path": "ddc-editor.js",
+      "bytes": 14099,
+      "sha256": "8299ab942aa776fb45c5c40ccb43003cdb664d8e2308d091ca5d28d38fd883d2"
+    },
+    {
+      "path": "ddc_web_editor.js",
+      "bytes": 169597,
+      "sha256": "8172c63c9c16af61212b4a4148afb41397d6dcee1dba15cb357f7a0a0eeaa88d"
+    },
+    {
+      "path": "ddc_web_editor_bg.wasm",
+      "bytes": 71472641,
+      "sha256": "58564cb38d8d90f881b1521bfd0e5f159e27263347dadbc4d5fccfb1551db0e8"
+    },
+    {
+      "path": "fonts/NotoSansArabic.ttf",
+      "bytes": 98768,
+      "sha256": "7047fe605f6d10b340bf30482d1561582cff9e500c22bc7c33b70b1b7071cb73",
+      "load": "on_demand"
+    },
+    {
+      "path": "fonts/NotoSansBengali.ttf",
+      "bytes": 17960,
+      "sha256": "ff02f6e2cb2e9b6ad5948d8fd49359ea04312be8b751061e64f262dd930231f0",
+      "load": "on_demand"
+    },
+    {
+      "path": "fonts/NotoSansDevanagari.ttf",
+      "bytes": 20584,
+      "sha256": "b4601a67b8eac361b8735dd1c0928f2a8b6cfcb101a8c83a915f5efa5784fbd0",
+      "load": "on_demand"
+    },
+    {
+      "path": "fonts/NotoSansHebrew.ttf",
+      "bytes": 10680,
+      "sha256": "a1b181f15bef1d88d9df80e0b4a21a63c4be7dc9e3077242f9f64c4f47d2f565",
+      "load": "on_demand"
+    },
+    {
+      "path": "fonts/NotoSansJP.ttf",
+      "bytes": 2182916,
+      "sha256": "e09c6d74c14bdf55c3a82e090d57167dce69ad09f7c8aa65f36c1cedd830b72e",
+      "load": "on_demand"
+    },
+    {
+      "path": "fonts/NotoSansKR.ttf",
+      "bytes": 500112,
+      "sha256": "b72e232b5204300f3f7d65542fbec8d9027dd375c14ff157603eaf3df53f3ed7",
+      "load": "on_demand"
+    },
+    {
+      "path": "fonts/NotoSansLatinVi.ttf",
+      "bytes": 65816,
+      "sha256": "b0bfaac25ad8560231116ccd739addd7f935f4bc254c05b6b282e0bf3764206f",
+      "load": "on_demand"
+    },
+    {
+      "path": "fonts/NotoSansSC.ttf",
+      "bytes": 2235412,
+      "sha256": "bac9e35b12aa97d861ece8c494d2f0f367283a8d20eb08a61590b1f58052a25a",
+      "load": "on_demand"
+    },
+    {
+      "path": "fonts/NotoSansThai.ttf",
+      "bytes": 13360,
+      "sha256": "7b0bf760f16844bc9d4f29c11cada4031065ceacce1780a874e3fd31675f7646",
+      "load": "on_demand"
+    },
+    {
+      "path": "i18n/ar.json",
+      "bytes": 1009923,
+      "sha256": "bd300a8a2a016dd2d0ef648879ae07e1178d98f4a3e79195dc8ecca2fc3f3eb6",
+      "load": "on_demand"
+    },
+    {
+      "path": "i18n/bg.json",
+      "bytes": 1179482,
+      "sha256": "f6d3a08aeb00887bf744165188fd28bccae5a378782d38f8e8d8aebb998b26bb",
+      "load": "on_demand"
+    },
+    {
+      "path": "i18n/bn.json",
+      "bytes": 1373102,
+      "sha256": "a74d3ace05f13142b8f2d177052c2c1cb06082f478246d9c38ae6a41187a2443",
+      "load": "on_demand"
+    },
+    {
+      "path": "i18n/cs.json",
+      "bytes": 818145,
+      "sha256": "f076bceb4cb8ba1b08e166b9496b960a01d6b03e506740cdcb62038be54aeb38",
+      "load": "on_demand"
+    },
+    {
+      "path": "i18n/da.json",
+      "bytes": 790091,
+      "sha256": "1f95a54f434417b138c288e785b769177b920a6306bbe56f37050f593251f5c7",
+      "load": "on_demand"
+    },
+    {
+      "path": "i18n/de.json",
+      "bytes": 846382,
+      "sha256": "dd2ec5d15c855ab456064a8503c1f38c248edacb4c845048475d259e4f385888",
+      "load": "on_demand"
+    },
+    {
+      "path": "i18n/el.json",
+      "bytes": 1237015,
+      "sha256": "5c030f716e94572825d77d883fa23ef781ab47bfca14a0a6b6b0dcbc152b5a0e",
+      "load": "on_demand"
+    },
+    {
+      "path": "i18n/en-GB.json",
+      "bytes": 592984,
+      "sha256": "1d83e9bc9189cfb124a671117468ce09b104984c4c5dbcad54e1d7ee941b2422",
+      "load": "on_demand"
+    },
+    {
+      "path": "i18n/en-US.json",
+      "bytes": 593005,
+      "sha256": "fc90ecc2d7124a4cd5875ac55eb50a75e87bccac429a4eb5eef45294e990f1c0",
+      "load": "on_demand"
+    },
+    {
+      "path": "i18n/es-CL.json",
+      "bytes": 790383,
+      "sha256": "9e5cc89a763ff63245108a2dbf2171ac1338636a034ae22804b936fb0d0e4d66",
+      "load": "on_demand"
+    },
+    {
+      "path": "i18n/es-CO.json",
+      "bytes": 778283,
+      "sha256": "dbc29ef7499264f5c93098d2f51e7ddf54ca5a0af1d1b766111e673b1e452f16",
+      "load": "on_demand"
+    },
+    {
+      "path": "i18n/es-MX.json",
+      "bytes": 791714,
+      "sha256": "ca2978417eb2e045f7fbd1aa0d10488a6a54989e46af1db411ed0f013256dba4",
+      "load": "on_demand"
+    },
+    {
+      "path": "i18n/es.json",
+      "bytes": 846454,
+      "sha256": "362ffd38ea4b37761fa25fd5c52426e0c4986d5e78723de7e0c0937e48e2ab45",
+      "load": "on_demand"
+    },
+    {
+      "path": "i18n/et.json",
+      "bytes": 786566,
+      "sha256": "7f0b18c95108280957740612562766a9b25ab86be5e0289c750ea301c5c0da3b",
+      "load": "on_demand"
+    },
+    {
+      "path": "i18n/fa.json",
+      "bytes": 1052003,
+      "sha256": "f7427cf9ee5ab55a3496d8b66cba4b5247fc49880f1e3db3920759b51e47eee9",
+      "load": "on_demand"
+    },
+    {
+      "path": "i18n/fi.json",
+      "bytes": 819160,
+      "sha256": "733c0ffa570efa28ccd5cb9cdd4f7646b3832cc3b6a8e239da2f8310dca1a83f",
+      "load": "on_demand"
+    },
+    {
+      "path": "i18n/fil.json",
+      "bytes": 842206,
+      "sha256": "d353446d9c02bfa194a8e21f82c1bf9fb99cd19369579cd3fcdb8775a1c2c14a",
+      "load": "on_demand"
+    },
+    {
+      "path": "i18n/fr.json",
+      "bytes": 877653,
+      "sha256": "9657caeb0ca1e15115c4c9f79de2a855b8413c7d48b95101f8480084dc4e1ff4",
+      "load": "on_demand"
+    },
+    {
+      "path": "i18n/he.json",
+      "bytes": 941742,
+      "sha256": "3e6634723b22f6db63f6c9cde766636f76c769f9a0f365dfdd4648eb3971afe9",
+      "load": "on_demand"
+    },
+    {
+      "path": "i18n/hi.json",
+      "bytes": 1346185,
+      "sha256": "d52b705c067af76ae5ea76f38c55653649695ffc2a063a36a20530c6ac654f12",
+      "load": "on_demand"
+    },
+    {
+      "path": "i18n/hr.json",
+      "bytes": 800025,
+      "sha256": "eba07cc582ad83e8a6677b0e9ae67049c4bf0d3a1d560d2cb12c9d16e2d92372",
+      "load": "on_demand"
+    },
+    {
+      "path": "i18n/hu.json",
+      "bytes": 868187,
+      "sha256": "d0193a9a17da94fcf314e86a8130471caf13cdd54283af002a3fe0c53580af44",
+      "load": "on_demand"
+    },
+    {
+      "path": "i18n/id.json",
+      "bytes": 789638,
+      "sha256": "f1b33d6e64bd6fb5e153be376f572d88b0494e6c3bb1c67c08d0481896f367ea",
+      "load": "on_demand"
+    },
+    {
+      "path": "i18n/it.json",
+      "bytes": 844681,
+      "sha256": "7b7e0ddb884ed0a16bf6fb3dfc5dd278a4c39bbfdb56c6495a0e9c734c00198b",
+      "load": "on_demand"
+    },
+    {
+      "path": "i18n/ja.json",
+      "bytes": 925502,
+      "sha256": "eb14b70d3c7008336d17cec0abb40b578d54f586d511ead882435cc0fabea28d",
+      "load": "on_demand"
+    },
+    {
+      "path": "i18n/kk.json",
+      "bytes": 1154163,
+      "sha256": "1bc4006a45becdfa59338c9427e7cd5dd8cef081e5fc120a7602c71a29c8cea0",
+      "load": "on_demand"
+    },
+    {
+      "path": "i18n/ko.json",
+      "bytes": 853765,
+      "sha256": "852405d564ebd6bd96edddb38c5dd3425904960fb1a386364be1994a099a80c3",
+      "load": "on_demand"
+    },
+    {
+      "path": "i18n/ky.json",
+      "bytes": 1172043,
+      "sha256": "a42b82aa4c97765302b3348063f1038297aa02ec531b61edadeb931e017fca16",
+      "load": "on_demand"
+    },
+    {
+      "path": "i18n/mn.json",
+      "bytes": 1129105,
+      "sha256": "4c018f1a5aa653ff45ceb50e0b90c00118e08b4dc601507a01241debaf2d33da",
+      "load": "on_demand"
+    },
+    {
+      "path": "i18n/nl.json",
+      "bytes": 829020,
+      "sha256": "1f985c07606873f0b7b9a59c9f2429c71c63cb1d0a8fb09ac13088bba7606018",
+      "load": "on_demand"
+    },
+    {
+      "path": "i18n/no.json",
+      "bytes": 784479,
+      "sha256": "8d77033ad6b22de6fa89376402470ebe58e91f391c663328c67331cf00e8cf17",
+      "load": "on_demand"
+    },
+    {
+      "path": "i18n/pl.json",
+      "bytes": 832847,
+      "sha256": "3084ccdd0443fe75487850470afe82d9b2ebf35201ba57e1d43b327744be148d",
+      "load": "on_demand"
+    },
+    {
+      "path": "i18n/pt-BR.json",
+      "bytes": 802723,
+      "sha256": "c73cb78f7dcfdb6a2c0ecedb759d6ea152a567078152e4a2518823f805c175fa",
+      "load": "on_demand"
+    },
+    {
+      "path": "i18n/pt.json",
+      "bytes": 845032,
+      "sha256": "4fd3d616447d7f9061da2993117717ccd3de33020605ba695c9dc6d128621abf",
+      "load": "on_demand"
+    },
+    {
+      "path": "i18n/ro.json",
+      "bytes": 858624,
+      "sha256": "1334098f6dfbb90478f734279f898ec7f472d3b511cfa5981e2c5f370c66631d",
+      "load": "on_demand"
+    },
+    {
+      "path": "i18n/sv.json",
+      "bytes": 797379,
+      "sha256": "043c176b355a8d9453a6a89e64386abcc89dd4f068be1067baea1eaab6a46ae8",
+      "load": "on_demand"
+    },
+    {
+      "path": "i18n/th.json",
+      "bytes": 1370507,
+      "sha256": "6769331a10e62572afdafb1f3b7f31ab80f8fecdd451c6800101ec0083920ea3",
+      "load": "on_demand"
+    },
+    {
+      "path": "i18n/tr.json",
+      "bytes": 828060,
+      "sha256": "a318e0b7f513708134f4cc85d224be136fe392741de1ed4115adfde7f195f8ee",
+      "load": "on_demand"
+    },
+    {
+      "path": "i18n/uk.json",
+      "bytes": 1146153,
+      "sha256": "00a2d838779e274bf5c019b7fea8f906dfe22805863f625319f8ab4a0ff9d1b4",
+      "load": "on_demand"
+    },
+    {
+      "path": "i18n/ur.json",
+      "bytes": 1040216,
+      "sha256": "88f817e2cc85c99bb222058c260cccb3071c6cd58a7d18903bf2f915a5fe0303",
+      "load": "on_demand"
+    },
+    {
+      "path": "i18n/uz.json",
+      "bytes": 830329,
+      "sha256": "78a48c4656901d5cb185b0c72c9fc7330f965fa7d53002ee8adfe74b817cb0af",
+      "load": "on_demand"
+    },
+    {
+      "path": "i18n/vi.json",
+      "bytes": 904787,
+      "sha256": "f9e61fe4ce535f70ce5981cd61df0c8549f2171835dcdbedd8f4d2a101543760",
+      "load": "on_demand"
+    },
+    {
+      "path": "i18n/zh.json",
+      "bytes": 744625,
+      "sha256": "75ed6d2132a33da3dfeaa3a1795b7840b694aa86f4cc54ef9c4319e7971731be",
+      "load": "on_demand"
+    }
+  ]
+}
