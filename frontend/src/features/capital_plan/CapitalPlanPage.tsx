@@ -7,6 +7,7 @@
 
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useRoleGate } from '@/shared/lib/useRoleGate';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ChevronLeft, ChevronRight, Download, GitCompare, Plus, Sparkles, Wallet } from 'lucide-react';
 
@@ -35,6 +36,7 @@ function statusLabel(t: (k: string, o?: Record<string, unknown>) => string, s: s
 
 export function CapitalPlanPage() {
   const { t } = useTranslation();
+  const write = useRoleGate('manager');
   const qc = useQueryClient();
   const [planId, setPlanId] = useState<string | null>(null);
   const [scenarioId, setScenarioId] = useState<string | null>(null);
@@ -260,7 +262,7 @@ export function CapitalPlanPage() {
                   onChange={(e) => setDraft({ ...draft, horizon: Number(e.target.value) })}
                 />
               </label>
-              <Button variant="primary" disabled={!valid} loading={createPlan.isPending} onClick={() => createPlan.mutate()}>
+              <Button variant="primary" disabledReason={write.reason} disabled={!valid} loading={createPlan.isPending} onClick={() => createPlan.mutate()}>
                 {t('capital_plan.create_plan', { defaultValue: 'Create plan' })}
               </Button>
             </div>
@@ -301,7 +303,7 @@ export function CapitalPlanPage() {
           </button>
         ))}
         {cloneName === null ? (
-          <Button variant="ghost" size="sm" icon={<Plus size={14} />} disabled={!scenario} onClick={() => setCloneName('')}>
+          <Button variant="ghost" size="sm" icon={<Plus size={14} />} disabledReason={write.reason} disabled={!scenario} onClick={() => setCloneName('')}>
             {t('capital_plan.new_scenario', { defaultValue: 'New scenario' })}
           </Button>
         ) : (
@@ -325,7 +327,7 @@ export function CapitalPlanPage() {
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
-        <Button variant="secondary" size="sm" loading={importProjects.isPending} disabled={!scenario} onClick={() => importProjects.mutate()}>
+        <Button variant="secondary" size="sm" loading={importProjects.isPending} disabledReason={write.reason} disabled={!scenario} onClick={() => importProjects.mutate()}>
           {t('capital_plan.import_projects', { defaultValue: 'Import projects' })}
         </Button>
         <Button variant="secondary" size="sm" icon={<Sparkles size={14} />} loading={suggest.isPending} disabled={!scenario || items.length === 0} onClick={() => suggest.mutate()}>
@@ -387,6 +389,7 @@ export function CapitalPlanPage() {
               <Button
                 size="sm"
                 variant="primary"
+                disabledReason={write.reason}
                 disabled={changes.length === 0}
                 loading={apply.isPending}
                 onClick={() => apply.mutate(changes.map((c) => ({ id: c.id, status: c.status })))}
@@ -479,7 +482,9 @@ export function CapitalPlanPage() {
                           type="button"
                           data-testid={`earlier-${item.id}`}
                           aria-label={t('capital_plan.start_earlier', { defaultValue: 'Start one year earlier' })}
-                          className="rounded p-1 text-content-tertiary hover:bg-surface-secondary hover:text-content-primary"
+                          disabled={!write.allowed}
+                          title={write.reason}
+                          className="rounded p-1 text-content-tertiary hover:bg-surface-secondary hover:text-content-primary disabled:cursor-not-allowed disabled:opacity-40"
                           onClick={() => patchItem.mutate({ id: item.id, body: { start_year: shiftedStart(item, -1) } })}
                         >
                           <ChevronLeft size={14} />
@@ -489,7 +494,9 @@ export function CapitalPlanPage() {
                           type="button"
                           data-testid={`later-${item.id}`}
                           aria-label={t('capital_plan.start_later', { defaultValue: 'Start one year later' })}
-                          className="rounded p-1 text-content-tertiary hover:bg-surface-secondary hover:text-content-primary"
+                          disabled={!write.allowed}
+                          title={write.reason}
+                          className="rounded p-1 text-content-tertiary hover:bg-surface-secondary hover:text-content-primary disabled:cursor-not-allowed disabled:opacity-40"
                           onClick={() => patchItem.mutate({ id: item.id, body: { start_year: shiftedStart(item, 1) } })}
                         >
                           <ChevronRight size={14} />
@@ -530,6 +537,8 @@ export function CapitalPlanPage() {
                             aria-label={`${t('capital_plan.row.envelope', { defaultValue: 'Envelope' })} ${y}`}
                             className={`${FIELD} w-28 text-right`}
                             defaultValue={Number(row?.envelope ?? 0)}
+                            disabled={!write.allowed}
+                            title={write.reason}
                             key={`${y}-${row?.envelope ?? '0'}`}
                             onBlur={(e) => {
                               const next = String(Math.max(0, Number(e.target.value) || 0));

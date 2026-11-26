@@ -9,6 +9,7 @@ import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter } from 'react-router-dom';
+import { useAuthStore } from '@/stores/useAuthStore';
 
 vi.mock('./api', () => ({
   capitalPlanApi: {
@@ -95,6 +96,7 @@ function renderPage() {
 describe('CapitalPlanPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    useAuthStore.setState({ userRole: 'manager' } as never);
     api.listPlans.mockResolvedValue([PLAN]);
     api.listScenarios.mockResolvedValue([BASE]);
     api.listEnvelopes.mockResolvedValue([
@@ -170,5 +172,25 @@ describe('CapitalPlanPage', () => {
     renderPage();
     expect(await screen.findByText('No capital plan yet')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Create plan' })).toBeDisabled();
+  });
+
+  it('shows a viewer the same actions, disabled with the reason, and lets a manager use them', async () => {
+    useAuthStore.setState({ userRole: 'viewer' } as never);
+    const viewer = renderPage();
+    await screen.findByTestId('gap-2030');
+    const importBtn = screen.getByRole('button', { name: 'Import projects' });
+    expect(importBtn).toBeDisabled();
+    expect(importBtn).toHaveAttribute('title', 'Only a manager or administrator can do this.');
+    expect(screen.getByTestId('later-it1')).toBeDisabled();
+    expect(screen.getByTestId('later-it1')).toHaveAttribute('title', 'Only a manager or administrator can do this.');
+    fireEvent.click(screen.getByTestId('later-it1'));
+    expect(api.patchItem).not.toHaveBeenCalled();
+    viewer.unmount();
+
+    useAuthStore.setState({ userRole: 'manager' } as never);
+    renderPage();
+    await screen.findByTestId('gap-2030');
+    expect(screen.getByRole('button', { name: 'Import projects' })).toBeEnabled();
+    expect(screen.getByTestId('later-it1')).toBeEnabled();
   });
 });
