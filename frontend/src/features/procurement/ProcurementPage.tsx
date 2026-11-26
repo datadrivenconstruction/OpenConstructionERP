@@ -41,6 +41,7 @@ import { OrderInvoicedSummary } from './OrderInvoicedSummary';
 import { DateDisplay } from '@/shared/ui/DateDisplay';
 import { ContactSearchInput } from '@/shared/ui/ContactSearchInput';
 import { apiGet, apiPost, apiPatch, type Page } from '@/shared/lib/api';
+import { useRoleReason } from '@/shared/lib/permissionReason';
 import { TruncationNotice } from '@/shared/ui/TruncationNotice';
 import { useToastStore } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
@@ -722,6 +723,8 @@ function PurchaseOrdersTab({
   const isManager = userRole === 'admin' || userRole === 'manager';
   // Same bar as the server's `procurement.update`, so Edit is not hidden from editors.
   const canEditPO = canUpdatePurchaseOrders(userRole);
+  const editReason = useRoleReason(canEditPO, 'editor');
+  const managerReason = useRoleReason(isManager, 'manager');
 
   // 3-way match: rows hovered or focused fetch their match status on demand
   // (we never bulk-fetch on list load to avoid N×fetch on big projects).
@@ -1837,16 +1840,15 @@ function PurchaseOrdersTab({
                   }),
                 })}
               </span>
-              {canEditPO && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => focusOffPage.data && openEditMut.mutate(focusOffPage.data.id)}
-                  disabled={openEditMut.isPending}
-                >
-                  {t('procurement.focus_po_open', { defaultValue: 'Open it' })}
-                </Button>
-              )}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => focusOffPage.data && openEditMut.mutate(focusOffPage.data.id)}
+                disabled={openEditMut.isPending}
+                disabledReason={editReason}
+              >
+                {t('procurement.focus_po_open', { defaultValue: 'Open it' })}
+              </Button>
             </>
           ) : !focusRechecking && focusOffPage.isError ? (
             <span>
@@ -2026,9 +2028,9 @@ function PurchaseOrdersTab({
                       testId={`po-pdf-${po.id}`}
                       onCustomize={poLayout.open({ recordId: po.id, projectId: projectId || null })}
                     />
-                  {canEditPO && (
                     <>
                       <Button
+                        disabledReason={editReason}
                         variant="secondary"
                         size="sm"
                         onClick={() => openEditMut.mutate(po.id)}
@@ -2038,6 +2040,7 @@ function PurchaseOrdersTab({
                         {t('common.edit', { defaultValue: 'Edit' })}
                       </Button>
                       <Button
+                        disabledReason={editReason}
                         variant="ghost"
                         size="sm"
                         onClick={() => openEditMut.mutate(po.id)}
@@ -2052,8 +2055,6 @@ function PurchaseOrdersTab({
                         )}
                       </Button>
                     </>
-                  )}
-                  {isManager && (
                   <>
                     {/* Commitment gate (TOP-30 #10): a draft PO must be
                         approved before it can be issued. Approval is what
@@ -2063,6 +2064,7 @@ function PurchaseOrdersTab({
                         tappable at 44x32 when the row stacks on phones. */}
                     {po.status === 'draft' && (
                       <Button
+                        disabledReason={managerReason}
                         variant="ghost"
                         size="sm"
                         onClick={() => approvePOMut.mutate(po.id)}
@@ -2084,6 +2086,7 @@ function PurchaseOrdersTab({
                     )}
                     {po.status === 'approved' && (
                       <Button
+                        disabledReason={managerReason}
                         variant="ghost"
                         size="sm"
                         onClick={() => issuePOMut.mutate(po.id)}
@@ -2101,6 +2104,7 @@ function PurchaseOrdersTab({
                     )}
                     {['issued', 'partially_received'].includes(po.status) && (
                       <Button
+                        disabledReason={managerReason}
                         variant="ghost"
                         size="sm"
                         onClick={() => setConfirmingPO(po)}
@@ -2134,6 +2138,7 @@ function PurchaseOrdersTab({
                       );
                       return (
                         <Button
+                          disabledReason={managerReason}
                           variant="ghost"
                           size="sm"
                           onClick={() => createInvoiceMut.mutate(po.id)}
@@ -2158,6 +2163,7 @@ function PurchaseOrdersTab({
                         inside is MANAGER-gated server-side and UI-side. */}
                     {Number(po.retention_percent ?? '0') > 0 && (
                       <Button
+                        disabledReason={managerReason}
                         variant="ghost"
                         size="sm"
                         onClick={() => setRetainagePO(po)}
@@ -2188,6 +2194,7 @@ function PurchaseOrdersTab({
                           });
                       return (
                         <Button
+                          disabledReason={managerReason}
                           variant="ghost"
                           size="sm"
                           onClick={() => setRemovingPO(po)}
@@ -2200,7 +2207,6 @@ function PurchaseOrdersTab({
                       );
                     })()}
                   </>
-                  )}
                   </div>
                 </td>
               </tr>

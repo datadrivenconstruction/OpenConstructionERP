@@ -39,6 +39,7 @@ import { apiGet, getErrorMessage } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { ROLE_RANK, normalizeRole } from '@/shared/lib/roles';
+import { useRoleReason } from '@/shared/lib/permissionReason';
 import {
   REQUISITION_STATUSES,
   approveRequisition,
@@ -426,6 +427,7 @@ export function RequisitionsTab({ projectId, focusRequisitionId }: RequisitionsT
   const userRole = useAuthStore((s) => s.userRole);
   // The server decides (procurement.manage_settings, manager and above); this only hides a button certain to fail.
   const canManageSettings = ((ROLE_RANK as Record<string, number>)[normalizeRole(userRole)] ?? 0) >= ROLE_RANK.manager;
+  const settingsReason = useRoleReason(canManageSettings, 'manager');
 
   useEffect(() => {
     if (focusRequisitionId) setOpenId(focusRequisitionId);
@@ -454,11 +456,9 @@ export function RequisitionsTab({ projectId, focusRequisitionId }: RequisitionsT
           })}
         </p>
         <div className="flex items-center gap-2">
-        {canManageSettings && (
-          <Button size="sm" variant="secondary" icon={<Settings size={14} />} onClick={() => setSettingsOpen(true)}>
-            {t('procurement.requisitions.settings', { defaultValue: 'Settings' })}
-          </Button>
-        )}
+        <Button size="sm" variant="secondary" icon={<Settings size={14} />} disabledReason={settingsReason} onClick={() => setSettingsOpen(true)}>
+          {t('procurement.requisitions.settings', { defaultValue: 'Settings' })}
+        </Button>
         <label className="flex items-center gap-2 text-xs text-content-secondary">
           {t('procurement.requisitions.filter_status', { defaultValue: 'Status' })}
           <select
@@ -832,11 +832,23 @@ function RequisitionDetailModal({ projectId, requisitionId, onClose }: DetailPro
   };
 
   const storedLines = useMemo(() => req?.items ?? [], [req]);
-  const canRecordExternal =
+  const showRecordExternal =
     !!req &&
     req.order_owner === 'external' &&
-    (req.status === 'approved' || req.status === 'ordered' || req.status === 'received') &&
-    ((ROLE_RANK as Record<string, number>)[normalizeRole(userRole)] ?? 0) >= ROLE_RANK.editor;
+    (req.status === 'approved' || req.status === 'ordered' || req.status === 'received');
+  const recordExternalReason = useRoleReason(
+    ((ROLE_RANK as Record<string, number>)[normalizeRole(userRole)] ?? 0) >= ROLE_RANK.editor,
+    'editor',
+  );
+  // A role below the approver bar still sees Approve and Reject, disabled with the reason;
+  // a submitter or a non-designated approver is not offered them at all (not a role matter).
+  const decisionRoleOk = canOfferDecision(
+    { status: 'submitted', submitted_by: null, next_approver_id: null },
+    userId,
+    userRole,
+    me?.permissions,
+  );
+  const decisionReason = useRoleReason(decisionRoleOk, 'manager');
 
   return (
     <WideModal
@@ -865,17 +877,17 @@ function RequisitionDetailModal({ projectId, requisitionId, onClose }: DetailPro
                 {t('procurement.requisitions.withdraw', { defaultValue: 'Withdraw to draft' })}
               </Button>
             )}
-            {canRecordExternal && (
-              <Button variant="secondary" icon={<ExternalLink size={14} />} onClick={() => setRecordingExternal(true)} disabled={busy}>
+            {showRecordExternal && (
+              <Button variant="secondary" icon={<ExternalLink size={14} />} onClick={() => setRecordingExternal(true)} disabled={busy} disabledReason={recordExternalReason}>
                 {t('procurement.requisitions.external_record', { defaultValue: 'Record external order' })}
               </Button>
             )}
-            {canOfferDecision(req, userId, userRole, me?.permissions) && (
+            {(canOfferDecision(req, userId, userRole, me?.permissions) || (req.status === 'submitted' && !decisionRoleOk)) && (
               <>
-                <Button variant="danger" icon={<X size={14} />} onClick={() => setDecision('reject')} disabled={busy}>
+                <Button variant="danger" icon={<X size={14} />} onClick={() => setDecision('reject')} disabled={busy} disabledReason={decisionReason}>
                   {t('procurement.requisitions.reject', { defaultValue: 'Reject' })}
                 </Button>
-                <Button icon={<Check size={14} />} onClick={() => setDecision('approve')} disabled={busy}>
+                <Button icon={<Check size={14} />} onClick={() => setDecision('approve')} disabled={busy} disabledReason={decisionReason}>
                   {t('procurement.requisitions.approve', { defaultValue: 'Approve' })}
                 </Button>
               </>
