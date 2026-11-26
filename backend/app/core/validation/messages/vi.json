@@ -2283,6 +2283,10 @@
       "unmapped_cost": {
         "fail": "{kind} {label} không có WBS hay mã chi phí: cam kết {committed}, thực tế {actual}",
         "suggestion": "Gán dòng đơn hàng, hợp đồng thầu phụ hoặc hóa đơn vào một phần tử WBS để CVR có thể xếp nó"
+      },
+      "wbs_rollup_reconciles": {
+        "fail": "WBS {label}: {field} là {total} nhưng các dòng riêng và phần tử con cộng lại là {parts}",
+        "suggestion": "Làm mới báo cáo từ cấu trúc chi phí hoặc kiểm tra các dòng gắn với phần tử WBS ngoài dự án"
       }
     },
     "procurement": {

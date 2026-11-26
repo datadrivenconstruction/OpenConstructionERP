@@ -2283,6 +2283,10 @@
       "unmapped_cost": {
         "fail": "{kind} {label} ללא WBS או קוד עלות: מחויב {committed}, בפועל {actual}",
         "suggestion": "שייכו את שורת ההזמנה, קבלנות המשנה או החשבונית לרכיב WBS כדי שדוח ה-CVR יוכל לשבץ אותה"
+      },
+      "wbs_rollup_reconciles": {
+        "fail": "WBS {label}: {field} הוא {total}, אך השורות שלו והצאצאים מסתכמים ב-{parts}",
+        "suggestion": "רעננו את הדוח ממבנה העלויות או בדקו שורות המשויכות לרכיב WBS מחוץ לפרויקט"
       }
     },
     "procurement": {

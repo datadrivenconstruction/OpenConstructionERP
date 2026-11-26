@@ -404,3 +404,54 @@ class CvrSpineRefreshResponse(BaseModel):
     lines: list[CvrLineResponse] = Field(default_factory=list)
     totals: dict[str, DecimalMoney] = Field(default_factory=dict)
     findings: list[dict[str, Any]] = Field(default_factory=list)
+
+
+# ── WBS rollup ───────────────────────────────────────────────────────────────
+
+
+class CvrWbsFigures(BaseModel):
+    """Budget, commitment, cost, value and forecast of one WBS node (or the report)."""
+
+    budget_cost: DecimalMoney = Decimal("0")
+    committed_cost: DecimalMoney = Decimal("0")
+    cost_to_date: DecimalMoney = Decimal("0")
+    value_to_date: DecimalMoney = Decimal("0")
+    forecast_cost: DecimalMoney = Decimal("0")
+    forecast_value: DecimalMoney = Decimal("0")
+    margin_to_date: DecimalMoney = Decimal("0")
+    forecast_margin: DecimalMoney = Decimal("0")
+    forecast_margin_pct: DecimalMoney = Decimal("0")
+
+
+class CvrWbsNode(BaseModel):
+    """One WBS element: figures beneath it and the report lines they come from."""
+
+    id: str
+    parent_id: str | None = None
+    code: str = ""
+    name: str = ""
+    depth: int = 0
+    child_count: int = 0
+    #: Report lines booked directly to this element (the drill-down to source rows).
+    line_ids: list[str] = Field(default_factory=list)
+    #: Report lines on this element and every element beneath it.
+    line_count: int = 0
+    #: Bill positions the cost spine folded into those lines.
+    positions: int = 0
+    own: CvrWbsFigures = Field(default_factory=CvrWbsFigures)
+    total: CvrWbsFigures = Field(default_factory=CvrWbsFigures)
+
+
+class CvrWbsRollupResponse(BaseModel):
+    """A CVR report rolled up the project's WBS tree, parents before children."""
+
+    report_id: UUID
+    project_id: UUID
+    period: str
+    currency: str = ""
+    line_count: int = 0
+    wbs_count: int = 0
+    nodes: list[CvrWbsNode] = Field(default_factory=list)
+    unallocated: CvrWbsNode
+    totals: CvrWbsFigures = Field(default_factory=CvrWbsFigures)
+    findings: list[dict[str, Any]] = Field(default_factory=list)

@@ -2283,6 +2283,10 @@
       "unmapped_cost": {
         "fail": "{kind} {label} tidak punya WBS atau kode biaya: komitmen {committed}, aktual {actual}",
         "suggestion": "Bebankan baris pesanan, subkontrak, atau faktur ke elemen WBS agar CVR dapat menempatkannya"
+      },
+      "wbs_rollup_reconciles": {
+        "fail": "WBS {label}: {field} bernilai {total}, tetapi baris sendiri dan turunannya berjumlah {parts}",
+        "suggestion": "Segarkan laporan dari struktur biaya atau periksa baris yang terikat ke elemen WBS di luar proyek"
       }
     },
     "procurement": {

@@ -320,6 +320,41 @@ def check_cumulative_not_decreasing(payload: dict[str, Any]) -> list[Finding]:
     return out
 
 
+# ── cvr.wbs_rollup_reconciles ──────────────────────────────────────────────
+
+
+def check_wbs_rollup_reconciles(payload: dict[str, Any]) -> list[Finding]:
+    """A WBS parent must equal its own lines plus its children, the report its roots plus unallocated.
+
+    Each part is rounded to the cent before it reaches the payload, so half a
+    cent per part is rounding, not a gap.
+    """
+    out: list[Finding] = []
+    for row in _rows(payload, "wbs_rollup_nodes"):
+        total = row.get("total") if isinstance(row.get("total"), dict) else {}
+        parts = [p for p in (row.get("parts") or []) if isinstance(p, dict)]
+        tolerance = Decimal("0.005") * max(len(parts), 1)
+        for name in sorted(total):
+            expected = _num(total.get(name))
+            summed = sum((_num(p.get(name)) for p in parts), ZERO)
+            if abs(expected - summed) <= tolerance:
+                continue
+            out.append(
+                Finding(
+                    element_ref=f"{row.get('id')}:{name}",
+                    params={
+                        "label": str(row.get("label") or row.get("id") or ""),
+                        "field": name,
+                        "total": _fmt(expected),
+                        "parts": _fmt(summed),
+                    },
+                    details={"id": str(row.get("id") or ""), "field": name},
+                    severity="error",
+                )
+            )
+    return out
+
+
 CHECKS: dict[str, Any] = {
     "cvr.target_rate_basis": check_target_rate_basis,
     "cvr.unmapped_cost": check_unmapped_cost,
@@ -328,4 +363,5 @@ CHECKS: dict[str, Any] = {
     "valuation.assessed_within_submitted": check_assessed_within_submitted,
     "valuation.certified_within_assessed": check_certified_within_assessed,
     "valuation.cumulative_not_decreasing": check_cumulative_not_decreasing,
+    "cvr.wbs_rollup_reconciles": check_wbs_rollup_reconciles,
 }

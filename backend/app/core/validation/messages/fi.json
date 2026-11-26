@@ -2283,6 +2283,10 @@
       "unmapped_cost": {
         "fail": "{kind} {label}: ei WBS-elementtiä eikä kustannuskoodia, sidottu {committed}, toteutunut {actual}",
         "suggestion": "Kohdista tilausrivi, aliurakka tai lasku WBS-elementtiin, jotta CVR voi sijoittaa sen"
+      },
+      "wbs_rollup_reconciles": {
+        "fail": "WBS {label}: {field} on {total}, mutta omat rivit ja alaelementit antavat {parts}",
+        "suggestion": "Päivitä raportti kustannusrakenteesta tai tarkista rivit, jotka on kirjattu projektin ulkopuoliseen WBS-elementtiin"
       }
     },
     "procurement": {

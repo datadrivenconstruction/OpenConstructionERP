@@ -2283,6 +2283,10 @@
       "unmapped_cost": {
         "fail": "{kind} {label} har ingen WBS eller kostnadskode: forpliktet {committed}, faktisk {actual}",
         "suggestion": "Før ordrelinjen, underentreprisen eller fakturaen på et WBS-element slik at CVR kan plassere den"
+      },
+      "wbs_rollup_reconciles": {
+        "fail": "WBS {label}: {field} er {total}, men egne linjer og underelementer gir {parts}",
+        "suggestion": "Oppdater rapporten fra kostnadsstrukturen, eller sjekk linjer ført på et WBS-element utenfor prosjektet"
       }
     },
     "procurement": {

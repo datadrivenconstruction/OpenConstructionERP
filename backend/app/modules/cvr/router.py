@@ -12,6 +12,7 @@ Endpoints (mounted at /api/v1/cvr):
       DELETE /reports/{report_id}               - delete report
       POST   /reports/{report_id}/finalize/     - strike report final
       GET    /reports/{report_id}/summary/      - roll-up totals + margins
+      GET    /reports/{report_id}/wbs-rollup/   - report rolled up the WBS tree
       GET    /reports/{report_id}/lines/        - list lines
       POST   /reports/{report_id}/lines/        - add a line
       POST   /reports/{report_id}/lines/from-field-time/ - import approved field labour
@@ -70,6 +71,7 @@ from app.modules.cvr.schemas import (
     CvrReportUpdate,
     CvrSpineRefreshResponse,
     CvrSummaryResponse,
+    CvrWbsRollupResponse,
     PaymentApplicationCreate,
     PaymentApplicationListResponse,
     PaymentApplicationResponse,
@@ -239,6 +241,23 @@ async def get_report_summary(
     report = await service.get_report(report_id)
     await verify_project_access(report.project_id, user_id, session)
     return await service.get_report_summary(report_id)
+
+
+@router.get(
+    "/reports/{report_id}/wbs-rollup/",
+    response_model=CvrWbsRollupResponse,
+    dependencies=[Depends(RequirePermission("cvr.read"))],
+)
+async def get_report_wbs_rollup(
+    report_id: uuid.UUID,
+    user_id: CurrentUserId,
+    session: SessionDep,
+    service: CvrService = Depends(_get_service),
+) -> CvrWbsRollupResponse:
+    """Return the report rolled up the project's WBS tree, with the lines behind every node."""
+    report = await service.get_report(report_id)
+    await verify_project_access(report.project_id, user_id, session)
+    return await service.get_wbs_rollup(report_id)
 
 
 @router.get(

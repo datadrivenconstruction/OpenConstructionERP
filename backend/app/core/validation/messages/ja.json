@@ -2283,6 +2283,10 @@
       "unmapped_cost": {
         "fail": "{kind} {label} に WBS もコストコードもありません: 発注済 {committed}、実績 {actual}",
         "suggestion": "CVR に計上できるよう、発注明細・下請契約・請求書を WBS 要素に紐づけてください"
+      },
+      "wbs_rollup_reconciles": {
+        "fail": "WBS {label}: {field} は {total} ですが、自身の行と子要素の合計は {parts} です",
+        "suggestion": "コスト構造からレポートを更新するか、プロジェクト外の WBS 要素に紐づく行を確認してください"
       }
     },
     "procurement": {

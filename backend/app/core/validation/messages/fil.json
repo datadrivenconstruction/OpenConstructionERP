@@ -2283,6 +2283,10 @@
       "unmapped_cost": {
         "fail": "Walang WBS o cost code ang {kind} {label}: committed {committed}, aktwal {actual}",
         "suggestion": "I-book ang order line, subcontract o invoice sa isang WBS element para mailagay ito ng CVR"
+      },
+      "wbs_rollup_reconciles": {
+        "fail": "WBS {label}: ang {field} ay {total} pero ang sariling linya at mga anak nito ay umaabot sa {parts}",
+        "suggestion": "I-refresh ang ulat mula sa istruktura ng gastos o suriin ang mga linyang nakakabit sa WBS element sa labas ng proyekto"
       }
     },
     "procurement": {

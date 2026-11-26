@@ -2283,6 +2283,10 @@
       "unmapped_cost": {
         "fail": "{kind} {label} hat kein PSP-Element und keine Kostenart: beauftragt {committed}, Ist {actual}",
         "suggestion": "Ordnen Sie Bestellposition, Nachunternehmervertrag oder Rechnung einem PSP-Element zu, damit die CVR sie zuordnen kann"
+      },
+      "wbs_rollup_reconciles": {
+        "fail": "PSP {label}: {field} ist {total}, die eigenen Zeilen und Unterelemente ergeben {parts}",
+        "suggestion": "Bericht aus dem Kostengerüst neu füllen oder Zeilen prüfen, die auf ein PSP-Element außerhalb des Projekts gebucht sind"
       }
     },
     "procurement": {

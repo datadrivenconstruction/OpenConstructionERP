@@ -2283,6 +2283,10 @@
       "unmapped_cost": {
         "fail": "{kind} {label}: nincs WBS-elem és költségkód, lekötött {committed}, tényleges {actual}",
         "suggestion": "Rendelje a megrendelési sort, alvállalkozást vagy számlát egy WBS-elemhez, hogy a CVR el tudja helyezni"
+      },
+      "wbs_rollup_reconciles": {
+        "fail": "WBS {label}: {field} értéke {total}, de a saját sorok és az alelemek összege {parts}",
+        "suggestion": "Frissítse a jelentést a költségszerkezetből, vagy ellenőrizze a projekten kívüli WBS-elemre könyvelt sorokat"
       }
     },
     "procurement": {

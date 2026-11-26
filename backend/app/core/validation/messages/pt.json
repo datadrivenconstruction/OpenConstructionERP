@@ -2283,6 +2283,10 @@
       "unmapped_cost": {
         "fail": "{kind} {label} não tem EAP nem código de custo: comprometido {committed}, real {actual}",
         "suggestion": "Atribua a linha de pedido, a subempreitada ou a fatura a um elemento da EAP para que o CVR a possa situar"
+      },
+      "wbs_rollup_reconciles": {
+        "fail": "EAP {label}: {field} é {total}, mas as suas linhas e filhos somam {parts}",
+        "suggestion": "Atualize o relatório a partir da estrutura de custos ou verifique linhas atribuídas a um elemento EAP fora do projeto"
       }
     },
     "procurement": {

@@ -19,6 +19,7 @@ from decimal import Decimal
 from typing import Any
 
 from fastapi import HTTPException, status
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.events import event_bus
@@ -45,6 +46,7 @@ from app.modules.cvr.schemas import (
     CvrReportCreate,
     CvrReportUpdate,
     CvrSummaryResponse,
+    CvrWbsRollupResponse,
     PaymentApplicationCreate,
     PaymentApplicationUpdate,
     ProgressClaimOption,
@@ -468,6 +470,50 @@ class CvrService:
             **totals,
         )
 
+    async def get_wbs_rollup(self, report_id: uuid.UUID) -> CvrWbsRollupResponse:
+        """Roll a report's lines up the project's WBS tree and check that every parent adds up."""
+        from app.core.validation.rules.commercial_control import evaluate
+        from app.modules.cvr.wbs_tree import WbsNodeRef, build_rollup, figures, node_payload, reconciliation_rows
+        from app.modules.projects.models import ProjectWBS
+
+        report = await self.get_report(report_id)
+        lines = await self.line_repo.list_for_report(report_id)
+        rows = (
+            await self.session.execute(
+                select(
+                    ProjectWBS.id, ProjectWBS.parent_id, ProjectWBS.code, ProjectWBS.name, ProjectWBS.sort_order
+                ).where(ProjectWBS.project_id == report.project_id)
+            )
+        ).all()
+        refs = [
+            WbsNodeRef(
+                id=str(r[0]),
+                parent_id=str(r[1]) if r[1] else None,
+                code=r[2] or "",
+                name=r[3] or "",
+                sort_order=int(r[4] or 0),
+            )
+            for r in rows
+        ]
+        rollup = build_rollup(refs, lines)
+        findings = await evaluate(
+            {"wbs_rollup_nodes": reconciliation_rows(rollup)},
+            target_type="cvr_report",
+            target_id=str(report_id),
+        )
+        return CvrWbsRollupResponse(
+            report_id=report.id,
+            project_id=report.project_id,
+            period=report.period,
+            currency=report.currency,
+            line_count=len(lines),
+            wbs_count=len(refs),
+            nodes=[node_payload(n) for n in rollup.walk()],
+            unallocated=node_payload(rollup.unallocated),
+            totals=figures(rollup.totals),
+            findings=findings,
+        )
+
     # ── Cashflow ──────────────────────────────────────────────────────────
 
     async def create_cashflow_point(self, data: CashflowPointCreate) -> CashflowPoint:
@@ -549,7 +595,6 @@ class CvrService:
         both answer 400: the application is refused rather than linked to a
         claim the caller cannot see.
         """
-        from sqlalchemy import select  # noqa: PLC0415
 
         # Lazy import: cvr stays loadable without the contracts module.
         from app.modules.contracts.models import Contract, ProgressClaim  # noqa: PLC0415
@@ -569,7 +614,6 @@ class CvrService:
 
     async def list_progress_claims_for_project(self, project_id: uuid.UUID) -> list[ProgressClaimOption]:
         """Every progress claim on the project's contracts, for the picker."""
-        from sqlalchemy import select  # noqa: PLC0415
 
         from app.modules.contracts.models import Contract, ProgressClaim  # noqa: PLC0415
 

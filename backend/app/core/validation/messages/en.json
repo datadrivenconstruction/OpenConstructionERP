@@ -2283,6 +2283,10 @@
       "unmapped_cost": {
         "fail": "{kind} {label} has no WBS or cost code: committed {committed}, actual {actual}",
         "suggestion": "Book the order line, subcontract or invoice to a WBS element so the CVR can place it"
+      },
+      "wbs_rollup_reconciles": {
+        "fail": "WBS {label}: {field} is {total} but its own lines and children sum to {parts}",
+        "suggestion": "Refresh the report from the cost spine, or check lines booked to a WBS element outside this project"
       }
     },
     "procurement": {

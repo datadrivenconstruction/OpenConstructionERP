@@ -265,6 +265,53 @@ export async function populateCvrFromSpine(reportId: string): Promise<CvrSpineRe
   return apiPost<CvrSpineRefresh>(`/v1/cvr/reports/${reportId}/lines/from-cost-spine/`, {});
 }
 
+/** Rolled figures of one WBS node. Money is Decimal-as-string. */
+export interface CvrWbsFigures {
+  budget_cost: string;
+  committed_cost: string;
+  cost_to_date: string;
+  value_to_date: string;
+  forecast_cost: string;
+  forecast_value: string;
+  margin_to_date: string;
+  forecast_margin: string;
+  forecast_margin_pct: string;
+}
+
+/** One WBS element of the rollup; parents come before their children. */
+export interface CvrWbsNode {
+  id: string;
+  parent_id: string | null;
+  code: string;
+  name: string;
+  depth: number;
+  child_count: number;
+  /** Report lines booked directly to this element. */
+  line_ids: string[];
+  line_count: number;
+  positions: number;
+  own: CvrWbsFigures;
+  total: CvrWbsFigures;
+}
+
+export interface CvrWbsRollup {
+  report_id: string;
+  project_id: string;
+  period: string;
+  currency: string;
+  line_count: number;
+  wbs_count: number;
+  nodes: CvrWbsNode[];
+  unallocated: CvrWbsNode;
+  totals: CvrWbsFigures;
+  findings: CommercialFinding[];
+}
+
+/** The report rolled up the project's WBS tree, with the lines behind each node. */
+export async function fetchCvrWbsRollup(reportId: string): Promise<CvrWbsRollup> {
+  return apiGet<CvrWbsRollup>(`/v1/cvr/reports/${reportId}/wbs-rollup/`);
+}
+
 /** One priced bill line: budget, committed, remaining, received. Money and quantities are strings. */
 export interface CommitmentGridRow {
   boq_position_id: string;
