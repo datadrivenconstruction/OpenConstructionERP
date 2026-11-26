@@ -65,6 +65,7 @@ class PathOut(BaseModel):
     route: str
     importance: str
     breaks: str
+    edge: str = Field(default="", description="i18n key of the short label drawn on the link")
     live: Live
 
 
@@ -103,6 +104,7 @@ class ModulePaths(BaseModel):
     installed: bool
     why: str = ""
     roles: list[str] = Field(default_factory=list)
+    phase: str = "platform"
     project_id: uuid.UUID | None = None
     currency: str = ""
     entities: list[EntityOut] = Field(default_factory=list)
@@ -118,6 +120,7 @@ class MapModule(BaseModel):
     name: str
     display_name: str
     category: str
+    phase: str = "platform"
     declared: bool
     installed: bool
     why: str = ""
@@ -146,6 +149,7 @@ class PlatformMap(BaseModel):
     modules: list[MapModule]
     edges: list[EdgeOut]
     health: list[HealthItem] = Field(default_factory=list)
+    phases: list[str] = Field(default_factory=list, description="Phase ids in project order, the map's columns")
     generated_at: datetime
 
 

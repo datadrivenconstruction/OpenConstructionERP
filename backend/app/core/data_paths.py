@@ -102,6 +102,8 @@ class DataPath:
         where: Extra filters on ``entity``.
         scope: ``project`` (default) or ``global`` for shared reference data
             (cost catalogues, statutory regimes) that has no project.
+        edge: i18n key of the one-to-three word label drawn on the link
+            (``priced scope``); the path label is drawn when empty.
     """
 
     module: str
@@ -115,6 +117,7 @@ class DataPath:
     missing: str = ""
     where: tuple[Where, ...] = ()
     scope: str = "project"
+    edge: str = ""
 
     def __post_init__(self) -> None:
         if not isinstance(self.importance, Importance):
@@ -205,6 +208,8 @@ class DataPaths:
         external: Sources outside the platform (parties, files) that feed this module.
         chips: Live status chips shown on the module's card.
         reason: Required when nothing else is declared: why the module is isolated.
+        phase: Project phase the module belongs to (``app.modules.dataflow.phases.PHASES``);
+            the dataflow phase table decides when empty.
     """
 
     entities: tuple[Entity, ...] = ()
@@ -218,6 +223,7 @@ class DataPaths:
     external: tuple[External, ...] = ()
     chips: tuple[Chip, ...] = ()
     reason: str = ""
+    phase: str = ""
 
     MAX_PATHS = 12
 
