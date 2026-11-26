@@ -12,6 +12,10 @@
       "fail": "A previsão está acima do valor planeado.",
       "suggestion": "Verifique a origem da previsão; registe uma previsão manual com justificação se espera poupanças."
     },
+    "forecast_over_target": {
+      "fail": "A previsão está acima do custo-alvo dos itens desta linha de custo.",
+      "suggestion": "Compare as encomendas e subempreitadas com os preços-alvo; registe uma previsão manual com justificação se o alvo já não se mantiver."
+    },
     "partly_awarded": {
       "fail": "Apenas parte do valor planeado foi adjudicada; a previsão pode não incluir trabalhos ainda por adjudicar.",
       "suggestion": "Se ainda houver trabalhos por adjudicar nesta linha, introduza uma previsão manual."

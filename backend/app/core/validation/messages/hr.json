@@ -12,6 +12,10 @@
       "fail": "Prognoza je iznad planiranog iznosa.",
       "suggestion": "Provjerite izvor prognoze; ako očekujete uštede, unesite ručnu prognozu s razlogom."
     },
+    "forecast_over_target": {
+      "fail": "Prognoza je iznad ciljnog troška stavki ove troškovne linije.",
+      "suggestion": "Usporedite narudžbe i podugovore s ciljnim cijenama; unesite ručnu prognozu s obrazloženjem ako cilj više ne vrijedi."
+    },
     "partly_awarded": {
       "fail": "Ugovoren je samo dio planiranog iznosa; u prognozi možda nedostaju radovi koje tek treba ugovoriti.",
       "suggestion": "Ako na ovoj stavci tek treba ugovoriti radove, unesite ručnu prognozu."

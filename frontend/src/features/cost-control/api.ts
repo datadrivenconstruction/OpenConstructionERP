@@ -91,6 +91,9 @@ export interface CostControlRow {
   automatic_source: ForecastSource;
   variance: string;
   variance_pct: string | null;
+  /** Target cost of the line's bill positions (quantity x target rate); "0" when none has a target rate. */
+  target?: string;
+  target_variance?: string;
   override: ForecastOverride | null;
   forecast_method: ForecastMethod;
   method_origin: MethodOrigin;

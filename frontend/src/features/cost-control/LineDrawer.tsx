@@ -150,6 +150,9 @@ export function LineDrawer({ projectId, row, currency, canEdit, onClose }: LineD
   const figures: { label: string; value: string; strong?: boolean }[] = current
     ? [
         { label: t('cost_control.col_planned', { defaultValue: 'Planned' }), value: current.planned },
+        ...(current.target && Number(current.target) !== 0
+          ? [{ label: t('cost_control.col_target', { defaultValue: 'Target cost' }), value: current.target }]
+          : []),
         { label: t('cost_control.col_awarded', { defaultValue: 'Awarded' }), value: current.awarded },
         { label: t('cost_control.col_changes', { defaultValue: 'Changes' }), value: current.changes },
         { label: t('cost_control.col_measured', { defaultValue: 'Measured' }), value: current.measured },

@@ -12,6 +12,10 @@
       "fail": "Mas mataas ang forecast kaysa sa nakaplanong halaga.",
       "suggestion": "Suriin ang pinagmulan ng forecast; magtala ng manual na forecast na may dahilan kung inaasahan mong may matitipid."
     },
+    "forecast_over_target": {
+      "fail": "Lampas ang forecast sa target na gastos ng mga item sa linyang ito ng gastos.",
+      "suggestion": "Ihambing ang mga order at subcontract sa mga target na rate; magtala ng manwal na forecast na may dahilan kung hindi na kaya ang target."
+    },
     "partly_awarded": {
       "fail": "Bahagi lamang ng nakaplanong halaga ang na-award; maaaring kulang ang forecast sa mga gawang ia-award pa lang.",
       "suggestion": "Kung may gawa pang ia-award sa linyang ito, maglagay ng manual na forecast."

@@ -12,6 +12,10 @@
       "fail": "La prévision dépasse le montant prévu.",
       "suggestion": "Vérifiez l'origine de la prévision ; saisissez une prévision manuelle avec un motif si vous attendez des économies."
     },
+    "forecast_over_target": {
+      "fail": "La prévision dépasse le coût cible des postes de cette ligne de coût.",
+      "suggestion": "Comparez les commandes et sous-traitances aux prix cibles ; saisissez une prévision manuelle motivée si l'objectif ne tient plus."
+    },
     "partly_awarded": {
       "fail": "Seule une partie du montant prévu est attribuée ; la prévision peut omettre des travaux restant à attribuer.",
       "suggestion": "S'il reste des travaux à attribuer sur cette ligne, saisissez une prévision manuelle."

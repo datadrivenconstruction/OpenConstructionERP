@@ -12,6 +12,10 @@
       "fail": "Prognoos on planeeritud summast kõrgem.",
       "suggestion": "Kontrolli prognoosi allikat; kui ootad kokkuhoidu, sisesta põhjendusega käsitsi prognoos."
     },
+    "forecast_over_target": {
+      "fail": "Prognoos ületab selle kulurea positsioonide sihtkulu.",
+      "suggestion": "Võrrelge tellimusi ja alltöövõtte sihthindadega; kui siht enam ei kehti, sisestage põhjendusega käsitsi prognoos."
+    },
     "partly_awarded": {
       "fail": "Planeeritud summast on hankega kaetud vaid osa; prognoosist võib puududa veel hankimata töö.",
       "suggestion": "Kui sellel real on veel hankimata tööd, sisesta käsitsi prognoos."

@@ -196,6 +196,8 @@ def _row(
         automatic_source=auto.source,
         variance=variance(forecast.amount, planned) if planned != ZERO else ZERO,
         variance_pct=variance_pct(forecast.amount, planned),
+        target=figures.target,
+        target_variance=variance(forecast.amount, figures.target) if figures.target != ZERO else ZERO,
         override=override,
         forecast_method=forecast.method,
         method_origin="manual" if figures.override is not None else method_origin,  # type: ignore[arg-type]
@@ -318,6 +320,7 @@ class CostControlService:
             override=_dec(override.amount) if override is not None else None,
             method=method,
             pending=data.pending_by_line.get(key, ZERO),
+            target=data.target.get(key, ZERO),
         )
 
     async def _cost_line_rows(

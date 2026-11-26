@@ -109,6 +109,8 @@ from app.modules.costmodel.schemas import (
     CashFlowResponse,
     CommitmentGridResponse,
     CommitmentGridRow,
+    CommitmentSourceRow,
+    CommitmentSourcesResponse,
     ContractExposureResponse,
     ControlAccountCreate,
     ControlAccountResponse,
@@ -1134,6 +1136,33 @@ async def get_commitment_grid(
 
 
 @router.get(
+    "/projects/{project_id}/spine/commitment-grid/{position_id}/sources/",
+    response_model=CommitmentSourcesResponse,
+    dependencies=[Depends(RequirePermission("costmodel.read"))],
+)
+async def get_commitment_sources(
+    project_id: uuid.UUID,
+    position_id: uuid.UUID,
+    user_id: CurrentUserId,
+    session: SessionDep,
+) -> CommitmentSourcesResponse:
+    """The order items and subcontract lines behind one commitment grid row; they sum to its figures."""
+    from app.modules.costmodel.commitment_grid import position_sources
+    from app.modules.costmodel.position_actuals import _project_currency
+
+    await verify_project_access(project_id, user_id, session)
+    pos, records = await position_sources(session, project_id, position_id)
+    if pos is None:
+        raise HTTPException(status_code=404, detail="Position not found on this project")
+    return CommitmentSourcesResponse(
+        currency=await _project_currency(session, project_id),
+        boq_position_id=position_id,
+        cost_line_id=getattr(pos, "cost_line_id", None),
+        sources=[CommitmentSourceRow.model_validate(r) for r in records],
+    )
+
+
+@router.get(
     "/projects/{project_id}/spine/position-actuals/",
     response_model=PositionActualsResponse,
     dependencies=[Depends(RequirePermission("costmodel.read"))],
@@ -1187,6 +1216,8 @@ async def get_position_actuals(
                 estimate_quantity=row.estimate_quantity,
                 estimate_unit_rate=row.estimate_unit_rate,
                 estimate_amount=row.estimate_amount,
+                cost_budget_amount=row.cost_budget_amount,
+                budget_basis=row.budget_basis,
                 budget_planned=row.budget_planned,
                 budget_actual=row.budget_actual,
                 committed_amount=row.committed_amount,

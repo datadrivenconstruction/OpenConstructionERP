@@ -12,6 +12,10 @@
       "fail": "Prakiraan berada di atas jumlah yang direncanakan.",
       "suggestion": "Periksa sumber prakiraan; catat prakiraan manual beserta alasannya jika Anda memperkirakan ada penghematan."
     },
+    "forecast_over_target": {
+      "fail": "Prakiraan melebihi biaya target item pada baris biaya ini.",
+      "suggestion": "Bandingkan pesanan dan subkontrak dengan harga target; catat prakiraan manual beserta alasannya jika target tidak lagi berlaku."
+    },
     "partly_awarded": {
       "fail": "Hanya sebagian dari jumlah rencana yang ditunjuk; prakiraan mungkin belum memuat pekerjaan yang masih akan ditenderkan.",
       "suggestion": "Jika pada baris ini masih ada pekerjaan yang akan ditenderkan, masukkan prakiraan manual."

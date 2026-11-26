@@ -12,6 +12,10 @@
       "fail": "Prognosen ligger över det planerade beloppet.",
       "suggestion": "Kontrollera prognosens källa; registrera en manuell prognos med orsak om du väntar dig besparingar."
     },
+    "forecast_over_target": {
+      "fail": "Prognosen ligger över målkostnaden för posterna på denna kostnadsrad.",
+      "suggestion": "Jämför beställningar och underentreprenader med målpriserna; registrera en manuell prognos med motivering om målet inte längre håller."
+    },
     "partly_awarded": {
       "fail": "Bara en del av det planerade beloppet är tilldelad; prognosen kan sakna arbete som ännu ska upphandlas.",
       "suggestion": "Om mer arbete ska upphandlas på den här raden, ange en manuell prognos."

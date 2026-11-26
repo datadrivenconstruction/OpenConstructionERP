@@ -300,6 +300,34 @@ export interface CommitmentGridResponse {
   findings: CommercialFinding[];
 }
 
+/** One order item or subcontract line behind a grid row, in project currency, cut to the row's cost line. */
+export interface CommitmentSource {
+  kind: 'purchase_order' | 'subcontract';
+  document_id: string;
+  document_number: string;
+  document_title: string;
+  status: string;
+  line_id: string;
+  description: string;
+  committed_qty: string;
+  committed_value: string;
+  received_qty: string;
+  received_value: string;
+}
+
+export interface CommitmentSourcesResponse {
+  currency: string;
+  boq_position_id: string;
+  cost_line_id: string | null;
+  sources: CommitmentSource[];
+}
+
+export async function fetchCommitmentSources(projectId: string, positionId: string): Promise<CommitmentSourcesResponse> {
+  return apiGet<CommitmentSourcesResponse>(
+    `/v1/costmodel/projects/${projectId}/spine/commitment-grid/${positionId}/sources/`,
+  );
+}
+
 export async function fetchCommitmentGrid(projectId: string): Promise<CommitmentGridResponse> {
   return apiGet<CommitmentGridResponse>(`/v1/costmodel/projects/${projectId}/spine/commitment-grid/`);
 }

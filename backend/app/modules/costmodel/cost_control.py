@@ -139,6 +139,8 @@ class LineFigures:
     method: str = METHOD_BEST_AVAILABLE
     #: Change orders on this line still waiting for a decision.
     pending: Decimal = ZERO
+    #: Target cost of the bill positions on this line (quantity x target rate), zero when none has one.
+    target: Decimal = ZERO
 
     @property
     def owed(self) -> Decimal:
@@ -333,6 +335,7 @@ FINDING_OVER_PLAN = "cost_control.forecast_over_plan"
 FINDING_PARTLY_AWARDED = "cost_control.partly_awarded"
 FINDING_STALE_SNAPSHOT = "cost_control.snapshot_stale"
 FINDING_PENDING_CHANGES = "cost_control.pending_changes"
+FINDING_OVER_TARGET = "cost_control.forecast_over_target"
 
 FINDING_RULE_IDS: tuple[str, ...] = (
     FINDING_UNASSIGNED,
@@ -341,6 +344,7 @@ FINDING_RULE_IDS: tuple[str, ...] = (
     FINDING_PARTLY_AWARDED,
     FINDING_STALE_SNAPSHOT,
     FINDING_PENDING_CHANGES,
+    FINDING_OVER_TARGET,
 )
 
 
@@ -402,6 +406,24 @@ def line_findings(rows: Iterable[LineInput]) -> list[Finding]:
                         "planned": str(planned),
                         "source": forecast.source,
                         "pct": str(variance_pct(forecast.amount, planned)),
+                    },
+                )
+            )
+        # The target is the cost the site is held to. When it is the plan already, over plan says it.
+        target = f.target
+        if target > ZERO and abs(target - planned) > CENT and forecast.amount - target > CENT:
+            out.append(
+                Finding(
+                    FINDING_OVER_TARGET,
+                    "warning",
+                    row.key,
+                    row.code,
+                    forecast.amount - target,
+                    {
+                        "forecast": str(forecast.amount),
+                        "target": str(target),
+                        "source": forecast.source,
+                        "pct": str(variance_pct(forecast.amount, target)),
                     },
                 )
             )

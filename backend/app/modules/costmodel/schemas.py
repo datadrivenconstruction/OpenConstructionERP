@@ -898,6 +898,9 @@ class PositionActualsRow(BaseModel):
     estimate_quantity: FiniteDecimal = Decimal("0")
     estimate_unit_rate: FiniteDecimal = Decimal("0")
     estimate_amount: FiniteDecimal = Decimal("0")
+    #: Quantity x target rate when the position has one, else the estimate.
+    cost_budget_amount: FiniteDecimal = Decimal("0")
+    budget_basis: str = "unit_rate"
 
     budget_planned: FiniteDecimal = Decimal("0")
     budget_actual: FiniteDecimal = Decimal("0")
@@ -934,6 +937,7 @@ class PositionActualsRow(BaseModel):
         "estimate_quantity",
         "estimate_unit_rate",
         "estimate_amount",
+        "cost_budget_amount",
         "budget_planned",
         "budget_actual",
         "committed_amount",
@@ -1015,3 +1019,30 @@ class CommitmentGridResponse(BaseModel):
     rows: list[CommitmentGridRow] = Field(default_factory=list)
     totals: dict[str, FiniteDecimal] = Field(default_factory=dict)
     findings: list[dict[str, Any]] = Field(default_factory=list)
+
+
+class CommitmentSourceRow(BaseModel):
+    """One order item or subcontract line behind a commitment grid row, in project currency."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    kind: str
+    document_id: UUID
+    document_number: str = ""
+    document_title: str = ""
+    status: str = ""
+    line_id: UUID
+    description: str = ""
+    committed_qty: FiniteDecimal
+    committed_value: FiniteDecimal
+    received_qty: FiniteDecimal
+    received_value: FiniteDecimal
+
+
+class CommitmentSourcesResponse(BaseModel):
+    """The sources of one grid row; empty when the position has no cost line or nothing is committed."""
+
+    currency: str = ""
+    boq_position_id: UUID
+    cost_line_id: UUID | None = None
+    sources: list[CommitmentSourceRow] = Field(default_factory=list)

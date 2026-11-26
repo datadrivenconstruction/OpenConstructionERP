@@ -247,6 +247,12 @@ export function PositionActualsDrawer({
                   {row.cost_line_code && (
                     <Row label={t('costmodel.actuals.cost_line')} value={row.cost_line_code} />
                   )}
+                  {row.budget_basis === 'target' && row.cost_budget_amount && (
+                    <Row
+                      label={t('costmodel.actuals.target_budget', { defaultValue: 'Target cost (qty x target rate)' })}
+                      value={money(row.cost_budget_amount)}
+                    />
+                  )}
                   <Row label={t('costmodel.actuals.budget_planned')} value={money(row.budget_planned)} />
                   <Row label={t('costmodel.actuals.budget_actual')} value={money(row.budget_actual)} />
                   <Row label={t('costmodel.actuals.committed')} value={money(row.committed_amount)} />

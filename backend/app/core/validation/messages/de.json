@@ -12,6 +12,10 @@
       "fail": "Die Prognose liegt über dem Planwert.",
       "suggestion": "Prüfen Sie die Quelle der Prognose; erfassen Sie bei erwarteten Einsparungen eine manuelle Prognose mit Begründung."
     },
+    "forecast_over_target": {
+      "fail": "Die Prognose liegt über den Zielkosten der Positionen dieser Kostenzeile.",
+      "suggestion": "Vergleichen Sie Bestellungen und Nachunternehmerverträge mit den Zielpreisen; erfassen Sie eine manuelle Prognose mit Begründung, wenn das Ziel nicht mehr gilt."
+    },
     "partly_awarded": {
       "fail": "Nur ein Teil des Planwerts ist vergeben; in der Prognose könnten noch zu vergebende Leistungen fehlen.",
       "suggestion": "Wenn auf dieser Kostenstelle noch Leistungen zu vergeben sind, erfassen Sie eine manuelle Prognose."

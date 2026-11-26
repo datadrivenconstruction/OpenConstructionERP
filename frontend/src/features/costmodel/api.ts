@@ -299,13 +299,16 @@ export interface PositionActualsRow {
    *  bug that precision guards against. */
   estimate_unit_rate: string;
   estimate_amount: string;
+  /** Quantity x target rate when the position has one (basis "target"), else the estimate. */
+  cost_budget_amount?: string;
+  budget_basis?: 'target' | 'unit_rate';
 
   budget_planned: string;
   budget_actual: string;
   committed_amount: string;
   contracted_amount: string;
   claimed_amount: string;
-  /** Estimate minus committed, reported SIGNED. Negative means more has been
+  /** Cost budget (target cost, else estimate) minus committed, reported SIGNED. Negative means more has been
    *  ordered against the item than was estimated for it, a finding rather than
    *  an error, so it is never floored at zero. */
   uncommitted_amount: string;

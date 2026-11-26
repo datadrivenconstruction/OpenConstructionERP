@@ -76,6 +76,9 @@ class CostControlRow(BaseModel):
     automatic_source: str = "none"
     variance: Money = Decimal("0")
     variance_pct: OptionalMoney = None
+    # Target cost of the line's bill positions (quantity x target rate); zero when none has a target rate.
+    target: Money = Decimal("0")
+    target_variance: Money = Decimal("0")
     override: ForecastOverrideInfo | None = None
     # The method the forecast was worked out with, and whether it could be (see cost_control.MethodOutcome).
     forecast_method: str = "best_available"
