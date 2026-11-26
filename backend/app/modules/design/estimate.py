@@ -69,9 +69,7 @@ async def install_rules(session, project_id: uuid.UUID, doc: dict[str, Any], use
         from app.modules.boq.schemas import BOQCreate
 
         boq = await _svc(session).create_boq(
-            BOQCreate(
-                project_id=project_id, name="Design estimate", description="Computed from model revisions by rules"
-            )
+            BOQCreate(project_id=project_id, name="design_estimate", description="")
         )
         est = DesignEstimate(
             project_id=project_id,
