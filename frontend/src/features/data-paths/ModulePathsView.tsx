@@ -15,7 +15,7 @@ import { Button } from '@/shared/ui/Button';
 import { EmptyState } from '@/shared/ui/EmptyState';
 import { ErrorState } from '@/shared/ui/ErrorState';
 import { Skeleton } from '@/shared/ui/Skeleton';
-import { formatNumber } from '@/shared/lib/formatters';
+import { fmtList, formatNumber } from '@/shared/lib/formatters';
 
 import { useModulePaths, type Importance, type ModulePaths, type PathOut } from './api';
 import { moduleLabel, stateText } from './flowModel';
@@ -404,7 +404,7 @@ function PathDetail({ data, path, onClose, onOpen }: { data: ModulePaths; path: 
               <li key={f.field} className="flex items-start gap-2 font-mono text-xs">
                 <span className="min-w-0 flex-1 break-all text-content-secondary">{f.field}</span>
                 <ArrowRight size={12} className="mt-0.5 shrink-0 text-content-tertiary rtl:rotate-180" aria-hidden />
-                <span className="min-w-0 flex-1 break-all text-content-primary">{f.drives.join(', ')}</span>
+                <span className="min-w-0 flex-1 break-all text-content-primary">{fmtList(f.drives)}</span>
               </li>
             ))}
           </ul>
