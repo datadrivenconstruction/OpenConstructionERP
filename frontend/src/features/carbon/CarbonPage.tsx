@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import clsx from 'clsx';
+import { useRoleGate } from '@/shared/lib/useRoleGate';
 import {
   Leaf,
   Target,
@@ -229,6 +230,8 @@ function useEscapeToClose(onClose: () => void) {
 
 export function CarbonPage() {
   const { t } = useTranslation();
+  const write = useRoleGate('editor');
+  const manage = useRoleGate('manager');
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   // `?tab=epds` deep-links from material pickers ("Manage materials").
@@ -287,6 +290,7 @@ export function CarbonPage() {
                 size="sm"
                 icon={<Plus size={14} />}
                 onClick={() => setCreateInvOpen(true)}
+                disabledReason={write.reason}
                 disabled={!effectiveProjectId}
               >
                 {t('carbon.new_inventory', { defaultValue: 'New Inventory' })}
@@ -298,6 +302,7 @@ export function CarbonPage() {
                 size="sm"
                 icon={<Plus size={14} />}
                 onClick={() => setCreateTargetOpen(true)}
+                disabledReason={manage.reason}
                 disabled={!effectiveProjectId}
               >
                 {t('carbon.new_target', { defaultValue: 'New Target' })}
@@ -309,6 +314,7 @@ export function CarbonPage() {
                 size="sm"
                 icon={<Plus size={14} />}
                 onClick={() => setCreateEpdOpen(true)}
+                disabledReason={write.reason}
               >
                 {t('carbon.new_epd', { defaultValue: 'New EPD' })}
               </Button>
@@ -319,6 +325,7 @@ export function CarbonPage() {
                 size="sm"
                 icon={<FileText size={14} />}
                 onClick={() => setGenerateReportOpen(true)}
+                disabledReason={write.reason}
                 disabled={!effectiveProjectId}
               >
                 {t('carbon.generate_report', { defaultValue: 'Generate Report' })}
@@ -587,11 +594,15 @@ function InventoryTab({
 function RowActions({
   onEdit,
   onDelete,
+  editRole = 'editor',
 }: {
   onEdit: () => void;
   onDelete: () => void;
+  editRole?: 'editor' | 'manager';
 }) {
   const { t } = useTranslation();
+  const editGate = useRoleGate(editRole);
+  const deleteGate = useRoleGate('manager');
   return (
     <span className="flex items-center justify-end gap-1">
       <button
@@ -600,9 +611,10 @@ function RowActions({
           e.stopPropagation();
           onEdit();
         }}
-        className="rounded p-1.5 text-content-tertiary hover:bg-surface-tertiary hover:text-content-primary"
+        disabled={!editGate.allowed}
+        className="rounded p-1.5 text-content-tertiary hover:bg-surface-tertiary hover:text-content-primary disabled:cursor-not-allowed disabled:opacity-40"
         aria-label={t('common.edit', { defaultValue: 'Edit' })}
-        title={t('common.edit', { defaultValue: 'Edit' })}
+        title={editGate.reason ?? t('common.edit', { defaultValue: 'Edit' })}
       >
         <Pencil size={14} />
       </button>
@@ -612,9 +624,10 @@ function RowActions({
           e.stopPropagation();
           onDelete();
         }}
-        className="rounded p-1.5 text-content-tertiary hover:bg-semantic-error/10 hover:text-semantic-error"
+        disabled={!deleteGate.allowed}
+        className="rounded p-1.5 text-content-tertiary hover:bg-semantic-error/10 hover:text-semantic-error disabled:cursor-not-allowed disabled:opacity-40"
         aria-label={t('common.delete', { defaultValue: 'Delete' })}
-        title={t('common.delete', { defaultValue: 'Delete' })}
+        title={deleteGate.reason ?? t('common.delete', { defaultValue: 'Delete' })}
       >
         <Trash2 size={14} />
       </button>
@@ -1034,7 +1047,7 @@ function TargetRow({
           >
             {targetStatusLabel(target.status, t)}
           </Badge>
-          <RowActions onEdit={onEdit} onDelete={onDelete} />
+          <RowActions onEdit={onEdit} onDelete={onDelete} editRole="manager" />
         </div>
       </div>
       <div className="mt-3 grid grid-cols-3 gap-3 text-xs">
@@ -1164,6 +1177,7 @@ function ReportTable({
   onDelete: (report: SustainabilityReport) => void;
 }) {
   const { t } = useTranslation();
+  const deleteGate = useRoleGate('manager');
   return (
     <div className="overflow-x-auto">
       <table className="oe-table w-full">
@@ -1215,9 +1229,10 @@ function ReportTable({
                   <button
                     type="button"
                     onClick={() => onDelete(r)}
-                    className="rounded p-1.5 text-content-tertiary hover:bg-semantic-error/10 hover:text-semantic-error"
+                    disabled={!deleteGate.allowed}
+                    className="rounded p-1.5 text-content-tertiary hover:bg-semantic-error/10 hover:text-semantic-error disabled:cursor-not-allowed disabled:opacity-40"
                     aria-label={t('common.delete', { defaultValue: 'Delete' })}
-                    title={t('common.delete', { defaultValue: 'Delete' })}
+                    title={deleteGate.reason ?? t('common.delete', { defaultValue: 'Delete' })}
                   >
                     <Trash2 size={14} />
                   </button>
@@ -1514,6 +1529,7 @@ function InventoryDrawer({
                         size="sm"
                         icon={<Sparkles size={14} />}
                         onClick={() => setAutoEnrichOpen(true)}
+                        disabledReason={write.reason}
                         disabled={!inventoryProjectId}
                       >
                         {t('carbon.sixd.action', {
@@ -1525,6 +1541,7 @@ function InventoryDrawer({
                         size="sm"
                         icon={<FileSpreadsheet size={14} />}
                         onClick={() => setAssignBoqOpen(true)}
+                        disabledReason={write.reason}
                       >
                         {t('carbon.add_from_boq', { defaultValue: 'Add from BOQ' })}
                       </Button>
@@ -1533,6 +1550,7 @@ function InventoryDrawer({
                         size="sm"
                         icon={<Plus size={14} />}
                         onClick={() => setEmbodiedModal({ mode: 'create' })}
+                        disabledReason={write.reason}
                       >
                         {t('carbon.add_entry', { defaultValue: 'Add entry' })}
                       </Button>
@@ -1682,6 +1700,7 @@ function ScopeSection({
   onDelete: (e: Scope1Entry | Scope2Entry | Scope3Entry) => void;
 }) {
   const { t } = useTranslation();
+  const write = useRoleGate('editor');
   return (
     <div>
       <div className="mb-2 flex items-center justify-between">
@@ -1693,6 +1712,7 @@ function ScopeSection({
           size="sm"
           icon={<Plus size={14} />}
           onClick={onAdd}
+          disabledReason={write.reason}
         >
           {t('carbon.add_entry', { defaultValue: 'Add entry' })}
         </Button>

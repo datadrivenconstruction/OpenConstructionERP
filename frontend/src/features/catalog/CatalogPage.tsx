@@ -55,6 +55,7 @@ import {
 import { getResourceTypeLabel } from '@/features/boq/boqResourceTypes';
 import { getUnitsForLocale } from '@/features/boq/boqHelpers';
 import { copyToClipboard } from '@/shared/lib/browser';
+import { useRoleGate } from '@/shared/lib/useRoleGate';
 import { currencyFractionDigits, formatCurrency } from '@/shared/lib/money';
 import { getNumberLocale } from '@/stores/usePreferencesStore';
 import { importToastTone } from '@/shared/lib/importToastTone';
@@ -1504,6 +1505,8 @@ function BuildAssemblyModal({
 
 export function CatalogPage() {
   const { t, i18n } = useTranslation();
+  const write = useRoleGate('editor');
+  const manage = useRoleGate('manager');
   const queryClient = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
   // Locale/imperial-aware unit list for the unit filter (same primitive the
@@ -1811,6 +1814,7 @@ export function CatalogPage() {
               variant="secondary"
               size="sm"
               icon={<Trash2 size={14} />}
+              disabledReason={manage.reason}
               onClick={() => handleDeleteRegion(region)}
             >
               {t('catalog.delete_region', { defaultValue: 'Delete Region' })}
@@ -1823,6 +1827,7 @@ export function CatalogPage() {
               variant="secondary"
               size="sm"
               icon={<TrendingUp size={14} />}
+              disabledReason={write.reason}
               onClick={() => setShowPriceAdjust(true)}
             >
               {t('catalog.adjust_prices', { defaultValue: 'Adjust Prices' })}
@@ -1834,6 +1839,7 @@ export function CatalogPage() {
             variant="secondary"
             size="sm"
             icon={<Plus size={14} />}
+            disabledReason={write.reason}
             onClick={() => setShowCreateResource(true)}
             data-guide="catalog-add-resource"
           >
@@ -1845,6 +1851,7 @@ export function CatalogPage() {
             variant="primary"
             size="sm"
             icon={<Upload size={14} />}
+            disabledReason={write.reason}
             onClick={() => setShowImportGrid(!showImportGrid)}
             data-guide="catalog-import"
           >
@@ -2155,6 +2162,7 @@ export function CatalogPage() {
               <Button
                 variant="primary"
                 icon={<Plus size={16} />}
+                disabledReason={write.reason}
                 onClick={() => setShowCreateResource(true)}
               >
                 {t('catalog.add_resource', { defaultValue: 'Add Resource' })}
@@ -2164,6 +2172,7 @@ export function CatalogPage() {
                 <Button
                   variant="primary"
                   icon={<Upload size={16} />}
+                  disabledReason={write.reason}
                   onClick={() => setShowImportGrid(true)}
                 >
                   {t('catalog.import_region', { defaultValue: 'Import Region' })}
@@ -2349,6 +2358,7 @@ export function CatalogPage() {
               variant="primary"
               size="sm"
               icon={<Layers size={14} />}
+              disabledReason={write.reason}
               onClick={() => setShowBuildAssembly(true)}
             >
               {t('catalog.build_assembly', { defaultValue: 'Build Assembly' })}
