@@ -201,7 +201,7 @@ describe('Change orders title claims the leftover width (#171)', () => {
     // Match the classes as separate tokens rather than as one exact string.
     // Reordering three class names is not a regression, and a guard that
     // fails on it costs someone an afternoon for nothing.
-    const titleCell = /<td className="([^"]*)"\s+title=\{order\.title\}>/.exec(source);
+    const titleCell = /<td className="([^"]*)"\s+title=\{(?:designRecordName\(t, )?order\.title\)?\}>/.exec(source);
     expect(titleCell).not.toBeNull();
     const classes = titleCell![1]!.split(/\s+/);
     expect(classes).toContain('w-full');
