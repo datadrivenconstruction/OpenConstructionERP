@@ -186,6 +186,23 @@ class TestCad2DataBridge:
         with pytest.raises(bridge.NoEntitiesExtractedError):
             bridge.convert_to_snapshot_frames([])
 
+    def test_real_upload_runs_with_text_step_fallback_off(self) -> None:
+        from app.modules.bim_hub import ifc_processor
+
+        seen: list[bool] = []
+
+        def _spy(*_a, **_k):
+            seen.append(ifc_processor._TEXT_STEP_FALLBACK.get())
+            return _fake_ifc_conversion()
+
+        with patch("app.modules.bim_hub.ifc_processor.process_ifc_file", side_effect=_spy):
+            bridge.convert_to_snapshot_frames(
+                [bridge.UploadedFile(original_name="a.ifc", extension="ifc", content=b"ISO-10303-21;")]
+            )
+
+        assert seen == [False]
+        assert ifc_processor._TEXT_STEP_FALLBACK.get() is True
+
     def test_ifc_happy_path_produces_frames(self) -> None:
         with patch(
             "app.modules.bim_hub.ifc_processor.process_ifc_file",

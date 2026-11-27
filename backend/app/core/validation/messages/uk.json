@@ -1126,7 +1126,8 @@
     "boq_classification_unavailable": "Сервіс класифікації недоступний",
     "boq_budget_no_positions": "У кошторисі обсягів немає позицій: нічого бюджетувати.",
     "boq_fix_unit_rate_required": "Потрібен невід'ємний параметр 'unit_rate'",
-    "levy_code_taken": "Збір із таким кодом уже є в каталозі."
+    "levy_code_taken": "Збір із таким кодом уже є в каталозі.",
+    "role_required": "Для цієї дії потрібна роль {role} або вища"
   },
   "variations": {
     "boq_lines_are_traced": {
@@ -2949,6 +2950,10 @@
     "position_unsplit": {
       "fail": "У {line} немає ресурсів, тому весь бюджет пішов в Інше",
       "suggestion": "Додайте ресурси позиції або перенесіть суму на потрібний тип витрат"
+    },
+    "resources_unpriced": {
+      "fail": "{line} has resources priced in a currency with no exchange rate to the project currency, so they took no part in the split: {resources}",
+      "suggestion": "Add the exchange rate under the project currency settings, then generate the budget again"
     },
     "unknown_type": {
       "fail": "У {line} категорія \"{category}\", яка не є типом витрат",

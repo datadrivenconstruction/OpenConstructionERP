@@ -587,3 +587,72 @@ def test_non_numeric_labor_metadata_falls_back_safely() -> None:
     )
     assert days >= 1
     assert source == "estimated_fallback"
+
+
+def _legacy_line(pos: SimpleNamespace, category: str = "other") -> SimpleNamespace:
+    return SimpleNamespace(
+        id=uuid.uuid4(),
+        boq_position_id=pos.id,
+        category=category,
+        planned_amount=pos.total,
+        forecast_amount=pos.total,
+        metadata_={},
+    )
+
+
+@pytest.mark.asyncio
+async def test_regenerate_resplits_a_legacy_single_line_and_is_idempotent(monkeypatch: pytest.MonkeyPatch) -> None:
+    resources = [
+        {"type": "labor", "quantity": 10, "unit_rate": 30},
+        {"type": "material", "quantity": 1, "unit_rate": 700},
+    ]
+    pos = _position("1000", metadata={"resources": resources})
+    service, repo = _make_service(monkeypatch, positions=[pos])
+    legacy = _legacy_line(pos)
+    repo.existing = {pos.id}
+    repo.line_by_position[pos.id] = legacy
+
+    created = await service.generate_budget_from_boq(_PROJECT_ID, _BOQ_ID)
+
+    assert len(created) == 1
+    assert created[0].category in {"labor", "material"}
+    assert legacy.category in {"labor", "material"}
+    assert legacy.category != created[0].category
+    assert Decimal(legacy.planned_amount) + Decimal(created[0].planned_amount) == Decimal("1000")
+    assert "cost_type_split" in legacy.metadata_
+
+    again = await service.generate_budget_from_boq(_PROJECT_ID, _BOQ_ID)
+    assert again == []
+
+
+@pytest.mark.asyncio
+async def test_regenerate_leaves_an_edited_legacy_line_alone(monkeypatch: pytest.MonkeyPatch) -> None:
+    pos = _position("1000", metadata={"resources": [{"type": "labor", "total": 1}, {"type": "material", "total": 1}]})
+    service, repo = _make_service(monkeypatch, positions=[pos])
+    legacy = _legacy_line(pos)
+    legacy.planned_amount = "1200"
+    repo.existing = {pos.id}
+    repo.line_by_position[pos.id] = legacy
+
+    assert await service.generate_budget_from_boq(_PROJECT_ID, _BOQ_ID) == []
+    assert legacy.category == "other"
+
+
+@pytest.mark.asyncio
+async def test_unpriced_resources_are_recorded_on_the_lines(monkeypatch: pytest.MonkeyPatch) -> None:
+    resources = [
+        {"type": "labor", "total": 100, "currency": ""},
+        {"type": "equipment", "total": 50, "currency": "GBP", "name": "Crane"},
+    ]
+    pos = _position("100", metadata={"resources": resources})
+    service, repo = _make_service(monkeypatch, positions=[pos])
+
+    async def _fx_context(project_id: uuid.UUID) -> tuple[str, dict[str, str]]:
+        return "EUR", {}
+
+    monkeypatch.setattr(repo, "_project_fx_context", _fx_context)
+
+    created = await service.generate_budget_from_boq(_PROJECT_ID, _BOQ_ID)
+
+    assert [ln.category for ln in created] == ["labor"]
+    assert created[0].metadata_["cost_type_split"]["unpriced_resources"] == ["Crane"]

@@ -23,7 +23,7 @@ import {
   FileBarChart,
   ShieldAlert,
   RotateCcw,
-  Download,
+  Upload,
   Box,
   GitBranch,
   TrendingUp,
@@ -1965,7 +1965,7 @@ export function ScheduleDetail({
               <Button
                 variant="secondary"
                 size="sm"
-                icon={<Download size={14} />}
+                icon={<Upload size={14} />}
                 onClick={() => {
                   const activities = ganttData?.activities ?? [];
                   const rows = [

@@ -15,6 +15,17 @@ describe('DisabledGroup', () => {
     expect(screen.getByRole('group')).toHaveAttribute('title', 'Only an administrator can do this.');
   });
 
+  it('prints the reason where a touch user can read it and links it to the group', () => {
+    render(
+      <DisabledGroup reason="Only an administrator can do this.">
+        <button type="button">Save</button>
+      </DisabledGroup>,
+    );
+    const note = screen.getByRole('note');
+    expect(note).toHaveTextContent('Only an administrator can do this.');
+    expect(screen.getByRole('group')).toHaveAttribute('aria-describedby', note.id);
+  });
+
   it('leaves the controls active when there is no reason', () => {
     render(
       <DisabledGroup>
@@ -22,5 +33,6 @@ describe('DisabledGroup', () => {
       </DisabledGroup>,
     );
     expect(screen.getByRole('button', { name: 'Save' })).toBeEnabled();
+    expect(screen.queryByRole('note')).toBeNull();
   });
 });

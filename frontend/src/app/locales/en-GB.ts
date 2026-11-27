@@ -232,6 +232,7 @@ const resource = {
     "schedule.tabular_import.rows_more": "More rows not shown: {{n}}",
     "schedule.tabular_import.issue.pdf_no_text_layer": "The PDF has no text layer (a scan or an image). Export the schedule as MS Project XML, XER or Excel and import that file instead.",
     "schedule.tabular_import.issue.pdf_table_not_found": "No page of the PDF has a schedule table header (ID, name, start, finish, duration).",
+    "schedule.delete_blocked_title": "This schedule cannot be deleted",
     "about.dev_model_title": "Development and Contribution Model",
     "about.dev_model_p1": "OpenConstructionERP has been under continuous development for more than six years and has benefited from contributions, feedback, testing, and domain expertise from many different people.",
     "about.dev_model_p2": "To maintain a consistent architecture and reduce security, dependency, and integration risks, the project follows a centralised integration model. Most production code is ultimately reviewed, consolidated, tested, and published through a single maintainer account. As a result, the GitHub contributor history does not necessarily reflect the actual number of people who have contributed to the project.",

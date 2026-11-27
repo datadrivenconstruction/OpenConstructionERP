@@ -1126,7 +1126,8 @@
     "boq_classification_unavailable": "Услугата за класификация не е налична",
     "boq_budget_no_positions": "Количествената сметка няма позиции: няма какво да се бюджетира.",
     "boq_fix_unit_rate_required": "Изисква се неотрицателен параметър 'unit_rate'",
-    "levy_code_taken": "В каталога вече има такса с този код."
+    "levy_code_taken": "В каталога вече има такса с този код.",
+    "role_required": "За това действие е нужна роля {role} или по-висока"
   },
   "variations": {
     "boq_lines_are_traced": {
@@ -2949,6 +2950,10 @@
     "position_unsplit": {
       "fail": "{line} няма ресурси, затова целият бюджет отиде в Други",
       "suggestion": "Добавете ресурсите на позицията или преместете сумата към правилния вид разход"
+    },
+    "resources_unpriced": {
+      "fail": "{line} has resources priced in a currency with no exchange rate to the project currency, so they took no part in the split: {resources}",
+      "suggestion": "Add the exchange rate under the project currency settings, then generate the budget again"
     },
     "unknown_type": {
       "fail": "{line} има категория \"{category}\", която не е вид разход",

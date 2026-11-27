@@ -1692,6 +1692,7 @@ const resource = {
     "tax_rates.status_harmonised": "Harmonized",
     "tax_rates.flow_intro": "Some countries have one sales tax rate and some do not. Canada has a federal rate that one province replaces with a single harmonized one, that several add their own to, and that four charge on its own. There is no Canadian rate, only a rate for a place on a date, so this page asks for both before it answers.",
     "schedule.tabular_import.match_none": "Not recognized",
+    "schedule.delete_blocked_title": "This schedule cannot be deleted",
     "supplier_catalogs.err_unknown_unit": "unit not recognized",
     "measurement_book.explainer": "Record what was actually built, one dated line per location: number x length x width x height, or a direct quantity. A second person checks each line. Checked quantities make the running bill, which progress claims then pick up.",
     "measurement_book.f_breadth": "Width",

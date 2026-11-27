@@ -1162,7 +1162,8 @@
     "fx_rate_set_locked": "The ECB rates for {date} are locked, so this refresh did not overwrite them. Unlock that rate set first if it should take the new publication.",
     "boq_locked": "BOQ is locked and cannot be modified. Create a revision to make changes.",
     "boq_link_owner_locked": "Code '{code}' is defined by a line in the locked bill '{bill}', and linking to it would change that bill. Unlock that bill first, or enter the line under a new code.",
-    "levy_code_taken": "A levy with this code is already in the catalogue."
+    "levy_code_taken": "A levy with this code is already in the catalogue.",
+    "role_required": "This action needs the {role} role or higher"
   },
   "variations": {
     "boq_lines_are_traced": {
@@ -2949,6 +2950,10 @@
     "position_unsplit": {
       "fail": "{line} has no resources, so its whole budget went to Other",
       "suggestion": "Add the position's resources, or move the amount to the right cost type"
+    },
+    "resources_unpriced": {
+      "fail": "{line} has resources priced in a currency with no exchange rate to the project currency, so they took no part in the split: {resources}",
+      "suggestion": "Add the exchange rate under the project currency settings, then generate the budget again"
     },
     "unknown_type": {
       "fail": "{line} has the category \"{category}\", which is not a cost type",

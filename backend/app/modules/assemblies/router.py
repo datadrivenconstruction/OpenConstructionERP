@@ -135,21 +135,17 @@ async def _verify_target_boq_owner(
         return
 
     from app.modules.boq.repository import BOQRepository
-    from app.modules.projects.repository import ProjectRepository
 
     boq_repo = BOQRepository(session)
     boq = await boq_repo.get_by_id(boq_id)
     if boq is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="BOQ not found")
-    project_repo = ProjectRepository(session)
-    project = await project_repo.get_by_id(boq.project_id)
-    if project is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail=translate("errors.project_not_found", locale=get_locale())
-        )
-    if str(project.owner_id) != str(user_id):
-        # 404 here too - don't let callers probe for valid BOQ ids.
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="BOQ not found")
+    # Owner, admin or team member of the BOQ's project may write; everyone else gets
+    # the same 404 so BOQ ids cannot be probed. Write permission is enforced by the route.
+    try:
+        await verify_project_access(boq.project_id, user_id, session)
+    except HTTPException:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="BOQ not found") from None
 
 
 def _assembly_to_response(

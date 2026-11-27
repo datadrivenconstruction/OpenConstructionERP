@@ -1126,7 +1126,8 @@
     "boq_classification_unavailable": "Layanan klasifikasi tidak tersedia",
     "boq_budget_no_positions": "Daftar kuantitas tidak memiliki item: tidak ada yang dianggarkan.",
     "boq_fix_unit_rate_required": "Parameter 'unit_rate' yang tidak negatif diperlukan",
-    "levy_code_taken": "Pungutan dengan kode ini sudah ada di katalog."
+    "levy_code_taken": "Pungutan dengan kode ini sudah ada di katalog.",
+    "role_required": "Tindakan ini memerlukan peran {role} atau lebih tinggi"
   },
   "variations": {
     "boq_lines_are_traced": {
@@ -2949,6 +2950,10 @@
     "position_unsplit": {
       "fail": "{line} tidak punya sumber daya, jadi seluruh anggarannya masuk ke Lainnya",
       "suggestion": "Tambahkan sumber daya item atau pindahkan jumlahnya ke jenis biaya yang benar"
+    },
+    "resources_unpriced": {
+      "fail": "{line} has resources priced in a currency with no exchange rate to the project currency, so they took no part in the split: {resources}",
+      "suggestion": "Add the exchange rate under the project currency settings, then generate the budget again"
     },
     "unknown_type": {
       "fail": "{line} berkategori \"{category}\", yang bukan jenis biaya",

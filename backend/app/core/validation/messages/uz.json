@@ -1126,7 +1126,8 @@
     "boq_classification_unavailable": "Tasniflash xizmati mavjud emas",
     "boq_budget_no_positions": "Hajmlar qaydnomasida pozitsiyalar yo'q: byudjetlaydigan narsa yo'q.",
     "boq_fix_unit_rate_required": "Manfiy bo'lmagan 'unit_rate' parametri kerak",
-    "levy_code_taken": "Bu kodli yigʻim katalogda allaqachon bor."
+    "levy_code_taken": "Bu kodli yigʻim katalogda allaqachon bor.",
+    "role_required": "Bu amal uchun {role} yoki undan yuqori rol kerak"
   },
   "variations": {
     "boq_lines_are_traced": {
@@ -2949,6 +2950,10 @@
     "position_unsplit": {
       "fail": "{line} da resurslar yo'q, shuning uchun butun byudjet Boshqaga ketdi",
       "suggestion": "Pozitsiya resurslarini qo'shing yoki summani to'g'ri xarajat turiga o'tkazing"
+    },
+    "resources_unpriced": {
+      "fail": "{line} has resources priced in a currency with no exchange rate to the project currency, so they took no part in the split: {resources}",
+      "suggestion": "Add the exchange rate under the project currency settings, then generate the budget again"
     },
     "unknown_type": {
       "fail": "{line} toifasi \"{category}\", bu xarajat turi emas",

@@ -1126,7 +1126,8 @@
     "boq_classification_unavailable": "Serviciul de clasificare este indisponibil",
     "boq_budget_no_positions": "Lista de cantități nu are poziții: nimic de bugetat.",
     "boq_fix_unit_rate_required": "Este necesar un parametru 'unit_rate' nenegativ",
-    "levy_code_taken": "Există deja în catalog o taxă cu acest cod."
+    "levy_code_taken": "Există deja în catalog o taxă cu acest cod.",
+    "role_required": "Această acțiune necesită rolul {role} sau superior"
   },
   "variations": {
     "boq_lines_are_traced": {
@@ -2949,6 +2950,10 @@
     "position_unsplit": {
       "fail": "{line} nu are resurse, așa că tot bugetul a mers la Altele",
       "suggestion": "Adăugați resursele articolului sau mutați suma pe tipul de cost corect"
+    },
+    "resources_unpriced": {
+      "fail": "{line} has resources priced in a currency with no exchange rate to the project currency, so they took no part in the split: {resources}",
+      "suggestion": "Add the exchange rate under the project currency settings, then generate the budget again"
     },
     "unknown_type": {
       "fail": "{line} are categoria \"{category}\", care nu este un tip de cost",

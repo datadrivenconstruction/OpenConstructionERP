@@ -128,6 +128,8 @@ class SubmittalService:
         ``IntegrityError`` and we simply re-roll the number. After
         ``_MAX_NUMBER_RETRIES`` collisions we surface 409 rather than spin.
         """
+        await self._refuse_people_without_access(data.project_id, None, data.distribution_list)
+
         # Auto-set ball_in_court based on initial status
         ball_in_court = data.ball_in_court
         if ball_in_court is None:
@@ -305,6 +307,8 @@ class SubmittalService:
             )
 
         fields: dict[str, Any] = data.model_dump(exclude_unset=True)
+        if fields.get("distribution_list"):
+            await self._refuse_people_without_access(submittal.project_id, None, fields["distribution_list"])
         # Merge a partial metadata patch into the existing column instead of
         # replacing it wholesale (the description block below then operates on
         # the merged dict). Without this a metadata PATCH without description
@@ -431,6 +435,10 @@ class SubmittalService:
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=(f"Can only submit from draft or revise_and_resubmit status, current: {submittal.status}"),
             )
+
+        await self._refuse_people_without_access(
+            submittal.project_id, submittal.ball_in_court, getattr(submittal, "distribution_list", None)
+        )
 
         from datetime import UTC, datetime
 
@@ -585,25 +593,54 @@ class SubmittalService:
             "as_of": datetime.now(UTC).date().isoformat(),
         }
 
-    async def _people_without_access(self, submittal: Submittal, payload: dict[str, Any]) -> list[str]:
-        """User ids on the ball or the distribution list that cannot open the project.
+    async def _users_without_access(self, project_id: uuid.UUID, user_ids: list[Any]) -> list[str]:
+        """Those of ``user_ids`` that cannot open the project.
 
         Uses the same check as every project route. A lookup that fails for any
         other reason counts as no finding: an advisory rule must not invent one.
         """
         from app.dependencies import verify_project_access
 
-        people = {u for u in [payload.get("ball_in_court"), *payload.get("distribution_list", [])] if u}
         out: list[str] = []
-        for user_id in sorted(people):
+        for user_id in sorted({str(u) for u in user_ids if u}):
             try:
-                await verify_project_access(submittal.project_id, user_id, self.session)
+                await verify_project_access(project_id, user_id, self.session)
             except HTTPException as exc:
                 if exc.status_code == status.HTTP_404_NOT_FOUND:
                     out.append(user_id)
             except Exception:  # pragma: no cover - defensive
                 logger.debug("Project access lookup failed for %s", user_id, exc_info=True)
         return out
+
+    async def _people_without_access(self, submittal: Submittal, payload: dict[str, Any]) -> list[str]:
+        """User ids on the ball or the distribution list that cannot open the project."""
+        return await self._users_without_access(
+            submittal.project_id, [payload.get("ball_in_court"), *payload.get("distribution_list", [])]
+        )
+
+    async def _refuse_people_without_access(
+        self, project_id: uuid.UUID, ball_in_court: Any, distribution_list: Any
+    ) -> None:
+        """Refuse with 422 and the reason when the ball or the distribution names someone without project access."""
+        from app.modules.submittals.messages import translate as tr
+
+        listed = distribution_list if isinstance(distribution_list, list) else []
+        people: list[str] = []
+        for raw in (ball_in_court, *listed):
+            try:
+                people.append(str(uuid.UUID(str(raw))))
+            except ValueError:
+                continue  # free text is not a user id; nothing to look up
+        missing = await self._users_without_access(project_id, people)
+        if missing:
+            locale = get_locale()
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail=(
+                    f"{tr('submittal.people_have_project_access.fail', locale, count=len(missing))}. "
+                    f"{tr('submittal.people_have_project_access.suggestion', locale)}"
+                ),
+            )
 
     async def _validate_submittal(
         self,

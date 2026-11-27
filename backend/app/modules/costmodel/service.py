@@ -26,7 +26,7 @@ from app.core.cost_types import OTHER as OTHER_COST_TYPE
 from app.core.events import event_bus
 from app.core.json_merge import merge_metadata
 from app.modules.costmodel.contract_exposure import compute_contract_exposure
-from app.modules.costmodel.cost_type_rules import SPLIT_BASIS_NO_RESOURCES
+from app.modules.costmodel.cost_type_rules import SPLIT_BASIS_NO_RESOURCES, SPLIT_BASIS_UNPRICED
 from app.modules.costmodel.models import (
     BudgetLine,
     CashFlow,
@@ -110,13 +110,18 @@ def _budget_lines_by_cost_type(
     shares: list[CostTypeShare],
     *,
     origin: Any,
+    unpriced: list[str] | None = None,
+    weight_total: Decimal | None = None,
 ) -> list[BudgetLine]:
     """One budget line per cost type of a bill position, each traceable to the resources it was cut by.
 
     A position without usable resources becomes a single ``other`` line for its
-    whole total, marked so the ``cost_types`` rules can ask for a breakdown.
+    whole total, marked so the ``cost_types`` rules can ask for a breakdown. Resource
+    rows that had no exchange rate to the project currency are named in
+    ``unpriced`` and recorded on every line, so the split is never silently short.
     """
-    weight_total = sum((s.weight for s in shares), Decimal("0"))
+    if weight_total is None:
+        weight_total = sum((s.weight for s in shares), Decimal("0"))
     if shares:
         parts = [
             (
@@ -132,7 +137,8 @@ def _budget_lines_by_cost_type(
             for s in shares
         ]
     else:
-        parts = [(OTHER_COST_TYPE, total, {"basis": SPLIT_BASIS_NO_RESOURCES})]
+        basis = SPLIT_BASIS_UNPRICED if unpriced else SPLIT_BASIS_NO_RESOURCES
+        parts = [(OTHER_COST_TYPE, total, {"basis": basis})]
     out: list[BudgetLine] = []
     for cost_type, amount, split in parts:
         out.append(
@@ -155,11 +161,23 @@ def _budget_lines_by_cost_type(
                         rate={"unit_rate": str(pos.unit_rate), "ordinal": pos.ordinal, "boq_id": str(boq_id)},
                         origin=origin,
                     ),
-                    COST_TYPE_SPLIT_KEY: {**split, "position_total": str(total)},
+                    COST_TYPE_SPLIT_KEY: {
+                        **split,
+                        "position_total": str(total),
+                        **({"unpriced_resources": unpriced} if unpriced else {}),
+                    },
                 },
             )
         )
     return out
+
+
+def _resource_label(row: Any) -> str:
+    """A resource row's name for a finding: its code and description, else its type."""
+    if not isinstance(row, dict):
+        return ""
+    parts = [str(row.get(k) or "").strip() for k in ("code", "name", "description")]
+    return " ".join(p for p in parts if p) or str(row.get("type") or "")
 
 
 def _canonical_category(raw: str) -> str:
@@ -1663,13 +1681,23 @@ class CostModelService:
 
         lines: list[BudgetLine] = []
         for pos in positions:
-            if pos.id in existing:
-                continue
             total = _str_to_decimal(pos.total)
             pos_meta = getattr(pos, "metadata_", None)
             pos_ccy = str(pos_meta.get("currency") or "").strip().upper() if isinstance(pos_meta, dict) else ""
             line_currency = pos_ccy if pos_ccy and pos_ccy != project_ccy_norm else currency
             resources = pos_meta.get("resources") if isinstance(pos_meta, dict) else None
+            skipped: list[Any] = []
+            shares = split_by_cost_type(
+                total, resources if isinstance(resources, list) else None, fx_factor=_fx, unpriced=skipped
+            )
+            unpriced = [_resource_label(row) for row in skipped]
+            if pos.id in existing:
+                lines.extend(
+                    await self._resplit_legacy_line(
+                        project_id, boq_id, pos, total, line_currency, shares, unpriced=unpriced
+                    )
+                )
+                continue
             lines.extend(
                 _budget_lines_by_cost_type(
                     project_id,
@@ -1677,8 +1705,9 @@ class CostModelService:
                     pos,
                     total,
                     line_currency,
-                    split_by_cost_type(total, resources if isinstance(resources, list) else None, fx_factor=_fx),
+                    shares,
                     origin=provenance.read(pos_meta),
+                    unpriced=unpriced,
                 )
             )
 
@@ -1709,6 +1738,69 @@ class CostModelService:
             project_id,
         )
         return created
+
+    async def _resplit_legacy_line(
+        self,
+        project_id: uuid.UUID,
+        boq_id: uuid.UUID,
+        pos: Any,
+        total: Decimal,
+        currency: str,
+        shares: list[CostTypeShare],
+        *,
+        unpriced: list[str],
+    ) -> list[BudgetLine]:
+        """Split a position's single pre-split budget line by cost type, keeping what was booked on it.
+
+        Only an untouched legacy line qualifies: the position's one line, with no recorded
+        split and a planned amount equal to the position total. The line stays as the anchor
+        (the share of its own category, else the first), so committed and actual amounts keep
+        their place, and the other shares are new lines. A split line is never touched again,
+        which makes the regeneration idempotent.
+        """
+        if len(shares) < 2:
+            return []
+        existing_lines = await self.budget_repo.list_by_position(project_id, pos.id)
+        if len(existing_lines) != 1:
+            return []
+        line = existing_lines[0]
+        meta = line.metadata_ if isinstance(line.metadata_, dict) else {}
+        if COST_TYPE_SPLIT_KEY in meta or _str_to_decimal(line.planned_amount) != total:
+            return []
+        weight_total = sum((sh.weight for sh in shares), Decimal("0"))
+        anchor = next((sh for sh in shares if sh.cost_type == (line.category or "")), shares[0])
+        new_lines = _budget_lines_by_cost_type(
+            project_id,
+            boq_id,
+            pos,
+            total,
+            currency,
+            [sh for sh in shares if sh is not anchor],
+            origin=provenance.read(getattr(pos, "metadata_", None)),
+            unpriced=unpriced,
+            weight_total=weight_total,
+        )
+        anchor_meta = {
+            **meta,
+            COST_TYPE_SPLIT_KEY: {
+                "basis": SPLIT_BASIS_RESOURCES,
+                "weight": str(anchor.weight),
+                "weight_total": str(weight_total),
+                "resource_count": anchor.resource_count,
+                "position_total": str(total),
+                **({"unpriced_resources": unpriced} if unpriced else {}),
+            },
+        }
+        await self.budget_repo.update_fields(
+            line.id,
+            category=anchor.cost_type,
+            planned_amount=str(anchor.amount),
+            forecast_amount=str(
+                anchor.amount if _str_to_decimal(line.forecast_amount) == total else line.forecast_amount
+            ),
+            metadata_=anchor_meta,
+        )
+        return new_lines
 
     async def generate_cash_flow_from_schedule(self, project_id: uuid.UUID) -> list[CashFlow]:
         """Generate cash flow entries by spreading budget line amounts across their schedule.

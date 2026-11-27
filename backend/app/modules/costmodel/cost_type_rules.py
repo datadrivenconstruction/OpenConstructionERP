@@ -4,12 +4,15 @@
 
 * ``cost_types.position_unsplit``: a budget line generated from a bill position
   that had no resources, so its whole total went to ``other``.
+* ``cost_types.resources_unpriced``: a budget line whose position has resource rows
+  priced in a currency with no exchange rate to the project currency; those rows
+  took no part in the split.
 * ``cost_types.unknown_type``: a budget line whose category is outside the
   shared vocabulary (an older free-text category), so it reports under no cost
   type.
 
-Both are warnings. Each rule reads ``context.data["cost_types"]["lines"]``, a
-list of dicts with ``line_id``, ``label``, ``category`` and ``split_basis``, and
+All are warnings. Each rule reads ``context.data["cost_types"]["lines"]``, a
+list of dicts with ``line_id``, ``label``, ``category``, ``split_basis`` and ``unpriced``, and
 is silent on any other payload. The cost-type grid runs the set on every read.
 """
 
@@ -34,6 +37,7 @@ logger = logging.getLogger(__name__)
 RULE_SET = "cost_types"
 PAYLOAD_KEY = "cost_types"
 SPLIT_BASIS_NO_RESOURCES = "no_resources"
+SPLIT_BASIS_UNPRICED = "resources_unpriced"
 
 
 class _CostTypeRule(ValidationRule):
@@ -54,7 +58,11 @@ class _CostTypeRule(ValidationRule):
         for line in payload.get("lines") or []:
             if not isinstance(line, dict) or not self.flagged(line):
                 continue
-            params = {"line": str(line.get("label") or ""), "category": str(line.get("category") or "")}
+            params = {
+                "line": str(line.get("label") or ""),
+                "category": str(line.get("category") or ""),
+                "resources": ", ".join(str(x) for x in line.get("unpriced") or [] if x),
+            }
             out.append(
                 RuleResult(
                     rule_id=self.rule_id,
@@ -90,6 +98,16 @@ class PositionUnsplitRule(_CostTypeRule):
         return line.get("split_basis") == SPLIT_BASIS_NO_RESOURCES
 
 
+class ResourcesUnpricedRule(_CostTypeRule):
+    rule_id = "cost_types.resources_unpriced"
+    name = "Resources without an exchange rate"
+    description = "Resource rows in a currency with no rate to the project currency took no part in the split."
+    category = RuleCategory.COMPLETENESS
+
+    def flagged(self, line: dict[str, Any]) -> bool:
+        return bool(line.get("unpriced"))
+
+
 class UnknownTypeRule(_CostTypeRule):
     rule_id = "cost_types.unknown_type"
     name = "Budget line without a known cost type"
@@ -100,11 +118,11 @@ class UnknownTypeRule(_CostTypeRule):
         return not is_budget_category(line.get("category"))
 
 
-COST_TYPE_RULES: tuple[type[_CostTypeRule], ...] = (PositionUnsplitRule, UnknownTypeRule)
+COST_TYPE_RULES: tuple[type[_CostTypeRule], ...] = (PositionUnsplitRule, ResourcesUnpricedRule, UnknownTypeRule)
 
 
 def register_cost_type_rules() -> None:
-    """Register the two rules into the ``cost_types`` rule set."""
+    """Register the cost type rules into the ``cost_types`` rule set."""
     for rule_cls in COST_TYPE_RULES:
         rule_registry.register(rule_cls(), [RULE_SET])
     logger.debug("Registered cost type validation rules")

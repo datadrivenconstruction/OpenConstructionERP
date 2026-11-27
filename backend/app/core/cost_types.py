@@ -27,9 +27,11 @@ Everything here is pure: standard library and :class:`~decimal.Decimal` only.
 
 from __future__ import annotations
 
+import json
 from collections.abc import Callable, Iterable, Mapping
 from dataclasses import dataclass
 from decimal import Decimal, InvalidOperation
+from pathlib import Path
 from typing import Any
 
 LABOR = "labor"
@@ -50,10 +52,10 @@ BUDGET_CATEGORIES: frozenset[str] = frozenset(COST_TYPES + LEGACY_BUDGET_CATEGOR
 # Resource and import spellings, lower-cased, mapped to a cost type.
 _ALIASES: dict[str, str] = {
     **dict.fromkeys(
-        ("labor", "labour", "work", "worker", "workers", "crew", "operator", "operators", "lohn", "arbeit"),
+        ("labor", "labour", "work", "worker", "workers", "crew", "operator", "operators"),
         LABOR,
     ),
-    **dict.fromkeys(("material", "materials", "mat", "baustoff", "baustoffe"), MATERIAL),
+    **dict.fromkeys(("material", "materials", "mat"), MATERIAL),
     **dict.fromkeys(
         (
             "equipment",
@@ -62,20 +64,39 @@ _ALIASES: dict[str, str] = {
             "machines",
             "mechanism",
             "mechanisms",
-            "maschine",
             "plant",
-            "geraet",
             "tool",
             "tools",
         ),
         EQUIPMENT,
     ),
     **dict.fromkeys(
-        ("subcontractor", "subcontractors", "subcontract", "sub", "nachunternehmer", "fremdleistung"),
+        ("subcontractor", "subcontractors", "subcontract", "sub"),
         SUBCONTRACTOR,
     ),
     **dict.fromkeys(("other", "electricity", "misc", "miscellaneous"), OTHER),
 }
+
+_SYNONYMS_PATH = Path(__file__).resolve().parent / "country_data" / "cost_type_synonyms.json"
+
+
+def _load_language_synonyms() -> dict[str, str]:
+    """Language spellings from ``country_data/cost_type_synonyms.json``, folded into the neutral aliases."""
+    try:
+        data = json.loads(_SYNONYMS_PATH.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return {}
+    out: dict[str, str] = {}
+    for language, rows in data.items():
+        if language.startswith("_") or not isinstance(rows, dict):
+            continue
+        for cost_type, spellings in rows.items():
+            if cost_type in COST_TYPES and isinstance(spellings, list):
+                out.update({str(sp).strip().lower(): cost_type for sp in spellings})
+    return out
+
+
+_ALIASES.update(_load_language_synonyms())
 
 _CENT = Decimal("0.01")
 
@@ -146,6 +167,7 @@ def split_by_cost_type(
     resources: Iterable[Any] | None,
     *,
     fx_factor: Callable[[str], Decimal | None] | None = None,
+    unpriced: list[Mapping[str, Any]] | None = None,
 ) -> list[CostTypeShare]:
     """Split a position total over its resources' cost types.
 
@@ -162,6 +184,8 @@ def split_by_cost_type(
         fx_factor: Converts a row's ``currency`` into the position's, so rows
             priced in different currencies weigh in one; a row it returns
             ``None`` for (no usable rate) is left out of the split.
+        unpriced: When given, receives every row left out for want of a rate,
+            so the caller can say so instead of dropping it silently.
 
     Returns:
         One share per cost type present, in :data:`COST_TYPES` order.
@@ -175,6 +199,8 @@ def split_by_cost_type(
         if fx_factor is not None:
             factor = fx_factor(str(row.get("currency") or "").strip().upper())
             if factor is None:
+                if unpriced is not None:
+                    unpriced.append(row)
                 continue
             weight *= factor
         cost_type = to_cost_type(row.get("type"))

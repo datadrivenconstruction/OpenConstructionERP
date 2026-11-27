@@ -1144,7 +1144,8 @@
     "fx_rate_set_locked": "Die EZB-Kurse vom {date} sind gesperrt, deshalb hat diese Aktualisierung sie nicht überschrieben. Entsperren Sie den Kurssatz zuerst, wenn er die neue Veröffentlichung übernehmen soll.",
     "boq_locked": "Das Leistungsverzeichnis ist gesperrt und kann nicht geändert werden. Legen Sie eine Revision an, um Änderungen vorzunehmen.",
     "boq_link_owner_locked": "Der Code '{code}' ist durch eine Position im gesperrten Leistungsverzeichnis '{bill}' definiert, und eine Verknüpfung würde dieses Leistungsverzeichnis ändern. Entsperren Sie es zuerst oder erfassen Sie die Position unter einem neuen Code.",
-    "levy_code_taken": "Eine Umlage mit diesem Kürzel steht bereits im Katalog."
+    "levy_code_taken": "Eine Umlage mit diesem Kürzel steht bereits im Katalog.",
+    "role_required": "Für diese Aktion ist mindestens die Rolle {role} erforderlich"
   },
   "variations": {
     "boq_lines_are_traced": {
@@ -2949,6 +2950,10 @@
     "position_unsplit": {
       "fail": "{line} hat keine Ressourcen, daher ging das ganze Budget an Sonstiges",
       "suggestion": "Ergänzen Sie die Ressourcen der Position oder verschieben Sie den Betrag auf die richtige Kostenart"
+    },
+    "resources_unpriced": {
+      "fail": "{line} hat Ressourcen in einer Währung ohne Wechselkurs zur Projektwährung, daher gingen sie nicht in die Aufteilung ein: {resources}",
+      "suggestion": "Hinterlegen Sie den Wechselkurs in den Währungseinstellungen des Projekts und erzeugen Sie das Budget erneut"
     },
     "unknown_type": {
       "fail": "{line} hat die Kategorie \"{category}\", die keine Kostenart ist",

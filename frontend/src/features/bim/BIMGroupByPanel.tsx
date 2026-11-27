@@ -13,7 +13,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import * as THREE from 'three';
-import { ChevronDown, ChevronRight, Download, Eye, FileSpreadsheet, MousePointerClick, Palette } from 'lucide-react';
+import { ChevronDown, ChevronRight, Eye, FileSpreadsheet, MousePointerClick, Palette, Upload } from 'lucide-react';
 import type { BIMElementData, ElementManager } from '@/shared/ui/BIMViewer';
 import { useDisplayQuantity } from '@/shared/hooks/useDisplayQuantity';
 import { getNumberLocale } from '@/stores/usePreferencesStore';
@@ -397,7 +397,7 @@ export default function BIMGroupByPanel({
             disabled={tree.length === 0}
             className="inline-flex items-center gap-1 px-2 py-1 rounded text-2xs font-medium border border-border-light text-content-secondary hover:bg-surface-tertiary disabled:opacity-40"
           >
-            <Download size={12} />
+            <Upload size={12} />
             CSV
           </button>
           <button

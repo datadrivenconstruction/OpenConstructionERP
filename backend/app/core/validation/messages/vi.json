@@ -1126,7 +1126,8 @@
     "boq_classification_unavailable": "Dịch vụ phân loại không khả dụng",
     "boq_budget_no_positions": "Bảng khối lượng không có hạng mục: không có gì để lập ngân sách.",
     "boq_fix_unit_rate_required": "Cần tham số 'unit_rate' không âm",
-    "levy_code_taken": "Danh mục đã có khoản phí với mã này."
+    "levy_code_taken": "Danh mục đã có khoản phí với mã này.",
+    "role_required": "Thao tác này cần vai trò {role} trở lên"
   },
   "variations": {
     "boq_lines_are_traced": {
@@ -2949,6 +2950,10 @@
     "position_unsplit": {
       "fail": "{line} không có tài nguyên nên toàn bộ ngân sách được đưa vào Khác",
       "suggestion": "Thêm tài nguyên của hạng mục hoặc chuyển số tiền sang đúng loại chi phí"
+    },
+    "resources_unpriced": {
+      "fail": "{line} has resources priced in a currency with no exchange rate to the project currency, so they took no part in the split: {resources}",
+      "suggestion": "Add the exchange rate under the project currency settings, then generate the budget again"
     },
     "unknown_type": {
       "fail": "{line} có danh mục \"{category}\", không phải loại chi phí",

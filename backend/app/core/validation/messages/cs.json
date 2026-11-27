@@ -1126,7 +1126,8 @@
     "boq_classification_unavailable": "Služba klasifikace není dostupná",
     "boq_budget_no_positions": "Výkaz výměr nemá žádné položky: není co rozpočtovat.",
     "boq_fix_unit_rate_required": "Je vyžadován nezáporný parametr 'unit_rate'",
-    "levy_code_taken": "Poplatek s tímto kódem už v katalogu je."
+    "levy_code_taken": "Poplatek s tímto kódem už v katalogu je.",
+    "role_required": "Tato akce vyžaduje roli {role} nebo vyšší"
   },
   "variations": {
     "boq_lines_are_traced": {
@@ -2949,6 +2950,10 @@
     "position_unsplit": {
       "fail": "{line} nemá žádné zdroje, proto celý rozpočet šel do Ostatní",
       "suggestion": "Doplňte zdroje položky nebo přesuňte částku na správný druh nákladu"
+    },
+    "resources_unpriced": {
+      "fail": "{line} has resources priced in a currency with no exchange rate to the project currency, so they took no part in the split: {resources}",
+      "suggestion": "Add the exchange rate under the project currency settings, then generate the budget again"
     },
     "unknown_type": {
       "fail": "{line} má kategorii \"{category}\", která není druhem nákladu",

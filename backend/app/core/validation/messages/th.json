@@ -1126,7 +1126,8 @@
     "boq_classification_unavailable": "บริการจัดหมวดหมู่ไม่พร้อมใช้งาน",
     "boq_budget_no_positions": "ใบถอดปริมาณงานไม่มีรายการ: ไม่มีสิ่งที่จะตั้งงบ",
     "boq_fix_unit_rate_required": "ต้องมีพารามิเตอร์ 'unit_rate' ที่ไม่เป็นลบ",
-    "levy_code_taken": "มีค่าธรรมเนียมที่ใช้รหัสนี้ในแคตตาล็อกแล้ว"
+    "levy_code_taken": "มีค่าธรรมเนียมที่ใช้รหัสนี้ในแคตตาล็อกแล้ว",
+    "role_required": "การดำเนินการนี้ต้องใช้บทบาท {role} ขึ้นไป"
   },
   "variations": {
     "boq_lines_are_traced": {
@@ -2949,6 +2950,10 @@
     "position_unsplit": {
       "fail": "{line} ไม่มีทรัพยากร งบประมาณทั้งหมดจึงไปอยู่ที่อื่นๆ",
       "suggestion": "เพิ่มทรัพยากรของรายการ หรือย้ายยอดไปยังประเภทต้นทุนที่ถูกต้อง"
+    },
+    "resources_unpriced": {
+      "fail": "{line} has resources priced in a currency with no exchange rate to the project currency, so they took no part in the split: {resources}",
+      "suggestion": "Add the exchange rate under the project currency settings, then generate the budget again"
     },
     "unknown_type": {
       "fail": "{line} มีหมวด \"{category}\" ซึ่งไม่ใช่ประเภทต้นทุน",

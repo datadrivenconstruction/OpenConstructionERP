@@ -1126,7 +1126,8 @@
     "boq_classification_unavailable": "Hindi available ang serbisyo ng klasipikasyon",
     "boq_budget_no_positions": "Walang item ang bill of quantities: walang ibu-budget.",
     "boq_fix_unit_rate_required": "Kailangan ang parameter na 'unit_rate' na hindi negatibo",
-    "levy_code_taken": "May singil na may ganitong code na sa katalogo."
+    "levy_code_taken": "May singil na may ganitong code na sa katalogo.",
+    "role_required": "Kailangan ng tungkuling {role} o mas mataas para sa aksyong ito"
   },
   "variations": {
     "boq_lines_are_traced": {
@@ -2949,6 +2950,10 @@
     "position_unsplit": {
       "fail": "Walang resources ang {line}, kaya napunta sa Iba pa ang buong budget nito",
       "suggestion": "Idagdag ang resources ng item, o ilipat ang halaga sa tamang uri ng gastos"
+    },
+    "resources_unpriced": {
+      "fail": "{line} has resources priced in a currency with no exchange rate to the project currency, so they took no part in the split: {resources}",
+      "suggestion": "Add the exchange rate under the project currency settings, then generate the budget again"
     },
     "unknown_type": {
       "fail": "Ang {line} ay may kategoryang \"{category}\", na hindi uri ng gastos",

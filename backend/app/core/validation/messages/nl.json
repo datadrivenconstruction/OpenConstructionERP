@@ -1126,7 +1126,8 @@
     "boq_classification_unavailable": "Classificatieservice niet beschikbaar",
     "boq_budget_no_positions": "De bestekstaat heeft geen posten: niets om te begroten.",
     "boq_fix_unit_rate_required": "Een niet-negatieve parameter 'unit_rate' is vereist",
-    "levy_code_taken": "Er staat al een heffing met deze code in de catalogus."
+    "levy_code_taken": "Er staat al een heffing met deze code in de catalogus.",
+    "role_required": "Deze actie vereist de rol {role} of hoger"
   },
   "variations": {
     "boq_lines_are_traced": {
@@ -2949,6 +2950,10 @@
     "position_unsplit": {
       "fail": "{line} heeft geen middelen, dus het hele budget ging naar Overig",
       "suggestion": "Voeg de middelen van de post toe of verplaats het bedrag naar de juiste kostensoort"
+    },
+    "resources_unpriced": {
+      "fail": "{line} has resources priced in a currency with no exchange rate to the project currency, so they took no part in the split: {resources}",
+      "suggestion": "Add the exchange rate under the project currency settings, then generate the budget again"
     },
     "unknown_type": {
       "fail": "{line} heeft de categorie \"{category}\", die geen kostensoort is",

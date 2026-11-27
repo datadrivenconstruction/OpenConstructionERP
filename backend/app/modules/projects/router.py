@@ -2576,8 +2576,8 @@ async def list_wbs_nodes(
     session: SessionDep,
     service: ProjectService = Depends(_get_service),
 ) -> list[WBSResponse]:
-    """List all WBS nodes for a project."""
-    await _verify_project_owner(service, project_id, user_id, payload)
+    """List all WBS nodes for a project (owner, admin or team member)."""
+    await _verify_project_access(service, project_id, user_id, session, payload)
 
     from sqlalchemy import select
 

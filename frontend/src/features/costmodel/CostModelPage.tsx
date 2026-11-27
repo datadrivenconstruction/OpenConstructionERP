@@ -34,6 +34,7 @@ import { Card, CardHeader, CardContent, Button, Badge, EmptyState, Skeleton, Bre
 import { PageHeader } from '@/shared/ui/PageHeader';
 import { PlanningCrossLinks } from '@/features/schedule/PlanningCrossLinks';
 import { apiGet, apiPost, apiPatch } from '@/shared/lib/api';
+import { useRoleGate } from '@/shared/lib/useRoleGate';
 import { fetchProjectList } from '@/shared/lib/projectList';
 import { useToastStore } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
@@ -85,6 +86,14 @@ function formatCurrency(amount: string | number, currency?: string): string {
   return fmtMoney(amount, currency, undefined, {
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
+  });
+}
+
+// Budget lines are cents-exact, so the category table shows both decimals like Finance does.
+function formatCents(amount: string | number, currency?: string): string {
+  return fmtMoney(amount, currency, undefined, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
   });
 }
 
@@ -484,6 +493,7 @@ const BudgetTable = memo(function BudgetTable({
       subcontractor: t('costmodel.cat_subcontractor', 'Subcontractor'),
       overhead: t('costmodel.cat_overhead', 'Overhead'),
       contingency: t('costmodel.cat_contingency', 'Contingency'),
+      other: t('costmodel.cat_other', 'Other'),
       // Lines without a category, and committed documents on cost lines that
       // have no budget line yet, arrive under the empty key.
       '': t('boq.uncategorized', '(Not specified)'),
@@ -527,21 +537,18 @@ const BudgetTable = memo(function BudgetTable({
               <tr key={cat.category}>
                 <td className="pr-4 font-medium">
                   <span>{categoryLabels[cat.category] || cat.category}</span>
-                  {cat.category && categoryLabels[cat.category] && cat.category !== categoryLabels[cat.category] && (
-                    <span className="block text-2xs text-content-tertiary font-normal">{cat.category}</span>
-                  )}
                 </td>
                 <td className="text-right tabular-nums text-content-secondary">
-                  {formatCurrency(cat.planned, currency)}
+                  {formatCents(cat.planned, currency)}
                 </td>
                 <td className="text-right tabular-nums text-content-secondary">
-                  {formatCurrency(cat.committed, currency)}
+                  {formatCents(cat.committed, currency)}
                 </td>
                 <td className="text-right tabular-nums text-content-secondary">
-                  {formatCurrency(cat.actual, currency)}
+                  {formatCents(cat.actual, currency)}
                 </td>
                 <td className="text-right tabular-nums text-content-secondary">
-                  {formatCurrency(cat.forecast, currency)}
+                  {formatCents(cat.forecast, currency)}
                 </td>
                 <td>
                   <div className="flex flex-col items-center gap-0.5">
@@ -560,7 +567,7 @@ const BudgetTable = memo(function BudgetTable({
                   className={`py-3.5 pl-4 text-right tabular-nums font-medium ${varianceColor(cat.variance)}`}
                 >
                   {cat.variance > 0 ? '+' : ''}
-                  {formatCurrency(cat.variance, currency)}
+                  {formatCents(cat.variance, currency)}
                 </td>
               </tr>
             );
@@ -572,16 +579,16 @@ const BudgetTable = memo(function BudgetTable({
               {t('costmodel.total', 'Total')}
             </td>
             <td className="text-right tabular-nums">
-              {formatCurrency(totals.planned, currency)}
+              {formatCents(totals.planned, currency)}
             </td>
             <td className="text-right tabular-nums">
-              {formatCurrency(totals.committed, currency)}
+              {formatCents(totals.committed, currency)}
             </td>
             <td className="text-right tabular-nums">
-              {formatCurrency(totals.actual, currency)}
+              {formatCents(totals.actual, currency)}
             </td>
             <td className="text-right tabular-nums">
-              {formatCurrency(totals.forecast, currency)}
+              {formatCents(totals.forecast, currency)}
             </td>
             <td>
               {totals.planned > 0 && (
@@ -602,7 +609,7 @@ const BudgetTable = memo(function BudgetTable({
               className={`py-3.5 pl-4 text-right tabular-nums font-semibold ${varianceColor(totals.variance)}`}
             >
               {totals.variance > 0 ? '+' : ''}
-              {formatCurrency(totals.variance, currency)}
+              {formatCents(totals.variance, currency)}
             </td>
           </tr>
         </tfoot>
@@ -2121,6 +2128,7 @@ function MonteCarloPanel({ projectId, currency }: { projectId: string; currency:
 
 function FiveDDashboard({ project }: { project: Project }) {
   const { t } = useTranslation();
+  const { reason: writeReason } = useRoleGate('editor');
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
@@ -2304,6 +2312,7 @@ function FiveDDashboard({ project }: { project: Project }) {
                       </select>
                     )}
                     <Button variant="primary" size="md" icon={<BarChart3 size={16} />} loading={generateBudget.isPending}
+                      disabledReason={writeReason}
                       onClick={() => generateBudget.mutate(selectedBoqId || (boqs[0]?.id ?? ''))}>
                       {t('costmodel.generate_budget_cta', { defaultValue: 'Generate Budget from BOQ' })}
                     </Button>
@@ -2388,6 +2397,7 @@ function FiveDDashboard({ project }: { project: Project }) {
               size="sm"
               icon={<Camera size={14} />}
               loading={createSnapshot.isPending}
+              disabledReason={writeReason}
               onClick={handleCreateSnapshot}
             >
               {t('costmodel.create_snapshot', { defaultValue: 'Create Snapshot' })}
@@ -2397,6 +2407,7 @@ function FiveDDashboard({ project }: { project: Project }) {
               size="sm"
               icon={<Banknote size={14} />}
               loading={generateCashFlow.isPending}
+              disabledReason={writeReason}
               onClick={handleGenerateCashFlow}
             >
               {t('costmodel.generate_cash_flow', { defaultValue: 'Generate Cash Flow' })}

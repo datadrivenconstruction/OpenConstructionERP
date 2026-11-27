@@ -1,0 +1,9 @@
+{
+  "_doc": "Language spellings of resource types, mapped to the neutral cost types in app/core/cost_types.py. One row per language code; add a language here, never in code.",
+  "de": {
+    "labor": ["lohn", "arbeit"],
+    "material": ["baustoff", "baustoffe"],
+    "equipment": ["maschine", "geraet"],
+    "subcontractor": ["nachunternehmer", "fremdleistung"]
+  }
+}

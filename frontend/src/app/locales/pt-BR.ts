@@ -51648,6 +51648,7 @@ const resource = {
     "schedule.impact.col_positions": "Itens do orçamento e aditivos",
     "schedule.impact.unlinked": "Sem vínculo com o orçamento",
     "schedule.impact.position_missing": "O item não está mais no orçamento",
+    "schedule.delete_blocked_title": "Este cronograma não pode ser excluído",
     "delivery_model.allocation_status.confirmed": "Confirmada",
     "delivery_model.allocation_status.link_missing": "Falta o vínculo ao risco",
     "delivery_model.allocation_status.unconfirmed": "Por confirmar",

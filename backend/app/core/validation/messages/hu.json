@@ -1126,7 +1126,8 @@
     "boq_classification_unavailable": "Az osztályozási szolgáltatás nem érhető el",
     "boq_budget_no_positions": "A költségvetési kiírásnak nincs tétele: nincs mit költségvetésbe venni.",
     "boq_fix_unit_rate_required": "Nem negatív 'unit_rate' paraméter szükséges",
-    "levy_code_taken": "Ezzel a kóddal már van díj a katalógusban."
+    "levy_code_taken": "Ezzel a kóddal már van díj a katalógusban.",
+    "role_required": "Ehhez a művelethez {role} vagy magasabb szerepkör szükséges"
   },
   "variations": {
     "boq_lines_are_traced": {
@@ -2949,6 +2950,10 @@
     "position_unsplit": {
       "fail": "A(z) {line} tételnek nincsenek erőforrásai, így a teljes költségvetés az Egyéb alá került",
       "suggestion": "Adja meg a tétel erőforrásait, vagy helyezze át az összeget a megfelelő költségnemre"
+    },
+    "resources_unpriced": {
+      "fail": "{line} has resources priced in a currency with no exchange rate to the project currency, so they took no part in the split: {resources}",
+      "suggestion": "Add the exchange rate under the project currency settings, then generate the budget again"
     },
     "unknown_type": {
       "fail": "A(z) {line} kategóriája \"{category}\", ez nem költségnem",

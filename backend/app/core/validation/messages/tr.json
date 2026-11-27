@@ -1126,7 +1126,8 @@
     "boq_classification_unavailable": "Sınıflandırma hizmeti kullanılamıyor",
     "boq_budget_no_positions": "Metraj cetvelinde poz yok: bütçelenecek bir şey yok.",
     "boq_fix_unit_rate_required": "Negatif olmayan bir 'unit_rate' parametresi gereklidir",
-    "levy_code_taken": "Bu koda sahip bir kesinti katalogda zaten var."
+    "levy_code_taken": "Bu koda sahip bir kesinti katalogda zaten var.",
+    "role_required": "Bu işlem için {role} veya daha yüksek bir rol gerekir"
   },
   "variations": {
     "boq_lines_are_traced": {
@@ -2949,6 +2950,10 @@
     "position_unsplit": {
       "fail": "{line} kaynak içermiyor, bu yüzden bütçesinin tamamı Diğer'e gitti",
       "suggestion": "Pozun kaynaklarını ekleyin veya tutarı doğru maliyet türüne taşıyın"
+    },
+    "resources_unpriced": {
+      "fail": "{line} has resources priced in a currency with no exchange rate to the project currency, so they took no part in the split: {resources}",
+      "suggestion": "Add the exchange rate under the project currency settings, then generate the budget again"
     },
     "unknown_type": {
       "fail": "{line} kategorisi \"{category}\", bu bir maliyet türü değil",

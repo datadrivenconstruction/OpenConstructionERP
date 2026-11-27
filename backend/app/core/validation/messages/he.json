@@ -1126,7 +1126,8 @@
     "boq_classification_unavailable": "שירות הסיווג אינו זמין",
     "boq_budget_no_positions": "לכתב הכמויות אין סעיפים: אין מה לתקצב.",
     "boq_fix_unit_rate_required": "נדרש פרמטר 'unit_rate' לא שלילי",
-    "levy_code_taken": "היטל עם קוד זה כבר קיים בקטלוג."
+    "levy_code_taken": "היטל עם קוד זה כבר קיים בקטלוג.",
+    "role_required": "פעולה זו דורשת את התפקיד {role} או גבוה יותר"
   },
   "variations": {
     "boq_lines_are_traced": {
@@ -2949,6 +2950,10 @@
     "position_unsplit": {
       "fail": "ל-{line} אין משאבים, ולכן כל התקציב שלו הלך לאחר",
       "suggestion": "הוסיפו את משאבי הסעיף או העבירו את הסכום לסוג העלות הנכון"
+    },
+    "resources_unpriced": {
+      "fail": "{line} has resources priced in a currency with no exchange rate to the project currency, so they took no part in the split: {resources}",
+      "suggestion": "Add the exchange rate under the project currency settings, then generate the budget again"
     },
     "unknown_type": {
       "fail": "ל-{line} יש קטגוריה \"{category}\", שאינה סוג עלות",

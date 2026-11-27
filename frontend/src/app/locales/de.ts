@@ -57433,6 +57433,7 @@ const resource = {
     "schedule.impact.col_positions": "LV-Positionen und Nachträge",
     "schedule.impact.unlinked": "Nicht mit dem LV verknüpft",
     "schedule.impact.position_missing": "Position nicht mehr im LV",
+    "schedule.delete_blocked_title": "Dieser Terminplan kann nicht gelöscht werden",
     "delivery_model.allocation_status.confirmed": "Bestätigt",
     "delivery_model.allocation_status.link_missing": "Risikoverknüpfung fehlt",
     "delivery_model.allocation_status.unconfirmed": "Unbestätigt",

@@ -111,6 +111,7 @@ import { DEFAULT_FINANCE_TAB, isFinanceTab, type FinanceTab } from './financeTab
 import { UnlinkedTwinBanner } from '@/features/subcontractors/UnlinkedTwinBanner';
 import { fmtDate, fmtList, fmtPercent, fmtFixed, fmtNumberForInput } from '@/shared/lib/formatters';
 import { matchesSearch } from '@/shared/lib/highlightMatch';
+import { useRoleGate } from '@/shared/lib/useRoleGate';
 import { VideoHint } from '@/features/videos/VideoHint';
 
 // English fallbacks for the computed `finance.payment_status_*` keys. The default used to be
@@ -1197,6 +1198,8 @@ const INITIAL_BUDGET_FORM = { wbs_code: '', category: '', original_budget: '', n
 
 function BudgetsTab({ projectId }: { projectId: string }) {
   const { t } = useTranslation();
+  // Budget lines are written by editors and up; a viewer sees the buttons, disabled, with the reason.
+  const { reason: editReason } = useRoleGate('editor');
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
@@ -1664,7 +1667,7 @@ function BudgetsTab({ projectId }: { projectId: string }) {
                   defaultValue: 'Create Budget from Estimate',
                 })}
               </Button>
-              <Button variant="secondary" onClick={() => setShowCreate(true)}>
+              <Button variant="secondary" disabledReason={editReason} onClick={() => setShowCreate(true)}>
                 {t('finance.new_budget', { defaultValue: 'New Budget Line' })}
               </Button>
             </div>
@@ -1734,6 +1737,7 @@ function BudgetsTab({ projectId }: { projectId: string }) {
             variant="secondary"
             size="sm"
             icon={<Download size={14} />}
+            disabledReason={editReason}
             onClick={() => {
               setShowImport(true);
               setImportFile(null);
@@ -1747,6 +1751,7 @@ function BudgetsTab({ projectId }: { projectId: string }) {
             variant="primary"
             size="sm"
             icon={<Plus size={14} />}
+            disabledReason={editReason}
             onClick={() => setShowCreate(true)}
           >
             {t('finance.new_budget', { defaultValue: 'New Budget Line' })}
@@ -1848,9 +1853,10 @@ function BudgetsTab({ projectId }: { projectId: string }) {
                     <button
                       type="button"
                       onClick={() => openEditBudget(b)}
-                      title={t('finance.edit_budget', { defaultValue: 'Edit Budget Line' })}
+                      disabled={!!editReason}
+                      title={editReason ?? t('finance.edit_budget', { defaultValue: 'Edit Budget Line' })}
                       aria-label={t('finance.edit_budget', { defaultValue: 'Edit Budget Line' })}
-                      className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-oe-blue transition-colors"
+                      className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-oe-blue transition-colors disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       <Pencil size={14} />
                     </button>
@@ -1939,9 +1945,10 @@ function BudgetsTab({ projectId }: { projectId: string }) {
                   <button
                     type="button"
                     onClick={() => openEditBudget(b)}
-                    title={t('finance.edit_budget', { defaultValue: 'Edit Budget Line' })}
+                    disabled={!!editReason}
+                    title={editReason ?? t('finance.edit_budget', { defaultValue: 'Edit Budget Line' })}
                     aria-label={t('finance.edit_budget', { defaultValue: 'Edit Budget Line' })}
-                    className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-oe-blue transition-colors"
+                    className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-oe-blue transition-colors disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     <Pencil size={14} />
                   </button>

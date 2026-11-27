@@ -7,7 +7,7 @@
 // server writes them in the reader's language.
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Download, FileSpreadsheet, FileText } from 'lucide-react';
+import { FileSpreadsheet, FileText, Upload } from 'lucide-react';
 
 import { Button } from '@/shared/ui';
 import { activeLanguageTag, downloadWithAuth } from '@/shared/lib/api';
@@ -69,7 +69,7 @@ export function ExportMenu({ projectId }: ExportMenuProps) {
       <Button
         variant="secondary"
         size="sm"
-        icon={<Download size={14} />}
+        icon={<Upload size={14} />}
         onClick={() => setOpen((v) => !v)}
         aria-haspopup="menu"
         aria-expanded={open}
