@@ -62868,6 +62868,7 @@ const resource = {
     "boq.position_cost.replace": "تبدیل کریں",
     "boq.position_cost.confirm_replace": "تبدیلی کی تصدیق کریں",
     "boq.position_cost.replaced": "وسیلہ تبدیل ہو گیا",
+    "boq.position_cost.err_unit_mismatch": "یہ مماثلت ریسورس قطار سے مختلف اکائی میں قیمت شدہ ہے، اس لیے مقدار منتقل نہیں ہو سکتی۔",
     "guide.cost_control.title": "لاگت کنٹرول",
     "guide.cost_control.intro": "لاگت کنٹرول ایک سوال کا جواب دیتا ہے: پروجیکٹ کی آخر میں لاگت کیا ہوگی، اور کیوں۔ یہ بجٹ، تخمینہ، کنٹریکٹس، تبدیلیاں، ناپا ہوا کام اور انوائسز پڑھتا ہے جو پہلے ہی اپنے ماڈیولز میں موجود ہیں، اس لیے کچھ دو بار نہیں لکھنا پڑتا۔",
     "guide.cost_control.methods.title": "پیش گوئی پڑھنے کے چار طریقے",

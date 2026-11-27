@@ -77,6 +77,7 @@ def inspect_composition(
             {
                 "index": i,
                 "name": str(r.get("name") or ""),
+                "unit": str(r.get("unit") or ""),
                 "quantity": str(_to_decimal(r.get("quantity"))),
                 "unit_rate": str(_to_decimal(r.get("unit_rate"))),
                 "issues": _row_issues(r),

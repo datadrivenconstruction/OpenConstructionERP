@@ -63834,6 +63834,7 @@ const resource = {
     "boq.position_cost.replace": "Almashtirish",
     "boq.position_cost.confirm_replace": "Almashtirishni tasdiqlash",
     "boq.position_cost.replaced": "Resurs almashtirildi",
+    "boq.position_cost.err_unit_mismatch": "Bu moslik resurs qatoridan boshqa o‘lchov birligida baholangan, shuning uchun miqdorni ko‘chirib bo‘lmaydi.",
     "guide.cost_control.title": "Xarajatlarni nazorat qilish",
     "guide.cost_control.intro": "Xarajatlarni nazorat qilish bitta savolga javob beradi: loyiha oxirida qancha turadi va nima uchun. U oʻz modullarida allaqachon turgan byudjet, smeta, shartnomalar, oʻzgartirishlar, oʻlchangan ish va hisob-fakturalarni oʻqiydi, shuning uchun hech narsa ikki marta kiritilmaydi.",
     "guide.cost_control.methods.title": "Prognozni oʻqishning toʻrt usuli",

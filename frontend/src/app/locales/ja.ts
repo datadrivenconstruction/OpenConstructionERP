@@ -64185,6 +64185,7 @@ const resource = {
     "boq.position_cost.replace": "置き換え",
     "boq.position_cost.confirm_replace": "置き換えを確定",
     "boq.position_cost.replaced": "リソースを置き換えました",
+    "boq.position_cost.err_unit_mismatch": "この一致項目は資源行と異なる単位で単価設定されているため、数量を引き継ぐことはできません。",
     "guide.cost_control.title": "原価管理",
     "guide.cost_control.intro": "原価管理が答えるのは一つの問いです。最終的にプロジェクトはいくらかかるのか、そしてなぜか。予算、見積、契約、変更、実測した出来高、請求書は、それぞれのモジュールにすでにあるものを読み込むので、二重に入力する必要はありません。",
     "guide.cost_control.methods.title": "予測の見方は4通り",

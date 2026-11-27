@@ -65541,6 +65541,7 @@ const resource = {
     "boq.position_cost.replace": "Ersetzen",
     "boq.position_cost.confirm_replace": "Ersetzen bestätigen",
     "boq.position_cost.replaced": "Ressource ersetzt",
+    "boq.position_cost.err_unit_mismatch": "Dieser Treffer ist für eine andere Einheit bepreist als die Ressourcenzeile, die Menge kann nicht übernommen werden.",
     "guide.cost_control.title": "Kostenkontrolle",
     "guide.cost_control.intro": "Die Kostenkontrolle beantwortet eine Frage: Was kostet das Projekt am Ende, und warum. Sie liest Budget, Kostenschätzung, Verträge, Änderungen, aufgemessene Leistungen und Rechnungen aus den Modulen, in denen sie ohnehin liegen. Nichts wird doppelt erfasst.",
     "guide.cost_control.methods.title": "Vier Arten, die Prognose zu lesen",

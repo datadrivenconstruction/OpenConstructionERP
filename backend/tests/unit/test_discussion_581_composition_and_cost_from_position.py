@@ -117,10 +117,10 @@ def test_replacement_keeps_quantity_and_type_and_records_the_swap() -> None:
 
     old = _row(qty="2", rate="40", type="labor", code="L1")
     new = replacement_row(old, item=_Item(), currency="EUR", score=0.8249)
-    assert new["quantity"] == 2.0
+    assert new["quantity"] == "2"
     assert new["type"] == "labor"
-    assert new["unit_rate"] == 50.0
-    assert new["total"] == 100.0
+    assert new["unit_rate"] == "50"
+    assert new["total"] == "100.00"
     assert new["currency"] == "EUR"
     assert new[REPLACED_KEY]["score"] == 0.8249
     assert new[REPLACED_KEY]["code"] == "L1"
@@ -130,7 +130,7 @@ def test_an_explicit_quantity_wins_over_the_old_one() -> None:
     from app.modules.boq.resource_replace import replacement_row
 
     new = replacement_row(_row(qty="2"), item=_Item(), currency="", score=None, quantity=Decimal("3"))
-    assert new["quantity"] == 3.0
+    assert new["quantity"] == "3"
     assert "currency" not in new
 
 
@@ -140,3 +140,21 @@ def test_unusable_candidates_are_refused(item) -> None:
 
     with pytest.raises(CandidateNotUsableError):
         replacement_row(_row(), item=item, currency="", score=0.5)
+
+
+def test_a_candidate_priced_per_another_unit_is_refused() -> None:
+    from app.modules.boq.resource_replace import CandidateNotUsableError, replacement_row
+
+    item = _Item()
+    item.unit = "m3"
+    with pytest.raises(CandidateNotUsableError, match="unit_mismatch"):
+        replacement_row(_row(unit="h"), item=item, currency="", score=0.5)
+
+
+def test_the_same_unit_in_another_case_is_accepted_and_stored_as_text() -> None:
+    from app.modules.boq.resource_replace import replacement_row
+
+    item = _Item()
+    item.unit = "H "
+    new = replacement_row(_row(unit="h", qty="2"), item=item, currency="", score=None)
+    assert all(isinstance(new[k], str) for k in ("quantity", "unit_rate", "total"))

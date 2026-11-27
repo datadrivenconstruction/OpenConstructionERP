@@ -63244,6 +63244,7 @@ const resource = {
     "boq.position_cost.replace": "Zamijeni",
     "boq.position_cost.confirm_replace": "Potvrdi zamjenu",
     "boq.position_cost.replaced": "Resurs je zamijenjen",
+    "boq.position_cost.err_unit_mismatch": "Ova stavka je ocijenjena u drugoj mjernoj jedinici od retka resursa, pa se količina ne može prenijeti.",
     "guide.cost_control.title": "Kontrola troškova",
     "guide.cost_control.intro": "Kontrola troškova odgovara na jedno pitanje: koliko će projekt na kraju koštati i zašto. Čita proračun, troškovnik, ugovore, izmjene, izmjerene radove i račune koji već postoje u svojim modulima, pa se ništa ne unosi dvaput.",
     "guide.cost_control.methods.title": "Četiri načina čitanja prognoze",

@@ -3153,6 +3153,7 @@ class CompositionComponent(BaseModel):
 
     index: int
     name: str
+    unit: str = ""
     quantity: str
     unit_rate: str
     issues: list[str] = Field(default_factory=list)

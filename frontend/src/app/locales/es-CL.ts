@@ -51778,6 +51778,7 @@ const resource = {
     "boq.position_cost.replace": "Reemplazar",
     "boq.position_cost.confirm_replace": "Confirmar reemplazo",
     "boq.position_cost.replaced": "Recurso reemplazado",
+    "boq.position_cost.err_unit_mismatch": "Esta coincidencia está valorizada en una unidad distinta a la de la línea de recurso, por lo que la cantidad no se puede traspasar.",
     // --- /Learn ---
     "schedule.calendar.week_fallback": "La semana laboral regional no está disponible. Se utiliza una semana de planificación estándar.",
     "schedule.calendar.holidays_missing": "No hay datos de días festivos para {{years}}. Revise el calendario antes de basarse en estas fechas.",

@@ -62860,6 +62860,7 @@ const resource = {
     "boq.position_cost.replace": "Palitan",
     "boq.position_cost.confirm_replace": "Kumpirmahin ang pagpalit",
     "boq.position_cost.replaced": "Napalitan ang resource",
+    "boq.position_cost.err_unit_mismatch": "Ang tugmang ito ay may presyong nakabatay sa ibang yunit kaysa sa resource row, kaya hindi maaaring ilipat ang dami.",
     "guide.cost_control.title": "Cost control",
     "guide.cost_control.intro": "Isang tanong ang sinasagot ng cost control: magkano ang aabutin ng proyekto sa huli, at bakit. Binabasa nito ang budget, estimate, mga kontrata, mga pagbabago, nasukat na trabaho at mga invoice na nasa sarili nilang module na, kaya walang tina-type nang dalawang beses.",
     "guide.cost_control.methods.title": "Apat na paraan ng pagbasa sa forecast",

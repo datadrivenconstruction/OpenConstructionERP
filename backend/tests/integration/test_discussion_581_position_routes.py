@@ -146,6 +146,7 @@ async def test_replace_resource_by_matched_item_keeps_quantity_and_rederives_rat
     row = body["metadata"]["resources"][0]
     assert row["name"] == "Mason skilled" and Decimal(str(row["quantity"])) == 2
     assert row["replaced_by_match"]["score"] == 0.82
+    assert row["quantity"] == "2" and row["unit_rate"] == "50" and row["total"] == "100.00"
     assert Decimal(str(body["unit_rate"])) == Decimal("115")  # 2*50 + 0.5*30
     out = await client.post(
         f"/api/v1/boq/positions/{pos['id']}/resources/9/replace/",
@@ -153,3 +154,37 @@ async def test_replace_resource_by_matched_item_keeps_quantity_and_rederives_rat
         json={"cost_item_id": cost.json()["id"]},
     )
     assert out.status_code == 422
+
+
+async def test_replace_by_an_item_priced_per_another_unit_is_refused_and_changes_nothing(client, headers):
+
+    pos = await _position(client, headers)
+
+    cost = await client.post(
+        "/api/v1/costs/",
+        headers=headers,
+        json={
+            "code": f"R-{uuid.uuid4().hex[:6]}",
+            "description": "Concrete",
+            "unit": "m3",
+            "rate": "231",
+            "region": "CUSTOM",
+            "source": "custom",
+        },
+    )
+
+    assert cost.status_code == 201, cost.text
+
+    r = await client.post(
+        f"/api/v1/boq/positions/{pos['id']}/resources/0/replace/",
+        headers=headers,
+        json={"cost_item_id": cost.json()["id"]},
+    )
+
+    assert r.status_code == 422
+
+    assert r.json()["detail"] == "unit_mismatch"
+
+    after = await client.get(f"/api/v1/boq/positions/{pos['id']}/composition/", headers=headers)
+
+    assert after.json()["components"][0]["unit"] == "h"

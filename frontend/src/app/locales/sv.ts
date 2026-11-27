@@ -63517,6 +63517,7 @@ const resource = {
     "boq.position_cost.replace": "Ersätt",
     "boq.position_cost.confirm_replace": "Bekräfta ersättning",
     "boq.position_cost.replaced": "Resursen ersattes",
+    "boq.position_cost.err_unit_mismatch": "Den här matchningen är prissatt i en annan enhet än resursraden, så kvantiteten kan inte föras över.",
     "guide.cost_control.title": "Kostnadsstyrning",
     "guide.cost_control.intro": "Kostnadsstyrningen svarar på en fråga: vad kommer projektet att kosta till slut, och varför. Den läser budget, kalkyl, kontrakt, ändringar, uppmätt arbete och fakturor som redan finns i sina egna moduler, så ingenting skrivs in två gånger.",
     "guide.cost_control.methods.title": "Fyra sätt att läsa prognosen",

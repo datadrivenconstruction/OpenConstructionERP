@@ -1163,6 +1163,7 @@ const resource = {
     "boq.provenance_catalogue": "Priced from a cost catalog.",
     "boq.total_tip_resources": "Total is the sum of this position's resources (labor, material, equipment).",
     "boq.labour_grade_tip": "Average labor grade of the line, weighted by the hours of its labor resources.",
+    "boq.position_cost.err_unit_mismatch": "This match is priced in a different unit from the resource row, so the quantity cannot carry over.",
     "explorer.feat_pivot_desc": "Group elements by story, discipline, or type. Aggregate volumes, areas, and counts.",
     "explorer.thresholds_subtitle": "Color pivot cells by value. Add up to {{max}} rules - one per numeric column.",
     "explorer.thresholds_empty_hint": "Add a rule to color cells red / amber / green based on their value.",

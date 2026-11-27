@@ -28,6 +28,17 @@ def _dec(value: Any) -> Decimal:
         return Decimal("0")
 
 
+def _text(value: Decimal) -> str:
+    return format(value, "f")
+
+
+def _same_unit(old: Any, new: Any) -> bool:
+    """Units match when equal ignoring case and spaces; a row with no unit accepts any."""
+    a = str(old or "").strip().casefold()
+    b = str(new or "").strip().casefold()
+    return not a or a == b
+
+
 def candidate_rate(item: Any) -> Decimal:
     """Unit rate of a cost item as Decimal; raises when the item cannot price a resource."""
     if not getattr(item, "is_active", True):
@@ -46,8 +57,14 @@ def replacement_row(
     score: float | None,
     quantity: Decimal | None = None,
 ) -> dict[str, Any]:
-    """The row that takes ``old``'s place, priced from ``item``."""
+    """The row that takes ``old``'s place, priced from ``item``.
+
+    A candidate priced per another unit is refused: the old quantity is in the old unit, so
+    carrying it over would silently reprice the line.
+    """
     rate = candidate_rate(item)
+    if not _same_unit(old.get("unit"), getattr(item, "unit", None)):
+        raise CandidateNotUsableError("unit_mismatch")
     qty = quantity if quantity is not None else _dec(old.get("quantity"))
     if qty < 0:
         raise CandidateNotUsableError("negative_quantity")
@@ -56,9 +73,9 @@ def replacement_row(
         "code": str(item.code or ""),
         "type": str(old.get("type") or "other"),
         "unit": str(item.unit or old.get("unit") or ""),
-        "quantity": float(qty),
-        "unit_rate": float(rate),
-        "total": float((qty * rate).quantize(Decimal("0.01"))),
+        "quantity": _text(qty),
+        "unit_rate": _text(rate),
+        "total": _text((qty * rate).quantize(Decimal("0.01"))),
         REPLACED_KEY: {
             "cost_item_id": str(item.id),
             "name": str(old.get("name") or ""),

@@ -65122,6 +65122,7 @@ const resource = {
     "boq.position_cost.replace": "替换",
     "boq.position_cost.confirm_replace": "确认替换",
     "boq.position_cost.replaced": "资源已替换",
+    "boq.position_cost.err_unit_mismatch": "该匹配项的计价单位与资源行不同，因此数量无法沿用。",
     "guide.cost_control.title": "成本控制",
     "guide.cost_control.intro": "成本控制回答一个问题：项目最终要花多少钱，为什么。它直接读取各模块中已有的预算、估算、合同、变更、实测工程量和发票，不需要重复录入。",
     "guide.cost_control.methods.title": "四种预测口径",

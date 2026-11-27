@@ -62652,6 +62652,7 @@ const resource = {
     "boq.position_cost.replace": "Ganti",
     "boq.position_cost.confirm_replace": "Konfirmasi penggantian",
     "boq.position_cost.replaced": "Sumber daya diganti",
+    "boq.position_cost.err_unit_mismatch": "Kecocokan ini diberi harga dalam satuan yang berbeda dari baris sumber daya, sehingga kuantitas tidak dapat diteruskan.",
     "guide.cost_control.title": "Pengendalian biaya",
     "guide.cost_control.intro": "Pengendalian biaya menjawab satu pertanyaan: berapa biaya proyek pada akhirnya, dan mengapa. Modul ini membaca anggaran, estimasi, kontrak, perubahan, pekerjaan terukur, dan faktur yang sudah ada di modulnya masing-masing, sehingga tidak ada yang diketik dua kali.",
     "guide.cost_control.methods.title": "Empat cara membaca prakiraan",

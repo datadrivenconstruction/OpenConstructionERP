@@ -62661,6 +62661,7 @@ const resource = {
     "boq.position_cost.replace": "Thay thế",
     "boq.position_cost.confirm_replace": "Xác nhận thay thế",
     "boq.position_cost.replaced": "Đã thay thế tài nguyên",
+    "boq.position_cost.err_unit_mismatch": "Kết quả khớp này được định giá theo đơn vị khác với dòng tài nguyên, nên số lượng không thể chuyển sang.",
     "guide.cost_control.title": "Kiểm soát chi phí",
     "guide.cost_control.intro": "Kiểm soát chi phí trả lời một câu hỏi: cuối cùng dự án sẽ tốn bao nhiêu, và vì sao. Nó đọc ngân sách, dự toán, hợp đồng, thay đổi, khối lượng đã đo và hóa đơn vốn đã nằm trong các module riêng, nên không phải nhập hai lần.",
     "guide.cost_control.methods.title": "Bốn cách đọc dự báo",

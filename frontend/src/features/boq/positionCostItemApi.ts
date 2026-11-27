@@ -17,6 +17,7 @@ export interface SavedCostItem {
 export interface CompositionComponent {
   index: number;
   name: string;
+  unit?: string;
   quantity: string;
   unit_rate: string;
   issues: string[];
@@ -73,6 +74,12 @@ export function refusalText(err: unknown, scope: 'save' | 'refresh' | 'replace')
     return {
       key: 'boq.position_cost.err_locked',
       fallback: 'The bill is locked or the line changed meanwhile. Reload and try again.',
+    };
+  const detail = err instanceof ApiError ? (err.body as { detail?: unknown } | null)?.detail : undefined;
+  if (status === 422 && scope === 'replace' && detail === 'unit_mismatch')
+    return {
+      key: 'boq.position_cost.err_unit_mismatch',
+      fallback: 'This match is priced per a different unit than the resource row, so the quantity cannot carry over.',
     };
   if (status === 422)
     return scope === 'replace'

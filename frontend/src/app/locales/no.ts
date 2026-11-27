@@ -62902,6 +62902,7 @@ const resource = {
     "boq.position_cost.replace": "Erstatt",
     "boq.position_cost.confirm_replace": "Bekreft erstatning",
     "boq.position_cost.replaced": "Ressursen ble erstattet",
+    "boq.position_cost.err_unit_mismatch": "Dette treffet er priset i en annen enhet enn ressursraden, så mengden kan ikke overføres.",
     "guide.cost_control.title": "Kostnadsstyring",
     "guide.cost_control.intro": "Kostnadsstyring svarer på ett spørsmål: hva kommer prosjektet til å koste til slutt, og hvorfor. Den leser budsjett, kalkyle, kontrakter, endringer, målt arbeid og fakturaer som allerede ligger i sine egne moduler, så ingenting skrives inn to ganger.",
     "guide.cost_control.methods.title": "Fire måter å lese prognosen på",

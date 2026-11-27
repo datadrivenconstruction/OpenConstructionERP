@@ -62852,6 +62852,7 @@ const resource = {
     "boq.position_cost.replace": "Asenda",
     "boq.position_cost.confirm_replace": "Kinnita asendamine",
     "boq.position_cost.replaced": "Ressurss asendati",
+    "boq.position_cost.err_unit_mismatch": "See vaste on hinnatud teistes mõõtühikus kui ressursirida, seetõttu ei saa kogust üle kanda.",
     "guide.cost_control.title": "Kuluseire",
     "guide.cost_control.intro": "Kuluseire vastab ühele küsimusele: mis saab projekt lõpuks maksma ja miks. See loeb eelarvet, hinnangut, lepinguid, muudatusi, mõõdetud tööd ja arveid, mis juba asuvad oma moodulites, nii et midagi ei sisestata kaks korda.",
     "guide.cost_control.methods.title": "Neli viisi prognoosi lugeda",

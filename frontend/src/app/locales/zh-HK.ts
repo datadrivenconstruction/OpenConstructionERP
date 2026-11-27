@@ -69448,6 +69448,7 @@ const resource = {
     "boq.position_cost.replace": "替換",
     "boq.position_cost.confirm_replace": "確認替換",
     "boq.position_cost.replaced": "資源已替換",
+    "boq.position_cost.err_unit_mismatch": "此配對項目的單價所用單位與資源行不同，因此數量無法沿用。",
     "cases.attest_the_boletim_de_medicao_and_invoice_the_period.step.atestar.in.boletim": "本期計量單",
     "cases.attest_the_boletim_de_medicao_and_invoice_the_period.step.atestar.in.fiscal": "指定負責核證的合約監督（fiscal do contrato）",
     "cases.attest_the_boletim_de_medicao_and_invoice_the_period.step.atestar.out.attested": "已核證的計量單",

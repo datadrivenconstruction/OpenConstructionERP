@@ -57108,6 +57108,7 @@ const resource = {
     "boq.position_cost.replace": "Replace",
     "boq.position_cost.confirm_replace": "Confirm replace",
     "boq.position_cost.replaced": "Resource replaced",
+    "boq.position_cost.err_unit_mismatch": "This match is priced per a different unit than the resource row, so the quantity cannot carry over.",
     "guide.cost_control.title": "Cost control",
     "guide.cost_control.intro": "Cost control answers one question: what will the project cost in the end, and why. It reads the budget, the estimate, contracts, changes, measured work and invoices that already live in their own modules, so nothing is typed in twice.",
     "guide.cost_control.methods.title": "Four ways to read the forecast",

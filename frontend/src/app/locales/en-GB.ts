@@ -201,6 +201,7 @@ const resource = {
     "boq.restore_model_qty_done": "Model quantity restored: {{quantity}} {{unit}}",
     "boq.restore_model_qty_provenance": "Linked elements: {{elements}}. Formula: {{formula}}",
     "boq.restore_model_qty_failed": "Could not restore the model quantity",
+    "boq.position_cost.err_unit_mismatch": "This match is priced in a different unit from the resource row, so the quantity cannot carry over.",
     "auth.or": "or",
     "auth.sso_login": "Sign in with SSO",
     "auth.oidc_errors.no_code": "No authorisation code received from the identity provider.",

@@ -63783,6 +63783,7 @@ const resource = {
     "boq.position_cost.replace": "Değiştir",
     "boq.position_cost.confirm_replace": "Değiştirmeyi onayla",
     "boq.position_cost.replaced": "Kaynak değiştirildi",
+    "boq.position_cost.err_unit_mismatch": "Bu eşleşme, kaynak satırından farklı bir birimle fiyatlandırılmış, bu nedenle miktar aktarılamaz.",
     "guide.cost_control.title": "Maliyet kontrolü",
     "guide.cost_control.intro": "Maliyet kontrolü tek bir soruya cevap verir: proje sonunda neye mal olacak ve neden. Bütçeyi, keşfi, sözleşmeleri, değişiklikleri, ölçülen işi ve faturaları, zaten kendi modüllerinde durdukları yerden okur; böylece hiçbir şey iki kez girilmez.",
     "guide.cost_control.methods.title": "Tahmini okumanın dört yolu",

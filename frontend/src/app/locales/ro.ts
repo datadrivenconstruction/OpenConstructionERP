@@ -63234,6 +63234,7 @@ const resource = {
     "boq.position_cost.replace": "Înlocuiește",
     "boq.position_cost.confirm_replace": "Confirmă înlocuirea",
     "boq.position_cost.replaced": "Resursa a fost înlocuită",
+    "boq.position_cost.err_unit_mismatch": "Această potrivire este evaluată într-o unitate de măsură diferită de cea a rândului de resursă, deci cantitatea nu poate fi preluată.",
     "guide.cost_control.title": "Controlul costurilor",
     "guide.cost_control.intro": "Controlul costurilor răspunde la o singură întrebare: cât va costa proiectul la final și de ce. Citește bugetul, devizul, contractele, modificările, lucrările măsurate și facturile care există deja în modulele lor, așa că nimic nu se introduce de două ori.",
     "guide.cost_control.methods.title": "Patru moduri de a citi prognoza",

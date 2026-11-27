@@ -51540,6 +51540,7 @@ const resource = {
     "boq.position_cost.replace": "Substituir",
     "boq.position_cost.confirm_replace": "Confirmar substituição",
     "boq.position_cost.replaced": "Insumo substituído",
+    "boq.position_cost.err_unit_mismatch": "Esta correspondência está precificada em uma unidade diferente da linha de recurso, por isso a quantidade não pode ser transferida.",
     // --- /Learn ---
     "schedule.calendar.week_fallback": "A semana de trabalho regional não está disponível. É utilizada uma semana de planejamento padrão.",
     "schedule.calendar.holidays_missing": "Os feriados não estão disponíveis para {{years}}. Verifique o calendário antes de se basear nestas datas.",

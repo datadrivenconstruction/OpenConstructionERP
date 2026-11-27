@@ -65988,6 +65988,7 @@ const resource = {
     "boq.position_cost.replace": "استبدال",
     "boq.position_cost.confirm_replace": "تأكيد الاستبدال",
     "boq.position_cost.replaced": "تم استبدال المورد",
+    "boq.position_cost.err_unit_mismatch": "هذه المطابقة مسعّرة بوحدة تختلف عن وحدة سطر الموارد، لذلك لا يمكن نقل الكمية.",
     "guide.cost_control.title": "ضبط التكاليف",
     "guide.cost_control.intro": "يجيب ضبط التكاليف عن سؤال واحد: كم سيكلّف المشروع في النهاية، ولماذا. يقرأ الميزانية والتقدير والعقود والتغييرات والأعمال المقاسة والفواتير الموجودة أصلًا في وحداتها، فلا يُدخل شيء مرتين.",
     "guide.cost_control.methods.title": "أربع طرق لقراءة التوقع",

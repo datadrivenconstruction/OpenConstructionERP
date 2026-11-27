@@ -63193,6 +63193,7 @@ const resource = {
     "boq.position_cost.replace": "החלף",
     "boq.position_cost.confirm_replace": "אשר החלפה",
     "boq.position_cost.replaced": "המשאב הוחלף",
+    "boq.position_cost.err_unit_mismatch": "התאמה זו מתומחרת ביחידת מידה שונה משורת המשאב, ולכן לא ניתן להעביר את הכמות.",
     "guide.cost_control.title": "בקרת עלויות",
     "guide.cost_control.intro": "בקרת עלויות עונה על שאלה אחת: כמה הפרויקט יעלה בסוף, ולמה. היא קוראת את התקציב, האומדן, החוזים, השינויים, העבודה שנמדדה והחשבוניות שכבר נמצאים במודולים שלהם, כך שאין הקלדה כפולה.",
     "guide.cost_control.methods.title": "ארבע דרכים לקרוא את התחזית",

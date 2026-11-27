@@ -39,7 +39,7 @@ export function PositionCompositionDialog({ positionId, onClose, onChanged }: Pr
 
   const matches = useQuery({
     queryKey: ['boq', 'resource-matches', positionId, target?.index],
-    queryFn: () => positionCostItemApi.match(target?.name ?? '', ''),
+    queryFn: () => positionCostItemApi.match(target?.name ?? '', target?.unit ?? ''),
     enabled: !!target,
   });
 

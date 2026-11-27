@@ -65822,6 +65822,7 @@ const resource = {
     "boq.position_cost.replace": "Sustituir",
     "boq.position_cost.confirm_replace": "Confirmar sustitución",
     "boq.position_cost.replaced": "Recurso sustituido",
+    "boq.position_cost.err_unit_mismatch": "Esta coincidencia está valorada en una unidad distinta a la de la línea de recurso, por lo que la cantidad no puede trasladarse.",
     "guide.cost_control.title": "Control de costes",
     "guide.cost_control.intro": "El control de costes responde a una pregunta: cuánto costará el proyecto al final y por qué. Lee el presupuesto, la estimación, los contratos, los cambios, la obra medida y las facturas que ya viven en sus propios módulos, así que nada se escribe dos veces.",
     "guide.cost_control.methods.title": "Cuatro formas de leer la previsión",

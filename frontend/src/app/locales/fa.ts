@@ -62862,6 +62862,7 @@ const resource = {
     "boq.position_cost.replace": "جایگزینی",
     "boq.position_cost.confirm_replace": "تأیید جایگزینی",
     "boq.position_cost.replaced": "منبع جایگزین شد",
+    "boq.position_cost.err_unit_mismatch": "این تطبیق با واحدی متفاوت از ردیف منبع قیمت‌گذاری شده، بنابراین مقدار قابل انتقال نیست.",
     "guide.cost_control.title": "کنترل هزینه",
     "guide.cost_control.intro": "کنترل هزینه به یک پرسش پاسخ می‌دهد: پروژه در پایان چقدر هزینه خواهد داشت و چرا. بودجه، برآورد، قراردادها، تغییرات، کار اندازه‌گیری‌شده و صورتحساب‌هایی را می‌خواند که از پیش در ماژول‌های خودشان هستند، پس چیزی دوبار وارد نمی‌شود.",
     "guide.cost_control.methods.title": "چهار روش برای خواندن پیش‌بینی",

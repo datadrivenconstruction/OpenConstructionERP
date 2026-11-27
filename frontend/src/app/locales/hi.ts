@@ -62905,6 +62905,7 @@ const resource = {
     "boq.position_cost.replace": "बदलें",
     "boq.position_cost.confirm_replace": "बदलने की पुष्टि करें",
     "boq.position_cost.replaced": "संसाधन बदल दिया गया",
+    "boq.position_cost.err_unit_mismatch": "यह मिलान संसाधन पंक्ति से अलग इकाई में मूल्यांकित है, इसलिए मात्रा आगे नहीं ले जाई जा सकती।",
     "guide.cost_control.title": "लागत नियंत्रण",
     "guide.cost_control.intro": "लागत नियंत्रण एक सवाल का जवाब देता है: अंत में प्रोजेक्ट की लागत क्या होगी, और क्यों। यह बजट, अनुमान, अनुबंध, बदलाव, मापा गया काम और चालान पढ़ता है जो पहले से अपने-अपने मॉड्यूल में हैं, इसलिए कुछ भी दो बार नहीं भरना पड़ता।",
     "guide.cost_control.methods.title": "पूर्वानुमान पढ़ने के चार तरीके",

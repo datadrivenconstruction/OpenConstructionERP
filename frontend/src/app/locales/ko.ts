@@ -63269,6 +63269,7 @@ const resource = {
     "boq.position_cost.replace": "바꾸기",
     "boq.position_cost.confirm_replace": "바꾸기 확인",
     "boq.position_cost.replaced": "자원을 바꿨습니다",
+    "boq.position_cost.err_unit_mismatch": "이 매칭 항목은 자원 행과 다른 단위로 단가가 책정되어 있어 수량을 옮길 수 없습니다.",
     "guide.cost_control.title": "원가 관리",
     "guide.cost_control.intro": "원가 관리는 한 가지 질문에 답합니다. 프로젝트가 결국 얼마가 들고, 그 이유는 무엇인가. 예산, 견적, 계약, 변경, 실측 물량, 청구서는 각자의 모듈에 이미 있는 것을 읽어 오므로 두 번 입력할 필요가 없습니다.",
     "guide.cost_control.methods.title": "예측을 보는 네 가지 방법",

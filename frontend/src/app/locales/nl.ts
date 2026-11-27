@@ -63783,6 +63783,7 @@ const resource = {
     "boq.position_cost.replace": "Vervangen",
     "boq.position_cost.confirm_replace": "Vervanging bevestigen",
     "boq.position_cost.replaced": "Resource vervangen",
+    "boq.position_cost.err_unit_mismatch": "Deze match is geprijsd in een andere eenheid dan de resourcerij, dus de hoeveelheid kan niet worden overgenomen.",
     "guide.cost_control.title": "Kostenbeheersing",
     "guide.cost_control.intro": "Kostenbeheersing beantwoordt één vraag: wat gaat het project uiteindelijk kosten, en waarom. Het leest budget, raming, contracten, wijzigingen, opgemeten werk en facturen uit de modules waar ze al staan, dus niets wordt dubbel ingevoerd.",
     "guide.cost_control.methods.title": "Vier manieren om de prognose te lezen",

@@ -62906,6 +62906,7 @@ const resource = {
     "boq.position_cost.replace": "Korvaa",
     "boq.position_cost.confirm_replace": "Vahvista korvaus",
     "boq.position_cost.replaced": "Resurssi korvattu",
+    "boq.position_cost.err_unit_mismatch": "Tämä osuma on hinnoiteltu eri yksikössä kuin resurssirivi, joten määrää ei voi siirtää.",
     "guide.cost_control.title": "Kustannusseuranta",
     "guide.cost_control.intro": "Kustannusseuranta vastaa yhteen kysymykseen: paljonko hanke maksaa lopulta ja miksi. Se lukee budjetin, kustannusarvion, sopimukset, muutokset, mitatun työn ja laskut, jotka ovat jo omissa moduuleissaan, joten mitään ei kirjata kahdesti.",
     "guide.cost_control.methods.title": "Neljä tapaa lukea ennuste",

@@ -62850,6 +62850,7 @@ const resource = {
     "boq.insert_assembly.pick_first": "Эхлээд иж бүрдэл сонгоно уу.",
     "boq.insert_assembly.apply": "Зүйлд оруулах",
     "boq.insert_assembly.applied": "{{code}} орууллаа: {{unit}} тутамд {{before}} → {{after}}",
+    "boq.position_cost.err_unit_mismatch": "Энэ тохирлыг нөөцийн мөртэй өөр хэмжих нэгжээр үнэлэгдсэн тул тоо хэмжээг шилжүүлэх боломжгүй.",
     "guide.cost_control.title": "Зардлын хяналт",
     "guide.cost_control.intro": "Зардлын хяналт нэг асуултад хариулна: төсөл эцэст нь хэдэд өртөх вэ, яагаад. Энэ нь төсөв, тооцоо, гэрээ, өөрчлөлт, хэмжсэн ажил, нэхэмжлэхийг өөрсдийн модуль дээрээс нь уншдаг тул юу ч хоёр удаа оруулахгүй.",
     "guide.cost_control.methods.title": "Таамаглалыг унших дөрвөн арга",

@@ -65467,6 +65467,7 @@ const resource = {
     "boq.position_cost.replace": "Csere",
     "boq.position_cost.confirm_replace": "Csere megerősítése",
     "boq.position_cost.replaced": "Erőforrás cserélve",
+    "boq.position_cost.err_unit_mismatch": "Ez az egyezés más mértékegységben van árazva, mint az erőforrás-sor, ezért a mennyiség nem vihető át.",
     "guide.cost_control.title": "Költségkövetés",
     "guide.cost_control.intro": "A költségkövetés egy kérdésre válaszol: mennyibe fog kerülni a projekt a végén, és miért. A költségvetést, a költségbecslést, a szerződéseket, a módosításokat, a felmért munkát és a számlákat olvassa, amelyek már a saját moduljukban vannak, így semmit nem kell kétszer beírni.",
     "guide.cost_control.methods.title": "Az előrejelzés négy olvasata",
